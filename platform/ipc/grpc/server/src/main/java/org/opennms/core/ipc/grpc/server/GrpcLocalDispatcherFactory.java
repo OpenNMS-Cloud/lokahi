@@ -30,7 +30,7 @@ package org.opennms.core.ipc.grpc.server;
 
 import static org.opennms.horizon.ipc.sink.api.Message.SINK_METRIC_PRODUCER_DOMAIN;
 
-import org.opennms.horizon.ipc.sink.api.Message;
+import com.google.protobuf.Message;
 import org.opennms.horizon.ipc.sink.api.SinkModule;
 import org.opennms.horizon.ipc.sink.common.AbstractMessageDispatcherFactory;
 import org.osgi.framework.BundleContext;
@@ -92,11 +92,9 @@ public class GrpcLocalDispatcherFactory extends AbstractMessageDispatcherFactory
 
     @Override
     public void afterPropertiesSet() {
-        onInit();
     }
 
     @Override
     public void destroy() {
-        onDestroy();
     }
 }

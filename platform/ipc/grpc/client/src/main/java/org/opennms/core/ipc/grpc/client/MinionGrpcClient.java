@@ -63,6 +63,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
+import com.google.protobuf.Message;
 import org.opennms.core.ipc.grpc.common.ConfigUtils;
 import org.opennms.core.ipc.grpc.common.OpenNMSIpcGrpc;
 import org.opennms.core.ipc.grpc.common.RpcRequestProto;
@@ -77,7 +78,6 @@ import org.opennms.horizon.core.lib.PropertiesUtils;
 import org.opennms.horizon.ipc.rpc.api.RpcModule;
 import org.opennms.horizon.ipc.rpc.api.RpcRequest;
 import org.opennms.horizon.ipc.rpc.api.RpcResponse;
-import org.opennms.horizon.ipc.sink.api.Message;
 import org.opennms.horizon.ipc.sink.api.MessageConsumerManager;
 import org.opennms.horizon.ipc.sink.api.SinkModule;
 import org.opennms.horizon.ipc.sink.common.AbstractMessageDispatcherFactory;

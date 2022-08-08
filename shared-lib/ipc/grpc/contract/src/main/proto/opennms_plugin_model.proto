@@ -1,0 +1,40 @@
+syntax = "proto3";
+
+package opennms;
+
+import "google/protobuf/any.proto";
+
+message ServiceMonitorRequest {
+  string name = 1;
+  string ip_address = 2;
+  uint64 node_id = 3;
+  string node_label = 4;
+  string node_location = 5;
+  string agent_ip = 6;
+  map<string, TypedParameter> parameters = 7;
+}
+
+message TypedParameter {
+  oneof value {
+    string string_val = 1;
+    google.protobuf.Any any_val = 2;
+  }
+}
+
+message ServiceMonitorResponse {
+  enum Status {
+    UNKNOWN = 0;
+    UP = 1;
+    DOWN = 2;
+    UNRESPONSIVE = 3;
+  }
+  Status status = 1;
+  string reason = 2;
+  map<string, double> properties = 3;
+  DeviceConfig device_config = 4;
+}
+
+message DeviceConfig {
+  bytes content = 1;
+  string filename = 2;
+}

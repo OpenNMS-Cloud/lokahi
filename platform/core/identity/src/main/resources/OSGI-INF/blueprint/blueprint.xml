@@ -23,6 +23,11 @@
     <argument value="${identity.type}"/>
   </bean>
 
-  <service ref="identity" interface="org.opennms.horizon.core.identity.Identity"/>
+  <service ref="identity">
+    <interfaces>
+      <value>org.opennms.horizon.core.identity.Identity</value>
+      <value>org.opennms.horizon.ipc.rpc.IpcIdentity</value>
+    </interfaces>
+  </service>
 
 </blueprint>

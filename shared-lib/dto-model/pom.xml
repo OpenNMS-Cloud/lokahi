@@ -12,27 +12,19 @@
     <name>OpenNMS Horizon :: Shared Library:: DTO Model</name>
     <packaging>bundle</packaging>
 
-    <properties>
-        <lombok.version>1.18.24</lombok.version>
-        <lombok.binding.version>0.2.0</lombok.binding.version>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-annotations</artifactId>
-            <version>${jackson.version}</version>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>${lombok.version}</version>
-            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>${jackson.version}</version>
         </dependency>
     </dependencies>
 

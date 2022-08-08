@@ -28,7 +28,9 @@
 
 package org.opennms.horizon.core.identity;
 
-public interface Identity {
+import org.opennms.horizon.ipc.rpc.IpcIdentity;
+
+public interface Identity extends IpcIdentity {
     String getId();
     String getLocation();
     String getType();

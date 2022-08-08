@@ -28,6 +28,12 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.opennms.horizon.shared.ipc</groupId>
+            <artifactId>api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
         </dependency>

@@ -48,7 +48,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import com.google.protobuf.Message;
 import org.opennms.core.grpc.common.GrpcIpcServer;
 import org.opennms.core.ipc.grpc.common.Empty;
 import org.opennms.core.ipc.grpc.common.SinkMessage;
@@ -73,6 +72,7 @@ import org.opennms.horizon.ipc.rpc.api.RpcModule;
 import org.opennms.horizon.ipc.rpc.api.RpcRequest;
 import org.opennms.horizon.ipc.rpc.api.RpcResponse;
 import org.opennms.horizon.ipc.rpc.api.RpcResponseHandler;
+import org.opennms.horizon.ipc.sink.api.Message;
 import org.opennms.horizon.ipc.sink.api.MessageConsumerManager;
 import org.opennms.horizon.ipc.sink.api.SinkModule;
 import org.opennms.horizon.ipc.sink.common.AbstractMessageConsumerManager;

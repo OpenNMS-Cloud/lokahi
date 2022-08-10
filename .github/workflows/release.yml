@@ -43,6 +43,12 @@ jobs:
             exit 1
           fi
 
+      - name: parent-pom
+        id: action-parent-pom
+        uses: ./.github/actions/parent-pom
+        with:
+          dir-location: 'parent-pom'
+
       - name: feature-grafana
         id: action-grafana
         uses: ./.github/actions/grafana

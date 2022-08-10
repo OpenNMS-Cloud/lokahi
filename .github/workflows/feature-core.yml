@@ -24,6 +24,12 @@ jobs:
 
           echo "For init steps."
 
+      - name: parent-pom
+        id: action-parent-pom
+        uses: ./.github/actions/parent-pom
+        with:
+          dir-location: 'parent-pom'
+
       - name: shared-lib
         id: action-shared-lib
         uses: ./.github/actions/shared-lib

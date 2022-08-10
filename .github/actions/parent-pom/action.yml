@@ -1,0 +1,19 @@
+name: 'Build and install parent-pom'
+description: 'Build and install the parent POM which defines standard dependency versions across sub-projects'
+inputs:
+  dir-location:
+    description: 'The dir containing the change.'
+    required: true
+    default: 'none'
+
+runs:
+  using: "composite"
+  steps:
+    - name: build-image
+      run: |
+
+        cd ${{ inputs.dir-location }}
+
+        mvn clean install
+
+      shell: bash

@@ -1,6 +1,6 @@
 package org.opennms.core.ipc.grpc.server.manager.rpcstreaming.impl;
 
-import static org.opennms.horizon.ipc.rpc.api.RpcModule.MINION_HEADERS_MODULE;
+import static org.opennms.horizon.shared.ipc.rpc.api.RpcModule.MINION_HEADERS_MODULE;
 
 import com.google.common.base.Strings;
 import io.grpc.stub.StreamObserver;
@@ -15,7 +15,7 @@ import org.opennms.core.ipc.grpc.server.manager.MinionManager;
 import org.opennms.core.ipc.grpc.server.manager.RpcConnectionTracker;
 import org.opennms.core.ipc.grpc.server.manager.RpcRequestTracker;
 import org.opennms.core.ipc.grpc.server.manager.rpcstreaming.MinionRpcStreamConnection;
-import org.opennms.horizon.ipc.rpc.api.RpcResponseHandler;
+import org.opennms.horizon.shared.ipc.rpc.api.RpcResponseHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

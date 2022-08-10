@@ -4,7 +4,7 @@ import java.util.concurrent.DelayQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.opennms.core.ipc.grpc.server.manager.RpcRequestTimeoutManager;
-import org.opennms.horizon.ipc.rpc.api.RpcResponseHandler;
+import org.opennms.horizon.shared.ipc.rpc.api.RpcResponseHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

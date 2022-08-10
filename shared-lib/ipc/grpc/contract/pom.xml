@@ -10,7 +10,7 @@
         <version>0.1.0-SNAPSHOT</version>
     </parent>
 
-    <groupId>org.opennms.horizon.ipc.grpc</groupId>
+    <groupId>org.opennms.horizon.shared.ipc.grpc</groupId>
     <artifactId>contract</artifactId>
     <packaging>bundle</packaging>
 

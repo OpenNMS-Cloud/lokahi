@@ -9,11 +9,11 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Semaphore;
 import org.opennms.cloud.grpc.minion.RpcRequestProto;
 import org.opennms.core.ipc.grpc.server.manager.RpcConnectionTracker;
-import org.opennms.horizon.ipc.rpc.api.RpcClient;
-import org.opennms.horizon.ipc.rpc.api.RpcClientFactory;
-import org.opennms.horizon.ipc.rpc.api.RpcModule;
-import org.opennms.horizon.ipc.rpc.api.RpcRequest;
-import org.opennms.horizon.ipc.rpc.api.RpcResponse;
+import org.opennms.horizon.shared.ipc.rpc.api.RpcClient;
+import org.opennms.horizon.shared.ipc.rpc.api.RpcClientFactory;
+import org.opennms.horizon.shared.ipc.rpc.api.RpcModule;
+import org.opennms.horizon.shared.ipc.rpc.api.RpcRequest;
+import org.opennms.horizon.shared.ipc.rpc.api.RpcResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

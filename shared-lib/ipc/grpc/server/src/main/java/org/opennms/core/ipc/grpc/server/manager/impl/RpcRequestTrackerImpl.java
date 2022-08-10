@@ -3,7 +3,7 @@ package org.opennms.core.ipc.grpc.server.manager.impl;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import org.opennms.core.ipc.grpc.server.manager.RpcRequestTracker;
-import org.opennms.horizon.ipc.rpc.api.RpcResponseHandler;
+import org.opennms.horizon.shared.ipc.rpc.api.RpcResponseHandler;
 
 public class RpcRequestTrackerImpl implements RpcRequestTracker {
 

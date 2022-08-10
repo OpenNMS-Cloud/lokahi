@@ -1,6 +1,6 @@
 package org.opennms.core.ipc.grpc.server.manager;
 
-import org.opennms.horizon.ipc.rpc.api.RpcResponseHandler;
+import org.opennms.horizon.shared.ipc.rpc.api.RpcResponseHandler;
 
 public interface RpcRequestTracker {
     void addRequest(String id, RpcResponseHandler responseHandler);

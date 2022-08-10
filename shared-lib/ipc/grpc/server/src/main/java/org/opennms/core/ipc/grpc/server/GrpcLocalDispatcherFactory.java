@@ -29,20 +29,16 @@
 package org.opennms.core.ipc.grpc.server;
 
 import com.codahale.metrics.MetricRegistry;
+import com.google.protobuf.Message;
 import io.opentracing.Tracer;
-import org.opennms.horizon.ipc.sink.api.Message;
-import org.opennms.horizon.ipc.sink.api.SinkModule;
-import org.opennms.horizon.ipc.sink.common.AbstractMessageDispatcherFactory;
+import org.opennms.horizon.shared.ipc.sink.api.SinkModule;
+import org.opennms.horizon.shared.ipc.sink.common.AbstractMessageDispatcherFactory;
 import org.osgi.framework.BundleContext;
-import org.springframework.beans.factory.DisposableBean;
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.Autowired;
 
-public class GrpcLocalDispatcherFactory extends AbstractMessageDispatcherFactory<Void> implements InitializingBean, DisposableBean {
+public class GrpcLocalDispatcherFactory extends AbstractMessageDispatcherFactory<Void> {
 
     static final String SINK_METRIC_PRODUCER_DOMAIN = "org.opennms.core.ipc.sink.producer";
 
-    @Autowired
     private OpennmsGrpcServer onmsGrpcServer;
 
     private MetricRegistry metrics;
@@ -84,15 +80,5 @@ public class GrpcLocalDispatcherFactory extends AbstractMessageDispatcherFactory
 
     public void setMetrics(MetricRegistry metrics) {
         this.metrics = metrics;
-    }
-
-    @Override
-    public void afterPropertiesSet() {
-
-    }
-
-    @Override
-    public void destroy() {
-
     }
 }

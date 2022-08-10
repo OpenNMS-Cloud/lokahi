@@ -1,7 +1,7 @@
 package org.opennms.core.ipc.grpc.server.manager.rpc;
 
 import java.util.concurrent.CompletableFuture;
-import org.opennms.horizon.ipc.rpc.api.RpcRequest;
+import org.opennms.horizon.shared.ipc.rpc.api.RpcRequest;
 
 @SuppressWarnings("rawtypes")
 public interface RemoteRegistrationHandler {

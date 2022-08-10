@@ -19,13 +19,13 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.opennms.horizon.ipc.grpc</groupId>
+            <groupId>org.opennms.horizon.shared.ipc.grpc</groupId>
             <artifactId>contract</artifactId>
             <version>${project.version}</version>
         </dependency>
 
         <dependency>
-            <groupId>org.opennms.horizon.ipc</groupId>
+            <groupId>org.opennms.horizon.shared.ipc</groupId>
             <artifactId>api</artifactId>
             <version>${project.version}</version>
         </dependency>

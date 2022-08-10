@@ -17,7 +17,7 @@
     </cm:property-placeholder>
 
     <reference id="configAdmin" interface="org.osgi.service.cm.ConfigurationAdmin"/>
-    <reference id="ipcIdentity" interface="org.opennms.horizon.ipc.rpc.IpcIdentity"/>
+    <reference id="ipcIdentity" interface="org.opennms.horizon.shared.ipc.rpc.IpcIdentity"/>
     <reference id="tracerWrapper" interface="org.opennms.core.tracing.api.TracerWrapper"/>
 
     <bean id="metricRegistry" class="com.codahale.metrics.MetricRegistry"/>
@@ -35,7 +35,7 @@
     <service ref="minionClient">
         <interfaces>
             <value>org.opennms.core.ipc.grpc.client.MinionGrpcClient</value>
-            <value>org.opennms.horizon.ipc.sink.api.MessageDispatcherFactory</value>
+            <value>org.opennms.horizon.shared.ipc.sink.api.MessageDispatcherFactory</value>
         </interfaces>
     </service>
 

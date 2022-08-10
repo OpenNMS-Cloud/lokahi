@@ -4,9 +4,9 @@ package org.opennms.core.ipc.grpc.server.manager.rpc;
 import com.codahale.metrics.MetricRegistry;
 import org.opennms.core.ipc.grpc.server.manager.LocationIndependentRpcClientFactory;
 import org.opennms.core.ipc.grpc.server.manager.RpcConnectionTracker;
-import org.opennms.horizon.ipc.rpc.api.RpcModule;
-import org.opennms.horizon.ipc.rpc.api.RpcRequest;
-import org.opennms.horizon.ipc.rpc.api.RpcResponse;
+import org.opennms.horizon.shared.ipc.rpc.api.RpcModule;
+import org.opennms.horizon.shared.ipc.rpc.api.RpcRequest;
+import org.opennms.horizon.shared.ipc.rpc.api.RpcResponse;
 
 public class LocationIndependentRpcClientFactoryImpl implements LocationIndependentRpcClientFactory {
 

@@ -31,6 +31,7 @@
         <geohash.version>1.4.0</geohash.version>
         <glassfish.jaxb.version>2.3.2</glassfish.jaxb.version>
         <grpc.version>1.43.2</grpc.version>
+        <gson.version>2.8.6</gson.version>
         <guava.version>31.0.1-jre</guava.version>
         <hamcrest.version>1.3</hamcrest.version>
         <hibernate.version>5.4.32.Final</hibernate.version>
@@ -80,13 +81,12 @@
         <snmp4j.version>2.5.5</snmp4j.version>
         <snmp4j.agent.version>2.5.3</snmp4j.agent.version>
         <spring.version>5.3.14_1</spring.version>
+        <spring-boot.version>2.6.8</spring-boot.version>
         <swagger.version>2.1.1</swagger.version>
         <testcontainers.version>1.16.3</testcontainers.version>
         <lombok.version>1.18.24</lombok.version>
         <lombok.binding.version>0.2.0</lombok.binding.version>
         <mockito.version>4.5.1</mockito.version>
-        <gson.version>2.8.6</gson.version>
-
     </properties>
 
     <dependencyManagement>
@@ -786,4 +786,32 @@
 
         </dependencies>
     </dependencyManagement>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-maven-plugin</artifactId>
+                    <version>${spring-boot.version}</version>
+                    <configuration>
+                        <layout>ZIP</layout>
+                        <excludes>
+                            <exclude>
+                                <groupId>org.projectlombok</groupId>
+                                <artifactId>lombok</artifactId>
+                            </exclude>
+                        </excludes>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>repackage</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
 </project>

@@ -1,3 +1,31 @@
+## LOCAL PORT ASSIGNMENTS (note internal ports use the native port number)
+##	xx = service/container
+##	xx080 = HTTP
+##	xx089 = GRPC
+##	xx022 = SSH
+##	xx025 = SMTP (mail)
+##	xx050 = JAVA DEBUG
+##	xx054 = POSTGRES
+##	xx090 = KAFKA
+##
+## 11 = horizon-stream-core
+## 12 = horizon-stream-minion
+## 13 = horizon-stream-api
+## 14 = api-gateway
+## 15 = horizon-stream-notification
+## 16 = horizon-stream-minion-gateway
+## 17 = horizon-stream-ui
+## 18 = grafana
+## 19 = prometheus
+## 21 = prometheus-pushgateway
+## 22 = mail-server
+## 23 = zookeeper
+## 24 = kafka
+## 25 = postgres
+## 26 = keycloak
+## 27 = minion (classic)
+##
+
 apiVersion: skaffold/v2beta28
 kind: Config
 metadata:
@@ -61,85 +89,95 @@ portForward:
   - resourceType: deployment
     resourceName: my-horizon-stream-ui
     port: 3000 # Vite dev server
+    localPort: 17080
   - resourceType: deployment
     resourceName: my-horizon-stream-api
     port: 9090 # HTTP
-  - resourceType: deployment
-    resourceName: my-horizon-stream-notification
-    port: 8080 # HTTP
-    localPort: 38080
-  - resourceType: deployment
-    resourceName: my-horizon-stream-notification
-    port: 5005 # Debug
-    localPort: 5007
+    localPort: 13080
   - resourceType: deployment
     resourceName: my-horizon-stream-api
     port: 5005 # Debug
-    localPort: 5006
+    localPort: 13050
+  - resourceType: deployment
+    resourceName: my-horizon-stream-notification
+    port: 8080 # HTTP
+    localPort: 15080
+  - resourceType: deployment
+    resourceName: my-horizon-stream-notification
+    port: 5005 # Debug
+    localPort: 15050
   - resourceType: deployment
     resourceName: my-horizon-stream-core
     port: 8181 # HTTP
-    localPort: 18181
+    localPort: 11080
   - resourceType: deployment
     resourceName: my-horizon-stream-core
     port: 8101 # SSH
-    localPort: 18101
+    localPort: 11022
   - resourceType: deployment
     resourceName: my-horizon-stream-core
     port: 5005 # Debug
-    localPort: 5005
+    localPort: 11050
   - resourceType: deployment
     resourceName: my-horizon-stream-minion
     port: 8181 # HTTP
-    localPort: 18182
+    localPort: 12080
   - resourceType: deployment
     resourceName: my-horizon-stream-minion
     port: 8102 # SSH
-    localPort: 18101
+    localPort: 12022
   - resourceType: deployment
     resourceName: my-horizon-stream-minion
     port: 5008 # Debug
-    localPort: 5005
+    localPort: 12050
   - resourceType: deployment
     resourceName: my-keycloak
     port: 8080 # HTTP
-    localPort: 28080
+    localPort: 26080
   - resourceType: deployment
     resourceName: my-minion
     port: 8201 # SSH
-    localPort: 38101
+    localPort: 27022
   - resourceType: deployment
     resourceName: api-gateway
     port: 80 # HTTP
-    localPort: 48080
+    localPort: 14080
+  - resourceType: deployment
+    resourceName: minion-gateway
+    port: 8080 # HTTP
+    localPort: 16080
+  - resourceType: deployment
+    resourceName: minion-gateway
+    port: 8990 # GRPC
+    localPort: 16089
   - resourceType: deployment
     resourceName: horizon-mail-server
     port: 8025 # HTTP
-    localPort: 8025
+    localPort: 22080
   - resourceType: deployment
     resourceName: horizon-mail-server
     port: 1025 # SMTP
-    localPort: 1025
+    localPort: 22025
   - resourceType: deployment
     resourceName: my-postgres
     port: 5432 # Postgres
-    localPort: 5432
+    localPort: 25054
   - resourceType: deployment
     resourceName: prometheus
     port: 9090 # prometheus tcp
-    localPort: 59090
+    localPort: 19080
   - resourceType: deployment
     resourceName: prometheus-pushgateway
     port: 9091 #prometheus-pushgateway tcp
-    localPort: 59091
+    localPort: 21080
   - resourceType: deployment
     resourceName: grafana
     port: 3000 #grafana HTTP
-    localPort: 53000
+    localPort: 18080
   - resourceType: deployment
     resourceName: my-kafka
     port: 59092 # kafka tcp local client port
-    localPort: 59092 # default port for kafka broker
+    localPort: 24090
 deploy:
   kubectl:
     manifests:

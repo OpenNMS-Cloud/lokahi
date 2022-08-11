@@ -71,7 +71,7 @@
                     <showLogs>true</showLogs>
                     <images>
                         <image>
-                            <name>opennms/distributed-scheduling-poc:local</name>
+                            <name>opennms/horizon-stream-minion:local</name>
                             <build>
                                 <dockerFileDir>app</dockerFileDir>
                                 <filter>@</filter>

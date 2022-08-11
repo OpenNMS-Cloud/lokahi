@@ -22,6 +22,24 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
+  name: horizon-stream-minion
+  labels:
+    run: my-horizon-stream-minion
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8101
+      protocol: TCP
+      name: ssh
+    - port: 8181
+      protocol: TCP
+      name: http
+  selector:
+    run: my-horizon-stream-minion
+---
+apiVersion: v1
+kind: Service
+metadata:
   name: horizon-stream-api
   labels:
     run: my-horizon-stream-api
@@ -649,6 +667,65 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  name: my-horizon-stream-minion
+spec:
+  selector:
+    matchLabels:
+      run: my-horizon-stream-minion
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        run: my-horizon-stream-minion
+      annotations:
+        linkerd.io/inject: enabled
+        config.linkerd.io/opaque-ports: "47100,47500"
+    spec:
+      volumes:
+        - name: config-volume
+          configMap:
+            name: minion-cfg-files
+        - name: users-volume
+          secret:
+            secretName: karaf-users-secret
+      initContainers:
+      - name: init-sysctl
+        image: busybox
+        command:
+        - sysctl
+        - -w
+        - net.ipv4.ping_group_range=0 429496729
+        securityContext:
+          privileged: true
+      containers:
+        - name: horizon-stream-minion
+          image: opennms/horizon-stream-minion
+          imagePullPolicy: Never
+          env:
+            - name: USE_KUBERNETES
+              value: "true"
+            - name: KUBERNETES_SERVICE_NAME
+              value: "horizon-stream-minion"
+            - name: JAVA_TOOL_OPTIONS # Presence of this var lets `skaffold debug` see that this is a jvm container
+              value: "-agentlib:jdwp=transport=dt_socket,server=y,address=5005,suspend=n,quiet=y" # Permanent debug port in `skaffold dev`
+          ports:
+            - containerPort: 8181
+            - containerPort: 8101
+          volumeMounts:
+            - name: config-volume
+              mountPath: "/opt/karaf/etc/org.opennms.core.ipc.grpc.client.cfg"
+              subPath: "grpc-config"
+            - name: config-volume
+              mountPath: "/opt/karaf/etc/org.opennms.identity.cfg"
+              subPath: "opennms-identity"
+            - name: users-volume
+              mountPath: "/opt/horizon-stream/etc/users.properties"
+              subPath: "data"
+              readOnly: true
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
   name: my-horizon-stream-api
 spec:
   selector:
@@ -1088,3 +1165,15 @@ spec:
       port: "1025"
       user: "admin@horizion.stream.com"
       from: "admin@horizion.stream.com"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: minion-cfg-files
+data:
+  grpc-config: |
+    host=minion-gateway
+    max.message.size=104857600
+  opennms-identity: |
+    identity.id=${env:HOSTNAME:-UNKNOWN}
+    identity.location=${env:LOCATION:-cloud}

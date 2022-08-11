@@ -73,6 +73,24 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
+  name: minion-gateway
+  labels:
+    run: my-gateway
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8080
+      protocol: TCP
+      name: http
+    - port: 8990
+      protocol: TCP
+      name: grpc
+  selector:
+    run: my-minion-gateway
+---
+apiVersion: v1
+kind: Service
+metadata:
   name: zookeeper
   labels:
     run: my-zookeeper
@@ -681,6 +699,30 @@ spec:
               value: "-agentlib:jdwp=transport=dt_socket,server=y,address=5005,suspend=n,quiet=y" # Permanent debug port in `skaffold dev`
             - name: SPRING_KAFKA_BOOTSTRAP_SERVERS
               value: "kafka:9092"
+          ports:
+            - containerPort: 8080
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-minion-gateway
+spec:
+  selector:
+    matchLabels:
+      run: my-minion-gateway
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        run: my-minion-gateway
+    spec:
+      containers:
+        - name: horizon-stream-minion-gateway
+          image: opennms/horizon-stream-minion-gateway
+          imagePullPolicy: Never
+          env:
+            - name: JAVA_TOOL_OPTIONS
+              value: "-agentlib:jdwp=transport=dt_socket,server=y,address=5005,suspend=n,quiet=y" # Permanent debug port in `skaffold dev`
           ports:
             - containerPort: 8080
 ---

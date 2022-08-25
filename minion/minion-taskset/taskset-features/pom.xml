@@ -9,20 +9,19 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.opennms.horizon.minion.taskset</groupId>
-    <artifactId>features</artifactId>
+    <artifactId>taskset-features</artifactId>
     <packaging>feature</packaging>
 
     <name>OpenNms Horizon :: Minion :: TaskSet :: Features</name>
 
     <dependencies>
         <dependency>
-            <groupId>org.opennms.horizon.minion.taskset</groupId>
+            <groupId>org.opennms.horizon.minion</groupId>
             <artifactId>taskset-ipc</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.opennms.horizon.minion.taskset</groupId>
+            <groupId>org.opennms.horizon.minion</groupId>
             <artifactId>taskset-worker</artifactId>
             <version>${project.version}</version>
         </dependency>

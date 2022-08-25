@@ -9,7 +9,6 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.opennms.horizon.minion.taskset</groupId>
     <artifactId>taskset-ipc</artifactId>
     <packaging>bundle</packaging>
 

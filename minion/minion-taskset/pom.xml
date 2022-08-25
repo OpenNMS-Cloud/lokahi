@@ -18,7 +18,7 @@
         <module>taskset-ipc</module>
         <module>taskset-scheduler</module>
         <module>taskset-worker</module>
-        <module>features</module>
+        <module>taskset-features</module>
     </modules>
 
 </project>

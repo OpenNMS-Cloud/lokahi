@@ -9,7 +9,6 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.opennms.horizon.minion.taskset</groupId>
     <artifactId>taskset-worker</artifactId>
 
     <name>OpenNms Horizon :: Minion :: TaskSet :: Worker</name>
@@ -28,7 +27,7 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.opennms.horizon.minion.taskset</groupId>
+            <groupId>org.opennms.horizon.minion</groupId>
             <artifactId>taskset-scheduler</artifactId>
             <version>${project.version}</version>
         </dependency>

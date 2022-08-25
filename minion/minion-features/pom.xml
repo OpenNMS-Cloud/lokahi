@@ -47,8 +47,8 @@
             <type>xml</type>
         </dependency>
         <dependency>
-            <groupId>org.opennms.horizon.minion.taskset</groupId>
-            <artifactId>features</artifactId>
+            <groupId>org.opennms.horizon.minion</groupId>
+            <artifactId>taskset-features</artifactId>
             <version>${project.version}</version>
             <classifier>features</classifier>
             <type>xml</type>

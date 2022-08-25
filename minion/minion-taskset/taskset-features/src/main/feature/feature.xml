@@ -23,7 +23,7 @@
         <feature dependency="true">wrap</feature>
         <feature>aries-blueprint</feature>
         <bundle>wrap:mvn:com.cronutils/cron-utils/${cron-utils.version}$overwrite=merge&amp;Import-Package=javax.validation;resolution:=optional,*</bundle>
-        <bundle>mvn:org.opennms.horizon.minion.taskset/taskset-scheduler/${project.version}</bundle>
+        <bundle>mvn:org.opennms.horizon.minion/taskset-scheduler/${project.version}</bundle>
     </feature>
 
     <feature name="taskset-worker-ignite-internal" version="${project.version}">
@@ -53,8 +53,8 @@
         <feature>taskset-scheduler-internal</feature>
         <feature>plugins-api</feature>
 
-        <bundle>mvn:org.opennms.horizon.minion.taskset/taskset-ipc/${project.version}</bundle>
-        <bundle>mvn:org.opennms.horizon.minion.taskset/taskset-worker/${project.version}</bundle>
+        <bundle>mvn:org.opennms.horizon.minion/taskset-ipc/${project.version}</bundle>
+        <bundle>mvn:org.opennms.horizon.minion/taskset-worker/${project.version}</bundle>
     </feature>
 
 </features>

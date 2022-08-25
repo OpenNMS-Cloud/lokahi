@@ -30,7 +30,7 @@
 
     <feature name="grpc-ratelimitter" version="2.0.2">
         <feature prerequisite="true">wrap</feature>
-        <bundle>wrap:mvn:com.swrve/rate-limited-logger/2.0.2</bundle>
+        <bundle>wrap:mvn:com.swrve/rate-limited-logger/2.0.2$Bundle-SymbolicName=com.swrve.rate-limited-logger&amp;Bundle-Name=Rate Limited Logger</bundle>
     </feature>
 
     <feature name="grpc-minion" version="${project.version}">

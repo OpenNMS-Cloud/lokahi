@@ -26,6 +26,8 @@
     <reference id="ipInterfaceDao" interface="org.opennms.horizon.db.dao.api.IpInterfaceDao" />
     <reference id="minionDao" interface="org.opennms.horizon.db.dao.api.MinionDao"/>
     <!--<reference id="locationAwarePingClient" interface="org.opennms.netmgt.icmp.proxy.LocationAwarePingClient"/>-->
+
+    <reference id="ignite" interface="org.apache.ignite.Ignite"/>
     <reference id="igniteTaskSetClientFactory" interface="org.opennms.taskset.service.igniteclient.TaskSetIgnitePublisherFactory"/>
     <!--<reference id="locationAwareSnmpClient" interface="org.opennms.horizon.shared.snmp.proxy.LocationAwareSnmpClient"/>-->
 
@@ -38,15 +40,6 @@
     <!--    <argument ref="minionDao"/>-->
     <!--    <argument ref="eventSubscriptionService"/>-->
     <!--</bean>-->
-
-    <bean id="workerIgniteConfiguration" class="org.opennms.horizon.core.ignite.WorkerIgniteConfiguration">
-        <property name="useKubernetes" value="${ignite.useKubernetes}"/>
-        <property name="kubernetesServiceName" value="${ignite.kubernetesServiceName}"/>
-    </bean>
-
-    <bean id="ignite" class="org.opennms.horizon.core.ignite.IgnitionFactory" factory-method="create" destroy-method="close">
-        <argument ref="workerIgniteConfiguration"/>
-    </bean>
 
     <bean id="taskSetIgniteClient" factory-ref="igniteTaskSetClientFactory" factory-method="create">
         <argument ref="ignite"/>

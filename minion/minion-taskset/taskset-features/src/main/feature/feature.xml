@@ -2,12 +2,6 @@
 <features name="minion-taskset-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.6.0">
 
     <feature name="taskset-rest-utils-internal" version="${project.version}">
-        <feature>cxf</feature>
-        <feature>cxf-jaxrs</feature>
-        <feature>cxf-sse</feature>
-        <feature>cxf-rs-description-openapi-v3</feature>
-        <feature>cxf-rs-security-oauth2</feature>
-
         <bundle>mvn:org.apache.aries.component-dsl/org.apache.aries.component-dsl.component-dsl/1.2.2</bundle>
         <bundle>mvn:org.apache.aries.jax.rs/org.apache.aries.jax.rs.openapi.resource/${aries.jax.rs.whiteboard.version}</bundle>
         <feature>aries-jax-rs-whiteboard</feature>
@@ -36,13 +30,13 @@
         <feature>taskset-ignite-core-internal</feature>
         <feature>taskset-rest-utils-internal</feature>
 
-        <bundle>wrap:mvn:org.apache.ignite/ignite-kubernetes/${ignite.version}</bundle>
+        <bundle>wrap:mvn:org.apache.ignite/ignite-kubernetes/${ignite.version}$Bundle-SymbolicName=org.apache.ignite.kubernetes&amp;Bundle-Name=Ignite-Kubernetes</bundle>
     </feature>
 
     <feature name="taskset-ignite-core-internal" version="${project.version}">
         <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.javax-cache-api/1.0.0_1</bundle>
         <bundle dependency="true">wrap:mvn:org.apache.ignite/ignite-osgi/${ignite.version}</bundle>
-        <bundle>wrap:mvn:org.apache.ignite/ignite-core/${ignite.version}$DynamicImport-Package=*</bundle>
+        <bundle>wrap:mvn:org.apache.ignite/ignite-core/${ignite.version}$DynamicImport-Package=*&amp;Bundle-SymbolicName=org.apache.ignite.core&amp;Bundle-Name=Ignite-Core</bundle>
     </feature>
 
     <feature name="taskset-minion" version="${project.version}">

@@ -2,8 +2,9 @@
 <features name="minion-taskset-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.6.0">
 
     <feature name="taskset-rest-utils-internal" version="${project.version}">
+        <feature>cxf-jaxrs</feature>
+        <feature>cxf-sse</feature>
         <bundle>mvn:org.apache.aries.component-dsl/org.apache.aries.component-dsl.component-dsl/1.2.2</bundle>
-        <bundle>mvn:org.apache.aries.jax.rs/org.apache.aries.jax.rs.openapi.resource/${aries.jax.rs.whiteboard.version}</bundle>
         <feature>aries-jax-rs-whiteboard</feature>
         <feature>aries-jax-rs-whiteboard-jackson</feature>
         <bundle>mvn:javax.annotation/javax.annotation-api/1.3.2</bundle>

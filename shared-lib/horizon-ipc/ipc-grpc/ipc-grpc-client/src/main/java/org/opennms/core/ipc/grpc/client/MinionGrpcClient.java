@@ -30,7 +30,6 @@ package org.opennms.core.ipc.grpc.client;
 
 import static org.opennms.core.ipc.grpc.client.GrpcClientConstants.*;
 import static org.opennms.horizon.shared.ipc.rpc.api.RpcModule.MINION_HEADERS_MODULE;
-import static org.opennms.horizon.shared.ipc.sink.api.SinkModule.HEARTBEAT_MODULE_ID;
 
 import com.codahale.metrics.MetricRegistry;
 import com.google.protobuf.Message;
@@ -122,6 +121,7 @@ public class MinionGrpcClient extends AbstractMessageDispatcherFactory<String> {
     // This maintains a blocking thread for each dispatch module when OpenNMS is not in active state.
     private final ScheduledExecutorService blockingSinkMessageScheduler = Executors.newScheduledThreadPool(SINK_BLOCKING_THREAD_POOL_SIZE,
             blockingSinkMessageThreadFactory);
+    private ReconnectStrategy reconnectStrategy;
     private Tracer tracer;
 
     public MinionGrpcClient(IpcIdentity ipcIdentity, ConfigurationAdmin configAdmin) {
@@ -162,10 +162,17 @@ public class MinionGrpcClient extends AbstractMessageDispatcherFactory<String> {
         } else {
             channel = channelBuilder.usePlaintext().build();
         }
-
         asyncStub = CloudServiceGrpc.newStub(channel);
-        initializeRpcStub();
-        initializeSinkStub();
+
+        reconnectStrategy = new SimpleReconnectStrategy(channel, () -> {
+            initializeRpcStub();
+            initializeSinkStub();
+        }, () -> {
+            rpcStream = null;
+            sinkStream = null;
+        });
+        reconnectStrategy.activate();
+
         LOG.info("Minion at location {} with systemId {} started", ipcIdentity.getLocation(), ipcIdentity.getId());
 
     }
@@ -186,37 +193,15 @@ public class MinionGrpcClient extends AbstractMessageDispatcherFactory<String> {
     }
 
     private void initializeRpcStub() {
-        // TODO: reconnect anytime the connection is not active (rpcStream == null)
-        if (getChannelState().equals(ConnectivityState.READY) || getChannelState().equals(ConnectivityState.IDLE)) {
-            rpcStream = asyncStub.cloudToMinionRPC(new RpcMessageHandler());
-            // Need to send minion headers to gRPC server in order to register.
-            sendMinionHeaders();
-            LOG.info("Initialized RPC stream");
-        } else {
-            LOG.warn("gRPC IPC server is not in ready state");
-            try {
-                Thread.sleep(2000);
-                initializeSinkStub();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
+        rpcStream = asyncStub.cloudToMinionRPC(new RpcMessageHandler());
+        // Need to send minion headers to gRPC server in order to register.
+        sendMinionHeaders();
+        LOG.info("Initialized RPC stream");
     }
 
     private void initializeSinkStub() {
-        // TODO: reconnect anytime the connection is not active (rpcStream == null)
-        if (getChannelState().equals(ConnectivityState.READY) || getChannelState().equals(ConnectivityState.IDLE)) {
-            sinkStream = asyncStub.minionToCloudMessages(new EmptyMessageReceiver());
-            LOG.info("Initialized Sink stream");
-        } else {
-            LOG.warn("gRPC IPC server is not in ready state");
-            try {
-                Thread.sleep(2000);
-                initializeSinkStub();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
+        sinkStream = asyncStub.minionToCloudMessages(new EmptyMessageReceiver());
+        LOG.info("Initialized Sink stream");
     }
 
 
@@ -284,7 +269,7 @@ public class MinionGrpcClient extends AbstractMessageDispatcherFactory<String> {
     }
 
     ConnectivityState getChannelState() {
-        return currentChannelState = channel.getState(true);
+        return channel.getState(true);
     }
 
     @Override
@@ -300,33 +285,12 @@ public class MinionGrpcClient extends AbstractMessageDispatcherFactory<String> {
                     .setModuleId(module.getId())
                     .setContent(ByteString.copyFrom(sinkMessageContent));
 
-            if (module.getId().equals(HEARTBEAT_MODULE_ID)) {
-                if (rpcStream == null || sinkStream == null || hasChangedToReadyState()) {
-                    initializeSinkStub();
-                    initializeRpcStub();
-                }
-            }
             // If module has asyncpolicy, keep attempting to send message.
             if (module.getAsyncPolicy() != null) {
                 sendBlockingSinkMessage(sinkMessageBuilder.build());
             } else {
                 sendSinkMessage(sinkMessageBuilder.build());
             }
-        }
-    }
-
-    public void close() {
-        if (rpcStream != null) {
-            rpcStream.onCompleted();
-            rpcStream = null;
-        }
-        if (sinkStream != null) {
-            sinkStream.onCompleted();
-            sinkStream = null;
-        }
-        if (channel != null) {
-            channel.shutdown();
-            channel = null;
         }
     }
 
@@ -356,20 +320,16 @@ public class MinionGrpcClient extends AbstractMessageDispatcherFactory<String> {
 
 
     private synchronized boolean sendSinkMessage(SinkMessage sinkMessage) {
-        if (getChannelState().equals(ConnectivityState.READY)) {
-            if (sinkStream != null) {
-                try {
-                    sinkStream.onNext(MinionToCloudMessage.newBuilder()
-                        .setSinkMessage(sinkMessage)
-                        .build()
-                    );
-                    return true;
-                } catch (Throwable e) {
-                    LOG.error("Exception while sending sinkMessage to gRPC IPC server", e);
-                }
+        if (sinkStream != null) {
+            try {
+                sinkStream.onNext(MinionToCloudMessage.newBuilder()
+                    .setSinkMessage(sinkMessage)
+                    .build()
+                );
+                return true;
+            } catch (Throwable e) {
+                LOG.error("Exception while sending sinkMessage to gRPC IPC server", e);
             }
-        } else {
-            LOG.info("gRPC IPC server is not in ready state");
         }
         return false;
     }
@@ -423,16 +383,13 @@ public class MinionGrpcClient extends AbstractMessageDispatcherFactory<String> {
                     .setModuleId(requestProto.getModuleId())
                     .setRpcContent(ByteString.copyFrom(responseAsString, StandardCharsets.UTF_8))
                     .build();
-            if (getChannelState().equals(ConnectivityState.READY)) {
-                try {
-                    sendRpcResponse(responseProto);
-                    LOG.debug("Request with RpcId:{} for module {} handled successfully, and response was sent",
-                            responseProto.getRpcId(), responseProto.getModuleId());
-                } catch (Throwable e) {
-                    LOG.error("Error while sending RPC response {}", responseProto, e);
-                }
-            } else {
-                LOG.warn("gRPC IPC server is not in ready state");
+
+            try {
+                sendRpcResponse(responseProto);
+                LOG.debug("Request with RpcId:{} for module {} handled successfully, and response was sent",
+                        responseProto.getRpcId(), responseProto.getModuleId());
+            } catch (Throwable e) {
+                LOG.error("Error while sending RPC response {}", responseProto, e);
             }
         });
     }
@@ -445,7 +402,8 @@ public class MinionGrpcClient extends AbstractMessageDispatcherFactory<String> {
                 LOG.error("Exception while sending RPC response : {}", rpcResponseProto);
             }
         } else {
-            throw new RuntimeException("RPC response handler not found");
+            //throw new RuntimeException("RPC response handler not found");
+            LOG.warn("gRPC IPC server is not in ready state");
         }
     }
 
@@ -465,13 +423,13 @@ public class MinionGrpcClient extends AbstractMessageDispatcherFactory<String> {
         @Override
         public void onError(Throwable throwable) {
             LOG.error("Error in RPC streaming", throwable);
-            rpcStream = null;
+            reconnectStrategy.activate();
         }
 
         @Override
         public void onCompleted() {
             LOG.error("Closing RPC message handler");
-            rpcStream = null;
+            reconnectStrategy.activate();
         }
 
     }

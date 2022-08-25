@@ -44,6 +44,8 @@ import org.opennms.cloud.grpc.minion.RpcRequestProto;
 import org.opennms.cloud.grpc.minion.RpcResponseProto;
 import org.opennms.cloud.grpc.minion.TwinRequestProto;
 import org.opennms.cloud.grpc.minion.TwinResponseProto;
+import org.opennms.core.ipc.grpc.client.ReconnectStrategy;
+import org.opennms.core.ipc.grpc.client.SimpleReconnectStrategy;
 import org.opennms.horizon.minion.ipc.twin.common.AbstractTwinSubscriber;
 import org.opennms.horizon.minion.ipc.twin.common.TwinRequest;
 import org.opennms.horizon.minion.ipc.twin.common.TwinUpdate;
@@ -68,6 +70,7 @@ public class GrpcTwinSubscriber extends AbstractTwinSubscriber {
     private ResponseHandler responseHandler = new ResponseHandler();
     private final ScheduledExecutorService twinRequestSenderExecutor = Executors.newScheduledThreadPool(TWIN_REQUEST_POOL_SIZE,
             new TwinThreadFactory());
+    private ReconnectStrategy reconnectStrategy;
 
     public GrpcTwinSubscriber(IpcIdentity minionIdentity, ConfigurationAdmin configAdmin, int port) {
         this(minionIdentity, GrpcIpcUtils.getPropertiesFromConfig(configAdmin, GrpcIpcUtils.GRPC_CLIENT_PID), port);
@@ -83,7 +86,8 @@ public class GrpcTwinSubscriber extends AbstractTwinSubscriber {
         channel = GrpcIpcUtils.getChannel(clientProperties, this.port);
 
         asyncStub = CloudServiceGrpc.newStub(channel);
-        sendMinionHeader();
+        reconnectStrategy = new SimpleReconnectStrategy(channel, this::sendMinionHeader, () -> {}); // we take no action on disconnect
+        reconnectStrategy.activate();
         LOG.info("Started Twin gRPC Subscriber at location {} with systemId {}", getIdentity().getLocation(), getIdentity().getId());
     }
 
@@ -110,8 +114,10 @@ public class GrpcTwinSubscriber extends AbstractTwinSubscriber {
             @Override
             public void onCompleted() {
                 LOG.debug("Closed stream");
+                reconnectStrategy.activate();
             }
         });
+        LOG.info("Registered minion {} in twin service", getIdentity());
     }
 
 
@@ -188,11 +194,13 @@ public class GrpcTwinSubscriber extends AbstractTwinSubscriber {
             @Override
             public void onError(Throwable t) {
                 LOG.warn("Error while requesting twin {}, received answer {}", twinRequestProto, t);
+                reconnectStrategy.activate();
             }
 
             @Override
             public void onCompleted() {
                 LOG.debug("Closed reply stream");
+                reconnectStrategy.activate();
             }
         });
         return true;
@@ -213,11 +221,13 @@ public class GrpcTwinSubscriber extends AbstractTwinSubscriber {
         @Override
         public void onError(Throwable throwable) {
             LOG.error("Error in Twin streaming", throwable);
+            reconnectStrategy.activate();
         }
 
         @Override
         public void onCompleted() {
             LOG.error("Closing Twin Response Handler");
+            reconnectStrategy.activate();
         }
 
     }

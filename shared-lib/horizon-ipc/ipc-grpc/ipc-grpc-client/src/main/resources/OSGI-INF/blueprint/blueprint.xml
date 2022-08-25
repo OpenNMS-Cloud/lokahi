@@ -35,7 +35,7 @@
     <bean id="metricRegistry" class="com.codahale.metrics.MetricRegistry"/>
     <bean id="tracer" class="io.opentracing.noop.NoopTracerFactory" factory-method="create"/>
 
-    <bean id="minionClient" class="org.opennms.core.ipc.grpc.client.MinionGrpcClient" init-method="start" destroy-method="close">
+    <bean id="minionClient" class="org.opennms.core.ipc.grpc.client.MinionGrpcClient" init-method="start" destroy-method="shutdown">
         <argument ref="ipcIdentity"/>
         <argument ref="configAdmin"/>
         <argument ref="metricRegistry"/>

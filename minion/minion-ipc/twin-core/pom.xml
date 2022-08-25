@@ -22,7 +22,7 @@
         </dependency>
         <dependency>
             <groupId>org.opennms.horizon.shared</groupId>
-            <artifactId>ipc-grpc-contract</artifactId>
+            <artifactId>ipc-grpc-client</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

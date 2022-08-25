@@ -92,7 +92,7 @@
                             <descriptors>
                                 <descriptor>mvn:org.apache.karaf.features/framework/${karaf.version}/xml/features</descriptor>
                                 <descriptor>mvn:org.apache.karaf.features/standard/${karaf.version}/xml/features</descriptor>
-                                <descriptor>mvn:org.opennms.horizon.minion.grpc/features/${project.version}/xml/features</descriptor>
+                                <descriptor>mvn:org.opennms.horizon.minion/grpc-features/${project.version}/xml/features</descriptor>
                                 <descriptor>mvn:org.opennms.horizon.minion/ipc-features/${project.version}/xml/features</descriptor>
                                 <descriptor>mvn:org.opennms.horizon.shared/snmp-api/${project.version}/xml/features</descriptor>
                                 <descriptor>mvn:org.opennms.horizon.minion/plugin-features/${project.version}/xml/features</descriptor>

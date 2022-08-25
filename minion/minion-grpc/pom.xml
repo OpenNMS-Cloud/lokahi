@@ -14,7 +14,7 @@
 
     <name>OpenNms Horizon :: Minion :: gRPC</name>
     <modules>
-        <module>features</module>
+        <module>grpc-features</module>
     </modules>
 
 </project>

@@ -9,8 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.opennms.horizon.minion.grpc</groupId>
-    <artifactId>features</artifactId>
+    <artifactId>grpc-features</artifactId>
     <packaging>feature</packaging>
 
     <name>OpenNms Horizon :: Minion :: gRPC :: Features</name>

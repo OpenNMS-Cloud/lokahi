@@ -26,8 +26,8 @@
         </dependency>
 
         <dependency>
-            <groupId>org.opennms.horizon.minion.grpc</groupId>
-            <artifactId>features</artifactId>
+            <groupId>org.opennms.horizon.minion</groupId>
+            <artifactId>grpc-features</artifactId>
             <version>${project.version}</version>
             <classifier>features</classifier>
             <type>xml</type>

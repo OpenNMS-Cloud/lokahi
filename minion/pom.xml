@@ -18,13 +18,13 @@
 
     <modules>
         <module>minion-3rdParty</module>
-        <module>plugins</module>
         <module>icmp</module>
         <module>snmp</module>
         <module>minion-ipc</module>
         <module>minion-grpc</module>
         <module>minion-observability</module>
         <module>minion-taskset</module>
+        <module>plugins</module>
         <module>minion-features</module>
         <module>docker-assembly</module>
         <module>assembly</module>

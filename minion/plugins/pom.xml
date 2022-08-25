@@ -15,12 +15,12 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>features</module>
         <module>plugins-api</module>
         <module>registration</module>
         <module>icmp-plugin</module>
         <module>snmp-plugin</module>
         <module>WEB-LISTEN</module>
+        <module>features</module>
     </modules>
 
 </project>

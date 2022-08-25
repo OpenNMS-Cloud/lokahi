@@ -51,10 +51,10 @@
         <feature>ipc-whiteboard-internal</feature>
         <feature>ipc-api</feature>
 
-        <bundle>mvn:org.opennms.horizon.minion.ipc/twin-api/${project.version}</bundle>
-        <bundle>mvn:org.opennms.horizon.minion.ipc/twin-common/${project.version}</bundle>
-        <bundle>mvn:org.opennms.horizon.minion.ipc/twin-core/${project.version}</bundle>
-        <bundle>mvn:org.opennms.horizon.minion.ipc/twin-whiteboard/${project.version}</bundle>
+        <bundle>mvn:org.opennms.horizon.minion/twin-api/${project.version}</bundle>
+        <bundle>mvn:org.opennms.horizon.minion/twin-common/${project.version}</bundle>
+        <bundle>mvn:org.opennms.horizon.minion/twin-core/${project.version}</bundle>
+        <bundle>mvn:org.opennms.horizon.minion/twin-whiteboard/${project.version}</bundle>
     </feature>
 
 </features>

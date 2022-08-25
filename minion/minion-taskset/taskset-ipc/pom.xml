@@ -33,7 +33,7 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.opennms.horizon.minion.ipc</groupId>
+            <groupId>org.opennms.horizon.minion</groupId>
             <artifactId>twin-api</artifactId>
             <version>${project.version}</version>
         </dependency>

@@ -9,18 +9,18 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>ipc</artifactId>
+    <artifactId>minion-ipc</artifactId>
     <packaging>pom</packaging>
 
     <name>OpenNms Horizon :: Minion :: Ipc</name>
 
     <modules>
-        <module>echo</module>
+        <module>ipc-echo</module>
         <module>twin-api</module>
         <module>twin-common</module>
         <module>twin-core</module>
         <module>twin-whiteboard</module>
-        <module>features</module>
+        <module>ipc-features</module>
     </modules>
 
 </project>

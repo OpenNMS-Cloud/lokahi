@@ -35,8 +35,8 @@
             <artifactId>lombok</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.opennms.horizon.minion.icmp</groupId>
-            <artifactId>best</artifactId>
+            <groupId>org.opennms.horizon.minion</groupId>
+            <artifactId>icmp-best</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

@@ -9,20 +9,19 @@
     <version>0.1.0-SNAPSHOT</version>
   </parent>
 
-  <groupId>org.opennms.horizon.minion.icmp</groupId>
   <artifactId>icmp</artifactId>
   <name>OpenNMS Horizon :: Minion :: ICMP</name>
   <packaging>pom</packaging>
 
   <modules>
-    <module>best</module>
-    <module>jni</module>
-    <module>jni6</module>
-    <module>jna</module>
-    <module>rpc-common</module>
-    <module>rpc-module-impl</module>
-    <module>rpc-impl</module>
-    <module>shell</module>
+    <module>icmp-best</module>
+    <module>icmp-jni</module>
+    <module>icmp-jni6</module>
+    <module>icmp-jna</module>
+    <module>icmp-rpc-common</module>
+    <module>icmp-rpc-module-impl</module>
+    <module>icmp-rpc-impl</module>
+    <module>icmp-shell</module>
   </modules>
 
 </project>

@@ -24,21 +24,21 @@
         <feature>icmp-shared-libs</feature>
         <feature>icmp-jna-internal</feature>
         <feature>icmp-guava-internal</feature>
-        <bundle>mvn:org.opennms.horizon.minion.icmp/jna/${project.version}</bundle>
+        <bundle>mvn:org.opennms.horizon.minion/icmp-jna/${project.version}</bundle>
     </feature>
 
     <feature name="icmp-jni" version="${project.version}">
         <feature>icmp-shared-libs</feature>
         <bundle dependency="true">mvn:org.opennms/jicmp-api/${jicmp.version}</bundle>
         <bundle dependency="true">mvn:org.opennms/jicmp6-api/${jicmp6.version}</bundle>
-        <bundle>mvn:org.opennms.horizon.minion.icmp/jni6/${project.version}</bundle>
-        <bundle>mvn:org.opennms.horizon.minion.icmp/jni/${project.version}</bundle>
+        <bundle>mvn:org.opennms.horizon.minion/icmp-jni6/${project.version}</bundle>
+        <bundle>mvn:org.opennms.horizon.minion/icmp-jni/${project.version}</bundle>
     </feature>
 
     <feature name="icmp-best" version="${project.version}">
         <feature>icmp-jna</feature>
         <feature>icmp-jni</feature>
-        <bundle>mvn:org.opennms.horizon.minion.icmp/best/${project.version}</bundle>
+        <bundle>mvn:org.opennms.horizon.minion/icmp-best/${project.version}</bundle>
     </feature>
 
     <feature name="icmp-plugins" version="${project.version}">

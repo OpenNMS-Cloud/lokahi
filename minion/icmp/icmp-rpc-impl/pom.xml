@@ -4,16 +4,21 @@
   <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.opennms.horizon.minion.icmp</groupId>
+        <groupId>org.opennms.horizon.minion</groupId>
         <artifactId>icmp</artifactId>
         <version>0.1.0-SNAPSHOT</version>
     </parent>
 
-  <artifactId>rpc-common</artifactId>
-  <name>OpenNMS Horizon :: Minion :: ICMP :: RPC Common</name>
+  <artifactId>icmp-rpc-impl</artifactId>
+  <name>OpenNMS Horizon :: Minion :: ICMP :: RPC Implementation</name>
   <packaging>bundle</packaging>
 
   <dependencies>
+    <dependency>
+      <groupId>org.opennms.horizon.minion</groupId>
+      <artifactId>icmp-rpc-common</artifactId>
+      <version>${project.version}</version>
+    </dependency>
     <dependency>
       <groupId>org.opennms.horizon.shared</groupId>
       <artifactId>icmp-api</artifactId>
@@ -30,11 +35,6 @@
       <artifactId>junit</artifactId>
       <scope>test</scope>
     </dependency>
-      <dependency>
-          <groupId>org.opennms.horizon.shared</groupId>
-          <artifactId>horizon-common-utils</artifactId>
-          <version>${project.version}</version>
-      </dependency>
   </dependencies>
 
   <build>

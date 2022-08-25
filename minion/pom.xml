@@ -58,8 +58,8 @@
             </dependency>
 
             <dependency>
-                <groupId>org.opennms.horizon.shared.ipc</groupId>
-                <artifactId>server</artifactId>
+                <groupId>org.opennms.horizon.shared</groupId>
+                <artifactId>ipc-grpc-server</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

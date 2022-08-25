@@ -18,10 +18,10 @@
 
     <modules>
         <module>dto-model</module>
-        <module>lang</module>
-        <module>logging</module>
-        <module>ipc</module>
-        <module>utils</module>
+        <module>horizon-common-lang</module>
+        <module>horizon-common-logging</module>
+        <module>horizon-ipc</module>
+        <module>horizon-common-utils</module>
         <module>snmp-api</module>
         <module>icmp-api</module>
         <module>task-set</module>

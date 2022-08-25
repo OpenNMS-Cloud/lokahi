@@ -6,18 +6,17 @@
 
     <parent>
         <groupId>org.opennms.horizon.shared</groupId>
-        <artifactId>ipc</artifactId>
+        <artifactId>horizon-ipc</artifactId>
         <version>0.1.0-SNAPSHOT</version>
     </parent>
 
-    <groupId>org.opennms.horizon.shared.ipc</groupId>
-    <artifactId>grpc</artifactId>
+    <artifactId>ipc-grpc</artifactId>
     <name>OpenNMS Horizon :: Shared Library :: IPC :: GRPC</name>
     <packaging>pom</packaging>
 
     <modules>
-        <module>contract</module>
-        <module>client</module>
-        <module>server</module>
+        <module>ipc-grpc-contract</module>
+        <module>ipc-grpc-client</module>
+        <module>ipc-grpc-server</module>
     </modules>
 </project>

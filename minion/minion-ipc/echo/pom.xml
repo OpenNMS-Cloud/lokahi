@@ -19,12 +19,12 @@
     <dependencies>
         <dependency>
             <groupId>org.opennms.horizon.shared</groupId>
-            <artifactId>utils</artifactId>
+            <artifactId>horizon-common-utils</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.opennms.horizon.shared.ipc</groupId>
-            <artifactId>api</artifactId>
+            <groupId>org.opennms.horizon.shared</groupId>
+            <artifactId>ipc-api</artifactId>
             <version>${project.version}</version>
         </dependency>
 

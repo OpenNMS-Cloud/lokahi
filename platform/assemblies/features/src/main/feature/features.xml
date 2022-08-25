@@ -39,7 +39,7 @@
 
         <bundle>mvn:org.opennms.horizon.core/identity/${project.version}</bundle>
         <bundle>mvn:org.opennms.horizon.core/lib/${project.version}</bundle>
-        <bundle>mvn:org.opennms.horizon.shared/utils/${project.version}</bundle>
+        <bundle>mvn:org.opennms.horizon.shared/horizon-common-utils/${project.version}</bundle>
         <bundle>mvn:org.opennms.horizon.core/xml/${project.version}</bundle>
         <bundle>mvn:org.opennms.horizon.core/soa/${project.version}</bundle>
     </feature>
@@ -291,7 +291,7 @@
     <!-- HORIZON SHARED -->
     <!--                -->
     <feature name="horizon-shared-lang" version="${project.version}">
-        <bundle>mvn:org.opennms.horizon.shared/lang/${project.version}</bundle>
+        <bundle>mvn:org.opennms.horizon.shared/horizon-common-lang/${project.version}</bundle>
     </feature>
 
     <feature name="horizon-shared-task-set-publisher" version="${project.version}">

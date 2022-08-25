@@ -5,7 +5,7 @@
         <feature>aries-blueprint</feature>
         <feature version="${project.version}">guava</feature>
         <bundle>wrap:mvn:org.json/json/20171018$Export-Package=org.json</bundle>
-        <bundle>mvn:org.opennms.horizon.shared/utils/${project.version}</bundle>
+        <bundle>mvn:org.opennms.horizon.shared/horizon-utils/${project.version}</bundle>
 
         <bundle>mvn:org.opennms.horizon.shared/snmp-api/${project.version}</bundle>
     </feature>

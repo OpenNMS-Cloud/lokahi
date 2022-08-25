@@ -2,7 +2,7 @@
 <features name="minion-plugin-api-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.6.0">
 
     <feature name="plugins-horizon-utils-internal" version="${project.version}">
-        <bundle>mvn:org.opennms.horizon.shared/utils/${project.version}</bundle>
+        <bundle>mvn:org.opennms.horizon.shared/horizon-common-utils/${project.version}</bundle>
     </feature>
 
     <feature name="plugins-guava-internal">

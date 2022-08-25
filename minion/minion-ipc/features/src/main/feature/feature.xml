@@ -40,8 +40,8 @@
         <feature>ipc-guava-internal</feature>
         <feature>protobuf</feature>
         <feature>grpc-ratelimitter</feature>
-        <bundle>mvn:org.opennms.horizon.shared/logging/${project.version}</bundle>
-        <bundle>mvn:org.opennms.horizon.shared.ipc/api/${project.version}</bundle>
+        <bundle>mvn:org.opennms.horizon.shared/horizon-common-logging/${project.version}</bundle>
+        <bundle>mvn:org.opennms.horizon.shared/ipc-api/${project.version}</bundle>
     </feature>
 
     <feature name="ipc-minion" version="${project.version}">

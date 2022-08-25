@@ -14,8 +14,8 @@
     <feature name="icmp-shared-libs" hidden="true">
         <feature>aries-blueprint</feature>
         <feature>icmp-guava-internal</feature>
-        <bundle dependency="true">mvn:org.opennms.horizon.shared/logging/${project.version}</bundle>
-        <bundle dependency="true">mvn:org.opennms.horizon.shared/utils/${project.version}</bundle>
+        <bundle dependency="true">mvn:org.opennms.horizon.shared/horizon-common-logging/${project.version}</bundle>
+        <bundle dependency="true">mvn:org.opennms.horizon.shared/horizon-common-utils/${project.version}</bundle>
         <bundle dependency="true">mvn:org.opennms.horizon.shared/icmp-api/${project.version}</bundle>
         <bundle dependency="true">mvn:org.opennms.lib/org.opennms.lib.tracker/0.7</bundle>
     </feature>

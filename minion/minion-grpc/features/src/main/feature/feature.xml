@@ -43,10 +43,10 @@
         <feature>grpc</feature>
         <feature>grpc-ratelimitter</feature>
 
-        <bundle>mvn:org.opennms.horizon.shared/logging/${project.version}</bundle>
-        <bundle>mvn:org.opennms.horizon.shared.ipc/api/${project.version}</bundle>
-        <bundle>mvn:org.opennms.horizon.shared.ipc.grpc/contract/${project.version}</bundle>
-        <bundle>mvn:org.opennms.horizon.shared.ipc.grpc/client/${project.version}</bundle>
+        <bundle>mvn:org.opennms.horizon.shared/horizon-common-logging/${project.version}</bundle>
+        <bundle>mvn:org.opennms.horizon.shared/ipc-api/${project.version}</bundle>
+        <bundle>mvn:org.opennms.horizon.shared/ipc-grpc-contract/${project.version}</bundle>
+        <bundle>mvn:org.opennms.horizon.shared/ipc-grpc-client/${project.version}</bundle>
     </feature>
 
 </features>

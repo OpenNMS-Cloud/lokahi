@@ -63,7 +63,7 @@
 
         <dependency>
             <groupId>org.opennms.horizon.shared</groupId>
-            <artifactId>lang</artifactId>
+            <artifactId>horizon-common-lang</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

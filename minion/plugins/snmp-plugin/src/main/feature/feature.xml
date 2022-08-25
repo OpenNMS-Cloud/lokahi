@@ -5,7 +5,7 @@
         <bundle dependency="true">mvn:commons-io/commons-io/${commons.io.version}</bundle>
         <bundle dependency="true">mvn:commons-lang/commons-lang/${commons.lang.version}</bundle>
 
-        <bundle>mvn:org.opennms.horizon.shared/logging/${project.version}</bundle>
+        <bundle>mvn:org.opennms.horizon.shared/horizon-common-logging/${project.version}</bundle>
         <feature version="${project.version}">snmp-api</feature>
     </feature>
 

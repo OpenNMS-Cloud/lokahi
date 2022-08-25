@@ -10,13 +10,13 @@
         <version>0.1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>ipc</artifactId>
+    <artifactId>horizon-ipc</artifactId>
     <name>OpenNMS Horizon :: Shared Library :: IPC</name>
     <packaging>pom</packaging>
 
     <modules>
-        <module>api</module>
-        <module>grpc</module>
+        <module>ipc-api</module>
+        <module>ipc-grpc</module>
     </modules>
 
 </project>

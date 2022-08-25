@@ -17,7 +17,7 @@
     <dependencies>
         <dependency>
             <groupId>org.opennms.horizon.shared</groupId>
-            <artifactId>utils</artifactId>
+            <artifactId>horizon-common-utils</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

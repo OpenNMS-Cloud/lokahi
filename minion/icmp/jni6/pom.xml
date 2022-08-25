@@ -21,7 +21,7 @@
     </dependency>
       <dependency>
           <groupId>org.opennms.horizon.shared</groupId>
-          <artifactId>logging</artifactId>
+          <artifactId>horizon-common-logging</artifactId>
           <version>${project.version}</version>
       </dependency>
     <dependency>

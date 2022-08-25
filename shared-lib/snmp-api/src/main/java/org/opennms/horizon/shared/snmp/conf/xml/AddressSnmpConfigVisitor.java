@@ -36,7 +36,6 @@ import org.opennms.horizon.shared.utils.LocationUtils;
 import org.opennms.horizon.shared.snmp.SnmpConfiguration;
 import org.opennms.horizon.shared.utils.ByteArrayComparator;
 import org.opennms.horizon.shared.utils.InetAddressUtils;
-import org.opennms.horizon.shared.utils.LocationUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

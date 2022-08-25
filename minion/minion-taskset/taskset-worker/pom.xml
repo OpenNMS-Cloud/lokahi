@@ -60,7 +60,7 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.opennms.horizon.minion.observability</groupId>
+            <groupId>org.opennms.horizon.minion</groupId>
             <artifactId>observability-metrics</artifactId>
             <version>${project.version}</version>
         </dependency>

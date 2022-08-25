@@ -9,7 +9,6 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.opennms.horizon.minion.observability</groupId>
     <artifactId>observability-tracing</artifactId>
     <packaging>bundle</packaging>
     <name>OpenNms Horizon :: Minion :: Observability :: Tracing</name>

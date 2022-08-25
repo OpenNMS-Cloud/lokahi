@@ -35,7 +35,7 @@
         <feature prerequisite="true">wrap</feature>
         <feature>aries-blueprint</feature>
         <feature>observability-opentracing-internal</feature>
-        <bundle>mvn:org.opennms.horizon.minion.observability/observability-tracing/${project.version}</bundle>
+        <bundle>mvn:org.opennms.horizon.minion/observability-tracing/${project.version}</bundle>
     </feature>
 
     <feature name="observability-minion" version="${project.version}">
@@ -45,7 +45,7 @@
         <feature>observability-whiteboard-internal</feature>
         <feature>observability-horizon-tracing-internal</feature>
 
-        <bundle>mvn:org.opennms.horizon.minion.observability/observability-metrics/${project.version}</bundle>
+        <bundle>mvn:org.opennms.horizon.minion/observability-metrics/${project.version}</bundle>
     </feature>
 
 </features>

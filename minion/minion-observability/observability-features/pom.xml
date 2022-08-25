@@ -9,20 +9,19 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.opennms.horizon.minion.observability</groupId>
-    <artifactId>features</artifactId>
+    <artifactId>observability-features</artifactId>
     <packaging>feature</packaging>
 
     <name>OpenNms Horizon :: Minion :: Observability :: Features</name>
 
     <dependencies>
         <dependency>
-            <groupId>org.opennms.horizon.minion.observability</groupId>
+            <groupId>org.opennms.horizon.minion</groupId>
             <artifactId>observability-metrics</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.opennms.horizon.minion.observability</groupId>
+            <groupId>org.opennms.horizon.minion</groupId>
             <artifactId>observability-tracing</artifactId>
             <version>${project.version}</version>
         </dependency>

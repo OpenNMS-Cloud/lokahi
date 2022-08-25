@@ -17,7 +17,7 @@
     <modules>
         <module>observability-metrics</module>
         <module>observability-tracing</module>
-        <module>features</module>
+        <module>observability-features</module>
     </modules>
 
 </project>

@@ -1,13 +1,14 @@
 package org.opennms.miniongateway.grpc.server.stub;
 
 import com.google.protobuf.InvalidProtocolBufferException;
+import com.google.protobuf.Message;
 import org.opennms.horizon.grpc.tasksets.contract.TaskSetResults;
 import org.opennms.horizon.shared.ipc.sink.aggregation.IdentityAggregationPolicy;
 import org.opennms.horizon.shared.ipc.sink.api.AggregationPolicy;
 import org.opennms.horizon.shared.ipc.sink.api.AsyncPolicy;
 import org.opennms.horizon.shared.ipc.sink.api.SinkModule;
 
-public class TaskResultsModule implements SinkModule<TaskSetResults, TaskSetResults> {
+public class TaskResultsModule implements SinkModule<Message, Message> {
 
     public static final String MODULE_ID = "task-set-result";
 
@@ -22,31 +23,31 @@ public class TaskResultsModule implements SinkModule<TaskSetResults, TaskSetResu
     }
 
     @Override
-    public byte[] marshal(TaskSetResults message) {
+    public byte[] marshal(Message message) {
         return message.toByteArray();
     }
 
     @Override
-    public TaskSetResults unmarshal(byte[] message) {
+    public Message unmarshal(byte[] content) {
         try {
-            return TaskSetResults.parseFrom(message);
+            return TaskSetResults.parseFrom(content);
         } catch (InvalidProtocolBufferException e) {
             throw new RuntimeException(e);
         }
     }
 
     @Override
-    public byte[] marshalSingleMessage(TaskSetResults message) {
+    public byte[] marshalSingleMessage(Message message) {
         return marshal(message);
     }
 
     @Override
-    public TaskSetResults unmarshalSingleMessage(byte[] message) {
+    public Message unmarshalSingleMessage(byte[] message) {
         return unmarshal(message);
     }
 
     @Override
-    public AggregationPolicy<TaskSetResults, TaskSetResults, ?> getAggregationPolicy() {
+    public AggregationPolicy<Message, Message, ?> getAggregationPolicy() {
         return new IdentityAggregationPolicy<>();
     }
 

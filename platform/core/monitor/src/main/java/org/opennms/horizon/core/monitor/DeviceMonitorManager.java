@@ -67,7 +67,7 @@ import java.util.stream.IntStream;
 /**
  * TBD888: Rework still needed for task-set definitions, and general completeness
  *
- *  1. list of nodes is only read once, in the init() method; it needs to be updated continually
+ *  1. (DONE - event handling applies the updates) list of nodes is only read once, in the init() method; it needs to be updated continually
  *  2. if there are other sources of task definitions, the management of task definitions needs to be extracted into
  *     its own source
  *  3. parameters for each task

@@ -832,6 +832,8 @@ spec:
           env:
             - name: JAVA_TOOL_OPTIONS
               value: "-agentlib:jdwp=transport=dt_socket,server=y,address=5005,suspend=n,quiet=y" # Permanent debug port in `skaffold dev`
+            - name: KAFKA_BOOTSTRAP_SERVERS
+              value: "kafka:9092"
           ports:
             - containerPort: 8080
             - containerPort: 47100

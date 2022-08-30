@@ -1,34 +1,44 @@
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.3.0"
-    xsi:schemaLocation="
-		http://www.osgi.org/xmlns/blueprint/v1.0.0 
-		https://osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.3.0"
+           xmlns:ext="http://aries.apache.org/blueprint/xmlns/blueprint-ext/v1.5.0"
 
-		http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.3.0
-		http://aries.apache.org/schemas/blueprint-cm/blueprint-cm-1.3.0.xsd
-">
+           xsi:schemaLocation="
+                http://www.osgi.org/xmlns/blueprint/v1.0.0
+                https://osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd
 
-    <cm:property-placeholder persistent-id="org.opennms.core.monitor"
+                http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.3.0
+                http://aries.apache.org/schemas/blueprint-cm/blueprint-cm-1.3.0.xsd
+           ">
+
+    <ext:property-placeholder placeholder-prefix="$[" placeholder-suffix="]"/>
+
+    <cm:property-placeholder id="monitorProperties"
+                             persistent-id="org.opennms.core.monitor"
                              update-strategy="reload">
         <cm:default-properties>
             <cm:property name="ignite.useKubernetes" value="true"/>
             <cm:property name="ignite.kubernetesServiceName" value="horizon-stream-ignite-core"/>
+
+            <cm:property name="monitor.task-set.kafka-topic" value="task-set.results"/>
+            <cm:property name="kafkaBrokers" value="$[env:KAFKA_BROKER_HOST]:$[env:KAFKA_BROKER_PORT]"/>
         </cm:default-properties>
     </cm:property-placeholder>
 
     <!--<reference id="rpcClientFactory" interface="org.opennms.horizon.ipc.rpc.api.RpcClientFactory"/>-->
     <!--<reference id="minionManager" interface="org.opennms.core.ipc.grpc.server.manager.MinionManager"/>-->
     <reference id="metricsAdapter" interface="org.opennms.horizon.metrics.api.OnmsMetricsAdapter"/>
-    <reference id="eventSubscriptionService" interface="org.opennms.horizon.events.api.EventSubscriptionService" availability="mandatory"/>
-    <reference id="sessionUtils" interface="org.opennms.horizon.db.dao.api.SessionUtils" />
-    <reference id="nodeDao" interface="org.opennms.horizon.db.dao.api.NodeDao" />
-    <reference id="ipInterfaceDao" interface="org.opennms.horizon.db.dao.api.IpInterfaceDao" />
+    <reference id="eventSubscriptionService" interface="org.opennms.horizon.events.api.EventSubscriptionService"
+               availability="mandatory"/>
+    <reference id="sessionUtils" interface="org.opennms.horizon.db.dao.api.SessionUtils"/>
+    <reference id="nodeDao" interface="org.opennms.horizon.db.dao.api.NodeDao"/>
+    <reference id="ipInterfaceDao" interface="org.opennms.horizon.db.dao.api.IpInterfaceDao"/>
     <reference id="minionDao" interface="org.opennms.horizon.db.dao.api.MinionDao"/>
     <!--<reference id="locationAwarePingClient" interface="org.opennms.netmgt.icmp.proxy.LocationAwarePingClient"/>-->
 
     <reference id="ignite" interface="org.apache.ignite.Ignite"/>
-    <reference id="igniteTaskSetClientFactory" interface="org.opennms.taskset.service.igniteclient.TaskSetIgnitePublisherFactory"/>
+    <reference id="igniteTaskSetClientFactory"
+               interface="org.opennms.taskset.service.igniteclient.TaskSetIgnitePublisherFactory"/>
     <!--<reference id="locationAwareSnmpClient" interface="org.opennms.horizon.shared.snmp.proxy.LocationAwareSnmpClient"/>-->
 
     <!-- TODO: how much in core? how much in gateway? -->
@@ -53,4 +63,26 @@
         <argument ref="sessionUtils"/>
         <argument ref="taskSetIgniteClient"/>
     </bean>
+
+    <!--       -->
+    <!-- CAMEL -->
+    <!--       -->
+
+    <bean id="deviceMonitorResultProcessor" class="org.opennms.horizon.core.monitor.DeviceMonitorResultProcessor">
+        <argument ref="metricsAdapter"/>
+    </bean>
+
+    <camelContext autoStartup="true" id="monitorCamelContext" xmlns="http://camel.apache.org/schema/blueprint"
+                  allowUseOriginalMessage="false">
+        <propertyPlaceholder id="properties" location="blueprint:monitorProperties"/>
+
+        <route id="consumeKafkaTaskSetResults">
+            <from uri="kafka:{{monitor.task-set.kafka-topic}}?brokers={{kafkaBrokers}}&amp;valueDeserializer=org.apache.kafka.common.serialization.ByteArrayDeserializer"/>
+            <unmarshal>
+                <protobuf instanceClass="org.opennms.horizon.grpc.tasksets.contract.TaskSetResults"/>
+            </unmarshal>
+            <process ref="deviceMonitorResultProcessor"/>
+        </route>
+    </camelContext>
+
 </blueprint>

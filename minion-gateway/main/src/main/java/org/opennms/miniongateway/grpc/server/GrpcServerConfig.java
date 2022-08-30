@@ -21,10 +21,9 @@ import org.opennms.core.ipc.grpc.server.manager.rpcstreaming.MinionRpcStreamConn
 import org.opennms.core.ipc.grpc.server.manager.rpcstreaming.impl.MinionRpcStreamConnectionManagerImpl;
 import org.opennms.miniongateway.grpc.server.stub.StubCloudToMinionMessageProcessor;
 import org.opennms.miniongateway.grpc.server.stub.StubMinionToCloudProcessor;
-import org.opennms.miniongateway.grpc.server.stub.TaskResultsConsumer;
+import org.opennms.miniongateway.grpc.server.stub.TaskResultsKafkaForwarder;
 import org.opennms.miniongateway.grpc.twin.GrpcTwinPublisher;
 import org.opennms.taskset.service.api.TaskSetForwarder;
-import org.opennms.taskset.service.api.TaskSetListener;
 import org.opennms.taskset.service.api.TaskSetPublisher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -97,7 +96,8 @@ public class GrpcServerConfig {
         @Autowired LocationIndependentRpcClientFactory locationIndependentRpcClientFactory,
         @Autowired MinionRpcStreamConnectionManager minionRpcStreamConnectionManager,
         @Autowired @Qualifier("minionToCloudRPCProcessor") BiConsumer<RpcRequestProto, StreamObserver<RpcResponseProto>> minionToCloudRPCProcessor,
-        @Autowired @Qualifier("cloudToMinionMessageProcessor") BiConsumer<Identity, StreamObserver<CloudToMinionMessage>> cloudToMinionMessageProcessor
+        @Autowired @Qualifier("cloudToMinionMessageProcessor") BiConsumer<Identity, StreamObserver<CloudToMinionMessage>> cloudToMinionMessageProcessor,
+        @Autowired TaskResultsKafkaForwarder taskResultsKafkaForwarder
     ) throws Exception {
 
         OpennmsGrpcServer server = new OpennmsGrpcServer(serverBuilder, Arrays.asList(
@@ -112,7 +112,7 @@ public class GrpcServerConfig {
         server.setMinionRpcStreamConnectionManager(minionRpcStreamConnectionManager);
         server.setIncomingRpcHandler(minionToCloudRPCProcessor);
         server.setOutgoingMessageHandler(cloudToMinionMessageProcessor);
-        server.registerConsumer(new TaskResultsConsumer());
+        server.registerConsumer(taskResultsKafkaForwarder);
 
         server.start();
         return server;

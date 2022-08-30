@@ -16,10 +16,7 @@
         <feature>horizon-events</feature>
         <feature>horizon-db</feature>
         <feature>horizon-core-rest</feature>
-        <feature>camel</feature>
-        <feature>camel-jaxb</feature>
-        <feature>camel-kafka</feature>
-        <feature>camel-activemq</feature>
+        <feature>horizon-core-camel</feature>
         <feature version="${activemq.version}">activemq-client</feature>
 
         <feature version="${drools.version}">kie-drools</feature>
@@ -107,10 +104,7 @@
         <feature>horizon-events-api</feature>
         <feature>horizon-db</feature>
         <feature>horizon-core-rest</feature>
-        <feature>camel</feature>
-        <feature>camel-jaxb</feature>
-        <feature>camel-kafka</feature>
-        <feature>camel-activemq</feature>
+        <feature>horizon-core-camel</feature>
 
         <bundle>mvn:org.opennms.horizon.events/dao/${project.version}</bundle>
         <bundle>mvn:org.opennms.horizon.events/daemon/${project.version}</bundle>
@@ -172,8 +166,23 @@
         <feature>horizon-ignite</feature>
         <feature>horizon-db</feature>
         <feature>horizon-shared-task-set-publisher</feature>
+        <feature>horizon-core-camel</feature>
 
+        <bundle>mvn:org.opennms.horizon.shared/ipc-api/${project.version}</bundle>
+        <bundle>mvn:org.opennms.horizon.shared/ipc-grpc-contract/${project.version}</bundle>
         <bundle>mvn:org.opennms.horizon.core/monitor/${project.version}</bundle>
+
+        <bundle dependency="true">mvn:org.opennms.horizon.shared/horizon-common-logging/${project.version}</bundle>
+    </feature>
+
+    <feature name="horizon-core-camel" version="${project.version}">
+        <feature>camel</feature>
+        <feature>camel-activemq</feature>
+        <feature>camel-gson</feature>
+        <feature>camel-jaxb</feature>
+        <feature>camel-kafka</feature>
+        <feature>camel-protobuf</feature>
+        <feature>camel-quartz</feature>
     </feature>
 
     <feature name="horizon-ipc-api" version="${project.version}">
@@ -244,8 +253,7 @@
     <feature name="horizon-provision" version="${project.version}" description="Horizon : Provision">
         <feature>onms-httpclient</feature>
         <feature>onms-netty3</feature>
-        <feature>camel-gson</feature>
-        <feature>camel-quartz</feature>
+        <feature>horizon-core-camel</feature>
         <feature>horizon-db</feature>
         <feature>horizon-tracing</feature>
         <feature>horizon-grpc</feature>

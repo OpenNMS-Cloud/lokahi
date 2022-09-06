@@ -1,11 +1,11 @@
 package org.opennms.horizon.minion.taskset.worker.impl;
 
 import java.util.concurrent.TimeUnit;
-import org.opennms.horizon.minion.taskset.worker.RetriableExecutor;
+import org.opennms.horizon.minion.taskset.worker.RetryableExecutor;
 import org.opennms.horizon.minion.taskset.worker.TaskExecutionResultProcessor;
 import org.opennms.horizon.minion.taskset.worker.TaskExecutorLocalService;
 import org.opennms.horizon.minion.scheduler.OpennmsScheduler;
-import org.opennms.taskset.model.TaskDefinition;
+import org.opennms.taskset.contract.TaskDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,19 +24,19 @@ public class TaskCommonRetryExecutor implements TaskExecutorLocalService {
 
     private TaskDefinition taskDefinition;
     private TaskExecutionResultProcessor resultProcessor;
-    private RetriableExecutor retriableExecutor;
+    private RetryableExecutor retryableExecutor;
     private int numRepeatFailures = 0;
 
     public TaskCommonRetryExecutor(
             OpennmsScheduler opennmsScheduler,
             TaskDefinition taskDefinition,
             TaskExecutionResultProcessor resultProcessor,
-            RetriableExecutor retriableExecutor) {
+            RetryableExecutor retryableExecutor) {
 
         this.opennmsScheduler = opennmsScheduler;
         this.taskDefinition = taskDefinition;
         this.resultProcessor = resultProcessor;
-        this.retriableExecutor = retriableExecutor;
+        this.retryableExecutor = retryableExecutor;
     }
 
 //========================================
@@ -46,7 +46,7 @@ public class TaskCommonRetryExecutor implements TaskExecutorLocalService {
     @Override
     public void start() {
         try {
-            retriableExecutor.init(this::handleDisconnect);
+            retryableExecutor.init(this::handleDisconnect);
 
             attemptConnect();
         } catch (RuntimeException rtExc) {
@@ -57,7 +57,7 @@ public class TaskCommonRetryExecutor implements TaskExecutorLocalService {
     @Override
     public void cancel() {
         opennmsScheduler.cancelTask(taskDefinition.getId());
-        retriableExecutor.cancel();
+        retryableExecutor.cancel();
     }
 
 //========================================
@@ -71,7 +71,7 @@ public class TaskCommonRetryExecutor implements TaskExecutorLocalService {
     private void attemptConnect() {
         try {
             log.info("Attempting to connect: workflow-uuid={}", taskDefinition.getId());
-            retriableExecutor.attempt();
+            retryableExecutor.attempt(taskDefinition.getConfiguration());
             numRepeatFailures = 0;
         } catch (Exception exc) {
             numRepeatFailures++;

@@ -1,11 +1,10 @@
 package org.opennms.horizon.minion.snmp;
 
-import java.util.function.Consumer;
 import org.opennms.horizon.minion.plugin.api.ServiceMonitor;
 import org.opennms.horizon.minion.plugin.api.ServiceMonitorManager;
-import org.opennms.horizon.minion.plugin.api.ServiceMonitorResponse;
-import org.opennms.horizon.shared.snmp.SnmpStrategy;
 import org.opennms.horizon.shared.snmp.StrategyResolver;
+
+import java.util.function.Consumer;
 
 public class SnmpMonitorManager implements ServiceMonitorManager {
 
@@ -16,7 +15,7 @@ public class SnmpMonitorManager implements ServiceMonitorManager {
     }
 
     @Override
-    public ServiceMonitor create(Consumer<ServiceMonitorResponse> resultProcessor) {
+    public ServiceMonitor create() {
         return new SnmpMonitor(strategyResolver);
     }
 }

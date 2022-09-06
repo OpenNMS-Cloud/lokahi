@@ -30,6 +30,10 @@ package org.opennms.horizon.minion.ipc.twin.common;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.util.Base64;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -40,6 +44,12 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
+import com.fasterxml.jackson.core.JacksonException;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonDeserializer;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.google.protobuf.Message;
 import org.opennms.cloud.grpc.minion.TwinRequestProto;
 import org.opennms.cloud.grpc.minion.TwinResponseProto;
 import org.opennms.horizon.minion.ipc.twin.api.TwinSubscriber;
@@ -66,6 +76,7 @@ public abstract class AbstractTwinSubscriber implements TwinSubscriber {
     private final Map<String, Subscription> subscriptions = new ConcurrentHashMap<>();
 
     private final ObjectMapper objectMapper = new ObjectMapper();
+    private final Set<Class> mapperKnownClasses = Collections.synchronizedSet(new HashSet<>());
 
     private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor(
             new ThreadFactoryBuilder()
@@ -84,6 +95,9 @@ public abstract class AbstractTwinSubscriber implements TwinSubscriber {
         if (this.executorService.isShutdown()) {
             throw new IllegalStateException("Subscriber is already closed");
         }
+
+        // Enable Jackson to deserialize into the class, if it wasn't already configured do to so for the given class
+        lazyAddProtobufJsonForClass((Class<? extends Message>) clazz);
 
         final var subscription = this.subscriptions.computeIfAbsent(key, Subscription::new);
         return subscription.consume(clazz, consumer);
@@ -304,6 +318,52 @@ public abstract class AbstractTwinSubscriber implements TwinSubscriber {
                 }
             }
         }
+    }
+    
+//========================================
+// Internals
+//----------------------------------------
+
+    private void lazyAddProtobufJsonForClass(Class<? extends Message> clazz) {
+        if (! mapperKnownClasses.contains(clazz)) {
+            configureProtobufJson(clazz);
+        }
+    }
+
+    private void configureProtobufJson(Class<? extends Message> clazz) {
+        SimpleModule simpleModule = new SimpleModule();
+        configureProtobufJsonOneClass(simpleModule, clazz);
+        objectMapper.registerModule(simpleModule);
+    }
+
+    private <T extends Message> void configureProtobufJsonOneClass(SimpleModule simpleModule, Class<T> clazz) {
+        simpleModule.addDeserializer(clazz, new JsonDeserializer<T>() {
+            @Override
+            public Class<?> handledType() {
+                return clazz;
+            }
+
+            @SuppressWarnings("rawtypes")
+            @Override
+            public T deserialize(JsonParser jsonParser, DeserializationContext ctxt) throws IOException, JacksonException {
+                Map object = jsonParser.getCodec().readValue(jsonParser, Map.class);
+                String typeName = (String) object.get("type");
+
+                if (typeName != null) {
+                    try {
+                        String base64content = (String) object.get("content");
+                        byte[] contentBytes = Base64.getDecoder().decode(base64content);
+
+                        T result = (T) clazz.getMethod("parseFrom", byte[].class).invoke(null, (Object) contentBytes);
+
+                        return result;
+                    } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+                        throw new RuntimeException("failed to deserialize protobuf message: type-name=" + typeName, e);
+                    }
+                }
+                return null;
+            }
+        });
     }
 
 }

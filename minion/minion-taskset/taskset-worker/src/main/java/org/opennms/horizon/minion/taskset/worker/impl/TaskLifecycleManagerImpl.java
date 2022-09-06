@@ -13,9 +13,9 @@ import org.apache.ignite.services.Service;
 import org.apache.ignite.services.ServiceConfiguration;
 import org.apache.ignite.services.ServiceDescriptor;
 import org.opennms.horizon.minion.taskset.worker.TaskLifecycleManager;
-import org.opennms.taskset.model.TaskDefinition;
-import org.opennms.taskset.model.TaskSet;
-import org.opennms.taskset.model.TaskType;
+import org.opennms.taskset.contract.TaskDefinition;
+import org.opennms.taskset.contract.TaskSet;
+import org.opennms.taskset.contract.TaskType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

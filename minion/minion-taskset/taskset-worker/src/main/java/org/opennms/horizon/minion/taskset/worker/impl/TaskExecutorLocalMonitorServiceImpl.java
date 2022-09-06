@@ -2,15 +2,11 @@ package org.opennms.horizon.minion.taskset.worker.impl;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
-import org.apache.ignite.resources.SpringResource;
-import org.opennms.horizon.minion.plugin.api.config.ConfigInjector;
 import org.opennms.horizon.minion.plugin.api.registries.MonitorRegistry;
+
 import org.opennms.horizon.minion.taskset.worker.TaskExecutionResultProcessor;
 import org.opennms.horizon.minion.taskset.worker.TaskExecutorLocalService;
 import org.opennms.horizon.minion.plugin.api.MonitoredService;
@@ -19,7 +15,7 @@ import org.opennms.horizon.minion.plugin.api.ServiceMonitorManager;
 import org.opennms.horizon.minion.plugin.api.ServiceMonitorResponse;
 import org.opennms.horizon.minion.scheduler.OpennmsScheduler;
 import org.opennms.horizon.shared.utils.IPAddress;
-import org.opennms.taskset.model.TaskDefinition;
+import org.opennms.taskset.contract.TaskDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,19 +33,17 @@ public class TaskExecutorLocalMonitorServiceImpl implements TaskExecutorLocalSer
     private TaskDefinition taskDefinition;
     private OpennmsScheduler scheduler;
     private TaskExecutionResultProcessor resultProcessor;
-    private final ConfigInjector pluginConfigInjector;
     private MonitorRegistry monitorRegistry;
     private ServiceMonitor monitor=null;
 
     private AtomicBoolean active = new AtomicBoolean(false);
 
     public TaskExecutorLocalMonitorServiceImpl(OpennmsScheduler scheduler, TaskDefinition taskDefinition,
-        TaskExecutionResultProcessor resultProcessor, ConfigInjector pluginConfigInjector,
+        TaskExecutionResultProcessor resultProcessor,
         MonitorRegistry monitorRegistry) {
         this.taskDefinition = taskDefinition;
         this.scheduler = scheduler;
         this.resultProcessor = resultProcessor;
-        this.pluginConfigInjector = pluginConfigInjector;
         this.monitorRegistry = monitorRegistry;
     }
 
@@ -85,23 +79,6 @@ public class TaskExecutorLocalMonitorServiceImpl implements TaskExecutorLocalSer
 
 
 //========================================
-// Setup Internals
-//----------------------------------------
-    private Optional<ServiceMonitor> lookupMonitor(TaskDefinition workflow) {
-        String pluginName = workflow.getPluginName();
-
-        ServiceMonitorManager result = monitorRegistry.getService(pluginName);
-
-        if (result != null) {
-            pluginConfigInjector.injectConfigs(result, workflow.getParameters());
-
-            //TODO: what parameters (if any) to pass on creation? Probably none since we want to inject everything from schema.
-            return Optional.of(result.create(null));
-        }
-        else return Optional.empty();
-    }
-
-//========================================
 // Processing
 //----------------------------------------
 
@@ -118,16 +95,16 @@ public class TaskExecutorLocalMonitorServiceImpl implements TaskExecutorLocalSer
     private void executeIteration() {
         try {
             if (monitor == null) {
-                Optional<ServiceMonitor> lazyMonitor = lookupMonitor(taskDefinition);
-                if (lazyMonitor.isPresent()) {
-                    this.monitor = lazyMonitor.get();
+                ServiceMonitor lazyMonitor = lookupMonitor(taskDefinition);
+                if (lazyMonitor != null) {
+                    this.monitor = lazyMonitor;
                 }
             }
             if (monitor != null) {
-                MonitoredService monitoredService = configureMonitoredService();
+                // TBD888: populate host, or stop?
+                MonitoredService monitoredService = configureMonitoredService(null);
 
-                Map<String, Object> castMap = new HashMap<>(taskDefinition.getParameters());
-                CompletableFuture<ServiceMonitorResponse> future = monitor.poll(monitoredService, castMap);
+                CompletableFuture<ServiceMonitorResponse> future = monitor.poll(monitoredService, taskDefinition.getConfiguration());
                 future.whenComplete(this::handleExecutionComplete);
             } else {
                 log.info("Skipping service monitor execution; monitor not found: monitor=" + taskDefinition.getPluginName());
@@ -149,9 +126,8 @@ public class TaskExecutorLocalMonitorServiceImpl implements TaskExecutorLocalSer
         }
     }
 
-    private MonitoredService configureMonitoredService() throws UnknownHostException {
+    private MonitoredService configureMonitoredService(String hostname) throws UnknownHostException {
         String svcName = "TBD";
-        String hostname = taskDefinition.getParameters().get("host");
 
         IPAddress ipAddress = lookupIpAddress(hostname);
 
@@ -164,5 +140,13 @@ public class TaskExecutorLocalMonitorServiceImpl implements TaskExecutorLocalSer
         InetAddress inetAddress = InetAddress.getByName(hostname);
 
         return new IPAddress(inetAddress);
+    }
+
+    private ServiceMonitor lookupMonitor(TaskDefinition taskDefinition) {
+        String pluginName = taskDefinition.getPluginName();
+
+        ServiceMonitorManager result = monitorRegistry.getService(pluginName);
+
+        return result.create();
     }
 }

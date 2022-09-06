@@ -25,37 +25,15 @@
  *     http://www.opennms.org/
  *     http://www.opennms.com/
  *******************************************************************************/
+syntax = "proto3";
 
-package org.opennms.horizon.metrics.impl;
+import "google/protobuf/any.proto";
 
-import io.prometheus.client.Collector;
-import io.prometheus.client.CollectorRegistry;
-import io.prometheus.client.exporter.PushGateway;
-import org.opennms.horizon.metrics.api.OnmsMetricsAdapter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+package opennms.echo;
+option java_multiple_files = true;
+option java_package = "org.opennms.weblisten.contract";
 
-import java.io.IOException;
-import java.util.Map;
-
-public class PrometheusPushGatewayAdapter implements OnmsMetricsAdapter {
-
-    private static final Logger LOG = LoggerFactory.getLogger(PrometheusPushGatewayAdapter.class);
-    private final PushGateway pushGateway;
-    private final String DEFAULT_JOB_PUSHGATEWAY = "horizon-core";
-
-    public PrometheusPushGatewayAdapter(String pushGatewayUrl) {
-        this.pushGateway = new PushGateway(pushGatewayUrl);
-    }
-
-
-    // TODO: rate-limit, or at least prevent concurrent pushes?  Maybe not critical due to groupingKey use
-    @Override
-    public void pushMetrics(CollectorRegistry registry, Map<String, String> groupingKey) {
-        try {
-            pushGateway.pushAdd(registry, DEFAULT_JOB_PUSHGATEWAY);
-        } catch (IOException e) {
-            LOG.error("Exception while pushing metrics for : {}", registry, e);
-        }
-    }
+message WebListenRequest {
+  string address = 1;
+  uint32 port = 2;
 }

@@ -1,70 +1,29 @@
 package org.opennms.horizon.minion.taskset.worker.impl;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.function.Consumer;
-import lombok.Setter;
-import org.opennms.horizon.minion.taskset.worker.queue.impl.AsyncProcessingQueueImpl;
-import org.opennms.taskset.model.Result;
-import org.opennms.taskset.model.Results;
+import org.opennms.horizon.shared.ipc.rpc.IpcIdentity;
+import org.opennms.horizon.shared.ipc.sink.api.SyncDispatcher;
+import org.opennms.taskset.contract.TaskResult;
+import org.opennms.taskset.contract.TaskSetResults;
 import org.opennms.horizon.minion.taskset.worker.TaskExecutionResultProcessor;
 import org.opennms.horizon.minion.plugin.api.ServiceMonitorResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collections;
+import java.util.Optional;
+
 public class TaskExecutionResultProcessorImpl implements TaskExecutionResultProcessor {
 
     private static final Logger DEFAULT_LOGGER = LoggerFactory.getLogger(TaskExecutionResultProcessorImpl.class);
-    private final Consumer<Entry> consumer;
 
     private Logger log = DEFAULT_LOGGER;
 
-    private AsyncProcessingQueueImpl<Entry> queue;
+    private final SyncDispatcher<TaskSetResults> taskSetSinkDispatcher;
+    private final IpcIdentity identity;
 
-    @Setter
-    private ThreadPoolExecutor executor;
-
-    @Setter
-    private int maxQueueSize = AsyncProcessingQueueImpl.DEFAULT_MAX_QUEUE_SIZE;
-
-    public TaskExecutionResultProcessorImpl(Consumer<Results> consumer) {
-        this.consumer = new Consumer<Entry>() {
-            @Override
-            public void accept(Entry entry) {
-                Map<String, Number> responseProperties = entry.result.getProperties();
-                Results results = new Results();
-                Result result = new Result();
-                result.setUuid(entry.uuid);
-                if (responseProperties != null) {
-                    result.setParameters(new LinkedHashMap<>(responseProperties));
-                } else {
-                    result.setParameters(new LinkedHashMap<>());
-                }
-                if (entry.result.getStatus() != null) {
-                    result.setStatus(entry.result.getStatus().name());
-                }
-                if (entry.result.getReason() != null) {
-                    result.setReason(entry.result.getReason());
-                }
-                results.getResults().add(result);
-                consumer.accept(results);
-            }
-        };
-    }
-
-//========================================
-// Lifecycle
-//----------------------------------------
-
-    public void init() {
-        queue = new AsyncProcessingQueueImpl<>();
-        queue.setExecutor(executor);
-        queue.setConsumer(this::stubConsumer);
-        queue.setMaxQueueSize(maxQueueSize);
-        queue.init();
+    public TaskExecutionResultProcessorImpl(SyncDispatcher<TaskSetResults> taskSetSinkDispatcher, IpcIdentity identity) {
+        this.taskSetSinkDispatcher = taskSetSinkDispatcher;
+        this.identity = identity;
     }
 
 
@@ -73,33 +32,39 @@ public class TaskExecutionResultProcessorImpl implements TaskExecutionResultProc
 //----------------------------------------
 
     @Override
-    public void queueSendResult(String uuid, ServiceMonitorResponse result) {
-        queue.asyncSend(new Entry(uuid, result));
+    public void queueSendResult(String id, ServiceMonitorResponse result) {
+        log.debug("O-POLL STATUS: status={}; reason={}", result.getStatus(), result.getReason());
+
+        TaskSetResults taskSetResults = formatTaskSetResults(id, result);
+
+        taskSetSinkDispatcher.send(taskSetResults);
     }
 
 //========================================
-// Downstream
+// Internals
 //----------------------------------------
 
-    private void stubConsumer(Entry entry) {
-        try {
-            if (log.isDebugEnabled()) {
-                // TBD: REMOVE the json mapping - feed response back to Core
-                log.debug("O-POLL STATUS: " + new ObjectMapper().writeValueAsString(entry.result));
-            }
-            consumer.accept(entry);
-        } catch (JsonProcessingException jpExc) {
-            log.warn("error processing workflow result", jpExc);
-        }
-    }
+    private TaskSetResults formatTaskSetResults(String id, ServiceMonitorResponse result) {
+        TaskResult taskResult =
+            TaskResult.newBuilder()
+                .setId(id)
+                .setStatus(result.getStatus().toString())
+                .setReason(Optional.of(result).map(ServiceMonitorResponse::getReason).orElse(TaskResult.getDefaultInstance().getReason()))
+                .setIpAddress(result.getIpAddress())
+                .setLocation(identity.getLocation())
+                .setSystemId(identity.getId())
+                .setResponseTime(result.getResponseTime())
+                .putAllMetrics(Optional.of(result).map(ServiceMonitorResponse::getProperties).orElse(Collections.EMPTY_MAP))
+                .build();
 
-    static class Entry {
-        String uuid;
-        ServiceMonitorResponse result;
+        TaskSetResults taskSetResults =
+            TaskSetResults.newBuilder()
+                .addResults(taskResult)
+                .build();
 
-        public Entry(String uuid, ServiceMonitorResponse result) {
-            this.uuid = uuid;
-            this.result = result;
-        }
+        return taskSetResults;
     }
+//                 .setReason(result.getReason() != null ?
+//                                result.getReason() :
+//                                TaskResult.getDefaultInstance().getReason())
 }

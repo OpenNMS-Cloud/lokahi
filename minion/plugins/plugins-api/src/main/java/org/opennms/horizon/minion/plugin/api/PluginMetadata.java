@@ -5,7 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import org.opennms.taskset.model.TaskType;
+import org.opennms.taskset.contract.TaskType;
 
 @AllArgsConstructor
 @Getter
@@ -15,6 +15,6 @@ public class PluginMetadata {
 
     private String pluginName;
     private TaskType pluginType;
-    private List<FieldConfigMeta> fieldConfigs;
+    // private List<FieldConfigMeta> fieldConfigs;
 
 }

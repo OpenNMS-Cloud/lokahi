@@ -25,37 +25,57 @@
  *     http://www.opennms.org/
  *     http://www.opennms.com/
  *******************************************************************************/
+syntax = "proto3";
 
-package org.opennms.horizon.metrics.impl;
+import "google/protobuf/any.proto";
+import "echo.proto";
+import "snmp.proto";
 
-import io.prometheus.client.Collector;
-import io.prometheus.client.CollectorRegistry;
-import io.prometheus.client.exporter.PushGateway;
-import org.opennms.horizon.metrics.api.OnmsMetricsAdapter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+package opennms.taskset;
+option java_multiple_files = true;
+option java_package = "org.opennms.taskset.contract";
 
-import java.io.IOException;
-import java.util.Map;
+enum TaskType {
+      UNDEFINED = 0; // a fallback?
+      DETECTOR = 1;
+      MONITOR = 2;
+      LISTENER = 3;
+      CONNECTOR = 4;
+}
 
-public class PrometheusPushGatewayAdapter implements OnmsMetricsAdapter {
+//message DeprecatedParametersType {
+//  map<string, string> parameters = 1;
+//}
 
-    private static final Logger LOG = LoggerFactory.getLogger(PrometheusPushGatewayAdapter.class);
-    private final PushGateway pushGateway;
-    private final String DEFAULT_JOB_PUSHGATEWAY = "horizon-core";
+message TaskDefinition {
+  string id = 1;
 
-    public PrometheusPushGatewayAdapter(String pushGatewayUrl) {
-        this.pushGateway = new PushGateway(pushGatewayUrl);
-    }
+  string description = 2;
+  TaskType type = 3;
+  string pluginName = 4;
+  string schedule = 5;
 
+  google.protobuf.Any configuration = 6;
+}
 
-    // TODO: rate-limit, or at least prevent concurrent pushes?  Maybe not critical due to groupingKey use
-    @Override
-    public void pushMetrics(CollectorRegistry registry, Map<String, String> groupingKey) {
-        try {
-            pushGateway.pushAdd(registry, DEFAULT_JOB_PUSHGATEWAY);
-        } catch (IOException e) {
-            LOG.error("Exception while pushing metrics for : {}", registry, e);
-        }
-    }
+message TaskSet {
+  repeated TaskDefinition taskDefinition = 1;
+}
+
+message TaskResult {
+  string id = 1;
+  string status = 2;
+  string reason = 3;
+  string ipAddress = 4;
+  string location = 5;
+  string systemId = 6;
+
+  // TBD888: monitor results, detector results, etc
+  double responseTime = 7;
+
+  map<string, double> metrics = 8;
+}
+
+message TaskSetResults {
+  repeated TaskResult results = 1;
 }

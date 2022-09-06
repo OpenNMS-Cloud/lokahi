@@ -1,5 +1,7 @@
 package org.opennms.horizon.minion.plugin.api;
 
+import com.google.protobuf.Any;
+
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
@@ -29,7 +31,7 @@ public interface ServiceMonitor {
      *
      * @param svc
      *            Includes details about to the service being monitored.
-     * @param parameters
+     * @param config
      *            Includes the service parameters defined in <EM>poller-configuration.xml</EM> and those
      *            returned by {@link #getRuntimeAttributes(MonitoredService, Map)}.
      * @return The availability of the interface and if a transition event
@@ -42,7 +44,7 @@ public interface ServiceMonitor {
      * @see PollStatus#SERVICE_AVAILABLE
      * @see PollStatus#SERVICE_UNAVAILABLE
      */
-    public CompletableFuture<ServiceMonitorResponse> poll(MonitoredService svc, Map<String, Object> parameters);
+    public CompletableFuture<ServiceMonitorResponse> poll(MonitoredService svc, Any config);
 
     /**
      *
@@ -51,7 +53,7 @@ public interface ServiceMonitor {
      * @param parameters
      *            Includes the service parameters defined in <EM>poller-configuration.xml</EM> and those
      *            returned by {@link #getRuntimeAttributes(MonitoredService, Map)}.
-     * @return Additional attributes, which should be added to the parameter map before calling {@link #poll(MonitoredService, Map)}.
+     * @return Additional attributes, which should be added to the parameter map before calling {@link #poll(MonitoredService, Any)}.
      */
     public Map<String, Object> getRuntimeAttributes(MonitoredService svc, Map<String, Object> parameters);
 

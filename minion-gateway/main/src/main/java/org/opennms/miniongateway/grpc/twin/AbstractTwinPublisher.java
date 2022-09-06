@@ -36,11 +36,17 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.BiConsumer;
 
+import com.fasterxml.jackson.core.JsonGenerator;
+
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.JsonSerializer;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.github.fge.jsonpatch.diff.JsonDiff;
 import com.google.common.base.Strings;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
+import com.google.protobuf.Message;
 import org.opennms.cloud.grpc.minion.TwinRequestProto;
 import org.opennms.cloud.grpc.minion.TwinResponseProto;
 import org.slf4j.Logger;
@@ -58,6 +64,7 @@ public abstract class AbstractTwinPublisher implements TwinPublisher {
     protected final ObjectMapper objectMapper = new ObjectMapper();
 
     public AbstractTwinPublisher() {
+        configureProtobufJson();
     }
 
     /**
@@ -238,4 +245,36 @@ public abstract class AbstractTwinPublisher implements TwinPublisher {
         }
     }
 
+
+//========================================
+// Internals
+//----------------------------------------
+
+    private void configureProtobufJson(Class<? extends Message>... protobufClasses) {
+        SimpleModule simpleModule = new SimpleModule();
+
+        // Just using Message.class here works.
+        configureProtobufJsonOneClass(simpleModule, Message.class);
+
+        objectMapper.registerModule(simpleModule);
+    }
+
+    private <T extends Message> void configureProtobufJsonOneClass(SimpleModule simpleModule, Class<T> clazz) {
+        simpleModule.addSerializer(new JsonSerializer<T>() {
+            @Override
+            public Class<T> handledType() {
+                return clazz;
+            }
+
+            @Override
+            public void serialize(T value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+                gen.writeStartObject();
+
+                gen.writeBinaryField("content", value.toByteArray());
+                gen.writeStringField("type", value.getClass().getName());
+
+                gen.writeEndObject();
+            }
+        });
+    }
 }

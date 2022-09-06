@@ -1,6 +1,6 @@
 package org.opennms.taskset.service.api;
 
-import org.opennms.taskset.model.TaskSet;
+import org.opennms.taskset.contract.TaskSet;
 
 public interface TaskSetPublisher {
     String TASK_SET_TOPIC = "task-set.publish";

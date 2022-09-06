@@ -9,7 +9,7 @@ import java.util.Collections;
 import java.util.Map;
 import org.opennms.horizon.minion.taskset.worker.TaskLifecycleManager;
 import org.opennms.horizon.shared.ipc.rpc.IpcIdentity;
-import org.opennms.taskset.model.TaskSet;
+import org.opennms.taskset.contract.TaskSet;
 
 public class MeteredWorkflowLifecycleManager implements TaskLifecycleManager, MetricSet {
 

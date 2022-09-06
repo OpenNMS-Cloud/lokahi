@@ -4,6 +4,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 
+@Deprecated
 public class Result {
 
   private String uuid;

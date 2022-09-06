@@ -1,10 +1,10 @@
 package org.opennms.horizon.minion.taskset.ipc.internal;
 
-import org.opennms.horizon.grpc.tasksets.contract.TaskSetResults;
 import org.opennms.horizon.shared.ipc.sink.aggregation.IdentityAggregationPolicy;
 import org.opennms.horizon.shared.ipc.sink.api.AggregationPolicy;
 import org.opennms.horizon.shared.ipc.sink.api.AsyncPolicy;
 import org.opennms.horizon.shared.ipc.sink.api.SinkModule;
+import org.opennms.taskset.contract.TaskSetResults;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

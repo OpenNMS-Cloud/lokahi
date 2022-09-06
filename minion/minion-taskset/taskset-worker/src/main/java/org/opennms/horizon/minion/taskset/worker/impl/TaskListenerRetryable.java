@@ -1,41 +1,40 @@
 package org.opennms.horizon.minion.taskset.worker.impl;
 
-import java.util.HashMap;
-import java.util.Map;
 import org.apache.ignite.resources.SpringResource;
 import org.opennms.horizon.minion.plugin.api.registries.ListenerFactoryRegistry;
-import org.opennms.horizon.minion.taskset.worker.RetriableExecutor;
+import com.google.protobuf.Any;
+import org.opennms.horizon.minion.taskset.worker.RetryableExecutor;
 import org.opennms.horizon.minion.taskset.worker.TaskExecutionResultProcessor;
 import org.opennms.horizon.minion.plugin.api.Listener;
 import org.opennms.horizon.minion.plugin.api.ListenerFactory;
-import org.opennms.taskset.model.TaskDefinition;
+import org.opennms.taskset.contract.TaskDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Core of the Workflow Executor for LISTENERS which implements the RetriableExecutor, focusing the logic for starting
+ * Core of the Task Definition Executor for LISTENERS which implements the RetryableExecutor, focusing the logic for starting
  *  and maintaining the listener.  Used with WorkflowCommonRetryExecutor for retry handling.
  *
  * NOTE: there currently is no mechanism by which a LISTENER plugin can notify of a lost listener.  If there is a need
  *  to trigger retries, a way for the Listener to notify back of the failure must be added.
  */
-public class TaskistenerRetriable implements RetriableExecutor {
+public class TaskListenerRetryable implements RetryableExecutor {
 
-    private static final Logger DEFAULT_LOGGER = LoggerFactory.getLogger(TaskistenerRetriable.class);
+    private static final Logger DEFAULT_LOGGER = LoggerFactory.getLogger(TaskListenerRetryable.class);
 
     @SpringResource(resourceClass = ListenerFactoryRegistry.class)
     private transient ListenerFactoryRegistry listenerFactoryRegistry;
 
     private Logger log = DEFAULT_LOGGER;
 
-    private TaskDefinition workflow;
+    private TaskDefinition taskDefinition;
     private Listener listener;
     private TaskExecutionResultProcessor resultProcessor;
 
     private Runnable onDisconnect;
 
-    public TaskistenerRetriable(TaskDefinition workflow, TaskExecutionResultProcessor resultProcessor) {
-        this.workflow = workflow;
+    public TaskListenerRetryable(TaskDefinition taskDefinition, TaskExecutionResultProcessor resultProcessor) {
+        this.taskDefinition = taskDefinition;
         this.resultProcessor = resultProcessor;
     }
 
@@ -49,23 +48,23 @@ public class TaskistenerRetriable implements RetriableExecutor {
     }
 
     @Override
-    public void attempt() throws Exception {
-        ListenerFactory listenerFactory = lookupListenerFactory(workflow);
+    public void attempt(Any config) throws Exception {
+        ListenerFactory listenerFactory = lookupListenerFactory(taskDefinition);
 
         if (listenerFactory != null) {
-            log.info("Staring listener: plugin-name={}; workflow-id={}", workflow.getPluginName(), workflow.getId());
-
-            Map<String, Object> castMap = new HashMap<>(workflow.getParameters());
+            log.info("Staring listener: plugin-name={}; workflow-id={}", taskDefinition.getPluginName(), taskDefinition.getId());
 
             listener = listenerFactory.create(
-                    serviceMonitorResponse -> resultProcessor.queueSendResult(workflow.getId(),
-                            serviceMonitorResponse), castMap);
+                serviceMonitorResponse -> resultProcessor.queueSendResult(taskDefinition.getId(), serviceMonitorResponse),
+                taskDefinition.getConfiguration()
+            );
+
             listener.start();
         } else {
             log.warn("Listener plugin not registered; workflow will not run: plugin-name={}; workflow-id={}",
-                    workflow.getPluginName(), workflow.getId());
+                    taskDefinition.getPluginName(), taskDefinition.getId());
 
-            throw new Exception("Listener plugin not registered: plugin-name=" + workflow.getPluginName());
+            throw new Exception("Listener plugin not registered: plugin-name=" + taskDefinition.getPluginName());
         }
     }
 

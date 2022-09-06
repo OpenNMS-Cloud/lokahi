@@ -7,6 +7,7 @@ import org.opennms.horizon.minion.plugin.api.Listener;
 import org.opennms.horizon.minion.plugin.api.ParameterMap;
 import org.opennms.horizon.minion.plugin.api.ServiceMonitorResponse;
 import org.opennms.horizon.minion.plugin.api.ServiceMonitorResponseImpl;
+import org.opennms.weblisten.contract.WebListenRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,12 +30,12 @@ public class WebListener implements Listener {
     private Logger log = DEFAULT_LOGGER;
 
     private Consumer<ServiceMonitorResponse> resultProcessor;
-    private Map<String, Object> parameters;
+    private WebListenRequest request;
     private Server server;
 
-    public WebListener(Consumer<ServiceMonitorResponse> resultProcessor, Map<String, Object> parameters) {
+    public WebListener(Consumer<ServiceMonitorResponse> resultProcessor, WebListenRequest request) {
         this.resultProcessor = resultProcessor;
-        this.parameters = parameters;
+        this.request = request;
     }
 
 //========================================
@@ -43,10 +44,7 @@ public class WebListener implements Listener {
 
     @Override
     public void start() throws Exception {
-        String listenHost = ParameterMap.getKeyedString(parameters, "address", "0.0.0.0");
-        int listenPort = ParameterMap.getKeyedInteger(parameters, "port", 9000);
-
-        server = prepareJettyServer(listenHost, listenPort);
+        server = prepareJettyServer(request.getAddress(), request.getPort());
         server.start();
     }
 

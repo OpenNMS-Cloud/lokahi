@@ -4,34 +4,52 @@
   xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
   xsi:schemaLocation="http://www.osgi.org/xmlns/blueprint/v1.0.0 http://www.osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd">
 
-  <reference id="identity" interface="org.opennms.horizon.shared.ipc.rpc.IpcIdentity" />
-  <reference id="messageDispatcherFactory" interface="org.opennms.horizon.shared.ipc.sink.api.MessageDispatcherFactory" />
+  <!--<reference id="identity" interface="org.opennms.horizon.shared.ipc.rpc.IpcIdentity" />-->
+    <reference id="messageDispatcherFactory" interface="org.opennms.horizon.shared.ipc.sink.api.MessageDispatcherFactory" />
 
-  <bean id="subscriber" class="org.opennms.horizon.minion.taskset.ipc.internal.LoggingWorkflowSubscriber" />
+    <bean id="taskSetResultsSinkModule" class="org.opennms.horizon.minion.taskset.ipc.internal.TaskSetResultsSinkModule"/>
+    <bean id="taskSetResultsMessageDispatcher" factory-ref="messageDispatcherFactory" factory-method="createSyncDispatcher">
+        <argument ref="taskSetResultsSinkModule"/>
+    </bean>
 
-  <bean id="resultConsumer" class="org.opennms.horizon.minion.taskset.ipc.internal.MeteredConsumer">
-    <argument ref="identity" />
-    <argument>
-      <bean class="org.opennms.horizon.minion.taskset.ipc.internal.ResultsConsumer">
-        <argument ref="messageDispatcherFactory" />
-      </bean>
-    </argument>
-  </bean>
+    <service ref="taskSetResultsMessageDispatcher" interface="org.opennms.horizon.shared.ipc.sink.api.SyncDispatcher">
+        <service-properties>
+            <entry key="message.type" value="taskset-results"/>
+        </service-properties>
+    </service>
 
-  <service ref="subscriber" interface="org.opennms.horizon.minion.ipc.twin.api.TwinListener">
-    <service-properties>
-      <entry key="message.listener.topic" value="task-set" />
-    </service-properties>
-  </service>
 
-  <service ref="resultConsumer">
-    <interfaces>
-      <value>java.util.function.Consumer</value>
-      <value>org.opennms.horizon.minion.observability.metrics.MetricsProvider</value>
-    </interfaces>
-    <service-properties>
-      <entry key="message.publisher.topic" value="taskset-results" />
-    </service-properties>
-  </service>
+  <!--  vvv - OLD - vvv-->
+  <!--  vvv - OLD - vvv-->
+  <!--  vvv - OLD - vvv-->
+
+
+
+  <!--<bean id="subscriber" class="org.opennms.horizon.minion.taskset.ipc.internal.LoggingWorkflowSubscriber" />-->
+
+  <!--<bean id="resultConsumer" class="org.opennms.horizon.minion.taskset.ipc.internal.MeteredConsumer">-->
+  <!--  <argument ref="identity" />-->
+  <!--  <argument>-->
+  <!--    <bean class="org.opennms.horizon.minion.taskset.ipc.internal.ResultsConsumer">-->
+  <!--      <argument ref="messageDispatcherFactory" />-->
+  <!--    </bean>-->
+  <!--  </argument>-->
+  <!--</bean>-->
+
+  <!--<service ref="subscriber" interface="org.opennms.horizon.minion.ipc.twin.api.TwinListener">-->
+  <!--  <service-properties>-->
+  <!--    <entry key="message.listener.topic" value="task-set" />-->
+  <!--  </service-properties>-->
+  <!--</service>-->
+
+  <!--<service ref="resultConsumer">-->
+  <!--  <interfaces>-->
+  <!--    <value>java.util.function.Consumer</value>-->
+  <!--    <value>org.opennms.horizon.minion.observability.metrics.MetricsProvider</value>-->
+  <!--  </interfaces>-->
+  <!--  <service-properties>-->
+  <!--    <entry key="message.publisher.topic" value="taskset-results" />-->
+  <!--  </service-properties>-->
+  <!--</service>-->
 
 </blueprint>

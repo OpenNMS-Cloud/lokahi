@@ -1,6 +1,7 @@
 package org.opennms.horizon.minion.taskset.worker;
 
-import org.opennms.taskset.model.TaskSet;
+
+import org.opennms.taskset.contract.TaskSet;
 
 /**
  * Responsible for management of task lifecycle.

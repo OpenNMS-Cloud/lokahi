@@ -79,7 +79,7 @@
         <route id="consumeKafkaTaskSetResults">
             <from uri="kafka:{{monitor.task-set.kafka-topic}}?brokers={{kafkaBrokers}}&amp;valueDeserializer=org.apache.kafka.common.serialization.ByteArrayDeserializer"/>
             <unmarshal>
-                <protobuf instanceClass="org.opennms.horizon.grpc.tasksets.contract.TaskSetResults"/>
+                <protobuf instanceClass="org.opennms.taskset.contract.TaskSetResults"/>
             </unmarshal>
             <process ref="deviceMonitorResultProcessor"/>
         </route>

@@ -9,6 +9,8 @@ import lombok.Data;
 public class ServiceMonitorResponseImpl implements ServiceMonitorResponse{
     private Status status;
     private String reason;
+    private String ipAddress;
+    private double responseTime;
     private DeviceConfig deviceConfig;
     private Map<String, Number> properties;
 

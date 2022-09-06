@@ -16,11 +16,18 @@ public interface ServiceMonitorResponse {
     String getReason();
 
     /**
-     * TECHDEBT: Mostly unstructured, but some known properties are used.
-     * See https://github.com/OpenNMS/opennms/blob/opennms-30.0.0-1/features/poller/monitors/core/src/main/java/org/opennms/netmgt/poller/monitors/StrafePingMonitor.java#L135
-     * .
-     * @return map of properties
+     *
+     * @return IP address that was monitored
      */
+    String getIpAddress();
+
+    /**
+     *  TODO: standardize the unit (ms or sec?)
+     *
+     * @return amount of time device took to respond to the monitor request
+     */
+    double getResponseTime();
+
     Map<String, Number> getProperties();
 
     /**

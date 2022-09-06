@@ -11,6 +11,7 @@
     </feature>
 
     <feature name="taskset-model" version="${project.version}">
+        <bundle>mvn:com.google.protobuf/protobuf-java/${protobuf.version}</bundle>
         <bundle>mvn:org.opennms.horizon.shared/task-set/${project.version}</bundle>
     </feature>
 

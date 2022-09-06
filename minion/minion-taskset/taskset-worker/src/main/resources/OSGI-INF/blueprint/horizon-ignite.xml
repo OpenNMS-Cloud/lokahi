@@ -13,7 +13,8 @@
 
   <reference id="identity" interface="org.opennms.horizon.shared.ipc.rpc.IpcIdentity"/>
   <reference id="opennmsScheduler" interface="org.opennms.horizon.minion.scheduler.OpennmsScheduler"/>
-  <reference id="resultPublisher" interface="java.util.function.Consumer" filter="(message.publisher.topic=taskset-results)" />
+
+  <reference id="taskResultsSyncDispatcher" interface="org.opennms.horizon.shared.ipc.sink.api.SyncDispatcher" filter="(message.type=taskset-results)"/>
 
   <bean id="workflowRepository" class="org.opennms.horizon.minion.taskset.worker.TaskRepository"/>
 
@@ -47,16 +48,11 @@
 
 <!--  ========= Detector whiteboard and plugins ==========-->
 
-  <bean id="resultProcessorThreadPoolExecutor" class="java.util.concurrent.Executors" factory-method="newFixedThreadPool">
-    <argument value="3"/>
-  </bean>
-
   <bean id="workflowExecutionResultProcessor"
         class="org.opennms.horizon.minion.taskset.worker.impl.TaskExecutionResultProcessorImpl"
-        init-method="init"
   >
-    <argument ref="resultPublisher" />
-    <property name="executor" ref="resultProcessorThreadPoolExecutor"/>
+    <argument ref="taskResultsSyncDispatcher" />
+    <argument ref="identity"/>
   </bean>
 
   <!-- plugin configuration framework -->
@@ -65,12 +61,10 @@
   <reference id="serviceConnectorFactoryRegistry" interface="org.opennms.horizon.minion.plugin.api.registries.ServiceConnectorFactoryRegistry" />
   <reference id="detectorRegistry" interface="org.opennms.horizon.minion.plugin.api.registries.DetectorRegistry" />
   <reference id="monitorRegistry" interface="org.opennms.horizon.minion.plugin.api.registries.MonitorRegistry" />
-  <reference id="pluginConfigInjector" interface="org.opennms.horizon.minion.plugin.api.config.ConfigInjector" />
 
   <bean id="workflowExecutorLocalServiceFactory" class="org.opennms.horizon.minion.taskset.worker.impl.TaskExecutorLocalServiceFactoryImpl">
     <argument ref="opennmsScheduler"/>
     <argument ref="workflowExecutionResultProcessor"/>
-    <argument ref="pluginConfigInjector"/>
   </bean>
 
   <bean id="workflowLifecycleManager" class="org.opennms.horizon.minion.taskset.worker.impl.TaskLifecycleManagerImpl" destroy-method="close">

@@ -15,9 +15,8 @@ import org.opennms.horizon.minion.plugin.api.PluginMetadata;
 import org.opennms.horizon.minion.plugin.api.ServiceDetector;
 import org.opennms.horizon.minion.plugin.api.ServiceDetectorManager;
 import org.opennms.horizon.minion.plugin.api.ServiceDetectorResults;
-import org.opennms.horizon.minion.plugin.api.annotations.HorizonConfig;
 import org.opennms.horizon.minion.plugin.api.RegistrationService;
-import org.opennms.taskset.model.TaskType;
+import org.opennms.taskset.contract.TaskType;
 import org.osgi.framework.BundleContext;
 
 public class AlertingPluginRegistryTest {
@@ -61,9 +60,6 @@ public class AlertingPluginRegistryTest {
     }
 
     private class TestPlugin implements ServiceDetectorManager {
-
-        @HorizonConfig(displayName = "blah")
-        public String prop;
 
         @Override
         public ServiceDetector create(Consumer<ServiceDetectorResults> resultProcessor) {

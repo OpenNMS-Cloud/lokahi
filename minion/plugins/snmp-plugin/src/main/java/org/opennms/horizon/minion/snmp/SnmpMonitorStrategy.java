@@ -79,8 +79,9 @@ public abstract class SnmpMonitorStrategy extends AbstractServiceMonitor {
         return ImmutableMap.of("agent", SnmpPeerFactory.getInstance().getAgentConfig(svc.getAddress(), svc.getNodeLocation()));
     }
 
-    public SnmpAgentConfig getAgentConfig(MonitoredService svc, Map<String, Object> parameters) {
-        return getKeyedInstance(parameters, "agent", () -> { return new SnmpAgentConfig(svc.getAddress()); });
+    public SnmpAgentConfig getAgentConfig(MonitoredService svc) {
+        // return getKeyedInstance(parameters, "agent", () -> { return new SnmpAgentConfig(svc.getAddress()); });
+        return new SnmpAgentConfig(svc.getAddress());
     }
 
     public String getStringValue(SnmpValue result) {

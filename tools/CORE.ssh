@@ -10,5 +10,6 @@ kubectl exec -it deployment.apps/my-horizon-stream-core -- \
 		-o StrictHostKeyChecking=false	\
 		-o UserKnownHostsFile=/dev/null	\
 		-o HostKeyAlgorithms=+ssh-dss	\
-		localhost
+		localhost			\
+		"$@"
 

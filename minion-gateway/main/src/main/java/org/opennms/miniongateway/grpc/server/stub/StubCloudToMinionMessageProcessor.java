@@ -10,8 +10,7 @@ import org.opennms.cloud.grpc.minion.Identity;
 import org.opennms.horizon.shared.ipc.rpc.IpcIdentity;
 import org.opennms.miniongateway.grpc.twin.GrpcTwinPublisher;
 import org.opennms.miniongateway.grpc.twin.TwinPublisher;
-import org.opennms.miniongateway.grpc.twin.TwinPublisher.Session;
-import org.opennms.taskset.model.TaskSet;
+import org.opennms.taskset.contract.TaskSet;
 import org.opennms.taskset.service.api.TaskSetForwarder;
 import org.opennms.taskset.service.api.TaskSetListener;
 import org.opennms.taskset.service.api.TaskSetPublisher;
@@ -54,7 +53,7 @@ public class StubCloudToMinionMessageProcessor implements BiConsumer<Identity, S
         private final IpcIdentity identity;
         private final TwinPublisher grpcPublisher;
         private final TaskSetForwarder forwarder;
-        private Session<TaskSet> session;
+        private TwinPublisher.Session<TaskSet> session;
 
         ForwardingTaskListener(IpcIdentity identity, TwinPublisher grpcPublisher, TaskSetForwarder forwarder) {
             this.identity = identity;

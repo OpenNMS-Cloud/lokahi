@@ -1,12 +1,13 @@
 package org.opennms.horizon.minion.taskset.worker;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.opennms.taskset.contract.TaskDefinition;
+import org.opennms.taskset.contract.TaskSet;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
-import org.opennms.taskset.model.TaskDefinition;
-import org.opennms.taskset.model.TaskSet;
 
 public class TaskRepository {
 

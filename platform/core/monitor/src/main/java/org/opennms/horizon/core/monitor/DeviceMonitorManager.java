@@ -28,8 +28,8 @@
 
 package org.opennms.horizon.core.monitor;
 
-import com.google.common.base.Strings;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import org.opennms.echo.contract.EchoRequest;
 import org.opennms.horizon.core.monitor.taskset.LocationBasedTaskSetManager;
 import org.opennms.horizon.core.monitor.taskset.TaskSetManager;
 import org.opennms.horizon.db.dao.api.IpInterfaceDao;
@@ -41,12 +41,10 @@ import org.opennms.horizon.events.api.EventConstants;
 import org.opennms.horizon.events.api.EventListener;
 import org.opennms.horizon.events.api.EventSubscriptionService;
 import org.opennms.horizon.events.model.IEvent;
-import org.opennms.horizon.metrics.api.OnmsMetricsAdapter;
-import org.opennms.horizon.shared.snmp.SnmpAgentConfig;
-import org.opennms.horizon.shared.snmp.SnmpObjId;
-import org.opennms.horizon.shared.snmp.proxy.LocationAwareSnmpClient;
-import org.opennms.taskset.model.TaskSet;
-import org.opennms.taskset.model.TaskType;
+
+import org.opennms.snmp.contract.SnmpRequest;
+import org.opennms.taskset.contract.TaskSet;
+import org.opennms.taskset.contract.TaskType;
 import org.opennms.taskset.service.api.TaskSetPublisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,8 +59,6 @@ import java.util.Optional;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 /**
  * TBD888: Rework still needed for task-set definitions, and general completeness
@@ -146,19 +142,34 @@ public class DeviceMonitorManager implements EventListener {
     }
 
     private void addPollIcmpTask(TaskSetManager taskSetManager, InetAddress inetAddress) {
-        Map<String, String> parameters = makeParametersMap("host", inetAddress.getHostAddress(), "timeout", "60000");
-        taskSetManager.addIpTask(inetAddress, "icmp-monitor", TaskType.MONITOR, "ICMPMonitor", "5000", parameters);
+        EchoRequest echoRequest =
+            EchoRequest.newBuilder()
+                .setHost(inetAddress.getHostAddress())
+                .setTimeout(60000)
+                .build()
+                ;
+
+        taskSetManager.addEchoTask(inetAddress, "icmp-monitor", TaskType.MONITOR, "ICMPMonitor", "5000", echoRequest);
     }
 
     private void addPollSnmpTask(TaskSetManager taskSetManager, InetAddress inetAddress, String snmpCommunityString) {
-        Map<String, String> parameters =
-            makeParametersMap(
-                "iod", SYS_OBJECTID_INSTANCE,
-                "timeout", "18000",
-                "retries", "2"
-            );
+        SnmpRequest.Builder snmpRequestBuilder =
+            SnmpRequest.newBuilder()
+                .setHost(inetAddress.getHostAddress())
+                .setOid(SYS_OBJECTID_INSTANCE)
+                .setTimeout(18000)
+                .setRetries(2)
+                ;
 
-        taskSetManager.addIpTask(inetAddress, "snmp-monitor", TaskType.MONITOR, "SNMPMonitor", "5000", parameters);
+        if (snmpCommunityString != null) {
+            snmpRequestBuilder
+                .setCommunity(snmpCommunityString)
+                ;
+        }
+
+        SnmpRequest snmpRequest = snmpRequestBuilder.build();
+
+        taskSetManager.addSnmpTask(inetAddress, "snmp-monitor", TaskType.MONITOR, "SNMPMonitor", "5000", snmpRequest);
     }
 
     @Override

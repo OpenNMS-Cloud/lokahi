@@ -28,26 +28,25 @@
 
 package org.opennms.horizon.minion.snmp;
 
-import java.net.InetAddress;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
-import org.opennms.horizon.minion.plugin.api.ServiceMonitorResponseImpl.ServiceMonitorResponseImplBuilder;
-import org.opennms.horizon.shared.snmp.SnmpAgentConfig;
-import org.opennms.horizon.shared.snmp.SnmpHelper;
-import org.opennms.horizon.shared.snmp.SnmpObjId;
-import org.opennms.horizon.shared.snmp.SnmpStrategy;
-import org.opennms.horizon.shared.snmp.StrategyResolver;
-import org.opennms.horizon.shared.utils.InetAddressUtils;
+import com.google.protobuf.Any;
 import org.opennms.horizon.minion.plugin.api.MonitoredService;
-import org.opennms.horizon.minion.plugin.api.ParameterMap;
 import org.opennms.horizon.minion.plugin.api.ServiceMonitorResponse;
 import org.opennms.horizon.minion.plugin.api.ServiceMonitorResponse.Status;
 import org.opennms.horizon.minion.plugin.api.ServiceMonitorResponseImpl;
+import org.opennms.horizon.minion.plugin.api.ServiceMonitorResponseImpl.ServiceMonitorResponseImplBuilder;
+import org.opennms.horizon.shared.snmp.SnmpAgentConfig;
+import org.opennms.horizon.shared.snmp.SnmpObjId;
+import org.opennms.horizon.shared.snmp.SnmpUtils;
+import org.opennms.horizon.shared.snmp.StrategyResolver;
+import org.opennms.snmp.contract.SnmpRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 /**
  * <P>
@@ -94,66 +93,98 @@ public class SnmpMonitor extends SnmpMonitorStrategy {
      *                Thrown for any unrecoverable errors.
      */
 
-//    public PollStatus poll(MonitoredService svc, Map<String, Object> parameters) {
     @Override
-    public CompletableFuture<ServiceMonitorResponse> poll(MonitoredService svc, Map<String, Object> parameters) {
+    public CompletableFuture<ServiceMonitorResponse> poll(MonitoredService svc, Any config) {
 
+        CompletableFuture<ServiceMonitorResponse> future = null;
+        String hostAddress = null;
 
-        InetAddress ipaddr = svc.getAddress();
-
-        // Retrieve this interface's SNMP peer object
+        // Establish SNMP session with interface
         //
-        final SnmpAgentConfig agentConfig = getAgentConfig(svc, parameters);
-        final String hostAddress = InetAddressUtils.str(ipaddr);
-
-        // Get configuration parameters
-        //
-        String oid = ParameterMap.getKeyedString(parameters, "oid", DEFAULT_OBJECT_IDENTIFIER);
-        String operator = ParameterMap.getKeyedString(parameters, "operator", null);
-        String operand = ParameterMap.getKeyedString(parameters, "operand", null);
-        String walkstr = ParameterMap.getKeyedString(parameters, "walk", "false");
-        String matchstr = ParameterMap.getKeyedString(parameters, "match-all", "true");
-        int countMin = ParameterMap.getKeyedInteger(parameters, "minimum", 0);
-        int countMax = ParameterMap.getKeyedInteger(parameters, "maximum", 0);
-        String reasonTemplate = ParameterMap.getKeyedString(parameters, "reason-template", DEFAULT_REASON_TEMPLATE);
-        String hexstr = ParameterMap.getKeyedString(parameters, "hex", "false");
-
-        hex = "true".equalsIgnoreCase(hexstr);
-        // set timeout and retries on SNMP peer object
-        //
-        agentConfig.setTimeout(ParameterMap.getKeyedInteger(parameters, "timeout", agentConfig.getTimeout()));
-        agentConfig.setRetries(ParameterMap.getKeyedInteger(parameters, "retry", ParameterMap.getKeyedInteger(parameters, "retries", agentConfig.getRetries())));
-        agentConfig.setPort(ParameterMap.getKeyedInteger(parameters, "port", agentConfig.getPort()));
-
-        // Squirrel the configuration parameters away in a Properties for later expansion if service is down
-        Properties svcParams = new Properties();
-        svcParams.setProperty("oid", oid);
-        svcParams.setProperty("operator", String.valueOf(operator));
-        svcParams.setProperty("operand", String.valueOf(operand));
-        svcParams.setProperty("walk", walkstr);
-        svcParams.setProperty("matchAll", matchstr);
-        svcParams.setProperty("minimum", String.valueOf(countMin));
-        svcParams.setProperty("maximum", String.valueOf(countMax));
-        svcParams.setProperty("timeout", String.valueOf(agentConfig.getTimeout()));
-        svcParams.setProperty("retry", String.valueOf(agentConfig.getRetries()));
-        svcParams.setProperty("retries", svcParams.getProperty("retry"));
-        svcParams.setProperty("ipaddr", hostAddress);
-        svcParams.setProperty("port", String.valueOf(agentConfig.getPort()));
-        svcParams.setProperty("hex", hexstr);
-
         try {
+            if (! config.is(SnmpRequest.class)) {
+                throw new IllegalArgumentException("config must be an SnmpRequest; type-url=" + config.getTypeUrl());
+            }
+
+            SnmpRequest snmpRequest = config.unpack(SnmpRequest.class);
+
+            // Retrieve this interface's SNMP peer object
+            //
+            SnmpAgentConfig agentConfig = getAgentConfig(svc);
+            hostAddress = snmpRequest.getHost();
+
+            // Get configuration parameters
+            //
+            String oid = snmpRequest.getOid();
+            // String operator = ParameterMap.getKeyedString(config, "operator", null);
+            String operator = null;
+            // String operand = ParameterMap.getKeyedString(config, "operand", null);
+            String operand = null;
+            // String walkstr = ParameterMap.getKeyedString(config, "walk", "false");
+            // String matchstr = ParameterMap.getKeyedString(config, "match-all", "true");
+            // int countMin = ParameterMap.getKeyedInteger(config, "minimum", 0);
+            // int countMax = ParameterMap.getKeyedInteger(config, "maximum", 0);
+            // String reasonTemplate = ParameterMap.getKeyedString(config, "reason-template", DEFAULT_REASON_TEMPLATE);
+            String reasonTemplate = DEFAULT_REASON_TEMPLATE;
+            // String hexstr = ParameterMap.getKeyedString(config, "hex", "false");
+            String hexstr = "false";
+
+            hex = "true".equalsIgnoreCase(hexstr);
+            // set timeout and retries on SNMP peer object
+            //
+            agentConfig.setTimeout((int) snmpRequest.getTimeout());
+            agentConfig.setRetries(snmpRequest.getRetries());
+            // agentConfig.setPort(ParameterMap.getKeyedInteger(config, "port", agentConfig.getPort()));
+
+            // Squirrel the configuration parameters away in a Properties for later expansion if service is down
+            // Properties svcParams = new Properties();
+            // svcParams.setProperty("oid", oid);
+            // svcParams.setProperty("operator", String.valueOf(operator));
+            // svcParams.setProperty("operand", String.valueOf(operand));
+            // svcParams.setProperty("walk", walkstr);
+            // svcParams.setProperty("matchAll", matchstr);
+            // svcParams.setProperty("minimum", String.valueOf(countMin));
+            // svcParams.setProperty("maximum", String.valueOf(countMax));
+            // svcParams.setProperty("timeout", String.valueOf(agentConfig.getTimeout()));
+            // svcParams.setProperty("retry", String.valueOf(agentConfig.getRetries()));
+            // svcParams.setProperty("retries", svcParams.getProperty("retry"));
+            // svcParams.setProperty("ipaddr", hostAddress);
+            // svcParams.setProperty("port", String.valueOf(agentConfig.getPort()));
+            // svcParams.setProperty("hex", hexstr);
+
+
+//            TODO: Removing to decouple from horizon core
+//            TimeoutTracker tracker = new TimeoutTracker(parameters, agentConfig.getRetries(), agentConfig.getTimeout());
+//            tracker.reset();
+//            tracker.startAttempt();
+
+            // This if block will count the number of matches within a walk and mark the service
+            // as up if it is between the minimum and maximum number, down if otherwise. Setting
+            // the parameter "matchall" to "count" will act as if "walk" has been set to "true".
+
+                if (DEFAULT_REASON_TEMPLATE.equals(reasonTemplate)) {
+                    if (operator != null) {
+                        reasonTemplate = "Observed value '${observedValue}' does not meet criteria '${operator} ${operand}'";
+                    } else {
+                        reasonTemplate = "Observed value '${observedValue}' was null";
+                    }
+                }
+
+            final String finalHostAddress = hostAddress;
             SnmpObjId snmpObjectId = SnmpObjId.get(oid);
-            return new SnmpHelper(strategyResolver).getAsync(agentConfig, new SnmpObjId[] {snmpObjectId})
-                .<ServiceMonitorResponse>thenApply(result -> {
+            future = SnmpUtils.getAsync(agentConfig, (SnmpObjId[]) Arrays.asList(snmpObjectId).toArray()).
+                thenApply(result -> {
                     ServiceMonitorResponseImplBuilder builder = ServiceMonitorResponseImpl.builder()
                         .status(Status.Unknown);
 
-                    Map<String, Number> properties = new HashMap<>();
+                    Map<String, Number> metrics = new HashMap<>();
+
                     if (result[0] != null) {
-                        LOG.debug("poll: SNMP poll succeeded, addr={} oid={} value={}", hostAddress, oid, result);
+                        // svcParams.setProperty("observedValue", getStringValue(result[0]));
+                        LOG.debug("poll: SNMP poll succeeded, addr={} oid={} value={}", finalHostAddress, oid, result);
 
                         if (result[0].isNumeric()) {
-                            properties.put("observedValue", result[0].toLong());
+                            metrics.put("observedValue", result[0].toLong());
                         }
 
                         if (meetsCriteria(result[0], operator, operand)) {
@@ -162,13 +193,15 @@ public class SnmpMonitor extends SnmpMonitorStrategy {
                             builder.status(Status.Down);
                         }
                     } else {
-                        LOG.debug("SNMP poll failed, addr={} oid={}", hostAddress, oid);
-                        builder.status(Status.Unknown);
+                        String reason = "SNMP poll failed, addr=" + finalHostAddress + " oid=" + oid;
+                        LOG.debug(reason);
                     }
 
-                    builder.properties(properties);
-                    return builder.build();
+                    builder.properties(metrics);
+                    return (ServiceMonitorResponse) builder.build();
                 }).orTimeout(agentConfig.getTimeout(), TimeUnit.MILLISECONDS);
+
+            return future;
         } catch (NumberFormatException e) {
             LOG.debug("Number operator used in a non-number evaluation", e);
             return CompletableFuture.completedFuture(ServiceMonitorResponseImpl.builder().reason(e.getMessage()).status(Status.Unknown).build());

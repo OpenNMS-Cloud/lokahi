@@ -146,7 +146,7 @@ portForward:
     localPort: 12022
   - resourceType: deployment
     resourceName: my-horizon-stream-minion
-    port: 5008 # Debug
+    port: 5005 # Debug
     localPort: 12050
   - resourceType: deployment
     resourceName: my-keycloak
@@ -167,7 +167,10 @@ portForward:
   - resourceType: deployment
     resourceName: minion-gateway
     port: 8990 # GRPC
-    localPort: 16089
+  - resourceType: deployment
+    resourceName: minion-gateway
+    port: 5005 # Debug
+    localPort: 16050
   - resourceType: deployment
     resourceName: horizon-mail-server
     port: 8025 # HTTP

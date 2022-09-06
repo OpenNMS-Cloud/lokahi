@@ -28,10 +28,4 @@
   </bean>
   <service ref="monitorRegistry" interface="org.opennms.horizon.minion.plugin.api.registries.MonitorRegistry" />
 
-  <bean id="pluginConfigScanner" class="org.opennms.horizon.minion.plugin.api.config.PluginConfigScanner" />
-  <bean id="pluginConfigInjector" class="org.opennms.horizon.minion.plugin.api.config.PluginConfigInjector">
-    <argument ref="pluginConfigScanner"/>
-  </bean>
-  <service ref="pluginConfigInjector" interface="org.opennms.horizon.minion.plugin.api.config.ConfigInjector" />
-
 </blueprint>

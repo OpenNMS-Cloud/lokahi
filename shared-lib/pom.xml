@@ -20,8 +20,8 @@
         <module>dto-model</module>
         <module>horizon-common-lang</module>
         <module>horizon-common-logging</module>
-        <module>horizon-ipc</module>
         <module>horizon-common-utils</module>
+        <module>horizon-ipc</module>
         <module>snmp-api</module>
         <module>icmp-api</module>
         <module>task-set</module>

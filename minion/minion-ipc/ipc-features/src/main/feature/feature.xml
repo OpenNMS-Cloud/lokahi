@@ -55,6 +55,8 @@
         <bundle>mvn:org.opennms.horizon.minion/twin-common/${project.version}</bundle>
         <bundle>mvn:org.opennms.horizon.minion/twin-core/${project.version}</bundle>
         <bundle>mvn:org.opennms.horizon.minion/twin-whiteboard/${project.version}</bundle>
+
+        <bundle>mvn:org.opennms.horizon.shared/task-set/${project.version}</bundle>
     </feature>
 
 </features>

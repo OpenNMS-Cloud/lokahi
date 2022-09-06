@@ -1,6 +1,6 @@
 package org.opennms.taskset.service.model;
 
-import org.opennms.taskset.model.TaskSet;
+import org.opennms.taskset.contract.TaskSet;
 
 public class LocatedTaskSet {
     private final String location;

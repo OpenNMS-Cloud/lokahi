@@ -1,23 +1,22 @@
 package org.opennms.horizon.minion.taskset.worker.impl;
 
-import java.util.HashMap;
-import java.util.Map;
 import org.apache.ignite.resources.SpringResource;
 import org.opennms.horizon.minion.plugin.api.registries.ServiceConnectorFactoryRegistry;
-import org.opennms.horizon.minion.taskset.worker.RetriableExecutor;
+import com.google.protobuf.Any;
+import org.opennms.horizon.minion.taskset.worker.RetryableExecutor;
 import org.opennms.horizon.minion.taskset.worker.TaskExecutionResultProcessor;
 import org.opennms.horizon.minion.plugin.api.ServiceConnector;
 import org.opennms.horizon.minion.plugin.api.ServiceConnectorFactory;
-import org.opennms.taskset.model.TaskDefinition;
+import org.opennms.taskset.contract.TaskDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Connector Service
  */
-public class TaskConnectorRetriable implements RetriableExecutor {
+public class TaskConnectorRetryable implements RetryableExecutor {
 
-    private static final Logger DEFAULT_LOGGER = LoggerFactory.getLogger(TaskConnectorRetriable.class);
+    private static final Logger DEFAULT_LOGGER = LoggerFactory.getLogger(TaskConnectorRetryable.class);
 
     private Logger log = DEFAULT_LOGGER;
 
@@ -30,7 +29,7 @@ public class TaskConnectorRetriable implements RetriableExecutor {
 
     private Runnable onDisconnect;
 
-    public TaskConnectorRetriable(TaskDefinition taskDefinition, TaskExecutionResultProcessor resultProcessor) {
+    public TaskConnectorRetryable(TaskDefinition taskDefinition, TaskExecutionResultProcessor resultProcessor) {
         this.taskDefinition = taskDefinition;
         this.resultProcessor = resultProcessor;
     }
@@ -45,15 +44,13 @@ public class TaskConnectorRetriable implements RetriableExecutor {
     }
 
     @Override
-    public void attempt() throws Exception {
+    public void attempt(Any config) throws Exception {
         ServiceConnectorFactory serviceConnectorFactory = lookupServiceConnectorFactory(taskDefinition);
-
-        Map<String, Object> castMap = new HashMap<>(taskDefinition.getParameters());
 
         serviceConnector =
                 serviceConnectorFactory.create(
                         result -> resultProcessor.queueSendResult(taskDefinition.getId(), result),
-                        castMap,
+                        config,
                         onDisconnect
                 );
 

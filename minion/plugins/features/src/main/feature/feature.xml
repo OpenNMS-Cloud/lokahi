@@ -26,6 +26,7 @@
     </feature>
 
     <feature name="plugins-model" version="${project.version}">
+        <bundle>mvn:com.google.protobuf/protobuf-java/${protobuf.version}</bundle>
         <bundle>mvn:org.opennms.horizon.shared/task-set/${project.version}</bundle>
     </feature>
 
@@ -45,6 +46,8 @@
         <feature>plugins-gson-internal</feature>
 <!--        <feature>plugins-horizon-core-lib-internal</feature>-->
         <feature>plugins-horizon-utils-internal</feature>
+
+        <bundle>mvn:com.google.protobuf/protobuf-java/${protobuf.version}</bundle>
         <bundle>mvn:org.opennms.horizon.minion/plugins-api/${project.version}</bundle>
     </feature>
 

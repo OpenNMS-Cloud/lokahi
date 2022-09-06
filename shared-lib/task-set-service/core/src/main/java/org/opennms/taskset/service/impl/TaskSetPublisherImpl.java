@@ -1,6 +1,6 @@
 package org.opennms.taskset.service.impl;
 
-import org.opennms.taskset.model.TaskSet;
+import org.opennms.taskset.contract.TaskSet;
 import org.opennms.taskset.service.api.TaskSetForwarder;
 import org.opennms.taskset.service.api.TaskSetListener;
 import org.opennms.taskset.service.api.TaskSetPublisher;

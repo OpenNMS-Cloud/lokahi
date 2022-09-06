@@ -17,11 +17,10 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.opennms.horizon.minion.plugin.api.PluginMetadata;
-import org.opennms.horizon.minion.plugin.api.FieldConfigMeta;
 import org.opennms.horizon.minion.registration.proto.PluginConfigMessage;
 import org.opennms.horizon.shared.ipc.sink.api.MessageDispatcherFactory;
 import org.opennms.horizon.shared.ipc.sink.api.SyncDispatcher;
-import org.opennms.taskset.model.TaskType;
+import org.opennms.taskset.contract.TaskType;
 
 public class PluginRegistrationRoutingTest extends CamelTestSupport {
 
@@ -57,8 +56,7 @@ public class PluginRegistrationRoutingTest extends CamelTestSupport {
     @Test
     public void goodDetection() throws Exception {
         doNothing().when(dispatcher).send(pluginConfigMessageArgumentCaptor.capture());
-        FieldConfigMeta fieldConfigMeta = new FieldConfigMeta("blahDisplayName", "blahDeclarledName", "java.lang.String");
-        template.sendBody(uri, new PluginMetadata("blah", TaskType.DETECTOR, Arrays.asList(fieldConfigMeta)));
+        template.sendBody(uri, new PluginMetadata("blah", TaskType.DETECTOR));
 
         Thread.sleep(aggregationDelay + 2000);
 

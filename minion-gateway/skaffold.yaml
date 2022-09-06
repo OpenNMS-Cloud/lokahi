@@ -16,7 +16,7 @@ build:
       sync:
         auto: true
       requires:
-        - image: minion_parent_pom
+        - image: minion_gateway_parent_pom
         - image: ignite_detector_library
         - image: shared-lib
           alias: unused_shared
@@ -34,10 +34,10 @@ build:
             "**/target/**"
           ]
       requires:
-        - image: minion_parent_pom
+        - image: minion_gateway_parent_pom
         - image: shared-lib
           alias: unused_shared
-    - image: minion_parent_pom # use an underscore, so we can reference this in other Skaffold artifacts without an alias
+    - image: minion_gateway_parent_pom # use an underscore, so we can reference this in other Skaffold artifacts without an alias
       custom:
         # ignite-detector builds only a jar, not an image.
         # Skaffold requires that artifacts produce images. This is a workaround that builds a dummy image.

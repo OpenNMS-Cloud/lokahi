@@ -33,6 +33,13 @@ package opennms.echo;
 option java_multiple_files = true;
 option java_package = "org.opennms.weblisten.contract";
 
+/**
+ * WebListen is a PROTOTYPE LISTENER task.
+ *
+ * It starts a Jetty server and listens for requests.  Every request received generates a sample (ServiceMonitorResponse)
+ *
+ * It will likely be removed as it was originally written as a simple way to verify LISTENER handling.
+ */
 message WebListenRequest {
   string address = 1;
   uint32 port = 2;

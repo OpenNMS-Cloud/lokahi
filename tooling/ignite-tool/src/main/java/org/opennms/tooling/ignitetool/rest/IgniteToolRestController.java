@@ -3,7 +3,7 @@ package org.opennms.tooling.ignitetool.rest;
 import org.apache.ignite.Ignite;
 import org.apache.ignite.cluster.ClusterNode;
 import org.apache.ignite.services.ServiceDescriptor;
-import org.opennms.taskset.model.TaskSet;
+import org.opennms.taskset.contract.TaskSet;
 import org.opennms.taskset.service.api.TaskSetPublisher;
 import org.opennms.taskset.service.model.LocatedTaskSet;
 import org.opennms.tooling.ignitetool.message.IgniteMessageConsumerManager;
@@ -27,8 +27,6 @@ import java.util.Optional;
 import java.util.TreeMap;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collector;
-import java.util.stream.Collectors;
 
 @SuppressWarnings("rawtypes")
 @RestController

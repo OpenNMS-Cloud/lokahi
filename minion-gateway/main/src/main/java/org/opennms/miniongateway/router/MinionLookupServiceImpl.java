@@ -1,13 +1,11 @@
 package org.opennms.miniongateway.router;
 
-import java.util.List;
 import java.util.Queue;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import org.apache.ignite.Ignite;
 import org.apache.ignite.IgniteCache;
 import org.opennms.core.ipc.grpc.server.manager.MinionInfo;
-import org.opennms.core.ipc.grpc.server.manager.MinionManagerListener;
 import org.opennms.horizon.shared.ignite.remoteasync.MinionLookupService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,6 +24,8 @@ public class MinionLookupServiceImpl implements MinionLookupService {
 
     public MinionLookupServiceImpl(Ignite ignite) {
         logger.info("############ MINION ROUTER SERVICE INITIALIZED");
+
+        this.ignite = ignite;
 
         minionByIdCache = ignite.getOrCreateCache(MINIONS_BY_ID);
         minionByLocationCache = ignite.getOrCreateCache(MINIONS_BY_LOCATION);
@@ -49,12 +49,14 @@ public class MinionLookupServiceImpl implements MinionLookupService {
         minionByIdCache.put(minionInfo.getId(), localUUID);
 
         Queue<UUID> existingMinions = minionByLocationCache.get(minionInfo.getLocation());
-        if (existingMinions.isEmpty()) {
-            existingMinions = new ConcurrentLinkedDeque();
+        if (existingMinions == null) {
+            existingMinions = new ConcurrentLinkedQueue<>();
             minionByLocationCache.put(minionInfo.getLocation(), existingMinions);
         }
         //TODO: for now, seems we can modify in place and not have to put this back in.
         existingMinions.add(localUUID);
+
+        int x = 0;
     }
 
     @Override
@@ -63,11 +65,14 @@ public class MinionLookupServiceImpl implements MinionLookupService {
         UUID localUUID = ignite.cluster().localNode().id();
 
         minionByIdCache.remove(minionInfo.getId());
-        minionByLocationCache.remove(minionInfo.getLocation());
 
         Queue<UUID> existingMinions = minionByLocationCache.get(minionInfo.getLocation());
-        if (!existingMinions.isEmpty()) {
+        if (existingMinions != null) {
             existingMinions.remove(localUUID);
+            if (existingMinions.size() == 0)
+            {
+                minionByLocationCache.remove(minionInfo.getLocation());
+            }
         }
     }
 }

@@ -82,14 +82,10 @@
                                 <feature>horizon-db</feature>
                                 <feature>horizon-events-api</feature>
                                 <feature>horizon-events</feature>
-                                <feature>horizon-grpc</feature>
-<!--                                <feature>horizon-icmp</feature>-->
+                                <feature>horizon-grpc</feature> <!-- TBD888: this goes away -->
                                 <feature>horizon-inventory</feature>
                                 <feature>horizon-ipc-api</feature>
                                 <feature>horizon-provision</feature>
-                                <!--<feature>horizon-minion-heartbeat</feature>-->
-                                <!--<feature>horizon-minion-rest</feature>-->
-<!--                                <feature>horizon-snmp</feature>-->
                                 <feature>horizon-tracing</feature>
                                 <feature>jackson</feature>
                                 <feature>java-native-access</feature>
@@ -104,6 +100,7 @@
                                 <feature>camel-activemq</feature>
                                 <feature>horizon-metrics-prometheus</feature>
                                 <feature>horizon-ignite</feature>
+                                <feature>horizon-core-heartbeat</feature>
                                 <feature>horizon-core-monitor</feature>
                             </features>
                         </configuration>
@@ -161,6 +158,11 @@
         <dependency>
             <groupId>org.opennms.horizon.core</groupId>
             <artifactId>rest</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.opennms.horizon.core</groupId>
+            <artifactId>heartbeat</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

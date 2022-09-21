@@ -26,7 +26,7 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.minion.heartbeat;
+package org.opennms.horizon.core.heartbeat;
 
 import org.opennms.horizon.core.identity.Identity;
 import org.opennms.horizon.ipc.sink.api.Message;

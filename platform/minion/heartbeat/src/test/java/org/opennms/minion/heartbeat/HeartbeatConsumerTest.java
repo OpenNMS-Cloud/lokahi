@@ -28,9 +28,7 @@
 
 package org.opennms.minion.heartbeat;
 
-import io.prometheus.client.Collector;
 import io.prometheus.client.CollectorRegistry;
-import io.prometheus.client.Gauge;
 import org.junit.Assert;
 import org.junit.Test;
 import org.opennms.horizon.core.identity.IdentityImpl;

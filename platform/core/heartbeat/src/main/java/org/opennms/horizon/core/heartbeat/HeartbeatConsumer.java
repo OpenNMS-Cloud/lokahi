@@ -26,7 +26,7 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.minion.heartbeat;
+package org.opennms.horizon.core.heartbeat;
 
 import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.Gauge;
@@ -46,8 +46,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Date;
 import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -88,56 +86,66 @@ public class HeartbeatConsumer implements MessageConsumer<MinionIdentityDTO, Min
 
     @Override
     public void handleMessage(MinionIdentityDTO minionHandle) {
-        LOG.info("Received heartbeat for Minion with id: {} at location: {}",
-            minionHandle.getId(), minionHandle.getLocation());
-        OnmsMinion minion = sessionUtils.withReadOnlyTransaction(() -> minionDao.findById(minionHandle.getId()));
+        update(minionHandle.getId(), minionHandle.getLocation(), minionHandle.getTimestamp());
+
+    }
+
+    public void update(String systemId, String location, Date timestamp) {
+        LOG.info("Received heartbeat for Minion with id: {} at location: {}", systemId, location);
+
+        OnmsMinion minion = sessionUtils.withReadOnlyTransaction(() -> minionDao.findById(systemId));
+
         long heartBeatDelta = 0;
         boolean newMinionDiscovered = false;
+        Date effectiveTimestamp;
+        if (timestamp == null) {
+            LOG.info("Received heartbeat without a timestamp: system-id={}; location={}", systemId, location);
+            effectiveTimestamp = new Date();
+        } else {
+            effectiveTimestamp = timestamp;
+        }
+
         if (minion == null) {
             minion = new OnmsMinion();
-            minion.setId(minionHandle.getId());
-            minion.setLocation(minionHandle.getLocation());
+            minion.setId(systemId);
+            minion.setLocation(location);
             newMinionDiscovered = true;
         } else {
-            heartBeatDelta = minionHandle.getTimestamp().getTime() - minion.getLastUpdated().getTime();
+            heartBeatDelta = effectiveTimestamp.getTime() - minion.getLastUpdated().getTime();
         }
-        if (minionHandle.getTimestamp() == null) {
-            // The heartbeat does not contain a timestamp - use the current time
-            minion.setLastUpdated(new Date());
-            LOG.info("Received heartbeat without a timestamp: {}", minionHandle);
-        } else if (minion.getLastUpdated() == null) {
+
+        if (minion.getLastUpdated() == null) {
             // The heartbeat does contain a timestamp, and we don't have
             // one set yet, so use whatever we've been given
-            minion.setLastUpdated(minionHandle.getTimestamp());
-        } else if (minionHandle.getTimestamp().after(minion.getLastUpdated())) {
+            minion.setLastUpdated(timestamp);
+        } else if (effectiveTimestamp.after(minion.getLastUpdated())) {
             // The timestamp in the heartbeat is more recent than the one we
             // have stored, so update it
-            minion.setLastUpdated(minionHandle.getTimestamp());
+            minion.setLastUpdated(effectiveTimestamp);
         } else {
             // The timestamp in the heartbeat is earlier than the
             // timestamp we have stored, so ignore it
-            LOG.info("Ignoring stale timestamp from heartbeat: {}", minionHandle);
+            LOG.info("Ignoring stale timestamp from heartbeat: system-id={}, location={}", systemId, location);
         }
         final var updatedMinion = minion;
         sessionUtils.withTransaction(() -> minionDao.saveOrUpdate(updatedMinion));
 
         if (newMinionDiscovered) {
-            sendMinionAddedEvent(minionHandle);
+            sendMinionAddedEvent(systemId, location);
         }
 
         // Negative value indicates stale update for heartbeat
         if (heartBeatDelta >= 0) {
-            updateMetrics(heartBeatDelta, minionHandle.getId(),
-                new String[]{minionHandle.getId(), minionHandle.getLocation()});
+            updateMetrics(heartBeatDelta, systemId, new String[] {systemId, location});
         }
     }
 
-    private void sendMinionAddedEvent(MinionIdentityDTO minionHandle) {
+    private void sendMinionAddedEvent(String systemId, String location) {
         final EventBuilder eventBuilder = new EventBuilder(EventConstants.MONITORING_SYSTEM_ADDED_UEI,
             "Horizon.Minion.Heartbeat");
         eventBuilder.addParam(EventConstants.PARAM_MONITORING_SYSTEM_TYPE, OnmsMonitoringSystem.TYPE_MINION);
-        eventBuilder.addParam(EventConstants.PARAM_MONITORING_SYSTEM_ID, minionHandle.getId());
-        eventBuilder.addParam(EventConstants.PARAM_MONITORING_SYSTEM_LOCATION, minionHandle.getLocation());
+        eventBuilder.addParam(EventConstants.PARAM_MONITORING_SYSTEM_ID, systemId);
+        eventBuilder.addParam(EventConstants.PARAM_MONITORING_SYSTEM_LOCATION, location);
         eventForwarder.sendNowSync(eventBuilder.getEvent());
     }
 

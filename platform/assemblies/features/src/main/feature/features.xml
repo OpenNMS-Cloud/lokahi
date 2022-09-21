@@ -185,6 +185,18 @@
         <bundle dependency="true">mvn:org.opennms.horizon.shared/horizon-common-logging/${project.version}</bundle>
     </feature>
 
+    <feature name="horizon-core-heartbeat" version="${project.version}">
+        <feature>horizon-metrics-prometheus</feature>
+        <feature>horizon-events</feature>
+        <feature>horizon-db</feature>
+        <feature>horizon-core-camel</feature>
+        <feature>horizon-grpc-contract</feature>
+
+        <bundle>mvn:org.opennms.horizon.core/heartbeat/${project.version}</bundle>
+
+        <bundle dependency="true">mvn:org.opennms.horizon.shared/horizon-common-logging/${project.version}</bundle>
+    </feature>
+
     <feature name="horizon-core-camel" version="${project.version}">
         <feature>camel</feature>
         <feature>camel-activemq</feature>

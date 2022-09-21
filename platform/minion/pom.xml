@@ -14,7 +14,6 @@
     <name>OpenNMS Horizon :: Minion</name>
     <modules>
         <module>rest</module>
-        <module>heartbeat</module>
     </modules>
 
 </project>

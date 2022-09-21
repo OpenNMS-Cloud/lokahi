@@ -1,16 +1,16 @@
-package org.opennms.miniongateway.grpc.server.stub;
+package org.opennms.miniongateway.grpc.server.heartbeat;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
+import org.opennms.horizon.grpc.heartbeat.contract.HeartbeatMessage;
 import org.opennms.horizon.shared.ipc.sink.aggregation.IdentityAggregationPolicy;
 import org.opennms.horizon.shared.ipc.sink.api.AggregationPolicy;
 import org.opennms.horizon.shared.ipc.sink.api.AsyncPolicy;
 import org.opennms.horizon.shared.ipc.sink.api.SinkModule;
-import org.opennms.taskset.contract.TaskSetResults;
 
-public class TaskResultsModule implements SinkModule<Message, Message> {
+public class HeartbeatModule implements SinkModule<Message, Message> {
 
-    public static final String MODULE_ID = "task-set-result";
+    public static final String MODULE_ID = "heartbeat";
 
     @Override
     public String getId() {
@@ -30,7 +30,7 @@ public class TaskResultsModule implements SinkModule<Message, Message> {
     @Override
     public Message unmarshal(byte[] content) {
         try {
-            return TaskSetResults.parseFrom(content);
+            return HeartbeatMessage.parseFrom(content);
         } catch (InvalidProtocolBufferException e) {
             throw new RuntimeException(e);
         }

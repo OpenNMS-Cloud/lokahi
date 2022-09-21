@@ -20,9 +20,10 @@ import org.opennms.core.ipc.grpc.server.manager.impl.RpcRequestTrackerImpl;
 import org.opennms.core.ipc.grpc.server.manager.rpc.LocationIndependentRpcClientFactoryImpl;
 import org.opennms.core.ipc.grpc.server.manager.rpcstreaming.MinionRpcStreamConnectionManager;
 import org.opennms.core.ipc.grpc.server.manager.rpcstreaming.impl.MinionRpcStreamConnectionManagerImpl;
+import org.opennms.miniongateway.grpc.server.heartbeat.HeartbeatKafkaForwarder;
 import org.opennms.miniongateway.grpc.server.stub.StubCloudToMinionMessageProcessor;
 import org.opennms.miniongateway.grpc.server.stub.StubMinionToCloudProcessor;
-import org.opennms.miniongateway.grpc.server.stub.TaskResultsKafkaForwarder;
+import org.opennms.miniongateway.grpc.server.tasktresults.TaskResultsKafkaForwarder;
 import org.opennms.miniongateway.grpc.twin.GrpcTwinPublisher;
 import org.opennms.taskset.service.api.TaskSetForwarder;
 import org.opennms.taskset.service.api.TaskSetPublisher;
@@ -111,6 +112,7 @@ public class GrpcServerConfig {
         @Autowired @Qualifier("minionToCloudRPCProcessor") BiConsumer<RpcRequestProto, StreamObserver<RpcResponseProto>> minionToCloudRPCProcessor,
         @Autowired @Qualifier("cloudToMinionMessageProcessor") BiConsumer<Identity, StreamObserver<CloudToMinionMessage>> cloudToMinionMessageProcessor,
         @Autowired TaskResultsKafkaForwarder taskResultsKafkaForwarder,
+        @Autowired HeartbeatKafkaForwarder heartbeatKafkaForwarder,
         @Autowired RpcRequestTimeoutManager rpcRequestTimeoutManager
     ) throws Exception {
 
@@ -128,6 +130,7 @@ public class GrpcServerConfig {
         server.setIncomingRpcHandler(minionToCloudRPCProcessor);
         server.setOutgoingMessageHandler(cloudToMinionMessageProcessor);
         server.registerConsumer(taskResultsKafkaForwarder);
+        server.registerConsumer(heartbeatKafkaForwarder);
 
         server.start();
         return server;

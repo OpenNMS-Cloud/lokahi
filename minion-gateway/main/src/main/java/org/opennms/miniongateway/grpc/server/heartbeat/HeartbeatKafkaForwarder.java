@@ -1,4 +1,4 @@
-package org.opennms.miniongateway.grpc.server.stub;
+package org.opennms.miniongateway.grpc.server.heartbeat;
 
 import com.google.protobuf.Message;
 import org.opennms.horizon.shared.ipc.sink.api.MessageConsumer;
@@ -12,14 +12,14 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
 /**
- * Forwarder of TaskResults - received via GRPC and forwarded to Kafka.
+ * Forwarder of Heartbeat messages - received via GRPC and forwarded to Kafka.
  */
 @Component
-public class TaskResultsKafkaForwarder implements MessageConsumer<Message, Message> {
+public class HeartbeatKafkaForwarder implements MessageConsumer<Message, Message> {
 
-    public static final String DEFAULT_TASK_RESULTS_TOPIC = "task-set.results";
+    public static final String DEFAULT_TASK_RESULTS_TOPIC = "heartbeat";
 
-    private final Logger logger = LoggerFactory.getLogger(TaskResultsKafkaForwarder.class);
+    private final Logger logger = LoggerFactory.getLogger(HeartbeatKafkaForwarder.class);
 
     @Autowired
     @Qualifier("kafkaByteArrayProducerTemplate")
@@ -30,7 +30,7 @@ public class TaskResultsKafkaForwarder implements MessageConsumer<Message, Messa
 
     @Override
     public SinkModule<Message, Message> getModule() {
-        return new TaskResultsModule();
+        return new HeartbeatModule();
     }
 
     @Override

@@ -23,7 +23,7 @@
             <cm:property name="ignite.useKubernetes" value="true"/>
             <cm:property name="ignite.kubernetesServiceName" value="horizon-stream-ignite-core"/>
 
-            <cm:property name="monitor.task-set.kafka-topic" value="task-set.results"/>
+            <cm:property name="heartbeat.kafka-topic" value="heartbeat"/>
             <cm:property name="kafkaBrokers" value="$[env:KAFKA_BROKER_HOST]:$[env:KAFKA_BROKER_PORT]"/>
         </cm:default-properties>
     </cm:property-placeholder>
@@ -51,7 +51,7 @@
         <propertyPlaceholder id="properties" location="blueprint:monitorProperties"/>
 
         <route id="consumeKafkaHeartbeats">
-            <from uri="kafka:{{monitor.task-set.kafka-topic}}?brokers={{kafkaBrokers}}&amp;valueDeserializer=org.apache.kafka.common.serialization.ByteArrayDeserializer"/>
+            <from uri="kafka:{{heartbeat.kafka-topic}}?brokers={{kafkaBrokers}}&amp;valueDeserializer=org.apache.kafka.common.serialization.ByteArrayDeserializer"/>
             <unmarshal>
                 <protobuf instanceClass="org.opennms.horizon.grpc.heartbeat.contract.Heartbeat"/>
             </unmarshal>

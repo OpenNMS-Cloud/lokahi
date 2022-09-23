@@ -37,7 +37,7 @@ const onSeveritySelect = () => mapStore.selectedSeverity = selectedSeverity.valu
   position: absolute;
   width: 250px;
   right: 60px;
-  top: 80px;
+  top: 11px;
   z-index: var($zindex-tooltip);
   .feather-input-wrapper {
     background: var($primary-text-on-color);

@@ -42,13 +42,6 @@ spec:
           imagePullPolicy: {{ .Values.OpenNMS.UI.ImagePullPolicy }}
           ports:
             - containerPort: {{ .Values.OpenNMS.UI.Port }}
-          env:
-            - name: DOMAIN_API
-              value: "https://{{ .Values.Host }}{{ .Values.OpenNMS.API.Path }}"
-            - name: DOMAIN_KEYCLOAK
-              value: "https://{{ .Values.Host }}{{ .Values.Keycloak.Path }}"
-          command: [ "/app/dev/entrypoint.sh" ]
-          args: [ "$(DOMAIN_KEYCLOAK)","$(DOMAIN_API)" ]
           resources:
             limits:
               cpu: "{{ .Values.OpenNMS.UI.Resources.Limits.Cpu }}"

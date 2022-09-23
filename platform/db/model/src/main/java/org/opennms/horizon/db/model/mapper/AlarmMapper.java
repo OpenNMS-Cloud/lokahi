@@ -52,7 +52,7 @@ import org.opennms.horizon.shared.dto.event.EventParameterDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @Mapper(componentModel = "spring", uses = {EventMapper.class}, injectionStrategy = InjectionStrategy.CONSTRUCTOR)
-public abstract class AlarmMapper {
+public abstract class AlarmMapper implements IAlarmMapper{
 
     private String ticketUrlTemplate = System.getProperty("opennms.alarmTroubleTicketLinkTemplate");
 

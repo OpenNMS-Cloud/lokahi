@@ -80,6 +80,8 @@ func (h *OpenNMSHandler) ProvideConfig(values values.TemplateValues) []client.Ob
 		&minionCM,
 		&minionSVC,
 		&minionDeploy,
+		&noteDeployment,
+		&noteService,
 	}
 
 	return h.Config

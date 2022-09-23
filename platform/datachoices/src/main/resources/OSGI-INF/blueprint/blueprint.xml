@@ -1,0 +1,45 @@
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.3.0"
+           xsi:schemaLocation="
+                http://www.osgi.org/xmlns/blueprint/v1.0.0
+                https://osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd
+                http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.3.0
+                http://aries.apache.org/schemas/blueprint-cm/blueprint-cm-1.3.0.xsd
+">
+
+    <cm:property-placeholder persistent-id="org.opennms.horizon.datachoices">
+        <cm:default-properties>
+<!--            Note: to test this with a local version of UsageStatsHandler, use the IP of your machine to connect to it outside the l8s cluster -->
+            <cm:property name="url" value="http://stats.opennms.com/"/>
+            <cm:property name="interval" value="86400000"/> <!-- 24 hours -->
+        </cm:default-properties>
+    </cm:property-placeholder>
+
+    <reference id="dataChoicesDao" interface="org.opennms.horizon.db.dao.api.DataChoicesDao"/>
+    <reference id="sessionUtils" interface="org.opennms.horizon.db.dao.api.SessionUtils"/>
+
+    <bean id="stateManager" class="org.opennms.horizon.datachoices.internal.StateManager">
+        <property name="dataChoicesDao" ref="dataChoicesDao"/>
+        <property name="sessionUtils" ref="sessionUtils"/>
+    </bean>
+
+    <bean id="usageStatisticsReporter" class="org.opennms.horizon.datachoices.internal.UsageStatisticsReporter"
+          init-method="init" destroy-method="destroy">
+        <property name="url" value="${url}"/>
+        <property name="interval" value="${interval}"/>
+        <property name="stateManager" ref="stateManager"/>
+    </bean>
+
+    <bean id="dataChoiceRestService" class="org.opennms.horizon.datachoices.web.internal.DataChoiceRestServiceImpl">
+        <property name="stateManager" ref="stateManager"/>
+        <property name="usageStatisticsReporter" ref="usageStatisticsReporter"/>
+    </bean>
+
+    <service interface="org.opennms.horizon.datachoices.web.DataChoicesRestService" ref="dataChoiceRestService">
+        <service-properties>
+            <entry key="osgi.jaxrs.resource" value="true"/>
+        </service-properties>
+    </service>
+
+</blueprint>

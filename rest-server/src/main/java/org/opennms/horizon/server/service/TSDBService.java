@@ -31,7 +31,8 @@ package org.opennms.horizon.server.service;
 import java.util.Map;
 
 import org.opennms.horizon.server.model.TimeSeriesQueryResult;
+import reactor.core.publisher.Mono;
 
 public interface TSDBService {
-    TimeSeriesQueryResult getMetric(String name, Map<String, String> labels);
+    Mono<TimeSeriesQueryResult> getMetric(String name, Map<String, String> labels);
 }

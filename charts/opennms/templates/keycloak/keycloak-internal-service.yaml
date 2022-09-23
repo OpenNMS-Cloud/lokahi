@@ -9,7 +9,12 @@ spec:
   ports:
     - protocol: TCP
       port: 443
-      targetPort: 8443
+      name: https
+      targetPort: {{ .Values.Keycloak.HttpsPort }}
+    - protocol: TCP
+      port: 80
+      name: http
+      targetPort: {{ .Values.Keycloak.Port }}
   selector:
     app: keycloak
   type: ClusterIP

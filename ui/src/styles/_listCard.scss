@@ -1,0 +1,46 @@
+@use "@featherds/table/scss/table";
+@use "@featherds/styles/themes/variables";
+@use "@featherds/styles/mixins/typography";
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  .title-container {
+    display: flex;
+    .title {
+      @include typography.headline3;
+      margin-left: 15px;
+      margin-top: 2px;
+    }
+  }
+  .search {
+    width: 300px;
+  }
+  .btns {
+    display: flex;
+  }
+}
+
+.table-container {
+  display: block;
+  overflow-x: auto;
+  table {
+    @include table.table-condensed();
+    thead {
+      background: var(variables.$background);
+      text-transform: uppercase;
+    }
+    td {
+      white-space: nowrap;
+      div {
+        border-radius: 5px;
+        padding: 0px 5px 0px 5px;
+      }
+    }
+  }
+}
+
+.feather-pagination {
+  margin-top: var(variables.$spacing-xl);
+  justify-content: center;
+}

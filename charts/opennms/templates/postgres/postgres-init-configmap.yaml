@@ -18,3 +18,7 @@ data:
     CREATE USER notification with password '{{ .Values.Postgres.NotificationPassword }}';
     CREATE DATABASE notification;
     GRANT ALL ON DATABASE notification TO notification;
+  postgres.grafana.initial.script.sql: |
+    CREATE USER grafana with password '{{ .Values.Postgres.GrafanaPassword }}';
+    CREATE DATABASE grafana;
+    GRANT ALL ON DATABASE grafana TO grafana;

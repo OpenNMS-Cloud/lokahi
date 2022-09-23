@@ -11,8 +11,8 @@ export const useApplianceQueries = defineStore('applianceQueries', {
     const tableMinions = ref()
     
     // fetch appliance devices table data
-    const fetchDevicesForTable = async () => {
-      const { data: devicesData } = await useQuery({
+    const fetchDevicesForTable = () => {
+      const { data: devicesData } = useQuery({
         cachePolicy: 'network-only',
         query: ListDevicesForTableDocument
       })

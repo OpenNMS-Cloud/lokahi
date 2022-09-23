@@ -90,6 +90,18 @@ spec:
                     image:
                       description: Docker Image tag for the service
                       type: string
+                keycloak:
+                  description: Defines service configuration for keycloak
+                  type: object
+                  properties:
+                    image:
+                      type: string
+                grafana:
+                  description: Defines service configuration for grafana
+                  type: object
+                  properties:
+                    image:
+                      type: string
                 credentials:
                   description: Set the default credentials for the instance
                   type: object

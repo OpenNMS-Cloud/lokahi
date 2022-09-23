@@ -2,17 +2,17 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: grafana
-  name: grafana
+    app: {{ .Values.Grafana.ServiceName }}
+  name: {{ .Values.Grafana.ServiceName }}
   namespace: {{ .Values.Namespace }}
 spec:
   selector:
     matchLabels:
-      app: grafana
+      app: {{ .Values.Grafana.ServiceName }}
   template:
     metadata:
       labels:
-        app: grafana
+        app: {{ .Values.Grafana.ServiceName }}
     spec:
       {{ if .Values.NodeRestrictions.Enabled }}
       tolerations:
@@ -32,108 +32,48 @@ spec:
                 - {{ .Values.NodeRestrictions.Value }}
       {{ end }}
       volumes:
-        - name: config
+        - name: grafana-config
           configMap:
-            name: grafana
+            name: {{ .Values.Grafana.ServiceName }}
             defaultMode: 420
-        - name: config-plugin
-          configMap:
-            name: grafana
-            defaultMode: 420
-        - name: config-datasource-opennms-flow
-          configMap:
-            name: grafana
-            defaultMode: 420
-        - name: config-datasource-opennms-performance
-          configMap:
-            name: grafana
-            defaultMode: 420
-        - name: config-datasource-opennms-entities
-          configMap:
-            name: grafana
-            defaultMode: 420
-        - name: config-datasource-cortex
-          configMap:
-            name: grafana
-            defaultMode: 420
-        - name: config-dashboards-opennms
-          configMap:
-            name: grafana
-            defaultMode: 420
-        - name: config-dashboards-opennms-json
-          configMap:
-            name: grafana
-            defaultMode: 420
-        - name: config-access-control-admin
-          configMap:
-            name: grafana
-            defaultMode: 420
-      securityContext:
-        fsGroup: 472
-        supplementalGroups:
-          - 0
       containers:
-        - name: grafana
+        - name: {{ .Values.Grafana.ServiceName }}
           image: {{ .Values.Grafana.Image }}
-          imagePullPolicy: IfNotPresent
-          env:
-            - name: GF_SECURITY_ADMIN_USER
-              value: "admin"
-            - name: GF_SECURITY_ADMIN_PASSWORD
-              value: "testpass" #todo update
+          imagePullPolicy: {{ .Values.Grafana.ImagePullPolicy }}
           ports:
-            - containerPort: 3000
-              name: http-grafana
-              protocol: TCP
-          {{ if not .Values.TestDeploy }}
+            - containerPort: {{ .Values.Grafana.Port }}
+          volumeMounts:
+            - name: grafana-config
+              mountPath: "/etc/grafana/provisioning/datasources/default.yml"
+              subPath: "default.yml"
+            - name: grafana-config
+              mountPath: "/etc/grafana/grafana.ini"
+              subPath: "grafana.ini"
+            - name: grafana-config
+              mountPath: "/etc/grafana/provisioning/dashboards/dashboard.yml"
+              subPath: "dashboard.yml"
+            - name: grafana-config
+              mountPath: "/usr/share/grafana/public/dashboards/opennms-entities.json"
+              subPath: "opennms-entities.json"
           readinessProbe:
             failureThreshold: 3
             httpGet:
               path: /robots.txt
-              port: 3000
+              port: {{ .Values.Grafana.Port }}
               scheme: HTTP
             initialDelaySeconds: 10
             periodSeconds: 30
-            successThreshold: 1
-            timeoutSeconds: 2
           livenessProbe:
-            failureThreshold: 3
             initialDelaySeconds: 30
             periodSeconds: 10
-            successThreshold: 1
             tcpSocket:
-              port: 3000
-            timeoutSeconds: 1
-          {{ end }}
+              port: {{ .Values.Grafana.Port }}
           resources:
+            limits:
+              cpu: "{{ .Values.Grafana.Resources.Limits.Cpu }}"
+              memory: "{{ .Values.Grafana.Resources.Limits.Memory }}"
             requests:
-              cpu: 250m
-              memory: 750Mi
-          volumeMounts:
-            - name: config
-              mountPath: /etc/grafana/grafana.ini
-              subPath: grafana.ini
-            - name: config-plugin
-              mountPath: /etc/grafana/provisioning/plugins/opennms-helm-app.yaml
-              subPath: opennms-helm-app.yaml
-            - name: config-datasource-opennms-performance
-              mountPath: /etc/grafana/provisioning/datasources/opennms-performance.yaml
-              subPath: opennms-performance.yaml
-            - name: config-datasource-opennms-flow
-              mountPath: /etc/grafana/provisioning/datasources/opennms-flow.yaml
-              subPath: opennms-flow.yaml
-            - name: config-datasource-opennms-entities
-              mountPath: /etc/grafana/provisioning/datasources/opennms-entities.yaml
-              subPath: opennms-entities.yaml
-            - name: config-datasource-cortex
-              mountPath: /etc/grafana/provisioning/datasources/datasource-cortex.yaml
-              subPath: datasource-cortex.yaml
-            - name: config-dashboards-opennms
-              mountPath: /etc/grafana/provisioning/dashboards/opennms.yaml
-              subPath: opennms.yaml
-            - name: config-dashboards-opennms-json
-              mountPath: /var/lib/grafana/dashboards/opennms-entities.json
-              subPath: opennms-entities.json
-            - name: config-access-control-admin
-              mountPath: /etc/grafana/provisioning/access-control/admin.yaml
-              subPath: admin.yaml
+              cpu: "{{ .Values.Grafana.Resources.Requests.Cpu }}"
+              memory: "{{ .Values.Grafana.Resources.Requests.Memory }}"
+
+          

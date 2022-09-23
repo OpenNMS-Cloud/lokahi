@@ -1,5 +1,5 @@
 .PHONY: dependencies build alpine-build unit-test integration-test
-.PHONY: local-docker copy-charts kubebuilder
+.PHONY: local-docker kind-load copy-charts kubebuilder
 
 all: build
 
@@ -21,6 +21,9 @@ copy-charts:
 
 local-docker: copy-charts
 	docker build -t opennms/operator:local-build .
+
+kind-load: local-docker
+	kind load docker-image opennms/operator:local-build
 
 build:
 	go build -a -o operator cmd/opennms-operator/main.go

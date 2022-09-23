@@ -14,11 +14,11 @@
 
     <bean id="entityManagerHolder" class="org.opennms.horizon.db.dao.impl.EntityManagerHolderImpl"/>
 
-    <service interface="org.opennms.horizon.db.dao.api.SessionUtils">
-        <bean class="org.opennms.horizon.db.dao.util.SessionUtilsImpl">
-            <argument ref="jpaTemplate"/>
-        </bean>
-    </service>
+    <service ref="sessionUtils" interface="org.opennms.horizon.db.dao.api.SessionUtils"/>
+
+    <bean id="sessionUtils" class="org.opennms.horizon.db.dao.util.SessionUtilsImpl">
+        <argument ref="jpaTemplate"/>
+    </bean>
 
     <service interface="org.opennms.horizon.db.dao.api.AcknowledgmentDao">
         <bean class="org.opennms.horizon.db.dao.impl.AcknowledgmentDaoHibernate">
@@ -38,22 +38,23 @@
         </bean>
     </service>
 
-    <service interface="org.opennms.horizon.db.dao.api.NodeDao">
-        <bean class="org.opennms.horizon.db.dao.impl.NodeDaoHibernate">
-            <argument ref="entityManagerHolder"/>
-        </bean>
-    </service>
+    <service ref="nodeDao" interface="org.opennms.horizon.db.dao.api.NodeDao"/>
+
+    <bean id="nodeDao" class="org.opennms.horizon.db.dao.impl.NodeDaoHibernate">
+        <argument ref="entityManagerHolder"/>
+    </bean>
+
     <service interface="org.opennms.horizon.db.dao.api.MonitoringLocationDao">
         <bean class="org.opennms.horizon.db.dao.impl.MonitoringLocationDaoHibernate">
             <argument ref="entityManagerHolder"/>
         </bean>
     </service>
 
-    <service interface="org.opennms.horizon.db.dao.api.IpInterfaceDao">
-        <bean class="org.opennms.horizon.db.dao.impl.IpInterfaceDaoHibernate">
-            <argument ref="entityManagerHolder"/>
-        </bean>
-    </service>
+    <service ref="ipInterfaceDao" interface="org.opennms.horizon.db.dao.api.IpInterfaceDao"/>
+
+    <bean id="ipInterfaceDao" class="org.opennms.horizon.db.dao.impl.IpInterfaceDaoHibernate">
+        <argument ref="entityManagerHolder"/>
+    </bean>
 
     <service interface="org.opennms.horizon.db.dao.api.DistPollerDao">
         <bean class="org.opennms.horizon.db.dao.impl.DistPollerDaoHibernate">
@@ -81,6 +82,21 @@
 
     <service interface="org.opennms.horizon.db.dao.api.MinionDao">
         <bean class="org.opennms.horizon.db.dao.impl.MinionDaoHibernate">
+            <argument ref="entityManagerHolder"/>
+        </bean>
+    </service>
+
+    <bean id="interfaceToNodeCache" class="org.opennms.horizon.db.dao.impl.InterfaceToNodeCacheDaoImpl" init-method="init"
+          destroy-method="destroy">
+        <property name="nodeDao" ref="nodeDao"/>
+        <property name="ipInterfaceDao" ref="ipInterfaceDao"/>
+        <property name="sessionUtils" ref="sessionUtils"/>
+    </bean>
+
+    <service ref="interfaceToNodeCache" interface="org.opennms.horizon.db.dao.api.InterfaceToNodeCache"/>
+
+    <service interface="org.opennms.horizon.db.dao.api.DataChoicesDao">
+        <bean class="org.opennms.horizon.db.dao.impl.DataChoicesDaoHibernate">
             <argument ref="entityManagerHolder"/>
         </bean>
     </service>

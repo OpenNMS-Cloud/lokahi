@@ -1,6 +1,6 @@
 http-url: "http://horizon:8980/opennms"
 id: "minion-01"
-location: "minion-location"
+location: "Default"
 
 karaf:
   shell:

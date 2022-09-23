@@ -1,0 +1,125 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.Keycloak.ServiceName }}
+  labels:
+    app: keycloak
+  namespace: {{ .Values.Namespace }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ .Values.Keycloak.ServiceName }}
+  replicas: {{ .Values.Keycloak.Replicas }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.Keycloak.ServiceName }}
+    spec:
+      containers:
+        - name: keycloak
+          image: "{{ .Values.Keycloak.Image }}"
+          imagePullPolicy: "{{ .Values.Keycloak.ImagePullPolicy }}"
+          resources:
+            limits:
+              cpu: "{{ .Values.Keycloak.Resources.Limits.Cpu }}"
+              memory: "{{ .Values.Keycloak.Resources.Limits.Memory }}"
+            requests:
+              cpu: "{{ .Values.Keycloak.Resources.Requests.Cpu }}"
+              memory: "{{ .Values.Keycloak.Resources.Requests.Memory }}"
+          args: ['start', '--optimized', '--import-realm']
+          env:
+            - name: KC_CACHE_STACK
+              value: kubernetes
+            - name: KC_HEALTH_ENABLED
+              value: "true"
+            - name: KC_CACHE
+              value: ispn
+            - name: KC_HOSTNAME
+              value: "{{ .Values.Host }}"
+            - name: KC_DB
+              value: postgres
+            - name: KC_DB_URL_HOST
+              value: "{{ .Values.Postgres.ServiceName }}"
+            - name: KC_DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: postgres
+                  key: keycloakUser
+            - name: KC_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres
+                  key: keycloakPwd
+            - name: KEYCLOAK_ADMIN
+              valueFrom:
+                secretKeyRef:
+                  key: username
+                  name: onms-keycloak-initial-admin
+            - name: KEYCLOAK_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: password
+                  name: onms-keycloak-initial-admin
+            - name: KC_HOSTNAME_STRICT
+              value: "false"
+            - name: KC_HOSTNAME_STRICT_BACKCHANNEL
+              value: "false"
+            - name: KC_HTTP_ENABLED
+              value: "true"
+            - name: KC_HTTP_RELATIVE_PATH
+              value: "{{ .Values.Keycloak.Path }}"
+            - name: KC_PROXY
+              value: passthrough
+            - name: jgroups.dns.query
+              value: "{{ .Values.Keycloak.ServiceName }}.{{ .Values.Namespace }}"
+            - name: KC_HTTPS_CERTIFICATE_FILE
+              value: /mnt/certificates/tls.crt
+            - name: KC_HTTPS_CERTIFICATE_KEY_FILE
+              value: /mnt/certificates/tls.key
+          ports:
+            - name: http
+              containerPort: {{ .Values.Keycloak.Port }}
+            - name: https
+              containerPort: {{ .Values.Keycloak.HttpsPort }}
+          volumeMounts:
+            - mountPath: /mnt/certificates
+              name: keycloak-tls-certificates
+            - mountPath: /opt/keycloak/data/import
+              name: realm-config
+          livenessProbe:
+            exec:
+              command:
+              - curl
+              - --head
+              - --fail
+              - --silent
+              - --insecure
+              - https://127.0.0.1:{{ .Values.Keycloak.HttpsPort }}{{ .Values.Keycloak.Path }}/health/live
+            failureThreshold: 150
+            initialDelaySeconds: 20
+            periodSeconds: 2
+            successThreshold: 1
+            timeoutSeconds: 1
+          readinessProbe:
+            exec:
+              command:
+              - curl
+              - --head
+              - --fail
+              - --silent
+              - --insecure
+              - https://127.0.0.1:{{ .Values.Keycloak.HttpsPort }}{{ .Values.Keycloak.Path }}/health/ready
+            failureThreshold: 250
+            initialDelaySeconds: 20
+            periodSeconds: 2
+            successThreshold: 1
+            timeoutSeconds: 1
+      volumes:
+        - name: keycloak-tls-certificates
+          secret:
+            defaultMode: 420
+            optional: false
+            secretName: tls-cert-wildcard
+        - name: realm-config
+          configMap:
+            name: keycloak-realm-configmap

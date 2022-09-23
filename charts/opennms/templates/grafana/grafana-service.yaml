@@ -1,13 +1,15 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: grafana
+  name: {{ .Values.Grafana.ServiceName }}
+  labels:
+    app: {{ .Values.Grafana.ServiceName }}
   namespace: {{ .Values.Namespace }}
 spec:
   ports:
-    - port: 3000
+    - port: {{ .Values.Grafana.Port }}
       protocol: TCP
-      targetPort: http-grafana
+      targetPort: {{ .Values.Grafana.Port }}
   selector:
-    app: grafana
+    app: {{ .Values.Grafana.ServiceName }}
   type: ClusterIP

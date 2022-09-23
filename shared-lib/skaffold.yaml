@@ -10,7 +10,7 @@ build:
   local:
     push: false
   artifacts:
-  - image: shared-lib
+  - image: shared_lib # use an underscore, so we can reference this in other Skaffold artifacts without an alias
     custom:
       # shared-lib builds only a jar, not an image.
       # Skaffold requires that artifacts produce images. This is a workaround that builds a dummy image.

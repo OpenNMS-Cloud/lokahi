@@ -1,0 +1,42 @@
+fragment ListEventsParts on Query {
+  listEvents {
+    events {
+      id
+      severity
+      time
+      source
+      nodeLabel
+      location
+      ipAddress
+      nodeId
+    }
+    offset
+    totalCount
+  }
+}
+
+fragment DeviceParts on DeviceDTO {
+  foreignSource
+  managementIp
+  id
+  label
+  createTime
+  location {
+    locationName
+    latitude
+    longitude
+  }
+}
+
+fragment DeviceByIdParts on Query {
+  device: deviceById(id: $id) {
+      ...DeviceParts
+    }
+}
+
+query ListDeviceStatus($id: Int) {
+  ...ListEventsParts
+  ...DeviceByIdParts
+  ...DeviceUptimeParts
+  ...DeviceLatencyParts
+}

@@ -8,4 +8,18 @@
             <column name="snmp_community_string" type="varchar2(32)" />
         </addColumn>
     </changeSet>
+    <changeSet author="tbigg" id="hs-0.1.0-datachoices-create-table">
+        <createSequence sequenceName="datachoicenxtid" minValue="1"/>
+        <createTable tableName="datachoices">
+            <column name="datachoiceid" type="integer">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_datachoiceid"/>
+            </column>
+            <column name="systemid" type="varchar(256)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="enabled" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
 </databaseChangeLog>

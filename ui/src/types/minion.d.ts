@@ -1,4 +1,3 @@
-
 import { BGColors } from '@/components/Appliances/appliances.helpers'
 import { MinionDto } from './graphql'
 

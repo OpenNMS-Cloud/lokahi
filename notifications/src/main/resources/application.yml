@@ -2,6 +2,12 @@ spring:
   application:
     name: horizon-stream-notifications
 
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://postgres:5432/notification
+    username: notification
+    password: passw0rd
+
   kafka:
     consumer:
       group-id: org.opennms.horizon.notifications
@@ -12,9 +18,16 @@ spring:
         spring.json.trusted.packages: org.opennms.horizon.shared.dto.event
         spring.json.value.default.type: org.opennms.horizon.shared.dto.event.AlarmDTO
 
+  liquibase:
+    change-log: db/changelog/changelog.xml
+
 horizon:
   kafka:
     alarms:
       topic: org.opennms.horizon.notifications.alarms
       concurrency: 1
+
+  pagerduty:
+    client: OpenNMS
+    clientURL: http://opennms.com
 

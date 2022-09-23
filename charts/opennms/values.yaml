@@ -35,7 +35,7 @@ OpenNMS:
     ServiceName: opennms-ui
     Image: opennms/horizon-stream-ui
     Replicas: 1
-    Port: 3000
+    Port: 80
     Resources:
       Limits:
         Cpu: 1
@@ -52,8 +52,8 @@ OpenNMS:
     SyslogPort: 1514
     Resources:
       Limits:
-        Cpu: 2
-        Memory: 1Gi
+        Cpu: 1
+        Memory: 2050M
       Requests:
         Cpu: 1
         Memory: 512Mi
@@ -77,17 +77,26 @@ Postgres:
   OpenNMSPassword: notset
   KeycloakPassword: notset
   NotificationPassword: notset
+  GrafanaPassword: notset
   VolumeSize: 10Gi
 Keycloak:
   Path: /auth
+  Image: opennms/horizon-stream-keycloak:latest
   Port: 8080
+  HttpsPort: 8443
   Replicas: 1
   ServiceName: onms-keycloak
+  Resources:
+    Limits:
+      Cpu: 1
+      Memory: 1000Mi
+    Requests:
+      Cpu: 100m
+      Memory: 500Mi
   AdminUsername: admin
   AdminPassword: notset
   UserUsername: user001
   UserPassword: notset
-  Image: opennms/horizon-stream-keycloak:test
   RealmName: opennms
   UUID:
     RealmId: 00000000-0000-0000-0000-000000000000
@@ -95,7 +104,19 @@ Keycloak:
     BaseUserId: 00000000-0000-0000-0000-000000000000
     AdminUserId: 00000000-0000-0000-0000-000000000000
 Grafana:
-  Image: placeholder
+  Path: /grafana
+  Port: 3000
+  Replicas: 1
+  ServiceName: grafana
+  Image: opennms/horizon-stream-grafana
+  InitContainerImage: busybox
+  Resources:
+    Limits:
+      Cpu: 500m
+      Memory: 1Gi
+    Requests:
+      Cpu: 100m
+      Memory: 100Mi
 Prometheus:
   Enabled: true
   Server:

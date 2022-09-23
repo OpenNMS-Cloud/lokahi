@@ -1,0 +1,26 @@
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0">
+
+    <reference id="configService" interface="org.opennms.horizon.config.service.api.ConfigService"/>
+    <reference id="eventConfDao" interface="org.opennms.horizon.events.api.EventConfDao"/>
+    <reference id="messageConsumerManager" interface="org.opennms.horizon.ipc.sink.api.MessageConsumerManager"/>
+    <reference id="eventForwarder" interface="org.opennms.horizon.events.api.EventForwarder" />
+    <reference id="distPollerDao" interface="org.opennms.horizon.db.dao.api.DistPollerDao" />
+    <reference id="interfaceToNodeCache" interface="org.opennms.horizon.db.dao.api.InterfaceToNodeCache" />
+    <reference id="twinPublisher" interface="org.opennms.core.ipc.twin.api.TwinPublisher" availability="mandatory"/>
+    <reference id="sessionUtils" interface="org.opennms.horizon.db.dao.api.SessionUtils" />
+    <reference id="eventSubscriptionService" interface="org.opennms.horizon.events.api.EventSubscriptionService" availability="mandatory"/>
+
+    <bean id="trapSinkConsumer" class="org.opennms.horizon.traps.consumer.TrapSinkConsumer"
+          init-method="init">
+        <property name="eventConfDao" ref="eventConfDao"/>
+        <property name="messageConsumerManager" ref="messageConsumerManager"/>
+        <property name="eventForwarder" ref="eventForwarder"/>
+        <property name="distPollerDao" ref="distPollerDao"/>
+        <property name="interfaceToNodeCache" ref="interfaceToNodeCache"/>
+        <property name="configService" ref="configService"/>
+        <property name="twinPublisher" ref="twinPublisher"/>
+        <property name="sessionUtils" ref="sessionUtils"/>
+        <property name="eventSubscriptionService" ref="eventSubscriptionService"/>
+    </bean>
+
+</blueprint>

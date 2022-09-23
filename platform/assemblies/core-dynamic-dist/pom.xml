@@ -114,17 +114,21 @@
                         <feature>kar</feature>
                         <feature>log</feature>
                         <feature>package</feature>
-                        <feature>service</feature>
+                        <feature>service</feature                        <feature>horizon-icmp</feature>
+>
                         <feature>system</feature>
                         <feature>scr</feature>
                         <feature>horizon-alarms</feature>
                         <feature>horizon-provision</feature>
+                        <feature>horizon-datachoices</feature>
                         <feature>horizon-inventory</feature>
                         <feature>horizon-minion-heartbeat</feature>
                         <feature>horizon-minion-rest</feature>
                         <feature>horizon-metrics-prometheus</feature>
                         <feature>horizon-core-heartbeat</feature>
                         <feature>horizon-core-monitor</feature>
+                        <feature>horizon-core-config-rest</feature>
+                        <feature>horizon-core-traps</feature>
                     </bootFeatures>
                     <libraries>
                     </libraries>

@@ -18,6 +18,7 @@ import "github.com/google/uuid"
 
 type KeycloakValues struct {
 	ServiceValues `yaml:",inline"`
+	HttpsPort     string   `yaml:"HttpsPort"`
 	AdminUsername string   `yaml:"AdminUsername"`
 	AdminPassword string   `yaml:"AdminPassword"`
 	UserUsername  string   `yaml:"UserUsername"`

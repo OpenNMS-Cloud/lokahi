@@ -299,6 +299,7 @@
                   <PGSQL_ADMIN_PASSWORD>unused</PGSQL_ADMIN_PASSWORD>
                   <KAFKA_BROKER_HOST>kafka-host</KAFKA_BROKER_HOST>
                   <KAFKA_BROKER_PORT>9092</KAFKA_BROKER_PORT>
+                  <NOTIFICATION_KAFKA_TOPIC>org.opennms.horizon.notifications.alarms</NOTIFICATION_KAFKA_TOPIC>
                   <ACTIVEMQ_BROKER_URL>tcp://localhost:61616</ACTIVEMQ_BROKER_URL>
                 </env>
                 <wait>

@@ -5,7 +5,7 @@ on:
     branches:
       - '**'
       - '!develop'
-      - '!release/**'
+      - '!release'
     paths:
       - 'rest-server/**'
 

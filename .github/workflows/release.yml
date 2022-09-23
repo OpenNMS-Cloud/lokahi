@@ -67,6 +67,7 @@ jobs:
         with:
           dir-location: 'ui'
 
+      # This needs to happen before core, rest-server, and notifications.
       - name: shared-lib
         id: action-shared-lib
         uses: ./.github/actions/shared-lib
@@ -84,6 +85,12 @@ jobs:
         uses: ./.github/actions/rest-server
         with:
           dir-location: 'rest-server'
+      
+      - name: feature-notifications
+        id: action-notifications
+        uses: ./.github/actions/notifications
+        with:
+          dir-location: 'notifications'
       
       - name: feature-operator
         id: action-feature-operator
@@ -178,6 +185,22 @@ jobs:
 
           docker push opennms/horizon-stream-rest-server:${{ env.RELEASE_TAG }}
           docker push opennms/horizon-stream-rest-server:latest
+      
+      - name: publish-image-notifications
+        run: |
+
+          # Login to dockerhub. Probably could remove this, session created in previous step.
+          echo ${{ secrets.DOCKERHUB_PASS }} | docker login -u ${{ secrets.DOCKERHUB_LOGIN }} --password-stdin
+
+          # Test build images
+          docker images
+
+          # Tag and save the image as a file to be published. Both release version and latest.
+          docker tag opennms/horizon-stream-notification:local opennms/horizon-stream-notification:${{ env.RELEASE_TAG }}
+          docker tag opennms/horizon-stream-notification:local opennms/horizon-stream-notification:latest
+
+          docker push opennms/horizon-stream-notification:${{ env.RELEASE_TAG }}
+          docker push opennms/horizon-stream-notification:latest
       
       - name: publish-image-operator
         run: |

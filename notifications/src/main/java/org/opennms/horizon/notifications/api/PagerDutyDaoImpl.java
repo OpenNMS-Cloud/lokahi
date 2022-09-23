@@ -60,23 +60,29 @@ public class PagerDutyDaoImpl implements PagerDutyDao{
                     )
             );
         } catch (BadSqlGrammarException e) {
-            throw new NotificationConfigUninitializedException("Pager duty config not initialized. Table does not exist.", e);
+            throw new NotificationConfigUninitializedException("PagerDuty config not initialized. Table does not exist.", e);
         }
 
         if (configList.size() != 1) {
-            throw new NotificationConfigUninitializedException("Pager duty config not initialized. Row count=" + configList.size());
+            throw new NotificationConfigUninitializedException("PagerDuty config not initialized. Row count=" + configList.size());
         }
 
         return configList.get(0);
     }
 
     @Override
-    public void initConfig(PagerDutyConfigDTO config) {
-        jdbcTemplate.execute("DROP TABLE IF EXISTS pager_duty_config");
-        jdbcTemplate.execute("CREATE TABLE pager_duty_config(" +
-            "token VARCHAR(255), integrationkey VARCHAR(255))");
+    public void saveConfig(PagerDutyConfigDTO config) {
+        int count = getRowCount();
 
-        // TODO: Think about encryption.
-        jdbcTemplate.update("INSERT INTO pager_duty_config(token, integrationkey) VALUES(?,?)", config.getToken(), config.getIntegrationkey());
+        if (count == 0) {
+            jdbcTemplate.update("INSERT INTO pager_duty_config(token, integrationkey) VALUES(?,?)", config.getToken(), config.getIntegrationkey());
+        } else {
+            jdbcTemplate.update("UPDATE pager_duty_config SET token=?, integrationkey=?", config.getToken(), config.getIntegrationkey());
+        }
+    }
+
+    private int getRowCount() {
+        String sql = "SELECT count(*) FROM pager_duty_config";
+        return jdbcTemplate.queryForObject(sql, Integer.class);
     }
 }

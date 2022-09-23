@@ -28,45 +28,44 @@
 
 package org.opennms.horizon.server.service;
 
-import java.util.List;
 import java.util.Map;
 
 import org.opennms.horizon.server.model.TimeSeriesQueryResult;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.spqr.spring.annotations.GraphQLApi;
 import lombok.extern.slf4j.Slf4j;
+import reactor.core.publisher.Mono;
 
 @Slf4j
 @GraphQLApi
 @Service
 public class PrometheusTSDBServiceImpl implements TSDBService {
-    @Value("${tsdb.url}")
-    private String tsdbURL;
     private static final String QUERY_TEMPLATE = "query=%s{%s}";
     private static final String QUERY_TEMPLATE_WITHOUT_LABELS = "query=%s";
     private static final String LABEL_INSTANCE = "instance";
-    private final RestTemplate restTemplate = new RestTemplate();
+    private WebClient webClient;
+
+    public PrometheusTSDBServiceImpl(@Value("${tsdb.url}") String tsdbURL) {
+        webClient = WebClient.builder()
+            .baseUrl(tsdbURL)
+            .defaultHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
+            .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+            .build();
+    }
 
     @GraphQLQuery
     @Override
-    public TimeSeriesQueryResult getMetric(String name, Map<String, String> labels) {
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-        headers.setAccept(List.of(MediaType.APPLICATION_JSON));
-        String urlEncodedQuery = generatePayloadString(name, labels);
-        ResponseEntity<TimeSeriesQueryResult> response = restTemplate.exchange(tsdbURL, HttpMethod.POST,
-            new HttpEntity<>(urlEncodedQuery, headers), TimeSeriesQueryResult.class);
-        return response.getBody();
+    public Mono<TimeSeriesQueryResult> getMetric(String name, Map<String, String> labels) {
+        return webClient.post()
+            .bodyValue(generatePayloadString(name, labels))
+            .retrieve()
+            .bodyToMono(TimeSeriesQueryResult.class);
     }
 
     private String generatePayloadString(String name, Map<String, String> labels) {

@@ -32,7 +32,7 @@ const labels = ref(defaultLabels)
 
 const selectItem: any = (items: { label: string }[]) => {
   const nodeLabels = items.map((item) => item.label)
-  mapStore.searchedNodeLabels = nodeLabels
+  mapStore.searchedDeviceLabels = nodeLabels
   if (nodeLabels.length) {
     if (nodeLabels.length === 1) {
       // fly to last selected node

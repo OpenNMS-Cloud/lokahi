@@ -8,6 +8,7 @@ import io.restassured.config.RestAssuredConfig;
 import io.restassured.config.SSLConfig;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
+import org.hamcrest.Matchers;
 
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.keycloak.admin.client.Keycloak;
@@ -21,6 +22,9 @@ import javax.net.ssl.SSLContext;
 import javax.ws.rs.core.HttpHeaders;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.concurrent.TimeUnit;
+
+import static com.jayway.awaitility.Awaitility.await;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -28,7 +32,6 @@ import java.security.SecureRandom;
 import static io.restassured.RestAssured.given;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 import static org.keycloak.OAuth2Constants.PASSWORD;
 
 public class HorizonStreamTestSteps {
@@ -135,12 +138,18 @@ public class HorizonStreamTestSteps {
 
     @Then("verify HTTP response code = {int}")
     public void verifyHTTPResponseCode(int expectedResponseCode) {
-        assertEquals(expectedResponseCode, restResponse.getStatusCode());
+        // Wait till Minion is registered to Horizon Core
+        await().atMost(180, TimeUnit.SECONDS).pollDelay(0, TimeUnit.SECONDS)
+            .pollInterval(5, TimeUnit.SECONDS)
+            .until(()-> restResponse.getStatusCode(), Matchers.is(expectedResponseCode));
     }
 
     @Then("verify response has Minion location = {string}")
     public void verifyMinionResponse(String location) {
-        assertTrue(restResponse.getBody().print().contains(location));
+        // Wait till Minion is registered to Horizon Core
+        await().atMost(180, TimeUnit.SECONDS).pollDelay(0, TimeUnit.SECONDS)
+            .pollInterval(5, TimeUnit.SECONDS)
+            .until(()-> restResponse.getBody().print(), Matchers.containsString(location));
     }
 
 //========================================

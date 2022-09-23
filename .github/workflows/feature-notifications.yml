@@ -1,0 +1,37 @@
+name: feature-notifications
+
+on:  
+  push:
+    branches:
+      - '**'
+      - '!develop'
+      - '!release'
+    paths:
+      - 'notifications/**'
+
+jobs:
+
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v2
+        # Is required to call actions.
+
+      - name: init
+        run: |
+
+          echo "For init steps."
+
+      - name: shared-lib
+        id: action-shared-lib
+        uses: ./.github/actions/shared-lib
+        with:
+          dir-location: 'shared-lib'
+
+      - name: feature-notifications
+        id: action-feature-notifications
+        uses: ./.github/actions/notifications
+        with:
+          dir-location: 'notifications'

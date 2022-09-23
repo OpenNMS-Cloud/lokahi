@@ -28,6 +28,7 @@
 
 package org.opennms.horizon.notifications.api.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -35,9 +36,18 @@ import lombok.Setter;
 @Setter
 public class PagerDutyEventDTO {
     PagerDutyPayloadDTO payload;
-    String routing_key;
-    String dedup_key;
-    String event_action;
+
+    @JsonProperty("routing_key")
+    String routingKey;
+
+    @JsonProperty("dedup_key")
+    String dedupKey;
+
+    @JsonProperty("event_action")
+    PagerDutyEventAction eventAction;
+
     String client;
-    String client_url;
+
+    @JsonProperty("client_url")
+    String clientUrl;
 }

@@ -28,21 +28,19 @@
 
 package org.opennms.horizon.server.service;
 
-import java.util.List;
-
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.web.context.request.ServletWebRequest;
+import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.server.ServerWebExchange;
 
 import graphql.GraphQLContext;
 import io.leangen.graphql.execution.ResolutionEnvironment;
 import io.leangen.graphql.spqr.spring.autoconfigure.DefaultGlobalContext;
 import io.leangen.graphql.util.ContextUtils;
 import lombok.extern.slf4j.Slf4j;
+import reactor.core.publisher.Mono;
 
 @Slf4j
 public class PlatformGateway {
@@ -55,57 +53,43 @@ public class PlatformGateway {
     public static final String URL_PATH_ALARMS_CLEAR = URL_PATH_ALARMS + "/%d/clear";
     public static final String URL_PATH_MINIONS = "/minions";
     public static final String URL_PATH_MINIONS_ID = "/minions/%s";
-    private final String baseUrl;
-
-    private final RestTemplate restTemplate = new RestTemplate();
+    private final WebClient webclient;
 
     public PlatformGateway(String baseUrl) {
-        this.baseUrl = baseUrl;
+        webclient = WebClient.builder()
+            .baseUrl(baseUrl)
+            .defaultHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
+            .build();
     }
 
     public String getAuthHeader(ResolutionEnvironment env) {
         GraphQLContext graphQLContext = env.dataFetchingEnvironment.getContext();
         DefaultGlobalContext context = (DefaultGlobalContext) ContextUtils.unwrapContext(graphQLContext);
-        ServletWebRequest request = (ServletWebRequest) context.getNativeRequest();
-        return request.getHeader(HttpHeaders.AUTHORIZATION);
+        ServerWebExchange webExchange = (ServerWebExchange) context.getNativeRequest();
+        ServerHttpRequest request = webExchange.getRequest();
+        return request.getHeaders().get(HttpHeaders.AUTHORIZATION).get(0);
     }
 
-    public <T> ResponseEntity<T> post(String path, String authToken, Object data, Class<T> returnType) {
-        HttpHeaders headers = createHeaders(authToken, true);
-        HttpEntity request = new HttpEntity(data, headers);
-        return executeRequest(path, HttpMethod.POST, request, returnType);
+    public <T> Mono<T> post(String path, String authToken, Object data, Class<T> returnType) {
+        return executeRequest(path, HttpMethod.POST, authToken, data, returnType);
     }
 
-    public <T> ResponseEntity<T> get(String path, String authToken, Class<T> returnType) {
-            HttpHeaders headers = createHeaders(authToken, false);
-            HttpEntity request = new HttpEntity(headers);
-            return executeRequest(path, HttpMethod.GET, request, returnType);
+    public <T> Mono<T> get(String path, String authToken, Class<T> returnType) {
+        return executeRequest(path, HttpMethod.GET, authToken, null, returnType);
     }
 
-    public <T> ResponseEntity<T> put(String path, String authToken, Object data, Class<T> returnType) {
-        HttpHeaders headers = createHeaders(authToken, true);
-        HttpEntity request = new HttpEntity(data, headers);
-        return executeRequest(path, HttpMethod.PUT, request, returnType);
+    public <T> Mono<T> put(String path, String authToken, Object data, Class<T> returnType) {
+        return executeRequest(path, HttpMethod.PUT, authToken, data, returnType);
     }
 
-    public ResponseEntity<String> delete(String path, String authToken) {
-        return executeRequest(path, HttpMethod.DELETE, new HttpEntity(createHeaders(authToken, false)), String.class);
-    }
-
-    private HttpHeaders createHeaders(String authToken, boolean hasRequestBody) {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setAccept(List.of(MediaType.APPLICATION_JSON));
-        headers.set(HttpHeaders.AUTHORIZATION, authToken);
-        if(hasRequestBody) {
-            headers.setContentType(MediaType.APPLICATION_JSON);
+    private <T> Mono <T> executeRequest(String path, HttpMethod method, String token, Object data, Class<T> type) {
+        WebClient.RequestBodySpec request = webclient
+            .method(method)
+            .uri(path)
+            .header(HttpHeaders.AUTHORIZATION, token);
+        if(data !=null) {
+            request.contentType(MediaType.APPLICATION_JSON).bodyValue(data);
         }
-        return headers;
-    }
-
-    private <T> ResponseEntity<T> executeRequest(String path, HttpMethod method, HttpEntity request, Class<T> type) {
-        log.info("Sending {} request to {}", method.name(), baseUrl + path);
-        ResponseEntity<T> response = restTemplate.exchange(baseUrl + path, method, request, type);
-        log.info("Response from platform with code {}, {}", response.getStatusCode(), response.hasBody());
-        return response;
+        return request.retrieve().bodyToMono(type);
     }
 }

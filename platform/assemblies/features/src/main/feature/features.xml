@@ -80,6 +80,8 @@
         <bundle>mvn:org.opennms.horizon.db/schema-liquibase/${project.version}</bundle>
         <bundle>mvn:org.opennms.horizon.db/model/${project.version}</bundle>
         <bundle>mvn:org.opennms.horizon.shared/dto-model/${horizon.shared.lib.version}</bundle>
+        <bundle>mvn:org.opennms.horizon.db/kvstore-api/${project.version}</bundle>
+        <bundle>mvn:org.opennms.horizon.db/postgres-kvstore/${project.version}</bundle>
 
         <bundle dependency="true">mvn:commons-lang/commons-lang/${commons.lang.version}</bundle>
 
@@ -143,6 +145,13 @@
     <feature name="horizon-grpc-contract" version="${project.version}">
         <feature>grpc</feature>
         <bundle>mvn:org.opennms.horizon.shared/ipc-grpc-contract/${project.version}</bundle>
+    </feature>
+
+    <feature name="horizon-datachoices" version="${project.version}" description="Horizon :: Data Choices">
+        <feature>horizon-db</feature>
+        <feature>onms-httpclient</feature>
+        <bundle>mvn:org.opennms.horizon.common/common-web/${project.version}</bundle>
+        <bundle start-level="80">mvn:org.opennms.horizon/datachoices/${project.version}</bundle>
     </feature>
 
     <feature name="horizon-core-monitor" version="${project.version}">
@@ -575,4 +584,27 @@
     </feature>
 
 
+    <feature name="horizon-core-config-rest" version="${project.version}">
+        <feature>horizon-core-config-service</feature>
+        <feature>horizon-core-rest</feature>
+        <bundle>mvn:org.opennms.horizon.config/rest/${project.version}</bundle>
+    </feature>
+
+    <feature name="horizon-core-config-service" version="${project.version}">
+        <feature>horizon-db</feature>
+        <feature>horizon-events</feature>
+        <bundle>wrap:mvn:org.json/json/${json.version}$Export-Package=org.json</bundle>
+        <bundle>mvn:org.opennms.horizon.config/api/${project.version}</bundle>
+        <bundle>mvn:org.opennms.horizon.config/service/${project.version}</bundle>
+    </feature>
+
+
+    <feature name="horizon-core-traps" version="${project.version}">
+        <feature>horizon-db</feature>
+        <feature>horizon-ipc-api</feature>
+        <feature>horizon-snmp</feature>
+        <feature>horizon-core-config-service</feature>
+        <feature>horizon-ipc-twin-grpc</feature>
+        <bundle>mvn:org.opennms.horizon/traps/${project.version}</bundle>
+    </feature>
 </features>

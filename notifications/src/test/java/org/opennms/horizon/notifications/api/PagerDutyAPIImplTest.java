@@ -28,8 +28,6 @@
 
 package org.opennms.horizon.notifications.api;
 
-import org.hamcrest.Matchers;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentMatchers;
@@ -38,16 +36,14 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.opennms.horizon.notifications.api.dto.PagerDutyConfigDTO;
-import org.opennms.horizon.notifications.dto.NotificationDTO;
 import org.opennms.horizon.notifications.exceptions.NotificationBadDataException;
-import org.opennms.horizon.notifications.exceptions.NotificationInternalException;
+import org.opennms.horizon.shared.dto.event.AlarmDTO;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -68,13 +64,13 @@ public class PagerDutyAPIImplTest {
     @Test
     public void postNotifications() throws Exception {
         Mockito.when(pagerDutyDao.getConfig()).thenReturn(getConfigDTO());
-        NotificationDTO notificationDTO = getNotification();
+        AlarmDTO notificationDTO = getAlarm();
         pagerDutyAPI.postNotification(notificationDTO);
     }
 
     @Test
-    public void initConfig() throws Exception {
-        pagerDutyAPI.initConfig(getConfigDTO());
+    public void saveConfig() throws Exception {
+        pagerDutyAPI.saveConfig(getConfigDTO());
     }
 
     @Test
@@ -94,7 +90,7 @@ public class PagerDutyAPIImplTest {
         try{
             pagerDutyAPI.validateConfig(getConfigDTO());
         } catch (NotificationBadDataException e) {
-            assertEquals("Invalid pager duty token", e.getMessage());
+            assertEquals("Invalid PagerDuty token", e.getMessage());
             exceptionCaught = true;
         }
 
@@ -105,10 +101,11 @@ public class PagerDutyAPIImplTest {
         return new PagerDutyConfigDTO("token", "integration_key");
     }
 
-    private NotificationDTO getNotification() {
-        NotificationDTO notificationDTO = new NotificationDTO();
-        notificationDTO.setMessage("Exciting message to go here");
-        notificationDTO.setDedupKey("srv01/mysql");
+    private AlarmDTO getAlarm() {
+        AlarmDTO notificationDTO = new AlarmDTO();
+        notificationDTO.setLogMessage("Exciting message to go here");
+        notificationDTO.setReductionKey("srv01/mysql");
+        notificationDTO.setSeverity("Indeterminate");
         return notificationDTO;
     }
 }

@@ -1,0 +1,145 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: keycloak-realm-configmap
+  namespace: {{ .Values.Namespace }}
+data:
+  onms-realm.json: |
+    {
+      "id": "{{ .Values.Keycloak.UUID.RealmId }}",
+      "realm": "{{ .Values.Keycloak.RealmName }}",
+      "accessTokenLifespan": 6000,
+      "enabled": true,
+      "loginTheme": "horizon-stream",
+      "emailTheme": "horizon-stream",
+      "rememberMe": true,
+      "resetPasswordAllowed": true,
+      "attributes": {
+        "frontendUrl": "https://{{ .Values.Host }}{{ .Values.Keycloak.Path }}"
+      },
+      "clients": [
+        {
+          "id": "{{ .Values.Keycloak.UUID.ClientId }}",
+          "clientId": "horizon-stream",
+          "standardFlowEnabled": true,
+          "enabled": true,
+          "webOrigins": [
+            "*"
+          ],
+          "redirectUris": [
+            "*"
+          ],
+          "publicClient": true,
+          "directAccessGrantsEnabled": true,
+          "defaultClientScopes": [
+            "web-origins",
+            "roles",
+            "profile",
+            "email"
+          ],
+          "optionalClientScopes": [
+            "address",
+            "phone",
+            "offline_access",
+            "microprofile-jwt"
+          ]
+        },
+        {
+          "id": "client-grafana",
+          "clientId": "grafana",
+          "name": "grafana",
+          "standardFlowEnabled": true,
+          "enabled": true,
+          "clientAuthenticatorType": "client-secret",
+          "secret": "grafana-client-secret",
+          "protocol": "openid-connect",
+          "webOrigins": [
+            "*"
+          ],
+          "redirectUris": [
+            "*"
+          ],
+          "publicClient": false,
+          "directAccessGrantsEnabled": false,
+          "defaultClientScopes": [
+            "roles",
+            "profile",
+            "email"
+          ],
+          "optionalClientScopes": [
+            "address",
+            "phone",
+            "offline_access",
+            "microprofile-jwt"
+          ]
+        }
+      ],
+      "roles": {
+        "realm": [
+          {
+            "id": "{{ .Values.Keycloak.UUID.AdminUserId }}",
+            "name": "admin",
+            "composite": false
+          },
+          {
+            "id": "{{ .Values.Keycloak.UUID.BaseUserId }}",
+            "name": "user",
+            "composite": false
+          }
+        ]
+      },
+      "users": [
+        {
+          "id": "{{ .Values.Keycloak.UUID.AdminUserId }}",
+          "username": "{{ .Values.Keycloak.AdminUsername }}",
+          "email": "admin@test.opennms.org",
+          "enabled": true,
+          "emailVerified": false,
+          "credentials": [
+            {
+              "type": "password",
+              "value": "{{ .Values.Keycloak.AdminPassword }}"
+            }
+          ],
+          "realmRoles": [
+            "admin"
+          ],
+          "clientRoles": {
+            "account": [
+              "manage-account",
+              "view-profile"
+            ],
+            "realm-management": [
+              "manage-users",
+              "view-users",
+              "query-users",
+              "create-client"
+            ]
+          }
+        },
+        {
+          "id": "{{ .Values.Keycloak.UUID.BaseUserId }}",
+          "username": "{{ .Values.Keycloak.UserUsername }}",
+          "firstName": "User001",
+          "lastName": "",
+          "email": "user001@test.opennms.org",
+          "enabled": true,
+          "emailVerified": false,
+          "credentials": [
+            {
+              "type": "password",
+              "value": "{{ .Values.Keycloak.UserPassword }}"
+            }
+          ],
+          "realmRoles": [
+            "user"
+          ],
+          "clientRoles": {
+            "account": [
+              "manage-account",
+              "view-profile"
+            ]
+          }
+        }
+      ]
+    }

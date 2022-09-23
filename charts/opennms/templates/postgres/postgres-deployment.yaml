@@ -99,3 +99,6 @@ spec:
             - mountPath: "/docker-entrypoint-initdb.d/postgres.notification.initial.script.sql"
               name: postgres-initial-script
               subPath: "postgres.notification.initial.script.sql"
+            - mountPath: "/docker-entrypoint-initdb.d/postgres.grafana.initial.script.sql"
+              name: postgres-initial-script
+              subPath: "postgres.grafana.initial.script.sql"

@@ -33,14 +33,17 @@ import org.opennms.echo.contract.EchoMonitorRequest;
 import org.opennms.horizon.core.monitor.taskset.LocationBasedTaskSetManager;
 import org.opennms.horizon.core.monitor.taskset.TaskSetManager;
 import org.opennms.horizon.db.dao.api.IpInterfaceDao;
+import org.opennms.horizon.db.dao.api.MonitoringLocationDao;
 import org.opennms.horizon.db.dao.api.NodeDao;
 import org.opennms.horizon.db.dao.api.SessionUtils;
 import org.opennms.horizon.db.model.OnmsIpInterface;
+import org.opennms.horizon.db.model.OnmsMonitoringLocation;
 import org.opennms.horizon.db.model.OnmsNode;
 import org.opennms.horizon.events.api.EventConstants;
 import org.opennms.horizon.events.api.EventListener;
 import org.opennms.horizon.events.api.EventSubscriptionService;
 import org.opennms.horizon.events.model.IEvent;
+import org.opennms.horizon.metrics.api.OnmsMetricsAdapter;
 
 import org.opennms.snmp.contract.SnmpMonitorRequest;
 import org.opennms.taskset.contract.TaskSet;
@@ -52,6 +55,7 @@ import org.slf4j.LoggerFactory;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -76,6 +80,8 @@ public class DeviceMonitorManager implements EventListener {
     private final NodeDao nodeDao;
     private final IpInterfaceDao ipInterfaceDao;
     private final SessionUtils sessionUtils;
+    private final OnmsMetricsAdapter metricsAdapter;
+    private final MonitoringLocationDao monitoringLocationDao;
     private final List<OnmsNode> nodeCache = new ArrayList<>();
     private final ThreadFactory monitorThreadFactory = new ThreadFactoryBuilder()
         .setNameFormat("device-monitor-runner-%d")
@@ -90,12 +96,16 @@ public class DeviceMonitorManager implements EventListener {
                                 NodeDao nodeDao,
                                 IpInterfaceDao ipInterfaceDao,
                                 SessionUtils sessionUtils,
-                                TaskSetPublisher taskSetIgniteClient) {
+                                OnmsMetricsAdapter metricsAdapter,
+                                TaskSetPublisher taskSetIgniteClient,
+                                MonitoringLocationDao locationDao) {
         this.eventSubscriptionService = eventSubscriptionService;
         this.nodeDao = nodeDao;
         this.ipInterfaceDao = ipInterfaceDao;
         this.sessionUtils = sessionUtils;
+        this.metricsAdapter = metricsAdapter;
         this.taskSetIgniteClient = taskSetIgniteClient;
+        this.monitoringLocationDao = locationDao;
     }
 
     // TODO: don't use a static snapshot of nodes at init-time; need to update as new nodes are discovered.
@@ -184,10 +194,32 @@ public class DeviceMonitorManager implements EventListener {
                 scheduledThreadPoolExecutor.scheduleAtFixedRate(() -> runMonitors(node), 5, 120, TimeUnit.SECONDS);
             }
         }
+        if (event.getUei().equals(EventConstants.NEW_SUSPECT_INTERFACE_EVENT_UEI)) {
+            String ipInterface = event.getInterface();
+            String location = event.getParm(EventConstants.PARM_LOCATION).isValid() ?
+                event.getParm(EventConstants.PARM_LOCATION).getValue().getContent() : MonitoringLocationDao.DEFAULT_MONITORING_LOCATION_ID;
+            createNodeFromDiscovery(ipInterface, location);
+        }
     }
 
     public void shutdown() {
         eventSubscriptionService.removeEventListener(this);
         scheduledThreadPoolExecutor.shutdown();
     }
+
+    public void createNodeFromDiscovery(String ipInterface, String location) {
+        OnmsMonitoringLocation monitoringLocation = sessionUtils.withReadOnlyTransaction(() -> monitoringLocationDao.get(location));
+        OnmsNode onmsNode = new OnmsNode(monitoringLocation, ipInterface);
+        OnmsIpInterface onmsIpInterface = new OnmsIpInterface(ipInterface);
+        onmsNode.addIpInterface(onmsIpInterface);
+        onmsNode.setCreateTime(new Date());
+        sessionUtils.withTransaction(() -> nodeDao.saveOrUpdate(onmsNode));
+        LOG.info("Node created from discovery with IpAddress {}", ipInterface);
+        List<OnmsNode> nodes = sessionUtils.withReadOnlyTransaction(() -> nodeDao.findByLabel(ipInterface));
+        if (!nodes.isEmpty()) {
+            OnmsNode node = nodes.get(0);
+            runMonitors(node);
+        }
+    }
+
 }

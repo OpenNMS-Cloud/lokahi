@@ -9,6 +9,7 @@ import useKeycloak from './composables/useKeycloak'
 import '@featherds/styles'
 import '@featherds/styles/themes/open-light.css'
 import dateFormatDirective from './directives/v-date'
+import featherInputFocusDirective from './directives/v-focus'
 import { getGqlClient } from './services/gqlService'
 
 // dark / light mode
@@ -38,3 +39,4 @@ const app = createApp({
     }
   })
   .directive('date', dateFormatDirective)
+  .directive('focus', featherInputFocusDirective)

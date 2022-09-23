@@ -1,0 +1,11 @@
+fragment DeviceUptimeParts on Query {
+  deviceUptime: metric(name: "snmp_uptime_sec") {
+    ...MetricParts
+  }
+}
+
+fragment DeviceLatencyParts on Query {
+  deviceLatency: metric(name: "icmp_round_trip_time_msec") {
+    ...MetricParts
+  }
+}

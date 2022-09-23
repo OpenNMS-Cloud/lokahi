@@ -82,6 +82,7 @@
                                 <feature>horizon-db</feature>
                                 <feature>horizon-events-api</feature>
                                 <feature>horizon-events</feature>
+                                <feature>horizon-datachoices</feature>
                                 <feature>horizon-grpc</feature> <!-- TBD888: this goes away -->
                                 <feature>horizon-inventory</feature>
                                 <feature>horizon-ipc-api</feature>
@@ -102,6 +103,8 @@
                                 <feature>horizon-ignite</feature>
                                 <feature>horizon-core-heartbeat</feature>
                                 <feature>horizon-core-monitor</feature>
+                                <feature>horizon-core-config-rest</feature>
+                                <feature>horizon-core-traps</feature>
                             </features>
                         </configuration>
                     </execution>
@@ -328,6 +331,31 @@
         <dependency>
             <groupId>org.opennms.horizon.metrics</groupId>
             <artifactId>impl</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.opennms.horizon.config</groupId>
+            <artifactId>api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.opennms.horizon.config</groupId>
+            <artifactId>service</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.opennms.horizon.config</groupId>
+            <artifactId>rest</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.opennms.horizon</groupId>
+            <artifactId>datachoices</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.opennms.horizon</groupId>
+            <artifactId>traps</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>

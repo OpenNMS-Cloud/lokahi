@@ -41,6 +41,7 @@
     <bean id="taskSetIgniteClient" factory-ref="igniteTaskSetClientFactory" factory-method="create">
         <argument ref="igniteClient"/>
     </bean>
+    <reference id="monitoringLocationDao" interface="org.opennms.horizon.db.dao.api.MonitoringLocationDao" />
 
     <bean id="minionRpcMonitorManager" class="org.opennms.horizon.core.monitor.MinionRpcMonitorManager"
         init-method="init" destroy-method="shutdown">
@@ -66,6 +67,7 @@
 
     <bean id="deviceMonitorResultProcessor" class="org.opennms.horizon.core.monitor.DeviceMonitorResultProcessor">
         <argument ref="metricsAdapter"/>
+        <argument ref="monitoringLocationDao"/>
     </bean>
 
     <camelContext autoStartup="true" id="monitorCamelContext" xmlns="http://camel.apache.org/schema/blueprint"

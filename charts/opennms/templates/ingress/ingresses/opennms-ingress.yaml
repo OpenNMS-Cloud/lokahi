@@ -30,6 +30,13 @@ spec:
                 name: {{ .Values.OpenNMS.API.ServiceName }}
                 port:
                   number: {{ .Values.OpenNMS.API.Port }}
+          - path: {{ .Values.Grafana.Path }}
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .Values.Grafana.ServiceName }}
+                port:
+                  number: {{ .Values.Grafana.Port }}
   tls:
     - hosts:
         -  {{.Values.Host }}

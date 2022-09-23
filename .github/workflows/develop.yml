@@ -53,7 +53,8 @@ jobs:
         uses: ./.github/actions/keycloak-ui
         with:
           dir-location: 'keycloak-ui'
-      
+    
+      # This needs to happen before core, rest-server, and notifications.
       - name: shared-lib
         id: action-shared-lib
         uses: ./.github/actions/shared-lib
@@ -80,6 +81,12 @@ jobs:
       #  uses: ./.github/actions/rest-server
       #  with:
       #    dir-location: 'rest-server'
+
+      - name: feature-notifications
+        id: action-notifications
+        uses: ./.github/actions/notifications
+        with:
+          dir-location: 'notifications'
 
       #- name: external-it
       #  id: action-external-it

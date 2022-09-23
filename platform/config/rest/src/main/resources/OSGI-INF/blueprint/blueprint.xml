@@ -1,0 +1,18 @@
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0">
+
+    <reference id="configService" interface="org.opennms.horizon.config.service.api.ConfigService"/>
+
+    <bean id="defaultConfigRestService" class="org.opennms.horizon.config.rest.impl.DefaultConfigRestService">
+        <argument ref="configService"/>
+    </bean>
+
+    <!--                                -->
+    <!-- JAX-RS WIRING WITH WHITE-BOARD -->
+    <!--                                -->
+    <service id="configRestService" ref="defaultConfigRestService" interface="org.opennms.horizon.config.rest.api.ConfigRestService">
+        <service-properties>
+            <entry key="osgi.jaxrs.resource" value="true"/>
+        </service-properties>
+    </service>
+
+</blueprint>

@@ -33,5 +33,5 @@ import org.opennms.horizon.notifications.exceptions.NotificationConfigUninitiali
 
 public interface PagerDutyDao {
     PagerDutyConfigDTO getConfig() throws NotificationConfigUninitializedException;
-    void initConfig(PagerDutyConfigDTO config);
+    void saveConfig(PagerDutyConfigDTO config);
 }

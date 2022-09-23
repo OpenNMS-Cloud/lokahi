@@ -1,0 +1,8 @@
+fragment MetricParts on TimeSeriesQueryResult {
+  data {
+    result {
+      metric
+      value
+    }
+  }
+}

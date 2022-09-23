@@ -49,7 +49,7 @@ spec:
               value: "http://{{ .Values.OpenNMS.Core.ServiceName }}:{{ .Values.OpenNMS.Core.HttpPort }}"
             - name: TSDB_URL
               value: "http://{{ .Values.Prometheus.Server.ServiceName }}:{{ .Values.Prometheus.Server.Port }}/api/v1/query"
-            - name: SERVER_SERVLET_CONTEXT_PATH
+            - name: SPRING_WEBFLUX_BASE_PATH
               value: /api
           ports:
             - containerPort: {{ .Values.OpenNMS.API.Port }}

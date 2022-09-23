@@ -9,6 +9,7 @@
           data-test="hide-minions-btn"
           icon="Hide Minions" 
           @click="appliancesStore.hideMinionsTable"
+          v-if="!widgetProps?.isWidget"
         >
           <FeatherIcon :icon="ChevronLeft" />
         </FeatherButton>
@@ -58,12 +59,13 @@ import ChevronLeft from '@featherds/icon/navigation/ChevronLeft'
 import { ExtendedMinionDTOWithBGColors } from '@/types/minion'
 import { ComputedRef } from 'vue'
 import { formatItemBgColor, getHumanReadableDuration, formatLatencyDisplay } from './appliances.helpers'
+import { WidgetProps } from '@/types'
+
+defineProps<{widgetProps?: WidgetProps}>()
 
 const appliancesStore = useAppliancesStore()
 const applianceQueries = useApplianceQueries()
-
 const listMinionsWithBgColor: ComputedRef<ExtendedMinionDTOWithBGColors[]> = computed<any[]>(() => formatItemBgColor(applianceQueries.tableMinions))
-
 </script>
 
 <style lang="scss" scoped>

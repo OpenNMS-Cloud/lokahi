@@ -12,7 +12,7 @@ make local-docker
 if [ $? -ne 0 ]; then exit; fi
 
 echo
-echo _______Pushing Docker Image into Kind Cluster______
+echo ______Pushing Docker Images into Kind Cluster______
 echo
 kind load docker-image opennms/operator:local-build
 

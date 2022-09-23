@@ -36,8 +36,9 @@ func (r *OpenNMSReconciler) InitServiceHandlers() {
 		&handlers.PostgresHandler{},
 		&handlers.KeycloakHandler{},
 		&handlers.OpenNMSHandler{},
-		&handlers.ElasticsearchHandler{},
+		//&handlers.ElasticsearchHandler{}, TODO fix/replace
 		&handlers.PrometheusHandler{},
+		&handlers.GrafanaHandler{},
 		&handlers.MailServerHandler{},
 		&handlers.IngressHandler{}, // MUST BE LAST
 	}

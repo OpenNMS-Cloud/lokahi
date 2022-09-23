@@ -1,0 +1,11 @@
+{
+  "snmpTrapAddress":"*",
+  "snmpTrapPort":10162,
+  "newSuspectOnTrap":false,
+  "snmpV3Users":[],
+  "includeRawMessage":false,
+  "batchSize":1000,
+  "queueSize":10000,
+  "numThreads":24,
+  "batchIntervalMs":500
+}

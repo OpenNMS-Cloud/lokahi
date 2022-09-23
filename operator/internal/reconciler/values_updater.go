@@ -90,24 +90,26 @@ func (r *OpenNMSReconciler) CheckForExistingPostgresCreds(ctx context.Context, v
 	adminPwd := string(credSecret.Data["adminPwd"])
 	keycloakPwd := string(credSecret.Data["keycloakPwd"])
 	notificationPwd := string(credSecret.Data["notificationPwd"])
+	grafanaPwd := string(credSecret.Data["grafanaPwd"])
 	if adminPwd == "" || keycloakPwd == "" || notificationPwd == "" {
 		return v, false
 	}
 	v.Values.Postgres.AdminPassword = adminPwd
 	v.Values.Postgres.KeycloakPassword = keycloakPwd
 	v.Values.Postgres.NotificationPassword = notificationPwd
+	v.Values.Postgres.GrafanaPassword = grafanaPwd
 	return v, true
 }
 
 //setCorePasswords - sets randomly generated passwords for the core if not already set
 func setCorePasswords(tv values.TemplateValues, creds v1alpha1.Credentials) values.TemplateValues {
 	if creds.AdminPassword == "" {
-		tv.Values.Keycloak.AdminPassword = security.GeneratePassword(true)
+		tv.Values.Keycloak.AdminPassword = security.GeneratePassword(false)
 	} else {
 		tv.Values.Keycloak.AdminPassword = creds.AdminPassword
 	}
 	if creds.UserPassword == "" {
-		tv.Values.Keycloak.UserPassword = security.GeneratePassword(true)
+		tv.Values.Keycloak.UserPassword = security.GeneratePassword(false)
 	} else {
 		tv.Values.Keycloak.UserPassword = creds.UserPassword
 	}
@@ -125,5 +127,6 @@ func setPostgresPassword(tv values.TemplateValues) values.TemplateValues {
 	tv.Values.Postgres.OpenNMSPassword = security.GeneratePassword(false)
 	tv.Values.Postgres.KeycloakPassword = security.GeneratePassword(false)
 	tv.Values.Postgres.NotificationPassword = security.GeneratePassword(false)
+	tv.Values.Postgres.GrafanaPassword = security.GeneratePassword(false)
 	return tv
 }

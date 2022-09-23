@@ -65,7 +65,7 @@ public class NotificationRestControllerTest {
     }
 
     private String getConfig() throws JsonProcessingException {
-        PagerDutyConfigDTO dto = new PagerDutyConfigDTO("token", "integration");
+        PagerDutyConfigDTO dto = new PagerDutyConfigDTO("integration");
 
         ObjectMapper om = new ObjectMapper();
         return om.writeValueAsString(dto);

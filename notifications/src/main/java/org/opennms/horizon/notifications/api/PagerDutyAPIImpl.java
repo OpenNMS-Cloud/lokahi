@@ -29,6 +29,7 @@
 package org.opennms.horizon.notifications.api;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.opennms.horizon.notifications.api.dto.*;
 import org.opennms.horizon.notifications.exceptions.*;
@@ -43,13 +44,13 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.Instant;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -77,10 +78,8 @@ public class PagerDutyAPIImpl implements PagerDutyAPI {
 
             String baseUrl = "https://events.pagerduty.com/v2/enqueue";
             URI uri = new URI(baseUrl);
-            String token = getAuthToken();
 
             HttpHeaders headers = new HttpHeaders();
-            headers.set("Authorization", "Token token="+token);
             headers.set("Accept", "application/vnd.pagerduty+json;version=2");
             headers.set("Content-Type", "application/json");
 
@@ -102,40 +101,9 @@ public class PagerDutyAPIImpl implements PagerDutyAPI {
         pagerDutyDao.saveConfig(config);
     }
 
-    @Override
-    public void validateConfig(PagerDutyConfigDTO config) throws NotificationException {
-        callGetService(config);
-    }
-
-    private void callGetService(PagerDutyConfigDTO config) throws NotificationException {
-        try {
-            String baseUrl = "https://api.pagerduty.com/services?include%5B%5D=integrations";
-            URI uri = new URI(baseUrl);
-            String token = config.getToken();
-
-            HttpHeaders headers = new HttpHeaders();
-            headers.set("Authorization", "Token token="+token);
-            headers.set("Accept", "application/vnd.pagerduty+json;version=2");
-            headers.set("Content-Type", "application/json");
-
-            HttpEntity<String> requestEntity = new HttpEntity<>(headers);
-
-            restTemplate.exchange(uri, HttpMethod.GET, requestEntity, String.class);
-        } catch (URISyntaxException e) {
-            throw new NotificationInternalException("Bad PagerDuty validation url", e);
-        } catch (HttpClientErrorException e) {
-            throw new NotificationBadDataException("Invalid PagerDuty token");
-        }
-    }
-
     private String getPagerDutyIntegrationKey() throws NotificationConfigUninitializedException {
         PagerDutyConfigDTO config = pagerDutyDao.getConfig();
         return config.getIntegrationkey();
-    }
-
-    private String getAuthToken() throws NotificationConfigUninitializedException {
-        PagerDutyConfigDTO config = pagerDutyDao.getConfig();
-        return config.getToken();
     }
 
     private String getEvent(AlarmDTO alarm) throws NotificationConfigUninitializedException, JsonProcessingException {
@@ -179,16 +147,22 @@ public class PagerDutyAPIImpl implements PagerDutyAPI {
         event.setClient(client);
         event.setClientUrl(clientURL);
 
-        EventDTO lastEvent = alarm.getLastEvent();
+        payload.setCustomDetails(new HashMap<>());
 
+        // Add all of the event parameters as custom details
+        EventDTO lastEvent = alarm.getLastEvent();
         if (lastEvent != null) {
             Map<String, Object> customDetails = eparmsToMap(lastEvent.getParameters());
-            payload.setCustomDetails(customDetails);
+            payload.getCustomDetails().putAll(customDetails);
         }
+
+        // If the event parameters contains a field called 'alarm', then the alarm itself overwrites that (by design).
+        JsonNode alarmJson = objectMapper.convertValue(alarm, JsonNode.class);
+        payload.getCustomDetails().put("alarm", alarmJson);
+
         event.setPayload(payload);
 
-        String bodyJson = objectMapper.writeValueAsString(event);
-        return bodyJson;
+        return objectMapper.writeValueAsString(event);
     }
 
     protected static Map<String, Object> eparmsToMap(List<EventParameterDTO> eparms) {

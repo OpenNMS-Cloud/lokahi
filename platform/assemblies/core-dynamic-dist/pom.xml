@@ -129,6 +129,7 @@
                         <feature>horizon-core-monitor</feature>
                         <feature>horizon-core-config-rest</feature>
                         <feature>horizon-core-traps</feature>
+                        <feature>horizon-stream-jmx</feature>
                     </bootFeatures>
                     <libraries>
                     </libraries>

@@ -47,45 +47,25 @@ class NotificationRestIntegrationTest {
     private Integer port;
 
     @Test
-    void callSaveInvalidConfig() throws Exception {
-        Mockito.doThrow(new NotificationBadDataException("Invalid PagerDuty token")).when(pagerDutyAPI).validateConfig(any());
-
-        PagerDutyConfigDTO config = new PagerDutyConfigDTO("invalid_token", "not_verified");
-        HttpHeaders headers = new HttpHeaders();
-        HttpEntity<PagerDutyConfigDTO> request = new HttpEntity<>(config, headers);
-
-        ResponseEntity<String> response = this.testRestTemplate.postForEntity("http://localhost:" + port + "/notifications/config", request, String.class);
-
-        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-    }
-
-    @Test
     void callSaveConfig() throws Exception {
-        Mockito.doNothing().when(pagerDutyAPI).validateConfig(any());
-
-        String token = "unverified_token";
         String integrationKey = "not_verified";
 
-        saveConfig(token, integrationKey);
+        saveConfig(integrationKey);
     }
 
     @Test
     void callSaveConfigTwice() throws Exception {
-        Mockito.doNothing().when(pagerDutyAPI).validateConfig(any());
-
-        String token = "unverified_token";
         String integrationKey = "not_verified";
 
-        saveConfig(token, integrationKey);
+        saveConfig(integrationKey);
 
-        token = "unverified_token2";
         integrationKey = "not_verified2";
 
-        saveConfig(token, integrationKey);
+        saveConfig(integrationKey);
     }
 
-    private void saveConfig(String token, String integrationKey) {
-        PagerDutyConfigDTO config = new PagerDutyConfigDTO(token, integrationKey);
+    private void saveConfig(String integrationKey) {
+        PagerDutyConfigDTO config = new PagerDutyConfigDTO(integrationKey);
         HttpHeaders headers = new HttpHeaders();
         HttpEntity<PagerDutyConfigDTO> request = new HttpEntity<>(config, headers);
 
@@ -94,24 +74,22 @@ class NotificationRestIntegrationTest {
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals("OK", response.getBody());
 
-        verifyConfigTable(token, integrationKey);
+        verifyConfigTable(integrationKey);
     }
 
-    private void verifyConfigTable(String token, String integrationKey) {
-        String sql = "SELECT token, integrationKey FROM pager_duty_config";
+    private void verifyConfigTable(String integrationKey) {
+        String sql = "SELECT integrationKey FROM pager_duty_config";
         List<PagerDutyConfigDTO> configList = null;
         configList = jdbcTemplate.query(
             sql,
             (rs, rowNum) ->
                 new PagerDutyConfigDTO(
-                    rs.getString("token"),
                     rs.getString("integrationKey")
                 )
         );
 
         PagerDutyConfigDTO config = configList.get(0);
 
-        assertEquals(token, config.getToken());
         assertEquals(integrationKey, config.getIntegrationkey());
     }
 }

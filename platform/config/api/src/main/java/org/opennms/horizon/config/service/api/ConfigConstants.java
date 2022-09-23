@@ -33,4 +33,5 @@ public class ConfigConstants {
     public static final String CONFIG = "config";
     public static final String CONFIG_NAMES = "config-names";
     public static final String SNMP_TRAPS_CONFIG = "snmp-traps";
+    public static final String JMX_CONFIG = "jmx-config";
 }

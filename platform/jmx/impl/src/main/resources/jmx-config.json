@@ -1,0 +1,30 @@
+{
+  "mbeanServer":[
+    {
+      "ipAddress":"127.0.0.1",
+      "port":18980,
+      "parameters":[
+        {
+          "key":"protocol",
+          "value":"rmi"
+        },
+        {
+          "key":"urlPath",
+          "value":"/jmxrmi"
+        },
+        {
+          "key":"factory",
+          "value":"PASSWORD-CLEAR"
+        },
+        {
+          "key":"username",
+          "value":"admin"
+        },
+        {
+          "key":"password",
+          "value":"admin"
+        }
+      ]
+    }
+  ]
+}

@@ -607,4 +607,11 @@
         <feature>horizon-ipc-twin-grpc</feature>
         <bundle>mvn:org.opennms.horizon/traps/${project.version}</bundle>
     </feature>
+    <feature name="horizon-stream-jmx" version="${project.version}">
+        <feature>horizon-core-config-service</feature>
+        <bundle>mvn:org.opennms.horizon.common/common-net/${project.version}</bundle>
+        <bundle>mvn:org.opennms.horizon.common/common-collection/${project.version}</bundle>
+        <bundle>mvn:org.opennms.horizon.jmx/api/${project.version}</bundle>
+        <bundle>mvn:org.opennms.horizon.jmx/impl/${project.version}</bundle>
+    </feature>
 </features>

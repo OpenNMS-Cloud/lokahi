@@ -48,7 +48,6 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public void postPagerDutyConfig(PagerDutyConfigDTO config) throws NotificationException {
-        pagerDutyAPI.validateConfig(config);
         pagerDutyAPI.saveConfig(config);
     }
 }

@@ -1,0 +1,7 @@
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0">
+    <reference id="configService" interface="org.opennms.horizon.config.service.api.ConfigService"/>
+    <bean id="jmxConfigDao" class="org.opennms.horizon.jmx.impl.dao.JmxConfigDaoImpl" init-method="initConfig">
+        <argument ref="configService" />
+    </bean>
+    <service ref="jmxConfigDao" interface="org.opennms.horizon.jmx.dao.JmxConfigDao"/>
+</blueprint>

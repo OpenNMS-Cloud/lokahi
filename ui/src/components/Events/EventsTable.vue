@@ -79,7 +79,6 @@
 import FilterAlt from '@featherds/icon/action/FilterAlt'
 import Sort from '@featherds/icon/action/Sort'
 import Search from '@featherds/icon/action/Search'
-import { FeatherPagination } from '@featherds/pagination'
 import { useNodeStore } from '@/store/Views/nodeStore'
 
 const nodeStore = useNodeStore()

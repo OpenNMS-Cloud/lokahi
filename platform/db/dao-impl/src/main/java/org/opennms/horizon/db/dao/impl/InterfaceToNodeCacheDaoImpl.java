@@ -62,7 +62,7 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
 
-import static org.opennms.horizon.core.lib.InetAddressUtils.str;
+import static org.opennms.horizon.shared.utils.InetAddressUtils.str;
 
 public class InterfaceToNodeCacheDaoImpl extends AbstractInterfaceToNodeCache {
     private static final Logger LOG = LoggerFactory.getLogger(InterfaceToNodeCacheDaoImpl.class);

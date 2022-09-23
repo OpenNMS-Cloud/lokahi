@@ -58,7 +58,9 @@
         <argument ref="nodeDao"/>
         <argument ref="ipInterfaceDao"/>
         <argument ref="sessionUtils"/>
+        <argument ref="metricsAdapter"/>
         <argument ref="taskSetIgniteClient"/>
+        <argument ref="monitoringLocationDao"/>
     </bean>
 
     <!--       -->

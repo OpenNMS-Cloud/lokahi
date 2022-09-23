@@ -104,7 +104,8 @@
                                 <feature>horizon-core-heartbeat</feature>
                                 <feature>horizon-core-monitor</feature>
                                 <feature>horizon-core-config-rest</feature>
-                                <feature>horizon-core-traps</feature>
+                                <!-- TODO-911 -->
+                                <!--<feature>horizon-core-traps</feature>-->
                                 <feature>horizon-stream-jmx</feature>
                             </features>
                         </configuration>

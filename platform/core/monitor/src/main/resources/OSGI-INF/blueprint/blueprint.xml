@@ -69,7 +69,6 @@
 
     <bean id="deviceMonitorResultProcessor" class="org.opennms.horizon.core.monitor.DeviceMonitorResultProcessor">
         <argument ref="metricsAdapter"/>
-        <argument ref="monitoringLocationDao"/>
     </bean>
 
     <camelContext autoStartup="true" id="monitorCamelContext" xmlns="http://camel.apache.org/schema/blueprint"

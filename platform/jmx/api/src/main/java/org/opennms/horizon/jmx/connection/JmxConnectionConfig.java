@@ -39,8 +39,8 @@ import java.util.Objects;
 
 import javax.management.remote.JMXServiceURL;
 
-import org.opennms.horizon.core.lib.InetAddressUtils;
 import org.opennms.horizon.core.lib.PropertiesUtils;
+import org.opennms.horizon.shared.utils.InetAddressUtils;
 
 /**
  * Helper object to safety access the connection properties.

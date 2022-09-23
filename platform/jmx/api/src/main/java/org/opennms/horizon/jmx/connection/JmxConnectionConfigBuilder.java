@@ -31,8 +31,8 @@ package org.opennms.horizon.jmx.connection;
 import java.net.InetAddress;
 import java.util.Map;
 
-import org.opennms.horizon.core.lib.InetAddressUtils;
 import org.opennms.horizon.core.lib.parameters.ParameterMapUtil;
+import org.opennms.horizon.shared.utils.InetAddressUtils;
 
 public class JmxConnectionConfigBuilder {
 

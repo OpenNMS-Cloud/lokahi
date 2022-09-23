@@ -50,7 +50,6 @@ import javax.management.ObjectName;
 import javax.management.ReflectionException;
 import javax.management.openmbean.CompositeData;
 
-import org.opennms.horizon.core.lib.InetAddressUtils;
 import org.opennms.horizon.jmx.JmxCollector;
 import org.opennms.horizon.jmx.JmxCollectorConfig;
 import org.opennms.horizon.jmx.JmxSampleProcessor;
@@ -66,6 +65,7 @@ import org.opennms.horizon.jmx.connection.JmxServerConnectionWrapper;
 import org.opennms.horizon.jmx.impl.connection.connectors.DefaultConnectionManager;
 import org.opennms.horizon.jmx.samples.JmxAttributeSample;
 import org.opennms.horizon.jmx.samples.JmxCompositeSample;
+import org.opennms.horizon.shared.utils.InetAddressUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

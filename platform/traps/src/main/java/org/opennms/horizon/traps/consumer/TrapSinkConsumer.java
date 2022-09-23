@@ -34,7 +34,6 @@ import com.google.common.annotations.VisibleForTesting;
 import org.opennms.core.ipc.twin.api.TwinPublisher;
 import org.opennms.horizon.config.service.api.ConfigConstants;
 import org.opennms.horizon.config.service.api.ConfigService;
-import org.opennms.horizon.core.lib.InetAddressUtils;
 import org.opennms.horizon.core.lib.Logging;
 import org.opennms.horizon.db.dao.api.DistPollerDao;
 import org.opennms.horizon.db.dao.api.InterfaceToNodeCache;
@@ -55,6 +54,8 @@ import org.opennms.horizon.events.xml.Log;
 import org.opennms.horizon.ipc.sink.api.MessageConsumer;
 import org.opennms.horizon.ipc.sink.api.MessageConsumerManager;
 import org.opennms.horizon.ipc.sink.api.SinkModule;
+import org.opennms.horizon.shared.snmp.TrapListenerConfig;
+import org.opennms.horizon.shared.utils.InetAddressUtils;
 import org.opennms.horizon.traps.config.SnmpTrapsConfig;
 import org.opennms.horizon.traps.config.TrapdConfig;
 import org.opennms.horizon.traps.config.TrapdConfigBean;
@@ -63,7 +64,6 @@ import org.opennms.horizon.traps.dto.TrapInformationWrapper;
 import org.opennms.horizon.traps.dto.TrapLogDTO;
 import org.opennms.horizon.traps.utils.EventCreator;
 import org.opennms.horizon.traps.utils.TrapdInstrumentation;
-import org.opennms.netmgt.snmp.TrapListenerConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -71,7 +71,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.Optional;
 
-import static org.opennms.horizon.core.lib.InetAddressUtils.addr;
+import static org.opennms.horizon.shared.utils.InetAddressUtils.addr;
 
 public class TrapSinkConsumer implements MessageConsumer<TrapInformationWrapper, TrapLogDTO>, EventListener {
 

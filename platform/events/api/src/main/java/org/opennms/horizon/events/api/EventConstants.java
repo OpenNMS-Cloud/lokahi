@@ -1066,7 +1066,7 @@ public abstract class EventConstants {
     public static final String XML_ENCODING_MAC_ADDRESS = "macAddress";
 
     /** Constant <code>OID_SNMP_IFINDEX</code> */
-//    public static final SnmpObjId OID_SNMP_IFINDEX = SnmpObjId.get(".1.3.6.1.2.1.2.2.1.1");
+   public static final String OID_SNMP_IFINDEX_STRING = ".1.3.6.1.2.1.2.2.1.1";
 
     /**
      * An utility method to parse a string into a 'Date' instance. Note that the

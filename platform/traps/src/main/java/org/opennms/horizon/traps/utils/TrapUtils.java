@@ -28,9 +28,9 @@
 
 package org.opennms.horizon.traps.utils;
 
-import org.opennms.netmgt.snmp.SnmpObjId;
-import org.opennms.netmgt.snmp.SnmpVarBindDTO;
-import org.opennms.netmgt.snmp.TrapInformation;
+import org.opennms.horizon.shared.snmp.SnmpObjId;
+import org.opennms.horizon.shared.snmp.SnmpVarBindDTO;
+import org.opennms.horizon.shared.snmp.TrapInformation;
 
 import java.net.InetAddress;
 import java.util.Objects;

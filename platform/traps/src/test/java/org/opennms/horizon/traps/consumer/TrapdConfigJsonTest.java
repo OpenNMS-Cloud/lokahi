@@ -35,8 +35,8 @@ import org.mockito.Mockito;
 import org.opennms.core.ipc.twin.api.TwinPublisher;
 import org.opennms.horizon.config.service.api.ConfigConstants;
 import org.opennms.horizon.config.service.api.ConfigService;
+import org.opennms.horizon.shared.snmp.TrapListenerConfig;
 import org.opennms.horizon.traps.config.TrapdConfigBean;
-import org.opennms.netmgt.snmp.TrapListenerConfig;
 
 import java.io.IOException;
 import java.util.HashMap;

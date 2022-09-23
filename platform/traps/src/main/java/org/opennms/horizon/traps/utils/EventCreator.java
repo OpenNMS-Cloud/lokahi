@@ -28,18 +28,18 @@
 
 package org.opennms.horizon.traps.utils;
 
-import org.opennms.horizon.core.lib.InetAddressUtils;
 import org.opennms.horizon.db.dao.api.InterfaceToNodeCache;
 import org.opennms.horizon.db.dao.api.MonitoringLocationDao;
 import org.opennms.horizon.events.api.EventBuilder;
 import org.opennms.horizon.events.api.EventConfDao;
 import org.opennms.horizon.events.api.EventConstants;
 import org.opennms.horizon.events.xml.Event;
+import org.opennms.horizon.shared.snmp.SnmpObjId;
+import org.opennms.horizon.shared.snmp.SnmpResult;
+import org.opennms.horizon.shared.snmp.SnmpValue;
+import org.opennms.horizon.shared.utils.InetAddressUtils;
 import org.opennms.horizon.traps.dto.TrapDTO;
 import org.opennms.horizon.traps.dto.TrapIdentityDTO;
-import org.opennms.netmgt.snmp.SnmpObjId;
-import org.opennms.netmgt.snmp.SnmpResult;
-import org.opennms.netmgt.snmp.SnmpValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,11 +48,14 @@ import java.util.Date;
 import java.util.Objects;
 import java.util.Optional;
 
-import static org.opennms.horizon.core.lib.InetAddressUtils.str;
+import static org.opennms.horizon.events.api.EventConstants.OID_SNMP_IFINDEX_STRING;
+import static org.opennms.horizon.shared.utils.InetAddressUtils.str;
 
 public class EventCreator {
 
     private static final Logger LOG = LoggerFactory.getLogger(EventCreator.class);
+
+    private static final SnmpObjId OID_SNMP_IFINDEX = SnmpObjId.get(OID_SNMP_IFINDEX_STRING);
 
     private final InterfaceToNodeCache cache;
     private final EventConfDao eventConfDao;
@@ -90,7 +93,7 @@ public class EventCreator {
             final SnmpObjId name = eachResult.getBase();
             final SnmpValue value = eachResult.getValue();
             eventBuilder.addParam(SyntaxToEvent.processSyntax(name.toString(), value));
-            if (EventConstants.OID_SNMP_IFINDEX.isPrefixOf(name)) {
+            if (OID_SNMP_IFINDEX.isPrefixOf(name)) {
                 eventBuilder.setIfIndex(value.toInt());
             }
         }

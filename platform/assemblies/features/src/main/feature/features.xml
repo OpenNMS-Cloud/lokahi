@@ -218,7 +218,8 @@
         <bundle>mvn:org.opennms.horizon.core.tracing/registry/${project.version}</bundle>
     </feature>
 
-    <!--<feature name="horizon-snmp" version="${project.version}" description="Horizon :: SNMP">-->
+    <!-- Warning: this is going away; SNMP internals are moving out core and into minion -->
+    <feature name="horizon-snmp" version="${project.version}" description="Horizon :: SNMP">
     <!--    <feature>horizon-grpc</feature>-->
     <!--    <feature>horizon-events</feature>-->
 
@@ -226,12 +227,11 @@
     <!--    <bundle dependency="true">mvn:commons-lang/commons-lang/${commons.lang.version}</bundle>-->
     <!--    <bundle dependency="true">wrap:mvn:org.snmp4j/snmp4j/${snmp4j.version}</bundle>-->
     <!--    -->
-    <!--    <bundle>mvn:org.opennms.horizon.shared/snmp-api/${project.version}</bundle>-->
     <!--    <bundle>mvn:org.opennms.horizon.minion/rpc-impl/${project.version}</bundle>-->
-    <!--    <bundle>mvn:org.opennms.horizon.shared/snmp-api/${project.version}</bundle>-->
-    <!--    <bundle>mvn:org.opennms.horizon.shared/snmp-impl/${project.version}</bundle>-->
+        <bundle>mvn:org.opennms.horizon.shared/snmp-api/${project.version}</bundle>
+        <bundle>mvn:org.opennms.horizon.shared/snmp-impl/${project.version}</bundle>
     <!--    <bundle>mvn:org.opennms.horizon.minion/shell/${project.version}</bundle>-->
-    <!--</feature>-->
+    </feature>
 
     <feature name="horizon-keycloak" version="${project.version}" description="Horizon :: Keycloak">
         <!-- Explicitly list the framework bundle to get pax-logging-api to resolve      -->
@@ -604,7 +604,6 @@
         <feature>horizon-ipc-api</feature>
         <feature>horizon-snmp</feature>
         <feature>horizon-core-config-service</feature>
-        <feature>horizon-ipc-twin-grpc</feature>
         <bundle>mvn:org.opennms.horizon/traps/${project.version}</bundle>
     </feature>
     <feature name="horizon-stream-jmx" version="${project.version}">

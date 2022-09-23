@@ -32,7 +32,7 @@ import java.net.MalformedURLException;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.opennms.horizon.core.lib.InetAddressUtils;
+import org.opennms.horizon.shared.utils.InetAddressUtils;
 
 public class JmxConnectionConfigTest {
 

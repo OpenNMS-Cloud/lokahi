@@ -31,7 +31,7 @@ package org.opennms.horizon.traps.utils;
 import org.opennms.horizon.events.api.EventConstants;
 import org.opennms.horizon.events.xml.Parm;
 import org.opennms.horizon.events.xml.Value;
-import org.opennms.netmgt.snmp.SnmpValue;
+import org.opennms.horizon.shared.snmp.SnmpValue;
 
 public class SyntaxToEvent {
     int m_typeId;
@@ -97,7 +97,7 @@ public class SyntaxToEvent {
      * <p>processSyntax</p>
      *
      * @param name a {@link java.lang.String} object.
-     * @param value a {@link org.opennms.netmgt.snmp.SnmpValue} object.
+     * @param value a {@link SnmpValue} object.
      * @return a {@link import org.opennms.netmgt.xml.event.Parm} object.
      */
     public static Parm processSyntax(final String name, final SnmpValue value) {

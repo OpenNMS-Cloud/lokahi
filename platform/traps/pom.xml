@@ -32,8 +32,8 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.opennms.horizon.snmp</groupId>
-            <artifactId>api</artifactId>
+            <groupId>org.opennms.horizon.shared</groupId>
+            <artifactId>snmp-api</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -42,8 +42,8 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.opennms.horizon.snmp</groupId>
-            <artifactId>snmp4j</artifactId>
+            <groupId>org.opennms.horizon.shared</groupId>
+            <artifactId>snmp-impl</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -69,6 +69,11 @@
         <dependency>
             <groupId>org.opennms.core.ipc.twin</groupId>
             <artifactId>api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.opennms.horizon.shared</groupId>
+            <artifactId>horizon-common-utils</artifactId>
             <version>${project.version}</version>
         </dependency>
 

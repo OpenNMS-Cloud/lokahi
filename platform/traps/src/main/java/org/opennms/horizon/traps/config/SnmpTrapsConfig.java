@@ -28,7 +28,7 @@
 
 package org.opennms.horizon.traps.config;
 
-import org.opennms.netmgt.snmp.SnmpV3User;
+import org.opennms.horizon.shared.snmp.SnmpV3User;
 
 import java.util.List;
 

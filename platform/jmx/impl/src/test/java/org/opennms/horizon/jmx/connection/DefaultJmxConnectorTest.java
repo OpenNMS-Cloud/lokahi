@@ -43,9 +43,9 @@ import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 
 import org.junit.Test;
-import org.opennms.horizon.core.lib.InetAddressUtils;
 import org.opennms.horizon.jmx.connection.test.ClientProvider;
 import org.opennms.horizon.jmx.impl.connection.connectors.DefaultConnectionManager;
+import org.opennms.horizon.shared.utils.InetAddressUtils;
 
 public class DefaultJmxConnectorTest {
 

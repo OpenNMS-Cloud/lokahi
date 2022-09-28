@@ -36,9 +36,11 @@ import com.google.protobuf.Message;
 import io.opentracing.Tracer;
 import java.io.File;
 import java.io.IOException;
+import java.util.Map;
 import java.util.Properties;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -114,6 +116,7 @@ public class MinionGrpcClient extends AbstractMessageDispatcherFactory<String> i
     // This maintains a blocking thread for each dispatch module when OpenNMS is not in active state.
     private final ScheduledExecutorService blockingSinkMessageScheduler = Executors.newScheduledThreadPool(SINK_BLOCKING_THREAD_POOL_SIZE,
             blockingSinkMessageThreadFactory);
+    private final Map<SinkMessage, ScheduledFuture<?>> pendingMessages = new ConcurrentHashMap<>(2000);
     private ReconnectStrategy reconnectStrategy;
     private Tracer tracer;
     private RpcRequestHandler rpcRequestHandler;
@@ -287,19 +290,15 @@ public class MinionGrpcClient extends AbstractMessageDispatcherFactory<String> i
         scheduleSinkMessageAfterDelay(sinkMessage);
     }
 
-    private boolean scheduleSinkMessageAfterDelay(SinkMessage sinkMessage) {
-        ScheduledFuture<Boolean> future = blockingSinkMessageScheduler.schedule(
-                () -> sendSinkMessage(sinkMessage), SINK_BLOCKING_TIMEOUT, TimeUnit.MILLISECONDS);
-        try {
-            boolean succeeded = future.get();
-            if (succeeded) {
-                return true;
+    private void scheduleSinkMessageAfterDelay(SinkMessage sinkMessage) {
+        // try until we get a successful send
+        ScheduledFuture<?> future = blockingSinkMessageScheduler.scheduleWithFixedDelay(() -> {
+            if (sendSinkMessage(sinkMessage)) {
+                // canceling myself?
+                pendingMessages.remove(sinkMessage).cancel(false);
             }
-        } catch (InterruptedException | ExecutionException e) {
-            LOG.error("Error while attempting to send sink message with id {} from module {} to gRPC IPC server",
-                    sinkMessage.getMessageId(), sinkMessage.getModuleId(), e);
-        }
-        return scheduleSinkMessageAfterDelay(sinkMessage);
+        }, SINK_BLOCKING_TIMEOUT, SINK_BLOCKING_TIMEOUT, TimeUnit.MILLISECONDS);
+        pendingMessages.put(sinkMessage, future);
     }
 
 

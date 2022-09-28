@@ -102,6 +102,7 @@ public class GrpcServerConfig {
 
         RpcRequestTimeoutManagerImpl result = new RpcRequestTimeoutManagerImpl();
         result.setRpcTimeoutExecutor(rpcTimeoutExecutor);
+        result.setResponseHandlerExecutor(rpcTimeoutExecutor);
 
         return result;
     }

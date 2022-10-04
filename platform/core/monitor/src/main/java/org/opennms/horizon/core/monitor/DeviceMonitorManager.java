@@ -59,9 +59,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.TimeUnit;
 
 /**
  * TBD888: Rework still needed for task-set definitions, and general completeness
@@ -89,7 +87,6 @@ public class DeviceMonitorManager implements EventListener {
         .setNameFormat("device-monitor-runner-%d")
         .build();
 
-    private final ScheduledThreadPoolExecutor scheduledThreadPoolExecutor = new ScheduledThreadPoolExecutor(25, monitorThreadFactory);
 
     private final TaskSetManagerUtil taskSetManagerUtil;
     private final TaskSetPublisher taskSetPublisher;
@@ -120,20 +117,19 @@ public class DeviceMonitorManager implements EventListener {
         sessionUtils.withReadOnlyTransaction(() -> nodeCache.addAll(nodeDao.findAll()));
         nodeCache.forEach(onmsNode -> {
             LOG.info("Starting device monitoring for device with ID {}", onmsNode.getId());
-
-            scheduledThreadPoolExecutor.scheduleAtFixedRate(() -> runMonitors(onmsNode), 5, 120, TimeUnit.SECONDS);
+            updateMonitors(onmsNode);
         });
     }
 
 
-    private void runMonitors(OnmsNode onmsNode) {
+    private void updateMonitors(OnmsNode onmsNode) {
         String locationName = DEFAULT_LOCATION;
 
         try {
             List<OnmsIpInterface> ipInterfaces = sessionUtils.withReadOnlyTransaction(() -> ipInterfaceDao.findInterfacesByNodeId(onmsNode.getId()));
             String location = sessionUtils.withReadOnlyTransaction(() -> onmsNode.getLocation().getLocationName());
             ipInterfaces.forEach(onmsIpInterface -> {
-                LOG.info("Polling ICMP/SNMP Monitor for IPAddress {}", onmsIpInterface.getIpAddress());
+                LOG.info("Updating ICMP/SNMP Monitor tasks for IPAddress {}", onmsIpInterface.getIpAddress());
 
                 addPollIcmpTask(locationName, onmsIpInterface.getIpAddress());
 
@@ -210,7 +206,7 @@ public class DeviceMonitorManager implements EventListener {
             Long nodeId = event.getNodeid();
             if (nodeId != null) {
                 OnmsNode node = sessionUtils.withReadOnlyTransaction(() -> nodeDao.get(nodeId.intValue()));
-                scheduledThreadPoolExecutor.scheduleAtFixedRate(() -> runMonitors(node), 5, 120, TimeUnit.SECONDS);
+                updateMonitors(node);
             }
         }
         if (event.getUei().equals(EventConstants.NEW_SUSPECT_INTERFACE_EVENT_UEI)) {
@@ -223,7 +219,6 @@ public class DeviceMonitorManager implements EventListener {
 
     public void shutdown() {
         eventSubscriptionService.removeEventListener(this);
-        scheduledThreadPoolExecutor.shutdown();
     }
 
     public void createNodeFromDiscovery(String ipInterface, String location) {
@@ -237,7 +232,7 @@ public class DeviceMonitorManager implements EventListener {
         List<OnmsNode> nodes = sessionUtils.withReadOnlyTransaction(() -> nodeDao.findByLabel(ipInterface));
         if (!nodes.isEmpty()) {
             OnmsNode node = nodes.get(0);
-            runMonitors(node);
+            updateMonitors(node);
         }
     }
 }

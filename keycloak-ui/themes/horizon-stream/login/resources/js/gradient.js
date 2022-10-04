@@ -37,10 +37,8 @@ const animateGradient = () => {
   }
 
   const createStyles = (style, index, seconds) => {
-    const a = blender()
     const b = blender()
     style.innerHTML = `.quad${index} {background: transparent}`
-    style.innerHTML += `.quad${index} {background: ${a.blend}}`
     style.innerHTML += `.quad${index}::after {content: ""}`
     style.innerHTML += `.quad${index}::after {position: absolute}`
     style.innerHTML += `.quad${index}::after {top: 0}`
@@ -93,39 +91,8 @@ const animateGradient = () => {
   }
 
   // init gradient
-  createStyles(style1, 0, 2)
-  createStyles(style2, 1, 2.5)
-  createStyles(style3, 2, 3)
-  createStyles(style4, 3, 3.5)
-
-  // set intervals for gradient change
-  interval1 = setInterval(() => {
-    createStyles(style1, 0, 2)
-  }, 4000)
-  interval2 = setInterval(() => {
-    createStyles(style2, 1, 2.5)
-  }, 5000)
-  interval3 = setInterval(() => {
-    createStyles(style3, 2, 3)
-  }, 6000)
-  interval4 = setInterval(() => {
-    createStyles(style4, 3, 3.5)
-  }, 7000)
-}
-
-const killGradient = () => {
-  const gradientClasses = ['quad0', 'quad1', 'quad2', 'quad3']
-
-  for (const gClass of gradientClasses) {
-    const elements = document.getElementsByClassName(gClass)
-    if (!elements || !elements[0].parentNode) return
-    while (elements.length > 0) {
-      elements[0].parentNode.removeChild(elements[0])
-    }
-  }
-
-  clearInterval(interval1)
-  clearInterval(interval2)
-  clearInterval(interval3)
-  clearInterval(interval4)
+  createStyles(style1, 0, 4)
+  createStyles(style2, 1, 5)
+  createStyles(style3, 2, 6)
+  createStyles(style4, 3, 7)
 }

@@ -42,6 +42,7 @@ public class SnmpMonitorTest {
     private CompletableFuture<SnmpValue[]> mockFuture1;
     private CompletableFuture<ServiceMonitorResponse> mockFuture2;
     private CompletableFuture<ServiceMonitorResponse> mockFuture3;
+    private CompletableFuture<ServiceMonitorResponse> mockFuture4;
     private SnmpValue mockSnmpValue;
 
     private SnmpMonitorRequest testRequest;
@@ -61,6 +62,7 @@ public class SnmpMonitorTest {
         mockFuture1 = Mockito.mock(CompletableFuture.class);
         mockFuture2 = Mockito.mock(CompletableFuture.class);
         mockFuture3 = Mockito.mock(CompletableFuture.class);
+        mockFuture4 = Mockito.mock(CompletableFuture.class);
         mockSnmpValue = Mockito.mock(SnmpValue.class);
 
         testRequest =
@@ -79,7 +81,8 @@ public class SnmpMonitorTest {
         Mockito.when(mockSnmpHelper.getAsync(Mockito.any(), Mockito.any())).thenReturn(mockFuture1);
         processSnmpResponseCaptor = ArgumentCaptor.forClass(Function.class);
         Mockito.when(mockFuture1.thenApply(processSnmpResponseCaptor.capture())).thenReturn((CompletableFuture) mockFuture2);
-        Mockito.when(mockFuture2.orTimeout(3000, TimeUnit.MILLISECONDS)).thenReturn(mockFuture3);
+        Mockito.when(mockFuture2.completeOnTimeout(Mockito.any(), Mockito.eq(3_000L), Mockito.eq(TimeUnit.MILLISECONDS))).thenReturn(mockFuture3);
+        Mockito.when(mockFuture3.exceptionally(Mockito.any())).thenReturn(mockFuture4);
     }
 
     @Test
@@ -96,7 +99,7 @@ public class SnmpMonitorTest {
         //
         // Verify the Results
         //
-        assertSame(mockFuture3, future);
+        assertSame(mockFuture4, future);
     }
 
     @Test

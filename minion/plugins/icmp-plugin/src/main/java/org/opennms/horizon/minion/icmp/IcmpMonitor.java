@@ -143,12 +143,24 @@ public class IcmpMonitor extends AbstractServiceMonitor {
 
         @Override
         public void handleTimeout(InetAddress inetAddress, EchoPacket echoPacket) {
-            future.complete(ServiceMonitorResponseImpl.unknown());
+            future.complete(
+                ServiceMonitorResponseImpl.builder()
+                    .monitorType(MonitorType.ICMP)
+                    .status(Status.Unknown)
+                    .ipAddress(inetAddress.getHostAddress())
+                    .build()
+            );
         }
 
         @Override
         public void handleError(InetAddress inetAddress, EchoPacket echoPacket, Throwable throwable) {
-            future.complete(ServiceMonitorResponseImpl.down());
+            future.complete(
+                ServiceMonitorResponseImpl.builder()
+                    .monitorType(MonitorType.ICMP)
+                    .status(Status.Down)
+                    .ipAddress(inetAddress.getHostAddress())
+                    .build()
+            );
         }
     }
 }

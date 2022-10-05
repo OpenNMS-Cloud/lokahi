@@ -171,6 +171,8 @@ public class DeviceMonitorResultProcessor implements Processor {
 
             log.info("Total upTime of SNMP for {} at location {} : {} sec", ipAddress, location, totalUpTimeInSec);
         } else {
+            // Mark the up-time as "DOWN"
+            snmpUpTimeGauge.labels(labelValues).set(-1);
             snmpUpTimeCache.put(ipAddress, INVALID_UP_TIME);
         }
     }

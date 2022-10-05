@@ -41,7 +41,6 @@ import org.opennms.horizon.shared.snmp.SnmpAgentConfig;
 import org.opennms.horizon.shared.snmp.SnmpConfiguration;
 import org.opennms.horizon.shared.snmp.SnmpHelper;
 import org.opennms.horizon.shared.snmp.SnmpObjId;
-import org.opennms.horizon.shared.snmp.SnmpUtils;
 import org.opennms.horizon.shared.snmp.SnmpValue;
 import org.opennms.horizon.shared.snmp.StrategyResolver;
 import org.opennms.snmp.contract.SnmpMonitorRequest;
@@ -202,7 +201,8 @@ public class SnmpMonitor extends SnmpMonitorStrategy {
             future =
                 snmpHelper.getAsync(agentConfig, new SnmpObjId[]{ snmpObjectId })
                     .thenApply(result -> processSnmpResponse(result, finalHostAddress, snmpObjectId, operator, operand, startTimestamp))
-                    .orTimeout(agentConfig.getTimeout(), TimeUnit.MILLISECONDS)
+                    .completeOnTimeout(this.createTimeoutResponse(finalHostAddress), agentConfig.getTimeout(), TimeUnit.MILLISECONDS)
+                    .exceptionally((thrown) -> this.createExceptionResponse(thrown, finalHostAddress))
             ;
 
             return future;
@@ -312,5 +312,35 @@ public class SnmpMonitor extends SnmpMonitorStrategy {
 
         builder.properties(metrics);
         return builder.build();
+    }
+
+    // NOTE: this is called at call-setup time, not after the timeout.
+    private ServiceMonitorResponse createTimeoutResponse(String hostAddress) {
+        ServiceMonitorResponse response =
+            ServiceMonitorResponseImpl.builder()
+                .monitorType(MonitorType.SNMP)
+                .status(Status.Unknown)
+                .ipAddress(hostAddress)
+                .reason("timeout")
+                .responseTime(-1)
+                .build()
+            ;
+
+        return response;
+    }
+
+    private ServiceMonitorResponse createExceptionResponse(Throwable thrown, String hostAddress) {
+        LOG.debug("SNMP poll failed", thrown);
+
+        ServiceMonitorResponse response =
+            ServiceMonitorResponseImpl.builder()
+                .monitorType(MonitorType.SNMP)
+                .status(Status.Unknown)
+                .ipAddress(hostAddress)
+                .reason(thrown.getMessage())
+                .build()
+            ;
+
+        return response;
     }
 }

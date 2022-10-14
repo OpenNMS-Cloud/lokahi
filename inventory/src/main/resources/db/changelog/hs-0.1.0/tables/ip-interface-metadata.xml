@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+
+    <changeSet author="tbigg" id="0.1.0-ip-interface-metadata">
+        <createTable tableName="ipinterface_metadata">
+            <column name="id" type="integer">
+                <constraints nullable="false"/>
+            </column>
+            <column name="context" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="key" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="value" type="text">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addPrimaryKey tableName="ipinterface_metadata" columnNames="id, context, key"
+                       constraintName="ipinterface_metadata_pkey"/>
+        <addForeignKeyConstraint constraintName="fk_ipinterface_metadata_id"
+                                 baseTableName="ipinterface_metadata" baseColumnNames="id"
+                                 referencedTableName="ipinterface" referencedColumnNames="id"/>
+    </changeSet>
+</databaseChangeLog>

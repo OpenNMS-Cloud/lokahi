@@ -58,6 +58,9 @@ type OpenNMSSpec struct {
 	// Defines service values for the Minion Gateway
 	MinionGateway BaseServiceResources `json:"minionGateway,omitempty"`
 
+	// Defines service values for Inventory service
+	Inventory BaseServiceResources `json:"inventory,omitempty"`
+
 	// Defines service values for Notification service
 	Notification BaseServiceResources `json:"notification,omitempty"`
 

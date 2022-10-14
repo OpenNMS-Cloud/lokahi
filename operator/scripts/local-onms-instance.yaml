@@ -29,6 +29,10 @@ spec:
     image: opennms/horizon-stream-minion-gateway
     cpu: "0"
     mem: 500Mi
+  inventory:
+    image: opennms/horizon-stream-inventory
+    cpu: "0"
+    mem: 100Mi
   notification:
     image: opennms/horizon-stream-notification
     cpu: "0"

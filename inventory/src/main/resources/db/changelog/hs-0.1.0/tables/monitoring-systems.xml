@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+
+    <changeSet author="tbigg" id="0.1.0-monitoring-systems">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="monitoringsystems"/>
+            </not>
+        </preConditions>
+
+        <createTable tableName="monitoringsystems">
+            <column name="id" type="varchar(255)">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="monitoringsystems_pkey"/>
+            </column>
+            <column name="label" type="TEXT"/>
+            <column name="location" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="type" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="TEXT"/>
+            <column name="last_updated" type="TIMESTAMP WITH TIME ZONE"/>
+        </createTable>
+    </changeSet>
+
+
+</databaseChangeLog>

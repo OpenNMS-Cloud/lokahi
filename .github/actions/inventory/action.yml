@@ -1,0 +1,22 @@
+name: 'Build and test inventory'
+description: 'This implements unit and built-time integration tests.'
+inputs:
+  dir-location:
+    description: 'The dir containing the change.'
+    required: true
+    default: 'none'
+
+runs:
+  using: "composite"
+  steps:
+    - name: build-image
+      run: |
+
+        cd ${{ inputs.dir-location }}
+
+        # When there are tests to run, put those here.
+
+        # Create the docker image.
+        mvn package jib:dockerBuild -Dimage=opennms/horizon-stream-inventory:local
+
+      shell: bash

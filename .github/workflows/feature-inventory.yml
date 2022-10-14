@@ -1,0 +1,43 @@
+name: feature-inventory
+
+on:  
+  push:
+    branches:
+      - '**'
+      - '!develop'
+      - '!release'
+    paths:
+      - 'inventory/**'
+
+jobs:
+
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v2
+        # Is required to call actions.
+
+      - name: init
+        run: |
+
+          echo "For init steps."
+
+      - name: parent-pom
+        id: action-parent-pom
+        uses: ./.github/actions/parent-pom
+        with:
+          dir-location: 'parent-pom'
+
+      - name: shared-lib
+        id: action-shared-lib
+        uses: ./.github/actions/shared-lib
+        with:
+          dir-location: 'shared-lib'
+
+      - name: feature-inventory
+        id: action-feature-inventory
+        uses: ./.github/actions/inventory
+        with:
+          dir-location: 'inventory'

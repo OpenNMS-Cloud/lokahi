@@ -19,6 +19,7 @@ type PostgresValues struct {
 	AdminPassword        string `yaml:"AdminPassword"`
 	OpenNMSPassword      string `yaml:"OpenNMSPassword"`
 	KeycloakPassword     string `yaml:"KeycloakPassword"`
+	InventoryPassword    string `yaml:"InventoryPassword"`
 	NotificationPassword string `yaml:"NotificationPassword"`
 	GrafanaPassword      string `yaml:"GrafanaPassword"`
 }

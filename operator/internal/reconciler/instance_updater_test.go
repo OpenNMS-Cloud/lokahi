@@ -106,6 +106,7 @@ func TestCheckForExistingCoreCreds(t *testing.T) {
 
 	adminPglPwd := "testpostgresadminpwd"
 	keycloakPwd := "testpostgreskeycloakpwd"
+    inventoryPwd := "testpostgresinventorypwd"
 	notificationPwd := "testpostgresnotificationpwd"
 	pgSecret := corev1.Secret{
 		ObjectMeta: v1.ObjectMeta{
@@ -114,6 +115,7 @@ func TestCheckForExistingCoreCreds(t *testing.T) {
 		Data: map[string][]byte{
 			"adminPwd":        []byte(adminPglPwd),
 			"keycloakPwd":     []byte(keycloakPwd),
+			"inventoryPwd":    []byte(inventoryPwd),
 			"notificationPwd": []byte(notificationPwd),
 		},
 	}
@@ -124,5 +126,6 @@ func TestCheckForExistingCoreCreds(t *testing.T) {
 	assert.True(t, resbool, "should return that there are existing creds")
 	assert.Equal(t, adminPglPwd, res.Values.Postgres.AdminPassword, "should return the postgres expected values")
 	assert.Equal(t, keycloakPwd, res.Values.Postgres.KeycloakPassword, "should return the postgres expected values")
+	assert.Equal(t, inventoryPwd, res.Values.Postgres.InventoryPassword, "should return the postgres expected values")
 	assert.Equal(t, notificationPwd, res.Values.Postgres.NotificationPassword, "should return the postgres expected values")
 }

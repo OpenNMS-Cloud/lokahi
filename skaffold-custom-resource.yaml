@@ -18,6 +18,10 @@ spec:
     image: opennms/horizon-stream-ui
     cpu: "0"
     mem: "0"
+  inventory:
+    image: opennms/horizon-stream-inventory
+    cpu: "0"
+    mem: "0"
   notification:
     image: opennms/horizon-stream-notification
     cpu: "0"

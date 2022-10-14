@@ -41,6 +41,12 @@ time {
 
 	echo ""
 	echo "==="
+	echo "=== INVENTORY IMAGE"
+	echo "==="
+	mvn -f inventory jib:dockerBuild -Djib.container.creationTime=USE_CURRENT_TIMESTAMP -Dimage=opennms/horizon-stream-inventory:local-basic
+
+	echo ""
+	echo "==="
 	echo "=== NOTIFICATION IMAGE"
 	echo "==="
 	mvn -f notifications jib:dockerBuild -Djib.container.creationTime=USE_CURRENT_TIMESTAMP -Dimage=opennms/horizon-stream-notification:local-basic

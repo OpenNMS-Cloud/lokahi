@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+
+    <changeSet author="tbigg" id="0.1.0-if-services-metadata">
+
+        <createTable tableName="ifservices_metadata">
+            <column name="id" type="integer">
+                <constraints nullable="false"/>
+            </column>
+            <column name="context" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="key" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="value" type="text">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addPrimaryKey tableName="ifservices_metadata" columnNames="id, context, key"
+                       constraintName="ifservices_metadata_pkey"/>
+        <addForeignKeyConstraint constraintName="fk_ifservices_metadata_id"
+                                 baseTableName="ifservices_metadata" baseColumnNames="id"
+                                 referencedTableName="ifservices" referencedColumnNames="id"/>
+    </changeSet>
+</databaseChangeLog>

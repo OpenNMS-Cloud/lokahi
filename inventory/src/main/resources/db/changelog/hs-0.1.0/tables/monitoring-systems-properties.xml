@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+
+    <changeSet author="tbigg" id="0.1.0-monitoring-systems-properties">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="monitoringsystemsproperties"/>
+            </not>
+        </preConditions>
+
+        <createTable tableName="monitoringsystemsproperties">
+            <column name="monitoringsystemid" type="varchar(255)">
+                <constraints nullable="false" foreignKeyName="monitoringsystemsproperties_fkey"
+                             references="monitoringsystems(id)" deleteCascade="true"/>
+            </column>
+            <column name="property" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="propertyvalue" type="TEXT"/>
+        </createTable>
+
+        <createIndex tableName="monitoringsystemsproperties" indexName="monitoringsystemsproperties_id_idx">
+            <column name="monitoringsystemid"/>
+        </createIndex>
+        <createIndex tableName="monitoringsystemsproperties" indexName="monitoringsystemsproperties_id_property_idx"
+                     unique="true">
+            <column name="monitoringsystemid"/>
+            <column name="property"/>
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>

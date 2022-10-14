@@ -26,6 +26,8 @@
 ## 26 = keycloak
 ## 27 = minion (classic)
 ## 28 = metric processor
+## 29 = horizon-stream-inventory
+##
 
 apiVersion: skaffold/v2beta28
 kind: Config
@@ -82,6 +84,13 @@ build:
       auto: true
     requires:
       - image: shared_lib
+  - image: opennms/horizon-stream-inventory
+    context: inventory
+    jib: {}
+    sync:
+      auto: true
+    requires:
+      - image: shared_lib
   - image: opennms/horizon-stream-notification
     context: notifications
     jib: {}
@@ -111,6 +120,14 @@ portForward:
     resourceName: opennms-rest-server
     port: 5005 # Debug
     localPort: 13050
+  - resourceType: deployment
+    resourceName: opennms-inventory
+    port: 8080 # HTTP
+    localPort: 29080
+  - resourceType: deployment
+    resourceName: opennms-inventory
+    port: 5005 # Debug
+    localPort: 29050
   - resourceType: deployment
     resourceName: opennms-notifications
     port: 8080 # HTTP
@@ -195,6 +212,7 @@ deploy:
           OpenNMS.API.Image: opennms/horizon-stream-rest-server
           OpenNMS.UI.Image: opennms/horizon-stream-ui
           OpenNMS.Notification.Image: opennms/horizon-stream-notification
+          OpenNMS.Inventory.Image: opennms/horizon-stream-inventory
           OpenNMS.Minion.Image: opennms/horizon-stream-minion
           OpenNMS.MinionGateway.Image: opennms/horizon-stream-minion-gateway
           Keycloak.Image: opennms/horizon-stream-keycloak-dev

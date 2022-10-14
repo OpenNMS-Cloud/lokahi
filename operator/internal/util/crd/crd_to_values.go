@@ -49,6 +49,9 @@ func ConvertCRDToValues(crd v1alpha1.OpenNMS, defaultValues values.TemplateValue
 	//ONMS Minion
 	v.OpenNMS = getMinionValues(spec, v.OpenNMS)
 
+    //ONMS Inventory
+    v.OpenNMS = getInventoryValues(spec, v.OpenNMS)
+
 	//ONMS Notification
 	v.OpenNMS = getNotificationValues(spec, v.OpenNMS)
 
@@ -163,6 +166,25 @@ func getMinionValues(spec v1alpha1.OpenNMSSpec, v values.OpenNMSValues) values.O
 	return v
 }
 
+// getInventoryValues - get ONMS Inventory values from the crd
+func getInventoryValues(spec v1alpha1.OpenNMSSpec, v values.OpenNMSValues) values.OpenNMSValues {
+    if spec.Inventory.Image != "" {
+        v.Inventory.Image = spec.Inventory.Image
+    }
+    if spec.Inventory.CPU != "" {
+        v.Inventory.Resources.Requests.Cpu = spec.Inventory.CPU
+        v.Inventory.Resources.Limits.Cpu = spec.Inventory.CPU
+    }
+    if spec.Inventory.MEM != "" {
+        v.Inventory.Resources.Requests.Memory = spec.Inventory.MEM
+        v.Inventory.Resources.Limits.Memory = spec.Inventory.MEM
+    }
+    if spec.Inventory.Disk != "" {
+        v.Inventory.VolumeSize = spec.Inventory.Disk
+    }
+    return v
+}
+
 // getNotificationValues - get ONMS Notification values from the crd
 func getNotificationValues(spec v1alpha1.OpenNMSSpec, v values.OpenNMSValues) values.OpenNMSValues {
 	if spec.Notification.Image != "" {
@@ -190,7 +212,7 @@ func getKeycloakValues(spec v1alpha1.OpenNMSSpec, v values.KeycloakValues) value
 	return v
 }
 
-// getGrafanaValues - get ONMS Notification values from the crd
+// getGrafanaValues - get ONMS Grafana values from the crd
 func getGrafanaValues(spec v1alpha1.OpenNMSSpec, v values.GrafanaValues) values.GrafanaValues {
 	if spec.Grafana.Image != "" {
 		v.Image = spec.Grafana.Image

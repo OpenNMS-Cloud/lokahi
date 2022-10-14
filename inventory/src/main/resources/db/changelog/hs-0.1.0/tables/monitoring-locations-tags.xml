@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+
+    <changeSet author="tbigg" id="0.1.0-monitoring-locations-tags">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="monitoringlocationstags"/>
+            </not>
+        </preConditions>
+
+        <createTable tableName="monitoringlocationstags">
+            <column name="monitoringlocationid" type="varchar(255)">
+                <constraints nullable="false" foreignKeyName="monitoringlocationstags_fkey"
+                             references="monitoringlocations(id)" deleteCascade="true"/>
+            </column>
+            <column name="tag" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createIndex tableName="monitoringlocationstags" indexName="monitoringlocationstags_id_idx">
+            <column name="monitoringlocationid"/>
+        </createIndex>
+        <createIndex tableName="monitoringlocationstags" indexName="monitoringlocationstags_id_pkg_idx" unique="true">
+            <column name="monitoringlocationid"/>
+            <column name="tag"/>
+        </createIndex>
+    </changeSet>
+</databaseChangeLog>

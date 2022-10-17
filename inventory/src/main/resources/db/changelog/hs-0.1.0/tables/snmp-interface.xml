@@ -31,10 +31,10 @@
             </column>
 
             <!-- SNMP MIB-2 ipAddrTable.ipAddrEntry.ipAdEntNetMask; Value is interface's subnet mask -->
-            <column name="snmpipadentnetmask" type="varchar(16)"/>
+            <column name="snmpipadentnetmask" type="varchar(45)"/>
 
             <!-- SNMP MIB-2 ifTable.ifEntry.ifPhysAddress; Value is interface's MAC Address -->
-            <column name="snmpphysaddr" type="varchar(12)"/>
+            <column name="snmpphysaddr" type="varchar(64)"/>
 
             <!-- SNMP MIB-2 ifTable.ifEntry.ifIndex; Value is interface's arbitrarily assigned index,
                 or -100 if we can query the agent, but we can't find this IP address in the ifTable. -->
@@ -43,7 +43,7 @@
             </column>
 
             <!-- SNMP MIB-2 ifTable.ifEntry.ifDescr; Value is interface's manufacturer/product name/version -->
-            <column name="snmpifdescr" type="varchar(256)"/>
+            <column name="snmpifdescr" type="text"/>
 
             <!-- SNMP MIB-2 ifTable.ifEntry.ifType; Value is interface's physical/link protocol -->
             <column name="snmpiftype" type="integer"/>
@@ -62,8 +62,17 @@
                 1 = Up, 2 = Down, 3 = Testing -->
             <column name="snmpifoperstatus" type="integer"/>
 
+            <column name="snmp_community_string" type="varchar2(32)" />
+
             <!-- SNMP MIB-2 ifXTable.ifXEntry.ifAlias; Value is interface's device alias -->
             <column name="snmpifalias" type="varchar(256)"/>
+
+            <column name="snmplastcapsdpoll" type="TIMESTAMP WITH TIME ZONE" />
+
+            <column name="snmpcollect" type="varchar(2)" defaultValue="N" />
+
+            <column name="last_ingress_flow" type="TIMESTAMP WITH TIME ZONE"  />
+            <column name="last_egress_flow" type="TIMESTAMP WITH TIME ZONE"  />
         </createTable>
 
         <addForeignKeyConstraint constraintName="fk_nodeid2" onDelete="CASCADE"

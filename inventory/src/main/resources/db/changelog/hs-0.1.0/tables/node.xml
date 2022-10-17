@@ -80,11 +80,16 @@
 
             <!-- When importing nodes this contains the id of the node as known to the foreign source, null otherwise -->
             <column name="foreignid" type="varchar(64)"/>
+
+            <column name="last_ingress_flow" type="TIMESTAMP WITH TIME ZONE"  />
+            <column name="last_egress_flow" type="TIMESTAMP WITH TIME ZONE"  />
         </createTable>
 
         <!--        <addForeignKeyConstraint constraintName="fk_dpname"-->
         <!--                                 baseTableName="node" baseColumnNames="dpname"-->
         <!--                                 referencedTableName="distpoller" referencedColumnNames="dpname" />-->
+
+        <addNotNullConstraint tableName="node" columnName="nodelabel"/>
 
         <createIndex tableName="node" indexName="node_id_type_idx">
             <column name="nodeid"/>

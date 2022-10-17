@@ -25,16 +25,6 @@
                 <constraints nullable="false"/>
             </column>
 
-            <!-- In the case that the node is virtual or an independent device in a chassis that should
-                be reflected as a subcomponent or "child", this field reflects the nodeID of the
-                chassis/physical node/"parent" device.  Currently unused. -->
-            <column name="nodeparentid" type="integer"/>
-
-            <!-- Flag indicating status of node
-                'A' - active
-                'D' - deleted -->
-            <column name="nodetype" type="char(1)"/>
-
             <!-- SNMP MIB-2 system.sysObjectID.0 -->
             <column name="nodesysoid" type="varchar(256)"/>
 
@@ -88,15 +78,8 @@
 
         <addNotNullConstraint tableName="node" columnName="nodelabel"/>
 
-        <createIndex tableName="node" indexName="node_id_type_idx">
-            <column name="nodeid"/>
-            <column name="nodetype"/>
-        </createIndex>
         <createIndex tableName="node" indexName="node_label_idx">
             <column name="nodelabel"/>
-        </createIndex>
-        <createIndex tableName="node" indexName="node_dpname_idx">
-            <column name="dpname"/>
         </createIndex>
         <createIndex tableName="node" indexName="node_foreign_unique_idx" unique="true">
             <column name="foreignsource"/>

@@ -20,9 +20,6 @@
                 <constraints nullable="false" primaryKey="true" primaryKeyName="pk_nodeid"/>
             </column>
 
-            <!-- Distributed Poller responsible for this node -->
-            <column name="dpname" type="varchar(12)"/>
-
             <!-- Time node was added to the database -->
             <column name="nodecreatetime" type="TIMESTAMP WITH TIME ZONE">
                 <constraints nullable="false"/>

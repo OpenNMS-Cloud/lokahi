@@ -73,13 +73,15 @@ func (i *Instance) CheckForExistingPostgresCreds(ctx context.Context, v values.T
     }
     adminPwd := string(credSecret.Data["adminPwd"])
     keycloakPwd := string(credSecret.Data["keycloakPwd"])
+    inventoryPwd := string(credSecret.Data["inventoryPwd"])
     notificationPwd := string(credSecret.Data["notificationPwd"])
     grafanaPwd := string(credSecret.Data["grafanaPwd"])
-    if adminPwd == "" || keycloakPwd == "" || notificationPwd == "" {
+    if adminPwd == "" || keycloakPwd == "" || inventoryPwd == "" || notificationPwd == "" {
         return v, false
     }
     v.Values.Postgres.AdminPassword = adminPwd
     v.Values.Postgres.KeycloakPassword = keycloakPwd
+    v.Values.Postgres.InventoryPassword = inventoryPwd
     v.Values.Postgres.NotificationPassword = notificationPwd
     v.Values.Postgres.GrafanaPassword = grafanaPwd
     return v, true
@@ -101,6 +103,7 @@ func setPostgresPassword(tv values.TemplateValues) values.TemplateValues {
     tv.Values.Postgres.AdminPassword = security.GeneratePassword(true)
     tv.Values.Postgres.OpenNMSPassword = security.GeneratePassword(true)
     tv.Values.Postgres.KeycloakPassword = security.GeneratePassword(true)
+    tv.Values.Postgres.InventoryPassword = security.GeneratePassword(true)
     tv.Values.Postgres.NotificationPassword = security.GeneratePassword(true)
 
     //fed into Grafana via an .ini, so cannot generate with special characters

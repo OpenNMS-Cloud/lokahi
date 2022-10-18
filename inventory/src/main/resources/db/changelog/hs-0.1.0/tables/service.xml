@@ -4,6 +4,8 @@
     xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
     xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
 
+<!--    todo: potentially remove this in favor of an Enum-->
+
     <changeSet author="tbigg" id="0.1.0-service">
         <preConditions onFail="MARK_RAN">
             <not>

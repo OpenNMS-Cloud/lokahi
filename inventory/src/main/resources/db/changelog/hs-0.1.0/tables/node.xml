@@ -11,75 +11,37 @@
             </not>
         </preConditions>
 
+<!--        todo: enforce consistency of naming conventions, underscores, remove table names from columne names-->
+<!--        todo: dont need to solve the H2 problem with datatypes-->
+
         <!-- Contains information on nodes discovered and potentially managed by OpenNMS.
             nodeSys* fields map to SNMP MIB 2 system table information. -->
         <createTable tableName="node">
             <!-- Unique identifier for node.  Note that this is the enabler for overlapping IP
                 ranges and that uniquity is dependent on combination of dpName and IP address -->
-            <column name="nodeid" type="integer">
+<!--            todo: type - bigint, bigserial -->
+            <column name="id" type="integer">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="pk_nodeid"/>
             </column>
 
+<!--          todo:  add teneant ID, type: placeholder, maybe string based, tennant id comes from portal (assign) -->
+
             <!-- Time node was added to the database -->
-            <column name="nodecreatetime" type="TIMESTAMP WITH TIME ZONE">
+            <column name="create_time" type="TIMESTAMP">
                 <constraints nullable="false"/>
             </column>
-
-            <!-- SNMP MIB-2 system.sysObjectID.0 -->
-            <column name="nodesysoid" type="varchar(256)"/>
-
-            <!-- SNMP MIB-2 system.sysName.0 -->
-            <column name="nodesysname" type="varchar(256)"/>
-
-            <!-- SNMP MIB-2 system.sysDescr.0 -->
-            <column name="nodesysdescription" type="varchar(256)"/>
-
-            <!-- SNMP MIB-2 system.sysLocation.0 -->
-            <column name="nodesyslocation" type="varchar(256)"/>
-
-            <!-- SNMP MIB-2 system.sysContact.0 -->
-            <column name="nodesyscontact" type="varchar(256)"/>
 
             <!-- User-friendly name associated with the node. -->
             <column name="nodelabel" type="varchar(256)"/>
 
-            <!-- Flag indicating source of nodeLabel
-                'U' = user defined
-                'H' = IP hostname
-                'S' = sysName
-                'A' = IP address -->
-            <column name="nodelabelsource" type="char(1)"/>
-
-            <!-- NetBIOS workstation name associated with the node. -->
-            <column name="nodenetbiosname" type="varchar(16)"/>
-
-            <!-- NetBIOS damain name associated with the node. -->
-            <column name="nodedomainname" type="varchar(16)"/>
-
-            <!-- Operating system running on the node. -->
-            <column name="operatingsystem" type="varchar(64)"/>
-
-            <!-- Date and time of last Capsd scan. -->
-            <column name="lastcapsdpoll" type="TIMESTAMP WITH TIME ZONE"/>
-
-            <!-- When importing nodes this contains the source of the nodes, null otherwise -->
-            <column name="foreignsource" type="varchar(64)"/>
-
-            <!-- When importing nodes this contains the id of the node as known to the foreign source, null otherwise -->
-            <column name="foreignid" type="varchar(64)"/>
-
-            <column name="last_ingress_flow" type="TIMESTAMP WITH TIME ZONE"  />
-            <column name="last_egress_flow" type="TIMESTAMP WITH TIME ZONE"  />
         </createTable>
 
         <addNotNullConstraint tableName="node" columnName="nodelabel"/>
 
+<!--        todo: add (nodeid, tenant) as an index-->
+
         <createIndex tableName="node" indexName="node_label_idx">
             <column name="nodelabel"/>
-        </createIndex>
-        <createIndex tableName="node" indexName="node_foreign_unique_idx" unique="true">
-            <column name="foreignsource"/>
-            <column name="foreignid"/>
         </createIndex>
     </changeSet>
 

@@ -4,8 +4,11 @@
     xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
     xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
 
+<!--    todo: remove this table, may want to use it with requisitions, but dont need now -->
+
     <changeSet author="tbigg" id="0.1.0-node-metadata">
         <createTable tableName="node_metadata">
+<!--            todo: type bigserial-->
             <column name="id" type="integer">
                 <constraints nullable="false"/>
             </column>

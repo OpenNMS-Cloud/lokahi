@@ -11,14 +11,7 @@
             </not>
         </preConditions>
 
-<!--        todo: enforce consistency of naming conventions, underscores, remove table names from columne names-->
-<!--        todo: dont need to solve the H2 problem with datatypes-->
-
-        <!-- Contains information on nodes discovered and potentially managed by OpenNMS.
-            nodeSys* fields map to SNMP MIB 2 system table information. -->
         <createTable tableName="node">
-            <!-- Unique identifier for node.  Note that this is the enabler for overlapping IP
-                ranges and that uniquity is dependent on combination of dpName and IP address -->
 <!--            todo: type - bigint, bigserial -->
             <column name="id" type="integer">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="pk_nodeid"/>

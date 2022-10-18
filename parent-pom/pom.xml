@@ -73,7 +73,8 @@
         <org.osgi.service.jdbc.version>1.0.0</org.osgi.service.jdbc.version>
         <osgi.version>7.0.0</osgi.version>
         <pax.jdbc.version>1.5.2</pax.jdbc.version>
-        <postgresql.version>42.3.7</postgresql.version>
+        <postgresql.version>42.5.0</postgresql.version>
+        <testcontainers.version>1.17.4</testcontainers.version>
         <prometheus.version>0.16.0</prometheus.version>
         <protobuf.version>3.17.3</protobuf.version>   <!-- WARNING: this also controls the version of the protobuf compiler, change at your risk!-->
         <rate.limitted.logger.version>2.0.2</rate.limitted.logger.version>
@@ -89,11 +90,10 @@
         <lombok.version>1.18.24</lombok.version>
         <lombok.binding.version>0.2.0</lombok.binding.version>
         <mockito.version>4.8.0</mockito.version>
-        <h2.version>2.1.214</h2.version>
         <jupiter.version>5.9.0</jupiter.version>
         <jib.version>3.2.1</jib.version>
-        <surefire.version>2.22.2</surefire.version>
-        <failsafe.version>2.22.0</failsafe.version>
+        <surefire.version>3.0.0-M5</surefire.version>
+        <failsafe.version>3.0.0-M5</failsafe.version>
     </properties>
 
     <dependencyManagement>

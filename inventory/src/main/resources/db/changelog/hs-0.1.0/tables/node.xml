@@ -72,10 +72,6 @@
             <column name="last_egress_flow" type="TIMESTAMP WITH TIME ZONE"  />
         </createTable>
 
-        <!--        <addForeignKeyConstraint constraintName="fk_dpname"-->
-        <!--                                 baseTableName="node" baseColumnNames="dpname"-->
-        <!--                                 referencedTableName="distpoller" referencedColumnNames="dpname" />-->
-
         <addNotNullConstraint tableName="node" columnName="nodelabel"/>
 
         <createIndex tableName="node" indexName="node_label_idx">

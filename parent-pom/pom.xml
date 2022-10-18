@@ -90,6 +90,9 @@
         <lombok.binding.version>0.2.0</lombok.binding.version>
         <mockito.version>4.8.0</mockito.version>
         <h2.version>2.1.214</h2.version>
+        <jupiter.version>5.9.0</jupiter.version>
+        <surefire.version>2.22.2</surefire.version>
+        <failsafe.version>2.22.0</failsafe.version>
     </properties>
 
     <dependencyManagement>

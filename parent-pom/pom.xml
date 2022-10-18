@@ -62,7 +62,7 @@
         <jsr305.version>3.0.2</jsr305.version>
         <karaf.version>4.3.6</karaf.version>
         <keycloak.version>18.0.0</keycloak.version>
-        <liquibaseVersion>3.6.3</liquibaseVersion>
+        <liquibaseVersion>4.17.0</liquibaseVersion>
         <log4j2.version>2.17.1</log4j2.version>
         <mapstruct.version>1.4.1.Final</mapstruct.version>
         <mina.version>2.1.5</mina.version>
@@ -73,7 +73,7 @@
         <org.osgi.service.jdbc.version>1.0.0</org.osgi.service.jdbc.version>
         <osgi.version>7.0.0</osgi.version>
         <pax.jdbc.version>1.5.2</pax.jdbc.version>
-        <postgresql.version>42.3.2</postgresql.version>
+        <postgresql.version>42.3.7</postgresql.version>
         <prometheus.version>0.16.0</prometheus.version>
         <protobuf.version>3.17.3</protobuf.version>   <!-- WARNING: this also controls the version of the protobuf compiler, change at your risk!-->
         <rate.limitted.logger.version>2.0.2</rate.limitted.logger.version>
@@ -81,13 +81,15 @@
         <slf4j.version>1.7.33</slf4j.version>
         <snmp4j.version>2.5.5</snmp4j.version>
         <snmp4j.agent.version>2.5.3</snmp4j.agent.version>
-        <spring.version>5.3.14_1</spring.version>
-        <spring-boot.version>2.6.8</spring-boot.version>
+        <spring.version>5.3.23</spring.version>
+        <spring-boot.version>2.7.4</spring-boot.version>
         <swagger.version>2.1.1</swagger.version>
+        <horizon.shared.lib.version>0.1.0-SNAPSHOT</horizon.shared.lib.version>
         <testcontainers.version>1.16.3</testcontainers.version>
         <lombok.version>1.18.24</lombok.version>
         <lombok.binding.version>0.2.0</lombok.binding.version>
-        <mockito.version>4.4.0</mockito.version>
+        <mockito.version>4.8.0</mockito.version>
+        <h2.version>2.1.214</h2.version>
     </properties>
 
     <dependencyManagement>

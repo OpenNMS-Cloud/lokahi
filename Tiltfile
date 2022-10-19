@@ -1,109 +1,185 @@
-## Tilt config ##
-secret_settings ( disable_scrub = True ) ## TODO: update secret values so we can reenable scrub
-update_settings(suppress_unused_image_warnings=["opennms/horizon-stream-grafana", "opennms/horizon-stream-keycloak"])
+# Tilt config #
+load('ext://tilt_inspector', 'tilt_inspector')
+tilt_inspector()
 
-## Namespace ##
-load('ext://namespace', 'namespace_yaml')
-k8s_yaml(namespace_yaml('tilt-instance'), allow_duplicates=False)
+secret_settings(disable_scrub=True)  ## TODO: update secret values so we can reenable scrub
 
-## Operator ##
-local('cd charts/opennms-operator && helm dep update')
-k8s_yaml(helm('./charts/opennms-operator',
-              values=['./operator/values.yaml'],))
+cluster_arch_cmd = '$(tilt get cluster default -o=jsonpath --template="{.status.arch}")'
 
-docker_build("opennms/operator", "operator")
+# Deployment #
+k8s_yaml(
+    helm(
+        'charts/opennms',
+        values=['./skaffold-helm-values.yaml'],
+    )
+)
+
+# Builds #
+## Shared ##
+local_resource(
+    'parent-pom',
+    cmd='mvn clean install -N',
+    dir='parent-pom',
+    deps=['./parent-pom'],
+    ignore=['**/target'],
+    labels=['opennms'],
+)
+
+local_resource(
+    'shared-lib',
+    cmd='mvn clean install -DskipTests=true',
+    dir='shared-lib',
+    deps=['./shared-lib'],
+    ignore=['**/target'],
+    labels=['opennms'],
+)
 
 ## OpenNMS ##
-k8s_yaml(helm('./charts/opennms',
-              namespace='tilt-instance',
-              set=[
-                  'Namespace=tilt-instance',
-                  'OpenNMS.Core.ImagePullPolicy=Never',
-                  'OpenNMS.API.ImagePullPolicy=Never',
-                  'OpenNMS.UI.ImagePullPolicy=Never',
-                  'Grafana.Image=hendrikmaus/kubernetes-dummy-image',
-                  'Grafana.ImagePullPolicy=IfNotPresent',
-              ]))
-
+### Core ###
 custom_build(
     'opennms/horizon-stream-core',
-    'platform/tilt-build.sh $EXPECTED_REF',
-    deps=['platform'],)
+    'mvn install -Pbuild-docker-images-enabled -DskipTests -Ddocker.image=$EXPECTED_REF -f platform',
+    deps=['./platform'],
+    ignore=['**/target', '**/dependency-reduced-pom.xml'],
+)
+
+k8s_resource(
+    'opennms-core',
+    port_forwards=['11022:8101', '11080:8181', '11050:5005'],
+    labels=['opennms'],
+)
+
+### Notification ###
+local_resource(
+    'compile-notifications',
+    'mvn clean compile -f notifications',
+    deps=['./notifications/src', './notifications/pom.xml'],
+    ignore=['**/target'],
+    labels=['opennms'],
+)
+
+custom_build(
+    'opennms/horizon-stream-notification',
+    'mvn jib:dockerBuild -Dimage=$EXPECTED_REF -f notifications -Djib.from.platforms=linux/' + cluster_arch_cmd,
+    deps=['./notifications/target/classes', './notifications/pom.xml'],
+    live_update=[
+        sync('./notifications/target/classes', '/app/classes'),
+    ],
+)
+
+k8s_resource(
+    'opennms-notifications',
+    port_forwards=['15080:8080', '15050:5005'],
+    labels=['opennms'],
+    resource_deps=['compile-notifications'],
+)
+
+### Vue.js BFF ###
+local_resource(
+    'compile-rest-server',
+    'mvn clean compile -f rest-server',
+    deps=['./rest-server/src', './rest-server/pom.xml'],
+    ignore=['**/target'],
+    labels=['opennms'],
+)
 
 custom_build(
     'opennms/horizon-stream-rest-server',
-    'mvn jib:dockerBuild -Dimage=$EXPECTED_REF -f rest-server',
-    deps=['rest-server'],
-            live_update = [
-                  sync('./rest-server/src', '/app'),
-          ],)
+    'mvn jib:dockerBuild -Dimage=$EXPECTED_REF -f rest-server -Djib.from.platforms=linux/' + cluster_arch_cmd,
+    deps=['./rest-server/target/classes', './rest-server/pom.xml'],
+    live_update=[
+        sync('./rest-server/target/classes', '/app/classes'),
+    ],
+)
 
+k8s_resource(
+    'opennms-rest-server',
+    port_forwards=['13080:9090', '13050:5005'],
+    labels=['opennms'],
+    resource_deps=['compile-rest-server'],
+)
 
-docker_build("opennms/horizon-stream-ui", "ui", dockerfile="ui/dev/Dockerfile",
-             live_update=[
-                 sync('ui', '/app'),
-                 run('yarn install', trigger=['ui/package.json', 'ui/yarn.lock']),
-             ])
-docker_build("opennms/horizon-stream-grafana", "grafana")
+### Vue.js UI ###
+docker_build(
+    'opennms/horizon-stream-ui',
+    'ui',
+    target='development',
+    live_update=[
+        sync('./ui', '/app'),
+        run('yarn install', trigger=['./ui/package.json', './ui/yarn.lock']),
+    ],
+)
+k8s_resource(
+    'opennms-ui',
+    port_forwards=['17080:80'],
+    labels=['opennms'],
+)
 
-docker_build("opennms/horizon-stream-keycloak", "keycloak-ui",
-             live_update=[
-                 sync('./themes', '/opt/keycloak/themes')
-             ])
+### Minion Gateway ###
+local_resource(
+    'compile-minion-gateway',
+    'mvn clean compile -f minion-gateway -pl main -am',
+    deps=['./minion-gateway/main/src', './minion-gateway/main/pom.xml'],
+    ignore=['**/target'],
+    labels=['opennms'],
+)
 
+custom_build(
+    'opennms/horizon-stream-minion-gateway',
+    'mvn jib:dockerBuild -Dimage=$EXPECTED_REF -f minion-gateway -pl main -Djib.from.platforms=linux/' + cluster_arch_cmd,
+    deps=['./minion-gateway/main/target/classes', './minion-gateway/main/pom.xml'],
+    live_update=[
+        sync('./minion-gateway/main/target/classes', '/app/classes'),
+    ],
+)
 
-# def init():
-#   return "sh -c ./local-sample/run.sh"
-#
-# k8s_context()
-#
-# init_complete = os.getenv( "INIT_COMPLETE" , default = "FALSE" )
-#
-# if init_complete == "FALSE":
-#   os.putenv( "INIT_COMPLETE" , "TRUE" )
-#   local(init(), quiet=False)
-#   k8s_yaml('./operator/local-instance.yaml')
-#
-# if init_complete == "TRUE":
-#   print("Test var: ", init_complete)
+k8s_resource(
+    'opennms-minion-gateway',
+    port_forwards=['16080:8080', '16089:8990'],
+    labels=['opennms'],
+    resource_deps=['compile-minion-gateway'],
+)
 
-# See for more info https://docs.tilt.dev/api.html#api.k8s_kind
-# This is to do with the resource kind, not the Kind cluster manager. This
-# updates the image field on the opennms crd for the api resource, will have to
-# add one for each resource (ui, core, etc). May be better to just update the
-# image directly. 
-# TODO: The operator has a bug where it does not update yet the deployments and
-# redeploys when this is changed, but it should and will be implemented when
-# the fix is in place (FIXED, merged into develop, need to test). See the change below.
-#k8s_yaml('./operator/local-instance.yaml')
-#docker_build('...', '.') # Need to run this first. Instead, use custom_build().
-#k8s_kind('opennms', image_json_path='{.spec.api.image}')
-# Just apply the change directly to the 
+### Minion ###
+custom_build(
+    'opennms/horizon-stream-minion',
+    'mvn install -f minion -Ddocker.image=$EXPECTED_REF -Dtest=false -DfailIfNoTests=false -DskipITs=true -DskipTests=true',
+    deps=['./minion'],
+    ignore=['**/target', '**/dependency-reduced-pom.xml'],
+)
 
-# For importing images into kind cluster, see
-# https://github.com/tilt-dev/kind-local for optimizing this process.
+k8s_resource(
+    'opennms-minion',
+    port_forwards=['12022:8101', '12080:8181', '12050:5005'],
+    labels=['opennms'],
+)
 
-# Note: For testing the
-# https://github.com/tilt-dev/tilt-example-java/tree/master/101-jib, I had to
-# update the record-start-time.sh with the following:
-#    
-#    # Needed to install 'brew install coreutils' on Mac. And change the date to 
-#    # gdate, had to remove the leading zero on startTimeNanos.
-#    cat src/main/java/dev/tilt/example/IndexController.java | \
-#        sed -e "s/startTimeSecs = .*;/startTimeSecs = $(gdate +%-s);/" | \
-#        sed -e "s/startTimeNanos = .*;/startTimeNanos = $(gdate +%-N);/" > \
-#        $tmpfile
+## 3rd Party Resources ##
+### Keycloak ###
+docker_build(
+    'opennms/horizon-stream-keycloak',
+    'keycloak-ui',
+    target='development',
+    live_update=[
+        sync('./keycloak-ui/themes', '/opt/keycloak/themes')
+    ],
+)
+k8s_resource(
+    'onms-keycloak',
+)
 
-# This temporary until the opennms operator can automatically update the
-# deployment from a CRD change.
-# local("kubectl -n opennms rollout restart deployment.apps/opennms-operator", quiet=False)
+### Grafana ###
+docker_build(
+    'opennms/horizon-stream-grafana',
+    'grafana',
+)
+k8s_resource(
+    'grafana',
+    port_forwards=['18080:3000'],
+)
 
-# Go example:
-#docker_build('example-go-image', '.', dockerfile='deployments/Dockerfile')
-#k8s_yaml('deployments/kubernetes.yaml')
-# TODO: Need a way to update the image directly possibly.
-
-# Should not need this, seeing that we have ingresses installed. They update
-# automatically.
-#k8s_resource('example-go', port_forwards=8000)
-
+### Others ###
+k8s_resource(
+    'ingress-nginx-controller',
+    port_forwards=['8123:80'],
+)

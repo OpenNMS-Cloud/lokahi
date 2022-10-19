@@ -12,7 +12,7 @@ on:
 
 jobs:
   release:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     environment: docker-publish-account
     # Enviroment that contains the required secrets.
     steps:
@@ -22,6 +22,10 @@ jobs:
 
       - name: init
         run: |
+
+          # In case a workflow, using the self-hosted runner, has failed and
+          # the kind cluster is still running.
+          kind delete clusters kind
 
           TAG=$(echo ${{ github.event.head_commit.message }} | awk '{ print $2 }')
 

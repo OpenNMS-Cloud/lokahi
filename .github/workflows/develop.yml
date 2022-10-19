@@ -28,7 +28,9 @@ jobs:
       - name: init
         run: |
 
-          echo "For init steps."
+          # In case a previous workflow, using self-hosted runner, failed with
+          # kind cluster still running, delete it. It uses a lot of space. 
+          kind delete clusters kind
 
       - name: feature-ui
         id: action-feature-ui

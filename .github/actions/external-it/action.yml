@@ -47,17 +47,37 @@ runs:
         cd operator/
         ./scripts/deploy-horizon-stream.sh
 
-        sleep 60
+        # Load image into kind cluster, this step can be removed if we get the
+        # kind registry working.
+        kind load docker-image opennms/operator:local-build
+        kind load docker-image opennms/horizon-stream-core:local& 
+        kind load docker-image opennms/horizon-stream-minion:local& 
+        kind load docker-image opennms/horizon-stream-minion-gateway:local& 
+        kind load docker-image opennms/horizon-stream-keycloak:local& 
+        kind load docker-image opennms/horizon-stream-grafana:local& 
+        kind load docker-image opennms/horizon-stream-ui:local& 
+        kind load docker-image opennms/horizon-stream-notification:local& 
+        kind load docker-image opennms/horizon-stream-rest-server:local& 
+
+        # Need to wait for the images to be loaded.
+        sleep 120
+
+        # Update the image tags in all the deployments.
+        kubectl -n local-instance patch deployments opennms-ui             -p '{"spec": {"template": {"spec":{"containers":[{"name": "opennms-ui",            "image":"opennms/horizon-stream-ui:local"}]}}}}'
+        kubectl -n local-instance patch deployments opennms-core           -p '{"spec": {"template": {"spec":{"containers":[{"name": "opennms-core",          "image":"opennms/horizon-stream-core:local"}]}}}}'
+        kubectl -n local-instance patch deployments opennms-rest-server    -p '{"spec": {"template": {"spec":{"containers":[{"name": "opennms-rest-server",   "image":"opennms/horizon-stream-rest-server:local"}]}}}}'
+        kubectl -n local-instance patch deployments opennms-notifications  -p '{"spec": {"template": {"spec":{"containers":[{"name": "opennms-notifications", "image":"opennms/horizon-stream-rest-server:local"}]}}}}'
+        kubectl -n local-instance patch deployments opennms-minion         -p '{"spec": {"template": {"spec":{"containers":[{"name": "opennms-minion",        "image":"opennms/horizon-stream-rest-server:local"}]}}}}'
+        kubectl -n local-instance patch deployments opennms-minion-gateway -p '{"spec": {"template": {"spec":{"containers":[{"name": "opennms-minion-gateway","image":"opennms/horizon-stream-rest-server:local"}]}}}}'
+        kubectl -n local-instance patch deployments onms-keycloak          -p '{"spec": {"template": {"spec":{"containers":[{"name": "keycloak",              "image":"opennms/horizon-stream-keycloak:local"}]}}}}'
+        kubectl -n local-instance patch deployments grafana                -p '{"spec": {"template": {"spec":{"containers":[{"name": "grafana",               "image":"opennms/horizon-stream-grafana:local"}]}}}}'
 
       shell: bash
 
     - name: Setup & Run Cucumber Tests
       run: |
 
-        ## Test
-        echo "test 1"
-        kubectl get all 
-        kubectl get ingress 
+        kubectl get pods --all-namespaces
 
         ### Install dependecies
         ##cd platform/

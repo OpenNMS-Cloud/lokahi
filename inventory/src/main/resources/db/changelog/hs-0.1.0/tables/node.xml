@@ -12,29 +12,22 @@
         </preConditions>
 
         <createTable tableName="node">
-<!--            todo: type - bigint, bigserial -->
-            <column name="id" type="integer">
-                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_nodeid"/>
-            </column>
+            <column name="id" type="BIGSERIAL" autoIncrement="true"/>
 
-<!--          todo:  add teneant ID, type: placeholder, maybe string based, tennant id comes from portal (assign) -->
+            <column name="tenant_id" type="BIGINT"/>
 
-            <!-- Time node was added to the database -->
             <column name="create_time" type="TIMESTAMP">
                 <constraints nullable="false"/>
             </column>
 
-            <!-- User-friendly name associated with the node. -->
-            <column name="nodelabel" type="varchar(256)"/>
-
+            <column name="nodelabel" type="VARCHAR(256)">
+                <constraints nullable="false"/>
+            </column>
         </createTable>
 
-        <addNotNullConstraint tableName="node" columnName="nodelabel"/>
-
-<!--        todo: add (nodeid, tenant) as an index-->
-
-        <createIndex tableName="node" indexName="node_label_idx">
-            <column name="nodelabel"/>
+        <createIndex tableName="node" indexName="node_id_tenant_id_idx">
+            <column name="id"/>
+            <column name="tenant_id"/>
         </createIndex>
     </changeSet>
 

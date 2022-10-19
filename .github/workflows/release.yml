@@ -263,13 +263,13 @@ jobs:
           docker push opennms/operator:${{ env.RELEASE_TAG }}
           docker push opennms/operator:latest
 
-      - name: tag-release-branch
-        run: |
+      #- name: tag-release-branch
+      #  run: |
 
-          # The following checkouts the release branch and merges develop into
-          # it and then tags release.
-          git fetch
-          git tag ${{ env.RELEASE_TAG }}
-          git push origin ${{ env.RELEASE_TAG }}
+      #    # The following checkouts the release branch and merges develop into
+      #    # it and then tags release.
+      #    git fetch
+      #    git tag ${{ env.RELEASE_TAG }}
+      #    git push origin ${{ env.RELEASE_TAG }}
 
 

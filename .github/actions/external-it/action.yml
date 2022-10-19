@@ -83,4 +83,6 @@ runs:
         ##  fi
         ##done
 
+        kind delete clusters kind
+
       shell: bash

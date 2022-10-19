@@ -1,5 +1,0 @@
-# your helm chart values here
-Operator:
-  image: opennms/operator:latest
-TLS:
-  Enabled: true

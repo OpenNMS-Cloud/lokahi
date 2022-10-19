@@ -26,7 +26,7 @@ type PostgresHandler struct {
 	ServiceHandlerObject
 }
 
-func (h *PostgresHandler) ProvideConfig(values values.TemplateValues) []client.Object {
+func (h *PostgresHandler) UpdateConfig(values values.TemplateValues) {
 	var initSecret corev1.Secret
 	var credSecret corev1.Secret
 	var service corev1.Service
@@ -43,6 +43,4 @@ func (h *PostgresHandler) ProvideConfig(values values.TemplateValues) []client.O
 		&service,
 		&deployment,
 	}
-
-	return h.Config
 }

@@ -26,7 +26,7 @@ type KafkaHandler struct {
 	ServiceHandlerObject
 }
 
-func (h *KafkaHandler) ProvideConfig(values values.TemplateValues) []client.Object {
+func (h *KafkaHandler) UpdateConfig(values values.TemplateValues) {
 
 	var deployment appsv1.Deployment
 	var service corev1.Service
@@ -39,5 +39,4 @@ func (h *KafkaHandler) ProvideConfig(values values.TemplateValues) []client.Obje
 		&deployment,
 	}
 
-	return h.Config
 }

@@ -15,34 +15,32 @@ limitations under the License.
 package handlers
 
 import (
-    "github.com/OpenNMS/opennms-operator/internal/model/values"
-    "github.com/OpenNMS/opennms-operator/internal/util/yaml"
-    appsv1 "k8s.io/api/apps/v1"
-    corev1 "k8s.io/api/core/v1"
-    "sigs.k8s.io/controller-runtime/pkg/client"
+	"github.com/OpenNMS/opennms-operator/internal/model/values"
+	"github.com/OpenNMS/opennms-operator/internal/util/yaml"
+	appsv1 "k8s.io/api/apps/v1"
+	corev1 "k8s.io/api/core/v1"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 type KeycloakHandler struct {
-    ServiceHandlerObject
+	ServiceHandlerObject
 }
 
-func (h *KeycloakHandler) ProvideConfig(values values.TemplateValues) []client.Object {
-    var initialAdminSecret corev1.Secret
-    var realmConfigmap corev1.ConfigMap
-    var deployment appsv1.Deployment
-    var service corev1.Service
+func (h *KeycloakHandler) UpdateConfig(values values.TemplateValues) {
+	var initialAdminSecret corev1.Secret
+	var realmConfigmap corev1.ConfigMap
+	var deployment appsv1.Deployment
+	var service corev1.Service
 
-    yaml.LoadYaml(filepath("keycloak/keycloak-initial-cred-secret.yaml"), values, &initialAdminSecret)
-    yaml.LoadYaml(filepath("keycloak/keycloak-realm-configmap.yaml"), values, &realmConfigmap)
-    yaml.LoadYaml(filepath("keycloak/keycloak-deployment.yaml"), values, &deployment)
-    yaml.LoadYaml(filepath("keycloak/keycloak-service.yaml"), values, &service)
+	yaml.LoadYaml(filepath("keycloak/keycloak-initial-cred-secret.yaml"), values, &initialAdminSecret)
+	yaml.LoadYaml(filepath("keycloak/keycloak-realm-configmap.yaml"), values, &realmConfigmap)
+	yaml.LoadYaml(filepath("keycloak/keycloak-deployment.yaml"), values, &deployment)
+	yaml.LoadYaml(filepath("keycloak/keycloak-service.yaml"), values, &service)
 
-    h.Config = []client.Object{
-        &initialAdminSecret,
-        &realmConfigmap,
-        &deployment,
-        &service,
-    }
-
-    return h.Config
+	h.Config = []client.Object{
+		&initialAdminSecret,
+		&realmConfigmap,
+		&deployment,
+		&service,
+	}
 }

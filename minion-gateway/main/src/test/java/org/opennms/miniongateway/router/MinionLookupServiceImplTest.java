@@ -4,8 +4,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
@@ -17,7 +19,9 @@ import java.util.concurrent.locks.Lock;
 import org.apache.ignite.Ignite;
 import org.apache.ignite.IgniteCache;
 import org.apache.ignite.IgniteCluster;
+import org.apache.ignite.cache.CacheAtomicityMode;
 import org.apache.ignite.cluster.ClusterNode;
+import org.apache.ignite.configuration.CacheConfiguration;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -74,15 +78,16 @@ public class MinionLookupServiceImplTest {
         doAnswer((Answer<Queue<UUID>>) invocationOnMock -> locationMap.put(invocationOnMock.getArgument(0), invocationOnMock.getArgument(1))).
             when(igniteLocationCache).put(any(), any());
 
-        when(ignite.getOrCreateCache(eq(MinionLookupServiceImpl.MINIONS_BY_ID))).thenReturn(igniteIdCache);
-        when(ignite.getOrCreateCache(eq(MinionLookupServiceImpl.MINIONS_BY_LOCATION))).thenReturn(igniteLocationCache);
+        doReturn(igniteIdCache).when(ignite).getOrCreateCache(argThat((CacheConfiguration config) -> config.getName().equals(MinionLookupServiceImpl.MINIONS_BY_ID)));
+        doReturn(igniteLocationCache).when(ignite).getOrCreateCache(argThat((CacheConfiguration config) -> config.getName().equals(MinionLookupServiceImpl.MINIONS_BY_LOCATION)));
+
         when(ignite.cache(eq(MinionLookupServiceImpl.MINIONS_BY_ID))).thenReturn(igniteIdCache);
-        when(ignite.cache(eq(MinionLookupServiceImpl.MINIONS_BY_ID))).thenReturn(igniteLocationCache);
+        when(ignite.cache(eq(MinionLookupServiceImpl.MINIONS_BY_LOCATION))).thenReturn(igniteLocationCache);
         when(ignite.cluster()).thenReturn(igniteCluster);
         when(igniteCluster.localNode()).thenReturn(clusterNode);
         when(clusterNode.id()).thenReturn(localNodeUUID);
 
-        
+
         minionLookupService = new MinionLookupServiceImpl(ignite);
     }
     

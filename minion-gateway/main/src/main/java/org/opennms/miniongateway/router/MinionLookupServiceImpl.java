@@ -7,6 +7,8 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.locks.Lock;
 import org.apache.ignite.Ignite;
 import org.apache.ignite.IgniteCache;
+import org.apache.ignite.cache.CacheAtomicityMode;
+import org.apache.ignite.configuration.CacheConfiguration;
 import org.opennms.horizon.shared.ipc.grpc.server.manager.MinionInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,8 +30,18 @@ public class MinionLookupServiceImpl implements MinionLookupService {
 
         this.ignite = ignite;
 
-        minionByIdCache = ignite.getOrCreateCache(MINIONS_BY_ID);
-        minionByLocationCache = ignite.getOrCreateCache(MINIONS_BY_LOCATION);
+        // We need to be able to lock the caches when inserting new values, to insure that there is no race condition
+        // with competing threads that may be trying to insert the same new location. So we will configure both caches
+        // to be TRANSACTIONAL and be ready for locking.
+        CacheConfiguration<String, UUID> minionByIdCacheConfig = new CacheConfiguration<String, UUID>().
+            setAtomicityMode(CacheAtomicityMode.TRANSACTIONAL).
+            setName(MINIONS_BY_ID);
+        minionByIdCache = ignite.getOrCreateCache(minionByIdCacheConfig);
+
+        CacheConfiguration<String, Queue<UUID>> minionByLocationCacheConfig = new CacheConfiguration<String, Queue<UUID>>().
+            setAtomicityMode(CacheAtomicityMode.TRANSACTIONAL).
+            setName(MINIONS_BY_LOCATION);
+        minionByLocationCache = ignite.getOrCreateCache(minionByLocationCacheConfig);
     }
 
     @Override

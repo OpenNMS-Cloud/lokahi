@@ -30,7 +30,7 @@ type IngressHandler struct {
 	ServiceHandlerObject
 }
 
-func (h *IngressHandler) ProvideConfig(values values.TemplateValues) []client.Object {
+func (h *IngressHandler) UpdateConfig(values values.TemplateValues) {
 
 	//INGRESS CONTROLLER CONFIGS
 	var controllerServiceAccount corev1.ServiceAccount
@@ -118,5 +118,4 @@ func (h *IngressHandler) ProvideConfig(values values.TemplateValues) []client.Ob
 		&opennmsIngress,
 	}
 
-	return h.Config
 }

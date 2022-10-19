@@ -145,6 +145,21 @@ func getMinionValues(spec v1alpha1.OpenNMSSpec, v values.OpenNMSValues) values.O
 	if spec.Minion.Disk != "" {
 		v.Minion.VolumeSize = spec.Minion.Disk
 	}
+
+	if spec.MinionGateway.Image != "" {
+		v.MinionGateway.Image = spec.MinionGateway.Image
+	}
+	if spec.MinionGateway.CPU != "" {
+		v.MinionGateway.Resources.Requests.Cpu = spec.MinionGateway.CPU
+		v.MinionGateway.Resources.Limits.Cpu = spec.MinionGateway.CPU
+	}
+	if spec.MinionGateway.MEM != "" {
+		v.MinionGateway.Resources.Requests.Memory = spec.MinionGateway.MEM
+		v.MinionGateway.Resources.Limits.Memory = spec.MinionGateway.MEM
+	}
+	if spec.MinionGateway.Disk != "" {
+		v.MinionGateway.VolumeSize = spec.MinionGateway.Disk
+	}
 	return v
 }
 
@@ -203,6 +218,9 @@ func overrideImages(v values.Values) values.Values {
 
 // getPostgresValues - get Postgres DB values from the CRD
 func getPostgresValues(spec v1alpha1.OpenNMSSpec, v values.PostgresValues) values.PostgresValues {
+	if spec.Postgres.Image != "" {
+		v.Image = spec.Postgres.Image
+	}
 	if spec.Postgres.Disk != "" {
 		v.VolumeSize = spec.Postgres.Disk
 	}

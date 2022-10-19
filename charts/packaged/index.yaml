@@ -2,14 +2,28 @@ apiVersion: v1
 entries:
   opennms:
   - apiVersion: v2
-    created: "2022-09-26T15:01:26.109658-04:00"
+    created: "2022-10-17T12:23:25.909672-04:00"
+    digest: 3e543e9529ba3b327a1b2b8d2bd9e86268a664513f234c78159bf20ce6037b94
+    name: opennms
+    urls:
+    - https://opennms.github.io/horizon-stream/charts/packaged/opennms-0.5.1.tgz
+    version: 0.5.1
+  - apiVersion: v2
+    created: "2022-10-17T12:22:21.012523-04:00"
+    digest: 624702dbe0284677158954732b5becc1fec4d7935949714f0f33779c64f5c089
+    name: opennms
+    urls:
+    - https://opennms.github.io/horizon-stream/charts/packaged/opennms-0.5.0.tgz
+    version: 0.5.0
+  - apiVersion: v2
+    created: "2022-10-17T12:23:25.908565-04:00"
     digest: fefba906fdd235f9ad57dee57973fd12f6c2d9906d2a971745279dbeb0409499
     name: opennms
     urls:
     - https://opennms.github.io/horizon-stream/charts/packaged/opennms-0.4.0.tgz
     version: 0.4.0
   - apiVersion: v2
-    created: "2022-09-26T15:01:26.108343-04:00"
+    created: "2022-10-17T12:23:25.906572-04:00"
     digest: fe3318c6c684061da0a8e10b53eea48aa557e489a99089685186c08b697dd909
     name: opennms
     urls:
@@ -23,14 +37,14 @@ entries:
     - https://opennms.github.io/horizon-stream/charts/packaged/opennms-0.2.0.tgz
     version: 0.2.0
   - apiVersion: v2
-    created: "2022-09-26T15:01:26.107047-04:00"
+    created: "2022-10-17T12:23:25.90519-04:00"
     digest: 6c7ff0329b30e75c37c27997c31364feade43be327042bd88a74f65f85484100
     name: opennms
     urls:
     - https://opennms.github.io/horizon-stream/charts/packaged/opennms-0.1.2.tgz
     version: 0.1.2
   - apiVersion: v2
-    created: "2022-09-26T15:01:26.105904-04:00"
+    created: "2022-10-17T12:23:25.904417-04:00"
     digest: 6306ff0d5e059ea56fcdf26be5470a90408dcf71c975d137004261b6afacc837
     name: opennms
     urls:
@@ -38,7 +52,21 @@ entries:
     version: 0.1.1
   opennms-operator:
   - apiVersion: v2
-    created: "2022-09-26T15:01:26.111339-04:00"
+    created: "2022-10-17T12:23:25.91179-04:00"
+    description: A Kubernetes operator for deploying and maintaining OpenNMS in the
+      cloud.
+    digest: 5d64754eb3ee3ccae04760a713a824e4cb150f0dc4d043800af6858bf3b34ef7
+    home: https://github.com/OpenNMS/horizon-stream
+    icon: https://www.opennms.com/wp-content/uploads/2021/04/OpenNMS_Horizontal-Logo_Light-BG-retina-website.png
+    maintainers:
+    - email: jkapp@opennms.com
+      name: Jeffrey-David Kapp
+    name: opennms-operator
+    urls:
+    - https://opennms.github.io/horizon-stream/charts/packaged/opennms-operator-0.4.1.tgz
+    version: 0.4.1
+  - apiVersion: v2
+    created: "2022-10-17T12:23:25.911587-04:00"
     description: A Kubernetes operator for deploying and maintaining OpenNMS in the
       cloud.
     digest: 65861f5ae4023fdd20ac7dac850fb5c170032bad1688be4f740d1f9df7dc4822
@@ -52,7 +80,7 @@ entries:
     - https://opennms.github.io/horizon-stream/charts/packaged/opennms-operator-0.4.0.tgz
     version: 0.4.0
   - apiVersion: v2
-    created: "2022-09-26T15:01:26.11109-04:00"
+    created: "2022-10-17T12:23:25.911199-04:00"
     description: A Kubernetes operator for deploying and maintaining OpenNMS in the
       cloud.
     digest: f140d9701ff28625db9116a31e9d1bb86ff278a6aa8abeb55bee7d4961de9dc1
@@ -80,7 +108,7 @@ entries:
     - https://opennms.github.io/horizon-stream/charts/packaged/opennms-operator-0.2.0.tgz
     version: 0.2.0
   - apiVersion: v2
-    created: "2022-09-26T15:01:26.110726-04:00"
+    created: "2022-10-17T12:23:25.910712-04:00"
     description: A Kubernetes operator for deploying and maintaining OpenNMS in the
       cloud.
     digest: c8ff1ab6f66feb32907d4b6486684fe8bdb6d0cd82b4a13bebe81f8f3f72d1c4
@@ -94,7 +122,7 @@ entries:
     - https://opennms.github.io/horizon-stream/charts/packaged/opennms-operator-0.1.2.tgz
     version: 0.1.2
   - apiVersion: v2
-    created: "2022-09-26T15:01:26.110239-04:00"
+    created: "2022-10-17T12:23:25.910193-04:00"
     description: A Kubernetes operator for deploying and maintaining OpenNMS in the
       cloud.
     digest: 2004c4ba1b805007b2527fe3260d65fc2f2e917399cd41f44b2a5adcd88684ac
@@ -109,7 +137,7 @@ entries:
     version: 0.1.1
   opennms-operator-dependencies:
   - apiVersion: v2
-    created: "2022-09-26T15:01:26.112674-04:00"
+    created: "2022-10-17T12:23:25.91299-04:00"
     dependencies:
     - name: kubernetes-replicator
       repository: https://helm.mittwald.de
@@ -131,7 +159,7 @@ entries:
     - https://opennms.github.io/horizon-stream/charts/packaged/opennms-operator-dependencies-0.1.4.tgz
     version: 0.1.4
   - apiVersion: v2
-    created: "2022-09-26T15:01:26.112111-04:00"
+    created: "2022-10-17T12:23:25.912551-04:00"
     dependencies:
     - name: kubernetes-replicator
       repository: https://helm.mittwald.de
@@ -142,10 +170,10 @@ entries:
     - https://opennms.github.io/horizon-stream/charts/packaged/opennms-operator-dependencies-0.1.2.tgz
     version: 0.1.2
   - apiVersion: v2
-    created: "2022-09-26T15:01:26.111625-04:00"
+    created: "2022-10-17T12:23:25.912036-04:00"
     digest: 5fd26a59231ab173a8b7b0b51e60575bf955fdc11615a3bd65b30da5690e074d
     name: opennms-operator-dependencies
     urls:
     - https://opennms.github.io/horizon-stream/charts/packaged/opennms-operator-dependencies-0.1.0.tgz
     version: 0.1.0
-generated: "2022-09-26T15:01:26.104608-04:00"
+generated: "2022-10-17T12:23:25.903545-04:00"

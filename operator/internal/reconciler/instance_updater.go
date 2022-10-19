@@ -15,106 +15,95 @@ limitations under the License.
 package reconciler
 
 import (
-	"context"
-	"fmt"
-	"github.com/OpenNMS/opennms-operator/api/v1alpha1"
-	"github.com/OpenNMS/opennms-operator/internal/util/maps"
-	"github.com/OpenNMS/opennms-operator/internal/util/subsets"
-	v1 "k8s.io/api/apps/v1"
-	batchv1 "k8s.io/api/batch/v1"
-	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/types"
-	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/reconcile"
-	"time"
+    "context"
+    "github.com/OpenNMS/opennms-operator/api/v1alpha1"
+    "github.com/OpenNMS/opennms-operator/internal/model/values"
+    valuesutil "github.com/OpenNMS/opennms-operator/internal/util/crd"
+    "github.com/OpenNMS/opennms-operator/internal/util/security"
+    v1 "k8s.io/api/core/v1"
+    "k8s.io/apimachinery/pkg/types"
 )
 
-func (r *OpenNMSReconciler) updateDeployment(ctx context.Context, instance *v1alpha1.OpenNMS, resource client.Object, deployedResource client.Object) (*reconcile.Result, error) {
-	if !subsets.SubsetEqual(resource, deployedResource) {
-		r.updateStatus(ctx, instance, false, fmt.Sprintf("updating deployment: %s", resource.GetName()))
-		if err := r.Update(ctx, resource); err != nil {
-			return &reconcile.Result{}, err
-		}
-		return &ctrl.Result{RequeueAfter: 10 * time.Second}, nil
-	} else {
-		// Determine if the resources are fully created, otherwise wait longer
-		deployment := deployedResource.(*v1.Deployment)
-		if deployment.Status.ReadyReplicas != deployment.Status.Replicas {
-			return &ctrl.Result{RequeueAfter: 10 * time.Second}, nil
-		}
-	}
-	return nil, nil
+// SetValues - set values for an instance based on it's crd
+func (i *Instance) SetValues(ctx context.Context) {
+    namespace := i.CRD.Namespace
+
+    templateValues := i.Values
+
+    templateValues = valuesutil.ConvertCRDToValues(i.CRD, templateValues)
+
+    // only set new passwords if they weren't already created by a previous operator
+    templateValues, existingCreds := i.CheckForExistingCoreCreds(ctx, templateValues, namespace)
+    if !existingCreds { // only set new passwords if they weren't already created by a previous operator
+        templateValues = setCorePasswords(templateValues, i.CRD.Spec.Credentials)
+    }
+
+    templateValues, existingCreds = i.CheckForExistingPostgresCreds(ctx, templateValues, namespace)
+    if !existingCreds {
+        templateValues = setPostgresPassword(templateValues)
+    }
+
+    i.Values = templateValues
 }
 
-func (r *OpenNMSReconciler) updateStatefulSet(ctx context.Context, instance *v1alpha1.OpenNMS, resource client.Object, deployedResource client.Object) (*reconcile.Result, error) {
-	if !subsets.SubsetEqual(resource, deployedResource) {
-		r.updateStatus(ctx, instance, false, fmt.Sprintf("updating sattefulset: %s", resource.GetName()))
-		if err := r.Update(ctx, resource); err != nil {
-			return &reconcile.Result{}, err
-		}
-		return &ctrl.Result{RequeueAfter: 10 * time.Second}, nil
-	} else {
-		// Determine if the resources are fully created, otherwise wait longer
-		statefulset := deployedResource.(*v1.StatefulSet)
-		if statefulset.Status.ReadyReplicas != statefulset.Status.Replicas {
-			return &ctrl.Result{RequeueAfter: 10 * time.Second}, nil
-		}
-	}
+// CheckForExistingCoreCreds - checks if core credentials already exist for a given namespace
+func (i *Instance) CheckForExistingCoreCreds(ctx context.Context, v values.TemplateValues, namespace string) (values.TemplateValues, bool) {
+    var credSecret v1.Secret
 
-	return nil, nil
+    err := i.Client.Get(ctx, types.NamespacedName{Namespace: namespace, Name: v.Values.Keycloak.ServiceName + "-initial-admin"}, &credSecret)
+    if err != nil {
+        return v, false
+    }
+
+    existingAdminPwd := string(credSecret.Data["password"])
+    if existingAdminPwd == "" {
+        return v, false
+    }
+    v.Values.Keycloak.AdminPassword = existingAdminPwd
+
+    return v, true
 }
 
-func (r *OpenNMSReconciler) updateJob(deployedResource client.Object) (*reconcile.Result, error) {
-	job := deployedResource.(*batchv1.Job)
-	if job.Status.Succeeded < 1 {
-		return &ctrl.Result{RequeueAfter: 10 * time.Second}, nil
-	}
-	return nil, nil
+// CheckForExistingPostgresCreds - checks if core credentials already exist for a given namespace
+func (i *Instance) CheckForExistingPostgresCreds(ctx context.Context, v values.TemplateValues, namespace string) (values.TemplateValues, bool) {
+    var credSecret v1.Secret
+    err := i.Client.Get(ctx, types.NamespacedName{Namespace: namespace, Name: "postgres"}, &credSecret)
+    if err != nil {
+        return v, false
+    }
+    adminPwd := string(credSecret.Data["adminPwd"])
+    keycloakPwd := string(credSecret.Data["keycloakPwd"])
+    notificationPwd := string(credSecret.Data["notificationPwd"])
+    grafanaPwd := string(credSecret.Data["grafanaPwd"])
+    if adminPwd == "" || keycloakPwd == "" || notificationPwd == "" {
+        return v, false
+    }
+    v.Values.Postgres.AdminPassword = adminPwd
+    v.Values.Postgres.KeycloakPassword = keycloakPwd
+    v.Values.Postgres.NotificationPassword = notificationPwd
+    v.Values.Postgres.GrafanaPassword = grafanaPwd
+    return v, true
 }
 
-func (r *OpenNMSReconciler) updateSecret(ctx context.Context, resource client.Object, deployedResource client.Object) (*reconcile.Result, error) {
-	//have to move secret data to StringData for SubsetEqual
-	deployedResource.(*corev1.Secret).StringData = maps.ConvertByteToStringMap(deployedResource.(*corev1.Secret).Data)
-	if resource.GetName() == "onms-allowed-users" && !subsets.SubsetEqual(resource, deployedResource) {
-		err := r.updateAllowedUsersSecret(ctx, resource)
-		if err != nil {
-			return &reconcile.Result{}, err
-		}
-	}
-	return nil, nil
+// setCorePasswords - sets randomly generated passwords for the core if not already set
+func setCorePasswords(tv values.TemplateValues, creds v1alpha1.Credentials) values.TemplateValues {
+    if creds.AdminPassword == "" {
+        tv.Values.Keycloak.AdminPassword = security.GeneratePassword(true)
+    } else {
+        tv.Values.Keycloak.AdminPassword = creds.AdminPassword
+    }
+
+    return tv
 }
 
-func (r *OpenNMSReconciler) updateConfigMap(ctx context.Context, instance *v1alpha1.OpenNMS, resource client.Object, deployedResource client.Object) (*reconcile.Result, error) {
-	if !subsets.SubsetEqual(resource, deployedResource) {
-		r.updateStatus(ctx, instance, false, fmt.Sprintf("updating sattefulset: %s", resource.GetName()))
-		if err := r.Update(ctx, resource); err != nil {
-			return &reconcile.Result{}, err
-		}
-		return &reconcile.Result{RequeueAfter: 10 * time.Second}, nil
-	}
-	return nil, nil
-}
+// setPostgresPassword - sets randomly generated password for Postgres if not already set
+func setPostgresPassword(tv values.TemplateValues) values.TemplateValues {
+    tv.Values.Postgres.AdminPassword = security.GeneratePassword(true)
+    tv.Values.Postgres.OpenNMSPassword = security.GeneratePassword(true)
+    tv.Values.Postgres.KeycloakPassword = security.GeneratePassword(true)
+    tv.Values.Postgres.NotificationPassword = security.GeneratePassword(true)
 
-func (r *OpenNMSReconciler) updateAllowedUsersSecret(ctx context.Context, resource client.Object) error {
-	// Need to update and restart auth container
-	if err := r.Update(ctx, resource); err != nil {
-		return err
-	}
-	// Update deployment to restart the auth container
-	deployment := &v1.Deployment{}
-	err := r.Get(ctx, types.NamespacedName{Name: "onms-auth", Namespace: resource.GetNamespace()}, deployment)
-	if err != nil {
-		return nil
-	} else {
-		// Update deployment to cause a restart. Needs to be something in the spec.template section for a restart
-		if deployment.Spec.Template.Annotations == nil {
-			deployment.Spec.Template.Annotations = make(map[string]string)
-		}
-		deployment.Spec.Template.Annotations["kubectl.kubernetes.io/restartedAt"] = time.Now().String()
-		if err := r.Update(ctx, deployment); err != nil {
-			return err
-		}
-	}
-	return nil
+    //fed into Grafana via an .ini, so cannot generate with special characters
+    tv.Values.Postgres.GrafanaPassword = security.GeneratePassword(false)
+    return tv
 }

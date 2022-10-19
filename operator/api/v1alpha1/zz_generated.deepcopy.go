@@ -91,6 +91,7 @@ func (in *OpenNMSSpec) DeepCopyInto(out *OpenNMSSpec) {
 	out.API = in.API
 	out.UI = in.UI
 	out.Minion = in.Minion
+	out.MinionGateway = in.MinionGateway
 	out.Notification = in.Notification
 	out.Postgres = in.Postgres
 	out.Keycloak = in.Keycloak

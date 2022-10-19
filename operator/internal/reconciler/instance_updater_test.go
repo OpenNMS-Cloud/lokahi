@@ -42,11 +42,6 @@ func TestUpdateValues(t *testing.T) {
 	}
 
 	k8sClient := fake.NewClientBuilder().Build()
-	testRecon := OpenNMSReconciler{
-		DefaultValues: testValues,
-		Client:        k8sClient,
-	}
-
 	crd := v1alpha1.OpenNMS{
 		ObjectMeta: v1.ObjectMeta{
 			Name: testName,
@@ -56,14 +51,18 @@ func TestUpdateValues(t *testing.T) {
 			Host:      testHost,
 		},
 	}
+	testInstance := Instance{
+		Values: testValues,
+		CRD:    crd,
+		Client: k8sClient,
+	}
 
-	res := testRecon.UpdateValues(context.Background(), crd)
+	testInstance.SetValues(context.Background())
+
+	res := testInstance.Values
 
 	assert.Equal(t, testNamespace, res.Release.Namespace, "should have populated values from reconcile request")
 	assert.Equal(t, "testingHost", res.Values.Host, "should have used values from the default values")
-
-	_, ok := testRecon.ValuesMap[testName]
-	assert.True(t, ok, "should have saved the created values to the reconciler's values map")
 }
 
 func TestCheckForExistingCoreCreds(t *testing.T) {
@@ -78,15 +77,15 @@ func TestCheckForExistingCoreCreds(t *testing.T) {
 		},
 	}
 	k8sClient := fake.NewClientBuilder().Build()
-	testRecon := OpenNMSReconciler{
-		DefaultValues: testValues,
-		Client:        k8sClient,
+	testInstance := Instance{
+		Values: testValues,
+		Client: k8sClient,
 	}
 	ctx := context.Background()
-	_, resbool := testRecon.CheckForExistingCoreCreds(ctx, testValues, "")
+	_, resbool := testInstance.CheckForExistingCoreCreds(ctx, testValues, "")
 	assert.False(t, resbool, "should return that no core creds existed")
 
-	_, resbool = testRecon.CheckForExistingPostgresCreds(ctx, testValues, "")
+	_, resbool = testInstance.CheckForExistingPostgresCreds(ctx, testValues, "")
 	assert.False(t, resbool, "should return that no postgres creds existed")
 
 	adminPwd := "testadminpwd"
@@ -101,7 +100,7 @@ func TestCheckForExistingCoreCreds(t *testing.T) {
 	err := k8sClient.Create(ctx, &coreSecret)
 	assert.Nil(t, err)
 
-	res, resbool := testRecon.CheckForExistingCoreCreds(ctx, testValues, "")
+	res, resbool := testInstance.CheckForExistingCoreCreds(ctx, testValues, "")
 	assert.True(t, resbool, "should return that there are existing creds")
 	assert.Equal(t, adminPwd, res.Values.Keycloak.AdminPassword, "should return the expected admin password values")
 
@@ -121,7 +120,7 @@ func TestCheckForExistingCoreCreds(t *testing.T) {
 	err = k8sClient.Create(ctx, &pgSecret)
 	assert.Nil(t, err)
 
-	res, resbool = testRecon.CheckForExistingPostgresCreds(ctx, testValues, "")
+	res, resbool = testInstance.CheckForExistingPostgresCreds(ctx, testValues, "")
 	assert.True(t, resbool, "should return that there are existing creds")
 	assert.Equal(t, adminPglPwd, res.Values.Postgres.AdminPassword, "should return the postgres expected values")
 	assert.Equal(t, keycloakPwd, res.Values.Postgres.KeycloakPassword, "should return the postgres expected values")

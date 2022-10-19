@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.OpenNMS.MetricsProcessor.ServiceName }}
+  labels:
+    app: {{ .Values.OpenNMS.MetricsProcessor.ServiceName }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: {{ .Values.OpenNMS.MetricsProcessor.Replicas }}
+  selector:
+    matchLabels:
+      run: {{ .Values.OpenNMS.MetricsProcessor.ServiceName }}
+  template:
+    metadata:
+      labels:
+        run: {{ .Values.OpenNMS.MetricsProcessor.ServiceName }}
+    spec:
+      containers:
+        - name: {{ .Values.OpenNMS.MetricsProcessor.ServiceName }}
+          image: {{ .Values.OpenNMS.MetricsProcessor.Image }}
+          imagePullPolicy: {{ .Values.OpenNMS.MetricsProcessor.ImagePullPolicy }}
+          env:
+            - name: JAVA_TOOL_OPTIONS
+              value: "-agentlib:jdwp=transport=dt_socket,server=y,address=5005,suspend=n,quiet=y" # Permanent debug port in `skaffold dev`
+            - name: SPRING_KAFKA_BOOTSTRAP_SERVERS
+              value: "{{ .Values.Kafka.ServiceName }}:9092"
+            - name: PROMETHEUS_PUSHGATEWAY_URL
+              value: "{{ .Values.Prometheus.PushGateway.ServiceName }}:9091"
+
+
+
+

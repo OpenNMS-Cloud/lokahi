@@ -3,7 +3,7 @@
   xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
   xsi:schemaLocation="http://www.osgi.org/xmlns/blueprint/v1.0.0 http://www.osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd">
 
-  <cm:property-placeholder persistent-id="org.opennms.poc.ignite.worker" update-strategy="reload">
+  <cm:property-placeholder persistent-id="org.opennms.horizon.minion.ignite.worker" update-strategy="reload">
     <cm:default-properties>
       <cm:property name="useKubernetes" value="false"/>
       <cm:property name="kubernetes.service.name" value="poc-distributed-scheduling"/>

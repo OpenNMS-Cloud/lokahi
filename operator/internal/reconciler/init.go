@@ -31,7 +31,7 @@ func (r *OpenNMSReconciler) SetupWithManager(mgr ctrl.Manager) error {
 }
 
 func (r *OpenNMSReconciler) InitServiceHandlers() {
-	r.Handlers = []handlers.ServiceHandler{
+	r.StandardHandlers = []handlers.ServiceHandler{
 		&handlers.BaseHandler{}, // MUST BE FIRST
 		&handlers.PostgresHandler{},
 		&handlers.KeycloakHandler{},

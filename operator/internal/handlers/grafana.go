@@ -26,7 +26,7 @@ type GrafanaHandler struct {
     ServiceHandlerObject
 }
 
-func (h *GrafanaHandler) ProvideConfig(values values.TemplateValues) []client.Object {
+func (h *GrafanaHandler) UpdateConfig(values values.TemplateValues) {
     var secret corev1.Secret
     var service corev1.Service
     var deployment appsv1.Deployment
@@ -41,5 +41,4 @@ func (h *GrafanaHandler) ProvideConfig(values values.TemplateValues) []client.Ob
         &deployment,
     }
 
-    return h.Config
 }

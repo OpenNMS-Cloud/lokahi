@@ -33,6 +33,18 @@ OpenNMS:
       Requests:
         Cpu: "1"
         Memory: 1Gi
+  MetricsProcessor:
+    ServiceName: opennms-metrics-processor
+    Image: opennms/horizon-stream-metrics-processor
+    ImagePullPolicy: IfNotPresent
+    Replicas: 1
+    Resources:
+      Limits:
+        Cpu: "1"
+        Memory: 512Mi
+      Requests:
+        Cpu: 250m
+        Memory: 256Mi
   UI:
     Path: /
     ServiceName: opennms-ui
@@ -91,7 +103,7 @@ OpenNMS:
         Memory: 250Mi
 Postgres:
   ServiceName: postgres
-  Image: postgres
+  Image: postgres:14.5-alpine
   ImagePullPolicy: IfNotPresent
   Replicas: 1
   AdminPassword: notset
@@ -107,6 +119,7 @@ Keycloak:
   Port: 8080
   HttpsPort: 8443
   HostnamePort: ~
+  HostnameAdminUrl: ~
   Replicas: 1
   ServiceName: onms-keycloak
   Resources:

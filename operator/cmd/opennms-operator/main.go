@@ -71,6 +71,7 @@ func main() {
 		CodecFactory:  serializer.NewCodecFactory(mgr.GetScheme()),
 		Config:        operatorConfig,
 		DefaultValues: defaultValues,
+		Instances:     map[string]*reconciler.Instance{},
 		ImageChecker:  imageChecker,
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create OpenNMS controller", "controller", "OpenNMS")

@@ -77,6 +77,19 @@ spec:
                     image:
                       description: Docker Image tag for the service
                       type: string
+                minionGateway:
+                  description: Defines cpu,mem and disk size for the Minion
+                  type: object
+                  properties:
+                    cpu:
+                      type: string
+                    disk:
+                      type: string
+                    mem:
+                      type: string
+                    image:
+                      description: Docker Image tag for the service
+                      type: string
                 notification:
                   description: Defines cpu,mem and disk size for the Notification service
                   type: object

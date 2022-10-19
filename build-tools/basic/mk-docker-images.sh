@@ -19,13 +19,13 @@ time {
 	echo "==="
 	echo "=== PLATFORM IMAGE"
 	echo "==="
-	mvn -f platform install -Pbuild-docker-images-enabled -DskipTests -Ddocker.image=opennms/horizon-stream-core:local-basic -Ddocker.skipPush=true
+	mvn -f platform/assemblies/docker install -Pbuild-docker-images-enabled -DskipTests -Ddocker.image=opennms/horizon-stream-core:local-basic -Ddocker.skipPush=true
 
 	echo ""
 	echo "==="
 	echo "=== MINION IMAGE"
 	echo "==="
-	mvn -f minion install -Pbuild-docker-images-enabled -DskipTests -Ddocker.image=opennms/horizon-stream-minion:local-basic -Ddocker.skipPush=true
+	mvn -f minion/docker-assembly install -Pbuild-docker-images-enabled -DskipTests -Ddocker.image=opennms/horizon-stream-minion:local-basic -Ddocker.skipPush=true
 
 	echo ""
 	echo "==="
@@ -37,7 +37,7 @@ time {
 	echo "=== REST-SERVER (AKA API) IMAGE"
 	echo "==="
 	echo "==="
-	mvn -f rest-server jib:dockerBuild -Djib.container.creationTime=USE_CURRENT_TIMESTAMP -Dimage=opennms/horizon-stream-api:local-basic
+	mvn -f rest-server jib:dockerBuild -Djib.container.creationTime=USE_CURRENT_TIMESTAMP -Dimage=opennms/horizon-stream-rest-server:local-basic
 
 	echo ""
 	echo "==="
@@ -49,13 +49,13 @@ time {
 	echo "==="
 	echo "=== KEYCLOAK UI IMAGE"
 	echo "==="
-	docker build -t opennms/horizon-stream-keycloak-dev:local-basic keycloak-ui
+	DOCKER_BUILDKIT=1 docker build -t opennms/horizon-stream-keycloak-dev:local-basic keycloak-ui
 
 	echo ""
 	echo "==="
 	echo "=== GRAFANA IMAGE"
 	echo "==="
-	docker build -t opennms/grafana-dev:local-basic grafana 
+	docker build -t opennms/horizon-stream-grafana-dev:local-basic grafana
 
 	echo ""
 	echo "==="

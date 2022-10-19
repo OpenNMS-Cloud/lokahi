@@ -25,6 +25,10 @@ spec:
     image: opennms/horizon-stream-minion
     cpu: "0"
     mem: 1000Mi
+  minionGateway:
+    image: opennms/horizon-stream-minion-gateway
+    cpu: "0"
+    mem: 500Mi
   notification:
     image: opennms/horizon-stream-notification
     cpu: "0"
@@ -34,7 +38,7 @@ spec:
   grafana:
     image: opennms/horizon-stream-grafana
   postgres:
-    image: postgres:13.3-alpine
+    image: postgres:14.5-alpine
   credentials:
     adminPassword: admin
     userPassword: passw0rd

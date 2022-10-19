@@ -38,6 +38,10 @@ spec:
             - name: KC_HOSTNAME_PORT
               value: "{{ .Values.Keycloak.HostnamePort }}"
             {{- end }}
+            {{- if .Values.Keycloak.HostnameAdminUrl }}
+            - name: KC_HOSTNAME_ADMIN_URL
+              value: "{{ .Values.Keycloak.HostnameAdminUrl }}"
+            {{- end }}
             - name: KC_DB
               value: postgres
             - name: KC_DB_URL_HOST

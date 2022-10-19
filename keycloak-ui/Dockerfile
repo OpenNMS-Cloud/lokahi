@@ -35,5 +35,4 @@ FROM quay.io/keycloak/keycloak:19.0.2 as production
 
 COPY --link --from=build /opt/keycloak/ /opt/keycloak/
 
-ENTRYPOINT ["/opt/keycloak/bin/kc.sh", "start"]
-CMD ["--optimized"]
+ENTRYPOINT ["/opt/keycloak/bin/kc.sh", "start", "--optimized"]

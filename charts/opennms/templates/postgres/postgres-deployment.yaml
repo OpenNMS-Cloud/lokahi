@@ -41,7 +41,7 @@ spec:
       containers:
         - name: {{ .Values.Postgres.ServiceName }}
           image: {{ .Values.Postgres.Image }}
-          imagePullPolicy: Always
+          imagePullPolicy: {{ .Values.Postgres.ImagePullPolicy }}
           env:
             - name: POSTGRES_USER
               valueFrom:

@@ -26,7 +26,7 @@ type BaseHandler struct {
 	ServiceHandlerObject
 }
 
-func (h *BaseHandler) ProvideConfig(values values.TemplateValues) []client.Object {
+func (h *BaseHandler) UpdateConfig(values values.TemplateValues) {
 	var namespace corev1.Namespace
 	var certSecret corev1.Secret
 	var endpointRole rbacv1.Role
@@ -40,6 +40,4 @@ func (h *BaseHandler) ProvideConfig(values values.TemplateValues) []client.Objec
 		&certSecret,
 		&endpointRole,
 	}
-
-	return h.Config
 }

@@ -25,7 +25,7 @@
 ## 25 = postgres
 ## 26 = keycloak
 ## 27 = minion (classic)
-##
+## 28 = metric processor
 
 apiVersion: skaffold/v2beta28
 kind: Config
@@ -70,6 +70,13 @@ build:
       - image: shared_lib
   - image: opennms/horizon-stream-rest-server
     context: rest-server
+    jib: {}
+    sync:
+      auto: true
+    requires:
+      - image: shared_lib
+  - image: opennms/horizon-stream-metrics-processor
+    context: metrics-processor
     jib: {}
     sync:
       auto: true
@@ -172,6 +179,10 @@ portForward:
     resourceName: ingress-nginx-controller
     port: 80 # HTTP
     localPort: 8123
+  - resourceType: deployment
+    resourceName: opennms-metrics-processor
+    port: 5005 #debug
+    localPort: 28050
 deploy:
   helm:
     releases:
@@ -188,6 +199,7 @@ deploy:
           OpenNMS.MinionGateway.Image: opennms/horizon-stream-minion-gateway
           Keycloak.Image: opennms/horizon-stream-keycloak-dev
           Grafana.Image: opennms/horizon-stream-grafana-dev
+          OpenNMS.MetricsProcessor.Image: opennms/horizon-stream-metrics-processor
 profiles:
   - name: prod
   - name: use-operator

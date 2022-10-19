@@ -26,7 +26,7 @@ type MailServerHandler struct {
 	ServiceHandlerObject
 }
 
-func (h *MailServerHandler) ProvideConfig(values values.TemplateValues) []client.Object {
+func (h *MailServerHandler) UpdateConfig(values values.TemplateValues) {
 	var service corev1.Service
 	var deployment appsv1.Deployment
 
@@ -37,6 +37,4 @@ func (h *MailServerHandler) ProvideConfig(values values.TemplateValues) []client
 		&service,
 		&deployment,
 	}
-
-	return h.Config
 }

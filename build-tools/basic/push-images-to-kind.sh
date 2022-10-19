@@ -20,12 +20,12 @@ kind load docker-image prom/prometheus
 kind load docker-image prom/pushgateway
 kind load docker-image busybox
 
-kind load docker-image "opennms/grafana-dev:local-basic"
+kind load docker-image "opennms/horizon-stream-grafana-dev:local-basic"
 kind load docker-image "opennms/horizon-stream-core:local-basic"
 kind load docker-image "opennms/horizon-stream-minion:local-basic"
 kind load docker-image "opennms/horizon-stream-ui:local-basic"
 kind load docker-image "opennms/horizon-stream-keycloak-dev:local-basic"
 kind load docker-image "opennms/horizon-stream-notification:local-basic"
-kind load docker-image "opennms/horizon-stream-api:local-basic"
+kind load docker-image "opennms/horizon-stream-rest-server:local-basic"
 kind load docker-image "opennms/horizon-stream-minion-gateway:local-basic"
 

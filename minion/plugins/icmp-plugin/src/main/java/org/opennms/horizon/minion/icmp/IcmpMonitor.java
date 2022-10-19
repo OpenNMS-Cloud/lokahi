@@ -18,6 +18,8 @@ import org.opennms.horizon.minion.plugin.api.ServiceMonitorResponse.Status;
 import org.opennms.horizon.minion.plugin.api.ServiceMonitorResponseImpl;
 import org.opennms.icmp.contract.IcmpMonitorRequest;
 import org.opennms.taskset.contract.MonitorType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class IcmpMonitor extends AbstractServiceMonitor {
 
@@ -117,6 +119,7 @@ public class IcmpMonitor extends AbstractServiceMonitor {
 //----------------------------------------
 
     private static class MyPingResponseCallback implements PingResponseCallback {
+        private final Logger logger = LoggerFactory.getLogger(MyPingResponseCallback.class);
         private final CompletableFuture<ServiceMonitorResponse> future;
 
         public MyPingResponseCallback(CompletableFuture<ServiceMonitorResponse> future) {

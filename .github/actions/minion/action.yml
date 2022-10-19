@@ -1,0 +1,19 @@
+name: 'Build and test Minion'
+description: 'This implements unit and built-time integration tests on minion, dir minion.'
+inputs:
+  dir-location:
+    description: 'The dir containing the change.'
+    required: true
+    default: 'none'
+
+runs:
+  using: "composite"
+  steps:
+    - name: global data
+      run: |
+
+        #cd ${{ inputs.dir-location }}
+
+        mvn -f minion clean install -Pbuild-docker-images-enabled -DskipTests -Ddocker.image=opennms/horizon-stream-minion:local -Ddocker.skipPush=true
+
+      shell: bash

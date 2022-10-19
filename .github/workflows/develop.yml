@@ -19,7 +19,6 @@ jobs:
   develop:
     # If label for PR, closed on PR, or develop branch on push, then run., 
     if: ${{ ( github.event.label.name == 'actions-develop' ) || ( github.event.action == 'closed' ) || ( github.event.ref == 'refs/heads/develop' ) }}
-    #runs-on: ubuntu-latest
     runs-on: self-hosted
     steps:
       - name: Check out repository code
@@ -62,29 +61,45 @@ jobs:
       #  with:
       #    dir-location: 'shared-lib'
 
-      #- name: feature-operator
-      #  id: action-feature-operator
-      #  uses: ./.github/actions/operator
-      #  with:
-      #    dir-location: 'operator'
+      - name: feature-operator
+        id: action-feature-operator
+        uses: ./.github/actions/operator
+        with:
+          dir-location: 'operator'
 
-      #- name: feature-core
-      #  id: action-feature-core
-      #  uses: ./.github/actions/core
-      #  with:
-      #    dir-location: 'platform'
+      - name: feature-core
+        id: action-feature-core
+        uses: ./.github/actions/core
+        with:
+          dir-location: 'platform'
 
-      #- name: feature-rest-server
-      #  id: action-rest-server
-      #  uses: ./.github/actions/rest-server
-      #  with:
-      #    dir-location: 'rest-server'
+      - name: feature-rest-server
+        id: action-rest-server
+        uses: ./.github/actions/rest-server
+        with:
+          dir-location: 'rest-server'
 
-      #- name: feature-notifications
-      #  id: action-notifications
-      #  uses: ./.github/actions/notifications
-      #  with:
-      #    dir-location: 'notifications'
+      - name: feature-notifications
+        id: action-notifications
+        uses: ./.github/actions/notifications
+        with:
+          dir-location: 'notifications'
+
+      - name: feature-minion
+        id: action-minion
+        uses: ./.github/actions/minion
+        with:
+          dir-location: 'minion'
+
+      - name: feature-minion-gateway
+        id: action-minion-gateway
+        uses: ./.github/actions/minion-gateway
+        with:
+          dir-location: 'minion-gateway'
+
+      #- name: external-it
+      #  id: action-external-it
+      #  uses: ./.github/actions/external-it
 
       - name: external-it
         id: action-external-it

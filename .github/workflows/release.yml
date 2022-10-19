@@ -98,6 +98,18 @@ jobs:
         with:
           dir-location: 'operator'
 
+      - name: feature-minion
+        id: action-minion
+        uses: ./.github/actions/minion
+        with:
+          dir-location: 'minion'
+
+      - name: feature-minion-gateway
+        id: action-minion-gateway
+        uses: ./.github/actions/minion-gateway
+        with:
+          dir-location: 'minion-gateway'
+
       #- name: external-it
       #  id: action-external-it
       #  uses: ./.github/actions/external-it
@@ -114,6 +126,38 @@ jobs:
           # re-test to confirm.
           #docker login -u ${{ secrets.DOCKERHUB_LOGIN }} -p ${{ secrets.DOCKERHUB_PASS }}
           echo ${{ secrets.DOCKERHUB_PASS }} | docker login -u ${{ secrets.DOCKERHUB_LOGIN }} --password-stdin
+
+      - name: publish-image-minion
+        run: |
+
+          # Login to dockerhub.
+          echo ${{ secrets.DOCKERHUB_PASS }} | docker login -u ${{ secrets.DOCKERHUB_LOGIN }} --password-stdin
+
+          # Publish minion image
+          cd minion/
+
+          # Tag and save the image as a file to be published. Both release version and latest.
+          docker tag opennms/horizon-stream-minion:local opennms/horizon-stream-minion:${{ env.RELEASE_TAG }}
+          docker tag opennms/horizon-stream-minion:local opennms/horizon-stream-minion:latest
+
+          docker push opennms/horizon-stream-minion:${{ env.RELEASE_TAG }}
+          docker push opennms/horizon-stream-minion:latest
+
+      - name: publish-image-minion-gateway
+        run: |
+
+          # Login to dockerhub.
+          echo ${{ secrets.DOCKERHUB_PASS }} | docker login -u ${{ secrets.DOCKERHUB_LOGIN }} --password-stdin
+
+          # Publish minion-gateway image
+          cd minion-gateway/
+
+          # Tag and save the image as a file to be published. Both release version and latest.
+          docker tag opennms/horizon-stream-minion-gateway:local opennms/horizon-stream-minion-gateway:${{ env.RELEASE_TAG }}
+          docker tag opennms/horizon-stream-minion-gateway:local opennms/horizon-stream-minion-gateway:latest
+
+          docker push opennms/horizon-stream-minion-gateway:${{ env.RELEASE_TAG }}
+          docker push opennms/horizon-stream-minion-gateway:latest
 
       - name: publish-image-core
         run: |

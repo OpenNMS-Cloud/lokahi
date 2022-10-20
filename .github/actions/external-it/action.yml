@@ -26,7 +26,7 @@ runs:
         cat /etc/hosts
         sudo echo "127.0.0.1 $DOMAIN" | sudo tee -a /etc/hosts
 
-        ./install-local.sh
+        ./install-local.sh custom-images
 
       shell: bash
 

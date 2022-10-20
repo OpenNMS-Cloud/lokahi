@@ -22,11 +22,9 @@ runs:
         # Delete if exists from previous failed run.
         kind delete clusters kind
         
-        echo "Domain: " $DOMAIN   
-
         # Setup localhost DNS
         cat /etc/hosts
-        sudo echo "127.0.0.1 $DOMAIN" | sudo tee -a /etc/hosts
+        sudo echo "127.0.0.1 onmshs" | sudo tee -a /etc/hosts
 
         ./install-local.sh custom-images
 

@@ -116,6 +116,7 @@ portForward:
   - resourceType: deployment
     resourceName: opennms-rest-server
     port: 9090 # HTTP
+    localPort: 13080
   - resourceType: deployment
     resourceName: opennms-rest-server
     port: 5005 # Debug

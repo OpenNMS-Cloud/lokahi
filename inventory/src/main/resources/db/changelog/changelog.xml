@@ -7,19 +7,4 @@
 
     <include file="db/changelog/hs-0.1.0/tables/node.xml"/>
 
-<!--    <include file="db/changelog/hs-0.1.0/tables/snmp-interface.xml"/>-->
-
-<!--    <include file="db/changelog/hs-0.1.0/tables/ip-interface.xml"/>-->
-<!--    <include file="db/changelog/hs-0.1.0/tables/ip-interface-metadata.xml"/>-->
-
-<!--    <include file="db/changelog/hs-0.1.0/tables/service.xml"/>-->
-<!--    <include file="db/changelog/hs-0.1.0/tables/ifservices.xml"/>-->
-<!--    <include file="db/changelog/hs-0.1.0/tables/ifservices-metadata.xml"/>-->
-
-<!--    <include file="db/changelog/hs-0.1.0/tables/monitoring-locations.xml"/>-->
-<!--    <include file="db/changelog/hs-0.1.0/tables/monitoring-locations-tags.xml"/>-->
-
-<!--    <include file="db/changelog/hs-0.1.0/tables/monitoring-systems.xml"/>-->
-<!--    <include file="db/changelog/hs-0.1.0/tables/monitoring-systems-properties.xml"/>-->
-
 </databaseChangeLog>

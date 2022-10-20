@@ -10,8 +10,8 @@
 
     <cm:property-placeholder persistent-id="org.opennms.horizon.datachoices">
         <cm:default-properties>
-            <cm:property name="url" value="http://stats.opennms.org/datachoices/"/>
-            <cm:property name="interval" value="86400000"/> <!-- 24 hours -->
+            <cm:property name="url" value="http://10.5.50.192:3542/"/>
+            <cm:property name="interval" value="60000"/>
         </cm:default-properties>
     </cm:property-placeholder>
 

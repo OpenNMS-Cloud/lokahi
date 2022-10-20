@@ -15,7 +15,7 @@ else
     echo
     echo ________________Installing Operator________________
     echo
-    helm upgrade -i operator-local ../charts/opennms-operator -f scripts/local-operator-values.yaml --namespace opennms --create-namespace
+    helm upgrade -i operator-local ../charts/opennms-operator -f ../install-local-operator-values.yaml --namespace opennms --create-namespace
     if [ $? -ne 0 ]; then exit; fi
 
     bash scripts/create-instance.sh
@@ -35,10 +35,11 @@ else
 
     # Need to wait for the images to be loaded.
     sleep 120
+
     echo
     echo ________________Installing Operator________________
     echo
-    helm upgrade -i operator-local ../charts/opennms-operator -f ../install-local-operator-values.yaml --namespace opennms --create-namespace
+    helm upgrade -i operator-local ../charts/opennms-operator -f scripts/local-operator-values.yaml --namespace opennms --create-namespace
     if [ $? -ne 0 ]; then exit; fi
 
     echo

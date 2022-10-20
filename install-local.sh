@@ -12,6 +12,16 @@ if [ -z "$1" ]; then
 else
   if [ $1 == "local" ]; then
 
+    echo
+    echo ________________Installing Operator________________
+    echo
+    helm upgrade -i operator-local ../charts/opennms-operator -f scripts/local-operator-values.yaml --namespace opennms --create-namespace
+    if [ $? -ne 0 ]; then exit; fi
+
+    bash scripts/create-instance.sh
+  
+  elif [ "$1" == "custom-images" ]; then
+
     # Will add a kind-registry here at some point, see .github/ for sample script.
     kind load docker-image opennms/operator:local-build&
     kind load docker-image opennms/horizon-stream-core:local&
@@ -25,17 +35,6 @@ else
 
     # Need to wait for the images to be loaded.
     sleep 120
-
-    echo
-    echo ________________Installing Operator________________
-    echo
-    helm upgrade -i operator-local ../charts/opennms-operator -f scripts/local-operator-values.yaml --namespace opennms --create-namespace
-    if [ $? -ne 0 ]; then exit; fi
-
-    bash scripts/create-instance.sh
-  
-  elif [ "$1" == "custom-images" ]; then
-
     echo
     echo ________________Installing Operator________________
     echo

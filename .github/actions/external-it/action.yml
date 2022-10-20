@@ -19,7 +19,9 @@ runs:
     - name: Create & Setup Cluster
       run: |
 
-        #source ./local-sample/config-run 
+        # Delete if exists from previous failed run.
+        kind delete clusters kind
+        
         echo "Domain: " $DOMAIN   
 
         # Setup localhost DNS
@@ -60,6 +62,8 @@ runs:
         ##  fi
         ##done
 
-        kind delete clusters kind
-
       shell: bash
+
+    - name: Cleanup
+      run: |
+        kind delete clusters kind

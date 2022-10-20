@@ -6,11 +6,12 @@ cd operator/
 bash scripts/create-kind-cluster.sh
 
 # This determines whether or not to import custom images or not.
-HELP="Need to pass 'local' parameter to script"
+HELP='Need to pass "local" parameter to script'
 if [ -z "$1" ]; then
-  echo "1 - $HELP"
+  echo "$HELP"
 else
   if [ $1 == "local" ]; then
+
     # Will add a kind-registry here at some point, see .github/ for sample script.
     kind load docker-image opennms/operator:local-build&
     kind load docker-image opennms/horizon-stream-core:local&
@@ -33,7 +34,7 @@ else
 
     bash scripts/create-instance.sh
   
-  elif [ $1 == "custom-images" ]; then
+  elif [ "$1" == "custom-images" ]; then
 
     echo
     echo ________________Installing Operator________________
@@ -45,10 +46,10 @@ else
     echo ____________Installing Local Instance______________
     echo
     kubectl apply -f install-local-onms-instance.yaml
-    if [ $? -ne 0 ]; then exit; f
+    if [ $? -ne 0 ]; then exit; fi
 
   else
-    echo "2 - $HELP"
+    echo "$HELP"
   fi
 fi
 
@@ -61,3 +62,4 @@ while [ -v $(kubectl get pods -n local-instance -l=app.kubernetes.io/component='
   echo "not-ready"
   sleep 60
 done
+

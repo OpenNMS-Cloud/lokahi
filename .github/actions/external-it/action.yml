@@ -67,3 +67,5 @@ runs:
     - name: Cleanup
       run: |
         kind delete clusters kind
+
+      shell: bash

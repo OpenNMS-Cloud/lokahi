@@ -35,25 +35,20 @@ runs:
     - name: Setup & Run Cucumber Tests
       run: |
 
-        kubectl get pods --all-namespaces
+        # Cucumber test
+        cd ${{ inputs.dir-location }}
 
-        ### Install dependecies
-        ##cd platform/
-        ##mvn clean install
-        ##cd .. 
-        #
-        ## Cucumber test
-        #cd ${{ inputs.dir-location }}
-        #mvn clean install
-        #HORIZON_STREAM_BASE_URL=https://onmshs/core
-          # 8181
-        #KEYCLOAK_BASE_URL=https://onmshs/auth
-        #KEYCLOAK_REALM=opennms
-        #KEYCLOAK_USERNAME=admin
-        #KEYCLOAK_PASSWORD=admin
-        #export HORIZON_STREAM_BASE_URL KEYCLOAK_BASE_URL KEYCLOAK_REALM KEYCLOAK_USERNAME KEYCLOAK_PASSWORD
-        #PROJECT_VERSION="$(mvn -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive -q org.codehaus.mojo:exec-maven-plugin:1.6.0:exec)"
-        #java -jar "external-horizon-stream-it/target/external-horizon-stream-it-${PROJECT_VERSION}.jar"
+        kubectl --context kind-kind -n local-instance port-forward --pod-running-timeout 1s services/opennms-core 11080:8181 &
+
+        mvn clean install
+        HORIZON_STREAM_BASE_URL=http://localhost:11080 
+        KEYCLOAK_BASE_URL=https://onmshs/auth
+        KEYCLOAK_REALM=opennms
+        KEYCLOAK_USERNAME=admin
+        KEYCLOAK_PASSWORD=admin
+        export HORIZON_STREAM_BASE_URL KEYCLOAK_BASE_URL KEYCLOAK_REALM KEYCLOAK_USERNAME KEYCLOAK_PASSWORD
+        PROJECT_VERSION="$(mvn -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive -q org.codehaus.mojo:exec-maven-plugin:1.6.0:exec)"
+        java -jar "external-horizon-stream-it/target/external-horizon-stream-it-${PROJECT_VERSION}.jar"
 
         ## If fail, exit which kills the ci-cd workflow.
         ##for i in $(jq '.[0].elements[].steps[].result.status' external-it/external-horizon-stream-it/cucumber.reports/cucumber-report.json);do

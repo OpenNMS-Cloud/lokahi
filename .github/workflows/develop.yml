@@ -32,73 +32,73 @@ jobs:
           # kind cluster still running, delete it. It uses a lot of space. 
           kind delete clusters kind
 
-      - name: feature-ui
-        id: action-feature-ui
-        uses: ./.github/actions/ui
-        with:
-          dir-location: 'ui'
+      #- name: feature-ui
+      #  id: action-feature-ui
+      #  uses: ./.github/actions/ui
+      #  with:
+      #    dir-location: 'ui'
   
-      - name: feature-grafana
-        id: action-feature-grafana
-        uses: ./.github/actions/grafana
-        with:
-          dir-location: 'grafana'
+      #- name: feature-grafana
+      #  id: action-feature-grafana
+      #  uses: ./.github/actions/grafana
+      #  with:
+      #    dir-location: 'grafana'
 
-      - name: feature-keycloak-ui
-        id: action-feature-keycloak-ui
-        uses: ./.github/actions/keycloak-ui
-        with:
-          dir-location: 'keycloak-ui'
+      #- name: feature-keycloak-ui
+      #  id: action-feature-keycloak-ui
+      #  uses: ./.github/actions/keycloak-ui
+      #  with:
+      #    dir-location: 'keycloak-ui'
     
-      - name: feature-operator
-        id: action-feature-operator
-        uses: ./.github/actions/operator
-        with:
-          dir-location: 'operator'
+      #- name: feature-operator
+      #  id: action-feature-operator
+      #  uses: ./.github/actions/operator
+      #  with:
+      #    dir-location: 'operator'
 
-      # This needs to happen before shared-lib.
-      - name: parent-pom
-        id: action-parent-pom
-        uses: ./.github/actions/parent-pom
-        with:
-          dir-location: 'parent-pom'
+      ## This needs to happen before shared-lib.
+      #- name: parent-pom
+      #  id: action-parent-pom
+      #  uses: ./.github/actions/parent-pom
+      #  with:
+      #    dir-location: 'parent-pom'
   
-      # This needs to happen before core, rest-server, and notifications.
-      - name: shared-lib
-        id: action-shared-lib
-        uses: ./.github/actions/shared-lib
-        with:
-          dir-location: 'shared-lib'
+      ## This needs to happen before core, rest-server, and notifications.
+      #- name: shared-lib
+      #  id: action-shared-lib
+      #  uses: ./.github/actions/shared-lib
+      #  with:
+      #    dir-location: 'shared-lib'
 
-      - name: feature-core
-        id: action-feature-core
-        uses: ./.github/actions/core
-        with:
-          dir-location: 'platform'
+      #- name: feature-core
+      #  id: action-feature-core
+      #  uses: ./.github/actions/core
+      #  with:
+      #    dir-location: 'platform'
 
-      - name: feature-rest-server
-        id: action-rest-server
-        uses: ./.github/actions/rest-server
-        with:
-          dir-location: 'rest-server'
+      #- name: feature-rest-server
+      #  id: action-rest-server
+      #  uses: ./.github/actions/rest-server
+      #  with:
+      #    dir-location: 'rest-server'
 
-      - name: feature-notifications
-        id: action-notifications
-        uses: ./.github/actions/notifications
-        with:
-          dir-location: 'notifications'
+      #- name: feature-notifications
+      #  id: action-notifications
+      #  uses: ./.github/actions/notifications
+      #  with:
+      #    dir-location: 'notifications'
 
-      - name: feature-minion
-        id: action-minion
-        uses: ./.github/actions/minion
-        with:
-          dir-location: 'minion'
+      #- name: feature-minion
+      #  id: action-minion
+      #  uses: ./.github/actions/minion
+      #  with:
+      #    dir-location: 'minion'
 
-      - name: feature-minion-gateway
-        id: action-minion-gateway
-        uses: ./.github/actions/minion-gateway
-        with:
-          dir-location: 'minion-gateway'
+      #- name: feature-minion-gateway
+      #  id: action-minion-gateway
+      #  uses: ./.github/actions/minion-gateway
+      #  with:
+      #    dir-location: 'minion-gateway'
 
       - name: external-it
         id: action-external-it

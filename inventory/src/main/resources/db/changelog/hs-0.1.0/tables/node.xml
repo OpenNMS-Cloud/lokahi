@@ -12,9 +12,9 @@
         </preConditions>
 
         <createTable tableName="node">
-            <column name="id" type="BIGSERIAL" autoIncrement="true" />
+            <column name="id" type="BIGINT" autoIncrement="true" />
 
-            <column name="tenant_id" type="BIGINT">
+            <column name="tenant_id" type="UUID">
                 <constraints nullable="false"/>
             </column>
 

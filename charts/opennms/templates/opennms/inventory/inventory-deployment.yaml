@@ -8,12 +8,12 @@ metadata:
 spec:
   selector:
     matchLabels:
-      run: {{ .Values.OpenNMS.Inventory.ServiceName }}
+      app: {{ .Values.OpenNMS.Inventory.ServiceName }}
   replicas: {{ .Values.OpenNMS.Inventory.Replicas }}
   template:
     metadata:
       labels:
-        run: {{ .Values.OpenNMS.Inventory.ServiceName }}
+        app: {{ .Values.OpenNMS.Inventory.ServiceName }}
     spec:
       containers:
         - name: {{ .Values.OpenNMS.Inventory.ServiceName }}

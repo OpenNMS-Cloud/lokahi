@@ -23,9 +23,9 @@ runs:
         kind delete clusters kind
         
         # Setup localhost DNS
-        cat /etc/hosts
         sudo echo "127.0.0.1 onmshs" | sudo tee -a /etc/hosts
 
+        # Build cluster with Horizon Stream installed.
         ./install-local.sh custom-images
 
       shell: bash
@@ -37,6 +37,10 @@ runs:
         cd ${{ inputs.dir-location }}
 
         kubectl --context kind-kind -n local-instance port-forward --pod-running-timeout 1s services/opennms-core 11080:8181 &
+
+        # Core takes some time after ready status true before it is setup and
+        # has the minion coming in. 
+        sleep 400
 
         mvn clean install
         HORIZON_STREAM_BASE_URL=http://localhost:11080 

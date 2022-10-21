@@ -39,6 +39,7 @@ jib_project(
     'notification',
     'opennms/horizon-stream-notification',
     'notifications',
+    'opennms-notifications',
     port_forwards=['15080:9090', '15050:5005'],
 )
 inject_java_debug(decoded, 'opennms-notifications', 'opennms-notifications',)
@@ -67,6 +68,7 @@ jib_project(
     'vuejs-bff',
     'opennms/horizon-stream-rest-server',
     'rest-server',
+    'opennms-rest-server',
     labels=['vuejs-app'],
     port_forwards=['13080:9090', '13050:5005'],
 )
@@ -77,6 +79,7 @@ jib_project(
     'inventory',
     'opennms/horizon-stream-inventory',
     'inventory',
+    'opennms-inventory',
     port_forwards=['29080:9090', '29050:5005'],
 )
 inject_java_debug(decoded, 'opennms-inventory', 'opennms-inventory',)
@@ -86,6 +89,7 @@ jib_project(
     'metrics-processor',
     'opennms/horizon-stream-metrics-processor',
     'metrics-processor',
+    'opennms-metrics-processor',
     port_forwards=['30080:9090', '30050:5005'],
 )
 inject_java_debug(decoded, 'opennms-metrics-processor', 'opennms-metrics-processor',)
@@ -95,6 +99,7 @@ jib_project(
     'minion-gateway',
     'opennms/horizon-stream-minion-gateway',
     'minion-gateway',
+    'opennms-minion-gateway',
     submodule='main',
     port_forwards=['16080:9090', '16050:5005'],
 )
@@ -116,6 +121,8 @@ k8s_resource(
     trigger_mode=TRIGGER_MODE_MANUAL,
 )
 
+inject_java_debug(decoded, 'opennms-core', 'opennms-core',)
+
 ### Minion ###
 custom_build(
     'opennms/horizon-stream-minion',
@@ -131,6 +138,8 @@ k8s_resource(
     labels=['minion'],
     trigger_mode=TRIGGER_MODE_MANUAL,
 )
+
+inject_java_debug(decoded, 'opennms-minion', 'opennms-minion',)
 
 ## 3rd Party Resources ##
 ### Keycloak ###

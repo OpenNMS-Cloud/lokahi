@@ -1,6 +1,6 @@
 cluster_arch_cmd = '$(tilt get cluster default -o=jsonpath --template="{.status.arch}")'
 
-def jib_project(resource_name, image_name, base_path, resource_deps=[], port_forwards=[], labels=None, submodule=None):
+def jib_project(resource_name, image_name, base_path, deployment_name, resource_deps=[], port_forwards=[], labels=None, submodule=None):
     if not labels:
         labels=[resource_name]
 

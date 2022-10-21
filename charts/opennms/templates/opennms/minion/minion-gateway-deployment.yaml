@@ -23,8 +23,6 @@ spec:
           image: {{ .Values.OpenNMS.MinionGateway.Image }}
           imagePullPolicy: {{ .Values.OpenNMS.Minion.ImagePullPolicy }}
           env:
-            - name: JAVA_TOOL_OPTIONS
-              value: "-agentlib:jdwp=transport=dt_socket,server=y,address=5005,suspend=n,quiet=y" # Permanent debug port in `skaffold dev`
             - name: KAFKA_BOOTSTRAP_SERVERS
               value: "{{ .Values.Kafka.ServiceName }}:{{ .Values.Kafka.Port }}"
           ports:

@@ -41,8 +41,6 @@ spec:
           image: {{ .Values.OpenNMS.API.Image }}
           imagePullPolicy: {{ .Values.OpenNMS.API.ImagePullPolicy }}
           env:
-            - name: JAVA_TOOL_OPTIONS
-              value: "-agentlib:jdwp=transport=dt_socket,server=y,address=5005,suspend=n,quiet=y" # Permanent debug port in `skaffold dev`
             - name: SPRING_CACHE_CAFFEINE_SPEC
               value: "maximumSize=10000,expireAfterWrite=60s"
             - name: HORIZON_STREAM_NOTIFICATIONS_URL

@@ -1,0 +1,72 @@
+cluster_arch_cmd = '$(tilt get cluster default -o=jsonpath --template="{.status.arch}")'
+
+def jib_project(resource_name, image_name, base_path, resource_deps=[], port_forwards=[], labels=None, submodule=None):
+    if not labels:
+        labels=[resource_name]
+
+    submodule_path = ''
+    submodule_flag = ''
+    if submodule:
+        submodule_path = '/{}'.format(submodule)
+        submodule_flag = '-pl {}'.format(submodule)
+
+
+    compile_resource_name = '{}-compile'.format(resource_name)
+
+    local_resource(
+        compile_resource_name,
+        'mvn compile -f {} -am {}'.format(base_path, submodule_flag),
+        deps=['{}/src'.format(base_path), '{}/pom.xml'.format(base_path)],
+        ignore=['**/target'],
+        labels=labels,
+    )
+
+    custom_build(
+        image_name,
+        'mvn jib:dockerBuild -Dimage=$EXPECTED_REF -f {} -Djib.from.platforms=linux/{} {}'.format(base_path, cluster_arch_cmd, submodule_flag),
+        deps=['{}{}/target/classes'.format(base_path, submodule_path), '{}{}/pom.xml'.format(base_path, submodule_path), '{}{}/src/main/resources'.format(base_path, submodule_path)],
+        live_update=[
+            sync('{}{}/target/classes/org/opennms'.format(base_path, submodule_path), '/app/classes/org/opennms'),
+            sync('{}{}/src/main/resources'.format(base_path, submodule_path), '/app/resources'),
+        ],
+    )
+
+    k8s_resource(
+        deployment_name,
+        new_name=resource_name,
+        labels=labels,
+        resource_deps=resource_deps + [compile_resource_name],
+        port_forwards=port_forwards
+    )
+
+def inject_java_debug(decoded_k8s_objects, deployment_name, container_name):
+    deployment = get_deployment(decoded_k8s_objects, deployment_name)
+    container = get_container(deployment, container_name)
+
+    if container:
+        inject_env_var(container, 'JAVA_TOOL_OPTIONS', '-agentlib:jdwp=transport=dt_socket,server=y,address=5005,suspend=n,quiet=y')
+        inject_port(container, 5005)
+
+def inject_env_var(container, env_var_name, env_var_value):
+    env_var = {'name': env_var_name, 'value': env_var_value}
+    if 'env' not in container:
+        container['env'] = []
+
+    container['env'].append(env_var)
+
+def inject_port(container, port_number):
+    port = {'containerPort': port_number}
+    if 'ports' not in container:
+        container['ports'] = []
+
+    container['ports'].append(port)
+
+def get_deployment(k8s_objects, deployment_name):
+    for o in k8s_objects:
+        if o['kind'] == 'Deployment' and o['metadata']['name'] == deployment_name:
+            return o
+
+def get_container(deployment, container_name):
+    for container in deployment['spec']['template']['spec']['containers']:
+        if container['name'] == container_name:
+            return container

@@ -46,8 +46,6 @@ spec:
           imagePullPolicy: {{ .Values.OpenNMS.Core.ImagePullPolicy }}
           args: [ "-f" ]
           env:
-            - name: JAVA_TOOL_OPTIONS
-              value: "-agentlib:jdwp=transport=dt_socket,server=y,address=5005,suspend=n,quiet=y"
             - name: EXTRA_JAVA_OPTS
               value: "-Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true"
             - name: PGSQL_SERVICE_NAME

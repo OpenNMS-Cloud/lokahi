@@ -44,8 +44,6 @@ spec:
               value: "true"
             - name: KUBERNETES_SERVICE_NAME
               value: "{{ .Values.OpenNMS.Minion.ServiceName }}"
-            - name: JAVA_TOOL_OPTIONS # Presence of this var lets `skaffold debug` see that this is a jvm container
-              value: "-agentlib:jdwp=transport=dt_socket,server=y,address=5005,suspend=n,quiet=y" # Permanent debug port in `skaffold dev`
             - name: LOCATION
               value: "Default"
           ports:

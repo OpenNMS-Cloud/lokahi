@@ -20,8 +20,6 @@ spec:
           image: {{ .Values.OpenNMS.MetricsProcessor.Image }}
           imagePullPolicy: {{ .Values.OpenNMS.MetricsProcessor.ImagePullPolicy }}
           env:
-            - name: JAVA_TOOL_OPTIONS
-              value: "-agentlib:jdwp=transport=dt_socket,server=y,address=5005,suspend=n,quiet=y" # Permanent debug port in `skaffold dev`
             - name: SPRING_KAFKA_BOOTSTRAP_SERVERS
               value: "{{ .Values.Kafka.ServiceName }}:9092"
             - name: PROMETHEUS_PUSHGATEWAY_URL

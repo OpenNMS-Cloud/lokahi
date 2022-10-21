@@ -20,8 +20,6 @@ spec:
           image: {{ .Values.OpenNMS.Notification.Image }}
           imagePullPolicy: {{ .Values.OpenNMS.Notification.ImagePullPolicy }}
           env:
-            - name: JAVA_TOOL_OPTIONS
-              value: "-agentlib:jdwp=transport=dt_socket,server=y,address=5005,suspend=n,quiet=y" # Permanent debug port in `skaffold dev`
             - name: SPRING_KAFKA_BOOTSTRAP_SERVERS
               value: "{{ .Values.Kafka.ServiceName }}:{{ .Values.Kafka.Port }}"
             - name: SPRING_DATASOURCE_USERNAME

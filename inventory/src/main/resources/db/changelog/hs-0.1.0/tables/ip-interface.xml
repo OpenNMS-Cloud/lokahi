@@ -25,18 +25,8 @@
         </createTable>
 
         <addPrimaryKey tableName="ip_interface" columnNames="id" constraintName="pk_ip_interface_id"/>
-
-        <addForeignKeyConstraint constraintName="fk_node_id" onDelete="CASCADE"
+        <addForeignKeyConstraint constraintName="fk_ip_interface_node_id" onDelete="CASCADE"
                                  baseTableName="ip_interface" baseColumnNames="node_id"
                                  referencedTableName="node" referencedColumnNames="id"/>
-
-        <createIndex tableName="ip_interface" indexName="ip_interface_ip_addr_idx">
-            <column name="ip_address"/>
-        </createIndex>
-
-        <createIndex tableName="ip_interface" indexName="ip_interface_node_id_idx">
-            <column name="node_id"/>
-        </createIndex>
     </changeSet>
-
 </databaseChangeLog>

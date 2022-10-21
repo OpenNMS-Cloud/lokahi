@@ -7,7 +7,7 @@ tilt_inspector()
 secret_settings(disable_scrub=True)  ## TODO: update secret values so we can reenable scrub
 
 # Deployment #
-decoded = decode_yaml_stream(helm(
+decoded_chart = decode_yaml_stream(helm(
     'charts/opennms',
     values=['./skaffold-helm-values.yaml'],
 ))
@@ -42,7 +42,7 @@ jib_project(
     'opennms-notifications',
     port_forwards=['15080:9090', '15050:5005'],
 )
-inject_java_debug(decoded, 'opennms-notifications', 'opennms-notifications',)
+inject_java_debug(decoded_chart, 'opennms-notifications', 'opennms-notifications', )
 
 ### Vue.js App ###
 #### UI ####
@@ -72,7 +72,7 @@ jib_project(
     labels=['vuejs-app'],
     port_forwards=['13080:9090', '13050:5005'],
 )
-inject_java_debug(decoded, 'opennms-rest-server', 'opennms-rest-server',)
+inject_java_debug(decoded_chart, 'opennms-rest-server', 'opennms-rest-server', )
 
 ### Inventory ###
 jib_project(
@@ -82,7 +82,7 @@ jib_project(
     'opennms-inventory',
     port_forwards=['29080:9090', '29050:5005'],
 )
-inject_java_debug(decoded, 'opennms-inventory', 'opennms-inventory',)
+inject_java_debug(decoded_chart, 'opennms-inventory', 'opennms-inventory', )
 
 ### Metrics Processor ###
 jib_project(
@@ -92,7 +92,7 @@ jib_project(
     'opennms-metrics-processor',
     port_forwards=['30080:9090', '30050:5005'],
 )
-inject_java_debug(decoded, 'opennms-metrics-processor', 'opennms-metrics-processor',)
+inject_java_debug(decoded_chart, 'opennms-metrics-processor', 'opennms-metrics-processor', )
 
 ### Minion Gateway ###
 jib_project(
@@ -103,7 +103,7 @@ jib_project(
     submodule='main',
     port_forwards=['16080:9090', '16050:5005'],
 )
-inject_java_debug(decoded, 'opennms-minion-gateway', 'opennms-minion-gateway',)
+inject_java_debug(decoded_chart, 'opennms-minion-gateway', 'opennms-minion-gateway', )
 
 ### Core ###
 custom_build(
@@ -121,7 +121,7 @@ k8s_resource(
     trigger_mode=TRIGGER_MODE_MANUAL,
 )
 
-inject_java_debug(decoded, 'opennms-core', 'opennms-core',)
+inject_java_debug(decoded_chart, 'opennms-core', 'opennms-core', )
 
 ### Minion ###
 custom_build(
@@ -139,7 +139,7 @@ k8s_resource(
     trigger_mode=TRIGGER_MODE_MANUAL,
 )
 
-inject_java_debug(decoded, 'opennms-minion', 'opennms-minion',)
+inject_java_debug(decoded_chart, 'opennms-minion', 'opennms-minion', )
 
 ## 3rd Party Resources ##
 ### Keycloak ###
@@ -178,7 +178,7 @@ k8s_resource(
     'onms-kafka',
     port_forwards=['24090:59092'],
 )
-kafka_deployment = get_deployment(decoded, 'onms-kafka')
+kafka_deployment = get_deployment(decoded_chart, 'onms-kafka')
 kafka_container = get_container(kafka_deployment, 'onms-kafka')
 
 inject_env_var(kafka_container, 'BITNAMI_DEBUG', 'true')
@@ -188,4 +188,4 @@ inject_env_var(kafka_container, 'KAFKA_ADVERTISED_LISTENERS', 'CLIENT://onms-kaf
 inject_port(kafka_container, 59092)
 
 # Deploy #
-k8s_yaml(encode_yaml_stream(decoded))
+k8s_yaml(encode_yaml_stream(decoded_chart))

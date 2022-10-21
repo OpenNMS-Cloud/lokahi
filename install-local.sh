@@ -35,6 +35,7 @@ else
     kind load docker-image opennms/horizon-stream-notification:local&
     kind load docker-image opennms/horizon-stream-rest-server:local&
     kind load docker-image opennms/horizon-stream-inventory:local&
+    kind load docker-image opennms/horizon-stream-metric-processor:local&
 
     # Need to wait for the images to be loaded.
     sleep 120

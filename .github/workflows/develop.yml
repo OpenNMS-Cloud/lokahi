@@ -76,6 +76,10 @@ jobs:
         with:
           dir-location: 'platform'
 
+      - name: feature-metrics-processor
+        id: action-feature-metrics-processor
+        uses: ./.github/actions/metrics-processor
+
       - name: feature-rest-server
         id: action-rest-server
         uses: ./.github/actions/rest-server

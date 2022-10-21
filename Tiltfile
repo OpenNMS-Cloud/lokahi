@@ -184,7 +184,7 @@ kafka_container = get_container(kafka_deployment, 'onms-kafka')
 inject_env_var(kafka_container, 'BITNAMI_DEBUG', 'true')
 inject_env_var(kafka_container, 'KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP', 'CLIENT:PLAINTEXT,CONTROLLER:PLAINTEXT,LOCALCLIENT:PLAINTEXT')
 inject_env_var(kafka_container, 'KAFKA_CFG_LISTENERS', 'CLIENT://:9092,CONTROLLER://:9093,LOCALCLIENT://:59092')
-inject_env_var(kafka_container, 'KAFKA_ADVERTISED_LISTENERS', 'CLIENT://onms-kafka:9092,LOCALCLIENT://localhost:59092')
+inject_env_var(kafka_container, 'KAFKA_ADVERTISED_LISTENERS', 'CLIENT://onms-kafka:9092,LOCALCLIENT://localhost:24090')
 inject_port(kafka_container, 59092)
 
 # Deploy #

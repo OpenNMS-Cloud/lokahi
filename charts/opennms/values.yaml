@@ -196,7 +196,6 @@ Kafka:
   Replicas: 1 
   Port: 9092
   ControllerPort: 9093
-  LocalPort: 59092
   Resources:
     Limits:
       Cpu: "2"

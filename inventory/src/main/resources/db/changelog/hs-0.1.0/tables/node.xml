@@ -5,34 +5,7 @@
     xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
 
     <changeSet author="tbigg" id="0.1.0-node">
-        <preConditions onFail="MARK_RAN">
-            <not>
-                <tableExists tableName="node"/>
-            </not>
-        </preConditions>
 
-        <createTable tableName="node">
-            <column name="id" type="BIGINT" autoIncrement="true" />
-
-            <column name="tenant_id" type="UUID">
-                <constraints nullable="false"/>
-            </column>
-
-            <column name="create_time" type="TIMESTAMP">
-                <constraints nullable="false"/>
-            </column>
-
-            <column name="node_label" type="VARCHAR(256)">
-                <constraints nullable="false"/>
-            </column>
-        </createTable>
-
-        <addPrimaryKey tableName="node" columnNames="id" constraintName="pk_node_id" />
-
-        <createIndex tableName="node" indexName="node_id_tenant_id_idx">
-            <column name="id"/>
-            <column name="tenant_id"/>
-        </createIndex>
     </changeSet>
 
 </databaseChangeLog>

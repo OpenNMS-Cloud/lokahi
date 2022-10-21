@@ -48,11 +48,19 @@ def inject_java_debug(decoded_k8s_objects, deployment_name, container_name):
         inject_port(container, 5005)
 
 def inject_env_var(container, env_var_name, env_var_value):
-    env_var = {'name': env_var_name, 'value': env_var_value}
     if 'env' not in container:
         container['env'] = []
 
-    container['env'].append(env_var)
+    existing = None
+    for env in container['env']:
+        if env['name'] == env_var_name:
+            existing = env
+
+    if existing:
+        existing['value'] = env_var_value
+    else:
+        env_var = {'name': env_var_name, 'value': env_var_value}
+        container['env'].append(env_var)
 
 def inject_port(container, port_number):
     port = {'containerPort': port_number}

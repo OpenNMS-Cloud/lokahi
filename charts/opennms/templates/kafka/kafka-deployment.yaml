@@ -20,8 +20,6 @@ spec:
           image: {{ .Values.Kafka.Image }}
           imagePullPolicy: {{ .Values.Kafka.ImagePullPolicy }}
           env:
-            - name: BITNAMI_DEBUG
-              value: "true"
             - name: KAFKA_ENABLE_KRAFT
               value: "yes"
             - name: KAFKA_CFG_BROKER_ID
@@ -31,13 +29,13 @@ spec:
             - name: KAFKA_CFG_PROCESS_ROLES
               value: "broker,controller"
             - name: KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP
-              value: "CLIENT:PLAINTEXT,LOCALCLIENT:PLAINTEXT,CONTROLLER:PLAINTEXT"
+              value: "CLIENT:PLAINTEXT,CONTROLLER:PLAINTEXT"
             - name: KAFKA_CFG_CONTROLLER_LISTENER_NAMES
               value: "CONTROLLER"
             - name: KAFKA_CFG_LISTENERS
-              value: "CLIENT://:{{ .Values.Kafka.Port }},CONTROLLER://:{{ .Values.Kafka.ControllerPort }},LOCALCLIENT://:{{ .Values.Kafka.LocalPort }}"
+              value: "CLIENT://:{{ .Values.Kafka.Port }},CONTROLLER://:{{ .Values.Kafka.ControllerPort }}"
             - name: KAFKA_ADVERTISED_LISTENERS
-              value: "CLIENT://{{ .Values.Kafka.ServiceName }}:{{ .Values.Kafka.Port }},LOCALCLIENT://localhost:{{ .Values.Kafka.LocalPort }}"
+              value: "CLIENT://{{ .Values.Kafka.ServiceName }}:{{ .Values.Kafka.Port }}"
             - name: KAFKA_INTER_BROKER_LISTENER_NAME
               value: "CLIENT"
             - name: KAFKA_CFG_CONTROLLER_QUORUM_VOTERS
@@ -54,8 +52,6 @@ spec:
               containerPort: {{ .Values.Kafka.Port }}
             - name: controller
               containerPort: {{ .Values.Kafka.ControllerPort }}
-            - name: local
-              containerPort: {{ .Values.Kafka.LocalPort }}
           livenessProbe:
             failureThreshold: 15
             initialDelaySeconds: 10

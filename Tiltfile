@@ -1,10 +1,10 @@
 # Tilt config #
+load('tilt/Tiltfile-helpers', 'jib_project', 'inject_java_debug', 'inject_env_var', 'inject_port', 'get_deployment', 'get_container')
+
 load('ext://tilt_inspector', 'tilt_inspector')
 tilt_inspector()
 
 secret_settings(disable_scrub=True)  ## TODO: update secret values so we can reenable scrub
-
-load('tilt/Tiltfile-helpers', 'jib_project', 'inject_java_debug')
 
 # Deployment #
 decoded = decode_yaml_stream(helm(
@@ -167,10 +167,25 @@ k8s_resource(
 )
 
 ### Others ###
+#### Ingress Controller ####
 k8s_resource(
     'ingress-nginx-controller',
     port_forwards=['8123:80'],
 )
+
+#### Kafka ####
+k8s_resource(
+    'onms-kafka',
+    port_forwards=['24090:59092'],
+)
+kafka_deployment = get_deployment(decoded, 'onms-kafka')
+kafka_container = get_container(kafka_deployment, 'onms-kafka')
+
+inject_env_var(kafka_container, 'BITNAMI_DEBUG', 'true')
+inject_env_var(kafka_container, 'KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP', 'CLIENT:PLAINTEXT,CONTROLLER:PLAINTEXT,LOCALCLIENT:PLAINTEXT')
+inject_env_var(kafka_container, 'KAFKA_CFG_LISTENERS', 'CLIENT://:9092,CONTROLLER://:9093,LOCALCLIENT://:59092')
+inject_env_var(kafka_container, 'KAFKA_ADVERTISED_LISTENERS', 'CLIENT://onms-kafka:9092,LOCALCLIENT://localhost:59092')
+inject_port(kafka_container, 59092)
 
 # Deploy #
 k8s_yaml(encode_yaml_stream(decoded))

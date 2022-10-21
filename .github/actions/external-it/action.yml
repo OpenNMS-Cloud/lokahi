@@ -40,7 +40,7 @@ runs:
 
         # Core takes some time after ready status true before it is setup and
         # has the minion coming in. 
-        sleep 400
+        sleep 500
 
         mvn clean install
         HORIZON_STREAM_BASE_URL=http://localhost:11080 

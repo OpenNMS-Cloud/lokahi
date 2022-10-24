@@ -30,13 +30,6 @@ jobs:
           java-version: 11
           cache: maven
 
-      - name: Cache SonarCloud packages
-        uses: actions/cache@v1
-        with:
-          path: ~/.sonar/cache
-          key: ${{ runner.os }}-sonar
-          restore-keys: ${{ runner.os }}-sonar
-
       - name: parent-pom
         id: action-parent-pom
         uses: ./.github/actions/parent-pom
@@ -48,12 +41,13 @@ jobs:
         uses: ./.github/actions/shared-lib
         with:
           dir-location: 'shared-lib'
-
-      - name: sonar-scan
-        id: action-sonar-scan
-        uses: ./.github/actions/sonar-scan-maven
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          sonar-token: ${{ secrets.SONAR_TOKEN }}
-          dir-location: 'shared-lib'
-          project-key: 'opennms_horizon-stream_shared-lib'
+  sonar-scan:
+    runs-on: ubuntu-latest
+    steps:
+    - name: sonar-scan
+      id: action-sonar-scan
+      uses: ./.github/workflows/sonar-maven.yml
+      with:
+        dir-location: 'shared-lib'
+        project-key: 'opennms_horizon-stream_shared-lib'
+      secrets: inherit

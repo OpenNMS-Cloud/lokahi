@@ -8,10 +8,10 @@ on:
       - '!release'
     paths:
       - 'shared-lib/**'
-#  pull_request:
-#    types: [opened, synchronize, reopened]
-#    paths:
-#      - 'shared-lib/**'
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - 'shared-lib/**'
 
 jobs:
   setup:

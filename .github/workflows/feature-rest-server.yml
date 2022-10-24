@@ -61,6 +61,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           sonar-token: ${{ secrets.SONAR_TOKEN }}
           dir-location: 'rest-server'
+          project-key: 'opennms_horizon-stream_bff'
 
       - name: build-image
         id: action-build-image
@@ -68,4 +69,3 @@ jobs:
         with:
           image: 'opennms/horizon-stream-rest-server:local'
           dir-location: 'rest-server'
-          project-key: 'opennms_horizon-stream_bff'

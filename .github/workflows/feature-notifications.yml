@@ -62,6 +62,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           sonar-token: ${{ secrets.SONAR_TOKEN }}
           dir-location: 'notifications'
+          project-key: 'opennms_horizon-stream_core'
 
       - name: build-image
         id: action-build-image
@@ -69,4 +70,3 @@ jobs:
         with:
           image: 'opennms/horizon-stream-notification:local'
           dir-location: 'notifications'
-          project-key: 'opennms_horizon-stream_core'

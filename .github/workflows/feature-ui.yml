@@ -29,6 +29,9 @@ jobs:
         uses: ./.github/actions/ui
         with:
           dir-location: 'ui'
+      - name: 'Install dependencies'
+        run: 'yarn'
+        working-directory: 'ui'
       - name: 'Coverage Report'
         run: 'yarn run test:coverage'
         working-directory: 'ui'

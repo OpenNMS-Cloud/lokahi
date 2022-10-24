@@ -40,7 +40,7 @@ export default defineConfig(({ mode }) => {
         inline: true
       },
       coverage: {
-        reporter: ['text', 'json', 'html']
+        reporter: ['lcov', 'html']
       }
     }
   }

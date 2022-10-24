@@ -4,31 +4,24 @@
     xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
     xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
 
-    <changeSet author="tbigg" id="0.1.0-node">
+    <changeSet author="tbigg" id="0.1.0-monitored-service-type">
         <preConditions onFail="MARK_RAN">
             <not>
-                <tableExists tableName="node"/>
+                <tableExists tableName="monitored_service_type"/>
             </not>
         </preConditions>
 
-        <createTable tableName="node">
+        <createTable tableName="monitored_service_type">
             <column name="id" type="BIGINT" autoIncrement="true"/>
 
-            <column name="tenant_id" type="UUID">
-                <constraints nullable="false"/>
-            </column>
-
-            <column name="create_time" type="TIMESTAMP">
-                <constraints nullable="false"/>
-            </column>
-
-            <column name="node_label" type="VARCHAR(256)">
+            <column name="service_name" type="VARCHAR(32)">
                 <constraints nullable="false"/>
             </column>
 
         </createTable>
 
-        <addPrimaryKey tableName="node" columnNames="id" constraintName="pk_node_id"/>
+        <addPrimaryKey tableName="monitored_service_type" columnNames="id"
+                       constraintName="pk_monitored_service_type_id"/>
 
     </changeSet>
 </databaseChangeLog>

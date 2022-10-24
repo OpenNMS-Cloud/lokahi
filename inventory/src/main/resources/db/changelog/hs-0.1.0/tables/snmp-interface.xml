@@ -13,20 +13,27 @@
 
         <createTable tableName="snmp_interface">
             <column name="id" type="BIGINT" autoIncrement="true"/>
+
             <column name="tenant_id" type="UUID">
                 <constraints nullable="false"/>
             </column>
+
             <column name="node_id" type="BIGINT">
                 <constraints nullable="false"/>
             </column>
+
             <column name="ip_address" type="INET"/>
+
             <column name="if_index" type="INTEGER">
                 <constraints nullable="false"/>
             </column>
+
             <column name="if_descr" type="VARCHAR(256)"/>
+
         </createTable>
 
         <addPrimaryKey tableName="snmp_interface" columnNames="id" constraintName="pk_snmp_interface_id"/>
+
         <addForeignKeyConstraint constraintName="fk_snmp_interface_node_id" onDelete="CASCADE"
                                  baseTableName="snmp_interface" baseColumnNames="node_id"
                                  referencedTableName="node" referencedColumnNames="id"/>

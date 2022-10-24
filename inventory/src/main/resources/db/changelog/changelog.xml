@@ -7,5 +7,7 @@
 
     <include file="db/changelog/hs-0.1.0/tables/node.xml"/>
     <include file="db/changelog/hs-0.1.0/tables/ip-interface.xml"/>
+    <include file="db/changelog/hs-0.1.0/tables/monitored-service-type.xml"/>
+    <include file="db/changelog/hs-0.1.0/tables/monitored-service.xml"/>
 
 </databaseChangeLog>

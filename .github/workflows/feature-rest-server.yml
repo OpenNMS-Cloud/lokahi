@@ -23,38 +23,38 @@ jobs:
         with:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
 
-      - name: init
-        run: |
-
-          echo "For init steps."
-
       - name: Set up JDK 11
         uses: actions/setup-java@v3
         with:
           distribution: temurin
           java-version: 11
           cache: maven
+
       - name: Cache SonarCloud packages
         uses: actions/cache@v1
         with:
           path: ~/.sonar/cache
           key: ${{ runner.os }}-sonar
           restore-keys: ${{ runner.os }}-sonar
+
       - name: parent-pom
         id: action-parent-pom
         uses: ./.github/actions/parent-pom
         with:
           dir-location: 'parent-pom'
+
       - name: shared-lib
         id: action-shared-lib
         uses: ./.github/actions/shared-lib
         with:
           dir-location: 'shared-lib'
+
       - name: feature-rest-server
         id: action-feature-rest-server
         uses: ./.github/actions/rest-server
         with:
           dir-location: 'rest-server'
+
       - name: sonar-scan
         id: action-sonar-scan
         uses: ./.github/actions/sonar-scan-maven
@@ -62,6 +62,7 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           sonar-token: ${{ secrets.SONAR_TOKEN }}
+
       - name: build-image
         id: action-build-image
         uses: ./.github/actions/jib-build-maven

@@ -1,5 +1,5 @@
 name: 'Build and test shared-lib'
-description: 'This implements unit and built-time integration tests on shared-lib. There is no workflow for this, it gets called by other workflows, platform (core) and rest-server.'
+description: 'This implements unit and built-time integration tests on shared-lib.'
 inputs:
   dir-location:
     description: 'The dir containing the change.'

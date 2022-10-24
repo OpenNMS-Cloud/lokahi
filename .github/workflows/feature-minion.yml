@@ -14,14 +14,23 @@ jobs:
   build-and-test:
     runs-on: self-hosted
     steps:
-      - name: Check out repository code
-        uses: actions/checkout@v2
-        # Is required to call actions.
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
 
-      - name: init
-        run: |
+      - name: Set up JDK 11
+        uses: actions/setup-java@v3
+        with:
+          distribution: temurin
+          java-version: 11
+          cache: maven
 
-          echo "For init steps."
+      - name: Cache SonarCloud packages
+        uses: actions/cache@v1
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
 
       - name: parent-pom
         id: action-parent-pom
@@ -40,3 +49,11 @@ jobs:
         uses: ./.github/actions/minion
         with:
           dir-location: 'minion'
+
+      - name: sonar-scan
+        id: action-sonar-scan
+        uses: ./.github/actions/sonar-scan-maven
+        working-directory: 'minion'
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          sonar-token: ${{ secrets.SONAR_TOKEN }}

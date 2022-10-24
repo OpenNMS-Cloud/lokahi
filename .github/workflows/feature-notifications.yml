@@ -65,9 +65,11 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           sonar-token: ${{ secrets.SONAR_TOKEN }}
+          dir-location: 'notifications'
 
       - name: build-image
         id: action-build-image
         uses: ./.github/actions/jib-build-maven
         with:
           image: 'opennms/horizon-stream-notification:local'
+          dir-location: 'notifications'

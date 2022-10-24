@@ -30,13 +30,6 @@ jobs:
           java-version: 11
           cache: maven
 
-      - name: Cache SonarCloud packages
-        uses: actions/cache@v1
-        with:
-          path: ~/.sonar/cache
-          key: ${{ runner.os }}-sonar
-          restore-keys: ${{ runner.os }}-sonar
-
       - name: parent-pom
         id: action-parent-pom
         uses: ./.github/actions/parent-pom
@@ -55,9 +48,7 @@ jobs:
         with:
           dir-location: 'minion-gateway'
 
-      - name: sonar-scan
-        id: action-sonar-scan
-        uses: ./.github/actions/sonar-scan-maven
+      - uses: ./.github/actions/sonar-scan-maven
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           sonar-token: ${{ secrets.SONAR_TOKEN }}

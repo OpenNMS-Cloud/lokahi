@@ -36,9 +36,7 @@ jobs:
         uses: ./.github/actions/shared-lib
         with:
           dir-location: 'shared-lib'
-      - name: sonar-scan
-        id: action-sonar-scan
-        uses: ./.github/actions/sonar-scan-maven
+      - uses: ./.github/actions/sonar-scan-maven
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           sonar-token: ${{ secrets.SONAR_TOKEN }}

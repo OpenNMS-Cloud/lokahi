@@ -1,0 +1,13 @@
+name: 'Jib build'
+description: 'This builds an image using jib-maven-plugin.'
+inputs:
+  image:
+    description: 'The name of the image to build.'
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: build-image
+      run: mvn -B jib:dockerBuild -Dimage=${{ inputs.image }}
+      shell: bash

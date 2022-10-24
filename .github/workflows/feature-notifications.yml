@@ -22,39 +22,43 @@ jobs:
       - uses: actions/checkout@v2
         with:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
-
       - name: Set up JDK 11
         uses: actions/setup-java@v3
         with:
           distribution: temurin
           java-version: 11
           cache: maven
-
       - name: Cache SonarCloud packages
         uses: actions/cache@v1
         with:
           path: ~/.sonar/cache
           key: ${{ runner.os }}-sonar
           restore-keys: ${{ runner.os }}-sonar
-
       - name: parent-pom
         id: action-parent-pom
         uses: ./.github/actions/parent-pom
         with:
           dir-location: 'parent-pom'
-
       - name: shared-lib
         id: action-shared-lib
         uses: ./.github/actions/shared-lib
         with:
           dir-location: 'shared-lib'
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          sonar-token: ${{ secrets.SONAR_TOKEN }}
-
       - name: feature-notifications
-        id: action-feature-notifications
+        id: action-build-notifications
         uses: ./.github/actions/notifications
         with:
           dir-location: 'notifications'
+      - name: sonar-scan
+        id: action-sonar-scan
+        uses: ./.github/actions/sonar-scan-maven
+        working-directory: 'notifications'
+        with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           sonar-token: ${{ secrets.SONAR_TOKEN }}
+      - name: build-image
+        id: action-build-image
+        uses: ./.github/actions/jib-build-maven
+        working-directory: 'notifications'
+        with:
+          image: 'opennms/horizon-stream-notification:local'

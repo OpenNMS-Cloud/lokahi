@@ -1,4 +1,4 @@
-name: feature-rest-server
+name: feature-notifications
 
 on:  
   push:
@@ -7,14 +7,14 @@ on:
       - '!develop'
       - '!release'
     paths:
-      - 'rest-server/**'
+      - 'shared-lib/**'
   pull_request:
     types: [opened, synchronize, reopened]
     paths:
-      - 'rest-server/**'
-
+      - 'shared-lib/**'
 
 jobs:
+
   build-and-test:
     runs-on: ubuntu-latest
 
@@ -22,12 +22,6 @@ jobs:
       - uses: actions/checkout@v2
         with:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
-
-      - name: init
-        run: |
-
-          echo "For init steps."
-
       - name: Set up JDK 11
         uses: actions/setup-java@v3
         with:
@@ -45,26 +39,15 @@ jobs:
         uses: ./.github/actions/parent-pom
         with:
           dir-location: 'parent-pom'
-      - name: shared-lib
-        id: action-shared-lib
+      - name: feature-shared-lib
+        id: action-build-shared-lib
         uses: ./.github/actions/shared-lib
         with:
           dir-location: 'shared-lib'
-      - name: feature-rest-server
-        id: action-feature-rest-server
-        uses: ./.github/actions/rest-server
-        with:
-          dir-location: 'rest-server'
       - name: sonar-scan
         id: action-sonar-scan
         uses: ./.github/actions/sonar-scan-maven
-        working-directory: 'rest-server'
+        working-directory: 'shared-lib'
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           sonar-token: ${{ secrets.SONAR_TOKEN }}
-      - name: build-image
-        id: action-build-image
-        uses: ./.github/actions/jib-build-maven
-        working-directory: 'rest-server'
-        with:
-          image: 'opennms/horizon-stream-rest-server:local'

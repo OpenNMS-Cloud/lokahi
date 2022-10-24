@@ -1,0 +1,19 @@
+name: 'Scan '
+description: 'This implements unit and built-time integration tests on shared-lib. There is no workflow for this, it gets called by other workflows, platform (core) and rest-server.'
+inputs:
+  github-token:
+    description: 'GITHUB_TOKEN secret for the workflow so SonarCloud can get PR information'
+    required: true
+  sonar-token:
+    description: 'SONAR_TOKEN secret to authenticate job with SonarCloud'
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: sonar-scan
+      run: mvn -B org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ inputs.github-token }}
+        SONAR_TOKEN: ${{ inputs.sonar-token }}

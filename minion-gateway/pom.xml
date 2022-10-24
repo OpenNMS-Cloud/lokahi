@@ -28,6 +28,9 @@
         <docker.image.skipPush>false</docker.image.skipPush>
         <docker.it.network>rest-server-it-network</docker.it.network>
         <horizon.shared.lib.version>0.1.0-SNAPSHOT</horizon.shared.lib.version>
+        <sonar.organization>opennms</sonar.organization>
+        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+        <sonar.projectKey>opennms_horizon-stream_minion-gateway</sonar.projectKey>
     </properties>
 
     <modules>

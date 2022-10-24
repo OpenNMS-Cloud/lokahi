@@ -45,6 +45,10 @@
         <cron-utils.version>9.1.6</cron-utils.version>
         <eos.version>1.2.0</eos.version>
         <prometheus.version>0.16.0</prometheus.version>
+
+        <sonar.organization>opennms</sonar.organization>
+        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+        <sonar.projectKey>opennms_horizon-stream_minion</sonar.projectKey>
     </properties>
 
     <dependencyManagement>

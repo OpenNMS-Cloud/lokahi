@@ -61,6 +61,7 @@ jobs:
       - name: sonar-scan
         id: action-sonar-scan
         uses: ./.github/actions/sonar-scan-maven
+        working-directory: rest-server
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           sonar-token: ${{ secrets.SONAR_TOKEN }}
@@ -68,5 +69,6 @@ jobs:
       - name: build-image
         id: action-build-image
         uses: ./.github/actions/jib-build-maven
+        working-directory: rest-server
         with:
           image: 'opennms/horizon-stream-rest-server:local'

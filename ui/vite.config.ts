@@ -38,9 +38,6 @@ export default defineConfig(({ mode }) => {
       environment: 'happy-dom',
       deps: {
         inline: true
-      },
-      coverage: {
-        reporter: ['lcov', 'html']
       }
     }
   }

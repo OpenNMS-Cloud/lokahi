@@ -18,19 +18,18 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v2
         # Is required to call actions.
-
-      - name: init
-        run: |
-
-          echo "For init steps."
-
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16
+          cache: 'yarn'
+        working-directory: 'ui'
       - name: feature-ui
         id: action-feature-ui
         uses: ./.github/actions/ui
         with:
           dir-location: 'ui'
       - name: 'Install dependencies'
-        run: 'yarn'
+        run: 'yarn install --immutable'
         working-directory: 'ui'
       - name: 'Coverage Report'
         run: 'yarn run test:coverage'

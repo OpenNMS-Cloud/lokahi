@@ -31,3 +31,11 @@ jobs:
         uses: ./.github/actions/operator
         with:
           dir-location: 'operator'
+
+      - name: 'SonarCloud Scan'
+        uses: SonarSource/sonarcloud-github-action@master
+        with:
+          projectBaseDir: operator
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

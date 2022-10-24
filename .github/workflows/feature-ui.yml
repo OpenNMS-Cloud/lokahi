@@ -29,4 +29,10 @@ jobs:
         uses: ./.github/actions/ui
         with:
           dir-location: 'ui'
-          
+      - name: 'SonarCloud Scan'
+        uses: SonarSource/sonarcloud-github-action@master
+        with:
+          projectBaseDir: ui
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

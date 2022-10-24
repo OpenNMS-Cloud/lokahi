@@ -13,10 +13,9 @@ on:
       SONAR_TOKEN:
         required: true
 jobs:
-
-  build-and-test:
+  sonar-scan:
+    name: Analyze project with SonarCloud
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v2
         with:
@@ -29,7 +28,7 @@ jobs:
           key: ${{ runner.os }}-sonar
           restore-keys: ${{ runner.os }}-sonar
 
-      - name: sonar-scan
+      - name: Run SonarCloud analysis
         run: mvn -B org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=${{ inputs.project-key }}
         shell: bash
         env:

@@ -1,12 +1,6 @@
 name: develop
 
-on:
-  workflow_dispatch: {}
-
-# For now, we have put all steps into a single job, this will allow for just
-# one vm to run. We use actions to factor out the functionality. If there is a
-# requirement to create additional jobs, maybe to run concurrent jobs, then we
-# can split them up later.
+on: workflow_dispatch
 
 jobs:
   full-scan:

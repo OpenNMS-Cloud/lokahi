@@ -69,3 +69,4 @@ jobs:
         with:
           image: 'opennms/horizon-stream-notification:local'
           dir-location: 'notifications'
+          project-key: 'opennms_horizon-stream_core'

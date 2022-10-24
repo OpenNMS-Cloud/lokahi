@@ -68,3 +68,4 @@ jobs:
         with:
           image: 'opennms/horizon-stream-rest-server:local'
           dir-location: 'rest-server'
+          project-key: 'opennms_horizon-stream_bff'

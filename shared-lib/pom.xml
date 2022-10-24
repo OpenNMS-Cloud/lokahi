@@ -35,8 +35,6 @@
         <jackson.version>2.13.3</jackson.version>
         <sonar.organization>opennms</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
-        <sonar.projectKey>opennms_horizon-stream_shared-lib</sonar.projectKey>
-        <sonar.moduleKey>${project.artifactId}</sonar.moduleKey>
     </properties>
 
     <build>

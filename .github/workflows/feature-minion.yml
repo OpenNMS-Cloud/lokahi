@@ -61,3 +61,4 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           sonar-token: ${{ secrets.SONAR_TOKEN }}
           dir-location: 'minion'
+          project-key: 'opennms_horizon-stream_minion'

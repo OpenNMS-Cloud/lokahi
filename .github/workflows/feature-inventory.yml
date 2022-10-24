@@ -62,3 +62,4 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           sonar-token: ${{ secrets.SONAR_TOKEN }}
           dir-location: 'inventory'
+          project-key: 'opennms_horizon-stream_inventory'

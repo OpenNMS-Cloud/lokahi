@@ -1,6 +1,12 @@
 name: 'Scan '
 description: 'This implements unit and built-time integration tests on shared-lib. There is no workflow for this, it gets called by other workflows, platform (core) and rest-server.'
 inputs:
+  github-token:
+    description: 'GITHUB_TOKEN secret for the workflow so SonarCloud can get PR information'
+    required: true
+  sonar-token:
+    description: 'SONAR_TOKEN secret to authenticate job with SonarCloud'
+    required: true
   dir-location:
     description: 'The dir containing the change.'
     required: true
@@ -15,6 +21,6 @@ runs:
       run: mvn -B org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=${{ inputs.project-key }}
       shell: bash
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        GITHUB_TOKEN: ${{ inputs.github-token }}
+        SONAR_TOKEN: ${{ inputs.sonar-token }}
       working-directory: ${{ inputs.dir-location }}

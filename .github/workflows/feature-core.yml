@@ -8,10 +8,6 @@ on:
       - '!release'
     paths:
       - 'platform/**'
-#  pull_request:
-#    types: [opened, synchronize, reopened]
-#    paths:
-#      - 'platform/**'
 
 jobs:
 

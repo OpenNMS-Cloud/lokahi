@@ -13,10 +13,6 @@ on:
     paths:
       - 'metrics-processor/**'
 
-defaults:
-  run:
-    working-directory: metrics-processor
-
 jobs:
 
   build-and-test:

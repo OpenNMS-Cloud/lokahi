@@ -13,10 +13,6 @@ on:
     paths:
       - 'notifications/**'
 
-defaults:
-  run:
-    working-directory: notifications
-
 jobs:
 
   build-and-test:

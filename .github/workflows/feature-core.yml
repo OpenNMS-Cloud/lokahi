@@ -13,10 +13,6 @@ on:
     paths:
       - 'platform/**'
 
-defaults:
-  run:
-    working-directory: platform
-
 jobs:
 
   build-and-test:

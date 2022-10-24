@@ -13,10 +13,6 @@ on:
     paths:
       - 'minion-gateway/**'
 
-defaults:
-  run:
-    working-directory: minion-gateway
-
 jobs:
 
   build-and-test:

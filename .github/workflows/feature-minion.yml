@@ -13,10 +13,6 @@ on:
     paths:
       - 'minion/**'
 
-defaults:
-  run:
-    working-directory: minion
-
 jobs:
 
   build-and-test:

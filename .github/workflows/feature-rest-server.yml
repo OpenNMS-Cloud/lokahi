@@ -13,10 +13,6 @@ on:
     paths:
       - 'rest-server/**'
 
-defaults:
-  run:
-    working-directory: rest-server
-
 jobs:
   build-and-test:
     runs-on: ubuntu-latest

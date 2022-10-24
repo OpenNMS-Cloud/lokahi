@@ -13,10 +13,6 @@ on:
     paths:
       - 'shared-lib/**'
 
-defaults:
-  run:
-    working-directory: shared-lib
-
 jobs:
 
   build-and-test:

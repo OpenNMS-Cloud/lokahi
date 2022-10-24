@@ -13,10 +13,6 @@ on:
     paths:
       - 'inventory/**'
 
-defaults:
-  run:
-    working-directory: inventory
-
 jobs:
 
   build-and-test:

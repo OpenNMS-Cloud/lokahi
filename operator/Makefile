@@ -11,6 +11,9 @@ unit-test:
 integration-test:
 	echo "These are integration tests"
 
+coverage:
+	go test -covermode=atomic -coverprofile cover.out --tags=unit ./...
+
 kubebuilder:
 	controller-gen object paths=./api/v1alpha1/opennms_types.go
 

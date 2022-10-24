@@ -2,3 +2,4 @@ charts/
 tmp/
 testtmp/
 operator
+cover.out

@@ -32,6 +32,10 @@ jobs:
         with:
           dir-location: 'operator'
 
+      - name: 'Test Coverage'
+        run: go test -covermode=atomic -coverprofile cover.out --tags=unit ./...
+        working-directory: 'operator'
+
       - name: 'SonarCloud Scan'
         uses: SonarSource/sonarcloud-github-action@master
         with:

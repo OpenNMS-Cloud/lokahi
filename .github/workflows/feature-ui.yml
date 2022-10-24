@@ -22,7 +22,7 @@ jobs:
         with:
           node-version: 18
           cache: 'yarn'
-        working-directory: 'ui'
+          cache-dependency-path: ui/yarn.lock
       - name: feature-ui
         id: action-feature-ui
         uses: ./.github/actions/ui

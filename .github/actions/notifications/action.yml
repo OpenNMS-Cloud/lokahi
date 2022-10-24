@@ -15,7 +15,7 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: package
+    - name: verify
       run: mvn -B verify -f ${{ inputs.dir-location }}
       shell: bash
     - name: sonar-scan

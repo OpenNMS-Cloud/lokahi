@@ -15,9 +15,15 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: build-image
+    - name: verify
+      run: mvn -B verify -f ${{ inputs.dir-location }}
+      shell: bash
+    - name: sonar-scan
+      run: mvn -B org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -f ${{ inputs.dir-location }}
+      shell: bash
       env:
         GITHUB_TOKEN: ${{ inputs.github-token }}
         SONAR_TOKEN: ${{ inputs.sonar-token }}
-      run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar jib:build -Dimage=opennms/horizon-stream-rest-server:local -f ${{ inputs.dir-location }}
+    - name: build-image
+      run: mvn -B jib:dockerBuild -Dimage=opennms/horizon-stream-rest-server:local -f ${{ inputs.dir-location }}
       shell: bash

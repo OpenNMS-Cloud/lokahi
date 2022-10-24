@@ -25,9 +25,9 @@ import (
 
 func TestTemplate(t *testing.T) {
 	namespace := "testNamespace"
-	testString := "{{ .Values.Namespace }}"
+	testString := "{{ .Release.Namespace }}"
 	v := values.TemplateValues{
-		Values: values.Values{
+		Release: values.HelmRelease{
 			Namespace: namespace,
 		},
 	}

@@ -1,0 +1,22 @@
+<blueprint
+	xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xsi:schemaLocation="http://www.osgi.org/xmlns/blueprint/v1.0.0 https://osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd"
+>
+
+  <bean id="snmpStrategy" class="org.opennms.horizon.shared.snmp.snmp4j.Snmp4JStrategy"/>
+  <bean id="strategyResolver" class="org.opennms.horizon.shared.snmp.ServiceBasedStrategyResolver">
+      <argument ref="snmpStrategy"/>
+  </bean>
+  <bean id="snmpHelper" class="org.opennms.horizon.shared.snmp.SnmpHelperImpl">
+    <argument ref="strategyResolver"/>
+  </bean>
+
+  <service ref="strategyResolver" interface="org.opennms.horizon.shared.snmp.StrategyResolver" />
+  <service ref="snmpHelper" interface="org.opennms.horizon.shared.snmp.SnmpHelper" />
+
+  <reference-list interface="org.opennms.horizon.shared.snmp.SnmpStrategy" availability="optional">
+    <reference-listener bind-method="onBind" unbind-method="onUnbind" ref="strategyResolver" />
+  </reference-list>
+ 
+</blueprint>

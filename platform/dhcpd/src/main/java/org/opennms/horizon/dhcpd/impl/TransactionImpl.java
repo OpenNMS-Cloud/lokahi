@@ -31,8 +31,8 @@ package org.opennms.horizon.dhcpd.impl;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.Sets;
 import org.dhcp4java.DHCPConstants;
-import org.opennms.horizon.core.lib.InetAddressUtils;
 import org.opennms.horizon.dhcpd.Transaction;
+import org.opennms.horizon.shared.utils.InetAddressUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

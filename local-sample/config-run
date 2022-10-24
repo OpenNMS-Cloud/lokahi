@@ -1,6 +1,0 @@
-#!/bin/bash
-
-IMAGE_TAG=latest
-
-DOMAIN=onmshs
-

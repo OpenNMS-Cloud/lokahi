@@ -1,0 +1,14 @@
+#!/bin/bash
+
+USER=admin
+
+kubectl exec -it deployment.apps/my-horizon-stream-minion -- \
+	ssh \
+		-o port="8101"			\
+		-o User="${USER}"		\
+		-o CheckHostIP=no		\
+		-o StrictHostKeyChecking=false	\
+		-o UserKnownHostsFile=/dev/null	\
+		-o HostKeyAlgorithms=+ssh-dss	\
+		localhost
+

@@ -4,7 +4,7 @@ metadata:
   name: {{ .Values.Prometheus.Server.ServiceName }}
   labels:
     app: {{ .Values.Prometheus.Server.ServiceName }}
-  namespace: {{ .Values.Namespace }}
+  namespace: {{ .Release.Namespace }}
 spec:
   replicas: {{ .Values.Prometheus.Server.Replicas }}
   selector:
@@ -15,7 +15,7 @@ spec:
       labels:
         app: {{ .Values.Prometheus.Server.ServiceName }}
     spec:
-      {{ if .Values.NodeRestrictions.Enabled }}
+      {{- if .Values.NodeRestrictions.Enabled }}
       tolerations:
         - effect: "NoSchedule"
           key: "{{ .Values.NodeRestrictions.Key }}"
@@ -31,7 +31,7 @@ spec:
                     operator: In
                     values:
                       - {{ .Values.NodeRestrictions.Value }}
-      {{ end }}
+      {{- end }}
       volumes:
         - name: prometheus-config-volume
           configMap:

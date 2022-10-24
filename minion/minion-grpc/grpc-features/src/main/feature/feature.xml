@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<features name="minion-grpc-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.6.0">
+
+    <feature name="internal-grpc-metrics">
+        <bundle>mvn:io.dropwizard.metrics/metrics-core/${dropwizard.metrics.version}</bundle>
+    </feature>
+
+    <feature name="internal-grpc-guava" description="Google Guava" version="${guava.version}">
+        <bundle dependency="true">mvn:com.google.guava/guava/${guava.version}</bundle>
+        <bundle dependency="true">mvn:com.google.guava/failureaccess/1.0.1</bundle>
+    </feature>
+
+    <feature name="internal-grpc-opentracing" version="0.31.0">
+        <bundle dependency="true">wrap:mvn:io.opentracing/opentracing-api/0.31.0</bundle>
+        <bundle dependency="true">wrap:mvn:io.opentracing/opentracing-noop/0.31.0</bundle>
+        <bundle dependency="true">wrap:mvn:io.opentracing/opentracing-util/0.31.0</bundle>
+    </feature>
+
+    <feature name="protobuf" version="${protobuf.version}">
+        <bundle>mvn:com.google.protobuf/protobuf-java/${protobuf.version}</bundle>
+    </feature>
+
+    <feature name="grpc" version="${grpc.version}">
+        <feature prerequisite="true">wrap</feature>
+        <feature>internal-grpc-guava</feature>
+        <feature>protobuf</feature>
+
+        <bundle>wrap:mvn:org.opennms.horizon.minion/shaded-grpc/${project.version}$overwrite=merge&amp;Karaf-Commands=none</bundle>
+    </feature>
+
+    <feature name="grpc-ratelimitter" version="2.0.2">
+        <feature prerequisite="true">wrap</feature>
+        <bundle>wrap:mvn:com.swrve/rate-limited-logger/2.0.2$Bundle-SymbolicName=com.swrve.rate-limited-logger&amp;Bundle-Name=Rate Limited Logger</bundle>
+    </feature>
+
+    <feature name="grpc-contract" version="2.0.2">
+        <feature>protobuf</feature>
+        <feature>grpc</feature>
+        <bundle>mvn:org.opennms.horizon.shared/ipc-grpc-contract/${project.version}</bundle>
+    </feature>
+
+    <feature name="grpc-minion" version="${project.version}">
+        <feature>aries-blueprint</feature>
+
+        <feature>internal-grpc-metrics</feature>
+        <feature>internal-grpc-opentracing</feature>
+        <feature>internal-grpc-guava</feature>
+        <feature>grpc-ratelimitter</feature>
+        <feature>grpc-contract</feature>
+
+        <bundle>mvn:org.opennms.horizon.shared/horizon-common-logging/${project.version}</bundle>
+        <bundle>mvn:org.opennms.horizon.shared/ipc-api/${project.version}</bundle>
+        <bundle>mvn:org.opennms.horizon.minion/grpc-client/${project.version}</bundle>
+    </feature>
+
+</features>

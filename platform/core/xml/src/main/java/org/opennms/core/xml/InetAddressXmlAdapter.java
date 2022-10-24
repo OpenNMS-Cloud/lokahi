@@ -31,8 +31,7 @@ package org.opennms.core.xml;
 import java.net.InetAddress;
 
 import javax.xml.bind.annotation.adapters.XmlAdapter;
-
-import org.opennms.horizon.core.lib.IPAddress;
+import org.opennms.horizon.shared.utils.IPAddress;
 
 public class InetAddressXmlAdapter extends XmlAdapter<String, InetAddress> {
 

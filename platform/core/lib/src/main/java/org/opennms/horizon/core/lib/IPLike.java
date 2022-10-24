@@ -29,6 +29,7 @@
 package org.opennms.horizon.core.lib;
 
 import java.net.InetAddress;
+import org.opennms.horizon.shared.utils.InetAddressUtils;
 
 /**
  * <p>IPLike class.</p>

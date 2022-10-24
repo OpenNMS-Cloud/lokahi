@@ -1,0 +1,48 @@
+syntax = "proto3";
+package opennms.rpc.ping;
+
+option java_multiple_files = true;
+option java_package = "org.opennms.horizon.grpc.ping.contract";
+
+import "opennms_minion_ipc.proto";
+
+message PingRequest {
+  uint64 timeout = 1;
+  uint32 packet_size = 2;
+  uint32 retries = 3;
+  string inetAddress = 4;
+}
+
+message PingResponse {
+  double rtt = 1;
+}
+
+message PingSweepRequest {
+  repeated IpRange ipRanges = 1;
+  int32 packet_size = 2;
+  double packets_per_second = 3;
+}
+
+message IpRange {
+  string begin = 1;
+  string end = 2;
+  int32 retries = 3;
+  int64 timeout = 4;
+}
+
+message PingSweepResponse {
+  string error = 1;
+  repeated PingResult results = 2;
+}
+
+message PingResult {
+  string address = 1;
+  double rtt = 2;
+}
+
+message PingSequence {
+  bool timeout = 1;
+  string error = 2;
+  double rtt = 3;
+  int32 sequence_number = 4;
+}

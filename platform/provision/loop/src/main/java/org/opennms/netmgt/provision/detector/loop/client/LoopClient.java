@@ -28,7 +28,7 @@
 
 package org.opennms.netmgt.provision.detector.loop.client;
 
-import org.opennms.horizon.core.lib.InetAddressUtils;
+import org.opennms.horizon.shared.utils.InetAddressUtils;
 import org.opennms.netmgt.provision.core.request.LineOrientedRequest;
 import org.opennms.netmgt.provision.detector.loop.response.LoopResponse;
 import org.opennms.netmgt.provision.support.Client;

@@ -2,7 +2,7 @@
  * This file is part of OpenNMS(R).
  *
  * Copyright (C) 2002-2014 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2014 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
  *
@@ -28,12 +28,10 @@
 
 package org.opennms.horizon.db.dao.api;
 
-import org.opennms.horizon.db.model.OnmsApplication;
 import org.opennms.horizon.db.model.OnmsMonitoredService;
 
 import java.net.InetAddress;
 import java.util.List;
-import java.util.Set;
 
 /**
  * <p>MonitoredServiceDao interface.</p>

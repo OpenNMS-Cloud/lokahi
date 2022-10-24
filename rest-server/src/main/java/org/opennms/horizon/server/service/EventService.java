@@ -28,6 +28,7 @@
 
 package org.opennms.horizon.server.service;
 
+import org.opennms.horizon.server.service.gateway.PlatformGateway;
 import org.opennms.horizon.shared.dto.event.EventCollectionDTO;
 import org.opennms.horizon.shared.dto.event.EventDTO;
 import org.springframework.stereotype.Service;
@@ -37,6 +38,7 @@ import io.leangen.graphql.annotations.GraphQLMutation;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.execution.ResolutionEnvironment;
 import io.leangen.graphql.spqr.spring.annotations.GraphQLApi;
+import reactor.core.publisher.Mono;
 
 @GraphQLApi
 @Service
@@ -48,12 +50,12 @@ public class EventService {
   }
 
   @GraphQLQuery
-  public EventCollectionDTO listEvents(@GraphQLEnvironment ResolutionEnvironment env) {
-    return gateway.get(PlatformGateway.URL_PATH_EVENTS, gateway.getAuthHeader(env), EventCollectionDTO.class).getBody();
+  public Mono<EventCollectionDTO> listEvents(@GraphQLEnvironment ResolutionEnvironment env) {
+    return gateway.get(PlatformGateway.URL_PATH_EVENTS, gateway.getAuthHeader(env), EventCollectionDTO.class);
   }
 
   @GraphQLMutation
-  public Void createEvent(EventDTO event, @GraphQLEnvironment ResolutionEnvironment env) {
-    return gateway.post(PlatformGateway.URL_PATH_EVENTS, gateway.getAuthHeader(env), event, Void.class).getBody();
+  public Mono<Void> createEvent(EventDTO event, @GraphQLEnvironment ResolutionEnvironment env) {
+    return gateway.post(PlatformGateway.URL_PATH_EVENTS, gateway.getAuthHeader(env), event, Void.class);
   }
 }

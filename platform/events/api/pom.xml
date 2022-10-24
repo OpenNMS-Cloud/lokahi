@@ -43,8 +43,8 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.opennms.horizon.snmp</groupId>
-            <artifactId>api</artifactId>
+            <groupId>org.opennms.horizon.shared</groupId>
+            <artifactId>snmp-api</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

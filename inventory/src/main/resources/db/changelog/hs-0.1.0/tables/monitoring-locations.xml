@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+
+    <changeSet author="tbigg" id="0.1.0-monitoring-locations">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="monitoring_locations"/>
+            </not>
+        </preConditions>
+
+        <createTable tableName="monitoring_locations">
+            <column name="id" type="BIGINT" autoIncrement="true"/>
+
+            <column name="tenant_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="location" type="TEXT">
+                <constraints nullable="false" unique="true"/>
+            </column>
+
+        </createTable>
+
+        <addPrimaryKey tableName="monitoring_locations" columnNames="id"
+                       constraintName="pk_monitoring_locations_id"/>
+
+    </changeSet>
+</databaseChangeLog>

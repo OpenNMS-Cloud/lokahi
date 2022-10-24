@@ -2,100 +2,176 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
+    <parent>
+        <groupId>org.opennms.horizon</groupId>
+        <artifactId>horizon-parent</artifactId>
+        <version>0.1.0-SNAPSHOT</version>
+    </parent>
+
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.opennms.horizon</groupId>
+    <groupId>org.opennms.horizon.minion</groupId>
     <artifactId>minion</artifactId>
     <packaging>pom</packaging>
-    <version>1.0.0-SNAPSHOT</version>
     <name>OpenNMS Horizon Minion</name>
     <inceptionYear>2022</inceptionYear>
 
     <modules>
-
+        <module>minion-3rdParty</module>
+        <module>icmp</module>
+        <module>snmp</module>
+        <module>minion-ipc</module>
+        <module>minion-grpc</module>
+        <module>minion-observability</module>
+        <module>minion-taskset</module>
+        <module>plugins</module>
+        <module>minion-features</module>
+        <module>docker-assembly</module>
+        <module>assembly</module>
     </modules>
 
     <properties>
-<!--        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>-->
-<!--        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>-->
-<!--        <dropwizard.metrics.version>3.1.2</dropwizard.metrics.version>-->
-<!--        <activemq.version>5.17.1</activemq.version>-->
-<!--        <aries.jax.rs.whiteboard.version>2.0.1</aries.jax.rs.whiteboard.version>-->
-<!--        <aries.jpa.api.version>2.7.3</aries.jpa.api.version>-->
-<!--        <bsf.version>2.4.0</bsf.version>-->
-<!--        <eclipselink.version>2.5.1</eclipselink.version>-->
-<!--        <camel.version>3.15.0</camel.version>-->
-<!--        <commons.io.version>2.11.0</commons.io.version>-->
-<!--        <commons.lang.version>2.6</commons.lang.version>-->
-<!--        <cucumber.version>7.1.0</cucumber.version>-->
-<!--        <cxf.version>3.5.0</cxf.version>-->
-<!--        <dhcp4java.version>1.1.0</dhcp4java.version>-->
-<!--        <docker.image.tag>local</docker.image.tag>-->
-<!--        <docker.image.skipPush>false</docker.image.skipPush>-->
-<!--        <drools.version>7.31.0.Final</drools.version>-->
-<!--        <geohash.version>1.4.0</geohash.version>-->
-<!--        <glassfish.jaxb.version>2.3.2</glassfish.jaxb.version>-->
-<!--        <grpc.version>1.43.2</grpc.version>-->
-<!--        <guava.version>31.0.1-jre</guava.version>-->
-<!--        <hamcrest.version>1.3</hamcrest.version>-->
-<!--        <hibernate.version>5.4.32.Final</hibernate.version>-->
-<!--        <httpcore.version>4.4.4</httpcore.version>-->
-<!--        <httpclient.version>4.5.13</httpclient.version>-->
-<!--        <horizon.shared.lib.version>0.1.0-SNAPSHOT</horizon.shared.lib.version>-->
-<!--        <jackson.version>2.13.1</jackson.version>-->
-<!--        <jaeger.version>0.34.0</jaeger.version>-->
-<!--        <jakarta.annotation.version>1.3.5</jakarta.annotation.version>-->
-<!--        <jakarta.xml.version>2.3.3</jakarta.xml.version>-->
-<!--        <jakarta.mail.version>1.6.7</jakarta.mail.version>-->
-<!--        <java.version>11</java.version>-->
-<!--        <javax.validation.version>2.0.1.Final</javax.validation.version>-->
-<!--        <jaxrs.version>2.1</jaxrs.version>-->
-<!--        <jboss-logging.version>3.4.1.Final</jboss-logging.version>-->
-<!--        <jcifs.version>2.1.6</jcifs.version>-->
-<!--        <jexl.version>2.1.1</jexl.version>-->
-<!--        <jicmp.version>2.0.1</jicmp.version>-->
-<!--        <jicmp6.version>2.0.1</jicmp6.version>-->
-<!--        <jna.version>4.4.0</jna.version>-->
-<!--        <joda.time.version>2.1</joda.time.version>-->
-<!--        <junit.version>4.13.2</junit.version>-->
-<!--        <jsonPatch.version>1.13</jsonPatch.version>-->
-<!--        <jacksonCoreUtils.version>2.0</jacksonCoreUtils.version>-->
-<!--        <fgeMsgSimple.version>1.1</fgeMsgSimple.version>-->
-<!--        <fgeBtf.version>1.2</fgeBtf.version>-->
-<!--        <json.version>20171018</json.version>-->
-<!--        <jsr250.version>1.0</jsr250.version>-->
-<!--        <jsr305.version>3.0.2</jsr305.version>-->
-<!--        <karaf.version>4.3.6</karaf.version>-->
-<!--        <keycloak.version>18.0.0</keycloak.version>-->
-<!--        <liquibaseVersion>3.6.3</liquibaseVersion>-->
-<!--        <log4j2.version>2.17.1</log4j2.version>-->
-<!--        <mapstruct.version>1.4.1.Final</mapstruct.version>-->
-<!--        <mina.version>2.1.5</mina.version>-->
-<!--        <netty3.version>3.10.6.Final</netty3.version>-->
-<!--        <netty4.version>4.1.78.Final</netty4.version>-->
-<!--        <opennms.tracker.version>0.7</opennms.tracker.version>-->
-<!--        <opentracing.version>0.31.0</opentracing.version>-->
-<!--        <org.osgi.service.jdbc.version>1.0.0</org.osgi.service.jdbc.version>-->
-<!--        <osgi.version>7.0.0</osgi.version>-->
-<!--        <pax.jdbc.version>1.5.2</pax.jdbc.version>-->
-<!--        <postgresql.version>42.3.2</postgresql.version>-->
-<!--        <prometheus.version>0.16.0</prometheus.version>-->
-<!--        <protobuf.version>3.16.1</protobuf.version>-->
-<!--        <rate.limitted.logger.version>2.0.2</rate.limitted.logger.version>-->
-<!--        <rest-assured.version>4.3.3</rest-assured.version>-->
-<!--        <skipTests>false</skipTests>-->
-<!--        <skipITs>true</skipITs>-->
-<!--        <skipUTs>${skipTests}</skipUTs>-->
-<!--        <slf4j.version>1.7.33</slf4j.version>-->
-<!--        <snmp4j.version>2.5.5</snmp4j.version>-->
-<!--        <snmp4j.agent.version>2.5.3</snmp4j.agent.version>-->
-<!--        <spring.version>5.3.14_1</spring.version>-->
-<!--        <swagger.version>2.1.1</swagger.version>-->
-<!--        <testcontainers.version>1.16.3</testcontainers.version>-->
-<!--        <lombok.version>1.18.24</lombok.version>-->
-<!--        <mockito.version>4.5.1</mockito.version>-->
-<!--        <gson.version>2.8.6</gson.version>-->
+        <skipUTs>false</skipUTs>
+        <skipITs>false</skipITs>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
+        <java.version>11</java.version>
+
+        <lombok.version>1.18.22</lombok.version>
+        <ignite.version>2.14.0</ignite.version>
+        <jetty.version>9.4.43.v20210629</jetty.version>
+        <cron-utils.version>9.1.6</cron-utils.version>
+        <eos.version>1.2.0</eos.version>
+        <prometheus.version>0.16.0</prometheus.version>
     </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>io.prometheus</groupId>
+                <artifactId>simpleclient_bom</artifactId>
+                <version>${prometheus.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.cronutils</groupId>
+                <artifactId>cron-utils</artifactId>
+                <version>${cron-utils.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.ignite</groupId>
+                <artifactId>ignite-core</artifactId>
+                <version>${ignite.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.ignite</groupId>
+                <artifactId>ignite-kubernetes</artifactId>
+                <version>${ignite.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.eclipse.jetty</groupId>
+                <artifactId>jetty-server</artifactId>
+                <version>${jetty.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.jetty</groupId>
+                <artifactId>jetty-servlet</artifactId>
+                <version>${jetty.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.google.protobuf</groupId>
+                <artifactId>protobuf-java</artifactId>
+                <version>${protobuf.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.google.protobuf</groupId>
+                <artifactId>protobuf-java-util</artifactId>
+                <version>${protobuf.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.grpc</groupId>
+                <artifactId>grpc-all</artifactId>
+                <version>${grpc.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.grpc</groupId>
+                <artifactId>grpc-api</artifactId>
+                <version>${grpc.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.grpc</groupId>
+                <artifactId>grpc-auth</artifactId>
+                <version>${grpc.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.grpc</groupId>
+                <artifactId>grpc-context</artifactId>
+                <version>${grpc.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.grpc</groupId>
+                <artifactId>grpc-core</artifactId>
+                <version>${grpc.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.grpc</groupId>
+                <artifactId>grpc-grpclb</artifactId>
+                <version>${grpc.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.grpc</groupId>
+                <artifactId>grpc-netty</artifactId>
+                <version>${grpc.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.grpc</groupId>
+                <artifactId>grpc-okhttp</artifactId>
+                <version>${grpc.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.grpc</groupId>
+                <artifactId>grpc-protobuf</artifactId>
+                <version>${grpc.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.grpc</groupId>
+                <artifactId>grpc-rls</artifactId>
+                <version>${grpc.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.grpc</groupId>
+                <artifactId>grpc-services</artifactId>
+                <version>${grpc.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.grpc</groupId>
+                <artifactId>grpc-stub</artifactId>
+                <version>${grpc.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.grpc</groupId>
+                <artifactId>grpc-testing</artifactId>
+                <version>${grpc.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.grpc</groupId>
+                <artifactId>grpc-xds</artifactId>
+                <version>${grpc.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>io.dropwizard.metrics</groupId>
+                <artifactId>metrics-core</artifactId>
+                <version>${dropwizard.metrics.version}</version>
+            </dependency>
+
+        </dependencies>
+    </dependencyManagement>
 
     <build>
         <defaultGoal>install</defaultGoal>
@@ -145,6 +221,7 @@
                     <groupId>org.apache.karaf.tooling</groupId>
                     <artifactId>karaf-maven-plugin</artifactId>
                     <version>${karaf.version}</version>
+                    <extensions>true</extensions>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -208,39 +285,45 @@
                 <configuration>
                     <instructions>
                         <Bundle-RequiredExecutionEnvironment>JavaSE-${java.version}</Bundle-RequiredExecutionEnvironment>
-                        <Karaf-Commands>*</Karaf-Commands>
                     </instructions>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>com.diffplug.spotless</groupId>
+                <artifactId>spotless-maven-plugin</artifactId>
+                <version>2.24.0</version>
+                <configuration>
+                    <ratchetFrom>origin/main</ratchetFrom>
+                    <java>
+                        <palantirJavaFormat>
+                            <version>2.10.0</version>
+                        </palantirJavaFormat>
+                        <licenseHeader>
+                            <file>${maven.multiModuleProjectDirectory}/spotless/header-java.txt</file>
+                        </licenseHeader>
+                    </java>
+                    <pom>
+                        <includes>
+                            <include>pom.xml</include>
+                        </includes>
+                        <sortPom />
+                        <licenseHeader>
+                            <file>${maven.multiModuleProjectDirectory}/spotless/header-xml.txt</file>
+                            <delimiter><![CDATA[<project]]></delimiter>
+                        </licenseHeader>
+                    </pom>
                 </configuration>
             </plugin>
         </plugins>
     </build>
 
-    <repositories>
-        <repository>
-            <snapshots><enabled>false</enabled></snapshots>
-            <releases><enabled>true</enabled></releases>
-            <id>opennms-repo</id>
-            <name>OpenNMS Maven Repository</name>
-            <url>https://maven.opennms.org/content/groups/opennms.org-release</url>
-        </repository>
-        <repository>
-            <snapshots><enabled>true</enabled></snapshots>
-            <releases><enabled>false</enabled></releases>
-            <id>opennms-snapshots</id>
-            <name>OpenNMS Snapshot Maven Repository</name>
-            <url>https://maven.opennms.org/content/groups/opennms.org-snapshot</url>
-        </repository>
-        <repository>
-            <id>opennms-maven-3rdparty</id>
-            <url>https://packages.opennms.com/public/3rdparty/maven/</url>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
-    </repositories>
+    <dependencies>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>${lombok.version}</version>
+        </dependency>
+    </dependencies>
     <profiles>
         <profile>
             <id>run-it</id>

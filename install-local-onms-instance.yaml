@@ -5,22 +5,44 @@ metadata:
 spec:
   allowedUsers: []
   host: onmshs
+  httpPort: 80
+  httpsPort: 443
   namespace: local-instance
   deployOnly: true
   core:
-    image: opennms/horizon-stream-core
+    image: opennms/horizon-stream-core:local
     cpu: "0"
     mem: "0"
   api:
-    image: opennms/horizon-stream-rest-server
+    image: opennms/horizon-stream-rest-server:local
     cpu: "0"
-    mem: "0"
+    mem: 500Mi
   ui:
-    image: opennms/horizon-stream-ui
+    image: opennms/horizon-stream-ui:local
     cpu: "0"
-    mem: "0"
+    mem: 100Mi
+  minion:
+    image: opennms/horizon-stream-minion:local
+    cpu: "0"
+    mem: 1000Mi
+  minionGateway:
+    image: opennms/horizon-stream-minion-gateway:local
+    cpu: "0"
+    mem: 500Mi
+  notification:
+    image: opennms/horizon-stream-notification:local
+    cpu: "0"
+    mem: 100Mi
+  inventory:
+    image: opennms/horizon-stream-inventory:local
+  metricsProcessor:
+    image: opennms/horizon-stream-metrics-processor:local
+  keycloak:
+    image: opennms/horizon-stream-keycloak:local
+  grafana:
+    image: opennms/horizon-stream-grafana:local
   postgres:
-    image: postgres:13.3-alpine
+    image: postgres:14.5-alpine
   credentials:
     adminPassword: admin
     userPassword: passw0rd

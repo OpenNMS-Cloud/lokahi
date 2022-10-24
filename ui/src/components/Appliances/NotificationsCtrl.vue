@@ -14,8 +14,8 @@
       </p>
       <FeatherInput
         data-test="routing-input"
-        label="API Routing Key"
-        v-model="routingKey"
+        label="Integration Key"
+        v-model="config.integrationkey"
       />
     </template>
 
@@ -30,7 +30,7 @@
       <FeatherButton 
         data-test="save-btn" 
         primary
-        :disabled="!routingKey"
+        :disabled="!config.integrationkey"
         @click="save">
           Save
       </FeatherButton>
@@ -42,21 +42,24 @@
 import { useNotificationMutations } from '@/store/Mutations/notificationMutations'
 import useModal from '@/composables/useModal'
 import useSnackbar from '@/composables/useSnackbar'
+import { PagerDutyConfigDtoInput } from '@/types/graphql'
 
 const { showSnackbar } = useSnackbar()
 const { openModal, closeModal, isVisible } = useModal()
 const notificationMutations = useNotificationMutations()
 
-const routingKey = ref<string>()
+const config: PagerDutyConfigDtoInput = reactive({
+  integrationkey: undefined
+})
 
 const save = async () => {
-  await notificationMutations.sendPagerDutyRoutingKey({ key: routingKey.value as string })
+  await notificationMutations.savePagerDutyIntegrationKey({ config })
   if (!notificationMutations.error) {
-    routingKey.value = undefined 
+    config.integrationkey = undefined
     closeModal()
 
     showSnackbar({
-      msg: 'Routing key successfuly saved.'
+      msg: 'Integration key successfuly saved.'
     })
   }
 }

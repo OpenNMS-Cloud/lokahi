@@ -32,6 +32,7 @@ import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.util.Comparator;
+import org.opennms.horizon.shared.utils.ByteArrayComparator;
 
 /**
  * <p>This comparator will sort {@link InetAddress} instances in the following order:</p>

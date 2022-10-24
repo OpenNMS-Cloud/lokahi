@@ -39,6 +39,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author jwhite
  */
+@Deprecated
 public abstract class AbstractXmlRpcModule<S extends RpcRequest,T extends RpcResponse> implements RpcModule<S, T>  {
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractXmlRpcModule.class);

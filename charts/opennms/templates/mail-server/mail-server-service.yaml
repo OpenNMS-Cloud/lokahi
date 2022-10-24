@@ -4,7 +4,7 @@ metadata:
   name: {{ .Values.MailServer.ServiceName }}
   labels:
     app: {{ .Values.MailServer.ServiceName }}
-  namespace: {{ .Values.Namespace }}
+  namespace: {{ .Release.Namespace }}
 spec:
   type: ClusterIP
   ports:

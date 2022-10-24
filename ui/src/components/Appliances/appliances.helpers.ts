@@ -3,9 +3,9 @@ import { ExtendedMinionDTO } from '@/types/minion'
 import { add, intervalToDuration, formatDuration } from 'date-fns'
 
 export interface BGColors {
-  statusBgColor: string
   latencyBgColor: string
   uptimeBgColor: string
+  statusBgColor: string
 }
 
 /**
@@ -14,23 +14,33 @@ export interface BGColors {
  * @returns list of items with added metrics background color props
  */
 export const formatItemBgColor = (list: ExtendedMinionDTO[] | ExtendedDeviceDTO[]) => list.map(item => {
-  const {icmp_latency: latency, snmp_uptime: uptime, status} = item
+  const { icmp_latency: latency, snmp_uptime: uptime, status } = item
   const bg = {
     ok: 'bg-ok',
     failed: 'bg-failed',
-    unknown: 'bg-unknown'
+    unknown: 'bg-unknown' // undefined | null
   }
+
+  const setBgColor = (metric: any) => {
+    let bgColor = bg.unknown
+    
+    if(![undefined, null].includes(metric)) {
+      bgColor = metric >= 0 ? bg.ok : bg.failed
+    }
+
+    return bgColor
+  } 
 
   return {
     ...item,
-    latencyBgColor: latency >= 0 ? bg.ok : bg.failed,
-    uptimeBgColor: uptime >= 0 ? bg.ok : bg.failed,
+    latencyBgColor: setBgColor(latency),
+    uptimeBgColor: setBgColor(uptime),
     statusBgColor: status === 'UP' ? bg.ok : bg.failed
   }
 })
 
 export const getHumanReadableDuration = (uptimeInSeconds: number) => {
-  let durationDisplay = '--' // undefined
+  let durationDisplay = '--' // undefined | null
 
   if(uptimeInSeconds >= 0) {
     if (uptimeInSeconds < 60) durationDisplay = `${uptimeInSeconds} ${uptimeInSeconds <= 0 ? '' : 'seconds'}` // 0-59secs
@@ -47,10 +57,13 @@ export const getHumanReadableDuration = (uptimeInSeconds: number) => {
   return durationDisplay
 }
 
-export const formatLatencyDisplay = (latency: number) => {
-  let displayLatency = '--'
+export const formatLatencyDisplay = (latency: any) => {
+  let display = '--' // undefined | null
 
-  if(latency >= 0) displayLatency = `${latency}ms`
+  if(![undefined, null].includes(latency)) {
+    if(latency > 0 || latency < 0) display = `${latency}ms`
+    else display = latency
+  }
 
-  return displayLatency
+  return display
 }

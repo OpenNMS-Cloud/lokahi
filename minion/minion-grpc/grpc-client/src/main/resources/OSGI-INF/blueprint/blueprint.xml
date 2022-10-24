@@ -1,0 +1,67 @@
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.3.0"
+    xsi:schemaLocation="
+        http://www.osgi.org/xmlns/blueprint/v1.0.0
+        https://osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd
+        http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.3.0
+        http://aries.apache.org/schemas/blueprint-cm/blueprint-cm-1.3.0.xsd
+    ">
+
+    <cm:property-placeholder id="serverProperties" persistent-id="org.opennms.core.ipc.grpc.client" update-strategy="reload">
+        <cm:default-properties>
+            <cm:property name="host" value="localhost"/>
+            <cm:property name="port" value="8990"/>
+        </cm:default-properties>
+    </cm:property-placeholder>
+
+    <cm:property-placeholder id="identityProperties" persistent-id="org.opennms.identity" update-strategy="reload"
+        placeholder-prefix="$[" placeholder-suffix="]">
+        <cm:default-properties>
+            <cm:property name="id" value="UNKNOWN"/>
+            <cm:property name="location" value="Default"/>
+        </cm:default-properties>
+    </cm:property-placeholder>
+
+    <bean id="ipcIdentity" class="org.opennms.horizon.minion.grpc.MinionIpcIdentity">
+        <argument value="$[id]" />
+        <argument value="$[location]" />
+    </bean>
+
+    <reference id="configAdmin" interface="org.osgi.service.cm.ConfigurationAdmin"/>
+    <service interface="org.opennms.horizon.shared.ipc.rpc.IpcIdentity" ref="ipcIdentity" />
+
+    <bean id="metricRegistry" class="com.codahale.metrics.MetricRegistry"/>
+    <bean id="tracer" class="io.opentracing.noop.NoopTracerFactory" factory-method="create"/>
+
+    <bean id="thinRpcRequestHandler" class="org.opennms.horizon.minion.grpc.rpc.ThinRpcRequestHandler">
+        <argument ref="ipcIdentity" />
+    </bean>
+
+    <bean id="minionClient" class="org.opennms.horizon.minion.grpc.MinionGrpcClient" init-method="start" destroy-method="shutdown">
+        <argument ref="ipcIdentity"/>
+        <argument ref="configAdmin"/>
+        <argument ref="metricRegistry"/>
+        <argument ref="tracer"/>
+        <property name="cloudMessageHandler" ref="cloudMessageHandler" />
+        <property name="rpcRequestHandler" ref="thinRpcRequestHandler" />
+    </bean>
+
+    <reference-list interface="org.opennms.horizon.shared.ipc.rpc.api.minion.RpcHandler" availability="optional">
+        <reference-listener ref="thinRpcRequestHandler" bind-method="bind" unbind-method="unbind" />
+    </reference-list>
+
+    <service ref="minionClient">
+        <interfaces>
+            <value>org.opennms.horizon.minion.grpc.MinionGrpcClient</value>
+            <value>org.opennms.horizon.shared.ipc.sink.api.MessageDispatcherFactory</value>
+            <value>org.opennms.horizon.shared.ipc.rpc.api.minion.ClientRequestDispatcher</value>
+        </interfaces>
+    </service>
+
+    <bean id="cloudMessageHandler" class="org.opennms.horizon.minion.grpc.client.message.ThinCloudMessageHandler" />
+    <reference-list id="cloudMessageReceivers" interface="org.opennms.horizon.shared.ipc.rpc.api.minion.CloudMessageReceiver" availability="optional">
+        <reference-listener ref="cloudMessageHandler" bind-method="bind" unbind-method="unbind" />
+    </reference-list>
+
+</blueprint>

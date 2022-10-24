@@ -37,6 +37,7 @@ import io.opentracing.Span;
  *
  * @author jwhite
  */
+@Deprecated
 public interface RpcRequest {
 
     public static final String TAG_NODE_ID = "nodeId";

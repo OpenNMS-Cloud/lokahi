@@ -12,7 +12,7 @@
 
     <artifactId>features</artifactId>
     <name>OpenNMS Horizon :: Assemblies :: Features</name>
-    <packaging>pom</packaging>
+    <packaging>feature</packaging>
 
     <dependencyManagement>
         <dependencies>
@@ -27,45 +27,22 @@
     </dependencyManagement>
 
     <build>
-        <resources>
-            <resource>
-                <directory>${project.basedir}/src/main/feature</directory>
-                <filtering>true</filtering>
-                <targetPath>${project.build.directory}/feature</targetPath>
-            </resource>
-        </resources>
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-resources-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>resources</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
             <plugin>
                 <groupId>org.apache.karaf.tooling</groupId>
                 <artifactId>karaf-maven-plugin</artifactId>
-                <extensions>true</extensions>
                 <configuration>
                     <skip>${skipTests}</skip>
                 </configuration>
                 <executions>
                     <execution>
-                        <id>verify</id>
-                        <phase>process-resources</phase>
-                        <goals>
-                            <goal>verify</goal>
-                        </goals>
+                        <id>default-verify</id>
                         <configuration>
                             <descriptors>
                                 <descriptor>mvn:org.apache.karaf.features/framework/${karaf.version}/xml/features</descriptor>
                                 <descriptor>mvn:org.apache.karaf.features/standard/${karaf.version}/xml/features</descriptor>
                                 <descriptor>mvn:org.apache.karaf.features/enterprise/${karaf.version}/xml/features</descriptor>
-                                <descriptor>file:${project.build.directory}/feature/features.xml</descriptor>
+                                <descriptor>file:${project.build.directory}/feature/feature.xml</descriptor>
                             </descriptors>
                             <distribution>org.apache.karaf.features:framework</distribution>
                             <javase>${java.version}</javase>
@@ -82,14 +59,11 @@
                                 <feature>horizon-db</feature>
                                 <feature>horizon-events-api</feature>
                                 <feature>horizon-events</feature>
-                                <feature>horizon-grpc</feature>
-                                <feature>horizon-icmp</feature>
+                                <feature>horizon-grpc</feature> <!-- TBD888: this goes away -->
+                                <feature>horizon-datachoices</feature>
                                 <feature>horizon-inventory</feature>
                                 <feature>horizon-ipc-api</feature>
                                 <feature>horizon-provision</feature>
-                                <feature>horizon-minion-heartbeat</feature>
-                                <feature>horizon-minion-rest</feature>
-                                <feature>horizon-snmp</feature>
                                 <feature>horizon-tracing</feature>
                                 <feature>jackson</feature>
                                 <feature>java-native-access</feature>
@@ -103,30 +77,14 @@
                                 <feature>camel-kafka</feature>
                                 <feature>camel-activemq</feature>
                                 <feature>horizon-metrics-prometheus</feature>
+                                <feature>horizon-ignite</feature>
+                                <feature>horizon-core-heartbeat</feature>
                                 <feature>horizon-core-monitor</feature>
+                                <feature>horizon-core-config-rest</feature>
+                                <!-- TODO-911 -->
+                                <!--<feature>horizon-core-traps</feature>-->
+                                <feature>horizon-stream-jmx</feature>
                             </features>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>build-helper-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>attach-artifacts</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>attach-artifact</goal>
-                        </goals>
-                        <configuration>
-                            <artifacts>
-                                <artifact>
-                                    <file>target/feature/features.xml</file>
-                                    <classifier>features</classifier>
-                                    <type>xml</type>
-                                </artifact>
-                            </artifacts>
                         </configuration>
                     </execution>
                 </executions>
@@ -160,6 +118,11 @@
         <dependency>
             <groupId>org.opennms.horizon.core</groupId>
             <artifactId>rest</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.opennms.horizon.core</groupId>
+            <artifactId>heartbeat</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -204,96 +167,6 @@
         </dependency>
         <dependency>
             <groupId>org.opennms.horizon.events</groupId>
-            <artifactId>shell</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.opennms.horizon.icmp</groupId>
-            <artifactId>best</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.opennms.horizon.icmp</groupId>
-            <artifactId>rpc-common</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.opennms.horizon.icmp</groupId>
-            <artifactId>rpc-module-impl</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.opennms.horizon.icmp</groupId>
-            <artifactId>rpc-impl</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.opennms.horizon.icmp</groupId>
-            <artifactId>shell</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.opennms.horizon.ipc</groupId>
-            <artifactId>echo</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.opennms.horizon.ipc</groupId>
-            <artifactId>shell</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.opennms.horizon.ipc.grpc</groupId>
-            <artifactId>client</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.opennms.horizon.ipc.grpc</groupId>
-            <artifactId>heartbeat</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.opennms.horizon.ipc.grpc</groupId>
-            <artifactId>server</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.opennms.core.ipc.twin</groupId>
-            <artifactId>api</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.opennms.core.ipc.twin</groupId>
-            <artifactId>common</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.opennms.core.ipc.twin.grpc</groupId>
-            <artifactId>common</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.opennms.core.ipc.twin.grpc</groupId>
-            <artifactId>publisher</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.opennms.core.ipc.twin.grpc</groupId>
-            <artifactId>subscriber</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.opennms.horizon.snmp</groupId>
-            <artifactId>rpc-impl</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.opennms.horizon.snmp</groupId>
-            <artifactId>snmp4j</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.opennms.horizon.snmp</groupId>
             <artifactId>shell</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -397,11 +270,11 @@
             <artifactId>org.opennms.horizon.minion.rest</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.opennms.horizon.minion</groupId>
-            <artifactId>heartbeat</artifactId>
-            <version>${project.version}</version>
-        </dependency>
+        <!--<dependency>-->
+        <!--    <groupId>org.opennms.horizon.minion</groupId>-->
+        <!--    <artifactId>heartbeat</artifactId>-->
+        <!--    <version>${project.version}</version>-->
+        <!--</dependency>-->
         <dependency>
             <groupId>org.opennms.horizon.shared</groupId>
             <artifactId>dto-model</artifactId>
@@ -414,6 +287,46 @@
         </dependency>
         <dependency>
             <groupId>org.opennms.horizon.metrics</groupId>
+            <artifactId>impl</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.opennms.horizon.config</groupId>
+            <artifactId>api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.opennms.horizon.config</groupId>
+            <artifactId>service</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.opennms.horizon.config</groupId>
+            <artifactId>rest</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.opennms.horizon</groupId>
+            <artifactId>datachoices</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.opennms.horizon</groupId>
+            <artifactId>traps</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.opennms.horizon.common</groupId>
+            <artifactId>common-collection</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.opennms.horizon.jmx</groupId>
+            <artifactId>api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.opennms.horizon.jmx</groupId>
             <artifactId>impl</artifactId>
             <version>${project.version}</version>
         </dependency>

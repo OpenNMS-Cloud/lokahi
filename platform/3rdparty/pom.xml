@@ -17,6 +17,7 @@
 
     <modules>
         <module>grpc</module>
+        <module>ignite</module>
         <module>jackson-coreutils</module>
         <module>jaeger</module>
         <module>jcifs-shaded</module>

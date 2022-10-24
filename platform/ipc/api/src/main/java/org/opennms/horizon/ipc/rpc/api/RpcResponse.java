@@ -33,6 +33,7 @@ package org.opennms.horizon.ipc.rpc.api;
  *
  * @author jwhite
  */
+@Deprecated
 public interface RpcResponse {
 
     /**

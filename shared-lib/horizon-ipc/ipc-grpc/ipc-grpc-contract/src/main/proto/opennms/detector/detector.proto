@@ -1,0 +1,26 @@
+syntax = "proto3";
+package opennms.rpc.detector;
+
+option java_multiple_files = true;
+option java_package = "org.opennms.horizon.grpc.detector.contract";
+
+import "opennms_minion_ipc.proto";
+
+message DetectorRequest {
+  minion.Identity identity = 1;
+  string class_name = 2;
+  string address = 3;
+  repeated Attribute detector_attributes = 4;
+  repeated Attribute runtime_attributes = 5;
+}
+
+message DetectorResponse {
+  optional string error = 1;
+  optional bool detected = 2;
+  repeated Attribute attributes = 3;
+}
+
+message Attribute {
+  string key = 1;
+  string value = 2;
+}

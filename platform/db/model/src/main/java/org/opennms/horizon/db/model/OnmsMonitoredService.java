@@ -28,7 +28,7 @@
 
 package org.opennms.horizon.db.model;
 
-import static org.opennms.horizon.core.lib.InetAddressUtils.toInteger;
+import static org.opennms.horizon.shared.utils.InetAddressUtils.toInteger;
 
 import java.io.Serializable;
 import java.math.BigInteger;

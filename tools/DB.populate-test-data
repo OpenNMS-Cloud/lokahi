@@ -1,0 +1,10 @@
+#!/bin/bash
+
+SQL="
+	\c opennms
+	insert into monitoringlocations (id, monitoringarea) values ('location-001', 'area-location-001');
+	insert into node (nodeid, nodelabel, nodesyslocation, location, nodecreatetime) values (1, 'asn-node-001', 'sys-location-001', 'location-001', NOW());
+	insert into ipinterface (id, nodeid, ipaddr) values (1, 1, '127.0.0.2');
+"
+
+printf "%s\n" "${SQL}" | kubectl exec -i deployment/my-postgres -- psql -U postgres -f -

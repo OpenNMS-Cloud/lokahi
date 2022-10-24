@@ -224,7 +224,7 @@
               <name>keycloak-it-image</name>
               <alias>keycloak</alias>
               <build>
-                <from>quay.io/keycloak/keycloak:18.0.0</from>
+                <from>quay.io/keycloak/keycloak:19.0.2</from>
               </build>
               <run>
                 <!--<cmd>start-dev &#45;&#45;log-level=DEBUG,org.hibernate:INFO</cmd>-->
@@ -297,9 +297,14 @@
                   <PGSQL_SERVICE_NAME>postgres-host</PGSQL_SERVICE_NAME>
                   <PGSQL_ADMIN_USERNAME>postgres</PGSQL_ADMIN_USERNAME>
                   <PGSQL_ADMIN_PASSWORD>unused</PGSQL_ADMIN_PASSWORD>
+                  <PGSQL_USERNAME>opennms</PGSQL_USERNAME>
+                  <PGSQL_PASSWORD>unused</PGSQL_PASSWORD>
                   <KAFKA_BROKER_HOST>kafka-host</KAFKA_BROKER_HOST>
                   <KAFKA_BROKER_PORT>9092</KAFKA_BROKER_PORT>
+                  <NOTIFICATION_KAFKA_TOPIC>org.opennms.horizon.notifications.alarms</NOTIFICATION_KAFKA_TOPIC>
                   <ACTIVEMQ_BROKER_URL>tcp://localhost:61616</ACTIVEMQ_BROKER_URL>
+                  <USE_KUBERNETES>false</USE_KUBERNETES>
+                  <IGNITE_SERVER_ADDRESSES>minion-gateway</IGNITE_SERVER_ADDRESSES>
                 </env>
                 <wait>
                   <log>Blueprint bundle org.opennms.horizon.alarms.daemon/.* has been started</log>
@@ -313,63 +318,14 @@
               </run>
             </image>
 
-            <!--              -->
-            <!-- MINION IMAGE -->
-            <!--              -->
-            <!-- NOTE: Minion must start AFTER application -->
-            <image>
-              <name>minion-it-image</name>
-              <alias>minion</alias>
-              <build>
-                <from>opennms/minion:29.0.10</from>
-                <assembly>
-                  <user>minion</user>
-                  <targetDir>/</targetDir>
-
-                  <inline xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                          xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2"
-                          xsi:schemaLocation="
-                                             http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2
-                                             http://maven.apache.org/xsd/assembly-1.1.2.xsd
-                                             ">
-
-                    <fileSets>
-                      <fileSet>
-                        <directory>${project.build.testOutputDirectory}/minion</directory>
-                        <outputDirectory>/opt/minion</outputDirectory>
-                      </fileSet>
-                    </fileSets>
-                  </inline>
-                </assembly>
-                <healthCheck>
-                  <interval>10s</interval>
-                  <timeout>10s</timeout>
-                  <retries>3</retries>
-                  <cmd>/health.sh</cmd>
-                </healthCheck>
-              </build>
-              <run>
-                <cmd>-f</cmd>
-                <env>
-                  <TZ>America/New_York</TZ>
-                  <JAVA_MIN_MEM>512M</JAVA_MIN_MEM>
-                  <JAVA_MAX_MEM>2048M</JAVA_MAX_MEM>
-                </env>
-                <ports>
-                  <port>minion-ssh.port:8201</port>
-                </ports>
-                <wait>
-                  <healthy>true</healthy>
-                  <time>600000</time>
-                  <!--<time>120000</time>-->
-                </wait>
-                <network>
-                  <mode>custom</mode>
-                  <name>alarm-docker-it-network</name>
-                  <alias>minion-host</alias>
-                </network>
-              </run>
-            </image>
+            <!--                           -->
+            <!-- MOCK MINION GATEWAY IMAGE -->
+            <!--                           -->
+            <!-- TODO -->
+            <!--<image>-->
+            <!--  <name>minion-gateway-it-image</name>-->
+            <!--  <alias>minion-gateway</alias>-->
+            <!--</image>-->
           </images>
         </configuration>
         <executions>

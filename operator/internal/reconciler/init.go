@@ -31,13 +31,14 @@ func (r *OpenNMSReconciler) SetupWithManager(mgr ctrl.Manager) error {
 }
 
 func (r *OpenNMSReconciler) InitServiceHandlers() {
-	r.Handlers = []handlers.ServiceHandler{
+	r.StandardHandlers = []handlers.ServiceHandler{
 		&handlers.BaseHandler{}, // MUST BE FIRST
 		&handlers.PostgresHandler{},
 		&handlers.KeycloakHandler{},
+		&handlers.KafkaHandler{},
 		&handlers.OpenNMSHandler{},
-		&handlers.ElasticsearchHandler{},
 		&handlers.PrometheusHandler{},
+		&handlers.GrafanaHandler{},
 		&handlers.MailServerHandler{},
 		&handlers.IngressHandler{}, // MUST BE LAST
 	}

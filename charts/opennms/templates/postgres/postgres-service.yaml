@@ -4,7 +4,7 @@ metadata:
   labels:
     app: {{ .Values.Postgres.ServiceName }}
   name: {{ .Values.Postgres.ServiceName }}
-  namespace: {{ .Values.Namespace }}
+  namespace: {{ .Release.Namespace }}
 spec:
   ports:
     - port: 5432

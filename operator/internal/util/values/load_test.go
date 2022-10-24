@@ -29,7 +29,7 @@ func TestLoadValues(t *testing.T) {
 
 	v := LoadValues(TestFilename1, TestFilename2)
 	assert.NotNil(t, v)
-	assert.Equal(t, "testNamespace", v.Namespace, "should load the first yaml file correctly")
+	assert.Equal(t, false, v.TestDeploy, "should load the first yaml file correctly")
 	assert.Equal(t, "testHost", v.Host, "should load the second yaml file correctly")
 
 }
@@ -37,7 +37,7 @@ func TestLoadValues(t *testing.T) {
 var TestFilename1 = "./testtmp/test1.yaml"
 var TestFilename2 = "./testtmp/test2.yaml"
 
-var TestFileContents1 = `Namespace: testNamespace`
+var TestFileContents1 = `TestDeploy: false`
 var TestFileContents2 = `Host: testHost`
 
 func writeTestFiles(t *testing.T) {

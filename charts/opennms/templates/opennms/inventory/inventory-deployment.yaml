@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.OpenNMS.Inventory.ServiceName }}
+  labels:
+    app: {{ .Values.OpenNMS.Inventory.ServiceName }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ .Values.OpenNMS.Inventory.ServiceName }}
+  replicas: {{ .Values.OpenNMS.Inventory.Replicas }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.OpenNMS.Inventory.ServiceName }}
+    spec:
+      containers:
+        - name: {{ .Values.OpenNMS.Inventory.ServiceName }}
+          image: {{ .Values.OpenNMS.Inventory.Image }}
+          imagePullPolicy: {{ .Values.OpenNMS.Inventory.ImagePullPolicy }}
+          env:
+            - name: JAVA_TOOL_OPTIONS
+              value: "-agentlib:jdwp=transport=dt_socket,server=y,address=5005,suspend=n,quiet=y" # Permanent debug port in `skaffold dev`
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: postgres
+                  key: inventoryUser
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres
+                  key: inventoryPwd
+          ports:
+            - name: http
+              containerPort: {{ .Values.OpenNMS.Inventory.Port }}

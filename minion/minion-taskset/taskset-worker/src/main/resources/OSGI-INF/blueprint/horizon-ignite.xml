@@ -1,0 +1,90 @@
+<blueprint xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0"
+  xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
+  xsi:schemaLocation="http://www.osgi.org/xmlns/blueprint/v1.0.0 http://www.osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd">
+
+  <cm:property-placeholder persistent-id="org.opennms.horizon.minion.ignite.worker" update-strategy="reload">
+    <cm:default-properties>
+      <cm:property name="useKubernetes" value="false"/>
+      <cm:property name="kubernetes.service.name" value="poc-distributed-scheduling"/>
+      <cm:property name="workflow.scheduler.threads" value="20"/>
+    </cm:default-properties>
+  </cm:property-placeholder>
+
+  <reference id="identity" interface="org.opennms.horizon.shared.ipc.rpc.IpcIdentity"/>
+  <reference id="opennmsScheduler" interface="org.opennms.horizon.minion.scheduler.OpennmsScheduler"/>
+
+  <reference id="taskResultsSyncDispatcher" interface="org.opennms.horizon.shared.ipc.sink.api.SyncDispatcher" filter="(message.type=taskset-results)"/>
+
+  <bean id="igniteMetrics" class="org.opennms.horizon.minion.taskset.worker.ignite.IgniteMetricsAdapter" init-method="start" destroy-method="stop">
+    <argument ref="identity" />
+  </bean>
+  <service ref="igniteMetrics" interface="org.opennms.horizon.minion.observability.metrics.MetricsProvider" />
+
+  <bean id="workerIgniteConfiguration" class="org.opennms.horizon.minion.taskset.worker.ignite.WorkerIgniteConfiguration">
+    <argument ref="igniteMetrics" />
+    <argument value="${useKubernetes}"/>
+    <argument value="${kubernetes.service.name}"/>
+  </bean>
+
+  <bean id="ignite" class="org.opennms.horizon.minion.taskset.worker.ignite.IgnitionFactory" factory-method="create" destroy-method="close">
+    <argument ref="workerIgniteConfiguration"/>
+    <argument ref="blueprintContainer" />
+    <argument ref="blueprintBundleContext" />
+  </bean>
+
+  <bean id="ignitePocRestServiceImpl" class="org.opennms.horizon.minion.taskset.worker.rest.IgniteWorkerRestControllerImpl" scope="singleton">
+    <argument ref="ignite"/>
+  </bean>
+
+  <service id="ignitePocRestService" ref="ignitePocRestServiceImpl" interface="org.opennms.horizon.minion.taskset.worker.rest.IgniteWorkerRestController">
+    <service-properties>
+      <entry key="osgi.jaxrs.resource" value="true"/>
+    </service-properties>
+  </service>
+
+<!--  ========= Detector whiteboard and plugins ==========-->
+
+  <bean id="workflowExecutionResultProcessor"
+        class="org.opennms.horizon.minion.taskset.worker.impl.TaskExecutionResultProcessorImpl"
+  >
+    <argument ref="taskResultsSyncDispatcher" />
+    <argument ref="identity"/>
+  </bean>
+
+  <!-- plugin configuration framework -->
+  <reference id="registrationService" interface="org.opennms.horizon.minion.plugin.api.RegistrationService"/>
+  <reference id="listenerFactoryRegistry" interface="org.opennms.horizon.minion.plugin.api.registries.ListenerFactoryRegistry" />
+  <reference id="serviceConnectorFactoryRegistry" interface="org.opennms.horizon.minion.plugin.api.registries.ServiceConnectorFactoryRegistry" />
+  <reference id="detectorRegistry" interface="org.opennms.horizon.minion.plugin.api.registries.DetectorRegistry" />
+  <reference id="monitorRegistry" interface="org.opennms.horizon.minion.plugin.api.registries.MonitorRegistry" />
+
+  <bean id="workflowExecutorLocalServiceFactory" class="org.opennms.horizon.minion.taskset.worker.impl.TaskExecutorLocalServiceFactoryImpl">
+    <argument ref="opennmsScheduler"/>
+    <argument ref="workflowExecutionResultProcessor"/>
+  </bean>
+
+  <bean id="workflowLifecycleManager" class="org.opennms.horizon.minion.taskset.worker.impl.TaskSetLifecycleManagerImpl" destroy-method="close">
+    <property name="ignite" ref="ignite"/>
+  </bean>
+
+  <bean id="meteredWorkflowLifecycleManager" class="org.opennms.horizon.minion.taskset.worker.impl.MeteredWorkflowLifecycleManager">
+    <argument ref="identity" />
+    <argument ref="workflowLifecycleManager" />
+  </bean>
+
+  <bean id="workflowLifecycleAdapter" class="org.opennms.horizon.minion.taskset.worker.impl.TwinToWorkflowLifecycleManagerAdapter">
+    <argument ref="meteredWorkflowLifecycleManager" />
+  </bean>
+
+  <service ref="workflowLifecycleAdapter" interface="org.opennms.horizon.minion.ipc.twin.api.TwinListener">
+    <service-properties>
+      <entry key="message.listener.topic" value="task-set" />
+    </service-properties>
+  </service>
+
+  <service ref="meteredWorkflowLifecycleManager" interface="com.codahale.metrics.MetricSet" />
+
+  <service ref="ignite" interface="org.apache.ignite.Ignite"/>
+
+</blueprint>

@@ -38,7 +38,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.Mappings;
-import org.opennms.horizon.core.lib.IPAddress;
+import org.opennms.horizon.shared.utils.IPAddress;
 import org.opennms.horizon.db.model.OnmsEvent;
 import org.opennms.horizon.db.model.OnmsEventParameter;
 import org.opennms.horizon.db.model.OnmsServiceType;

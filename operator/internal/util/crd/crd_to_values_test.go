@@ -34,7 +34,7 @@ func TestConvertCRDToValues(t *testing.T) {
 
 	res := ConvertCRDToValues(crd, values.TemplateValues{})
 
-	assert.Equal(t, crd.Spec.Namespace, res.Values.Namespace, "should pull the correct value")
+	assert.Equal(t, crd.Spec.Namespace, res.Release.Namespace, "should pull the correct value")
 	assert.Equal(t, crd.Spec.Host, res.Values.Host, "should pull the correct value")
 }
 

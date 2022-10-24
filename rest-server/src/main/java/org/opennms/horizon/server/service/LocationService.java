@@ -28,19 +28,21 @@
 
 package org.opennms.horizon.server.service;
 
+import org.opennms.horizon.server.service.gateway.PlatformGateway;
+import org.opennms.horizon.shared.dto.device.LocationCollectionDTO;
+import org.opennms.horizon.shared.dto.device.LocationDTO;
+import org.springframework.stereotype.Service;
+
 import io.leangen.graphql.annotations.GraphQLArgument;
 import io.leangen.graphql.annotations.GraphQLEnvironment;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.execution.ResolutionEnvironment;
 import io.leangen.graphql.spqr.spring.annotations.GraphQLApi;
-import org.opennms.horizon.shared.dto.device.LocationCollectionDTO;
-import org.opennms.horizon.shared.dto.device.LocationDTO;
-import org.springframework.stereotype.Service;
+import reactor.core.publisher.Mono;
 
 @GraphQLApi
 @Service
 public class LocationService {
-
     private final PlatformGateway gateway;
 
     public LocationService(PlatformGateway gateway) {
@@ -48,12 +50,12 @@ public class LocationService {
     }
 
     @GraphQLQuery
-    public LocationCollectionDTO listLocations(@GraphQLEnvironment ResolutionEnvironment env) {
-        return gateway.get(PlatformGateway.URL_PATH_LOCATIONS, gateway.getAuthHeader(env), LocationCollectionDTO.class).getBody();
+    public Mono<LocationCollectionDTO> listLocations(@GraphQLEnvironment ResolutionEnvironment env) {
+        return gateway.get(PlatformGateway.URL_PATH_LOCATIONS, gateway.getAuthHeader(env), LocationCollectionDTO.class);
     }
 
     @GraphQLQuery
-    public LocationDTO getLocationById(@GraphQLArgument(name = "id") String id, @GraphQLEnvironment ResolutionEnvironment env) {
-        return gateway.get(PlatformGateway.URL_PATH_LOCATIONS + "/" + id, gateway.getAuthHeader(env), LocationDTO.class).getBody();
+    public Mono<LocationDTO> getLocationById(@GraphQLArgument(name = "id") String id, @GraphQLEnvironment ResolutionEnvironment env) {
+        return gateway.get(PlatformGateway.URL_PATH_LOCATIONS + "/" + id, gateway.getAuthHeader(env), LocationDTO.class);
     }
 }

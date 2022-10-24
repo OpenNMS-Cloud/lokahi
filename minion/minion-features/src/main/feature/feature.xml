@@ -1,0 +1,23 @@
+<features name="minion-ng" xmlns="http://karaf.apache.org/xmlns/features/v1.6.0">
+
+    <repository>mvn:org.apache.cxf.karaf/apache-cxf/${cxf.version}/xml/features</repository>
+    <repository>mvn:org.apache.camel.karaf/apache-camel/${camel.version}/xml/features</repository>
+
+    <repository>mvn:org.opennms.horizon.minion/grpc-features/${project.version}/xml/features</repository>
+    <repository>mvn:org.opennms.horizon.minion/ipc-features/${project.version}/xml/features</repository>
+    <repository>mvn:org.opennms.horizon.minion/taskset-features/${project.version}/xml/features</repository>
+    <repository>mvn:org.opennms.horizon.minion/observability-features/${project.version}/xml/features</repository>
+    <repository>mvn:org.opennms.horizon.minion/plugin-features/${project.version}/xml/features</repository>
+    <repository>mvn:org.opennms.horizon.minion/icmp-plugin/${project.version}/xml/features</repository>
+    <repository>mvn:org.opennms.horizon.shared/snmp-api/${project.version}/xml/features</repository>
+    <repository>mvn:org.opennms.horizon.minion/snmp-plugin/${project.version}/xml/features</repository>
+
+    <feature name="minion-ng">
+        <feature>taskset-minion</feature>
+        <feature>icmp-plugins</feature>
+        <feature>icmp-rpc</feature>
+        <feature>snmp-plugins</feature>
+        <feature>snmp-rpc</feature>
+    </feature>
+
+</features>

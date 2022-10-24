@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <version>0.1.0-SNAPSHOT</version>
+    <parent>
+        <groupId>org.opennms.horizon</groupId>
+        <artifactId>horizon-parent</artifactId>
+        <version>0.1.0-SNAPSHOT</version>
+        <relativePath/> <!-- lookup parent from repository -->
+    </parent>
+
+    <groupId>org.opennms.horizon.minion.gateway</groupId>
+    <artifactId>minion-gateway</artifactId>
+    <packaging>pom</packaging>
+
+    <name>OpenNMS Horizon :: Minion Gateway</name>
+    <description>
+        Gateway which serves GRPC connections from Minions and routes traffic between the Core and the Minions.
+    </description>
+
+    <properties>
+        <java.version>11</java.version>
+        <lombok.version>1.18.22</lombok.version>
+        <lombok.binding.version>0.2.0</lombok.binding.version>
+        <skip-docker-image-build>true</skip-docker-image-build>
+        <docker.image.tag>local</docker.image.tag>
+        <docker.image.skipPush>false</docker.image.skipPush>
+        <docker.it.network>rest-server-it-network</docker.it.network>
+        <horizon.shared.lib.version>0.1.0-SNAPSHOT</horizon.shared.lib.version>
+    </properties>
+
+    <modules>
+        <module>ignite-detector</module>
+        <module>ipc-grpc-server</module>
+        <module>main</module>
+    </modules>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>3.9.0</version>
+                    <configuration>
+                        <source>${java.version}</source>
+                        <target>${java.version}</target>
+                        <annotationProcessorPaths>
+                            <path>
+                                <groupId>org.projectlombok</groupId>
+                                <artifactId>lombok</artifactId>
+                                <version>${lombok.version}</version>
+                            </path>
+                            <path>
+                                <groupId>org.projectlombok</groupId>
+                                <artifactId>lombok-mapstruct-binding</artifactId>
+                                <version>${lombok.binding.version}</version>
+                            </path>
+                        </annotationProcessorPaths>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>com.google.cloud.tools</groupId>
+                    <artifactId>jib-maven-plugin</artifactId>
+                    <version>3.2.1</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.felix</groupId>
+                    <artifactId>maven-bundle-plugin</artifactId>
+                    <version>5.1.2</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+
+</project>

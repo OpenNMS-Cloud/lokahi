@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+
+    <changeSet author="tbigg" id="0.1.0-monitored-service-type">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="monitored_service_type"/>
+            </not>
+        </preConditions>
+
+        <createTable tableName="monitored_service_type">
+            <column name="id" type="BIGINT" autoIncrement="true"/>
+
+            <column name="tenant_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="service_name" type="VARCHAR(32)">
+                <constraints nullable="false"/>
+            </column>
+
+        </createTable>
+
+        <addPrimaryKey tableName="monitored_service_type" columnNames="id"
+                       constraintName="pk_monitored_service_type_id"/>
+
+    </changeSet>
+</databaseChangeLog>

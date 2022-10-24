@@ -57,8 +57,8 @@
             <cm:property name="datasource.adminPassword" value="$[env:PGSQL_ADMIN_PASSWORD]" />
 
             <cm:property name="datasource.url" value="jdbc:postgresql://$[env:PGSQL_SERVICE_NAME]:5432/opennms" />
-            <cm:property name="datasource.username" value="opennms" />
-            <cm:property name="datasource.password" value="" />
+            <cm:property name="datasource.username" value="$[env:PGSQL_USERNAME]" />
+            <cm:property name="datasource.password" value="$[env:PGSQL_PASSWORD]" />
             <cm:property name="datasource.databaseName" value="opennms" />
             <cm:property name="datasource.initialize" value="true" />
 
@@ -67,7 +67,8 @@
     </cm:property-placeholder>
 
     <reference id="opennmsLiquibaseChangeLogProvider" interface="org.opennms.core.schema.liquibase.OpennmsLiquibaseChangeLogProvider"/>
-    <reference id="dataSourceFactory" interface="org.osgi.service.jdbc.DataSourceFactory" />
+    <!-- TODO This binds us to PostgreSQL driver, even if driver is customizable  -->
+    <reference id="dataSourceFactory" interface="org.osgi.service.jdbc.DataSourceFactory" filter="(osgi.jdbc.driver.class=org.postgresql.Driver)" />
     <reference id="pooledDataSourceFactory" interface="org.ops4j.pax.jdbc.pool.common.PooledDataSourceFactory" />
 
     <bean id="liquibaseResourceClassLoader" factory-ref="opennmsLiquibaseChangeLogProvider" factory-method="getResourceClassLoader"/>

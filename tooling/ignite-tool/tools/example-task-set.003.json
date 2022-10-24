@@ -1,0 +1,17 @@
+{
+  "taskDefinitionList": [
+    {
+      "description": "Monitor localhost ping",
+      "type": "MONITOR",
+      "pluginName": "SNMPMonitor",
+      "schedule": "5000",
+      "parameters": {
+          "host": "192.168.2.1",
+          "oid": "1.3.6.1.2.1.2.2.1.16.1",
+          "operand": "1",
+          "operator": ">="
+      },
+      "id": "59572742-f853-46ac-872f-2b1f3785b7e5"
+    }
+  ]
+}

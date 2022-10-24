@@ -1,0 +1,83 @@
+Namespace: skaffold-instance
+Host: localhost
+TLS:
+  Enabled: False
+Keycloak:
+  AdminPassword: admin
+  HostnamePort: 8123
+  HostnameAdminUrl: http://localhost:8123/auth
+
+OpenNMS:
+  API:
+    Resources:
+      Limits:
+        Cpu: '0'
+        Memory: '0'
+      Requests:
+        Cpu: '0'
+        Memory: '0'
+  UI:
+    Resources:
+      Limits:
+        Cpu: '0'
+        Memory: '0'
+      Requests:
+        Cpu: '0'
+        Memory: '0'
+  Minion:
+    Resources:
+      Limits:
+        Cpu: '0'
+        Memory: '0'
+      Requests:
+        Cpu: '0'
+        Memory: '0'
+  Inventory:
+    Resources:
+      Limits:
+        Cpu: '0'
+        Memory: '0'
+      Requests:
+        Cpu: '0'
+        Memory: '0'
+  Notification:
+    Resources:
+      Limits:
+        Cpu: '0'
+        Memory: '0'
+      Requests:
+        Cpu: '0'
+        Memory: '0'
+  Core:
+    Resources:
+      Limits:
+        Cpu: '0'
+        Memory: 4Gi
+      Requests:
+        Cpu: '0'
+        Memory: 2Gi
+Grafana:
+  Resources:
+    Limits:
+      Cpu: 500m
+      Memory: 1Gi
+    Requests:
+      Cpu: 100m
+      Memory: 100Mi
+Prometheus:
+  Server:
+    Resources:
+      Limits:
+        Cpu: "1"
+        Memory: 512Mi
+      Requests:
+        Cpu: 100m
+        Memory: 100Mi
+  PushGateway:
+    Resources:
+      Limits:
+        Cpu: "1"
+        Memory: 512Mi
+      Requests:
+        Cpu: 100m
+        Memory: 100Mi

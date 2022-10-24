@@ -1,4 +1,3 @@
-Namespace: opennms-instance
 Host: onmshs
 TestDeploy: false
 OpenNMS:
@@ -6,102 +5,169 @@ OpenNMS:
     Path: /core
     ServiceName: opennms-core
     Image: opennms/horizon-stream-core
+    ImagePullPolicy: IfNotPresent
     Replicas: 1
     HttpPort: 8181
     SshPort: 8101
     GrpcPort: 8990
+    IgniteClusterPort: 47100
+    IgniteDiscoveryPort: 47500
     Resources:
       Limits:
-        Cpu: 2
+        Cpu: "2"
         Memory: 4Gi
       Requests:
-        Cpu: 2
+        Cpu: "2"
         Memory: 2Gi
   API:
     Path: /api
     ServiceName: opennms-rest-server
     Image: opennms/horizon-stream-rest-server
+    ImagePullPolicy: IfNotPresent
     Replicas: 1
     Port: 9090
     Resources:
       Limits:
-        Cpu: 2
+        Cpu: "2"
         Memory: 2Gi
       Requests:
-        Cpu: 1
+        Cpu: "1"
         Memory: 1Gi
+  MetricsProcessor:
+    ServiceName: opennms-metrics-processor
+    Image: opennms/horizon-stream-metrics-processor
+    ImagePullPolicy: IfNotPresent
+    Replicas: 1
+    Resources:
+      Limits:
+        Cpu: "1"
+        Memory: 512Mi
+      Requests:
+        Cpu: 250m
+        Memory: 256Mi
   UI:
     Path: /
     ServiceName: opennms-ui
     Image: opennms/horizon-stream-ui
+    ImagePullPolicy: IfNotPresent
     Replicas: 1
-    Port: 3000
+    Port: 80
     Resources:
       Limits:
-        Cpu: 1
+        Cpu: "1"
         Memory: 500Mi
       Requests:
         Cpu: 100m
         Memory: 250Mi
   Minion:
     ServiceName: opennms-minion
-    Image: opennms/minion:29.0.10
+    Image: opennms/horizon-stream-minion
+    ImagePullPolicy: IfNotPresent
     Replicas: 1
-    SshPort: 8201
-    SnmpPort: 1162
-    SyslogPort: 1514
+    Port: 8181
+    SshPort: 8101
     Resources:
       Limits:
-        Cpu: 2
-        Memory: 1Gi
+        Cpu: "1"
+        Memory: 2050M
       Requests:
-        Cpu: 1
+        Cpu: "1"
         Memory: 512Mi
-  Notification: 
-    ServiceName: opennms-notifications
-    Image: opennms/horizon-stream-notification
+  MinionGateway:
+    ServiceName: opennms-minion-gateway
+    Image: opennms/horizon-stream-minion-gateway
+    ImagePullPolicy: IfNotPresent
+    Port: 8080
+    GrpcPort: 8990
+    IgniteClientPort: 10800
+    Replicas: 1
+    Resources:
+      Limits:
+        Cpu: "1"
+        Memory: 2050M
+      Requests:
+        Cpu: "1"
+        Memory: 512Mi
+  Inventory:
+    ServiceName: opennms-inventory
+    Image: opennms/horizon-stream-inventory
+    ImagePullPolicy: IfNotPresent
     Replicas: 1
     Port: 8080
     Resources:
       Limits:
-        Cpu: 1
+        Cpu: "1"
+        Memory: 500Mi
+      Requests:
+        Cpu: 100m
+        Memory: 250Mi
+  Notification: 
+    ServiceName: opennms-notifications
+    Image: opennms/horizon-stream-notification
+    ImagePullPolicy: IfNotPresent
+    Replicas: 1
+    Port: 8080
+    Resources:
+      Limits:
+        Cpu: "1"
         Memory: 500Mi
       Requests:
         Cpu: 100m
         Memory: 250Mi
 Postgres:
   ServiceName: postgres
-  Image: postgres
+  Image: postgres:14.5-alpine
+  ImagePullPolicy: IfNotPresent
   Replicas: 1
   AdminPassword: notset
   OpenNMSPassword: notset
   KeycloakPassword: notset
+  InventoryPassword: notset
   NotificationPassword: notset
+  GrafanaPassword: notset
   VolumeSize: 10Gi
 Keycloak:
   Path: /auth
+  Image: opennms/horizon-stream-keycloak:latest
+  ImagePullPolicy: IfNotPresent
   Port: 8080
+  HttpsPort: 8443
+  HostnamePort: ~
+  HostnameAdminUrl: ~
   Replicas: 1
   ServiceName: onms-keycloak
+  Resources:
+    Limits:
+      Cpu: "1"
+      Memory: 1000Mi
+    Requests:
+      Cpu: 100m
+      Memory: 500Mi
   AdminUsername: admin
   AdminPassword: notset
-  UserUsername: user001
-  UserPassword: notset
-  Image: opennms/horizon-stream-keycloak:test
   RealmName: opennms
-  UUID:
-    RealmId: 00000000-0000-0000-0000-000000000000
-    ClientId: 00000000-0000-0000-0000-000000000000
-    BaseUserId: 00000000-0000-0000-0000-000000000000
-    AdminUserId: 00000000-0000-0000-0000-000000000000
 Grafana:
-  Image: placeholder
+  Path: /grafana
+  Port: 3000
+  Replicas: 1
+  ServiceName: grafana
+  Image: opennms/horizon-stream-grafana
+  ImagePullPolicy: IfNotPresent
+  InitContainerImage: busybox
+  Resources:
+    Limits:
+      Cpu: 500m
+      Memory: 1Gi
+    Requests:
+      Cpu: 100m
+      Memory: 100Mi
 Prometheus:
   Enabled: true
   Server:
     ServiceName: prometheus
     Port: 9090
     Image: prom/prometheus
+    ImagePullPolicy: IfNotPresent
     Replicas: 1
     Resources:
       Limits:
@@ -114,6 +180,7 @@ Prometheus:
     ServiceName: prometheus-pushgateway
     Port: 9091
     Image: prom/pushgateway
+    ImagePullPolicy: IfNotPresent
     Replicas: 1
     Resources:
       Limits:
@@ -122,10 +189,27 @@ Prometheus:
       Requests:
         Cpu: 100m
         Memory: 100Mi
+Kafka:
+  ServiceName: onms-kafka
+  Image: bitnami/kafka:3.3.1-debian-11-r1
+  ImagePullPolicy: IfNotPresent
+  Replicas: 1 
+  Port: 9092
+  ControllerPort: 9093
+  LocalPort: 59092
+  Resources:
+    Limits:
+      Cpu: "2"
+      Memory: 2Gi
+    Requests:
+      Cpu: 500m
+      Memory: 512Mi
+  VolumeSize: 10Gi
 MailServer:
   ServiceName: mail-server
   Image: mailhog/mailhog:latest
-  Replicas: 1 
+  ImagePullPolicy: IfNotPresent
+  Replicas: 1
   Port: 8025
   SmtpPort: 1025
   Resources:
@@ -135,3 +219,33 @@ MailServer:
     Requests:
       Cpu: 100m
       Memory: 100Mi
+NodeRestrictions: # will be applied to every pod in the instance
+  Enabled: false
+  Key: kubernetes.azure.com/scalesetpriority
+  Value: spot
+TLS:
+  Enabled: true
+  Issuer:
+    IssuerServer: https://acme-v02.api.letsencrypt.org/directory
+    IssuerUserEmail: email@address.com
+  Cert:
+    Hostname: "*.wildcard.domain.com"
+    Name: tls-cert-wildcard
+  # Configure according to: https://cert-manager.io/docs/configuration/acme/dns01/
+  Solver: |
+    cloudDNS:
+      project: my-project
+      serviceAccountSecretRef:
+        name: prod-clouddns-svc-acct-secret
+        key: service-account.json
+Ingress:
+  HttpPort: 80
+  HttpsPort: 443
+  ControllerImage: registry.k8s.io/ingress-nginx/controller:v1.3.0@sha256:d1707ca76d3b044ab8a28277a2466a02100ee9f58a86af1535a3edf9323ea1b5
+  SecretJobImage: registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.1.1@sha256:64d8c73dca984af206adf9d6d7e46aa550362b1d7a01f3a0a91b20cc67868660
+  WebhookPatchJobImage: registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.1.1@sha256:64d8c73dca984af206adf9d6d7e46aa550362b1d7a01f3a0a91b20cc67868660
+CustomErrors:
+  Image: quay.io/kubernetes-ingress-controller/custom-error-pages:0.4
+  Debug: true
+
+

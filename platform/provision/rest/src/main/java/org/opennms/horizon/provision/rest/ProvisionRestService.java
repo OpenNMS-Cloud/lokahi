@@ -37,6 +37,8 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.container.AsyncResponse;
+import javax.ws.rs.container.Suspended;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -76,4 +78,11 @@ public interface ProvisionRestService {
     @Consumes({MediaType.APPLICATION_JSON})
 //    @RolesAllowed({"admin"})
     Response publishForeignSource(final String foreignSource);
+
+    @POST
+    @Path("run/igniteTest")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+//    @RolesAllowed({"admin"})
+    void runIgniteTest(@Suspended final AsyncResponse callback);
 }

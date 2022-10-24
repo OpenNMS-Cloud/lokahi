@@ -28,18 +28,27 @@
 
 package org.opennms.horizon.server.config;
 
-import org.opennms.horizon.server.service.PlatformGateway;
+import org.opennms.horizon.server.service.gateway.NotificationGateway;
+import org.opennms.horizon.server.service.gateway.PlatformGateway;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class ConfigurationUtil {
-  @Value("${horizon-stream.core.url}")
-  private String platformUrl;
+    @Value("${horizon-stream.core.url}")
+    private String platformUrl;
 
-  @Bean
-  public PlatformGateway createGateway() {
-    return new PlatformGateway(platformUrl);
-  }
+    @Value("${horizon-stream.notifications.url}")
+    private String notificationsUrl;
+
+    @Bean
+    public PlatformGateway createGateway() {
+        return new PlatformGateway(platformUrl);
+    }
+
+    @Bean
+    public NotificationGateway createNotificationGateway() {
+        return new NotificationGateway(notificationsUrl);
+    }
 }

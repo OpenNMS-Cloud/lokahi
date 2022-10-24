@@ -15,6 +15,7 @@ public class CoreContainer extends GenericContainer<CoreContainer> implements Te
     public static final String DB_ALIAS = "db";
     public static final String KAFKA_ALIAS = "kafka";
     public static final Integer KAFKA_PORT = 9092;
+    public static final String NOTIFICATION_KAFKA_TOPIC = "org.opennms.horizon.notifications.alarms";
 
     public static final int CORE_WEB_PORT = 8181;
     private static final int CORE_SSH_PORT = 8101;
@@ -56,8 +57,11 @@ public class CoreContainer extends GenericContainer<CoreContainer> implements Te
                 .withEnv("PGSQL_SERVICE_NAME", DB_ALIAS)
                 .withEnv("PGSQL_ADMIN_USERNAME", pgContainer.getUsername())
                 .withEnv("PGSQL_ADMIN_PASSWORD", pgContainer.getPassword())
+                .withEnv("PGSQL_USERNAME", pgContainer.getUsername())
+                .withEnv("PGSQL_PASSWORD", pgContainer.getPassword())
                 .withEnv("KAFKA_BROKER_HOST", KAFKA_ALIAS)
                 .withEnv("KAFKA_BROKER_PORT", KAFKA_PORT.toString())
+                .withEnv("NOTIFICATION_KAFKA_TOPIC", NOTIFICATION_KAFKA_TOPIC.toString())
                 .withNetwork(Network.SHARED)
                 .withNetworkAliases(ALIAS)
                 .withCommand(containerCommand)

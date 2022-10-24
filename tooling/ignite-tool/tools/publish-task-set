@@ -1,0 +1,6 @@
+#!/bin/bash
+
+DEFAULT_TASK_SET_FILE="example-task-set.001.json"
+TASK_SET_FILE="${1:-${DEFAULT_TASK_SET_FILE}}"
+
+curl -X POST -H 'Content-Type: application/json' --data-binary "@${TASK_SET_FILE}" http://localhost:8008/ignite/task-set/cloud

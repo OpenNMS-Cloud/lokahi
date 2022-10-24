@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Configuration monitorInterval="5">
+    <!-- <Properties> -->
+        <!-- <Property name="data.dir">data</Property> -->
+    <!-- </Properties> -->
+    <Appenders>
+
+        <Console name="console" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d %-5p [%t] %C{2} (%F:%L) - %m%n"/>
+        </Console>
+
+        <!-- <RollingFile name="stats" -->
+                     <!-- fileName="${sys:data.dir}/stats/stats.log" -->
+                     <!-- filePattern="${sys:data.dir}/stats/%d{yyyy-MM-dd}/stats-%d{yyyy-MM-dd_HH}-%i.log.gz"> -->
+            <!-- <PatternLayout> -->
+                <!-- <pattern>%d{ISO8601} %m%n</pattern> -->
+            <!-- </PatternLayout> -->
+            <!-- <Policies> -->
+                <!-- <TimeBasedTriggeringPolicy /> -->
+            <!-- </Policies> -->
+        <!-- </RollingFile> -->
+    </Appenders>
+
+    <Loggers>
+        <!-- <Logger name="org.apache.log4j.xml" level="info"/> -->
+
+        <!-- <Logger name="com.amlinv.activemq.monitor.activemq.statsLog" level="info" additivity="false"> -->
+            <!-- <AppenderRef ref="stats" /> -->
+        <!-- </Logger> -->
+
+        <Root level="info">
+            <AppenderRef ref="console"/>
+        </Root>
+    </Loggers>
+</Configuration>

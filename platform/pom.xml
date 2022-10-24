@@ -20,19 +20,23 @@
         <module>dhcpd</module>
         <module>db</module>
         <module>events</module>
-        <module>icmp</module>
+        <module>ignite</module>
         <module>ipc</module>
-        <module>snmp</module>
         <module>provision</module>
-        
+        <module>datachoices</module>
+
         <module>assemblies</module>
         <module>docker-it</module>
         <module>inventory</module>
         <module>minion</module>
         <module>metrics</module>
+        <module>config</module>
+        <module>traps</module>
+        <module>jmx</module>
     </modules>
 
     <properties>
+        <display.version>${project.version}</display.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <dropwizard.metrics.version>3.1.2</dropwizard.metrics.version>
@@ -47,7 +51,8 @@
         <cucumber.version>7.1.0</cucumber.version>
         <cxf.version>3.5.0</cxf.version>
         <dhcp4java.version>1.1.0</dhcp4java.version>
-        <docker.image>opennms/horizon-stream-core:local</docker.image>
+        <docker.image.tag>local</docker.image.tag>
+        <docker.image>opennms/horizon-stream-core:${docker.image.tag}</docker.image>
         <docker.skipPush>false</docker.skipPush>
         <drools.version>7.31.0.Final</drools.version>
         <geohash.version>1.4.0</geohash.version>
@@ -59,6 +64,7 @@
         <httpcore.version>4.4.4</httpcore.version>
         <httpclient.version>4.5.13</httpclient.version>
         <horizon.shared.lib.version>0.1.0-SNAPSHOT</horizon.shared.lib.version>
+        <ignite.version>2.14.0</ignite.version>
         <jackson.version>2.13.1</jackson.version>
         <jaeger.version>0.34.0</jaeger.version>
         <jakarta.annotation.version>1.3.5</jakarta.annotation.version>
@@ -83,7 +89,7 @@
         <jsr250.version>1.0</jsr250.version>
         <jsr305.version>3.0.2</jsr305.version>
         <karaf.version>4.3.6</karaf.version>
-        <keycloak.version>18.0.0</keycloak.version>
+        <keycloak.version>18.0.2</keycloak.version>
         <liquibaseVersion>3.6.3</liquibaseVersion>
         <log4j2.version>2.17.1</log4j2.version>
         <mapstruct.version>1.4.1.Final</mapstruct.version>
@@ -97,7 +103,7 @@
         <pax.jdbc.version>1.5.2</pax.jdbc.version>
         <postgresql.version>42.3.2</postgresql.version>
         <prometheus.version>0.16.0</prometheus.version>
-        <protobuf.version>3.16.1</protobuf.version>
+        <protobuf.version>3.17.3</protobuf.version>
         <rate.limitted.logger.version>2.0.2</rate.limitted.logger.version>
         <rest-assured.version>4.3.3</rest-assured.version>
         <skipTests>false</skipTests>
@@ -112,6 +118,7 @@
         <lombok.version>1.18.24</lombok.version>
         <mockito.version>4.5.1</mockito.version>
         <gson.version>2.8.6</gson.version>
+
     </properties>
 
     <build>
@@ -134,6 +141,11 @@
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>build-helper-maven-plugin</artifactId>
                     <version>3.3.0</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>properties-maven-plugin</artifactId>
+                    <version>1.1.0</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -162,6 +174,7 @@
                     <groupId>org.apache.karaf.tooling</groupId>
                     <artifactId>karaf-maven-plugin</artifactId>
                     <version>${karaf.version}</version>
+                    <extensions>true</extensions>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -225,9 +238,24 @@
                 <configuration>
                     <instructions>
                         <Bundle-RequiredExecutionEnvironment>JavaSE-${java.version}</Bundle-RequiredExecutionEnvironment>
-                        <Karaf-Commands>*</Karaf-Commands>
                     </instructions>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>properties-maven-plugin</artifactId>
+                <version>1.1.0</version>
+                <executions>
+                    <execution>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>write-project-properties</goal>
+                        </goals>
+                        <configuration>
+                            <outputFile>${project.build.outputDirectory}/properties-from-pom.properties</outputFile>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>minion-3rdParty</artifactId>
+        <groupId>org.opennms.horizon.minion</groupId>
+        <version>0.1.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+<!--    NOTE: The OSGi bundle for Ignite is not built correctly and therefore not usable in Karaf. This shades the regular Ignite -->
+<!--    jar correctly show that it can be used.-->
+
+    <artifactId>shaded-ignite</artifactId>
+    <name>OpenNMS Horizon :: Minion :: 3rd Party :: ignite (shaded)</name>
+    <packaging>bundle</packaging>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.ignite</groupId>
+            <artifactId>ignite-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.ignite</groupId>
+            <artifactId>ignite-kubernetes</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.ignite</groupId>
+            <artifactId>ignite-spring</artifactId>
+            <version>${ignite.version}</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <defaultGoal>install</defaultGoal>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <configuration>
+                    <instructions combine.self="override">
+                        <Import-Package>
+                            com.apple*;resolution:=optional,
+                            com.sun*;resolution:=optional,
+                            sun*;resolution:=optional,
+                            jdk.internal*;;resolution:=optional,
+                            javax.swing*;;resolution:=optional,
+                            org.apache.log4j.varia;resolution:=optional,
+                            org.apache.ignite.logger.log4j;resolution:=optional,
+                            org.apache.ignite.logger.log4j2;resolution:=optional,
+                            org.apache.ignite.internal.processors.rest.protocols.http.jetty;resolution:=optional,
+                            com.fasterxml.jackson*;resolution:=optional,
+                            *
+                        </Import-Package>
+                        <Export-Package>
+                            org.apache.ignite.*
+                        </Export-Package>
+                        <Embed-Dependency>*;groupId=org.apache.ignite;inline=true</Embed-Dependency>
+                    </instructions>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

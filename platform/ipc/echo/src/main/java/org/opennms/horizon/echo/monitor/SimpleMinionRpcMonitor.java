@@ -31,7 +31,7 @@ package org.opennms.horizon.echo.monitor;
 import com.google.common.base.Strings;
 import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.Gauge;
-import org.opennms.horizon.core.lib.InetAddressUtils;
+import org.opennms.horizon.shared.utils.InetAddressUtils;
 import org.opennms.horizon.echo.EchoRequest;
 import org.opennms.horizon.echo.EchoResponse;
 import org.opennms.horizon.echo.EchoRpcModule;

@@ -39,7 +39,7 @@ import org.hibernate.engine.spi.SharedSessionContractImplementor;
 import org.hibernate.type.StringType;
 import org.hibernate.usertype.UserType;
 import org.opennms.horizon.core.lib.InetAddressComparator;
-import org.opennms.horizon.core.lib.InetAddressUtils;
+import org.opennms.horizon.shared.utils.InetAddressUtils;
 
 public class InetAddressUserType implements UserType {
 

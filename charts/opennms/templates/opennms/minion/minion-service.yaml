@@ -4,18 +4,15 @@ metadata:
   name: {{ .Values.OpenNMS.Minion.ServiceName }}
   labels:
     app: {{ .Values.OpenNMS.Minion.ServiceName }}
-  namespace: {{ .Values.Namespace }}
+  namespace: {{ .Release.Namespace }}
 spec:
   type: ClusterIP
   ports:
     - port: {{ .Values.OpenNMS.Minion.SshPort }}
       protocol: TCP
       name: ssh
-    - port: {{ .Values.OpenNMS.Minion.SnmpPort }}
-      protocol: UDP
-      name: snmp-trap
-    - port: {{ .Values.OpenNMS.Minion.SyslogPort }}
-      protocol: UDP
-      name: syslog
+    - port: {{ .Values.OpenNMS.Minion.Port }}
+      protocol: TCP
+      name: http
   selector:
     run: {{ .Values.OpenNMS.Minion.ServiceName }}

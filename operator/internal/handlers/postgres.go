@@ -26,23 +26,21 @@ type PostgresHandler struct {
 	ServiceHandlerObject
 }
 
-func (h *PostgresHandler) ProvideConfig(values values.TemplateValues) []client.Object {
-	var configMap corev1.ConfigMap
-	var secret corev1.Secret
+func (h *PostgresHandler) UpdateConfig(values values.TemplateValues) {
+	var initSecret corev1.Secret
+	var credSecret corev1.Secret
 	var service corev1.Service
 	var deployment appsv1.Deployment
 
-	yaml.LoadYaml(filepath("postgres/postgres-init-configmap.yaml"), values, &configMap)
-	yaml.LoadYaml(filepath("postgres/postgres-cred-secret.yaml"), values, &secret)
+	yaml.LoadYaml(filepath("postgres/postgres-init-secret.yaml"), values, &initSecret)
+	yaml.LoadYaml(filepath("postgres/postgres-cred-secret.yaml"), values, &credSecret)
 	yaml.LoadYaml(filepath("postgres/postgres-service.yaml"), values, &service)
 	yaml.LoadYaml(filepath("postgres/postgres-deployment.yaml"), values, &deployment)
 
 	h.Config = []client.Object{
-		&configMap,
-		&secret,
+		&initSecret,
+		&credSecret,
 		&service,
 		&deployment,
 	}
-
-	return h.Config
 }

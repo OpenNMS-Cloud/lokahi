@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.OpenNMS.MinionGateway.ServiceName }}
+  labels:
+    ignite-cluster: core
+    app: {{ .Values.OpenNMS.MinionGateway.ServiceName }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ .Values.OpenNMS.MinionGateway.ServiceName }}
+  replicas: {{ .Values.OpenNMS.MinionGateway.Replicas }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.OpenNMS.MinionGateway.ServiceName }}
+        ignite-cluster: core
+    spec:
+      serviceAccountName: {{ .Values.OpenNMS.Minion.ServiceName }}-sa
+      containers:
+        - name: {{ .Values.OpenNMS.MinionGateway.ServiceName }}
+          image: {{ .Values.OpenNMS.MinionGateway.Image }}
+          imagePullPolicy: {{ .Values.OpenNMS.Minion.ImagePullPolicy }}
+          env:
+            - name: JAVA_TOOL_OPTIONS
+              value: "-agentlib:jdwp=transport=dt_socket,server=y,address=5005,suspend=n,quiet=y" # Permanent debug port in `skaffold dev`
+            - name: KAFKA_BOOTSTRAP_SERVERS
+              value: "{{ .Values.Kafka.ServiceName }}:{{ .Values.Kafka.Port }}"
+          ports:
+            - name: http
+              containerPort: {{ .Values.OpenNMS.MinionGateway.Port }}
+            - name: grpc
+              containerPort: {{ .Values.OpenNMS.MinionGateway.GrpcPort }}
+            - name: ig-client
+              containerPort: {{ .Values.OpenNMS.MinionGateway.IgniteClientPort }}
+            - name: ig-cluster
+              containerPort: {{ .Values.OpenNMS.Core.IgniteClusterPort }}
+            - name: ig-discovery
+              containerPort: {{ .Values.OpenNMS.Core.IgniteDiscoveryPort }}
+          resources:
+            limits:
+              cpu: "{{ .Values.OpenNMS.MinionGateway.Resources.Limits.Cpu }}"
+              memory: "{{ .Values.OpenNMS.MinionGateway.Resources.Limits.Memory }}"
+            requests:
+              cpu: "{{ .Values.OpenNMS.MinionGateway.Resources.Requests.Cpu }}"
+              memory: "{{ .Values.OpenNMS.MinionGateway.Resources.Requests.Memory }}"

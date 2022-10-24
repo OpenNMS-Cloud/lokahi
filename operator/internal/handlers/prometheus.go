@@ -12,9 +12,9 @@ type PrometheusHandler struct {
 	ServiceHandlerObject
 }
 
-func (h *PrometheusHandler) ProvideConfig(values values.TemplateValues) []client.Object {
+func (h *PrometheusHandler) UpdateConfig(values values.TemplateValues) {
 	if values.Values.Prometheus.Enabled == false {
-		return []client.Object{}
+		return
 	}
 	var prometheusConfigMap corev1.ConfigMap
 	var prometheusService corev1.Service
@@ -35,5 +35,4 @@ func (h *PrometheusHandler) ProvideConfig(values values.TemplateValues) []client
 		&pushGatewayService,
 		&pushGateWayDeployment,
 	}
-	return h.Config
 }

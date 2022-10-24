@@ -3,6 +3,7 @@ package org.opennms.core.ipc.grpc.server.manager;
 import java.util.Objects;
 
 // TODO: move to a more appropriate API package
+@Deprecated
 public class MinionInfo {
     private String id;
     private String location;

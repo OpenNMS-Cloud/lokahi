@@ -1,0 +1,3 @@
+query GetMetric($metric: String!) {
+  ...TimeSeriesMetric
+}

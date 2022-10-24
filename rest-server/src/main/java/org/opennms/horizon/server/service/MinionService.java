@@ -28,20 +28,22 @@
 
 package org.opennms.horizon.server.service;
 
+import org.opennms.horizon.server.service.gateway.PlatformGateway;
+import org.opennms.horizon.shared.dto.minion.MinionCollectionDTO;
+import org.opennms.horizon.shared.dto.minion.MinionDTO;
+import org.springframework.stereotype.Service;
+
 import io.leangen.graphql.annotations.GraphQLArgument;
 import io.leangen.graphql.annotations.GraphQLEnvironment;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.execution.ResolutionEnvironment;
 import io.leangen.graphql.spqr.spring.annotations.GraphQLApi;
-import org.opennms.horizon.shared.dto.minion.MinionCollectionDTO;
-import org.opennms.horizon.shared.dto.minion.MinionDTO;
-import org.springframework.stereotype.Service;
+import reactor.core.publisher.Mono;
 
 
 @GraphQLApi
 @Service
 public class MinionService {
-
     private final PlatformGateway gateway;
 
     public MinionService(PlatformGateway gateway) {
@@ -49,12 +51,12 @@ public class MinionService {
     }
 
     @GraphQLQuery
-    public MinionCollectionDTO listMinions(@GraphQLEnvironment ResolutionEnvironment env) {
-        return gateway.get(String.format(PlatformGateway.URL_PATH_MINIONS), gateway.getAuthHeader(env), MinionCollectionDTO.class).getBody();
+    public Mono<MinionCollectionDTO> listMinions(@GraphQLEnvironment ResolutionEnvironment env) {//TODO: add search TDO object with pagination as cache key
+        return gateway.get(PlatformGateway.URL_PATH_MINIONS, gateway.getAuthHeader(env), MinionCollectionDTO.class);
     }
 
     @GraphQLQuery
-    public MinionDTO getMinionById(@GraphQLArgument(name = "id") String id, @GraphQLEnvironment ResolutionEnvironment env) {
-        return gateway.get(String.format(PlatformGateway.URL_PATH_MINIONS_ID, id), gateway.getAuthHeader(env), MinionDTO.class).getBody();
+    public Mono<MinionDTO> getMinionById(@GraphQLArgument(name = "id") String id, @GraphQLEnvironment ResolutionEnvironment env) {
+        return gateway.get(String.format(PlatformGateway.URL_PATH_MINIONS_ID, id), gateway.getAuthHeader(env), MinionDTO.class);
     }
 }

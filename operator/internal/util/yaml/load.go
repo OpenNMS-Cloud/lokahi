@@ -17,9 +17,9 @@ package yaml
 import (
 	"github.com/OpenNMS/opennms-operator/internal/model/values"
 	"github.com/OpenNMS/opennms-operator/internal/util/template"
-	"io/ioutil"
 	"k8s.io/apimachinery/pkg/util/yaml"
 	"log"
+	"os"
 	"strings"
 )
 
@@ -53,7 +53,7 @@ func decodeIntoObject(yamlStr string, decodeInto interface{}) error {
 
 // loadFromFile - loads a given filename
 func loadFromFile(filename string) (string, error) {
-	file, err := ioutil.ReadFile(filename)
+	file, err := os.ReadFile(filename)
 	if err != nil {
 		return "", err
 	}

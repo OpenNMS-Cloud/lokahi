@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ .Values.OpenNMS.API.ServiceName }}
-  namespace: {{ .Values.Namespace }}
+  namespace: {{ .Release.Namespace }}
   labels:
     app: {{ .Values.OpenNMS.API.ServiceName }}
     app.kubernetes.io/name: {{ .Values.OpenNMS.API.ServiceName }}
@@ -45,19 +45,23 @@ spec:
               value: "-agentlib:jdwp=transport=dt_socket,server=y,address=5005,suspend=n,quiet=y" # Permanent debug port in `skaffold dev`
             - name: SPRING_CACHE_CAFFEINE_SPEC
               value: "maximumSize=10000,expireAfterWrite=60s"
+            - name: HORIZON_STREAM_NOTIFICATIONS_URL
+              value: "http://{{ .Values.OpenNMS.Notification.ServiceName }}:{{ .Values.OpenNMS.Notification.Port }}"
             - name: HORIZON_STREAM_CORE_URL
               value: "http://{{ .Values.OpenNMS.Core.ServiceName }}:{{ .Values.OpenNMS.Core.HttpPort }}"
             - name: TSDB_URL
               value: "http://{{ .Values.Prometheus.Server.ServiceName }}:{{ .Values.Prometheus.Server.Port }}/api/v1/query"
-            - name: SERVER_SERVLET_CONTEXT_PATH
+            - name: SPRING_WEBFLUX_BASE_PATH
               value: /api
+            - name: GRAPHQL_SPQR_GUI_TARGET_ENDPOINT
+              value: /api/graphql
           ports:
             - containerPort: {{ .Values.OpenNMS.API.Port }}
-          {{ if not .Values.TestDeploy }}
+          {{- if not .Values.TestDeploy }}
           {{/*  TODO    livenessProbe:*/}}
           {{/*          readinessProbe:*/}}
           {{/*          startupProbe:*/}}
-          {{ end }}
+          {{- end }}
           resources:
             limits:
               cpu: "{{ .Values.OpenNMS.API.Resources.Limits.Cpu }}"

@@ -30,26 +30,16 @@ package org.opennms.horizon.notifications.api;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.opennms.horizon.notifications.api.PagerDutyDao;
-import org.opennms.horizon.notifications.api.PagerDutyDaoImpl;
-import org.opennms.horizon.notifications.api.dto.PagerDutyConfigDTO;
-import org.opennms.horizon.notifications.dto.NotificationDTO;
-import org.opennms.horizon.notifications.exceptions.NotificationBadDataException;
+import org.opennms.horizon.shared.dto.notifications.PagerDutyConfigDTO;
 import org.opennms.horizon.notifications.exceptions.NotificationConfigUninitializedException;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.RestTemplate;
 
-import java.net.URI;
 import java.util.Arrays;
 import java.util.List;
 
@@ -69,12 +59,20 @@ public class PagerDutyDaoImplTest {
     JdbcTemplate jdbcTemplate;
 
     @Test
-    public void initConfig() throws Exception {
+    public void updateConfig() throws Exception {
+        Mockito.when(jdbcTemplate.queryForObject(anyString(), any(Class.class))).thenReturn(Integer.valueOf(1));
         PagerDutyConfigDTO config = getConfigDTO();
-        pagerDutyDao.initConfig(config);
+        pagerDutyDao.saveConfig(config);
 
-        Mockito.verify(jdbcTemplate, times(2)).execute(anyString());
-        Mockito.verify(jdbcTemplate, times(1)).update(anyString(), anyString(), anyString());
+        Mockito.verify(jdbcTemplate, times(1)).update(anyString(), anyString());
+    }
+    @Test
+    public void insertConfig() throws Exception {
+        Mockito.when(jdbcTemplate.queryForObject(anyString(), any(Class.class))).thenReturn(Integer.valueOf(0));
+        PagerDutyConfigDTO config = getConfigDTO();
+        pagerDutyDao.saveConfig(config);
+
+        Mockito.verify(jdbcTemplate, times(1)).update(anyString(), anyString());
     }
 
     @Test
@@ -82,7 +80,7 @@ public class PagerDutyDaoImplTest {
         try {
             pagerDutyDao.getConfig();
         } catch (NotificationConfigUninitializedException e) {
-            assertEquals("Pager duty config not initialized. Row count=0", e.getMessage());
+            assertEquals("PagerDuty config not initialized. Row count=0", e.getMessage());
         }
     }
 
@@ -92,7 +90,6 @@ public class PagerDutyDaoImplTest {
         Mockito.when(jdbcTemplate.query(any(String.class), any(RowMapper.class))).thenReturn(configs);
         PagerDutyConfigDTO config = pagerDutyDao.getConfig();
 
-        assertEquals("token", config.getToken());
         assertEquals("integration_key", config.getIntegrationkey());
     }
 
@@ -105,7 +102,7 @@ public class PagerDutyDaoImplTest {
         try{
             pagerDutyDao.getConfig();
         } catch (NotificationConfigUninitializedException e) {
-            assertEquals("Pager duty config not initialized. Table does not exist.", e.getMessage());
+            assertEquals("PagerDuty config not initialized. Table does not exist.", e.getMessage());
             exceptionCaught = true;
         }
 
@@ -113,6 +110,6 @@ public class PagerDutyDaoImplTest {
     }
 
     private PagerDutyConfigDTO getConfigDTO() {
-        return new PagerDutyConfigDTO("token", "integration_key");
+        return new PagerDutyConfigDTO("integration_key");
     }
 }

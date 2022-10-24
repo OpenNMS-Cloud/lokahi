@@ -9,9 +9,9 @@
     </div>
   </div>
 
-  <div class="minions-device-container">
+  <div class="minions-devices-container">
     <div class="minions-table"><MinionsTable /></div>
-    <div class="device-table"><DeviceTable /></div>
+    <div class="devices-table"><DevicesTable /></div>
   </div>
 </template>
 
@@ -31,7 +31,7 @@ const gapWidth = computed<string>(() => appliancesStore.minionsTableOpen ? '20px
 .header-container {
   display: flex;
   justify-content: space-between;
-  margin: 30px 0px 25px 0px;
+  margin: 30px 10px 25px;
   .welcome {
     @include headline2;
     font-weight: bold;
@@ -42,7 +42,7 @@ const gapWidth = computed<string>(() => appliancesStore.minionsTableOpen ? '20px
     gap: 20px;
   }
 }
-.minions-device-container {
+.minions-devices-container {
   display: flex;
   gap: v-bind(gapWidth);
   
@@ -50,7 +50,7 @@ const gapWidth = computed<string>(() => appliancesStore.minionsTableOpen ? '20px
     width: v-bind(minionTableWidth);
     transition: width 0.4s ease-out;
   }
-  .device-table {
+  .devices-table {
     flex-grow: 1;
   }
 }
@@ -61,13 +61,13 @@ $breakpoint: 1024px;
   .header-container {
     display: block;
   }
-  .minions-device-container {
+  .minions-devices-container {
     display: block;
     .minions-table {
       width: 100%;
       margin-bottom: 20px;
     }
-    .device-table {
+    .devices-table {
       width: 100%;
     }
   }

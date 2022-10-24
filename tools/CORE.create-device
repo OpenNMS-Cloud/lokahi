@@ -1,0 +1,53 @@
+#!/bin/bash
+
+HOST_PORT=localhost:8181
+ROOT_PATH=""
+JSON="application/json"
+XML="application/xml"
+
+ACCEPT="${JSON}"
+CURL_OPTS=()
+TOKEN=""
+
+DATA='
+	{
+		"label": "localhost5",
+		"managementIp": "127.0.0.5"
+	}
+'
+
+while getopts "cH:jt:u:vx" arg
+do
+	case "$arg" in
+		c)
+			ROOT_PATH="cxf/"
+			;;
+
+		H)
+			HOST_PORT="${OPTARG}"
+			;;
+
+		j)
+			ACCEPT="${JSON}"
+			;;
+
+		t)
+			TOKEN="${OPTARG}"
+			CURL_OPTS=("${CURL_OPTS[@]}" "-H" "Authorization: Bearer ${OPTARG}")
+			;;
+
+		u)
+			CURL_OPTS=("${CURL_OPTS[@]}" "-u${OPTARG}")
+			;;
+
+		v)
+			CURL_OPTS=("${CURL_OPTS[@]}" -v)
+			;;
+
+		x)
+			ACCEPT="${XML}"
+			;;
+	esac
+done
+
+curl "${CURL_OPTS[@]}" -X POST --data-ascii "${DATA}" -H "Accept: ${ACCEPT}" -H "Content-Type: application/json" -s http://${HOST_PORT}/${ROOT_PATH}devices

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<features name="minion-taskset-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.6.0">
+
+    <feature name="taskset-rest-utils-internal" version="${project.version}">
+        <feature>cxf-jaxrs</feature>
+        <feature>cxf-sse</feature>
+        <bundle>mvn:org.apache.aries.component-dsl/org.apache.aries.component-dsl.component-dsl/1.2.2</bundle>
+        <feature>aries-jax-rs-whiteboard</feature>
+        <feature>aries-jax-rs-whiteboard-jackson</feature>
+        <bundle>mvn:javax.annotation/javax.annotation-api/1.3.2</bundle>
+    </feature>
+
+    <feature name="taskset-model" version="${project.version}">
+        <bundle>mvn:com.google.protobuf/protobuf-java/${protobuf.version}</bundle>
+        <bundle>mvn:org.opennms.horizon.shared/protobuf/${project.version}</bundle>
+    </feature>
+
+    <feature name="taskset-scheduler-internal" version="${project.version}">
+        <feature dependency="true">wrap</feature>
+        <feature>aries-blueprint</feature>
+        <bundle>wrap:mvn:com.cronutils/cron-utils/${cron-utils.version}$overwrite=merge&amp;Import-Package=javax.validation;resolution:=optional,*</bundle>
+        <bundle>mvn:org.opennms.horizon.minion/taskset-scheduler/${project.version}</bundle>
+    </feature>
+
+    <feature name="taskset-worker-ignite-internal" version="${project.version}">
+        <feature>aries-blueprint</feature>
+        <feature>cxf-jackson</feature>
+        <feature>ipc-minion</feature>
+        <feature>observability-minion</feature>
+        <feature>taskset-model</feature>
+        <feature>taskset-ignite-core-internal</feature>
+        <feature>taskset-rest-utils-internal</feature>
+    </feature>
+
+    <feature name="taskset-ignite-core-internal" version="${project.version}">
+        <feature>spring</feature>
+        <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.javax-cache-api/1.0.0_1</bundle>
+        <bundle>mvn:org.opennms.horizon.minion/shaded-ignite/${project.version}</bundle>
+    </feature>
+
+    <feature name="taskset-minion" version="${project.version}">
+        <feature>ipc-minion</feature>
+        <feature>observability-minion</feature>
+        <feature>plugins-minion</feature>
+        <feature>taskset-worker-ignite-internal</feature>
+        <feature>taskset-scheduler-internal</feature>
+        <feature>plugins-api</feature>
+
+        <bundle>mvn:org.opennms.horizon.minion/taskset-ipc/${project.version}</bundle>
+        <bundle>mvn:org.opennms.horizon.minion/taskset-worker/${project.version}</bundle>
+    </feature>
+
+</features>

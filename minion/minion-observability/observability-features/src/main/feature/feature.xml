@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<features name="minion-observability-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.6.0">
+
+    <feature name="observability-whiteboard-internal" version="${project.version}">
+        <bundle dependency="true">mvn:org.apache.commons/commons-lang3/3.4</bundle>
+        <bundle dependency="true">mvn:com.google.guava/guava/18.0</bundle>
+        <bundle dependency="true">mvn:com.savoirtech.eos/eos-core/${eos.version}</bundle>
+    </feature>
+
+    <feature name="observability-prometheus-internal">
+        <bundle>mvn:io.prometheus/simpleclient/${prometheus.version}</bundle>
+        <bundle>mvn:io.prometheus/simpleclient_common/${prometheus.version}</bundle>
+        <bundle>mvn:io.prometheus/simpleclient_tracer_common/${prometheus.version}</bundle>
+        <bundle>mvn:io.prometheus/simpleclient_tracer_otel/${prometheus.version}</bundle>
+        <bundle>mvn:io.prometheus/simpleclient_tracer_otel_agent/${prometheus.version}</bundle>
+    </feature>
+
+    <feature name="observability-prometheus-dropwizard-internal">
+        <feature>observability-metrics-internal</feature>
+        <feature>observability-prometheus-internal</feature>
+        <bundle>mvn:io.prometheus/simpleclient_dropwizard/${prometheus.version}</bundle>
+    </feature>
+
+    <feature name="observability-metrics-internal" version="${project.version}">
+        <bundle>mvn:io.dropwizard.metrics/metrics-core/${dropwizard.metrics.version}</bundle>
+    </feature>
+
+    <feature name="observability-opentracing-internal" version="${project.version}">
+        <bundle dependency="true">wrap:mvn:io.opentracing/opentracing-api/0.31.0</bundle>
+        <bundle dependency="true">wrap:mvn:io.opentracing/opentracing-noop/0.31.0</bundle>
+        <bundle dependency="true">wrap:mvn:io.opentracing/opentracing-util/0.31.0</bundle>
+    </feature>
+
+    <feature name="observability-horizon-tracing-internal" version="${project.version}">
+        <feature prerequisite="true">wrap</feature>
+        <feature>aries-blueprint</feature>
+        <feature>observability-opentracing-internal</feature>
+        <bundle>mvn:org.opennms.horizon.minion/observability-tracing/${project.version}</bundle>
+    </feature>
+
+    <feature name="observability-minion" version="${project.version}">
+        <feature>http</feature>
+        <feature>aries-blueprint</feature>
+        <feature>observability-prometheus-dropwizard-internal</feature>
+        <feature>observability-whiteboard-internal</feature>
+        <feature>observability-horizon-tracing-internal</feature>
+
+        <bundle>mvn:org.opennms.horizon.minion/observability-metrics/${project.version}</bundle>
+    </feature>
+
+</features>

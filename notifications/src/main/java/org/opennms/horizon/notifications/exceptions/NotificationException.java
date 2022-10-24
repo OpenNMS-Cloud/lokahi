@@ -1,8 +1,5 @@
 package org.opennms.horizon.notifications.exceptions;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.ResponseStatus;
-
 public abstract class NotificationException extends Exception {
     public NotificationException() {
     }

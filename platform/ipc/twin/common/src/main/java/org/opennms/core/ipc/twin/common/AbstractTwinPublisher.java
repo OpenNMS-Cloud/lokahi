@@ -41,6 +41,7 @@ import com.github.fge.jsonpatch.diff.JsonDiff;
 import com.google.common.base.Strings;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
+
 import io.opentracing.Span;
 import io.opentracing.Tracer;
 import org.opennms.core.ipc.twin.api.TwinPublisher;

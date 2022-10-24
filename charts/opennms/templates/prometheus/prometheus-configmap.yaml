@@ -4,7 +4,7 @@ metadata:
   labels:
     app: {{ .Values.Prometheus.Server.ServiceName }}
   name: prometheus-config-map
-  namespace: {{ .Values.Namespace }}
+  namespace: {{ .Release.Namespace }}
 data:
   prometheus.yml: |
     global:

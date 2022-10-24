@@ -4,7 +4,7 @@ metadata:
   labels:
     app: {{ .Values.OpenNMS.API.ServiceName }}
   name: {{ .Values.OpenNMS.API.ServiceName }}
-  namespace: {{ .Values.Namespace }}
+  namespace: {{ .Release.Namespace }}
 spec:
   ports:
     - port: {{ .Values.OpenNMS.API.Port }}

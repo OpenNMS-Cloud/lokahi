@@ -37,7 +37,7 @@ import jcifs.context.SingletonContext;
 import jcifs.netbios.NameServiceClientImpl;
 import jcifs.netbios.NbtAddress;
 
-import org.opennms.horizon.core.lib.InetAddressUtils;
+import org.opennms.horizon.shared.utils.InetAddressUtils;
 import org.opennms.netmgt.provision.core.request.LineOrientedRequest;
 import org.opennms.netmgt.provision.detector.smb.response.NbtAddressResponse;
 import org.opennms.netmgt.provision.support.Client;

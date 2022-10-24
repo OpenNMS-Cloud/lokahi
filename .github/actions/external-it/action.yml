@@ -13,68 +13,37 @@ runs:
       run: |
 
         echo "For init - placeholder"
-        # Confirm versions
-        #java --version # JDK 11
-        #docker version
-        #kubectl -h
-
-        # Install dependencies
-        brew install operator-sdk
-        operator-sdk
-        which operator-sdk
 
       shell: bash
 
     - name: Create & Setup Cluster
       run: |
 
-        # Test version to get cucumber report values.
-        #jq --version
-        #kind version
-        #kubectl version
-        #kubectl get nodes
-        #docker ps 
-        #docker stats --no-stream
-
-        #cd local-sample/
-
-        source ./local-sample/config-run 
-        echo "Domain: " $DOMAIN   
-
+        # Delete if exists from previous failed run.
+        kind delete clusters kind
+        
         # Setup localhost DNS
-        cat /etc/hosts
-        sudo echo "127.0.0.1 $DOMAIN" | sudo tee -a /etc/hosts
+        sudo echo "127.0.0.1 onmshs" | sudo tee -a /etc/hosts
 
-        sed -i.bak 's/IMAGE_TAG=latest/IMAGE_TAG=local/g' ./local-sample/config-run
-        sed -i.bak 's/image: opennms\/operator:latest/image: opennms\/operator:local-build/g' charts/opennms-operator/values.yaml
-        ./local-sample/run.sh cicd
-
-        # List images in kind cluster container.  
-        # ISSUE: This produces an error, not required if the '$ kubectl apply
-        # -f ...' succeeds below, means image loads were successful.
-        #docker exec -it kind-control-plane crictl images ls
-
-        sleep 60
+        # Build cluster with Horizon Stream installed.
+        ./install-local.sh custom-images
 
       shell: bash
 
     - name: Setup & Run Cucumber Tests
       run: |
 
-        # Test
-        echo "test 1"
-        kubectl get all 
-        kubectl get ingress 
-
-        ## Install dependecies
-        #cd platform/
-        #mvn clean install
-        #cd .. 
-        
         # Cucumber test
         cd ${{ inputs.dir-location }}
+
+        kubectl --context kind-kind -n local-instance port-forward --pod-running-timeout 1s services/opennms-core 11080:8181 &
+
+        # Core takes some time after ready status true before it is setup and
+        # has the minion coming in. 
+        sleep 500
+
         mvn clean install
-        HORIZON_STREAM_BASE_URL=https://onmshs/core
+        HORIZON_STREAM_BASE_URL=http://localhost:11080 
         KEYCLOAK_BASE_URL=https://onmshs/auth
         KEYCLOAK_REALM=opennms
         KEYCLOAK_USERNAME=admin
@@ -83,11 +52,17 @@ runs:
         PROJECT_VERSION="$(mvn -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive -q org.codehaus.mojo:exec-maven-plugin:1.6.0:exec)"
         java -jar "external-horizon-stream-it/target/external-horizon-stream-it-${PROJECT_VERSION}.jar"
 
-        # If fail, exit which kills the ci-cd workflow.
-        #for i in $(jq '.[0].elements[].steps[].result.status' external-it/external-horizon-stream-it/cucumber.reports/cucumber-report.json);do
-        #  if [[ $i != '"passed"' ]];then
-        #    exit;
-        #  fi
-        #done
+        ## If fail, exit which kills the ci-cd workflow.
+        ##for i in $(jq '.[0].elements[].steps[].result.status' external-it/external-horizon-stream-it/cucumber.reports/cucumber-report.json);do
+        ##  if [[ $i != '"passed"' ]];then
+        ##    exit;
+        ##  fi
+        ##done
+
+      shell: bash
+
+    - name: Cleanup
+      run: |
+        kind delete clusters kind
 
       shell: bash

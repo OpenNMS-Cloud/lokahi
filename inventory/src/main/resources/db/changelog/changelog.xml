@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+
+    <include file="db/changelog/hs-0.1.0/tables/node.xml"/>
+    <include file="db/changelog/hs-0.1.0/tables/ip-interface.xml"/>
+    <include file="db/changelog/hs-0.1.0/tables/monitored-service-type.xml"/>
+    <include file="db/changelog/hs-0.1.0/tables/monitored-service.xml"/>
+    <include file="db/changelog/hs-0.1.0/tables/monitoring-locations.xml"/>
+    <include file="db/changelog/hs-0.1.0/tables/monitoring-systems.xml"/>
+
+</databaseChangeLog>

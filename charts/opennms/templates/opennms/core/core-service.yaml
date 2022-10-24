@@ -4,7 +4,7 @@ metadata:
   labels:
     app: {{ .Values.OpenNMS.Core.ServiceName }}
   name: {{ .Values.OpenNMS.Core.ServiceName }}
-  namespace: {{ .Values.Namespace }}
+  namespace: {{ .Release.Namespace }}
 spec:
   ports:
     - port: {{ .Values.OpenNMS.Core.SshPort }}

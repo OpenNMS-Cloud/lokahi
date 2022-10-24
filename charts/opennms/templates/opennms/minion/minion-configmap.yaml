@@ -1,30 +1,14 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ .Values.OpenNMS.Minion.ServiceName }}-config-map
+  name: minion-config 
   labels:
     app: {{ .Values.OpenNMS.Minion.ServiceName }}
-  namespace: {{ .Values.Namespace }}
+  namespace: {{ .Release.Namespace }}
 data:
-  minion-config.yaml: |
-    id: "minion-01"
-    location: "Default"
-
-    karaf:
-      shell:
-        ssh:
-          host: "0.0.0.0"
-
-    ipc:
-      grpc:
-        host: "{{ .Values.OpenNMS.Core.ServiceName }}"
-        port: "{{ .Values.OpenNMS.Core.GrpcPort }}"
-
-    netmgt:
-      syslog:
-        syslog.listen.interface: "0.0.0.0"
-        syslog.listen.port: {{ .Values.OpenNMS.Minion.SyslogPort }}
-
-      traps:
-        trapd.listen.interface: "0.0.0.0"
-        trapd.listen.port: {{ .Values.OpenNMS.Minion.SnmpPort }}
+  grpc-config: |
+    host={{ .Values.OpenNMS.MinionGateway.ServiceName }}
+    max.message.size=104857600
+  opennms-minion-identity: |
+    id=${env:HOSTNAME:-UNKNOWN}
+    location=${env:LOCATION:-Default}

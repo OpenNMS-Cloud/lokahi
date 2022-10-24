@@ -30,7 +30,12 @@ runs:
 
         # Full build, including docker image creation and Integration Tests
         #mvn -Prun-it clean install
-        mvn -Prun-it -Dhttp.keepAlive=false -Dmaven.wagon.http.pool=false -Dmaven.wagon.httpconnectionManager.ttlSeconds=120 clean install 
+        mvn -Prun-it \
+          -Dhttp.keepAlive=false \
+          -Dmaven.wagon.http.pool=false \
+          -Dmaven.wagon.httpconnectionManager.ttlSeconds=25 \
+          -Dmaven.wagon.http.retryHandler.count=3 \
+          clean install 
           # Added extra args to deal with time out issue, see
           # https://github.com/actions/virtual-environments/issues/1499.
 

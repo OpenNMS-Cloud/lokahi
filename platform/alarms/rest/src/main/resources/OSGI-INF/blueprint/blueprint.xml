@@ -46,6 +46,8 @@
         <property name="acknowledgmentDao" ref="acknowledgmentDao"/>
     </bean>
 
+    <service id="alarmMapperService" ref="alarmMapper" interface="org.opennms.horizon.db.model.mapper.IAlarmMapper" />
+
 
     <!--                                -->
     <!-- JAX-RS WIRING WITH WHITE-BOARD -->

@@ -5,11 +5,6 @@
 # Target the development stage to produce a larger dev image running Vite dev server. Good for Skaffold/file sync.
 FROM node:17-alpine as sources
 
-ARG VITE_BASE_URL
-ARG VITE_KEYCLOAK_URL
-ARG VITE_KEYCLOAK_REALM
-ARG VITE_KEYCLOAK_CLIENT_ID
-
 WORKDIR /app
 
 # Dependencies
@@ -33,6 +28,11 @@ RUN ["yarn", "run", "build"]
 
 # Serves prod build with nginx
 FROM nginx:1.23.1-alpine as production
+
+ARG VITE_BASE_URL
+ARG VITE_KEYCLOAK_URL
+ARG VITE_KEYCLOAK_REALM
+ARG VITE_KEYCLOAK_CLIENT_ID
 
 # Configure nginx
 COPY --link /nginx /etc/nginx

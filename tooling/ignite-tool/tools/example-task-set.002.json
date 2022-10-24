@@ -1,0 +1,34 @@
+{
+  "taskDefinitionList": [
+    {
+      "description": "Monitor localhost ping 1",
+      "type": "MONITOR",
+      "pluginName": "ICMPMonitor",
+      "schedule": "5000",
+      "parameters": {
+          "host": "127.0.0.1"
+      },
+      "id": "59572742-f853-46ac-872f-2b1f3785b7e5"
+    },
+    {
+      "description": "Monitor localhost ping 2",
+      "type": "MONITOR",
+      "pluginName": "ICMPMonitor",
+      "schedule": "5000",
+      "parameters": {
+          "host": "127.0.0.2"
+      },
+      "id": "fdaf7737-05f7-4922-b203-858a6cbd2a17"
+    },
+    {
+      "description": "Monitor localhost ping 3",
+      "type": "MONITOR",
+      "pluginName": "ICMPMonitor",
+      "schedule": "5000",
+      "parameters": {
+          "host": "127.0.0.3"
+      },
+      "id": "34985684-b279-4552-ac8f-ff2ab6d4ca78"
+    }
+  ]
+}

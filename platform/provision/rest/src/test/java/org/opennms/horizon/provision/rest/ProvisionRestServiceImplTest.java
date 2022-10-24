@@ -25,6 +25,7 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.opennms.horizon.db.dao.api.SessionUtils;
+import org.opennms.netmgt.provision.LocationAwareDetectorClient;
 import org.opennms.netmgt.provision.persistence.dto.ForeignSourceDTO;
 import org.opennms.netmgt.provision.persistence.dto.RequisitionDTO;
 import org.opennms.netmgt.provision.service.Provisioner;
@@ -32,6 +33,9 @@ import org.opennms.netmgt.provision.service.Provisioner;
 public class ProvisionRestServiceImplTest {
     @Mock
     Provisioner provisioner;
+
+    @Mock
+    LocationAwareDetectorClient locationAwareDetectorClient;
 
     SessionUtils sessionUtils;
 
@@ -44,7 +48,7 @@ public class ProvisionRestServiceImplTest {
     public void setUp() throws Exception {
         MockitoAnnotations.openMocks(this);
         sessionUtils = new MockSessionUtils();
-        provisionRestService = new ProvisionRestServiceImpl(provisioner, sessionUtils);
+        provisionRestService = new ProvisionRestServiceImpl(provisioner, sessionUtils, locationAwareDetectorClient);
 
         InputStream stream = this.getClass().getClassLoader().getResourceAsStream("import_dummy-empty.json");
         if (stream == null) {

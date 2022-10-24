@@ -1,5 +1,7 @@
+IMAGE ?= opennms/operator:local-build
+
 .PHONY: dependencies build alpine-build unit-test integration-test
-.PHONY: local-docker copy-charts kubebuilder
+.PHONY: local-docker kind-load copy-charts kubebuilder
 
 all: build
 
@@ -20,7 +22,10 @@ copy-charts:
 	cp -rf ../charts .
 
 local-docker: copy-charts
-	docker build -t opennms/operator:local-build .
+	docker build -t $(IMAGE) .
+
+kind-load: local-docker
+	kind load docker-image $(IMAGE)
 
 build:
 	go build -a -o operator cmd/opennms-operator/main.go

@@ -39,7 +39,7 @@ import org.opennms.configvars.MapScope;
 import org.opennms.configvars.ObjectScope;
 import org.opennms.configvars.Scope;
 import org.opennms.horizon.core.configvars.EntityScopeProvider;
-import org.opennms.horizon.core.lib.InetAddressUtils;
+import org.opennms.horizon.shared.utils.InetAddressUtils;
 import org.opennms.horizon.db.dao.api.IpInterfaceDao;
 import org.opennms.horizon.db.dao.api.MonitoredServiceDao;
 import org.opennms.horizon.db.dao.api.NodeDao;

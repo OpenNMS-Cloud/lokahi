@@ -31,6 +31,8 @@ package org.opennms.horizon.db.dao.api;
 import org.opennms.horizon.db.model.OnmsNode;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 /**
  * <p>NodeDao interface.</p>
@@ -40,6 +42,8 @@ public interface NodeDao extends OnmsDao<OnmsNode, Integer> {
     String getLabelForId(Integer id);
 
     String getLocationForId(Integer id);
+
+    List<OnmsNode> findByLabel(String label);
 
 //    /**
 //     * Get a node based on it's node ID or foreignSource:foreignId

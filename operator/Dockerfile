@@ -11,7 +11,6 @@ COPY go.sum go.sum
 RUN make dependencies
 
 COPY cmd/ cmd/
-COPY dependencies/ dependencies/
 COPY api/ api/
 COPY config/ config/
 COPY internal/ internal/
@@ -28,7 +27,6 @@ COPY --from=builder /app/operator .
 COPY charts/opennms charts/opennms
 COPY charts/opennms-operator/values.yaml charts/opennms-operator/values.yaml
 
-COPY dependencies charts/dependencies
 COPY config/ config/
 
 ENTRYPOINT ["/app/operator"]

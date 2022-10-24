@@ -49,6 +49,7 @@ public class PrometheusPushGatewayAdapter implements OnmsMetricsAdapter {
     }
 
 
+    // TODO: rate-limit, or at least prevent concurrent pushes?  Maybe not critical due to groupingKey use
     @Override
     public void pushMetrics(CollectorRegistry registry, Map<String, String> groupingKey) {
         try {

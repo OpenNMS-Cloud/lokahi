@@ -28,8 +28,8 @@
 
 package org.opennms.horizon.events.xml;
 
-import static org.opennms.horizon.core.lib.InetAddressUtils.addr;
-import static org.opennms.horizon.core.lib.InetAddressUtils.str;
+import static org.opennms.horizon.shared.utils.InetAddressUtils.addr;
+import static org.opennms.horizon.shared.utils.InetAddressUtils.str;
 
 import java.io.Serializable;
 import java.net.InetAddress;

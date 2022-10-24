@@ -1,4 +1,3 @@
-  
 <template>
   <FeatherAppLayout contentLayout="full" class="feather-styles layout">
     <template v-slot:header>
@@ -6,13 +5,18 @@
     </template>
 
     <template v-slot:rail>
-      <NavigationRail :modelValue="store.navRailOpen" />
+      <NavigationRail />
     </template>
-
-    <div class="main-content">
-      <Spinner />
-      <Snackbar />
-      <router-view />
+    
+    <div class="content-and-widget">
+      <div id="mainContent" class="main-content">
+        <Spinner />
+        <Snackbar />
+        <router-view />
+      </div>
+      <transition name="fade">
+        <Widgetbar v-if="store.widgetBarOpen" />
+      </transition>
     </div>
   </FeatherAppLayout>
 </template>
@@ -25,11 +29,7 @@ const route = useRoute()
 const router = useRouter()
 if (route.query.theme) router.replace(route.path)
 
-// transition nav rail open / close
 const store = useLayoutStore()
-const contentMargin = computed(() => store.navRailOpen ? '230px' : '15px')
-const ease = computed(() => store.navRailOpen ? '10ms' : '80ms')
-const maxWidth = computed(() => store.navRailOpen ? '223px' : '0px')
 </script>
   
 <style lang="scss">
@@ -47,11 +47,12 @@ body {
   margin: 0
 }
 
+.content-and-widget {
+  display: flex;
+}
+
 .main-content {
-  margin-left: v-bind(contentMargin);
-  margin-right: 15px;
-  transition: margin-left 0.28s ease-in-out v-bind(ease);
-  max-width: calc(100% - v-bind(maxWidth));
+  width: 100%;
 
   table {
     width: 100%;
@@ -103,5 +104,21 @@ a {
   .bg-unknown {
     color: rgb(10, 12, 27);
   }
+}
+</style>
+
+<style scoped lang="scss">
+.fade-enter-active {
+  transition: all 0.5s;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+:deep(.header) {
+  border-bottom: 0;
+}
+:deep(.feather-app-rail) {
+  border-right: 0 !important;
 }
 </style>

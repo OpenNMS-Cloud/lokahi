@@ -45,3 +45,6 @@ tab_width = 2
 
 [{*.yaml,*.yml}]
 indent_size = 2
+
+[horizon-ignite.xml]
+indent_size = 2

@@ -35,7 +35,7 @@ import java.net.InetAddress;
 import java.net.NoRouteToHostException;
 import java.net.PortUnreachableException;
 
-import org.opennms.horizon.core.lib.InetAddressUtils;
+import org.opennms.horizon.shared.utils.InetAddressUtils;
 import org.opennms.netmgt.provision.support.Client;
 import org.opennms.netmgt.provision.support.RequestBuilder;
 import org.opennms.netmgt.provision.support.ResponseValidator;

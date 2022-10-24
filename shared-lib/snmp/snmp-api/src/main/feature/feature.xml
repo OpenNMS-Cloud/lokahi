@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<features name="minion-plugin-api-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.6.0">
+
+    <feature name="snmp-api" description="OpenNMS Minion SNMP Api" version="${project.version}">
+        <feature>aries-blueprint</feature>
+        <feature version="${project.version}">guava</feature>
+        <bundle>wrap:mvn:org.json/json/20171018$Export-Package=org.json</bundle>
+        <bundle>mvn:org.opennms.horizon.shared/horizon-common-utils/${project.version}</bundle>
+
+        <bundle>mvn:org.opennms.horizon.shared/snmp-api/${project.version}</bundle>
+    </feature>
+
+    <feature name="guava" description="Google Guava" version="${project.version}">
+        <bundle dependency="true">mvn:com.google.guava/guava/${guava.version}</bundle>
+        <bundle dependency="true">mvn:com.google.guava/failureaccess/1.0.1</bundle>
+    </feature>
+
+</features>

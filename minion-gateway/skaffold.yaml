@@ -1,0 +1,49 @@
+# nonk8s
+apiVersion: skaffold/v2beta28
+kind: Config
+metadata:
+  name: minion-gateway
+requires:
+  - configs: [ "parent-pom" ]
+    path: ../parent-pom/skaffold.yaml
+  - configs: [ "shared-lib" ]
+    path: ../shared-lib/skaffold.yaml
+build:
+  artifacts:
+    - image: opennms/horizon-stream-minion-gateway
+      jib:
+        project: main
+      sync:
+        auto: true
+      requires:
+        - image: minion_gateway_parent_pom
+        - image: ignite_detector_library
+        - image: shared_lib
+    - image: ignite_detector_library # use an underscore, so we can reference this in other Skaffold artifacts without an alias
+      context: ignite-detector
+      custom:
+        # ignite-detector builds only a jar, not an image.
+        # Skaffold requires that artifacts produce images. This is a workaround that builds a dummy image.
+        buildCommand: |
+          mvn clean install -DskipTests=$SKIP_TEST &&
+          printf 'FROM scratch\nCMD \"Dummy Image Started\"' | docker build -t $IMAGE -
+        dependencies:
+          paths: ["."]
+          ignore: [
+            "**/target/**"
+          ]
+      requires:
+        - image: minion_gateway_parent_pom
+        - image: shared_lib
+    - image: minion_gateway_parent_pom # use an underscore, so we can reference this in other Skaffold artifacts without an alias
+      custom:
+        # ignite-detector builds only a jar, not an image.
+        # Skaffold requires that artifacts produce images. This is a workaround that builds a dummy image.
+        buildCommand: |
+          mvn clean install -DskipTests=$SKIP_TEST -N &&
+          printf 'FROM scratch\nCMD \"Dummy Image Started\"' | docker build -t $IMAGE -
+        dependencies:
+          paths: ["pom.xml"]
+      requires:
+        - image: parent-pom
+          alias: unused_parent

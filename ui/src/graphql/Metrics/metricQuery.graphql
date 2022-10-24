@@ -1,0 +1,14 @@
+fragment MetricParts on TimeSeriesQueryResult {
+  data {
+    result {
+      metric
+      value
+    }
+  }
+}
+
+fragment TimeSeriesMetric on Query {
+  metric: metric(name: $metric) {
+    ...MetricParts
+  }
+}

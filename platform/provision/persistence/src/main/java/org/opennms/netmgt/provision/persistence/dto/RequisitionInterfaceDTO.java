@@ -44,8 +44,7 @@ import java.util.Set;
 import javax.validation.ValidationException;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import org.opennms.horizon.core.lib.IPAddress;
-import org.opennms.horizon.core.lib.InetAddressUtils;
+import org.opennms.horizon.shared.utils.InetAddressUtils;
 import org.opennms.horizon.db.model.PrimaryType;
 
 

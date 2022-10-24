@@ -28,10 +28,10 @@
 
 package org.opennms.horizon.notifications.api;
 
-import org.opennms.horizon.notifications.api.dto.PagerDutyConfigDTO;
 import org.opennms.horizon.notifications.exceptions.NotificationConfigUninitializedException;
+import org.opennms.horizon.shared.dto.notifications.PagerDutyConfigDTO;
 
 public interface PagerDutyDao {
     PagerDutyConfigDTO getConfig() throws NotificationConfigUninitializedException;
-    void initConfig(PagerDutyConfigDTO config);
+    void saveConfig(PagerDutyConfigDTO config);
 }

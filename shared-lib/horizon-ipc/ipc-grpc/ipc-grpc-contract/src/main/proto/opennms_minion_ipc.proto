@@ -1,0 +1,133 @@
+/*******************************************************************************
+ * This file is part of OpenNMS(R).
+ *
+ * Copyright (C) 2022 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
+ *
+ * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *
+ * OpenNMS(R) is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published
+ * by the Free Software Foundation, either version 3 of the License,
+ * or (at your option) any later version.
+ *
+ * OpenNMS(R) is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with OpenNMS(R).  If not, see:
+ *      http://www.gnu.org/licenses/
+ *
+ * For more information contact:
+ *     OpenNMS(R) Licensing <license@opennms.org>
+ *     http://www.opennms.org/
+ *     http://www.opennms.com/
+ *******************************************************************************/
+syntax = "proto3";
+
+import "google/protobuf/any.proto";
+import "google/protobuf/empty.proto";
+
+// This spec defines the interface via which a Minion ("client") can
+// handle RPCs, trigger RPCs and send/receives messages to the OpenNMS system.
+//
+// Minions can be deployed in remote locations and are not assumed to have direct
+// access to other OpenNMS services. All Minions in service are expected to maintain
+// a connection to OpenNMS via this interface.
+package minion;
+option java_multiple_files = true;
+option java_package = "org.opennms.cloud.grpc.minion";
+
+// Minions initiate the connection to Cloud and maintains these streams
+service CloudService {
+  // RPCs triggered from Cloud to Minion (i.e. Run a monitor)
+  // > ad hoc calls echo/heartbeat ?
+  // OpenNMSIpc.RpcStreaming
+  rpc CloudToMinionRPC (stream RpcResponseProto) returns (stream RpcRequestProto) {}
+  // Messages sent from Cloud to Minion (i.e. Twin Updates), called SinkStreaming in Horizon
+  // 3. > incremental update of workflow v56 (delta of changes)
+  // Twin.SinkStreaming
+  rpc CloudToMinionMessages (Identity) returns (stream CloudToMinionMessage) {}
+
+  // RPCs triggered from Minion to Cloud (i.e. Twin Registration Request)
+  // 1. < I am interested in twin objects of workflow
+  // 2. > these are workflows v55
+  // Twin.RpcStreaming
+  rpc MinionToCloudRPC (RpcRequestProto) returns (RpcResponseProto) {}
+  // Messages sent from Minion to Cloud (i.e. Sink API push)
+  // 4. < Workflow execution status/results
+  // OpenNMSIpc.SinkStreaming
+  rpc MinionToCloudMessages (stream MinionToCloudMessage) returns (google.protobuf.Empty) {}
+}
+
+message Identity {
+  string system_id = 1;
+  string location = 2;
+}
+
+message MinionToCloudMessage {
+  oneof value {
+    google.protobuf.Any any_val = 1;
+    SinkMessage sink_message = 2;
+    TwinRequestProto twin_request = 3;
+  }
+}
+
+message CloudToMinionMessage {
+  oneof value {
+    google.protobuf.Any any_val = 1;
+    TwinResponseProto twin_response = 2;
+  }
+}
+
+message RpcRequestProto {
+  string rpc_id = 1;
+  google.protobuf.Any payload = 2;
+  string system_id = 3;
+  string location = 4;
+  string module_id = 5;
+  // absolute time elapsed since the epoch in msec.
+  uint64 expiration_time = 6;
+  map<string, google.protobuf.Any> metadata = 7;
+}
+
+message RpcResponseProto {
+  string rpc_id = 1;
+  google.protobuf.Any payload = 2;
+  string system_id = 3;
+  string location = 4;
+  string module_id = 5;
+  map<string, google.protobuf.Any> metadata = 6;
+}
+
+message SinkMessage {
+  string message_id = 1;
+  bytes content = 2;
+  // these should always be the same values for a given session
+  string system_id = 3;
+  string location = 4;
+  // where are the messages coming from
+  string module_id = 5;
+  // tracing headers
+  map<string, google.protobuf.Any> metadata = 6;
+}
+
+message TwinRequestProto {
+  string consumer_key = 1;
+  string system_id = 2;
+  string location = 3;
+  map<string, google.protobuf.Any> metadata = 4;
+}
+
+message TwinResponseProto {
+  string consumer_key = 1;
+  bytes twin_object = 2;
+  string system_id = 3;
+  string location = 4;
+  bool is_patch_object = 5;
+  string session_id = 6;
+  int32 version = 7;
+  map<string, google.protobuf.Any> metadata = 8;
+}

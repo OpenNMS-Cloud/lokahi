@@ -1,0 +1,102 @@
+syntax = "proto3";
+package opennms.rpc.snmp;
+
+option java_multiple_files = true;
+option java_package = "org.opennms.horizon.grpc.snmp.contract";
+
+import "opennms_minion_ipc.proto";
+
+message SnmpRequest {
+  SnmpConfiguration agent = 1;
+  string description = 2;
+  repeated SnmpGetRequest gets = 3;
+  repeated SnmpWalkRequest walks = 4;
+  int64 ttl = 5;
+}
+
+message SnmpMultiResponse {
+  string error = 1;
+  repeated SnmpResponse responses = 2;
+}
+
+message SnmpGetRequest {
+  string correlationId = 1;
+  repeated string oids = 2;
+}
+
+message SnmpWalkRequest {
+  string correlationId = 1;
+  repeated string oids = 2;
+  optional int32 maxRepetitions = 3;
+  optional string instance = 5;
+}
+
+message SnmpResponse {
+  string correlationId = 1;
+  repeated SnmpResult results = 2;
+}
+
+message SnmpResult {
+  string base = 1;
+  string instance = 2;
+  SnmpValue value = 3;
+}
+
+
+enum SnmpValueType {
+  NONE = 0x0 [ deprecated = true ];
+  INT32 = 0x02;
+  OCTET_STRING = 0x04;
+  NULL = 0x05;
+  OBJECT_IDENTIFIER = 0x06;
+  IPADDRESS = 0x40;         // 64
+  COUNTER32 = 0x41;         // 65
+  GAUGE32 = 0x42;           // 66
+  TIMETICKS = 0x43;         // 67
+  OPAQUE = 0x44;            // 68
+  COUNTER64 = 0x46;         // 70
+  NO_SUCH_OBJECT = 0x80;    // 128
+  NO_SUCH_INSTANCE = 0x81;  // 129
+  END_OF_MIB = 0x82;        // 8*16 + 2 = 130
+}
+
+message SnmpValue {
+  SnmpValueType type = 1;
+  bytes value = 2;
+}
+
+enum Version {
+  none = 0 [ deprecated = true ];
+  v1 = 1;
+  v2 = 2;
+  v3 = 3;
+}
+
+message SnmpConfiguration {
+  Version version = 1;
+  string address = 2;
+  optional string proxyForAddress = 3;
+  optional int32 port = 4;
+  optional int32 timeout = 5;
+  optional int32 retries = 6;
+  optional int32 maxVarsPerPdu = 7;
+  optional int32 maxRepetitions = 8;
+  optional int32 maxRequestSize = 9;
+  optional int64 ttl = 10;
+  optional string readCommunity = 11;
+  optional string writeCommunity = 12;
+  optional SnmpV3Configuration config = 13;
+}
+
+message SnmpV3Configuration {
+  optional int32 securityLevel = 1;
+  optional string securityName = 2;
+  optional string authPassPhrase = 3;
+  optional string authProtocol = 4;
+  optional string privPassPhrase = 5;
+  optional string privProtocol = 6;
+  optional string contextName = 7;
+  optional string engineId = 8;
+  optional string contextEngineId = 9;
+  optional string enterpriseId = 10;
+}

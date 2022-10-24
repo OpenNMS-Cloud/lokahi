@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: horizon-stream-inventory
+
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://postgres:5432/inventory
+    username: inventory
+    password: passw0rd
+
+  liquibase:
+    change-log: db/changelog/changelog.xml

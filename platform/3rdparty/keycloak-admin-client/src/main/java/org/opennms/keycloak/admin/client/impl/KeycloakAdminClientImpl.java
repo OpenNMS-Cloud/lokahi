@@ -18,6 +18,8 @@ import org.opennms.keycloak.admin.client.KeycloakAdminClient;
 import org.opennms.keycloak.admin.client.KeycloakAdminClientSession;
 import org.opennms.keycloak.admin.client.exc.KeycloakAuthenticationException;
 import org.opennms.keycloak.admin.client.util.SurprisinglyHardToFindUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -28,6 +30,10 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class KeycloakAdminClientImpl implements KeycloakAdminClient {
+
+    private static final Logger DEFAULT_LOGGER = LoggerFactory.getLogger(KeycloakAdminClientImpl.class);
+
+    private Logger log = DEFAULT_LOGGER;
 
     public static final String DEFAULT_CLIENT_ID = "admin-cli";
     public static final String DEFAULT_SCOPE = "openid";
@@ -141,6 +147,8 @@ public class KeycloakAdminClientImpl implements KeycloakAdminClient {
      */
     @Override
     public KeycloakAdminClientSession login(String realm, String user, String password) throws IOException, URISyntaxException, KeycloakAuthenticationException {
+        log.debug("login keycloak at {} with admin realm [{}], admin user [{}]", this.getBaseUrl(), realm, user);
+
         //
         // Format the URL
         //

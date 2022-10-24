@@ -2,9 +2,14 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: opennms-ingress
-  namespace: {{ .Values.Namespace }}
+  namespace: {{ .Release.Namespace }}
 spec:
   ingressClassName: nginx
+  defaultBackend:
+    service:
+      name: {{ .Values.OpenNMS.UI.ServiceName }}
+      port:
+        number: {{ .Values.OpenNMS.UI.Port }}
   rules:
     - host: {{ .Values.Host }}
       http:
@@ -30,7 +35,16 @@ spec:
                 name: {{ .Values.OpenNMS.API.ServiceName }}
                 port:
                   number: {{ .Values.OpenNMS.API.Port }}
+          - path: {{ .Values.Grafana.Path }}
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .Values.Grafana.ServiceName }}
+                port:
+                  number: {{ .Values.Grafana.Port }}
+  {{- if .Values.TLS.Enabled }}
   tls:
     - hosts:
         -  {{.Values.Host }}
       secretName: {{ .Values.TLS.Cert.Name }}
+  {{- end }}

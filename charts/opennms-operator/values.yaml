@@ -1,43 +1,12 @@
-Operator:
-  Namespace: opennms
-  serviceName: opennms-operator
-  image: opennms/operator:latest
-  imagePullPolicy: IfNotPresent
-  imageUpdateFreq: 60
-  resources:
-    limits:
-      cpu: 100m
-      memory: 500Mi
-    requests:
-      cpu: 100m
-      memory: 500Mi
-  devMode: false
-customErrors:
-  image: quay.io/kubernetes-ingress-controller/custom-error-pages-amd64:0.4
-  debug: true
-ServiceImages:
-  Grafana: placeholder
-TLS:
-  Enabled: true
-  Issuer:
-    IssuerServer: https://acme-v02.api.letsencrypt.org/directory
-    IssuerUserEmail: email@address.com
-  Cert:
-    Hostname: "*.wildcard.domain.com"
-    Name: tls-cert-wildcard
-  # Configure according to: https://cert-manager.io/docs/configuration/acme/dns01/
-  Solver: |
-    cloudDNS:
-      project: my-project
-      serviceAccountSecretRef:
-        name: prod-clouddns-svc-acct-secret
-        key: service-account.json
-Kafka:
-  Namespace: kafka
-  ServiceName: opennms
-  VolumeSize: 10Gi
-  URL: opennms-kafka-bootstrap.kafka
-NodeRestrictions: # will be applied to every pod in the instance
-  Enabled: false
-  Key: kubernetes.azure.com/scalesetpriority
-  Value: spot
+serviceName: opennms-operator
+image: opennms/operator:latest
+imagePullPolicy: IfNotPresent
+imageUpdateFreq: 60
+resources:
+  limits:
+    cpu: 100m
+    memory: 500Mi
+  requests:
+    cpu: 100m
+    memory: 500Mi
+devMode: false

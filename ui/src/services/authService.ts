@@ -12,10 +12,9 @@ const auth = axios.create({
 
 auth.interceptors.request.use(
   (config) => {
-    const defaultHeaders = {
+    config.headers = {
       Authorization: `Bearer ${keycloak.value?.tokenParsed}`
     }
-    config.headers = defaultHeaders
     return config
   },
   (error) => {

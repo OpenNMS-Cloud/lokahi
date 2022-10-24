@@ -30,5 +30,5 @@ package org.opennms.netmgt.provision;
 
 public interface LocationAwareDetectorClient {
 
-    DetectorRequestBuilder detect();
+    DetectorRequestExecutorBuilder detect();
 }

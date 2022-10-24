@@ -14,21 +14,12 @@ limitations under the License.
 
 package values
 
-import "github.com/google/uuid"
-
 type KeycloakValues struct {
-	ServiceValues `yaml:",inline"`
-	AdminUsername string   `yaml:"AdminUsername"`
-	AdminPassword string   `yaml:"AdminPassword"`
-	UserUsername  string   `yaml:"UserUsername"`
-	UserPassword  string   `yaml:"UserPassword"`
-	RealmName     string   `yaml:"RealmName"`
-	UUID          UUIDList `yaml:"UUID"`
-}
-
-type UUIDList struct {
-	RealmId     uuid.UUID `yaml:"RealmId"`
-	ClientId    uuid.UUID `yaml:"ClientId"`
-	BaseUserId  uuid.UUID `yaml:"BaseUserId"`
-	AdminUserId uuid.UUID `yaml:"AdminUserId"`
+	ServiceValues    `yaml:",inline"`
+	HttpsPort        string `yaml:"HttpsPort"`
+	HostnamePort     string `yaml:"HostnamePort"`
+	HostnameAdminUrl string `yaml:"HostnameAdminUrl"`
+	AdminUsername    string `yaml:"AdminUsername"`
+	AdminPassword    string `yaml:"AdminPassword"`
+	RealmName        string `yaml:"RealmName"`
 }

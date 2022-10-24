@@ -4,7 +4,7 @@ metadata:
   labels:
     app: {{ .Values.Prometheus.Server.ServiceName }}
   name: {{ .Values.Prometheus.Server.ServiceName }}
-  namespace: {{ .Values.Namespace }}
+  namespace: {{ .Release.Namespace }}
 spec:
   type: ClusterIP
   ports:

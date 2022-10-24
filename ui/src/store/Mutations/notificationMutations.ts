@@ -2,17 +2,17 @@ import { defineStore } from 'pinia'
 import { useMutation } from 'villus'
 import useSpinner from '@/composables/useSpinner'
 
-import { SaveRoutingKeyDocument } from '@/types/graphql-mocks'
+import { SavePagerDutyConfigDocument } from '@/types/graphql'
 
 const { startSpinner, stopSpinner } = useSpinner()
 
 export const useNotificationMutations = defineStore('notificationMutations', () => {
-  // send pager duty routing key
+  // send pager duty integration key
   const {
-    execute: sendPagerDutyRoutingKey,
+    execute: savePagerDutyIntegrationKey,
     isFetching,
     error
-  } = useMutation(SaveRoutingKeyDocument)
+  } = useMutation(SavePagerDutyConfigDocument)
 
   watchEffect(() => {
     if (isFetching.value) {
@@ -23,7 +23,7 @@ export const useNotificationMutations = defineStore('notificationMutations', () 
   })
 
   return {
-    sendPagerDutyRoutingKey,
+    savePagerDutyIntegrationKey,
     error
   }
 })

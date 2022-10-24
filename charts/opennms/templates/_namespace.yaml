@@ -1,0 +1,7 @@
+{{/*Note: When deploying through Helm, Helm manages the namespace. Make sure to keep the underscore in the file name.*/}}
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: opennms

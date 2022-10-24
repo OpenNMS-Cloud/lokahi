@@ -46,5 +46,10 @@
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
     </dependency>
+      <dependency>
+          <groupId>org.opennms.horizon.shared</groupId>
+          <artifactId>snmp-api</artifactId>
+          <version>0.1.0-SNAPSHOT</version>
+      </dependency>
   </dependencies>
 </project>

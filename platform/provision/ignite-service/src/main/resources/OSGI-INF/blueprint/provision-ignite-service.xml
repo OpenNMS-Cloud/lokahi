@@ -1,0 +1,21 @@
+<blueprint xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0"
+  xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
+  xsi:schemaLocation="http://www.osgi.org/xmlns/blueprint/v1.0.0 http://www.osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd">
+
+  <cm:property-placeholder persistent-id="org.opennms.horizon.provision.ignite.service" update-strategy="reload">
+  </cm:property-placeholder>
+
+    <reference id="igniteClient" interface="org.apache.ignite.client.IgniteClient"/>
+
+    <bean id="igniteLocationAwareDetectorClient"
+        class="org.opennms.netmgt.provision.rpc.ignite.impl.IgniteLocationAwareDetectorClient">
+        <property name="igniteClient" ref="igniteClient"/>
+    </bean>
+
+    <service ref="igniteLocationAwareDetectorClient" interface="org.opennms.netmgt.provision.LocationAwareDetectorClient">
+        <service-properties>
+            <entry key="type" value="ignite"/>
+        </service-properties>
+    </service>
+</blueprint>

@@ -136,7 +136,6 @@ public class KeycloakRoleAssignmentProvider implements RoleAssignmentProvider {
         KeycloakAdminClientSession session = null;
         try {
             session = this.keycloakAdminClient.login(keycloakAdminRealm, keycloakAdminUsername, keycloakAdminPassword);
-            log.info("login keycloak at {} with admin realm [{}], admin user [{}] and admin password [{}]", ((KeycloakAdminClientImpl)keycloakAdminClient).getBaseUrl(), keycloakAdminRealm, keycloakAdminUsername, keycloakAdminPassword);
             UserRepresentation userRepresentation = session.getUserByUsername(realm, username);
 
             List<String> result;

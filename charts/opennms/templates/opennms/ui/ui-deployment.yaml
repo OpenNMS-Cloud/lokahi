@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ .Values.OpenNMS.UI.ServiceName }}
-  namespace: {{ .Values.Namespace }}
+  namespace: {{ .Release.Namespace }}
   labels:
     app: {{ .Values.OpenNMS.UI.ServiceName }}
     app.kubernetes.io/name: {{ .Values.OpenNMS.UI.ServiceName }}
@@ -18,7 +18,7 @@ spec:
       labels:
         app: {{ .Values.OpenNMS.UI.ServiceName }}
     spec:
-      {{ if .Values.NodeRestrictions.Enabled }}
+      {{- if .Values.NodeRestrictions.Enabled }}
       tolerations:
         - effect: "NoSchedule"
           key: "{{ .Values.NodeRestrictions.Key }}"
@@ -34,7 +34,7 @@ spec:
                     operator: In
                     values:
                       - {{ .Values.NodeRestrictions.Value }}
-      {{ end }}
+      {{- end }}
       terminationGracePeriodSeconds: 120
       containers:
         - name: {{ .Values.OpenNMS.UI.ServiceName }}
@@ -42,13 +42,6 @@ spec:
           imagePullPolicy: {{ .Values.OpenNMS.UI.ImagePullPolicy }}
           ports:
             - containerPort: {{ .Values.OpenNMS.UI.Port }}
-          env:
-            - name: DOMAIN_API
-              value: "https://{{ .Values.Host }}{{ .Values.OpenNMS.API.Path }}"
-            - name: DOMAIN_KEYCLOAK
-              value: "https://{{ .Values.Host }}{{ .Values.Keycloak.Path }}"
-          command: [ "/app/dev/entrypoint.sh" ]
-          args: [ "$(DOMAIN_KEYCLOAK)","$(DOMAIN_API)" ]
           resources:
             limits:
               cpu: "{{ .Values.OpenNMS.UI.Resources.Limits.Cpu }}"
@@ -56,8 +49,8 @@ spec:
             requests:
               cpu: "{{ .Values.OpenNMS.UI.Resources.Requests.Cpu }}"
               memory: "{{ .Values.OpenNMS.UI.Resources.Requests.Memory }}"
-          {{ if not .Values.TestDeploy }}
+          {{- if not .Values.TestDeploy }}
           {{/*  TODO    livenessProbe:*/}}
           {{/*          readinessProbe:*/}}
           {{/*          startupProbe:*/}}
-          {{ end }}
+          {{- end }}

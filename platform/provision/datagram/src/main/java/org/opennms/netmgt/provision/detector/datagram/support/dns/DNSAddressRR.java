@@ -28,7 +28,7 @@
 
 package org.opennms.netmgt.provision.detector.datagram.support.dns;
 
-import org.opennms.horizon.core.lib.InetAddressUtils;
+import org.opennms.horizon.shared.utils.InetAddressUtils;
 
 import java.io.IOException;
 import java.net.InetAddress;

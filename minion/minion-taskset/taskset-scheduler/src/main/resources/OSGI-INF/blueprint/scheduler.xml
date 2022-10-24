@@ -1,0 +1,28 @@
+<blueprint xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0"
+  xmlns:camel="http://camel.apache.org/schema/blueprint"
+  xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
+  xsi:schemaLocation="http://www.osgi.org/xmlns/blueprint/v1.0.0 http://www.osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd">
+
+  <cm:property-placeholder persistent-id="org.opennms.horizon.minion.scheduler" update-strategy="reload">
+    <cm:default-properties>
+      <cm:property name="scheduler.threads" value="20"/>
+    </cm:default-properties>
+  </cm:property-placeholder>
+
+  <bean id="scheduledThreadPoolExecutorFactory" class="org.opennms.horizon.minion.scheduler.impl.ScheduledThreadPoolExecutorFactory"/>
+
+  <bean id="opennmsWorkflowScheduler-executor" factory-ref="scheduledThreadPoolExecutorFactory" factory-method="create">
+    <argument value="${scheduler.threads}"/>
+    <argument value="opennms.workflow.scheduler.thread."/>
+  </bean>
+
+  <bean id="scheduler" class="org.opennms.horizon.minion.scheduler.impl.OpennmsSchedulerImpl" destroy-method="shutdown">
+    <property name="scheduledThreadPoolExecutor" ref="opennmsWorkflowScheduler-executor"/>
+    <!--<property name="threadCount" value="${scheduler.threads}"/>-->
+  </bean>
+
+  <service ref="scheduler" interface="org.opennms.horizon.minion.scheduler.OpennmsScheduler">
+  </service>
+
+</blueprint>

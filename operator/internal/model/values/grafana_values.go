@@ -15,5 +15,5 @@ limitations under the License.
 package values
 
 type GrafanaValues struct {
-	Image string `yaml:"Image"`
+	ServiceValues `yaml:",inline"`
 }

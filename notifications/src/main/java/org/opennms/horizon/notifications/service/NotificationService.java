@@ -28,12 +28,13 @@
 
 package org.opennms.horizon.notifications.service;
 
-import org.opennms.horizon.notifications.api.dto.PagerDutyConfigDTO;
-import org.opennms.horizon.notifications.dto.NotificationDTO;
+import org.opennms.horizon.notifications.exceptions.NotificationException;
+import org.opennms.horizon.shared.dto.event.AlarmDTO;
+import org.opennms.horizon.shared.dto.notifications.PagerDutyConfigDTO;
 
 public interface NotificationService {
 
-    void postNotification(NotificationDTO notification) throws Exception;
+    void postNotification(AlarmDTO alarm) throws NotificationException;
 
-    void postPagerDutyConfig(PagerDutyConfigDTO config) throws Exception;
+    void postPagerDutyConfig(PagerDutyConfigDTO config) throws NotificationException;
 }

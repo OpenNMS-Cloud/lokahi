@@ -16,7 +16,7 @@ package template
 
 import (
 	"bytes"
-	"github.com/Masterminds/sprig"
+	"github.com/Masterminds/sprig/v3"
 	"github.com/OpenNMS/opennms-operator/internal/model/values"
 	"text/template"
 )
@@ -41,5 +41,11 @@ func TemplateConfig(file string, values values.TemplateValues) (string, error) {
 
 func initTemplater() {
 	templater = template.New("operator-templater")
-	templater.Funcs(sprig.TxtFuncMap())
+	funcMap := sprig.TxtFuncMap()
+	funcMap["lookup"] = emptyDict
+	templater.Funcs(funcMap)
+}
+
+func emptyDict(_ ...string) map[string]interface{} {
+	return map[string]interface{}{}
 }

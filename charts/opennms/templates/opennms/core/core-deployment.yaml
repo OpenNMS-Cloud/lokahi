@@ -2,10 +2,11 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ .Values.OpenNMS.Core.ServiceName }}
-  namespace: {{ .Values.Namespace }}
+  namespace: {{ .Release.Namespace }}
   labels:
     app: {{ .Values.OpenNMS.Core.ServiceName }}
     app.kubernetes.io/name: {{ .Values.OpenNMS.Core.ServiceName }}
+    ignite-cluster: core
   annotations:
     autoupdate: "true"
 spec:
@@ -13,12 +14,15 @@ spec:
   selector:
     matchLabels:
       app: {{ .Values.OpenNMS.Core.ServiceName }}
+      ignite-cluster: core
   template:
     metadata:
       labels:
         app: {{ .Values.OpenNMS.Core.ServiceName }}
+        ignite-cluster: core
     spec:
-      {{ if .Values.NodeRestrictions.Enabled }}
+      serviceAccountName: {{ .Values.OpenNMS.Core.ServiceName }}-sa
+      {{- if .Values.NodeRestrictions.Enabled }}
       tolerations:
         - effect: "NoSchedule"
           key: "{{ .Values.NodeRestrictions.Key }}"
@@ -34,7 +38,7 @@ spec:
                 operator: In
                 values:
                 - {{ .Values.NodeRestrictions.Value }}
-      {{ end }}
+      {{- end }}
       terminationGracePeriodSeconds: 120
       containers:
         - name: {{ .Values.OpenNMS.Core.ServiceName }}
@@ -43,9 +47,9 @@ spec:
           args: [ "-f" ]
           env:
             - name: JAVA_TOOL_OPTIONS
-              #value: "-agentlib:jdwp=transport=dt_socket,server=y,address=5005,suspend=n,quiet=y"
+              value: "-agentlib:jdwp=transport=dt_socket,server=y,address=5005,suspend=n,quiet=y"
             - name: EXTRA_JAVA_OPTS
-              value: "-Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true -Djavax.net.ssl.trustStore=/opt/horizon-stream/truststore.jks -Djavax.net.ssl.trustStorePassword=password123 -Djavax.net.ssl.trustStoreType=JKS"
+              value: "-Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true"
             - name: PGSQL_SERVICE_NAME
               value: {{ .Values.Postgres.ServiceName }}
             - name: PGSQL_ADMIN_USERNAME
@@ -58,11 +62,25 @@ spec:
                 secretKeyRef:
                   name: postgres
                   key: adminPwd
+            - name: PGSQL_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: postgres
+                  key: opennmsUser
+            - name: PGSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres
+                  key: opennmsPwd
+            - name: ORG_OPENNMS_CORE_IGNITE_CLIENT_KUBERNETESSERVICENAME
+              value: "{{ .Values.OpenNMS.MinionGateway.ServiceName }}-ignite"
             - name: KAFKA_BROKER_HOST
-              value: "{{ .Values.Kafka.URL }}"
+              value: "{{ .Values.Kafka.ServiceName }}"
             - name: KAFKA_BROKER_PORT
-              value: "9092"
-            - name: ACTIVEMQ_BROKER_URL #todo is this still needed?
+              value: "{{ .Values.Kafka.Port }}"
+            - name: NOTIFICATION_KAFKA_TOPIC
+              value: "org.opennms.horizon.notifications.alarms"
+            - name: ACTIVEMQ_BROKER_URL
               value: "tcp://localhost:61616"
             - name: KEYCLOAK_BASE_URL
               value: "http://{{ .Values.Keycloak.ServiceName }}:{{ .Values.Keycloak.Port }}{{ .Values.Keycloak.Path }}/"
@@ -89,24 +107,22 @@ spec:
               mountPath: "/opt/horizon-stream/etc/users.properties"
               subPath: "karafUsers"
               readOnly: true
-            - name: config-volume
-              mountPath: /opt/horizon-stream/etc/org.opennms.core.rest.cfg 
-              subPath: restCfg
-            - name: config-volume #todo remove
-              mountPath: /opt/horizon-stream/truststore.jks
-              subPath: truststore.jks
           ports:
             - name: ssh
               containerPort: {{ .Values.OpenNMS.Core.SshPort }}
             - name: http
               containerPort: {{ .Values.OpenNMS.Core.HttpPort }}
             - name: grpc
-              containerPort: {{ .Values.OpenNMS.Core.GrpcPort }}
-          {{ if not .Values.TestDeploy }}
+              containerPort: {{ .Values.OpenNMS.Core.GrpcPort }}                        
+            - name: ig-cluster
+              containerPort: {{ .Values.OpenNMS.Core.IgniteClusterPort }}
+            - name: ig-discovery
+              containerPort: {{ .Values.OpenNMS.Core.IgniteDiscoveryPort }}
+          {{- if not .Values.TestDeploy }}
 {{/*    TODO  livenessProbe:*/}}
 {{/*          readinessProbe:*/}}
 {{/*          startupProbe:*/}}
-          {{ end }}
+          {{- end }}
           resources:
             limits:
               cpu: "{{ .Values.OpenNMS.Core.Resources.Limits.Cpu }}"
@@ -118,9 +134,3 @@ spec:
         - name: config-volume
           configMap:
             name: opennms-config
-        - name: truststore #todo remove
-          configMap:
-            name: core.truststore
-            defaultMode: 420
-
-

@@ -25,6 +25,12 @@ type OpenNMSSpec struct {
 	// Domain name used in ingress rule
 	Host string `json:"host,omitempty"`
 
+	//HTTP port number the instance will be exposed on
+	HttpPort int `json:"httpPort"`
+
+	//HTTPS port number the instance will be exposed on
+	HttpsPort int `json:"httpsPort"`
+
 	// K8s namespace to use
 	Namespace string `json:"namespace"`
 
@@ -49,17 +55,32 @@ type OpenNMSSpec struct {
 	// Defines service values for the Minion
 	Minion BaseServiceResources `json:"minion,omitempty"`
 
+	// Defines service values for the Minion Gateway
+	MinionGateway BaseServiceResources `json:"minionGateway,omitempty"`
+
+	// Defines service values for Inventory service
+	Inventory BaseServiceResources `json:"inventory,omitempty"`
+
 	// Defines service values for Notification service
 	Notification BaseServiceResources `json:"notification,omitempty"`
 
+	// Defines service values for MetricsProcessor service
+	MetricsProcessor BaseServiceResources `json:"metricsProcessor,omitempty"`
+
 	// Defines service values for Postgres
 	Postgres BaseServiceResources `json:"postgres,omitempty"`
+
+	// Defines service values for Postgres
+	Keycloak BaseServiceResources `json:"keycloak,omitempty"`
+
+	// Defines service values for Grafana
+	Grafana BaseServiceResources `json:"grafana,omitempty"`
 
 	// Defines the logic of ONMS image update
 	ImageUpdateConfig ImageUpdateConfig `json:"imageUpdate,omitempty"`
 }
 
-//Timeseries - defines the timeseries DB backend to use
+// Timeseries - defines the timeseries DB backend to use
 type Timeseries struct {
 	Mode   string `json:"mode,omitempty"`
 	Host   string `json:"host,omitempty"`
@@ -67,7 +88,7 @@ type Timeseries struct {
 	ApiKey string `json:"apiKey,omitempty"`
 }
 
-//BaseServiceResources - defines basic resource needs of a service
+// BaseServiceResources - defines basic resource needs of a service
 type BaseServiceResources struct {
 	// Image tag version of OpenNMS.
 	Image string `json:"image,omitempty"`
@@ -110,7 +131,7 @@ type ImageStatus struct {
 
 // +kubebuilder:object:generate=true
 
-//ReadinessStatus - the ready status of the ONMS instance
+// ReadinessStatus - the ready status of the ONMS instance
 type ReadinessStatus struct {
 	// if the ONMS instance is ready
 	Ready bool `json:"ready,omitempty"`

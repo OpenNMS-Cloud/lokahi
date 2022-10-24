@@ -1,4 +1,4 @@
-fragment DeviceTableParts on Query {
+fragment DevicesTableParts on Query {
   listDevices {
     devices {
       id
@@ -9,7 +9,7 @@ fragment DeviceTableParts on Query {
   }
 }
 
-fragment MinionTableParts on Query {
+fragment MinionsTableParts on Query {
   listMinions {
     minions {
       id
@@ -20,16 +20,7 @@ fragment MinionTableParts on Query {
   }
 }
 
-fragment MetricParts on TimeSeriesQueryResult {
-  data {
-    result {
-      metric
-      value
-    }
-  }
-}
-
-fragment LocationParts on Query {
+fragment LocationsParts on Query {
   listLocations {
     locations {
       locationName
@@ -37,48 +28,24 @@ fragment LocationParts on Query {
   }
 }
 
-fragment MinionUptimeParts on Query {
-  minionUptime: metric(name: "minion_uptime_sec") {
-    ...MetricParts
-  }
-}
-
-fragment MinionLatencyParts on Query {
-  minionLatency: metric(name: "minion_response_time_msec") {
-    ...MetricParts
-  }
-}
-
-fragment DeviceUptimeParts on Query {
-  deviceUptime: metric(name: "snmp_uptime_sec") {
-    ...MetricParts
-  }
-}
-
-fragment DeviceLatencyParts on Query {
-  deviceLatency: metric(name: "icmp_round_trip_time_msec") {
-    ...MetricParts
-  }
-}
-
 query ListDevicesForTable {
-  ...DeviceTableParts
+  ...DevicesTableParts
   ...DeviceUptimeParts
   ...DeviceLatencyParts
 }
 
 query ListMinionsForTable {
-  ...MinionTableParts
+  ...MinionsTableParts
   ...MinionUptimeParts
   ...MinionLatencyParts
 }
 
 query ListMinionsAndDevicesForTables {
-  ...DeviceTableParts
+  ...DevicesTableParts
   ...DeviceUptimeParts
   ...DeviceLatencyParts
-  ...MinionTableParts
+  ...MinionsTableParts
   ...MinionUptimeParts
   ...MinionLatencyParts
-  ...LocationParts
+  ...LocationsParts
 }

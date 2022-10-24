@@ -19,6 +19,7 @@
   <reference id="nodeRepository" interface="org.opennms.horizon.repository.api.NodeRepository"/>
   <reference id="grpcServer" interface="org.opennms.horizon.ipc.rpc.api.RpcClientFactory"/>
   <reference id="entityScopeProvider" interface="org.opennms.horizon.core.configvars.EntityScopeProvider"/>
+  <reference id="igniteLocationAwareDetectorClient" interface="org.opennms.netmgt.provision.LocationAwareDetectorClient" filter="(type=ignite)"/>
 
   <bean id="provisioner" class="org.opennms.netmgt.provision.service.ProvisionerImpl">
     <argument ref="requisitionRepository"/>
@@ -40,13 +41,6 @@
     </property>
   </bean>
 
-  <bean id="locationAwareDetector" class="org.opennms.netmgt.provision.detector.client.LocationAwareDetectorClientRpcImpl" init-method="afterPropertiesSet">
-     <property name="registry" ref="serviceDetectorRegistry"/>
-    <property name="detectorClientRpcModule" ref="detectorClientRpcModule"/>
-    <property name="rpcClientFactory" ref="grpcServer"/>
-    <property name="entityScopeProvider" ref="entityScopeProvider"/>
-  </bean>
-
   <bean id="customQuartz" class="org.apache.camel.component.quartz.QuartzComponent">
     <property name="properties">
       <map>
@@ -62,7 +56,7 @@
 
   <bean id="nodeScanner" class="org.opennms.netmgt.provision.scan.NodeScanner">
     <argument ref="provisionCamelContext"/>
-    <argument ref="locationAwareDetector"/>
+    <argument ref="igniteLocationAwareDetectorClient"/>
     <argument ref="foreignSourceRepository"/>
   </bean>
 

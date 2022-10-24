@@ -32,6 +32,7 @@
     <module>common-config-vars</module>
     <module>common-net</module>
     <module>common-web</module>
+    <module>common-collection</module>
   </modules>
 
 </project>

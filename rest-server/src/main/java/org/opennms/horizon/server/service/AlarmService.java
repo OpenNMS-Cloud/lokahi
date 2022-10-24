@@ -28,6 +28,7 @@
 
 package org.opennms.horizon.server.service;
 
+import org.opennms.horizon.server.service.gateway.PlatformGateway;
 import org.opennms.horizon.shared.dto.event.AlarmAckDTO;
 import org.opennms.horizon.shared.dto.event.AlarmCollectionDTO;
 import org.springframework.stereotype.Service;
@@ -38,6 +39,7 @@ import io.leangen.graphql.annotations.GraphQLMutation;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.execution.ResolutionEnvironment;
 import io.leangen.graphql.spqr.spring.annotations.GraphQLApi;
+import reactor.core.publisher.Mono;
 
 
 @GraphQLApi
@@ -50,12 +52,12 @@ public class AlarmService {
   }
 
   @GraphQLQuery
-  public AlarmCollectionDTO listAlarms(@GraphQLEnvironment ResolutionEnvironment env) {
-    return gateway.get(PlatformGateway.URL_PATH_ALARMS_LIST, gateway.getAuthHeader(env), AlarmCollectionDTO.class).getBody();
+  public Mono<AlarmCollectionDTO> listAlarms(@GraphQLEnvironment ResolutionEnvironment env) {
+    return gateway.get(PlatformGateway.URL_PATH_ALARMS_LIST, gateway.getAuthHeader(env), AlarmCollectionDTO.class);
   }
 
   @GraphQLMutation
-  public String clearAlarm(@GraphQLArgument(name = "id") Long id, AlarmAckDTO ackDTO, @GraphQLEnvironment ResolutionEnvironment env) {
-    return gateway.post(String.format(PlatformGateway.URL_PATH_ALARMS_CLEAR, id), gateway.getAuthHeader(env), ackDTO, String.class).getBody();
+  public Mono<String> clearAlarm(@GraphQLArgument(name = "id") Long id, AlarmAckDTO ackDTO, @GraphQLEnvironment ResolutionEnvironment env) {
+    return gateway.post(String.format(PlatformGateway.URL_PATH_ALARMS_CLEAR, id), gateway.getAuthHeader(env), ackDTO, String.class);
   }
 }

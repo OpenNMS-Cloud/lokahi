@@ -34,6 +34,7 @@ package org.opennms.horizon.ipc.rpc.api;
  *
  * @author jwhite
  */
+@Deprecated
 public interface RpcModule<S extends RpcRequest, T extends RpcResponse> extends RpcClient<S,T> {
 
     public static final String MINION_HEADERS_MODULE = "MINION_HEADERS";

@@ -30,6 +30,7 @@
     <module>web</module>
     <module>rest</module>
 
+    <module>ignite-service</module>
     <module>service</module>
     <module>ssh</module>
     <module>persistence</module>

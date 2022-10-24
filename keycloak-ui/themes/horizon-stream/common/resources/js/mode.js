@@ -1,17 +1,22 @@
 (function checkTheme() {
-  const localStorageTheme = window.localStorage.getItem('theme')
-
   // check param on the redirectUri for dark mode
-  const params = new Proxy(new URLSearchParams(window.location.search), {
-    get: (searchParams, prop) => searchParams.get(prop),
-  })
+  const params = new URLSearchParams(window.location.search)
+  const redirectUri = params.get('redirect_uri')
 
-  const appUri = params.redirect_uri
+  let isDark;
 
-  if (appUri){
-    isDark = appUri.includes('dark')
-  } else {
-    isDark = localStorageTheme === 'dark'
+  // First check redirectUri for theme
+  if (redirectUri) {
+    const appUrl = new URL(redirectUri)
+    if (appUrl.searchParams.get('theme')) {
+      isDark = appUrl.searchParams.get('theme') === 'dark'
+    }
+  }
+
+  // then check localStorage
+  if (isDark == null) {
+    const localStorageTheme = window.localStorage.getItem('theme')
+    isDark = localStorageTheme !== 'light' // default to dark if not set
   }
   
   if (isDark) {

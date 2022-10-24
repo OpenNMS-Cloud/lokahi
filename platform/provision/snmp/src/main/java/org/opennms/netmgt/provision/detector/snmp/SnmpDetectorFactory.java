@@ -30,9 +30,9 @@ package org.opennms.netmgt.provision.detector.snmp;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import org.opennms.netmgt.provision.core.support.AgentBasedSyncAbstractDetector;
-import org.opennms.netmgt.snmp.SnmpAgentConfig;
-import org.opennms.netmgt.snmp.conf.SnmpAgentConfigFactory;
-import org.opennms.netmgt.snmp.conf.xml.SnmpProfile;
+import org.opennms.horizon.shared.snmp.SnmpAgentConfig;
+import org.opennms.horizon.shared.snmp.conf.SnmpAgentConfigFactory;
+import org.opennms.horizon.shared.snmp.conf.xml.SnmpProfile;
 import org.springframework.stereotype.Component;
 
 import java.net.InetAddress;
@@ -43,7 +43,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 
-import static org.opennms.netmgt.snmp.SnmpAgentConfig.AGENT_CONFIG_PREFIX;
+import static org.opennms.horizon.shared.snmp.SnmpAgentConfig.AGENT_CONFIG_PREFIX;
 
 @Component
 public class SnmpDetectorFactory extends GenericSnmpDetectorFactory<SnmpDetector> {

@@ -313,9 +313,11 @@ const forceLayout = new ForceLayout({
 })
 
 const d3ForceEnabled = computed({
-  get: () => configs.view.layoutHandler instanceof ForceLayout,
+  get: () => configs.view?.layoutHandler instanceof ForceLayout,
   set: (value: boolean) => {
-    configs.view.layoutHandler = value ? forceLayout : new SimpleLayout()
+    if (configs.view) {
+      configs.view.layoutHandler = value ? forceLayout : new SimpleLayout()
+    }
   }
 })
 
@@ -355,12 +357,12 @@ const configs = reactive(
       selectable: true,
       normal: {
         type: ViewType.circle,
-        color: node => setColor(node)
+        color: (node: Node) => setColor(node)
       }
     },
     edge: {
       normal: {
-        color: edge => setColor(edge)
+        color: (edge: Edge) => setColor(edge)
       }
     }
   })

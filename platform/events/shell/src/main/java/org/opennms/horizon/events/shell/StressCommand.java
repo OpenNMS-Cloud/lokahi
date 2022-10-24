@@ -49,7 +49,7 @@ import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
-import org.opennms.horizon.core.lib.InetAddressUtils;
+import org.opennms.horizon.shared.utils.InetAddressUtils;
 import org.opennms.horizon.core.lib.OnmsJexlEngine;
 import org.opennms.horizon.events.api.EventBuilder;
 import org.opennms.horizon.events.api.EventForwarder;

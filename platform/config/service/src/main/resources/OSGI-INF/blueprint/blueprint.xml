@@ -1,0 +1,13 @@
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0">
+
+    <reference id="jsonStore" interface="org.opennms.horizon.db.kvstore.api.JsonStore"/>
+    <reference id="eventForwarder" interface="org.opennms.horizon.events.api.EventForwarder" />
+
+    <bean id="configService" class="org.opennms.horizon.config.service.impl.DefaultConfigService">
+        <argument ref="jsonStore"/>
+        <argument ref="eventForwarder"/>
+    </bean>
+
+    <service ref="configService" interface="org.opennms.horizon.config.service.api.ConfigService"/>
+
+</blueprint>

@@ -15,12 +15,12 @@ limitations under the License.
 package values
 
 type TemplateValues struct {
-	Values Values
+	Release HelmRelease
+	Values  Values
 }
 
-//Values - Helm values for a complete OpenNMS Horizon Stream instance
+// Values - Helm values for a complete OpenNMS Horizon Stream instance
 type Values struct {
-	Namespace        string                 `yaml:"Namespace"`
 	Host             string                 `yaml:"Host"`
 	TestDeploy       bool                   `yaml:"TestDeploy"`
 	Prometheus       PrometheusValues       `yaml:"Prometheus"`
@@ -34,4 +34,10 @@ type Values struct {
 	MailServer       MailServerValues       `yaml:"MailServer"`
 	NodeRestrictions NodeRestrictionsValues `yaml:"NodeRestrictions"`
 	Operator         OperatorValues         `yaml:"Operator"`
+	CustomErrors     CustomErrorsValues     `yaml:"CustomErrors"`
+}
+
+// HelmRelease - Special Helm values
+type HelmRelease struct {
+	Namespace string `yaml:"Namespace"`
 }

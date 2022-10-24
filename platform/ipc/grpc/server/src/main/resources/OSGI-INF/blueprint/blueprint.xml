@@ -64,7 +64,6 @@
     <property name="identity" ref="identity"/>
     <property name="rpcMetrics" ref="grpcRpcMetrics"/>
     <property name="sinkMetrics" ref="grpcSinkMetrics"/>
-    <property name="minionManager" ref="minionManager"/>
 
     <property name="rpcRequestTracker" ref="rpcRequestTracker"/>
     <property name="rpcConnectionTracker" ref="rpcConnectionTracker"/>

@@ -1,5 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import Appliances from '@/containers/Appliances.vue'
+import { useWidgets, Widgets } from '@/composables/useWidgets' 
+
+const { setAvailableWidgets } = useWidgets()
 
 const router = createRouter({
   history: createWebHistory(),
@@ -7,7 +10,10 @@ const router = createRouter({
     {
       path: '/',
       name: 'Appliances',
-      component: Appliances
+      component: Appliances,
+      beforeEnter: () => {
+        setAvailableWidgets(Widgets.GEOMAP)
+      }
     },
     {
       path: '/test', // For now, keep the alarms test available at this route
@@ -15,9 +21,17 @@ const router = createRouter({
       component: () => import('@/containers/Alarms.vue')
     },
     {
+      path: '/graphs',
+      name: 'Graphs',
+      component: () => import('@/containers/Graphs.vue')
+    },
+    {
       path: '/map',
       name: 'Map',
       component: () => import('@/containers/Map.vue'),
+      beforeEnter: () => {
+        setAvailableWidgets(Widgets.DEVICES, Widgets.MINIONS)
+      },
       children: [
         {
           path: '',
@@ -30,6 +44,14 @@ const router = createRouter({
           component: () => import('@/components/Map/MapNodesGrid.vue')
         }
       ]
+    },
+    {
+      path: '/node/:id',
+      name: 'Node',
+      component: () => import('@/containers/NodeStatus.vue'),
+      beforeEnter: () => {
+        setAvailableWidgets(Widgets.TAGS)
+      }
     },
     {
       path: '/:pathMatch(.*)*', // catch other paths and redirect

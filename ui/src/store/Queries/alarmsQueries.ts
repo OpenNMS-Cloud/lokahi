@@ -4,7 +4,8 @@ import { AlarmsDocument, AlarmsQuery } from '@/types/graphql'
 
 export const useAlarmsQueries = defineStore('alarmsQueries', () => {
   const { data, execute } = useQuery<AlarmsQuery>({
-    query: AlarmsDocument
+    query: AlarmsDocument,
+    cachePolicy: 'network-only' // always fetch and do not cache
   })
 
   const alarms = computed(() => data.value?.listAlarms?.alarms || [])

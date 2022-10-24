@@ -4,7 +4,11 @@ node_modules
 **/*.tsx~
 **/*.swn
 **/*.swo
-*.local
 skaffold.yaml
 mock-graphql
 node_modules
+.env.local
+.env.*.local
+
+# only used during development with Skaffold
+!.env.development.local

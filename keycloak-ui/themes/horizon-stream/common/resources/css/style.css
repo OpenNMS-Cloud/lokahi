@@ -172,7 +172,7 @@ body.feather-styles {
   to { opacity: 1; }
   0% { -webkit-filter: blur(90px);}
   50% { -webkit-filter: blur(100px);}
-  100% { -webkit-filter: blur(90px);}
+  100% { -webkit-filter: blur(0px);}
   from { transform : scale(0.8);}
   to { transform : scale(1); }
 }

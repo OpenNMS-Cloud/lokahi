@@ -48,7 +48,7 @@ import org.jboss.netty.channel.ChannelPipelineFactory;
 import org.jboss.netty.channel.Channels;
 import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory;
 import org.jboss.netty.handler.ssl.SslHandler;
-import org.opennms.horizon.core.lib.InetAddressUtils;
+import org.opennms.horizon.shared.utils.InetAddressUtils;
 import org.opennms.horizon.core.lib.LogPreservingThreadFactory;
 import org.opennms.net.util.RelaxedX509ExtendedTrustManager;
 import org.opennms.netmgt.provision.DetectFuture;

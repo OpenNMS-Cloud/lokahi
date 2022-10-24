@@ -1,0 +1,36 @@
+<blueprint xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0"
+  xmlns:camel="http://camel.apache.org/schema/blueprint"
+  xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
+  xsi:schemaLocation="http://www.osgi.org/xmlns/blueprint/v1.0.0 http://www.osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd">
+
+  <cm:property-placeholder persistent-id="org.opennms.horizon.minion.registration" update-strategy="reload">
+    <cm:default-properties>
+        <cm:property name="registration.uri" value="seda:registration"/>
+        <cm:property name="aggregation.delay" value="10000"/>
+    </cm:default-properties>
+  </cm:property-placeholder>
+
+  <!--
+  <camel:camelContext id="registrationRoutingContext" allowUseOriginalMessage="false">
+    <camel:contextScan/>
+    <camel:template id="registrationProducer" defaultEndpoint="{{registration.uri}}"/>
+  </camel:camelContext>
+
+  <reference id="messageDispatcherFactory" interface="org.opennms.horizon.shared.ipc.sink.api.MessageDispatcherFactory" />
+
+  <bean id="registrationService" class="org.opennms.horizon.minion.plugin.registration.RegistrationServiceImpl">
+    <argument ref="registrationProducer"/>
+  </bean>
+
+  <bean id="pluginRegistrationRouting" class="org.opennms.horizon.minion.plugin.registration.PluginRegistrationRouting">
+      <argument value="${registration.uri}"/>
+      <argument ref="messageDispatcherFactory"/>
+      <argument value="${aggregation.delay}"/>
+  </bean>
+  -->
+
+  <bean id="registrationService" class="org.opennms.horizon.minion.plugin.api.DummyRegistrationService" />
+  <service ref="registrationService" interface="org.opennms.horizon.minion.plugin.api.RegistrationService"/>
+
+</blueprint>

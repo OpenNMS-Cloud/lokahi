@@ -2,21 +2,21 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app.kubernetes.io/component: controller-{{ .Values.Namespace }}
-    app.kubernetes.io/name: ingress-nginx-{{ .Values.Namespace }}
-    app.kubernetes.io/instance: ingress-nginx-{{ .Values.Namespace }}
-    app.kubernetes.io/part-of: ingress-nginx-{{ .Values.Namespace }}
+    app.kubernetes.io/component: controller-{{ .Release.Namespace }}
+    app.kubernetes.io/name: ingress-nginx-{{ .Release.Namespace }}
+    app.kubernetes.io/instance: ingress-nginx-{{ .Release.Namespace }}
+    app.kubernetes.io/part-of: ingress-nginx-{{ .Release.Namespace }}
     app.kubernetes.io/version: 1.3.0
   name: ingress-nginx-controller
-  namespace: {{ .Values.Namespace }}
+  namespace: {{ .Release.Namespace }}
 spec:
   minReadySeconds: 0
   revisionHistoryLimit: 10
   selector:
     matchLabels:
-      app.kubernetes.io/component: controller-{{ .Values.Namespace }}
-      app.kubernetes.io/name: ingress-nginx-{{ .Values.Namespace }}
-      app.kubernetes.io/instance: ingress-nginx-{{ .Values.Namespace }}
+      app.kubernetes.io/component: controller-{{ .Release.Namespace }}
+      app.kubernetes.io/name: ingress-nginx-{{ .Release.Namespace }}
+      app.kubernetes.io/instance: ingress-nginx-{{ .Release.Namespace }}
   strategy:
     rollingUpdate:
       maxUnavailable: 1
@@ -24,11 +24,11 @@ spec:
   template:
     metadata:
       labels:
-        app.kubernetes.io/component: controller-{{ .Values.Namespace }}
-        app.kubernetes.io/name: ingress-nginx-{{ .Values.Namespace }}
-        app.kubernetes.io/instance: ingress-nginx-{{ .Values.Namespace }}
+        app.kubernetes.io/component: controller-{{ .Release.Namespace }}
+        app.kubernetes.io/name: ingress-nginx-{{ .Release.Namespace }}
+        app.kubernetes.io/instance: ingress-nginx-{{ .Release.Namespace }}
     spec:
-      {{ if .Values.NodeRestrictions.Enabled }}
+      {{- if .Values.NodeRestrictions.Enabled }}
       tolerations:
         - effect: "NoSchedule"
           key: "{{ .Values.NodeRestrictions.Key }}"
@@ -44,7 +44,7 @@ spec:
                 operator: In
                 values:
                 - {{ .Values.NodeRestrictions.Value }}
-      {{ end }}
+      {{- end }}
       dnsPolicy: ClusterFirst
       containers:
       - args:
@@ -53,11 +53,13 @@ spec:
         - --controller-class=k8s.io/ingress-nginx
         - --ingress-class=nginx
         - --configmap=$(POD_NAMESPACE)/ingress-nginx-controller
+        - --watch-ingress-without-class=true
+        - --publish-status-address=localhost
+        - --http-port={{ .Values.Ingress.HttpPort }}
+        - --https-port={{ .Values.Ingress.HttpsPort }}
         - --validating-webhook=:8443
         - --validating-webhook-certificate=/usr/local/certificates/cert
         - --validating-webhook-key=/usr/local/certificates/key
-        - --watch-ingress-without-class=true
-        - --publish-status-address=localhost
         env:
         - name: POD_NAME
           valueFrom:
@@ -69,7 +71,7 @@ spec:
               fieldPath: metadata.namespace
         - name: LD_PRELOAD
           value: /usr/local/lib/libmimalloc.so
-        image: registry.k8s.io/ingress-nginx/controller:v1.3.0@sha256:d1707ca76d3b044ab8a28277a2466a02100ee9f58a86af1535a3edf9323ea1b5
+        image: {{ .Values.Ingress.ControllerImage }}
         imagePullPolicy: IfNotPresent
         lifecycle:
           preStop:
@@ -88,12 +90,12 @@ spec:
           timeoutSeconds: 1
         name: controller
         ports:
-        - containerPort: 80
-          hostPort: 80
+        - containerPort: {{ .Values.Ingress.HttpPort }}
+          hostPort: {{ .Values.Ingress.HttpPort }}
           name: http
           protocol: TCP
-        - containerPort: 443
-          hostPort: 443
+        - containerPort: {{ .Values.Ingress.HttpsPort }}
+          hostPort: {{ .Values.Ingress.HttpsPort }}
           name: https
           protocol: TCP
         - containerPort: 8443
@@ -125,7 +127,6 @@ spec:
         - mountPath: /usr/local/certificates/
           name: webhook-cert
           readOnly: true
-      dnsPolicy: ClusterFirst
       serviceAccountName: ingress-nginx
       terminationGracePeriodSeconds: 0
       volumes:

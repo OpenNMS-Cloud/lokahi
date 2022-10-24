@@ -42,7 +42,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.opennms.core.web.HttpClientWrapper;
-import org.opennms.horizon.core.lib.InetAddressUtils;
+import org.opennms.horizon.shared.utils.InetAddressUtils;
 import org.opennms.netmgt.provision.detector.web.request.WebRequest;
 import org.opennms.netmgt.provision.detector.web.response.WebResponse;
 import org.opennms.netmgt.provision.support.Client;

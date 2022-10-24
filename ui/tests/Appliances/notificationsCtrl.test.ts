@@ -54,7 +54,7 @@ test('The save btn should enable if a key is added', async () => {
 
 test('The save mutation is called', async () => {
   const notificationMutations = useNotificationMutations()
-  const sendPagerDutyRoutingKeySpy = vi.spyOn(notificationMutations, 'sendPagerDutyRoutingKey')
+  const sendPagerDutyRoutingKeySpy = vi.spyOn(notificationMutations, 'savePagerDutyIntegrationKey')
 
   await wrapper.get('[data-test="notifications-btn"]').trigger('click')
 

@@ -1,23 +1,38 @@
-FROM quay.io/keycloak/keycloak:19.0.1 as builder
- 
+# syntax=docker/dockerfile:1
+
+# This Dockerfile performs a multi-stage build and must be built with BuildKit: `docker buildx build .`.
+# By default, it will produce an optimized image with the production build.
+# Target the development stage to produce an unoptimized dev image running start-dev.
+
+FROM quay.io/keycloak/keycloak:19.0.2 as build
+
 ENV KC_HEALTH_ENABLED=true
 ENV KC_METRICS_ENABLED=true
 ENV KC_FEATURES=token-exchange
 ENV KC_DB=postgres
- 
-USER 0
-RUN microdnf install tar # allows for Skaffold file sync
- 
+ENV KC_HTTP_RELATIVE_PATH=/auth
+ENV KC_CACHE=ispn
+ENV KC_CACHE_STACK=kubernetes
+
+WORKDIR /opt/keycloak
+
 # Install custom providers
 RUN curl -sL https://github.com/aerogear/keycloak-metrics-spi/releases/download/2.5.3/keycloak-metrics-spi-2.5.3.jar -o /opt/keycloak/providers/keycloak-metrics-spi-2.5.3.jar
-RUN /opt/keycloak/bin/kc.sh build --http-relative-path=/auth
- 
-USER 1000
- 
-FROM quay.io/keycloak/keycloak:19.0.1
-COPY --from=builder /opt/keycloak/ /opt/keycloak/
-WORKDIR /opt/keycloak
- 
-COPY --chown=1000 themes themes
 
-ENTRYPOINT ["/opt/keycloak/bin/kc.sh", "--verbose"]
+COPY --link --chown=1000 themes themes
+
+RUN /opt/keycloak/bin/kc.sh build
+
+FROM build as development
+
+USER 0
+RUN microdnf install tar # allows for Skaffold file sync
+USER 1000
+
+ENTRYPOINT ["/opt/keycloak/bin/kc.sh", "start-dev"]
+
+FROM quay.io/keycloak/keycloak:19.0.2 as production
+
+COPY --link --from=build /opt/keycloak/ /opt/keycloak/
+
+ENTRYPOINT ["/opt/keycloak/bin/kc.sh", "start", "--optimized"]

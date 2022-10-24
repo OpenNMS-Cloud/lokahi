@@ -15,39 +15,46 @@ limitations under the License.
 package handlers
 
 import (
-	"github.com/OpenNMS/opennms-operator/internal/model/values"
-	"sigs.k8s.io/controller-runtime/pkg/client"
+    "github.com/OpenNMS/opennms-operator/internal/model/values"
+    "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 var ConfigFilePath = "./charts/opennms/templates/"
 var OperatorFilePath = "./charts/dependencies/config/"
 
 type ServiceHandler interface {
-	//ProvideConfig - provide k8s config for the service
-	ProvideConfig(values values.TemplateValues) []client.Object
+    //GetConfig - get the config
+    GetConfig() []client.Object
 
-	GetDeployed() bool
+    //UpdateConfig - update k8s config for the service handler
+    UpdateConfig(values values.TemplateValues)
 
-	SetDeployed(tf bool)
+    GetDeployed() bool
+
+    SetDeployed(tf bool)
 }
 
 type ServiceHandlerObject struct {
-	Config   []client.Object
-	Deployed bool
+    Config   []client.Object
+    Deployed bool
+}
+
+func (o *ServiceHandlerObject) GetConfig() []client.Object {
+    return o.Config
 }
 
 func (o *ServiceHandlerObject) GetDeployed() bool {
-	return o.Deployed
+    return o.Deployed
 }
 
 func (o *ServiceHandlerObject) SetDeployed(tf bool) {
-	o.Deployed = tf
+    o.Deployed = tf
 }
 
 func filepath(filename string) string {
-	return ConfigFilePath + filename
+    return ConfigFilePath + filename
 }
 
 func opfilepath(filename string) string {
-	return OperatorFilePath + filename
+    return OperatorFilePath + filename
 }

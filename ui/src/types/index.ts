@@ -15,3 +15,8 @@ export interface FeatherSortObject {
   property: string
   value: SORT | any
 }
+
+export interface WidgetProps {
+  [x: string]: any
+  isWidget: boolean
+}

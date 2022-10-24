@@ -1,0 +1,95 @@
+/*******************************************************************************
+ * This file is part of OpenNMS(R).
+ *
+ * Copyright (C) 2022 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
+ *
+ * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *
+ * OpenNMS(R) is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published
+ * by the Free Software Foundation, either version 3 of the License,
+ * or (at your option) any later version.
+ *
+ * OpenNMS(R) is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with OpenNMS(R).  If not, see:
+ *      http://www.gnu.org/licenses/
+ *
+ * For more information contact:
+ *     OpenNMS(R) Licensing <license@opennms.org>
+ *     http://www.opennms.org/
+ *     http://www.opennms.com/
+ *******************************************************************************/
+syntax = "proto3";
+
+import "google/protobuf/any.proto";
+import "icmp.proto";
+import "snmp.proto";
+
+package opennms.taskset;
+option java_multiple_files = true;
+option java_package = "org.opennms.taskset.contract";
+
+enum TaskType {
+      UNDEFINED = 0; // a fallback?
+      DETECTOR = 1;
+      MONITOR = 2;
+      LISTENER = 3;
+      CONNECTOR = 4;
+}
+
+enum MonitorType {
+  UNKNOWN = 0;
+  ICMP = 1;
+  SNMP = 2;
+}
+
+message TaskDefinition {
+  string id = 1;
+
+  string description = 2;
+  TaskType type = 3;
+  string plugin_name = 4;
+  string schedule = 5;
+
+  google.protobuf.Any configuration = 6;
+}
+
+message TaskSet {
+  repeated TaskDefinition taskDefinition = 1;
+}
+
+message TaskResult {
+  string id = 1;
+  string location = 5;
+  string systemId = 6;
+
+  oneof result {
+    MonitorResponse monitor_response = 7;
+    DetectorResponse detector_response = 8;
+  }
+}
+
+message TaskSetResults {
+  repeated TaskResult results = 1;
+}
+
+message MonitorResponse {
+  string status = 2;
+  string reason = 3;
+  string ip_address = 4;
+
+  double response_time_ms = 7;
+  MonitorType monitor_type = 8;
+
+  map<string, double> metrics = 9;
+}
+
+message DetectorResponse {
+  bool detected = 1;
+}

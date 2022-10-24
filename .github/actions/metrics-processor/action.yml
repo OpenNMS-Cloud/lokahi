@@ -1,0 +1,12 @@
+name: 'Build and test Metrics Processor'
+description: 'This implements unit and built-time integration tests on Metrics Processor, dir platform.'
+runs:
+  using: "composite"
+  steps:
+    - name: global data
+      run: |
+
+        mvn clean install -f metrics-processor
+        mvn -f metrics-processor jib:dockerBuild -Djib.container.creationTime=USE_CURRENT_TIMESTAMP -Dimage=opennms/horizon-stream-metrics-processor:local
+
+      shell: bash

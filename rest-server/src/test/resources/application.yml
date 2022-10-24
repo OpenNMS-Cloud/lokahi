@@ -1,11 +1,8 @@
-spring:
-  cache:
-    caffeine:
-      spec: maximumSize=10000,expireAfterAccess=600s
-
 # keycloak admin client properties
 horizon-stream:
   core:
     url: http://localhost:8181
+  notifications:
+    url: http://localhost:15080
 
 tsdb.url: http://localhost:59090/api/v1/query

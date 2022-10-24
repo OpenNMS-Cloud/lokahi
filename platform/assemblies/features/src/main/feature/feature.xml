@@ -1,0 +1,615 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<features name="horizon" xmlns="http://karaf.apache.org/xmlns/features/v1.3.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.3.0 http://karaf.apache.org/xmlns/features/v1.3.0">
+
+    <repository>mvn:org.apache.aries.jax.rs/org.apache.aries.jax.rs.features/${aries.jax.rs.whiteboard.version}/xml</repository>
+    <repository>mvn:org.apache.cxf.karaf/apache-cxf/${cxf.version}/xml/features</repository>
+    <repository>mvn:no.priv.bang.karaf/liquibase-core-karaf/${liquibaseVersion}/xml/features</repository>
+    <repository>mvn:org.apache.camel.karaf/apache-camel/${camel.version}/xml/features</repository>
+    <repository>mvn:org.apache.karaf.features/spring/${karaf.version}/xml/features</repository>
+    <repository>mvn:org.apache.activemq/activemq-karaf/${activemq.version}/xml/features-core</repository>
+    <repository>mvn:org.keycloak/keycloak-osgi-features/${keycloak.version}/xml/features</repository>
+
+    <!--         -->
+    <!-- HORIZON -->
+    <!--         -->
+    <feature name="horizon-alarms" version="${project.version}">
+        <feature>horizon-events</feature>
+        <feature>horizon-db</feature>
+        <feature>horizon-core-rest</feature>
+        <feature>horizon-core-camel</feature>
+        <feature version="${activemq.version}">activemq-client</feature>
+
+        <feature version="${drools.version}">kie-drools</feature>
+
+        <bundle>mvn:org.opennms.horizon.alarms/api/${project.version}</bundle>
+        <bundle>mvn:org.opennms.horizon.alarms/daemon/${project.version}</bundle>
+        <bundle start-level="80">mvn:org.opennms.horizon.alarms/rest/${project.version}</bundle>
+    </feature>
+
+    <feature name="horizon-core" version="${project.version}">
+        <feature>moxy</feature>
+        <feature version="${spring.version}">spring</feature>
+        <feature>guava</feature>
+
+        <bundle>mvn:commons-io/commons-io/${commons.io.version}</bundle>
+        <bundle dependency="true">mvn:org.apache.commons/commons-jexl/${jexl.version}</bundle>
+
+        <bundle>mvn:org.opennms.horizon.core/identity/${project.version}</bundle>
+        <bundle>mvn:org.opennms.horizon.core/lib/${project.version}</bundle>
+        <bundle>mvn:org.opennms.horizon.shared/horizon-common-utils/${project.version}</bundle>
+        <bundle>mvn:org.opennms.horizon.core/xml/${project.version}</bundle>
+        <bundle>mvn:org.opennms.horizon.core/soa/${project.version}</bundle>
+    </feature>
+
+    <feature name="horizon-core-rest" version="${project.version}">
+        <feature>horizon-core</feature>
+        <feature>horizon-keycloak</feature>
+
+        <feature>cxf</feature>
+        <feature>cxf-jaxrs</feature>
+        <feature>cxf-sse</feature>
+        <feature>cxf-rs-description-openapi-v3</feature>
+        <feature>cxf-rs-security-oauth2</feature>
+
+        <bundle>mvn:org.apache.aries.component-dsl/org.apache.aries.component-dsl.component-dsl/1.2.2</bundle>
+        <bundle>mvn:org.apache.aries.jax.rs/org.apache.aries.jax.rs.openapi.resource/${aries.jax.rs.whiteboard.version}</bundle>
+        <feature>aries-jax-rs-whiteboard</feature>
+        <feature>aries-jax-rs-whiteboard-jackson</feature>
+        <bundle>mvn:javax.annotation/javax.annotation-api/1.3.2</bundle>
+
+<!--        Use the built-in JAAS provider - may not be necessary if we use JWTs-->
+<!--        <feature>jaas-deployer</feature>-->
+<!--        <bundle>mvn:org.opennms.horizon.core/jaas/${project.version}</bundle>-->
+
+        <bundle start-level="79">mvn:org.opennms.horizon.core/rest/${project.version}</bundle>
+    </feature>
+
+    <feature name="horizon-db" version="${project.version}" description="Horizon :: DB">
+        <feature>pax-jdbc-postgresql</feature>
+        <feature>pax-jdbc-pool-capability-workaround</feature>
+
+        <feature>horizon-events-api</feature>
+        <feature>liquibase-core</feature>
+        <feature version="${jackson.version}">jackson</feature>
+
+        <bundle>mvn:org.opennms.horizon.db/dao-api/${project.version}</bundle>
+        <bundle>mvn:org.opennms.horizon.db/dao-impl/${project.version}</bundle>
+        <bundle>mvn:org.opennms.horizon.db/repository-api/${project.version}</bundle>
+        <bundle>mvn:org.opennms.horizon.db/repository-impl/${project.version}</bundle>
+        <bundle>mvn:org.opennms.horizon.db/schema/${project.version}</bundle>
+        <bundle>mvn:org.opennms.horizon.db/schema-liquibase/${project.version}</bundle>
+        <bundle>mvn:org.opennms.horizon.db/model/${project.version}</bundle>
+        <bundle>mvn:org.opennms.horizon.shared/dto-model/${horizon.shared.lib.version}</bundle>
+        <bundle>mvn:org.opennms.horizon.db/kvstore-api/${project.version}</bundle>
+        <bundle>mvn:org.opennms.horizon.db/postgres-kvstore/${project.version}</bundle>
+
+        <bundle dependency="true">mvn:commons-lang/commons-lang/${commons.lang.version}</bundle>
+
+        <feature version="${hibernate.version}">hibernate</feature>
+        <feature>jdbc</feature>
+        <feature>jndi</feature>
+        <feature>jpa</feature>
+        <feature>transaction</feature>
+    </feature>
+
+    <feature name="horizon-events-api" version="${project.version}" description="Horizon :: Events :: API">
+        <feature>horizon-ipc-api</feature>
+
+        <bundle dependency="true">mvn:javax.validation/validation-api/${javax.validation.version}</bundle>
+        <bundle>wrap:mvn:org.json/json/${json.version}$Export-Package=org.json</bundle>
+        <bundle>mvn:org.opennms.horizon.shared/snmp-api/${project.version}</bundle>
+
+        <bundle>mvn:org.opennms.horizon.events/api/${project.version}</bundle>
+    </feature>
+
+    <feature name="horizon-events" version="${project.version}" description="Horizon :: Events">
+        <feature>horizon-events-api</feature>
+        <feature>horizon-db</feature>
+        <feature>horizon-core-rest</feature>
+        <feature>horizon-core-camel</feature>
+
+        <bundle>mvn:org.opennms.horizon.events/dao/${project.version}</bundle>
+        <bundle>mvn:org.opennms.horizon.events/daemon/${project.version}</bundle>
+        <bundle start-level="80">mvn:org.opennms.horizon.events/rest/${project.version}</bundle>
+        <bundle>mvn:org.opennms.horizon.events/shell/${project.version}</bundle>
+    </feature>
+
+    <feature name="horizon-grpc" version="${project.version}" description="Horizon :: gRPC">
+        <feature>horizon-ipc-api</feature>
+        <feature>horizon-db</feature>
+        <feature>horizon-metrics-api</feature>
+        <feature>grpc</feature>
+
+        <bundle>mvn:org.opennms.horizon.ipc.grpc/client/${project.version}</bundle>
+        <bundle>mvn:org.opennms.horizon.ipc.grpc/common/${project.version}</bundle>
+        <bundle>mvn:org.opennms.horizon.ipc.grpc/server/${project.version}</bundle>
+        <bundle>mvn:org.opennms.horizon.ipc/echo/${project.version}</bundle>
+    </feature>
+
+    <feature name="horizon-echo-client" version="${project.version}" description="Horizon :: Echo Client">
+        <feature>horizon-ignite</feature>
+        <bundle>mvn:org.opennms.horizon.ipc/echo-ipc-client/${project.version}</bundle>
+    </feature>
+
+    <feature name="horizon-icmp-client" version="${project.version}" description="Horizon :: ICMP Client">
+        <feature>horizon-ignite</feature>
+        <bundle>mvn:org.opennms.horizon.ipc/icmp-ipc-client/${project.version}</bundle>
+    </feature>
+
+    <feature name="horizon-snmp-client" version="${project.version}" description="Horizon :: SNMP Client">
+        <feature>horizon-ignite</feature>
+        <bundle>mvn:org.opennms.horizon.ipc/snmp-ipc-client/${project.version}</bundle>
+    </feature>
+
+
+    <feature name="horizon-grpc-contract" version="${project.version}">
+        <feature>grpc</feature>
+        <bundle>mvn:org.opennms.horizon.shared/ipc-grpc-contract/${project.version}</bundle>
+    </feature>
+
+    <feature name="horizon-datachoices" version="${project.version}" description="Horizon :: Data Choices">
+        <feature>horizon-db</feature>
+        <feature>onms-httpclient</feature>
+        <bundle>mvn:org.opennms.horizon.common/common-web/${project.version}</bundle>
+        <bundle start-level="80">mvn:org.opennms.horizon/datachoices/${project.version}</bundle>
+    </feature>
+
+    <feature name="horizon-core-monitor" version="${project.version}">
+        <feature>horizon-metrics-prometheus</feature>
+        <feature>horizon-events</feature>
+        <feature>horizon-ignite</feature>
+        <feature>horizon-db</feature>
+        <feature>horizon-shared-lang</feature>
+        <feature>horizon-shared-task-set-service</feature>
+        <feature>horizon-shared-task-set-publisher</feature>
+        <feature>horizon-core-camel</feature>
+        <feature>horizon-echo-client</feature>
+
+        <bundle>mvn:org.opennms.horizon.core/monitor/${project.version}</bundle>
+
+        <bundle dependency="true">mvn:org.opennms.horizon.shared/horizon-common-logging/${project.version}</bundle>
+    </feature>
+
+    <feature name="horizon-core-heartbeat" version="${project.version}">
+        <feature>horizon-metrics-prometheus</feature>
+        <feature>horizon-events</feature>
+        <feature>horizon-db</feature>
+        <feature>horizon-core-camel</feature>
+        <feature>horizon-grpc-contract</feature>
+
+        <bundle>mvn:org.opennms.horizon.core/heartbeat/${project.version}</bundle>
+
+        <bundle dependency="true">mvn:org.opennms.horizon.shared/horizon-common-logging/${project.version}</bundle>
+    </feature>
+
+    <feature name="horizon-core-camel" version="${project.version}">
+        <feature>camel</feature>
+        <feature>camel-activemq</feature>
+        <feature>camel-gson</feature>
+        <feature>camel-jaxb</feature>
+        <feature>camel-kafka</feature>
+        <feature>camel-protobuf</feature>
+        <feature>camel-quartz</feature>
+    </feature>
+
+    <feature name="horizon-ipc-api" version="${project.version}">
+        <feature>guava</feature>
+        <feature>rate-limited-logger</feature>
+        <feature>horizon-core</feature>
+        <feature>horizon-tracing</feature>
+        <feature>dropwizard-metrics-core-3.x</feature>
+
+        <bundle>mvn:org.opennms.horizon.ipc/api/${project.version}</bundle>
+        <bundle>mvn:org.opennms.horizon.ipc/shell/${project.version}</bundle>
+    </feature>
+
+    <!--    // ignored for now until we get core/minion refactoring figured out-->
+    <feature name="horizon-tracing" version="${project.version}" description="Horizon :: Tracing">
+        <feature>horizon-core</feature>
+
+        <bundle dependency="true">wrap:mvn:io.opentracing/opentracing-api/${opentracing.version}</bundle>
+        <bundle dependency="true">wrap:mvn:io.opentracing/opentracing-noop/${opentracing.version}</bundle>
+        <bundle dependency="true">wrap:mvn:io.opentracing/opentracing-util/${opentracing.version}</bundle>
+
+        <bundle>mvn:org.opennms.horizon.3rdparty/jaeger/${project.version}</bundle>
+
+        <bundle>mvn:org.opennms.horizon.core.tracing/api/${project.version}</bundle>
+        <bundle>mvn:org.opennms.horizon.core.tracing/jaeger/${project.version}</bundle>
+        <bundle>mvn:org.opennms.horizon.core.tracing/registry/${project.version}</bundle>
+    </feature>
+
+    <!-- Warning: this is going away; SNMP internals are moving out core and into minion -->
+    <feature name="horizon-snmp" version="${project.version}" description="Horizon :: SNMP">
+    <!--    <feature>horizon-grpc</feature>-->
+    <!--    <feature>horizon-events</feature>-->
+
+    <!--    <bundle dependency="true">mvn:commons-io/commons-io/${commons.io.version}</bundle>-->
+    <!--    <bundle dependency="true">mvn:commons-lang/commons-lang/${commons.lang.version}</bundle>-->
+    <!--    <bundle dependency="true">wrap:mvn:org.snmp4j/snmp4j/${snmp4j.version}</bundle>-->
+    <!--    -->
+    <!--    <bundle>mvn:org.opennms.horizon.minion/rpc-impl/${project.version}</bundle>-->
+        <bundle>mvn:org.opennms.horizon.shared/snmp-api/${project.version}</bundle>
+        <bundle>mvn:org.opennms.horizon.shared/snmp-impl/${project.version}</bundle>
+    <!--    <bundle>mvn:org.opennms.horizon.minion/shell/${project.version}</bundle>-->
+    </feature>
+
+    <feature name="horizon-keycloak" version="${project.version}" description="Horizon :: Keycloak">
+        <!-- Explicitly list the framework bundle to get pax-logging-api to resolve      -->
+        <!--  Without this, expect to get java.lang.ClassNotFoundException from keycloak -->
+        <!--  missing org.jboss.logging.Logger.                                          -->
+        <feature>framework</feature>
+
+        <!--<feature>keycloak-servlet-filter-adapter</feature>-->
+        <feature>keycloak-jaas</feature>
+        <feature>jaas-deployer</feature>
+
+        <!--<bundle>mvn:org.keycloak/keycloak-jaxrs-oauth-client/${keycloak.version}</bundle>-->
+        <bundle>mvn:org.keycloak/keycloak-pax-web-jetty94/${keycloak.version}</bundle>
+        <bundle>mvn:org.keycloak/keycloak-jetty94-adapter/${keycloak.version}</bundle>
+        <bundle>mvn:org.keycloak/keycloak-jetty-core/${keycloak.version}</bundle>
+        <bundle>mvn:org.keycloak/keycloak-jetty-adapter-spi/${keycloak.version}</bundle>
+        <bundle>mvn:org.keycloak/keycloak-servlet-filter-adapter/${keycloak.version}</bundle>
+
+        <bundle>mvn:org.opennms.horizon.3rdparty/keycloak-admin-client/${project.version}</bundle>
+    </feature>
+
+
+    <!--           -->
+    <!-- PROVSIOND -->
+    <!--           -->
+    <feature name="horizon-provision" version="${project.version}" description="Horizon : Provision">
+        <feature>onms-httpclient</feature>
+        <feature>onms-netty3</feature>
+        <feature>horizon-core-camel</feature>
+        <feature>horizon-db</feature>
+        <feature>horizon-tracing</feature>
+        <feature>horizon-grpc</feature>
+        <feature>horizon-configvar-scopes</feature>
+        <feature>3rdparty-bsf</feature>
+        <feature>provision-ignite</feature>
+
+        <feature>opennms-activemq-client-fix</feature>
+
+        <bundle>mvn:commons-io/commons-io/${commons.io.version}</bundle>
+        <bundle>mvn:commons-lang/commons-lang/${commons.lang.version}</bundle>
+
+        <bundle>mvn:org.apache.mina/mina-core/${mina.version}</bundle>
+
+        <bundle>mvn:org.opennms.horizon.common/common-concurrency/${project.version}</bundle>
+        <bundle>mvn:org.opennms.horizon.common/common-net/${project.version}</bundle>
+        <bundle>mvn:org.opennms.horizon.common/common-web/${project.version}</bundle>
+
+        <bundle>mvn:org.opennms.horizon.provision/api/${project.version}</bundle>
+        <bundle>mvn:org.opennms.horizon.provision/core/${project.version}</bundle>
+        <bundle>mvn:org.opennms.horizon.provision/detector-activemq/${project.version}</bundle>
+        <bundle>mvn:org.opennms.horizon.provision/detector-bsf/${project.version}</bundle>
+        <bundle>mvn:org.opennms.horizon.provision/detector-datagram/${project.version}</bundle>
+        <bundle>mvn:org.opennms.horizon.provision/detector-jdbc/${project.version}</bundle>
+        <bundle>mvn:org.opennms.horizon.provision/detector-loop/${project.version}</bundle>
+        <bundle>mvn:org.opennms.horizon.provision/detector-snmp/${project.version}</bundle>
+        <bundle>mvn:org.opennms.horizon.provision/detector-ssh/${project.version}</bundle>
+        <bundle>mvn:org.opennms.horizon.provision/detector-web/${project.version}</bundle>
+        <bundle>mvn:org.opennms.horizon.provision/persistence/${project.version}</bundle>
+        <bundle>mvn:org.opennms.horizon.provision/service/${project.version}</bundle>
+        <bundle>mvn:org.opennms.horizon.provision/rest/${project.version}</bundle>
+
+        <bundle>mvn:com.helger/dhcp4java/${dhcp4java.version}</bundle>
+        <bundle>mvn:org.opennms.horizon/dhcpd/${project.version}</bundle>
+        <bundle>mvn:org.opennms.horizon.provision/detector-dhcp/${project.version}</bundle>
+        <bundle>mvn:org.opennms.horizon.shared/snmp-api/${project.version}</bundle>
+
+        <!-- TODO: which JCIFS dependency should be used?  The classic pom uses a shaded jar, but the feature has the un-shaded jar + bouncycastle? -->
+        <!-- https://issues.opennms.org/browse/NMS-13111 -->
+        <!--<bundle>mvn:org.opennms.horizon.provision/detector-smb/${project.version}</bundle>-->
+    </feature>
+
+    <feature name="provision-ignite" version="${project.version}">
+        <feature>horizon-tracing</feature>
+        <feature>horizon-ignite</feature>
+
+        <bundle>mvn:org.opennms.horizon.provision/ignite-service/${project.version}</bundle>
+    </feature>
+
+    <!--                -->
+    <!-- HORIZON SHARED -->
+    <!--                -->
+    <feature name="horizon-shared-lang" version="${project.version}">
+        <bundle>mvn:org.opennms.horizon.shared/horizon-common-lang/${project.version}</bundle>
+    </feature>
+
+    <feature name="horizon-shared-task-set-publisher" version="${project.version}">
+        <feature version="${project.version}">horizon-shared-task-set-publisher-common</feature>
+
+        <bundle>mvn:org.opennms.horizon.shared/task-set-ignite-client/${project.version}</bundle>
+    </feature>
+
+    <feature name="horizon-shared-task-set-service" version="${project.version}">
+        <feature version="${project.version}">horizon-shared-task-set-publisher-common</feature>
+
+    </feature>
+
+    <feature name="horizon-shared-task-set-publisher-common" version="${project.version}">
+        <feature>protobuf</feature>
+        <feature version="${project.version}">3rdparty-ignite</feature>
+
+        <bundle>mvn:org.opennms.horizon.shared/protobuf/${project.version}</bundle>
+        <bundle>mvn:org.opennms.horizon.shared/task-set-service-api/${project.version}</bundle>
+    </feature>
+
+
+    <!--                               -->
+    <!-- CONFIGURATION VARIABLE SCOPES -->
+    <!--                               -->
+    <feature name="horizon-configvar-scopes" version="${project.version}" description="Horizon : Configuration Variable Scopes">
+        <feature>horizon-db</feature>
+
+        <bundle>mvn:org.opennms.horizon.common/common-config-vars/${project.version}</bundle>
+        <bundle>mvn:org.opennms.horizon.core/config-vars/${project.version}</bundle>
+
+        <bundle>wrap:mvn:ch.hsr/geohash/${geohash.version}</bundle>
+    </feature>
+
+    <feature name="horizon-minion-rest" version="${project.version}" description="Horizon: Minion :: Rest">
+        <feature>horizon-db</feature>
+        <feature>horizon-core-rest</feature>
+        <bundle>mvn:org.opennms.horizon.shared/dto-model/${horizon.shared.lib.version}</bundle>
+        <bundle start-level="80">mvn:org.opennms.horizon.minion/org.opennms.horizon.minion.rest/${project.version}</bundle>
+    </feature>
+
+    <!--<feature name="horizon-minion-heartbeat" version="${project.version}" description="Horizon: Minion :: Heartbeat">-->
+    <!--    <feature>horizon-db</feature>-->
+    <!--    <feature>horizon-metrics-prometheus</feature>-->
+    <!--    <feature>horizon-ipc-api</feature>-->
+    <!--    <bundle>mvn:org.opennms.horizon.minion/heartbeat/${project.version}</bundle>-->
+    <!--</feature>-->
+
+    <!--&lt;!&ndash;        &ndash;&gt;-->
+    <!--&lt;!&ndash; MINION &ndash;&gt;-->
+    <!--&lt;!&ndash;        &ndash;&gt;-->
+    <!--<feature name="minion-grpc" version="${project.version}" description="Minion :: gRPC">-->
+    <!--    <feature>horizon-ipc-api</feature>-->
+
+    <!--    <bundle>mvn:org.opennms.horizon.3rdparty/grpc/${project.version}</bundle>-->
+    <!--    <bundle>mvn:com.google.protobuf/protobuf-java/${protobuf.version}</bundle>-->
+
+    <!--    <bundle>mvn:org.opennms.horizon.ipc.grpc/client/${project.version}</bundle>-->
+    <!--    <bundle>mvn:org.opennms.horizon.ipc.grpc/common/${project.version}</bundle>-->
+    <!--    <bundle>mvn:org.opennms.horizon.ipc.grpc/heartbeat/${project.version}</bundle>-->
+    <!--</feature>-->
+
+    <!--<feature name="minion-icmp" version="${project.version}" description="Minion :: ICMP">-->
+    <!--    <feature>java-native-access</feature>-->
+    <!--    <feature>guava</feature>-->
+    <!--    <feature>minion-grpc</feature>-->
+
+    <!--    <bundle>mvn:org.opennms.horizon.core/lib/${project.version}</bundle>-->
+    <!--    <bundle>mvn:org.opennms.lib/org.opennms.lib.tracker/${opennms.tracker.version}</bundle>-->
+    <!--    <bundle>mvn:org.opennms/jicmp-api/${jicmp.version}</bundle>-->
+    <!--    <bundle>mvn:org.opennms/jicmp6-api/${jicmp.version}</bundle>-->
+
+    <!--    <bundle>mvn:org.opennms.horizon.shared/icmp-api/${project.version}</bundle>-->
+    <!--    <bundle>mvn:org.opennms.horizon.icmp/best/${project.version}</bundle>-->
+    <!--    <bundle>mvn:org.opennms.horizon.icmp/jna/${project.version}</bundle>-->
+    <!--    <bundle>mvn:org.opennms.horizon.icmp/jni/${project.version}</bundle>-->
+    <!--    <bundle>mvn:org.opennms.horizon.icmp/jni6/${project.version}</bundle>-->
+    <!--    <bundle>mvn:org.opennms.horizon.icmp/shell/${project.version}</bundle>-->
+
+    <!--    <bundle>mvn:org.opennms.horizon.icmp/rpc-common/${project.version}</bundle>-->
+    <!--    <bundle>mvn:org.opennms.horizon.icmp/rpc-module-impl/${project.version}</bundle>-->
+    <!--</feature>-->
+
+
+    <!--        -->
+    <!-- COMMON -->
+    <!--        -->
+    <!-- TODO: this is a workaround - remove when the activemq-client feature loads the correct package -->
+    <feature name="opennms-activemq-client-fix" description="ActiveMQ Client (fix)">
+        <feature version="${activemq.version}">activemq-client</feature>
+
+        <!-- The AMQ karaf feature loads the jms2.0 spec bundle, which leads to failed resolution for the -->
+        <!--  application because the AMQ artifacts all depend on the jms1.1 spec bundle.  (i.e. runtime  -->
+        <!--  version does not match the compile-time one.)                                               -->
+        <bundle>mvn:org.apache.geronimo.specs/geronimo-jms_1.1_spec/1.1.1</bundle>
+    </feature>
+
+
+    <feature name="guava" version="${guava.version}" description="Google :: Guava">
+        <bundle dependency="true">mvn:com.google.guava/guava/${guava.version}</bundle>
+        <bundle dependency="true">mvn:com.google.guava/failureaccess/1.0.1</bundle>
+    </feature>
+
+    <feature name="jackson" version="${jackson.version}">
+        <bundle dependency="true">mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.jaxrs-api-2.1/2.9.1</bundle>
+        <bundle>mvn:com.fasterxml.jackson.core/jackson-core/${jackson.version}</bundle>
+        <bundle>mvn:com.fasterxml.jackson.core/jackson-annotations/${jackson.version}</bundle>
+        <bundle>mvn:com.fasterxml.jackson.core/jackson-databind/${jackson.version}</bundle>
+        <bundle>mvn:com.fasterxml.jackson.jaxrs/jackson-jaxrs-base/${jackson.version}</bundle>
+        <bundle>mvn:com.fasterxml.jackson.jaxrs/jackson-jaxrs-json-provider/${jackson.version}</bundle>
+        <bundle>mvn:com.fasterxml.jackson.module/jackson-module-jaxb-annotations/${jackson.version}</bundle>
+    </feature>
+
+    <feature name="java-native-access" version="${jna.version}" description="Java Native Access (JNA)">
+        <bundle>mvn:net.java.dev.jna/jna/${jna.version}</bundle>
+        <bundle>mvn:net.java.dev.jna/jna-platform/${jna.version}</bundle>
+    </feature>
+
+    <feature name="kie-drools" version="${drools.version}" description="KIE Drools">
+        <!-- org.kie.api.KieServices -->
+        <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.xstream/1.4.8_1</bundle>
+        <bundle>mvn:org.kie.soup/kie-soup-commons/7.31.0.Final</bundle>
+        <bundle>mvn:org.kie.soup/kie-soup-project-datamodel-api/7.31.0.Final</bundle>
+        <bundle>mvn:org.mvel/mvel2/2.2.4.Final</bundle>
+        <bundle>mvn:org.kie.soup/kie-soup-project-datamodel-commons/7.31.0.Final</bundle>
+        <bundle>mvn:org.kie.soup/kie-soup-maven-support/7.31.0.Final</bundle>
+        <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.antlr</bundle>
+        <bundle>mvn:com.google.protobuf/protobuf-java/${protobuf.version}</bundle>
+        <bundle>mvn:commons-codec/commons-codec/1.10</bundle>
+
+        <!-- these next 5 have interdependent dependencies and cannot start as loaded -->
+        <bundle>mvn:org.drools/drools-core/7.31.0.Final</bundle>
+        <bundle>mvn:org.drools/drools-compiler/7.31.0.Final</bundle>
+        <bundle>mvn:org.kie/kie-api/7.31.0.Final</bundle>
+        <bundle>mvn:org.kie/kie-internal/7.31.0.Final</bundle>
+        <bundle>mvn:org.drools/drools-core-reflective/7.31.0.Final</bundle>
+
+        <bundle>mvn:org.drools/drools-core-dynamic/7.31.0.Final</bundle>
+        <bundle>mvn:com.thoughtworks.xstream/xstream/1.4.18</bundle> <!-- this later version provides lambda loader dependency -->
+        <!--  <bundle>mvn:org.kie/kie-osgi-integration/7.31.0.Final</bundle> -->
+        <bundle>mvn:org.mvel/mvel2/2.4.4.Final</bundle>
+        <bundle>wrap:mvn:org.eclipse.jdt.core.compiler/ecj/4.4.2$Bundle-SymbolicName=Eclipse-JDT-Compiler&amp;Bundle-Version=4.4.2</bundle>
+        <bundle>wrap:mvn:org.codehaus.janino/janino/2.5.16$Bundle-SymbolicName=Codehaus-Janino&amp;Bundle-Version=2.5.16</bundle>
+        <bundle>mvn:org.apache.geronimo.specs/geronimo-atinject_1.0_spec/1.0</bundle>
+    </feature>
+
+    <feature name="moxy" version="${eclipselink.version}" description="EclipseLink :: MOXy">
+        <bundle>mvn:com.sun.mail/jakarta.mail/${jakarta.mail.version}</bundle>
+        <bundle>mvn:org.eclipse.persistence/org.eclipse.persistence.moxy/${eclipselink.version}</bundle>
+        <bundle>mvn:org.eclipse.persistence/org.eclipse.persistence.core/${eclipselink.version}</bundle>
+        <bundle>mvn:org.eclipse.persistence/org.eclipse.persistence.asm/${eclipselink.version}</bundle>
+        <bundle>mvn:org.eclipse.persistence/org.eclipse.persistence.antlr/${eclipselink.version}</bundle>
+    </feature>
+
+    <feature name="rate-limited-logger" version="${rate.limitted.logger.version}" description="Rate Limited Logger">
+        <bundle>mvn:joda-time/joda-time/2.1</bundle>
+        <bundle>wrap:mvn:com.swrve/rate-limited-logger/${rate.limitted.logger.version}</bundle>
+    </feature>
+
+    <!-- -->
+    <feature name="onms-httpclient" version="${project.version}" description="HTTP Client Feature">
+        <bundle>mvn:org.apache.httpcomponents/httpcore-osgi/${httpcore.version}</bundle>
+        <bundle>mvn:org.apache.httpcomponents/httpclient-osgi/${httpclient.version}</bundle>
+    </feature>
+    <feature name="onms-netty3" version="${project.version}" description="Netty3 Feature">
+        <bundle>mvn:io.netty/netty/3.10.6.Final</bundle>
+    </feature>
+
+
+    <!--             -->
+    <!-- THIRD-PARTY -->
+    <!--             -->
+    <feature name="3rdparty-bsf" version="${bsf.version}" description="Apache :: Bean Scripting Framework">
+        <bundle>wrap:mvn:bsf/bsf/${bsf.version}</bundle>
+    </feature>
+    <feature name="jcifs" version="${jcifsVersion}" description="jcifs">
+        <feature>bcprov</feature>
+        <bundle>mvn:eu.agno3.jcifs/jcifs-ng/${jcifsVersion}</bundle>
+    </feature>
+
+
+    <!--        -->
+    <!-- IGNITE -->
+    <!--        -->
+    <feature name="horizon-ignite" version="${project.version}">
+        <feature version="${project.version}">horizon-grpc-contract</feature>
+        <feature version="${project.version}">3rdparty-ignite</feature>
+        <feature version="${project.version}">horizon-shared-lang</feature>
+        <feature version="4.2.10">dropwizard-metrics-core-4.x</feature>
+        <feature>rate-limited-logger</feature>
+        <feature>horizon-tracing</feature>
+        <bundle dependency="true">mvn:org.opennms.horizon.shared/horizon-common-logging/${project.version}</bundle>
+
+        <bundle>mvn:org.opennms.horizon.shared/ipc-api/${project.version}</bundle>
+        <bundle>mvn:org.opennms.horizon/ignite/${project.version}</bundle>
+    </feature>
+
+    <feature name="3rdparty-ignite" version="${project.version}">
+        <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.javax-cache-api/1.0.0_1</bundle>
+        <bundle>mvn:org.opennms.horizon.3rdparty/ignite/${project.version}</bundle>
+    </feature>
+
+
+    <!--             -->
+    <!-- WORKAROUNDS -->
+    <!--             -->
+
+    <!-- WORKAROUND: the PooledDataSourceFactory service exported by pax-jdbc-pool-hikaricp for some reason -->
+    <!--             fails the feature install unless we explicitly declare the capability.                 -->
+    <feature name="pax-jdbc-pool-capability-workaround">
+        <feature>pax-jdbc-pool-hikaricp</feature>
+
+        <capability>
+            osgi.service;effective:=active;objectClass=org.ops4j.pax.jdbc.pool.common.PooledDataSourceFactory
+        </capability>
+    </feature>
+    
+    <!-- inventory -->
+    <feature name="horizon-inventory" version="${project.version}">
+        <feature>horizon-db</feature>
+        <feature>horizon-core-rest</feature>
+        <feature>horizon-events-api</feature>
+        <bundle>mvn:org.opennms.horizon.inventory/device/${project.version}</bundle>
+    </feature>
+
+    <feature name="prometheus-client" version="${prometheus.version}">
+        <bundle>mvn:io.prometheus/simpleclient/${prometheus.version}</bundle>
+        <bundle>mvn:io.prometheus/simpleclient_tracer_otel/${prometheus.version}</bundle>
+        <bundle>mvn:io.prometheus/simpleclient_tracer_common/${prometheus.version}</bundle>
+        <bundle>mvn:io.prometheus/simpleclient_tracer_otel_agent/${prometheus.version}</bundle>
+    </feature>
+
+    <feature name="prometheus-push-gateway" version="${prometheus.version}">
+        <feature>prometheus-client</feature>
+        <bundle>mvn:io.prometheus/simpleclient_common/${prometheus.version}</bundle>
+        <bundle>mvn:io.prometheus/simpleclient_pushgateway/${prometheus.version}</bundle>
+    </feature>
+
+    <feature name="horizon-metrics-api" version="${project.version}">
+        <feature>prometheus-client</feature>
+        <bundle>mvn:org.opennms.horizon.metrics/api/${project.version}</bundle>
+    </feature>
+
+    <feature name="horizon-metrics-prometheus" version="${project.version}">
+        <feature>horizon-metrics-api</feature>
+        <feature>prometheus-push-gateway</feature>
+        <bundle>mvn:org.opennms.horizon.metrics/impl/${project.version}</bundle>
+    </feature>
+
+    <feature name="dropwizard-metrics-core-3.x" version="${dropwizard.metrics.version}">
+        <bundle>mvn:io.dropwizard.metrics/metrics-core/${dropwizard.metrics.version}</bundle>
+    </feature>
+
+    <feature name="dropwizard-metrics-core-4.x" version="4.2.10">
+        <bundle>mvn:io.dropwizard.metrics/metrics-core/4.2.10</bundle>
+    </feature>
+
+    <feature name="grpc">
+        <feature>guava</feature>
+        <feature>protobuf</feature>
+        <bundle>mvn:org.opennms.horizon.3rdparty/grpc/${project.version}</bundle>
+    </feature>
+
+    <feature name="protobuf">
+        <bundle>mvn:com.google.protobuf/protobuf-java/${protobuf.version}</bundle>
+    </feature>
+
+
+    <feature name="horizon-core-config-rest" version="${project.version}">
+        <feature>horizon-core-config-service</feature>
+        <feature>horizon-core-rest</feature>
+        <bundle>mvn:org.opennms.horizon.config/rest/${project.version}</bundle>
+    </feature>
+
+    <feature name="horizon-core-config-service" version="${project.version}">
+        <feature>horizon-db</feature>
+        <feature>horizon-events</feature>
+        <bundle>wrap:mvn:org.json/json/${json.version}$Export-Package=org.json</bundle>
+        <bundle>mvn:org.opennms.horizon.config/api/${project.version}</bundle>
+        <bundle>mvn:org.opennms.horizon.config/service/${project.version}</bundle>
+    </feature>
+
+
+    <feature name="horizon-core-traps" version="${project.version}">
+        <feature>horizon-db</feature>
+        <feature>horizon-ipc-api</feature>
+        <feature>horizon-snmp</feature>
+        <feature>horizon-core-config-service</feature>
+        <bundle>mvn:org.opennms.horizon/traps/${project.version}</bundle>
+    </feature>
+    <feature name="horizon-stream-jmx" version="${project.version}">
+        <feature>horizon-core-config-service</feature>
+        <bundle>mvn:org.opennms.horizon.common/common-net/${project.version}</bundle>
+        <bundle>mvn:org.opennms.horizon.common/common-collection/${project.version}</bundle>
+        <bundle>mvn:org.opennms.horizon.jmx/api/${project.version}</bundle>
+        <bundle>mvn:org.opennms.horizon.jmx/impl/${project.version}</bundle>
+    </feature>
+</features>

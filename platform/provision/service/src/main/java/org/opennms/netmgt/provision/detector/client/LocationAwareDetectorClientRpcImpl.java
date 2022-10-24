@@ -32,7 +32,7 @@ import lombok.Data;
 import org.opennms.horizon.core.configvars.EntityScopeProvider;
 import org.opennms.horizon.ipc.rpc.api.RpcClient;
 import org.opennms.horizon.ipc.rpc.api.RpcClientFactory;
-import org.opennms.netmgt.provision.DetectorRequestBuilder;
+import org.opennms.netmgt.provision.DetectorRequestExecutorBuilder;
 import org.opennms.netmgt.provision.LocationAwareDetectorClient;
 import org.opennms.netmgt.provision.ServiceDetectorRegistry;
 import org.springframework.beans.factory.InitializingBean;
@@ -56,7 +56,7 @@ public class LocationAwareDetectorClientRpcImpl implements LocationAwareDetector
     }
 
     @Override
-    public DetectorRequestBuilder detect() {
+    public DetectorRequestExecutorBuilder detect() {
         return new DetectorRequestBuilderImpl(this);
     }
 

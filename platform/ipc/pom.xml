@@ -21,6 +21,9 @@
     <module>shell</module>
     <module>echo</module>
     <module>twin</module>
+    <module>echo-ipc-client</module>
+    <module>icmp-ipc-client</module>
+    <module>snmp-ipc-client</module>
   </modules>
 
 </project>

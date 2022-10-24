@@ -4,7 +4,7 @@ metadata:
   name: {{ .Values.OpenNMS.Notification.ServiceName }}
   labels:
     app: {{ .Values.OpenNMS.Notification.ServiceName }}
-  namespace: {{ .Values.Namespace }}
+  namespace: {{ .Release.Namespace }}
 spec:
   type: ClusterIP
   ports:

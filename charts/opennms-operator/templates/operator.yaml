@@ -1,32 +1,32 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Values.Operator.serviceName }}
+  name: {{ .Values.serviceName }}
 spec:
   selector:
     matchLabels:
-      name: {{ .Values.Operator.serviceName }}
+      name: {{ .Values.serviceName }}
   replicas: 1
   template:
     metadata:
       labels:
-        name: {{ .Values.Operator.serviceName }}
+        name: {{ .Values.serviceName }}
     spec:
-      serviceAccountName: {{ .Values.Operator.serviceName }}
+      serviceAccountName: {{ .Values.serviceName }}
       containers:
-        - image:  {{ .Values.Operator.image }}
-          name: {{ .Values.Operator.serviceName }}
-          imagePullPolicy: {{ .Values.Operator.imagePullPolicy }}
+        - image:  {{ .Values.image }}
+          name: {{ .Values.serviceName }}
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
           env:
             - name: DEV_MODE
-              value: "{{ .Values.Operator.devMode }}"
+              value: "{{ .Values.devMode }}"
             - name: IMAGE_UPDATE_FREQUENCY
-              value: "{{ .Values.Operator.imageUpdateFreq }}"
+              value: "{{ .Values.imageUpdateFreq }}"
           resources:
             limits:
-              cpu: {{ .Values.Operator.resources.limits.cpu }}
-              memory: {{ .Values.Operator.resources.limits.memory }}
+              cpu: {{ .Values.resources.limits.cpu }}
+              memory: {{ .Values.resources.limits.memory }}
             requests:
-              cpu: {{ .Values.Operator.resources.requests.cpu }}
-              memory: {{ .Values.Operator.resources.requests.memory }}
+              cpu: {{ .Values.resources.requests.cpu }}
+              memory: {{ .Values.resources.requests.memory }}
       terminationGracePeriodSeconds: 10

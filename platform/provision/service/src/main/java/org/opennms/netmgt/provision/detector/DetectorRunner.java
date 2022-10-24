@@ -34,8 +34,9 @@ import io.opentracing.Span;
 import java.net.InetAddress;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
-import org.opennms.horizon.core.lib.InetAddressUtils;
+import org.opennms.horizon.shared.utils.InetAddressUtils;
 import org.opennms.horizon.db.model.OnmsMonitoringLocation;
+import org.opennms.netmgt.provision.DetectorRequestExecutor;
 import org.opennms.netmgt.provision.LocationAwareDetectorClient;
 import org.opennms.netmgt.provision.persistence.dto.PluginConfigDTO;
 import org.opennms.netmgt.provision.persistence.dto.PluginParameterDTO;
@@ -75,31 +76,36 @@ public class DetectorRunner implements Async<Boolean> {
 //            if(!LocationUtils.isDefaultLocationName(getLocationName())) {
 //                startSpan();
 //            }
-            CompletableFuture<Boolean> completableFuture =
+
+            DetectorRequestExecutor detectorRequestExecutor =
                 locationAwareDetectorClient.detect().withClassName(detectorConfig.getPluginClass())
                         .withAddress(address).withNodeId(nodeId).withLocation(getLocationName())
                         .withAttributes(detectorConfig.getParameters().stream()
                                 .collect(Collectors.toMap(PluginParameterDTO::getKey, PluginParameterDTO::getValue)))
                         .withParentSpan(span)
     //                    .withPreDetectCallback(this::startSpan)
-                        .execute()
-                        // After completion, run the callback
-                        .whenComplete((res, ex) -> {
-                            LOG.info("Completed detector execution for service {} on address {} at location {}",
-                                    detectorConfig.getName(), getHostAddress(), getLocationName());
-                            if (ex != null) {
-                                cb.handleException(ex);
-                                if(span != null) {
-                                    span.log(ex.getMessage());
-                                    span.setTag(ERROR, true);
+                        .build()
+                    ;
+
+            CompletableFuture<Boolean> completableFuture =
+                detectorRequestExecutor.execute()
+                            // After completion, run the callback
+                            .whenComplete((res, ex) -> {
+                                LOG.info("Completed detector execution for service {} on address {} at location {}",
+                                        detectorConfig.getName(), getHostAddress(), getLocationName());
+                                if (ex != null) {
+                                    cb.handleException(ex);
+                                    if(span != null) {
+                                        span.log(ex.getMessage());
+                                        span.setTag(ERROR, true);
+                                    }
+                                } else {
+                                    cb.accept(res);
                                 }
-                            } else {
-                                cb.accept(res);
-                            }
-                            if(span != null) {
-                                span.finish();
-                            }
-                        });
+                                if(span != null) {
+                                    span.finish();
+                                }
+                            });
         } catch (Throwable e) {
             LOG.warn("Detection failure", e);
             cb.handleException(e);

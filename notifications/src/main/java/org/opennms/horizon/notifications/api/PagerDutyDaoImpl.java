@@ -28,16 +28,16 @@
 
 package org.opennms.horizon.notifications.api;
 
-import java.util.List;
-
-import org.opennms.horizon.notifications.api.dto.PagerDutyConfigDTO;
 import org.opennms.horizon.notifications.exceptions.NotificationConfigUninitializedException;
+import org.opennms.horizon.shared.dto.notifications.PagerDutyConfigDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 @Component
 public class PagerDutyDaoImpl implements PagerDutyDao{
@@ -48,35 +48,40 @@ public class PagerDutyDaoImpl implements PagerDutyDao{
 
     @Override
     public PagerDutyConfigDTO getConfig() throws NotificationConfigUninitializedException {
-        String sql = "SELECT token, integrationKey FROM pager_duty_config";
+        String sql = "SELECT integrationKey FROM pager_duty_config";
         List<PagerDutyConfigDTO> configList = null;
         try {
             configList = jdbcTemplate.query(
                 sql,
                 (rs, rowNum) ->
                     new PagerDutyConfigDTO(
-                        rs.getString("token"),
                         rs.getString("integrationKey")
                     )
             );
         } catch (BadSqlGrammarException e) {
-            throw new NotificationConfigUninitializedException("Pager duty config not initialized. Table does not exist.", e);
+            throw new NotificationConfigUninitializedException("PagerDuty config not initialized. Table does not exist.", e);
         }
 
         if (configList.size() != 1) {
-            throw new NotificationConfigUninitializedException("Pager duty config not initialized. Row count=" + configList.size());
+            throw new NotificationConfigUninitializedException("PagerDuty config not initialized. Row count=" + configList.size());
         }
 
         return configList.get(0);
     }
 
     @Override
-    public void initConfig(PagerDutyConfigDTO config) {
-        jdbcTemplate.execute("DROP TABLE IF EXISTS pager_duty_config");
-        jdbcTemplate.execute("CREATE TABLE pager_duty_config(" +
-            "token VARCHAR(255), integrationkey VARCHAR(255))");
+    public void saveConfig(PagerDutyConfigDTO config) {
+        int count = getRowCount();
 
-        // TODO: Think about encryption.
-        jdbcTemplate.update("INSERT INTO pager_duty_config(token, integrationkey) VALUES(?,?)", config.getToken(), config.getIntegrationkey());
+        if (count == 0) {
+            jdbcTemplate.update("INSERT INTO pager_duty_config(integrationkey) VALUES(?)", config.getIntegrationkey());
+        } else {
+            jdbcTemplate.update("UPDATE pager_duty_config SET integrationkey=?", config.getIntegrationkey());
+        }
+    }
+
+    private int getRowCount() {
+        String sql = "SELECT count(*) FROM pager_duty_config";
+        return jdbcTemplate.queryForObject(sql, Integer.class);
     }
 }

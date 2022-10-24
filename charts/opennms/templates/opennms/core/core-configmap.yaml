@@ -2,12 +2,8 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: opennms-config
-  namespace: {{ .Values.Namespace }}
+  namespace: {{ .Release.Namespace }}
 data:
-  restCfg: |
-    keycloak.base-url=http://{{ .Values.Keycloak.ServiceName }}:{{ .Values.Keycloak.Port }}{{ .Values.Keycloak.Path }}/
-    keycloak.admin-username={{ .Values.Keycloak.AdminUsername }}
-    keycloak.admin-password={{ .Values.Keycloak.AdminPassword }}
   useKafka: |
     useSeda=false
     useKafka=true
@@ -15,41 +11,3 @@ data:
   karafUsers: |
     admin=admin,_g_:admingroup
     _g_\:admingroup=group,admin,manager,viewer,systembundles,ssh
-  application.yml: |
-    server:
-      port: 9090
-      ssl:
-        enabled: true
-        key-alias: onms
-        key-store: "/app/onms.keystore"
-        key-store-type: jks
-        key-store-password: opennmspw
-        key-password: opennmspw
-
-    spring:
-      cache:
-        caffeine:
-          spec: maximumSize=10000,expireAfterWrite=600s
-
-    # graphql
-    graphql:
-      spqr:
-        gui:
-          enabled: true
-        base-packages:
-          - org.opennms.horizon.shared.dto
-
-    # keycloak admin client properties
-    horizon-stream:
-      core:
-        url: http://localhost:{{ .Values.OpenNMS.Core.HttpPort }}
-
-    logging:
-      file.path: /var/log/restServer
-binaryData: 
-  # Just for backend SSL, can add dynamically at some point. This one is set
-  # for a 1000 years roughly with CN as opennms-rest-server. Remove eventually
-  truststore.jks: >-
-    MIIEcwIBAzCCBCwGCSqGSIb3DQEHAaCCBB0EggQZMIIEFTCCBBEGCSqGSIb3DQEHBqCCBAIwggP+AgEAMIID9wYJKoZIhvcNAQcBMGYGCSqGSIb3DQEFDTBZMDgGCSqGSIb3DQEFDDArBBQgIvBYo77AAL/J1SB5/hfZurldPAICJxACASAwDAYIKoZIhvcNAgkFADAdBglghkgBZQMEASoEEA9BuHsoNpinVC5qtsHn20KAggOAy60O2P9h8QM773pXxJHlnaP5tvPAWSf79HAQM7/e/41s7Oo5okqpe2pXYALxlKORVtuoYm+3uxo1V3wttT42vi4QlMgv7l3DcbtRjOQHssyYLKUvH40x03IJS+bRa7wD76LQ4vm8qAp4xWqjjV/ApCVKi2aDk7opWg8l7xEcoek/Qkjzv361BGZSxoHpTLl/uGNe4KdW0CiGugpZj7yIhyKIqgdFdwLmU1xgq2J9BZRcuk+ZmNArrOF5gVxmE8Z+VJJgftgTp1xE/86U70NjyMlCdY0WAeQp5N7KPFP0QTNfqH00UgI1Qfx0mgzOGXnQB7SyZDIDcjOFrJdNXSpGIPYlyxdMKgg16bcbTF80I36hxKseuQEuSh48I4pLhR66RzTD2incZJ1FpRhsWVMVb8gi2JNXlNghS1fTaxAs6wreZ3L5wKZWQuTT6kirXcJcg8NnuJ6coP3Xkzz77jKnnmAF9xXJ5CGSUZ2Ojkpe6O54jH3ppwFJBrI35phUWvALq11aZEO63M2lyMOU/YDbzIvKhEhasZL9pmuN/054Y4ykkhNQlR6U8nyGNSdCSelRvCRAMcGdg3agcYkrGDwdHlOZl8KoG0ObjtNaRKDUcMN5DuFSwvboaprxLGWlr7xDAN9GQEGChWsjm39LTQGvg7bUbzvH91Eb9L3TmihOygMc+VU9Eh/edAl4PvUfxXpUNiNxuGoYCa1V/BL7ch2ws67SfE0uIlRzRsFwax/tyMjxFiV6ls6kEfR/ESmbvxi9yKwVJBPwsGYOfcGTo2qojGfQZM9KJ0skMIqNqqvKke8Xo4VR569NLyKSBD31IQ8za6WwwRgTL4Oua9vUiOVKPl80EO9kYCZP4GHis+n697hl9n5RzP88cDC7z9i9ELO5ko4i+DJvSLzzL9zQ9E/kw5t7VDN2RNykRf2MCkVZ5gVHOSLji8saoHXQgGKq6sSPC2F0GT5sKtnJwQIVuAlAMEz0JwrCNeqP3dIv1VUFzaHs6IOCnLSqqTUUucNraS23lFOhbygcv+SI/3cerSrqhKN/XDnAQRBiGb455CWV2zX2V2ws4HELNGai7Wom+Tfl6ud2d8EAD6Ll9/2m0HMpOJLu19Y+T+RvxYXqaCrVZj3br07+FRErD+OlYKaw8Myo+2v6YMM7E0t3kPfNqUPY9Q+krzfYoFKNem8xTAdC4jEwPjAhMAkGBSsOAwIaBQAEFHuzpE+9klO79hDF3E0BRR15jIyYBBTjrQxvWJmPYBv7Sc8/CY+WQGcqQQIDAYag
-  onms.keystore: >-
-    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

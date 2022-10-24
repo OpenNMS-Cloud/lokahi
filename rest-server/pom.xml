@@ -33,7 +33,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-web</artifactId>
+			<artifactId>spring-boot-starter-webflux</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -119,18 +119,4 @@
 			</plugin>
 		</plugins>
 	</build>
-
-	<!--<repositories>
-		<repository>
-			<id>opennms-maven-3rdparty</id>
-			<url>https://packages.opennms.com/public/3rdparty/maven/</url>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-		</repository>
-	</repositories>-->
-
 </project>

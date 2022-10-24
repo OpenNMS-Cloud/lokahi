@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<features name="minion-ipc-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.6.0">
+
+    <feature name="ipc-guava-internal">
+        <bundle>mvn:com.google.guava/guava/${guava.version}</bundle>
+        <bundle dependency="true">mvn:com.google.guava/failureaccess/1.0.1</bundle>
+    </feature>
+
+    <feature name="ipc-jackson-internal" version="${project.version}">
+        <bundle>mvn:com.fasterxml.jackson.core/jackson-annotations/${jackson.version}</bundle>
+        <bundle>mvn:com.fasterxml.jackson.core/jackson-core/${jackson.version}</bundle>
+        <bundle>mvn:com.fasterxml.jackson.core/jackson-databind/${jackson.version}</bundle>
+    </feature>
+
+    <feature name="ipc-json-coreutils-internal" version="${project.version}">
+        <feature prerequisite="true">wrap</feature>
+        <feature>ipc-jackson-internal</feature>
+
+        <bundle>mvn:com.github.java-json-tools/msg-simple/${fgeMsgSimple.version}</bundle>
+        <bundle>mvn:com.github.java-json-tools/btf/${fgeBtf.version}</bundle>
+
+        <bundle>wrap:mvn:com.github.java-json-tools/jackson-coreutils/${jacksonCoreUtils.version}$overwrite=merge&amp;Import-Package=!javax.annotation,*</bundle>
+    </feature>
+
+    <feature name="ipc-json-patch-internal" version="${project.version}">
+        <feature prerequisite="true">wrap</feature>
+        <feature>ipc-json-coreutils-internal</feature>
+
+        <bundle>wrap:mvn:com.github.java-json-tools/json-patch/${jsonPatch.version}$overwrite=merge&amp;Import-Package=!javax.annotation,*</bundle>
+    </feature>
+
+    <feature name="ipc-whiteboard-internal" version="${project.version}">
+        <bundle dependency="true">mvn:org.apache.commons/commons-lang3/3.4</bundle>
+        <bundle dependency="true">mvn:com.google.guava/guava/18.0</bundle>
+        <bundle dependency="true">mvn:com.savoirtech.eos/eos-core/${eos.version}</bundle>
+    </feature>
+
+    <feature name="ipc-api" version="${project.version}">
+        <feature>observability-minion</feature>
+        <feature>ipc-guava-internal</feature>
+        <feature>protobuf</feature>
+        <feature>grpc-minion</feature>
+        <bundle>mvn:org.opennms.horizon.shared/horizon-common-logging/${project.version}</bundle>
+        <bundle>mvn:org.opennms.horizon.shared/ipc-api/${project.version}</bundle>
+    </feature>
+
+    <feature name="ipc-echo" version="${project.version}">
+        <feature>ipc-api</feature>
+        <bundle>mvn:org.opennms.horizon.minion/ipc-echo/${project.version}</bundle>
+    </feature>
+
+    <feature name="ipc-heartbeat" version="${project.version}">
+        <feature>ipc-api</feature>
+        <bundle>mvn:org.opennms.horizon.minion/ipc-heartbeat/${project.version}</bundle>
+    </feature>
+
+    <feature name="ipc-minion" version="${project.version}">
+        <feature>grpc-minion</feature>
+        <feature>ipc-jackson-internal</feature>
+        <feature>ipc-json-patch-internal</feature>
+        <feature>ipc-whiteboard-internal</feature>
+        <feature>ipc-api</feature>
+        <feature>ipc-echo</feature>
+        <feature>ipc-heartbeat</feature>
+
+        <bundle>mvn:org.opennms.horizon.minion/twin-api/${project.version}</bundle>
+        <bundle>mvn:org.opennms.horizon.minion/twin-common/${project.version}</bundle>
+        <bundle>mvn:org.opennms.horizon.minion/twin-core/${project.version}</bundle>
+        <bundle>mvn:org.opennms.horizon.minion/twin-whiteboard/${project.version}</bundle>
+
+        <bundle>mvn:org.opennms.horizon.shared/protobuf/${project.version}</bundle>
+    </feature>
+
+</features>

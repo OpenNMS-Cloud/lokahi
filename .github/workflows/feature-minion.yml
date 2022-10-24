@@ -1,0 +1,42 @@
+name: feature-minion
+
+on:  
+  push:
+    branches:
+      - '**'
+      - '!develop'
+      - '!release'
+    paths:
+      - 'minion/**'
+
+jobs:
+
+  build-and-test:
+    runs-on: self-hosted
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v2
+        # Is required to call actions.
+
+      - name: init
+        run: |
+
+          echo "For init steps."
+
+      - name: parent-pom
+        id: action-parent-pom
+        uses: ./.github/actions/parent-pom
+        with:
+          dir-location: 'parent-pom'
+
+      - name: shared-lib
+        id: action-shared-lib
+        uses: ./.github/actions/shared-lib
+        with:
+          dir-location: 'shared-lib'
+
+      - name: feature-minion
+        id: action-feature-minion
+        uses: ./.github/actions/minion
+        with:
+          dir-location: 'minion'

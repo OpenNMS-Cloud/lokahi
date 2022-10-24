@@ -31,7 +31,7 @@ package org.opennms.netmgt.provision.detector.snmp;
 import org.opennms.netmgt.provision.DetectRequest;
 import org.opennms.netmgt.provision.core.support.DetectRequestImpl;
 import org.opennms.netmgt.provision.core.support.GenericServiceDetectorFactory;
-import org.opennms.netmgt.snmp.conf.SnmpAgentConfigFactory;
+import org.opennms.horizon.shared.snmp.conf.SnmpAgentConfigFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.net.InetAddress;

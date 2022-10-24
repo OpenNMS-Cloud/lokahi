@@ -20,9 +20,20 @@
     <reference id="eventForwarder" interface="org.opennms.horizon.events.api.EventForwarder" />
     <reference id="eventDao" interface="org.opennms.horizon.db.dao.api.EventDao" />
     <reference id="acknowledgmentDao" interface="org.opennms.horizon.db.dao.api.AcknowledgmentDao" />
+    <reference id="alarmMapper" interface="org.opennms.horizon.db.model.mapper.IAlarmMapper" />
 
     <bean id="alarmEntityNotifier" class="org.opennms.netmgt.alarmd.AlarmEntityNotifierImpl"/>
     <service interface="org.opennms.horizon.alarms.api.AlarmEntityNotifier" ref="alarmEntityNotifier"/>
+    <reference-list id="alarmEntityListeners" interface="org.opennms.horizon.alarms.api.AlarmEntityListener" availability="optional">
+        <reference-listener ref="alarmEntityNotifier" bind-method="onListenerRegistered" unbind-method="onListenerUnregistered" />
+    </reference-list>
+
+    <bean id="notificationForwarder" class="org.opennms.netmgt.alarmd.notifications.NotificationForwarder" init-method="initProducer">
+        <property name="alarmMapper" ref="alarmMapper" />
+        <property name="kafkaBrokers" value="${kafkaBrokers}"/>
+        <property name="notificationKafkaTopic" value="$[env:NOTIFICATION_KAFKA_TOPIC]"/>
+    </bean>
+    <service interface="org.opennms.horizon.alarms.api.AlarmEntityListener" ref="notificationForwarder" />
 
     <!-- drools integration -->
     <bean id="defaultAlarmService" class="org.opennms.netmgt.alarmd.drools.DefaultAlarmService">
@@ -60,6 +71,7 @@
     <reference-list id="alarmPersisterExtensions" interface="org.opennms.horizon.alarms.api.AlarmPersisterExtension" availability="optional" >
         <reference-listener ref="alarmPersister" bind-method="onExtensionRegistered" unbind-method="onExtensionUnregistered" />
     </reference-list>
+
 
     <bean id="alarmLifecycleListenerManager" class="org.opennms.netmgt.alarmd.AlarmLifecycleListenerManager" init-method="start" destroy-method="stop" >
         <property name="alarmDao" ref="alarmDao" />

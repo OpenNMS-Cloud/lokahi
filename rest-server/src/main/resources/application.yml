@@ -1,11 +1,6 @@
 server:
   port: 9090
 
-spring:
-  cache:
-    caffeine:
-      spec: maximumSize=10000,expireAfterWrite=600s
-
 # graphql
 graphql:
   spqr:
@@ -18,6 +13,8 @@ graphql:
 horizon-stream:
   core:
     url: http://localhost:8181
+  notifications:
+    url: http://localhost:15080
 
 logging:
   file.path: /var/log/restServer

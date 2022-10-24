@@ -15,6 +15,8 @@ limitations under the License.
 package values
 
 type IngressValues struct {
+	HttpPort             int    `yaml:"HttpPort"`
+	HttpsPort            int    `yaml:"HttpsPort"`
 	ControllerImage      string `yaml:"ControllerImage"`
 	SecretJobImage       string `yaml:"SecretJobImage"`
 	WebhookPatchJobImage string `yaml:"WebhookPatchJobImage"`

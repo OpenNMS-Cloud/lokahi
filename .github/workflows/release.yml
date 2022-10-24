@@ -12,7 +12,7 @@ on:
 
 jobs:
   release:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     environment: docker-publish-account
     # Enviroment that contains the required secrets.
     steps:
@@ -22,6 +22,10 @@ jobs:
 
       - name: init
         run: |
+
+          # In case a workflow, using the self-hosted runner, has failed and
+          # the kind cluster is still running.
+          kind delete clusters kind
 
           TAG=$(echo ${{ github.event.head_commit.message }} | awk '{ print $2 }')
 
@@ -43,6 +47,12 @@ jobs:
             exit 1
           fi
 
+      - name: parent-pom
+        id: action-parent-pom
+        uses: ./.github/actions/parent-pom
+        with:
+          dir-location: 'parent-pom'
+
       - name: feature-grafana
         id: action-grafana
         uses: ./.github/actions/grafana
@@ -61,6 +71,7 @@ jobs:
         with:
           dir-location: 'ui'
 
+      # This needs to happen before core, rest-server, inventory, and notifications.
       - name: shared-lib
         id: action-shared-lib
         uses: ./.github/actions/shared-lib
@@ -73,17 +84,45 @@ jobs:
         with:
           dir-location: 'platform'
 
+      - name: feature-metrics-processor
+        id: action-feature-metrics-processor
+        uses: ./.github/actions/metrics-processor
+
       - name: feature-rest-server
         id: action-rest-server
         uses: ./.github/actions/rest-server
         with:
           dir-location: 'rest-server'
+
+      - name: feature-inventory
+        id: action-inventory
+        uses: ./.github/actions/inventory
+        with:
+          dir-location: 'inventory'
+      
+      - name: feature-notifications
+        id: action-notifications
+        uses: ./.github/actions/notifications
+        with:
+          dir-location: 'notifications'
       
       - name: feature-operator
         id: action-feature-operator
         uses: ./.github/actions/operator
         with:
           dir-location: 'operator'
+
+      - name: feature-minion
+        id: action-minion
+        uses: ./.github/actions/minion
+        with:
+          dir-location: 'minion'
+
+      - name: feature-minion-gateway
+        id: action-minion-gateway
+        uses: ./.github/actions/minion-gateway
+        with:
+          dir-location: 'minion-gateway'
 
       #- name: external-it
       #  id: action-external-it
@@ -101,6 +140,38 @@ jobs:
           # re-test to confirm.
           #docker login -u ${{ secrets.DOCKERHUB_LOGIN }} -p ${{ secrets.DOCKERHUB_PASS }}
           echo ${{ secrets.DOCKERHUB_PASS }} | docker login -u ${{ secrets.DOCKERHUB_LOGIN }} --password-stdin
+
+      - name: publish-image-minion
+        run: |
+
+          # Login to dockerhub.
+          echo ${{ secrets.DOCKERHUB_PASS }} | docker login -u ${{ secrets.DOCKERHUB_LOGIN }} --password-stdin
+
+          # Publish minion image
+          cd minion/
+
+          # Tag and save the image as a file to be published. Both release version and latest.
+          docker tag opennms/horizon-stream-minion:local opennms/horizon-stream-minion:${{ env.RELEASE_TAG }}
+          docker tag opennms/horizon-stream-minion:local opennms/horizon-stream-minion:latest
+
+          docker push opennms/horizon-stream-minion:${{ env.RELEASE_TAG }}
+          docker push opennms/horizon-stream-minion:latest
+
+      - name: publish-image-minion-gateway
+        run: |
+
+          # Login to dockerhub.
+          echo ${{ secrets.DOCKERHUB_PASS }} | docker login -u ${{ secrets.DOCKERHUB_LOGIN }} --password-stdin
+
+          # Publish minion-gateway image
+          cd minion-gateway/
+
+          # Tag and save the image as a file to be published. Both release version and latest.
+          docker tag opennms/horizon-stream-minion-gateway:local opennms/horizon-stream-minion-gateway:${{ env.RELEASE_TAG }}
+          docker tag opennms/horizon-stream-minion-gateway:local opennms/horizon-stream-minion-gateway:latest
+
+          docker push opennms/horizon-stream-minion-gateway:${{ env.RELEASE_TAG }}
+          docker push opennms/horizon-stream-minion-gateway:latest
 
       - name: publish-image-core
         run: |
@@ -172,6 +243,54 @@ jobs:
 
           docker push opennms/horizon-stream-rest-server:${{ env.RELEASE_TAG }}
           docker push opennms/horizon-stream-rest-server:latest
+
+      - name: publish-image-inventory
+        run: |
+
+          # Login to dockerhub. Probably could remove this, session created in previous step.
+          echo ${{ secrets.DOCKERHUB_PASS }} | docker login -u ${{ secrets.DOCKERHUB_LOGIN }} --password-stdin
+
+          # Test build images
+          docker images
+
+          # Tag and save the image as a file to be published. Both release version and latest.
+          docker tag opennms/horizon-stream-inventory:local opennms/horizon-stream-inventory:${{ env.RELEASE_TAG }}
+          docker tag opennms/horizon-stream-inventory:local opennms/horizon-stream-inventory:latest
+
+          docker push opennms/horizon-stream-inventory:${{ env.RELEASE_TAG }}
+          docker push opennms/horizon-stream-inventory:latest
+      
+      - name: publish-image-metrics-processor
+        run: |
+
+          # Login to dockerhub. Probably could remove this, session created in previous step.
+          echo ${{ secrets.DOCKERHUB_PASS }} | docker login -u ${{ secrets.DOCKERHUB_LOGIN }} --password-stdin
+
+          # Test build images
+          docker images
+
+          # Tag and save the image as a file to be published. Both release version and latest.
+          docker tag opennms/horizon-stream-metrics-processor:local opennms/horizon-stream-metrics-processor:${{ env.RELEASE_TAG }}
+          docker tag opennms/horizon-stream-metrics-processor:local opennms/horizon-stream-metrics-processor:latest
+
+          docker push opennms/horizon-stream-metrics-processor:${{ env.RELEASE_TAG }}
+          docker push opennms/horizon-stream-metrics-processor:latest
+      
+      - name: publish-image-notifications
+        run: |
+
+          # Login to dockerhub. Probably could remove this, session created in previous step.
+          echo ${{ secrets.DOCKERHUB_PASS }} | docker login -u ${{ secrets.DOCKERHUB_LOGIN }} --password-stdin
+
+          # Test build images
+          docker images
+
+          # Tag and save the image as a file to be published. Both release version and latest.
+          docker tag opennms/horizon-stream-notification:local opennms/horizon-stream-notification:${{ env.RELEASE_TAG }}
+          docker tag opennms/horizon-stream-notification:local opennms/horizon-stream-notification:latest
+
+          docker push opennms/horizon-stream-notification:${{ env.RELEASE_TAG }}
+          docker push opennms/horizon-stream-notification:latest
       
       - name: publish-image-operator
         run: |
@@ -186,13 +305,13 @@ jobs:
           docker push opennms/operator:${{ env.RELEASE_TAG }}
           docker push opennms/operator:latest
 
-      - name: tag-release-branch
-        run: |
+      #- name: tag-release-branch
+      #  run: |
 
-          # The following checkouts the release branch and merges develop into
-          # it and then tags release.
-          git fetch
-          git tag ${{ env.RELEASE_TAG }}
-          git push origin ${{ env.RELEASE_TAG }}
+      #    # The following checkouts the release branch and merges develop into
+      #    # it and then tags release.
+      #    git fetch
+      #    git tag ${{ env.RELEASE_TAG }}
+      #    git push origin ${{ env.RELEASE_TAG }}
 
 

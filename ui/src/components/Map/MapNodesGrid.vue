@@ -100,20 +100,18 @@
           >SYSLOCATION</FeatherSortHeader>
         </tr>
       </thead>
-      <tbody data-test="node-list">
-        <tr v-for="device in geomapQueries.devicesForGeomap" :key="(device?.id as number)" @dblclick="doubleClickHandler(device as Partial<DeviceDto>)">
-          <td class="first-td" :class="nodeLabelAlarmServerityMap[device?.label as string]">{{ device?.id }}</td>
-          <td>{{ device?.foreignSource }}</td>
-          <td>{{ device?.foreignId }}</td>
-          <td>{{ device?.label }}</td>
-          <td>{{ device?.labelSource }}</td>
-          <!-- <td v-date>{{ device?.lastCapabilitiesScan }}</td> -->
-          <!-- <td>{{ device?.primaryInterface }}</td> -->
-          <td>{{ device?.sysOid }}</td>
-          <td>{{ device?.sysName }}</td>
-          <td>{{ device?.sysDescription }}</td>
-          <td>{{ device?.sysContact }}</td>
-          <td>{{ device?.sysLocation }}</td>
+      <tbody class="node-list-grid" data-test="node-list">
+        <tr v-for="node in nodes" :key="(node?.id as number)" @dblclick="doubleClickHandler(node as Partial<DeviceDto>)" :node="node?.id">
+          <td :class="nodeLabelAlarmServerityMap[node?.label as string]">{{ node?.id }}</td>
+          <td>{{ node?.foreignSource }}</td>
+          <td>{{ node?.foreignId }}</td>
+          <td>{{ node?.label }}</td>
+          <td>{{ node?.labelSource }}</td>
+          <td>{{ node?.sysOid }}</td>
+          <td>{{ node?.sysName }}</td>
+          <td>{{ node?.sysDescription }}</td>
+          <td>{{ node?.sysContact }}</td>
+          <td>{{ node?.sysLocation }}</td>
         </tr>
       </tbody>
     </table>
@@ -121,19 +119,25 @@
 </template>
 <script setup lang="ts">
 import { useMapStore } from '@/store/Views/mapStore'
-import { useGeomapQueries } from '@/store/Queries/geomapQueries'
-import { Coordinates, FeatherSortObject } from '@/types/map'
+import { FeatherSortObject } from '@/types'
 import { FeatherSortHeader, SORT } from '@featherds/table'
-import { DeviceDto } from '@/types/graphql';
+import { DeviceDto, LocationDto } from '@/types/graphql'
 
 const mapStore = useMapStore()
-const geomapQueries = useGeomapQueries()
-const nodeLabelAlarmServerityMap = computed(() => mapStore.getNodeAlarmSeverityMap)
+const nodes = computed(() => mapStore.devicesInbounds)
+const nodeLabelAlarmServerityMap = computed(() => mapStore.getDeviceAlarmSeverityMap())
 
-const doubleClickHandler = (device: Partial<DeviceDto>) => {
-  if (device.location?.latitude && device.location.longitude) {
-    const coordinate: Coordinates = { latitude: device?.location?.latitude, longitude: device?.location?.longitude }
+const doubleClickHandler = (node: Partial<DeviceDto>) => {
+  if (node.location?.latitude && node.location.longitude) {
+    const coordinate: LocationDto = { latitude: node?.location?.latitude, longitude: node?.location?.longitude }
     mapStore.mapCenter = coordinate
+
+    // to highlighting the selected row
+    const rows = document.querySelectorAll('.node-list-grid > tr')
+    rows.forEach(row => {
+      if(row.getAttribute('node') === node.id?.toString()) row.classList.add('selected')
+      else row.classList.remove('selected')
+    })
   }
 }
 
@@ -157,7 +161,7 @@ const sortChanged = (sortObj: FeatherSortObject) => {
     sortStates[key] = SORT.NONE
   }
   sortStates[`${sortObj.property}`] = sortObj.value
-  mapStore.nodeSortObject = sortObj
+  mapStore.deviceSortObject = sortObj
 }
 
 onMounted(() => {
@@ -183,6 +187,8 @@ onMounted(() => {
 table {
   @include table;
   @include table-condensed;
+  @include row-select;
+  @include row-hover;
   background: var($surface);
   color: var($primary-text-on-surface);
   padding-top: 4px;
@@ -194,7 +200,7 @@ thead {
   background: var($surface);
   white-space: nowrap;
 }
-.first-td {
+.selected > td:first-child {
   padding-left: 12px;
   border-left: 4px solid var($success);
 }

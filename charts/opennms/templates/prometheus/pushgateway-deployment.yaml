@@ -4,7 +4,7 @@ metadata:
   name: {{ .Values.Prometheus.PushGateway.ServiceName }}
   labels:
     app: {{ .Values.Prometheus.PushGateway.ServiceName }}
-  namespace: {{ .Values.Namespace }}
+  namespace: {{ .Release.Namespace }}
 spec:
   replicas: {{ .Values.Prometheus.PushGateway.Replicas }}
   selector:
@@ -15,7 +15,7 @@ spec:
       labels:
         app: {{ .Values.Prometheus.PushGateway.ServiceName }}
     spec:
-      {{ if .Values.NodeRestrictions.Enabled }}
+      {{- if .Values.NodeRestrictions.Enabled }}
       tolerations:
         - effect: "NoSchedule"
           key: "{{ .Values.NodeRestrictions.Key }}"
@@ -31,7 +31,7 @@ spec:
                     operator: In
                     values:
                       - {{ .Values.NodeRestrictions.Value }}
-      {{ end }}
+      {{- end }}
       containers:
         - name: {{ .Values.Prometheus.PushGateway.ServiceName }}
           image: {{ .Values.Prometheus.PushGateway.Image }}

@@ -30,7 +30,7 @@ type IngressHandler struct {
 	ServiceHandlerObject
 }
 
-func (h *IngressHandler) ProvideConfig(values values.TemplateValues) []client.Object {
+func (h *IngressHandler) UpdateConfig(values values.TemplateValues) {
 
 	//INGRESS CONTROLLER CONFIGS
 	var controllerServiceAccount corev1.ServiceAccount
@@ -54,6 +54,14 @@ func (h *IngressHandler) ProvideConfig(values values.TemplateValues) []client.Ob
 	yaml.LoadYaml(filepath("ingress/nginx-controller/controller-service-admission.yaml"), values, &controllerServiceAdmission)
 	yaml.LoadYaml(filepath("ingress/nginx-controller/controller-ingress-class.yaml"), values, &controllerIngressClass)
 	yaml.LoadYaml(filepath("ingress/nginx-controller/controller-deployment.yaml"), values, &controllerDeployment)
+
+	//CUSTOM ERRORS CONFIGS
+	//FIXME Is this even used?
+	var customErrorsDeployment appsv1.Deployment
+	var customErrorsService corev1.Service
+
+	yaml.LoadYaml(filepath("ingress/custom-errors/nginx-errors-deployment.yaml"), values, &customErrorsDeployment)
+	yaml.LoadYaml(filepath("ingress/custom-errors/nginx-errors-service.yaml"), values, &customErrorsService)
 
 	//VALIDATING WEBHOOK CONFIGS
 	var validatingWebhook adminv1.ValidatingWebhookConfiguration
@@ -92,6 +100,9 @@ func (h *IngressHandler) ProvideConfig(values values.TemplateValues) []client.Ob
 		&controllerService,
 		&controllerServiceAdmission,
 
+		&customErrorsDeployment,
+		&customErrorsService,
+
 		&webhookServiceAccount,
 		&webhookRole,
 		&webhookRoleBinding,
@@ -107,5 +118,4 @@ func (h *IngressHandler) ProvideConfig(values values.TemplateValues) []client.Ob
 		&opennmsIngress,
 	}
 
-	return h.Config
 }

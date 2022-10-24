@@ -30,11 +30,11 @@
     </dependencyManagement>
 
     <dependencies>
-        <dependency>
-            <groupId>org.opennms.horizon.ipc</groupId>
-            <artifactId>echo</artifactId>
-            <version>${project.version}</version>
-        </dependency>
+        <!--<dependency>-->
+        <!--    <groupId>org.opennms.horizon.ipc</groupId>-->
+        <!--    <artifactId>echo</artifactId>-->
+        <!--    <version>${project.version}</version>-->
+        <!--</dependency>-->
         <dependency>
             <groupId>org.opennms.horizon.ipc.grpc</groupId>
             <artifactId>server</artifactId>
@@ -46,8 +46,8 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.opennms.horizon.icmp</groupId>
-            <artifactId>api</artifactId>
+            <groupId>org.opennms.horizon.shared</groupId>
+            <artifactId>icmp-api</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -61,6 +61,49 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
+            <groupId>org.opennms.horizon.shared</groupId>
+            <artifactId>ipc-grpc-contract</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.opennms.horizon.shared</groupId>
+            <artifactId>horizon-common-lang</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.opennms.horizon.shared</groupId>
+            <artifactId>protobuf</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.opennms.horizon.shared</groupId>
+            <artifactId>task-set-ignite-client</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.camel</groupId>
+            <artifactId>camel-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.camel</groupId>
+            <artifactId>camel-kafka</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.camel</groupId>
+            <artifactId>camel-protobuf</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.ignite</groupId>
+            <artifactId>ignite-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.ignite</groupId>
+            <artifactId>ignite-kubernetes</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
         </dependency>
@@ -68,6 +111,16 @@
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.opennms.horizon.shared</groupId>
+            <artifactId>snmp-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.opennms.horizon.ipc</groupId>
+            <artifactId>echo-ipc-client</artifactId>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 

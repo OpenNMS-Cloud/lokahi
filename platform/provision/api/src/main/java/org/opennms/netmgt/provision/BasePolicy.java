@@ -29,12 +29,11 @@
 package org.opennms.netmgt.provision;
 
 import java.net.InetAddress;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.opennms.horizon.core.lib.InetAddressUtils;
+import org.opennms.horizon.shared.utils.InetAddressUtils;
 import org.opennms.netmgt.provision.annotations.Require;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

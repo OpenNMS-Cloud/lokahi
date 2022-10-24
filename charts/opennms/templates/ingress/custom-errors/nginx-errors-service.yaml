@@ -1,0 +1,15 @@
+{{/*FIXME Is this even used?*/}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: opennms-nginx-errors
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: opennms-nginx-errors
+spec:
+  selector:
+    app.kubernetes.io/name: opennms-nginx-errors
+  ports:
+    - port: 80
+      targetPort: 8080
+      name: http

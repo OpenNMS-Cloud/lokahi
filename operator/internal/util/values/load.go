@@ -15,11 +15,9 @@ limitations under the License.
 */
 
 import (
-	"fmt"
 	"github.com/OpenNMS/opennms-operator/config"
 	"github.com/OpenNMS/opennms-operator/internal/model/values"
-	"gopkg.in/yaml.v3"
-	"io/ioutil"
+	uberConfig "go.uber.org/config"
 	"log"
 )
 
@@ -27,23 +25,24 @@ import (
 func GetDefaultValues(operatorConfig config.OperatorConfig) values.TemplateValues {
 	v := LoadValues(operatorConfig.DefaultOpenNMSValuesFile, operatorConfig.DefaultOperatorValuesFile)
 	return values.TemplateValues{
-		Values: v,
+		Values:  v,
+		Release: values.HelmRelease{},
 	}
 }
 
 // LoadValues - load Helm/Template values from the given files
-func LoadValues(filename1, filename2 string) values.Values {
-	yamlFile1, err := ioutil.ReadFile(filename1)
+func LoadValues(opennmsValues string, operatorValues string) values.Values {
+	combinedYaml, err := uberConfig.NewYAML(
+		// TODO remove after cleaning up yamls
+		uberConfig.Permissive(), // this allows for values from the yaml that aren't represented in the Values struct
+		uberConfig.File(opennmsValues),
+		uberConfig.File(operatorValues),
+	)
 	if err != nil {
-		log.Fatalf("error reading default values from file: %v", err)
+		log.Fatalf("error reading yaml from files: %v", err)
 	}
-	yamlFile2, err := ioutil.ReadFile(filename2)
-	if err != nil {
-		log.Fatalf("error reading default values from file: %v", err)
-	}
-	combinedYaml := fmt.Sprintf("%s\n%s", yamlFile1, yamlFile2)
 	var defValues values.Values
-	err = yaml.Unmarshal([]byte(combinedYaml), &defValues)
+	err = combinedYaml.Get(uberConfig.Root).Populate(&defValues)
 	if err != nil {
 		log.Fatalf("error unmarshalling default values from file: %v", err)
 	}

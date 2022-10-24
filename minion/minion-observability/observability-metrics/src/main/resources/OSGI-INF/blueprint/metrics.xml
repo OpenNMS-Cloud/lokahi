@@ -1,0 +1,31 @@
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="
+        http://www.osgi.org/xmlns/blueprint/v1.0.0
+        https://osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd
+    ">
+
+    <bean id="metricRegistry" class="com.codahale.metrics.MetricRegistry" />
+    <service ref="metricRegistry" interface="com.codahale.metrics.MetricRegistry" />
+
+    <bean class="org.opennms.horizon.minion.observability.metrics.internal.MetricsWhiteboard" init-method="start" destroy-method="stop">
+        <argument ref="metricRegistry" />
+        <argument ref="blueprintBundleContext" />
+    </bean>
+
+    <bean class="org.opennms.horizon.minion.observability.metrics.internal.MetricsProviderWhiteboard" init-method="start" destroy-method="stop">
+        <argument ref="metricRegistry" />
+        <argument ref="blueprintBundleContext" />
+    </bean>
+
+    <service interface="javax.servlet.http.HttpServlet">
+        <service-properties>
+            <entry key="osgi.http.whiteboard.context.path" value="/metrics" />
+            <entry key="alias" value="/metrics" />
+        </service-properties>
+        <bean class="org.opennms.horizon.minion.observability.metrics.internal.MetricsServlet">
+            <argument ref="metricRegistry" />
+        </bean>
+    </service>
+
+</blueprint>

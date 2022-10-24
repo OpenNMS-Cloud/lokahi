@@ -16,7 +16,6 @@ package main
 
 import (
 	"github.com/OpenNMS/opennms-operator/config"
-	"github.com/OpenNMS/opennms-operator/dependencies"
 	"github.com/OpenNMS/opennms-operator/internal/handlers"
 	"github.com/OpenNMS/opennms-operator/internal/image"
 	"github.com/OpenNMS/opennms-operator/internal/reconciler"
@@ -28,7 +27,6 @@ import (
 	"os"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
-	// +kubebuilder:scaffold:imports
 )
 
 var (
@@ -42,7 +40,7 @@ func main() {
 	handlers.ConfigFilePath = operatorConfig.DefaultOpenNMSTemplateLoc
 
 	loggerOptions := zap.Options{
-		Development: operatorConfig.DevMode, //TODO make this configurable
+		Development: operatorConfig.DevMode,
 		TimeEncoder: zapcore.ISO8601TimeEncoder,
 	}
 
@@ -65,12 +63,6 @@ func main() {
 
 	defaultValues := values.GetDefaultValues(operatorConfig)
 
-	err = dependencies.ApplyDependencies(setupLog, defaultValues, k8sClient)
-	if err != nil {
-		setupLog.Error(err, "Error applying Helm dependencies")
-		os.Exit(1)
-	}
-
 	imageChecker := image.NewImageUpdater(k8sClient, operatorConfig.ImageUpdateFreq)
 	if err = (&reconciler.OpenNMSReconciler{
 		Client:        mgr.GetClient(),
@@ -79,6 +71,7 @@ func main() {
 		CodecFactory:  serializer.NewCodecFactory(mgr.GetScheme()),
 		Config:        operatorConfig,
 		DefaultValues: defaultValues,
+		Instances:     map[string]*reconciler.Instance{},
 		ImageChecker:  imageChecker,
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create OpenNMS controller", "controller", "OpenNMS")

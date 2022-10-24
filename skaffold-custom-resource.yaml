@@ -1,0 +1,34 @@
+apiVersion: k8s.opennms.com/v1alpha1
+kind: OpenNMS
+metadata:
+  name: local-instance
+spec:
+  allowedUsers: []
+  host: onmshs
+  namespace: skaffold-instance
+  core:
+    image: opennms/horizon-stream-core
+    cpu: "0"
+    mem: "0"
+  api:
+    image: opennms/horizon-stream-rest-server
+    cpu: "0"
+    mem: "0"
+  ui:
+    image: opennms/horizon-stream-ui
+    cpu: "0"
+    mem: "0"
+  inventory:
+    image: opennms/horizon-stream-inventory
+    cpu: "0"
+    mem: "0"
+  notification:
+    image: opennms/horizon-stream-notification
+    cpu: "0"
+    mem: "0"
+  keycloak:
+    image: opennms/horizon-stream-keycloak-dev
+  grafana:
+    image: opennms/horizon-stream-grafana-dev
+  postgres:
+    image: postgres:13.3-alpine

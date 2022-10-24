@@ -39,6 +39,9 @@
     <bean id="provisionRestServiceImpl" class="org.opennms.horizon.provision.rest.ProvisionRestServiceImpl" scope="singleton">
         <argument ref="provisioner"/>
         <argument ref="sessionUtils"/>
+        <!--    Temp For testing only....-->
+
+        <argument ref="locationAwareDetectorClient"/>
     </bean>
 
 
@@ -51,4 +54,7 @@
         </service-properties>
     </service>
 
+<!--    Temp For testing only....-->
+
+    <reference id="locationAwareDetectorClient" interface="org.opennms.netmgt.provision.LocationAwareDetectorClient" filter="(type=ignite)"/>
 </blueprint>

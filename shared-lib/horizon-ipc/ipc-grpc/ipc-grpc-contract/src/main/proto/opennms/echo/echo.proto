@@ -1,0 +1,22 @@
+syntax = "proto3";
+package opennms.rpc.echo;
+
+option java_multiple_files = true;
+option java_package = "org.opennms.horizon.grpc.echo.contract";
+
+import "opennms_minion_ipc.proto";
+
+message EchoRequest {
+  uint64 time = 1;
+  string message = 2;
+  optional string body = 3;
+  optional int64 delay = 4;
+  bool throw = 5;
+}
+
+message EchoResponse {
+  int64 time = 1;
+  string error = 2;
+  string message = 3;
+  optional string body = 4;
+}

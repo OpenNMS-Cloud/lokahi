@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+
+    <changeSet author="tbigg" id="0.1.0-monitoring-systems">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="monitoring_systems"/>
+            </not>
+        </preConditions>
+
+        <createTable tableName="monitoring_systems">
+            <column name="id" type="BIGINT" autoIncrement="true"/>
+
+            <column name="tenant_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="system_id" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="label" type="TEXT"/>
+
+            <column name="monitoring_location_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="last_checked_in" type="TIMESTAMP"/>
+
+        </createTable>
+
+        <addPrimaryKey tableName="monitoring_systems" columnNames="id" constraintName="pk_monitoring_systems_id"/>
+
+        <addForeignKeyConstraint constraintName="fk_monitoring_systems_monitoring_location_id" onDelete="CASCADE"
+                                 baseTableName="monitoring_systems" baseColumnNames="monitoring_location_id"
+                                 referencedTableName="monitoring_locations" referencedColumnNames="id"/>
+
+    </changeSet>
+</databaseChangeLog>

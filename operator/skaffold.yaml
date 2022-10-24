@@ -1,0 +1,29 @@
+apiVersion: skaffold/v2beta28
+kind: Config
+metadata:
+  name: operator
+profiles:
+  - name: use-operator
+    resourceSelector:
+      allow:
+        - groupKind: "OpenNMS.k8s.opennms.com"
+          image: [ ".*" ]
+          labels: [ ".*" ]
+    build:
+      artifacts:
+        - image: opennms/operator
+          custom:
+            buildCommand: make local-docker
+            dependencies:
+              dockerfile:
+                path: Dockerfile
+    deploy:
+      statusCheck: false
+      helm:
+        releases:
+          - name: opennms-operator
+            chartPath: ../charts/opennms-operator
+            setValues:
+              devMode: true
+            artifactOverrides:
+              image: opennms/operator

@@ -4,55 +4,66 @@ metadata:
   name: {{ .Values.OpenNMS.Minion.ServiceName }}
   labels:
     app: {{ .Values.OpenNMS.Minion.ServiceName }}
-  namespace: {{ .Values.Namespace }}
+  namespace: {{ .Release.Namespace }}
 spec:
   selector:
     matchLabels:
-      run: {{ .Values.OpenNMS.Minion.ServiceName }}
+      app: {{ .Values.OpenNMS.Minion.ServiceName }}
   replicas: {{ .Values.OpenNMS.Minion.Replicas }}
   template:
     metadata:
       labels:
-        run: {{ .Values.OpenNMS.Minion.ServiceName }}
+        app: {{ .Values.OpenNMS.Minion.ServiceName }}
+      annotations:
+        linkerd.io/inject: enabled
+        config.linkerd.io/opaque-ports: "{{ .Values.OpenNMS.Core.IgniteClusterPort }},{{ .Values.OpenNMS.Core.IgniteDiscoveryPort }}"
     spec:
+      serviceAccountName: {{ .Values.OpenNMS.Minion.ServiceName }}-sa
       volumes:
+        - name: config-volume
+          configMap:
+            name: opennms-config
         - name: minion-config-volume
           configMap:
-            name: {{ .Values.OpenNMS.Minion.ServiceName }}-config-map
+            name: minion-config 
+      initContainers:
+      - name: init-sysctl
+        image: busybox
+        command:
+        - sysctl
+        - -w
+        - net.ipv4.ping_group_range=0 429496729
+        securityContext:
+          privileged: true
       containers:
-        - name: minion
+        - name: {{ .Values.OpenNMS.Minion.ServiceName }}
           image: {{ .Values.OpenNMS.Minion.Image }}
           imagePullPolicy: {{ .Values.OpenNMS.Minion.ImagePullPolicy }}
-          args: ["-f"]
           env:
-            - name: KARAF_DEBUG
+            - name: USE_KUBERNETES
               value: "true"
-            - name: TZ
-              value: "America/New_York"
-            - name: JAVA_MIN_MEM
-              value: "512M"
-            - name: JAVA_MAX_MEM
-              value: "2048M"
+            - name: KUBERNETES_SERVICE_NAME
+              value: "{{ .Values.OpenNMS.Minion.ServiceName }}"
+            - name: JAVA_TOOL_OPTIONS # Presence of this var lets `skaffold debug` see that this is a jvm container
+              value: "-agentlib:jdwp=transport=dt_socket,server=y,address=5005,suspend=n,quiet=y" # Permanent debug port in `skaffold dev`
+            - name: LOCATION
+              value: "Default"
           ports:
+            - name: http
+              containerPort: {{ .Values.OpenNMS.Minion.Port }}
             - name: ssh
               containerPort: {{ .Values.OpenNMS.Minion.SshPort }}
-            - name: snmp
-              containerPort: {{ .Values.OpenNMS.Minion.SnmpPort }}
-              protocol: UDP
-            - name: syslog
-              containerPort: {{ .Values.OpenNMS.Minion.SyslogPort }}
-              protocol: UDP
-#          livenessProbe: #todo this needs to be added
-#            exec:
-#              command: ["/health.sh"]
-#            initialDelaySeconds: 30
-#            periodSeconds: 30
-#            timeoutSeconds: 20
-#            failureThreshold: 3
           volumeMounts:
             - name: minion-config-volume
-              mountPath: "/opt/minion/minion-config.yaml"
-              subPath: "minion-config.yaml"
+              mountPath: "/opt/karaf/etc/org.opennms.core.ipc.grpc.client.cfg"
+              subPath: "grpc-config"
+            - name: minion-config-volume
+              mountPath: "/opt/karaf/etc/org.opennms.identity.cfg"
+              subPath: "opennms-minion-identity"
+            - name: config-volume
+              mountPath: "/opt/horizon-stream/etc/users.properties"
+              subPath: "data"
+              readOnly: true
           resources:
             limits:
               cpu: "{{ .Values.OpenNMS.Minion.Resources.Limits.Cpu }}"

@@ -1,4 +1,4 @@
-name: 'Scan '
+name: 'SonarCloud Scan'
 description: 'This implements unit and built-time integration tests on shared-lib. There is no workflow for this, it gets called by other workflows, platform (core) and rest-server.'
 inputs:
   github-token:

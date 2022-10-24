@@ -48,7 +48,8 @@ jobs:
         with:
           dir-location: 'minion-gateway'
 
-      - uses: ./.github/actions/sonar-scan-maven
+      - name: 'SonarCloud Scan'
+        uses: ./.github/actions/sonar-scan-maven
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           sonar-token: ${{ secrets.SONAR_TOKEN }}

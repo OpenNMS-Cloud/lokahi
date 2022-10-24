@@ -51,10 +51,3 @@ jobs:
           sonar-token: ${{ secrets.SONAR_TOKEN }}
           dir-location: 'notifications'
           project-key: 'opennms_horizon-stream_core'
-
-      - name: build-image
-        id: action-build-image
-        uses: ./.github/actions/jib-build-maven
-        with:
-          image: 'opennms/horizon-stream-notification:local'
-          dir-location: 'notifications'

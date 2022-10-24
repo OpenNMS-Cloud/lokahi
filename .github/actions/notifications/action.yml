@@ -10,6 +10,6 @@ runs:
   using: "composite"
   steps:
     - name: build
-      run: mvn -B verify
+      run: mvn -B verify jib:dockerBuild -Dimage=opennms/horizon-stream-notification:local
       shell: bash
       working-directory: ${{ inputs.dir-location }}

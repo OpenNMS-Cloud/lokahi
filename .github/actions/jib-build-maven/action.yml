@@ -4,6 +4,9 @@ inputs:
   image:
     description: 'The name of the image to build.'
     required: true
+  dir-location:
+    description: 'The dir containing the change.'
+    required: true
 
 runs:
   using: "composite"
@@ -11,3 +14,4 @@ runs:
     - name: build-image
       run: mvn -B jib:dockerBuild -Dimage=${{ inputs.image }}
       shell: bash
+      working-directory: ${{ inputs.dir-location }}

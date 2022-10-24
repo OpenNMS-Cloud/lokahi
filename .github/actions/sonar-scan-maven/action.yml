@@ -7,6 +7,9 @@ inputs:
   sonar-token:
     description: 'SONAR_TOKEN secret to authenticate job with SonarCloud'
     required: true
+  dir-location:
+    description: 'The dir containing the change.'
+    required: true
 
 runs:
   using: "composite"
@@ -17,3 +20,4 @@ runs:
       env:
         GITHUB_TOKEN: ${{ inputs.github-token }}
         SONAR_TOKEN: ${{ inputs.sonar-token }}
+      working-directory: ${{ inputs.dir-location }}

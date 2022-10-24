@@ -4,7 +4,6 @@ inputs:
   dir-location:
     description: 'The dir containing the change.'
     required: true
-    default: 'none'
 
 runs:
   using: "composite"

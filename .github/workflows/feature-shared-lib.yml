@@ -1,4 +1,4 @@
-name: feature-notifications
+name: feature-shared-lib
 
 on:  
   push:

@@ -12,11 +12,10 @@ runs:
     - name: build-image
       run: |
 
-        cd ${{ inputs.dir-location }}
-
         # When there are tests to run, put those here.
 
         # Create the docker image.
         mvn package jib:dockerBuild -Dimage=opennms/horizon-stream-inventory:local
 
       shell: bash
+      working-directory: ${{ inputs.dir-location }}

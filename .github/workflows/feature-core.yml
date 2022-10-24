@@ -11,7 +11,11 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
     paths:
-      - 'rest-server/**'
+      - 'platform/**'
+
+defaults:
+  run:
+    working-directory: platform
 
 jobs:
 
@@ -58,7 +62,6 @@ jobs:
       - name: sonar-scan
         id: action-sonar-scan
         uses: ./.github/actions/sonar-scan-maven
-        working-directory: 'platform'
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           sonar-token: ${{ secrets.SONAR_TOKEN }}

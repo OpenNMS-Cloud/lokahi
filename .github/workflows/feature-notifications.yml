@@ -13,6 +13,10 @@ on:
     paths:
       - 'notifications/**'
 
+defaults:
+  run:
+    working-directory: notifications
+
 jobs:
 
   build-and-test:
@@ -58,7 +62,6 @@ jobs:
       - name: sonar-scan
         id: action-sonar-scan
         uses: ./.github/actions/sonar-scan-maven
-        working-directory: 'notifications'
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           sonar-token: ${{ secrets.SONAR_TOKEN }}
@@ -66,6 +69,5 @@ jobs:
       - name: build-image
         id: action-build-image
         uses: ./.github/actions/jib-build-maven
-        working-directory: 'notifications'
         with:
           image: 'opennms/horizon-stream-notification:local'

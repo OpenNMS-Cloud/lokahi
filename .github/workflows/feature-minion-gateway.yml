@@ -11,7 +11,11 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
     paths:
-      - 'rest-server/**'
+      - 'minion-gateway/**'
+
+defaults:
+  run:
+    working-directory: minion-gateway
 
 jobs:
 
@@ -58,7 +62,6 @@ jobs:
       - name: sonar-scan
         id: action-sonar-scan
         uses: ./.github/actions/sonar-scan-maven
-        working-directory: 'minion-gateway'
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           sonar-token: ${{ secrets.SONAR_TOKEN }}

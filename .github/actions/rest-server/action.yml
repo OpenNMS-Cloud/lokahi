@@ -10,5 +10,6 @@ runs:
   using: "composite"
   steps:
     - name: build
-      run: mvn -B verify -f ${{ inputs.dir-location }}
+      run: mvn -B verify
       shell: bash
+      working-directory: ${{ inputs.dir-location }}

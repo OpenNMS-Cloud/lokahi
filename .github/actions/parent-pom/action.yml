@@ -9,11 +9,7 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: build-image
-      run: |
-
-        cd ${{ inputs.dir-location }}
-
-        mvn clean install
-
+    - name: build
+      run: mvn -B clean install
       shell: bash
+      working-directory: ${{ inputs.dir-location }}

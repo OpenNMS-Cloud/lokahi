@@ -12,8 +12,7 @@ runs:
     - name: global data
       run: |
 
-        #cd ${{ inputs.dir-location }}
-
-        mvn -f minion clean install -Pbuild-docker-images-enabled -DskipTests -Ddocker.image=opennms/horizon-stream-minion:local -Ddocker.skipPush=true
+        mvn clean install -Pbuild-docker-images-enabled -DskipTests -Ddocker.image=opennms/horizon-stream-minion:local -Ddocker.skipPush=true
 
       shell: bash
+      working-directory: ${{ inputs.dir-location }}

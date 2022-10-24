@@ -13,6 +13,10 @@ on:
     paths:
       - 'shared-lib/**'
 
+defaults:
+  run:
+    working-directory: shared-lib
+
 jobs:
 
   build-and-test:
@@ -52,7 +56,6 @@ jobs:
       - name: sonar-scan
         id: action-sonar-scan
         uses: ./.github/actions/sonar-scan-maven
-        working-directory: 'shared-lib'
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           sonar-token: ${{ secrets.SONAR_TOKEN }}

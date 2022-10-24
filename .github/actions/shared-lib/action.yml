@@ -10,5 +10,6 @@ runs:
   using: "composite"
   steps:
     - name: build
-      run: mvn clean install -f ${{ inputs.dir-location }}
+      run: mvn -B clean install
       shell: bash
+      working-directory: ${{ inputs.dir-location }}

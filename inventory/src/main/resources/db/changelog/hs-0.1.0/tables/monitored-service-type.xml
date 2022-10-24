@@ -14,6 +14,10 @@
         <createTable tableName="monitored_service_type">
             <column name="id" type="BIGINT" autoIncrement="true"/>
 
+            <column name="tenant_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+
             <column name="service_name" type="VARCHAR(32)">
                 <constraints nullable="false"/>
             </column>

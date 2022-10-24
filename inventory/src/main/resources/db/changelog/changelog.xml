@@ -10,5 +10,6 @@
     <include file="db/changelog/hs-0.1.0/tables/monitored-service-type.xml"/>
     <include file="db/changelog/hs-0.1.0/tables/monitored-service.xml"/>
     <include file="db/changelog/hs-0.1.0/tables/monitoring-locations.xml"/>
+    <include file="db/changelog/hs-0.1.0/tables/monitoring-systems.xml"/>
 
 </databaseChangeLog>

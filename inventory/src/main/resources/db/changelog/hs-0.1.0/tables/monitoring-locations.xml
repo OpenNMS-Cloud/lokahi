@@ -14,14 +14,18 @@
         <createTable tableName="monitoring_locations">
             <column name="id" type="BIGINT" autoIncrement="true"/>
 
-            <column name="location" type="TEXT">
+            <column name="tenant_id" type="UUID">
                 <constraints nullable="false"/>
+            </column>
+
+            <column name="location" type="TEXT">
+                <constraints nullable="false" unique="true"/>
             </column>
 
         </createTable>
 
-        <addPrimaryKey tableName="monitoring_locations" columnNames="id, location"
-                       constraintName="pk_monitoring_locations_id_location"/>
+        <addPrimaryKey tableName="monitoring_locations" columnNames="id"
+                       constraintName="pk_monitoring_locations_id"/>
 
     </changeSet>
 </databaseChangeLog>

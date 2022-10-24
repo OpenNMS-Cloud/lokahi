@@ -1,4 +1,4 @@
-name: develop
+name: develop-sonar-scan
 
 on: workflow_dispatch
 

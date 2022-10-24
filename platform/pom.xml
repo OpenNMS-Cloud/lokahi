@@ -109,6 +109,9 @@
         <skipTests>false</skipTests>
         <skipITs>true</skipITs>
         <skipUTs>${skipTests}</skipUTs>
+        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+        <sonar.projectKey>opennms_horizon-stream_core</sonar.projectKey>
+        <sonar.moduleKey>${project.artifactId}</sonar.moduleKey>
         <slf4j.version>1.7.33</slf4j.version>
         <snmp4j.version>2.5.5</snmp4j.version>
         <snmp4j.agent.version>2.5.3</snmp4j.agent.version>

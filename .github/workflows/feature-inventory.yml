@@ -8,10 +8,10 @@ on:
       - '!release'
     paths:
       - 'inventory/**'
-  pull_request:
-    types: [opened, synchronize, reopened]
-    paths:
-      - 'inventory/**'
+#  pull_request:
+#    types: [opened, synchronize, reopened]
+#    paths:
+#      - 'inventory/**'
 
 jobs:
 

@@ -8,10 +8,10 @@ on:
       - '!release'
     paths:
       - 'notifications/**'
-  pull_request:
-    types: [opened, synchronize, reopened]
-    paths:
-      - 'notifications/**'
+#  pull_request:
+#    types: [opened, synchronize, reopened]
+#    paths:
+#      - 'notifications/**'
 
 jobs:
 

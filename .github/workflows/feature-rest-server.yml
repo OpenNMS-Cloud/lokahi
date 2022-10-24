@@ -8,10 +8,10 @@ on:
       - '!release'
     paths:
       - 'rest-server/**'
-  pull_request:
-    types: [opened, synchronize, reopened]
-    paths:
-      - 'rest-server/**'
+#  pull_request:
+#    types: [opened, synchronize, reopened]
+#    paths:
+#      - 'rest-server/**'
 
 jobs:
   build-and-test:

@@ -8,10 +8,10 @@ on:
       - '!release'
     paths:
       - 'minion-gateway/**'
-  pull_request:
-    types: [opened, synchronize, reopened]
-    paths:
-      - 'minion-gateway/**'
+#  pull_request:
+#    types: [opened, synchronize, reopened]
+#    paths:
+#      - 'minion-gateway/**'
 
 jobs:
 

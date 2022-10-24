@@ -10,12 +10,15 @@ inputs:
   dir-location:
     description: 'The dir containing the change.'
     required: true
+  project-key:
+    description: 'The Sonar project key'
+    required: true
 
 runs:
   using: "composite"
   steps:
     - name: sonar-scan
-      run: mvn -B org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
+      run: mvn -B org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=${{ inputs.project-key }}
       shell: bash
       env:
         GITHUB_TOKEN: ${{ inputs.github-token }}

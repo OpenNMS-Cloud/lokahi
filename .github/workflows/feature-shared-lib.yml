@@ -42,12 +42,8 @@ jobs:
         with:
           dir-location: 'shared-lib'
   sonar-scan:
-    runs-on: ubuntu-latest
-    steps:
-    - name: sonar-scan
-      id: action-sonar-scan
-      uses: ./.github/workflows/sonar-maven.yml
-      with:
-        dir-location: 'shared-lib'
-        project-key: 'opennms_horizon-stream_shared-lib'
-      secrets: inherit
+    uses: ./.github/workflows/sonar-maven.yml
+    with:
+      dir-location: 'shared-lib'
+      project-key: 'opennms_horizon-stream_shared-lib'
+    secrets: inherit

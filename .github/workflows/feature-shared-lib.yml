@@ -42,3 +42,4 @@ jobs:
         with:
           dir-location: 'shared-lib'
           project-key: 'opennms_horizon-stream_shared-lib'
+        secrets: inherit

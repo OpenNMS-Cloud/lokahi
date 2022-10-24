@@ -37,7 +37,7 @@ jobs:
         with:
           dir-location: 'shared-lib'
   sonar-scan:
-    needs: setup
+    needs: build-and-test
     uses: ./.github/workflows/sonar-maven.yml
     with:
       dir-location: 'shared-lib'

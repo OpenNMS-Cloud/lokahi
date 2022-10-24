@@ -29,6 +29,9 @@ jobs:
         uses: ./.github/actions/ui
         with:
           dir-location: 'ui'
+      - name: 'Coverage Report'
+        run: 'yarn run test:coverage'
+        working-directory: 'ui'
       - name: 'SonarCloud Scan'
         uses: SonarSource/sonarcloud-github-action@master
         with:

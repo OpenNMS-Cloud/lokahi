@@ -18,7 +18,7 @@
 		<lombok.version>1.18.22</lombok.version>
 		<lombok.binding.version>0.2.0</lombok.binding.version>
 		<graphql.spqr.version>0.0.6</graphql.spqr.version>
-		<docker.it.network>rest-server-it-network</docker.it.network>
+		<docker.it.network>rest-server-it-network-2</docker.it.network>
 		<caffeine.cache.version>3.1.0</caffeine.cache.version>
 		<springdoc.openapi.version>1.6.9</springdoc.openapi.version>
 		<horizon.shared.lib.version>0.1.0-SNAPSHOT</horizon.shared.lib.version>

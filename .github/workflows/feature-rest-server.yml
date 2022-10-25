@@ -8,6 +8,7 @@ on:
       - '!release'
     paths:
       - 'rest-server/**'
+  workflow_call: {}
 
 jobs:
   shared-lib:

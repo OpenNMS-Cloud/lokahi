@@ -1,6 +1,6 @@
 name: feature-core
 
-on:  
+on:
   push:
     branches:
       - '**'
@@ -8,6 +8,7 @@ on:
       - '!release'
     paths:
       - 'platform/**'
+  workflow_call: {}
 
 jobs:
   shared-lib:

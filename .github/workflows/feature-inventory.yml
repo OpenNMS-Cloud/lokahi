@@ -8,6 +8,7 @@ on:
       - '!release'
     paths:
       - 'inventory/**'
+  workflow_call: {}
 
 jobs:
   shared-lib:

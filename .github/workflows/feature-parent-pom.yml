@@ -8,9 +8,6 @@ on:
       - '!release'
     paths:
       - 'parent-pom/**'
-  pull_request:
-    paths:
-      - 'parent-pom/**'
   workflow_call: {}
 
 jobs:

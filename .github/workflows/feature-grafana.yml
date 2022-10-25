@@ -8,6 +8,7 @@ on:
       - '!release'
     paths:
       - 'grafana/**'
+  workflow_call: {}
 
 jobs:
 

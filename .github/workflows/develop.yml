@@ -4,115 +4,125 @@ on:
   push:
     branches:
       - 'develop'
-  pull_request:
-    #types: [ labeled, closed]
-    types: [ labeled]
-    branches:
-      - 'develop'
-
-# For now, we have put all steps into a single job, this will allow for just
-# one vm to run. We use actions to factor out the functionality. If there is a
-# requirement to create additional jobs, maybe to run concurrent jobs, then we
-# can split them up later.
+#  pull_request:
+#    #types: [ labeled, closed]
+#    types: [ labeled ]
+#    branches:
+#      - 'develop'
+  pull_request: {}
 
 jobs:
-  develop:
-    # If label for PR, closed on PR, or develop branch on push, then run., 
-    if: ${{ ( github.event.label.name == 'actions-develop' ) || ( github.event.action == 'closed' ) || ( github.event.ref == 'refs/heads/develop' ) }}
-    runs-on: self-hosted
+  shared-lib:
+    uses: ./.github/feature-shared-lib.yml
+    secrets: inherit
+  core:
+    needs: shared-lib
+    uses: ./.github/feature-core.yml
+    secrets: inherit
+  rest-server:
+    needs: shared-lib
+    uses: ./.github/feature-rest-server.yml
+    secrets: inherit
+  inventory:
+    needs: shared-lib
+    uses: ./.github/feature-inventory.yml
+    secrets: inherit
+  metrics-processor:
+    needs: shared-lib
+    uses: ./.github/feature-metrics-processor.yml
+    secrets: inherit
+  notifications:
+    needs: shared-lib
+    uses: ./.github/feature-notifications.yml
+    secrets: inherit
+  minion:
+    needs: shared-lib
+    uses: ./.github/feature-minion.yml
+    secrets: inherit
+  minion-gateway:
+    needs: shared-lib
+    uses: ./.github/feature-minion-gateway.yml
+    secrets: inherit
+  ui:
+    uses: ./.github/feature-ui.yml
+    secrets: inherit
+  operator:
+    uses: ./.github/feature-operator.yml
+    secrets: inherit
+  grafana:
+    uses: ./.github/feature-grafana.yml
+    secrets: inherit
+  keycloak-ui:
+    uses: ./.github/feature-keycloak-ui.yml
+    secrets: inherit
+  external-it:
+    needs: [
+      shared-lib,
+      core,
+      rest-server,
+      inventory,
+      metrics-processor,
+      notifications,
+      minion,
+      minion-gateway,
+      ui,
+      operator,
+      grafana,
+      keycloak-ui
+    ]
+    runs-on: ubuntu-latest
     steps:
-      - name: Check out repository code
-        uses: actions/checkout@v2
-        # Is required to call actions.
-
-      - name: init
+      - name: Init
         run: |
+          
+          echo "For init - placeholder"
 
-          # In case a previous workflow, using self-hosted runner, failed with
-          # kind cluster still running, delete it. It uses a lot of space. 
+        shell: bash
+
+      - name: Create & Setup Cluster
+        run: |
+          
+          # Delete if exists from previous failed run.
+          kind delete clusters kind
+          
+          # Setup localhost DNS
+          sudo echo "127.0.0.1 onmshs" | sudo tee -a /etc/hosts
+          
+          # Build cluster with Horizon Stream installed.
+          ./install-local.sh custom-images
+
+        shell: bash
+
+      - name: Setup & Run Cucumber Tests
+        run: |          
+          kubectl --context kind-kind -n local-instance port-forward --pod-running-timeout 1s services/opennms-core 11080:8181 &
+          
+          # Core takes some time after ready status true before it is setup and
+          # has the minion coming in. 
+          sleep 500
+          
+          mvn clean install
+          HORIZON_STREAM_BASE_URL=http://localhost:11080 
+          KEYCLOAK_BASE_URL=https://onmshs/auth
+          KEYCLOAK_REALM=opennms
+          KEYCLOAK_USERNAME=admin
+          KEYCLOAK_PASSWORD=admin
+          export HORIZON_STREAM_BASE_URL KEYCLOAK_BASE_URL KEYCLOAK_REALM KEYCLOAK_USERNAME KEYCLOAK_PASSWORD
+          PROJECT_VERSION="$(mvn -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive -q org.codehaus.mojo:exec-maven-plugin:1.6.0:exec)"
+          java -jar "external-horizon-stream-it/target/external-horizon-stream-it-${PROJECT_VERSION}.jar"
+          
+          ## If fail, exit which kills the ci-cd workflow.
+          ##for i in $(jq '.[0].elements[].steps[].result.status' external-it/external-horizon-stream-it/cucumber.reports/cucumber-report.json);do
+          ##  if [[ $i != '"passed"' ]];then
+          ##    exit;
+          ##  fi
+          ##done
+
+        shell: bash
+        working-directory: external-it
+
+      - name: Cleanup
+        run: |
           kind delete clusters kind
 
-      - name: feature-ui
-        id: action-feature-ui
-        uses: ./.github/actions/ui
-        with:
-          dir-location: 'ui'
-  
-      - name: feature-grafana
-        id: action-feature-grafana
-        uses: ./.github/actions/grafana
-        with:
-          dir-location: 'grafana'
-
-      - name: feature-keycloak-ui
-        id: action-feature-keycloak-ui
-        uses: ./.github/actions/keycloak-ui
-        with:
-          dir-location: 'keycloak-ui'
-
-      - name: feature-operator
-        id: action-feature-operator
-        uses: ./.github/actions/operator
-        with:
-          dir-location: 'operator'
-
-      # This needs to happen before shared-lib.
-      - name: parent-pom
-        id: action-parent-pom
-        uses: ./.github/actions/parent-pom
-        with:
-          dir-location: 'parent-pom'
-
-      # This needs to happen before core, rest-server, and notifications.
-      - name: shared-lib
-        id: action-shared-lib
-        uses: ./.github/actions/shared-lib
-        with:
-          dir-location: 'shared-lib'
-
-      - name: feature-core
-        id: action-feature-core
-        uses: ./.github/actions/core
-        with:
-          dir-location: 'platform'
-
-      - name: feature-metrics-processor
-        id: action-feature-metrics-processor
-        uses: ./.github/actions/metrics-processor
-
-      - name: feature-rest-server
-        id: action-rest-server
-        uses: ./.github/actions/rest-server
-        with:
-          dir-location: 'rest-server'
-
-      - name: feature-inventory
-        id: action-inventory
-        uses: ./.github/actions/inventory
-        with:
-          dir-location: 'inventory'
-
-      - name: feature-notifications
-        id: action-notifications
-        uses: ./.github/actions/notifications
-        with:
-          dir-location: 'notifications'
-
-      - name: feature-minion
-        id: action-minion
-        uses: ./.github/actions/minion
-        with:
-          dir-location: 'minion'
-
-      - name: feature-minion-gateway
-        id: action-minion-gateway
-        uses: ./.github/actions/minion-gateway
-        with:
-          dir-location: 'minion-gateway'
-
-      - name: external-it
-        id: action-external-it
-        uses: ./.github/actions/external-it
-        with:
-          dir-location: 'external-it'
-
+        shell: bash

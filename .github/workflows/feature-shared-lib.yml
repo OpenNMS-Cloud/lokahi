@@ -8,9 +8,6 @@ on:
       - '!release'
     paths:
       - 'shared-lib/**'
-  pull_request:
-    paths:
-      - 'shared-lib/**'
   workflow_call: {}
 
 jobs:

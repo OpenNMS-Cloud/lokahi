@@ -8,6 +8,7 @@ on:
       - '!release'
     paths:
       - 'minion-gateway/**'
+  workflow_call: {}
 
 jobs:
   shared-lib:

@@ -8,6 +8,7 @@ on:
       - '!release'
     paths:
       - 'notifications/**'
+  workflow_call: {}
 
 jobs:
   shared-lib:

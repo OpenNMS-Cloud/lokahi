@@ -8,6 +8,7 @@ on:
       - '!release'
     paths:
       - 'operator/**'
+  workflow_call: {}
 
 jobs:
 

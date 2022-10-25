@@ -1,13 +1,13 @@
-name: feature-shared-lib
+name: feature-parent-pom
 
-on:  
+on:
   push:
     branches:
       - '**'
       - '!develop'
       - '!release'
     paths:
-      - 'shared-lib/**'
+      - 'parent-pom/**'
 
 jobs:
   install:

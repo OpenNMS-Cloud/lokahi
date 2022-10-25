@@ -9,7 +9,9 @@ on:
 #    types: [ labeled ]
 #    branches:
 #      - 'develop'
-  pull_request: {}
+  pull_request:
+    branches:
+      - 'develop'
 
 jobs:
   shared-lib:

@@ -12,6 +12,6 @@ runs:
   using: "composite"
   steps:
     - name: build
-      run: mvn -B verify jib:dockerBuild -Dimage={{ $inputs.image }}
+      run: mvn -B verify jib:dockerBuild -Dimage=${{ inputs.image }}
       shell: bash
       working-directory: ${{ inputs.working-directory }}

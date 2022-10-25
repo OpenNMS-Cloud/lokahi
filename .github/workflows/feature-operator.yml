@@ -33,7 +33,7 @@ jobs:
           dir-location: 'operator'
 
       - name: 'Test Coverage'
-        run: go test -covermode=atomic -coverprofile cover.out --tags=unit ./...
+        run: make coverage
         working-directory: 'operator'
 
       - name: 'SonarCloud Scan'

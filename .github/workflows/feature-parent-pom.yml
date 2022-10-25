@@ -8,6 +8,9 @@ on:
       - '!release'
     paths:
       - 'parent-pom/**'
+  pull_request:
+    paths:
+      - 'parent-pom/**'
 
 jobs:
   install:

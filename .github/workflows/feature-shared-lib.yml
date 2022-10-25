@@ -8,6 +8,9 @@ on:
       - '!release'
     paths:
       - 'shared-lib/**'
+  pull_request:
+    paths:
+      - 'shared-lib/**'
 
 jobs:
   parent-pom:

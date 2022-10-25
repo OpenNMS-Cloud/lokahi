@@ -13,47 +13,47 @@ on:
 
 jobs:
   shared-lib:
-    uses: ./.github/feature-shared-lib.yml
+    uses: ./.github/workflows/feature-shared-lib.yml
     secrets: inherit
   core:
     needs: shared-lib
-    uses: ./.github/feature-core.yml
+    uses: ./.github/workflows/feature-core.yml
     secrets: inherit
   rest-server:
     needs: shared-lib
-    uses: ./.github/feature-rest-server.yml
+    uses: ./.github/workflows/feature-rest-server.yml
     secrets: inherit
   inventory:
     needs: shared-lib
-    uses: ./.github/feature-inventory.yml
+    uses: ./.github/workflows/feature-inventory.yml
     secrets: inherit
   metrics-processor:
     needs: shared-lib
-    uses: ./.github/feature-metrics-processor.yml
+    uses: ./.github/workflows/feature-metrics-processor.yml
     secrets: inherit
   notifications:
     needs: shared-lib
-    uses: ./.github/feature-notifications.yml
+    uses: ./.github/workflows/feature-notifications.yml
     secrets: inherit
   minion:
     needs: shared-lib
-    uses: ./.github/feature-minion.yml
+    uses: ./.github/workflows/feature-minion.yml
     secrets: inherit
   minion-gateway:
     needs: shared-lib
-    uses: ./.github/feature-minion-gateway.yml
+    uses: ./.github/workflows/feature-minion-gateway.yml
     secrets: inherit
   ui:
-    uses: ./.github/feature-ui.yml
+    uses: ./.github/workflows/feature-ui.yml
     secrets: inherit
   operator:
-    uses: ./.github/feature-operator.yml
+    uses: ./.github/workflows/feature-operator.yml
     secrets: inherit
   grafana:
-    uses: ./.github/feature-grafana.yml
+    uses: ./.github/workflows/feature-grafana.yml
     secrets: inherit
   keycloak-ui:
-    uses: ./.github/feature-keycloak-ui.yml
+    uses: ./.github/workflows/feature-keycloak-ui.yml
     secrets: inherit
   external-it:
     needs: [

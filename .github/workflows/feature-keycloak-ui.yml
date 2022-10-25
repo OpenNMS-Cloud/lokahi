@@ -19,16 +19,9 @@ jobs:
         uses: actions/checkout@v2
         # Is required to call actions.
 
-      - name: init
-        run: |
-
-          echo "For init steps."
-
-      - name: feature-keycloak-ui
-        id: action-feature-keycloak-ui
-        uses: ./.github/actions/keycloak-ui
-        with:
-          dir-location: 'keycloak-ui'
+      - name: 'Build Image'
+        run: DOCKER_BUILDKIT=1 docker build -t opennms/horizon-stream-keycloak:local -f ./Dockerfile .
+        working-directory: 'keycloak-ui'
 
       - name: publish-image-keycloak-ui
         run: |

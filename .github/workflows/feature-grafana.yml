@@ -19,13 +19,6 @@ jobs:
         uses: actions/checkout@v2
         # Is required to call actions.
 
-      - name: init
-        run: |
-
-          echo "For init steps."
-
-      - name: feature-grafana
-        id: action-feature-grafana
-        uses: ./.github/actions/grafana
-        with:
-          dir-location: 'grafana'
+      - name: 'Build Image'
+        run: docker build -t opennms/horizon-stream-grafana:local -f ./Dockerfile .
+        working-directory: 'grafana'

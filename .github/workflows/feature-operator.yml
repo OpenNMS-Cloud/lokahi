@@ -22,15 +22,9 @@ jobs:
       - name: Setup golang
         uses: actions/setup-go@v3
 
-      - name: Copy charts
-        run: |
-          cp -rf charts/ operator/charts
-
-      - name: feature-operator
-        id: action-feature-operator
-        uses: ./.github/actions/operator
-        with:
-          dir-location: 'operator'
+      - name: 'Build Image'
+        run: make local-docker
+        working-directory: 'operator'
 
       - name: 'Test Coverage'
         run: make coverage

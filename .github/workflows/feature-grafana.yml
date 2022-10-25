@@ -26,6 +26,6 @@ jobs:
 
       - name: feature-grafana
         id: action-feature-grafana
-        uses: ${{ github.action_path }}/grafana
+        uses: ./.github/actions/grafana
         with:
           dir-location: 'grafana'

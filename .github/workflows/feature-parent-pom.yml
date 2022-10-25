@@ -34,7 +34,7 @@ jobs:
         working-directory: 'parent-pom'
 
       - name: 'SonarCloud Scan'
-        uses: ${{ github.action_path }}/sonar-scan-maven
+        uses: ./.github/actions/sonar-scan-maven
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           sonar-token: ${{ secrets.SONAR_TOKEN }}

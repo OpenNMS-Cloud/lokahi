@@ -28,7 +28,7 @@ jobs:
         working-directory: 'ui'
       - name: feature-ui
         id: action-feature-ui
-        uses: ${{ github.action_path }}/ui
+        uses: ./.github/actions/ui
         with:
           dir-location: 'ui'
       - name: 'Coverage Report'

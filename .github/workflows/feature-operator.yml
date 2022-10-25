@@ -28,7 +28,7 @@ jobs:
 
       - name: feature-operator
         id: action-feature-operator
-        uses: ${{ github.action_path }}/operator
+        uses: ./.github/actions/operator
         with:
           dir-location: 'operator'
 

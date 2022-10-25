@@ -28,24 +28,24 @@ jobs:
 
       - name: parent-pom
         id: action-parent-pom
-        uses: ${{ github.action_path }}/parent-pom
+        uses: ./.github/actions/parent-pom
         with:
           dir-location: 'parent-pom'
 
       - name: shared-lib
         id: action-shared-lib
-        uses: ${{ github.action_path }}/shared-lib
+        uses: ./.github/actions/shared-lib
         with:
           dir-location: 'shared-lib'
 
-      - uses: ${{ github.action_path }}/jib-maven-submodule
+      - uses: ./.github/actions/jib-maven-submodule
         with:
           working-directory: 'minion-gateway'
           image: 'opennms/horizon-stream-minion-gateway:local'
           submodule: 'main'
 
       - name: 'SonarCloud Scan'
-        uses: ${{ github.action_path }}/sonar-scan-maven
+        uses: ./.github/actions/sonar-scan-maven
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           sonar-token: ${{ secrets.SONAR_TOKEN }}

@@ -11,12 +11,7 @@ on:
   workflow_call: {}
 
 jobs:
-  shared-lib:
-    uses: ./.github/workflows/feature-shared-lib.yml
-    secrets: inherit
-
   build-and-test:
-    needs: shared-lib
     runs-on: self-hosted
 
     steps:

@@ -15,25 +15,35 @@ on:
       - 'develop'
 
 jobs:
+  shared-lib:
+    uses: ./.github/workflows/feature-shared-lib.yml
+    secrets: inherit
   core:
+    needs: shared-lib
     uses: ./.github/workflows/feature-core.yml
     secrets: inherit
   rest-server:
+    needs: shared-lib
     uses: ./.github/workflows/feature-rest-server.yml
     secrets: inherit
   inventory:
+    needs: shared-lib
     uses: ./.github/workflows/feature-inventory.yml
     secrets: inherit
   metrics-processor:
+    needs: shared-lib
     uses: ./.github/workflows/feature-metrics-processor.yml
     secrets: inherit
   notifications:
+    needs: shared-lib
     uses: ./.github/workflows/feature-notifications.yml
     secrets: inherit
   minion:
+    needs: shared-lib
     uses: ./.github/workflows/feature-minion.yml
     secrets: inherit
   minion-gateway:
+    needs: shared-lib
     uses: ./.github/workflows/feature-minion-gateway.yml
     secrets: inherit
   ui:

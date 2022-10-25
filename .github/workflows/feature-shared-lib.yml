@@ -37,6 +37,13 @@ jobs:
         shell: bash
         working-directory: 'shared-lib'
 
+      - name: Post install maven caching
+        uses: actions/setup-java@v3
+        with:
+          distribution: temurin
+          java-version: 11
+          cache: maven
+
       - name: 'SonarCloud Scan'
         uses: ./.github/actions/sonar-scan-maven
         with:

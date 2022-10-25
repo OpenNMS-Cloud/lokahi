@@ -11,6 +11,7 @@ on:
   pull_request:
     paths:
       - 'shared-lib/**'
+  workflow_call: {}
 
 jobs:
   parent-pom:

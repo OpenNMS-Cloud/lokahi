@@ -28,24 +28,24 @@ jobs:
 
       - name: parent-pom
         id: action-parent-pom
-        uses: ./.github/actions/parent-pom
+        uses: ${{ github.action_path }}/parent-pom
         with:
           dir-location: 'parent-pom'
 
       - name: shared-lib
         id: action-shared-lib
-        uses: ./.github/actions/shared-lib
+        uses: ${{ github.action_path }}/shared-lib
         with:
           dir-location: 'shared-lib'
 
       - name: feature-core
         id: action-feature-core
-        uses: ./.github/actions/core
+        uses: ${{ github.action_path }}/core
         with:
           dir-location: 'platform'
 
       - name: 'SonarCloud Scan'
-        uses: ./.github/actions/sonar-scan-maven
+        uses: ${{ github.action_path }}/sonar-scan-maven
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           sonar-token: ${{ secrets.SONAR_TOKEN }}

@@ -34,85 +34,85 @@ jobs:
 
       - name: feature-ui
         id: action-feature-ui
-        uses: ./.github/actions/ui
+        uses: ${{ github.action_path }}/ui
         with:
           dir-location: 'ui'
   
       - name: feature-grafana
         id: action-feature-grafana
-        uses: ./.github/actions/grafana
+        uses: ${{ github.action_path }}/grafana
         with:
           dir-location: 'grafana'
 
       - name: feature-keycloak-ui
         id: action-feature-keycloak-ui
-        uses: ./.github/actions/keycloak-ui
+        uses: ${{ github.action_path }}/keycloak-ui
         with:
           dir-location: 'keycloak-ui'
 
       - name: feature-operator
         id: action-feature-operator
-        uses: ./.github/actions/operator
+        uses: ${{ github.action_path }}/operator
         with:
           dir-location: 'operator'
 
       # This needs to happen before shared-lib.
       - name: parent-pom
         id: action-parent-pom
-        uses: ./.github/actions/parent-pom
+        uses: ${{ github.action_path }}/parent-pom
         with:
           dir-location: 'parent-pom'
 
       # This needs to happen before core, rest-server, and notifications.
       - name: shared-lib
         id: action-shared-lib
-        uses: ./.github/actions/shared-lib
+        uses: ${{ github.action_path }}/shared-lib
         with:
           dir-location: 'shared-lib'
 
       - name: feature-core
         id: action-feature-core
-        uses: ./.github/actions/core
+        uses: ${{ github.action_path }}/core
         with:
           dir-location: 'platform'
 
       - name: feature-metrics-processor
         id: action-feature-metrics-processor
-        uses: ./.github/actions/metrics-processor
+        uses: ${{ github.action_path }}/metrics-processor
 
       - name: feature-rest-server
         id: action-rest-server
-        uses: ./.github/actions/rest-server
+        uses: ${{ github.action_path }}/rest-server
         with:
           dir-location: 'rest-server'
 
       - name: feature-inventory
         id: action-inventory
-        uses: ./.github/actions/inventory
+        uses: ${{ github.action_path }}/inventory
         with:
           dir-location: 'inventory'
 
       - name: feature-notifications
         id: action-notifications
-        uses: ./.github/actions/notifications
+        uses: ${{ github.action_path }}/notifications
         with:
           dir-location: 'notifications'
 
       - name: feature-minion
         id: action-minion
-        uses: ./.github/actions/minion
+        uses: ${{ github.action_path }}/minion
         with:
           dir-location: 'minion'
 
       - name: feature-minion-gateway
         id: action-minion-gateway
-        uses: ./.github/actions/minion-gateway
+        uses: ${{ github.action_path }}/minion-gateway
         with:
           dir-location: 'minion-gateway'
 
       - name: external-it
         id: action-external-it
-        uses: ./.github/actions/external-it
+        uses: ${{ github.action_path }}/external-it
         with:
           dir-location: 'external-it'
 

@@ -10,11 +10,7 @@ on:
       - 'shared-lib/**'
 
 jobs:
-  parent-pom:
-    uses: ./.github/workflows/feature-parent-pom.yml
-    secrets: inherit
   install:
-    needs: parent-pom
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -31,12 +27,12 @@ jobs:
       - name: 'Maven Install'
         run: mvn -B install
         shell: bash
-        working-directory: 'shared-lib'
+        working-directory: 'parent-pom'
 
       - name: 'SonarCloud Scan'
         uses: ${{ github.action_path }}/sonar-scan-maven
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           sonar-token: ${{ secrets.SONAR_TOKEN }}
-          dir-location: 'shared-lib'
-          project-key: 'opennms_horizon-stream_shared-lib'
+          dir-location: 'parent-pom'
+          project-key: 'opennms_horizon-stream_parent-pom'

@@ -10,9 +10,14 @@ on:
       - 'minion/**'
 
 jobs:
+  shared-lib:
+    uses: ./.github/workflows/feature-shared-lib.yml
+    secrets: inherit
 
   build-and-test:
+    needs: shared-lib
     runs-on: self-hosted
+
     steps:
       - uses: actions/checkout@v2
         with:
@@ -24,18 +29,6 @@ jobs:
           distribution: temurin
           java-version: 11
           cache: maven
-
-      - name: parent-pom
-        id: action-parent-pom
-        uses: ./.github/actions/parent-pom
-        with:
-          dir-location: 'parent-pom'
-
-      - name: shared-lib
-        id: action-shared-lib
-        uses: ./.github/actions/shared-lib
-        with:
-          dir-location: 'shared-lib'
 
       - uses: ./.github/actions/jib-maven
         with:

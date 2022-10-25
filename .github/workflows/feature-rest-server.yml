@@ -37,11 +37,10 @@ jobs:
         with:
           dir-location: 'shared-lib'
 
-      - name: feature-rest-server
-        id: action-feature-rest-server
-        uses: ${{ github.action_path }}/rest-server
+      - uses: ${{ github.action_path }}/jib-maven
         with:
-          dir-location: 'rest-server'
+          working-directory: 'rest-server'
+          image: 'opennms/horizon-stream-rest-server:local'
 
       - name: 'SonarCloud Scan'
         uses: ${{ github.action_path }}/sonar-scan-maven

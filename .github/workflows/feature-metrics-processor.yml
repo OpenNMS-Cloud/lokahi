@@ -38,11 +38,10 @@ jobs:
         with:
           dir-location: 'shared-lib'
 
-      - name: feature-metrics-processor
-        id: action-feature-metrics-processor
-        uses: ${{ github.action_path }}/metrics-processor
+      - uses: ${{ github.action_path }}/jib-maven
         with:
-          dir-location: 'metrics-processor'
+          working-directory: 'metrics-processor'
+          image: 'opennms/horizon-stream-metrics-processor:local'
 
       - name: 'SonarCloud Scan'
         uses: ${{ github.action_path }}/sonar-scan-maven

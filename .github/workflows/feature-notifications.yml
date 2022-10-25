@@ -38,11 +38,10 @@ jobs:
         with:
           dir-location: 'shared-lib'
 
-      - name: feature-notifications
-        id: action-build-notifications
-        uses: ${{ github.action_path }}/notifications
+      - uses: ${{ github.action_path }}/jib-maven
         with:
-          dir-location: 'notifications'
+          working-directory: 'notifications'
+          image: 'opennms/horizon-stream-notification:local'
 
       - name: 'SonarCloud Scan'
         uses: ${{ github.action_path }}/sonar-scan-maven

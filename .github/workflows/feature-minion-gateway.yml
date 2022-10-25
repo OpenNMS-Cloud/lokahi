@@ -38,11 +38,11 @@ jobs:
         with:
           dir-location: 'shared-lib'
 
-      - name: feature-minion-gateway
-        id: action-feature-minion-gateway
-        uses: ${{ github.action_path }}/minion-gateway
+      - uses: ${{ github.action_path }}/jib-maven-submodule
         with:
-          dir-location: 'minion-gateway'
+          working-directory: 'minion-gateway'
+          image: 'opennms/horizon-stream-minion-gateway:local'
+          submodule: 'main'
 
       - name: 'SonarCloud Scan'
         uses: ${{ github.action_path }}/sonar-scan-maven

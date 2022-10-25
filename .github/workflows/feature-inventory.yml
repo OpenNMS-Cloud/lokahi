@@ -38,11 +38,10 @@ jobs:
         with:
           dir-location: 'shared-lib'
 
-      - name: feature-inventory
-        id: action-feature-inventory
-        uses: ${{ github.action_path }}/actions/inventory
+      - uses: ${{ github.action_path }}/jib-maven
         with:
-          dir-location: 'inventory'
+          working-directory: 'inventory'
+          image: 'opennms/horizon-stream-inventory:local'
 
       - name: 'SonarCloud Scan'
         uses: ${{ github.action_path }}/sonar-scan-maven

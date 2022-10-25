@@ -23,14 +23,14 @@ jobs:
           node-version: 18
           cache: 'yarn'
           cache-dependency-path: ui/yarn.lock
+      - name: 'Install dependencies'
+        run: 'yarn install --pure-lockfile'
+        working-directory: 'ui'
       - name: feature-ui
         id: action-feature-ui
         uses: ./.github/actions/ui
         with:
           dir-location: 'ui'
-      - name: 'Install dependencies'
-        run: 'yarn install --immutable'
-        working-directory: 'ui'
       - name: 'Coverage Report'
         run: 'yarn test:coverage:sonar'
         working-directory: 'ui'

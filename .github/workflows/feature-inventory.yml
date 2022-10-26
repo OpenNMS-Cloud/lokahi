@@ -10,6 +10,8 @@ on:
       - 'inventory/**'
   workflow_call:
   pull_request:
+    paths:
+      - 'inventory/**'
 
 jobs:
   build-and-test:

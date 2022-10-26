@@ -44,13 +44,9 @@ jobs:
         with:
           working-directory: 'shared-lib'
 
-      - name: 'Jib Maven Build'
-        uses: ./.github/actions/jib-maven
-        with:
-          working-directory: 'minion'
-          image: 'opennms/horizon-stream-minion:local'
-          registry-username: ${{ secrets.DOCKERHUB_LOGIN }}
-          registry-password: ${{ secrets.DOCKERHUB_PASS }}
+      - name: 'Build Image'
+        run: mvn install -Pbuild-docker-images-enabled -DskipTests -Ddocker.image=opennms/horizon-stream-minion:local -Ddocker.skipPush=true
+        working-directory: 'minion'
 
       - name: 'SonarCloud Scan'
         uses: ./.github/actions/sonar-scan-maven

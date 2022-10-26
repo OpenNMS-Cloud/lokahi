@@ -18,15 +18,7 @@ jobs:
   wait:
     runs-on: ubuntu-latest
     steps:
-      - name: Wait for tests to succeed
-        uses: lewagon/wait-on-check-action@v1.2.0
-        with:
-          ref: ${{ github.ref }}
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-          running-workflow-name: wait
-          wait-interval: 10
-
-      - name: Wait for tests to succeed
+      - name: Wait for builds to succeed
         uses: lewagon/wait-on-check-action@v1.2.0
         with:
           ref: ${{ github.ref }}

@@ -16,7 +16,7 @@ on:
 
 env:
   IMAGE: 'opennms/horizon-stream-rest-server'
-  IMAGE_TAG: ${{ inputs.image-tag || github.ref }}
+  IMAGE_TAG: ${{ inputs.image-tag || github.sha }}
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

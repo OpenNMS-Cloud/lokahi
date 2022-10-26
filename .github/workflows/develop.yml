@@ -24,6 +24,8 @@ jobs:
   inventory:
     uses: ./.github/workflows/feature-inventory.yml
     secrets: inherit
+    with:
+      image-tag: local
   metrics-processor:
     uses: ./.github/workflows/feature-metrics-processor.yml
     secrets: inherit

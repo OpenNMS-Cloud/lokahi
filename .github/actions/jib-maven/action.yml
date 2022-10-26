@@ -16,11 +16,11 @@ runs:
   steps:
     - name: build
       if: ${{ !inputs.submodule }}
-      run: mvn -B verify jib:dockerBuild -Dimage=${{ inputs.image }}
+      run: mvn -B verify jib:build -Dimage=${{ inputs.image }}
       shell: bash
       working-directory: ${{ inputs.working-directory }}
     - name: build-submodule
       if: ${{ inputs.submodule }}
-      run: mvn -B verify jib:dockerBuild -Dimage=${{ inputs.image }}
+      run: mvn -B verify jib:build -Dimage=${{ inputs.image }} -pl=${{ inputs.submodule }} -am
       shell: bash
       working-directory: ${{ inputs.working-directory }}

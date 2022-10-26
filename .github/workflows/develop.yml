@@ -25,6 +25,7 @@ jobs:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           running-workflow-name: wait
           wait-interval: 10
+          check-regexp: .*
   external-it:
     needs: wait
     runs-on: self-hosted

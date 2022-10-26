@@ -15,71 +15,27 @@ on:
       - 'develop'
 
 jobs:
-  shared-lib:
-    uses: ./.github/workflows/feature-shared-lib.yml
-    secrets: inherit
-  core:
-    needs: shared-lib
-    uses: ./.github/workflows/feature-core.yml
-    secrets: inherit
-  rest-server:
-    needs: shared-lib
-    uses: ./.github/workflows/feature-rest-server.yml
-    secrets: inherit
-  inventory:
-    needs: shared-lib
-    uses: ./.github/workflows/feature-inventory.yml
-    secrets: inherit
-  metrics-processor:
-    needs: shared-lib
-    uses: ./.github/workflows/feature-metrics-processor.yml
-    secrets: inherit
-  notifications:
-    needs: shared-lib
-    uses: ./.github/workflows/feature-notifications.yml
-    secrets: inherit
-  minion:
-    needs: shared-lib
-    uses: ./.github/workflows/feature-minion.yml
-    secrets: inherit
-  minion-gateway:
-    needs: shared-lib
-    uses: ./.github/workflows/feature-minion-gateway.yml
-    secrets: inherit
-  ui:
-    uses: ./.github/workflows/feature-ui.yml
-    secrets: inherit
-  operator:
-    uses: ./.github/workflows/feature-operator.yml
-    secrets: inherit
-  grafana:
-    uses: ./.github/workflows/feature-grafana.yml
-    secrets: inherit
-  keycloak-ui:
-    uses: ./.github/workflows/feature-keycloak-ui.yml
-    secrets: inherit
   external-it:
-    needs: [
-      shared-lib,
-      core,
-      rest-server,
-      inventory,
-      metrics-processor,
-      notifications,
-      minion,
-      minion-gateway,
-      ui,
-      operator,
-      grafana,
-      keycloak-ui
-    ]
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
-      - name: Init
-        run: |
-          
-          echo "For init - placeholder"
+      - name: Wait for tests to succeed
+        uses: lewagon/wait-on-check-action@v1.2.0
+        with:
+          ref: ${{ github.ref }}
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          running-workflow-name: feature-shared-lib
+          wait-interval: 10
 
+      - name: Wait for tests to succeed
+        uses: lewagon/wait-on-check-action@v1.2.0
+        with:
+          ref: ${{ github.ref }}
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          running-workflow-name: feature-inventory
+          wait-interval: 10
+
+      - name: test
+        run: echo "Workflow complete!"
         shell: bash
 
       - name: Create & Setup Cluster

@@ -24,6 +24,7 @@ if [[ -z "$2" || -z "$1" ]]; then
 else
   mkdir -p tmp
   cat install-local-onms-instance.yaml| sed "s/onmshs/$2/g" > tmp/install-local-onms-instance.yaml
+  cat install-local-onms-instance-custom-images.yaml| sed "s/onmshs/$2/g" > tmp/install-local-onms-instance-custom-images.yaml
 fi
 
 if [ $1 == "local" ]; then

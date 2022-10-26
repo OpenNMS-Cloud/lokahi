@@ -4,13 +4,11 @@ on:
   push:
     branches:
       - '**'
-#      - '!develop'
-#      - '!release'
+      - '!develop'
+      - '!release'
     paths:
       - 'inventory/**'
-  pull_request:
-    paths:
-      - 'inventory/**'
+  workflow_call:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

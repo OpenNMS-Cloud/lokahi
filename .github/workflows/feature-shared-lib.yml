@@ -8,7 +8,7 @@ on:
       - '!release'
     paths:
       - 'shared-lib/**'
-  workflow_call: {}
+  workflow_call:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

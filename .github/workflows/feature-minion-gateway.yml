@@ -8,9 +8,7 @@ on:
       - '!release'
     paths:
       - 'minion-gateway/**'
-  pull_request:
-    paths:
-      - 'minion-gateway/**'
+  workflow_call:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

@@ -1,9 +1,9 @@
 name: develop
 
 on:
-#  push:
-#    branches:
-#      - '**'
+  push:
+    branches:
+      - '**'
 #      - 'develop'
 #  pull_request:
 #    #types: [ labeled, closed]
@@ -13,40 +13,57 @@ on:
 #  pull_request:
 #    branches:
 #      - 'develop'
-  workflow_run:
-    workflows: [
-      feature-shared-lib,
-      feature-core,
-      feature-rest-server,
-      feature-inventory,
-      feature-metrics-processor,
-      feature-notifications,
-      feature-minion,
-      feature-minion-gateway,
-      feature-ui,
-      feature-operator,
-      feature-grafana,
-      feature-keycloak-ui
-    ]
-    types: [ completed ]
 
 jobs:
-  wait:
-    runs-on: ubuntu-latest
-    concurrency:
-      group: ${{ github.workflow }}-${{ github.ref }}
-    steps:
-      - name: Wait for other builds to succeed
-        uses: lewagon/wait-on-check-action@v1.2.0
-        with:
-          ref: ${{ github.ref }}
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-          running-workflow-name: wait
-          wait-interval: 10
+  core:
+    uses: ./.github/workflows/feature-core.yml
+    secrets: inherit
+  rest-server:
+    uses: ./.github/workflows/feature-rest-server.yml
+    secrets: inherit
+  inventory:
+    uses: ./.github/workflows/feature-inventory.yml
+    secrets: inherit
+  metrics-processor:
+    uses: ./.github/workflows/feature-metrics-processor.yml
+    secrets: inherit
+  notifications:
+    uses: ./.github/workflows/feature-notifications.yml
+    secrets: inherit
+  minion:
+    uses: ./.github/workflows/feature-minion.yml
+    secrets: inherit
+  minion-gateway:
+    uses: ./.github/workflows/feature-minion-gateway.yml
+    secrets: inherit
+  ui:
+    uses: ./.github/workflows/feature-ui.yml
+    secrets: inherit
+  operator:
+    uses: ./.github/workflows/feature-operator.yml
+    secrets: inherit
+  grafana:
+    uses: ./.github/workflows/feature-grafana.yml
+    secrets: inherit
+  keycloak-ui:
+    uses: ./.github/workflows/feature-keycloak-ui.yml
+    secrets: inherit
   external-it:
-    needs: wait
-#    runs-on: self-hosted
-    runs-on: ubuntu-latest # Temporary
+    needs: [
+      shared-lib,
+      core,
+      rest-server,
+      inventory,
+      metrics-processor,
+      notifications,
+      minion,
+      minion-gateway,
+      ui,
+      operator,
+      grafana,
+      keycloak-ui
+    ]
+    runs-on: self-hosted
     steps:
       - name: test
         run: echo "Workflow complete!"

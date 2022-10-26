@@ -33,7 +33,7 @@ import org.opennms.core.xml.InetAddressXmlAdapter;
 import org.opennms.horizon.ipc.sink.api.Message;
 import org.opennms.horizon.shared.snmp.SnmpResult;
 import org.opennms.horizon.shared.snmp.SnmpVarBindDTO;
-import org.opennms.horizon.shared.snmp.TrapInformation;
+import org.opennms.horizon.shared.snmp.traps.TrapInformation;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;

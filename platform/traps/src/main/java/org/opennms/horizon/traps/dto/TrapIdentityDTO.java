@@ -29,7 +29,7 @@
 package org.opennms.horizon.traps.dto;
 
 import com.google.common.base.MoreObjects;
-import org.opennms.horizon.shared.snmp.TrapIdentity;
+import org.opennms.horizon.shared.snmp.traps.TrapIdentity;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;

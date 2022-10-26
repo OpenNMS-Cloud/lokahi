@@ -32,14 +32,13 @@ import org.opennms.horizon.db.dao.api.InterfaceToNodeCache;
 import org.opennms.horizon.db.dao.api.MonitoringLocationDao;
 import org.opennms.horizon.events.api.EventBuilder;
 import org.opennms.horizon.events.api.EventConfDao;
-import org.opennms.horizon.events.api.EventConstants;
 import org.opennms.horizon.events.xml.Event;
+import org.opennms.horizon.grpc.traps.contract.TrapDTO;
+import org.opennms.horizon.grpc.traps.contract.TrapIdentity;
+import org.opennms.horizon.shared.snmp.SnmpHelper;
 import org.opennms.horizon.shared.snmp.SnmpObjId;
-import org.opennms.horizon.shared.snmp.SnmpResult;
 import org.opennms.horizon.shared.snmp.SnmpValue;
-import org.opennms.horizon.shared.utils.InetAddressUtils;
-import org.opennms.horizon.traps.dto.TrapDTO;
-import org.opennms.horizon.traps.dto.TrapIdentityDTO;
+import org.opennms.horizon.snmp.api.SnmpResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,10 +58,12 @@ public class EventCreator {
 
     private final InterfaceToNodeCache cache;
     private final EventConfDao eventConfDao;
+    private final SnmpHelper snmpHelper;
 
-    public EventCreator(InterfaceToNodeCache cache, EventConfDao eventConfDao) {
+    public EventCreator(InterfaceToNodeCache cache, EventConfDao eventConfDao, SnmpHelper snmpHelper) {
         this.cache = Objects.requireNonNull(cache);
         this.eventConfDao = Objects.requireNonNull(eventConfDao);
+        this.snmpHelper = Objects.requireNonNull(snmpHelper);
     }
 
     public Event createEventFrom(final TrapDTO trapDTO, final String systemId, final String location, final InetAddress trapAddress) {
@@ -76,22 +77,21 @@ public class EventCreator {
         eventBuilder.setSnmpVersion(trapDTO.getVersion());
         eventBuilder.setSnmpHost(str(trapAddress));
         eventBuilder.setInterface(trapAddress);
-        eventBuilder.setHost(InetAddressUtils.toIpAddrString(trapDTO.getAgentAddress()));
+        eventBuilder.setHost(trapDTO.getAgentAddress());
 
         // Handle trap identity
-        final TrapIdentityDTO trapIdentity = trapDTO.getTrapIdentity();
-        if (trapIdentity != null) {
-            LOG.debug("Trap Identity {}", trapIdentity);
-            eventBuilder.setGeneric(trapIdentity.getGeneric());
-            eventBuilder.setSpecific(trapIdentity.getSpecific());
-            eventBuilder.setEnterpriseId(trapIdentity.getEnterpriseId());
-            eventBuilder.setTrapOID(trapIdentity.getTrapOID());
-        }
+        final TrapIdentity trapIdentity = trapDTO.getTrapIdentity();
+        LOG.debug("Trap Identity {}", trapIdentity);
+        eventBuilder.setGeneric(trapIdentity.getGeneric());
+        eventBuilder.setSpecific(trapIdentity.getSpecific());
+        eventBuilder.setEnterpriseId(trapIdentity.getEnterpriseId());
+        eventBuilder.setTrapOID(trapIdentity.getTrapOID());
 
         // Handle var bindings
-        for (SnmpResult eachResult : trapDTO.getResults()) {
-            final SnmpObjId name = eachResult.getBase();
-            final SnmpValue value = eachResult.getValue();
+        for (SnmpResult eachResult : trapDTO.getSnmpResultsList()) {
+            final SnmpObjId name = SnmpObjId.get(eachResult.getBase());
+            final SnmpValue value  = snmpHelper.getValueFactory().getValue(eachResult.getValue().getTypeValue(),
+                eachResult.getValue().getValue().toByteArray());
             eventBuilder.addParam(SyntaxToEvent.processSyntax(name.toString(), value));
             if (OID_SNMP_IFINDEX.isPrefixOf(name)) {
                 eventBuilder.setIfIndex(value.toInt());

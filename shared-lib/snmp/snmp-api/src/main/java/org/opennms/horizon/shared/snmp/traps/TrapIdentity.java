@@ -26,15 +26,17 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.shared.snmp;
+package org.opennms.horizon.shared.snmp.traps;
+
+import org.opennms.horizon.shared.snmp.SnmpObjId;
+import org.opennms.horizon.shared.snmp.SnmpValue;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * TODO: This class should override {@link #equals(Object)} and {@link #hashCode()}

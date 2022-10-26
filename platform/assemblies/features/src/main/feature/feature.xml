@@ -114,16 +114,29 @@
         <bundle>mvn:org.opennms.horizon.events/shell/${project.version}</bundle>
     </feature>
 
+
+    <feature name="json-patch" description="OpenNMS :: Json Patch " version="${project.version}">
+        <feature>jackson</feature>
+        <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.jsr305/3.0.2_1</bundle>
+        <bundle>wrap:mvn:com.github.java-json-tools/btf/1.3</bundle>
+        <bundle>wrap:mvn:com.github.java-json-tools/msg-simple/1.2</bundle>
+        <bundle>wrap:mvn:com.github.java-json-tools/jackson-coreutils/2.0$overwrite=merge&amp;Import-Package=*;</bundle>
+        <bundle>wrap:mvn:com.github.java-json-tools/json-patch/1.13$overwrite=merge&amp;Import-Package=*;resolution:=optional&amp;Export-Package=com.github.fge.jsonpatch.diff,com.github.fge.jsonpatch</bundle>
+    </feature>
+
     <feature name="horizon-grpc" version="${project.version}" description="Horizon :: gRPC">
         <feature>horizon-ipc-api</feature>
         <feature>horizon-db</feature>
         <feature>horizon-metrics-api</feature>
         <feature>grpc</feature>
-
+        <feature>json-patch</feature>
         <bundle>mvn:org.opennms.horizon.ipc.grpc/client/${project.version}</bundle>
         <bundle>mvn:org.opennms.horizon.ipc.grpc/common/${project.version}</bundle>
         <bundle>mvn:org.opennms.horizon.ipc.grpc/server/${project.version}</bundle>
         <bundle>mvn:org.opennms.horizon.ipc/echo/${project.version}</bundle>
+        <bundle>mvn:org.opennms.core.ipc.twin/common/${project.version}</bundle>
+        <bundle>mvn:org.opennms.core.ipc.twin.grpc/common/${project.version}</bundle>
+        <bundle>mvn:org.opennms.core.ipc.twin.grpc/publisher/${project.version}</bundle>
     </feature>
 
     <feature name="horizon-echo-client" version="${project.version}" description="Horizon :: Echo Client">
@@ -201,6 +214,7 @@
 
         <bundle>mvn:org.opennms.horizon.ipc/api/${project.version}</bundle>
         <bundle>mvn:org.opennms.horizon.ipc/shell/${project.version}</bundle>
+        <bundle>mvn:org.opennms.core.ipc.twin/api/${project.version}</bundle>
     </feature>
 
     <!--    // ignored for now until we get core/minion refactoring figured out-->
@@ -597,14 +611,31 @@
         <bundle>mvn:org.opennms.horizon.config/service/${project.version}</bundle>
     </feature>
 
+    <feature name="snmp-snmp4j" version="${project.version}" description="Horizon :: SNMP4j">
+        <feature prerequisite="true">wrap</feature>
+        <feature version="${project.version}">snmp-api</feature>
+        <bundle>wrap:mvn:org.snmp4j/snmp4j/${snmp4j.version}</bundle>
+        <bundle>mvn:commons-lang/commons-lang/${commons.lang.version}</bundle>
+        <bundle>mvn:commons-io/commons-io/${commons.io.version}</bundle>
+        <bundle>mvn:org.opennms.horizon.shared/horizon-common-logging/${project.version}</bundle>
+        <bundle>mvn:org.opennms.horizon.shared/snmp-api/${project.version}</bundle>
+        <bundle>mvn:org.opennms.horizon.shared/snmp-impl/${project.version}</bundle>
+    </feature>
 
     <feature name="horizon-core-traps" version="${project.version}">
         <feature>horizon-db</feature>
         <feature>horizon-ipc-api</feature>
         <feature>horizon-snmp</feature>
         <feature>horizon-core-config-service</feature>
+        <feature>horizon-core-camel</feature>
+        <feature>horizon-grpc-contract</feature>
+        <feature>snmp-snmp4j</feature>
+        <feature>horizon-grpc</feature>
+        <bundle>mvn:org.opennms.horizon.shared/ipc-api/${project.version}</bundle>
+        <bundle dependency="true">mvn:org.opennms.horizon.shared/horizon-common-logging/${project.version}</bundle>
         <bundle>mvn:org.opennms.horizon/traps/${project.version}</bundle>
     </feature>
+
     <feature name="horizon-stream-jmx" version="${project.version}">
         <feature>horizon-core-config-service</feature>
         <bundle>mvn:org.opennms.horizon.common/common-net/${project.version}</bundle>

@@ -61,7 +61,7 @@ public class SnmpObjId implements Comparable<SnmpObjId> {
     /**
      * These constructors are private.  The get method should be called to create a new oid
      */ 
-    protected SnmpObjId(String oid) {
+    public SnmpObjId(String oid) {
         this(convertStringToInts(oid), false);
     }
     

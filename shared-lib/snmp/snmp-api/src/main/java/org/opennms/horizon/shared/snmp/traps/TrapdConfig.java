@@ -26,7 +26,7 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.traps.config;
+package org.opennms.horizon.shared.snmp.traps;
 
 import org.opennms.horizon.shared.snmp.SnmpV3User;
 

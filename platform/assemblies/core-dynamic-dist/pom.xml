@@ -63,6 +63,14 @@
             <classifier>features</classifier>
             <version>${project.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.opennms.horizon.shared</groupId>
+            <artifactId>snmp-api</artifactId>
+            <version>${project.version}</version>
+            <classifier>features</classifier>
+            <type>xml</type>
+        </dependency>
     </dependencies>
 
     <build>
@@ -127,8 +135,7 @@
                         <feature>horizon-core-heartbeat</feature>
                         <feature>horizon-core-monitor</feature>
                         <feature>horizon-core-config-rest</feature>
-                        <!-- TODO-911 -->
-                        <!--<feature>horizon-core-traps</feature>-->
+                        <feature>horizon-core-traps</feature>
                         <feature>horizon-stream-jmx</feature>
                     </bootFeatures>
                     <libraries>

@@ -66,6 +66,7 @@ OpenNMS:
     Replicas: 1
     Port: 8181
     SshPort: 8101
+    TrapsListenerPort: 1162
     Resources:
       Limits:
         Cpu: "1"

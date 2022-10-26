@@ -30,7 +30,7 @@ package org.opennms.horizon.traps.utils;
 
 import org.opennms.horizon.shared.snmp.SnmpObjId;
 import org.opennms.horizon.shared.snmp.SnmpVarBindDTO;
-import org.opennms.horizon.shared.snmp.TrapInformation;
+import org.opennms.horizon.shared.snmp.traps.TrapInformation;
 
 import java.net.InetAddress;
 import java.util.Objects;

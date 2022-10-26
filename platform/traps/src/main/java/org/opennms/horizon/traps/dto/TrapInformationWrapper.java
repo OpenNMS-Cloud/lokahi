@@ -30,7 +30,7 @@ package org.opennms.horizon.traps.dto;
 
 import org.opennms.horizon.ipc.sink.api.Message;
 import org.opennms.horizon.shared.snmp.SnmpException;
-import org.opennms.horizon.shared.snmp.TrapInformation;
+import org.opennms.horizon.shared.snmp.traps.TrapInformation;
 
 import java.net.InetAddress;
 import java.util.Objects;

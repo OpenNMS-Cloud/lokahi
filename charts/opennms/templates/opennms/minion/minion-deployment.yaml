@@ -51,6 +51,9 @@ spec:
           ports:
             - name: http
               containerPort: {{ .Values.OpenNMS.Minion.Port }}
+            - name: snmp-traps
+              protocol: UDP
+              containerPort: {{ .Values.OpenNMS.Minion.TrapsListenerPort }}
             - name: ssh
               containerPort: {{ .Values.OpenNMS.Minion.SshPort }}
           volumeMounts:

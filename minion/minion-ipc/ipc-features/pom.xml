@@ -45,7 +45,6 @@
             <artifactId>ipc-heartbeat</artifactId>
             <version>${project.version}</version>
         </dependency>
-
         <dependency>
             <groupId>org.opennms.horizon.minion</groupId>
             <artifactId>grpc-features</artifactId>
@@ -56,7 +55,7 @@
         <dependency>
             <groupId>org.opennms.horizon.minion</groupId>
             <artifactId>observability-features</artifactId>
-            <version>0.1.0-SNAPSHOT</version>
+            <version>${project.version}</version>
             <classifier>features</classifier>
             <type>xml</type>
         </dependency>

@@ -38,10 +38,7 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
-import org.opennms.horizon.core.lib.Base64;
-import org.opennms.horizon.events.xml.Value;
-//import org.opennms.horizon.minion.snmp.SnmpObjId;
-//import org.opennms.horizon.minion.snmp.SnmpValue;
+import org.opennms.horizon.shared.snmp.SnmpValue;
 
 /**
  * This class holds all OpenNMS events related constants - the UEIs, parm
@@ -53,6 +50,7 @@ public abstract class EventConstants {
      * database timestamp using the PostgreSQL to_timestamp() built-in function.
      */
     public static final String POSTGRES_DATE_FORMAT = "\'Dy Mon DD HH24:MI:SS Tz YYYY\'";
+
 
     //
     // The eventUEIs used by OpenNMS
@@ -1162,8 +1160,8 @@ public abstract class EventConstants {
                 result = (String) value;
             else if (value instanceof Number)
                 result = value.toString();
-//            else if (value instanceof SnmpValue)
-//                result = ((SnmpValue)value).toString();
+            else if (value instanceof SnmpValue)
+                result = ((SnmpValue)value).toString();
         } else if (XML_ENCODING_BASE64.equals(encoding)) {
             if (value instanceof String)
                 result = new String(Base64.encodeBase64(((String) value).getBytes()));
@@ -1177,21 +1175,21 @@ public abstract class EventConstants {
 
                 result = new String(Base64.encodeBase64(ibuf));
             }
-//            else if (value instanceof SnmpValue) {
-//                SnmpValue snmpValue = (SnmpValue)value;
-//                result = new String(Base64.encodeBase64(snmpValue.getBytes()));
-//            }
+            else if (value instanceof SnmpValue) {
+                SnmpValue snmpValue = (SnmpValue)value;
+                result = new String(Base64.encodeBase64(snmpValue.getBytes()));
+            }
         } else if (XML_ENCODING_MAC_ADDRESS.equals(encoding)) {
-//            if (value instanceof SnmpValue) {
-//                SnmpValue snmpValue = (SnmpValue)value;
-//                final StringBuilder macAddress = new StringBuilder();
-//                byte[] bytes = snmpValue.getBytes();
-//                for (int i = 0; i < bytes.length; i++) {
-//                    if (i > 0) macAddress.append(":");
-//                    macAddress.append(String.format("%02X", bytes[i]));
-//                }
-//                result = macAddress.toString();
-//            }
+            if (value instanceof SnmpValue) {
+                SnmpValue snmpValue = (SnmpValue)value;
+                final StringBuilder macAddress = new StringBuilder();
+                byte[] bytes = snmpValue.getBytes();
+                for (int i = 0; i < bytes.length; i++) {
+                    if (i > 0) macAddress.append(":");
+                    macAddress.append(String.format("%02X", bytes[i]));
+                }
+                result = macAddress.toString();
+            }
         }
         
         if (result == null)

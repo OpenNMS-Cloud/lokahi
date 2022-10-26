@@ -33,12 +33,6 @@ FROM ${BASE_IMAGE}
 RUN groupadd --gid 10001 horizon-stream && \
     useradd --system --uid 10001 --gid horizon-stream horizon-stream --home-dir /opt/horizon-stream
 
-# https://issues.opennms.org/browse/NMS-12635
-# It is possible to set sysctls: net.ipv4.ping_group_range=0 10001 which allows the container using sockets. If we run on
-# infrastructure which doesn't allow whitelisting net.ipv4.ping_group_range as a safe sysctl (Kubernetes < 1.18) the
-# minimal solution is giving the Java binary the cap_net_raw+ep capabilities.
-RUN setcap cap_net_raw+ep $(readlink -f /usr/bin/java)
-
 # Install entrypoint wrapper and health check script
 COPY container-fs/entrypoint.sh /
 COPY container-fs/health.sh /

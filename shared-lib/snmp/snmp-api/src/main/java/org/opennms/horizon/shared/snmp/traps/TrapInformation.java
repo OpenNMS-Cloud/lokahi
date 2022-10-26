@@ -26,7 +26,10 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.shared.snmp;
+package org.opennms.horizon.shared.snmp.traps;
+
+import org.opennms.horizon.shared.snmp.SnmpException;
+import org.opennms.horizon.shared.snmp.SnmpVarBindDTO;
 
 import java.net.InetAddress;
 import java.util.Date;

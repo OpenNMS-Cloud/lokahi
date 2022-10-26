@@ -34,7 +34,7 @@ public class MeteringServerInterceptor implements ServerInterceptor {
 
     Counter counter = metric(metricRegistry, name(baseMetricName, "count"), Counter::new);
     counter.inc();
-    logger.info("Call counter {}", counter.getCount());
+    logger.debug("Call counter {}", counter.getCount());
 
     SimpleForwardingServerCall<ReqT, RespT> serverCall = new SimpleForwardingServerCall<>(call) {
       @Override

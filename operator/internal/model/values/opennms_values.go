@@ -37,6 +37,7 @@ type CoreValues struct {
 type MinionValues struct {
     ServiceValues `yaml:",inline"`
     SshPort       int `yaml:"SshPort"`
+    TrapsListenerPort int `yaml:"TrapsListenerPort"`
 }
 
 type MinionGatewayValues struct {

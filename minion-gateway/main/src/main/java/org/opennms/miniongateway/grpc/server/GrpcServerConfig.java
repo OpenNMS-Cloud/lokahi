@@ -3,13 +3,6 @@ package org.opennms.miniongateway.grpc.server;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import io.grpc.stub.StreamObserver;
-import java.util.Arrays;
-import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ThreadFactory;
-import java.util.function.BiConsumer;
 import org.opennms.cloud.grpc.minion.CloudToMinionMessage;
 import org.opennms.cloud.grpc.minion.Identity;
 import org.opennms.horizon.shared.grpc.common.GrpcIpcServer;
@@ -26,15 +19,24 @@ import org.opennms.horizon.shared.ipc.grpc.server.manager.rpc.LocationIndependen
 import org.opennms.horizon.shared.ipc.grpc.server.manager.rpcstreaming.MinionRpcStreamConnectionManager;
 import org.opennms.horizon.shared.ipc.grpc.server.manager.rpcstreaming.impl.MinionRpcStreamConnectionManagerImpl;
 import org.opennms.miniongateway.grpc.server.heartbeat.HeartbeatKafkaForwarder;
-import org.opennms.miniongateway.grpc.twin.TaskSetTwinMessageProcessor;
 import org.opennms.miniongateway.grpc.server.tasktresults.TaskResultsKafkaForwarder;
+import org.opennms.miniongateway.grpc.server.traps.TrapsKafkaForwarder;
 import org.opennms.miniongateway.grpc.twin.GrpcTwinPublisher;
+import org.opennms.miniongateway.grpc.twin.TaskSetTwinMessageProcessor;
 import org.opennms.taskset.service.api.TaskSetForwarder;
 import org.opennms.taskset.service.api.TaskSetPublisher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadFactory;
+import java.util.function.BiConsumer;
 
 @Configuration
 public class GrpcServerConfig {
@@ -111,6 +113,7 @@ public class GrpcServerConfig {
         @Autowired @Qualifier("cloudToMinionMessageProcessor") BiConsumer<Identity, StreamObserver<CloudToMinionMessage>> cloudToMinionMessageProcessor,
         @Autowired TaskResultsKafkaForwarder taskResultsKafkaForwarder,
         @Autowired HeartbeatKafkaForwarder heartbeatKafkaForwarder,
+        @Autowired TrapsKafkaForwarder trapsKafkaForwarder,
         @Autowired RpcRequestTimeoutManager rpcRequestTimeoutManager
     ) throws Exception {
 
@@ -128,6 +131,7 @@ public class GrpcServerConfig {
         server.setOutgoingMessageHandler(cloudToMinionMessageProcessor);
         server.registerConsumer(taskResultsKafkaForwarder);
         server.registerConsumer(heartbeatKafkaForwarder);
+        server.registerConsumer(trapsKafkaForwarder);
 
         server.start();
         return server;

@@ -26,7 +26,7 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.traps.utils;
+package org.opennms.horizon.shared.snmp.traps;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

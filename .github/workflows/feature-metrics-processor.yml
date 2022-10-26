@@ -49,6 +49,8 @@ jobs:
         with:
           working-directory: 'metrics-processor'
           image: 'opennms/horizon-stream-metrics-processor:local'
+          registry-username: ${{ secrets.DOCKERHUB_LOGIN }}
+          registry-password: ${{ secrets.DOCKERHUB_PASS }}
 
       - name: 'SonarCloud Scan'
         uses: ./.github/actions/sonar-scan-maven

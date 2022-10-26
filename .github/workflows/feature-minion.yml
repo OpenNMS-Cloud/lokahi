@@ -49,6 +49,8 @@ jobs:
         with:
           working-directory: 'minion'
           image: 'opennms/horizon-stream-minion:local'
+          registry-username: ${{ secrets.DOCKERHUB_LOGIN }}
+          registry-password: ${{ secrets.DOCKERHUB_PASS }}
 
       - name: 'SonarCloud Scan'
         uses: ./.github/actions/sonar-scan-maven

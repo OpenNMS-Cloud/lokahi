@@ -57,6 +57,8 @@ jobs:
         with:
           working-directory: 'inventory'
           image: ${{ env.IMAGE }}:${{ env.IMAGE_TAG }}
+          registry-username: ${{ secrets.DOCKERHUB_LOGIN }}
+          registry-password: ${{ secrets.DOCKERHUB_PASS }}
 
       - name: 'SonarCloud Scan'
         uses: ./.github/actions/sonar-scan-maven

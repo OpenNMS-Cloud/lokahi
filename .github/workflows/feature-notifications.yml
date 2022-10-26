@@ -49,6 +49,8 @@ jobs:
         with:
           working-directory: 'notifications'
           image: 'opennms/horizon-stream-notification:local'
+          registry-username: ${{ secrets.DOCKERHUB_LOGIN }}
+          registry-password: ${{ secrets.DOCKERHUB_PASS }}
 
       - name: 'SonarCloud Scan'
         uses: ./.github/actions/sonar-scan-maven

@@ -12,4 +12,4 @@ runs:
       uses: actions/cache@v3
       with:
         path: '~/.m2/repository'
-        key: ${{ platform }}-${{ hashFiles(inputs.paths.split(',')) }}
+        key: maven-deps-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles(inputs.paths.split(',')) }}

@@ -48,9 +48,7 @@ jobs:
         uses: ./.github/actions/jib-maven
         with:
           working-directory: 'inventory'
-          image: opennms/horizon-stream-inventory:${{ github.sha }}
-          registry-username: ${{ secrets.DOCKERHUB_LOGIN }}
-          registry-password: ${{ secrets.DOCKERHUB_PASS }}
+          image: opennms/horizon-stream-inventory:local
 
       - name: 'SonarCloud Scan'
         uses: ./.github/actions/sonar-scan-maven

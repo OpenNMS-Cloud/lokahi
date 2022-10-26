@@ -10,17 +10,33 @@ inputs:
   submodule:
     description: 'The Maven submodule to build (optional)'
     required: false
+  registry-username:
+    description: 'The username to use for authentication to the image registry'
+    required: false
+  registry-password:
+    description: 'The username to use for authentication to the image registry'
+    required: false
 
 runs:
   using: "composite"
   steps:
     - name: build
       if: ${{ !inputs.submodule }}
-      run: mvn -B verify jib:build -Dimage=${{ inputs.image }}
+      run: |
+        mvn -B verify jib:build \
+        -Dimage=${{ inputs.image }} \
+        -Djib.to.auth.username=${{ inputs.registry-username }} \
+        -Djib.to.auth.password=${{ inputs.registry-password }}
       shell: bash
       working-directory: ${{ inputs.working-directory }}
     - name: build-submodule
       if: ${{ inputs.submodule }}
-      run: mvn -B verify jib:build -Dimage=${{ inputs.image }} -pl=${{ inputs.submodule }} -am
+      run: |
+        mvn -B verify jib:build \
+        -Dimage=${{ inputs.image }} \
+        -Djib.to.auth.username=${{ inputs.registry-username }} \
+        -Djib.to.auth.password=${{ inputs.registry-password }} \
+        -pl=${{ inputs.submodule }} \
+        -am
       shell: bash
       working-directory: ${{ inputs.working-directory }}

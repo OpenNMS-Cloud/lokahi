@@ -33,6 +33,10 @@ jobs:
           path: '~/.m2/repository'
           key: maven-deps-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('inventory/**/pom.xml', 'parent-pom/**/pom.xml', 'shared-lib/**/pom.xml') }}
 
+      - name: Git SHA
+        id: git-sha
+        run: echo 'gitSha=$(git log -n 1 --pretty=format:%H -- inventory shared-lib parent-pom)' >> $GITHUB_OUTPUT
+
       - name: 'Install parent-pom'
         uses: ./.github/actions/maven-install
         with:
@@ -47,7 +51,9 @@ jobs:
         uses: ./.github/actions/jib-maven
         with:
           working-directory: 'inventory'
-          image: 'opennms/horizon-stream-inventory:local'
+          image: ${{ 'opennms/horizon-stream-inventory:' + steps.git-sha.outputs.gitSha }}
+          registry-username: ${{ secrets.DOCKERHUB_LOGIN }}
+          registry-password: ${{ secrets.DOCKERHUB_PASS }}
 
       - name: 'SonarCloud Scan'
         uses: ./.github/actions/sonar-scan-maven
@@ -56,8 +62,3 @@ jobs:
           sonar-token: ${{ secrets.SONAR_TOKEN }}
           working-directory: 'inventory'
           project-key: 'opennms_horizon-stream_inventory'
-
-      - name: Upload image
-        uses: ishworkh/docker-image-artifact-upload@v1
-        with:
-          image: 'opennms/horizon-stream-inventory:local'

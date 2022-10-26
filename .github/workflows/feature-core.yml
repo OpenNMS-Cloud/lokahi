@@ -28,7 +28,7 @@ jobs:
       - name: Cache Maven Dependencies
         uses: actions/cache@v3
         with:
-          path: '$HOME/.m2/repository'
+          path: '~/.m2/repository'
           key: maven-deps-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('platform/**/pom.xml', 'parent-pom/**/pom.xml', 'shared-lib/**/pom.xml') }}
 
       - uses: ./.github/actions/maven-install

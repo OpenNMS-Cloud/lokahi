@@ -34,7 +34,7 @@ jobs:
   wait:
     runs-on: ubuntu-latest
     concurrency:
-      group: ${{ github.ref }}
+      group: ${{ github.workflow }}-${{ github.ref }}
     steps:
       - name: Wait for other builds to succeed
         uses: lewagon/wait-on-check-action@v1.2.0

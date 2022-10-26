@@ -18,9 +18,9 @@ env:
   IMAGE: 'opennms/horizon-stream-rest-server'
   IMAGE_TAG: ${{ inputs.image-tag || github.sha }}
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+#concurrency:
+#  group: ${{ github.workflow }}-${{ github.ref }}
+#  cancel-in-progress: true
 
 jobs:
   build-and-test:

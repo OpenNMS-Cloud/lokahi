@@ -29,7 +29,7 @@ jobs:
 
       - uses: ./.github/actions/cache-maven-dependencies
         with:
-          paths: ['inventory/**/pom.xml', 'parent-pom/**/pom.xml', 'shared-lib/**/pom.xml']
+          paths: 'inventory/**/pom.xml,parent-pom/**/pom.xml,shared-lib/**/pom.xml'
 
       - uses: ./.github/actions/maven-install
         with:

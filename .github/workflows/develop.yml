@@ -23,7 +23,7 @@ jobs:
         with:
           ref: ${{ github.ref }}
           repo-token: ${{ secrets.GITHUB_TOKEN }}
-          running-workflow-name: feature-shared-lib
+          running-workflow-name: wait
           wait-interval: 10
 
       - name: Wait for tests to succeed
@@ -31,7 +31,7 @@ jobs:
         with:
           ref: ${{ github.ref }}
           repo-token: ${{ secrets.GITHUB_TOKEN }}
-          running-workflow-name: feature-inventory
+          running-workflow-name: wait
           wait-interval: 10
   external-it:
     needs: wait

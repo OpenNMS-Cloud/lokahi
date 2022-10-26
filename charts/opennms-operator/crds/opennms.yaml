@@ -167,7 +167,7 @@ spec:
                   type: string
                 tlsEnabled:
                   description: Whether or not TLS is enabled for this instance
-                  type: bool
+                  type: boolean
                 httpPort:
                   description: HTTP port number the instance will be exposed on
                   type: number

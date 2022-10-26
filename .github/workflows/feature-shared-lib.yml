@@ -17,6 +17,9 @@ jobs:
   install:
     needs: parent-pom
     runs-on: ubuntu-latest
+    concurrency:
+      group: ${{ github.ref }}
+      cancel-in-progress: true
     defaults:
       run:
         working-directory: 'shared-lib'

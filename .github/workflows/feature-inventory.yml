@@ -15,7 +15,9 @@ on:
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
-
+    concurrency:
+      group: ${{ github.ref }}
+      cancel-in-progress: true
     steps:
       - uses: actions/checkout@v3
         with:
@@ -38,16 +40,7 @@ jobs:
         uses: docker/metadata-action@v4
         with:
           images: opennms/horizon-stream-inventory
-          sep-tags: ','
-          tags: |
-            type=ref,event=branch
-            type=ref,event=pr
-            type=edge
-            type=sha
-
-      - name: Strip image name from tags
-        id: strip-tags
-        run: echo 'tags=$(echo ${{ steps.docker-meta.outputs.tags }} | sed 's/opennms\/horizon-stream-inventory://g')' >> $GITHUB_OUTPUT
+          tags: type=sha,prefix={{branch}}-
 
       - name: 'Install parent-pom'
         uses: ./.github/actions/maven-install
@@ -63,8 +56,7 @@ jobs:
         uses: ./.github/actions/jib-maven
         with:
           working-directory: 'inventory'
-          image: opennms/horizon-stream-inventory
-          tags: ${{ steps.strip-tags.outputs.tags }}
+          image: ${{ steps.strip-tags.outputs.tags }}
           registry-username: ${{ secrets.DOCKERHUB_LOGIN }}
           registry-password: ${{ secrets.DOCKERHUB_PASS }}
 

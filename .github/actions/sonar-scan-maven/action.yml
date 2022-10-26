@@ -30,4 +30,4 @@ runs:
       env:
         GITHUB_TOKEN: ${{ inputs.github-token }}
         SONAR_TOKEN: ${{ inputs.sonar-token }}
-      working-directory: ${{ inputs.dir-location }}
+      working-directory: ${{ inputs.working-directory }}

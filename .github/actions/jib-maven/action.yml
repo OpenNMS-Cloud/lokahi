@@ -24,9 +24,7 @@ runs:
       if: ${{ !inputs.submodule }}
       run: |
         mvn -B verify jib:build \
-        -Dimage=${{ inputs.image }} \
-        -Djib.to.auth.username=${{ inputs.registry-username }} \
-        -Djib.to.auth.password=${{ inputs.registry-password }}
+        -Dimage=${{ inputs.image }}
       shell: bash
       working-directory: ${{ inputs.working-directory }}
 
@@ -35,8 +33,6 @@ runs:
       run: |
         mvn -B verify jib:build \
         -pl=${{ inputs.submodule }} -am \
-        -Dimage=${{ inputs.image }} \
-        -Djib.to.auth.username=${{ inputs.registry-username }} \
-        -Djib.to.auth.password=${{ inputs.registry-password }} \
+        -Dimage=${{ inputs.image }}
       shell: bash
       working-directory: ${{ inputs.working-directory }}

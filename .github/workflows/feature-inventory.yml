@@ -51,7 +51,7 @@ jobs:
         with:
           working-directory: 'inventory'
           image: 'opennms/horizon-stream-inventory'
-          tags: ${{ github.ref }},${{ github.sha }}
+          tags: ${{ github.sha }}
           registry-username: ${{ secrets.DOCKERHUB_LOGIN }}
           registry-password: ${{ secrets.DOCKERHUB_PASS }}
 

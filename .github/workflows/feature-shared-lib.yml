@@ -10,6 +10,10 @@ on:
       - 'shared-lib/**'
   workflow_call: {}
 
+concurrency:
+  group: ${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   parent-pom:
     uses: ./.github/workflows/feature-parent-pom.yml
@@ -17,9 +21,6 @@ jobs:
   install:
     needs: parent-pom
     runs-on: ubuntu-latest
-    concurrency:
-      group: ${{ github.ref }}
-      cancel-in-progress: true
     defaults:
       run:
         working-directory: 'shared-lib'

@@ -12,12 +12,13 @@ on:
     paths:
       - 'inventory/**'
 
+concurrency:
+  group: ${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
-    concurrency:
-      group: ${{ github.ref }}
-      cancel-in-progress: true
     steps:
       - uses: actions/checkout@v3
         with:
@@ -34,13 +35,6 @@ jobs:
         with:
           path: '~/.m2/repository'
           key: maven-deps-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('inventory/**/pom.xml', 'parent-pom/**/pom.xml', 'shared-lib/**/pom.xml') }}
-
-      - name: Docker meta
-        id: docker-meta
-        uses: docker/metadata-action@v4
-        with:
-          images: opennms/horizon-stream-inventory
-          tags: type=sha,prefix={{branch}}-
 
       - name: 'Install parent-pom'
         uses: ./.github/actions/maven-install

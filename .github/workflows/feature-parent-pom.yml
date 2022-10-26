@@ -10,12 +10,13 @@ on:
       - 'parent-pom/**'
   workflow_call: {}
 
+concurrency:
+  group: ${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   install:
     runs-on: ubuntu-latest
-    concurrency:
-      group: ${{ github.ref }}
-      cancel-in-progress: true
     defaults:
       run:
         working-directory: 'parent-pom'

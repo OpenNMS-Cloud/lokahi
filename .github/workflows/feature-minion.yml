@@ -10,12 +10,13 @@ on:
       - 'minion/**'
   workflow_call: {}
 
+concurrency:
+  group: ${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build-and-test:
     runs-on: self-hosted
-    concurrency:
-      group: ${{ github.ref }}
-      cancel-in-progress: true
     steps:
       - uses: actions/checkout@v3
         with:

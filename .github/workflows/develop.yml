@@ -29,6 +29,10 @@ jobs:
     needs: wait
     runs-on: self-hosted
     steps:
+      - name: Download image
+        uses: ishworkh/docker-image-artifact-download@v1
+        with:
+          image: 'opennms/horizon-stream-inventory:local'
       - name: test
         run: echo "Workflow complete!"
         shell: bash

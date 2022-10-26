@@ -1,14 +1,14 @@
 name: feature-inventory
 
 on:  
-#  push:
-#    branches:
-#      - '**'
+  push:
+    branches:
+      - '**'
 #      - '!develop'
 #      - '!release'
-#    paths:
-#      - 'inventory/**'
-#  workflow_call:
+    paths:
+      - 'inventory/**'
+  workflow_call:
   pull_request:
     paths:
       - 'inventory/**'

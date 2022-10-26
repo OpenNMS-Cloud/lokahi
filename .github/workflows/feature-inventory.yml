@@ -1,6 +1,6 @@
 name: feature-inventory
 
-on:  
+on:
   push:
     branches:
       - '**'

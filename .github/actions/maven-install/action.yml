@@ -1,0 +1,14 @@
+name: 'Maven Install'
+description: 'Builds a Maven project and installs it into the runner''s Maven repository'
+inputs:
+  working-directory:
+    description: 'The directory containing the top-level pom'
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: build
+      run: mvn -B install
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}

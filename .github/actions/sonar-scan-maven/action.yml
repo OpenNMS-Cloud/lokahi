@@ -8,7 +8,7 @@ inputs:
     description: 'SONAR_TOKEN secret to authenticate job with SonarCloud'
     required: true
   working-directory:
-    description: 'The working directory containing the top-level pom'
+    description: 'The directory containing the top-level pom'
     required: true
   project-key:
     description: 'The Sonar project key'

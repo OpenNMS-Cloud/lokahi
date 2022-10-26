@@ -37,7 +37,7 @@ jobs:
         with:
           working-directory: 'shared-lib'
 
-      - uses: ./.github/actions/jib-maven-submodule
+      - uses: ./.github/actions/jib-maven
         with:
           working-directory: 'minion-gateway'
           image: 'opennms/horizon-stream-minion-gateway:local'

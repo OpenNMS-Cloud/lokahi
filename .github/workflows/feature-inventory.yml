@@ -56,7 +56,7 @@ jobs:
         uses: ./.github/actions/jib-maven
         with:
           working-directory: 'inventory'
-          image: ${{ steps.strip-tags.outputs.tags }}
+          image: ${{ steps.docker-meta.outputs.tags }}
           registry-username: ${{ secrets.DOCKERHUB_LOGIN }}
           registry-password: ${{ secrets.DOCKERHUB_PASS }}
 

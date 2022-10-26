@@ -32,6 +32,7 @@ jobs:
         with:
           path: '~/.m2/repository'
           key: maven-deps-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('inventory/**/pom.xml', 'parent-pom/**/pom.xml', 'shared-lib/**/pom.xml') }}
+
       - name: Docker meta
         id: docker-meta
         uses: docker/metadata-action@v4

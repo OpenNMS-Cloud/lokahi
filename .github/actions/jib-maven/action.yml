@@ -38,11 +38,10 @@ runs:
       if: ${{ inputs.submodule }}
       run: |
         mvn -B verify jib:build \
+        -pl=${{ inputs.submodule }} -am \
         -Dimage=${{ inputs.image }} \
         -Djib.to.tags="${{ inputs.tags }}" \
         -Djib.to.auth.username=${{ inputs.registry-username }} \
         -Djib.to.auth.password=${{ inputs.registry-password }} \
-        -pl=${{ inputs.submodule }} \
-        -am
       shell: bash
       working-directory: ${{ inputs.working-directory }}

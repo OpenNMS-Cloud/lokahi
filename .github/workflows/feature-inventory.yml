@@ -37,11 +37,11 @@ jobs:
         uses: docker/metadata-action@v4
         with:
           images: opennms/horizon-stream-inventory
+          sep-tags: ' '
           tags: |
             type=ref,event=branch
             type=ref,event=pr
             type=edge
-            type=edge,branch=develop
             type=sha
 
       - name: 'Install parent-pom'

@@ -33,6 +33,7 @@ runs:
         -Djib.to.auth.password=${{ inputs.registry-password }}
       shell: bash
       working-directory: ${{ inputs.working-directory }}
+
     - name: build-submodule
       if: ${{ inputs.submodule }}
       run: |

@@ -43,9 +43,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-${{ runner.arch }}-buildx-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-${{ runner.arch }}-buildx-
+          key: ${{ runner.os }}-${{ runner.arch }}-buildx-${{ github.ref }}
 
       - name: 'Install parent-pom'
         uses: ./.github/actions/maven-install

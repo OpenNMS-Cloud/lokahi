@@ -31,9 +31,11 @@ jobs:
           distribution: temurin
           java-version: 11
 
-      - uses: ./.github/actions/cache-maven-dependencies
+      - name: Cache Maven Dependencies
+        uses: actions/cache@v3
         with:
-          paths: 'shared-lib/**/pom.xml'
+          path: '$HOME/.m2/repository'
+          key: maven-deps-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles(['parent-pom/**/pom.xml', 'shared-lib/**/pom.xml']) }}
 
       - name: 'Maven Install'
         run: mvn -B install

@@ -21,11 +21,10 @@ jobs:
       - name: Wait for builds to succeed
         uses: lewagon/wait-on-check-action@v1.2.0
         with:
-          ref: ${{ github.ref }}
+          ref: feature/HS-300
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           running-workflow-name: wait
           wait-interval: 10
-          check-regexp: .*
   external-it:
     needs: wait
     runs-on: self-hosted

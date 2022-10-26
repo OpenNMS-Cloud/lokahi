@@ -7,6 +7,9 @@ inputs:
   image:
     description: 'The image label'
     required: true
+  tags:
+    description: 'Additional tags to use for the image'
+    required: false
   submodule:
     description: 'The Maven submodule to build (optional)'
     required: false
@@ -25,6 +28,7 @@ runs:
       run: |
         mvn -B verify jib:build \
         -Dimage=${{ inputs.image }} \
+        -Djib.to.tags=${{ inputs.tags }} \
         -Djib.to.auth.username=${{ inputs.registry-username }} \
         -Djib.to.auth.password=${{ inputs.registry-password }}
       shell: bash

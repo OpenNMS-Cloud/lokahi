@@ -50,7 +50,8 @@ jobs:
         uses: ./.github/actions/jib-maven
         with:
           working-directory: 'inventory'
-          image: ${{ steps.docker-meta.outputs.tags }}
+          image: 'opennms/horizon-stream-inventory'
+          tags: ${{ github.ref }},${{ github.sha }}
           registry-username: ${{ secrets.DOCKERHUB_LOGIN }}
           registry-password: ${{ secrets.DOCKERHUB_PASS }}
 

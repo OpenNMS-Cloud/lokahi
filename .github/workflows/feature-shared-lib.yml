@@ -1,6 +1,6 @@
 name: feature-shared-lib
 
-on:  
+on:
   push:
     branches:
       - '**'
@@ -30,24 +30,19 @@ jobs:
         with:
           distribution: temurin
           java-version: 11
-          cache: maven
+
+      - uses: ./.github/actions/cache-maven-dependencies
+        with:
+          paths: 'shared-lib/**/pom.xml'
 
       - name: 'Maven Install'
         run: mvn -B install
         shell: bash
-        working-directory: 'shared-lib'
-
-      - name: Post install maven caching
-        uses: actions/setup-java@v3
-        with:
-          distribution: temurin
-          java-version: 11
-          cache: maven
 
       - name: 'SonarCloud Scan'
         uses: ./.github/actions/sonar-scan-maven
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           sonar-token: ${{ secrets.SONAR_TOKEN }}
-          dir-location: 'shared-lib'
+          working-directory: 'shared-lib'
           project-key: 'opennms_horizon-stream_shared-lib'

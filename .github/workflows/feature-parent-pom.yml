@@ -26,24 +26,20 @@ jobs:
         with:
           distribution: temurin
           java-version: 11
-          cache: maven
+
+      - uses: ./.github/actions/cache-maven-dependencies
+        with:
+          paths: 'parent-pom/**/pom.xml'
 
       - name: 'Maven Install'
         run: mvn -B install
         shell: bash
         working-directory: 'parent-pom'
 
-      - name: Post install maven caching
-        uses: actions/setup-java@v3
-        with:
-          distribution: temurin
-          java-version: 11
-          cache: maven
-
       - name: 'SonarCloud Scan'
         uses: ./.github/actions/sonar-scan-maven
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           sonar-token: ${{ secrets.SONAR_TOKEN }}
-          dir-location: 'parent-pom'
+          working-directory: 'parent-pom'
           project-key: 'opennms_horizon-stream_parent-pom'

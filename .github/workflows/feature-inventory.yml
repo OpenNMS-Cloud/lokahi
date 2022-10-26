@@ -24,7 +24,10 @@ jobs:
         with:
           distribution: temurin
           java-version: 11
-          cache: maven
+
+      - uses: ./.github/actions/cache-maven-dependencies
+        with:
+          paths: ['inventory/**/pom.xml', 'parent-pom/**/pom.xml', 'shared-lib/**/pom.xml']
 
       - uses: ./.github/actions/jib-maven
         with:
@@ -36,5 +39,5 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           sonar-token: ${{ secrets.SONAR_TOKEN }}
-          dir-location: 'inventory'
+          working-directory: 'inventory'
           project-key: 'opennms_horizon-stream_inventory'

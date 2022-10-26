@@ -24,7 +24,10 @@ jobs:
         with:
           distribution: temurin
           java-version: 11
-          cache: maven
+
+      - uses: ./.github/actions/cache-maven-dependencies
+        with:
+          paths: ['platform/**/pom.xml', 'parent-pom/**/pom.xml', 'shared-lib/**/pom.xml']
 
       - name: 'Build Image'
         run: |
@@ -43,5 +46,5 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           sonar-token: ${{ secrets.SONAR_TOKEN }}
-          dir-location: 'platform'
+          working-directory: 'platform'
           project-key: 'opennms_horizon-stream_core'

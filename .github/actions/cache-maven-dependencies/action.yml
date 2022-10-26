@@ -1,0 +1,15 @@
+name: 'Cache Maven Dependencies'
+description: 'Cache Maven dependencies for multiple projects in a monorepo'
+inputs:
+  paths:
+    description: 'File globs to use as the cache key. Should match pom files.'
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Cache Maven Dependencies
+      uses: actions/cache@v3
+      with:
+        path: '~/.m2/repository'
+        key: ${{ platform }}-${{ hashFiles(inputs.paths) }}

@@ -24,7 +24,10 @@ jobs:
         with:
           distribution: temurin
           java-version: 11
-          cache: maven
+
+      - uses: ./.github/actions/cache-maven-dependencies
+        with:
+          paths: ['minion-gateway/**/pom.xml', 'parent-pom/**/pom.xml', 'shared-lib/**/pom.xml']
 
       - uses: ./.github/actions/jib-maven-submodule
         with:
@@ -37,5 +40,5 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           sonar-token: ${{ secrets.SONAR_TOKEN }}
-          dir-location: 'minion-gateway'
+          working-directory: 'minion-gateway'
           project-key: 'opennms_horizon-stream_minion-gateway'

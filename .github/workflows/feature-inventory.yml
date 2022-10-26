@@ -8,7 +8,8 @@ on:
       - '!release'
     paths:
       - 'inventory/**'
-  workflow_call: {}
+  workflow_call:
+  pull_request:
 
 jobs:
   build-and-test:

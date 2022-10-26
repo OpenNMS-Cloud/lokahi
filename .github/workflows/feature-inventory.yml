@@ -45,6 +45,10 @@ jobs:
             type=edge
             type=sha
 
+      - name: Strip image name from tags
+        id: strip-tags
+        run: echo 'tags=$(echo ${{ steps.docker-meta.outputs.tags }} | sed 's/opennms\/horizon-stream-inventory://g')' >> $GITHUB_OUTPUT
+
       - name: 'Install parent-pom'
         uses: ./.github/actions/maven-install
         with:
@@ -60,7 +64,7 @@ jobs:
         with:
           working-directory: 'inventory'
           image: opennms/horizon-stream-inventory
-          tags: ${{ steps.docker-meta.outputs.tags }}
+          tags: ${{ steps.strip-tags.outputs.tags }}
           registry-username: ${{ secrets.DOCKERHUB_LOGIN }}
           registry-password: ${{ secrets.DOCKERHUB_PASS }}
 

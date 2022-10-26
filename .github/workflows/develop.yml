@@ -50,7 +50,6 @@ jobs:
     secrets: inherit
   external-it:
     needs: [
-      shared-lib,
       core,
       rest-server,
       inventory,

@@ -32,10 +32,17 @@ jobs:
         with:
           path: '~/.m2/repository'
           key: maven-deps-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('inventory/**/pom.xml', 'parent-pom/**/pom.xml', 'shared-lib/**/pom.xml') }}
-
-      - name: Git SHA
-        id: git-sha
-        run: echo 'gitSha=$(git log -n 1 --pretty=format:%H -- inventory shared-lib parent-pom)' >> $GITHUB_OUTPUT
+      - name: Docker meta
+        id: docker-meta
+        uses: docker/metadata-action@v4
+        with:
+          images: opennms/horizon-stream-inventory
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=edge
+            type=edge,branch=develop
+            type=sha
 
       - name: 'Install parent-pom'
         uses: ./.github/actions/maven-install
@@ -51,7 +58,8 @@ jobs:
         uses: ./.github/actions/jib-maven
         with:
           working-directory: 'inventory'
-          image: opennms/horizon-stream-inventory:${{ steps.git-sha.outputs.gitSha }}
+          image: opennms/horizon-stream-inventory
+          tags: ${{ steps.docker-meta.outputs.tags }}
           registry-username: ${{ secrets.DOCKERHUB_LOGIN }}
           registry-password: ${{ secrets.DOCKERHUB_PASS }}
 

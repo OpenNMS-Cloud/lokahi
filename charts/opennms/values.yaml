@@ -1,4 +1,6 @@
 Host: onmshs
+Port: 443 #set depending on TLS.Enabled and the Ingress ports, do not change
+Protocol: https #set depending on TLS.Enabled, do not change
 TestDeploy: false
 OpenNMS:
   Core:

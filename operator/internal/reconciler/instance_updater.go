@@ -15,98 +15,111 @@ limitations under the License.
 package reconciler
 
 import (
-    "context"
-    "github.com/OpenNMS/opennms-operator/api/v1alpha1"
-    "github.com/OpenNMS/opennms-operator/internal/model/values"
-    valuesutil "github.com/OpenNMS/opennms-operator/internal/util/crd"
-    "github.com/OpenNMS/opennms-operator/internal/util/security"
-    v1 "k8s.io/api/core/v1"
-    "k8s.io/apimachinery/pkg/types"
+	"context"
+	"github.com/OpenNMS/opennms-operator/api/v1alpha1"
+	"github.com/OpenNMS/opennms-operator/internal/model/values"
+	valuesutil "github.com/OpenNMS/opennms-operator/internal/util/crd"
+	"github.com/OpenNMS/opennms-operator/internal/util/security"
+	v1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/types"
 )
 
 // SetValues - set values for an instance based on it's crd
 func (i *Instance) SetValues(ctx context.Context) {
-    namespace := i.CRD.Namespace
+	namespace := i.CRD.Namespace
 
-    templateValues := i.Values
+	templateValues := i.Values
 
-    templateValues = valuesutil.ConvertCRDToValues(i.CRD, templateValues)
+	templateValues = valuesutil.ConvertCRDToValues(i.CRD, templateValues)
 
-    // only set new passwords if they weren't already created by a previous operator
-    templateValues, existingCreds := i.CheckForExistingCoreCreds(ctx, templateValues, namespace)
-    if !existingCreds { // only set new passwords if they weren't already created by a previous operator
-        templateValues = setCorePasswords(templateValues, i.CRD.Spec.Credentials)
-    }
+	// only set new passwords if they weren't already created by a previous operator
+	templateValues, existingCreds := i.CheckForExistingCoreCreds(ctx, templateValues, namespace)
+	if !existingCreds { // only set new passwords if they weren't already created by a previous operator
+		templateValues = setCorePasswords(templateValues, i.CRD.Spec.Credentials)
+	}
 
-    templateValues, existingCreds = i.CheckForExistingPostgresCreds(ctx, templateValues, namespace)
-    if !existingCreds {
-        templateValues = setPostgresPassword(templateValues)
-    }
+	templateValues, existingCreds = i.CheckForExistingPostgresCreds(ctx, templateValues, namespace)
+	if !existingCreds {
+		templateValues = setPostgresPassword(templateValues)
+	}
 
-    i.Values = templateValues
+	templateValues = setIngressValues(templateValues)
+
+	i.Values = templateValues
 }
 
 // CheckForExistingCoreCreds - checks if core credentials already exist for a given namespace
 func (i *Instance) CheckForExistingCoreCreds(ctx context.Context, v values.TemplateValues, namespace string) (values.TemplateValues, bool) {
-    var credSecret v1.Secret
+	var credSecret v1.Secret
 
-    err := i.Client.Get(ctx, types.NamespacedName{Namespace: namespace, Name: v.Values.Keycloak.ServiceName + "-initial-admin"}, &credSecret)
-    if err != nil {
-        return v, false
-    }
+	err := i.Client.Get(ctx, types.NamespacedName{Namespace: namespace, Name: v.Values.Keycloak.ServiceName + "-initial-admin"}, &credSecret)
+	if err != nil {
+		return v, false
+	}
 
-    existingAdminPwd := string(credSecret.Data["password"])
-    if existingAdminPwd == "" {
-        return v, false
-    }
-    v.Values.Keycloak.AdminPassword = existingAdminPwd
+	existingAdminPwd := string(credSecret.Data["password"])
+	if existingAdminPwd == "" {
+		return v, false
+	}
+	v.Values.Keycloak.AdminPassword = existingAdminPwd
 
-    return v, true
+	return v, true
 }
 
 // CheckForExistingPostgresCreds - checks if core credentials already exist for a given namespace
 func (i *Instance) CheckForExistingPostgresCreds(ctx context.Context, v values.TemplateValues, namespace string) (values.TemplateValues, bool) {
-    var credSecret v1.Secret
-    err := i.Client.Get(ctx, types.NamespacedName{Namespace: namespace, Name: "postgres"}, &credSecret)
-    if err != nil {
-        return v, false
-    }
-    adminPwd := string(credSecret.Data["adminPwd"])
-    keycloakPwd := string(credSecret.Data["keycloakPwd"])
-    inventoryPwd := string(credSecret.Data["inventoryPwd"])
-    notificationPwd := string(credSecret.Data["notificationPwd"])
-    grafanaPwd := string(credSecret.Data["grafanaPwd"])
-    if adminPwd == "" || keycloakPwd == "" || inventoryPwd == "" || notificationPwd == "" {
-        return v, false
-    }
-    v.Values.Postgres.AdminPassword = adminPwd
-    v.Values.Postgres.KeycloakPassword = keycloakPwd
-    v.Values.Postgres.InventoryPassword = inventoryPwd
-    v.Values.Postgres.NotificationPassword = notificationPwd
-    v.Values.Postgres.GrafanaPassword = grafanaPwd
-    return v, true
+	var credSecret v1.Secret
+	err := i.Client.Get(ctx, types.NamespacedName{Namespace: namespace, Name: "postgres"}, &credSecret)
+	if err != nil {
+		return v, false
+	}
+	adminPwd := string(credSecret.Data["adminPwd"])
+	keycloakPwd := string(credSecret.Data["keycloakPwd"])
+	inventoryPwd := string(credSecret.Data["inventoryPwd"])
+	notificationPwd := string(credSecret.Data["notificationPwd"])
+	grafanaPwd := string(credSecret.Data["grafanaPwd"])
+	if adminPwd == "" || keycloakPwd == "" || inventoryPwd == "" || notificationPwd == "" {
+		return v, false
+	}
+	v.Values.Postgres.AdminPassword = adminPwd
+	v.Values.Postgres.KeycloakPassword = keycloakPwd
+	v.Values.Postgres.InventoryPassword = inventoryPwd
+	v.Values.Postgres.NotificationPassword = notificationPwd
+	v.Values.Postgres.GrafanaPassword = grafanaPwd
+	return v, true
 }
 
 // setCorePasswords - sets randomly generated passwords for the core if not already set
 func setCorePasswords(tv values.TemplateValues, creds v1alpha1.Credentials) values.TemplateValues {
-    if creds.AdminPassword == "" {
-        tv.Values.Keycloak.AdminPassword = security.GeneratePassword(true)
-    } else {
-        tv.Values.Keycloak.AdminPassword = creds.AdminPassword
-    }
+	if creds.AdminPassword == "" {
+		tv.Values.Keycloak.AdminPassword = security.GeneratePassword(true)
+	} else {
+		tv.Values.Keycloak.AdminPassword = creds.AdminPassword
+	}
 
-    return tv
+	return tv
 }
 
 // setPostgresPassword - sets randomly generated password for Postgres if not already set
 func setPostgresPassword(tv values.TemplateValues) values.TemplateValues {
-    tv.Values.Postgres.AdminPassword = security.GeneratePassword(true)
-    tv.Values.Postgres.OpenNMSPassword = security.GeneratePassword(true)
-    tv.Values.Postgres.KeycloakPassword = security.GeneratePassword(true)
-    tv.Values.Postgres.InventoryPassword = security.GeneratePassword(true)
-    tv.Values.Postgres.NotificationPassword = security.GeneratePassword(true)
+	tv.Values.Postgres.AdminPassword = security.GeneratePassword(true)
+	tv.Values.Postgres.OpenNMSPassword = security.GeneratePassword(true)
+	tv.Values.Postgres.KeycloakPassword = security.GeneratePassword(true)
+	tv.Values.Postgres.InventoryPassword = security.GeneratePassword(true)
+	tv.Values.Postgres.NotificationPassword = security.GeneratePassword(true)
 
-    //fed into Grafana via an .ini, so cannot generate with special characters
-    tv.Values.Postgres.GrafanaPassword = security.GeneratePassword(false)
-    return tv
+	//fed into Grafana via an .ini, so cannot generate with special characters
+	tv.Values.Postgres.GrafanaPassword = security.GeneratePassword(false)
+	return tv
+}
+
+func setIngressValues(tv values.TemplateValues) values.TemplateValues {
+	if tv.Values.TLS.Enabled {
+		tv.Values.Port = tv.Values.Ingress.HttpsPort
+		tv.Values.Protocol = "https"
+	} else {
+		tv.Values.Port = tv.Values.Ingress.HttpPort
+		tv.Values.Protocol = "http"
+	}
+	return tv
 }

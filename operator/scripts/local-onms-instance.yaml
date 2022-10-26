@@ -8,6 +8,7 @@ spec:
   httpPort: 80
   httpsPort: 443
   namespace: local-instance
+  tlsEnabled: false
   deployOnly: true
   core:
     image: opennms/horizon-stream-core

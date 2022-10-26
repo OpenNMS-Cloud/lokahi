@@ -1,5 +1,7 @@
 Namespace: skaffold-instance
 Host: localhost
+Port: 8123
+Protocol: http
 TLS:
   Enabled: False
 Keycloak:

@@ -33,7 +33,7 @@ jobs:
       - name: Download image
         uses: ishworkh/docker-image-artifact-download@v1
         with:
-          image: 'opennms/horizon-stream-inventory:local'
+          image: 'action_image_artifact_opennms_horizon-stream-inventory_local'
       - name: test
         run: echo "Workflow complete!"
         shell: bash

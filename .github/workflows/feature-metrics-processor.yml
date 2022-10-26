@@ -31,15 +31,18 @@ jobs:
           path: '~/.m2/repository'
           key: maven-deps-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('metrics-processor/**/pom.xml', 'parent-pom/**/pom.xml', 'shared-lib/**/pom.xml') }}
 
-      - uses: ./.github/actions/maven-install
+      - name: 'Install parent-pom'
+        uses: ./.github/actions/maven-install
         with:
           working-directory: 'parent-pom'
 
-      - uses: ./.github/actions/maven-install
+      - name: 'Install shared-lib'
+        uses: ./.github/actions/maven-install
         with:
           working-directory: 'shared-lib'
 
-      - uses: ./.github/actions/jib-maven
+      - name: 'Jib Maven Build'
+        uses: ./.github/actions/jib-maven
         with:
           working-directory: 'metrics-processor'
           image: 'opennms/horizon-stream-metrics-processor:local'

@@ -31,11 +31,13 @@ jobs:
           path: '~/.m2/repository'
           key: maven-deps-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('platform/**/pom.xml', 'parent-pom/**/pom.xml', 'shared-lib/**/pom.xml') }}
 
-      - uses: ./.github/actions/maven-install
+      - name: 'Install parent-pom'
+        uses: ./.github/actions/maven-install
         with:
           working-directory: 'parent-pom'
 
-      - uses: ./.github/actions/maven-install
+      - name: 'Install shared-lib'
+        uses: ./.github/actions/maven-install
         with:
           working-directory: 'shared-lib'
 

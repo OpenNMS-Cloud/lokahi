@@ -8,7 +8,6 @@ on:
 #      - '!release'
     paths:
       - 'inventory/**'
-  workflow_call:
   pull_request:
     paths:
       - 'inventory/**'

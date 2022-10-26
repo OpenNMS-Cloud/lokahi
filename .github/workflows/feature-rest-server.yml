@@ -29,6 +29,14 @@ jobs:
         with:
           paths: ['rest-server/**/pom.xml', 'parent-pom/**/pom.xml', 'shared-lib/**/pom.xml']
 
+      - uses: ./.github/actions/maven-install
+        with:
+          working-directory: 'parent-pom'
+
+      - uses: ./.github/actions/maven-install
+        with:
+          working-directory: 'shared-lib'
+
       - uses: ./.github/actions/jib-maven
         with:
           working-directory: 'rest-server'

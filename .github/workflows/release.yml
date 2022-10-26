@@ -21,7 +21,7 @@ jobs:
     # Enviroment that contains the required secrets.
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         # Is required to call actions.
 
       - name: init

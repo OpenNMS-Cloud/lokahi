@@ -9,6 +9,19 @@ on:
     paths:
       - 'ui/**'
   workflow_call:
+    inputs:
+      image:
+        description: 'Name of the image to build'
+        required: false
+        type: string
+      image-tag:
+        description: 'Tag for the built image'
+        required: false
+        type: string
+
+env:
+  IMAGE: ${{ inputs.image || 'opennms/horizon-stream-ui' }}
+  IMAGE_TAG: ${{ inputs.image-tag || github.sha }}
 
 #concurrency:
 #  group: ${{ github.workflow }}-${{ github.ref }}
@@ -31,7 +44,7 @@ jobs:
         run: 'yarn install --pure-lockfile'
         working-directory: 'ui'
       - name: 'Build Image'
-        run: DOCKER_BUILDKIT=1 docker build -t opennms/horizon-stream-ui:local .
+        run: DOCKER_BUILDKIT=1 docker build -t $IMAGE:$IMAGE_TAG .
         shell: bash
         working-directory: 'ui'
       - name: 'Coverage Report'

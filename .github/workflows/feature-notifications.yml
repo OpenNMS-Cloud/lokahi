@@ -9,6 +9,19 @@ on:
     paths:
       - 'notifications/**'
   workflow_call:
+    inputs:
+      image:
+        description: 'Name of the image to build'
+        required: false
+        type: string
+      image-tag:
+        description: 'Tag for the built image'
+        required: false
+        type: string
+
+env:
+  IMAGE: ${{ inputs.image || 'opennms/horizon-stream-notification' }}
+  IMAGE_TAG: ${{ inputs.image-tag || github.sha }}
 
 #concurrency:
 #  group: ${{ github.workflow }}-${{ github.ref }}
@@ -48,7 +61,7 @@ jobs:
         uses: ./.github/actions/jib-maven
         with:
           working-directory: 'notifications'
-          image: 'opennms/horizon-stream-notification:local'
+          image: ${{ env.IMAGE }}:${{ env.IMAGE_TAG }}
 
       - name: 'SonarCloud Scan'
         uses: ./.github/actions/sonar-scan-maven

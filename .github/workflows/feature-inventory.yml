@@ -10,12 +10,17 @@ on:
       - 'inventory/**'
   workflow_call:
     inputs:
+      image:
+        description: 'Name of the image to build'
+        required: false
+        type: string
       image-tag:
+        description: 'Tag for the built image'
         required: false
         type: string
 
 env:
-  IMAGE: 'opennms/horizon-stream-inventory'
+  IMAGE: ${{ inputs.image || 'opennms/horizon-stream-inventory' }}
   IMAGE_TAG: ${{ inputs.image-tag || github.sha }}
 
 #concurrency:

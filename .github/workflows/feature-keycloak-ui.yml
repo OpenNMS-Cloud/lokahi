@@ -9,6 +9,19 @@ on:
     paths:
       - 'keycloak-ui/**'
   workflow_call:
+    inputs:
+      image:
+        description: 'Name of the image to build'
+        required: false
+        type: string
+      image-tag:
+        description: 'Tag for the built image'
+        required: false
+        type: string
+
+env:
+  IMAGE: ${{ inputs.image-name || 'opennms/horizon-stream-keycloak' }}
+  IMAGE_TAG: ${{ inputs.image-tag || github.sha }}
 
 #concurrency:
 #  group: ${{ github.workflow }}-${{ github.ref }}
@@ -25,14 +38,14 @@ jobs:
         # Is required to call actions.
 
       - name: 'Build Image'
-        run: DOCKER_BUILDKIT=1 docker build -t opennms/horizon-stream-keycloak:local -f ./Dockerfile .
+        run: DOCKER_BUILDKIT=1 docker build -t $IMAGE:$IMAGE_TAG -f ./Dockerfile .
         working-directory: 'keycloak-ui'
 
       - name: publish-image-keycloak-ui
         run: |
           echo ${{ secrets.DOCKERHUB_PASS }} | docker login -u ${{ secrets.DOCKERHUB_LOGIN }} --password-stdin
 
-          docker tag opennms/horizon-stream-keycloak:local opennms/horizon-stream-keycloak:test
+          docker tag $IMAGE:$IMAGE_TAG opennms/horizon-stream-keycloak:test
   
           docker push opennms/horizon-stream-keycloak:test
         shell: bash

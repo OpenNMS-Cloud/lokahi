@@ -10,29 +10,28 @@ inputs:
   submodule:
     description: 'The Maven submodule to build (optional)'
     required: false
-  registry-username:
-    description: 'The username to use for authentication to the image registry'
-    required: false
-  registry-password:
-    description: 'The username to use for authentication to the image registry'
-    required: false
 
 runs:
   using: "composite"
   steps:
     - name: build
       if: ${{ !inputs.submodule }}
+      env:
+        IMAGE: ${{ inputs.image }}
       run: |
-        mvn -B verify jib:build \
-        -Dimage=${{ inputs.image }}
+        mvn -B verify jib:dockerBuild \
+        -Dimage=$IMAGE
       shell: bash
       working-directory: ${{ inputs.working-directory }}
 
     - name: build-submodule
       if: ${{ inputs.submodule }}
+      env:
+        IMAGE: ${{ inputs.image }}
+        SUBMODULE: ${{ inputs.submodule }}
       run: |
-        mvn -B verify jib:build \
-        -pl=${{ inputs.submodule }} -am \
-        -Dimage=${{ inputs.image }}
+        mvn -B verify jib:dockerBuild \
+        -pl=$SUBMODULE -am \
+        -Dimage=$IMAGE
       shell: bash
       working-directory: ${{ inputs.working-directory }}

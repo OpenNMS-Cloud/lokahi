@@ -7,12 +7,13 @@ inputs:
   sonar-token:
     description: 'SONAR_TOKEN secret to authenticate job with SonarCloud'
     required: true
-  working-directory:
-    description: 'The directory containing the top-level pom'
-    required: true
   project-key:
     description: 'The Sonar project key'
     required: true
+  working-directory:
+    description: 'The directory containing the top-level pom'
+    required: false
+    default: '.'
 
 runs:
   using: "composite"
@@ -24,9 +25,10 @@ runs:
         key: ${{ runner.os }}-sonar
 
     - name: Scan project with SonarCloud
-      run: mvn -B org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=${{ inputs.project-key }}
+      run: mvn -B org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=$SONAR_PROJECT_KEY
       shell: bash
       env:
         GITHUB_TOKEN: ${{ inputs.github-token }}
         SONAR_TOKEN: ${{ inputs.sonar-token }}
+        SONAR_PROJECT_KEY: ${{ inputs.project-key }}
       working-directory: ${{ inputs.working-directory }}

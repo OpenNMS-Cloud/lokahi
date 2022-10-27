@@ -99,7 +99,6 @@
             <plugin>
                 <groupId>com.google.cloud.tools</groupId>
                 <artifactId>jib-maven-plugin</artifactId>
-                <version>3.2.1</version>
             </plugin>
             <plugin>
                 <groupId>org.apache.felix</groupId>

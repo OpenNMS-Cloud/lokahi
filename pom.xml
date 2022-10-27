@@ -868,6 +868,11 @@
                     <version>5.1.4</version>
                     <extensions>true</extensions>
                 </plugin>
+                <plugin>
+                    <groupId>com.google.cloud.tools</groupId>
+                    <artifactId>jib-maven-plugin</artifactId>
+                    <version>${jib.version}</version>
+                </plugin>
             </plugins>
         </pluginManagement>
     </build>

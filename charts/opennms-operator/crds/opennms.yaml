@@ -165,6 +165,9 @@ spec:
                 host:
                   description: Domain name used for ingress into the instance
                   type: string
+                tlsEnabled:
+                  description: Whether or not TLS is enabled for this instance
+                  type: boolean
                 httpPort:
                   description: HTTP port number the instance will be exposed on
                   type: number

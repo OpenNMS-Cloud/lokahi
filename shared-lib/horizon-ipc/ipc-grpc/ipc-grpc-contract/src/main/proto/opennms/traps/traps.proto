@@ -1,0 +1,35 @@
+syntax = "proto3";
+package opennms.sink.traps;
+
+option java_multiple_files = true;
+option java_package = "org.opennms.horizon.grpc.traps.contract";
+
+import "snmp.proto";
+import "opennms_minion_ipc.proto";
+
+
+message TrapIdentity {
+  int32 generic = 1;
+  int32 specific = 2;
+  string enterpriseId = 3;
+  string trapOID = 4;
+}
+
+message TrapDTO {
+  string agentAddress = 1;
+  string community = 2;
+  string version = 3;
+  int64 timestamp = 4;
+  int32 pduLength = 5;
+  int64 creationTime = 6;
+  bytes rawMessage = 7;
+  string trapAddress = 8;
+  TrapIdentity trapIdentity = 9;
+  repeated opennms.snmp.SnmpResult snmpResults = 10;
+}
+
+message TrapLogDTO {
+  minion.Identity identity = 1;
+  string trapAddress = 2;
+  repeated TrapDTO trapDTO = 3;
+}

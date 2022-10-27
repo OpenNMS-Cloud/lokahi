@@ -28,27 +28,20 @@
 
 package org.opennms.horizon.traps.consumer;
 
+import com.google.protobuf.InvalidProtocolBufferException;
 import org.opennms.horizon.db.model.OnmsDistPoller;
-import org.opennms.horizon.ipc.sink.api.AbstractXmlSinkModule;
-import org.opennms.horizon.ipc.sink.api.AggregationPolicy;
-import org.opennms.horizon.ipc.sink.api.AsyncPolicy;
-import org.opennms.horizon.shared.snmp.TrapInformation;
-import org.opennms.horizon.shared.snmp.snmp4j.Snmp4JStrategy;
-import org.opennms.horizon.shared.snmp.snmp4j.Snmp4JTrapNotifier;
-import org.opennms.horizon.shared.snmp.snmp4j.Snmp4JUtils;
-import org.opennms.horizon.traps.config.TrapdConfig;
-import org.opennms.horizon.traps.dto.TrapDTO;
-import org.opennms.horizon.traps.dto.TrapInformationWrapper;
-import org.opennms.horizon.traps.dto.TrapLogDTO;
-import org.opennms.horizon.traps.utils.TrapUtils;
+import org.opennms.horizon.grpc.traps.contract.TrapDTO;
+import org.opennms.horizon.grpc.traps.contract.TrapLogDTO;
+import org.opennms.horizon.shared.ipc.sink.api.AggregationPolicy;
+import org.opennms.horizon.shared.ipc.sink.api.AsyncPolicy;
+import org.opennms.horizon.shared.ipc.sink.api.SinkModule;
+import org.opennms.horizon.shared.snmp.traps.TrapdConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.snmp4j.PDU;
 
-import java.net.InetAddress;
 import java.util.Objects;
 
-public class TrapSinkModule extends AbstractXmlSinkModule<TrapInformationWrapper, TrapLogDTO> {
+public class TrapSinkModule implements SinkModule<org.opennms.horizon.grpc.traps.contract.TrapDTO, org.opennms.horizon.grpc.traps.contract.TrapLogDTO> {
 
     private static final Logger LOG = LoggerFactory.getLogger(TrapSinkModule.class);
 
@@ -57,7 +50,6 @@ public class TrapSinkModule extends AbstractXmlSinkModule<TrapInformationWrapper
     private OnmsDistPoller distPoller;
 
     public TrapSinkModule(TrapdConfig trapdConfig, OnmsDistPoller distPoller) {
-        super(TrapLogDTO.class);
         this.config = Objects.requireNonNull(trapdConfig);
         this.distPoller = Objects.requireNonNull(distPoller);
     }
@@ -73,8 +65,37 @@ public class TrapSinkModule extends AbstractXmlSinkModule<TrapInformationWrapper
     }
 
     @Override
-    public AggregationPolicy<TrapInformationWrapper, TrapLogDTO, TrapLogDTO> getAggregationPolicy() {
-        return new AggregationPolicy<TrapInformationWrapper, TrapLogDTO, TrapLogDTO>() {
+    public byte[] marshal(TrapLogDTO message) {
+        return message.toByteArray();
+    }
+
+    @Override
+    public TrapLogDTO unmarshal(byte[] message) {
+        try {
+            return TrapLogDTO.parseFrom(message);
+        } catch (InvalidProtocolBufferException e) {
+            return null;
+        }
+    }
+
+    @Override
+    public byte[] marshalSingleMessage(TrapDTO message) {
+        return message.toByteArray();
+    }
+
+    @Override
+    public TrapDTO unmarshalSingleMessage(byte[] message) {
+        try {
+            return TrapDTO.parseFrom(message);
+        } catch (InvalidProtocolBufferException e) {
+            return null;
+        }
+    }
+
+    @Override
+    public AggregationPolicy<TrapDTO, TrapLogDTO, TrapLogDTO> getAggregationPolicy() {
+
+        return new AggregationPolicy<>() {
             @Override
             public int getCompletionSize() {
                 return config.getBatchSize();
@@ -86,26 +107,19 @@ public class TrapSinkModule extends AbstractXmlSinkModule<TrapInformationWrapper
             }
 
             @Override
-            public Object key(TrapInformationWrapper message) {
+            public Object key(TrapDTO message) {
                 return message.getTrapAddress();
             }
 
             @Override
-            public TrapLogDTO aggregate(TrapLogDTO accumulator, TrapInformationWrapper newMessage) {
-                final TrapInformation trapInfo = newMessage.getTrapInformation();
-                TrapDTO trapDTO;
-                InetAddress trapAddress;
-                if(trapInfo != null) {
-                    trapDTO = transformTrapInfo(trapInfo);
-                    trapAddress = TrapUtils.getEffectiveTrapAddress(trapInfo, config.shouldUseAddressFromVarbind());
+            public TrapLogDTO aggregate(TrapLogDTO accumulator, TrapDTO newMessage) {
+                if (accumulator == null) {
+                    accumulator = TrapLogDTO.newBuilder()
+                        .setTrapAddress(newMessage.getTrapAddress())
+                        .addTrapDTO(newMessage).build();
                 } else {
-                    trapDTO = newMessage.getTrapDTO();
-                    trapAddress = newMessage.getTrapAddress();
+                    TrapLogDTO.newBuilder(accumulator).addTrapDTO(newMessage);
                 }
-                if (accumulator == null) { // no log created yet
-                    accumulator = new TrapLogDTO(distPoller.getId(), distPoller.getLocation(), trapAddress);
-                }
-                accumulator.addMessage(trapDTO);
                 return accumulator;
             }
 
@@ -115,28 +129,6 @@ public class TrapSinkModule extends AbstractXmlSinkModule<TrapInformationWrapper
             }
         };
     }
-
-
-    private TrapDTO transformTrapInfo(TrapInformation trapInfo) {
-        final TrapDTO trapDTO = new TrapDTO(trapInfo);
-        // include the raw message, if configured
-        if (config.isIncludeRawMessage()) {
-            byte[] rawMessage = convertToRawMessage(trapInfo);
-            if (rawMessage != null) {
-                trapDTO.setRawMessage(convertToRawMessage(trapInfo));
-            }
-        }
-        return trapDTO;
-    }
-
-    @Override
-    public TrapInformationWrapper unmarshalSingleMessage(byte[] bytes) {
-        TrapLogDTO trapLogDTO = unmarshal(bytes);
-        TrapInformationWrapper trapInfo = new TrapInformationWrapper(trapLogDTO.getMessages().get(0));
-        trapInfo.setTrapAddress(trapLogDTO.getTrapAddress());
-        return trapInfo;
-    }
-
 
     @Override
     public AsyncPolicy getAsyncPolicy() {
@@ -158,45 +150,5 @@ public class TrapSinkModule extends AbstractXmlSinkModule<TrapInformationWrapper
         };
     }
 
-    /**
-     * Converts the {@link TrapInformation} to a raw message.
-     * This is only supported for Snmp4J {@link TrapInformation} implementations.
-     *
-     * @param trapInfo The Snmp4J {@link TrapInformation}
-     * @return The bytes representing the raw message, or null if not supported
-     */
-    private static byte[] convertToRawMessage(TrapInformation trapInfo) {
-        // Raw message conversion is not implemented for JoeSnmp, as the usage of that strategy is deprecated
-        if (!(trapInfo instanceof Snmp4JTrapNotifier.Snmp4JV1TrapInformation)
-            && !(trapInfo instanceof Snmp4JTrapNotifier.Snmp4JV2V3TrapInformation)) {
-            LOG.warn("Unable to convert TrapInformation of type {} to raw message. " +
-                    "Please use {} as snmp strategy to include raw messages",
-                trapInfo.getClass(), Snmp4JStrategy.class);
-            return null;
-        }
 
-        // Extract PDU
-        try {
-            PDU pdu = extractPDU(trapInfo);
-            if (pdu != null) {
-                return Snmp4JUtils.convertPduToBytes(trapInfo.getTrapAddress(), 0, trapInfo.getCommunity(), pdu);
-            }
-        } catch (Throwable e) {
-            LOG.warn("Unable to convert PDU into bytes: {}", e.getMessage());
-        }
-        return null;
-    }
-
-    /**
-     * Retreive PDU from SNMP4j {@link TrapInformation}.
-     */
-    private static PDU extractPDU(TrapInformation trapInfo) {
-        if (trapInfo instanceof Snmp4JTrapNotifier.Snmp4JV1TrapInformation) {
-            return ((Snmp4JTrapNotifier.Snmp4JV1TrapInformation) trapInfo).getPdu();
-        }
-        if (trapInfo instanceof Snmp4JTrapNotifier.Snmp4JV2V3TrapInformation) {
-            return ((Snmp4JTrapNotifier.Snmp4JV2V3TrapInformation) trapInfo).getPdu();
-        }
-        throw new IllegalArgumentException("Cannot extract PDU from trapInfo of type " + trapInfo.getClass());
-    }
 }

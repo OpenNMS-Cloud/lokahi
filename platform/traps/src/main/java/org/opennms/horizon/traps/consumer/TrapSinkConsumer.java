@@ -31,6 +31,8 @@ package org.opennms.horizon.traps.consumer;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
+import org.apache.camel.Exchange;
+import org.apache.camel.Processor;
 import org.opennms.core.ipc.twin.api.TwinPublisher;
 import org.opennms.horizon.config.service.api.ConfigConstants;
 import org.opennms.horizon.config.service.api.ConfigService;
@@ -51,19 +53,16 @@ import org.opennms.horizon.events.model.IEvent;
 import org.opennms.horizon.events.xml.Event;
 import org.opennms.horizon.events.xml.Events;
 import org.opennms.horizon.events.xml.Log;
-import org.opennms.horizon.ipc.sink.api.MessageConsumer;
-import org.opennms.horizon.ipc.sink.api.MessageConsumerManager;
-import org.opennms.horizon.ipc.sink.api.SinkModule;
-import org.opennms.horizon.shared.snmp.TrapListenerConfig;
+import org.opennms.horizon.grpc.traps.contract.TrapDTO;
+import org.opennms.horizon.grpc.traps.contract.TrapLogDTO;
+import org.opennms.horizon.shared.snmp.SnmpHelper;
+import org.opennms.horizon.shared.snmp.traps.TrapListenerConfig;
+import org.opennms.horizon.shared.snmp.traps.TrapdConfig;
+import org.opennms.horizon.shared.snmp.traps.TrapdConfigBean;
+import org.opennms.horizon.shared.snmp.traps.TrapdInstrumentation;
 import org.opennms.horizon.shared.utils.InetAddressUtils;
 import org.opennms.horizon.traps.config.SnmpTrapsConfig;
-import org.opennms.horizon.traps.config.TrapdConfig;
-import org.opennms.horizon.traps.config.TrapdConfigBean;
-import org.opennms.horizon.traps.dto.TrapDTO;
-import org.opennms.horizon.traps.dto.TrapInformationWrapper;
-import org.opennms.horizon.traps.dto.TrapLogDTO;
 import org.opennms.horizon.traps.utils.EventCreator;
-import org.opennms.horizon.traps.utils.TrapdInstrumentation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -73,7 +72,7 @@ import java.util.Optional;
 
 import static org.opennms.horizon.shared.utils.InetAddressUtils.addr;
 
-public class TrapSinkConsumer implements MessageConsumer<TrapInformationWrapper, TrapLogDTO>, EventListener {
+public class TrapSinkConsumer implements  EventListener, Processor {
 
     public static final String LOG4J_CATEGORY = "trapd";
     public static final String TRAPS_EVENT_SOURCE = "snmp-traps-consumer";
@@ -87,8 +86,6 @@ public class TrapSinkConsumer implements MessageConsumer<TrapInformationWrapper,
     private static final String LOCALHOST_ADDRESS = InetAddressUtils.getLocalHostName();
 
     private final ObjectMapper objectMapper = new ObjectMapper();
-
-    private MessageConsumerManager messageConsumerManager;
 
     private EventConfDao eventConfDao;
 
@@ -112,16 +109,18 @@ public class TrapSinkConsumer implements MessageConsumer<TrapInformationWrapper,
 
     private EventSubscriptionService eventSubscriptionService;
 
+    private SnmpHelper snmpHelper;
+
     private final SnmpTrapsConfig snmpTrapsConfig = new SnmpTrapsConfig();
 
 
     public void init() throws Exception {
         eventSubscriptionService.addEventListener(this, EventConstants.CONFIG_UPDATED_UEI);
-        eventCreator = new EventCreator(interfaceToNodeCache, eventConfDao);
+        eventCreator = new EventCreator(interfaceToNodeCache, eventConfDao, snmpHelper);
         registerTwinPublisher();
         // Initialize Config.
         initializeConfig();
-        messageConsumerManager.registerConsumer(this);
+        //messageConsumerManager.registerConsumer(this);
     }
 
     void initializeConfig() throws IOException {
@@ -165,14 +164,15 @@ public class TrapSinkConsumer implements MessageConsumer<TrapInformationWrapper,
 
     }
 
-    @Override
-    public SinkModule<TrapInformationWrapper, TrapLogDTO> getModule() {
+
+    /*@Override
+    public SinkModule<TrapDTO, TrapLogDTO> getModule() {
         OnmsDistPoller distPoller = sessionUtils.withReadOnlyTransaction(() -> distPollerDao.whoami());
         return new TrapSinkModule(snmpTrapsConfig, distPoller);
     }
 
     @Override
-    public void handleMessage(TrapLogDTO messageLog) {
+    public void handleMessage(org.opennms.horizon.grpc.traps.contract.TrapLogDTO messageLog) {
         try (Logging.MDCCloseable mdc = Logging.withPrefixCloseable(LOG4J_CATEGORY)) {
             final Log eventLog = toLog(messageLog);
 
@@ -183,25 +183,26 @@ public class TrapSinkConsumer implements MessageConsumer<TrapInformationWrapper,
                 eventLog.getEvents().getEventCollection().stream()
                     .filter(e -> !e.hasNodeid())
                     .forEach(e -> {
-                        sendNewSuspectEvent(e.getInterface(), e.getDistPoller(), messageLog.getLocation());
+                        sendNewSuspectEvent(e.getInterface(), e.getDistPoller(), messageLog.getIdentity().getLocation());
                         LOG.debug("Sent newSuspectEvent for interface {}", e.getInterface());
                     });
             }
         }
-    }
+    }*/
+
 
     private Log toLog(TrapLogDTO messageLog) {
         final Log log = new Log();
         final Events events = new Events();
         log.setEvents(events);
 
-        for (TrapDTO eachMessage : messageLog.getMessages()) {
+        for (TrapDTO eachMessage : messageLog.getTrapDTOList()) {
             try {
                 final Event event = eventCreator.createEventFrom(
                     eachMessage,
-                    messageLog.getSystemId(),
-                    messageLog.getLocation(),
-                    messageLog.getTrapAddress());
+                    messageLog.getIdentity().getSystemId(),
+                    messageLog.getIdentity().getLocation(),
+                    InetAddressUtils.getInetAddress(messageLog.getTrapAddress()));
                 if (!shouldDiscard(event)) {
                     if (event.getSnmp() != null) {
                         trapdInstrumentation.incTrapsReceivedCount(event.getSnmp().getVersion());
@@ -240,13 +241,6 @@ public class TrapSinkConsumer implements MessageConsumer<TrapInformationWrapper,
         return false;
     }
 
-    public MessageConsumerManager getMessageConsumerManager() {
-        return messageConsumerManager;
-    }
-
-    public void setMessageConsumerManager(MessageConsumerManager messageConsumerManager) {
-        this.messageConsumerManager = messageConsumerManager;
-    }
 
     public EventConfDao getEventConfDao() {
         return eventConfDao;
@@ -300,6 +294,10 @@ public class TrapSinkConsumer implements MessageConsumer<TrapInformationWrapper,
         this.eventSubscriptionService = eventSubscriptionService;
     }
 
+    public void setSnmpHelper(SnmpHelper snmpHelper) {
+        this.snmpHelper = snmpHelper;
+    }
+
     public static TrapListenerConfig from(final TrapdConfig config) {
         final TrapListenerConfig result = new TrapListenerConfig();
         result.setSnmpV3Users(config.getSnmpV3Users());
@@ -329,5 +327,26 @@ public class TrapSinkConsumer implements MessageConsumer<TrapInformationWrapper,
     @VisibleForTesting
     void setTwinSession(TwinPublisher.Session<TrapListenerConfig> twinSession) {
         this.twinSession = twinSession;
+    }
+
+    @Override
+    public void process(Exchange exchange) throws Exception {
+
+        TrapLogDTO messageLog = exchange.getIn().getMandatoryBody(TrapLogDTO.class);
+        try (Logging.MDCCloseable mdc = Logging.withPrefixCloseable(LOG4J_CATEGORY)) {
+            final Log eventLog = toLog(messageLog);
+
+            eventForwarder.sendNowSync(eventLog);
+
+            // If configured, also send events for new suspects
+            if (config.getNewSuspectOnTrap()) {
+                eventLog.getEvents().getEventCollection().stream()
+                    .filter(e -> !e.hasNodeid())
+                    .forEach(e -> {
+                        sendNewSuspectEvent(e.getInterface(), e.getDistPoller(), messageLog.getIdentity().getLocation());
+                        LOG.debug("Sent newSuspectEvent for interface {}", e.getInterface());
+                    });
+            }
+        }
     }
 }

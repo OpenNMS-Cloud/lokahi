@@ -26,7 +26,7 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.shared.snmp;
+package org.opennms.horizon.shared.snmp.traps;
 
 public interface TrapNotificationListener {
 

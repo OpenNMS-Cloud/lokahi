@@ -4,7 +4,6 @@ package opennms.rpc.echo;
 option java_multiple_files = true;
 option java_package = "org.opennms.horizon.grpc.echo.contract";
 
-import "opennms_minion_ipc.proto";
 
 message EchoRequest {
   uint64 time = 1;

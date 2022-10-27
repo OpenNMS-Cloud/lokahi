@@ -4,7 +4,6 @@ package opennms.rpc.snmp;
 option java_multiple_files = true;
 option java_package = "org.opennms.horizon.grpc.snmp.contract";
 
-import "opennms_minion_ipc.proto";
 
 message SnmpRequest {
   SnmpConfiguration agent = 1;

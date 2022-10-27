@@ -39,6 +39,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.CompletableFuture;
 
+import org.opennms.horizon.shared.snmp.traps.TrapNotificationListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

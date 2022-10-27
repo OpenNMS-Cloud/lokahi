@@ -115,11 +115,11 @@ jobs:
         with:
           dir-location: 'minion-gateway'
 
-      #- name: external-it
-      #  id: action-external-it
-      #  uses: ./.github/actions/external-it
-      #  with:
-      #    dir-location: 'external-it'
+      - name: external-it
+        id: action-external-it
+        uses: ./.github/actions/external-it
+        with:
+          dir-location: 'external-it'
       
       - name: dockerhub-login
         run: |

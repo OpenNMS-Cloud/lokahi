@@ -8,8 +8,7 @@ ENV GF_PLUGINS_ALLOW_LOADING_UNSIGNED_PLUGINS="opennms-helm-app"
 
 USER root
 
-RUN apk add --update --no-cache libcap && \
- setcap 'cap_net_bind_service=+ep' /usr/share/grafana/bin/grafana-server
+RUN apk add --update --no-cache libcap
 
 ARG GF_GID="0"
 ARG GF_INSTALL_IMAGE_RENDERER_PLUGIN="false"

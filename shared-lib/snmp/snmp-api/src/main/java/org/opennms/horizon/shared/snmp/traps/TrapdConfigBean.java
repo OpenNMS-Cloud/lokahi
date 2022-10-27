@@ -26,7 +26,7 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.traps.config;
+package org.opennms.horizon.shared.snmp.traps;
 
 import org.opennms.horizon.shared.snmp.SnmpV3User;
 
@@ -35,7 +35,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 public class TrapdConfigBean implements TrapdConfig, Serializable {
 
@@ -60,21 +59,6 @@ public class TrapdConfigBean implements TrapdConfig, Serializable {
         update(configToClone);
     }
 
-    public TrapdConfigBean(TrapdConfiguration trapdConfiguration) {
-        setSnmpTrapAddress(trapdConfiguration.getSnmpTrapAddress());
-        setSnmpTrapPort(trapdConfiguration.getSnmpTrapPort());
-        setNewSuspectOnTrap(trapdConfiguration.isNewSuspectOnTrap());
-        setIncludeRawMessage(trapdConfiguration.isIncludeRawMessage());
-        setBatchIntervalMs(trapdConfiguration.getBatchInterval());
-        setBatchSize(trapdConfiguration.getBatchSize());
-        setQueueSize(trapdConfiguration.getQueueSize());
-        setNumThreads(trapdConfiguration.getThreads());
-        if (trapdConfiguration.getSnmpv3UserCollection() != null) {
-            setSnmpV3Users(trapdConfiguration.getSnmpv3UserCollection().stream()
-                .map(TrapdConfigBean::toSnmpV3User)
-                .collect(Collectors.toList()));
-        }
-    }
 
     public void setSnmpTrapAddress(String snmpTrapAddress) {
         this.snmpTrapAddress = snmpTrapAddress;
@@ -173,17 +157,6 @@ public class TrapdConfigBean implements TrapdConfig, Serializable {
         this.numThreads = numThreads;
     }
 
-    public static SnmpV3User toSnmpV3User(Snmpv3User snmpv3User) {
-        SnmpV3User snmpV3User = new SnmpV3User();
-        snmpV3User.setAuthPassPhrase(snmpv3User.getAuthPassphrase());
-        snmpV3User.setAuthProtocol(snmpv3User.getAuthProtocol());
-        snmpV3User.setEngineId(snmpv3User.getEngineId());
-        snmpV3User.setPrivPassPhrase(snmpv3User.getPrivacyPassphrase());
-        snmpV3User.setPrivProtocol(snmpv3User.getPrivacyProtocol());
-        snmpV3User.setSecurityName(snmpv3User.getSecurityName());
-        snmpV3User.setSecurityLevel(snmpv3User.getSecurityLevel());
-        return snmpV3User;
-    }
 
     @Override
     public boolean shouldUseAddressFromVarbind() {

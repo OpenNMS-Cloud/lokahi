@@ -66,7 +66,7 @@ import org.opennms.horizon.shared.snmp.SnmpV3User;
 import org.opennms.horizon.shared.snmp.SnmpValue;
 import org.opennms.horizon.shared.snmp.SnmpValueFactory;
 import org.opennms.horizon.shared.snmp.SnmpWalker;
-import org.opennms.horizon.shared.snmp.TrapNotificationListener;
+import org.opennms.horizon.shared.snmp.traps.TrapNotificationListener;
 import org.opennms.horizon.shared.utils.SystemInfoUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

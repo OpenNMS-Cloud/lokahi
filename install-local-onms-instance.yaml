@@ -8,39 +8,40 @@ spec:
   httpPort: 80
   httpsPort: 443
   namespace: local-instance
+  tlsEnabled: true
   deployOnly: true
   core:
-    image: opennms/horizon-stream-core:local
+    image: opennms/horizon-stream-core
     cpu: "0"
     mem: "0"
   api:
-    image: opennms/horizon-stream-rest-server:local
+    image: opennms/horizon-stream-rest-server
     cpu: "0"
     mem: 500Mi
   ui:
-    image: opennms/horizon-stream-ui:local
+    image: opennms/horizon-stream-ui
     cpu: "0"
     mem: 100Mi
   minion:
-    image: opennms/horizon-stream-minion:local
+    image: opennms/horizon-stream-minion
     cpu: "0"
     mem: 1000Mi
   minionGateway:
-    image: opennms/horizon-stream-minion-gateway:local
+    image: opennms/horizon-stream-minion-gateway
     cpu: "0"
     mem: 500Mi
   notification:
-    image: opennms/horizon-stream-notification:local
+    image: opennms/horizon-stream-notification
     cpu: "0"
     mem: 100Mi
   inventory:
-    image: opennms/horizon-stream-inventory:local
+    image: opennms/horizon-stream-inventory
   metricsProcessor:
-    image: opennms/horizon-stream-metrics-processor:local
+    image: opennms/horizon-stream-metrics-processor
   keycloak:
-    image: opennms/horizon-stream-keycloak:local
+    image: opennms/horizon-stream-keycloak
   grafana:
-    image: opennms/horizon-stream-grafana:local
+    image: opennms/horizon-stream-grafana
   postgres:
     image: postgres:14.5-alpine
   credentials:

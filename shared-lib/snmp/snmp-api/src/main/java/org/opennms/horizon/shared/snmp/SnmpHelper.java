@@ -1,5 +1,7 @@
 package org.opennms.horizon.shared.snmp;
 
+import org.opennms.horizon.shared.snmp.traps.TrapNotificationListener;
+
 import java.io.IOException;
 import java.net.InetAddress;
 import java.util.List;

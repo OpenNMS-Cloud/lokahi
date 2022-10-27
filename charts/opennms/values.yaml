@@ -1,4 +1,6 @@
 Host: onmshs
+Port: 443 #set depending on TLS.Enabled and the Ingress ports, do not change
+Protocol: https #set depending on TLS.Enabled, do not change
 TestDeploy: false
 OpenNMS:
   Core:
@@ -51,7 +53,7 @@ OpenNMS:
     Image: opennms/horizon-stream-ui
     ImagePullPolicy: IfNotPresent
     Replicas: 1
-    Port: 80
+    Port: 8080
     Resources:
       Limits:
         Cpu: "1"
@@ -66,6 +68,7 @@ OpenNMS:
     Replicas: 1
     Port: 8181
     SshPort: 8101
+    TrapsListenerPort: 1162
     Resources:
       Limits:
         Cpu: "1"

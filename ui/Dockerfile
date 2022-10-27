@@ -17,9 +17,9 @@ COPY --link . ./
 # Starts Vite dev server, used by Skaffold
 FROM sources as development
 
-EXPOSE 80
+EXPOSE 8080
 ENTRYPOINT ["yarn", "run", "dev"]
-CMD ["--port", "80"]
+CMD ["--port", "8080"]
 
 # Builds the app for production
 FROM sources as build
@@ -40,5 +40,5 @@ COPY --link /nginx /etc/nginx
 # Copy prod files from prod-build stage
 COPY --from=build --link /app/dist /usr/share/nginx/html
 
-EXPOSE 80
+EXPOSE 8080
 ENTRYPOINT ["nginx", "-g", "daemon off;"]

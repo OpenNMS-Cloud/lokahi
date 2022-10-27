@@ -14,6 +14,9 @@ inputs:
     description: 'The directory containing the top-level pom'
     required: false
     default: '.'
+  submodule:
+    description: 'The Maven submodule to build (optional)'
+    required: false
 
 runs:
   using: "composite"
@@ -25,10 +28,21 @@ runs:
         key: ${{ runner.os }}-sonar
 
     - name: Scan project with SonarCloud
+      if: ${{ !inputs.submodule }}
       run: mvn -B org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=$SONAR_PROJECT_KEY
       shell: bash
       env:
         GITHUB_TOKEN: ${{ inputs.github-token }}
         SONAR_TOKEN: ${{ inputs.sonar-token }}
         SONAR_PROJECT_KEY: ${{ inputs.project-key }}
+      working-directory: ${{ inputs.working-directory }}
+    - name: Scan project with SonarCloud
+      if: ${{ inputs.submodule }}
+      run: mvn -B org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -pl=$SUBMODULE -Dsonar.projectKey=$SONAR_PROJECT_KEY
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ inputs.github-token }}
+        SONAR_TOKEN: ${{ inputs.sonar-token }}
+        SONAR_PROJECT_KEY: ${{ inputs.project-key }}
+        SUBMODULE: ${{ inputs.submodule }}
       working-directory: ${{ inputs.working-directory }}

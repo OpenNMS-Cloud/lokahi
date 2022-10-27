@@ -88,14 +88,14 @@ jobs:
           # has the minion coming in.
           sleep 500
 
-          mvn clean install
+          mvn -B clean install
           HORIZON_STREAM_BASE_URL=http://localhost:11080
           KEYCLOAK_BASE_URL=https://onmshs/auth
           KEYCLOAK_REALM=opennms
           KEYCLOAK_USERNAME=admin
           KEYCLOAK_PASSWORD=admin
           export HORIZON_STREAM_BASE_URL KEYCLOAK_BASE_URL KEYCLOAK_REALM KEYCLOAK_USERNAME KEYCLOAK_PASSWORD
-          PROJECT_VERSION="$(mvn -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive -q org.codehaus.mojo:exec-maven-plugin:1.6.0:exec)"
+          PROJECT_VERSION="$(mvn -B -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive -q org.codehaus.mojo:exec-maven-plugin:1.6.0:exec)"
           java -jar "external-horizon-stream-it/target/external-horizon-stream-it-${PROJECT_VERSION}.jar"
 
           ## If fail, exit which kills the ci-cd workflow.

@@ -46,7 +46,7 @@ jobs:
 
       - name: 'Build Image'
         run: |
-          mvn -Prun-it \
+          mvn -B -Prun-it \
           -Dhttp.keepAlive=false \
           -Dmaven.wagon.http.pool=false \
           -Dmaven.wagon.httpconnectionManager.ttlSeconds=25 \

@@ -45,7 +45,7 @@ jobs:
           working-directory: 'shared-lib'
 
       - name: 'Build Image'
-        run: mvn install -Pbuild-docker-images-enabled -DskipTests -Ddocker.image=opennms/horizon-stream-minion:local -Ddocker.skipPush=true
+        run: mvn -B install -Pbuild-docker-images-enabled -DskipTests -Ddocker.image=opennms/horizon-stream-minion:local -Ddocker.skipPush=true
         working-directory: 'minion'
 
       - name: 'SonarCloud Scan'

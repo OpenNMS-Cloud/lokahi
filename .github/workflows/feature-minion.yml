@@ -42,10 +42,9 @@ jobs:
           java-version: 11
 
       - name: Cache Maven Dependencies
-        uses: actions/cache@v3
+        uses: ./.github/actions/cache-maven
         with:
-          path: '~/.m2/repository'
-          key: maven-deps-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('minion/**/pom.xml', 'parent-pom/**/pom.xml', 'shared-lib/**/pom.xml') }}
+          submodule: 'minion'
 
       - name: 'Build Image'
         run: mvn -B -pl minion -am install -Pbuild-docker-images-enabled -DskipTests -Ddocker.image=$IMAGE:$IMAGE_TAG -Ddocker.skipPush=true

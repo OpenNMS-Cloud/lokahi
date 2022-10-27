@@ -41,6 +41,11 @@ jobs:
           distribution: temurin
           java-version: 11
 
+      - name: Cache Maven Dependencies
+        uses: ./.github/actions/cache-maven
+        with:
+          submodule: 'metrics-processor'
+
       - name: 'Jib Maven Build'
         uses: ./.github/actions/jib-maven
         with:

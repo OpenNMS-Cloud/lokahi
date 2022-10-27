@@ -42,11 +42,9 @@ jobs:
           java-version: 11
 
       - name: Cache Maven Dependencies
-        uses: actions/cache@v3
+        uses: ./.github/actions/cache-maven
         with:
-          path: '~/.m2/repository'
-          key: maven-deps-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('inventory/**/pom.xml', 'parent-pom/**/pom.xml', 'shared-lib/**/pom.xml') }}
-
+          submodule: 'notifications'
 
       - name: 'Jib Maven Build'
         uses: ./.github/actions/jib-maven

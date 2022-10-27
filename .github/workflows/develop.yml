@@ -18,9 +18,13 @@ jobs:
   core:
     uses: ./.github/workflows/feature-core.yml
     secrets: inherit
+    with:
+      image-tag: local
   rest-server:
     uses: ./.github/workflows/feature-rest-server.yml
     secrets: inherit
+    with:
+      image-tag: local
   inventory:
     uses: ./.github/workflows/feature-inventory.yml
     secrets: inherit
@@ -29,27 +33,43 @@ jobs:
   metrics-processor:
     uses: ./.github/workflows/feature-metrics-processor.yml
     secrets: inherit
+    with:
+      image-tag: local
   notifications:
     uses: ./.github/workflows/feature-notifications.yml
     secrets: inherit
+    with:
+      image-tag: local
   minion:
     uses: ./.github/workflows/feature-minion.yml
     secrets: inherit
+    with:
+      image-tag: local
   minion-gateway:
     uses: ./.github/workflows/feature-minion-gateway.yml
     secrets: inherit
+    with:
+      image-tag: local
   ui:
     uses: ./.github/workflows/feature-ui.yml
     secrets: inherit
+    with:
+      image-tag: local
   operator:
     uses: ./.github/workflows/feature-operator.yml
     secrets: inherit
+    with:
+      image-tag: local
   grafana:
     uses: ./.github/workflows/feature-grafana.yml
     secrets: inherit
+    with:
+      image-tag: local
   keycloak-ui:
     uses: ./.github/workflows/feature-keycloak-ui.yml
     secrets: inherit
+    with:
+      image-tag: local
   external-it:
     needs: [
       core,

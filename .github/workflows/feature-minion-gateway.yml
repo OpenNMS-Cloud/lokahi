@@ -47,22 +47,11 @@ jobs:
           path: '~/.m2/repository'
           key: maven-deps-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('minion-gateway/**/pom.xml', 'parent-pom/**/pom.xml', 'shared-lib/**/pom.xml') }}
 
-      - name: 'Install parent-pom'
-        uses: ./.github/actions/maven-install
-        with:
-          working-directory: 'parent-pom'
-
-      - name: 'Install shared-lib'
-        uses: ./.github/actions/maven-install
-        with:
-          working-directory: 'shared-lib'
-
       - name: 'Jib Maven Build'
         uses: ./.github/actions/jib-maven
         with:
-          working-directory: 'minion-gateway'
           image: ${{ env.IMAGE }}:${{ env.IMAGE_TAG }}
-          submodule: 'main'
+          submodule: 'minion-gateway/main'
 
       - name: 'SonarCloud Scan'
         uses: ./.github/actions/sonar-scan-maven

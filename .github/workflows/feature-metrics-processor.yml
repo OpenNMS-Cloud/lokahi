@@ -41,26 +41,10 @@ jobs:
           distribution: temurin
           java-version: 11
 
-      - name: Cache Maven Dependencies
-        uses: actions/cache@v3
-        with:
-          path: '~/.m2/repository'
-          key: maven-deps-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('metrics-processor/**/pom.xml', 'parent-pom/**/pom.xml', 'shared-lib/**/pom.xml') }}
-
-      - name: 'Install parent-pom'
-        uses: ./.github/actions/maven-install
-        with:
-          working-directory: 'parent-pom'
-
-      - name: 'Install shared-lib'
-        uses: ./.github/actions/maven-install
-        with:
-          working-directory: 'shared-lib'
-
       - name: 'Jib Maven Build'
         uses: ./.github/actions/jib-maven
         with:
-          working-directory: 'metrics-processor'
+          submodule: 'metrics-processor'
           image: ${{ env.IMAGE }}:${{ env.IMAGE_TAG }}
 
       - name: 'SonarCloud Scan'

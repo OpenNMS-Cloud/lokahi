@@ -8,11 +8,22 @@
     <version>0.1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
-    <name>OpenNMS Horizon :: Horizon Parent</name>
+    <name>OpenNMS Horizon :: Horizon Stream</name>
 
     <description>
         Top-level Parent POM with standard dependency versions for use across multiple top-level projects.
     </description>
+
+    <modules>
+        <module>inventory</module>
+        <module>metrics-processor</module>
+        <module>minion</module>
+        <module>minion-gateway</module>
+        <module>notifications</module>
+        <module>platform</module>
+        <module>rest-server</module>
+        <module>shared-lib</module>
+    </modules>
 
     <properties>
         <!-- Dependency properties -->

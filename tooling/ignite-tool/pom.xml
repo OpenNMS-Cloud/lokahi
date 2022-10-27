@@ -6,7 +6,7 @@
         <groupId>org.opennms.horizon</groupId>
         <artifactId>horizon-parent</artifactId>
         <version>0.1.0-SNAPSHOT</version>
-        <relativePath>../../parent-pom</relativePath>
+        <relativePath>../../pom.xml</relativePath>
     </parent>
 
     <artifactId>opennms-ignite-tool</artifactId>

@@ -1,0 +1,23 @@
+name: 'Maven Install'
+description: 'Builds a Maven project and installs it into the runner''s Maven repository'
+inputs:
+  working-directory:
+    description: 'The directory containing the top-level pom'
+    required: true
+  submodule:
+    description: 'The Maven submodule to build (optional)'
+    required: false
+
+runs:
+  using: "composite"
+  steps:
+    - name: Generate effective POM
+      run: mvn -B org.apache.maven.plugins:maven-help-plugin:3.3.0:effective-pom -pl $SUBMODULE -Doutput=target/effective-pom.xml
+      with:
+        path: '~/.m2/repository'
+        key: maven-deps-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('metrics-processor/**/pom.xml', 'parent-pom/**/pom.xml', 'shared-lib/**/pom.xml') }}
+    - name: Cache Maven Dependencies
+      uses: actions/cache@v3
+      with:
+        path: '~/.m2/repository'
+        key: maven-deps-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('metrics-processor/**/pom.xml', 'parent-pom/**/pom.xml', 'shared-lib/**/pom.xml') }}

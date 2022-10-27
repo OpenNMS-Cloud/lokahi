@@ -8,7 +8,6 @@
     <groupId>org.opennms.horizon.alarms</groupId>
     <artifactId>alarms</artifactId>
     <version>0.1.0-SNAPSHOT</version>
-    <relativePath>../pom.xml</relativePath>
   </parent>
 
   <artifactId>rest</artifactId>

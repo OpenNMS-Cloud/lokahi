@@ -7,7 +7,8 @@ secret_settings(disable_scrub=True)  ## TODO: update secret values so we can ree
 # Functions #
 cluster_arch_cmd = '$(tilt get cluster default -o=jsonpath --template="{.status.arch}")'
 
-def jib_project(resource_name, image_name, base_path, k8s_resource_name, resource_deps=[], port_forwards=[], labels=None, submodule=None):
+def jib_project(resource_name, image_name, k8s_resource_name, base_path='.', resource_deps=[], port_forwards=[],
+                labels=None, submodule=None):
     if not labels:
         labels=[resource_name]
 
@@ -55,35 +56,11 @@ k8s_yaml(
 )
 
 # Builds #
-## Shared ##
-local_resource(
-    'parent-pom',
-    cmd='mvn clean install -N',
-    dir='parent-pom',
-    deps=['./parent-pom'],
-    ignore=['**/target'],
-    labels=['shared'],
-)
-
-local_resource(
-    'shared-lib',
-    cmd='mvn clean install -DskipTests=true',
-    dir='shared-lib',
-    deps=['./shared-lib'],
-    ignore=['**/target'],
-    labels=['shared'],
-    resource_deps=['parent-pom'],
-)
 
 ## Microservices ##
 ### Notification ###
-jib_project(
-    'notification',
-    'opennms/horizon-stream-notification',
-    'notifications',
-    'opennms-notifications',
-    port_forwards=['15080:9090', '15050:5005'],
-)
+jib_project('notification', 'opennms/horizon-stream-notification', 'opennms-notifications', submodule='notifications',
+            port_forwards=['15080:9090', '15050:5005'])
 
 ### Vue.js App ###
 #### UI ####
@@ -105,47 +82,25 @@ k8s_resource(
 )
 
 #### BFF ####
-jib_project(
-    'vuejs-bff',
-    'opennms/horizon-stream-rest-server',
-    'rest-server',
-    'opennms-rest-server',
-    labels=['vuejs-app'],
-    port_forwards=['13080:9090', '13050:5005'],
-)
+jib_project('vuejs-bff', 'opennms/horizon-stream-rest-server', 'opennms-rest-server', submodule='rest-server',
+            port_forwards=['13080:9090', '13050:5005'], labels=['vuejs-app'])
 
 ### Inventory ###
-jib_project(
-    'inventory',
-    'opennms/horizon-stream-inventory',
-    'inventory',
-    'opennms-inventory',
-    port_forwards=['29080:9090', '29050:5005'],
-)
+jib_project('inventory', 'opennms/horizon-stream-inventory', 'opennms-inventory', submodule='inventory',
+            port_forwards=['29080:9090', '29050:5005'])
 
 ### Metrics Processor ###
-jib_project(
-    'metrics-processor',
-    'opennms/horizon-stream-metrics-processor',
-    'metrics-processor',
-    'opennms-metrics-processor',
-    port_forwards=['30080:9090', '30050:5005'],
-)
+jib_project('metrics-processor', 'opennms/horizon-stream-metrics-processor', 'opennms-metrics-processor',
+            submodule='metrics-processor', port_forwards=['30080:9090', '30050:5005'])
 
 ### Minion Gateway ###
-jib_project(
-    'minion-gateway',
-    'opennms/horizon-stream-minion-gateway',
-    'minion-gateway',
-    'opennms-minion-gateway',
-    submodule='main',
-    port_forwards=['16080:9090', '16050:5005'],
-)
+jib_project('minion-gateway', 'opennms/horizon-stream-minion-gateway', 'opennms-minion-gateway', submodule='minion-gateway/main',
+            port_forwards=['16080:9090', '16050:5005'])
 
 ### Core ###
 custom_build(
     'opennms/horizon-stream-core',
-    'mvn install -Pbuild-docker-images-enabled -DskipTests -Ddocker.image=$EXPECTED_REF -f platform',
+    'mvn install -pl platform -am -Pbuild-docker-images-enabled -DskipTests -Ddocker.image=$EXPECTED_REF',
     deps=['./platform'],
     ignore=['**/target', '**/dependency-reduced-pom.xml'],
 )
@@ -161,7 +116,7 @@ k8s_resource(
 ### Minion ###
 custom_build(
     'opennms/horizon-stream-minion',
-    'mvn install -f minion -Ddocker.image=$EXPECTED_REF -Dtest=false -DfailIfNoTests=false -DskipITs=true -DskipTests=true',
+    'mvn install -pl minion -am -Ddocker.image=$EXPECTED_REF -Dtest=false -DfailIfNoTests=false -DskipITs=true -DskipTests=true',
     deps=['./minion'],
     ignore=['**/target', '**/dependency-reduced-pom.xml'],
 )

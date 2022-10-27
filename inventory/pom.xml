@@ -8,15 +8,17 @@
         <groupId>org.opennms.horizon</groupId>
         <artifactId>horizon-parent</artifactId>
         <version>0.1.0-SNAPSHOT</version>
-        <relativePath>../parent-pom</relativePath>
     </parent>
+
     <artifactId>inventory</artifactId>
     <name>OpenNMS Horizon :: Inventory</name>
     <description>inventory</description>
+
     <properties>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
     </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>

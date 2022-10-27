@@ -11,11 +11,7 @@ on:
 # can split them up later.
 
 jobs:
-  shared-lib:
-    uses: ./.github/workflows/feature-shared-lib.yml
-    secrets: inherit
   release:
-    needs: shared-lib
     runs-on: self-hosted
     environment: docker-publish-account
     # Enviroment that contains the required secrets.

@@ -47,19 +47,8 @@ jobs:
           path: '~/.m2/repository'
           key: maven-deps-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('minion/**/pom.xml', 'parent-pom/**/pom.xml', 'shared-lib/**/pom.xml') }}
 
-      - name: 'Install parent-pom'
-        uses: ./.github/actions/maven-install
-        with:
-          working-directory: 'parent-pom'
-
-      - name: 'Install shared-lib'
-        uses: ./.github/actions/maven-install
-        with:
-          working-directory: 'shared-lib'
-
       - name: 'Build Image'
-        run: mvn -B install -Pbuild-docker-images-enabled -DskipTests -Ddocker.image=$IMAGE:$IMAGE_TAG -Ddocker.skipPush=true
-        working-directory: 'minion'
+        run: mvn -B -pl minion -am install -Pbuild-docker-images-enabled -DskipTests -Ddocker.image=$IMAGE:$IMAGE_TAG -Ddocker.skipPush=true
 
       - name: 'SonarCloud Scan'
         uses: ./.github/actions/sonar-scan-maven

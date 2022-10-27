@@ -42,7 +42,7 @@ jobs:
           java-version: 11
 
       - name: Cache Maven Dependencies
-        uses: ./.github/actions/cache-maven
+        uses: ./.github/actions/maven-cache
         with:
           submodule: 'metrics-processor'
 

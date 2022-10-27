@@ -1,4 +1,4 @@
-name: 'Maven Install'
+name: 'Maven Cache'
 description: 'Builds a Maven project and installs it into the runner''s Maven repository'
 inputs:
   working-directory:
@@ -12,12 +12,26 @@ runs:
   using: "composite"
   steps:
     - name: Generate effective POM
-      run: mvn -B org.apache.maven.plugins:maven-help-plugin:3.3.0:effective-pom -pl $SUBMODULE -Doutput=target/effective-pom.xml
-      with:
-        path: '~/.m2/repository'
-        key: maven-deps-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('metrics-processor/**/pom.xml', 'parent-pom/**/pom.xml', 'shared-lib/**/pom.xml') }}
+      if: ${{ !inputs.submodule }}
+      run: mvn -B org.apache.maven.plugins:maven-help-plugin:3.3.0:effective-pom -Doutput=target/effective-pom.xml
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
     - name: Cache Maven Dependencies
+      if: ${{ !inputs.submodule }}
       uses: actions/cache@v3
       with:
         path: '~/.m2/repository'
-        key: maven-deps-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('metrics-processor/**/pom.xml', 'parent-pom/**/pom.xml', 'shared-lib/**/pom.xml') }}
+        key: maven-deps-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles(format('{0}/target/effective-pom.xml', inputs.working-directory)) }}
+    - name: Generate effective POM
+      if: ${{ inputs.submodule }}
+      run: mvn -B org.apache.maven.plugins:maven-help-plugin:3.3.0:effective-pom -pl $SUBMODULE -Doutput=target/effective-pom.xml
+      shell: bash
+      env:
+        SUBMODULE: ${{ inputs.submodule }}
+      working-directory: ${{ inputs.working-directory }}
+    - name: Cache Maven Dependencies
+      if: ${{ inputs.submodule }}
+      uses: actions/cache@v3
+      with:
+        path: '~/.m2/repository'
+        key: maven-deps-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles(format('{0}/{1}/target/effective-pom.xml', inputs.working-directory, inputs.submodule)) }}

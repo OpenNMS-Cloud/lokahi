@@ -15,6 +15,7 @@
     </description>
 
     <properties>
+        <!-- Dependency properties -->
         <dropwizard.metrics.version>4.2.10</dropwizard.metrics.version>
         <activemq.version>5.17.1</activemq.version>
         <aries.jax.rs.whiteboard.version>2.0.1</aries.jax.rs.whiteboard.version>
@@ -96,6 +97,8 @@
         <jib.version>3.2.1</jib.version>
         <surefire.version>3.0.0-M5</surefire.version>
         <failsafe.version>3.0.0-M5</failsafe.version>
+
+        <!-- Non-dependency properties -->
         <sonar.organization>opennms</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
     </properties>

@@ -14,8 +14,6 @@
 	<description>metrics-processor</description>
     <properties>
         <java.version>11</java.version>
-        <sonar.organization>opennms</sonar.organization>
-        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
     </properties>
     <dependencyManagement>
         <dependencies>

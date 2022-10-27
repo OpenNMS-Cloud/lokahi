@@ -19,8 +19,6 @@
         <maven.compiler.target>11</maven.compiler.target>
 		<java.version>11</java.version>
         <horizon.shared.lib.version>0.1.0-SNAPSHOT</horizon.shared.lib.version>
-        <sonar.organization>opennms</sonar.organization>
-        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
 	</properties>
 	<dependencies>
         <dependency>

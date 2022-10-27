@@ -38,7 +38,7 @@ runs:
       working-directory: ${{ inputs.working-directory }}
     - name: Scan project with SonarCloud
       if: ${{ inputs.submodule }}
-      run: mvn -B org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -pl=$SUBMODULE -Dsonar.projectKey=$SONAR_PROJECT_KEY
+      run: mvn -B org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -pl=$SUBMODULE -am -Dsonar.projectKey=$SONAR_PROJECT_KEY
       shell: bash
       env:
         GITHUB_TOKEN: ${{ inputs.github-token }}

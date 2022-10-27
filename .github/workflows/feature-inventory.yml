@@ -58,5 +58,5 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           sonar-token: ${{ secrets.SONAR_TOKEN }}
-          working-directory: 'inventory'
+          submodule: 'inventory'
           project-key: 'opennms_horizon-stream_inventory'

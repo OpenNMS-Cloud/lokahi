@@ -65,5 +65,5 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           sonar-token: ${{ secrets.SONAR_TOKEN }}
-          working-directory: 'platform'
+          submodule: 'platform'
           project-key: 'opennms_horizon-stream_core'

@@ -39,7 +39,7 @@ jobs:
 
       - name: 'Build Image'
         run: DOCKER_BUILDKIT=1 docker build -t $IMAGE:$IMAGE_TAG -f ./Dockerfile .
-        working-directory: 'keycloak-ui'
+        submodule: 'keycloak-ui'
 
       - name: publish-image-keycloak-ui
         run: |

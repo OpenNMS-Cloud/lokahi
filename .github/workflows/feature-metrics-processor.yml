@@ -52,5 +52,5 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           sonar-token: ${{ secrets.SONAR_TOKEN }}
-          working-directory: 'metrics-processor'
+          submodule: 'metrics-processor'
           project-key: 'opennms_horizon-stream_metrics-processor'

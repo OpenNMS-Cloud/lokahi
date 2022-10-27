@@ -58,5 +58,5 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           sonar-token: ${{ secrets.SONAR_TOKEN }}
-          working-directory: 'rest-server'
+          submodule: 'rest-server'
           project-key: 'opennms_horizon-stream_bff'

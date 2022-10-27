@@ -16,12 +16,6 @@ runs:
       run: mvn -B org.apache.maven.plugins:maven-help-plugin:3.3.0:effective-pom -Doutput=target/effective-pom.xml
       shell: bash
       working-directory: ${{ inputs.working-directory }}
-    - name: Cache Maven Dependencies
-      if: ${{ !inputs.submodule }}
-      uses: actions/cache@v3
-      with:
-        path: '~/.m2/repository'
-        key: maven-deps-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles(format('{0}/target/effective-pom.xml', inputs.working-directory)) }}
     - name: Generate effective POM
       if: ${{ inputs.submodule }}
       run: mvn -B org.apache.maven.plugins:maven-help-plugin:3.3.0:effective-pom -pl $SUBMODULE -Doutput=target/effective-pom.xml
@@ -34,4 +28,4 @@ runs:
       uses: actions/cache@v3
       with:
         path: '~/.m2/repository'
-        key: maven-deps-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles(format('{0}/{1}/target/effective-pom.xml', inputs.working-directory, inputs.submodule)) }}
+        key: maven-deps-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('**/target/effective-pom.xml') }}

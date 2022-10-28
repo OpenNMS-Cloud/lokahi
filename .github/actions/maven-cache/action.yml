@@ -18,7 +18,7 @@ runs:
       working-directory: ${{ inputs.working-directory }}
     - name: Generate effective POM
       if: ${{ inputs.submodule }}
-      run: mvn -B org.apache.maven.plugins:maven-help-plugin:3.3.0:effective-pom -pl $SUBMODULE -Doutput=target/effective-pom.xml
+      run: mvn -B org.apache.maven.plugins:maven-help-plugin:3.3.0:effective-pom -pl $SUBMODULE -am -amd -Doutput=target/effective-pom.xml
       shell: bash
       env:
         SUBMODULE: ${{ inputs.submodule }}

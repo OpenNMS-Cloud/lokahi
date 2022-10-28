@@ -47,7 +47,7 @@ jobs:
           submodule: 'minion'
 
       - name: 'Build Image'
-        run: mvn -B -pl minion -am install -Pbuild-docker-images-enabled -DskipTests -Ddocker.image=$IMAGE:$IMAGE_TAG -Ddocker.skipPush=true
+        run: mvn -B -pl minion -am -amd install -Pbuild-docker-images-enabled -DskipTests -Ddocker.image=$IMAGE:$IMAGE_TAG -Ddocker.skipPush=true
 
       - name: 'SonarCloud Scan'
         uses: ./.github/actions/sonar-scan-maven

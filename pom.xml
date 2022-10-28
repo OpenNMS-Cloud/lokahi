@@ -873,9 +873,65 @@
                     <artifactId>jib-maven-plugin</artifactId>
                     <version>${jib.version}</version>
                 </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-failsafe-plugin</artifactId>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>properties-maven-plugin</artifactId>
+                </plugin>
+                <plugin>
+                    <groupId>io.fabric8</groupId>
+                    <artifactId>docker-maven-plugin</artifactId>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-resources-plugin</artifactId>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-shade-plugin</artifactId>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.karaf.tooling</groupId>
+                    <artifactId>karaf-maven-plugin</artifactId>
+                </plugin>
             </plugins>
         </pluginManagement>
     </build>
+
+<!--    <profiles>-->
+<!--        &lt;!&ndash; Build docker images on request. &ndash;&gt;-->
+<!--        <profile>-->
+<!--            <id>build-docker-images-enabled</id>-->
+<!--            <activation>-->
+<!--                <activeByDefault>false</activeByDefault>-->
+<!--            </activation>-->
+<!--            <properties>-->
+<!--                <skip-docker-image-build>false</skip-docker-image-build>-->
+<!--            </properties>-->
+<!--        </profile>-->
+
+<!--        &lt;!&ndash; Also, always build the docker images when the run-it profile is enabled to test against the latest &ndash;&gt;-->
+<!--        <profile>-->
+<!--            <id>run-it</id>-->
+<!--            <activation>-->
+<!--                <activeByDefault>false</activeByDefault>-->
+<!--            </activation>-->
+<!--            <properties>-->
+<!--                <skip-docker-image-build>false</skip-docker-image-build>-->
+<!--            </properties>-->
+<!--        </profile>-->
+<!--    </profiles>-->
 
     <repositories>
         <repository>

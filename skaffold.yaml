@@ -44,7 +44,7 @@ build:
   artifacts:
   - image: opennms/horizon-stream-core
     custom:
-      buildCommand: "mvn install -pl platform -am -Pbuild-docker-images-enabled -DskipTests=$SKIP_TEST -Ddocker.image=$IMAGE -Ddocker.skipPush={{ .PUSH_IMAGE | not }}"
+      buildCommand: "mvn install -pl platform -am -amd -Pbuild-docker-images-enabled -DskipTests=$SKIP_TEST -Ddocker.image=$IMAGE -Ddocker.skipPush={{ .PUSH_IMAGE | not }}"
       dependencies:
         paths: ["platform"]
         ignore: [
@@ -53,7 +53,7 @@ build:
         ]
   - image: opennms/horizon-stream-minion
     custom:
-      buildCommand: "mvn install -pl minion -am -Dtest={{ .SKIP_TEST | not }} -DfailIfNoTests=false -DskipITs=true -DskipTests=$SKIP_TEST -Ddocker.image=$IMAGE -Ddocker.skipPush={{ .PUSH_IMAGE | not }}"
+      buildCommand: "mvn install -pl minion -am -amd -Dtest={{ .SKIP_TEST | not }} -DfailIfNoTests=false -DskipITs=true -DskipTests=$SKIP_TEST -Ddocker.image=$IMAGE -Ddocker.skipPush={{ .PUSH_IMAGE | not }}"
       dependencies:
         paths: ["minion"]
         ignore: [

@@ -23,7 +23,7 @@ def jib_project(resource_name, image_name, k8s_resource_name, base_path='.', res
 
     local_resource(
         compile_resource_name,
-        'mvn compile -f {} -am {}'.format(base_path, submodule_flag),
+        'mvn compile -f {} -am -amd {}'.format(base_path, submodule_flag),
         deps=['{}/src'.format(base_path), '{}/pom.xml'.format(base_path)],
         ignore=['**/target'],
         labels=labels,
@@ -100,7 +100,7 @@ jib_project('minion-gateway', 'opennms/horizon-stream-minion-gateway', 'opennms-
 ### Core ###
 custom_build(
     'opennms/horizon-stream-core',
-    'mvn install -pl platform -am -Pbuild-docker-images-enabled -DskipTests -Ddocker.image=$EXPECTED_REF',
+    'mvn install -pl platform -am -amd -Pbuild-docker-images-enabled -DskipTests -Ddocker.image=$EXPECTED_REF',
     deps=['./platform'],
     ignore=['**/target', '**/dependency-reduced-pom.xml'],
 )
@@ -116,7 +116,7 @@ k8s_resource(
 ### Minion ###
 custom_build(
     'opennms/horizon-stream-minion',
-    'mvn install -pl minion -am -Ddocker.image=$EXPECTED_REF -Dtest=false -DfailIfNoTests=false -DskipITs=true -DskipTests=true',
+    'mvn install -pl minion -am -amd -Ddocker.image=$EXPECTED_REF -Dtest=false -DfailIfNoTests=false -DskipITs=true -DskipTests=true',
     deps=['./minion'],
     ignore=['**/target', '**/dependency-reduced-pom.xml'],
 )

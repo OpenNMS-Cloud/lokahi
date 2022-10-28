@@ -49,8 +49,8 @@ jobs:
       - name: 'Build Image'
         run: |
           mvn -B -Prun-it \
-          -pl platform -am \
-          -Ddocker.image=$IMAGE:$IMAGE_TAG
+          -pl platform -am -amd \
+          -Ddocker.image=$IMAGE:$IMAGE_TAG \
           -Dhttp.keepAlive=false \
           -Dmaven.wagon.http.pool=false \
           -Dmaven.wagon.httpconnectionManager.ttlSeconds=25 \

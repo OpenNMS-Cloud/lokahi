@@ -14,6 +14,10 @@
         Top-level Parent POM with standard dependency versions for use across multiple top-level projects.
     </description>
 
+    <modules>
+        <module>../shared-lib</module>
+    </modules>
+
     <properties>
         <!-- Dependency properties -->
         <dropwizard.metrics.version>4.2.10</dropwizard.metrics.version>

@@ -45,6 +45,7 @@ jobs:
   build-all:
     needs: tag
     uses: ./.github/workflows/develop.yml
+    secrets: inherit
     with:
       image-tag: ${{ needs.tag.outputs.image-tag }}
   release:

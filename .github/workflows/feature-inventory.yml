@@ -28,31 +28,16 @@ env:
 #  cancel-in-progress: true
 
 jobs:
-  shared-lib:
+  prereqs:
     runs-on: ubuntu-latest
+    outputs:
+      cache-key: ${{ steps.install-prereqs.outputs.cache-key }}
     steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
-      - name: Set up JDK 11
-        uses: actions/setup-java@v3
-        with:
-          distribution: temurin
-          java-version: 11
-      - uses: actions/cache@v3
-        with:
-          path: '~/.m2/repository'
-          key: shared-lib-m2-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('parent-pom/**', 'shared-lib/**') }}
-      - name: 'Install parent-pom'
-        uses: ./.github/actions/maven-install
-        with:
-          working-directory: 'parent-pom'
-      - name: 'Install shared-lib'
-        uses: ./.github/actions/maven-install
-        with:
-          working-directory: 'shared-lib'
+      - name: Install prereqs
+        id: install-prereqs
+        uses: ./.github/actions/java-install-prereqs
   build-and-test:
-    needs: shared-lib
+    needs: prereqs
     runs-on: ubuntu-latest
     steps:
 
@@ -71,11 +56,11 @@ jobs:
         with:
           working-directory: 'inventory'
 
-      - name: Restore Maven Repository cache from previous job
+      - name: Restore prereqs Maven Repository cache
         uses: actions/cache@v3
         with:
           path: '~/.m2/repository'
-          key: shared-lib-m2-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('parent-pom/**', 'shared-lib/**') }}
+          key: ${{ jobs.prereqs.outputs.cache-key }}
 
       - name: 'Jib Maven Build'
         uses: ./.github/actions/jib-maven

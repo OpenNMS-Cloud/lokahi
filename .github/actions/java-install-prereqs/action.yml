@@ -1,0 +1,40 @@
+name: 'Install Java Prereqs'
+description: 'Builds a Maven project and installs it into the runner''s Maven repository'
+outputs:
+  cache-key:
+    description: 'The key for the cache containing the resulting build files'
+    value: ${{ steps.generate-cache-key.outputs.cache-key }}
+  cache-hit:
+    description: 'True if a previously cached build was found and reused, false otherwise'
+    value: ${{ steps.cache-maven.outputs.cache-hit }}
+
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+    - name: Set up JDK 11
+      uses: actions/setup-java@v3
+      with:
+        distribution: temurin
+        java-version: 11
+    - name: Generate cache key
+      id: generate-cache-key
+      run: echo "cache-key=java-prereqs-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('parent-pom/**', 'shared-lib/**') }}" >> $GITHUB_OUTPUT
+      shell: bash
+    - uses: actions/cache@v3
+      id: cache-maven
+      with:
+        path: '~/.m2/repository'
+        key: ${{ steps.generate-cache-key.outputs.cache-key }}
+    - name: 'Install parent-pom'
+      if: ${{ steps.cache-maven.outputs.cache-hit != 'true' }}
+      uses: ./.github/actions/maven-install
+      with:
+        working-directory: 'parent-pom'
+    - name: 'Install shared-lib'
+      if: ${{ steps.cache-maven.outputs.cache-hit != 'true' }}
+      uses: ./.github/actions/maven-install
+      with:
+        working-directory: 'shared-lib'

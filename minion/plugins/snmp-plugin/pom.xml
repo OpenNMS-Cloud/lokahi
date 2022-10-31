@@ -25,11 +25,19 @@
             <artifactId>concurrent-locks</artifactId>
             <version>1.0.0</version>
         </dependency>
+
         <dependency>
             <groupId>org.opennms.horizon.minion</groupId>
             <artifactId>plugins-api</artifactId>
             <version>${project.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.opennms.horizon.minion</groupId>
+            <artifactId>plugin-features</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
         <dependency>
             <groupId>org.opennms.horizon.minion</groupId>
             <artifactId>snmp-ipc</artifactId>
@@ -41,30 +49,18 @@
             <groupId>org.opennms.horizon.minion</groupId>
             <artifactId>grpc-features</artifactId>
             <version>${project.version}</version>
-            <scope>runtime</scope>
         </dependency>
-
 
         <dependency>
             <groupId>org.opennms.horizon.minion</groupId>
             <artifactId>ipc-features</artifactId>
             <version>${project.version}</version>
-            <scope>runtime</scope>
         </dependency>
-
 
         <dependency>
             <groupId>org.opennms.horizon.minion</groupId>
             <artifactId>observability-features</artifactId>
             <version>${project.version}</version>
-            <scope>runtime</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.opennms.horizon.minion</groupId>
-            <artifactId>plugin-features</artifactId>
-            <version>${project.version}</version>
-            <scope>runtime</scope>
         </dependency>
 
 

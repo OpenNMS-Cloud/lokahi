@@ -44,7 +44,7 @@ jobs:
         uses: ./.github/actions/java-install-prereqs
   build-and-test:
     needs: prereqs
-    if: ${{ success() || cancelled() }}
+    if: ${{ !inputs.install-prereqs || success() }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3

@@ -87,10 +87,6 @@ jobs:
               # https://github.com/actions/virtual-environments/issues/1499.
         working-directory: 'platform'
 
-      - name: 'Push Image'
-        run: docker push $IMAGE:$IMAGE_TAG
-        working-directory: 'platform'
-
       - name: 'SonarCloud Scan'
         uses: ./.github/actions/sonar-scan-maven
         with:

@@ -82,10 +82,6 @@ jobs:
              -Dorg.slf4j.simpleLogger.dateTimeFormat="yyyy-MM-dd HH:mm:ss"
         working-directory: 'minion'
 
-      - name: 'Push Image'
-        run: docker push $IMAGE:$IMAGE_TAG
-        working-directory: 'minion'
-
       - name: 'SonarCloud Scan'
         uses: ./.github/actions/sonar-scan-maven
         with:

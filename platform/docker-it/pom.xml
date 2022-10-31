@@ -260,7 +260,7 @@
               <name>opennms-horizon-application-it-image</name>
               <alias>application</alias>
               <build>
-                <from>opennms/horizon-stream-core:local</from>
+                <from>${docker.image}</from>
                 <assembly>
                   <user>horizon-stream</user>
                   <targetDir>/</targetDir>

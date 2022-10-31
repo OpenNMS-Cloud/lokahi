@@ -52,7 +52,7 @@ jobs:
           cache-dependency-path: ui/yarn.lock
 
       - name: 'Install dependencies'
-        run: 'yarn install --pure-lockfile'
+        run: 'yarn install --frozen-lockfile'
         working-directory: 'ui'
 
       - name: Build and push image

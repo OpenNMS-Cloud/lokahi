@@ -7,7 +7,6 @@
         <groupId>org.opennms.horizon.core</groupId>
         <artifactId>core</artifactId>
         <version>0.1.0-SNAPSHOT</version>
-        <relativePath>../pom.xml</relativePath>
     </parent>
 
     <artifactId>monitor</artifactId>

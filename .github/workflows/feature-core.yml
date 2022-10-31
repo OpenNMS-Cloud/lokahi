@@ -73,7 +73,7 @@ jobs:
 
       - name: 'Build Image'
         run: |
-          mvn -B verify \
+          mvn -B deploy \
               -Prun-it -Ddocker.image=$IMAGE:$IMAGE_TAG \
               -Dhttp.keepAlive=false \
               -Dmaven.wagon.http.pool=false \

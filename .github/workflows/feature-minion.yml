@@ -74,7 +74,7 @@ jobs:
 
       - name: 'Build Image'
         run: |
-         mvn -B verify \
+         mvn -B deploy \
              -Prun-it -Ddocker.image=$IMAGE:$IMAGE_TAG \
              -T 1C \
              -Dorg.slf4j.simpleLogger.showThreadName=true \

@@ -11,4 +11,4 @@ runs:
     - uses: actions/cache@v3
       with:
         path: '~/.m2/repository'
-        key: maven-deps-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('${{ inputs.working-directory }}/**/pom.xml') }}
+        key: maven-deps-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles(format('{0}/**/pom.xml', inputs.working-directory)) }}

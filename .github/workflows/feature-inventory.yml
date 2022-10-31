@@ -42,7 +42,7 @@ jobs:
       - uses: actions/cache@v3
         with:
           path: '~/.m2/repository'
-          key: maven-deps-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('parent-pom/**/pom.xml', 'shared-lib/**/pom.xml') }}
+          key: shared-lib-m2-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('parent-pom/**', 'shared-lib/**') }}
       - name: 'Install parent-pom'
         uses: ./.github/actions/maven-install
         with:
@@ -51,20 +51,10 @@ jobs:
         uses: ./.github/actions/maven-install
         with:
           working-directory: 'shared-lib'
-      - name: Upload Maven repository artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: shared-lib-mvn-repo
-          path: ~/.m2/repository/org/opennms/horizon
   build-and-test:
     needs: shared-lib
     runs-on: ubuntu-latest
     steps:
-      - name: Download Maven repository artifacts
-        uses: actions/download-artifact@v3
-        with:
-          name: shared-lib-mvn-repo
-          path: ~/.m2/repository/org/opennms/horizon
 
       - uses: actions/checkout@v3
         with:
@@ -80,6 +70,12 @@ jobs:
         uses: ./.github/actions/maven-cache
         with:
           working-directory: 'inventory'
+
+      - name: Restore Maven Repository cache from previous job
+        uses: actions/cache@v3
+        with:
+          path: '~/.m2/repository'
+          key: shared-lib-m2-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('parent-pom/**', 'shared-lib/**') }}
 
       - name: 'Jib Maven Build'
         uses: ./.github/actions/jib-maven

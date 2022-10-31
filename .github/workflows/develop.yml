@@ -30,42 +30,49 @@ jobs:
     secrets: inherit
     with:
       image-tag: local
+      install-prereqs: false
   rest-server:
     needs: java-prereqs
     uses: ./.github/workflows/feature-rest-server.yml
     secrets: inherit
     with:
       image-tag: local
+      install-prereqs: false
   inventory:
     needs: java-prereqs
     uses: ./.github/workflows/feature-inventory.yml
     secrets: inherit
     with:
       image-tag: local
+      install-prereqs: false
   metrics-processor:
     needs: java-prereqs
     uses: ./.github/workflows/feature-metrics-processor.yml
     secrets: inherit
     with:
       image-tag: local
+      install-prereqs: false
   notifications:
     needs: java-prereqs
     uses: ./.github/workflows/feature-notifications.yml
     secrets: inherit
     with:
       image-tag: local
+      install-prereqs: false
   minion:
     needs: java-prereqs
     uses: ./.github/workflows/feature-minion.yml
     secrets: inherit
     with:
       image-tag: local
+      install-prereqs: false
   minion-gateway:
     needs: java-prereqs
     uses: ./.github/workflows/feature-minion-gateway.yml
     secrets: inherit
     with:
       image-tag: local
+      install-prereqs: false
   ui:
     uses: ./.github/workflows/feature-ui.yml
     secrets: inherit

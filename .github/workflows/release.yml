@@ -12,6 +12,7 @@ on:
 
 jobs:
   tag:
+    runs-on: ubuntu-latest
     outputs:
       image-tag: ${{ steps.extract-tag.outputs.image-tag }}
     steps:
@@ -43,7 +44,6 @@ jobs:
         echo "release-tag=$TAG" >> $GITHUB_OUTPUT
   build-all:
     needs: tag
-    runs-on: ubuntu-latest
     uses: ./.github/workflows/develop.yml
     with:
       image-tag: ${{ needs.tag.outputs.image-tag }}

@@ -15,11 +15,7 @@ on:
 #  cancel-in-progress: true
 
 jobs:
-  parent-pom:
-    uses: ./.github/workflows/feature-parent-pom.yml
-    secrets: inherit
   install:
-    needs: parent-pom
     runs-on: ubuntu-latest
     defaults:
       run:

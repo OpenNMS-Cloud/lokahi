@@ -1,0 +1,13 @@
+name: develop
+
+on:
+  push:
+    branches:
+      - '**'
+
+jobs:
+  develop:
+    uses: ./.github/workflows/develop.yml
+    secrets: inherit
+    with:
+      image-tag: 'local'

@@ -18,11 +18,11 @@ on:
         description: 'Tag for the built image'
         required: false
         type: string
-      install-prereqs:
+      skip-prereqs:
         description: 'Toggles prereq installation'
         required: false
         type: boolean
-        default: true
+        default: false
 
 env:
   IMAGE: ${{ inputs.image || 'opennms/horizon-stream-rest-server' }}
@@ -34,7 +34,7 @@ env:
 
 jobs:
   prereqs:
-    if: ${{ inputs.install-prereqs }}
+    if: ${{ inputs.skip-prereqs }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -45,7 +45,7 @@ jobs:
         uses: ./.github/actions/java-install-prereqs
   build-and-test:
     needs: prereqs
-    if: ${{ !inputs.install-prereqs || success() }}
+    if: ${{ inputs.skip-prereqs || success() }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3

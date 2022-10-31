@@ -13,6 +13,13 @@ on:
 #  pull_request:
 #    branches:
 #      - 'develop'
+  workflow_call:
+    inputs:
+      image-tag:
+        description: 'Tag for all images'
+        required: false
+        type: string
+        default: 'local'
 
 jobs:
   java-prereqs:
@@ -29,70 +36,70 @@ jobs:
     uses: ./.github/workflows/feature-core.yml
     secrets: inherit
     with:
-      image-tag: local
+      image-tag: ${{ inputs.image-tag }}
       skip-prereqs: true
   rest-server:
     needs: java-prereqs
     uses: ./.github/workflows/feature-rest-server.yml
     secrets: inherit
     with:
-      image-tag: local
+      image-tag: ${{ inputs.image-tag }}
       skip-prereqs: true
   inventory:
     needs: java-prereqs
     uses: ./.github/workflows/feature-inventory.yml
     secrets: inherit
     with:
-      image-tag: local
+      image-tag: ${{ inputs.image-tag }}
       skip-prereqs: true
   metrics-processor:
     needs: java-prereqs
     uses: ./.github/workflows/feature-metrics-processor.yml
     secrets: inherit
     with:
-      image-tag: local
+      image-tag: ${{ inputs.image-tag }}
       skip-prereqs: true
   notifications:
     needs: java-prereqs
     uses: ./.github/workflows/feature-notifications.yml
     secrets: inherit
     with:
-      image-tag: local
+      image-tag: ${{ inputs.image-tag }}
       skip-prereqs: true
   minion:
     needs: java-prereqs
     uses: ./.github/workflows/feature-minion.yml
     secrets: inherit
     with:
-      image-tag: local
+      image-tag: ${{ inputs.image-tag }}
       skip-prereqs: true
   minion-gateway:
     needs: java-prereqs
     uses: ./.github/workflows/feature-minion-gateway.yml
     secrets: inherit
     with:
-      image-tag: local
+      image-tag: ${{ inputs.image-tag }}
       skip-prereqs: true
   ui:
     uses: ./.github/workflows/feature-ui.yml
     secrets: inherit
     with:
-      image-tag: local
+      image-tag: ${{ inputs.image-tag }}
   operator:
     uses: ./.github/workflows/feature-operator.yml
     secrets: inherit
     with:
-      image-tag: local
+      image-tag: ${{ inputs.image-tag }}
   grafana:
     uses: ./.github/workflows/feature-grafana.yml
     secrets: inherit
     with:
-      image-tag: local
+      image-tag: ${{ inputs.image-tag }}
   keycloak-ui:
     uses: ./.github/workflows/feature-keycloak-ui.yml
     secrets: inherit
     with:
-      image-tag: local
+      image-tag: ${{ inputs.image-tag }}
   external-it:
     needs: [
       core,
@@ -153,6 +160,7 @@ jobs:
         working-directory: external-it
 
       - name: Cleanup
+        if: ${{ always() }}
         run: |
           kind delete clusters kind
 

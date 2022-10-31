@@ -18,7 +18,6 @@ jobs:
     - name: init
       id: extract-tag
       run: |
-        
         # In case a workflow, using the self-hosted runner, has failed and
         # the kind cluster is still running.
         kind delete clusters kind

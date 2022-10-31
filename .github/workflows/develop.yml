@@ -21,7 +21,7 @@ on:
         type: string
 
 env:
-  IMAGE_TAG: ${{ imports.image-tag || 'local' }}
+  IMAGE_TAG: ${{ inputs.image-tag || 'local' }}
 
 jobs:
   java-prereqs:

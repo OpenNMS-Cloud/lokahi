@@ -20,7 +20,7 @@ runs:
       env:
         IMAGE: ${{ inputs.image }}
       run: |
-        mvn -B verify jib:dockerBuild \
+        mvn -B verify jib:build \
         -Dimage=$IMAGE
       shell: bash
       working-directory: ${{ inputs.working-directory }}
@@ -31,7 +31,7 @@ runs:
         IMAGE: ${{ inputs.image }}
         SUBMODULE: ${{ inputs.submodule }}
       run: |
-        mvn -B verify jib:dockerBuild \
+        mvn -B verify jib:build \
         -pl=$SUBMODULE -am -amd \
         -Dimage=$IMAGE \
         -T 1C \

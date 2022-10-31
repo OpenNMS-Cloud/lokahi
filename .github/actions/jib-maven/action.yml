@@ -31,7 +31,11 @@ runs:
         SUBMODULE: ${{ inputs.submodule }}
       run: |
         mvn -B verify jib:dockerBuild \
-        -pl=$SUBMODULE -am \
-        -Dimage=$IMAGE
+        -pl=$SUBMODULE -am -amd \
+        -Dimage=$IMAGE \
+        -T 1C \
+        -Dorg.slf4j.simpleLogger.showThreadName=true \
+        -Dorg.slf4j.simpleLogger.showDateTime=true \
+        -Dorg.slf4j.simpleLogger.dateTimeFormat="yyyy-MM-dd HH:mm:ss"
       shell: bash
       working-directory: ${{ inputs.working-directory }}

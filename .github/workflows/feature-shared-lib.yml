@@ -38,8 +38,9 @@ jobs:
           key: maven-deps-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('parent-pom/**/pom.xml', 'shared-lib/**/pom.xml') }}
 
       - name: 'Maven Install'
-        run: mvn -B install
-        shell: bash
+        uses: ./.github/actions/maven-install
+        with:
+          working-directory: 'shared-lib'
 
       - name: 'SonarCloud Scan'
         uses: ./.github/actions/sonar-scan-maven

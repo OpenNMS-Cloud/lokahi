@@ -111,7 +111,7 @@ jobs:
           echo "Waiting for OpenNMS Horizon Core to start completely..."
           sleep 500
           
-          mvn -B clean install
+          mvn -B install
           HORIZON_STREAM_BASE_URL=http://localhost:11080 
           KEYCLOAK_BASE_URL=https://onmshs/auth
           KEYCLOAK_REALM=opennms

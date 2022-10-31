@@ -14,17 +14,19 @@ on:
         description: 'Name of the image to build'
         required: false
         type: string
-        default: 'opennms/horizon-stream-inventory'
       image-tag:
         description: 'Tag for the built image'
         required: false
         type: string
-        default: ${{ github.sha }}
       skip-prereqs:
         description: 'Toggles prereq installation'
         required: false
         type: boolean
         default: false
+
+env:
+  IMAGE: ${{ inputs.image || 'opennms/horizon-stream-inventory' }}
+  IMAGE_TAG: ${{ inputs.image-tag || github.sha }}
 
 #concurrency:
 #  group: ${{ github.workflow }}-${{ github.ref }}
@@ -75,7 +77,7 @@ jobs:
         uses: ./.github/actions/jib-maven
         with:
           working-directory: 'inventory'
-          image: ${{ inputs.image }}:${{ inputs.image-tag }}
+          image: ${{ env.IMAGE }}:${{ env.IMAGE_TAG }}
 
       - name: 'SonarCloud Scan'
         uses: ./.github/actions/sonar-scan-maven

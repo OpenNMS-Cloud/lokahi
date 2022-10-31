@@ -14,16 +14,14 @@ on:
         description: 'Name of the image to build'
         required: false
         type: string
-        default: 'opennms/horizon-stream-keycloak'
       image-tag:
         description: 'Tag for the built image'
         required: false
         type: string
-        default: ${{ github.sha }}
 
 env:
-  IMAGE: ${{ inputs.image }}
-  IMAGE_TAG: ${{ inputs.image-tag }}
+  IMAGE: ${{ inputs.image-name || 'opennms/horizon-stream-keycloak' }}
+  IMAGE_TAG: ${{ inputs.image-tag || github.sha }}
 
 #concurrency:
 #  group: ${{ github.workflow }}-${{ github.ref }}

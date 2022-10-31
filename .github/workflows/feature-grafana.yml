@@ -14,12 +14,14 @@ on:
         description: 'Name of the image to build'
         required: false
         type: string
-        default: 'opennms/horizon-stream-grafana'
       image-tag:
         description: 'Tag for the built image'
         required: false
         type: string
-        default: ${{ github.sha }}
+
+env:
+  IMAGE: ${{ inputs.image || 'opennms/horizon-stream-grafana' }}
+  IMAGE_TAG: ${{ inputs.image-tag || github.sha }}
 
 #concurrency:
 #  group: ${{ github.workflow }}-${{ github.ref }}
@@ -36,6 +38,3 @@ jobs:
       - name: 'Build Image'
         run: docker build -t $IMAGE:$IMAGE_TAG -f ./Dockerfile .
         working-directory: 'grafana'
-        env:
-          IMAGE: ${{ inputs.image }}
-          IMAGE_TAG: ${{ inputs.image-tag }}

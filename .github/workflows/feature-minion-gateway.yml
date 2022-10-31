@@ -14,12 +14,10 @@ on:
         description: 'Name of the image to build'
         required: false
         type: string
-        default: 'opennms/horizon-stream-minion-gateway'
       image-tag:
         description: 'Tag for the built image'
         required: false
         type: string
-        default: ${{ github.sha }}
       skip-prereqs:
         description: 'Toggles prereq installation'
         required: false
@@ -72,7 +70,7 @@ jobs:
         uses: ./.github/actions/jib-maven
         with:
           working-directory: 'minion-gateway'
-          image: ${{ inputs.image }}:${{ inputs.image-tag }}
+          image: ${{ env.IMAGE }}:${{ env.IMAGE_TAG }}
           submodule: 'main'
 
       - name: 'SonarCloud Scan'

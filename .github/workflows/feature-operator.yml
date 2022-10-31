@@ -14,12 +14,14 @@ on:
         description: 'Name of the image to build'
         required: false
         type: string
-        default: 'opennms/horizon-stream-operator'
       image-tag:
         description: 'Tag for the built image'
         required: false
         type: string
-        default: ${{ github.sha }}
+
+env:
+  IMAGE: ${{ inputs.image || 'opennms/horizon-stream-operator' }}
+  IMAGE_TAG: ${{ inputs.image-tag || github.sha }}
 
 #concurrency:
 #  group: ${{ github.workflow }}-${{ github.ref }}
@@ -40,7 +42,7 @@ jobs:
       - name: 'Build Image'
         run: make local-docker
         env:
-          IMAGE: ${{ inputs.image }}:${{ inputs.image-tag }}
+          IMAGE: ${{ env.IMAGE }}:${{ env.IMAGE_TAG }}
         working-directory: 'operator'
 
       - name: 'Test Coverage'

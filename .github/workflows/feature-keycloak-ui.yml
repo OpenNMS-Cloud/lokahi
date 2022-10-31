@@ -14,14 +14,12 @@ on:
         description: 'Name of the image to build'
         required: false
         type: string
+        default: 'opennms/horizon-stream-keycloak'
       image-tag:
         description: 'Tag for the built image'
         required: false
         type: string
-
-env:
-  IMAGE: ${{ inputs.image-name || 'opennms/horizon-stream-keycloak' }}
-  IMAGE_TAG: ${{ inputs.image-tag || github.sha }}
+        default: ${{ github.sha }}
 
 #concurrency:
 #  group: ${{ github.workflow }}-${{ github.ref }}
@@ -39,6 +37,9 @@ jobs:
 
       - name: 'Build Image'
         run: DOCKER_BUILDKIT=1 docker build -t $IMAGE:$IMAGE_TAG -f ./Dockerfile .
+        env:
+          IMAGE: ${{ inputs.image }}
+          IMAGE_TAG: ${{ inputs.image-tag }}
         working-directory: 'keycloak-ui'
 
       - name: publish-image-keycloak-ui

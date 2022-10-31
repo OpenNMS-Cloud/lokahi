@@ -14,19 +14,17 @@ on:
         description: 'Name of the image to build'
         required: false
         type: string
+        default: 'opennms/horizon-stream-minion'
       image-tag:
         description: 'Tag for the built image'
         required: false
         type: string
+        default: ${{ github.sha }}
       skip-prereqs:
         description: 'Toggles prereq installation'
         required: false
         type: boolean
         default: false
-
-env:
-  IMAGE: ${{ inputs.image || 'opennms/horizon-stream-minion' }}
-  IMAGE_TAG: ${{ inputs.image-tag || github.sha }}
 
 #concurrency:
 #  group: ${{ github.workflow }}-${{ github.ref }}
@@ -74,6 +72,9 @@ jobs:
              -Dorg.slf4j.simpleLogger.showThreadName=true \
              -Dorg.slf4j.simpleLogger.showDateTime=true \
              -Dorg.slf4j.simpleLogger.dateTimeFormat="yyyy-MM-dd HH:mm:ss"
+        env:
+          IMAGE: ${{ inputs.image }}
+          IMAGE_TAG: ${{ inputs.image-tag }}
         working-directory: 'minion'
 
       - name: 'SonarCloud Scan'

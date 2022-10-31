@@ -14,14 +14,12 @@ on:
         description: 'Name of the image to build'
         required: false
         type: string
+        default: 'opennms/horizon-stream-ui'
       image-tag:
         description: 'Tag for the built image'
         required: false
         type: string
-
-env:
-  IMAGE: ${{ inputs.image || 'opennms/horizon-stream-ui' }}
-  IMAGE_TAG: ${{ inputs.image-tag || github.sha }}
+        default: ${{ github.sha }}
 
 #concurrency:
 #  group: ${{ github.workflow }}-${{ github.ref }}
@@ -46,6 +44,9 @@ jobs:
       - name: 'Build Image'
         run: DOCKER_BUILDKIT=1 docker build -t $IMAGE:$IMAGE_TAG .
         shell: bash
+        env:
+          IMAGE: ${{ inputs.image }}
+          IMAGE_TAG: ${{ inputs.image-tag }}
         working-directory: 'ui'
       - name: 'Coverage Report'
         run: 'yarn test:coverage:sonar'

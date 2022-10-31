@@ -47,6 +47,11 @@ jobs:
           path: '~/.m2/repository'
           key: maven-deps-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('minion-gateway/**/pom.xml', 'parent-pom/**/pom.xml', 'shared-lib/**/pom.xml') }}
 
+      - name: 'Install parent-pom'
+        uses: ./.github/actions/maven-install
+        with:
+          working-directory: 'shared-lib'
+
       - name: 'Install shared-lib'
         uses: ./.github/actions/maven-install
         with:

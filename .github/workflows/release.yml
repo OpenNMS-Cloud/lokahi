@@ -3,7 +3,7 @@ name: release
 on:
   push:
     branches:
-      - 'release'
+      - '**'
 
 # For now, we have put all steps into a single job, this will allow for just
 # one vm to run. We use actions to factor out the functionality. If there is a
@@ -51,8 +51,23 @@ jobs:
   release:
     needs: [tag, build-all]
     runs-on: self-hosted
+    strategy:
+      matrix:
+        image: [
+          'opennms/horizon-stream-minion',
+          'opennms/horizon-stream-minion-gateway',
+          'opennms/horizon-stream-core',
+          'opennms/horizon-stream-ui',
+          'opennms/horizon-stream-keycloak-ui',
+          'opennms/horizon-stream-grafana',
+          'opennms/horizon-stream-rest-server',
+          'opennms/horizon-stream-inventory',
+          'opennms/horizon-stream-metrics-processor',
+          'opennms/horizon-stream-notifications',
+          'opennms/horizon-stream-operator',
+        ]
     environment: docker-publish-account
-    # Enviroment that contains the required secrets.
+    # Environment that contains the required secrets.
     steps:
       - name: Check out repository code
         uses: actions/checkout@v3
@@ -67,99 +82,5 @@ jobs:
       - name: publish-image-minion
         run: |
           # Tag and save the image as a file to be published. Both release version and latest.
-          docker tag opennms/horizon-stream-minion:${{ needs.tag.outputs.image-tag }} opennms/horizon-stream-minion:latest
-
-          docker push opennms/horizon-stream-minion:${{ needs.tag.outputs.image-tag }}
-          docker push opennms/horizon-stream-minion:latest
-
-
-      - name: publish-image-minion-gateway
-        run: |
-          # Tag and save the image as a file to be published. Both release version and latest.
-          docker tag opennms/horizon-stream-minion-gateway:${{ needs.tag.outputs.image-tag }} opennms/horizon-stream-minion-gateway:latest
-
-          docker push opennms/horizon-stream-minion-gateway:${{ needs.tag.outputs.image-tag }}
-          docker push opennms/horizon-stream-minion-gateway:latest
-
-      - name: publish-image-core
-        run: |
-          # Tag and save the image as a file to be published. Both release version and latest.
-          docker tag opennms/horizon-stream-core:${{ needs.tag.outputs.image-tag }} opennms/horizon-stream-core:latest
-
-          docker push opennms/horizon-stream-core:${{ needs.tag.outputs.image-tag }}
-          docker push opennms/horizon-stream-core:latest
-      
-      - name: publish-image-ui
-        run: |
-          # Tag and save the image as a file to be published. Both release version and latest.
-          docker tag opennms/horizon-stream-ui:${{ needs.tag.outputs.image-tag }} opennms/horizon-stream-ui:latest
-
-          docker push opennms/horizon-stream-ui:${{ needs.tag.outputs.image-tag }}
-          docker push opennms/horizon-stream-ui:latest
-
-      - name: publish-image-keycloak-ui
-        run: |
-          # Tag and save the image as a file to be published. Both release version and latest.
-          docker tag opennms/horizon-stream-keycloak:${{ needs.tag.outputs.image-tag }} opennms/horizon-stream-keycloak:latest
-
-          docker push opennms/horizon-stream-keycloak:${{ needs.tag.outputs.image-tag }}
-          docker push opennms/horizon-stream-keycloak:latest
-
-      - name: publish-image-grafana
-        run: |
-          # Tag and save the image as a file to be published. Both release version and latest.
-          docker tag opennms/horizon-stream-grafana:${{ needs.tag.outputs.image-tag }} opennms/horizon-stream-grafana:latest
-
-          docker push opennms/horizon-stream-grafana:${{ needs.tag.outputs.image-tag }}
-          docker push opennms/horizon-stream-grafana:latest
-
-      - name: publish-image-rest-server
-        run: |
-          # Tag and save the image as a file to be published. Both release version and latest.
-          docker tag opennms/horizon-stream-rest-server:${{ needs.tag.outputs.image-tag }} opennms/horizon-stream-rest-server:latest
-
-          docker push opennms/horizon-stream-rest-server:${{ needs.tag.outputs.image-tag }}
-          docker push opennms/horizon-stream-rest-server:latest
-
-      - name: publish-image-inventory
-        run: |
-          # Tag and save the image as a file to be published. Both release version and latest.
-          docker tag opennms/horizon-stream-inventory:${{ needs.tag.outputs.image-tag }} opennms/horizon-stream-inventory:latest
-
-          docker push opennms/horizon-stream-inventory:${{ needs.tag.outputs.image-tag }}
-          docker push opennms/horizon-stream-inventory:latest
-      
-      - name: publish-image-metrics-processor
-        run: |
-          # Tag and save the image as a file to be published. Both release version and latest.
-          docker tag opennms/horizon-stream-metrics-processor:${{ needs.tag.outputs.image-tag }} opennms/horizon-stream-metrics-processor:latest
-
-          docker push opennms/horizon-stream-metrics-processor:${{ needs.tag.outputs.image-tag }}
-          docker push opennms/horizon-stream-metrics-processor:latest
-      
-      - name: publish-image-notifications
-        run: |
-          # Tag and save the image as a file to be published. Both release version and latest.
-          docker tag opennms/horizon-stream-notification:${{ needs.tag.outputs.image-tag }} opennms/horizon-stream-notification:latest
-
-          docker push opennms/horizon-stream-notification:${{ needs.tag.outputs.image-tag }}
-          docker push opennms/horizon-stream-notification:latest
-      
-      - name: publish-image-operator
-        run: |
-          # Tag and save the image as a file to be published. Both release version and latest.
-          docker tag opennms/operator:${{ needs.tag.outputs.image-tag }} opennms/operator:latest
-
-          docker push opennms/operator:${{ needs.tag.outputs.image-tag }}
-          docker push opennms/operator:latest
-
-      #- name: tag-release-branch
-      #  run: |
-
-      #    # The following checkouts the release branch and merges develop into
-      #    # it and then tags release.
-      #    git fetch
-      #    git tag ${{ needs.tag.outputs.image-tag }}
-      #    git push origin ${{ needs.tag.outputs.image-tag }}
-
-
+          docker tag ${{ matrix.image }}:${{ needs.tag.outputs.image-tag }} ${{ matrix.image }}:latest
+          docker push ${{ matrix.image }}:latest

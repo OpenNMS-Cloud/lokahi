@@ -57,27 +57,15 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v3
         # Is required to call actions.
-      
-      - name: dockerhub-login
-        run: |
 
-          # This and the following steps are put here rather than put into an
-          # action because it is only ever called from this workflow.
-
-          # Login to dockerhub. The session doesn't seem to carry across steps,
-          # re-test to confirm.
-          #docker login -u ${{ secrets.DOCKERHUB_LOGIN }} -p ${{ secrets.DOCKERHUB_PASS }}
-          echo ${{ secrets.DOCKERHUB_PASS }} | docker login -u ${{ secrets.DOCKERHUB_LOGIN }} --password-stdin
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_LOGIN }}
+          password: ${{ secrets.DOCKERHUB_PASS }}
 
       - name: publish-image-minion
         run: |
-
-          # Login to dockerhub.
-          echo ${{ secrets.DOCKERHUB_PASS }} | docker login -u ${{ secrets.DOCKERHUB_LOGIN }} --password-stdin
-
-          # Publish minion image
-          cd minion/
-
           # Tag and save the image as a file to be published. Both release version and latest.
           docker tag opennms/horizon-stream-minion:${{ needs.tag.outputs.image-tag }} opennms/horizon-stream-minion:latest
 
@@ -87,13 +75,6 @@ jobs:
 
       - name: publish-image-minion-gateway
         run: |
-
-          # Login to dockerhub.
-          echo ${{ secrets.DOCKERHUB_PASS }} | docker login -u ${{ secrets.DOCKERHUB_LOGIN }} --password-stdin
-
-          # Publish minion-gateway image
-          cd minion-gateway/
-
           # Tag and save the image as a file to be published. Both release version and latest.
           docker tag opennms/horizon-stream-minion-gateway:${{ needs.tag.outputs.image-tag }} opennms/horizon-stream-minion-gateway:latest
 
@@ -102,13 +83,6 @@ jobs:
 
       - name: publish-image-core
         run: |
-
-          # Login to dockerhub.
-          echo ${{ secrets.DOCKERHUB_PASS }} | docker login -u ${{ secrets.DOCKERHUB_LOGIN }} --password-stdin
-
-          # Publish core image
-          cd platform/
-
           # Tag and save the image as a file to be published. Both release version and latest.
           docker tag opennms/horizon-stream-core:${{ needs.tag.outputs.image-tag }} opennms/horizon-stream-core:latest
 
@@ -117,10 +91,6 @@ jobs:
       
       - name: publish-image-ui
         run: |
-
-          # Login to dockerhub.
-          echo ${{ secrets.DOCKERHUB_PASS }} | docker login -u ${{ secrets.DOCKERHUB_LOGIN }} --password-stdin
-
           # Tag and save the image as a file to be published. Both release version and latest.
           docker tag opennms/horizon-stream-ui:${{ needs.tag.outputs.image-tag }} opennms/horizon-stream-ui:latest
 
@@ -129,10 +99,6 @@ jobs:
 
       - name: publish-image-keycloak-ui
         run: |
-
-          # Login to dockerhub.
-          echo ${{ secrets.DOCKERHUB_PASS }} | docker login -u ${{ secrets.DOCKERHUB_LOGIN }} --password-stdin
-
           # Tag and save the image as a file to be published. Both release version and latest.
           docker tag opennms/horizon-stream-keycloak:${{ needs.tag.outputs.image-tag }} opennms/horizon-stream-keycloak:latest
 
@@ -141,10 +107,6 @@ jobs:
 
       - name: publish-image-grafana
         run: |
-
-          # Login to dockerhub.
-          echo ${{ secrets.DOCKERHUB_PASS }} | docker login -u ${{ secrets.DOCKERHUB_LOGIN }} --password-stdin
-
           # Tag and save the image as a file to be published. Both release version and latest.
           docker tag opennms/horizon-stream-grafana:${{ needs.tag.outputs.image-tag }} opennms/horizon-stream-grafana:latest
 
@@ -153,13 +115,6 @@ jobs:
 
       - name: publish-image-rest-server
         run: |
-
-          # Login to dockerhub. Probably could remove this, session created in previous step.
-          echo ${{ secrets.DOCKERHUB_PASS }} | docker login -u ${{ secrets.DOCKERHUB_LOGIN }} --password-stdin
-
-          # Test build images
-          docker images
-
           # Tag and save the image as a file to be published. Both release version and latest.
           docker tag opennms/horizon-stream-rest-server:${{ needs.tag.outputs.image-tag }} opennms/horizon-stream-rest-server:latest
 
@@ -168,13 +123,6 @@ jobs:
 
       - name: publish-image-inventory
         run: |
-
-          # Login to dockerhub. Probably could remove this, session created in previous step.
-          echo ${{ secrets.DOCKERHUB_PASS }} | docker login -u ${{ secrets.DOCKERHUB_LOGIN }} --password-stdin
-
-          # Test build images
-          docker images
-
           # Tag and save the image as a file to be published. Both release version and latest.
           docker tag opennms/horizon-stream-inventory:${{ needs.tag.outputs.image-tag }} opennms/horizon-stream-inventory:latest
 
@@ -183,13 +131,6 @@ jobs:
       
       - name: publish-image-metrics-processor
         run: |
-
-          # Login to dockerhub. Probably could remove this, session created in previous step.
-          echo ${{ secrets.DOCKERHUB_PASS }} | docker login -u ${{ secrets.DOCKERHUB_LOGIN }} --password-stdin
-
-          # Test build images
-          docker images
-
           # Tag and save the image as a file to be published. Both release version and latest.
           docker tag opennms/horizon-stream-metrics-processor:${{ needs.tag.outputs.image-tag }} opennms/horizon-stream-metrics-processor:latest
 
@@ -198,13 +139,6 @@ jobs:
       
       - name: publish-image-notifications
         run: |
-
-          # Login to dockerhub. Probably could remove this, session created in previous step.
-          echo ${{ secrets.DOCKERHUB_PASS }} | docker login -u ${{ secrets.DOCKERHUB_LOGIN }} --password-stdin
-
-          # Test build images
-          docker images
-
           # Tag and save the image as a file to be published. Both release version and latest.
           docker tag opennms/horizon-stream-notification:${{ needs.tag.outputs.image-tag }} opennms/horizon-stream-notification:latest
 
@@ -213,9 +147,6 @@ jobs:
       
       - name: publish-image-operator
         run: |
-          # Login to dockerhub.
-          echo ${{ secrets.DOCKERHUB_PASS }} | docker login -u ${{ secrets.DOCKERHUB_LOGIN }} --password-stdin
-
           # Tag and save the image as a file to be published. Both release version and latest.
           docker tag opennms/operator:${{ needs.tag.outputs.image-tag }} opennms/operator:latest
 

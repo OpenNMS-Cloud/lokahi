@@ -45,6 +45,7 @@ jobs:
         uses: ./.github/actions/java-install-prereqs
   build-and-test:
     needs: prereqs
+    if: ${{ success() || cancelled() }}
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v3

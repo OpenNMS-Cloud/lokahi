@@ -15,37 +15,53 @@ on:
 #      - 'develop'
 
 jobs:
+  java-prereqs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+      - name: Install prereqs
+        id: install-prereqs
+        uses: ./.github/actions/java-install-prereqs
   core:
+    needs: java-prereqs
     uses: ./.github/workflows/feature-core.yml
     secrets: inherit
     with:
       image-tag: local
   rest-server:
+    needs: java-prereqs
     uses: ./.github/workflows/feature-rest-server.yml
     secrets: inherit
     with:
       image-tag: local
   inventory:
+    needs: java-prereqs
     uses: ./.github/workflows/feature-inventory.yml
     secrets: inherit
     with:
       image-tag: local
   metrics-processor:
+    needs: java-prereqs
     uses: ./.github/workflows/feature-metrics-processor.yml
     secrets: inherit
     with:
       image-tag: local
   notifications:
+    needs: java-prereqs
     uses: ./.github/workflows/feature-notifications.yml
     secrets: inherit
     with:
       image-tag: local
   minion:
+    needs: java-prereqs
     uses: ./.github/workflows/feature-minion.yml
     secrets: inherit
     with:
       image-tag: local
   minion-gateway:
+    needs: java-prereqs
     uses: ./.github/workflows/feature-minion-gateway.yml
     secrets: inherit
     with:

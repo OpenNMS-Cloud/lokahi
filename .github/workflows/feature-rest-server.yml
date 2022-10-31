@@ -28,7 +28,17 @@ env:
 #  cancel-in-progress: true
 
 jobs:
+  prereqs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+      - name: Install prereqs
+        id: install-prereqs
+        uses: ./.github/actions/java-install-prereqs
   build-and-test:
+    needs: prereqs
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -46,15 +56,8 @@ jobs:
         with:
           working-directory: 'rest-server'
 
-      - name: 'Install & Cache parent-pom'
-        uses: ./.github/actions/maven-install-cache
-        with:
-          working-directory: 'parent-pom'
-
-      - name: 'Install & Cache shared-lib'
-        uses: ./.github/actions/maven-install-cache
-        with:
-          working-directory: 'shared-lib'
+      - name: Restore prereqs Maven Repository cache
+        uses: ./.github/actions/java-restore-prereqs
 
       - name: 'Jib Maven Build'
         uses: ./.github/actions/jib-maven

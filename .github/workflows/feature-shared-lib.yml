@@ -31,8 +31,13 @@ jobs:
           distribution: temurin
           java-version: 11
 
-      - name: 'Maven Install & Cache'
-        uses: ./.github/actions/maven-install-cache
+      - name: 'Maven Cache'
+        uses: ./.github/actions/maven-cache
+        with:
+          working-directory: 'shared-lib'
+
+      - name: 'Maven Install'
+        uses: ./.github/actions/maven-install
         with:
           working-directory: 'shared-lib'
 

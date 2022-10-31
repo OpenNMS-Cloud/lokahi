@@ -1,0 +1,21 @@
+name: 'Install Java Prereqs'
+description: 'Builds a Maven project and installs it into the runner''s Maven repository'
+inputs:
+  cache-key:
+    description: 'The key for the cache containing the resulting build files'
+    required: false
+    default: java-prereqs-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('parent-pom/**', 'shared-lib/**') }}
+outputs:
+  cache-hit:
+    description: 'True if a previously cached build was found and reused, false otherwise'
+    value: ${{ steps.restore-maven.outputs.cache-hit }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Restore prereqs Maven Repository cache
+      id: restore-maven
+      uses: actions/cache@v3
+      with:
+        path: '~/.m2/repository'
+        key: ${{ inputs.cache-key }}

@@ -30,8 +30,6 @@ env:
 jobs:
   prereqs:
     runs-on: ubuntu-latest
-    outputs:
-      cache-key: ${{ steps.install-prereqs.outputs.cache-key }}
     steps:
       - uses: actions/checkout@v3
         with:
@@ -60,10 +58,7 @@ jobs:
           working-directory: 'inventory'
 
       - name: Restore prereqs Maven Repository cache
-        uses: actions/cache@v3
-        with:
-          path: '~/.m2/repository'
-          key: ${{ needs.prereqs.outputs.cache-key }}
+        uses: ./.github/actions/java-restore-prereqs
 
       - name: 'Jib Maven Build'
         uses: ./.github/actions/jib-maven

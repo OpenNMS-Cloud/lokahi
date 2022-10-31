@@ -74,12 +74,16 @@ jobs:
 
       - name: 'Build Image'
         run: |
-         mvn -B deploy \
+         mvn -B verify \
              -Prun-it -Ddocker.image=$IMAGE:$IMAGE_TAG \
              -T 1C \
              -Dorg.slf4j.simpleLogger.showThreadName=true \
              -Dorg.slf4j.simpleLogger.showDateTime=true \
              -Dorg.slf4j.simpleLogger.dateTimeFormat="yyyy-MM-dd HH:mm:ss"
+        working-directory: 'minion'
+
+      - name: 'Push Image'
+        run: docker push $IMAGE:$IMAGE_TAG
         working-directory: 'minion'
 
       - name: 'SonarCloud Scan'

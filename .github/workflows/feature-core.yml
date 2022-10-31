@@ -73,7 +73,7 @@ jobs:
 
       - name: 'Build Image'
         run: |
-          mvn -B deploy \
+          mvn -B verify \
               -Prun-it -Ddocker.image=$IMAGE:$IMAGE_TAG \
               -Dhttp.keepAlive=false \
               -Dmaven.wagon.http.pool=false \
@@ -85,6 +85,10 @@ jobs:
               -Dorg.slf4j.simpleLogger.dateTimeFormat="yyyy-MM-dd HH:mm:ss"
               # Added extra args to deal with time out issue, see
               # https://github.com/actions/virtual-environments/issues/1499.
+        working-directory: 'platform'
+
+      - name: 'Push Image'
+        run: docker push $IMAGE:$IMAGE_TAG
         working-directory: 'platform'
 
       - name: 'SonarCloud Scan'

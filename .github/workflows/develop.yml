@@ -20,9 +20,6 @@ on:
         required: false
         type: string
 
-env:
-  IMAGE_TAG: ${{ inputs.image-tag || 'local' }}
-
 jobs:
   java-prereqs:
     runs-on: ubuntu-latest
@@ -38,70 +35,70 @@ jobs:
     uses: ./.github/workflows/feature-core.yml
     secrets: inherit
     with:
-      image-tag: ${{ env.IMAGE_TAG }}
+      image-tag: ${{ inputs.image-tag || 'local' }}
       skip-prereqs: true
   rest-server:
     needs: java-prereqs
     uses: ./.github/workflows/feature-rest-server.yml
     secrets: inherit
     with:
-      image-tag: ${{ env.IMAGE_TAG }}
+      image-tag: ${{ inputs.image-tag || 'local' }}
       skip-prereqs: true
   inventory:
     needs: java-prereqs
     uses: ./.github/workflows/feature-inventory.yml
     secrets: inherit
     with:
-      image-tag: ${{ env.IMAGE_TAG }}
+      image-tag: ${{ inputs.image-tag || 'local' }}
       skip-prereqs: true
   metrics-processor:
     needs: java-prereqs
     uses: ./.github/workflows/feature-metrics-processor.yml
     secrets: inherit
     with:
-      image-tag: ${{ env.IMAGE_TAG }}
+      image-tag: ${{ inputs.image-tag || 'local' }}
       skip-prereqs: true
   notifications:
     needs: java-prereqs
     uses: ./.github/workflows/feature-notifications.yml
     secrets: inherit
     with:
-      image-tag: ${{ env.IMAGE_TAG }}
+      image-tag: ${{ inputs.image-tag || 'local' }}
       skip-prereqs: true
   minion:
     needs: java-prereqs
     uses: ./.github/workflows/feature-minion.yml
     secrets: inherit
     with:
-      image-tag: ${{ env.IMAGE_TAG }}
+      image-tag: ${{ inputs.image-tag || 'local' }}
       skip-prereqs: true
   minion-gateway:
     needs: java-prereqs
     uses: ./.github/workflows/feature-minion-gateway.yml
     secrets: inherit
     with:
-      image-tag: ${{ env.IMAGE_TAG }}
+      image-tag: ${{ inputs.image-tag || 'local' }}
       skip-prereqs: true
   ui:
     uses: ./.github/workflows/feature-ui.yml
     secrets: inherit
     with:
-      image-tag: ${{ env.IMAGE_TAG }}
+      image-tag: ${{ inputs.image-tag || 'local' }}
   operator:
     uses: ./.github/workflows/feature-operator.yml
     secrets: inherit
     with:
-      image-tag: ${{ env.IMAGE_TAG }}
+      image-tag: ${{ inputs.image-tag || 'local' }}
   grafana:
     uses: ./.github/workflows/feature-grafana.yml
     secrets: inherit
     with:
-      image-tag: ${{ env.IMAGE_TAG }}
+      image-tag: ${{ inputs.image-tag || 'local' }}
   keycloak-ui:
     uses: ./.github/workflows/feature-keycloak-ui.yml
     secrets: inherit
     with:
-      image-tag: ${{ env.IMAGE_TAG }}
+      image-tag: ${{ inputs.image-tag || 'local' }}
   external-it:
     needs: [
       core,

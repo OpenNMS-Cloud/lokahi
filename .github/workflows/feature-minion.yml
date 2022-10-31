@@ -50,7 +50,7 @@ jobs:
       - name: 'Install parent-pom'
         uses: ./.github/actions/maven-install
         with:
-          working-directory: 'shared-lib'
+          working-directory: 'parent-pom'
 
       - name: 'Install shared-lib'
         uses: ./.github/actions/maven-install

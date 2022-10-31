@@ -60,7 +60,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: '~/.m2/repository'
-          key: ${{ jobs.prereqs.outputs.cache-key }}
+          key: ${{ needs.prereqs.outputs.cache-key }}
 
       - name: 'Jib Maven Build'
         uses: ./.github/actions/jib-maven

@@ -19,3 +19,7 @@ runs:
       with:
         path: '~/.m2/repository'
         key: ${{ inputs.cache-key }}
+    - name:  Fail if no cache hit happened, e.g.
+      if: ${{ steps.restore-maven.outputs.cache-hit != 'true'}}
+      run: exit 1
+      shell: bash

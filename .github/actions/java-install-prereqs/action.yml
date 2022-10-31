@@ -1,5 +1,10 @@
 name: 'Install Java Prereqs'
 description: 'Builds a Maven project and installs it into the runner''s Maven repository'
+inputs:
+  cache-key:
+    description: 'The key for the cache containing the resulting build files'
+    required: false
+    default: java-prereqs-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('parent-pom/**', 'shared-lib/**') }}
 outputs:
   cache-key:
     description: 'The key for the cache containing the resulting build files'
@@ -16,15 +21,11 @@ runs:
       with:
         distribution: temurin
         java-version: 11
-    - name: Generate cache key
-      id: generate-cache-key
-      run: echo "cache-key=java-prereqs-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('parent-pom/**', 'shared-lib/**') }}" >> $GITHUB_OUTPUT
-      shell: bash
     - uses: actions/cache@v3
       id: cache-maven
       with:
         path: '~/.m2/repository'
-        key: ${{ steps.generate-cache-key.outputs.cache-key }}
+        key: ${{ inputs.cache-key }}
     - name: 'Install parent-pom'
       if: ${{ steps.cache-maven.outputs.cache-hit != 'true' }}
       uses: ./.github/actions/maven-install

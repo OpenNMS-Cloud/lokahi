@@ -29,7 +29,6 @@ env:
 
 jobs:
   build-and-test:
-    needs: prereqs
     runs-on: ubuntu-latest
     steps:
 

@@ -42,18 +42,17 @@ jobs:
           java-version: 11
 
       - name: Cache Maven Dependencies
-        uses: actions/cache@v3
+        uses: ./.github/actions/maven-cache
         with:
-          path: '~/.m2/repository'
-          key: maven-deps-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('minion/**/pom.xml', 'parent-pom/**/pom.xml', 'shared-lib/**/pom.xml') }}
+          working-directory: 'minion'
 
-      - name: 'Install parent-pom'
-        uses: ./.github/actions/maven-install
+      - name: 'Install & Cache parent-pom'
+        uses: ./.github/actions/maven-install-cache
         with:
           working-directory: 'parent-pom'
 
-      - name: 'Install shared-lib'
-        uses: ./.github/actions/maven-install
+      - name: 'Install & Cache shared-lib'
+        uses: ./.github/actions/maven-install-cache
         with:
           working-directory: 'shared-lib'
 

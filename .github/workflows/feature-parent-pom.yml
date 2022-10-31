@@ -31,16 +31,10 @@ jobs:
           distribution: temurin
           java-version: 11
 
-      - name: Cache Maven Dependencies
-        uses: actions/cache@v3
+      - name: 'Maven Install & Cache'
+        uses: ./.github/actions/maven-install-cache
         with:
-          path: '~/.m2/repository'
-          key: maven-deps-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('parent-pom/**/pom.xml') }}
-
-      - name: 'Maven Install'
-        uses: ./.github/actions/maven-install
-        with:
-          working-directory: 'shared-lib'
+          working-directory: 'parent-pom'
 
       - name: 'SonarCloud Scan'
         uses: ./.github/actions/sonar-scan-maven

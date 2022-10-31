@@ -22,7 +22,7 @@ runs:
       uses: actions/cache@v3
       with:
         path: ~/.sonar/cache
-        key: ${{ runner.os }}-sonar
+        key: ${{ runner.os }}-${{ runner.arch }}-sonar
 
     - name: Scan project with SonarCloud
       run: mvn -B org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=$SONAR_PROJECT_KEY

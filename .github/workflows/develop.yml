@@ -88,7 +88,6 @@ jobs:
     steps:
       - name: Create & Setup Cluster
         run: |
-          
           # Delete if exists from previous failed run.
           kind delete clusters kind
           
@@ -102,7 +101,6 @@ jobs:
 
       - name: Setup & Run Cucumber Tests
         run: |
-          
           # Cucumber test
           kubectl --context kind-kind -n local-instance port-forward --pod-running-timeout 1s services/opennms-core 11080:8181 &
           

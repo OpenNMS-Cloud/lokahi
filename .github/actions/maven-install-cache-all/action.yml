@@ -9,14 +9,17 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - uses: ./.github/actions/maven-cache
+    - uses: actions/cache@v3
+      id: cache-maven
       with:
-        working-directory: ${{ inputs.working-directory }}
+        path: '~/.m2/repository'
+        key: maven-deps-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles(format('{0}/**', inputs.working-directory)) }}
     - run: |
         mvn -B install \
             -T 1C \
             -Dorg.slf4j.simpleLogger.showThreadName=true \
             -Dorg.slf4j.simpleLogger.showDateTime=true \
             -Dorg.slf4j.simpleLogger.dateTimeFormat="yyyy-MM-dd HH:mm:ss"
+      if: ${{ steps.cache-maven.outputs.cache-hit != 'true' }}
       shell: bash
       working-directory: ${{ inputs.working-directory }}

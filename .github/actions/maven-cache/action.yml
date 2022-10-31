@@ -3,7 +3,8 @@ description: 'Caches Maven dependencies in the runner''s local Maven repository'
 inputs:
   working-directory:
     description: 'The directory containing the top-level pom'
-    required: true
+    required: false
+    default: '.'
 
 runs:
   using: "composite"

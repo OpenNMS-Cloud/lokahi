@@ -3,7 +3,8 @@ description: 'Builds a docker image for maven projects using jib-maven-plugin'
 inputs:
   working-directory:
     description: 'The directory containing the top-level pom'
-    required: true
+    required: false
+    default: '.'
   image:
     description: 'The image label'
     required: true

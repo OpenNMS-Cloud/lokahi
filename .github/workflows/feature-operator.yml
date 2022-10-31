@@ -35,6 +35,12 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v3
         # Is required to call actions.
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_LOGIN }}
+          password: ${{ secrets.DOCKERHUB_PASS }}
     
       - name: Setup golang
         uses: actions/setup-go@v3
@@ -43,6 +49,10 @@ jobs:
         run: make local-docker
         env:
           IMAGE: ${{ env.IMAGE }}:${{ env.IMAGE_TAG }}
+        working-directory: 'operator'
+
+      - name: 'Push Image'
+        run: docker push $IMAGE:$IMAGE_TAG
         working-directory: 'operator'
 
       - name: 'Test Coverage'

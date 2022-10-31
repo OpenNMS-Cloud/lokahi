@@ -51,6 +51,12 @@ jobs:
         with:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
 
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_LOGIN }}
+          password: ${{ secrets.DOCKERHUB_PASS }}
+
       - name: Set up JDK 11
         uses: actions/setup-java@v3
         with:
@@ -67,7 +73,7 @@ jobs:
 
       - name: 'Build Image'
         run: |
-          mvn -B install \
+          mvn -B verify \
               -Prun-it -Ddocker.image=$IMAGE:$IMAGE_TAG \
               -Dhttp.keepAlive=false \
               -Dmaven.wagon.http.pool=false \
@@ -79,6 +85,10 @@ jobs:
               -Dorg.slf4j.simpleLogger.dateTimeFormat="yyyy-MM-dd HH:mm:ss"
               # Added extra args to deal with time out issue, see
               # https://github.com/actions/virtual-environments/issues/1499.
+        working-directory: 'platform'
+
+      - name: 'Push Image'
+        run: docker push $IMAGE:$IMAGE_TAG
         working-directory: 'platform'
 
       - name: 'SonarCloud Scan'

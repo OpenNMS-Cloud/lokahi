@@ -33,11 +33,12 @@
 
         <dependency>
             <groupId>org.opennms.horizon.minion</groupId>
-            <artifactId>ipc-features</artifactId>
+            <artifactId>plugin-features</artifactId>
             <version>${project.version}</version>
             <classifier>features</classifier>
             <type>xml</type>
         </dependency>
+
         <dependency>
             <groupId>org.opennms.horizon.minion</groupId>
             <artifactId>observability-features</artifactId>
@@ -45,10 +46,21 @@
             <classifier>features</classifier>
             <type>xml</type>
         </dependency>
+
         <dependency>
             <groupId>org.opennms.horizon.minion</groupId>
-            <artifactId>plugin-features</artifactId>
+            <artifactId>grpc-features</artifactId>
             <version>${project.version}</version>
+            <classifier>features</classifier>
+            <type>xml</type>
+        </dependency>
+
+        <dependency>
+            <groupId>org.opennms.horizon.minion</groupId>
+            <artifactId>ipc-features</artifactId>
+            <version>${project.version}</version>
+            <classifier>features</classifier>
+            <type>xml</type>
         </dependency>
     </dependencies>
 

@@ -75,12 +75,12 @@ jobs:
       - name: Build & Sonar Scan
         run: >
           mvn -B verify
-          -Prun-it -Ddocker.image=$IMAGE:$IMAGE_TAG
-          -T 1C
-          -Dorg.slf4j.simpleLogger.showThreadName=true
-          -Dorg.slf4j.simpleLogger.showDateTime=true
-          -Dorg.slf4j.simpleLogger.dateTimeFormat="yyyy-MM-dd HH:mm:ss"
-          org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=$SONAR_PROJECT_KEY
+              -Prun-it -Ddocker.image=$IMAGE:$IMAGE_TAG
+              -T 1C
+              -Dorg.slf4j.simpleLogger.showThreadName=true
+              -Dorg.slf4j.simpleLogger.showDateTime=true
+              -Dorg.slf4j.simpleLogger.dateTimeFormat="yyyy-MM-dd HH:mm:ss"
+              org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=$SONAR_PROJECT_KEY
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

@@ -78,18 +78,18 @@ jobs:
         uses: ./.github/actions/java-restore-prereqs
 
       - name: 'Build & Scan Image'
-        run: >
+        run:
           mvn -B verify
-          -Prun-it -Ddocker.image=$IMAGE:$IMAGE_TAG
-          -Dhttp.keepAlive=false
-          -Dmaven.wagon.http.pool=false
-          -Dmaven.wagon.httpconnectionManager.ttlSeconds=25
-          -Dmaven.wagon.http.retryHandler.count=3
-          -T 1C
-          -Dorg.slf4j.simpleLogger.showThreadName=true
-          -Dorg.slf4j.simpleLogger.showDateTime=true
-          -Dorg.slf4j.simpleLogger.dateTimeFormat="yyyy-MM-dd HH:mm:ss"
-          org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=$SONAR_PROJECT_KEY
+              -Prun-it -Ddocker.image=$IMAGE:$IMAGE_TAG
+              -Dhttp.keepAlive=false
+              -Dmaven.wagon.http.pool=false
+              -Dmaven.wagon.httpconnectionManager.ttlSeconds=25
+              -Dmaven.wagon.http.retryHandler.count=3
+              -T 1C
+              -Dorg.slf4j.simpleLogger.showThreadName=true
+              -Dorg.slf4j.simpleLogger.showDateTime=true
+              -Dorg.slf4j.simpleLogger.dateTimeFormat="yyyy-MM-dd HH:mm:ss"
+              org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=$SONAR_PROJECT_KEY
 
           # Added extra args to deal with time out issue, see
           # https://github.com/actions/virtual-environments/issues/1499

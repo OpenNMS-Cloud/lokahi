@@ -24,11 +24,11 @@ runs:
         path: ~/.sonar/cache
         key: ${{ runner.os }}-${{ runner.arch }}-sonar
 
-    - run: |
-        mvn -B install \
-            -T 1C \
-            -Dorg.slf4j.simpleLogger.showThreadName=true \
-            -Dorg.slf4j.simpleLogger.showDateTime=true \
+    - run: >
+        mvn -B install
+            -T 1C
+            -Dorg.slf4j.simpleLogger.showThreadName=true
+            -Dorg.slf4j.simpleLogger.showDateTime=true
             -Dorg.slf4j.simpleLogger.dateTimeFormat="yyyy-MM-dd HH:mm:ss"
       shell: bash
       working-directory: ${{ inputs.working-directory }}

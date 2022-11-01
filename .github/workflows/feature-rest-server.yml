@@ -72,16 +72,11 @@ jobs:
       - name: Restore prereqs Maven Repository cache
         uses: ./.github/actions/java-restore-prereqs
 
-      - name: 'Jib Maven Build'
-        uses: ./.github/actions/jib-maven
+      - name: Jib Maven Build & Sonar Scan
+        uses: ./.github/actions/jib-maven-sonar
         with:
           working-directory: 'rest-server'
           image: ${{ env.IMAGE }}:${{ env.IMAGE_TAG }}
-
-      - name: 'SonarCloud Scan'
-        uses: ./.github/actions/sonar-scan-maven
-        with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           sonar-token: ${{ secrets.SONAR_TOKEN }}
-          working-directory: 'rest-server'
           project-key: 'opennms_horizon-stream_bff'

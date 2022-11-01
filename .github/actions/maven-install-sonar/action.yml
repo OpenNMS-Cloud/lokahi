@@ -1,6 +1,10 @@
-name: 'SonarCloud Scan'
-description: 'This implements unit and built-time integration tests on shared-lib. There is no workflow for this, it gets called by other workflows, platform (core) and rest-server.'
+name: 'Maven Install & Cache'
+description: 'Builds a Maven project and installs it into the runner''s Maven repository'
 inputs:
+  working-directory:
+    description: 'The directory containing the top-level pom'
+    required: false
+    default: '.'
   github-token:
     description: 'GITHUB_TOKEN secret for the workflow so SonarCloud can get PR information'
     required: true
@@ -10,10 +14,6 @@ inputs:
   project-key:
     description: 'The Sonar project key'
     required: true
-  working-directory:
-    description: 'The directory containing the top-level pom'
-    required: false
-    default: '.'
 
 runs:
   using: "composite"
@@ -24,11 +24,15 @@ runs:
         path: ~/.sonar/cache
         key: ${{ runner.os }}-${{ runner.arch }}-sonar
 
-    - name: Scan project with SonarCloud
-      run: mvn -B org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=$SONAR_PROJECT_KEY
+    - run: |
+        mvn -B install \
+            -T 1C \
+            -Dorg.slf4j.simpleLogger.showThreadName=true \
+            -Dorg.slf4j.simpleLogger.showDateTime=true \
+            -Dorg.slf4j.simpleLogger.dateTimeFormat="yyyy-MM-dd HH:mm:ss"
       shell: bash
+      working-directory: ${{ inputs.working-directory }}
       env:
         GITHUB_TOKEN: ${{ inputs.github-token }}
         SONAR_TOKEN: ${{ inputs.sonar-token }}
         SONAR_PROJECT_KEY: ${{ inputs.project-key }}
-      working-directory: ${{ inputs.working-directory }}

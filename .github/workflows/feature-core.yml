@@ -80,9 +80,7 @@ jobs:
       - name: 'Build & Scan Image'
         run: >
           mvn -B verify
-          org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
           -Prun-it -Ddocker.image=$IMAGE:$IMAGE_TAG
-          -Dsonar.projectKey=$SONAR_PROJECT_KEY
           -Dhttp.keepAlive=false
           -Dmaven.wagon.http.pool=false
           -Dmaven.wagon.httpconnectionManager.ttlSeconds=25
@@ -91,9 +89,10 @@ jobs:
           -Dorg.slf4j.simpleLogger.showThreadName=true
           -Dorg.slf4j.simpleLogger.showDateTime=true
           -Dorg.slf4j.simpleLogger.dateTimeFormat="yyyy-MM-dd HH:mm:ss"
+          org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=$SONAR_PROJECT_KEY
 
           # Added extra args to deal with time out issue, see
-          # https://github.com/actions/virtual-environments/issues/1499.
+          # https://github.com/actions/virtual-environments/issues/1499
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

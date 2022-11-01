@@ -51,3 +51,5 @@ jobs:
           push: true
           context: keycloak-ui
           tags: ${{ env.IMAGE }}:${{ env.IMAGE_TAG }}
+          cache-from: type=gha
+          cache-to: type=gha

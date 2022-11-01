@@ -72,24 +72,21 @@ jobs:
       - name: Restore prereqs Maven Repository cache
         uses: ./.github/actions/java-restore-prereqs
 
-      - name: 'Build Image'
-        run: |
-         mvn -B verify \
-             -Prun-it -Ddocker.image=$IMAGE:$IMAGE_TAG \
-             -T 1C \
-             -Dorg.slf4j.simpleLogger.showThreadName=true \
-             -Dorg.slf4j.simpleLogger.showDateTime=true \
-             -Dorg.slf4j.simpleLogger.dateTimeFormat="yyyy-MM-dd HH:mm:ss"
+      - name: Build & Sonar Scan
+        run: >
+          mvn -B verify
+          -Prun-it -Ddocker.image=$IMAGE:$IMAGE_TAG
+          -T 1C
+          -Dorg.slf4j.simpleLogger.showThreadName=true
+          -Dorg.slf4j.simpleLogger.showDateTime=true
+          -Dorg.slf4j.simpleLogger.dateTimeFormat="yyyy-MM-dd HH:mm:ss"
+          org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=$SONAR_PROJECT_KEY
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_PROJECT_KEY: 'opennms_horizon-stream_minion'
         working-directory: 'minion'
 
-      - name: 'Push Image'
+      - name: Push Image
         run: docker push $IMAGE:$IMAGE_TAG
         working-directory: 'minion'
-
-      - name: 'SonarCloud Scan'
-        uses: ./.github/actions/sonar-scan-maven
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          sonar-token: ${{ secrets.SONAR_TOKEN }}
-          working-directory: 'minion'
-          project-key: 'opennms_horizon-stream_minion'

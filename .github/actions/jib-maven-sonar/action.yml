@@ -37,13 +37,13 @@ runs:
         GITHUB_TOKEN: ${{ inputs.github-token }}
         SONAR_TOKEN: ${{ inputs.sonar-token }}
         SONAR_PROJECT_KEY: ${{ inputs.project-key }}
-      run: >
-        mvn -B verify
-            jib:build -Dimage=$IMAGE
-            -T 1C
-            -Dorg.slf4j.simpleLogger.showThreadName=true
-            -Dorg.slf4j.simpleLogger.showDateTime=true
-            -Dorg.slf4j.simpleLogger.dateTimeFormat="yyyy-MM-dd HH:mm:ss"
+      run: |
+        mvn -B verify \
+            jib:build -Dimage=$IMAGE \
+            -T 1C \
+            -Dorg.slf4j.simpleLogger.showThreadName=true \
+            -Dorg.slf4j.simpleLogger.showDateTime=true \
+            -Dorg.slf4j.simpleLogger.dateTimeFormat="yyyy-MM-dd HH:mm:ss" \
             org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=$SONAR_PROJECT_KEY
       shell: bash
       working-directory: ${{ inputs.working-directory }}
@@ -56,14 +56,14 @@ runs:
         GITHUB_TOKEN: ${{ inputs.github-token }}
         SONAR_TOKEN: ${{ inputs.sonar-token }}
         SONAR_PROJECT_KEY: ${{ inputs.project-key }}
-      run: >
-        mvn -B verify
-            -pl=$SUBMODULE -am -amd
-            jib:build -Dimage=$IMAGE
-            -T 1C
-            -Dorg.slf4j.simpleLogger.showThreadName=true
-            -Dorg.slf4j.simpleLogger.showDateTime=true
-            -Dorg.slf4j.simpleLogger.dateTimeFormat="yyyy-MM-dd HH:mm:ss"
+      run: |
+        mvn -B verify \
+            -pl=$SUBMODULE -am -amd \
+            jib:build -Dimage=$IMAGE \
+            -T 1C \
+            -Dorg.slf4j.simpleLogger.showThreadName=true \
+            -Dorg.slf4j.simpleLogger.showDateTime=true \
+            -Dorg.slf4j.simpleLogger.dateTimeFormat="yyyy-MM-dd HH:mm:ss" \
             org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=$SONAR_PROJECT_KEY
       shell: bash
       working-directory: ${{ inputs.working-directory }}

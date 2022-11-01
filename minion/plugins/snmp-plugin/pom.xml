@@ -65,7 +65,6 @@
             <scope>test</scope>
         </dependency>
 
-
         <dependency>
             <groupId>org.opennms.horizon.minion</groupId>
             <artifactId>plugin-features</artifactId>

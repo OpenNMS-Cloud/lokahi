@@ -56,6 +56,30 @@
             <artifactId>slf4j-log4j12</artifactId>
             <scope>test</scope>
         </dependency>
+
+        <dependency>
+            <groupId>org.opennms.horizon.minion</groupId>
+            <artifactId>plugin-features</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.opennms.horizon.minion</groupId>
+            <artifactId>observability-features</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.opennms.horizon.minion</groupId>
+            <artifactId>grpc-features</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.opennms.horizon.minion</groupId>
+            <artifactId>ipc-features</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 
     <build>

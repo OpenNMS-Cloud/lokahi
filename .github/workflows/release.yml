@@ -1,11 +1,11 @@
 name: release
 
-#on:
-#  workflow_dispatch:
-#    inputs:
-#      release_version:
-#        required: true
-#        type: string
+on:
+  workflow_dispatch:
+    inputs:
+      release_version:
+        required: true
+        type: string
 
 # For now, we have put all steps into a single job, this will allow for just
 # one vm to run. We use actions to factor out the functionality. If there is a

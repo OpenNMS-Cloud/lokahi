@@ -68,33 +68,38 @@ jobs:
         with:
           working-directory: 'platform'
 
+      - name: Cache SonarCloud packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-${{ runner.arch }}-sonar
+
       - name: Restore prereqs Maven Repository cache
         uses: ./.github/actions/java-restore-prereqs
 
-      - name: 'Build Image'
-        run: |
-          mvn -B verify \
-              -Prun-it -Ddocker.image=$IMAGE:$IMAGE_TAG \
-              -Dhttp.keepAlive=false \
-              -Dmaven.wagon.http.pool=false \
-              -Dmaven.wagon.httpconnectionManager.ttlSeconds=25 \
-              -Dmaven.wagon.http.retryHandler.count=3 \
-              -T 1C \
-              -Dorg.slf4j.simpleLogger.showThreadName=true \
-              -Dorg.slf4j.simpleLogger.showDateTime=true \
+      - name: 'Build & Scan Image'
+        run: >
+          mvn -B verify
+              org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
+              -Prun-it -Ddocker.image=$IMAGE:$IMAGE_TAG
+               -Dsonar.projectKey=$SONAR_PROJECT_KEY
+              -Dhttp.keepAlive=false
+              -Dmaven.wagon.http.pool=false
+              -Dmaven.wagon.httpconnectionManager.ttlSeconds=25
+              -Dmaven.wagon.http.retryHandler.count=3
+              -T 1C
+              -Dorg.slf4j.simpleLogger.showThreadName=true
+              -Dorg.slf4j.simpleLogger.showDateTime=true
               -Dorg.slf4j.simpleLogger.dateTimeFormat="yyyy-MM-dd HH:mm:ss"
+
               # Added extra args to deal with time out issue, see
               # https://github.com/actions/virtual-environments/issues/1499.
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_PROJECT_KEY: 'opennms_horizon-stream_core'
         working-directory: 'platform'
 
       - name: 'Push Image'
         run: docker push $IMAGE:$IMAGE_TAG
         working-directory: 'platform'
-
-      - name: 'SonarCloud Scan'
-        uses: ./.github/actions/sonar-scan-maven
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          sonar-token: ${{ secrets.SONAR_TOKEN }}
-          working-directory: 'platform'
-          project-key: 'opennms_horizon-stream_core'

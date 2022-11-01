@@ -49,8 +49,6 @@
             <groupId>org.opennms.horizon.minion</groupId>
             <artifactId>plugin-features</artifactId>
             <version>${project.version}</version>
-            <classifier>features</classifier>
-            <type>xml</type>
         </dependency>
     </dependencies>
 

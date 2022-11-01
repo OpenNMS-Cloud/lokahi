@@ -30,6 +30,11 @@
             <artifactId>ignite-spring</artifactId>
             <version>${ignite.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.ignite</groupId>
+            <artifactId>ignite-ioc</artifactId>
+            <version>${ignite.version}</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -54,7 +59,7 @@
                             *
                         </Import-Package>
                         <Export-Package>
-                            org.apache.ignite.*
+                            org.apache.ignite.*;version=${ignite.version}
                         </Export-Package>
                         <Embed-Dependency>*;groupId=org.apache.ignite;inline=true</Embed-Dependency>
                     </instructions>

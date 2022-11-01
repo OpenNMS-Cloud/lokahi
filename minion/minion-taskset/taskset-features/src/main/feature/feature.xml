@@ -34,9 +34,11 @@
     </feature>
 
     <feature name="taskset-ignite-core-internal" version="${project.version}">
+        <feature prerequisite="true">wrap</feature>
         <feature>spring</feature>
         <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.javax-cache-api/1.0.0_1</bundle>
         <bundle>mvn:org.opennms.horizon.minion/shaded-ignite/${project.version}</bundle>
+        <bundle>wrap:mvn:org.apache.ignite/ignite-osgi-blueprint-ext/1.0.0-SNAPSHOT</bundle>
     </feature>
 
     <feature name="taskset-minion" version="${project.version}">

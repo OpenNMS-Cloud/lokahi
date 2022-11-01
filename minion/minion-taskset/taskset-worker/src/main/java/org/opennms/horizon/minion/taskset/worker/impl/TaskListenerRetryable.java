@@ -1,6 +1,6 @@
 package org.opennms.horizon.minion.taskset.worker.impl;
 
-import org.apache.ignite.resources.SpringResource;
+import org.apache.ignite.resources.InjectResource;
 import org.opennms.horizon.minion.plugin.api.registries.ListenerFactoryRegistry;
 import com.google.protobuf.Any;
 import org.opennms.horizon.minion.taskset.worker.RetryableExecutor;
@@ -22,7 +22,7 @@ public class TaskListenerRetryable implements RetryableExecutor {
 
     private static final Logger DEFAULT_LOGGER = LoggerFactory.getLogger(TaskListenerRetryable.class);
 
-    @SpringResource(resourceClass = ListenerFactoryRegistry.class)
+    @InjectResource(resourceClass = ListenerFactoryRegistry.class)
     private transient ListenerFactoryRegistry listenerFactoryRegistry;
 
     private Logger log = DEFAULT_LOGGER;

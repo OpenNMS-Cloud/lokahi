@@ -39,6 +39,16 @@
         <skipITs>false</skipITs>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
+        <java.version>11</java.version>
+
+        <lombok.version>1.18.22</lombok.version>
+        <ignite.version>2.15.0-SNAPSHOT</ignite.version>
+        <jetty.version>9.4.43.v20210629</jetty.version>
+        <cron-utils.version>9.1.6</cron-utils.version>
+        <eos.version>1.2.0</eos.version>
+        <prometheus.version>0.16.0</prometheus.version>
     </properties>
 
     <dependencyManagement>

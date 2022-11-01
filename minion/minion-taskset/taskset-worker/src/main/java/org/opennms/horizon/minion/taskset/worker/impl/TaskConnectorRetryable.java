@@ -1,6 +1,6 @@
 package org.opennms.horizon.minion.taskset.worker.impl;
 
-import org.apache.ignite.resources.SpringResource;
+import org.apache.ignite.resources.InjectResource;
 import org.opennms.horizon.minion.plugin.api.registries.ServiceConnectorFactoryRegistry;
 import com.google.protobuf.Any;
 import org.opennms.horizon.minion.taskset.worker.RetryableExecutor;
@@ -20,7 +20,7 @@ public class TaskConnectorRetryable implements RetryableExecutor {
 
     private Logger log = DEFAULT_LOGGER;
 
-    @SpringResource(resourceClass = ServiceConnectorFactoryRegistry.class)
+    @InjectResource(resourceClass = ServiceConnectorFactoryRegistry.class)
     private transient ServiceConnectorFactoryRegistry serviceConnectorFactoryRegistry;
 
     private TaskDefinition taskDefinition;

@@ -23,6 +23,8 @@ spec:
     spec:
       serviceAccountName: {{ .Values.OpenNMS.Core.ServiceName }}-sa
       {{- if .Values.NodeRestrictions.Enabled }}
+      nodeSelector:
+        {{ .Values.NodeRestrictions.Key }}: {{ .Values.NodeRestrictions.Value }}
       tolerations:
         - effect: "NoSchedule"
           key: "{{ .Values.NodeRestrictions.Key }}"

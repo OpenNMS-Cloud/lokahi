@@ -16,6 +16,8 @@ spec:
         app: {{ .Values.Prometheus.Server.ServiceName }}
     spec:
       {{- if .Values.NodeRestrictions.Enabled }}
+      nodeSelector:
+        {{ .Values.NodeRestrictions.Key }}: {{ .Values.NodeRestrictions.Value }}
       tolerations:
         - effect: "NoSchedule"
           key: "{{ .Values.NodeRestrictions.Key }}"

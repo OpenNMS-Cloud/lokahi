@@ -30,15 +30,11 @@ package org.opennms.horizon.inventory.grpc;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.opennms.horizon.inventory.InventoryApplication;
@@ -79,8 +75,9 @@ public class GrpcIntegrationTest {
     private static void registerDatasourceProperties(DynamicPropertyRegistry registry) {
         registry.add("spring.datasource.url",
             () -> String.format("jdbc:postgresql://localhost:%d/%s", postgres.getFirstMappedPort(), postgres.getDatabaseName()));
-        registry.add("spring.datasource.username", () -> postgres.getUsername());
-        registry.add("spring.datasource.password", () -> postgres.getPassword());
+        registry.add("spring.datasource.username", postgres::getUsername);
+        registry.add("spring.datasource.password", postgres::getPassword);
+        registry.add("grpc.server.port", ()->6767);
     }
 
     private MonitoringLocationDTO location1;
@@ -90,20 +87,8 @@ public class GrpcIntegrationTest {
     private MonitoringLocationRepository repo;
     @Autowired
     private MonitoringLocationMapper mapper;
-    private static ManagedChannel channel;
-    private static MonitoringServiceGrpc.MonitoringServiceBlockingStub serviceStub;
-
-    @BeforeAll
-    public static void setUp() {
-        channel = ManagedChannelBuilder.forAddress("localhost", 6565)
-            .usePlaintext().build();
-        serviceStub = MonitoringServiceGrpc.newBlockingStub(channel);
-    }
-
-    @AfterAll
-    public static void shutdown() {
-        channel.shutdown();
-    }
+    private ManagedChannel channel;
+    private MonitoringServiceGrpc.MonitoringServiceBlockingStub serviceStub;
 
     @BeforeEach
     public void prepareData(){
@@ -118,11 +103,15 @@ public class GrpcIntegrationTest {
             .setTenantId(new UUID(10, 10).toString())
             .build();
         repo.save(mapper.dtoToModel(location2));
+            channel = ManagedChannelBuilder.forAddress("localhost", 6767)
+                .usePlaintext().build();
+            serviceStub = MonitoringServiceGrpc.newBlockingStub(channel);
     }
 
     @AfterEach
     public void cleanUp(){
         repo.deleteAll();
+        channel.shutdown();
     }
 
     @Test

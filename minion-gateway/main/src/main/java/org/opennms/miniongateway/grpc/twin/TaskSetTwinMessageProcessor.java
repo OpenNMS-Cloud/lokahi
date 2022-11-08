@@ -66,7 +66,7 @@ public class TaskSetTwinMessageProcessor implements BiConsumer<Identity, StreamO
                 session = grpcPublisher.register("task-set", TaskSet.class, identity.getLocation());
                 session.publish(taskSet);
             } catch (IOException e) {
-                e.printStackTrace();
+                throw new RuntimeException("failed to update task set", e);
             }
         }
 

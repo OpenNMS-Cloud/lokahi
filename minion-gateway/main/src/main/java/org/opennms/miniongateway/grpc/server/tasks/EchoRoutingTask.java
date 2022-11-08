@@ -105,13 +105,6 @@ public class EchoRoutingTask implements ComputeTask<byte[], byte[]> {
         return jobResult.getData();
     }
 
-    private Random random() {
-        if (this.random == null) {
-            this.random = new Random();
-        }
-        return this.random;
-    }
-
     public static class RoutingJob implements ComputeJob {
         private final RpcRequestProto request;
 

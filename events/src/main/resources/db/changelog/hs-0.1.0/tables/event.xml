@@ -36,7 +36,10 @@
             <column name="node_id" type="bigint">
             </column>
 
-            <column name="event_parameters" type="bytea">
+            <column name="event_parameters" type="jsonb">
+            </column>
+
+            <column name="event_info" type="bytea">
             </column>
 
         </createTable>

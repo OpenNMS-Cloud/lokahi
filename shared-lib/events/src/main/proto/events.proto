@@ -41,12 +41,13 @@ message Event {
   uint64 node_id = 5;
   string location = 6;
   string ip_address = 7;
-  EventInfo event_info = 8;
+  repeated EventParameter event_params = 8;
+  EventInfo event_info = 9;
 }
 
 message EventInfo {
- repeated EventParameter event_params = 1;
- optional SnmpInfo snmp = 2;
+  optional SnmpInfo snmp = 1;
+  // Any other optional event info.
 }
 
 message SnmpInfo {

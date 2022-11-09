@@ -1,5 +1,6 @@
 package org.opennms.horizon.minion.taskset.worker.impl;
 
+import org.opennms.horizon.minion.plugin.api.registries.DetectorRegistry;
 import org.opennms.horizon.minion.plugin.api.registries.ListenerFactoryRegistry;
 import org.opennms.horizon.minion.plugin.api.registries.MonitorRegistry;
 import org.opennms.horizon.minion.taskset.worker.TaskExecutionResultProcessor;
@@ -40,8 +41,11 @@ public class TaskExecutorLocalServiceFactoryImpl implements TaskExecutorLocalSer
 //----------------------------------------
 
     @Override
-    public TaskExecutorLocalService create(TaskDefinition taskDefinition, MonitorRegistry monitorRegistry) {
+    public TaskExecutorLocalService create(TaskDefinition taskDefinition, DetectorRegistry detectorRegistry, MonitorRegistry monitorRegistry) {
         switch (taskDefinition.getType()) {
+            case DETECTOR:
+                return new TaskExecutorLocalDetectorServiceImpl(scheduler, taskDefinition, detectorRegistry);
+
             case MONITOR:
                 return new TaskExecutorLocalMonitorServiceImpl(scheduler, taskDefinition, resultProcessor, monitorRegistry);
 

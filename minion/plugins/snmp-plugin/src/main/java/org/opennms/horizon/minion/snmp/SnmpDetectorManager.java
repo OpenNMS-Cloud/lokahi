@@ -1,15 +1,19 @@
 package org.opennms.horizon.minion.snmp;
 
-import java.util.function.Consumer;
 import org.opennms.horizon.minion.plugin.api.ServiceDetector;
 import org.opennms.horizon.minion.plugin.api.ServiceDetectorManager;
-import org.opennms.horizon.minion.plugin.api.ServiceDetectorResults;
-import org.opennms.horizon.minion.plugin.api.ServiceMonitorResponse;
+import org.opennms.horizon.shared.snmp.SnmpHelper;
 
 public class SnmpDetectorManager implements ServiceDetectorManager {
 
+    private final SnmpHelper snmpHelper;
+
+    public SnmpDetectorManager(SnmpHelper snmpHelper) {
+        this.snmpHelper = snmpHelper;
+    }
+
     @Override
-    public ServiceDetector create(Consumer<ServiceDetectorResults> resultProcessor) {
-        return new SnmpDetector();
+    public ServiceDetector create() {
+        return new SnmpDetector(snmpHelper);
     }
 }

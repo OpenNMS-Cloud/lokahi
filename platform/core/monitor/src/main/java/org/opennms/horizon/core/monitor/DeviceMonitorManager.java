@@ -135,6 +135,8 @@ public class DeviceMonitorManager implements EventListener {
                 LOG.info("Polling ICMP/SNMP Monitor for IPAddress {}", onmsIpInterface.getIpAddress());
 
                 addPollIcmpTask(locationName, onmsIpInterface.getIpAddress());
+
+                addDetectSnmpTask(locationName, onmsIpInterface.getIpAddress(), onmsNode.getSnmpCommunityString());
                 addPollSnmpTask(locationName, onmsIpInterface.getIpAddress(), onmsNode.getSnmpCommunityString());
             });
 
@@ -181,6 +183,26 @@ public class DeviceMonitorManager implements EventListener {
         SnmpMonitorRequest snmpMonitorRequest = snmpRequestBuilder.build();
 
         taskSetManagerUtil.addSnmpTask(location, inetAddress, "snmp-monitor", TaskType.MONITOR, "SNMPMonitor", "5000", snmpMonitorRequest);
+    }
+
+    private void addDetectSnmpTask(String location, InetAddress inetAddress, String snmpCommunityString) {
+
+        //todo probably should be an SnmpDetectorRequest, for now using same
+        SnmpMonitorRequest.Builder snmpRequestBuilder =
+            SnmpMonitorRequest.newBuilder()
+                .setHost(inetAddress.getHostAddress())
+                .setOid(SYS_OBJECTID_INSTANCE)
+                .setTimeout(18000)
+                .setRetries(2);
+
+        if (snmpCommunityString != null) {
+            snmpRequestBuilder
+                .setCommunity(snmpCommunityString);
+        }
+
+        SnmpMonitorRequest snmpDetectorRequest = snmpRequestBuilder.build();
+
+        taskSetManagerUtil.addSnmpTask(location, inetAddress, "snmp-detector", TaskType.DETECTOR, "SNMPDetector", "5000", snmpDetectorRequest);
     }
 
     @Override

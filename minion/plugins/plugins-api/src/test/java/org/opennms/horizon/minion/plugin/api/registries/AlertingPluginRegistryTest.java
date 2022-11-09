@@ -1,7 +1,6 @@
 package org.opennms.horizon.minion.plugin.api.registries;
 
 import com.savoirtech.eos.util.ServiceProperties;
-import java.util.function.Consumer;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -14,7 +13,6 @@ import org.mockito.MockitoAnnotations;
 import org.opennms.horizon.minion.plugin.api.PluginMetadata;
 import org.opennms.horizon.minion.plugin.api.ServiceDetector;
 import org.opennms.horizon.minion.plugin.api.ServiceDetectorManager;
-import org.opennms.horizon.minion.plugin.api.ServiceDetectorResults;
 import org.opennms.horizon.minion.plugin.api.RegistrationService;
 import org.opennms.taskset.contract.TaskType;
 import org.osgi.framework.BundleContext;
@@ -62,7 +60,7 @@ public class AlertingPluginRegistryTest {
     private class TestPlugin implements ServiceDetectorManager {
 
         @Override
-        public ServiceDetector create(Consumer<ServiceDetectorResults> resultProcessor) {
+        public ServiceDetector create() {
             return null;
         }
     }

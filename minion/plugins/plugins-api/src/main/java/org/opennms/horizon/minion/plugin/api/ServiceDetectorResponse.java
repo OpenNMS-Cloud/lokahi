@@ -2,7 +2,7 @@ package org.opennms.horizon.minion.plugin.api;
 
 import java.util.Map;
 
-public interface ServiceDetectorResults {
+public interface ServiceDetectorResponse {
 
     /**
      * @return true if the service was detected, false otherwise

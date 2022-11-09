@@ -10,7 +10,9 @@
     </cm:default-properties>
   </cm:property-placeholder>
 
-  <bean id="snmpDetectorManager" class="org.opennms.horizon.minion.snmp.SnmpDetectorManager"/>
+  <bean id="snmpDetectorManager" class="org.opennms.horizon.minion.snmp.SnmpDetectorManager">
+      <argument ref="snmpHelper" />
+  </bean>
 
   <service ref="snmpDetectorManager" interface="org.opennms.horizon.minion.plugin.api.ServiceDetectorManager">
     <service-properties>

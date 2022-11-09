@@ -4,6 +4,6 @@ import java.util.concurrent.CompletableFuture;
 
 public interface ServiceDetector {
 
-    CompletableFuture<ServiceDetectorResults> detect(ServiceDetectorRequest request);
+    CompletableFuture<ServiceDetectorResponse> detect(ServiceDetectorRequest request);
 
 }

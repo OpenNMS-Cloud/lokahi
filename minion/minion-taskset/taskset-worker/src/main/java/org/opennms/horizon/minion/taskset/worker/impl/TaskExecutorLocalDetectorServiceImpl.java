@@ -5,6 +5,7 @@ import org.opennms.horizon.minion.plugin.api.ServiceDetectorManager;
 import org.opennms.horizon.minion.plugin.api.ServiceDetectorResponse;
 import org.opennms.horizon.minion.plugin.api.registries.DetectorRegistry;
 import org.opennms.horizon.minion.scheduler.OpennmsScheduler;
+import org.opennms.horizon.minion.taskset.worker.TaskExecutionResultProcessor;
 import org.opennms.horizon.minion.taskset.worker.TaskExecutorLocalService;
 import org.opennms.taskset.contract.TaskDefinition;
 import org.slf4j.Logger;
@@ -17,18 +18,20 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class TaskExecutorLocalDetectorServiceImpl implements TaskExecutorLocalService {
     private static final Logger log = LoggerFactory.getLogger(TaskExecutorLocalDetectorServiceImpl.class);
 
-    protected final OpennmsScheduler scheduler;
-    protected final TaskDefinition taskDefinition;
+    private final TaskDefinition taskDefinition;
+    private final OpennmsScheduler scheduler;
+    private final TaskExecutionResultProcessor resultProcessor;
     private final DetectorRegistry detectorRegistry;
-    private AtomicBoolean active = new AtomicBoolean(false);
-
     private ServiceDetector detector = null;
+    private AtomicBoolean active = new AtomicBoolean(false);
 
     public TaskExecutorLocalDetectorServiceImpl(OpennmsScheduler scheduler,
                                                 TaskDefinition taskDefinition,
-                                                DetectorRegistry detectorRegistry) {
+                                                DetectorRegistry detectorRegistry,
+                                                TaskExecutionResultProcessor resultProcessor) {
         this.scheduler = scheduler;
         this.taskDefinition = taskDefinition;
+        this.resultProcessor = resultProcessor;
         this.detectorRegistry = detectorRegistry;
     }
 
@@ -86,7 +89,7 @@ public class TaskExecutorLocalDetectorServiceImpl implements TaskExecutorLocalSe
             if (detector != null) {
 
                 CompletableFuture<ServiceDetectorResponse> future = detector.detect(null);
-//                future.whenComplete(this::handleExecutionComplete);
+                future.whenComplete(this::handleExecutionComplete);
             } else {
                 log.info("Skipping service monitor execution; monitor not found: monitor=" + taskDefinition.getPluginName());
             }
@@ -94,6 +97,12 @@ public class TaskExecutorLocalDetectorServiceImpl implements TaskExecutorLocalSe
             // TODO: throttle - we can get very large numbers of these in a short time
             log.warn("error executing workflow " + taskDefinition.getId(), exc);
         }
+    }
+
+    private void handleExecutionComplete(ServiceDetectorResponse serviceDetectorResponse, Throwable exc) {
+        System.out.println(">>>> tbigg - TaskExecutorLocalDetectorServiceImpl.handleExecutionComplete");
+        System.out.println("serviceDetectorResponse = " + serviceDetectorResponse);
+        System.out.println("exc = " + exc);
     }
 
     private ServiceDetector lookupDetector(TaskDefinition taskDefinition) {

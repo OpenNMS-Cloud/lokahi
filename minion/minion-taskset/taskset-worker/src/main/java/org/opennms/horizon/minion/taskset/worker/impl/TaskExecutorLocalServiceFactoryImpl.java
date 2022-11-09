@@ -44,7 +44,7 @@ public class TaskExecutorLocalServiceFactoryImpl implements TaskExecutorLocalSer
     public TaskExecutorLocalService create(TaskDefinition taskDefinition, DetectorRegistry detectorRegistry, MonitorRegistry monitorRegistry) {
         switch (taskDefinition.getType()) {
             case DETECTOR:
-                return new TaskExecutorLocalDetectorServiceImpl(scheduler, taskDefinition, detectorRegistry);
+                return new TaskExecutorLocalDetectorServiceImpl(scheduler, taskDefinition, detectorRegistry, resultProcessor);
 
             case MONITOR:
                 return new TaskExecutorLocalMonitorServiceImpl(scheduler, taskDefinition, resultProcessor, monitorRegistry);

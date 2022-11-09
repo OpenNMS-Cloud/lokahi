@@ -49,6 +49,10 @@ public class TaskSetTwinMessageProcessor implements BiConsumer<Identity, StreamO
 
     static class ForwardingTaskListener implements TaskSetListener, AutoCloseable {
 
+        private static final Logger DEFAULT_LOGGER = LoggerFactory.getLogger(ForwardingTaskListener.class);
+
+        private Logger log = DEFAULT_LOGGER;
+
         private final IpcIdentity identity;
         private final TwinPublisher grpcPublisher;
         private final TaskSetForwarder forwarder;
@@ -66,7 +70,7 @@ public class TaskSetTwinMessageProcessor implements BiConsumer<Identity, StreamO
                 session = grpcPublisher.register("task-set", TaskSet.class, identity.getLocation());
                 session.publish(taskSet);
             } catch (IOException e) {
-                throw new RuntimeException("failed to update task set", e);
+                log.error("failed to update task set", e);
             }
         }
 

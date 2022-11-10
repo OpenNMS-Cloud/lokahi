@@ -14,5 +14,8 @@ spec:
     - port: {{ .Values.OpenNMS.MinionGateway.GrpcPort }}
       protocol: TCP
       name: grpc
+    - port: {{ .Values.OpenNMS.MinionGateway.InternalGrpcPort }}
+      protocol: TCP
+      name: internal-grpc
   selector:
     app: {{ .Values.OpenNMS.MinionGateway.ServiceName }}

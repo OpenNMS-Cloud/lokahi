@@ -9,6 +9,7 @@ import org.opennms.taskset.service.contract.TaskSetServiceGrpc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -25,6 +26,7 @@ public class TaskSetGrpcService extends TaskSetServiceGrpc.TaskSetServiceImplBas
     private TaskSetPublisher taskSetPublisher;
 
     @Autowired
+    @Qualifier("internalGrpcIpcServer")
     private GrpcIpcServer grpcIpcServer;
 
 //========================================

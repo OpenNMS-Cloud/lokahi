@@ -10,6 +10,7 @@ import org.opennms.miniongateway.rpcrequest.RpcRequestRouter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -27,11 +28,12 @@ public class RpcRequestGrpcService extends RpcRequestServiceGrpc.RpcRequestServi
     private RpcRequestRouter rpcRequestRouter;
 
     @Autowired
+    @Qualifier("internalGrpcIpcServer")
     private GrpcIpcServer grpcIpcServer;
 
-    //========================================
-    // Lifecycle
-    //----------------------------------------
+//========================================
+// Lifecycle
+//----------------------------------------
 
     @PostConstruct
     public void start() throws IOException {
@@ -39,9 +41,9 @@ public class RpcRequestGrpcService extends RpcRequestServiceGrpc.RpcRequestServi
         log.info("Started RPC-Request GRPC Service");
     }
 
-    //========================================
-    // Service API
-    //----------------------------------------
+//========================================
+// Service API
+//----------------------------------------
 
     @Override
     public void request(RpcRequestProto request, StreamObserver<RpcResponseProto> responseObserver) {
@@ -52,9 +54,9 @@ public class RpcRequestGrpcService extends RpcRequestServiceGrpc.RpcRequestServi
         );
     }
 
-    //========================================
-    // Internals
-    //----------------------------------------
+//========================================
+// Internals
+//----------------------------------------
 
     private void handleCompletedRequest(RpcResponseProto response, Throwable exception, StreamObserver<RpcResponseProto> responseObserver) {
         if (exception != null) {

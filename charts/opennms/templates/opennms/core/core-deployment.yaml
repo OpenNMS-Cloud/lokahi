@@ -100,8 +100,12 @@ spec:
               value: "http://{{ .Values.Prometheus.PushGateway.ServiceName }}:{{ .Values.Prometheus.PushGateway.Port }}"
             - name: TASK_SET_GRPC_HOST
               value: "{{ .Values.OpenNMS.MinionGateway.ServiceName }}"
+            - name: TASK_SET_GRPC_PORT
+              value: "{{ .Values.OpenNMS.MinionGateway.InternalGrpcPort }}"
             - name: RPC_REQUEST_GRPC_HOST
               value: "{{ .Values.OpenNMS.MinionGateway.ServiceName }}"
+            - name: RPC_REQUEST_GRPC_PORT
+              value: "{{ .Values.OpenNMS.MinionGateway.InternalGrpcPort }}"
           volumeMounts:
             - name: config-volume
               mountPath: "/opt/horizon-stream/etc/org.opennms.horizon.alarmd.camel.cfg"

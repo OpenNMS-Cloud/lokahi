@@ -82,6 +82,7 @@ OpenNMS:
     ImagePullPolicy: IfNotPresent
     Port: 8080
     GrpcPort: 8990
+    InternalGrpcPort: 8991
     IgniteClientPort: 10800
     Replicas: 1
     Resources:

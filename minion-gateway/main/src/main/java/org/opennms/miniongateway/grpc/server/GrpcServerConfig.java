@@ -103,7 +103,7 @@ public class GrpcServerConfig {
 
     @Bean
     public OpennmsGrpcServer opennmsServer(
-        @Autowired GrpcIpcServer serverBuilder,
+        @Autowired @Qualifier("externalGrpcIpcServer") GrpcIpcServer serverBuilder,
         @Autowired MinionManager minionManager,
         @Autowired RpcConnectionTracker rpcConnectionTracker,
         @Autowired RpcRequestTracker rpcRequestTracker,

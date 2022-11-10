@@ -51,6 +51,8 @@ spec:
               containerPort: {{ .Values.OpenNMS.MinionGateway.Port }}
             - name: grpc
               containerPort: {{ .Values.OpenNMS.MinionGateway.GrpcPort }}
+            - name: internal-grpc
+              containerPort: {{ .Values.OpenNMS.MinionGateway.InternalGrpcPort }}
             - name: ig-client
               containerPort: {{ .Values.OpenNMS.MinionGateway.IgniteClientPort }}
             - name: ig-cluster

@@ -181,6 +181,10 @@ http.realm=keycloak
 | ENV VAR | Config File | Config Property Name | Default |
 | ------- | ----------- | -------------------- | ------- |
 | ``TASK_SET_GRPC_HOST`` | ``org.opennms.core.taskset.client`` | ``host`` | ``localhost`` |
-| ``TASK_SET_GRPC_PORT`` | ``org.opennms.core.taskset.client`` | ``port`` | ``8990`` |
+| ``TASK_SET_GRPC_PORT`` | ``org.opennms.core.taskset.client`` | ``port`` | ``8991`` |
 | ``TASK_SET_GRPC_TLS_ENABLED`` | ``org.opennms.core.taskset.client`` | ``tlsEnabled`` | ``false`` |
 | ``TASK_SET_GRPC_MAX_MESSAGE_SIZE`` | ``org.opennms.core.taskset.client`` | ``maxMessageSize`` | ``10485760`` |
+| ``RPC_REQUEST_GRPC_HOST`` | ``org.opennms.core.rpc.request.client`` | ``host`` | ``localhost`` |
+| ``RPC_REQUEST_GRPC_PORT`` | ``org.opennms.core.rpc.request.client`` | ``port`` | ``8991`` |
+| ``RPC_REQUEST_GRPC_TLS_ENABLED`` | ``org.opennms.core.rpc.request.client`` | ``tlsEnabled`` | ``false`` |
+| ``RPC_REQUEST_GRPC_MAX_MESSAGE_SIZE`` | ``org.opennms.core.rpc.request.client`` | ``maxMessageSize`` | ``10485760`` |

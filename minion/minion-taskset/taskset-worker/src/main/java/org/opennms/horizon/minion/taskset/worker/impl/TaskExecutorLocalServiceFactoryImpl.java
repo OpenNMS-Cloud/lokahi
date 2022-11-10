@@ -1,5 +1,6 @@
 package org.opennms.horizon.minion.taskset.worker.impl;
 
+import org.apache.ignite.resources.SpringResource;
 import org.opennms.horizon.minion.plugin.api.registries.DetectorRegistry;
 import org.opennms.horizon.minion.plugin.api.registries.ListenerFactoryRegistry;
 import org.opennms.horizon.minion.plugin.api.registries.MonitorRegistry;
@@ -20,6 +21,8 @@ public class TaskExecutorLocalServiceFactoryImpl implements TaskExecutorLocalSer
     private final OpennmsScheduler scheduler;
     private final TaskExecutionResultProcessor resultProcessor;
     private final ListenerFactoryRegistry listenerFactoryRegistry;
+    private final DetectorRegistry detectorRegistry;
+    private final MonitorRegistry monitorRegistry;
 
 //========================================
 // Constructor
@@ -28,12 +31,16 @@ public class TaskExecutorLocalServiceFactoryImpl implements TaskExecutorLocalSer
     public TaskExecutorLocalServiceFactoryImpl(
         OpennmsScheduler scheduler,
         TaskExecutionResultProcessor resultProcessor,
-        ListenerFactoryRegistry listenerFactoryRegistry
+        ListenerFactoryRegistry listenerFactoryRegistry,
+        DetectorRegistry detectorRegistry,
+        MonitorRegistry monitorRegistry
     ) {
 
         this.scheduler = scheduler;
         this.resultProcessor = resultProcessor;
         this.listenerFactoryRegistry = listenerFactoryRegistry;
+        this.detectorRegistry = detectorRegistry;
+        this.monitorRegistry = monitorRegistry;
     }
 
 //========================================
@@ -41,7 +48,7 @@ public class TaskExecutorLocalServiceFactoryImpl implements TaskExecutorLocalSer
 //----------------------------------------
 
     @Override
-    public TaskExecutorLocalService create(TaskDefinition taskDefinition, DetectorRegistry detectorRegistry, MonitorRegistry monitorRegistry) {
+    public TaskExecutorLocalService create(TaskDefinition taskDefinition) {
         switch (taskDefinition.getType()) {
             case DETECTOR:
                 return new TaskExecutorLocalDetectorServiceImpl(scheduler, taskDefinition, detectorRegistry, resultProcessor);

@@ -24,12 +24,6 @@ public class TaskExecutorIgniteService implements Service {
     @SpringResource(resourceClass = TaskExecutorLocalServiceFactory.class)
     private transient TaskExecutorLocalServiceFactory workflowExecutorLocalServiceFactory;
 
-    @SpringResource(resourceClass = DetectorRegistry.class)
-    private transient DetectorRegistry detectorRegistry;
-
-    @SpringResource(resourceClass = MonitorRegistry.class)
-    private transient MonitorRegistry monitorRegistry;
-
     private transient TaskExecutorLocalService localService;
     private transient boolean shutdown;
 
@@ -56,7 +50,7 @@ public class TaskExecutorIgniteService implements Service {
             return;
         }
 
-        TaskExecutorLocalService newLocalService = workflowExecutorLocalServiceFactory.create(taskDefinition, detectorRegistry, monitorRegistry);
+        TaskExecutorLocalService newLocalService = workflowExecutorLocalServiceFactory.create(taskDefinition);
         synchronized (sync) {
             if (! shutdown) {
                 localService = newLocalService;

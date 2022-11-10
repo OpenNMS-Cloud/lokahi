@@ -63,6 +63,8 @@
     <argument ref="opennmsScheduler"/>
     <argument ref="workflowExecutionResultProcessor"/>
     <argument ref="listenerFactoryRegistry"/>
+    <argument ref="detectorRegistry"/>
+    <argument ref="monitorRegistry"/>
   </bean>
 
   <bean id="workflowLifecycleManager" class="org.opennms.horizon.minion.taskset.worker.impl.TaskSetLifecycleManagerImpl" destroy-method="close">

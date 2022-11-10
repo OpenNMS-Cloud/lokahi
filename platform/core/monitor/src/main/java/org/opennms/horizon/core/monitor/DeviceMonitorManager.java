@@ -188,7 +188,6 @@ public class DeviceMonitorManager implements EventListener {
 
     private void addDetectSnmpTask(String location, InetAddress inetAddress, String snmpCommunityString) {
 
-        //todo probably should be an SnmpDetectorRequest, for now using same
         SnmpDetectorRequest.Builder snmpRequestBuilder =
             SnmpDetectorRequest.newBuilder()
                 .setHost(inetAddress.getHostAddress())

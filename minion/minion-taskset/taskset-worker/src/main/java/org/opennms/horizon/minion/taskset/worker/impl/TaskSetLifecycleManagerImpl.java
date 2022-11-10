@@ -136,6 +136,7 @@ public class TaskSetLifecycleManagerImpl implements TaskSetLifecycleManager {
 
     private boolean isSingletonTask(TaskDefinition taskDefinition) {
         switch (taskDefinition.getType()) {
+            case DETECTOR:
             case MONITOR:
             case CONNECTOR:
                 return true;
@@ -163,11 +164,9 @@ public class TaskSetLifecycleManagerImpl implements TaskSetLifecycleManager {
         return serviceConfiguration;
     }
 
-    private Collection<String>
-    calculateServicesToUndeploy(
-        Collection<ServiceConfiguration> deployed,
-        Collection<String> plannedSingletonIds,
-        Collection<ServiceDescriptor> serviceDescriptorList) {
+    private Collection<String> calculateServicesToUndeploy(Collection<ServiceConfiguration> deployed,
+                                                           Collection<String> plannedSingletonIds,
+                                                           Collection<ServiceDescriptor> serviceDescriptorList) {
 
         Set<String> deployedNames = deployed.stream().map(ServiceConfiguration::getName).collect(Collectors.toSet());
         deployedNames.addAll(plannedSingletonIds);

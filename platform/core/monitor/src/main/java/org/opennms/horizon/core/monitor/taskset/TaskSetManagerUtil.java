@@ -3,6 +3,7 @@ package org.opennms.horizon.core.monitor.taskset;
 import com.google.protobuf.Any;
 import org.opennms.horizon.taskset.manager.TaskSetManager;
 import org.opennms.icmp.contract.IcmpMonitorRequest;
+import org.opennms.snmp.contract.SnmpDetectorRequest;
 import org.opennms.snmp.contract.SnmpMonitorRequest;
 import org.opennms.taskset.contract.TaskDefinition;
 import org.opennms.taskset.contract.TaskSet;
@@ -50,6 +51,23 @@ public class TaskSetManagerUtil {
                 .setId(taskId)
                 .setConfiguration(Any.pack(snmpMonitorRequest))
                 ;
+
+        TaskDefinition taskDefinition = builder.build();
+
+        taskSetManager.addTaskSet(location, taskDefinition);
+    }
+
+    public void addSnmpTask(String location, InetAddress inetAddress, String name, TaskType taskType, String pluginName, String schedule, SnmpDetectorRequest snmpDetectorRequest) {
+        String taskId = monitorTaskSetIdentityUtil.identityForIpTask(inetAddress.getHostAddress(), name);
+
+        TaskDefinition.Builder builder =
+            TaskDefinition.newBuilder()
+                .setType(taskType)
+                .setPluginName(pluginName)
+                .setSchedule(schedule)
+                .setId(taskId)
+                .setConfiguration(Any.pack(snmpDetectorRequest))
+            ;
 
         TaskDefinition taskDefinition = builder.build();
 

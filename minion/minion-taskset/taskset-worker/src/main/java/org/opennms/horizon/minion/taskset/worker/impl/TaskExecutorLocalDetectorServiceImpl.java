@@ -39,7 +39,6 @@ public class TaskExecutorLocalDetectorServiceImpl implements TaskExecutorLocalSe
 // API
 //----------------------------------------
 
-    //todo: consider super class for start(), cancel(), executeSerializedIteration() as this is repeated code from TaskExecutorLocalMoitorServiceImpl
     @Override
     public void start() throws Exception {
         try {
@@ -67,7 +66,6 @@ public class TaskExecutorLocalDetectorServiceImpl implements TaskExecutorLocalSe
     }
 
     private void executeSerializedIteration() {
-        System.out.println(">>>> tbigg - TaskExecutorLocalDetectorServiceImpl.executeSerializedIteration");
         // Verify it's not already active
         if (active.compareAndSet(false, true)) {
             log.trace("Executing iteration of task: workflow-uuid={}", taskDefinition.getId());
@@ -78,7 +76,6 @@ public class TaskExecutorLocalDetectorServiceImpl implements TaskExecutorLocalSe
     }
 
     private void executeIteration() {
-        System.out.println(">>>> tbigg - TaskExecutorLocalMonitorServiceImpl.executeIteration");
         try {
             if (detector == null) {
                 ServiceDetector lazyDetector = lookupDetector(taskDefinition);
@@ -91,7 +88,7 @@ public class TaskExecutorLocalDetectorServiceImpl implements TaskExecutorLocalSe
                 CompletableFuture<ServiceDetectorResponse> future = detector.detect(null);
                 future.whenComplete(this::handleExecutionComplete);
             } else {
-                log.info("Skipping service monitor execution; monitor not found: monitor=" + taskDefinition.getPluginName());
+                log.info("Skipping service detection execution; detector not found: detector=" + taskDefinition.getPluginName());
             }
         } catch (Exception exc) {
             // TODO: throttle - we can get very large numbers of these in a short time
@@ -100,9 +97,14 @@ public class TaskExecutorLocalDetectorServiceImpl implements TaskExecutorLocalSe
     }
 
     private void handleExecutionComplete(ServiceDetectorResponse serviceDetectorResponse, Throwable exc) {
-        System.out.println(">>>> tbigg - TaskExecutorLocalDetectorServiceImpl.handleExecutionComplete");
-        System.out.println("serviceDetectorResponse = " + serviceDetectorResponse);
-        System.out.println("exc = " + exc);
+        log.trace("Completed execution: workflow-uuid={}", taskDefinition.getId());
+        active.set(false);
+
+        if (exc == null) {
+            resultProcessor.queueSendResult(taskDefinition.getId(), serviceDetectorResponse);
+        } else {
+            log.warn("error executing workflow; workflow-uuid=" + taskDefinition.getId(), exc);
+        }
     }
 
     private ServiceDetector lookupDetector(TaskDefinition taskDefinition) {

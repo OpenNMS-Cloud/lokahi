@@ -1,7 +1,9 @@
 package org.opennms.horizon.minion.taskset.worker.impl;
 
+import org.opennms.horizon.minion.plugin.api.ServiceDetectorResponse;
 import org.opennms.horizon.shared.ipc.rpc.IpcIdentity;
 import org.opennms.horizon.shared.ipc.sink.api.SyncDispatcher;
+import org.opennms.taskset.contract.DetectorResponse;
 import org.opennms.taskset.contract.MonitorResponse;
 import org.opennms.taskset.contract.TaskResult;
 import org.opennms.taskset.contract.TaskSetResults;
@@ -33,10 +35,19 @@ public class TaskExecutionResultProcessorImpl implements TaskExecutionResultProc
 //----------------------------------------
 
     @Override
-    public void queueSendResult(String id, ServiceMonitorResponse result) {
-        log.debug("O-POLL STATUS: status={}; reason={}", result.getStatus(), result.getReason());
+    public void queueSendResult(String id, ServiceDetectorResponse response) {
+        log.debug("O-POLL STATUS: detected={}; responseTimeMs={}", response.isServiceDetected(), response.getResponseTimeMs());
 
-        TaskSetResults taskSetResults = formatTaskSetResults(id, result);
+        TaskSetResults taskSetResults = formatTaskSetResults(id, response);
+
+        taskSetSinkDispatcher.send(taskSetResults);
+    }
+
+    @Override
+    public void queueSendResult(String id, ServiceMonitorResponse response) {
+        log.debug("O-POLL STATUS: status={}; reason={}", response.getStatus(), response.getReason());
+
+        TaskSetResults taskSetResults = formatTaskSetResults(id, response);
 
         taskSetSinkDispatcher.send(taskSetResults);
     }
@@ -62,6 +73,34 @@ public class TaskExecutionResultProcessorImpl implements TaskExecutionResultProc
                 .build();
 
         return taskSetResults;
+    }
+
+    private TaskSetResults formatTaskSetResults(String id, ServiceDetectorResponse result) {
+        DetectorResponse detectorResponse = formatDetectorResponse(result);
+
+        TaskResult taskResult =
+            TaskResult.newBuilder()
+                .setId(id)
+                .setDetectorResponse(detectorResponse)
+                .setLocation(identity.getLocation())
+                .setSystemId(identity.getId())
+                .build();
+
+        TaskSetResults taskSetResults =
+            TaskSetResults.newBuilder()
+                .addResults(taskResult)
+                .build();
+
+        return taskSetResults;
+    }
+
+    private DetectorResponse formatDetectorResponse(ServiceDetectorResponse response) {
+        DetectorResponse result =
+            DetectorResponse.newBuilder()
+                .setDetected(Optional.of(response).map(ServiceDetectorResponse::isServiceDetected).orElse(DetectorResponse.getDefaultInstance().getDetected()))
+                .build();
+
+        return result;
     }
 
     private MonitorResponse formatMonitorResponse(ServiceMonitorResponse smr) {

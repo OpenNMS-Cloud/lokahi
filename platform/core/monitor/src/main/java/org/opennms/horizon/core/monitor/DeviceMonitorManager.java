@@ -45,6 +45,7 @@ import org.opennms.horizon.events.api.EventSubscriptionService;
 import org.opennms.horizon.events.model.IEvent;
 import org.opennms.horizon.metrics.api.OnmsMetricsAdapter;
 
+import org.opennms.snmp.contract.SnmpDetectorRequest;
 import org.opennms.snmp.contract.SnmpMonitorRequest;
 import org.opennms.taskset.contract.TaskSet;
 import org.opennms.taskset.contract.TaskType;
@@ -188,8 +189,8 @@ public class DeviceMonitorManager implements EventListener {
     private void addDetectSnmpTask(String location, InetAddress inetAddress, String snmpCommunityString) {
 
         //todo probably should be an SnmpDetectorRequest, for now using same
-        SnmpMonitorRequest.Builder snmpRequestBuilder =
-            SnmpMonitorRequest.newBuilder()
+        SnmpDetectorRequest.Builder snmpRequestBuilder =
+            SnmpDetectorRequest.newBuilder()
                 .setHost(inetAddress.getHostAddress())
                 .setOid(SYS_OBJECTID_INSTANCE)
                 .setTimeout(18000)
@@ -200,7 +201,7 @@ public class DeviceMonitorManager implements EventListener {
                 .setCommunity(snmpCommunityString);
         }
 
-        SnmpMonitorRequest snmpDetectorRequest = snmpRequestBuilder.build();
+        SnmpDetectorRequest snmpDetectorRequest = snmpRequestBuilder.build();
 
         taskSetManagerUtil.addSnmpTask(location, inetAddress, "snmp-detector", TaskType.DETECTOR, "SNMPDetector", "5000", snmpDetectorRequest);
     }

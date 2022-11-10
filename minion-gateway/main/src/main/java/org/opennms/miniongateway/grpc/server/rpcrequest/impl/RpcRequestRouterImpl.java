@@ -1,6 +1,7 @@
 package org.opennms.miniongateway.grpc.server.rpcrequest.impl;
 
 import com.google.protobuf.InvalidProtocolBufferException;
+import lombok.Setter;
 import org.apache.ignite.Ignite;
 import org.apache.ignite.compute.ComputeTaskFuture;
 import org.apache.ignite.lang.IgniteFuture;
@@ -20,13 +21,20 @@ public class RpcRequestRouterImpl implements RpcRequestRouter {
 
     private static final Logger DEFAULT_LOGGER = LoggerFactory.getLogger(RpcRequestRouterImpl.class);
 
+    @Setter
     private Logger log = DEFAULT_LOGGER;
 
     @Autowired
+    @Setter
     private Ignite ignite;
 
     @Autowired
+    @Setter
     private RpcRequestRouterIgniteTask rpcRequestRouterIgniteTask;
+
+//========================================
+// Interface: RpcRequestRouter
+//----------------------------------------
 
     @Override
     public CompletableFuture<RpcResponseProto> routeRequest(RpcRequestProto request) {

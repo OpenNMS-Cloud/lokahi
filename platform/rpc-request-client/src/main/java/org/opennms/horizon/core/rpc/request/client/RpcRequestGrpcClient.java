@@ -16,6 +16,8 @@ import java.lang.reflect.Method;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 public class RpcRequestGrpcClient<T extends Message> implements RpcClient<T> {
 
@@ -28,19 +30,51 @@ public class RpcRequestGrpcClient<T extends Message> implements RpcClient<T> {
     private RpcRequestServiceGrpc.RpcRequestServiceFutureStub rpcRequestServiceFutureStub;
     private Executor futureCompletionExecutor = Executors.newSingleThreadExecutor();
 
-    private Deserializer<T> deserializer;
+    private Deserializer<T> deserializer = (in) -> (T) in;
 
     private boolean tlsEnabled = false;
     private String host = RpcRequestGrpcClientFactory.DEFAULT_GRPC_HOSTNAME;
     private int port = RpcRequestGrpcClientFactory.DEFAULT_GRPC_PORT;
     private int maxMessageSize = RpcRequestGrpcClientFactory.DEFAULT_MAX_MESSAGE_SIZE;
 
+    /**
+     * TESTABILITY: enable injection of a mock to bypass the static method execution of NettyChannelBuilder.forAddress
+     */
+    private BiFunction<String, Integer, NettyChannelBuilder>
+        nettyChannelBuilderForAddressFunction = this::callDefaultNettyChannelBuilderForAddress;
+
+    /**
+     * TESTABILITY: enable injection of a mock to bypass the static method execution of NettyChannelBuilder.forAddress
+     */
+    private Function<Channel, RpcRequestServiceGrpc.RpcRequestServiceFutureStub>
+        rpcRequestServiceNewFutureStubFunction = this::callDefaultRpcRequestServiceNewFutureStub;
+
+//========================================
+// Getters and Setters
+//----------------------------------------
+
+    public BiFunction<String, Integer, NettyChannelBuilder> getNettyChannelBuilderForAddressFunction() {
+        return nettyChannelBuilderForAddressFunction;
+    }
+
+    public void setNettyChannelBuilderForAddressFunction(BiFunction<String, Integer, NettyChannelBuilder> nettyChannelBuilderForAddressFunction) {
+        this.nettyChannelBuilderForAddressFunction = nettyChannelBuilderForAddressFunction;
+    }
+
+    public Function<Channel, RpcRequestServiceGrpc.RpcRequestServiceFutureStub> getRpcRequestServiceNewFutureStubFunction() {
+        return rpcRequestServiceNewFutureStubFunction;
+    }
+
+    public void setRpcRequestServiceNewFutureStubFunction(Function<Channel, RpcRequestServiceGrpc.RpcRequestServiceFutureStub> rpcRequestServiceNewFutureStubFunction) {
+        this.rpcRequestServiceNewFutureStubFunction = rpcRequestServiceNewFutureStubFunction;
+    }
+
 //========================================
 // Lifecycle
 //----------------------------------------
 
     public void init() {
-        NettyChannelBuilder channelBuilder = NettyChannelBuilder.forAddress(host, port)
+        NettyChannelBuilder channelBuilder = nettyChannelBuilderForAddressFunction.apply(host, port)
             .keepAliveWithoutCalls(true)
             .maxInboundMessageSize(maxMessageSize);
 
@@ -55,7 +89,7 @@ public class RpcRequestGrpcClient<T extends Message> implements RpcClient<T> {
             channel = channelBuilder.usePlaintext().build();
         }
 
-        rpcRequestServiceFutureStub = RpcRequestServiceGrpc.newFutureStub(channel);
+        rpcRequestServiceFutureStub = rpcRequestServiceNewFutureStubFunction.apply(channel);
     }
 
 //========================================
@@ -102,6 +136,13 @@ public class RpcRequestGrpcClient<T extends Message> implements RpcClient<T> {
         this.maxMessageSize = maxMessageSize;
     }
 
+    public Logger getLog() {
+        return log;
+    }
+
+    public void setLog(Logger log) {
+        this.log = log;
+    }
 
 //========================================
 // RpcClient INTERFACE
@@ -174,5 +215,19 @@ public class RpcRequestGrpcClient<T extends Message> implements RpcClient<T> {
         } catch (Exception exc) {
             resultFuture.completeExceptionally(exc);
         }
+    }
+
+//========================================
+// Testability
+//----------------------------------------
+
+    private NettyChannelBuilder callDefaultNettyChannelBuilderForAddress(String host, int port) {
+        return
+            NettyChannelBuilder.forAddress(host, port)
+                ;
+    }
+
+    private RpcRequestServiceGrpc.RpcRequestServiceFutureStub callDefaultRpcRequestServiceNewFutureStub(Channel channel) {
+        return RpcRequestServiceGrpc.newFutureStub(channel);
     }
 }

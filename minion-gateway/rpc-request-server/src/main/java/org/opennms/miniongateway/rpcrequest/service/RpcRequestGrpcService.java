@@ -2,6 +2,7 @@ package org.opennms.miniongateway.rpcrequest.service;
 
 import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
+import lombok.Setter;
 import org.opennms.cloud.grpc.minion.RpcRequestProto;
 import org.opennms.cloud.grpc.minion.RpcRequestServiceGrpc;
 import org.opennms.cloud.grpc.minion.RpcResponseProto;
@@ -24,14 +25,16 @@ public class RpcRequestGrpcService extends RpcRequestServiceGrpc.RpcRequestServi
     private Logger log = DEFAULT_LOGGER;
 
     @Autowired
+    @Setter
     private RpcRequestRouter rpcRequestRouter;
 
     @Autowired
+    @Setter
     private GrpcIpcServer grpcIpcServer;
 
-    //========================================
-    // Lifecycle
-    //----------------------------------------
+//========================================
+// Lifecycle
+//----------------------------------------
 
     @PostConstruct
     public void start() throws IOException {
@@ -39,9 +42,9 @@ public class RpcRequestGrpcService extends RpcRequestServiceGrpc.RpcRequestServi
         log.info("Started RPC-Request GRPC Service");
     }
 
-    //========================================
-    // Service API
-    //----------------------------------------
+//========================================
+// Service API
+//----------------------------------------
 
     @Override
     public void request(RpcRequestProto request, StreamObserver<RpcResponseProto> responseObserver) {
@@ -52,9 +55,9 @@ public class RpcRequestGrpcService extends RpcRequestServiceGrpc.RpcRequestServi
         );
     }
 
-    //========================================
-    // Internals
-    //----------------------------------------
+//========================================
+// Internals
+//----------------------------------------
 
     private void handleCompletedRequest(RpcResponseProto response, Throwable exception, StreamObserver<RpcResponseProto> responseObserver) {
         if (exception != null) {

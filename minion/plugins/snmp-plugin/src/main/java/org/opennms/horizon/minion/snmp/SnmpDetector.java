@@ -105,7 +105,7 @@ public class SnmpDetector implements ServiceDetector {
     private ServiceDetectorResponse processSnmpResponse(SnmpValue[] values, String hostAddress, SnmpObjId oid) {
         System.out.println(">>>> tbigg - SnmpDetector.processSnmpResponse");
         System.out.println(">>>> tbigg - values = " + Arrays.deepToString(values) + ", hostAddress = " + hostAddress + ", oid = " + oid);
-        
+
         // >>>> tbigg - values = [.1.3.6.1.4.1.8072.3.2.10], hostAddress = 192.168.1.66, oid = .1.3.6.1.2.1.1.2.0
 
         ServiceDetectorResponseImpl.ServiceDetectorResponseImplBuilder builder = ServiceDetectorResponseImpl.builder()

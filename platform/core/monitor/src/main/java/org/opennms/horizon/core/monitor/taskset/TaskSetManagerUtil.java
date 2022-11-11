@@ -57,14 +57,13 @@ public class TaskSetManagerUtil {
         taskSetManager.addTaskSet(location, taskDefinition);
     }
 
-    public void addSnmpTask(String location, InetAddress inetAddress, String name, TaskType taskType, String pluginName, String schedule, SnmpDetectorRequest snmpDetectorRequest) {
+    public void addSnmpTask(String location, InetAddress inetAddress, String name, TaskType taskType, String pluginName, SnmpDetectorRequest snmpDetectorRequest) {
         String taskId = monitorTaskSetIdentityUtil.identityForIpTask(inetAddress.getHostAddress(), name);
 
         TaskDefinition.Builder builder =
             TaskDefinition.newBuilder()
                 .setType(taskType)
                 .setPluginName(pluginName)
-                .setSchedule(schedule)
                 .setId(taskId)
                 .setConfiguration(Any.pack(snmpDetectorRequest))
             ;

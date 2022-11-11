@@ -196,7 +196,7 @@ public class DeviceMonitorManager implements EventListener {
 
         SnmpDetectorRequest snmpDetectorRequest = snmpRequestBuilder.build();
 
-        taskSetManagerUtil.addSnmpTask(location, inetAddress, "snmp-detector", TaskType.DETECTOR, "SNMPDetector", "5000", snmpDetectorRequest);
+        taskSetManagerUtil.addSnmpTask(location, inetAddress, "snmp-detector", TaskType.DETECTOR, "SNMPDetector", snmpDetectorRequest);
     }
 
     @Override

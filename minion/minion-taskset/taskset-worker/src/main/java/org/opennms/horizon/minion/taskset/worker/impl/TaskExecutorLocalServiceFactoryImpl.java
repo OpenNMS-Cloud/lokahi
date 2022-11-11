@@ -3,10 +3,10 @@ package org.opennms.horizon.minion.taskset.worker.impl;
 import org.opennms.horizon.minion.plugin.api.registries.DetectorRegistry;
 import org.opennms.horizon.minion.plugin.api.registries.ListenerFactoryRegistry;
 import org.opennms.horizon.minion.plugin.api.registries.MonitorRegistry;
+import org.opennms.horizon.minion.scheduler.OpennmsScheduler;
 import org.opennms.horizon.minion.taskset.worker.TaskExecutionResultProcessor;
 import org.opennms.horizon.minion.taskset.worker.TaskExecutorLocalService;
 import org.opennms.horizon.minion.taskset.worker.TaskExecutorLocalServiceFactory;
-import org.opennms.horizon.minion.scheduler.OpennmsScheduler;
 import org.opennms.taskset.contract.TaskDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,7 +50,7 @@ public class TaskExecutorLocalServiceFactoryImpl implements TaskExecutorLocalSer
     public TaskExecutorLocalService create(TaskDefinition taskDefinition) {
         switch (taskDefinition.getType()) {
             case DETECTOR:
-                return new TaskExecutorLocalDetectorServiceImpl(scheduler, taskDefinition, detectorRegistry, resultProcessor);
+                return new TaskExecutorLocalDetectorServiceImpl(taskDefinition, detectorRegistry, resultProcessor);
 
             case MONITOR:
                 return new TaskExecutorLocalMonitorServiceImpl(scheduler, taskDefinition, resultProcessor, monitorRegistry);

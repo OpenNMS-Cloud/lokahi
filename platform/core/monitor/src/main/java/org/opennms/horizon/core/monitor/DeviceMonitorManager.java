@@ -137,7 +137,7 @@ public class DeviceMonitorManager implements EventListener {
 
                 addPollIcmpTask(locationName, onmsIpInterface.getIpAddress());
 
-                addDetectSnmpTask(locationName, onmsIpInterface.getIpAddress(), onmsNode.getSnmpCommunityString());
+                addDetectSnmpTask(locationName, onmsIpInterface.getIpAddress());
                 addPollSnmpTask(locationName, onmsIpInterface.getIpAddress(), onmsNode.getSnmpCommunityString());
             });
 
@@ -186,19 +186,13 @@ public class DeviceMonitorManager implements EventListener {
         taskSetManagerUtil.addSnmpTask(location, inetAddress, "snmp-monitor", TaskType.MONITOR, "SNMPMonitor", "5000", snmpMonitorRequest);
     }
 
-    private void addDetectSnmpTask(String location, InetAddress inetAddress, String snmpCommunityString) {
+    private void addDetectSnmpTask(String location, InetAddress inetAddress) {
 
         SnmpDetectorRequest.Builder snmpRequestBuilder =
             SnmpDetectorRequest.newBuilder()
                 .setHost(inetAddress.getHostAddress())
-                .setOid(SYS_OBJECTID_INSTANCE)
                 .setTimeout(18000)
                 .setRetries(2);
-
-        if (snmpCommunityString != null) {
-            snmpRequestBuilder
-                .setCommunity(snmpCommunityString);
-        }
 
         SnmpDetectorRequest snmpDetectorRequest = snmpRequestBuilder.build();
 

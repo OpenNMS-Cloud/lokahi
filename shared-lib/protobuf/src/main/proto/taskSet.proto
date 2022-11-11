@@ -93,4 +93,7 @@ message MonitorResponse {
 
 message DetectorResponse {
   bool detected = 1;
+  string ip_address = 2;
+  string reason = 3;
+  MonitorType monitor_type = 4;
 }

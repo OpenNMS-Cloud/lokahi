@@ -2,21 +2,15 @@ package org.opennms.horizon.minion.plugin.api;
 
 import lombok.Builder;
 import lombok.Data;
+import org.opennms.taskset.contract.MonitorType;
 
 import java.util.Map;
 
 @Data
 @Builder
 public class ServiceDetectorResponseImpl implements ServiceDetectorResponse {
-    private boolean serviceDetected;
-    private double responseTimeMs;
-    private Map<String, String> serviceAttributes;
-
-    public static ServiceDetectorResponse down() {
-        return builder().serviceDetected(false).build();
-    }
-
-    public static ServiceDetectorResponse up() {
-        return builder().serviceDetected(true).build();
-    }
+    private MonitorType monitorType;
+    private boolean serviceDetected; // enum instead?
+    private String reason;
+    private String ipAddress;
 }

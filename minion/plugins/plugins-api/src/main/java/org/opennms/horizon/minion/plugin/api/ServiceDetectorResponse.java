@@ -1,8 +1,13 @@
 package org.opennms.horizon.minion.plugin.api;
 
-import java.util.Map;
+import org.opennms.taskset.contract.MonitorType;
 
 public interface ServiceDetectorResponse {
+
+    /**
+     * @return type of monitor that produced the response.
+     */
+    MonitorType getMonitorType();
 
     /**
      * @return true if the service was detected, false otherwise
@@ -10,20 +15,12 @@ public interface ServiceDetectorResponse {
     boolean isServiceDetected();
 
     /**
-     * How long did it take to determine if the service is present or not?
-     *
-     * @return response time in milliseconds
+     * @return reason behind the current detection status when the service is not detected
      */
-    double getResponseTimeMs();
+    String getReason();
 
     /**
-     * TECHDEBT: In Horizon 30 this is used to cary information from the agent
-     * that was gathered during the detector invocation, to be used by the provisioning
-     * process. In the WS-Man detector case, this is used to cary the Windows Server version
-     * which is then stored in an asset field.
-     *
-     * @return additional attributes from the detector invocation
+     * @return IP address that was under detection
      */
-    Map<String, String> getServiceAttributes();
-
+    String getIpAddress();
 }

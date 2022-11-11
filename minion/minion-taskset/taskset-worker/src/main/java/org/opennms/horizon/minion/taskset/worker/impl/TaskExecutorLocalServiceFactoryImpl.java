@@ -1,6 +1,5 @@
 package org.opennms.horizon.minion.taskset.worker.impl;
 
-import org.apache.ignite.resources.SpringResource;
 import org.opennms.horizon.minion.plugin.api.registries.DetectorRegistry;
 import org.opennms.horizon.minion.plugin.api.registries.ListenerFactoryRegistry;
 import org.opennms.horizon.minion.plugin.api.registries.MonitorRegistry;

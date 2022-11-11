@@ -36,7 +36,7 @@ public class TaskExecutionResultProcessorImpl implements TaskExecutionResultProc
 
     @Override
     public void queueSendResult(String id, ServiceDetectorResponse response) {
-        log.debug("O-POLL STATUS: detected={}; responseTimeMs={}", response.isServiceDetected(), response.getResponseTimeMs());
+        log.debug("O-POLL STATUS: detected={}", response.isServiceDetected());
 
         TaskSetResults taskSetResults = formatTaskSetResults(id, response);
 
@@ -98,6 +98,9 @@ public class TaskExecutionResultProcessorImpl implements TaskExecutionResultProc
         DetectorResponse result =
             DetectorResponse.newBuilder()
                 .setDetected(Optional.of(response).map(ServiceDetectorResponse::isServiceDetected).orElse(DetectorResponse.getDefaultInstance().getDetected()))
+                .setIpAddress(Optional.of(response).map(ServiceDetectorResponse::getIpAddress).orElse(DetectorResponse.getDefaultInstance().getIpAddress()))
+                .setMonitorType(Optional.of(response).map(ServiceDetectorResponse::getMonitorType).orElse(DetectorResponse.getDefaultInstance().getMonitorType()))
+                .setReason(Optional.of(response).map(ServiceDetectorResponse::getReason).orElse(DetectorResponse.getDefaultInstance().getReason()))
                 .build();
 
         return result;

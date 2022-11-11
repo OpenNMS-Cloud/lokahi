@@ -23,7 +23,7 @@ public class TaskExecutorLocalDetectorServiceImpl implements TaskExecutorLocalSe
     private final TaskExecutionResultProcessor resultProcessor;
     private final DetectorRegistry detectorRegistry;
     private ServiceDetector detector = null;
-    private AtomicBoolean active = new AtomicBoolean(false);
+    private final AtomicBoolean active = new AtomicBoolean(false);
 
     public TaskExecutorLocalDetectorServiceImpl(OpennmsScheduler scheduler,
                                                 TaskDefinition taskDefinition,
@@ -84,11 +84,10 @@ public class TaskExecutorLocalDetectorServiceImpl implements TaskExecutorLocalSe
                 }
             }
             if (detector != null) {
-
-                CompletableFuture<ServiceDetectorResponse> future = detector.detect(null);
+                CompletableFuture<ServiceDetectorResponse> future = detector.detect(taskDefinition.getConfiguration());
                 future.whenComplete(this::handleExecutionComplete);
             } else {
-                log.info("Skipping service detection execution; detector not found: detector=" + taskDefinition.getPluginName());
+                log.info("Skipping service detection execution; detector not found: detector = {}", taskDefinition.getPluginName());
             }
         } catch (Exception exc) {
             // TODO: throttle - we can get very large numbers of these in a short time

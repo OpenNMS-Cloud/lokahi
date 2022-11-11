@@ -4,8 +4,6 @@ import org.apache.ignite.IgniteLogger;
 import org.apache.ignite.resources.LoggerResource;
 import org.apache.ignite.resources.SpringResource;
 import org.apache.ignite.services.Service;
-import org.opennms.horizon.minion.plugin.api.registries.DetectorRegistry;
-import org.opennms.horizon.minion.plugin.api.registries.MonitorRegistry;
 import org.opennms.horizon.minion.taskset.worker.TaskExecutorLocalService;
 import org.opennms.horizon.minion.taskset.worker.TaskExecutorLocalServiceFactory;
 import org.opennms.taskset.contract.TaskDefinition;

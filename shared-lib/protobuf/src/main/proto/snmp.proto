@@ -36,10 +36,8 @@ option java_package = "org.opennms.snmp.contract";
 message SnmpDetectorRequest {
   string host = 1;
 
-  string oid = 2;
-  int32 timeout = 3;
-  int32 retries = 4;
-  string community = 5;
+  int32 timeout = 2;
+  int32 retries = 3;
 }
 
 message SnmpMonitorRequest {

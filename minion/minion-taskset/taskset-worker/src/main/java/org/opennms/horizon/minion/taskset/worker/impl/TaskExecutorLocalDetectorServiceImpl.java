@@ -48,15 +48,16 @@ public class TaskExecutorLocalDetectorServiceImpl implements TaskExecutorLocalSe
 
     @Override
     public void cancel() {
-        if (future != null && !future.isCancelled()) {
+        if (future != null
+            && !future.isCancelled()) {
 
             future.cancel(true);
-            future = null;
         }
+        future = null;
     }
 
     private void handleExecutionComplete(ServiceDetectorResponse serviceDetectorResponse, Throwable exc) {
-        log.trace("Completed execution: workflow-uuid={}", taskDefinition.getId());
+        log.trace("Completed execution: workflow-uuid = {}", taskDefinition.getId());
 
         if (exc == null) {
             resultProcessor.queueSendResult(taskDefinition.getId(), serviceDetectorResponse);

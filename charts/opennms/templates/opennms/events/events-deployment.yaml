@@ -51,6 +51,8 @@ spec:
                 secretKeyRef:
                   name: postgres
                   key: eventsPwd
+            - name: SPRING_KAFKA_BOOTSTRAP_SERVERS
+              value: "{{ .Values.Kafka.ServiceName }}:{{ .Values.Kafka.Port }}"
           ports:
             - name: http
               containerPort: {{ .Values.OpenNMS.Events.Port }}

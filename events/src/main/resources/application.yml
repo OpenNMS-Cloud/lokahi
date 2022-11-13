@@ -10,3 +10,14 @@ spring:
 
   liquibase:
     change-log: db/changelog/changelog.xml
+
+  kafka:
+    consumer:
+      group-id: "ts-consumer"
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.ByteArrayDeserializer
+    bootstrap-servers: localhost:59092
+
+kafka:
+  topics: "traps"

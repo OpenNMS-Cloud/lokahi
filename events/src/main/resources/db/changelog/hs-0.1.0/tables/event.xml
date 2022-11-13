@@ -13,9 +13,9 @@
 
         <createTable tableName="event">
 
-            <column name="id" type="BIGINT" autoIncrement="true"/>
+            <column name="id" type="bigint" autoIncrement="true"/>
 
-            <column name="tenant_id" type="UUID">
+            <column name="tenant_id" type="text">
                 <constraints nullable="false"/>
             </column>
 

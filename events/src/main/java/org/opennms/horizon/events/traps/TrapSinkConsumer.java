@@ -51,6 +51,7 @@ public class TrapSinkConsumer {
     public void consume(byte[] data) {
 
         try {
+            // TODO: Add tests along with event consumption.
             TrapLogDTO trapLogDTO = TrapLogDTO.parseFrom(data);
             LOG.debug("Received trap {}", trapLogDTO);
         } catch (InvalidProtocolBufferException e) {

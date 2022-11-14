@@ -50,19 +50,12 @@ public class SnmpDetector implements ServiceDetector {
             SnmpDetectorRequest effectiveSnmpDetectorRequest = populateDefaultsAsNeeded(snmpDetectorRequest);
             hostAddress = effectiveSnmpDetectorRequest.getHost();
 
-            SnmpAgentConfig agentConfig = getAgentConfig(snmpDetectorRequest);
+            SnmpAgentConfig agentConfig = getAgentConfig(effectiveSnmpDetectorRequest);
 
             SnmpObjId snmpObjectId = SnmpObjId.get(DEFAULT_OBJECT_IDENTIFIER);
 
             return snmpHelper.getAsync(agentConfig, new SnmpObjId[]{snmpObjectId})
-                .handle((snmpValues, throwable) -> {
-                    String host = effectiveSnmpDetectorRequest.getHost();
-                    if (throwable != null) {
-                        return getErrorResponse(host, throwable.getMessage());
-                    } else {
-                        return getDetectedResponse(host);
-                    }
-                })
+                .handle((snmpValues, throwable) -> getResponse(effectiveSnmpDetectorRequest, throwable))
                 .completeOnTimeout(getErrorResponse(hostAddress, SNMP_DETECTION_TIMED_OUT),
                     agentConfig.getTimeout(), TimeUnit.MILLISECONDS);
 
@@ -75,28 +68,35 @@ public class SnmpDetector implements ServiceDetector {
         }
     }
 
-    private SnmpDetectorRequest populateDefaultsAsNeeded(SnmpDetectorRequest snmpDetectorRequest) {
-        SnmpDetectorRequest.Builder requestBuilder = SnmpDetectorRequest.newBuilder(snmpDetectorRequest);
+    private SnmpDetectorRequest populateDefaultsAsNeeded(SnmpDetectorRequest request) {
+        SnmpDetectorRequest.Builder requestBuilder = SnmpDetectorRequest.newBuilder(request);
 
-        if (!snmpDetectorRequest.hasField(retriesFieldDescriptor)) {
+        if (!request.hasField(retriesFieldDescriptor)) {
             requestBuilder.setRetries(SnmpConfiguration.DEFAULT_RETRIES);
         }
 
-        if (!snmpDetectorRequest.hasField(timeoutFieldDescriptor)) {
+        if (!request.hasField(timeoutFieldDescriptor)) {
             requestBuilder.setTimeout(SnmpConfiguration.DEFAULT_TIMEOUT);
         }
 
         return requestBuilder.build();
     }
 
-    public SnmpAgentConfig getAgentConfig(SnmpDetectorRequest snmpDetectorRequest) throws UnknownHostException {
+    public SnmpAgentConfig getAgentConfig(SnmpDetectorRequest request) throws UnknownHostException {
         SnmpConfiguration configuration = new SnmpConfiguration();
-        configuration.setTimeout(snmpDetectorRequest.getTimeout());
-        configuration.setRetries(snmpDetectorRequest.getRetries());
+        configuration.setTimeout(request.getTimeout());
+        configuration.setRetries(request.getRetries());
 
-        InetAddress host = InetAddress.getByName(snmpDetectorRequest.getHost());
+        InetAddress host = InetAddress.getByName(request.getHost());
 
         return new SnmpAgentConfig(host, configuration);
+    }
+
+    private ServiceDetectorResponse getResponse(SnmpDetectorRequest request, Throwable throwable) {
+        if (throwable != null) {
+            return getErrorResponse(request.getHost(), throwable.getMessage());
+        }
+        return getDetectedResponse(request.getHost());
     }
 
     private ServiceDetectorResponse getDetectedResponse(String host) {

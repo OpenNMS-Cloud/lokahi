@@ -8,7 +8,8 @@ on:
 jobs:
 
   build-and-test:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v3
         with:
@@ -41,3 +42,4 @@ jobs:
           enable-sonar-scan: true
           github-token: ${{ secrets.GITHUB_TOKEN }}
           sonar-token: ${{ secrets.SONAR_TOKEN }}
+

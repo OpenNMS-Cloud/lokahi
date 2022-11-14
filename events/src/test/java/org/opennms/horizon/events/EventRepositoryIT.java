@@ -54,7 +54,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-public class EventRepositoryIT {
+class EventRepositoryIT {
 
 
     private static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:14.5-alpine")
@@ -73,7 +73,7 @@ public class EventRepositoryIT {
     }
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         assertTrue(postgres.isCreated());
         assertTrue(postgres.isRunning());
     }
@@ -82,7 +82,7 @@ public class EventRepositoryIT {
     private EventRepository eventRepository;
 
     @Test
-    public void testPersistence() throws InvalidProtocolBufferException {
+    void testPersistence() throws InvalidProtocolBufferException {
         var event = new Event();
         event.setEventUei("uei");
         event.setTenantId("test");
@@ -103,6 +103,6 @@ public class EventRepositoryIT {
         assertEquals("snmp", EventInfo.parseFrom(retrieved.getEventInfo()).getSnmp().getId());
         assertEquals("public", EventInfo.parseFrom(retrieved.getEventInfo()).getSnmp().getCommunity());
         assertEquals("192.168.1.1", retrieved.getIpAddress().getAddress());
-        assertEquals(parm, retrieved.getEventParameters().getEventParameters().get(0));
+        assertEquals(parm, retrieved.getEventParameters().getParameters().get(0));
     }
 }

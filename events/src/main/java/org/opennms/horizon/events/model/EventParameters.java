@@ -33,17 +33,17 @@ import java.util.List;
 
 public class EventParameters {
 
-    private List<EventParameter> eventParameters = new ArrayList<>();
+    private List<EventParameter> parameters = new ArrayList<>();
 
-    public List<EventParameter> getEventParameters() {
-        return eventParameters;
+    public List<EventParameter> getParameters() {
+        return parameters;
     }
 
-    public void setEventParameters(List<EventParameter> eventParameters) {
-        this.eventParameters = eventParameters;
+    public void setParameters(List<EventParameter> parameters) {
+        this.parameters = parameters;
     }
 
     public void addEventParameters(EventParameter eventParameter) {
-        this.eventParameters.add(eventParameter);
+        this.parameters.add(eventParameter);
     }
 }

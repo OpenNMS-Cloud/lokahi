@@ -28,7 +28,7 @@
 
 package org.opennms.horizon.events.model;
 
-import com.sun.istack.NotNull;
+
 import com.vladmihalcea.hibernate.type.basic.Inet;
 import com.vladmihalcea.hibernate.type.basic.PostgreSQLInetType;
 import org.hibernate.annotations.Type;
@@ -40,7 +40,9 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
+
 
 
 @TypeDef(

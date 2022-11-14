@@ -4,8 +4,6 @@ import lombok.Builder;
 import lombok.Data;
 import org.opennms.taskset.contract.MonitorType;
 
-import java.util.Map;
-
 @Data
 @Builder
 public class ServiceDetectorResponseImpl implements ServiceDetectorResponse {
@@ -13,4 +11,24 @@ public class ServiceDetectorResponseImpl implements ServiceDetectorResponse {
     private boolean serviceDetected; // enum instead?
     private String reason;
     private String ipAddress;
+
+    @Override
+    public MonitorType getMonitorType() {
+        return monitorType;
+    }
+
+    @Override
+    public boolean isServiceDetected() {
+        return serviceDetected;
+    }
+
+    @Override
+    public String getReason() {
+        return reason;
+    }
+
+    @Override
+    public String getIpAddress() {
+        return ipAddress;
+    }
 }

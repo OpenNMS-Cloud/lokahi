@@ -54,7 +54,7 @@ public class TrapSinkConsumer {
             TrapLogDTO trapLogDTO = TrapLogDTO.parseFrom(data);
             LOG.debug("Received trap {}", trapLogDTO);
         } catch (InvalidProtocolBufferException e) {
-            e.printStackTrace();
+            LOG.error("Error while parsing traps ", e);
         }
     }
 }

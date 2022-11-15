@@ -275,6 +275,7 @@
         <!--<feature>keycloak-servlet-filter-adapter</feature>-->
         <feature>keycloak-jaas</feature>
         <feature>jaas-deployer</feature>
+        <feature>horizon-3rdparty-keycloak-admin</feature>
 
         <!--<bundle>mvn:org.keycloak/keycloak-jaxrs-oauth-client/${keycloak.version}</bundle>-->
         <bundle>mvn:org.keycloak/keycloak-pax-web-jetty94/${keycloak.version}</bundle>
@@ -282,10 +283,12 @@
         <bundle>mvn:org.keycloak/keycloak-jetty-core/${keycloak.version}</bundle>
         <bundle>mvn:org.keycloak/keycloak-jetty-adapter-spi/${keycloak.version}</bundle>
         <bundle>mvn:org.keycloak/keycloak-servlet-filter-adapter/${keycloak.version}</bundle>
-
-        <bundle>mvn:org.opennms.horizon.3rdparty/keycloak-admin-client/${project.version}</bundle>
     </feature>
 
+    <feature name="horizon-3rdparty-keycloak-admin" version="${project.version}" description="Horizon :: Keycloak">
+        <feature>jackson</feature>
+        <bundle>mvn:org.opennms.horizon.3rdparty/keycloak-admin-client/${project.version}</bundle>
+    </feature>
 
     <!--           -->
     <!-- PROVSIOND -->

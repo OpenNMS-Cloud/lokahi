@@ -27,6 +27,22 @@ grpc:
   server:
     port: 6565
 
+  client:
+    task-set:
+      host: localhost
+      port: 8990
+      tlsEnabled: false
+      maxMessageSize: 10485760
+
 kafka:
   topics:
     minion-heartbeat: "heartbeat"
+
+
+#
+#    <bean id="taskSetGrpcClient" class="org.opennms.horizon.core.taskset.client.TaskSetGrpcClient" init-method="init">
+#    <property name="host" value="${host}"/>
+#    <property name="port" value="${port}"/>
+#    <property name="tlsEnabled" value="${tlsEnabled}"/>
+#    <property name="maxMessageSize" value="${maxMessageSize}"/>
+#    </bean>

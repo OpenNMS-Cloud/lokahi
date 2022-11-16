@@ -27,7 +27,7 @@
         <module>icmp-api</module>
         <module>protobuf</module>
         <module>task-set-service</module>
-      <module>ignite-tasks</module>
+        <module>ignite-tasks</module>
         <module>events</module>
     </modules>
 

@@ -18,6 +18,7 @@
 
     <modules>
         <module>api</module>
+        <module>client</module>
         <module>ignite-client</module>
     </modules>
 

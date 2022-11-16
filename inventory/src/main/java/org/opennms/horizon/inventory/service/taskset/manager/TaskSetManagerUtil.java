@@ -1,7 +1,8 @@
-package org.opennms.horizon.inventory.service.taskset;
+package org.opennms.horizon.inventory.service.taskset.manager;
 
 import com.google.protobuf.Any;
 import lombok.RequiredArgsConstructor;
+import org.opennms.horizon.inventory.service.taskset.identity.TaskSetIdentityUtil;
 import org.opennms.snmp.contract.SnmpDetectorRequest;
 import org.opennms.taskset.contract.TaskDefinition;
 import org.opennms.taskset.contract.TaskType;

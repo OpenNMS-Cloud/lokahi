@@ -1,4 +1,4 @@
-package org.opennms.horizon.inventory.service.taskset;
+package org.opennms.horizon.inventory.service.taskset.identity;
 
 import org.springframework.stereotype.Component;
 

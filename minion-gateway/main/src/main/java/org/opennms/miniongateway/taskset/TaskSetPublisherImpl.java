@@ -34,6 +34,7 @@ public class TaskSetPublisherImpl implements TaskSetPublisher, TaskSetForwarder 
 // Interface
 //----------------------------------------
 
+    @Override
     public void publishTaskSet(String location, TaskSet taskSet) {
         Set<TaskSetListener> listeners;
 

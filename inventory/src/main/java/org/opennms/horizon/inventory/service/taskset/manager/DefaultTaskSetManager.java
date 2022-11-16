@@ -1,4 +1,4 @@
-package org.opennms.horizon.inventory.service.taskset;
+package org.opennms.horizon.inventory.service.taskset.manager;
 
 import org.opennms.taskset.contract.TaskDefinition;
 import org.opennms.taskset.contract.TaskSet;

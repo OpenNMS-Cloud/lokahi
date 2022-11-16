@@ -5,6 +5,9 @@ import org.opennms.horizon.inventory.model.IpInterface;
 import org.opennms.horizon.inventory.model.MonitoringLocation;
 import org.opennms.horizon.inventory.model.Node;
 import org.opennms.horizon.inventory.repository.IpInterfaceRepository;
+import org.opennms.horizon.inventory.service.taskset.manager.TaskSetManager;
+import org.opennms.horizon.inventory.service.taskset.manager.TaskSetManagerUtil;
+import org.opennms.horizon.inventory.service.taskset.publisher.TaskSetPublisher;
 import org.opennms.snmp.contract.SnmpDetectorRequest;
 import org.opennms.taskset.contract.MonitorType;
 import org.opennms.taskset.contract.TaskSet;
@@ -21,6 +24,7 @@ public class DetectorTaskSetService {
     private static final Logger log = LoggerFactory.getLogger(DetectorTaskSetService.class);
     private final TaskSetManagerUtil taskSetManagerUtil;
     private final TaskSetManager taskSetManager;
+    private final TaskSetPublisher taskSetPublisher;
     private final IpInterfaceRepository ipInterfaceRepository;
 
     //todo: add ICMP
@@ -35,14 +39,7 @@ public class DetectorTaskSetService {
             addDetectorTasks(node, ipInterfaces, monitorType);
         }
 
-        MonitoringLocation monitoringLocation = node.getMonitoringLocation();
-        String location = monitoringLocation.getLocation();
-        TaskSet taskSet = taskSetManager.getTaskSet(location);
-
-
-
-        System.out.println("taskSet = " + taskSet);
-
+        sendTaskSet(node);
     }
 
     private void addDetectorTasks(Node node, List<IpInterface> ipInterfaces, MonitorType monitorType) {
@@ -87,5 +84,13 @@ public class DetectorTaskSetService {
                 break;
             }
         }
+    }
+
+    private void sendTaskSet(Node node) {
+        MonitoringLocation monitoringLocation = node.getMonitoringLocation();
+        String location = monitoringLocation.getLocation();
+        TaskSet taskSet = taskSetManager.getTaskSet(location);
+
+        taskSetPublisher.publishTaskSet(location, taskSet);
     }
 }

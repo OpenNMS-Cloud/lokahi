@@ -28,9 +28,9 @@ grpc:
     port: 6565
 
   client:
-    task-set:
-      host: localhost
-      port: 8990
+    minion-gateway:
+      host: opennms-minion-gateway
+      port: 8991
       tlsEnabled: false
       maxMessageSize: 10485760
 

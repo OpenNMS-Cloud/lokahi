@@ -18,16 +18,16 @@ import javax.annotation.PostConstruct;
 public class GrpcTaskSetPublisher implements TaskSetPublisher {
     private static final Logger log = LoggerFactory.getLogger(GrpcTaskSetPublisher.class);
 
-    @Value("${grpc.client.task-set.host:localhost}")
+    @Value("${grpc.client.minion-gateway.host:localhost}")
     private String host;
 
-    @Value("${grpc.client.task-set.port:8990}")
+    @Value("${grpc.client.minion-gateway.port:8990}")
     private int port;
 
-    @Value("${grpc.client.task-set.tlsEnabled:false}")
+    @Value("${grpc.client.minion-gateway.tlsEnabled:false}")
     private boolean tlsEnabled;
 
-    @Value("${grpc.client.task-set.maxMessageSize:10485760}")
+    @Value("${grpc.client.minion-gateway.maxMessageSize:10485760}")
     private int maxMessageSize;
 
     private TaskSetServiceGrpc.TaskSetServiceBlockingStub taskSetServiceStub;

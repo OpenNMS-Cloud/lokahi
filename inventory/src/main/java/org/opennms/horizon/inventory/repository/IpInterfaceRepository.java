@@ -17,4 +17,6 @@ public interface IpInterfaceRepository extends JpaRepository<IpInterface, Long> 
         " inner join MonitoringLocation ml on n.monitoringLocationId = ml.id" +
         " where ip.ipAddress = ?1 and ml.location = ?2 and ip.tenantId = ?3")
     List<IpInterface> findByIpAddressAndLocationAndTenantId(Inet ipAddress, String location, String tenantId);
+
+    List<IpInterface> findByNodeIdAndTenantId(long nodeId, String tenantId);
 }

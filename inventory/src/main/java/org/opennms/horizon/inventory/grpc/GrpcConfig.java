@@ -34,12 +34,9 @@ import org.opennms.horizon.inventory.service.IpInterfaceService;
 import org.opennms.horizon.inventory.service.MonitoringLocationService;
 import org.opennms.horizon.inventory.service.MonitoringSystemService;
 import lombok.RequiredArgsConstructor;
-import org.opennms.horizon.inventory.mapper.MonitoringLocationMapper;
 import org.opennms.horizon.inventory.mapper.NodeMapper;
-import org.opennms.horizon.inventory.repository.IpInterfaceRepository;
-import org.opennms.horizon.inventory.repository.MonitoringLocationRepository;
-import org.opennms.horizon.inventory.repository.NodeRepository;
 import org.opennms.horizon.inventory.service.NodeService;
+import org.opennms.horizon.inventory.service.taskset.DetectorTaskSetService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -55,6 +52,7 @@ public class GrpcConfig {
     private final NodeService nodeService;
     private final IpInterfaceService ipInterfaceService;
     private final NodeMapper nodeMapper;
+    private final DetectorTaskSetService taskSetService;
 
 
     @Bean
@@ -74,7 +72,7 @@ public class GrpcConfig {
 
     @Bean
     public DeviceGrpcService createDeviceService(TenantLookup tenantLookup) {
-        return new DeviceGrpcService(nodeService, ipInterfaceService, nodeMapper, tenantLookup);
+        return new DeviceGrpcService(nodeService, ipInterfaceService, nodeMapper, tenantLookup, taskSetService);
     }
 
     @Bean(destroyMethod = "stopServer")

@@ -16,6 +16,7 @@ import org.opennms.horizon.inventory.mapper.NodeMapper;
 import org.opennms.horizon.inventory.model.Node;
 import org.opennms.horizon.inventory.service.IpInterfaceService;
 import org.opennms.horizon.inventory.service.NodeService;
+import org.opennms.horizon.inventory.service.taskset.DetectorTaskSetService;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -28,6 +29,7 @@ public class DeviceGrpcService extends DeviceServiceGrpc.DeviceServiceImplBase {
     private final IpInterfaceService ipInterfaceService;
     private final NodeMapper nodeMapper;
     private final TenantLookup tenantLookup;
+    private final DetectorTaskSetService taskSetService;
 
     @Override
     @Transactional
@@ -37,6 +39,8 @@ public class DeviceGrpcService extends DeviceServiceGrpc.DeviceServiceImplBase {
 
         if (valid) {
             Node node = nodeService.createDevice(request, tenantId.orElseThrow());
+
+            taskSetService.sendDetectorTasks(node);
 
             responseObserver.onNext(nodeMapper.modelToDTO(node));
             responseObserver.onCompleted();

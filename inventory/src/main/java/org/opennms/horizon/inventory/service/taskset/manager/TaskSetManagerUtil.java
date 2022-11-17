@@ -2,12 +2,13 @@ package org.opennms.horizon.inventory.service.taskset.manager;
 
 import com.google.protobuf.Any;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.opennms.horizon.inventory.service.taskset.identity.TaskSetIdentityUtil;
-import org.opennms.snmp.contract.SnmpDetectorRequest;
-import org.opennms.snmp.contract.SnmpMonitorRequest;
 import org.opennms.taskset.contract.TaskDefinition;
 import org.opennms.taskset.contract.TaskType;
 import org.springframework.stereotype.Component;
+
+import java.util.Objects;
 
 @Component
 @RequiredArgsConstructor
@@ -15,10 +16,28 @@ public class TaskSetManagerUtil {
     private final TaskSetManager taskSetManager;
     private final TaskSetIdentityUtil taskSetIdentityUtil;
 
-    //    todo: add icmp detector task request
-    public void addIcmpTask(String location, String ipAddress, String name, TaskType taskType, String pluginName) {
+    public void addTask(String location, String ipAddress, String name, TaskType taskType, String pluginName) {
 
         String taskId = taskSetIdentityUtil.identityForIpTask(ipAddress, name);
+        addTaskToTaskSet(location, taskType, pluginName, null, null, taskId);
+    }
+
+    public void addTask(String location, String ipAddress, String name, TaskType taskType,
+                        String pluginName, String schedule, Any configuration) {
+
+        String taskId = taskSetIdentityUtil.identityForIpTask(ipAddress, name);
+        addTaskToTaskSet(location, taskType, pluginName, schedule, configuration, taskId);
+    }
+
+    public void addTask(String location, String ipAddress, String name, TaskType taskType,
+                        String pluginName, Any configuration) {
+
+        String taskId = taskSetIdentityUtil.identityForIpTask(ipAddress, name);
+        addTaskToTaskSet(location, taskType, pluginName, null, configuration, taskId);
+    }
+
+    private void addTaskToTaskSet(String location, TaskType taskType, String pluginName, String schedule,
+                                  Any configuration, String taskId) {
 
         TaskDefinition.Builder builder =
             TaskDefinition.newBuilder()
@@ -26,40 +45,13 @@ public class TaskSetManagerUtil {
                 .setPluginName(pluginName)
                 .setId(taskId);
 
-        TaskDefinition taskDefinition = builder.build();
+        if (StringUtils.isNotBlank(schedule)) {
+            builder.setSchedule(schedule);
+        }
 
-        taskSetManager.addTaskSet(location, taskDefinition);
-    }
-
-    public void addSnmpTask(String location, String ipAddress, String name, TaskType taskType,
-                            String pluginName, String schedule, SnmpMonitorRequest snmpMonitorRequest) {
-
-        String taskId = taskSetIdentityUtil.identityForIpTask(ipAddress, name);
-
-        TaskDefinition.Builder builder =
-            TaskDefinition.newBuilder()
-                .setType(taskType)
-                .setPluginName(pluginName)
-                .setId(taskId)
-                .setSchedule(schedule)
-                .setConfiguration(Any.pack(snmpMonitorRequest));
-
-        TaskDefinition taskDefinition = builder.build();
-
-        taskSetManager.addTaskSet(location, taskDefinition);
-    }
-
-    public void addSnmpTask(String location, String ipAddress, String name, TaskType taskType,
-                            String pluginName, SnmpDetectorRequest snmpDetectorRequest) {
-
-        String taskId = taskSetIdentityUtil.identityForIpTask(ipAddress, name);
-
-        TaskDefinition.Builder builder =
-            TaskDefinition.newBuilder()
-                .setType(taskType)
-                .setPluginName(pluginName)
-                .setId(taskId)
-                .setConfiguration(Any.pack(snmpDetectorRequest));
+        if (!Objects.isNull(configuration)) {
+            builder.setConfiguration(configuration);
+        }
 
         TaskDefinition taskDefinition = builder.build();
 

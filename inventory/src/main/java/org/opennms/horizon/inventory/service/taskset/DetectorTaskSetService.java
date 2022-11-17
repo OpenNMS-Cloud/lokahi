@@ -1,5 +1,6 @@
 package org.opennms.horizon.inventory.service.taskset;
 
+import com.google.protobuf.Any;
 import lombok.RequiredArgsConstructor;
 import org.opennms.horizon.inventory.model.IpInterface;
 import org.opennms.horizon.inventory.model.MonitoringLocation;
@@ -22,6 +23,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class DetectorTaskSetService {
     private static final Logger log = LoggerFactory.getLogger(DetectorTaskSetService.class);
+    private static final int DEFAULT_SNMP_TIMEOUT = 18000;
+    private static final int DEFAULT_SNMP_RETRIES = 2;
     private final TaskSetManagerUtil taskSetManagerUtil;
     private final TaskSetManager taskSetManager;
     private final TaskSetPublisher taskSetPublisher;
@@ -61,18 +64,18 @@ public class DetectorTaskSetService {
         switch (monitorType) {
             case ICMP: {
                 //todo: add request
-                taskSetManagerUtil.addIcmpTask(location, ipAddress, name, TaskType.DETECTOR, pluginName);
+                taskSetManagerUtil.addTask(location, ipAddress, name, TaskType.DETECTOR, pluginName);
                 break;
             }
             case SNMP: {
-                SnmpDetectorRequest request =
-                    SnmpDetectorRequest.newBuilder()
+                Any configuration =
+                    Any.pack(SnmpDetectorRequest.newBuilder()
                         .setHost(ipAddress)
-                        .setTimeout(18000)
-                        .setRetries(2)
-                        .build();
+                        .setTimeout(DEFAULT_SNMP_TIMEOUT)
+                        .setRetries(DEFAULT_SNMP_RETRIES)
+                        .build());
 
-                taskSetManagerUtil.addSnmpTask(location, ipAddress, name, TaskType.DETECTOR, pluginName, request);
+                taskSetManagerUtil.addTask(location, ipAddress, name, TaskType.DETECTOR, pluginName, configuration);
                 break;
             }
             case UNRECOGNIZED: {

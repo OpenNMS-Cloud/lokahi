@@ -1,5 +1,6 @@
 package org.opennms.horizon.inventory.service.taskset;
 
+import com.google.protobuf.Any;
 import lombok.RequiredArgsConstructor;
 import org.opennms.horizon.inventory.model.IpInterface;
 import org.opennms.horizon.inventory.service.taskset.manager.TaskSetManager;
@@ -18,6 +19,8 @@ import org.springframework.stereotype.Component;
 public class MonitorTaskSetService {
     private static final Logger log = LoggerFactory.getLogger(MonitorTaskSetService.class);
     private static final String DEFAULT_SCHEDULE = "5000";
+    private static final int DEFAULT_SNMP_TIMEOUT = 18000;
+    private static final int DEFAULT_SNMP_RETRIES = 2;
     private final TaskSetManagerUtil taskSetManagerUtil;
     private final TaskSetManager taskSetManager;
     private final TaskSetPublisher taskSetPublisher;
@@ -37,18 +40,18 @@ public class MonitorTaskSetService {
         switch (monitorType) {
             case ICMP: {
                 //todo: add request
-                taskSetManagerUtil.addIcmpTask(location, ipAddress, name, TaskType.MONITOR, pluginName);
+                taskSetManagerUtil.addTask(location, ipAddress, name, TaskType.MONITOR, pluginName);
                 break;
             }
             case SNMP: {
-                SnmpMonitorRequest request =
-                    SnmpMonitorRequest.newBuilder()
+                Any configuration =
+                    Any.pack(SnmpMonitorRequest.newBuilder()
                         .setHost(ipAddress)
-                        .setTimeout(18000)
-                        .setRetries(2)
-                        .build();
+                        .setTimeout(DEFAULT_SNMP_TIMEOUT)
+                        .setRetries(DEFAULT_SNMP_RETRIES)
+                        .build());
 
-                taskSetManagerUtil.addSnmpTask(location, ipAddress, name, TaskType.MONITOR, pluginName, DEFAULT_SCHEDULE, request);
+                taskSetManagerUtil.addTask(location, ipAddress, name, TaskType.MONITOR, pluginName, DEFAULT_SCHEDULE, configuration);
                 break;
             }
             case UNRECOGNIZED: {

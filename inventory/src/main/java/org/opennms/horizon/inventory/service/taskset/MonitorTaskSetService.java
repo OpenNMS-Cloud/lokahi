@@ -7,6 +7,7 @@ import org.opennms.horizon.inventory.service.taskset.manager.TaskSetManager;
 import org.opennms.horizon.inventory.service.taskset.manager.TaskSetManagerUtil;
 import org.opennms.snmp.contract.SnmpMonitorRequest;
 import org.opennms.taskset.contract.MonitorType;
+import org.opennms.taskset.contract.TaskSet;
 import org.opennms.taskset.contract.TaskType;
 import org.opennms.taskset.service.api.TaskSetPublisher;
 import org.slf4j.Logger;
@@ -17,12 +18,19 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class MonitorTaskSetService {
     private static final Logger log = LoggerFactory.getLogger(MonitorTaskSetService.class);
-    private static final String DEFAULT_SCHEDULE = "5000";
+    private static final String DEFAULT_SCHEDULE = "60000";
     private static final int DEFAULT_SNMP_TIMEOUT = 18000;
     private static final int DEFAULT_SNMP_RETRIES = 2;
     private final TaskSetManagerUtil taskSetManagerUtil;
+    private final TaskSetManager taskSetManager;
+    private final TaskSetPublisher taskSetPublisher;
 
-    public void addMonitorTask(String location, MonitorType monitorType, IpInterface ipInterface) {
+    public void sendMonitorTask(String location, MonitorType monitorType, IpInterface ipInterface) {
+        addMonitorTask(location, monitorType, ipInterface);
+        sendTaskSet(location);
+    }
+
+    private void addMonitorTask(String location, MonitorType monitorType, IpInterface ipInterface) {
         String monitorTypeValue = monitorType.getValueDescriptor().getName();
         String ipAddress = ipInterface.getIpAddress().getAddress();
 
@@ -55,5 +63,10 @@ public class MonitorTaskSetService {
                 break;
             }
         }
+    }
+
+    private void sendTaskSet(String location) {
+        TaskSet taskSet = taskSetManager.getTaskSet(location);
+        taskSetPublisher.publishTaskSet(location, taskSet);
     }
 }

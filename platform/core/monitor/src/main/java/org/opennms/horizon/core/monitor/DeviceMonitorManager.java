@@ -131,9 +131,10 @@ public class DeviceMonitorManager implements EventListener {
             ipInterfaces.forEach(onmsIpInterface -> {
                 LOG.info("Updating ICMP/SNMP Monitor tasks for IPAddress {}", onmsIpInterface.getIpAddress());
 
-//                addPollIcmpTask(locationName, onmsIpInterface.getIpAddress());
-//                addDetectSnmpTask(locationName, onmsIpInterface.getIpAddress());
-//                addPollSnmpTask(locationName, onmsIpInterface.getIpAddress(), onmsNode.getSnmpCommunityString());
+                addPollIcmpTask(locationName, onmsIpInterface.getIpAddress());
+
+                addDetectSnmpTask(locationName, onmsIpInterface.getIpAddress());
+                addPollSnmpTask(locationName, onmsIpInterface.getIpAddress(), onmsNode.getSnmpCommunityString());
             });
 
             //TaskSet updatedTaskSet = locationBasedTaskSetManager.getManagerForLocation(locationName).getTaskSet();

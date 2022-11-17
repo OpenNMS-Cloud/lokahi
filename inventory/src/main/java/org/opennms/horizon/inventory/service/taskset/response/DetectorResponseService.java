@@ -31,7 +31,8 @@ public class DetectorResponseService {
 
         Inet ipAddress = new Inet(response.getIpAddress());
 
-        //todo: This should have tenantId in it, as it is possible that a different tenant is using the same location and ipAddress
+        //todo: This should have tenantId in it, as it is possible
+        // that a different tenant is using the same location and ipAddress
         Optional<IpInterface> ipInterfaceOpt = ipInterfaceRepository
             .findByIpAddressAndLocation(ipAddress, location);
 
@@ -42,11 +43,10 @@ public class DetectorResponseService {
                 createMonitoredService(response, ipInterface);
 
                 MonitorType monitorType = response.getMonitorType();
-                monitorTaskSetService.addMonitorTask(location, monitorType, ipInterface);
+                monitorTaskSetService.sendMonitorTask(location, monitorType, ipInterface);
 
             } else {
-                deleteMonitoredService(response, ipInterface);
-                stopMonitors(response, ipInterface);
+                log.info("{} not detected on ip address = {}", response.getMonitorType(), ipAddress.getAddress());
             }
         } else {
             log.warn("Failed to find IP Interface during detection for ip = {}", ipAddress.toInetAddress());
@@ -66,17 +66,6 @@ public class DetectorResponseService {
             .setTenantId(tenantId)
             .build();
 
-        monitoredServiceService.create(newMonitoredService, monitoredServiceType, ipInterface);
-    }
-
-    private void deleteMonitoredService(DetectorResponse response, IpInterface ipInterface) {
-        System.out.println("DetectorResponseService.deleteMonitoredService");
-        System.out.println("response = " + response + ", ipInterface = " + ipInterface);
-        //todo: implement this
-    }
-
-    private void stopMonitors(DetectorResponse response, IpInterface ipInterface) {
-        log.info("Stop monitors for ip = {}", ipInterface.getIpAddress().getAddress());
-        //todo: implement this
+        monitoredServiceService.createSingle(newMonitoredService, monitoredServiceType, ipInterface);
     }
 }

@@ -49,6 +49,9 @@ public class TaskSetPublisherImpl implements TaskSetPublisher, TaskSetForwarder 
             Optional.ofNullable(taskSet.getTaskDefinitionList()).map(Collection::size).orElse(0));
 
         // Publish to downstream listeners
+        // NOTE: there will not be a listener for a location
+        // if a minion has not registered in that location, so this will be null.
+        // location must be a valid location with a minion
         if (listeners != null) {
             for (TaskSetListener listener : listeners) {
                 listener.onTaskSetUpdate(taskSet);

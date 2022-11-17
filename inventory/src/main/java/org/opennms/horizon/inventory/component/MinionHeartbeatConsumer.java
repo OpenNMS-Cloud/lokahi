@@ -50,7 +50,7 @@ public class MinionHeartbeatConsumer {
     public void receiveMessage(byte[] data) {
         try {
             HeartbeatMessage message = HeartbeatMessage.parseFrom(data);
-            log.debug("Received heartbeat message for minion with id {} and location {}", message.getIdentity().getSystemId(), message.getIdentity().getLocation());
+            log.info("Received heartbeat message for minion with id {} and location {}", message.getIdentity().getSystemId(), message.getIdentity().getLocation());
             service.addMonitoringSystemFromHeartbeat(message);
         } catch (InvalidProtocolBufferException e) {
             log.error("Error while parsing heartbeat message", e);

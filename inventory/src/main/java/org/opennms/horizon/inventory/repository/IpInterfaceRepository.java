@@ -27,5 +27,5 @@ public interface IpInterfaceRepository extends JpaRepository<IpInterface, Long> 
     Optional<IpInterface> findByIpAddressAndLocation(@Param("ipAddress") Inet ipAddress,
                                                      @Param("location") String location);
 
-    List<IpInterface> findByNodeIdAndTenantId(long nodeId, String tenantId);
+    List<IpInterface> findByNodeId(long nodeId);
 }

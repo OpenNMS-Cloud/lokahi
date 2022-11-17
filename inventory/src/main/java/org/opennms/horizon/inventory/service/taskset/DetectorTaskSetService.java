@@ -35,8 +35,8 @@ public class DetectorTaskSetService {
 
     public void sendDetectorTasks(Node node) {
 
-        List<IpInterface> ipInterfaces = ipInterfaceRepository
-            .findByNodeIdAndTenantId(node.getId(), node.getTenantId());
+        List<IpInterface> ipInterfaces =
+            ipInterfaceRepository.findByNodeId(node.getId());
 
         for (MonitorType monitorType : DETECTOR_MONITOR_TYPES) {
             addDetectorTasks(node, ipInterfaces, monitorType);

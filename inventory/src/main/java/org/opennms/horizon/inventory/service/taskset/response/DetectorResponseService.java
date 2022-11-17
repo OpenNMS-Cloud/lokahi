@@ -31,6 +31,7 @@ public class DetectorResponseService {
 
         Inet ipAddress = new Inet(response.getIpAddress());
 
+        //todo: This should have tenantId in it, as it is possible that a different tenant is using the same location and ipAddress
         Optional<IpInterface> ipInterfaceOpt = ipInterfaceRepository
             .findByIpAddressAndLocation(ipAddress, location);
 

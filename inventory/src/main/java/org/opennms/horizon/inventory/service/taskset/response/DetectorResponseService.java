@@ -26,14 +26,6 @@ public class DetectorResponseService {
     public void accept(DetectorResponse response) {
         log.info("Received Detector Response = {}", response);
 
-        if (response.getDetected()) {
-            detected(response);
-        } else {
-            undetected(response);
-        }
-    }
-
-    private void detected(DetectorResponse response) {
         Inet ipAddress = new Inet(response.getIpAddress());
 
         //todo: send back location in response ?
@@ -43,11 +35,15 @@ public class DetectorResponseService {
         if (ipInterfaceOpt.isPresent()) {
             IpInterface ipInterface = ipInterfaceOpt.get();
 
-            createMonitoredService(response, ipInterface);
-            runMonitors(response, ipInterface);
-
+            if (response.getDetected()) {
+                createMonitoredService(response, ipInterface);
+                runMonitors(response, ipInterface);
+            } else {
+                deleteMonitoredService(response, ipInterface);
+                stopMonitors(response, ipInterface);
+            }
         } else {
-            log.warn("Failed to find IP Interface for ip = {}", ipAddress.toInetAddress());
+            log.warn("Failed to find IP Interface during detection for ip = {}", ipAddress.toInetAddress());
         }
     }
 
@@ -65,11 +61,19 @@ public class DetectorResponseService {
         monitoredServiceService.create(newMonitoredService, monitoredServiceType, ipInterface);
     }
 
-    private void undetected(DetectorResponse response) {
-
+    private void deleteMonitoredService(DetectorResponse response, IpInterface ipInterface) {
+        System.out.println("DetectorResponseService.deleteMonitoredService");
+        System.out.println("response = " + response + ", ipInterface = " + ipInterface);
+        //todo: implement this
     }
 
     private void runMonitors(DetectorResponse response, IpInterface ipInterface) {
         log.info("Run monitors for ip = {}", ipInterface.getIpAddress().getAddress());
+        //todo: implement this
+    }
+
+    private void stopMonitors(DetectorResponse response, IpInterface ipInterface) {
+        log.info("Stop monitors for ip = {}", ipInterface.getIpAddress().getAddress());
+        //todo: implement this
     }
 }

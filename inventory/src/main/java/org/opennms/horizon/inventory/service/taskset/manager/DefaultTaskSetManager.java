@@ -30,7 +30,7 @@ public class DefaultTaskSetManager implements TaskSetManager {
     }
 
     @Override
-    public TaskSet getTaskSet(String location) {
+    public synchronized TaskSet getTaskSet(String location) {
         return taskSetsByLocation.get(location);
     }
 }

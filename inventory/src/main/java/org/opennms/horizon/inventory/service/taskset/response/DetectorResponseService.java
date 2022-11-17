@@ -39,7 +39,10 @@ public class DetectorResponseService {
 
             if (response.getDetected()) {
                 createMonitoredService(response, ipInterface);
-                runMonitors(location, response, ipInterface);
+
+                MonitorType monitorType = response.getMonitorType();
+                monitorTaskSetService.addMonitorTask(location, monitorType, ipInterface);
+
             } else {
                 deleteMonitoredService(response, ipInterface);
                 stopMonitors(response, ipInterface);
@@ -69,12 +72,6 @@ public class DetectorResponseService {
         System.out.println("DetectorResponseService.deleteMonitoredService");
         System.out.println("response = " + response + ", ipInterface = " + ipInterface);
         //todo: implement this
-    }
-
-    private void runMonitors(String location, DetectorResponse response, IpInterface ipInterface) {
-        log.info("Run monitors for ip = {}", ipInterface.getIpAddress().getAddress());
-        MonitorType monitorType = response.getMonitorType();
-        monitorTaskSetService.sendMonitorTask(location, monitorType, ipInterface);
     }
 
     private void stopMonitors(DetectorResponse response, IpInterface ipInterface) {

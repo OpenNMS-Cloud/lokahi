@@ -10,7 +10,9 @@ import org.opennms.horizon.inventory.model.MonitoredServiceType;
 import org.opennms.horizon.inventory.repository.IpInterfaceRepository;
 import org.opennms.horizon.inventory.service.MonitoredServiceService;
 import org.opennms.horizon.inventory.service.MonitoredServiceTypeService;
+import org.opennms.horizon.inventory.service.taskset.MonitorTaskSetService;
 import org.opennms.taskset.contract.DetectorResponse;
+import org.opennms.taskset.contract.MonitorType;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
@@ -22,22 +24,22 @@ public class DetectorResponseService {
     private final IpInterfaceRepository ipInterfaceRepository;
     private final MonitoredServiceTypeService monitoredServiceTypeService;
     private final MonitoredServiceService monitoredServiceService;
+    private final MonitorTaskSetService monitorTaskSetService;
 
-    public void accept(DetectorResponse response) {
-        log.info("Received Detector Response = {}", response);
+    public void accept(String location, DetectorResponse response) {
+        log.info("Received Detector Response = {} for location = {}", response, location);
 
         Inet ipAddress = new Inet(response.getIpAddress());
 
-        //todo: send back location in response ?
         Optional<IpInterface> ipInterfaceOpt = ipInterfaceRepository
-            .findByIpAddressAndLocation(ipAddress, "Default");
+            .findByIpAddressAndLocation(ipAddress, location);
 
         if (ipInterfaceOpt.isPresent()) {
             IpInterface ipInterface = ipInterfaceOpt.get();
 
             if (response.getDetected()) {
                 createMonitoredService(response, ipInterface);
-                runMonitors(response, ipInterface);
+                runMonitors(location, response, ipInterface);
             } else {
                 deleteMonitoredService(response, ipInterface);
                 stopMonitors(response, ipInterface);
@@ -48,14 +50,16 @@ public class DetectorResponseService {
     }
 
     private void createMonitoredService(DetectorResponse response, IpInterface ipInterface) {
+        String tenantId = ipInterface.getTenantId();
+
         MonitoredServiceType monitoredServiceType =
             monitoredServiceTypeService.createSingle(MonitoredServiceTypeDTO.newBuilder()
                 .setServiceName(response.getMonitorType().name())
-                .setTenantId(ipInterface.getTenantId())
+                .setTenantId(tenantId)
                 .build());
 
         MonitoredServiceDTO newMonitoredService = MonitoredServiceDTO.newBuilder()
-            .setTenantId(ipInterface.getTenantId())
+            .setTenantId(tenantId)
             .build();
 
         monitoredServiceService.create(newMonitoredService, monitoredServiceType, ipInterface);
@@ -67,9 +71,10 @@ public class DetectorResponseService {
         //todo: implement this
     }
 
-    private void runMonitors(DetectorResponse response, IpInterface ipInterface) {
+    private void runMonitors(String location, DetectorResponse response, IpInterface ipInterface) {
         log.info("Run monitors for ip = {}", ipInterface.getIpAddress().getAddress());
-        //todo: implement this
+        MonitorType monitorType = response.getMonitorType();
+        monitorTaskSetService.sendMonitorTask(location, monitorType, ipInterface);
     }
 
     private void stopMonitors(DetectorResponse response, IpInterface ipInterface) {

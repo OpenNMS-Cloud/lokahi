@@ -21,7 +21,7 @@ public interface IpInterfaceRepository extends JpaRepository<IpInterface, Long> 
     List<IpInterface> findByIpAddressAndLocationAndTenantId(Inet ipAddress, String location, String tenantId);
 
     @Query("SELECT ip " +
-        "from IpInterface ip " +
+        "FROM IpInterface ip " +
         "WHERE ip.ipAddress = :ipAddress " +
         "AND ip.node.monitoringLocation.location = :location ")
     Optional<IpInterface> findByIpAddressAndLocation(@Param("ipAddress") Inet ipAddress,

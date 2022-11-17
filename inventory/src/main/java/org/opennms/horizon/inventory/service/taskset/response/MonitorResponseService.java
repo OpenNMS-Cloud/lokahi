@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class MonitorResponseService {
 
-    public void accept(MonitorResponse response) {
-        log.info("Received Monitor Response = {}", response);
+    public void accept(String location, MonitorResponse response) {
+        log.info("Received Monitor Response = {} for location = {}", response, location);
     }
 }

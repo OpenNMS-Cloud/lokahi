@@ -24,10 +24,12 @@ public class TaskSetResultsConsumer {
 
             for (TaskResult taskResult : message.getResultsList()) {
 
+                String location = taskResult.getLocation();
+
                 if (taskResult.hasDetectorResponse()) {
-                    detectorResponseService.accept(taskResult.getDetectorResponse());
+                    detectorResponseService.accept(location, taskResult.getDetectorResponse());
                 } else if (taskResult.hasMonitorResponse()) {
-                    monitorResponseService.accept(taskResult.getMonitorResponse());
+                    monitorResponseService.accept(location, taskResult.getMonitorResponse());
                 } else {
                     log.warn("Unknown task set response = {}", taskResult);
                 }

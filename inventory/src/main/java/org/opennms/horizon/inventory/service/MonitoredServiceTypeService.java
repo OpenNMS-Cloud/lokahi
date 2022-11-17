@@ -17,6 +17,19 @@ public class MonitoredServiceTypeService {
 
     private final MonitoredServiceTypeMapper mapper;
 
+    public MonitoredServiceType createSingle(MonitoredServiceTypeDTO newMonitoredServiceType) {
+
+        Optional<MonitoredServiceType> monitoredServiceTypeOpt = modelRepo.findByTenantIdAndServiceName(
+            newMonitoredServiceType.getTenantId(), newMonitoredServiceType.getServiceName());
+
+        if (monitoredServiceTypeOpt.isPresent()) {
+            return monitoredServiceTypeOpt.get();
+        }
+
+        MonitoredServiceType monitoredServiceType = mapper.dtoToModel(newMonitoredServiceType);
+        return modelRepo.save(monitoredServiceType);
+    }
+
     public List<MonitoredServiceTypeDTO> findByTenantId(String tenantId) {
         List<MonitoredServiceType> all = modelRepo.findByTenantId(tenantId);
         return all

@@ -17,6 +17,17 @@ public class MonitoredServiceService {
 
     private final MonitoredServiceMapper mapper;
 
+    public void create(MonitoredServiceDTO newMonitoredService,
+                       MonitoredServiceType monitoredServiceType,
+                       IpInterface ipInterface) {
+
+        MonitoredService monitoredService = mapper.dtoToModel(newMonitoredService);
+        monitoredService.setIpInterface(ipInterface);
+        monitoredService.setMonitoredServiceType(monitoredServiceType);
+
+        modelRepo.save(monitoredService);
+    }
+
     public List<MonitoredServiceDTO> findByTenantId(String tenantId) {
         List<MonitoredService> all = modelRepo.findByTenantId(tenantId);
         return all

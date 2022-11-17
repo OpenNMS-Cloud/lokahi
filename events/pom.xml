@@ -7,7 +7,9 @@
     <modules>
         <module>main</module>
         <module>persistence</module>
+        <module>conf</module>
         <module>traps</module>
+        <module>consumer</module>
     </modules>
     <parent>
         <groupId>org.opennms.horizon</groupId>

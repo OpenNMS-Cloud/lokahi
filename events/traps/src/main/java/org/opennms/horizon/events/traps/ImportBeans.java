@@ -25,44 +25,16 @@
  *     http://www.opennms.org/
  *     http://www.opennms.com/
  *******************************************************************************/
-syntax = "proto3";
 
-import "google/protobuf/any.proto";
+package org.opennms.horizon.events.traps;
 
-package opennms.events;
-option java_multiple_files = true;
-option java_package = "org.opennms.horizon.events.proto";
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.ImportResource;
 
+@Configuration
+@ImportResource("classpath:spring-beans-context.xml")
+@ComponentScan(basePackages = "org.opennms.horizon.config")
+public class ImportBeans {
 
-message EventLog {
-  repeated Event event = 1;
-}
-message Event {
-  string uei = 1;
-  uint64 node_id = 2;
-  string location = 3;
-  string ip_address = 4;
-  uint64 produced_time = 5;
-  repeated EventParameter event_params = 6;
-  optional EventInfo event_info = 7;
-}
-
-message EventInfo {
-  optional SnmpInfo snmp = 1;
-  // Any other optional event info.
-}
-
-message SnmpInfo {
-  string id = 1;
-  string version = 2;
-  uint32 specific = 3;
-  uint32 generic = 4;
-  string community = 5;
-  string trap_oid = 6;
-}
-
-message EventParameter {
-  string name = 1;
-  string value = 2;
-  string type = 3;
 }

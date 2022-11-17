@@ -20,4 +20,5 @@ spring:
     bootstrap-servers: localhost:59092
 
 kafka:
-  topics: "traps"
+  traps-topic: "traps"
+  events-topic: "events-proto"

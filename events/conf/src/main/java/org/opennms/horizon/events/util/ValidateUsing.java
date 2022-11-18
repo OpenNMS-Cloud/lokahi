@@ -26,27 +26,25 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.events;
+package org.opennms.horizon.events.util;
 
-import org.junit.jupiter.api.Test;
-import org.opennms.horizon.events.api.EventBuilder;
-import org.opennms.horizon.events.conf.xml.Event;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.TYPE})
+public @interface ValidateUsing {
 
-public class EventConfTest {
+    /**
+     * The name of the XSD file associated with this JAXB-compatible object.
+     * This will be used by JAXBUtils to validate the XML when passing through
+     * the system.
+     *
+     * @return The name of the XSD file, without paths.  This file is expected
+     * to be in the classpath, in /xsds/.
+     */
+    String value();
 
-
-    @Test
-    public void testEventConf() {
-        DefaultEventConfDao eventConfDao = new DefaultEventConfDao();
-        eventConfDao.init();
-        String uei = "uei.opennms.org/generic/traps/SNMP_Cold_Start";
-        EventBuilder eb = new EventBuilder(uei, "JUnit");
-        Event event = eventConfDao.findByEvent(eb.getEvent());
-        assertNotNull(event);
-        assertEquals(uei, event.getUei());
-        assertEquals("Normal", event.getSeverity());
-    }
 }

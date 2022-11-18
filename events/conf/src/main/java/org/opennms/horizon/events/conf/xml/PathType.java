@@ -1,8 +1,8 @@
 /*******************************************************************************
  * This file is part of OpenNMS(R).
  *
- * Copyright (C) 2022 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
+ * Copyright (C) 2017 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2017 The OpenNMS Group, Inc.
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
  *
@@ -26,27 +26,40 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.events;
+package org.opennms.horizon.events.conf.xml;
 
-import org.junit.jupiter.api.Test;
-import org.opennms.horizon.events.api.EventBuilder;
-import org.opennms.horizon.events.conf.xml.Event;
+import javax.xml.bind.annotation.XmlEnum;
+import javax.xml.bind.annotation.XmlEnumValue;
+import javax.xml.bind.annotation.XmlRootElement;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+@XmlRootElement(name="path")
+@XmlEnum
+public enum PathType {
+    @XmlEnumValue("suppressDuplicates")
+    SUPPRESS_DUPLICATES("suppressDuplicates"),
+    @XmlEnumValue("cancellingEvent")
+    CANCELLING_EVENT("cancellingEvent"),
+    @XmlEnumValue("suppressAndCancel")
+    SUPPRESS_AND_CANCEL("suppressAndCancel"),
+    @XmlEnumValue("pathOutage")
+    PATH_OUTAGE("pathOutage");
 
-public class EventConfTest {
+    private String m_value;
 
+    private PathType(final String value) {
+        m_value = value;
+    }
 
-    @Test
-    public void testEventConf() {
-        DefaultEventConfDao eventConfDao = new DefaultEventConfDao();
-        eventConfDao.init();
-        String uei = "uei.opennms.org/generic/traps/SNMP_Cold_Start";
-        EventBuilder eb = new EventBuilder(uei, "JUnit");
-        Event event = eventConfDao.findByEvent(eb.getEvent());
-        assertNotNull(event);
-        assertEquals(uei, event.getUei());
-        assertEquals("Normal", event.getSeverity());
+    public static PathType fromString(final String v) {
+        for (final PathType type : PathType.values()) {
+            if (v.equalsIgnoreCase(type.toString())) {
+                return type;
+            }
+        }
+        return null;
+    }
+
+    public String toString() {
+        return m_value;
     }
 }

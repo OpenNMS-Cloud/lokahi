@@ -28,11 +28,11 @@
 
 package org.opennms.horizon.events.traps;
 
-import org.opennms.horizon.config.api.EventBuilder;
-import org.opennms.horizon.config.api.EventConfDao;
-import org.opennms.horizon.config.conf.xml.LogDestType;
-import org.opennms.horizon.config.conf.xml.Logmsg;
-import org.opennms.horizon.config.xml.Event;
+import org.opennms.horizon.events.api.EventBuilder;
+import org.opennms.horizon.events.api.EventConfDao;
+import org.opennms.horizon.events.conf.xml.Event;
+import org.opennms.horizon.events.conf.xml.LogDestType;
+import org.opennms.horizon.events.conf.xml.Logmsg;
 import org.opennms.horizon.grpc.traps.contract.TrapDTO;
 import org.opennms.horizon.grpc.traps.contract.TrapIdentity;
 import org.opennms.horizon.shared.snmp.SnmpHelper;
@@ -46,7 +46,7 @@ import java.net.InetAddress;
 import java.util.Date;
 import java.util.Optional;
 
-import static org.opennms.horizon.config.EventConstants.OID_SNMP_IFINDEX_STRING;
+import static org.opennms.horizon.events.EventConstants.OID_SNMP_IFINDEX_STRING;
 import static org.opennms.horizon.shared.utils.InetAddressUtils.str;
 
 public class EventFactory {
@@ -63,11 +63,11 @@ public class EventFactory {
         this.snmpHelper = snmpHelper;
     }
 
-    public Event createEventFrom(final TrapDTO trapDTO,
-                                 final String systemId,
-                                 final String location,
-                                 final InetAddress trapAddress,
-                                 String tenantId) {
+    public org.opennms.horizon.events.xml.Event createEventFrom(final TrapDTO trapDTO,
+                                                                final String systemId,
+                                                                final String location,
+                                                                final InetAddress trapAddress,
+                                                                String tenantId) {
         LOG.debug("{} trap - trapInterface: {}", trapDTO.getVersion(), trapDTO.getAgentAddress());
 
         // Set event data
@@ -109,8 +109,8 @@ public class EventFactory {
         }
 
         // Get event template and set uei, if unknown
-        final Event event = eventBuilder.getEvent();
-        final org.opennms.horizon.config.conf.xml.Event econf = eventConfDao.findByEvent(event);
+        final org.opennms.horizon.events.xml.Event event = eventBuilder.getEvent();
+        final Event econf = eventConfDao.findByEvent(event);
         if (econf == null || econf.getUei() == null) {
             event.setUei("uei.opennms.org/default/trap");
         } else {
@@ -123,7 +123,7 @@ public class EventFactory {
         return event;
     }
 
-    private boolean shouldDiscard(org.opennms.horizon.config.conf.xml.Event  econf) {
+    private boolean shouldDiscard(Event econf) {
         if (econf != null) {
             final Logmsg logmsg = econf.getLogmsg();
             return logmsg != null && LogDestType.DISCARDTRAPS.equals(logmsg.getDest());

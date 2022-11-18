@@ -29,12 +29,12 @@
 package org.opennms.horizon.events.traps;
 
 import com.google.protobuf.InvalidProtocolBufferException;
-import org.opennms.horizon.config.api.EventConfDao;
-import org.opennms.horizon.config.xml.Event;
-import org.opennms.horizon.config.xml.Events;
-import org.opennms.horizon.config.xml.Log;
-import org.opennms.horizon.config.xml.Parm;
-import org.opennms.horizon.config.xml.Snmp;
+import org.opennms.horizon.events.api.EventConfDao;
+import org.opennms.horizon.events.xml.Event;
+import org.opennms.horizon.events.xml.Events;
+import org.opennms.horizon.events.xml.Log;
+import org.opennms.horizon.events.xml.Parm;
+import org.opennms.horizon.events.xml.Snmp;
 import org.opennms.horizon.events.proto.EventInfo;
 import org.opennms.horizon.events.proto.EventLog;
 import org.opennms.horizon.events.proto.EventParameter;

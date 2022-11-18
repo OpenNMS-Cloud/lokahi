@@ -29,8 +29,8 @@
 package org.opennms.horizon.events.traps;
 
 import org.junit.jupiter.api.Test;
-import org.opennms.horizon.config.EventConstants;
-import org.opennms.horizon.config.xml.Parm;
+import org.opennms.horizon.events.EventConstants;
+import org.opennms.horizon.events.xml.Parm;
 import org.opennms.horizon.shared.snmp.SnmpUtils;
 import org.opennms.horizon.shared.snmp.SnmpValue;
 import org.opennms.horizon.shared.snmp.SnmpValueFactory;

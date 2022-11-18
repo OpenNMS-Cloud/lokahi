@@ -1,8 +1,8 @@
 /*******************************************************************************
  * This file is part of OpenNMS(R).
  *
- * Copyright (C) 2022 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
+ * Copyright (C) 2013-2014 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2014 The OpenNMS Group, Inc.
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
  *
@@ -26,27 +26,19 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.events;
+package org.opennms.horizon.events.conf.xml;
 
-import org.junit.jupiter.api.Test;
-import org.opennms.horizon.events.api.EventBuilder;
-import org.opennms.horizon.events.conf.xml.Event;
+import java.io.Serializable;
+import java.util.Comparator;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+public class EventLabelComparator implements Comparator<Event>, Serializable {
+    private static final long serialVersionUID = 7976730920523203921L;
 
-public class EventConfTest {
-
-
-    @Test
-    public void testEventConf() {
-        DefaultEventConfDao eventConfDao = new DefaultEventConfDao();
-        eventConfDao.init();
-        String uei = "uei.opennms.org/generic/traps/SNMP_Cold_Start";
-        EventBuilder eb = new EventBuilder(uei, "JUnit");
-        Event event = eventConfDao.findByEvent(eb.getEvent());
-        assertNotNull(event);
-        assertEquals(uei, event.getUei());
-        assertEquals("Normal", event.getSeverity());
+    @Override
+    public int compare(final Event e1, final Event e2) {
+        if (e1.getEventLabel() == e2.getEventLabel()) return 0;
+        if (e1.getEventLabel() == null) return -1;
+        if (e2.getEventLabel() == null) return 1;
+        return e1.getEventLabel().compareToIgnoreCase(e2.getEventLabel());
     }
 }

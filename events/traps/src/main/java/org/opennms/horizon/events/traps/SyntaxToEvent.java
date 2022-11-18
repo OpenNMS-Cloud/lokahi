@@ -29,9 +29,9 @@
 package org.opennms.horizon.events.traps;
 
 
-import org.opennms.horizon.config.EventConstants;
-import org.opennms.horizon.config.xml.Parm;
-import org.opennms.horizon.config.xml.Value;
+import org.opennms.horizon.events.EventConstants;
+import org.opennms.horizon.events.xml.Parm;
+import org.opennms.horizon.events.xml.Value;
 import org.opennms.horizon.shared.snmp.SnmpValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -41,7 +41,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class SyntaxToEventTest {
 
-
     @Test
     public void testProcessSyntaxZeros() {
         SnmpValueFactory valueFactory = SnmpUtils.getValueFactory();

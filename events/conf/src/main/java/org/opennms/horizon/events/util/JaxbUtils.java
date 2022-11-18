@@ -38,10 +38,13 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+import org.xml.sax.SAXNotRecognizedException;
+import org.xml.sax.SAXNotSupportedException;
 import org.xml.sax.XMLFilter;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.XMLReaderFactory;
 
+import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
@@ -87,6 +90,7 @@ public abstract class JaxbUtils {
 
     private static final Class<?>[] EMPTY_CLASS_LIST = new Class<?>[0];
     private static final Source[] EMPTY_SOURCE_LIST = new Source[0];
+    private static final String DISALLOW_DOCTYPE_FEATURE = "http://apache.org/xml/features/disallow-doctype-decl";
 
     protected static final class LoggingValidationEventHandler implements ValidationEventHandler {
 
@@ -101,8 +105,6 @@ public abstract class JaxbUtils {
     }
 
     private static final MarshallingExceptionTranslator EXCEPTION_TRANSLATOR = new MarshallingExceptionTranslator();
-    private static ThreadLocal<Map<Class<?>, Marshaller>> m_marshallers = new ThreadLocal<Map<Class<?>, Marshaller>>();
-    private static ThreadLocal<Map<Class<?>, Unmarshaller>> m_unMarshallers = new ThreadLocal<Map<Class<?>, Unmarshaller>>();
     private static final Map<Class<?>,JAXBContext> m_contexts = Collections.synchronizedMap(new WeakHashMap<Class<?>,JAXBContext>());
     private static final Map<Class<?>,Schema> m_schemas = Collections.synchronizedMap(new WeakHashMap<Class<?>,Schema>());
     private static final Map<String,Class<?>> m_elementClasses = Collections.synchronizedMap(new WeakHashMap<String,Class<?>>());
@@ -126,10 +128,11 @@ public abstract class JaxbUtils {
         String xmlString = marshal(obj);
 
         if (xmlString != null) {
-            Writer fileWriter = new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8);
-            fileWriter.write(xmlString);
-            fileWriter.flush();
-            fileWriter.close();
+            try (Writer fileWriter = new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8)) {
+                fileWriter.write(xmlString);
+                fileWriter.flush();
+            }
+
         }
     }
 
@@ -307,17 +310,6 @@ public abstract class JaxbUtils {
     public static Marshaller getMarshallerFor(final Object obj, final JAXBContext jaxbContext) {
         final Class<?> clazz = (Class<?>)(obj instanceof Class<?> ? obj : obj.getClass());
 
-        Map<Class<?>, Marshaller> marshallers = m_marshallers.get();
-        if (jaxbContext == null) {
-            if (marshallers == null) {
-                marshallers = new WeakHashMap<Class<?>, Marshaller>();
-                m_marshallers.set(marshallers);
-            }
-            if (marshallers.containsKey(clazz)) {
-                LOG.trace("found unmarshaller for {}", clazz);
-                return marshallers.get(clazz);
-            }
-        }
         LOG.trace("creating unmarshaller for {}", clazz);
 
         try {
@@ -337,7 +329,6 @@ public abstract class JaxbUtils {
             }
             final Schema schema = getValidatorFor(clazz);
             marshaller.setSchema(schema);
-            if (jaxbContext == null) marshallers.put(clazz, marshaller);
 
             return marshaller;
         } catch (final JAXBException e) {
@@ -357,29 +348,14 @@ public abstract class JaxbUtils {
         final Class<?> clazz = (Class<?>)(obj instanceof Class<?> ? obj : obj.getClass());
 
         Unmarshaller unmarshaller = null;
-
-        Map<Class<?>, Unmarshaller> unmarshallers = m_unMarshallers.get();
-        if (jaxbContext == null) {
-            if (unmarshallers == null) {
-                unmarshallers = new WeakHashMap<Class<?>, Unmarshaller>();
-                m_unMarshallers.set(unmarshallers);
+        try {
+            if (jaxbContext == null) {
+                unmarshaller = getContextFor(clazz).createUnmarshaller();
+            } else {
+                unmarshaller = jaxbContext.createUnmarshaller();
             }
-            if (unmarshallers.containsKey(clazz)) {
-                LOG.trace("found unmarshaller for {}", clazz);
-                unmarshaller = unmarshallers.get(clazz);
-            }
-        }
-
-        if (unmarshaller == null) {
-            try {
-                if (jaxbContext == null) {
-                    unmarshaller = getContextFor(clazz).createUnmarshaller();
-                } else {
-                    unmarshaller = jaxbContext.createUnmarshaller();
-                }
-            } catch (final JAXBException e) {
-                throw EXCEPTION_TRANSLATOR.translate("creating XML marshaller", e);
-            }
+        } catch (final JAXBException e) {
+            throw EXCEPTION_TRANSLATOR.translate("creating XML marshaller", e);
         }
 
         LOG.trace("created unmarshaller for {}", clazz);
@@ -391,7 +367,6 @@ public abstract class JaxbUtils {
             }
             unmarshaller.setSchema(schema);
         }
-        if (jaxbContext == null) unmarshallers.put(clazz, unmarshaller);
 
         return unmarshaller;
     }
@@ -449,12 +424,18 @@ public abstract class JaxbUtils {
         }
 
         final List<Source> sources = new ArrayList<>();
-        final SchemaFactory factory = SchemaFactory.newInstance("http://www.w3.org/2001/XMLSchema");
-
+        SchemaFactory factory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+        try {
+            factory.setFeature(DISALLOW_DOCTYPE_FEATURE, true);
+            factory.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+            factory.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
+        } catch (SAXNotRecognizedException | SAXNotSupportedException e) {
+            LOG.warn("Exception while setting feature {}", DISALLOW_DOCTYPE_FEATURE, e);
+        }
         for (final String schemaFileName : getSchemaFilesFor(clazz)) {
             InputStream schemaInputStream = null;
             try {
-                if (schemaInputStream == null) {
+                {
                     final File schemaFile = new File(System.getProperty("opennms.home") + "/share/xsds/" + schemaFileName);
                     if (schemaFile.exists()) {
                         LOG.trace("Found schema file {} related to {}", schemaFile, clazz);
@@ -482,13 +463,11 @@ public abstract class JaxbUtils {
                 }
                 if (schemaInputStream == null) {
                     LOG.trace("Did not find a suitable XSD.  Skipping.");
-                    continue;
                 } else {
                     sources.add(new StreamSource(schemaInputStream));
                 }
             } catch (final Throwable t) {
                 LOG.warn("an error occurred while attempting to load {} for validation", schemaFileName);
-                continue;
             }
         }
 

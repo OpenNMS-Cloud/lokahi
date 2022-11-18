@@ -33,17 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.swing.filechooser.FileSystemView;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Source;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.stream.StreamResult;
-import javax.xml.transform.stream.StreamSource;
-import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.StringWriter;
-import java.nio.charset.StandardCharsets;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -218,30 +208,6 @@ public abstract class StringUtils {
     	}
     }
 
-    /**
-     * Uses the Xalan javax.transform classes to indent an XML string properly
-     * so that it is easier to read.
-     */
-    public static String prettyXml(String xml) throws TransformerException {
-        StringWriter out = new StringWriter();
-
-        TransformerFactory transFactory = TransformerFactory.newInstance();
-        Transformer transformer  = transFactory.newTransformer();
-
-        // Set options on the transformer so that it will indent the XML properly
-        transformer.setOutputProperty(OutputKeys.ENCODING, StandardCharsets.UTF_8.name());
-        transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no");
-        transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-        transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
-
-        StreamResult result = new StreamResult(out);
-        Source source = new StreamSource(new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8)));
-
-        // Run the transformer to put the XML into the StringWriter
-        transformer.transform(source, result);
-
-        return out.toString().trim();
-    }
     
     public static String iso8601LocalOffsetString(Date d) {
         return iso8601OffsetString(d, ZoneId.systemDefault(), null);

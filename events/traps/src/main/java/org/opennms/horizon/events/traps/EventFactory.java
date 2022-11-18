@@ -93,7 +93,7 @@ public class EventFactory {
             final SnmpObjId name = SnmpObjId.get(eachResult.getBase());
             final SnmpValue value = snmpHelper.getValueFactory().getValue(eachResult.getValue().getTypeValue(),
                 eachResult.getValue().getValue().toByteArray());
-            SyntaxToEvent.processSyntax(name.toString(), value).map(eventBuilder::addParam);
+            SyntaxToEvent.processSyntax(name.toString(), value).ifPresent(eventBuilder::addParam);
             if (OID_SNMP_IFINDEX.isPrefixOf(name)) {
                 eventBuilder.setIfIndex(value.toInt());
             }

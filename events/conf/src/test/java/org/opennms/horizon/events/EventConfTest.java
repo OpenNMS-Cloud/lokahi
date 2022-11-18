@@ -33,6 +33,7 @@ import org.opennms.horizon.events.api.EventBuilder;
 import org.opennms.horizon.events.conf.xml.Event;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class EventConfTest {
@@ -42,6 +43,8 @@ public class EventConfTest {
     public void testEventConf() {
         DefaultEventConfDao eventConfDao = new DefaultEventConfDao();
         eventConfDao.init();
+        var ueis = eventConfDao.getEventUEIs();
+        assertFalse(ueis.isEmpty(), "Should have loaded some ueis");
         String uei = "uei.opennms.org/generic/traps/SNMP_Cold_Start";
         EventBuilder eb = new EventBuilder(uei, "JUnit");
         Event event = eventConfDao.findByEvent(eb.getEvent());

@@ -30,7 +30,11 @@ package org.opennms.horizon.events.api;
 
 import org.opennms.horizon.events.conf.xml.Event;
 
+import java.util.List;
+
 public interface EventConfDao {
 
     Event findByEvent(org.opennms.horizon.events.xml.Event matchingEvent);
+
+    List<String> getEventUEIs();
 }

@@ -28,19 +28,21 @@
 
 package org.opennms.horizon.events;
 
-import org.opennms.horizon.events.conf.xml.EnterpriseIdPartition;
-import org.opennms.horizon.events.util.JaxbUtils;
 import org.opennms.horizon.events.api.EventConfDao;
+import org.opennms.horizon.events.conf.xml.EnterpriseIdPartition;
 import org.opennms.horizon.events.conf.xml.Event;
 import org.opennms.horizon.events.conf.xml.EventOrdering;
 import org.opennms.horizon.events.conf.xml.Events;
 import org.opennms.horizon.events.conf.xml.Partition;
+import org.opennms.horizon.events.util.JaxbUtils;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 @Component
@@ -58,6 +60,18 @@ public class DefaultEventConfDao implements EventConfDao {
     @Override
     public Event findByEvent(org.opennms.horizon.events.xml.Event matchingEvent) {
         return events.findFirstMatchingEvent(matchingEvent);
+    }
+
+    @Override
+    public List<String> getEventUEIs() {
+        return events.forEachEvent(new ArrayList<String>(), new Events.EventCallback<List<String>>() {
+            @Override
+            public List<String> process(List<String> ueis, Event event) {
+                ueis.add(event.getUei());
+                return ueis;
+            }
+        });
+
     }
 
     @PostConstruct

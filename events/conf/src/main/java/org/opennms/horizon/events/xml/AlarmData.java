@@ -118,11 +118,6 @@ public class AlarmData implements Serializable {
 
 
 
-    public void deleteAlarmType(
-    ) {
-    	this._alarmType = null;
-    }
-
     /**
      */
     public void deleteAutoClean(

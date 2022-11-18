@@ -29,6 +29,7 @@
 package org.opennms.horizon.events.api;
 
 import org.opennms.horizon.events.EventConstants;
+import org.opennms.horizon.events.util.StringUtils;
 import org.opennms.horizon.events.xml.AlarmData;
 import org.opennms.horizon.events.xml.Event;
 import org.opennms.horizon.events.xml.Events;

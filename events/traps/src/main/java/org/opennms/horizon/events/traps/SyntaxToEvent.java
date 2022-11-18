@@ -39,10 +39,13 @@ import org.slf4j.LoggerFactory;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.regex.Pattern;
 
 public class SyntaxToEvent {
 
     private static final Logger LOG = LoggerFactory.getLogger(SyntaxToEvent.class);
+
+    private static Pattern pattern = Pattern.compile(".*[Mm][Aa][Cc].*");
 
     public static Map<Integer, String> syntaxToEventsMap = new HashMap<>();
 
@@ -71,7 +74,7 @@ public class SyntaxToEvent {
         if (type != null) {
             val.setType(type);
             if (value.isDisplayable()) {
-                if (name.matches(".*[Mm][Aa][Cc].*")) {
+                if (pattern.matcher(name).matches()) {
                     encoding = EventConstants.XML_ENCODING_MAC_ADDRESS;
                 } else {
                     encoding = EventConstants.XML_ENCODING_TEXT;

@@ -1,7 +1,9 @@
 package org.opennms.horizon.core.taskset.client;
 
 import io.grpc.Channel;
+import io.grpc.Metadata;
 import io.grpc.netty.shaded.io.grpc.netty.NettyChannelBuilder;
+import io.grpc.stub.MetadataUtils;
 import org.opennms.taskset.contract.TaskSet;
 import org.opennms.taskset.service.api.TaskSetPublisher;
 import org.opennms.taskset.service.contract.PublishTaskSetRequest;
@@ -14,6 +16,8 @@ public class TaskSetGrpcClient implements TaskSetPublisher {
     public static final String DEFAULT_GRPC_HOSTNAME = "localhost";
     public static final int DEFAULT_GRPC_PORT = 8990;
     public static final int DEFAULT_MAX_MESSAGE_SIZE = 1_0485_760;
+
+    private static final Metadata.Key HEADER_KE = Metadata.Key.of("tenant-id", Metadata.ASCII_STRING_MARSHALLER);
 
     private static final Logger DEFAULT_LOGGER = org.slf4j.LoggerFactory.getLogger(TaskSetGrpcClient.class);
 
@@ -91,7 +95,8 @@ public class TaskSetGrpcClient implements TaskSetPublisher {
 //----------------------------------------
 
     @Override
-    public void publishTaskSet(String location, TaskSet taskSet) {
+    public void publishTaskSet(String tenantId, String location, TaskSet taskSet) {
+
         try {
             PublishTaskSetRequest request =
                 PublishTaskSetRequest.newBuilder()
@@ -100,7 +105,11 @@ public class TaskSetGrpcClient implements TaskSetPublisher {
                     .build()
                 ;
 
-            PublishTaskSetResponse unused = taskSetServiceStub.publishTaskSet(request);
+            Metadata metadata = new Metadata();
+            metadata.put(HEADER_KE, tenantId);
+
+            PublishTaskSetResponse unused =
+                taskSetServiceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).publishTaskSet(request);
 
             log.debug("PUBLISH task set complete: location={}", location);
         } catch (Exception exc) {

@@ -3,13 +3,19 @@ package org.opennms.horizon.shared.ipc.grpc.server.manager.rpcstreaming.impl;
 import static org.opennms.horizon.shared.ipc.rpc.api.RpcModule.MINION_HEADERS_MODULE;
 
 import com.google.common.base.Strings;
+import com.swrve.ratelimitedlogger.RateLimitedLog;
+import io.grpc.Context;
+import io.grpc.Metadata;
 import io.grpc.stub.StreamObserver;
+
+import java.time.Duration;
 import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import org.opennms.cloud.grpc.minion.RpcRequestProto;
 import org.opennms.cloud.grpc.minion.RpcResponseProto;
+import org.opennms.horizon.shared.grpc.common.TenantIDGrpcServerInterceptor;
 import org.opennms.horizon.shared.ipc.grpc.server.manager.MinionInfo;
 import org.opennms.horizon.shared.ipc.grpc.server.manager.MinionManager;
 import org.opennms.horizon.shared.ipc.grpc.server.manager.RpcConnectionTracker;
@@ -37,6 +43,7 @@ public class MinionRpcStreamConnectionImpl implements MinionRpcStreamConnection 
     private final RpcRequestTracker rpcRequestTracker;
     private final ExecutorService responseHandlerExecutor;
     private final MinionManager minionManager;
+    private final TenantIDGrpcServerInterceptor tenantIDGrpcServerInterceptor;
 
     public MinionRpcStreamConnectionImpl(
             StreamObserver<RpcRequestProto> streamObserver,
@@ -45,7 +52,8 @@ public class MinionRpcStreamConnectionImpl implements MinionRpcStreamConnection 
             RpcConnectionTracker rpcConnectionTracker,
             RpcRequestTracker rpcRequestTracker,
             ExecutorService responseHandlerExecutor,
-            MinionManager minionManager
+            MinionManager minionManager,
+            TenantIDGrpcServerInterceptor tenantIDGrpcServerInterceptor
             ) {
 
         this.streamObserver = streamObserver;
@@ -55,6 +63,7 @@ public class MinionRpcStreamConnectionImpl implements MinionRpcStreamConnection 
         this.rpcRequestTracker = rpcRequestTracker;
         this.responseHandlerExecutor = responseHandlerExecutor;
         this.minionManager = minionManager;
+        this.tenantIDGrpcServerInterceptor = tenantIDGrpcServerInterceptor;
     }
 
     private boolean isMinionIdentityHeaders(RpcResponseProto rpcMessage) {
@@ -63,6 +72,8 @@ public class MinionRpcStreamConnectionImpl implements MinionRpcStreamConnection 
 
     @Override
     public void handleRpcStreamInboundMessage(RpcResponseProto message) {
+        String tenantId = tenantIDGrpcServerInterceptor.readCurrentContextTenantId();
+
         if (isMinionIdentityHeaders(message)) {
             String location = message.getLocation();
             String systemId = message.getSystemId();
@@ -73,13 +84,14 @@ public class MinionRpcStreamConnectionImpl implements MinionRpcStreamConnection 
             }
 
             // Register the Minion
-            boolean added = rpcConnectionTracker.addConnection(message.getLocation(), message.getSystemId(), streamObserver);
+            boolean added = rpcConnectionTracker.addConnection(tenantId, message.getLocation(), message.getSystemId(), streamObserver);
 
             if (added) {
-                log.info("Added RPC handler for minion {} at location {}", systemId, location);
+                log.info("Added RPC handler for minion: minion-id={}; location={}; tenant-id={}", systemId, location, tenantId);
 
                 // Notify the MinionManager of the addition
                 MinionInfo minionInfo = new MinionInfo();
+                minionInfo.setTenantId(tenantId);
                 minionInfo.setId(systemId);
                 minionInfo.setLocation(location);
                 minionManager.addMinion(minionInfo);

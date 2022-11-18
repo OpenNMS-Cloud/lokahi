@@ -2,6 +2,7 @@ package org.opennms.miniongateway.taskset.service;
 
 import io.grpc.stub.StreamObserver;
 import org.opennms.horizon.shared.grpc.common.GrpcIpcServer;
+import org.opennms.horizon.shared.grpc.common.TenantIDGrpcServerInterceptor;
 import org.opennms.taskset.service.api.TaskSetPublisher;
 import org.opennms.taskset.service.contract.PublishTaskSetRequest;
 import org.opennms.taskset.service.contract.PublishTaskSetResponse;
@@ -29,6 +30,9 @@ public class TaskSetGrpcService extends TaskSetServiceGrpc.TaskSetServiceImplBas
     @Qualifier("internalGrpcIpcServer")
     private GrpcIpcServer grpcIpcServer;
 
+    @Autowired
+    private TenantIDGrpcServerInterceptor tenantIDGrpcServerInterceptor;
+
 //========================================
 // Lifecycle
 //----------------------------------------
@@ -45,7 +49,10 @@ public class TaskSetGrpcService extends TaskSetServiceGrpc.TaskSetServiceImplBas
 
     @Override
     public void publishTaskSet(PublishTaskSetRequest request, StreamObserver<PublishTaskSetResponse> responseObserver) {
-        taskSetPublisher.publishTaskSet(request.getLocation(), request.getTaskSet());
+        // Retrieve the Tenant ID from the TenantID GRPC Interceptor
+        String tenantId = tenantIDGrpcServerInterceptor.readCurrentContextTenantId();
+
+        taskSetPublisher.publishTaskSet(tenantId, request.getLocation(), request.getTaskSet());
 
         PublishTaskSetResponse response =
             PublishTaskSetResponse.newBuilder()

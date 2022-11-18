@@ -168,9 +168,9 @@ public class LocationIndependentRpcClient<REQUEST extends RpcRequest, RESPONSE e
 
         // If a specific Minion weas requested, use it
         if (! Strings.isNullOrEmpty(requestProto.getSystemId())) {
-            rpcHandler = rpcConnectionTracker.lookupByMinionId(requestProto.getSystemId());
+            rpcHandler = rpcConnectionTracker.lookupByMinionId("opennms-prime", requestProto.getSystemId());
         } else {
-            rpcHandler = rpcConnectionTracker.lookupByLocationRoundRobin(requestProto.getLocation());
+            rpcHandler = rpcConnectionTracker.lookupByLocationRoundRobin("opennms-prime", requestProto.getLocation());
         }
 
         if (rpcHandler == null) {

@@ -66,7 +66,6 @@ import org.opennms.sink.traps.contract.ListenerConfig;
 import org.opennms.sink.traps.contract.SnmpV3User;
 import org.opennms.sink.traps.contract.TrapConfig;
 import org.opennms.taskset.contract.TaskDefinition;
-import org.opennms.taskset.contract.TaskSet;
 import org.opennms.taskset.contract.TaskType;
 import org.opennms.taskset.service.api.TaskSetPublisher;
 import org.slf4j.Logger;
@@ -157,6 +156,10 @@ public class TrapSinkConsumer implements  EventListener, Processor {
     private void publishTrapConfig() {
 
         TrapConfig trapConfig = mapConfigToProto();
+
+        // TBD888: source tenant ID and stop using the hard-coded default here
+        String tenantId = "opennms-prime";
+
         // Setting the location to be Default for now.
         String location = "Default";
 
@@ -167,8 +170,8 @@ public class TrapSinkConsumer implements  EventListener, Processor {
             .setConfiguration(Any.pack(trapConfig))
             .build();
 
-        taskSetManager.addTaskSet(location, taskDefinition);
-        taskSetPublisher.publishTaskSet(location, taskSetManager.getTaskSet(location));
+        taskSetManager.addTaskSet("opennms-prime", location, taskDefinition);
+        taskSetPublisher.publishTaskSet(tenantId, location, taskSetManager.getTaskSet("opennms-prime", location));
 
     }
 

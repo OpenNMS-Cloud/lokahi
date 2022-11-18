@@ -46,14 +46,14 @@ public class LocationAwareEchoClientImpl implements LocationAwareEchoClient {
     }
 
     @Override
-    public CompletableFuture<EchoResponse> execute(String systemId, String location, Long timeToLive, EchoRequest payload) {
+    public CompletableFuture<EchoResponse> execute(String tenantId, String systemId, String location, Long timeToLive, EchoRequest payload) {
         RequestBuilder request = client.builder("Echo")
             .withLocation(location)
             .withSystemId(systemId)
             .withPayload(payload);
 
         Optional.ofNullable(timeToLive).ifPresent(request::withExpirationTime);
-        return client.execute(request.build());
+        return client.execute(tenantId, request.build());
     }
 
 }

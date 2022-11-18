@@ -39,12 +39,14 @@ import java.util.Map;
 
 public class DefaultTaskSetManager implements TaskSetManager {
 
-    private final Map<String, TaskSet> taskSetsByLocation = new HashMap<>();
+    private final Map<String, Map<String, TaskSet>> taskSetsByTenantLocation = new HashMap<>();
 
     @Override
-    public synchronized void addTaskSet(String location, TaskDefinition newTaskDefinition) {
+    public synchronized void addTaskSet(String tenantId, String location, TaskDefinition newTaskDefinition) {
+        Map<String, TaskSet> taskSetsByLocation = taskSetsByTenantLocation.computeIfAbsent(tenantId, (unusedTenantId) -> new HashMap<>());
         TaskSet existingTaskSet = taskSetsByLocation.get(location);
-        TaskSet taskSet = null;
+        TaskSet taskSet;
+
         if (existingTaskSet != null) {
             List<TaskDefinition> existingTaskDefinitions = new ArrayList<>(existingTaskSet.getTaskDefinitionList());
             existingTaskDefinitions.removeIf(task -> task.getId().equals(newTaskDefinition.getId()));
@@ -53,11 +55,18 @@ public class DefaultTaskSetManager implements TaskSetManager {
         } else {
             taskSet = TaskSet.newBuilder().addTaskDefinition(newTaskDefinition).build();
         }
+
         taskSetsByLocation.put(location, taskSet);
     }
 
     @Override
-    public TaskSet getTaskSet(String location) {
-        return taskSetsByLocation.get(location);
+    public synchronized TaskSet getTaskSet(String tenantId, String location) {
+        Map<String, TaskSet> taskSetsByLocation = taskSetsByTenantLocation.get(tenantId);
+
+        if (taskSetsByLocation != null) {
+            return taskSetsByLocation.get(location);
+        }
+
+        return null;
     }
 }

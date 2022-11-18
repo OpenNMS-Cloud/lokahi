@@ -54,6 +54,7 @@ public abstract class AbstractSNMPRequestBuilder<T> implements SNMPRequestBuilde
     private final SnmpValueFactory valueFactory;
     private List<SnmpGetRequest> gets;
     private List<SnmpWalkRequest> walks;
+    private String tenantId;
     private String location;
     private String systemId;
     private String description;
@@ -66,6 +67,12 @@ public abstract class AbstractSNMPRequestBuilder<T> implements SNMPRequestBuilde
         this.valueFactory = Objects.requireNonNull(valueFactory);
         this.gets = Objects.requireNonNull(gets);
         this.walks = Objects.requireNonNull(walks);
+    }
+
+    @Override
+    public SNMPRequestBuilder<T> withTenantId(String tenantId) {
+        this.tenantId = tenantId;
+        return this;
     }
 
     @Override
@@ -116,7 +123,7 @@ public abstract class AbstractSNMPRequestBuilder<T> implements SNMPRequestBuilde
         //if (description != null) {
         //    snmpRequestDTO.addTracingInfo(RpcRequest.TAG_DESCRIPTION, description);
         //}
-        return client.execute(location, systemId, snmpRequestDTO)
+        return client.execute(tenantId, location, systemId, snmpRequestDTO)
             // Different types of requests can process the responses differently
             .thenApply(this::processResponse);
     }

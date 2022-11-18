@@ -39,7 +39,15 @@ import org.opennms.cloud.grpc.minion.RpcRequestProto;
  */
 public interface RpcClient<T extends Message>  {
 
-    CompletableFuture<T> execute(RpcRequestProto request);
+    /**
+     *
+     * @param tenantId the Tenant to which the request applies.  The tenant is not in the request payload itself because
+     *                 the request gets sent to the minions, and we never explicitly send the tenant ID to services
+     *                 running on-site.
+     * @param request
+     * @return
+     */
+    CompletableFuture<T> execute(String tenantId, RpcRequestProto request);
 
     RequestBuilder builder(String module);
 

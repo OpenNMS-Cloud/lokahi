@@ -21,3 +21,4 @@ grpc:
 kafka:
   topics:
     minion-heartbeat: "heartbeat"
+    task-set-results: "task-set.results"

@@ -12,6 +12,7 @@ import org.opennms.horizon.inventory.dto.NodeDTO;
 import org.opennms.horizon.inventory.mapper.NodeMapper;
 import org.opennms.horizon.inventory.service.IpInterfaceService;
 import org.opennms.horizon.inventory.service.NodeService;
+import org.opennms.horizon.inventory.service.taskset.DetectorTaskSetService;
 
 import java.util.Arrays;
 import java.util.List;
@@ -37,6 +38,9 @@ public class DeviceGrpcTest {
     @Mock
     TenantLookup tenantLookup;
 
+    @Mock
+    DetectorTaskSetService taskSetService;
+
     @Test
     public void createDevice() {
         doReturn(Optional.of("ANY")).when(tenantLookup).lookupTenantId(any());
@@ -53,6 +57,8 @@ public class DeviceGrpcTest {
 
         verify(obs, times(0)).onError(any());
         verify(obs).onCompleted();
+
+        verify(taskSetService, times(1)).sendDetectorTasks(any());
     }
 
     @Test

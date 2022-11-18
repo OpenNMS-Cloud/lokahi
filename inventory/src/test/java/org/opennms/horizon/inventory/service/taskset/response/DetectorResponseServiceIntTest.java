@@ -117,6 +117,43 @@ class DetectorResponseServiceIntTest extends GrpcTestBase {
         assertEquals(1, testGrpcService.getTimesCalled());
     }
 
+    @Test
+    @Transactional
+    void testAcceptMultipleSameIpAddress() {
+        populateDatabase();
+
+        DetectorResponse response = DetectorResponse.newBuilder()
+            .setDetected(true).setIpAddress(TEST_IP_ADDRESS)
+            .setMonitorType(MonitorType.SNMP).build();
+
+        int numberOfCalls = 2;
+
+        for (int index = 0; index < numberOfCalls; index++) {
+            service.accept(TEST_LOCATION, response);
+        }
+
+        List<MonitoredServiceType> monitoredServiceTypes = monitoredServiceTypeRepository.findAll();
+        assertEquals(1, monitoredServiceTypes.size());
+
+        MonitoredServiceType monitoredServiceType = monitoredServiceTypes.get(0);
+        assertEquals(response.getMonitorType().name(), monitoredServiceType.getServiceName());
+        assertEquals(TEST_TENANT_ID, monitoredServiceType.getTenantId());
+
+        List<MonitoredService> monitoredServices = monitoredServiceRepository.findAll();
+        assertEquals(1, monitoredServices.size());
+
+        MonitoredService monitoredService = monitoredServices.get(0);
+        IpInterface ipInterface = monitoredService.getIpInterface();
+
+        assertEquals(TEST_IP_ADDRESS, ipInterface.getIpAddress().getAddress());
+        assertEquals(TEST_TENANT_ID, monitoredService.getTenantId());
+
+        MonitoredServiceType relatedType = monitoredService.getMonitoredServiceType();
+        assertEquals(monitoredServiceType, relatedType);
+
+        assertEquals(numberOfCalls, testGrpcService.getTimesCalled());
+    }
+
     private void populateDatabase() {
 
         MonitoringLocation monitoringLocation = new MonitoringLocation();

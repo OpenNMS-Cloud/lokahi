@@ -30,6 +30,8 @@ package org.opennms.horizon.events.traps;
 
 import org.opennms.horizon.config.api.EventBuilder;
 import org.opennms.horizon.config.api.EventConfDao;
+import org.opennms.horizon.config.conf.xml.LogDestType;
+import org.opennms.horizon.config.conf.xml.Logmsg;
 import org.opennms.horizon.config.xml.Event;
 import org.opennms.horizon.grpc.traps.contract.TrapDTO;
 import org.opennms.horizon.grpc.traps.contract.TrapIdentity;
@@ -47,21 +49,25 @@ import java.util.Optional;
 import static org.opennms.horizon.config.EventConstants.OID_SNMP_IFINDEX_STRING;
 import static org.opennms.horizon.shared.utils.InetAddressUtils.str;
 
-public class EventCreator {
+public class EventFactory {
 
-    private static final Logger LOG = LoggerFactory.getLogger(EventCreator.class);
+    private static final Logger LOG = LoggerFactory.getLogger(EventFactory.class);
 
     private static final SnmpObjId OID_SNMP_IFINDEX = SnmpObjId.get(OID_SNMP_IFINDEX_STRING);
 
     private final EventConfDao eventConfDao;
     private final SnmpHelper snmpHelper;
 
-    public EventCreator(EventConfDao eventConfDao, SnmpHelper snmpHelper) {
+    public EventFactory(EventConfDao eventConfDao, SnmpHelper snmpHelper) {
         this.eventConfDao = eventConfDao;
         this.snmpHelper = snmpHelper;
     }
 
-    public Event createEventFrom(final TrapDTO trapDTO, final String systemId, final String location, final InetAddress trapAddress) {
+    public Event createEventFrom(final TrapDTO trapDTO,
+                                 final String systemId,
+                                 final String location,
+                                 final InetAddress trapAddress,
+                                 String tenantId) {
         LOG.debug("{} trap - trapInterface: {}", trapDTO.getVersion(), trapDTO.getAgentAddress());
 
         // Set event data
@@ -85,16 +91,16 @@ public class EventCreator {
         // Handle var bindings
         for (SnmpResult eachResult : trapDTO.getSnmpResultsList()) {
             final SnmpObjId name = SnmpObjId.get(eachResult.getBase());
-            final SnmpValue value  = snmpHelper.getValueFactory().getValue(eachResult.getValue().getTypeValue(),
+            final SnmpValue value = snmpHelper.getValueFactory().getValue(eachResult.getValue().getTypeValue(),
                 eachResult.getValue().getValue().toByteArray());
-            eventBuilder.addParam(SyntaxToEvent.processSyntax(name.toString(), value));
+            SyntaxToEvent.processSyntax(name.toString(), value).map(eventBuilder::addParam);
             if (OID_SNMP_IFINDEX.isPrefixOf(name)) {
                 eventBuilder.setIfIndex(value.toInt());
             }
         }
 
         // Resolve Node id and set, if known by OpenNMS
-        resolveNodeId(location, trapAddress)
+        resolveNodeId(location, trapAddress, tenantId)
             .ifPresent(eventBuilder::setNodeid);
 
         // Note: Filling in Location instead of SystemId. Do we really need to know about system id ?
@@ -110,10 +116,22 @@ public class EventCreator {
         } else {
             event.setUei(econf.getUei());
         }
+        if (shouldDiscard(econf)) {
+            LOG.debug("Trap discarded due to matching event having logmsg dest == discardtraps");
+            return null;
+        }
         return event;
     }
 
-    private Optional<Integer> resolveNodeId(String location, InetAddress trapAddress) {
+    private boolean shouldDiscard(org.opennms.horizon.config.conf.xml.Event  econf) {
+        if (econf != null) {
+            final Logmsg logmsg = econf.getLogmsg();
+            return logmsg != null && LogDestType.DISCARDTRAPS.equals(logmsg.getDest());
+        }
+        return false;
+    }
+
+    private Optional<Integer> resolveNodeId(String location, InetAddress trapAddress, String tenantId) {
         // TODO: Query inventory service for node id
         return Optional.empty();
     }

@@ -29,15 +29,15 @@
 package org.opennms.horizon.events.traps;
 
 import com.google.protobuf.InvalidProtocolBufferException;
-import org.opennms.horizon.config.DefaultEventConfDao;
-import org.opennms.horizon.config.conf.xml.LogDestType;
-import org.opennms.horizon.config.conf.xml.Logmsg;
+import org.opennms.horizon.config.api.EventConfDao;
 import org.opennms.horizon.config.xml.Event;
 import org.opennms.horizon.config.xml.Events;
 import org.opennms.horizon.config.xml.Log;
+import org.opennms.horizon.config.xml.Parm;
 import org.opennms.horizon.config.xml.Snmp;
 import org.opennms.horizon.events.proto.EventInfo;
 import org.opennms.horizon.events.proto.EventLog;
+import org.opennms.horizon.events.proto.EventParameter;
 import org.opennms.horizon.events.proto.SnmpInfo;
 import org.opennms.horizon.grpc.traps.contract.TrapDTO;
 import org.opennms.horizon.grpc.traps.contract.TrapLogDTO;
@@ -54,8 +54,10 @@ import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Component
 @PropertySource("classpath:application.yml")
@@ -65,21 +67,25 @@ public class TrapsConsumer {
 
     public static final TrapdInstrumentation trapdInstrumentation = new TrapdInstrumentation();
 
-    @Autowired
-    private DefaultEventConfDao eventConfDao;
+    private final EventConfDao eventConfDao;
+
+    private final SnmpHelper snmpHelper;
+
+    private final TrapEventForwarder eventForwarder;
 
     @Autowired
-    private SnmpHelper snmpHelper;
+    public TrapsConsumer(EventConfDao eventConfDao, SnmpHelper snmpHelper, TrapEventForwarder eventForwarder) {
+        this.eventConfDao = eventConfDao;
+        this.snmpHelper = snmpHelper;
+        this.eventForwarder = eventForwarder;
+    }
 
-    @Autowired
-    private EventForwarder eventForwarder;
-
-    private EventCreator eventCreator;
+    private EventFactory eventFactory;
 
 
     @PostConstruct
     public void init() {
-        eventCreator = new EventCreator(eventConfDao, snmpHelper);
+        eventFactory = new EventFactory(eventConfDao, snmpHelper);
     }
 
 
@@ -89,15 +95,18 @@ public class TrapsConsumer {
         try {
             TrapLogDTO trapLogDTO = TrapLogDTO.parseFrom(data);
             LOG.debug("Received trap {}", trapLogDTO);
-            // Convert to Event
-            final Log eventLog = toLog(trapLogDTO);
             // Derive tenant Id
             Optional<String> tenantOptional = getTenantId(headers);
             if (tenantOptional.isEmpty()) {
                 // Traps without tenantId are dropped.
+                LOG.warn("Received {} traps without tenantId, dropping", trapLogDTO.getTrapDTOList().size());
                 return;
             }
             String tenantId = tenantOptional.get();
+
+            // Convert to Event
+            final Log eventLog = toLog(trapLogDTO, tenantId);
+
             // Convert to events into protobuf format
             EventLog eventLogProto = convertToProtoEvents(eventLog);
             // Send them to kafka
@@ -126,7 +135,8 @@ public class TrapsConsumer {
         if (event.getSnmp() != null) {
             eventBuilder.setEventInfo(mapEventInfo(event.getSnmp()));
         }
-        // TODO: Add Event Params
+        List<EventParameter> eventParameters = mapEventParams(event);
+        eventBuilder.addAllEventParams(eventParameters);
         return eventBuilder.build();
     }
 
@@ -140,54 +150,60 @@ public class TrapsConsumer {
             .setTrapOid(snmp.getTrapOID()).build()).build();
     }
 
+    private List<EventParameter> mapEventParams(Event event) {
+
+        return event.getParmCollection().stream().map(this::mapEventParm)
+            .flatMap(Optional::stream)
+            .collect(Collectors.toList());
+    }
+
+    private Optional<EventParameter> mapEventParm(Parm parm) {
+        if (parm.isValid()) {
+            var eventParm = EventParameter.newBuilder()
+                .setName(parm.getParmName())
+                .setType(parm.getValue().getType())
+                .setEncoding(parm.getValue().getEncoding())
+                .setValue(parm.getValue().getContent()).build();
+            return Optional.of(eventParm);
+        }
+        return Optional.empty();
+    }
+
     private Optional<String> getTenantId(Map<String, Object> headers) {
         Object tenantId = headers.get("tenant-id");
-        // TODO: remove this once tenant is coming from minion gateway
+        //TODO: remove this once tenant is coming from minion gateway
         if (tenantId == null) {
             return Optional.of("opennms-prime");
         }
-        if (tenantId instanceof String) {
-            return Optional.of((String) tenantId);
+        if (tenantId instanceof byte[]) {
+            return Optional.of(new String((byte[]) tenantId));
         }
         return Optional.empty();
     }
 
 
-    private Log toLog(TrapLogDTO messageLog) {
+    private Log toLog(TrapLogDTO messageLog, String tenantId) {
         final Log log = new Log();
         final Events events = new Events();
         log.setEvents(events);
 
+        // TODO: Add metrics for Traps received/error/dropped.
         for (TrapDTO eachMessage : messageLog.getTrapDTOList()) {
             try {
-                final Event event = eventCreator.createEventFrom(
+                final Event event = eventFactory.createEventFrom(
                     eachMessage,
                     messageLog.getIdentity().getSystemId(),
                     messageLog.getIdentity().getLocation(),
-                    InetAddressUtils.getInetAddress(messageLog.getTrapAddress()));
-                if (!shouldDiscard(event)) {
-                    if (event.getSnmp() != null) {
-                        trapdInstrumentation.incTrapsReceivedCount(event.getSnmp().getVersion());
-                    }
+                    InetAddressUtils.getInetAddress(messageLog.getTrapAddress()),
+                    tenantId);
+                if (event != null) {
                     events.addEvent(event);
-                } else {
-                    LOG.debug("Trap discarded due to matching event having logmsg dest == discardtraps");
-                    trapdInstrumentation.incDiscardCount();
                 }
             } catch (Throwable e) {
                 LOG.error("Unexpected error processing trap: {}", eachMessage, e);
-                trapdInstrumentation.incErrorCount();
             }
         }
         return log;
     }
 
-    private boolean shouldDiscard(Event event) {
-        org.opennms.horizon.config.conf.xml.Event econf = eventConfDao.findByEvent(event);
-        if (econf != null) {
-            final Logmsg logmsg = econf.getLogmsg();
-            return logmsg != null && LogDestType.DISCARDTRAPS.equals(logmsg.getDest());
-        }
-        return false;
-    }
 }

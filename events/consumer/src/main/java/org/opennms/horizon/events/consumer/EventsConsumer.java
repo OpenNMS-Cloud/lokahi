@@ -31,6 +31,8 @@ package org.opennms.horizon.events.consumer;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.vladmihalcea.hibernate.type.basic.Inet;
 import org.opennms.horizon.events.persistence.model.Event;
+import org.opennms.horizon.events.persistence.model.EventParameter;
+import org.opennms.horizon.events.persistence.model.EventParameters;
 import org.opennms.horizon.events.persistence.repository.EventRepository;
 import org.opennms.horizon.events.proto.EventLog;
 import org.slf4j.Logger;
@@ -54,15 +56,19 @@ public class EventsConsumer {
 
     private static final Logger LOG = LoggerFactory.getLogger(EventsConsumer.class);
 
+    private final EventRepository eventRepository;
+
     @Autowired
-    private EventRepository eventRepository;
+    public EventsConsumer(EventRepository eventRepository) {
+        this.eventRepository = eventRepository;
+    }
 
     @KafkaListener(topics = "${kafka.events-topic}", concurrency = "1")
     public void consume(@Payload byte[] data, @Headers Map<String, Object> headers) {
 
         try {
             EventLog eventLog = EventLog.parseFrom(data);
-            LOG.info("Received event from kafka {}", eventLog);
+            LOG.info("Received events from kafka {}", eventLog);
             var tenantOptional = getTenantId(headers);
             if (tenantOptional.isEmpty()) {
                 LOG.warn("TenantId is empty, dropping events {}", eventLog);
@@ -89,19 +95,29 @@ public class EventsConsumer {
         event.setIpAddress(new Inet(eventProto.getIpAddress()));
         event.setNodeId(event.getNodeId());
         event.setProducedTime(LocalDateTime.now());
+        var eventParameters = new EventParameters();
+        var paramsList = eventProto.getEventParamsList().stream().map(this::mapEventParam).collect(Collectors.toList());
+        eventParameters.setParameters(paramsList);
+        event.setEventParameters(eventParameters);
+        event.setEventInfo(eventProto.getEventInfo().toByteArray());
         return event;
     }
 
+    private EventParameter mapEventParam(org.opennms.horizon.events.proto.EventParameter eventParameter) {
+        var param = new EventParameter();
+        param.setEncoding(eventParameter.getEncoding());
+        param.setName(eventParameter.getName());
+        param.setType(eventParameter.getType());
+        param.setValue(eventParameter.getValue());
+        return param;
+    }
+
+
     private Optional<String> getTenantId(Map<String, Object> headers) {
         Object tenantId = headers.get("tenant-id");
-        // TODO: remove this once tenant is coming from minion gateway
-        if (tenantId == null) {
-            return Optional.of("opennms-prime");
-        }
         if (tenantId instanceof byte[]) {
             return Optional.of(new String((byte[]) tenantId));
         }
-        LOG.warn("TenantId is coming as {}", tenantId.getClass());
         return Optional.empty();
     }
 }

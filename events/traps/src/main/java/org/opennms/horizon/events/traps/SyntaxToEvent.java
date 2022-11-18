@@ -33,110 +33,68 @@ import org.opennms.horizon.config.EventConstants;
 import org.opennms.horizon.config.xml.Parm;
 import org.opennms.horizon.config.xml.Value;
 import org.opennms.horizon.shared.snmp.SnmpValue;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
 public class SyntaxToEvent {
-    int m_typeId;
 
-    String m_type;
+    private static final Logger LOG = LoggerFactory.getLogger(SyntaxToEvent.class);
 
-    /** Constant <code>m_syntaxToEvents</code> */
-    public static SyntaxToEvent[] m_syntaxToEvents;
+    public static Map<Integer, String> syntaxToEventsMap = new HashMap<>();
 
     static {
-        setupSyntax();
+        setup();
     }
 
-    /**
-     * <p>Constructor for SyntaxToEvent.</p>
-     *
-     * @param typeId a int.
-     * @param type a {@link String} object.
-     */
-    private SyntaxToEvent(int typeId, String type) {
-        m_typeId = typeId;
-        m_type = type;
+    public static void setup() {
+        syntaxToEventsMap.put(SnmpValue.SNMP_INT32, EventConstants.TYPE_SNMP_INT32);
+        syntaxToEventsMap.put(SnmpValue.SNMP_NULL, EventConstants.TYPE_SNMP_NULL);
+        syntaxToEventsMap.put(SnmpValue.SNMP_OBJECT_IDENTIFIER, EventConstants.TYPE_SNMP_OBJECT_IDENTIFIER);
+        syntaxToEventsMap.put(SnmpValue.SNMP_IPADDRESS, EventConstants.TYPE_SNMP_IPADDRESS);
+        syntaxToEventsMap.put(SnmpValue.SNMP_TIMETICKS, EventConstants.TYPE_SNMP_TIMETICKS);
+        syntaxToEventsMap.put(SnmpValue.SNMP_COUNTER32, EventConstants.TYPE_SNMP_COUNTER32);
+        syntaxToEventsMap.put(SnmpValue.SNMP_GAUGE32, EventConstants.TYPE_SNMP_GAUGE32);
+        syntaxToEventsMap.put(SnmpValue.SNMP_OCTET_STRING, EventConstants.TYPE_SNMP_OCTET_STRING);
+        syntaxToEventsMap.put(SnmpValue.SNMP_OPAQUE, EventConstants.TYPE_SNMP_OPAQUE);
+        syntaxToEventsMap.put(SnmpValue.SNMP_COUNTER64, EventConstants.TYPE_SNMP_COUNTER64);
+        syntaxToEventsMap.put(-1, EventConstants.TYPE_STRING);
     }
 
-    /**
-     * <p>getTypeId</p>
-     *
-     * @return a int.
-     */
-    private int getTypeId() {
-        return m_typeId;
-    }
-
-    /**
-     * <p>getType</p>
-     *
-     * @return a {@link String} object.
-     */
-    private String getType() {
-        return m_type;
-    }
-
-    /**
-     * <p>setupSyntax</p>
-     */
-    public static void setupSyntax() {
-        m_syntaxToEvents = new SyntaxToEvent[] {
-            new SyntaxToEvent(SnmpValue.SNMP_INT32,             EventConstants.TYPE_SNMP_INT32),
-            new SyntaxToEvent(SnmpValue.SNMP_NULL,              EventConstants.TYPE_SNMP_NULL),
-            new SyntaxToEvent(SnmpValue.SNMP_OBJECT_IDENTIFIER, EventConstants.TYPE_SNMP_OBJECT_IDENTIFIER),
-            new SyntaxToEvent(SnmpValue.SNMP_IPADDRESS,         EventConstants.TYPE_SNMP_IPADDRESS),
-            new SyntaxToEvent(SnmpValue.SNMP_TIMETICKS,         EventConstants.TYPE_SNMP_TIMETICKS),
-            new SyntaxToEvent(SnmpValue.SNMP_COUNTER32,         EventConstants.TYPE_SNMP_COUNTER32),
-            new SyntaxToEvent(SnmpValue.SNMP_GAUGE32,           EventConstants.TYPE_SNMP_GAUGE32),
-            new SyntaxToEvent(SnmpValue.SNMP_OCTET_STRING,      EventConstants.TYPE_SNMP_OCTET_STRING),
-            new SyntaxToEvent(SnmpValue.SNMP_OPAQUE,            EventConstants.TYPE_SNMP_OPAQUE),
-            new SyntaxToEvent(SnmpValue.SNMP_COUNTER64,         EventConstants.TYPE_SNMP_COUNTER64),
-            new SyntaxToEvent(-1,                               EventConstants.TYPE_STRING)
-        };
-    }
-
-    /**
-     * <p>processSyntax</p>
-     *
-     * @param name a {@link String} object.
-     * @param value a {@link SnmpValue} object.
-     * @return a {@link import org.opennms.netmgt.xml.event.Parm} object.
-     */
-    public static Parm processSyntax(final String name, final SnmpValue value) {
+    public static Optional<Parm> processSyntax(final String name, final SnmpValue value) {
         final Value val = new Value();
-
-        boolean found = false;
-        for (int i = 0; i < m_syntaxToEvents.length; i++) {
-            if (m_syntaxToEvents[i].getTypeId() == -1 || m_syntaxToEvents[i].getTypeId() == value.getType()) {
-                val.setType(m_syntaxToEvents[i].getType());
-                String encoding = null;
-                if (value.isDisplayable()) {
-                    if (name.matches(".*[Mm][Aa][Cc].*")) {
-                        encoding = EventConstants.XML_ENCODING_MAC_ADDRESS;
-                    } else {
-                        encoding = EventConstants.XML_ENCODING_TEXT;
-                    }
+        String type = syntaxToEventsMap.get(value.getType());
+        String encoding = null;
+        if (type != null) {
+            val.setType(type);
+            if (value.isDisplayable()) {
+                if (name.matches(".*[Mm][Aa][Cc].*")) {
+                    encoding = EventConstants.XML_ENCODING_MAC_ADDRESS;
                 } else {
-                    if (value.getBytes().length == 6) {
-                        encoding = EventConstants.XML_ENCODING_MAC_ADDRESS;
-                    } else {
-                        encoding = EventConstants.XML_ENCODING_BASE64;
-                    }
+                    encoding = EventConstants.XML_ENCODING_TEXT;
                 }
-                val.setEncoding(encoding);
-                val.setContent(EventConstants.toString(encoding, value));
-                found = true;
-                break;
+            } else {
+                if (value.getBytes().length == 6) {
+                    encoding = EventConstants.XML_ENCODING_MAC_ADDRESS;
+                } else {
+                    encoding = EventConstants.XML_ENCODING_BASE64;
+                }
             }
-        }
-        if (!found) {
-            throw new IllegalStateException("Internal error: fell through the " + "bottom of the loop.  The syntax-to-events array might not have a " + "catch-all for Object");
+            val.setEncoding(encoding);
+            val.setContent(EventConstants.toString(encoding, value));
+        } else {
+            LOG.error("Couldn't match snmp value type {} to event type", value.getType());
+            return Optional.empty();
         }
 
         final Parm parm = new Parm();
         parm.setParmName(name);
         parm.setValue(val);
 
-        return parm;
+        return Optional.of(parm);
     }
 }
 

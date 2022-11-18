@@ -65,4 +65,5 @@ message EventParameter {
   string name = 1;
   string value = 2;
   string type = 3;
+  string encoding = 4;
 }

@@ -41,20 +41,26 @@ import org.springframework.stereotype.Component;
 import java.nio.charset.StandardCharsets;
 
 @Component
-public class EventForwarder {
+public class TrapEventForwarder {
 
-    private static final Logger LOG = LoggerFactory.getLogger(EventForwarder.class);
+    private static final Logger LOG = LoggerFactory.getLogger(TrapEventForwarder.class);
+    private static final String TENANT_ID = "tenant-id";
+
+    private final KafkaTemplate<String, byte[]> kafkaTemplate;
+
+    private final String kafkaTopic;
 
     @Autowired
-    private KafkaTemplate<String, byte[]> kafkaTemplate;
-
-    @Value("${kafka.events-topic}")
-    private String kafkaTopic;
+    public TrapEventForwarder(KafkaTemplate<String, byte[]> kafkaTemplate,
+                              @Value("${kafka.events-topic}") String kafkaTopic) {
+        this.kafkaTemplate = kafkaTemplate;
+        this.kafkaTopic = kafkaTopic;
+    }
 
     public void sendEvents(EventLog eventLog, String tenantId) {
-        LOG.debug("Sending {} events to events topic", eventLog.getEventCount());
-        ProducerRecord<String, byte[]> producerRecord = new ProducerRecord<String, byte[]>(kafkaTopic, eventLog.toByteArray());
-        producerRecord.headers().add(new RecordHeader("tenant-id", tenantId.getBytes(StandardCharsets.UTF_8)));
+        LOG.info("Sending {} events to events topic", eventLog.getEventCount());
+        var producerRecord = new ProducerRecord<String, byte[]>(kafkaTopic, eventLog.toByteArray());
+        producerRecord.headers().add(new RecordHeader(TENANT_ID, tenantId.getBytes(StandardCharsets.UTF_8)));
         kafkaTemplate.send(producerRecord);
     }
 }

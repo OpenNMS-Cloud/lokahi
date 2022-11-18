@@ -43,7 +43,7 @@ public class EventParameters {
         this.parameters = parameters;
     }
 
-    public void addEventParameters(EventParameter eventParameter) {
+    public void addEventParameter(EventParameter eventParameter) {
         this.parameters.add(eventParameter);
     }
 }

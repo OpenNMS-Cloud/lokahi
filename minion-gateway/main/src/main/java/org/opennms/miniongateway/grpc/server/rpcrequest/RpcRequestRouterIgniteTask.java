@@ -24,6 +24,7 @@ import org.apache.ignite.resources.SpringResource;
 import org.jetbrains.annotations.NotNull;
 import org.opennms.cloud.grpc.minion.RpcRequestProto;
 import org.opennms.cloud.grpc.minion.RpcResponseProto;
+import org.opennms.horizon.shared.grpc.common.TenantIDGrpcServerInterceptor;
 import org.opennms.miniongateway.detector.server.IgniteRpcRequestDispatcher;
 import org.opennms.miniongateway.router.MinionLookupService;
 import org.slf4j.Logger;
@@ -40,6 +41,9 @@ public class RpcRequestRouterIgniteTask implements ComputeTask<byte[], byte[]> {
     @SpringResource(resourceName = MinionLookupService.IGNITE_SERVICE_NAME)
     private transient MinionLookupService minionLookupService;
 
+    @SpringResource(resourceClass = TenantIDGrpcServerInterceptor.class)
+    private transient TenantIDGrpcServerInterceptor tenantIDGrpcServerInterceptor;
+
     @IgniteInstanceResource
     private transient Ignite ignite;
 
@@ -50,11 +54,13 @@ public class RpcRequestRouterIgniteTask implements ComputeTask<byte[], byte[]> {
         UUID gatewayNodeId = null;
         Map<ComputeJob, ClusterNode> map = new HashMap<>();
         try {
+            String tenantId = tenantIDGrpcServerInterceptor.readCurrentContextTenantId();
+
             RpcRequestProto request = RpcRequestProto.parseFrom(arg);
             if (!request.getSystemId().isBlank()) {
-                gatewayNodeId = minionLookupService.findGatewayNodeWithId(request.getSystemId());
+                gatewayNodeId = minionLookupService.findGatewayNodeWithId(tenantId, request.getSystemId());
             } else {
-                gatewayNodeId = shuffle(minionLookupService.findGatewayNodeWithLocation(request.getLocation()));
+                gatewayNodeId = shuffle(minionLookupService.findGatewayNodeWithLocation(tenantId, request.getLocation()));
             }
 
             ClusterNode routingNode;

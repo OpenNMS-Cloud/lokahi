@@ -30,8 +30,8 @@ public class TaskSetIgnitePublisherImpl implements TaskSetPublisher {
 //----------------------------------------
 
     @Override
-    public void publishTaskSet(String location, TaskSet taskSet) {
-        LocatedTaskSet locatedTaskSet = new LocatedTaskSet(location, taskSet);
+    public void publishTaskSet(String tenantId, String location, TaskSet taskSet) {
+        LocatedTaskSet locatedTaskSet = new LocatedTaskSet(tenantId, location, taskSet);
 
         igniteClient.services().serviceProxy(TASK_SET_PUBLISH_SERVICE, Consumer.class).accept(locatedTaskSet);
     }

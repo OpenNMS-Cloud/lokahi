@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class MinionInfo {
+    private String tenantId;
     private String id;
     private String location;
 }

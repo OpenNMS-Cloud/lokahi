@@ -33,7 +33,7 @@ import org.opennms.taskset.contract.TaskSet;
 
 public interface TaskSetManager {
 
-    void addTaskSet(String location, TaskDefinition taskDefinition);
+    void addTaskSet(String tenantId, String location, TaskDefinition taskDefinition);
 
-    TaskSet getTaskSet(String location);
+    TaskSet getTaskSet(String tenantId, String location);
 }

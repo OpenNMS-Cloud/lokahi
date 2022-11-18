@@ -72,11 +72,12 @@ public class IgniteToolRestController {
         igniteMessageConsumerManager.stopListenMessages(topic);
     }
 
-    @PostMapping(path = "/task-set/{location}", consumes = MimeTypeUtils.APPLICATION_JSON_VALUE)
-    public void publishTaskSet(@PathVariable("location") String location, @RequestBody TaskSet taskSet) {
-        LocatedTaskSet locatedTaskSet = new LocatedTaskSet(location, taskSet);
+    @PostMapping(path = "/task-set/{tenant-id}/{location}", consumes = MimeTypeUtils.APPLICATION_JSON_VALUE)
+    public void publishTaskSet(@PathVariable("tenant-id") String tenantId, @PathVariable("location") String location, @RequestBody TaskSet taskSet) {
+        LocatedTaskSet locatedTaskSet = new LocatedTaskSet(tenantId, location, taskSet);
 
-        log.info("Publishing task set: location={}; num-task={}", location, Optional.ofNullable(taskSet.getTaskDefinitionList()).map(Collection::size).orElse(0));
+        log.info("Publishing task set: tenant-id={}; location={}; num-task={}",
+            tenantId, location, Optional.ofNullable(taskSet.getTaskDefinitionList()).map(Collection::size).orElse(0));
 
         ignite.services().serviceProxy(TASK_SET_PUBLISH_SERVICE, Consumer.class, false).accept(locatedTaskSet);
     }

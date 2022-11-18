@@ -50,6 +50,7 @@ import io.grpc.Server;
 import io.grpc.netty.shaded.io.grpc.netty.NettyServerBuilder;
 import io.grpc.netty.shaded.io.netty.handler.ssl.SslContextBuilder;
 
+@Deprecated
 public class GrpcIpcServerBuilder implements GrpcIpcServer {
 
     private static final Logger LOG = LoggerFactory.getLogger(GrpcIpcServerBuilder.class);

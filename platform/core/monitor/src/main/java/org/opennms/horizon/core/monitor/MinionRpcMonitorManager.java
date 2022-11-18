@@ -68,7 +68,8 @@ public class MinionRpcMonitorManager implements EventListener {
         List<OnmsMinion> minions = sessionUtils.withReadOnlyTransaction(minionDao::findAll);
         minionCache.addAll(minions);
         minionCache.forEach(minion -> {
-            scheduledThreadPoolExecutor.scheduleAtFixedRate(() -> runMinionMonitor(minion.getLocation(), minion.getId()),
+            // TBD888: NEED TENANT ID
+            scheduledThreadPoolExecutor.scheduleAtFixedRate(() -> runMinionMonitor("opennms-prime", minion.getLocation(), minion.getId()),
                 MONITOR_INITIAL_DELAY, MONITOR_PERIOD, TimeUnit.MILLISECONDS);
         });
     }
@@ -93,8 +94,9 @@ public class MinionRpcMonitorManager implements EventListener {
             IParm systemIdParm = event.getParm(EventConstants.PARAM_MONITORING_SYSTEM_ID);
             String systemId = systemIdParm.getValue() != null ? systemIdParm.getValue().getContent() : null;
             if (!Strings.isNullOrEmpty(systemId)) {
+                // TBD888: NEED TENANT ID
                 LOG.info("Received event for new Minion with Id {}", systemId);
-                scheduledThreadPoolExecutor.scheduleAtFixedRate(() -> runMinionMonitor(location, systemId),
+                scheduledThreadPoolExecutor.scheduleAtFixedRate(() -> runMinionMonitor("opennms-prime", location, systemId),
                     MONITOR_INITIAL_DELAY, MONITOR_PERIOD, TimeUnit.MILLISECONDS);
             }
         }
@@ -102,7 +104,7 @@ public class MinionRpcMonitorManager implements EventListener {
     }
 
 
-    private void runMinionMonitor(String location, String minionId) {
+    private void runMinionMonitor(String tenantId, String location, String minionId) {
          LOG.info("Minion RPC Monitor: executing check for minion: id={}; location={}", minionId, location);
 
          EchoRequest echoRequest = EchoRequest.newBuilder()
@@ -110,7 +112,7 @@ public class MinionRpcMonitorManager implements EventListener {
              .setMessage(Strings.repeat("*", DEFAULT_MESSAGE_SIZE))
              .build();
 
-         echoClient.execute(minionId, location, null, echoRequest).whenComplete((response, error) -> {
+         echoClient.execute(tenantId, minionId, location, null, echoRequest).whenComplete((response, error) -> {
              if (error != null) {
                  LOG.warn("ECHO REQUEST failed", error);
                  LOG.error("Minion RPC Monitor: check for minion failed: id={}", minionId);

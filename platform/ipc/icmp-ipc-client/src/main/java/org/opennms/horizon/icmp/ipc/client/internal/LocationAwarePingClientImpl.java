@@ -57,12 +57,12 @@ public class LocationAwarePingClientImpl implements LocationAwarePingClient {
         throw new UnsupportedOperationException("This RPC operation is currently not supported");
     }
 
-    CompletableFuture<PingResponse> execute(String systemId, String location, PingRequest payload) {
+    CompletableFuture<PingResponse> execute(String tenantId, String systemId, String location, PingRequest payload) {
         RpcRequestProto request = client.builder("PING")
             .withLocation(location)
             .withSystemId(systemId)
             .withPayload(payload)
             .build();
-        return client.execute(request);
+        return client.execute(tenantId, request);
     }
 }

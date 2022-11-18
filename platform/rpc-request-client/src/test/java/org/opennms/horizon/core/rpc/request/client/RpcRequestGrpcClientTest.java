@@ -3,7 +3,9 @@ package org.opennms.horizon.core.rpc.request.client;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.protobuf.Message;
 import io.grpc.Channel;
+import io.grpc.ClientInterceptor;
 import io.grpc.ManagedChannel;
+import io.grpc.Metadata;
 import io.grpc.netty.shaded.io.grpc.netty.NettyChannelBuilder;
 import org.junit.Before;
 import org.junit.Test;
@@ -29,12 +31,15 @@ public class RpcRequestGrpcClientTest {
 
     private NettyChannelBuilder mockNettyChannelBuilder;
     private RpcRequestServiceGrpc.RpcRequestServiceFutureStub mockRpcRequestServiceFutureStub;
+    private ClientInterceptor mockClientInterceptor;
     private ManagedChannel mockChannel;
     private ListenableFuture mockListenableFuture;
     private Logger mockLogger;
 
     private RpcRequestProto testRequest;
     private RpcResponseProto testResponse;
+
+    private Metadata capturedMetadata;
 
     @Before
     public void init() throws ExecutionException, InterruptedException {
@@ -46,9 +51,12 @@ public class RpcRequestGrpcClientTest {
         // TODO: why is the compiler complaining without these casts?
         target.setNettyChannelBuilderForAddressFunction((BiFunction<String, Integer, NettyChannelBuilder>) this::testNettyChannelBuilderForAddressFunction);
         target.setRpcRequestServiceNewFutureStubFunction((Function<Channel, RpcRequestServiceGrpc.RpcRequestServiceFutureStub>) this::testRpcRequestServiceNewFutureStubFunction);
+        target.setNewAttachHeadersInterceptorFunction((Function<Metadata, ClientInterceptor>) this::testAttachHeadersInterceptorFunction);
 
         mockNettyChannelBuilder = Mockito.mock(NettyChannelBuilder.class);
         mockRpcRequestServiceFutureStub = Mockito.mock(RpcRequestServiceGrpc.RpcRequestServiceFutureStub.class);
+        mockClientInterceptor = Mockito.mock(ClientInterceptor.class);
+
         mockChannel = Mockito.mock(ManagedChannel.class);
         mockListenableFuture = Mockito.mock(ListenableFuture.class);
         mockLogger = Mockito.mock(Logger.class);
@@ -65,6 +73,7 @@ public class RpcRequestGrpcClientTest {
         //
         // Setup Test Data and Interactions
         //
+        Mockito.when(mockRpcRequestServiceFutureStub.withInterceptors(Mockito.any())).thenReturn(mockRpcRequestServiceFutureStub);
         Mockito.when(mockRpcRequestServiceFutureStub.request(testRequest)).thenReturn(mockListenableFuture);
         Mockito.when(mockListenableFuture.get()).thenReturn(testResponse);
 
@@ -72,7 +81,7 @@ public class RpcRequestGrpcClientTest {
         // Execute
         //
         target.init();
-        CompletableFuture result = target.execute(testRequest);
+        CompletableFuture result = target.execute("opennms-prime", testRequest);
 
         //
         // Verify the Results
@@ -95,6 +104,7 @@ public class RpcRequestGrpcClientTest {
         //
         Message mockMessage = Mockito.mock(Message.class);
         RpcClientFactory.Deserializer<Message> testDeserializer = (in) -> mockMessage;
+        Mockito.when(mockRpcRequestServiceFutureStub.withInterceptors(Mockito.any())).thenReturn(mockRpcRequestServiceFutureStub);
         Mockito.when(mockRpcRequestServiceFutureStub.request(testRequest)).thenReturn(mockListenableFuture);
         Mockito.when(mockListenableFuture.get()).thenReturn(testResponse);
 
@@ -103,7 +113,7 @@ public class RpcRequestGrpcClientTest {
         //
         target.setDeserializer(testDeserializer);
         target.init();
-        CompletableFuture result = target.execute(testRequest);
+        CompletableFuture result = target.execute("opennms-prime", testRequest);
 
         // Verify addListener() call and execute the completion function
 
@@ -155,6 +165,14 @@ public class RpcRequestGrpcClientTest {
         // Setup Test Data and Interactions
         //
         RuntimeException testException = new RuntimeException("x-test-request-exception-x");
+        /*
+                            .withInterceptors(
+                        MetadataUtils.newAttachHeadersInterceptor(
+                            metadata
+                        )
+                    )
+         */
+        Mockito.when(mockRpcRequestServiceFutureStub.withInterceptors(Mockito.any())).thenReturn(mockRpcRequestServiceFutureStub);
         Mockito.when(mockRpcRequestServiceFutureStub.request(testRequest)).thenThrow(testException);
 
         //
@@ -162,7 +180,7 @@ public class RpcRequestGrpcClientTest {
         //
         target.setLog(mockLogger);
         target.init();
-        CompletableFuture resultFuture = target.execute(testRequest);
+        CompletableFuture resultFuture = target.execute("opennms-prime", testRequest);
 
         //
         // Verify the Results
@@ -183,6 +201,7 @@ public class RpcRequestGrpcClientTest {
         // Setup Test Data and Interactions
         //
         RuntimeException testException = new RuntimeException("x-test-get-exception-x");
+        Mockito.when(mockRpcRequestServiceFutureStub.withInterceptors(Mockito.any())).thenReturn(mockRpcRequestServiceFutureStub);
         Mockito.when(mockRpcRequestServiceFutureStub.request(testRequest)).thenReturn(mockListenableFuture);
         Mockito.when(mockListenableFuture.get()).thenThrow(testException);
 
@@ -191,7 +210,7 @@ public class RpcRequestGrpcClientTest {
         //
         target.setLog(mockLogger);
         target.init();
-        CompletableFuture resultFuture = target.execute(testRequest);
+        CompletableFuture resultFuture = target.execute("opennms-prime", testRequest);
 
         // Verify addListener() call and execute the completion function
 
@@ -215,6 +234,30 @@ public class RpcRequestGrpcClientTest {
         }
     }
 
+    @Test
+    public void testTenantIdInjection() {
+        //
+        // Setup Test Data and Interactions
+        //
+        Mockito.when(mockRpcRequestServiceFutureStub.withInterceptors(Mockito.any())).thenReturn(mockRpcRequestServiceFutureStub);
+        Mockito.when(mockRpcRequestServiceFutureStub.request(testRequest)).thenReturn(mockListenableFuture);
+
+        //
+        // Execute
+        //
+        target.setLog(mockLogger);
+        target.init();
+        target.execute("x-tenant-id-x", testRequest);
+
+        //
+        // Verify the Results
+        //
+        assertNotNull(capturedMetadata);
+
+        String tenantId = capturedMetadata.get(Metadata.Key.of("tenant-id", Metadata.ASCII_STRING_MARSHALLER));
+        assertEquals("x-tenant-id-x", tenantId);
+    }
+
 //========================================
 //
 //----------------------------------------
@@ -225,5 +268,10 @@ public class RpcRequestGrpcClientTest {
 
     private RpcRequestServiceGrpc.RpcRequestServiceFutureStub testRpcRequestServiceNewFutureStubFunction(Channel channel) {
         return mockRpcRequestServiceFutureStub;
+    }
+
+    private ClientInterceptor testAttachHeadersInterceptorFunction(Metadata metadata) {
+        capturedMetadata = metadata;
+        return mockClientInterceptor;
     }
 }

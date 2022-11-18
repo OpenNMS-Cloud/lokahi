@@ -10,6 +10,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.runner.RunWith;
 import org.opennms.horizon.inventory.InventoryApplication;
 import org.opennms.horizon.inventory.PostgresInitializer;
 import org.opennms.horizon.inventory.dto.DeviceCreateDTO;
@@ -28,6 +29,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -35,6 +37,7 @@ import java.time.LocalDateTime;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@RunWith(SpringRunner.class)
 @Import(TestTaskSetGrpcConfig.class)
 @SpringBootTest(
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
@@ -42,7 +45,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
     properties = {"spring.main.allow-bean-definition-overriding=true"}
 )
 @ContextConfiguration(initializers = {PostgresInitializer.class})
-class DeviceGrpcIT extends GrpcTestBase {
+class DeviceGrpcIntTest extends GrpcTestBase {
     private DeviceServiceGrpc.DeviceServiceBlockingStub serviceStub;
 
     @Autowired

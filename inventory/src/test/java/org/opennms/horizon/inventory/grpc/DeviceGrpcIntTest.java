@@ -5,40 +5,35 @@ import com.google.rpc.Status;
 import com.vladmihalcea.hibernate.type.basic.Inet;
 import io.grpc.StatusRuntimeException;
 import io.grpc.protobuf.StatusProto;
-import org.grpcmock.GrpcMock;
-import org.grpcmock.junit5.GrpcMockExtension;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.opennms.horizon.inventory.PostgresInitializer;
+import org.opennms.horizon.inventory.SpringContextTestInitializer;
 import org.opennms.horizon.inventory.dto.DeviceCreateDTO;
 import org.opennms.horizon.inventory.dto.DeviceServiceGrpc;
 import org.opennms.horizon.inventory.dto.NodeDTO;
+import org.opennms.horizon.inventory.grpc.taskset.TestTaskSetGrpcService;
 import org.opennms.horizon.inventory.model.IpInterface;
 import org.opennms.horizon.inventory.model.MonitoringLocation;
 import org.opennms.horizon.inventory.model.Node;
 import org.opennms.horizon.inventory.repository.IpInterfaceRepository;
 import org.opennms.horizon.inventory.repository.MonitoringLocationRepository;
 import org.opennms.horizon.inventory.repository.NodeRepository;
-import org.opennms.taskset.service.contract.PublishTaskSetResponse;
 import org.opennms.taskset.service.contract.TaskSetServiceGrpc;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.grpcmock.GrpcMock.stubFor;
-import static org.grpcmock.GrpcMock.unaryMethod;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest
-@ExtendWith(GrpcMockExtension.class)
-@ContextConfiguration(initializers = {PostgresInitializer.class})
+@ContextConfiguration(initializers = {SpringContextTestInitializer.class})
 class DeviceGrpcIntTest extends GrpcTestBase {
     private DeviceServiceGrpc.DeviceServiceBlockingStub serviceStub;
 
@@ -49,18 +44,16 @@ class DeviceGrpcIntTest extends GrpcTestBase {
     @Autowired
     private IpInterfaceRepository ipInterfaceRepository;
 
-    @DynamicPropertySource
-    static void registerDatasourceProperties(DynamicPropertyRegistry registry) {
-        registry.add("grpc.client.minion-gateway.port", GrpcMock::getGlobalPort);
-    }
+    private static TestTaskSetGrpcService testGrpcService;
 
     private void initStub() {
         serviceStub = DeviceServiceGrpc.newBlockingStub(channel);
     }
 
-    private void mockPublishTaskSet() {
-        stubFor(unaryMethod(TaskSetServiceGrpc.getPublishTaskSetMethod())
-            .willReturn(PublishTaskSetResponse.newBuilder().build()));
+    @BeforeAll
+    public static void setup() throws IOException {
+        testGrpcService = new TestTaskSetGrpcService();
+        server = startMockServer(TaskSetServiceGrpc.SERVICE_NAME, testGrpcService);
     }
 
     @AfterEach
@@ -69,14 +62,20 @@ class DeviceGrpcIntTest extends GrpcTestBase {
         nodeRepository.deleteAll();
         monitoringLocationRepository.deleteAll();
 
+        testGrpcService.reset();
         channel.shutdown();
+    }
+
+    @AfterAll
+    public static void tearDown() throws InterruptedException {
+        server.shutdownNow();
+        server.awaitTermination();
     }
 
     @Test
     void testCreateDevice() throws Exception {
         setupGrpc();
         initStub();
-        mockPublishTaskSet();
 
         String label = "label";
 
@@ -89,6 +88,7 @@ class DeviceGrpcIntTest extends GrpcTestBase {
         NodeDTO node = serviceStub.createDevice(createDTO);
 
         assertEquals(label, node.getNodeLabel());
+        assertEquals(1, testGrpcService.getTimesCalled());
     }
 
     @Test
@@ -111,6 +111,7 @@ class DeviceGrpcIntTest extends GrpcTestBase {
         Status status = StatusProto.fromThrowable(exception);
         assertThat(status.getCode()).isEqualTo(Code.ALREADY_EXISTS_VALUE);
         assertThat(status.getMessage()).isEqualTo("Ip address already exists for location");
+        assertEquals(0, testGrpcService.getTimesCalled());
     }
 
     @Test
@@ -122,7 +123,6 @@ class DeviceGrpcIntTest extends GrpcTestBase {
         setupGrpcWithDifferentTenantID();
         populateTables(location, ip);
         initStub();
-        mockPublishTaskSet();
 
         DeviceCreateDTO createDTO = DeviceCreateDTO.newBuilder()
             .setLocation(location)
@@ -133,6 +133,7 @@ class DeviceGrpcIntTest extends GrpcTestBase {
         NodeDTO node = serviceStub.createDevice(createDTO);
 
         assertEquals(label, node.getNodeLabel());
+        assertEquals(1, testGrpcService.getTimesCalled());
     }
 
     @Test
@@ -144,7 +145,6 @@ class DeviceGrpcIntTest extends GrpcTestBase {
         setupGrpc();
         populateTables(location, ip);
         initStub();
-        mockPublishTaskSet();
 
         DeviceCreateDTO createDTO = DeviceCreateDTO.newBuilder()
             .setLocation("different")
@@ -155,6 +155,7 @@ class DeviceGrpcIntTest extends GrpcTestBase {
         NodeDTO node = serviceStub.createDevice(createDTO);
 
         assertEquals(label, node.getNodeLabel());
+        assertEquals(1, testGrpcService.getTimesCalled());
     }
 
     @Test
@@ -169,7 +170,6 @@ class DeviceGrpcIntTest extends GrpcTestBase {
         populateTables(location, ip);
         populateTables(secondLocation, secondIp);
         initStub();
-        mockPublishTaskSet();
 
         DeviceCreateDTO createDTO = DeviceCreateDTO.newBuilder()
             .setLocation(secondLocation)
@@ -180,6 +180,7 @@ class DeviceGrpcIntTest extends GrpcTestBase {
         NodeDTO node = serviceStub.createDevice(createDTO);
 
         assertEquals(label, node.getNodeLabel());
+        assertEquals(1, testGrpcService.getTimesCalled());
     }
 
     private void populateTables(String location, String ip) {
@@ -219,6 +220,7 @@ class DeviceGrpcIntTest extends GrpcTestBase {
         Status status = StatusProto.fromThrowable(exception);
         assertThat(status.getCode()).isEqualTo(Code.UNAUTHENTICATED_VALUE);
         assertThat(status.getMessage()).isEqualTo("Missing tenant id");
+        assertEquals(0, testGrpcService.getTimesCalled());
     }
 
     @Test
@@ -238,5 +240,6 @@ class DeviceGrpcIntTest extends GrpcTestBase {
         Status status = StatusProto.fromThrowable(exception);
         assertThat(status.getCode()).isEqualTo(Code.INVALID_ARGUMENT_VALUE);
         assertThat(status.getMessage()).isEqualTo("Bad management_ip: BAD");
+        assertEquals(0, testGrpcService.getTimesCalled());
     }
 }

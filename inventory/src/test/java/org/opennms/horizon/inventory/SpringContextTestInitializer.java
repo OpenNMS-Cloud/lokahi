@@ -28,12 +28,18 @@
 
 package org.opennms.horizon.inventory;
 
+import io.grpc.inprocess.InProcessChannelBuilder;
+import org.jetbrains.annotations.NotNull;
+import org.opennms.taskset.service.contract.TaskSetServiceGrpc;
+import org.springframework.beans.factory.config.BeanDefinitionCustomizer;
 import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.ApplicationContextInitializer;
-import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.support.GenericApplicationContext;
 import org.testcontainers.containers.PostgreSQLContainer;
 
-public class PostgresInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
+import java.util.function.Supplier;
+
+public class SpringContextTestInitializer implements ApplicationContextInitializer<GenericApplicationContext> {
 
     private static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:14.5-alpine")
         .withDatabaseName("inventory").withUsername("inventory")
@@ -43,11 +49,30 @@ public class PostgresInitializer implements ApplicationContextInitializer<Config
     }
 
     @Override
-    public void initialize(ConfigurableApplicationContext applicationContext) {
+    public void initialize(@NotNull GenericApplicationContext context) {
+        initDatasourceParams(context);
+        initMockGrpcTaskSetService(context);
+    }
+
+    private void initDatasourceParams(GenericApplicationContext context) {
         TestPropertyValues.of(
             "spring.datasource.url=" + postgres.getJdbcUrl(),
             "spring.datasource.username=" + postgres.getUsername(),
             "spring.datasource.password=" + postgres.getPassword()
-        ).applyTo(applicationContext.getEnvironment());
+        ).applyTo(context.getEnvironment());
+    }
+
+    // Creating this test bean in this class due to errors as we are sharing the context between test classes.
+    // The Mock Grpc server was getting a different stub due to other tests interfering.
+    // This overrides the appropriate bean from the beginning of when the spring context gets initialized.
+    private void initMockGrpcTaskSetService(GenericApplicationContext context) {
+        Supplier<TaskSetServiceGrpc.TaskSetServiceBlockingStub> supplier = () -> TaskSetServiceGrpc.newBlockingStub(
+            InProcessChannelBuilder.forName(TaskSetServiceGrpc.SERVICE_NAME).directExecutor().build());
+        BeanDefinitionCustomizer customizer = beanDefinition -> beanDefinition.setPrimary(true);
+
+        String beanName = "taskSetServiceBlockingStub";
+        Class<TaskSetServiceGrpc.TaskSetServiceBlockingStub> stubClass = TaskSetServiceGrpc.TaskSetServiceBlockingStub.class;
+
+        context.registerBean(beanName, stubClass, supplier, customizer);
     }
 }

@@ -52,6 +52,8 @@ public interface PingRequestBuilder {
 
     PingRequestBuilder withRetries(int retries);
 
+    PingRequestBuilder withTenantId(String tenantId);
+
     PingRequestBuilder withInetAddress(InetAddress inetAddress);
 
     PingRequestBuilder withLocation(String location);

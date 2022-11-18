@@ -47,6 +47,7 @@ public class PingRequestBuilderImpl implements PingRequestBuilder {
     private int retries = PingConstants.DEFAULT_RETRIES;
     private int numberOfRequests = 1;
     private InetAddress inetAddress;
+    private String tenantId;
     private String location;
     private String systemId;
     private Callback callback;
@@ -80,6 +81,12 @@ public class PingRequestBuilderImpl implements PingRequestBuilder {
     @Override
     public PingRequestBuilder withInetAddress(InetAddress inetAddress) {
         this.inetAddress = Objects.requireNonNull(inetAddress);
+        return this;
+    }
+
+    @Override
+    public PingRequestBuilder withTenantId(String tenantId) {
+        this.tenantId = tenantId;
         return this;
     }
 
@@ -122,7 +129,7 @@ public class PingRequestBuilderImpl implements PingRequestBuilder {
             return CompletableFuture.failedFuture(new UnsupportedOperationException("Multiple requests are not supported for now."));
         }
 
-        return client.execute(systemId, location, request).thenApply(response -> {
+        return client.execute(tenantId, systemId, location, request).thenApply(response -> {
             PingSummary summary = new PingSummary(request, 1);
             summary.addSequence(new PingSequence(1, response));
             return summary;

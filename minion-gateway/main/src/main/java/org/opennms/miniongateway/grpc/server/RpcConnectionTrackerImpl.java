@@ -43,7 +43,7 @@ public class RpcConnectionTrackerImpl implements RpcConnectionTracker {
     private Map<StreamObserver<RpcRequestProto>, Semaphore> semaphoreByConnection = new IdentityHashMap<>();
 
     @Override
-    public boolean addConnection(String location, String minionId, StreamObserver<RpcRequestProto> connection) {
+    public boolean addConnection(String tenantId, String location, String minionId, StreamObserver<RpcRequestProto> connection) {
         boolean added = false;
         synchronized (lock) {
             // Prevent duplicate registration
@@ -62,7 +62,7 @@ public class RpcConnectionTrackerImpl implements RpcConnectionTracker {
 
                 updateIteratorLocked(location);
 
-                minionManager.addMinion(new MinionInfo(minionId, location));
+                minionManager.addMinion(new MinionInfo(tenantId, minionId, location));
 
                 added = true;
             } else {
@@ -74,14 +74,14 @@ public class RpcConnectionTrackerImpl implements RpcConnectionTracker {
     }
 
     @Override
-    public StreamObserver<RpcRequestProto> lookupByMinionId(String minionId) {
+    public StreamObserver<RpcRequestProto> lookupByMinionId(String tenantId, String minionId) {
         synchronized (lock) {
             return connectionByMinionId.get(minionId);
         }
     }
 
     @Override
-    public StreamObserver<RpcRequestProto> lookupByLocationRoundRobin(String locationId) {
+    public StreamObserver<RpcRequestProto> lookupByLocationRoundRobin(String tenantId, String locationId) {
         synchronized (lock) {
             Iterator<StreamObserver<RpcRequestProto>> iterator = rpcHandlerIteratorMap.get(locationId);
 

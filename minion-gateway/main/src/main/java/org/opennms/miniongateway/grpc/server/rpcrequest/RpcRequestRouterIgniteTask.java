@@ -24,6 +24,7 @@ import org.apache.ignite.resources.SpringResource;
 import org.jetbrains.annotations.NotNull;
 import org.opennms.cloud.grpc.minion.RpcRequestProto;
 import org.opennms.cloud.grpc.minion.RpcResponseProto;
+import org.opennms.horizon.shared.grpc.common.TenantIDGrpcServerInterceptor;
 import org.opennms.miniongateway.detector.server.IgniteRpcRequestDispatcher;
 import org.opennms.miniongateway.router.MinionLookupService;
 import org.slf4j.Logger;
@@ -31,7 +32,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 @Component
-public class RpcRequestRouterIgniteTask implements ComputeTask<byte[], byte[]> {
+public class RpcRequestRouterIgniteTask implements ComputeTask<RouterTaskData, byte[]> {
 
     private static final Logger DEFAULT_LOGGER = LoggerFactory.getLogger(RpcRequestRouterIgniteTask.class);
 
@@ -40,21 +41,26 @@ public class RpcRequestRouterIgniteTask implements ComputeTask<byte[], byte[]> {
     @SpringResource(resourceName = MinionLookupService.IGNITE_SERVICE_NAME)
     private transient MinionLookupService minionLookupService;
 
+    @SpringResource(resourceClass = TenantIDGrpcServerInterceptor.class)
+    private transient TenantIDGrpcServerInterceptor tenantIDGrpcServerInterceptor;
+
     @IgniteInstanceResource
     private transient Ignite ignite;
 
     private transient Random random;
 
     @Override
-    public @NotNull Map<? extends ComputeJob, ClusterNode> map(List<ClusterNode> subgrid, @Nullable byte[] arg) throws IgniteException {
+    public @NotNull Map<? extends ComputeJob, ClusterNode> map(List<ClusterNode> subgrid, @Nullable RouterTaskData arg) throws IgniteException {
         UUID gatewayNodeId = null;
         Map<ComputeJob, ClusterNode> map = new HashMap<>();
         try {
-            RpcRequestProto request = RpcRequestProto.parseFrom(arg);
+            String tenantId = arg.getTenantId();
+
+            RpcRequestProto request = RpcRequestProto.parseFrom(arg.getRequestPayload());
             if (!request.getSystemId().isBlank()) {
-                gatewayNodeId = minionLookupService.findGatewayNodeWithId(request.getSystemId());
+                gatewayNodeId = minionLookupService.findGatewayNodeWithId(tenantId, request.getSystemId());
             } else {
-                gatewayNodeId = shuffle(minionLookupService.findGatewayNodeWithLocation(request.getLocation()));
+                gatewayNodeId = shuffle(minionLookupService.findGatewayNodeWithLocation(tenantId, request.getLocation()));
             }
 
             ClusterNode routingNode;

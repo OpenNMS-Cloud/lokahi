@@ -6,6 +6,7 @@ import io.grpc.stub.StreamObserver;
 import org.opennms.cloud.grpc.minion.CloudToMinionMessage;
 import org.opennms.cloud.grpc.minion.Identity;
 import org.opennms.horizon.shared.grpc.common.GrpcIpcServer;
+import org.opennms.horizon.shared.grpc.common.TenantIDGrpcServerInterceptor;
 import org.opennms.horizon.shared.grpc.interceptor.MeteringInterceptorFactory;
 import org.opennms.horizon.shared.ipc.grpc.server.OpennmsGrpcServer;
 import org.opennms.horizon.shared.ipc.grpc.server.manager.LocationIndependentRpcClientFactory;
@@ -63,12 +64,17 @@ public class GrpcServerConfig {
     public MinionRpcStreamConnectionManager minionRpcStreamConnectionManager(
         @Autowired MinionManager minionManager,
         @Autowired RpcConnectionTracker rpcConnectionTracker,
-        @Autowired RpcRequestTracker rpcRequestTracker
-    ) {
+        @Autowired RpcRequestTracker rpcRequestTracker,
+        @Autowired TenantIDGrpcServerInterceptor tenantIDGrpcServerInterceptor
+        ) {
         ScheduledExecutorService responseHandlerExecutor = Executors.newSingleThreadScheduledExecutor();
 
         return new MinionRpcStreamConnectionManagerImpl(
-            rpcConnectionTracker, rpcRequestTracker, minionManager, responseHandlerExecutor
+            rpcConnectionTracker,
+            rpcRequestTracker,
+            minionManager,
+            responseHandlerExecutor,
+            tenantIDGrpcServerInterceptor
         );
     }
 

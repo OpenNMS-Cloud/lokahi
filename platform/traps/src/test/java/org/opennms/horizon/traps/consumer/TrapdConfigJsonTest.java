@@ -31,72 +31,42 @@ package org.opennms.horizon.traps.consumer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
 import org.opennms.horizon.config.service.api.ConfigConstants;
 import org.opennms.horizon.config.service.api.ConfigService;
 import org.opennms.horizon.shared.snmp.traps.TrapdConfigBean;
 import org.opennms.horizon.taskset.manager.TaskSetManager;
-import org.opennms.taskset.contract.TaskDefinition;
-import org.opennms.taskset.contract.TaskSet;
-import org.opennms.taskset.service.api.TaskSetPublisher;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+
+import static org.junit.Assert.assertNotNull;
 
 public class TrapdConfigJsonTest {
 
     @Test
     public void testTrapdConfigInJson() throws IOException {
-        TrapSinkConsumer trapSinkConsumer = new TrapSinkConsumer();
-        ConfigService configService = new MockConfigService();
-        trapSinkConsumer.setConfigService(configService);
-        trapSinkConsumer.setTaskSetManager(new TaskSetManager() {
-            @Override
-            public void addTaskSet(String location, TaskDefinition taskDefinition) {
+        TaskSetManager mockTaskSetManager = Mockito.mock(TaskSetManager.class);
+        ConfigService mockConfigService = Mockito.mock(ConfigService.class);
 
-            }
-            @Override
-            public TaskSet getTaskSet(String location) {
-                return null;
-            }
-        });
-        trapSinkConsumer.setTaskSetPublisher((location, taskSet) -> {});
+        TrapSinkConsumer trapSinkConsumer = new TrapSinkConsumer();
+        trapSinkConsumer.setConfigService(mockConfigService);
+        trapSinkConsumer.setTaskSetManager(mockTaskSetManager);
+        trapSinkConsumer.setTaskSetPublisher((tenantId, location, taskSet) -> {});
         trapSinkConsumer.initializeConfig();
-        Optional<String> optionalConfig = configService.getConfig(ConfigConstants.SNMP_TRAPS_CONFIG);
-        Assert.assertTrue("Config must be present", optionalConfig.isPresent());
+
+        ArgumentCaptor<String> jsonStringCaptor = ArgumentCaptor.forClass(String.class);
+        Mockito.verify(mockConfigService).addConfig(Mockito.eq(ConfigConstants.SNMP_TRAPS_CONFIG), jsonStringCaptor.capture(), Mockito.eq(TrapSinkConsumer.TRAPS_EVENT_SOURCE));
+
+        String json = jsonStringCaptor.getValue();
+        assertNotNull(json);
+
         ObjectMapper objectMapper = new ObjectMapper();
-        TrapdConfigBean configBean = objectMapper.readValue(optionalConfig.get(), TrapdConfigBean.class);
+        TrapdConfigBean configBean = objectMapper.readValue(json, TrapdConfigBean.class);
         Assert.assertEquals(10162, configBean.getSnmpTrapPort());
         Assert.assertEquals("*", configBean.getSnmpTrapAddress());
         Assert.assertEquals(500, configBean.getBatchIntervalMs());
         Assert.assertEquals(10000, configBean.getQueueSize());
         Assert.assertTrue("snmpv3 users must be empty", configBean.getSnmpV3Users().isEmpty());
-    }
-
-    static class MockConfigService implements ConfigService {
-
-        Map<String, String> configs = new HashMap<>();
-
-        @Override
-        public void addConfig(String configName, String jsonConfig, String source) {
-            configs.put(configName, jsonConfig);
-        }
-
-        @Override
-        public void updateConfig(String configName, String jsonConfig, String source) {
-
-        }
-
-        @Override
-        public Optional<String> getConfig(String configName) {
-            return Optional.ofNullable(configs.get(configName));
-        }
-
-        @Override
-        public List<String> getConfigNames() {
-            return null;
-        }
     }
 }

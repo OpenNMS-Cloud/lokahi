@@ -63,7 +63,7 @@ public class TaskSetPublisherImpl implements TaskSetPublisher, TaskSetForwarder 
 //----------------------------------------
 
     @Override
-    public void publishTaskSet(String location, TaskSet taskSet) {
+    public void publishTaskSet(String tenantId, String location, TaskSet taskSet) {
         Set<TaskSetListener> listeners;
 
         synchronized (lock) {

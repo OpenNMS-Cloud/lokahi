@@ -6,12 +6,9 @@ import org.opennms.icmp.contract.IcmpMonitorRequest;
 import org.opennms.snmp.contract.SnmpDetectorRequest;
 import org.opennms.snmp.contract.SnmpMonitorRequest;
 import org.opennms.taskset.contract.TaskDefinition;
-import org.opennms.taskset.contract.TaskSet;
 import org.opennms.taskset.contract.TaskType;
 
 import java.net.InetAddress;
-import java.util.Map;
-import java.util.TreeMap;
 
 public class TaskSetManagerUtil {
 
@@ -23,7 +20,7 @@ public class TaskSetManagerUtil {
         this.taskSetManager = taskSetManager;
     }
 
-    public void addEchotask(String location, InetAddress inetAddress, String name, TaskType taskType, String pluginName, String schedule, IcmpMonitorRequest echoRequest) {
+    public void addEchoTask(String tenantId, String location, InetAddress inetAddress, String name, TaskType taskType, String pluginName, String schedule, IcmpMonitorRequest echoRequest) {
         String taskId = monitorTaskSetIdentityUtil.identityForIpTask(inetAddress.getHostAddress(), name);
 
         TaskDefinition.Builder builder =
@@ -37,10 +34,10 @@ public class TaskSetManagerUtil {
 
         TaskDefinition taskDefinition = builder.build();
 
-        taskSetManager.addTaskSet(location, taskDefinition);
+        taskSetManager.addTaskSet(tenantId, location, taskDefinition);
     }
 
-    public void addSnmpTask(String location, InetAddress inetAddress, String name, TaskType taskType, String pluginName, String schedule, SnmpMonitorRequest snmpMonitorRequest) {
+    public void addSnmpTask(String tenantId, String location, InetAddress inetAddress, String name, TaskType taskType, String pluginName, String schedule, SnmpMonitorRequest snmpMonitorRequest) {
         String taskId = monitorTaskSetIdentityUtil.identityForIpTask(inetAddress.getHostAddress(), name);
 
         TaskDefinition.Builder builder =
@@ -54,10 +51,10 @@ public class TaskSetManagerUtil {
 
         TaskDefinition taskDefinition = builder.build();
 
-        taskSetManager.addTaskSet(location, taskDefinition);
+        taskSetManager.addTaskSet(tenantId, location, taskDefinition);
     }
 
-    public void addSnmpTask(String location, InetAddress inetAddress, String name, TaskType taskType, String pluginName, SnmpDetectorRequest snmpDetectorRequest) {
+    public void addSnmpTask(String tenantId, String location, InetAddress inetAddress, String name, TaskType taskType, String pluginName, SnmpDetectorRequest snmpDetectorRequest) {
         String taskId = monitorTaskSetIdentityUtil.identityForIpTask(inetAddress.getHostAddress(), name);
 
         TaskDefinition.Builder builder =
@@ -70,6 +67,6 @@ public class TaskSetManagerUtil {
 
         TaskDefinition taskDefinition = builder.build();
 
-        taskSetManager.addTaskSet(location, taskDefinition);
+        taskSetManager.addTaskSet(tenantId, location, taskDefinition);
     }
 }

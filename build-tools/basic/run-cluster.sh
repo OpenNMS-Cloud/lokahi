@@ -10,4 +10,5 @@ helm upgrade -i opennms ./charts/opennms -f build-tools/basic/helm-values.yaml \
   --set Keycloak.Image=opennms/horizon-stream-keycloak-dev:local-basic \
   --set Grafana.Image=opennms/horizon-stream-grafana-dev:local-basic \
   --set OpenNMS.MetricsProcessor.Image=opennms/horizon-stream-metrics-processor:local-basic \
-  --set OpenNMS.Events.Image=opennms/horizon-stream-events:local-basic
+  --set OpenNMS.Events.Image=opennms/horizon-stream-events:local-basic \
+  --set OpenNMS.MinionGatewayGrpcProxy.Image=opennms/horizon-stream-minion-gateway-grpc-proxy:local-basic 

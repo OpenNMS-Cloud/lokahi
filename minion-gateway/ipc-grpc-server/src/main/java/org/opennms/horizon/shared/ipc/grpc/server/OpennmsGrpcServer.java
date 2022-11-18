@@ -33,6 +33,7 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import io.grpc.BindableService;
+import io.grpc.Context;
 import io.grpc.stub.StreamObserver;
 import java.io.IOException;
 import java.util.Collections;
@@ -62,7 +63,6 @@ import org.opennms.horizon.shared.ipc.grpc.server.manager.RpcRequestTimeoutManag
 import org.opennms.horizon.shared.ipc.grpc.server.manager.RpcRequestTracker;
 import org.opennms.horizon.shared.ipc.grpc.server.manager.adapter.MinionRSTransportAdapter;
 import org.opennms.horizon.shared.ipc.grpc.server.manager.rpcstreaming.MinionRpcStreamConnectionManager;
-import org.opennms.horizon.shared.ipc.rpc.api.RemoteExecutionException;
 import org.opennms.horizon.shared.ipc.rpc.api.RpcClientFactory;
 import org.opennms.horizon.shared.ipc.sink.api.SinkModule;
 import org.opennms.horizon.shared.ipc.sink.common.AbstractMessageConsumerManager;
@@ -93,6 +93,7 @@ import org.slf4j.MDC.MDCCloseable;
 public class OpennmsGrpcServer extends AbstractMessageConsumerManager implements RpcRequestDispatcher {
 
     private static final Logger LOG = LoggerFactory.getLogger(OpennmsGrpcServer.class);
+
     private final GrpcIpcServer grpcIpcServer;
     private final List<InterceptorFactory> interceptors;
     private String location;
@@ -269,7 +270,9 @@ public class OpennmsGrpcServer extends AbstractMessageConsumerManager implements
                     if (!Strings.isNullOrEmpty(sinkMessage.getModuleId())) {
                         ExecutorService sinkModuleExecutor = sinkConsumersByModuleId.get(sinkMessage.getModuleId());
                         if (sinkModuleExecutor != null) {
-                            sinkModuleExecutor.execute(() -> dispatchSinkMessage(sinkMessage));
+                            // Schedule execution with the ExecutorService, with the current GRPC context active
+                            Context.currentContextExecutor(sinkModuleExecutor)
+                                .execute(() -> dispatchSinkMessage(sinkMessage));
                         }
                     }
                 } else {
@@ -307,7 +310,7 @@ public class OpennmsGrpcServer extends AbstractMessageConsumerManager implements
 
     @Override
     public CompletableFuture<RpcResponseProto> dispatch(String location, RpcRequestProto request) {
-        StreamObserver<RpcRequestProto> rpcHandler = rpcConnectionTracker.lookupByLocationRoundRobin(location);
+        StreamObserver<RpcRequestProto> rpcHandler = rpcConnectionTracker.lookupByLocationRoundRobin("opennms-prime", location);
         if (rpcHandler == null) {
             return CompletableFuture.failedFuture(new IllegalArgumentException("Unknown location " + location));
         }
@@ -316,7 +319,7 @@ public class OpennmsGrpcServer extends AbstractMessageConsumerManager implements
 
     @Override
     public CompletableFuture<RpcResponseProto> dispatch(String location, String systemId, RpcRequestProto request) {
-        StreamObserver<RpcRequestProto> rpcHandler = rpcConnectionTracker.lookupByMinionId(systemId);
+        StreamObserver<RpcRequestProto> rpcHandler = rpcConnectionTracker.lookupByMinionId("opennms-prime", systemId);
         if (rpcHandler == null) {
             return CompletableFuture.failedFuture(new IllegalArgumentException("Unknown system id " + systemId));
         }

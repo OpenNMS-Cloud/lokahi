@@ -58,7 +58,7 @@ import io.grpc.StatusRuntimeException;
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
     classes = InventoryApplication.class)
 @ContextConfiguration(initializers = {PostgresInitializer.class})
-public class LocationGrpcIntegrationTest extends GrpcTestBase {
+public class LocationGrpcIntTest extends GrpcTestBase {
     private MonitoringLocation location1;
     private MonitoringLocation location2;
     @Autowired

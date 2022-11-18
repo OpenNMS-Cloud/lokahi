@@ -28,23 +28,14 @@
 
 package org.opennms.horizon.inventory.grpc;
 
-import java.io.IOException;
-import java.util.UUID;
-
-import io.grpc.BindableService;
-import io.grpc.Server;
-import io.grpc.inprocess.InProcessServerBuilder;
-import io.grpc.stub.StreamObserver;
-import org.opennms.taskset.service.contract.PublishTaskSetRequest;
-import org.opennms.taskset.service.contract.PublishTaskSetResponse;
-import org.opennms.taskset.service.contract.TaskSetServiceGrpc;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
-
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.Metadata;
 import io.grpc.stub.MetadataUtils;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
+
+import java.util.UUID;
 
 abstract class GrpcTestBase {
     @DynamicPropertySource
@@ -55,8 +46,6 @@ abstract class GrpcTestBase {
     protected final String tenantId = new UUID(10, 10).toString();
 
     protected ManagedChannel channel;
-
-    protected static Server server;
 
     protected static final Metadata.Key<String> TENANT_ID = Metadata.Key.of("tenant-id", Metadata.ASCII_STRING_MARSHALLER);
 
@@ -79,17 +68,5 @@ abstract class GrpcTestBase {
     protected void setupGrpcWithOutTenantID() {
         channel = ManagedChannelBuilder.forAddress("localhost", 6767)
             .usePlaintext().build();
-    }
-
-    protected static Server startMockServer(String name, BindableService... services) throws IOException {
-        InProcessServerBuilder builder = InProcessServerBuilder
-            .forName(name).directExecutor();
-
-        if (services != null) {
-            for (BindableService service : services) {
-                builder.addService(service);
-            }
-        }
-        return builder.build().start();
     }
 }

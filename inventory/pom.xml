@@ -199,8 +199,12 @@
             <artifactId>grpc-testing</artifactId>
             <version>${grpc.version}</version>
             <scope>test</scope>
+        </dependency><dependency>
+            <groupId>org.grpcmock</groupId>
+            <artifactId>grpcmock-junit5</artifactId>
+            <version>${grpcmock.version}</version>
+            <scope>test</scope>
         </dependency>
-
         <dependency>
             <!--
                 temporarily required for test-containers on m1 mac

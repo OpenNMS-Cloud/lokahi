@@ -42,7 +42,7 @@ import org.springframework.test.context.DynamicPropertySource;
 import java.io.IOException;
 import java.util.UUID;
 
-abstract class GrpcTestBase {
+public abstract class GrpcTestBase {
     @DynamicPropertySource
     private static void registerDatasourceProperties(DynamicPropertyRegistry registry) {
         registry.add("grpc.server.port", ()->6767);

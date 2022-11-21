@@ -39,7 +39,7 @@ class DetectorResponseServiceIntTest extends GrpcTestBase {
     private static final String TEST_IP_ADDRESS = "127.0.0.1";
     private static final String TEST_NODE_LABEL = "node-label";
     private static final String TEST_LOCATION = "Default";
-    public static final String TEST_TENANT_ID = "test-tenant-id";
+    private static final String TEST_TENANT_ID = "test-tenant-id";
 
     @Autowired
     private DetectorResponseService service;
@@ -152,6 +152,26 @@ class DetectorResponseServiceIntTest extends GrpcTestBase {
         assertEquals(monitoredServiceType, relatedType);
 
         assertEquals(numberOfCalls, testGrpcService.getTimesCalled());
+    }
+
+    @Test
+    @Transactional
+    void testAcceptNotDetected() {
+        populateDatabase();
+
+        DetectorResponse response = DetectorResponse.newBuilder()
+            .setDetected(false).setIpAddress(TEST_IP_ADDRESS)
+            .setMonitorType(MonitorType.SNMP).build();
+
+        service.accept(TEST_LOCATION, response);
+
+        List<MonitoredServiceType> monitoredServiceTypes = monitoredServiceTypeRepository.findAll();
+        assertEquals(0, monitoredServiceTypes.size());
+
+        List<MonitoredService> monitoredServices = monitoredServiceRepository.findAll();
+        assertEquals(0, monitoredServices.size());
+
+        assertEquals(0, testGrpcService.getTimesCalled());
     }
 
     private void populateDatabase() {

@@ -40,10 +40,12 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import java.util.function.Supplier;
 
 public class SpringContextTestInitializer implements ApplicationContextInitializer<GenericApplicationContext> {
-
+    private static final String TASK_SET_BLOCKING_STUB_NAME = "taskSetServiceBlockingStub";
     private static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:14.5-alpine")
         .withDatabaseName("inventory").withUsername("inventory")
         .withPassword("password").withExposedPorts(5432);
+
+
     static {
         postgres.start();
     }
@@ -66,13 +68,16 @@ public class SpringContextTestInitializer implements ApplicationContextInitializ
     // The Mock Grpc server was getting a different stub due to other tests interfering.
     // This overrides the appropriate bean from the beginning of when the spring context gets initialized.
     private void initMockGrpcTaskSetService(GenericApplicationContext context) {
-        Supplier<TaskSetServiceGrpc.TaskSetServiceBlockingStub> supplier = () -> TaskSetServiceGrpc.newBlockingStub(
-            InProcessChannelBuilder.forName(TaskSetServiceGrpc.SERVICE_NAME).directExecutor().build());
+
+        Class<TaskSetServiceGrpc.TaskSetServiceBlockingStub> stubClass
+            = TaskSetServiceGrpc.TaskSetServiceBlockingStub.class;
+
+        registerBean(context, TASK_SET_BLOCKING_STUB_NAME, stubClass, () -> TaskSetServiceGrpc.newBlockingStub(
+            InProcessChannelBuilder.forName(TaskSetServiceGrpc.SERVICE_NAME).directExecutor().build()));
+    }
+
+    private <T> void registerBean(GenericApplicationContext context, String name, Class<T> clazz, Supplier<T> supplier) {
         BeanDefinitionCustomizer customizer = beanDefinition -> beanDefinition.setPrimary(true);
-
-        String beanName = "taskSetServiceBlockingStub";
-        Class<TaskSetServiceGrpc.TaskSetServiceBlockingStub> stubClass = TaskSetServiceGrpc.TaskSetServiceBlockingStub.class;
-
-        context.registerBean(beanName, stubClass, supplier, customizer);
+        context.registerBean(name, clazz, supplier, customizer);
     }
 }

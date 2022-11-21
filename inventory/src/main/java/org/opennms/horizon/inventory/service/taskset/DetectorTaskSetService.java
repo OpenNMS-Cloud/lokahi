@@ -45,6 +45,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import javax.transaction.Transactional;
 import java.util.List;
 
 @Component
@@ -61,6 +62,7 @@ public class DetectorTaskSetService {
     //todo: add ICMP
     private static final MonitorType[] DETECTOR_MONITOR_TYPES = {MonitorType.SNMP};
 
+    @Transactional
     public void sendDetectorTasks(Node node) {
 
         List<IpInterface> ipInterfaces =

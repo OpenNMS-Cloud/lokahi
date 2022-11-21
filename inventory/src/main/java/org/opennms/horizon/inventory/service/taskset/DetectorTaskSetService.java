@@ -120,10 +120,12 @@ public class DetectorTaskSetService {
     }
 
     private void sendTaskSet(Node node) {
+        String tenantId = "opennms-prime";  // TBD888: properly source the Tenant ID
+
         MonitoringLocation monitoringLocation = node.getMonitoringLocation();
         String location = monitoringLocation.getLocation();
         TaskSet taskSet = taskSetManager.getTaskSet(location);
 
-        taskSetPublisher.publishTaskSet(location, taskSet);
+        taskSetPublisher.publishTaskSet(tenantId, location, taskSet);
     }
 }

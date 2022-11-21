@@ -94,7 +94,9 @@ public class MonitorTaskSetService {
     }
 
     private void sendTaskSet(String location) {
+        String tenantId = "opennms-prime";  // TBD888: properly source the Tenant ID
+
         TaskSet taskSet = taskSetManager.getTaskSet(location);
-        taskSetPublisher.publishTaskSet(location, taskSet);
+        taskSetPublisher.publishTaskSet(tenantId, location, taskSet);
     }
 }

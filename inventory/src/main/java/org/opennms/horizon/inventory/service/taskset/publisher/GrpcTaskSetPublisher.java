@@ -28,6 +28,8 @@
 
 package org.opennms.horizon.inventory.service.taskset.publisher;
 
+import io.grpc.Metadata;
+import io.grpc.stub.MetadataUtils;
 import lombok.RequiredArgsConstructor;
 import org.opennms.taskset.contract.TaskSet;
 import org.opennms.taskset.service.api.TaskSetPublisher;
@@ -44,8 +46,10 @@ public class GrpcTaskSetPublisher implements TaskSetPublisher {
     private static final Logger log = LoggerFactory.getLogger(GrpcTaskSetPublisher.class);
     private final TaskSetServiceGrpc.TaskSetServiceBlockingStub taskSetServiceStub;
 
+    private static final Metadata.Key HEADER_KE = Metadata.Key.of("tenant-id", Metadata.ASCII_STRING_MARSHALLER);
+
     @Override
-    public void publishTaskSet(String location, TaskSet taskSet) {
+    public void publishTaskSet(String tenantId, String location, TaskSet taskSet) {
         try {
             PublishTaskSetRequest request =
                 PublishTaskSetRequest.newBuilder()
@@ -53,7 +57,11 @@ public class GrpcTaskSetPublisher implements TaskSetPublisher {
                     .setTaskSet(taskSet)
                     .build();
 
-            PublishTaskSetResponse response = taskSetServiceStub.publishTaskSet(request);
+            Metadata metadata = new Metadata();
+            metadata.put(HEADER_KE, tenantId);
+
+            PublishTaskSetResponse response =
+                taskSetServiceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).publishTaskSet(request);
 
             log.debug("PUBLISH task set complete: location={}, response={}", location, response);
         } catch (Exception e) {

@@ -1,4 +1,6 @@
 # Tilt config #
+load('ext://uibutton', 'cmd_button')
+
 secret_settings(disable_scrub=True)  ## TODO: update secret values so we can reenable scrub
 
 # Functions #
@@ -151,7 +153,7 @@ jib_project(
 ### Core ###
 custom_build(
     'opennms/horizon-stream-core',
-    'mvn install -Pbuild-docker-images-enabled -DskipTests -Ddocker.image=$EXPECTED_REF -f platform',
+    'mvn install -Pbuild-docker-images-enabled -DskipTests -Dfeatures.verify.skip=true -Ddocker.image=$EXPECTED_REF -f platform',
     deps=['./platform'],
     ignore=['**/target', '**/dependency-reduced-pom.xml'],
 )
@@ -181,9 +183,18 @@ k8s_resource(
 )
 
 local_resource(
-    'minion-local',
-    cmd=['mvn', 'install', '-Ddocker.skip=true', '-Dtest=false', '-DfailIfNoTests=false', '-DskipITs=true', '-DskipUTs=true', '-DskipTests=true', '-Dfeatures.verify.skip=true'],
+    'minion-local-compile',
+    cmd=['mvn', 'clean', 'install', '-Ddocker.skip=true', '-Dtest=false', '-DfailIfNoTests=false', '-DskipITs=true', '-DskipUTs=true', '-DskipTests=true', '-Dfeatures.verify.skip=true', '-pl=!assembly,!docker-assembly'],
     dir='minion',
+    labels=['minion'],
+    allow_parallel=True,
+    auto_init=False
+)
+
+local_resource(
+    'minion-local',
+    cmd=['mvn', 'install'],
+    dir='minion/assembly',
     serve_cmd=['./bin/karaf', 'server'],
     serve_dir='minion/assembly/target/assembly',
     serve_env={
@@ -191,6 +202,7 @@ local_resource(
         "LOCATION": "Default"
     },
     labels=['minion'],
+    resource_deps=['minion-local-compile'],
     trigger_mode=TRIGGER_MODE_MANUAL,
     allow_parallel=True,
     auto_init=False

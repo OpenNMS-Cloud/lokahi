@@ -29,6 +29,7 @@ import javax.transaction.Transactional;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -68,7 +69,7 @@ class DetectorResponseServiceIntTest extends GrpcTestBase {
     }
 
     @AfterEach
-    public void cleanUp(){
+    public void cleanUp() {
         monitoredServiceRepository.deleteAll();
         monitoredServiceTypeRepository.deleteAll();
         ipInterfaceRepository.deleteAll();
@@ -172,6 +173,53 @@ class DetectorResponseServiceIntTest extends GrpcTestBase {
         assertEquals(0, monitoredServices.size());
 
         assertEquals(0, testGrpcService.getTimesCalled());
+    }
+
+    @Test
+    @Transactional
+    void testAcceptMultipleSameIpAddressDifferentMonitorType() {
+        populateDatabase();
+
+        DetectorResponse.Builder builder = DetectorResponse.newBuilder()
+            .setDetected(true).setIpAddress(TEST_IP_ADDRESS);
+
+        int numberOfCalls = 2;
+
+        MonitorType[] monitorTypes = {MonitorType.ICMP, MonitorType.SNMP};
+
+        for (int index = 0; index < numberOfCalls; index++) {
+
+            DetectorResponse response = builder
+                .setMonitorType(monitorTypes[index]).build();
+
+            service.accept(TEST_LOCATION, response);
+        }
+
+        List<MonitoredServiceType> monitoredServiceTypes = monitoredServiceTypeRepository.findAll();
+        assertEquals(monitorTypes.length, monitoredServiceTypes.size());
+
+        List<String> monitoredServiceNames =
+            monitoredServiceTypes.stream()
+                .map(MonitoredServiceType::getServiceName)
+                .collect(Collectors.toList());
+
+        assertEquals(monitorTypes.length, monitoredServiceNames.size());
+
+        for (int index = 0; index < monitorTypes.length; index++) {
+            assertEquals(monitorTypes[index].getValueDescriptor().getName(), monitoredServiceNames.get(index));
+        }
+
+        List<MonitoredService> monitoredServices = monitoredServiceRepository.findAll();
+        assertEquals(2, monitoredServices.size());
+
+        for (MonitoredService monitoredService : monitoredServices) {
+            IpInterface ipInterface = monitoredService.getIpInterface();
+
+            assertEquals(TEST_IP_ADDRESS, ipInterface.getIpAddress().getAddress());
+            assertEquals(TEST_TENANT_ID, monitoredService.getTenantId());
+        }
+
+        assertEquals(numberOfCalls, testGrpcService.getTimesCalled());
     }
 
     private void populateDatabase() {

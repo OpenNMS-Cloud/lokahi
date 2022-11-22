@@ -31,7 +31,6 @@ package org.opennms.horizon.minion.snmp;
 import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors;
 import com.google.protobuf.Message;
-import lombok.Setter;
 import org.opennms.horizon.minion.plugin.api.MonitoredService;
 import org.opennms.horizon.minion.plugin.api.ServiceMonitorResponse;
 import org.opennms.horizon.minion.plugin.api.ServiceMonitorResponse.Status;
@@ -52,7 +51,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.function.BiFunction;
 
 /**
  * TBD888: is there lost logic here?  For example, counting
@@ -200,10 +198,9 @@ public class SnmpMonitor extends SnmpMonitorStrategy {
 
             future =
                 snmpHelper.getAsync(agentConfig, new SnmpObjId[]{ snmpObjectId })
-                    .thenApply(result -> processSnmpResponse(result, finalHostAddress, snmpObjectId, operator, operand, startTimestamp))
+                    .thenApply(result -> processSnmpResponse(result, finalHostAddress, snmpObjectId, operator, operand, startTimestamp, svc.getNodeId()))
                     .completeOnTimeout(this.createTimeoutResponse(finalHostAddress), agentConfig.getTimeout(), TimeUnit.MILLISECONDS)
-                    .exceptionally((thrown) -> this.createExceptionResponse(thrown, finalHostAddress))
-            ;
+                    .exceptionally((thrown) -> this.createExceptionResponse(thrown, finalHostAddress));
 
             return future;
         } catch (NumberFormatException e) {
@@ -268,8 +265,8 @@ public class SnmpMonitor extends SnmpMonitorStrategy {
         SnmpObjId oid,
         String operator,
         String operand,
-        long startTimestamp
-    ) {
+        long startTimestamp,
+        long nodeId) {
         long endTimestamp = System.nanoTime();
         long elapsedTimeNs = ( endTimestamp - startTimestamp );
         double elapsedTimeMs = (double) elapsedTimeNs / NANOSECOND_PER_MILLISECOND;
@@ -279,7 +276,7 @@ public class SnmpMonitor extends SnmpMonitorStrategy {
             .status(Status.Unknown)
             .responseTime(elapsedTimeMs)
             .ipAddress(hostAddress)
-            ;
+            .nodeId(nodeId);
 
         Map<String, Number> metrics = new HashMap<>();
 

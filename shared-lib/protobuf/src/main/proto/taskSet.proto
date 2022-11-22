@@ -57,8 +57,9 @@ message TaskDefinition {
   TaskType type = 3;
   string plugin_name = 4;
   string schedule = 5;
+  uint64 node_id = 6;
+  google.protobuf.Any configuration = 7;
 
-  google.protobuf.Any configuration = 6;
 }
 
 message TaskSet {
@@ -81,14 +82,13 @@ message TaskSetResults {
 }
 
 message MonitorResponse {
-  string status = 2;
-  string reason = 3;
-  string ip_address = 4;
-
-  double response_time_ms = 7;
-  MonitorType monitor_type = 8;
-
-  map<string, double> metrics = 9;
+  string status = 1;
+  string reason = 2;
+  string ip_address = 3;
+  double response_time_ms = 4;
+  MonitorType monitor_type = 5;
+  map<string, double> metrics = 6;
+  uint64 node_id = 7;
 }
 
 message DetectorResponse {
@@ -96,4 +96,5 @@ message DetectorResponse {
   string ip_address = 2;
   string reason = 3;
   MonitorType monitor_type = 4;
+  uint64 node_id = 5;
 }

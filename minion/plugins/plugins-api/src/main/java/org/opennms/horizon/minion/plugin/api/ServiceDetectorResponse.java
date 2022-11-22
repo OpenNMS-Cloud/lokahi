@@ -23,4 +23,6 @@ public interface ServiceDetectorResponse {
      * @return IP address that was under detection
      */
     String getIpAddress();
+
+    long getNodeId();
 }

@@ -38,7 +38,7 @@ public class TaskExecutorLocalDetectorServiceImpl implements TaskExecutorLocalSe
         try {
             ServiceDetector detector = lookupDetector(taskDefinition);
 
-            future = detector.detect(taskDefinition.getConfiguration());
+            future = detector.detect(taskDefinition.getConfiguration(), taskDefinition.getNodeId());
             future.whenComplete(this::handleExecutionComplete);
 
         } catch (Exception exc) {

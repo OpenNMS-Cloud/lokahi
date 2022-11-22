@@ -71,7 +71,7 @@ public class DetectorResponseService {
                 createMonitoredService(response, ipInterface);
 
                 MonitorType monitorType = response.getMonitorType();
-                monitorTaskSetService.sendMonitorTask(location, monitorType, ipInterface);
+                monitorTaskSetService.sendMonitorTask(location, monitorType, ipInterface, response.getNodeId());
 
             } else {
                 log.info("{} not detected on ip address = {}", response.getMonitorType(), ipAddress.getAddress());

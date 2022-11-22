@@ -37,7 +37,7 @@ public class SnmpDetector implements ServiceDetector {
     }
 
     @Override
-    public CompletableFuture<ServiceDetectorResponse> detect(Any config) {
+    public CompletableFuture<ServiceDetectorResponse> detect(Any config, long nodeId) {
 
         String hostAddress = null;
 
@@ -55,7 +55,7 @@ public class SnmpDetector implements ServiceDetector {
             SnmpObjId snmpObjectId = SnmpObjId.get(DEFAULT_OBJECT_IDENTIFIER);
 
             return snmpHelper.getAsync(agentConfig, new SnmpObjId[]{snmpObjectId})
-                .handle((snmpValues, throwable) -> getResponse(effectiveSnmpDetectorRequest, throwable))
+                .handle((snmpValues, throwable) -> getResponse(effectiveSnmpDetectorRequest, nodeId, throwable))
                 .completeOnTimeout(getErrorResponse(hostAddress, SNMP_DETECTION_TIMED_OUT),
                     agentConfig.getTimeout(), TimeUnit.MILLISECONDS);
 
@@ -92,17 +92,18 @@ public class SnmpDetector implements ServiceDetector {
         return new SnmpAgentConfig(host, configuration);
     }
 
-    private ServiceDetectorResponse getResponse(SnmpDetectorRequest request, Throwable throwable) {
+    private ServiceDetectorResponse getResponse(SnmpDetectorRequest request, long nodeId, Throwable throwable) {
         if (throwable != null) {
             return getErrorResponse(request.getHost(), throwable.getMessage());
         }
-        return getDetectedResponse(request.getHost());
+        return getDetectedResponse(request.getHost(), nodeId);
     }
 
-    private ServiceDetectorResponse getDetectedResponse(String host) {
+    private ServiceDetectorResponse getDetectedResponse(String host, long nodeId) {
         return ServiceDetectorResponseImpl.builder()
             .monitorType(MonitorType.SNMP)
             .ipAddress(host)
+            .nodeId(nodeId)
             .serviceDetected(true)
             .build();
     }

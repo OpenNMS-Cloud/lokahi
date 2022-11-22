@@ -53,7 +53,7 @@ public class SnmpDetectorTest {
 
         Mockito.when(mockSnmpHelper.getAsync(Mockito.any(SnmpAgentConfig.class), Mockito.any(SnmpObjId[].class))).thenReturn(future);
 
-        CompletableFuture<ServiceDetectorResponse> response = target.detect(testConfig);
+        CompletableFuture<ServiceDetectorResponse> response = target.detect(testConfig, Mockito.anyInt());
 
         ServiceDetectorResponse serviceDetectorResponse = response.get();
 
@@ -69,7 +69,7 @@ public class SnmpDetectorTest {
 
         Mockito.when(mockSnmpHelper.getAsync(Mockito.any(SnmpAgentConfig.class), Mockito.any(SnmpObjId[].class))).thenThrow(exception);
 
-        CompletableFuture<ServiceDetectorResponse> response = target.detect(testConfig);
+        CompletableFuture<ServiceDetectorResponse> response = target.detect(testConfig,  Mockito.anyInt());
 
         ServiceDetectorResponse serviceDetectorResponse = response.get();
 

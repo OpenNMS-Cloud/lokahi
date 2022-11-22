@@ -94,7 +94,7 @@ public class DetectorTaskSetService {
         switch (monitorType) {
             case ICMP: {
                 //todo: add request
-                taskSetManagerUtil.addTask(location, ipAddress, name, TaskType.DETECTOR, pluginName);
+                taskSetManagerUtil.addTask(location, ipAddress, name, TaskType.DETECTOR, pluginName, node.getId());
                 break;
             }
             case SNMP: {
@@ -105,7 +105,7 @@ public class DetectorTaskSetService {
                         .setRetries(DEFAULT_SNMP_RETRIES)
                         .build());
 
-                taskSetManagerUtil.addTask(location, ipAddress, name, TaskType.DETECTOR, pluginName, configuration);
+                taskSetManagerUtil.addTask(location, ipAddress, name, TaskType.DETECTOR, pluginName, configuration, node.getId());
                 break;
             }
             case UNRECOGNIZED: {
@@ -126,4 +126,6 @@ public class DetectorTaskSetService {
 
         taskSetPublisher.publishTaskSet(location, taskSet);
     }
+
+
 }

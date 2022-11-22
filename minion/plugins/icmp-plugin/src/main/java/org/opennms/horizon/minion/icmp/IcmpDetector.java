@@ -40,9 +40,9 @@ import java.util.concurrent.CompletableFuture;
 @AllArgsConstructor
 public class IcmpDetector implements ServiceDetector {
     @Override
-    public CompletableFuture<ServiceDetectorResponse> detect(Any config) {
+    public CompletableFuture<ServiceDetectorResponse> detect(Any config, long nodeId) {
 //        todo: implement this
         return CompletableFuture.completedFuture(ServiceDetectorResponseImpl.builder()
-            .monitorType(MonitorType.ICMP).serviceDetected(true).build());
+            .monitorType(MonitorType.ICMP).nodeId(nodeId).serviceDetected(true).build());
     }
 }

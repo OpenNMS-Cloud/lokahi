@@ -60,7 +60,8 @@ public class TSDataProcessor {
         "instance",
         "location",
         "system_id",
-        "monitor"};
+        "monitor",
+        "node_id"};
     private final CollectorRegistry collectorRegistry = new CollectorRegistry();
     private final Map<String, Gauge> gauges = new ConcurrentHashMap<>();
     private final MetricsPushAdapter pushAdapter;
@@ -73,7 +74,7 @@ public class TSDataProcessor {
     public void consume(byte[] data) {
         try {
             TaskSetResults results = TaskSetResults.parseFrom(data);
-            results.getResultsList().forEach(result -> CompletableFuture.supplyAsync(()->{
+            results.getResultsList().forEach(result -> CompletableFuture.supplyAsync(() -> {
                 try {
                     if (result != null) {
                         log.info("Processing task set result {}", result);
@@ -100,16 +101,16 @@ public class TSDataProcessor {
 
     private void processMonitorResponse(TaskResult result) {
         MonitorResponse response = result.getMonitorResponse();
-        String [] labelValues = {response.getIpAddress(), result.getLocation(), result.getSystemId(),  response.getMonitorType().name()};
+        String[] labelValues = {response.getIpAddress(), result.getLocation(), result.getSystemId(), response.getMonitorType().name(), String.valueOf(response.getNodeId())};
         Gauge gauge = getGaugeFromName(METRICS_NAME_RESPONSE, true);
         gauge.labels(labelValues).set(response.getResponseTimeMs());
         Map<String, String> labels = new HashMap<>();
-        for (int i = 0; i< MONITOR_METRICS_LABEL_NAMES.length; i++) {
+        for (int i = 0; i < MONITOR_METRICS_LABEL_NAMES.length; i++) {
             labels.put(MONITOR_METRICS_LABEL_NAMES[i], labelValues[i]);
         }
 
-        if(response.getMetricsMap()!=null) {
-            response.getMetricsMap().forEach((k, v)-> {
+        if (response.getMetricsMap() != null) {
+            response.getMetricsMap().forEach((k, v) -> {
                 Gauge extGauge = getGaugeFromName(METRICS_NAME_PREFIX_MONITOR + k, false);
                 extGauge.labels(labelValues).set(v);
             });
@@ -119,10 +120,10 @@ public class TSDataProcessor {
 
     private Gauge getGaugeFromName(String name, boolean withDesc) {
         return gauges.compute(name, (key, gauge) -> {
-            if(gauge != null) {
+            if (gauge != null) {
                 return gauge;
             }
-            if(withDesc) {
+            if (withDesc) {
                 return Gauge.build()
                     .name(name)
                     .help("Monitor round trip response time")

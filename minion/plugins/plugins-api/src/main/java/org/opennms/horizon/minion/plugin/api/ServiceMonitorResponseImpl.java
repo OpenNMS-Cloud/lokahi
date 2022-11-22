@@ -1,13 +1,14 @@
 package org.opennms.horizon.minion.plugin.api;
 
-import java.util.Map;
 import lombok.Builder;
 import lombok.Data;
 import org.opennms.taskset.contract.MonitorType;
 
+import java.util.Map;
+
 @Builder
 @Data
-public class ServiceMonitorResponseImpl implements ServiceMonitorResponse{
+public class ServiceMonitorResponseImpl implements ServiceMonitorResponse {
     private Status status;
     private String reason;
     private String ipAddress;
@@ -15,6 +16,7 @@ public class ServiceMonitorResponseImpl implements ServiceMonitorResponse{
     private DeviceConfig deviceConfig;
     private Map<String, Number> properties;
     private MonitorType monitorType;
+    private long nodeId;
 
     public static ServiceMonitorResponse unknown() { return builder().status(Status.Unknown).build();}
     public static ServiceMonitorResponse down() { return builder().status(Status.Down).build();}

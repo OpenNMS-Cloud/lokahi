@@ -57,7 +57,7 @@ public interface MonitoredService {
      *
      * @return the nodeid
      */
-    int getNodeId();
+    long getNodeId();
 
     /**
      * Returns the label of the node that this service is associated with.

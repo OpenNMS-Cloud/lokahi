@@ -29,6 +29,9 @@ public interface ServiceMonitorResponse {
      */
     String getIpAddress();
 
+
+    long getNodeId();
+
     /**
      *  TODO: standardize the unit (ms or sec?)
      *

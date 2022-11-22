@@ -1,25 +1,25 @@
 package org.opennms.horizon.minion.icmp;
 
-import java.net.InetAddress;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
-
 import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors;
-import org.opennms.horizon.shared.icmp.EchoPacket;
-import org.opennms.horizon.shared.icmp.PingConstants;
-import org.opennms.horizon.shared.icmp.PingResponseCallback;
-import org.opennms.horizon.shared.icmp.Pinger;
-import org.opennms.horizon.shared.icmp.PingerFactory;
 import org.opennms.horizon.minion.plugin.api.AbstractServiceMonitor;
 import org.opennms.horizon.minion.plugin.api.MonitoredService;
 import org.opennms.horizon.minion.plugin.api.ServiceMonitorResponse;
 import org.opennms.horizon.minion.plugin.api.ServiceMonitorResponse.Status;
 import org.opennms.horizon.minion.plugin.api.ServiceMonitorResponseImpl;
+import org.opennms.horizon.shared.icmp.EchoPacket;
+import org.opennms.horizon.shared.icmp.PingConstants;
+import org.opennms.horizon.shared.icmp.PingResponseCallback;
+import org.opennms.horizon.shared.icmp.Pinger;
+import org.opennms.horizon.shared.icmp.PingerFactory;
 import org.opennms.icmp.contract.IcmpMonitorRequest;
 import org.opennms.taskset.contract.MonitorType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.net.InetAddress;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 public class IcmpMonitor extends AbstractServiceMonitor {
 
@@ -74,7 +74,7 @@ public class IcmpMonitor extends AbstractServiceMonitor {
                 effectiveRequest.getTimeout(),
                 effectiveRequest.getRetries(),
                 effectiveRequest.getPacketSize(),
-                new MyPingResponseCallback(future)
+                new MyPingResponseCallback(future, svc.getNodeId())
             );
         } catch (Exception e) {
             future.completeExceptionally(e);
@@ -121,9 +121,11 @@ public class IcmpMonitor extends AbstractServiceMonitor {
     private static class MyPingResponseCallback implements PingResponseCallback {
         private final Logger logger = LoggerFactory.getLogger(MyPingResponseCallback.class);
         private final CompletableFuture<ServiceMonitorResponse> future;
+        private final long nodeId;
 
-        public MyPingResponseCallback(CompletableFuture<ServiceMonitorResponse> future) {
+        public MyPingResponseCallback(CompletableFuture<ServiceMonitorResponse> future, long nodeId) {
             this.future = future;
+            this.nodeId = nodeId;
         }
 
         @Override
@@ -136,6 +138,7 @@ public class IcmpMonitor extends AbstractServiceMonitor {
                     .monitorType(MonitorType.ICMP)
                     .status(Status.Up)
                     .responseTime(responseTimeMillis)
+                    .nodeId(nodeId)
                     .ipAddress(inetAddress.getHostAddress())
                     .build()
             );

@@ -11,6 +11,7 @@ public class ServiceDetectorResponseImpl implements ServiceDetectorResponse {
     private boolean serviceDetected; // enum instead?
     private String reason;
     private String ipAddress;
+    private long nodeId;
 
     @Override
     public MonitorType getMonitorType() {

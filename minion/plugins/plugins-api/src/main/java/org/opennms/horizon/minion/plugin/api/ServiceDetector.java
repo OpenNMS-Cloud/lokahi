@@ -6,6 +6,6 @@ import java.util.concurrent.CompletableFuture;
 
 public interface ServiceDetector {
 
-    CompletableFuture<ServiceDetectorResponse> detect(Any config);
+    CompletableFuture<ServiceDetectorResponse> detect(Any config, long nodeId);
 
 }

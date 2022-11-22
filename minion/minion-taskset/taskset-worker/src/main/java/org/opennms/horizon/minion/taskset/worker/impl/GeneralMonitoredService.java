@@ -1,19 +1,20 @@
 package org.opennms.horizon.minion.taskset.worker.impl;
 
-import java.net.InetAddress;
 import org.opennms.horizon.minion.plugin.api.MonitoredService;
+
+import java.net.InetAddress;
 
 // TODO: why an interface - this seems like a straight-forward model?
 public class GeneralMonitoredService implements MonitoredService {
 
     private final String svcName;
     private final String ipAddr;
-    private final int nodeId;
+    private final long nodeId;
     private final String nodeLabel;
     private final String nodeLocation;
     private final InetAddress address;
 
-    public GeneralMonitoredService(String svcName, String ipAddr, int nodeId, String nodeLabel, String nodeLocation, InetAddress address) {
+    public GeneralMonitoredService(String svcName, String ipAddr, long nodeId, String nodeLabel, String nodeLocation, InetAddress address) {
         this.svcName = svcName;
         this.ipAddr = ipAddr;
         this.nodeId = nodeId;
@@ -33,7 +34,7 @@ public class GeneralMonitoredService implements MonitoredService {
     }
 
     @Override
-    public int getNodeId() {
+    public long getNodeId() {
         return nodeId;
     }
 

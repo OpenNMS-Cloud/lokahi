@@ -50,7 +50,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @ContextConfiguration(initializers = {SpringContextTestInitializer.class})
-public class IpInterfaceRepositoryTest {
+class IpInterfaceRepositoryTest {
 
     private static final int NUM_NODES = 10;
 
@@ -90,7 +90,7 @@ public class IpInterfaceRepositoryTest {
 
 
     @Test
-    public void testFindByIpInterfaceForAGivenLocationAndIpAddress() {
+    void testFindByIpInterfaceForAGivenLocationAndIpAddress() {
         var node = nodeRepository.findByNodeLabel("node1");
         assertNotNull(node);
         var locationList = monitoringLocationRepository.findByLocation("location1");
@@ -106,12 +106,12 @@ public class IpInterfaceRepositoryTest {
 
             // Check with invalid location
             var optionalInterface = ipInterfaceRepository.findByIpAddressAndLocationAndTenantId(
-                new Inet("192.168.1.1"), "location" + i + 3, "tenant" + i);
+                new Inet("192.168.1." + i), "location" + i + 3, "tenant" + i);
             assertThat(optionalInterface).isEmpty();
 
             // Check with invalid tenant
             optionalInterface = ipInterfaceRepository.findByIpAddressAndLocationAndTenantId(
-                new Inet("192.168.1.1"), "location" + i, "tenant2" + i + 3);
+                new Inet("192.168.1." + i), "location" + i, "tenant2" + i + 3);
             assertThat(optionalInterface).isEmpty();
         }
 

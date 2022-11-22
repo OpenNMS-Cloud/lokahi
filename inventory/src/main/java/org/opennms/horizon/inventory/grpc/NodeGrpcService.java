@@ -42,6 +42,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.opennms.horizon.inventory.dto.IpInterfaceDTO;
 import org.opennms.horizon.inventory.dto.NodeCreateDTO;
 import org.opennms.horizon.inventory.dto.NodeDTO;
+import org.opennms.horizon.inventory.dto.NodeIdQuery;
 import org.opennms.horizon.inventory.dto.NodeList;
 import org.opennms.horizon.inventory.dto.NodeServiceGrpc;
 import org.opennms.horizon.inventory.mapper.NodeMapper;
@@ -103,8 +104,8 @@ public class NodeGrpcService extends NodeServiceGrpc.NodeServiceImplBase {
     }
 
     @Override
-    public void getNodeIdFromQuery(org.opennms.horizon.inventory.dto.NodeIdQuery request,
-                                   io.grpc.stub.StreamObserver<com.google.protobuf.Int64Value> responseObserver) {
+    public void getNodeIdFromQuery(NodeIdQuery request,
+                                   StreamObserver<Int64Value> responseObserver) {
 
         Optional<String> tenantIdOptional = tenantLookup.lookupTenantId(Context.current());
 

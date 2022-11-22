@@ -167,17 +167,33 @@ k8s_resource(
 ### Minion ###
 custom_build(
     'opennms/horizon-stream-minion',
-    'mvn install -f minion -Ddocker.image=$EXPECTED_REF -Dtest=false -DfailIfNoTests=false -DskipITs=true -DskipTests=true',
+    ['mvn', 'install', '-Ddocker.image=$EXPECTED_REF', '-Dtest=false', '-DfailIfNoTests=false', '-DskipITs=true', '-DskipUTs=true', '-DskipTests=true', '-Dfeatures.verify.skip=true'],
     deps=['./minion'],
     ignore=['**/target', '**/dependency-reduced-pom.xml'],
 )
 
 k8s_resource(
     'opennms-minion',
-    new_name='minion',
+    new_name='minion-k8s',
     port_forwards=['12022:8101', '12080:8181', '12050:5005'],
     labels=['minion'],
     trigger_mode=TRIGGER_MODE_MANUAL,
+)
+
+local_resource(
+    'minion-local',
+    cmd=['mvn', 'install', '-Ddocker.skip=true', '-Dtest=false', '-DfailIfNoTests=false', '-DskipITs=true', '-DskipUTs=true', '-DskipTests=true', '-Dfeatures.verify.skip=true'],
+    dir='minion',
+    serve_cmd=['./bin/karaf', 'server'],
+    serve_dir='minion/assembly/target/assembly',
+    serve_env={
+        "USE_KUBERNETES": "false",
+        "LOCATION": "Default"
+    },
+    labels=['minion'],
+    trigger_mode=TRIGGER_MODE_MANUAL,
+    allow_parallel=True,
+    auto_init=False
 )
 
 ## 3rd Party Resources ##

@@ -56,13 +56,13 @@ public class IcmpDetector implements ServiceDetector {
     public IcmpDetector(PingerFactory pingerFactory) {
         this.pingerFactory = pingerFactory;
 
-        Descriptors.Descriptor echoMonitorRequestDescriptor = IcmpDetectorRequest.getDefaultInstance().getDescriptorForType();
+        Descriptors.Descriptor icmpDetectorRequestDescriptor = IcmpDetectorRequest.getDefaultInstance().getDescriptorForType();
 
-        allowFragmentationFieldDescriptor = echoMonitorRequestDescriptor.findFieldByNumber(IcmpDetectorRequest.ALLOW_FRAGMENTATION_FIELD_NUMBER);
-        dscpFieldDescriptor = echoMonitorRequestDescriptor.findFieldByNumber(IcmpDetectorRequest.DSCP_FIELD_NUMBER);
-        packetSizeFieldDescriptor = echoMonitorRequestDescriptor.findFieldByNumber(IcmpDetectorRequest.PACKET_SIZE_FIELD_NUMBER);
-        retriesFieldDescriptor = echoMonitorRequestDescriptor.findFieldByNumber(IcmpDetectorRequest.RETRIES_FIELD_NUMBER);
-        timeoutFieldDescriptor = echoMonitorRequestDescriptor.findFieldByNumber(IcmpDetectorRequest.TIMEOUT_FIELD_NUMBER);
+        allowFragmentationFieldDescriptor = icmpDetectorRequestDescriptor.findFieldByNumber(IcmpDetectorRequest.ALLOW_FRAGMENTATION_FIELD_NUMBER);
+        dscpFieldDescriptor = icmpDetectorRequestDescriptor.findFieldByNumber(IcmpDetectorRequest.DSCP_FIELD_NUMBER);
+        packetSizeFieldDescriptor = icmpDetectorRequestDescriptor.findFieldByNumber(IcmpDetectorRequest.PACKET_SIZE_FIELD_NUMBER);
+        retriesFieldDescriptor = icmpDetectorRequestDescriptor.findFieldByNumber(IcmpDetectorRequest.RETRIES_FIELD_NUMBER);
+        timeoutFieldDescriptor = icmpDetectorRequestDescriptor.findFieldByNumber(IcmpDetectorRequest.TIMEOUT_FIELD_NUMBER);
     }
 
     @Override

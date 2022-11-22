@@ -68,6 +68,7 @@ import io.grpc.protobuf.StatusProto;
     classes = InventoryApplication.class)
 @ContextConfiguration(initializers = {SpringContextTestInitializer.class})
 class NodeGrpcIT extends GrpcTestBase {
+    private static final int EXPECTED_TASK_DEF_COUNT = 2;
     private NodeServiceGrpc.NodeServiceBlockingStub serviceStub;
 
     @Autowired

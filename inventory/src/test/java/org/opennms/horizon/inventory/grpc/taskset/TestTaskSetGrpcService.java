@@ -11,11 +11,13 @@ import org.opennms.taskset.service.contract.TaskSetServiceGrpc;
 @Getter
 public class TestTaskSetGrpcService extends TaskSetServiceGrpc.TaskSetServiceImplBase {
     private int timesCalled = 0;
+    private PublishTaskSetRequest request;
 
     @Override
     public void publishTaskSet(PublishTaskSetRequest request,
                                StreamObserver<PublishTaskSetResponse> responseObserver) {
-        timesCalled++;
+        this.timesCalled++;
+        this.request = request;
         log.info("Called TestTaskSetGrpcService.publishTaskSet with request = {}", request);
         responseObserver.onNext(PublishTaskSetResponse.newBuilder().build());
         responseObserver.onCompleted();
@@ -23,5 +25,6 @@ public class TestTaskSetGrpcService extends TaskSetServiceGrpc.TaskSetServiceImp
 
     public void reset() {
         timesCalled = 0;
+        request = null;
     }
 }

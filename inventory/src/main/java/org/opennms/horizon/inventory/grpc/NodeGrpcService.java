@@ -28,9 +28,17 @@
 
 package org.opennms.horizon.inventory.grpc;
 
-import java.util.List;
-import java.util.Optional;
-
+import com.google.common.base.Strings;
+import com.google.common.net.InetAddresses;
+import com.google.protobuf.Empty;
+import com.google.protobuf.Int64Value;
+import com.google.rpc.Code;
+import com.google.rpc.Status;
+import io.grpc.Context;
+import io.grpc.protobuf.StatusProto;
+import io.grpc.stub.StreamObserver;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.opennms.horizon.inventory.dto.IpInterfaceDTO;
 import org.opennms.horizon.inventory.dto.NodeCreateDTO;
 import org.opennms.horizon.inventory.dto.NodeDTO;
@@ -43,17 +51,8 @@ import org.opennms.horizon.inventory.service.NodeService;
 import org.opennms.horizon.inventory.service.taskset.DetectorTaskSetService;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.google.common.net.InetAddresses;
-import com.google.protobuf.Empty;
-import com.google.protobuf.Int64Value;
-import com.google.rpc.Code;
-import com.google.rpc.Status;
-
-import io.grpc.Context;
-import io.grpc.protobuf.StatusProto;
-import io.grpc.stub.StreamObserver;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -68,7 +67,7 @@ public class NodeGrpcService extends NodeServiceGrpc.NodeServiceImplBase {
     @Transactional
     public void createNode(NodeCreateDTO request, StreamObserver<NodeDTO> responseObserver) {
         Optional<String> tenantId = tenantLookup.lookupTenantId(Context.current());
-        boolean valid = tenantId.map(id->validateInput(request, id, responseObserver)).orElseThrow();
+        boolean valid = tenantId.map(id -> validateInput(request, id, responseObserver)).orElseThrow();
 
         if (valid) {
             Node node = nodeService.createNode(request, tenantId.orElseThrow());
@@ -90,9 +89,9 @@ public class NodeGrpcService extends NodeServiceGrpc.NodeServiceImplBase {
     @Override
     public void getNodeById(Int64Value request, StreamObserver<NodeDTO> responseObserver) {
         Optional<NodeDTO> node = tenantLookup.lookupTenantId(Context.current())
-            .map(tenantId-> nodeService.getByIdAndTenantId(request.getValue(), tenantId))
+            .map(tenantId -> nodeService.getByIdAndTenantId(request.getValue(), tenantId))
             .orElseThrow();
-        if(node.isPresent()){
+        if (node.isPresent()) {
             responseObserver.onNext(node.get());
             responseObserver.onCompleted();
         } else {
@@ -101,6 +100,50 @@ public class NodeGrpcService extends NodeServiceGrpc.NodeServiceImplBase {
                 .setMessage("Node with id: " + request.getValue() + " doesn't exist.").build();
             responseObserver.onError(StatusProto.toStatusRuntimeException(status));
         }
+    }
+
+    @Override
+    public void getNodeIdFromQuery(org.opennms.horizon.inventory.dto.NodeIdQuery request,
+                                   io.grpc.stub.StreamObserver<com.google.protobuf.Int64Value> responseObserver) {
+
+        Optional<String> tenantIdOptional = tenantLookup.lookupTenantId(Context.current());
+
+        if (tenantIdOptional.isEmpty()) {
+            Status status = Status.newBuilder()
+                .setCode(Code.INVALID_ARGUMENT_VALUE)
+                .setMessage("Tenant Id can't be empty")
+                .build();
+            responseObserver.onError(StatusProto.toStatusRuntimeException(status));
+            return;
+        }
+
+        String tenantId = tenantIdOptional.get();
+        String location = request.getLocation();
+        String ipAddress = request.getIpAddress();
+        if (Strings.isNullOrEmpty(location) || Strings.isNullOrEmpty(ipAddress)) {
+            Status status = Status.newBuilder()
+                .setCode(Code.INVALID_ARGUMENT_VALUE)
+                .setMessage("Invalid Request Query, location/ipAddress can't be empty")
+                .build();
+            responseObserver.onError(StatusProto.toStatusRuntimeException(status));
+            return;
+        }
+
+        Optional<IpInterfaceDTO> optional = ipInterfaceService.findByIpAddressAndLocationAndTenantId(ipAddress, location, tenantId);
+
+        if (optional.isEmpty()) {
+            Status status = Status.newBuilder()
+                .setCode(Code.NOT_FOUND_VALUE)
+                .setMessage("Didn't find a valid node id with the given query")
+                .build();
+            responseObserver.onError(StatusProto.toStatusRuntimeException(status));
+            return;
+        }
+
+        var ipInterface = optional.get();
+        long nodeId = ipInterface.getNodeId();
+        var nodeIdProto = Int64Value.newBuilder().setValue(nodeId).build();
+        responseObserver.onNext(nodeIdProto);
     }
 
     private boolean validateInput(NodeCreateDTO request, String tenantId, StreamObserver<NodeDTO> responseObserver) {
@@ -115,8 +158,8 @@ public class NodeGrpcService extends NodeServiceGrpc.NodeServiceImplBase {
                     .build();
                 responseObserver.onError(StatusProto.toStatusRuntimeException(status));
             } else {
-                List<IpInterfaceDTO> ipList = ipInterfaceService.findByIpAddressAndLocationAndTenantId(request.getManagementIp(), request.getLocation(), tenantId);
-                if (!ipList.isEmpty()) {
+                Optional<IpInterfaceDTO> optionalIpInterface = ipInterfaceService.findByIpAddressAndLocationAndTenantId(request.getManagementIp(), request.getLocation(), tenantId);
+                if (!optionalIpInterface.isEmpty()) {
                     valid = false;
                     Status status = Status.newBuilder()
                         .setCode(Code.ALREADY_EXISTS_VALUE)

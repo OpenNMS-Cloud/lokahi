@@ -9,6 +9,7 @@ import org.opennms.horizon.inventory.repository.IpInterfaceRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -26,11 +27,8 @@ public class IpInterfaceService {
             .collect(Collectors.toList());
     }
 
-    public List<IpInterfaceDTO> findByIpAddressAndLocationAndTenantId(String ipAddress, String location, String tenantId) {
-        List<IpInterface> all = modelRepo.findByIpAddressAndLocationAndTenantId(new Inet(ipAddress), location, tenantId);
-        return all
-            .stream()
-            .map(mapper::modelToDTO)
-            .collect(Collectors.toList());
+    public Optional<IpInterfaceDTO> findByIpAddressAndLocationAndTenantId(String ipAddress, String location, String tenantId) {
+        Optional<IpInterface> optional = modelRepo.findByIpAddressAndLocationAndTenantId(new Inet(ipAddress), location, tenantId);
+        return optional.map(mapper::modelToDTO);
     }
 }

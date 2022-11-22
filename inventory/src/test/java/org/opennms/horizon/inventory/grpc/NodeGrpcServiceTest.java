@@ -28,15 +28,7 @@
 
 package org.opennms.horizon.inventory.grpc;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-
-import java.util.List;
-import java.util.Optional;
-
+import io.grpc.stub.StreamObserver;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -50,7 +42,13 @@ import org.opennms.horizon.inventory.service.IpInterfaceService;
 import org.opennms.horizon.inventory.service.NodeService;
 import org.opennms.horizon.inventory.service.taskset.DetectorTaskSetService;
 
-import io.grpc.stub.StreamObserver;
+import java.util.Optional;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 @RunWith(MockitoJUnitRunner.class)
 public class NodeGrpcServiceTest {
@@ -112,7 +110,7 @@ public class NodeGrpcServiceTest {
 
     @Test
     public void createNodeDuplicateIp() {
-        List<IpInterfaceDTO> interfaces = List.of(IpInterfaceDTO.newBuilder().build());
+        Optional<IpInterfaceDTO> interfaces = Optional.of(IpInterfaceDTO.newBuilder().build());
 
         doReturn(Optional.of("ANY")).when(tenantLookup).lookupTenantId(any());
         doReturn(interfaces).when(ipInterfaceService).findByIpAddressAndLocationAndTenantId(any(), any(), any());

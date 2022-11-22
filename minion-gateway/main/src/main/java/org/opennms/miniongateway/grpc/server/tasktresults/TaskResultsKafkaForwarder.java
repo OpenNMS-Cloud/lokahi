@@ -28,7 +28,7 @@ import java.util.List;
 public class TaskResultsKafkaForwarder implements MessageConsumer<Message, Message> {
 
     public static final String DEFAULT_TASK_RESULTS_TOPIC = "task-set.results";
-    public static final String TENANT_ID_HEADER_NAME = "TENANT_ID";
+    public static final String TENANT_ID_HEADER_NAME = "tenant-id";
 
     private final Logger logger = LoggerFactory.getLogger(TaskResultsKafkaForwarder.class);
 

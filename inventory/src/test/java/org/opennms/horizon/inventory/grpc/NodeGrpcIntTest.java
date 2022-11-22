@@ -28,20 +28,16 @@
 
 package org.opennms.horizon.inventory.grpc;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-
-import java.io.IOException;
-import java.time.LocalDateTime;
-
+import com.google.rpc.Code;
+import com.google.rpc.Status;
+import com.vladmihalcea.hibernate.type.basic.Inet;
+import io.grpc.StatusRuntimeException;
+import io.grpc.protobuf.StatusProto;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.opennms.horizon.grpc.detector.contract.Detector;
-import org.opennms.horizon.inventory.InventoryApplication;
 import org.opennms.horizon.inventory.SpringContextTestInitializer;
 import org.opennms.horizon.inventory.dto.NodeCreateDTO;
 import org.opennms.horizon.inventory.dto.NodeDTO;
@@ -60,19 +56,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 
-import com.google.rpc.Code;
-import com.google.rpc.Status;
-import com.vladmihalcea.hibernate.type.basic.Inet;
+import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.List;
 
-import io.grpc.StatusRuntimeException;
-import io.grpc.protobuf.StatusProto;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-@SpringBootTest(
-    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-    classes = InventoryApplication.class)
+@SpringBootTest
 @ContextConfiguration(initializers = {SpringContextTestInitializer.class})
-class NodeGrpcIT extends GrpcTestBase {
+class NodeGrpcIntTest extends GrpcTestBase {
     private static final int EXPECTED_TASK_DEF_COUNT = 2;
     private NodeServiceGrpc.NodeServiceBlockingStub serviceStub;
 
@@ -96,7 +90,7 @@ class NodeGrpcIT extends GrpcTestBase {
     }
 
     @AfterEach
-    public void cleanUp(){
+    public void cleanUp() {
         ipInterfaceRepository.deleteAll();
         nodeRepository.deleteAll();
         monitoringLocationRepository.deleteAll();
@@ -154,7 +148,7 @@ class NodeGrpcIT extends GrpcTestBase {
             .setManagementIp(ip)
             .build();
 
-        StatusRuntimeException exception = Assertions.assertThrows(StatusRuntimeException.class, ()->serviceStub.createNode(createDTO));
+        StatusRuntimeException exception = Assertions.assertThrows(StatusRuntimeException.class, () -> serviceStub.createNode(createDTO));
         Status status = StatusProto.fromThrowable(exception);
         assertThat(status.getCode()).isEqualTo(Code.ALREADY_EXISTS_VALUE);
         assertThat(status.getMessage()).isEqualTo("Ip address already exists for location");
@@ -287,7 +281,7 @@ class NodeGrpcIT extends GrpcTestBase {
             .setManagementIp("127.0.0.1")
             .build();
 
-        StatusRuntimeException exception = Assertions.assertThrows(StatusRuntimeException.class, ()->serviceStub.createNode(createDTO));
+        StatusRuntimeException exception = Assertions.assertThrows(StatusRuntimeException.class, () -> serviceStub.createNode(createDTO));
         Status status = StatusProto.fromThrowable(exception);
         assertThat(status.getCode()).isEqualTo(Code.UNAUTHENTICATED_VALUE);
         assertThat(status.getMessage()).isEqualTo("Missing tenant id");
@@ -307,7 +301,7 @@ class NodeGrpcIT extends GrpcTestBase {
             .setManagementIp("BAD")
             .build();
 
-        StatusRuntimeException exception = Assertions.assertThrows(StatusRuntimeException.class, ()->serviceStub.createNode(createDTO));
+        StatusRuntimeException exception = Assertions.assertThrows(StatusRuntimeException.class, () -> serviceStub.createNode(createDTO));
         Status status = StatusProto.fromThrowable(exception);
         assertThat(status.getCode()).isEqualTo(Code.INVALID_ARGUMENT_VALUE);
         assertThat(status.getMessage()).isEqualTo("Bad management_ip: BAD");

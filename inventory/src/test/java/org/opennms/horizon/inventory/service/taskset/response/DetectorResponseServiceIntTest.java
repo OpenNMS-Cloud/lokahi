@@ -20,6 +20,7 @@ import org.opennms.horizon.inventory.repository.MonitoringLocationRepository;
 import org.opennms.horizon.inventory.repository.NodeRepository;
 import org.opennms.taskset.contract.DetectorResponse;
 import org.opennms.taskset.contract.MonitorType;
+import org.opennms.taskset.service.contract.PublishTaskSetRequest;
 import org.opennms.taskset.service.contract.TaskSetServiceGrpc;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -210,7 +211,7 @@ class DetectorResponseServiceIntTest extends GrpcTestBase {
         }
 
         List<MonitoredService> monitoredServices = monitoredServiceRepository.findAll();
-        assertEquals(2, monitoredServices.size());
+        assertEquals(monitorTypes.length, monitoredServices.size());
 
         for (MonitoredService monitoredService : monitoredServices) {
             IpInterface ipInterface = monitoredService.getIpInterface();
@@ -220,6 +221,9 @@ class DetectorResponseServiceIntTest extends GrpcTestBase {
         }
 
         assertEquals(numberOfCalls, testGrpcService.getTimesCalled());
+
+        List<PublishTaskSetRequest> grpcRequests = testGrpcService.getRequests();
+        assertEquals(monitorTypes.length, grpcRequests.size());
     }
 
     private void populateDatabase() {

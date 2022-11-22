@@ -30,6 +30,7 @@ package org.opennms.horizon.inventory.grpc;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -39,6 +40,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.opennms.horizon.grpc.detector.contract.Detector;
 import org.opennms.horizon.inventory.InventoryApplication;
 import org.opennms.horizon.inventory.SpringContextTestInitializer;
 import org.opennms.horizon.inventory.dto.NodeCreateDTO;
@@ -51,6 +53,8 @@ import org.opennms.horizon.inventory.model.Node;
 import org.opennms.horizon.inventory.repository.IpInterfaceRepository;
 import org.opennms.horizon.inventory.repository.MonitoringLocationRepository;
 import org.opennms.horizon.inventory.repository.NodeRepository;
+import org.opennms.taskset.contract.TaskSet;
+import org.opennms.taskset.service.contract.PublishTaskSetRequest;
 import org.opennms.taskset.service.contract.TaskSetServiceGrpc;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -59,6 +63,7 @@ import org.springframework.test.context.ContextConfiguration;
 import com.google.rpc.Code;
 import com.google.rpc.Status;
 import com.vladmihalcea.hibernate.type.basic.Inet;
+import java.util.List;
 
 import io.grpc.StatusRuntimeException;
 import io.grpc.protobuf.StatusProto;
@@ -123,6 +128,14 @@ class NodeGrpcIT extends GrpcTestBase {
 
         assertEquals(label, node.getNodeLabel());
         assertEquals(1, testGrpcService.getTimesCalled());
+
+        List<PublishTaskSetRequest> grpcRequests = testGrpcService.getRequests();
+        assertEquals(1, grpcRequests.size());
+
+        PublishTaskSetRequest request = grpcRequests.get(0);
+        TaskSet taskSet = request.getTaskSet();
+        assertNotNull(taskSet);
+        assertEquals(EXPECTED_TASK_DEF_COUNT, taskSet.getTaskDefinitionCount());
     }
 
     @Test
@@ -168,6 +181,14 @@ class NodeGrpcIT extends GrpcTestBase {
 
         assertEquals(label, node.getNodeLabel());
         assertEquals(1, testGrpcService.getTimesCalled());
+
+        List<PublishTaskSetRequest> grpcRequests = testGrpcService.getRequests();
+        assertEquals(1, grpcRequests.size());
+
+        PublishTaskSetRequest request = grpcRequests.get(0);
+        TaskSet taskSet = request.getTaskSet();
+        assertNotNull(taskSet);
+        assertEquals(EXPECTED_TASK_DEF_COUNT, taskSet.getTaskDefinitionCount());
     }
 
     @Test
@@ -190,6 +211,14 @@ class NodeGrpcIT extends GrpcTestBase {
 
         assertEquals(label, node.getNodeLabel());
         assertEquals(1, testGrpcService.getTimesCalled());
+
+        List<PublishTaskSetRequest> grpcRequests = testGrpcService.getRequests();
+        assertEquals(1, grpcRequests.size());
+
+        PublishTaskSetRequest request = grpcRequests.get(0);
+        TaskSet taskSet = request.getTaskSet();
+        assertNotNull(taskSet);
+        assertEquals(EXPECTED_TASK_DEF_COUNT, taskSet.getTaskDefinitionCount());
     }
 
     @Test
@@ -215,6 +244,14 @@ class NodeGrpcIT extends GrpcTestBase {
 
         assertEquals(label, node.getNodeLabel());
         assertEquals(1, testGrpcService.getTimesCalled());
+
+        List<PublishTaskSetRequest> grpcRequests = testGrpcService.getRequests();
+        assertEquals(1, grpcRequests.size());
+
+        PublishTaskSetRequest request = grpcRequests.get(0);
+        TaskSet taskSet = request.getTaskSet();
+        assertNotNull(taskSet);
+        assertEquals(EXPECTED_TASK_DEF_COUNT, taskSet.getTaskDefinitionCount());
     }
 
     private void populateTables(String location, String ip) {

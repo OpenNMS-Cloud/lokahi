@@ -36,7 +36,9 @@ import org.opennms.horizon.inventory.model.Node;
 import org.opennms.horizon.inventory.repository.IpInterfaceRepository;
 import org.opennms.horizon.inventory.service.taskset.manager.TaskSetManager;
 import org.opennms.horizon.inventory.service.taskset.manager.TaskSetManagerUtil;
+import org.opennms.icmp.contract.IcmpDetectorRequest;
 import org.opennms.icmp.contract.IcmpMonitorRequest;
+import org.opennms.snmp.contract.SnmpDetectorRequest;
 import org.opennms.snmp.contract.SnmpMonitorRequest;
 import org.opennms.taskset.contract.MonitorType;
 import org.opennms.taskset.contract.TaskSet;
@@ -92,7 +94,7 @@ public class DetectorTaskSetService {
         switch (monitorType) {
             case ICMP: {
                 Any configuration =
-                    Any.pack(IcmpMonitorRequest.newBuilder()
+                    Any.pack(IcmpDetectorRequest.newBuilder()
                         .setHost(ipAddress)
                         .setTimeout(Constants.Icmp.DEFAULT_TIMEOUT)
                         .setDscp(Constants.Icmp.DEFAULT_DSCP)
@@ -107,7 +109,7 @@ public class DetectorTaskSetService {
             }
             case SNMP: {
                 Any configuration =
-                    Any.pack(SnmpMonitorRequest.newBuilder()
+                    Any.pack(SnmpDetectorRequest.newBuilder()
                         .setHost(ipAddress)
                         .setTimeout(Constants.Snmp.DEFAULT_TIMEOUT)
                         .setRetries(Constants.Snmp.DEFAULT_RETRIES)

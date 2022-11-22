@@ -11,7 +11,9 @@
 
   <bean id="pingerFactory" class="org.opennms.horizon.minion.icmp.jna.JnaPingerFactory"/>
 
-  <bean id="icmpDetectorManager" class="org.opennms.horizon.minion.icmp.IcmpDetectorManager"/>
+  <bean id="icmpDetectorManager" class="org.opennms.horizon.minion.icmp.IcmpDetectorManager">
+      <argument ref="pingerFactory"/>
+  </bean>
 
   <service ref="icmpDetectorManager" interface="org.opennms.horizon.minion.plugin.api.ServiceDetectorManager">
     <service-properties>

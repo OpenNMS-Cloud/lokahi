@@ -69,7 +69,7 @@ public class TenantIDGrpcServerInterceptor implements ServerInterceptor {
     public <ReqT, RespT> ServerCall.Listener<ReqT> interceptCall(ServerCall<ReqT, RespT> serverCall, Metadata headers, ServerCallHandler<ReqT, RespT> callHandler) {
         // Read the tenant id out of the headers
         log.debug("Received metadata: {}", headers);
-        String tenantId = readCurrentContextTenantId();
+        String tenantId = commonReadContextTenantId(() -> headers.get(Metadata.Key.of("tenant-id", Metadata.ASCII_STRING_MARSHALLER)));
         // TBD888: restore this logic when tenant ID is reliably received from the Minion upstream flow
         // if (tenantId == null) {
         //     //

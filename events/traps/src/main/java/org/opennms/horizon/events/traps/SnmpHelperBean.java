@@ -28,13 +28,17 @@
 
 package org.opennms.horizon.events.traps;
 
-import org.springframework.context.annotation.ComponentScan;
+import org.opennms.horizon.shared.snmp.SnmpHelper;
+import org.opennms.horizon.shared.snmp.SnmpHelperImpl;
+import org.opennms.horizon.shared.snmp.snmp4j.Snmp4JStrategy;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.ImportResource;
 
 @Configuration
-@ImportResource("classpath:spring-beans-context.xml")
-@ComponentScan(basePackages = "org.opennms.horizon.config")
-public class ImportBeans {
+public class SnmpHelperBean {
 
+    @Bean
+    public SnmpHelper snmpHelper() {
+        return new SnmpHelperImpl(new Snmp4JStrategy());
+    }
 }

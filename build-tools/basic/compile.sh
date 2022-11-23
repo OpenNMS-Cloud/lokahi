@@ -27,6 +27,7 @@ mvn clean install -f parent-pom
 mvn clean install -f shared-lib
 
 mvn clean install -f minion-gateway
+mvn clean install -f minion-gateway-grpc-proxy
 mvn clean install -f minion
 mvn clean install -f rest-server
 mvn clean install -f inventory

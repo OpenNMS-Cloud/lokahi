@@ -1,6 +1,4 @@
 # Tilt config #
-load('ext://uibutton', 'cmd_button')
-
 secret_settings(disable_scrub=True)  ## TODO: update secret values so we can reenable scrub
 
 # Functions #

@@ -18,7 +18,7 @@
         <relativePath/>
     </parent>
     <artifactId>events</artifactId>
-    <name>OpenNMS Horizon :: Events :: Parent</name>
+    <name>OpenNMS Horizon :: Events</name>
     <version>0.1.0-SNAPSHOT</version>
 
     <build>

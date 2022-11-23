@@ -33,16 +33,18 @@ package opennms.events;
 option java_multiple_files = true;
 option java_package = "org.opennms.horizon.events.proto";
 
+
+message EventLog {
+  repeated Event event = 1;
+}
 message Event {
-  uint64 db_id = 1;
-  uint64 tenant_id = 2;
-  string uei = 3;
-  uint64 produced_time = 4;
-  uint64 node_id = 5;
-  string location = 6;
-  string ip_address = 7;
-  repeated EventParameter event_params = 8;
-  EventInfo event_info = 9;
+  string uei = 1;
+  uint64 node_id = 2;
+  string location = 3;
+  string ip_address = 4;
+  uint64 produced_time = 5;
+  repeated EventParameter event_params = 6;
+  optional EventInfo event_info = 7;
 }
 
 message EventInfo {
@@ -63,4 +65,5 @@ message EventParameter {
   string name = 1;
   string value = 2;
   string type = 3;
+  string encoding = 4;
 }

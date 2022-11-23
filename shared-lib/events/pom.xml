@@ -12,8 +12,8 @@
     <artifactId>events</artifactId>
     <packaging>bundle</packaging>
 
-    <name>OpenNMS Horizon :: Shared Library :: Inventory</name>
-    <description>The inventory service contract.</description>
+    <name>OpenNMS Horizon :: Shared Library :: Events</name>
+    <description>The events service contract.</description>
 
     <dependencies>
         <dependency>

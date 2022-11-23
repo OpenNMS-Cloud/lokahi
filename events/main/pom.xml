@@ -11,15 +11,12 @@
 
     <groupId>org.opennms.horizon.events</groupId>
     <artifactId>main</artifactId>
-    <name>OpenNMS Horizon :: Events Service</name>
+    <name>OpenNMS Horizon :: Events :: Main</name>
     <version>0.1.0-SNAPSHOT</version>
     <description>Events Service</description>
     <properties>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
-        <sonar.coverage.exclusions>
-            src/main/java/org/opennms/horizon/events/**/*
-        </sonar.coverage.exclusions>
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -42,6 +39,48 @@
             <groupId>org.opennms.horizon.events</groupId>
             <artifactId>traps</artifactId>
             <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.opennms.horizon.events</groupId>
+            <artifactId>consumer</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <!-- Test Dependencies -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <version>${spring-boot.version}</version>
+            <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.junit.vintage</groupId>
+                    <artifactId>junit-vintage-engine</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>${mockito.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>${jupiter.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.liquibase</groupId>
+            <artifactId>liquibase-core</artifactId>
+            <version>${liquibaseVersion}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>1.17.4</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 

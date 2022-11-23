@@ -1,0 +1,52 @@
+<events xmlns="http://xmlns.opennms.org/xsd/eventconf">
+   <event>
+      <mask>
+         <maskelement>
+            <mename>id</mename>
+            <mevalue>.1.0.8802.1.1.2.0</mevalue>
+         </maskelement>
+         <maskelement>
+            <mename>generic</mename>
+            <mevalue>6</mevalue>
+         </maskelement>
+         <maskelement>
+            <mename>specific</mename>
+            <mevalue>1</mevalue>
+         </maskelement>
+      </mask>
+      <uei>uei.opennms.org/ieee/lldpMIB/traps/lldpRemTablesChange</uei>
+      <event-label>LLDP-MIB defined trap event: lldpRemTablesChange</event-label>
+      <descr>&lt;p>A lldpRemTablesChange notification is sent when the value 
+of lldpStatsRemTableLastChangeTime changes. It can be 
+utilized by an NMS to trigger LLDP remote systems table 
+maintenance polls.
+
+Note that transmission of lldpRemTablesChange
+notifications are throttled by the agent, as specified by the 
+'lldpNotificationInterval' object.&lt;/p>&lt;table>
+	&lt;tr>&lt;td>&lt;b>
+
+	lldpStatsRemTablesInserts&lt;/b>&lt;/td>&lt;td>
+	%parm[#1]%;&lt;/td>&lt;td>&lt;p>&lt;/p>&lt;/td>&lt;/tr>
+	&lt;tr>&lt;td>&lt;b>
+
+	lldpStatsRemTablesDeletes&lt;/b>&lt;/td>&lt;td>
+	%parm[#2]%;&lt;/td>&lt;td>&lt;p>&lt;/p>&lt;/td>&lt;/tr>
+	&lt;tr>&lt;td>&lt;b>
+
+	lldpStatsRemTablesDrops&lt;/b>&lt;/td>&lt;td>
+	%parm[#3]%;&lt;/td>&lt;td>&lt;p>&lt;/p>&lt;/td>&lt;/tr>
+	&lt;tr>&lt;td>&lt;b>
+
+	lldpStatsRemTablesAgeouts&lt;/b>&lt;/td>&lt;td>
+	%parm[#4]%;&lt;/td>&lt;td>&lt;p>&lt;/p>&lt;/td>&lt;/tr>&lt;/table></descr>
+      <logmsg dest="logndisplay">&lt;p>
+			lldpRemTablesChange trap received 
+			lldpStatsRemTablesInserts=%parm[#1]% 
+			lldpStatsRemTablesDeletes=%parm[#2]% 
+			lldpStatsRemTablesDrops=%parm[#3]% 
+			lldpStatsRemTablesAgeouts=%parm[#4]%&lt;/p>
+		</logmsg>
+      <severity>Normal</severity>
+   </event>
+</events>

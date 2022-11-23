@@ -36,6 +36,8 @@ public class EventParameter {
 
     private String type;
 
+    private String encoding;
+
     public String getName() {
         return name;
     }
@@ -58,5 +60,13 @@ public class EventParameter {
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    public String getEncoding() {
+        return encoding;
+    }
+
+    public void setEncoding(String encoding) {
+        this.encoding = encoding;
     }
 }

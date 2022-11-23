@@ -96,7 +96,7 @@ class EventRepositoryIT {
         parm.setName("ifIndex");
         parm.setType("int32");
         parm.setValue("64");
-        parms.addEventParameters(parm);
+        parms.addEventParameter(parm);
         event.setEventParameters(parms);
         SnmpInfo snmpInfo = SnmpInfo.newBuilder().setId("snmp").setTrapOid("0.0.1.2").setCommunity("public").setGeneric(34).build();
         EventInfo eventInfo = EventInfo.newBuilder().setSnmp(snmpInfo).build();

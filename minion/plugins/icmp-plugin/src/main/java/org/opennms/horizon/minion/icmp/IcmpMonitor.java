@@ -56,11 +56,11 @@ public class IcmpMonitor extends AbstractServiceMonitor {
 
         try {
             if (! config.is(IcmpMonitorRequest.class)) {
-                throw new IllegalArgumentException("configuration must be an EchoRequest; type-url=" + config.getTypeUrl());
+                throw new IllegalArgumentException("configuration must be an IcmpMonitorRequest; type-url=" + config.getTypeUrl());
             }
 
-            IcmpMonitorRequest IcmpMonitorRequest = config.unpack(IcmpMonitorRequest.class);
-            IcmpMonitorRequest effectiveRequest = populateDefaultsAsNeeded(IcmpMonitorRequest);
+            IcmpMonitorRequest icmpMonitorRequest = config.unpack(IcmpMonitorRequest.class);
+            IcmpMonitorRequest effectiveRequest = populateDefaultsAsNeeded(icmpMonitorRequest);
 
             String hostString = effectiveRequest.getHost();
             InetAddress host = InetAddress.getByName(hostString);
@@ -87,26 +87,26 @@ public class IcmpMonitor extends AbstractServiceMonitor {
 // Internal Methods
 //----------------------------------------
 
-    private IcmpMonitorRequest populateDefaultsAsNeeded(IcmpMonitorRequest IcmpMonitorRequest) {
-        IcmpMonitorRequest.Builder resultBuilder = IcmpMonitorRequest.newBuilder(IcmpMonitorRequest);
+    private IcmpMonitorRequest populateDefaultsAsNeeded(IcmpMonitorRequest request) {
+        IcmpMonitorRequest.Builder resultBuilder = request.newBuilder(request);
 
-        if (! IcmpMonitorRequest.hasField(retriesFieldDescriptor)) {
+        if (! request.hasField(retriesFieldDescriptor)) {
             resultBuilder.setRetries(PingConstants.DEFAULT_RETRIES);
         }
 
-        if ((! IcmpMonitorRequest.hasField(packetSizeFieldDescriptor)) || (IcmpMonitorRequest.getPacketSize() <= 0)) {
+        if ((! request.hasField(packetSizeFieldDescriptor)) || (request.getPacketSize() <= 0)) {
             resultBuilder.setPacketSize(PingConstants.DEFAULT_PACKET_SIZE);
         }
 
-        if (! IcmpMonitorRequest.hasField(dscpFieldDescriptor)) {
-            resultBuilder.setDscp(0);
+        if (! request.hasField(dscpFieldDescriptor)) {
+            resultBuilder.setDscp(PingConstants.DEFAULT_DSCP);
         }
 
-        if (! IcmpMonitorRequest.hasField(allowFragmentationFieldDescriptor)) {
-            resultBuilder.setAllowFragmentation(true);
+        if (! request.hasField(allowFragmentationFieldDescriptor)) {
+            resultBuilder.setAllowFragmentation(PingConstants.DEFAULT_ALLOW_FRAGMENTATION);
         }
 
-        if (! IcmpMonitorRequest.hasField(timeoutFieldDescriptor)) {
+        if (! request.hasField(timeoutFieldDescriptor)) {
             resultBuilder.setTimeout(PingConstants.DEFAULT_TIMEOUT);
         }
 

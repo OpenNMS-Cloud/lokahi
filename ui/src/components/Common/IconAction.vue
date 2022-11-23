@@ -1,6 +1,6 @@
 <template>
   <component :is="asLi ? 'li' : 'a'" :title="item.title" class="pointer">
-    <FeatherIcon @click="item.action" :icon="item.icon" :title="item.title" :viewBox="viewBox" data-test="" />
+    <FeatherIcon @click="item.action" :icon="item.icon" :title="item.title" :viewBox="viewBox" />
   </component>
 </template>
 

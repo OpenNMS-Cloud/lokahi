@@ -13,9 +13,7 @@ const mockData: EventDto = {
 const eventsFixture = (props: Partial<EventDto> = {}): EventCollectionDto => ({
   events: [
     { ...mockData, ...props }
-  ],
-  offset: 0,
-  totalCount: 1
+  ]
 })
 
 export {

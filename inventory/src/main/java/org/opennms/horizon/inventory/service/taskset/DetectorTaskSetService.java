@@ -36,6 +36,7 @@ import org.opennms.horizon.inventory.model.Node;
 import org.opennms.horizon.inventory.repository.IpInterfaceRepository;
 import org.opennms.horizon.inventory.service.taskset.manager.TaskSetManager;
 import org.opennms.horizon.inventory.service.taskset.manager.TaskSetManagerUtil;
+import org.opennms.icmp.contract.IcmpDetectorRequest;
 import org.opennms.snmp.contract.SnmpDetectorRequest;
 import org.opennms.taskset.contract.MonitorType;
 import org.opennms.taskset.contract.TaskSet;
@@ -52,15 +53,12 @@ import java.util.List;
 @RequiredArgsConstructor
 public class DetectorTaskSetService {
     private static final Logger log = LoggerFactory.getLogger(DetectorTaskSetService.class);
-    private static final int DEFAULT_SNMP_TIMEOUT = 18000;
-    private static final int DEFAULT_SNMP_RETRIES = 2;
     private final TaskSetManagerUtil taskSetManagerUtil;
     private final TaskSetManager taskSetManager;
     private final TaskSetPublisher taskSetPublisher;
     private final IpInterfaceRepository ipInterfaceRepository;
 
-    //todo: add ICMP
-    private static final MonitorType[] DETECTOR_MONITOR_TYPES = {MonitorType.SNMP};
+    private static final MonitorType[] DETECTOR_MONITOR_TYPES = {MonitorType.ICMP, MonitorType.SNMP};
 
     @Transactional
     public void sendDetectorTasks(Node node) {
@@ -93,16 +91,26 @@ public class DetectorTaskSetService {
 
         switch (monitorType) {
             case ICMP: {
-                //todo: add request
-                taskSetManagerUtil.addTask(location, ipAddress, name, TaskType.DETECTOR, pluginName, node.getId());
+                Any configuration =
+                    Any.pack(IcmpDetectorRequest.newBuilder()
+                        .setHost(ipAddress)
+                        .setTimeout(Constants.Icmp.DEFAULT_TIMEOUT)
+                        .setDscp(Constants.Icmp.DEFAULT_DSCP)
+                        .setAllowFragmentation(Constants.Icmp.DEFAULT_ALLOW_FRAGMENTATION)
+                        .setPacketSize(Constants.Icmp.DEFAULT_PACKET_SIZE)
+                        .setRetries(Constants.Icmp.DEFAULT_RETRIES)
+                        .build());
+
+                taskSetManagerUtil.addTask(location, ipAddress, name,
+                    TaskType.DETECTOR, pluginName, configuration, node.getId());
                 break;
             }
             case SNMP: {
                 Any configuration =
                     Any.pack(SnmpDetectorRequest.newBuilder()
                         .setHost(ipAddress)
-                        .setTimeout(DEFAULT_SNMP_TIMEOUT)
-                        .setRetries(DEFAULT_SNMP_RETRIES)
+                        .setTimeout(Constants.Snmp.DEFAULT_TIMEOUT)
+                        .setRetries(Constants.Snmp.DEFAULT_RETRIES)
                         .build());
 
                 taskSetManagerUtil.addTask(location, ipAddress, name, TaskType.DETECTOR, pluginName, configuration, node.getId());

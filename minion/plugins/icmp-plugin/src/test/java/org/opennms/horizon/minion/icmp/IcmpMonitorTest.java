@@ -1,6 +1,8 @@
 package org.opennms.horizon.minion.icmp;
 
 import static org.junit.Assert.*;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 
 import java.util.concurrent.CompletableFuture;
@@ -9,15 +11,17 @@ import com.google.protobuf.Any;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.opennms.horizon.shared.icmp.PingerFactory;
 import org.opennms.icmp.contract.IcmpMonitorRequest;
 import org.opennms.horizon.shared.utils.InetAddressUtils;
-import org.opennms.minion.icmp.best.BestMatchPingerFactory;
 import org.opennms.horizon.minion.plugin.api.MonitoredService;
 import org.opennms.horizon.minion.plugin.api.ServiceMonitorResponse;
 import org.opennms.horizon.minion.plugin.api.ServiceMonitorResponse.Status;
 
 public class IcmpMonitorTest {
+    private static final String TEST_LOCALHOST_IP_VALUE = "127.0.0.1";
     @Mock
     MonitoredService monitoredService;
 
@@ -28,12 +32,20 @@ public class IcmpMonitorTest {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.openMocks(this);
-        when(monitoredService.getAddress()).thenReturn(InetAddressUtils.addr("127.0.0.1"));
-        icmpMonitor = new IcmpMonitor(new BestMatchPingerFactory());
+        when(monitoredService.getAddress()).thenReturn(InetAddressUtils.addr(TEST_LOCALHOST_IP_VALUE));
+
+        TestPinger testPinger = new TestPinger();
+        testPinger.setHandleResponse(true);
+
+        PingerFactory pingerFactory = Mockito.mock(PingerFactory.class);
+        when(pingerFactory.getInstance(anyInt(), anyBoolean()))
+            .thenReturn(testPinger);
+
+        icmpMonitor = new IcmpMonitor(pingerFactory);
 
         testEchoRequest =
             IcmpMonitorRequest.newBuilder()
-                .setHost("127.0.0.1")
+                .setHost(TEST_LOCALHOST_IP_VALUE)
                 .build();
 
         testConfig = Any.pack(testEchoRequest);

@@ -14,7 +14,6 @@ import MultilineChart from '@material-design-icons/svg/outlined/multiline_chart.
 import PieChart from '@material-design-icons/svg/outlined/pie_chart.svg'
 import Warning from '@featherds/icon/notification/Warning'
 import Delete from '@featherds/icon/action/Delete'
-import { markRaw } from 'vue'
 import IconAction from '@/components/Common/IconAction.vue'
 
 const onBubbleChart = () => {

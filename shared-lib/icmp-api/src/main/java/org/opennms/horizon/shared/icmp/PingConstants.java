@@ -35,14 +35,10 @@ package org.opennms.horizon.shared.icmp;
  * @version $Id: $
  */
 public interface PingConstants {
-    
-    /** Constant <code>DEFAULT_RETRIES=2</code> */
-    public static final int DEFAULT_RETRIES = 2;
-    /** Constant <code>DEFAULT_TIMEOUT=800</code> */
-    public static final int DEFAULT_TIMEOUT = 800;
-    /** Constant <code>DEFAULT_PACKET_SIZE=64</code> */
-    public static final int DEFAULT_PACKET_SIZE = 64;
-    /** Constant <code>DEFAULT_PACKETS_PER_SECOND=3</code> */
-    public static final double DEFAULT_PACKETS_PER_SECOND = 1.0;
-
+    int DEFAULT_RETRIES = 2;
+    int DEFAULT_TIMEOUT = 800;
+    int DEFAULT_PACKET_SIZE = 64;
+    double DEFAULT_PACKETS_PER_SECOND = 1.0;
+    boolean DEFAULT_ALLOW_FRAGMENTATION = true;
+    int DEFAULT_DSCP = 0;
 }

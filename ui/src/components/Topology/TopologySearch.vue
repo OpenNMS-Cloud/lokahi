@@ -25,7 +25,6 @@ import { useTopologyStore } from '@/store/Views/topologyStore'
 import { FeatherIcon } from '@featherds/icon'
 import Close from '@featherds/icon/navigation/Cancel'
 import { FeatherAutocomplete } from '@featherds/autocomplete'
-import { FeatherChip, FeatherChipList } from '@featherds/chips'
 import { IdLabelProps } from '@/types'
 import { useTopologyFocus } from './topology.composables'
 

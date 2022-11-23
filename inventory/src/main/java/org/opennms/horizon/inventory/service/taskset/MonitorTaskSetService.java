@@ -33,6 +33,7 @@ import lombok.RequiredArgsConstructor;
 import org.opennms.horizon.inventory.model.IpInterface;
 import org.opennms.horizon.inventory.service.taskset.manager.TaskSetManager;
 import org.opennms.horizon.inventory.service.taskset.manager.TaskSetManagerUtil;
+import org.opennms.icmp.contract.IcmpMonitorRequest;
 import org.opennms.snmp.contract.SnmpMonitorRequest;
 import org.opennms.taskset.contract.MonitorType;
 import org.opennms.taskset.contract.TaskSet;
@@ -46,9 +47,6 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class MonitorTaskSetService {
     private static final Logger log = LoggerFactory.getLogger(MonitorTaskSetService.class);
-    private static final String DEFAULT_SCHEDULE = "60000";
-    private static final int DEFAULT_SNMP_TIMEOUT = 18000;
-    private static final int DEFAULT_SNMP_RETRIES = 2;
     private final TaskSetManagerUtil taskSetManagerUtil;
     private final TaskSetManager taskSetManager;
     private final TaskSetPublisher taskSetPublisher;
@@ -67,19 +65,29 @@ public class MonitorTaskSetService {
 
         switch (monitorType) {
             case ICMP: {
-                //todo: add request
-                taskSetManagerUtil.addTask(location, ipAddress, name, TaskType.MONITOR, pluginName, nodeId);
+                Any configuration =
+                    Any.pack(IcmpMonitorRequest.newBuilder()
+                        .setHost(ipAddress)
+                        .setTimeout(Constants.Icmp.DEFAULT_TIMEOUT)
+                        .setDscp(Constants.Icmp.DEFAULT_DSCP)
+                        .setAllowFragmentation(Constants.Icmp.DEFAULT_ALLOW_FRAGMENTATION)
+                        .setPacketSize(Constants.Icmp.DEFAULT_PACKET_SIZE)
+                        .setRetries(Constants.Icmp.DEFAULT_RETRIES)
+                        .build());
+
+                taskSetManagerUtil.addTask(location, ipAddress, name,
+                    TaskType.MONITOR, pluginName, Constants.DEFAULT_SCHEDULE, nodeId, configuration);
                 break;
             }
             case SNMP: {
                 Any configuration =
                     Any.pack(SnmpMonitorRequest.newBuilder()
                         .setHost(ipAddress)
-                        .setTimeout(DEFAULT_SNMP_TIMEOUT)
-                        .setRetries(DEFAULT_SNMP_RETRIES)
+                        .setTimeout(Constants.Snmp.DEFAULT_TIMEOUT)
+                        .setRetries(Constants.Snmp.DEFAULT_RETRIES)
                         .build());
 
-                taskSetManagerUtil.addTask(location, ipAddress, name, TaskType.MONITOR, pluginName, DEFAULT_SCHEDULE, nodeId, configuration);
+                taskSetManagerUtil.addTask(location, ipAddress, name, TaskType.MONITOR, pluginName, Constants.DEFAULT_SCHEDULE, nodeId, configuration);
                 break;
             }
             case UNRECOGNIZED: {

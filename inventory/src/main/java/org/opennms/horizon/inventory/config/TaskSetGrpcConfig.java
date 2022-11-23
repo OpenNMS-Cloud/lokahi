@@ -32,13 +32,6 @@ public class TaskSetGrpcConfig {
 
         if (tlsEnabled) {
             throw new RuntimeException("TLS NOT YET IMPLEMENTED");
-            /*
-             channel = channelBuilder
-                 .negotiationType(NegotiationType.TLS)
-                 .sslContext(buildSslContext().build())
-                 .build();
-             log.info("TLS enabled for TaskSet gRPC");
-             */
         } else {
             channel = channelBuilder.usePlaintext().build();
         }

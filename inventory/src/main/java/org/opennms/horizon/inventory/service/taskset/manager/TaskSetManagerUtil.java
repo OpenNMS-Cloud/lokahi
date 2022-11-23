@@ -44,12 +44,6 @@ public class TaskSetManagerUtil {
     private final TaskSetManager taskSetManager;
     private final TaskSetIdentityUtil taskSetIdentityUtil;
 
-    public void addTask(String location, String ipAddress, String name, TaskType taskType, String pluginName, long nodeId) {
-
-        String taskId = taskSetIdentityUtil.identityForIpTask(ipAddress, name);
-        addTaskToTaskSet(location, taskType, pluginName, null, null, taskId, nodeId);
-    }
-
     public void addTask(String location, String ipAddress, String name, TaskType taskType,
                         String pluginName, String schedule, long nodeId, Any configuration) {
 
@@ -66,6 +60,7 @@ public class TaskSetManagerUtil {
 
     private void addTaskToTaskSet(String location, TaskType taskType, String pluginName, String schedule,
                                   Any configuration, String taskId, long nodeId) {
+
 
         TaskDefinition.Builder builder =
             TaskDefinition.newBuilder()

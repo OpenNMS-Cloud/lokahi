@@ -4,6 +4,10 @@
   <!-- expandable filter: search, select, sorting -->
   <Filter @selected-item="onSelectedItem"/>
   <!-- card: title, metric chip list, text anchor list, icon action list -->
+
+  <!-- This ctrl should later be moved into Filter. -->
+  <TagManagerCtrl />
+  <TagManager />
 </template>
 
 <script lang="ts" setup>

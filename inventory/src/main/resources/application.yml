@@ -27,6 +27,14 @@ grpc:
   server:
     port: 6565
 
+  client:
+    minion-gateway:
+      host: opennms-minion-gateway
+      port: 8991
+      tlsEnabled: false
+      maxMessageSize: 10485760
+
 kafka:
   topics:
     minion-heartbeat: "heartbeat"
+    task-set-results: "task-set.results"

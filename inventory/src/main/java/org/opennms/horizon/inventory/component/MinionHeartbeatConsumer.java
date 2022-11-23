@@ -28,7 +28,6 @@
 
 package org.opennms.horizon.inventory.component;
 
-import org.opennms.cloud.grpc.minion.Identity;
 import org.opennms.horizon.grpc.heartbeat.contract.HeartbeatMessage;
 import org.opennms.horizon.inventory.service.MonitoringSystemService;
 import org.springframework.context.annotation.PropertySource;
@@ -50,7 +49,7 @@ public class MinionHeartbeatConsumer {
     public void receiveMessage(byte[] data) {
         try {
             HeartbeatMessage message = HeartbeatMessage.parseFrom(data);
-            log.debug("Received heartbeat message for minion with id {} and location {}", message.getIdentity().getSystemId(), message.getIdentity().getLocation());
+            log.info("Received heartbeat message for minion with id {} and location {}", message.getIdentity().getSystemId(), message.getIdentity().getLocation());
             service.addMonitoringSystemFromHeartbeat(message);
         } catch (InvalidProtocolBufferException e) {
             log.error("Error while parsing heartbeat message", e);

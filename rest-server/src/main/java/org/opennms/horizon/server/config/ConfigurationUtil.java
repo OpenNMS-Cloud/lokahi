@@ -30,17 +30,22 @@ package org.opennms.horizon.server.config;
 
 import org.opennms.horizon.server.service.gateway.NotificationGateway;
 import org.opennms.horizon.server.service.gateway.PlatformGateway;
+import org.opennms.horizon.server.service.grpc.InventoryClient;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Configuration
 public class ConfigurationUtil {
     @Value("${horizon-stream.core.url}")
     private String platformUrl;
-
     @Value("${horizon-stream.notifications.url}")
     private String notificationsUrl;
+    @Value("${grpc.url.inventory}")
+    private String inventoryGrpcAddress;
 
     @Bean
     public PlatformGateway createGateway() {
@@ -50,5 +55,10 @@ public class ConfigurationUtil {
     @Bean
     public NotificationGateway createNotificationGateway() {
         return new NotificationGateway(notificationsUrl);
+    }
+
+    @Bean(destroyMethod = "shutdown")
+    public InventoryClient createInventoryClient() {
+        return new InventoryClient(inventoryGrpcAddress);
     }
 }

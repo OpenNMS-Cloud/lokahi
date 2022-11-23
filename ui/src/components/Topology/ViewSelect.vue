@@ -52,9 +52,6 @@
   lang="ts"
 >
 import { useTopologyStore } from '@/store/Views/topologyStore'
-import { FeatherButton } from '@featherds/button'
-import { FeatherDropdown, FeatherDropdownItem } from '@featherds/dropdown'
-import { FeatherCheckbox } from '@featherds/checkbox'
 import { Views, ViewType, DisplayType } from './topology.constants'
 import { TopologyGraphList } from '@/types/topology'
 

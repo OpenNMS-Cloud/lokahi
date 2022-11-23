@@ -1,8 +1,39 @@
+/*******************************************************************************
+ * This file is part of OpenNMS(R).
+ *
+ * Copyright (C) 2022 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
+ *
+ * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *
+ * OpenNMS(R) is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published
+ * by the Free Software Foundation, either version 3 of the License,
+ * or (at your option) any later version.
+ *
+ * OpenNMS(R) is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with OpenNMS(R).  If not, see:
+ *      http://www.gnu.org/licenses/
+ *
+ * For more information contact:
+ *     OpenNMS(R) Licensing <license@opennms.org>
+ *     http://www.opennms.org/
+ *     http://www.opennms.com/
+ *******************************************************************************/
+
 package org.opennms.horizon.inventory.service;
 
-import com.vladmihalcea.hibernate.type.basic.Inet;
-import lombok.RequiredArgsConstructor;
-import org.opennms.horizon.inventory.dto.DeviceCreateDTO;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import org.opennms.horizon.inventory.dto.NodeCreateDTO;
 import org.opennms.horizon.inventory.dto.NodeDTO;
 import org.opennms.horizon.inventory.mapper.NodeMapper;
 import org.opennms.horizon.inventory.model.IpInterface;
@@ -13,10 +44,9 @@ import org.opennms.horizon.inventory.repository.MonitoringLocationRepository;
 import org.opennms.horizon.inventory.repository.NodeRepository;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import com.vladmihalcea.hibernate.type.basic.Inet;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -35,7 +65,11 @@ public class NodeService {
             .collect(Collectors.toList());
     }
 
-    private void saveIpInterfaces(DeviceCreateDTO request, Node node, String tenantId) {
+    public Optional<NodeDTO> getByIdAndTenantId(long id, String tenantId){
+        return nodeRepository.findByIdAndTenantId(id, tenantId).map(mapper::modelToDTO);
+    }
+
+    private void saveIpInterfaces(NodeCreateDTO request, Node node, String tenantId) {
         if (request.hasManagementIp()) {
             IpInterface ipInterface = new IpInterface();
 
@@ -47,7 +81,7 @@ public class NodeService {
         }
     }
 
-    private MonitoringLocation saveMonitoringLocation(DeviceCreateDTO request, String tenantId) {
+    private MonitoringLocation saveMonitoringLocation(NodeCreateDTO request, String tenantId) {
         Optional<MonitoringLocation> found =
             monitoringLocationRepository.findByLocationAndTenantId(request.getLocation(), tenantId);
 
@@ -63,18 +97,19 @@ public class NodeService {
         }
     }
 
-    private Node saveNode(DeviceCreateDTO request, MonitoringLocation monitoringLocation, String tenantId) {
+    private Node saveNode(NodeCreateDTO request, MonitoringLocation monitoringLocation, String tenantId) {
         Node node = new Node();
 
         node.setTenantId(tenantId);
         node.setNodeLabel(request.getLabel());
         node.setCreateTime(LocalDateTime.now());
         node.setMonitoringLocation(monitoringLocation);
+        node.setMonitoringLocationId(monitoringLocation.getId());
 
         return nodeRepository.save(node);
     }
 
-    public Node createDevice(DeviceCreateDTO request, String tenantId) {
+    public Node createNode(NodeCreateDTO request, String tenantId) {
         MonitoringLocation monitoringLocation = saveMonitoringLocation(request, tenantId);
         Node node = saveNode(request, monitoringLocation, tenantId);
         saveIpInterfaces(request, node, tenantId);

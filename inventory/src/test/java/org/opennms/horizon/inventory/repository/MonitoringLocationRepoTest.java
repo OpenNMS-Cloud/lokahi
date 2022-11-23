@@ -37,7 +37,7 @@ import java.util.UUID;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.opennms.horizon.inventory.PostgresInitializer;
+import org.opennms.horizon.inventory.SpringContextTestInitializer;
 import org.opennms.horizon.inventory.model.MonitoringLocation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -46,7 +46,7 @@ import org.springframework.test.context.ContextConfiguration;
 
 @DataJpaTest
 @AutoConfigureTestDatabase(replace= AutoConfigureTestDatabase.Replace.NONE)
-@ContextConfiguration(initializers = {PostgresInitializer.class})
+@ContextConfiguration(initializers = {SpringContextTestInitializer.class})
 public class MonitoringLocationRepoTest {
     private final String tenantId = new UUID(10, 10).toString();
     private MonitoringLocation location1, location2, location3;

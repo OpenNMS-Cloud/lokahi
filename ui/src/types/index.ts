@@ -28,3 +28,8 @@ export enum TimeUnit {
 
 export declare type fncVoid = () => void;
 export declare type fncArgVoid = (...args: unknown[]) => void;
+
+export enum NodeDetailContentType {
+  MONITORED,
+  DETECTED
+}

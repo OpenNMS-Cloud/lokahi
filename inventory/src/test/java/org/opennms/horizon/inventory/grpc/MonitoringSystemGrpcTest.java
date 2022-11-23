@@ -37,8 +37,7 @@ import java.util.UUID;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.opennms.horizon.inventory.InventoryApplication;
-import org.opennms.horizon.inventory.PostgresInitializer;
+import org.opennms.horizon.inventory.SpringContextTestInitializer;
 import org.opennms.horizon.inventory.dto.MonitoringSystemDTO;
 import org.opennms.horizon.inventory.dto.MonitoringSystemList;
 import org.opennms.horizon.inventory.dto.MonitoringSystemServiceGrpc;
@@ -48,19 +47,17 @@ import org.opennms.horizon.inventory.model.MonitoringSystem;
 import org.opennms.horizon.inventory.repository.MonitoringLocationRepository;
 import org.opennms.horizon.inventory.repository.MonitoringSystemRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ContextConfiguration;
 
 import com.google.protobuf.Empty;
 import com.google.protobuf.StringValue;
 
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ContextConfiguration;
 
-@SpringBootTest(
-    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-    classes = InventoryApplication.class)
-@ContextConfiguration(initializers = {PostgresInitializer.class})
+@SpringBootTest
+@ContextConfiguration(initializers = {SpringContextTestInitializer.class})
 public class MonitoringSystemGrpcTest extends GrpcTestBase {
     @Autowired
     private MonitoringSystemRepository systemRepo;
@@ -122,7 +119,7 @@ public class MonitoringSystemGrpcTest extends GrpcTestBase {
         initStub();
         MonitoringSystemList systemList = serviceStub.listMonitoringSystem(Empty.newBuilder().build());
         assertThat(systemList).isNotNull();
-        assertThat(systemList.getListList().size()).isEqualTo(2);
+        assertThat(systemList.getSystemsList().size()).isEqualTo(2);
     }
 
     @Test
@@ -131,7 +128,7 @@ public class MonitoringSystemGrpcTest extends GrpcTestBase {
         initStub();
         MonitoringSystemList systemList = serviceStub.listMonitoringSystem(Empty.newBuilder().build());
         assertThat(systemList).isNotNull();
-        assertThat(systemList.getListList().size()).isEqualTo(0);
+        assertThat(systemList.getSystemsList().size()).isEqualTo(0);
     }
 
     @Test

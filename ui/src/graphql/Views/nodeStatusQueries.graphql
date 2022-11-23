@@ -10,8 +10,6 @@ fragment ListEventsParts on Query {
       ipAddress
       nodeId
     }
-    offset
-    totalCount
   }
 }
 

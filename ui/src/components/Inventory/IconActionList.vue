@@ -14,7 +14,6 @@ import MultilineChart from '@material-design-icons/svg/outlined/multiline_chart.
 import PieChart from '@material-design-icons/svg/outlined/pie_chart.svg'
 import Warning from '@featherds/icon/notification/Warning'
 import Delete from '@featherds/icon/action/Delete'
-import { markRaw } from 'vue'
 import IconAction from '@/components/Common/IconAction.vue'
 
 const onBubbleChart = () => {
@@ -64,8 +63,6 @@ const deleteItem = {
 </script>
 
 <style lang="scss" scoped>
-@use "@featherds/styles/themes/variables";
-
 .icon-action-list {
   list-style-type: none;
   padding: 0;

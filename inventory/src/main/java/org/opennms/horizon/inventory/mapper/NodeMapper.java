@@ -5,7 +5,7 @@ import org.opennms.horizon.inventory.dto.NodeDTO;
 import org.opennms.horizon.inventory.model.Node;
 
 @Mapper(componentModel = "spring")
-public interface NodeMapper {
+public interface NodeMapper extends DateTimeMapper {
     Node dtoToModel(NodeDTO dto);
     NodeDTO modelToDTO(Node model);
 }

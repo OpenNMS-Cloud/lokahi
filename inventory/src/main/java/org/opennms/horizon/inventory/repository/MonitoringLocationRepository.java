@@ -12,4 +12,5 @@ public interface MonitoringLocationRepository extends JpaRepository<MonitoringLo
     Optional<MonitoringLocation> findByLocation(String location);
     List<MonitoringLocation> findByTenantId(String tenantId);
     Optional<MonitoringLocation> findByLocationAndTenantId(String location, String tenantId);
+    Optional<MonitoringLocation> findByIdAndTenantId(long id, String tenantId);
 }

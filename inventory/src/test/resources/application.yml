@@ -14,6 +14,9 @@ spring:
       value-deserializer: org.apache.kafka.common.serialization.ByteArrayDeserializer
     bootstrap-servers: localhost:59092
 
+  main:
+    allow-bean-definition-overriding: true
+
 grpc:
   server:
     port: 6565
@@ -21,3 +24,4 @@ grpc:
 kafka:
   topics:
     minion-heartbeat: "heartbeat"
+    task-set-results: "task-set.results"

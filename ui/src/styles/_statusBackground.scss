@@ -1,6 +1,7 @@
 @use "@featherds/styles/themes/variables";
 
 .bg-status {
+  color: var(variables.$primary-text-on-color);
   :deep(.label) {
     color: var(variables.$primary-text-on-color);
   }

@@ -47,4 +47,5 @@ message MonitoringLocationList {
 service MonitoringLocationService {
   rpc listLocations(google.protobuf.Empty) returns (MonitoringLocationList) {};
   rpc getLocationByName(google.protobuf.StringValue) returns (MonitoringLocationDTO) {};
+  rpc getLocationById(google.protobuf.Int64Value) returns (MonitoringLocationDTO) {};
 }

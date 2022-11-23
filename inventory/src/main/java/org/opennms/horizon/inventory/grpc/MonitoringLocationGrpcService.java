@@ -37,6 +37,7 @@ import org.opennms.horizon.inventory.dto.MonitoringLocationServiceGrpc;
 import org.opennms.horizon.inventory.service.MonitoringLocationService;
 
 import com.google.protobuf.Empty;
+import com.google.protobuf.Int64Value;
 import com.google.protobuf.StringValue;
 import com.google.rpc.Code;
 import com.google.rpc.Status;
@@ -64,11 +65,12 @@ public class MonitoringLocationGrpcService extends MonitoringLocationServiceGrpc
 
     @Override
     public void getLocationByName(StringValue locationName, StreamObserver<MonitoringLocationDTO> responseObserver) {
-        Optional<MonitoringLocationDTO> location =tenantLookup.lookupTenantId(Context.current())
+        Optional<MonitoringLocationDTO> location = tenantLookup.lookupTenantId(Context.current())
             .map(tenantId -> service.findByLocationAndTenantId(locationName.getValue(), tenantId))
             .orElseThrow();
-        if(location.isPresent()){
+        if (location.isPresent()) {
             responseObserver.onNext(location.get());
+            responseObserver.onCompleted();
         } else {
             Status status = Status.newBuilder()
                 .setCode(Code.NOT_FOUND_VALUE)
@@ -76,6 +78,21 @@ public class MonitoringLocationGrpcService extends MonitoringLocationServiceGrpc
                 .build();
             responseObserver.onError(StatusProto.toStatusRuntimeException(status));
         }
-        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void getLocationById(Int64Value request, StreamObserver<MonitoringLocationDTO> responseObserver) {
+        Optional<MonitoringLocationDTO> location = tenantLookup.lookupTenantId(Context.current())
+            .map(tenantId -> service.getByIdAndTenantId(request.getValue(), tenantId)).orElseThrow();
+        if (location.isPresent()) {
+            responseObserver.onNext(location.get());
+            responseObserver.onCompleted();
+        } else {
+            Status status = Status.newBuilder()
+                .setCode(Code.NOT_FOUND_VALUE)
+                .setMessage("Location with id: " + request.getValue() + " doesn't exist.").build();
+            responseObserver.onError(StatusProto.toStatusRuntimeException(status));
+        }
     }
 }
+

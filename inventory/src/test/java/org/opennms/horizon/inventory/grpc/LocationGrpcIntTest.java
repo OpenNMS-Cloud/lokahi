@@ -36,8 +36,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.opennms.horizon.inventory.InventoryApplication;
-import org.opennms.horizon.inventory.PostgresInitializer;
+import org.opennms.horizon.inventory.SpringContextTestInitializer;
 import org.opennms.horizon.inventory.dto.MonitoringLocationDTO;
 import org.opennms.horizon.inventory.dto.MonitoringLocationList;
 import org.opennms.horizon.inventory.dto.MonitoringLocationServiceGrpc;
@@ -45,20 +44,18 @@ import org.opennms.horizon.inventory.mapper.MonitoringLocationMapper;
 import org.opennms.horizon.inventory.model.MonitoringLocation;
 import org.opennms.horizon.inventory.repository.MonitoringLocationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ContextConfiguration;
 
 import com.google.protobuf.Empty;
 import com.google.protobuf.StringValue;
 
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ContextConfiguration;
 
-@SpringBootTest(
-    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-    classes = InventoryApplication.class)
-@ContextConfiguration(initializers = {PostgresInitializer.class})
-public class LocationGrpcIntegrationTest extends GrpcTestBase {
+@SpringBootTest
+@ContextConfiguration(initializers = {SpringContextTestInitializer.class})
+class LocationGrpcIntTest extends GrpcTestBase {
     private MonitoringLocation location1;
     private MonitoringLocation location2;
     @Autowired

@@ -1,18 +1,16 @@
 package org.opennms.horizon.inventory.service;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
+import com.vladmihalcea.hibernate.type.basic.Inet;
+import lombok.RequiredArgsConstructor;
 import org.opennms.horizon.inventory.dto.IpInterfaceDTO;
 import org.opennms.horizon.inventory.mapper.IpInterfaceMapper;
 import org.opennms.horizon.inventory.model.IpInterface;
-import org.opennms.horizon.inventory.model.Node;
 import org.opennms.horizon.inventory.repository.IpInterfaceRepository;
-import org.opennms.horizon.inventory.repository.NodeRepository;
 import org.springframework.stereotype.Service;
 
-import lombok.RequiredArgsConstructor;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -27,5 +25,10 @@ public class IpInterfaceService {
             .stream()
             .map(mapper::modelToDTO)
             .collect(Collectors.toList());
+    }
+
+    public Optional<IpInterfaceDTO> findByIpAddressAndLocationAndTenantId(String ipAddress, String location, String tenantId) {
+        Optional<IpInterface> optional = modelRepo.findByIpAddressAndLocationAndTenantId(new Inet(ipAddress), location, tenantId);
+        return optional.map(mapper::modelToDTO);
     }
 }

@@ -11,7 +11,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.OneToOne;
+import javax.persistence.ManyToOne;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
@@ -36,7 +36,7 @@ public class Node {
     @Column(name = "create_time", columnDefinition = "TIMESTAMP")
     private LocalDateTime createTime;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(optional=false, fetch=FetchType.LAZY)
     @JoinColumn(name = "monitoring_location_id", referencedColumnName = "id")
     private MonitoringLocation monitoringLocation;
 

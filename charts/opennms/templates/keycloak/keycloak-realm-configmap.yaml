@@ -26,6 +26,22 @@ data:
           ],
           "publicClient": true,
           "directAccessGrantsEnabled": true,
+          "protocolMappers": [
+            {
+              "name": "tenant-id",
+              "protocol": "openid-connect",
+              "protocolMapper": "oidc-hardcoded-claim-mapper",
+              "consentRequired": false,
+              "config": {
+                "claim.value": "opennms-prime",
+                "userinfo.token.claim": "true",
+                "id.token.claim": "true",
+                "access.token.claim": "true",
+                "claim.name": "tenant-id",
+                "access.tokenResponse.claim": "false"
+              }
+            }
+          ],
           "defaultClientScopes": [
             "web-origins",
             "roles",

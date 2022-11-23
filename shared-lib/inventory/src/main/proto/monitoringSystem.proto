@@ -46,7 +46,7 @@ message MonitoringSystemDTO {
 }
 
 message MonitoringSystemList {
-  repeated MonitoringSystemDTO list = 1;
+  repeated MonitoringSystemDTO systems = 1;
 }
 
 service MonitoringSystemService {

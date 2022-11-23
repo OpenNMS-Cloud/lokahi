@@ -26,28 +26,15 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.inventory;
+package org.opennms.horizon.server.mapper;
 
-import org.springframework.boot.test.util.TestPropertyValues;
-import org.springframework.context.ApplicationContextInitializer;
-import org.springframework.context.ConfigurableApplicationContext;
-import org.testcontainers.containers.PostgreSQLContainer;
+import org.mapstruct.Mapper;
+import org.opennms.horizon.inventory.dto.MonitoringLocationDTO;
+import org.opennms.horizon.server.model.inventory.Location;
 
-public class PostgresInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
-
-    private static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:14.5-alpine")
-        .withDatabaseName("inventory").withUsername("inventory")
-        .withPassword("password").withExposedPorts(5432);
-    static {
-        postgres.start();
-    }
-
-    @Override
-    public void initialize(ConfigurableApplicationContext applicationContext) {
-        TestPropertyValues.of(
-            "spring.datasource.url=" + postgres.getJdbcUrl(),
-            "spring.datasource.username=" + postgres.getUsername(),
-            "spring.datasource.password=" + postgres.getPassword()
-        ).applyTo(applicationContext.getEnvironment());
-    }
+@Mapper(componentModel = "spring")
+public interface LocationMapper {
+    Location protoToLocation(MonitoringLocationDTO locationDTO);
+    MonitoringLocationDTO locationToProto(Location location);
 }
+

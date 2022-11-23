@@ -11,7 +11,7 @@ graphql:
     gui:
       enabled: true
     base-packages:
-      - org.opennms.horizon.shared.dto
+      - org.opennms.horizon.server.model.inventory
 
 # keycloak admin client properties
 horizon-stream:
@@ -24,3 +24,7 @@ logging:
   file.path: /var/log/restServer
 
 tsdb.url: http://localhost:59090/api/v1/query
+
+grpc:
+  url:
+    inventory: localhost:29065

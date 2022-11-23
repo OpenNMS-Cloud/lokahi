@@ -27,7 +27,6 @@
  *******************************************************************************/
 
 package org.opennms.horizon.server.service;
-
 import io.leangen.graphql.annotations.GraphQLArgument;
 import io.leangen.graphql.annotations.GraphQLEnvironment;
 import io.leangen.graphql.annotations.GraphQLMutation;
@@ -44,25 +43,24 @@ import reactor.core.publisher.Mono;
 @GraphQLApi
 @Service
 public class DeviceService {
-  private final PlatformGateway gateway;
+    private final PlatformGateway gateway;
 
     public DeviceService(PlatformGateway gateway) {
         this.gateway = gateway;
     }
 
-  @GraphQLQuery
-  public Mono<DeviceCollectionDTO> listDevices(@GraphQLEnvironment ResolutionEnvironment env) {
-    return gateway.get(PlatformGateway.URL_PATH_DEVICES, gateway.getAuthHeader(env), DeviceCollectionDTO.class);
-  }
+    @GraphQLQuery
+    public Mono<DeviceCollectionDTO> listDevices(@GraphQLEnvironment ResolutionEnvironment env) {
+        return gateway.get(PlatformGateway.URL_PATH_DEVICES, gateway.getAuthHeader(env), DeviceCollectionDTO.class);
+    }
 
-  @GraphQLQuery
-  public Mono<DeviceDTO> getDeviceById(@GraphQLArgument(name = "id") Integer id, @GraphQLEnvironment ResolutionEnvironment env) {
-    return gateway.get(PlatformGateway.URL_PATH_DEVICES + "/" + id, gateway.getAuthHeader(env), DeviceDTO.class);
-  }
+    @GraphQLQuery
+    public Mono<DeviceDTO> getDeviceById(@GraphQLArgument(name = "id") Integer id, @GraphQLEnvironment ResolutionEnvironment env) {
+        return gateway.get(PlatformGateway.URL_PATH_DEVICES + "/" + id, gateway.getAuthHeader(env), DeviceDTO.class);
+    }
 
-  @GraphQLMutation
-  public Mono<Integer> addDevice(DeviceCreateDTO device, @GraphQLEnvironment ResolutionEnvironment env) {
-      return gateway.post(PlatformGateway.URL_PATH_DEVICES, gateway.getAuthHeader(env), device, Integer.class);
-  }
+    @GraphQLMutation
+    public Mono<Integer> addDevice(DeviceCreateDTO device, @GraphQLEnvironment ResolutionEnvironment env) {
+        return gateway.post(PlatformGateway.URL_PATH_DEVICES, gateway.getAuthHeader(env), device, Integer.class);
+    }
 }
-

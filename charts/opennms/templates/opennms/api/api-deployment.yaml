@@ -57,6 +57,8 @@ spec:
               value: /api
             - name: GRAPHQL_SPQR_GUI_TARGET_ENDPOINT
               value: /api/graphql
+            - name: GRPC_URL_INVENTORY
+              value: "{{ .Values.OpenNMS.Inventory.ServiceName }}:{{ .Values.OpenNMS.Inventory.GrpcPort }}"
           ports:
             - containerPort: {{ .Values.OpenNMS.API.Port }}
           {{/*  TODO    livenessProbe:*/}}

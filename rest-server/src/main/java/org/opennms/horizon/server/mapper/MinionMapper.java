@@ -25,29 +25,25 @@
  *     http://www.opennms.org/
  *     http://www.opennms.com/
  *******************************************************************************/
-syntax = "proto3";
 
-import "google/protobuf/empty.proto";
-import "google/protobuf/any.proto";
+package org.opennms.horizon.server.mapper;
 
-package opennms.inventory;
-option java_multiple_files = true;
-option java_package = "org.opennms.horizon.inventory.dto";
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.Mappings;
+import org.opennms.horizon.inventory.dto.MonitoringSystemDTO;
+import org.opennms.horizon.server.model.inventory.Minion;
 
-message NodeDTO {
-  int64 id = 1;
-  string tenant_id = 2;
-  string node_label = 3;
-  string create_time = 4;
-  int64 monitoring_location_id = 5;
-}
-
-message DeviceCreateDTO {
-  string label = 1;
-  string location = 2;
-  optional string management_ip = 3;
-}
-
-service DeviceService {
-  rpc createDevice(DeviceCreateDTO) returns (NodeDTO) {};
+@Mapper(componentModel = "spring")
+public interface MinionMapper {
+    @Mappings({
+        @Mapping(target = "locationId", source = "monitoringLocationId"),
+        @Mapping(target = "lastCheckedTime", source = "lastCheckedIn")
+    })
+    Minion protoToMinion(MonitoringSystemDTO dto);
+    @Mappings({
+        @Mapping(source = "locationId", target = "monitoringLocationId"),
+        @Mapping(source = "lastCheckedTime", target = "lastCheckedIn")
+    })
+    MonitoringSystemDTO minionToProto(Minion minion);
 }

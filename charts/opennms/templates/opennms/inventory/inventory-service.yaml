@@ -11,5 +11,8 @@ spec:
     - port: {{ .Values.OpenNMS.Inventory.Port }}
       protocol: TCP
       name: http
+    - port: {{ .Values.OpenNMS.Inventory.GrpcPort }}
+      protocol: TCP
+      name: grpc
   selector:
     app: {{ .Values.OpenNMS.Inventory.ServiceName }}

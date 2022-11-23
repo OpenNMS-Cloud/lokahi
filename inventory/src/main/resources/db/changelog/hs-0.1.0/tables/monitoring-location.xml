@@ -19,13 +19,19 @@
             </column>
 
             <column name="location" type="TEXT">
-                <constraints nullable="false" unique="true"/>
+                <constraints nullable="false"/>
             </column>
 
         </createTable>
 
         <addPrimaryKey tableName="monitoring_location" columnNames="id"
                        constraintName="pk_monitoring_location_id"/>
+
+        <addUniqueConstraint
+            columnNames="tenant_id, location"
+            constraintName="location_constraint"
+            tableName="monitoring_location"
+        />
 
     </changeSet>
 </databaseChangeLog>

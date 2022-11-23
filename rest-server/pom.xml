@@ -2,30 +2,33 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
+    <version>0.1.0-SNAPSHOT</version>
 	<parent>
-		<groupId>org.springframework.boot</groupId>
-		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.6.8</version>
-		<relativePath/> <!-- lookup parent from repository -->
+        <groupId>org.opennms.horizon</groupId>
+        <artifactId>horizon-parent</artifactId>
+        <version>0.1.0-SNAPSHOT</version>
+        <relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>org.opennms.horizon</groupId>
 	<artifactId>rest-server</artifactId>
-	<version>0.1.0-SNAPSHOT</version>
+
 	<name>OpenNMS Horizon :: Rest API server</name>
 	<description>rest-server</description>
 	<properties>
 		<java.version>11</java.version>
-        <jacoco.version>0.8.8</jacoco.version>
-		<lombok.version>1.18.22</lombok.version>
-		<lombok.binding.version>0.2.0</lombok.binding.version>
 		<graphql.spqr.version>0.0.6</graphql.spqr.version>
-		<docker.it.network>rest-server-it-network</docker.it.network>
-		<caffeine.cache.version>3.1.0</caffeine.cache.version>
-		<springdoc.openapi.version>1.6.9</springdoc.openapi.version>
-		<horizon.shared.lib.version>0.1.0-SNAPSHOT</horizon.shared.lib.version>
-        <sonar.organization>opennms</sonar.organization>
-        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
 	</properties>
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>2.6.8</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -47,7 +50,6 @@
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
-			<version>${lombok.version}</version>
 			<optional>true</optional>
 		</dependency>
 		<dependency>
@@ -59,11 +61,23 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-cache</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>com.github.ben-manes.caffeine</groupId>
-			<artifactId>caffeine</artifactId>
-			<version>${caffeine.cache.version}</version>
-		</dependency>
+        <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-netty-shaded</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.opennms.horizon.shared</groupId>
+            <artifactId>inventory</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct</artifactId>
+        </dependency>
 		<!-- Test -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -95,7 +109,15 @@
 				<configuration>
 					<source>${java.version}</source>
 					<target>${java.version}</target>
+                    <compilerArgs>
+                        <arg>-parameters</arg>
+                    </compilerArgs>
 					<annotationProcessorPaths>
+                        <path>
+                            <groupId>org.mapstruct</groupId>
+                            <artifactId>mapstruct-processor</artifactId>
+                            <version>${mapstruct.version}</version>
+                        </path>
 						<path>
 							<groupId>org.projectlombok</groupId>
 							<artifactId>lombok</artifactId>

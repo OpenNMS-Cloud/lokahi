@@ -167,11 +167,25 @@ k8s_resource(
 )
 
 ### Minion ###
+
+# Compile Minion code without the assembly modules.
+# The assembly modules and docker image are built later, by the `minion-k8s` and `minion-local` resources.
+local_resource(
+    'minion-compile',
+    cmd=['mvn', 'clean', 'install', '-Ddocker.skip=true', '-Dtest=false', '-DfailIfNoTests=false', '-DskipITs=true', '-DskipUTs=true', '-DskipTests=true', '-Dfeatures.verify.skip=true', '-pl=!assembly,!docker-assembly'],
+    dir='minion',
+    labels=['minion'],
+    resource_deps=['shared-lib'],
+    allow_parallel=True,
+)
+
+# Minion image build and deployment to Kubernetes.
+# Builds karaf/docker assembly modules and produces an image.
 custom_build(
     'opennms/horizon-stream-minion',
-    ['mvn', 'install', '-Ddocker.image=$EXPECTED_REF', '-Dtest=false', '-DfailIfNoTests=false', '-DskipITs=true', '-DskipUTs=true', '-DskipTests=true', '-Dfeatures.verify.skip=true'],
+    'mvn install -Ddocker.image=$EXPECTED_REF -f=minion -pl=assembly,docker-assembly',
     deps=['./minion'],
-    ignore=['**/target', '**/dependency-reduced-pom.xml'],
+    ignore=['**/target', '**/dependency-reduced-pom.xml', './minion/tmp'],
 )
 
 k8s_resource(
@@ -179,30 +193,29 @@ k8s_resource(
     new_name='minion-k8s',
     port_forwards=['12022:8101', '12080:8181', '12050:5005'],
     labels=['minion'],
+    resource_deps=['minion-compile'],
     trigger_mode=TRIGGER_MODE_MANUAL,
 )
 
-local_resource(
-    'minion-local-compile',
-    cmd=['mvn', 'clean', 'install', '-Ddocker.skip=true', '-Dtest=false', '-DfailIfNoTests=false', '-DskipITs=true', '-DskipUTs=true', '-DskipTests=true', '-Dfeatures.verify.skip=true', '-pl=!assembly,!docker-assembly'],
-    dir='minion',
-    labels=['minion'],
-    allow_parallel=True,
-    auto_init=False
-)
-
+# Minion running locally.
+#
+# Tilt will first run `cmd`. After it successfully completes, it will run `serve_cmd` and stream log output.
+# Requires the JAVA_HOME environment variable to be set, which should point to JDK 11.
 local_resource(
     'minion-local',
-    cmd=['mvn', 'install'],
-    dir='minion/assembly',
-    serve_cmd=['./bin/karaf', 'server'],
-    serve_dir='minion/assembly/target/assembly',
+    cmd='./tmp/assembly/bin/karaf stop || true && ' + # Attempts to stop karaf, proceeds on error (e.g. when karaf isn't already running).
+        'rm -rf tmp/assembly || true && ' + # Removes old tmp folder, proceeds on error (e.g. when the folder does not exist).
+        'mvn package -pl=assembly && ' + # Builds the karaf assembly module.
+        'cp -r assembly/target/assembly tmp/assembly', # Copy the assembly to 'minion/tmp`. This is done so rebuilds of the assembly module won't interfere with serve_cmd.
+    dir='minion',
+    serve_cmd=['./bin/karaf', 'server'], # Runs Karaf locally and streams log output into Tilt
+    serve_dir='minion/tmp/assembly',
     serve_env={
         "USE_KUBERNETES": "false",
         "LOCATION": "Default"
     },
     labels=['minion'],
-    resource_deps=['minion-local-compile'],
+    resource_deps=['minion-compile'],
     trigger_mode=TRIGGER_MODE_MANUAL,
     allow_parallel=True,
     auto_init=False

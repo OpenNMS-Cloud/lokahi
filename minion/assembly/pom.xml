@@ -147,6 +147,9 @@
                 <!-- This variable is used to allow externalizing this configuration. By default, it matches karaf-maven-plugin's default. -->
                 <devAssembly.outputDirectory>${project.build.directory}/assembly</devAssembly.outputDirectory>
 
+                <!-- FIXME DO NOT COMMIT Allows execution of commands  -->
+                <devAssembly.command/>
+
                 <!-- These should only ever be present in a development profile -->
                 <devAssembly.user>admin</devAssembly.user>
                 <devAssembly.password>admin</devAssembly.password>
@@ -200,6 +203,24 @@
                                             <command>
                                                 <rank>1</rank>
                                                 <command>bundle:watch *</command>
+                                            </command>
+                                        </commands>
+
+                                        <user>${devAssembly.user}</user>
+                                        <password>${devAssembly.password}</password>
+                                    </configuration>
+                                </execution>
+                                <execution>
+                                    <id>send-command</id>
+                                    <phase>none</phase>
+                                    <goals>
+                                        <goal>client</goal>
+                                    </goals>
+                                    <configuration>
+                                        <commands>
+                                            <command>
+                                                <rank>1</rank>
+                                                <command>${devAssembly.command}</command>
                                             </command>
                                         </commands>
 

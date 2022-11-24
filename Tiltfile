@@ -1,5 +1,5 @@
 # Tilt config #
-load('ext://uibutton', 'cmd_button')
+load('ext://uibutton', 'cmd_button', 'text_input')
 
 secret_settings(disable_scrub=True)  ## TODO: update secret values so we can reenable scrub
 
@@ -226,6 +226,18 @@ cmd_button(
     resource='minion-local',
     icon_name='autorenew',
     text='Enable bundle:watch',
+)
+
+# Allows developer to send a command to the running Minion's Karaf shell
+cmd_button(
+    'minion-karaf-command',
+    argv=['sh', '-c', 'mvn -P=devAssembly org.apache.karaf.tooling:karaf-maven-plugin:client@send-command -f minion/assembly -DdevAssembly.command="$COMMAND"'],
+    resource='minion-local',
+    icon_name='electric_bolt',
+    text='Run a command in the Karaf shell',
+    inputs=[
+        text_input('COMMAND', 'Command', 'diag | grep -v Active'),
+    ],
 )
 
 ## 3rd Party Resources ##

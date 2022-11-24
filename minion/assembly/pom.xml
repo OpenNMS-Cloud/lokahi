@@ -139,4 +139,80 @@
         </plugins>
     </build>
 
+    <profiles>
+        <profile>
+            <id>devAssembly</id>
+
+            <properties>
+                <!-- This variable is used to allow externalizing this configuration. By default, it matches karaf-maven-plugin's default. -->
+                <devAssembly.outputDirectory>${project.build.directory}/assembly</devAssembly.outputDirectory>
+
+                <!-- These should only ever be present in a development profile -->
+                <devAssembly.user>admin</devAssembly.user>
+                <devAssembly.password>admin</devAssembly.password>
+            </properties>
+
+            <build>
+                <resources>
+                    <resource>
+                        <directory>src/main/dev-resources</directory>
+                        <filtering>true</filtering>
+                        <includes>
+                            <!-- This should only ever be present in a development profile -->
+                            <include>etc/users.properties</include>
+                        </includes>
+                    </resource>
+                </resources>
+
+                <pluginManagement>
+                    <plugins>
+                        <plugin>
+                            <groupId>org.apache.karaf.tooling</groupId>
+                            <artifactId>karaf-maven-plugin</artifactId>
+                            <executions>
+                                <execution>
+                                    <id>default-assembly</id>
+                                    <goals>
+                                        <goal>assembly</goal>
+                                    </goals>
+                                    <configuration>
+                                        <workDirectory>${devAssembly.outputDirectory}</workDirectory>
+                                    </configuration>
+                                </execution>
+                                <execution>
+                                    <id>default-archive</id>
+                                    <goals>
+                                        <goal>archive</goal>
+                                    </goals>
+                                    <configuration>
+                                        <!-- needs to be set to what the assembly goal produces -->
+                                        <targetServerDirectory>${devAssembly.outputDirectory}</targetServerDirectory>
+                                    </configuration>
+                                </execution>
+                                <execution>
+                                    <id>bundle-watch</id>
+                                    <phase>none</phase>
+                                    <goals>
+                                        <goal>client</goal>
+                                    </goals>
+                                    <configuration>
+                                        <commands>
+                                            <command>
+                                                <rank>1</rank>
+                                                <command>bundle:watch *</command>
+                                            </command>
+                                        </commands>
+
+                                        <user>${devAssembly.user}</user>
+                                        <password>${devAssembly.password}</password>
+                                    </configuration>
+                                </execution>
+                            </executions>
+                        </plugin>
+                    </plugins>
+                </pluginManagement>
+            </build>
+        </profile>
+    </profiles>
+
 </project>

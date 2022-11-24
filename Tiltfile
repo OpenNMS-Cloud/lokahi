@@ -181,7 +181,7 @@ local_resource(
 # Builds karaf/docker assembly modules and produces an image.
 custom_build(
     'opennms/horizon-stream-minion',
-    'mvn install -Ddocker.image=$EXPECTED_REF -f=minion -pl=assembly,docker-assembly',
+    'mvn install -Ddocker.image=$EXPECTED_REF -f=minion -pl=assembly,docker-assembly -PdevAssembly',
     deps=['./minion'],
     ignore=['**/target', '**/dependency-reduced-pom.xml', './minion/tmp'],
 )
@@ -201,13 +201,11 @@ k8s_resource(
 # Requires the JAVA_HOME environment variable to be set, which should point to JDK 11.
 local_resource(
     'minion-local',
-    cmd='./tmp/assembly/bin/karaf stop || true && ' + # Attempts to stop karaf, proceeds on error (e.g. when karaf isn't already running).
-        'rm -rf tmp/assembly || true && ' + # Removes old tmp folder, proceeds on error (e.g. when the folder does not exist).
-        'mvn package -pl=assembly && ' + # Builds the karaf assembly module.
-        'cp -r assembly/target/assembly tmp/assembly', # Copy the assembly to 'minion/tmp`. This is done so rebuilds of the assembly module won't interfere with serve_cmd.
+    cmd='./assembly/target/dev-assembly/bin/karaf stop || true && ' + # Attempts to stop karaf, proceeds on error (e.g. when karaf isn't already running).
+        'mvn clean package -pl=assembly -PdevAssembly -DdevAssembly.outputDirectory=target/dev-assembly', # Builds the karaf assembly module.
     dir='minion',
     serve_cmd=['./bin/karaf', 'server'], # Runs Karaf locally and streams log output into Tilt
-    serve_dir='minion/tmp/assembly',
+    serve_dir='minion/assembly/target/dev-assembly',
     serve_env={
         "USE_KUBERNETES": "false",
         "LOCATION": "Default"

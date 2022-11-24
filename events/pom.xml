@@ -10,6 +10,7 @@
         <module>conf</module>
         <module>traps</module>
         <module>consumer</module>
+        <module>grpc</module>
     </modules>
     <parent>
         <groupId>org.opennms.horizon</groupId>

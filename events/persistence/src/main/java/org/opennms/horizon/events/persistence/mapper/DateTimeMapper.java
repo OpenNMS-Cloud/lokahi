@@ -26,15 +26,13 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.events.persistence.repository;
+package org.opennms.horizon.events.persistence.mapper;
 
-import org.opennms.horizon.events.persistence.model.Event;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 
-import java.util.List;
-
-@Repository
-public interface EventRepository extends JpaRepository<Event, Long> {
-    List<Event> findAllByNodeId(long nodeId);
+public interface DateTimeMapper {
+    default long dateTimeToTimestamp(LocalDateTime dateTime) {
+        return dateTime.toInstant(ZoneOffset.UTC).toEpochMilli();
+    }
 }

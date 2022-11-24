@@ -10,10 +10,10 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.opennms.horizon.events</groupId>
-    <artifactId>main</artifactId>
-    <name>OpenNMS Horizon :: Events :: Main</name>
+    <artifactId>grpc</artifactId>
+    <name>OpenNMS Horizon :: Events :: Grpc</name>
     <version>0.1.0-SNAPSHOT</version>
-    <description>Events Service</description>
+
     <properties>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
@@ -31,23 +31,18 @@
     </dependencyManagement>
     <dependencies>
         <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter</artifactId>
+            <version>${spring-boot.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.opennms.horizon.events</groupId>
             <artifactId>persistence</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.opennms.horizon.events</groupId>
-            <artifactId>traps</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.opennms.horizon.events</groupId>
-            <artifactId>consumer</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.opennms.horizon.events</groupId>
-            <artifactId>grpc</artifactId>
+            <groupId>org.opennms.horizon.shared</groupId>
+            <artifactId>events</artifactId>
             <version>${project.version}</version>
         </dependency>
 
@@ -77,9 +72,22 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.liquibase</groupId>
-            <artifactId>liquibase-core</artifactId>
-            <version>${liquibaseVersion}</version>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>${jupiter.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>testcontainers</artifactId>
+            <version>1.17.4</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>1.17.4</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.testcontainers</groupId>
@@ -95,32 +103,7 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
             </plugin>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>com.google.cloud.tools</groupId>
-                <artifactId>jib-maven-plugin</artifactId>
-                <configuration>
-                    <!-- override skip=false from minion-gateway parent so jib executes here -->
-                    <skip>false</skip>
-                </configuration>
-            </plugin>
         </plugins>
     </build>
 
-
-    <profiles>
-        <!-- Build docker images on request. -->
-        <profile>
-            <id>build-docker-images-enabled</id>
-            <activation>
-                <activeByDefault>false</activeByDefault>
-            </activation>
-            <properties>
-                <skip-docker-image-build>false</skip-docker-image-build>
-            </properties>
-        </profile>
-    </profiles>
 </project>

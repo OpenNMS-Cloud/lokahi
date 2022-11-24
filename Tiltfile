@@ -1,4 +1,6 @@
 # Tilt config #
+load('ext://uibutton', 'cmd_button')
+
 secret_settings(disable_scrub=True)  ## TODO: update secret values so we can reenable scrub
 
 # Functions #
@@ -215,6 +217,15 @@ local_resource(
     trigger_mode=TRIGGER_MODE_MANUAL,
     allow_parallel=True,
     auto_init=False
+)
+
+# Enables bundle:watch on the local minion
+cmd_button(
+    'minion-bundle-watch',
+    argv=['sh', '-c', 'mvn -P=devAssembly org.apache.karaf.tooling:karaf-maven-plugin:client@bundle-watch -f minion/assembly'],
+    resource='minion-local',
+    icon_name='autorenew',
+    text='Enable bundle:watch',
 )
 
 ## 3rd Party Resources ##

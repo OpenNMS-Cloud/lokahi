@@ -35,10 +35,15 @@ class EventServiceIntTest {
     private static final String TEST_TYPE = "int32";
     private static final String TEST_VALUE = "64";
     private static final String TEST_ENCODING = "encoding";
+    private static final String TEST_ID = "snmp";
+    private static final String TEST_TRAP_OID = "0.0.1.2";
+    private static final String TEST_COMMUNITY = "public";
+    private static final int TEST_GENERIC = 34;
 
     private static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:14.5-alpine")
         .withDatabaseName("events").withUsername("events")
         .withPassword("password").withExposedPorts(5432);
+
 
     static {
         postgres.start();
@@ -83,20 +88,10 @@ class EventServiceIntTest {
         for (int index = 0; index < events.size(); index++) {
             EventDTO event = events.get(index);
             assertEquals(index + 1, event.getNodeId());
-            assertEquals(TEST_TENANT_ID, event.getTenantId());
-            assertEquals(TEST_UEI, event.getUei());
-            assertNotEquals(0, event.getProducedTime());
-            assertEquals(TEST_IP_ADDRESS.getAddress(), event.getIpAddress());
-
-            assertNotNull(event.getEventParamsList());
-            event.getEventParamsList().forEach(parameter -> {
-                assertEquals(TEST_NAME, parameter.getName());
-                assertEquals(TEST_TYPE, parameter.getType());
-                assertEquals(TEST_VALUE, parameter.getValue());
-                assertEquals(TEST_ENCODING, parameter.getEncoding());
-            });
+            assertEvent(event);
         }
     }
+
 
     @Test
     void testFindAllEventsByNodeId() {
@@ -111,20 +106,14 @@ class EventServiceIntTest {
         assertEquals(3, eventsNode1.size());
         for (EventDTO event : eventsNode1) {
             assertEquals(1, event.getNodeId());
-            assertEquals(TEST_TENANT_ID, event.getTenantId());
-            assertEquals(TEST_UEI, event.getUei());
-            assertNotEquals(0, event.getProducedTime());
-            assertEquals(TEST_IP_ADDRESS.getAddress(), event.getIpAddress());
+            assertEvent(event);
         }
 
         List<EventDTO> eventsNode2 = service.findEventsByNodeId(2);
         assertEquals(5, eventsNode2.size());
         for (EventDTO event : eventsNode2) {
             assertEquals(2, event.getNodeId());
-            assertEquals(TEST_TENANT_ID, event.getTenantId());
-            assertEquals(TEST_UEI, event.getUei());
-            assertNotEquals(0, event.getProducedTime());
-            assertEquals(TEST_IP_ADDRESS.getAddress(), event.getIpAddress());
+            assertEvent(event);
         }
     }
 
@@ -148,15 +137,40 @@ class EventServiceIntTest {
         event.setEventParameters(parms);
 
         SnmpInfo snmpInfo = SnmpInfo.newBuilder()
-            .setId("snmp")
-            .setTrapOid("0.0.1.2")
-            .setCommunity("public")
-            .setGeneric(34).build();
+            .setId(TEST_ID)
+            .setTrapOid(TEST_TRAP_OID)
+            .setCommunity(TEST_COMMUNITY)
+            .setGeneric(TEST_GENERIC).build();
         EventInfo eventInfo = EventInfo.newBuilder()
             .setSnmp(snmpInfo).build();
 
         event.setEventInfo(eventInfo.toByteArray());
 
         repository.save(event);
+    }
+
+    private static void assertEvent(EventDTO event) {
+        assertEquals(TEST_TENANT_ID, event.getTenantId());
+        assertEquals(TEST_UEI, event.getUei());
+        assertNotEquals(0, event.getProducedTime());
+        assertEquals(TEST_IP_ADDRESS.getAddress(), event.getIpAddress());
+
+        assertNotNull(event.getEventParamsList());
+        event.getEventParamsList().forEach(parameter -> {
+            assertEquals(TEST_NAME, parameter.getName());
+            assertEquals(TEST_TYPE, parameter.getType());
+            assertEquals(TEST_VALUE, parameter.getValue());
+            assertEquals(TEST_ENCODING, parameter.getEncoding());
+        });
+
+        EventInfo eventInfo = event.getEventInfo();
+        assertNotNull(eventInfo);
+
+        SnmpInfo snmpInfo = eventInfo.getSnmp();
+        assertNotNull(snmpInfo);
+        assertEquals(TEST_ID, snmpInfo.getId());
+        assertEquals(TEST_TRAP_OID, snmpInfo.getTrapOid());
+        assertEquals(TEST_COMMUNITY, snmpInfo.getCommunity());
+        assertEquals(TEST_GENERIC, snmpInfo.getGeneric());
     }
 }

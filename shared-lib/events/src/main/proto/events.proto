@@ -79,7 +79,7 @@ message EventDTO {
   string ip_address = 5;
   uint64 produced_time = 6;
   repeated EventParameter event_params = 7;
-//  optional EventInfo event_info = 8;
+  optional EventInfo event_info = 8;
 }
 
 message EventList {

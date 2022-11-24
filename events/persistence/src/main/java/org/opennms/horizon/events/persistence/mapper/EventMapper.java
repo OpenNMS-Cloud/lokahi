@@ -1,5 +1,6 @@
 package org.opennms.horizon.events.persistence.mapper;
 
+import com.google.protobuf.InvalidProtocolBufferException;
 import com.vladmihalcea.hibernate.type.basic.Inet;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -7,6 +8,7 @@ import org.opennms.horizon.events.persistence.model.Event;
 import org.opennms.horizon.events.persistence.model.EventParameter;
 import org.opennms.horizon.events.persistence.model.EventParameters;
 import org.opennms.horizon.events.proto.EventDTO;
+import org.opennms.horizon.events.proto.EventInfo;
 
 import java.util.List;
 
@@ -26,13 +28,21 @@ public interface EventMapper extends DateTimeMapper {
 
             List<EventParameter> parameters = eventParams.getParameters();
             for (EventParameter param : parameters) {
-                builder.addEventParams(dtoToModel(param));
+                builder.addEventParams(modelToDTO(param));
             }
         }
         return builder.build();
     }
 
-    org.opennms.horizon.events.proto.EventParameter dtoToModel(EventParameter param);
+    org.opennms.horizon.events.proto.EventParameter modelToDTO(EventParameter param);
+
+    default EventInfo map(byte[] value) {
+        try {
+            return EventInfo.parseFrom(value);
+        } catch (InvalidProtocolBufferException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     default String map(Inet value) {
         if (value == null) {

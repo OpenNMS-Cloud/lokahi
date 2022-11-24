@@ -135,7 +135,7 @@ jib_project(
     'opennms/horizon-stream-events',
     'events',
     'opennms-events',
-    port_forwards=['30050:5005'],
+    port_forwards=['30050:5005', '30065:6565'],
 )
 
 ### Minion Gateway ###

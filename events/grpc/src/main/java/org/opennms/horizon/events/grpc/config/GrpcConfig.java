@@ -26,17 +26,36 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.events.persistence.repository;
+package org.opennms.horizon.events.grpc.config;
 
-import org.opennms.horizon.events.persistence.model.Event;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
+import lombok.RequiredArgsConstructor;
+import org.opennms.horizon.events.grpc.service.EventGrpcService;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
-import java.util.List;
+@Configuration
+@RequiredArgsConstructor
+public class GrpcConfig {
+    private static final int DEFAULT_GRPC_PORT = 8990;
 
-@Repository
-public interface EventRepository extends JpaRepository<Event, Long> {
-    List<Event> findAllByTenantId(String tenantId);
+    @Value("${grpc.server.port:" + DEFAULT_GRPC_PORT + "}")
+    private int port;
 
-    List<Event> findAllByTenantIdAndNodeId(String tenantId, long nodeId);
+    @Bean
+    public TenantLookup createTenantLookup() {
+        return new GrpcTenantLookupImpl();
+    }
+
+    @Bean
+    public EventServerInterceptor createInterceptor() {
+        return new EventServerInterceptor();
+    }
+
+    @Bean(destroyMethod = "stopServer")
+    public GrpcServerManager startServer(EventGrpcService eventGrpcService, EventServerInterceptor interceptor) {
+        GrpcServerManager manager = new GrpcServerManager(port, interceptor);
+        manager.startServer(eventGrpcService);
+        return manager;
+    }
 }

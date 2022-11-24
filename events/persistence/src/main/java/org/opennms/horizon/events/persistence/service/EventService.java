@@ -18,14 +18,14 @@ public class EventService {
         this.eventMapper = eventMapper;
     }
 
-    public List<EventDTO> findEvents() {
-        return eventRepository.findAll().stream()
+    public List<EventDTO> findEvents(String tenantId) {
+        return eventRepository.findAllByTenantId(tenantId).stream()
             .map(eventMapper::modelToDtoWithParams)
             .collect(Collectors.toList());
     }
 
-    public List<EventDTO> findEventsByNodeId(long nodeId) {
-        return eventRepository.findAllByNodeId(nodeId).stream()
+    public List<EventDTO> findEventsByNodeId(String tenantId, long nodeId) {
+        return eventRepository.findAllByTenantIdAndNodeId(tenantId, nodeId).stream()
             .map(eventMapper::modelToDtoWithParams)
             .collect(Collectors.toList());
     }

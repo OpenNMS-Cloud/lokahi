@@ -19,6 +19,10 @@ spring:
       value-deserializer: org.apache.kafka.common.serialization.ByteArrayDeserializer
     bootstrap-servers: localhost:59092
 
+grpc:
+  server:
+    port: 6565
+
 kafka:
   traps-topic: "traps"
   events-topic: "events-proto"

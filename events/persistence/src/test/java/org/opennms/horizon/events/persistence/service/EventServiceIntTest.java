@@ -82,7 +82,7 @@ class EventServiceIntTest {
             populateDatabase(index + 1);
         }
 
-        List<EventDTO> events = service.findEvents();
+        List<EventDTO> events = service.findEvents(TEST_TENANT_ID);
         assertEquals(count, events.size());
 
         for (int index = 0; index < events.size(); index++) {
@@ -102,14 +102,14 @@ class EventServiceIntTest {
             populateDatabase(2);
         }
 
-        List<EventDTO> eventsNode1 = service.findEventsByNodeId(1);
+        List<EventDTO> eventsNode1 = service.findEventsByNodeId(TEST_TENANT_ID, 1);
         assertEquals(3, eventsNode1.size());
         for (EventDTO event : eventsNode1) {
             assertEquals(1, event.getNodeId());
             assertEvent(event);
         }
 
-        List<EventDTO> eventsNode2 = service.findEventsByNodeId(2);
+        List<EventDTO> eventsNode2 = service.findEventsByNodeId(TEST_TENANT_ID, 2);
         assertEquals(5, eventsNode2.size());
         for (EventDTO event : eventsNode2) {
             assertEquals(2, event.getNodeId());

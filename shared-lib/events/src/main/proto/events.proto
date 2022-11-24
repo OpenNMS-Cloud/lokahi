@@ -78,7 +78,7 @@ message EventDTO {
   uint64 node_id = 4;
   string ip_address = 5;
   uint64 produced_time = 6;
-//  repeated EventParameter event_params = 7;
+  repeated EventParameter event_params = 7;
 //  optional EventInfo event_info = 8;
 }
 

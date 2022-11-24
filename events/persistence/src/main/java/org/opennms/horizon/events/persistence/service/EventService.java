@@ -20,13 +20,13 @@ public class EventService {
 
     public List<EventDTO> findEvents() {
         return eventRepository.findAll().stream()
-            .map(eventMapper::modelToDTO)
+            .map(eventMapper::modelToDtoWithParams)
             .collect(Collectors.toList());
     }
 
     public List<EventDTO> findEventsByNodeId(long nodeId) {
         return eventRepository.findAllByNodeId(nodeId).stream()
-            .map(eventMapper::modelToDTO)
+            .map(eventMapper::modelToDtoWithParams)
             .collect(Collectors.toList());
     }
 }

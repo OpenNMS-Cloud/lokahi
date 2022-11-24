@@ -23,6 +23,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
@@ -30,6 +31,10 @@ class EventServiceIntTest {
     private static final String TEST_TENANT_ID = "tenant-id";
     private static final String TEST_UEI = "uei";
     private static final Inet TEST_IP_ADDRESS = new Inet("192.168.1.1");
+    private static final String TEST_NAME = "ifIndex";
+    private static final String TEST_TYPE = "int32";
+    private static final String TEST_VALUE = "64";
+    private static final String TEST_ENCODING = "encoding";
 
     private static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:14.5-alpine")
         .withDatabaseName("events").withUsername("events")
@@ -82,6 +87,14 @@ class EventServiceIntTest {
             assertEquals(TEST_UEI, event.getUei());
             assertNotEquals(0, event.getProducedTime());
             assertEquals(TEST_IP_ADDRESS.getAddress(), event.getIpAddress());
+
+            assertNotNull(event.getEventParamsList());
+            event.getEventParamsList().forEach(parameter -> {
+                assertEquals(TEST_NAME, parameter.getName());
+                assertEquals(TEST_TYPE, parameter.getType());
+                assertEquals(TEST_VALUE, parameter.getValue());
+                assertEquals(TEST_ENCODING, parameter.getEncoding());
+            });
         }
     }
 
@@ -126,9 +139,10 @@ class EventServiceIntTest {
 
         EventParameters parms = new EventParameters();
         EventParameter param = new EventParameter();
-        param.setName("ifIndex");
-        param.setType("int32");
-        param.setValue("64");
+        param.setName(TEST_NAME);
+        param.setType(TEST_TYPE);
+        param.setValue(TEST_VALUE);
+        param.setEncoding(TEST_ENCODING);
         parms.setParameters(Collections.singletonList(param));
 
         event.setEventParameters(parms);

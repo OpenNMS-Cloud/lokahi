@@ -52,7 +52,7 @@ public class EventServerInterceptor implements ServerInterceptor {
             serverCall.close(Status.UNAUTHENTICATED.withDescription("Missing tenant id"), new Metadata());
             return new ServerCall.Listener<>() {};
         }
-        Context context = Context.current().withValue(TENANT_ID, "59a6686e-ca84-4b58-8434-712d97f91d94");
+        Context context = Context.current().withValue(TENANT_ID, tenantId);
         return Contexts.interceptCall(context, serverCall, headers, callHandler);
     }
 }

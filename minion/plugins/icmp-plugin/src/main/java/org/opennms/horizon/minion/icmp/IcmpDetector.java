@@ -92,7 +92,7 @@ public class IcmpDetector implements ServiceDetector {
                 effectiveRequest.getTimeout(),
                 effectiveRequest.getRetries(),
                 effectiveRequest.getPacketSize(),
-                new MyPingResponseCallback(future)
+                new MyPingResponseCallback(future, nodeId)
             );
         } catch (Exception e) {
             future.complete(
@@ -138,8 +138,11 @@ public class IcmpDetector implements ServiceDetector {
     private static class MyPingResponseCallback implements PingResponseCallback {
         private final CompletableFuture<ServiceDetectorResponse> future;
 
-        public MyPingResponseCallback(CompletableFuture<ServiceDetectorResponse> future) {
+        private final long nodeId;
+
+        public MyPingResponseCallback(CompletableFuture<ServiceDetectorResponse> future, long nodeId) {
             this.future = future;
+            this.nodeId = nodeId;
         }
 
         @Override
@@ -149,6 +152,7 @@ public class IcmpDetector implements ServiceDetector {
                     .monitorType(MonitorType.ICMP)
                     .serviceDetected(true)
                     .ipAddress(inetAddress.getHostAddress())
+                    .nodeId(nodeId)
                     .build()
             );
         }

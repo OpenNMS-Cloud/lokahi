@@ -132,6 +132,7 @@ public class DetectorTaskSetService {
         String location = monitoringLocation.getLocation();
         TaskSet taskSet = taskSetManager.getTaskSet(location);
 
+        log.info("Sending task set {}  at location {}", taskSet, location);
         taskSetPublisher.publishTaskSet(location, taskSet);
     }
 

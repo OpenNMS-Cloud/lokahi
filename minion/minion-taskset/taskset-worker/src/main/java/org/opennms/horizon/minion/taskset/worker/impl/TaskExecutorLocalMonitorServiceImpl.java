@@ -102,7 +102,7 @@ public class TaskExecutorLocalMonitorServiceImpl implements TaskExecutorLocalSer
             }
             if (monitor != null) {
                 // TBD888: populate host, or stop?
-                MonitoredService monitoredService = configureMonitoredService(null);
+                MonitoredService monitoredService = configureMonitoredService(taskDefinition);
 
                 CompletableFuture<ServiceMonitorResponse> future = monitor.poll(monitoredService, taskDefinition.getConfiguration());
                 future.whenComplete(this::handleExecutionComplete);
@@ -128,19 +128,10 @@ public class TaskExecutorLocalMonitorServiceImpl implements TaskExecutorLocalSer
 
     private MonitoredService configureMonitoredService(TaskDefinition taskDefinition) throws UnknownHostException {
         String svcName = "TBD";
+        return new GeneralMonitoredService("TBD", "TBD", taskDefinition.getNodeId(), "TBD", "TBD");
 
-        IPAddress ipAddress = lookupIpAddress(null);
-
-        MonitoredService result = new GeneralMonitoredService(svcName, null, taskDefinition.getNodeId(), "TBD", "TBD", ipAddress.toInetAddress());
-
-        return result;
     }
 
-    private IPAddress lookupIpAddress(String hostname) throws UnknownHostException {
-        InetAddress inetAddress = InetAddress.getByName(hostname);
-
-        return new IPAddress(inetAddress);
-    }
 
     private ServiceMonitor lookupMonitor(TaskDefinition taskDefinition) {
         String pluginName = taskDefinition.getPluginName();

@@ -55,7 +55,7 @@ public class GrpcTaskSetPublisher implements TaskSetPublisher {
 
             PublishTaskSetResponse response = taskSetServiceStub.publishTaskSet(request);
 
-            log.debug("PUBLISH task set complete: location={}, response={}", location, response);
+            log.debug("Publish task set complete: location={}, response={}", location, response);
         } catch (Exception e) {
             log.error("Error publishing taskset", e);
             throw new RuntimeException("failed to publish taskset", e);

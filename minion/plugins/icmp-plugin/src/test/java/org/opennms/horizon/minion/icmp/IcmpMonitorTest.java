@@ -32,7 +32,6 @@ public class IcmpMonitorTest {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.openMocks(this);
-        when(monitoredService.getAddress()).thenReturn(InetAddressUtils.addr(TEST_LOCALHOST_IP_VALUE));
 
         TestPinger testPinger = new TestPinger();
         testPinger.setHandleResponse(true);

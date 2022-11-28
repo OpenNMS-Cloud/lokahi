@@ -101,6 +101,7 @@ public class TaskExecutionResultProcessorImpl implements TaskExecutionResultProc
                 .setIpAddress(Optional.of(response).map(ServiceDetectorResponse::getIpAddress).orElse(DetectorResponse.getDefaultInstance().getIpAddress()))
                 .setMonitorType(Optional.of(response).map(ServiceDetectorResponse::getMonitorType).orElse(DetectorResponse.getDefaultInstance().getMonitorType()))
                 .setReason(Optional.of(response).map(ServiceDetectorResponse::getReason).orElse(DetectorResponse.getDefaultInstance().getReason()))
+                .setNodeId(response.getNodeId())
                 .build();
 
         return result;
@@ -115,6 +116,7 @@ public class TaskExecutionResultProcessorImpl implements TaskExecutionResultProc
                 .setStatus(Optional.of(smr).map(ServiceMonitorResponse::getStatus).map(Object::toString).orElse(MonitorResponse.getDefaultInstance().getStatus()))
                 .setReason(Optional.of(smr).map(ServiceMonitorResponse::getReason).orElse(MonitorResponse.getDefaultInstance().getReason()))
                 .putAllMetrics(Optional.of(smr).map(ServiceMonitorResponse::getProperties).orElse(Collections.EMPTY_MAP))
+                .setNodeId(smr.getNodeId())
                 .build();
 
         return result;

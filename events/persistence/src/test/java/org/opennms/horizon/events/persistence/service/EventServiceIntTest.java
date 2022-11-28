@@ -38,7 +38,9 @@ import org.opennms.horizon.events.persistence.model.EventParameters;
 import org.opennms.horizon.events.persistence.repository.EventRepository;
 import org.opennms.horizon.events.proto.EventDTO;
 import org.opennms.horizon.events.proto.EventInfo;
+import org.opennms.horizon.events.proto.EventInfoDTO;
 import org.opennms.horizon.events.proto.SnmpInfo;
+import org.opennms.horizon.events.proto.SnmpInfoDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.DynamicPropertyRegistry;
@@ -191,10 +193,10 @@ class EventServiceIntTest {
             assertEquals(TEST_ENCODING, parameter.getEncoding());
         });
 
-        EventInfo eventInfo = event.getEventInfo();
+        EventInfoDTO eventInfo = event.getEventInfo();
         assertNotNull(eventInfo);
 
-        SnmpInfo snmpInfo = eventInfo.getSnmp();
+        SnmpInfoDTO snmpInfo = eventInfo.getSnmp();
         assertNotNull(snmpInfo);
         assertEquals(TEST_ID, snmpInfo.getId());
         assertEquals(TEST_TRAP_OID, snmpInfo.getTrapOid());

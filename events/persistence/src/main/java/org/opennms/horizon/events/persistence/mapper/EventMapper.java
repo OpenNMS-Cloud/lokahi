@@ -9,6 +9,8 @@ import org.opennms.horizon.events.persistence.model.EventParameter;
 import org.opennms.horizon.events.persistence.model.EventParameters;
 import org.opennms.horizon.events.proto.EventDTO;
 import org.opennms.horizon.events.proto.EventInfo;
+import org.opennms.horizon.events.proto.EventInfoDTO;
+import org.opennms.horizon.events.proto.EventParameterDTO;
 
 import java.util.List;
 
@@ -34,11 +36,11 @@ public interface EventMapper extends DateTimeMapper {
         return builder.build();
     }
 
-    org.opennms.horizon.events.proto.EventParameter modelToDTO(EventParameter param);
+    EventParameterDTO modelToDTO(EventParameter param);
 
-    default EventInfo map(byte[] value) {
+    default EventInfoDTO map(byte[] value) {
         try {
-            return EventInfo.parseFrom(value);
+            return EventInfoDTO.parseFrom(value);
         } catch (InvalidProtocolBufferException e) {
             throw new RuntimeException(e);
         }

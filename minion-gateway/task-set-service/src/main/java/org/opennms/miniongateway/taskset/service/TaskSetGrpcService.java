@@ -45,7 +45,10 @@ public class TaskSetGrpcService extends TaskSetServiceGrpc.TaskSetServiceImplBas
 
     @Override
     public void publishTaskSet(PublishTaskSetRequest request, StreamObserver<PublishTaskSetResponse> responseObserver) {
-        taskSetPublisher.publishTaskSet(request.getLocation(), request.getTaskSet());
+        // Retrieve the Tenant ID from the TenantID GRPC Interceptor
+        String tenantId = "opennms-prime";
+
+        taskSetPublisher.publishTaskSet(tenantId, request.getLocation(), request.getTaskSet());
 
         PublishTaskSetResponse response =
             PublishTaskSetResponse.newBuilder()

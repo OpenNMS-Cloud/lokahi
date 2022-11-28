@@ -26,14 +26,15 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.inventory.service.taskset.manager;
+package org.opennms.horizon.inventory;
 
-import org.opennms.taskset.contract.TaskDefinition;
-import org.opennms.taskset.contract.TaskSet;
+import io.grpc.Context;
+import io.grpc.Metadata;
 
-public interface TaskSetManager {
+public interface Constants {
+    String TENANT_ID_KEY = "tenant-id";
+    String DEFAULT_TENANT_ID = "opennms-prime";
+    Metadata.Key<String> AUTHORIZATION_METADATA_KEY = Metadata.Key.of("Authorization", Metadata.ASCII_STRING_MARSHALLER);
 
-    void addTaskSet(String tenantId, String location, TaskDefinition taskDefinition);
-
-    TaskSet getTaskSet(String tenantId, String location);
+    Context.Key<String> TENANT_ID_CONTEXT_KEY = Context.key(TENANT_ID_KEY);
 }

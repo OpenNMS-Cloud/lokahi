@@ -62,7 +62,7 @@ public class TrapdConfigJsonTest {
                 return null;
             }
         });
-        trapSinkConsumer.setTaskSetPublisher((location, taskSet) -> {});
+        trapSinkConsumer.setTaskSetPublisher((tenantId, location, taskSet) -> {});
         trapSinkConsumer.initializeConfig();
         Optional<String> optionalConfig = configService.getConfig(ConfigConstants.SNMP_TRAPS_CONFIG);
         Assert.assertTrue("Config must be present", optionalConfig.isPresent());

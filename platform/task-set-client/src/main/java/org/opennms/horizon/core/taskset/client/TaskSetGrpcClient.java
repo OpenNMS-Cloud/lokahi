@@ -91,7 +91,7 @@ public class TaskSetGrpcClient implements TaskSetPublisher {
 //----------------------------------------
 
     @Override
-    public void publishTaskSet(String location, TaskSet taskSet) {
+    public void publishTaskSet(String tenantId, String location, TaskSet taskSet) {
         try {
             PublishTaskSetRequest request =
                 PublishTaskSetRequest.newBuilder()

@@ -145,7 +145,7 @@ public class DeviceMonitorManager implements EventListener {
                 locationName,
                 Optional.ofNullable(updatedTaskSet.getTaskDefinitionList()).map(Collection::size).orElse(0));
 
-            taskSetPublisher.publishTaskSet(locationName, updatedTaskSet);
+            taskSetPublisher.publishTaskSet("opennms-prime", locationName, updatedTaskSet);
         } catch (Exception e) {
             LOG.error("Exception while running monitors for device with Id : {}", onmsNode.getId(), e);
         }

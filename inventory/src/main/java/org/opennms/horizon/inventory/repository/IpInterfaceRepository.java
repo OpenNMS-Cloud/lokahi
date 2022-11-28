@@ -42,18 +42,14 @@ import java.util.Optional;
 public interface IpInterfaceRepository extends JpaRepository<IpInterface, Long> {
     List<IpInterface> findByTenantId(String tenantId);
 
-    @Query("select ip from IpInterface ip" +
-        " inner join Node n on ip.nodeId = n.id" +
-        " inner join MonitoringLocation ml on n.monitoringLocationId = ml.id" +
-        " where ip.ipAddress = ?1 and ml.location = ?2 and ip.tenantId = ?3")
-   Optional<IpInterface> findByIpAddressAndLocationAndTenantId(Inet ipAddress, String location, String tenantId);
-
     @Query("SELECT ip " +
         "FROM IpInterface ip " +
         "WHERE ip.ipAddress = :ipAddress " +
-        "AND ip.node.monitoringLocation.location = :location ")
-    Optional<IpInterface> findByIpAddressAndLocation(@Param("ipAddress") Inet ipAddress,
-                                                     @Param("location") String location);
+        "AND ip.node.monitoringLocation.location = :location " +
+        "AND ip.tenantId = :tenantId ")
+    Optional<IpInterface> findByIpAddressAndLocationAndTenantId(@Param("ipAddress") Inet ipAddress,
+                                                                @Param("location") String location,
+                                                                @Param("tenantId") String tenantId);
 
     List<IpInterface> findByNodeId(long nodeId);
 }

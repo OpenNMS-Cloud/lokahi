@@ -73,5 +73,11 @@ public interface MonitoredService {
      */
     String getNodeLocation();
 
+    /**
+     * Returns the {@link InetAddress} associated with the service
+     *
+     * @return the {@link InetAddress}
+     */
+    InetAddress getAddress();
 
 }

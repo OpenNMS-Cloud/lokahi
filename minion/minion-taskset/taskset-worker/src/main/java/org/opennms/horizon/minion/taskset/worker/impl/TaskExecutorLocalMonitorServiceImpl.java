@@ -128,7 +128,7 @@ public class TaskExecutorLocalMonitorServiceImpl implements TaskExecutorLocalSer
 
     private MonitoredService configureMonitoredService(TaskDefinition taskDefinition) throws UnknownHostException {
         String svcName = "TBD";
-        return new GeneralMonitoredService("TBD", "TBD", taskDefinition.getNodeId(), "TBD", "TBD");
+        return new GeneralMonitoredService("TBD", "TBD", taskDefinition.getNodeId(), "TBD", "TBD", null);
 
     }
 

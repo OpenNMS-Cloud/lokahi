@@ -42,6 +42,7 @@ message NodeDTO {
   int64 monitoring_location_id = 5;
 }
 
+
 message NodeCreateDTO {
   string label = 1;
   string location = 2;

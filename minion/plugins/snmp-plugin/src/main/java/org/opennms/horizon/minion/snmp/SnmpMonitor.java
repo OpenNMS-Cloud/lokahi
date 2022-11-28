@@ -200,7 +200,7 @@ public class SnmpMonitor extends SnmpMonitorStrategy {
                 snmpHelper.getAsync(agentConfig, new SnmpObjId[]{ snmpObjectId })
                     .thenApply(result -> processSnmpResponse(result, finalHostAddress, snmpObjectId, operator, operand, startTimestamp, svc.getNodeId()))
                     .completeOnTimeout(this.createTimeoutResponse(finalHostAddress), agentConfig.getTimeout(), TimeUnit.MILLISECONDS)
-                    .exceptionally((thrown) -> this.createExceptionResponse(thrown, finalHostAddress));
+                    .exceptionally(thrown -> this.createExceptionResponse(thrown, finalHostAddress));
 
             return future;
         } catch (NumberFormatException e) {

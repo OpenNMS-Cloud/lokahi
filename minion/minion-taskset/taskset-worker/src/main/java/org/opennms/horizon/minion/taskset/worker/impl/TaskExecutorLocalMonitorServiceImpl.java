@@ -8,13 +8,10 @@ import org.opennms.horizon.minion.plugin.api.registries.MonitorRegistry;
 import org.opennms.horizon.minion.scheduler.OpennmsScheduler;
 import org.opennms.horizon.minion.taskset.worker.TaskExecutionResultProcessor;
 import org.opennms.horizon.minion.taskset.worker.TaskExecutorLocalService;
-import org.opennms.horizon.shared.utils.IPAddress;
 import org.opennms.taskset.contract.TaskDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -126,10 +123,8 @@ public class TaskExecutorLocalMonitorServiceImpl implements TaskExecutorLocalSer
         }
     }
 
-    private MonitoredService configureMonitoredService(TaskDefinition taskDefinition) throws UnknownHostException {
-        String svcName = "TBD";
+    private MonitoredService configureMonitoredService(TaskDefinition taskDefinition)  {
         return new GeneralMonitoredService("TBD", "TBD", taskDefinition.getNodeId(), "TBD", "TBD", null);
-
     }
 
 

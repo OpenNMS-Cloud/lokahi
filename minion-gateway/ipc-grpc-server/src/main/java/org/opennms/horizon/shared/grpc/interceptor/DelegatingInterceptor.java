@@ -20,14 +20,17 @@ public class DelegatingInterceptor implements ServerInterceptor {
     Listener<ReqT> listener = next.startCall(call, headers);
 
     for (ServerInterceptor interceptor : interceptors) {
-      interceptor.interceptCall(call, headers, new ServerCallHandler<ReqT, RespT>() {
-        @Override
-        public Listener<ReqT> startCall(ServerCall<ReqT, RespT> call, Metadata headers) {
-          return listener;
-        }
-      });
+      // Use the previous listener with the next interceptor call
+      final Listener<ReqT> listenerAsFinal = listener;
+      Listener<ReqT> nextListener =
+          interceptor.interceptCall(call, headers, (call1, headers1) -> listenerAsFinal);
+
+      // Update the listener to the new one returned by the interceptor - in this was, the listeners are (usually)
+      //  chained by the interceptors.
+      listener = nextListener;
     }
 
+    // Return the listener returned by the last interceptor
     return listener;
   }
 }

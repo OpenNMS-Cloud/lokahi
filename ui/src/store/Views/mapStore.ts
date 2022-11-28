@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { FeatherSortObject } from '@/types'
-import { DeviceDto, AlarmDto, LocationDto } from '@/types/graphql'
-import { LatLngLiteral } from 'leaflet'
+import { Node, AlarmDto, LocationDto } from '@/types/graphql'
+// import { LatLngLiteral } from 'leaflet'
 import { SORT } from '@featherds/table'
 import { numericSeverityLevel } from '@/components/Map/utils'
 import { useMapQueries } from '@/store/Queries/mapQueries'
@@ -11,14 +11,16 @@ export const useMapStore = defineStore('mapStore', () => {
   const mapQueries = useMapQueries()
   
   const areDevicesFetching = computed(() => mapQueries.isFetching)
-  const devicesWithCoordinates = computed(() => mapQueries.devices.filter((device: DeviceDto) => device.location?.latitude && device.location.longitude))
+  // TODO: Uncomment when nodes have locations
+  // const nodesWithCoordinates = computed(() => mapQueries.nodes.filter((node: Node) => node.location?.latitude && node.location.longitude))
 
-  const devicesInbounds = computed(() => mapQueries.devices.filter((device: DeviceDto) => {
-    const location: LatLngLiteral = {
-      lat: device.location?.latitude || -9999999.99,
-      lng: device.location?.longitude || -9999999.99
-    }
-    return mapBounds.value?.contains(location)
+  const devicesInbounds = computed(() => mapQueries.nodes.filter((node: Node) => {
+    return false
+    // const location: LatLngLiteral = {
+    //   lat: node.location?.latitude || -9999999.99,
+    //   lng: node.location?.longitude || -9999999.99
+    // }
+    // return mapBounds.value?.contains(location)
   }))
 
   const alarms: AlarmDto[] = [],
@@ -55,7 +57,7 @@ export const useMapStore = defineStore('mapStore', () => {
 
   return {
     areDevicesFetching,
-    devicesWithCoordinates,
+    nodesWithCoordinates: [] as any[], // TODO: fix when nodes have locations
     devicesInbounds,
     alarms,
     interestedDevicesID,

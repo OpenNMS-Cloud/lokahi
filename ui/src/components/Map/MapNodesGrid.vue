@@ -101,7 +101,7 @@
         </tr>
       </thead>
       <TransitionGroup name="data-table" tag="tbody" data-test="node-list">
-        <tr v-for="node in nodes" :key="(node?.id as number)" @dblclick="doubleClickHandler(node as Partial<DeviceDto>)" :node="node?.id">
+        <tr v-for="node in nodes" :key="(node?.id as number)" @dblclick="doubleClickHandler(node as Partial<Node>)" :node="node?.id">
           <td :class="nodeLabelAlarmServerityMap[node?.label as string]">{{ node?.id }}</td>
           <td>{{ node?.foreignSource }}</td>
           <td>{{ node?.foreignId }}</td>
@@ -121,13 +121,14 @@
 import { useMapStore } from '@/store/Views/mapStore'
 import { FeatherSortObject } from '@/types'
 import { FeatherSortHeader, SORT } from '@featherds/table'
-import { DeviceDto, LocationDto } from '@/types/graphql'
+import { Node, LocationDto } from '@/types/graphql'
 
 const mapStore = useMapStore()
 const nodes = computed(() => mapStore.devicesInbounds)
 const nodeLabelAlarmServerityMap = computed(() => mapStore.getDeviceAlarmSeverityMap())
 
-const doubleClickHandler = (node: Partial<DeviceDto>) => {
+// TODO: Switch to Node type once location available
+const doubleClickHandler = (node: Partial<any>) => {
   if (node.location?.latitude && node.location.longitude) {
     const coordinate: LocationDto = { latitude: node?.location?.latitude, longitude: node?.location?.longitude }
     mapStore.mapCenter = coordinate

@@ -1,3 +1,0 @@
-mutation AddDevice ($device: DeviceCreateDTOInput!) {
-  addDevice (device: $device)
-}

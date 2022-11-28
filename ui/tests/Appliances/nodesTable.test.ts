@@ -1,8 +1,8 @@
 import { mount } from '@vue/test-utils'
-import DevicesTable from '@/components/Appliances/DevicesTable.vue'
+import NodesTable from '@/components/Appliances/NodesTable.vue'
 import { setAppliancesStore } from '../store/setVillusPiniaStore'
 
-describe('DevicesTable.vue', () => {
+describe('NodesTable.vue', () => {
   describe('Required columns', () => {
     beforeAll(() => {
       const deviceItems = [
@@ -14,18 +14,18 @@ describe('DevicesTable.vue', () => {
           status: 'UP'
         }
       ]
-      setAppliancesStore({devices: computed(() => deviceItems)})
+      setAppliancesStore({nodes: computed(() => deviceItems)})
     })
 
     const requiredColumns = [
-      ['Device', 'col-device'],
+      ['Device', 'col-node'],
       ['Latency', 'col-latency'],
       ['Uptime', 'col-uptime'],
       ['Status', 'col-status']
     ]
 
     it.each(requiredColumns)('should have "%s" column', (_, dataTest) => {
-      const wrapper = mount(DevicesTable)
+      const wrapper = mount(NodesTable)
        
       const elem = wrapper.find(`[data-test="${dataTest}"]`)
       expect(elem.exists()).toBe(true)
@@ -33,15 +33,15 @@ describe('DevicesTable.vue', () => {
   })
 
   describe('Device list', () => {
-    it('should have an empty table when there\'s no device', () =>{
-      setAppliancesStore({devices: computed(() => [])})
-      const wrapper = mount(DevicesTable)
+    it('should have an empty table when there\'s no node', () =>{
+      setAppliancesStore({nodes: computed(() => [])})
+      const wrapper = mount(NodesTable)
          
-      const deviceItem = wrapper.find('[data-test="device-item"]')
+      const deviceItem = wrapper.find('[data-test="node-item"]')
       expect(deviceItem.exists()).toBe(false)
     })
     
-    it('should display a list when there\'s device', () => {
+    it('should display a list when there\'s node', () => {
       const deviceItems = [
         {
           id: '1',
@@ -51,10 +51,10 @@ describe('DevicesTable.vue', () => {
           status: 'DOWN'
         }
       ]
-      setAppliancesStore({devices: computed(() => deviceItems)}) 
-      const wrapper = mount(DevicesTable)
+      setAppliancesStore({nodes: computed(() => deviceItems)}) 
+      const wrapper = mount(NodesTable)
 
-      const deviceItem = wrapper.find('[data-test="device-item"]')
+      const deviceItem = wrapper.find('[data-test="node-item"]')
       expect(deviceItem.exists()).toBe(true)
     })
   })
@@ -99,7 +99,7 @@ describe('DevicesTable.vue', () => {
             status: 'UP'
           }
         ] 
-        setAppliancesStore({devices: computed(() => deviceItems)}) 
+        setAppliancesStore({nodes: computed(() => deviceItems)}) 
       })
   
       /**
@@ -114,7 +114,7 @@ describe('DevicesTable.vue', () => {
       })
 
       test('Latency OK/FAILED/UNKNOWN should have the corresponding background color', () => {
-        const wrapper = mount(DevicesTable)
+        const wrapper = mount(NodesTable)
 
         const latencies = formatValueBackground(wrapper.findAll('[data-test="col-latency"] > .value'))
         const expectedValueBackground = [
@@ -128,7 +128,7 @@ describe('DevicesTable.vue', () => {
       })
         
       test('Uptime OK/FAILED/UNKNOWN should have the corresponding background color', () => {
-        const wrapper = mount(DevicesTable)
+        const wrapper = mount(NodesTable)
 
         const uptimes = formatValueBackground(wrapper.findAll('[data-test="col-uptime"] > .value'))
         const expectedValueBackground = [
@@ -160,7 +160,7 @@ describe('DevicesTable.vue', () => {
             status: 'DOWN'
           }
         ] 
-        setAppliancesStore({devices: computed(() => deviceItems)}) 
+        setAppliancesStore({nodes: computed(() => deviceItems)}) 
       })
 
       /**
@@ -176,7 +176,7 @@ describe('DevicesTable.vue', () => {
       })
 
       test('Status UP/DOWN should have the corresponding background color', () => {
-        const wrapper = mount(DevicesTable)
+        const wrapper = mount(NodesTable)
 
         const statuses = formatValueBackground(wrapper.findAll('[data-test="col-status"] > .value'))
         const expectedValueBackground = [

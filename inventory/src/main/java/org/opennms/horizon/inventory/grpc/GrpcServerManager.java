@@ -28,32 +28,31 @@
 
 package org.opennms.horizon.inventory.grpc;
 
-import io.grpc.BindableService;
-import io.grpc.Server;
-import io.grpc.netty.shaded.io.grpc.netty.NettyServerBuilder;
-import io.grpc.protobuf.services.ProtoReflectionService;
-import lombok.extern.slf4j.Slf4j;
-
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.util.List;
+import java.util.Arrays;
 
+import io.grpc.BindableService;
+import io.grpc.Server;
+import io.grpc.ServerInterceptor;
+import io.grpc.netty.shaded.io.grpc.netty.NettyServerBuilder;
+import io.grpc.protobuf.services.ProtoReflectionService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+@RequiredArgsConstructor
 @Slf4j
 public class GrpcServerManager {
 
     private Server grpcServer;
     private final int port;
+    private final ServerInterceptor interceptor;
 
-
-    public GrpcServerManager(int port) {
-        this.port = port;
-    }
-
-    public synchronized void startServer(List<BindableService> services) {
+    public synchronized void startServer(BindableService ... services) {
         NettyServerBuilder serverBuilder = NettyServerBuilder.forAddress(new InetSocketAddress(port))
-            .intercept(new InventoryServerInterceptor())
+            .intercept(interceptor)
             .addService(ProtoReflectionService.newInstance());
-        services.forEach(serverBuilder::addService);
+        Arrays.stream(services).forEach(serverBuilder::addService);
         grpcServer = serverBuilder.build();
         try {
             grpcServer.start();
@@ -63,9 +62,10 @@ public class GrpcServerManager {
         }
     }
 
-    public synchronized void stopServer() {
+    public synchronized void stopServer() throws InterruptedException {
         if(grpcServer != null && !grpcServer.isShutdown()) {
             grpcServer.shutdown();
+            grpcServer.awaitTermination();
         }
     }
 }

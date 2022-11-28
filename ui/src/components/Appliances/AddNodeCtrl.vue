@@ -1,7 +1,7 @@
 <template>
   <FeatherButton 
     primary
-    data-test="add-device-btn" 
+    data-test="add-node-btn" 
     @click="openModal"
   > 
     <template v-slot:icon>
@@ -19,7 +19,7 @@
       <FeatherInput
         data-test="name-input"
         label="Name"
-        v-model="device.label"
+        v-model="node.label"
       />
       <FeatherSelect
         data-test="location-name-input"
@@ -33,31 +33,32 @@
       <FeatherInput
         data-test="ip-input"
         label="Management IP"
-        v-model="device.managementIp"
+        v-model="node.managementIp"
       />
-      <FeatherInput
+      <!-- TODO: Uncomment when BE support for these available. -->
+      <!-- <FeatherInput
         data-test="string-input"
         label="Community String (Optional)"
-        v-model="device.snmpCommunityString"
+        v-model="node.snmpCommunityString"
       />
       <FeatherInput
         type="number"
         data-test="port-input"
         label="SNMP Port (Optional)"
-        v-model="device.port"
+        v-model="node.port"
       />
       <FeatherInput
         type="number"
         data-test="port-latitude"
         label="Latitude (Optional)"
-        v-model="device.latitude"
+        v-model="node.latitude"
       />
       <FeatherInput
         type="number"
         data-test="port-longitude"
         label="Longitude (Optional)"
-        v-model="device.longitude"
-      />
+        v-model="node.longitude"
+      /> -->
     </template>
 
     <template v-slot:footer>
@@ -71,7 +72,7 @@
       <FeatherButton 
         data-test="save-btn" 
         primary
-        :disabled="!device.label" 
+        :disabled="!node.label" 
         @click="save">
           Save
       </FeatherButton>
@@ -81,7 +82,7 @@
 
 <script setup lang="ts">
 import Add from '@featherds/icon/action/Add'
-import { useDeviceMutations } from '@/store/Mutations/deviceMutations'
+import { useNodeMutations } from '@/store/Mutations/nodeMutations'
 import { useAppliancesQueries } from '@/store/Queries/appliancesQueries'
 import useModal from '@/composables/useModal'
 import useSnackbar from '@/composables/useSnackbar'
@@ -89,35 +90,35 @@ import { DeviceCreateDtoInput } from '@/types/graphql'
 
 const { showSnackbar } = useSnackbar()
 const { openModal, closeModal, isVisible } = useModal()
-const deviceMutations = useDeviceMutations()
+const nodeMutations = useNodeMutations()
 const applianceQueries = useAppliancesQueries()
 
 const defaultDevice: DeviceCreateDtoInput = { 
   label: undefined,
   location: undefined,
-  latitude: undefined,
-  longitude: undefined,
-  monitoringArea: undefined,
+  // latitude: undefined,
+  // longitude: undefined,
+  // monitoringArea: undefined,
   managementIp: undefined,
-  port: undefined,
-  snmpCommunityString: undefined
+  // port: undefined,
+  // snmpCommunityString: undefined
 }
 
-const device = reactive({ ...defaultDevice })
+const node = reactive({ ...defaultDevice })
 
 const save = async () => {
-  // convert the field value to undefined if their value is an empty string (entered then erased the input field returns an empty string) - empty string as value in payload causes error when adding device.
-  Object.assign(device, {
-    port: device.port || undefined,
-    latitude: device.latitude || undefined,
-    longitude: device.longitude || undefined
-  })
+  // convert the field value to undefined if their value is an empty string (entered then erased the input field returns an empty string) - empty string as value in payload causes error when adding node.
+  // Object.assign(node, {
+  //   port: node.port || undefined,
+  //   latitude: node.latitude || undefined,
+  //   longitude: node.longitude || undefined
+  // })
 
-  await deviceMutations.addDevice({ device })
+  await nodeMutations.addNode({ node })
   
-  if (!deviceMutations.error) {
-    // clears device obj on successful save
-    Object.assign(device, defaultDevice)
+  if (!nodeMutations.error) {
+    // clears node obj on successful save
+    Object.assign(node, defaultDevice)
 
     closeModal()
 
@@ -125,17 +126,17 @@ const save = async () => {
       msg: 'Device successfuly saved.'
     })
 
-    // Timeout because device may not be available right away
+    // Timeout because node may not be available right away
     // TODO: Replace timeout with websocket/polling
     setTimeout(() => {
-      applianceQueries.fetchDevicesForTable()
+      applianceQueries.fetchNodesForTable()
     }, 350)
   }
 }
 
 const cancel = () => {
-  // clears device obj
-  Object.assign(device, defaultDevice)
+  // clears node obj
+  Object.assign(node, defaultDevice)
 
   closeModal()
 }
@@ -145,7 +146,7 @@ const locationOption = ref()
 // sets location val in the payload
 const selectLocation = () => {
   if (locationOption.value?.name) {
-    device.location = locationOption.value.name
+    node.location = locationOption.value.name
   }
 }
 // sets default location when locations available

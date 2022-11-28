@@ -60,6 +60,8 @@ public class MonitoringSystemServiceTest {
     private final String location = "test location";
     private final String systemId = "test-monitoring-system-12345";
 
+    private final String tenantId = "test-tenant";
+
     @BeforeEach
     public void setUP(){
         mockLocationRepo = mock(MonitoringLocationRepository.class);
@@ -83,7 +85,7 @@ public class MonitoringSystemServiceTest {
     @Test
     public void testReceiveMsgMonitorSystemExist() {
         doReturn(Optional.of(testMonitoringSystem)).when(mockMonitoringSystemRepo).findBySystemId(systemId);
-        service.addMonitoringSystemFromHeartbeat(heartbeatMessage);
+        service.addMonitoringSystemFromHeartbeat(heartbeatMessage, tenantId);
         verify(mockMonitoringSystemRepo).findBySystemId(systemId);
         verify(mockMonitoringSystemRepo).save(testMonitoringSystem);
     }
@@ -92,7 +94,7 @@ public class MonitoringSystemServiceTest {
     public void testCreateNewMonitorSystemWithLocationExist() {
         doReturn(Optional.empty()).when(mockMonitoringSystemRepo).findBySystemId(systemId);
         doReturn(Optional.of(testLocation)).when(mockLocationRepo).findByLocation(location);
-        service.addMonitoringSystemFromHeartbeat(heartbeatMessage);
+        service.addMonitoringSystemFromHeartbeat(heartbeatMessage, tenantId);
         verify(mockMonitoringSystemRepo).findBySystemId(systemId);
         verify(mockMonitoringSystemRepo).save(any(MonitoringSystem.class));
         verify(mockLocationRepo).findByLocation(location);
@@ -102,7 +104,7 @@ public class MonitoringSystemServiceTest {
     public void testCreateNewMonitorSystemAndNewLocation() {
         doReturn(Optional.empty()).when(mockMonitoringSystemRepo).findBySystemId(systemId);
         doReturn(Optional.empty()).when(mockLocationRepo).findByLocation(location);
-        service.addMonitoringSystemFromHeartbeat(heartbeatMessage);
+        service.addMonitoringSystemFromHeartbeat(heartbeatMessage, tenantId);
         verify(mockMonitoringSystemRepo).findBySystemId(systemId);
         verify(mockMonitoringSystemRepo).save(any(MonitoringSystem.class));
         verify(mockLocationRepo).findByLocation(location);

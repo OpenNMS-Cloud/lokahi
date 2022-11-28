@@ -35,27 +35,27 @@
     </div>
     <div class="data-table">
       <TransitionGroup name="data-table" tag="div">
-        <div class="card" v-for="(device) in listDevicesWithBgColor" :key="(device.id as number)" data-test="device-item">
-          <div class="name pointer" @click="gotoNode(device.id as number)" data-test="col-device">
+        <div class="card" v-for="(node) in listDevicesWithBgColor" :key="(node.id as number)" data-test="node-item">
+          <div class="name pointer" @click="gotoNode(node.id as number)" data-test="col-node">
               <div class="name-cell">
                 <FeatherIcon :icon="Instances" class="icon"/>
                 <div class="text">
-                  <div class="name">{{ device.label }}</div>
-                  <div class="server">{{ device.createTime }}</div>
+                  <div class="name">{{ node.nodeLabel }}</div>
+                  <div class="server" v-date>{{ node.createTime }}</div>
                 </div>
               </div>
           </div>
-          <div class="pointer" @click="openLatencyGraph(device.id as number)" data-test="col-latency">
+          <div class="pointer" @click="openLatencyGraph(node.id as number)" data-test="col-latency">
             <pre class="title">ICMP Latency</pre>
-            <div :data-metric="device.icmp_latency" class="value bg-status" :class="device.latencyBgColor">{{ getHumanReadableDuration(device.icmp_latency) }}</div>
+            <div :data-metric="node.icmp_latency" class="value bg-status" :class="node.latencyBgColor">{{ getHumanReadableDuration(node.icmp_latency) }}</div>
           </div>
-          <div class="pointer" @click="openUptimeGraph(device.id as number)" data-test="col-uptime">
+          <div class="pointer" @click="openUptimeGraph(node.id as number)" data-test="col-uptime">
             <pre class="title">SNMP Uptime</pre>
-            <div :data-metric="device.snmp_uptime" class="value bg-status" :class="device.uptimeBgColor">{{ getHumanReadableDuration(device.snmp_uptime, TimeUnit.Secs) }}</div>
+            <div :data-metric="node.snmp_uptime" class="value bg-status" :class="node.uptimeBgColor">{{ getHumanReadableDuration(node.snmp_uptime, TimeUnit.Secs) }}</div>
           </div>
           <div data-test="col-status">
             <pre class="title">Status</pre>
-            <div class="value bg-status" :class="device.statusBgColor">{{ device.status }}</div>
+            <div class="value bg-status" :class="node.statusBgColor">{{ node.status }}</div>
           </div>
         </div>
       </TransitionGroup>
@@ -79,9 +79,10 @@ import Instances from '@featherds/icon/hardware/Instances'
 import ChevronRight from '@featherds/icon/navigation/ChevronRight'
 import { useAppliancesQueries } from '@/store/Queries/appliancesQueries'
 import { useAppliancesStore } from '@/store/Views/appliancesStore'
-import { ExtendedDeviceDTOWithBGColors } from '@/types/device'
+import { ExtendedNodeWithBGColors } from '@/types/node'
 import { ComputedRef } from 'vue'
-import { formatItemBgColor, getHumanReadableDuration } from './utils'
+import { formatItemBgColor } from './utils'
+import { getHumanReadableDuration } from '@/components/utils'
 import { WidgetProps, TimeUnit } from '@/types'
 import { GraphProps } from '@/types/graphs'
 import { TimeRangeUnit } from '@/types/graphql'
@@ -92,7 +93,7 @@ const appliancesStore = useAppliancesStore()
 const appliancesQueries = useAppliancesQueries()
 const router = useRouter()
 
-const listDevicesWithBgColor: ComputedRef<ExtendedDeviceDTOWithBGColors[]> = computed<any[]>(() => formatItemBgColor(appliancesQueries.tableDevices))
+const listDevicesWithBgColor: ComputedRef<ExtendedNodeWithBGColors[]> = computed<any[]>(() => formatItemBgColor(appliancesQueries.tableNodes))
 
 const searchValue = ref('')
 

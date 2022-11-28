@@ -1,5 +1,7 @@
 package org.opennms.horizon.server.service.gateway;
 
+import org.opennms.horizon.server.utils.ServerHeaderUtil;
+
 public class PlatformGateway extends GatewayBase {
     public static final String URL_PATH_EVENTS = "/events";
     public static final String URL_PATH_NOTIFICATIONS_CONFIG = "/notifications/config";
@@ -14,7 +16,7 @@ public class PlatformGateway extends GatewayBase {
     public static final String URL_PATH_DATA_CHOICES = "/datachoices";
     public static final String QUERY_PARAM_TOGGLE = "toggle";
 
-    public PlatformGateway(String baseUrl) {
-        super(baseUrl);
+    public PlatformGateway(String baseUrl, ServerHeaderUtil util) {
+        super(baseUrl, util);
     }
 }

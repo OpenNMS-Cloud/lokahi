@@ -5,30 +5,21 @@
 </template>
 
 <script lang="ts" setup>
+import { PropType } from 'vue'
 import { FeatherChipList } from '@featherds/chips'
-import { TimeUnit } from '@/types'
 import { Chip } from '@/types/metric'
 import MetricChip from '../Common/MetricChip.vue'
 
-const items: Chip[] = [
-  {
-    type: 'latency',
-    timestamp: -1667930274660,
-    timeUnit: TimeUnit.MSecs,
-    status: 'UP'
-  },
-  {
-    type: 'uptime',
-    timestamp: 1667930274.660,
-    timeUnit: TimeUnit.Secs,
-    status: 'DOWN'
-  },
-  {
-    type: 'status',
-    status: 'DOWN'
+defineProps({
+  items: {
+    type: Object as PropType<Chip[]>,
+    required: true
   }
-]
+})
 </script>
 
 <style lang="scss" scoped>
+.chip-list {
+  margin: 0;
+}
 </style>

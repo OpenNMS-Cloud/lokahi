@@ -28,37 +28,31 @@
 
 package org.opennms.horizon.server.service.gateway;
 
+import org.opennms.horizon.server.utils.ServerHeaderUtil;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.server.ServerWebExchange;
 
-import graphql.GraphQLContext;
 import io.leangen.graphql.execution.ResolutionEnvironment;
-import io.leangen.graphql.spqr.spring.autoconfigure.DefaultGlobalContext;
-import io.leangen.graphql.util.ContextUtils;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 
 @Slf4j
 public abstract class GatewayBase {
     private final WebClient webclient;
+    private final ServerHeaderUtil headerUtil;
 
-    public GatewayBase(String baseUrl) {
+    public GatewayBase(String baseUrl, ServerHeaderUtil headerUtil) {
         webclient = WebClient.builder()
             .baseUrl(baseUrl)
             .defaultHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
             .build();
+        this.headerUtil = headerUtil;
     }
 
     public String getAuthHeader(ResolutionEnvironment env) {
-        GraphQLContext graphQLContext = env.dataFetchingEnvironment.getContext();
-        DefaultGlobalContext context = (DefaultGlobalContext) ContextUtils.unwrapContext(graphQLContext);
-        ServerWebExchange webExchange = (ServerWebExchange) context.getNativeRequest();
-        ServerHttpRequest request = webExchange.getRequest();
-        return request.getHeaders().get(HttpHeaders.AUTHORIZATION).get(0);
+        return headerUtil.getAuthHeader(env);
     }
 
     public <T> Mono<T> post(String path, String authToken, Object data, Class<T> returnType) {

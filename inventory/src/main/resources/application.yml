@@ -38,3 +38,7 @@ kafka:
   topics:
     minion-heartbeat: "heartbeat"
     task-set-results: "task-set.results"
+
+keycloak:
+  realm: opennms
+  base-url: http://onms-keycloak:8080/auth

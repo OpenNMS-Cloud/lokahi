@@ -7,7 +7,7 @@
         :loading="search.loading"
         :results="search.results"
         @search="search.getItem"
-        label="Users"
+        label="Search"
         type="multi"
         data-test="search"
       />
@@ -47,14 +47,8 @@
     </li>
     <li>
       <!-- Tagging -->
-      <FeatherSelect
-        v-model="taggingState"
-        :options="tagging.options"
-        :text-prop="tagging.optionText"
-        :label="tagging.label"
-        @update:modelValue="onTaggingSelect"
-        data-test="tagging"
-      />
+      <TagManagerCtrl data-test="tag-manager-ctrl" />
+      <TagManager />
     </li>
     <!-- Sort / A-Z -->
     <li>
@@ -178,30 +172,6 @@ const severity: ISelectDropdown = {
   optionText: 'type'
 }
 
-// Tagging
-const taggingState = ref(undefined)
-const onTaggingSelect: fncArgVoid = (selectedItem: any) => {
-  emits('selectedItem', selectedItem)
-}
-const tagging: ISelectDropdown = {
-  label: 'Tagging',
-  options: [
-    {
-      id: 1,
-      type: 'tagging1'
-    },
-    {
-      id: 2,
-      type: 'tagging2'
-    },
-    {
-      id: 3,
-      type: 'tagging3'
-    }
-  ],
-  optionText: 'type'
-}
-
 const getViewBox = (icon: any) => {
   const iconProps = icon.render().props
   return iconProps.viewBox || `0 0 ${iconProps.width} ${iconProps.height}`
@@ -238,7 +208,7 @@ const collapse = {
 @use "@featherds/styles/themes/variables";
 
 .filter-container {
-  margin: 0 var(variables.$spacing-xl) var(variables.$spacing-l);
+  margin: var(variables.$spacing-l) 0;
   display: flex;
   flex-flow: row wrap;
   > * {

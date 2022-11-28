@@ -33,6 +33,7 @@ import java.util.stream.Collectors;
 import org.opennms.horizon.server.mapper.LocationMapper;
 import org.opennms.horizon.server.model.inventory.Location;
 import org.opennms.horizon.server.service.grpc.InventoryClient;
+import org.opennms.horizon.server.utils.ServerHeaderUtil;
 import org.springframework.stereotype.Service;
 
 import io.leangen.graphql.annotations.GraphQLArgument;
@@ -50,13 +51,14 @@ import reactor.core.publisher.Mono;
 public class GrpcLocationService {
     private final InventoryClient client;
     private final LocationMapper mapper;
+    private final ServerHeaderUtil headerUtil;
 
     @GraphQLQuery
     public Flux<Location> findAllLocations(@GraphQLEnvironment ResolutionEnvironment env) {
-        return Flux.fromIterable(client.listLocations().stream().map(mapper::protoToLocation).collect(Collectors.toList()));
+        return Flux.fromIterable(client.listLocations(headerUtil.getAuthHeader(env)).stream().map(mapper::protoToLocation).collect(Collectors.toList()));
     }
     @GraphQLQuery
     public Mono<Location> findLocationById(@GraphQLArgument(name = "id") long id, @GraphQLEnvironment ResolutionEnvironment env) {
-        return Mono.just(mapper.protoToLocation(client.getLocationById(id)));
+        return Mono.just(mapper.protoToLocation(client.getLocationById(id, headerUtil.getAuthHeader(env))));
     }
 }

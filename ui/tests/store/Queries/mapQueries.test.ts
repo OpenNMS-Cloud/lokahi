@@ -1,9 +1,8 @@
 import { createTestingPinia } from '@pinia/testing'
 import { useMapQueries } from '@/store/Queries/mapQueries'
-import { deviceFixture } from '../../fixture/devices'
-import { DeviceDto } from '@/types/graphql'
+import { nodeFixture } from '../../fixture/nodes'
 
-const mockMapDevice: DeviceDto = {
+const mockMapNode: any = {
   'foreignId': '',
   'foreignSource': '',
   'labelSource': '',
@@ -32,15 +31,13 @@ describe('Map queries', () =>{
       useQuery: vi.fn().mockImplementation(() => ({
         data: {
           value: {
-            listDevices: {
-              devices: deviceFixture(mockMapDevice)
-            }
+            findAllNodes: nodeFixture(mockMapNode)
           }
         }
       }))
     }))
 
     const mapQueries = useMapQueries()
-    expect(mapQueries.devices).toStrictEqual(deviceFixture(mockMapDevice))
+    expect(mapQueries.nodes).toStrictEqual(nodeFixture(mockMapNode))
   })
 })

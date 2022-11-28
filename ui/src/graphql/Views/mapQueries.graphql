@@ -1,20 +1,6 @@
-query DeviceForMap {
-  listDevices {
-    devices {
-      foreignId
-      foreignSource
-      id
-      label
-      labelSource
-      location {
-        latitude
-        longitude
-      }
-      sysContact
-      sysDescription
-      sysLocation
-      sysName
-      sysOid
-    }
+query NodesForMap {
+  findAllNodes {
+    id
+    nodeLabel
   }
 }

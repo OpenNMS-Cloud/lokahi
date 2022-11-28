@@ -33,6 +33,7 @@ import java.util.stream.Collectors;
 import org.opennms.horizon.server.mapper.MinionMapper;
 import org.opennms.horizon.server.model.inventory.Minion;
 import org.opennms.horizon.server.service.grpc.InventoryClient;
+import org.opennms.horizon.server.utils.ServerHeaderUtil;
 import org.springframework.stereotype.Service;
 
 import io.leangen.graphql.annotations.GraphQLArgument;
@@ -50,14 +51,15 @@ import reactor.core.publisher.Mono;
 public class GrpcMinionService {
     private final InventoryClient client;
     private final MinionMapper mapper;
+    private final ServerHeaderUtil headerUtil;
 
     @GraphQLQuery
     public Flux<Minion> findAllMinions(@GraphQLEnvironment ResolutionEnvironment env) {
-        return Flux.fromIterable(client.listMonitoringSystems().stream().map(mapper::protoToMinion).collect(Collectors.toList()));
+        return Flux.fromIterable(client.listMonitoringSystems(headerUtil.getAuthHeader(env)).stream().map(mapper::protoToMinion).collect(Collectors.toList()));
     }
 
     @GraphQLQuery
     public Mono<Minion> findMinionById(@GraphQLArgument(name = "id") String id, @GraphQLEnvironment ResolutionEnvironment env) {
-        return Mono.just(mapper.protoToMinion(client.getSystemBySystemId(id)));
+        return Mono.just(mapper.protoToMinion(client.getSystemBySystemId(id, headerUtil.getAuthHeader(env))));
     }
 }

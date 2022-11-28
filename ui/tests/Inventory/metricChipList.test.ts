@@ -27,7 +27,9 @@ let wrapper: any
 describe('Metric chip list', () => {
   beforeAll(() => {
     wrapper = mount(MetricChipList, { 
-      items
+      propsData: {
+        items
+      }
     })
   })
   afterAll(() => {

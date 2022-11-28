@@ -29,9 +29,9 @@
         >
           <LMarker
             v-for="node of nodes"
-            :key="node?.label"
+            :key="node?.nodeLabel"
             :lat-lng="[node?.location?.latitude, node?.location?.longitude]"
-            :name="node?.label"
+            :name="node?.nodeLabel"
             :options="{ id: node?.id }"
           >
             <LPopup>
@@ -39,15 +39,15 @@
               <router-link
                 :to="`/node/${node?.id}`"
                 target="_blank"
-                >{{ node?.label }}</router-link
+                >{{ node?.nodeLabel }}</router-link
               >
               <br />
-              Severity: {{ nodeLabelAlarmServerityMap[node?.label as string] || 'NORMAL' }}
+              Severity: {{ nodeLabelAlarmServerityMap[node?.nodeLabel as string] || 'NORMAL' }}
               <br />
               <!-- Category: {{ node?.categories?.length ? node?.categories[0].name : 'N/A' }} -->
             </LPopup>
             <LIcon
-              :icon-url="setIcon(node as Partial<DeviceDto>)"
+              :icon-url="setIcon(node as Partial<Node>)"
               :icon-size="iconSize"
             />
           </LMarker>
@@ -88,7 +88,7 @@ import SeverityFilter from './SeverityFilter.vue'
 import { useTopologyStore } from '@/store/Views/topologyStore'
 import { useMapStore } from '@/store/Views/mapStore'
 import useSpinner from '@/composables/useSpinner'
-import { DeviceDto } from '@/types/graphql'
+import { Node } from '@/types/graphql'
 import useTheme from '@/composables/useTheme'
 import { WidgetProps } from '@/types'
 // @ts-ignore
@@ -113,11 +113,11 @@ const nodeClusterCoords = ref<Record<string, number[]>>({})
 const { startSpinner, stopSpinner } = useSpinner()
 const mapStore = useMapStore()
 const nodesReady = ref()
-const nodes = computed(() => mapStore.devicesWithCoordinates)
+const nodes = computed(() => mapStore.nodesWithCoordinates)
 const center = computed<number[]>(() => ['latitude', 'longitude'].map(k => (mapStore.mapCenter as any)[k] ))
 const bounds = computed(() => {
   const coordinatedMap = getNodeCoordinateMap.value
-  return mapStore.devicesWithCoordinates.map((node: DeviceDto) => coordinatedMap.get(node?.id))
+  return mapStore.nodesWithCoordinates.map((node: Node) => coordinatedMap.get(node?.id))
 })
 const nodeLabelAlarmServerityMap = computed(() => mapStore.getDeviceAlarmSeverityMap())
 
@@ -176,7 +176,7 @@ const iconCreateFunction = (cluster: Cluster) => {
   return divIcon({ html: `<span class=${highestSeverity}>` + cluster.getChildCount() + '</span>' })
 }
 
-const setIcon = (device?: Partial<DeviceDto>) => setMarkerColor(device?.label)
+const setIcon = (node?: Partial<Node>) => setMarkerColor(node?.nodeLabel)
 
 const setMarkerColor = (severity: string | undefined | null) => {
   if (severity) {
@@ -228,9 +228,9 @@ const computeEdges = () => {
 const getNodeCoordinateMap = computed(() => {
   const map = new Map()
 
-  mapStore.devicesWithCoordinates.forEach((device: any) => {
-    map.set(device.id, [device.location.latitude, device.location.longitude])
-    map.set(device.label, [device.location.latitude, device.location.longitude])
+  mapStore.nodesWithCoordinates.forEach((node: any) => {
+    map.set(node.id, [node.location.latitude, node.location.longitude])
+    map.set(node.nodeLabel, [node.location.latitude, node.location.longitude])
   })
   
   return map

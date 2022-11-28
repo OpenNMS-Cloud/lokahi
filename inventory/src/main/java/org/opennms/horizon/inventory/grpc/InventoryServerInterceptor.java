@@ -28,6 +28,18 @@
 
 package org.opennms.horizon.inventory.grpc;
 
+import java.util.NoSuchElementException;
+import java.util.Optional;
+
+import org.apache.commons.lang3.StringUtils;
+import org.keycloak.TokenVerifier;
+import org.keycloak.adapters.KeycloakDeployment;
+import org.keycloak.adapters.rotation.AdapterTokenVerifier;
+import org.keycloak.common.VerificationException;
+import org.keycloak.representations.AccessToken;
+import org.keycloak.util.TokenUtil;
+import org.opennms.horizon.inventory.Constants;
+
 import io.grpc.Context;
 import io.grpc.Contexts;
 import io.grpc.Metadata;
@@ -35,23 +47,44 @@ import io.grpc.ServerCall;
 import io.grpc.ServerCallHandler;
 import io.grpc.ServerInterceptor;
 import io.grpc.Status;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+@RequiredArgsConstructor
 @Slf4j
 public class InventoryServerInterceptor implements ServerInterceptor {
-    //TODO will change to JWT token
-    private static final Metadata.Key HEADER_KE = Metadata.Key.of("tenant-id", Metadata.ASCII_STRING_MARSHALLER);
-    public static final Context.Key<String> TENANT_ID = Context.key("tenant-id");
+    private final String tokenPrefix = "Bearer";
+    private final KeycloakDeployment keycloak;
     @Override
     public <ReqT, RespT> ServerCall.Listener<ReqT> interceptCall(ServerCall<ReqT, RespT> serverCall, Metadata headers, ServerCallHandler<ReqT, RespT> callHandler) {
         log.debug("Received metadata: {}", headers);
-        String tenantId = (String)headers.get(HEADER_KE);
-        if(tenantId==null){
-            log.error("Missing tenant id");
+        String authHeader = headers.get(Constants.AUTHORIZATION_METADATA_KEY);
+        try {
+            Optional<String> tenantId = verifyAccessToken(authHeader);
+            Context context = tenantId.map(tnId -> Context.current().withValue(Constants.TENANT_ID_CONTEXT_KEY, tnId)).orElseThrow();
+            return Contexts.interceptCall(context, serverCall, headers, callHandler);
+        } catch (VerificationException e) {
+            log.error("Failed to verify access token", e);
+            serverCall.close(Status.UNAUTHENTICATED.withDescription("Invalid access token"), new Metadata());
+            return new ServerCall.Listener<>() {};
+        }
+        catch (NoSuchElementException e) {
             serverCall.close(Status.UNAUTHENTICATED.withDescription("Missing tenant id"), new Metadata());
             return new ServerCall.Listener<>() {};
         }
-        Context context = Context.current().withValue(TENANT_ID, tenantId);
-        return Contexts.interceptCall(context, serverCall, headers, callHandler);
     }
+
+    protected Optional<String> verifyAccessToken(String authHeader) throws VerificationException {
+        if (!authHeader.startsWith(tokenPrefix) || StringUtils.isEmpty(authHeader)) {
+            throw  new VerificationException();
+        }
+        String token = authHeader.substring(tokenPrefix.length()+1);
+        TokenVerifier<AccessToken> verifier = AdapterTokenVerifier.createVerifier(token, keycloak, false, AccessToken.class);
+        verifier.withChecks(TokenVerifier.SUBJECT_EXISTS_CHECK, new TokenVerifier.TokenTypeCheck(TokenUtil.TOKEN_TYPE_BEARER), TokenVerifier.IS_ACTIVE);
+        verifier.verify();
+        AccessToken accessToken = verifier.getToken();
+        return Optional.ofNullable((String)accessToken.getOtherClaims().get(Constants.TENANT_ID_KEY));
+    }
+
+
 }

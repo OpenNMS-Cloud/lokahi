@@ -30,11 +30,13 @@ package org.opennms.horizon.inventory.grpc;
 
 import java.util.Optional;
 
+import org.opennms.horizon.inventory.Constants;
+
 import io.grpc.Context;
 
 public class GrpcTenantLookupImpl implements TenantLookup {
     @Override
     public Optional<String> lookupTenantId(Context context) {
-        return Optional.ofNullable(InventoryServerInterceptor.TENANT_ID.get());
+        return Optional.ofNullable(Constants.TENANT_ID_CONTEXT_KEY.get());
     }
 }

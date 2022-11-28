@@ -1,11 +1,10 @@
 <template>
-  <div class="container" data-test="metric-chip">
+  <component :is="asLi ? 'li' : 'div'" :title="item.type" class="container pointer" data-test="metric-chip">
     <label :for="item.type">{{ item.type }}</label>
     <FeatherChip :id="item.type" :class="`bg-status ${itemBgColor}`" data-test="chip">
       {{ itemText }}
     </FeatherChip>
-  </div>
-  
+  </component>
 </template>
 
 <script lang="ts" setup>
@@ -18,12 +17,16 @@ const props = defineProps({
   item: {
     type: Object as PropType<Chip>,
     required: true
+  },
+  asLi: {
+    type: Boolean,
+    default: false
   }
 })
 
 const itemBgColor = props.item.status.toLowerCase()
 
-const itemText = props.item.type === 'status' ? props.item.status : getHumanReadableDuration(props.item.timestamp as number, props.item.timeUnit)
+const itemText = props.item.type === 'status' ? props.item.status : getHumanReadableDuration(props.item?.timestamp as number, props.item?.timeUnit)
 </script>
 
 <style lang="scss" scoped>

@@ -5,13 +5,13 @@
     </div>
     <div class="btns">
       <NotificationsCtrl />
-      <AddDeviceCtrl />
+      <AddNodeCtrl />
     </div>
   </div>
 
   <div class="minions-devices-container">
     <div class="minions-table"><MinionsTable /></div>
-    <div class="devices-table"><DevicesTable /></div>
+    <div class="devices-table"><NodesTable /></div>
   </div>
 </template>
 

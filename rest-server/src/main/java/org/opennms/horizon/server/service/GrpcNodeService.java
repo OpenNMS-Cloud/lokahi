@@ -34,6 +34,7 @@ import org.opennms.horizon.server.mapper.NodeMapper;
 import org.opennms.horizon.server.model.inventory.Node;
 import org.opennms.horizon.server.model.inventory.NodeCreate;
 import org.opennms.horizon.server.service.grpc.InventoryClient;
+import org.opennms.horizon.server.utils.ServerHeaderUtil;
 import org.springframework.stereotype.Service;
 
 import io.leangen.graphql.annotations.GraphQLArgument;
@@ -52,19 +53,20 @@ import reactor.core.publisher.Mono;
 public class GrpcNodeService {
     private final InventoryClient client;
     private final NodeMapper mapper;
+    private final ServerHeaderUtil headerUtil;
 
     @GraphQLQuery
     public Flux<Node> findAllNodes(@GraphQLEnvironment ResolutionEnvironment env) {
-        return Flux.fromIterable(client.listNodes().stream().map(mapper::protoToNode).collect(Collectors.toList()));
+        return Flux.fromIterable(client.listNodes(headerUtil.getAuthHeader(env)).stream().map(mapper::protoToNode).collect(Collectors.toList()));
   }
 
   @GraphQLQuery
   public Mono<Node> findNodeById(@GraphQLArgument(name = "id") Long id, @GraphQLEnvironment ResolutionEnvironment env) {
-        return Mono.just(mapper.protoToNode(client.getNodeById(id)));
+        return Mono.just(mapper.protoToNode(client.getNodeById(id, headerUtil.getAuthHeader(env))));
   }
 
   @GraphQLMutation
   public Mono<Node> addNode(NodeCreate node, @GraphQLEnvironment ResolutionEnvironment env) {
-        return Mono.just(mapper.protoToNode(client.createNewNode(mapper.nodeCreateToProto(node))));
+        return Mono.just(mapper.protoToNode(client.createNewNode(mapper.nodeCreateToProto(node), headerUtil.getAuthHeader(env))));
   }
 }

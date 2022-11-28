@@ -28,10 +28,16 @@
 
 package org.opennms.horizon.inventory.component;
 
+import java.util.Map;
+import java.util.Optional;
+
 import org.opennms.horizon.grpc.heartbeat.contract.HeartbeatMessage;
+import org.opennms.horizon.inventory.Constants;
 import org.opennms.horizon.inventory.service.MonitoringSystemService;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.messaging.handler.annotation.Headers;
+import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -46,11 +52,12 @@ import lombok.extern.slf4j.Slf4j;
 public class MinionHeartbeatConsumer {
     private final MonitoringSystemService service;
     @KafkaListener(topics = "${kafka.topics.minion-heartbeat}", concurrency = "1")
-    public void receiveMessage(byte[] data) {
+    public void receiveMessage(@Payload byte[] data, @Headers Map<String, Object> headers) {
         try {
             HeartbeatMessage message = HeartbeatMessage.parseFrom(data);
             log.info("Received heartbeat message for minion with id {} and location {}", message.getIdentity().getSystemId(), message.getIdentity().getLocation());
-            service.addMonitoringSystemFromHeartbeat(message);
+            String tenantId = Optional.ofNullable(headers.get(Constants.TENANT_ID_KEY)).map(o -> new String((byte[])o)).orElse(Constants.DEFAULT_TENANT_ID);
+            service.addMonitoringSystemFromHeartbeat(message, tenantId);
         } catch (InvalidProtocolBufferException e) {
             log.error("Error while parsing heartbeat message", e);
         }

@@ -1,10 +1,10 @@
-import AddDeviceCtrl from '@/components/Appliances/AddDeviceCtrl.vue'
+import AddNodeCtrl from '@/components/Appliances/AddNodeCtrl.vue'
 import { createTestingPinia } from '@pinia/testing'
 import { mount } from '@vue/test-utils'
 import { createClient, VILLUS_CLIENT } from 'villus'
-import { useDeviceMutations } from '@/store/Mutations/deviceMutations'
+import { useNodeMutations } from '@/store/Mutations/nodeMutations'
 
-const wrapper = mount(AddDeviceCtrl, { 
+const wrapper = mount(AddNodeCtrl, { 
   global: {
     stubs: {
       teleport: true
@@ -22,8 +22,8 @@ test('The component mounts', () => {
   expect(wrapper).toBeTruthy()
 })
 
-test('The modal should open when the add device btn is clicked', async () => {
-  const btn = wrapper.get('[data-test="add-device-btn"]')
+test('The modal should open when the add node btn is clicked', async () => {
+  const btn = wrapper.get('[data-test="add-node-btn"]')
   const modalInput1 = wrapper.find('[data-test="name-input"]')
 
   // modal should be closed
@@ -37,7 +37,7 @@ test('The modal should open when the add device btn is clicked', async () => {
 })
 
 test('The cancel btn should close the modal', async () => {
-  await wrapper.get('[data-test="add-device-btn"]').trigger('click')
+  await wrapper.get('[data-test="add-node-btn"]').trigger('click')
   await wrapper.get('[data-test="cancel-btn"]').trigger('click')
 
   const modalInput = wrapper.find('[data-test="name-input"]')
@@ -45,7 +45,7 @@ test('The cancel btn should close the modal', async () => {
 })
 
 test('The save btn should enable if name is entered', async () => {
-  await wrapper.get('[data-test="add-device-btn"]').trigger('click')
+  await wrapper.get('[data-test="add-node-btn"]').trigger('click')
   
   const nameInput = wrapper.get('[data-test="name-input"] .feather-input')
   const saveBtn = wrapper.get('[data-test="save-btn"]')
@@ -59,14 +59,14 @@ test('The save btn should enable if name is entered', async () => {
   expect(saveBtn.attributes('aria-disabled')).toBeUndefined()
 })
 
-test('The add device mutation is called', async () => {
-  const deviceMutations = useDeviceMutations()
-  const addDevice = vi.spyOn(deviceMutations, 'addDevice')
+test('The add node mutation is called', async () => {
+  const nodeMutations = useNodeMutations()
+  const addNode = vi.spyOn(nodeMutations, 'addNode')
 
-  await wrapper.get('[data-test="add-device-btn"]').trigger('click')
+  await wrapper.get('[data-test="add-node-btn"]').trigger('click')
   await wrapper.get('[data-test="name-input"] .feather-input').setValue('some name')
   await wrapper.get('[data-test="save-btn"]').trigger('click')
 
-  // expect save device query to be called
-  expect(addDevice).toHaveBeenCalledTimes(1)
+  // expect save node query to be called
+  expect(addNode).toHaveBeenCalledTimes(1)
 })

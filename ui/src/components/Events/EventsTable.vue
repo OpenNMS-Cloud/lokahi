@@ -10,7 +10,7 @@
     <div class="header">
       <div class="title-container">
         <span class="title">
-          Events ({{ nodeData.node.label }})
+          Events ({{ nodeData.node.nodeLabel }})
         </span>
       </div>
       <FeatherInput
@@ -97,9 +97,7 @@ const nodeData = computed(() => {
 
   return {
     events,
-    node: nodeStatusStore.fetchedData?.device,
-    latencies: nodeStatusStore.fetchedData?.deviceLatency,
-    uptimes: nodeStatusStore.fetchedData?.deviceUptime
+    node: nodeStatusStore.fetchedData?.node
   }
 })
 

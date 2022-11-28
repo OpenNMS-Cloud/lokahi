@@ -1,8 +1,8 @@
 import Appliances from '@/containers/Appliances.vue'
 import NotificationsCtrl from '@/components/Appliances/NotificationsCtrl.vue'
-import DevicesTable from '@/components/Appliances/DevicesTable.vue'
+import DevicesTable from '@/components/Appliances/NodesTable.vue'
 import MinionsTable from '@/components/Appliances/MinionsTable.vue'
-import AddDeviceCtrl from '@/components/Appliances/AddDeviceCtrl.vue'
+import AddNodeCtrl from '@/components/Appliances/AddNodeCtrl.vue'
 import useKeycloak from '@/composables/useKeycloak'
 import { KeycloakInstance } from '@dsb-norge/vue-keycloak-js/dist/types'
 import setupWrapper from 'tests/setupWrapper'
@@ -24,9 +24,9 @@ it('should have NotificationsCtrl component', () => {
   expect(notificationsCtrl.exists()).toBe(true)
 })
 
-it('should have AddDeviceCtrl component', () => {
-  const addDeviceCtrl = wrapper.findComponent(AddDeviceCtrl)
-  expect(addDeviceCtrl.exists()).toBe(true)
+it('should have AddNodeCtrl component', () => {
+  const addNodeCtrl = wrapper.findComponent(AddNodeCtrl)
+  expect(addNodeCtrl.exists()).toBe(true)
 })
 
 it('should have DevicesTable component', () => {

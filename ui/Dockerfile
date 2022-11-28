@@ -24,15 +24,15 @@ CMD ["--port", "8080"]
 # Builds the app for production
 FROM sources as build
 
-RUN ["yarn", "run", "build"]
-
-# Serves prod build with nginx
-FROM nginx:1.23.1-alpine as production
-
 ARG VITE_BASE_URL
 ARG VITE_KEYCLOAK_URL
 ARG VITE_KEYCLOAK_REALM
 ARG VITE_KEYCLOAK_CLIENT_ID
+
+RUN ["yarn", "run", "build"]
+
+# Serves prod build with nginx
+FROM nginx:1.23.1-alpine as production
 
 # Configure nginx
 COPY --link /nginx /etc/nginx

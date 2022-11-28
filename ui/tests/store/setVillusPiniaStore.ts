@@ -13,11 +13,11 @@ const setActive = (state: any) => {
 }
 
 const setAppliancesStore = (minionsDevices: any) => {
-  const { minions: tableMinions, devices: tableDevices } = minionsDevices
+  const { minions: tableMinions, nodes: tableNodes } = minionsDevices
   const state = {
     appliancesQueries: { 
       tableMinions,
-      tableDevices
+      tableNodes
     }
   }
 

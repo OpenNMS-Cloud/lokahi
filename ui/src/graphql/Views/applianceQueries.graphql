@@ -1,11 +1,10 @@
-fragment DevicesTableParts on Query {
-  listDevices {
-    devices {
-      id
-      label
-      createTime
-      managementIp
-    }
+fragment NodeTableParts on Query {
+  findAllNodes {
+    id
+    nodeLabel
+    tenantId
+    createTime
+    monitoringLocationId
   }
 }
 
@@ -28,8 +27,8 @@ fragment LocationsParts on Query {
   }
 }
 
-query ListDevicesForTable {
-  ...DevicesTableParts
+query ListNodesForTable {
+  ...NodeTableParts
   ...DeviceUptimeParts
   ...DeviceLatencyParts
 }
@@ -41,7 +40,7 @@ query ListMinionsForTable {
 }
 
 query ListMinionsAndDevicesForTables {
-  ...DevicesTableParts
+  ...NodeTableParts
   ...DeviceUptimeParts
   ...DeviceLatencyParts
   ...MinionsTableParts

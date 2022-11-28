@@ -31,10 +31,14 @@ package org.opennms.horizon.server.config;
 import org.opennms.horizon.server.service.gateway.NotificationGateway;
 import org.opennms.horizon.server.service.gateway.PlatformGateway;
 import org.opennms.horizon.server.service.grpc.InventoryClient;
+import org.opennms.horizon.server.utils.ServerHeaderUtil;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import io.grpc.ManagedChannel;
+import io.grpc.ManagedChannelBuilder;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -48,17 +52,29 @@ public class ConfigurationUtil {
     private String inventoryGrpcAddress;
 
     @Bean
-    public PlatformGateway createGateway() {
-        return new PlatformGateway(platformUrl);
+    public ServerHeaderUtil createHeaderUtil() {
+        return new ServerHeaderUtil();
     }
 
     @Bean
-    public NotificationGateway createNotificationGateway() {
-        return new NotificationGateway(notificationsUrl);
+    public PlatformGateway createGateway(ServerHeaderUtil util) {
+        return new PlatformGateway(platformUrl, util);
     }
 
-    @Bean(destroyMethod = "shutdown")
-    public InventoryClient createInventoryClient() {
-        return new InventoryClient(inventoryGrpcAddress);
+    @Bean
+    public NotificationGateway createNotificationGateway(ServerHeaderUtil util) {
+        return new NotificationGateway(notificationsUrl, util);
+    }
+
+    @Bean(name = "inventory")
+    public ManagedChannel createInventoryChannel() {
+        return ManagedChannelBuilder.forTarget(inventoryGrpcAddress)
+            .keepAliveWithoutCalls(true)
+            .usePlaintext().build();
+    }
+
+    @Bean(destroyMethod = "shutdown", initMethod = "initialStubs")
+    public InventoryClient createInventoryClient(@Qualifier("inventory") ManagedChannel channel) {
+        return new InventoryClient(channel);
     }
 }

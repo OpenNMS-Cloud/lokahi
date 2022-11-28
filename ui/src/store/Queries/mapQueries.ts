@@ -1,21 +1,21 @@
 import { defineStore } from 'pinia'
 import { useQuery } from 'villus'
-import { DeviceForMapDocument } from '@/types/graphql'
+import { NodesForMapDocument } from '@/types/graphql'
 
 export const useMapQueries = defineStore('mapQueries', () => {
-  const devices = ref()
+  const nodes = ref()
 
   const { data, execute, isFetching } = useQuery({
-    query: DeviceForMapDocument,
+    query: NodesForMapDocument,
     cachePolicy: 'network-only' // always fetch and do not cache
   })
 
   watchEffect(() => {
-    devices.value = data.value?.listDevices?.devices || []
+    nodes.value = data.value?.findAllNodes || []
   })
 
   return {
-    devices,
+    nodes,
     fetch: execute,
     isFetching
   }

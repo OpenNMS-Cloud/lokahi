@@ -17,7 +17,7 @@ describe('Filter component', () => {
       'node-type',
       'monitoring-location',
       'severity',
-      'tagging',
+      'tag-manager-ctrl',
       'sort-icon',
       'sort-alpha-icon',
       'expand-icon'

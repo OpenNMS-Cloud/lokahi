@@ -13,28 +13,20 @@ fragment ListEventsParts on Query {
   }
 }
 
-fragment DeviceParts on DeviceDTO {
-  foreignSource
-  managementIp
+fragment NodeParts on Node {
   id
-  label
+  nodeLabel
   createTime
-  location {
-    locationName
-    latitude
-    longitude
-  }
 }
 
-fragment DeviceByIdParts on Query {
-  device: deviceById(id: $id) {
-      ...DeviceParts
+fragment NodeByIdParts on Query {
+  node: findNodeById(id: $id) {
+      ...NodeParts
     }
 }
 
-query ListDeviceStatus($id: Int) {
+# TODO: Add metric details when endpoints available
+query ListNodeStatus($id: Long) {
   ...ListEventsParts
-  ...DeviceByIdParts
-  ...DeviceUptimeParts
-  ...DeviceLatencyParts
+  ...NodeByIdParts
 }

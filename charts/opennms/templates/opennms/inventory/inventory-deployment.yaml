@@ -53,6 +53,10 @@ spec:
                   key: inventoryPwd
             - name: SPRING_KAFKA_BOOTSTRAP_SERVERS
               value: "{{ .Values.Kafka.ServiceName }}:{{ .Values.Kafka.Port }}"
+            - name: KEYCLOAK_BASE_URL
+              value: "http://{{ .Values.Keycloak.ServiceName }}:8080/auth/"
+            - name: KEYCLOAK_REALM
+              value: "{{ .Values.Keycloak.RealmName }}"
           ports:
             - name: http
               containerPort: {{ .Values.OpenNMS.Inventory.Port }}

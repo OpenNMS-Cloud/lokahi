@@ -1,13 +1,13 @@
 import { useQuery } from 'villus'
 import { defineStore } from 'pinia'
-import { ListDevicesForTableDocument, ListMinionsForTableDocument, ListMinionsAndDevicesForTablesDocument, ListMinionsForTableQuery, ListDevicesForTableQuery } from '@/types/graphql'
+import { ListNodesForTableDocument, ListMinionsForTableDocument, ListMinionsAndDevicesForTablesDocument, ListMinionsForTableQuery, ListNodesForTableQuery } from '@/types/graphql'
 import { ExtendedMinionDTO } from '@/types/minion'
-import { ExtendedDeviceDTO } from '@/types/device'
+import { ExtendedNode } from '@/types/node'
 import { Ref } from 'vue'
 
 export const useAppliancesQueries = defineStore('appliancesQueries', {
   state: () => {
-    const tableDevices = ref()
+    const tableNodes = ref()
     const tableMinions = ref()
     
     // fetch appliance minions table data
@@ -46,20 +46,20 @@ export const useAppliancesQueries = defineStore('appliancesQueries', {
       return minions
     }
     
-    // fetch appliance devices table data
-    const fetchDevicesForTable = () => {
-      const { data: devicesData } = useQuery({
-        query: ListDevicesForTableDocument,
-        cachePolicy: 'network-only' // always fetch and do not cache
+    // fetch appliance nodes table data
+    const fetchNodesForTable = () => {
+      const { data: nodesData } = useQuery({
+        query: ListNodesForTableDocument,
+        cachePolicy: 'network-only'
       })
 
       watchEffect(() => {
-        tableDevices.value = addMetricsToDevices(devicesData)
+        tableNodes.value = addMetricsToNodes(nodesData)
       })
     }
 
-    const addMetricsToDevices = (data: Ref<ListDevicesForTableQuery | null>)=> {
-      const devices = data.value?.listDevices?.devices as ExtendedDeviceDTO[] || []
+    const addMetricsToNodes = (data: Ref<ListNodesForTableQuery | null>)=> {
+      const nodes = data.value?.findAllNodes as ExtendedNode[] || []
       const deviceLatencies = data.value?.deviceLatency?.data?.result || []
       const deviceUptimes = data.value?.deviceUptime?.data?.result || []
 
@@ -74,33 +74,34 @@ export const useAppliancesQueries = defineStore('appliancesQueries', {
         uptimesMap[uptime?.metric?.instance] = uptime?.value?.[1] || 0
       }
 
-      for (const device of devices) {
-        device.icmp_latency = latenciesMap[device.managementIp as string]
-        device.snmp_uptime = uptimesMap[device.managementIp as string]
-        device.status = (device.icmp_latency >= 0 && device.snmp_uptime >= 0) ? 'UP' : 'DOWN'
-      }
+      // TODO: add metrics when available
+      // for (const node of nodes) {
+      //   node.icmp_latency = latenciesMap[node.managementIp as string]
+      //   node.snmp_uptime = uptimesMap[node.managementIp as string]
+      //   node.status = (node.icmp_latency >= 0 && node.snmp_uptime >= 0) ? 'UP' : 'DOWN'
+      // }
       
-      return devices
+      return nodes
     }
 
-    // minions AND devices table
-    const { data: minionsAndDevices, execute } = useQuery({
+    // minions AND nodes table
+    const { data: minionsAndNodes, execute } = useQuery({
       query: ListMinionsAndDevicesForTablesDocument,
       cachePolicy: 'network-only'
     })
 
     watchEffect(() => {
-      tableMinions.value = addMetricsToMinions(minionsAndDevices)
-      tableDevices.value = addMetricsToDevices(minionsAndDevices)
+      tableMinions.value = addMetricsToMinions(minionsAndNodes)
+      tableNodes.value = addMetricsToNodes(minionsAndNodes)
     })
 
-    const locations = computed(() => minionsAndDevices.value?.listLocations?.locations?.map((item, index) => ({ id: index, name: item.locationName })) || [])
+    const locations = computed(() => minionsAndNodes.value?.listLocations?.locations?.map((item, index) => ({ id: index, name: item.locationName })) || [])
     
     return {
       tableMinions,
       fetchMinionsForTable,
-      tableDevices,
-      fetchDevicesForTable,
+      tableNodes,
+      fetchNodesForTable,
       locations,
       fetch: execute
     }

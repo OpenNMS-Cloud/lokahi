@@ -56,5 +56,3 @@ spec:
           ports:
             - name: http
               containerPort: {{ .Values.OpenNMS.Events.Port }}
-            - name: grpc
-              containerPort: {{ .Values.OpenNMS.Events.GrpcPort }}

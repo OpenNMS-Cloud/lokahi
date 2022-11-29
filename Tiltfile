@@ -187,8 +187,8 @@ jib_project(
 jib_project(
     'minion-gateway-grpc-proxy',
     'opennms/horizon-stream-minion-gateway-grpc-proxy',
-    'minion-gateway',
-    'opennms-minion-gateway',
+    'minion-gateway-grpc-proxy',
+    'opennms-minion-gateway-grpc-proxy',
     submodule='main',
     port_forwards=['31089:8990', '31050:5005'],
 )

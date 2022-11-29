@@ -38,7 +38,6 @@ import org.keycloak.adapters.rotation.AdapterTokenVerifier;
 import org.keycloak.common.VerificationException;
 import org.keycloak.representations.AccessToken;
 import org.keycloak.util.TokenUtil;
-import org.opennms.horizon.inventory.Constants;
 
 import io.grpc.Context;
 import io.grpc.Contexts;

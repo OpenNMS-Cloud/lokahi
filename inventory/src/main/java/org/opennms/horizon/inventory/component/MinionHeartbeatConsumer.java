@@ -32,7 +32,6 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.opennms.horizon.grpc.heartbeat.contract.HeartbeatMessage;
-import org.opennms.horizon.inventory.Constants;
 import org.opennms.horizon.inventory.service.MonitoringSystemService;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.kafka.annotation.KafkaListener;

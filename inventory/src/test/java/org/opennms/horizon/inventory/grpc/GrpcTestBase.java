@@ -38,7 +38,6 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import org.keycloak.common.VerificationException;
-import org.opennms.horizon.inventory.Constants;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;

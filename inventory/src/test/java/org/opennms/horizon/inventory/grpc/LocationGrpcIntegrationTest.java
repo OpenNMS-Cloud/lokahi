@@ -40,7 +40,6 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Optional;
 
 import org.junit.Rule;
@@ -50,7 +49,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.keycloak.adapters.KeycloakDeployment;
 import org.keycloak.common.VerificationException;
-import org.opennms.horizon.inventory.Constants;
 import org.opennms.horizon.inventory.dto.MonitoringLocationDTO;
 import org.opennms.horizon.inventory.dto.MonitoringLocationList;
 import org.opennms.horizon.inventory.dto.MonitoringLocationServiceGrpc;

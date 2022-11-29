@@ -51,6 +51,9 @@ public class ConfigurationUtil {
     @Value("${grpc.url.inventory}")
     private String inventoryGrpcAddress;
 
+    @Value("${grpc.url.events}")
+    private String eventsGrpcAddress;
+
     @Bean
     public ServerHeaderUtil createHeaderUtil() {
         return new ServerHeaderUtil();
@@ -69,6 +72,13 @@ public class ConfigurationUtil {
     @Bean(name = "inventory")
     public ManagedChannel createInventoryChannel() {
         return ManagedChannelBuilder.forTarget(inventoryGrpcAddress)
+            .keepAliveWithoutCalls(true)
+            .usePlaintext().build();
+    }
+
+    @Bean(name = "events")
+    public ManagedChannel createEventsChannel() {
+        return ManagedChannelBuilder.forTarget(eventsGrpcAddress)
             .keepAliveWithoutCalls(true)
             .usePlaintext().build();
     }

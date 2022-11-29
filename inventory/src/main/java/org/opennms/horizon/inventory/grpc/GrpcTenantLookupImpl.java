@@ -28,9 +28,10 @@
 
 package org.opennms.horizon.inventory.grpc;
 
-import java.util.Optional;
-
 import io.grpc.Context;
+import org.opennms.horizon.inventory.Constants;
+
+import java.util.Optional;
 
 public class GrpcTenantLookupImpl implements TenantLookup {
     @Override

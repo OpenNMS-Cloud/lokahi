@@ -48,6 +48,7 @@ import io.grpc.ServerInterceptor;
 import io.grpc.Status;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.opennms.horizon.inventory.Constants;
 
 @RequiredArgsConstructor
 @Slf4j

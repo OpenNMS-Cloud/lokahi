@@ -5,7 +5,6 @@ import lombok.Setter;
 import org.apache.ignite.Ignite;
 import org.apache.ignite.compute.ComputeTaskFuture;
 import org.apache.ignite.lang.IgniteFuture;
-import org.apache.ignite.resources.SpringResource;
 import org.opennms.cloud.grpc.minion.RpcRequestProto;
 import org.opennms.cloud.grpc.minion.RpcResponseProto;
 import org.opennms.horizon.shared.grpc.common.TenantIDGrpcServerInterceptor;

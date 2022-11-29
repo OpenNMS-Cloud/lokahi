@@ -11,7 +11,6 @@ import org.opennms.cloud.grpc.minion.CloudToMinionMessage;
 import org.opennms.cloud.grpc.minion.Identity;
 import org.opennms.cloud.grpc.minion.MinionToCloudMessage;
 import org.opennms.cloud.grpc.minion.RpcRequestProto;
-import org.opennms.cloud.grpc.minion.RpcRequestServiceGrpc;
 import org.opennms.cloud.grpc.minion.RpcResponseProto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,7 +47,7 @@ public class CloudServiceProxyImpl extends CloudServiceGrpc.CloudServiceImplBase
     @Value("${grpc.downstream.inject-header-name:tenant-id}")
     private String injectHeaderName;
 
-    @Value("${grpc.downstream.inject-header-value:YYY-opennms-prime}")
+    @Value("${grpc.downstream.inject-header-value:opennms-prime}")
     private String injectHeaderValue;
 
     private Channel channel;

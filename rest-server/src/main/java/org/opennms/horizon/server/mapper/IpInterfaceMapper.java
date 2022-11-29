@@ -26,20 +26,14 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.server.model.inventory;
+package org.opennms.horizon.server.mapper;
 
-import lombok.Getter;
-import lombok.Setter;
+import org.mapstruct.Mapper;
+import org.opennms.horizon.inventory.dto.IpInterfaceDTO;
+import org.opennms.horizon.server.model.inventory.IpInterface;
 
-import java.util.List;
+@Mapper(componentModel = "spring")
+public interface IpInterfaceMapper {
 
-@Getter
-@Setter
-public class Node {
-    private long id;
-    private String tenantId;
-    private String nodeLabel;
-    private long createTime;
-    private long monitoringLocationId;
-    private List<IpInterface> ipInterfaces;
+    IpInterface protoToIpInterface(IpInterfaceDTO nodeDTO);
 }

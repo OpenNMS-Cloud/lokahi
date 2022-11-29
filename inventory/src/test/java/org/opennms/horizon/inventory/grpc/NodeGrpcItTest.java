@@ -36,9 +36,11 @@ import static org.mockito.Mockito.verify;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import com.google.protobuf.Empty;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -49,6 +51,7 @@ import org.keycloak.common.VerificationException;
 import org.opennms.horizon.inventory.SpringContextTestInitializer;
 import org.opennms.horizon.inventory.dto.NodeCreateDTO;
 import org.opennms.horizon.inventory.dto.NodeDTO;
+import org.opennms.horizon.inventory.dto.NodeList;
 import org.opennms.horizon.inventory.dto.NodeServiceGrpc;
 import org.opennms.horizon.inventory.grpc.taskset.TestTaskSetGrpcService;
 import org.opennms.horizon.inventory.model.IpInterface;
@@ -260,7 +263,7 @@ class NodeGrpcItTest extends GrpcTestBase {
     private synchronized void populateTables(String location, String ip) {
         Optional<MonitoringLocation> dbL = monitoringLocationRepository.findByLocation(location);
         MonitoringLocation dBLocation;
-        if(dbL.isEmpty()) {
+        if (dbL.isEmpty()) {
             MonitoringLocation ml = new MonitoringLocation();
             ml.setLocation(location);
             ml.setTenantId(tenantId);
@@ -274,13 +277,15 @@ class NodeGrpcItTest extends GrpcTestBase {
         node.setNodeLabel("label");
         node.setMonitoringLocation(dBLocation);
         node.setCreateTime(LocalDateTime.now());
-        Node savedNode = nodeRepository.save(node);
 
         IpInterface ipInterface = new IpInterface();
         ipInterface.setTenantId(tenantId);
         ipInterface.setIpAddress(new Inet(ip));
-        ipInterface.setNode(savedNode);
-        ipInterfaceRepository.save(ipInterface);
+        ipInterface.setNode(node);
+        var ipInterfaces = new ArrayList<IpInterface>();
+        ipInterfaces.add(ipInterface);
+        node.setIpInterfaces(ipInterfaces);
+        nodeRepository.save(node);
     }
 
     @Test
@@ -321,5 +326,20 @@ class NodeGrpcItTest extends GrpcTestBase {
         assertEquals(0, testGrpcService.getTimesCalled());
         verify(spyInterceptor).verifyAccessToken(authHeader);
         verify(spyInterceptor).interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));
+    }
+
+
+    @Test
+    void testListNodesShouldContainIpInterfaces() throws VerificationException {
+        String location = "minion";
+        String ip = "192.168.1.123";
+        populateTables(location, ip);
+        NodeList nodeList = serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader)))
+            .listNodes(Empty.newBuilder().build());
+        assertEquals(1, nodeList.getNodesCount());
+        assertEquals(1, nodeList.getNodes(0).getIpInterfacesList().size());
+        verify(spyInterceptor).verifyAccessToken(authHeader);
+        verify(spyInterceptor).interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));
+
     }
 }

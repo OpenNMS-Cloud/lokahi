@@ -50,6 +50,8 @@ import com.vladmihalcea.hibernate.type.basic.Inet;
 
 import lombok.RequiredArgsConstructor;
 
+import javax.transaction.Transactional;
+
 @Service
 @RequiredArgsConstructor
 public class NodeService {
@@ -60,6 +62,7 @@ public class NodeService {
 
     private final NodeMapper mapper;
 
+    @Transactional
     public List<NodeDTO> findByTenantId(String tenantId) {
         List<Node> all = nodeRepository.findByTenantId(tenantId);
         return all

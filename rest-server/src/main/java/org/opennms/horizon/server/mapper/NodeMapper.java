@@ -28,8 +28,10 @@
 
 package org.opennms.horizon.server.mapper;
 
+import org.mapstruct.CollectionMappingStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.Mappings;
 import org.mapstruct.NullValueCheckStrategy;
 import org.opennms.horizon.inventory.dto.NodeCreateDTO;
 import org.opennms.horizon.inventory.dto.NodeDTO;
@@ -37,8 +39,13 @@ import org.opennms.horizon.server.model.inventory.Node;
 import org.opennms.horizon.server.model.inventory.NodeCreate;
 
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = IpInterfaceMapper.class,
+    collectionMappingStrategy = CollectionMappingStrategy.ADDER_PREFERRED,
+    nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
 public interface NodeMapper {
+    @Mappings({
+        @Mapping(source = "ipInterfacesList", target = "ipInterfaces")
+    })
     Node protoToNode(NodeDTO nodeDTO);
 
     @Mapping(target = "location", source = "location", nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)

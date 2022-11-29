@@ -31,15 +31,11 @@ package org.opennms.horizon.server.model.inventory;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.List;
-
 @Getter
 @Setter
-public class Node {
+public class IpInterface {
     private long id;
     private String tenantId;
-    private String nodeLabel;
-    private long createTime;
-    private long monitoringLocationId;
-    private List<IpInterface> ipInterfaces;
+    private long nodeId;
+    private String ipAddress;
 }

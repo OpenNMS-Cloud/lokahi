@@ -42,6 +42,8 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ContextConfiguration;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -67,27 +69,6 @@ class IpInterfaceRepositoryTest {
     public void setup() {
         loadNodes();
     }
-
-    private void loadNodes() {
-        for (int i = 0; i < NUM_NODES; i++) {
-            var node = new Node();
-            node.setNodeLabel("node" + i);
-            node.setCreateTime(LocalDateTime.now());
-            node.setTenantId("tenant" + i);
-            var location = new MonitoringLocation();
-            location.setLocation("location" + i);
-            location.setTenantId("tenant" + i);
-            monitoringLocationRepository.save(location);
-            node.setMonitoringLocation(location);
-            nodeRepository.save(node);
-            var ipInterface = new IpInterface();
-            ipInterface.setTenantId("tenant" + i);
-            ipInterface.setNode(node);
-            ipInterface.setIpAddress(new Inet("192.168.1." + i));
-            ipInterfaceRepository.save(ipInterface);
-        }
-    }
-
 
     @Test
     void testFindByIpInterfaceForAGivenLocationAndIpAddress() {
@@ -115,6 +96,28 @@ class IpInterfaceRepositoryTest {
             assertThat(optionalInterface).isEmpty();
         }
 
+    }
+
+    private void loadNodes() {
+        for (int i = 0; i < NUM_NODES; i++) {
+            var node = new Node();
+            node.setNodeLabel("node" + i);
+            node.setCreateTime(LocalDateTime.now());
+            node.setTenantId("tenant" + i);
+            var location = new MonitoringLocation();
+            location.setLocation("location" + i);
+            location.setTenantId("tenant" + i);
+            monitoringLocationRepository.save(location);
+            node.setMonitoringLocation(location);
+            var ipInterface = new IpInterface();
+            ipInterface.setTenantId("tenant" + i);
+            ipInterface.setNode(node);
+            ipInterface.setIpAddress(new Inet("192.168.1." + i));
+            var ipInterfaces = new ArrayList<IpInterface>();
+            ipInterfaces.add(ipInterface);
+            node.setIpInterfaces(ipInterfaces);
+            nodeRepository.save(node);
+        }
     }
 
 }

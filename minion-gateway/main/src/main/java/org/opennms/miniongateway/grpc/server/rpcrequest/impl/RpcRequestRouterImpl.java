@@ -5,8 +5,11 @@ import lombok.Setter;
 import org.apache.ignite.Ignite;
 import org.apache.ignite.compute.ComputeTaskFuture;
 import org.apache.ignite.lang.IgniteFuture;
+import org.apache.ignite.resources.SpringResource;
 import org.opennms.cloud.grpc.minion.RpcRequestProto;
 import org.opennms.cloud.grpc.minion.RpcResponseProto;
+import org.opennms.horizon.shared.grpc.common.TenantIDGrpcServerInterceptor;
+import org.opennms.miniongateway.grpc.server.rpcrequest.RouterTaskData;
 import org.opennms.miniongateway.grpc.server.rpcrequest.RpcRequestRouterIgniteTask;
 import org.opennms.miniongateway.rpcrequest.RpcRequestRouter;
 import org.slf4j.Logger;
@@ -32,7 +35,12 @@ public class RpcRequestRouterImpl implements RpcRequestRouter {
     @Setter
     private RpcRequestRouterIgniteTask rpcRequestRouterIgniteTask;
 
-//========================================
+    @Autowired
+    @Setter
+    private TenantIDGrpcServerInterceptor tenantIDGrpcServerInterceptor;
+
+
+    //========================================
 // Interface: RpcRequestRouter
 //----------------------------------------
 
@@ -40,8 +48,11 @@ public class RpcRequestRouterImpl implements RpcRequestRouter {
     public CompletableFuture<RpcResponseProto> routeRequest(RpcRequestProto request) {
         CompletableFuture<RpcResponseProto> resultFuture = new CompletableFuture<>();
 
+        String tenantId = tenantIDGrpcServerInterceptor.readCurrentContextTenantId();
+        RouterTaskData routerTaskData = new RouterTaskData(tenantId, request.toByteArray());
+
         ComputeTaskFuture<byte[]> igniteFuture =
-            ignite.compute().executeAsync(rpcRequestRouterIgniteTask, request.toByteArray());
+            ignite.compute().executeAsync(rpcRequestRouterIgniteTask, routerTaskData);
 
         igniteFuture.listen((futureArg) -> this.processCompletedIgniteFuture(resultFuture, futureArg));
 

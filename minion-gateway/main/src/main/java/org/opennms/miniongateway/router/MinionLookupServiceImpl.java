@@ -141,5 +141,13 @@ public class MinionLookupServiceImpl implements MinionLookupService {
         public int hashCode() {
             return Objects.hash(tenantId, key);
         }
+
+        @Override
+        public String toString() {
+            return "TenantKey{" +
+                "tenantId='" + tenantId + '\'' +
+                ", key='" + key + '\'' +
+                '}';
+        }
     }
 }

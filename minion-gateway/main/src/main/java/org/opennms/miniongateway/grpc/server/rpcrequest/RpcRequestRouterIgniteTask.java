@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 @Component
-public class RpcRequestRouterIgniteTask implements ComputeTask<byte[], byte[]> {
+public class RpcRequestRouterIgniteTask implements ComputeTask<RouterTaskData, byte[]> {
 
     private static final Logger DEFAULT_LOGGER = LoggerFactory.getLogger(RpcRequestRouterIgniteTask.class);
 
@@ -50,13 +50,13 @@ public class RpcRequestRouterIgniteTask implements ComputeTask<byte[], byte[]> {
     private transient Random random;
 
     @Override
-    public @NotNull Map<? extends ComputeJob, ClusterNode> map(List<ClusterNode> subgrid, @Nullable byte[] arg) throws IgniteException {
+    public @NotNull Map<? extends ComputeJob, ClusterNode> map(List<ClusterNode> subgrid, @Nullable RouterTaskData arg) throws IgniteException {
         UUID gatewayNodeId = null;
         Map<ComputeJob, ClusterNode> map = new HashMap<>();
         try {
-            String tenantId = tenantIDGrpcServerInterceptor.readCurrentContextTenantId();
+            String tenantId = arg.getTenantId();
 
-            RpcRequestProto request = RpcRequestProto.parseFrom(arg);
+            RpcRequestProto request = RpcRequestProto.parseFrom(arg.getRequestPayload());
             if (!request.getSystemId().isBlank()) {
                 gatewayNodeId = minionLookupService.findGatewayNodeWithId(tenantId, request.getSystemId());
             } else {

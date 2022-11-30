@@ -49,8 +49,8 @@ import org.springframework.stereotype.Service;
 import com.vladmihalcea.hibernate.type.basic.Inet;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.transaction.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -62,7 +62,7 @@ public class NodeService {
 
     private final NodeMapper mapper;
 
-    @Transactional
+    @Transactional(readOnly = true)
     public List<NodeDTO> findByTenantId(String tenantId) {
         List<Node> all = nodeRepository.findByTenantId(tenantId);
         return all

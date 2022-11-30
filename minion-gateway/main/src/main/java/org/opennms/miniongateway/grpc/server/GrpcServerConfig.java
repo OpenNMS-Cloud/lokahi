@@ -92,7 +92,7 @@ public class GrpcServerConfig {
             .build();
 
         // RPC timeout executor thread retrieves elements from delay queue used to timeout rpc requests.
-        ExecutorService rpcTimeoutExecutor = Executors.newSingleThreadExecutor(timerThreadFactory);
+        ExecutorService rpcTimeoutExecutor = Executors.newFixedThreadPool(3, timerThreadFactory);
 
         RpcRequestTimeoutManagerImpl result = new RpcRequestTimeoutManagerImpl();
         result.setRpcTimeoutExecutor(rpcTimeoutExecutor);

@@ -75,7 +75,7 @@ public class InventoryServerInterceptor implements ServerInterceptor {
     }
 
     protected Optional<String> verifyAccessToken(String authHeader) throws VerificationException {
-        if (!authHeader.startsWith(tokenPrefix) || StringUtils.isEmpty(authHeader)) {
+        if (StringUtils.isEmpty(authHeader) || !authHeader.startsWith(tokenPrefix)) {
             throw  new VerificationException();
         }
         String token = authHeader.substring(tokenPrefix.length()+1);
@@ -85,6 +85,4 @@ public class InventoryServerInterceptor implements ServerInterceptor {
         AccessToken accessToken = verifier.getToken();
         return Optional.ofNullable((String)accessToken.getOtherClaims().get(Constants.TENANT_ID_KEY));
     }
-
-
 }

@@ -30,6 +30,7 @@ package org.opennms.horizon.inventory.repository;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -118,5 +119,11 @@ public class MonitoringLocationRepoTest {
     public void testFindByLocationAndRandomTenantId() {
         Optional<MonitoringLocation> result = repository.findByLocationAndTenantId(location1.getLocation(), new UUID(5,8).toString());
         assertThat(result.isPresent()).isFalse();
+    }
+
+    @Test
+    public void testFindByIdList(){
+        List<MonitoringLocation> result = repository.findByIdIn(Arrays.asList(location1.getId(),location2.getId(),location3.getId()));
+        assertThat(result.size()).isEqualTo(3);
     }
 }

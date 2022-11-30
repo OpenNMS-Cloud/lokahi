@@ -30,7 +30,9 @@ package org.opennms.horizon.inventory.grpc;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
+import org.opennms.horizon.inventory.dto.IdList;
 import org.opennms.horizon.inventory.dto.MonitoringLocationDTO;
 import org.opennms.horizon.inventory.dto.MonitoringLocationList;
 import org.opennms.horizon.inventory.dto.MonitoringLocationServiceGrpc;
@@ -93,6 +95,13 @@ public class MonitoringLocationGrpcService extends MonitoringLocationServiceGrpc
                 .setMessage("Location with id: " + request.getValue() + " doesn't exist.").build();
             responseObserver.onError(StatusProto.toStatusRuntimeException(status));
         }
+    }
+
+    @Override
+    public void listLocationsByIds(IdList request, StreamObserver<MonitoringLocationList> responseObserver) {
+        List<Long> idList = request.getIdsList().stream().map(Int64Value::getValue).collect(Collectors.toList());
+        responseObserver.onNext(MonitoringLocationList.newBuilder().addAllLocations(service.findByLocationIds(idList)).build());
+        responseObserver.onCompleted();
     }
 }
 

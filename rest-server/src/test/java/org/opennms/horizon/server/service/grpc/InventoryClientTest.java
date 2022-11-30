@@ -37,7 +37,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.junit.Rule;
 import org.junit.jupiter.api.AfterEach;
@@ -45,6 +47,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.opennms.horizon.inventory.Constants;
+import org.opennms.horizon.inventory.dto.IdList;
 import org.opennms.horizon.inventory.dto.MonitoringLocationDTO;
 import org.opennms.horizon.inventory.dto.MonitoringLocationList;
 import org.opennms.horizon.inventory.dto.MonitoringLocationServiceGrpc;
@@ -55,6 +58,7 @@ import org.opennms.horizon.inventory.dto.NodeCreateDTO;
 import org.opennms.horizon.inventory.dto.NodeDTO;
 import org.opennms.horizon.inventory.dto.NodeList;
 import org.opennms.horizon.inventory.dto.NodeServiceGrpc;
+import org.opennms.horizon.server.config.DataLoaderFactory;
 
 import com.google.protobuf.Empty;
 import com.google.protobuf.Int64Value;
@@ -96,6 +100,12 @@ public class InventoryClientTest {
                @Override
                 public void getLocationById(Int64Value request, StreamObserver<MonitoringLocationDTO> responseObserver) {
                     responseObserver.onNext(MonitoringLocationDTO.newBuilder().build());
+                    responseObserver.onCompleted();
+                }
+
+                @Override
+                public void listLocationsByIds(IdList request, StreamObserver<MonitoringLocationList> responseObserver) {
+                    responseObserver.onNext(MonitoringLocationList.newBuilder().build());
                     responseObserver.onCompleted();
                 }
             }));
@@ -163,6 +173,21 @@ public class InventoryClientTest {
         assertThat(result.isEmpty()).isTrue();
         verify(mockLocationService).listLocations(captor.capture(), any());
         assertThat(captor.getValue()).isNotNull();
+        assertThat(mockInterceptor.getAuthHeader()).isEqualTo(accessToken + methodName);
+    }
+
+    @Test
+    public void testListLocationsByIds() {
+        String methodName = new Object(){}.getClass().getEnclosingMethod().getName();
+        List<Long> ids = Arrays.asList(1L, 2L);
+        List<DataLoaderFactory.Key> keys = ids.stream().map(id -> new DataLoaderFactory.Key(id, accessToken + methodName)).collect(Collectors.toList());
+        ArgumentCaptor<IdList> captor = ArgumentCaptor.forClass(IdList.class);
+        List<MonitoringLocationDTO> result = client.listLocationsByIds(keys);
+        assertThat(result.isEmpty()).isTrue();
+        verify(mockLocationService).listLocationsByIds(captor.capture(), any());
+        List<Int64Value> argList = captor.getValue().getIdsList();
+        assertThat(argList.size()).isEqualTo(keys.size());
+        argList.forEach(v -> assertThat(ids.contains(v.getValue())).isTrue());
         assertThat(mockInterceptor.getAuthHeader()).isEqualTo(accessToken + methodName);
     }
 

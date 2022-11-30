@@ -34,6 +34,10 @@ public class MonitoringLocationService {
         return modelRepo.findByIdAndTenantId(id, tenantId).map(mapper::modelToDTO);
     }
 
+    public List<MonitoringLocationDTO> findByLocationIds(List<Long> ids) {
+        return modelRepo.findByIdIn(ids).stream().map(mapper::modelToDTO).collect(Collectors.toList());
+    }
+
     public List<MonitoringLocationDTO> findAll() {
         List<MonitoringLocation> all = modelRepo.findAll();
         return all

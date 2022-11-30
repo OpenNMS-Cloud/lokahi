@@ -33,6 +33,7 @@ public class MinionRpcMonitorManager implements EventListener {
     private static final String[] LABEL_NAMES = {"instance", "location"};
     private static final int MONITOR_INITIAL_DELAY = 3_000;
     private static final int MONITOR_PERIOD = 30_000;
+    private static final long ECHO_TIMEOUT = 120_000;
 
     private final CollectorRegistry collectorRegistry = new CollectorRegistry();
 
@@ -110,7 +111,7 @@ public class MinionRpcMonitorManager implements EventListener {
              .setMessage(Strings.repeat("*", DEFAULT_MESSAGE_SIZE))
              .build();
 
-         echoClient.execute(minionId, location, null, echoRequest).whenComplete((response, error) -> {
+         echoClient.execute(minionId, location, ECHO_TIMEOUT, echoRequest).whenComplete((response, error) -> {
              if (error != null) {
                  LOG.warn("ECHO REQUEST failed", error);
                  LOG.error("Minion RPC Monitor: check for minion failed: id={}", minionId);

@@ -28,15 +28,20 @@
 
 package org.opennms.horizon.server.service;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
+import org.dataloader.DataLoader;
+import org.opennms.horizon.server.config.DataLoaderFactory;
 import org.opennms.horizon.server.mapper.MinionMapper;
+import org.opennms.horizon.server.model.inventory.Location;
 import org.opennms.horizon.server.model.inventory.Minion;
 import org.opennms.horizon.server.service.grpc.InventoryClient;
 import org.opennms.horizon.server.utils.ServerHeaderUtil;
 import org.springframework.stereotype.Service;
 
 import io.leangen.graphql.annotations.GraphQLArgument;
+import io.leangen.graphql.annotations.GraphQLContext;
 import io.leangen.graphql.annotations.GraphQLEnvironment;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.execution.ResolutionEnvironment;
@@ -61,5 +66,12 @@ public class GrpcMinionService {
     @GraphQLQuery
     public Mono<Minion> findMinionById(@GraphQLArgument(name = "id") String id, @GraphQLEnvironment ResolutionEnvironment env) {
         return Mono.just(mapper.protoToMinion(client.getSystemBySystemId(id, headerUtil.getAuthHeader(env))));
+    }
+
+    @GraphQLQuery
+    public CompletableFuture<Location> location(@GraphQLContext Minion minion, @GraphQLEnvironment ResolutionEnvironment env) {
+        DataLoader<DataLoaderFactory.Key, Location> locationDataLoader = env.dataFetchingEnvironment.getDataLoader(DataLoaderFactory.DATA_LOADER_LOCATION);
+        DataLoaderFactory.Key key = new DataLoaderFactory.Key(minion.getLocationId(), headerUtil.getAuthHeader(env));
+        return locationDataLoader.load(key);
     }
 }

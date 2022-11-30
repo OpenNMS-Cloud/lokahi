@@ -31,7 +31,6 @@ package org.opennms.horizon.inventory.grpc;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
@@ -42,23 +41,25 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.junit.Rule;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.keycloak.adapters.KeycloakDeployment;
 import org.keycloak.common.VerificationException;
 import org.opennms.horizon.inventory.Constants;
+import org.opennms.horizon.inventory.dto.IdList;
 import org.opennms.horizon.inventory.dto.MonitoringLocationDTO;
 import org.opennms.horizon.inventory.dto.MonitoringLocationList;
 import org.opennms.horizon.inventory.dto.MonitoringLocationServiceGrpc;
 import org.opennms.horizon.inventory.service.MonitoringLocationService;
 
 import com.google.protobuf.Empty;
+import com.google.protobuf.Int64Value;
 
-import io.grpc.ManagedChannel;
 import io.grpc.Metadata;
 import io.grpc.Server;
 import io.grpc.ServerCall;
@@ -75,18 +76,12 @@ import lombok.extern.slf4j.Slf4j;
 public class LocationGrpcIntegrationTest {
     @Rule
     public static final GrpcCleanupRule grpcCleanup = new GrpcCleanupRule();
-    private  static Server server;
-    private  static ManagedChannel channel;
     private static MonitoringLocationServiceGrpc.MonitoringLocationServiceBlockingStub stub;
-    private static MonitoringLocationGrpcService grpcService;
     private static MonitoringLocationService mockLocationService;
-    private static TenantLookup tenantLookup;
     private static InventoryServerInterceptor spyInterceptor;
 
     private final String tenantId = "test-tenant";
     private final String authHeader = "Bearer esgs12345";
-    private final String headerWithoutTenant = "Bearer esgs12345invalid";
-    private final String differentTenantHeader = "Bearer esgs12345different";
 
     private MonitoringLocationDTO location1, location2;
 
@@ -94,12 +89,12 @@ public class LocationGrpcIntegrationTest {
 
     @BeforeAll
     public static void startServer() throws IOException {
-        tenantLookup = new GrpcTenantLookupImpl();
+        TenantLookup tenantLookup = new GrpcTenantLookupImpl();
         mockLocationService = mock(MonitoringLocationService.class);
         spyInterceptor = spy(new InventoryServerInterceptor(mock(KeycloakDeployment.class)));
-        grpcService = new MonitoringLocationGrpcService(mockLocationService, tenantLookup);
+        MonitoringLocationGrpcService grpcService = new MonitoringLocationGrpcService(mockLocationService, tenantLookup);
         String serverName = InProcessServerBuilder.generateName();
-        server = InProcessServerBuilder.forName(serverName)
+        Server server = InProcessServerBuilder.forName(serverName)
             .addService(ServerInterceptors.intercept(grpcService, spyInterceptor)).directExecutor().build();
         server.start();
         grpcCleanup.register(server);
@@ -110,9 +105,6 @@ public class LocationGrpcIntegrationTest {
     @BeforeEach
     public void prepareTest() throws VerificationException {
         doReturn(Optional.of(tenantId)).when(spyInterceptor).verifyAccessToken(authHeader);
-        doReturn(Optional.of("invalid-tenant")).when(spyInterceptor).verifyAccessToken(differentTenantHeader);
-        doReturn(Optional.empty()).when(spyInterceptor).verifyAccessToken(headerWithoutTenant);
-        doThrow(new VerificationException()).when(spyInterceptor).verifyAccessToken(null);
         location1 = MonitoringLocationDTO.newBuilder().build();
         location2 = MonitoringLocationDTO.newBuilder().build();
     }
@@ -133,6 +125,20 @@ public class LocationGrpcIntegrationTest {
         MonitoringLocationList result = stub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(headers)).listLocations(Empty.newBuilder().build());
         assertThat(result.getLocationsList().size()).isEqualTo(2);
         verify(mockLocationService).findByTenantId(tenantId);
+        verify(spyInterceptor).verifyAccessToken(authHeader);
+        verify(spyInterceptor).interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));
+    }
+
+    @Test
+    public void testListLocationsByIds() throws VerificationException {
+        List<Long> ids = Arrays.asList(1L, 2L);
+        doReturn(Arrays.asList(location1, location2)).when(mockLocationService).findByLocationIds(ids);
+        Metadata headers = new Metadata();
+        headers.put(Constants.AUTHORIZATION_METADATA_KEY, authHeader);
+        MonitoringLocationList result = stub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(headers)).listLocationsByIds(IdList.newBuilder().addAllIds(ids
+            .stream().map(Int64Value::of).collect(Collectors.toList())).build());
+        assertThat(result.getLocationsList().size()).isEqualTo(2);
+        verify(mockLocationService).findByLocationIds(ids);
         verify(spyInterceptor).verifyAccessToken(authHeader);
         verify(spyInterceptor).interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));
     }

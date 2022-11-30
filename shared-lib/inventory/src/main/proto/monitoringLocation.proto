@@ -44,8 +44,13 @@ message MonitoringLocationList {
   repeated MonitoringLocationDTO locations = 1;
 }
 
+message IdList {
+  repeated google.protobuf.Int64Value ids = 1;
+}
+
 service MonitoringLocationService {
   rpc listLocations(google.protobuf.Empty) returns (MonitoringLocationList) {};
   rpc getLocationByName(google.protobuf.StringValue) returns (MonitoringLocationDTO) {};
   rpc getLocationById(google.protobuf.Int64Value) returns (MonitoringLocationDTO) {};
+  rpc listLocationsByIds(IdList) returns (MonitoringLocationList) {};
 }

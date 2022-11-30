@@ -28,9 +28,13 @@
 
 package org.opennms.horizon.server.service;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
+import org.dataloader.DataLoader;
+import org.opennms.horizon.server.config.DataLoaderFactory;
 import org.opennms.horizon.server.mapper.NodeMapper;
+import org.opennms.horizon.server.model.inventory.Location;
 import org.opennms.horizon.server.model.inventory.Node;
 import org.opennms.horizon.server.model.inventory.NodeCreate;
 import org.opennms.horizon.server.service.grpc.InventoryClient;
@@ -38,6 +42,7 @@ import org.opennms.horizon.server.utils.ServerHeaderUtil;
 import org.springframework.stereotype.Service;
 
 import io.leangen.graphql.annotations.GraphQLArgument;
+import io.leangen.graphql.annotations.GraphQLContext;
 import io.leangen.graphql.annotations.GraphQLEnvironment;
 import io.leangen.graphql.annotations.GraphQLMutation;
 import io.leangen.graphql.annotations.GraphQLQuery;
@@ -68,5 +73,12 @@ public class GrpcNodeService {
   @GraphQLMutation
   public Mono<Node> addNode(NodeCreate node, @GraphQLEnvironment ResolutionEnvironment env) {
         return Mono.just(mapper.protoToNode(client.createNewNode(mapper.nodeCreateToProto(node), headerUtil.getAuthHeader(env))));
+  }
+
+  @GraphQLQuery
+  public CompletableFuture<Location> location(@GraphQLContext Node node, @GraphQLEnvironment  ResolutionEnvironment env) {
+      DataLoader<DataLoaderFactory.Key, Location> locationLoader = env.dataFetchingEnvironment.getDataLoader(DataLoaderFactory.DATA_LOADER_LOCATION);
+      DataLoaderFactory.Key key = new DataLoaderFactory.Key(node.getMonitoringLocationId(), headerUtil.getAuthHeader(env));
+      return locationLoader.load(key);
   }
 }

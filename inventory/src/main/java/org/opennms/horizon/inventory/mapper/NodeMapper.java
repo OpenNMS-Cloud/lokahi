@@ -18,13 +18,9 @@ import java.util.List;
     nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
 public interface NodeMapper extends DateTimeMapper {
 
-    @Mappings({
-        @Mapping(source = "ipInterfacesList", target = "ipInterfaces")
-    })
+    @Mapping(source = "ipInterfacesList", target = "ipInterfaces")
     Node dtoToModel(NodeDTO dto);
 
-    @Mappings({
-        @Mapping(source = "ipInterfaces", target = "ipInterfacesList")
-    })
+    @Mapping(source = "ipInterfaces", target = "ipInterfacesList")
     NodeDTO modelToDTO(Node model);
 }

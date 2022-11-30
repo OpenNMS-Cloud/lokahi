@@ -43,9 +43,8 @@ import org.opennms.horizon.server.model.inventory.NodeCreate;
     collectionMappingStrategy = CollectionMappingStrategy.ADDER_PREFERRED,
     nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
 public interface NodeMapper {
-    @Mappings({
-        @Mapping(source = "ipInterfacesList", target = "ipInterfaces")
-    })
+
+    @Mapping(source = "ipInterfacesList", target = "ipInterfaces")
     Node protoToNode(NodeDTO nodeDTO);
 
     @Mapping(target = "location", source = "location", nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)

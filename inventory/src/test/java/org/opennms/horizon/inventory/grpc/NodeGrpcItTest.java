@@ -33,6 +33,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
+import static org.mockito.internal.verification.VerificationModeFactory.times;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -41,6 +42,7 @@ import java.util.List;
 import java.util.Optional;
 
 import com.google.protobuf.Empty;
+import com.google.protobuf.Int64Value;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -48,6 +50,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.keycloak.common.VerificationException;
+import org.mockito.internal.verification.VerificationModeFactory;
 import org.opennms.horizon.inventory.SpringContextTestInitializer;
 import org.opennms.horizon.inventory.dto.NodeCreateDTO;
 import org.opennms.horizon.inventory.dto.NodeDTO;
@@ -334,12 +337,16 @@ class NodeGrpcItTest extends GrpcTestBase {
         String location = "minion";
         String ip = "192.168.1.123";
         populateTables(location, ip);
-        NodeList nodeList = serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader)))
+        var nodeList = serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader)))
             .listNodes(Empty.newBuilder().build());
         assertEquals(1, nodeList.getNodesCount());
         assertEquals(1, nodeList.getNodes(0).getIpInterfacesList().size());
-        verify(spyInterceptor).verifyAccessToken(authHeader);
-        verify(spyInterceptor).interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));
+        var nodeId = nodeList.getNodes(0).getId();
+        var node = serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader)))
+                .getNodeById(Int64Value.newBuilder().setValue(nodeId).build());
+        assertEquals(1, node.getIpInterfacesList().size());
+        verify(spyInterceptor, times(2)).verifyAccessToken(authHeader);
+        verify(spyInterceptor, times(2)).interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));
 
     }
 }

@@ -70,7 +70,7 @@ public class NodeService {
             .map(mapper::modelToDTO)
             .collect(Collectors.toList());
     }
-
+    @Transactional(readOnly = true)
     public Optional<NodeDTO> getByIdAndTenantId(long id, String tenantId){
         return nodeRepository.findByIdAndTenantId(id, tenantId).map(mapper::modelToDTO);
     }

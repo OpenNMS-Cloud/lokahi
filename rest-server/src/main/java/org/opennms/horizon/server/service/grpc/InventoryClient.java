@@ -36,8 +36,6 @@ import io.grpc.ManagedChannel;
 import io.grpc.Metadata;
 import io.grpc.stub.MetadataUtils;
 import lombok.RequiredArgsConstructor;
-import org.opennms.horizon.events.proto.EventDTO;
-import org.opennms.horizon.events.proto.EventServiceGrpc;
 import org.opennms.horizon.inventory.Constants;
 import org.opennms.horizon.inventory.dto.IdList;
 import org.opennms.horizon.inventory.dto.MonitoringLocationDTO;
@@ -58,13 +56,11 @@ public class InventoryClient {
     private MonitoringLocationServiceGrpc.MonitoringLocationServiceBlockingStub locationStub;
     private NodeServiceGrpc.NodeServiceBlockingStub nodeStub;
     private MonitoringSystemServiceGrpc.MonitoringSystemServiceBlockingStub systemStub;
-    private EventServiceGrpc.EventServiceBlockingStub eventsStub;
 
     protected void initialStubs() {
         locationStub = MonitoringLocationServiceGrpc.newBlockingStub(channel);
         nodeStub = NodeServiceGrpc.newBlockingStub(channel);
         systemStub = MonitoringSystemServiceGrpc.newBlockingStub(channel);
-        eventsStub = EventServiceGrpc.newBlockingStub(channel);
     }
 
     public void shutdown() {
@@ -122,17 +118,5 @@ public class InventoryClient {
             List<Int64Value> idValues = keys.stream().map(k->Int64Value.of(k.getId())).collect(Collectors.toList());
             return locationStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).listLocationsByIds(IdList.newBuilder().addAllIds(idValues).build()).getLocationsList();
         }).orElseThrow();
-    }
-
-    public List<EventDTO> listEvents(String accessToken) {
-        Metadata metadata = new Metadata();
-        metadata.put(Constants.AUTHORIZATION_METADATA_KEY, accessToken);
-        return eventsStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).listEvents(Empty.newBuilder().build()).getEventsList();
-    }
-
-    public List<EventDTO> getEventsByNodeId(long nodeId, String accessToken) {
-        Metadata metadata = new Metadata();
-        metadata.put(Constants.AUTHORIZATION_METADATA_KEY, accessToken);
-        return eventsStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).getEventsByNodeId(Int64Value.of(nodeId)).getEventsList();
     }
 }

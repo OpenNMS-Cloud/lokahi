@@ -36,7 +36,7 @@ import io.leangen.graphql.spqr.spring.annotations.GraphQLApi;
 import lombok.RequiredArgsConstructor;
 import org.opennms.horizon.server.mapper.EventMapper;
 import org.opennms.horizon.server.model.events.Event;
-import org.opennms.horizon.server.service.grpc.InventoryClient;
+import org.opennms.horizon.server.service.grpc.EventsClient;
 import org.opennms.horizon.server.utils.ServerHeaderUtil;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -47,7 +47,7 @@ import java.util.stream.Collectors;
 @GraphQLApi
 @Service
 public class GrpcEventService {
-    private final InventoryClient client;
+    private final EventsClient client;
     private final EventMapper mapper;
     private final ServerHeaderUtil headerUtil;
 

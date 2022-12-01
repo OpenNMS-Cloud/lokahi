@@ -29,12 +29,13 @@
 package org.opennms.horizon.events.grpc.config;
 
 import io.grpc.Context;
+import org.opennms.horizon.events.Constants;
 
 import java.util.Optional;
 
 public class GrpcTenantLookupImpl implements TenantLookup {
     @Override
     public Optional<String> lookupTenantId(Context context) {
-        return Optional.ofNullable(EventServerInterceptor.TENANT_ID.get());
+        return Optional.ofNullable(Constants.TENANT_ID_CONTEXT_KEY.get());
     }
 }

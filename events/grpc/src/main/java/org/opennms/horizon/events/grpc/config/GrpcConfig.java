@@ -29,6 +29,11 @@
 package org.opennms.horizon.events.grpc.config;
 
 import lombok.RequiredArgsConstructor;
+import org.apache.http.client.HttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.keycloak.adapters.KeycloakDeployment;
+import org.keycloak.adapters.rotation.JWKPublicKeyLocator;
+import org.keycloak.representations.adapters.config.AdapterConfig;
 import org.opennms.horizon.events.grpc.service.EventGrpcService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -42,14 +47,41 @@ public class GrpcConfig {
     @Value("${grpc.server.port:" + DEFAULT_GRPC_PORT + "}")
     private int port;
 
+    @Value("${keycloak.base-url}")
+    private String keycloakAuthUrl;
+
+    @Value("${keycloak.realm}")
+    private String keycloakRealm;
+
     @Bean
     public TenantLookup createTenantLookup() {
         return new GrpcTenantLookupImpl();
     }
 
     @Bean
-    public EventServerInterceptor createInterceptor() {
-        return new EventServerInterceptor();
+    public KeycloakDeployment createKeycloak() {
+        AdapterConfig config = new AdapterConfig();
+        config.setAllowAnyHostname(true);
+        config.setAuthServerUrl(keycloakAuthUrl);
+        config.setRealm(keycloakRealm);
+        config.setUseResourceRoleMappings(false);
+        config.setPrincipalAttribute("preferred_username");
+        config.setSslRequired("false");
+
+        KeycloakDeployment keycloak = new KeycloakDeployment();
+        keycloak.setAuthServerBaseUrl(config);
+        keycloak.setRealm(keycloakRealm);
+        keycloak.setPublicKeyLocator(new JWKPublicKeyLocator());
+        keycloak.setPublicKeyCacheTtl(3600);
+        HttpClient client = HttpClientBuilder.create().build();
+        keycloak.setClient(client);
+
+        return keycloak;
+    }
+
+    @Bean
+    public EventServerInterceptor createInterceptor(KeycloakDeployment keycloak) {
+        return new EventServerInterceptor(keycloak);
     }
 
     @Bean(destroyMethod = "stopServer")

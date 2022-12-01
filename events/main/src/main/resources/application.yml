@@ -26,3 +26,7 @@ grpc:
 kafka:
   traps-topic: "traps"
   events-topic: "events-proto"
+
+keycloak:
+  realm: opennms
+  base-url: http://onms-keycloak:8080/auth

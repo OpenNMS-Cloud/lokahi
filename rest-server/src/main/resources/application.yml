@@ -12,6 +12,7 @@ graphql:
       enabled: true
     base-packages:
       - org.opennms.horizon.server.model.inventory
+      - org.opennms.horizon.server.model.events
 
 # keycloak admin client properties
 horizon-stream:

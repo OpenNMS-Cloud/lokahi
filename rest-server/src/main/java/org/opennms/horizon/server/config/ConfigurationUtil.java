@@ -30,6 +30,7 @@ package org.opennms.horizon.server.config;
 
 import org.opennms.horizon.server.service.gateway.NotificationGateway;
 import org.opennms.horizon.server.service.gateway.PlatformGateway;
+import org.opennms.horizon.server.service.grpc.EventsClient;
 import org.opennms.horizon.server.service.grpc.InventoryClient;
 import org.opennms.horizon.server.utils.ServerHeaderUtil;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -86,5 +87,10 @@ public class ConfigurationUtil {
     @Bean(destroyMethod = "shutdown", initMethod = "initialStubs")
     public InventoryClient createInventoryClient(@Qualifier("inventory") ManagedChannel channel) {
         return new InventoryClient(channel);
+    }
+
+    @Bean(destroyMethod = "shutdown", initMethod = "initialStubs")
+    public EventsClient createEventsClient(@Qualifier("events") ManagedChannel channel) {
+        return new EventsClient(channel);
     }
 }

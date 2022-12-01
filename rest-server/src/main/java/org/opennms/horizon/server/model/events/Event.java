@@ -13,7 +13,7 @@ public class Event {
     private String uei;
     private int nodeId;
     private String ipAddress;
-    private int producedTime;
+    private long producedTime;
     private List<EventParameter> eventParams;
     private EventInfo eventInfo;
 }

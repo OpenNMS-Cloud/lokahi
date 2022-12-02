@@ -25,19 +25,19 @@ runs:
         path: ~/.sonar/cache
         key: ${{ runner.os }}-${{ runner.arch }}-sonar
 
-    - name: global data
-      if: ${{ inputs.enable-sonar-scan == 'true' }}
-      run: |
-
-        mvn -Pcoverage verify jib:dockerBuild -Djib.container.creationTime=USE_CURRENT_TIMESTAMP -Dimage=opennms/horizon-stream-minion-gateway-grpc-proxy:local \
-          org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=$SONAR_PROJECT_KEY
-
-      shell: bash
-      working-directory: minion-gateway-grpc-proxy
-      env:
-        GITHUB_TOKEN: ${{ inputs.github-token }}
-        SONAR_TOKEN: ${{ inputs.sonar-token }}
-        SONAR_PROJECT_KEY: 'opennms_horizon-stream_minion-gateway-grpc-proxy'
+#    - name: global data
+#      if: ${{ inputs.enable-sonar-scan == 'true' }}
+#      run: |
+#
+#        mvn -Pcoverage verify jib:dockerBuild -Djib.container.creationTime=USE_CURRENT_TIMESTAMP -Dimage=opennms/horizon-stream-minion-gateway-grpc-proxy:local \
+#          org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=$SONAR_PROJECT_KEY
+#
+#      shell: bash
+#      working-directory: minion-gateway-grpc-proxy
+#      env:
+#        GITHUB_TOKEN: ${{ inputs.github-token }}
+#        SONAR_TOKEN: ${{ inputs.sonar-token }}
+#        SONAR_PROJECT_KEY: 'opennms_horizon-stream_minion-gateway-grpc-proxy'
 
     - name: global data
       if: ${{ inputs.enable-sonar-scan == 'false' }}

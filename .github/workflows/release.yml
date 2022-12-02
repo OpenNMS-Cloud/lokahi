@@ -149,6 +149,14 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           sonar-token: ${{ secrets.SONAR_TOKEN }}
 
+      - name: feature-minion-gateway-grpc-proxy
+        id: action-minion-gateway-grpc-proxy
+        uses: ./.github/actions/minion-gateway-grpc-proxy
+        with:
+          dir-location: 'minion-gateway-grpc-proxy'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          sonar-token: ${{ secrets.SONAR_TOKEN }}
+
       - name: external-it
         id: action-external-it
         uses: ./.github/actions/external-it
@@ -197,6 +205,22 @@ jobs:
 
           docker push opennms/horizon-stream-minion-gateway:${{ env.RELEASE_TAG }}
           docker push opennms/horizon-stream-minion-gateway:latest
+
+      - name: publish-image-minion-gateway-grpc-proxy
+        run: |
+
+          # Login to dockerhub.
+          echo ${{ secrets.DOCKERHUB_PASS }} | docker login -u ${{ secrets.DOCKERHUB_LOGIN }} --password-stdin
+
+          # Publish minion-gateway-grpc-proxy image
+          cd minion-gateway-grpc-proxy/
+
+          # Tag and save the image as a file to be published. Both release version and latest.
+          docker tag opennms/horizon-stream-minion-gateway-grpc-proxy:local opennms/horizon-stream-minion-gateway-grpc-proxy:${{ env.RELEASE_TAG }}
+          docker tag opennms/horizon-stream-minion-gateway-grpc-proxy:local opennms/horizon-stream-minion-gateway-grpc-proxy:latest
+
+          docker push opennms/horizon-stream-minion-gateway-grpc-proxy:${{ env.RELEASE_TAG }}
+          docker push opennms/horizon-stream-minion-gateway-grpc-proxy:latest
 
       - name: publish-image-core
         run: |

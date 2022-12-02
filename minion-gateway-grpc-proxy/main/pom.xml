@@ -30,9 +30,26 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.opennms.horizon.minion.gateway</groupId>
-            <artifactId>ipc-grpc-server</artifactId>
+            <groupId>org.opennms.horizon.shared</groupId>
+            <artifactId>ipc-grpc-contract</artifactId>
             <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-netty-shaded</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-protobuf</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-stub</artifactId>
         </dependency>
 
         <dependency>

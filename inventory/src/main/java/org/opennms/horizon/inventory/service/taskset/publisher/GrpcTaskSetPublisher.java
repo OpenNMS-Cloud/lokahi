@@ -46,7 +46,7 @@ public class GrpcTaskSetPublisher implements TaskSetPublisher {
     private static final Logger log = LoggerFactory.getLogger(GrpcTaskSetPublisher.class);
     private final TaskSetServiceGrpc.TaskSetServiceBlockingStub taskSetServiceStub;
 
-    private static final Metadata.Key HEADER_KE = Metadata.Key.of("tenant-id", Metadata.ASCII_STRING_MARSHALLER);
+    private static final Metadata.Key HEADER_KEY = Metadata.Key.of("tenant-id", Metadata.ASCII_STRING_MARSHALLER);
 
     @Override
     public void publishTaskSet(String tenantId, String location, TaskSet taskSet) {
@@ -58,7 +58,7 @@ public class GrpcTaskSetPublisher implements TaskSetPublisher {
                     .build();
 
             Metadata metadata = new Metadata();
-            metadata.put(HEADER_KE, tenantId);
+            metadata.put(HEADER_KEY, tenantId);
 
             PublishTaskSetResponse response =
                 taskSetServiceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).publishTaskSet(request);

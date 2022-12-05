@@ -28,6 +28,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.stubbing.Answer;
 import org.opennms.horizon.shared.ipc.grpc.server.manager.MinionInfo;
+import org.opennms.miniongateway.grpc.server.model.TenantKey;
 
 public class MinionLookupServiceImplTest {
 
@@ -49,9 +50,9 @@ public class MinionLookupServiceImplTest {
     @Mock
     Lock lock;
 
-    private Map<MinionLookupServiceImpl.TenantKey, Queue<UUID>> locationMap = new HashMap<>();
+    private Map<TenantKey, Queue<UUID>> locationMap = new HashMap<>();
 
-    private Map<MinionLookupServiceImpl.TenantKey, UUID> idMap = new HashMap<>();
+    private Map<TenantKey, UUID> idMap = new HashMap<>();
 
     MinionLookupService minionLookupService;
 

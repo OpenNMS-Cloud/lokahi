@@ -1,8 +1,6 @@
 package org.opennms.miniongateway.router;
 
-import java.io.Serializable;
 import java.util.List;
-import java.util.Objects;
 import java.util.Queue;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -13,6 +11,7 @@ import org.apache.ignite.IgniteCache;
 import org.apache.ignite.cache.CacheAtomicityMode;
 import org.apache.ignite.configuration.CacheConfiguration;
 import org.opennms.horizon.shared.ipc.grpc.server.manager.MinionInfo;
+import org.opennms.miniongateway.grpc.server.model.TenantKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -103,51 +102,6 @@ public class MinionLookupServiceImpl implements MinionLookupService {
             {
                 minionByLocationCache.remove(new TenantKey(minionInfo.getTenantId(), minionInfo.getLocation()));
             }
-        }
-    }
-
-//========================================
-//
-//----------------------------------------
-
-    // TESTABILITY: public for test use
-    public static class TenantKey implements Serializable {
-        private final String tenantId;
-        private final String key;
-
-        public TenantKey(String tenantId, String key) {
-            this.tenantId = tenantId;
-            this.key = key;
-        }
-
-        public String getTenantId() {
-            return tenantId;
-        }
-
-        public String getKey() {
-            return key;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            TenantKey tenantKey = (TenantKey) o;
-            return Objects.equals(tenantId, tenantKey.tenantId) &&
-                Objects.equals(key, tenantKey.key);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(tenantId, key);
-        }
-
-        @Override
-        public String toString() {
-            return "TenantKey{" +
-                "tenantId='" + tenantId + '\'' +
-                ", key='" + key + '\'' +
-                '}';
         }
     }
 }

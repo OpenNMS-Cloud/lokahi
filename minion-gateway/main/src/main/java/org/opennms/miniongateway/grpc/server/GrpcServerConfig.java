@@ -120,7 +120,8 @@ public class GrpcServerConfig {
         @Autowired TaskResultsKafkaForwarder taskResultsKafkaForwarder,
         @Autowired HeartbeatKafkaForwarder heartbeatKafkaForwarder,
         @Autowired TrapsKafkaForwarder trapsKafkaForwarder,
-        @Autowired RpcRequestTimeoutManager rpcRequestTimeoutManager
+        @Autowired RpcRequestTimeoutManager rpcRequestTimeoutManager,
+        @Autowired TenantIDGrpcServerInterceptor tenantIDGrpcServerInterceptor
     ) throws Exception {
 
         OpennmsGrpcServer server = new OpennmsGrpcServer(serverBuilder, Arrays.asList(
@@ -130,6 +131,7 @@ public class GrpcServerConfig {
         server.setRpcConnectionTracker(rpcConnectionTracker);
         server.setRpcRequestTracker(rpcRequestTracker);
         server.setRpcRequestTimeoutManager(rpcRequestTimeoutManager);
+        server.setTenantIDGrpcServerInterceptor(tenantIDGrpcServerInterceptor);
         server.setMinionManager(minionManager);
         server.setLocationIndependentRpcClientFactory(locationIndependentRpcClientFactory);
         server.setMinionRpcStreamConnectionManager(minionRpcStreamConnectionManager);

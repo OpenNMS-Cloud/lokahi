@@ -45,7 +45,7 @@ public class TaskSetGrpcClient implements TaskSetPublisher {
     public static final int DEFAULT_GRPC_PORT = 8990;
     public static final int DEFAULT_MAX_MESSAGE_SIZE = 1_0485_760;
 
-    private static final Metadata.Key HEADER_KE = Metadata.Key.of("tenant-id", Metadata.ASCII_STRING_MARSHALLER);
+    private static final Metadata.Key HEADER_KEY = Metadata.Key.of("tenant-id", Metadata.ASCII_STRING_MARSHALLER);
 
     private static final Logger DEFAULT_LOGGER = org.slf4j.LoggerFactory.getLogger(TaskSetGrpcClient.class);
 
@@ -134,7 +134,7 @@ public class TaskSetGrpcClient implements TaskSetPublisher {
                 ;
 
             Metadata metadata = new Metadata();
-            metadata.put(HEADER_KE, tenantId);
+            metadata.put(HEADER_KEY, tenantId);
 
             PublishTaskSetResponse unused =
                 taskSetServiceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).publishTaskSet(request);

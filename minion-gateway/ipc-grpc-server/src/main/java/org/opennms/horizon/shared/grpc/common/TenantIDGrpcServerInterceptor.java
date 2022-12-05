@@ -56,7 +56,7 @@ public class TenantIDGrpcServerInterceptor implements ServerInterceptor {
             .build();
 
     //TODO will change to JWT token
-    private static final Metadata.Key HEADER_KE = Metadata.Key.of("tenant-id", Metadata.ASCII_STRING_MARSHALLER);
+    private static final Metadata.Key HEADER_KEY = Metadata.Key.of("tenant-id", Metadata.ASCII_STRING_MARSHALLER);
 
     /**
      * GRPC uses Context.Key objects to read the context (there are no direct methods on the context itself).  Define

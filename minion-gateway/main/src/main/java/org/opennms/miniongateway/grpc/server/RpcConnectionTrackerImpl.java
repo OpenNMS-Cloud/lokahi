@@ -14,6 +14,7 @@ import org.opennms.cloud.grpc.minion.RpcRequestProto;
 import org.opennms.horizon.shared.ipc.grpc.server.manager.MinionInfo;
 import org.opennms.horizon.shared.ipc.grpc.server.manager.MinionManager;
 import org.opennms.horizon.shared.ipc.grpc.server.manager.RpcConnectionTracker;
+import org.opennms.miniongateway.grpc.server.model.TenantKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,12 +31,12 @@ public class RpcConnectionTrackerImpl implements RpcConnectionTracker {
     private MinionManager minionManager;
 
     // Remove location tracking here, keep it in the minion manager
-    private Map<StreamObserver<RpcRequestProto>, String> locationByConnection = new IdentityHashMap<>();
-    private Map<StreamObserver<RpcRequestProto>, String> minionIdByConnection = new IdentityHashMap<>();
+    private Map<StreamObserver<RpcRequestProto>, TenantKey> locationByConnection = new IdentityHashMap<>();
+    private Map<StreamObserver<RpcRequestProto>, TenantKey> minionIdByConnection = new IdentityHashMap<>();
 
-    private Map<String, StreamObserver<RpcRequestProto>> connectionByMinionId = new HashMap<>();
-    private Multimap<String, StreamObserver<RpcRequestProto>> connectionListByLocation = LinkedListMultimap.create();
-    private Map<String, Iterator<StreamObserver<RpcRequestProto>>> rpcHandlerIteratorMap = new HashMap<>();
+    private Map<TenantKey, StreamObserver<RpcRequestProto>> connectionByMinionId = new HashMap<>();
+    private Multimap<TenantKey, StreamObserver<RpcRequestProto>> connectionListByLocation = LinkedListMultimap.create();
+    private Map<TenantKey, Iterator<StreamObserver<RpcRequestProto>>> rpcHandlerIteratorMap = new HashMap<>();
 
     /**
      * Semaphore per connection that is used to ensure thread-safe sending to each connection.
@@ -46,21 +47,24 @@ public class RpcConnectionTrackerImpl implements RpcConnectionTracker {
     public boolean addConnection(String tenantId, String location, String minionId, StreamObserver<RpcRequestProto> connection) {
         boolean added = false;
         synchronized (lock) {
+            TenantKey tenantMinionId = new TenantKey(tenantId, minionId);
+            TenantKey tenantLocation = new TenantKey(tenantId, location);
+
             // Prevent duplicate registration
-            if (! connectionListByLocation.containsEntry(location, connection)) {
+            if (! connectionListByLocation.containsEntry(tenantLocation, connection)) {
                 log.debug("Registering connection: location={}; minionId={}", location, minionId);
 
                 removePossibleExistingMinionConnectionLocked(minionId);
 
-                connectionByMinionId.put(minionId, connection);
-                connectionListByLocation.put(location, connection);
+                connectionByMinionId.put(tenantMinionId, connection);
+                connectionListByLocation.put(tenantLocation, connection);
 
-                locationByConnection.put(connection, location);
-                minionIdByConnection.put(connection, minionId);
+                locationByConnection.put(connection, tenantLocation);
+                minionIdByConnection.put(connection, tenantMinionId);
 
                 semaphoreByConnection.put(connection, new Semaphore(1, true));
 
-                updateIteratorLocked(location);
+                updateIteratorLocked(tenantLocation);
 
                 minionManager.addMinion(new MinionInfo(tenantId, minionId, location));
 
@@ -75,8 +79,10 @@ public class RpcConnectionTrackerImpl implements RpcConnectionTracker {
 
     @Override
     public StreamObserver<RpcRequestProto> lookupByMinionId(String tenantId, String minionId) {
+        TenantKey tenantMinionId = new TenantKey(tenantId, minionId);
+
         synchronized (lock) {
-            return connectionByMinionId.get(minionId);
+            return connectionByMinionId.get(tenantMinionId);
         }
     }
 
@@ -98,23 +104,23 @@ public class RpcConnectionTrackerImpl implements RpcConnectionTracker {
         MinionInfo removedMinionInfo = new MinionInfo();
 
         synchronized (lock) {
-            String minionId = minionIdByConnection.remove(connection);
-            String locationId = locationByConnection.remove(connection);
+            TenantKey tenantMinionId = minionIdByConnection.remove(connection);
+            TenantKey tenantLocation = locationByConnection.remove(connection);
 
-            if (minionId != null) {
-                log.debug("removing connection for minion: location={}, minionId={}", locationId, minionId);
+            if (tenantMinionId != null) {
+                log.debug("removing connection for minion: location={}, minionId={}", tenantLocation, tenantMinionId);
 
-                connectionByMinionId.remove(minionId);
-                removedMinionInfo.setId(minionId);
+                connectionByMinionId.remove(tenantMinionId);
+                removedMinionInfo.setId(tenantMinionId.getKey());
             }
 
-            if (locationId != null) {
-                log.debug("removing connection for location: location={}, minionId={}", locationId, minionId);
+            if (tenantLocation != null) {
+                log.debug("removing connection for location: location={}, minionId={}", tenantLocation, tenantMinionId);
 
-                connectionListByLocation.remove(locationId, connection);
-                updateIteratorLocked(locationId);
+                connectionListByLocation.remove(tenantLocation, connection);
+                updateIteratorLocked(tenantLocation);
 
-                removedMinionInfo.setLocation(locationId);
+                removedMinionInfo.setLocation(tenantLocation.getKey());
             }
 
             semaphoreByConnection.remove(connection);
@@ -156,10 +162,10 @@ public class RpcConnectionTrackerImpl implements RpcConnectionTracker {
         }
     }
 
-    private void updateIteratorLocked(String location) {
-        Collection<StreamObserver<RpcRequestProto>> streamObservers = connectionListByLocation.get(location);
+    private void updateIteratorLocked(TenantKey tenantLocation) {
+        Collection<StreamObserver<RpcRequestProto>> streamObservers = connectionListByLocation.get(tenantLocation);
         Iterator<StreamObserver<RpcRequestProto>> iterator = Iterables.cycle(streamObservers).iterator();
 
-        rpcHandlerIteratorMap.put(location, iterator);
+        rpcHandlerIteratorMap.put(tenantLocation, iterator);
     }
 }

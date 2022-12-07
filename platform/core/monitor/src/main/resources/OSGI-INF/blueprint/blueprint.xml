@@ -25,26 +25,15 @@
         </cm:default-properties>
     </cm:property-placeholder>
 
-    <reference id="echoClient" interface="org.opennms.horizon.minion.echo.ipc.client.LocationAwareEchoClient"/>
     <reference id="metricsAdapter" interface="org.opennms.horizon.metrics.api.OnmsMetricsAdapter"/>
     <reference id="eventSubscriptionService" interface="org.opennms.horizon.events.api.EventSubscriptionService" availability="mandatory"/>
     <reference id="sessionUtils" interface="org.opennms.horizon.db.dao.api.SessionUtils" />
     <reference id="nodeDao" interface="org.opennms.horizon.db.dao.api.NodeDao" />
     <reference id="ipInterfaceDao" interface="org.opennms.horizon.db.dao.api.IpInterfaceDao" />
-    <reference id="minionDao" interface="org.opennms.horizon.db.dao.api.MinionDao"/>
     <reference id="taskSetManager" interface="org.opennms.horizon.taskset.manager.TaskSetManager"/>
     <reference id="taskSetGrpcClient" interface="org.opennms.taskset.service.api.TaskSetPublisher" filter="(type=grpc)"/>
 
     <reference id="monitoringLocationDao" interface="org.opennms.horizon.db.dao.api.MonitoringLocationDao" />
-
-    <bean id="minionRpcMonitorManager" class="org.opennms.horizon.core.monitor.MinionRpcMonitorManager"
-        init-method="init" destroy-method="shutdown">
-        <argument ref="echoClient"/>
-        <argument ref="metricsAdapter"/>
-        <argument ref="sessionUtils"/>
-        <argument ref="minionDao"/>
-        <argument ref="eventSubscriptionService"/>
-    </bean>
 
     <bean id="deviceMonitorManager" class="org.opennms.horizon.core.monitor.DeviceMonitorManager"
           init-method="init" destroy-method="shutdown">

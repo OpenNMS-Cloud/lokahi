@@ -22,6 +22,9 @@ spring:
 grpc:
   server:
     port: 6565
+  url:
+    inventory: localhost:29065
+
 
 kafka:
   traps-topic: "traps"

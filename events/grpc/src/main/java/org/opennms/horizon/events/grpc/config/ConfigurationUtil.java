@@ -26,19 +26,33 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.inventory;
+package org.opennms.horizon.events.grpc.config;
 
-import io.grpc.Context;
-import io.grpc.Metadata;
+import io.grpc.ManagedChannel;
+import io.grpc.ManagedChannelBuilder;
+import lombok.extern.slf4j.Slf4j;
+import org.opennms.horizon.events.grpc.client.InventoryClient;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
-public interface Constants {
-    String TENANT_ID_KEY = "tenant-id";
-    String DEFAULT_TENANT_ID = "opennms-prime";
-    String DEFAULT_LOCATION = "Default";
-    Metadata.Key<String> AUTHORIZATION_METADATA_KEY = Metadata.Key.of("Authorization", Metadata.ASCII_STRING_MARSHALLER);
-    Context.Key<String> TENANT_ID_CONTEXT_KEY = Context.key(TENANT_ID_KEY);
+@Slf4j
+@Configuration
+public class ConfigurationUtil {
 
-    // TODO: Remove this once we have inter-service authentication in place
-    Metadata.Key<String> AUTHORIZATION_BYPASS_KEY = Metadata.Key.of("Bypass-Authorization", Metadata.ASCII_STRING_MARSHALLER);
-    Metadata.Key<String> TENANT_ID_BYPASS_KEY = Metadata.Key.of("Bypass-Tenant-ID", Metadata.ASCII_STRING_MARSHALLER);
+    @Value("${grpc.url.inventory}")
+    private String inventoryGrpcAddress;
+
+    @Bean(name = "inventory")
+    public ManagedChannel createInventoryChannel() {
+        return ManagedChannelBuilder.forTarget(inventoryGrpcAddress)
+            .keepAliveWithoutCalls(true)
+            .usePlaintext().build();
+    }
+
+    @Bean(destroyMethod = "shutdown", initMethod = "initialStubs")
+    public InventoryClient createInventoryClient(@Qualifier("inventory") ManagedChannel channel) {
+        return new InventoryClient(channel);
+    }
 }

@@ -50,6 +50,11 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
+            <groupId>org.opennms.horizon.events</groupId>
+            <artifactId>grpc</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.opennms.horizon.shared</groupId>
             <artifactId>snmp-impl</artifactId>
             <version>${project.version}</version>

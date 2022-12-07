@@ -33,6 +33,7 @@ import org.opennms.horizon.events.api.EventConfDao;
 import org.opennms.horizon.events.conf.xml.Event;
 import org.opennms.horizon.events.conf.xml.LogDestType;
 import org.opennms.horizon.events.conf.xml.Logmsg;
+import org.opennms.horizon.events.grpc.client.InventoryClient;
 import org.opennms.horizon.grpc.traps.contract.TrapDTO;
 import org.opennms.horizon.grpc.traps.contract.TrapIdentity;
 import org.opennms.horizon.shared.snmp.SnmpHelper;
@@ -57,10 +58,12 @@ public class EventFactory {
 
     private final EventConfDao eventConfDao;
     private final SnmpHelper snmpHelper;
+    private final InventoryClient inventoryClient;
 
-    public EventFactory(EventConfDao eventConfDao, SnmpHelper snmpHelper) {
+    public EventFactory(EventConfDao eventConfDao, SnmpHelper snmpHelper, InventoryClient inventoryClient) {
         this.eventConfDao = eventConfDao;
         this.snmpHelper = snmpHelper;
+        this.inventoryClient = inventoryClient;
     }
 
     public org.opennms.horizon.events.xml.Event createEventFrom(final TrapDTO trapDTO,
@@ -68,7 +71,7 @@ public class EventFactory {
                                                                 final String location,
                                                                 final InetAddress trapAddress,
                                                                 String tenantId) {
-        LOG.debug("{} trap - trapInterface: {}", trapDTO.getVersion(), trapDTO.getAgentAddress());
+        LOG.info("{} trap - trapInterface: {}", trapDTO.getVersion(), trapDTO.getAgentAddress());
 
         // Set event data
         final EventBuilder eventBuilder = new EventBuilder(null, "trapd");
@@ -131,8 +134,14 @@ public class EventFactory {
         return false;
     }
 
-    private Optional<Integer> resolveNodeId(String location, InetAddress trapAddress, String tenantId) {
-        // TODO: Query inventory service for node id
-        return Optional.empty();
+    private Optional<Long> resolveNodeId(String location, InetAddress trapAddress, String tenantId) {
+        String trapIpAddress = trapAddress.getHostAddress();
+        try {
+            return Optional.of(inventoryClient
+                .getNodeIdFromQuery(tenantId, trapIpAddress, location));
+        } catch (Exception e) {
+            LOG.warn("Failed to find node id for location = {}, trap address = {}, reason = {}", location, trapIpAddress, e.getMessage());
+            return Optional.empty();
+        }
     }
 }

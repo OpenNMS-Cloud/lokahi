@@ -161,7 +161,7 @@ jib_project(
     'opennms/horizon-stream-alarm',
     'alarm',
     'opennms-alarm',
-    port_forwards=['31080:9090', '31050:5005', '31065:6565',  '31000:8080'],
+    port_forwards=['32080:9090', '32050:5005', '32065:6565',  '32000:8080'],
 )
 
 ### Metrics Processor ###

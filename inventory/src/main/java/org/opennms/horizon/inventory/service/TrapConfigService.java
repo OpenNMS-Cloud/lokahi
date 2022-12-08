@@ -114,7 +114,7 @@ public class TrapConfigService {
 
         taskSetManager.addTaskSet(tenantId, location, taskDefinition);
 
-        TaskSet taskSet = taskSetManager.getTaskSet(location, location);
+        TaskSet taskSet = taskSetManager.getTaskSet(tenantId, location);
         taskSetPublisher.publishTaskSet(tenantId, location, taskSet);
     }
 

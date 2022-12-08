@@ -22,5 +22,5 @@ public interface TaskExecutionResultProcessor {
     void queueSendResult(String uuid, ServiceMonitorResponse serviceMonitorResponse);
 
 
-    void queueSendResult(String uuid, CollectionSet serviceMonitorResponse);
+    void queueSendResult(String uuid, CollectionSet collectionSet);
 }

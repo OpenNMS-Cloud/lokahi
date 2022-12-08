@@ -35,7 +35,6 @@ import org.opennms.horizon.inventory.service.taskset.manager.TaskSetManager;
 import org.opennms.horizon.inventory.service.taskset.manager.TaskSetManagerUtil;
 import org.opennms.horizon.snmp.api.SnmpConfiguration;
 import org.opennms.snmp.contract.SnmpCollectorRequest;
-import org.opennms.snmp.contract.SnmpMonitorRequest;
 import org.opennms.taskset.contract.MonitorType;
 import org.opennms.taskset.contract.TaskSet;
 import org.opennms.taskset.contract.TaskType;
@@ -48,7 +47,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class CollectorTaskSetService {
 
-    private static final Logger log = LoggerFactory.getLogger(MonitorTaskSetService.class);
+    private static final Logger log = LoggerFactory.getLogger(CollectorTaskSetService.class);
     private final TaskSetManagerUtil taskSetManagerUtil;
     private final TaskSetManager taskSetManager;
     private final TaskSetPublisher taskSetPublisher;

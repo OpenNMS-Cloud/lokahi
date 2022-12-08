@@ -37,7 +37,7 @@ import java.util.TreeMap;
 
 public class SnmpNodeTracker extends AggregateTracker {
 
-    private static final Logger LOG = LoggerFactory.getLogger(Mib2InterfacesTracker.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SnmpNodeTracker.class);
 
     public static NamedSnmpVar[] elemList = new NamedSnmpVar[44];
     private final Map<String, SnmpResult> snmpResultMap = new TreeMap<>();

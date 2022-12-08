@@ -1,0 +1,16 @@
+{
+  "status": "success",
+  "data": [
+    {
+      "__name__": "na8793e6f6477407bbd105bf6ed36b698",
+      "_idx0": "(snmp,4)",
+      "_idx1": "(snmp:1,4)",
+      "_idx2": "(snmp:1:opennms-jvm,4)",
+      "_idx2w": "(snmp:1,*)",
+      "_idx3": "(snmp:1:opennms-jvm:OpenNMS_Name_Notifd,4)",
+      "host": "myHost1",
+      "mtype": "counter",
+      "resourceId": "snmp:1:opennms-jvm:org_opennms_newts_name_ring_buffer_max_size_unit=unknown"
+    }
+  ]
+}

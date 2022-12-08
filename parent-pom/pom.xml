@@ -96,7 +96,6 @@
         <spring-security.version>5.7.3</spring-security.version>
         <spring-kafka.version>2.8.6</spring-kafka.version>
         <swagger.version>2.1.1</swagger.version>
-        <testcontainers.version>1.16.3</testcontainers.version>
         <lombok.version>1.18.24</lombok.version>
         <lombok.binding.version>0.2.0</lombok.binding.version>
         <zjsonpatch.version>0.4.12</zjsonpatch.version>
@@ -109,6 +108,12 @@
         <jetty.version>9.4.43.v20210629</jetty.version>
         <cron-utils.version>9.1.6</cron-utils.version>
         <eos.version>1.2.0</eos.version>
+        <tss-tests.version>1.0.0</tss-tests.version>
+        <metrics-core.version>4.2.6</metrics-core.version>
+        <common.version>1.1.0</common.version>
+        <okhttp.version>3.14.0</okhttp.version>
+        <resilience4j.version>2.0.1</resilience4j.version>
+        <snappy-java.version>1.1.8.4</snappy-java.version>
     </properties>
 
     <dependencyManagement>

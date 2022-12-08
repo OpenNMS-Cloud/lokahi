@@ -116,7 +116,7 @@ class DetectorResponseServiceIntTest extends GrpcTestBase {
         MonitoredServiceType relatedType = monitoredService.getMonitoredServiceType();
         assertEquals(monitoredServiceType, relatedType);
 
-        assertEquals(1, testGrpcService.getTimesCalled());
+        assertEquals(2, testGrpcService.getTimesCalled());
     }
 
     @Test
@@ -153,7 +153,7 @@ class DetectorResponseServiceIntTest extends GrpcTestBase {
         MonitoredServiceType relatedType = monitoredService.getMonitoredServiceType();
         assertEquals(monitoredServiceType, relatedType);
 
-        assertEquals(numberOfCalls, testGrpcService.getTimesCalled());
+        assertEquals(numberOfCalls*2, testGrpcService.getTimesCalled());
     }
 
     @Test
@@ -220,10 +220,10 @@ class DetectorResponseServiceIntTest extends GrpcTestBase {
             assertEquals(TEST_TENANT_ID, monitoredService.getTenantId());
         }
 
-        assertEquals(numberOfCalls, testGrpcService.getTimesCalled());
+        assertEquals(numberOfCalls*2, testGrpcService.getTimesCalled());
 
         List<PublishTaskSetRequest> grpcRequests = testGrpcService.getRequests();
-        assertEquals(monitorTypes.length, grpcRequests.size());
+        assertEquals(monitorTypes.length*2, grpcRequests.size());
     }
 
     private void populateDatabase() {

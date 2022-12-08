@@ -80,6 +80,8 @@ public class DetectorTaskSetService {
     }
 
     private void addDetectorTask(Node node, IpInterface ipInterface, MonitorType monitorType) {
+        String tenantId = node.getTenantId();
+
         String ipAddress = ipInterface.getIpAddress().getAddress();
         MonitoringLocation monitoringLocation = node.getMonitoringLocation();
         String location = monitoringLocation.getLocation();
@@ -101,7 +103,7 @@ public class DetectorTaskSetService {
                         .setRetries(Constants.Icmp.DEFAULT_RETRIES)
                         .build());
 
-                taskSetManagerUtil.addTask(location, ipAddress, name,
+                taskSetManagerUtil.addTask(tenantId, location, ipAddress, name,
                     TaskType.DETECTOR, pluginName, configuration, node.getId());
                 break;
             }
@@ -113,7 +115,8 @@ public class DetectorTaskSetService {
                         .setRetries(Constants.Snmp.DEFAULT_RETRIES)
                         .build());
 
-                taskSetManagerUtil.addTask(location, ipAddress, name, TaskType.DETECTOR, pluginName, configuration, node.getId());
+                taskSetManagerUtil.addTask(tenantId, location, ipAddress, name,
+                    TaskType.DETECTOR, pluginName, configuration, node.getId());
                 break;
             }
             case UNRECOGNIZED: {
@@ -132,7 +135,7 @@ public class DetectorTaskSetService {
 
         MonitoringLocation monitoringLocation = node.getMonitoringLocation();
         String location = monitoringLocation.getLocation();
-        TaskSet taskSet = taskSetManager.getTaskSet(location);
+        TaskSet taskSet = taskSetManager.getTaskSet(tenantId, location);
 
         log.info("Sending task set: task-set={}; location={}; tenant-id={}", taskSet, location, tenantId);
         taskSetPublisher.publishTaskSet(tenantId, location, taskSet);

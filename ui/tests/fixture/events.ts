@@ -1,16 +1,13 @@
-import { EventDto, EventCollectionDto } from '@/types/graphql'
+import { Event } from '@/types/graphql'
 
-const mockData: EventDto = {
-  'id': 2,
-  'severity': 'WARNING',
-  'time': '2022-09-20T09:25:44Z',
-  'source': 'Device-Rest-Service',
-  'nodeLabel': 'Unknown',
-  'location': 'Default',
-  'ipAddress': '',
-  'nodeId': 1
+const mockData: Event = {
+  id: 2,
+  uei: 'uei',
+  nodeId: 1,
+  ipAddress: '127.0.0.1',
+  producedTime: '2022-09-20T09:25:44Z',
 }
-const eventsFixture = (props: Partial<EventDto> = {}): EventCollectionDto => ({
+const eventsFixture = (props: Partial<Event> = {}) => ({
   events: [
     { ...mockData, ...props }
   ]

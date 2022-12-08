@@ -1,7 +1,37 @@
+/*
+ * This file is part of OpenNMS(R).
+ *
+ * Copyright (C) 2022 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
+ *
+ * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *
+ * OpenNMS(R) is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published
+ * by the Free Software Foundation, either version 3 of the License,
+ * or (at your option) any later version.
+ *
+ * OpenNMS(R) is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with OpenNMS(R).  If not, see:
+ *      http://www.gnu.org/licenses/
+ *
+ * For more information contact:
+ *     OpenNMS(R) Licensing <license@opennms.org>
+ *     http://www.opennms.org/
+ *     http://www.opennms.com/
+ */
+
 package org.opennms.horizon.core.taskset.client;
 
 import io.grpc.Channel;
+import io.grpc.Metadata;
 import io.grpc.netty.shaded.io.grpc.netty.NettyChannelBuilder;
+import io.grpc.stub.MetadataUtils;
 import org.opennms.taskset.contract.TaskSet;
 import org.opennms.taskset.service.api.TaskSetPublisher;
 import org.opennms.taskset.service.contract.PublishTaskSetRequest;
@@ -14,6 +44,8 @@ public class TaskSetGrpcClient implements TaskSetPublisher {
     public static final String DEFAULT_GRPC_HOSTNAME = "localhost";
     public static final int DEFAULT_GRPC_PORT = 8990;
     public static final int DEFAULT_MAX_MESSAGE_SIZE = 1_0485_760;
+
+    private static final Metadata.Key HEADER_KEY = Metadata.Key.of("tenant-id", Metadata.ASCII_STRING_MARSHALLER);
 
     private static final Logger DEFAULT_LOGGER = org.slf4j.LoggerFactory.getLogger(TaskSetGrpcClient.class);
 
@@ -91,7 +123,8 @@ public class TaskSetGrpcClient implements TaskSetPublisher {
 //----------------------------------------
 
     @Override
-    public void publishTaskSet(String location, TaskSet taskSet) {
+    public void publishTaskSet(String tenantId, String location, TaskSet taskSet) {
+
         try {
             PublishTaskSetRequest request =
                 PublishTaskSetRequest.newBuilder()
@@ -100,7 +133,11 @@ public class TaskSetGrpcClient implements TaskSetPublisher {
                     .build()
                 ;
 
-            PublishTaskSetResponse unused = taskSetServiceStub.publishTaskSet(request);
+            Metadata metadata = new Metadata();
+            metadata.put(HEADER_KEY, tenantId);
+
+            PublishTaskSetResponse unused =
+                taskSetServiceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).publishTaskSet(request);
 
             log.debug("PUBLISH task set complete: location={}", location);
         } catch (Exception exc) {

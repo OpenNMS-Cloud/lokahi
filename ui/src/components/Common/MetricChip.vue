@@ -1,7 +1,7 @@
 <template>
-  <component :is="asLi ? 'li' : 'div'" :title="item.type" class="container pointer" data-test="metric-chip">
-    <label :for="item.type">{{ item.type }}</label>
-    <FeatherChip :id="item.type" :class="`bg-status ${itemBgColor}`" data-test="chip">
+  <component :is="asLi ? 'li' : 'div'" :title="metric.label" class="container pointer" data-test="metric-chip">
+    <label :for="metric.type">{{ metric.type }}</label>
+    <FeatherChip :id="metric.type" :class="`bg-status ${itemBgColor}`" data-test="chip">
       {{ itemText }}
     </FeatherChip>
   </component>
@@ -14,7 +14,7 @@ import { Chip } from '@/types/metric'
 import { getHumanReadableDuration } from '@/components/utils'
 
 const props = defineProps({
-  item: {
+  metric: {
     type: Object as PropType<Chip>,
     required: true
   },
@@ -24,16 +24,16 @@ const props = defineProps({
   }
 })
 
-const itemBgColor = props.item.status.toLowerCase()
+const itemBgColor = props.metric.status?.toLowerCase() || 'unknown'
 
-const itemText = props.item.type === 'status' ? props.item.status : getHumanReadableDuration(props.item?.timestamp as number, props.item?.timeUnit)
+const itemText = props.metric.type === 'status' ? props.metric.status : getHumanReadableDuration(props.metric?.timestamp as number, props.metric?.timeUnit)
 </script>
 
 <style lang="scss" scoped>
 @use "@/styles/_statusBackground";
 
 .container {
-  text-align: left;
+  text-align: center;
 }
 
 label {

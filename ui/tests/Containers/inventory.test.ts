@@ -1,7 +1,5 @@
-import { shallowMount } from '@vue/test-utils'
 import Inventory from '@/containers/Inventory.vue'
-import PageHeader from '@/components/Common/PageHeader.vue'
-import { FeatherTabContainer } from '@featherds/tabs'
+import mountWithPiniaVillus from 'tests/mountWithPiniaVillus'
 
 let wrapper: any
 
@@ -11,12 +9,15 @@ describe('Inventory page', () => {
   })
 
   it('should have the required components', () => {
-    wrapper = shallowMount(Inventory)
+    wrapper = mountWithPiniaVillus({
+      component: Inventory,
+      shallow: true
+    })
     
-    const pageHeader = wrapper.getComponent(PageHeader)
+    const pageHeader = wrapper.getComponent('[data-test="page-header"]')
     expect(pageHeader.exists()).toBe(true)
     
-    const featherTabContainer = wrapper.getComponent(FeatherTabContainer)
+    const featherTabContainer = wrapper.getComponent('[data-test="tab-container"]')
     expect(featherTabContainer.exists()).toBe(true)
   })
 })

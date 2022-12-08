@@ -14,7 +14,7 @@
       </FeatherButton>
     </div>
     <div class="container">
-      <table class="tl1 tl2 tc3 tc4 tc5 data-table" summary="Minions" data-test="minions-table">
+      <table class="tl1 tl2 tc3 tc4 tc5 data-table" aria-label="Minions Table" data-test="minions-table">
         <thead>
           <tr>
             <th scope="col" data-test="col-date">Time</th>

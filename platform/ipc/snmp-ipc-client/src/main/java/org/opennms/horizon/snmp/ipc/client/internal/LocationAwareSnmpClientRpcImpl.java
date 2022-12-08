@@ -114,13 +114,13 @@ public class LocationAwareSnmpClientRpcImpl implements LocationAwareSnmpClient {
         return new SNMPMultiGetBuilder(this, agent, valueFactory, oids);
     }
 
-    CompletableFuture<SnmpMultiResponse> execute(String location, String systemId, SnmpRequest payload) {
+    CompletableFuture<SnmpMultiResponse> execute(String tenantId, String location, String systemId, SnmpRequest payload) {
         RpcRequestProto request = client.builder("SNMP")
             .withLocation(location)
             .withSystemId(systemId)
             .withExpirationTime(0L)
             .withPayload(payload)
             .build();
-        return client.execute(request);
+        return client.execute(tenantId, request);
     }
 }

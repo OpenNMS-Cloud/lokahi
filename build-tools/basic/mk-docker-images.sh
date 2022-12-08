@@ -34,6 +34,12 @@ time {
 	mvn -f minion-gateway/main jib:dockerBuild -Djib.container.creationTime=USE_CURRENT_TIMESTAMP -Dimage=opennms/horizon-stream-minion-gateway:local-basic
 
 	echo ""
+	echo "==="
+	echo "=== MINION-GATEWAY-GRPC-PROXY IMAGE"
+	echo "==="
+	mvn -f minion-gateway-grpc-proxy/main jib:dockerBuild -Djib.container.creationTime=USE_CURRENT_TIMESTAMP -Dimage=opennms/horizon-stream-minion-gateway-grpc-proxy:local-basic
+
+	echo ""
 	echo "=== REST-SERVER (AKA API) IMAGE"
 	echo "==="
 	echo "==="
@@ -44,6 +50,12 @@ time {
 	echo "=== INVENTORY IMAGE"
 	echo "==="
 	mvn -f inventory jib:dockerBuild -Djib.container.creationTime=USE_CURRENT_TIMESTAMP -Dimage=opennms/horizon-stream-inventory:local-basic
+
+		echo ""
+  	echo "==="
+  	echo "=== ALARM SERVICE IMAGE"
+  	echo "==="
+  	mvn -f alarm jib:dockerBuild -Djib.container.creationTime=USE_CURRENT_TIMESTAMP -Dimage=opennms/horizon-stream-alarm:local-basic
 
 	echo ""
 	echo "==="

@@ -5,13 +5,22 @@ let wrapper: any
 
 describe('Inventory node icon action list', () => {
   beforeAll(() => {
-    wrapper = mount(IconActionList)
+    wrapper = mount(IconActionList, {
+      shallow: true
+    })
   })
   afterAll(() => {
     wrapper.unmount() 
   })
 
-  test('component should have been mounted', () => {
-    expect(wrapper).toBeTruthy()
+  const actionList = [
+    'bubble-chart',
+    'line-chart',
+    'pie-chart',
+    'warning',
+    'delete'
+  ]
+  it.each(actionList)('should have "%s" action icon', (icon) => {
+    expect(wrapper.get(`[data-test="${icon}"]`).exists()).toBe(true)
   })
 })

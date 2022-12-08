@@ -33,6 +33,7 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import io.grpc.BindableService;
+import io.grpc.Context;
 import io.grpc.stub.StreamObserver;
 import java.io.IOException;
 import java.util.Collections;
@@ -53,6 +54,7 @@ import org.opennms.cloud.grpc.minion.RpcRequestProto;
 import org.opennms.cloud.grpc.minion.RpcResponseProto;
 import org.opennms.cloud.grpc.minion.SinkMessage;
 import org.opennms.horizon.shared.grpc.common.GrpcIpcServer;
+import org.opennms.horizon.shared.grpc.common.TenantIDGrpcServerInterceptor;
 import org.opennms.horizon.shared.grpc.interceptor.InterceptorFactory;
 import org.opennms.horizon.shared.ipc.grpc.server.manager.LocationIndependentRpcClientFactory;
 import org.opennms.horizon.shared.ipc.grpc.server.manager.MinionManager;
@@ -62,7 +64,6 @@ import org.opennms.horizon.shared.ipc.grpc.server.manager.RpcRequestTimeoutManag
 import org.opennms.horizon.shared.ipc.grpc.server.manager.RpcRequestTracker;
 import org.opennms.horizon.shared.ipc.grpc.server.manager.adapter.MinionRSTransportAdapter;
 import org.opennms.horizon.shared.ipc.grpc.server.manager.rpcstreaming.MinionRpcStreamConnectionManager;
-import org.opennms.horizon.shared.ipc.rpc.api.RemoteExecutionException;
 import org.opennms.horizon.shared.ipc.rpc.api.RpcClientFactory;
 import org.opennms.horizon.shared.ipc.sink.api.SinkModule;
 import org.opennms.horizon.shared.ipc.sink.common.AbstractMessageConsumerManager;
@@ -93,6 +94,7 @@ import org.slf4j.MDC.MDCCloseable;
 public class OpennmsGrpcServer extends AbstractMessageConsumerManager implements RpcRequestDispatcher {
 
     private static final Logger LOG = LoggerFactory.getLogger(OpennmsGrpcServer.class);
+
     private final GrpcIpcServer grpcIpcServer;
     private final List<InterceptorFactory> interceptors;
     private String location;
@@ -108,6 +110,7 @@ public class OpennmsGrpcServer extends AbstractMessageConsumerManager implements
     private MinionRpcStreamConnectionManager minionRpcStreamConnectionManager;
     private RpcRequestTimeoutManager rpcRequestTimeoutManager;
     private MinionManager minionManager;
+    private TenantIDGrpcServerInterceptor tenantIDGrpcServerInterceptor;
 
     // Maintains the map of sink modules by it's id.
     private final Map<String, SinkModule<?, Message>> sinkModulesById = new ConcurrentHashMap<>();
@@ -224,6 +227,13 @@ public class OpennmsGrpcServer extends AbstractMessageConsumerManager implements
         this.rpcRequestTimeoutManager = rpcRequestTimeoutManager;
     }
 
+    public TenantIDGrpcServerInterceptor getTenantIDGrpcServerInterceptor() {
+        return tenantIDGrpcServerInterceptor;
+    }
+
+    public void setTenantIDGrpcServerInterceptor(TenantIDGrpcServerInterceptor tenantIDGrpcServerInterceptor) {
+        this.tenantIDGrpcServerInterceptor = tenantIDGrpcServerInterceptor;
+    }
 
 //========================================
 // Operations
@@ -269,7 +279,9 @@ public class OpennmsGrpcServer extends AbstractMessageConsumerManager implements
                     if (!Strings.isNullOrEmpty(sinkMessage.getModuleId())) {
                         ExecutorService sinkModuleExecutor = sinkConsumersByModuleId.get(sinkMessage.getModuleId());
                         if (sinkModuleExecutor != null) {
-                            sinkModuleExecutor.execute(() -> dispatchSinkMessage(sinkMessage));
+                            // Schedule execution with the ExecutorService, with the current GRPC context active
+                            Context.currentContextExecutor(sinkModuleExecutor)
+                                .execute(() -> dispatchSinkMessage(sinkMessage));
                         }
                     }
                 } else {
@@ -307,7 +319,8 @@ public class OpennmsGrpcServer extends AbstractMessageConsumerManager implements
 
     @Override
     public CompletableFuture<RpcResponseProto> dispatch(String location, RpcRequestProto request) {
-        StreamObserver<RpcRequestProto> rpcHandler = rpcConnectionTracker.lookupByLocationRoundRobin(location);
+        String tenantId = tenantIDGrpcServerInterceptor.readCurrentContextTenantId();
+        StreamObserver<RpcRequestProto> rpcHandler = rpcConnectionTracker.lookupByLocationRoundRobin(tenantId, location);
         if (rpcHandler == null) {
             return CompletableFuture.failedFuture(new IllegalArgumentException("Unknown location " + location));
         }
@@ -316,7 +329,8 @@ public class OpennmsGrpcServer extends AbstractMessageConsumerManager implements
 
     @Override
     public CompletableFuture<RpcResponseProto> dispatch(String location, String systemId, RpcRequestProto request) {
-        StreamObserver<RpcRequestProto> rpcHandler = rpcConnectionTracker.lookupByMinionId(systemId);
+        String tenantId = tenantIDGrpcServerInterceptor.readCurrentContextTenantId();
+        StreamObserver<RpcRequestProto> rpcHandler = rpcConnectionTracker.lookupByMinionId(tenantId, systemId);
         if (rpcHandler == null) {
             return CompletableFuture.failedFuture(new IllegalArgumentException("Unknown system id " + systemId));
         }

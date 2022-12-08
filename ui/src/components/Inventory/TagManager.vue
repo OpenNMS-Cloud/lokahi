@@ -67,7 +67,7 @@
 <script setup lang="ts">
 import { useInventoryStore } from '@/store/Views/inventoryStore'
 import Search from '@featherds/icon/action/Search'
-import AddIcon from "@featherds/icon/action/AddCircleAlt"
+import AddIcon from '@featherds/icon/action/AddCircleAlt'
 
 const store = useInventoryStore()
 

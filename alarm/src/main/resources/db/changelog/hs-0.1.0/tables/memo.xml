@@ -1,0 +1,40 @@
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+
+
+    <changeSet author="mfrazier" id="hs-0.1.0-alarm">
+<!--        <preConditions onFail="MARK_RAN">-->
+<!--            <not><tableExists tableName="memo" /></not>-->
+<!--        </preConditions>-->
+
+        <createTable tableName="memo">
+
+            <!-- the alarm's ID -->
+            <column name="id" type="bigint">
+                <constraints nullable="false" />
+            </column>
+
+            <column name="tenant_id" type="bigint"/>
+
+            <column name="type" type="varchar"/>
+
+            <column name="body" type="varchar(63)" />
+
+            <column name="author" type="varchar(255)" />
+
+            <column name="updated" type="TIMESTAMP WITH TIME ZONE" />
+
+            <column name="created" type="TIMESTAMP WITH TIME ZONE" />
+
+            <column name="reduction_key" type="varchar"/>
+            
+        </createTable>
+
+        <createSequence sequenceName="memo_nxt_id"/>
+
+
+    </changeSet>
+
+</databaseChangeLog>

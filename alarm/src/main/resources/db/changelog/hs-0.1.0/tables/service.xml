@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+
+	<changeSet author="mfrazier" id="hs-0.1.0-alarm">
+<!--		<validCheckSum>3:bf2fe2bd84eacb76952e7fb6c7f18f57</validCheckSum>-->
+<!--		<preConditions onFail="MARK_RAN">-->
+<!--			<not><tableExists tableName="service" /></not>-->
+<!--		</preConditions> -->
+
+		<createTable tableName="service">
+            <column name="service_id" type="bigint"/>
+            <column name="tenant_id" type="bigint"/>
+			<column name="service_name" type="varchar(255)"/>
+		</createTable>
+
+        <createSequence sequenceName="service_nxt_id"/>
+	</changeSet>
+
+</databaseChangeLog>

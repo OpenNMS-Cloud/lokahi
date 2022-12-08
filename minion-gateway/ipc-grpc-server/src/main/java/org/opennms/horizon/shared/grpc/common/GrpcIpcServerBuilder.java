@@ -45,7 +45,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import javax.net.ssl.SSLException;
-import org.opennms.horizon.shared.grpc.interceptor.DelegatingInterceptor;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -109,10 +108,13 @@ public class GrpcIpcServerBuilder implements GrpcIpcServer {
             int maxInboundMessageSize = PropertiesUtils.getProperty(properties, GrpcIpcUtils.GRPC_MAX_INBOUND_SIZE, GrpcIpcUtils.DEFAULT_MESSAGE_SIZE);
             boolean tlsEnabled = PropertiesUtils.getProperty(properties, GrpcIpcUtils.TLS_ENABLED, false);
 
-            // Use DelegatingInterceptor below to allow the list of interceptors to change at runtime (consider, for example, OSGi-based plugins)
             serverBuilder = NettyServerBuilder.forAddress(new InetSocketAddress(this.port))
                 .maxInboundMessageSize(maxInboundMessageSize)
-                .intercept(new DelegatingInterceptor(interceptors));
+                ;
+
+            // Add the interceptors
+            interceptors.forEach(serverBuilder::intercept);
+
             if (tlsEnabled) {
                 SslContextBuilder sslContextBuilder = GrpcIpcUtils.getSslContextBuilder(properties);
                 if (sslContextBuilder != null) {

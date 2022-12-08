@@ -64,6 +64,9 @@ func (h *OpenNMSHandler) UpdateConfig(values values.TemplateValues) error {
 	var minionGatewayIgniteSVC corev1.Service
 	var minionDeploy appsv1.Deployment
 	var minionGatewayDeploy appsv1.Deployment
+	var minionGGPSA corev1.ServiceAccount
+	var minionGGPSVC corev1.Service
+	var minionGGPDeploy appsv1.Deployment
 
 	h.AddToTemplates(filepath("opennms/minion/minion-configmap.yaml"), values, &minionCM)
 	h.AddToTemplates(filepath("opennms/minion/minion-serviceaccount.yaml"), values, &minionSA)
@@ -73,6 +76,9 @@ func (h *OpenNMSHandler) UpdateConfig(values values.TemplateValues) error {
 	h.AddToTemplates(filepath("opennms/minion/minion-gateway-ignite-service.yaml"), values, &minionGatewayIgniteSVC)
 	h.AddToTemplates(filepath("opennms/minion/minion-deployment.yaml"), values, &minionDeploy)
 	h.AddToTemplates(filepath("opennms/minion/minion-gateway-deployment.yaml"), values, &minionGatewayDeploy)
+	h.AddToTemplates(filepath("opennms/minion-gateway-grpc-proxy/minion-gateway-grpc-proxy-serviceaccount.yaml"), values, &minionGGPSA)
+	h.AddToTemplates(filepath("opennms/minion-gateway-grpc-proxy/minion-gateway-grpc-proxy-service.yaml"), values, &minionGGPSVC)
+	h.AddToTemplates(filepath("opennms/minion-gateway-grpc-proxy/minion-gateway-grpc-proxy-deployment.yaml"), values, &minionGGPDeploy)
 
 	//inventory
 	var inventoryDeployment appsv1.Deployment

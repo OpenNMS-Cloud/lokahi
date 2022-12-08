@@ -30,6 +30,7 @@ package org.opennms.horizon.inventory.service;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
@@ -105,7 +106,7 @@ public class NodeServiceTest {
 
         verify(ipInterfaceRepository).save(any(IpInterface.class));
         verify(monitoringLocationRepository).save(any(MonitoringLocation.class));
-        verify(trapConfigService).sendTrapConfigToMinion(location);
+        verify(trapConfigService).sendTrapConfigToMinion(tenant, location);
     }
 
     @Test
@@ -125,7 +126,7 @@ public class NodeServiceTest {
 
         verify(ipInterfaceRepository).save(any(IpInterface.class));
         verify(monitoringLocationRepository, times(0)).save(any(MonitoringLocation.class));
-        verify(trapConfigService, times(0)).sendTrapConfigToMinion(any());
+        verify(trapConfigService, times(0)).sendTrapConfigToMinion(eq(tenantId), any());
     }
 
     @Test

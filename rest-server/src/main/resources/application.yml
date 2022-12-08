@@ -12,6 +12,7 @@ graphql:
       enabled: true
     base-packages:
       - org.opennms.horizon.server.model.inventory
+      - org.opennms.horizon.server.model.events
 
 # keycloak admin client properties
 horizon-stream:
@@ -28,3 +29,4 @@ tsdb.url: http://localhost:59090/api/v1/query
 grpc:
   url:
     inventory: localhost:29065
+    events: localhost:30065

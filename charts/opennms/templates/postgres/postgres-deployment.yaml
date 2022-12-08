@@ -97,6 +97,9 @@ spec:
             - mountPath: "/docker-entrypoint-initdb.d/postgres.inventory.initial.script.sql"
               name: postgres-initial-script
               subPath: "postgres.inventory.initial.script.sql"
+            - mountPath: "/docker-entrypoint-initdb.d/postgres.alarm.initial.script.sql"
+              name: postgres-initial-script
+              subPath: "postgres.alarm.initial.script.sql"
             - mountPath: "/docker-entrypoint-initdb.d/postgres.notification.initial.script.sql"
               name: postgres-initial-script
               subPath: "postgres.notification.initial.script.sql"

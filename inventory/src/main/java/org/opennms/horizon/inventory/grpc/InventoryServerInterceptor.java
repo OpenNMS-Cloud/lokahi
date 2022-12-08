@@ -53,7 +53,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @Slf4j
 public class InventoryServerInterceptor implements ServerInterceptor {
-    private final String tokenPrefix = "Bearer";
+    private static final String TOKEN_PREFIX = "Bearer";
     private final KeycloakDeployment keycloak;
     @Override
     public <ReqT, RespT> ServerCall.Listener<ReqT> interceptCall(ServerCall<ReqT, RespT> serverCall, Metadata headers, ServerCallHandler<ReqT, RespT> callHandler) {
@@ -75,10 +75,10 @@ public class InventoryServerInterceptor implements ServerInterceptor {
     }
 
     protected Optional<String> verifyAccessToken(String authHeader) throws VerificationException {
-        if (StringUtils.isEmpty(authHeader) || !authHeader.startsWith(tokenPrefix)) {
+        if (StringUtils.isEmpty(authHeader) || !authHeader.startsWith(TOKEN_PREFIX)) {
             throw  new VerificationException();
         }
-        String token = authHeader.substring(tokenPrefix.length()+1);
+        String token = authHeader.substring(TOKEN_PREFIX.length()+1);
         TokenVerifier<AccessToken> verifier = AdapterTokenVerifier.createVerifier(token, keycloak, false, AccessToken.class);
         verifier.withChecks(TokenVerifier.SUBJECT_EXISTS_CHECK, new TokenVerifier.TokenTypeCheck(TokenUtil.TOKEN_TYPE_BEARER), TokenVerifier.IS_ACTIVE);
         verifier.verify();

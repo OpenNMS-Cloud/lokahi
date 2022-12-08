@@ -6,14 +6,15 @@ let wrapper: any
 describe('Text anchor list', () => {
   beforeAll(() => {
     wrapper = mount(TextAnchorList, {
-      propsData: {
+      shallow: true,
+      props: {
         anchor: {
           profileValue: 75,
           profileLink: '#',
           locationValue: 'DefaultMinion',
           locationLink: '#',
-          ipInterfaceValue: 25,
-          ipInterfaceLink: '#',
+          managementIpValue: '0.0.0.0',
+          managementIpLink: '#',
           tagValue: 100,
           tagLink: '#'
         }
@@ -24,7 +25,13 @@ describe('Text anchor list', () => {
     wrapper.unmount() 
   })
 
-  test('component should have been mounted', () => {
-    expect(wrapper).toBeTruthy()
+  const anchorList = [
+    'profile',
+    'location',
+    'management-ip',
+    'tag'
+  ]
+  it.each(anchorList)('should have "%s" element', (elem) => {
+    expect(wrapper.get(`[data-test="${elem}"]`).exists()).toBe(true)
   })
 })

@@ -91,3 +91,5 @@ Prometheus:
       Requests:
         Cpu: 100m
         Memory: 100Mi
+Kafka:
+  LocalPort: 24092

@@ -12,7 +12,7 @@
     data-test="select-ack"
   />
   <div class="container">
-    <table class="tl1 tl2 tl3 data-table" summary="Alarms">
+    <table aria-label="Map Alarms Table" class="tl1 tl2 tl3 data-table">
       <thead>
         <tr>
           <th class="first-th" data-test="col-check-all">
@@ -179,7 +179,7 @@ const selectAlarmAck = async () => {
     }
   })
   // update and reset selections
-  mapStore.fetchAlarms
+  mapStore.fetchAlarms()
   all.value = false
   alarmCheckboxes.value = {}
 }

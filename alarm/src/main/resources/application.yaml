@@ -1,0 +1,36 @@
+spring:
+  application:
+    name: horizon-stream-alarm
+
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://postgres:5432/alarm
+    username: alarm
+    password: passw0rd
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+
+  liquibase:
+    change-log: db/changelog/changelog.xml
+
+  kafka:
+    template:
+      default-topic: "alarms"
+    consumer:
+      client-id: "alarm-service"
+      group-id: "alarm"
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.ByteArrayDeserializer
+    producer:
+      client-id: "alarm-service"
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.ByteArraySerializer
+    bootstrap-servers: localhost:59092
+
+kafka:
+  topics:
+    alarm-events: "events-proto"
+    new-alarms: "alarms"

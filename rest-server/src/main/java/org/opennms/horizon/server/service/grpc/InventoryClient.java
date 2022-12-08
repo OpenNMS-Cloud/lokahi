@@ -28,9 +28,14 @@
 
 package org.opennms.horizon.server.service.grpc;
 
-import java.util.List;
-import java.util.stream.Collectors;
 
+import com.google.protobuf.Empty;
+import com.google.protobuf.Int64Value;
+import com.google.protobuf.StringValue;
+import io.grpc.ManagedChannel;
+import io.grpc.Metadata;
+import io.grpc.stub.MetadataUtils;
+import lombok.RequiredArgsConstructor;
 import org.opennms.horizon.inventory.Constants;
 import org.opennms.horizon.inventory.dto.IdList;
 import org.opennms.horizon.inventory.dto.MonitoringLocationDTO;
@@ -42,14 +47,8 @@ import org.opennms.horizon.inventory.dto.NodeDTO;
 import org.opennms.horizon.inventory.dto.NodeServiceGrpc;
 import org.opennms.horizon.server.config.DataLoaderFactory;
 
-import com.google.protobuf.Empty;
-import com.google.protobuf.Int64Value;
-import com.google.protobuf.StringValue;
-
-import io.grpc.ManagedChannel;
-import io.grpc.Metadata;
-import io.grpc.stub.MetadataUtils;
-import lombok.RequiredArgsConstructor;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 public class InventoryClient {
@@ -65,7 +64,7 @@ public class InventoryClient {
     }
 
     public void shutdown() {
-        if(channel!=null && !channel.isShutdown()) {
+        if (channel != null && !channel.isShutdown()) {
             channel.shutdown();
         }
     }

@@ -1,11 +1,15 @@
-import { shallowMount } from '@vue/test-utils'
 import Filter from '@/components/Inventory/Filter.vue'
+import mountWithPiniaVillus from 'tests/mountWithPiniaVillus'
+import { useInventoryStore } from '@/store/Views/inventoryStore'
 
 let wrapper: any
 
 describe('Filter component', () => {
   beforeAll(() => {
-    wrapper = shallowMount(Filter)
+    wrapper = mountWithPiniaVillus({
+      component: Filter,
+      shallow: true 
+    })
   })
   afterAll(() => {
     wrapper.unmount()
@@ -18,21 +22,27 @@ describe('Filter component', () => {
       'monitoring-location',
       'severity',
       'tag-manager-ctrl',
-      'sort-icon',
-      'sort-alpha-icon',
-      'expand-icon'
-      // 'collapse-icon'
+      'sort-btn',
+      'sort-alpha-btn',
+      'expand-btn'
+    // 'collapse-btn'
     ]
 
     it.each(requiredComponents)('should have "%s" component', (item) => {
-      expect(wrapper.getComponent(`[data-test="${item}"]`).exists()).toBe(true)
+      expect(wrapper.get(`[data-test="${item}"]`).exists()).toBe(true)
     })
 
-    it('should have "collapse-icon" component', async () => {
-      await wrapper.findComponent('[data-test="expand-icon"]').trigger('click')
-      
-      const collapseIcon = wrapper.findComponent('[data-test="collapse-icon"]') 
-      expect(collapseIcon.exists()).toBe(true)
+    it('should have collapse button', async () => {
+      const inventoryStore = useInventoryStore()
+      const toggleFilter = vi.spyOn(inventoryStore, 'toggleFilter')
+  
+      const expandBtn = wrapper.get('[data-test="expand-btn"]')
+      await expandBtn.trigger('click')
+      expect(toggleFilter).toHaveBeenCalledOnce()
+
+      // TODO Assert collapse button after expand was clicked
+      // const collapseBtn = wrapper.get('[data-test="collapse-btn"]')
+      // expect(collapseBtn.existxs()).toBe(true)
     })
   })
 })

@@ -1,6 +1,6 @@
 <template>
   <FeatherChipList label="List of metric chips">
-    <MetricChip v-for="item in items" :key="item.type" :item="item" />
+    <MetricChip v-for="metric in metrics" :key="metric?.type" :metric="metric" />
   </FeatherChipList>
 </template>
 
@@ -11,7 +11,7 @@ import { Chip } from '@/types/metric'
 import MetricChip from '../Common/MetricChip.vue'
 
 defineProps({
-  items: {
+  metrics: {
     type: Object as PropType<Chip[]>,
     required: true
   }
@@ -19,7 +19,10 @@ defineProps({
 </script>
 
 <style lang="scss" scoped>
+@use "@featherds/styles/themes/variables";
+
 .chip-list {
-  margin: 0;
+  margin: 0 0 var(variables.$spacing-s);
+  gap: 1rem;
 }
 </style>

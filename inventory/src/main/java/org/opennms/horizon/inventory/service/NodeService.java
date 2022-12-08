@@ -49,6 +49,8 @@ import org.springframework.stereotype.Service;
 import com.vladmihalcea.hibernate.type.basic.Inet;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.transaction.annotation.Transactional;
+
 
 @Service
 @RequiredArgsConstructor
@@ -60,6 +62,7 @@ public class NodeService {
 
     private final NodeMapper mapper;
 
+    @Transactional(readOnly = true)
     public List<NodeDTO> findByTenantId(String tenantId) {
         List<Node> all = nodeRepository.findByTenantId(tenantId);
         return all
@@ -67,7 +70,7 @@ public class NodeService {
             .map(mapper::modelToDTO)
             .collect(Collectors.toList());
     }
-
+    @Transactional(readOnly = true)
     public Optional<NodeDTO> getByIdAndTenantId(long id, String tenantId){
         return nodeRepository.findByIdAndTenantId(id, tenantId).map(mapper::modelToDTO);
     }
@@ -98,7 +101,7 @@ public class NodeService {
             newLocation.setLocation(location);
 
             MonitoringLocation saved = monitoringLocationRepository.save(newLocation);
-            trapConfigService.sendTrapConfigToMinion(saved.getLocation());
+            trapConfigService.sendTrapConfigToMinion(tenantId, saved.getLocation());
 
             return saved;
         }

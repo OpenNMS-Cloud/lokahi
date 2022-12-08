@@ -45,7 +45,6 @@ const mainContentWidth = computed(() => store.widgetBarOpen ? 'calc(100% - 500px
 }
 </style>
 
-
 <style lang="scss">
 @use "@/styles/_app";
 </style>

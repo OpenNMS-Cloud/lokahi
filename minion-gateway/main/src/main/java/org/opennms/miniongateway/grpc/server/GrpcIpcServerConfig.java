@@ -3,7 +3,9 @@ package org.opennms.miniongateway.grpc.server;
 import org.opennms.horizon.shared.grpc.common.GrpcIpcServer;
 import org.opennms.horizon.shared.grpc.common.GrpcIpcServerBuilder;
 import org.opennms.horizon.shared.grpc.common.GrpcIpcUtils;
+import org.opennms.horizon.shared.grpc.common.TenantIDGrpcServerInterceptor;
 import org.opennms.horizon.shared.grpc.interceptor.LoggingInterceptor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -29,28 +31,39 @@ public class GrpcIpcServerConfig {
     @Value("${grpc.internal.port:" + DEFAULT_INTERNAL_GRPC_PORT + "}")
     private int internalGrpcPort;
 
+//========================================
+// BEAN REGISTRATION
+//----------------------------------------
+
+    @Bean
+    public TenantIDGrpcServerInterceptor prepareTenantIDGrpcInterceptor() {
+        return new TenantIDGrpcServerInterceptor();
+    }
+
     /**
      * External GRPC service for handling
      *
      * @return
      */
     @Bean(name = "externalGrpcIpcServer", destroyMethod = "stopServer")
-    public GrpcIpcServer prepareExternalGrpcIpcServer() {
+    public GrpcIpcServer prepareExternalGrpcIpcServer(@Autowired TenantIDGrpcServerInterceptor tenantIDGrpcServerInterceptor) {
         Properties properties = new Properties();
         properties.setProperty(GrpcIpcUtils.GRPC_MAX_INBOUND_SIZE, Long.toString(maxMessageSize));
 
         return new GrpcIpcServerBuilder(properties, externalGrpcPort, "PT10S", Arrays.asList(
-            new LoggingInterceptor()
+            new LoggingInterceptor(),
+            tenantIDGrpcServerInterceptor
         ));
     }
 
     @Bean(name = "internalGrpcIpcServer", destroyMethod = "stopServer")
-    public GrpcIpcServer prepareInternalGrpcIpcServer() {
+    public GrpcIpcServer prepareInternalGrpcIpcServer(@Autowired TenantIDGrpcServerInterceptor tenantIDGrpcServerInterceptor) {
         Properties properties = new Properties();
         properties.setProperty(GrpcIpcUtils.GRPC_MAX_INBOUND_SIZE, Long.toString(maxMessageSize));
 
         return new GrpcIpcServerBuilder(properties, internalGrpcPort, "PT10S", Arrays.asList(
-            new LoggingInterceptor()
+            new LoggingInterceptor(),
+            tenantIDGrpcServerInterceptor
         ));
     }
 }

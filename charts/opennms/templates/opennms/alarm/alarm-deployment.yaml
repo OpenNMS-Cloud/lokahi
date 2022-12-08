@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.OpenNMS.Alarm.ServiceName }}
+  labels:
+    app: {{ .Values.OpenNMS.Alarm.ServiceName }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ .Values.OpenNMS.Alarm.ServiceName }}
+  replicas: {{ .Values.OpenNMS.Alarm.Replicas }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.OpenNMS.Alarm.ServiceName }}
+    spec:
+      {{- if .Values.NodeRestrictions.Enabled }}
+      nodeSelector:                                                                                    
+        {{ .Values.NodeRestrictions.Key }}: {{ .Values.NodeRestrictions.Value }}                       
+      tolerations:
+        - effect: "NoSchedule"                                                                         
+          key: "{{ .Values.NodeRestrictions.Key }}"                                                    
+          operator: "Equal"
+          value: {{ .Values.NodeRestrictions.Value }} 
+      affinity: 
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:                                             
+          - weight: 1                                                                                  
+            preference:                                                                                
+              matchExpressions:                                                                        
+              - key: "{{ .Values.NodeRestrictions.Key }}"                                              
+                operator: In
+                values:                                                                                
+                - {{ .Values.NodeRestrictions.Value }}                                                 
+      {{- end }}
+      containers:
+        - name: {{ .Values.OpenNMS.Alarm.ServiceName }}
+          image: {{ .Values.OpenNMS.Alarm.Image }}
+          imagePullPolicy: {{ .Values.OpenNMS.Alarm.ImagePullPolicy }}
+          env:
+            - name: JAVA_TOOL_OPTIONS
+              value: "-agentlib:jdwp=transport=dt_socket,server=y,address=5005,suspend=n,quiet=y" # Permanent debug port in `skaffold dev`
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: postgres
+                  key: alarmUser
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres
+                  key: alarmPwd
+            - name: SPRING_KAFKA_BOOTSTRAP_SERVERS
+              value: "{{ .Values.Kafka.ServiceName }}:{{ .Values.Kafka.Port }}"
+          ports:
+            - name: http
+              containerPort: {{ .Values.OpenNMS.Alarm.Port }}
+            - name: grpc
+              containerPort: {{ .Values.OpenNMS.Alarm.GrpcPort }}

@@ -91,9 +91,36 @@ OpenNMS:
       Requests:
         Cpu: "1"
         Memory: 512Mi
+  MinionGatewayGrpcProxy:
+    ServiceName: opennms-minion-gateway-grpc-proxy
+    Image: opennms/horizon-stream-minion-gateway-grpc-proxy
+    ImagePullPolicy: IfNotPresent
+    Port: 8990
+    Replicas: 1
+    Resources:
+      Limits:
+        Cpu: "1"
+        Memory: 2050M
+      Requests:
+        Cpu: "1"
+        Memory: 512Mi
   Inventory:
     ServiceName: opennms-inventory
     Image: opennms/horizon-stream-inventory
+    ImagePullPolicy: IfNotPresent
+    Replicas: 1
+    Port: 8080
+    GrpcPort: 6565
+    Resources:
+      Limits:
+        Cpu: "1"
+        Memory: 500Mi
+      Requests:
+        Cpu: 100m
+        Memory: 250Mi
+  Alarm:
+    ServiceName: opennms-alarm
+    Image: opennms/horizon-stream-alarm
     ImagePullPolicy: IfNotPresent
     Replicas: 1
     Port: 8080
@@ -124,6 +151,7 @@ OpenNMS:
     ImagePullPolicy: IfNotPresent
     Replicas: 1
     Port: 8080
+    GrpcPort: 6565
     Resources:
       Limits:
         Cpu: "1"
@@ -140,6 +168,7 @@ Postgres:
   OpenNMSPassword: notset
   KeycloakPassword: notset
   InventoryPassword: notset
+  AlarmPassword: notset
   EventsPassword: notset
   NotificationPassword: notset
   GrafanaPassword: notset

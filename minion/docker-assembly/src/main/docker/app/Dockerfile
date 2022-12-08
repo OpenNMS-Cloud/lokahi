@@ -1,7 +1,7 @@
 ##
 ## RELEASE IMAGE
 ##
-FROM opennms/deploy-base:jre-1.2.0.b105
+FROM opennms/deploy-base:jre-1.3.0.b138
 
 RUN mkdir -p /opt
 

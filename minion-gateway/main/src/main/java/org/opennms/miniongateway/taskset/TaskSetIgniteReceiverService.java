@@ -29,6 +29,6 @@ public class TaskSetIgniteReceiverService implements Consumer<LocatedTaskSet>, S
 
     @Override
     public void accept(LocatedTaskSet locatedTaskSet) {
-        taskSetPublisher.publishTaskSet(locatedTaskSet.getLocation(), locatedTaskSet.getTaskSet());
+        taskSetPublisher.publishTaskSet(locatedTaskSet.getTenantId(), locatedTaskSet.getLocation(), locatedTaskSet.getTaskSet());
     }
 }

@@ -80,49 +80,49 @@ public class MonitoringLocationRepoTest {
     }
 
     @Test
-    public void testFindByTenantId() {
+    void testFindByTenantId() {
         List<MonitoringLocation> result = repository.findByTenantId(tenantId);
         assertThat(result.size()).isEqualTo(2);
     }
 
     @Test
-    public void testFindByRandomTenantId() {
+    void testFindByRandomTenantId() {
         List<MonitoringLocation> result = repository.findByTenantId( new UUID(5,7).toString());
-        assertThat(result.size()).isEqualTo(0);
+        assertThat(result.size()).isZero();
     }
 
     @Test
-    public void testFindByLocation(){
+    void testFindByLocation(){
         Optional<MonitoringLocation> result = repository.findByLocation(location1.getLocation());
-        assertThat(result.isPresent()).isTrue();
+        assertThat(result).isPresent();
     }
 
     @Test
-    public void testFindByLocationNotExist(){
+    void testFindByLocationNotExist(){
         Optional<MonitoringLocation> result = repository.findByLocation("random location");
-        assertThat(result.isPresent()).isFalse();
+        assertThat(result).isNotPresent();
     }
 
     @Test
-    public void testFindByLocationAndTenantId() {
+    void testFindByLocationAndTenantId() {
         Optional<MonitoringLocation> result = repository.findByLocationAndTenantId(location1.getLocation(), tenantId);
-        assertThat(result.isPresent()).isTrue();
+        assertThat(result).isPresent();
     }
 
     @Test
-    public void testFindByRandomLocationAndTenantId() {
+    void testFindByRandomLocationAndTenantId() {
         Optional<MonitoringLocation> result = repository.findByLocationAndTenantId("invalid location", tenantId);
-        assertThat(result.isPresent()).isFalse();
+        assertThat(result).isNotPresent();
     }
 
     @Test
-    public void testFindByLocationAndRandomTenantId() {
+    void testFindByLocationAndRandomTenantId() {
         Optional<MonitoringLocation> result = repository.findByLocationAndTenantId(location1.getLocation(), new UUID(5,8).toString());
-        assertThat(result.isPresent()).isFalse();
+        assertThat(result).isNotPresent();
     }
 
     @Test
-    public void testFindByIdList(){
+    void testFindByIdList(){
         List<MonitoringLocation> result = repository.findByIdIn(Arrays.asList(location1.getId(),location2.getId(),location3.getId()));
         assertThat(result.size()).isEqualTo(3);
     }

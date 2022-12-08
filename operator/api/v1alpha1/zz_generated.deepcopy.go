@@ -93,6 +93,7 @@ func (in *OpenNMSSpec) DeepCopyInto(out *OpenNMSSpec) {
 	out.Minion = in.Minion
 	out.MinionGateway = in.MinionGateway
 	out.Inventory = in.Inventory
+    out.Alarm = in.Alarm
 	out.Notification = in.Notification
 	out.MetricsProcessor = in.MetricsProcessor
 	out.Postgres = in.Postgres

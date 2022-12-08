@@ -8,7 +8,7 @@ import { VILLUS_CLIENT, createClient } from 'villus'
  * @returns mounted component
  */
 const wrapper = (mountingOption: Record<string, any>): any => {
-  const { component, global = {}, type = 'mount', attachTo } = mountingOption
+  const { component, global = {}, type = 'mount', attachTo, props } = mountingOption
   const  { stubs = {}, plugins = [], provide = {} } = global
 
   const globalOptions: Record<string, any> = {
@@ -25,6 +25,7 @@ const wrapper = (mountingOption: Record<string, any>): any => {
         ...provide
       }
     },
+    props,
     attachTo
   }
   

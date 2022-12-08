@@ -30,6 +30,7 @@ package org.opennms.horizon.server.config;
 
 import org.opennms.horizon.server.service.gateway.NotificationGateway;
 import org.opennms.horizon.server.service.gateway.PlatformGateway;
+import org.opennms.horizon.server.service.grpc.EventsClient;
 import org.opennms.horizon.server.service.grpc.InventoryClient;
 import org.opennms.horizon.server.utils.ServerHeaderUtil;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -50,6 +51,9 @@ public class ConfigurationUtil {
     private String notificationsUrl;
     @Value("${grpc.url.inventory}")
     private String inventoryGrpcAddress;
+
+    @Value("${grpc.url.events}")
+    private String eventsGrpcAddress;
 
     @Bean
     public ServerHeaderUtil createHeaderUtil() {
@@ -73,8 +77,20 @@ public class ConfigurationUtil {
             .usePlaintext().build();
     }
 
+    @Bean(name = "events")
+    public ManagedChannel createEventsChannel() {
+        return ManagedChannelBuilder.forTarget(eventsGrpcAddress)
+            .keepAliveWithoutCalls(true)
+            .usePlaintext().build();
+    }
+
     @Bean(destroyMethod = "shutdown", initMethod = "initialStubs")
     public InventoryClient createInventoryClient(@Qualifier("inventory") ManagedChannel channel) {
         return new InventoryClient(channel);
+    }
+
+    @Bean(destroyMethod = "shutdown", initMethod = "initialStubs")
+    public EventsClient createEventsClient(@Qualifier("events") ManagedChannel channel) {
+        return new EventsClient(channel);
     }
 }

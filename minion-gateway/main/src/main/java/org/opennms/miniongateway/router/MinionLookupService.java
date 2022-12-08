@@ -8,13 +8,15 @@ public interface MinionLookupService extends MinionManagerListener {
 
     String IGNITE_SERVICE_NAME = "minionLookup";
 
-    UUID findGatewayNodeWithId(String id);
+    UUID findGatewayNodeWithId(String tenantId, String id);
 
     /**
      * Returns list of minions assigned to given location.
      *
+     *
+     * @param tenantId
      * @param location Location name.
      * @return Minions assigned to location or null if none found.
      */
-    List<UUID> findGatewayNodeWithLocation(String location);
+    List<UUID> findGatewayNodeWithLocation(String tenantId, String location);
 }

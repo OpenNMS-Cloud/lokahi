@@ -1,31 +1,20 @@
 import { Chip } from './metric'
 
-// TODO: cause error when importing
-/* export enum NodeDetailContentType {
-  MONITORED,
-  DETECTED
-} */
-
-export interface Anchor {
-  profileValue: number,
-  profileLink: string,
-  locationValue: string,
-  locationLink: string,
-  ipInterfaceValue: number,
-  ipInterfaceLink: string,
-  tagValue: number,
-  tagLink: string,
+interface Anchor {
+  profileValue?: number | string,
+  profileLink?: string,
+  locationValue?: string,
+  locationLink?: string,
+  managementIpValue?: string,
+  managementIpLink?: string,
+  tagValue?: number | string,
+  tagLink?: string,
 }
 
-interface NodeDetail {
+interface NodeContent {
   id: number,
-  name: string,
+  label: string | undefined,
+  status: string,
   metrics: Chip[],
   anchor: Anchor
-}
-
-export interface TabNode {
-  type: number,
-  label: string,
-  nodes: NodeDetail[]
 }

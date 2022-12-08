@@ -62,12 +62,7 @@ import java.util.Optional;
 import java.util.concurrent.ThreadFactory;
 
 /**
- * TBD888: Rework still needed for task-set definitions, and general completeness
  *
- *  1. (DONE - event handling applies the updates) list of nodes is only read once, in the init() method; it needs to be updated continually
- *  2. if there are other sources of task definitions, the management of task definitions needs to be extracted into
- *     its own source
- *  3. parameters for each task
  */
 public class DeviceMonitorManager implements EventListener {
 
@@ -123,6 +118,7 @@ public class DeviceMonitorManager implements EventListener {
 
 
     private void updateMonitors(OnmsNode onmsNode) {
+        String tenantId = "openmms-prime"; // TBD888: use proper source and remove default
         String locationName = DEFAULT_LOCATION;
 
         try {
@@ -131,27 +127,27 @@ public class DeviceMonitorManager implements EventListener {
             ipInterfaces.forEach(onmsIpInterface -> {
                 LOG.info("Updating ICMP/SNMP Monitor tasks for IPAddress {}", onmsIpInterface.getIpAddress());
 
-                addPollIcmpTask(locationName, onmsIpInterface.getIpAddress());
+                addPollIcmpTask(tenantId, locationName, onmsIpInterface.getIpAddress());
 
-                addDetectSnmpTask(locationName, onmsIpInterface.getIpAddress());
-                addPollSnmpTask(locationName, onmsIpInterface.getIpAddress(), onmsNode.getSnmpCommunityString());
+                addDetectSnmpTask(tenantId, locationName, onmsIpInterface.getIpAddress());
+                addPollSnmpTask(tenantId, locationName, onmsIpInterface.getIpAddress(), onmsNode.getSnmpCommunityString());
             });
 
             //TaskSet updatedTaskSet = locationBasedTaskSetManager.getManagerForLocation(locationName).getTaskSet();
-            TaskSet updatedTaskSet = taskSetManager.getTaskSet(locationName);
+            TaskSet updatedTaskSet = taskSetManager.getTaskSet(tenantId, locationName);
 
             // TODO: reduce log level to debug
             LOG.info("Publishing task set for location: location={}; num-task={}",
                 locationName,
                 Optional.ofNullable(updatedTaskSet.getTaskDefinitionList()).map(Collection::size).orElse(0));
 
-            taskSetPublisher.publishTaskSet(locationName, updatedTaskSet);
+            taskSetPublisher.publishTaskSet(tenantId, locationName, updatedTaskSet);
         } catch (Exception e) {
             LOG.error("Exception while running monitors for device with Id : {}", onmsNode.getId(), e);
         }
     }
 
-    private void addPollIcmpTask(String location, InetAddress inetAddress) {
+    private void addPollIcmpTask(String tenantId, String location, InetAddress inetAddress) {
         IcmpMonitorRequest echoRequest =
             IcmpMonitorRequest.newBuilder()
                 .setHost(inetAddress.getHostAddress())
@@ -159,10 +155,10 @@ public class DeviceMonitorManager implements EventListener {
                 .build()
                 ;
 
-        taskSetManagerUtil.addEchotask(location, inetAddress, "icmp-monitor", TaskType.MONITOR, "ICMPMonitor", "5000", echoRequest);
+        taskSetManagerUtil.addEchoTask(tenantId, location, inetAddress, "icmp-monitor", TaskType.MONITOR, "ICMPMonitor", "5000", echoRequest);
     }
 
-    private void addPollSnmpTask(String location, InetAddress inetAddress, String snmpCommunityString) {
+    private void addPollSnmpTask(String tenantId, String location, InetAddress inetAddress, String snmpCommunityString) {
         SnmpMonitorRequest.Builder snmpRequestBuilder =
             SnmpMonitorRequest.newBuilder()
                 .setHost(inetAddress.getHostAddress())
@@ -179,10 +175,10 @@ public class DeviceMonitorManager implements EventListener {
 
         SnmpMonitorRequest snmpMonitorRequest = snmpRequestBuilder.build();
 
-        taskSetManagerUtil.addSnmpTask(location, inetAddress, "snmp-monitor", TaskType.MONITOR, "SNMPMonitor", "5000", snmpMonitorRequest);
+        taskSetManagerUtil.addSnmpTask(tenantId, location, inetAddress, "snmp-monitor", TaskType.MONITOR, "SNMPMonitor", "5000", snmpMonitorRequest);
     }
 
-    private void addDetectSnmpTask(String location, InetAddress inetAddress) {
+    private void addDetectSnmpTask(String tenantId, String location, InetAddress inetAddress) {
 
         SnmpDetectorRequest.Builder snmpRequestBuilder =
             SnmpDetectorRequest.newBuilder()
@@ -192,7 +188,7 @@ public class DeviceMonitorManager implements EventListener {
 
         SnmpDetectorRequest snmpDetectorRequest = snmpRequestBuilder.build();
 
-        taskSetManagerUtil.addSnmpTask(location, inetAddress, "snmp-detector", TaskType.DETECTOR, "SNMPDetector", snmpDetectorRequest);
+        taskSetManagerUtil.addSnmpTask(tenantId, location, inetAddress, "snmp-detector", TaskType.DETECTOR, "SNMPDetector", snmpDetectorRequest);
     }
 
     @Override

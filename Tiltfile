@@ -1,3 +1,38 @@
+## LOCAL PORT ASSIGNMENTS (note internal ports use the native port number)
+##
+##      xx = service/container
+##      xx080 = HTTP
+##      xx089 = GRPC
+##      xx022 = SSH
+##      xx025 = SMTP (mail)
+##      xx050 = JAVA DEBUG
+##      xx054 = POSTGRES
+##      xx090 = KAFKA
+##
+##	Exceptions to the Rule
+##		8123 = INGRESS HTTP
+##
+## 11 = horizon-stream-core
+## 12 = horizon-stream-minion
+## 13 = horizon-stream-api
+## 14 = api-gateway
+## 15 = horizon-stream-notification
+## 16 = horizon-stream-minion-gateway
+## 17 = horizon-stream-ui
+## 18 = grafana
+## 19 = prometheus
+## 21 = prometheus-pushgateway
+## 22 = mail-server
+## 23 = zookeeper
+## 24 = kafka
+## 25 = postgres
+## 26 = keycloak
+## 27 = minion (classic)
+## 28 = metric processor
+## 29 = horizon-stream-inventory
+## 30 = events
+##
+
 # Tilt config #
 secret_settings(disable_scrub=True)  ## TODO: update secret values so we can reenable scrub
 
@@ -120,6 +155,15 @@ jib_project(
     port_forwards=['29080:9090', '29050:5005', '29065:6565'],
 )
 
+### Alarm ###
+jib_project(
+    'alarm',
+    'opennms/horizon-stream-alarm',
+    'alarm',
+    'opennms-alarm',
+    port_forwards=['31080:9090', '31050:5005', '31065:6565',  '31000:8080'],
+)
+
 ### Metrics Processor ###
 jib_project(
     'metrics-processor',
@@ -146,6 +190,16 @@ jib_project(
     'opennms-minion-gateway',
     submodule='main',
     port_forwards=['16080:9090', '16050:5005'],
+)
+
+### Minion Gateway GRPC Proxy ###
+jib_project(
+    'minion-gateway-grpc-proxy',
+    'opennms/horizon-stream-minion-gateway-grpc-proxy',
+    'minion-gateway-grpc-proxy',
+    'opennms-minion-gateway-grpc-proxy',
+    submodule='main',
+    port_forwards=['31089:8990', '31050:5005'],
 )
 
 ### Core ###
@@ -216,6 +270,19 @@ k8s_resource(
 k8s_resource(
     'prometheus-pushgateway',
     port_forwards=['21080:9091'],
+)
+
+### Postgres ###
+k8s_resource(
+    'postgres',
+    port_forwards=['25054:5432'],
+)
+
+### Kafka ###
+k8s_resource(
+    'onms-kafka',
+    new_name='kafka',
+    port_forwards=['24092:59092'],
 )
 
 ### Others ###

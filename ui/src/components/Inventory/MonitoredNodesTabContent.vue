@@ -1,14 +1,14 @@
 <template>
-  <ul class="tab-content">
-    <li v-for="node in tab.nodes" :key="node.id">
+  <ul>
+    <li v-for="node in tabContent" :key="node?.id">
       <section class="header">
-        <Icon :item="item" data-test="icon" />
-        <h4 data-test="heading">{{ node.name }}</h4>
+        <Icon :icon="icon" data-test="icon" />
+        <h4 data-test="heading">{{ node?.label }}</h4>
       </section>
       <section class="node-content">
         <div>
-          <MetricChipList :items="node.metrics" data-test="metric-chip-list" />
-          <TextAnchorList :anchor="node.anchor" data-test="text-anchor-list" />
+          <MetricChipList :metrics="node?.metrics" data-test="metric-chip-list" />
+          <TextAnchorList :anchor="node?.anchor" data-test="text-anchor-list" />
         </div>
         <IconActionList class="icon-action" data-test="icon-action-list" />
       </section>
@@ -19,17 +19,18 @@
 <script lang="ts" setup>
 import { PropType } from 'vue'
 import Storage from '@material-design-icons/svg/outlined/storage.svg'
-import { TabNode } from '@/types/inventory'
+import { NodeContent } from '@/types/inventory'
+import { IIcon } from '@/types'
   
 defineProps({
-  tab: {
-    type: Object as PropType<TabNode>,
+  tabContent: {
+    type: Object as PropType<NodeContent[]>,
     required: true
   }
 })
 
-const item = {
-  icon: Storage,
+const icon: IIcon = {
+  image: Storage,
   title: 'Node'
 }
 </script>
@@ -37,7 +38,7 @@ const item = {
 <style lang="scss" scoped>
 @use "@featherds/styles/themes/variables";
 
-.tab-content {
+ul {
   display: flex;
   flex-flow: row wrap;
   gap: 1rem;
@@ -45,8 +46,7 @@ const item = {
     padding: var(variables.$spacing-l);
     border: 1px solid var(variables.$secondary-text-on-surface); 
     border-radius: 10px;
-    // TODO: set color dynamically
-    border-left: 10px solid var(variables.$secondary-text-on-surface);
+    border-left: 10px solid var(variables.$secondary-text-on-surface); // TODO set color dynamically to the node's status
     > .header {
       margin-bottom: var(variables.$spacing-s);
       display: flex;
@@ -58,12 +58,11 @@ const item = {
       }
     }
   }
-}
-
-.node-content {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  gap: 2rem;
+  .node-content {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 2rem;
+  }
 }
 </style>

@@ -1,0 +1,30 @@
+fragment NodesUptimeParts on Query {
+  nodesUptime: metric(name: "snmp_uptime_sec") {
+    ...MetricParts
+  }
+}
+
+fragment NodesLatencyParts on Query {
+  nodesLatency: metric(name: "response_time_msec") {
+    ...MetricParts
+  }
+}
+
+fragment NodeLatencyParts on Query {
+  nodeLatency: metric(
+    name: "response_time_msec", 
+    labels: {
+      node_id: $id
+    }
+  ) {
+    status
+    data {
+      result {
+        metric
+        value
+        values
+      }
+      resultType
+    }
+  }
+}

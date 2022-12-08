@@ -104,44 +104,44 @@ public class MonitoringSystemRepositoryTest {
     }
 
     @Test
-    public void testFindByTenantId() {
+    void testFindByTenantId() {
         List<MonitoringSystem> list = systemRepository.findByTenantId(tenantId);
         assertThat(list.size()).isEqualTo(2);
     }
 
     @Test
-    public void testFindByRandomTenantId(){
+    void testFindByRandomTenantId(){
         List<MonitoringSystem> list = systemRepository.findByTenantId(new UUID(5,7).toString());
-        assertThat(list.size()).isEqualTo(0);
+        assertThat(list.size()).isZero();
     }
 
     @Test
-    public void testFindBySystemId() {
+    void testFindBySystemId() {
         Optional<MonitoringSystem> result = systemRepository.findBySystemId(system1.getSystemId());
-        assertThat(result.isPresent()).isTrue();
+        assertThat(result).isPresent();
     }
 
     @Test
-    public void testFindBySystemIdNotExist() {
+    void testFindBySystemIdNotExist() {
         Optional<MonitoringSystem> result = systemRepository.findBySystemId("random id");
-        assertThat(result.isPresent()).isFalse();
+        assertThat(result).isNotPresent();
     }
 
     @Test
-    public void testFindBySystemIdAndTenantId() {
+    void testFindBySystemIdAndTenantId() {
         Optional<MonitoringSystem> result = systemRepository.findBySystemIdAndTenantId(system1.getSystemId(), tenantId);
-        assertThat(result.isPresent()).isTrue();
+        assertThat(result).isPresent();
     }
 
     @Test
-    public void testFindByRandomSystemIdAndTenantId() {
+    void testFindByRandomSystemIdAndTenantId() {
         Optional<MonitoringSystem> result = systemRepository.findBySystemIdAndTenantId("random system id", tenantId);
-        assertThat(result.isPresent()).isFalse();
+        assertThat(result).isNotPresent();
     }
 
     @Test
-    public void testFindBySystemIdAndRandomTenantId() {
+    void testFindBySystemIdAndRandomTenantId() {
         Optional<MonitoringSystem> result = systemRepository.findBySystemIdAndTenantId(system1.getSystemId(), new UUID(5,8).toString());
-        assertThat(result.isPresent()).isFalse();
+        assertThat(result).isNotPresent();
     }
 }

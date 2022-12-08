@@ -77,15 +77,17 @@ func (i *Instance) CheckForExistingPostgresCreds(ctx context.Context, v values.T
 	adminPwd := string(credSecret.Data["adminPwd"])
 	keycloakPwd := string(credSecret.Data["keycloakPwd"])
 	inventoryPwd := string(credSecret.Data["inventoryPwd"])
+	alarmPwd := string(credSecret.Data["alarmPwd"])
 	notificationPwd := string(credSecret.Data["notificationPwd"])
 	grafanaPwd := string(credSecret.Data["grafanaPwd"])
 	eventsPwd := string(credSecret.Data["eventsPwd"])
-	if adminPwd == "" || keycloakPwd == "" || inventoryPwd == "" || notificationPwd == "" || eventsPwd == "" {
+	if adminPwd == "" || keycloakPwd == "" || inventoryPwd == "" || alarmPwd == "" || notificationPwd == "" || grafanaPwd == "" || eventsPwd == "" {
 		return v, false
 	}
 	v.Values.Postgres.AdminPassword = adminPwd
 	v.Values.Postgres.KeycloakPassword = keycloakPwd
 	v.Values.Postgres.InventoryPassword = inventoryPwd
+	v.Values.Postgres.AlarmPassword = alarmPwd
 	v.Values.Postgres.NotificationPassword = notificationPwd
 	v.Values.Postgres.GrafanaPassword = grafanaPwd
 	v.Values.Postgres.EventsPassword = eventsPwd
@@ -109,6 +111,7 @@ func setPostgresPassword(tv values.TemplateValues) values.TemplateValues {
 	tv.Values.Postgres.OpenNMSPassword = security.GeneratePassword(true)
 	tv.Values.Postgres.KeycloakPassword = security.GeneratePassword(true)
 	tv.Values.Postgres.InventoryPassword = security.GeneratePassword(true)
+	tv.Values.Postgres.AlarmPassword = security.GeneratePassword(true)
 	tv.Values.Postgres.NotificationPassword = security.GeneratePassword(true)
 	tv.Values.Postgres.EventsPassword = security.GeneratePassword(true)
 

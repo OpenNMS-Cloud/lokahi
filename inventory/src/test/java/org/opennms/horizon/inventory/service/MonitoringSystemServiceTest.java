@@ -83,7 +83,7 @@ public class MonitoringSystemServiceTest {
     }
 
     @Test
-    public void testReceiveMsgMonitorSystemExist() {
+    void testReceiveMsgMonitorSystemExist() {
         doReturn(Optional.of(testMonitoringSystem)).when(mockMonitoringSystemRepo).findBySystemId(systemId);
         service.addMonitoringSystemFromHeartbeat(heartbeatMessage, tenantId);
         verify(mockMonitoringSystemRepo).findBySystemId(systemId);
@@ -91,7 +91,7 @@ public class MonitoringSystemServiceTest {
     }
 
     @Test
-    public void testCreateNewMonitorSystemWithLocationExist() {
+    void testCreateNewMonitorSystemWithLocationExist() {
         doReturn(Optional.empty()).when(mockMonitoringSystemRepo).findBySystemId(systemId);
         doReturn(Optional.of(testLocation)).when(mockLocationRepo).findByLocation(location);
         service.addMonitoringSystemFromHeartbeat(heartbeatMessage, tenantId);
@@ -101,7 +101,7 @@ public class MonitoringSystemServiceTest {
     }
 
     @Test
-    public void testCreateNewMonitorSystemAndNewLocation() {
+    void testCreateNewMonitorSystemAndNewLocation() {
         doReturn(Optional.empty()).when(mockMonitoringSystemRepo).findBySystemId(systemId);
         doReturn(Optional.empty()).when(mockLocationRepo).findByLocation(location);
         service.addMonitoringSystemFromHeartbeat(heartbeatMessage, tenantId);

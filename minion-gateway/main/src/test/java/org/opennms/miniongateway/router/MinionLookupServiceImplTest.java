@@ -16,10 +16,10 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.UUID;
 import java.util.concurrent.locks.Lock;
+
 import org.apache.ignite.Ignite;
 import org.apache.ignite.IgniteCache;
 import org.apache.ignite.IgniteCluster;
-import org.apache.ignite.cache.CacheAtomicityMode;
 import org.apache.ignite.cluster.ClusterNode;
 import org.apache.ignite.configuration.CacheConfiguration;
 import org.junit.Before;
@@ -28,6 +28,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.stubbing.Answer;
 import org.opennms.horizon.shared.ipc.grpc.server.manager.MinionInfo;
+import org.opennms.miniongateway.grpc.server.model.TenantKey;
 
 public class MinionLookupServiceImplTest {
 
@@ -49,9 +50,9 @@ public class MinionLookupServiceImplTest {
     @Mock
     Lock lock;
 
-    private Map<String, Queue<UUID>> locationMap = new HashMap<>();
+    private Map<TenantKey, Queue<UUID>> locationMap = new HashMap<>();
 
-    private Map<String, UUID> idMap = new HashMap<>();
+    private Map<TenantKey, UUID> idMap = new HashMap<>();
 
     MinionLookupService minionLookupService;
 
@@ -96,13 +97,13 @@ public class MinionLookupServiceImplTest {
     public void findGatewayNodeWithId() {
         generateMinions(3);
 
-        UUID uuid = minionLookupService.findGatewayNodeWithId("minion1");
+        UUID uuid = minionLookupService.findGatewayNodeWithId("tenant", "minion1");
         assertEquals(localNodeUUID, uuid);
 
-        uuid = minionLookupService.findGatewayNodeWithId("minion2");
+        uuid = minionLookupService.findGatewayNodeWithId("tenant", "minion2");
         assertEquals(localNodeUUID, uuid);
 
-        uuid = minionLookupService.findGatewayNodeWithId("bogus");
+        uuid = minionLookupService.findGatewayNodeWithId("tenant", "bogus");
         assertNull(uuid);
     }
 
@@ -110,13 +111,13 @@ public class MinionLookupServiceImplTest {
     public void findGatewayNodeWithLocation() {
         generateMinions(3);
 
-        List<UUID> uuids = minionLookupService.findGatewayNodeWithLocation("location");
+        List<UUID> uuids = minionLookupService.findGatewayNodeWithLocation("tenant", "location");
         assertNotNull(uuids);
         assertEquals(3, uuids.size());
 
         assertEquals(localNodeUUID, uuids.stream().findFirst().get());
 
-        uuids = minionLookupService.findGatewayNodeWithLocation("badLocation");
+        uuids = minionLookupService.findGatewayNodeWithLocation("tenant", "badLocation");
         assertNull(uuids);
 
     }
@@ -124,21 +125,23 @@ public class MinionLookupServiceImplTest {
     @Test
     public void onMinionRemoved() {
         MinionInfo minionInfo1 = new MinionInfo();
+        minionInfo1.setTenantId("tenant");
         minionInfo1.setId("minion");
         minionInfo1.setLocation(("location"));
 
         minionLookupService.onMinionAdded(1, minionInfo1);
 
-        assertNotNull(minionLookupService.findGatewayNodeWithId(minionInfo1.getId()));
+        assertNotNull(minionLookupService.findGatewayNodeWithId("tenant", minionInfo1.getId()));
 
         minionLookupService.onMinionRemoved(1, minionInfo1);
 
-        assertNull(minionLookupService.findGatewayNodeWithId(minionInfo1.getId()));
+        assertNull(minionLookupService.findGatewayNodeWithId("tenant", minionInfo1.getId()));
     }
 
     private void generateMinions(int num) {
         for (int i=0;i<num;i++) {
             MinionInfo minionInfo1 = new MinionInfo();
+            minionInfo1.setTenantId("tenant");
             minionInfo1.setId("minion"+i);
             minionInfo1.setLocation(("location"));
 

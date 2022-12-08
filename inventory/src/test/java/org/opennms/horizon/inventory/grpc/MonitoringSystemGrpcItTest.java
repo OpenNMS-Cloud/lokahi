@@ -119,7 +119,7 @@ public class MonitoringSystemGrpcItTest extends GrpcTestBase {
     }
 
     @Test
-    public void testListSystem() throws VerificationException {
+    void testListSystem() throws VerificationException {
         MonitoringSystemList systemList = serviceStub
             .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader)))
             .listMonitoringSystem(Empty.newBuilder().build());
@@ -130,18 +130,18 @@ public class MonitoringSystemGrpcItTest extends GrpcTestBase {
     }
 
     @Test
-    public void testListSystemWithDifferentTenantId() throws VerificationException {
+    void testListSystemWithDifferentTenantId() throws VerificationException {
         MonitoringSystemList systemList = serviceStub
             .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(differentTenantHeader)))
             .listMonitoringSystem(Empty.newBuilder().build());
         assertThat(systemList).isNotNull();
-        assertThat(systemList.getSystemsList().size()).isEqualTo(0);
+        assertThat(systemList.getSystemsList().size()).isZero();
         verify(spyInterceptor).verifyAccessToken(differentTenantHeader);
         verify(spyInterceptor).interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));
     }
 
     @Test
-    public void testGetBySystemId() throws VerificationException {
+    void testGetBySystemId() throws VerificationException {
         MonitoringSystemDTO systemDTO = serviceStub
             .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader)))
             .getMonitoringSystemById(StringValue.of(system1.getSystemId()));
@@ -152,7 +152,7 @@ public class MonitoringSystemGrpcItTest extends GrpcTestBase {
     }
 
     @Test
-    public void testGetBySystemIdNotExist() throws VerificationException {
+    void testGetBySystemIdNotExist() throws VerificationException {
         StatusRuntimeException exception = assertThrows(StatusRuntimeException.class, ()-> serviceStub
             .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader)))
             .getMonitoringSystemById(StringValue.of("wrong systemId")));
@@ -162,7 +162,7 @@ public class MonitoringSystemGrpcItTest extends GrpcTestBase {
     }
 
     @Test
-    public void testGetBySystemIdWithWrongTenantId() throws VerificationException {
+    void testGetBySystemIdWithWrongTenantId() throws VerificationException {
         StatusRuntimeException exception = assertThrows(StatusRuntimeException.class, ()-> serviceStub
             .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(differentTenantHeader)))
             .getMonitoringSystemById(StringValue.of(system1.getSystemId())));
@@ -172,7 +172,7 @@ public class MonitoringSystemGrpcItTest extends GrpcTestBase {
     }
 
     @Test
-    public void testListWithoutTenantId() throws VerificationException {
+    void testListWithoutTenantId() throws VerificationException {
         StatusRuntimeException exception = assertThrows(StatusRuntimeException.class, () -> serviceStub
             .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(headerWithoutTenant)))
             .listMonitoringSystem(Empty.newBuilder().build()));

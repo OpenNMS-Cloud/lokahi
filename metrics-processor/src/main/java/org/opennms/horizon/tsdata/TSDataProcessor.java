@@ -46,6 +46,8 @@ import org.opennms.taskset.contract.TaskResult;
 import org.opennms.taskset.contract.TaskSetResults;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.messaging.handler.annotation.Headers;
+import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Service;
 
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -76,8 +78,9 @@ public class TSDataProcessor {
         this.pushAdapter = pushAdapter;
     }
 
+    //headers for future use.
     @KafkaListener(topics = "${kafka.topics}", concurrency = "1")
-    public void consume(byte[] data) {
+    public void consume(@Payload byte[] data, @Headers Map<String, Object> headers) {
         try {
             TaskSetResults results = TaskSetResults.parseFrom(data);
             results.getResultsList().forEach(result -> CompletableFuture.supplyAsync(() -> {

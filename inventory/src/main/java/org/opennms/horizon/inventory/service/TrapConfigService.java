@@ -64,14 +64,14 @@ public class TrapConfigService {
         List<MonitoringLocationDTO> allLocations = monitoringLocationService.findAll();
 
         for(MonitoringLocationDTO dto : allLocations) {
-            sendTrapConfigToMinion(dto.getLocation());
+            sendTrapConfigToMinion(dto.getTenantId(), dto.getLocation());
         }
     }
 
-    public void sendTrapConfigToMinion(String location) {
+    public void sendTrapConfigToMinion(String tenantId, String location) {
         TrapConfigBean trapConfigBean = readTrapConfig();
         TrapConfig trapConfig = mapBeanToProto(trapConfigBean);
-        publishTrapConfig(location, trapConfig);
+        publishTrapConfig(tenantId, location, trapConfig);
     }
 
     private TrapConfig mapBeanToProto(TrapConfigBean config) {
@@ -102,7 +102,7 @@ public class TrapConfigService {
         }).collect(Collectors.toList());
     }
 
-    private void publishTrapConfig(String location, TrapConfig trapConfig) {
+    private void publishTrapConfig(String tenantId, String location, TrapConfig trapConfig) {
         TaskDefinition taskDefinition = TaskDefinition.newBuilder()
             .setId("traps-config")
             .setPluginName("trapd.listener.config")
@@ -111,7 +111,7 @@ public class TrapConfigService {
             .build();
 
         taskSetManager.addTaskSet(location, taskDefinition);
-        taskSetPublisher.publishTaskSet(location, taskSetManager.getTaskSet(location));
+        taskSetPublisher.publishTaskSet(tenantId, location, taskSetManager.getTaskSet(location));
     }
 
     private TrapConfigBean readTrapConfig() {

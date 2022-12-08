@@ -48,6 +48,9 @@ func ConvertCRDToValues(crd v1alpha1.OpenNMS, defaultValues values.TemplateValue
 	//ONMS Inventory
 	v.OpenNMS = getInventoryValues(spec, v.OpenNMS)
 
+    //ONMS Alarm
+    v.OpenNMS = getAlarmValues(spec, v.OpenNMS)
+
 	//ONMS Notification
 	v.OpenNMS = getNotificationValues(spec, v.OpenNMS)
 
@@ -182,6 +185,25 @@ func getInventoryValues(spec v1alpha1.OpenNMSSpec, v values.OpenNMSValues) value
 	return v
 }
 
+// getAlarmValues - get ONMS Alarm values from the crd
+func getAlarmValues(spec v1alpha1.OpenNMSSpec, v values.OpenNMSValues) values.OpenNMSValues {
+	if spec.Alarm.Image != "" {
+		v.Alarm.Image = spec.Alarm.Image
+	}
+	if spec.Alarm.CPU != "" {
+		v.Alarm.Resources.Requests.Cpu = spec.Alarm.CPU
+		v.Alarm.Resources.Limits.Cpu = spec.Alarm.CPU
+	}
+	if spec.Alarm.MEM != "" {
+		v.Alarm.Resources.Requests.Memory = spec.Alarm.MEM
+		v.Alarm.Resources.Limits.Memory = spec.Alarm.MEM
+	}
+	if spec.Alarm.Disk != "" {
+		v.Alarm.VolumeSize = spec.Alarm.Disk
+	}
+	return v
+}
+
 // getNotificationValues - get ONMS Notification values from the crd
 func getNotificationValues(spec v1alpha1.OpenNMSSpec, v values.OpenNMSValues) values.OpenNMSValues {
 	if spec.Notification.Image != "" {
@@ -220,7 +242,7 @@ func getMetricsProcessorValues(spec v1alpha1.OpenNMSSpec, v values.OpenNMSValues
 	return v
 }
 
-// getEventsValues - get ONMS Inventory values from the crd
+// getEventsValues - get ONMS Events values from the crd
 func getEventsValues(spec v1alpha1.OpenNMSSpec, v values.OpenNMSValues) values.OpenNMSValues {
     if spec.Events.Image != "" {
         v.Events.Image = spec.Events.Image

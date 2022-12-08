@@ -1,7 +1,7 @@
 <template>
   <ul class="filter-container">
+    <!-- Search -->
     <li class="autocomplete">
-      <!-- Search -->
       <FeatherAutocomplete
         v-model="search.value"
         :loading="search.loading"
@@ -12,8 +12,8 @@
         data-test="search"
       />
     </li>
+    <!-- Node type -->
     <li>
-      <!-- Node type -->
       <FeatherSelect
         v-model="nodeTypeState"
         :options="nodeType.options"
@@ -23,8 +23,8 @@
         data-test="node-type"
       />
     </li>
+    <!-- Monitoring Location -->
     <li>
-      <!-- Monitoring Location -->
       <FeatherSelect
         v-model="monitoringLocationState"
         :options="monitoringLocation.options"
@@ -34,8 +34,8 @@
         data-test="monitoring-location"
       />
     </li>
+    <!-- Severity -->
     <li>
-      <!-- Severity -->
       <FeatherSelect
         v-model="severityState"
         :options="severity.options"
@@ -45,41 +45,30 @@
         data-test="severity"
       />
     </li>
+    <!-- Tagging -->
     <li>
-      <!-- Tagging -->
-      <TagManagerCtrl data-test="tag-manager-ctrl" />
-      <TagManager />
+      <TagManagerCtrl data-test="tag-manager-ctrl" /> 
     </li>
-    <!-- Sort / A-Z -->
-    <li>
-      <FeatherIcon @click="onSort" :icon="sort?.icon" :title="sort?.title" :viewBox="sort.viewBox" data-test="sort-icon" />
-    </li>
-    <li>
-      <FeatherIcon @click="onSortAlpha" :icon="sortAlpha.icon" :title="sortAlpha.title" :viewBox="sortAlpha.viewBox" data-test="sort-alpha-icon" />
-    </li>
+    <!-- Sort/A-Z -->
+    <li @click="onSort" class="action-btn" data-test="sort-btn"><Icon :icon="sort" /></li>
+    <li @click="onSortAlpha" class="action-btn" data-test="sort-alpha-btn" ><Icon :icon="sortAlpha" /></li>
     <!-- Expand/Collapse -->
-    <li v-if="isExpanded">
-      <FeatherIcon @click="isExpanded = !isExpanded" :icon="collapse.icon" :title="collapse.title" :viewBox="collapse.viewBox" data-test="collapse-icon" />
-    </li>
-    <li v-else>
-      <FeatherIcon @click="isExpanded = !isExpanded" :icon="expand.icon" :title="expand.title" :viewBox="expand.viewBox" data-test="expand-icon" />
-    </li>
+    <li @click="inventoryStore.toggleFilter" :data-test="expandCollapseBtn" class="action-btn"><Icon :icon="expandCollapse" /></li>
   </ul>
+  <TagManager />
 </template>
 
 <script lang="ts" setup>
-import { fncArgVoid } from '@/types'
-import { ISelectDropdown } from '@/types/select'
-import {
-  FeatherAutocomplete,
-  IAutocompleteItemType
-} from '@featherds/autocomplete'
+import { IAutocompleteItemType } from '@featherds/autocomplete'
 import Sort from '@material-design-icons/svg/outlined/sort.svg'
 import SortByAlpha from '@material-design-icons/svg/outlined/sort_by_alpha.svg'
 import KeyboardDoubleArrowDown from '@material-design-icons/svg/outlined/keyboard_double_arrow_down.svg'
 import KeyboardDoubleArrowUp from '@material-design-icons/svg/outlined/keyboard_double_arrow_up.svg'
+import { ISelectDropdown } from '@/types/select'
+import { fncArgVoid, IIcon } from '@/types'
+import { useInventoryStore } from '@/store/Views/inventoryStore'
 
-const emits = defineEmits(['selectedItem'])
+const inventoryStore = useInventoryStore()
 
 // Search
 const search = {
@@ -100,108 +89,106 @@ const search = {
       search.loading = false
     }, 500)}
 }
+
 // Node Type
 const nodeTypeState = ref(undefined)
-const onNodeTypeSelect: fncArgVoid = (selectedItem: any) => {
-  emits('selectedItem', selectedItem)
+const onNodeTypeSelect: fncArgVoid = (selectedType: any) => {
+  // use store to query new list
 }
 const nodeType: ISelectDropdown = {
   label: 'Node Type',
   options: [
     {
       id: 1,
-      type: 'type1'
+      name: 'type1'
     },
     {
       id: 2,
-      type: 'type2'
+      name: 'type2'
     },
     {
       id: 3,
-      type: 'type3'
+      name: 'type3'
     }
   ],
-  optionText: 'type'
+  optionText: 'name'
 }
 
 // Monitoring Location
 const monitoringLocationState = ref(undefined)
 const onMonitoringLocationSelect: fncArgVoid = (selectedItem: any) => {
-  emits('selectedItem', selectedItem)
+  // use store to query new list
 }
 const monitoringLocation: ISelectDropdown = {
   label: 'Monitoring Location',
   options: [
     {
       id: 1,
-      type: 'location1'
+      name: 'location1'
     },
     {
       id: 2,
-      type: 'location2'
+      name: 'location2'
     },
     {
       id: 3,
-      type: 'location3'
+      name: 'location3'
     }
   ],
-  optionText: 'type'
+  optionText: 'name'
 }
 
 // Severity
 const severityState = ref(undefined)
 const onSeveritySelect: fncArgVoid = (selectedItem: any) => {
-  emits('selectedItem', selectedItem)
+  // use store to query new list
 }
 const severity: ISelectDropdown = {
   label: 'Severity',
   options: [
     {
       id: 1,
-      type: 'severity1'
+      name: 'severity1'
     },
     {
       id: 2,
-      type: 'severity2'
+      name: 'severity2'
     },
     {
       id: 3,
-      type: 'severity3'
+      name: 'severity3'
     }
   ],
-  optionText: 'type'
+  optionText: 'name'
 }
 
-const getViewBox = (icon: any) => {
-  const iconProps = icon.render().props
-  return iconProps.viewBox || `0 0 ${iconProps.width} ${iconProps.height}`
-}
-// Sort / A-Z
+// Sort/A-Z
 const onSort = () => null
-const sort = {
-  title: 'Sort',
-  icon: Sort,
-  viewBox: getViewBox(Sort)
+const sort: IIcon = {
+  image: Sort,
+  title: 'Sort'
 }
 const onSortAlpha = () => null
-const sortAlpha = {
-  title: 'Sort Alpha',
-  icon: SortByAlpha,
-  viewBox: getViewBox(SortByAlpha)
+const sortAlpha: IIcon = {
+  image: SortByAlpha,
+  title: 'Sort Alpha'
 }
 
 // Expand/Collapse
-const isExpanded = ref(false)
-const expand = {
-  title: 'Expand',
-  icon: KeyboardDoubleArrowDown,
-  viewBox: getViewBox(KeyboardDoubleArrowDown)
+const expandCollapseBtn = ref('expand-btn')
+const expand: IIcon = {
+  image: KeyboardDoubleArrowDown,
+  title: 'Expand'
 }
-const collapse = {
-  title: 'Collapse',
-  icon: KeyboardDoubleArrowUp,
-  viewBox: getViewBox(KeyboardDoubleArrowUp)
+const collapse: IIcon = {
+  image: KeyboardDoubleArrowUp,
+  title: 'Collapse'
 }
+const expandCollapse = ref(computed<IIcon>(() => {
+  expandCollapseBtn.value = inventoryStore.isFilterOpen ? 'collapse-btn' : 'expand-btn'
+  return inventoryStore.isFilterOpen ? collapse : expand
+}))
+
 </script>
 
 <style lang="scss" scoped>
@@ -219,17 +206,18 @@ const collapse = {
       text-align: right;
     }
   }
-}
+  > .autocomplete {
+    min-width: 13rem;
+  }
 
-.autocomplete {
-  min-width: 13rem;
-}
-.feather-icon {
-  margin-top: var(variables.$spacing-xs);
-  font-size: 1.5rem;
-  color: var(variables.$disabled-text-on-surface);
-  &:hover {
-    color: var(variables.$primary-text-on-surface);
+  > .action-btn {
+    margin-right: 0;
+    padding: var(variables.$spacing-xxs);
+    font-size: 1.5rem;
+    color: var(variables.$secondary-text-on-surface);
+    &:hover {
+      color: var(variables.$disabled-text-on-surface);
+    }
   }
 }
 </style>

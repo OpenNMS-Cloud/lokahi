@@ -107,7 +107,7 @@ import TopologyModal from './TopologyModal.vue'
 import ICON_PATHS from './icons/iconPaths'
 import { IdLabelProps } from '@/types'
 
-interface d3Node extends Required<SimulationNodeDatum> {
+interface D3Node extends Required<SimulationNodeDatum> {
   id: string
 }
 
@@ -127,7 +127,7 @@ const tooltip = ref<HTMLDivElement>()
 const showTooltip = ref(false)
 const cancelTooltipDebounce = ref(false)
 const targetNodeId = ref('')
-const d3Nodes = ref<d3Node[]>([])
+const d3Nodes = ref<D3Node[]>([])
 const contextMenu = ref(null)
 const showContextMenu = ref(false)
 const contextNode = ref()
@@ -273,12 +273,11 @@ const eventHandlers: EventHandlers = {
     if(selectedView.value === ViewType.d3) {
       const nodeId = Object.keys(node)[0]
       const {x: nodeX, y: nodeY} = Object.values(node)[0]
-      d3Nodes.value.map(d3Node => {
+      d3Nodes.value.forEach(d3Node => {
         if(d3Node.id === nodeId) {
           d3Node.x = nodeX
           d3Node.y = nodeY
         }
-        return d3Node
       })
     }
 
@@ -306,7 +305,7 @@ const forceLayout = new ForceLayout({
       .force('y', d3.forceY(0).strength(0.01))
       .alphaMin(0.001)
 
-    d3Nodes.value = force.nodes() as d3Node[]
+    d3Nodes.value = force.nodes() as D3Node[]
 
     return force
   }

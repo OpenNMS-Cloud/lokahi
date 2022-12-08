@@ -1,10 +1,10 @@
 <template>
   <ul class="icon-action-list">
-    <IconAction :item="bubbleChartItem" :asLi="true" />
-    <IconAction :item="lineChartItem" :asLi="true" />
-    <IconAction :item="pieChartItem" :asLi="true" />
-    <IconAction :item="warningItem" :asLi="true" />
-    <IconAction :item="deleteItem" :asLi="true" />
+    <li @click="onBubbleChart" data-test="bubble-chart"><Icon :icon="bubbleChartIcon" /></li>
+    <li @click="onLineChart" data-test="line-chart"><Icon :icon="lineChartIcon" /></li>
+    <li @click="onPieChart" data-test="pie-chart"><Icon :icon="pieChartIcon" /></li>
+    <li @click="onWarning" data-test="warning"><Icon :icon="warningIcon" /></li>
+    <li @click="onDelete" data-test="delete"><Icon :icon="deleteIcon" /></li>
   </ul>
 </template>
 
@@ -14,60 +14,64 @@ import MultilineChart from '@material-design-icons/svg/outlined/multiline_chart.
 import PieChart from '@material-design-icons/svg/outlined/pie_chart.svg'
 import Warning from '@featherds/icon/notification/Warning'
 import Delete from '@featherds/icon/action/Delete'
-import IconAction from '@/components/Common/IconAction.vue'
+import { IIcon } from '@/types'
 
 const onBubbleChart = () => {
   console.log('bubble chart')
 }
-const bubbleChartItem = {
-  icon: BubbleChart,
-  title: 'Bubble Chart',
-  action: onBubbleChart
+const bubbleChartIcon: IIcon = {
+  image: BubbleChart,
+  title: 'Bubble Chart'
 }
 
 const onLineChart = () => {
   console.log('line chart')
 }
-const lineChartItem = {
-  icon: MultilineChart,
-  title: 'Line Chart',
-  action: onLineChart
+const lineChartIcon: IIcon = {
+  image: MultilineChart,
+  title: 'Line Chart'
 }
 
 const onPieChart = () => {
   console.log('pie chart')
 }
-const pieChartItem = {
-  icon: PieChart,
-  title: 'Pie Chart',
-  action: onPieChart
+const pieChartIcon: IIcon = {
+  image: PieChart,
+  title: 'Pie Chart'
 }
 
 const onWarning = () => {
   console.log('warning')
 }
-const warningItem = {
-  icon: markRaw(Warning),
-  title: 'Warning',
-  action: onWarning
+const warningIcon: IIcon = {
+  image: markRaw(Warning),
+  title: 'Warning'
 }
 
 const onDelete = () => {
   console.log('delete')
 }
-const deleteItem = {
-  icon: markRaw(Delete),
-  title: 'Delete',
-  action: onDelete
+const deleteIcon: IIcon = {
+  image: markRaw(Delete),
+  title: 'Delete'
 }
 </script>
 
 <style lang="scss" scoped>
-.icon-action-list {
-  list-style-type: none;
+@use "@featherds/styles/themes/variables";
+
+ul.icon-action-list {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   gap: 0.2rem;
+  > li {
+    padding: var(variables.$spacing-xxs);
+    font-size: 1.5rem;
+    color: var(variables.$secondary-text-on-surface);
+    &:hover {
+      color: var(variables.$disabled-text-on-surface);
+    }
+  }
 }
 </style>

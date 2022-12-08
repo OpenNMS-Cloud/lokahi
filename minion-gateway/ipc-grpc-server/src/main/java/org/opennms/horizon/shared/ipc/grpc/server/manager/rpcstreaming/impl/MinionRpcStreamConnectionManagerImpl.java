@@ -3,6 +3,7 @@ package org.opennms.horizon.shared.ipc.grpc.server.manager.rpcstreaming.impl;
 import io.grpc.stub.StreamObserver;
 import java.util.concurrent.ExecutorService;
 import org.opennms.cloud.grpc.minion.RpcRequestProto;
+import org.opennms.horizon.shared.grpc.common.TenantIDGrpcServerInterceptor;
 import org.opennms.horizon.shared.ipc.grpc.server.manager.MinionInfo;
 import org.opennms.horizon.shared.ipc.grpc.server.manager.MinionManager;
 import org.opennms.horizon.shared.ipc.grpc.server.manager.RpcConnectionTracker;
@@ -22,22 +23,25 @@ public class MinionRpcStreamConnectionManagerImpl implements MinionRpcStreamConn
     private final RpcRequestTracker rpcRequestTracker;
     private final MinionManager minionManager;
     private final ExecutorService responseHandlerExecutor;
-
+    private final TenantIDGrpcServerInterceptor tenantIDGrpcServerInterceptor;
 
 //========================================
 // Constructor
 //----------------------------------------
 
     public MinionRpcStreamConnectionManagerImpl(
-            RpcConnectionTracker rpcConnectionTracker,
-            RpcRequestTracker rpcRequestTracker,
-            MinionManager minionManager,
-            ExecutorService responseHandlerExecutor) {
+        RpcConnectionTracker rpcConnectionTracker,
+        RpcRequestTracker rpcRequestTracker,
+        MinionManager minionManager,
+        ExecutorService responseHandlerExecutor,
+        TenantIDGrpcServerInterceptor tenantIDGrpcServerInterceptor
+    ) {
 
         this.rpcConnectionTracker = rpcConnectionTracker;
         this.rpcRequestTracker = rpcRequestTracker;
         this.minionManager = minionManager;
         this.responseHandlerExecutor = responseHandlerExecutor;
+        this.tenantIDGrpcServerInterceptor = tenantIDGrpcServerInterceptor;
     }
 
 
@@ -64,7 +68,8 @@ public class MinionRpcStreamConnectionManagerImpl implements MinionRpcStreamConn
                         rpcConnectionTracker,
                         rpcRequestTracker,
                         responseHandlerExecutor,
-                        minionManager
+                        minionManager,
+                        tenantIDGrpcServerInterceptor
                         );
 
         InboundRpcAdapter result =

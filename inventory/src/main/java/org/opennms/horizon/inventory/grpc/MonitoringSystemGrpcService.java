@@ -62,7 +62,7 @@ public class MonitoringSystemGrpcService extends MonitoringSystemServiceGrpc.Mon
     @Override
     public void getMonitoringSystemById(StringValue systemId, StreamObserver<MonitoringSystemDTO> responseObserver) {
         Optional<MonitoringSystemDTO> monitoringSystem = tenantLookup.lookupTenantId(Context.current())
-            .map(tenant_id -> service.findBySystemId(systemId.getValue(), tenant_id))
+            .map(tenantId -> service.findBySystemId(systemId.getValue(), tenantId))
             .orElseThrow();
         if(monitoringSystem.isPresent()) {
             responseObserver.onNext(monitoringSystem.get());

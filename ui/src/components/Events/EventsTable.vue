@@ -1,11 +1,4 @@
 <template>
-  <!-- 
-    View all events / Search (form) / Severity legend
-    Search (event text @ time)
-    Filter
-    Pagination
-    columns: ID, Severity, Time, Source Location, System-ID, Node, Node Location, Interface, Service, alarm ID 
-  -->
   <TableCard>
     <div class="header">
       <div class="title-container">
@@ -31,33 +24,23 @@
       </div>
     </div>
     <div class="container">
-      <table class="tl1 tl2 tc3 tc4 tc5 data-table" summary="Events" data-test="data-table">
+      <table class="data-table" aria-label="Events Table" data-test="data-table">
         <thead>
           <tr>
-            <th scope="col" data-test="col-id">ID</th>
-            <th scope="col" data-test="col-severity">Severity</th>
-            <th scope="col" data-test="col-time">Time</th>
-            <th scope="col" data-test="col-source-location">Source Location</th>
-            <th scope="col" data-test="col-system-id">System-ID</th>
-            <th scope="col" data-test="col-node">Node</th>
-            <th scope="col" data-test="col-node-location">Node Location</th>
-            <th scope="col" data-test="col-interface">Interface</th>
-            <th scope="col" data-test="col-service">Service</th>
-            <th scope="col" data-test="col-alarm-id">Alarm ID</th>
+            <th scope="col">ID</th>
+            <th scope="col">Time</th>
+            <th scope="col">UEI</th>
+            <th scope="col">Node Id</th>
+            <th scope="col">IP Address</th>
           </tr>
         </thead>
         <TransitionGroup name="data-table" tag="tbody">
           <tr v-for="event in nodeData.events" :key="event.id as number" data-test="data-item">
             <td>{{ event.id }}</td>
-            <td>{{ event.severity }}</td>
-            <td>{{ event.time }}</td>
-            <td>{{ event.source }}</td>
-            <td>--</td>
-            <td>{{ event.nodeLabel }}</td>
-            <td>{{ event.location }}</td>
-            <td>{{ event.ipAddress || '--' }}</td>
-            <td>--</td>
-            <td>--</td>
+            <td>{{ event.producedTime }}</td>
+            <td>{{ event.uei }}</td>
+            <td>{{ event.nodeId }}</td>
+            <td>{{ event.ipAddress }}</td>
           </tr>
         </TransitionGroup>
       </table>
@@ -91,7 +74,7 @@ const total = ref(0)
 const updatePageSize = (v: number) => { pageSize.value = v }
   
 const nodeData = computed(() => {
-  const events = nodeStatusStore.fetchedData?.listEvents?.events?.filter((event: any) => event.nodeId == route.params.id)
+  const events = nodeStatusStore.fetchedData?.events
 
   total.value = events?.length || 0
 

@@ -55,7 +55,7 @@
           </div>
           <div data-test="col-status">
             <pre class="title">Status</pre>
-            <div class="value bg-status" :class="node.statusBgColor">{{ node.status }}</div>
+            <div class="value bg-status" :class="node.statusBgColor">{{ node.status || '--' }}</div>
           </div>
         </div>
       </TransitionGroup>

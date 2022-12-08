@@ -15,144 +15,147 @@ limitations under the License.
 package v1alpha1
 
 import (
-    metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // +kubebuilder:object:generate=true
 
 // OpenNMSSpec defines the desired state of OpenNMS
 type OpenNMSSpec struct {
-    // Domain name used in ingress rule
-    Host string `json:"host,omitempty"`
+	// Domain name used in ingress rule
+	Host string `json:"host,omitempty"`
 
-    //HTTP port number the instance will be exposed on
-    HttpPort int `json:"httpPort"`
+	//HTTP port number the instance will be exposed on
+	HttpPort int `json:"httpPort"`
 
-    //HTTPS port number the instance will be exposed on
-    HttpsPort int `json:"httpsPort"`
+	//HTTPS port number the instance will be exposed on
+	HttpsPort int `json:"httpsPort"`
 
-    // K8s namespace to use
-    Namespace string `json:"namespace"`
+	// K8s namespace to use
+	Namespace string `json:"namespace"`
 
-    // Only deploy the instance, do not run recurring updates on it
-    DeployOnly bool `json:"deployOnly,omitempty"`
+	// Only deploy the instance, do not run recurring updates on it
+	DeployOnly bool `json:"deployOnly,omitempty"`
 
-    // Whether TLS is enabled for this instance
-    TLSEnabled bool `json:"tlsEnabled,omitempty"`
+	// Whether TLS is enabled for this instance
+	TLSEnabled bool `json:"tlsEnabled,omitempty"`
 
-    // Set the default credentials for the instance
-    Credentials Credentials `json:"credentials,omitempty"`
+	// Set the default credentials for the instance
+	Credentials Credentials `json:"credentials,omitempty"`
 
-    // Defines service values for Core service
-    Core BaseServiceResources `json:"core,omitempty"`
+	// Defines service values for Core service
+	Core BaseServiceResources `json:"core,omitempty"`
 
-    // Defines service values for API service
-    API BaseServiceResources `json:"api,omitempty"`
+	// Defines service values for API service
+	API BaseServiceResources `json:"api,omitempty"`
 
-    // Defines service values for UI service
-    UI BaseServiceResources `json:"ui,omitempty"`
+	// Defines service values for UI service
+	UI BaseServiceResources `json:"ui,omitempty"`
 
-    // Defines service values for the Minion
-    Minion BaseServiceResources `json:"minion,omitempty"`
+	// Defines service values for the Minion
+	Minion BaseServiceResources `json:"minion,omitempty"`
 
-    // Defines service values for the Minion Gateway
-    MinionGateway BaseServiceResources `json:"minionGateway,omitempty"`
+	// Defines service values for the Minion Gateway
+	MinionGateway BaseServiceResources `json:"minionGateway,omitempty"`
 
-    // Defines service values for Inventory service
-    Inventory BaseServiceResources `json:"inventory,omitempty"`
+	// Defines service values for Inventory service
+	Inventory BaseServiceResources `json:"inventory,omitempty"`
 
-    // Defines service values for Notification service
-    Notification BaseServiceResources `json:"notification,omitempty"`
+	// Defines service values for Alarm service
+	Alarm BaseServiceResources `json:"alarm,omitempty"`
 
-    // Defines service values for MetricsProcessor service
-    MetricsProcessor BaseServiceResources `json:"metricsProcessor,omitempty"`
+	// Defines service values for Notification service
+	Notification BaseServiceResources `json:"notification,omitempty"`
 
-    // Defines service values for Postgres
-    Postgres BaseServiceResources `json:"postgres,omitempty"`
+	// Defines service values for MetricsProcessor service
+	MetricsProcessor BaseServiceResources `json:"metricsProcessor,omitempty"`
 
-    // Defines service values for Events service
-    Events BaseServiceResources `json:"events,omitempty"`
+	// Defines service values for Postgres
+	Postgres BaseServiceResources `json:"postgres,omitempty"`
 
-    // Defines service values for Keycloak
-    Keycloak BaseServiceResources `json:"keycloak,omitempty"`
+	// Defines service values for Events service
+	Events BaseServiceResources `json:"events,omitempty"`
 
-    // Defines service values for Grafana
-    Grafana BaseServiceResources `json:"grafana,omitempty"`
+	// Defines service values for Keycloak
+	Keycloak BaseServiceResources `json:"keycloak,omitempty"`
 
-    // Defines the logic of ONMS image update
-    ImageUpdateConfig ImageUpdateConfig `json:"imageUpdate,omitempty"`
+	// Defines service values for Grafana
+	Grafana BaseServiceResources `json:"grafana,omitempty"`
+
+	// Defines the logic of ONMS image update
+	ImageUpdateConfig ImageUpdateConfig `json:"imageUpdate,omitempty"`
 }
 
 // Timeseries - defines the timeseries DB backend to use
 type Timeseries struct {
-    Mode   string `json:"mode,omitempty"`
-    Host   string `json:"host,omitempty"`
-    Port   string `json:"port,omitempty"`
-    ApiKey string `json:"apiKey,omitempty"`
+	Mode   string `json:"mode,omitempty"`
+	Host   string `json:"host,omitempty"`
+	Port   string `json:"port,omitempty"`
+	ApiKey string `json:"apiKey,omitempty"`
 }
 
 // BaseServiceResources - defines basic resource needs of a service
 type BaseServiceResources struct {
-    // Image tag version of OpenNMS.
-    Image string `json:"image,omitempty"`
-    MEM   string `json:"mem,omitempty"`
-    Disk  string `json:"disk,omitempty"`
-    CPU   string `json:"cpu,omitempty"`
+	// Image tag version of OpenNMS.
+	Image string `json:"image,omitempty"`
+	MEM   string `json:"mem,omitempty"`
+	Disk  string `json:"disk,omitempty"`
+	CPU   string `json:"cpu,omitempty"`
 }
 
 type Credentials struct {
-    AdminPassword string `json:"adminPassword"`
-    UserPassword  string `json:"userPassword"`
+	AdminPassword string `json:"adminPassword"`
+	UserPassword  string `json:"userPassword"`
 }
 
 // +kubebuilder:object:generate=true
 
 // OpenNMSStatus - defines the observed state of OpenNMS
 type OpenNMSStatus struct {
-    Image     ImageStatus     `json:"image,omitempty"`
-    Readiness ReadinessStatus `json:"readiness,omitempty"`
-    Nodes     []string        `json:"nodes,omitempty"`
+	Image     ImageStatus     `json:"image,omitempty"`
+	Readiness ReadinessStatus `json:"readiness,omitempty"`
+	Nodes     []string        `json:"nodes,omitempty"`
 }
 
 // ImageUpdateConfig - defines current status of used image for OpenNMS container
 type ImageUpdateConfig struct {
-    // can have values of now/none
-    Update string `json:"update,omitempty"`
+	// can have values of now/none
+	Update string `json:"update,omitempty"`
 }
 
 // +kubebuilder:object:generate=true
 
 // ImageStatus - defines current status of used image for OpenNMS container
 type ImageStatus struct {
-    // true if latest image used, false otherwise
-    IsLatest bool `json:"isLatest"`
-    // timestamp of a last image check in DockerHub
-    CheckedAt string `json:"checkedAt,omitempty"`
-    // list of services that have updates available
-    ServicesToUpdate string `json:"servicesToUpdate,omitempty"`
+	// true if latest image used, false otherwise
+	IsLatest bool `json:"isLatest"`
+	// timestamp of a last image check in DockerHub
+	CheckedAt string `json:"checkedAt,omitempty"`
+	// list of services that have updates available
+	ServicesToUpdate string `json:"servicesToUpdate,omitempty"`
 }
 
 // +kubebuilder:object:generate=true
 
 // ReadinessStatus - the ready status of the ONMS instance
 type ReadinessStatus struct {
-    // if the ONMS instance is ready
-    Ready bool `json:"ready,omitempty"`
-    // reason an ONMS instance isn't ready
-    Reason string `json:"reason,omitempty"`
-    // the time the `ready` flag was last updated
-    Timestamp string `json:"timestamp,omitempty"`
-    // list of readinesses of the constituent services
-    Services []ServiceStatus `json:"services,omitempty"`
+	// if the ONMS instance is ready
+	Ready bool `json:"ready,omitempty"`
+	// reason an ONMS instance isn't ready
+	Reason string `json:"reason,omitempty"`
+	// the time the `ready` flag was last updated
+	Timestamp string `json:"timestamp,omitempty"`
+	// list of readinesses of the constituent services
+	Services []ServiceStatus `json:"services,omitempty"`
 }
 
 type ServiceStatus struct {
-    // if the service is ready
-    Ready bool `json:"ready"`
-    // reason a service isn't ready
-    Reason string `json:"reason"`
-    // the time the `ready` flag was last updated
-    Timestamp string `json:"timestamp,omitempty"`
+	// if the service is ready
+	Ready bool `json:"ready"`
+	// reason a service isn't ready
+	Reason string `json:"reason"`
+	// the time the `ready` flag was last updated
+	Timestamp string `json:"timestamp,omitempty"`
 }
 
 // +kubebuilder:object:root=true
@@ -160,22 +163,22 @@ type ServiceStatus struct {
 
 // OpenNMS - is the Schema for the opennms API
 type OpenNMS struct {
-    metav1.TypeMeta   `json:",inline"`
-    metav1.ObjectMeta `json:"metadata,omitempty"`
+	metav1.TypeMeta   `json:",inline"`
+	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-    Spec   OpenNMSSpec   `json:"spec,omitempty"`
-    Status OpenNMSStatus `json:"status,omitempty"`
+	Spec   OpenNMSSpec   `json:"spec,omitempty"`
+	Status OpenNMSStatus `json:"status,omitempty"`
 }
 
 // +kubebuilder:object:root=true
 
 // OpenNMSList - contains a list of OpenNMS
 type OpenNMSList struct {
-    metav1.TypeMeta `json:",inline"`
-    metav1.ListMeta `json:"metadata,omitempty"`
-    Items           []OpenNMS `json:"items"`
+	metav1.TypeMeta `json:",inline"`
+	metav1.ListMeta `json:"metadata,omitempty"`
+	Items           []OpenNMS `json:"items"`
 }
 
 func init() {
-    SchemeBuilder.Register(&OpenNMS{}, &OpenNMSList{})
+	SchemeBuilder.Register(&OpenNMS{}, &OpenNMSList{})
 }

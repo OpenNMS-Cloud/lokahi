@@ -99,7 +99,7 @@ const defaultDevice: DeviceCreateDtoInput = {
   // latitude: undefined,
   // longitude: undefined,
   // monitoringArea: undefined,
-  managementIp: undefined,
+  managementIp: undefined
   // port: undefined,
   // snmpCommunityString: undefined
 }

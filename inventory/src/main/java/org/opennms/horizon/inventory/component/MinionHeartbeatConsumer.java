@@ -51,13 +51,15 @@ import lombok.extern.slf4j.Slf4j;
 @PropertySource("classpath:application.yml")
 public class MinionHeartbeatConsumer {
     private final MonitoringSystemService service;
+    private final MinionRpcManager minionRpc;
     @KafkaListener(topics = "${kafka.topics.minion-heartbeat}", concurrency = "1")
     public void receiveMessage(@Payload byte[] data, @Headers Map<String, Object> headers) {
         try {
             HeartbeatMessage message = HeartbeatMessage.parseFrom(data);
             log.info("Received heartbeat message for minion with id {} and location {}", message.getIdentity().getSystemId(), message.getIdentity().getLocation());
             String tenantId = Optional.ofNullable(headers.get(Constants.TENANT_ID_KEY)).map(o -> new String((byte[])o)).orElse(Constants.DEFAULT_TENANT_ID);
-            service.addMonitoringSystemFromHeartbeat(message, tenantId);
+            Optional<Long> newCreatedId = service.addMonitoringSystemFromHeartbeat(message, tenantId);
+            newCreatedId.ifPresent(minionRpc::addSystem);
         } catch (InvalidProtocolBufferException e) {
             log.error("Error while parsing heartbeat message", e);
         }

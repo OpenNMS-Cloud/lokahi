@@ -1,0 +1,43 @@
+name: feature-alarm
+
+on:
+  pull_request:
+    paths:
+      - 'alarm/**'
+
+jobs:
+
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+
+      - name: init
+        run: |
+
+          echo "For init steps."
+
+      - name: parent-pom
+        id: action-parent-pom
+        uses: ./.github/actions/parent-pom
+        with:
+          dir-location: 'parent-pom'
+          enable-sonar-scan: false
+
+      - name: shared-lib
+        id: action-shared-lib
+        uses: ./.github/actions/shared-lib
+        with:
+          dir-location: 'shared-lib'
+          enable-sonar-scan: false
+
+      - name: feature-alarm
+        id: action-feature-alarm
+        uses: ./.github/actions/alarm
+        with:
+          dir-location: 'alarm'
+          enable-sonar-scan: true
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          sonar-token: ${{ secrets.SONAR_TOKEN }}

@@ -1,0 +1,20 @@
+fragment NodesParts on Query {
+  findAllNodes {
+    createTime
+    id
+    ipInterfaces {
+      id
+      ipAddress
+      nodeId
+      tenantId
+    }
+    location {
+      id
+      location
+      tenantId
+    }
+    monitoringLocationId
+    nodeLabel
+    tenantId
+  }
+}

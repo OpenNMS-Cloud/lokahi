@@ -1,14 +1,21 @@
 <template>
-  <PageHeader :heading="'Network Inventory'" class="mx-l" />
-  <FeatherTabContainer class="tab-container">
+  <PageHeader :heading="heading" class="header" data-test="page-header" />
+  <FeatherTabContainer class="tab-container" data-test="tab-container">
     <template v-slot:tabs>
       <FeatherTab v-for="tab in tabs" :key="tab.label">{{ tab.label }}</FeatherTab>
     </template>
-    <FeatherTabPanel v-for="tab in tabs" :key="tab.label">
-      <Filter />
-      <DetectedNodesTabContent v-if="tab.type === NodeDetailContentType.DETECTED" :tab="tab" />
-      <MonitoredNodesTabContent v-else :tab="tab" />
+    <FeatherTabPanel>
+      <Filter v-if="tabMonitoredContent.length" />
+      <MonitoredNodesTabContent v-if="tabMonitoredContent.length" :tabContent="tabMonitoredContent" />
     </FeatherTabPanel>
+    <!-- <FeatherTabPanel>
+      <Filter v-if="tabUnmonitoredContent.length" />
+      <MonitoredNodesTabContent :tabContent="tabUnmonitoredContent" />
+    </FeatherTabPanel> -->
+    <!-- <FeatherTabPanel>
+      <Filter v-if="tabDetectedContent.length" />
+      <DetectedNodesTabContent :tabContent="tabDetectedContent" />
+    </FeatherTabPanel> -->
   </FeatherTabContainer>
 </template>
 
@@ -19,151 +26,218 @@ import {
   FeatherTabPanel
 } from '@featherds/tabs'
 import Filter from '@/components/Inventory/Filter.vue'
-import DetectedNodesTabContent from '@/components/Inventory/DetectedNodesTabContent.vue'
 import MonitoredNodesTabContent from '@/components/Inventory/MonitoredNodesTabContent.vue'
-import { NodeDetailContentType, TimeUnit } from '@/types'
-import { TabNode } from '@/types/inventory'
+// import DetectedNodesTabContent from '@/components/Inventory/DetectedNodesTabContent.vue'
+// import { TimeUnit } from '@/types'
+import { NodeContent } from '@/types/inventory'
+import { useInventoryQueries } from '@/store/Queries/inventoryQueries'
 
-const tabs: TabNode[] = [
+/* const unmonitoredContent: NodeContent[] = [
   {
-    type: NodeDetailContentType.MONITORED,
-    label: 'Monitored Nodes',
-    nodes: [
+    id: 1,
+    label: 'Unmonitored Node 1',
+    status: '',
+    metrics: [
       {
-        id: 1,
-        name: 'Monitored Node 1',
-        metrics: [
-          {
-            type: 'latency',
-            timestamp: 9,
-            timeUnit: TimeUnit.MSecs,
-            status: 'UP'
-          },
-          {
-            type: 'uptime',
-            timestamp: 1667930274.660,
-            timeUnit: TimeUnit.Secs,
-            status: 'DOWN'
-          },
-          {
-            type: 'status',
-            status: 'DOWN'
-          }
-        ],
-        anchor: {
-          profileValue: 75,
-          profileLink: 'goto',
-          locationValue: 'DefaultMinion',
-          locationLink: 'goto',
-          ipInterfaceValue: 25,
-          ipInterfaceLink: 'goto',
-          tagValue: 100,
-          tagLink: 'goto'
-        }
+        type: 'latency',
+        label: 'Latency',
+        timestamp: 9,
+        timeUnit: TimeUnit.MSecs,
+        status: 'UP'
       },
       {
-        id: 2,
-        name: 'Monitored Node 2',
-        metrics: [
-          {
-            type: 'latency',
-            timestamp: 9,
-            timeUnit: TimeUnit.MSecs,
-            status: 'UP'
-          },
-          {
-            type: 'uptime',
-            timestamp: 1667930274.660,
-            timeUnit: TimeUnit.Secs,
-            status: 'DOWN'
-          },
-          {
-            type: 'status',
-            status: 'DOWN'
-          }
-        ],
-        anchor: {
-          profileValue: 75,
-          profileLink: 'goto',
-          locationValue: 'DefaultMinion',
-          locationLink: 'goto',
-          ipInterfaceValue: 25,
-          ipInterfaceLink: 'goto',
-          tagValue: 100,
-          tagLink: 'goto'
-        }
+        type: 'uptime',
+        label: 'Uptime',
+        timestamp: 1667930274.660,
+        timeUnit: TimeUnit.Secs,
+        status: '--'
       },
       {
-        id: 3,
-        name: 'Monitored Node 3',
-        metrics: [
-          {
-            type: 'latency',
-            timestamp: 9,
-            timeUnit: TimeUnit.MSecs,
-            status: 'UP'
-          },
-          {
-            type: 'uptime',
-            timestamp: 1667930274.660,
-            timeUnit: TimeUnit.Secs,
-            status: 'DOWN'
-          },
-          {
-            type: 'status',
-            status: 'DOWN'
-          }
-        ],
-        anchor: {
-          profileValue: 75,
-          profileLink: 'goto',
-          locationValue: 'DefaultMinion',
-          locationLink: 'goto',
-          ipInterfaceValue: 25,
-          ipInterfaceLink: 'goto',
-          tagValue: 100,
-          tagLink: 'goto'
-        }
-      },
-      {
-        id: 4,
-        name: 'Monitored Node 4',
-        metrics: [
-          {
-            type: 'latency',
-            timestamp: 9,
-            timeUnit: TimeUnit.MSecs,
-            status: 'UP'
-          },
-          {
-            type: 'uptime',
-            timestamp: 1667930274.660,
-            timeUnit: TimeUnit.Secs,
-            status: 'DOWN'
-          },
-          {
-            type: 'status',
-            status: 'DOWN'
-          }
-        ],
-        anchor: {
-          profileValue: 75,
-          profileLink: 'goto',
-          locationValue: 'DefaultMinion',
-          locationLink: 'goto',
-          ipInterfaceValue: 25,
-          ipInterfaceLink: 'goto',
-          tagValue: 100,
-          tagLink: 'goto'
-        }
+        type: 'status',
+        label: 'Status',
+        status: 'DOWN'
       }
-    ]
+    ],
+    anchor: {
+      profileValue: 70,
+      profileLink: 'goto',
+      locationValue: 'Default',
+      locationLink: 'goto',
+      managementIpValue: '0.0.0.0',
+      managementIpLink: 'goto',
+      tagValue: 10,
+      tagLink: 'goto'
+    }
+  },
+  {
+    id: 2,
+    label: 'Unmonitored Node 2',
+    status: '',
+    metrics: [
+      {
+        type: 'latency',
+        label: 'Latency',
+        timestamp: 89,
+        timeUnit: TimeUnit.MSecs,
+        status: 'UP'
+      },
+      {
+        type: 'uptime',
+        label: 'Uptime',
+        timestamp: 1667930274.660,
+        timeUnit: TimeUnit.Secs,
+        status: 'DOWN'
+      },
+      {
+        type: 'status',
+        label: 'Status',
+        status: '--'
+      }
+    ],
+    anchor: {
+      profileValue: 30,
+      profileLink: 'goto',
+      locationValue: 'DefaultMinion',
+      locationLink: 'goto',
+      managementIpValue: '0.0.0.0',
+      managementIpLink: 'goto',
+      tagValue: 49,
+      tagLink: 'goto'
+    }
   }
+] */
+/* const detectedContent: NodeContent[] = [
+  {
+    id: 1,
+    label: 'Detected Node 1',
+    status: '',
+    metrics: [
+      {
+        type: 'latency',
+        label: 'Latency',
+        timestamp: '--',
+        timeUnit: TimeUnit.MSecs,
+        status: '--'
+      },
+      {
+        type: 'uptime',
+        label: 'Uptime',
+        timestamp: 1667930274.660,
+        timeUnit: TimeUnit.Secs,
+        status: 'UP'
+      },
+      {
+        type: 'status',
+        label: 'Status',
+        status: 'DOWN'
+      }
+    ],
+    anchor: {
+      profileValue: 40,
+      profileLink: 'goto',
+      locationValue: 'DefaultMinion',
+      locationLink: 'goto',
+      managementIpValue: '10.0.0.1',
+      managementIpLink: 'goto',
+      tagValue: 20,
+      tagLink: 'goto'
+    }
+  },
+  {
+    id: 2,
+    label: 'Detected Node 2',
+    status: '',
+    metrics: [
+      {
+        type: 'latency',
+        label: 'Latency',
+        timestamp: 50,
+        timeUnit: TimeUnit.MSecs,
+        status: 'DOWN'
+      },
+      {
+        type: 'uptime',
+        label: 'Uptime',
+        timestamp: 1667930274.660,
+        timeUnit: TimeUnit.Secs,
+        status: 'UP'
+      },
+      {
+        type: 'status',
+        label: 'Status',
+        status: '--'
+      }
+    ],
+    anchor: {
+      profileValue: 53,
+      profileLink: 'goto',
+      locationValue: 'DefaultMinion',
+      locationLink: 'goto',
+      managementIpValue: '0.0.0.0',
+      managementIpLink: 'goto',
+      tagValue: 60,
+      tagLink: 'goto'
+    }
+  },
+  {
+    id: 3,
+    label: 'Detected Node 3',
+    status: '',
+    metrics: [
+      {
+        type: 'latency',
+        label: 'Latency',
+        timestamp: 19,
+        timeUnit: TimeUnit.MSecs,
+        status: 'UP'
+      },
+      {
+        type: 'uptime',
+        label: 'Uptime',
+        timestamp: 1667930274.660,
+        timeUnit: TimeUnit.Secs,
+        status: '--'
+      },
+      {
+        type: 'status',
+        label: 'Status',
+        status: '--'
+      }
+    ],
+    anchor: {
+      profileValue: 40,
+      profileLink: 'goto',
+      locationValue: 'DefaultMinion',
+      locationLink: 'goto',
+      managementIpValue: '11.1.1.1',
+      managementIpLink: 'goto',
+      tagValue: 62,
+      tagLink: 'goto'
+    }
+  }
+] */
+
+const heading = 'Network Inventory'
+const tabs = [
+  { label: 'Monitored Nodes' },
+  { label: 'Umonitored Nodes' },
+  { label: 'Detected Nodes' }
 ]
+
+const inventoryQueries = useInventoryQueries()
+const tabMonitoredContent = computed((): NodeContent[] => inventoryQueries.nodes)
+
+// const tabUnmonitoredContent = unmonitoredContent
+// const tabDetectedContent = detectedContent
 </script>
 
 <style lang="scss" scoped>
 @use '@featherds/styles/themes/variables';
+
+.header {
+  margin-right: var(variables.$spacing-l);
+  margin-left: var(variables.$spacing-l);
+}
 
 .tab-container {
   margin: 0 var(variables.$spacing-l);

@@ -17,7 +17,7 @@ describe('Events queries', () => {
       useQuery: vi.fn().mockImplementation(() => ({
         data: { 
           value: { 
-            listEvents: eventsFixture(),
+            events: eventsFixture(),
             node: nodeFixture()
           }}
       }))
@@ -27,7 +27,7 @@ describe('Events queries', () => {
     nodeStatusQueries.setNodeId(2)
 
     const expectedFetchedData = {
-      listEvents: eventsFixture(),
+      events: eventsFixture(),
       node: nodeFixture()
     }
     expect(nodeStatusQueries.fetchedData).toStrictEqual(expectedFetchedData)

@@ -11,5 +11,8 @@ spec:
     - port: {{ .Values.OpenNMS.Events.Port }}
       protocol: TCP
       name: http
+    - port: {{ .Values.OpenNMS.Events.GrpcPort }}
+      protocol: TCP
+      name: grpc
   selector:
     app: {{ .Values.OpenNMS.Events.ServiceName }}

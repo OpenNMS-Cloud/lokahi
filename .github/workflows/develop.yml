@@ -191,6 +191,16 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           sonar-token: ${{ secrets.SONAR_TOKEN }}
 
+      - name: feature-minion-gateway-grpc-proxy
+        id: action-minion-gateway-grpc-proxy
+        uses: ./.github/actions/minion-gateway-grpc-proxy
+        with:
+          dir-location: 'minion-gateway-grpc-proxy'
+          # only enable scans on develop branch, scans on other branches are covered by other workflows
+          enable-sonar-scan: ${{ github.event.ref == 'refs/heads/develop' }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          sonar-token: ${{ secrets.SONAR_TOKEN }}
+
       - name: external-it
         id: action-external-it
         uses: ./.github/actions/external-it

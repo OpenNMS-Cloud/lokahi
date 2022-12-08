@@ -118,7 +118,7 @@ public class LocationGrpcIntegrationTest {
 
 
     @Test
-    public void testListLocations() throws VerificationException {
+    void testListLocations() throws VerificationException {
         doReturn(Arrays.asList(location1, location2)).when(mockLocationService).findByTenantId(tenantId);
         Metadata headers = new Metadata();
         headers.put(Constants.AUTHORIZATION_METADATA_KEY, authHeader);
@@ -130,7 +130,7 @@ public class LocationGrpcIntegrationTest {
     }
 
     @Test
-    public void testListLocationsByIds() throws VerificationException {
+    void testListLocationsByIds() throws VerificationException {
         List<Long> ids = Arrays.asList(1L, 2L);
         doReturn(Arrays.asList(location1, location2)).when(mockLocationService).findByLocationIds(ids);
         Metadata headers = new Metadata();

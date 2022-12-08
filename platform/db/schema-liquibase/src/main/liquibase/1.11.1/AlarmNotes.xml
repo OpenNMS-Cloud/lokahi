@@ -27,10 +27,10 @@
         <addPrimaryKey tableName="memos" columnNames="id"/>
         <addColumn tableName="alarms">
             <column name="stickymemo" type="integer"/>
-        </addColumn>        
-        
+        </addColumn>
+
         <addForeignKeyConstraint baseTableName="alarms" baseColumnNames="stickymemo" constraintName="fk_stickyMemo" referencedTableName="memos" referencedColumnNames="id" onDelete="CASCADE"/>
-         
+
         <rollback>
             <dropSequence sequenceName="memonxtid"/>
             <dropTable tableName="memos"/>

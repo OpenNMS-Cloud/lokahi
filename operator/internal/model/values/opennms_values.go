@@ -15,51 +15,66 @@ limitations under the License.
 package values
 
 type OpenNMSValues struct {
-    Core             CoreValues             `yaml:"Core"`
-    API              ServiceValues          `yaml:"API"`
-    UI               ServiceValues          `yaml:"UI"`
-    Minion           MinionValues           `yaml:"Minion"`
-    MinionGateway    MinionGatewayValues    `yaml:"MinionGateway"`
-    Inventory        InventoryValues        `yaml:"Inventory"`
-    Notification     ServiceValues          `yaml:"Notification"`
-    MetricsProcessor MetricsProcessorValues `yaml:"MetricsProcessor"`
-    Events           ServiceValues          `yaml:"Events"`
+	Core                   CoreValues             `yaml:"Core"`
+	API                    ServiceValues          `yaml:"API"`
+	UI                     ServiceValues          `yaml:"UI"`
+	Minion                 MinionValues           `yaml:"Minion"`
+	MinionGateway          MinionGatewayValues    `yaml:"MinionGateway"`
+	MinionGatewayGrpcProxy MGGPValues             `yaml:"MinionGatewayGrpcProxy"`
+	Inventory              InventoryValues        `yaml:"Inventory"`
+	Alarm                  AlarmValues            `yaml:"Alarm"`
+	Notification           ServiceValues          `yaml:"Notification"`
+	MetricsProcessor       MetricsProcessorValues `yaml:"MetricsProcessor"`
+	Events                 EventsValues           `yaml:"Events"`
 }
 
 type CoreValues struct {
-    ServiceValues       `yaml:",inline"`
-    HttpPort            int `yaml:"HttpPort"`
-    SshPort             int `yaml:"SshPort"`
-    GrpcPort            int `yaml:"GrpcPort"`
-    IgniteClusterPort   int `yaml:"IgniteClusterPort"`
-    IgniteDiscoveryPort int `yaml:"IgniteDiscoveryPort"`
+	ServiceValues       `yaml:",inline"`
+	HttpPort            int `yaml:"HttpPort"`
+	SshPort             int `yaml:"SshPort"`
+	GrpcPort            int `yaml:"GrpcPort"`
+	IgniteClusterPort   int `yaml:"IgniteClusterPort"`
+	IgniteDiscoveryPort int `yaml:"IgniteDiscoveryPort"`
 }
 
 type MinionValues struct {
-    ServiceValues     `yaml:",inline"`
-    SshPort           int `yaml:"SshPort"`
-    TrapsListenerPort int `yaml:"TrapsListenerPort"`
+	ServiceValues     `yaml:",inline"`
+	SshPort           int `yaml:"SshPort"`
+	TrapsListenerPort int `yaml:"TrapsListenerPort"`
 }
 
 type MinionGatewayValues struct {
-    ServiceValues    `yaml:",inline"`
-    GrpcPort         int `yaml:"GrpcPort"`
-    InternalGrpcPort int `yaml:"InternalGrpcPort"`
-    IgniteClientPort int `yaml:"IgniteClientPort"`
+	ServiceValues    `yaml:",inline"`
+	GrpcPort         int `yaml:"GrpcPort"`
+	InternalGrpcPort int `yaml:"InternalGrpcPort"`
+	IgniteClientPort int `yaml:"IgniteClientPort"`
 }
 
+type MGGPValues struct {
+	ServiceValues `yaml:",inline"`
+}
 type MetricsProcessorValues struct {
-    ServiceValues `yaml:",inline"`
+	ServiceValues `yaml:",inline"`
 }
 
 type InventoryValues struct {
-    ServiceValues `yaml:",inline"`
-    GrpcPort      int `yaml:"GrpcPort"`
+	ServiceValues `yaml:",inline"`
+	GrpcPort      int `yaml:"GrpcPort"`
+}
+
+type AlarmValues struct {
+	ServiceValues `yaml:",inline"`
+	GrpcPort      int `yaml:"GrpcPort"`
+}
+
+type EventsValues struct {
+	ServiceValues `yaml:",inline"`
+	GrpcPort      int `yaml:"GrpcPort"`
 }
 
 type TimeseriesValues struct {
-    Mode   string `yaml:"Mode"`
-    Host   string `yaml:"Host"`
-    Port   string `yaml:"Port"`
-    ApiKey string `yaml:"ApiKey"`
+	Mode   string `yaml:"Mode"`
+	Host   string `yaml:"Host"`
+	Port   string `yaml:"Port"`
+	ApiKey string `yaml:"ApiKey"`
 }

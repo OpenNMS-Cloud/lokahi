@@ -2,27 +2,6 @@ import { add, intervalToDuration, formatDuration } from 'date-fns'
 import { TimeUnit } from '@/types'
 
 /**
- * 
- * @param timestamp 
- * @param timeUnit 
- * @returns 
- */
-/* export const getHumanReadableDuration = (timestamp: number, timeUnit = TimeUnit.Secs) => {
-  let durationDisplay = '--' // undefined | null
-
-  if(![undefined, null].includes(timestamp as any)) {
-    const duration = intervalToDuration({
-      start: new Date(),
-      end: add(new Date(), {seconds: timeUnit === TimeUnit.Secs ? timestamp : timestamp / 1000})
-    })
-      
-    durationDisplay = formatDuration(duration, { format: ['days', 'hours', 'minutes']})
-  }
-
-  return durationDisplay
-} */
-
-/**
  * Translate timestamp to human-readeable duration
  * @param timestamp seconds/milliseconds
  * @param timeUnit milliseconds by default
@@ -33,8 +12,10 @@ export const getHumanReadableDuration = (timestamp: number, timeUnit = TimeUnit.
 
   if(![undefined, null].includes(timestamp as any)) {
     const timestampInSecs = timeUnit === TimeUnit.Secs ? timestamp : timestamp / 1000
+
     if(Math.abs(timestampInSecs) < 1) {
       durationDisplay = String(timestamp)
+
       if(timestampInSecs !== 0) durationDisplay += 'ms'
     } else {
       const duration = intervalToDuration({
@@ -48,6 +29,7 @@ export const getHumanReadableDuration = (timestamp: number, timeUnit = TimeUnit.
       // replace days/hours/minutes/seconds by d/h/m/s
       for(const mat of durationFormatted.matchAll(re)) {
         const { s, m, h, d } = mat.groups as Record<string, string>
+
         if(s) durationFormatted = durationFormatted.replace(s, 's')
         if(m) durationFormatted = durationFormatted.replace(m, 'm')
         if(h) durationFormatted = durationFormatted.replace(h, 'h')
@@ -70,10 +52,11 @@ export const getHumanReadableDuration = (timestamp: number, timeUnit = TimeUnit.
     - @featherds: only viewBox available
 
  * @param icon svg
- * @returns string e.g. '0 0  24 24'
+ * @returns string e.g. '0 0 24 24'
  */
 export const setViewBox = (icon: any) => {
   const iconProps = icon.render().props
+  
   return iconProps.viewBox || `0 0 ${iconProps.width} ${iconProps.height}`
 }
       

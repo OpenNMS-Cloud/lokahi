@@ -34,6 +34,10 @@ spec:
     image: opennms/horizon-stream-inventory
     cpu: "0"
     mem: 100Mi
+  alarm:
+    image: opennms/horizon-stream-alarm
+    cpu: "0"
+    mem: 100Mi
   notification:
     image: opennms/horizon-stream-notification
     cpu: "0"

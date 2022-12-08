@@ -176,6 +176,7 @@
                 </ports>
                 <wait>
                   <log>(?s)PostgreSQL init process complete; ready for start up..*database system is ready to accept connections</log>
+                  <time>120000</time>
                 </wait>
                 <ports>
                   <port>postgresql.port:5432</port>

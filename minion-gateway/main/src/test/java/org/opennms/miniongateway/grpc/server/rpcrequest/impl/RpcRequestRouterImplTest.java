@@ -12,6 +12,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.opennms.cloud.grpc.minion.RpcRequestProto;
 import org.opennms.cloud.grpc.minion.RpcResponseProto;
+import org.opennms.horizon.shared.grpc.common.TenantIDGrpcServerInterceptor;
+import org.opennms.miniongateway.grpc.server.rpcrequest.RouterTaskData;
 import org.opennms.miniongateway.grpc.server.rpcrequest.RpcRequestRouterIgniteTask;
 import org.slf4j.Logger;
 
@@ -32,6 +34,7 @@ public class RpcRequestRouterImplTest {
     private RpcRequestRouterIgniteTask mockRpcRequestRouterIgniteTask;
     private ComputeTaskFuture mockComputeTaskFuture;
     private IgniteFuture mockIgniteFuture;
+    private TenantIDGrpcServerInterceptor mockTenantIDGrpcServerInterceptor;
 
     @Before
     public void setUp() throws Exception {
@@ -43,9 +46,11 @@ public class RpcRequestRouterImplTest {
         mockRpcRequestRouterIgniteTask = Mockito.mock(RpcRequestRouterIgniteTask.class);
         mockComputeTaskFuture = Mockito.mock(ComputeTaskFuture.class);
         mockIgniteFuture = Mockito.mock(IgniteFuture.class);
+        mockTenantIDGrpcServerInterceptor = Mockito.mock(TenantIDGrpcServerInterceptor.class);
 
         Mockito.when(mockIgnite.compute()).thenReturn(mockIgniteCompute);
-        Mockito.when(mockIgniteCompute.executeAsync(Mockito.same(mockRpcRequestRouterIgniteTask), Mockito.any(byte[].class))).thenReturn(mockComputeTaskFuture);
+        Mockito.when(mockIgniteCompute.executeAsync(Mockito.same(mockRpcRequestRouterIgniteTask), Mockito.any(RouterTaskData.class))).thenReturn(mockComputeTaskFuture);
+        Mockito.when(mockTenantIDGrpcServerInterceptor.readCurrentContextTenantId()).thenReturn("x-tenant-id-x");
     }
 
     @Test
@@ -75,6 +80,7 @@ public class RpcRequestRouterImplTest {
         //
         target.setIgnite(mockIgnite);
         target.setRpcRequestRouterIgniteTask(mockRpcRequestRouterIgniteTask);
+        target.setTenantIDGrpcServerInterceptor(mockTenantIDGrpcServerInterceptor);
         CompletableFuture<RpcResponseProto> completableFuture = target.routeRequest(testRequest);
 
         // Verify listen() call and execute the completion function
@@ -115,6 +121,7 @@ public class RpcRequestRouterImplTest {
         //
         target.setIgnite(mockIgnite);
         target.setRpcRequestRouterIgniteTask(mockRpcRequestRouterIgniteTask);
+        target.setTenantIDGrpcServerInterceptor(mockTenantIDGrpcServerInterceptor);
         CompletableFuture<RpcResponseProto> completableFuture = target.routeRequest(testRequest);
 
         // Verify listen() call and execute the completion function
@@ -160,6 +167,7 @@ public class RpcRequestRouterImplTest {
         target.setLog(mockLogger);
         target.setIgnite(mockIgnite);
         target.setRpcRequestRouterIgniteTask(mockRpcRequestRouterIgniteTask);
+        target.setTenantIDGrpcServerInterceptor(mockTenantIDGrpcServerInterceptor);
         CompletableFuture<RpcResponseProto> completableFuture = target.routeRequest(testRequest);
 
         // Verify listen() call and execute the completion function

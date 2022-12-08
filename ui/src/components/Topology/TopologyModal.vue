@@ -8,6 +8,7 @@
           class="pointer icon"
           @click="selectIcon(key)"
           :class="{ 'selected-icon': key === selectedIconKey }"
+          :alt="key"
         />
       </div>
     </div>

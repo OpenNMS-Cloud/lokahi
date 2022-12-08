@@ -49,6 +49,7 @@ enum MonitorType {
   UNKNOWN = 0;
   ICMP = 1;
   SNMP = 2;
+  ECHO = 3;
 }
 
 message TaskDefinition {

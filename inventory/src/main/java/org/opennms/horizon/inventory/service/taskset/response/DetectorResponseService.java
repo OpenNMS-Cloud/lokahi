@@ -38,6 +38,7 @@ import org.opennms.horizon.inventory.model.MonitoredServiceType;
 import org.opennms.horizon.inventory.repository.IpInterfaceRepository;
 import org.opennms.horizon.inventory.service.MonitoredServiceService;
 import org.opennms.horizon.inventory.service.MonitoredServiceTypeService;
+import org.opennms.horizon.inventory.service.taskset.CollectorTaskSetService;
 import org.opennms.horizon.inventory.service.taskset.MonitorTaskSetService;
 import org.opennms.taskset.contract.DetectorResponse;
 import org.opennms.taskset.contract.MonitorType;
@@ -53,6 +54,7 @@ public class DetectorResponseService {
     private final MonitoredServiceTypeService monitoredServiceTypeService;
     private final MonitoredServiceService monitoredServiceService;
     private final MonitorTaskSetService monitorTaskSetService;
+    private final CollectorTaskSetService collectorTaskSetService;
 
     public void accept(String location, DetectorResponse response) {
         log.info("Received Detector Response = {} for location = {}", response, location);
@@ -72,6 +74,7 @@ public class DetectorResponseService {
 
                 MonitorType monitorType = response.getMonitorType();
                 monitorTaskSetService.sendMonitorTask(location, monitorType, ipInterface, response.getNodeId());
+                collectorTaskSetService.sendCollectorTask(location, monitorType, ipInterface, response.getNodeId());
 
             } else {
                 log.info("{} not detected on ip address = {}", response.getMonitorType(), ipAddress.getAddress());

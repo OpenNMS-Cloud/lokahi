@@ -37,6 +37,7 @@
         <feature>grpc-protobuf</feature>
         <feature>grpc</feature>
         <bundle>mvn:org.opennms.horizon.shared/ipc-grpc-contract/${project.version}</bundle>
+        <bundle>mvn:org.opennms.horizon.shared.snmp/proto/${project.version}</bundle>
     </feature>
 
     <feature name="grpc-minion" version="${project.version}">

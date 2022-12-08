@@ -17,7 +17,7 @@
  * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:ufl
+ * along with OpenNMS(R).  If not, see:
  *      http://www.gnu.org/licenses/
  *
  * For more information contact:
@@ -25,40 +25,19 @@
  *     http://www.opennms.org/
  *     http://www.opennms.com/
  *******************************************************************************/
-syntax = "proto3";
 
-import "google/protobuf/any.proto";
-import "snmp-api.proto";
+package org.opennms.horizon.shared.snmp;
 
-package opennms.snmp;
-option java_multiple_files = true;
-option java_package = "org.opennms.snmp.contract";
+import static org.opennms.horizon.shared.snmp.SnmpHelper.NODE_SYSUPTIME;
 
-message SnmpDetectorRequest {
-  string host = 1;
 
-  int32 timeout = 2;
-  int32 retries = 3;
-}
+public class SysUpTimeTracker extends ObjIdMonitor {
 
-message SnmpMonitorRequest {
-  string host = 1;
-
-  string oid = 2;
-  int32 timeout = 3;
-  int32 retries = 4;
-  string community = 5;
-
-  string operator = 6;
-  string operand = 7;
-  string reason_template = 8;
-
-  // TBD888: what does this do?
-  bool hex = 9;
-}
-
-message SnmpCollectorRequest {
-  string  host = 1;
-  opennms.snmp.api.SnmpConfiguration agent_config = 2;
-  uint64  node_id = 3;
+    public SysUpTimeTracker() {
+        super(SnmpObjId.get(NODE_SYSUPTIME), SnmpInstId.INST_ZERO);
+    }
+    
+    boolean isChanged(long savedSysUpTime) {
+        return (savedSysUpTime != -1) && (getLongValue() < savedSysUpTime);
+    }
 }

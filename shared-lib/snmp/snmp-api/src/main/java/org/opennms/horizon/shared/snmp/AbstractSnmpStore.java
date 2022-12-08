@@ -95,5 +95,7 @@ public abstract class AbstractSnmpStore {
         return m_responseMap.isEmpty();
     }
 
-
+    public Map<String, SnmpValue> getResponseMap() {
+        return m_responseMap;
+    }
 }

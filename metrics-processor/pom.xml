@@ -58,6 +58,11 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
+            <groupId>org.opennms.horizon.shared.snmp</groupId>
+            <artifactId>proto</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
         <groupId>io.prometheus</groupId>
             <artifactId>simpleclient</artifactId>
             <version>${prometheus.version}</version>

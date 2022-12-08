@@ -17,7 +17,7 @@
  * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:ufl
+ * along with OpenNMS(R).  If not, see:
  *      http://www.gnu.org/licenses/
  *
  * For more information contact:
@@ -25,40 +25,25 @@
  *     http://www.opennms.org/
  *     http://www.opennms.com/
  *******************************************************************************/
-syntax = "proto3";
 
-import "google/protobuf/any.proto";
-import "snmp-api.proto";
+package org.opennms.horizon.minion.plugin.api.registries;
 
-package opennms.snmp;
-option java_multiple_files = true;
-option java_package = "org.opennms.snmp.contract";
+import org.opennms.horizon.minion.plugin.api.RegistrationService;
+import org.opennms.horizon.minion.plugin.api.ServiceCollectorManager;
+import org.osgi.framework.BundleContext;
 
-message SnmpDetectorRequest {
-  string host = 1;
+import java.util.Map;
 
-  int32 timeout = 2;
-  int32 retries = 3;
-}
+public class CollectorRegistryImpl extends AlertingPluginRegistry<String, ServiceCollectorManager> implements CollectorRegistry {
 
-message SnmpMonitorRequest {
-  string host = 1;
+    public static final String PLUGIN_IDENTIFIER = "collector.name";
 
-  string oid = 2;
-  int32 timeout = 3;
-  int32 retries = 4;
-  string community = 5;
+    public CollectorRegistryImpl(BundleContext bundleContext, RegistrationService alertingService) {
+        super(bundleContext, ServiceCollectorManager.class, PLUGIN_IDENTIFIER, alertingService);
+    }
 
-  string operator = 6;
-  string operand = 7;
-  string reason_template = 8;
-
-  // TBD888: what does this do?
-  bool hex = 9;
-}
-
-message SnmpCollectorRequest {
-  string  host = 1;
-  opennms.snmp.api.SnmpConfiguration agent_config = 2;
-  uint64  node_id = 3;
+    @Override
+    public Map<String, ServiceCollectorManager> getServices() {
+        return super.asMap();
+    }
 }

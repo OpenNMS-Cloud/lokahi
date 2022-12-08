@@ -9,6 +9,19 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 public interface SnmpHelper {
+
+    /**
+     * Object identifier used to retrieve interface count. This is the MIB-II
+     * interfaces.ifNumber value.
+     */
+    String INTERFACES_IFNUMBER = ".1.3.6.1.2.1.2.1";
+
+    /**
+     * Object identifier used to retrieve system uptime. This is the MIB-II
+     * system.sysUpTime value.
+     */
+    String NODE_SYSUPTIME = ".1.3.6.1.2.1.1.3";
+
     SnmpWalker createWalker(SnmpAgentConfig agentConfig, String name, CollectionTracker... trackers);
 
     SnmpWalker createWalker(SnmpAgentConfig agentConfig, String name, CollectionTracker tracker);

@@ -26,6 +26,7 @@
         <feature>protobuf</feature>
         <bundle>mvn:com.google.protobuf/protobuf-java/${protobuf.version}</bundle>
         <bundle>mvn:org.opennms.horizon.shared/protobuf/${project.version}</bundle>
+        <bundle>mvn:org.opennms.horizon.shared.snmp/proto/${project.version}</bundle>
     </feature>
 
     <feature name="plugins-registration-internal" description="Plugin registration plugin-registration" version="${project.version}">

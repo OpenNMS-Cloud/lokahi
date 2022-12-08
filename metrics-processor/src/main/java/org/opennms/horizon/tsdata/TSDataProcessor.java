@@ -28,12 +28,18 @@
 
 package org.opennms.horizon.tsdata;
 
+import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.google.common.base.Strings;
+import com.google.protobuf.Any;
+import org.opennms.horizon.snmp.api.SnmpResponseMetric;
+import org.opennms.horizon.snmp.api.SnmpValueType;
 import org.opennms.horizon.tsdata.metrics.MetricsPushAdapter;
+import org.opennms.taskset.contract.CollectorResponse;
 import org.opennms.taskset.contract.DetectorResponse;
 import org.opennms.taskset.contract.MonitorResponse;
 import org.opennms.taskset.contract.TaskResult;
@@ -84,6 +90,9 @@ public class TSDataProcessor {
                             DetectorResponse detectorResponse = result.getDetectorResponse();
                             // TBD: how to process?
                             log.info("Have detector response: task-id={}; detected={}", result.getId(), detectorResponse.getDetected());
+                        } else if(result.hasCollectorResponse()) {
+                            CollectorResponse collectorResponse = result.getCollectorResponse();
+                            processCollectorResponse(result);
                         }
                     } else {
                         log.warn("Task result appears to be missing the echo response details with results {}", results);
@@ -102,7 +111,7 @@ public class TSDataProcessor {
     private void processMonitorResponse(TaskResult result) {
         MonitorResponse response = result.getMonitorResponse();
         String[] labelValues = {response.getIpAddress(), result.getLocation(), result.getSystemId(), response.getMonitorType().name(), String.valueOf(response.getNodeId())};
-        Gauge gauge = getGaugeFromName(METRICS_NAME_RESPONSE, true);
+        Gauge gauge = getGaugeFromName(METRICS_NAME_RESPONSE, "Monitor round trip response time");
         gauge.labels(labelValues).set(response.getResponseTimeMs());
         Map<String, String> labels = new HashMap<>();
         for (int i = 0; i < MONITOR_METRICS_LABEL_NAMES.length; i++) {
@@ -111,22 +120,22 @@ public class TSDataProcessor {
 
         if (response.getMetricsMap() != null) {
             response.getMetricsMap().forEach((k, v) -> {
-                Gauge extGauge = getGaugeFromName(METRICS_NAME_PREFIX_MONITOR + k, false);
+                Gauge extGauge = getGaugeFromName(METRICS_NAME_PREFIX_MONITOR + k, null);
                 extGauge.labels(labelValues).set(v);
             });
         }
         pushAdapter.pushMetrics(collectorRegistry, labels);
     }
 
-    private Gauge getGaugeFromName(String name, boolean withDesc) {
+    private Gauge getGaugeFromName(String name, String description) {
         return gauges.compute(name, (key, gauge) -> {
             if (gauge != null) {
                 return gauge;
             }
-            if (withDesc) {
+            if (!Strings.isNullOrEmpty(description)) {
                 return Gauge.build()
                     .name(name)
-                    .help("Monitor round trip response time")
+                    .help(description)
                     .unit(METRICS_UNIT_MS)
                     .labelNames(MONITOR_METRICS_LABEL_NAMES)
                     .register(collectorRegistry);
@@ -137,5 +146,52 @@ public class TSDataProcessor {
                 .labelNames(MONITOR_METRICS_LABEL_NAMES)
                 .register(collectorRegistry);
         });
+    }
+
+    private void processCollectorResponse(TaskResult result) {
+        CollectorResponse response = result.getCollectorResponse();
+        String[] labelValues = {response.getIpAddress(), result.getLocation(), result.getSystemId(),
+            response.getMonitorType().name(), String.valueOf(response.getNodeId())};
+        if (response.hasResult()) {
+            Any collectorMetric = response.getResult();
+            try {
+                var snmpResponse = collectorMetric.unpack(SnmpResponseMetric.class);
+                snmpResponse.getResultsList().forEach((snmpResult) -> {
+                    String metricName = snmpResult.getAlias();
+                    int type = snmpResult.getValue().getTypeValue();
+                    switch (type) {
+                        case SnmpValueType.INT32_VALUE:
+                            Gauge int32Value = getGaugeFromName(metricName,
+                                metricName + " with oid " + snmpResult.getBase());
+                            int32Value.labels(labelValues).set(snmpResult.getValue().getSint64());
+                            break;
+                        case SnmpValueType.COUNTER32_VALUE:
+                            // TODO: Can't set a counter through prometheus API, may be possible with remote write
+                        case SnmpValueType.TIMETICKS_VALUE:
+                        case SnmpValueType.GAUGE32_VALUE:
+                            Gauge uint64Value = getGaugeFromName(metricName,
+                                metricName + " with oid " + snmpResult.getBase());
+                            uint64Value.labels(labelValues).set(snmpResult.getValue().getUint64());
+                            break;
+                        case SnmpValueType.COUNTER64_VALUE:
+                            double metric = new BigInteger(snmpResult.getValue().getBytes().toByteArray()).doubleValue();
+                            Gauge gauge = getGaugeFromName(metricName,
+                                metricName + " with oid " + snmpResult.getBase());
+                            gauge.labels(labelValues).set(metric);
+                            break;
+                    }
+
+                });
+            } catch (InvalidProtocolBufferException e) {
+                log.warn("Exception while parsing protobuf ", e);
+
+            }
+        }
+        Map<String, String> labels = new HashMap<>();
+        for (int i = 0; i < MONITOR_METRICS_LABEL_NAMES.length; i++) {
+            labels.put(MONITOR_METRICS_LABEL_NAMES[i], labelValues[i]);
+        }
+        pushAdapter.pushMetrics(collectorRegistry, labels);
+
     }
 }

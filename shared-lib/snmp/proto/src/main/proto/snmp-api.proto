@@ -1,5 +1,5 @@
 syntax = "proto3";
-package opennms.snmp;
+package opennms.snmp.api;
 
 option java_multiple_files = true;
 option java_package = "org.opennms.horizon.snmp.api";
@@ -9,6 +9,12 @@ message SnmpResult {
   string base = 1;
   string instance = 2;
   SnmpValue value = 3;
+  string alias = 4;
+}
+
+message SnmpResponse {
+  string correlationId = 1;
+  repeated SnmpResult results = 2;
 }
 
 
@@ -32,6 +38,30 @@ enum SnmpValueType {
 message SnmpValue {
   SnmpValueType type = 1;
   bytes value = 2;
+}
+
+message SnmpValueMetric {
+  SnmpValueType type = 1;
+  oneof value {
+    sint32 sint32 = 2;
+    sint64 sint64 = 3;
+    uint32 uint32 = 4;
+    uint64 uint64 = 5;
+    string string = 6;
+    bytes bytes = 7;
+  };
+}
+
+message SnmpResultMetric {
+  string base = 1;
+  string instance = 2;
+  SnmpValueMetric value = 3;
+  string alias = 4;
+}
+
+message SnmpResponseMetric {
+  string correlationId = 1;
+  repeated SnmpResultMetric results = 2;
 }
 
 enum Version {

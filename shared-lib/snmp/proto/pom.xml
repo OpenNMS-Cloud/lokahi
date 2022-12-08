@@ -2,22 +2,22 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-
-    <modelVersion>4.0.0</modelVersion>
-
     <parent>
+        <artifactId>snmp-parent</artifactId>
         <groupId>org.opennms.horizon.shared</groupId>
-        <artifactId>shared-lib</artifactId>
         <version>0.1.0-SNAPSHOT</version>
     </parent>
+    <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>protobuf</artifactId>
-    <name>OpenNMS Horizon :: Shared Library:: Protobuf</name>
+    <groupId>org.opennms.horizon.shared.snmp</groupId>
+    <artifactId>proto</artifactId>
+    <name>OpenNMS Horizon :: Shared Library :: Snmp :: Proto</name>
     <packaging>bundle</packaging>
 
-    <description>
-        Model definitions for Task Sets.
-    </description>
+    <properties>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
+    </properties>
 
     <dependencies>
         <dependency>
@@ -25,28 +25,8 @@
             <artifactId>protobuf-java</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.opennms.horizon.shared.snmp</groupId>
-            <artifactId>proto</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <version>${lombok.version}</version>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-        </dependency>
-        <dependency>
             <groupId>com.google.protobuf</groupId>
             <artifactId>protobuf-java-util</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <scope>test</scope>
         </dependency>
     </dependencies>
 

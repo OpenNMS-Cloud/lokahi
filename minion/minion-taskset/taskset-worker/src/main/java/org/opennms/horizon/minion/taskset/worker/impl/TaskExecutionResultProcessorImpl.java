@@ -1,8 +1,11 @@
 package org.opennms.horizon.minion.taskset.worker.impl;
 
+import com.google.protobuf.Any;
+import org.opennms.horizon.minion.plugin.api.CollectionSet;
 import org.opennms.horizon.minion.plugin.api.ServiceDetectorResponse;
 import org.opennms.horizon.shared.ipc.rpc.IpcIdentity;
 import org.opennms.horizon.shared.ipc.sink.api.SyncDispatcher;
+import org.opennms.taskset.contract.CollectorResponse;
 import org.opennms.taskset.contract.DetectorResponse;
 import org.opennms.taskset.contract.MonitorResponse;
 import org.opennms.taskset.contract.TaskResult;
@@ -49,6 +52,14 @@ public class TaskExecutionResultProcessorImpl implements TaskExecutionResultProc
 
         TaskSetResults taskSetResults = formatTaskSetResults(id, response);
 
+        taskSetSinkDispatcher.send(taskSetResults);
+    }
+
+    @Override
+    public void queueSendResult(String uuid, CollectionSet collectionSet) {
+        log.info("Sending Collector Set results {}", collectionSet);
+        TaskSetResults taskSetResults = formatTaskSetResults(uuid, collectionSet);
+        log.info("Sending TaskSet results {}", taskSetResults);
         taskSetSinkDispatcher.send(taskSetResults);
     }
 
@@ -121,4 +132,32 @@ public class TaskExecutionResultProcessorImpl implements TaskExecutionResultProc
 
         return result;
     }
+
+    private TaskSetResults formatTaskSetResults(String id, CollectionSet collectionSet) {
+        CollectorResponse collectorResponse = formatCollectorResponse(collectionSet);
+
+        TaskResult taskResult =
+            TaskResult.newBuilder()
+                .setId(id)
+                .setCollectorResponse(collectorResponse)
+                .setLocation(identity.getLocation())
+                .setSystemId(identity.getId())
+                .build();
+
+        return TaskSetResults.newBuilder()
+            .addResults(taskResult)
+            .build();
+
+    }
+
+    private CollectorResponse formatCollectorResponse(CollectionSet collectionSet) {
+
+        return CollectorResponse.newBuilder()
+            .setStatus(collectionSet.getStatus())
+            .setNodeId(collectionSet.getNodeId())
+            .setIpAddress(collectionSet.getIpAddress())
+            .setResult(Any.pack(collectionSet.getResults())).build();
+    }
+
+
 }

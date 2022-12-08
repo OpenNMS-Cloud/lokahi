@@ -17,7 +17,7 @@
  * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:ufl
+ * along with OpenNMS(R).  If not, see:
  *      http://www.gnu.org/licenses/
  *
  * For more information contact:
@@ -25,40 +25,26 @@
  *     http://www.opennms.org/
  *     http://www.opennms.com/
  *******************************************************************************/
-syntax = "proto3";
 
-import "google/protobuf/any.proto";
-import "snmp-api.proto";
+package org.opennms.horizon.minion.snmp;
 
-package opennms.snmp;
-option java_multiple_files = true;
-option java_package = "org.opennms.snmp.contract";
+import org.junit.Test;
+import org.opennms.horizon.shared.snmp.SnmpAgentConfig;
+import org.opennms.horizon.snmp.api.SnmpConfiguration;
 
-message SnmpDetectorRequest {
-  string host = 1;
+import static org.junit.Assert.assertEquals;
 
-  int32 timeout = 2;
-  int32 retries = 3;
-}
+public class SnmpAgentConfigTest {
 
-message SnmpMonitorRequest {
-  string host = 1;
 
-  string oid = 2;
-  int32 timeout = 3;
-  int32 retries = 4;
-  string community = 5;
 
-  string operator = 6;
-  string operand = 7;
-  string reason_template = 8;
+    @Test
+    public void testAgentConfigDefaults() throws Exception {
 
-  // TBD888: what does this do?
-  bool hex = 9;
-}
-
-message SnmpCollectorRequest {
-  string  host = 1;
-  opennms.snmp.api.SnmpConfiguration agent_config = 2;
-  uint64  node_id = 3;
+        SnmpConfiguration snmpConfiguration = SnmpConfiguration.newBuilder().build();
+        SnmpAgentConfig agentConfig = SnmpCollector.mapAgent(snmpConfiguration);
+        assertEquals("public", agentConfig.getReadCommunity());
+        assertEquals("private", agentConfig.getWriteCommunity());
+        assertEquals(3000, agentConfig.getTimeout());
+    }
 }

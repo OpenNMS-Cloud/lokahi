@@ -1,5 +1,6 @@
 package org.opennms.horizon.minion.taskset.worker;
 
+import org.opennms.horizon.minion.plugin.api.CollectionSet;
 import org.opennms.horizon.minion.plugin.api.ServiceDetectorResponse;
 import org.opennms.horizon.minion.plugin.api.ServiceMonitorResponse;
 
@@ -19,4 +20,7 @@ public interface TaskExecutionResultProcessor {
      * @param serviceMonitorResponse
      */
     void queueSendResult(String uuid, ServiceMonitorResponse serviceMonitorResponse);
+
+
+    void queueSendResult(String uuid, CollectionSet serviceMonitorResponse);
 }

@@ -92,31 +92,32 @@ public class SnmpCollector implements ServiceCollector {
             AggregateTracker aggregate = new AggregateTracker(snmpCollectionSet.getTrackers());
             String ipAddress = snmpRequest.getAgentConfig().getAddress();
             long nodeId = request.getNodeId();
-            final SnmpWalker walker = snmpHelper.createWalker(mapAgent(snmpRequest.getAgentConfig()), "Snmp-collector", aggregate);
-            walker.setCallback(new SnmpWalkCallback() {
-                @Override
-                public void complete(SnmpWalker tracker, Throwable t) {
-                    try {
-                        if (t != null) {
-                            future.completeExceptionally(t);
-                        } else {
-                            var responseList = builder.getResultsList();
-                            future.complete(responseList);
-                        }
-                    } finally {
-                        // Close the tracker using a separate thread
-                        // This allows the SnmpWalker to clean up properly instead
-                        // of interrupting execution as it's executing the callback
-                        REAPER_EXECUTOR.submit(new Runnable() {
-                            @Override
-                            public void run() {
-                                tracker.close();
+            try (final SnmpWalker walker = snmpHelper.createWalker(mapAgent(snmpRequest.getAgentConfig()), "Snmp-collector", aggregate)) {
+                walker.setCallback(new SnmpWalkCallback() {
+                    @Override
+                    public void complete(SnmpWalker tracker, Throwable t) {
+                        try {
+                            if (t != null) {
+                                future.completeExceptionally(t);
+                            } else {
+                                var responseList = builder.getResultsList();
+                                future.complete(responseList);
                             }
-                        });
+                        } finally {
+                            // Close the tracker using a separate thread
+                            // This allows the SnmpWalker to clean up properly instead
+                            // of interrupting execution as it's executing the callback
+                            REAPER_EXECUTOR.submit(new Runnable() {
+                                @Override
+                                public void run() {
+                                    tracker.close();
+                                }
+                            });
+                        }
                     }
-                }
-            });
-            walker.start();
+                });
+                walker.start();
+            }
             LOG.info("Walker started running ");
             result = future.thenApplyAsync(snmpResults -> mapSnmpValuesToResponse(snmpResults, ipAddress, nodeId));
         } catch (InvalidProtocolBufferException e) {

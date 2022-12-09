@@ -9,7 +9,6 @@ operator_run () {
   sleep 60 # Need to wait until the pod is created or else nothing comes back. Messes with the conditional.
   while [[ $(kubectl get pods -n hs-instance -l=app.kubernetes.io/component='controller-hs-instance' -o jsonpath='{.items[*].status.containerStatuses[0].ready}') == 'false' ]]; do 
     echo "not-ready"
-    echo $(kubectl get pods -n hs-instance -l=app.kubernetes.io/component='controller-hs-instance' -o jsonpath='{.items[*].status.containerStatuses[0].ready}')
     sleep 30
   done
 

@@ -41,7 +41,7 @@ public interface Listener {
     String getName();
     String getDescription();
 
-    Collection<? extends Parser> getParsers();
+    Collection<Parser> getParsers();
 
     void start() throws InterruptedException;
     void stop() throws InterruptedException;

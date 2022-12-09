@@ -162,7 +162,7 @@ public abstract class ParserBase implements Parser {
         // This variable is used to identify the thread as one that belongs to this class
         final LogPreservingThreadFactory logPreservingThreadFactory = new LogPreservingThreadFactory("Telemetryd-" + protocol + "-" + name, Integer.MAX_VALUE);
         threadFactory = r -> logPreservingThreadFactory.newThread(() -> {
-            if (isParserThread.get()) {
+            if (Objects.nonNull(isParserThread.get()) && isParserThread.get()) {
                 unload();
             }
             isParserThread.set(true);

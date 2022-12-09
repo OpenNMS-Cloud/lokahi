@@ -33,9 +33,9 @@ package org.opennms.netmgt.telemetry.listeners.factory;
  *
  * @author jwhite
  */
-public interface Message {
+public class Message {
 
-    static final String SINK_METRIC_PRODUCER_DOMAIN = "org.opennms.core.ipc.sink.producer";
+    public static final String SINK_METRIC_PRODUCER_DOMAIN = "org.opennms.core.ipc.sink.producer";
 
-    static final String SINK_METRIC_CONSUMER_DOMAIN = "org.opennms.core.ipc.sink.consumer";
+    public static final String SINK_METRIC_CONSUMER_DOMAIN = "org.opennms.core.ipc.sink.consumer";
 }

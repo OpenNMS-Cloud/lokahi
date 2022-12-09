@@ -28,6 +28,8 @@
 
 package org.opennms.netmgt.telemetry.listeners.factory;
 
+import static java.util.Objects.nonNull;
+
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -58,7 +60,7 @@ public class TcpListenerFactory implements ListenerFactory {
         // Ensure each defined parser is of type TcpParser
         final List<TcpParser> parser = listenerDefinition.getParsers().stream()
                 .map(telemetryRegistry::getParser)
-                .filter(p -> p instanceof TcpParser && p != null)
+                .filter(p -> nonNull(p) && p instanceof TcpParser)
                 .map(p -> (TcpParser) p).collect(Collectors.toList());
         if (parser.size() != listenerDefinition.getParsers().size()) {
             throw new IllegalArgumentException("Each parser must be of type TcpParser but was not.");

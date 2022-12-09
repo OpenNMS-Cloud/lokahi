@@ -41,7 +41,6 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.opennms.netmgt.telemetry.listeners.factory.Message;
 import org.opennms.netmgt.telemetry.protocols.netflow.parser.ipfix.proto.Header;
 
 /**
@@ -52,8 +51,7 @@ import org.opennms.netmgt.telemetry.protocols.netflow.parser.ipfix.proto.Header;
 
 @XmlRootElement(name="log")
 @XmlAccessorType(XmlAccessType.FIELD)
-//@ValidateUsing("event.xsd")
-public class Log implements Message,Serializable {
+public class Log implements Serializable {
     private static final long serialVersionUID = 7684449895077223094L;
 
     //--------------------------/
@@ -63,7 +61,7 @@ public class Log implements Message,Serializable {
     /**
      * Field _header.
      */
-    @XmlElement(name="header", required=false)
+    @XmlElement(name="header")
     @Valid
     private Header _header;
 

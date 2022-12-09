@@ -47,5 +47,5 @@ public interface AdapterDefinition extends TelemetryBeanDefinition {
      *
      * @return the list of configured packages
      */
-    List<? extends PackageDefinition> getPackages();
+    List<PackageDefinition> getPackages();
 }

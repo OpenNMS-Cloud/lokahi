@@ -32,7 +32,7 @@ import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.util.Date;
 
-public class TelemetryMessage implements Message {
+public class TelemetryMessage {
     private final InetSocketAddress source;
     private final ByteBuffer buffer;
     private final Date receivedAt;

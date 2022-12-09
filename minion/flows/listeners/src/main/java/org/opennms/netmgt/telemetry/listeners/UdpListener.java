@@ -73,7 +73,7 @@ public class UdpListener implements GracefulShutdownListener {
             .build();
 
     private final String name;
-    private final List<UdpParser> parsers;
+    private final List<Parser> parsers;
 
     private final Meter packetsReceived;
 
@@ -86,7 +86,7 @@ public class UdpListener implements GracefulShutdownListener {
 
     private Future<String> stopFuture;
 
-    public UdpListener(final String name, final List<UdpParser> parsers, final MetricRegistry metrics) {
+    public UdpListener(final String name, final List<Parser> parsers, final MetricRegistry metrics) {
         this.name = Objects.requireNonNull(name);
         this.parsers = Objects.requireNonNull(parsers);
         Objects.requireNonNull(metrics);
@@ -145,7 +145,7 @@ public class UdpListener implements GracefulShutdownListener {
 
         this.parsers.forEach(Parser::stop);
 
-        stopFuture = new Future<String>() {
+        stopFuture = new Future<>() {
             @Override
             public boolean cancel(boolean mayInterruptIfRunning) {
                 return false;
@@ -167,7 +167,7 @@ public class UdpListener implements GracefulShutdownListener {
             }
 
             @Override
-            public String get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+            public String get(long timeout, TimeUnit unit) {
                 return get();
             }
         };
@@ -208,7 +208,7 @@ public class UdpListener implements GracefulShutdownListener {
     }
 
     @Override
-    public Collection<? extends Parser> getParsers() {
+    public Collection<Parser> getParsers() {
         return this.parsers;
     }
 
@@ -226,7 +226,7 @@ public class UdpListener implements GracefulShutdownListener {
             ch.pipeline().addFirst(new AccountingHandler());
 
             if (parsers.size() == 1) {
-                final UdpParser parser = parsers.get(0);
+                final UdpParser parser = (UdpParser) parsers.get(0);
                 // If only one parser is defined, we can directly use the handler
                 ch.pipeline().addLast(new SingleDatagramPacketParserHandler(parser));
             } else {
@@ -234,9 +234,9 @@ public class UdpListener implements GracefulShutdownListener {
                 ch.pipeline().addLast(new SimpleChannelInboundHandler<DatagramPacket>() {
                     @Override
                     protected void channelRead0(final ChannelHandlerContext ctx, final DatagramPacket msg) throws Exception {
-                        for (final UdpParser parser : parsers) {
+                        for (final Parser parser : parsers) {
                             if (BufferUtils.peek(msg.content(), ((Dispatchable) parser)::handles)) {
-                                new SingleDatagramPacketParserHandler(parser).channelRead0(ctx, msg);
+                                new SingleDatagramPacketParserHandler((UdpParser) parser).channelRead0(ctx, msg);
                                 return;
                             }
                         }
@@ -248,7 +248,7 @@ public class UdpListener implements GracefulShutdownListener {
             // Add error handling
             ch.pipeline().addLast(new ChannelInboundHandlerAdapter() {
                 @Override
-                public void exceptionCaught(final ChannelHandlerContext ctx, final Throwable cause) throws Exception {
+                public void exceptionCaught(final ChannelHandlerContext ctx, final Throwable cause) {
                     LOG.warn("Invalid packet: {}", cause.getMessage());
                     RATE_LIMITED_LOG.debug("", cause);
                 }

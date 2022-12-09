@@ -37,7 +37,7 @@ import java.util.concurrent.CompletableFuture;
  *
  * @author jwhite
  */
-public interface AsyncDispatcher<S extends Message> extends AutoCloseable {
+public interface AsyncDispatcher<S> extends AutoCloseable {
 
     /**
      * Asynchronously send the given message.

@@ -249,7 +249,7 @@ public class TcpListener implements GracefulShutdownListener {
     }
 
     @Override
-    public Collection<? extends Parser> getParsers() {
+    public Collection<Parser> getParsers() {
         return Collections.singleton(this.parser);
     }
 

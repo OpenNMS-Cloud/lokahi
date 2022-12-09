@@ -44,6 +44,6 @@ public interface ListenerDefinition extends TelemetryBeanDefinition {
      *
      * @return The list of parsers to create. Should neither be null or empty. However if empty, the listener will not be created
      */
-    List<? extends ParserDefinition> getParsers();
+    List<ParserDefinition> getParsers();
 
 }

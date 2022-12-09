@@ -39,7 +39,7 @@ import org.opennms.netmgt.telemetry.listeners.UdpParser;
 
 public class UdpListenerFactory implements ListenerFactory {
 
-    private TelemetryRegistry telemetryRegistry;
+    private final TelemetryRegistry telemetryRegistry;
 
     public UdpListenerFactory(TelemetryRegistry telemetryRegistry) {
         this.telemetryRegistry = Objects.requireNonNull(telemetryRegistry);
@@ -54,9 +54,9 @@ public class UdpListenerFactory implements ListenerFactory {
     public Listener createBean(ListenerDefinition listenerDefinition) {
         // Ensure each defined parser is of type UdpParser
         final List<Parser> parsers = listenerDefinition.getParsers().stream()
-                .map(p -> telemetryRegistry.getParser(p))
+                .map(telemetryRegistry::getParser)
                 .collect(Collectors.toList());
-        final List<UdpParser> udpParsers = parsers.stream()
+        final List<Parser> udpParsers = parsers.stream()
                 .filter(p -> p instanceof UdpParser)
                 .map(p -> (UdpParser) p).collect(Collectors.toList());
         if (parsers.size() != udpParsers.size()) {

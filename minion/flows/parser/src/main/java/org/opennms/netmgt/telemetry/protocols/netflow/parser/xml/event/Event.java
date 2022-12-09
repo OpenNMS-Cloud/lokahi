@@ -64,7 +64,7 @@ import org.opennms.netmgt.telemetry.listeners.factory.Message;
 @XmlRootElement(name = "event")
 @XmlAccessorType(XmlAccessType.FIELD)
 //@ValidateUsing("event.xsd")
-public class Event implements Message,Serializable {
+public class Event implements Serializable {
         private static final long serialVersionUID = 6997817689084653400L;
 
 	@XmlAttribute(name = "uuid")

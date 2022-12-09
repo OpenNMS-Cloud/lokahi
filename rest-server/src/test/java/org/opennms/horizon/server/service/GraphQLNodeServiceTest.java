@@ -291,6 +291,26 @@ public class GraphQLNodeServiceTest {
         verify(mockHeaderUtil, times(1)).getAuthHeader(any(ResolutionEnvironment.class));
     }
 
+    @Test
+    public void testGetNodeStatusNoIpInterface() throws JSONException {
+        doReturn(nodeDTO3).when(mockClient).getNodeById(anyLong(), eq(accessToken));
+
+        String query = String.format("query { nodeStatus(id: %d) { id, status }}", nodeDTO3.getId());
+        String request = createPayload(query);
+        webClient.post()
+            .uri(GRAPHQL_PATH)
+            .accept(MediaType.APPLICATION_JSON)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(request)
+            .exchange()
+            .expectStatus().isOk()
+            .expectBody()
+            .jsonPath("$.data.nodeStatus.id").isEqualTo(nodeDTO3.getId())
+            .jsonPath("$.data.nodeStatus.status").isEqualTo("DOWN");
+        verify(mockClient).getNodeById(eq(nodeDTO3.getId()), eq(accessToken));
+        verify(mockHeaderUtil, times(1)).getAuthHeader(any(ResolutionEnvironment.class));
+    }
+
     private String createPayload(String request) throws JSONException {
         return new JSONObject().put("query", request).toString();
     }

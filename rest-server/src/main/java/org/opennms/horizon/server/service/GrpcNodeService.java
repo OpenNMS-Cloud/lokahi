@@ -56,7 +56,8 @@ import java.util.stream.Collectors;
 @GraphQLApi
 @Service
 public class GrpcNodeService {
-    public static final String ICMP_MONITOR_TYPE = "ICMP";
+    private static final String ICMP_MONITOR_TYPE = "ICMP";
+
     private final InventoryClient client;
     private final NodeMapper mapper;
     private final ServerHeaderUtil headerUtil;

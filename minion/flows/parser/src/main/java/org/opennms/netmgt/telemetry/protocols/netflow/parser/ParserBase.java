@@ -162,6 +162,9 @@ public abstract class ParserBase implements Parser {
         // This variable is used to identify the thread as one that belongs to this class
         final LogPreservingThreadFactory logPreservingThreadFactory = new LogPreservingThreadFactory("Telemetryd-" + protocol + "-" + name, Integer.MAX_VALUE);
         threadFactory = r -> logPreservingThreadFactory.newThread(() -> {
+            if (isParserThread.get()) {
+                unload();
+            }
             isParserThread.set(true);
             r.run();
         });
@@ -464,5 +467,9 @@ public abstract class ParserBase implements Parser {
 
     protected SequenceNumberTracker sequenceNumberTracker() {
         return new SequenceNumberTracker(this.sequenceNumberPatience);
+    }
+
+    public void unload() {
+        isParserThread.remove();
     }
 }

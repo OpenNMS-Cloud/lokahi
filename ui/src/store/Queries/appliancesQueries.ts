@@ -1,7 +1,15 @@
 import { useQuery } from 'villus'
 import { defineStore } from 'pinia'
-import { ListNodesForTableDocument, ListMinionsForTableDocument, ListMinionsAndDevicesForTablesDocument, ListMinionsForTableQuery, ListNodesForTableQuery } from '@/types/graphql'
-import { ExtendedMinionDTO } from '@/types/minion'
+import { 
+  ListNodesForTableDocument, 
+  ListMinionsForTableDocument, 
+  ListMinionsAndDevicesForTablesDocument, 
+  ListMinionsForTableQuery, 
+  ListNodesForTableQuery,
+  ListMinionMetricsDocument,
+  TsResult
+} from '@/types/graphql'
+import { ExtendedMinion } from '@/types/minion'
 import { ExtendedNode } from '@/types/node'
 import { Ref } from 'vue'
 
@@ -21,27 +29,26 @@ export const useAppliancesQueries = defineStore('appliancesQueries', {
         tableMinions.value = addMetricsToMinions(minionsData)
       })
     }
+
+    const fetchMinionMetrics = (instance: string) => useQuery({
+      query: ListMinionMetricsDocument,
+      variables: { instance },
+      cachePolicy: 'network-only'
+    })
     
-    const addMetricsToMinions = (data: Ref<ListMinionsForTableQuery | null>)=> {
-      const minions = data.value?.listMinions?.minions as ExtendedMinionDTO[] || []
-      const minionLatencies = data.value?.minionLatency?.data?.result || []
-      const minionUptimes = data.value?.minionUptime?.data?.result || []
-    
-      const latenciesMap: Record<string, number> = {}
-      const uptimesMap: Record<string, number> = {}
-    
-      for (const latency of minionLatencies) {
-        latenciesMap[latency?.metric?.instance] = latency?.value?.[1] || 0
-      }
-    
-      for (const uptime of minionUptimes) {
-        uptimesMap[uptime?.metric?.instance] = uptime?.value?.[1] || 0
-      }
-    
-      for (const minion of minions) {
-        minion.icmp_latency = latenciesMap[minion.id as string]
-        minion.snmp_uptime = uptimesMap[minion.id as string]
-      }
+    const addMetricsToMinions = (resp: Ref<ListMinionsForTableQuery | null>)=> {
+      const minions = resp.value?.findAllMinions as ExtendedMinion[] || []
+      
+      minions.forEach(async (minion) => {
+        const { data, isFetching } = await fetchMinionMetrics(minion.systemId as string)
+        
+        if (data.value && !isFetching.value) {
+          const [{ value }] = data.value.minionLatency?.data?.result as TsResult[]
+          const [, val] = value as number[]
+
+          minion.icmp_latency = val
+        }
+      })
     
       return minions
     }
@@ -95,7 +102,7 @@ export const useAppliancesQueries = defineStore('appliancesQueries', {
       tableNodes.value = addMetricsToNodes(minionsAndNodes)
     })
 
-    const locations = computed(() => minionsAndNodes.value?.listLocations?.locations?.map((item, index) => ({ id: index, name: item.locationName })) || [])
+    const locations = computed(() => minionsAndNodes.value?.findAllLocations || [])
     
     return {
       tableMinions,

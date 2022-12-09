@@ -1,6 +1,12 @@
 import Graphs from '@/containers/Graphs.vue'
 import setupWrapper from 'tests/setupWrapper'
 import { downloadCanvas, downloadMultipleCanvases } from '@/components/Graphs/utils'
+import { createRouter, createWebHistory } from 'vue-router'
+import { RouterLinkStub } from '@vue/test-utils'
+
+// mock the route param
+const mockRouter = createRouter({ history: createWebHistory(), routes: [] })
+mockRouter.currentRoute.value.params = { id: '1'}
 
 const mockCanvas = {
   offsetWidth: 100, 
@@ -31,7 +37,13 @@ vi.mock('jspdf', () => {
 })
 
 const wrapper = setupWrapper({
-  component: Graphs
+  component: Graphs,
+  global: {
+    plugins: [mockRouter],
+    stubs: {
+      RouterLink: RouterLinkStub
+    }
+  }
 })
 
 test('The Graphs container mounts correctly', () => {

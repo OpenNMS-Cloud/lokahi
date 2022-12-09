@@ -71,13 +71,6 @@ describe('NodesTable.vue', () => {
             status: 'DOWN'
           },
           {
-            id: '2',
-            name: 'device2',
-            icmp_latency: null,
-            snmp_uptime: null,
-            status: 'DOWN'
-          },
-          {
             id: '3',
             name: 'device3',
             icmp_latency: -10,
@@ -119,7 +112,6 @@ describe('NodesTable.vue', () => {
         const latencies = formatValueBackground(wrapper.findAll('[data-test="col-latency"] > .value'))
         const expectedValueBackground = [
           [undefined, 'unknown'],
-          [undefined, 'unknown'],
           ['-10', 'failed'],
           ['0', 'ok'],
           ['10', 'ok']
@@ -132,7 +124,6 @@ describe('NodesTable.vue', () => {
 
         const uptimes = formatValueBackground(wrapper.findAll('[data-test="col-uptime"] > .value'))
         const expectedValueBackground = [
-          [undefined, 'unknown'],
           [undefined, 'unknown'],
           ['-10', 'failed'],
           ['0', 'ok'],

@@ -26,7 +26,14 @@ const props = defineProps({
 
 const itemBgColor = props.metric.status?.toLowerCase() || 'unknown'
 
-const itemText = props.metric.type === 'status' ? props.metric.status : getHumanReadableDuration(props.metric?.timestamp as number, props.metric?.timeUnit)
+const itemText = computed(() => {
+  let txt = '--'
+
+  if(props.metric.type === 'status' && props.metric.status) txt = props.metric.status 
+  else if(!props.metric?.timestamp !== undefined) txt = getHumanReadableDuration(props.metric?.timestamp as number, props.metric?.timeUnit)
+  
+  return txt
+})
 </script>
 
 <style lang="scss" scoped>

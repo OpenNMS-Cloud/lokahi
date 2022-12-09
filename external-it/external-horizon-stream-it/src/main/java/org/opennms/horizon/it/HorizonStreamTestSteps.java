@@ -87,6 +87,11 @@ public class HorizonStreamTestSteps {
         keycloakPassword = System.getenv(variableName);
     }
 
+    @Then("Say {string}")
+    public void say(String text) {
+        log.info("{}", text);
+    }
+
     @Then("login to Keycloak")
     public void loginToKeycloak() throws NoSuchAlgorithmException, KeyManagementException {
         ResteasyClientBuilder restClientBuilder = new ResteasyClientBuilder();

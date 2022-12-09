@@ -32,4 +32,5 @@ export declare type fncArgVoid = (...args: unknown[]) => void;
 export interface IIcon {
   image: any,
   title?: string
+  tooltip?: string
 }

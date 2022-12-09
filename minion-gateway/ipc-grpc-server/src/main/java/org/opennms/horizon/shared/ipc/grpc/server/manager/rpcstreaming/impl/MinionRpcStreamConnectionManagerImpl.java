@@ -88,7 +88,7 @@ public class MinionRpcStreamConnectionManagerImpl implements MinionRpcStreamConn
 
     // Notify the MinionManager of the removal
     if (removedMinionInfo.getId() != null) {
-      minionManager.removeMinion(removedMinionInfo.getId());
+      minionManager.removeMinion(removedMinionInfo);
     }
   }
 
@@ -102,7 +102,7 @@ public class MinionRpcStreamConnectionManagerImpl implements MinionRpcStreamConn
 
         // Notify the MinionManager of the removal
         if (removedMinionInfo.getId() != null) {
-            minionManager.removeMinion(removedMinionInfo.getId());
+            minionManager.removeMinion(removedMinionInfo);
         }
     }
 }

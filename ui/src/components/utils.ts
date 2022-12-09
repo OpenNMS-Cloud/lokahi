@@ -7,10 +7,10 @@ import { TimeUnit } from '@/types'
  * @param timeUnit milliseconds by default
  * @returns A shorted version (e.g. 28d4h22m16s) 
  */
-export const getHumanReadableDuration = (timestamp: number, timeUnit = TimeUnit.MSecs) => {
+export const getHumanReadableDuration = (timestamp: number | undefined, timeUnit = TimeUnit.MSecs) => {
   let durationDisplay = '--' // undefined | null
 
-  if(![undefined, null].includes(timestamp as any)) {
+  if(timestamp !== undefined) {
     const timestampInSecs = timeUnit === TimeUnit.Secs ? timestamp : timestamp / 1000
 
     if(Math.abs(timestampInSecs) < 1) {

@@ -5,10 +5,19 @@ query GetMetric($metric: String!) {
 query GetTimeSeriesMetric(
   $name: String!, 
   $monitor: String,
-  # $id: Int,
-  # $instance: String,
+  $nodeId: String,
+  $instance: String,
   $timeRange: Int!,
   $timeRangeUnit: TimeRangeUnit!
 ) {
   ...ChartTimeSeriesMetric
+}
+
+query GetNodeForGraphs($id: Long) {
+  findNodeById(id: $id) {
+    id
+    ipInterfaces {
+      ipAddress
+    }
+  }
 }

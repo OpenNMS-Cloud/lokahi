@@ -21,7 +21,7 @@ const router = createRouter({
       component: () => import('@/containers/Alarms.vue')
     },
     {
-      path: '/graphs',
+      path: '/graphs/:id',
       name: 'Graphs',
       component: () => import('@/containers/Graphs.vue')
     },

@@ -84,9 +84,7 @@ const nodeData = computed(() => {
   }
 })
 
-onBeforeMount(() => {
-  nodeStatusStore.setNodeId(Number(route.params.id))
-})
+onBeforeMount(() => nodeStatusStore.setNodeId(Number(route.params.id)))
 </script>
 
 <style lang="scss" scoped>

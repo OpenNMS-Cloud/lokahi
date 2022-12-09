@@ -5,7 +5,13 @@ fragment MinionUptimeParts on Query {
 }
 
 fragment MinionLatencyParts on Query {
-  minionLatency: metric(name: "minion_response_time_msec") {
+  minionLatency: metric(
+    name: "response_time_msec", 
+    labels: {
+      instance: $instance
+    }
+  ) {
+    status
     ...MetricParts
   }
 }

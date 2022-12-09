@@ -28,12 +28,15 @@
 
 package org.opennms.netmgt.telemetry.protocols.netflow.parser;
 
+import static java.util.Objects.requireNonNull;
+
 import java.math.BigInteger;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -304,7 +307,7 @@ public class IPAddress implements Comparable<IPAddress> {
     }
 
     protected byte[] toIpAddrBytes(final String dottedNotation) {
-        return getInetAddress(dottedNotation).getAddress();
+        return requireNonNull(getInetAddress(dottedNotation)).getAddress();
     }
 
     private InetAddress getInetAddress(final byte[] ipAddrOctets) {

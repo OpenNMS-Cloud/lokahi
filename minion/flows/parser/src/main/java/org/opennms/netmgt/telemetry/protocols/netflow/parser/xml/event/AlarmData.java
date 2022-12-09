@@ -74,7 +74,6 @@ public class AlarmData implements Serializable {
      * Field _alarmType.
      */
 	@XmlAttribute(name="alarm-type", required=true)
-	@NotNull
 	@Min(1)
     private Integer _alarmType;
 

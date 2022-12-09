@@ -30,6 +30,7 @@ package org.opennms.netmgt.telemetry.protocols.netflow.parser;
 
 import java.util.BitSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ThreadFactory;
 
 import org.slf4j.MDC;
@@ -40,6 +41,7 @@ public class LogPreservingThreadFactory implements ThreadFactory {
     private final int m_poolSize;
     private Map<String,String> m_mdc = null;
     private int m_counter = 0;
+    private static final Object lockObj = new Object();
 
     public LogPreservingThreadFactory(String poolName, int poolSize) {
          m_name = poolName;
@@ -114,30 +116,27 @@ public class LogPreservingThreadFactory implements ThreadFactory {
     private Thread getPooledThread(final Runnable r) {
         final int threadNumber = getOpenThreadSlot(m_slotNumbers);
         String name = String.format("%s-Thread-%d-of-%d", m_name, threadNumber, m_poolSize);
-        return new Thread(new Runnable() {
-            @Override
-            public void run() {
-                Map<String,String> mdc = getCopyOfContextMap();
+        return new Thread(() -> {
+            Map<String,String> mdc = getCopyOfContextMap();
+            try {
                 try {
-                    try {
-                        setContextMap(m_mdc);
-                        r.run();
-                    } finally {
-                        setContextMap(mdc);
-                    }
+                    setContextMap(m_mdc);
+                    r.run();
                 } finally {
-                    // And make sure the mark the thread as unused afterwards if
-                    // the thread ever exits
-                    synchronized(m_slotNumbers) {
-                        m_slotNumbers.set(threadNumber, false);
-                    }
+                    setContextMap(mdc);
+                }
+            } finally {
+                // And make sure the mark the thread as unused afterwards if
+                // the thread ever exits
+                synchronized(m_slotNumbers) {
+                    m_slotNumbers.set(threadNumber, false);
                 }
             }
         }, name);
     }
 
     private static int getOpenThreadSlot(BitSet bs) {
-        synchronized(bs) {
+        synchronized(lockObj) {
             // Start at 1 so that we always return a positive integer
             for (int i = 1; i < bs.size(); i++) {
                 if (!bs.get(i)) {

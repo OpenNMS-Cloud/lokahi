@@ -31,6 +31,12 @@
 
 package org.opennms.netmgt.telemetry.protocols.netflow.parser.flowmessage;
 
+import static org.apache.commons.lang3.StringUtils.EMPTY;
+
+import java.util.Objects;
+
+import org.apache.commons.lang3.StringUtils;
+
 /**
  * Protobuf type {@code FlowMessage}
  */
@@ -553,7 +559,7 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int DST_ADDRESS_FIELD_NUMBER = 4;
-  private volatile Object dstAddress_;
+  private Object dstAddress_;
   /**
    * <pre>
    *  Destination address.
@@ -561,12 +567,12 @@ private static final long serialVersionUID = 0L;
    *
    * <code>string dst_address = 4;</code>
    */
-  public String getDstAddress() {
+  public synchronized String getDstAddress() {
     Object ref = dstAddress_;
     if (ref instanceof String) {
       return (String) ref;
     } else {
-      com.google.protobuf.ByteString bs = 
+      com.google.protobuf.ByteString bs =
           (com.google.protobuf.ByteString) ref;
       String s = bs.toStringUtf8();
       dstAddress_ = s;
@@ -580,11 +586,11 @@ private static final long serialVersionUID = 0L;
    *
    * <code>string dst_address = 4;</code>
    */
-  public com.google.protobuf.ByteString
+  public synchronized com.google.protobuf.ByteString
       getDstAddressBytes() {
     Object ref = dstAddress_;
     if (ref instanceof String) {
-      com.google.protobuf.ByteString b = 
+      com.google.protobuf.ByteString b =
           com.google.protobuf.ByteString.copyFromUtf8(
               (String) ref);
       dstAddress_ = b;
@@ -595,7 +601,8 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int DST_HOSTNAME_FIELD_NUMBER = 5;
-  private volatile Object dstHostname_;
+  private Object dstHostname_;
+
   /**
    * <pre>
    * Destination address hostname.
@@ -603,12 +610,12 @@ private static final long serialVersionUID = 0L;
    *
    * <code>string dst_hostname = 5;</code>
    */
-  public String getDstHostname() {
+  public synchronized String getDstHostname() {
     Object ref = dstHostname_;
     if (ref instanceof String) {
       return (String) ref;
     } else {
-      com.google.protobuf.ByteString bs = 
+      com.google.protobuf.ByteString bs =
           (com.google.protobuf.ByteString) ref;
       String s = bs.toStringUtf8();
       dstHostname_ = s;
@@ -626,10 +633,10 @@ private static final long serialVersionUID = 0L;
       getDstHostnameBytes() {
     Object ref = dstHostname_;
     if (ref instanceof String) {
-      com.google.protobuf.ByteString b = 
+      com.google.protobuf.ByteString b =
           com.google.protobuf.ByteString.copyFromUtf8(
               (String) ref);
-      dstHostname_ = b;
+        dstHostname_ = b;
       return b;
     } else {
       return (com.google.protobuf.ByteString) ref;
@@ -1099,7 +1106,7 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int NEXT_HOP_ADDRESS_FIELD_NUMBER = 20;
-  private volatile Object nextHopAddress_;
+  private Object nextHopAddress_;
   /**
    * <pre>
    * Next hop IpAddress.
@@ -1107,12 +1114,12 @@ private static final long serialVersionUID = 0L;
    *
    * <code>string next_hop_address = 20;</code>
    */
-  public String getNextHopAddress() {
+  public synchronized String getNextHopAddress() {
     Object ref = nextHopAddress_;
     if (ref instanceof String) {
       return (String) ref;
     } else {
-      com.google.protobuf.ByteString bs = 
+      com.google.protobuf.ByteString bs =
           (com.google.protobuf.ByteString) ref;
       String s = bs.toStringUtf8();
       nextHopAddress_ = s;
@@ -1126,11 +1133,11 @@ private static final long serialVersionUID = 0L;
    *
    * <code>string next_hop_address = 20;</code>
    */
-  public com.google.protobuf.ByteString
+  public synchronized com.google.protobuf.ByteString
       getNextHopAddressBytes() {
     Object ref = nextHopAddress_;
     if (ref instanceof String) {
-      com.google.protobuf.ByteString b = 
+      com.google.protobuf.ByteString b =
           com.google.protobuf.ByteString.copyFromUtf8(
               (String) ref);
       nextHopAddress_ = b;
@@ -1141,7 +1148,7 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int NEXT_HOP_HOSTNAME_FIELD_NUMBER = 21;
-  private volatile Object nextHopHostname_;
+  private Object nextHopHostname_;
   /**
    * <pre>
    * Next hop hostname.
@@ -1149,12 +1156,12 @@ private static final long serialVersionUID = 0L;
    *
    * <code>string next_hop_hostname = 21;</code>
    */
-  public String getNextHopHostname() {
+  public synchronized String getNextHopHostname() {
     Object ref = nextHopHostname_;
     if (ref instanceof String) {
       return (String) ref;
     } else {
-      com.google.protobuf.ByteString bs = 
+      com.google.protobuf.ByteString bs =
           (com.google.protobuf.ByteString) ref;
       String s = bs.toStringUtf8();
       nextHopHostname_ = s;
@@ -1172,7 +1179,7 @@ private static final long serialVersionUID = 0L;
       getNextHopHostnameBytes() {
     Object ref = nextHopHostname_;
     if (ref instanceof String) {
-      com.google.protobuf.ByteString b = 
+      com.google.protobuf.ByteString b =
           com.google.protobuf.ByteString.copyFromUtf8(
               (String) ref);
       nextHopHostname_ = b;
@@ -1274,7 +1281,7 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int SRC_ADDRESS_FIELD_NUMBER = 26;
-  private volatile Object srcAddress_;
+  private Object srcAddress_;
   /**
    * <pre>
    * Source address.
@@ -1282,12 +1289,12 @@ private static final long serialVersionUID = 0L;
    *
    * <code>string src_address = 26;</code>
    */
-  public String getSrcAddress() {
+  public synchronized String getSrcAddress() {
     Object ref = srcAddress_;
     if (ref instanceof String) {
       return (String) ref;
     } else {
-      com.google.protobuf.ByteString bs = 
+      com.google.protobuf.ByteString bs =
           (com.google.protobuf.ByteString) ref;
       String s = bs.toStringUtf8();
       srcAddress_ = s;
@@ -1305,7 +1312,7 @@ private static final long serialVersionUID = 0L;
       getSrcAddressBytes() {
     Object ref = srcAddress_;
     if (ref instanceof String) {
-      com.google.protobuf.ByteString b = 
+      com.google.protobuf.ByteString b =
           com.google.protobuf.ByteString.copyFromUtf8(
               (String) ref);
       srcAddress_ = b;
@@ -1316,7 +1323,7 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int SRC_HOSTNAME_FIELD_NUMBER = 27;
-  private volatile Object srcHostname_;
+  private Object srcHostname_;
   /**
    * <pre>
    * Source hostname.
@@ -1324,12 +1331,12 @@ private static final long serialVersionUID = 0L;
    *
    * <code>string src_hostname = 27;</code>
    */
-  public String getSrcHostname() {
+  public synchronized String getSrcHostname() {
     Object ref = srcHostname_;
     if (ref instanceof String) {
       return (String) ref;
     } else {
-      com.google.protobuf.ByteString bs = 
+      com.google.protobuf.ByteString bs =
           (com.google.protobuf.ByteString) ref;
       String s = bs.toStringUtf8();
       srcHostname_ = s;
@@ -1347,7 +1354,7 @@ private static final long serialVersionUID = 0L;
       getSrcHostnameBytes() {
     Object ref = srcHostname_;
     if (ref instanceof String) {
-      com.google.protobuf.ByteString b = 
+      com.google.protobuf.ByteString b =
           com.google.protobuf.ByteString.copyFromUtf8(
               (String) ref);
       srcHostname_ = b;
@@ -1581,7 +1588,7 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int NODE_IDENTIFIER_FIELD_NUMBER = 35;
-  private volatile Object nodeIdentifier_;
+  private Object nodeIdentifier_;
   /**
    * <pre>
    * node lookup identifier.
@@ -1589,12 +1596,12 @@ private static final long serialVersionUID = 0L;
    *
    * <code>string node_identifier = 35;</code>
    */
-  public String getNodeIdentifier() {
+  public synchronized String getNodeIdentifier() {
     Object ref = nodeIdentifier_;
     if (ref instanceof String) {
       return (String) ref;
     } else {
-      com.google.protobuf.ByteString bs = 
+      com.google.protobuf.ByteString bs =
           (com.google.protobuf.ByteString) ref;
       String s = bs.toStringUtf8();
       nodeIdentifier_ = s;
@@ -1608,11 +1615,11 @@ private static final long serialVersionUID = 0L;
    *
    * <code>string node_identifier = 35;</code>
    */
-  public com.google.protobuf.ByteString
+  public synchronized com.google.protobuf.ByteString
       getNodeIdentifierBytes() {
     Object ref = nodeIdentifier_;
     if (ref instanceof String) {
-      com.google.protobuf.ByteString b = 
+      com.google.protobuf.ByteString b =
           com.google.protobuf.ByteString.copyFromUtf8(
               (String) ref);
       nodeIdentifier_ = b;
@@ -2253,7 +2260,7 @@ private static final long serialVersionUID = 0L;
       com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
       // @@protoc_insertion_point(builder_implements:FlowMessage)
       FlowMessageOrBuilder {
-    public static final com.google.protobuf.Descriptors.Descriptor
+    public static com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return FlowProtos.internal_static_FlowMessage_descriptor;
     }
@@ -2296,7 +2303,7 @@ private static final long serialVersionUID = 0L;
 
       dstAddress_ = "";
 
-      dstHostname_ = "";
+      setDstHostname(EMPTY);
 
       if (dstAsBuilder_ == null) {
         dstAs_ = null;
@@ -2658,7 +2665,7 @@ private static final long serialVersionUID = 0L;
         onChanged();
       }
       if (!other.getDstHostname().isEmpty()) {
-        dstHostname_ = other.dstHostname_;
+        setDstHostname((String) other.dstHostname_);
         onChanged();
       }
       if (other.hasDstAs()) {
@@ -2801,7 +2808,7 @@ private static final long serialVersionUID = 0L;
      * <code>uint64 timestamp = 1;</code>
      */
     public Builder setTimestamp(long value) {
-      
+
       timestamp_ = value;
       onChanged();
       return this;
@@ -2814,7 +2821,7 @@ private static final long serialVersionUID = 0L;
      * <code>uint64 timestamp = 1;</code>
      */
     public Builder clearTimestamp() {
-      
+
       timestamp_ = 0L;
       onChanged();
       return this;
@@ -2933,7 +2940,7 @@ private static final long serialVersionUID = 0L;
      * <code>.google.protobuf.UInt64Value num_bytes = 2;</code>
      */
     public com.google.protobuf.UInt64Value.Builder getNumBytesBuilder() {
-      
+
       onChanged();
       return getNumBytesFieldBuilder().getBuilder();
     }
@@ -2960,7 +2967,7 @@ private static final long serialVersionUID = 0L;
      * <code>.google.protobuf.UInt64Value num_bytes = 2;</code>
      */
     private com.google.protobuf.SingleFieldBuilderV3<
-        com.google.protobuf.UInt64Value, com.google.protobuf.UInt64Value.Builder, com.google.protobuf.UInt64ValueOrBuilder> 
+        com.google.protobuf.UInt64Value, com.google.protobuf.UInt64Value.Builder, com.google.protobuf.UInt64ValueOrBuilder>
         getNumBytesFieldBuilder() {
       if (numBytesBuilder_ == null) {
         numBytesBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
@@ -3019,7 +3026,7 @@ private static final long serialVersionUID = 0L;
       if (value == null) {
         throw new NullPointerException();
       }
-      
+
       direction_ = value.getNumber();
       onChanged();
       return this;
@@ -3032,7 +3039,7 @@ private static final long serialVersionUID = 0L;
      * <code>.Direction direction = 3;</code>
      */
     public Builder clearDirection() {
-      
+
       direction_ = 0;
       onChanged();
       return this;
@@ -3046,7 +3053,7 @@ private static final long serialVersionUID = 0L;
      *
      * <code>string dst_address = 4;</code>
      */
-    public String getDstAddress() {
+    public synchronized String getDstAddress() {
       Object ref = dstAddress_;
       if (!(ref instanceof String)) {
         com.google.protobuf.ByteString bs =
@@ -3065,11 +3072,11 @@ private static final long serialVersionUID = 0L;
      *
      * <code>string dst_address = 4;</code>
      */
-    public com.google.protobuf.ByteString
+    public synchronized com.google.protobuf.ByteString
         getDstAddressBytes() {
       Object ref = dstAddress_;
       if (ref instanceof String) {
-        com.google.protobuf.ByteString b = 
+        com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (String) ref);
         dstAddress_ = b;
@@ -3085,12 +3092,9 @@ private static final long serialVersionUID = 0L;
      *
      * <code>string dst_address = 4;</code>
      */
-    public Builder setDstAddress(
+    public synchronized Builder setDstAddress(
         String value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  
+     Objects.requireNonNull(value);
       dstAddress_ = value;
       onChanged();
       return this;
@@ -3102,8 +3106,8 @@ private static final long serialVersionUID = 0L;
      *
      * <code>string dst_address = 4;</code>
      */
-    public Builder clearDstAddress() {
-      
+    public synchronized Builder clearDstAddress() {
+
       dstAddress_ = getDefaultInstance().getDstAddress();
       onChanged();
       return this;
@@ -3115,13 +3119,13 @@ private static final long serialVersionUID = 0L;
      *
      * <code>string dst_address = 4;</code>
      */
-    public Builder setDstAddressBytes(
+    public synchronized Builder setDstAddressBytes(
         com.google.protobuf.ByteString value) {
       if (value == null) {
     throw new NullPointerException();
   }
   checkByteStringIsUtf8(value);
-      
+
       dstAddress_ = value;
       onChanged();
       return this;
@@ -3135,7 +3139,7 @@ private static final long serialVersionUID = 0L;
      *
      * <code>string dst_hostname = 5;</code>
      */
-    public String getDstHostname() {
+    public synchronized String getDstHostname() {
       Object ref = dstHostname_;
       if (!(ref instanceof String)) {
         com.google.protobuf.ByteString bs =
@@ -3158,7 +3162,7 @@ private static final long serialVersionUID = 0L;
         getDstHostnameBytes() {
       Object ref = dstHostname_;
       if (ref instanceof String) {
-        com.google.protobuf.ByteString b = 
+        com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (String) ref);
         dstHostname_ = b;
@@ -3174,12 +3178,8 @@ private static final long serialVersionUID = 0L;
      *
      * <code>string dst_hostname = 5;</code>
      */
-    public Builder setDstHostname(
-        String value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  
+    public Builder setDstHostname(String value) {
+      Objects.requireNonNull(value);
       dstHostname_ = value;
       onChanged();
       return this;
@@ -3192,7 +3192,7 @@ private static final long serialVersionUID = 0L;
      * <code>string dst_hostname = 5;</code>
      */
     public Builder clearDstHostname() {
-      
+
       dstHostname_ = getDefaultInstance().getDstHostname();
       onChanged();
       return this;
@@ -3210,7 +3210,7 @@ private static final long serialVersionUID = 0L;
     throw new NullPointerException();
   }
   checkByteStringIsUtf8(value);
-      
+
       dstHostname_ = value;
       onChanged();
       return this;
@@ -3329,7 +3329,7 @@ private static final long serialVersionUID = 0L;
      * <code>.google.protobuf.UInt64Value dst_as = 6;</code>
      */
     public com.google.protobuf.UInt64Value.Builder getDstAsBuilder() {
-      
+
       onChanged();
       return getDstAsFieldBuilder().getBuilder();
     }
@@ -3356,7 +3356,7 @@ private static final long serialVersionUID = 0L;
      * <code>.google.protobuf.UInt64Value dst_as = 6;</code>
      */
     private com.google.protobuf.SingleFieldBuilderV3<
-        com.google.protobuf.UInt64Value, com.google.protobuf.UInt64Value.Builder, com.google.protobuf.UInt64ValueOrBuilder> 
+        com.google.protobuf.UInt64Value, com.google.protobuf.UInt64Value.Builder, com.google.protobuf.UInt64ValueOrBuilder>
         getDstAsFieldBuilder() {
       if (dstAsBuilder_ == null) {
         dstAsBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
@@ -3482,7 +3482,7 @@ private static final long serialVersionUID = 0L;
      * <code>.google.protobuf.UInt32Value dst_mask_len = 7;</code>
      */
     public com.google.protobuf.UInt32Value.Builder getDstMaskLenBuilder() {
-      
+
       onChanged();
       return getDstMaskLenFieldBuilder().getBuilder();
     }
@@ -3509,7 +3509,7 @@ private static final long serialVersionUID = 0L;
      * <code>.google.protobuf.UInt32Value dst_mask_len = 7;</code>
      */
     private com.google.protobuf.SingleFieldBuilderV3<
-        com.google.protobuf.UInt32Value, com.google.protobuf.UInt32Value.Builder, com.google.protobuf.UInt32ValueOrBuilder> 
+        com.google.protobuf.UInt32Value, com.google.protobuf.UInt32Value.Builder, com.google.protobuf.UInt32ValueOrBuilder>
         getDstMaskLenFieldBuilder() {
       if (dstMaskLenBuilder_ == null) {
         dstMaskLenBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
@@ -3635,7 +3635,7 @@ private static final long serialVersionUID = 0L;
      * <code>.google.protobuf.UInt32Value dst_port = 8;</code>
      */
     public com.google.protobuf.UInt32Value.Builder getDstPortBuilder() {
-      
+
       onChanged();
       return getDstPortFieldBuilder().getBuilder();
     }
@@ -3662,7 +3662,7 @@ private static final long serialVersionUID = 0L;
      * <code>.google.protobuf.UInt32Value dst_port = 8;</code>
      */
     private com.google.protobuf.SingleFieldBuilderV3<
-        com.google.protobuf.UInt32Value, com.google.protobuf.UInt32Value.Builder, com.google.protobuf.UInt32ValueOrBuilder> 
+        com.google.protobuf.UInt32Value, com.google.protobuf.UInt32Value.Builder, com.google.protobuf.UInt32ValueOrBuilder>
         getDstPortFieldBuilder() {
       if (dstPortBuilder_ == null) {
         dstPortBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
@@ -3788,7 +3788,7 @@ private static final long serialVersionUID = 0L;
      * <code>.google.protobuf.UInt32Value engine_id = 9;</code>
      */
     public com.google.protobuf.UInt32Value.Builder getEngineIdBuilder() {
-      
+
       onChanged();
       return getEngineIdFieldBuilder().getBuilder();
     }
@@ -3815,7 +3815,7 @@ private static final long serialVersionUID = 0L;
      * <code>.google.protobuf.UInt32Value engine_id = 9;</code>
      */
     private com.google.protobuf.SingleFieldBuilderV3<
-        com.google.protobuf.UInt32Value, com.google.protobuf.UInt32Value.Builder, com.google.protobuf.UInt32ValueOrBuilder> 
+        com.google.protobuf.UInt32Value, com.google.protobuf.UInt32Value.Builder, com.google.protobuf.UInt32ValueOrBuilder>
         getEngineIdFieldBuilder() {
       if (engineIdBuilder_ == null) {
         engineIdBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
@@ -3941,7 +3941,7 @@ private static final long serialVersionUID = 0L;
      * <code>.google.protobuf.UInt32Value engine_type = 10;</code>
      */
     public com.google.protobuf.UInt32Value.Builder getEngineTypeBuilder() {
-      
+
       onChanged();
       return getEngineTypeFieldBuilder().getBuilder();
     }
@@ -3968,7 +3968,7 @@ private static final long serialVersionUID = 0L;
      * <code>.google.protobuf.UInt32Value engine_type = 10;</code>
      */
     private com.google.protobuf.SingleFieldBuilderV3<
-        com.google.protobuf.UInt32Value, com.google.protobuf.UInt32Value.Builder, com.google.protobuf.UInt32ValueOrBuilder> 
+        com.google.protobuf.UInt32Value, com.google.protobuf.UInt32Value.Builder, com.google.protobuf.UInt32ValueOrBuilder>
         getEngineTypeFieldBuilder() {
       if (engineTypeBuilder_ == null) {
         engineTypeBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
@@ -4094,7 +4094,7 @@ private static final long serialVersionUID = 0L;
      * <code>.google.protobuf.UInt64Value delta_switched = 11;</code>
      */
     public com.google.protobuf.UInt64Value.Builder getDeltaSwitchedBuilder() {
-      
+
       onChanged();
       return getDeltaSwitchedFieldBuilder().getBuilder();
     }
@@ -4121,7 +4121,7 @@ private static final long serialVersionUID = 0L;
      * <code>.google.protobuf.UInt64Value delta_switched = 11;</code>
      */
     private com.google.protobuf.SingleFieldBuilderV3<
-        com.google.protobuf.UInt64Value, com.google.protobuf.UInt64Value.Builder, com.google.protobuf.UInt64ValueOrBuilder> 
+        com.google.protobuf.UInt64Value, com.google.protobuf.UInt64Value.Builder, com.google.protobuf.UInt64ValueOrBuilder>
         getDeltaSwitchedFieldBuilder() {
       if (deltaSwitchedBuilder_ == null) {
         deltaSwitchedBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
@@ -4247,7 +4247,7 @@ private static final long serialVersionUID = 0L;
      * <code>.google.protobuf.UInt64Value first_switched = 12;</code>
      */
     public com.google.protobuf.UInt64Value.Builder getFirstSwitchedBuilder() {
-      
+
       onChanged();
       return getFirstSwitchedFieldBuilder().getBuilder();
     }
@@ -4274,7 +4274,7 @@ private static final long serialVersionUID = 0L;
      * <code>.google.protobuf.UInt64Value first_switched = 12;</code>
      */
     private com.google.protobuf.SingleFieldBuilderV3<
-        com.google.protobuf.UInt64Value, com.google.protobuf.UInt64Value.Builder, com.google.protobuf.UInt64ValueOrBuilder> 
+        com.google.protobuf.UInt64Value, com.google.protobuf.UInt64Value.Builder, com.google.protobuf.UInt64ValueOrBuilder>
         getFirstSwitchedFieldBuilder() {
       if (firstSwitchedBuilder_ == null) {
         firstSwitchedBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
@@ -4400,7 +4400,7 @@ private static final long serialVersionUID = 0L;
      * <code>.google.protobuf.UInt64Value last_switched = 13;</code>
      */
     public com.google.protobuf.UInt64Value.Builder getLastSwitchedBuilder() {
-      
+
       onChanged();
       return getLastSwitchedFieldBuilder().getBuilder();
     }
@@ -4427,7 +4427,7 @@ private static final long serialVersionUID = 0L;
      * <code>.google.protobuf.UInt64Value last_switched = 13;</code>
      */
     private com.google.protobuf.SingleFieldBuilderV3<
-        com.google.protobuf.UInt64Value, com.google.protobuf.UInt64Value.Builder, com.google.protobuf.UInt64ValueOrBuilder> 
+        com.google.protobuf.UInt64Value, com.google.protobuf.UInt64Value.Builder, com.google.protobuf.UInt64ValueOrBuilder>
         getLastSwitchedFieldBuilder() {
       if (lastSwitchedBuilder_ == null) {
         lastSwitchedBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
@@ -4553,7 +4553,7 @@ private static final long serialVersionUID = 0L;
      * <code>.google.protobuf.UInt32Value num_flow_records = 14;</code>
      */
     public com.google.protobuf.UInt32Value.Builder getNumFlowRecordsBuilder() {
-      
+
       onChanged();
       return getNumFlowRecordsFieldBuilder().getBuilder();
     }
@@ -4580,7 +4580,7 @@ private static final long serialVersionUID = 0L;
      * <code>.google.protobuf.UInt32Value num_flow_records = 14;</code>
      */
     private com.google.protobuf.SingleFieldBuilderV3<
-        com.google.protobuf.UInt32Value, com.google.protobuf.UInt32Value.Builder, com.google.protobuf.UInt32ValueOrBuilder> 
+        com.google.protobuf.UInt32Value, com.google.protobuf.UInt32Value.Builder, com.google.protobuf.UInt32ValueOrBuilder>
         getNumFlowRecordsFieldBuilder() {
       if (numFlowRecordsBuilder_ == null) {
         numFlowRecordsBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
@@ -4706,7 +4706,7 @@ private static final long serialVersionUID = 0L;
      * <code>.google.protobuf.UInt64Value num_packets = 15;</code>
      */
     public com.google.protobuf.UInt64Value.Builder getNumPacketsBuilder() {
-      
+
       onChanged();
       return getNumPacketsFieldBuilder().getBuilder();
     }
@@ -4733,7 +4733,7 @@ private static final long serialVersionUID = 0L;
      * <code>.google.protobuf.UInt64Value num_packets = 15;</code>
      */
     private com.google.protobuf.SingleFieldBuilderV3<
-        com.google.protobuf.UInt64Value, com.google.protobuf.UInt64Value.Builder, com.google.protobuf.UInt64ValueOrBuilder> 
+        com.google.protobuf.UInt64Value, com.google.protobuf.UInt64Value.Builder, com.google.protobuf.UInt64ValueOrBuilder>
         getNumPacketsFieldBuilder() {
       if (numPacketsBuilder_ == null) {
         numPacketsBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
@@ -4859,7 +4859,7 @@ private static final long serialVersionUID = 0L;
      * <code>.google.protobuf.UInt64Value flow_seq_num = 16;</code>
      */
     public com.google.protobuf.UInt64Value.Builder getFlowSeqNumBuilder() {
-      
+
       onChanged();
       return getFlowSeqNumFieldBuilder().getBuilder();
     }
@@ -4886,7 +4886,7 @@ private static final long serialVersionUID = 0L;
      * <code>.google.protobuf.UInt64Value flow_seq_num = 16;</code>
      */
     private com.google.protobuf.SingleFieldBuilderV3<
-        com.google.protobuf.UInt64Value, com.google.protobuf.UInt64Value.Builder, com.google.protobuf.UInt64ValueOrBuilder> 
+        com.google.protobuf.UInt64Value, com.google.protobuf.UInt64Value.Builder, com.google.protobuf.UInt64ValueOrBuilder>
         getFlowSeqNumFieldBuilder() {
       if (flowSeqNumBuilder_ == null) {
         flowSeqNumBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
@@ -5012,7 +5012,7 @@ private static final long serialVersionUID = 0L;
      * <code>.google.protobuf.UInt32Value input_snmp_ifindex = 17;</code>
      */
     public com.google.protobuf.UInt32Value.Builder getInputSnmpIfindexBuilder() {
-      
+
       onChanged();
       return getInputSnmpIfindexFieldBuilder().getBuilder();
     }
@@ -5039,7 +5039,7 @@ private static final long serialVersionUID = 0L;
      * <code>.google.protobuf.UInt32Value input_snmp_ifindex = 17;</code>
      */
     private com.google.protobuf.SingleFieldBuilderV3<
-        com.google.protobuf.UInt32Value, com.google.protobuf.UInt32Value.Builder, com.google.protobuf.UInt32ValueOrBuilder> 
+        com.google.protobuf.UInt32Value, com.google.protobuf.UInt32Value.Builder, com.google.protobuf.UInt32ValueOrBuilder>
         getInputSnmpIfindexFieldBuilder() {
       if (inputSnmpIfindexBuilder_ == null) {
         inputSnmpIfindexBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
@@ -5165,7 +5165,7 @@ private static final long serialVersionUID = 0L;
      * <code>.google.protobuf.UInt32Value output_snmp_ifindex = 18;</code>
      */
     public com.google.protobuf.UInt32Value.Builder getOutputSnmpIfindexBuilder() {
-      
+
       onChanged();
       return getOutputSnmpIfindexFieldBuilder().getBuilder();
     }
@@ -5192,7 +5192,7 @@ private static final long serialVersionUID = 0L;
      * <code>.google.protobuf.UInt32Value output_snmp_ifindex = 18;</code>
      */
     private com.google.protobuf.SingleFieldBuilderV3<
-        com.google.protobuf.UInt32Value, com.google.protobuf.UInt32Value.Builder, com.google.protobuf.UInt32ValueOrBuilder> 
+        com.google.protobuf.UInt32Value, com.google.protobuf.UInt32Value.Builder, com.google.protobuf.UInt32ValueOrBuilder>
         getOutputSnmpIfindexFieldBuilder() {
       if (outputSnmpIfindexBuilder_ == null) {
         outputSnmpIfindexBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
@@ -5318,7 +5318,7 @@ private static final long serialVersionUID = 0L;
      * <code>.google.protobuf.UInt32Value ip_protocol_version = 19;</code>
      */
     public com.google.protobuf.UInt32Value.Builder getIpProtocolVersionBuilder() {
-      
+
       onChanged();
       return getIpProtocolVersionFieldBuilder().getBuilder();
     }
@@ -5345,7 +5345,7 @@ private static final long serialVersionUID = 0L;
      * <code>.google.protobuf.UInt32Value ip_protocol_version = 19;</code>
      */
     private com.google.protobuf.SingleFieldBuilderV3<
-        com.google.protobuf.UInt32Value, com.google.protobuf.UInt32Value.Builder, com.google.protobuf.UInt32ValueOrBuilder> 
+        com.google.protobuf.UInt32Value, com.google.protobuf.UInt32Value.Builder, com.google.protobuf.UInt32ValueOrBuilder>
         getIpProtocolVersionFieldBuilder() {
       if (ipProtocolVersionBuilder_ == null) {
         ipProtocolVersionBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
@@ -5389,7 +5389,7 @@ private static final long serialVersionUID = 0L;
         getNextHopAddressBytes() {
       Object ref = nextHopAddress_;
       if (ref instanceof String) {
-        com.google.protobuf.ByteString b = 
+        com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (String) ref);
         nextHopAddress_ = b;
@@ -5410,7 +5410,7 @@ private static final long serialVersionUID = 0L;
       if (value == null) {
     throw new NullPointerException();
   }
-  
+
       nextHopAddress_ = value;
       onChanged();
       return this;
@@ -5423,7 +5423,7 @@ private static final long serialVersionUID = 0L;
      * <code>string next_hop_address = 20;</code>
      */
     public Builder clearNextHopAddress() {
-      
+
       nextHopAddress_ = getDefaultInstance().getNextHopAddress();
       onChanged();
       return this;
@@ -5441,7 +5441,7 @@ private static final long serialVersionUID = 0L;
     throw new NullPointerException();
   }
   checkByteStringIsUtf8(value);
-      
+
       nextHopAddress_ = value;
       onChanged();
       return this;
@@ -5478,7 +5478,7 @@ private static final long serialVersionUID = 0L;
         getNextHopHostnameBytes() {
       Object ref = nextHopHostname_;
       if (ref instanceof String) {
-        com.google.protobuf.ByteString b = 
+        com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (String) ref);
         nextHopHostname_ = b;
@@ -5499,7 +5499,7 @@ private static final long serialVersionUID = 0L;
       if (value == null) {
     throw new NullPointerException();
   }
-  
+
       nextHopHostname_ = value;
       onChanged();
       return this;
@@ -5512,7 +5512,7 @@ private static final long serialVersionUID = 0L;
      * <code>string next_hop_hostname = 21;</code>
      */
     public Builder clearNextHopHostname() {
-      
+
       nextHopHostname_ = getDefaultInstance().getNextHopHostname();
       onChanged();
       return this;
@@ -5530,7 +5530,7 @@ private static final long serialVersionUID = 0L;
     throw new NullPointerException();
   }
   checkByteStringIsUtf8(value);
-      
+
       nextHopHostname_ = value;
       onChanged();
       return this;
@@ -5649,7 +5649,7 @@ private static final long serialVersionUID = 0L;
      * <code>.google.protobuf.UInt32Value protocol = 22;</code>
      */
     public com.google.protobuf.UInt32Value.Builder getProtocolBuilder() {
-      
+
       onChanged();
       return getProtocolFieldBuilder().getBuilder();
     }
@@ -5676,7 +5676,7 @@ private static final long serialVersionUID = 0L;
      * <code>.google.protobuf.UInt32Value protocol = 22;</code>
      */
     private com.google.protobuf.SingleFieldBuilderV3<
-        com.google.protobuf.UInt32Value, com.google.protobuf.UInt32Value.Builder, com.google.protobuf.UInt32ValueOrBuilder> 
+        com.google.protobuf.UInt32Value, com.google.protobuf.UInt32Value.Builder, com.google.protobuf.UInt32ValueOrBuilder>
         getProtocolFieldBuilder() {
       if (protocolBuilder_ == null) {
         protocolBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
@@ -5735,7 +5735,7 @@ private static final long serialVersionUID = 0L;
       if (value == null) {
         throw new NullPointerException();
       }
-      
+
       samplingAlgorithm_ = value.getNumber();
       onChanged();
       return this;
@@ -5748,7 +5748,7 @@ private static final long serialVersionUID = 0L;
      * <code>.SamplingAlgorithm sampling_algorithm = 23;</code>
      */
     public Builder clearSamplingAlgorithm() {
-      
+
       samplingAlgorithm_ = 0;
       onChanged();
       return this;
@@ -5867,7 +5867,7 @@ private static final long serialVersionUID = 0L;
      * <code>.google.protobuf.DoubleValue sampling_interval = 24;</code>
      */
     public com.google.protobuf.DoubleValue.Builder getSamplingIntervalBuilder() {
-      
+
       onChanged();
       return getSamplingIntervalFieldBuilder().getBuilder();
     }
@@ -5894,7 +5894,7 @@ private static final long serialVersionUID = 0L;
      * <code>.google.protobuf.DoubleValue sampling_interval = 24;</code>
      */
     private com.google.protobuf.SingleFieldBuilderV3<
-        com.google.protobuf.DoubleValue, com.google.protobuf.DoubleValue.Builder, com.google.protobuf.DoubleValueOrBuilder> 
+        com.google.protobuf.DoubleValue, com.google.protobuf.DoubleValue.Builder, com.google.protobuf.DoubleValueOrBuilder>
         getSamplingIntervalFieldBuilder() {
       if (samplingIntervalBuilder_ == null) {
         samplingIntervalBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
@@ -5938,7 +5938,7 @@ private static final long serialVersionUID = 0L;
         getSrcAddressBytes() {
       Object ref = srcAddress_;
       if (ref instanceof String) {
-        com.google.protobuf.ByteString b = 
+        com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (String) ref);
         srcAddress_ = b;
@@ -5959,7 +5959,7 @@ private static final long serialVersionUID = 0L;
       if (value == null) {
     throw new NullPointerException();
   }
-  
+
       srcAddress_ = value;
       onChanged();
       return this;
@@ -5972,7 +5972,7 @@ private static final long serialVersionUID = 0L;
      * <code>string src_address = 26;</code>
      */
     public Builder clearSrcAddress() {
-      
+
       srcAddress_ = getDefaultInstance().getSrcAddress();
       onChanged();
       return this;
@@ -5990,7 +5990,7 @@ private static final long serialVersionUID = 0L;
     throw new NullPointerException();
   }
   checkByteStringIsUtf8(value);
-      
+
       srcAddress_ = value;
       onChanged();
       return this;
@@ -6027,7 +6027,7 @@ private static final long serialVersionUID = 0L;
         getSrcHostnameBytes() {
       Object ref = srcHostname_;
       if (ref instanceof String) {
-        com.google.protobuf.ByteString b = 
+        com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (String) ref);
         srcHostname_ = b;
@@ -6048,7 +6048,7 @@ private static final long serialVersionUID = 0L;
       if (value == null) {
     throw new NullPointerException();
   }
-  
+
       srcHostname_ = value;
       onChanged();
       return this;
@@ -6061,7 +6061,7 @@ private static final long serialVersionUID = 0L;
      * <code>string src_hostname = 27;</code>
      */
     public Builder clearSrcHostname() {
-      
+
       srcHostname_ = getDefaultInstance().getSrcHostname();
       onChanged();
       return this;
@@ -6079,7 +6079,7 @@ private static final long serialVersionUID = 0L;
     throw new NullPointerException();
   }
   checkByteStringIsUtf8(value);
-      
+
       srcHostname_ = value;
       onChanged();
       return this;
@@ -6198,7 +6198,7 @@ private static final long serialVersionUID = 0L;
      * <code>.google.protobuf.UInt64Value src_as = 28;</code>
      */
     public com.google.protobuf.UInt64Value.Builder getSrcAsBuilder() {
-      
+
       onChanged();
       return getSrcAsFieldBuilder().getBuilder();
     }
@@ -6225,7 +6225,7 @@ private static final long serialVersionUID = 0L;
      * <code>.google.protobuf.UInt64Value src_as = 28;</code>
      */
     private com.google.protobuf.SingleFieldBuilderV3<
-        com.google.protobuf.UInt64Value, com.google.protobuf.UInt64Value.Builder, com.google.protobuf.UInt64ValueOrBuilder> 
+        com.google.protobuf.UInt64Value, com.google.protobuf.UInt64Value.Builder, com.google.protobuf.UInt64ValueOrBuilder>
         getSrcAsFieldBuilder() {
       if (srcAsBuilder_ == null) {
         srcAsBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
@@ -6351,7 +6351,7 @@ private static final long serialVersionUID = 0L;
      * <code>.google.protobuf.UInt32Value src_mask_len = 29;</code>
      */
     public com.google.protobuf.UInt32Value.Builder getSrcMaskLenBuilder() {
-      
+
       onChanged();
       return getSrcMaskLenFieldBuilder().getBuilder();
     }
@@ -6378,7 +6378,7 @@ private static final long serialVersionUID = 0L;
      * <code>.google.protobuf.UInt32Value src_mask_len = 29;</code>
      */
     private com.google.protobuf.SingleFieldBuilderV3<
-        com.google.protobuf.UInt32Value, com.google.protobuf.UInt32Value.Builder, com.google.protobuf.UInt32ValueOrBuilder> 
+        com.google.protobuf.UInt32Value, com.google.protobuf.UInt32Value.Builder, com.google.protobuf.UInt32ValueOrBuilder>
         getSrcMaskLenFieldBuilder() {
       if (srcMaskLenBuilder_ == null) {
         srcMaskLenBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
@@ -6504,7 +6504,7 @@ private static final long serialVersionUID = 0L;
      * <code>.google.protobuf.UInt32Value src_port = 30;</code>
      */
     public com.google.protobuf.UInt32Value.Builder getSrcPortBuilder() {
-      
+
       onChanged();
       return getSrcPortFieldBuilder().getBuilder();
     }
@@ -6531,7 +6531,7 @@ private static final long serialVersionUID = 0L;
      * <code>.google.protobuf.UInt32Value src_port = 30;</code>
      */
     private com.google.protobuf.SingleFieldBuilderV3<
-        com.google.protobuf.UInt32Value, com.google.protobuf.UInt32Value.Builder, com.google.protobuf.UInt32ValueOrBuilder> 
+        com.google.protobuf.UInt32Value, com.google.protobuf.UInt32Value.Builder, com.google.protobuf.UInt32ValueOrBuilder>
         getSrcPortFieldBuilder() {
       if (srcPortBuilder_ == null) {
         srcPortBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
@@ -6657,7 +6657,7 @@ private static final long serialVersionUID = 0L;
      * <code>.google.protobuf.UInt32Value tcp_flags = 31;</code>
      */
     public com.google.protobuf.UInt32Value.Builder getTcpFlagsBuilder() {
-      
+
       onChanged();
       return getTcpFlagsFieldBuilder().getBuilder();
     }
@@ -6684,7 +6684,7 @@ private static final long serialVersionUID = 0L;
      * <code>.google.protobuf.UInt32Value tcp_flags = 31;</code>
      */
     private com.google.protobuf.SingleFieldBuilderV3<
-        com.google.protobuf.UInt32Value, com.google.protobuf.UInt32Value.Builder, com.google.protobuf.UInt32ValueOrBuilder> 
+        com.google.protobuf.UInt32Value, com.google.protobuf.UInt32Value.Builder, com.google.protobuf.UInt32ValueOrBuilder>
         getTcpFlagsFieldBuilder() {
       if (tcpFlagsBuilder_ == null) {
         tcpFlagsBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
@@ -6810,7 +6810,7 @@ private static final long serialVersionUID = 0L;
      * <code>.google.protobuf.UInt32Value tos = 32;</code>
      */
     public com.google.protobuf.UInt32Value.Builder getTosBuilder() {
-      
+
       onChanged();
       return getTosFieldBuilder().getBuilder();
     }
@@ -6837,7 +6837,7 @@ private static final long serialVersionUID = 0L;
      * <code>.google.protobuf.UInt32Value tos = 32;</code>
      */
     private com.google.protobuf.SingleFieldBuilderV3<
-        com.google.protobuf.UInt32Value, com.google.protobuf.UInt32Value.Builder, com.google.protobuf.UInt32ValueOrBuilder> 
+        com.google.protobuf.UInt32Value, com.google.protobuf.UInt32Value.Builder, com.google.protobuf.UInt32ValueOrBuilder>
         getTosFieldBuilder() {
       if (tosBuilder_ == null) {
         tosBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
@@ -6896,7 +6896,7 @@ private static final long serialVersionUID = 0L;
       if (value == null) {
         throw new NullPointerException();
       }
-      
+
       netflowVersion_ = value.getNumber();
       onChanged();
       return this;
@@ -6909,7 +6909,7 @@ private static final long serialVersionUID = 0L;
      * <code>.NetflowVersion netflow_version = 33;</code>
      */
     public Builder clearNetflowVersion() {
-      
+
       netflowVersion_ = 0;
       onChanged();
       return this;
@@ -7028,7 +7028,7 @@ private static final long serialVersionUID = 0L;
      * <code>.google.protobuf.UInt32Value vlan = 34;</code>
      */
     public com.google.protobuf.UInt32Value.Builder getVlanBuilder() {
-      
+
       onChanged();
       return getVlanFieldBuilder().getBuilder();
     }
@@ -7055,7 +7055,7 @@ private static final long serialVersionUID = 0L;
      * <code>.google.protobuf.UInt32Value vlan = 34;</code>
      */
     private com.google.protobuf.SingleFieldBuilderV3<
-        com.google.protobuf.UInt32Value, com.google.protobuf.UInt32Value.Builder, com.google.protobuf.UInt32ValueOrBuilder> 
+        com.google.protobuf.UInt32Value, com.google.protobuf.UInt32Value.Builder, com.google.protobuf.UInt32ValueOrBuilder>
         getVlanFieldBuilder() {
       if (vlanBuilder_ == null) {
         vlanBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
@@ -7099,7 +7099,7 @@ private static final long serialVersionUID = 0L;
         getNodeIdentifierBytes() {
       Object ref = nodeIdentifier_;
       if (ref instanceof String) {
-        com.google.protobuf.ByteString b = 
+        com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (String) ref);
         nodeIdentifier_ = b;
@@ -7120,7 +7120,7 @@ private static final long serialVersionUID = 0L;
       if (value == null) {
     throw new NullPointerException();
   }
-  
+
       nodeIdentifier_ = value;
       onChanged();
       return this;
@@ -7133,7 +7133,7 @@ private static final long serialVersionUID = 0L;
      * <code>string node_identifier = 35;</code>
      */
     public Builder clearNodeIdentifier() {
-      
+
       nodeIdentifier_ = getDefaultInstance().getNodeIdentifier();
       onChanged();
       return this;
@@ -7151,7 +7151,7 @@ private static final long serialVersionUID = 0L;
     throw new NullPointerException();
   }
   checkByteStringIsUtf8(value);
-      
+
       nodeIdentifier_ = value;
       onChanged();
       return this;

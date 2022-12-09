@@ -161,15 +161,10 @@ public abstract class ParserBase implements Parser {
         // Create a thread factory that sets a thread local variable when the thread is created
         // This variable is used to identify the thread as one that belongs to this class
         final LogPreservingThreadFactory logPreservingThreadFactory = new LogPreservingThreadFactory("Telemetryd-" + protocol + "-" + name, Integer.MAX_VALUE);
-        threadFactory = new ThreadFactory() {
-            @Override
-            public Thread newThread(Runnable r) {
-                return logPreservingThreadFactory.newThread(() -> {
-                    isParserThread.set(true);
-                    r.run();
-                });
-            }
-        };
+        threadFactory = r -> logPreservingThreadFactory.newThread(() -> {
+            isParserThread.set(true);
+            r.run();
+        });
 
         recordsReceived = metricRegistry.meter(MetricRegistry.name("parsers",  name, "recordsReceived"));
         recordsDispatched = metricRegistry.meter(MetricRegistry.name("parsers",  name, "recordsDispatched"));

@@ -196,7 +196,8 @@ public abstract class InetAddressUtils {
     public static InetAddress getInetAddress(final int[] octets, final int offset, final int length) {
         final byte[] addressBytes = new byte[length];
         for (int i = 0; i < addressBytes.length; i++) {
-            addressBytes[i] = Integer.valueOf(octets[i + offset]).byteValue();
+            int val = octets[i + offset];
+            addressBytes[i] = (byte) val;
         }
         return getInetAddress(addressBytes);
     }
@@ -335,7 +336,8 @@ public abstract class InetAddressUtils {
         final byte[] netWork = new byte[4];
 
         for (int i=0;i< 4; i++) {
-            netWork[i] = Integer.valueOf(ipAddress[i] & netMask[i]).byteValue();
+            int val = ipAddress[i] & netMask[i];
+            netWork[i] = (byte) val;
 
         }
         return InetAddressUtils.getInetAddress(netWork);
@@ -347,7 +349,8 @@ public abstract class InetAddressUtils {
         final byte[] netWork = new byte[16];
 
         for (int i=0;i< 16; i++) {
-            netWork[i] = Integer.valueOf(ipAddress[i] & netMask[i]).byteValue();
+            int val = ipAddress[i] & netMask[i];
+            netWork[i] = (byte) val;
 
         }
         return InetAddressUtils.getInetAddress(netWork);

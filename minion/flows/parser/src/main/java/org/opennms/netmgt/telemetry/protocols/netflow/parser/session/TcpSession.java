@@ -115,6 +115,7 @@ public class TcpSession implements Session {
         @Override
         public boolean equals(final Object o) {
             if (this == o) return true;
+            Objects.requireNonNull(o);
             if (o.getClass() != TemplateKey.class) return false;
 
             final TemplateKey that = (TemplateKey) o;

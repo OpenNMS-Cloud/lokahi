@@ -554,7 +554,7 @@ public class IpFixMessageBuilder implements MessageBuilder {
                                           flowSamplingTimeInterval.doubleValue() : 1.0;
                         double spacing = flowSamplingTimeSpacing != null ?
                                          flowSamplingTimeSpacing.doubleValue() : 0.0;
-                        double samplingIntervalValue = interval + spacing / spacing;
+                        double samplingIntervalValue = interval + 1.0;
                         builder.setSamplingInterval(setDoubleValue(samplingIntervalValue));
                         break;
                     }

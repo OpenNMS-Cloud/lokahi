@@ -1,7 +1,6 @@
 Host: onmshs
 Port: 443 #set depending on TLS.Enabled and the Ingress ports, do not change
 Protocol: https #set depending on TLS.Enabled, do not change
-TestDeploy: false
 OpenNMS:
   Core:
     Path: /core
@@ -82,6 +81,7 @@ OpenNMS:
     ImagePullPolicy: IfNotPresent
     Port: 8080
     GrpcPort: 8990
+    InternalGrpcPort: 8991
     IgniteClientPort: 10800
     Replicas: 1
     Resources:
@@ -91,18 +91,46 @@ OpenNMS:
       Requests:
         Cpu: "0"
         Memory: 250Mi
+  MinionGatewayGrpcProxy:
+    ServiceName: opennms-minion-gateway-grpc-proxy
+    Image: opennms/horizon-stream-minion-gateway-grpc-proxy
+    ImagePullPolicy: IfNotPresent
+    Port: 8990
+    Replicas: 1
+    Resources:
+      Limits:
+        Cpu: "1"
+        Memory: 2050M
+      Requests:
+        Cpu: "1"
+        Memory: 512Mi
   Inventory:
     ServiceName: opennms-inventory
     Image: opennms/horizon-stream-inventory:local
     ImagePullPolicy: IfNotPresent
     Replicas: 1
     Port: 8080
+    GrpcPort: 6565
     Resources:
       Limits:
         Cpu: "0"
         Memory: 500Mi
       Requests:
         Cpu: "0"
+        Memory: 250Mi
+  Alarm:
+    ServiceName: opennms-alarm
+    Image: opennms/horizon-stream-alarm
+    ImagePullPolicy: IfNotPresent
+    Replicas: 1
+    Port: 8080
+    GrpcPort: 6565
+    Resources:
+      Limits:
+        Cpu: "1"
+        Memory: 500Mi
+      Requests:
+        Cpu: 100m
         Memory: 250Mi
   Notification: 
     ServiceName: opennms-notifications
@@ -117,6 +145,20 @@ OpenNMS:
       Requests:
         Cpu: "0"
         Memory: 50Mi
+  Events:
+    ServiceName: opennms-events
+    Image: opennms/horizon-stream-events
+    ImagePullPolicy: IfNotPresent
+    Replicas: 1
+    Port: 8080
+    GrpcPort: 6565
+    Resources:
+      Limits:
+        Cpu: "1"
+        Memory: 500Mi
+      Requests:
+        Cpu: 100m
+        Memory: 250Mi
 Postgres:
   ServiceName: postgres
   Image: postgres:14.5-alpine
@@ -126,6 +168,8 @@ Postgres:
   OpenNMSPassword: notset
   KeycloakPassword: notset
   InventoryPassword: notset
+  AlarmPassword: notset
+  EventsPassword: notset
   NotificationPassword: notset
   GrafanaPassword: notset
   VolumeSize: 10Gi

@@ -39,7 +39,7 @@ if [ $1 == "local" ]; then
   bash scripts/create-kind-cluster.sh
 
   echo
-  echo ________________Installing Operator________________
+  echo ________________Installing Horizon Stream________________
   echo
   helm upgrade -i horizon-stream ../charts/opennms -f ../tmp/install-local-opennms-horizon-stream-values.yaml --namespace hs-instance --create-namespace
   if [ $? -ne 0 ]; then exit; fi
@@ -70,7 +70,7 @@ elif [ "$1" == "custom-images" ]; then
   sleep 120
 
   echo
-  echo ________________Installing Operator________________
+  echo ________________Installing Horizon Stream________________
   echo
   helm upgrade -i horizon-stream ../charts/opennms -f ../tmp/install-local-opennms-horizon-stream-custom-images-values.yaml --namespace hs-instance --create-namespace
   if [ $? -ne 0 ]; then exit; fi
@@ -82,7 +82,7 @@ elif [ $1 == "existing-k8s" ]; then
   cd operator/
 
   echo
-  echo ________________Installing Operator________________
+  echo ________________Installing Horizon Stream________________
   echo
   helm upgrade -i horizon-stream ../charts/opennms -f ../tmp/install-local-opennms-horizon-stream-values.yaml --namespace hs-instance --create-namespace
   if [ $? -ne 0 ]; then exit; fi

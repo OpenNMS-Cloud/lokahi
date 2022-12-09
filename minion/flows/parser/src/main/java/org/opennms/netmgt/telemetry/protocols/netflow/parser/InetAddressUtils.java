@@ -55,6 +55,7 @@ import org.slf4j.LoggerFactory;
  * @author <a href="mailto:brozow@opennms.org">Mathew Brozowski</a>
  * @version $Id: $
  */
+@SuppressWarnings("java:S1313")
 public abstract class InetAddressUtils {
     private static final Logger LOG = LoggerFactory.getLogger(InetAddressUtils.class);
     private static final Comparator<InetAddress> IFACE_COMPARATOR = (o1, o2) -> {
@@ -262,6 +263,7 @@ public abstract class InetAddressUtils {
      * @param addresses a {@link List} object.
      * @return a {@link InetAddress} object.
      */
+    @SuppressWarnings("java:S1313")
     public static InetAddress getLowestInetAddress(final List<InetAddress> addresses) {
         if (addresses == null) {
             throw new IllegalArgumentException("Cannot take null parameters.");
@@ -389,6 +391,7 @@ public abstract class InetAddressUtils {
         return true;
     }
 
+    @SuppressWarnings("java:S1313")
     public static boolean isPointToPointMask(InetAddress mask) {
         if (mask.equals(addr("255.255.255.252"))) {
             return true;
@@ -396,6 +399,7 @@ public abstract class InetAddressUtils {
         return mask.equals(addr("ffff:ffff:ffff:ffff:ffff:ffff:ffff:fffd"));
     }
 
+    @SuppressWarnings("java:S1313")
     public static boolean isLoopbackMask(InetAddress mask) {
         if (mask.equals(addr("255.255.255.255"))) {
             return true;

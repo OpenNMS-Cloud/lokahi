@@ -36,25 +36,30 @@ public class NodeStatusService {
         NodeDTO node = client.getNodeById(id, accessToken);
 
         if (node.getIpInterfacesCount() > 0) {
+
             IpInterfaceDTO ipInterface = node.getIpInterfaces(0);
-            String ipAddress = ipInterface.getIpAddress();
-
-            TimeSeriesQueryResult result = getStatusMetric(id, ipAddress, monitorType);
-            if (isNull(result)) {
-                return false;
-            }
-            List<TSResult> tsResults = result.getData().getResult();
-
-            if (isEmpty(tsResults)) {
-                return false;
-            }
-
-            TSResult tsResult = tsResults.get(0);
-            List<List<Double>> values = tsResult.getValues();
-
-            return !isEmpty(values);
+            return getNodeStatusByInterface(id, monitorType, ipInterface);
         }
         return false;
+    }
+
+    private boolean getNodeStatusByInterface(long id, String monitorType, IpInterfaceDTO ipInterface) {
+        String ipAddress = ipInterface.getIpAddress();
+
+        TimeSeriesQueryResult result = getStatusMetric(id, ipAddress, monitorType);
+        if (isNull(result)) {
+            return false;
+        }
+        List<TSResult> tsResults = result.getData().getResult();
+
+        if (isEmpty(tsResults)) {
+            return false;
+        }
+
+        TSResult tsResult = tsResults.get(0);
+        List<List<Double>> values = tsResult.getValues();
+
+        return !isEmpty(values);
     }
 
     private TimeSeriesQueryResult getStatusMetric(long id, String ipAddress, String monitorType) {

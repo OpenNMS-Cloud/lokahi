@@ -57,20 +57,17 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class InetAddressUtils {
     private static final Logger LOG = LoggerFactory.getLogger(InetAddressUtils.class);
-    private static final Comparator<InetAddress> IFACE_COMPARATOR = new Comparator<InetAddress>() {
-        @Override
-        public int compare(final InetAddress o1, final InetAddress o2) {
-            if (o1 == null) {
-                if (o2 == null) {
-                    return 0;
-                }
-                return 1;
-            } else {
-                if (o2 == null) {
-                    return -1;
-                }
-                return o1.getClass().getName().compareTo(o2.getClass().getName());
+    private static final Comparator<InetAddress> IFACE_COMPARATOR = (o1, o2) -> {
+        if (o1 == null) {
+            if (o2 == null) {
+                return 0;
             }
+            return 1;
+        } else {
+            if (o2 == null) {
+                return -1;
+            }
+            return o1.getClass().getName().compareTo(o2.getClass().getName());
         }
     };
 
@@ -120,7 +117,7 @@ public abstract class InetAddressUtils {
         }
     }
 
-    public static enum AddressType {
+    public enum AddressType {
         IPv4,
         IPv6
     }
@@ -325,7 +322,7 @@ public abstract class InetAddressUtils {
                 return false;
             } else {
                 // Compare the IPv6 scope IDs
-                return Integer.valueOf(((Inet6Address)addr1).getScopeId()).compareTo(((Inet6Address)addr2).getScopeId()) == 0;
+                return ((Inet6Address) addr1).getScopeId() == ((Inet6Address) addr2).getScopeId();
             }
         }
     }
@@ -430,49 +427,48 @@ public abstract class InetAddressUtils {
         byte[] addr = mask.getAddress();
         boolean foundZero = false;
         int cidr = 0;
-        for (int i=0; i< addr.length; i++) {
-            Byte value= addr[i];
-            int k=0;
-            if (foundZero && value.intValue() != 0) {
+        for (byte value : addr) {
+            int k = 0;
+            if (foundZero && (int) value != 0) {
                 throw new IllegalArgumentException("Error in mask: " + str(mask));
             }
-            if (value.intValue() < 0) {
-                k = 256 + value.intValue();
+            if ((int) value < 0) {
+                k = 256 + (int) value;
             }
             switch (k) {
                 case 255:
-                    cidr=cidr+8;
+                    cidr = cidr + 8;
                     break;
                 case 254:
-                    cidr=cidr+7;
-                    foundZero=true;
+                    cidr = cidr + 7;
+                    foundZero = true;
                     break;
                 case 252:
-                    cidr=cidr+6;
-                    foundZero=true;
+                    cidr = cidr + 6;
+                    foundZero = true;
                     break;
                 case 248:
-                    cidr=cidr+5;
-                    foundZero=true;
+                    cidr = cidr + 5;
+                    foundZero = true;
                     break;
                 case 240:
-                    cidr=cidr+4;
-                    foundZero=true;
+                    cidr = cidr + 4;
+                    foundZero = true;
                     break;
                 case 224:
-                    cidr=cidr+3;
-                    foundZero=true;
+                    cidr = cidr + 3;
+                    foundZero = true;
                     break;
                 case 192:
-                    cidr=cidr+2;
-                    foundZero=true;
+                    cidr = cidr + 2;
+                    foundZero = true;
                     break;
                 case 128:
-                    cidr=cidr+1;
-                    foundZero=true;
+                    cidr = cidr + 1;
+                    foundZero = true;
                     break;
                 case 0:
-                    foundZero=true;
+                    foundZero = true;
                     break;
                 default:
                     throw new IllegalArgumentException("Error in mask: " + str(mask));

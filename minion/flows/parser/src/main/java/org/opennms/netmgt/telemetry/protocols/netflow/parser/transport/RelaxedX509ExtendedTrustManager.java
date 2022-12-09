@@ -29,7 +29,6 @@
 package org.opennms.netmgt.telemetry.protocols.netflow.parser.transport;
 
 import java.net.Socket;
-import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
 import javax.net.ssl.SSLEngine;
@@ -43,20 +42,23 @@ import javax.net.ssl.X509ExtendedTrustManager;
  * @author <a href="mailto:roskens@opennms.org">Ronald Roskens</a>
  * @author <a href="http://www.opennms.org">OpenNMS</a>
  */
+@SuppressWarnings("java:S4830")
 public class RelaxedX509ExtendedTrustManager extends X509ExtendedTrustManager {
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+    @SuppressWarnings("java:S4830")
+    public void checkClientTrusted(X509Certificate[] chain, String authType) {
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+    @SuppressWarnings("java:S4830")
+    public void checkServerTrusted(X509Certificate[] chain, String authType) {
     }
 
     /**
@@ -71,18 +73,22 @@ public class RelaxedX509ExtendedTrustManager extends X509ExtendedTrustManager {
     }
 
     @Override
-    public void checkClientTrusted(X509Certificate[] chain, String authType, Socket socket) throws CertificateException {
+    @SuppressWarnings("java:S4830")
+    public void checkClientTrusted(X509Certificate[] chain, String authType, Socket socket) {
     }
 
     @Override
-    public void checkServerTrusted(X509Certificate[] chain, String authType, Socket socket) throws CertificateException {
+    @SuppressWarnings("java:S4830")
+    public void checkServerTrusted(X509Certificate[] chain, String authType, Socket socket) {
     }
 
     @Override
-    public void checkClientTrusted(X509Certificate[] chain, String authType, SSLEngine ssle) throws CertificateException {
+    @SuppressWarnings("java:S4830")
+    public void checkClientTrusted(X509Certificate[] chain, String authType, SSLEngine ssle) {
     }
 
     @Override
-    public void checkServerTrusted(X509Certificate[] chain, String authType, SSLEngine ssle) throws CertificateException {
+    @SuppressWarnings("java:S4830")
+    public void checkServerTrusted(X509Certificate[] chain, String authType, SSLEngine ssle) {
     }
 }

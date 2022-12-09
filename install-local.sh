@@ -52,9 +52,11 @@ elif [ "$1" == "custom-images" ]; then
   bash scripts/create-kind-cluster.sh
 
   # Will add a kind-registry here at some point, see .github/ for sample script.
+  kind load docker-image opennms/horizon-stream-alarm:local&
   kind load docker-image opennms/horizon-stream-core:local&
   kind load docker-image opennms/horizon-stream-minion:local&
   kind load docker-image opennms/horizon-stream-minion-gateway:local&
+  kind load docker-image opennms/horizon-stream-minion-gateway-grpc-proxy:local&
   kind load docker-image opennms/horizon-stream-keycloak:local&
   kind load docker-image opennms/horizon-stream-grafana:local&
   kind load docker-image opennms/horizon-stream-ui:local&

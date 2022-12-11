@@ -35,15 +35,22 @@ import org.opennms.horizon.minion.plugin.api.CollectionSet;
 import org.opennms.horizon.minion.plugin.api.ServiceCollectorResponseImpl;
 import org.opennms.horizon.minion.plugin.api.ServiceCollector;
 import org.opennms.horizon.shared.snmp.AggregateTracker;
+import org.opennms.horizon.shared.snmp.ColumnTracker;
 import org.opennms.horizon.shared.snmp.SnmpAgentConfig;
 import org.opennms.horizon.shared.snmp.SnmpHelper;
+import org.opennms.horizon.shared.snmp.SnmpObjId;
+import org.opennms.horizon.shared.snmp.SnmpResult;
+import org.opennms.horizon.shared.snmp.SnmpUtils;
 import org.opennms.horizon.shared.snmp.SnmpWalkCallback;
 import org.opennms.horizon.shared.snmp.SnmpWalker;
+import org.opennms.horizon.shared.utils.InetAddressUtils;
 import org.opennms.horizon.snmp.api.SnmpConfiguration;
 import org.opennms.horizon.snmp.api.SnmpResponseMetric;
 import org.opennms.horizon.snmp.api.SnmpResultMetric;
 import org.opennms.horizon.snmp.api.SnmpV3Configuration;
+import org.opennms.horizon.snmp.api.SnmpValue;
 import org.opennms.snmp.contract.SnmpCollectorRequest;
+import org.opennms.taskset.contract.MonitorType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -86,11 +93,25 @@ public class SnmpCollector implements ServiceCollector {
             SnmpCollectorRequest snmpRequest = config.unpack(SnmpCollectorRequest.class);
 
             LOG.info("SNMP Collector Request {}", snmpRequest);
-
             SnmpResponseMetric.Builder builder = SnmpResponseMetric.newBuilder();
             SnmpCollectionSet snmpCollectionSet = new SnmpCollectionSet(builder);
-            AggregateTracker aggregate = new AggregateTracker(snmpCollectionSet.getTrackers());
+
             String ipAddress = snmpRequest.getAgentConfig().getAddress();
+            var values = snmpHelper.getOidValues(mapAgent(snmpRequest.getAgentConfig()),
+                "ifIndex", SnmpObjId.get(".1.3.6.1.2.1.4.20.1.2"));
+            values.forEach( (instId, value) -> {
+                    LOG.info("values for ifIndex OID: {} , {}", instId, value);
+                    String ipAddressFromSnmp = instId.toString();
+                if (ipAddress.equals(ipAddressFromSnmp)) {
+                    Integer ifIndex = value.toInt();
+                    LOG.info("ifIndex for ipAddress {} is {}", ipAddress, ifIndex);
+                    var interfaceMetricsTracker = new InterfaceMetricsTracker(ifIndex, builder);
+                    snmpCollectionSet.getTrackers().add(interfaceMetricsTracker);
+                }
+            });
+
+            AggregateTracker aggregate = new AggregateTracker(snmpCollectionSet.getTrackers());
+
             long nodeId = request.getNodeId();
             try (final SnmpWalker walker = snmpHelper.createWalker(mapAgent(snmpRequest.getAgentConfig()), "Snmp-collector", aggregate)) {
                 walker.setCallback(new SnmpWalkCallback() {
@@ -117,6 +138,7 @@ public class SnmpCollector implements ServiceCollector {
                     }
                 });
                 walker.start();
+                walker.waitFor();
             }
             LOG.info("Walker started running ");
             result = future.thenApplyAsync(snmpResults -> mapSnmpValuesToResponse(snmpResults, ipAddress, nodeId));
@@ -135,6 +157,8 @@ public class SnmpCollector implements ServiceCollector {
         var response = SnmpResponseMetric.newBuilder().addAllResults(snmpResults).build();
         return ServiceCollectorResponseImpl.builder().results(response)
             .nodeId(nodeId)
+            .monitorType(MonitorType.SNMP)
+            .status(true)
             .ipAddress(ipAddress).build();
     }
 

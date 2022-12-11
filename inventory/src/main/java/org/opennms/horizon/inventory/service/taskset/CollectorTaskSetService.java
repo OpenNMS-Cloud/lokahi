@@ -70,7 +70,7 @@ public class CollectorTaskSetService {
                 Any configuration =
                     Any.pack(SnmpCollectorRequest.newBuilder()
                         .setHost(ipAddress)
-                        .setAgentConfig(SnmpConfiguration.newBuilder().setAddress(ipAddress).setTimeout(30000).build())
+                        .setAgentConfig(SnmpConfiguration.newBuilder().setAddress(ipAddress).setTimeout(45000).build())
                         .setNodeId(nodeId)
                         .build());
 

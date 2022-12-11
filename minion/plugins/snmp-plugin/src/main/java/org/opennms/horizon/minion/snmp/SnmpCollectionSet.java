@@ -31,6 +31,7 @@ package org.opennms.horizon.minion.snmp;
 import com.google.protobuf.ByteString;
 import org.opennms.horizon.shared.snmp.Collectable;
 import org.opennms.horizon.shared.snmp.IfNumberTracker;
+import org.opennms.horizon.shared.snmp.Mib2InterfacesTracker;
 import org.opennms.horizon.shared.snmp.SnmpNodeTracker;
 import org.opennms.horizon.shared.snmp.SnmpValue;
 import org.opennms.horizon.shared.snmp.SysUpTimeTracker;
@@ -79,11 +80,10 @@ public class SnmpCollectionSet {
         };
         trackers.add(ifNumberTracker);
         trackers.add(sysUpTimeTracker);
-        trackers.add(nodeTracker);
         return trackers;
     }
 
-    private static void addResult(org.opennms.horizon.shared.snmp.SnmpResult result, SnmpResponseMetric.Builder builder, String alias) {
+    static void addResult(org.opennms.horizon.shared.snmp.SnmpResult result, SnmpResponseMetric.Builder builder, String alias) {
         builder.addResults(mapResult(result, alias));
     }
 

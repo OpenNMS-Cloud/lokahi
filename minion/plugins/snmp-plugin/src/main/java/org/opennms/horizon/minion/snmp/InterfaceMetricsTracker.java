@@ -26,22 +26,37 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.minion.plugin.api;
+package org.opennms.horizon.minion.snmp;
 
-import com.google.protobuf.Message;
-import org.opennms.taskset.contract.MonitorType;
+import org.opennms.horizon.shared.snmp.Mib2InterfacesTracker;
+import org.opennms.horizon.snmp.api.SnmpResponseMetric;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public interface CollectionSet {
+import static org.opennms.horizon.minion.snmp.SnmpCollectionSet.addResult;
 
-    Message getResults();
+public class InterfaceMetricsTracker extends Mib2InterfacesTracker {
 
-    long getTimeStamp();
+    private final Logger LOG = LoggerFactory.getLogger(InterfaceMetricsTracker.class);
+    private final Integer ifIndex;
+    private final SnmpResponseMetric.Builder builder;
 
-    long getNodeId();
+    public InterfaceMetricsTracker(Integer ifIndex, SnmpResponseMetric.Builder builder) {
+        super();
+        this.ifIndex = ifIndex;
+        this.builder = builder;
+    }
 
-    String getIpAddress();
+    @Override
+    protected void storeResult(org.opennms.horizon.shared.snmp.SnmpResult res) {
+        var aliasOptional = getAlias(res);
+        try {
+            if (res.getInstance() != null && ifIndex == res.getInstance().toInt()) {
+                aliasOptional.ifPresent((alias) -> addResult(res, builder, alias));
+            }
+        } catch (Exception e) {
+            LOG.warn("Exception while converting result from SnmpValue to proto", e);
+        }
+    }
 
-    boolean getStatus();
-
-    MonitorType getMonitorType();
 }

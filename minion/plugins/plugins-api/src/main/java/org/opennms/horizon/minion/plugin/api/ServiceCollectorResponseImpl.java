@@ -31,6 +31,7 @@ package org.opennms.horizon.minion.plugin.api;
 import com.google.protobuf.Message;
 import lombok.Builder;
 import lombok.Data;
+import org.opennms.taskset.contract.MonitorType;
 
 @Builder
 @Data
@@ -45,6 +46,8 @@ public class ServiceCollectorResponseImpl implements CollectionSet {
     private long nodeId;
 
     private String ipAddress;
+
+    private MonitorType monitorType;
 
 
     @Override

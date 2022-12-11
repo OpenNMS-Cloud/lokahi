@@ -114,7 +114,7 @@ public class TSDataProcessor {
     private void processMonitorResponse(TaskResult result) {
         MonitorResponse response = result.getMonitorResponse();
         String[] labelValues = {response.getIpAddress(), result.getLocation(), result.getSystemId(), response.getMonitorType().name(), String.valueOf(response.getNodeId())};
-        Gauge gauge = getGaugeFromName(METRICS_NAME_RESPONSE, "Monitor round trip response time");
+        Gauge gauge = getGaugeFrom(METRICS_NAME_RESPONSE, "Monitor round trip response time", METRICS_UNIT_MS);
         gauge.labels(labelValues).set(response.getResponseTimeMs());
         Map<String, String> labels = new HashMap<>();
         for (int i = 0; i < MONITOR_METRICS_LABEL_NAMES.length; i++) {
@@ -123,31 +123,28 @@ public class TSDataProcessor {
 
         if (response.getMetricsMap() != null) {
             response.getMetricsMap().forEach((k, v) -> {
-                Gauge extGauge = getGaugeFromName(METRICS_NAME_PREFIX_MONITOR + k, null);
+                Gauge extGauge = getGaugeFrom(METRICS_NAME_PREFIX_MONITOR + k, null, null);
                 extGauge.labels(labelValues).set(v);
             });
         }
         pushAdapter.pushMetrics(collectorRegistry, labels);
     }
 
-    private Gauge getGaugeFromName(String name, String description) {
+    private Gauge getGaugeFrom(String name, String description, String unit) {
         return gauges.compute(name, (key, gauge) -> {
             if (gauge != null) {
                 return gauge;
             }
+            var builder = Gauge.build().name(name).labelNames(MONITOR_METRICS_LABEL_NAMES);
+
             if (!Strings.isNullOrEmpty(description)) {
-                return Gauge.build()
-                    .name(name)
-                    .help(description)
-                    .unit(METRICS_UNIT_MS)
-                    .labelNames(MONITOR_METRICS_LABEL_NAMES)
-                    .register(collectorRegistry);
+                builder.help(description);
             }
-            return Gauge.build()
-                .name(name)
-                .unit(METRICS_UNIT_MS)
-                .labelNames(MONITOR_METRICS_LABEL_NAMES)
-                .register(collectorRegistry);
+            if (!Strings.isNullOrEmpty(unit)) {
+                builder.unit(unit);
+            }
+
+            return builder.register(collectorRegistry);
         });
     }
 
@@ -164,22 +161,22 @@ public class TSDataProcessor {
                     int type = snmpResult.getValue().getTypeValue();
                     switch (type) {
                         case SnmpValueType.INT32_VALUE:
-                            Gauge int32Value = getGaugeFromName(metricName,
-                                metricName + " with oid " + snmpResult.getBase());
+                            Gauge int32Value = getGaugeFrom(metricName,
+                                metricName + " with oid " + snmpResult.getBase(), null);
                             int32Value.labels(labelValues).set(snmpResult.getValue().getSint64());
                             break;
                         case SnmpValueType.COUNTER32_VALUE:
                             // TODO: Can't set a counter through prometheus API, may be possible with remote write
                         case SnmpValueType.TIMETICKS_VALUE:
                         case SnmpValueType.GAUGE32_VALUE:
-                            Gauge uint64Value = getGaugeFromName(metricName,
-                                metricName + " with oid " + snmpResult.getBase());
+                            Gauge uint64Value = getGaugeFrom(metricName,
+                                metricName + " with oid " + snmpResult.getBase(), null);
                             uint64Value.labels(labelValues).set(snmpResult.getValue().getUint64());
                             break;
                         case SnmpValueType.COUNTER64_VALUE:
                             double metric = new BigInteger(snmpResult.getValue().getBytes().toByteArray()).doubleValue();
-                            Gauge gauge = getGaugeFromName(metricName,
-                                metricName + " with oid " + snmpResult.getBase());
+                            Gauge gauge = getGaugeFrom(metricName,
+                                metricName + " with oid " + snmpResult.getBase(), null);
                             gauge.labels(labelValues).set(metric);
                             break;
                     }

@@ -32,6 +32,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.TreeMap;
 
 public class Mib2InterfacesTracker extends AggregateTracker {
@@ -45,16 +46,16 @@ public class Mib2InterfacesTracker extends AggregateTracker {
 
     static {
         int ndx = 0;
-        elemList[ndx++] = new NamedSnmpVar(NamedSnmpVar.SNMPCOUNTER64, "ifInOctets", ".1.3.6.1.2.1.2.2.1.10");
-        elemList[ndx++] = new NamedSnmpVar(NamedSnmpVar.SNMPCOUNTER64, "ifInUcastpkts", ".1.3.6.1.2.1.2.2.1.11");
-        elemList[ndx++] = new NamedSnmpVar(NamedSnmpVar.SNMPCOUNTER64, "ifInNUcastpkts", ".1.3.6.1.2.1.2.2.1.12");
-        elemList[ndx++] = new NamedSnmpVar(NamedSnmpVar.SNMPCOUNTER64, "ifInDiscards", ".1.3.6.1.2.1.2.2.1.13");
-        elemList[ndx++] = new NamedSnmpVar(NamedSnmpVar.SNMPCOUNTER64, "ifInErrors", ".1.3.6.1.2.1.2.2.1.14");
-        elemList[ndx++] = new NamedSnmpVar(NamedSnmpVar.SNMPCOUNTER64, "ifOutOctets", ".1.3.6.1.2.1.2.2.1.16");
-        elemList[ndx++] = new NamedSnmpVar(NamedSnmpVar.SNMPCOUNTER64, "ifOutUcastPkts", ".1.3.6.1.2.1.2.2.1.17");
-        elemList[ndx++] = new NamedSnmpVar(NamedSnmpVar.SNMPCOUNTER64, "ifOutNUcastPkts", ".1.3.6.1.2.1.2.2.1.18");
-        elemList[ndx++] = new NamedSnmpVar(NamedSnmpVar.SNMPCOUNTER64, "ifOutDiscards", ".1.3.6.1.2.1.2.2.1.19");
-        elemList[ndx++] = new NamedSnmpVar(NamedSnmpVar.SNMPCOUNTER64, "ifOutErrors", ".1.3.6.1.2.1.2.2.1.20");
+        elemList[ndx++] = new NamedSnmpVar(NamedSnmpVar.SNMPCOUNTER64, "ifInOctets", ".1.3.6.1.2.1.2.2.1.10", 6);
+        elemList[ndx++] = new NamedSnmpVar(NamedSnmpVar.SNMPCOUNTER64, "ifInUcastpkts", ".1.3.6.1.2.1.2.2.1.11", 6);
+        elemList[ndx++] = new NamedSnmpVar(NamedSnmpVar.SNMPCOUNTER64, "ifInNUcastpkts", ".1.3.6.1.2.1.2.2.1.12", 6);
+        elemList[ndx++] = new NamedSnmpVar(NamedSnmpVar.SNMPCOUNTER64, "ifInDiscards", ".1.3.6.1.2.1.2.2.1.13", 6);
+        elemList[ndx++] = new NamedSnmpVar(NamedSnmpVar.SNMPCOUNTER64, "ifInErrors", ".1.3.6.1.2.1.2.2.1.14", 6);
+        elemList[ndx++] = new NamedSnmpVar(NamedSnmpVar.SNMPCOUNTER64, "ifOutOctets", ".1.3.6.1.2.1.2.2.1.16", 6);
+        elemList[ndx++] = new NamedSnmpVar(NamedSnmpVar.SNMPCOUNTER64, "ifOutUcastPkts", ".1.3.6.1.2.1.2.2.1.17", 6);
+        elemList[ndx++] = new NamedSnmpVar(NamedSnmpVar.SNMPCOUNTER64, "ifOutNUcastPkts", ".1.3.6.1.2.1.2.2.1.18", 6);
+        elemList[ndx++] = new NamedSnmpVar(NamedSnmpVar.SNMPCOUNTER64, "ifOutDiscards", ".1.3.6.1.2.1.2.2.1.19", 6);
+        elemList[ndx++] = new NamedSnmpVar(NamedSnmpVar.SNMPCOUNTER64, "ifOutErrors", ".1.3.6.1.2.1.2.2.1.20", 6);
     }
 
     public Mib2InterfacesTracker() {
@@ -88,5 +89,20 @@ public class Mib2InterfacesTracker extends AggregateTracker {
 
     public Map<String, SnmpResult> getSnmpResultMap() {
         return snmpResultMap;
+    }
+
+    public static Optional<String> getAlias(SnmpResult snmpResult) {
+        final SnmpObjId base = snmpResult.getBase();
+        final SnmpValue value = snmpResult.getValue();
+        for (final NamedSnmpVar var : elemList) {
+            if (base.equals(var.getSnmpObjId())) {
+                if (value.isError() || value.isEndOfMib()) {
+                    return Optional.empty();
+                } else {
+                    return Optional.of(var.getAlias());
+                }
+            }
+        }
+        return Optional.empty();
     }
 }

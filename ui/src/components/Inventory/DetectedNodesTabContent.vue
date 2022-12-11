@@ -10,7 +10,7 @@
           <MetricChipList :metrics="node?.metrics" data-test="metric-chip-list" />
           <TextAnchorList :anchor="node.anchor" data-test="text-anchor-list" />
         </div>
-        <IconActionList class="icon-action" data-test="icon-action-list" />
+        <IconActionList :node="node" class="icon-action" data-test="icon-action-list" />
       </section>
     </li>
   </ul>
@@ -43,7 +43,7 @@ ul {
   flex-flow: row wrap;
   gap: 1rem;
   > li {
-    padding: var(variables.$spacing-l);
+    padding: var(variables.$spacing-l) var(variables.$spacing-xxl);
     border: 1px solid var(variables.$secondary-text-on-surface); 
     border-radius: 10px;
     border-left: 10px solid var(variables.$secondary-text-on-surface); // TODO set color dynamically to the node's status

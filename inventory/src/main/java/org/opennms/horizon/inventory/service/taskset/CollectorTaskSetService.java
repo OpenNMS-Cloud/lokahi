@@ -54,13 +54,15 @@ public class CollectorTaskSetService {
 
 
     public void sendCollectorTask(String location, MonitorType monitorType, IpInterface ipInterface, long nodeId) {
+        String tenantId = ipInterface.getTenantId();
         addCollectorTask(location, monitorType, ipInterface, nodeId);
-        sendTaskSet(location);
+        sendTaskSet(tenantId, location);
     }
 
     private void addCollectorTask(String location, MonitorType monitorType, IpInterface ipInterface, long nodeId) {
         String monitorTypeValue = monitorType.getValueDescriptor().getName();
         String ipAddress = ipInterface.getIpAddress().getAddress();
+        String tenantId = ipInterface.getTenantId();
 
         String name = String.format("%s-collector", monitorTypeValue.toLowerCase());
         String pluginName = String.format("%sCollector", monitorTypeValue);
@@ -70,19 +72,19 @@ public class CollectorTaskSetService {
                 Any configuration =
                     Any.pack(SnmpCollectorRequest.newBuilder()
                         .setHost(ipAddress)
-                        .setAgentConfig(SnmpConfiguration.newBuilder().setAddress(ipAddress).setTimeout(45000).build())
+                        .setAgentConfig(SnmpConfiguration.newBuilder().setAddress(ipAddress).setTimeout(30000).build())
                         .setNodeId(nodeId)
                         .build());
 
-                taskSetManagerUtil.addTask(location, ipAddress, name, TaskType.COLLECTOR, pluginName, Constants.DEFAULT_SCHEDULE, nodeId, configuration);
+                taskSetManagerUtil.addTask(tenantId, location, ipAddress, name, TaskType.COLLECTOR, pluginName,
+                    Constants.DEFAULT_SCHEDULE, nodeId, configuration);
                 break;
             }
         }
     }
 
-    private void sendTaskSet(String location) {
-        String tenantId = "opennms-prime";  // TBD888: properly source the Tenant ID
-        TaskSet taskSet = taskSetManager.getTaskSet(location);
+    private void sendTaskSet(String tenantId, String location) {
+        TaskSet taskSet = taskSetManager.getTaskSet(tenantId, location);
         log.info("Sending task set {}  at location {}", taskSet, location);
         taskSetPublisher.publishTaskSet(tenantId, location, taskSet);
     }

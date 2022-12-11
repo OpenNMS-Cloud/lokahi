@@ -14,11 +14,12 @@
       </FeatherButton>
     </div>
     <div class="container">
-      <table class="tl1 tl2 tc3 tc4 tc5 data-table" aria-label="Minions Table" data-test="minions-table">
+      <table class="tl1 tl2 tl3 tc4 tc5 tc6 data-table" aria-label="Minions Table" data-test="minions-table">
         <thead>
           <tr>
+            <th scope="col" data-test="col-label">Label</th>
             <th scope="col" data-test="col-date">Time</th>
-            <th scope="col" data-test="col-minion">Name</th>
+            <th scope="col" data-test="col-minion">Id</th>
             <th scope="col" data-test="col-latency">Latency</th>
             <th scope="col" data-test="col-uptime">Uptime</th>
             <th scope="col" data-test="col-status">Status</th>
@@ -26,7 +27,8 @@
         </thead>
         <TransitionGroup name="data-table" tag="tbody">
           <tr v-for="(minion, index) in listMinionsWithBgColor" :key="(minion.id as string)" :data-index="index" data-test="minion-item">
-            <td>{{ minion.lastUpdated }}</td>
+            <td>{{ minion.label }}</td>
+            <td v-date>{{ minion.lastCheckedTime }}</td>
             <td>{{ minion.id }}</td>
             <td>
               <div @click="openLatencyGraph(minion.id as string)" :data-metric="minion.icmp_latency" class="bg-status pointer" :class="minion.latencyBgColor" data-test="minion-item-latency">
@@ -40,7 +42,7 @@
             </td>
             <td>
               <div class="bg-status" :class="minion.statusBgColor" data-test="minion-item-status">
-                {{ minion.status }}
+                {{ minion.status || '--'}} 
               </div>
             </td>
           </tr>
@@ -62,7 +64,7 @@
 import { useAppliancesQueries } from '@/store/Queries/appliancesQueries'
 import { useAppliancesStore } from '@/store/Views/appliancesStore'
 import ChevronLeft from '@featherds/icon/navigation/ChevronLeft'
-import { ExtendedMinionDTOWithBGColors } from '@/types/minion'
+import { ExtendedMinionWithBGColors } from '@/types/minion'
 import { ComputedRef } from 'vue'
 import { formatItemBgColor } from './utils'
 import { getHumanReadableDuration } from '@/components/utils'
@@ -74,7 +76,7 @@ defineProps<{widgetProps?: WidgetProps}>()
 
 const appliancesStore = useAppliancesStore()
 const applianceQueries = useAppliancesQueries()
-const listMinionsWithBgColor: ComputedRef<ExtendedMinionDTOWithBGColors[]> = computed<any[]>(() => formatItemBgColor(applianceQueries.tableMinions))
+const listMinionsWithBgColor: ComputedRef<ExtendedMinionWithBGColors[]> = computed<any[]>(() => formatItemBgColor(applianceQueries.tableMinions))
 
 const graphProps = ref({} as GraphProps)
 const modal = ref({
@@ -89,7 +91,7 @@ const openLatencyGraph = (id: string) => {
   }
   graphProps.value = {
     label: 'Minion Latency',
-    metrics: ['minion_response_time_msec'], // TODO: might be different once BE avail
+    metrics: ['response_time_msec'],
     monitor: '', // 'ICMP',
     // id, // not yet implemented in BE
     // instance: id, // not yet implemented in BE

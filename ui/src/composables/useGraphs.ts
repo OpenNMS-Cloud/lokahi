@@ -14,10 +14,10 @@ export const useGraphs = () => {
   })
 
   const getMetrics = async (props: GraphProps) => {
-    const { metrics, monitor, timeRange, timeRangeUnit } = props
+    const { metrics, monitor, timeRange, timeRangeUnit, instance, nodeId } = props
 
     for (const metricStr of metrics) {
-      variables.value = { name: metricStr, monitor, timeRange, timeRangeUnit }
+      variables.value = { name: metricStr, monitor, timeRange, timeRangeUnit, instance, nodeId }
       await getMetric()
       
       const result = data.value?.metric?.data?.result?.[0]

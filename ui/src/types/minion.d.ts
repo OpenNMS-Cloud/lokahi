@@ -1,9 +1,10 @@
 import { BGColors } from '@/components/Appliances/utils'
-import { MinionDto } from './graphql'
+import { Minion } from './graphql'
 
-interface ExtendedMinionDTO extends MinionDto {
-  icmp_latency: number
-  snmp_uptime: number
+interface ExtendedMinion extends Minion {
+  icmp_latency?: number | undefined
+  snmp_uptime?: number | undefined
+  status?: string
 }
 
-interface ExtendedMinionDTOWithBGColors extends ExtendedMinionDTO, BGColors {}
+interface ExtendedMinionWithBGColors extends ExtendedMinion, BGColors {}

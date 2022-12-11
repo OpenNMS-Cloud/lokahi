@@ -26,7 +26,7 @@
         name="locationOptions"
         v-model="locationOption"
         :options="applianceQueries.locations"
-        text-prop="name"
+        text-prop="location"
         @update:modelValue="selectLocation"
         label="Location"
       />

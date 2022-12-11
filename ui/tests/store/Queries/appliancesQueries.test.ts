@@ -19,16 +19,17 @@ describe('Appliances queries', () =>{
       useQuery: vi.fn().mockImplementation(() => ({
         data: {
           value: {
-            listMinions: {
-              minions: [ minionFixture() ]
-            },
+            findAllMinions: [ minionFixture() ],
             minionLatency: minionLatencyFixture(),
             minionUptime: minionUptimeFixture(),
             findAllNodes:  [ nodeFixture() ],
             deviceLatency: deviceLatencyFixture(),
             deviceUptime: deviceUptimeFixture(),
-            listLocations: locationsFixture()
+            findAllLocations: locationsFixture()
           }
+        },
+        isFetching: {
+          value: false
         } 
       }))
     }))
@@ -36,11 +37,14 @@ describe('Appliances queries', () =>{
     const expectedAppliancesMinions = [
       {
         id: 'minion-01',
-        status: 'UP',
-        location: 'Default',
-        lastUpdated: '2022-09-09T12:17:09.497Z',
-        icmp_latency: 2,
-        snmp_uptime: 97419
+        label: 'minionlabel',
+        lastCheckedTime: 1670542388,
+        location: {
+          location: 'default',
+          id: 1
+        },
+        systemId: 'opennms-minion-8d6f5f64f-4l4wh',
+        locationId: 1 // TODO: this should be removed once Minion type updated
       }
     ]
 

@@ -9,21 +9,22 @@ fragment NodeTableParts on Query {
 }
 
 fragment MinionsTableParts on Query {
-  listMinions {
-    minions {
+  findAllMinions {
+    id
+    label
+    lastCheckedTime
+    location {
       id
-      status
       location
-      lastUpdated
     }
+    systemId
   }
 }
 
 fragment LocationsParts on Query {
-  listLocations {
-    locations {
-      locationName
-    }
+  findAllLocations {
+    id
+    location
   }
 }
 
@@ -35,7 +36,9 @@ query ListNodesForTable {
 
 query ListMinionsForTable {
   ...MinionsTableParts
-  ...MinionUptimeParts
+}
+
+query ListMinionMetrics($instance: String) {
   ...MinionLatencyParts
 }
 
@@ -44,7 +47,5 @@ query ListMinionsAndDevicesForTables {
   ...DeviceUptimeParts
   ...DeviceLatencyParts
   ...MinionsTableParts
-  ...MinionUptimeParts
-  ...MinionLatencyParts
   ...LocationsParts
 }

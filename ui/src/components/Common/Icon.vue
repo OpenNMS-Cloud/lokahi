@@ -1,5 +1,15 @@
 <template>
-  <FeatherIcon :icon="icon.image" :title="icon.title" :viewBox="setViewBox(icon.image)" />
+  <FeatherTooltip
+    :title="icon.tooltip || ''"
+    v-slot="{ attrs, on }"
+  >
+    <FeatherIcon
+      v-bind="icon.tooltip ? attrs : null" 
+      v-on="on" :icon="icon.image" 
+      :title="icon.title" 
+      :viewBox="setViewBox(icon.image)" 
+    />
+  </FeatherTooltip>
 </template>
 
 <script lang="ts" setup>

@@ -60,12 +60,6 @@ public class TaskResultsKafkaForwarder implements MessageConsumer<Message, Messa
 
         // Retrieve the Tenant ID from the TenantID GRPC Interceptor
         String tenantId = tenantIDGrpcInterceptor.readCurrentContextTenantId();
-
-        if (tenantId == null) {
-            usingDefaultTenantIdLog.warn("!!! USING DEFAULT TENANT ID !!! (TASKSET RESULTS)");
-            tenantId = "opennms-prime";
-        }
-
         byte[] rawContent = messageLog.toByteArray();
 
         ProducerRecord<String, byte[]> producerRecord = formatProducerRecord(rawContent, tenantId);

@@ -67,6 +67,8 @@ spec:
               value: "-agentlib:jdwp=transport=dt_socket,server=y,address=5005,suspend=n,quiet=y" # FIXME: Permanent debug port, enable only for dev mode
             - name: LOCATION
               value: "Default"
+            - name: IGNITE_UPDATE_NOTIFIER # Disable Ignite version lookups
+              value: "false"
           ports:
             - name: http
               containerPort: {{ .Values.OpenNMS.Minion.Port }}

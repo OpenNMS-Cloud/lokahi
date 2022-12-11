@@ -14,11 +14,11 @@ describe('Inventory node icon action list', () => {
   })
 
   const actionList = [
-    'bubble-chart',
+    // 'bubble-chart',
     'line-chart',
-    'pie-chart',
+    // 'pie-chart',
     'warning',
-    'delete'
+    // 'delete'
   ]
   it.each(actionList)('should have "%s" action icon', (icon) => {
     expect(wrapper.get(`[data-test="${icon}"]`).exists()).toBe(true)

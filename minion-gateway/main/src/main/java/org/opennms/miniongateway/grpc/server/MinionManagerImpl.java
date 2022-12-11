@@ -8,6 +8,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import org.opennms.horizon.shared.ipc.grpc.server.manager.MinionInfo;
 import org.opennms.horizon.shared.ipc.grpc.server.manager.MinionManager;
 import org.opennms.horizon.shared.ipc.grpc.server.manager.MinionManagerListener;
+import org.opennms.miniongateway.grpc.server.model.TenantKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,7 +31,7 @@ public class MinionManagerImpl implements MinionManager {
 
     private Logger log = DEFAULT_LOGGER;
 
-    private Map<String, MinionInfo> minionByIdMap = new ConcurrentHashMap<>();
+    private Map<TenantKey, MinionInfo> minionByIdMap = new ConcurrentHashMap<>();
     private ConcurrentLinkedQueue<MinionManagerListener> listeners = new ConcurrentLinkedQueue<>();
     
 
@@ -38,32 +39,36 @@ public class MinionManagerImpl implements MinionManager {
 
     @Override
     public void addMinion(MinionInfo minionInfo) {
-        log.info("Minion Manager: adding minion: id={}; location={}", minionInfo.getId(), minionInfo.getLocation());
+        log.info("Minion Manager: adding minion: tenant={}, id={}; location={}", minionInfo.getTenantId(), minionInfo.getId(), minionInfo.getLocation());
 
-        if (minionByIdMap.containsKey(minionInfo.getId())) {
-            log.warn("Attempt to register minion with duplicate id; ignoring: id=" + minionInfo.getId() + "; location=" + minionInfo.getLocation());
+        TenantKey minionKey = new TenantKey(minionInfo.getTenantId(), minionInfo.getId());
+        if (minionByIdMap.containsKey(minionKey)) {
+            log.warn("Attempt to register minion with duplicate id; ignoring: tenant={}; id={}; location={}",
+                minionInfo.getTenantId(), minionInfo.getId(), minionInfo.getLocation());
             return;
         }
 
-        minionByIdMap.put(minionInfo.getId(), minionInfo);
+        minionByIdMap.put(minionKey, minionInfo);
 
         listeners.forEach(listener -> listener.onMinionAdded(sequence++, minionInfo));
     }
 
     @Override
-    public void removeMinion(String minionId) {
-        log.info("Minion Manager: removing minion: id={}", minionId);
+    public void removeMinion(MinionInfo minionInfo) {
+        log.info("Minion Manager: removing minion: tenant={}, id={}; location={}",  minionInfo.getTenantId(), minionInfo.getId(), minionInfo.getLocation());
 
         MinionInfo removedMinionInfo;
 
-        removedMinionInfo = minionByIdMap.remove(minionId);
+        TenantKey minionKey = new TenantKey(minionInfo.getTenantId(), minionInfo.getId());
+        removedMinionInfo = minionByIdMap.remove(minionKey);
 
         if (removedMinionInfo == null) {
-            log.warn("Attempt to remove minion with unknown id; ignoring: id={}", minionId);
+            log.warn("Attempt to remove minion with unknown id; ignoring: tenant={}, id={}; location={}",
+                minionInfo.getTenantId(), minionInfo.getId(), minionInfo.getLocation());
             return;
         }
 
-        minionByIdMap.remove(minionId);
+        minionByIdMap.remove(minionKey);
 
         listeners.forEach(listener -> listener.onMinionRemoved(sequence++, removedMinionInfo));
     }

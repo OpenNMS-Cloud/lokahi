@@ -16,10 +16,10 @@ OpenNMS:
     Resources:
       Limits:
         Cpu: "2"
-        Memory: 2Gi
+        Memory: 4Gi
       Requests:
         Cpu: "2"
-        Memory: 1Gi
+        Memory: 2Gi
   API:
     Path: /api
     ServiceName: opennms-rest-server
@@ -71,10 +71,10 @@ OpenNMS:
     Resources:
       Limits:
         Cpu: "1"
-        Memory: 2050M
+        Memory: 500Mi
       Requests:
-        Cpu: "1"
-        Memory: 512Mi
+        Cpu: 100m
+        Memory: 250Mi
   MinionGateway:
     ServiceName: opennms-minion-gateway
     Image: opennms/horizon-stream-minion-gateway
@@ -89,7 +89,7 @@ OpenNMS:
         Cpu: "1"
         Memory: 500Mi
       Requests:
-        Cpu: "1"
+        Cpu: 100m
         Memory: 250Mi
   MinionGatewayGrpcProxy:
     ServiceName: opennms-minion-gateway-grpc-proxy
@@ -102,7 +102,7 @@ OpenNMS:
         Cpu: "1"
         Memory: 500Mi
       Requests:
-        Cpu: "1"
+        Cpu: 100m
         Memory: 250Mi
   Inventory:
     ServiceName: opennms-inventory

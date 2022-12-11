@@ -1,14 +1,17 @@
 import { TsResult, TimeSeriesQueryResult } from '@/types/graphql'
 
 const mockMinionLatency: TsResult = {
-  'metric': {
-    '__name__': 'minion_response_time_msec',
-    'instance': 'minion-01',
-    'job': 'horizon-core',
-    'location': 'Default',
-    'pushgateway_instance': 'horizon-core-pushgateway'
+  metric: {
+    '__name__': 'response_time_msec',
+    instance: 'opennms-minion-8d6f5f64f-4l4wh',
+    job: 'horizon-core',
+    location: 'Default',
+    pushgateway_instance: 'horizon-core-pushgateway',
+    system_id: 'opennms-minion-8d6f5f64f-4l4wh',
+    node_id: 0,
+    monitor: 'ECHO'
   },
-  'value': [
+  value: [
     1662670391.864,
     2
   ]

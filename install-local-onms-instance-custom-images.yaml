@@ -40,6 +40,8 @@ spec:
     image: opennms/horizon-stream-metrics-processor:local
   events:
     image: opennms/horizon-stream-events:local
+  datachoices:
+    image: opennms/horizon-stream-datachoices:local
   keycloak:
     image: opennms/horizon-stream-keycloak:local
   grafana:

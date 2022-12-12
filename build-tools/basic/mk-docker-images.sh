@@ -75,6 +75,12 @@ time {
   echo "==="
   mvn -f events jib:dockerBuild -Djib.container.creationTime=USE_CURRENT_TIMESTAMP -Dimage=opennms/horizon-stream-events:local-basic
 
+  echo ""
+  echo "==="
+  echo "=== DATACHOICES IMAGE"
+  echo "==="
+  mvn -f events jib:dockerBuild -Djib.container.creationTime=USE_CURRENT_TIMESTAMP -Dimage=opennms/horizon-stream-datachoices:local-basic
+
 	echo ""
 	echo "==="
 	echo "=== KEYCLOAK UI IMAGE"

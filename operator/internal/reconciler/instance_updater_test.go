@@ -116,6 +116,7 @@ func TestCheckForExistingCoreCreds(t *testing.T) {
 	notificationPwd := "testpostgresnotificationpwd"
 	grafanaPwd := "testpostgresgrafanapwd"
 	eventsPwd := "testpostgreseventspwd"
+	dataChoicesPwd := "testpostgresdatachoicespwd"
 	pgSecret := corev1.Secret{
 		ObjectMeta: v1.ObjectMeta{
 			Name: "postgres",
@@ -128,6 +129,7 @@ func TestCheckForExistingCoreCreds(t *testing.T) {
 			"notificationPwd": []byte(notificationPwd),
 			"grafanaPwd":      []byte(grafanaPwd),
 			"eventsPwd":       []byte(eventsPwd),
+			"dataChoicesPwd":  []byte(dataChoicesPwd),
 		},
 	}
 	err = k8sClient.Create(ctx, &pgSecret)
@@ -142,6 +144,7 @@ func TestCheckForExistingCoreCreds(t *testing.T) {
 	assert.Equal(t, notificationPwd, res.Values.Postgres.NotificationPassword, "should return the postgres expected values")
 	assert.Equal(t, grafanaPwd, res.Values.Postgres.GrafanaPassword, "should return the postgres expected values")
 	assert.Equal(t, eventsPwd, res.Values.Postgres.EventsPassword, "should return the postgres expected values")
+	assert.Equal(t, dataChoicesPwd, res.Values.Postgres.DataChoicesPassword, "should return the postgres expected values")
 
 	pgSecret.Data["adminPwd"] = []byte("")
 	err = k8sClient.Update(ctx, &pgSecret)

@@ -1,0 +1,62 @@
+spring:
+  application:
+    name: horizon-stream-datachoices
+
+  datasource:
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+
+  liquibase:
+    change-log: db/changelog/changelog.xml
+
+  quartz:
+    job-store-type: jdbc
+    overwrite-existing-jobs: true
+    jdbc:
+      initialize-schema: never
+    properties:
+      org:
+        quartz:
+          scheduler:
+            instanceName: ${spring.application.name}
+            instanceId: AUTO
+          threadPool:
+            class: org.quartz.simpl.SimpleThreadPool
+            threadCount: 10
+          jobStore:
+            class: org.quartz.impl.jdbcjobstore.JobStoreTX
+            driverDelegateClass: org.quartz.impl.jdbcjobstore.PostgreSQLDelegate
+            useProperties: false
+            misfireThreshold: 60000
+            tablePrefix: QRTZ_
+            dataSource: myDS
+          plugin:
+            triggerHistory:
+              class: org.quartz.plugins.history.LoggingTriggerHistoryPlugin
+              triggerFiredMessage: 'Trigger [{1}.{0}] fired job [{6}.{5}] scheduled at: {2, date, dd-MM-yyyy HH:mm:ss.SSS}, next scheduled at: {3, date, dd-MM-yyyy HH:mm:ss.SSS}'
+              triggerCompleteMessage: 'Trigger [{1}.{0}] completed firing job [{6}.{5}] with resulting trigger instruction code: {9}. Next scheduled at: {3, date, dd-MM-yyyy HH:mm:ss.SSS}'
+              triggerMisfiredMessage: 'Trigger [{1}.{0}] misfired job [{6}.{5}]. Should have fired at: {3, date, dd-MM-yyyy HH:mm:ss.SSS}'
+            shutdownHook:
+              class: org.quartz.plugins.management.ShutdownHookPlugin
+              cleanShutdown: true
+          dataSource:
+            myDS:
+              driver: ${spring.datasource.driver-class-name}
+              URL: ${spring.datasource.url}
+              user: ${spring.datasource.username}
+              password: ${spring.datasource.password}
+              validationQuery: select 1
+
+grpc:
+  server:
+    port: 6565
+
+keycloak:
+  realm: opennms
+  base-url: http://onms-keycloak:8080/auth
+
+datachoices:
+  interval-ms: 30000

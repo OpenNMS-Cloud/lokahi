@@ -109,3 +109,6 @@ spec:
             - mountPath: "/docker-entrypoint-initdb.d/postgres.events.initial.script.sql"
               name: postgres-initial-script
               subPath: "postgres.events.initial.script.sql"
+            - mountPath: "/docker-entrypoint-initdb.d/postgres.datachoices.initial.script.sql"
+              name: postgres-initial-script
+              subPath: "postgres.datachoices.initial.script.sql"

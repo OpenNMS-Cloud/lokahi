@@ -25,6 +25,7 @@ type OpenNMSValues struct {
 	Notification           ServiceValues          `yaml:"Notification"`
 	MetricsProcessor       MetricsProcessorValues `yaml:"MetricsProcessor"`
 	Events                 EventsValues           `yaml:"Events"`
+	DataChoices            DataChoicesValues      `yaml:"DataChoices"`
 }
 
 type MinionValues struct {
@@ -58,6 +59,11 @@ type AlarmValues struct {
 }
 
 type EventsValues struct {
+	ServiceValues `yaml:",inline"`
+	GrpcPort      int `yaml:"GrpcPort"`
+}
+
+type DataChoicesValues struct {
 	ServiceValues `yaml:",inline"`
 	GrpcPort      int `yaml:"GrpcPort"`
 }

@@ -40,6 +40,14 @@ OpenNMS:
       Requests:
         Cpu: '0'
         Memory: '0'
+  DataChoices:
+    Resources:
+      Limits:
+        Cpu: '0'
+        Memory: '0'
+      Requests:
+        Cpu: '0'
+        Memory: '0'
   Core:
     Resources:
       Limits:

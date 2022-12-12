@@ -202,6 +202,15 @@ jib_project(
     port_forwards=['31089:8990', '31050:5005'],
 )
 
+### DataChoices ###
+jib_project(
+    'datachoices',
+    'opennms/horizon-stream-datachoices',
+    'datachoices',
+    'opennms-datachoices',
+    port_forwards=['33080:9090', '33050:5005', '33065:6565'],
+)
+
 ### Minion ###
 custom_build(
     'opennms/horizon-stream-minion',

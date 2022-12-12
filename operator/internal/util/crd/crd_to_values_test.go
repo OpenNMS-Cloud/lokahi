@@ -242,6 +242,33 @@ func TestGetEventsValues(t *testing.T) {
 	assert.Equal(t, "testdisk", v.Events.VolumeSize, "value should remain unchanged when spec is unset")
 }
 
+func TestGetDataChoicesValues(t *testing.T) {
+	spec := v1alpha1.OpenNMSSpec{
+		DataChoices: v1alpha1.BaseServiceResources{
+			Image: "image",
+			CPU:   "testcpu",
+			MEM:   "testmem",
+			Disk:  "testdisk",
+		},
+	}
+
+	v := values.OpenNMSValues{}
+
+	v = getDatachoicesValues(spec, v)
+
+	assert.Equal(t, spec.DataChoices.Image, v.DataChoices.Image, "should set the image correctly")
+	assert.Equal(t, spec.DataChoices.CPU, v.DataChoices.Resources.Requests.Cpu, "should pull the correct value")
+	assert.Equal(t, spec.DataChoices.MEM, v.DataChoices.Resources.Requests.Memory, "should pull the correct value")
+	assert.Equal(t, spec.DataChoices.Disk, v.DataChoices.VolumeSize, "should pull the correct value")
+
+	v = getDatachoicesValues(v1alpha1.OpenNMSSpec{}, v)
+
+	assert.Equal(t, "image", v.DataChoices.Image, "value should remain unchanged when spec is unset")
+	assert.Equal(t, "testcpu", v.DataChoices.Resources.Requests.Cpu, "value should remain unchanged when spec is unset")
+	assert.Equal(t, "testmem", v.DataChoices.Resources.Requests.Memory, "value should remain unchanged when spec is unset")
+	assert.Equal(t, "testdisk", v.DataChoices.VolumeSize, "value should remain unchanged when spec is unset")
+}
+
 func TestGetPostgresValues(t *testing.T) {
 	spec := v1alpha1.OpenNMSSpec{
 		Postgres: v1alpha1.BaseServiceResources{

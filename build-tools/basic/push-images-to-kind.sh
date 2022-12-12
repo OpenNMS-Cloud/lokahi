@@ -33,4 +33,5 @@ kind load docker-image "opennms/horizon-stream-minion-gateway:local-basic"
 kind load docker-image "opennms/horizon-stream-minion-gateway-grpc-proxy:local-basic"
 kind load docker-image "opennms/horizon-stream-metrics-processor:local-basic"
 kind load docker-image "opennms/horizon-stream-events:local-basic"
+kind load docker-image "opennms/horizon-stream-datachoices:local-basic"
 

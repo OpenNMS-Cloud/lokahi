@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.OpenNMS.DataChoices.ServiceName }}
+  labels:
+    app: {{ .Values.OpenNMS.DataChoices.ServiceName }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ .Values.OpenNMS.DataChoices.ServiceName }}
+  replicas: {{ .Values.OpenNMS.DataChoices.Replicas }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.OpenNMS.DataChoices.ServiceName }}
+    spec:
+      {{- if .Values.NodeRestrictions.Enabled }}
+      nodeSelector:                                                                                    
+        {{ .Values.NodeRestrictions.Key }}: {{ .Values.NodeRestrictions.Value }}                       
+      tolerations:
+        - effect: "NoSchedule"                                                                         
+          key: "{{ .Values.NodeRestrictions.Key }}"                                                    
+          operator: "Equal"
+          value: {{ .Values.NodeRestrictions.Value }} 
+      affinity: 
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:                                             
+          - weight: 1                                                                                  
+            preference:                                                                                
+              matchExpressions:                                                                        
+              - key: "{{ .Values.NodeRestrictions.Key }}"                                              
+                operator: In
+                values:                                                                                
+                - {{ .Values.NodeRestrictions.Value }}                                                 
+      {{- end }}
+      containers:
+        - name: {{ .Values.OpenNMS.DataChoices.ServiceName }}
+          image: {{ .Values.OpenNMS.DataChoices.Image }}
+          imagePullPolicy: {{ .Values.OpenNMS.DataChoices.ImagePullPolicy }}
+          env:
+            - name: JAVA_TOOL_OPTIONS
+              value: "-agentlib:jdwp=transport=dt_socket,server=y,address=5005,suspend=n,quiet=y"  # FIXME: Permanent debug port, enable only for dev mode
+            - name: SPRING_DATASOURCE_URL
+              value: "jdbc:postgresql://postgres:5432/datachoices"
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: postgres
+                  key: dataChoicesUsr
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres
+                  key: dataChoicesPwd
+            - name: SPRING_KAFKA_BOOTSTRAP_SERVERS
+              value: "{{ .Values.Kafka.ServiceName }}:{{ .Values.Kafka.Port }}"
+            - name: KEYCLOAK_BASE_URL
+              value: "http://{{ .Values.Keycloak.ServiceName }}:8080/auth/"
+            - name: KEYCLOAK_REALM
+              value: "{{ .Values.Keycloak.RealmName }}"
+          ports:
+            - name: http
+              containerPort: {{ .Values.OpenNMS.DataChoices.Port }}
+            - name: grpc
+              containerPort: {{ .Values.OpenNMS.DataChoices.GrpcPort }}

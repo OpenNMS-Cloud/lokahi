@@ -19,4 +19,5 @@ kubectl delete deployment opennms-minion-gateway
 kubectl delete deployment opennms-minion-gateway-grpc-proxy
 kubectl delete deployment opennms-metrics-processor
 kubectl delete deployment opennms-events
+kubectl delete deployment opennms-datachoices
 

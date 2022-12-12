@@ -57,6 +57,9 @@ func ConvertCRDToValues(crd v1alpha1.OpenNMS, defaultValues values.TemplateValue
 	//ONMS Events Processor
 	v.OpenNMS = getEventsValues(spec, v.OpenNMS)
 
+	//ONMS Datachoices Processor
+	v.OpenNMS = getDatachoicesValues(spec, v.OpenNMS)
+
 	//Keycloak
 	v.Keycloak = getKeycloakValues(spec, v.Keycloak)
 
@@ -235,6 +238,25 @@ func getEventsValues(spec v1alpha1.OpenNMSSpec, v values.OpenNMSValues) values.O
 	}
 	if spec.Events.Disk != "" {
 		v.Events.VolumeSize = spec.Events.Disk
+	}
+	return v
+}
+
+// getDatachoicesValues - get ONMS DataChoices values from the crd
+func getDatachoicesValues(spec v1alpha1.OpenNMSSpec, v values.OpenNMSValues) values.OpenNMSValues {
+	if spec.Events.Image != "" {
+		v.DataChoices.Image = spec.DataChoices.Image
+	}
+	if spec.DataChoices.CPU != "" {
+		v.DataChoices.Resources.Requests.Cpu = spec.DataChoices.CPU
+		v.DataChoices.Resources.Limits.Cpu = spec.DataChoices.CPU
+	}
+	if spec.DataChoices.MEM != "" {
+		v.DataChoices.Resources.Requests.Memory = spec.DataChoices.MEM
+		v.DataChoices.Resources.Limits.Memory = spec.DataChoices.MEM
+	}
+	if spec.DataChoices.Disk != "" {
+		v.DataChoices.VolumeSize = spec.DataChoices.Disk
 	}
 	return v
 }

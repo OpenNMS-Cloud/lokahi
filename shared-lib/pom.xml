@@ -30,6 +30,7 @@
         <module>ignite-tasks</module>
         <module>events</module>
         <module>horizon-grpc-common-constants</module>
+        <module>datachoices</module>
     </modules>
 
     <build>

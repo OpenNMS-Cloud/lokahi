@@ -141,6 +141,20 @@ OpenNMS:
       Requests:
         Cpu: 100m
         Memory: 250Mi
+  DataChoices:
+    ServiceName: opennms-datachoices
+    Image: opennms/horizon-stream-datachoices
+    ImagePullPolicy: IfNotPresent
+    Replicas: 1
+    Port: 8080
+    GrpcPort: 6565
+    Resources:
+      Limits:
+        Cpu: "1"
+        Memory: 500Mi
+      Requests:
+        Cpu: 100m
+        Memory: 250Mi
 Postgres:
   ServiceName: postgres
   Image: postgres:14.5-alpine
@@ -152,6 +166,7 @@ Postgres:
   InventoryPassword: notset
   AlarmPassword: notset
   EventsPassword: notset
+  DataChoicesPassword: notset
   NotificationPassword: notset
   GrafanaPassword: notset
   VolumeSize: 10Gi

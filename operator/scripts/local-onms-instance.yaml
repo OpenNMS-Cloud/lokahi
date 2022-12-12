@@ -50,6 +50,10 @@ spec:
     image: opennms/horizon-stream-events
     cpu: "0"
     mem: 100Mi
+  datachoices:
+    image: opennms/horizon-stream-datachoices
+    cpu: "0"
+    mem: 100Mi
   keycloak:
     image: opennms/horizon-stream-keycloak
   grafana:

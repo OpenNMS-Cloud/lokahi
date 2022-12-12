@@ -43,6 +43,7 @@ message MonitoringSystemDTO {
   int64 monitoring_location_id = 5;
   //timestamp in msec will convert to data time in the entity
   int64 last_checked_in = 6;
+  bool status = 7;
 }
 
 message MonitoringSystemList {

@@ -81,7 +81,7 @@ public class OpennmsSchedulerImpl implements OpennmsScheduler {
             unscheduleTask(old);
         }
 
-        Future<?> future = scheduledThreadPoolExecutor.scheduleAtFixedRate(operation, period, period, unit);
+        Future<?> future = scheduledThreadPoolExecutor.scheduleAtFixedRate(operation, 0, period, unit);
         safeSetTaskInfoFuture(taskInfo, future);
     }
 

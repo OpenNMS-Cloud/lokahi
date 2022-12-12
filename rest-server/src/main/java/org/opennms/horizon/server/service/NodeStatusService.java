@@ -24,7 +24,7 @@ import static org.springframework.util.CollectionUtils.isEmpty;
 @RequiredArgsConstructor
 public class NodeStatusService {
     private static final String RESPONSE_TIME_METRIC = "response_time_msec";
-    private static final int TIME_RANGE_IN_MINUTES = 1;
+    private static final int TIME_RANGE_IN_SECONDS = 90;
     private static final String NODE_ID_KEY = "node_id";
     private static final String MONITOR_KEY = "monitor";
     private static final String INSTANCE_KEY = "instance";
@@ -69,7 +69,7 @@ public class NodeStatusService {
         labels.put(INSTANCE_KEY, ipAddress);
 
         Mono<TimeSeriesQueryResult> result = prometheusTSDBService
-            .getMetric(RESPONSE_TIME_METRIC, labels, TIME_RANGE_IN_MINUTES, TimeRangeUnit.MINUTE);
+            .getMetric(RESPONSE_TIME_METRIC, labels, TIME_RANGE_IN_SECONDS, TimeRangeUnit.SECOND);
         try {
             return result.toFuture().get(TIMEOUT_IN_SECONDS, TimeUnit.SECONDS);
         } catch (InterruptedException | ExecutionException | TimeoutException e) {

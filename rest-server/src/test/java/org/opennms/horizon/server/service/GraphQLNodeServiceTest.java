@@ -326,7 +326,7 @@ public class GraphQLNodeServiceTest {
 
         Map<String, String> metric = new HashMap<>();
         metric.put("__name__", "response_time_msec");
-        metric.put("instance", "192.168.1.89");
+        metric.put("instance", "127.0.0.1");
         metric.put("job", "horizon-core");
         metric.put("location", "Default");
         metric.put("monitor", "ICMP");

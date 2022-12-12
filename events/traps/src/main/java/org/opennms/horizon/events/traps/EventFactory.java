@@ -39,6 +39,7 @@ import org.opennms.horizon.grpc.traps.contract.TrapIdentity;
 import org.opennms.horizon.shared.snmp.SnmpHelper;
 import org.opennms.horizon.shared.snmp.SnmpObjId;
 import org.opennms.horizon.shared.snmp.SnmpValue;
+import org.opennms.horizon.shared.utils.InetAddressUtils;
 import org.opennms.horizon.snmp.api.SnmpResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -135,7 +136,7 @@ public class EventFactory {
     }
 
     private Optional<Long> resolveNodeId(String location, InetAddress trapAddress, String tenantId) {
-        String trapIpAddress = trapAddress.getHostAddress();
+        String trapIpAddress = InetAddressUtils.str(trapAddress);
         try {
             return Optional.of(inventoryClient
                 .getNodeIdFromQuery(tenantId, trapIpAddress, location));

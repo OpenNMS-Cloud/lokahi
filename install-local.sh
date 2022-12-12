@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #use this script to install a basic version of OpenNMS Horizon Stream locally
 
-operator_run () {
+cluster_ready_check () {
   #bash scripts/add-local-ssl-cert.sh
   kubectl config set-context --current --namespace=hs-instance
 
@@ -43,7 +43,7 @@ if [ $1 == "local" ]; then
   helm upgrade -i horizon-stream ../charts/opennms -f ../tmp/install-local-opennms-horizon-stream-values.yaml --namespace hs-instance --create-namespace
   if [ $? -ne 0 ]; then exit; fi
 
-  operator_run
+  cluster_ready_check
 
 elif [ "$1" == "custom-images" ]; then
 
@@ -74,7 +74,7 @@ elif [ "$1" == "custom-images" ]; then
   helm upgrade -i horizon-stream ../charts/opennms -f ../tmp/install-local-opennms-horizon-stream-custom-images-values.yaml --namespace hs-instance --create-namespace
   if [ $? -ne 0 ]; then exit; fi
 
-  operator_run
+  cluster_ready_check
 
 elif [ $1 == "existing-k8s" ]; then
 
@@ -86,7 +86,7 @@ elif [ $1 == "existing-k8s" ]; then
   helm upgrade -i horizon-stream ../charts/opennms -f ../tmp/install-local-opennms-horizon-stream-values.yaml --namespace hs-instance --create-namespace
   if [ $? -ne 0 ]; then exit; fi
 
-  operator_run
+  cluster_ready_check
 
 elif [ $1 == "existing-k8s-no-op" ]; then
 

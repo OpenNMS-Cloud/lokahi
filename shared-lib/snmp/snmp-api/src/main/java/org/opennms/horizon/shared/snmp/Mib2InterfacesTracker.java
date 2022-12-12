@@ -39,13 +39,13 @@ public class Mib2InterfacesTracker extends AggregateTracker {
 
     private static final Logger LOG = LoggerFactory.getLogger(Mib2InterfacesTracker.class);
 
-    public static NamedSnmpVar[] elemList = new NamedSnmpVar[10];
-    private final SnmpStore snmpStore;
-    private Map<String, SnmpResult> snmpResultMap = new TreeMap<>();
+    private static final NamedSnmpVar[] elemList = new NamedSnmpVar[22];
 
 
     static {
         int ndx = 0;
+        elemList[ndx++] = new NamedSnmpVar(NamedSnmpVar.SNMPOCTETSTRING, "ifDescr", ".1.3.6.1.2.1.2.2.1.2", 6);
+        elemList[ndx++] = new NamedSnmpVar(NamedSnmpVar.SNMPGAUGE32, "ifSpeed", ".1.3.6.1.2.1.2.2.1.5", 6);
         elemList[ndx++] = new NamedSnmpVar(NamedSnmpVar.SNMPCOUNTER64, "ifInOctets", ".1.3.6.1.2.1.2.2.1.10", 6);
         elemList[ndx++] = new NamedSnmpVar(NamedSnmpVar.SNMPCOUNTER64, "ifInUcastpkts", ".1.3.6.1.2.1.2.2.1.11", 6);
         elemList[ndx++] = new NamedSnmpVar(NamedSnmpVar.SNMPCOUNTER64, "ifInNUcastpkts", ".1.3.6.1.2.1.2.2.1.12", 6);
@@ -56,40 +56,23 @@ public class Mib2InterfacesTracker extends AggregateTracker {
         elemList[ndx++] = new NamedSnmpVar(NamedSnmpVar.SNMPCOUNTER64, "ifOutNUcastPkts", ".1.3.6.1.2.1.2.2.1.18", 6);
         elemList[ndx++] = new NamedSnmpVar(NamedSnmpVar.SNMPCOUNTER64, "ifOutDiscards", ".1.3.6.1.2.1.2.2.1.19", 6);
         elemList[ndx++] = new NamedSnmpVar(NamedSnmpVar.SNMPCOUNTER64, "ifOutErrors", ".1.3.6.1.2.1.2.2.1.20", 6);
+
+        elemList[ndx++] = new NamedSnmpVar(NamedSnmpVar.SNMPOCTETSTRING, "ifName", ".1.3.6.1.2.1.31.1.1.1.1", 6);
+        elemList[ndx++] = new NamedSnmpVar(NamedSnmpVar.SNMPCOUNTER64, "ifHCInOctets", ".1.3.6.1.2.1.31.1.1.1.6", 6);
+        elemList[ndx++] = new NamedSnmpVar(NamedSnmpVar.SNMPCOUNTER64, "ifHCInUcastPkts", ".1.3.6.1.2.1.31.1.1.1.7", 6);
+        elemList[ndx++] = new NamedSnmpVar(NamedSnmpVar.SNMPCOUNTER64, "ifHCInMulticastPkts", ".1.3.6.1.2.1.31.1.1.1.8", 6);
+        elemList[ndx++] = new NamedSnmpVar(NamedSnmpVar.SNMPCOUNTER64, "ifHCInBroadcastPkts", ".1.3.6.1.2.1.31.1.1.1.9", 6);
+        elemList[ndx++] = new NamedSnmpVar(NamedSnmpVar.SNMPCOUNTER64, "ifHCOutOctets", ".1.3.6.1.2.1.31.1.1.1.10", 6);
+        elemList[ndx++] = new NamedSnmpVar(NamedSnmpVar.SNMPCOUNTER64, "ifHCOutUcastPkts", ".1.3.6.1.2.1.31.1.1.1.11", 6);
+        elemList[ndx++] = new NamedSnmpVar(NamedSnmpVar.SNMPCOUNTER64, "ifHCOutMulticastPkt", ".1.3.6.1.2.1.31.1.1.1.12", 6);
+        elemList[ndx++] = new NamedSnmpVar(NamedSnmpVar.SNMPCOUNTER64, "ifHCOutBroadcastPkt", ".1.3.6.1.2.1.31.1.1.1.13", 6);
+        elemList[ndx++] = new NamedSnmpVar(NamedSnmpVar.SNMPOCTETSTRING, "ifHighSpeed", ".1.3.6.1.2.1.31.1.1.1.15", 6);
     }
 
     public Mib2InterfacesTracker() {
         super(NamedSnmpVar.getTrackersFor(elemList));
-        snmpStore = new SnmpStore(elemList);
     }
 
-    @Override
-    protected void storeResult(SnmpResult res) {
-
-        final SnmpObjId base = res.getBase();
-        final SnmpValue value = res.getValue();
-
-        for (final NamedSnmpVar var : elemList) {
-            if (base.equals(var.getSnmpObjId())) {
-                if (value.isError()) {
-                    LOG.error("storeResult: got an error for alias {} [{}].[{}]," +
-                        " but we should only be getting non-errors: {}", var.getAlias(), base, res.getInstance(), value);
-                } else if (value.isEndOfMib()) {
-                    LOG.debug("storeResult: got endOfMib for alias {} [{}].[{}], not storing", var.getAlias(), base, res.getInstance());
-                } else {
-                    snmpResultMap.put(var.getAlias(), res);
-                }
-            }
-        }
-    }
-
-    public SnmpStore getSnmpStore() {
-        return snmpStore;
-    }
-
-    public Map<String, SnmpResult> getSnmpResultMap() {
-        return snmpResultMap;
-    }
 
     public static Optional<String> getAlias(SnmpResult snmpResult) {
         final SnmpObjId base = snmpResult.getBase();

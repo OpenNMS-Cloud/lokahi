@@ -57,9 +57,8 @@ public class TaskExecutionResultProcessorImpl implements TaskExecutionResultProc
 
     @Override
     public void queueSendResult(String uuid, CollectionSet collectionSet) {
-        log.info("Sending Collector Set results {}", collectionSet);
         TaskSetResults taskSetResults = formatTaskSetResults(uuid, collectionSet);
-        log.info("Sending TaskSet results {}", taskSetResults);
+        log.info("Collector TaskSet results {}", taskSetResults);
         taskSetSinkDispatcher.send(taskSetResults);
     }
 

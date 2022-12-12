@@ -42,6 +42,7 @@ import org.opennms.horizon.tsdata.metrics.MetricsPushAdapter;
 import org.opennms.taskset.contract.CollectorResponse;
 import org.opennms.taskset.contract.DetectorResponse;
 import org.opennms.taskset.contract.MonitorResponse;
+import org.opennms.taskset.contract.MonitorType;
 import org.opennms.taskset.contract.TaskResult;
 import org.opennms.taskset.contract.TaskSetResults;
 import org.springframework.context.annotation.PropertySource;
@@ -94,7 +95,6 @@ public class TSDataProcessor {
                             // TBD: how to process?
                             log.info("Have detector response: task-id={}; detected={}", result.getId(), detectorResponse.getDetected());
                         } else if(result.hasCollectorResponse()) {
-                            CollectorResponse collectorResponse = result.getCollectorResponse();
                             processCollectorResponse(result);
                         }
                     } else {
@@ -121,12 +121,11 @@ public class TSDataProcessor {
             labels.put(MONITOR_METRICS_LABEL_NAMES[i], labelValues[i]);
         }
 
-        if (response.getMetricsMap() != null) {
-            response.getMetricsMap().forEach((k, v) -> {
-                Gauge extGauge = getGaugeFrom(METRICS_NAME_PREFIX_MONITOR + k, null, null);
-                extGauge.labels(labelValues).set(v);
-            });
-        }
+        response.getMetricsMap().forEach((k, v) -> {
+            Gauge extGauge = getGaugeFrom(METRICS_NAME_PREFIX_MONITOR + k, null, null);
+            extGauge.labels(labelValues).set(v);
+        });
+
         pushAdapter.pushMetrics(collectorRegistry, labels);
     }
 
@@ -135,7 +134,7 @@ public class TSDataProcessor {
             if (gauge != null) {
                 return gauge;
             }
-            var builder = Gauge.build().name(name).labelNames(MONITOR_METRICS_LABEL_NAMES);
+            var builder = Gauge.build().name(name).labelNames(TSDataProcessor.MONITOR_METRICS_LABEL_NAMES);
 
             if (!Strings.isNullOrEmpty(description)) {
                 builder.help(description);
@@ -152,17 +151,18 @@ public class TSDataProcessor {
         CollectorResponse response = result.getCollectorResponse();
         String[] labelValues = {response.getIpAddress(), result.getLocation(), result.getSystemId(),
             response.getMonitorType().name(), String.valueOf(response.getNodeId())};
-        if (response.hasResult()) {
+        if (response.hasResult() && response.getMonitorType().equals(MonitorType.SNMP)) {
             Any collectorMetric = response.getResult();
             try {
                 var snmpResponse = collectorMetric.unpack(SnmpResponseMetric.class);
                 snmpResponse.getResultsList().forEach((snmpResult) -> {
                     String metricName = snmpResult.getAlias();
+                    String description = metricName + " with oid " + snmpResult.getBase();
                     int type = snmpResult.getValue().getTypeValue();
                     switch (type) {
                         case SnmpValueType.INT32_VALUE:
                             Gauge int32Value = getGaugeFrom(metricName,
-                                metricName + " with oid " + snmpResult.getBase(), null);
+                                metricName + description, null);
                             int32Value.labels(labelValues).set(snmpResult.getValue().getSint64());
                             break;
                         case SnmpValueType.COUNTER32_VALUE:
@@ -170,13 +170,13 @@ public class TSDataProcessor {
                         case SnmpValueType.TIMETICKS_VALUE:
                         case SnmpValueType.GAUGE32_VALUE:
                             Gauge uint64Value = getGaugeFrom(metricName,
-                                metricName + " with oid " + snmpResult.getBase(), null);
+                                metricName + description, null);
                             uint64Value.labels(labelValues).set(snmpResult.getValue().getUint64());
                             break;
                         case SnmpValueType.COUNTER64_VALUE:
                             double metric = new BigInteger(snmpResult.getValue().getBytes().toByteArray()).doubleValue();
                             Gauge gauge = getGaugeFrom(metricName,
-                                metricName + " with oid " + snmpResult.getBase(), null);
+                                metricName + description, null);
                             gauge.labels(labelValues).set(metric);
                             break;
                     }

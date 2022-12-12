@@ -22,6 +22,8 @@ public interface SnmpHelper {
      */
     String NODE_SYSUPTIME = ".1.3.6.1.2.1.1.3";
 
+    String IFINDEX_OID = ".1.3.6.1.2.1.4.20.1.2";
+
     SnmpWalker createWalker(SnmpAgentConfig agentConfig, String name, CollectionTracker... trackers);
 
     SnmpWalker createWalker(SnmpAgentConfig agentConfig, String name, CollectionTracker tracker);

@@ -30,6 +30,7 @@ package org.opennms.horizon.minion.taskset.worker.impl;
 
 import org.opennms.horizon.minion.plugin.api.CollectionRequest;
 import org.opennms.horizon.minion.plugin.api.CollectionSet;
+import org.opennms.horizon.minion.plugin.api.CollectorRequestImpl;
 import org.opennms.horizon.minion.plugin.api.ServiceCollector;
 import org.opennms.horizon.minion.plugin.api.ServiceCollectorManager;
 import org.opennms.horizon.minion.plugin.api.registries.CollectorRegistry;
@@ -120,18 +121,7 @@ public class TaskExecutorLocalCollectorServiceImpl implements TaskExecutorLocalS
     }
 
     private CollectionRequest configureCollectionRequest(TaskDefinition taskDefinition) {
-
-        return new CollectionRequest() {
-            @Override
-            public String getIpAddress() {
-                return null;
-            }
-
-            @Override
-            public long getNodeId() {
-                return taskDefinition.getNodeId();
-            }
-        };
+        return CollectorRequestImpl.builder().nodeId(taskDefinition.getNodeId()).build();
     }
 
 

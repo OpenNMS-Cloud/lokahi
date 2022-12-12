@@ -145,6 +145,7 @@ public class NodeGrpcService extends NodeServiceGrpc.NodeServiceImplBase {
         long nodeId = ipInterface.getNodeId();
         var nodeIdProto = Int64Value.newBuilder().setValue(nodeId).build();
         responseObserver.onNext(nodeIdProto);
+        responseObserver.onCompleted();
     }
 
     private boolean validateInput(NodeCreateDTO request, String tenantId, StreamObserver<NodeDTO> responseObserver) {

@@ -144,6 +144,7 @@
         <feature>jackson</feature>
 
         <bundle>mvn:org.opennms.horizon.shared/protobuf/${project.version}</bundle>
+        <bundle>mvn:org.opennms.horizon.shared.snmp/proto/${project.version}</bundle>
         <bundle>mvn:org.opennms.horizon.shared/task-set-service-api/${project.version}</bundle>
         <bundle>mvn:org.opennms.horizon/task-set-client/${project.version}</bundle>
     </feature>
@@ -176,6 +177,7 @@
     <feature name="horizon-grpc-contract" version="${project.version}">
         <feature>grpc</feature>
         <bundle>mvn:org.opennms.horizon.shared/ipc-grpc-contract/${project.version}</bundle>
+        <bundle>mvn:org.opennms.horizon.shared.snmp/proto/${project.version}</bundle>
     </feature>
 
     <feature name="horizon-datachoices" version="${project.version}" description="Horizon :: Data Choices">
@@ -361,6 +363,7 @@
         <feature>protobuf</feature>
 
         <bundle>mvn:org.opennms.horizon.shared/protobuf/${project.version}</bundle>
+        <bundle>mvn:org.opennms.horizon.shared.snmp/proto/${project.version}</bundle>
         <bundle>mvn:org.opennms.horizon.shared/task-set-service-api/${project.version}</bundle>
     </feature>
 

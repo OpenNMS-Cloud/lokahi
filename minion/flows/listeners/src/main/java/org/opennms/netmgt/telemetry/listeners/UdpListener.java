@@ -64,7 +64,7 @@ import io.netty.channel.socket.nio.NioDatagramChannel;
 import io.netty.util.ReferenceCountUtil;
 import io.netty.util.internal.SocketUtils;
 
-public class UdpListener implements GracefulShutdownListener {
+public class UdpListener implements GracefulShutdownListener, Listener {
     private static final Logger LOG = LoggerFactory.getLogger(UdpListener.class);
 
     public static final RateLimitedLog RATE_LIMITED_LOG = RateLimitedLog

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<features name="flows-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.6.0">
+
+    <feature name="flows">
+        <bundle>mvn:org.opennms.features.telemetry/listeners/${project.version}</bundle>
+        <bundle>mvn:org.opennms.features.telemetry.protocols.netflow/parser/${project.version}</bundle>
+    </feature>
+</features>

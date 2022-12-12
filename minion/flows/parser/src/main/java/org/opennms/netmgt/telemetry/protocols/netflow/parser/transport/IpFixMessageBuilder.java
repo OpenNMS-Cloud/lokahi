@@ -254,6 +254,7 @@ public class IpFixMessageBuilder implements MessageBuilder {
                     break;
                 case "flowEndNanoseconds":
                     flowEndNanoseconds = getTime(value);
+                    break;
                 case "flowEndDeltaMicroseconds":
                     flowEndDeltaMicroseconds = getLongValue(value);
                     break;

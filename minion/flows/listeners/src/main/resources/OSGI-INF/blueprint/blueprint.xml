@@ -6,8 +6,7 @@
 		http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0
 		http://aries.apache.org/schemas/blueprint-cm/blueprint-cm-1.1.0.xsd
 		http://aries.apache.org/blueprint/xmlns/blueprint-ext/v1.1.0
-		http://aries.apache.org/schemas/blueprint-ext/blueprint-ext-1.1.xsd
-">
+		http://aries.apache.org/schemas/blueprint-ext/blueprint-ext-1.1.xsd">
     <reference id="telemetryRegistry" interface="org.opennms.netmgt.telemetry.api.registry.TelemetryRegistry" availability="mandatory" />
 
     <!-- TCP Listener Factory -->
@@ -29,4 +28,12 @@
             <entry key="registration.export" value="true" />
         </service-properties>
     </service>
+
+    <bean id="configManager" class="org.opennms.netmgt.telemetry.listeners.ConfigManager">
+        <argument ref="udpListenerFactory" />
+        <argument ref="listenerDefinition" />
+    </bean>
+
+    <service ref="listenerDefinition" interface="org.opennms.netmgt.telemetry.listeners.factory.ListenerDefinition" />
+
 </blueprint>

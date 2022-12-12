@@ -64,7 +64,7 @@ import io.netty.handler.codec.ByteToMessageDecoder;
 import io.netty.util.concurrent.GlobalEventExecutor;
 import io.netty.util.internal.SocketUtils;
 
-public class TcpListener implements GracefulShutdownListener {
+public class TcpListener implements GracefulShutdownListener, Listener {
     private static final Logger LOG = LoggerFactory.getLogger(TcpListener.class);
 
     private final String name;

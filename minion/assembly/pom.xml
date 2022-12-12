@@ -126,6 +126,7 @@
                         <feature>system</feature>
                         <feature>scr</feature>
                         <feature>minion-ng</feature>
+                        <feature>flows</feature>
                         <!--
                         <feature>icmp-plugins</feature>
                         <feature>snmp-plugins</feature>

@@ -31,6 +31,7 @@ package org.opennms.netmgt.telemetry.protocols.netflow.parser.xml.event;
 
 import static org.opennms.netmgt.telemetry.protocols.netflow.parser.InetAddressUtils.addr;
 import static org.opennms.netmgt.telemetry.protocols.netflow.parser.InetAddressUtils.str;
+import static org.opennms.netmgt.telemetry.protocols.netflow.parser.xml.event.model.StringUtils.equalsTrimmed;
 
 import java.io.Serializable;
 import java.net.InetAddress;
@@ -56,10 +57,9 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-import org.opennms.netmgt.telemetry.listeners.factory.Message;
+import org.opennms.netmgt.telemetry.protocols.netflow.parser.xml.event.model.IEvent;
 
 @XmlRootElement(name = "event")
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -1938,54 +1938,6 @@ public class Event implements Serializable {
 		if (_parms  != null) builder.append("parms",  _parms);
 		return builder.toString();
 	}
-    public static boolean equalsTrimmed(String a, String b) {
-        if (a == null) {
-            return false;
-        }
-
-        int alen = a.length();
-        final int blen = b.length();
-
-        // Fail fast: If B is longer than A, B cannot be a substring of A
-        if (blen > alen) {
-            return false;
-        }
-
-        // Find the index of the first non-whitespace character in A
-        int i = 0;
-        while ((i < alen) && (a.charAt(i) <= ' ')) {
-            i++;
-        }
-
-        // Match the subsequent characters in A to those in B
-        int j = 0;
-        while ((i < alen && j < blen)) {
-            if (a.charAt(i) != b.charAt(j)) {
-                return false;
-            }
-            i++;
-            j++;
-        }
-
-        // If we've reached the end of A, then we have a match
-        if (i == alen) {
-            return true;
-        }
-
-        // "Trim" the whitespace characters off the end of A
-        while ((i < alen) && (a.charAt(alen - 1) <= ' ')) {
-            alen--;
-        }
-
-        // If only whitespace characters remained on A, then we have a match
-        if (alen - i == 0) {
-            return true;
-        }
-
-        // There are extra characters at the tail of A, that don't show up in B
-        return false;
-    }
-
 
 
 }

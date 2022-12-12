@@ -2607,6 +2607,7 @@ private static final long serialVersionUID = 0L;
       return result;
     }
 
+    @SuppressWarnings("java:S2975")
     @Override
     public Builder clone() {
       return super.clone();

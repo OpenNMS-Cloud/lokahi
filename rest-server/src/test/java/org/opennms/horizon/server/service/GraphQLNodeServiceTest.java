@@ -249,7 +249,7 @@ public class GraphQLNodeServiceTest {
 
         doReturn(nodeDTO4).when(mockClient).getNodeById(anyLong(), eq(accessToken));
         doReturn(Mono.just(tsQueryResult)).when(prometheusTSDBService)
-            .getMetric(anyString(), anyMap(), anyInt(), any(TimeRangeUnit.class));
+            .getMetric(any(), anyString(), anyMap(), anyInt(), any(TimeRangeUnit.class));
 
         String query = String.format("query { nodeStatus(id: %d) { id, status }}", nodeDTO4.getId());
         String request = createPayload(query);
@@ -273,7 +273,7 @@ public class GraphQLNodeServiceTest {
 
         doReturn(nodeDTO4).when(mockClient).getNodeById(anyLong(), eq(accessToken));
         doReturn(Mono.just(tsQueryResult)).when(prometheusTSDBService)
-            .getMetric(anyString(), anyMap(), anyInt(), any(TimeRangeUnit.class));
+            .getMetric(any(), anyString(), anyMap(), anyInt(), any(TimeRangeUnit.class));
 
         String query = String.format("query { nodeStatus(id: %d) { id, status }}", nodeDTO4.getId());
         String request = createPayload(query);

@@ -74,7 +74,9 @@ public class PrometheusTSDBServiceImpl {
             .map(HashMap::new)
             .orElseGet(HashMap::new);
         // override value in case if it was in incoming values
-        metricLabels.put("tenant_id", headerUtil.extractTenant(env));
+        if (env != null) {
+            metricLabels.put("tenant_id", headerUtil.extractTenant(env));
+        }
         String queryString = generatePayloadString(name, metricLabels);
         if(timeRange != null && timeRangeUnit != null) {
             queryString += "[" + timeRange + timeRangeUnit.value + "]";

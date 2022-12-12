@@ -56,6 +56,7 @@ public class NodeStatusService {
     private static final String NODE_ID_KEY = "node_id";
     private static final String MONITOR_KEY = "monitor";
     private static final String INSTANCE_KEY = "instance";
+    private static final String TENANT_ID = "tenant_id";
     private static final long TIMEOUT_IN_SECONDS = 30L;
     private final InventoryClient client;
     private final PrometheusTSDBServiceImpl prometheusTSDBService;
@@ -74,7 +75,7 @@ public class NodeStatusService {
     private boolean getNodeStatusByInterface(long id, String monitorType, IpInterfaceDTO ipInterface) {
         String ipAddress = ipInterface.getIpAddress();
 
-        TimeSeriesQueryResult result = getStatusMetric(id, ipAddress, monitorType);
+        TimeSeriesQueryResult result = getStatusMetric(id, ipAddress, monitorType, ipInterface.getTenantId());
         if (isNull(result)) {
             return false;
         }
@@ -90,14 +91,15 @@ public class NodeStatusService {
         return !isEmpty(values);
     }
 
-    private TimeSeriesQueryResult getStatusMetric(long id, String ipAddress, String monitorType) {
+    private TimeSeriesQueryResult getStatusMetric(long id, String ipAddress, String monitorType, String tenantId) {
         Map<String, String> labels = new HashMap<>();
         labels.put(NODE_ID_KEY, String.valueOf(id));
         labels.put(MONITOR_KEY, monitorType);
         labels.put(INSTANCE_KEY, ipAddress);
+        labels.put(TENANT_ID, tenantId);
 
         Mono<TimeSeriesQueryResult> result = prometheusTSDBService
-            .getMetric(RESPONSE_TIME_METRIC, labels, TIME_RANGE_IN_SECONDS, TimeRangeUnit.SECOND);
+            .getMetric(null, RESPONSE_TIME_METRIC, labels, TIME_RANGE_IN_SECONDS, TimeRangeUnit.SECOND);
         try {
             return result.toFuture().get(TIMEOUT_IN_SECONDS, TimeUnit.SECONDS);
         } catch (InterruptedException | ExecutionException | TimeoutException e) {

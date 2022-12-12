@@ -161,22 +161,19 @@ public class TSDataProcessor {
                     int type = snmpResult.getValue().getTypeValue();
                     switch (type) {
                         case SnmpValueType.INT32_VALUE:
-                            Gauge int32Value = getGaugeFrom(metricName,
-                                metricName + description, null);
+                            Gauge int32Value = getGaugeFrom(metricName, description, null);
                             int32Value.labels(labelValues).set(snmpResult.getValue().getSint64());
                             break;
                         case SnmpValueType.COUNTER32_VALUE:
                             // TODO: Can't set a counter through prometheus API, may be possible with remote write
                         case SnmpValueType.TIMETICKS_VALUE:
                         case SnmpValueType.GAUGE32_VALUE:
-                            Gauge uint64Value = getGaugeFrom(metricName,
-                                metricName + description, null);
+                            Gauge uint64Value = getGaugeFrom(metricName, description, null);
                             uint64Value.labels(labelValues).set(snmpResult.getValue().getUint64());
                             break;
                         case SnmpValueType.COUNTER64_VALUE:
                             double metric = new BigInteger(snmpResult.getValue().getBytes().toByteArray()).doubleValue();
-                            Gauge gauge = getGaugeFrom(metricName,
-                                metricName + description, null);
+                            Gauge gauge = getGaugeFrom(metricName, description, null);
                             gauge.labels(labelValues).set(metric);
                             break;
                     }

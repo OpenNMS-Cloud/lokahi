@@ -31,9 +31,7 @@ package org.opennms.horizon.shared.snmp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Map;
 import java.util.Optional;
-import java.util.TreeMap;
 
 public class Mib2InterfacesTracker extends AggregateTracker {
 
@@ -77,12 +75,12 @@ public class Mib2InterfacesTracker extends AggregateTracker {
     public static Optional<String> getAlias(SnmpResult snmpResult) {
         final SnmpObjId base = snmpResult.getBase();
         final SnmpValue value = snmpResult.getValue();
-        for (final NamedSnmpVar var : elemList) {
-            if (base.equals(var.getSnmpObjId())) {
+        for (final NamedSnmpVar snmpVar : elemList) {
+            if (base.equals(snmpVar.getSnmpObjId())) {
                 if (value.isError() || value.isEndOfMib()) {
                     return Optional.empty();
                 } else {
-                    return Optional.of(var.getAlias());
+                    return Optional.of(snmpVar.getAlias());
                 }
             }
         }

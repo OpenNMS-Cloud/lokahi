@@ -39,7 +39,7 @@ public class SnmpNodeTracker extends AggregateTracker {
 
     private static final Logger LOG = LoggerFactory.getLogger(SnmpNodeTracker.class);
 
-    public static NamedSnmpVar[] elemList = new NamedSnmpVar[44];
+    private static final NamedSnmpVar[] elemList = new NamedSnmpVar[44];
     private final Map<String, SnmpResult> snmpResultMap = new TreeMap<>();
 
     public SnmpNodeTracker() {
@@ -106,15 +106,15 @@ public class SnmpNodeTracker extends AggregateTracker {
         final SnmpObjId base = res.getBase();
         final SnmpValue value = res.getValue();
 
-        for (final NamedSnmpVar var : elemList) {
-            if (base.equals(var.getSnmpObjId())) {
+        for (final NamedSnmpVar snmpVar : elemList) {
+            if (base.equals(snmpVar.getSnmpObjId())) {
                 if (value.isError()) {
                     LOG.error("storeResult: got an error for alias {} [{}].[{}]," +
-                        " but we should only be getting non-errors: {}", var.getAlias(), base, res.getInstance(), value);
+                        " but we should only be getting non-errors: {}", snmpVar.getAlias(), base, res.getInstance(), value);
                 } else if (value.isEndOfMib()) {
-                    LOG.debug("storeResult: got endOfMib for alias {} [{}].[{}], not storing", var.getAlias(), base, res.getInstance());
+                    LOG.debug("storeResult: got endOfMib for alias {} [{}].[{}], not storing", snmpVar.getAlias(), base, res.getInstance());
                 } else {
-                    snmpResultMap.put(var.getAlias(), res);
+                    snmpResultMap.put(snmpVar.getAlias(), res);
                 }
             }
         }
@@ -123,19 +123,19 @@ public class SnmpNodeTracker extends AggregateTracker {
     public static Optional<String> getAlias(SnmpResult snmpResult) {
         final SnmpObjId base = snmpResult.getBase();
         final SnmpValue value = snmpResult.getValue();
-        for (final NamedSnmpVar var : elemList) {
-            if (base.equals(var.getSnmpObjId())) {
+        for (final NamedSnmpVar snmpVar : elemList) {
+            if (base.equals(snmpVar.getSnmpObjId())) {
                 if (value.isError() || value.isEndOfMib()) {
                     return Optional.empty();
                 } else {
-                    return Optional.of(var.getAlias());
+                    return Optional.of(snmpVar.getAlias());
                 }
             }
         }
         return Optional.empty();
     }
 
-    public Map<String, SnmpResult> getSnmpResultMap() {
+    Map<String, SnmpResult> getSnmpResultMap() {
         return snmpResultMap;
     }
 

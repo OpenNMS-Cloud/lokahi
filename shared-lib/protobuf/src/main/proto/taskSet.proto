@@ -42,6 +42,7 @@ enum TaskType {
       MONITOR = 2;
       LISTENER = 3;
       CONNECTOR = 4;
+      COLLECTOR = 5;
 }
 
 enum MonitorType {
@@ -69,12 +70,13 @@ message TaskSet {
 
 message TaskResult {
   string id = 1;
-  string location = 5;
-  string systemId = 6;
+  string location = 2;
+  string systemId = 3;
 
   oneof result {
-    MonitorResponse monitor_response = 7;
-    DetectorResponse detector_response = 8;
+    MonitorResponse monitor_response = 4;
+    DetectorResponse detector_response = 5;
+    CollectorResponse collector_response = 6;
   }
 }
 
@@ -98,4 +100,13 @@ message DetectorResponse {
   string reason = 3;
   MonitorType monitor_type = 4;
   uint64 node_id = 5;
+}
+
+message CollectorResponse {
+  string ip_address = 1;
+  bool status = 2;
+  uint64 node_id = 3;
+  // results varies for each collector.
+  google.protobuf.Any result = 4;
+  MonitorType monitor_type = 5;
 }

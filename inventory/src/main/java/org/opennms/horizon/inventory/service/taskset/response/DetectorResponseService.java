@@ -38,6 +38,7 @@ import org.opennms.horizon.inventory.model.MonitoredServiceType;
 import org.opennms.horizon.inventory.repository.IpInterfaceRepository;
 import org.opennms.horizon.inventory.service.MonitoredServiceService;
 import org.opennms.horizon.inventory.service.MonitoredServiceTypeService;
+import org.opennms.horizon.inventory.service.taskset.CollectorTaskSetService;
 import org.opennms.horizon.inventory.service.taskset.MonitorTaskSetService;
 import org.opennms.taskset.contract.DetectorResponse;
 import org.opennms.taskset.contract.MonitorType;
@@ -53,16 +54,15 @@ public class DetectorResponseService {
     private final MonitoredServiceTypeService monitoredServiceTypeService;
     private final MonitoredServiceService monitoredServiceService;
     private final MonitorTaskSetService monitorTaskSetService;
+    private final CollectorTaskSetService collectorTaskSetService;
 
-    public void accept(String location, DetectorResponse response) {
-        log.info("Received Detector Response = {} for location = {}", response, location);
+    public void accept(String tenantId, String location, DetectorResponse response) {
+        log.info("Received Detector Response = {} for tenant = {} and location = {}", response, tenantId, location);
 
         Inet ipAddress = new Inet(response.getIpAddress());
 
-        //todo: This should have tenantId in it, as it is possible
-        // that a different tenant is using the same location and ipAddress
         Optional<IpInterface> ipInterfaceOpt = ipInterfaceRepository
-            .findByIpAddressAndLocation(ipAddress, location);
+            .findByIpAddressAndLocationAndTenantId(ipAddress, location, tenantId);
 
         if (ipInterfaceOpt.isPresent()) {
             IpInterface ipInterface = ipInterfaceOpt.get();
@@ -71,7 +71,9 @@ public class DetectorResponseService {
                 createMonitoredService(response, ipInterface);
 
                 MonitorType monitorType = response.getMonitorType();
-                monitorTaskSetService.sendMonitorTask(location, monitorType, ipInterface, response.getNodeId());
+                long nodeId = response.getNodeId();
+                monitorTaskSetService.sendMonitorTask(location, monitorType, ipInterface, nodeId);
+                collectorTaskSetService.sendCollectorTask(location, monitorType, ipInterface, nodeId);
 
             } else {
                 log.info("{} not detected on ip address = {}", response.getMonitorType(), ipAddress.getAddress());

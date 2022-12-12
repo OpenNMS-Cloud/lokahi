@@ -95,7 +95,7 @@ class DetectorResponseServiceIntTest extends GrpcTestBase {
             .setDetected(true).setIpAddress(TEST_IP_ADDRESS)
             .setMonitorType(MonitorType.SNMP).build();
 
-        service.accept(TEST_LOCATION, response);
+        service.accept(TEST_TENANT_ID, TEST_LOCATION, response);
 
         List<MonitoredServiceType> monitoredServiceTypes = monitoredServiceTypeRepository.findAll();
         assertEquals(1, monitoredServiceTypes.size());
@@ -116,7 +116,7 @@ class DetectorResponseServiceIntTest extends GrpcTestBase {
         MonitoredServiceType relatedType = monitoredService.getMonitoredServiceType();
         assertEquals(monitoredServiceType, relatedType);
 
-        assertEquals(1, testGrpcService.getTimesCalled());
+        assertEquals(2, testGrpcService.getTimesCalled());
     }
 
     @Test
@@ -131,7 +131,7 @@ class DetectorResponseServiceIntTest extends GrpcTestBase {
         int numberOfCalls = 2;
 
         for (int index = 0; index < numberOfCalls; index++) {
-            service.accept(TEST_LOCATION, response);
+            service.accept(TEST_TENANT_ID, TEST_LOCATION, response);
         }
 
         List<MonitoredServiceType> monitoredServiceTypes = monitoredServiceTypeRepository.findAll();
@@ -153,7 +153,7 @@ class DetectorResponseServiceIntTest extends GrpcTestBase {
         MonitoredServiceType relatedType = monitoredService.getMonitoredServiceType();
         assertEquals(monitoredServiceType, relatedType);
 
-        assertEquals(numberOfCalls, testGrpcService.getTimesCalled());
+        assertEquals(numberOfCalls*2, testGrpcService.getTimesCalled());
     }
 
     @Test
@@ -165,7 +165,7 @@ class DetectorResponseServiceIntTest extends GrpcTestBase {
             .setDetected(false).setIpAddress(TEST_IP_ADDRESS)
             .setMonitorType(MonitorType.SNMP).build();
 
-        service.accept(TEST_LOCATION, response);
+        service.accept(TEST_TENANT_ID, TEST_LOCATION, response);
 
         List<MonitoredServiceType> monitoredServiceTypes = monitoredServiceTypeRepository.findAll();
         assertEquals(0, monitoredServiceTypes.size());
@@ -193,7 +193,7 @@ class DetectorResponseServiceIntTest extends GrpcTestBase {
             DetectorResponse response = builder
                 .setMonitorType(monitorTypes[index]).build();
 
-            service.accept(TEST_LOCATION, response);
+            service.accept(TEST_TENANT_ID, TEST_LOCATION, response);
         }
 
         List<MonitoredServiceType> monitoredServiceTypes = monitoredServiceTypeRepository.findAll();
@@ -220,10 +220,10 @@ class DetectorResponseServiceIntTest extends GrpcTestBase {
             assertEquals(TEST_TENANT_ID, monitoredService.getTenantId());
         }
 
-        assertEquals(numberOfCalls, testGrpcService.getTimesCalled());
+        assertEquals(numberOfCalls*2, testGrpcService.getTimesCalled());
 
         List<PublishTaskSetRequest> grpcRequests = testGrpcService.getRequests();
-        assertEquals(monitorTypes.length, grpcRequests.size());
+        assertEquals(monitorTypes.length*2, grpcRequests.size());
     }
 
     private void populateDatabase() {

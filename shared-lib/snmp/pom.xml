@@ -16,6 +16,7 @@
   <modules>
     <module>snmp-api</module>
     <module>snmp-impl</module>
+      <module>proto</module>
   </modules>
 
 </project>

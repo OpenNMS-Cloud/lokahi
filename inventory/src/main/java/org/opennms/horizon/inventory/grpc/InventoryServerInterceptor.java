@@ -38,7 +38,6 @@ import org.keycloak.adapters.rotation.AdapterTokenVerifier;
 import org.keycloak.common.VerificationException;
 import org.keycloak.representations.AccessToken;
 import org.keycloak.util.TokenUtil;
-import org.opennms.horizon.inventory.Constants;
 
 import io.grpc.Context;
 import io.grpc.Contexts;
@@ -49,6 +48,7 @@ import io.grpc.ServerInterceptor;
 import io.grpc.Status;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.opennms.horizon.inventory.Constants;
 
 @RequiredArgsConstructor
 @Slf4j

@@ -28,6 +28,7 @@
 syntax = "proto3";
 
 import "google/protobuf/any.proto";
+import "snmp-api.proto";
 
 package opennms.snmp;
 option java_multiple_files = true;
@@ -54,4 +55,10 @@ message SnmpMonitorRequest {
 
   // TBD888: what does this do?
   bool hex = 9;
+}
+
+message SnmpCollectorRequest {
+  string  host = 1;
+  opennms.snmp.api.SnmpConfiguration agent_config = 2;
+  uint64  node_id = 3;
 }

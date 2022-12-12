@@ -30,6 +30,7 @@ package org.opennms.horizon.inventory.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.protobuf.Any;
 import lombok.RequiredArgsConstructor;
+import org.opennms.horizon.inventory.dto.MonitoringLocation;
 import org.opennms.horizon.inventory.dto.MonitoringLocationDTO;
 import org.opennms.horizon.inventory.service.taskset.manager.TaskSetManager;
 import org.opennms.horizon.inventory.service.trapconfig.TrapConfigBean;
@@ -37,6 +38,7 @@ import org.opennms.sink.traps.contract.ListenerConfig;
 import org.opennms.sink.traps.contract.SnmpV3User;
 import org.opennms.sink.traps.contract.TrapConfig;
 import org.opennms.taskset.contract.TaskDefinition;
+import org.opennms.taskset.contract.TaskSet;
 import org.opennms.taskset.contract.TaskType;
 import org.opennms.taskset.service.api.TaskSetPublisher;
 import org.slf4j.Logger;
@@ -110,8 +112,10 @@ public class TrapConfigService {
             .setConfiguration(Any.pack(trapConfig))
             .build();
 
-        taskSetManager.addTaskSet(location, taskDefinition);
-        taskSetPublisher.publishTaskSet(tenantId, location, taskSetManager.getTaskSet(location));
+        taskSetManager.addTaskSet(tenantId, location, taskDefinition);
+
+        TaskSet taskSet = taskSetManager.getTaskSet(tenantId, location);
+        taskSetPublisher.publishTaskSet(tenantId, location, taskSet);
     }
 
     private TrapConfigBean readTrapConfig() {

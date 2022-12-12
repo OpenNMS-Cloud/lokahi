@@ -170,8 +170,8 @@ public class TrapSinkConsumer implements  EventListener, Processor {
             .setConfiguration(Any.pack(trapConfig))
             .build();
 
-        taskSetManager.addTaskSet("opennms-prime", location, taskDefinition);
-        taskSetPublisher.publishTaskSet(tenantId, location, taskSetManager.getTaskSet("opennms-prime", location));
+        taskSetManager.addTaskSet(tenantId, location, taskDefinition);
+        taskSetPublisher.publishTaskSet(tenantId, location, taskSetManager.getTaskSet(tenantId, location));
 
     }
 

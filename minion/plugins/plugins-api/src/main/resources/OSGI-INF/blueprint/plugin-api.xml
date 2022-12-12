@@ -28,4 +28,10 @@
   </bean>
   <service ref="monitorRegistry" interface="org.opennms.horizon.minion.plugin.api.registries.MonitorRegistry" />
 
+    <bean id="collectorRegistry" class="org.opennms.horizon.minion.plugin.api.registries.CollectorRegistryImpl">
+        <argument ref="blueprintBundleContext" />
+        <argument ref="registrationService" />
+    </bean>
+    <service ref="collectorRegistry" interface="org.opennms.horizon.minion.plugin.api.registries.CollectorRegistry" />
+
 </blueprint>

@@ -4,7 +4,7 @@ package opennms.sink.traps;
 option java_multiple_files = true;
 option java_package = "org.opennms.horizon.grpc.traps.contract";
 
-import "snmp.proto";
+import "snmp-api.proto";
 import "opennms_minion_ipc.proto";
 
 
@@ -25,7 +25,7 @@ message TrapDTO {
   bytes rawMessage = 7;
   string trapAddress = 8;
   TrapIdentity trapIdentity = 9;
-  repeated opennms.snmp.SnmpResult snmpResults = 10;
+  repeated opennms.snmp.api.SnmpResult snmpResults = 10;
 }
 
 message TrapLogDTO {

@@ -31,6 +31,17 @@
     </service-properties>
   </service>
 
+
+    <bean id="snmpCollectorManager" class="org.opennms.horizon.minion.snmp.SnmpCollectorManager">
+        <argument ref="snmpHelper" />
+    </bean>
+
+    <service ref="snmpCollectorManager" interface="org.opennms.horizon.minion.plugin.api.ServiceCollectorManager">
+        <service-properties>
+            <entry key="collector.name" value="SNMPCollector"/>
+        </service-properties>
+    </service>
+
   <reference id="strategyResolver" interface="org.opennms.horizon.shared.snmp.StrategyResolver" />
   <reference id="snmpHelper" interface="org.opennms.horizon.shared.snmp.SnmpHelper" />
 

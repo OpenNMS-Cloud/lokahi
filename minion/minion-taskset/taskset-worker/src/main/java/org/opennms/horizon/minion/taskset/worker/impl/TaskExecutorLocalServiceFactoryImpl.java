@@ -1,5 +1,6 @@
 package org.opennms.horizon.minion.taskset.worker.impl;
 
+import org.opennms.horizon.minion.plugin.api.registries.CollectorRegistry;
 import org.opennms.horizon.minion.plugin.api.registries.DetectorRegistry;
 import org.opennms.horizon.minion.plugin.api.registries.ListenerFactoryRegistry;
 import org.opennms.horizon.minion.plugin.api.registries.MonitorRegistry;
@@ -22,6 +23,7 @@ public class TaskExecutorLocalServiceFactoryImpl implements TaskExecutorLocalSer
     private final ListenerFactoryRegistry listenerFactoryRegistry;
     private final DetectorRegistry detectorRegistry;
     private final MonitorRegistry monitorRegistry;
+    private final CollectorRegistry collectorRegistry;
 
 //========================================
 // Constructor
@@ -32,14 +34,15 @@ public class TaskExecutorLocalServiceFactoryImpl implements TaskExecutorLocalSer
         TaskExecutionResultProcessor resultProcessor,
         ListenerFactoryRegistry listenerFactoryRegistry,
         DetectorRegistry detectorRegistry,
-        MonitorRegistry monitorRegistry
-    ) {
+        MonitorRegistry monitorRegistry,
+        CollectorRegistry collectorRegistry) {
 
         this.scheduler = scheduler;
         this.resultProcessor = resultProcessor;
         this.listenerFactoryRegistry = listenerFactoryRegistry;
         this.detectorRegistry = detectorRegistry;
         this.monitorRegistry = monitorRegistry;
+        this.collectorRegistry = collectorRegistry;
     }
 
 //========================================
@@ -62,6 +65,9 @@ public class TaskExecutorLocalServiceFactoryImpl implements TaskExecutorLocalSer
             case CONNECTOR:
                 TaskConnectorRetryable connectorService = new TaskConnectorRetryable(taskDefinition, resultProcessor);
                 return new TaskCommonRetryExecutor(scheduler, taskDefinition, resultProcessor, connectorService);
+
+            case COLLECTOR:
+                return new TaskExecutorLocalCollectorServiceImpl(taskDefinition, scheduler, resultProcessor, collectorRegistry);
 
             default:
                 throw new RuntimeException("unrecognized taskDefinition type " + taskDefinition.getType());

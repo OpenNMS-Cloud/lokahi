@@ -52,11 +52,15 @@ public class MonitorTaskSetService {
     private final TaskSetPublisher taskSetPublisher;
 
     public void sendMonitorTask(String location, MonitorType monitorType, IpInterface ipInterface, long nodeId) {
+        String tenantId = ipInterface.getTenantId();
+
         addMonitorTask(location, monitorType, ipInterface, nodeId);
-        sendTaskSet(location);
+        sendTaskSet(tenantId, location);
     }
 
     private void addMonitorTask(String location, MonitorType monitorType, IpInterface ipInterface, long nodeId) {
+        String tenantId = ipInterface.getTenantId();
+
         String monitorTypeValue = monitorType.getValueDescriptor().getName();
         String ipAddress = ipInterface.getIpAddress().getAddress();
 
@@ -75,7 +79,7 @@ public class MonitorTaskSetService {
                         .setRetries(Constants.Icmp.DEFAULT_RETRIES)
                         .build());
 
-                taskSetManagerUtil.addTask(location, ipAddress, name,
+                taskSetManagerUtil.addTask(tenantId, location, ipAddress, name,
                     TaskType.MONITOR, pluginName, Constants.DEFAULT_SCHEDULE, nodeId, configuration);
                 break;
             }
@@ -87,7 +91,8 @@ public class MonitorTaskSetService {
                         .setRetries(Constants.Snmp.DEFAULT_RETRIES)
                         .build());
 
-                taskSetManagerUtil.addTask(location, ipAddress, name, TaskType.MONITOR, pluginName, Constants.DEFAULT_SCHEDULE, nodeId, configuration);
+                taskSetManagerUtil.addTask(tenantId, location, ipAddress, name,
+                    TaskType.MONITOR, pluginName, Constants.DEFAULT_SCHEDULE, nodeId, configuration);
                 break;
             }
             case UNRECOGNIZED: {
@@ -101,11 +106,8 @@ public class MonitorTaskSetService {
         }
     }
 
-    private void sendTaskSet(String location) {
-        String tenantId = "opennms-prime";  // TBD888: properly source the Tenant ID
-
-        TaskSet taskSet = taskSetManager.getTaskSet(location);
-
+    private void sendTaskSet(String tenantId, String location) {
+        TaskSet taskSet = taskSetManager.getTaskSet(tenantId, location);
         log.info("Sending task set: task-set={}; location={}; tenant-id={}", taskSet, location, tenantId);
         taskSetPublisher.publishTaskSet(tenantId, location, taskSet);
     }

@@ -139,6 +139,7 @@ public class TaskSetLifecycleManagerImpl implements TaskSetLifecycleManager {
             case DETECTOR:
             case MONITOR:
             case CONNECTOR:
+            case COLLECTOR:
                 return true;
 
             default:

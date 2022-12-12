@@ -41,7 +41,7 @@ import java.util.Set;
  * Should the instance also be part of a table, then the column number of the
  * instance is also stored in the object.
  */
-public final class NamedSnmpVar {
+public class NamedSnmpVar {
     /**
      * String which contains the Class name of the expected SNMP data type for
      * the object.

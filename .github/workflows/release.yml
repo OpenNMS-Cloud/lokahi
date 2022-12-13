@@ -99,6 +99,7 @@ jobs:
         id: action-feature-alarm
         uses: ./.github/actions/alarm
         with:
+          dir-location: 'alarm'
           enable-sonar-scan: false
 
       - name: feature-rest-server

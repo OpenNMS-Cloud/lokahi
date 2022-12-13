@@ -126,6 +126,7 @@ jobs:
         id: action-feature-alarm
         uses: ./.github/actions/alarm
         with:
+          dir-location: 'alarm'
           # only enable scans on develop branch, scans on other branches are covered by other workflows
           enable-sonar-scan: ${{ github.event.ref == 'refs/heads/develop' }}
           github-token: ${{ secrets.GITHUB_TOKEN }}

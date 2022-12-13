@@ -1,18 +1,18 @@
 #!/usr/bin/env bash
 #use this script to install a basic version of OpenNMS Horizon Stream locally
 
-
-operator_run () {
-  bash scripts/add-local-ssl-cert.sh
-  kubectl config set-context --current --namespace=local-instance
+cluster_ready_check () {
+  #bash scripts/add-local-ssl-cert.sh
+  kubectl config set-context --current --namespace=hs-instance
 
   # This is the last pod to run, if ready, then give back the terminal session.
-  while [ -v $(kubectl get pods -n local-instance -l=app.kubernetes.io/component='controller-local-instance' -o jsonpath='{.items[*].status.containerStatuses[0].ready}')  ]; do 
+  sleep 60 # Need to wait until the pod is created or else nothing comes back. Messes with the conditional.
+  while [[ $(kubectl get pods -n hs-instance -l=app.kubernetes.io/component='controller-hs-instance' -o jsonpath='{.items[*].status.containerStatuses[0].ready}') == 'false' ]]; do 
     echo "not-ready"
-    sleep 60
+    sleep 30
   done
 
-  kubectl config set-context --current --namespace=local-instance
+  kubectl config set-context --current --namespace=hs-instance
 }
 
 # For local, we can setup localhost as the default on port 8080 or something.
@@ -28,6 +28,8 @@ else
   cat install-local-onms-instance.yaml | sed "s/onmshs/$2/g" > tmp/install-local-onms-instance.yaml
   cat install-local-onms-instance-custom-images.yaml | sed "s/onmshs/$2/g" > tmp/install-local-onms-instance-custom-images.yaml
   cat charts/opennms/values.yaml | sed "s/onmshs/$2/g" > tmp/values.yaml
+  cat install-local-opennms-horizon-stream-values.yaml | sed "s/onmshs/$2/g" > tmp/install-local-opennms-horizon-stream-values.yaml
+  cat install-local-opennms-horizon-stream-custom-images-values.yaml | sed "s/onmshs/$2/g" > tmp/install-local-opennms-horizon-stream-custom-images-values.yaml
 fi
 
 if [ $1 == "local" ]; then
@@ -36,18 +38,12 @@ if [ $1 == "local" ]; then
   bash scripts/create-kind-cluster.sh
 
   echo
-  echo ________________Installing Operator________________
+  echo ________________Installing Horizon Stream________________
   echo
-  helm upgrade -i operator-local ../charts/opennms-operator -f ../install-local-operator-values.yaml --namespace opennms --create-namespace
+  helm upgrade -i horizon-stream ../charts/opennms -f ../tmp/install-local-opennms-horizon-stream-values.yaml --namespace hs-instance --create-namespace
   if [ $? -ne 0 ]; then exit; fi
 
-  echo
-  echo ____________Installing Local Instance______________
-  echo
-  kubectl apply -f ../tmp/install-local-onms-instance.yaml
-  if [ $? -ne 0 ]; then exit; fi
-
-  operator_run
+  cluster_ready_check
 
 elif [ "$1" == "custom-images" ]; then
 
@@ -55,10 +51,11 @@ elif [ "$1" == "custom-images" ]; then
   bash scripts/create-kind-cluster.sh
 
   # Will add a kind-registry here at some point, see .github/ for sample script.
-  kind load docker-image opennms/operator:local-build&
+  kind load docker-image opennms/horizon-stream-alarm:local&
   kind load docker-image opennms/horizon-stream-core:local&
   kind load docker-image opennms/horizon-stream-minion:local&
   kind load docker-image opennms/horizon-stream-minion-gateway:local&
+  kind load docker-image opennms/horizon-stream-minion-gateway-grpc-proxy:local&
   kind load docker-image opennms/horizon-stream-keycloak:local&
   kind load docker-image opennms/horizon-stream-grafana:local&
   kind load docker-image opennms/horizon-stream-ui:local&
@@ -72,36 +69,24 @@ elif [ "$1" == "custom-images" ]; then
   sleep 120
 
   echo
-  echo ________________Installing Operator________________
+  echo ________________Installing Horizon Stream________________
   echo
-  helm upgrade -i operator-local ../charts/opennms-operator -f ../install-local-operator-values-custom-image.yaml --namespace opennms --create-namespace
+  helm upgrade -i horizon-stream ../charts/opennms -f ../tmp/install-local-opennms-horizon-stream-custom-images-values.yaml --namespace hs-instance --create-namespace
   if [ $? -ne 0 ]; then exit; fi
 
-  echo
-  echo ____________Installing Local Instance______________
-  echo
-  kubectl apply -f ../tmp/install-local-onms-instance-custom-images.yaml
-  if [ $? -ne 0 ]; then exit; fi
-
-  operator_run
+  cluster_ready_check
 
 elif [ $1 == "existing-k8s" ]; then
 
   cd operator/
 
   echo
-  echo ________________Installing Operator________________
+  echo ________________Installing Horizon Stream________________
   echo
-  helm upgrade -i operator-local ../charts/opennms-operator -f ../install-local-operator-values.yaml --namespace opennms --create-namespace
+  helm upgrade -i horizon-stream ../charts/opennms -f ../tmp/install-local-opennms-horizon-stream-values.yaml --namespace hs-instance --create-namespace
   if [ $? -ne 0 ]; then exit; fi
 
-  echo
-  echo ____________Installing Local Instance______________
-  echo
-  kubectl apply -f ../tmp/install-local-onms-instance.yaml
-  if [ $? -ne 0 ]; then exit; fi
-
-  operator_run
+  cluster_ready_check
 
 elif [ $1 == "existing-k8s-no-op" ]; then
 
@@ -114,11 +99,11 @@ else
   echo "$HELP"
 fi
 
-bash scripts/add-local-ssl-cert.sh
+#bash scripts/add-local-ssl-cert.sh
 
 # This is the last pod to run, if ready, then give back the terminal session.
 JOB_FAIL=1
-while [ -v $(kubectl get pods -n local-instance -l=app.kubernetes.io/component='controller-local-instance' -o jsonpath='{.items[*].status.containerStatuses[0].ready}')  ]; do 
+while [ -v $(kubectl get pods -n hs-instance -l=app.kubernetes.io/component='controller-hs-instance' -o jsonpath='{.items[*].status.containerStatuses[0].ready}')  ]; do 
   echo "not-ready"
   if [ $JOB_FAIL == 8 ]; then
     exit 1;

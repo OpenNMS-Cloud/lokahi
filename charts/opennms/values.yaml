@@ -2,24 +2,6 @@ Host: onmshs
 Port: 443 #set depending on TLS.Enabled and the Ingress ports, do not change
 Protocol: https #set depending on TLS.Enabled, do not change
 OpenNMS:
-  Core:
-    Path: /core
-    ServiceName: opennms-core
-    Image: opennms/horizon-stream-core
-    ImagePullPolicy: IfNotPresent
-    Replicas: 1
-    HttpPort: 8181
-    SshPort: 8101
-    GrpcPort: 8990
-    IgniteClusterPort: 47100
-    IgniteDiscoveryPort: 47500
-    Resources:
-      Limits:
-        Cpu: "2"
-        Memory: 4Gi
-      Requests:
-        Cpu: "2"
-        Memory: 2Gi
   API:
     Path: /api
     ServiceName: opennms-rest-server

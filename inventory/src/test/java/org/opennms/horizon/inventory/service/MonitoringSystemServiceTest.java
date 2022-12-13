@@ -73,6 +73,8 @@ public class MonitoringSystemServiceTest {
         MonitoringSystemMapper mapper = Mappers.getMapper(MonitoringSystemMapper.class);
         service = new MonitoringSystemService(mockMonitoringSystemRepo, mockLocationRepo, mapper, mockTrapConfigService);
         testLocation = new MonitoringLocation();
+        testLocation.setLocation(location);
+        testLocation.setTenantId(tenantId);
         testMonitoringSystem = new MonitoringSystem();
         testMonitoringSystem.setLastCheckedIn(LocalDateTime.now());
         testMonitoringSystem.setTenantId(tenantId);
@@ -101,12 +103,12 @@ public class MonitoringSystemServiceTest {
 
     @Test
     void testCreateNewMonitorSystemWithLocationExist() {
-        doReturn(Optional.empty()).when(mockMonitoringSystemRepo).findBySystemId(systemId);
-        doReturn(Optional.of(testLocation)).when(mockLocationRepo).findByLocation(location);
+        doReturn(Optional.empty()).when(mockMonitoringSystemRepo).findBySystemIdAndTenantId(systemId, tenantId);
+        doReturn(Optional.of(testLocation)).when(mockLocationRepo).findByLocationAndTenantId(location, tenantId);
         service.addMonitoringSystemFromHeartbeat(heartbeatMessage, tenantId);
-        verify(mockMonitoringSystemRepo).findBySystemId(systemId);
+        verify(mockMonitoringSystemRepo).findBySystemIdAndTenantId(systemId, tenantId);
         verify(mockMonitoringSystemRepo).save(any(MonitoringSystem.class));
-        verify(mockLocationRepo).findByLocation(location);
+        verify(mockLocationRepo).findByLocationAndTenantId(location, tenantId);
     }
 
     @Test

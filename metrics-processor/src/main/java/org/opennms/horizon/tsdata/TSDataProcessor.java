@@ -28,46 +28,28 @@
 
 package org.opennms.horizon.tsdata;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
 
-import org.opennms.horizon.tsdata.metrics.MetricsPushAdapter;
 import org.opennms.taskset.contract.DetectorResponse;
-import org.opennms.taskset.contract.MonitorResponse;
-import org.opennms.taskset.contract.TaskResult;
 import org.opennms.taskset.contract.TaskSetResults;
+import org.opennms.timeseries.cortex.CortexTSS;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 
-import io.prometheus.client.CollectorRegistry;
-import io.prometheus.client.Gauge;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
 @PropertySource("classpath:application.yml")
 public class TSDataProcessor {
-    private static final String METRICS_NAME_PREFIX_MONITOR = "monitor_";
-    private static final String METRICS_UNIT_MS = "msec";
-    private static final String METRICS_NAME_RESPONSE = "response_time";
 
-    private static final String[] MONITOR_METRICS_LABEL_NAMES = {
-        "instance",
-        "location",
-        "system_id",
-        "monitor",
-        "node_id"};
-    private final CollectorRegistry collectorRegistry = new CollectorRegistry();
-    private final Map<String, Gauge> gauges = new ConcurrentHashMap<>();
-    private final MetricsPushAdapter pushAdapter;
+    private final CortexTSS cortexTSS;
 
-    public TSDataProcessor(MetricsPushAdapter pushAdapter) {
-        this.pushAdapter = pushAdapter;
+    public TSDataProcessor(CortexTSS cortexTSS) {
+        this.cortexTSS = cortexTSS;
     }
 
     @KafkaListener(topics = "${kafka.topics}", concurrency = "1")
@@ -79,7 +61,7 @@ public class TSDataProcessor {
                     if (result != null) {
                         log.info("Processing task set result {}", result);
                         if (result.hasMonitorResponse()) {
-                            processMonitorResponse(result);
+                            cortexTSS.store(result);
                         } else if (result.hasDetectorResponse()) {
                             DetectorResponse detectorResponse = result.getDetectorResponse();
                             // TBD: how to process?
@@ -97,45 +79,5 @@ public class TSDataProcessor {
         } catch (InvalidProtocolBufferException e) {
             log.error("Invalid data from kafka", e);
         }
-    }
-
-    private void processMonitorResponse(TaskResult result) {
-        MonitorResponse response = result.getMonitorResponse();
-        String[] labelValues = {response.getIpAddress(), result.getLocation(), result.getSystemId(), response.getMonitorType().name(), String.valueOf(response.getNodeId())};
-        Gauge gauge = getGaugeFromName(METRICS_NAME_RESPONSE, true);
-        gauge.labels(labelValues).set(response.getResponseTimeMs());
-        Map<String, String> labels = new HashMap<>();
-        for (int i = 0; i < MONITOR_METRICS_LABEL_NAMES.length; i++) {
-            labels.put(MONITOR_METRICS_LABEL_NAMES[i], labelValues[i]);
-        }
-
-        if (response.getMetricsMap() != null) {
-            response.getMetricsMap().forEach((k, v) -> {
-                Gauge extGauge = getGaugeFromName(METRICS_NAME_PREFIX_MONITOR + k, false);
-                extGauge.labels(labelValues).set(v);
-            });
-        }
-        pushAdapter.pushMetrics(collectorRegistry, labels);
-    }
-
-    private Gauge getGaugeFromName(String name, boolean withDesc) {
-        return gauges.compute(name, (key, gauge) -> {
-            if (gauge != null) {
-                return gauge;
-            }
-            if (withDesc) {
-                return Gauge.build()
-                    .name(name)
-                    .help("Monitor round trip response time")
-                    .unit(METRICS_UNIT_MS)
-                    .labelNames(MONITOR_METRICS_LABEL_NAMES)
-                    .register(collectorRegistry);
-            }
-            return Gauge.build()
-                .name(name)
-                .unit(METRICS_UNIT_MS)
-                .labelNames(MONITOR_METRICS_LABEL_NAMES)
-                .register(collectorRegistry);
-        });
     }
 }

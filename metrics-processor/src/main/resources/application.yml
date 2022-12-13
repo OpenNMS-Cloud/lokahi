@@ -10,4 +10,12 @@ spring:
 kafka:
   topics: "task-set.results"
 
-prometheus.pushgateway.url: localhost:21080
+cortex.write.url: http://localhost:9009/api/prom/push
+cortex.read.url: http://localhost:9009/prometheus/api/v1
+cortex.maxconcurrenthttpconnections: 100
+cortex.cortexwritetimeoutinms: 1000
+cortex.readtimeoutinms: 1000
+cortex.metriccachesize: 1000
+cortex.externaltagscachesize: 1000
+cortex.bulkheadmaxwaitdurationinms: 9223372036854775807
+cortex.organizationid:

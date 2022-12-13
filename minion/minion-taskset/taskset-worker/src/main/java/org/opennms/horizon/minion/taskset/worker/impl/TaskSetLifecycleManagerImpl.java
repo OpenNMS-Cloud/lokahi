@@ -1,6 +1,5 @@
 package org.opennms.horizon.minion.taskset.worker.impl;
 
-import com.google.common.collect.Sets;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -9,8 +8,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
-import lombok.Getter;
-import lombok.Setter;
+
 import org.apache.ignite.Ignite;
 import org.apache.ignite.services.Service;
 import org.apache.ignite.services.ServiceConfiguration;
@@ -22,6 +20,11 @@ import org.opennms.taskset.contract.TaskType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.DigestUtils;
+
+import com.google.common.collect.Sets;
+
+import lombok.Getter;
+import lombok.Setter;
 
 public class TaskSetLifecycleManagerImpl implements TaskSetLifecycleManager {
 
@@ -35,6 +38,11 @@ public class TaskSetLifecycleManagerImpl implements TaskSetLifecycleManager {
     @Getter
     @Setter
     private Ignite ignite;
+
+    /**
+     * Reference to the last TaskSet that was successfully deployed
+     */
+    private TaskSet deployedTaskSet;
 
 //========================================
 // Processing
@@ -79,7 +87,16 @@ public class TaskSetLifecycleManagerImpl implements TaskSetLifecycleManager {
         log.info("Completed task set update: deploy-count={}; cancel-count={}",
             serviceConfigurationList.size() + nodeSingletons.size(),
             canceledServices.size());
+
+        // Save a reference to the TaskSet
+        deployedTaskSet = taskSet;
+
         return canceledServices.size();
+    }
+
+    @Override
+    public TaskSet getDeployedTaskSet() {
+        return deployedTaskSet;
     }
 
     public void close() {

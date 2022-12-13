@@ -95,6 +95,13 @@ jobs:
         with:
           enable-sonar-scan: false
 
+      - name: feature-alarm
+        id: action-feature-alarm
+        uses: ./.github/actions/alarm
+        with:
+          dir-location: 'alarm'
+          enable-sonar-scan: false
+
       - name: feature-rest-server
         id: action-rest-server
         uses: ./.github/actions/rest-server
@@ -325,6 +332,22 @@ jobs:
 
           docker push opennms/horizon-stream-metrics-processor:${{ env.RELEASE_TAG }}
           docker push opennms/horizon-stream-metrics-processor:latest
+      
+      - name: publish-image-alarm
+        run: |
+
+          # Login to dockerhub. Probably could remove this, session created in previous step.
+          echo ${{ secrets.DOCKERHUB_PASS }} | docker login -u ${{ secrets.DOCKERHUB_LOGIN }} --password-stdin
+
+          # Test build images
+          docker images
+
+          # Tag and save the image as a file to be published. Both release version and latest.
+          docker tag opennms/horizon-stream-alarm:local opennms/horizon-stream-alarm:${{ env.RELEASE_TAG }}
+          docker tag opennms/horizon-stream-alarm:local opennms/horizon-stream-alarm:latest
+
+          docker push opennms/horizon-stream-alarm:${{ env.RELEASE_TAG }}
+          docker push opennms/horizon-stream-alarm:latest
 
       - name: publish-image-events
         run: |

@@ -28,12 +28,11 @@
 
 package org.opennms.horizon.inventory.service.taskset;
 
-import com.google.protobuf.Any;
-import lombok.RequiredArgsConstructor;
 import org.opennms.horizon.inventory.model.IpInterface;
 import org.opennms.horizon.inventory.service.taskset.manager.TaskSetManager;
 import org.opennms.horizon.inventory.service.taskset.manager.TaskSetManagerUtil;
 import org.opennms.horizon.snmp.api.SnmpConfiguration;
+import org.opennms.horizon.snmp.api.Version;
 import org.opennms.snmp.contract.SnmpCollectorRequest;
 import org.opennms.taskset.contract.MonitorType;
 import org.opennms.taskset.contract.TaskSet;
@@ -42,6 +41,10 @@ import org.opennms.taskset.service.api.TaskSetPublisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+
+import com.google.protobuf.Any;
+
+import lombok.RequiredArgsConstructor;
 
 @Component
 @RequiredArgsConstructor
@@ -72,7 +75,10 @@ public class CollectorTaskSetService {
                 Any configuration =
                     Any.pack(SnmpCollectorRequest.newBuilder()
                         .setHost(ipAddress)
-                        .setAgentConfig(SnmpConfiguration.newBuilder().setAddress(ipAddress).setTimeout(30000).build())
+                        .setAgentConfig(SnmpConfiguration.newBuilder()
+                            .setAddress(ipAddress)
+                            .setVersion(Version.v2)
+                            .setTimeout(30000).build())
                         .setNodeId(nodeId)
                         .build());
 

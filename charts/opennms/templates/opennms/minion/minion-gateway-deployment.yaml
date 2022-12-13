@@ -57,10 +57,6 @@ spec:
               containerPort: {{ .Values.OpenNMS.MinionGateway.InternalGrpcPort }}
             - name: ig-client
               containerPort: {{ .Values.OpenNMS.MinionGateway.IgniteClientPort }}
-            - name: ig-cluster
-              containerPort: {{ .Values.OpenNMS.Core.IgniteClusterPort }}
-            - name: ig-discovery
-              containerPort: {{ .Values.OpenNMS.Core.IgniteDiscoveryPort }}
           resources:
             limits:
               cpu: "{{ .Values.OpenNMS.MinionGateway.Resources.Limits.Cpu }}"

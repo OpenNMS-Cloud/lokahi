@@ -17,4 +17,11 @@ public interface TaskSetLifecycleManager {
    */
   int deploy(TaskSet taskSet);
 
+  /**
+   * Return the last TaskSet that was successfully deployed
+   *
+   * @return active TaskSet
+   */
+  TaskSet getDeployedTaskSet();
+
 }

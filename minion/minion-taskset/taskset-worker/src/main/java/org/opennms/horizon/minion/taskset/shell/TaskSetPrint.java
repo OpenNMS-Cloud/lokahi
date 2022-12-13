@@ -25,32 +25,25 @@
  *     http://www.opennms.org/
  *     http://www.opennms.com/
  *******************************************************************************/
-syntax = "proto3";
 
-import "google/protobuf/empty.proto";
-import "google/protobuf/wrappers.proto";
+package org.opennms.horizon.minion.taskset.shell;
 
-package opennms.inventory;
-option java_multiple_files = true;
-option java_package = "org.opennms.horizon.inventory.dto";
+import org.apache.karaf.shell.api.action.Action;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.lifecycle.Reference;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
+import org.opennms.horizon.minion.taskset.worker.TaskSetLifecycleManager;
 
+@Service
+@Command(scope = "opennms", name = "task-set-print", description = "Print currently deployed task set to the console. ")
+public class TaskSetPrint implements Action {
 
-message MonitoringSystemDTO {
-  int64 id = 1;
-  string tenant_id = 2;
-  string system_id = 3;
-  string label = 4;
-  int64 monitoring_location_id = 5;
-  //timestamp in msec will convert to data time in the entity
-  int64 last_checked_in = 6;
-  bool status = 7;
-}
+    @Reference
+    public TaskSetLifecycleManager taskSetLifecycleManager;
 
-message MonitoringSystemList {
-  repeated MonitoringSystemDTO systems = 1;
-}
-
-service MonitoringSystemService {
-  rpc listMonitoringSystem(google.protobuf.Empty) returns (MonitoringSystemList) {};
-  rpc getMonitoringSystemById(google.protobuf.StringValue) returns (MonitoringSystemDTO) {};
+    @Override
+    public Object execute() {
+        System.out.println(taskSetLifecycleManager.getDeployedTaskSet());
+        return null;
+    }
 }

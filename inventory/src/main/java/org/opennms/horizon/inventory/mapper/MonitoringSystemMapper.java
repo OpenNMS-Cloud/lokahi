@@ -29,11 +29,23 @@
 package org.opennms.horizon.inventory.mapper;
 
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.opennms.horizon.inventory.dto.MonitoringSystemDTO;
 import org.opennms.horizon.inventory.model.MonitoringSystem;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
+
 @Mapper(componentModel = "spring")
 public interface MonitoringSystemMapper extends DateTimeMapper {
+
     MonitoringSystem dtoToModel(MonitoringSystemDTO dto);
+    @Mapping(target = "status", source = "model")
     MonitoringSystemDTO modelToDTO(MonitoringSystem model);
+
+    default boolean modelToStatus(MonitoringSystem model) {
+        LocalDateTime lastCheckedIn = model.getLastCheckedIn();
+        LocalDateTime currentTime = LocalDateTime.now();
+        return Math.abs(Duration.between(currentTime, lastCheckedIn).getSeconds()) <= 60;
+    }
 }

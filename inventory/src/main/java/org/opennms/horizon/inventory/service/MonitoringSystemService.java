@@ -42,9 +42,9 @@ public class MonitoringSystemService {
 
     public Optional<Long> addMonitoringSystemFromHeartbeat(HeartbeatMessage message, String tenantId) {
         Identity identity = message.getIdentity();
-        Optional<MonitoringSystem> msOp = modelRepo.findBySystemId(identity.getSystemId());
+        Optional<MonitoringSystem> msOp = modelRepo.findBySystemIdAndTenantId(identity.getSystemId(), tenantId);
         if(msOp.isEmpty()) {
-            Optional<MonitoringLocation> locationOp = locationRepository.findByLocation(identity.getLocation());
+            Optional<MonitoringLocation> locationOp = locationRepository.findByLocationAndTenantId(identity.getLocation(), tenantId);
             MonitoringLocation location = new MonitoringLocation();
             if(locationOp.isPresent()) {
                 location = locationOp.get();
@@ -58,7 +58,7 @@ public class MonitoringSystemService {
             MonitoringSystem monitoringSystem = new MonitoringSystem();
             monitoringSystem.setSystemId(identity.getSystemId());
             monitoringSystem.setMonitoringLocation(location);
-            monitoringSystem.setTenantId(location.getTenantId());
+            monitoringSystem.setTenantId(tenantId);
             monitoringSystem.setLastCheckedIn(LocalDateTime.now());
             monitoringSystem.setLabel(identity.getSystemId().toUpperCase());
             monitoringSystem.setMonitoringLocationId(location.getId());

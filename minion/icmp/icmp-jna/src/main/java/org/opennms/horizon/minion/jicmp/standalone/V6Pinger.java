@@ -40,6 +40,8 @@ import org.opennms.horizon.minion.jicmp.ipv6.ICMPv6Packet.Type;
 import org.opennms.horizon.minion.jicmp.jna.NativeDatagramPacket;
 
 import com.sun.jna.Platform;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * PingListener
@@ -47,6 +49,7 @@ import com.sun.jna.Platform;
  * @author brozow
  */
 public class V6Pinger extends AbstractPinger<Inet6Address> {
+    private static final Logger log = LoggerFactory.getLogger(V6Pinger.class);
 
     public V6Pinger(int id) throws Exception {
         super(NativeDatagramSocket.create(NativeDatagramSocket.PF_INET6, NativeDatagramSocket.IPPROTO_ICMPV6, id));
@@ -91,7 +94,7 @@ public class V6Pinger extends AbstractPinger<Inet6Address> {
             }
         } catch(final Throwable e) {
             m_throwable.set(e);
-            e.printStackTrace();
+            log.error("Failed to run v6 pinger", e);
         }
     }
 

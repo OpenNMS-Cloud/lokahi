@@ -41,6 +41,8 @@ import org.opennms.horizon.minion.jicmp.jna.NativeDatagramSocket;
 import org.opennms.horizon.minion.jicmp.jna.NativeDatagramPacket;
 
 import com.sun.jna.Platform;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * PingListener
@@ -48,6 +50,7 @@ import com.sun.jna.Platform;
  * @author brozow
  */
 public class V4Pinger extends AbstractPinger<Inet4Address> {
+    private static final Logger log = LoggerFactory.getLogger(V4Pinger.class);
 
     public V4Pinger(final int id) throws Exception {
         super(NativeDatagramSocket.create(NativeDatagramSocket.PF_INET, NativeDatagramSocket.IPPROTO_ICMP, id));
@@ -92,7 +95,7 @@ public class V4Pinger extends AbstractPinger<Inet4Address> {
             }
         } catch(final Throwable e) {
             m_throwable.set(e);
-            e.printStackTrace();
+            log.error("Failed to run v4 pinger", e);
         }
     }
 

@@ -185,7 +185,8 @@ public class IgniteMetricsAdapter implements MetricExporterSpi, MetricsProvider,
       try {
         Thread.sleep(30_000);
       } catch (InterruptedException e) {
-        e.printStackTrace();
+        Thread.currentThread().interrupt();
+        logger.error("Failed to sleep refreshing metrics", e);
       }
     }
   }

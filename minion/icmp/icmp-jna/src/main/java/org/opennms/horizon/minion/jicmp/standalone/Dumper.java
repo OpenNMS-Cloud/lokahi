@@ -36,6 +36,8 @@ import org.opennms.horizon.minion.jicmp.ipv6.ICMPv6Packet.Type;
 import org.opennms.horizon.minion.jicmp.jna.NativeDatagramPacket;
 
 import com.sun.jna.Platform;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Dumper
@@ -43,6 +45,7 @@ import com.sun.jna.Platform;
  * @author brozow
  */
 public class Dumper {
+    private static final Logger log = LoggerFactory.getLogger(Dumper.class);
     
     public void dump() throws Exception {
         NativeDatagramSocket m_pingSocket =  NativeDatagramSocket.create(NativeDatagramSocket.PF_INET6, NativeDatagramSocket.IPPROTO_ICMPV6, 1234);
@@ -65,7 +68,7 @@ public class Dumper {
     
     
         } catch(Throwable e) {
-            e.printStackTrace();
+            log.error("Failed to dump datagram packet", e);
         }
  
     }

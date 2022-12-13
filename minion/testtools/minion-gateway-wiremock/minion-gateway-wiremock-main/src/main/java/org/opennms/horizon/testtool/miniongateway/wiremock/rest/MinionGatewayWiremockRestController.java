@@ -37,7 +37,7 @@ public class MinionGatewayWiremockRestController {
         consumes = MimeTypeUtils.APPLICATION_JSON_VALUE
     )
     public String publishTwinUpdate(@RequestBody String bodyText, @PathVariable("topic") String topic, @PathVariable("location") String location) {
-        log.info("HAVE twin update: topic={}; location={}; body={}", topic, location, bodyText);
+        log.info("HAVE twin update: topic={}; location={}", topic, location);
 
         mockTwinHandler.publish(location, topic, bodyText.getBytes(StandardCharsets.UTF_8));
 
@@ -58,8 +58,8 @@ public class MinionGatewayWiremockRestController {
 //----------------------------------------
 
     // PROTOBUF-to-JSON workaround
-    private Map minionIdentityToMap(Identity identity) {
-        Map result = new TreeMap<>();
+    private Map<String, String> minionIdentityToMap(Identity identity) {
+        Map<String, String> result = new TreeMap<>();
 
         result.put("systemId", identity.getSystemId());
         result.put("location", identity.getLocation());

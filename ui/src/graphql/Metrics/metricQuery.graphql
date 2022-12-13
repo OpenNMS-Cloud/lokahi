@@ -3,6 +3,7 @@ fragment MetricParts on TimeSeriesQueryResult {
     result {
       metric
       value
+      values
     }
   }
 }

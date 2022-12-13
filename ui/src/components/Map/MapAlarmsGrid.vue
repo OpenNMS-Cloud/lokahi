@@ -100,7 +100,6 @@
 
 <script setup lang="ts">
 import { useMapStore } from '@/store/Views/mapStore'
-import { AlarmDto } from '@/types/graphql'
 import { FeatherSortObject } from '@/types'
 import { AlarmQueryParameters } from '@/types/map'
 import { FeatherSelect } from '@featherds/select'
@@ -108,7 +107,7 @@ import { FeatherCheckbox } from '@featherds/checkbox'
 import { FeatherSortHeader, SORT } from '@featherds/table'
 
 const mapStore = useMapStore()
-const alarms = computed<AlarmDto[]>(() => mapStore.alarms)
+const alarms = computed<any[]>(() => mapStore.alarms)
 const alarmOptions = [
   { id: 1, option: 'Not Selected' },
   { id: 2, option: 'Acknowledge' },
@@ -130,7 +129,7 @@ const disableAckSelect = computed(() => {
   return !all.value && !hasSelectedCheckbox
 })
 
-const selectCheckbox = (alarm: AlarmDto) => {
+const selectCheckbox = (alarm: any) => {
   if(alarm.id) {
     alarmCheckboxes.value[alarm.id] = !alarmCheckboxes.value[alarm.id]
   }
@@ -161,11 +160,11 @@ const selectAlarmAck = async () => {
       break
   }
 
-  const selectedAlarms = alarms.value.filter((alarm: AlarmDto) => all.value || alarm.id && alarmCheckboxes.value[alarm.id])
+  const selectedAlarms = alarms.value.filter((alarm: any) => all.value || alarm.id && alarmCheckboxes.value[alarm.id])
 
   let numFail = 0
   const respCollection: any = []
-  selectedAlarms.forEach((alarm: AlarmDto) => {
+  selectedAlarms.forEach((alarm: any) => {
     const resp = mapStore.modifyAlarm({
       pathVariable: (alarm?.id as number).toString(), 
       queryParameters: alarmQueryParameters

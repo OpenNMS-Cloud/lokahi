@@ -18,13 +18,6 @@ fragment NodeLatencyParts on Query {
     }
   ) {
     status
-    data {
-      result {
-        metric
-        value
-        values
-      }
-      resultType
-    }
+    ...MetricParts
   }
 }

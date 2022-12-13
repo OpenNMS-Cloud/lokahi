@@ -39,9 +39,6 @@ spec:
                 - {{ .Values.NodeRestrictions.Value }}                                                 
       {{- end }}
       volumes:
-        - name: config-volume
-          configMap:
-            name: opennms-config
         - name: minion-config-volume
           configMap:
             name: minion-config 
@@ -84,9 +81,9 @@ spec:
             - name: minion-config-volume
               mountPath: "/opt/karaf/etc/org.opennms.identity.cfg"
               subPath: "opennms-minion-identity"
-            - name: config-volume
+            - name: minion-config-volume
               mountPath: "/opt/horizon-stream/etc/users.properties"
-              subPath: "data"
+              subPath: "karafUsers"
               readOnly: true
           resources:
             limits:

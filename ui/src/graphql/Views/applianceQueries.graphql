@@ -42,6 +42,10 @@ query ListMinionMetrics($instance: String) {
   ...MinionLatencyParts
 }
 
+query ListNodeMetrics($id: String) {
+  ...NodeLatencyParts
+}
+
 query ListMinionsAndDevicesForTables {
   ...NodeTableParts
   ...DeviceUptimeParts

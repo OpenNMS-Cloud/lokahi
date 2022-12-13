@@ -1,3 +1,0 @@
-mutation ClearAlarm ($id: Long!, $ackDTO: AlarmAckDTOInput!) {
-  clearAlarm (id: $id, ackDTO: $ackDTO)
-}

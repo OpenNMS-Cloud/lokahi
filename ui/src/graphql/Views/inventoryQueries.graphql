@@ -6,4 +6,5 @@ query NodesList {
 
 query NodeLatencyMetric($id: Long!) {
   ...NodeLatencyParts
+  ...NodeStatusParts
 }

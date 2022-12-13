@@ -87,8 +87,9 @@ public class GrpcServerConfig {
     public TaskSetTwinMessageProcessor stubCloudToMinionMessageProcessor(
         @Qualifier("taskSetPublisher") TaskSetPublisher publisher,
         @Qualifier("taskSetForwarder") TaskSetForwarder forwarder,
-        GrpcTwinPublisher grpcTwinPublisher) {
-        return new TaskSetTwinMessageProcessor(publisher, forwarder, grpcTwinPublisher);
+        GrpcTwinPublisher grpcTwinPublisher,
+        TenantIDGrpcServerInterceptor tenantIDGrpcServerInterceptor) {
+        return new TaskSetTwinMessageProcessor(publisher, forwarder, grpcTwinPublisher, tenantIDGrpcServerInterceptor);
     }
 
     @Bean

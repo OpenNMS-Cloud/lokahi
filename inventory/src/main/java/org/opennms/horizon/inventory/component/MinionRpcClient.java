@@ -28,24 +28,36 @@
 
 package org.opennms.horizon.inventory.component;
 
+import io.grpc.Context;
+import io.grpc.stub.StreamObserver;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import org.opennms.cloud.grpc.minion.RpcRequestProto;
 import org.opennms.cloud.grpc.minion.RpcRequestServiceGrpc;
+import org.opennms.cloud.grpc.minion.RpcRequestServiceGrpc.RpcRequestServiceStub;
 import org.opennms.cloud.grpc.minion.RpcResponseProto;
+import org.opennms.horizon.inventory.Constants;
+import org.opennms.horizon.inventory.grpc.TenantIdClientInterceptor;
+import org.opennms.horizon.inventory.grpc.TenantLookup;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 import io.grpc.ManagedChannel;
 
 public class MinionRpcClient {
-    private final ManagedChannel channel;
 
-    public MinionRpcClient(@Qualifier("minion-gateway") ManagedChannel channel) {
+    private final ManagedChannel channel;
+    private final TenantLookup tenantLookup;
+
+    public MinionRpcClient(@Qualifier("minion-gateway") ManagedChannel channel, TenantLookup tenantLookup) {
         this.channel = channel;
+        this.tenantLookup = tenantLookup;
     }
 
-    private RpcRequestServiceGrpc.RpcRequestServiceBlockingStub rpcStub;
+    private RpcRequestServiceStub rpcStub;
 
     protected void init() {
-        rpcStub = RpcRequestServiceGrpc.newBlockingStub(channel);
+        rpcStub = RpcRequestServiceGrpc.newStub(channel)
+            .withInterceptors(new TenantIdClientInterceptor(tenantLookup));
     }
 
     public void shutdown() {
@@ -54,7 +66,30 @@ public class MinionRpcClient {
         }
     }
 
-    public RpcResponseProto sendRpcRequest(RpcRequestProto request) {
-        return rpcStub.request(request);
+    public CompletableFuture<RpcResponseProto> sendRpcRequest(String tenantId, RpcRequestProto request) {
+        CompletableFuture<RpcResponseProto> future = new CompletableFuture<>();
+        Context withCredential = Context.current().withValue(Constants.TENANT_ID_CONTEXT_KEY, tenantId);
+        try {
+            withCredential.run(() -> {
+                rpcStub.request(request, new StreamObserver<>() {
+                    @Override
+                    public void onNext(RpcResponseProto value) {
+                        future.complete(value);
+                    }
+
+                    @Override
+                    public void onError(Throwable t) {
+                        future.completeExceptionally(t);
+                    }
+
+                    @Override
+                    public void onCompleted() {
+                    }
+                });
+            });
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to call minion", e);
+        }
+        return future.orTimeout(60, TimeUnit.SECONDS);
     }
 }

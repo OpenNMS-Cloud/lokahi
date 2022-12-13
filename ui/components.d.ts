@@ -8,7 +8,6 @@ export {}
 declare module '@vue/runtime-core' {
   export interface GlobalComponents {
     AddNodeCtrl: typeof import('./src/components/Appliances/AddNodeCtrl.vue')['default']
-    AlarmsTable: typeof import('./src/components/Alarms/AlarmsTable.vue')['default']
     ContextMenu: typeof import('./src/components/Topology/ContextMenu.vue')['default']
     CtrlHighlightFocusedNodes: typeof import('./src/components/Topology/CtrlHighlightFocusedNodes.vue')['default']
     CtrlLayers: typeof import('./src/components/Topology/CtrlLayers.vue')['default']

@@ -121,7 +121,7 @@
 import { useMapStore } from '@/store/Views/mapStore'
 import { FeatherSortObject } from '@/types'
 import { FeatherSortHeader, SORT } from '@featherds/table'
-import { Node, LocationDto } from '@/types/graphql'
+import { Node, Location } from '@/types/graphql'
 
 const mapStore = useMapStore()
 const nodes = computed(() => mapStore.devicesInbounds)
@@ -130,7 +130,7 @@ const nodeLabelAlarmServerityMap = computed(() => mapStore.getDeviceAlarmSeverit
 // TODO: Switch to Node type once location available
 const doubleClickHandler = (node: Partial<any>) => {
   if (node.location?.latitude && node.location.longitude) {
-    const coordinate: LocationDto = { latitude: node?.location?.latitude, longitude: node?.location?.longitude }
+    const coordinate: any = { latitude: node?.location?.latitude, longitude: node?.location?.longitude }
     mapStore.mapCenter = coordinate
 
     // to highlighting the selected row

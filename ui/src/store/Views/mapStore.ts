@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { FeatherSortObject } from '@/types'
-import { Node, AlarmDto, LocationDto } from '@/types/graphql'
+import { Node, Location } from '@/types/graphql'
 // import { LatLngLiteral } from 'leaflet'
 import { SORT } from '@featherds/table'
 import { numericSeverityLevel } from '@/components/Map/utils'
@@ -23,9 +23,9 @@ export const useMapStore = defineStore('mapStore', () => {
     // return mapBounds.value?.contains(location)
   }))
 
-  const alarms: AlarmDto[] = [],
+  const alarms: any[] = [],
     interestedDevicesID: string[] = [],
-    mapCenter: LocationDto = { latitude: 37.776603506225115, longitude: -33.43824554266541 },
+    mapCenter: any = { latitude: 37.776603506225115, longitude: -33.43824554266541 },
     mapBounds = ref(),
     selectedSeverity = 'NORMAL',
     searchedDeviceLabels: string[] = [],
@@ -37,7 +37,7 @@ export const useMapStore = defineStore('mapStore', () => {
   const getDeviceAlarmSeverityMap = (): Record<string, string> => {
     const map: { [x: string]: string } = {}
 
-    alarms.forEach((alarm: AlarmDto) => {
+    alarms.forEach((alarm: any) => {
       if(alarm.nodeLabel) {
         if (numericSeverityLevel(alarm.severity) > numericSeverityLevel(map[alarm.nodeLabel])) {
           map[alarm.nodeLabel] = alarm.severity?.toUpperCase() || ''

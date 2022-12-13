@@ -25,21 +25,37 @@
  *     http://www.opennms.org/
  *     http://www.opennms.com/
  *******************************************************************************/
+package org.opennms.horizon.inventory.grpc;
 
-package org.opennms.horizon.inventory;
-
+import io.grpc.CallOptions;
+import io.grpc.Channel;
+import io.grpc.ClientCall;
+import io.grpc.ClientInterceptor;
 import io.grpc.Context;
+import io.grpc.ForwardingClientCall.SimpleForwardingClientCall;
 import io.grpc.Metadata;
+import io.grpc.MethodDescriptor;
+import org.opennms.horizon.inventory.Constants;
 
-public interface Constants {
-    String TENANT_ID_KEY = "tenant-id";
-    String DEFAULT_TENANT_ID = "opennms-prime";
-    String DEFAULT_LOCATION = "Default";
-    Metadata.Key<String> AUTHORIZATION_METADATA_KEY = Metadata.Key.of("Authorization", Metadata.ASCII_STRING_MARSHALLER);
-    Metadata.Key<String> TENANT_ID_REQUEST_KEY = Metadata.Key.of(TENANT_ID_KEY, Metadata.ASCII_STRING_MARSHALLER);
-    Context.Key<String> TENANT_ID_CONTEXT_KEY = Context.key(TENANT_ID_KEY);
+public class TenantIdClientInterceptor implements ClientInterceptor {
 
-    // TODO: Remove this once we have inter-service authentication in place
-    Metadata.Key<String> AUTHORIZATION_BYPASS_KEY = Metadata.Key.of("Bypass-Authorization", Metadata.ASCII_STRING_MARSHALLER);
-    Metadata.Key<String> TENANT_ID_BYPASS_KEY = Metadata.Key.of("Bypass-Tenant-ID", Metadata.ASCII_STRING_MARSHALLER);
+    private final TenantLookup tenantLookup;
+
+    public TenantIdClientInterceptor(TenantLookup tenantLookup) {
+        this.tenantLookup = tenantLookup;
+    }
+
+    @Override
+    public <ReqT, RespT> ClientCall<ReqT, RespT> interceptCall(MethodDescriptor<ReqT, RespT> method, CallOptions callOptions, Channel next) {
+        return new SimpleForwardingClientCall<>(next.newCall(method, callOptions)) {
+            @Override
+            public void start(Listener<RespT> responseListener, Metadata headers) {
+                String tenantId = tenantLookup.lookupTenantId(Context.current())
+                    .orElseThrow(() -> new IllegalArgumentException("Tenant id is not specified"));
+
+                headers.put(Constants.TENANT_ID_REQUEST_KEY, tenantId);
+                super.start(responseListener, headers);
+            }
+        };
+    }
 }

@@ -31,6 +31,7 @@ package org.opennms.horizon.tsdata;
 import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -66,6 +67,7 @@ public class TSDataProcessor {
     private static final String METRICS_NAME_RESPONSE = "response_time";
 
     private static final String[] MONITOR_METRICS_LABEL_NAMES = {
+        "tenant_id",
         "instance",
         "location",
         "system_id",
@@ -82,6 +84,7 @@ public class TSDataProcessor {
     //headers for future use.
     @KafkaListener(topics = "${kafka.topics}", concurrency = "1")
     public void consume(@Payload byte[] data, @Headers Map<String, Object> headers) {
+        String tenantId = getTenantId(headers);
         try {
             TaskSetResults results = TaskSetResults.parseFrom(data);
             results.getResultsList().forEach(result -> CompletableFuture.supplyAsync(() -> {
@@ -89,13 +92,13 @@ public class TSDataProcessor {
                     if (result != null) {
                         log.info("Processing task set result {}", result);
                         if (result.hasMonitorResponse()) {
-                            processMonitorResponse(result);
+                            processMonitorResponse(tenantId, result);
                         } else if (result.hasDetectorResponse()) {
                             DetectorResponse detectorResponse = result.getDetectorResponse();
                             // TBD: how to process?
                             log.info("Have detector response: task-id={}; detected={}", result.getId(), detectorResponse.getDetected());
                         } else if(result.hasCollectorResponse()) {
-                            processCollectorResponse(result);
+                            processCollectorResponse(tenantId, result);
                         }
                     } else {
                         log.warn("Task result appears to be missing the echo response details with results {}", results);
@@ -111,9 +114,9 @@ public class TSDataProcessor {
         }
     }
 
-    private void processMonitorResponse(TaskResult result) {
+    private void processMonitorResponse(String tenantId, TaskResult result) {
         MonitorResponse response = result.getMonitorResponse();
-        String[] labelValues = {response.getIpAddress(), result.getLocation(), result.getSystemId(), response.getMonitorType().name(), String.valueOf(response.getNodeId())};
+        String[] labelValues = {tenantId, response.getIpAddress(), result.getLocation(), result.getSystemId(), response.getMonitorType().name(), String.valueOf(response.getNodeId())};
         Gauge gauge = getGaugeFrom(METRICS_NAME_RESPONSE, "Monitor round trip response time", METRICS_UNIT_MS);
         gauge.labels(labelValues).set(response.getResponseTimeMs());
         Map<String, String> labels = new HashMap<>();
@@ -147,9 +150,9 @@ public class TSDataProcessor {
         });
     }
 
-    private void processCollectorResponse(TaskResult result) {
+    private void processCollectorResponse(String tenantId, TaskResult result) {
         CollectorResponse response = result.getCollectorResponse();
-        String[] labelValues = {response.getIpAddress(), result.getLocation(), result.getSystemId(),
+        String[] labelValues = {tenantId, response.getIpAddress(), result.getLocation(), result.getSystemId(),
             response.getMonitorType().name(), String.valueOf(response.getNodeId())};
         if (response.hasResult() && response.getMonitorType().equals(MonitorType.SNMP)) {
             Any collectorMetric = response.getResult();
@@ -191,4 +194,19 @@ public class TSDataProcessor {
         pushAdapter.pushMetrics(collectorRegistry, labels);
 
     }
+
+    private String getTenantId(Map<String, Object> headers) {
+        return Optional.ofNullable(headers.get("tenant-id"))
+            .map(tenantId -> {
+                if (tenantId instanceof byte[]) {
+                    return new String((byte[]) tenantId);
+                }
+                if (tenantId instanceof String) {
+                    return (String) tenantId;
+                }
+                return "" + tenantId;
+            })
+            .orElseThrow(() -> new RuntimeException("Could not determine tenant id"));
+    }
+
 }

@@ -86,14 +86,14 @@ import { useNodeMutations } from '@/store/Mutations/nodeMutations'
 import { useAppliancesQueries } from '@/store/Queries/appliancesQueries'
 import useModal from '@/composables/useModal'
 import useSnackbar from '@/composables/useSnackbar'
-import { DeviceCreateDtoInput } from '@/types/graphql'
+import { NodeCreateInput } from '@/types/graphql'
 
 const { showSnackbar } = useSnackbar()
 const { openModal, closeModal, isVisible } = useModal()
 const nodeMutations = useNodeMutations()
 const applianceQueries = useAppliancesQueries()
 
-const defaultDevice: DeviceCreateDtoInput = { 
+const defaultDevice: NodeCreateInput = { 
   label: undefined,
   location: undefined,
   // latitude: undefined,

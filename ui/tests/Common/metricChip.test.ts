@@ -31,7 +31,7 @@ describe('Metric chip', () => {
 
     const component = wrapper.getComponent('[data-test="chip"]')
     const text = component.text()
-    expect(component.classes().includes(metric.status.toLowerCase())).toBe(true)
+    expect(component.classes().includes(metric.status?.toLowerCase())).toBe(true)
     // TODO: this test may fail when running in our build-and-test pipeline (PR) - inconsistence
     // Expected   "7d17h57m54s"
     // Received   "7d17h57m53s"
@@ -52,10 +52,10 @@ describe('Metric chip', () => {
     })
 
     const label = wrapper.get('label').text()
-    expect(label).toEqual(metric.type)
+    expect(label).toEqual(metric.label)
 
     const component = wrapper.getComponent('[data-test="chip"]')
-    expect(component.classes().includes(metric.status.toLowerCase())).toBe(true)
+    expect(component.classes().includes(metric.status?.toLowerCase())).toBe(true)
     expect(component.text()).toEqual(metric.status)
   })
 })

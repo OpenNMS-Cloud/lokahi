@@ -10,7 +10,7 @@
         >
           <FeatherIcon :icon="ChevronRight" />
         </FeatherButton>
-        <span class="title">Devices ({{listDevicesWithBgColor.length}})</span>
+        <span class="title">Devices ({{nodesTable.length}})</span>
       </div>
 
       <FeatherInput
@@ -35,7 +35,7 @@
     </div>
     <div class="data-table">
       <TransitionGroup name="data-table" tag="div">
-        <div class="card" v-for="(node) in listDevicesWithBgColor" :key="(node.id as number)" data-test="node-item">
+        <div class="card" v-for="(node) in nodesTable" :key="(node.id as number)" data-test="node-item">
           <div class="name pointer" @click="gotoNode(node.id as number)" data-test="col-node">
               <div class="name-cell">
                 <FeatherIcon :icon="Instances" class="icon"/>
@@ -45,18 +45,9 @@
                 </div>
               </div>
           </div>
-          <div class="pointer" @click="openLatencyGraph(node.id as number)" data-test="col-latency">
-            <pre class="title">ICMP Latency</pre>
-            <div :data-metric="node.icmp_latency" class="value bg-status" :class="node.latencyBgColor">{{ getHumanReadableDuration(node.icmp_latency) }}</div>
-          </div>
-          <div class="pointer" @click="openUptimeGraph(node.id as number)" data-test="col-uptime">
-            <pre class="title">SNMP Uptime</pre>
-            <div :data-metric="node.snmp_uptime" class="value bg-status" :class="node.uptimeBgColor">{{ getHumanReadableDuration(node.snmp_uptime, TimeUnit.Secs) }}</div>
-          </div>
-          <div data-test="col-status">
-            <pre class="title">Status</pre>
-            <div class="value bg-status" :class="node.statusBgColor">{{ node.status || '--' }}</div>
-          </div>
+          <div />
+          <MetricChip :metric="{timestamp: node.latency?.timestamp, label: 'ICMP Latency'}" @click="openLatencyGraph(node.id as string)" :data-metric="node.latency?.timestamp" class="bg-status pointer" data-test="node-item-latency" />
+          <MetricChip :metric="{label: 'Status'}" class="bg-status pointer" data-test="node-item-status" />
         </div>
       </TransitionGroup>
     </div>
@@ -79,11 +70,8 @@ import Instances from '@featherds/icon/hardware/Instances'
 import ChevronRight from '@featherds/icon/navigation/ChevronRight'
 import { useAppliancesQueries } from '@/store/Queries/appliancesQueries'
 import { useAppliancesStore } from '@/store/Views/appliancesStore'
-import { ExtendedNodeWithBGColors } from '@/types/node'
-import { ComputedRef } from 'vue'
-import { formatItemBgColor } from './utils'
-import { getHumanReadableDuration } from '@/components/utils'
-import { WidgetProps, TimeUnit } from '@/types'
+import { ExtendedNode } from '@/types/node'
+import { WidgetProps } from '@/types'
 import { GraphProps } from '@/types/graphs'
 import { TimeRangeUnit } from '@/types/graphql'
 
@@ -93,7 +81,7 @@ const appliancesStore = useAppliancesStore()
 const appliancesQueries = useAppliancesQueries()
 const router = useRouter()
 
-const listDevicesWithBgColor: ComputedRef<ExtendedNodeWithBGColors[]> = computed<any[]>(() => formatItemBgColor(appliancesQueries.tableNodes))
+const nodesTable = computed<ExtendedNode[]>(() => appliancesQueries.tableNodes)
 
 const searchValue = ref('')
 
@@ -105,7 +93,7 @@ const modal = ref({
   title: '',
   hideTitle: true
 })
-const openLatencyGraph = (id: number) => {
+const openLatencyGraph = (id: string) => {
   modal.value = {
     ...modal.value,
     isVisible: true
@@ -114,21 +102,7 @@ const openLatencyGraph = (id: number) => {
     label: 'Device Latency',
     metrics: ['response_time_msec'], // TODO: might be different once BE avail
     monitor: 'ICMP',
-    // id, // not yet implemented in BE
-    timeRange: 10,
-    timeRangeUnit: TimeRangeUnit.Minute
-  }
-}
-const openUptimeGraph = (id: number) => {
-  modal.value = {
-    ...modal.value,
-    isVisible: true
-  }
-  graphProps.value = {
-    label: 'Device Uptime',
-    metrics: ['device_uptime_sec'], // TODO: might be different once BE avail
-    monitor: 'ICMP',
-    // id, // not yet implemented in BE
+    nodeId: id,
     timeRange: 10,
     timeRangeUnit: TimeRangeUnit.Minute
   }
@@ -162,6 +136,13 @@ const openUptimeGraph = (id: number) => {
     display: flex;
   }
 }
+
+:deep(.chip) {
+  .label {
+    margin: 0 auto;
+  }
+}
+
 .card {
   border: 1px solid var(variables.$shade-4);
   display: flex;

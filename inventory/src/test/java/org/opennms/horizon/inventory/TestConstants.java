@@ -25,21 +25,10 @@
  *     http://www.opennms.org/
  *     http://www.opennms.com/
  *******************************************************************************/
-
 package org.opennms.horizon.inventory;
 
-import io.grpc.Context;
-import io.grpc.Metadata;
+public interface TestConstants {
+    String PRIMARY_TENANT_ID = "test-tenant";
+    String SECONDARY_TENANT_ID = "another-tenant";
 
-public interface Constants {
-    String TENANT_ID_KEY = "tenant-id";
-    String DEFAULT_TENANT_ID = "opennms-prime";
-    String DEFAULT_LOCATION = "Default";
-    Metadata.Key<String> AUTHORIZATION_METADATA_KEY = Metadata.Key.of("Authorization", Metadata.ASCII_STRING_MARSHALLER);
-    Metadata.Key<String> TENANT_ID_REQUEST_KEY = Metadata.Key.of(TENANT_ID_KEY, Metadata.ASCII_STRING_MARSHALLER);
-    Context.Key<String> TENANT_ID_CONTEXT_KEY = Context.key(TENANT_ID_KEY);
-
-    // TODO: Remove this once we have inter-service authentication in place
-    Metadata.Key<String> AUTHORIZATION_BYPASS_KEY = Metadata.Key.of("Bypass-Authorization", Metadata.ASCII_STRING_MARSHALLER);
-    Metadata.Key<String> TENANT_ID_BYPASS_KEY = Metadata.Key.of("Bypass-Tenant-ID", Metadata.ASCII_STRING_MARSHALLER);
 }

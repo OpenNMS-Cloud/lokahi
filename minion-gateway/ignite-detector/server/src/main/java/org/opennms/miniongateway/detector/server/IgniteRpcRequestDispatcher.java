@@ -6,6 +6,6 @@ import org.opennms.cloud.grpc.minion.RpcResponseProto;
 
 public interface IgniteRpcRequestDispatcher {
 
-    CompletableFuture<RpcResponseProto> execute(RpcRequestProto request);
+    CompletableFuture<RpcResponseProto> execute(String tenantId, RpcRequestProto request);
 
 }

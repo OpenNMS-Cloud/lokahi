@@ -4,29 +4,36 @@ import {
   ListNodesForTableDocument, 
   ListMinionsForTableDocument, 
   ListMinionsAndDevicesForTablesDocument, 
-  ListMinionsForTableQuery, 
-  ListNodesForTableQuery,
   ListMinionMetricsDocument,
-  TsResult
+  ListNodeMetricsDocument,
+  TsResult,
+  Minion,
+  Node
 } from '@/types/graphql'
 import { ExtendedMinion } from '@/types/minion'
 import { ExtendedNode } from '@/types/node'
-import { Ref } from 'vue'
+import useSpinner from '@/composables/useSpinner'
 
 export const useAppliancesQueries = defineStore('appliancesQueries', {
   state: () => {
-    const tableNodes = ref()
-    const tableMinions = ref()
+    const tableMinions = ref<ExtendedMinion[]>([])
+    const tableNodes = ref<ExtendedNode[]>([])
     
-    // fetch appliance minions table data
+    const { startSpinner, stopSpinner } = useSpinner()
+
     const fetchMinionsForTable = () => {
-      const { data: minionsData } = useQuery({
+      const { data: minionsData, isFetching } = useQuery({
         query: ListMinionsForTableDocument,
         cachePolicy: 'network-only'
       })
 
       watchEffect(() => {
-        tableMinions.value = addMetricsToMinions(minionsData)
+        isFetching.value ? startSpinner() : stopSpinner()
+
+        const allMinions = minionsData.value?.findAllMinions as ExtendedMinion[]
+        if(allMinions?.length) {
+          addMetricsToMinions(allMinions)
+        }
       })
     }
 
@@ -36,70 +43,87 @@ export const useAppliancesQueries = defineStore('appliancesQueries', {
       cachePolicy: 'network-only'
     })
     
-    const addMetricsToMinions = (resp: Ref<ListMinionsForTableQuery | null>)=> {
-      const minions = resp.value?.findAllMinions as ExtendedMinion[] || []
-      
-      minions.forEach(async (minion) => {
+    const addMetricsToMinions = ((allMinions: Minion[]) => {
+      allMinions.forEach(async minion => {
         const { data, isFetching } = await fetchMinionMetrics(minion.systemId as string)
-        
-        if (data.value && !isFetching.value) {
+
+        if(data.value && !isFetching.value) {
           const [{ value }] = data.value.minionLatency?.data?.result as TsResult[]
           const [, val] = value as number[]
 
-          minion.icmp_latency = val
+          tableMinions.value.push({
+            ...minion,
+            latency: {
+              timestamp: val
+            }
+          })
         }
       })
+    })
     
-      return minions
-    }
-    
-    // fetch appliance nodes table data
     const fetchNodesForTable = () => {
-      const { data: nodesData } = useQuery({
+      const { data: nodesData, isFetching } = useQuery({
         query: ListNodesForTableDocument,
         cachePolicy: 'network-only'
       })
 
       watchEffect(() => {
-        tableNodes.value = addMetricsToNodes(nodesData)
+        isFetching.value ? startSpinner() : stopSpinner()
+        
+        const allNodes = nodesData.value?.findAllNodes as ExtendedNode[]
+        if(allNodes?.length) {
+          addMetricsToNodes(allNodes)
+        }
       })
     }
 
-    const addMetricsToNodes = (data: Ref<ListNodesForTableQuery | null>)=> {
-      const nodes = data.value?.findAllNodes as ExtendedNode[] || []
-      const deviceLatencies = data.value?.deviceLatency?.data?.result || []
-      const deviceUptimes = data.value?.deviceUptime?.data?.result || []
+    const fetchNodeMetrics = (id: string) => useQuery({
+      query: ListNodeMetricsDocument,
+      variables: { id },
+      cachePolicy: 'network-only'
+    })
+    
+    const addMetricsToNodes = (allNodes: Node[]) => {
+      tableNodes.value = [] // reset
 
-      const latenciesMap: Record<string, number> = {}
-      const uptimesMap: Record<string, number> = {}
+      allNodes.forEach(async node => {
+        const { data, isFetching } = await fetchNodeMetrics(node.id as string)
+        const result = data.value?.nodeLatency?.data?.result
 
-      for (const latency of deviceLatencies) {
-        latenciesMap[latency?.metric?.instance] = latency?.value?.[1] || 0
-      }
-      
-      for (const uptime of deviceUptimes) {
-        uptimesMap[uptime?.metric?.instance] = uptime?.value?.[1] || 0
-      }
+        if(!isFetching.value) {
+          if(result?.length) {
+            const [{ value }] = result as TsResult[]
+            const [, val] = value as number[]
 
-      // TODO: add metrics when available
-      // for (const node of nodes) {
-      //   node.icmp_latency = latenciesMap[node.managementIp as string]
-      //   node.snmp_uptime = uptimesMap[node.managementIp as string]
-      //   node.status = (node.icmp_latency >= 0 && node.snmp_uptime >= 0) ? 'UP' : 'DOWN'
-      // }
-      
-      return nodes
+            tableNodes.value.push({
+              ...node,
+              latency: {
+                timestamp: val
+              }
+            })
+          } else tableNodes.value.push(node)
+        } 
+      })
     }
-
+    
     // minions AND nodes table
-    const { data: minionsAndNodes, execute } = useQuery({
+    const { data: minionsAndNodes, execute, isFetching } = useQuery({
       query: ListMinionsAndDevicesForTablesDocument,
       cachePolicy: 'network-only'
     })
 
     watchEffect(() => {
-      tableMinions.value = addMetricsToMinions(minionsAndNodes)
-      tableNodes.value = addMetricsToNodes(minionsAndNodes)
+      isFetching.value ? startSpinner() : stopSpinner()
+
+      const allMinions = minionsAndNodes.value?.findAllMinions as ExtendedMinion[]
+      if(allMinions?.length) {
+        addMetricsToMinions(allMinions)
+      }
+
+      const allNodes = minionsAndNodes.value?.findAllNodes as ExtendedNode[]
+      if(allNodes?.length) {
+        addMetricsToNodes(allNodes)
+      }
     })
 
     const locations = computed(() => minionsAndNodes.value?.findAllLocations || [])

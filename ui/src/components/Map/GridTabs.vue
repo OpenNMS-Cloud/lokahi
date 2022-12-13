@@ -10,13 +10,12 @@
 <script setup lang="ts">
 import { useMapStore } from '@/store/Views/mapStore'
 import { FeatherTab, FeatherTabContainer } from '@featherds/tabs'
-import { AlarmDto } from '@/types/graphql'
 
 const mapStore = useMapStore()
 const router = useRouter()
 const route = useRoute()
 const nodes = computed(() => mapStore.devicesInbounds)
-const alarms = computed<AlarmDto[]>(() => mapStore.alarms)
+const alarms = computed<any[]>(() => mapStore.alarms)
 const alarmTab = ref()
 const nodesTab = ref()
 

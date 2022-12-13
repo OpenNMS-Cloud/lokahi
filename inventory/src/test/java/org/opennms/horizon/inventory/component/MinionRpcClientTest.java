@@ -31,11 +31,14 @@ package org.opennms.horizon.inventory.component;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.AdditionalAnswers.delegatesTo;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.opennms.horizon.inventory.TestConstants.PRIMARY_TENANT_ID;
 
 import java.io.IOException;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.junit.Rule;
@@ -56,8 +59,10 @@ import io.grpc.inprocess.InProcessChannelBuilder;
 import io.grpc.inprocess.InProcessServerBuilder;
 import io.grpc.stub.StreamObserver;
 import io.grpc.testing.GrpcCleanupRule;
+import org.opennms.horizon.inventory.Constants;
 
 class MinionRpcClientTest {
+
     @Rule
     public final GrpcCleanupRule grpcCleanup = new GrpcCleanupRule();
     private MinionRpcClient client;
@@ -89,7 +94,7 @@ class MinionRpcClientTest {
             .addService(mockRequestService)
             .directExecutor().build().start());
         ManagedChannel channel = grpcCleanup.register(InProcessChannelBuilder.forName(MinionRpcClientTest.class.getName()).directExecutor().build());
-        client = new MinionRpcClient(channel);
+        client = new MinionRpcClient(channel, (ctx) -> Optional.ofNullable(Constants.TENANT_ID_CONTEXT_KEY.get()));
         client.init();
     }
 
@@ -100,7 +105,7 @@ class MinionRpcClientTest {
     }
 
     @Test
-    void testSentRpcRequest() throws InvalidProtocolBufferException {
+    void testSentRpcRequest() throws Exception {
         EchoRequest echoRequest = EchoRequest.newBuilder().setTime(System.currentTimeMillis()).build();
         RpcRequestProto request = RpcRequestProto.newBuilder()
             .setSystemId("test-system")
@@ -109,7 +114,7 @@ class MinionRpcClientTest {
             .setRpcId(UUID.randomUUID().toString())
             .setPayload(Any.pack(echoRequest))
             .build();
-        RpcResponseProto response = client.sendRpcRequest(request);
+        RpcResponseProto response = client.sendRpcRequest(PRIMARY_TENANT_ID, request).get();
         verify(mockRequestService).request(any(), any());
         assertThat(response.getSystemId()).isEqualTo(request.getSystemId());
         assertThat(response.getLocation()).isEqualTo(request.getLocation());

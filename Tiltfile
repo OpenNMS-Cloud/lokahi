@@ -202,22 +202,6 @@ jib_project(
     port_forwards=['31089:8990', '31050:5005'],
 )
 
-### Core ###
-custom_build(
-    'opennms/horizon-stream-core',
-    'mvn install -Pbuild-docker-images-enabled -DskipTests -Ddocker.image=$EXPECTED_REF -f platform',
-    deps=['./platform'],
-    ignore=['**/target', '**/dependency-reduced-pom.xml'],
-)
-
-k8s_resource(
-    'opennms-core',
-    new_name='core',
-    port_forwards=['11022:8101', '11080:8181', '11050:5005'],
-    labels=['core'],
-    trigger_mode=TRIGGER_MODE_MANUAL,
-)
-
 ### Minion ###
 custom_build(
     'opennms/horizon-stream-minion',

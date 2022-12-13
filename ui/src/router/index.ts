@@ -16,11 +16,6 @@ const router = createRouter({
       }
     },
     {
-      path: '/test', // For now, keep the alarms test available at this route
-      name: 'Alarms',
-      component: () => import('@/containers/Alarms.vue')
-    },
-    {
       path: '/graphs/:id',
       name: 'Graphs',
       component: () => import('@/containers/Graphs.vue')

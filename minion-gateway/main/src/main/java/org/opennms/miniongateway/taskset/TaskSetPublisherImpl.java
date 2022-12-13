@@ -28,6 +28,7 @@
 
 package org.opennms.miniongateway.taskset;
 
+import org.opennms.miniongateway.grpc.server.model.TenantKey;
 import org.opennms.taskset.contract.TaskSet;
 import org.opennms.taskset.service.api.TaskSetForwarder;
 import org.opennms.taskset.service.api.TaskSetListener;
@@ -53,8 +54,8 @@ public class TaskSetPublisherImpl implements TaskSetPublisher, TaskSetForwarder 
 
     private Logger log = DEFAULT_LOGGER;
 
-    private Map<String, TaskSet> taskSetByLocation = new HashMap<>();
-    private Map<String, Set<TaskSetListener>> taskSetListeners = new HashMap<>();
+    private Map<TenantKey, TaskSet> taskSetByLocation = new HashMap<>();
+    private Map<TenantKey, Set<TaskSetListener>> taskSetListeners = new HashMap<>();
 
     private final Object lock = new Object();
 
@@ -67,8 +68,9 @@ public class TaskSetPublisherImpl implements TaskSetPublisher, TaskSetForwarder 
         Set<TaskSetListener> listeners;
 
         synchronized (lock) {
-            taskSetByLocation.put(location, taskSet);
-            listeners = taskSetListeners.get(location);
+            TenantKey tenantKey = new TenantKey(tenantId, location);
+            taskSetByLocation.put(tenantKey, taskSet);
+            listeners = taskSetListeners.get(tenantKey);
         }
 
         // TODO: reduce log level to debug
@@ -88,15 +90,16 @@ public class TaskSetPublisherImpl implements TaskSetPublisher, TaskSetForwarder 
     }
 
     @Override
-    public void addListener(String location, TaskSetListener listener) {
+    public void addListener(String tenantId, String location, TaskSetListener listener) {
         boolean added;
         TaskSet latestDefinition = null;
 
         synchronized (lock) {
-            Set<TaskSetListener> listeners = taskSetListeners.computeIfAbsent(location, (key) -> this.createIdentitySet());
+            TenantKey tenantKey = new TenantKey(tenantId, location);
+            Set<TaskSetListener> listeners = taskSetListeners.computeIfAbsent(tenantKey, (key) -> this.createIdentitySet());
             added = listeners.add(listener);
             if (added) {
-                latestDefinition = taskSetByLocation.get(location);
+                latestDefinition = taskSetByLocation.get(tenantKey);
             }
         }
 
@@ -107,9 +110,9 @@ public class TaskSetPublisherImpl implements TaskSetPublisher, TaskSetForwarder 
     }
 
     @Override
-    public void removeListener(String location, TaskSetListener listener) {
+    public void removeListener(String tenantId, String location, TaskSetListener listener) {
         synchronized (lock) {
-            Set<TaskSetListener> listeners = taskSetListeners.get(location);
+            Set<TaskSetListener> listeners = taskSetListeners.get(new TenantKey(tenantId, location));
             if (listeners != null) {
                 listeners.remove(listener);
             }

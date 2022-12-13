@@ -15,11 +15,11 @@ public class LocalIgniteRpcRequestDispatcher implements IgniteRpcRequestDispatch
     }
 
     @Override
-    public CompletableFuture<RpcResponseProto> execute(RpcRequestProto request) {
+    public CompletableFuture<RpcResponseProto> execute(String tenantId, RpcRequestProto request) {
         if (request.getSystemId().isBlank()) {
-            return rpcRequestDispatcher.dispatch(request.getLocation(), request);
+            return rpcRequestDispatcher.dispatch(tenantId, request.getLocation(), request);
         }
-        return rpcRequestDispatcher.dispatch(request.getLocation(), request.getSystemId(), request);
+        return rpcRequestDispatcher.dispatch(tenantId, request.getLocation(), request.getSystemId(), request);
     }
 
 }

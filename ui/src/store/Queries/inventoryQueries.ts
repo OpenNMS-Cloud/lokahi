@@ -9,7 +9,6 @@ import {
 } from '@/types/graphql'
 import { NodeContent } from '@/types/inventory'
 import useSpinner from '@/composables/useSpinner'
-import { TimeUnit } from '@/types'
 
 export const useInventoryQueries = defineStore('inventoryQueries', () => {
   const nodes = ref<NodeContent[]>([])
@@ -38,6 +37,7 @@ export const useInventoryQueries = defineStore('inventoryQueries', () => {
 
         if(data.value && !isFetching.value) {
           const [res] = data.value.nodeLatency?.data?.result as TsResult[]
+          const status = data.value.nodeStatus?.status
           const [, latency] = res?.value || [] as number[] | string[] | undefined[]
           const { location: nodeLocation } = location as Location
           const [{ ipAddress }] = ipInterfaces as IpInterface[]
@@ -56,7 +56,7 @@ export const useInventoryQueries = defineStore('inventoryQueries', () => {
               {
                 type: 'status',
                 label: 'Status',
-                status: res?.metric?.status
+                status: status || ''
               }
             ],
             anchor: {

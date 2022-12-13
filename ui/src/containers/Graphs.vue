@@ -11,6 +11,7 @@
     <LineGraph :graph="nodeLatency" />
   </div>
   <div class="right-column">
+    <LineGraph :graph="bits" />
   </div>
 </div>
 </template>
@@ -30,6 +31,18 @@ const nodeLatency = computed<GraphProps>(() => {
   return {
     label: 'ICMP Response Time',
     metrics: ['response_time_msec'],
+    monitor: 'ICMP',
+    nodeId: route.params.id as string,
+    instance: instance.value,
+    timeRange: 10,
+    timeRangeUnit: TimeRangeUnit.Minute
+  }
+})
+
+const bits = computed<GraphProps>(() => {
+  return {
+    label: 'Bytes In / Out',
+    metrics: ['ifInOctets', 'ifOutOctets '],
     monitor: 'ICMP',
     nodeId: route.params.id as string,
     instance: instance.value,

@@ -28,19 +28,6 @@
 
 package org.opennms.horizon.server.service;
 
-import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
-
-import org.dataloader.DataLoader;
-import org.opennms.horizon.server.config.DataLoaderFactory;
-import org.opennms.horizon.server.mapper.NodeMapper;
-import org.opennms.horizon.server.model.inventory.Location;
-import org.opennms.horizon.server.model.inventory.Node;
-import org.opennms.horizon.server.model.inventory.NodeCreate;
-import org.opennms.horizon.server.service.grpc.InventoryClient;
-import org.opennms.horizon.server.utils.ServerHeaderUtil;
-import org.springframework.stereotype.Service;
-
 import io.leangen.graphql.annotations.GraphQLArgument;
 import io.leangen.graphql.annotations.GraphQLContext;
 import io.leangen.graphql.annotations.GraphQLEnvironment;
@@ -49,36 +36,58 @@ import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.execution.ResolutionEnvironment;
 import io.leangen.graphql.spqr.spring.annotations.GraphQLApi;
 import lombok.RequiredArgsConstructor;
+import org.dataloader.DataLoader;
+import org.opennms.horizon.server.config.DataLoaderFactory;
+import org.opennms.horizon.server.mapper.NodeMapper;
+import org.opennms.horizon.server.model.inventory.Location;
+import org.opennms.horizon.server.model.inventory.Node;
+import org.opennms.horizon.server.model.inventory.NodeCreate;
+import org.opennms.horizon.server.model.status.NodeStatus;
+import org.opennms.horizon.server.service.grpc.InventoryClient;
+import org.opennms.horizon.server.utils.ServerHeaderUtil;
+import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @GraphQLApi
 @Service
 public class GrpcNodeService {
+    private static final String ICMP_MONITOR_TYPE = "ICMP";
+
     private final InventoryClient client;
     private final NodeMapper mapper;
     private final ServerHeaderUtil headerUtil;
+    private final NodeStatusService nodeStatusService;
 
     @GraphQLQuery
     public Flux<Node> findAllNodes(@GraphQLEnvironment ResolutionEnvironment env) {
         return Flux.fromIterable(client.listNodes(headerUtil.getAuthHeader(env)).stream().map(mapper::protoToNode).collect(Collectors.toList()));
-  }
+    }
 
-  @GraphQLQuery
-  public Mono<Node> findNodeById(@GraphQLArgument(name = "id") Long id, @GraphQLEnvironment ResolutionEnvironment env) {
+    @GraphQLQuery
+    public Mono<Node> findNodeById(@GraphQLArgument(name = "id") Long id, @GraphQLEnvironment ResolutionEnvironment env) {
         return Mono.just(mapper.protoToNode(client.getNodeById(id, headerUtil.getAuthHeader(env))));
-  }
+    }
 
-  @GraphQLMutation
-  public Mono<Node> addNode(NodeCreate node, @GraphQLEnvironment ResolutionEnvironment env) {
+    @GraphQLMutation
+    public Mono<Node> addNode(NodeCreate node, @GraphQLEnvironment ResolutionEnvironment env) {
         return Mono.just(mapper.protoToNode(client.createNewNode(mapper.nodeCreateToProto(node), headerUtil.getAuthHeader(env))));
-  }
+    }
 
-  @GraphQLQuery
-  public CompletableFuture<Location> location(@GraphQLContext Node node, @GraphQLEnvironment  ResolutionEnvironment env) {
-      DataLoader<DataLoaderFactory.Key, Location> locationLoader = env.dataFetchingEnvironment.getDataLoader(DataLoaderFactory.DATA_LOADER_LOCATION);
-      DataLoaderFactory.Key key = new DataLoaderFactory.Key(node.getMonitoringLocationId(), headerUtil.getAuthHeader(env));
-      return locationLoader.load(key);
-  }
+    @GraphQLQuery
+    public CompletableFuture<Location> location(@GraphQLContext Node node, @GraphQLEnvironment ResolutionEnvironment env) {
+        DataLoader<DataLoaderFactory.Key, Location> locationLoader = env.dataFetchingEnvironment.getDataLoader(DataLoaderFactory.DATA_LOADER_LOCATION);
+        DataLoaderFactory.Key key = new DataLoaderFactory.Key(node.getMonitoringLocationId(), headerUtil.getAuthHeader(env));
+        return locationLoader.load(key);
+    }
+
+    @GraphQLQuery
+    public Mono<NodeStatus> getNodeStatus(@GraphQLArgument(name = "id") Long id, @GraphQLEnvironment ResolutionEnvironment env) {
+        boolean status = nodeStatusService.getNodeStatus(id, ICMP_MONITOR_TYPE, env);
+        return Mono.just(new NodeStatus(id, status));
+    }
 }

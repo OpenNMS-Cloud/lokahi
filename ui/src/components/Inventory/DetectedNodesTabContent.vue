@@ -43,7 +43,7 @@ ul {
   flex-flow: row wrap;
   gap: 1rem;
   > li {
-    padding: var(variables.$spacing-l) var(variables.$spacing-xxl);
+    padding: var(variables.$spacing-l) var(variables.$spacing-l);
     border: 1px solid var(variables.$secondary-text-on-surface); 
     border-radius: 10px;
     border-left: 10px solid var(variables.$secondary-text-on-surface); // TODO set color dynamically to the node's status

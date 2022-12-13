@@ -12,7 +12,7 @@ import org.opennms.cloud.grpc.minion.RpcResponseProto;
  */
 public interface RpcRequestDispatcher {
 
-    CompletableFuture<RpcResponseProto> dispatch(String location, RpcRequestProto request);
-    CompletableFuture<RpcResponseProto> dispatch(String location, String systemId, RpcRequestProto request);
+    CompletableFuture<RpcResponseProto> dispatch(String tenant, String location, RpcRequestProto request);
+    CompletableFuture<RpcResponseProto> dispatch(String tenant, String location, String systemId, RpcRequestProto request);
 
 }

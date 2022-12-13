@@ -67,7 +67,11 @@ STOPSIGNAL SIGTERM
 ### Runtime information and not relevant at build time
 ENV IGNITE_UPDATE_NOTIFIER="false" \
     MINION_ID="00000000-0000-0000-0000-deadbeef0001" \
-    MINION_LOCATION="MINION"
+    MINION_LOCATION="MINION" \
+    MINION_GATEWAY_HOST="minion-gateway" \
+    MINION_GATEWAY_PORT="8990" \
+    MINION_GATEWAY_TLS="false"
+
 
 ##------------------------------------------------------------------------------
 ## EXPOSED PORTS

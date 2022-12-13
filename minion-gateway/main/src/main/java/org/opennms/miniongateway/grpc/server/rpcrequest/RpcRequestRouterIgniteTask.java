@@ -68,7 +68,7 @@ public class RpcRequestRouterIgniteTask implements ComputeTask<RouterTaskData, b
                 // throw new IgniteException("Could not find active connection for location=" + request.getLocation() + " and systemId=" + request.getSystemId());
                 map.put(new FailedJob(request), ignite.cluster().localNode());
             } else {
-                map.put(new RoutingJob(request), routingNode);
+                map.put(new RoutingJob(tenantId, request), routingNode);
             }
         } catch (InvalidProtocolBufferException e) {
             throw new RuntimeException(e);
@@ -124,6 +124,8 @@ public class RpcRequestRouterIgniteTask implements ComputeTask<RouterTaskData, b
     }
 
     public static class RoutingJob implements ComputeJob {
+
+        private String tenantId;
         private final RpcRequestProto request;
 
         @LoggerResource
@@ -134,7 +136,8 @@ public class RpcRequestRouterIgniteTask implements ComputeTask<RouterTaskData, b
 
         private CompletableFuture<RpcResponseProto> responseFuture;
 
-        public RoutingJob(RpcRequestProto request) {
+        public RoutingJob(String tenantId, RpcRequestProto request) {
+            this.tenantId = tenantId;
             this.request = request;
         }
 
@@ -153,7 +156,7 @@ public class RpcRequestRouterIgniteTask implements ComputeTask<RouterTaskData, b
                 } else if (logger.isDebugEnabled()) {
                     logger.debug("Dispatching rpc request " + request.getRpcId());
                 }
-                responseFuture = requestDispatcher.execute(request).whenComplete((response, error) -> {
+                responseFuture = requestDispatcher.execute(tenantId, request).whenComplete((response, error) -> {
                     if (error != null) {
                         logger.warning("Failure found while execution of " + request.getRpcId() + " " + error);
                         return;

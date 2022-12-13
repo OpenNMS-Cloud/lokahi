@@ -10,7 +10,7 @@ public interface TaskSetForwarder {
      * @param location
      * @param listener
      */
-    void addListener(String location, TaskSetListener listener);
+    void addListener(String tenantId, String location, TaskSetListener listener);
 
     /**
      * Remove a listener that was added with addListener().  Note that listeners are tracked by their system identity,
@@ -19,5 +19,5 @@ public interface TaskSetForwarder {
      * @param location
      * @param listener
      */
-    void removeListener(String location, TaskSetListener listener);
+    void removeListener(String tenantId, String location, TaskSetListener listener);
 }

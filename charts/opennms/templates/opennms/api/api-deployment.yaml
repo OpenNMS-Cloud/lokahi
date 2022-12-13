@@ -49,8 +49,6 @@ spec:
               value: "maximumSize=10000,expireAfterWrite=60s"
             - name: HORIZON_STREAM_NOTIFICATIONS_URL
               value: "http://{{ .Values.OpenNMS.Notification.ServiceName }}:{{ .Values.OpenNMS.Notification.Port }}"
-            - name: HORIZON_STREAM_CORE_URL
-              value: "http://{{ .Values.OpenNMS.Core.ServiceName }}:{{ .Values.OpenNMS.Core.HttpPort }}"
             - name: TSDB_URL
               value: "http://{{ .Values.Prometheus.Server.ServiceName }}:{{ .Values.Prometheus.Server.Port }}/api/v1/query"
             - name: SPRING_WEBFLUX_BASE_PATH

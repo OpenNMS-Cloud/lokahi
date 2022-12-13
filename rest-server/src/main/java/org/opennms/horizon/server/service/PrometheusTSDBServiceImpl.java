@@ -28,10 +28,17 @@
 
 package org.opennms.horizon.server.service;
 
+import io.leangen.graphql.annotations.GraphQLEnvironment;
+import io.leangen.graphql.execution.ResolutionEnvironment;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
+import java.util.Optional;
 import org.opennms.horizon.server.model.TimeRangeUnit;
 import org.opennms.horizon.server.model.TimeSeriesQueryResult;
+import org.opennms.horizon.server.utils.ServerHeaderUtil;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -48,9 +55,12 @@ import reactor.core.publisher.Mono;
 @Service
 public class PrometheusTSDBServiceImpl {
     private static final String QUERY_TEMPLATE = "query=%s";
+
+    private final ServerHeaderUtil headerUtil;
     private final WebClient webClient;
 
-    public PrometheusTSDBServiceImpl(@Value("${tsdb.url}") String tsdbURL) {
+    public PrometheusTSDBServiceImpl(ServerHeaderUtil headerUtil, @Value("${tsdb.url}") String tsdbURL) {
+        this.headerUtil = headerUtil;
         webClient = WebClient.builder()
             .baseUrl(tsdbURL)
             .defaultHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
@@ -59,8 +69,13 @@ public class PrometheusTSDBServiceImpl {
     }
 
     @GraphQLQuery
-    public Mono<TimeSeriesQueryResult> getMetric(String name, Map<String, String> labels, Integer timeRange, TimeRangeUnit timeRangeUnit) {
-        String queryString = generatePayloadString(name, labels);
+    public Mono<TimeSeriesQueryResult> getMetric(@GraphQLEnvironment ResolutionEnvironment env, String name, Map<String, String> labels, Integer timeRange, TimeRangeUnit timeRangeUnit) {
+        Map<String, String> metricLabels = Optional.ofNullable(labels)
+            .map(HashMap::new)
+            .orElseGet(HashMap::new);
+        // override value in case if it was in incoming values
+        metricLabels.put("tenant_id", headerUtil.extractTenant(env));
+        String queryString = generatePayloadString(name, metricLabels);
         if(timeRange != null && timeRangeUnit != null) {
             queryString += "[" + timeRange + timeRangeUnit.value + "]";
         }
@@ -72,19 +87,10 @@ public class PrometheusTSDBServiceImpl {
 
     private String generatePayloadString(String name, Map<String, String> labels) {
         String queryString = name;
-        if (labels != null && labels.size() > 0) {
-            StringBuilder filterStr = new StringBuilder();
-            String filterTmp = "%s=\"%s\"";
-            for (Map.Entry<String, String> entry : labels.entrySet()) {
-                if (filterStr.length() > 0) {
-                    filterStr.append(",");
-                }
-                filterStr.append(String.format(filterTmp, entry.getKey(), entry.getValue()));
-            }
-            filterStr.insert(0, "{");
-            filterStr.append("}");
-            queryString += filterStr;
-        }
+        String filterStr = labels.entrySet().stream()
+            .map(entry -> entry.getKey() + "=\"" + entry.getValue() + "\"")
+            .reduce((left, right) -> left + "," + right).orElse("");
+        queryString += '{' + filterStr + '}';
         return String.format(QUERY_TEMPLATE, queryString);
     }
 }

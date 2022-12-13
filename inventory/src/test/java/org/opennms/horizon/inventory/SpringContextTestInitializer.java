@@ -28,8 +28,10 @@
 
 package org.opennms.horizon.inventory;
 
+import io.grpc.ManagedChannel;
 import io.grpc.inprocess.InProcessChannelBuilder;
 import org.jetbrains.annotations.NotNull;
+import org.opennms.horizon.inventory.config.MinionGatewayGrpcClientConfig;
 import org.opennms.taskset.service.contract.TaskSetServiceGrpc;
 import org.springframework.beans.factory.config.BeanDefinitionCustomizer;
 import org.springframework.boot.test.util.TestPropertyValues;
@@ -40,7 +42,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import java.util.function.Supplier;
 
 public class SpringContextTestInitializer implements ApplicationContextInitializer<GenericApplicationContext> {
-    private static final String TASK_SET_BLOCKING_STUB_NAME = "taskSetServiceBlockingStub";
+
     private static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:14.5-alpine")
         .withDatabaseName("inventory").withUsername("inventory")
         .withPassword("password").withExposedPorts(5432);
@@ -68,12 +70,9 @@ public class SpringContextTestInitializer implements ApplicationContextInitializ
     // The Mock Grpc server was getting a different stub due to other tests interfering.
     // This overrides the appropriate bean from the beginning of when the spring context gets initialized.
     private void initMockGrpcTaskSetService(GenericApplicationContext context) {
-
-        Class<TaskSetServiceGrpc.TaskSetServiceBlockingStub> stubClass
-            = TaskSetServiceGrpc.TaskSetServiceBlockingStub.class;
-
-        registerBean(context, TASK_SET_BLOCKING_STUB_NAME, stubClass, () -> TaskSetServiceGrpc.newBlockingStub(
-            InProcessChannelBuilder.forName(TaskSetServiceGrpc.SERVICE_NAME).directExecutor().build()));
+        registerBean(context, MinionGatewayGrpcClientConfig.MINION_GATEWAY_GRPC_CHANNEL, ManagedChannel.class,
+            () -> InProcessChannelBuilder.forName(TaskSetServiceGrpc.SERVICE_NAME).directExecutor().build()
+        );
     }
 
     private <T> void registerBean(GenericApplicationContext context, String name, Class<T> clazz, Supplier<T> supplier) {

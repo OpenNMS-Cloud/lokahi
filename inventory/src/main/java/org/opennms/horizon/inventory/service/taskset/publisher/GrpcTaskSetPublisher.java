@@ -28,25 +28,38 @@
 
 package org.opennms.horizon.inventory.service.taskset.publisher;
 
-import io.grpc.Metadata;
-import io.grpc.stub.MetadataUtils;
-import lombok.RequiredArgsConstructor;
+import io.grpc.Context;
+import io.grpc.ManagedChannel;
+import org.opennms.horizon.inventory.Constants;
+import org.opennms.horizon.inventory.grpc.TenantIdClientInterceptor;
+import org.opennms.horizon.inventory.grpc.TenantLookup;
 import org.opennms.taskset.contract.TaskSet;
 import org.opennms.taskset.service.api.TaskSetPublisher;
 import org.opennms.taskset.service.contract.PublishTaskSetRequest;
 import org.opennms.taskset.service.contract.PublishTaskSetResponse;
 import org.opennms.taskset.service.contract.TaskSetServiceGrpc;
+import org.opennms.taskset.service.contract.TaskSetServiceGrpc.TaskSetServiceBlockingStub;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 
-@Component
-@RequiredArgsConstructor
 public class GrpcTaskSetPublisher implements TaskSetPublisher {
-    private static final Logger log = LoggerFactory.getLogger(GrpcTaskSetPublisher.class);
-    private final TaskSetServiceGrpc.TaskSetServiceBlockingStub taskSetServiceStub;
 
-    private static final Metadata.Key<String> HEADER_KEY = Metadata.Key.of("tenant-id", Metadata.ASCII_STRING_MARSHALLER);
+    public static final String TASK_SET_PUBLISH_BEAN_NAME = "taskSetServiceBlockingStub";
+    private static final Logger log = LoggerFactory.getLogger(GrpcTaskSetPublisher.class);
+    private final ManagedChannel channel;
+    private final TenantLookup tenantLookup;
+
+    private TaskSetServiceBlockingStub taskSetServiceStub;
+
+    public GrpcTaskSetPublisher(ManagedChannel channel, TenantLookup tenantLookup) {
+        this.channel = channel;
+        this.tenantLookup = tenantLookup;
+    }
+
+    private void init() {
+        taskSetServiceStub = TaskSetServiceGrpc.newBlockingStub(channel)
+            .withInterceptors(new TenantIdClientInterceptor(tenantLookup));
+    }
 
     @Override
     public void publishTaskSet(String tenantId, String location, TaskSet taskSet) {
@@ -57,11 +70,9 @@ public class GrpcTaskSetPublisher implements TaskSetPublisher {
                     .setTaskSet(taskSet)
                     .build();
 
-            Metadata metadata = new Metadata();
-            metadata.put(HEADER_KEY, tenantId);
-
-            PublishTaskSetResponse response =
-                taskSetServiceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).publishTaskSet(request);
+            PublishTaskSetResponse response = Context.current().withValue(Constants.TENANT_ID_CONTEXT_KEY, tenantId).call(() ->
+                taskSetServiceStub.publishTaskSet(request)
+            );
 
             log.debug("Publish task set complete: location={}, response={}", location, response);
         } catch (Exception e) {

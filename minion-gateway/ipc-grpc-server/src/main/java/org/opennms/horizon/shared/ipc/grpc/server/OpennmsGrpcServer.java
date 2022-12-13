@@ -318,8 +318,7 @@ public class OpennmsGrpcServer extends AbstractMessageConsumerManager implements
     }
 
     @Override
-    public CompletableFuture<RpcResponseProto> dispatch(String location, RpcRequestProto request) {
-        String tenantId = tenantIDGrpcServerInterceptor.readCurrentContextTenantId();
+    public CompletableFuture<RpcResponseProto> dispatch(String tenantId, String location, RpcRequestProto request) {
         StreamObserver<RpcRequestProto> rpcHandler = rpcConnectionTracker.lookupByLocationRoundRobin(tenantId, location);
         if (rpcHandler == null) {
             return CompletableFuture.failedFuture(new IllegalArgumentException("Unknown location " + location));
@@ -328,8 +327,7 @@ public class OpennmsGrpcServer extends AbstractMessageConsumerManager implements
     }
 
     @Override
-    public CompletableFuture<RpcResponseProto> dispatch(String location, String systemId, RpcRequestProto request) {
-        String tenantId = tenantIDGrpcServerInterceptor.readCurrentContextTenantId();
+    public CompletableFuture<RpcResponseProto> dispatch(String tenantId, String location, String systemId, RpcRequestProto request) {
         StreamObserver<RpcRequestProto> rpcHandler = rpcConnectionTracker.lookupByMinionId(tenantId, systemId);
         if (rpcHandler == null) {
             return CompletableFuture.failedFuture(new IllegalArgumentException("Unknown system id " + systemId));

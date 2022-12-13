@@ -29,6 +29,7 @@
 package org.opennms.horizon.inventory.component;
 
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
@@ -118,15 +119,24 @@ public class MinionRpcManager {
             .setRpcId(UUID.randomUUID().toString())
             .setPayload(Any.pack(echoRequest))
             .build();
-        RpcResponseProto response = rpcClient.sendRpcRequest(request);
-        try {
-            EchoResponse echoResponse = response.getPayload().unpack(EchoResponse.class);
-            long responseTime = (System.nanoTime() - echoResponse.getTime()) / 1000000;
-            publishResult(systemId, location, tenantId, responseTime);
-            log.info("Response time for minion {} is {} msecs", systemId, responseTime);
-        } catch (InvalidProtocolBufferException e) {
-            log.error("Unable to parse echo response", e);
-        }
+        rpcClient.sendRpcRequest(tenantId, request).thenApply(RpcResponseProto::getPayload)
+            .thenApply(payload -> {
+                try {
+                    return payload.unpack(EchoResponse.class);
+                } catch (InvalidProtocolBufferException e) {
+                    throw new RuntimeException(e);
+                }
+            })
+            .whenComplete((echoResponse, error) -> {
+                if (error != null) {
+                    log.error("Unable to complete echo request", error);
+                    return;
+                }
+                long responseTime = (System.nanoTime() - echoResponse.getTime()) / 1000000;
+                publishResult(systemId, location, tenantId, responseTime);
+                log.info("Response time for minion {} is {} msecs", systemId, responseTime);
+            }
+        );
     }
 
     private void publishResult(String systemId, String location, String tenantId, long responseTime) {

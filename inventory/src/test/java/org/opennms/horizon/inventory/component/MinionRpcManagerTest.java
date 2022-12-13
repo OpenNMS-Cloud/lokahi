@@ -30,11 +30,14 @@ package org.opennms.horizon.inventory.component;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.opennms.horizon.inventory.TestConstants.PRIMARY_TENANT_ID;
+import static org.opennms.horizon.inventory.TestConstants.SECONDARY_TENANT_ID;
 import static org.testcontainers.shaded.org.awaitility.Awaitility.await;
 
 import java.time.Duration;
@@ -42,6 +45,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -88,8 +92,8 @@ class MinionRpcManagerTest {
         rpcManager = new MinionRpcManager(mockClient, mockService, mockTemplate);
         ReflectionTestUtils.setField(rpcManager, "initialDelay", 0);
         ReflectionTestUtils.setField(rpcManager, "kafkaTopic", "test-topic");
-        system1 = new MonitoringSystemBean("test-system1", "test-tenant1", "test-location1");
-        system2 = new MonitoringSystemBean("test-system2", "test-tenant2", "test-location2");
+        system1 = new MonitoringSystemBean("test-system1", PRIMARY_TENANT_ID, "test-location1");
+        system2 = new MonitoringSystemBean("test-system2", SECONDARY_TENANT_ID, "test-location2");
         EchoResponse echoResponse = EchoResponse.newBuilder().setTime(System.nanoTime()).build();
         rpcResponse = RpcResponseProto.newBuilder().setPayload(Any.pack(echoResponse)).build();
     }
@@ -106,17 +110,22 @@ class MinionRpcManagerTest {
     @Test
     void testStartUp() throws InvalidProtocolBufferException {
         List<MonitoringSystemBean> systemList = Arrays.asList(system1, system2);
-        ArgumentCaptor<RpcRequestProto> requestCaptor = ArgumentCaptor.forClass(RpcRequestProto.class);
+        ArgumentCaptor<RpcRequestProto> primaryTenantCaptor = ArgumentCaptor.forClass(RpcRequestProto.class);
+        ArgumentCaptor<RpcRequestProto> secondaryTenantCaptor = ArgumentCaptor.forClass(RpcRequestProto.class);
         doReturn(Arrays.asList(system1, system2)).when(mockService).listAllForMonitoring();
-        doReturn(rpcResponse).when(mockClient).sendRpcRequest(any(RpcRequestProto.class));
+        doReturn(CompletableFuture.completedFuture(rpcResponse)).when(mockClient).sendRpcRequest(eq(PRIMARY_TENANT_ID), any(RpcRequestProto.class));
+        doReturn(CompletableFuture.completedFuture(rpcResponse)).when(mockClient).sendRpcRequest(eq(SECONDARY_TENANT_ID), any(RpcRequestProto.class));
         ArgumentCaptor<ProducerRecord<String, byte[]>> producerCaptor = ArgumentCaptor.forClass(ProducerRecord.class);
         rpcManager.startRpc();
         await().atMost(Duration.ofMillis(1000)).until(() ->
             logCaptor.getInfoLogs().stream().anyMatch(l->l.startsWith("Response time for minion")));
         verify(mockService).listAllForMonitoring();
-        verify(mockClient, times(2)).sendRpcRequest(requestCaptor.capture());
-        List<RpcRequestProto> requests = requestCaptor.getAllValues();
-        assertRequests(systemList, requests);
+        verify(mockClient, times(1)).sendRpcRequest(eq(PRIMARY_TENANT_ID), primaryTenantCaptor.capture());
+        verify(mockClient, times(1)).sendRpcRequest(eq(SECONDARY_TENANT_ID), secondaryTenantCaptor.capture());
+        List<RpcRequestProto> requests = primaryTenantCaptor.getAllValues();
+        assertRequests(Collections.singletonList(system1), requests);
+        requests = secondaryTenantCaptor.getAllValues();
+        assertRequests(Collections.singletonList(system2), requests);
         verify(mockTemplate, times(2)).send(producerCaptor.capture());
         List<ProducerRecord<String, byte[]>> records = producerCaptor.getAllValues();
         assertProducerRecords(systemList, records);
@@ -127,16 +136,16 @@ class MinionRpcManagerTest {
         long id = 1L;
         doReturn(Collections.emptyList()).when(mockService).listAllForMonitoring();
         doReturn(Optional.of(system1)).when(mockService).getByIdForMonitoring(id);
-        doReturn(rpcResponse).when(mockClient).sendRpcRequest(any(RpcRequestProto.class));
+        doReturn(CompletableFuture.completedFuture(rpcResponse)).when(mockClient).sendRpcRequest(eq(PRIMARY_TENANT_ID), any(RpcRequestProto.class));
         rpcManager.startRpc();
         rpcManager.addSystem(id);
-        await().atMost(Duration.ofMillis(1000)).until(() ->
+        await().atMost(Duration.ofMillis(5000)).until(() ->
             logCaptor.getInfoLogs().stream().anyMatch(l -> l.startsWith("Response time for minion")));
         ArgumentCaptor<RpcRequestProto> requestCaptor = ArgumentCaptor.forClass(RpcRequestProto.class);
         ArgumentCaptor<ProducerRecord<String, byte[]>> producerCaptor = ArgumentCaptor.forClass(ProducerRecord.class);
         verify(mockService).listAllForMonitoring();
         verify(mockService).getByIdForMonitoring(id);
-        verify(mockClient).sendRpcRequest(requestCaptor.capture());
+        verify(mockClient).sendRpcRequest(eq(PRIMARY_TENANT_ID), requestCaptor.capture());
         assertRequests(Collections.singletonList(system1), Collections.singletonList(requestCaptor.getValue()));
         verify(mockTemplate).send(producerCaptor.capture());
         assertProducerRecords(Collections.singletonList(system1), Collections.singletonList(producerCaptor.getValue()));
@@ -144,7 +153,7 @@ class MinionRpcManagerTest {
 
     private void assertProducerRecords(List<MonitoringSystemBean> systems, List<ProducerRecord<String, byte[]>> records) throws InvalidProtocolBufferException {
         assertThat(records).asList().hasSameSizeAs(systems);
-        for(ProducerRecord<String, byte[]> record : records) {
+        for (ProducerRecord<String, byte[]> record : records) {
             TaskSetResults results = TaskSetResults.parseFrom(record.value());
             assertThat(results.getResultsList()).asList().hasSize(1);
             TaskResult result = results.getResults(0);

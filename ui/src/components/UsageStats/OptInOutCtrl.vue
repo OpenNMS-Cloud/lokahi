@@ -19,7 +19,7 @@
         title="Show me what is being sent.">
         <pre>
           <code>
-            {{ usageStatsQueries.usageStatsReport }}
+            <!-- {{ usageStatsQueries.usageStatsReport }} -->
           </code>
         </pre>
       </FeatherExpansionPanel>
@@ -46,12 +46,12 @@
 <script setup lang="ts">
 import Settings from "@featherds/icon/action/Settings"
 import useModal from '@/composables/useModal'
-import { useUsageStatsMutations } from '@/store/Mutations/usageStatsMutations'
-import { useUsageStatsQueries } from '@/store/Queries/usageStatsQueries'
+// import { useUsageStatsMutations } from '@/store/Mutations/usageStatsMutations'
+// import { useUsageStatsQueries } from '@/store/Queries/usageStatsQueries'
 
 const { openModal, closeModal, isVisible } = useModal()
-const usageStatsMutations = useUsageStatsMutations()
-const usageStatsQueries = useUsageStatsQueries()
+// const usageStatsMutations = useUsageStatsMutations()
+// const usageStatsQueries = useUsageStatsQueries()
 
 const state = useStorage<{ showModalOnLoad: boolean } >('first-load', {
   showModalOnLoad: true
@@ -60,11 +60,11 @@ const state = useStorage<{ showModalOnLoad: boolean } >('first-load', {
 const opt = (choice: boolean = false) => {
   state.value.showModalOnLoad = false
 
-  usageStatsMutations.toggleUsageStats({ 
-    toggleDataChoices: {
-      toggle: choice
-    }
-  })
+  // usageStatsMutations.toggleUsageStats({ 
+  //   toggleDataChoices: {
+  //     toggle: choice
+  //   }
+  // })
 
   closeModal()
 }

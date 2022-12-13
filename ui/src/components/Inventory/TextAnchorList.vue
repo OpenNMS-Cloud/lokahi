@@ -1,10 +1,10 @@
 <template>
   <ul class="text-anchor-list">
-    <li data-test="profile">
+    <!-- <li data-test="profile">
       <label :for="label.profile">{{ label.profile }}: </label>
       <a v-if="anchor.profileLink" @click="goto(anchor.profileLink)" :id="label.profile">{{ anchor?.profileValue }}</a>
       <span v-else :id="label.profile">{{ anchor.profileValue }}</span>
-    </li>
+    </li> -->
     <li data-test="location">
       <label :for="label.location">{{ label.location }}: </label>
       <a v-if="anchor.locationLink" @click="goto(anchor.locationLink)" :id="label.location">{{ anchor?.locationValue }}</a>
@@ -15,11 +15,11 @@
       <a v-if="anchor.managementIpLink" @click="goto(anchor.managementIpLink)" :id="label.managementIp">{{ anchor.managementIpValue }}</a>
       <span v-else :id="(label.managementIp)">{{ anchor.managementIpValue }}</span>
     </li>
-    <li data-test="tag">
+    <!-- <li data-test="tag">
       <label :for="label.tag">{{ label.tag }}: </label>
       <a v-if="anchor.tagLink" @click="goto(anchor.tagLink)" :id="label.tag">{{ anchor.tagValue }}</a>
       <span v-else :id="label.tag">{{ anchor.tagValue }}</span>
-    </li>
+    </li> -->
   </ul>
 </template>
 

@@ -1,0 +1,6 @@
+fragment NodeStatusParts on Query {
+  nodeStatus(id: $id) {
+    id
+    status
+  }
+}

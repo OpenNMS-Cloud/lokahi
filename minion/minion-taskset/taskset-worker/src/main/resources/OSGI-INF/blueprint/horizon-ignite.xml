@@ -72,6 +72,7 @@
   <bean id="workflowLifecycleManager" class="org.opennms.horizon.minion.taskset.worker.impl.TaskSetLifecycleManagerImpl" destroy-method="close">
     <property name="ignite" ref="ignite"/>
   </bean>
+  <service ref="workflowLifecycleManager" interface="org.opennms.horizon.minion.taskset.worker.TaskSetLifecycleManager" />
 
   <bean id="meteredWorkflowLifecycleManager" class="org.opennms.horizon.minion.taskset.worker.impl.MeteredWorkflowLifecycleManager">
     <argument ref="identity" />

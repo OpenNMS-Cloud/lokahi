@@ -87,7 +87,6 @@ public class GrpcNodeService {
 
     @GraphQLQuery
     public Mono<NodeStatus> getNodeStatus(@GraphQLArgument(name = "id") Long id, @GraphQLEnvironment ResolutionEnvironment env) {
-        boolean status = nodeStatusService.getNodeStatus(id, ICMP_MONITOR_TYPE, env);
-        return Mono.just(new NodeStatus(id, status));
+        return nodeStatusService.getNodeStatus(id, ICMP_MONITOR_TYPE, env);
     }
 }

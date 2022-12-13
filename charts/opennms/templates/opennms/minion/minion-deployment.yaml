@@ -61,7 +61,7 @@ spec:
               value: "{{ .Values.OpenNMS.Minion.ServiceName }}"
             - name: JAVA_TOOL_OPTIONS
               value: "-agentlib:jdwp=transport=dt_socket,server=y,address=5005,suspend=n,quiet=y" # FIXME: Permanent debug port, enable only for dev mode
-            - name: LOCATION
+            - name: MINION_LOCATION
               value: "Default"
             - name: IGNITE_UPDATE_NOTIFIER # Disable Ignite version lookups
               value: "false"

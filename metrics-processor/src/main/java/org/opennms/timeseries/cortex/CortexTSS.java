@@ -44,12 +44,9 @@ import org.opennms.timeseries.cortex.shaded.resilience4j.bulkhead.Bulkhead;
 import org.opennms.timeseries.cortex.shaded.resilience4j.bulkhead.BulkheadConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.stereotype.Service;
 import org.xerial.snappy.Snappy;
 
-import com.codahale.metrics.Gauge;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -83,9 +80,7 @@ public class CortexTSS {
     private static final Logger LOG = LoggerFactory.getLogger(CortexTSS.class);
 
     private static final String X_SCOPE_ORG_ID_HEADER = "X-Scope-OrgID";
-
     private static final MediaType PROTOBUF_MEDIA_TYPE = MediaType.parse("application/x-protobuf");
-
     private static final String[] MONITOR_METRICS_LABEL_NAMES = {
         "instance",
         "location",
@@ -101,8 +96,6 @@ public class CortexTSS {
 
     private final Bulkhead asyncHttpCallsBulkhead;
     private final CortexTSSConfig config;
-
-    public static final String CORTEX_TSS = "CORTEX_TSS";
 
     public CortexTSS(final CortexTSSConfig config) {
         this.config = Objects.requireNonNull(config);
@@ -125,14 +118,6 @@ public class CortexTSS {
             .fairCallHandlingStrategyEnabled(true)
             .build();
         asyncHttpCallsBulkhead = Bulkhead.of("asyncHttpCalls", bulkheadConfig);
-
-        // Expose HTTP client statistics
-        metrics.register("connectionCount", (Gauge<Integer>) () -> client.connectionPool().connectionCount());
-        metrics.register("idleConnectionCount", (Gauge<Integer>) () -> client.connectionPool().idleConnectionCount());
-        metrics.register("queuedCallsCount", (Gauge<Integer>) () -> client.dispatcher().queuedCallsCount());
-        metrics.register("runningCallsCount", (Gauge<Integer>) () -> client.dispatcher().runningCallsCount());
-        metrics.register("availableConcurrentCalls", (Gauge<Integer>) () -> asyncHttpCallsBulkhead.getMetrics().getAvailableConcurrentCalls());
-        metrics.register("maxAllowedConcurrentCalls", (Gauge<Integer>) () -> asyncHttpCallsBulkhead.getMetrics().getMaxAllowedConcurrentCalls());
     }
 
     @KafkaListener(topics = "${kafka.topics}", concurrency = "1")
@@ -165,7 +150,6 @@ public class CortexTSS {
     }
 
     public void store(final TaskResult result) throws IOException {
-
         prometheus.PrometheusRemote.WriteRequest.Builder writeBuilder = prometheus.PrometheusRemote.WriteRequest.newBuilder();
         writeBuilder.addTimeseries(toPrometheusTimeSeries(result));
 
@@ -174,7 +158,6 @@ public class CortexTSS {
         // Compress the write request using Snappy
         final byte[] writeRequestCompressed;
         writeRequestCompressed = Snappy.compress(writeRequest.toByteArray());
-
 
         // Build the HTTP request
         final RequestBody body = RequestBody.create(PROTOBUF_MEDIA_TYPE, writeRequestCompressed);
@@ -237,19 +220,17 @@ public class CortexTSS {
     }
 
     private static prometheus.PrometheusTypes.TimeSeries.Builder toPrometheusTimeSeries(TaskResult result) {
-
         MonitorResponse response = result.getMonitorResponse();
         String[] labelValues = {response.getIpAddress(), result.getLocation(), result.getSystemId(), response.getMonitorType().name(), String.valueOf(response.getNodeId())};
 
         prometheus.PrometheusTypes.TimeSeries.Builder builder = prometheus.PrometheusTypes.TimeSeries.newBuilder();
-        // Convert all the tags to labels
         for (int i = 0; i < MONITOR_METRICS_LABEL_NAMES.length; i++) {
-            //TODO which tag should we use intrinsic||meta||external?
             builder.addLabels(prometheus.PrometheusTypes.Label.newBuilder()
                 .setName(sanitizeLabelName(MONITOR_METRICS_LABEL_NAMES[i]))
                 .setValue(sanitizeLabelValue(labelValues[i])));
         }
         builder.addSamples(prometheus.PrometheusTypes.Sample.newBuilder()
+            //is now okay ?
             .setTimestamp(Instant.now().toEpochMilli())
             .setValue(response.getResponseTimeMs()));
 

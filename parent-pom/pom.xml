@@ -33,7 +33,7 @@
         <commons.io.version>2.11.0</commons.io.version>
         <commons.lang.version>2.6</commons.lang.version>
         <cucumber.version>7.1.0</cucumber.version>
-        <cxf.version>3.5.1</cxf.version>
+        <cxf.version>3.5.5</cxf.version>
         <dhcp4java.version>1.1.0</dhcp4java.version>
         <drools.version>7.31.0.Final</drools.version>
         <geohash.version>1.4.0</geohash.version>

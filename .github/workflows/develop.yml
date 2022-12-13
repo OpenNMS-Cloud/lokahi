@@ -35,14 +35,6 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           sonar-token: ${{ secrets.SONAR_TOKEN }}
 
-      - name: Scan Operator with SonarCloud
-        uses: ./.github/actions/operator
-        with:
-          dir-location: 'operator'
-          enable-sonar-scan: true
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          sonar-token: ${{ secrets.SONAR_TOKEN }}
-
   develop:
     # If label for PR, closed on PR, or develop branch on push, then run., 
     if: ${{ ( github.event.label.name == 'actions-develop' ) || ( github.event.action == 'closed' ) || ( github.event.ref == 'refs/heads/develop' ) }}
@@ -81,16 +73,6 @@ jobs:
         with:
           dir-location: 'keycloak-ui'
     
-      - name: feature-operator
-        id: action-feature-operator
-        uses: ./.github/actions/operator
-        with:
-          dir-location: 'operator'
-          # leave false, sonar scans don't work on self-hosted runner, covered in the scan job
-          enable-sonar-scan: false
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          sonar-token: ${{ secrets.SONAR_TOKEN }}
-
       # This needs to happen before shared-lib.
       - name: parent-pom
         id: action-parent-pom

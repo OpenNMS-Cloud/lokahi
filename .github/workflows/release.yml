@@ -66,13 +66,6 @@ jobs:
         with:
           dir-location: 'keycloak-ui'
 
-      - name: feature-operator
-        id: action-feature-operator
-        uses: ./.github/actions/operator
-        with:
-          dir-location: 'operator'
-          enable-sonar-scan: false
-
       # This needs to happen before shared-lib.
       - name: parent-pom
         id: action-parent-pom
@@ -381,19 +374,6 @@ jobs:
           docker push opennms/horizon-stream-notification:${{ env.RELEASE_TAG }}
           docker push opennms/horizon-stream-notification:latest
       
-      - name: publish-image-operator
-        run: |
-
-          # Login to dockerhub.
-          echo ${{ secrets.DOCKERHUB_PASS }} | docker login -u ${{ secrets.DOCKERHUB_LOGIN }} --password-stdin
-
-          # Tag and save the image as a file to be published. Both release version and latest.
-          docker tag opennms/operator:local-build opennms/operator:${{ env.RELEASE_TAG }}
-          docker tag opennms/operator:local-build opennms/operator:latest
-
-          docker push opennms/operator:${{ env.RELEASE_TAG }}
-          docker push opennms/operator:latest
-
       #- name: tag-release-branch
       #  run: |
 

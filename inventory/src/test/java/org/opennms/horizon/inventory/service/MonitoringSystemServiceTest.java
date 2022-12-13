@@ -28,15 +28,18 @@
 
 package org.opennms.horizon.inventory.service;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
@@ -67,9 +70,14 @@ public class MonitoringSystemServiceTest {
         mockLocationRepo = mock(MonitoringLocationRepository.class);
         mockMonitoringSystemRepo = mock(MonitoringSystemRepository.class);
         MonitoringSystemMapper mapper = Mappers.getMapper(MonitoringSystemMapper.class);
+
         service = new MonitoringSystemService(mockMonitoringSystemRepo, mockLocationRepo, mapper);
         testLocation = new MonitoringLocation();
         testMonitoringSystem = new MonitoringSystem();
+        testMonitoringSystem.setLastCheckedIn(LocalDateTime.now());
+        testMonitoringSystem.setTenantId(tenantId);
+        testMonitoringSystem.setSystemId(systemId);
+        testMonitoringSystem.setLabel(systemId);
         heartbeatMessage = HeartbeatMessage.newBuilder()
             .setIdentity(Identity.newBuilder()
                 .setLocation(location)
@@ -109,6 +117,15 @@ public class MonitoringSystemServiceTest {
         verify(mockMonitoringSystemRepo).save(any(MonitoringSystem.class));
         verify(mockLocationRepo).findByLocation(location);
         verify(mockLocationRepo).save(any(MonitoringLocation.class));
+    }
+
+    @Test
+    void testFindBySystemIdWithStatus() {
+        doReturn(Optional.of(testMonitoringSystem)).when(mockMonitoringSystemRepo).findBySystemIdAndTenantId(systemId, tenantId);
+        var result = service.findBySystemId(systemId, tenantId);
+        assertTrue(result.isPresent());
+        assertTrue(result.get().getStatus());
+        verify(mockMonitoringSystemRepo).findBySystemIdAndTenantId(systemId, tenantId);
     }
 
 }

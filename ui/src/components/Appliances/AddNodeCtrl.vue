@@ -151,8 +151,10 @@ const selectLocation = () => {
 }
 // sets default location when locations available
 watchEffect(() => { 
-  locationOption.value = applianceQueries.locations[0]
-  selectLocation()
+  if (!locationOption.value) {
+    locationOption.value = applianceQueries.locations[0]
+    selectLocation()
+  }
 })
 </script>
 

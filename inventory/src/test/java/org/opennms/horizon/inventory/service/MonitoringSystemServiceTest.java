@@ -93,9 +93,9 @@ public class MonitoringSystemServiceTest {
 
     @Test
     void testReceiveMsgMonitorSystemExist() {
-        doReturn(Optional.of(testMonitoringSystem)).when(mockMonitoringSystemRepo).findBySystemId(systemId);
+        doReturn(Optional.of(testMonitoringSystem)).when(mockMonitoringSystemRepo).findBySystemIdAndTenantId(systemId, tenantId);
         service.addMonitoringSystemFromHeartbeat(heartbeatMessage, tenantId);
-        verify(mockMonitoringSystemRepo).findBySystemId(systemId);
+        verify(mockMonitoringSystemRepo).findBySystemIdAndTenantId(systemId, tenantId);
         verify(mockMonitoringSystemRepo).save(testMonitoringSystem);
     }
 
@@ -111,13 +111,13 @@ public class MonitoringSystemServiceTest {
 
     @Test
     void testCreateNewMonitorSystemAndNewLocation() {
-        doReturn(Optional.empty()).when(mockMonitoringSystemRepo).findBySystemId(systemId);
-        doReturn(Optional.empty()).when(mockLocationRepo).findByLocation(location);
+        doReturn(Optional.empty()).when(mockMonitoringSystemRepo).findBySystemIdAndTenantId(systemId, tenantId);
+        doReturn(Optional.empty()).when(mockLocationRepo).findByLocationAndTenantId(location, tenantId);
         doReturn(testLocation).when(mockLocationRepo).save(any(MonitoringLocation.class));
         service.addMonitoringSystemFromHeartbeat(heartbeatMessage, tenantId);
-        verify(mockMonitoringSystemRepo).findBySystemId(systemId);
+        verify(mockMonitoringSystemRepo).findBySystemIdAndTenantId(systemId, tenantId);
         verify(mockMonitoringSystemRepo).save(any(MonitoringSystem.class));
-        verify(mockLocationRepo).findByLocation(location);
+        verify(mockLocationRepo).findByLocationAndTenantId(location, tenantId);
         verify(mockLocationRepo).save(any(MonitoringLocation.class));
         verify(mockTrapConfigService).sendTrapConfigToMinion(testLocation.getTenantId(), testLocation.getLocation());
     }

@@ -31,7 +31,7 @@ package org.opennms.minion.icmp.jni6;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
-import java.util.Random;
+import java.security.SecureRandom;
 import java.util.concurrent.TimeUnit;
 
 import org.opennms.horizon.shared.utils.InetAddressUtils;
@@ -100,7 +100,7 @@ public abstract class Ping {
         }
 
         String host = argv[0];
-        short icmpId = (short) new Random().nextInt(Short.MAX_VALUE);
+        short icmpId = (short) new SecureRandom().nextInt(Short.MAX_VALUE);
 
         ICMPv6Socket m_socket = null;
 

@@ -40,5 +40,5 @@ public class Minion {
     private String label;
     private long locationId;
     private long lastCheckedTime;
-    private boolean status;
+    private String status;
 }

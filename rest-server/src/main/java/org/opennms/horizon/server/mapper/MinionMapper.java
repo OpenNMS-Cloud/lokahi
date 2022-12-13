@@ -41,9 +41,18 @@ public interface MinionMapper {
         @Mapping(target = "lastCheckedTime", source = "lastCheckedIn")
     })
     Minion protoToMinion(MonitoringSystemDTO dto);
+
     @Mappings({
         @Mapping(source = "locationId", target = "monitoringLocationId"),
         @Mapping(source = "lastCheckedTime", target = "lastCheckedIn")
     })
     MonitoringSystemDTO minionToProto(Minion minion);
+
+    default String statusToStatus(boolean status) {
+        return status ? "UP" : "DOWN";
+    }
+
+    default boolean statusToStatus(String status) {
+        return "UP".equalsIgnoreCase(status);
+    }
 }

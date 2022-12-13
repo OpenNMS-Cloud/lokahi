@@ -89,13 +89,6 @@ jobs:
           dir-location: 'shared-lib'
           enable-sonar-scan: false
 
-      - name: feature-core
-        id: action-feature-core
-        uses: ./.github/actions/core
-        with:
-          dir-location: 'platform'
-          enable-sonar-scan: false
-
       - name: feature-metrics-processor
         id: action-feature-metrics-processor
         uses: ./.github/actions/metrics-processor
@@ -230,22 +223,6 @@ jobs:
           docker push opennms/horizon-stream-minion-gateway-grpc-proxy:${{ env.RELEASE_TAG }}
           docker push opennms/horizon-stream-minion-gateway-grpc-proxy:latest
 
-      - name: publish-image-core
-        run: |
-
-          # Login to dockerhub.
-          echo ${{ secrets.DOCKERHUB_PASS }} | docker login -u ${{ secrets.DOCKERHUB_LOGIN }} --password-stdin
-
-          # Publish core image
-          cd platform/
-
-          # Tag and save the image as a file to be published. Both release version and latest.
-          docker tag opennms/horizon-stream-core:local opennms/horizon-stream-core:${{ env.RELEASE_TAG }}
-          docker tag opennms/horizon-stream-core:local opennms/horizon-stream-core:latest
-
-          docker push opennms/horizon-stream-core:${{ env.RELEASE_TAG }}
-          docker push opennms/horizon-stream-core:latest
-      
       - name: publish-image-ui
         run: |
 

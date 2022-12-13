@@ -16,7 +16,6 @@ spec:
         app: {{ .Values.OpenNMS.Minion.ServiceName }}
       annotations:
         linkerd.io/inject: enabled
-        config.linkerd.io/opaque-ports: "{{ .Values.OpenNMS.Core.IgniteClusterPort }},{{ .Values.OpenNMS.Core.IgniteDiscoveryPort }}"
     spec:
       serviceAccountName: {{ .Values.OpenNMS.Minion.ServiceName }}-sa
       {{- if .Values.NodeRestrictions.Enabled }}

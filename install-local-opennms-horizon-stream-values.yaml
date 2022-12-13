@@ -1,14 +1,5 @@
 Host: onmshs
 OpenNMS:
-  Core:
-    Image: opennms/horizon-stream-core:latest
-    Resources:
-      Limits:
-        Cpu: "0"
-        Memory: "0"
-      Requests:
-        Cpu: "0"
-        Memory: "0"
   API:
     Image: opennms/horizon-stream-rest-server:latest
     Resources:

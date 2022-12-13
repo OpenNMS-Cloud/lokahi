@@ -282,7 +282,20 @@ public class OpennmsGrpcServer extends AbstractMessageConsumerManager implements
                             // Schedule execution with the ExecutorService, with the current GRPC context active
                             Context.currentContextExecutor(sinkModuleExecutor)
                                 .execute(() -> dispatchSinkMessage(sinkMessage));
+                        } else {
+                            LOG.error("Ignoring sink message; no module executor registered: module-id={}; location={}; system-id={}; message-id={}",
+                                sinkMessage.getModuleId(),
+                                sinkMessage.getLocation(),
+                                sinkMessage.getSystemId(),
+                                sinkMessage.getMessageId()
+                            );
                         }
+                    } else {
+                        LOG.error("Ignoring sink message with null or empty module-id: location={}; system-id={}; message-id={}",
+                            sinkMessage.getLocation(),
+                            sinkMessage.getSystemId(),
+                            sinkMessage.getMessageId()
+                        );
                     }
                 } else {
                     LOG.error("Unsupported message {}", message);

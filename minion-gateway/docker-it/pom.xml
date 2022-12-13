@@ -1,0 +1,293 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.opennms.horizon.minion.gateway</groupId>
+        <artifactId>minion-gateway</artifactId>
+        <version>0.1.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>minion-gateway-docker-it</artifactId>
+
+    <name>OpenNMS Horizon :: Minion Gateway :: Docker IT</name>
+    <description>
+        Docker build-time Integration Tests for the OpenNMS Minion Gateway.
+
+        The docker-maven-plugin is used to spin up containers with the core project and exercise
+        the public endpoints.
+    </description>
+
+    <dependencies>
+        <!-- Dependency to ensure the docker image is built before running the tests -->
+        <dependency>
+            <groupId>org.opennms.horizon.minion.gateway</groupId>
+            <artifactId>minion-gateway-main</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.opennms.horizon.shared</groupId>
+            <artifactId>ipc-grpc-contract</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.cucumber</groupId>
+            <artifactId>cucumber-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.cucumber</groupId>
+            <artifactId>cucumber-java</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.cucumber</groupId>
+            <artifactId>cucumber-junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.cucumber</groupId>
+            <artifactId>cucumber-picocontainer</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>io.rest-assured</groupId>
+            <artifactId>rest-assured</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>jcl-over-slf4j</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-slf4j-impl</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <testResources>
+            <testResource>
+                <directory>src/test/resources</directory>
+                <filtering>false</filtering>
+            </testResource>
+            <testResource>
+                <directory>src/test/resources-filtered</directory>
+                <filtering>true</filtering>
+            </testResource>
+        </testResources>
+
+        <plugins>
+
+            <!--         -->
+            <!--  DOCKER -->
+            <!--         -->
+            <plugin>
+                <groupId>io.fabric8</groupId>
+                <artifactId>docker-maven-plugin</artifactId>
+                <configuration>
+                    <!--suppress MavenModelInspection -->
+                    <skip>${skipITs}</skip>
+                    <showLogs>true</showLogs>
+                    <autoCreateCustomNetworks>true</autoCreateCustomNetworks>
+                    <images>
+
+                        <!--             -->
+                        <!-- KAFKA IMAGE -->
+                        <!--             -->
+                        <image>
+                            <name>kafka-it-image</name>
+                            <alias>kafka-host</alias>
+                            <build>
+                                <!-- POSTGRES VERSION PROPERTY -->
+                                <from>blacktop/kafka:2.6</from>
+                            </build>
+                            <run>
+                                <env>
+                                    <KAFKA_ADVERTISED_HOST_NAME>kafka-host</KAFKA_ADVERTISED_HOST_NAME>
+                                    <KAFKA_LISTENERS>CLIENT://:9092</KAFKA_LISTENERS>
+                                    <KAFKA_ADVERTISED_LISTENERS>CLIENT://kafka-host:9092</KAFKA_ADVERTISED_LISTENERS>
+                                    <KAFKA_LISTENER_SECURITY_PROTOCOL_MAP>CLIENT:PLAINTEXT</KAFKA_LISTENER_SECURITY_PROTOCOL_MAP>
+                                    <KAFKA_INTER_BROKER_LISTENER_NAME>CLIENT</KAFKA_INTER_BROKER_LISTENER_NAME>
+                                </env>
+                                <ports>
+                                    <port>kafka.port:9092</port>
+                                </ports>
+                                <wait>
+                                    <log>(?s)started \(kafka.server.KafkaServer\)</log>
+                                    <time>120000</time>
+                                </wait>
+                                <network>
+                                    <mode>custom</mode>
+                                    <name>minion-gateway-docker-it-network</name>
+                                    <alias>kafka-host</alias>
+                                </network>
+                            </run>
+                        </image>
+
+                        <!--                  -->
+                        <!-- KAFKA-REST IMAGE -->
+                        <!--                  -->
+                        <image>
+                            <name>kafka-rest-it-image</name>
+                            <alias>kafka-rest</alias>
+                            <build>
+                                <from>confluentinc/cp-kafka-rest:7.3.0</from>
+                            </build>
+                            <run>
+                                <env>
+                                    <KAFKA_REST_BOOTSTRAP_SERVERS>kafka-host:9092</KAFKA_REST_BOOTSTRAP_SERVERS>
+                                    <KAFKA_REST_LISTENERS>http://0.0.0.0:8080</KAFKA_REST_LISTENERS>
+                                </env>
+                                <ports>
+                                    <port>kafka-rest.port:8080</port>
+                                </ports>
+                                <wait>
+                                    <log>INFO Server started, listening for requests\.\.\. \(io.confluent.kafkarest.KafkaRestMain\)</log>
+                                    <time>60000</time>
+                                </wait>
+                                <network>
+                                    <mode>custom</mode>
+                                    <name>minion-gateway-docker-it-network</name>
+                                    <alias>kafka-rest-host</alias>
+                                </network>
+                            </run>
+                        </image>
+
+
+                        <!--                    -->
+                        <!-- APPLICATION IMAGE  -->
+                        <!--                    -->
+                        <image>
+                            <name>opennms-minion-gateway-application-it-image</name>
+                            <alias>application</alias>
+                            <build>
+                                <from>opennms/horizon-stream-minion-gateway:local</from>
+                            </build>
+                            <run>
+                                <ports>
+                                    <port>application-http-port:8181</port>
+                                    <port>application-external-grpc-port:8990</port>
+                                    <port>application-internal-grpc-port:8991</port>
+                                    <port>5005:5005</port>
+                                </ports>
+                                <env>
+                                    <!-- Need to make sure address=* is in the DEBUG OPTS otherwise it listens on the container's localhost only -->
+                                    <JAVA_TOOL_OPTIONS>-Djava.security.egd=file:/dev/./urandom -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005</JAVA_TOOL_OPTIONS>
+                                    <KAFKA_BOOTSTRAP_SERVERS>kafka-host:9092</KAFKA_BOOTSTRAP_SERVERS>
+                                </env>
+                                <wait>
+                                    <!-- Three separate lines matched here (?s) enables multi-line matching -->
+                                    <log>(?s)Started MinionGatewayMain in .* seconds.*OpenNMS IPC gRPC server started with .* services.*OpenNMS IPC gRPC server started with .* services</log>
+                                    <time>300000</time>
+                                </wait>
+                                <network>
+                                    <mode>custom</mode>
+                                    <name>minion-gateway-docker-it-network</name>
+                                    <alias>application</alias>
+                                </network>
+                            </run>
+                        </image>
+                    </images>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>start-before-integration-test</id>
+                        <phase>pre-integration-test</phase>
+                        <goals>
+                            <goal>build</goal>
+                            <goal>start</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>stop-after-integration-test</id>
+                        <phase>post-integration-test</phase>
+                        <goals>
+                            <goal>stop</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!--                -->
+            <!-- TEST EXECUTION -->
+            <!--                -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>horizon-integration-test</id>
+                        <goals>
+                            <goal>integration-test</goal>
+                        </goals>
+                        <phase>integration-test</phase>
+                        <configuration>
+                            <excludes>
+                                <exclude>none</exclude>
+                            </excludes>
+                            <includes>
+                                <include>**/*IT.java</include>
+                            </includes>
+                        </configuration>
+                    </execution>
+
+                    <!-- Fail the build on IT Failures.  Executed as a separate step so that post-integration-test -->
+                    <!--  phase executes even after an IT failure.                                                 -->
+                    <execution>
+                        <id>horizon-verify-it</id>
+                        <goals>
+                            <goal>verify</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <!--suppress MavenModelInspection -->
+                    <skipITs>${skipITs}</skipITs>
+                    <reuseForks>true</reuseForks>
+                    <useSystemClassLoader>false</useSystemClassLoader>
+                    <systemProperties>
+                        <property>
+                            <name>application.base-url</name>
+                            <!--suppress MavenModelInspection -->
+                            <value>http://localhost:${application-http-port}</value>
+                        </property>
+                        <property>
+                            <name>application-external-grpc-port</name>
+                            <!--suppress MavenModelInspection -->
+                            <value>${application-external-grpc-port}</value>
+                        </property>
+                        <property>
+                            <name>application-internal-grpc-port</name>
+                            <!--suppress MavenModelInspection -->
+                            <value>${application-internal-grpc-port}</value>
+                        </property>
+                        <property>
+                            <name>kafka-rest.url</name>
+                            <!--suppress UnresolvedMavenProperty -->
+                            <value>http://localhost:${kafka-rest.port}</value>
+                        </property>
+                    </systemProperties>
+                </configuration>
+            </plugin>
+
+        </plugins>
+    </build>
+</project>

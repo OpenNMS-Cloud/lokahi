@@ -27,6 +27,12 @@
         </dependencies>
     </dependencyManagement>
 
+    <properties>
+        <docker.image.name>opennms/horizon-stream-minion-gateway</docker.image.name>
+        <docker.image.tag>local</docker.image.tag>
+        <skipJib>false</skipJib>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.opennms.horizon.minion.gateway</groupId>
@@ -156,25 +162,24 @@
                 <groupId>com.google.cloud.tools</groupId>
                 <artifactId>jib-maven-plugin</artifactId>
                 <configuration>
-                    <!-- override skip=false from minion-gateway parent so jib executes here -->
-                    <skip>false</skip>
+                    <skip>${skipJib}</skip>
+                    <to>
+                        <image>${docker.image.name}:${docker.image.tag}</image>
+                    </to>
+                    <container>
+                        <creationTime>USE_CURRENT_TIMESTAMP</creationTime>
+                    </container>
                 </configuration>
+                <executions>
+                    <execution>
+                        <id>build-docker-image</id>
+                        <phase>install</phase>
+                        <goals>
+                            <goal>dockerBuild</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
-
-
-    <profiles>
-        <!-- Build docker images on request. -->
-        <profile>
-            <id>build-docker-images-enabled</id>
-            <activation>
-                <activeByDefault>false</activeByDefault>
-            </activation>
-            <properties>
-                <skip-docker-image-build>false</skip-docker-image-build>
-            </properties>
-        </profile>
-    </profiles>
-
 </project>

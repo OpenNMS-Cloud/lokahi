@@ -24,6 +24,7 @@
         <docker.image.tag>local</docker.image.tag>
         <docker.image.skipPush>false</docker.image.skipPush>
         <docker.it.network>rest-server-it-network</docker.it.network>
+        <skipITs>false</skipITs>
     </properties>
 
     <modules>
@@ -32,6 +33,8 @@
         <module>ipc-grpc-server</module>
         <module>rpc-request-server</module>
         <module>main</module>
+
+        <module>docker-it</module>
     </modules>
 
     <build>

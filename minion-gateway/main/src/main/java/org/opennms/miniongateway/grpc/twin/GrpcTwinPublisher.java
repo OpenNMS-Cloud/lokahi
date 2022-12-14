@@ -31,6 +31,7 @@ package org.opennms.miniongateway.grpc.twin;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.concurrent.*;
 
@@ -41,7 +42,9 @@ import java.util.function.BiConsumer;
 import org.opennms.cloud.grpc.minion.CloudToMinionMessage;
 import org.opennms.cloud.grpc.minion.TwinResponseProto;
 import org.opennms.horizon.shared.grpc.common.GrpcIpcUtils;
+import org.opennms.horizon.shared.grpc.common.TenantIDGrpcServerInterceptor;
 import org.opennms.horizon.shared.ipc.rpc.IpcIdentity;
+import org.opennms.miniongateway.grpc.server.model.TenantKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,8 +57,8 @@ import org.slf4j.MDC.MDCCloseable;
 public class GrpcTwinPublisher extends AbstractTwinPublisher {
 
     private static final Logger LOG = LoggerFactory.getLogger(GrpcTwinPublisher.class);
-    private Multimap<String, StreamObserver<TwinResponseProto>> sinkStreamsByLocation = LinkedListMultimap.create();
-    private Map<String, StreamObserver<TwinResponseProto>> sinkStreamsBySystemId = new HashMap<>();
+    private Multimap<TenantKey, StreamObserver<TwinResponseProto>> sinkStreamsByLocation = LinkedListMultimap.create();
+    private Map<TenantKey, StreamObserver<TwinResponseProto>> sinkStreamsBySystemId = new HashMap<>();
     private final ThreadFactory twinRpcThreadFactory = new ThreadFactoryBuilder()
             .setNameFormat("twin-rpc-handler-%d")
             .build();
@@ -66,22 +69,23 @@ public class GrpcTwinPublisher extends AbstractTwinPublisher {
 
     @Override
     protected void handleSinkUpdate(TwinUpdate sinkUpdate) {
-        sendTwinResponseForSink(mapTwinResponse(sinkUpdate));
+        sendTwinResponseForSink(sinkUpdate.getTenantId(), mapTwinResponse(sinkUpdate));
     }
 
-    private synchronized boolean sendTwinResponseForSink(TwinResponseProto twinResponseProto) {
+    private synchronized boolean sendTwinResponseForSink(String tenantId, TwinResponseProto twinResponseProto) {
         if (sinkStreamsByLocation.isEmpty()) {
             return false;
         }
         try {
             if (Strings.isNullOrEmpty(twinResponseProto.getLocation())) {
                 LOG.debug("Sending sink update for key {} at all locations", twinResponseProto.getConsumerKey());
-                sinkStreamsByLocation.values().forEach(stream -> {
+                sinkStreamsByLocation.entries().stream().filter(entry -> tenantId.equals(entry.getKey().getTenantId())).map(
+                    Entry::getValue).forEach(stream -> {
                     stream.onNext(twinResponseProto);
                 });
             } else {
                 String location = twinResponseProto.getLocation();
-                sinkStreamsByLocation.get(location).forEach(stream -> {
+                sinkStreamsByLocation.get(new TenantKey(tenantId, location)).forEach(stream -> {
                     stream.onNext(twinResponseProto);
                     LOG.debug("Sending sink update for key {} at location {}", twinResponseProto.getConsumerKey(), twinResponseProto.getLocation());
                 });
@@ -160,26 +164,29 @@ public class GrpcTwinPublisher extends AbstractTwinPublisher {
     }
 
     // BiConsumer<MinionHeader, StreamObserver<CloudToMinionMessage>>
-    public BiConsumer<IpcIdentity, StreamObserver<CloudToMinionMessage>> getStreamObserver() {
+    public BiConsumer<IpcIdentity, StreamObserver<CloudToMinionMessage>> getStreamObserver(TenantIDGrpcServerInterceptor tenantIDGrpcServerInterceptor) {
         return new BiConsumer<>() {
             @Override
             public void accept(IpcIdentity minionHeader, StreamObserver<CloudToMinionMessage> responseObserver) {
-                if (sinkStreamsBySystemId.containsKey(minionHeader.getId())) {
-                    StreamObserver<TwinResponseProto> sinkStream = sinkStreamsBySystemId.remove(minionHeader.getId());
-                    sinkStreamsByLocation.remove(minionHeader.getLocation(), sinkStream);
+                String tenantId = tenantIDGrpcServerInterceptor.readCurrentContextTenantId();
+                TenantKey systemIdKey = new TenantKey(tenantId, minionHeader.getId());
+                TenantKey locationKey = new TenantKey(tenantId, minionHeader.getLocation());
+                if (sinkStreamsBySystemId.containsKey(systemIdKey)) {
+                    StreamObserver<TwinResponseProto> sinkStream = sinkStreamsBySystemId.remove(systemIdKey);
+                    sinkStreamsByLocation.remove(locationKey, sinkStream);
                     sinkStream.onCompleted(); // force termination of session.
                 }
                 AdapterObserver delegate = new AdapterObserver(responseObserver);
                 delegate.setCompletionCallback(() -> {
-                    sinkStreamsByLocation.remove(minionHeader.getLocation(), delegate);
-                    sinkStreamsBySystemId.remove(minionHeader.getId());
+                    sinkStreamsByLocation.remove(locationKey, delegate);
+                    sinkStreamsBySystemId.remove(systemIdKey);
                 });
-                sinkStreamsByLocation.put(minionHeader.getLocation(), delegate);
-                sinkStreamsBySystemId.put(minionHeader.getId(), delegate);
+                sinkStreamsByLocation.put(locationKey, delegate);
+                sinkStreamsBySystemId.put(systemIdKey, delegate);
 
-                forEachSession(((sessionKey, twinTracker) -> {
-                    if (sessionKey.location == null || sessionKey.location.equals(minionHeader.getLocation())) {
-                        TwinUpdate twinUpdate = new TwinUpdate(sessionKey.key, sessionKey.location, twinTracker.getObj());
+                forEachSession(tenantId, ((sessionKey, twinTracker) -> {
+                    if (sessionKey.location == null || sessionKey.location.equals(locationKey.getKey())) {
+                        TwinUpdate twinUpdate = new TwinUpdate(sessionKey.key, sessionKey.tenantId, sessionKey.location, twinTracker.getObj());
                         twinUpdate.setSessionId(twinTracker.getSessionId());
                         twinUpdate.setVersion(twinTracker.getVersion());
                         twinUpdate.setPatch(false);

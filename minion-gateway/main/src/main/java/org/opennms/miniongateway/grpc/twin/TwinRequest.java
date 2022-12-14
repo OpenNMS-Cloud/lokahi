@@ -36,12 +36,15 @@ public class TwinRequest {
 
     protected String key;
 
+    protected String tenantId;
+
     protected String location;
 
     private Map<String, String> tracingInfo = new HashMap<>();
 
-    public TwinRequest(String key, String location) {
+    public TwinRequest(String key, String tenantId, String location) {
         this.key = key;
+        this.tenantId = tenantId;
         this.location = location;
     }
 
@@ -54,6 +57,14 @@ public class TwinRequest {
 
     public void setKey(String key) {
         this.key = key;
+    }
+
+    public String getTenantId() {
+        return tenantId;
+    }
+
+    public void setTenantId(String tenantId) {
+        this.tenantId = tenantId;
     }
 
     public String getLocation() {
@@ -77,18 +88,19 @@ public class TwinRequest {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         TwinRequest that = (TwinRequest) o;
-        return Objects.equals(key, that.key) && Objects.equals(location, that.location);
+        return Objects.equals(key, that.key) && Objects.equals(tenantId, that.tenantId) && Objects.equals(location, that.location);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(key, location);
+        return Objects.hash(key, tenantId, location);
     }
 
     @Override
     public String toString() {
         return "TwinRequestBean{" +
                 "key='" + key + '\'' +
+                "tenant-id='" + tenantId + '\'' +
                 ", location='" + location + '\'' +
                 '}';
     }

@@ -51,24 +51,20 @@ public class TwinUpdate {
         this.twinRequest = new TwinRequest();
     }
 
-    public TwinUpdate(String key, String location, byte[] object) {
-        this.twinRequest = new TwinRequest(key, location);
+    public TwinUpdate(String key, String tenantId, String location, byte[] object) {
+        this.twinRequest = new TwinRequest(key, tenantId, location);
         this.object = object;
     }
-    public TwinUpdate(String key, String location) {
-        this.twinRequest = new TwinRequest(key, location);
-    }
-
-    public void setLocation(String location) {
-        twinRequest.setLocation(location);
-    }
-
-    public void setKey(String key) {
-        twinRequest.setKey(key);
+    public TwinUpdate(String key, String tenantId, String location) {
+        this.twinRequest = new TwinRequest(key, tenantId, location);
     }
 
     public String getLocation() {
         return twinRequest.getLocation();
+    }
+
+    public String getTenantId() {
+        return twinRequest.getTenantId();
     }
 
     public String getKey() {

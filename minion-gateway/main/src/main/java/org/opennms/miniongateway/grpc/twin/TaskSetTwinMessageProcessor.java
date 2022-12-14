@@ -37,7 +37,7 @@ public class TaskSetTwinMessageProcessor implements BiConsumer<Identity, StreamO
         this.publisher = publisher;
         this.forwarder = forwarder;
         this.twinPublisher = twinPublisher;
-        this.streamObserver = twinPublisher.getStreamObserver();
+        this.streamObserver = twinPublisher.getStreamObserver(tenantIDGrpcServerInterceptor);
         this.tenantIDGrpcServerInterceptor = tenantIDGrpcServerInterceptor;
     }
 
@@ -77,7 +77,7 @@ public class TaskSetTwinMessageProcessor implements BiConsumer<Identity, StreamO
         public void onTaskSetUpdate(TaskSet taskSet) {
             try {
                 session = grpcPublisher.register("task-set", TaskSet.class, identity.getLocation());
-                session.publish(taskSet);
+                session.publish(tenantId, taskSet);
             } catch (IOException e) {
                 log.error("failed to update task set", e);
             }

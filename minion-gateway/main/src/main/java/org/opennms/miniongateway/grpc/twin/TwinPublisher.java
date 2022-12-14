@@ -46,22 +46,24 @@ public interface TwinPublisher extends Closeable {
      */
     interface Session<T> extends Closeable {
         /**
+         * @param tenantId tenant identifier.
          * @param obj an object that needs replication on Minion
          */
-        void publish(T obj) throws IOException;
+        void publish(String tenantId, T obj) throws IOException;
     }
 
     /**
      * @param <T>      type of object for replication
      * @param key      unique key for the object.
      * @param clazz    a class used for serialization.
+     * @param tenantId tenant identifier
      * @param location targeted Minion location for the object, set null for all locations.
      * @return Session which provides updates to object.
      */
-    <T> Session<T> register(String key, Class<T> clazz, String location) throws IOException;
+    <T> Session<T> register(String key, Class<T> clazz, String tenantId, String location) throws IOException;
 
-    default <T> Session<T> register(String key, Class<T> clazz) throws IOException {
-        return register(key, clazz, null);
+    default <T> Session<T> register(String key, Class<T> clazz, String tenantId) throws IOException {
+        return register(key, clazz, tenantId, null);
     }
 }
 

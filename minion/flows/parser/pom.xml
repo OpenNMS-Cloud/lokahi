@@ -107,7 +107,7 @@
       <dependency>
           <groupId>org.opennms.features.telemetry</groupId>
           <artifactId>listeners</artifactId>
-          <version>0.1.0-SNAPSHOT</version>
+          <version>${project.version}</version>
       </dependency>
   </dependencies>
 </project>

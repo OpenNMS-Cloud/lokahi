@@ -76,7 +76,7 @@ public class TaskSetTwinMessageProcessor implements BiConsumer<Identity, StreamO
         @Override
         public void onTaskSetUpdate(TaskSet taskSet) {
             try {
-                session = grpcPublisher.register("task-set", TaskSet.class, identity.getLocation());
+                session = grpcPublisher.register("task-set", TaskSet.class, tenantId, identity.getLocation());
                 session.publish(tenantId, taskSet);
             } catch (IOException e) {
                 log.error("failed to update task set", e);

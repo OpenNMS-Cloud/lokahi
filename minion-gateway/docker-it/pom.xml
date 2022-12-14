@@ -61,6 +61,11 @@
         </dependency>
 
         <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>kafka</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>io.rest-assured</groupId>
             <artifactId>rest-assured</artifactId>
             <scope>test</scope>
@@ -104,7 +109,8 @@
                 <artifactId>docker-maven-plugin</artifactId>
                 <configuration>
                     <!--suppress MavenModelInspection -->
-                    <skip>${skipITs}</skip>
+                    <skip>true</skip>
+                    <!--<skip>${skipITs}</skip>-->
                     <showLogs>true</showLogs>
                     <autoCreateCustomNetworks>true</autoCreateCustomNetworks>
                     <images>

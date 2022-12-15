@@ -36,11 +36,11 @@ import org.opennms.horizon.events.api.EventBuilder;
 import org.opennms.horizon.events.proto.EventSeverity;
 import org.opennms.horizon.events.xml.Event;
 
-public class EventProtoMappingTest {
+class EventProtoMappingTest {
 
 
     @Test
-    public void testEventSeverityMapping() {
+    void testEventSeverityMapping() {
         Event event = Mockito.mock(Event.class);
         Mockito.when(event.getSeverity()).thenReturn("Cleared");
         var builder = org.opennms.horizon.events.proto.Event.newBuilder();
@@ -49,7 +49,7 @@ public class EventProtoMappingTest {
     }
 
     @Test
-    public void testAlarmDataMapping() {
+    void testAlarmDataMapping() {
 
         DefaultEventConfDao defaultEventConfDao = new DefaultEventConfDao();
         defaultEventConfDao.init();

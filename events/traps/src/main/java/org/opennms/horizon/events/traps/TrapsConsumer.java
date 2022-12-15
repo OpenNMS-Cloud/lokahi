@@ -32,7 +32,6 @@ import com.google.common.base.Strings;
 import com.google.protobuf.InvalidProtocolBufferException;
 
 import org.opennms.horizon.events.EventConstants;
-import org.opennms.horizon.events.api.EventBuilder;
 import org.opennms.horizon.events.api.EventConfDao;
 import org.opennms.horizon.events.grpc.client.InventoryClient;
 import org.opennms.horizon.events.proto.AlarmData;
@@ -43,7 +42,6 @@ import org.opennms.horizon.events.xml.Event;
 import org.opennms.horizon.events.xml.Events;
 import org.opennms.horizon.events.xml.Log;
 import org.opennms.horizon.events.xml.Parm;
-import org.opennms.horizon.events.xml.Snmp;
 import org.opennms.horizon.events.proto.EventInfo;
 import org.opennms.horizon.events.proto.EventLog;
 import org.opennms.horizon.events.proto.EventParameter;
@@ -232,11 +230,10 @@ public class TrapsConsumer {
                 builder.setManagedObject(ManagedObject.newBuilder()
                     .setType(alarmData.getManagedObject().getType()).build());
             }
-            alarmData.getUpdateFieldList().forEach(updateField -> {
+            alarmData.getUpdateFieldList().forEach(updateField ->
                 builder.addUpdateField(UpdateField.newBuilder()
                     .setFieldName(updateField.getFieldName())
-                    .setUpdateOnReduction(updateField.isUpdateOnReduction()).build());
-            });
+                    .setUpdateOnReduction(updateField.isUpdateOnReduction()).build()));
             eventBuilder.setAlarmData(builder.build());
         }
     }

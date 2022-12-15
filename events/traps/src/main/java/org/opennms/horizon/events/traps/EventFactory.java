@@ -144,25 +144,20 @@ public class EventFactory {
             alarmData.setX733ProbableCause(econfAlarmData.getX733ProbableCause());
             alarmData.setClearKey(econfAlarmData.getClearKey());
 
-            var updateFieldList = econfAlarmData.getUpdateFields();
-            if (updateFieldList.size() > 0) {
-                List<UpdateField> updateFields = new ArrayList<>(updateFieldList.size());
-                for (var econfUpdateField : updateFieldList) {
-                    UpdateField eventField = new UpdateField();
-                    eventField.setFieldName(econfUpdateField.getFieldName());
-                    eventField.setUpdateOnReduction(econfUpdateField.getUpdateOnReduction());
-                    updateFields.add(eventField);
-                }
-                alarmData.setUpdateField(updateFields);
-            }
-
+            List<UpdateField> updateFields = new ArrayList<>();
+            econfAlarmData.getUpdateFields().forEach((updateField -> {
+                UpdateField eventField = new UpdateField();
+                eventField.setFieldName(updateField.getFieldName());
+                eventField.setUpdateOnReduction(updateField.getUpdateOnReduction());
+                updateFields.add(eventField);
+            }));
+            alarmData.setUpdateField(updateFields);
             final var econfMo = econfAlarmData.getManagedObject();
             if (econfMo != null) {
                 final ManagedObject mo = new ManagedObject();
                 mo.setType(econfMo.getType());
                 alarmData.setManagedObject(mo);
             }
-
             event.setAlarmData(alarmData);
         }
     }

@@ -47,7 +47,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.Assert;
 import org.junit.Test;
-
 import org.opennms.netmgt.telemetry.listeners.UdpListener;
 import org.opennms.netmgt.telemetry.listeners.factory.AsyncDispatcher;
 import org.opennms.netmgt.telemetry.listeners.factory.TelemetryMessage;
@@ -56,7 +55,6 @@ import org.opennms.netmgt.telemetry.protocols.netflow.parser.factory.Identity;
 import org.opennms.netmgt.telemetry.protocols.netflow.parser.xml.event.Event;
 import org.opennms.netmgt.telemetry.protocols.netflow.parser.xml.event.EventForwarder;
 import org.opennms.netmgt.telemetry.protocols.netflow.parser.xml.event.Log;
-// import org.springframework.util.SocketUtils;
 
 import com.codahale.metrics.MetricRegistry;
 
@@ -105,7 +103,7 @@ public class IllegalFlowTest {
             }
         };
 
-        final int udpPort = 4242; // TODO: Patrick SocketUtils.findAvailableUdpPort();
+        final int udpPort = TestUtil.findAvailablePort(1, 65535);
 
         // setting up nf9 parser
 
@@ -219,4 +217,5 @@ public class IllegalFlowTest {
             }
         }
     }
+
 }

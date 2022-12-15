@@ -1,17 +1,14 @@
-<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-           xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0" xmlns:ext="http://aries.apache.org/blueprint/xmlns/blueprint-ext/v1.1.0"
-           xsi:schemaLocation="
-		http://www.osgi.org/xmlns/blueprint/v1.0.0
-		http://www.osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd
-		http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0
-		http://aries.apache.org/schemas/blueprint-cm/blueprint-cm-1.1.0.xsd
-		http://aries.apache.org/blueprint/xmlns/blueprint-ext/v1.1.0
-		http://aries.apache.org/schemas/blueprint-ext/blueprint-ext-1.1.xsd
-">
-    <reference id="telemetryRegistry" interface="org.opennms.netmgt.telemetry.listeners.factory.TelemetryRegistry" availability="mandatory" />
-    <reference id="eventForwarder" interface="org.opennms.netmgt.telemetry.protocols.netflow.parser.xml.event.EventForwarder" availability="mandatory"/>
-    <reference id="identity" interface="org.opennms.netmgt.telemetry.protocols.netflow.parser.factory.Identity" />
-    <reference id="dnsResolver" interface="org.opennms.netmgt.telemetry.protocols.netflow.parser.factory.DnsResolver" availability="mandatory" />
+<blueprint
+    xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="
+                http://www.osgi.org/xmlns/blueprint/v1.0.0 https://osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd">
+
+    <bean id="identity" class="org.opennms.netmgt.telemetry.protocols.netflow.parser.factory.IdentityImpl" />
+    <bean id="dnsResolver" class="org.opennms.netmgt.telemetry.protocols.netflow.parser.factory.DnsResolverImpl" />
+    <bean id="eventForwarder" class="org.opennms.netmgt.telemetry.protocols.netflow.parser.xml.event.EventForwarderImpl" />
+    <bean id="telemetryRegistry" class="org.opennms.netmgt.telemetry.listeners.factory.TelemetryRegistryImpl" />
+
 
     <!-- Netflow 5 UDP Parser Factory -->
     <bean id="netflow5UdpParserFactory" class="org.opennms.netmgt.telemetry.protocols.netflow.parser.factory.Netflow5UdpParserFactory">

@@ -183,6 +183,16 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           sonar-token: ${{ secrets.SONAR_TOKEN }}
 
+      - name: feature-datachoices
+        id: action-datachoices
+        uses: ./.github/actions/datachoices
+        with:
+          dir-location: 'datachoices'
+          # only enable scans on develop branch, scans on other branches are covered by other workflows
+          enable-sonar-scan: ${{ github.event.ref == 'refs/heads/develop' }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          sonar-token: ${{ secrets.SONAR_TOKEN }}
+
       - name: external-it
         id: action-external-it
         uses: ./.github/actions/external-it

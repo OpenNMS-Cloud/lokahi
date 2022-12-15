@@ -158,6 +158,14 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           sonar-token: ${{ secrets.SONAR_TOKEN }}
 
+      - name: feature-datachoices
+        id: action-datachoices
+        uses: ./.github/actions/datachoices
+        with:
+          dir-location: 'datachoices'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          sonar-token: ${{ secrets.SONAR_TOKEN }}
+
       - name: external-it
         id: action-external-it
         uses: ./.github/actions/external-it
@@ -373,6 +381,22 @@ jobs:
 
           docker push opennms/horizon-stream-notification:${{ env.RELEASE_TAG }}
           docker push opennms/horizon-stream-notification:latest
+
+      - name: publish-image-datachoices
+        run: |
+
+          # Login to dockerhub. Probably could remove this, session created in previous step.
+          echo ${{ secrets.DOCKERHUB_PASS }} | docker login -u ${{ secrets.DOCKERHUB_LOGIN }} --password-stdin
+
+          # Test build images
+          docker images
+
+          # Tag and save the image as a file to be published. Both release version and latest.
+          docker tag opennms/horizon-stream-datachoices:local opennms/horizon-stream-datachoices:${{ env.RELEASE_TAG }}
+          docker tag opennms/horizon-stream-datachoices:local opennms/horizon-stream-datachoices:latest
+
+          docker push opennms/horizon-stream-datachoices:${{ env.RELEASE_TAG }}
+          docker push opennms/horizon-stream-datachoices:latest
       
       #- name: tag-release-branch
       #  run: |

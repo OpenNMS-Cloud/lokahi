@@ -15,4 +15,4 @@ spec:
       protocol: TCP
       name: http
   selector:
-    run: {{ .Values.OpenNMS.Minion.ServiceName }}
+    app: {{ .Values.OpenNMS.Minion.ServiceName }}

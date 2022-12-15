@@ -57,8 +57,6 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
 import org.opennms.netmgt.telemetry.protocols.netflow.parser.xml.event.model.IEvent;
 
 @XmlRootElement(name = "event")
@@ -1926,17 +1924,6 @@ public class Event implements Serializable {
     @Override
 	public String toString() {
 		return new OnmsStringBuilder(this).toString();
-	}
-
-	public String toStringSimple() {
-		ToStringBuilder builder =  new ToStringBuilder(this, ToStringStyle.JSON_STYLE);
-		builder.append("uei", _uei);
-		builder.append("time", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss,SSSZ").format(_time));
-		if (_dbid   != null) builder.append("dbid", _dbid);
-		if (_source != null) builder.append("source", _source);
-		if (_nodeid != null) builder.append("nodeid", _nodeid);
-		if (_parms  != null) builder.append("parms",  _parms);
-		return builder.toString();
 	}
 
 

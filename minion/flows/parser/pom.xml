@@ -6,9 +6,9 @@
     <version>0.1.0-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
-  <groupId>org.opennms.features.telemetry.protocols.netflow</groupId>
+  <groupId>org.opennms.horizon.minion.flows</groupId>
   <artifactId>parser</artifactId>
-  <name>Flows :: Parser</name>
+  <name>OpenNms Horizon :: Minion :: Flows :: Parser</name>
   <packaging>bundle</packaging>
   <build>
     <plugins>
@@ -48,7 +48,6 @@
       <dependency>
           <groupId>com.google.protobuf</groupId>
           <artifactId>protobuf-java</artifactId>
-          <version>4.0.0-rc-2</version>
       </dependency>
       <!-- https://mvnrepository.com/artifact/org.springframework/spring-core -->
       <dependency>
@@ -68,9 +67,9 @@
           <version>2.0.1.Final</version>
       </dependency>
       <dependency>
-          <groupId>org.opennms.features.telemetry</groupId>
-          <artifactId>listeners</artifactId>
-          <version>${parent.version}</version>
+          <groupId>org.opennms.horizon.minion.flows</groupId>
+          <artifactId>listener</artifactId>
+          <version>${project.version}</version>
       </dependency>
 
     <!-- Test -->
@@ -85,15 +84,10 @@
       <scope>test</scope>
     </dependency>
       <dependency>
-          <groupId>org.apache.servicemix.bundles</groupId>
-          <artifactId>org.apache.servicemix.bundles.spring-core</artifactId>
-          <version>5.3.23_1</version>
+          <groupId>org.osgi</groupId>
+          <artifactId>osgi.core</artifactId>
+          <scope>test</scope>
       </dependency>
-      <dependency>
-      <groupId>org.osgi</groupId>
-      <artifactId>osgi.core</artifactId>
-      <scope>test</scope>
-    </dependency>
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-core</artifactId>
@@ -104,10 +98,5 @@
         <version>4.2.0</version>
         <scope>test</scope>
     </dependency>
-      <dependency>
-          <groupId>org.opennms.features.telemetry</groupId>
-          <artifactId>listeners</artifactId>
-          <version>${project.version}</version>
-      </dependency>
   </dependencies>
 </project>

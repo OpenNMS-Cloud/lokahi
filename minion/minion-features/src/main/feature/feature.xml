@@ -12,7 +12,7 @@
     <repository>mvn:org.opennms.horizon.shared/snmp-api/${project.version}/xml/features</repository>
     <repository>mvn:org.opennms.horizon.minion/snmp-plugin/${project.version}/xml/features</repository>
     <repository>mvn:org.opennms.horizon.minion/traps-features/${project.version}/xml/features</repository>
-    <repository>mvn:org.opennms.horizon.minion/flows/${project.version}/xml/features</repository>
+    <repository>mvn:org.opennms.horizon.minion.flows/flows-features/${project.version}/xml/features</repository>
 
 
     <feature name="minion-ng">

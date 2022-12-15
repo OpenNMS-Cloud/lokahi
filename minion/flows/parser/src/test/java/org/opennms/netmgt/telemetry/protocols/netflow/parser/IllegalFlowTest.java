@@ -56,7 +56,7 @@ import org.opennms.netmgt.telemetry.protocols.netflow.parser.factory.Identity;
 import org.opennms.netmgt.telemetry.protocols.netflow.parser.xml.event.Event;
 import org.opennms.netmgt.telemetry.protocols.netflow.parser.xml.event.EventForwarder;
 import org.opennms.netmgt.telemetry.protocols.netflow.parser.xml.event.Log;
-import org.springframework.util.SocketUtils;
+// import org.springframework.util.SocketUtils;
 
 import com.codahale.metrics.MetricRegistry;
 
@@ -105,7 +105,7 @@ public class IllegalFlowTest {
             }
         };
 
-        final int udpPort = SocketUtils.findAvailableUdpPort();
+        final int udpPort = 4242; // TODO: Patrick SocketUtils.findAvailableUdpPort();
 
         // setting up nf9 parser
 

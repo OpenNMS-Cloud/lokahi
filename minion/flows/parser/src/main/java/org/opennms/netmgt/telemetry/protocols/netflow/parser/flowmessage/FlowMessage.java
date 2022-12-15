@@ -31,11 +31,7 @@
 
 package org.opennms.netmgt.telemetry.protocols.netflow.parser.flowmessage;
 
-import static org.apache.commons.lang3.StringUtils.EMPTY;
-
 import java.util.Objects;
-
-import org.apache.commons.lang3.StringUtils;
 
 /**
  * Protobuf type {@code FlowMessage}
@@ -2303,7 +2299,7 @@ private static final long serialVersionUID = 0L;
 
       dstAddress_ = "";
 
-      setDstHostname(EMPTY);
+      setDstHostname("");
 
       if (dstAsBuilder_ == null) {
         dstAs_ = null;

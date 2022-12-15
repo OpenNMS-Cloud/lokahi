@@ -6,10 +6,10 @@
     <version>0.1.0-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
-  <groupId>org.opennms.features.telemetry</groupId>
-  <artifactId>listeners</artifactId>
+  <groupId>org.opennms.horizon.minion.flows</groupId>
+  <artifactId>listener</artifactId>
   <packaging>bundle</packaging>
-  <name>Flows :: Listeners</name>
+  <name>OpenNms Horizon :: Minion :: Flows :: Listeners</name>
   <build>
     <plugins>
       <plugin>
@@ -34,7 +34,6 @@
       <dependency>
           <groupId>io.netty</groupId>
           <artifactId>netty-all</artifactId>
-          <version>4.1.85.Final</version>
       </dependency>
       <dependency>
           <groupId>io.netty</groupId>

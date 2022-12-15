@@ -8,10 +8,10 @@
 		http://aries.apache.org/blueprint/xmlns/blueprint-ext/v1.1.0
 		http://aries.apache.org/schemas/blueprint-ext/blueprint-ext-1.1.xsd
 ">
-    <reference id="telemetryRegistry" interface="org.opennms.netmgt.telemetry.api.registry.TelemetryRegistry" availability="mandatory" />
-    <reference id="eventForwarder" interface="org.opennms.netmgt.events.api.EventForwarder" availability="mandatory"/>
-    <reference id="identity" interface="org.opennms.distributed.core.api.Identity" />
-    <reference id="dnsResolver" interface="org.opennms.netmgt.dnsresolver.api.DnsResolver" availability="mandatory" />
+    <reference id="telemetryRegistry" interface="org.opennms.netmgt.telemetry.listeners.factory.TelemetryRegistry" availability="mandatory" />
+    <reference id="eventForwarder" interface="org.opennms.netmgt.telemetry.protocols.netflow.parser.xml.event.EventForwarder" availability="mandatory"/>
+    <reference id="identity" interface="org.opennms.netmgt.telemetry.protocols.netflow.parser.factory.Identity" />
+    <reference id="dnsResolver" interface="org.opennms.netmgt.telemetry.protocols.netflow.parser.factory.DnsResolver" availability="mandatory" />
 
     <!-- Netflow 5 UDP Parser Factory -->
     <bean id="netflow5UdpParserFactory" class="org.opennms.netmgt.telemetry.protocols.netflow.parser.factory.Netflow5UdpParserFactory">
@@ -20,7 +20,7 @@
         <argument ref="identity" />
         <argument ref="dnsResolver" />
     </bean>
-    <service ref="netflow5UdpParserFactory" interface="org.opennms.netmgt.telemetry.api.receiver.ParserFactory">
+    <service ref="netflow5UdpParserFactory" interface="org.opennms.netmgt.telemetry.protocols.netflow.parser.factory.ParserFactory">
         <service-properties>
             <entry key="registration.export" value="true" />
         </service-properties>
@@ -33,7 +33,7 @@
         <argument ref="identity" />
         <argument ref="dnsResolver" />
     </bean>
-    <service ref="netflow9UdpParserFactory" interface="org.opennms.netmgt.telemetry.api.receiver.ParserFactory">
+    <service ref="netflow9UdpParserFactory" interface="org.opennms.netmgt.telemetry.protocols.netflow.parser.factory.ParserFactory">
         <service-properties>
             <entry key="registration.export" value="true" />
         </service-properties>
@@ -46,7 +46,7 @@
         <argument ref="identity" />
         <argument ref="dnsResolver" />
     </bean>
-    <service ref="ipfixTcpParserFactory" interface="org.opennms.netmgt.telemetry.api.receiver.ParserFactory">
+    <service ref="ipfixTcpParserFactory" interface="org.opennms.netmgt.telemetry.protocols.netflow.parser.factory.ParserFactory">
         <service-properties>
             <entry key="registration.export" value="true" />
         </service-properties>
@@ -59,7 +59,7 @@
         <argument ref="identity" />
         <argument ref="dnsResolver" />
     </bean>
-    <service ref="ipfixUdpParserFactory" interface="org.opennms.netmgt.telemetry.api.receiver.ParserFactory">
+    <service ref="ipfixUdpParserFactory" interface="org.opennms.netmgt.telemetry.protocols.netflow.parser.factory.ParserFactory">
         <service-properties>
             <entry key="registration.export" value="true" />
         </service-properties>

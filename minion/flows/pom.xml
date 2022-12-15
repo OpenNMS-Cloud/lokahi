@@ -14,7 +14,8 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>listeners</module>
+        <module>flows-features</module>
+        <module>listener</module>
         <module>parser</module>
     </modules>
 

@@ -1,4 +1,4 @@
-name: 'Build and test inventory'
+name: 'Build and test datachoices'
 description: 'This implements unit and built-time integration tests.'
 inputs:
   dir-location:
@@ -37,7 +37,7 @@ runs:
       env:
         GITHUB_TOKEN: ${{ inputs.github-token }}
         SONAR_TOKEN: ${{ inputs.sonar-token }}
-        SONAR_PROJECT_KEY: 'opennms_horizon-datachoices'
+        SONAR_PROJECT_KEY: 'opennms_horizon-stream_datachoices'
 
     - name: build-image
       if: ${{ inputs.enable-sonar-scan == 'false' }}

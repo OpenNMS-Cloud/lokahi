@@ -244,7 +244,7 @@ func getEventsValues(spec v1alpha1.OpenNMSSpec, v values.OpenNMSValues) values.O
 
 // getDatachoicesValues - get ONMS DataChoices values from the crd
 func getDatachoicesValues(spec v1alpha1.OpenNMSSpec, v values.OpenNMSValues) values.OpenNMSValues {
-	if spec.Events.Image != "" {
+	if spec.DataChoices.Image != "" {
 		v.DataChoices.Image = spec.DataChoices.Image
 	}
 	if spec.DataChoices.CPU != "" {

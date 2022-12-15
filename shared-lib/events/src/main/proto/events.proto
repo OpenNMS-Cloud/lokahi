@@ -37,6 +37,7 @@ option java_package = "org.opennms.horizon.events.proto";
 message EventLog {
   repeated Event event = 1;
 }
+
 message Event {
   string uei = 1;
   uint64 node_id = 2;
@@ -45,6 +46,8 @@ message Event {
   uint64 produced_time = 5;
   repeated EventParameter event_params = 6;
   optional EventInfo event_info = 7;
+  optional EventSeverity event_severity = 8;
+  optional AlarmData alarm_data = 9;
 }
 
 message EventInfo {
@@ -66,4 +69,33 @@ message EventParameter {
   string value = 2;
   string type = 3;
   string encoding = 4;
+}
+
+enum EventSeverity {
+  UNDEFINED = 0;
+  INDETERMINATE = 1;
+  CLEARED = 2;
+  NORMAL = 3;
+  WARNING = 4;
+  MINOR = 5;
+  MAJOR = 6;
+  CRITICAL = 7;
+}
+
+message AlarmData {
+  string reduction_key = 1;
+  uint32 alarm_type = 2;
+  optional string clear_key = 3;
+  optional bool auto_clean = 4;
+  repeated UpdateField update_field = 5;
+  optional ManagedObject managed_object = 6;
+}
+
+message UpdateField {
+  string field_name = 1;
+  bool update_on_reduction = 2;
+}
+
+message ManagedObject {
+  string type = 1;
 }

@@ -34,6 +34,9 @@ import org.opennms.horizon.events.conf.xml.Event;
 import org.opennms.horizon.events.conf.xml.LogDestType;
 import org.opennms.horizon.events.conf.xml.Logmsg;
 import org.opennms.horizon.events.grpc.client.InventoryClient;
+import org.opennms.horizon.events.xml.AlarmData;
+import org.opennms.horizon.events.xml.ManagedObject;
+import org.opennms.horizon.events.xml.UpdateField;
 import org.opennms.horizon.grpc.traps.contract.TrapDTO;
 import org.opennms.horizon.grpc.traps.contract.TrapIdentity;
 import org.opennms.horizon.shared.snmp.SnmpHelper;
@@ -45,7 +48,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.InetAddress;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 import static org.opennms.horizon.events.EventConstants.OID_SNMP_IFINDEX_STRING;
@@ -124,7 +129,42 @@ public class EventFactory {
             LOG.debug("Trap discarded due to matching event having logmsg dest == discardtraps");
             return null;
         }
+        expandEventWithAlarmData(event, econf);
         return event;
+    }
+
+    static void expandEventWithAlarmData(org.opennms.horizon.events.xml.Event event, Event econf) {
+        if (econf != null && econf.getAlarmData() != null) {
+            AlarmData alarmData = new AlarmData();
+            final var econfAlarmData = econf.getAlarmData();
+            alarmData.setAlarmType(econfAlarmData.getAlarmType());
+            alarmData.setReductionKey(econfAlarmData.getReductionKey());
+            alarmData.setAutoClean(econfAlarmData.getAutoClean());
+            alarmData.setX733AlarmType(econfAlarmData.getX733AlarmType());
+            alarmData.setX733ProbableCause(econfAlarmData.getX733ProbableCause());
+            alarmData.setClearKey(econfAlarmData.getClearKey());
+
+            var updateFieldList = econfAlarmData.getUpdateFields();
+            if (updateFieldList.size() > 0) {
+                List<UpdateField> updateFields = new ArrayList<>(updateFieldList.size());
+                for (var econfUpdateField : updateFieldList) {
+                    UpdateField eventField = new UpdateField();
+                    eventField.setFieldName(econfUpdateField.getFieldName());
+                    eventField.setUpdateOnReduction(econfUpdateField.getUpdateOnReduction());
+                    updateFields.add(eventField);
+                }
+                alarmData.setUpdateField(updateFields);
+            }
+
+            final var econfMo = econfAlarmData.getManagedObject();
+            if (econfMo != null) {
+                final ManagedObject mo = new ManagedObject();
+                mo.setType(econfMo.getType());
+                alarmData.setManagedObject(mo);
+            }
+
+            event.setAlarmData(alarmData);
+        }
     }
 
     private boolean shouldDiscard(Event econf) {

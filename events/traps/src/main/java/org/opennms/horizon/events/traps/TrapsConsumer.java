@@ -28,11 +28,17 @@
 
 package org.opennms.horizon.events.traps;
 
+import com.google.common.base.Strings;
 import com.google.protobuf.InvalidProtocolBufferException;
 
 import org.opennms.horizon.events.EventConstants;
+import org.opennms.horizon.events.api.EventBuilder;
 import org.opennms.horizon.events.api.EventConfDao;
 import org.opennms.horizon.events.grpc.client.InventoryClient;
+import org.opennms.horizon.events.proto.AlarmData;
+import org.opennms.horizon.events.proto.EventSeverity;
+import org.opennms.horizon.events.proto.ManagedObject;
+import org.opennms.horizon.events.proto.UpdateField;
 import org.opennms.horizon.events.xml.Event;
 import org.opennms.horizon.events.xml.Events;
 import org.opennms.horizon.events.xml.Log;
@@ -58,9 +64,12 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import static org.opennms.horizon.events.Constants.TENANT_ID_KEY;
 
 @Component
 @PropertySource("classpath:application.yml")
@@ -156,22 +165,40 @@ public class TrapsConsumer {
             .setNodeId(event.getNodeid())
             .setLocation(event.getDistPoller())
             .setIpAddress(event.getInterface());
-        if (event.getSnmp() != null) {
-            eventBuilder.setEventInfo(mapEventInfo(event.getSnmp()));
-        }
+
+        mapSeverity(event, eventBuilder);
+        mapAlarmData(event, eventBuilder);
+        mapEventInfo(event, eventBuilder);
+
         List<EventParameter> eventParameters = mapEventParams(event);
         eventBuilder.addAllEventParams(eventParameters);
         return eventBuilder.build();
     }
 
-    private EventInfo mapEventInfo(Snmp snmp) {
-        return EventInfo.newBuilder().setSnmp(SnmpInfo.newBuilder()
-            .setId(snmp.getId())
-            .setVersion(snmp.getVersion())
-            .setGeneric(snmp.getGeneric())
-            .setCommunity(snmp.getCommunity())
-            .setSpecific(snmp.getSpecific())
-            .setTrapOid(snmp.getTrapOID()).build()).build();
+    static void mapSeverity(Event event, org.opennms.horizon.events.proto.Event.Builder eventBuilder) {
+        if (!Strings.isNullOrEmpty(event.getSeverity())) {
+            String severity = event.getSeverity().toUpperCase(Locale.ROOT);
+            try {
+                EventSeverity eventSeverity = EventSeverity.valueOf(severity);
+                eventBuilder.setEventSeverity(eventSeverity);
+            } catch (IllegalArgumentException iae) {
+                LOG.warn("No matching event severity for {} in proto", severity);
+            }
+        }
+    }
+
+    static void mapEventInfo(Event event, org.opennms.horizon.events.proto.Event.Builder eventBuilder) {
+        var snmp = event.getSnmp();
+        if (snmp != null) {
+            var eventInfo = EventInfo.newBuilder().setSnmp(SnmpInfo.newBuilder()
+                .setId(snmp.getId())
+                .setVersion(snmp.getVersion())
+                .setGeneric(snmp.getGeneric())
+                .setCommunity(snmp.getCommunity())
+                .setSpecific(snmp.getSpecific())
+                .setTrapOid(snmp.getTrapOID()).build()).build();
+            eventBuilder.setEventInfo(eventInfo);
+        }
     }
 
     private List<EventParameter> mapEventParams(Event event) {
@@ -193,12 +220,29 @@ public class TrapsConsumer {
         return Optional.empty();
     }
 
-    private Optional<String> getTenantId(Map<String, Object> headers) {
-        Object tenantId = headers.get("tenant-id");
-        //TODO: remove this once tenant is coming from minion gateway
-        if (tenantId == null) {
-            return Optional.of("opennms-prime");
+    static void mapAlarmData(Event event, org.opennms.horizon.events.proto.Event.Builder eventBuilder) {
+        var alarmData = event.getAlarmData();
+        if (alarmData != null) {
+            AlarmData.Builder builder = AlarmData.newBuilder();
+            builder.setReductionKey(alarmData.getReductionKey());
+            builder.setAlarmType(alarmData.getAlarmType());
+            builder.setClearKey(Optional.ofNullable(alarmData.getClearKey()).orElse(AlarmData.getDefaultInstance().getClearKey()));
+            builder.setAutoClean(Optional.ofNullable(alarmData.getAutoClean()).orElse(AlarmData.getDefaultInstance().getAutoClean()));
+            if (alarmData.getManagedObject() != null) {
+                builder.setManagedObject(ManagedObject.newBuilder()
+                    .setType(alarmData.getManagedObject().getType()).build());
+            }
+            alarmData.getUpdateFieldList().forEach(updateField -> {
+                builder.addUpdateField(UpdateField.newBuilder()
+                    .setFieldName(updateField.getFieldName())
+                    .setUpdateOnReduction(updateField.isUpdateOnReduction()).build());
+            });
+            eventBuilder.setAlarmData(builder.build());
         }
+    }
+
+    private Optional<String> getTenantId(Map<String, Object> headers) {
+        Object tenantId = headers.get(TENANT_ID_KEY);
         if (tenantId instanceof byte[]) {
             return Optional.of(new String((byte[]) tenantId));
         }

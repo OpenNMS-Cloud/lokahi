@@ -24,5 +24,5 @@ type PostgresValues struct {
 	NotificationPassword string `yaml:"NotificationPassword"`
 	GrafanaPassword      string `yaml:"GrafanaPassword"`
 	EventsPassword       string `yaml:"EventsPassword"`
-	DataChoicesPassword  string `yaml:"EventsPassword"`
+	DataChoicesPassword  string `yaml:"DataChoicesPassword"`
 }

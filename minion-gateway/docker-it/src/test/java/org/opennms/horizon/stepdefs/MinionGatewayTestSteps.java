@@ -28,6 +28,9 @@
 
 package org.opennms.horizon.stepdefs;
 
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.protobuf.Any;
+import com.google.protobuf.InvalidProtocolBufferException;
 import io.cucumber.java.After;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
@@ -51,6 +54,8 @@ import org.opennms.cloud.grpc.minion.RpcRequestProto;
 import org.opennms.cloud.grpc.minion.RpcRequestServiceGrpc;
 import org.opennms.cloud.grpc.minion.RpcResponseProto;
 import org.opennms.cloud.grpc.minion.SinkMessage;
+import org.opennms.cloud.grpc.minion.TwinRequestProto;
+import org.opennms.cloud.grpc.minion.TwinResponseProto;
 import org.opennms.horizon.RetryUtils;
 import org.opennms.horizon.grpc.TestCloudServiceRpcRequestHandler;
 import org.opennms.horizon.grpc.TestCloudToMinionMessageHandler;
@@ -131,15 +136,14 @@ public class MinionGatewayTestSteps {
     private StreamObserver<RpcResponseProto> minionRpcStream;
 
     private StreamObserver<MinionToCloudMessage> minionToCloudMessageStream;
+    private CloudServiceGrpc.CloudServiceFutureStub minionToCloudRpcStub;
     private ManagedChannel cloudRpcManagedChannel;
 
     private RpcRequestProto.Builder rpcRequestProtoBuilder;
     private RpcResponseProto rpcResponseProto;
     private Exception rpcException;
     private PublishTaskSetResponse publishTaskSetResponse;
-    private JsonPath parsedJsonResponse;
 
-    private Response restAssuredResponse;
     private ConsumerRecord<String, byte[]> matchedKafkaRecord;
 
 //========================================
@@ -203,13 +207,6 @@ public class MinionGatewayTestSteps {
         this.kafkaTestHelper.setKafkaBootstrapUrl(kafkaBootstrapUrl);
 
         LOG.info("USING KAFKA BOOTSTRAP URL {}", kafkaBootstrapUrl);
-    }
-
-    @Then("^verify JSON path expressions match$")
-    public void verifyJsonPathExpressionsMatch(List<String> pathExpressions) {
-        for (String onePathExpression : pathExpressions) {
-            verifyJsonPathExpressionMatch(parsedJsonResponse, onePathExpression);
-        }
     }
 
     @Given("Generated RPC Request ID")
@@ -319,12 +316,29 @@ public class MinionGatewayTestSteps {
         ;
     }
 
+    @Then("create Minion-to-Cloud RPC Request connection")
+    public void createMinionToCloudRPCRequestConnection() {
+        NettyChannelBuilder channelBuilder =
+            NettyChannelBuilder.forAddress("localhost", externalGrpcPort);
+
+        cloudRpcManagedChannel = channelBuilder.usePlaintext().build();
+        cloudRpcManagedChannel.getState(true);
+
+        minionServiceStub = CloudServiceGrpc.newStub(cloudRpcManagedChannel);
+        minionToCloudRpcStub = CloudServiceGrpc.newFutureStub(cloudRpcManagedChannel);
+    }
+
     @Then("send task set to the Minion Gateway until successful with timeout {int}ms")
     public void sendTaskSetToTheMinionGatewayUntilSuccessfulWithTimeoutMs(int timeout) throws InterruptedException {
+        long expirationNanoTime = System.nanoTime() + ( ((long) timeout) * 1_000_000L );
+
         Exception exc =
             retryUtils.retry(
                 () -> {
-                    commonSendTaskSet();
+                    long remainingTimeoutMs = ( expirationNanoTime - System.nanoTime() ) / 1_000_000;
+                    if (remainingTimeoutMs >= 1 ) {
+                        commonSendTaskSet(remainingTimeoutMs);
+                    }
                     return rpcException;
                 },
                 Objects::isNull,
@@ -336,17 +350,22 @@ public class MinionGatewayTestSteps {
         verifyRPCExceptionWasNOTReceived();
     }
 
-    @Then("send RPC Request")
-    public void sendRPCRequest() {
-        commonSendRpcRequest();
+    @Then("send RPC Request with timeout {int}ms")
+    public void sendRPCRequest(long timeout) {
+        commonSendRpcRequest(timeout);
     }
 
     @Then("send RPC Request until successful with timeout {int}ms")
     public void sendRPCRequestUntilSuccessfulWithTimeoutMs(int timeout) throws InterruptedException {
+        long expirationNanoTime = System.nanoTime() + ( ((long) timeout) * 1_000_000L );
+
         Exception exc =
             retryUtils.retry(
                 () -> {
-                    commonSendRpcRequest();
+                    long remainingTimeoutMs = ( expirationNanoTime - System.nanoTime() ) / 1_000_000;
+                    if (remainingTimeoutMs >= 1 ) {
+                        commonSendRpcRequest(remainingTimeoutMs);
+                    }
                     return rpcException;
                 },
                 Objects::isNull,
@@ -364,6 +383,28 @@ public class MinionGatewayTestSteps {
             retryUtils.retry(
                 () -> {
                     commonSendTaskSetMonitorResult();
+                    return rpcException;
+                },
+                Objects::isNull,
+                250,
+                timeout,
+                new Exception("fail")
+            );
+
+        assertNull(exc);
+    }
+
+    @Then("send twin update request to the Minion Gateway until successful with timeout {int}ms")
+    public void sendTwinUpdateRequestToTheMinionGatewayUntilSuccessfulWithTimeoutMs(int timeout) throws InterruptedException {
+        long expirationNanoTime = System.nanoTime() + ( ((long) timeout) * 1_000_000L );
+        Exception exc =
+            retryUtils.retry(
+                () -> {
+                    long remainingTimeoutMs = ( expirationNanoTime - System.nanoTime() ) / 1_000_000;
+                    if (remainingTimeoutMs >= 1 ) {
+                        commonSendTwinRegistrationRequest(remainingTimeoutMs);
+                    }
+
                     return rpcException;
                 },
                 Objects::isNull,
@@ -469,6 +510,22 @@ public class MinionGatewayTestSteps {
         assertEquals(execpted, actual);
     }
 
+    @Then("verify twin update response was received from the Minion Gateway")
+    public void verifyTwinUpdateResponseWasReceivedFromTheMinionGateway() throws InvalidProtocolBufferException {
+        assertNotNull(rpcResponseProto);
+
+        assertEquals("twin", rpcResponseProto.getModuleId());
+        assertEquals(rpcRequestProtoBuilder.getRpcId(), rpcResponseProto.getRpcId());
+
+        // Check for a TwinResponseProto payload
+        Any payload = rpcResponseProto.getPayload();
+        assertTrue("Twin response payload must be a TwinResponseProto", payload.is(TwinResponseProto.class));
+
+        TwinResponseProto twinResponseProto = payload.unpack(TwinResponseProto.class);
+        assertEquals(rpcRequestProtoBuilder.getLocation(), twinResponseProto.getLocation());
+        assertEquals("x-consumer-key-x", twinResponseProto.getConsumerKey());
+    }
+
 
 //========================================
 // Utility Rules
@@ -483,32 +540,33 @@ public class MinionGatewayTestSteps {
 // Internals
 //========================================
 
-    private void commonSendRpcRequest() {
+    private void commonSendRpcRequest(long timeout) {
         NettyChannelBuilder channelBuilder =
             NettyChannelBuilder.forAddress("localhost", internalGrpcPort);
 
         ManagedChannel channel = channelBuilder.usePlaintext().build();
         channel.getState(true);
 
-        RpcRequestServiceGrpc.RpcRequestServiceBlockingStub stub = RpcRequestServiceGrpc.newBlockingStub(channel);
+        RpcRequestServiceGrpc.RpcRequestServiceFutureStub stub = RpcRequestServiceGrpc.newFutureStub(channel);
 
         rpcException = null;
         try {
             RpcRequestProto msg = rpcRequestProtoBuilder.build();
-            rpcResponseProto = stub.request(msg);
+            ListenableFuture<RpcResponseProto> future = stub.request(msg);
+            rpcResponseProto = future.get(timeout, TimeUnit.MILLISECONDS);
         } catch (Exception exc) {
             rpcException = exc;
         }
     }
 
-    private void commonSendTaskSet() {
+    private void commonSendTaskSet(long timeout) {
         NettyChannelBuilder channelBuilder = NettyChannelBuilder.forAddress("localhost", internalGrpcPort)
             .keepAliveWithoutCalls(true);
 
         ManagedChannel channel = channelBuilder.usePlaintext().build();
 
         try {
-            var taskSetServiceStub = TaskSetServiceGrpc.newBlockingStub(channel);
+            var taskSetServiceStub = TaskSetServiceGrpc.newFutureStub(channel);
 
             TaskDefinition taskDefinition =
                 TaskDefinition.newBuilder()
@@ -532,11 +590,13 @@ public class MinionGatewayTestSteps {
                 Metadata headers = new Metadata();
                 headers.put(Metadata.Key.of("tenant-id", Metadata.ASCII_STRING_MARSHALLER), "opennms-prime");
 
-                publishTaskSetResponse =
+                ListenableFuture<PublishTaskSetResponse> future =
                     taskSetServiceStub
                         .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(headers))
                         .publishTaskSet(publishTaskSetRequest)
                 ;
+
+                publishTaskSetResponse = future.get(timeout, TimeUnit.MILLISECONDS);
             } catch (Exception exc) {
                 rpcException = exc;
             }
@@ -547,20 +607,38 @@ public class MinionGatewayTestSteps {
 
     private void commonSendTaskSetMonitorResult() {
         MinionToCloudMessage minionToCloudMessage = prepareTaskSetMonitorResultMessage();
-        NettyChannelBuilder channelBuilder = NettyChannelBuilder.forAddress("localhost", internalGrpcPort)
-            .keepAliveWithoutCalls(true);
 
-        ManagedChannel channel = channelBuilder.usePlaintext().build();
-
+        rpcException = null;
         try {
-            rpcException = null;
-            try {
-                minionToCloudMessageStream.onNext(minionToCloudMessage);
-            } catch (Exception exc) {
-                rpcException = exc;
-            }
-        } finally {
-            safeChannelShutdown(channel);
+            minionToCloudMessageStream.onNext(minionToCloudMessage);
+        } catch (Exception exc) {
+            rpcException = exc;
+        }
+    }
+
+    private void commonSendTwinRegistrationRequest(long timeout) {
+        TwinRequestProto twinRequestProto =
+            TwinRequestProto.newBuilder()
+                .setConsumerKey("x-consumer-key-x")
+                .setLocation(rpcRequestProtoBuilder.getLocation())
+                .build()
+            ;
+
+        RpcRequestProto twinRegistrationRequest =
+            rpcRequestProtoBuilder
+                .setModuleId("twin")
+                .setPayload(
+                    Any.pack(twinRequestProto)
+                )
+                .build()
+            ;
+
+        rpcException = null;
+        try {
+            ListenableFuture<RpcResponseProto> future = minionToCloudRpcStub.minionToCloudRPC(twinRegistrationRequest);
+            rpcResponseProto = future.get(timeout, TimeUnit.MILLISECONDS);
+        } catch (Exception exc) {
+            rpcException = exc;
         }
     }
 
@@ -600,37 +678,6 @@ public class MinionGatewayTestSteps {
                 .orElse(null);
 
         return match;
-    }
-
-    private void verifyJsonPathExpressionMatch(JsonPath jsonPath, String pathExpression) {
-        String[] parts = pathExpression.split(" == ", 2);
-
-        if (parts.length == 2) {
-            // Expression and value to match - evaluate as a string and compare
-            String actualValue = jsonPath.getString(parts[0]);
-            String actualTrimmed;
-
-            if (actualValue != null) {
-                actualTrimmed = actualValue.trim();
-            } else {
-                actualTrimmed = null;
-            }
-
-            String expectedTrimmed = parts[1].trim();
-
-            assertEquals("matching to JSON path " + parts[0], expectedTrimmed, actualTrimmed);
-        } else {
-            // Just an expression - evaluate as a boolean
-            assertTrue("verifying JSON path expression " + pathExpression, jsonPath.getBoolean(pathExpression));
-        }
-    }
-
-    private String loadResource(String path) throws IOException {
-        try (InputStream inputStream = getClass().getResourceAsStream(path)) {
-            byte[] payloadBytes = IOUtils.toByteArray(inputStream);
-
-            return new String(payloadBytes, StandardCharsets.UTF_8);
-        }
     }
 
     private void handleRpcResponse(RpcResponseProto rpcResponseProto) {

@@ -37,6 +37,8 @@ import org.testcontainers.containers.Network;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.utility.DockerImageName;
 
+import java.time.Duration;
+
 @SuppressWarnings("rawtypes")
 public class TestContainerRunnerClassRule extends ExternalResource {
 
@@ -57,7 +59,7 @@ public class TestContainerRunnerClassRule extends ExternalResource {
     public TestContainerRunnerClassRule() {
         kafkaContainer = new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka").withTag(confluentPlatformVersion));
         zookeeperContainer = new GenericContainer(DockerImageName.parse("confluentinc/cp-zookeeper").withTag(confluentPlatformVersion));
-        applicationContainer = new GenericContainer(DockerImageName.parse("opennms/horizon-stream-minion-gateway").withTag("local"));
+        applicationContainer = new GenericContainer(DockerImageName.parse("opennms/horizon-stream-minion-gateway").withTag("local").toString());
     }
 
     @Override
@@ -117,16 +119,20 @@ public class TestContainerRunnerClassRule extends ExternalResource {
             .withNetworkAliases("application", "application-host")
             .dependsOn(zookeeperContainer, kafkaContainer)
             .withExposedPorts(8080, 8990, 8991, 5005)
+            .withStartupTimeout(Duration.ofMinutes(5))
             .withEnv("JAVA_TOOL_OPTIONS", "-Djava.security.egd=file:/dev/./urandom -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005")
             .withEnv("KAFKA_BOOTSTRAP_SERVERS", "kafka-host:9092")
             .withLogConsumer(new Slf4jLogConsumer(LOG).withPrefix("APPLICATION"))
-            .start()
             ;
+
+        // DEBUGGING: uncomment to force local port 5005
+        // applicationContainer.getPortBindings().add("5005:5005");
+        applicationContainer.start();
 
         var httpPort = applicationContainer.getMappedPort(8080); // application-http-port
         var externalGrpcPort = applicationContainer.getMappedPort(8990); // application-external-grpc-port
         var internalGrpcPort = applicationContainer.getMappedPort(8991); // application-internal-grpc-port
-        var debuggerPort = applicationContainer.getMappedPort(5005); // application-internal-grpc-port
+        var debuggerPort = applicationContainer.getMappedPort(5005);
 
         LOG.info("APPLICATION MAPPED PORTS: http={}; external-grpc={}; internal-grpc={}; debugger={}",
             httpPort,

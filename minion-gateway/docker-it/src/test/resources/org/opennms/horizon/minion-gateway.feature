@@ -11,7 +11,7 @@ Feature: Minion Gateway RPC Request Processing
     Given RPC Request Location "x-location-001-x"
     Given RPC Request Module ID "x-rpc-module-x"
     Given RPC Request TTL 3000ms
-    Then send RPC Request
+    Then send RPC Request with timeout 3000ms
     Then verify RPC exception was received
     Then verify RPC exception states active connection could not be found
 
@@ -43,3 +43,14 @@ Feature: Minion Gateway RPC Request Processing
     Then send task set monitor result to the Minion Gateway until successful with timeout 5000ms
     Then verify task set result was published to Kafka with timeout 3000ms
     Then verify the "tenant-id" header on Kafka = "x-tenant-x"
+
+  Scenario: Register for Twin updates to the Gateway via the external GRPC API (MinionToCloudRPC)
+    Given GRPC header "tenant-id" = "x-tenant-x"
+    Then create Minion-to-Cloud RPC Request connection
+
+    Given Generated RPC Request ID
+    Given RPC Request System ID "x-system-id-001-x"
+    Given RPC Request Location "x-location-001-x"
+    Given RPC Request TTL 3000ms
+    Then send twin update request to the Minion Gateway until successful with timeout 5000ms
+    Then verify twin update response was received from the Minion Gateway

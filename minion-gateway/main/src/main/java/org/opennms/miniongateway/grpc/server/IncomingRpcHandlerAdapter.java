@@ -28,6 +28,7 @@ public class IncomingRpcHandlerAdapter implements BiConsumer<RpcRequestProto, St
                     return;
                 }
                 responseStream.onNext(response);
+                responseStream.onCompleted();
             });
         }
     }

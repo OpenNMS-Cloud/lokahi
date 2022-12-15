@@ -29,22 +29,19 @@
 package org.opennms.horizon.kafkahelper;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.restassured.RestAssured;
-import io.restassured.config.RestAssuredConfig;
-import io.restassured.response.Response;
-import io.restassured.specification.RequestSpecification;
-import org.opennms.horizon.kafkahelper.internals.KafkaRestCreateConsumerRequest;
-import org.opennms.horizon.kafkahelper.internals.KafkaRestSubscribeRequest;
-import org.opennms.horizon.kafkahelper.internals.KafkaTestRecord;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.clients.consumer.ConsumerRecords;
+import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.opennms.horizon.kafkahelper.internals.KafkaProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
+import java.util.Map;
+import java.util.Properties;
 
 public class KafkaTestHelper {
 
@@ -52,196 +49,126 @@ public class KafkaTestHelper {
 
     private Logger LOG = DEFAULT_LOGGER;
 
-    private RestAssuredConfig restAssuredConfig;
-    private String kafkaRestBaseUrl;
+    private String kafkaBootstrapUrl;
 
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private final Object lock = new Object();
+
+    private Map<String, KafkaProcessor<String, byte[]>> kafkaTopicProcessors = new HashMap<>();
+    private Map<String, List<ConsumerRecord<String, byte[]>>> consumedRecords = new HashMap<>();
 
 //========================================
 // Getters and Setters
 //----------------------------------------
 
-    public RestAssuredConfig getRestAssuredConfig() {
-        return restAssuredConfig;
+    public String getKafkaBootstrapUrl() {
+        return kafkaBootstrapUrl;
     }
 
-    public void setRestAssuredConfig(RestAssuredConfig restAssuredConfig) {
-        this.restAssuredConfig = restAssuredConfig;
+    public void setKafkaBootstrapUrl(String kafkaBootstrapUrl) {
+        this.kafkaBootstrapUrl = kafkaBootstrapUrl;
     }
 
-    public String getKafkaRestBaseUrl() {
-        return kafkaRestBaseUrl;
-    }
-
-    public void setKafkaRestBaseUrl(String kafkaRestBaseUrl) {
-        this.kafkaRestBaseUrl = kafkaRestBaseUrl;
-    }
 
 //========================================
 // Test Operations
 //----------------------------------------
 
-    public void startConsumer(String consumerGroup, String consumerName, String... topics) {
+    public boolean startConsumer(String topic) {
         try {
-            createConsumerOnRestServer(consumerGroup, consumerName);
-            createSubscriptionsOnRestServer(consumerGroup, consumerName, topics);
+            KafkaConsumer<String, byte[]> consumer = this.createKafkaConsumer("test-consumer-group", "test-consumer-for-" + topic);
+            KafkaProcessor<String, byte[]> processor = new KafkaProcessor<>(consumer, records -> processRecords(topic, records));
+
+            synchronized (lock) {
+                if (kafkaTopicProcessors.containsKey(topic)) {
+                    return false;
+                }
+
+                kafkaTopicProcessors.put(topic, processor);
+            }
+
+            consumer.subscribe(Collections.singletonList(topic));
+
+            startPollingThread(processor);
         } catch (Exception exc) {
             throw new RuntimeException(exc);
+        }
+
+        return true;
+    }
+
+    public void removeConsumer(String topic) {
+        KafkaProcessor<String, byte[]> processor;
+
+        synchronized (lock) {
+            processor = kafkaTopicProcessors.remove(topic);
+        }
+
+        if (processor != null) {
+            processor.shutdown();
         }
     }
 
-    public void removeConsumer(String consumerGroup, String consumerName) {
-        try {
-            deleteConsumerOnRestServer(consumerGroup, consumerName);
-        } catch (Exception exc) {
-            throw new RuntimeException(exc);
+    public List<ConsumerRecord<String, byte[]>> getConsumedMessages(String topic)  {
+        List<ConsumerRecord<String, byte[]>> result = new LinkedList<>();
+
+        synchronized (lock) {
+            List<ConsumerRecord<String, byte[]>> consumed = consumedRecords.get(topic);
+            if (consumed != null) {
+                result.addAll(consumed);
+            }
         }
-    }
 
-    public List<KafkaTestRecord> getConsumedMessages(String consumerGroup, String consumerName, String topic)  {
-        try {
-            List<KafkaTestRecord> records = readRecordsFromRestServer(consumerGroup, consumerName);
-
-            List<KafkaTestRecord> result =
-                records.stream().filter(record -> Objects.equals(record.getTopic(), topic)).collect(Collectors.toList());
-
-            return result;
-        } catch (Exception exc) {
-            throw new RuntimeException(exc);
-        }
+        return result;
     }
 
 //========================================
-// Kafka-Rest Operations
+// Kafka Client
 //----------------------------------------
 
-    private void createConsumerOnRestServer(String consumerGroup, String consumerName) throws Exception {
-        KafkaRestCreateConsumerRequest kafkaRestCreateConsumerRequest = new KafkaRestCreateConsumerRequest();
-        kafkaRestCreateConsumerRequest.setName(consumerName);
+    private <K,V> KafkaConsumer<K,V> createKafkaConsumer(String groupId, String consumerName) {
 
-        String jsonText = objectMapper.writeValueAsString(kafkaRestCreateConsumerRequest);
+        // create instance for properties to access producer configs
+        Properties props = new Properties();
 
-        Response response = post("/consumers/" + consumerGroup, jsonText, "application/vnd.kafka.v2+json", null);
-        if ((response.getStatusCode() < 200) || (response.getStatusCode() >= 300)) {
-            throw new RuntimeException("failed to create consumer: response-code=" + response.getStatusCode() + "; body=" + response.getBody().asString());
+        props.put("group.id", groupId);
+        props.put("group.instance.id", consumerName);
+
+        //Assign localhost id
+        props.put("bootstrap.servers", kafkaBootstrapUrl);
+
+        //Set acknowledgements for producer requests.
+        props.put("acks","all");
+
+        //If the request fails, the producer can automatically retry,
+        props.put("retries", 0);
+
+        //Specify buffer size in config
+        props.put("batch.size", 16384);
+
+        //Reduce the no of requests less than 0
+        props.put("linger.ms", 1);
+
+        //The buffer.memory controls the total amount of memory available to the producer for buffering.
+        props.put("buffer.memory", 33554432);
+
+        props.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
+        props.put("value.deserializer", "org.apache.kafka.common.serialization.ByteArrayDeserializer");
+
+        props.put("auto.offset.reset", "earliest");
+
+        return new KafkaConsumer<K, V>(props);
+    }
+
+    private void processRecords(String topic, ConsumerRecords<String, byte[]> records) {
+        synchronized (lock) {
+            List<ConsumerRecord<String, byte[]>> recordList =
+                consumedRecords.computeIfAbsent(topic, key -> new LinkedList<>());
+            records.forEach(recordList::add);
         }
     }
 
-    private void createSubscriptionsOnRestServer(String consumerGroup, String consumerName, String[] topics) throws Exception {
-        KafkaRestSubscribeRequest kafkaRestSubscribeRequest = new KafkaRestSubscribeRequest();
-        kafkaRestSubscribeRequest.setTopics(Arrays.asList(topics));
-
-        String jsonText = objectMapper.writeValueAsString(kafkaRestSubscribeRequest);
-
-        post("/consumers/" + consumerGroup + "/instances/" + consumerName + "/subscription", jsonText, "application/vnd.kafka.v2+json", null);
-    }
-
-    private void deleteConsumerOnRestServer(String consumerGroup, String consumerName) throws Exception {
-        Response response = delete("/consumers/" + consumerGroup + "/instances/" + consumerName, null);
-        if ((response.getStatusCode() < 200) || (response.getStatusCode() >= 300)) {
-            throw new RuntimeException("failed to delete consumer: response-code=" + response.getStatusCode() + "; body=" + response.getBody().asString());
-        }
-    }
-
-    private List<KafkaTestRecord> readRecordsFromRestServer(String consumerGroup, String consumerName) throws Exception {
-        Response response =
-            get("/consumers/" + consumerGroup + "/instances/" + consumerName + "/records", "application/vnd.kafka.v2+json");
-
-        if ((response.getStatusCode() < 200) || (response.getStatusCode() >= 300)) {
-            throw new RuntimeException("failed to read records: response-code=" + response.getStatusCode() + "; body=" + response.getBody().asString());
-        }
-
-        KafkaTestRecord[] result = objectMapper.readValue(response.getBody().asString(), KafkaTestRecord[].class);
-
-        return Arrays.asList(result);
-    }
-
-//========================================
-// REST Operations
-//----------------------------------------
-
-    private Response get(String url, String acceptHeader) throws MalformedURLException {
-        URL requestUrl = new URL(new URL(kafkaRestBaseUrl), url);
-
-        RequestSpecification requestSpecification =
-            RestAssured
-                .given()
-                .config(restAssuredConfig);
-
-        if (acceptHeader != null) {
-            requestSpecification =
-                requestSpecification
-                    .header("Accept", acceptHeader)
-            ;
-        }
-
-        Response response =
-            requestSpecification
-                .get(requestUrl)
-                .thenReturn()
-            ;
-
-        return response;
-    }
-
-    private Response post(String url, String body, String contentType, String acceptHeader) throws MalformedURLException {
-        URL requestUrl = new URL(new URL(kafkaRestBaseUrl), url);
-
-        RequestSpecification requestSpecification =
-            RestAssured
-                .given()
-                .config(restAssuredConfig);
-
-        if (contentType != null) {
-            requestSpecification =
-                requestSpecification
-                    .header("Content-Type", contentType)
-            ;
-        }
-
-        if (acceptHeader != null) {
-            requestSpecification =
-                requestSpecification
-                    .header("Accept", acceptHeader)
-            ;
-        }
-
-        if (body != null) {
-            requestSpecification =
-                requestSpecification
-                    .body(body);
-        }
-
-        Response response =
-            requestSpecification
-                .post(requestUrl)
-                .thenReturn()
-            ;
-
-        return response;
-    }
-
-    private Response delete(String url, String acceptHeader) throws MalformedURLException {
-        URL requestUrl = new URL(new URL(kafkaRestBaseUrl), url);
-
-        RequestSpecification requestSpecification =
-            RestAssured
-                .given()
-                .config(restAssuredConfig);
-
-        if (acceptHeader != null) {
-            requestSpecification =
-                requestSpecification
-                    .header("Accept", acceptHeader)
-            ;
-        }
-
-        Response response =
-            requestSpecification
-                .delete(requestUrl)
-                .thenReturn()
-            ;
-
-        return response;
+    private void startPollingThread(KafkaProcessor<String, byte[]> processor) {
+        Thread processorThread = new Thread(processor);
+        processorThread.start();
     }
 }

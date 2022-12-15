@@ -42,6 +42,7 @@ import io.restassured.config.RestAssuredConfig;
 import io.restassured.internal.util.IOUtils;
 import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.opennms.cloud.grpc.minion.CloudServiceGrpc;
 import org.opennms.cloud.grpc.minion.CloudToMinionMessage;
 import org.opennms.cloud.grpc.minion.Identity;
@@ -55,7 +56,6 @@ import org.opennms.horizon.grpc.TestCloudServiceRpcRequestHandler;
 import org.opennms.horizon.grpc.TestCloudToMinionMessageHandler;
 import org.opennms.horizon.grpc.TestEmptyMessageHandler;
 import org.opennms.horizon.kafkahelper.KafkaTestHelper;
-import org.opennms.horizon.kafkahelper.internals.KafkaTestRecord;
 import org.opennms.taskset.contract.MonitorResponse;
 import org.opennms.taskset.contract.MonitorType;
 import org.opennms.taskset.contract.TaskDefinition;
@@ -117,7 +117,7 @@ public class MinionGatewayTestSteps {
     //
     private int internalGrpcPort;
     private int externalGrpcPort;
-    private String kafkaRestServiceBaseUrl;
+    private String kafkaBootstrapUrl;
     private String mockLocation;
     private String mockSystemId;
     private String applicationBaseUrl;
@@ -140,6 +140,7 @@ public class MinionGatewayTestSteps {
     private JsonPath parsedJsonResponse;
 
     private Response restAssuredResponse;
+    private ConsumerRecord<String, byte[]> matchedKafkaRecord;
 
 //========================================
 // Lifecycle
@@ -148,10 +149,6 @@ public class MinionGatewayTestSteps {
     public MinionGatewayTestSteps(RetryUtils retryUtils, KafkaTestHelper kafkaTestHelper) {
         this.retryUtils = retryUtils;
         this.kafkaTestHelper = kafkaTestHelper;
-
-        this.kafkaTestHelper.setRestAssuredConfig(
-            createRestAssuredTestConfig()
-        );
     }
 
     @After
@@ -198,14 +195,14 @@ public class MinionGatewayTestSteps {
         LOG.info("Using INTERNAL GRPC PORT {}", internalGrpcPort);
     }
 
-    @Given("Kafka Rest Service Base URL in system property {string}")
-    public void kafkaRestServiceBaseURLInSystemProperty(String systemPropertyName) {
+    @Given("Kafka Bootstrap URL in system property {string}")
+    public void kafkaBootstrapURLInSystemProperty(String systemPropertyName) {
         String value = System.getProperty(systemPropertyName);
-        kafkaRestServiceBaseUrl = value;
+        kafkaBootstrapUrl = value;
 
-        this.kafkaTestHelper.setKafkaRestBaseUrl(kafkaRestServiceBaseUrl);
+        this.kafkaTestHelper.setKafkaBootstrapUrl(kafkaBootstrapUrl);
 
-        LOG.info("USING KAFKA REST URL {}", kafkaRestServiceBaseUrl);
+        LOG.info("USING KAFKA BOOTSTRAP URL {}", kafkaBootstrapUrl);
     }
 
     @Then("^verify JSON path expressions match$")
@@ -435,12 +432,12 @@ public class MinionGatewayTestSteps {
 
     @Then("verify task set result was published to Kafka with timeout {int}ms")
     public void verifyTaskSetResultWasPublishedToKafkaWithTimeoutMs(int timeout) throws Exception {
-        kafkaTestHelper.startConsumer("docker-it-consumer", "task-set-result-consumer", "task-set.results");
+        kafkaTestHelper.startConsumer("task-set.results");
 
         try {
-            List<KafkaTestRecord> records =
+            List<ConsumerRecord<String, byte[]>> records =
                 retryUtils.retry(
-                    () -> kafkaTestHelper.getConsumedMessages("docker-it-consumer", "task-set-result-consumer", "task-set.results"),
+                    () -> kafkaTestHelper.getConsumedMessages("task-set.results"),
                     (list) -> ! list.isEmpty(),
                     250,
                     timeout,
@@ -449,8 +446,8 @@ public class MinionGatewayTestSteps {
 
             assertTrue("verify at least 1 record was returned", ! records.isEmpty());
 
-            KafkaTestRecord rec = records.get(0);
-            TaskSetResults results = TaskSetResults.parseFrom(rec.getValue());
+            matchedKafkaRecord = records.get(0);
+            TaskSetResults results = TaskSetResults.parseFrom(matchedKafkaRecord.value());
             assertNotNull(results);
             assertEquals(1, results.getResultsCount());
 
@@ -462,13 +459,14 @@ public class MinionGatewayTestSteps {
             assertEquals("OK", taskResult.getMonitorResponse().getStatus());
             assertEquals(13.999, taskResult.getMonitorResponse().getResponseTimeMs(), 0.00000001);
         } finally {
-            kafkaTestHelper.removeConsumer("docker-it-consumer", "task-set-result-consumer");
+            kafkaTestHelper.removeConsumer("task-set.results");
         }
     }
 
     @Then("verify the {string} header on Kafka = {string}")
-    public void verifyTheHeaderOnKafka(String headerName, String headerValue) {
-        LOG.warn("CURRENTLY unable to read Kafka headers");
+    public void verifyTheHeaderOnKafka(String headerName, String execpted) {
+        String actual = new String(matchedKafkaRecord.headers().lastHeader(headerName).value(), StandardCharsets.UTF_8);
+        assertEquals(execpted, actual);
     }
 
 

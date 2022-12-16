@@ -53,24 +53,19 @@ public class DataChoicesGrpcService extends DataChoicesServiceGrpc.DataChoicesSe
     public void toggle(ToggleDataChoicesDTO request, StreamObserver<ToggleDataChoicesDTO> responseObserver) {
         Optional<String> tenantIdOptional = tenantLookup.lookupTenantId(Context.current());
 
-        if (tenantIdOptional.isEmpty()) {
+        tenantIdOptional.ifPresentOrElse(tenantId -> {
+
+            service.toggle(request, tenantId);
+            responseObserver.onNext(request);
+            responseObserver.onCompleted();
+
+        }, () -> {
+
             Status status = Status.newBuilder()
                 .setCode(Code.INVALID_ARGUMENT_VALUE)
                 .setMessage("Tenant Id can't be empty")
                 .build();
             responseObserver.onError(StatusProto.toStatusRuntimeException(status));
-            return;
-        }
-
-        String tenantId = tenantIdOptional.get();
-
-        try {
-            service.toggle(request, tenantId);
-
-            responseObserver.onNext(request);
-            responseObserver.onCompleted();
-        } catch (Exception e) {
-            responseObserver.onError(e);
-        }
+        });
     }
 }

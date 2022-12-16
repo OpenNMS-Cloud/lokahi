@@ -28,17 +28,18 @@
 
 package org.opennms.horizon.datachoices.job;
 
-import lombok.RequiredArgsConstructor;
 import org.opennms.horizon.datachoices.service.DataChoicesService;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.stereotype.Component;
 
 @Component
-@RequiredArgsConstructor
 public class DataChoicesJob extends QuartzJobBean {
-    private final DataChoicesService service;
+
+    @Autowired //must be autowired
+    private DataChoicesService service;
 
     @Override
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {

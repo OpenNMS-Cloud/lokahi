@@ -44,7 +44,7 @@ import org.keycloak.adapters.rotation.AdapterTokenVerifier;
 import org.keycloak.common.VerificationException;
 import org.keycloak.representations.AccessToken;
 import org.keycloak.util.TokenUtil;
-import org.opennms.horizon.datachoices.Constants;
+import org.opennms.horizon.shared.constants.GrpcConstants;
 
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -54,35 +54,37 @@ import java.util.Optional;
 public class DataChoicesServerInterceptor implements ServerInterceptor {
     private static final String TOKEN_PREFIX = "Bearer";
     private final KeycloakDeployment keycloak;
+
     @Override
     public <ReqT, RespT> ServerCall.Listener<ReqT> interceptCall(ServerCall<ReqT, RespT> serverCall, Metadata headers, ServerCallHandler<ReqT, RespT> callHandler) {
 
         log.debug("Received metadata: {}", headers);
-        String authHeader = headers.get(Constants.AUTHORIZATION_METADATA_KEY);
+        String authHeader = headers.get(GrpcConstants.AUTHORIZATION_METADATA_KEY);
         try {
             Optional<String> tenantId = verifyAccessToken(authHeader);
-            Context context = tenantId.map(tnId -> Context.current().withValue(Constants.TENANT_ID_CONTEXT_KEY, tnId)).orElseThrow();
+            Context context = tenantId.map(tnId -> Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, tnId)).orElseThrow();
             return Contexts.interceptCall(context, serverCall, headers, callHandler);
         } catch (VerificationException e) {
             log.error("Failed to verify access token", e);
             serverCall.close(Status.UNAUTHENTICATED.withDescription("Invalid access token"), new Metadata());
-            return new ServerCall.Listener<>() {};
-        }
-        catch (NoSuchElementException e) {
+            return new ServerCall.Listener<>() {
+            };
+        } catch (NoSuchElementException e) {
             serverCall.close(Status.UNAUTHENTICATED.withDescription("Missing tenant id"), new Metadata());
-            return new ServerCall.Listener<>() {};
+            return new ServerCall.Listener<>() {
+            };
         }
     }
 
     protected Optional<String> verifyAccessToken(String authHeader) throws VerificationException {
         if (StringUtils.isEmpty(authHeader) || !authHeader.startsWith(TOKEN_PREFIX)) {
-            throw  new VerificationException();
+            throw new VerificationException();
         }
-        String token = authHeader.substring(TOKEN_PREFIX.length()+1);
+        String token = authHeader.substring(TOKEN_PREFIX.length() + 1);
         TokenVerifier<AccessToken> verifier = AdapterTokenVerifier.createVerifier(token, keycloak, false, AccessToken.class);
         verifier.withChecks(TokenVerifier.SUBJECT_EXISTS_CHECK, new TokenVerifier.TokenTypeCheck(TokenUtil.TOKEN_TYPE_BEARER), TokenVerifier.IS_ACTIVE);
         verifier.verify();
         AccessToken accessToken = verifier.getToken();
-        return Optional.ofNullable((String)accessToken.getOtherClaims().get(Constants.TENANT_ID_KEY));
+        return Optional.ofNullable((String) accessToken.getOtherClaims().get(GrpcConstants.TENANT_ID_KEY));
     }
 }

@@ -29,13 +29,13 @@
 package org.opennms.horizon.datachoices.grpc;
 
 import io.grpc.Context;
-import org.opennms.horizon.datachoices.Constants;
+import org.opennms.horizon.shared.constants.GrpcConstants;
 
 import java.util.Optional;
 
 public class GrpcTenantLookupImpl implements TenantLookup {
     @Override
     public Optional<String> lookupTenantId(Context context) {
-        return Optional.ofNullable(Constants.TENANT_ID_CONTEXT_KEY.get());
+        return Optional.ofNullable(GrpcConstants.TENANT_ID_CONTEXT_KEY.get());
     }
 }

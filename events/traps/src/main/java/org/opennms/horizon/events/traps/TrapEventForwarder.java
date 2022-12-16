@@ -32,6 +32,7 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.header.internals.RecordHeader;
 import org.opennms.horizon.events.proto.Event;
 import org.opennms.horizon.events.proto.EventLog;
+import org.opennms.horizon.shared.constants.GrpcConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,7 +46,6 @@ import java.nio.charset.StandardCharsets;
 public class TrapEventForwarder {
 
     private static final Logger LOG = LoggerFactory.getLogger(TrapEventForwarder.class);
-    private static final String TENANT_ID = "tenant-id";
 
     private final KafkaTemplate<String, byte[]> kafkaTemplate;
 
@@ -64,14 +64,14 @@ public class TrapEventForwarder {
     public void sendEvents(EventLog eventLog, String tenantId) {
         LOG.info("Sending {} events to events topic", eventLog.getEventCount());
         var producerRecord = new ProducerRecord<String, byte[]>(kafkaTopic, eventLog.toByteArray());
-        producerRecord.headers().add(new RecordHeader(TENANT_ID, tenantId.getBytes(StandardCharsets.UTF_8)));
+        producerRecord.headers().add(new RecordHeader(GrpcConstants.TENANT_ID_KEY, tenantId.getBytes(StandardCharsets.UTF_8)));
         kafkaTemplate.send(producerRecord);
     }
 
     public void sendInternalEvents(Event event, String tenantId) {
         LOG.info("Sending event for new node with interface {} with location {}", event.getIpAddress(), event.getLocation());
         var record = new ProducerRecord<String, byte[]>(internalTopic, event.toByteArray());
-        record.headers().add(new RecordHeader(TENANT_ID, tenantId.getBytes(StandardCharsets.UTF_8)));
+        record.headers().add(new RecordHeader(GrpcConstants.TENANT_ID_KEY, tenantId.getBytes(StandardCharsets.UTF_8)));
         kafkaTemplate.send(record);
     }
 }

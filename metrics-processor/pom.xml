@@ -58,6 +58,11 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
+            <groupId>org.opennms.horizon.shared</groupId>
+            <artifactId>grpc-common-constants</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.opennms.horizon.shared.snmp</groupId>
             <artifactId>proto</artifactId>
             <version>${project.version}</version>

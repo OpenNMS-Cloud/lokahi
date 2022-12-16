@@ -33,9 +33,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
 import java.util.Optional;
 
@@ -46,7 +46,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.opennms.horizon.inventory.Constants;
 import org.opennms.horizon.inventory.dto.NodeCreateDTO;
 import org.opennms.horizon.inventory.mapper.NodeMapper;
 import org.opennms.horizon.inventory.model.IpInterface;
@@ -55,6 +54,7 @@ import org.opennms.horizon.inventory.model.Node;
 import org.opennms.horizon.inventory.repository.IpInterfaceRepository;
 import org.opennms.horizon.inventory.repository.MonitoringLocationRepository;
 import org.opennms.horizon.inventory.repository.NodeRepository;
+import org.opennms.horizon.shared.constants.GrpcConstants;
 
 @RunWith(MockitoJUnitRunner.class)
 public class NodeServiceTest {
@@ -155,9 +155,9 @@ public class NodeServiceTest {
             .setLabel("test-node")
             .setManagementIp("127.0.0.1").build();
         MonitoringLocation location = new MonitoringLocation();
-        doReturn(Optional.of(location)).when(monitoringLocationRepository).findByLocationAndTenantId(Constants.DEFAULT_LOCATION, tenantID);
+        doReturn(Optional.of(location)).when(monitoringLocationRepository).findByLocationAndTenantId(GrpcConstants.DEFAULT_LOCATION, tenantID);
         nodeService.createNode(nodeCreate, tenantID);
-        verify(monitoringLocationRepository).findByLocationAndTenantId(Constants.DEFAULT_LOCATION, tenantID);
+        verify(monitoringLocationRepository).findByLocationAndTenantId(GrpcConstants.DEFAULT_LOCATION, tenantID);
         verify(nodeRepository).save(any(Node.class));
         verify(ipInterfaceRepository).save(any(IpInterface.class));
     }
@@ -167,13 +167,13 @@ public class NodeServiceTest {
         NodeCreateDTO nodeCreate = NodeCreateDTO.newBuilder()
             .setLabel("test-node")
             .setManagementIp("127.0.0.1").build();
-        doReturn(Optional.empty()).when(monitoringLocationRepository).findByLocationAndTenantId(Constants.DEFAULT_LOCATION, tenantID);
+        doReturn(Optional.empty()).when(monitoringLocationRepository).findByLocationAndTenantId(GrpcConstants.DEFAULT_LOCATION, tenantID);
         doReturn(new MonitoringLocation()).when(monitoringLocationRepository).save(any(MonitoringLocation.class));
         ArgumentCaptor<MonitoringLocation> captor = ArgumentCaptor.forClass(MonitoringLocation.class);
         nodeService.createNode(nodeCreate, tenantID);
-        verify(monitoringLocationRepository).findByLocationAndTenantId(Constants.DEFAULT_LOCATION, tenantID);
+        verify(monitoringLocationRepository).findByLocationAndTenantId(GrpcConstants.DEFAULT_LOCATION, tenantID);
         verify(monitoringLocationRepository).save(captor.capture());
-        assertThat(captor.getValue().getLocation()).isEqualTo(Constants.DEFAULT_LOCATION);
+        assertThat(captor.getValue().getLocation()).isEqualTo(GrpcConstants.DEFAULT_LOCATION);
         verify(nodeRepository).save(any(Node.class));
         verify(ipInterfaceRepository).save(any(IpInterface.class));
     }

@@ -28,20 +28,21 @@
 
 package org.opennms.horizon.inventory.component;
 
-import io.grpc.Context;
-import io.grpc.stub.StreamObserver;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+
 import org.opennms.cloud.grpc.minion.RpcRequestProto;
 import org.opennms.cloud.grpc.minion.RpcRequestServiceGrpc;
 import org.opennms.cloud.grpc.minion.RpcRequestServiceGrpc.RpcRequestServiceStub;
 import org.opennms.cloud.grpc.minion.RpcResponseProto;
-import org.opennms.horizon.inventory.Constants;
 import org.opennms.horizon.inventory.grpc.TenantIdClientInterceptor;
 import org.opennms.horizon.inventory.grpc.TenantLookup;
+import org.opennms.horizon.shared.constants.GrpcConstants;
 import org.springframework.beans.factory.annotation.Qualifier;
 
+import io.grpc.Context;
 import io.grpc.ManagedChannel;
+import io.grpc.stub.StreamObserver;
 
 public class MinionRpcClient {
 
@@ -68,7 +69,7 @@ public class MinionRpcClient {
 
     public CompletableFuture<RpcResponseProto> sendRpcRequest(String tenantId, RpcRequestProto request) {
         CompletableFuture<RpcResponseProto> future = new CompletableFuture<>();
-        Context withCredential = Context.current().withValue(Constants.TENANT_ID_CONTEXT_KEY, tenantId);
+        Context withCredential = Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, tenantId);
         try {
             withCredential.run(() -> {
                 rpcStub.request(request, new StreamObserver<>() {

@@ -35,8 +35,7 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.google.common.base.Strings;
-import com.google.protobuf.Any;
+import org.opennms.horizon.shared.constants.GrpcConstants;
 import org.opennms.horizon.snmp.api.SnmpResponseMetric;
 import org.opennms.horizon.snmp.api.SnmpValueType;
 import org.opennms.horizon.tsdata.metrics.MetricsPushAdapter;
@@ -52,6 +51,8 @@ import org.springframework.messaging.handler.annotation.Headers;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Service;
 
+import com.google.common.base.Strings;
+import com.google.protobuf.Any;
 import com.google.protobuf.InvalidProtocolBufferException;
 
 import io.prometheus.client.CollectorRegistry;
@@ -198,7 +199,7 @@ public class TSDataProcessor {
     }
 
     private String getTenantId(Map<String, Object> headers) {
-        return Optional.ofNullable(headers.get("tenant-id"))
+        return Optional.ofNullable(headers.get(GrpcConstants.TENANT_ID_KEY))
             .map(tenantId -> {
                 if (tenantId instanceof byte[]) {
                     return new String((byte[]) tenantId);

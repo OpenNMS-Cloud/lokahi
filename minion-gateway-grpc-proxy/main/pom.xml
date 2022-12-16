@@ -62,7 +62,11 @@
             <artifactId>ipc-grpc-contract</artifactId>
             <version>${project.version}</version>
         </dependency>
-
+        <dependency>
+            <groupId>org.opennms.horizon.shared</groupId>
+            <artifactId>grpc-common-constants</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <dependency>
             <groupId>io.grpc</groupId>
             <artifactId>grpc-api</artifactId>

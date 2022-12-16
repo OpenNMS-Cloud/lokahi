@@ -32,15 +32,14 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.opennms.horizon.grpc.heartbeat.contract.HeartbeatMessage;
-import org.opennms.horizon.inventory.Constants;
+import org.opennms.horizon.inventory.exception.InventoryRuntimeException;
 import org.opennms.horizon.inventory.service.MonitoringSystemService;
+import org.opennms.horizon.shared.constants.GrpcConstants;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.messaging.handler.annotation.Headers;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
-
-import com.google.protobuf.InvalidProtocolBufferException;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -56,12 +55,13 @@ public class MinionHeartbeatConsumer {
     public void receiveMessage(@Payload byte[] data, @Headers Map<String, Object> headers) {
         try {
             HeartbeatMessage message = HeartbeatMessage.parseFrom(data);
-            String tenantId = Optional.ofNullable(headers.get(Constants.TENANT_ID_KEY)).map(o -> new String((byte[])o)).orElse(Constants.DEFAULT_TENANT_ID);
+            String tenantId = Optional.ofNullable(headers.get(GrpcConstants.TENANT_ID_KEY)).map(o -> new String((byte[])o))
+                .orElseThrow(()->new InventoryRuntimeException("Missing tenant id"));
             log.info("Received heartbeat message for minion with tenant id: {}; id: {}; location: {}", tenantId, message.getIdentity().getSystemId(), message.getIdentity().getLocation());
             Optional<Long> newCreatedId = service.addMonitoringSystemFromHeartbeat(message, tenantId);
             newCreatedId.ifPresent(minionRpc::addSystem);
-        } catch (InvalidProtocolBufferException e) {
-            log.error("Error while parsing heartbeat message", e);
+        } catch (Exception e) {
+            log.error("Error while processing heartbeat message: ", e);
         }
     }
 }

@@ -29,7 +29,6 @@
 package org.opennms.horizon.inventory.component;
 
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
@@ -43,9 +42,9 @@ import org.opennms.cloud.grpc.minion.RpcRequestProto;
 import org.opennms.cloud.grpc.minion.RpcResponseProto;
 import org.opennms.horizon.grpc.echo.contract.EchoRequest;
 import org.opennms.horizon.grpc.echo.contract.EchoResponse;
-import org.opennms.horizon.inventory.Constants;
 import org.opennms.horizon.inventory.model.MonitoringSystemBean;
 import org.opennms.horizon.inventory.service.MonitoringSystemService;
+import org.opennms.horizon.shared.constants.GrpcConstants;
 import org.opennms.taskset.contract.MonitorResponse;
 import org.opennms.taskset.contract.MonitorType;
 import org.opennms.taskset.contract.TaskResult;
@@ -156,7 +155,7 @@ public class MinionRpcManager {
             .addResults(result)
             .build();
         ProducerRecord<String, byte[]> producerRecord = new ProducerRecord<>(kafkaTopic, results.toByteArray());
-        producerRecord.headers().add(new RecordHeader(Constants.TENANT_ID_KEY, tenantId.getBytes()));
+        producerRecord.headers().add(new RecordHeader(GrpcConstants.TENANT_ID_KEY, tenantId.getBytes()));
         kafkaTemplate.send(producerRecord);
     }
 

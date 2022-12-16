@@ -48,6 +48,7 @@ import org.opennms.horizon.events.proto.EventParameter;
 import org.opennms.horizon.events.proto.SnmpInfo;
 import org.opennms.horizon.grpc.traps.contract.TrapDTO;
 import org.opennms.horizon.grpc.traps.contract.TrapLogDTO;
+import org.opennms.horizon.shared.constants.GrpcConstants;
 import org.opennms.horizon.shared.snmp.SnmpHelper;
 import org.opennms.horizon.shared.snmp.traps.TrapdInstrumentation;
 import org.opennms.horizon.shared.utils.InetAddressUtils;
@@ -67,15 +68,12 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static org.opennms.horizon.events.Constants.TENANT_ID_KEY;
 
 @Component
 @PropertySource("classpath:application.yml")
 public class TrapsConsumer {
 
     private static final Logger LOG = LoggerFactory.getLogger(TrapsConsumer.class);
-
-    public static final TrapdInstrumentation trapdInstrumentation = new TrapdInstrumentation();
 
     private final EventConfDao eventConfDao;
 
@@ -150,9 +148,7 @@ public class TrapsConsumer {
 
     private EventLog convertToProtoEvents(Log eventLog) {
         EventLog.Builder builder = EventLog.newBuilder();
-        eventLog.getEvents().getEventCollection().forEach((event -> {
-            builder.addEvent(mapToEventProto(event));
-        }));
+        eventLog.getEvents().getEventCollection().forEach((event -> builder.addEvent(mapToEventProto(event))));
         return builder.build();
     }
 
@@ -239,7 +235,7 @@ public class TrapsConsumer {
     }
 
     private Optional<String> getTenantId(Map<String, Object> headers) {
-        Object tenantId = headers.get(TENANT_ID_KEY);
+        Object tenantId = headers.get(GrpcConstants.TENANT_ID_KEY);
         if (tenantId instanceof byte[]) {
             return Optional.of(new String((byte[]) tenantId));
         }

@@ -26,15 +26,18 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.inventory;
+package org.opennms.horizon.shared.constants;
 
 import io.grpc.Context;
 import io.grpc.Metadata;
 
-public interface Constants {
+//Those constants used in more than one services will be here.
+public interface GrpcConstants {
     String TENANT_ID_KEY = "tenant-id";
     String DEFAULT_TENANT_ID = "opennms-prime";
     String DEFAULT_LOCATION = "Default";
+
+    //gRPC constants
     Metadata.Key<String> AUTHORIZATION_METADATA_KEY = Metadata.Key.of("Authorization", Metadata.ASCII_STRING_MARSHALLER);
     Metadata.Key<String> TENANT_ID_REQUEST_KEY = Metadata.Key.of(TENANT_ID_KEY, Metadata.ASCII_STRING_MARSHALLER);
     Context.Key<String> TENANT_ID_CONTEXT_KEY = Context.key(TENANT_ID_KEY);

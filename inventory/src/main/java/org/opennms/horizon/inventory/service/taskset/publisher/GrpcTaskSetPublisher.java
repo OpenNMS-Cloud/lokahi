@@ -28,11 +28,9 @@
 
 package org.opennms.horizon.inventory.service.taskset.publisher;
 
-import io.grpc.Context;
-import io.grpc.ManagedChannel;
-import org.opennms.horizon.inventory.Constants;
 import org.opennms.horizon.inventory.grpc.TenantIdClientInterceptor;
 import org.opennms.horizon.inventory.grpc.TenantLookup;
+import org.opennms.horizon.shared.constants.GrpcConstants;
 import org.opennms.taskset.contract.TaskSet;
 import org.opennms.taskset.service.api.TaskSetPublisher;
 import org.opennms.taskset.service.contract.PublishTaskSetRequest;
@@ -41,6 +39,9 @@ import org.opennms.taskset.service.contract.TaskSetServiceGrpc;
 import org.opennms.taskset.service.contract.TaskSetServiceGrpc.TaskSetServiceBlockingStub;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import io.grpc.Context;
+import io.grpc.ManagedChannel;
 
 public class GrpcTaskSetPublisher implements TaskSetPublisher {
 
@@ -70,7 +71,7 @@ public class GrpcTaskSetPublisher implements TaskSetPublisher {
                     .setTaskSet(taskSet)
                     .build();
 
-            PublishTaskSetResponse response = Context.current().withValue(Constants.TENANT_ID_CONTEXT_KEY, tenantId).call(() ->
+            PublishTaskSetResponse response = Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, tenantId).call(() ->
                 taskSetServiceStub.publishTaskSet(request)
             );
 

@@ -32,6 +32,8 @@ import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.Metadata;
 import io.grpc.stub.MetadataUtils;
+
+import org.opennms.horizon.shared.constants.GrpcConstants;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 
@@ -48,11 +50,9 @@ public abstract class GrpcTestBase {
 
     protected ManagedChannel channel;
 
-    protected static final Metadata.Key<String> TENANT_ID = Metadata.Key.of("tenant-id", Metadata.ASCII_STRING_MARSHALLER);
-
     protected void setupGrpc() {
         Metadata metadata = new Metadata();
-        metadata.put(TENANT_ID, tenantId.toString());
+        metadata.put(GrpcConstants.TENANT_ID_REQUEST_KEY, tenantId);
         channel = ManagedChannelBuilder.forAddress("localhost", 6767)
             .intercept(MetadataUtils.newAttachHeadersInterceptor(metadata))
             .usePlaintext().build();
@@ -60,7 +60,7 @@ public abstract class GrpcTestBase {
 
     protected void setupGrpcWithDifferentTenantID() {
         Metadata metadata = new Metadata();
-        metadata.put(TENANT_ID, new UUID(5, 5).toString());
+        metadata.put(GrpcConstants.TENANT_ID_REQUEST_KEY, new UUID(5, 5).toString());
         channel = ManagedChannelBuilder.forAddress("localhost", 6767)
             .intercept(MetadataUtils.newAttachHeadersInterceptor(metadata))
             .usePlaintext().build();

@@ -50,6 +50,11 @@
             <artifactId>grpc</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.opennms.horizon.shared</groupId>
+            <artifactId>grpc-common-constants</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
         <!-- Test Dependencies -->
         <dependency>

@@ -50,12 +50,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.keycloak.adapters.KeycloakDeployment;
 import org.keycloak.common.VerificationException;
-import org.opennms.horizon.inventory.Constants;
 import org.opennms.horizon.inventory.dto.IdList;
 import org.opennms.horizon.inventory.dto.MonitoringLocationDTO;
 import org.opennms.horizon.inventory.dto.MonitoringLocationList;
 import org.opennms.horizon.inventory.dto.MonitoringLocationServiceGrpc;
 import org.opennms.horizon.inventory.service.MonitoringLocationService;
+import org.opennms.horizon.shared.constants.GrpcConstants;
 
 import com.google.protobuf.Empty;
 import com.google.protobuf.Int64Value;
@@ -121,7 +121,7 @@ public class LocationGrpcIntegrationTest {
     void testListLocations() throws VerificationException {
         doReturn(Arrays.asList(location1, location2)).when(mockLocationService).findByTenantId(tenantId);
         Metadata headers = new Metadata();
-        headers.put(Constants.AUTHORIZATION_METADATA_KEY, authHeader);
+        headers.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, authHeader);
         MonitoringLocationList result = stub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(headers)).listLocations(Empty.newBuilder().build());
         assertThat(result.getLocationsList().size()).isEqualTo(2);
         verify(mockLocationService).findByTenantId(tenantId);
@@ -134,7 +134,7 @@ public class LocationGrpcIntegrationTest {
         List<Long> ids = Arrays.asList(1L, 2L);
         doReturn(Arrays.asList(location1, location2)).when(mockLocationService).findByLocationIds(ids);
         Metadata headers = new Metadata();
-        headers.put(Constants.AUTHORIZATION_METADATA_KEY, authHeader);
+        headers.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, authHeader);
         MonitoringLocationList result = stub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(headers)).listLocationsByIds(IdList.newBuilder().addAllIds(ids
             .stream().map(Int64Value::of).collect(Collectors.toList())).build());
         assertThat(result.getLocationsList().size()).isEqualTo(2);

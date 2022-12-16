@@ -28,13 +28,14 @@
 
 package org.opennms.horizon.events.grpc.client;
 
+import org.opennms.horizon.inventory.dto.NodeIdQuery;
+import org.opennms.horizon.inventory.dto.NodeServiceGrpc;
+import org.opennms.horizon.shared.constants.GrpcConstants;
+
 import io.grpc.ManagedChannel;
 import io.grpc.Metadata;
 import io.grpc.stub.MetadataUtils;
 import lombok.RequiredArgsConstructor;
-import org.opennms.horizon.inventory.Constants;
-import org.opennms.horizon.inventory.dto.NodeIdQuery;
-import org.opennms.horizon.inventory.dto.NodeServiceGrpc;
 
 @RequiredArgsConstructor
 public class InventoryClient {
@@ -53,8 +54,8 @@ public class InventoryClient {
 
     public long getNodeIdFromQuery(String tenantId, String ipAddress, String location) {
         Metadata metadata = new Metadata();
-        metadata.put(Constants.AUTHORIZATION_BYPASS_KEY, String.valueOf(true));
-        metadata.put(Constants.TENANT_ID_BYPASS_KEY, tenantId);
+        metadata.put(GrpcConstants.AUTHORIZATION_BYPASS_KEY, String.valueOf(true));
+        metadata.put(GrpcConstants.TENANT_ID_BYPASS_KEY, tenantId);
 
         NodeIdQuery query = NodeIdQuery.newBuilder()
             .setIpAddress(ipAddress).setLocation(location).build();

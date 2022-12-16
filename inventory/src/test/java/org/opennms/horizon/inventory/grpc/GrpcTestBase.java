@@ -38,7 +38,7 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import org.keycloak.common.VerificationException;
-import org.opennms.horizon.inventory.Constants;
+import org.opennms.horizon.shared.constants.GrpcConstants;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -82,7 +82,7 @@ public abstract class GrpcTestBase {
 
     protected Metadata createAuthHeader(String value) {
         Metadata headers = new Metadata();
-        headers.put(Constants.AUTHORIZATION_METADATA_KEY, value);
+        headers.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, value);
         return headers;
     }
     protected static Server server;

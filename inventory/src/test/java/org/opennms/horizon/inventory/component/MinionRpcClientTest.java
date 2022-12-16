@@ -31,7 +31,6 @@ package org.opennms.horizon.inventory.component;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.AdditionalAnswers.delegatesTo;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -50,16 +49,15 @@ import org.opennms.cloud.grpc.minion.RpcRequestServiceGrpc;
 import org.opennms.cloud.grpc.minion.RpcResponseProto;
 import org.opennms.horizon.grpc.echo.contract.EchoRequest;
 import org.opennms.horizon.grpc.echo.contract.EchoResponse;
+import org.opennms.horizon.shared.constants.GrpcConstants;
 
 import com.google.protobuf.Any;
-import com.google.protobuf.InvalidProtocolBufferException;
 
 import io.grpc.ManagedChannel;
 import io.grpc.inprocess.InProcessChannelBuilder;
 import io.grpc.inprocess.InProcessServerBuilder;
 import io.grpc.stub.StreamObserver;
 import io.grpc.testing.GrpcCleanupRule;
-import org.opennms.horizon.inventory.Constants;
 
 class MinionRpcClientTest {
 
@@ -94,7 +92,7 @@ class MinionRpcClientTest {
             .addService(mockRequestService)
             .directExecutor().build().start());
         ManagedChannel channel = grpcCleanup.register(InProcessChannelBuilder.forName(MinionRpcClientTest.class.getName()).directExecutor().build());
-        client = new MinionRpcClient(channel, (ctx) -> Optional.ofNullable(Constants.TENANT_ID_CONTEXT_KEY.get()));
+        client = new MinionRpcClient(channel, (ctx) -> Optional.ofNullable(GrpcConstants.TENANT_ID_CONTEXT_KEY.get()));
         client.init();
     }
 

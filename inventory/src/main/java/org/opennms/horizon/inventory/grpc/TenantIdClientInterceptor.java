@@ -27,6 +27,8 @@
  *******************************************************************************/
 package org.opennms.horizon.inventory.grpc;
 
+import org.opennms.horizon.shared.constants.GrpcConstants;
+
 import io.grpc.CallOptions;
 import io.grpc.Channel;
 import io.grpc.ClientCall;
@@ -35,7 +37,6 @@ import io.grpc.Context;
 import io.grpc.ForwardingClientCall.SimpleForwardingClientCall;
 import io.grpc.Metadata;
 import io.grpc.MethodDescriptor;
-import org.opennms.horizon.inventory.Constants;
 
 public class TenantIdClientInterceptor implements ClientInterceptor {
 
@@ -53,7 +54,7 @@ public class TenantIdClientInterceptor implements ClientInterceptor {
                 String tenantId = tenantLookup.lookupTenantId(Context.current())
                     .orElseThrow(() -> new IllegalArgumentException("Tenant id is not specified"));
 
-                headers.put(Constants.TENANT_ID_REQUEST_KEY, tenantId);
+                headers.put(GrpcConstants.TENANT_ID_REQUEST_KEY, tenantId);
                 super.start(responseListener, headers);
             }
         };

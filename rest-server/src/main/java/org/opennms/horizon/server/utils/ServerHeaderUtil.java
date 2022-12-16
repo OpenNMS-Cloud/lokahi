@@ -32,6 +32,8 @@ import com.nimbusds.jwt.SignedJWT;
 import java.util.List;
 
 import java.util.Optional;
+
+import org.opennms.horizon.shared.constants.GrpcConstants;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.web.server.ServerWebExchange;
@@ -42,10 +44,7 @@ import io.leangen.graphql.spqr.spring.autoconfigure.DefaultGlobalContext;
 import io.leangen.graphql.util.ContextUtils;
 
 public class ServerHeaderUtil {
-
-    private static final String DEFAULT_TENANT = "opennms-prime";
-    private static final String TENANT_ID_CLAIM_NAME = "tenant-id";
-    private JWTValidator validator;
+    private final JWTValidator validator;
 
     public ServerHeaderUtil(JWTValidator validator) {
         this.validator = validator;
@@ -81,8 +80,8 @@ public class ServerHeaderUtil {
     private static String parseHeader(String header) {
         try {
             SignedJWT jwt = SignedJWT.parse(header.substring(7));
-            return Optional.ofNullable(jwt.getJWTClaimsSet().getStringClaim(TENANT_ID_CLAIM_NAME))
-                .orElse(DEFAULT_TENANT);
+            return Optional.ofNullable(jwt.getJWTClaimsSet().getStringClaim(GrpcConstants.TENANT_ID_KEY))
+                .orElseThrow();
         } catch (Exception e) {
             throw new RuntimeException("Could not extract tenant information", e);
         }

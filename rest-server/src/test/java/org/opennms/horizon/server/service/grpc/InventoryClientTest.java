@@ -46,7 +46,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import org.opennms.horizon.inventory.Constants;
 import org.opennms.horizon.inventory.dto.IdList;
 import org.opennms.horizon.inventory.dto.MonitoringLocationDTO;
 import org.opennms.horizon.inventory.dto.MonitoringLocationList;
@@ -59,6 +58,7 @@ import org.opennms.horizon.inventory.dto.NodeDTO;
 import org.opennms.horizon.inventory.dto.NodeList;
 import org.opennms.horizon.inventory.dto.NodeServiceGrpc;
 import org.opennms.horizon.server.config.DataLoaderFactory;
+import org.opennms.horizon.shared.constants.GrpcConstants;
 
 import com.google.protobuf.Empty;
 import com.google.protobuf.Int64Value;
@@ -266,7 +266,7 @@ public class InventoryClientTest {
         private String authHeader;
         @Override
         public <ReqT, RespT> ServerCall.Listener<ReqT> interceptCall(ServerCall<ReqT, RespT> call, Metadata headers, ServerCallHandler<ReqT, RespT> next) {
-            authHeader = headers.get(Constants.AUTHORIZATION_METADATA_KEY);
+            authHeader = headers.get(GrpcConstants.AUTHORIZATION_METADATA_KEY);
             return next.startCall(call, headers);
         }
 

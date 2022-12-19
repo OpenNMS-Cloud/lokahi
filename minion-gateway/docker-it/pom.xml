@@ -138,6 +138,7 @@
                     <skipITs>${skipITs}</skipITs>
                     <reuseForks>true</reuseForks>
                     <useSystemClassLoader>false</useSystemClassLoader>
+                    <trimStackTrace>false</trimStackTrace>
                 </configuration>
             </plugin>
 

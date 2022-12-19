@@ -13,8 +13,6 @@
     <artifactId>conf</artifactId>
     <name>OpenNMS Horizon :: Events Conf</name>
     <properties>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
         <sonar.coverage.exclusions>
             src/main/java/org/opennms/horizon/events/**/*
         </sonar.coverage.exclusions>

@@ -393,9 +393,7 @@
                                 </ports>
                                 <env>
                                     <!-- Need to make sure address=* is in the DEBUG OPTS otherwise it listens on the container's localhost only -->
-<!--                                    <JAVA_TOOL_OPTIONS>-Djava.security.egd=file:/dev/./urandom-->
-<!--                                        -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005-->
-<!--                                    </JAVA_TOOL_OPTIONS>-->
+                                    <JAVA_TOOL_OPTIONS>-Djava.security.egd=file:/dev/./urandom -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005</JAVA_TOOL_OPTIONS>
                                     <SPRING_KAFKA_BOOTSTRAP_SERVERS>kafka-host:9092</SPRING_KAFKA_BOOTSTRAP_SERVERS>
                                 </env>
                                 <wait>

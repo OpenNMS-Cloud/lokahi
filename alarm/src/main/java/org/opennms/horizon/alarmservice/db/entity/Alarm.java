@@ -243,7 +243,7 @@ public class Alarm extends TenantAwareEntity implements Serializable {
 
     @Transient
     public void incrementCount() {
-        counter = counter++;
+        counter++;
     }
 
     @Transient

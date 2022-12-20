@@ -50,18 +50,25 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.List;
+import java.util.Objects;
 import javax.ws.rs.core.MediaType;
 import lombok.extern.slf4j.Slf4j;
 import org.opennms.horizon.alarmservice.model.AlarmDTO;
 import org.opennms.horizon.alarmservice.model.AlarmSeverity;
 import org.opennms.horizon.alarmservice.rest.AlarmCollectionDTO;
 import org.opennms.horizon.alarmservice.rest.support.MultivaluedMapImpl;
+import org.opennms.horizon.events.proto.AlarmData;
 import org.opennms.horizon.events.proto.Event;
 
 @Slf4j
 public class AlarmTestSteps {
 
     public static final int DEFAULT_HTTP_SOCKET_TIMEOUT = 15_000;
+
+    //
+    // Test Injectables
+    //
+    private RetryUtils retryUtils;
 
     //
     // Test Configuration
@@ -75,20 +82,30 @@ public class AlarmTestSteps {
     private Response restAssuredResponse;
     private JsonPath parsedJsonResponse;
     private Long lastAlarmId;
+    private String testAlarmReductionKey;
+
+//========================================
+// Constructor
+//----------------------------------------
+
+    public AlarmTestSteps(RetryUtils retryUtils) {
+        this.retryUtils = retryUtils;
+    }
+
 
 //========================================
 // Gherkin Rules
 //========================================
 
     @Given("Application Base URL in system property {string}")
-    public void applicationBaseURLInSystemProperty(String systemProperty) {
+    public void applicationBaseURLInSystemProperty(String systemProperty) throws Exception {
         this.applicationBaseUrl = System.getProperty(systemProperty);
 
         log.info("Using BASE URL {}", this.applicationBaseUrl);
     }
 
     @Given("Kafka Rest Server URL in system property {string}")
-    public void kafkaRestServerURLInSystemProperty(String systemProperty) {
+    public void kafkaRestServerURLInSystemProperty(String systemProperty) throws Exception {
         this.kafkaRestBaseUrl = System.getProperty(systemProperty);
 
         log.info("Using KAFKA REST BASE URL {}", this.kafkaRestBaseUrl);
@@ -102,14 +119,16 @@ public class AlarmTestSteps {
     @Then("Send POST request to clear alarm at path {string}")
     public void sendPOSTRequestToClearAlarmAtPath(String path) throws Exception {
         AlarmCollectionDTO alarmCollectionDTO = restAssuredResponse.getBody().as(AlarmCollectionDTO.class);
-        AlarmDTO alarmDTO = alarmCollectionDTO.getAlarms().get(0);
+        List<AlarmDTO> alarmDTOList = alarmCollectionDTO.getAlarms();
+        AlarmDTO alarmDTO = findCurrentTestAlarm(alarmDTOList);
         commonSendPOSTRequestToApplication(path+"/"+ alarmDTO.getAlarmId());
     }
 
     @Then("Send PUT request to add memo at path {string}")
     public void sendPUTRequestToAddMemoAtPath(String path) throws Exception {
         AlarmCollectionDTO alarmCollectionDTO = restAssuredResponse.getBody().as(AlarmCollectionDTO.class);
-        AlarmDTO alarmDTO = alarmCollectionDTO.getAlarms().get(0);
+        List<AlarmDTO> alarmDTOList = alarmCollectionDTO.getAlarms();
+        AlarmDTO alarmDTO = findCurrentTestAlarm(alarmDTOList);
         MultivaluedMapImpl multiValuedMap = new MultivaluedMapImpl();
         multiValuedMap.putSingle("body", "blahNobody");
         commonSendPUTRequestWithBodyToApplication(path+"/"+ alarmDTO.getAlarmId(), multiValuedMap);
@@ -118,34 +137,40 @@ public class AlarmTestSteps {
     @Then("Send POST request to acknowledge alarm at path {string}")
     public void sendPOSTRequestToAckAlarmAtPath(String path) throws Exception {
         AlarmCollectionDTO alarmCollectionDTO = restAssuredResponse.getBody().as(AlarmCollectionDTO.class);
-        AlarmDTO alarmDTO = alarmCollectionDTO.getAlarms().get(0);
+        List<AlarmDTO> alarmDTOList = alarmCollectionDTO.getAlarms();
+        AlarmDTO alarmDTO = findCurrentTestAlarm(alarmDTOList);
         commonSendPOSTRequestToApplication(path+"/"+ alarmDTO.getAlarmId()+"/blahUserId");
     }
 
     @Then("Send POST request to unacknowledge alarm at path {string}")
     public void sendPOSTRequestToUnAckAlarmAtPath(String path) throws Exception {
         AlarmCollectionDTO alarmCollectionDTO = restAssuredResponse.getBody().as(AlarmCollectionDTO.class);
-        AlarmDTO alarmDTO = alarmCollectionDTO.getAlarms().get(0);
+        List<AlarmDTO> alarmDTOList = alarmCollectionDTO.getAlarms();
+        AlarmDTO alarmDTO = findCurrentTestAlarm(alarmDTOList);
         commonSendPOSTRequestToApplication(path+"/"+ alarmDTO.getAlarmId());
     }
 
     @Then("Send POST request to set alarm severity at path {string}")
     public void sendPOSTRequestToSetAlarmSeverityAtPath(String path) throws Exception {
         AlarmCollectionDTO alarmCollectionDTO = restAssuredResponse.getBody().as(AlarmCollectionDTO.class);
-        AlarmDTO alarmDTO = alarmCollectionDTO.getAlarms().get(0);
+        List<AlarmDTO> alarmDTOList = alarmCollectionDTO.getAlarms();
+        AlarmDTO alarmDTO = findCurrentTestAlarm(alarmDTOList);
         commonSendPOSTRequestToApplication(path+"/"+ alarmDTO.getAlarmId()+"/1");
     }
 
     @Then("Send POST request to escalate alarm severity at path {string}")
     public void sendPOSTRequestToEscalateAlarmSeverityAtPath(String path) throws Exception {
         AlarmCollectionDTO alarmCollectionDTO = restAssuredResponse.getBody().as(AlarmCollectionDTO.class);
-        AlarmDTO alarmDTO = alarmCollectionDTO.getAlarms().get(0);
+        List<AlarmDTO> alarmDTOList = alarmCollectionDTO.getAlarms();
+        AlarmDTO alarmDTO = findCurrentTestAlarm(alarmDTOList);
         commonSendPOSTRequestToApplication(path+"/"+ alarmDTO.getAlarmId());
     }
 
-    @Then("Send message to Kafka at topic {string}")
-    public void sendMessageToKafkaAtTopic(String topic) throws Exception {
+    @Then("Send Event message to Kafka at topic {string} with alarm reduction key {string}")
+    public void sendMessageToKafkaAtTopic(String topic, String alarmReductionKey) throws Exception {
         URL requestUrl = new URL(new URL(this.kafkaRestBaseUrl), "/topics/" + topic);
+
+        testAlarmReductionKey = alarmReductionKey;
 
         RestAssuredConfig restAssuredConfig = this.createRestAssuredTestConfig();
 
@@ -154,8 +179,19 @@ public class AlarmTestSteps {
                 .given()
                 .config(restAssuredConfig);
 
-        Event event = Event.newBuilder().setNodeId(10L).setUei("BlahUEI").build();
-        
+        AlarmData alarmData =
+            AlarmData.newBuilder()
+                .setReductionKey(alarmReductionKey)
+                .build()
+            ;
+
+        Event event =
+            Event.newBuilder()
+                .setNodeId(10L)
+                .setUei("BlahUEI")
+                .setAlarmData(alarmData)
+                .build();
+
         String body = formatKafkaRestProducerMessageBody(event.toByteArray());
 
         requestSpecification =
@@ -170,6 +206,20 @@ public class AlarmTestSteps {
                 .post(requestUrl)
                 .thenReturn()
         ;
+    }
+
+    @Then("send GET request to application at path {string}, with timeout {int}ms, until JSON response matches the following JSON path expressions")
+    public void sendGETRequestToApplicationAtPathUntilJSONResponseMatchesTheFollowingJSONPathExpressions(String path, int timeout, List<String> jsonPathExpressions) throws Exception {
+        boolean success =
+            retryUtils.retry(
+                () -> this.processGetRequestThenCheckJsonPathMatch(path, jsonPathExpressions),
+                result -> result,
+                100,
+                timeout,
+                false
+            );
+
+        assertTrue("GET request expected to return JSON response matching JSON path expression(s)", success);
     }
 
     @Then("delay")
@@ -205,12 +255,12 @@ public class AlarmTestSteps {
     }
 
     @Then("^parse the JSON response$")
-    public void parseTheJsonResponse() {
-        parsedJsonResponse = JsonPath.from((this.restAssuredResponse.getBody().asString()));
+    public void parseTheJsonResponse() throws Exception {
+        commonParseJsonResponse();
     }
 
     @Then("Verify JSON path expressions match$")
-    public void verifyJsonPathExpressionsMatch(List<String> pathExpressions) {
+    public void verifyJsonPathExpressionsMatch(List<String> pathExpressions) throws Exception {
         for (String onePathExpression : pathExpressions) {
             verifyJsonPathExpressionMatch(parsedJsonResponse, onePathExpression);
         }
@@ -218,9 +268,11 @@ public class AlarmTestSteps {
 
     @Then("Verify alarm was cleared")
     public void verifyAlarmWasCleared() {
-
         AlarmCollectionDTO alarmCollectionDTO = restAssuredResponse.getBody().as(AlarmCollectionDTO.class);
-        AlarmDTO alarmDTO = alarmCollectionDTO.getAlarms().get(0);
+
+        List<AlarmDTO> alarmDTOList = alarmCollectionDTO.getAlarms();
+        AlarmDTO alarmDTO = findCurrentTestAlarm(alarmDTOList);
+
         assertEquals(AlarmSeverity.CLEARED, alarmDTO.getSeverity());
     }
 
@@ -228,7 +280,8 @@ public class AlarmTestSteps {
     public void verifyAlarmWasAcked() {
 
         AlarmCollectionDTO alarmCollectionDTO = restAssuredResponse.getBody().as(AlarmCollectionDTO.class);
-        AlarmDTO alarmDTO = alarmCollectionDTO.getAlarms().get(0);
+        List<AlarmDTO> alarmDTOList = alarmCollectionDTO.getAlarms();
+        AlarmDTO alarmDTO = findCurrentTestAlarm(alarmDTOList);
         assertNotNull(alarmDTO.getAlarmAckTime());
         assertNotNull(alarmDTO.getAlarmAckUser());
     }
@@ -237,7 +290,8 @@ public class AlarmTestSteps {
     public void verifyAlarmWasUnAcked() {
 
         AlarmCollectionDTO alarmCollectionDTO = restAssuredResponse.getBody().as(AlarmCollectionDTO.class);
-        AlarmDTO alarmDTO = alarmCollectionDTO.getAlarms().get(0);
+        List<AlarmDTO> alarmDTOList = alarmCollectionDTO.getAlarms();
+        AlarmDTO alarmDTO = findCurrentTestAlarm(alarmDTOList);
         assertNull(alarmDTO.getAlarmAckTime());
         assertNull(alarmDTO.getAlarmAckUser());
     }
@@ -246,7 +300,8 @@ public class AlarmTestSteps {
     public void verifyAlarmWasEscalated() {
 
         AlarmCollectionDTO alarmCollectionDTO = restAssuredResponse.getBody().as(AlarmCollectionDTO.class);
-        AlarmDTO alarmDTO = alarmCollectionDTO.getAlarms().get(0);
+        List<AlarmDTO> alarmDTOList = alarmCollectionDTO.getAlarms();
+        AlarmDTO alarmDTO = findCurrentTestAlarm(alarmDTOList);
         assertTrue(alarmDTO.getSeverity().isGreaterThan(AlarmSeverity.INDETERMINATE));
     }
 
@@ -254,14 +309,16 @@ public class AlarmTestSteps {
     public void verifyAlarmWasUncleared() {
 
         AlarmCollectionDTO alarmCollectionDTO = restAssuredResponse.getBody().as(AlarmCollectionDTO.class);
-        AlarmDTO alarmDTO = alarmCollectionDTO.getAlarms().get(0);
+        List<AlarmDTO> alarmDTOList = alarmCollectionDTO.getAlarms();
+        AlarmDTO alarmDTO = findCurrentTestAlarm(alarmDTOList);
         assertEquals(alarmDTO.getLastEventSeverity(), alarmDTO.getSeverity());
     }
 
     @Then("Remember alarm id")
     public void rememberAlarmId() {
         AlarmCollectionDTO alarmCollectionDTO = restAssuredResponse.getBody().as(AlarmCollectionDTO.class);
-        AlarmDTO alarmDTO = alarmCollectionDTO.getAlarms().get(0);
+        List<AlarmDTO> alarmDTOList = alarmCollectionDTO.getAlarms();
+        AlarmDTO alarmDTO = findCurrentTestAlarm(alarmDTOList);
         this.lastAlarmId = alarmDTO.getAlarmId();
     }
 
@@ -277,6 +334,16 @@ public class AlarmTestSteps {
 //========================================
 // Internals
 //----------------------------------------
+
+    private AlarmDTO findCurrentTestAlarm(List<AlarmDTO> alarmList) {
+        return
+            alarmList
+                .stream()
+                .filter((alarmDTO) -> Objects.equals(testAlarmReductionKey, alarmDTO.getReductionKey()))
+                .findFirst()
+                .orElse(null)
+            ;
+    }
 
     private void verifyJsonPathExpressionMatch(JsonPath jsonPath, String pathExpression) {
         String[] parts = pathExpression.split(" == ", 2);
@@ -373,6 +440,28 @@ public class AlarmTestSteps {
             requestSpecification
                 .delete(requestUrl)
                 .thenReturn();
+    }
+
+    private void commonParseJsonResponse() {
+        parsedJsonResponse = JsonPath.from((this.restAssuredResponse.getBody().asString()));
+    }
+
+    private boolean processGetRequestThenCheckJsonPathMatch(String path, List<String> jsonPathExpressions) {
+        log.debug("running get with check; path={}; json-path-expressions={}", path, jsonPathExpressions);
+        try {
+            commonSendGetRequestToApplication(path);
+            commonParseJsonResponse();
+
+            log.debug("checking json path expressions");
+            for (String onePathExpression : jsonPathExpressions) {
+                verifyJsonPathExpressionMatch(parsedJsonResponse, onePathExpression);
+            }
+
+            log.debug("finished get with check; path={}; json-path-expressions={}", path, jsonPathExpressions);
+            return true;
+        } catch (Throwable thrown) {    // Assertions extend Error
+            throw new RuntimeException(thrown);
+        }
     }
 
     private String formatKafkaRestProducerMessageBody(byte[] payload) throws JsonProcessingException {

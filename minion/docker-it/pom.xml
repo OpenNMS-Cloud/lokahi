@@ -222,7 +222,7 @@
                                     <!--<port>5005:5005</port>-->
                                 </ports>
                                 <env>
-                                    <LOCATION>Default</LOCATION>
+                                    <MINION_LOCATION>Default</MINION_LOCATION>
                                     <!-- Need to make sure address=* is in the DEBUG OPTS otherwise it listens on the container's localhost only -->
                                     <JAVA_OPTS>-Djava.security.egd=file:/dev/./urandom
                                         -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005

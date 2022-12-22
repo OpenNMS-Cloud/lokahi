@@ -92,7 +92,7 @@ public class TSDataProcessor {
                 try {
                     if (result != null) {
                         if (result.hasMonitorResponse()) {
-                            log.info("Have monitor response, tenant-id: {}; task-id={}; instance={}", tenantId, result.getId(), result.getMonitorResponse().getIpAddress());
+                            log.info("Have monitor response, tenant-id: {}; task-id={}; instance={}; tye={}", tenantId, result.getId(), result.getMonitorResponse().getIpAddress(), result.getMonitorResponse().getMonitorType());
                             processMonitorResponse(tenantId, result);
                         } else if (result.hasDetectorResponse()) {
                             DetectorResponse detectorResponse = result.getDetectorResponse();

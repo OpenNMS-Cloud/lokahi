@@ -27,10 +27,11 @@
  *******************************************************************************/
 package org.opennms.horizon.inventory.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.protobuf.Any;
-import lombok.RequiredArgsConstructor;
-import org.opennms.horizon.inventory.dto.MonitoringLocation;
+import java.io.IOException;
+import java.net.URL;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.opennms.horizon.inventory.dto.MonitoringLocationDTO;
 import org.opennms.horizon.inventory.service.taskset.manager.TaskSetManager;
 import org.opennms.horizon.inventory.service.trapconfig.TrapConfigBean;
@@ -38,28 +39,22 @@ import org.opennms.sink.traps.contract.ListenerConfig;
 import org.opennms.sink.traps.contract.SnmpV3User;
 import org.opennms.sink.traps.contract.TrapConfig;
 import org.opennms.taskset.contract.TaskDefinition;
-import org.opennms.taskset.contract.TaskSet;
 import org.opennms.taskset.contract.TaskType;
-import org.opennms.taskset.service.api.TaskSetPublisher;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
-import java.net.URL;
-import java.util.List;
-import java.util.stream.Collectors;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.protobuf.Any;
 
-@Service
+import lombok.RequiredArgsConstructor;
+
 @RequiredArgsConstructor
+@Service
 public class TrapConfigService {
-    private static final Logger LOG = LoggerFactory.getLogger(TrapConfigService.class);
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final MonitoringLocationService monitoringLocationService;
     private final TaskSetManager taskSetManager;
-    private final TaskSetPublisher taskSetPublisher;
 
     @EventListener(ApplicationReadyEvent.class)
     public void sendTrapConfigToMinionAfterStartup() {
@@ -93,15 +88,13 @@ public class TrapConfigService {
     }
 
     private List<SnmpV3User> mapSnmpV3Users(TrapConfigBean config) {
-        return config.getSnmpV3Users().stream().map(snmpV3User -> {
-            return SnmpV3User.newBuilder()
-                .setEngineId(snmpV3User.getEngineId())
-                .setAuthPassphrase(snmpV3User.getAuthPassphrase())
-                .setAuthProtocol(snmpV3User.getAuthProtocol())
-                .setPrivacyPassphrase(snmpV3User.getPrivacyPassphrase())
-                .setPrivacyProtocol(snmpV3User.getPrivacyProtocol())
-                .build();
-        }).collect(Collectors.toList());
+        return config.getSnmpV3Users().stream().map(snmpV3User -> SnmpV3User.newBuilder()
+            .setEngineId(snmpV3User.getEngineId())
+            .setAuthPassphrase(snmpV3User.getAuthPassphrase())
+            .setAuthProtocol(snmpV3User.getAuthProtocol())
+            .setPrivacyPassphrase(snmpV3User.getPrivacyPassphrase())
+            .setPrivacyProtocol(snmpV3User.getPrivacyProtocol())
+            .build()).collect(Collectors.toList());
     }
 
     private void publishTrapConfig(String tenantId, String location, TrapConfig trapConfig) {
@@ -111,11 +104,8 @@ public class TrapConfigService {
             .setType(TaskType.LISTENER)
             .setConfiguration(Any.pack(trapConfig))
             .build();
-
         taskSetManager.addTaskSet(tenantId, location, taskDefinition);
-
-        TaskSet taskSet = taskSetManager.getTaskSet(tenantId, location);
-        taskSetPublisher.publishTaskSet(tenantId, location, taskSet);
+        taskSetManager.sendTaskSet(tenantId, location);
     }
 
     private TrapConfigBean readTrapConfig() {

@@ -220,10 +220,10 @@ class DetectorResponseServiceIntTest extends GrpcTestBase {
             assertEquals(TEST_TENANT_ID, monitoredService.getTenantId());
         }
 
-        assertEquals(numberOfCalls*2, testGrpcService.getTimesCalled());
+        assertEquals(numberOfCalls + 1, testGrpcService.getTimesCalled());
 
         List<PublishTaskSetRequest> grpcRequests = testGrpcService.getRequests();
-        assertEquals(monitorTypes.length*2, grpcRequests.size());
+        assertEquals(monitorTypes.length + 1, grpcRequests.size());
     }
 
     private void populateDatabase() {

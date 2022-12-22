@@ -28,34 +28,33 @@
 
 package org.opennms.horizon.inventory.service.taskset;
 
-import com.google.protobuf.Any;
-import lombok.RequiredArgsConstructor;
 import org.opennms.horizon.inventory.model.IpInterface;
 import org.opennms.horizon.inventory.service.taskset.manager.TaskSetManager;
 import org.opennms.horizon.inventory.service.taskset.manager.TaskSetManagerUtil;
 import org.opennms.icmp.contract.IcmpMonitorRequest;
 import org.opennms.snmp.contract.SnmpMonitorRequest;
 import org.opennms.taskset.contract.MonitorType;
-import org.opennms.taskset.contract.TaskSet;
 import org.opennms.taskset.contract.TaskType;
-import org.opennms.taskset.service.api.TaskSetPublisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-@Component
+import com.google.protobuf.Any;
+
+import lombok.RequiredArgsConstructor;
+
 @RequiredArgsConstructor
+@Component
 public class MonitorTaskSetService {
     private static final Logger log = LoggerFactory.getLogger(MonitorTaskSetService.class);
     private final TaskSetManagerUtil taskSetManagerUtil;
     private final TaskSetManager taskSetManager;
-    private final TaskSetPublisher taskSetPublisher;
 
     public void sendMonitorTask(String location, MonitorType monitorType, IpInterface ipInterface, long nodeId) {
         String tenantId = ipInterface.getTenantId();
 
         addMonitorTask(location, monitorType, ipInterface, nodeId);
-        sendTaskSet(tenantId, location);
+        taskSetManager.sendTaskSet(tenantId, location);
     }
 
     private void addMonitorTask(String location, MonitorType monitorType, IpInterface ipInterface, long nodeId) {
@@ -104,11 +103,5 @@ public class MonitorTaskSetService {
                 break;
             }
         }
-    }
-
-    private void sendTaskSet(String tenantId, String location) {
-        TaskSet taskSet = taskSetManager.getTaskSet(tenantId, location);
-        log.info("Sending task set: task-set={}; location={}; tenant-id={}", taskSet, location, tenantId);
-        taskSetPublisher.publishTaskSet(tenantId, location, taskSet);
     }
 }

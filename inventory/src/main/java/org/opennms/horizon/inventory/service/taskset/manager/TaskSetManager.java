@@ -29,11 +29,10 @@
 package org.opennms.horizon.inventory.service.taskset.manager;
 
 import org.opennms.taskset.contract.TaskDefinition;
-import org.opennms.taskset.contract.TaskSet;
 
 public interface TaskSetManager {
 
     void addTaskSet(String tenantId, String location, TaskDefinition taskDefinition);
 
-    TaskSet getTaskSet(String tenantId, String location);
+    void sendTaskSet(String tenantId, String location);
 }

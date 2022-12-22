@@ -91,16 +91,15 @@ public class TSDataProcessor {
             results.getResultsList().forEach(result -> CompletableFuture.supplyAsync(() -> {
                 try {
                     if (result != null) {
-                        log.info("Processing task set result {}", result);
                         if (result.hasMonitorResponse()) {
-                            log.info("Have monitor response, tenant-id: {}; task-id={};", tenantId, result.getId());
+                            log.info("Have monitor response, tenant-id: {}; task-id={}; instance={}", tenantId, result.getId(), result.getMonitorResponse().getIpAddress());
                             processMonitorResponse(tenantId, result);
                         } else if (result.hasDetectorResponse()) {
                             DetectorResponse detectorResponse = result.getDetectorResponse();
                             // TBD: how to process?
-                            log.info("Have detector response, tenant-id: {}; task-id={}; detected={}", tenantId, result.getId(), detectorResponse.getDetected());
+                            log.info("Have detector response, tenant-id: {}; task-id={}; detected={}; instance={}", tenantId, result.getId(), detectorResponse.getDetected(), detectorResponse.getIpAddress());
                         } else if(result.hasCollectorResponse()) {
-                            log.info("Have collector response, tenant-id: {}; task-id={};", tenantId, result.getId());
+                            log.info("Have collector response, tenant-id: {}; task-id={}; instance={}", tenantId, result.getId(), result.getCollectorResponse().getIpAddress());
                             processCollectorResponse(tenantId, result);
                         }
                     } else {

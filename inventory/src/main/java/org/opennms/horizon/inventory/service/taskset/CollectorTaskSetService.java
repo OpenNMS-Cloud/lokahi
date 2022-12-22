@@ -35,31 +35,23 @@ import org.opennms.horizon.snmp.api.SnmpConfiguration;
 import org.opennms.horizon.snmp.api.Version;
 import org.opennms.snmp.contract.SnmpCollectorRequest;
 import org.opennms.taskset.contract.MonitorType;
-import org.opennms.taskset.contract.TaskSet;
 import org.opennms.taskset.contract.TaskType;
-import org.opennms.taskset.service.api.TaskSetPublisher;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.google.protobuf.Any;
 
 import lombok.RequiredArgsConstructor;
 
-@Component
 @RequiredArgsConstructor
+@Component
 public class CollectorTaskSetService {
-
-    private static final Logger log = LoggerFactory.getLogger(CollectorTaskSetService.class);
     private final TaskSetManagerUtil taskSetManagerUtil;
     private final TaskSetManager taskSetManager;
-    private final TaskSetPublisher taskSetPublisher;
-
 
     public void sendCollectorTask(String location, MonitorType monitorType, IpInterface ipInterface, long nodeId) {
         String tenantId = ipInterface.getTenantId();
         addCollectorTask(location, monitorType, ipInterface, nodeId);
-        sendTaskSet(tenantId, location);
+        taskSetManager.sendTaskSet(tenantId, location);
     }
 
     private void addCollectorTask(String location, MonitorType monitorType, IpInterface ipInterface, long nodeId) {
@@ -70,28 +62,19 @@ public class CollectorTaskSetService {
         String name = String.format("%s-collector", monitorTypeValue.toLowerCase());
         String pluginName = String.format("%sCollector", monitorTypeValue);
 
-        switch (monitorType) {
-            case SNMP: {
-                Any configuration =
-                    Any.pack(SnmpCollectorRequest.newBuilder()
-                        .setHost(ipAddress)
-                        .setAgentConfig(SnmpConfiguration.newBuilder()
-                            .setAddress(ipAddress)
-                            .setVersion(Version.v2)
-                            .setTimeout(30000).build())
-                        .setNodeId(nodeId)
-                        .build());
+        if (monitorType == MonitorType.SNMP) {
+            Any configuration =
+                Any.pack(SnmpCollectorRequest.newBuilder()
+                    .setHost(ipAddress)
+                    .setAgentConfig(SnmpConfiguration.newBuilder()
+                        .setAddress(ipAddress)
+                        .setVersion(Version.v2)
+                        .setTimeout(30000).build())
+                    .setNodeId(nodeId)
+                    .build());
 
-                taskSetManagerUtil.addTask(tenantId, location, ipAddress, name, TaskType.COLLECTOR, pluginName,
-                    Constants.DEFAULT_SCHEDULE, nodeId, configuration);
-                break;
-            }
+            taskSetManagerUtil.addTask(tenantId, location, ipAddress, name, TaskType.COLLECTOR, pluginName,
+                Constants.DEFAULT_SCHEDULE, nodeId, configuration);
         }
-    }
-
-    private void sendTaskSet(String tenantId, String location) {
-        TaskSet taskSet = taskSetManager.getTaskSet(tenantId, location);
-        log.info("Sending task set {}  at location {}", taskSet, location);
-        taskSetPublisher.publishTaskSet(tenantId, location, taskSet);
     }
 }

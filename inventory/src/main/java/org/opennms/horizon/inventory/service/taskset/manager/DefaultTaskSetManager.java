@@ -28,17 +28,24 @@
 
 package org.opennms.horizon.inventory.service.taskset.manager;
 
-import org.opennms.taskset.contract.TaskDefinition;
-import org.opennms.taskset.contract.TaskSet;
-import org.springframework.stereotype.Component;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.opennms.taskset.contract.TaskDefinition;
+import org.opennms.taskset.contract.TaskSet;
+import org.opennms.taskset.service.api.TaskSetPublisher;
+import org.springframework.stereotype.Component;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@RequiredArgsConstructor
 @Component
 public class DefaultTaskSetManager implements TaskSetManager {
+    private final TaskSetPublisher taskSetPublisher;
 
     private final Map<String, Map<String, TaskSet>> taskSetsByTenantLocation = new HashMap<>();
 
@@ -47,7 +54,6 @@ public class DefaultTaskSetManager implements TaskSetManager {
         Map<String, TaskSet> taskSetsByLocation = taskSetsByTenantLocation.computeIfAbsent(tenantId, (unusedTenantId) -> new HashMap<>());
         TaskSet existingTaskSet = taskSetsByLocation.get(location);
         TaskSet taskSet;
-
         if (existingTaskSet != null) {
             List<TaskDefinition> existingTaskDefinitions = new ArrayList<>(existingTaskSet.getTaskDefinitionList());
             existingTaskDefinitions.removeIf(task -> task.getId().equals(newTaskDefinition.getId()));
@@ -56,18 +62,19 @@ public class DefaultTaskSetManager implements TaskSetManager {
         } else {
             taskSet = TaskSet.newBuilder().addTaskDefinition(newTaskDefinition).build();
         }
-
         taskSetsByLocation.put(location, taskSet);
     }
 
     @Override
-    public synchronized TaskSet getTaskSet(String tenantId, String location) {
+    public synchronized void sendTaskSet(String tenantId, String location) {
         Map<String, TaskSet> taskSetsByLocation = taskSetsByTenantLocation.get(tenantId);
-
         if (taskSetsByLocation != null) {
-            return taskSetsByLocation.get(location);
+            TaskSet taskSet = taskSetsByLocation.get(location);
+            if(taskSet != null) {
+                log.info("Sending task set: task-set={}; location={}; tenant-id={}", taskSet, location, tenantId);
+                taskSetPublisher.publishTaskSet(tenantId, location, taskSet);
+                taskSetsByLocation.remove(location);
+            }
         }
-
-        return null;
     }
 }

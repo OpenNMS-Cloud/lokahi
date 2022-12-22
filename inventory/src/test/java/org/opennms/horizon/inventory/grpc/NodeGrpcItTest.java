@@ -41,8 +41,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import com.google.protobuf.Empty;
-import com.google.protobuf.Int64Value;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -50,11 +48,9 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.keycloak.common.VerificationException;
-import org.mockito.internal.verification.VerificationModeFactory;
 import org.opennms.horizon.inventory.SpringContextTestInitializer;
 import org.opennms.horizon.inventory.dto.NodeCreateDTO;
 import org.opennms.horizon.inventory.dto.NodeDTO;
-import org.opennms.horizon.inventory.dto.NodeList;
 import org.opennms.horizon.inventory.dto.NodeServiceGrpc;
 import org.opennms.horizon.inventory.grpc.taskset.TestTaskSetGrpcService;
 import org.opennms.horizon.inventory.model.IpInterface;
@@ -70,6 +66,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 
+import com.google.protobuf.Empty;
+import com.google.protobuf.Int64Value;
 import com.google.rpc.Code;
 import com.google.rpc.Status;
 import com.vladmihalcea.hibernate.type.basic.Inet;
@@ -84,7 +82,7 @@ import io.grpc.stub.MetadataUtils;
 @SpringBootTest
 @ContextConfiguration(initializers = {SpringContextTestInitializer.class})
 class NodeGrpcItTest extends GrpcTestBase {
-    private static final int EXPECTED_TASK_DEF_COUNT_FOR_NEW_LOCATION = 3;
+    private static final int EXPECTED_TASK_DEF_COUNT_FOR_NEW_LOCATION = 2;
     private static final int EXPECTED_TASK_DEF_COUNT_WITHOUT_NEW_LOCATION = 2;
     private NodeServiceGrpc.NodeServiceBlockingStub serviceStub;
 
@@ -259,7 +257,7 @@ class NodeGrpcItTest extends GrpcTestBase {
 
         PublishTaskSetRequest request = grpcRequests.get(0);
         TaskSet taskSet = request.getTaskSet();
-        assertNotNull(taskSet);
+        Assertions.assertNotNull(taskSet);
         assertEquals(EXPECTED_TASK_DEF_COUNT_WITHOUT_NEW_LOCATION, taskSet.getTaskDefinitionCount());
     }
 

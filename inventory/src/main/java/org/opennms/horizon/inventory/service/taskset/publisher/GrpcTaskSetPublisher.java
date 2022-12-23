@@ -28,9 +28,12 @@
 
 package org.opennms.horizon.inventory.service.taskset.publisher;
 
+import io.grpc.Context;
+import io.grpc.ManagedChannel;
 import org.opennms.horizon.inventory.grpc.TenantIdClientInterceptor;
 import org.opennms.horizon.inventory.grpc.TenantLookup;
 import org.opennms.horizon.shared.constants.GrpcConstants;
+import org.opennms.taskset.contract.TaskDefinition;
 import org.opennms.taskset.contract.TaskSet;
 import org.opennms.taskset.service.api.TaskSetPublisher;
 import org.opennms.taskset.service.contract.PublishTaskSetRequest;
@@ -40,8 +43,10 @@ import org.opennms.taskset.service.contract.TaskSetServiceGrpc.TaskSetServiceBlo
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.grpc.Context;
-import io.grpc.ManagedChannel;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class GrpcTaskSetPublisher implements TaskSetPublisher {
 
@@ -49,6 +54,7 @@ public class GrpcTaskSetPublisher implements TaskSetPublisher {
     private static final Logger log = LoggerFactory.getLogger(GrpcTaskSetPublisher.class);
     private final ManagedChannel channel;
     private final TenantLookup tenantLookup;
+    private final Map<String, Map<String, TaskSet>> taskSetsByTenantLocation = new HashMap<>();
 
     private TaskSetServiceBlockingStub taskSetServiceStub;
 
@@ -80,5 +86,30 @@ public class GrpcTaskSetPublisher implements TaskSetPublisher {
             log.error("Error publishing taskset", e);
             throw new RuntimeException("failed to publish taskset", e);
         }
+    }
+
+    @Override
+    public synchronized void publishNewTasks(String tenantId, String location, List<TaskDefinition> taskList) {
+        var taskSet = buildTaskSetWithNewTasks(tenantId, location, taskList);
+        publishTaskSet(tenantId, location, taskSet);
+    }
+
+
+    private TaskSet buildTaskSetWithNewTasks(String tenantId, String location, List<TaskDefinition> taskList) {
+        Map<String, TaskSet> taskSetsByLocation = taskSetsByTenantLocation.computeIfAbsent(tenantId, (unusedTenantId) -> new HashMap<>());
+        TaskSet existingTaskSet = taskSetsByLocation.get(location);
+        TaskSet taskSet;
+
+        if (existingTaskSet != null) {
+            List<TaskDefinition> existingTasks = new ArrayList<>(existingTaskSet.getTaskDefinitionList());
+            taskList.forEach(task -> existingTasks.removeIf(existingTask -> task.getId().equals(existingTask.getId())));
+            taskSet = TaskSet.newBuilder().addAllTaskDefinition(existingTasks)
+                .addAllTaskDefinition(taskList).build();
+        } else {
+            taskSet = TaskSet.newBuilder().addAllTaskDefinition(taskList).build();
+        }
+
+        taskSetsByLocation.put(location, taskSet);
+        return taskSet;
     }
 }

@@ -30,15 +30,12 @@ package org.opennms.horizon.inventory.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.protobuf.Any;
 import lombok.RequiredArgsConstructor;
-import org.opennms.horizon.inventory.dto.MonitoringLocation;
 import org.opennms.horizon.inventory.dto.MonitoringLocationDTO;
-import org.opennms.horizon.inventory.service.taskset.manager.TaskSetManager;
 import org.opennms.horizon.inventory.service.trapconfig.TrapConfigBean;
 import org.opennms.sink.traps.contract.ListenerConfig;
 import org.opennms.sink.traps.contract.SnmpV3User;
 import org.opennms.sink.traps.contract.TrapConfig;
 import org.opennms.taskset.contract.TaskDefinition;
-import org.opennms.taskset.contract.TaskSet;
 import org.opennms.taskset.contract.TaskType;
 import org.opennms.taskset.service.api.TaskSetPublisher;
 import org.slf4j.Logger;
@@ -49,6 +46,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -58,7 +56,6 @@ public class TrapConfigService {
     private static final Logger LOG = LoggerFactory.getLogger(TrapConfigService.class);
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final MonitoringLocationService monitoringLocationService;
-    private final TaskSetManager taskSetManager;
     private final TaskSetPublisher taskSetPublisher;
 
     @EventListener(ApplicationReadyEvent.class)
@@ -111,11 +108,10 @@ public class TrapConfigService {
             .setType(TaskType.LISTENER)
             .setConfiguration(Any.pack(trapConfig))
             .build();
+        var taskList = new ArrayList<TaskDefinition>();
+        taskList.add(taskDefinition);
 
-        taskSetManager.addTaskSet(tenantId, location, taskDefinition);
-
-        TaskSet taskSet = taskSetManager.getTaskSet(tenantId, location);
-        taskSetPublisher.publishTaskSet(tenantId, location, taskSet);
+        taskSetPublisher.publishNewTasks(tenantId, location, taskList);
     }
 
     private TrapConfigBean readTrapConfig() {

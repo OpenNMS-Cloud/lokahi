@@ -31,68 +31,68 @@ package org.opennms.horizon.inventory.service.taskset;
 import com.google.protobuf.Any;
 import lombok.RequiredArgsConstructor;
 import org.opennms.horizon.inventory.model.IpInterface;
-import org.opennms.horizon.inventory.service.taskset.manager.TaskSetManager;
-import org.opennms.horizon.inventory.service.taskset.manager.TaskSetManagerUtil;
 import org.opennms.icmp.contract.IcmpMonitorRequest;
 import org.opennms.snmp.contract.SnmpMonitorRequest;
 import org.opennms.taskset.contract.MonitorType;
-import org.opennms.taskset.contract.TaskSet;
+import org.opennms.taskset.contract.TaskDefinition;
 import org.opennms.taskset.contract.TaskType;
 import org.opennms.taskset.service.api.TaskSetPublisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import java.util.Arrays;
+
+import static org.opennms.horizon.inventory.service.taskset.TaskUtils.identityForIpTask;
+
 @Component
 @RequiredArgsConstructor
 public class MonitorTaskSetService {
+
     private static final Logger log = LoggerFactory.getLogger(MonitorTaskSetService.class);
-    private final TaskSetManagerUtil taskSetManagerUtil;
-    private final TaskSetManager taskSetManager;
+
     private final TaskSetPublisher taskSetPublisher;
 
     public void sendMonitorTask(String location, MonitorType monitorType, IpInterface ipInterface, long nodeId) {
         String tenantId = ipInterface.getTenantId();
 
-        addMonitorTask(location, monitorType, ipInterface, nodeId);
-        sendTaskSet(tenantId, location);
+        var task = addMonitorTask(monitorType, ipInterface, nodeId);
+        if (task != null) {
+            taskSetPublisher.publishNewTasks(tenantId, location, Arrays.asList(task));
+        }
     }
 
-    private void addMonitorTask(String location, MonitorType monitorType, IpInterface ipInterface, long nodeId) {
-        String tenantId = ipInterface.getTenantId();
+    private TaskDefinition addMonitorTask(MonitorType monitorType, IpInterface ipInterface, long nodeId) {
 
         String monitorTypeValue = monitorType.getValueDescriptor().getName();
         String ipAddress = ipInterface.getIpAddress().getAddress();
 
         String name = String.format("%s-monitor", monitorTypeValue.toLowerCase());
         String pluginName = String.format("%sMonitor", monitorTypeValue);
+        TaskDefinition taskDefinition = null;
+        Any configuration = null;
 
         switch (monitorType) {
             case ICMP: {
-                Any configuration =
+                configuration =
                     Any.pack(IcmpMonitorRequest.newBuilder()
                         .setHost(ipAddress)
-                        .setTimeout(Constants.Icmp.DEFAULT_TIMEOUT)
-                        .setDscp(Constants.Icmp.DEFAULT_DSCP)
-                        .setAllowFragmentation(Constants.Icmp.DEFAULT_ALLOW_FRAGMENTATION)
-                        .setPacketSize(Constants.Icmp.DEFAULT_PACKET_SIZE)
-                        .setRetries(Constants.Icmp.DEFAULT_RETRIES)
+                        .setTimeout(TaskUtils.Icmp.DEFAULT_TIMEOUT)
+                        .setDscp(TaskUtils.Icmp.DEFAULT_DSCP)
+                        .setAllowFragmentation(TaskUtils.Icmp.DEFAULT_ALLOW_FRAGMENTATION)
+                        .setPacketSize(TaskUtils.Icmp.DEFAULT_PACKET_SIZE)
+                        .setRetries(TaskUtils.Icmp.DEFAULT_RETRIES)
                         .build());
 
-                taskSetManagerUtil.addTask(tenantId, location, ipAddress, name,
-                    TaskType.MONITOR, pluginName, Constants.DEFAULT_SCHEDULE, nodeId, configuration);
                 break;
             }
             case SNMP: {
-                Any configuration =
+                configuration =
                     Any.pack(SnmpMonitorRequest.newBuilder()
                         .setHost(ipAddress)
-                        .setTimeout(Constants.Snmp.DEFAULT_TIMEOUT)
-                        .setRetries(Constants.Snmp.DEFAULT_RETRIES)
+                        .setTimeout(TaskUtils.Snmp.DEFAULT_TIMEOUT)
+                        .setRetries(TaskUtils.Snmp.DEFAULT_RETRIES)
                         .build());
-
-                taskSetManagerUtil.addTask(tenantId, location, ipAddress, name,
-                    TaskType.MONITOR, pluginName, Constants.DEFAULT_SCHEDULE, nodeId, configuration);
                 break;
             }
             case UNRECOGNIZED: {
@@ -104,11 +104,20 @@ public class MonitorTaskSetService {
                 break;
             }
         }
+
+        if (configuration != null) {
+            String taskId = identityForIpTask(ipAddress, name);
+            TaskDefinition.Builder builder =
+                TaskDefinition.newBuilder()
+                    .setType(TaskType.MONITOR)
+                    .setPluginName(pluginName)
+                    .setNodeId(nodeId)
+                    .setId(taskId)
+                    .setConfiguration(configuration)
+                    .setSchedule(TaskUtils.DEFAULT_SCHEDULE);
+            taskDefinition = builder.build();
+        }
+        return taskDefinition;
     }
 
-    private void sendTaskSet(String tenantId, String location) {
-        TaskSet taskSet = taskSetManager.getTaskSet(tenantId, location);
-        log.info("Sending task set: task-set={}; location={}; tenant-id={}", taskSet, location, tenantId);
-        taskSetPublisher.publishTaskSet(tenantId, location, taskSet);
-    }
 }

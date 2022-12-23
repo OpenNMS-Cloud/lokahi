@@ -1,6 +1,6 @@
 package org.opennms.horizon.inventory.service.taskset;
 
-public interface Constants {
+public interface TaskUtils {
 
     String DEFAULT_SCHEDULE = "60000";
 
@@ -16,4 +16,11 @@ public interface Constants {
         int DEFAULT_TIMEOUT = 18000;
         int DEFAULT_RETRIES = 2;
     }
+
+    String IP_LABEL = "ip=";
+
+    static String identityForIpTask(String ipAddress, String name) {
+        return IP_LABEL + ipAddress + "/" + name;
+    }
+
 }

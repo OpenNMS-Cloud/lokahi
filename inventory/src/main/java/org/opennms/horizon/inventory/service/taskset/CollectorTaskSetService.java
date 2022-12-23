@@ -28,47 +28,47 @@
 
 package org.opennms.horizon.inventory.service.taskset;
 
+import com.google.protobuf.Any;
+import lombok.RequiredArgsConstructor;
 import org.opennms.horizon.inventory.model.IpInterface;
-import org.opennms.horizon.inventory.service.taskset.manager.TaskSetManager;
-import org.opennms.horizon.inventory.service.taskset.manager.TaskSetManagerUtil;
 import org.opennms.horizon.snmp.api.SnmpConfiguration;
 import org.opennms.horizon.snmp.api.Version;
 import org.opennms.snmp.contract.SnmpCollectorRequest;
 import org.opennms.taskset.contract.MonitorType;
-import org.opennms.taskset.contract.TaskSet;
+import org.opennms.taskset.contract.TaskDefinition;
 import org.opennms.taskset.contract.TaskType;
 import org.opennms.taskset.service.api.TaskSetPublisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.google.protobuf.Any;
+import java.util.Arrays;
 
-import lombok.RequiredArgsConstructor;
+import static org.opennms.horizon.inventory.service.taskset.TaskUtils.identityForIpTask;
 
 @Component
 @RequiredArgsConstructor
 public class CollectorTaskSetService {
 
     private static final Logger log = LoggerFactory.getLogger(CollectorTaskSetService.class);
-    private final TaskSetManagerUtil taskSetManagerUtil;
-    private final TaskSetManager taskSetManager;
     private final TaskSetPublisher taskSetPublisher;
 
 
     public void sendCollectorTask(String location, MonitorType monitorType, IpInterface ipInterface, long nodeId) {
         String tenantId = ipInterface.getTenantId();
-        addCollectorTask(location, monitorType, ipInterface, nodeId);
-        sendTaskSet(tenantId, location);
+        var task = addCollectorTask(monitorType, ipInterface, nodeId);
+        if (task != null) {
+            taskSetPublisher.publishNewTasks(tenantId, location, Arrays.asList(task));
+        }
     }
 
-    private void addCollectorTask(String location, MonitorType monitorType, IpInterface ipInterface, long nodeId) {
+    private TaskDefinition addCollectorTask(MonitorType monitorType, IpInterface ipInterface, long nodeId) {
         String monitorTypeValue = monitorType.getValueDescriptor().getName();
         String ipAddress = ipInterface.getIpAddress().getAddress();
-        String tenantId = ipInterface.getTenantId();
 
         String name = String.format("%s-collector", monitorTypeValue.toLowerCase());
         String pluginName = String.format("%sCollector", monitorTypeValue);
+        TaskDefinition taskDefinition = null;
 
         switch (monitorType) {
             case SNMP: {
@@ -82,16 +82,20 @@ public class CollectorTaskSetService {
                         .setNodeId(nodeId)
                         .build());
 
-                taskSetManagerUtil.addTask(tenantId, location, ipAddress, name, TaskType.COLLECTOR, pluginName,
-                    Constants.DEFAULT_SCHEDULE, nodeId, configuration);
+                String taskId = identityForIpTask(ipAddress, name);
+                TaskDefinition.Builder builder =
+                    TaskDefinition.newBuilder()
+                        .setType(TaskType.COLLECTOR)
+                        .setPluginName(pluginName)
+                        .setNodeId(nodeId)
+                        .setId(taskId)
+                        .setConfiguration(configuration)
+                        .setSchedule(TaskUtils.DEFAULT_SCHEDULE);
+                taskDefinition = builder.build();
                 break;
             }
         }
+        return taskDefinition;
     }
 
-    private void sendTaskSet(String tenantId, String location) {
-        TaskSet taskSet = taskSetManager.getTaskSet(tenantId, location);
-        log.info("Sending task set {}  at location {}", taskSet, location);
-        taskSetPublisher.publishTaskSet(tenantId, location, taskSet);
-    }
 }

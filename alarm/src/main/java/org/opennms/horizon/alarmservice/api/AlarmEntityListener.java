@@ -64,7 +64,4 @@ public interface AlarmEntityListener {
     void onLastAutomationTimeUpdated(Alarm alarm, Date previousLastAutomationTime);
 
     void onRelatedAlarmsUpdated(Alarm alarm, Set<Alarm> previousRelatedAlarms);
-
-//    void onTicketStateChanged(Alarm alarm, TroubleTicketState previousState);
-
 }

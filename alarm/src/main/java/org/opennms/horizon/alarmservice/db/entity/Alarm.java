@@ -56,7 +56,6 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
@@ -182,7 +181,6 @@ public class Alarm extends TenantAwareEntity implements Serializable {
     @Column(name="x733_probable_cause", nullable=false)
     private int x733ProbableCause = 0;
 
-    //TODO:MMF add in whatever is needed from the Event protobuf as individual fields.
     @Column
     private AlarmSeverity lastEventSeverity;
 

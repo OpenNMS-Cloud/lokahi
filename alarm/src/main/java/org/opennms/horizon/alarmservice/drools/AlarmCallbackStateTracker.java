@@ -26,7 +26,7 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.alarmservice.service;
+package org.opennms.horizon.alarmservice.drools;
 
 import com.google.common.collect.ImmutableSet;
 import java.util.Arrays;

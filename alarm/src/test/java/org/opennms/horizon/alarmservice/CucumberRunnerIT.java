@@ -26,11 +26,13 @@
  *     http://www.opennms.com/
  ******************************************************************************/
 
-package org.opennms.horizon.alarmservice.dockerit;
+package org.opennms.horizon.alarmservice;
 
 import io.cucumber.junit.Cucumber;
 import io.cucumber.junit.CucumberOptions;
+import org.junit.ClassRule;
 import org.junit.runner.RunWith;
+import org.opennms.horizon.alarmservice.testcontainers.TestContainerRunnerClassRule;
 
 /**
  * IT runner that kicks off Cucumber.
@@ -41,8 +43,13 @@ import org.junit.runner.RunWith;
  */
 @RunWith(Cucumber.class)
 @CucumberOptions(
-    glue = {"org.opennms.horizon.alarmservice.dockerit"},
+    glue = {"org.opennms.horizon.alarmservice"},
     plugin = {"json:target/cucumber-report.json", "html:target/cucumber.html", "pretty"}
     )
+
 public class CucumberRunnerIT {
+
+    // ClassRule must be public
+    @ClassRule
+    public static TestContainerRunnerClassRule testContainerRunnerClassRule = new TestContainerRunnerClassRule();
 }

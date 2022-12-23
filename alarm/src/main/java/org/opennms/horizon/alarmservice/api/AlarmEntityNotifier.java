@@ -71,7 +71,4 @@ public interface AlarmEntityNotifier {
     void didUpdateLastAutomationTime(Alarm alarm, Date previousLastAutomationTime);
 
     void didUpdateRelatedAlarms(Alarm alarm, Set<Alarm> previousRelatedAlarms);
-
-//    void didChangeTicketStateForAlarm(Alarm alarm, TroubleTicketState previousState);
-
 }

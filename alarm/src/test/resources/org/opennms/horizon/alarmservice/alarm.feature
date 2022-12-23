@@ -3,23 +3,21 @@ Feature: Alarm Service Basic Functionality
 
   Background: Configure base URLs
     Given Application Base URL in system property "application.base-url"
-    Given Kafka Rest Server URL in system property "kafka-rest.url"
+    Given Kafka Bootstrap URL in system property "kafka.bootstrap-servers"
+    Given Kafka topics "events-proto" "alarms"
 
   Scenario: Verify when an event is received from Kafka, a new Alarm is created
     Then Send Event message to Kafka at topic "events-proto" with alarm reduction key "alarm.reduction-key.010"
-    Then Verify the HTTP response code is 200
     Then send GET request to application at path "/alarms/list", with timeout 5000ms, until JSON response matches the following JSON path expressions
       | totalCount == 1 |
 
   Scenario: Verify when an event is received from Kafka, a new Alarm is created
     Then Send Event message to Kafka at topic "events-proto" with alarm reduction key "alarm.reduction-key.020"
-    Then Verify the HTTP response code is 200
     Then send GET request to application at path "/alarms/list", with timeout 5000ms, until JSON response matches the following JSON path expressions
       | totalCount == 2 |
 
   Scenario: Verify alarm can be deleted
     Then Send Event message to Kafka at topic "events-proto" with alarm reduction key "alarm.reduction-key.030"
-    Then Verify the HTTP response code is 200
     Then send GET request to application at path "/alarms/list", with timeout 5000ms, until JSON response matches the following JSON path expressions
       | totalCount == 3 |
     Then Remember alarm id
@@ -33,7 +31,6 @@ Feature: Alarm Service Basic Functionality
 
   Scenario: Verify alarm can be cleared
     Then Send Event message to Kafka at topic "events-proto" with alarm reduction key "alarm.reduction-key.040"
-    Then Verify the HTTP response code is 200
     Then send GET request to application at path "/alarms/list", with timeout 5000ms, until JSON response matches the following JSON path expressions
       | totalCount == 3 |
     Then Send POST request to clear alarm at path "/alarms/clear"
@@ -47,7 +44,6 @@ Feature: Alarm Service Basic Functionality
 
   Scenario: Verify alarm can be acknowledged and unacknowledged
     Then Send Event message to Kafka at topic "events-proto" with alarm reduction key "alarm.reduction-key.050"
-    Then Verify the HTTP response code is 200
     Then send GET request to application at path "/alarms/list", with timeout 5000ms, until JSON response matches the following JSON path expressions
       | totalCount == 4 |
     Then Send POST request to acknowledge alarm at path "/alarms/ack"
@@ -61,7 +57,6 @@ Feature: Alarm Service Basic Functionality
 
   Scenario: Verify alarm severity can be set and escalated
     Then Send Event message to Kafka at topic "events-proto" with alarm reduction key "alarm.reduction-key.060"
-    Then Verify the HTTP response code is 200
     Then send GET request to application at path "/alarms/list", with timeout 5000ms, until JSON response matches the following JSON path expressions
       | totalCount == 5 |
     Then Send POST request to set alarm severity at path "/alarms/severity"
@@ -76,7 +71,6 @@ Feature: Alarm Service Basic Functionality
   Scenario: Verify alarm reduction for duplicate events
     # Generate an alarm
     Then Send Event message to Kafka at topic "events-proto" with alarm reduction key "alarm.reduction-key.070"
-    Then Verify the HTTP response code is 200
     Then send GET request to application at path "/alarms/list", with timeout 5000ms, until JSON response matches the following JSON path expressions
       | totalCount == 6        |
       | alarms[0].counter == 1 |
@@ -90,7 +84,6 @@ Feature: Alarm Service Basic Functionality
 
   Scenario: Verify alarm memo can be updated and removed
     Then Send Event message to Kafka at topic "events-proto" with alarm reduction key "alarm.reduction-key.080"
-    Then Verify the HTTP response code is 200
     Then send GET request to application at path "/alarms/list", with timeout 5000ms, until JSON response matches the following JSON path expressions
       | totalCount == 7 |
     Then Send PUT request to add memo at path "/alarms/memo"

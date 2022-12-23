@@ -59,7 +59,6 @@ import org.opennms.horizon.alarmservice.api.AlarmService;
 import org.opennms.horizon.alarmservice.db.entity.Alarm;
 import org.opennms.horizon.alarmservice.db.entity.AlarmAssociation;
 import org.opennms.horizon.alarmservice.db.repository.AlarmRepository;
-import org.opennms.horizon.alarmservice.service.AlarmCallbackStateTracker;
 import org.opennms.horizon.alarmservice.service.AlarmServiceImpl;
 import org.opennms.horizon.alarmservice.utils.SystemProperties;
 import org.springframework.beans.factory.annotation.Autowired;

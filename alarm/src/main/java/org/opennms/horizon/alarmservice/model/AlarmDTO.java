@@ -31,7 +31,6 @@ package org.opennms.horizon.alarmservice.model;
 import com.google.common.base.MoreObjects;
 import java.beans.Transient;
 import java.io.Serializable;
-import java.net.InetAddress;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Map;

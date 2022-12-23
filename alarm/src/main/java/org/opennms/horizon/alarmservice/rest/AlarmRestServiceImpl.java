@@ -46,7 +46,6 @@ import org.opennms.horizon.alarmservice.api.AlarmService;
 import org.opennms.horizon.alarmservice.model.AlarmDTO;
 import org.opennms.horizon.alarmservice.model.AlarmSeverity;
 import org.opennms.horizon.alarmservice.rest.support.MultivaluedMapImpl;
-import org.opennms.horizon.alarmservice.rest.support.SecurityHelper;
 import org.slf4j.helpers.MessageFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -136,11 +135,10 @@ public class AlarmRestServiceImpl  {
         return ResponseEntity.ok(alarmService.escalateAlarm(id, new Date()));
     }
 
-    @PostMapping(path="/severity/{id}/{ord}", produces = MimeTypeUtils.APPLICATION_JSON_VALUE)
-    //TODO:MMF not sure passing ordinal in is the right way to do this
-    public ResponseEntity<AlarmDTO> escalateAlarm(@PathVariable Long id, @PathVariable int ord) {
+    @PostMapping(path="/severity/{id}/{label}", produces = MimeTypeUtils.APPLICATION_JSON_VALUE)
+    public ResponseEntity<AlarmDTO> escalateAlarm(@PathVariable Long id, @PathVariable String label) {
 
-        return ResponseEntity.ok(alarmService.setSeverity(id, AlarmSeverity.get(ord), new Date()));
+        return ResponseEntity.ok(alarmService.setSeverity(id, AlarmSeverity.get(label), new Date()));
     }
 
     @PutMapping(path = "memo/{alarmId}",  consumes = MediaType.APPLICATION_JSON, produces = MimeTypeUtils.APPLICATION_JSON_VALUE)

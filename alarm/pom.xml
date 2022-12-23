@@ -111,9 +111,13 @@
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
         </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.slf4j</groupId>-->
+<!--            <artifactId>slf4j-log4j12</artifactId>-->
+<!--        </dependency>-->
         <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-log4j12</artifactId>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-slf4j-impl</artifactId>
         </dependency>
 
         <dependency>
@@ -174,6 +178,20 @@
             <groupId>io.rest-assured</groupId>
             <artifactId>rest-assured</artifactId>
             <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>testcontainers</artifactId>
+            <version>${testcontainers.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>kafka</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>postgresql</artifactId>
         </dependency>
     </dependencies>
 
@@ -256,178 +274,6 @@
                 </configuration>
             </plugin>
 
-
-            <plugin>
-                <groupId>io.fabric8</groupId>
-                <artifactId>docker-maven-plugin</artifactId>
-                <configuration>
-                    <skip>${skipITs}</skip>
-                    <showLogs>true</showLogs>
-                    <autoCreateCustomNetworks>true</autoCreateCustomNetworks>
-                    <images>
-
-                        <!--                -->
-                        <!-- POSTGRES IMAGE -->
-                        <!--                -->
-                        <image>
-                            <name>postgres-it-image</name>
-                            <alias>postgres</alias>
-                            <build>
-                                <!-- POSTGRES VERSION PROPERTY -->
-                                <from>postgres:13.3-alpine</from>
-                                <assembly>
-                                    <targetDir>/</targetDir>
-                                    <inline xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                                        xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2"
-                                        xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2 http://maven.apache.org/xsd/assembly-1.1.2.xsd">
-                                        <files>
-                                            <file>
-                                                <source>
-                                                    ./target/test-classes/db-init.sql
-                                                </source>
-                                                <destName>db-init.sql</destName>
-                                                <outputDirectory>/docker-entrypoint-initdb.d</outputDirectory>
-                                            </file>
-                                        </files>
-                                    </inline>
-                                </assembly>
-                            </build>
-                            <run>
-                                <env>
-                                    <POSTGRES_HOST_AUTH_METHOD>trust</POSTGRES_HOST_AUTH_METHOD>
-                                </env>
-                                <ports>
-                                    <port>postgres-db-port:5432</port>
-                                </ports>
-                                <wait>
-                                    <log>(?s)PostgreSQL init process complete; ready for start up..*database system is ready to accept connections</log>
-                                    <time>120000</time>
-                                </wait>
-                                <ports>
-                                    <port>postgresql.port:5432</port>
-                                </ports>
-                                <network>
-                                    <mode>custom</mode>
-                                    <name>alarm-docker-it-network</name>
-                                    <alias>postgres</alias>
-                                </network>
-                            </run>
-                        </image>
-
-                        <!--                -->
-                        <!-- KAFKA IMAGE -->
-                        <!--                -->
-                        <image>
-                            <name>kafka-it-image</name>
-                            <alias>kafka</alias>
-                            <build>
-                                <!-- POSTGRES VERSION PROPERTY -->
-                                <from>blacktop/kafka:2.6</from>
-                            </build>
-                            <run>
-                                <env>
-                                    <KAFKA_ADVERTISED_HOST_NAME>kafka-host</KAFKA_ADVERTISED_HOST_NAME>
-                                    <KAFKA_LISTENERS>LOCALCLIENT://:59092,CLIENT://:9092</KAFKA_LISTENERS>
-                                    <KAFKA_ADVERTISED_LISTENERS>LOCALCLIENT://localhost:59092,CLIENT://kafka-host:9092</KAFKA_ADVERTISED_LISTENERS>
-                                    <KAFKA_LISTENER_SECURITY_PROTOCOL_MAP>CLIENT:PLAINTEXT,LOCALCLIENT:PLAINTEXT</KAFKA_LISTENER_SECURITY_PROTOCOL_MAP>
-                                    <KAFKA_INTER_BROKER_LISTENER_NAME>CLIENT</KAFKA_INTER_BROKER_LISTENER_NAME>
-                                </env>
-                                <ports>
-                                    <port>kafka.port:9092</port>
-                                </ports>
-                                <wait>
-                                    <log>(?s)started \(kafka.server.KafkaServer\)</log>
-                                    <time>120000</time>
-                                </wait>
-                                <network>
-                                    <mode>custom</mode>
-                                    <name>alarm-docker-it-network</name>
-                                    <alias>kafka-host</alias>
-                                </network>
-                            </run>
-                        </image>
-
-                        <!--                  -->
-                        <!-- KAFKA-REST IMAGE -->
-                        <!--                  -->
-                        <image>
-                            <name>kafka-rest-it-image</name>
-                            <alias>kafka-rest</alias>
-                            <build>
-                                <from>confluentinc/cp-kafka-rest:7.3.0</from>
-                            </build>
-                            <run>
-                                <env>
-                                    <KAFKA_REST_BOOTSTRAP_SERVERS>kafka-host:9092</KAFKA_REST_BOOTSTRAP_SERVERS>
-                                    <KAFKA_REST_LISTENERS>http://0.0.0.0:8080</KAFKA_REST_LISTENERS>
-                                </env>
-                                <ports>
-                                    <port>kafka-rest.port:8080</port>
-                                </ports>
-                                <wait>
-                                    <log>INFO Server started, listening for requests\.\.\. \(io.confluent.kafkarest.KafkaRestMain\)</log>
-                                    <time>60000</time>
-                                </wait>
-                                <network>
-                                    <mode>custom</mode>
-                                    <name>alarm-docker-it-network</name>
-                                    <alias>kafka-rest-host</alias>
-                                </network>
-                            </run>
-                        </image>
-
-                        <!--                    -->
-                        <!-- ALARM APPLICATION IMAGE  -->
-                        <!--                    -->
-                        <image>
-                            <name>opennms-horizon-application-it-image</name>
-                            <alias>alarm-application</alias>
-                            <build>
-                                <from>${docker.image.name}:${docker.image.tag}</from>
-                            </build>
-                            <run>
-                                <hostname>test-alarm-001</hostname>
-                                <ports>
-                                    <port>app-http-port:8080</port>
-                                    <!--<port>5005:5005</port>-->
-                                </ports>
-                                <env>
-                                    <!-- Need to make sure address=* is in the DEBUG OPTS otherwise it listens on the container's localhost only -->
-                                    <JAVA_TOOL_OPTIONS>-Djava.security.egd=file:/dev/./urandom -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005</JAVA_TOOL_OPTIONS>
-                                    <SPRING_KAFKA_BOOTSTRAP_SERVERS>kafka-host:9092</SPRING_KAFKA_BOOTSTRAP_SERVERS>
-                                </env>
-                                <wait>
-                                    <log>Started AlarmServiceMain in .* seconds</log>
-                                    <time>300000</time>
-                                </wait>
-                                <network>
-                                    <mode>custom</mode>
-                                    <name>alarm-docker-it-network</name>
-                                    <alias>alarm</alias>
-                                </network>
-                            </run>
-                        </image>
-                    </images>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>start-before-integration-test</id>
-                        <phase>pre-integration-test</phase>
-                        <goals>
-                            <goal>build</goal>
-                            <goal>start</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>stop-after-integration-test</id>
-                        <phase>post-integration-test</phase>
-                        <goals>
-                            <goal>stop</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-
             <!--                -->
             <!-- TEST EXECUTION -->
             <!--                -->
@@ -466,7 +312,7 @@
                     <reuseForks>true</reuseForks>
                     <useSystemClassLoader>false</useSystemClassLoader>
 <!--                    ##########################-->
-<!--                    ### this is REQUIRED so that the the ITTests have access to the project classes!-->
+<!--                    ### this is REQUIRED so that the the IT Tests have access to the project classes!-->
 <!--                    ##########################-->
                     <classesDirectory>${project.build.outputDirectory}</classesDirectory>
                     <systemProperties>
@@ -484,6 +330,5 @@
 
         </plugins>
     </build>
-
-
+    
 </project>

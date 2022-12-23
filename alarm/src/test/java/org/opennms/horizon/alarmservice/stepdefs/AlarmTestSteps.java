@@ -26,7 +26,7 @@
  *     http://www.opennms.com/
  ******************************************************************************/
 
-package org.opennms.horizon.alarmservice.dockerit;
+package org.opennms.horizon.alarmservice.stepdefs;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -41,7 +41,6 @@ import io.cucumber.java.en.Then;
 import io.restassured.RestAssured;
 import io.restassured.config.HttpClientConfig;
 import io.restassured.config.RestAssuredConfig;
-import io.restassured.http.ContentType;
 import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
@@ -51,8 +50,12 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.List;
 import java.util.Objects;
+import java.util.Properties;
 import javax.ws.rs.core.MediaType;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.kafka.clients.producer.KafkaProducer;
+import org.opennms.horizon.alarmservice.RetryUtils;
+import org.opennms.horizon.alarmservice.kafkahelper.KafkaTestHelper;
 import org.opennms.horizon.alarmservice.model.AlarmDTO;
 import org.opennms.horizon.alarmservice.model.AlarmSeverity;
 import org.opennms.horizon.alarmservice.rest.AlarmCollectionDTO;
@@ -74,7 +77,8 @@ public class AlarmTestSteps {
     // Test Configuration
     //
     private String applicationBaseUrl;
-    private String kafkaRestBaseUrl;
+    private String kafkaBootstrapUrl;
+    private KafkaTestHelper kafkaTestHelper;
 
     //
     // Test Runtime Data
@@ -88,14 +92,20 @@ public class AlarmTestSteps {
 // Constructor
 //----------------------------------------
 
-    public AlarmTestSteps(RetryUtils retryUtils) {
+    public AlarmTestSteps(RetryUtils retryUtils, KafkaTestHelper kafkaTestHelper) {
         this.retryUtils = retryUtils;
+        this.kafkaTestHelper = kafkaTestHelper;
     }
 
 
 //========================================
 // Gherkin Rules
 //========================================
+
+    @Given("Kafka topics {string} {string}")
+    public void createKafkaTopic(String consumerTopicEnv, String producerTopicEnv) throws Exception {
+        kafkaTestHelper.startConsumerAndProducer(consumerTopicEnv, producerTopicEnv);
+    }
 
     @Given("Application Base URL in system property {string}")
     public void applicationBaseURLInSystemProperty(String systemProperty) throws Exception {
@@ -104,11 +114,12 @@ public class AlarmTestSteps {
         log.info("Using BASE URL {}", this.applicationBaseUrl);
     }
 
-    @Given("Kafka Rest Server URL in system property {string}")
+    @Given("Kafka Bootstrap URL in system property {string}")
     public void kafkaRestServerURLInSystemProperty(String systemProperty) throws Exception {
-        this.kafkaRestBaseUrl = System.getProperty(systemProperty);
+        this.kafkaBootstrapUrl = System.getProperty(systemProperty);
+        this.kafkaTestHelper.setKafkaBootstrapUrl(kafkaBootstrapUrl);
 
-        log.info("Using KAFKA REST BASE URL {}", this.kafkaRestBaseUrl);
+        log.info("Using KAFKA BASE URL {}", this.kafkaBootstrapUrl);
     }
 
     @Then("Send POST request to application at path {string}")
@@ -155,7 +166,8 @@ public class AlarmTestSteps {
         AlarmCollectionDTO alarmCollectionDTO = restAssuredResponse.getBody().as(AlarmCollectionDTO.class);
         List<AlarmDTO> alarmDTOList = alarmCollectionDTO.getAlarms();
         AlarmDTO alarmDTO = findCurrentTestAlarm(alarmDTOList);
-        commonSendPOSTRequestToApplication(path+"/"+ alarmDTO.getAlarmId()+"/1");
+        String uri = String.format("%s/%d/%s", path, alarmDTO.getAlarmId(), AlarmSeverity.INDETERMINATE.getLabel());
+        commonSendPOSTRequestToApplication(uri);
     }
 
     @Then("Send POST request to escalate alarm severity at path {string}")
@@ -168,16 +180,8 @@ public class AlarmTestSteps {
 
     @Then("Send Event message to Kafka at topic {string} with alarm reduction key {string}")
     public void sendMessageToKafkaAtTopic(String topic, String alarmReductionKey) throws Exception {
-        URL requestUrl = new URL(new URL(this.kafkaRestBaseUrl), "/topics/" + topic);
 
         testAlarmReductionKey = alarmReductionKey;
-
-        RestAssuredConfig restAssuredConfig = this.createRestAssuredTestConfig();
-
-        RequestSpecification requestSpecification =
-            RestAssured
-                .given()
-                .config(restAssuredConfig);
 
         AlarmData alarmData =
             AlarmData.newBuilder()
@@ -192,20 +196,7 @@ public class AlarmTestSteps {
                 .setAlarmData(alarmData)
                 .build();
 
-        String body = formatKafkaRestProducerMessageBody(event.toByteArray());
-
-        requestSpecification =
-            requestSpecification
-                .body(body)
-                .header("Content-Type", "application/vnd.kafka.binary.v2+json")
-                .header("Accept", "application/vnd.kafka.v2+json")
-                ;
-
-        restAssuredResponse =
-            requestSpecification
-                .post(requestUrl)
-                .thenReturn()
-        ;
+        kafkaTestHelper.sendToTopic(topic, event.toByteArray());
     }
 
     @Then("send GET request to application at path {string}, with timeout {int}ms, until JSON response matches the following JSON path expressions")
@@ -231,11 +222,6 @@ public class AlarmTestSteps {
     public void verifyTheHTTPResponseCodeIs(int expectedStatusCode) {
         assertEquals(expectedStatusCode, restAssuredResponse.getStatusCode());
     }
-
-//    @Then("delay {int}ms")
-//    public void delayMs(int ms) throws Exception {
-//        Thread.sleep(ms);
-//    }
 
     @Then("Send GET request to application at path {string}")
     public void sendGETRequestToApplicationAtPath(String path) throws Exception {
@@ -498,5 +484,35 @@ public class AlarmTestSteps {
         public void setValue(String value) {
             this.value = value;
         }
+    }
+
+    private <K,V> KafkaProducer<K,V> createKafkaProducer() {
+
+        log.info("####### Kafka Producer");
+        // create instance for properties to access producer configs
+        Properties props = new Properties();
+
+        //Assign localhost id
+        props.put("bootstrap.servers", kafkaBootstrapUrl);
+
+        //Set acknowledgements for producer requests.
+        props.put("acks","all");
+
+        //If the request fails, the producer can automatically retry,
+        props.put("retries", 0);
+
+        //Specify buffer size in config
+        props.put("batch.size", 16384);
+
+        //Reduce the no of requests less than 0
+        props.put("linger.ms", 1);
+
+        //The buffer.memory controls the total amount of memory available to the producer for buffering.
+        props.put("buffer.memory", 33554432);
+
+        props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
+        props.put("value.serializer", "org.apache.kafka.common.serialization.ByteArraySerializer");
+
+        return new KafkaProducer<K, V>(props);
     }
 }

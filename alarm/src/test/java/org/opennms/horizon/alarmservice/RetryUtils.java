@@ -26,14 +26,13 @@
  *     http://www.opennms.com/
  */
 
-package org.opennms.horizon.alarmservice.dockerit;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+package org.opennms.horizon.alarmservice;
 
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class RetryUtils {
 

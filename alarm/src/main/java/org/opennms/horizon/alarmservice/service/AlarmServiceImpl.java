@@ -28,8 +28,6 @@
 
 package org.opennms.horizon.alarmservice.service;
 
-import com.google.common.util.concurrent.Striped;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -39,7 +37,6 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.locks.Lock;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.opennms.horizon.alarmservice.api.AlarmEntityNotifier;
@@ -49,11 +46,9 @@ import org.opennms.horizon.alarmservice.db.entity.Memo;
 import org.opennms.horizon.alarmservice.db.repository.AlarmRepository;
 import org.opennms.horizon.alarmservice.model.AlarmDTO;
 import org.opennms.horizon.alarmservice.model.AlarmSeverity;
-import org.opennms.horizon.alarmservice.utils.StripedExt;
 import org.opennms.horizon.alarmservice.utils.SystemProperties;
 import org.opennms.horizon.events.proto.Event;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -63,13 +58,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class AlarmServiceImpl implements AlarmService {
 
     protected static final Integer THREADS = SystemProperties.getInteger("org.opennms.alarmd.threads", 4);
-    protected static final Integer NUM_STRIPE_LOCKS = SystemProperties.getInteger("org.opennms.alarmd.stripe.locks", THREADS * 4);
-    protected static boolean NEW_IF_CLEARED = Boolean.getBoolean("org.opennms.alarmd.newIfClearedAlarmExists");
-    protected static boolean LEGACY_ALARM_STATE = Boolean.getBoolean("org.opennms.alarmd.legacyAlarmState");
 
     public static final String ALARM_RULES_NAME = "alarm";
-
-    private boolean createNewAlarmIfClearedAlarmExists = LEGACY_ALARM_STATE == true ? false : NEW_IF_CLEARED;
 
     protected static final String DEFAULT_USER = "admin";
 
@@ -81,10 +71,6 @@ public class AlarmServiceImpl implements AlarmService {
 
     @Autowired
     private AlarmMapper alarmMapper;
-
-    private boolean legacyAlarmState = LEGACY_ALARM_STATE;
-
-    private Striped<Lock> lockStripes = StripedExt.fairLock(NUM_STRIPE_LOCKS);
 
     @Override
     @Transactional

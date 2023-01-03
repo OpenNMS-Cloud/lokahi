@@ -27,6 +27,8 @@
  *******************************************************************************/
 package org.opennms.horizon.inventory.mapper;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -44,6 +46,7 @@ import java.util.Base64;
 
 @Component
 public class EncryptAttributeConverter implements AttributeConverter<String, String> {
+    private static final Logger log = LoggerFactory.getLogger(EncryptAttributeConverter.class);
     private static final String ALGORITHM = "AES";
     private static final String TRANSFORMATION = "AES/CBC/PKCS5Padding";
     private static final SecureRandom RANDOM = new SecureRandom();
@@ -72,7 +75,8 @@ public class EncryptAttributeConverter implements AttributeConverter<String, Str
             return Base64.getEncoder().encodeToString(cipher.doFinal(value.getBytes()));
         } catch (IllegalBlockSizeException | BadPaddingException | InvalidKeyException |
                  InvalidAlgorithmParameterException e) {
-            throw new IllegalStateException("Failed to convert to database column", e);
+            log.error("Failed to convert to database column, writing in cleartext...", e);
+            return value;
         }
     }
 
@@ -83,7 +87,8 @@ public class EncryptAttributeConverter implements AttributeConverter<String, Str
             return new String(cipher.doFinal(Base64.getDecoder().decode(value)));
         } catch (InvalidKeyException | BadPaddingException | IllegalBlockSizeException |
                  InvalidAlgorithmParameterException e) {
-            throw new IllegalStateException("Failed to convert to entity attribute", e);
+            log.error("Failed to convert to entity attribute, reading encrypted value...", e);
+            return value;
         }
     }
 

@@ -219,6 +219,7 @@ class DetectorResponseServiceIntTest extends GrpcTestBase {
             assertEquals(TEST_IP_ADDRESS, ipInterface.getIpAddress().getAddress());
             assertEquals(TEST_TENANT_ID, monitoredService.getTenantId());
         }
+        
         // fragile test : extra 1 call for SNMP collector
         assertEquals(numberOfCalls + 1, testGrpcService.getTimesCalled().intValue());
 

@@ -27,7 +27,10 @@
  *******************************************************************************/
 package org.opennms.horizon.inventory.grpc;
 
+import com.google.rpc.Code;
+import com.google.rpc.Status;
 import io.grpc.Context;
+import io.grpc.protobuf.StatusProto;
 import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -51,12 +54,19 @@ public class AzureCredentialGrpcService extends AzureCredentialServiceGrpc.Azure
 
         Optional<String> tenantIdOptional = tenantLookup.lookupTenantId(Context.current());
 
-        tenantIdOptional.ifPresent(tenantId -> {
+        tenantIdOptional.ifPresentOrElse(tenantId -> {
 
             AzureCredentialDTO credentials = service.createCredentials(tenantId, request);
 
             responseObserver.onNext(credentials);
             responseObserver.onCompleted();
-        });
+        }, () -> {
+
+            Status status = Status.newBuilder()
+                .setCode(Code.INVALID_ARGUMENT_VALUE)
+                .setMessage("Tenant Id can't be empty")
+                .build();
+            responseObserver.onError(StatusProto.toStatusRuntimeException(status));
+         });
     }
 }

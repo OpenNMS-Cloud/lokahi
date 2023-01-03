@@ -51,6 +51,7 @@ import org.opennms.horizon.inventory.model.Node;
 import org.opennms.horizon.inventory.service.IpInterfaceService;
 import org.opennms.horizon.inventory.service.NodeService;
 import org.opennms.horizon.inventory.service.taskset.DetectorTaskSetService;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Optional;
@@ -59,6 +60,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 
 @Slf4j
+@Component
 @RequiredArgsConstructor
 public class NodeGrpcService extends NodeServiceGrpc.NodeServiceImplBase {
     private final NodeService nodeService;

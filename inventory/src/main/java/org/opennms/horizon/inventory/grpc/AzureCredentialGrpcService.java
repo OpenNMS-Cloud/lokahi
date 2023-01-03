@@ -25,56 +25,49 @@
  *     http://www.opennms.org/
  *     http://www.opennms.com/
  *******************************************************************************/
-
 package org.opennms.horizon.inventory.grpc;
 
-import java.util.List;
-import java.util.Optional;
-
-import org.opennms.horizon.inventory.dto.MonitoringSystemDTO;
-import org.opennms.horizon.inventory.dto.MonitoringSystemList;
-import org.opennms.horizon.inventory.dto.MonitoringSystemServiceGrpc;
-import org.opennms.horizon.inventory.service.MonitoringSystemService;
-
-import com.google.protobuf.Empty;
-import com.google.protobuf.StringValue;
 import com.google.rpc.Code;
 import com.google.rpc.Status;
-
 import io.grpc.Context;
 import io.grpc.protobuf.StatusProto;
 import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.opennms.horizon.inventory.dto.AzureCredentialCreateDTO;
+import org.opennms.horizon.inventory.dto.AzureCredentialDTO;
+import org.opennms.horizon.inventory.dto.AzureCredentialServiceGrpc;
+import org.opennms.horizon.inventory.service.AzureCredentialService;
 import org.springframework.stereotype.Component;
 
+import java.util.Optional;
+
+@Slf4j
 @Component
 @RequiredArgsConstructor
-public class MonitoringSystemGrpcService extends MonitoringSystemServiceGrpc.MonitoringSystemServiceImplBase {
-    private final MonitoringSystemService service;
+public class AzureCredentialGrpcService extends AzureCredentialServiceGrpc.AzureCredentialServiceImplBase {
     private final TenantLookup tenantLookup;
-    @Override
-    public void listMonitoringSystem(Empty request, StreamObserver<MonitoringSystemList> responseObserver) {
-        List<MonitoringSystemDTO> list = tenantLookup.lookupTenantId(Context.current())
-            .map(service::findByTenantId)
-            .orElseThrow();
-        responseObserver.onNext(MonitoringSystemList.newBuilder().addAllSystems(list).build());
-        responseObserver.onCompleted();
-    }
+    private final AzureCredentialService service;
 
     @Override
-    public void getMonitoringSystemById(StringValue systemId, StreamObserver<MonitoringSystemDTO> responseObserver) {
-        Optional<MonitoringSystemDTO> monitoringSystem = tenantLookup.lookupTenantId(Context.current())
-            .map(tenantId -> service.findBySystemId(systemId.getValue(), tenantId))
-            .orElseThrow();
-        if(monitoringSystem.isPresent()) {
-            responseObserver.onNext(monitoringSystem.get());
+    public void createCredentials(AzureCredentialCreateDTO request, StreamObserver<AzureCredentialDTO> responseObserver) {
+
+        Optional<String> tenantIdOptional = tenantLookup.lookupTenantId(Context.current());
+
+        tenantIdOptional.ifPresentOrElse(tenantId -> {
+
+            AzureCredentialDTO credentials = service.createCredentials(tenantId, request);
+
+            responseObserver.onNext(credentials);
             responseObserver.onCompleted();
-        } else {
+
+        }, () -> {
+
             Status status = Status.newBuilder()
-                .setCode(Code.NOT_FOUND_VALUE)
-                .setMessage("Monitor system with system id: " + systemId + " doesn't exist")
+                .setCode(Code.INVALID_ARGUMENT_VALUE)
+                .setMessage("Tenant Id can't be empty")
                 .build();
             responseObserver.onError(StatusProto.toStatusRuntimeException(status));
-        }
+        });
     }
 }

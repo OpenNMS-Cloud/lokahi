@@ -28,17 +28,6 @@
 
 package org.opennms.horizon.inventory.service;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
-
-import java.util.Optional;
-
 import org.junit.Test;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.runner.RunWith;
@@ -56,6 +45,18 @@ import org.opennms.horizon.inventory.repository.MonitoringLocationRepository;
 import org.opennms.horizon.inventory.repository.NodeRepository;
 import org.opennms.horizon.shared.constants.GrpcConstants;
 
+import java.util.Optional;
+
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.timeout;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
+
 @RunWith(MockitoJUnitRunner.class)
 public class NodeServiceTest {
 
@@ -72,7 +73,7 @@ public class NodeServiceTest {
     IpInterfaceRepository ipInterfaceRepository;
 
     @Mock
-    TrapConfigService trapConfigService;
+    ConfigUpdateService configUpdateService;
 
     @Mock
     NodeMapper mapper;
@@ -106,7 +107,7 @@ public class NodeServiceTest {
 
         verify(ipInterfaceRepository).save(any(IpInterface.class));
         verify(monitoringLocationRepository).save(any(MonitoringLocation.class));
-        verify(trapConfigService).sendTrapConfigToMinion(tenant, location);
+        verify(configUpdateService, timeout(5000)).sendConfigUpdate(tenant, location);
     }
 
     @Test
@@ -126,7 +127,7 @@ public class NodeServiceTest {
 
         verify(ipInterfaceRepository).save(any(IpInterface.class));
         verify(monitoringLocationRepository, times(0)).save(any(MonitoringLocation.class));
-        verify(trapConfigService, times(0)).sendTrapConfigToMinion(eq(tenantId), any());
+        verify(configUpdateService, timeout(5000).times(0)).sendConfigUpdate(eq(tenantId), any());
     }
 
     @Test

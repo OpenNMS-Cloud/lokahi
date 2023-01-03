@@ -1,32 +1,33 @@
 package org.opennms.horizon.inventory.service;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.opennms.cloud.grpc.minion.Identity;
+import org.opennms.horizon.grpc.heartbeat.contract.HeartbeatMessage;
+import org.opennms.horizon.inventory.dto.MonitoringSystemDTO;
+import org.opennms.horizon.inventory.mapper.MonitoringSystemMapper;
+import org.opennms.horizon.inventory.model.MonitoringLocation;
+import org.opennms.horizon.inventory.model.MonitoringSystem;
+import org.opennms.horizon.inventory.model.MonitoringSystemBean;
+import org.opennms.horizon.inventory.repository.MonitoringLocationRepository;
+import org.opennms.horizon.inventory.repository.MonitoringSystemRepository;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.opennms.cloud.grpc.minion.Identity;
-import org.opennms.horizon.grpc.heartbeat.contract.HeartbeatMessage;
-import org.opennms.horizon.inventory.dto.MonitoringSystemDTO;
-import org.opennms.horizon.inventory.mapper.MonitoringSystemMapper;
-import org.opennms.horizon.inventory.model.MonitoringSystemBean;
-import org.opennms.horizon.inventory.model.MonitoringLocation;
-import org.opennms.horizon.inventory.model.MonitoringSystem;
-import org.opennms.horizon.inventory.repository.MonitoringLocationRepository;
-import org.opennms.horizon.inventory.repository.MonitoringSystemRepository;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import lombok.RequiredArgsConstructor;
-
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class MonitoringSystemService {
     private final MonitoringSystemRepository modelRepo;
     private final MonitoringLocationRepository locationRepository;
     private final MonitoringSystemMapper mapper;
-    private final TrapConfigService trapConfigService;
+    private final ConfigUpdateService configUpdateService;
 
     public List<MonitoringSystemDTO> findByTenantId(String tenantId) {
         List<MonitoringSystem> all = modelRepo.findByTenantId(tenantId);
@@ -52,7 +53,8 @@ public class MonitoringSystemService {
                 location.setLocation(identity.getLocation());
                 location.setTenantId(tenantId);
                 var newLocation = locationRepository.save(location);
-                trapConfigService.sendTrapConfigToMinion(newLocation.getTenantId(), newLocation.getLocation());
+                // Send config updates asynchronously to Minion
+                configUpdateService.sendConfigUpdate(newLocation.getTenantId(), newLocation.getLocation());
 
             }
             MonitoringSystem monitoringSystem = new MonitoringSystem();
@@ -70,6 +72,7 @@ public class MonitoringSystemService {
             modelRepo.save(monitoringSystem);
             return Optional.empty();
         }
+
     }
 
     //For inventory internal use only
@@ -84,4 +87,5 @@ public class MonitoringSystemService {
     public Optional<MonitoringSystemBean> getByIdForMonitoring(long id) {
         return modelRepo.findById(id).map(s->new MonitoringSystemBean(s.getSystemId(), s.getTenantId(), s.getMonitoringLocation().getLocation()));
     }
+
 }

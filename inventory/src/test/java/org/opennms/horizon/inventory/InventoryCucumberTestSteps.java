@@ -123,11 +123,11 @@ public class InventoryCucumberTestSteps {
         ManagedChannel managedChannel = channelBuilder.usePlaintext().build();
         managedChannel.getState(true);
         monitoringSystemStub = MonitoringSystemServiceGrpc.newBlockingStub(managedChannel)
-            .withInterceptors(prepareGrpcHeaderInterceptor());
+            .withInterceptors(prepareGrpcHeaderInterceptor()).withDeadlineAfter(30, TimeUnit.SECONDS);
         monitoringLocationStub = MonitoringLocationServiceGrpc.newBlockingStub(managedChannel)
-            .withInterceptors(prepareGrpcHeaderInterceptor());
+            .withInterceptors(prepareGrpcHeaderInterceptor()).withDeadlineAfter(30, TimeUnit.SECONDS);
         nodeServiceBlockingStub = NodeServiceGrpc.newBlockingStub(managedChannel)
-            .withInterceptors(prepareGrpcHeaderInterceptor());
+            .withInterceptors(prepareGrpcHeaderInterceptor()).withDeadlineAfter(30, TimeUnit.SECONDS);
 
     }
 
@@ -226,7 +226,7 @@ public class InventoryCucumberTestSteps {
                 .setManagementIp(ipAddress).build());
             fail();
         } catch (Exception e) {
-            
+
         }
     }
 }

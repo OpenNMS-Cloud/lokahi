@@ -1,22 +1,27 @@
 package org.opennms.horizon.minion.taskset.worker.impl;
 
 import com.google.protobuf.Any;
+import org.opennms.azure.contract.AzureScanItem;
+import org.opennms.horizon.minion.plugin.api.AzureScannerResponse;
 import org.opennms.horizon.minion.plugin.api.CollectionSet;
 import org.opennms.horizon.minion.plugin.api.ServiceDetectorResponse;
+import org.opennms.horizon.minion.plugin.api.ServiceMonitorResponse;
+import org.opennms.horizon.minion.taskset.worker.TaskExecutionResultProcessor;
 import org.opennms.horizon.shared.ipc.rpc.IpcIdentity;
 import org.opennms.horizon.shared.ipc.sink.api.SyncDispatcher;
 import org.opennms.taskset.contract.CollectorResponse;
 import org.opennms.taskset.contract.DetectorResponse;
 import org.opennms.taskset.contract.MonitorResponse;
+import org.opennms.taskset.contract.ScannerResponse;
 import org.opennms.taskset.contract.TaskResult;
 import org.opennms.taskset.contract.TaskSetResults;
-import org.opennms.horizon.minion.taskset.worker.TaskExecutionResultProcessor;
-import org.opennms.horizon.minion.plugin.api.ServiceMonitorResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 
 public class TaskExecutionResultProcessorImpl implements TaskExecutionResultProcessor {
 
@@ -36,6 +41,15 @@ public class TaskExecutionResultProcessorImpl implements TaskExecutionResultProc
 //========================================
 // API
 //----------------------------------------
+
+    @Override
+    public void queueSendResult(String id, AzureScannerResponse response) {
+        log.info("O-AzureScan STATUS: results-size={}; reason={}", response.getResults().size(), response.getReason());
+
+        TaskSetResults taskSetResults = formatTaskSetResults(id, response);
+
+        taskSetSinkDispatcher.send(taskSetResults);
+    }
 
     @Override
     public void queueSendResult(String id, ServiceDetectorResponse response) {
@@ -65,6 +79,25 @@ public class TaskExecutionResultProcessorImpl implements TaskExecutionResultProc
 //========================================
 // Internals
 //----------------------------------------
+
+    private TaskSetResults formatTaskSetResults(String id, AzureScannerResponse result) {
+        ScannerResponse scannerResponse = formatAzureScannerResponse(result);
+
+        TaskResult taskResult =
+            TaskResult.newBuilder()
+                .setId(id)
+                .setScannerResponse(scannerResponse)
+                .setLocation(identity.getLocation())
+                .setSystemId(identity.getId())
+                .build();
+
+        TaskSetResults taskSetResults =
+            TaskSetResults.newBuilder()
+                .addResults(taskResult)
+                .build();
+
+        return taskSetResults;
+    }
 
     private TaskSetResults formatTaskSetResults(String id, ServiceMonitorResponse result) {
         MonitorResponse monitorResponse = formatMonitorResponse(result);
@@ -102,6 +135,16 @@ public class TaskExecutionResultProcessorImpl implements TaskExecutionResultProc
                 .build();
 
         return taskSetResults;
+    }
+
+    private ScannerResponse formatAzureScannerResponse(AzureScannerResponse response) {
+
+        ScannerResponse result = ScannerResponse.newBuilder()
+            .addAllResults(Optional.of(response.getResults()).orElse(Collections.EMPTY_LIST))
+            .setReason(Optional.of(response).map(AzureScannerResponse::getReason).orElse(ScannerResponse.getDefaultInstance().getReason()))
+            .build();
+
+        return result;
     }
 
     private DetectorResponse formatDetectorResponse(ServiceDetectorResponse response) {

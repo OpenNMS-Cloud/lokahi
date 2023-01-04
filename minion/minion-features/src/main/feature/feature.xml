@@ -13,6 +13,7 @@
     <repository>mvn:org.opennms.horizon.minion/snmp-plugin/${project.version}/xml/features</repository>
     <repository>mvn:org.opennms.horizon.minion/traps-features/${project.version}/xml/features</repository>
     <repository>mvn:org.opennms.horizon.minion/flows-features/${project.version}/xml/features</repository>
+    <repository>mvn:org.opennms.horizon.minion/azure-plugin/${project.version}/xml/features</repository>
 
 
     <feature name="minion-ng">
@@ -23,6 +24,7 @@
         <feature>snmp-rpc</feature>
         <feature>minion-traps</feature>
         <feature>minion-flows</feature>
+        <feature>azure-plugins</feature>
     </feature>
 
 

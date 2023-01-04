@@ -72,6 +72,13 @@
             <classifier>features</classifier>
             <type>xml</type>
         </dependency>
+        <dependency>
+            <groupId>org.opennms.horizon.minion</groupId>
+            <artifactId>azure-plugin</artifactId>
+            <version>${project.version}</version>
+            <classifier>features</classifier>
+            <type>xml</type>
+        </dependency>
     </dependencies>
 
     <build>

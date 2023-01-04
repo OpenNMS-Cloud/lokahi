@@ -18,9 +18,19 @@ public interface TaskUtils {
     }
 
     String IP_LABEL = "ip=";
+    String AZURE_LABEL = "azure=";
 
     static String identityForIpTask(String ipAddress, String name) {
         return IP_LABEL + ipAddress + "/" + name;
+    }
+
+    static String identityForAzureTask(String name) {
+        return AZURE_LABEL + name;
+    }
+
+    interface Azure {
+        int DEFAULT_TIMEOUT = 18000;
+        int DEFAULT_RETRIES = 2;
     }
 
 }

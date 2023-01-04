@@ -30,10 +30,10 @@ package org.opennms.horizon.inventory.service;
 import lombok.RequiredArgsConstructor;
 import org.opennms.horizon.inventory.dto.AzureCredentialCreateDTO;
 import org.opennms.horizon.inventory.dto.AzureCredentialDTO;
-import org.opennms.horizon.inventory.dto.AzureCredentialDTO;
 import org.opennms.horizon.inventory.mapper.AzureCredentialMapper;
 import org.opennms.horizon.inventory.model.AzureCredential;
 import org.opennms.horizon.inventory.repository.AzureCredentialRepository;
+import org.opennms.horizon.inventory.service.taskset.ScannerTaskSetService;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
@@ -43,12 +43,15 @@ import java.time.LocalDateTime;
 public class AzureCredentialService {
     private final AzureCredentialMapper mapper;
     private final AzureCredentialRepository repository;
+    private final ScannerTaskSetService scannerTaskSetService;
 
     public AzureCredentialDTO createCredentials(String tenantId, AzureCredentialCreateDTO request) {
         AzureCredential credential = mapper.dtoToModel(request);
         credential.setTenantId(tenantId);
         credential.setCreateTime(LocalDateTime.now());
         credential = repository.save(credential);
+
+        scannerTaskSetService.sendAzureScannerTask(credential);
 
         return mapper.modelToDto(credential);
     }

@@ -19,6 +19,7 @@
         <module>registration</module>
         <module>icmp-plugin</module>
         <module>snmp-plugin</module>
+        <module>azure-plugin</module>
         <module>features</module>
     </modules>
 

@@ -29,6 +29,7 @@
 package org.opennms.horizon.inventory;
 
 import com.google.protobuf.Empty;
+import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
@@ -49,6 +50,7 @@ import org.opennms.horizon.grpc.heartbeat.contract.HeartbeatMessage;
 import org.opennms.horizon.inventory.dto.MonitoringLocationServiceGrpc;
 import org.opennms.horizon.inventory.dto.MonitoringSystemServiceGrpc;
 import org.opennms.horizon.inventory.dto.NodeCreateDTO;
+import org.opennms.horizon.inventory.dto.NodeIdQuery;
 import org.opennms.horizon.inventory.dto.NodeServiceGrpc;
 import org.opennms.horizon.shared.constants.GrpcConstants;
 import org.slf4j.Logger;
@@ -64,6 +66,8 @@ import java.util.concurrent.TimeUnit;
 import static com.jayway.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 
 public class InventoryCucumberTestSteps {
@@ -158,11 +162,12 @@ public class InventoryCucumberTestSteps {
     @Then("verify Monitoring location is created with location {string}")
     public void verifyMonitoringLocationIsCreatedWithLocation(String location) {
         await().pollInterval(5, TimeUnit.SECONDS)
-            .atMost(30, TimeUnit.SECONDS).until(() -> monitoringLocationStub.listLocations(Empty.newBuilder().build()).getLocationsList().size(),
-            Matchers.equalTo(1));
-        var locations = monitoringLocationStub.listLocations(Empty.newBuilder().build()).getLocationsList();
-        assertEquals(location, locations.get(0).getLocation());
-        assertEquals(tenantId, locations.get(0).getTenantId());
+            .atMost(30, TimeUnit.SECONDS).until(() ->
+                    monitoringLocationStub.getLocationByName(StringValue.newBuilder().setValue(location).build()).getLocation(),
+            Matchers.notNullValue());
+        var locationDTO = monitoringLocationStub.getLocationByName(StringValue.newBuilder().setValue(location).build());
+        assertEquals(location, locationDTO.getLocation());
+        assertEquals(tenantId, locationDTO.getTenantId());
     }
 
     private ClientInterceptor prepareGrpcHeaderInterceptor() {
@@ -187,9 +192,41 @@ public class InventoryCucumberTestSteps {
     public void verifyThatANewNodeIsCreatedWithLabelAndIpAddress(String label, String ipAddress) {
         var nodeList = nodeServiceBlockingStub.listNodes(Empty.newBuilder().build());
         Assertions.assertFalse(nodeList.getNodesList().isEmpty());
-        var node = nodeList.getNodesList().get(0);
+        var nodeOptional = nodeList.getNodesList().stream().filter(
+                nodeDTO ->
+                    nodeDTO.getNodeLabel().equals(label) &&
+                        nodeDTO.getIpInterfacesList().stream().anyMatch(ipInterfaceDTO -> ipInterfaceDTO.getIpAddress().equals(ipAddress)))
+            .findFirst();
+        assertTrue(nodeOptional.isPresent());
+        var node = nodeOptional.get();
         assertEquals(label, node.getNodeLabel());
-        assertEquals(ipAddress, node.getIpInterfacesList().get(0).getIpAddress());
     }
 
+    @Given("add a new device with label {string} and ip address {string} and location {string}")
+    public void addANewDeviceWithLabelAndIpAddressAndLocation(String label, String ipAddress, String location) {
+        var nodeDto = nodeServiceBlockingStub.createNode(NodeCreateDTO.newBuilder().setLabel(label).setLocation(location)
+            .setManagementIp(ipAddress).build());
+        assertNotNull(nodeDto);
+    }
+
+    @Then("verify that a new node is created with location {string} and ip address {string}")
+    public void verifyThatANewNodeIsCreatedWithLocationAndIpAddress(String location, String ipAddress) {
+
+        var nodeId = nodeServiceBlockingStub.getNodeIdFromQuery(NodeIdQuery.newBuilder()
+            .setIpAddress(ipAddress).setLocation(location).build());
+        assertNotNull(nodeId);
+        var node = nodeServiceBlockingStub.getNodeById(nodeId);
+        assertNotNull(node);
+    }
+
+    @Then("verify adding existing device with label {string} and ip address {string} and location {string} will fail")
+    public void verifyAddingExistingDeviceWithLabelAndIpAddressAndLocationWillFail(String label, String ipAddress, String location) {
+        try {
+            var nodeDto = nodeServiceBlockingStub.createNode(NodeCreateDTO.newBuilder().setLabel(label).setLocation(location)
+                .setManagementIp(ipAddress).build());
+            fail();
+        } catch (Exception e) {
+            
+        }
+    }
 }

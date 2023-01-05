@@ -5,8 +5,8 @@
     <CustomFeatherStepper>
       <CustomFeatherStep>Step 1 Content</CustomFeatherStep>
       <CustomFeatherStep>Step 2 Content</CustomFeatherStep>
-      <CustomFeatherStep @slideNext="callApi">Step 1 Content</CustomFeatherStep>
-      <CustomFeatherStep nextBtnText="Exit">Step 2 content</CustomFeatherStep>
+      <CustomFeatherStep @slideNext="callApi">Step 3 Content</CustomFeatherStep>
+      <CustomFeatherStep nextBtnText="Exit">Step 4 content</CustomFeatherStep>
     </CustomFeatherStepper>
   
   Optional event hooks for CustomFeatherStep:

@@ -29,16 +29,18 @@
 package listeners.factory;
 
 
+import org.opennms.horizon.grpc.telemetry.contract.TelemetryMessage;
 import org.opennms.horizon.shared.ipc.sink.api.AsyncDispatcher;
 
 import listeners.Parser;
 
 import com.codahale.metrics.MetricRegistry;
+import com.google.protobuf.Message;
 
 public interface TelemetryRegistry {
     Parser getParser(ParserDefinition parserDefinition);
 
     MetricRegistry getMetricRegistry();
 
-    AsyncDispatcher<UdpListenerMessage> getDispatcher(String queueName);
+    AsyncDispatcher<TelemetryMessage> getDispatcher(String queueName);
 }

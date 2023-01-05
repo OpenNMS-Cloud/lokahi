@@ -30,12 +30,14 @@ package parser.factory;
 
 import java.util.Objects;
 
+import org.opennms.horizon.grpc.telemetry.contract.TelemetryMessage;
 import org.opennms.horizon.shared.ipc.sink.api.AsyncDispatcher;
+
+import com.google.protobuf.Message;
 
 import listeners.Parser;
 import listeners.factory.ParserDefinition;
 import listeners.factory.TelemetryRegistry;
-import listeners.factory.UdpListenerMessage;
 import parser.IpfixTcpParser;
 
 public class IpfixTcpParserFactory implements ParserFactory {
@@ -57,7 +59,7 @@ public class IpfixTcpParserFactory implements ParserFactory {
 
     @Override
     public Parser createBean(ParserDefinition parserDefinition) {
-        final AsyncDispatcher<UdpListenerMessage> dispatcher = telemetryRegistry.getDispatcher(parserDefinition.getQueueName());
+        final AsyncDispatcher<TelemetryMessage> dispatcher = telemetryRegistry.getDispatcher(parserDefinition.getQueueName());
         return new IpfixTcpParser(parserDefinition.getFullName(), dispatcher, identity, dnsResolver, telemetryRegistry.getMetricRegistry());
     }
 }

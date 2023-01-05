@@ -24,35 +24,42 @@ package parser; /***************************************************************
  *     OpenNMS(R) Licensing <license@opennms.org>
  *     http://www.opennms.org/
  *     http://www.opennms.com/
+  location: class parser.factory.Netflow9UdpParserFactory
+
  *******************************************************************************/
 
+import org.opennms.horizon.grpc.telemetry.contract.TelemetryMessage;
+import org.opennms.horizon.minion.flows.parser.FlowSinkModule;
 import org.opennms.horizon.shared.ipc.sink.api.AsyncDispatcher;
 import org.opennms.horizon.shared.ipc.sink.api.MessageDispatcherFactory;
 
 import com.codahale.metrics.MetricRegistry;
+import com.google.protobuf.Message;
 
 import listeners.Parser;
 import listeners.factory.ParserDefinition;
 import listeners.factory.TelemetryRegistry;
-import listeners.factory.UdpListenerMessage;
 import parser.factory.Netflow9UdpParserFactory;
 
 public class TelemetryRegistryImpl implements TelemetryRegistry {
 
     private final Netflow9UdpParserFactory netflow9UdpParserFactory;
 
+
     private final MessageDispatcherFactory messageDispatcherFactory;
 
-    private final UdpListenerModule udpListenerModule;
+    private final FlowSinkModule flowSinkModule;
 
-    public TelemetryRegistryImpl(Netflow9UdpParserFactory netflow9UdpParserFactory, MessageDispatcherFactory messageDispatcherFactory, UdpListenerModule udpListenerModule) {
+    public TelemetryRegistryImpl(Netflow9UdpParserFactory netflow9UdpParserFactory,
+                                 MessageDispatcherFactory messageDispatcherFactory, FlowSinkModule flowSinkModule) {
         this.netflow9UdpParserFactory = netflow9UdpParserFactory;
         this.messageDispatcherFactory = messageDispatcherFactory;
-        this.udpListenerModule = udpListenerModule;
+        this.flowSinkModule = flowSinkModule;
     }
 
     @Override
     public Parser getParser(ParserDefinition parserDefinition) {
+        // TODO: add netflow5
         return netflow9UdpParserFactory.createBean(parserDefinition);
     }
 
@@ -62,10 +69,8 @@ public class TelemetryRegistryImpl implements TelemetryRegistry {
     }
 
     @Override
-    public AsyncDispatcher<UdpListenerMessage> getDispatcher(String queueName) {
-        // look into HeartBeatProducer:
-        // dispatcher = messageDispatcherFactory.createSyncDispatcher(new HeartbeatModule());
-        final AsyncDispatcher<UdpListenerMessage> dispatcher = messageDispatcherFactory.createAsyncDispatcher(udpListenerModule);
-        return dispatcher;
+    public AsyncDispatcher<TelemetryMessage> getDispatcher(String queueName) {
+        return messageDispatcherFactory.createAsyncDispatcher(flowSinkModule);
+
     }
 }

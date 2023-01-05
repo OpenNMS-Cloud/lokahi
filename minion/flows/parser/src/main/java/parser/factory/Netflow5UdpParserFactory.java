@@ -30,16 +30,17 @@ package parser.factory;
 
 import java.util.Objects;
 
+import org.opennms.horizon.grpc.telemetry.contract.TelemetryMessage;
+import org.opennms.horizon.minion.flows.parser.FlowSinkModule;
 import org.opennms.horizon.shared.ipc.sink.api.AsyncDispatcher;
 import org.opennms.horizon.shared.ipc.sink.api.MessageDispatcherFactory;
 
 import com.codahale.metrics.MetricRegistry;
+import com.google.protobuf.Message;
 
 import listeners.Parser;
 import listeners.factory.ParserDefinition;
-import listeners.factory.UdpListenerMessage;
 import parser.Netflow5UdpParser;
-import parser.UdpListenerModule;
 
 public class Netflow5UdpParserFactory implements ParserFactory {
 
@@ -48,16 +49,16 @@ public class Netflow5UdpParserFactory implements ParserFactory {
 
     private final DnsResolver dnsResolver;
 
-    private final UdpListenerModule udpListenerModule;
+    private final FlowSinkModule flowSinkModule;
 
     private final MessageDispatcherFactory messageDispatcherFactory;
 
 
     public Netflow5UdpParserFactory(final MessageDispatcherFactory messageDispatcherFactory, final Identity identity, final DnsResolver dnsResolver,
-                                    final UdpListenerModule udpListenerModule) {
+                                    final FlowSinkModule flowSinkModule) {
         this.identity = Objects.requireNonNull(identity);
         this.dnsResolver = Objects.requireNonNull(dnsResolver);
-        this.udpListenerModule = Objects.requireNonNull(udpListenerModule);
+        this.flowSinkModule = Objects.requireNonNull(flowSinkModule);
         this.messageDispatcherFactory = Objects.requireNonNull(messageDispatcherFactory);
     }
 
@@ -68,7 +69,7 @@ public class Netflow5UdpParserFactory implements ParserFactory {
 
     @Override
     public Parser createBean(final ParserDefinition parserDefinition) {
-        final AsyncDispatcher<UdpListenerMessage> dispatcher = messageDispatcherFactory.createAsyncDispatcher(udpListenerModule);
+        final AsyncDispatcher<TelemetryMessage> dispatcher = messageDispatcherFactory.createAsyncDispatcher(flowSinkModule);
         return new Netflow5UdpParser(parserDefinition.getFullName(), dispatcher, identity, dnsResolver, new MetricRegistry());
     }
 }

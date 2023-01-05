@@ -19,9 +19,9 @@
     <bean id="telemetryRegistry" class="parser.TelemetryRegistryImpl" >
         <argument ref="netflow9UdpParserFactory" />
         <argument ref="messageDispatcherFactory" />
-        <argument ref="udpListenerModule"/>
+        <argument ref="flowSinkModule"/>
     </bean>
-    <bean id="udpListenerModule" class="parser.UdpListenerModule" />
+    <bean id="flowSinkModule" class="org.opennms.horizon.minion.flows.parser.FlowSinkModule" />
 
 
     <!-- Netflow 9 UDP Parser Factory -->
@@ -29,7 +29,7 @@
         <argument ref="messageDispatcherFactory" />
         <argument ref="identity" />
         <argument ref="dnsResolver" />
-        <argument ref="udpListenerModule" />
+        <argument ref="flowSinkModule" />
     </bean>
     <service ref="netflow9UdpParserFactory" interface="parser.factory.ParserFactory">
     </service>

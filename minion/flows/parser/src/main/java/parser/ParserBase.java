@@ -45,6 +45,8 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import org.opennms.horizon.grpc.telemetry.contract.TelemetryMessage;
+import org.opennms.horizon.grpc.telemetry.contract.TelemetryMessageOrBuilder;
 import org.opennms.horizon.shared.ipc.sink.api.AsyncDispatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,6 +59,8 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Lists;
+import com.google.protobuf.ByteString;
+import com.google.protobuf.Message;
 import com.swrve.ratelimitedlogger.RateLimitedLog;
 
 import listeners.Parser;
@@ -93,7 +97,7 @@ public abstract class ParserBase implements Parser {
 
     private final String name;
 
-    private final AsyncDispatcher<UdpListenerMessage> dispatcher;
+    private final AsyncDispatcher<TelemetryMessage> dispatcher;
 
     private final Identity identity;
 
@@ -139,7 +143,7 @@ public abstract class ParserBase implements Parser {
 
     public ParserBase(final Protocol protocol,
                       final String name,
-                      final AsyncDispatcher<UdpListenerMessage> dispatcher,
+                      final AsyncDispatcher<TelemetryMessage> dispatcher,
                       final Identity identity,
                       final DnsResolver dnsResolver,
                       final MetricRegistry metricRegistry) {
@@ -340,10 +344,12 @@ public abstract class ParserBase implements Parser {
                         }
 
                         // Build the message to dispatch
-                        final UdpListenerMessage msg = new UdpListenerMessage(remoteAddress, ByteBuffer.wrap(flowMessage.build().toByteArray()));
+                        final TelemetryMessage telemetryMessage = TelemetryMessage.newBuilder()
+                            .setBytes(ByteString.copyFrom(flowMessage.build().toByteArray()))
+                            .build();
 
                         // Dispatch
-                        dispatcher.send(msg).whenComplete((b, exx) -> {
+                        dispatcher.send(telemetryMessage).whenComplete((b, exx) -> {
                             if (exx != null) {
                                 this.recordDispatchErrors.inc();
                                 future.completeExceptionally(exx);

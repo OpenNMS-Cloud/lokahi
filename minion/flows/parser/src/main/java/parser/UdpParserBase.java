@@ -35,12 +35,14 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+import org.opennms.horizon.grpc.telemetry.contract.TelemetryMessage;
 import org.opennms.horizon.shared.ipc.sink.api.AsyncDispatcher;
 
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.Gauge;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
+import com.google.protobuf.Message;
 
 import io.netty.buffer.ByteBuf;
 import listeners.UdpParser;
@@ -64,7 +66,7 @@ public abstract class UdpParserBase extends ParserBase implements UdpParser {
 
     public UdpParserBase(final Protocol protocol,
                          final String name,
-                         final AsyncDispatcher<UdpListenerMessage> dispatcher,
+                         final AsyncDispatcher<TelemetryMessage> dispatcher,
                         // final EventForwarder eventForwarder,
                          final Identity identity,
                          final DnsResolver dnsResolver,

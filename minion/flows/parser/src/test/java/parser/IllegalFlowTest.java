@@ -46,6 +46,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.Ignore;
+import org.opennms.horizon.grpc.telemetry.contract.TelemetryMessage;
 import org.opennms.horizon.shared.ipc.sink.api.AsyncDispatcher;
 
 import listeners.UdpListener;
@@ -55,6 +56,7 @@ import parser.factory.DnsResolver;
 import parser.factory.Identity;
 
 import com.codahale.metrics.MetricRegistry;
+import com.google.protobuf.Message;
 
 public class IllegalFlowTest {
     private final static Path FOLDER = Paths.get("src/test/resources/flows");
@@ -84,7 +86,7 @@ public class IllegalFlowTest {
 
         final Netflow9UdpParser parser = new Netflow9UdpParser("FLOW", new AsyncDispatcher<>() {
             @Override
-            public CompletableFuture<AsyncDispatcher.DispatchStatus> send(UdpListenerMessage message) {
+            public CompletableFuture<AsyncDispatcher.DispatchStatus> send(TelemetryMessage message) {
                 messagesSent.incrementAndGet();
                 return CompletableFuture.completedFuture(DispatchStatus.DISPATCHED);
             }

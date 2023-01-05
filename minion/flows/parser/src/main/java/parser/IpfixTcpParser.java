@@ -35,10 +35,12 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
+import org.opennms.horizon.grpc.telemetry.contract.TelemetryMessage;
 import org.opennms.horizon.shared.ipc.sink.api.AsyncDispatcher;
 
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.collect.Sets;
+import com.google.protobuf.Message;
 
 import io.netty.buffer.ByteBuf;
 import listeners.TcpParser;
@@ -58,7 +60,7 @@ public class IpfixTcpParser extends ParserBase implements TcpParser {
     private final Set<TcpSession> sessions = Sets.newConcurrentHashSet();
 
     public IpfixTcpParser(final String name,
-                          final AsyncDispatcher<UdpListenerMessage> dispatcher,
+                          final AsyncDispatcher<TelemetryMessage> dispatcher,
                           final Identity identity,
                           final DnsResolver dnsResolver,
                           final MetricRegistry metricRegistry) {

@@ -102,9 +102,9 @@
         </dependency>
 
         <dependency>
-            <groupId>com.jayway.awaitility</groupId>
+            <groupId>org.awaitility</groupId>
             <artifactId>awaitility</artifactId>
-            <version>1.7.0</version>
+            <version>4.1.1</version>
             <scope>compile</scope>
         </dependency>
 

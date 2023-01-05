@@ -1,6 +1,5 @@
 package org.opennms.horizon.it;
 
-import com.jayway.awaitility.Awaitility;
 import io.cucumber.java.en.Then;
 import io.restassured.RestAssured;
 import io.restassured.config.HttpClientConfig;
@@ -11,6 +10,7 @@ import io.restassured.specification.RequestSpecification;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.entity.ContentType;
 import org.apache.http.protocol.HTTP;
+import org.awaitility.Awaitility;
 import org.opennms.horizon.it.gqlmodels.GQLQuery;
 import org.opennms.horizon.it.gqlmodels.MinionData;
 import org.opennms.horizon.it.gqlmodels.querywrappers.MetricQueryResult;

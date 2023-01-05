@@ -12,6 +12,8 @@ declare module '@vue/runtime-core' {
     CtrlHighlightFocusedNodes: typeof import('./src/components/Topology/CtrlHighlightFocusedNodes.vue')['default']
     CtrlLayers: typeof import('./src/components/Topology/CtrlLayers.vue')['default']
     CtrlSemanticZoomLevel: typeof import('./src/components/Topology/CtrlSemanticZoomLevel.vue')['default']
+    CustomFeatherStep: typeof import('./src/components/Common/Stepper/CustomFeatherStep.vue')['default']
+    CustomFeatherStepper: typeof import('./src/components/Common/Stepper/CustomFeatherStepper.vue')['default']
     DetectedNodesTabContent: typeof import('./src/components/Inventory/DetectedNodesTabContent.vue')['default']
     DeviceWidget: typeof import('./src/components/Widgets/DeviceWidget.vue')['default']
     DrawerBtn: typeof import('./src/components/Topology/DrawerBtn.vue')['default']

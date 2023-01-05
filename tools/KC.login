@@ -13,12 +13,12 @@
 ##
 ########################################################################################################################
 
-HOST_PORT=localhost:9000
+HOST_PORT=localhost:8123
 REALM=opennms
 CLIENT_ID=admin-cli
 USERNAME=admin
 PASSWORD=admin
-CONTEXT=""
+CONTEXT="auth/"
 
 usage()
 {

@@ -3,7 +3,15 @@
 </template>
 
 <script setup lang="ts">
-defineEmits(['slideNext', 'slidePrev'])
+defineEmits([
+  'slideNext', 
+  'slidePrev'
+])
+
+defineProps({
+  nextBtnText: String,
+  prevBtnText: String
+})
 </script>
 
 <style scoped lang="scss">

@@ -3,10 +3,17 @@
   Usage:
 
     <CustomFeatherStepper>
-      <CustomFeatherStep @slideNext="someFn">Step 1 Content</CustomFeatherStep>
-      <CustomFeatherStep @slidePrev="someOtherFn">Step 2 content</CustomFeatherStep>
-      <CustomFeatherStep>Step 3 content</CustomFeatherStep>
+      <CustomFeatherStep @slideNext="someEvent">Step 1 Content</CustomFeatherStep>
+      <CustomFeatherStep nextBtnText="continue">Step 2 content</CustomFeatherStep>
     </CustomFeatherStepper>
+  
+  Available event hooks for CustomFeatherStep:
+  @slideNext
+  @slidePrev
+
+  Available props for CustomFeatherStep:
+  nextBtnText
+  prevBtnText
  -->
 <template>
   <div class="container">
@@ -32,12 +39,12 @@
     <div class="btns">
       <div>
         <FeatherButton primary @click="slidePrev" v-if="currentStep > 1">
-          Prev
+          {{ prevBtnText }}
         </FeatherButton>
       </div>
       <div>
-        <FeatherButton primary @click="slideNext" v-if="currentStep !== stepNumbers.length">
-          Next
+        <FeatherButton primary @click="slideNext">
+          {{ nextBtnText }}
         </FeatherButton>
       </div>
     </div>
@@ -49,13 +56,23 @@ import { render, VNode } from "vue"
 const slots = useSlots()
 const stepNumbers = ref<number[]>([])
 const currentStep = ref(1)
-let currentContent: VNode
+const currentContent = ref<VNode>()
+
+const prevBtnText = computed(() => currentContent.value?.props?.prevBtnText || 'Prev')
+const nextBtnText = computed(() => {
+  let text = 'Next'
+  if (currentStep.value === stepNumbers.value.length) text = 'Finish'
+  return currentContent.value?.props?.nextBtnText || text
+})
 
 const slideNext = () => {
   // check and use slideNext event passed from the step
-  if (currentContent.props && currentContent.props.onSlideNext) {
-    currentContent.props.onSlideNext()
+  if (currentContent.value?.props && currentContent.value?.props.onSlideNext) {
+    currentContent.value.props.onSlideNext()
   }
+
+  // if last step, don't increase step count
+  if (currentStep.value === stepNumbers.value.length) return
 
   currentStep.value++
   updateContent()
@@ -63,8 +80,8 @@ const slideNext = () => {
 
 const slidePrev = () => {
   // check and use slidePrev event passed from the step
-  if (currentContent.props && currentContent.props.onSlidePrev) {
-    currentContent.props.onSlidePrev()
+  if (currentContent.value?.props && currentContent.value?.props.onSlidePrev) {
+    currentContent.value.props.onSlidePrev()
   }
 
   currentStep.value--
@@ -75,8 +92,8 @@ const updateContent = () => {
   if (!slots.default) return
   const contentDiv = document.getElementById('content') as HTMLElement
   render(null, contentDiv) // unmount any previous VNode content
-  currentContent = slots.default()[currentStep.value - 1] // get content as VNode
-  render(currentContent, contentDiv) // render VNode
+  currentContent.value = slots.default()[currentStep.value - 1] // get content as VNode
+  render(currentContent.value, contentDiv) // render VNode
 }
 
 onMounted(() => {

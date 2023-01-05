@@ -38,12 +38,12 @@
 
     <div class="btns">
       <div>
-        <FeatherButton primary @click="slidePrev" v-if="currentStep > 1">
+        <FeatherButton primary @click="slidePrev" v-if="currentStep > 1" data-test="prev-btn">
           {{ prevBtnText }}
         </FeatherButton>
       </div>
       <div>
-        <FeatherButton primary @click="slideNext">
+        <FeatherButton primary @click="slideNext" data-test="next-btn">
           {{ nextBtnText }}
         </FeatherButton>
       </div>

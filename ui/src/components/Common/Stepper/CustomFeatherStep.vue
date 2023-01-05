@@ -13,6 +13,3 @@ defineProps({
   prevBtnText: String
 })
 </script>
-
-<style scoped lang="scss">
-</style>

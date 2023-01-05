@@ -7,12 +7,12 @@ Feature: Minion Monitoring via Echo Messages Logged in Prometheus
     Given Keycloak username in environment variable "KEYCLOAK_USERNAME"
     Given Keycloak password in environment variable "KEYCLOAK_PASSWORD"
     Given Keycloak client-id in environment variable "KEYCLOAK_CLIENT_ID"
-    Then login to Keycloak with timeout 300000ms
+    Then login to Keycloak with timeout 120000ms
 
   Scenario: Wait for at least one minion to connect from location Default
     Given At least one Minion is running with location "Default"
     # NOTE: there is redundant processing between this step and the ones that follow it
-    Then Wait for at least one minion for the given location reported by inventory with timeout 600000ms
+    Then Wait for at least one minion for the given location reported by inventory with timeout 120000ms
 
   Scenario: Verify Minion echo measurements are recorded into prometheus for a running Minion
     Given At least one Minion is running with location "Default"

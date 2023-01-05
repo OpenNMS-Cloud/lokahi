@@ -3,17 +3,19 @@
   Usage:
 
     <CustomFeatherStepper>
-      <CustomFeatherStep @slideNext="someEvent">Step 1 Content</CustomFeatherStep>
-      <CustomFeatherStep nextBtnText="continue">Step 2 content</CustomFeatherStep>
+      <CustomFeatherStep>Step 1 Content</CustomFeatherStep>
+      <CustomFeatherStep>Step 2 Content</CustomFeatherStep>
+      <CustomFeatherStep @slideNext="callApi">Step 1 Content</CustomFeatherStep>
+      <CustomFeatherStep nextBtnText="Exit">Step 2 content</CustomFeatherStep>
     </CustomFeatherStepper>
   
-  Available event hooks for CustomFeatherStep:
+  Optional event hooks for CustomFeatherStep:
   @slideNext
   @slidePrev
 
-  Available props for CustomFeatherStep:
-  nextBtnText
-  prevBtnText
+  Optional props for CustomFeatherStep:
+  nextBtnText (default 'Next')
+  prevBtnText (default 'Prev')
  -->
 <template>
   <div class="container">

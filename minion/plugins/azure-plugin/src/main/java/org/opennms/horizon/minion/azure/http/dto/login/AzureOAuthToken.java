@@ -1,4 +1,4 @@
-package org.opennms.horizon.minion.azure.http.dto;
+package org.opennms.horizon.minion.azure.http.dto.login;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;

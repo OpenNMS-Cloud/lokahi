@@ -32,16 +32,14 @@ import com.google.protobuf.Any;
 import org.opennms.azure.contract.AzureScanItem;
 import org.opennms.azure.contract.AzureScanRequest;
 import org.opennms.horizon.minion.azure.http.AzureHttpClient;
-import org.opennms.horizon.minion.azure.http.dto.AzureOAuthToken;
-import org.opennms.horizon.minion.azure.http.dto.AzureResources;
-import org.opennms.horizon.minion.azure.http.dto.AzureValue;
-import org.opennms.horizon.minion.plugin.api.Scanner;
+import org.opennms.horizon.minion.azure.http.dto.login.AzureOAuthToken;
+import org.opennms.horizon.minion.azure.http.dto.resources.AzureResources;
 import org.opennms.horizon.minion.plugin.api.AzureScannerResponse;
 import org.opennms.horizon.minion.plugin.api.AzureScannerResponseImpl;
+import org.opennms.horizon.minion.plugin.api.Scanner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
@@ -75,22 +73,15 @@ public class AzureScanner implements Scanner {
             AzureResources resources = client.getResources(token, azureScanRequest.getSubscriptionId(),
                 azureScanRequest.getResourceGroup(), azureScanRequest.getTimeout());
 
-            // getting only virtual machines for now
-            List<AzureValue> filteredResources = resources.getValue().stream()
+            List<AzureScanItem> items = resources.getValue().stream()
                 .filter(azureValue -> azureValue.getType().equalsIgnoreCase(MICROSOFT_COMPUTE_VIRTUAL_MACHINES))
-                .collect(Collectors.toList());
-
-            List<AzureScanItem> items = new LinkedList<>();
-
-            for (AzureValue resource : filteredResources) {
-
-                items.add(AzureScanItem.newBuilder()
-                    .setId(resource.getId())
-                    .setName(resource.getName())
-                    .setResourceGroup(getResourceGroup(resource.getId()))
+                .map(azureValue -> AzureScanItem.newBuilder()
+                    .setId(azureValue.getId())
+                    .setName(azureValue.getName())
+                    .setResourceGroup(getResourceGroup(azureValue.getId()))
                     .setCredentialId(azureScanRequest.getCredentialId())
-                    .build());
-            }
+                    .build())
+                .collect(Collectors.toList());
 
             future.complete(
                 AzureScannerResponseImpl.builder()

@@ -33,6 +33,8 @@ package opennms.azure;
 option java_multiple_files = true;
 option java_package = "org.opennms.azure.contract";
 
+// todo: create common credential fields into reusable message
+
 message AzureScanRequest {
   int64 credential_id = 1;
   string client_id = 2;
@@ -49,4 +51,16 @@ message AzureScanItem {
   string name = 2;
   string resourceGroup = 3;
   int64 credential_id = 4;
+}
+
+message AzureMonitorRequest {
+  string resource = 1;
+  string resource_group = 2;
+  string host = 3; // dummy in order for metrics to work (management ip)
+  string client_id = 4;
+  string client_secret = 5;
+  string subscription_id = 6;
+  string directory_id = 7;
+  int32 retries = 8;
+  int64 timeout = 9;
 }

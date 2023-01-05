@@ -31,6 +31,7 @@ public interface TaskUtils {
     interface Azure {
         int DEFAULT_TIMEOUT = 18000;
         int DEFAULT_RETRIES = 2;
+        String MONITOR_SCHEDULE = "10000";
     }
 
 }

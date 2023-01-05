@@ -30,6 +30,9 @@ package org.opennms.horizon.inventory.service.taskset;
 
 import com.google.protobuf.Any;
 import lombok.RequiredArgsConstructor;
+import org.opennms.azure.contract.AzureMonitorRequest;
+import org.opennms.azure.contract.AzureScanItem;
+import org.opennms.horizon.inventory.model.AzureCredential;
 import org.opennms.horizon.inventory.model.IpInterface;
 import org.opennms.icmp.contract.IcmpMonitorRequest;
 import org.opennms.snmp.contract.SnmpMonitorRequest;
@@ -42,7 +45,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
+import java.util.List;
 
+import static org.opennms.horizon.inventory.service.taskset.TaskUtils.identityForAzureTask;
 import static org.opennms.horizon.inventory.service.taskset.TaskUtils.identityForIpTask;
 
 @Component
@@ -60,6 +65,10 @@ public class MonitorTaskSetService {
         if (task != null) {
             taskSetPublisher.publishNewTasks(tenantId, location, Arrays.asList(task));
         }
+    }
+
+    public void sendMonitorTasks(String tenantId, String location, List<TaskDefinition> tasks) {
+        taskSetPublisher.publishNewTasks(tenantId, location, tasks);
     }
 
     private TaskDefinition addMonitorTask(MonitorType monitorType, IpInterface ipInterface, long nodeId) {
@@ -118,6 +127,34 @@ public class MonitorTaskSetService {
             taskDefinition = builder.build();
         }
         return taskDefinition;
+    }
+
+    public TaskDefinition addAzureMonitorTask(AzureCredential credential, AzureScanItem scanItem, String ipAddress, long nodeId) {
+
+
+        Any configuration =
+            Any.pack(AzureMonitorRequest.newBuilder()
+                .setResource(scanItem.getName())
+                .setResourceGroup(scanItem.getResourceGroup())
+                .setHost(ipAddress) // dummy address to allow metrics to be added
+                .setClientId(credential.getClientId())
+                .setClientSecret(credential.getClientSecret())
+                .setSubscriptionId(credential.getSubscriptionId())
+                .setDirectoryId(credential.getDirectoryId())
+                .setTimeout(TaskUtils.Azure.DEFAULT_TIMEOUT)
+                .setRetries(TaskUtils.Azure.DEFAULT_RETRIES)
+                .build());
+
+        String name = String.join("-", "azure", "monitor", scanItem.getId());
+        String taskId = identityForAzureTask(name);
+        return TaskDefinition.newBuilder()
+            .setType(TaskType.MONITOR)
+            .setPluginName("AZUREMonitor")
+            .setNodeId(nodeId)
+            .setId(taskId)
+            .setConfiguration(configuration)
+            .setSchedule(TaskUtils.Azure.MONITOR_SCHEDULE)
+            .build();
     }
 
 }

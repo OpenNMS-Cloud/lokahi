@@ -2,8 +2,9 @@ package org.opennms.horizon.minion.azure.http;
 
 import com.google.common.net.HttpHeaders;
 import com.google.gson.Gson;
-import org.opennms.horizon.minion.azure.http.dto.AzureOAuthToken;
-import org.opennms.horizon.minion.azure.http.dto.AzureResources;
+import org.opennms.horizon.minion.azure.http.dto.instanceview.AzureInstanceView;
+import org.opennms.horizon.minion.azure.http.dto.login.AzureOAuthToken;
+import org.opennms.horizon.minion.azure.http.dto.resources.AzureResources;
 
 import java.io.IOException;
 import java.net.URI;
@@ -28,6 +29,7 @@ public class AzureHttpClient {
      */
     private static final String OAUTH2_TOKEN_ENDPOINT = "/%s/oauth2/token";
     private static final String RESOURCES_ENDPOINT = "/subscriptions/%s/resourceGroups/%s/resources";
+    private static final String INSTANCE_VIEW_ENDPOINT = "/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Compute/virtualMachines/%s/InstanceView";
 
     /*
      * Parameters
@@ -37,11 +39,14 @@ public class AzureHttpClient {
     private static final String LOGIN_CLIENT_SECRET_PARAM = "client_secret=";
     private static final String LOGIN_RESOURCE_PARAM = "resource=" + MANAGEMENT_BASE_URL + "/";
 
+    private static final String API_VERSION = "2021-04-01"; // todo: get latest version and test
+    private static final String API_VERSION_PARAM = "?api-version=" +  API_VERSION;
+    private static final String PARAMETER_DELIMITER = "&";
+
     /*
      * Misc
      */
     private static final String APPLICATION_FORM_URLENCODED_VALUE = "application/x-www-form-urlencoded";
-    private static final String PARAMETER_DELIMITER = "&";
     private static final int STATUS_CODE_SUCCESSFUL = 200;
 
     private final HttpClient client;
@@ -60,7 +65,7 @@ public class AzureHttpClient {
         parameters.add(LOGIN_RESOURCE_PARAM);
 
         HttpRequest request = HttpRequest.newBuilder()
-            .uri(URI.create(String.format(LOGIN_BASE_URL + OAUTH2_TOKEN_ENDPOINT, directoryId)))
+            .uri(URI.create(String.format(LOGIN_BASE_URL + OAUTH2_TOKEN_ENDPOINT + API_VERSION_PARAM, directoryId)))
             .timeout(Duration.of(timeout, ChronoUnit.MILLIS))
             .header(HttpHeaders.CONTENT_TYPE, APPLICATION_FORM_URLENCODED_VALUE)
             .POST(HttpRequest.BodyPublishers.ofString(String.join(PARAMETER_DELIMITER, parameters)))
@@ -70,8 +75,13 @@ public class AzureHttpClient {
     }
 
     public AzureResources getResources(AzureOAuthToken token, String subscriptionId, String resourceGroup, long timeout) throws AzureHttpException {
-        String url = String.format(RESOURCES_ENDPOINT + "?api-version=2021-04-01", subscriptionId, resourceGroup);
+        String url = String.format(RESOURCES_ENDPOINT + API_VERSION_PARAM, subscriptionId, resourceGroup);
         return get(token, url, timeout, AzureResources.class);
+    }
+
+    public AzureInstanceView getInstanceView(AzureOAuthToken token, String subscriptionId, String resourceGroup, String resourceName, long timeout) throws AzureHttpException {
+        String url = String.format(INSTANCE_VIEW_ENDPOINT  + API_VERSION_PARAM, subscriptionId, resourceGroup, resourceName);
+        return get(token, url, timeout, AzureInstanceView.class);
     }
 
     public <T> T get(AzureOAuthToken token, String endpoint, long timeout, Class<T> clazz) throws AzureHttpException {

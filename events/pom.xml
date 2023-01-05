@@ -61,6 +61,9 @@
                          This disables jib by default, which allows you to run jib goals on this parent pom without
                          specifying a submodule. Set skip=false on submodules that need jib. -->
                     <skip>true</skip>
+                    <to>
+                        <image>${docker.image.name}:${docker.image.tag}</image>
+                    </to>
                 </configuration>
             </plugin>
         </plugins>

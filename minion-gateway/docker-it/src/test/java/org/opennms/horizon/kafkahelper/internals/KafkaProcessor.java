@@ -69,7 +69,20 @@ public class KafkaProcessor<K,V> implements Runnable {
                 }
             } catch (Exception exc) {
                 LOG.error("Error reading records from kafka", exc);
+                delay();
             }
+        }
+    }
+
+//========================================
+// Internals
+//----------------------------------------
+
+    private void delay() {
+        try {
+            Thread.sleep(100);
+        } catch (InterruptedException interruptedException) {
+            LOG.debug("delay interrupted", interruptedException);
         }
     }
 }

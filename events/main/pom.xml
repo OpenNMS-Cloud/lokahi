@@ -14,6 +14,10 @@
     <name>OpenNMS Horizon Stream :: Events :: Main</name>
     <version>0.1.0-SNAPSHOT</version>
     <description>Events Service</description>
+    <properties>
+        <docker.image.name>opennms/horizon-stream-events</docker.image.name>
+        <docker.image.tag>local</docker.image.tag>
+    </properties>
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -132,9 +136,13 @@
             <plugin>
                 <groupId>com.google.cloud.tools</groupId>
                 <artifactId>jib-maven-plugin</artifactId>
+                <version>${jib.version}</version>
                 <configuration>
                     <!-- override skip=false from minion-gateway parent so jib executes here -->
                     <skip>false</skip>
+                    <to>
+                        <image>${docker.image.name}:${docker.image.tag}</image>
+                    </to>
                 </configuration>
             </plugin>
         </plugins>

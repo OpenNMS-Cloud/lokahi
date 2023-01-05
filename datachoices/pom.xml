@@ -13,6 +13,10 @@
     <artifactId>datachoices</artifactId>
     <name>OpenNMS Horizon :: DataChoices</name>
     <description>datachoices</description>
+    <properties>
+        <docker.image.name>opennms/horizon-stream-datachoices</docker.image.name>
+        <docker.image.tag>local</docker.image.tag>
+    </properties>
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -263,6 +267,11 @@
                 <groupId>com.google.cloud.tools</groupId>
                 <artifactId>jib-maven-plugin</artifactId>
                 <version>${jib.version}</version>
+                <configuration>
+                    <to>
+                        <image>${docker.image.name}:${docker.image.tag}</image>
+                    </to>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

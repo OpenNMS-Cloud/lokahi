@@ -25,7 +25,7 @@ grpc:
 
 kafka:
   traps-topic: "traps"
-  events-topic: "events-proto"
+  events-topic: "events"
   internal-topic: "internal-event"
 
 keycloak:

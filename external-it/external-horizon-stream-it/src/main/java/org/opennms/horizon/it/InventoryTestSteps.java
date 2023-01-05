@@ -1,7 +1,5 @@
 package org.opennms.horizon.it;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.jayway.awaitility.Awaitility;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.restassured.RestAssured;
@@ -12,6 +10,7 @@ import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 import org.apache.http.entity.ContentType;
 import org.apache.http.protocol.HTTP;
+import org.awaitility.Awaitility;
 import org.junit.Assert;
 import org.opennms.horizon.it.gqlmodels.querywrappers.FindAllMinionsQueryResult;
 import org.opennms.horizon.it.gqlmodels.GQLQuery;

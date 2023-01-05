@@ -1,9 +1,9 @@
 package org.opennms.horizon.it;
 
-import com.jayway.awaitility.Awaitility;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.restassured.response.Response;
+import org.awaitility.Awaitility;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.KeycloakBuilder;

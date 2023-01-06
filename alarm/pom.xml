@@ -234,14 +234,18 @@
                 <artifactId>jib-maven-plugin</artifactId>
                 <configuration>
                     <skip>${skipJib}</skip>
-                    <from>
-                        <image>openjdk:11</image>
-                    </from>
                     <to>
                         <image>${docker.image.name}:${docker.image.tag}</image>
                     </to>
                     <container>
                         <creationTime>USE_CURRENT_TIMESTAMP</creationTime>
+                        <jvmFlags>
+                            <jvmFlag>--add-opens=java.base/java.util=ALL-UNNAMED</jvmFlag>
+                            <jvmFlag>--add-opens=java.base/java.lang=ALL-UNNAMED</jvmFlag>
+                            <jvmFlag>--add-opens=java.base/java.lang.reflect=ALL-UNNAMED</jvmFlag>
+                            <jvmFlag>--add-opens=java.base/java.text=ALL-UNNAMED</jvmFlag>
+                            <jvmFlag>--add-opens=java.desktop/java.awt.font=ALL-UNNAMED</jvmFlag>
+                        </jvmFlags>
                     </container>
                 </configuration>
                 <executions>
@@ -280,7 +284,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
-                <version>3.0.0-M5</version>
+                <version>3.0.0-M7</version>
                 <executions>
                     <execution>
                         <id>horizon-integration-test</id>

@@ -31,7 +31,7 @@ runs:
         cd ${{ inputs.dir-location }}
 
         ###--- kubectl --context kind-kind -n hs-instance port-forward --pod-running-timeout 1s services/ingress-nginx-controller 8123:80 &
-        kubectl log -f -l appdomain=opennms &
+        kubectl logs -f -l appdomain=opennms &
 
         mvn install
         INGRESS_BASE_URL=https://onmshs

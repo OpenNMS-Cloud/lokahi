@@ -33,78 +33,45 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.junit.Rule;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.keycloak.adapters.KeycloakDeployment;
 import org.keycloak.common.VerificationException;
 import org.opennms.horizon.inventory.dto.IdList;
 import org.opennms.horizon.inventory.dto.MonitoringLocationDTO;
 import org.opennms.horizon.inventory.dto.MonitoringLocationList;
 import org.opennms.horizon.inventory.dto.MonitoringLocationServiceGrpc;
 import org.opennms.horizon.inventory.service.MonitoringLocationService;
-import org.opennms.horizon.shared.constants.GrpcConstants;
 
 import com.google.protobuf.Empty;
 import com.google.protobuf.Int64Value;
 
 import io.grpc.Metadata;
-import io.grpc.Server;
 import io.grpc.ServerCall;
 import io.grpc.ServerCallHandler;
-import io.grpc.ServerInterceptors;
 import io.grpc.inprocess.InProcessChannelBuilder;
-import io.grpc.inprocess.InProcessServerBuilder;
 import io.grpc.stub.MetadataUtils;
-import io.grpc.testing.GrpcCleanupRule;
-import lombok.extern.slf4j.Slf4j;
 
 //This is an example of gRPC integration tests underline mock services.
-@Slf4j
-public class LocationGrpcTest {
-    @Rule
-    public static final GrpcCleanupRule grpcCleanup = new GrpcCleanupRule();
-    private static MonitoringLocationServiceGrpc.MonitoringLocationServiceBlockingStub stub;
-    private static MonitoringLocationService mockLocationService;
-    private static InventoryServerInterceptor spyInterceptor;
-
-    private final String tenantId = "test-tenant";
-    private final String authHeader = "Bearer esgs12345";
-
+public class LocationGrpcTest extends AbstractGrpcUnitTest {
+    private MonitoringLocationServiceGrpc.MonitoringLocationServiceBlockingStub stub;
+    private MonitoringLocationService mockLocationService;
     private MonitoringLocationDTO location1, location2;
 
-
-
-    @BeforeAll
-    public static void startServer() throws IOException {
-        TenantLookup tenantLookup = new GrpcTenantLookupImpl();
-        mockLocationService = mock(MonitoringLocationService.class);
-        spyInterceptor = spy(new InventoryServerInterceptor(mock(KeycloakDeployment.class)));
-        MonitoringLocationGrpcService grpcService = new MonitoringLocationGrpcService(mockLocationService, tenantLookup);
-        String serverName = InProcessServerBuilder.generateName();
-        Server server = InProcessServerBuilder.forName(serverName)
-            .addService(ServerInterceptors.intercept(grpcService, spyInterceptor)).directExecutor().build();
-        server.start();
-        grpcCleanup.register(server);
-        log.info("Server {} was started.", serverName);
-        stub = MonitoringLocationServiceGrpc.newBlockingStub(grpcCleanup.register(InProcessChannelBuilder.forName(serverName).directExecutor().build()));
-    }
-
     @BeforeEach
-    public void prepareTest() throws VerificationException {
-        doReturn(Optional.of(tenantId)).when(spyInterceptor).verifyAccessToken(authHeader);
+    public void prepareTest() throws VerificationException, IOException {
+        mockLocationService = mock(MonitoringLocationService.class);
+        MonitoringLocationGrpcService grpcService = new MonitoringLocationGrpcService(mockLocationService, tenantLookup);
+        startServer(grpcService);
+        stub = MonitoringLocationServiceGrpc.newBlockingStub(grpCleanup.register(InProcessChannelBuilder.forName(serverName).directExecutor().build()));
         location1 = MonitoringLocationDTO.newBuilder().build();
         location2 = MonitoringLocationDTO.newBuilder().build();
     }
@@ -120,9 +87,7 @@ public class LocationGrpcTest {
     @Test
     void testListLocations() throws VerificationException {
         doReturn(Arrays.asList(location1, location2)).when(mockLocationService).findByTenantId(tenantId);
-        Metadata headers = new Metadata();
-        headers.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, authHeader);
-        MonitoringLocationList result = stub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(headers)).listLocations(Empty.newBuilder().build());
+        MonitoringLocationList result = stub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createHeaders())).listLocations(Empty.newBuilder().build());
         assertThat(result.getLocationsList().size()).isEqualTo(2);
         verify(mockLocationService).findByTenantId(tenantId);
         verify(spyInterceptor).verifyAccessToken(authHeader);
@@ -133,9 +98,7 @@ public class LocationGrpcTest {
     void testListLocationsByIds() throws VerificationException {
         List<Long> ids = Arrays.asList(1L, 2L);
         doReturn(Arrays.asList(location1, location2)).when(mockLocationService).findByLocationIds(ids);
-        Metadata headers = new Metadata();
-        headers.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, authHeader);
-        MonitoringLocationList result = stub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(headers)).listLocationsByIds(IdList.newBuilder().addAllIds(ids
+        MonitoringLocationList result = stub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createHeaders())).listLocationsByIds(IdList.newBuilder().addAllIds(ids
             .stream().map(Int64Value::of).collect(Collectors.toList())).build());
         assertThat(result.getLocationsList().size()).isEqualTo(2);
         verify(mockLocationService).findByLocationIds(ids);

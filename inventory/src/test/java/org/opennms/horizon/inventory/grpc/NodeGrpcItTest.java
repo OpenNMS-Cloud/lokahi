@@ -28,21 +28,25 @@
 
 package org.opennms.horizon.inventory.grpc;
 
-import com.google.protobuf.Empty;
-import com.google.protobuf.Int64Value;
-import com.google.rpc.Code;
-import com.google.rpc.Status;
-import com.vladmihalcea.hibernate.type.basic.Inet;
-import io.grpc.Metadata;
-import io.grpc.ServerCall;
-import io.grpc.ServerCallHandler;
-import io.grpc.StatusRuntimeException;
-import io.grpc.protobuf.StatusProto;
-import io.grpc.stub.MetadataUtils;
+import static com.jayway.awaitility.Awaitility.await;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.internal.verification.VerificationModeFactory.times;
+
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
+
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -65,20 +69,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 
-import java.io.IOException;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.TimeUnit;
+import com.google.protobuf.Empty;
+import com.google.protobuf.Int64Value;
+import com.google.rpc.Code;
+import com.google.rpc.Status;
+import com.vladmihalcea.hibernate.type.basic.Inet;
 
-import static com.jayway.awaitility.Awaitility.await;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.internal.verification.VerificationModeFactory.times;
+import io.grpc.Metadata;
+import io.grpc.ServerCall;
+import io.grpc.ServerCallHandler;
+import io.grpc.StatusRuntimeException;
+import io.grpc.protobuf.StatusProto;
+import io.grpc.stub.MetadataUtils;
 
 @SpringBootTest
 @ContextConfiguration(initializers = {SpringContextTestInitializer.class})
@@ -149,6 +151,22 @@ class NodeGrpcItTest extends GrpcTestBase {
     }
 
     @Test
+    void testCreateNodeWithBadIp() throws VerificationException {
+        NodeCreateDTO createDTO = NodeCreateDTO.newBuilder()
+            .setLocation("location")
+            .setLabel("test-node")
+            .setManagementIp("invalid ip")
+            .build();
+        StatusRuntimeException exception = assertThrows(StatusRuntimeException.class, () -> serviceStub
+            .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).createNode(createDTO));
+        Status status = StatusProto.fromThrowable(exception);
+        assertThat(status.getCode()).isEqualTo(Code.INVALID_ARGUMENT_VALUE);
+        assertEquals(0, testGrpcService.getTimesCalled().intValue());
+        verify(spyInterceptor).verifyAccessToken(authHeader);
+        verify(spyInterceptor).interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));
+    }
+
+    @Test
     void testCreateNodeExistingIpAddress() throws Exception {
         String location = "location";
         String ip = "127.0.0.1";
@@ -161,7 +179,7 @@ class NodeGrpcItTest extends GrpcTestBase {
             .setManagementIp(ip)
             .build();
 
-        StatusRuntimeException exception = Assertions.assertThrows(StatusRuntimeException.class, () -> serviceStub
+        StatusRuntimeException exception = assertThrows(StatusRuntimeException.class, () -> serviceStub
             .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).createNode(createDTO));
         Status status = StatusProto.fromThrowable(exception);
         assertThat(status.getCode()).isEqualTo(Code.ALREADY_EXISTS_VALUE);
@@ -300,7 +318,7 @@ class NodeGrpcItTest extends GrpcTestBase {
             .setManagementIp("127.0.0.1")
             .build();
 
-        StatusRuntimeException exception = Assertions.assertThrows(StatusRuntimeException.class, () -> serviceStub
+        StatusRuntimeException exception = assertThrows(StatusRuntimeException.class, () -> serviceStub
             .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(headerWithoutTenant))).createNode(createDTO));
         Status status = StatusProto.fromThrowable(exception);
         assertThat(status.getCode()).isEqualTo(Code.UNAUTHENTICATED_VALUE);
@@ -320,7 +338,7 @@ class NodeGrpcItTest extends GrpcTestBase {
             .setManagementIp("BAD")
             .build();
 
-        StatusRuntimeException exception = Assertions.assertThrows(StatusRuntimeException.class, () -> serviceStub
+        StatusRuntimeException exception = assertThrows(StatusRuntimeException.class, () -> serviceStub
             .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).createNode(createDTO));
         Status status = StatusProto.fromThrowable(exception);
         assertThat(status.getCode()).isEqualTo(Code.INVALID_ARGUMENT_VALUE);
@@ -367,7 +385,7 @@ class NodeGrpcItTest extends GrpcTestBase {
 
     @Test
     void testDeleteNodeNotFound() throws VerificationException {
-        StatusRuntimeException exception = Assertions.assertThrows(StatusRuntimeException.class, () -> serviceStub
+        StatusRuntimeException exception = assertThrows(StatusRuntimeException.class, () -> serviceStub
             .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).deleteNode(Int64Value.of(100L)));
         Status status = StatusProto.fromThrowable(exception);
         assertThat(status.getCode()).isEqualTo(Code.NOT_FOUND_VALUE);

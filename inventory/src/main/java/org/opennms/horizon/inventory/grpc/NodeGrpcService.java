@@ -158,11 +158,17 @@ public class NodeGrpcService extends NodeServiceGrpc.NodeServiceImplBase {
             .map(tenantId -> nodeService.getByIdAndTenantId(request.getValue(), tenantId))
             .orElseThrow();
         node.ifPresentOrElse(nodeDTO -> {
+            try {
                 nodeService.deleteNode(nodeDTO.getId());
                 responseObserver.onNext(BoolValue.newBuilder().setValue(true).build());
                 responseObserver.onCompleted();
-            },
-            () -> responseObserver.onError(StatusProto.toStatusRuntimeException(createStatusNotExits(request.getValue())))
+            } catch (Exception e) {
+                log.error("Error while deleting node with ID {}", request.getValue(), e);
+                Status status = Status.newBuilder()
+                    .setCode(Code.INTERNAL_VALUE)
+                    .setMessage("Error while deleting node with ID " + request.getValue()).build();
+                responseObserver.onError(StatusProto.toStatusRuntimeException(status));
+            }}, () -> responseObserver.onError(StatusProto.toStatusRuntimeException(createStatusNotExits(request.getValue())))
         );
     }
 

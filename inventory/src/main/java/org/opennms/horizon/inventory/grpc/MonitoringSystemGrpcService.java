@@ -47,7 +47,9 @@ import io.grpc.Context;
 import io.grpc.protobuf.StatusProto;
 import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class MonitoringSystemGrpcService extends MonitoringSystemServiceGrpc.MonitoringSystemServiceImplBase {
@@ -83,10 +85,17 @@ public class MonitoringSystemGrpcService extends MonitoringSystemServiceGrpc.Mon
             .map(tenantId -> service.findBySystemId(request.getValue(), tenantId))
             .orElseThrow();
         monitoringSystem.ifPresentOrElse(system -> {
-            service.deleteMonitoringSystem(system.getId());
-            responseObserver.onNext(BoolValue.newBuilder().setValue(true).build());
-            responseObserver.onCompleted();
-        }, () -> responseObserver.onError(StatusProto.toStatusRuntimeException(createStatusNotExist(request.getValue())))
+            try {
+                service.deleteMonitoringSystem(system.getId());
+                responseObserver.onNext(BoolValue.newBuilder().setValue(true).build());
+                responseObserver.onCompleted();
+            } catch (Exception e) {
+                log.error("Error while deleting monitoring system with systemId {}", system.getSystemId(), e);
+                Status status = Status.newBuilder()
+                    .setCode(Code.INTERNAL_VALUE)
+                    .setMessage("Error while deleting monitoring system with systemId " + system.getSystemId()).build();
+                responseObserver.onError(StatusProto.toStatusRuntimeException(status));
+            }}, () -> responseObserver.onError(StatusProto.toStatusRuntimeException(createStatusNotExist(request.getValue())))
         );
     }
 

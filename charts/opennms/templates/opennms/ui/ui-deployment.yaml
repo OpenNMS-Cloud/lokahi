@@ -16,6 +16,7 @@ spec:
   template:
     metadata:
       labels:
+        appdomain: opennms
         app: {{ .Values.OpenNMS.UI.ServiceName }}
     spec:
       {{- if .Values.NodeRestrictions.Enabled }}

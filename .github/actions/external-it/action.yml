@@ -32,7 +32,7 @@ runs:
 
         mvn install
         INGRESS_BASE_URL=http://localhost:8123
-        KEYCLOAK_BASE_URL=https://onmshs/auth
+        KEYCLOAK_BASE_URL=http://localhost:8123/auth
         KEYCLOAK_REALM=opennms
         KEYCLOAK_USERNAME=admin
         KEYCLOAK_PASSWORD=admin

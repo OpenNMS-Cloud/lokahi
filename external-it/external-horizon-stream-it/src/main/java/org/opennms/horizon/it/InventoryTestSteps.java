@@ -153,7 +153,7 @@ public class InventoryTestSteps {
         FindAllMinionsQueryResult findAllMinionsQueryResult = commonQueryMinions();
         List<MinionData> filtered = commonFilterMinionsAtLocation(findAllMinionsQueryResult);
 
-        LOG.debug("MINIONS for location: count={}; location={}", minionsAtLocation.size(), minionLocation);
+        LOG.debug("MINIONS for location: count={}; location={}", filtered.size(), minionLocation);
 
         return ( ! filtered.isEmpty() );
     }

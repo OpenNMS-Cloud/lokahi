@@ -1,17 +1,20 @@
-package org.opennms.horizon.minion.azure.http.dto.resources;
+package org.opennms.horizon.shared.azure.http.dto.instanceview;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Getter
 @Setter
-public class AzureSku {
+public class AzureDisk {
     @SerializedName("name")
     @Expose
     private String name;
-    @SerializedName("tier")
+    @SerializedName("statuses")
     @Expose
-    private String tier;
+    private List<AzureStatus> statuses = new ArrayList<>();
 }

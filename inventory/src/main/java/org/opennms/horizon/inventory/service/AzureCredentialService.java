@@ -30,23 +30,38 @@ package org.opennms.horizon.inventory.service;
 import lombok.RequiredArgsConstructor;
 import org.opennms.horizon.inventory.dto.AzureCredentialCreateDTO;
 import org.opennms.horizon.inventory.dto.AzureCredentialDTO;
+import org.opennms.horizon.inventory.exception.InventoryRuntimeException;
 import org.opennms.horizon.inventory.mapper.AzureCredentialMapper;
 import org.opennms.horizon.inventory.model.AzureCredential;
 import org.opennms.horizon.inventory.repository.AzureCredentialRepository;
 import org.opennms.horizon.inventory.service.taskset.ScannerTaskSetService;
+import org.opennms.horizon.inventory.service.taskset.TaskUtils;
+import org.opennms.horizon.shared.azure.http.AzureHttpClient;
+import org.opennms.horizon.shared.azure.http.AzureHttpException;
+import org.opennms.horizon.shared.azure.http.dto.login.AzureOAuthToken;
+import org.opennms.horizon.shared.azure.http.dto.resourcegroup.AzureResourceGroups;
+import org.opennms.horizon.shared.azure.http.dto.resourcegroup.AzureValue;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
 public class AzureCredentialService {
+    private final AzureHttpClient client;
     private final AzureCredentialMapper mapper;
     private final AzureCredentialRepository repository;
     private final ScannerTaskSetService scannerTaskSetService;
 
     public AzureCredentialDTO createCredentials(String tenantId, AzureCredentialCreateDTO request) {
+        List<String> resourceGroups = getResourceGroups(request);
+
         AzureCredential credential = mapper.dtoToModel(request);
+        credential.setResourceGroup(String.join(",", resourceGroups)); //todo: add 1-to-many relationship
         credential.setTenantId(tenantId);
         credential.setCreateTime(LocalDateTime.now());
         credential = repository.save(credential);
@@ -54,5 +69,30 @@ public class AzureCredentialService {
         scannerTaskSetService.sendAzureScannerTask(credential);
 
         return mapper.modelToDto(credential);
+    }
+
+    private List<String> getResourceGroups(AzureCredentialCreateDTO request) {
+        AzureOAuthToken token = login(request);
+
+        try {
+            AzureResourceGroups resourceGroups = client.getResourceGroups(token,
+                request.getSubscriptionId(), TaskUtils.Azure.DEFAULT_TIMEOUT);
+
+            return resourceGroups.getValue().stream()
+                .map(AzureValue::getName)
+                .collect(Collectors.toList());
+
+        } catch (AzureHttpException e) {
+            throw new InventoryRuntimeException("Failed to get resource groups for subscription", e);
+        }
+    }
+
+    private AzureOAuthToken login(AzureCredentialCreateDTO request) {
+        try {
+            return client.login(request.getDirectoryId(),
+                request.getClientId(), request.getClientSecret(), TaskUtils.Azure.DEFAULT_TIMEOUT);
+        } catch (AzureHttpException e) {
+            throw new InventoryRuntimeException("Failed to login with azure credentials", e);
+        }
     }
 }

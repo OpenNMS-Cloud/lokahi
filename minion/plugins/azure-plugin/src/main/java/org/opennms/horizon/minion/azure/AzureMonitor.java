@@ -2,14 +2,14 @@ package org.opennms.horizon.minion.azure;
 
 import com.google.protobuf.Any;
 import org.opennms.azure.contract.AzureMonitorRequest;
-import org.opennms.horizon.minion.azure.http.AzureHttpClient;
-import org.opennms.horizon.minion.azure.http.dto.instanceview.AzureInstanceView;
-import org.opennms.horizon.minion.azure.http.dto.instanceview.AzureStatus;
-import org.opennms.horizon.minion.azure.http.dto.login.AzureOAuthToken;
 import org.opennms.horizon.minion.plugin.api.AbstractServiceMonitor;
 import org.opennms.horizon.minion.plugin.api.MonitoredService;
 import org.opennms.horizon.minion.plugin.api.ServiceMonitorResponse;
 import org.opennms.horizon.minion.plugin.api.ServiceMonitorResponseImpl;
+import org.opennms.horizon.shared.azure.http.AzureHttpClient;
+import org.opennms.horizon.shared.azure.http.dto.instanceview.AzureInstanceView;
+import org.opennms.horizon.shared.azure.http.dto.instanceview.AzureStatus;
+import org.opennms.horizon.shared.azure.http.dto.login.AzureOAuthToken;
 import org.opennms.taskset.contract.MonitorType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,17 +36,15 @@ public class AzureMonitor extends AbstractServiceMonitor {
                 throw new IllegalArgumentException("configuration must be an AzureMonitorRequest; type-url=" + config.getTypeUrl());
             }
 
-            AzureMonitorRequest azureMonitorRequest = config.unpack(AzureMonitorRequest.class);
+            AzureMonitorRequest request = config.unpack(AzureMonitorRequest.class);
 
-            AzureOAuthToken token = client.login(azureMonitorRequest.getDirectoryId(),
-                azureMonitorRequest.getClientId(),
-                azureMonitorRequest.getClientSecret(),
-                azureMonitorRequest.getTimeout());
+            AzureOAuthToken token = client.login(request.getDirectoryId(),
+                request.getClientId(), request.getClientSecret(), request.getTimeout());
 
             long startMs = System.currentTimeMillis();
 
-            AzureInstanceView instanceView = client.getInstanceView(token, azureMonitorRequest.getSubscriptionId(),
-                azureMonitorRequest.getResourceGroup(), azureMonitorRequest.getResource(), azureMonitorRequest.getTimeout());
+            AzureInstanceView instanceView = client.getInstanceView(token, request.getSubscriptionId(),
+                request.getResourceGroup(), request.getResource(), request.getTimeout());
 
             ServiceMonitorResponse.Status status = getInstanceStatus(instanceView);
 
@@ -57,7 +55,7 @@ public class AzureMonitor extends AbstractServiceMonitor {
                         .status(status)
                         .responseTime(System.currentTimeMillis() - startMs)
                         .nodeId(svc.getNodeId())
-                        .ipAddress(azureMonitorRequest.getHost())
+                        .ipAddress(request.getHost())
                         .build()
                 );
             } else {
@@ -66,7 +64,7 @@ public class AzureMonitor extends AbstractServiceMonitor {
                         .monitorType(MonitorType.ICMP)
                         .status(status)
                         .nodeId(svc.getNodeId())
-                        .ipAddress(azureMonitorRequest.getHost())
+                        .ipAddress(request.getHost())
                         .build()
                 );
             }

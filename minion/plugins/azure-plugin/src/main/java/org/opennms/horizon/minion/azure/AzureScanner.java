@@ -31,15 +31,16 @@ package org.opennms.horizon.minion.azure;
 import com.google.protobuf.Any;
 import org.opennms.azure.contract.AzureScanItem;
 import org.opennms.azure.contract.AzureScanRequest;
-import org.opennms.horizon.minion.azure.http.AzureHttpClient;
-import org.opennms.horizon.minion.azure.http.dto.login.AzureOAuthToken;
-import org.opennms.horizon.minion.azure.http.dto.resources.AzureResources;
 import org.opennms.horizon.minion.plugin.api.AzureScannerResponse;
 import org.opennms.horizon.minion.plugin.api.AzureScannerResponseImpl;
 import org.opennms.horizon.minion.plugin.api.Scanner;
+import org.opennms.horizon.shared.azure.http.AzureHttpClient;
+import org.opennms.horizon.shared.azure.http.dto.login.AzureOAuthToken;
+import org.opennms.horizon.shared.azure.http.dto.resources.AzureResources;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
@@ -63,29 +64,34 @@ public class AzureScanner implements Scanner {
                 throw new IllegalArgumentException("configuration must be an AzureScanRequest; type-url=" + config.getTypeUrl());
             }
 
-            AzureScanRequest azureScanRequest = config.unpack(AzureScanRequest.class);
+            AzureScanRequest request = config.unpack(AzureScanRequest.class);
 
-            AzureOAuthToken token = client.login(azureScanRequest.getDirectoryId(),
-                azureScanRequest.getClientId(),
-                azureScanRequest.getClientSecret(),
-                azureScanRequest.getTimeout());
+            AzureOAuthToken token = client.login(request.getDirectoryId(),
+                request.getClientId(), request.getClientSecret(), request.getTimeout());
 
-            AzureResources resources = client.getResources(token, azureScanRequest.getSubscriptionId(),
-                azureScanRequest.getResourceGroup(), azureScanRequest.getTimeout());
+            List<AzureScanItem> scannedItems = new LinkedList<>();
 
-            List<AzureScanItem> items = resources.getValue().stream()
-                .filter(azureValue -> azureValue.getType().equalsIgnoreCase(MICROSOFT_COMPUTE_VIRTUAL_MACHINES))
-                .map(azureValue -> AzureScanItem.newBuilder()
-                    .setId(azureValue.getId())
-                    .setName(azureValue.getName())
-                    .setResourceGroup(getResourceGroup(azureValue.getId()))
-                    .setCredentialId(azureScanRequest.getCredentialId())
-                    .build())
-                .collect(Collectors.toList());
+            String[] resourceGroups = request.getResourceGroup().split(",");
+            for (String resourceGroup : resourceGroups) {
+
+                AzureResources resources = client.getResources(token, request.getSubscriptionId(),
+                    resourceGroup, request.getTimeout());
+
+                scannedItems.addAll(resources.getValue().stream()
+                    .filter(azureValue -> azureValue.getType()
+                        .equalsIgnoreCase(MICROSOFT_COMPUTE_VIRTUAL_MACHINES))
+                    .map(azureValue -> AzureScanItem.newBuilder()
+                        .setId(azureValue.getId())
+                        .setName(azureValue.getName())
+                        .setResourceGroup(resourceGroup)
+                        .setCredentialId(request.getCredentialId())
+                        .build())
+                    .collect(Collectors.toList()));
+            }
 
             future.complete(
                 AzureScannerResponseImpl.builder()
-                    .results(items)
+                    .results(scannedItems)
                     .build()
             );
 
@@ -98,17 +104,5 @@ public class AzureScanner implements Scanner {
             );
         }
         return future;
-    }
-
-    // getting it from the id as it is available, dont need to make another http call for it
-    private String getResourceGroup(String id) {
-        String[] idSplit = id.split("/");
-        for (int index = 0; index < idSplit.length; index++) {
-            String subSection = idSplit[index];
-            if (subSection.equalsIgnoreCase("resourceGroups")) {
-                return idSplit[index + 1];
-            }
-        }
-        throw new IllegalArgumentException("Failed to parse for resource group from id");
     }
 }

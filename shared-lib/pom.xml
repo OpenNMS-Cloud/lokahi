@@ -33,6 +33,7 @@
         <module>events</module>
         <module>horizon-grpc-common-constants</module>
         <module>datachoices</module>
+        <module>azure</module>
     </modules>
 
     <build>

@@ -1,9 +1,9 @@
 package org.opennms.horizon.minion.azure;
 
 import lombok.RequiredArgsConstructor;
-import org.opennms.horizon.minion.azure.http.AzureHttpClient;
 import org.opennms.horizon.minion.plugin.api.ServiceMonitor;
 import org.opennms.horizon.minion.plugin.api.ServiceMonitorManager;
+import org.opennms.horizon.shared.azure.http.AzureHttpClient;
 
 @RequiredArgsConstructor
 public class AzureMonitorManager implements ServiceMonitorManager {

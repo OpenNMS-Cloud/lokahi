@@ -1,10 +1,10 @@
-package org.opennms.horizon.minion.azure.http;
+package org.opennms.horizon.shared.azure.http;
 
-import com.google.common.net.HttpHeaders;
 import com.google.gson.Gson;
-import org.opennms.horizon.minion.azure.http.dto.instanceview.AzureInstanceView;
-import org.opennms.horizon.minion.azure.http.dto.login.AzureOAuthToken;
-import org.opennms.horizon.minion.azure.http.dto.resources.AzureResources;
+import org.opennms.horizon.shared.azure.http.dto.instanceview.AzureInstanceView;
+import org.opennms.horizon.shared.azure.http.dto.login.AzureOAuthToken;
+import org.opennms.horizon.shared.azure.http.dto.resourcegroup.AzureResourceGroups;
+import org.opennms.horizon.shared.azure.http.dto.resources.AzureResources;
 
 import java.io.IOException;
 import java.net.URI;
@@ -28,8 +28,15 @@ public class AzureHttpClient {
      * Endpoints
      */
     private static final String OAUTH2_TOKEN_ENDPOINT = "/%s/oauth2/token";
+    private static final String RESOURCE_GROUPS_ENDPOINT = "/subscriptions/%s/resourceGroups";
     private static final String RESOURCES_ENDPOINT = "/subscriptions/%s/resourceGroups/%s/resources";
     private static final String INSTANCE_VIEW_ENDPOINT = "/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Compute/virtualMachines/%s/InstanceView";
+
+    /*
+     * Headers
+     */
+    private static final String AUTH_HEADER = "Authorization";
+    private static final String CONTENT_TYPE_HEADER = "Content-Type";
 
     /*
      * Parameters
@@ -40,7 +47,7 @@ public class AzureHttpClient {
     private static final String LOGIN_RESOURCE_PARAM = "resource=" + MANAGEMENT_BASE_URL + "/";
 
     private static final String API_VERSION = "2021-04-01"; // todo: get latest version and test
-    private static final String API_VERSION_PARAM = "?api-version=" +  API_VERSION;
+    private static final String API_VERSION_PARAM = "?api-version=" + API_VERSION;
     private static final String PARAMETER_DELIMITER = "&";
 
     /*
@@ -67,11 +74,16 @@ public class AzureHttpClient {
         HttpRequest request = HttpRequest.newBuilder()
             .uri(URI.create(String.format(LOGIN_BASE_URL + OAUTH2_TOKEN_ENDPOINT + API_VERSION_PARAM, directoryId)))
             .timeout(Duration.of(timeout, ChronoUnit.MILLIS))
-            .header(HttpHeaders.CONTENT_TYPE, APPLICATION_FORM_URLENCODED_VALUE)
+            .header(CONTENT_TYPE_HEADER, APPLICATION_FORM_URLENCODED_VALUE)
             .POST(HttpRequest.BodyPublishers.ofString(String.join(PARAMETER_DELIMITER, parameters)))
             .build();
 
         return performRequest(OAUTH2_TOKEN_ENDPOINT, AzureOAuthToken.class, request);
+    }
+
+    public AzureResourceGroups getResourceGroups(AzureOAuthToken token, String subscriptionId, long timeout) throws AzureHttpException {
+        String url = String.format(RESOURCE_GROUPS_ENDPOINT + API_VERSION_PARAM, subscriptionId);
+        return get(token, url, timeout, AzureResourceGroups.class);
     }
 
     public AzureResources getResources(AzureOAuthToken token, String subscriptionId, String resourceGroup, long timeout) throws AzureHttpException {
@@ -80,11 +92,11 @@ public class AzureHttpClient {
     }
 
     public AzureInstanceView getInstanceView(AzureOAuthToken token, String subscriptionId, String resourceGroup, String resourceName, long timeout) throws AzureHttpException {
-        String url = String.format(INSTANCE_VIEW_ENDPOINT  + API_VERSION_PARAM, subscriptionId, resourceGroup, resourceName);
+        String url = String.format(INSTANCE_VIEW_ENDPOINT + API_VERSION_PARAM, subscriptionId, resourceGroup, resourceName);
         return get(token, url, timeout, AzureInstanceView.class);
     }
 
-    public <T> T get(AzureOAuthToken token, String endpoint, long timeout, Class<T> clazz) throws AzureHttpException {
+    private <T> T get(AzureOAuthToken token, String endpoint, long timeout, Class<T> clazz) throws AzureHttpException {
         String url = MANAGEMENT_BASE_URL + endpoint;
         HttpRequest request = buildGetHttpRequest(token, url, timeout);
 
@@ -114,7 +126,7 @@ public class AzureHttpClient {
         return HttpRequest.newBuilder()
             .uri(URI.create(url))
             .timeout(Duration.of(timeout, ChronoUnit.MILLIS))
-            .header(HttpHeaders.AUTHORIZATION, String.format("%s %s", token.getTokenType(), token.getAccessToken()))
+            .header(AUTH_HEADER, String.format("%s %s", token.getTokenType(), token.getAccessToken()))
             .GET().build();
     }
 }

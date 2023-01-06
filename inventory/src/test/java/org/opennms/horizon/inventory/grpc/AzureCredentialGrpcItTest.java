@@ -91,7 +91,6 @@ class AzureCredentialGrpcItTest extends GrpcTestBase {
             .setClientSecret(TEST_CLIENT_SECRET)
             .setSubscriptionId(TEST_SUBSCRIPTION_ID)
             .setDirectoryId(TEST_DIRECTORY_ID)
-            .setResourceGroup(TEST_RESOURCE_GROUP)
             .build();
 
         AzureCredentialDTO credentials = serviceStub.withInterceptors(MetadataUtils
@@ -102,7 +101,6 @@ class AzureCredentialGrpcItTest extends GrpcTestBase {
         assertEquals(createDTO.getClientId(), credentials.getClientId());
         assertEquals(createDTO.getSubscriptionId(), credentials.getSubscriptionId());
         assertEquals(createDTO.getDirectoryId(), credentials.getDirectoryId());
-        assertEquals(createDTO.getResourceGroup(), credentials.getResourceGroup());
         assertTrue(credentials.getCreateTime() > 0L);
 
         List<AzureCredential> list = azureCredentialRepository.findAll();
@@ -114,7 +112,6 @@ class AzureCredentialGrpcItTest extends GrpcTestBase {
         assertEquals(createDTO.getClientSecret(), azureCredential.getClientSecret());
         assertEquals(createDTO.getSubscriptionId(), azureCredential.getSubscriptionId());
         assertEquals(createDTO.getDirectoryId(), azureCredential.getDirectoryId());
-        assertEquals(createDTO.getResourceGroup(), azureCredential.getResourceGroup());
         assertNotNull(azureCredential.getCreateTime());
 
         verify(spyInterceptor).verifyAccessToken(authHeader);
@@ -129,7 +126,6 @@ class AzureCredentialGrpcItTest extends GrpcTestBase {
             .setClientSecret(TEST_CLIENT_SECRET)
             .setSubscriptionId(TEST_SUBSCRIPTION_ID)
             .setDirectoryId(TEST_DIRECTORY_ID)
-            .setResourceGroup(TEST_RESOURCE_GROUP)
             .build();
 
         StatusRuntimeException exception = Assertions.assertThrows(StatusRuntimeException.class, () ->

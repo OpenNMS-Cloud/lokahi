@@ -1,4 +1,4 @@
-package org.opennms.horizon.minion.azure.http.dto.instanceview;
+package org.opennms.horizon.shared.azure.http.dto.instanceview;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;

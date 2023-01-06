@@ -1,4 +1,4 @@
-package org.opennms.horizon.minion.azure.http;
+package org.opennms.horizon.shared.azure.http;
 
 public class AzureHttpException extends Exception {
 

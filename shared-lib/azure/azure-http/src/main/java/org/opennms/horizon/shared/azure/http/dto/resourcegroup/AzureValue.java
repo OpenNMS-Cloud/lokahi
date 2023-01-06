@@ -1,4 +1,4 @@
-package org.opennms.horizon.minion.azure.http.dto.resources;
+package org.opennms.horizon.shared.azure.http.dto.resourcegroup;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
@@ -17,19 +17,10 @@ public class AzureValue {
     @SerializedName("type")
     @Expose
     private String type;
-    @SerializedName("sku")
-    @Expose
-    private AzureSku sku;
-    @SerializedName("managedBy")
-    @Expose
-    private String managedBy;
     @SerializedName("location")
     @Expose
     private String location;
-    @SerializedName("tags")
+    @SerializedName("properties")
     @Expose
-    private AzureTags tags;
-    @SerializedName("systemData")
-    @Expose
-    private AzureSystemData systemData;
+    private AzureProperties properties;
 }

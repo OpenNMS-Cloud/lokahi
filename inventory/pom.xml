@@ -88,6 +88,11 @@
         </dependency>
         <dependency>
             <groupId>org.opennms.horizon.shared</groupId>
+            <artifactId>azure-http</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.opennms.horizon.shared</groupId>
             <artifactId>protobuf</artifactId>
             <version>${project.version}</version>
         </dependency>

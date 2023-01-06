@@ -23,5 +23,5 @@ spec:
                 port:
                   number: {{ .Values.OpenNMS.MinionGateway.GrpcPort }}
 
-  selector:
-    app: {{ .Values.OpenNMS.MinionGateway.ServiceName }}
+  #selector:
+  #  app: {{ .Values.OpenNMS.MinionGateway.ServiceName }}

@@ -1,19 +1,8 @@
 #!/usr/bin/env bash
 #use this script to install a basic version of OpenNMS Horizon Stream locally
 
-cluster_ready_check () {
-  #bash scripts/add-local-ssl-cert.sh
-  kubectl config set-context --current --namespace=hs-instance
-
-  # This is the last pod to run, if ready, then give back the terminal session.
-  sleep 60 # Need to wait until the pod is created or else nothing comes back. Messes with the conditional.
-  while [[ $(kubectl get pods -n hs-instance -l=app.kubernetes.io/component='controller-hs-instance' -o jsonpath='{.items[*].status.containerStatuses[0].ready}') == 'false' ]]; do 
-    echo "not-ready"
-    sleep 30
-  done
-
-  kubectl config set-context --current --namespace=hs-instance
-}
+#### ENV VARS
+################################
 
 # For local, we can setup localhost as the default on port 8080 or something.
 # Like Skaffold and Tilt. 
@@ -23,32 +12,78 @@ if [[ -z "$2" || -z "$1" ]]; then
   echo "Need to add custom DNS for the second parameter, domain to use."
   echo "$HELP"
   exit 1
-else
-  mkdir -p tmp
-  cat install-local-onms-instance.yaml | sed "s/onmshs/$2/g" > tmp/install-local-onms-instance.yaml
-  cat install-local-onms-instance-custom-images.yaml | sed "s/onmshs/$2/g" > tmp/install-local-onms-instance-custom-images.yaml
-  cat charts/opennms/values.yaml | sed "s/onmshs/$2/g" > tmp/values.yaml
-  cat install-local-opennms-horizon-stream-values.yaml | sed "s/onmshs/$2/g" > tmp/install-local-opennms-horizon-stream-values.yaml
-  cat install-local-opennms-horizon-stream-custom-images-values.yaml | sed "s/onmshs/$2/g" > tmp/install-local-opennms-horizon-stream-custom-images-values.yaml
 fi
 
-if [ $1 == "local" ]; then
+CONTEXT=$1
+DOMAIN=$2
+KIND_CLUSTER_NAME=kind-test
+NAMESPACE=hs-instance
 
-  cd operator/
-  bash scripts/create-kind-cluster.sh
+#### FUNCTION DEF
+################################
+
+create_cluster() {
+  echo
+  echo ______________Creating Kind Cluster________________
+  echo
+  kind create cluster --name $KIND_CLUSTER_NAME --config=./install-local-kind-config.yaml
+  kubectl config use-context "kind-$KIND_CLUSTER_NAME"
+  kubectl config get-contexts
+}
+
+cluster_ready_check () {
+
+  # This is the last pod to run, if ready, then give back the terminal session.
+  sleep 60 # Need to wait until the pod is created or else nothing comes back. Messes with the conditional.
+  while [[ $(kubectl get pods -n $NAMESPACE -l=app.kubernetes.io/component="controller-$NAMESPACE" -o jsonpath='{.items[*].status.containerStatuses[0].ready}') == 'false' ]]; do 
+    echo "not-ready"
+    sleep 30
+  done
+
+}
+
+create_ssl_cert_secret () {
+
+  # Create SSL Certificate
+  openssl genrsa -out tmp/ca.key
+  openssl req -new -x509 -days 365 -key tmp/ca.key -subj "/CN=$DOMAIN/O=Test Keycloak./C=US" -out tmp/ca.crt
+  openssl req -newkey rsa:2048 -nodes -keyout tmp/server.key -subj "/CN=$DOMAIN/O=Test Keycloak./C=US" -out tmp/server.csr
+  openssl x509 -req -extfile <(printf "subjectAltName=DNS:$DOMAIN") -days 365 -in tmp/server.csr -CA tmp/ca.crt -CAkey tmp/ca.key -CAcreateserial -out tmp/server.crt
+  if [ $? -ne 0 ]; then exit; fi
+  kubectl -n $NAMESPACE delete secrets/tls-cert-wildcard
+  kubectl -n $NAMESPACE create secret tls tls-cert-wildcard --cert tmp/server.crt --key tmp/server.key
+  if [ $? -ne 0 ]; then exit; fi
+
+}
+
+#### MAIN
+################################
+
+# Swap Domain in YAML files
+mkdir -p tmp
+cat install-local-onms-instance.yaml | sed "s/onmshs/$DOMAIN/g" > tmp/install-local-onms-instance.yaml
+cat install-local-onms-instance-custom-images.yaml | sed "s/onmshs/$DOMAIN/g" > tmp/install-local-onms-instance-custom-images.yaml
+cat charts/opennms/values.yaml | sed "s/onmshs/$DOMAIN/g" > tmp/values.yaml
+cat install-local-opennms-horizon-stream-values.yaml | sed "s/onmshs/$DOMAIN/g" > tmp/install-local-opennms-horizon-stream-values.yaml
+cat install-local-opennms-horizon-stream-custom-images-values.yaml | sed "s/onmshs/$DOMAIN/g" > tmp/install-local-opennms-horizon-stream-custom-images-values.yaml
+
+# Select Context, Create Cluster, and Deploy
+if [ $CONTEXT == "local" ]; then
+
+  create_cluster
 
   echo
   echo ________________Installing Horizon Stream________________
   echo
-  helm upgrade -i horizon-stream ../charts/opennms -f ../tmp/install-local-opennms-horizon-stream-values.yaml --namespace hs-instance --create-namespace
+  helm upgrade -i horizon-stream ./charts/opennms -f ./tmp/install-local-opennms-horizon-stream-values.yaml --namespace $NAMESPACE --create-namespace
   if [ $? -ne 0 ]; then exit; fi
 
+  create_ssl_cert_secret 
   cluster_ready_check
 
-elif [ "$1" == "custom-images" ]; then
+elif [ "$CONTEXT" == "custom-images" ]; then
 
-  cd operator/
-  bash scripts/create-kind-cluster.sh
+  create_cluster
 
   # Will add a kind-registry here at some point, see .github/ for sample script.
   kind load docker-image opennms/horizon-stream-alarm:local&
@@ -72,44 +107,22 @@ elif [ "$1" == "custom-images" ]; then
   echo
   echo ________________Installing Horizon Stream________________
   echo
-  helm upgrade -i horizon-stream ../charts/opennms -f ../tmp/install-local-opennms-horizon-stream-custom-images-values.yaml --namespace hs-instance --create-namespace
+  helm upgrade -i horizon-stream ./charts/opennms -f ./tmp/install-local-opennms-horizon-stream-custom-images-values.yaml --namespace $NAMESPACE --create-namespace
   if [ $? -ne 0 ]; then exit; fi
 
+  create_ssl_cert_secret 
   cluster_ready_check
 
-elif [ $1 == "existing-k8s" ]; then
-
-  cd operator/
+elif [ $CONTEXT == "existing-k8s" ]; then
 
   echo
   echo ________________Installing Horizon Stream________________
   echo
-  helm upgrade -i horizon-stream ../charts/opennms -f ../tmp/install-local-opennms-horizon-stream-values.yaml --namespace hs-instance --create-namespace
+  helm upgrade -i horizon-stream ./charts/opennms -f ./tmp/install-local-opennms-horizon-stream-values.yaml --namespace $NAMESPACE --create-namespace
   if [ $? -ne 0 ]; then exit; fi
 
   cluster_ready_check
 
-elif [ $1 == "existing-k8s-no-op" ]; then
-
-  echo
-  echo ____________Installing HS Instance______________
-  echo
-  helm upgrade -i horizon-stream charts/opennms -f ./tmp/values.yaml --namespace hs-instance --create-namespace
-
 else
   echo "$HELP"
 fi
-
-#bash scripts/add-local-ssl-cert.sh
-
-# This is the last pod to run, if ready, then give back the terminal session.
-JOB_FAIL=1
-while [ -v $(kubectl get pods -n hs-instance -l=app.kubernetes.io/component='controller-hs-instance' -o jsonpath='{.items[*].status.containerStatuses[0].ready}')  ]; do 
-  echo "not-ready"
-  if [ $JOB_FAIL == 8 ]; then
-    exit 1;
-  else
-    JOB_FAIL=$((JOB_FAIL+1))
-  fi
-  sleep 60
-done

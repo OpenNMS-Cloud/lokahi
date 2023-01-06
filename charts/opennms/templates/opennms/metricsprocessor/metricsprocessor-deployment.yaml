@@ -13,6 +13,7 @@ spec:
   template:
     metadata:
       labels:
+        appdomain: opennms
         run: {{ .Values.OpenNMS.MetricsProcessor.ServiceName }}
     spec:
       {{- if .Values.NodeRestrictions.Enabled }}

@@ -1,5 +1,7 @@
 package org.opennms.horizon.inventory.config;
 
+import io.grpc.ManagedChannel;
+import io.grpc.netty.shaded.io.grpc.netty.NettyChannelBuilder;
 import org.opennms.horizon.inventory.component.MinionRpcClient;
 import org.opennms.horizon.inventory.exception.InventoryRuntimeException;
 import org.opennms.horizon.inventory.grpc.TenantLookup;
@@ -8,9 +10,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import io.grpc.ManagedChannel;
-import io.grpc.netty.shaded.io.grpc.netty.NettyChannelBuilder;
 import org.springframework.context.annotation.Lazy;
 
 @Configuration
@@ -29,6 +28,7 @@ public class MinionGatewayGrpcClientConfig {
 
     @Value("${grpc.client.minion-gateway.maxMessageSize:10485760}")
     private int maxMessageSize;
+
 
     @Bean(name = MINION_GATEWAY_GRPC_CHANNEL)
     public ManagedChannel createGrpcChannel() {

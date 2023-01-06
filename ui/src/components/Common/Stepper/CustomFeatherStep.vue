@@ -1,0 +1,32 @@
+<template>
+  <div class="container">
+    <div class="title">{{ title }}</div>
+    <slot></slot>
+  </div>
+</template>
+
+<script setup lang="ts">
+defineEmits([
+  'slideNext', 
+  'slidePrev'
+])
+
+defineProps({
+  nextBtnText: String,
+  prevBtnText: String,
+  title: String
+})
+</script>
+
+<style scoped lang="scss">
+@use "@featherds/styles/mixins/typography";
+@use "@featherds/styles/themes/variables";
+.container {
+  padding: var(variables.$spacing-l) 0;
+  min-height: 200px;
+
+  .title {
+    @include typography.headline4;
+  }
+}
+</style>

@@ -39,7 +39,7 @@ public class TaskExecutionResultProcessorImpl implements TaskExecutionResultProc
 
     @Override
     public void queueSendResult(String id, ServiceDetectorResponse response) {
-        log.info("O-Detect STATUS: detected={}; ipaddress ={}", response.isServiceDetected(), response.getIpAddress());
+        log.info("Detect Status: id = {} , detected = {}; ", id, response.isServiceDetected());
 
         TaskSetResults taskSetResults = formatTaskSetResults(id, response);
 
@@ -48,7 +48,7 @@ public class TaskExecutionResultProcessorImpl implements TaskExecutionResultProc
 
     @Override
     public void queueSendResult(String id, ServiceMonitorResponse response) {
-        log.debug("O-POLL STATUS: status={}; reason={}", response.getStatus(), response.getReason());
+        log.info("Poll Status: id = {} , status = {}; ", id, response.getStatus());
 
         TaskSetResults taskSetResults = formatTaskSetResults(id, response);
 
@@ -58,7 +58,7 @@ public class TaskExecutionResultProcessorImpl implements TaskExecutionResultProc
     @Override
     public void queueSendResult(String uuid, CollectionSet collectionSet) {
         TaskSetResults taskSetResults = formatTaskSetResults(uuid, collectionSet);
-        log.info("Collector TaskSet results {}", taskSetResults);
+        log.info("Collect Status: id = {}, status = {} ", uuid, collectionSet.getStatus());
         taskSetSinkDispatcher.send(taskSetResults);
     }
 

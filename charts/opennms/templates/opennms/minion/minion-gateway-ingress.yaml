@@ -1,0 +1,27 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ .Values.OpenNMS.MinionGateway.ServiceName }}
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "{{ .Values.TLS.Enabled }}"
+    nginx.ingress.kubernetes.io/backend-protocol: "GRPC"
+    {{- range $Annotation, $Value := .Values.OpenNMS.MinionGateway.IngressAnnotations }}
+    {{ $Annotation | quote }}: {{ $Value | quote }}
+    {{- end }}
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: "minion.{{ .Values.Host }}"
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .Values.OpenNMS.MinionGateway.ServiceName }}
+                port:
+                  number: {{ .Values.OpenNMS.MinionGateway.GrpcPort }}
+
+  selector:
+    app: {{ .Values.OpenNMS.MinionGateway.ServiceName }}

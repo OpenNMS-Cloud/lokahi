@@ -29,6 +29,7 @@
 package org.opennms.miniongateway.taskset;
 
 import org.opennms.miniongateway.grpc.server.model.TenantKey;
+import org.opennms.taskset.contract.TaskDefinition;
 import org.opennms.taskset.contract.TaskSet;
 import org.opennms.taskset.service.api.TaskSetForwarder;
 import org.opennms.taskset.service.api.TaskSetListener;
@@ -40,6 +41,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -87,6 +89,11 @@ public class TaskSetPublisherImpl implements TaskSetPublisher, TaskSetForwarder 
                 listener.onTaskSetUpdate(taskSet);
             }
         }
+    }
+
+    @Override
+    public void publishNewTasks(String tenantId, String location, List<TaskDefinition> taskList) {
+
     }
 
     @Override

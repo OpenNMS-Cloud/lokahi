@@ -49,9 +49,12 @@ import io.grpc.ServerInterceptor;
 import io.grpc.Status;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 
-@RequiredArgsConstructor
+
 @Slf4j
+@Component
+@RequiredArgsConstructor
 public class InventoryServerInterceptor implements ServerInterceptor {
     private static final String TOKEN_PREFIX = "Bearer";
     private final KeycloakDeployment keycloak;

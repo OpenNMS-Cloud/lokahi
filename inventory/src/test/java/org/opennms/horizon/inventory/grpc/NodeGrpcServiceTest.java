@@ -47,6 +47,7 @@ import java.util.Optional;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -86,8 +87,7 @@ public class NodeGrpcServiceTest {
 
         verify(obs, times(0)).onError(any());
         verify(obs).onCompleted();
-
-        verify(taskSetService, times(1)).sendDetectorTasks(any());
+        verify(taskSetService, timeout(10000).times(1)).sendDetectorTasks(any());
     }
 
     @Test

@@ -33,12 +33,6 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.keycloak.adapters.KeycloakDeployment;
 import org.keycloak.adapters.rotation.JWKPublicKeyLocator;
 import org.keycloak.representations.adapters.config.AdapterConfig;
-import org.opennms.horizon.inventory.mapper.NodeMapper;
-import org.opennms.horizon.inventory.service.IpInterfaceService;
-import org.opennms.horizon.inventory.service.MonitoringLocationService;
-import org.opennms.horizon.inventory.service.MonitoringSystemService;
-import org.opennms.horizon.inventory.service.NodeService;
-import org.opennms.horizon.inventory.service.taskset.DetectorTaskSetService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -49,38 +43,16 @@ import lombok.RequiredArgsConstructor;
 @Configuration
 public class GrpcConfig {
     private static final int DEFAULT_GRPC_PORT = 8990;
-    private final MonitoringSystemService systemService;
-    private final MonitoringLocationService locationService;
     @Value("${grpc.server.port:" + DEFAULT_GRPC_PORT +"}")
     private int port;
     @Value("${keycloak.base-url}")
     private String keycloakAuthUrl;
     @Value("${keycloak.realm}")
     private String keycloakRealm;
-    private final NodeService nodeService;
-    private final IpInterfaceService ipInterfaceService;
-    private final NodeMapper nodeMapper;
-    private final DetectorTaskSetService taskSetService;
-
 
     @Bean
     public TenantLookup createTenantLookup(){
         return new GrpcTenantLookupImpl();
-    }
-
-    @Bean
-    public MonitoringLocationGrpcService createLocationGrpcService(TenantLookup tenantLookup) {
-        return new MonitoringLocationGrpcService(locationService, tenantLookup);
-    }
-
-    @Bean
-    public MonitoringSystemGrpcService createSystemGrpcService(TenantLookup tenantLookup) {
-        return new MonitoringSystemGrpcService(systemService, tenantLookup);
-    }
-
-    @Bean
-    public NodeGrpcService createNodeService(TenantLookup tenantLookup) {
-        return new NodeGrpcService(nodeService, ipInterfaceService, nodeMapper, tenantLookup, taskSetService);
     }
 
     @Bean
@@ -104,15 +76,12 @@ public class GrpcConfig {
         return keycloak;
     }
 
-    @Bean
-    public InventoryServerInterceptor createInterceptor(KeycloakDeployment keycloak) {
-        return new InventoryServerInterceptor(keycloak);
-    }
-
     @Bean(destroyMethod = "stopServer")
-    public GrpcServerManager startServer(MonitoringLocationGrpcService locationGrpc, MonitoringSystemGrpcService systemGrpc, NodeGrpcService nodeGrpcService, InventoryServerInterceptor interceptor) {
+    public GrpcServerManager startServer(MonitoringLocationGrpcService locationGrpc, MonitoringSystemGrpcService systemGrpc,
+                                         NodeGrpcService nodeGrpcService, AzureCredentialGrpcService azureCredentialGrpcService,
+                                         InventoryServerInterceptor interceptor) {
         GrpcServerManager manager = new GrpcServerManager(port, interceptor);
-        manager.startServer(locationGrpc, systemGrpc, nodeGrpcService);
+        manager.startServer(locationGrpc, systemGrpc, nodeGrpcService, azureCredentialGrpcService);
         return manager;
     }
 }

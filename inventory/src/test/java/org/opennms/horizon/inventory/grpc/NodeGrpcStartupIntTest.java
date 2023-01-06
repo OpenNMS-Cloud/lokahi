@@ -28,6 +28,7 @@
 
 package org.opennms.horizon.inventory.grpc;
 
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -43,7 +44,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
+import static com.jayway.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest(properties = { "spring.liquibase.change-log=db/changelog/changelog-test.xml" })
@@ -79,7 +82,7 @@ class NodeGrpcStartupIntTest extends GrpcTestBase {
     @Test
     void testStartup() throws Exception {
         // TrapConfigService listens for ApplicationReadyEvent and sends the trap config for each location.
-        assertEquals(1, testGrpcService.getTimesCalled());
+        await().atMost(10, TimeUnit.SECONDS).untilAtomic(testGrpcService.getTimesCalled(), Matchers.is(1));
 
         org.assertj.core.api.Assertions.assertThat(testGrpcService.getRequests())
             .hasSize(1)

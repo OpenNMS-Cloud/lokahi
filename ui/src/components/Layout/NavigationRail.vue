@@ -22,6 +22,7 @@
         <FeatherAppRailNavItem href="/" :icon="Appliances" title="Appliances" :class="{ selected: isSelected('/') }" />
         <FeatherAppRailNavItem href="/map" :icon="Location" title="Map" :class="{ selected: isSelected('/map') }" />
         <FeatherAppRailNavItem href="/inventory" :icon="Business" title="Inventory" :class="{ selected: isSelected('/inventory') }" />
+        <FeatherAppRailNavItem href="/discovery" :icon="Discovery" title="Discovery" :class="{ selected: isSelected('/discovery') }" />
       </template>
     </FeatherAppRail>
 </template>
@@ -33,6 +34,7 @@ import Location from '@featherds/icon/action/Location'
 import Business from '@featherds/icon/action/Business'
 import LogoIcon from '@/assets/OpenNMS-logo-icon.svg'
 import LogoText from '@/assets/OpenNMS-logo-text.svg'
+import Discovery from '@featherds/icon/action/Search'
 
 const labels = {
   skip: 'Skip to main content'

@@ -28,14 +28,9 @@
 
 package org.opennms.horizon.inventory.service;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
+import com.vladmihalcea.hibernate.type.basic.Inet;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.opennms.horizon.inventory.dto.NodeCreateDTO;
 import org.opennms.horizon.inventory.dto.NodeDTO;
@@ -50,18 +45,24 @@ import org.opennms.horizon.shared.constants.GrpcConstants;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.vladmihalcea.hibernate.type.basic.Inet;
-
-import lombok.RequiredArgsConstructor;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class NodeService {
-    private final TrapConfigService trapConfigService;
+
     private final NodeRepository nodeRepository;
     private final MonitoringLocationRepository monitoringLocationRepository;
     private final IpInterfaceRepository ipInterfaceRepository;
+    private final ConfigUpdateService configUpdateService;
 
     private final NodeMapper mapper;
 
@@ -104,8 +105,8 @@ public class NodeService {
             newLocation.setLocation(location);
 
             MonitoringLocation saved = monitoringLocationRepository.save(newLocation);
-            trapConfigService.sendTrapConfigToMinion(tenantId, saved.getLocation());
-
+            // Asynchronously send config updates to Minion
+            configUpdateService.sendConfigUpdate(tenantId, saved.getLocation());
             return saved;
         }
     }
@@ -122,6 +123,7 @@ public class NodeService {
         return nodeRepository.save(node);
     }
 
+    @Transactional
     public Node createNode(NodeCreateDTO request, String tenantId) {
         MonitoringLocation monitoringLocation = saveMonitoringLocation(request, tenantId);
         Node node = saveNode(request, monitoringLocation, tenantId);
@@ -140,4 +142,5 @@ public class NodeService {
         });
         return nodesByTenantLocation;
     }
+
 }

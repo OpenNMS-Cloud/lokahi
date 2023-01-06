@@ -30,6 +30,7 @@ package org.opennms.horizon.inventory.grpc;
 
 import com.google.common.base.Strings;
 import com.google.common.net.InetAddresses;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Int64Value;
 import com.google.rpc.Code;
@@ -50,12 +51,16 @@ import org.opennms.horizon.inventory.model.Node;
 import org.opennms.horizon.inventory.service.IpInterfaceService;
 import org.opennms.horizon.inventory.service.NodeService;
 import org.opennms.horizon.inventory.service.taskset.DetectorTaskSetService;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 
 @Slf4j
+@Component
 @RequiredArgsConstructor
 public class NodeGrpcService extends NodeServiceGrpc.NodeServiceImplBase {
     private final NodeService nodeService;
@@ -63,19 +68,22 @@ public class NodeGrpcService extends NodeServiceGrpc.NodeServiceImplBase {
     private final NodeMapper nodeMapper;
     private final TenantLookup tenantLookup;
     private final DetectorTaskSetService taskSetService;
+    private final ThreadFactory threadFactory = new ThreadFactoryBuilder()
+        .setNameFormat("send-taskset-for-node-%d")
+        .build();
+    private final ExecutorService executorService = Executors.newFixedThreadPool(10, threadFactory);
 
     @Override
-    @Transactional
     public void createNode(NodeCreateDTO request, StreamObserver<NodeDTO> responseObserver) {
         Optional<String> tenantId = tenantLookup.lookupTenantId(Context.current());
         boolean valid = tenantId.map(id -> validateInput(request, id, responseObserver)).orElseThrow();
 
         if (valid) {
             Node node = nodeService.createNode(request, tenantId.orElseThrow());
-
-            taskSetService.sendDetectorTasks(node);
             responseObserver.onNext(nodeMapper.modelToDTO(node));
             responseObserver.onCompleted();
+            // Asynchronously send task sets to Minion
+            executorService.execute(() -> sendTaskSetsToMinion(node));
         }
     }
 
@@ -173,5 +181,13 @@ public class NodeGrpcService extends NodeServiceGrpc.NodeServiceImplBase {
         }
 
         return valid;
+    }
+
+    private void sendTaskSetsToMinion(Node node) {
+        try {
+            taskSetService.sendDetectorTasks(node);
+        } catch (Exception e) {
+            log.error("Error while sending detector task for node with label {}", node.getNodeLabel());
+        }
     }
 }

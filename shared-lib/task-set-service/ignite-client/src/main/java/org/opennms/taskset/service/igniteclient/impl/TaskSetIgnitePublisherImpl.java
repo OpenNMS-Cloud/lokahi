@@ -29,10 +29,12 @@
 package org.opennms.taskset.service.igniteclient.impl;
 
 import org.apache.ignite.client.IgniteClient;
+import org.opennms.taskset.contract.TaskDefinition;
 import org.opennms.taskset.contract.TaskSet;
 import org.opennms.taskset.service.api.TaskSetPublisher;
 import org.opennms.taskset.service.model.LocatedTaskSet;
 
+import java.util.List;
 import java.util.function.Consumer;
 
 @Deprecated
@@ -62,5 +64,10 @@ public class TaskSetIgnitePublisherImpl implements TaskSetPublisher {
         LocatedTaskSet locatedTaskSet = new LocatedTaskSet(tenantId, location, taskSet);
 
         igniteClient.services().serviceProxy(TASK_SET_PUBLISH_SERVICE, Consumer.class).accept(locatedTaskSet);
+    }
+
+    @Override
+    public void publishNewTasks(String tenantId, String location, List<TaskDefinition> taskList) {
+
     }
 }

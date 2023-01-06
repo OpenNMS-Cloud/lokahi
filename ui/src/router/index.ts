@@ -46,6 +46,16 @@ const router = createRouter({
       component: () => import('@/containers/Inventory.vue')
     },
     {
+      path: '/discovery',
+      name: 'Discovery',
+      component: () => import('@/containers/Discovery.vue')
+    },
+    {
+      path: '/my-discovery',
+      name: 'My Discovery',
+      component: () => import('@/containers/MyDiscovery.vue')
+    },
+    {
       path: '/node/:id',
       name: 'Node',
       component: () => import('@/containers/NodeStatus.vue'),

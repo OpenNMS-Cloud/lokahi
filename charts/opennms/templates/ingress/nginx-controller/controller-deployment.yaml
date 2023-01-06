@@ -103,6 +103,9 @@ spec:
         - containerPort: 8443
           name: webhook
           protocol: TCP
+        - containerPort: 8990
+          name: grpc
+          protocol: TCP
         readinessProbe:
           failureThreshold: 3
           httpGet:

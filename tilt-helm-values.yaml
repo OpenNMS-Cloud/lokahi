@@ -34,6 +34,14 @@ OpenNMS:
       Requests:
         Cpu: '0'
         Memory: '0'
+  MinionGateway:
+    Resources:
+      Limits:
+        Cpu: '0'
+        Memory: '0'
+      Requests:
+        Cpu: '0'
+        Memory: '0'
   Inventory:
     Resources:
       Limits:

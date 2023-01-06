@@ -23,7 +23,6 @@
 
     <properties>
         <docker.image.tag>local</docker.image.tag>
-        <java.version>11</java.version>
     </properties>
 
     <dependencies>

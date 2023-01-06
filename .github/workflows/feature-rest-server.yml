@@ -20,6 +20,12 @@ jobs:
 
           echo "For init steps."
 
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          distribution: temurin
+          java-version: 17
+
       - name: parent-pom
         id: action-parent-pom
         uses: ./.github/actions/parent-pom

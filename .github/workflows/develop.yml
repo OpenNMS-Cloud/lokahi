@@ -51,6 +51,17 @@ jobs:
           # kind cluster still running, delete it. It uses a lot of space. 
           kind delete clusters kind
 
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Set up Maven
+        uses: stCarolas/setup-maven@v4.5
+        with:
+          maven-version: 3.8.2
+
       - name: feature-ui
         id: action-feature-ui
         uses: ./.github/actions/ui

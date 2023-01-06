@@ -330,7 +330,7 @@
                 <configuration>
                     <skip>${skipJib}</skip>
                     <from>
-                        <image>openjdk:11</image>
+                        <image>openjdk:17</image>
                     </from>
                     <to>
                         <image>${docker.image.name}:${docker.image.tag}</image>

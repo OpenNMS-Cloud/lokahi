@@ -180,4 +180,22 @@ public class MonitoringSystemGrpcItTest extends GrpcTestBase {
         verify(spyInterceptor).verifyAccessToken(headerWithoutTenant);
         verify(spyInterceptor).interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));
     }
+
+    @Test
+    void testDeleteMonitoringSystem() throws VerificationException {
+        assertThat(serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader)))
+            .deleteMonitoringSystem(StringValue.of(system1.getSystemId())));
+        verify(spyInterceptor).verifyAccessToken(authHeader);
+        verify(spyInterceptor).interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));
+    }
+
+    @Test
+    void testDeleteSystemNotFound() throws VerificationException {
+        StatusRuntimeException exception = assertThrows(StatusRuntimeException.class, ()-> serviceStub
+            .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(differentTenantHeader)))
+            .deleteMonitoringSystem(StringValue.of("bad-system-id")));
+        assertThat(exception.getStatus().getCode()).isEqualTo(Status.Code.NOT_FOUND);
+        verify(spyInterceptor).verifyAccessToken(differentTenantHeader);
+        verify(spyInterceptor).interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));
+    }
 }

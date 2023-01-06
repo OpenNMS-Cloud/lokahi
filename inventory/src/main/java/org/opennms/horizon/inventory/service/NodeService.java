@@ -143,4 +143,8 @@ public class NodeService {
         return nodesByTenantLocation;
     }
 
+    public void deleteNode(long id) {
+        nodeRepository.deleteById(id);
+    }
+
 }

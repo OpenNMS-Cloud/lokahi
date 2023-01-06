@@ -348,4 +348,30 @@ class NodeGrpcItTest extends GrpcTestBase {
         verify(spyInterceptor, times(2)).interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));
 
     }
+
+    @Test
+    void testDeleteNode() throws VerificationException {
+        String label = "label";
+
+        NodeCreateDTO createDTO = NodeCreateDTO.newBuilder()
+            .setLocation("location")
+            .setLabel(label)
+            .setManagementIp("127.0.0.1")
+            .build();
+        NodeDTO node = serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).createNode(createDTO);
+        assertThat(node).isNotNull();
+        assertThat(serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).deleteNode(Int64Value.of(node.getId())));
+        verify(spyInterceptor, times(2)).verifyAccessToken(authHeader);
+        verify(spyInterceptor, times(2)).interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));
+    }
+
+    @Test
+    void testDeleteNodeNotFound() throws VerificationException {
+        StatusRuntimeException exception = Assertions.assertThrows(StatusRuntimeException.class, () -> serviceStub
+            .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).deleteNode(Int64Value.of(100L)));
+        Status status = StatusProto.fromThrowable(exception);
+        assertThat(status.getCode()).isEqualTo(Code.NOT_FOUND_VALUE);
+        verify(spyInterceptor).verifyAccessToken(authHeader);
+        verify(spyInterceptor).interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));
+    }
 }

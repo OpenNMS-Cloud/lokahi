@@ -73,7 +73,7 @@ import lombok.extern.slf4j.Slf4j;
 
 //This is an example of gRPC integration tests underline mock services.
 @Slf4j
-public class LocationGrpcIntegrationTest {
+public class LocationGrpcTest {
     @Rule
     public static final GrpcCleanupRule grpcCleanup = new GrpcCleanupRule();
     private static MonitoringLocationServiceGrpc.MonitoringLocationServiceBlockingStub stub;

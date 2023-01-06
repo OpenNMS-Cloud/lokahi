@@ -4,6 +4,7 @@
     <div class="content">
       <img
         class="img"
+        alt="discovery image"
         :src="imgUrl"
       />
       <slot name="footer" />

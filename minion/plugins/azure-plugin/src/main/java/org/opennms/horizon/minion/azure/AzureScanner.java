@@ -36,6 +36,8 @@ import org.opennms.horizon.minion.plugin.api.AzureScannerResponseImpl;
 import org.opennms.horizon.minion.plugin.api.Scanner;
 import org.opennms.horizon.shared.azure.http.AzureHttpClient;
 import org.opennms.horizon.shared.azure.http.dto.login.AzureOAuthToken;
+import org.opennms.horizon.shared.azure.http.dto.resourcegroup.AzureResourceGroups;
+import org.opennms.horizon.shared.azure.http.dto.resourcegroup.AzureValue;
 import org.opennms.horizon.shared.azure.http.dto.resources.AzureResources;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,8 +73,11 @@ public class AzureScanner implements Scanner {
 
             List<AzureScanItem> scannedItems = new LinkedList<>();
 
-            String[] resourceGroups = request.getResourceGroup().split(",");
-            for (String resourceGroup : resourceGroups) {
+            AzureResourceGroups resourceGroups = client
+                .getResourceGroups(token, request.getSubscriptionId(), request.getTimeout());
+
+            for (AzureValue resourceGroupValue : resourceGroups.getValue()) {
+                String resourceGroup = resourceGroupValue.getName();
 
                 AzureResources resources = client.getResources(token, request.getSubscriptionId(),
                     resourceGroup, request.getTimeout());

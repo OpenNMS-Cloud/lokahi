@@ -58,6 +58,9 @@ public class ScannerResponseService {
         Optional<Node> nodeOpt = nodeRepository.findByTenantLocationAndNodeLabel(tenantId, location, nodeLabel);
 
         if (nodeOpt.isEmpty()) {
+
+            //todo: may need to relate AzureCredential with Node for monitoring recovery
+
             NodeCreateDTO createDTO = NodeCreateDTO.newBuilder()
                 .setLocation(location)
                 .setManagementIp(ipAddress)

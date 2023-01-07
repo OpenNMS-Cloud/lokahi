@@ -7,29 +7,27 @@ import org.opennms.horizon.inventory.model.AzureCredential;
 import org.opennms.taskset.contract.TaskDefinition;
 import org.opennms.taskset.contract.TaskType;
 import org.opennms.taskset.service.api.TaskSetPublisher;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import java.util.Arrays;
+import java.util.List;
 
 import static org.opennms.horizon.inventory.service.taskset.TaskUtils.identityForAzureTask;
 
 @Component
 @RequiredArgsConstructor
 public class ScannerTaskSetService {
-    private static final Logger log = LoggerFactory.getLogger(ScannerTaskSetService.class);
     private final TaskSetPublisher taskSetPublisher;
 
     public void sendAzureScannerTask(AzureCredential credential) {
         String tenantId = credential.getTenantId();
 
         var task = addAzureScannerTask(credential);
-        taskSetPublisher.publishNewTasks(tenantId, "Default", Arrays.asList(task));
+
+        String location = credential.getMonitoringLocation().getLocation();
+        taskSetPublisher.publishNewTasks(tenantId, location, List.of(task));
     }
 
     private TaskDefinition addAzureScannerTask(AzureCredential credential) {
-
         Any configuration =
             Any.pack(AzureScanRequest.newBuilder()
                 .setCredentialId(credential.getId())
@@ -37,7 +35,6 @@ public class ScannerTaskSetService {
                 .setClientSecret(credential.getClientSecret())
                 .setSubscriptionId(credential.getSubscriptionId())
                 .setDirectoryId(credential.getDirectoryId())
-                .setResourceGroup(credential.getResourceGroup())
                 .setTimeout(TaskUtils.Azure.DEFAULT_TIMEOUT)
                 .setRetries(TaskUtils.Azure.DEFAULT_RETRIES)
                 .build());

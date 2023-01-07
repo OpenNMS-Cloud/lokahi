@@ -131,7 +131,6 @@ public class MonitorTaskSetService {
 
     public TaskDefinition addAzureMonitorTask(AzureCredential credential, AzureScanItem scanItem, String ipAddress, long nodeId) {
 
-
         Any configuration =
             Any.pack(AzureMonitorRequest.newBuilder()
                 .setResource(scanItem.getName())

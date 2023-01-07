@@ -52,7 +52,6 @@ public class AzureCredentialGrpcService extends AzureCredentialServiceGrpc.Azure
 
     @Override
     public void createCredentials(AzureCredentialCreateDTO request, StreamObserver<AzureCredentialDTO> responseObserver) {
-
         Optional<String> tenantIdOptional = tenantLookup.lookupTenantId(Context.current());
 
         tenantIdOptional.ifPresentOrElse(tenantId -> {

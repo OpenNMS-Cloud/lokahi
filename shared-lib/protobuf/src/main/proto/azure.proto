@@ -41,9 +41,8 @@ message AzureScanRequest {
   string client_secret = 3;
   string subscription_id = 4;
   string directory_id = 5;
-  string resource_group = 6;
-  int64 timeout = 7;
-  int32 retries = 8;
+  int64 timeout = 6;
+  int32 retries = 7;
 }
 
 message AzureScanItem {

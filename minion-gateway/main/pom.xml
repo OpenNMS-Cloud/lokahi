@@ -179,6 +179,7 @@
                             <jvmFlag>--add-opens=java.base/java.nio=ALL-UNNAMED</jvmFlag>
                             <jvmFlag>--add-opens=java.base/java.util=ALL-UNNAMED</jvmFlag>
                             <jvmFlag>--add-opens=java.base/java.lang=ALL-UNNAMED</jvmFlag>
+                            <jvmFlag>--add-opens=java.base/java.util.concurrent=ALL-UNNAMED</jvmFlag>
                         </jvmFlags>
                     </container>
                 </configuration>

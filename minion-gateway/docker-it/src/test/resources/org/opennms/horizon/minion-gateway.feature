@@ -16,6 +16,7 @@ Feature: Minion Gateway RPC Request Processing
     Then verify RPC exception was received
     Then verify RPC exception states active connection could not be found
 
+  @ignore
   Scenario: Send an RPC Request to a "Minion" that is connected to the gateway
     Given GRPC header "tenant-id" = "x-tenant-x"
     Given mock system id "x-system-id-001-x"

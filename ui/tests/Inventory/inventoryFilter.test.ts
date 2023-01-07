@@ -1,19 +1,19 @@
-import Filter from '@/components/Inventory/Filter.vue'
+import InventoryFilter from '@/components/Inventory/InventoryFilter.vue'
 import mountWithPiniaVillus from 'tests/mountWithPiniaVillus'
 import { useInventoryStore } from '@/store/Views/inventoryStore'
 
 let wrapper: any
 
-describe('Filter component', () => {
+describe('InventoryFilter.vue', () => {
   beforeAll(() => {
     wrapper = mountWithPiniaVillus({
-      component: Filter,
-      shallow: true 
+      component: InventoryFilter,
+      shallow: true
     })
   })
   afterAll(() => {
     wrapper.unmount()
-  }) 
+  })
 
   describe('Required components', () => {
     const requiredComponents = [
@@ -25,7 +25,7 @@ describe('Filter component', () => {
       'sort-btn',
       'sort-alpha-btn',
       'expand-btn'
-    // 'collapse-btn'
+      // 'collapse-btn'
     ]
 
     it.each(requiredComponents)('should have "%s" component', (item) => {
@@ -35,7 +35,7 @@ describe('Filter component', () => {
     it('should have collapse button', async () => {
       const inventoryStore = useInventoryStore()
       const toggleFilter = vi.spyOn(inventoryStore, 'toggleFilter')
-  
+
       const expandBtn = wrapper.get('[data-test="expand-btn"]')
       await expandBtn.trigger('click')
       expect(toggleFilter).toHaveBeenCalledOnce()

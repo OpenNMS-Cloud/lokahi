@@ -1,13 +1,13 @@
-import TagManager from '@/components/Inventory/TagManager.vue'
-import TagManagerCtrl from '@/components/Inventory/TagManagerCtrl.vue'
+import InventoryTagManager from '@/components/Inventory/InventoryTagManager.vue'
+import InventoryTagManagerCtrl from '@/components/Inventory/InventoryTagManagerCtrl.vue'
 import setupWrapper from 'tests/setupWrapper'
 
-const tagManagerWrapper = setupWrapper({ 
-  component: TagManager 
+const tagManagerWrapper = setupWrapper({
+  component: InventoryTagManager
 })
 
-const tagManagerCtrlWrapper = setupWrapper({ 
-  component: TagManagerCtrl 
+const tagManagerCtrlWrapper = setupWrapper({
+  component: InventoryTagManagerCtrl
 })
 
 test('The tags manager component mounts', () => {

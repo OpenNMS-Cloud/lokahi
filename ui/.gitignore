@@ -5,3 +5,6 @@ dist-ssr
 *.local
 coverage
 yarn-error.log
+cypress/e2e/examples
+cypress/videos
+.vscode

@@ -7,10 +7,12 @@
       </section>
       <section class="node-content">
         <div>
-          <MetricChipList :metrics="node?.metrics" data-test="metric-chip-list" />
-          <TextAnchorList :anchor="node.anchor" data-test="text-anchor-list" />
+          <FeatherChipList label="List of metric chips" data-test="metric-chip-list">
+            <MetricChip v-for="metric in node?.metrics" :key="metric?.type" :metric="metric" />
+          </FeatherChipList>
+          <InventoryTextAnchorList :anchor="node?.anchor" data-test="text-anchor-list" />
         </div>
-        <IconActionList :node="node" class="icon-action" data-test="icon-action-list" />
+        <InventoryIconActionList :node="node" class="icon-action" data-test="icon-action-list" />
       </section>
     </li>
   </ul>
@@ -47,7 +49,6 @@ ul {
     border: 1px solid var(variables.$secondary-text-on-surface); 
     border-radius: 10px;
     border-left: 10px solid var(variables.$secondary-text-on-surface); // TODO set color dynamically to the node's status
-
     > .header {
       margin-bottom: var(variables.$spacing-s);
       display: flex;
@@ -65,5 +66,10 @@ ul {
     justify-content: space-between;
     gap: 2rem;
   }
+}
+
+.chip-list {
+  margin: 0 0 var(variables.$spacing-s);
+  gap: 1rem;
 }
 </style>

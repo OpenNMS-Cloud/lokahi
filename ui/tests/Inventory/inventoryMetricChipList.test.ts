@@ -1,7 +1,7 @@
 import { mount } from '@vue/test-utils'
 import { TimeUnit } from '@/types'
 import { Chip } from '@/types/metric'
-import MetricChipList from '@/components/Inventory/MetricChipList.vue'
+import InventoryMetricChipList from '@/components/Inventory/InventoryMetricChipList.vue'
 
 const metrics: Chip[] = [
   {
@@ -14,7 +14,7 @@ const metrics: Chip[] = [
   {
     type: 'uptime',
     label: 'Uptime',
-    timestamp: 1667930274.660,
+    timestamp: 1667930274.66,
     timeUnit: TimeUnit.Secs,
     status: 'DOWN'
   },
@@ -28,20 +28,20 @@ const metrics: Chip[] = [
 let wrapper: any
 
 // TODO: will fix after demo
-describe.skip('Metric chip list', () => {
+describe.skip('InventoryMetricChipList.vue', () => {
   beforeAll(() => {
-    wrapper = mount(MetricChipList, {
+    wrapper = mount(InventoryMetricChipList, {
       props: {
         metrics
       }
     })
   })
   afterAll(() => {
-    wrapper.unmount() 
+    wrapper.unmount()
   })
 
   it(`should have ${metrics.length} metric chip(s)`, () => {
     const chipItem = wrapper.findAllComponents('[data-test="metric-chip"]')
-    expect(chipItem.length).toEqual(metrics.length)   
+    expect(chipItem.length).toEqual(metrics.length)
   })
 })

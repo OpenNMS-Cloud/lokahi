@@ -1,23 +1,23 @@
 import { mount } from '@vue/test-utils'
-import IconActionList from '@/components/Inventory/IconActionList.vue'
+import InventoryIconActionList from '@/components/Inventory/InventoryIconActionList.vue'
 
 let wrapper: any
 
-describe('Inventory node icon action list', () => {
+describe('InventoryIconActionList.vue', () => {
   beforeAll(() => {
-    wrapper = mount(IconActionList, {
+    wrapper = mount(InventoryIconActionList, {
       shallow: true
     })
   })
   afterAll(() => {
-    wrapper.unmount() 
+    wrapper.unmount()
   })
 
   const actionList = [
     // 'bubble-chart',
     'line-chart',
     // 'pie-chart',
-    'warning',
+    'warning'
     // 'delete'
   ]
   it.each(actionList)('should have "%s" action icon', (icon) => {

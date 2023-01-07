@@ -1,5 +1,5 @@
 import { mount } from '@vue/test-utils'
-import MonitoredNodesTabContent from '@/components/Inventory/MonitoredNodesTabContent.vue'
+import InventoryMonitoredNodesTabContent from '@/components/Inventory/InventoryMonitoredNodesTabContent.vue'
 import { TimeUnit } from '@/types'
 
 const tabContent = [
@@ -18,7 +18,7 @@ const tabContent = [
       {
         type: 'uptime',
         label: 'Uptime',
-        timestamp: 1667930274.660,
+        timestamp: 1667930274.66,
         timeUnit: TimeUnit.Secs,
         status: 'DOWN'
       },
@@ -43,9 +43,9 @@ const tabContent = [
 
 let wrapper: any
 
-describe('MonitoredNodesTabContent component', () => {
+describe('InventoryMonitoredNodesTabContent.vue', () => {
   beforeAll(() => {
-    wrapper = mount(MonitoredNodesTabContent, {
+    wrapper = mount(InventoryMonitoredNodesTabContent, {
       shallow: true,
       props: {
         tabContent
@@ -54,15 +54,9 @@ describe('MonitoredNodesTabContent component', () => {
   })
   afterAll(() => {
     wrapper.unmount()
-  }) 
+  })
 
-  const tabComponents = [
-    'icon',
-    'heading',
-    'metric-chip-list',
-    'text-anchor-list',
-    'icon-action-list'
-  ]
+  const tabComponents = ['icon', 'heading', 'metric-chip-list', 'text-anchor-list', 'icon-action-list']
   it.each(tabComponents)('should have "%s" components', (cmp) => {
     expect(wrapper.get(`[data-test="${cmp}"]`).exists()).toBe(true)
   })

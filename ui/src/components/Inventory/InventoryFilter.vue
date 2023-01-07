@@ -47,7 +47,7 @@
     </li>
     <!-- Tagging -->
     <li>
-      <TagManagerCtrl data-test="tag-manager-ctrl" /> 
+      <InventoryTagManagerCtrl data-test="tag-manager-ctrl" /> 
     </li>
     <!-- Sort/A-Z -->
     <li @click="onSort" class="action-btn" data-test="sort-btn"><Icon :icon="sort" /></li>
@@ -55,7 +55,7 @@
     <!-- Expand/Collapse -->
     <li @click="inventoryStore.toggleFilter" :data-test="expandCollapseBtn" class="action-btn"><Icon :icon="expandCollapse" /></li>
   </ul>
-  <TagManager />
+  <InventoryTagManager />
 </template>
 
 <script lang="ts" setup>

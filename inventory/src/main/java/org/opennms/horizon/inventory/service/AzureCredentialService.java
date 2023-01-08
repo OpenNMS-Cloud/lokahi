@@ -41,6 +41,8 @@ import org.opennms.horizon.inventory.service.taskset.ScannerTaskSetService;
 import org.opennms.horizon.inventory.service.taskset.TaskUtils;
 import org.opennms.horizon.shared.azure.http.AzureHttpClient;
 import org.opennms.horizon.shared.azure.http.AzureHttpException;
+import org.opennms.horizon.shared.azure.http.dto.login.AzureOAuthToken;
+import org.opennms.horizon.shared.azure.http.dto.subscription.AzureSubscription;
 import org.opennms.horizon.shared.constants.GrpcConstants;
 import org.springframework.stereotype.Component;
 
@@ -50,6 +52,8 @@ import java.util.Optional;
 @Component
 @RequiredArgsConstructor
 public class AzureCredentialService {
+    private static final String SUB_ENABLED_STATE = "Enabled";
+
     private final AzureHttpClient client;
     private final AzureCredentialMapper mapper;
     private final AzureCredentialRepository repository;
@@ -74,11 +78,22 @@ public class AzureCredentialService {
     }
 
     private void validateCredentials(AzureCredentialCreateDTO request) {
+        AzureOAuthToken token;
         try {
-            client.login(request.getDirectoryId(),
+            token = client.login(request.getDirectoryId(),
                 request.getClientId(), request.getClientSecret(), TaskUtils.Azure.DEFAULT_TIMEOUT);
         } catch (AzureHttpException e) {
             throw new InventoryRuntimeException("Failed to login with azure credentials", e);
+        }
+        AzureSubscription subscription;
+        try {
+           subscription = client.getSubscription(token, request.getSubscriptionId(), TaskUtils.Azure.DEFAULT_TIMEOUT);
+        } catch (AzureHttpException e) {
+            throw new InventoryRuntimeException("Failed to get azure subscription", e);
+        }
+        if (!subscription.getState().equalsIgnoreCase(SUB_ENABLED_STATE)) {
+            String message = String.format("Subscription %s is not enabled", request.getSubscriptionId());
+            throw new InventoryRuntimeException(message);
         }
     }
 

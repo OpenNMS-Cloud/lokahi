@@ -5,6 +5,7 @@ import org.opennms.horizon.shared.azure.http.dto.instanceview.AzureInstanceView;
 import org.opennms.horizon.shared.azure.http.dto.login.AzureOAuthToken;
 import org.opennms.horizon.shared.azure.http.dto.resourcegroup.AzureResourceGroups;
 import org.opennms.horizon.shared.azure.http.dto.resources.AzureResources;
+import org.opennms.horizon.shared.azure.http.dto.subscription.AzureSubscription;
 
 import java.io.IOException;
 import java.net.URI;
@@ -28,6 +29,7 @@ public class AzureHttpClient {
      * Endpoints
      */
     private static final String OAUTH2_TOKEN_ENDPOINT = "/%s/oauth2/token";
+    private static final String SUBSCRIPTION_ENDPOINT = "/subscriptions/%s";
     private static final String RESOURCE_GROUPS_ENDPOINT = "/subscriptions/%s/resourceGroups";
     private static final String RESOURCES_ENDPOINT = "/subscriptions/%s/resourceGroups/%s/resources";
     private static final String INSTANCE_VIEW_ENDPOINT = "/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Compute/virtualMachines/%s/InstanceView";
@@ -79,6 +81,11 @@ public class AzureHttpClient {
             .build();
 
         return performRequest(OAUTH2_TOKEN_ENDPOINT, AzureOAuthToken.class, request);
+    }
+
+    public AzureSubscription getSubscription(AzureOAuthToken token, String subscriptionId, long timeout) throws AzureHttpException {
+        String url = String.format(SUBSCRIPTION_ENDPOINT + API_VERSION_PARAM, subscriptionId);
+        return get(token, url, timeout, AzureSubscription.class);
     }
 
     public AzureResourceGroups getResourceGroups(AzureOAuthToken token, String subscriptionId, long timeout) throws AzureHttpException {

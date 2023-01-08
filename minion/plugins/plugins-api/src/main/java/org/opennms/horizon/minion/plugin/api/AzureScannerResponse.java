@@ -8,7 +8,5 @@ public interface AzureScannerResponse {
 
     List<AzureScanItem> getResults();
 
-    //cloud type
-
     String getReason();
 }

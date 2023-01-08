@@ -9,12 +9,11 @@ import org.opennms.horizon.inventory.model.Node;
 import org.opennms.horizon.inventory.repository.AzureCredentialRepository;
 import org.opennms.horizon.inventory.repository.NodeRepository;
 import org.opennms.horizon.inventory.service.NodeService;
+import org.opennms.horizon.inventory.service.taskset.CollectorTaskSetService;
 import org.opennms.horizon.inventory.service.taskset.MonitorTaskSetService;
 import org.opennms.taskset.contract.ScannerResponse;
-import org.opennms.taskset.contract.TaskDefinition;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -22,45 +21,42 @@ import java.util.Optional;
 @Component
 @RequiredArgsConstructor
 public class ScannerResponseService {
+    private final AzureCredentialRepository azureCredentialRepository;
     private final NodeRepository nodeRepository;
     private final NodeService nodeService;
     private final MonitorTaskSetService monitorTaskSetService;
-    private final AzureCredentialRepository azureCredentialRepository;
+    private final CollectorTaskSetService collectorTaskSetService;
 
     public void accept(String tenantId, String location, ScannerResponse response) {
-        List<TaskDefinition> tasks = new ArrayList<>();
+        List<AzureScanItem> resultsList = response.getResultsList();
 
-        for (int index = 0; index < response.getResultsList().size(); index++) {
+        for (int index = 0; index < resultsList.size(); index++) {
+            AzureScanItem item = resultsList.get(index);
 
-            // HACK: creating a dummy semi-unique ip address in order for status to display on ui
+            // HACK: for now, creating a dummy ip address in order for status to display on ui
+            // could maybe get ip interfaces from VM to save instead but private IPs may not be unique enough if no public IP attached ?
+            // Postgres requires a valid INET field
             String ipAddress = String.format("127.0.0.%d", index + 1);
 
-            AzureScanItem item = response.getResultsList().get(index);
-            Optional<TaskDefinition> taskOpt = process(tenantId, location, ipAddress, item);
-            taskOpt.ifPresent(tasks::add);
+            process(tenantId, location, ipAddress, item);
         }
-
-        monitorTaskSetService.sendMonitorTasks(tenantId, location, tasks);
     }
 
-    private Optional<TaskDefinition> process(String tenantId, String location, String ipAddress, AzureScanItem item) {
-
+    private void process(String tenantId, String location, String ipAddress, AzureScanItem item) {
         Optional<AzureCredential> azureCredentialOpt = azureCredentialRepository.findById(item.getCredentialId());
         if (azureCredentialOpt.isEmpty()) {
             log.warn("No Azure Credential found for id: {}", item.getCredentialId());
-            return Optional.empty();
+            return;
         }
 
         AzureCredential credential = azureCredentialOpt.get();
 
-        //adding resource group here, we also need to save with node in order to do next requests
         String nodeLabel = String.format("%s (%s)", item.getName(), item.getResourceGroup());
         Optional<Node> nodeOpt = nodeRepository.findByTenantLocationAndNodeLabel(tenantId, location, nodeLabel);
 
         if (nodeOpt.isEmpty()) {
 
-            //todo: may need to relate AzureCredential with Node for monitoring recovery
-
+            //todo: may need to relate AzureCredential with Node for recovery of monitoring
             NodeCreateDTO createDTO = NodeCreateDTO.newBuilder()
                 .setLocation(location)
                 .setManagementIp(ipAddress)
@@ -68,11 +64,11 @@ public class ScannerResponseService {
                 .build();
             Node node = nodeService.createNode(createDTO, tenantId);
 
-            TaskDefinition monitorTask = monitorTaskSetService.addAzureMonitorTask(credential, item,ipAddress, node.getId());
-            return Optional.of(monitorTask);
-        }
+            monitorTaskSetService.sendAzureMonitorTasks(credential, item, ipAddress, node.getId());
+            collectorTaskSetService.sendAzureCollectorTasks(credential, item, ipAddress, node.getId());
 
-        log.warn("Node already exists for tenant: {}, location: {}, label: {}", tenantId, location, nodeLabel);
-        return Optional.empty();
+        } else {
+            log.warn("Node already exists for tenant: {}, location: {}, label: {}", tenantId, location, nodeLabel);
+        }
     }
 }

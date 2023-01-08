@@ -89,7 +89,8 @@ public class AzureCredentialService {
         try {
            subscription = client.getSubscription(token, request.getSubscriptionId(), TaskUtils.Azure.DEFAULT_TIMEOUT);
         } catch (AzureHttpException e) {
-            throw new InventoryRuntimeException("Failed to get azure subscription", e);
+            String message = String.format("Failed to get azure subscription %s", request.getSubscriptionId());
+            throw new InventoryRuntimeException(message, e);
         }
         if (!subscription.getState().equalsIgnoreCase(SUB_ENABLED_STATE)) {
             String message = String.format("Subscription %s is not enabled", request.getSubscriptionId());

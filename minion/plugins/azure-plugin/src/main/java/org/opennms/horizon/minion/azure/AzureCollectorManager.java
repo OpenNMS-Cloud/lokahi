@@ -25,53 +25,17 @@
  *     http://www.opennms.org/
  *     http://www.opennms.com/
  *******************************************************************************/
-syntax = "proto3";
 
-import "google/protobuf/any.proto";
+package org.opennms.horizon.minion.azure;
 
-package opennms.azure;
-option java_multiple_files = true;
-option java_package = "org.opennms.azure.contract";
+import org.opennms.horizon.minion.plugin.api.ServiceCollector;
+import org.opennms.horizon.minion.plugin.api.ServiceCollectorManager;
+import org.opennms.horizon.shared.azure.http.AzureHttpClient;
 
-// todo: create common credential fields into reusable message
-
-message AzureScanRequest {
-  int64 credential_id = 1;
-  string client_id = 2;
-  string client_secret = 3;
-  string subscription_id = 4;
-  string directory_id = 5;
-  int64 timeout = 6;
-  int32 retries = 7;
-}
-
-message AzureScanItem {
-  string id = 1;
-  string name = 2;
-  string resourceGroup = 3;
-  int64 credential_id = 4;
-}
-
-message AzureMonitorRequest {
-  string resource = 1;
-  string resource_group = 2;
-  string host = 3; // dummy in order for metrics to work (management ip)
-  string client_id = 4;
-  string client_secret = 5;
-  string subscription_id = 6;
-  string directory_id = 7;
-  int32 retries = 8;
-  int64 timeout = 9;
-}
-
-message AzureCollectorRequest {
-  string resource = 1;
-  string resource_group = 2;
-  string host = 3; // dummy in order for metrics to work (management ip)
-  string client_id = 4;
-  string client_secret = 5;
-  string subscription_id = 6;
-  string directory_id = 7;
-  int32 retries = 8;
-  int64 timeout = 9;
+public class AzureCollectorManager implements ServiceCollectorManager {
+    @Override
+    public ServiceCollector create() {
+        AzureHttpClient client = new AzureHttpClient();
+        return new AzureCollector(client);
+    }
 }

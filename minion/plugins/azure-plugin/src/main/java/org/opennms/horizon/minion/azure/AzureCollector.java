@@ -1,0 +1,111 @@
+/*******************************************************************************
+ * This file is part of OpenNMS(R).
+ *
+ * Copyright (C) 2022 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
+ *
+ * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *
+ * OpenNMS(R) is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published
+ * by the Free Software Foundation, either version 3 of the License,
+ * or (at your option) any later version.
+ *
+ * OpenNMS(R) is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with OpenNMS(R).  If not, see:
+ *      http://www.gnu.org/licenses/
+ *
+ * For more information contact:
+ *     OpenNMS(R) Licensing <license@opennms.org>
+ *     http://www.opennms.org/
+ *     http://www.opennms.com/
+ *******************************************************************************/
+
+package org.opennms.horizon.minion.azure;
+
+import com.google.protobuf.Any;
+import org.opennms.azure.contract.AzureCollectorRequest;
+import org.opennms.horizon.minion.plugin.api.CollectionRequest;
+import org.opennms.horizon.minion.plugin.api.CollectionSet;
+import org.opennms.horizon.minion.plugin.api.ServiceCollector;
+import org.opennms.horizon.minion.plugin.api.ServiceCollectorResponseImpl;
+import org.opennms.horizon.shared.azure.http.AzureHttpClient;
+import org.opennms.horizon.shared.azure.http.dto.login.AzureOAuthToken;
+import org.opennms.horizon.shared.azure.http.dto.metrics.AzureMetrics;
+import org.opennms.horizon.snmp.api.SnmpResponseMetric;
+import org.opennms.taskset.contract.MonitorType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.concurrent.CompletableFuture;
+
+public class AzureCollector implements ServiceCollector
+    private final Logger log = LoggerFactory.getLogger(AzureCollector.class);
+    private static final String METRIC_INTERVAL = "PT1M";
+    private static final String[] METRIC_NAMES = {
+        "Network In Total", "Network Out Total"
+    };
+    private static final String METRIC_DELIMITER = ",";
+
+    private final AzureHttpClient client;
+
+    public AzureCollector(AzureHttpClient client) {
+        this.client = client;
+    }
+
+    @Override
+    public CompletableFuture<CollectionSet> collect(CollectionRequest svc, Any config) {
+        CompletableFuture<CollectionSet> future = new CompletableFuture<>();
+
+        try {
+            if (!config.is(AzureCollectorRequest.class)) {
+                throw new IllegalArgumentException("configuration must be an AzureCollectorRequest; type-url=" + config.getTypeUrl());
+            }
+
+            AzureCollectorRequest request = config.unpack(AzureCollectorRequest.class);
+
+            AzureOAuthToken token = client.login(request.getDirectoryId(),
+                request.getClientId(), request.getClientSecret(), request.getTimeout());
+
+            String[] params = {
+                "interval=" + METRIC_INTERVAL,
+                "metricnames=" + String.join(METRIC_DELIMITER, METRIC_NAMES)
+            };
+
+            System.out.println("Getting metrics....");
+
+            AzureMetrics metrics = client.getMetrics(token, request.getSubscriptionId(),
+                request.getResourceGroup(), request.getResource(), params, request.getTimeout());
+
+            System.out.println("metrics = " + metrics);
+
+
+            SnmpResponseMetric response = SnmpResponseMetric.newBuilder()
+//                .addAllResults(snmpResults)
+                .build();
+
+            future.complete(ServiceCollectorResponseImpl.builder()
+                .results(response)
+                .nodeId(svc.getNodeId())
+                .monitorType(MonitorType.SNMP)
+                .status(true)
+                .ipAddress(svc.getIpAddress()).build());
+
+
+        } catch (Exception e) {
+            log.error("Failed to collect for azure resource", e);
+            future.complete(ServiceCollectorResponseImpl.builder()
+                .nodeId(svc.getNodeId())
+                .monitorType(MonitorType.SNMP)
+                .status(false)
+                .ipAddress(svc.getIpAddress()).build());
+        }
+
+        return future;
+    }
+}

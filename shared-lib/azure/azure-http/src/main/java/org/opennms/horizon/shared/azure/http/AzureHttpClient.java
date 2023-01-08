@@ -3,15 +3,18 @@ package org.opennms.horizon.shared.azure.http;
 import com.google.gson.Gson;
 import org.opennms.horizon.shared.azure.http.dto.instanceview.AzureInstanceView;
 import org.opennms.horizon.shared.azure.http.dto.login.AzureOAuthToken;
+import org.opennms.horizon.shared.azure.http.dto.metrics.AzureMetrics;
 import org.opennms.horizon.shared.azure.http.dto.resourcegroup.AzureResourceGroups;
 import org.opennms.horizon.shared.azure.http.dto.resources.AzureResources;
 import org.opennms.horizon.shared.azure.http.dto.subscription.AzureSubscription;
 
 import java.io.IOException;
 import java.net.URI;
+import java.net.URLEncoder;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.LinkedList;
@@ -33,6 +36,7 @@ public class AzureHttpClient {
     private static final String RESOURCE_GROUPS_ENDPOINT = "/subscriptions/%s/resourceGroups";
     private static final String RESOURCES_ENDPOINT = "/subscriptions/%s/resourceGroups/%s/resources";
     private static final String INSTANCE_VIEW_ENDPOINT = "/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Compute/virtualMachines/%s/InstanceView";
+    private static final String METRICS_ENDPOINT = "/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Compute/virtualMachines/%s/providers/Microsoft.Insights/metrics";
 
     /*
      * Headers
@@ -48,8 +52,10 @@ public class AzureHttpClient {
     private static final String LOGIN_CLIENT_SECRET_PARAM = "client_secret=";
     private static final String LOGIN_RESOURCE_PARAM = "resource=" + MANAGEMENT_BASE_URL + "/";
 
-    private static final String API_VERSION = "2021-04-01"; // todo: get latest version and test
+    private static final String API_VERSION = "2021-04-01";
+    private static final String METRICS_API_VERSION = "2018-01-01";
     private static final String API_VERSION_PARAM = "?api-version=" + API_VERSION;
+    private static final String METRICS_API_VERSION_PARAM = "?api-version=" + METRICS_API_VERSION;
     private static final String PARAMETER_DELIMITER = "&";
 
     /*
@@ -73,9 +79,8 @@ public class AzureHttpClient {
         parameters.add(LOGIN_CLIENT_SECRET_PARAM + clientSecret);
         parameters.add(LOGIN_RESOURCE_PARAM);
 
-        HttpRequest request = HttpRequest.newBuilder()
-            .uri(URI.create(String.format(LOGIN_BASE_URL + OAUTH2_TOKEN_ENDPOINT + API_VERSION_PARAM, directoryId)))
-            .timeout(Duration.of(timeout, ChronoUnit.MILLIS))
+        String url = String.format(LOGIN_BASE_URL + OAUTH2_TOKEN_ENDPOINT + API_VERSION_PARAM, directoryId);
+        HttpRequest request = getHttpRequestBuilder(url, timeout)
             .header(CONTENT_TYPE_HEADER, APPLICATION_FORM_URLENCODED_VALUE)
             .POST(HttpRequest.BodyPublishers.ofString(String.join(PARAMETER_DELIMITER, parameters)))
             .build();
@@ -101,6 +106,12 @@ public class AzureHttpClient {
     public AzureInstanceView getInstanceView(AzureOAuthToken token, String subscriptionId, String resourceGroup, String resourceName, long timeout) throws AzureHttpException {
         String url = String.format(INSTANCE_VIEW_ENDPOINT + API_VERSION_PARAM, subscriptionId, resourceGroup, resourceName);
         return get(token, url, timeout, AzureInstanceView.class);
+    }
+
+    public AzureMetrics getMetrics(AzureOAuthToken token, String subscriptionId, String resourceGroup, String resourceName, String[] params, long timeout) throws AzureHttpException {
+        String url = String.format(METRICS_ENDPOINT + METRICS_API_VERSION_PARAM, subscriptionId, resourceGroup, resourceName);
+        url = addUrlParams(url, params);
+        return get(token, url, timeout, AzureMetrics.class);
     }
 
     private <T> T get(AzureOAuthToken token, String endpoint, long timeout, Class<T> clazz) throws AzureHttpException {
@@ -130,10 +141,27 @@ public class AzureHttpClient {
     }
 
     private HttpRequest buildGetHttpRequest(AzureOAuthToken token, String url, long timeout) {
-        return HttpRequest.newBuilder()
-            .uri(URI.create(url))
-            .timeout(Duration.of(timeout, ChronoUnit.MILLIS))
+        return getHttpRequestBuilder(url, timeout)
             .header(AUTH_HEADER, String.format("%s %s", token.getTokenType(), token.getAccessToken()))
             .GET().build();
+    }
+
+    private HttpRequest.Builder getHttpRequestBuilder(String url, long timeout) {
+        return HttpRequest.newBuilder()
+            .uri(URI.create(url))
+            .timeout(Duration.of(timeout, ChronoUnit.MILLIS));
+    }
+
+    private String addUrlParams(String url, String[] params) {
+        StringBuilder urlBuilder = new StringBuilder(url);
+        for (String param : params) {
+            urlBuilder.append(PARAMETER_DELIMITER);
+            urlBuilder.append(encode(param));
+        }
+        return urlBuilder.toString();
+    }
+
+    private String encode(String value) {
+        return URLEncoder.encode(value, StandardCharsets.UTF_8);
     }
 }

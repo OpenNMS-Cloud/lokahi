@@ -28,4 +28,14 @@
         </service-properties>
     </service>
 
+    <bean id="azureCollectorManager" class="org.opennms.horizon.minion.azure.AzureCollectorManager">
+
+    </bean>
+
+    <service ref="azureCollectorManager" interface="org.opennms.horizon.minion.plugin.api.ServiceCollectorManager">
+        <service-properties>
+            <entry key="collector.name" value="AZURECollector"/>
+        </service-properties>
+    </service>
+
 </blueprint>

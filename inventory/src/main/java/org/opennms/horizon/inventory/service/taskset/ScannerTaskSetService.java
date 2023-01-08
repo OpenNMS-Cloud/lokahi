@@ -20,10 +20,10 @@ public class ScannerTaskSetService {
 
     public void sendAzureScannerTask(AzureCredential credential) {
         String tenantId = credential.getTenantId();
-
-        var task = addAzureScannerTask(credential);
-
         String location = credential.getMonitoringLocation().getLocation();
+
+        TaskDefinition task = addAzureScannerTask(credential);
+
         taskSetPublisher.publishNewTasks(tenantId, location, List.of(task));
     }
 

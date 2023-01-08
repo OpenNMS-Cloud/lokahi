@@ -30,6 +30,10 @@ package org.opennms.horizon.inventory.service.taskset;
 
 import com.google.protobuf.Any;
 import lombok.RequiredArgsConstructor;
+import org.opennms.azure.contract.AzureCollectorRequest;
+import org.opennms.azure.contract.AzureMonitorRequest;
+import org.opennms.azure.contract.AzureScanItem;
+import org.opennms.horizon.inventory.model.AzureCredential;
 import org.opennms.horizon.inventory.model.IpInterface;
 import org.opennms.horizon.snmp.api.SnmpConfiguration;
 import org.opennms.horizon.snmp.api.Version;
@@ -44,6 +48,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
 
+import static org.opennms.horizon.inventory.service.taskset.TaskUtils.identityForAzureTask;
 import static org.opennms.horizon.inventory.service.taskset.TaskUtils.identityForIpTask;
 
 @Component
@@ -60,6 +65,14 @@ public class CollectorTaskSetService {
         if (task != null) {
             taskSetPublisher.publishNewTasks(tenantId, location, Arrays.asList(task));
         }
+    }
+
+    public void sendAzureCollectorTasks(AzureCredential credential, AzureScanItem item, String ipAddress, long nodeId) {
+        String tenantId = credential.getTenantId();
+        String location = credential.getMonitoringLocation().getLocation();
+
+        TaskDefinition task = addAzureCollectorTask(credential, item, ipAddress, nodeId);
+        taskSetPublisher.publishNewTasks(tenantId, location, Arrays.asList(task));
     }
 
     private TaskDefinition addCollectorTask(MonitorType monitorType, IpInterface ipInterface, long nodeId) {
@@ -98,4 +111,29 @@ public class CollectorTaskSetService {
         return taskDefinition;
     }
 
+    private TaskDefinition addAzureCollectorTask(AzureCredential credential, AzureScanItem scanItem, String ipAddress, long nodeId) {
+        Any configuration =
+            Any.pack(AzureCollectorRequest.newBuilder()
+                .setResource(scanItem.getName())
+                .setResourceGroup(scanItem.getResourceGroup())
+                .setHost(ipAddress) // dummy address to allow metrics to be added
+                .setClientId(credential.getClientId())
+                .setClientSecret(credential.getClientSecret())
+                .setSubscriptionId(credential.getSubscriptionId())
+                .setDirectoryId(credential.getDirectoryId())
+                .setTimeout(TaskUtils.Azure.DEFAULT_TIMEOUT)
+                .setRetries(TaskUtils.Azure.DEFAULT_RETRIES)
+                .build());
+
+        String name = String.join("-", "azure", "collector", scanItem.getId());
+        String taskId = identityForAzureTask(name);
+        return TaskDefinition.newBuilder()
+            .setType(TaskType.COLLECTOR)
+            .setPluginName("AZURECollector")
+            .setNodeId(nodeId)
+            .setId(taskId)
+            .setConfiguration(configuration)
+            .setSchedule(TaskUtils.Azure.COLLECTOR_SCHEDULE)
+            .build();
+    }
 }

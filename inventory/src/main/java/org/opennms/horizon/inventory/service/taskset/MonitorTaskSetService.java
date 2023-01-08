@@ -67,8 +67,12 @@ public class MonitorTaskSetService {
         }
     }
 
-    public void sendMonitorTasks(String tenantId, String location, List<TaskDefinition> tasks) {
-        taskSetPublisher.publishNewTasks(tenantId, location, tasks);
+    public void sendAzureMonitorTasks(AzureCredential credential, AzureScanItem item, String ipAddress, long nodeId) {
+        String tenantId = credential.getTenantId();
+        String location = credential.getMonitoringLocation().getLocation();
+
+        TaskDefinition task = addAzureMonitorTask(credential, item, ipAddress, nodeId);
+        taskSetPublisher.publishNewTasks(tenantId, location, Arrays.asList(task));
     }
 
     private TaskDefinition addMonitorTask(MonitorType monitorType, IpInterface ipInterface, long nodeId) {
@@ -129,7 +133,7 @@ public class MonitorTaskSetService {
         return taskDefinition;
     }
 
-    public TaskDefinition addAzureMonitorTask(AzureCredential credential, AzureScanItem scanItem, String ipAddress, long nodeId) {
+    private TaskDefinition addAzureMonitorTask(AzureCredential credential, AzureScanItem scanItem, String ipAddress, long nodeId) {
 
         Any configuration =
             Any.pack(AzureMonitorRequest.newBuilder()

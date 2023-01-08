@@ -19,6 +19,7 @@ import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 public class AzureHttpClient {
 
@@ -108,9 +109,10 @@ public class AzureHttpClient {
         return get(token, url, timeout, AzureInstanceView.class);
     }
 
-    public AzureMetrics getMetrics(AzureOAuthToken token, String subscriptionId, String resourceGroup, String resourceName, String[] params, long timeout) throws AzureHttpException {
+    public AzureMetrics getMetrics(AzureOAuthToken token, String subscriptionId, String resourceGroup, String resourceName, Map<String, String> params, long timeout) throws AzureHttpException {
         String url = String.format(METRICS_ENDPOINT + METRICS_API_VERSION_PARAM, subscriptionId, resourceGroup, resourceName);
         url = addUrlParams(url, params);
+        System.out.println("metrics url = " + url);
         return get(token, url, timeout, AzureMetrics.class);
     }
 
@@ -152,11 +154,11 @@ public class AzureHttpClient {
             .timeout(Duration.of(timeout, ChronoUnit.MILLIS));
     }
 
-    private String addUrlParams(String url, String[] params) {
+    private String addUrlParams(String url, Map<String, String> params) {
         StringBuilder urlBuilder = new StringBuilder(url);
-        for (String param : params) {
+        for (Map.Entry<String, String> param : params.entrySet()) {
             urlBuilder.append(PARAMETER_DELIMITER);
-            urlBuilder.append(encode(param));
+            urlBuilder.append(String.format("%s=%s", param.getKey(), encode(param.getValue())));
         }
         return urlBuilder.toString();
     }

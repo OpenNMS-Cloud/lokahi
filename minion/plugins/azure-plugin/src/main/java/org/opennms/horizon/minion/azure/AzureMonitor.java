@@ -8,7 +8,6 @@ import org.opennms.horizon.minion.plugin.api.ServiceMonitorResponse;
 import org.opennms.horizon.minion.plugin.api.ServiceMonitorResponseImpl;
 import org.opennms.horizon.shared.azure.http.AzureHttpClient;
 import org.opennms.horizon.shared.azure.http.dto.instanceview.AzureInstanceView;
-import org.opennms.horizon.shared.azure.http.dto.instanceview.AzureStatus;
 import org.opennms.horizon.shared.azure.http.dto.login.AzureOAuthToken;
 import org.opennms.taskset.contract.MonitorType;
 import org.slf4j.Logger;
@@ -18,7 +17,6 @@ import java.util.concurrent.CompletableFuture;
 
 public class AzureMonitor extends AbstractServiceMonitor {
     private static final Logger log = LoggerFactory.getLogger(AzureMonitor.class);
-    private static final String POWER_STATE_RUNNING = "PowerState/running";
 
     private final AzureHttpClient client;
 
@@ -46,13 +44,12 @@ public class AzureMonitor extends AbstractServiceMonitor {
             AzureInstanceView instanceView = client.getInstanceView(token, request.getSubscriptionId(),
                 request.getResourceGroup(), request.getResource(), request.getTimeout());
 
-            ServiceMonitorResponse.Status status = getInstanceStatus(instanceView);
+            if (instanceView.isUp()) {
 
-            if (status == ServiceMonitorResponse.Status.Up) {
                 future.complete(
                     ServiceMonitorResponseImpl.builder()
                         .monitorType(MonitorType.ICMP) // HACK: using ICMP because the UI makes a query with ICMP for status
-                        .status(status)
+                        .status(ServiceMonitorResponse.Status.Up)
                         .responseTime(System.currentTimeMillis() - startMs)
                         .nodeId(svc.getNodeId())
                         .ipAddress(request.getHost())
@@ -62,7 +59,7 @@ public class AzureMonitor extends AbstractServiceMonitor {
                 future.complete(
                     ServiceMonitorResponseImpl.builder()
                         .monitorType(MonitorType.ICMP)
-                        .status(status)
+                        .status(ServiceMonitorResponse.Status.Down)
                         .nodeId(svc.getNodeId())
                         .ipAddress(request.getHost())
                         .build()
@@ -82,15 +79,5 @@ public class AzureMonitor extends AbstractServiceMonitor {
         }
 
         return future;
-    }
-
-    private ServiceMonitorResponse.Status getInstanceStatus(AzureInstanceView instanceView) {
-        for (AzureStatus status : instanceView.getStatuses()) {
-            String code = status.getCode();
-            if (code.equalsIgnoreCase(POWER_STATE_RUNNING)) {
-                return ServiceMonitorResponse.Status.Up;
-            }
-        }
-        return ServiceMonitorResponse.Status.Down;
     }
 }

@@ -5,7 +5,7 @@
     </div>
     <div class="btns">
       <AppliancesNotificationsCtrl />
-      <AddNodeCtrl />
+      <AppliancesAddNodeCtrl />
     </div>
   </div>
 

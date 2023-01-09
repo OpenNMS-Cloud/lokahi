@@ -7,7 +7,6 @@ export {}
 
 declare module '@vue/runtime-core' {
   export interface GlobalComponents {
-    AddNodeCtrl: typeof import('./src/components/Appliances/AddNodeCtrl.vue')['default']
     AppliancesAddNodeCtrl: typeof import('./src/components/Appliances/AppliancesAddNodeCtrl.vue')['default']
     AppliancesNotificationsCtrl: typeof import('./src/components/Appliances/AppliancesNotificationsCtrl.vue')['default']
     ContextMenu: typeof import('./src/components/Topology/ContextMenu.vue')['default']

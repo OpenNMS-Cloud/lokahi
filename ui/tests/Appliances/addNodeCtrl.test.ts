@@ -1,10 +1,10 @@
-import AddNodeCtrl from '@/components/Appliances/AddNodeCtrl.vue'
+import AppliancesAddNodeCtrl from '@/components/Appliances/AppliancesAppliancesAddNodeCtrl.vue'
 import { createTestingPinia } from '@pinia/testing'
 import { mount } from '@vue/test-utils'
 import { createClient, VILLUS_CLIENT } from 'villus'
 import { useNodeMutations } from '@/store/Mutations/nodeMutations'
 
-const wrapper = mount(AddNodeCtrl, {
+const wrapper = mount(AppliancesAddNodeCtrl, {
   global: {
     stubs: {
       teleport: true

@@ -30,7 +30,7 @@ package org.opennms.miniongateway.grpc.server.rpcrequest.flow;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
-import org.opennms.horizon.grpc.traps.contract.TrapLogDTO;
+import org.opennms.horizon.grpc.telemetry.contract.TelemetryMessageLog;
 import org.opennms.horizon.shared.ipc.sink.aggregation.IdentityAggregationPolicy;
 import org.opennms.horizon.shared.ipc.sink.api.AggregationPolicy;
 import org.opennms.horizon.shared.ipc.sink.api.AsyncPolicy;
@@ -55,7 +55,7 @@ public class FlowSinkModule implements SinkModule<Message, Message> {
     @Override
     public Message unmarshal(byte[] message) {
         try {
-            return TrapLogDTO.parseFrom(message);
+            return TelemetryMessageLog.parseFrom(message);
         } catch (InvalidProtocolBufferException e) {
             throw new RuntimeException(e);
         }
@@ -69,7 +69,7 @@ public class FlowSinkModule implements SinkModule<Message, Message> {
     @Override
     public Message unmarshalSingleMessage(byte[] message) {
         try {
-            return TrapLogDTO.parseFrom(message);
+            return TelemetryMessageLog.parseFrom(message);
         } catch (InvalidProtocolBufferException e) {
             throw new RuntimeException(e);
         }

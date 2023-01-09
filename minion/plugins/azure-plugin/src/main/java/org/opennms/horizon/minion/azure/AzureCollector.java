@@ -38,18 +38,13 @@ import org.opennms.horizon.shared.azure.http.AzureHttpClient;
 import org.opennms.horizon.shared.azure.http.AzureHttpException;
 import org.opennms.horizon.shared.azure.http.dto.instanceview.AzureInstanceView;
 import org.opennms.horizon.shared.azure.http.dto.login.AzureOAuthToken;
-import org.opennms.horizon.shared.azure.http.dto.metrics.AzureDatum;
 import org.opennms.horizon.shared.azure.http.dto.metrics.AzureMetrics;
-import org.opennms.horizon.shared.azure.http.dto.metrics.AzureTimeseries;
-import org.opennms.horizon.shared.azure.http.dto.metrics.AzureValue;
 import org.opennms.horizon.snmp.api.SnmpResponseMetric;
 import org.opennms.taskset.contract.MonitorType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.time.Instant;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
@@ -72,7 +67,7 @@ public class AzureCollector implements ServiceCollector {
     }
 
     @Override
-    public CompletableFuture<CollectionSet> collect(CollectionRequest svc, Any config) {
+    public CompletableFuture<CollectionSet> collect(CollectionRequest collectionRequest, Any config) {
         CompletableFuture<CollectionSet> future = new CompletableFuture<>();
 
         try {
@@ -91,30 +86,44 @@ public class AzureCollector implements ServiceCollector {
             if (instanceView.isUp()) {
 
                 Map<String, Double> collectedData = new HashMap<>();
-                collectedData.put("Uptime Ms", instanceView.getUptimeInMs().doubleValue());
+                collectedData.put("Uptime Ms", instanceView.getUptimeMs().doubleValue());
 
-                collect(svc, request, collectedData, future, token);
+                collect(request, token, collectedData);
+
+                System.out.println("collectedData = " + collectedData);
+
+                SnmpResponseMetric response = SnmpResponseMetric.newBuilder()
+//                .addAllResults(snmpResults)
+                    .build();
+
+                future.complete(ServiceCollectorResponseImpl.builder()
+                    .results(response)
+                    .nodeId(collectionRequest.getNodeId())
+                    .monitorType(MonitorType.SNMP)
+                    .status(true)
+                    .ipAddress(collectionRequest.getIpAddress()).build());
 
             } else {
                 future.complete(ServiceCollectorResponseImpl.builder()
-                    .nodeId(svc.getNodeId())
+                    .nodeId(collectionRequest.getNodeId())
                     .monitorType(MonitorType.SNMP)
                     .status(false)
-                    .ipAddress(svc.getIpAddress()).build());
+                    .ipAddress(collectionRequest.getIpAddress()).build());
             }
         } catch (Exception e) {
             log.error("Failed to collect for azure resource", e);
             future.complete(ServiceCollectorResponseImpl.builder()
-                .nodeId(svc.getNodeId())
+                .nodeId(collectionRequest.getNodeId())
                 .monitorType(MonitorType.SNMP)
                 .status(false)
-                .ipAddress(svc.getIpAddress()).build());
+                .ipAddress(collectionRequest.getIpAddress()).build());
         }
         return future;
     }
 
-    private void collect(CollectionRequest svc, AzureCollectorRequest request, Map<String, Double> collectedData,
-                         CompletableFuture<CollectionSet> future, AzureOAuthToken token) throws AzureHttpException {
+    private void collect(AzureCollectorRequest request,
+                         AzureOAuthToken token,
+                         Map<String, Double> collectedData) throws AzureHttpException {
 
         Map<String, String> params = new HashMap<>();
         params.put(INTERVAL_PARAM, METRIC_INTERVAL);
@@ -123,50 +132,6 @@ public class AzureCollector implements ServiceCollector {
         AzureMetrics metrics = client.getMetrics(token, request.getSubscriptionId(),
             request.getResourceGroup(), request.getResource(), params, request.getTimeout());
 
-        for (AzureValue metric : metrics.getValue()) {
-            collectMetric(collectedData, metric);
-        }
-
-        System.out.println("collectedData = " + collectedData);
-
-        SnmpResponseMetric response = SnmpResponseMetric.newBuilder()
-//                .addAllResults(snmpResults)
-            .build();
-
-        future.complete(ServiceCollectorResponseImpl.builder()
-            .results(response)
-            .nodeId(svc.getNodeId())
-            .monitorType(MonitorType.SNMP)
-            .status(true)
-            .ipAddress(svc.getIpAddress()).build());
-    }
-
-    private void collectMetric(Map<String, Double> collectedData, AzureValue metric) {
-        String metricName = metric.getName().getValue();
-
-        List<AzureTimeseries> timeseriesList = metric.getTimeseries();
-        if (timeseriesList.isEmpty()) {
-            collectedData.put(metricName, 0d);
-        } else {
-
-            AzureTimeseries timeseries = timeseriesList.get(0);
-            List<AzureDatum> data = timeseries.getData();
-
-            //todo: sanity check - double check we actually need to sort
-            data.sort((o1, o2) -> {
-                Instant t1 = Instant.parse(o1.getTimeStamp());
-                Instant t2 = Instant.parse(o2.getTimeStamp());
-                return t1.compareTo(t2);
-            });
-
-            // for now getting last value as it is most recent
-            AzureDatum datum = data.get(data.size() - 1);
-
-            Double value = datum.getValue();
-            if (value == null) {
-                value = 0d;
-            }
-            collectedData.put(metricName, value);
-        }
+        metrics.collect(collectedData);
     }
 }

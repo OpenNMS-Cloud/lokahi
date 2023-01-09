@@ -7,6 +7,7 @@ import lombok.ToString;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @ToString
 @Getter
@@ -24,4 +25,10 @@ public class AzureMetrics {
     private String namespace;
     @SerializedName("resourceregion")
     private String resourceregion;
+
+    public void collect(Map<String, Double> collectedData) {
+        for (AzureValue metric : value) {
+            metric.collect(collectedData);
+        }
+    }
 }

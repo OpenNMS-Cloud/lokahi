@@ -4,9 +4,6 @@ import com.google.gson.annotations.SerializedName;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.Instant;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,7 +33,7 @@ public class AzureInstanceView {
         return false;
     }
 
-    public Long getUptimeInMs() {
+    public Long getUptimeMs() {
 
         // check if its been deallocated as a succeeded is also in the list as a previous element
         // maybe instead loop in reverse for succeeded provisioning state...
@@ -50,19 +47,10 @@ public class AzureInstanceView {
         for (AzureStatus status : getStatuses()) {
             String code = status.getCode();
             if (code.equalsIgnoreCase(PROVISIONING_STATE_SUCCEEDED)) {
-                return getUptimeInMs(status);
+
+                return status.getElapsedTimeMs();
             }
         }
         return null;
-    }
-
-    private long getUptimeInMs(AzureStatus status) {
-        ZonedDateTime statusDateTime = ZonedDateTime.parse(status.getTime(), DateTimeFormatter.ISO_OFFSET_DATE_TIME);
-        ZonedDateTime nowDateTime = ZonedDateTime.now(statusDateTime.getZone());
-
-        Instant statusInstant = statusDateTime.toInstant();
-        Instant nowInstant = nowDateTime.toInstant();
-
-        return nowInstant.toEpochMilli() - statusInstant.toEpochMilli();
     }
 }

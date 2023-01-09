@@ -13,7 +13,7 @@
     <name>OpenNMS Horizon :: Minion :: Flows</name>
     <packaging>pom</packaging>
     <properties>
-        <!-- TODO Patrick: we override here the version from the parent pom (2.1.0) which requires java 17. But minion requires java 17 -->
+        <!-- TODO Patrick: we override here the version from the parent pom (2.1.0) which requires java 17. But minion requires java 11 according to the wiki -->
         <resilience4j.version>0.17.0</resilience4j.version>
     </properties>
     <modules>

@@ -29,6 +29,7 @@ runs:
       if: ${{ inputs.enable-sonar-scan == 'true' }}
       run: |
 
+        mvn clean install
         mvn -Pcoverage verify -DskipTests -Ddocker.image=opennms/horizon-stream-minion:local -Ddocker.skipPush=true \
           org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=$SONAR_PROJECT_KEY
 
@@ -43,6 +44,7 @@ runs:
       if: ${{ inputs.enable-sonar-scan == 'false' }}
       run: |
 
+        mvn clean install
         mvn verify -DskipTests -Ddocker.image=opennms/horizon-stream-minion:local -Ddocker.skipPush=true
 
       working-directory: minion

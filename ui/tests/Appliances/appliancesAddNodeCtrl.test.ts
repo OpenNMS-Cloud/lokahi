@@ -1,4 +1,4 @@
-import AppliancesAddNodeCtrl from '@/components/Appliances/AppliancesAppliancesAddNodeCtrl.vue'
+import AppliancesAddNodeCtrl from '@/components/Appliances/AppliancesAddNodeCtrl.vue'
 import { createTestingPinia } from '@pinia/testing'
 import { mount } from '@vue/test-utils'
 import { createClient, VILLUS_CLIENT } from 'villus'

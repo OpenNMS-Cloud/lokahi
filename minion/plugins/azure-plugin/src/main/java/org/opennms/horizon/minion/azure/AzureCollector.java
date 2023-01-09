@@ -59,7 +59,9 @@ public class AzureCollector implements ServiceCollector {
     private static final String INTERVAL_PARAM = "interval";
     private static final String METRIC_NAMES_PARAM = "metricnames";
 
-    private static final String METRIC_INTERVAL = "PT30S";
+
+    //   Supported intervals: PT1M,PT5M,PT15M,PT30M,PT1H,PT6H,PT12H,P1D
+    private static final String METRIC_INTERVAL = "PT1M";
 
     private static final Map<String, String> AZURE_METRIC_TO_ALIAS = new HashMap<>();
 
@@ -89,10 +91,10 @@ public class AzureCollector implements ServiceCollector {
             AzureCollectorRequest request = config.unpack(AzureCollectorRequest.class);
 
             AzureOAuthToken token = client.login(request.getDirectoryId(),
-                request.getClientId(), request.getClientSecret(), request.getTimeout());
+                request.getClientId(), request.getClientSecret(), request.getTimeout(), request.getRetries());
 
             AzureInstanceView instanceView = client.getInstanceView(token, request.getSubscriptionId(),
-                request.getResourceGroup(), request.getResource(), request.getTimeout());
+                request.getResourceGroup(), request.getResource(), request.getTimeout(), request.getRetries());
 
             if (instanceView.isUp()) {
 
@@ -143,7 +145,7 @@ public class AzureCollector implements ServiceCollector {
         params.put(METRIC_NAMES_PARAM, String.join(METRIC_DELIMITER, metricNames));
 
         AzureMetrics metrics = client.getMetrics(token, request.getSubscriptionId(),
-            request.getResourceGroup(), request.getResource(), params, request.getTimeout());
+            request.getResourceGroup(), request.getResource(), params, request.getTimeout(), request.getRetries());
 
         metrics.collect(collectedData);
     }

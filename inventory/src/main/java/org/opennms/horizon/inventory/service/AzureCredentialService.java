@@ -80,14 +80,15 @@ public class AzureCredentialService {
     private void validateCredentials(AzureCredentialCreateDTO request) {
         AzureOAuthToken token;
         try {
-            token = client.login(request.getDirectoryId(),
-                request.getClientId(), request.getClientSecret(), TaskUtils.Azure.DEFAULT_TIMEOUT);
+            token = client.login(request.getDirectoryId(), request.getClientId(),
+                request.getClientSecret(), TaskUtils.Azure.DEFAULT_TIMEOUT, TaskUtils.Azure.DEFAULT_RETRIES);
         } catch (AzureHttpException e) {
             throw new InventoryRuntimeException("Failed to login with azure credentials", e);
         }
         AzureSubscription subscription;
         try {
-           subscription = client.getSubscription(token, request.getSubscriptionId(), TaskUtils.Azure.DEFAULT_TIMEOUT);
+           subscription = client.getSubscription(token, request.getSubscriptionId(),
+               TaskUtils.Azure.DEFAULT_TIMEOUT, TaskUtils.Azure.DEFAULT_RETRIES);
         } catch (AzureHttpException e) {
             String message = String.format("Failed to get azure subscription %s", request.getSubscriptionId());
             throw new InventoryRuntimeException(message, e);

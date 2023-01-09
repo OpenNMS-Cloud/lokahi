@@ -37,12 +37,12 @@ public class AzureMonitor extends AbstractServiceMonitor {
             AzureMonitorRequest request = config.unpack(AzureMonitorRequest.class);
 
             AzureOAuthToken token = client.login(request.getDirectoryId(),
-                request.getClientId(), request.getClientSecret(), request.getTimeout());
+                request.getClientId(), request.getClientSecret(), request.getTimeout(), request.getRetries());
 
             long startMs = System.currentTimeMillis();
 
             AzureInstanceView instanceView = client.getInstanceView(token, request.getSubscriptionId(),
-                request.getResourceGroup(), request.getResource(), request.getTimeout());
+                request.getResourceGroup(), request.getResource(), request.getTimeout(), request.getRetries());
 
             if (instanceView.isUp()) {
 

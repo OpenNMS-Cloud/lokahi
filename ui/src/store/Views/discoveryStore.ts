@@ -2,7 +2,13 @@ import { defineStore } from 'pinia'
 
 export const useDiscoveryStore = defineStore('discoveryStore', {
   state: () => ({
-    selectedLocationIds: <string[]>[]
+    selectedLocationIds: <string[]>[],
+    ipAddresses: <string[]>[],
+    ipRange: {
+      cidr: '',
+      fromIp: '',
+      toIp: ''
+    }
   }),
   actions: {
     selectLocation(id: string) {

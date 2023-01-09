@@ -1,15 +1,15 @@
-import NotificationsCtrl from '@/components/Appliances/NotificationsCtrl.vue'
+import AppliancesNotificationsCtrl from '@/components/Appliances/AppliancesNotificationsCtrl.vue'
 import { useNotificationMutations } from '@/store/Mutations/notificationMutations'
 import setupWrapper from 'tests/setupWrapper'
 
 const wrapper = setupWrapper({
-  component: NotificationsCtrl,
+  component: AppliancesNotificationsCtrl,
   global: {
     stubs: {
       teleport: true
     }
   }
-}) 
+})
 
 test('The component mounts', () => {
   expect(wrapper).toBeTruthy()
@@ -39,15 +39,15 @@ test('The cancel btn should close the modal', async () => {
 
 test('The save btn should enable if a key is added', async () => {
   await wrapper.get('[data-test="notifications-btn"]').trigger('click')
-  
+
   const input = wrapper.get('[data-test="routing-input"] .feather-input')
   const saveBtn = wrapper.get('[data-test="save-btn"]')
 
   // should be disabled
   expect(saveBtn.attributes('aria-disabled')).toBe('true')
-  
+
   await input.setValue('key')
-  
+
   // should be enabled
   expect(saveBtn.attributes('aria-disabled')).toBeUndefined()
 })

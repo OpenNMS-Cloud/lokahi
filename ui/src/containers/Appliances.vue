@@ -4,7 +4,7 @@
         Welcome, {{ keycloak.tokenParsed?.preferred_username }}
     </div>
     <div class="btns">
-      <NotificationsCtrl />
+      <AppliancesNotificationsCtrl />
       <AddNodeCtrl />
     </div>
   </div>

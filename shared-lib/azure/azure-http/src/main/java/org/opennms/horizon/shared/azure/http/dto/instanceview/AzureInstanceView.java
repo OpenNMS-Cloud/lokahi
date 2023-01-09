@@ -11,8 +11,6 @@ import java.util.List;
 @Setter
 public class AzureInstanceView {
     private static final String POWER_STATE_RUNNING = "PowerState/running";
-    private static final String POWER_STATE_DEALLOCATED = "PowerState/deallocated";
-    private static final String PROVISIONING_STATE_SUCCEEDED = "ProvisioningState/succeeded";
 
     @SerializedName("disks")
     private List<AzureDisk> disks = new ArrayList<>();
@@ -31,26 +29,5 @@ public class AzureInstanceView {
             }
         }
         return false;
-    }
-
-    public Long getUptimeMs() {
-
-        // check if its been deallocated as a succeeded is also in the list as a previous element
-        // maybe instead loop in reverse for succeeded provisioning state...
-        for (AzureStatus status : getStatuses()) {
-            String code = status.getCode();
-            if (code.equalsIgnoreCase(POWER_STATE_DEALLOCATED)) {
-                return null;
-            }
-        }
-
-        for (AzureStatus status : getStatuses()) {
-            String code = status.getCode();
-            if (code.equalsIgnoreCase(PROVISIONING_STATE_SUCCEEDED)) {
-
-                return status.getElapsedTimeMs();
-            }
-        }
-        return null;
     }
 }

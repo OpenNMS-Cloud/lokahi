@@ -1,6 +1,7 @@
 package org.opennms.horizon.shared.azure.http;
 
 import com.google.gson.Gson;
+import lombok.extern.slf4j.Slf4j;
 import org.opennms.horizon.shared.azure.http.dto.instanceview.AzureInstanceView;
 import org.opennms.horizon.shared.azure.http.dto.login.AzureOAuthToken;
 import org.opennms.horizon.shared.azure.http.dto.metrics.AzureMetrics;
@@ -21,6 +22,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 public class AzureHttpClient {
 
     /*
@@ -64,6 +66,8 @@ public class AzureHttpClient {
      */
     private static final String APPLICATION_FORM_URLENCODED_VALUE = "application/x-www-form-urlencoded";
     private static final int STATUS_CODE_SUCCESSFUL = 200;
+    private static final int INITIAL_BACKOFF_TIME_MS = 1000;
+    private static final double EXPONENTIAL_BACKOFF_AMPLIFIER = 2.1;
 
     private final HttpClient client;
     private final Gson gson;
@@ -112,7 +116,6 @@ public class AzureHttpClient {
     public AzureMetrics getMetrics(AzureOAuthToken token, String subscriptionId, String resourceGroup, String resourceName, Map<String, String> params, long timeout) throws AzureHttpException {
         String url = String.format(METRICS_ENDPOINT + METRICS_API_VERSION_PARAM, subscriptionId, resourceGroup, resourceName);
         url = addUrlParams(url, params);
-        System.out.println("metrics url = " + url);
         return get(token, url, timeout, AzureMetrics.class);
     }
 
@@ -124,22 +127,40 @@ public class AzureHttpClient {
     }
 
     private <T> T performRequest(String endpoint, Class<T> clazz, HttpRequest request) throws AzureHttpException {
-        try {
-            HttpResponse<String> httpResponse = client.send(request, HttpResponse.BodyHandlers.ofString());
+        AzureHttpException exception = null;
+        long backoffTime = INITIAL_BACKOFF_TIME_MS;
 
-            if (httpResponse.statusCode() == STATUS_CODE_SUCCESSFUL) {
-                return gson.fromJson(httpResponse.body(), clazz);
+        for (int retryCount = 1; retryCount <= 5; retryCount++) {
+            try {
+                HttpResponse<String> httpResponse = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+                if (httpResponse.statusCode() == STATUS_CODE_SUCCESSFUL) {
+
+                    String httpBody = httpResponse.body();
+                    return gson.fromJson(httpBody, clazz);
+                }
+
+                exception = new AzureHttpException("Failed to get for endpoint: "
+                    + endpoint + " status: " + httpResponse.statusCode() + " body: " + httpResponse.body() + " retry: " + retryCount);
+
+            } catch (IOException | InterruptedException e) {
+                exception = new AzureHttpException("Failed to get for endpoint: " + endpoint + " retry: " + retryCount, e);
             }
+            log.warn(exception.getMessage());
 
-            throw new AzureHttpException("Failed to get for endpoint: "
-                + endpoint + " status: " + httpResponse.statusCode() + " body: " + httpResponse.body());
-
-        } catch (IOException e) {
-            throw new AzureHttpException("Failed to get for endpoint: " + endpoint, e);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new AzureHttpException("Failed to get for endpoint: " + endpoint, e);
+            try {
+                Thread.sleep(backoffTime);
+                backoffTime *= EXPONENTIAL_BACKOFF_AMPLIFIER;
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new AzureHttpException("Failed to wait for exp backoff with time: " + backoffTime + " retry: " + retryCount, e);
+            }
         }
+        Throwable cause = exception.getCause();
+        if (cause instanceof InterruptedException) {
+            Thread.currentThread().interrupt();
+        }
+        throw exception;
     }
 
     private HttpRequest buildGetHttpRequest(AzureOAuthToken token, String url, long timeout) {

@@ -40,13 +40,18 @@ import org.opennms.horizon.shared.azure.http.dto.instanceview.AzureInstanceView;
 import org.opennms.horizon.shared.azure.http.dto.login.AzureOAuthToken;
 import org.opennms.horizon.shared.azure.http.dto.metrics.AzureMetrics;
 import org.opennms.horizon.snmp.api.SnmpResponseMetric;
+import org.opennms.horizon.snmp.api.SnmpResultMetric;
+import org.opennms.horizon.snmp.api.SnmpValueMetric;
+import org.opennms.horizon.snmp.api.SnmpValueType;
 import org.opennms.taskset.contract.MonitorType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 public class AzureCollector implements ServiceCollector {
     private final Logger log = LoggerFactory.getLogger(AzureCollector.class);
@@ -54,10 +59,16 @@ public class AzureCollector implements ServiceCollector {
     private static final String INTERVAL_PARAM = "interval";
     private static final String METRIC_NAMES_PARAM = "metricnames";
 
-    private static final String METRIC_INTERVAL = "PT1M";
-    private static final String[] METRIC_NAMES = {
-        "Network In Total", "Network Out Total", "Percentage CPU", "Disk Read Bytes", "Disk Write Bytes"
-    };
+    private static final String METRIC_INTERVAL = "PT30S";
+
+    private static final Map<String, String> AZURE_METRIC_TO_ALIAS = new HashMap<>();
+
+    static {
+        // Azure Metric Key - Metrics Processor Key
+        AZURE_METRIC_TO_ALIAS.put("Network In Total", "ifInOctets");
+        AZURE_METRIC_TO_ALIAS.put("Network Out Total", "ifOutOctets");
+    }
+
     private static final String METRIC_DELIMITER = ",";
 
     private final AzureHttpClient client;
@@ -86,29 +97,29 @@ public class AzureCollector implements ServiceCollector {
             if (instanceView.isUp()) {
 
                 Map<String, Double> collectedData = new HashMap<>();
-                collectedData.put("Uptime Ms", instanceView.getUptimeMs().doubleValue());
 
                 collect(request, token, collectedData);
 
-                System.out.println("collectedData = " + collectedData);
-
-                SnmpResponseMetric response = SnmpResponseMetric.newBuilder()
-//                .addAllResults(snmpResults)
+                SnmpResponseMetric results = SnmpResponseMetric.newBuilder()
+                    .addAllResults(mapCollectedDataToResults(request, collectedData))
                     .build();
 
                 future.complete(ServiceCollectorResponseImpl.builder()
-                    .results(response)
+                    .results(results)
                     .nodeId(collectionRequest.getNodeId())
                     .monitorType(MonitorType.SNMP)
                     .status(true)
-                    .ipAddress(collectionRequest.getIpAddress()).build());
+                    .ipAddress(request.getHost())
+                    .timeStamp(System.currentTimeMillis())
+                    .build());
 
             } else {
                 future.complete(ServiceCollectorResponseImpl.builder()
                     .nodeId(collectionRequest.getNodeId())
                     .monitorType(MonitorType.SNMP)
                     .status(false)
-                    .ipAddress(collectionRequest.getIpAddress()).build());
+                    .ipAddress(request.getHost())
+                    .build());
             }
         } catch (Exception e) {
             log.error("Failed to collect for azure resource", e);
@@ -116,7 +127,7 @@ public class AzureCollector implements ServiceCollector {
                 .nodeId(collectionRequest.getNodeId())
                 .monitorType(MonitorType.SNMP)
                 .status(false)
-                .ipAddress(collectionRequest.getIpAddress()).build());
+                .build());
         }
         return future;
     }
@@ -125,13 +136,44 @@ public class AzureCollector implements ServiceCollector {
                          AzureOAuthToken token,
                          Map<String, Double> collectedData) throws AzureHttpException {
 
+        String[] metricNames = AZURE_METRIC_TO_ALIAS.keySet().toArray(new String[0]);
+
         Map<String, String> params = new HashMap<>();
         params.put(INTERVAL_PARAM, METRIC_INTERVAL);
-        params.put(METRIC_NAMES_PARAM, String.join(METRIC_DELIMITER, METRIC_NAMES));
+        params.put(METRIC_NAMES_PARAM, String.join(METRIC_DELIMITER, metricNames));
 
         AzureMetrics metrics = client.getMetrics(token, request.getSubscriptionId(),
             request.getResourceGroup(), request.getResource(), params, request.getTimeout());
 
         metrics.collect(collectedData);
+    }
+
+    private List<SnmpResultMetric> mapCollectedDataToResults(AzureCollectorRequest request,
+                                                             Map<String, Double> collectedData) {
+        return collectedData.entrySet().stream()
+            .map(collectedMetric -> mapMetric(request, collectedMetric))
+            .collect(Collectors.toList());
+    }
+
+    private SnmpResultMetric mapMetric(AzureCollectorRequest request,
+                                       Map.Entry<String, Double> collectedMetric) {
+
+        return SnmpResultMetric.newBuilder()
+            .setBase(request.getResourceGroup())
+            .setInstance(request.getResource())
+            .setAlias(getAlias(collectedMetric.getKey()))
+            .setValue(
+                SnmpValueMetric.newBuilder()
+                    .setType(SnmpValueType.INT32)
+                    .setSint64(collectedMetric.getValue().longValue())
+                    .build())
+            .build();
+    }
+
+    private String getAlias(String metricName) {
+        if (AZURE_METRIC_TO_ALIAS.containsKey(metricName)) {
+            return AZURE_METRIC_TO_ALIAS.get(metricName);
+        }
+        throw new IllegalArgumentException("Failed to find alias - shouldn't be reached");
     }
 }

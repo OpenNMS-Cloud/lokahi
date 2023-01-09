@@ -32,7 +32,7 @@ public interface TaskUtils {
         int DEFAULT_TIMEOUT = 18000;
         int DEFAULT_RETRIES = 2;
         String MONITOR_SCHEDULE = "60000";
-        String COLLECTOR_SCHEDULE = "10000";
+        String COLLECTOR_SCHEDULE = "30000";
     }
 
 }

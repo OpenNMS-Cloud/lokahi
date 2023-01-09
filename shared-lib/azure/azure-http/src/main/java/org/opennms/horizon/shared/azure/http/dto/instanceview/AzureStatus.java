@@ -4,10 +4,6 @@ import com.google.gson.annotations.SerializedName;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.Instant;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-
 @Getter
 @Setter
 public class AzureStatus {
@@ -19,17 +15,4 @@ public class AzureStatus {
     private String displayStatus;
     @SerializedName("time")
     private String time;
-
-    public Long getElapsedTimeMs() {
-        if (time == null) {
-            return null;
-        }
-        ZonedDateTime statusDateTime = ZonedDateTime.parse(time, DateTimeFormatter.ISO_OFFSET_DATE_TIME);
-        ZonedDateTime nowDateTime = ZonedDateTime.now(statusDateTime.getZone());
-
-        Instant statusInstant = statusDateTime.toInstant();
-        Instant nowInstant = nowDateTime.toInstant();
-
-        return nowInstant.toEpochMilli() - statusInstant.toEpochMilli();
-    }
 }

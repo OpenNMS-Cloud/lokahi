@@ -1,4 +1,4 @@
-package shell;
+package org.opennms.horizon.minion.flows.shell;
 
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Argument;

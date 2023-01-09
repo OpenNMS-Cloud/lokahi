@@ -15,31 +15,36 @@
       <artifactId>commons-csv</artifactId>
       <version>1.9.0</version>
     </dependency>
-      <dependency>
-          <groupId>org.apache.commons</groupId>
-          <artifactId>commons-lang3</artifactId>
-          <version>3.12.0</version>
-      </dependency>
-      <!-- Xml Validation Apis, temporary imported-->
-      <dependency>
-          <groupId>javax.xml.bind</groupId>
-          <artifactId>jaxb-api</artifactId>
-          <version>2.4.0-b180830.0359</version>
-      </dependency>
-      <dependency>
-          <groupId>org.osgi</groupId>
-          <artifactId>osgi.core</artifactId>
-      </dependency>
-      <dependency>
-      <groupId>javax.validation</groupId>
-          <artifactId>validation-api</artifactId>
-          <version>2.0.1.Final</version>
-      </dependency>
-      <dependency>
-          <groupId>org.opennms.horizon.shared</groupId>
-          <artifactId>ipc-api</artifactId>
-          <version>${project.version}</version>
-      </dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+      <version>3.12.0</version>
+    </dependency>
+    <!-- Xml Validation Apis, temporary imported-->
+    <dependency>
+      <groupId>javax.xml.bind</groupId>
+      <artifactId>jaxb-api</artifactId>
+      <version>2.4.0-b180830.0359</version>
+    </dependency>
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>osgi.core</artifactId>
+    </dependency>
+    <dependency>
+    <groupId>javax.validation</groupId>
+      <artifactId>validation-api</artifactId>
+      <version>2.0.1.Final</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opennms.horizon.shared</groupId>
+      <artifactId>ipc-api</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opennms.horizon.shared</groupId>
+      <artifactId>ipc-grpc-contract</artifactId>
+      <version>${project.version}</version>
+    </dependency>
 
     <!-- Test -->
     <dependency>

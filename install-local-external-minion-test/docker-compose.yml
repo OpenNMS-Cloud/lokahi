@@ -5,17 +5,14 @@ services:
     image: docker.io/opennms/horizon-stream-minion:test.2022-12-13.22-17-26
     extra_hosts:
       minion.onmshs: 10.0.0.55
-      #minion.onmshs: 0.0.0.0
     environment:
       TZ: 'America/New_York'
       MINION_ID: 'minion-b'
       MINION_LOCATION: 'minion-b-loc'
       USE_KUBERNETES: false
       IGNITE_SERVER_ADDRESSES: localhost
-      #MINION_GATEWAY_HOST: 10.0.0.55
       MINION_GATEWAY_HOST: minion.onmshs
       MINION_GATEWAY_PORT: 8990
-      #MINION_GATEWAY_PORT: 80
       MINION_GATEWAY_TLS: false
     volumes:
       - ./grpc.cfg:/opt/karaf/etc/org.opennms.core.ipc.grpc.client.cfg

@@ -16,6 +16,7 @@ declare module '@vue/runtime-core' {
     CustomFeatherStepper: typeof import('./src/components/Common/Stepper/CustomFeatherStepper.vue')['default']
     DeviceWidget: typeof import('./src/components/Widgets/DeviceWidget.vue')['default']
     DiscoveryStep1: typeof import('./src/components/Discovery/DiscoveryStep1.vue')['default']
+    DiscoveryStep2: typeof import('./src/components/Discovery/DiscoveryStep2.vue')['default']
     DiscoveryStepper: typeof import('./src/components/Discovery/DiscoveryStepper.vue')['default']
     DrawerBtn: typeof import('./src/components/Topology/DrawerBtn.vue')['default']
     EventsTable: typeof import('./src/components/Events/EventsTable.vue')['default']

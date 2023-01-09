@@ -1,6 +1,7 @@
 <template>
   <CustomFeatherStepper>
-    <DiscoveryStep1/>
+    <DiscoveryStep1 />
+    <DiscoveryStep2 />
   </CustomFeatherStepper>
 </template>
 

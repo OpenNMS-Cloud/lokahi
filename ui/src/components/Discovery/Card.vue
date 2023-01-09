@@ -26,13 +26,13 @@ defineProps<{
 	width: 37%;
 	border: 1px solid #d8d8d8;
 	border-radius: 5px;
-	background-color: #ffffff;
+	background-color: var(variables.$surface);
 	margin-right: 20px;
 }
 
 .title {
 	padding: var(variables.$spacing-l) var(variables.$spacing-m);
-	background-color: #e8e8e8;
+	background-color: var(variables.$shade-4);
 	font-size: 18px;
 	font-weight: 600;
 }

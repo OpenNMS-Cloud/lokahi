@@ -63,7 +63,7 @@ create_ssl_cert_secret () {
 mkdir -p tmp
 cat install-local-onms-instance.yaml | sed "s/onmshs/$DOMAIN/g" > tmp/install-local-onms-instance.yaml
 cat install-local-onms-instance-custom-images.yaml | sed "s/onmshs/$DOMAIN/g" > tmp/install-local-onms-instance-custom-images.yaml
-cat charts/opennms/values.yaml | sed "s/onmshs/$DOMAIN/g" > tmp/values.yaml
+cat ./../charts/opennms/values.yaml | sed "s/onmshs/$DOMAIN/g" > tmp/values.yaml
 cat install-local-opennms-horizon-stream-values.yaml | sed "s/onmshs/$DOMAIN/g" > tmp/install-local-opennms-horizon-stream-values.yaml
 cat install-local-opennms-horizon-stream-custom-images-values.yaml | sed "s/onmshs/$DOMAIN/g" > tmp/install-local-opennms-horizon-stream-custom-images-values.yaml
 
@@ -75,7 +75,7 @@ if [ $CONTEXT == "local" ]; then
   echo
   echo ________________Installing Horizon Stream________________
   echo
-  helm upgrade -i horizon-stream ./charts/opennms -f ./tmp/install-local-opennms-horizon-stream-values.yaml --namespace $NAMESPACE --create-namespace
+  helm upgrade -i horizon-stream ./../charts/opennms -f ./tmp/install-local-opennms-horizon-stream-values.yaml --namespace $NAMESPACE --create-namespace
   if [ $? -ne 0 ]; then exit; fi
 
   create_ssl_cert_secret 
@@ -107,7 +107,7 @@ elif [ "$CONTEXT" == "custom-images" ]; then
   echo
   echo ________________Installing Horizon Stream________________
   echo
-  helm upgrade -i horizon-stream ./charts/opennms -f ./tmp/install-local-opennms-horizon-stream-custom-images-values.yaml --namespace $NAMESPACE --create-namespace
+  helm upgrade -i horizon-stream ./../charts/opennms -f ./tmp/install-local-opennms-horizon-stream-custom-images-values.yaml --namespace $NAMESPACE --create-namespace
   if [ $? -ne 0 ]; then exit; fi
 
   create_ssl_cert_secret 
@@ -118,7 +118,7 @@ elif [ $CONTEXT == "existing-k8s" ]; then
   echo
   echo ________________Installing Horizon Stream________________
   echo
-  helm upgrade -i horizon-stream ./charts/opennms -f ./tmp/install-local-opennms-horizon-stream-values.yaml --namespace $NAMESPACE --create-namespace
+  helm upgrade -i horizon-stream ./../charts/opennms -f ./tmp/install-local-opennms-horizon-stream-values.yaml --namespace $NAMESPACE --create-namespace
   if [ $? -ne 0 ]; then exit; fi
 
   cluster_ready_check

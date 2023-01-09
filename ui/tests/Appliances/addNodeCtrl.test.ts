@@ -4,7 +4,7 @@ import { mount } from '@vue/test-utils'
 import { createClient, VILLUS_CLIENT } from 'villus'
 import { useNodeMutations } from '@/store/Mutations/nodeMutations'
 
-const wrapper = mount(AddNodeCtrl, { 
+const wrapper = mount(AddNodeCtrl, {
   global: {
     stubs: {
       teleport: true
@@ -46,15 +46,15 @@ test('The cancel btn should close the modal', async () => {
 
 test('The save btn should enable if name is entered', async () => {
   await wrapper.get('[data-test="add-node-btn"]').trigger('click')
-  
+
   const nameInput = wrapper.get('[data-test="name-input"] .feather-input')
   const saveBtn = wrapper.get('[data-test="save-btn"]')
 
   // should be disabled
   expect(saveBtn.attributes('aria-disabled')).toBe('true')
-  
+
   await nameInput.setValue('some name')
-  
+
   // should be enabled
   expect(saveBtn.attributes('aria-disabled')).toBeUndefined()
 })

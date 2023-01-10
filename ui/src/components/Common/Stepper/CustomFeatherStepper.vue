@@ -71,7 +71,7 @@ const nextBtnText = computed(() => {
 })
 const hideNextBtn = computed(() => {
   if (slots.default){
-    // must call default slot to keep disableNextBtn prop reactive
+    // must call default slot to keep hideNextBtn prop reactive
     return slots.default()[currentStep.value - 1].props?.hideNextBtn
   }
 })

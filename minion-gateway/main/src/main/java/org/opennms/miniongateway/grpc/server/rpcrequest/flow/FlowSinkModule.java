@@ -1,8 +1,8 @@
 /*******************************************************************************
  * This file is part of OpenNMS(R).
  *
- * Copyright (C) 2022 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
+ * Copyright (C) 2022-2023 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
  *
@@ -35,6 +35,8 @@ import org.opennms.horizon.shared.ipc.sink.aggregation.IdentityAggregationPolicy
 import org.opennms.horizon.shared.ipc.sink.api.AggregationPolicy;
 import org.opennms.horizon.shared.ipc.sink.api.AsyncPolicy;
 import org.opennms.horizon.shared.ipc.sink.api.SinkModule;
+import org.opennms.horizon.shared.ipc.sink.api.UnmarshalException;
+
 
 public class FlowSinkModule implements SinkModule<Message, Message> {
     @Override
@@ -57,7 +59,7 @@ public class FlowSinkModule implements SinkModule<Message, Message> {
         try {
             return TelemetryMessageLog.parseFrom(message);
         } catch (InvalidProtocolBufferException e) {
-            throw new RuntimeException(e);
+            throw new UnmarshalException(e);
         }
     }
 
@@ -71,7 +73,7 @@ public class FlowSinkModule implements SinkModule<Message, Message> {
         try {
             return TelemetryMessageLog.parseFrom(message);
         } catch (InvalidProtocolBufferException e) {
-            throw new RuntimeException(e);
+            throw new UnmarshalException(e);
         }
     }
 

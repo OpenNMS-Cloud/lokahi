@@ -1,8 +1,8 @@
 /*******************************************************************************
  * This file is part of OpenNMS(R).
  *
- * Copyright (C) 2022 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
+ * Copyright (C) 2022-2023 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
  *
@@ -79,7 +79,9 @@ public class FlowKafkaForwarder implements MessageConsumer<Message, Message> {
         logger.info("Received flow; sending to Kafka: tenant-id: {}; kafka-topic={}; message={}", tenantId, kafkaTopic, messageLog);
 
         byte[] rawContent = messageLog.toByteArray();
-        this.kafkaTemplate.send(kafkaTopic, rawContent);
+        ProducerRecord<String, byte[]> producerRecord = formatProducerRecord(rawContent, tenantId);
+
+        this.kafkaTemplate.send(producerRecord);
     }
 
 //========================================
@@ -97,10 +99,8 @@ public class FlowKafkaForwarder implements MessageConsumer<Message, Message> {
         List<Header> headers = new LinkedList<>();
         headers.add(new RecordHeader(TENANT_ID_HEADER_NAME, tenantId.getBytes(StandardCharsets.UTF_8)));
 
-        return new ProducerRecord<String, byte[]>(
+        return new ProducerRecord(
             kafkaTopic,
-            null,
-            null,
             rawContent,
             headers
         );

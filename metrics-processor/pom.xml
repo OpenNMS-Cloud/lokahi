@@ -73,8 +73,8 @@
             <version>${snappy-java.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.opennms.plugin.timeseries.cortex.wrap</groupId>
-            <artifactId>resilience4j</artifactId>
+            <groupId>io.github.resilience4j</groupId>
+            <artifactId>resilience4j-bulkhead</artifactId>
             <version>${resilience4j.version}</version>
         </dependency>
         <dependency>

@@ -35,8 +35,6 @@ import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
-import org.opennms.timeseries.cortex.shaded.resilience4j.bulkhead.Bulkhead;
-import org.opennms.timeseries.cortex.shaded.resilience4j.bulkhead.BulkheadConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xerial.snappy.Snappy;
@@ -44,6 +42,8 @@ import org.xerial.snappy.Snappy;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 
+import io.github.resilience4j.bulkhead.Bulkhead;
+import io.github.resilience4j.bulkhead.BulkheadConfig;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.ConnectionPool;

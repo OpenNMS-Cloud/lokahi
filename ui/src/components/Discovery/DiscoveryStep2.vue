@@ -51,13 +51,10 @@ const updateIpsPayload = () => store.ipAddresses = ipAddressesStr.value.split(',
   @include typography.subtitle1;
   margin-bottom: var(variables.$spacing-s);
 }
-.ip-address-container,
-.ip-range-container {
-  margin-top: var(variables.$spacing-m);
-}
 .ip-range-container {
   display: flex;
   flex-direction: column;
+  margin-top: var(variables.$spacing-m);
 
   .input-container {
     display: flex;

@@ -34,7 +34,6 @@ import org.opennms.horizon.shared.ipc.sink.api.AsyncDispatcher;
 import org.opennms.horizon.shared.ipc.sink.api.MessageDispatcherFactory;
 
 import com.codahale.metrics.MetricRegistry;
-import com.google.protobuf.Message;
 
 import listeners.Parser;
 import listeners.factory.ParserDefinition;
@@ -59,7 +58,6 @@ public class TelemetryRegistryImpl implements TelemetryRegistry {
 
     @Override
     public Parser getParser(ParserDefinition parserDefinition) {
-        // TODO: add netflow5
         return netflow9UdpParserFactory.createBean(parserDefinition);
     }
 

@@ -14,6 +14,8 @@ defineEmits([
 defineProps({
   nextBtnText: String,
   prevBtnText: String,
+  hideNextBtn: Boolean,
+  disableNextBtn: Boolean,
   title: String
 })
 </script>
@@ -23,7 +25,6 @@ defineProps({
 @use "@featherds/styles/themes/variables";
 .container {
   padding: var(variables.$spacing-l) 0;
-  min-height: 200px;
 
   .title {
     @include typography.headline4;

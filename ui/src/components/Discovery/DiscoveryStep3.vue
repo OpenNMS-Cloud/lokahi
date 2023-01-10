@@ -18,8 +18,8 @@
         </FeatherList>
       </div>
       <div class="step-3-text-container">
-        <p class="step-3-text">Last detected nodes</p>
-        <p class="step-3-text">My Active Discovery</p>
+        <a class="step-3-text" href="inventory">Last detected nodes</a>
+        <a class="step-3-text" href="my-discovery">My Active Discovery</a>
       </div>
     </div>
   </CustomFeatherStep>
@@ -44,6 +44,8 @@ const store = useDiscoveryStore()
       @include typography.subtitle1;
       color: var(variables.$secondary-variant);
       cursor: pointer;
+      display: block;
+      text-decoration: none;
     }
   }
 }

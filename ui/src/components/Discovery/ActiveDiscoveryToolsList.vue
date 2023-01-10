@@ -6,7 +6,7 @@
     />
     <div
       class="tool"
-      @click="emit('show-config-active-tool', 'icmp')"
+      @click="emit('show-config-active-tool', DiscoveryType.ICMP)"
     >
       ICMP
     </div>
@@ -18,7 +18,7 @@
     />
     <div
       class="tool"
-      @click="emit('show-config-active-tool', 'azure')"
+      @click="emit('show-config-active-tool', DiscoveryType.Azure)"
     >
       AZURE
     </div>
@@ -28,6 +28,7 @@
 <script setup lang="ts">
 import Cloud from '@featherds/icon/action/Cloud'
 import Network from '@featherds/icon/hardware/Network'
+import { DiscoveryType } from './discovery.constants'
 const emit = defineEmits(['show-config-active-tool'])
 </script>
 

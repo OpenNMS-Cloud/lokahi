@@ -16,6 +16,9 @@
   Optional props for CustomFeatherStep:
   nextBtnText (default 'Next')
   prevBtnText (default 'Prev')
+  hideNextBtn (default false),
+  disableNextBtn (default false)
+  title (no default)
  -->
 <template>
   <div class="container">
@@ -45,7 +48,7 @@
         </FeatherButton>
       </div>
       <div>
-        <FeatherButton primary @click="slideNext" data-test="next-btn">
+        <FeatherButton v-if="!hideNextBtn" :disabled="disableNextBtn" primary @click="slideNext" data-test="next-btn">
           {{ nextBtnText }}
         </FeatherButton>
       </div>
@@ -65,6 +68,18 @@ const nextBtnText = computed(() => {
   let text = 'Next'
   if (currentStep.value === stepNumbers.value.length) text = 'Finish'
   return currentContent.value?.props?.nextBtnText || text
+})
+const hideNextBtn = computed(() => {
+  if (slots.default){
+    // must call default slot to keep disableNextBtn prop reactive
+    return slots.default()[currentStep.value - 1].props?.hideNextBtn
+  }
+})
+const disableNextBtn = computed(() => {
+  if (slots.default){
+    // must call default slot to keep disableNextBtn prop reactive
+    return slots.default()[currentStep.value - 1].props?.disableNextBtn
+  }
 })
 
 const slideNext = () => {

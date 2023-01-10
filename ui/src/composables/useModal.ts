@@ -3,6 +3,8 @@ const useModal = () => {
   const openModal = () => (isVisible.value = true)
   const closeModal = () => (isVisible.value = false)
 
+  onKeyStroke('Escape', () => closeModal())
+
   return { openModal, closeModal, isVisible }
 }
 

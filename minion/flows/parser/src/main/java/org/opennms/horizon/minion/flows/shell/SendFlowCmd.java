@@ -12,8 +12,7 @@ import java.net.Socket;
 import static com.google.common.io.ByteStreams.toByteArray;
 
 /**
- * Shell command wrapper around socat to send flow data for testing purposes.
- * socat needs to be installed
+ * Shell command to send flow data for testing purposes.
  */
 @Command(scope = "opennms", name = "send-flow", description = "Sends flow data for test purposes")
 @Service

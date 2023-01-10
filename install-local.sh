@@ -67,7 +67,19 @@ elif [ "$1" == "custom-images" ]; then
   kind load docker-image opennms/horizon-stream-datachoices:local&
 
   # Need to wait for the images to be loaded.
+  echo === SLEEP
   sleep 120
+  echo === PS
+  ps axu | grep kind
+  echo === IMAGES
+  docker exec -it kind-control-plane crictl images ls
+  echo === SLEEP
+
+  sleep 120
+  echo === PS
+  ps axu | grep kind
+  echo === IMAGES
+  docker exec -it kind-control-plane crictl images ls
 
   echo
   echo ________________Installing Horizon Stream________________

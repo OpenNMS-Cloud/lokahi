@@ -26,6 +26,7 @@ runs:
         sudo echo "127.0.0.1 onmshs" | sudo tee -a /etc/hosts
 
         # Build cluster with Horizon Stream installed.
+        cd install-local/
         ./install-local.sh custom-images onmshs
 
       shell: bash

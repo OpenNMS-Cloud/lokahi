@@ -1,13 +1,15 @@
 package org.opennms.horizon.minion.flows.shell;
 
 import org.apache.karaf.shell.api.action.Action;
-import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 
-import java.io.DataOutputStream;
-import java.io.OutputStream;
-import java.net.Socket;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 import static com.google.common.io.ByteStreams.toByteArray;
 
@@ -19,31 +21,33 @@ import static com.google.common.io.ByteStreams.toByteArray;
 @SuppressWarnings("java:S106") // System.out is used intentionally: we want to see it in the Karaf shell
 public class SendFlowCmd implements Action {
 
-    @Argument()
+    @Option(name = "-h", aliases = "--host", description = "host to send to, default: localhost")
     String host = "localhost";
 
-    @Argument()
-    int port = 5000;
+    @Option(name = "-p", aliases = "--port", description = "port to send to, default: 50000")
+    int port = 50000;
 
-    @Argument(description = "file containing the flow data")
+    @Option(name = "-f", aliases = "--file", description = "file containing flow data, default: netflow9_test_valid01.dat")
     String file = "netflow9_test_valid01.dat";
 
     @Override
     public Object execute() throws Exception {
-        if (file == null || file.isEmpty() || this.getClass().getResource("/flows/" + file) == null) {
-           System.out.println("Please enter a valid file, e.g. 'netflow9_test_valid01.dat'");
-           return null;
-        }
-        byte[] arr = toByteArray(this.getClass().getResourceAsStream("/flows/" + file));
 
-        try (Socket socket = new Socket(host, port);
-             final OutputStream outputStream = socket.getOutputStream();
-             final DataOutputStream dataOutputStream = new DataOutputStream(outputStream);
-        ) {
+        byte[] dataToSend;
+        if (Files.exists(Paths.get(file))) {
+            dataToSend = Files.readAllBytes(Paths.get(file));
+        } else if(this.getClass().getResource("/flows/" + file) != null) {
+            dataToSend = toByteArray(this.getClass().getResourceAsStream("/flows/" + file));
+        } else {
+            System.out.printf("cannot read file %s. Please enter a valid file, e.g. 'netflow9_test_valid01.dat'.%n", file);
+            return null;
+        }
+
+        try ( DatagramSocket socket = new DatagramSocket()) {
             System.out.printf("Sending flow to the server %s:%s%n", this.host, this.port);
-            dataOutputStream.write(arr);
-            dataOutputStream.flush();
-            dataOutputStream.close();
+            InetAddress ip = InetAddress.getByName(host);
+            DatagramPacket dp = new DatagramPacket(dataToSend, dataToSend.length, ip, port);
+            socket.send(dp);
             System.out.println("done.");
         }
         return null;

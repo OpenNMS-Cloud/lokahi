@@ -39,7 +39,7 @@ public class AzureValue {
             AzureTimeseries firstTimeseries = timeseries.get(0);
             List<AzureDatum> data = firstTimeseries.getData();
 
-            //todo: sanity check - double check we actually need to sort (probably not)
+            //sanity check - may not actually need to sort here
             data.sort((o1, o2) -> {
                 Instant t1 = Instant.parse(o1.getTimeStamp());
                 Instant t2 = Instant.parse(o2.getTimeStamp());

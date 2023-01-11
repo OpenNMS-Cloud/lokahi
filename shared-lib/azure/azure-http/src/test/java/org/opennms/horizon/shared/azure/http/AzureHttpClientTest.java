@@ -26,6 +26,7 @@ import java.time.Instant;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.exactly;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
@@ -37,6 +38,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThrows;
 import static org.opennms.horizon.shared.azure.http.AzureHttpClient.INSTANCE_VIEW_ENDPOINT;
 import static org.opennms.horizon.shared.azure.http.AzureHttpClient.METRICS_ENDPOINT;
 import static org.opennms.horizon.shared.azure.http.AzureHttpClient.OAUTH2_TOKEN_ENDPOINT;
@@ -107,6 +109,24 @@ public class AzureHttpClientTest {
         assertEquals(oAuthToken.getNotBefore(), token.getNotBefore());
         assertEquals(oAuthToken.getResource(), token.getResource());
         assertEquals(oAuthToken.getAccessToken(), token.getAccessToken());
+    }
+
+    @Test
+    public void testLoginWithRetriesAndFails() {
+        String url = String.format(OAUTH2_TOKEN_ENDPOINT, TEST_DIRECTORY_ID)
+            + "?api-version=" + this.params.getApiVersion();
+
+        wireMock.stubFor(post(url)
+            .withHeader("Content-Type", new EqualToPattern("application/x-www-form-urlencoded"))
+            .willReturn(ResponseDefinitionBuilder.responseDefinition()
+                .withStatus(HttpStatus.SC_INTERNAL_SERVER_ERROR)));
+
+        AzureHttpException e = assertThrows(AzureHttpException.class, () -> {
+            this.client.login(TEST_DIRECTORY_ID, TEST_CLIENT_ID, TEST_CLIENT_SECRET, TEST_TIMEOUT, TEST_RETRIES);
+        });
+
+        verify(exactly(TEST_RETRIES), postRequestedFor(urlEqualTo(url)));
+        assertEquals("Failed to get for endpoint: /%s/oauth2/token, status: 500, body: , retry: 2/2", e.getMessage());
     }
 
     @Test

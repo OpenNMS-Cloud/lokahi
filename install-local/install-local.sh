@@ -92,7 +92,7 @@ save_part_of_normal_docker_image_load () {
 }
 
 load_part_of_normal_docker_image_load () {
-	docker exec -i kind-control-plane ctr --namespace=k8s.io images import --snapshotter overlayfs -
+	docker exec -i "${KIND_CLUSTER_NAME}-control-plane" ctr --namespace=k8s.io images import --snapshotter overlayfs -
 }
 
 load_images_to_kind_using_normal_docker () {

@@ -1,0 +1,201 @@
+name: develop
+
+on:
+  push:
+    branches:
+      - 'develop'
+  pull_request:
+    #types: [ labeled, closed]
+    types: [ labeled]
+    branches:
+      - 'develop.2'
+
+# For now, we have put all steps into a single job, this will allow for just
+# one vm to run. We use actions to factor out the functionality. If there is a
+# requirement to create additional jobs, maybe to run concurrent jobs, then we
+# can split them up later.
+
+jobs:
+  scan:
+    # Workaround for issues caused by running sonar scans on self-hosted runner
+    # Run the problematic scans on a hosted runner, separately
+    # only trigger these scans on develop branch, scans on other branches are covered by other workflows
+    if: ${{ github.event.ref == 'refs/heads/develop' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+
+      - name: Scan UI with SonarCloud
+        uses: ./.github/actions/ui
+        with:
+          dir-location: 'ui'
+          enable-sonar-scan: true
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          sonar-token: ${{ secrets.SONAR_TOKEN }}
+
+  develop:
+    # If label for PR, closed on PR, or develop branch on push, then run., 
+    if: ${{ ( github.event.label.name == 'actions-develop' ) || ( github.event.action == 'closed' ) || ( github.event.ref == 'refs/heads/develop' ) }}
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+
+      - name: init
+        run: |
+
+          # In case a previous workflow, using self-hosted runner, failed with
+          # kind cluster still running, delete it. It uses a lot of space. 
+          kind delete clusters kind
+
+      - name: feature-ui
+        id: action-feature-ui
+        uses: ./.github/actions/ui
+        with:
+          dir-location: 'ui'
+          # leave false, sonar scans don't work on self-hosted runner, covered in the scan job
+          enable-sonar-scan: false
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          sonar-token: ${{ secrets.SONAR_TOKEN }}
+  
+      - name: feature-grafana
+        id: action-feature-grafana
+        uses: ./.github/actions/grafana
+        with:
+          dir-location: 'grafana'
+
+      - name: feature-keycloak-ui
+        id: action-feature-keycloak-ui
+        uses: ./.github/actions/keycloak-ui
+        with:
+          dir-location: 'keycloak-ui'
+    
+      # This needs to happen before shared-lib.
+      - name: parent-pom
+        id: action-parent-pom
+        uses: ./.github/actions/parent-pom
+        with:
+          dir-location: 'parent-pom'
+          # only enable scans on develop branch, scans on other branches are covered by other workflows
+          enable-sonar-scan: ${{ github.event.ref == 'refs/heads/develop' }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          sonar-token: ${{ secrets.SONAR_TOKEN }}
+  
+      # This needs to happen before core, rest-server, and notifications.
+      - name: shared-lib
+        id: action-shared-lib
+        uses: ./.github/actions/shared-lib
+        with:
+          dir-location: 'shared-lib'
+          # only enable scans on develop branch, scans on other branches are covered by other workflows
+          enable-sonar-scan: ${{ github.event.ref == 'refs/heads/develop' }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          sonar-token: ${{ secrets.SONAR_TOKEN }}
+
+      - name: feature-metrics-processor
+        id: action-feature-metrics-processor
+        uses: ./.github/actions/metrics-processor
+        with:
+          # only enable scans on develop branch, scans on other branches are covered by other workflows
+          enable-sonar-scan: ${{ github.event.ref == 'refs/heads/develop' }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          sonar-token: ${{ secrets.SONAR_TOKEN }}
+
+      - name: feature-alarm
+        id: action-feature-alarm
+        uses: ./.github/actions/alarm
+        with:
+          dir-location: 'alarm'
+          # only enable scans on develop branch, scans on other branches are covered by other workflows
+          enable-sonar-scan: ${{ github.event.ref == 'refs/heads/develop' }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          sonar-token: ${{ secrets.SONAR_TOKEN }}
+
+      - name: feature-rest-server
+        id: action-rest-server
+        uses: ./.github/actions/rest-server
+        with:
+          dir-location: 'rest-server'
+          # only enable scans on develop branch, scans on other branches are covered by other workflows
+          enable-sonar-scan: ${{ github.event.ref == 'refs/heads/develop' }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          sonar-token: ${{ secrets.SONAR_TOKEN }}
+
+      - name: feature-inventory
+        id: action-inventory
+        uses: ./.github/actions/inventory
+        with:
+          dir-location: 'inventory'
+          # only enable scans on develop branch, scans on other branches are covered by other workflows
+          enable-sonar-scan: ${{ github.event.ref == 'refs/heads/develop' }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          sonar-token: ${{ secrets.SONAR_TOKEN }}
+
+      - name: feature-events
+        id: action-events
+        uses: ./.github/actions/events
+        with:
+          # only enable scans on develop branch, scans on other branches are covered by other workflows
+          enable-sonar-scan: ${{ github.event.ref == 'refs/heads/develop' }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          sonar-token: ${{ secrets.SONAR_TOKEN }}
+
+      - name: feature-notifications
+        id: action-notifications
+        uses: ./.github/actions/notifications
+        with:
+          dir-location: 'notifications'
+          # only enable scans on develop branch, scans on other branches are covered by other workflows
+          enable-sonar-scan: ${{ github.event.ref == 'refs/heads/develop' }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          sonar-token: ${{ secrets.SONAR_TOKEN }}
+
+      - name: feature-minion
+        id: action-minion
+        uses: ./.github/actions/minion
+        with:
+          dir-location: 'minion'
+          # only enable scans on develop branch, scans on other branches are covered by other workflows
+          enable-sonar-scan: ${{ github.event.ref == 'refs/heads/develop' }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          sonar-token: ${{ secrets.SONAR_TOKEN }}
+
+      - name: feature-minion-gateway
+        id: action-minion-gateway
+        uses: ./.github/actions/minion-gateway
+        with:
+          dir-location: 'minion-gateway'
+          # only enable scans on develop branch, scans on other branches are covered by other workflows
+          enable-sonar-scan: ${{ github.event.ref == 'refs/heads/develop' }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          sonar-token: ${{ secrets.SONAR_TOKEN }}
+
+      - name: feature-minion-gateway-grpc-proxy
+        id: action-minion-gateway-grpc-proxy
+        uses: ./.github/actions/minion-gateway-grpc-proxy
+        with:
+          dir-location: 'minion-gateway-grpc-proxy'
+          # only enable scans on develop branch, scans on other branches are covered by other workflows
+          enable-sonar-scan: ${{ github.event.ref == 'refs/heads/develop' }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          sonar-token: ${{ secrets.SONAR_TOKEN }}
+
+      - name: feature-datachoices
+        id: action-datachoices
+        uses: ./.github/actions/datachoices
+        with:
+          dir-location: 'datachoices'
+          # only enable scans on develop branch, scans on other branches are covered by other workflows
+          enable-sonar-scan: ${{ github.event.ref == 'refs/heads/develop' }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          sonar-token: ${{ secrets.SONAR_TOKEN }}
+
+      - name: external-it
+        id: action-external-it
+        uses: ./.github/actions/external-it
+        with:
+          dir-location: 'external-it'
+

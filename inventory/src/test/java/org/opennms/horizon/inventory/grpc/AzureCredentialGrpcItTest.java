@@ -109,8 +109,6 @@ class AzureCredentialGrpcItTest extends GrpcTestBase {
     public AzureCredentialGrpcItTest() {
         this.snakeCaseMapper = new ObjectMapper();
         this.snakeCaseMapper.setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
-
-
     }
 
     @BeforeAll

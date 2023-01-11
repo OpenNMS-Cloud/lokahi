@@ -144,7 +144,7 @@ public class AzureHttpClient {
 
     private <T> T performRequest(String endpoint, Class<T> clazz, HttpRequest request, int retries) throws AzureHttpException {
         if (retries < 1) {
-            throw new AzureHttpException("Retry count must be a positive number");
+            throw new AzureHttpException("Number of retries must be a positive number");
         }
 
         AzureHttpException exception = null;
@@ -160,20 +160,26 @@ public class AzureHttpClient {
                     return gson.fromJson(httpBody, clazz);
                 }
 
-                exception = new AzureHttpException("Failed to get for endpoint: "
-                    + endpoint + " status: " + httpResponse.statusCode() + " body: " + httpResponse.body() + " retry: " + retryCount);
+                String message = String.format("Failed to get for endpoint: %s, status: %d, body: %s, retry: %d/%d",
+                    endpoint, httpResponse.statusCode(), httpResponse.body(), retryCount, retries);
+                exception = new AzureHttpException(message);
 
             } catch (IOException | InterruptedException e) {
-                exception = new AzureHttpException("Failed to get for endpoint: " + endpoint + " retry: " + retryCount, e);
+                String message = String.format("Failed to get for endpoint: %s, retry: %d/%d",
+                    endpoint, retryCount, retries);
+                exception = new AzureHttpException(message, e);
             }
-            log.warn(exception.getMessage());
-
-            try {
-                Thread.sleep(backoffTime);
-                backoffTime *= EXPONENTIAL_BACKOFF_AMPLIFIER;
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                throw new AzureHttpException("Failed to wait for exp backoff with time: " + backoffTime + " retry: " + retryCount, e);
+            if (retryCount != retries) {
+                log.warn(exception.getMessage());
+                try {
+                    Thread.sleep(backoffTime);
+                    backoffTime *= EXPONENTIAL_BACKOFF_AMPLIFIER;
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    String message = String.format("Failed to wait for exp backoff with time: %d, retry: %d/%d",
+                        backoffTime, retryCount, retries);
+                    throw new AzureHttpException(message, e);
+                }
             }
         }
         Throwable cause = exception.getCause();

@@ -29,7 +29,7 @@ runs:
       if: ${{ inputs.enable-sonar-scan == 'true' }}
       run: |
 
-        mvn -Pcoverage verify jib:dockerBuild -Dimage=opennms/horizon-stream-notification:local \
+        mvn -Pcoverage verify jib:dockerBuild \
           org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=$SONAR_PROJECT_KEY
 
       working-directory: ${{ inputs.dir-location }}
@@ -44,7 +44,7 @@ runs:
       run: |
 
         # Test and create the docker image.
-        mvn verify jib:dockerBuild -Dimage=opennms/horizon-stream-notification:local
+        mvn verify jib:dockerBuild
 
       working-directory: ${{ inputs.dir-location }}
       shell: bash

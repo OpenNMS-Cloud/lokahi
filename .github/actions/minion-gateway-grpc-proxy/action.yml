@@ -43,7 +43,7 @@ runs:
       if: ${{ inputs.enable-sonar-scan == 'false' }}
       run: |
 
-        mvn verify jib:dockerBuild -Djib.container.creationTime=USE_CURRENT_TIMESTAMP -Dimage=opennms/horizon-stream-minion-gateway-grpc-proxy:local
+        mvn verify jib:dockerBuild
 
       working-directory: minion-gateway-grpc-proxy
       shell: bash

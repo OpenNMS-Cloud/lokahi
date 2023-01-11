@@ -157,7 +157,7 @@ class AzureCredentialGrpcItTest extends GrpcTestBase {
         assertEquals(1, credentials.getId());
 
         //2 calls because the trap listener also gets called on startup
-        await().atMost(10, TimeUnit.SECONDS).untilAtomic(testGrpcService.getTimesCalled(), Matchers.is(2));
+        await().atMost(10, TimeUnit.SECONDS).untilAtomic(testGrpcService.getTimesCalled(), Matchers.is(3));
 
         assertEquals(createDTO.getLocation(), credentials.getLocation());
         assertEquals(createDTO.getClientId(), credentials.getClientId());

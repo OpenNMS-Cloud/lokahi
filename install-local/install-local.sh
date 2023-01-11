@@ -76,19 +76,19 @@ load_images_to_kind_using_slow_kind () {
 
 save_part_of_normal_docker_image_load () {
 	docker save \
-		opennms/horizon-stream-ui:local-basic \
-		opennms/horizon-stream-grafana-dev:local-basic \
-		opennms/horizon-stream-datachoices:local-basic \
-		opennms/horizon-stream-events:local-basic \
-		opennms/horizon-stream-metrics-processor:local-basic \
-		opennms/horizon-stream-notification:local-basic \
-		opennms/horizon-stream-alarm:local-basic \
-		opennms/horizon-stream-inventory:local-basic \
-		opennms/horizon-stream-rest-server:local-basic \
-		opennms/horizon-stream-minion-gateway-grpc-proxy:local-basic \
-		opennms/horizon-stream-minion-gateway:local-basic \
-		opennms/horizon-stream-minion:local-basic \
-		opennms/horizon-stream-keycloak-dev:local-basic
+		opennms/horizon-stream-ui:local \
+		opennms/horizon-stream-grafana-dev:local \
+		opennms/horizon-stream-datachoices:local \
+		opennms/horizon-stream-events:local \
+		opennms/horizon-stream-metrics-processor:local \
+		opennms/horizon-stream-notification:local \
+		opennms/horizon-stream-alarm:local \
+		opennms/horizon-stream-inventory:local \
+		opennms/horizon-stream-rest-server:local \
+		opennms/horizon-stream-minion-gateway-grpc-proxy:local \
+		opennms/horizon-stream-minion-gateway:local \
+		opennms/horizon-stream-minion:local \
+		opennms/horizon-stream-keycloak-dev:local
 }
 
 load_part_of_normal_docker_image_load () {

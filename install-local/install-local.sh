@@ -88,34 +88,38 @@ elif [ "$CONTEXT" == "custom-images" ]; then
   create_cluster
 
   # Will add a kind-registry here at some point, see .github/ for sample script.
-  kind load docker-image --name kind-test opennms/horizon-stream-alarm:local&
-  kind load docker-image --name kind-test opennms/horizon-stream-minion:local&
-  kind load docker-image --name kind-test opennms/horizon-stream-minion-gateway:local&
-  kind load docker-image --name kind-test opennms/horizon-stream-minion-gateway-grpc-proxy:local&
-  kind load docker-image --name kind-test opennms/horizon-stream-keycloak:local&
-  kind load docker-image --name kind-test opennms/horizon-stream-grafana:local&
-  kind load docker-image --name kind-test opennms/horizon-stream-ui:local&
-  kind load docker-image --name kind-test opennms/horizon-stream-notification:local&
-  kind load docker-image --name kind-test opennms/horizon-stream-rest-server:local&
-  kind load docker-image --name kind-test opennms/horizon-stream-inventory:local&
-  kind load docker-image --name kind-test opennms/horizon-stream-metrics-processor:local&
-  kind load docker-image --name kind-test opennms/horizon-stream-events:local&
-  kind load docker-image --name kind-test opennms/horizon-stream-datachoices:local&
+  echo "START LOADING IMAGES INTO KIND AT $(date)"
 
-  # Need to wait for the images to be loaded.
-  echo === SLEEP
-  sleep 120
-  echo === PS
-  ps axu | grep kind || true
-  echo === IMAGES
-  docker exec -it kind-test-control-plane crictl images ls || true
+  time \
+      kind load docker-image --name kind-test opennms/horizon-stream-alarm:local \
+                                              opennms/horizon-stream-minion:local \
+                                              opennms/horizon-stream-minion-gateway:local \
+                                              opennms/horizon-stream-minion-gateway-grpc-proxy:local \
+                                              opennms/horizon-stream-keycloak:local \
+                                              opennms/horizon-stream-grafana:local \
+                                              opennms/horizon-stream-ui:local \
+                                              opennms/horizon-stream-notification:local \
+                                              opennms/horizon-stream-rest-server:local \
+                                              opennms/horizon-stream-inventory:local \
+                                              opennms/horizon-stream-metrics-processor:local \
+                                              opennms/horizon-stream-events:local \
+                                              opennms/horizon-stream-datachoices:local \
 
-  echo "=== SLEEP (2)"
-  sleep 120
-  echo "=== PS (2)"
-  ps axu | grep kind || true
-  echo "=== IMAGES (2)"
-  docker exec -it kind-test-control-plane crictl images ls || true
+  echo "FINISHED LOADING IMAGES INTO KIND AT $(date)"
+###---  # Need to wait for the images to be loaded.
+###---  echo === SLEEP
+###---  sleep 120
+###---  echo === PS
+###---  ps axu | grep kind || true
+###---  echo === IMAGES
+###---  docker exec -it kind-test-control-plane crictl images ls || true
+###---
+###---  echo "=== SLEEP (2)"
+###---  sleep 120
+###---  echo "=== PS (2)"
+###---  ps axu | grep kind || true
+###---  echo "=== IMAGES (2)"
+###---  docker exec -it kind-test-control-plane crictl images ls || true
 
   echo
   echo ________________Installing Horizon Stream________________

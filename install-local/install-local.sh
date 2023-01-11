@@ -89,7 +89,6 @@ elif [ "$CONTEXT" == "custom-images" ]; then
 
   # Will add a kind-registry here at some point, see .github/ for sample script.
   kind load docker-image --name kind-test opennms/horizon-stream-alarm:local&
-  kind load docker-image --name kind-test opennms/horizon-stream-core:local&
   kind load docker-image --name kind-test opennms/horizon-stream-minion:local&
   kind load docker-image --name kind-test opennms/horizon-stream-minion-gateway:local&
   kind load docker-image --name kind-test opennms/horizon-stream-minion-gateway-grpc-proxy:local&
@@ -107,16 +106,16 @@ elif [ "$CONTEXT" == "custom-images" ]; then
   echo === SLEEP
   sleep 120
   echo === PS
-  ps axu | grep kind
+  ps axu | grep kind || true
   echo === IMAGES
-  docker exec -it kind-control-plane crictl images ls
-  echo === SLEEP
+  docker exec -it kind-test-control-plane crictl images ls || true
 
+  echo "=== SLEEP (2)"
   sleep 120
-  echo === PS
-  ps axu | grep kind
-  echo === IMAGES
-  docker exec -it kind-control-plane crictl images ls
+  echo "=== PS (2)"
+  ps axu | grep kind || true
+  echo "=== IMAGES (2)"
+  docker exec -it kind-test-control-plane crictl images ls || true
 
   echo
   echo ________________Installing Horizon Stream________________

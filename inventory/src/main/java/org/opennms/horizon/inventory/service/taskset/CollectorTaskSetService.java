@@ -31,7 +31,6 @@ package org.opennms.horizon.inventory.service.taskset;
 import com.google.protobuf.Any;
 import lombok.RequiredArgsConstructor;
 import org.opennms.azure.contract.AzureCollectorRequest;
-import org.opennms.azure.contract.AzureMonitorRequest;
 import org.opennms.azure.contract.AzureScanItem;
 import org.opennms.horizon.inventory.model.AzureCredential;
 import org.opennms.horizon.inventory.model.IpInterface;
@@ -54,10 +53,7 @@ import static org.opennms.horizon.inventory.service.taskset.TaskUtils.identityFo
 @Component
 @RequiredArgsConstructor
 public class CollectorTaskSetService {
-
-    private static final Logger log = LoggerFactory.getLogger(CollectorTaskSetService.class);
     private final TaskSetPublisher taskSetPublisher;
-
 
     public void sendCollectorTask(String location, MonitorType monitorType, IpInterface ipInterface, long nodeId) {
         String tenantId = ipInterface.getTenantId();

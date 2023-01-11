@@ -56,7 +56,7 @@ public class ScannerResponseService {
 
         if (nodeOpt.isEmpty()) {
 
-            //todo: may need to relate AzureCredential with Node for recovery of monitoring
+            //note: may need to relate AzureCredential with Node for recovery of monitoring
             NodeCreateDTO createDTO = NodeCreateDTO.newBuilder()
                 .setLocation(location)
                 .setManagementIp(ipAddress)

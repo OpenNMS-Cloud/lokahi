@@ -27,6 +27,7 @@
  *******************************************************************************/
 package org.opennms.horizon.inventory.service;
 
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.opennms.horizon.inventory.dto.AzureCredentialCreateDTO;
@@ -48,6 +49,9 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 
 @Component
 @RequiredArgsConstructor
@@ -60,6 +64,10 @@ public class AzureCredentialService {
     private final MonitoringLocationRepository locationRepository;
     private final ConfigUpdateService configUpdateService;
     private final ScannerTaskSetService scannerTaskSetService;
+    private final ThreadFactory threadFactory = new ThreadFactoryBuilder()
+        .setNameFormat("send-taskset-for-azure-%d")
+        .build();
+    private final ExecutorService executorService = Executors.newFixedThreadPool(10, threadFactory);
 
     public AzureCredentialDTO createCredentials(String tenantId, AzureCredentialCreateDTO request) {
         validateCredentials(request);
@@ -70,11 +78,12 @@ public class AzureCredentialService {
         credential.setTenantId(tenantId);
         credential.setCreateTime(LocalDateTime.now());
         credential.setMonitoringLocation(monitoringLocation);
-        credential = repository.save(credential);
+        final AzureCredential savedCredential = repository.save(credential);
 
-        scannerTaskSetService.sendAzureScannerTask(credential);
+        // Asynchronously send task sets to Minion
+        executorService.execute(() -> scannerTaskSetService.sendAzureScannerTask(savedCredential));
 
-        return mapper.modelToDto(credential);
+        return mapper.modelToDto(savedCredential);
     }
 
     private void validateCredentials(AzureCredentialCreateDTO request) {

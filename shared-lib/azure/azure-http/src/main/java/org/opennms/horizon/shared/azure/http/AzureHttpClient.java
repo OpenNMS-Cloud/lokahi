@@ -35,12 +35,12 @@ public class AzureHttpClient {
     /*
      * Endpoints
      */
-    protected static final String OAUTH2_TOKEN_ENDPOINT = "/%s/oauth2/token";
-    protected static final String SUBSCRIPTION_ENDPOINT = "/subscriptions/%s";
-    protected static final String RESOURCE_GROUPS_ENDPOINT = "/subscriptions/%s/resourceGroups";
-    protected static final String RESOURCES_ENDPOINT = "/subscriptions/%s/resourceGroups/%s/resources";
-    protected static final String INSTANCE_VIEW_ENDPOINT = "/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Compute/virtualMachines/%s/InstanceView";
-    protected static final String METRICS_ENDPOINT = "/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Compute/virtualMachines/%s/providers/Microsoft.Insights/metrics";
+    public static final String OAUTH2_TOKEN_ENDPOINT = "/%s/oauth2/token";
+    public static final String SUBSCRIPTION_ENDPOINT = "/subscriptions/%s";
+    public static final String RESOURCE_GROUPS_ENDPOINT = "/subscriptions/%s/resourceGroups";
+    public static final String RESOURCES_ENDPOINT = "/subscriptions/%s/resourceGroups/%s/resources";
+    public static final String INSTANCE_VIEW_ENDPOINT = "/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Compute/virtualMachines/%s/InstanceView";
+    public static final String METRICS_ENDPOINT = "/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Compute/virtualMachines/%s/providers/Microsoft.Insights/metrics";
 
     /*
      * Headers

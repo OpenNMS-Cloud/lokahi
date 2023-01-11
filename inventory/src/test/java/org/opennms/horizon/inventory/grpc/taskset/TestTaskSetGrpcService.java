@@ -14,7 +14,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Slf4j
 @Getter
 public class TestTaskSetGrpcService extends TaskSetServiceGrpc.TaskSetServiceImplBase {
-    private AtomicInteger timesCalled = new AtomicInteger(0);
+    private final AtomicInteger timesCalled = new AtomicInteger(0);
     private final List<PublishTaskSetRequest> requests = new ArrayList<>();
 
     @Override

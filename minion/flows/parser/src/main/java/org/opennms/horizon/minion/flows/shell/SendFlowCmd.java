@@ -65,14 +65,14 @@ public class SendFlowCmd implements Action {
         byte[] dataToSend;
         if (Files.exists(Paths.get(file))) {
             dataToSend = Files.readAllBytes(Paths.get(file));
-        } else if(this.getClass().getResource("/flows/" + file) != null) {
+        } else if (this.getClass().getResource("/flows/" + file) != null) {
             dataToSend = toByteArray(this.getClass().getResourceAsStream("/flows/" + file));
         } else {
-            System.out.printf("cannot read file %s. Please enter a valid file, e.g. 'netflow9_test_valid01.dat'.%n", file);
+            System.out.printf("Can not read file %s. Please enter a valid file, e.g. 'netflow9_test_valid01.dat'.%n", file);
             return null;
         }
 
-        try ( DatagramSocket socket = new DatagramSocket()) {
+        try (DatagramSocket socket = new DatagramSocket()) {
             System.out.printf("Sending flow to the server %s:%s%n", this.host, this.port);
             InetAddress ip = InetAddress.getByName(host);
             DatagramPacket dp = new DatagramPacket(dataToSend, dataToSend.length, ip, port);

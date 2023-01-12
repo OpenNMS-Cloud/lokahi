@@ -31,7 +31,6 @@ package org.opennms.horizon.minion.snmp;
 import com.google.protobuf.ByteString;
 import org.opennms.horizon.shared.snmp.Collectable;
 import org.opennms.horizon.shared.snmp.IfNumberTracker;
-import org.opennms.horizon.shared.snmp.Mib2InterfacesTracker;
 import org.opennms.horizon.shared.snmp.SnmpNodeTracker;
 import org.opennms.horizon.shared.snmp.SnmpValue;
 import org.opennms.horizon.shared.snmp.SysUpTimeTracker;
@@ -57,7 +56,7 @@ public class SnmpCollectionSet {
     }
 
 
-    public List<Collectable> getTrackers() {
+    public List<Collectable> addDefaultTrackers() {
         IfNumberTracker ifNumberTracker = new IfNumberTracker() {
             @Override
             protected void storeResult(org.opennms.horizon.shared.snmp.SnmpResult res) {
@@ -135,5 +134,9 @@ public class SnmpCollectionSet {
 
         }
         return builder.build();
+    }
+
+    public List<Collectable> getTrackers() {
+        return trackers;
     }
 }

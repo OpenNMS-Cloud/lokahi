@@ -28,14 +28,10 @@
 
 package org.opennms.horizon.server.service;
 
-import io.leangen.graphql.annotations.GraphQLEnvironment;
-import io.leangen.graphql.execution.ResolutionEnvironment;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
-
 import java.util.Optional;
+
 import org.opennms.horizon.server.model.TimeRangeUnit;
 import org.opennms.horizon.server.model.TimeSeriesQueryResult;
 import org.opennms.horizon.server.utils.ServerHeaderUtil;
@@ -45,7 +41,9 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import io.leangen.graphql.annotations.GraphQLEnvironment;
 import io.leangen.graphql.annotations.GraphQLQuery;
+import io.leangen.graphql.execution.ResolutionEnvironment;
 import io.leangen.graphql.spqr.spring.annotations.GraphQLApi;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
@@ -74,12 +72,13 @@ public class PrometheusTSDBServiceImpl {
             .map(HashMap::new)
             .orElseGet(HashMap::new);
         // override value in case if it was in incoming values
-        metricLabels.put("tenant_id", headerUtil.extractTenant(env));
+        String tenantId = headerUtil.extractTenant(env);
         String queryString = generatePayloadString(name, metricLabels);
         if(timeRange != null && timeRangeUnit != null) {
             queryString += "[" + timeRange + timeRangeUnit.value + "]";
         }
         return webClient.post()
+            .header("X-Scope-OrgID", tenantId)
             .bodyValue(queryString)
             .retrieve()
             .bodyToMono(TimeSeriesQueryResult.class);

@@ -43,8 +43,8 @@ spec:
               value: "-agentlib:jdwp=transport=dt_socket,server=y,address=5005,suspend=n,quiet=y"  # FIXME: Permanent debug port, enable only for dev mode
             - name: SPRING_KAFKA_BOOTSTRAP_SERVERS
               value: "{{ .Values.Kafka.ServiceName }}:{{ .Values.Kafka.Port }}"
-            - name: PROMETHEUS_PUSHGATEWAY_URL
-              value: "{{ .Values.Prometheus.PushGateway.ServiceName }}:{{ .Values.Prometheus.PushGateway.Port }}"
+            - name: CORTEX_WRITE_URL
+              value: http://{{ .Values.Cortex.ServiceName }}:{{ .Values.Cortex.Port }}/api/v1/push
 
 
 

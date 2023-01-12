@@ -43,6 +43,7 @@ import org.springframework.stereotype.Service;
 import io.leangen.graphql.annotations.GraphQLArgument;
 import io.leangen.graphql.annotations.GraphQLContext;
 import io.leangen.graphql.annotations.GraphQLEnvironment;
+import io.leangen.graphql.annotations.GraphQLMutation;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.execution.ResolutionEnvironment;
 import io.leangen.graphql.spqr.spring.annotations.GraphQLApi;
@@ -73,5 +74,10 @@ public class GrpcMinionService {
         DataLoader<DataLoaderFactory.Key, Location> locationDataLoader = env.dataFetchingEnvironment.getDataLoader(DataLoaderFactory.DATA_LOADER_LOCATION);
         DataLoaderFactory.Key key = new DataLoaderFactory.Key(minion.getLocationId(), headerUtil.getAuthHeader(env));
         return locationDataLoader.load(key);
+    }
+
+    @GraphQLMutation
+    public Mono<Boolean> deleteMinion(@GraphQLArgument(name = "id") String id, @GraphQLEnvironment ResolutionEnvironment env) {
+        return Mono.just(client.deleteMonitoringSystem(id, headerUtil.getAuthHeader(env)));
     }
 }

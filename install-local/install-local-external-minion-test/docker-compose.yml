@@ -1,0 +1,48 @@
+version: '3.5'
+
+services:
+  minion-localnet:
+    image: docker.io/opennms/horizon-stream-minion:test.2022-12-13.22-17-26
+    extra_hosts:
+      minion.onmshs: 10.0.0.55
+    environment:
+      TZ: 'America/New_York'
+      MINION_ID: 'minion-b'
+      MINION_LOCATION: 'minion-b-loc'
+      USE_KUBERNETES: false
+      IGNITE_SERVER_ADDRESSES: localhost
+      MINION_GATEWAY_HOST: minion.onmshs
+      MINION_GATEWAY_PORT: 8990
+      MINION_GATEWAY_TLS: false
+    volumes:
+      - ./grpc.cfg:/opt/karaf/etc/org.opennms.core.ipc.grpc.client.cfg
+      - ./id.cfg:/opt/karaf/etc/org.opennms.identity.cfg
+    networks:
+      localnet:
+        ipv4_address: 172.4.1.1
+
+  snmpd-temp-a:
+    image: polinux/snmpd
+    networks:
+      localnet:
+        ipv4_address: 172.4.2.1
+
+  snmpd-temp-b:
+    image: polinux/snmpd
+    networks:
+      localnet:
+        ipv4_address: 172.4.2.2
+
+  snmpd-temp-c:
+    image: polinux/snmpd
+    networks:
+      localnet:
+        ipv4_address: 172.4.2.3
+
+networks:
+  localnet:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.4.0.0/16

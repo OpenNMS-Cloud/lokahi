@@ -35,7 +35,9 @@ import org.opennms.horizon.inventory.dto.MonitoringSystemDTO;
 import org.opennms.horizon.inventory.dto.MonitoringSystemList;
 import org.opennms.horizon.inventory.dto.MonitoringSystemServiceGrpc;
 import org.opennms.horizon.inventory.service.MonitoringSystemService;
+import org.springframework.stereotype.Component;
 
+import com.google.protobuf.BoolValue;
 import com.google.protobuf.Empty;
 import com.google.protobuf.StringValue;
 import com.google.rpc.Code;
@@ -45,8 +47,9 @@ import io.grpc.Context;
 import io.grpc.protobuf.StatusProto;
 import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class MonitoringSystemGrpcService extends MonitoringSystemServiceGrpc.MonitoringSystemServiceImplBase {
@@ -66,15 +69,40 @@ public class MonitoringSystemGrpcService extends MonitoringSystemServiceGrpc.Mon
         Optional<MonitoringSystemDTO> monitoringSystem = tenantLookup.lookupTenantId(Context.current())
             .map(tenantId -> service.findBySystemId(systemId.getValue(), tenantId))
             .orElseThrow();
-        if(monitoringSystem.isPresent()) {
-            responseObserver.onNext(monitoringSystem.get());
-            responseObserver.onCompleted();
-        } else {
-            Status status = Status.newBuilder()
-                .setCode(Code.NOT_FOUND_VALUE)
-                .setMessage("Monitor system with system id: " + systemId + " doesn't exist")
-                .build();
-            responseObserver.onError(StatusProto.toStatusRuntimeException(status));
-        }
+        monitoringSystem.ifPresentOrElse(
+            systemDTO -> {
+                responseObserver.onNext(systemDTO);
+                responseObserver.onCompleted();
+            },
+            () -> responseObserver.onError(StatusProto.toStatusRuntimeException(createStatusNotExist(systemId.getValue())))
+        );
+    }
+
+    @Override
+    public void deleteMonitoringSystem(StringValue request, StreamObserver<BoolValue> responseObserver) {
+        Optional<MonitoringSystemDTO> monitoringSystem = tenantLookup
+            .lookupTenantId(Context.current())
+            .map(tenantId -> service.findBySystemId(request.getValue(), tenantId))
+            .orElseThrow();
+        monitoringSystem.ifPresentOrElse(system -> {
+            try {
+                service.deleteMonitoringSystem(system.getId());
+                responseObserver.onNext(BoolValue.newBuilder().setValue(true).build());
+                responseObserver.onCompleted();
+            } catch (Exception e) {
+                log.error("Error while deleting monitoring system with systemId {}", system.getSystemId(), e);
+                Status status = Status.newBuilder()
+                    .setCode(Code.INTERNAL_VALUE)
+                    .setMessage("Error while deleting monitoring system with systemId " + system.getSystemId()).build();
+                responseObserver.onError(StatusProto.toStatusRuntimeException(status));
+            }}, () -> responseObserver.onError(StatusProto.toStatusRuntimeException(createStatusNotExist(request.getValue())))
+        );
+    }
+
+    private Status createStatusNotExist (String systemId) {
+        return Status.newBuilder()
+            .setCode(Code.NOT_FOUND_VALUE)
+            .setMessage("Monitor system with system id: " + systemId + " doesn't exist")
+            .build();
     }
 }

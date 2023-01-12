@@ -53,4 +53,5 @@ message MonitoringSystemList {
 service MonitoringSystemService {
   rpc listMonitoringSystem(google.protobuf.Empty) returns (MonitoringSystemList) {};
   rpc getMonitoringSystemById(google.protobuf.StringValue) returns (MonitoringSystemDTO) {};
+  rpc deleteMonitoringSystem(google.protobuf.StringValue) returns (google.protobuf.BoolValue);
 }

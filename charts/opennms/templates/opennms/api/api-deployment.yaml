@@ -50,7 +50,7 @@ spec:
             - name: HORIZON_STREAM_NOTIFICATIONS_URL
               value: "http://{{ .Values.OpenNMS.Notification.ServiceName }}:{{ .Values.OpenNMS.Notification.Port }}"
             - name: TSDB_URL
-              value: "http://{{ .Values.Prometheus.Server.ServiceName }}:{{ .Values.Prometheus.Server.Port }}/api/v1/query"
+              value: "http://{{ .Values.Cortex.ServiceName }}:{{ .Values.Cortex.Port }}/prometheus/api/v1/query"
             - name: SPRING_WEBFLUX_BASE_PATH
               value: /api
             - name: GRAPHQL_SPQR_GUI_TARGET_ENDPOINT

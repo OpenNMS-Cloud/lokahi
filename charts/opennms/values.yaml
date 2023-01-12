@@ -214,34 +214,17 @@ Grafana:
     Requests:
       Cpu: 100m
       Memory: 100Mi
-Prometheus:
-  Enabled: true
-  Server:
-    ServiceName: prometheus
-    Port: 9090
-    Image: prom/prometheus:v2.39.1
-    ImagePullPolicy: IfNotPresent
-    Replicas: 1
-    Resources:
-      Limits:
-        Cpu: "1"
-        Memory: 512Mi
-      Requests:
-        Cpu: 100m
-        Memory: 100Mi
-  PushGateway:
-    ServiceName: prometheus-pushgateway
-    Port: 9091
-    Image: prom/pushgateway:v1.4.3
-    ImagePullPolicy: IfNotPresent
-    Replicas: 1
-    Resources:
-      Limits:
-        Cpu: "1"
-        Memory: 512Mi
-      Requests:
-        Cpu: 100m
-        Memory: 100Mi
+Cortex:
+  ServiceName: cortex
+  Port: 9000
+  Image: cortexproject/cortex:v1.14.0
+  Resources:
+    Limits:
+      Cpu: "1"
+      Memory: 512Mi
+    Requests:
+      Cpu: 100m
+      Memory: 100Mi
 Kafka:
   ServiceName: onms-kafka
   Image: bitnami/kafka:3.3.1-debian-11-r1

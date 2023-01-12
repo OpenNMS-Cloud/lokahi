@@ -112,6 +112,9 @@
         <jetty.version>9.4.43.v20210629</jetty.version>
         <cron-utils.version>9.1.6</cron-utils.version>
         <eos.version>1.2.0</eos.version>
+        <okhttp.version>3.14.0</okhttp.version>
+        <resilience4j.version>1.7.0</resilience4j.version>
+        <snappy-java.version>1.1.8.4</snappy-java.version>
     </properties>
 
     <dependencyManagement>

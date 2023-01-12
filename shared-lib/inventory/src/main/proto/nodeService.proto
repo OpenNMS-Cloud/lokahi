@@ -64,5 +64,5 @@ service NodeService {
   rpc listNodes(google.protobuf.Empty) returns (NodeList) {};
   rpc getNodeById(google.protobuf.Int64Value) returns (NodeDTO) {};
   rpc getNodeIdFromQuery(NodeIdQuery) returns (google.protobuf.Int64Value) {};
-
+  rpc deleteNode(google.protobuf.Int64Value) returns(google.protobuf.BoolValue) {};
 }

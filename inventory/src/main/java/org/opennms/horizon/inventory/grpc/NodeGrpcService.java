@@ -31,6 +31,7 @@ package org.opennms.horizon.inventory.grpc;
 import com.google.common.base.Strings;
 import com.google.common.net.InetAddresses;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import com.google.protobuf.BoolValue;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Int64Value;
 import com.google.rpc.Code;
@@ -100,15 +101,10 @@ public class NodeGrpcService extends NodeServiceGrpc.NodeServiceImplBase {
         Optional<NodeDTO> node = tenantLookup.lookupTenantId(Context.current())
             .map(tenantId -> nodeService.getByIdAndTenantId(request.getValue(), tenantId))
             .orElseThrow();
-        if (node.isPresent()) {
-            responseObserver.onNext(node.get());
+        node.ifPresentOrElse(nodeDTO -> {
+            responseObserver.onNext(nodeDTO);
             responseObserver.onCompleted();
-        } else {
-            Status status = Status.newBuilder()
-                .setCode(Code.NOT_FOUND_VALUE)
-                .setMessage("Node with id: " + request.getValue() + " doesn't exist.").build();
-            responseObserver.onError(StatusProto.toStatusRuntimeException(status));
-        }
+        }, () -> responseObserver.onError(StatusProto.toStatusRuntimeException(createStatusNotExits(request.getValue()))));
     }
 
     @Override
@@ -154,6 +150,33 @@ public class NodeGrpcService extends NodeServiceGrpc.NodeServiceImplBase {
         var nodeIdProto = Int64Value.newBuilder().setValue(nodeId).build();
         responseObserver.onNext(nodeIdProto);
         responseObserver.onCompleted();
+    }
+
+    @Override
+    public void deleteNode(Int64Value request, StreamObserver<BoolValue> responseObserver) {
+        Optional<NodeDTO> node = tenantLookup.lookupTenantId(Context.current())
+            .map(tenantId -> nodeService.getByIdAndTenantId(request.getValue(), tenantId))
+            .orElseThrow();
+        node.ifPresentOrElse(nodeDTO -> {
+            try {
+                nodeService.deleteNode(nodeDTO.getId());
+                responseObserver.onNext(BoolValue.newBuilder().setValue(true).build());
+                responseObserver.onCompleted();
+            } catch (Exception e) {
+                log.error("Error while deleting node with ID {}", request.getValue(), e);
+                Status status = Status.newBuilder()
+                    .setCode(Code.INTERNAL_VALUE)
+                    .setMessage("Error while deleting node with ID " + request.getValue()).build();
+                responseObserver.onError(StatusProto.toStatusRuntimeException(status));
+            }}, () -> responseObserver.onError(StatusProto.toStatusRuntimeException(createStatusNotExits(request.getValue())))
+        );
+    }
+
+    private Status createStatusNotExits(long id) {
+        return Status.newBuilder()
+            .setCode(Code.NOT_FOUND_VALUE)
+            .setMessage(String.format("Node with id: %s doesn't exist.", id)).build();
+
     }
 
     private boolean validateInput(NodeCreateDTO request, String tenantId, StreamObserver<NodeDTO> responseObserver) {

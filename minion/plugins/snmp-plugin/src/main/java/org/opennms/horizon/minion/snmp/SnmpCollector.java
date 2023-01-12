@@ -101,6 +101,7 @@ public class SnmpCollector implements ServiceCollector {
                         Integer ifIndex = value.toInt();
                         LOG.info("ifIndex for ipAddress {} is {}", ipAddress, ifIndex);
                         var interfaceMetricsTracker = new InterfaceMetricsTracker(ifIndex, builder);
+                        snmpCollectionSet.addDefaultTrackers();
                         snmpCollectionSet.getTrackers().add(interfaceMetricsTracker);
                     }
                 });

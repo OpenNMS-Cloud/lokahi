@@ -20,8 +20,6 @@
 ## 16 = horizon-stream-minion-gateway
 ## 17 = horizon-stream-ui
 ## 18 = grafana
-## 19 = prometheus
-## 21 = prometheus-pushgateway
 ## 22 = mail-server
 ## 23 = zookeeper
 ## 24 = kafka
@@ -31,6 +29,7 @@
 ## 28 = metric processor
 ## 29 = horizon-stream-inventory
 ## 30 = events
+## 31 = cortex
 ##
 
 # Tilt config #
@@ -253,16 +252,10 @@ k8s_resource(
     port_forwards=['18080:3000'],
 )
 
-### Prometheus ###
+### Cortex ###
 k8s_resource(
-    'prometheus',
-    port_forwards=['19080:9090'],
-)
-
-### Prometheus Push Gateway ###
-k8s_resource(
-    'prometheus-pushgateway',
-    port_forwards=['21080:9091'],
+    'cortex',
+    port_forwards=['19000:9000'],
 )
 
 ### Postgres ###

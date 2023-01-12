@@ -28,19 +28,40 @@
 
 package org.opennms.horizon.tsdata;
 
-import org.opennms.horizon.tsdata.metrics.MetricsPushAdapter;
-import org.opennms.horizon.tsdata.metrics.PrometheusMetricsPushAdapter;
+import org.opennms.timeseries.cortex.CortexTSS;
+import org.opennms.timeseries.cortex.CortexTSSConfig;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class ApplicationConfig {
-    @Value("${prometheus.pushgateway.url}")
-    private String dataPushURL;
+    @Value("${cortex.write.url}")
+    private String cortexWriteURL;
+
+    @Value("${cortex.maxconcurrenthttpconnections:100}")
+    private int maxConcurrentHttpConnections;
+
+    @Value("${cortex.cortexwritetimeoutinms:1000}")
+    private long cortexWriteTimeoutInMs;
+
+    @Value("${cortex.readtimeoutinms:1000}")
+    private long readTimeoutInMs;
+
+    @Value("${cortex.bulkheadmaxwaitdurationinms:9223372036854775807}")
+    private long bulkheadMaxWaitDurationInMs;
+
+    @Value("${cortex.organizationid}")
+    private String organizationId;
+
     @Bean
-    public MetricsPushAdapter createPushAdapter() {
-        return new PrometheusMetricsPushAdapter(dataPushURL);
+    public CortexTSSConfig cortexTSSConfig() {
+        return new CortexTSSConfig(cortexWriteURL, maxConcurrentHttpConnections, cortexWriteTimeoutInMs, readTimeoutInMs, bulkheadMaxWaitDurationInMs, organizationId);
+    }
+
+    @Bean
+    public CortexTSS createCortex() {
+        return new CortexTSS(cortexTSSConfig());
     }
 }
 

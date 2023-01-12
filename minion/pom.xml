@@ -29,7 +29,7 @@
         <module>minion-features</module>
         <module>docker-assembly</module>
         <module>assembly</module>
-        <module>flows</module>
+        <module>minion-flows</module>
         <module>testtools</module>
         <module>docker-it</module>
     </modules>
@@ -280,7 +280,6 @@
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
-                <version>5.1.2</version>
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>

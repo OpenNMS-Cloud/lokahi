@@ -1,0 +1,100 @@
+/*******************************************************************************
+ * This file is part of OpenNMS(R).
+ *
+ * Copyright (C) 2022 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
+ *
+ * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *
+ * OpenNMS(R) is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published
+ * by the Free Software Foundation, either version 3 of the License,
+ * or (at your option) any later version.
+ *
+ * OpenNMS(R) is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with OpenNMS(R).  If not, see:
+ *      http://www.gnu.org/licenses/
+ *
+ * For more information contact:
+ *     OpenNMS(R) Licensing <license@opennms.org>
+ *     http://www.opennms.org/
+ *     http://www.opennms.com/
+ *******************************************************************************/
+syntax = "proto3";
+
+package opennms.sink.flows;
+option java_multiple_files = true;
+option java_package = "org.opennms.sink.flows.contract";
+
+message FlowsConfig {
+  repeated ListenerConfig listeners = 1;
+  repeated ConnectorConfig connectors = 2;
+  repeated QueueConfig queues = 3;
+}
+
+message ListenerConfig {
+  string  name = 1;
+  string class_name = 2;
+  bool enabled = 3;
+  repeated Parameter parameters = 4;
+  repeated ParserConfig parsers = 5;
+}
+
+message Parameter {
+  string key = 1;
+  string value = 2;
+  optional string group = 3;
+}
+
+message ParserConfig {
+  string name = 1;
+  string class_name = 2;
+  QueueConfig queue = 3;
+  repeated Parameter parameters = 4;
+}
+
+message ConnectorConfig {
+  string name = 1;
+  string class_name = 2;
+  string service_name = 3;
+  string queue = 4;
+  bool enabled = 5;
+  repeated Parameter parameters = 6;
+  repeated PackageConfig packages = 7;
+}
+
+//  Telemetry protocol package configuration.
+message PackageConfig {
+  string name = 1;
+  Filter filter = 2;
+  repeated Parameter parameters = 4;
+  string filter_rule = 5;
+  map<string, string>  parameter_map = 6;
+}
+
+message Filter {
+  string content = 1;
+}
+
+message QueueConfig {
+  string name = 1;
+  int32 num_threads = 2;
+  int32 batch_size = 3;
+  int32 batch_interval = 4; // ms
+  int32 queue_size = 5;
+  bool use_routing_key = 6;
+  repeated AdapterConfig adapters = 7;
+}
+
+message AdapterConfig {
+  string name = 1;
+  string class_name = 2;
+  bool enabled = 3;
+  repeated Parameter parameters = 4;
+  repeated PackageConfig packages = 5;
+}

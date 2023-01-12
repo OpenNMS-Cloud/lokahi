@@ -88,4 +88,7 @@ public class MonitoringSystemService {
         return modelRepo.findById(id).map(s->new MonitoringSystemBean(s.getSystemId(), s.getTenantId(), s.getMonitoringLocation().getLocation()));
     }
 
+    public void deleteMonitoringSystem(long id) {
+        modelRepo.deleteById(id);
+    }
 }

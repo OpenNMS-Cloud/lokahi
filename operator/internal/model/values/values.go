@@ -24,7 +24,7 @@ type Values struct {
 	Host             string                 `yaml:"Host"`
 	Port             int                    `yaml:"Port"`
 	Protocol         string                 `yaml:"Protocol"`
-	Prometheus       PrometheusValues       `yaml:"Prometheus"`
+	Cortex           CortexValues           `yaml:"Cortex"`
 	OpenNMS          OpenNMSValues          `yaml:"OpenNMS"`
 	TLS              TLSValues              `yaml:"TLS"`
 	Postgres         PostgresValues         `yaml:"Postgres"`

@@ -6,15 +6,15 @@
     </template>
     <FeatherTabPanel>
       <Filter v-if="tabMonitoredContent.length" />
-      <MonitoredNodesTabContent v-if="tabMonitoredContent.length" :tabContent="tabMonitoredContent" />
+      <InventoryMonitoredNodesTabContent v-if="tabMonitoredContent.length" :tabContent="tabMonitoredContent" />
     </FeatherTabPanel>
     <!-- <FeatherTabPanel>
-      <Filter v-if="tabUnmonitoredContent.length" />
-      <MonitoredNodesTabContent :tabContent="tabUnmonitoredContent" />
+      <InventoryFilter v-if="tabUnmonitoredContent.length" />
+      <InventoryMonitoredNodesTabContent :tabContent="tabUnmonitoredContent" />
     </FeatherTabPanel> -->
     <!-- <FeatherTabPanel>
       <Filter v-if="tabDetectedContent.length" />
-      <DetectedNodesTabContent :tabContent="tabDetectedContent" />
+      <InventoryDetectedNodesTabContent :tabContent="tabDetectedContent" />
     </FeatherTabPanel> -->
   </FeatherTabContainer>
 </template>
@@ -25,9 +25,9 @@ import {
   FeatherTabContainer,
   FeatherTabPanel
 } from '@featherds/tabs'
-import Filter from '@/components/Inventory/Filter.vue'
-import MonitoredNodesTabContent from '@/components/Inventory/MonitoredNodesTabContent.vue'
-// import DetectedNodesTabContent from '@/components/Inventory/DetectedNodesTabContent.vue'
+import InventoryFilter from '@/components/Inventory/InventoryFilter.vue'
+import InventoryMonitoredNodesTabContent from '@/components/Inventory/InventoryMonitoredNodesTabContent.vue'
+// import InventoryDetectedNodesTabContent from '@/components/Inventory/InventoryDetectedNodesTabContent.vue'
 // import { TimeUnit } from '@/types'
 import { NodeContent } from '@/types/inventory'
 import { useInventoryQueries } from '@/store/Queries/inventoryQueries'

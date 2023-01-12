@@ -20,12 +20,13 @@ runs:
       run: |
 
         # Delete if exists from previous failed run.
-        kind delete clusters kind
+        kind delete clusters kind-test
         
         # Setup localhost DNS
         sudo echo "127.0.0.1 onmshs" | sudo tee -a /etc/hosts
 
         # Build cluster with Horizon Stream installed.
+        cd install-local/
         ./install-local.sh custom-images onmshs
 
       shell: bash
@@ -35,13 +36,6 @@ runs:
 
         # Cucumber test
         cd ${{ inputs.dir-location }}
-
-        kubectl --context kind-kind -n hs-instance port-forward --pod-running-timeout 1s services/opennms-core 11080:8181 &
-
-        # Core takes some time after ready status true before it is setup and
-        # has the minion coming in.
-        echo "Waiting for OpenNMS Horizon Core to start completely..."
-        sleep 500
 
         mvn install
         HORIZON_STREAM_BASE_URL=http://localhost:11080 
@@ -64,5 +58,5 @@ runs:
 
     - name: Cleanup
       if: ${{ always() }}
-      run: kind delete clusters kind
+      run: kind delete clusters kind-test
       shell: bash

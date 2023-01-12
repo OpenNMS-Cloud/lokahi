@@ -121,4 +121,16 @@ public class InventoryClient {
             return locationStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).listLocationsByIds(IdList.newBuilder().addAllIds(idValues).build()).getLocationsList();
         }).orElseThrow();
     }
+
+    public boolean deleteNode(long nodeId, String accessToken) {
+        Metadata metadata = new Metadata();
+        metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
+        return nodeStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).deleteNode(Int64Value.of(nodeId)).getValue();
+    }
+
+    public boolean deleteMonitoringSystem(String systemId, String accessToken) {
+        Metadata metadata = new Metadata();
+        metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
+        return systemStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).deleteMonitoringSystem(StringValue.of(systemId)).getValue();
+    }
 }

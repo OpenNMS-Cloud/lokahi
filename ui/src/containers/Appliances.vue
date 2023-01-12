@@ -4,14 +4,14 @@
         Welcome, {{ keycloak.tokenParsed?.preferred_username }}
     </div>
     <div class="btns">
-      <NotificationsCtrl />
-      <AddNodeCtrl />
+      <AppliancesNotificationsCtrl />
+      <AppliancesAddNodeCtrl />
     </div>
   </div>
 
   <div class="minions-devices-container">
-    <div class="minions-table"><MinionsTable /></div>
-    <div class="devices-table"><NodesTable /></div>
+    <div class="minions-table"><AppliancesMinionsTable /></div>
+    <div class="devices-table"><AppliancesNodesTable /></div>
   </div>
 </template>
 

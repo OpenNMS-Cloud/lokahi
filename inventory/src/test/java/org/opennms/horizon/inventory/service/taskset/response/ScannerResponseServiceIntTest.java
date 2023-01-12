@@ -93,9 +93,10 @@ class ScannerResponseServiceIntTest extends GrpcTestBase {
 
     @AfterEach
     public void cleanUp() {
+        ipInterfaceRepository.deleteAll();
         nodeRepository.deleteAll();
         credentialRepository.deleteAll();
-
+        locationRepository.deleteAll();
         testGrpcService.reset();
     }
 
@@ -108,13 +109,13 @@ class ScannerResponseServiceIntTest extends GrpcTestBase {
     @Test
     @Transactional
     void testAzureAccept() throws Exception {
-        populateDatabase();
+        AzureCredential credential = createAzureCredential();
 
         AzureScanItem scanItem = AzureScanItem.newBuilder()
             .setId("/subscriptions/sub-id/resourceGroups/resource-group/providers/Microsoft.Compute/virtualMachines/vm-name")
             .setName("vm-name")
             .setResourceGroup("resource-group")
-            .setCredentialId(1)
+            .setCredentialId(credential.getId())
             .build();
 
         List<AzureScanItem> azureScanItems = Collections.singletonList(scanItem);
@@ -142,7 +143,7 @@ class ScannerResponseServiceIntTest extends GrpcTestBase {
         assertEquals("127.0.0.1", ipInterface.getIpAddress().getAddress());
     }
 
-    private void populateDatabase() {
+    private AzureCredential createAzureCredential() {
 
         MonitoringLocation location = new MonitoringLocation();
         location.setLocation(TEST_LOCATION);
@@ -158,7 +159,7 @@ class ScannerResponseServiceIntTest extends GrpcTestBase {
         credential.setCreateTime(LocalDateTime.now());
         credential.setMonitoringLocation(location);
 
-        credentialRepository.save(credential);
+        return credentialRepository.save(credential);
     }
 
 }

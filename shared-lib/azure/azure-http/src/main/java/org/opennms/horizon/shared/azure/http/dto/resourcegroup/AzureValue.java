@@ -35,14 +35,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class AzureValue {
-    @SerializedName("id")
-    private String id;
     @SerializedName("name")
     private String name;
-    @SerializedName("type")
-    private String type;
-    @SerializedName("location")
-    private String location;
-    @SerializedName("properties")
-    private AzureProperties properties;
 }

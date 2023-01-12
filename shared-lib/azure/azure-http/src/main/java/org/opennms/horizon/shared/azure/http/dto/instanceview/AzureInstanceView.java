@@ -41,12 +41,6 @@ import java.util.List;
 public class AzureInstanceView {
     private static final String POWER_STATE_RUNNING = "PowerState/running";
 
-    @SerializedName("disks")
-    private List<AzureDisk> disks = new ArrayList<>();
-    @SerializedName("bootDiagnostics")
-    private AzureBootDiagnostics bootDiagnostics;
-    @SerializedName("hyperVGeneration")
-    private String hyperVGeneration;
     @SerializedName("statuses")
     private List<AzureStatus> statuses = new ArrayList<>();
 

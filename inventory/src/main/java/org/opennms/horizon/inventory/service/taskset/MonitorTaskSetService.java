@@ -89,7 +89,7 @@ public class MonitorTaskSetService {
                 configuration =
                     Any.pack(IcmpMonitorRequest.newBuilder()
                         .setHost(ipAddress)
-                        .setTimeout(TaskUtils.Icmp.DEFAULT_TIMEOUT)
+                        .setTimeout(TaskUtils.Icmp.DEFAULT_TIMEOUT_MS)
                         .setDscp(TaskUtils.Icmp.DEFAULT_DSCP)
                         .setAllowFragmentation(TaskUtils.Icmp.DEFAULT_ALLOW_FRAGMENTATION)
                         .setPacketSize(TaskUtils.Icmp.DEFAULT_PACKET_SIZE)
@@ -102,7 +102,7 @@ public class MonitorTaskSetService {
                 configuration =
                     Any.pack(SnmpMonitorRequest.newBuilder()
                         .setHost(ipAddress)
-                        .setTimeout(TaskUtils.Snmp.DEFAULT_TIMEOUT)
+                        .setTimeout(TaskUtils.Snmp.DEFAULT_TIMEOUT_MS)
                         .setRetries(TaskUtils.Snmp.DEFAULT_RETRIES)
                         .build());
                 break;
@@ -143,7 +143,7 @@ public class MonitorTaskSetService {
                 .setClientSecret(credential.getClientSecret())
                 .setSubscriptionId(credential.getSubscriptionId())
                 .setDirectoryId(credential.getDirectoryId())
-                .setTimeout(TaskUtils.Azure.DEFAULT_TIMEOUT)
+                .setTimeoutMs(TaskUtils.Azure.DEFAULT_TIMEOUT_MS)
                 .setRetries(TaskUtils.Azure.DEFAULT_RETRIES)
                 .build());
 

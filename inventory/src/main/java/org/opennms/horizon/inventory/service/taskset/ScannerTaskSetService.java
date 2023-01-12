@@ -63,7 +63,7 @@ public class ScannerTaskSetService {
                 .setClientSecret(credential.getClientSecret())
                 .setSubscriptionId(credential.getSubscriptionId())
                 .setDirectoryId(credential.getDirectoryId())
-                .setTimeout(TaskUtils.Azure.DEFAULT_TIMEOUT)
+                .setTimeoutMs(TaskUtils.Azure.DEFAULT_TIMEOUT_MS)
                 .setRetries(TaskUtils.Azure.DEFAULT_RETRIES)
                 .build());
 

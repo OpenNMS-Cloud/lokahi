@@ -41,8 +41,6 @@ import org.opennms.taskset.contract.MonitorType;
 import org.opennms.taskset.contract.TaskDefinition;
 import org.opennms.taskset.contract.TaskType;
 import org.opennms.taskset.service.api.TaskSetPublisher;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
@@ -117,7 +115,7 @@ public class CollectorTaskSetService {
                 .setClientSecret(credential.getClientSecret())
                 .setSubscriptionId(credential.getSubscriptionId())
                 .setDirectoryId(credential.getDirectoryId())
-                .setTimeout(TaskUtils.Azure.DEFAULT_TIMEOUT)
+                .setTimeoutMs(TaskUtils.Azure.DEFAULT_TIMEOUT_MS)
                 .setRetries(TaskUtils.Azure.DEFAULT_RETRIES)
                 .build());
 

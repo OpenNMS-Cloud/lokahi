@@ -70,18 +70,18 @@ public class AzureScanner implements Scanner {
             AzureScanRequest request = config.unpack(AzureScanRequest.class);
 
             AzureOAuthToken token = client.login(request.getDirectoryId(),
-                request.getClientId(), request.getClientSecret(), request.getTimeout(), request.getRetries());
+                request.getClientId(), request.getClientSecret(), request.getTimeoutMs(), request.getRetries());
 
             List<AzureScanItem> scannedItems = new LinkedList<>();
 
             AzureResourceGroups resourceGroups = client
-                .getResourceGroups(token, request.getSubscriptionId(), request.getTimeout(), request.getRetries());
+                .getResourceGroups(token, request.getSubscriptionId(), request.getTimeoutMs(), request.getRetries());
 
             for (AzureValue resourceGroupValue : resourceGroups.getValue()) {
                 String resourceGroup = resourceGroupValue.getName();
 
                 AzureResources resources = client.getResources(token, request.getSubscriptionId(),
-                    resourceGroup, request.getTimeout(), request.getRetries());
+                    resourceGroup, request.getTimeoutMs(), request.getRetries());
 
                 scannedItems.addAll(resources.getValue().stream()
                     .filter(azureValue -> azureValue.getType()

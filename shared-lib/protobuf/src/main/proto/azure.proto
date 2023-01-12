@@ -41,7 +41,7 @@ message AzureScanRequest {
   string client_secret = 3;
   string subscription_id = 4;
   string directory_id = 5;
-  int64 timeout = 6;
+  int64 timeout_ms = 6;
   int32 retries = 7;
 }
 
@@ -54,7 +54,7 @@ message AzureMonitorRequest {
   string subscription_id = 6;
   string directory_id = 7;
   int32 retries = 8;
-  int64 timeout = 9;
+  int64 timeout_ms = 9;
 }
 
 message AzureCollectorRequest {
@@ -66,5 +66,5 @@ message AzureCollectorRequest {
   string subscription_id = 6;
   string directory_id = 7;
   int32 retries = 8;
-  int64 timeout = 9;
+  int64 timeout_ms = 9;
 }

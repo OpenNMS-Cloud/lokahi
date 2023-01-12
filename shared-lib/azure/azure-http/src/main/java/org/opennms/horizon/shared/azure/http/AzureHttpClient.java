@@ -111,7 +111,7 @@ public class AzureHttpClient {
         this.gson = new Gson();
     }
 
-    public AzureOAuthToken login(String directoryId, String clientId, String clientSecret, long timeout, int retries) throws AzureHttpException {
+    public AzureOAuthToken login(String directoryId, String clientId, String clientSecret, long timeoutMs, int retries) throws AzureHttpException {
         List<String> parameters = new LinkedList<>();
         parameters.add(LOGIN_GRANT_TYPE_PARAM);
         parameters.add(LOGIN_CLIENT_ID_PARAM + clientId);
@@ -121,7 +121,7 @@ public class AzureHttpClient {
         String baseLoginUrl = params.getBaseLoginUrl();
         String versionQueryParam = API_VERSION_PARAM + params.getApiVersion();
         String url = String.format(baseLoginUrl + OAUTH2_TOKEN_ENDPOINT + versionQueryParam, directoryId);
-        HttpRequest request = getHttpRequestBuilder(url, timeout)
+        HttpRequest request = getHttpRequestBuilder(url, timeoutMs)
             .header(CONTENT_TYPE_HEADER, APPLICATION_FORM_URLENCODED_VALUE)
             .POST(HttpRequest.BodyPublishers.ofString(String.join(PARAMETER_DELIMITER, parameters)))
             .build();
@@ -129,43 +129,43 @@ public class AzureHttpClient {
         return performRequest(OAUTH2_TOKEN_ENDPOINT, AzureOAuthToken.class, request, retries);
     }
 
-    public AzureSubscription getSubscription(AzureOAuthToken token, String subscriptionId, long timeout, int retries) throws AzureHttpException {
+    public AzureSubscription getSubscription(AzureOAuthToken token, String subscriptionId, long timeoutMs, int retries) throws AzureHttpException {
         String versionQueryParam = API_VERSION_PARAM + params.getApiVersion();
         String url = String.format(SUBSCRIPTION_ENDPOINT + versionQueryParam, subscriptionId);
-        return get(token, url, timeout, retries, AzureSubscription.class);
+        return get(token, url, timeoutMs, retries, AzureSubscription.class);
     }
 
-    public AzureResourceGroups getResourceGroups(AzureOAuthToken token, String subscriptionId, long timeout, int retries) throws AzureHttpException {
+    public AzureResourceGroups getResourceGroups(AzureOAuthToken token, String subscriptionId, long timeoutMs, int retries) throws AzureHttpException {
         String versionQueryParam = API_VERSION_PARAM + params.getApiVersion();
         String url = String.format(RESOURCE_GROUPS_ENDPOINT + versionQueryParam, subscriptionId);
-        return get(token, url, timeout, retries, AzureResourceGroups.class);
+        return get(token, url, timeoutMs, retries, AzureResourceGroups.class);
     }
 
     public AzureResources getResources(AzureOAuthToken token, String subscriptionId, String resourceGroup,
-                                       long timeout, int retries) throws AzureHttpException {
+                                       long timeoutMs, int retries) throws AzureHttpException {
         String versionQueryParam = API_VERSION_PARAM + params.getApiVersion();
         String url = String.format(RESOURCES_ENDPOINT + versionQueryParam, subscriptionId, resourceGroup);
-        return get(token, url, timeout, retries, AzureResources.class);
+        return get(token, url, timeoutMs, retries, AzureResources.class);
     }
 
     public AzureInstanceView getInstanceView(AzureOAuthToken token, String subscriptionId, String resourceGroup,
-                                             String resourceName, long timeout, int retries) throws AzureHttpException {
+                                             String resourceName, long timeoutMs, int retries) throws AzureHttpException {
         String versionQueryParam = API_VERSION_PARAM + params.getApiVersion();
         String url = String.format(INSTANCE_VIEW_ENDPOINT + versionQueryParam, subscriptionId, resourceGroup, resourceName);
-        return get(token, url, timeout, retries, AzureInstanceView.class);
+        return get(token, url, timeoutMs, retries, AzureInstanceView.class);
     }
 
     public AzureMetrics getMetrics(AzureOAuthToken token, String subscriptionId, String resourceGroup,
-                                   String resourceName, Map<String, String> params, long timeout, int retries) throws AzureHttpException {
+                                   String resourceName, Map<String, String> params, long timeoutMs, int retries) throws AzureHttpException {
         String versionQueryParam = API_VERSION_PARAM + this.params.getMetricsApiVersion();
         String url = String.format(METRICS_ENDPOINT + versionQueryParam, subscriptionId, resourceGroup, resourceName);
         url = addUrlParams(url, params);
-        return get(token, url, timeout, retries, AzureMetrics.class);
+        return get(token, url, timeoutMs, retries, AzureMetrics.class);
     }
 
-    private <T> T get(AzureOAuthToken token, String endpoint, long timeout, int retries, Class<T> clazz) throws AzureHttpException {
+    private <T> T get(AzureOAuthToken token, String endpoint, long timeoutMs, int retries, Class<T> clazz) throws AzureHttpException {
         String url = params.getBaseManagementUrl() + endpoint;
-        HttpRequest request = buildGetHttpRequest(token, url, timeout);
+        HttpRequest request = buildGetHttpRequest(token, url, timeoutMs);
 
         return performRequest(endpoint, clazz, request, retries);
     }
@@ -217,19 +217,19 @@ public class AzureHttpClient {
         throw exception;
     }
 
-    private HttpRequest buildGetHttpRequest(AzureOAuthToken token, String url, long timeout) throws AzureHttpException {
-        if (timeout < MIN_TIMEOUT_MS) {
+    private HttpRequest buildGetHttpRequest(AzureOAuthToken token, String url, long timeoutMs) throws AzureHttpException {
+        if (timeoutMs < MIN_TIMEOUT_MS) {
             throw new AzureHttpException("Retry count must be a positive number > " + MIN_TIMEOUT_MS);
         }
-        return getHttpRequestBuilder(url, timeout)
+        return getHttpRequestBuilder(url, timeoutMs)
             .header(AUTH_HEADER, String.format("%s %s", token.getTokenType(), token.getAccessToken()))
             .GET().build();
     }
 
-    private HttpRequest.Builder getHttpRequestBuilder(String url, long timeout) {
+    private HttpRequest.Builder getHttpRequestBuilder(String url, long timeoutMs) {
         return HttpRequest.newBuilder()
             .uri(URI.create(url))
-            .timeout(Duration.of(timeout, ChronoUnit.MILLIS));
+            .timeout(Duration.of(timeoutMs, ChronoUnit.MILLIS));
     }
 
     private String addUrlParams(String url, Map<String, String> params) {

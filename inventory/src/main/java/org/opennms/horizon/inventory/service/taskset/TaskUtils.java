@@ -5,7 +5,7 @@ public interface TaskUtils {
     String DEFAULT_SCHEDULE = "60000";
 
     interface Icmp {
-        int DEFAULT_TIMEOUT = 800;
+        int DEFAULT_TIMEOUT_MS = 800;
         int DEFAULT_RETRIES = 2;
         int DEFAULT_DSCP = 0;
         int DEFAULT_PACKET_SIZE = 64;
@@ -13,7 +13,7 @@ public interface TaskUtils {
     }
 
     interface Snmp {
-        int DEFAULT_TIMEOUT = 18000;
+        int DEFAULT_TIMEOUT_MS = 18000;
         int DEFAULT_RETRIES = 2;
     }
 
@@ -29,7 +29,7 @@ public interface TaskUtils {
     }
 
     interface Azure {
-        int DEFAULT_TIMEOUT = 18000;
+        int DEFAULT_TIMEOUT_MS = 18000;
         int DEFAULT_RETRIES = 2;
         String MONITOR_SCHEDULE = DEFAULT_SCHEDULE;
         String COLLECTOR_SCHEDULE = DEFAULT_SCHEDULE;

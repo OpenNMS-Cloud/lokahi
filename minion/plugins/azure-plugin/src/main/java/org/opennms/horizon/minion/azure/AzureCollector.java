@@ -91,10 +91,10 @@ public class AzureCollector implements ServiceCollector {
             AzureCollectorRequest request = config.unpack(AzureCollectorRequest.class);
 
             AzureOAuthToken token = client.login(request.getDirectoryId(),
-                request.getClientId(), request.getClientSecret(), request.getTimeout(), request.getRetries());
+                request.getClientId(), request.getClientSecret(), request.getTimeoutMs(), request.getRetries());
 
             AzureInstanceView instanceView = client.getInstanceView(token, request.getSubscriptionId(),
-                request.getResourceGroup(), request.getResource(), request.getTimeout(), request.getRetries());
+                request.getResourceGroup(), request.getResource(), request.getTimeoutMs(), request.getRetries());
 
             if (instanceView.isUp()) {
 
@@ -145,7 +145,7 @@ public class AzureCollector implements ServiceCollector {
         params.put(METRIC_NAMES_PARAM, String.join(METRIC_DELIMITER, metricNames));
 
         AzureMetrics metrics = client.getMetrics(token, request.getSubscriptionId(),
-            request.getResourceGroup(), request.getResource(), params, request.getTimeout(), request.getRetries());
+            request.getResourceGroup(), request.getResource(), params, request.getTimeoutMs(), request.getRetries());
 
         metrics.collect(collectedData);
     }

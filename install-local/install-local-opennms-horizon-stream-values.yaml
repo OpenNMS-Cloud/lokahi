@@ -96,3 +96,6 @@ Keycloak:
   AdminPassword: admin
 Grafana:
   Image: opennms/horizon-stream-grafana:latest
+Ingress:
+  Enabled: true
+

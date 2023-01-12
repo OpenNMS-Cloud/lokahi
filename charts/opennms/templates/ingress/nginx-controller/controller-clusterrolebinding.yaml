@@ -1,3 +1,4 @@
+{{- if .Values.Ingress.Enabled }}
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
@@ -16,3 +17,4 @@ subjects:
   - kind: ServiceAccount
     name: ingress-nginx
     namespace: {{ .Release.Namespace }}
+{{- end }}

@@ -1,8 +1,8 @@
 package org.opennms.horizon.minion.taskset.worker.impl;
 
+import org.opennms.horizon.minion.plugin.api.ScanResultsResponse;
 import org.opennms.horizon.minion.plugin.api.Scanner;
 import org.opennms.horizon.minion.plugin.api.ScannerManager;
-import org.opennms.horizon.minion.plugin.api.AzureScannerResponse;
 import org.opennms.horizon.minion.plugin.api.registries.ScannerRegistry;
 import org.opennms.horizon.minion.taskset.worker.TaskExecutionResultProcessor;
 import org.opennms.horizon.minion.taskset.worker.TaskExecutorLocalService;
@@ -19,7 +19,7 @@ public class TaskExecutorLocalScannerServiceImpl implements TaskExecutorLocalSer
     private final TaskExecutionResultProcessor resultProcessor;
     private final ScannerRegistry scannerRegistry;
 
-    private CompletableFuture<AzureScannerResponse> future;
+    private CompletableFuture<ScanResultsResponse> future;
 
     public TaskExecutorLocalScannerServiceImpl(TaskDefinition taskDefinition,
                                                ScannerRegistry scannerRegistry,
@@ -36,7 +36,7 @@ public class TaskExecutorLocalScannerServiceImpl implements TaskExecutorLocalSer
     @Override
     public void start() throws Exception {
         try {
-            Scanner scanner = loookupAzureScanner(taskDefinition);
+            Scanner scanner = lookupScanner(taskDefinition);
 
             future = scanner.scan(taskDefinition.getConfiguration());
             future.whenComplete(this::handleExecutionComplete);
@@ -56,7 +56,7 @@ public class TaskExecutorLocalScannerServiceImpl implements TaskExecutorLocalSer
         future = null;
     }
 
-    private void handleExecutionComplete(AzureScannerResponse response, Throwable exc) {
+    private void handleExecutionComplete(ScanResultsResponse response, Throwable exc) {
         log.trace("Completed execution: workflow-uuid = {}", taskDefinition.getId());
 
         if (exc == null) {
@@ -66,7 +66,7 @@ public class TaskExecutorLocalScannerServiceImpl implements TaskExecutorLocalSer
         }
     }
 
-    private Scanner loookupAzureScanner(TaskDefinition taskDefinition) {
+    private Scanner lookupScanner(TaskDefinition taskDefinition) {
         String pluginName = taskDefinition.getPluginName();
 
         ScannerManager result = scannerRegistry.getService(pluginName);

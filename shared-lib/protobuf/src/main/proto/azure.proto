@@ -45,13 +45,6 @@ message AzureScanRequest {
   int32 retries = 7;
 }
 
-message AzureScanItem {
-  string id = 1;
-  string name = 2;
-  string resourceGroup = 3;
-  int64 credential_id = 4;
-}
-
 message AzureMonitorRequest {
   string resource = 1;
   string resource_group = 2;

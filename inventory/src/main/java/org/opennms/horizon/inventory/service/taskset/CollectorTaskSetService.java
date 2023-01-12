@@ -31,7 +31,7 @@ package org.opennms.horizon.inventory.service.taskset;
 import com.google.protobuf.Any;
 import lombok.RequiredArgsConstructor;
 import org.opennms.azure.contract.AzureCollectorRequest;
-import org.opennms.azure.contract.AzureScanItem;
+import org.opennms.horizon.azure.api.AzureScanItem;
 import org.opennms.horizon.inventory.model.AzureCredential;
 import org.opennms.horizon.inventory.model.IpInterface;
 import org.opennms.horizon.snmp.api.SnmpConfiguration;

@@ -7,6 +7,7 @@
         <bundle>mvn:org.opennms.horizon.shared/horizon-common-logging/${project.version}</bundle>
         <bundle>mvn:org.opennms.horizon.shared/protobuf/${project.version}</bundle>
         <bundle>mvn:org.opennms.horizon.shared/azure-http/${project.version}</bundle>
+        <bundle>mvn:org.opennms.horizon.shared.azure/proto/${project.version}</bundle>
     </feature>
 
 </features>

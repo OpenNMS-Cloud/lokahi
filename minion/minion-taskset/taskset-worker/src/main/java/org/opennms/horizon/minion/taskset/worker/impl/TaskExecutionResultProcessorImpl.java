@@ -1,9 +1,9 @@
 package org.opennms.horizon.minion.taskset.worker.impl;
 
 import com.google.protobuf.Any;
-import org.opennms.azure.contract.AzureScanItem;
-import org.opennms.horizon.minion.plugin.api.AzureScannerResponse;
+import com.google.protobuf.Message;
 import org.opennms.horizon.minion.plugin.api.CollectionSet;
+import org.opennms.horizon.minion.plugin.api.ScanResultsResponse;
 import org.opennms.horizon.minion.plugin.api.ServiceDetectorResponse;
 import org.opennms.horizon.minion.plugin.api.ServiceMonitorResponse;
 import org.opennms.horizon.minion.taskset.worker.TaskExecutionResultProcessor;
@@ -19,9 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
-import java.util.function.Function;
 
 public class TaskExecutionResultProcessorImpl implements TaskExecutionResultProcessor {
 
@@ -43,11 +41,9 @@ public class TaskExecutionResultProcessorImpl implements TaskExecutionResultProc
 //----------------------------------------
 
     @Override
-    public void queueSendResult(String id, AzureScannerResponse response) {
-        log.info("O-AzureScan STATUS: results-size={}; reason={}", response.getResults().size(), response.getReason());
-
+    public void queueSendResult(String id, ScanResultsResponse response) {
         TaskSetResults taskSetResults = formatTaskSetResults(id, response);
-
+        log.info("Scan Status: id = {}, results = {} ", id, response.getResults());
         taskSetSinkDispatcher.send(taskSetResults);
     }
 
@@ -70,9 +66,9 @@ public class TaskExecutionResultProcessorImpl implements TaskExecutionResultProc
     }
 
     @Override
-    public void queueSendResult(String uuid, CollectionSet collectionSet) {
-        TaskSetResults taskSetResults = formatTaskSetResults(uuid, collectionSet);
-        log.info("Collect Status: id = {}, status = {} ", uuid, collectionSet.getStatus());
+    public void queueSendResult(String id, CollectionSet collectionSet) {
+        TaskSetResults taskSetResults = formatTaskSetResults(id, collectionSet);
+        log.info("Collect Status: id = {}, status = {} ", id, collectionSet.getStatus());
         taskSetSinkDispatcher.send(taskSetResults);
     }
 
@@ -80,8 +76,8 @@ public class TaskExecutionResultProcessorImpl implements TaskExecutionResultProc
 // Internals
 //----------------------------------------
 
-    private TaskSetResults formatTaskSetResults(String id, AzureScannerResponse result) {
-        ScannerResponse scannerResponse = formatAzureScannerResponse(result);
+    private TaskSetResults formatTaskSetResults(String id, ScanResultsResponse result) {
+        ScannerResponse scannerResponse = formatScanResultsResponse(result);
 
         TaskResult taskResult =
             TaskResult.newBuilder()
@@ -137,14 +133,11 @@ public class TaskExecutionResultProcessorImpl implements TaskExecutionResultProc
         return taskSetResults;
     }
 
-    private ScannerResponse formatAzureScannerResponse(AzureScannerResponse response) {
-
-        ScannerResponse result = ScannerResponse.newBuilder()
-            .addAllResults(Optional.of(response.getResults()).orElse(Collections.EMPTY_LIST))
-            .setReason(Optional.of(response).map(AzureScannerResponse::getReason).orElse(ScannerResponse.getDefaultInstance().getReason()))
+    private ScannerResponse formatScanResultsResponse(ScanResultsResponse response) {
+        return ScannerResponse.newBuilder()
+            .setResult(Any.pack(Optional.of(response).map(ScanResultsResponse::getResults).orElse(ScannerResponse.getDefaultInstance().getResult())))
+            .setReason(Optional.of(response).map(ScanResultsResponse::getReason).orElse(ScannerResponse.getDefaultInstance().getReason()))
             .build();
-
-        return result;
     }
 
     private DetectorResponse formatDetectorResponse(ServiceDetectorResponse response) {

@@ -34,7 +34,7 @@ public class TaskSetResultsConsumerTest {
     private ScannerResponseService scannerService;
 
     @Test
-    public void testReceiveScannerMessage() {
+    public void testReceiveScannerMessage() throws Exception {
 
         ScannerResponse response = ScannerResponse.newBuilder().build();
 

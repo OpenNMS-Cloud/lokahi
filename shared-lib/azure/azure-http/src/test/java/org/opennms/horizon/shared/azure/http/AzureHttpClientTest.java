@@ -26,7 +26,6 @@ import java.time.Instant;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.exactly;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
@@ -286,6 +285,16 @@ public class AzureHttpClientTest {
         AzureDatum datum = timeseries.getData().get(0);
         assertEquals(1234d, datum.getTotal(), 0d);
         assertEquals(now.toString(), datum.getTimeStamp());
+    }
+
+    @Test
+    public void testPopulateParamsNullFields() {
+        AzureHttpParams result = client.populateParamDefaults(null);
+        assertNotNull(result);
+        assertNotNull(result.getBaseLoginUrl());
+        assertNotNull(result.getBaseManagementUrl());
+        assertNotNull(result.getApiVersion());
+        assertNotNull(result.getMetricsApiVersion());
     }
 
     private AzureOAuthToken getAzureOAuthToken() {

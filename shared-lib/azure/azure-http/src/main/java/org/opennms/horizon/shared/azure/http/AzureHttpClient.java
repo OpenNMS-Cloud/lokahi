@@ -217,7 +217,7 @@ public class AzureHttpClient {
         return URLEncoder.encode(value, StandardCharsets.UTF_8);
     }
 
-    private AzureHttpParams populateParamDefaults(AzureHttpParams params) {
+    protected AzureHttpParams populateParamDefaults(AzureHttpParams params) {
         if (params == null) {
             params = new AzureHttpParams();
         }

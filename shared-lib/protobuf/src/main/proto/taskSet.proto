@@ -47,6 +47,11 @@ enum TaskType {
       COLLECTOR = 6;
 }
 
+
+enum ScanType {
+  AZURE = 0;
+}
+
 enum MonitorType {
   UNKNOWN = 0;
   ICMP = 1;
@@ -88,7 +93,8 @@ message TaskSetResults {
 }
 
 message ScannerResponse {
-  repeated opennms.azure.AzureScanItem results = 1; //todo tbigg: change to any
+  // results varies for each scanner.
+  google.protobuf.Any result = 1;
   string reason = 2;
 }
 

@@ -29,10 +29,11 @@
 package org.opennms.horizon.minion.azure;
 
 import com.google.protobuf.Any;
-import org.opennms.azure.contract.AzureScanItem;
 import org.opennms.azure.contract.AzureScanRequest;
-import org.opennms.horizon.minion.plugin.api.AzureScannerResponse;
-import org.opennms.horizon.minion.plugin.api.AzureScannerResponseImpl;
+import org.opennms.horizon.azure.api.AzureScanItem;
+import org.opennms.horizon.azure.api.AzureScanResponse;
+import org.opennms.horizon.minion.plugin.api.ScanResultsResponse;
+import org.opennms.horizon.minion.plugin.api.ScanResultsResponseImpl;
 import org.opennms.horizon.minion.plugin.api.Scanner;
 import org.opennms.horizon.shared.azure.http.AzureHttpClient;
 import org.opennms.horizon.shared.azure.http.dto.login.AzureOAuthToken;
@@ -58,8 +59,8 @@ public class AzureScanner implements Scanner {
     }
 
     @Override
-    public CompletableFuture<AzureScannerResponse> scan(Any config) {
-        CompletableFuture<AzureScannerResponse> future = new CompletableFuture<>();
+    public CompletableFuture<ScanResultsResponse> scan(Any config) {
+        CompletableFuture<ScanResultsResponse> future = new CompletableFuture<>();
 
         try {
             if (!config.is(AzureScanRequest.class)) {
@@ -95,15 +96,16 @@ public class AzureScanner implements Scanner {
             }
 
             future.complete(
-                AzureScannerResponseImpl.builder()
-                    .results(scannedItems)
+                ScanResultsResponseImpl.builder()
+                    .results(AzureScanResponse.newBuilder()
+                        .addAllResults(scannedItems).build())
                     .build()
             );
 
         } catch (Exception e) {
             log.error("Failed to scan azure resources", e);
             future.complete(
-                AzureScannerResponseImpl.builder()
+                ScanResultsResponseImpl.builder()
                     .reason("Failed to scan for azure resources: " + e.getMessage())
                     .build()
             );

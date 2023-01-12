@@ -59,36 +59,37 @@ create_ssl_cert_secret () {
 }
 
 load_images_to_kind_using_slow_kind () {
-      kind load docker-image --name kind-test opennms/horizon-stream-alarm:local \
-                                              opennms/horizon-stream-minion:local \
-                                              opennms/horizon-stream-minion-gateway:local \
-                                              opennms/horizon-stream-minion-gateway-grpc-proxy:local \
-                                              opennms/horizon-stream-keycloak:local \
+      kind load docker-image --name kind-test \
+                                              opennms/horizon-stream-alarm:local \
+                                              opennms/horizon-stream-datachoices:local \
+                                              opennms/horizon-stream-events:local \
                                               opennms/horizon-stream-grafana:local \
-                                              opennms/horizon-stream-ui:local \
+                                              opennms/horizon-stream-inventory:local \
+                                              opennms/horizon-stream-keycloak:local \
+                                              opennms/horizon-stream-metrics-processor:local \
+                                              opennms/horizon-stream-minion-gateway-grpc-proxy:local \
+                                              opennms/horizon-stream-minion-gateway:local \
+                                              opennms/horizon-stream-minion:local \
                                               opennms/horizon-stream-notification:local \
                                               opennms/horizon-stream-rest-server:local \
-                                              opennms/horizon-stream-inventory:local \
-                                              opennms/horizon-stream-metrics-processor:local \
-                                              opennms/horizon-stream-events:local \
-                                              opennms/horizon-stream-datachoices:local
+                                              opennms/horizon-stream-ui:local
 }
 
 save_part_of_normal_docker_image_load () {
 	docker save \
-		opennms/horizon-stream-ui:local \
-		opennms/horizon-stream-grafana-dev:local \
+		opennms/horizon-stream-alarm:local \
 		opennms/horizon-stream-datachoices:local \
 		opennms/horizon-stream-events:local \
-		opennms/horizon-stream-metrics-processor:local \
-		opennms/horizon-stream-notification:local \
-		opennms/horizon-stream-alarm:local \
+		opennms/horizon-stream-grafana:local \
 		opennms/horizon-stream-inventory:local \
-		opennms/horizon-stream-rest-server:local \
+		opennms/horizon-stream-keycloak:local
+		opennms/horizon-stream-metrics-processor:local \
 		opennms/horizon-stream-minion-gateway-grpc-proxy:local \
 		opennms/horizon-stream-minion-gateway:local \
 		opennms/horizon-stream-minion:local \
-		opennms/horizon-stream-keycloak-dev:local
+		opennms/horizon-stream-notification:local \
+		opennms/horizon-stream-rest-server:local \
+		opennms/horizon-stream-ui:local
 }
 
 load_part_of_normal_docker_image_load () {
@@ -96,6 +97,11 @@ load_part_of_normal_docker_image_load () {
 }
 
 load_images_to_kind_using_normal_docker () {
+	### DEBUGGING
+	echo =====
+	docker images | grep opennms
+	echo =====
+
 	save_part_of_normal_docker_image_load | load_part_of_normal_docker_image_load
 }
 

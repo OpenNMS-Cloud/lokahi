@@ -18,6 +18,7 @@
     <artifactId>opennms-ignite-tool</artifactId>
 
     <properties>
+        <docker.image.name>opennms/horizon-stream-ignite-tool</docker.image.name>
         <docker.image.tag>local</docker.image.tag>
         <docker.image.skipPush>false</docker.image.skipPush>
     </properties>
@@ -97,6 +98,11 @@
                 <groupId>com.google.cloud.tools</groupId>
                 <artifactId>jib-maven-plugin</artifactId>
                 <version>3.2.1</version>
+                <configuration>
+                    <to>
+                        <image>${docker.image.name}:${docker.image.tag}</image>
+                    </to>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.felix</groupId>

@@ -82,7 +82,7 @@ save_part_of_normal_docker_image_load () {
 		opennms/horizon-stream-events:local \
 		opennms/horizon-stream-grafana:local \
 		opennms/horizon-stream-inventory:local \
-		opennms/horizon-stream-keycloak:local
+		opennms/horizon-stream-keycloak:local \
 		opennms/horizon-stream-metrics-processor:local \
 		opennms/horizon-stream-minion-gateway-grpc-proxy:local \
 		opennms/horizon-stream-minion-gateway:local \

@@ -7,7 +7,7 @@ import org.opennms.horizon.minion.plugin.api.ServiceMonitorResponse;
 
 public interface TaskExecutionResultProcessor {
     /**
-     * Queue the given azure scan result to be sent out.
+     * Queue the given scan result to be sent out.
      *
      * @param uuid
      * @param scanResultsResponse

@@ -13,9 +13,7 @@ import org.apache.http.protocol.HTTP;
 import org.awaitility.Awaitility;
 import org.junit.Assert;
 import org.opennms.horizon.it.gqlmodels.querywrappers.FindAllMinionsQueryResult;
-import org.opennms.horizon.it.gqlmodels.GQLQuery;
 import org.opennms.horizon.it.gqlmodels.MinionData;
-import org.opennms.horizon.it.gqlmodels.querywrappers.MetricQueryResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,6 +43,7 @@ public class InventoryTestSteps {
     private String minionLocation;
     private FindAllMinionsQueryResult findAllMinionsQueryResult;
     private List<MinionData> minionsAtLocation;
+    private String lastMinionQueryResultBody;
 
 //========================================
 // Getters and Setters
@@ -82,11 +81,16 @@ public class InventoryTestSteps {
 
     @Then("Wait for at least one minion for the given location reported by inventory with timeout {int}ms")
     public void waitForAtLeastOneMinionForTheGivenLocationReportedByInventoryWithTimeoutMs(int timeout) {
-        Awaitility
-            .await()
-            .atMost(timeout, TimeUnit.MILLISECONDS)
-            .until(this::checkAtLeastOneMinionAtGivenLocation)
-            ;
+        try {
+            Awaitility
+                .await()
+                .atMost(timeout, TimeUnit.MILLISECONDS)
+                .ignoreExceptions()
+                .until(this::checkAtLeastOneMinionAtGivenLocation)
+                ;
+        } finally {
+            LOG.info("LAST CHECK MINION RESPONSE BODY: {}", lastMinionQueryResultBody);
+        }
     }
 
     /** @noinspection rawtypes*/
@@ -165,6 +169,8 @@ public class InventoryTestSteps {
         URL url = formatIngressUrl("/api/graphql");
 
         Response restAssuredResponse = executePost(url, accessToken, GQLQueryConstants.LIST_MINIONS_QUERY);
+
+        lastMinionQueryResultBody = restAssuredResponse.getBody().asString();
 
         Assert.assertEquals(200, restAssuredResponse.getStatusCode());
 

@@ -14,6 +14,8 @@
     <name>OpenNMS Horizon :: DataChoices</name>
     <description>datachoices</description>
     <properties>
+        <docker.image.name>opennms/horizon-stream-events</docker.image.name>
+        <docker.image.tag>local</docker.image.tag>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
     </properties>
@@ -267,6 +269,11 @@
                 <groupId>com.google.cloud.tools</groupId>
                 <artifactId>jib-maven-plugin</artifactId>
                 <version>${jib.version}</version>
+                <configuration>
+                    <to>
+                        <image>${docker.image.name}:${docker.image.tag}</image>
+                    </to>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

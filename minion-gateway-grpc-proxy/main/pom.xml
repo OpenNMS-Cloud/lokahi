@@ -43,6 +43,10 @@
         Main executable for the Minion Gateway GRPC Proxy.
     </description>
 
+    <properties>
+        <docker.image.name>opennms/horizon-stream-minion-gateway-grpc-proxy</docker.image.name>
+        <docker.image.tag>local</docker.image.tag>
+    </properties>
 
     <dependencyManagement>
         <dependencies>
@@ -145,6 +149,9 @@
                 <configuration>
                     <!-- override skip=false from minion-gateway parent so jib executes here -->
                     <skip>false</skip>
+                    <to>
+                        <image>${docker.image.name}:${docker.image.tag}</image>
+                    </to>
                 </configuration>
             </plugin>
         </plugins>

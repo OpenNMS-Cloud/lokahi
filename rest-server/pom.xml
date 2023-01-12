@@ -14,7 +14,9 @@
 
 	<name>OpenNMS Horizon :: Rest API server</name>
 	<description>rest-server</description>
-	<properties>
+    <properties>
+        <docker.image.name>opennms/horizon-stream-rest-server</docker.image.name>
+        <docker.image.tag>local</docker.image.tag>
 		<java.version>11</java.version>
 		<graphql.spqr.version>0.0.6</graphql.spqr.version>
 	</properties>
@@ -217,6 +219,11 @@
 				<groupId>com.google.cloud.tools</groupId>
 				<artifactId>jib-maven-plugin</artifactId>
 				<version>3.2.1</version>
+                <configuration>
+                    <to>
+                        <image>${docker.image.name}:${docker.image.tag}</image>
+                    </to>
+                </configuration>
 			</plugin>
 		</plugins>
 	</build>

@@ -14,6 +14,10 @@
 	<version>0.1.0-SNAPSHOT</version>
     <name>OpenNMS Horizon :: Notifications</name>
 	<description>notifications</description>
+    <properties>
+        <docker.image.name>opennms/horizon-stream-notification</docker.image.name>
+        <docker.image.tag>local</docker.image.tag>
+    </properties>
 	<dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -141,6 +145,11 @@
                 <groupId>com.google.cloud.tools</groupId>
                 <artifactId>jib-maven-plugin</artifactId>
                 <version>3.2.1</version>
+                <configuration>
+                    <to>
+                        <image>${docker.image.name}:${docker.image.tag}</image>
+                    </to>
+                </configuration>
             </plugin>
         </plugins>
     </build>

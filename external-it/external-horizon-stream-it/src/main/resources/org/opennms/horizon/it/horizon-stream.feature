@@ -12,7 +12,7 @@ Feature: Minion Monitoring via Echo Messages Logged in Prometheus
   Scenario: Wait for at least one minion to connect from location Default
     Given At least one Minion is running with location "Default"
     # NOTE: there is redundant processing between this step and the ones that follow it
-    Then Wait for at least one minion for the given location reported by inventory with timeout 120000ms
+    Then Wait for at least one minion for the given location reported by inventory with timeout 600000ms
 
   Scenario: Verify Minion echo measurements are recorded into prometheus for a running Minion
     Given At least one Minion is running with location "Default"

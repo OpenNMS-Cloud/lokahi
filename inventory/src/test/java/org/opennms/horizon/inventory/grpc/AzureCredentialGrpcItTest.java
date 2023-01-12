@@ -34,10 +34,13 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import com.github.tomakehurst.wiremock.matching.EqualToPattern;
+import com.google.rpc.Code;
+import com.google.rpc.Status;
 import io.grpc.Metadata;
 import io.grpc.ServerCall;
 import io.grpc.ServerCallHandler;
 import io.grpc.StatusRuntimeException;
+import io.grpc.protobuf.StatusProto;
 import io.grpc.stub.MetadataUtils;
 import org.apache.http.HttpStatus;
 import org.hamcrest.Matchers;
@@ -75,6 +78,7 @@ import static com.jayway.awaitility.Awaitility.await;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
@@ -128,6 +132,7 @@ class AzureCredentialGrpcItTest extends GrpcTestBase {
     public void cleanUp() throws InterruptedException {
         wireMock.stop();
         azureCredentialRepository.deleteAll();
+        testGrpcService.reset();
         afterTest();
     }
 
@@ -140,7 +145,7 @@ class AzureCredentialGrpcItTest extends GrpcTestBase {
     @Test
     void testCreateAzureCredentials() throws Exception {
         mockAzureLogin();
-        mockAzureGetSubscription();
+        mockAzureGetSubscription(true);
 
         AzureCredentialCreateDTO createDTO = AzureCredentialCreateDTO.newBuilder()
             .setLocation(DEFAULT_LOCATION)
@@ -183,6 +188,29 @@ class AzureCredentialGrpcItTest extends GrpcTestBase {
     }
 
     @Test
+    void testCreateAzureCredentialsDisabledSubscription() throws Exception {
+        mockAzureLogin();
+        mockAzureGetSubscription(false);
+
+        AzureCredentialCreateDTO createDTO = AzureCredentialCreateDTO.newBuilder()
+            .setLocation(DEFAULT_LOCATION)
+            .setClientId(TEST_CLIENT_ID)
+            .setClientSecret(TEST_CLIENT_SECRET)
+            .setSubscriptionId(TEST_SUBSCRIPTION_ID)
+            .setDirectoryId(TEST_DIRECTORY_ID)
+            .build();
+
+        StatusRuntimeException exception = assertThrows(StatusRuntimeException.class, () ->  serviceStub.withInterceptors(MetadataUtils
+                .newAttachHeadersInterceptor(createAuthHeader(authHeader)))
+            .createCredentials(createDTO));
+        Status status = StatusProto.fromThrowable(exception);
+        assertThat(status.getCode()).isEqualTo(Code.INVALID_ARGUMENT_VALUE);
+        assertEquals(0, testGrpcService.getTimesCalled().intValue());
+        verify(spyInterceptor).verifyAccessToken(authHeader);
+        verify(spyInterceptor).interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));
+    }
+
+    @Test
     void testCreateAzureCredentialsWithoutTenantId() throws VerificationException {
 
         AzureCredentialCreateDTO createDTO = AzureCredentialCreateDTO.newBuilder()
@@ -213,7 +241,7 @@ class AzureCredentialGrpcItTest extends GrpcTestBase {
                 .withBody(snakeCaseMapper.writeValueAsString(getAzureOAuthToken()))));
     }
 
-    private void mockAzureGetSubscription() {
+    private void mockAzureGetSubscription(boolean enabled) {
         AzureOAuthToken token = getAzureOAuthToken();
 
         String url = String.format(SUBSCRIPTION_ENDPOINT, TEST_SUBSCRIPTION_ID)
@@ -221,7 +249,7 @@ class AzureCredentialGrpcItTest extends GrpcTestBase {
 
         AzureSubscription azureSubscription = new AzureSubscription();
         azureSubscription.setSubscriptionId(TEST_SUBSCRIPTION_ID);
-        azureSubscription.setState("Enabled");
+        azureSubscription.setState((enabled) ? "Enabled" : "Disabled");
 
         wireMock.stubFor(get(url)
             .withHeader("Authorization", new EqualToPattern("Bearer " + token.getAccessToken()))

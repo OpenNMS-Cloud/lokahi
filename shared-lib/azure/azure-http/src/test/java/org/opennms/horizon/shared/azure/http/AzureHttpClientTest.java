@@ -109,8 +109,6 @@ public class AzureHttpClientTest {
         this.client = new AzureHttpClient(this.params);
     }
 
-//    todo: add testing for retries and timeouts
-
     @Test
     public void testLogin() throws Exception {
         AzureOAuthToken oAuthToken = getAzureOAuthToken();

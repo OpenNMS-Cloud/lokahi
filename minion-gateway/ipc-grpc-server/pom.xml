@@ -13,7 +13,7 @@
     <artifactId>ipc-grpc-server</artifactId>
     <packaging>jar</packaging>
 
-    <name>OpenNMS Horizon :: Minion Gateway :: IPC GRPC Server</name>
+    <name>OpenNMS Horizon Stream :: Minion Gateway :: IPC gRPC Server</name>
     <description>Server side of gRPC.</description>
 
     <dependencies>

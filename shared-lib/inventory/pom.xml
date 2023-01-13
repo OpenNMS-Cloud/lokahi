@@ -17,7 +17,7 @@
     <artifactId>inventory</artifactId>
     <packaging>bundle</packaging>
 
-    <name>OpenNMS Horizon :: Shared Library :: Inventory</name>
+    <name>OpenNMS Horizon Stream :: Shared Library :: Inventory</name>
     <description>The inventory service contract.</description>
 
     <dependencies>

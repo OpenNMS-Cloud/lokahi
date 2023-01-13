@@ -20,24 +20,14 @@ jobs:
           distribution: temurin
           java-version: 17
 
-      - name: init
-        run: |
-
-          echo "For init steps."
-
-      - name: parent-pom
-        id: action-parent-pom
-        uses: ./.github/actions/parent-pom
+      - name: Cache Maven Dependencies
+        uses: ./.github/actions/maven-cache
         with:
-          dir-location: 'parent-pom'
-          enable-sonar-scan: false
+          cache-key-hash: ${{ hashFiles('inventory/**/pom.xml', 'parent-pom/pom.xml', 'shared-lib/**/pom.xml') }}
 
       - name: shared-lib
         id: action-shared-lib
-        uses: ./.github/actions/shared-lib
-        with:
-          dir-location: 'shared-lib'
-          enable-sonar-scan: false
+        uses: ./.github/actions/shared-lib-prereq
 
       - name: feature-inventory
         id: action-feature-inventory

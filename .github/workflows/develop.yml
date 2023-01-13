@@ -84,27 +84,32 @@ jobs:
         with:
           dir-location: 'keycloak-ui'
     
-      # This needs to happen before shared-lib.
+      # Used for sonar scans on the develop branch, not necessary as a prerequisite for other builds
       - name: parent-pom
         id: action-parent-pom
+        if: ${{ github.event.ref == 'refs/heads/develop' }}
         uses: ./.github/actions/parent-pom
         with:
           dir-location: 'parent-pom'
-          # only enable scans on develop branch, scans on other branches are covered by other workflows
-          enable-sonar-scan: ${{ github.event.ref == 'refs/heads/develop' }}
+          enable-sonar-scan: true
           github-token: ${{ secrets.GITHUB_TOKEN }}
           sonar-token: ${{ secrets.SONAR_TOKEN }}
-  
-      # This needs to happen before core, rest-server, and notifications.
+
+        # Used for tests and sonar scans on the develop branch, not necessary as a prerequisite for other builds
       - name: shared-lib
         id: action-shared-lib
+        if: ${{ github.event.ref == 'refs/heads/develop' }}
         uses: ./.github/actions/shared-lib
         with:
           dir-location: 'shared-lib'
-          # only enable scans on develop branch, scans on other branches are covered by other workflows
-          enable-sonar-scan: ${{ github.event.ref == 'refs/heads/develop' }}
+          enable-sonar-scan: true
           github-token: ${{ secrets.GITHUB_TOKEN }}
           sonar-token: ${{ secrets.SONAR_TOKEN }}
+
+        # Installs prerequisites for other builds
+      - name: shared-lib-prereq
+        id: action-shared-lib-prereq
+        uses: ./.github/actions/shared-lib-prereq
 
       - name: feature-metrics-processor
         id: action-feature-metrics-processor

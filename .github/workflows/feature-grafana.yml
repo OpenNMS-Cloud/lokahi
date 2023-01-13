@@ -8,8 +8,9 @@ on:
 jobs:
 
   build-and-test:
-    runs-on: ubuntu-latest
-
+    #runs-on: ubuntu-latest
+    runs-on:
+      labels: ubuntu-20.04-16core
     steps:
       - uses: actions/checkout@v3
         with:

@@ -29,11 +29,6 @@
         <module>grpc</module>
     </modules>
 
-    <properties>
-        <docker.image.name>opennms/horizon-stream-events</docker.image.name>
-        <docker.image.tag>local</docker.image.tag>
-    </properties>
-
     <build>
         <plugins>
             <plugin>
@@ -55,20 +50,6 @@
                             <version>${lombok.binding.version}</version>
                         </path>
                     </annotationProcessorPaths>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>com.google.cloud.tools</groupId>
-                <artifactId>jib-maven-plugin</artifactId>
-                <version>${jib.version}</version>
-                <configuration>
-                    <!-- jib-maven-plugin needs to be executed only on specific submodules.
-                         This disables jib by default, which allows you to run jib goals on this parent pom without
-                         specifying a submodule. Set skip=false on submodules that need jib. -->
-                    <skip>true</skip>
-                    <to>
-                        <image>${docker.image.name}:${docker.image.tag}</image>
-                    </to>
                 </configuration>
             </plugin>
         </plugins>

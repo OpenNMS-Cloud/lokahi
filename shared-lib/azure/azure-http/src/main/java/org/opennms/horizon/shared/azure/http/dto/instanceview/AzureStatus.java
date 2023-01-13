@@ -37,10 +37,4 @@ import lombok.Setter;
 public class AzureStatus {
     @SerializedName("code")
     private String code;
-    @SerializedName("level")
-    private String level;
-    @SerializedName("displayStatus")
-    private String displayStatus;
-    @SerializedName("time")
-    private String time;
 }

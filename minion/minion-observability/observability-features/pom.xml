@@ -12,7 +12,7 @@
     <artifactId>observability-features</artifactId>
     <packaging>feature</packaging>
 
-    <name>OpenNms Horizon :: Minion :: Observability :: Features</name>
+    <name>OpenNMS Horizon Stream :: Minion :: Observability :: Features</name>
 
     <dependencies>
         <dependency>

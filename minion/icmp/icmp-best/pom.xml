@@ -10,7 +10,7 @@
     </parent>
 
   <artifactId>icmp-best</artifactId>
-  <name>OpenNMS Horizon :: Minion :: ICMP :: Best</name>
+  <name>OpenNMS Horizon Stream :: Minion :: ICMP :: Best</name>
   <packaging>bundle</packaging>
 
   <dependencies>

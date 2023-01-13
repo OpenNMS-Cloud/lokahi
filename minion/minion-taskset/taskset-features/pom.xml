@@ -12,7 +12,7 @@
     <artifactId>taskset-features</artifactId>
     <packaging>feature</packaging>
 
-    <name>OpenNms Horizon :: Minion :: TaskSet :: Features</name>
+    <name>OpenNMS Horizon Stream :: Minion :: TaskSet :: Features</name>
 
     <dependencies>
         <dependency>

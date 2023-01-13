@@ -30,7 +30,7 @@ jobs:
       - name: Cache Maven Dependencies
         uses: ./.github/actions/maven-cache
         with:
-          working-directory: 'parent-pom'
+          cache-key-hash: ${{ hashFiles('parent-pom/pom.xml') }}
 
       - name: feature-parent-pom
         uses: ./.github/actions/parent-pom

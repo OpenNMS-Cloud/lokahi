@@ -191,7 +191,7 @@ jib_project(
     port_forwards=['16080:9090', '16050:5005'],
 )
 
-### Minion Gateway GRPC Proxy ###
+### Minion Gateway gRPC Proxy ###
 jib_project(
     'minion-gateway-grpc-proxy',
     'opennms/horizon-stream-minion-gateway-grpc-proxy',

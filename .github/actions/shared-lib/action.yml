@@ -1,5 +1,5 @@
 name: 'Build and test shared-lib'
-description: 'This implements unit and built-time integration tests on shared-lib. There is no workflow for this, it gets called by other workflows, rest-server.'
+description: 'This implements unit and build-time integration tests on shared-lib.'
 inputs:
   dir-location:
     description: 'The dir containing the change.'
@@ -25,11 +25,10 @@ runs:
         path: ~/.sonar/cache
         key: ${{ runner.os }}-${{ runner.arch }}-sonar
 
-    - name: build-image
+    - name: build
       if: ${{ inputs.enable-sonar-scan == 'true' }}
       run: |
-
-        mvn -Pcoverage install \
+        mvn -Pcoverage verify \
           org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=$SONAR_PROJECT_KEY
 
       working-directory: ${{ inputs.dir-location }}
@@ -39,11 +38,9 @@ runs:
         SONAR_TOKEN: ${{ inputs.sonar-token }}
         SONAR_PROJECT_KEY: 'opennms_horizon-stream_shared-lib'
 
-    - name: build-image
+    - name: build
       if: ${{ inputs.enable-sonar-scan == 'false' }}
       run: |
-
-        mvn install
-
+        mvn verify
       working-directory: ${{ inputs.dir-location }}
       shell: bash

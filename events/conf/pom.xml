@@ -11,7 +11,7 @@
 
     <groupId>org.opennms.horizon.events</groupId>
     <artifactId>conf</artifactId>
-    <name>OpenNMS Horizon :: Events Conf</name>
+    <name>OpenNMS Horizon Stream :: Events Conf</name>
     <properties>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>

@@ -11,7 +11,7 @@
 
     <groupId>org.opennms.horizon.events</groupId>
     <artifactId>traps</artifactId>
-    <name>OpenNMS Horizon :: Events :: Traps</name>
+    <name>OpenNMS Horizon Stream :: Events :: Traps</name>
     <version>0.1.0-SNAPSHOT</version>
     <properties>
         <maven.compiler.source>11</maven.compiler.source>

@@ -10,7 +10,7 @@
   </parent>
 
   <artifactId>icmp-api</artifactId>
-  <name>OpenNMS Horizon :: Shared Library :: Icmp :: Api</name>
+  <name>OpenNMS Horizon Stream :: Shared Library :: Icmp :: Api</name>
   <packaging>bundle</packaging>
 
   <dependencies>

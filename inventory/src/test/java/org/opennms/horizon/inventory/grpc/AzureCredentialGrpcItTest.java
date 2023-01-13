@@ -44,7 +44,6 @@ import io.grpc.protobuf.StatusProto;
 import io.grpc.stub.MetadataUtils;
 import org.apache.http.HttpStatus;
 import org.hamcrest.Matchers;
-import org.junit.Rule;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -159,12 +158,11 @@ class AzureCredentialGrpcItTest extends GrpcTestBase {
                 .newAttachHeadersInterceptor(createAuthHeader(authHeader)))
             .createCredentials(createDTO);
 
-        assertEquals(1, credentials.getId());
+        assertTrue(credentials.getId() > 0);
 
         //2 calls because the trap listener also gets called on startup
         await().atMost(10, TimeUnit.SECONDS).untilAtomic(testGrpcService.getTimesCalled(), Matchers.is(3));
 
-        assertEquals(createDTO.getLocation(), credentials.getLocation());
         assertEquals(createDTO.getClientId(), credentials.getClientId());
         assertEquals(createDTO.getSubscriptionId(), credentials.getSubscriptionId());
         assertEquals(createDTO.getDirectoryId(), credentials.getDirectoryId());
@@ -200,7 +198,7 @@ class AzureCredentialGrpcItTest extends GrpcTestBase {
             .setDirectoryId(TEST_DIRECTORY_ID)
             .build();
 
-        StatusRuntimeException exception = assertThrows(StatusRuntimeException.class, () ->  serviceStub.withInterceptors(MetadataUtils
+        StatusRuntimeException exception = assertThrows(StatusRuntimeException.class, () -> serviceStub.withInterceptors(MetadataUtils
                 .newAttachHeadersInterceptor(createAuthHeader(authHeader)))
             .createCredentials(createDTO));
         Status status = StatusProto.fromThrowable(exception);

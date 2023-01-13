@@ -1,4 +1,3 @@
-{{- if .Values.Ingress.Enabled }}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -49,4 +48,3 @@ spec:
         -  {{.Values.Host }}
       secretName: {{ .Values.TLS.Cert.Name }}
   {{- end }}
-{{- end }}

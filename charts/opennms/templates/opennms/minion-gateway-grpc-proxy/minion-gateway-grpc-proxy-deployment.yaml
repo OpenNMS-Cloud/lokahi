@@ -1,4 +1,4 @@
-{{- if .Values.MinionGatewayGrpcProxy.Enabled }}
+{{- if .Values.OpenNMS.MinionGatewayGrpcProxy.Enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:

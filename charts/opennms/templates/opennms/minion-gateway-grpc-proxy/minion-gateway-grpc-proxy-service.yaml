@@ -1,4 +1,4 @@
-{{- if .Values.Ingress.Enabled }}
+{{- if .Values.MinionGatewayGrpcProxy.Enabled }}
 apiVersion: v1
 kind: Service
 metadata:

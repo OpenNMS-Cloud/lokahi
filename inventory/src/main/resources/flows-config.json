@@ -1,7 +1,7 @@
 {
   "listeners": [{
     "name": "Netflow-5-UDP-8877",
-    "className": "org.opennms.horizon.minion.parser.UdpListener",
+    "className": "org.opennms.horizon.minion.flows.listeners.UdpListener",
     "enabled": true,
     "parameters": [{
       "key": "port",
@@ -9,12 +9,12 @@
     }],
     "parsers": [{
       "name": "Netflow-5-Parser",
-      "className": "org.opennms.horizon.minion.parser.Netflow5UdpParser",
+      "className": "org.opennms.horizon.minion.flows.parser.Netflow5UdpParser",
       "queue": {
         "name": "Netflow-5",
         "adapters": [{
           "name": "Netflow-5-Adapter",
-          "className": "org.opennms.horizon.flows.netflow5.Netflow5Adapter",
+          "className": "org.opennms.horizon.flows.adapter.netflow5.Netflow5Adapter",
           "enabled": true,
           "parameters": [{
             "key": "applicationDataCollection",
@@ -22,13 +22,33 @@
           }, {
             "key": "applicationThresholding",
             "value": "false"
-          }],
-          "packages": [{
-            "name": "Netflow-5-Default",
-            "rrd": {
-              "step": 300,
-              "rras": ["RRA:AVERAGE:0.5:1:2016", "RRA:AVERAGE:0.5:12:1488", "RRA:AVERAGE:0.5:288:366", "RRA:MAX:0.5:288:366", "RRA:MAX:0.5:288:366"]
-            }
+          }]
+        }]
+      }
+    }]
+  }, {
+    "name": "IPFIX-TCP-4730",
+    "className": "org.opennms.horizon.minion.flows.listeners.TcpListener",
+    "enabled": true,
+    "parameters": [{
+      "key": "port",
+      "value": "4730"
+    }],
+    "parsers": [{
+      "name": "IPFIX-TCP-Parser",
+      "className": "org.opennms.horizon.minion.flows.parser.IpfixTcpParser",
+      "queue": {
+        "name": "IPFIX",
+        "adapters": [{
+          "name": "IPFIX-Adapter",
+          "className": "org.opennms.horizon.flows.adapter.ipfix.IpfixAdapter",
+          "enabled": true,
+          "parameters": [{
+            "key": "applicationDataCollection",
+            "value": "false"
+          }, {
+            "key": "applicationThresholding",
+            "value": "false"
           }]
         }]
       }

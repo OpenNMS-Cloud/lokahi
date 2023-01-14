@@ -35,7 +35,6 @@ import org.opennms.horizon.shared.ipc.sink.api.MessageDispatcherFactory;
 import com.codahale.metrics.MetricRegistry;
 
 import org.opennms.horizon.minion.flows.listeners.Parser;
-import org.opennms.horizon.minion.flows.listeners.factory.ParserDefinition;
 import org.opennms.horizon.minion.flows.listeners.factory.TelemetryRegistry;
 import org.opennms.horizon.minion.flows.listeners.factory.UdpListenerMessage;
 import org.opennms.sink.flows.contract.ParserConfig;

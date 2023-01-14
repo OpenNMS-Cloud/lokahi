@@ -38,6 +38,7 @@ import org.opennms.horizon.minion.flows.listeners.Parser;
 import org.opennms.horizon.minion.flows.listeners.factory.ParserDefinition;
 import org.opennms.horizon.minion.flows.listeners.factory.TelemetryRegistry;
 import org.opennms.horizon.minion.flows.parser.IpfixUdpParser;
+import org.opennms.sink.flows.contract.ParserConfig;
 
 public class IpfixUdpParserFactory implements ParserFactory {
 
@@ -57,8 +58,8 @@ public class IpfixUdpParserFactory implements ParserFactory {
     }
 
     @Override
-    public Parser createBean(ParserDefinition parserDefinition) {
-        final AsyncDispatcher<TelemetryMessage> dispatcher = telemetryRegistry.getDispatcher(parserDefinition.getQueueName());
-        return new IpfixUdpParser(parserDefinition.getFullName(), dispatcher, identity, dnsResolver, telemetryRegistry.getMetricRegistry());
+    public Parser createBean(ParserConfig parserConfig) {
+        final AsyncDispatcher<UdpListenerMessage> dispatcher = telemetryRegistry.getDispatcher(parserConfig.getQueue().getName());
+        return new IpfixUdpParser(parserConfig.getName(), dispatcher, dnsResolver, telemetryRegistry.getMetricRegistry());
     }
 }

@@ -35,10 +35,10 @@ import org.opennms.horizon.shared.ipc.sink.api.AsyncDispatcher;
 import org.opennms.horizon.minion.flows.listeners.Parser;
 
 import com.codahale.metrics.MetricRegistry;
-import com.google.protobuf.Message;
+import org.opennms.sink.flows.contract.ParserConfig;
 
 public interface TelemetryRegistry {
-    Parser getParser(ParserDefinition parserDefinition);
+    Parser getParser(ParserConfig parserConfig);
 
     MetricRegistry getMetricRegistry();
 

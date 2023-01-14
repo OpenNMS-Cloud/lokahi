@@ -62,13 +62,13 @@ import io.netty.channel.socket.nio.NioDatagramChannel;
 import io.netty.util.ReferenceCountUtil;
 import io.netty.util.internal.SocketUtils;
 
-public class UdpListener implements GracefulShutdownListener, Listener {
+public class UdpListener implements GracefulShutdownListener, FlowsListener {
     private static final Logger LOG = LoggerFactory.getLogger(UdpListener.class);
 
     public static final RateLimitedLog RATE_LIMITED_LOG = RateLimitedLog
-            .withRateLimit(LOG)
-            .maxRate(5).every(Duration.ofSeconds(30))
-            .build();
+        .withRateLimit(LOG)
+        .maxRate(5).every(Duration.ofSeconds(30))
+        .build();
 
     private final String name;
     private final List<Parser> parsers;
@@ -96,33 +96,33 @@ public class UdpListener implements GracefulShutdownListener, Listener {
             throw new IllegalArgumentException("If more than 1 parser is defined, all parsers must be Dispatchable");
         }
 
-        packetsReceived = metrics.meter(MetricRegistry.name("org/opennms/horizon/minion/flows/listeners",  name, "packetsReceived"));
+        packetsReceived = metrics.meter(MetricRegistry.name("org/opennms/horizon/minion/flows/listeners", name, "packetsReceived"));
     }
 
     public void start() throws InterruptedException {
         // Netty defaults to 2 * num cores when the number of threads is set to 0
         this.bossGroup = new NioEventLoopGroup(0, new ThreadFactoryBuilder()
-                .setNameFormat("telemetryd-nio-" + name + "-%d")
-                .build() );
+            .setNameFormat("telemetryd-nio-" + name + "-%d")
+            .build());
 
         this.parsers.forEach(parser -> parser.start(this.bossGroup));
 
         final InetSocketAddress address = this.host != null
-                ? SocketUtils.socketAddress(this.host, this.port)
-                : new InetSocketAddress(this.port);
+            ? SocketUtils.socketAddress(this.host, this.port)
+            : new InetSocketAddress(this.port);
 
         this.socketFuture = new Bootstrap()
-                .group(this.bossGroup)
-                .channel(NioDatagramChannel.class)
-                .option(ChannelOption.SO_REUSEADDR, true)
-                .option(ChannelOption.SO_RCVBUF, Integer.MAX_VALUE)
-                .option(ChannelOption.RCVBUF_ALLOCATOR, new FixedRecvByteBufAllocator(this.maxPacketSize))
-                .handler(new DefaultChannelInitializer())
-                .bind(address)
-                .sync();
+            .group(this.bossGroup)
+            .channel(NioDatagramChannel.class)
+            .option(ChannelOption.SO_REUSEADDR, true)
+            .option(ChannelOption.SO_RCVBUF, Integer.MAX_VALUE)
+            .option(ChannelOption.RCVBUF_ALLOCATOR, new FixedRecvByteBufAllocator(this.maxPacketSize))
+            .handler(new DefaultChannelInitializer())
+            .bind(address)
+            .sync();
     }
 
-    public void stop() throws InterruptedException {
+    public void stop() {
         NettyEventListener bossListener = new NettyEventListener("boss");
 
         LOG.info("Closing boss group...");
@@ -132,10 +132,14 @@ public class UdpListener implements GracefulShutdownListener, Listener {
         }
 
         if (this.socketFuture != null) {
-            LOG.info("Closing channel...");
-            this.socketFuture.channel().close().sync();
-            if (this.socketFuture.channel().parent() != null) {
-                this.socketFuture.channel().parent().close().sync();
+            try {
+                LOG.info("Closing channel...");
+                this.socketFuture.channel().close().sync();
+                if (this.socketFuture.channel().parent() != null) {
+                    this.socketFuture.channel().parent().close().sync();
+                }
+            } catch (InterruptedException e) {
+                LOG.warn("Fail to close channel. {}", e);
             }
         }
 
@@ -200,7 +204,7 @@ public class UdpListener implements GracefulShutdownListener, Listener {
 
     @Override
     public String getDescription() {
-        return String.format("UDP %s:%s",  this.host != null ? this.host : "*", this.port);
+        return String.format("UDP %s:%s", this.host != null ? this.host : "*", this.port);
     }
 
     @Override
@@ -254,7 +258,7 @@ public class UdpListener implements GracefulShutdownListener, Listener {
 
     private class AccountingHandler extends ChannelInboundHandlerAdapter {
         @Override
-        public  void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+        public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
             packetsReceived.mark();
             super.channelRead(ctx, msg);
         }
@@ -272,15 +276,15 @@ public class UdpListener implements GracefulShutdownListener, Listener {
         @Override
         protected void channelRead0(ChannelHandlerContext ctx, DatagramPacket msg) throws Exception {
             parser.parse(
-                    ReferenceCountUtil.retain(msg.content()),
-                    msg.sender(), msg.recipient()
-                ).handle((result, ex) -> {
-                    ReferenceCountUtil.release(msg.content());
-                    if (ex != null) {
-                        ctx.fireExceptionCaught(ex);
-                    }
-                    return result;
-                });
+                ReferenceCountUtil.retain(msg.content()),
+                msg.sender(), msg.recipient()
+            ).handle((result, ex) -> {
+                ReferenceCountUtil.release(msg.content());
+                if (ex != null) {
+                    ctx.fireExceptionCaught(ex);
+                }
+                return result;
+            });
         }
     }
 

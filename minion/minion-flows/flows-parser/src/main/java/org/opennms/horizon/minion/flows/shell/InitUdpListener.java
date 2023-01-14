@@ -46,7 +46,8 @@ public class InitUdpListener implements Action {
 
     @Override
     public Object execute() {
-        manager.configure();
+// TODO: config is it needed
+//        manager.configure();
         return null;
     }
 

@@ -36,7 +36,7 @@ package org.opennms.horizon.minion.flows.listeners.factory;
  *
  * @author mvrueden
  */
-public interface TelemetryBeanFactory<T, B extends TelemetryBeanDefinition> {
+public interface TelemetryBeanFactory<T, B> {
     Class<? extends T> getBeanClass();
     T createBean(B beanDefinition);
 }

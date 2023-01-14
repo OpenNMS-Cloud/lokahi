@@ -26,24 +26,20 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.minion.flows.listeners.factory;
+package org.opennms.horizon.minion.flows.listeners;
 
-import java.util.List;
+import java.util.Collection;
 
 /**
- * {@link TelemetryBeanDefinition} to define listeners.
- * Besides the common attributes, a listener may define one or more parsers.
+ * Interface used by the daemon to manage listeners.
  *
- *  @author mvrueden
+ * When messages are received, they should be forwarded to the given {@link Parser}s.
+ *
+ * @author jwhite
  */
-public interface ListenerDefinition extends TelemetryBeanDefinition {
-    /**
-     * The {@link ParserDefinition} to create.
-     * Should not be null or empty.
-     * If empty, the listener will not be created.
-     *
-     * @return The list of parsers to create. Should neither be null or empty. However if empty, the listener will not be created
-     */
-    List<ParserDefinition> getParsers();
+public interface FlowsListener extends org.opennms.horizon.minion.plugin.api.Listener{
+    String getName();
+    String getDescription();
 
+    Collection<Parser> getParsers();
 }

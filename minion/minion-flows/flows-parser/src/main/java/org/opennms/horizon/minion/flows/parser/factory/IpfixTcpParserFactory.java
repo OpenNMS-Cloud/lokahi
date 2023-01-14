@@ -31,25 +31,27 @@ package org.opennms.horizon.minion.flows.parser.factory;
 import java.util.Objects;
 
 import org.opennms.horizon.grpc.telemetry.contract.TelemetryMessage;
-import org.opennms.horizon.shared.ipc.rpc.IpcIdentity;
+import org.opennms.horizon.minion.flows.parser.FlowSinkModule;
 import org.opennms.horizon.shared.ipc.sink.api.AsyncDispatcher;
 
 import org.opennms.horizon.minion.flows.listeners.Parser;
 import org.opennms.horizon.minion.flows.listeners.factory.ParserDefinition;
 import org.opennms.horizon.minion.flows.listeners.factory.TelemetryRegistry;
 import org.opennms.horizon.minion.flows.parser.IpfixTcpParser;
+import org.opennms.sink.flows.contract.ParserConfig;
 
 public class IpfixTcpParserFactory implements ParserFactory {
 
     private final TelemetryRegistry telemetryRegistry;
-    private final IpcIdentity identity;
     private final DnsResolver dnsResolver;
+    private final FlowSinkModule flowSinkModule;
 
-    public IpfixTcpParserFactory(final TelemetryRegistry telemetryRegistry, final IpcIdentity identity,
-                                 final DnsResolver dnsResolver) {
+    public IpfixTcpParserFactory(final TelemetryRegistry telemetryRegistry, final DnsResolver dnsResolver,
+                                 final FlowSinkModule flowSinkModule) {
         this.telemetryRegistry = Objects.requireNonNull(telemetryRegistry);
         this.identity = Objects.requireNonNull(identity);
         this.dnsResolver = Objects.requireNonNull(dnsResolver);
+        this.flowSinkModule = Objects.requireNonNull(flowSinkModule);
     }
 
     @Override
@@ -58,8 +60,8 @@ public class IpfixTcpParserFactory implements ParserFactory {
     }
 
     @Override
-    public Parser createBean(ParserDefinition parserDefinition) {
-        final AsyncDispatcher<TelemetryMessage> dispatcher = telemetryRegistry.getDispatcher(parserDefinition.getQueueName());
-        return new IpfixTcpParser(parserDefinition.getFullName(), dispatcher, identity, dnsResolver, telemetryRegistry.getMetricRegistry());
+    public Parser createBean(ParserConfig parserConfig) {
+        final AsyncDispatcher<UdpListenerMessage> dispatcher = telemetryRegistry.getDispatcher(parserConfig.getQueue().getName());
+        return new IpfixTcpParser(parserConfig.getName(), dispatcher, dnsResolver, telemetryRegistry.getMetricRegistry());
     }
 }

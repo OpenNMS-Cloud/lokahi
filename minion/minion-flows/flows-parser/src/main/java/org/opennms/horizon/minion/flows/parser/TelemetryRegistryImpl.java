@@ -38,6 +38,7 @@ import org.opennms.horizon.minion.flows.listeners.Parser;
 import org.opennms.horizon.minion.flows.listeners.factory.ParserDefinition;
 import org.opennms.horizon.minion.flows.listeners.factory.TelemetryRegistry;
 import org.opennms.horizon.minion.flows.listeners.factory.UdpListenerMessage;
+import org.opennms.sink.flows.contract.ParserConfig;
 
 public class TelemetryRegistryImpl implements TelemetryRegistry {
 
@@ -55,9 +56,10 @@ public class TelemetryRegistryImpl implements TelemetryRegistry {
     }
 
     @Override
-    public Parser getParser(ParserDefinition parserDefinition) {
-        return netflow9UdpParserFactory.createBean(parserDefinition);
+    public Parser getParser(ParserConfig parserConfig) {
+        return netflow9UdpParserFactory.createBean(parserConfig);
     }
+
 
     @Override
     public MetricRegistry getMetricRegistry() {

@@ -92,6 +92,7 @@ class ScannerResponseServiceIntTest extends GrpcTestBase {
     }
 
     @AfterEach
+    @Transactional
     public void cleanUp() {
         ipInterfaceRepository.deleteAll();
         nodeRepository.deleteAll();

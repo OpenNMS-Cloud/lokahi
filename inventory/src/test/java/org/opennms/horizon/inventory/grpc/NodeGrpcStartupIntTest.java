@@ -37,8 +37,8 @@ import org.junit.jupiter.api.Test;
 import org.keycloak.common.VerificationException;
 import org.opennms.horizon.inventory.SpringContextTestInitializer;
 import org.opennms.horizon.inventory.grpc.taskset.TestTaskSetGrpcService;
-import org.opennms.horizon.inventory.repository.IpInterfaceRepository;
-import org.opennms.horizon.inventory.repository.NodeRepository;
+import org.opennms.horizon.inventory.model.MonitoringLocation;
+import org.opennms.horizon.inventory.repository.MonitoringLocationRepository;
 import org.opennms.taskset.contract.TaskSet;
 import org.opennms.taskset.service.contract.PublishTaskSetRequest;
 import org.opennms.taskset.service.contract.TaskSetServiceGrpc;
@@ -50,26 +50,30 @@ import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 import static com.jayway.awaitility.Awaitility.await;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest(properties = { "spring.liquibase.change-log=db/changelog/changelog-test.xml" })
 @ContextConfiguration(initializers = {SpringContextTestInitializer.class})
 class NodeGrpcStartupIntTest extends GrpcTestBase {
     private static final int EXPECTED_TASK_DEF_COUNT = 1;
 
-    @Autowired
-    private IpInterfaceRepository ipInterfaceRepository;
-    @Autowired
-    private NodeRepository nodeRepository;
-
     private static TestTaskSetGrpcService testGrpcService;
+
+    @Autowired
+    private MonitoringLocationRepository repository;
 
     @BeforeEach
     public void prepare() throws VerificationException {
         prepareServer();
+        setupMonitoringLocation();
+    }
 
-        ipInterfaceRepository.deleteAll();
-        nodeRepository.deleteAll();
+    // adding due to flaky test
+    private void setupMonitoringLocation() {
+        repository.deleteAll();
+        MonitoringLocation location = new MonitoringLocation();
+        location.setTenantId("00000000-0000-0005-0000-000000000005");
+        location.setLocation("Default");
+        repository.save(location);
     }
 
     @BeforeAll

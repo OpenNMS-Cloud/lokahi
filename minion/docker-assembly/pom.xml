@@ -92,13 +92,6 @@
                                     </assembly>
                                 </assemblies>
                                 <skipPush>${docker.image.skipPush}</skipPush> <!-- only applies to the push goal - not the build goal -->
-                                <buildx>
-                                    <platforms>
-                                        <platform>linux/amd64</platform>
-                                        <platform>linux/arm/v7</platform>
-                                        <platform>linux/arm64</platform>
-                                    </platforms>
-                                </buildx>
                             </build>
                         </image>
                     </images>
@@ -107,7 +100,6 @@
                     <execution>
                         <goals>
                             <goal>build</goal>
-                            <goal>push</goal>
                         </goals>
                         <phase>package</phase>
                     </execution>

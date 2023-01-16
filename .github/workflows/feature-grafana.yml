@@ -8,9 +8,7 @@ on:
 jobs:
 
   build-and-test:
-    #runs-on: ubuntu-latest
-    runs-on:
-      labels: ubuntu-latest-8-cores
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
         with:

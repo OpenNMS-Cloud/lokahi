@@ -38,7 +38,9 @@ jobs:
   develop:
     # If label for PR, closed on PR, or develop branch on push, then run., 
     if: ${{ ( github.event.label.name == 'actions-develop' ) || ( github.event.action == 'closed' ) || ( github.event.ref == 'refs/heads/develop' ) }}
-    runs-on: self-hosted
+    #runs-on: self-hosted
+    runs-on:
+      labels: ubuntu-latest-8-cores
     steps:
       - uses: actions/checkout@v3
         with:

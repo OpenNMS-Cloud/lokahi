@@ -37,9 +37,12 @@ import org.junit.jupiter.api.Test;
 import org.keycloak.common.VerificationException;
 import org.opennms.horizon.inventory.SpringContextTestInitializer;
 import org.opennms.horizon.inventory.grpc.taskset.TestTaskSetGrpcService;
+import org.opennms.horizon.inventory.repository.IpInterfaceRepository;
+import org.opennms.horizon.inventory.repository.NodeRepository;
 import org.opennms.taskset.contract.TaskSet;
 import org.opennms.taskset.service.contract.PublishTaskSetRequest;
 import org.opennms.taskset.service.contract.TaskSetServiceGrpc;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 
@@ -54,11 +57,19 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class NodeGrpcStartupIntTest extends GrpcTestBase {
     private static final int EXPECTED_TASK_DEF_COUNT = 1;
 
+    @Autowired
+    private IpInterfaceRepository ipInterfaceRepository;
+    @Autowired
+    private NodeRepository nodeRepository;
+
     private static TestTaskSetGrpcService testGrpcService;
 
     @BeforeEach
-    public void prepare() throws VerificationException, IOException {
+    public void prepare() throws VerificationException {
         prepareServer();
+
+        ipInterfaceRepository.deleteAll();
+        nodeRepository.deleteAll();
     }
 
     @BeforeAll

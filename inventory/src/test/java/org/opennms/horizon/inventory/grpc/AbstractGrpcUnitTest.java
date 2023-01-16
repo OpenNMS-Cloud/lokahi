@@ -49,8 +49,6 @@ import io.grpc.inprocess.InProcessServerBuilder;
 import io.grpc.testing.GrpcCleanupRule;
 
 public abstract class AbstractGrpcUnitTest {
-    @Rule
-    public final GrpcCleanupRule grpCleanup = new GrpcCleanupRule();
 
     protected InventoryServerInterceptor spyInterceptor;
     protected TenantLookup tenantLookup = new GrpcTenantLookupImpl();
@@ -66,7 +64,6 @@ public abstract class AbstractGrpcUnitTest {
         server = InProcessServerBuilder.forName(serverName)
             .addService(ServerInterceptors.intercept(service, spyInterceptor)).directExecutor().build();
         server.start();
-        grpCleanup.register(server);
         doReturn(Optional.of(tenantId)).when(spyInterceptor).verifyAccessToken(authHeader);
     }
 

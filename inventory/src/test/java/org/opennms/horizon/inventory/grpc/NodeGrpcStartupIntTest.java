@@ -37,20 +37,15 @@ import org.junit.jupiter.api.Test;
 import org.keycloak.common.VerificationException;
 import org.opennms.horizon.inventory.SpringContextTestInitializer;
 import org.opennms.horizon.inventory.grpc.taskset.TestTaskSetGrpcService;
-import org.opennms.horizon.inventory.model.MonitoringLocation;
-import org.opennms.horizon.inventory.repository.MonitoringLocationRepository;
 import org.opennms.taskset.contract.TaskSet;
 import org.opennms.taskset.service.contract.PublishTaskSetRequest;
 import org.opennms.taskset.service.contract.TaskSetServiceGrpc;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 
 import javax.transaction.Transactional;
 import java.io.IOException;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 import static com.jayway.awaitility.Awaitility.await;
 
@@ -61,17 +56,9 @@ class NodeGrpcStartupIntTest extends GrpcTestBase {
 
     private static TestTaskSetGrpcService testGrpcService;
 
-    @Autowired
-    private MonitoringLocationRepository monitoringLocationRepository;
-
     @BeforeEach
     @Transactional
     public void prepare() throws VerificationException {
-        List<MonitoringLocation> allMonitoringLocation = monitoringLocationRepository.findAll();
-        monitoringLocationRepository.deleteAll(allMonitoringLocation.stream()
-            .filter(monitoringLocation -> !monitoringLocation.getTenantId()
-                .equalsIgnoreCase("00000000-0000-0005-0000-000000000005")).collect(Collectors.toList()));
-
         prepareServer();
     }
 

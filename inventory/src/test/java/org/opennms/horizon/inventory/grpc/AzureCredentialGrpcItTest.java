@@ -58,6 +58,7 @@ import org.opennms.horizon.inventory.dto.AzureCredentialServiceGrpc;
 import org.opennms.horizon.inventory.grpc.taskset.TestTaskSetGrpcService;
 import org.opennms.horizon.inventory.model.AzureCredential;
 import org.opennms.horizon.inventory.repository.AzureCredentialRepository;
+import org.opennms.horizon.inventory.repository.MonitoringLocationRepository;
 import org.opennms.horizon.shared.azure.http.dto.AzureHttpParams;
 import org.opennms.horizon.shared.azure.http.dto.login.AzureOAuthToken;
 import org.opennms.horizon.shared.azure.http.dto.subscription.AzureSubscription;
@@ -99,6 +100,9 @@ class AzureCredentialGrpcItTest extends GrpcTestBase {
     private AzureCredentialRepository azureCredentialRepository;
 
     @Autowired
+    private MonitoringLocationRepository monitoringLocationRepository;
+
+    @Autowired
     private AzureHttpParams params;
 
     //marking as a @Rule doesn't work, need to manually start/stop in before/after
@@ -130,6 +134,7 @@ class AzureCredentialGrpcItTest extends GrpcTestBase {
     @AfterEach
     public void cleanUp() throws InterruptedException {
         wireMock.stop();
+        monitoringLocationRepository.deleteAll();
         azureCredentialRepository.deleteAll();
         testGrpcService.reset();
         afterTest();

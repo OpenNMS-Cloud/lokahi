@@ -77,10 +77,11 @@ public class LocationGrpcTest extends AbstractGrpcUnitTest {
     }
 
     @AfterEach
-    public void afterTest() {
+    public void afterTest() throws InterruptedException {
         verifyNoMoreInteractions(mockLocationService);
         verifyNoMoreInteractions(spyInterceptor);
         reset(mockLocationService, spyInterceptor);
+        stopServer();
     }
 
 

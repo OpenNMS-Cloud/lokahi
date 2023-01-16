@@ -67,9 +67,9 @@ class NodeGrpcStartupIntTest extends GrpcTestBase {
     }
 
     @AfterEach
-    public void cleanUp() {
+    public void cleanUp() throws InterruptedException {
         testGrpcService.reset();
-        channel.shutdown();
+        afterTest();
     }
 
     @AfterAll

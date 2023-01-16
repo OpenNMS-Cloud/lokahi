@@ -69,8 +69,9 @@ public class MonitorSystemGrpcTest extends AbstractGrpcUnitTest {
     }
 
     @AfterEach
-    void afterTest() {
+    void afterTest() throws InterruptedException {
         verifyNoMoreInteractions(mockService);
+        stopServer();
     }
 
     @Test

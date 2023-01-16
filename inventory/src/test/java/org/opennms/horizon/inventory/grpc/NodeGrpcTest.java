@@ -78,8 +78,9 @@ public class NodeGrpcTest extends AbstractGrpcUnitTest {
     }
 
     @AfterEach
-    public void afterTest() {
+    public void afterTest() throws InterruptedException {
         verifyNoMoreInteractions(mockNodeService);
+        stopServer();
     }
 
     @Test

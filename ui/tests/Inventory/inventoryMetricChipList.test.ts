@@ -7,14 +7,14 @@ const metrics: Chip[] = [
   {
     type: 'latency',
     label: 'Latency',
-    timestamp: -1667930274660,
+    value: -1667930274660,
     timeUnit: TimeUnit.MSecs,
     status: 'UP'
   },
   {
     type: 'uptime',
     label: 'Uptime',
-    timestamp: 1667930274.66,
+    value: 1667930274.66,
     timeUnit: TimeUnit.Secs,
     status: 'DOWN'
   },

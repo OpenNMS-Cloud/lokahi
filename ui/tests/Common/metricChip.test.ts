@@ -11,11 +11,11 @@ describe('Metric chip', () => {
     wrapper.unmount()
   })
 
-  it.skip('should have `Latency` label, `up` css class and human readable timestamp text', () => {
+  it.skip('should have `Latency` label, `up` css class and human readable latency metric value', () => {
     const metric: Chip = {
       type: 'latency',
       label: 'Latency',
-      timestamp: -1667930274660,
+      value: -1667930274660,
       timeUnit: TimeUnit.MSecs,
       status: 'UP'
     }
@@ -35,9 +35,9 @@ describe('Metric chip', () => {
     // TODO: this test may fail when running in our build-and-test pipeline (PR) - inconsistence
     // Expected   "7d17h57m54s"
     // Received   "7d17h57m53s"
-    expect(text).toEqual(getHumanReadableDuration(metric.timestamp as number, metric.timeUnit))
+    expect(text).toEqual(getHumanReadableDuration(metric.value as number, metric.timeUnit))
   })
-  
+
   it('should have `Status` label, `down` css class and `Down` text', () => {
     const metric: Chip = {
       type: 'status',

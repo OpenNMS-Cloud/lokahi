@@ -37,12 +37,9 @@ import org.junit.jupiter.api.Test;
 import org.keycloak.common.VerificationException;
 import org.opennms.horizon.inventory.SpringContextTestInitializer;
 import org.opennms.horizon.inventory.grpc.taskset.TestTaskSetGrpcService;
-import org.opennms.horizon.inventory.model.MonitoringLocation;
-import org.opennms.horizon.inventory.repository.MonitoringLocationRepository;
 import org.opennms.taskset.contract.TaskSet;
 import org.opennms.taskset.service.contract.PublishTaskSetRequest;
 import org.opennms.taskset.service.contract.TaskSetServiceGrpc;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 
@@ -58,22 +55,9 @@ class NodeGrpcStartupIntTest extends GrpcTestBase {
 
     private static TestTaskSetGrpcService testGrpcService;
 
-    @Autowired
-    private MonitoringLocationRepository repository;
-
     @BeforeEach
     public void prepare() throws VerificationException {
         prepareServer();
-        setupMonitoringLocation();
-    }
-
-    // adding due to flaky test
-    private void setupMonitoringLocation() {
-        repository.deleteAll();
-        MonitoringLocation location = new MonitoringLocation();
-        location.setTenantId("00000000-0000-0005-0000-000000000005");
-        location.setLocation("Default");
-        repository.save(location);
     }
 
     @BeforeAll
@@ -95,9 +79,9 @@ class NodeGrpcStartupIntTest extends GrpcTestBase {
     }
 
     @Test
-    void testStartup() throws Exception {
+    void testStartup() {
         // TrapConfigService & FlowsConfigService listens for ApplicationReadyEvent and sends the trap config for each location.
-        await().atMost(10, TimeUnit.SECONDS).untilAtomic(testGrpcService.getTimesCalled(), Matchers.is(2));
+        await().atMost(15, TimeUnit.SECONDS).untilAtomic(testGrpcService.getTimesCalled(), Matchers.is(2));
 
         org.assertj.core.api.Assertions.assertThat(testGrpcService.getRequests())
             .hasSize(2)

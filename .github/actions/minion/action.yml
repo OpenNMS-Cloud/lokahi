@@ -44,11 +44,14 @@ runs:
       run: |
 
         mvn verify -DskipTests -Ddocker.image=opennms/horizon-stream-minion:local -Ddocker.skipPush=true
-
         
         # Test release
         docker buildx create --use --driver docker-container --name maven
-        docker buildx build --push --tag opennms/horizon-stream-minion:test-20230112 docker-assembly/target/docker/opennms/horizon-stream-minion/local/build/ -f docker-assembly/src/main/docker/app/Dockerfile --platform linux/amd64,linux/arm64,linux/arm/v7
+        #docker buildx build --push --tag opennms/horizon-stream-minion:test-20230112 docker-assembly/target/docker/opennms/horizon-stream-minion/local/build/ -f docker-assembly/src/main/docker/app/Dockerfile --platform linux/amd64,linux/arm64,linux/arm/v7
+        docker buildx build --tag opennms/horizon-stream-minion:local-multi-arch docker-assembly/target/docker/opennms/horizon-stream-minion/local/build/ -f docker-assembly/src/main/docker/app/Dockerfile --platform linux/amd64,linux/arm64,linux/arm/v7
+cd horizon-stream/
+
+        docker images
 
       working-directory: minion
       shell: bash

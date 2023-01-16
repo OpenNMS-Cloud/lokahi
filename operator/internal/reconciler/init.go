@@ -37,7 +37,7 @@ func (r *OpenNMSReconciler) InitServiceHandlers() {
 		&handlers.KeycloakHandler{},
 		&handlers.KafkaHandler{},
 		&handlers.OpenNMSHandler{},
-		&handlers.PrometheusHandler{},
+		&handlers.CortexHandler{},
 		&handlers.GrafanaHandler{},
 		&handlers.MailServerHandler{},
 		&handlers.IngressHandler{}, // MUST BE LAST

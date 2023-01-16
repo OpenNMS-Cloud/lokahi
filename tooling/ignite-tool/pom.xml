@@ -2,19 +2,20 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+
     <parent>
         <groupId>org.opennms.horizon</groupId>
         <artifactId>horizon-parent</artifactId>
         <version>0.1.0-SNAPSHOT</version>
-        <relativePath/> <!-- lookup parent from repository -->
+        <relativePath>../../parent-pom</relativePath>
     </parent>
 
-    <artifactId>opennms-ignite-tool</artifactId>
-
-    <name>OpenNMS Horizon :: Ignite Tool</name>
+    <name>OpenNMS Horizon Stream :: Ignite Tool</name>
     <description>
         Tool for connecting to an Ignite cluster, reporting statistics, accessing functionality, and more.
     </description>
+
+    <artifactId>opennms-ignite-tool</artifactId>
 
     <properties>
         <docker.image.tag>local</docker.image.tag>

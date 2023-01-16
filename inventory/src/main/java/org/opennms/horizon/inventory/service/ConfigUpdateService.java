@@ -1,8 +1,8 @@
 /*******************************************************************************
  * This file is part of OpenNMS(R).
  *
- * Copyright (C) 2022 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
+ * Copyright (C) 2022-2023 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
  *
@@ -47,13 +47,18 @@ public class ConfigUpdateService {
         .build();
     private final ExecutorService executorService = Executors.newFixedThreadPool(10, threadFactory);
     private final TrapConfigService trapConfigService;
-
+    private final FlowsConfigService flowsConfigService;
 
     private void sendConfigUpdatesToMinion(String tenantId, String location) {
         try {
             trapConfigService.sendTrapConfigToMinion(tenantId, location);
         } catch (Exception e) {
             log.error("Exception while sending traps to Minion", e);
+        }
+        try {
+            flowsConfigService.sendFlowsConfigToMinion(tenantId, location);
+        } catch (Exception e) {
+            log.error("Exception while sending flows to Minion", e);
         }
     }
 

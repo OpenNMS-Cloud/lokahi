@@ -29,7 +29,7 @@
             <td>{{ minion.label }}</td>
             <td v-date>{{ minion.lastCheckedTime }}</td>
             <td>{{ minion.id }}</td>
-            <MetricChip tag="td" :metric="{timestamp: minion.latency?.timestamp}" :data-metric="minion.latency?.timestamp" class="bg-status" data-test="minion-item-latency" />
+            <MetricChip tag="td" :metric="{value: minion.latency?.value}" :data-metric="minion.latency?.value" class="bg-status" data-test="minion-item-latency" />
             <MetricChip tag="td" :metric="{status: minion.status}" class="bg-status" data-test="minion-item-status" />
           </tr>
         </TransitionGroup>

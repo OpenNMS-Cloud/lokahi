@@ -1,18 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-
     <modelVersion>4.0.0</modelVersion>
+
+    <name>OpenNMS Horizon Stream :: Horizon Parent</name>
+    <description>
+        Top-level Parent POM with standard dependency versions for use across multiple top-level projects.
+    </description>
 
     <groupId>org.opennms.horizon</groupId>
     <artifactId>horizon-parent</artifactId>
     <version>0.1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
-
-    <name>OpenNMS Horizon :: Horizon Parent</name>
-
-    <description>
-        Top-level Parent POM with standard dependency versions for use across multiple top-level projects.
-    </description>
 
     <properties>
         <!-- Configuration properties -->
@@ -113,7 +111,7 @@
         <cron-utils.version>9.1.6</cron-utils.version>
         <eos.version>1.2.0</eos.version>
         <okhttp.version>3.14.0</okhttp.version>
-        <resilience4j.version>2.0.1</resilience4j.version>
+        <resilience4j.version>1.7.0</resilience4j.version>
         <snappy-java.version>1.1.8.4</snappy-java.version>
     </properties>
 

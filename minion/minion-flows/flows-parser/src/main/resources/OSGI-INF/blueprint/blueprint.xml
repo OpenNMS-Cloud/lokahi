@@ -1,0 +1,46 @@
+<blueprint
+    xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="
+                http://www.osgi.org/xmlns/blueprint/v1.0.0 https://osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd">
+
+    <reference id="messageDispatcherFactory" interface="org.opennms.horizon.shared.ipc.sink.api.MessageDispatcherFactory"/>
+    <bean id="dnsResolver" class="org.opennms.horizon.minion.flows.parser.factory.dnsresolver.NettyDnsResolver" init-method="init" destroy-method="destroy">
+        <argument index="0" ref="metricRegistry"/>
+    </bean>
+    <bean id="metricRegistry" class="com.codahale.metrics.MetricRegistry"/>
+    <service ref="metricRegistry" interface="com.codahale.metrics.MetricSet">
+        <service-properties>
+            <entry key="name" value="Netty DNS Resolver" />
+            <entry key="description" value="Netty DNS resolution metrics" />
+        </service-properties>
+    </service>
+    <bean id="telemetryRegistry" class="org.opennms.horizon.minion.flows.parser.TelemetryRegistryImpl" >
+        <argument ref="netflow9UdpParserFactory" />
+        <argument ref="messageDispatcherFactory" />
+        <argument ref="udpListenerModule"/>
+    </bean>
+    <bean id="udpListenerModule" class="org.opennms.horizon.minion.flows.parser.UdpListenerModule" />
+
+
+    <!-- Netflow 9 UDP Parser Factory -->
+    <bean id="netflow9UdpParserFactory" class="org.opennms.horizon.minion.flows.parser.factory.Netflow9UdpParserFactory">
+        <argument ref="messageDispatcherFactory" />
+        <argument ref="dnsResolver" />
+        <argument ref="udpListenerModule" />
+    </bean>
+    <service ref="netflow9UdpParserFactory" interface="org.opennms.horizon.minion.flows.parser.factory.ParserFactory">
+    </service>
+
+    <!-- UDP Listener Factory -->
+    <bean id="udpListenerFactory" class="org.opennms.horizon.minion.flows.listeners.factory.UdpListenerFactory">
+        <argument ref="telemetryRegistry" />
+    </bean>
+
+    <bean id="listenerDefinition" class="org.opennms.horizon.minion.flows.listeners.factory.ListenerDefinitionImpl" />
+
+    <bean id="configManager" class="org.opennms.horizon.minion.flows.parser.ConfigManager">
+        <argument ref="udpListenerFactory" />
+        <argument ref="listenerDefinition" />
+    </bean>
+</blueprint>

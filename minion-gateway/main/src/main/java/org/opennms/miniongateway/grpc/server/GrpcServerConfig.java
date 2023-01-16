@@ -20,6 +20,7 @@ import org.opennms.horizon.shared.ipc.grpc.server.manager.rpc.LocationIndependen
 import org.opennms.horizon.shared.ipc.grpc.server.manager.rpcstreaming.MinionRpcStreamConnectionManager;
 import org.opennms.horizon.shared.ipc.grpc.server.manager.rpcstreaming.impl.MinionRpcStreamConnectionManagerImpl;
 import org.opennms.miniongateway.grpc.server.heartbeat.HeartbeatKafkaForwarder;
+import org.opennms.miniongateway.grpc.server.rpcrequest.flows.FlowKafkaForwarder;
 import org.opennms.miniongateway.grpc.server.tasktresults.TaskResultsKafkaForwarder;
 import org.opennms.miniongateway.grpc.server.traps.TrapsKafkaForwarder;
 import org.opennms.miniongateway.grpc.twin.GrpcTwinPublisher;
@@ -121,6 +122,7 @@ public class GrpcServerConfig {
         @Autowired TaskResultsKafkaForwarder taskResultsKafkaForwarder,
         @Autowired HeartbeatKafkaForwarder heartbeatKafkaForwarder,
         @Autowired TrapsKafkaForwarder trapsKafkaForwarder,
+        @Autowired FlowKafkaForwarder flowKafkaForwarder,
         @Autowired RpcRequestTimeoutManager rpcRequestTimeoutManager,
         @Autowired TenantIDGrpcServerInterceptor tenantIDGrpcServerInterceptor
     ) throws Exception {
@@ -141,6 +143,7 @@ public class GrpcServerConfig {
         server.registerConsumer(taskResultsKafkaForwarder);
         server.registerConsumer(heartbeatKafkaForwarder);
         server.registerConsumer(trapsKafkaForwarder);
+        server.registerConsumer(flowKafkaForwarder);
 
         server.start();
         return server;

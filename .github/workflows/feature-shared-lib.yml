@@ -30,14 +30,7 @@ jobs:
       - name: Cache Maven Dependencies
         uses: ./.github/actions/maven-cache
         with:
-          working-directory: 'shared-lib'
-
-      - name: parent-pom
-        id: action-parent-pom
-        uses: ./.github/actions/parent-pom
-        with:
-          dir-location: 'parent-pom'
-          enable-sonar-scan: false
+          cache-key-hash: ${{ hashFiles('parent-pom/pom.xml', 'shared-lib/**/pom.xml') }}
 
       - name: feature-shared-lib
         uses: ./.github/actions/shared-lib

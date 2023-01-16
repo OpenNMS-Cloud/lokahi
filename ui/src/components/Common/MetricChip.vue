@@ -31,16 +31,16 @@ const propsData = computed(() => {
     bgColor: props.metric.status || 'unknown'
   }
   
-  if('timestamp' in props.metric) {
+  if('value' in props.metric) {
     let bgColor = 'unknown'
 
-    if(props.metric.timestamp !== undefined) {
-      bgColor = props.metric.timestamp >= 0 ? 'up' : 'down'
+    if(props.metric.value !== undefined) {
+      bgColor = props.metric.value >= 0 ? 'up' : 'down'
     }
     
     chip = {
       ...chip,
-      value: getHumanReadableDuration(props.metric.timestamp as number),
+      value: getHumanReadableDuration(props.metric.value as number),
       bgColor
     }
   }

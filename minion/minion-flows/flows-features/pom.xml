@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>minion-flows</artifactId>
+        <groupId>org.opennms.horizon.minion</groupId>
+        <version>0.1.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>flows-features</artifactId>
+    <packaging>feature</packaging>
+
+    <name>OpenNms Horizon :: Minion :: Flows :: Features</name>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.opennms.horizon.minion</groupId>
+            <artifactId>flows-parser</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.opennms.horizon.minion</groupId>
+            <artifactId>observability-features</artifactId>
+            <version>${project.version}</version>
+            <classifier>features</classifier>
+            <type>xml</type>
+        </dependency>
+        <dependency>
+            <groupId>org.opennms.horizon.minion</groupId>
+            <artifactId>plugin-features</artifactId>
+            <version>${project.version}</version>
+            <classifier>features</classifier>
+            <type>xml</type>
+        </dependency>
+        <dependency>
+            <groupId>org.opennms.horizon.minion</groupId>
+            <artifactId>ipc-features</artifactId>
+            <version>${project.version}</version>
+            <classifier>features</classifier>
+            <type>xml</type>
+        </dependency>
+        <dependency>
+            <groupId>org.opennms.horizon.minion</groupId>
+            <artifactId>grpc-features</artifactId>
+            <version>${project.version}</version>
+            <classifier>features</classifier>
+            <type>xml</type>
+        </dependency>
+    </dependencies>
+
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.karaf.tooling</groupId>
+                <artifactId>karaf-maven-plugin</artifactId>
+                <extensions>true</extensions>
+                <executions>
+                    <execution>
+                        <id>verify</id>
+                        <goals>
+                            <goal>verify</goal>
+                        </goals>
+                        <phase>verify</phase>
+                        <configuration>
+                            <descriptors>
+                                <descriptor>mvn:org.apache.karaf.features/framework/${karaf.version}/xml/features</descriptor>
+                                <descriptor>mvn:org.apache.karaf.features/standard/${karaf.version}/xml/features</descriptor>
+                                <descriptor>mvn:org.opennms.horizon.minion/ipc-features/${project.version}/xml/features</descriptor>
+                                <descriptor>mvn:org.opennms.horizon.minion/grpc-features/${project.version}/xml/features</descriptor>
+                                <descriptor>mvn:org.opennms.horizon.minion/observability-features/${project.version}/xml/features</descriptor>
+                                <descriptor>mvn:org.opennms.horizon.minion/plugin-features/${project.version}/xml/features</descriptor>
+                                <descriptor>file:${project.build.directory}/feature/feature.xml</descriptor>
+                            </descriptors>
+                            <javase>11</javase>
+                            <framework>
+                                <feature>framework</feature>
+                            </framework>
+                            <features>
+                                <feature>minion-flows</feature>
+                            </features>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

@@ -89,4 +89,9 @@ public class GrpcNodeService {
     public Mono<NodeStatus> getNodeStatus(@GraphQLArgument(name = "id") Long id, @GraphQLEnvironment ResolutionEnvironment env) {
         return nodeStatusService.getNodeStatus(id, ICMP_MONITOR_TYPE, env);
     }
+
+    @GraphQLMutation
+    public Mono<Boolean> deleteNode(@GraphQLArgument(name = "id") Long id, @GraphQLEnvironment ResolutionEnvironment env) {
+        return Mono.just(client.deleteNode(id, headerUtil.getAuthHeader(env)));
+    }
 }

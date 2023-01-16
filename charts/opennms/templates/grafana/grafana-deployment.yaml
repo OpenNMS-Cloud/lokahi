@@ -1,3 +1,4 @@
+{{- if .Values.Grafana.Enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -77,3 +78,4 @@ spec:
             requests:
               cpu: "{{ .Values.Grafana.Resources.Requests.Cpu }}"
               memory: "{{ .Values.Grafana.Resources.Requests.Memory }}"
+{{- end }}

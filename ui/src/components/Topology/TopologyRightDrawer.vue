@@ -25,9 +25,6 @@
   lang="ts"
 >
 import { useTopologyStore } from '@/store/Views/topologyStore'
-import { FeatherListItem, FeatherList } from '@featherds/list'
-import { FeatherButton } from '@featherds/button'
-import { FeatherIcon } from '@featherds/icon'
 import Close from '@featherds/icon/navigation/Cancel'
 
 const topologyStore = useTopologyStore()

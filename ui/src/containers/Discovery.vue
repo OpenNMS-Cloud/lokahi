@@ -2,7 +2,7 @@
   <div class="container">
     <PageHeader heading="Discovery" />
     <div>
-      <!-- info bar -->
+      <Infobar />
     </div>
     <div class="discovery-cards">
       <Card
@@ -26,13 +26,13 @@
             <div class="passive-tools">
               <PassiveTool
                 :label="'Syslog'"
-                @show-settings="() => showSettings('syslog')"
-                @show-instructions="() => showInstructions('syslog')"
+                @show-settings="showSettings(DiscoveryType.Syslog)"
+                @show-instructions="showInstructions(DiscoveryType.Syslog)"
               />
               <PassiveTool
                 :label="'SNMP Traps'"
-                @show-settings="() => showSettings('snmp')"
-                @show-instructions="() => showInstructions('snmp')"
+                @show-settings="showSettings(DiscoveryType.SNMP)"
+                @show-instructions="showInstructions(DiscoveryType.SNMP)"
               />
             </div>
           </div>
@@ -40,25 +40,69 @@
       </Card>
     </div>
   </div>
+   <PrimaryModal :visible="isVisible" title="''" hide-title>
+    <template #content>
+      <component :is="modalContent?.component" v-bind="modalContent?.props" />
+    </template>
+    <template v-slot:footer>
+      <FeatherButton 
+        secondary 
+        @click="closeModal">
+          Close
+      </FeatherButton>
+    </template>
+  </PrimaryModal>
+   <FeatherDrawer
+    id="map-left-drawer"
+    :left="false"
+    :modelValue="isDrawerOpen"
+    @update:modelValue="closeDrawer"
+    :labels="{ close: 'close', title: 'Instructions' }"
+  >
+    <div class="container">
+      <slot name="search"><DiscoveryInstructions :tool="selectedTool"/></slot>
+      <slot name="view"></slot>
+    </div>
+  </FeatherDrawer>
 </template>
 
 <script setup lang="ts">
 import ActiveDiscoveryImg from '@/assets/active-discovery.png'
 import PassiveDiscoveryImg from '@/assets/passive-discovery.png'
+import DiscoveryStepper from '@/components/Discovery/DiscoveryStepper.vue'
+import { DiscoveryType } from '@/components/Discovery/discovery.constants'
+import useModal from '@/composables/useModal'
+const { openModal, closeModal, isVisible } = useModal()
+const selectedTool = ref()
+const isDrawerOpen = ref(false)
 
+const modalContent = computed(() => {
+  switch(selectedTool.value) {
+    case DiscoveryType.ICMP:
+      return { component: DiscoveryStepper, props: { callback: closeModal }}
+    case DiscoveryType.Azure:
+      // return Azure content
+  }
+})
 
-const showSettings = (tool: string) => {
-  console.log('show settings for', tool)
+const showSettings = (tool: DiscoveryType) => {
+  selectedTool.value = tool
+  openModal()
 }
 
 
-const showInstructions = (tool: string) => {
-  console.log('show instructions for', tool)
+const showInstructions = (tool: DiscoveryType) => {
+  selectedTool.value = tool
+  isDrawerOpen.value = true
 }
 
-const showConfigActiveTool = (tool: string) => {
-  console.log('show setting for', tool)
+const showConfigActiveTool = (tool: DiscoveryType) => {
+  selectedTool.value = tool
+  openModal()
+}
 
+const closeDrawer = () => {
+  isDrawerOpen.value = false
 }
 </script>
 

@@ -98,6 +98,17 @@ public class MinionTestSteps {
         commonSendGetRequestToApplication(path);
     }
 
+    @Then("Send GET request to application at path {string} until success with timeout {int}ms")
+    public void sendGETRequestToApplicationAtPathUntilSuccessWithTimeoutMs(String path, int timeout) throws InterruptedException {
+        retryUtils.retry(
+            () -> retryableSendGetRequestToApplication(path),
+            (response) -> ( response != null ) && isSuccessHttpStatusCode(response.getStatusCode()),
+            100,
+            timeout,
+            null
+        );
+    }
+
     @Then("Remember response body for later comparison")
     public void rememberResponseBodyForLaterComparison() {
         rememberedRestAssuredResponse = restAssuredResponse;
@@ -143,6 +154,10 @@ public class MinionTestSteps {
 //========================================
 // Internals
 //----------------------------------------
+
+    private boolean isSuccessHttpStatusCode(int code) {
+        return ( ( (code) >= 200 ) && ( code <= 299 ) );
+    }
 
     private RestAssuredConfig createRestAssuredTestConfig() {
         return RestAssuredConfig.config()

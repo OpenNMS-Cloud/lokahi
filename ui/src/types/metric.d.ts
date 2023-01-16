@@ -1,7 +1,7 @@
 export interface Chip {
   type?: string
   label?: string | undefined
-  timestamp?: number | string
+  value?: number | string
   timeUnit?: number
   status?: string | undefined
 }

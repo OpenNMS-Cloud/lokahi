@@ -85,7 +85,7 @@ import io.grpc.stub.MetadataUtils;
 @SpringBootTest
 @ContextConfiguration(initializers = {SpringContextTestInitializer.class})
 class NodeGrpcItTest extends GrpcTestBase {
-    private static final int EXPECTED_TASK_DEF_COUNT_FOR_NEW_LOCATION = 3;
+    private static final int EXPECTED_TASK_DEF_COUNT_FOR_NEW_LOCATION = 4;
     private static final int EXPECTED_TASK_DEF_COUNT_WITHOUT_NEW_LOCATION = 2;
     private NodeServiceGrpc.NodeServiceBlockingStub serviceStub;
 
@@ -138,10 +138,10 @@ class NodeGrpcItTest extends GrpcTestBase {
         NodeDTO node = serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).createNode(createDTO);
 
         assertEquals(label, node.getNodeLabel());
-        await().atMost(10, TimeUnit.SECONDS).untilAtomic(testGrpcService.getTimesCalled(), Matchers.is(2));
+        await().atMost(10, TimeUnit.SECONDS).untilAtomic(testGrpcService.getTimesCalled(), Matchers.is(3));
 
         org.assertj.core.api.Assertions.assertThat(testGrpcService.getRequests())
-            .hasSize(2)
+            .hasSize(3)
             .extracting(PublishTaskSetRequest::getTaskSet)
             .isNotNull()
             .extracting(TaskSet::getTaskDefinitionCount)
@@ -206,10 +206,10 @@ class NodeGrpcItTest extends GrpcTestBase {
         NodeDTO node = serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(differentTenantHeader))).createNode(createDTO);
 
         assertEquals(label, node.getNodeLabel());
-        await().atMost(10, TimeUnit.SECONDS).untilAtomic(testGrpcService.getTimesCalled(), Matchers.is(2));
+        await().atMost(10, TimeUnit.SECONDS).untilAtomic(testGrpcService.getTimesCalled(), Matchers.is(3));
 
         org.assertj.core.api.Assertions.assertThat(testGrpcService.getRequests())
-            .hasSize(2)
+            .hasSize(3)
             .extracting(PublishTaskSetRequest::getTaskSet)
             .isNotNull()
             .extracting(TaskSet::getTaskDefinitionCount)
@@ -235,10 +235,10 @@ class NodeGrpcItTest extends GrpcTestBase {
         NodeDTO node = serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).createNode(createDTO);
 
         assertEquals(label, node.getNodeLabel());
-        await().atMost(10, TimeUnit.SECONDS).untilAtomic(testGrpcService.getTimesCalled(), Matchers.is(2));
+        await().atMost(10, TimeUnit.SECONDS).untilAtomic(testGrpcService.getTimesCalled(), Matchers.is(3));
 
         org.assertj.core.api.Assertions.assertThat(testGrpcService.getRequests())
-            .hasSize(2)
+            .hasSize(3)
             .extracting(PublishTaskSetRequest::getTaskSet)
             .isNotNull()
             .extracting(TaskSet::getTaskDefinitionCount)

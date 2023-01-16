@@ -1,3 +1,4 @@
+{{- if .Values.Ingress.Enabled }}
 # Source: ingress-nginx/templates/controller-service.yaml
 apiVersion: v1
 kind: Service
@@ -26,3 +27,4 @@ spec:
     app.kubernetes.io/component: controller-{{ .Release.Namespace }}
     app.kubernetes.io/name: ingress-nginx-{{ .Release.Namespace }}
     app.kubernetes.io/instance: ingress-nginx-{{ .Release.Namespace }}
+{{- end }}

@@ -20,8 +20,6 @@
 ## 16 = horizon-stream-minion-gateway
 ## 17 = horizon-stream-ui
 ## 18 = grafana
-## 19 = prometheus
-## 21 = prometheus-pushgateway
 ## 22 = mail-server
 ## 23 = zookeeper
 ## 24 = kafka
@@ -31,6 +29,7 @@
 ## 28 = metric processor
 ## 29 = horizon-stream-inventory
 ## 30 = events
+## 31 = cortex
 ##
 
 # Tilt config #
@@ -192,7 +191,7 @@ jib_project(
     port_forwards=['16080:9090', '16050:5005'],
 )
 
-### Minion Gateway GRPC Proxy ###
+### Minion Gateway gRPC Proxy ###
 jib_project(
     'minion-gateway-grpc-proxy',
     'opennms/horizon-stream-minion-gateway-grpc-proxy',
@@ -251,18 +250,6 @@ docker_build(
 k8s_resource(
     'grafana',
     port_forwards=['18080:3000'],
-)
-
-### Prometheus ###
-k8s_resource(
-    'prometheus',
-    port_forwards=['19080:9090'],
-)
-
-### Prometheus Push Gateway ###
-k8s_resource(
-    'prometheus-pushgateway',
-    port_forwards=['21080:9091'],
 )
 
 ### Cortex ###

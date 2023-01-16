@@ -83,6 +83,7 @@ OpenNMS:
         grpc_set_header tenant-id 'opennms-prime';
 
   MinionGatewayGrpcProxy:
+    Enabled: true
     ServiceName: opennms-minion-gateway-grpc-proxy
     Image: opennms/horizon-stream-minion-gateway-grpc-proxy
     ImagePullPolicy: IfNotPresent
@@ -200,6 +201,7 @@ Keycloak:
   AdminPassword: notset
   RealmName: opennms
 Grafana:
+  Enabled: true
   Path: /grafana
   Port: 3000
   Replicas: 1
@@ -225,34 +227,6 @@ Cortex:
     Requests:
       Cpu: 100m
       Memory: 100Mi
-Prometheus:
-  Enabled: true
-  Server:
-    ServiceName: prometheus
-    Port: 9090
-    Image: prom/prometheus:v2.39.1
-    ImagePullPolicy: IfNotPresent
-    Replicas: 1
-    Resources:
-      Limits:
-        Cpu: "1"
-        Memory: 512Mi
-      Requests:
-        Cpu: 100m
-        Memory: 100Mi
-  PushGateway:
-    ServiceName: prometheus-pushgateway
-    Port: 9091
-    Image: prom/pushgateway:v1.4.3
-    ImagePullPolicy: IfNotPresent
-    Replicas: 1
-    Resources:
-      Limits:
-        Cpu: "1"
-        Memory: 512Mi
-      Requests:
-        Cpu: 100m
-        Memory: 100Mi
 Kafka:
   ServiceName: onms-kafka
   Image: bitnami/kafka:3.3.1-debian-11-r1
@@ -303,6 +277,7 @@ TLS:
         name: prod-clouddns-svc-acct-secret
         key: service-account.json
 Ingress:
+  Enabled: true
   HttpPort: 80
   HttpsPort: 443
   ControllerImage: registry.k8s.io/ingress-nginx/controller:v1.3.0@sha256:d1707ca76d3b044ab8a28277a2466a02100ee9f58a86af1535a3edf9323ea1b5

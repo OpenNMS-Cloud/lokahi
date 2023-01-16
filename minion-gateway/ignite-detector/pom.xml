@@ -11,7 +11,7 @@
     <artifactId>minion-gateway-ignite-detector-parent</artifactId>
     <packaging>pom</packaging>
 
-    <name>OpenNMS Horizon :: Minion Gateway :: Ignite Detector</name>
+    <name>OpenNMS Horizon Stream :: Minion Gateway :: Ignite Detector</name>
     <description>
         Parent for the Ignite Detector for the Minion Gateway,
         which includes a client and server for processing Detectors
@@ -30,7 +30,7 @@
             <plugin>
                 <groupId>io.github.zlika</groupId>
                 <artifactId>reproducible-build-maven-plugin</artifactId>
-                <version>0.15</version>
+                <version>0.16</version>
                 <executions>
                     <execution>
                         <id>run-when-packaged</id>

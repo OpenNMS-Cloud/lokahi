@@ -6,7 +6,6 @@ ARG GF_INSTALL_PLUGINS="https://github.com/OpenNMS/opennms-helm/releases/downloa
 #ARG GF_INSTALL_PLUGINS="https://github.com/OpenNMS/opennms-helm/releases/download/v7.1.2/opennms-helm-app-7.1.2.zip;opennms-helm-app"
 ENV GF_PLUGINS_ALLOW_LOADING_UNSIGNED_PLUGINS="opennms-helm-app"
 
-
 USER root
 
 RUN apk add --update --no-cache libcap

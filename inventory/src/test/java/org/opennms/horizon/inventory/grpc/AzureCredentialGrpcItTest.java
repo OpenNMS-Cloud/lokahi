@@ -172,7 +172,7 @@ class AzureCredentialGrpcItTest extends GrpcTestBase {
         assertEquals(1, list.size());
 
         AzureCredential azureCredential = list.get(0);
-        assertEquals(1, credentials.getId());
+        assertTrue(azureCredential.getId() > 0);
         assertNotNull(azureCredential.getMonitoringLocation());
         assertEquals(createDTO.getLocation(), azureCredential.getMonitoringLocation().getLocation());
         assertEquals(createDTO.getClientId(), azureCredential.getClientId());

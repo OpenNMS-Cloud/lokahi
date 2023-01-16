@@ -19,4 +19,13 @@ Feature: Minion Monitoring via Echo Messages Logged in Prometheus
     Then Read the list of connected Minions from the BFF
     Then Find the minions running in the given location
     Then Verify at least one minion was found for the location
-    Then Read the "response_time_msec" from Prometheus with label "system_id" set to the Minion System ID for each Minion found with timeout 120000ms
+    Then Read the "response_time_msec" metrics with label "instance" set to the Minion System ID for each Minion found with timeout 120000ms
+
+  Scenario: Add devices and verify monitoring metrics are recorded into prometheus
+    Given At least one Minion is running with location "Default"
+    Then Add a device with label "local1" IP address "127.1.0.1" and location "Default"
+    Then Add a device with label "local2" IP address "127.1.0.2" and location "Default"
+    Then Add a device with label "local3" IP address "127.1.0.3" and location "Default"
+    Then Read the "response_time_msec" metrics with label "instance" set to "127.1.0.1" with timeout 120000ms
+    Then Read the "response_time_msec" metrics with label "instance" set to "127.1.0.2" with timeout 120000ms
+    Then Read the "response_time_msec" metrics with label "instance" set to "127.1.0.3" with timeout 120000ms

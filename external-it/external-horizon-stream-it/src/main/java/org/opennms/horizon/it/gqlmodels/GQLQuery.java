@@ -1,8 +1,10 @@
 package org.opennms.horizon.it.gqlmodels;
 
+import java.util.Map;
+
 public class GQLQuery {
     private String query;
-    private String variables;
+    private Map<String, Object> variables;
     private String operationName;
 
     public String getQuery() {
@@ -13,11 +15,11 @@ public class GQLQuery {
         this.query = query;
     }
 
-    public String getVariables() {
+    public Map<String, Object> getVariables() {
         return variables;
     }
 
-    public void setVariables(String variables) {
+    public void setVariables(Map<String, Object> variables) {
         this.variables = variables;
     }
 

@@ -224,4 +224,4 @@ jobs:
 
             echo ""
             echo "=== K8S APPLICATION LOGS ==="
-            kubectl logs -n hs-instance -l appdomain=opennms
+            kubectl logs -n hs-instance -l appdomain=opennms --tail=-1 --prefix --all-containers

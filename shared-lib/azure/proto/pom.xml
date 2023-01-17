@@ -14,11 +14,6 @@
     <name>OpenNMS Horizon :: Shared Library :: Azure :: Proto</name>
     <packaging>bundle</packaging>
 
-    <properties>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.source>17</maven.compiler.source>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>com.google.protobuf</groupId>

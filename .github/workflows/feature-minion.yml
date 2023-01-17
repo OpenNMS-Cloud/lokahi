@@ -44,18 +44,3 @@ jobs:
           enable-sonar-scan: true
           github-token: ${{ secrets.GITHUB_TOKEN }}
           sonar-token: ${{ secrets.SONAR_TOKEN }}
-
-      - name: dockerhub-publish-test
-        run: |
-
-          echo ${{ secrets.DOCKERHUB_PASS }} | docker login -u ${{ secrets.DOCKERHUB_LOGIN }} --password-stdin
-
-          # Test
-          #docker tag opennms/horizon-stream-minion:local opennms/horizon-stream-minion:test-20230117-1151
-          #docker push opennms/horizon-stream-minion:test-20230117-1151
-        
-          docker buildx create --use --driver docker-container --name maven
-          docker buildx build --push --tag opennms/horizon-stream-minion:test-20230117-1234 docker-assembly/target/docker/opennms/horizon-stream-minion/local/build/ -f docker-assembly/src/main/docker/app/Dockerfile --platform linux/amd64,linux/arm64,linux/arm/v7
-
-        working-directory: minion
-        shell: bash

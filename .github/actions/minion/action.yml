@@ -17,6 +17,7 @@ inputs:
 
 runs:
   using: "composite"
+  environment: docker-publish-account
   steps:
     - name: Cache SonarCloud packages
       if: ${{ inputs.enable-sonar-scan == 'true' }}
@@ -35,6 +36,7 @@ runs:
         # re-test to confirm.
         #docker login -u ${{ secrets.DOCKERHUB_LOGIN }} -p ${{ secrets.DOCKERHUB_PASS }}
         echo ${{ secrets.DOCKERHUB_PASS }} | docker login -u ${{ secrets.DOCKERHUB_LOGIN }} --password-stdin
+      shell: bash
 
     - name: global data
       if: ${{ inputs.enable-sonar-scan == 'true' }}

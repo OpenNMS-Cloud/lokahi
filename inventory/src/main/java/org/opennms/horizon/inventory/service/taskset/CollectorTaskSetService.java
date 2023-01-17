@@ -115,8 +115,8 @@ public class CollectorTaskSetService {
                 .setClientSecret(credential.getClientSecret())
                 .setSubscriptionId(credential.getSubscriptionId())
                 .setDirectoryId(credential.getDirectoryId())
-                .setTimeoutMs(TaskUtils.Azure.DEFAULT_TIMEOUT_MS)
-                .setRetries(TaskUtils.Azure.DEFAULT_RETRIES)
+                .setTimeoutMs(TaskUtils.AZURE_DEFAULT_TIMEOUT_MS)
+                .setRetries(TaskUtils.AZURE_DEFAULT_RETRIES)
                 .build());
 
         String name = String.join("-", "azure", "collector", scanItem.getId());
@@ -127,7 +127,7 @@ public class CollectorTaskSetService {
             .setNodeId(nodeId)
             .setId(taskId)
             .setConfiguration(configuration)
-            .setSchedule(TaskUtils.Azure.COLLECTOR_SCHEDULE)
+            .setSchedule(TaskUtils.AZURE_COLLECTOR_SCHEDULE)
             .build();
     }
 }

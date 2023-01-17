@@ -28,6 +28,7 @@
 
 package org.opennms.horizon.inventory.service.taskset;
 
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.protobuf.Any;
 import lombok.RequiredArgsConstructor;
 import org.opennms.azure.contract.AzureScanRequest;
@@ -38,15 +39,27 @@ import org.opennms.taskset.service.api.TaskSetPublisher;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 
 import static org.opennms.horizon.inventory.service.taskset.TaskUtils.identityForAzureTask;
 
 @Component
 @RequiredArgsConstructor
 public class ScannerTaskSetService {
+    private final ThreadFactory threadFactory = new ThreadFactoryBuilder()
+        .setNameFormat("send-taskset-for-scan-%d")
+        .build();
+    private final ExecutorService executorService = Executors.newFixedThreadPool(10, threadFactory);
+
     private final TaskSetPublisher taskSetPublisher;
 
-    public void sendAzureScannerTask(AzureCredential credential) {
+    public void sendAzureScannerTaskAsync(AzureCredential credential) {
+        executorService.execute(() -> sendAzureScannerTask(credential));
+    }
+
+    private void sendAzureScannerTask(AzureCredential credential) {
         String tenantId = credential.getTenantId();
         String location = credential.getMonitoringLocation().getLocation();
 
@@ -63,8 +76,8 @@ public class ScannerTaskSetService {
                 .setClientSecret(credential.getClientSecret())
                 .setSubscriptionId(credential.getSubscriptionId())
                 .setDirectoryId(credential.getDirectoryId())
-                .setTimeoutMs(TaskUtils.Azure.DEFAULT_TIMEOUT_MS)
-                .setRetries(TaskUtils.Azure.DEFAULT_RETRIES)
+                .setTimeoutMs(TaskUtils.AZURE_DEFAULT_TIMEOUT_MS)
+                .setRetries(TaskUtils.AZURE_DEFAULT_RETRIES)
                 .build());
 
         String taskId = identityForAzureTask("azure-scanner");

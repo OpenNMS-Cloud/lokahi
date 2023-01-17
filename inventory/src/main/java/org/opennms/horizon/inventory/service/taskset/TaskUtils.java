@@ -4,18 +4,19 @@ public interface TaskUtils {
 
     String DEFAULT_SCHEDULE = "60000";
 
-    interface Icmp {
-        int DEFAULT_TIMEOUT_MS = 800;
-        int DEFAULT_RETRIES = 2;
-        int DEFAULT_DSCP = 0;
-        int DEFAULT_PACKET_SIZE = 64;
-        boolean DEFAULT_ALLOW_FRAGMENTATION = true;
-    }
+    int ICMP_DEFAULT_TIMEOUT_MS = 800;
+    int ICMP_DEFAULT_RETRIES = 2;
+    int ICMP_DEFAULT_DSCP = 0;
+    int ICMP_DEFAULT_PACKET_SIZE = 64;
+    boolean ICMP_DEFAULT_ALLOW_FRAGMENTATION = true;
 
-    interface Snmp {
-        int DEFAULT_TIMEOUT_MS = 18000;
-        int DEFAULT_RETRIES = 2;
-    }
+    int SNMP_DEFAULT_TIMEOUT_MS = 18000;
+    int SNMP_DEFAULT_RETRIES = 2;
+
+    int AZURE_DEFAULT_TIMEOUT_MS = 18000;
+    int AZURE_DEFAULT_RETRIES = 2;
+    String AZURE_MONITOR_SCHEDULE = DEFAULT_SCHEDULE;
+    String AZURE_COLLECTOR_SCHEDULE = DEFAULT_SCHEDULE;
 
     String IP_LABEL = "ip=";
     String AZURE_LABEL = "azure=";
@@ -27,12 +28,4 @@ public interface TaskUtils {
     static String identityForAzureTask(String name) {
         return AZURE_LABEL + name;
     }
-
-    interface Azure {
-        int DEFAULT_TIMEOUT_MS = 18000;
-        int DEFAULT_RETRIES = 2;
-        String MONITOR_SCHEDULE = DEFAULT_SCHEDULE;
-        String COLLECTOR_SCHEDULE = DEFAULT_SCHEDULE;
-    }
-
 }

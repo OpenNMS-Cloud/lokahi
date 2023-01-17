@@ -27,7 +27,6 @@
  *******************************************************************************/
 package org.opennms.horizon.inventory.service;
 
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.opennms.horizon.inventory.dto.AzureCredentialCreateDTO;
@@ -49,9 +48,6 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
 
 @Component
 @RequiredArgsConstructor
@@ -64,10 +60,6 @@ public class AzureCredentialService {
     private final MonitoringLocationRepository locationRepository;
     private final ConfigUpdateService configUpdateService;
     private final ScannerTaskSetService scannerTaskSetService;
-    private final ThreadFactory threadFactory = new ThreadFactoryBuilder()
-        .setNameFormat("send-taskset-for-azure-%d")
-        .build();
-    private final ExecutorService executorService = Executors.newFixedThreadPool(10, threadFactory);
 
     public AzureCredentialDTO createCredentials(String tenantId, AzureCredentialCreateDTO request) {
         validateCredentials(request);
@@ -78,26 +70,26 @@ public class AzureCredentialService {
         credential.setTenantId(tenantId);
         credential.setCreateTime(LocalDateTime.now());
         credential.setMonitoringLocation(monitoringLocation);
-        final AzureCredential savedCredential = repository.save(credential);
+        credential = repository.save(credential);
 
         // Asynchronously send task sets to Minion
-        executorService.execute(() -> scannerTaskSetService.sendAzureScannerTask(savedCredential));
+        scannerTaskSetService.sendAzureScannerTaskAsync(credential);
 
-        return mapper.modelToDto(savedCredential);
+        return mapper.modelToDto(credential);
     }
 
     private void validateCredentials(AzureCredentialCreateDTO request) {
         AzureOAuthToken token;
         try {
             token = client.login(request.getDirectoryId(), request.getClientId(),
-                request.getClientSecret(), TaskUtils.Azure.DEFAULT_TIMEOUT_MS, TaskUtils.Azure.DEFAULT_RETRIES);
+                request.getClientSecret(), TaskUtils.AZURE_DEFAULT_TIMEOUT_MS, TaskUtils.AZURE_DEFAULT_RETRIES);
         } catch (AzureHttpException e) {
             throw new InventoryRuntimeException("Failed to login with azure credentials", e);
         }
         AzureSubscription subscription;
         try {
            subscription = client.getSubscription(token, request.getSubscriptionId(),
-               TaskUtils.Azure.DEFAULT_TIMEOUT_MS, TaskUtils.Azure.DEFAULT_RETRIES);
+               TaskUtils.AZURE_DEFAULT_TIMEOUT_MS, TaskUtils.AZURE_DEFAULT_RETRIES);
         } catch (AzureHttpException e) {
             String message = String.format("Failed to get azure subscription %s", request.getSubscriptionId());
             throw new InventoryRuntimeException(message, e);

@@ -207,7 +207,7 @@ class AzureCredentialGrpcItTest extends GrpcTestBase {
                 .newAttachHeadersInterceptor(createAuthHeader(authHeader)))
             .createCredentials(createDTO));
         Status status = StatusProto.fromThrowable(exception);
-        assertThat(status.getCode()).isEqualTo(Code.INVALID_ARGUMENT_VALUE);
+        assertThat(status.getCode()).isEqualTo(Code.INTERNAL_VALUE);
         assertEquals(0, testGrpcService.getTimesCalled().intValue());
         verify(spyInterceptor).verifyAccessToken(authHeader);
         verify(spyInterceptor).interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));

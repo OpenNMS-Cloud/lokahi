@@ -37,7 +37,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.opennms.horizon.inventory.dto.AzureCredentialCreateDTO;
 import org.opennms.horizon.inventory.dto.AzureCredentialDTO;
 import org.opennms.horizon.inventory.dto.AzureCredentialServiceGrpc;
-import org.opennms.horizon.inventory.exception.InventoryRuntimeException;
 import org.opennms.horizon.inventory.service.AzureCredentialService;
 import org.springframework.stereotype.Component;
 
@@ -62,10 +61,10 @@ public class AzureCredentialGrpcService extends AzureCredentialServiceGrpc.Azure
                 responseObserver.onNext(credentials);
                 responseObserver.onCompleted();
 
-            } catch (InventoryRuntimeException e) {
+            } catch (Exception e) {
 
                 Status status = Status.newBuilder()
-                    .setCode(Code.INVALID_ARGUMENT_VALUE)
+                    .setCode(Code.INTERNAL_VALUE)
                     .setMessage(e.getMessage())
                     .build();
                 responseObserver.onError(StatusProto.toStatusRuntimeException(status));

@@ -45,3 +45,19 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           sonar-token: ${{ secrets.SONAR_TOKEN }}
 
+      - name: dockerhub-publish-test
+        run: |
+  
+          # This and the following steps are put here rather than put into an
+          # action because it is only ever called from this workflow.
+  
+          # Login to dockerhub. The session doesn't seem to carry across steps,
+          # re-test to confirm.
+          #docker login -u ${{ secrets.DOCKERHUB_LOGIN }} -p ${{ secrets.DOCKERHUB_PASS }}
+          echo ${{ secrets.DOCKERHUB_PASS }} | docker login -u ${{ secrets.DOCKERHUB_LOGIN }} --password-stdin
+
+          # Test
+          docker tag opennms/horizon-stream-minion:local opennms/horizon-stream-minion:test-20230117-1151
+          docker push opennms/horizon-stream-minion:test-20230117-1151
+
+        shell: bash

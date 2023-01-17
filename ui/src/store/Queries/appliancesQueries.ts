@@ -58,12 +58,11 @@ export const useAppliancesQueries = defineStore('appliancesQueries', {
     const addMetricsToMinions = (allMinions: Minion[]) => {
       allMinions.forEach(async (minion) => {
         const { data, isFetching } = await fetchMinionMetrics(minion.systemId as string)
-        const result = data.value?.minionLatency?.data?.result
+        const result = data.value?.minionLatency?.data?.result?.[0]?.values?.[0]
 
         if (!isFetching.value) {
-          if (result?.length) {
-            const [{ value }] = data.value?.minionLatency?.data?.result as TsResult[]
-            const [, val] = value as number[]
+          if (result) {
+            const [, val] = result as number[]
 
             tableMinions.value.push({
               ...minion,
@@ -113,7 +112,7 @@ export const useAppliancesQueries = defineStore('appliancesQueries', {
           node.id as number,
           node.ipInterfaces?.[0].ipAddress as string
         ) // currently only 1 interface per node
-        const latencyResult = data.value?.nodeLatency?.data?.result
+        const latencyResult = data.value?.nodeLatency?.data?.result?.[0]?.values?.[0]
         const status = data.value?.nodeStatus?.status
 
         if (!isFetching.value) {
@@ -122,9 +121,8 @@ export const useAppliancesQueries = defineStore('appliancesQueries', {
             status
           }
 
-          if (latencyResult?.length) {
-            const [{ value }] = latencyResult as TsResult[]
-            const [, val] = value as number[]
+          if (latencyResult) {
+            const [, val] = latencyResult as number[]
 
             tableNode = {
               ...tableNode,

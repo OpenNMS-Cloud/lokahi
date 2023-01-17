@@ -1,12 +1,3 @@
-fragment ChartParts on TimeSeriesQueryResult {
-  data {
-    result {
-      metric
-      values
-    }
-  }
-}
-
 fragment ChartTimeSeriesMetric on Query {
   metric: metric(
     name: $name
@@ -18,6 +9,6 @@ fragment ChartTimeSeriesMetric on Query {
     timeRange: $timeRange
     timeRangeUnit: $timeRangeUnit
   ) {
-    ...ChartParts
+    ...MetricParts
   }
 }

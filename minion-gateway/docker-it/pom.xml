@@ -14,8 +14,7 @@
     <description>
         Docker build-time Integration Tests for the OpenNMS Minion Gateway.
 
-        The docker-maven-plugin is used to spin up containers with the core project and exercise
-        the public endpoints.
+        Test Containers are used to spin up containers and exercise the public endpoints.
     </description>
 
     <dependencies>

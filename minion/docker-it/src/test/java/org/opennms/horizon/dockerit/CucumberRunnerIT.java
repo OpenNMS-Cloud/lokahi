@@ -30,7 +30,9 @@ package org.opennms.horizon.dockerit;
 
 import io.cucumber.junit.Cucumber;
 import io.cucumber.junit.CucumberOptions;
+import org.junit.ClassRule;
 import org.junit.runner.RunWith;
+import org.opennms.horizon.dockerit.testcontainers.TestContainerRunnerClassRule;
 
 /**
  * IT runner that kicks off Cucumber.
@@ -45,4 +47,7 @@ import org.junit.runner.RunWith;
     plugin = {"json:target/cucumber-report.json", "html:target/cucumber.html", "pretty"}
     )
 public class CucumberRunnerIT {
+    // ClassRule must be public
+    @ClassRule
+    public static TestContainerRunnerClassRule testContainerRunnerClassRule = new TestContainerRunnerClassRule();
 }

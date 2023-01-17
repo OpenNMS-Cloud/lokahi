@@ -36,12 +36,14 @@ export default defineConfig(({ mode }) => {
     test: {
       globals: true,
       environment: 'happy-dom',
+      
       deps: {
         inline: true
       },
       coverage: {
         reporter: ['lcov', 'html']
-      }
+      },
+      threads: false
     }
   }
 })

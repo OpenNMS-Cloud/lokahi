@@ -39,8 +39,10 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import io.grpc.ManagedChannel;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -65,22 +67,27 @@ public class LocationGrpcTest extends AbstractGrpcUnitTest {
     private MonitoringLocationServiceGrpc.MonitoringLocationServiceBlockingStub stub;
     private MonitoringLocationService mockLocationService;
     private MonitoringLocationDTO location1, location2;
+    private ManagedChannel channel;
 
     @BeforeEach
     public void prepareTest() throws VerificationException, IOException {
         mockLocationService = mock(MonitoringLocationService.class);
         MonitoringLocationGrpcService grpcService = new MonitoringLocationGrpcService(mockLocationService, tenantLookup);
         startServer(grpcService);
-        stub = MonitoringLocationServiceGrpc.newBlockingStub(grpCleanup.register(InProcessChannelBuilder.forName(serverName).directExecutor().build()));
+        channel = InProcessChannelBuilder.forName(serverName).directExecutor().build();
+        stub = MonitoringLocationServiceGrpc.newBlockingStub(channel);
         location1 = MonitoringLocationDTO.newBuilder().build();
         location2 = MonitoringLocationDTO.newBuilder().build();
     }
 
     @AfterEach
-    public void afterTest() {
+    public void afterTest() throws InterruptedException {
         verifyNoMoreInteractions(mockLocationService);
         verifyNoMoreInteractions(spyInterceptor);
         reset(mockLocationService, spyInterceptor);
+        channel.shutdownNow();
+        channel.awaitTermination(10, TimeUnit.SECONDS);
+        stopServer();
     }
 
 

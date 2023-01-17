@@ -28,28 +28,97 @@
 package org.opennms.horizon.inventory.service;
 
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.opennms.horizon.inventory.dto.AzureCredentialCreateDTO;
 import org.opennms.horizon.inventory.dto.AzureCredentialDTO;
-import org.opennms.horizon.inventory.dto.AzureCredentialDTO;
+import org.opennms.horizon.inventory.exception.InventoryRuntimeException;
 import org.opennms.horizon.inventory.mapper.AzureCredentialMapper;
 import org.opennms.horizon.inventory.model.AzureCredential;
+import org.opennms.horizon.inventory.model.MonitoringLocation;
 import org.opennms.horizon.inventory.repository.AzureCredentialRepository;
+import org.opennms.horizon.inventory.repository.MonitoringLocationRepository;
+import org.opennms.horizon.inventory.service.taskset.ScannerTaskSetService;
+import org.opennms.horizon.inventory.service.taskset.TaskUtils;
+import org.opennms.horizon.shared.azure.http.AzureHttpClient;
+import org.opennms.horizon.shared.azure.http.AzureHttpException;
+import org.opennms.horizon.shared.azure.http.dto.login.AzureOAuthToken;
+import org.opennms.horizon.shared.azure.http.dto.subscription.AzureSubscription;
+import org.opennms.horizon.shared.constants.GrpcConstants;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
 public class AzureCredentialService {
+    private static final String SUB_ENABLED_STATE = "Enabled";
+
+    private final AzureHttpClient client;
     private final AzureCredentialMapper mapper;
     private final AzureCredentialRepository repository;
+    private final MonitoringLocationRepository locationRepository;
+    private final ConfigUpdateService configUpdateService;
+    private final ScannerTaskSetService scannerTaskSetService;
 
     public AzureCredentialDTO createCredentials(String tenantId, AzureCredentialCreateDTO request) {
+        validateCredentials(request);
+
+        MonitoringLocation monitoringLocation = getMonitoringLocation(tenantId, request);
+
         AzureCredential credential = mapper.dtoToModel(request);
         credential.setTenantId(tenantId);
         credential.setCreateTime(LocalDateTime.now());
+        credential.setMonitoringLocation(monitoringLocation);
         credential = repository.save(credential);
 
+        // Asynchronously send task sets to Minion
+        scannerTaskSetService.sendAzureScannerTaskAsync(credential);
+
         return mapper.modelToDto(credential);
+    }
+
+    private void validateCredentials(AzureCredentialCreateDTO request) {
+        AzureOAuthToken token;
+        try {
+            token = client.login(request.getDirectoryId(), request.getClientId(),
+                request.getClientSecret(), TaskUtils.AZURE_DEFAULT_TIMEOUT_MS, TaskUtils.AZURE_DEFAULT_RETRIES);
+        } catch (AzureHttpException e) {
+            throw new InventoryRuntimeException("Failed to login with azure credentials", e);
+        }
+        AzureSubscription subscription;
+        try {
+           subscription = client.getSubscription(token, request.getSubscriptionId(),
+               TaskUtils.AZURE_DEFAULT_TIMEOUT_MS, TaskUtils.AZURE_DEFAULT_RETRIES);
+        } catch (AzureHttpException e) {
+            String message = String.format("Failed to get azure subscription %s", request.getSubscriptionId());
+            throw new InventoryRuntimeException(message, e);
+        }
+        if (!subscription.getState().equalsIgnoreCase(SUB_ENABLED_STATE)) {
+            String message = String.format("Subscription %s is not enabled", request.getSubscriptionId());
+            throw new InventoryRuntimeException(message);
+        }
+    }
+
+    private MonitoringLocation getMonitoringLocation(String tenantId, AzureCredentialCreateDTO request) {
+        String location = StringUtils.isEmpty(request.getLocation())
+            ? GrpcConstants.DEFAULT_LOCATION: request.getLocation();
+
+        Optional<MonitoringLocation> locationOp = locationRepository
+            .findByLocationAndTenantId(location, tenantId);
+
+        if (locationOp.isPresent()) {
+            return locationOp.get();
+        }
+
+        MonitoringLocation monitoringLocation = new MonitoringLocation();
+        monitoringLocation.setLocation(location);
+        monitoringLocation.setTenantId(tenantId);
+        monitoringLocation = locationRepository.save(monitoringLocation);
+
+        // Send config updates asynchronously to Minion
+        configUpdateService.sendConfigUpdate(tenantId, location);
+
+        return monitoringLocation;
     }
 }

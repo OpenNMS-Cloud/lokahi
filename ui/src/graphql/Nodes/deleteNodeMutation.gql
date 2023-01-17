@@ -1,0 +1,3 @@
+mutation DeleteNode ($id: Long!) {
+  deleteNode (id: $id)
+}

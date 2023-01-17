@@ -88,6 +88,11 @@
         </dependency>
         <dependency>
             <groupId>org.opennms.horizon.shared</groupId>
+            <artifactId>azure-http</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.opennms.horizon.shared</groupId>
             <artifactId>protobuf</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -271,6 +276,12 @@
             <groupId>com.jayway.awaitility</groupId>
             <artifactId>awaitility</artifactId>
             <version>1.7.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.github.tomakehurst</groupId>
+            <artifactId>wiremock</artifactId>
+            <version>${wiremock.version}</version>
             <scope>test</scope>
         </dependency>
 

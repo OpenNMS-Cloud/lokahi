@@ -29,6 +29,12 @@
             <column name="monitoring_location_id" type="BIGINT">
                 <constraints nullable="false"/>
             </column>
+            <column name="system_objectid" type="text" />
+            <column name="system_name" type="text" />
+            <column name="system_desc" type="text" />
+            <column name="system_location" type="text" />
+            <column name="system_contact" type="text" />
+
         </createTable>
 
         <addPrimaryKey tableName="node" columnNames="id" constraintName="pk_node_id"/>

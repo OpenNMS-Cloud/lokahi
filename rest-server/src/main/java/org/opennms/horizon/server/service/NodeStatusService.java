@@ -91,7 +91,19 @@ public class NodeStatusService {
         TSResult tsResult = tsResults.get(0);
         List<List<Double>> values = tsResult.getValues();
 
-        return new NodeStatus(id, !isEmpty(values));
+        if (isEmpty(values)) {
+            return new NodeStatus(id, false);
+        }
+
+        List<Double> doubles = values.get(values.size() - 1);
+        if (doubles.size() != 2) {
+            return new NodeStatus(id, false);
+        }
+
+        Double responseTime = doubles.get(1);
+        boolean status = responseTime > 0d;
+
+        return new NodeStatus(id, status);
     }
 
     private Mono<TimeSeriesQueryResult> getStatusMetric(long id, String ipAddress, String monitorType, ResolutionEnvironment env) {

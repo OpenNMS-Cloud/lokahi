@@ -29,6 +29,7 @@
 package org.opennms.horizon.inventory.mapper;
 
 import org.mapstruct.CollectionMappingStrategy;
+import org.mapstruct.Condition;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.opennms.horizon.inventory.dto.NodeDTO;
@@ -45,4 +46,10 @@ public interface NodeMapper extends DateTimeMapper {
 
     @Mapping(source = "ipInterfaces", target = "ipInterfacesList")
     NodeDTO modelToDTO(Node model);
+
+    //need for string value check
+    @Condition
+    default boolean isNotEmpty(String value) {
+        return value != null && !value.isEmpty();
+    }
 }

@@ -28,6 +28,7 @@
 package org.opennms.horizon.inventory.mapper;
 
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.opennms.horizon.inventory.dto.AzureCredentialCreateDTO;
 import org.opennms.horizon.inventory.dto.AzureCredentialDTO;
 import org.opennms.horizon.inventory.model.AzureCredential;
@@ -36,5 +37,6 @@ import org.opennms.horizon.inventory.model.AzureCredential;
 public interface AzureCredentialMapper extends DateTimeMapper {
     AzureCredential dtoToModel(AzureCredentialCreateDTO dto);
 
+    @Mapping(source = "monitoringLocation.location", target = "location")
     AzureCredentialDTO modelToDto(AzureCredential model);
 }

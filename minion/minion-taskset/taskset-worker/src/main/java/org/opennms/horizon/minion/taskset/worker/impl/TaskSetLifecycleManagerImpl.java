@@ -153,6 +153,7 @@ public class TaskSetLifecycleManagerImpl implements TaskSetLifecycleManager {
 
     private boolean isSingletonTask(TaskDefinition taskDefinition) {
         switch (taskDefinition.getType()) {
+            case SCANNER:
             case DETECTOR:
             case MONITOR:
             case CONNECTOR:

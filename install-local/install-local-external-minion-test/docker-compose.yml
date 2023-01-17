@@ -2,7 +2,7 @@ version: '3.5'
 
 services:
   minion-localnet:
-    image: docker.io/opennms/horizon-stream-minion:test.2022-12-13.22-17-26
+    image: docker.io/opennms/horizon-stream-minion:latest
     extra_hosts:
       minion.onmshs: 10.0.0.55
     environment:

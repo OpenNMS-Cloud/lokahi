@@ -49,4 +49,16 @@ public class Node {
 
     @OneToMany(mappedBy = "node", orphanRemoval = true, cascade = CascadeType.ALL)
     private List<IpInterface> ipInterfaces = new ArrayList<>();
+
+    @Column(name = "system_objectid")
+    private String objectId;
+    @Column(name = "system_name")
+    private String systemName;
+    @Column(name = "system_desc")
+    private String systemDesc;
+    @Column(name = "system_location")
+    private String systemLocation;
+    @Column(name = "system_contact")
+    private String systemContact;
+
 }

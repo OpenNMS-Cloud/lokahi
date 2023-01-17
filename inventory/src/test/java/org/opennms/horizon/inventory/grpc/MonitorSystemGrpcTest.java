@@ -38,7 +38,9 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import java.io.IOException;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
+import io.grpc.ManagedChannel;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -59,18 +61,23 @@ public class MonitorSystemGrpcTest extends AbstractGrpcUnitTest {
     private MonitoringSystemService mockService;
     private MonitoringSystemServiceGrpc.MonitoringSystemServiceBlockingStub stub;
     private final String systemId = "test-system";
+    private ManagedChannel channel;
 
     @BeforeEach
     void beforeTest() throws IOException, VerificationException {
         mockService = mock(MonitoringSystemService.class);
         MonitoringSystemGrpcService grpcService = new MonitoringSystemGrpcService(mockService, tenantLookup);
         startServer(grpcService);
-        stub = MonitoringSystemServiceGrpc.newBlockingStub(grpCleanup.register(InProcessChannelBuilder.forName(serverName).directExecutor().build()));
+        channel = InProcessChannelBuilder.forName(serverName).directExecutor().build();
+        stub = MonitoringSystemServiceGrpc.newBlockingStub(channel);
     }
 
     @AfterEach
-    void afterTest() {
+    void afterTest() throws InterruptedException {
         verifyNoMoreInteractions(mockService);
+        channel.shutdownNow();
+        channel.awaitTermination(10, TimeUnit.SECONDS);
+        stopServer();
     }
 
     @Test

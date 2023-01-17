@@ -30,6 +30,9 @@ package org.opennms.horizon.inventory.service.taskset;
 
 import com.google.protobuf.Any;
 import lombok.RequiredArgsConstructor;
+import org.opennms.azure.contract.AzureMonitorRequest;
+import org.opennms.horizon.azure.api.AzureScanItem;
+import org.opennms.horizon.inventory.model.AzureCredential;
 import org.opennms.horizon.inventory.model.IpInterface;
 import org.opennms.icmp.contract.IcmpMonitorRequest;
 import org.opennms.snmp.contract.SnmpMonitorRequest;
@@ -43,6 +46,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
 
+import static org.opennms.horizon.inventory.service.taskset.TaskUtils.identityForAzureTask;
 import static org.opennms.horizon.inventory.service.taskset.TaskUtils.identityForIpTask;
 
 @Component
@@ -62,6 +66,14 @@ public class MonitorTaskSetService {
         }
     }
 
+    public void sendAzureMonitorTasks(AzureCredential credential, AzureScanItem item, String ipAddress, long nodeId) {
+        String tenantId = credential.getTenantId();
+        String location = credential.getMonitoringLocation().getLocation();
+
+        TaskDefinition task = addAzureMonitorTask(credential, item, ipAddress, nodeId);
+        taskSetPublisher.publishNewTasks(tenantId, location, Arrays.asList(task));
+    }
+
     private TaskDefinition addMonitorTask(MonitorType monitorType, IpInterface ipInterface, long nodeId) {
 
         String monitorTypeValue = monitorType.getValueDescriptor().getName();
@@ -77,11 +89,11 @@ public class MonitorTaskSetService {
                 configuration =
                     Any.pack(IcmpMonitorRequest.newBuilder()
                         .setHost(ipAddress)
-                        .setTimeout(TaskUtils.Icmp.DEFAULT_TIMEOUT)
-                        .setDscp(TaskUtils.Icmp.DEFAULT_DSCP)
-                        .setAllowFragmentation(TaskUtils.Icmp.DEFAULT_ALLOW_FRAGMENTATION)
-                        .setPacketSize(TaskUtils.Icmp.DEFAULT_PACKET_SIZE)
-                        .setRetries(TaskUtils.Icmp.DEFAULT_RETRIES)
+                        .setTimeout(TaskUtils.ICMP_DEFAULT_TIMEOUT_MS)
+                        .setDscp(TaskUtils.ICMP_DEFAULT_DSCP)
+                        .setAllowFragmentation(TaskUtils.ICMP_DEFAULT_ALLOW_FRAGMENTATION)
+                        .setPacketSize(TaskUtils.ICMP_DEFAULT_PACKET_SIZE)
+                        .setRetries(TaskUtils.ICMP_DEFAULT_RETRIES)
                         .build());
 
                 break;
@@ -90,8 +102,8 @@ public class MonitorTaskSetService {
                 configuration =
                     Any.pack(SnmpMonitorRequest.newBuilder()
                         .setHost(ipAddress)
-                        .setTimeout(TaskUtils.Snmp.DEFAULT_TIMEOUT)
-                        .setRetries(TaskUtils.Snmp.DEFAULT_RETRIES)
+                        .setTimeout(TaskUtils.SNMP_DEFAULT_TIMEOUT_MS)
+                        .setRetries(TaskUtils.SNMP_DEFAULT_RETRIES)
                         .build());
                 break;
             }
@@ -118,6 +130,33 @@ public class MonitorTaskSetService {
             taskDefinition = builder.build();
         }
         return taskDefinition;
+    }
+
+    private TaskDefinition addAzureMonitorTask(AzureCredential credential, AzureScanItem scanItem, String ipAddress, long nodeId) {
+
+        Any configuration =
+            Any.pack(AzureMonitorRequest.newBuilder()
+                .setResource(scanItem.getName())
+                .setResourceGroup(scanItem.getResourceGroup())
+                .setHost(ipAddress) // dummy address to allow metrics to be added
+                .setClientId(credential.getClientId())
+                .setClientSecret(credential.getClientSecret())
+                .setSubscriptionId(credential.getSubscriptionId())
+                .setDirectoryId(credential.getDirectoryId())
+                .setTimeoutMs(TaskUtils.AZURE_DEFAULT_TIMEOUT_MS)
+                .setRetries(TaskUtils.AZURE_DEFAULT_RETRIES)
+                .build());
+
+        String name = String.join("-", "azure", "monitor", scanItem.getId());
+        String taskId = identityForAzureTask(name);
+        return TaskDefinition.newBuilder()
+            .setType(TaskType.MONITOR)
+            .setPluginName("AZUREMonitor")
+            .setNodeId(nodeId)
+            .setId(taskId)
+            .setConfiguration(configuration)
+            .setSchedule(TaskUtils.AZURE_MONITOR_SCHEDULE)
+            .build();
     }
 
 }

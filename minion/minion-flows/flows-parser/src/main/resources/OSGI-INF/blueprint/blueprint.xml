@@ -1,6 +1,7 @@
 <blueprint
     xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.3.0"
     xsi:schemaLocation="
                 http://www.osgi.org/xmlns/blueprint/v1.0.0 https://osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd">
 
@@ -18,16 +19,31 @@
     <bean id="telemetryRegistry" class="org.opennms.horizon.minion.flows.parser.TelemetryRegistryImpl" >
         <argument ref="netflow9UdpParserFactory" />
         <argument ref="messageDispatcherFactory" />
-        <argument ref="udpListenerModule"/>
+        <argument ref="flowSinkModule"/>
     </bean>
-    <bean id="udpListenerModule" class="org.opennms.horizon.minion.flows.parser.UdpListenerModule" />
+    <bean id="flowSinkModule" class="org.opennms.horizon.minion.flows.parser.FlowSinkModule" >
+        <argument ref="identity" />
+    </bean>
+    <bean id="UnmarshalException" class="org.opennms.horizon.minion.flows.parser.UnmarshalException" />
+    <bean id="identity" class="org.opennms.horizon.minion.grpc.MinionIpcIdentity" >
+        <argument value="$[id]" />
+        <argument value="$[location]" />
+    </bean>
 
+    <cm:property-placeholder id="identityProperties" persistent-id="org.horizon.identity" update-strategy="reload"
+                             placeholder-prefix="$[" placeholder-suffix="]">
+        <cm:default-properties>
+            <cm:property name="id" value="UNKNOWN"/>
+            <cm:property name="location" value="Default"/>
+        </cm:default-properties>
+    </cm:property-placeholder>
 
     <!-- Netflow 9 UDP Parser Factory -->
     <bean id="netflow9UdpParserFactory" class="org.opennms.horizon.minion.flows.parser.factory.Netflow9UdpParserFactory">
         <argument ref="messageDispatcherFactory" />
+        <argument ref="identity" />
         <argument ref="dnsResolver" />
-        <argument ref="udpListenerModule" />
+        <argument ref="flowSinkModule" />
     </bean>
     <service ref="netflow9UdpParserFactory" interface="org.opennms.horizon.minion.flows.parser.factory.ParserFactory">
     </service>

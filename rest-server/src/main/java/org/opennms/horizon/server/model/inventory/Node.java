@@ -42,4 +42,9 @@ public class Node {
     private long createTime;
     private long monitoringLocationId;
     private List<IpInterface> ipInterfaces;
+    private String objectId;
+    private String systemName;
+    private String systemDesc;
+    private String systemLocation;
+    private String systemContact;
 }

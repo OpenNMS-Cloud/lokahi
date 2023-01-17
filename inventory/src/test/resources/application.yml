@@ -37,3 +37,10 @@ kafka:
 keycloak:
   realm: opennms
   base-url: http://onms-keycloak:8080/auth
+
+inventory:
+  azure:
+    login-url: http://localhost:12345
+    management-url: http://localhost:12345
+    api-version: 2021-04-01
+    metrics-api-version: 2018-01-01

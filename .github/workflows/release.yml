@@ -194,8 +194,15 @@ jobs:
           docker tag opennms/horizon-stream-minion:local opennms/horizon-stream-minion:${{ env.RELEASE_TAG }}
           docker tag opennms/horizon-stream-minion:local opennms/horizon-stream-minion:latest
 
-          docker push opennms/horizon-stream-minion:${{ env.RELEASE_TAG }}
-          docker push opennms/horizon-stream-minion:latest
+          docker buildx create --use --driver docker-container --name maven
+          
+          # Not sure how to push this without build for multi-arch.
+          docker buildx build --push \
+            --tag opennms/horizon-stream-minion:latest \
+            --tag opennms/horizon-stream-minion:${{ env.RELEASE_TAG }} \
+            docker-assembly/target/docker/opennms/horizon-stream-minion/local/build/ \
+            -f docker-assembly/src/main/docker/app/Dockerfile \
+            --platform linux/amd64,linux/arm64,linux/arm/v7
 
       - name: publish-image-minion-gateway
         run: |

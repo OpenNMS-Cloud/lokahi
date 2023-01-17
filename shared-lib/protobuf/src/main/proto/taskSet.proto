@@ -31,6 +31,7 @@ import "google/protobuf/any.proto";
 import "icmp.proto";
 import "snmp.proto";
 import "traps-config.proto";
+import "azure.proto";
 
 package opennms.taskset;
 option java_multiple_files = true;
@@ -38,11 +39,17 @@ option java_package = "org.opennms.taskset.contract";
 
 enum TaskType {
       UNDEFINED = 0; // a fallback?
-      DETECTOR = 1;
-      MONITOR = 2;
-      LISTENER = 3;
-      CONNECTOR = 4;
-      COLLECTOR = 5;
+      SCANNER = 1;
+      DETECTOR = 2;
+      MONITOR = 3;
+      LISTENER = 4;
+      CONNECTOR = 5;
+      COLLECTOR = 6;
+}
+
+
+enum ScanType {
+  AZURE = 0;
 }
 
 enum MonitorType {
@@ -74,14 +81,21 @@ message TaskResult {
   string systemId = 3;
 
   oneof result {
-    MonitorResponse monitor_response = 4;
-    DetectorResponse detector_response = 5;
-    CollectorResponse collector_response = 6;
+    ScannerResponse scanner_response = 4;
+    MonitorResponse monitor_response = 5;
+    DetectorResponse detector_response = 6;
+    CollectorResponse collector_response = 7;
   }
 }
 
 message TaskSetResults {
   repeated TaskResult results = 1;
+}
+
+message ScannerResponse {
+  // results varies for each scanner.
+  google.protobuf.Any result = 1;
+  string reason = 2;
 }
 
 message MonitorResponse {

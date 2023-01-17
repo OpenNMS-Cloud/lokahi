@@ -6,7 +6,7 @@
 
     <changeSet author="jhutc" id="trap-config-data">
         <insert tableName="monitoring_location">
-            <column name="location" value="unknown_location"/>
+            <column name="location" value="Default"/>
             <column name="tenant_id" value="00000000-0000-0005-0000-000000000005"/>
         </insert>
     </changeSet>

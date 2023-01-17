@@ -11,7 +11,7 @@
       </template>
   </FeatherDialog>
 </template>
-
+// TODO: need to fix the error when modal closed: Uncaught TypeError: Cannot read properties of null (reading 'contains')
 <script setup lang="ts">
 const props = defineProps({
   visible: {
@@ -47,11 +47,11 @@ watchEffect(() => {
   position: relative;
 }
 </style>
-
 <style lang="scss">
 // TODO: need to find a way to scope the style below. ':deep' selector does not seem to work
 @use "@featherds/styles/themes/variables";
-.modal-delete-minion {
+
+.modal-delete {
   .dialog-body {
     display: flex;
     flex-flow: column;

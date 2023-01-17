@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<features name="minion-plugin-azure-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.6.0">
+
+    <feature name="azure-plugins" version="${project.version}">
+        <feature>plugins-api</feature>
+        <bundle>mvn:org.opennms.horizon.minion/azure-plugin/${project.version}</bundle>
+        <bundle>mvn:org.opennms.horizon.shared/horizon-common-logging/${project.version}</bundle>
+        <bundle>mvn:org.opennms.horizon.shared/protobuf/${project.version}</bundle>
+        <bundle>mvn:org.opennms.horizon.shared/azure-http/${project.version}</bundle>
+        <bundle>mvn:org.opennms.horizon.shared.azure/proto/${project.version}</bundle>
+    </feature>
+
+</features>

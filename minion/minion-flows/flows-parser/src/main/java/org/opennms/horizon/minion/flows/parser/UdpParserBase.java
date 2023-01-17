@@ -39,6 +39,8 @@ import org.opennms.horizon.minion.flows.parser.factory.DnsResolver;
 import org.opennms.horizon.minion.flows.parser.ie.RecordProvider;
 import org.opennms.horizon.minion.flows.parser.session.Session;
 import org.opennms.horizon.minion.flows.parser.session.UdpSessionManager;
+import org.opennms.horizon.grpc.telemetry.contract.TelemetryMessage;
+import org.opennms.horizon.shared.ipc.rpc.IpcIdentity;
 import org.opennms.horizon.shared.ipc.sink.api.AsyncDispatcher;
 
 import com.codahale.metrics.Counter;
@@ -48,7 +50,6 @@ import com.codahale.metrics.MetricRegistry;
 
 import io.netty.buffer.ByteBuf;
 import org.opennms.horizon.minion.flows.listeners.UdpParser;
-import org.opennms.horizon.minion.flows.listeners.factory.UdpListenerMessage;
 
 public abstract class UdpParserBase extends ParserBase implements UdpParser {
     public final static long HOUSEKEEPING_INTERVAL = 60000;
@@ -63,10 +64,11 @@ public abstract class UdpParserBase extends ParserBase implements UdpParser {
 
     public UdpParserBase(final Protocol protocol,
                          final String name,
-                         final AsyncDispatcher<UdpListenerMessage> dispatcher,
+                         final AsyncDispatcher<TelemetryMessage> dispatcher,
+                         final IpcIdentity identity,
                          final DnsResolver dnsResolver,
                          final MetricRegistry metricRegistry) {
-        super(protocol, name, dispatcher, dnsResolver, metricRegistry);
+        super(protocol, name, dispatcher, identity, dnsResolver, metricRegistry);
 
         this.packetsReceived = metricRegistry.meter(MetricRegistry.name("parsers",  name, "packetsReceived"));
         this.parserErrors = metricRegistry.counter(MetricRegistry.name("parsers",  name, "parserErrors"));

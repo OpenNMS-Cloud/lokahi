@@ -1,5 +1,6 @@
 package org.opennms.horizon.minion.taskset.worker.impl;
 
+import org.opennms.horizon.minion.plugin.api.registries.ScannerRegistry;
 import org.opennms.horizon.minion.plugin.api.registries.CollectorRegistry;
 import org.opennms.horizon.minion.plugin.api.registries.DetectorRegistry;
 import org.opennms.horizon.minion.plugin.api.registries.ListenerFactoryRegistry;
@@ -24,6 +25,7 @@ public class TaskExecutorLocalServiceFactoryImpl implements TaskExecutorLocalSer
     private final DetectorRegistry detectorRegistry;
     private final MonitorRegistry monitorRegistry;
     private final CollectorRegistry collectorRegistry;
+    private final ScannerRegistry scannerRegistry;
 
 //========================================
 // Constructor
@@ -35,7 +37,8 @@ public class TaskExecutorLocalServiceFactoryImpl implements TaskExecutorLocalSer
         ListenerFactoryRegistry listenerFactoryRegistry,
         DetectorRegistry detectorRegistry,
         MonitorRegistry monitorRegistry,
-        CollectorRegistry collectorRegistry) {
+        CollectorRegistry collectorRegistry,
+        ScannerRegistry scannerRegistry) {
 
         this.scheduler = scheduler;
         this.resultProcessor = resultProcessor;
@@ -43,6 +46,7 @@ public class TaskExecutorLocalServiceFactoryImpl implements TaskExecutorLocalSer
         this.detectorRegistry = detectorRegistry;
         this.monitorRegistry = monitorRegistry;
         this.collectorRegistry = collectorRegistry;
+        this.scannerRegistry = scannerRegistry;
     }
 
 //========================================
@@ -51,7 +55,11 @@ public class TaskExecutorLocalServiceFactoryImpl implements TaskExecutorLocalSer
 
     @Override
     public TaskExecutorLocalService create(TaskDefinition taskDefinition) {
+
         switch (taskDefinition.getType()) {
+            case SCANNER:
+                return new TaskExecutorLocalScannerServiceImpl(taskDefinition, scannerRegistry, resultProcessor);
+
             case DETECTOR:
                 return new TaskExecutorLocalDetectorServiceImpl(taskDefinition, detectorRegistry, resultProcessor);
 

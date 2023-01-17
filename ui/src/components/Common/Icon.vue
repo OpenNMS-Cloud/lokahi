@@ -5,9 +5,10 @@
   >
     <FeatherIcon
       v-bind="icon.tooltip ? attrs : null" 
-      v-on="on" :icon="icon.image" 
+      v-on="on"
+      :icon="icon.image" 
       :title="icon.title" 
-      :viewBox="setViewBox(icon.image)" 
+      :viewBox="setViewBox(icon.image)"
     />
   </FeatherTooltip>
 </template>

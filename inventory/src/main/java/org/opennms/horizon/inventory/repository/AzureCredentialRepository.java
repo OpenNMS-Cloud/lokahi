@@ -33,4 +33,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface AzureCredentialRepository extends JpaRepository<AzureCredential, Long> {
+
 }

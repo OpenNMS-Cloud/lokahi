@@ -13,10 +13,6 @@
     <artifactId>datachoices</artifactId>
     <name>OpenNMS Horizon :: DataChoices</name>
     <description>datachoices</description>
-    <properties>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
-    </properties>
     <dependencyManagement>
         <dependencies>
             <dependency>

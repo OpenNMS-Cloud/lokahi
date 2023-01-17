@@ -42,6 +42,11 @@ message NodeDTO {
   int64 create_time = 4;
   int64 monitoring_location_id = 5;
   repeated opennms.inventory.IpInterfaceDTO ip_interfaces = 6;
+  string object_id = 7;
+  string system_name = 8;
+  string system_desc = 9;
+  string system_location = 10;
+  string system_contact = 11;
 }
 
 message NodeCreateDTO {

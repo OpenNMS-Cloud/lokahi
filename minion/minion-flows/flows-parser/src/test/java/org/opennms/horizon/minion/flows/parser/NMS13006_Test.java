@@ -28,20 +28,17 @@
 
 package org.opennms.horizon.minion.flows.parser;
 
-import static java.lang.String.format;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.opennms.horizon.minion.flows.listeners.utils.BufferUtils.slice;
 
 import java.net.InetAddress;
-import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 import org.junit.Assert;

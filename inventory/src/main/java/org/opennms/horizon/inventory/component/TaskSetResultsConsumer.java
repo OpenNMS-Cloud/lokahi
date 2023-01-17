@@ -33,8 +33,10 @@ import java.util.Optional;
 
 import org.opennms.horizon.inventory.exception.InventoryRuntimeException;
 import org.opennms.horizon.inventory.service.taskset.response.DetectorResponseService;
+import org.opennms.horizon.inventory.service.taskset.response.ScannerResponseService;
 import org.opennms.horizon.shared.constants.GrpcConstants;
 import org.opennms.taskset.contract.DetectorResponse;
+import org.opennms.taskset.contract.ScannerResponse;
 import org.opennms.taskset.contract.TaskResult;
 import org.opennms.taskset.contract.TaskSetResults;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -49,6 +51,7 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 @RequiredArgsConstructor
 public class TaskSetResultsConsumer {
+    private final ScannerResponseService scannerResponseService;
     private final DetectorResponseService detectorResponseService;
 
     @KafkaListener(topics = "${kafka.topics.task-set-results}", concurrency = "1")
@@ -61,7 +64,12 @@ public class TaskSetResultsConsumer {
 
                 String location = taskResult.getLocation();
                 log.info("Received taskset results from minion with tenant id: {}; location: {}", tenantId, location);
-                if (taskResult.hasDetectorResponse()) {
+                if (taskResult.hasScannerResponse()) {
+
+                    ScannerResponse response = taskResult.getScannerResponse();
+
+                    scannerResponseService.accept(tenantId, location, response);
+                } else if (taskResult.hasDetectorResponse()) {
 
                     DetectorResponse response = taskResult.getDetectorResponse();
 

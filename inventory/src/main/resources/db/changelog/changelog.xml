@@ -13,5 +13,6 @@
     <include file="db/changelog/hs-0.1.0/tables/monitoring-system.xml"/>
     <include file="db/changelog/hs-0.1.0/tables/snmp-interface.xml"/>
     <include file="db/changelog/hs-0.1.0/tables/azure-credential.xml"/>
+    <include file="db/changelog/hs-0.1.0/tables/azure-monitoring.xml"/>
 
 </databaseChangeLog>

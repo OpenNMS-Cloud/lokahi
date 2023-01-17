@@ -43,6 +43,7 @@ runs:
       if: ${{ inputs.enable-sonar-scan == 'false' }}
       run: |
 
+        #mvn verify -DskipTests -Ddocker.image=opennms/horizon-stream-minion:local -Ddocker.skipPush=true
         mvn verify -Ddocker.image=opennms/horizon-stream-minion:local -Ddocker.skipPush=true
 
       working-directory: minion

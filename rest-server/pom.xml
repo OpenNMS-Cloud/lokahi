@@ -21,7 +21,7 @@
     <version>0.1.0-SNAPSHOT</version>
 
 	<properties>
-		<java.version>11</java.version>
+		<java.version>17</java.version>
 		<graphql.spqr.version>0.0.6</graphql.spqr.version>
 	</properties>
     <dependencyManagement>

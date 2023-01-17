@@ -37,7 +37,9 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import java.io.IOException;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
+import io.grpc.ManagedChannel;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -65,6 +67,7 @@ public class NodeGrpcTest extends AbstractGrpcUnitTest {
     private NodeMapper mockNodeMapper;
     private DetectorTaskSetService mockTaskSetService;
     private NodeServiceGrpc.NodeServiceBlockingStub stub;
+    private ManagedChannel channel;
 
     @BeforeEach
     public void beforeTest() throws VerificationException, IOException {
@@ -74,12 +77,16 @@ public class NodeGrpcTest extends AbstractGrpcUnitTest {
         mockTaskSetService = mock(DetectorTaskSetService.class);
         NodeGrpcService grpcService = new NodeGrpcService(mockNodeService, mockIpInterfaceService, mockNodeMapper, tenantLookup, mockTaskSetService);
         startServer(grpcService);
-        stub = NodeServiceGrpc.newBlockingStub(grpCleanup.register(InProcessChannelBuilder.forName(serverName).directExecutor().build()));
+        channel = InProcessChannelBuilder.forName(serverName).directExecutor().build();
+        stub = NodeServiceGrpc.newBlockingStub(channel);
     }
 
     @AfterEach
-    public void afterTest() {
+    public void afterTest() throws InterruptedException {
         verifyNoMoreInteractions(mockNodeService);
+        channel.shutdownNow();
+        channel.awaitTermination(10, TimeUnit.SECONDS);
+        stopServer();
     }
 
     @Test

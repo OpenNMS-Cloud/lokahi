@@ -5,7 +5,7 @@
       <FeatherTab v-for="tab in tabs" :key="tab.label">{{ tab.label }}</FeatherTab>
     </template>
     <FeatherTabPanel>
-      <Filter v-if="tabMonitoredContent.length" />
+      <InventoryFilter v-if="tabMonitoredContent.length" />
       <InventoryMonitoredNodesTabContent v-if="tabMonitoredContent.length" :tabContent="tabMonitoredContent" />
     </FeatherTabPanel>
     <!-- <FeatherTabPanel>

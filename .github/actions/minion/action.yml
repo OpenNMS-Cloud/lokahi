@@ -53,6 +53,6 @@ runs:
 cd horizon-stream/
 
         docker images
+      shell: bash
 
       working-directory: minion
-      shell: bash

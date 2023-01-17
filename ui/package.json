@@ -10,7 +10,7 @@
     "test": "vitest run",
     "test:watch": "vitest watch",
     "test:coverage": "vitest --coverage",
-    "test:coverage:sonar": "vitest run --coverage",
+    "test:coverage:sonar": "vitest run --coverage --watch false",
     "lint": "eslint --ignore-path ./.gitignore --ext .ts,.vue .",
     "lint:fix": "eslint --ignore-path ./.gitignore --ext .ts,.vue . --fix",
     "format": "prettier --ignore-path ./.gitignore --write \"**/*.+(ts)\"",

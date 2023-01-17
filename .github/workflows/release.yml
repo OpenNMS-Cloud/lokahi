@@ -12,7 +12,8 @@ on:
 
 jobs:
   release:
-    runs-on: self-hosted
+    runs-on:
+      labels: ubuntu-latest-8-cores
     environment: docker-publish-account
     # Environment that contains the required secrets.
     steps:

@@ -10,6 +10,7 @@ jobs:
   build-and-test:
     runs-on: ubuntu-latest
 
+    environment: docker-publish-account
     steps:
       - uses: actions/checkout@v3
         with:

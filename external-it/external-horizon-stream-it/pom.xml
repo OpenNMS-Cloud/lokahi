@@ -27,7 +27,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
         <cucumber.version>7.1.0</cucumber.version>
-        <java.version>11</java.version>
+        <java.version>17</java.version>
         <junit.version>4.13.2</junit.version>
         <keycloak.version>17.0.0</keycloak.version>
         <rest-assured.version>4.3.3</rest-assured.version>

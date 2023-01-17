@@ -19,7 +19,7 @@
     </description>
 
     <properties>
-        <java.version>11</java.version>
+        <java.version>17</java.version>
         <docker.image.name>opennms/horizon-stream-mock-minion-gateway</docker.image.name>
         <docker.image.tag>local</docker.image.tag>
         <skipJib>false</skipJib>

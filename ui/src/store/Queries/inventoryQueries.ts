@@ -39,8 +39,10 @@ export const useInventoryQueries = defineStore('inventoryQueries', () => {
       cachePolicy: 'network-only' // always fetch and do not cache
     })
 
+  watch(nodesFetching, (_, fetched) => (fetched ? stopSpinner() : startSpinner()))
+
   watchEffect(() => {
-    nodesFetching.value ? startSpinner() : stopSpinner()
+    nodes.value = []
 
     const allNodes = nodesData.value?.findAllNodes
 
@@ -50,10 +52,11 @@ export const useInventoryQueries = defineStore('inventoryQueries', () => {
 
         if (data.value && !isFetching.value) {
           const nodeLatency = data.value.nodeLatency?.data?.result as TsResult[]
-          const [...values] = [...nodeLatency][0].values as number[][]
+          const latenciesValues = [...nodeLatency][0]?.values as number[][]
+          // get the last item of the list
+          const latencyValue = latenciesValues?.length ? latenciesValues[latenciesValues.length - 1][1] : undefined
 
           const status = data.value.nodeStatus?.status
-
           const { location: nodeLocation } = location as Location
           const [{ ipAddress }] = ipInterfaces as IpInterface[]
 
@@ -65,7 +68,7 @@ export const useInventoryQueries = defineStore('inventoryQueries', () => {
               {
                 type: 'latency',
                 label: 'Latency',
-                value: values[values.length - 1][1], // get the last item of the list
+                value: latencyValue,
                 status: ''
               },
               {

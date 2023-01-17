@@ -19,6 +19,7 @@ spring:
 grpc:
   server:
     port: 6565
+    deadline: 60000
   url:
     inventory: localhost:29065
 

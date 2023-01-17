@@ -65,10 +65,6 @@
                                 <descriptor>mvn:org.apache.camel.karaf/apache-camel/${camel.version}/xml/features</descriptor>
                                 <descriptor>file:${project.build.directory}/feature/feature.xml</descriptor>
                             </descriptors>
-                            <javase>11</javase>
-                            <framework>
-                                <feature>framework</feature>
-                            </framework>
                             <features>
                                 <feature>plugin*</feature>
                             </features>

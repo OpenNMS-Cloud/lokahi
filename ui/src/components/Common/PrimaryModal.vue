@@ -47,3 +47,21 @@ watchEffect(() => {
   position: relative;
 }
 </style>
+
+<style lang="scss">
+// TODO: need to find a way to scope the style below. ':deep' selector does not seem to work
+@use "@featherds/styles/themes/variables";
+.modal-delete-minion {
+  .dialog-body {
+    display: flex;
+    flex-flow: column;
+    > header {
+      order: 1;
+    }
+    .content {
+      min-height: auto;
+      margin-bottom: var(variables.$spacing-l);
+    }
+  }
+}
+</style>

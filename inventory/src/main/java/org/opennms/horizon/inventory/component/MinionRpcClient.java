@@ -48,10 +48,12 @@ public class MinionRpcClient {
 
     private final ManagedChannel channel;
     private final TenantLookup tenantLookup;
+    private final long deadline;
 
-    public MinionRpcClient(@Qualifier("minion-gateway") ManagedChannel channel, TenantLookup tenantLookup) {
+    public MinionRpcClient(@Qualifier("minion-gateway") ManagedChannel channel, TenantLookup tenantLookup, long deadline) {
         this.channel = channel;
         this.tenantLookup = tenantLookup;
+        this.deadline = deadline;
     }
 
     private RpcRequestServiceStub rpcStub;
@@ -72,7 +74,7 @@ public class MinionRpcClient {
         Context withCredential = Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, tenantId);
         try {
             withCredential.run(() -> {
-                rpcStub.request(request, new StreamObserver<>() {
+                rpcStub.withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).request(request, new StreamObserver<>() {
                     @Override
                     public void onNext(RpcResponseProto value) {
                         future.complete(value);
@@ -89,8 +91,8 @@ public class MinionRpcClient {
                 });
             });
         } catch (Exception e) {
-            throw new RuntimeException("Failed to call minion", e);
+            future.completeExceptionally(new RuntimeException("Failed to call minion", e));
         }
-        return future.orTimeout(60, TimeUnit.SECONDS);
+        return future;
     }
 }

@@ -220,6 +220,12 @@
                     <artifactId>karaf-maven-plugin</artifactId>
                     <version>${karaf.version}</version>
                     <extensions>true</extensions>
+                    <configuration combine.children="append">
+                        <javase>${java.version}</javase>
+                        <framework>
+                            <feature>framework</feature>
+                        </framework>
+                    </configuration>
                 </plugin>
             </plugins>
         </pluginManagement>

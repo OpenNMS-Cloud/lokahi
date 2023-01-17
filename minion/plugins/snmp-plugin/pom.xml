@@ -125,10 +125,6 @@
                                 <descriptor>mvn:org.opennms.horizon.minion/plugin-features/${project.version}/xml/features</descriptor>
                                 <descriptor>file:${project.build.directory}/feature/feature.xml</descriptor>
                             </descriptors>
-                            <javase>11</javase>
-                            <framework>
-                                <feature>framework</feature>
-                            </framework>
                             <features>
                                 <feature>snmp*</feature>
                             </features>

@@ -33,8 +33,11 @@ export const useAppliancesQueries = defineStore('appliancesQueries', {
         isFetching.value ? startSpinner() : stopSpinner()
 
         const allMinions = minionsData.value?.findAllMinions as Minion[]
+
         if (allMinions?.length) {
           addMetricsToMinions(allMinions)
+        } else {
+          tableMinions.value = []
         }
       })
     }
@@ -42,6 +45,7 @@ export const useAppliancesQueries = defineStore('appliancesQueries', {
     const fetchMinionMetrics = (instance: string) =>
       useQuery({
         query: ListMinionMetricsDocument,
+
         variables: {
           instance,
           monitor: Monitor.ECHO,
@@ -54,16 +58,17 @@ export const useAppliancesQueries = defineStore('appliancesQueries', {
     const addMetricsToMinions = (allMinions: Minion[]) => {
       allMinions.forEach(async (minion) => {
         const { data, isFetching } = await fetchMinionMetrics(minion.systemId as string)
-        const minionLatency = data.value?.minionLatency?.data?.result as TsResult[]
+        const result = data.value?.minionLatency?.data?.result
 
         if (!isFetching.value) {
-          if (minionLatency?.length) {
-            const [...values] = [...minionLatency][0].values as number[][]
+          if (result?.length) {
+            const [{ value }] = data.value?.minionLatency?.data?.result as TsResult[]
+            const [, val] = value as number[]
 
             tableMinions.value.push({
               ...minion,
               latency: {
-                value: values[values.length - 1][1] // get the last item of the list
+                value: val
               }
             })
           } else tableMinions.value.push(minion)
@@ -108,7 +113,7 @@ export const useAppliancesQueries = defineStore('appliancesQueries', {
           node.id as number,
           node.ipInterfaces?.[0].ipAddress as string
         ) // currently only 1 interface per node
-        const nodeLatency = data.value?.nodeLatency?.data?.result as TsResult[]
+        const latencyResult = data.value?.nodeLatency?.data?.result
         const status = data.value?.nodeStatus?.status
 
         if (!isFetching.value) {
@@ -117,13 +122,14 @@ export const useAppliancesQueries = defineStore('appliancesQueries', {
             status
           }
 
-          if (nodeLatency?.length) {
-            const [...values] = [...nodeLatency][0].values as number[][]
+          if (latencyResult?.length) {
+            const [{ value }] = latencyResult as TsResult[]
+            const [, val] = value as number[]
 
             tableNode = {
               ...tableNode,
               latency: {
-                value: values[values.length - 1][1] // get the last item of the list
+                value: val
               }
             }
           }
@@ -143,9 +149,11 @@ export const useAppliancesQueries = defineStore('appliancesQueries', {
       cachePolicy: 'network-only'
     })
 
-    watchEffect(() => {
-      isFetching.value ? startSpinner() : stopSpinner()
+    watch(isFetching, (_, fetched) => {
+      fetched ? stopSpinner() : startSpinner()
+    })
 
+    watchEffect(() => {
       const allMinions = minionsAndNodes.value?.findAllMinions as Minion[]
       if (allMinions?.length) {
         addMetricsToMinions(allMinions)

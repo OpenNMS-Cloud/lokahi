@@ -30,6 +30,7 @@ package org.opennms.horizon.server.service.grpc;
 
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.opennms.horizon.inventory.dto.IdList;
@@ -55,6 +56,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class InventoryClient {
     private final ManagedChannel channel;
+    private final long deadline;
     private MonitoringLocationServiceGrpc.MonitoringLocationServiceBlockingStub locationStub;
     private NodeServiceGrpc.NodeServiceBlockingStub nodeStub;
     private MonitoringSystemServiceGrpc.MonitoringSystemServiceBlockingStub systemStub;
@@ -74,43 +76,43 @@ public class InventoryClient {
     public NodeDTO createNewNode(NodeCreateDTO node, String accessToken) {
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
-        return nodeStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).createNode(node);
+        return nodeStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).createNode(node);
     }
 
     public List<NodeDTO> listNodes(String accessToken) {
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
-        return nodeStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).listNodes(Empty.newBuilder().build()).getNodesList();
+        return nodeStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).listNodes(Empty.newBuilder().build()).getNodesList();
     }
 
     public NodeDTO getNodeById(long id, String accessToken) {
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
-        return nodeStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).getNodeById(Int64Value.of(id));
+        return nodeStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).getNodeById(Int64Value.of(id));
     }
 
     public List<MonitoringLocationDTO> listLocations(String accessToken) {
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
-        return locationStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).listLocations(Empty.newBuilder().build()).getLocationsList();
+        return locationStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).listLocations(Empty.newBuilder().build()).getLocationsList();
     }
 
     public MonitoringLocationDTO getLocationById(long id, String accessToken) {
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
-        return locationStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).getLocationById(Int64Value.of(id));
+        return locationStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).getLocationById(Int64Value.of(id));
     }
 
     public List<MonitoringSystemDTO> listMonitoringSystems(String accessToken) {
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
-        return systemStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).listMonitoringSystem(Empty.newBuilder().build()).getSystemsList();
+        return systemStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).listMonitoringSystem(Empty.newBuilder().build()).getSystemsList();
     }
 
     public MonitoringSystemDTO getSystemBySystemId(String systemId, String accessToken) {
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
-        return systemStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).getMonitoringSystemById(StringValue.of(systemId));
+        return systemStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).getMonitoringSystemById(StringValue.of(systemId));
     }
 
     public List<MonitoringLocationDTO> listLocationsByIds(List<DataLoaderFactory.Key> keys) {
@@ -118,7 +120,7 @@ public class InventoryClient {
             Metadata metadata = new Metadata();
             metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
             List<Int64Value> idValues = keys.stream().map(k->Int64Value.of(k.getId())).collect(Collectors.toList());
-            return locationStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).listLocationsByIds(IdList.newBuilder().addAllIds(idValues).build()).getLocationsList();
+            return locationStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).listLocationsByIds(IdList.newBuilder().addAllIds(idValues).build()).getLocationsList();
         }).orElseThrow();
     }
 

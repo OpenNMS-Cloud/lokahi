@@ -13,10 +13,6 @@
     <artifactId>traps</artifactId>
     <name>OpenNMS Horizon Stream :: Events :: Traps</name>
     <version>0.1.0-SNAPSHOT</version>
-    <properties>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
-    </properties>
     <dependencyManagement>
         <dependencies>
             <dependency>

@@ -92,10 +92,6 @@
                                 <descriptor>mvn:org.apache.aries.jax.rs/org.apache.aries.jax.rs.features/${aries.jax.rs.whiteboard.version}/xml</descriptor>
                                 <descriptor>file:${project.build.directory}/feature/feature.xml</descriptor>
                             </descriptors>
-                            <javase>11</javase>
-                            <framework>
-                                <feature>framework</feature>
-                            </framework>
                             <features>
                                 <feature>minion-ng*</feature>
                             </features>

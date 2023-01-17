@@ -220,7 +220,7 @@ import { useInventoryQueries } from '@/store/Queries/inventoryQueries'
 const heading = 'Network Inventory'
 const tabs = [
   { label: 'Monitored Nodes' },
-  { label: 'Umonitored Nodes' },
+  { label: 'Unmonitored Nodes' },
   { label: 'Detected Nodes' }
 ]
 

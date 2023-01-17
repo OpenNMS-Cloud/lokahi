@@ -28,12 +28,19 @@
 
 package org.opennms.horizon.minion.grpc;
 
-import static org.opennms.horizon.minion.grpc.GrpcClientConstants.*;
+import static org.opennms.horizon.minion.grpc.GrpcClientConstants.CLIENT_CERTIFICATE_FILE_PATH;
+import static org.opennms.horizon.minion.grpc.GrpcClientConstants.CLIENT_PRIVATE_KEY_FILE_PATH;
+import static org.opennms.horizon.minion.grpc.GrpcClientConstants.DEFAULT_GRPC_HOST;
+import static org.opennms.horizon.minion.grpc.GrpcClientConstants.DEFAULT_GRPC_PORT;
+import static org.opennms.horizon.minion.grpc.GrpcClientConstants.DEFAULT_MESSAGE_SIZE;
+import static org.opennms.horizon.minion.grpc.GrpcClientConstants.GRPC_CLIENT_PID;
+import static org.opennms.horizon.minion.grpc.GrpcClientConstants.GRPC_HOST;
+import static org.opennms.horizon.minion.grpc.GrpcClientConstants.GRPC_MAX_INBOUND_SIZE;
+import static org.opennms.horizon.minion.grpc.GrpcClientConstants.GRPC_PORT;
+import static org.opennms.horizon.minion.grpc.GrpcClientConstants.TLS_ENABLED;
+import static org.opennms.horizon.minion.grpc.GrpcClientConstants.TRUST_CERTIFICATE_FILE_PATH;
 import static org.opennms.horizon.shared.ipc.rpc.api.RpcModule.MINION_HEADERS_MODULE;
 
-import com.codahale.metrics.MetricRegistry;
-import com.google.protobuf.Message;
-import io.opentracing.Tracer;
 import java.io.File;
 import java.io.IOException;
 import java.util.Map;
@@ -46,8 +53,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
-
 import java.util.concurrent.atomic.AtomicLong;
+
 import org.opennms.cloud.grpc.minion.CloudServiceGrpc;
 import org.opennms.cloud.grpc.minion.CloudServiceGrpc.CloudServiceStub;
 import org.opennms.cloud.grpc.minion.CloudToMinionMessage;
@@ -66,8 +73,12 @@ import org.osgi.framework.BundleContext;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
+import org.slf4j.MDC.MDCCloseable;
 
+import com.codahale.metrics.MetricRegistry;
 import com.google.protobuf.ByteString;
+import com.google.protobuf.Message;
 
 import io.grpc.ConnectivityState;
 import io.grpc.ManagedChannel;
@@ -76,8 +87,7 @@ import io.grpc.netty.shaded.io.grpc.netty.NegotiationType;
 import io.grpc.netty.shaded.io.grpc.netty.NettyChannelBuilder;
 import io.grpc.netty.shaded.io.netty.handler.ssl.SslContextBuilder;
 import io.grpc.stub.StreamObserver;
-import org.slf4j.MDC;
-import org.slf4j.MDC.MDCCloseable;
+import io.opentracing.Tracer;
 
 /**
  * Minion GRPC client runs both RPC/Sink together.

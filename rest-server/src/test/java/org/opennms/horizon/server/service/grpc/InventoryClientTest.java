@@ -146,13 +146,12 @@ public class InventoryClientTest {
                 }
             }));
 
-
         grpcCleanUp.register(InProcessServerBuilder.forName("InventoryClientTest").intercept(mockInterceptor)
             .addService(mockLocationService)
             .addService(mockSystemService)
             .addService(mockNodeService).directExecutor().build().start());
         ManagedChannel channel = grpcCleanUp.register(InProcessChannelBuilder.forName("InventoryClientTest").directExecutor().build());
-        client = new InventoryClient(channel);
+        client = new InventoryClient(channel, 5000);
         client.initialStubs();
     }
 

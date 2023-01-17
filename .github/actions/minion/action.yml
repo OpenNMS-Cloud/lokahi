@@ -32,9 +32,6 @@ runs:
         mvn -Pcoverage verify -Ddocker.image=opennms/horizon-stream-minion:local -Ddocker.skipPush=true \
           org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=$SONAR_PROJECT_KEY
 
-        docker buildx create --use --driver docker-container --name maven
-        docker buildx build --tag opennms/horizon-stream-minion:local-multi-arch docker-assembly/target/docker/opennms/horizon-stream-minion/local/build/ -f docker-assembly/src/main/docker/app/Dockerfile --platform linux/amd64,linux/arm64,linux/arm/v7
-
       shell: bash
       working-directory: minion
       env:
@@ -48,13 +45,6 @@ runs:
 
         #mvn verify -DskipTests -Ddocker.image=opennms/horizon-stream-minion:local -Ddocker.skipPush=true
         mvn verify -Ddocker.image=opennms/horizon-stream-minion:local -Ddocker.skipPush=true
-        
-        # Test release
-        docker buildx create --use --driver docker-container --name maven
-        #docker buildx build --push --tag opennms/horizon-stream-minion:test-20230112 docker-assembly/target/docker/opennms/horizon-stream-minion/local/build/ -f docker-assembly/src/main/docker/app/Dockerfile --platform linux/amd64,linux/arm64,linux/arm/v7
-        docker buildx build --tag opennms/horizon-stream-minion:local-multi-arch docker-assembly/target/docker/opennms/horizon-stream-minion/local/build/ -f docker-assembly/src/main/docker/app/Dockerfile --platform linux/amd64,linux/arm64,linux/arm/v7
-
-        docker images
 
       working-directory: minion
       shell: bash

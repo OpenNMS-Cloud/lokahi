@@ -42,7 +42,8 @@ export default defineConfig(({ mode }) => {
       },
       coverage: {
         reporter: ['lcov', 'html']
-      }
+      },
+      watch: false
     }
   }
 })

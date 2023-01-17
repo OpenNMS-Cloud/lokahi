@@ -2001,13 +2001,13 @@
   resolved "https://registry.yarnpkg.com/@vitejs/plugin-vue/-/plugin-vue-4.0.0.tgz#93815beffd23db46288c787352a8ea31a0c03e5e"
   integrity sha512-e0X4jErIxAB5oLtDqbHvHpJe/uWNkdpYV83AOG2xo2tEVSzCzewgJMtREZM30wXnM5ls90hxiOtAuVU6H5JgbA==
 
-"@vitest/coverage-c8@^0.27.2":
-  version "0.27.2"
-  resolved "https://registry.yarnpkg.com/@vitest/coverage-c8/-/coverage-c8-0.27.2.tgz#059b83496d12c24467153ef45ccb7402bf2323e8"
-  integrity sha512-1MFwlwfwIfPFLfu6aN+dZ5jo2aOah5nAwoq/SrqUkt9rXzUmohLOgI1GTT0PpXbJKqaZicIlWuBjiC+BjVgRwQ==
+"@vitest/coverage-c8@0.26.3":
+  version "0.26.3"
+  resolved "https://registry.yarnpkg.com/@vitest/coverage-c8/-/coverage-c8-0.26.3.tgz#3a87150f6faaa9b2c8da4dda55a2de6b23a895d8"
+  integrity sha512-sjmVYPozajWY2DawzuvhYX6hEe/LD6p2xv9VmPvh1zzDeNNVCAnyLcvXoaSMQD522x9bqciuyPrlrnh2iNkE/w==
   dependencies:
     c8 "^7.12.0"
-    vitest "0.27.2"
+    vitest "0.26.3"
 
 "@volar/language-core@1.0.22":
   version "1.0.22"
@@ -2510,11 +2510,6 @@ c8@^7.11.3, c8@^7.12.0:
     v8-to-istanbul "^9.0.0"
     yargs "^16.2.0"
     yargs-parser "^20.2.9"
-
-cac@^6.7.14:
-  version "6.7.14"
-  resolved "https://registry.yarnpkg.com/cac/-/cac-6.7.14.tgz#804e1e6f506ee363cb0e3ccbb09cad5dd9870959"
-  integrity sha512-b6Ilus+c3RrdDk+JhLKUAQfzzgLEPy6wcXqS7f/xe1EETvsDP6GORG7SFuOs6cID5YkqchW/LXZbX5bc8j7ZcQ==
 
 callsites@^3.0.0:
   version "3.1.0"
@@ -4522,16 +4517,6 @@ mlly@^1.0.0:
     pkg-types "^1.0.0"
     ufo "^1.0.0"
 
-mlly@^1.1.0:
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/mlly/-/mlly-1.1.0.tgz#9e23c5e675ef7b10cc47ee6281795cb1a7aa3aa2"
-  integrity sha512-cwzBrBfwGC1gYJyfcy8TcZU1f+dbH/T+TuOhtYP2wLv/Fb51/uV7HJQfBPtEupZ2ORLRU1EKFS/QfS3eo9+kBQ==
-  dependencies:
-    acorn "^8.8.1"
-    pathe "^1.0.0"
-    pkg-types "^1.0.1"
-    ufo "^1.0.1"
-
 ms@2.1.2:
   version "2.1.2"
   resolved "https://registry.yarnpkg.com/ms/-/ms-2.1.2.tgz#d09d1f357b443f493382a8eb3ccd183872ae6009"
@@ -5149,11 +5134,6 @@ shell-quote@^1.7.3:
   resolved "https://registry.yarnpkg.com/shell-quote/-/shell-quote-1.7.4.tgz#33fe15dee71ab2a81fcbd3a52106c5cfb9fb75d8"
   integrity sha512-8o/QEhSSRb1a5i7TFR0iM4G16Z0vYB2OQVs4G3aAFXjn3T6yEx8AZxy1PgDF7I00LZHYA3WxaSYIf5e5sAX8Rw==
 
-siginfo@^2.0.0:
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/siginfo/-/siginfo-2.0.0.tgz#32e76c70b79724e3bb567cb9d543eb858ccfaf30"
-  integrity sha512-ybx0WO1/8bSBLEWXZvEd7gMW3Sn3JFlW3TvX1nREbDLRNQNaeNN8WK0meBwPdAaOI7TtRRRJn/Es1zhrrCHu7g==
-
 signal-exit@^3.0.2:
   version "3.0.7"
   resolved "https://registry.yarnpkg.com/signal-exit/-/signal-exit-3.0.7.tgz#a9a1767f8af84155114eaabd73f99273c8f59ad9"
@@ -5229,11 +5209,6 @@ sponge-case@^1.0.1:
   integrity sha512-dblb9Et4DAtiZ5YSUZHLl4XhH4uK80GhAZrVXdN4O2P4gQ40Wa5UIOPUHlA/nFd2PLblBZWUioLMMAVrgpoYcA==
   dependencies:
     tslib "^2.0.3"
-
-stackback@0.0.2:
-  version "0.0.2"
-  resolved "https://registry.yarnpkg.com/stackback/-/stackback-0.0.2.tgz#1ac8a0d9483848d1695e418b6d031a3c3ce68e3b"
-  integrity sha512-1XMJE5fQo1jGH6Y/7ebnwPOBEkIEnT4QF32d5R1+VXdXveM0IBMJt8zfaxX1P3QhVwrYe+576+jkANtSS2mBbw==
 
 stackblur-canvas@^2.0.0:
   version "2.5.0"
@@ -5473,7 +5448,7 @@ ua-parser-js@^0.7.30:
   resolved "https://registry.yarnpkg.com/ua-parser-js/-/ua-parser-js-0.7.32.tgz#cd8c639cdca949e30fa68c44b7813ef13e36d211"
   integrity sha512-f9BESNVhzlhEFf2CHMSj40NWOjYPl1YKYbrvIr/hFTDEmLq7SRbWvm7FcdcpCYT95zrOhC7gZSxjdnnTpBcwVw==
 
-ufo@^1.0.0, ufo@^1.0.1:
+ufo@^1.0.0:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/ufo/-/ufo-1.0.1.tgz#64ed43b530706bda2e4892f911f568cf4cf67d29"
   integrity sha512-boAm74ubXHY7KJQZLlXrtMz52qFvpsbOxDcZOnw/Wf+LS4Mmyu7JxmzD4tDLtUQtmZECypJ0FrCz4QIe6dvKRA==
@@ -5630,16 +5605,14 @@ villus@^2.1.0:
   resolved "https://registry.yarnpkg.com/villus/-/villus-2.1.0.tgz#fa7af554d35d27884ae1d71e4a702a8bbd0370af"
   integrity sha512-3xXbsZC+mlnA8h+tNHdeaXyzjDpnuA2SeuNsZrO95QKiInMOOQTGcKkCKSLWfBye4k5B06k64pENTV9D4xfDcQ==
 
-vite-node@0.27.2:
-  version "0.27.2"
-  resolved "https://registry.yarnpkg.com/vite-node/-/vite-node-0.27.2.tgz#c15d1a936f4d5b5639613b0e05665400521c084d"
-  integrity sha512-IDwuVhslF10qCnWOGJui7/2KksAOBHi+UbVo6Pqt4f5lgn+kS2sVvYDsETRG5PSuslisGB5CFGvb9I6FQgymBQ==
+vite-node@0.26.3:
+  version "0.26.3"
+  resolved "https://registry.yarnpkg.com/vite-node/-/vite-node-0.26.3.tgz#164fbaf449d5bd382b44b736653ba800397b5ebd"
+  integrity sha512-Te2bq0Bfvq6XiO718I+1EinMjpNYKws6SNHKOmVbILAQimKoZKDd+IZLlkaYcBXPpK3HFe2U80k8Zw+m3w/a2w==
   dependencies:
-    cac "^6.7.14"
     debug "^4.3.4"
-    mlly "^1.1.0"
+    mlly "^1.0.0"
     pathe "^0.2.0"
-    picocolors "^1.0.0"
     source-map "^0.6.1"
     source-map-support "^0.5.21"
     vite "^3.0.0 || ^4.0.0"
@@ -5664,29 +5637,26 @@ vite-svg-loader@^4.0.0:
   optionalDependencies:
     fsevents "~2.3.2"
 
-vitest@0.27.2, vitest@^0.27.2:
-  version "0.27.2"
-  resolved "https://registry.yarnpkg.com/vitest/-/vitest-0.27.2.tgz#af10dad4d2e94b816b2e7c4d947a0976626b345a"
-  integrity sha512-y7tdsL2uaQy+KF18AlmNHZe29ukyFytlxrpSTwwmgLE2XHR/aPucJP9FLjWoqjgqFlXzRAjHlFJLU+HDyI/OsA==
+vitest@0.26.3:
+  version "0.26.3"
+  resolved "https://registry.yarnpkg.com/vitest/-/vitest-0.26.3.tgz#0e3abb7674e8af7b74519b40c04efe6e43c0b0a7"
+  integrity sha512-FmHxU9aUCxTi23keF3vxb/Qp0lYXaaJ+jRLGOUmMS3qVTOJvgGE+f1VArupA6pEhaG2Ans4X+zV9dqM5WISMbg==
   dependencies:
     "@types/chai" "^4.3.4"
     "@types/chai-subset" "^1.3.3"
     "@types/node" "*"
     acorn "^8.8.1"
     acorn-walk "^8.2.0"
-    cac "^6.7.14"
     chai "^4.3.7"
     debug "^4.3.4"
     local-pkg "^0.4.2"
-    picocolors "^1.0.0"
     source-map "^0.6.1"
     strip-literal "^1.0.0"
     tinybench "^2.3.1"
     tinypool "^0.3.0"
     tinyspy "^1.0.2"
     vite "^3.0.0 || ^4.0.0"
-    vite-node "0.27.2"
-    why-is-node-running "^2.2.2"
+    vite-node "0.26.3"
 
 vue-demi@*:
   version "0.13.11"
@@ -5832,14 +5802,6 @@ which@^2.0.1:
   integrity sha512-BLI3Tl1TW3Pvl70l3yq3Y64i+awpwXqsGBYWkkqMtnbXgrMD+yj7rhW0kuEDxzJaYXGjEW5ogapKNMEKNMjibA==
   dependencies:
     isexe "^2.0.0"
-
-why-is-node-running@^2.2.2:
-  version "2.2.2"
-  resolved "https://registry.yarnpkg.com/why-is-node-running/-/why-is-node-running-2.2.2.tgz#4185b2b4699117819e7154594271e7e344c9973e"
-  integrity sha512-6tSwToZxTOcotxHeA+qGCq1mVzKR3CwcJGmVcY+QE8SHy6TnpFnh8PAvPNHYr7EcuVeG0QSMxtYCuO1ta/G/oA==
-  dependencies:
-    siginfo "^2.0.0"
-    stackback "0.0.2"
 
 word-wrap@^1.2.3:
   version "1.2.3"

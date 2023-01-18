@@ -171,7 +171,7 @@ class AzureCredentialGrpcItTest extends GrpcTestBase {
         assertEquals(createDTO.getClientId(), credentials.getClientId());
         assertEquals(createDTO.getSubscriptionId(), credentials.getSubscriptionId());
         assertEquals(createDTO.getDirectoryId(), credentials.getDirectoryId());
-        assertTrue(credentials.getCreateTime() > 0L);
+        assertTrue(credentials.getCreateTimeMsec() > 0L);
 
         List<AzureCredential> list = azureCredentialRepository.findAll();
         assertEquals(1, list.size());

@@ -54,11 +54,8 @@ public class GrpcAzureCredentialService {
 
     @GraphQLMutation
     public Mono<AzureCredential> addAzureCredential(AzureCredentialCreate azureCredential, @GraphQLEnvironment ResolutionEnvironment env) {
-        System.out.println("GrpcAzureCredentialService.addAzureCredential");
-        System.out.println("azureCredential = " + azureCredential + ", env = " + env);
-        String authHeader = headerUtil.getAuthHeader(env);
         AzureCredentialCreateDTO createDto = mapper.azureCredentialCreateToProto(azureCredential);
-        AzureCredentialDTO credentialDto = client.createNewAzureCredential(createDto, authHeader);
+        AzureCredentialDTO credentialDto = client.createNewAzureCredential(createDto, headerUtil.getAuthHeader(env));
         return Mono.just(mapper.protoToAzureCredential(credentialDto));
     }
 }

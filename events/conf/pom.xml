@@ -77,9 +77,9 @@
             <artifactId>slf4j-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>javax.annotation</groupId>
-            <artifactId>javax.annotation-api</artifactId>
-            <version>1.3.2</version>
+            <groupId>jakarta.annotation</groupId>
+            <artifactId>jakarta.annotation-api</artifactId>
+            <version>${jakarta.annotation.version}</version>
         </dependency>
 
         <!-- Test Dependencies -->
@@ -113,6 +113,7 @@
             <version>${jupiter.version}</version>
             <scope>test</scope>
         </dependency>
+
     </dependencies>
 
     <build>

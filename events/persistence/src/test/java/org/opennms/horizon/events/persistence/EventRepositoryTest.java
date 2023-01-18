@@ -58,7 +58,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @ContextConfiguration(classes = EventsTestApp.class)
-class EventRepositoryIT {
+class EventRepositoryTest {
 
 
     private static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:14.5-alpine")

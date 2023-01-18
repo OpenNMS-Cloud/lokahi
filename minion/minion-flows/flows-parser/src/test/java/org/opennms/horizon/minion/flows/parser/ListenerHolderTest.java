@@ -1,7 +1,7 @@
 /*******************************************************************************
  * This file is part of OpenNMS(R).
  *
- * Copyright (C) 2022-2023 The OpenNMS Group, Inc.
+ * Copyright (C) 2023 The OpenNMS Group, Inc.
  * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
@@ -26,49 +26,36 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-
 package org.opennms.horizon.minion.flows.parser;
 
+import org.junit.Assert;
+import org.junit.Test;
+import org.mockito.Mockito;
 import org.opennms.horizon.minion.flows.listeners.FlowsListener;
-import org.opennms.horizon.minion.plugin.api.Listener;
 
-import java.util.HashMap;
-import java.util.Map;
+public class ListenerHolderTest {
 
-public class ListenerHolder implements Listener {
-
-    private Map<String, FlowsListener> listenerMap = new HashMap<>();
-
-    public void clear() {
-        stop(); // stop all before remove prevent resource leakage
-        listenerMap.clear();
+    @Test
+    public void testAdd() {
+        FlowsListener listener = Mockito.mock(FlowsListener.class);
+        Mockito.when(listener.getName()).thenReturn("test");
+        ListenerHolder holder = new ListenerHolder();
+        holder.put(listener);
+        Assert.assertEquals(1, holder.size());
+        FlowsListener fromGet = holder.get("test");
+        Assert.assertEquals(listener, fromGet);
+        holder.remove("test");
+        Assert.assertEquals(0, holder.size());
     }
 
-    public int size() {
-        return listenerMap.size();
-    }
-
-    public FlowsListener get(String name) {
-        return this.listenerMap.get(name);
-    }
-
-    public void put(FlowsListener listener) {
-        this.listenerMap.put(listener.getName(), listener);
-    }
-
-    public FlowsListener remove(String name) {
-        return this.listenerMap.remove(name);
-    }
-
-    @Override
-    public void start() throws Exception {
-        for (FlowsListener listener : listenerMap.values()) {
-            listener.start();
-        }
-    }
-
-    @Override
-    public void stop() {
-        listenerMap.values().forEach(FlowsListener::stop);
+    @Test
+    public void testStartAndStop() throws Exception {
+        FlowsListener listener = Mockito.mock(FlowsListener.class);
+        ListenerHolder holder = new ListenerHolder();
+        holder.put(listener);
+        holder.stop();
+        Mockito.verify(listener, Mockito.times(1)).stop();
+        holder.start();
+        Mockito.verify(listener, Mockito.times(1)).start();
     }
 }

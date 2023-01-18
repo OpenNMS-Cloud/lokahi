@@ -28,12 +28,12 @@
 
 @XmlSchema(
     namespace = "http://xmlns.opennms.org/xsd/event",
-    elementFormDefault = javax.xml.bind.annotation.XmlNsForm.QUALIFIED,
+    elementFormDefault = jakarta.xml.bind.annotation.XmlNsForm.QUALIFIED,
     xmlns={
         @XmlNs(prefix="", namespaceURI="http://xmlns.opennms.org/xsd/event")
     }
 )
 package org.opennms.horizon.events.xml;
 
-import javax.xml.bind.annotation.XmlNs;
-import javax.xml.bind.annotation.XmlSchema;
+import jakarta.xml.bind.annotation.XmlNs;
+import jakarta.xml.bind.annotation.XmlSchema;

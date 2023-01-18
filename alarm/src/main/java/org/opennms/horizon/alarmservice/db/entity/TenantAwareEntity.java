@@ -28,7 +28,7 @@
 
 package org.opennms.horizon.alarmservice.db.entity;
 
-import javax.persistence.Column;
+import jakarta.persistence.Column;
 //import org.hibernate.annotations.TenantId;
 
 /**

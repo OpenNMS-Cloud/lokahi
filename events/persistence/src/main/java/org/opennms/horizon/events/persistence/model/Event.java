@@ -29,27 +29,22 @@
 package org.opennms.horizon.events.persistence.model;
 
 
-import com.vladmihalcea.hibernate.type.basic.Inet;
-import com.vladmihalcea.hibernate.type.basic.PostgreSQLInetType;
-import org.hibernate.annotations.Type;
-import org.hibernate.annotations.TypeDef;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Lob;
+import jakarta.persistence.Table;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
+import java.net.InetAddress;
 import java.time.LocalDateTime;
 
 
 
-@TypeDef(
-    name = "ipv4",
-    typeClass = PostgreSQLInetType.class,
-    defaultForType = Inet.class
-)
 @Entity
 @Table(name = "event")
 public class Event {
@@ -78,15 +73,15 @@ public class Event {
     private Long nodeId;
 
     @Column(name = "ip_address", columnDefinition = "inet")
-    @Type(type = "com.vladmihalcea.hibernate.type.basic.PostgreSQLInetType")
-    private Inet ipAddress;
+    private InetAddress ipAddress;
 
     @Column(name = "event_parameters", columnDefinition = "jsonb")
-    @Type(type = "com.vladmihalcea.hibernate.type.json.JsonBinaryType")
+    @JdbcTypeCode( SqlTypes.JSON )
     private EventParameters eventParameters;
 
-    @Column(name = "event_info")
-    @Type(type = "org.hibernate.type.BinaryType")
+    @Column(name = "event_info", columnDefinition = "bytea")
+    @Lob
+    @JdbcTypeCode(SqlTypes.VARBINARY)
     private byte[] eventInfo;
 
 
@@ -142,11 +137,11 @@ public class Event {
         this.nodeId = nodeId;
     }
 
-    public Inet getIpAddress() {
+    public InetAddress getIpAddress() {
         return ipAddress;
     }
 
-    public void setIpAddress(Inet ipAddress) {
+    public void setIpAddress(InetAddress ipAddress) {
         this.ipAddress = ipAddress;
     }
 

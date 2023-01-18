@@ -29,6 +29,7 @@
 package org.opennms.horizon.inventory.service.taskset.response;
 
 import com.google.protobuf.Any;
+import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -46,13 +47,13 @@ import org.opennms.horizon.inventory.repository.AzureCredentialRepository;
 import org.opennms.horizon.inventory.repository.IpInterfaceRepository;
 import org.opennms.horizon.inventory.repository.MonitoringLocationRepository;
 import org.opennms.horizon.inventory.repository.NodeRepository;
+import org.opennms.horizon.shared.utils.InetAddressUtils;
 import org.opennms.taskset.contract.ScannerResponse;
 import org.opennms.taskset.service.contract.TaskSetServiceGrpc;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 
-import javax.transaction.Transactional;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -141,7 +142,7 @@ class ScannerResponseServiceIntTest extends GrpcTestBase {
         assertEquals(1, allIpInterfaces.size());
         IpInterface ipInterface = allIpInterfaces.get(0);
         assertEquals(TEST_TENANT_ID, ipInterface.getTenantId());
-        assertEquals("127.0.0.1", ipInterface.getIpAddress().getAddress());
+        assertEquals("127.0.0.1", InetAddressUtils.toIpAddrString(ipInterface.getIpAddress()));
     }
 
     private AzureCredential createAzureCredential() {

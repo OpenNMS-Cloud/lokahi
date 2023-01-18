@@ -28,7 +28,6 @@
 
 package org.opennms.horizon.inventory.service;
 
-import com.vladmihalcea.hibernate.type.basic.Inet;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -45,6 +44,8 @@ import org.opennms.horizon.shared.constants.GrpcConstants;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -81,13 +82,15 @@ public class NodeService {
 
     private void saveIpInterfaces(NodeCreateDTO request, Node node, String tenantId) {
         if (request.hasManagementIp()) {
-            IpInterface ipInterface = new IpInterface();
-
-            ipInterface.setNode(node);
-            ipInterface.setTenantId(tenantId);
-            ipInterface.setIpAddress(new Inet(request.getManagementIp()));
-
-            ipInterfaceRepository.save(ipInterface);
+            try {
+                IpInterface ipInterface = new IpInterface();
+                ipInterface.setNode(node);
+                ipInterface.setTenantId(tenantId);
+                ipInterface.setIpAddress(InetAddress.getByName(request.getManagementIp()));
+                ipInterfaceRepository.save(ipInterface);
+            } catch (UnknownHostException e) {
+                e.printStackTrace();
+            }
         }
     }
 

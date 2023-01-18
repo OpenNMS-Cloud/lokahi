@@ -1,17 +1,16 @@
 package org.opennms.horizon.events.persistence.mapper;
 
 import com.google.protobuf.InvalidProtocolBufferException;
-import com.vladmihalcea.hibernate.type.basic.Inet;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.opennms.horizon.events.persistence.model.Event;
 import org.opennms.horizon.events.persistence.model.EventParameter;
 import org.opennms.horizon.events.persistence.model.EventParameters;
 import org.opennms.horizon.events.proto.EventDTO;
-import org.opennms.horizon.events.proto.EventInfo;
 import org.opennms.horizon.events.proto.EventInfoDTO;
 import org.opennms.horizon.events.proto.EventParameterDTO;
 
+import java.net.InetAddress;
 import java.util.List;
 
 @Mapper(componentModel = "spring")
@@ -46,11 +45,11 @@ public interface EventMapper extends DateTimeMapper {
         }
     }
 
-    default String map(Inet value) {
+    default String map(InetAddress value) {
         if (value == null) {
             return "";
         } else {
-            return value.getAddress();
+            return value.getHostAddress();
         }
     }
 }

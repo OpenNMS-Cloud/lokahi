@@ -28,7 +28,6 @@
 
 package org.opennms.horizon.inventory.service.taskset.response;
 
-import com.vladmihalcea.hibernate.type.basic.Inet;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.opennms.horizon.inventory.dto.MonitoredServiceDTO;
@@ -44,6 +43,8 @@ import org.opennms.taskset.contract.DetectorResponse;
 import org.opennms.taskset.contract.MonitorType;
 import org.springframework.stereotype.Component;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Optional;
 
 @Slf4j
@@ -59,27 +60,30 @@ public class DetectorResponseService {
     public void accept(String tenantId, String location, DetectorResponse response) {
         log.info("Received Detector Response = {} for tenant = {} and location = {}", response, tenantId, location);
 
-        Inet ipAddress = new Inet(response.getIpAddress());
+        try {
+            InetAddress ipAddress = InetAddress.getByName(response.getIpAddress());
+            Optional<IpInterface> ipInterfaceOpt = ipInterfaceRepository
+                .findByIpAddressAndLocationAndTenantId(ipAddress, location, tenantId);
 
-        Optional<IpInterface> ipInterfaceOpt = ipInterfaceRepository
-            .findByIpAddressAndLocationAndTenantId(ipAddress, location, tenantId);
+            if (ipInterfaceOpt.isPresent()) {
+                IpInterface ipInterface = ipInterfaceOpt.get();
 
-        if (ipInterfaceOpt.isPresent()) {
-            IpInterface ipInterface = ipInterfaceOpt.get();
+                if (response.getDetected()) {
+                    createMonitoredService(response, ipInterface);
 
-            if (response.getDetected()) {
-                createMonitoredService(response, ipInterface);
+                    MonitorType monitorType = response.getMonitorType();
+                    long nodeId = response.getNodeId();
+                    monitorTaskSetService.sendMonitorTask(location, monitorType, ipInterface, nodeId);
+                    collectorTaskSetService.sendCollectorTask(location, monitorType, ipInterface, nodeId);
 
-                MonitorType monitorType = response.getMonitorType();
-                long nodeId = response.getNodeId();
-                monitorTaskSetService.sendMonitorTask(location, monitorType, ipInterface, nodeId);
-                collectorTaskSetService.sendCollectorTask(location, monitorType, ipInterface, nodeId);
-
+                } else {
+                    log.info("{} not detected on ip address = {}", response.getMonitorType(), ipAddress.getAddress());
+                }
             } else {
-                log.info("{} not detected on ip address = {}", response.getMonitorType(), ipAddress.getAddress());
+                log.warn("Failed to find IP Interface during detection for ip = {}", ipAddress.getHostAddress());
             }
-        } else {
-            log.warn("Failed to find IP Interface during detection for ip = {}", ipAddress.toInetAddress());
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
         }
     }
 

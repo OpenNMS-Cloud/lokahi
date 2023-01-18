@@ -71,7 +71,7 @@ public class CollectorTaskSetService {
 
     private TaskDefinition addCollectorTask(MonitorType monitorType, IpInterface ipInterface, long nodeId) {
         String monitorTypeValue = monitorType.getValueDescriptor().getName();
-        String ipAddress = ipInterface.getIpAddress().getAddress();
+        String ipAddress = ipInterface.getIpAddress().getHostAddress();
 
         String name = String.format("%s-collector", monitorTypeValue.toLowerCase());
         String pluginName = String.format("%sCollector", monitorTypeValue);

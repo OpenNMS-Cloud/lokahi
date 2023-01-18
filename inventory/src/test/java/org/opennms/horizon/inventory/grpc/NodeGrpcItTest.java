@@ -28,23 +28,16 @@
 
 package org.opennms.horizon.inventory.grpc;
 
-import static com.jayway.awaitility.Awaitility.await;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.internal.verification.VerificationModeFactory.times;
-
-import java.io.IOException;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.TimeUnit;
-
+import com.google.protobuf.Empty;
+import com.google.protobuf.Int64Value;
+import com.google.rpc.Code;
+import com.google.rpc.Status;
+import io.grpc.Metadata;
+import io.grpc.ServerCall;
+import io.grpc.ServerCallHandler;
+import io.grpc.StatusRuntimeException;
+import io.grpc.protobuf.StatusProto;
+import io.grpc.stub.MetadataUtils;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -73,18 +66,23 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 
-import com.google.protobuf.Empty;
-import com.google.protobuf.Int64Value;
-import com.google.rpc.Code;
-import com.google.rpc.Status;
-import com.vladmihalcea.hibernate.type.basic.Inet;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
-import io.grpc.Metadata;
-import io.grpc.ServerCall;
-import io.grpc.ServerCallHandler;
-import io.grpc.StatusRuntimeException;
-import io.grpc.protobuf.StatusProto;
-import io.grpc.stub.MetadataUtils;
+import static com.jayway.awaitility.Awaitility.await;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.internal.verification.VerificationModeFactory.times;
 
 @SpringBootTest
 @ContextConfiguration(initializers = {SpringContextTestInitializer.class})
@@ -289,7 +287,7 @@ class NodeGrpcItTest extends GrpcTestBase {
         assertEquals(EXPECTED_TASK_DEF_COUNT_WITHOUT_NEW_LOCATION, taskSet.getTaskDefinitionCount());
     }
 
-    private synchronized void populateTables(String location, String ip) {
+    private synchronized void populateTables(String location, String ip) throws UnknownHostException {
         Optional<MonitoringLocation> dbL = monitoringLocationRepository.findByLocation(location);
         MonitoringLocation dBLocation;
         if (dbL.isEmpty()) {
@@ -309,7 +307,7 @@ class NodeGrpcItTest extends GrpcTestBase {
 
         IpInterface ipInterface = new IpInterface();
         ipInterface.setTenantId(tenantId);
-        ipInterface.setIpAddress(new Inet(ip));
+        ipInterface.setIpAddress(InetAddress.getByName(ip));
         ipInterface.setNode(node);
         var ipInterfaces = new ArrayList<IpInterface>();
         ipInterfaces.add(ipInterface);
@@ -359,7 +357,7 @@ class NodeGrpcItTest extends GrpcTestBase {
 
 
     @Test
-    void testListNodesShouldContainIpInterfaces() throws VerificationException {
+    void testListNodesShouldContainIpInterfaces() throws VerificationException, UnknownHostException {
         String location = "minion";
         String ip = "192.168.1.123";
         populateTables(location, ip);

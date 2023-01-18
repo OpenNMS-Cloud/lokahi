@@ -35,7 +35,7 @@ import org.opennms.horizon.datachoices.model.DataChoices;
 import org.opennms.horizon.datachoices.repository.DataChoicesRepository;
 import org.springframework.stereotype.Component;
 
-import javax.transaction.Transactional;
+import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;

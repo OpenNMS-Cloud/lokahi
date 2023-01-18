@@ -28,7 +28,7 @@
 
 package org.opennms.horizon.shared.snmp;
 
-import javax.xml.bind.annotation.adapters.XmlAdapter;
+import jakarta.xml.bind.annotation.adapters.XmlAdapter;
 
 public class SnmpObjIdXmlAdapter extends XmlAdapter<String, SnmpObjId> {
 

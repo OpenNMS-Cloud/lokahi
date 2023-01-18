@@ -45,7 +45,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import javax.transaction.Transactional;
+import jakarta.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -99,7 +99,7 @@ public class DetectorTaskSetService {
     private List<TaskDefinition> addDetectorTasks(Node node, List<IpInterface> ipInterfaces, MonitorType monitorType) {
         List<TaskDefinition> tasks = new ArrayList<>();
         for (IpInterface ipInterface : ipInterfaces) {
-            var task = addDetectorTask(node.getId(), node.getTenantId(), ipInterface.getIpAddress().getAddress(),
+            var task = addDetectorTask(node.getId(), node.getTenantId(), ipInterface.getIpAddress().getHostAddress(),
                 node.getMonitoringLocation().getLocation(), monitorType);
             if (task != null) {
                 tasks.add(task);

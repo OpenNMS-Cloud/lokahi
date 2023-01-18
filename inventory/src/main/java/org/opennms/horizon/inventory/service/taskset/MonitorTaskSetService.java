@@ -77,7 +77,7 @@ public class MonitorTaskSetService {
     private TaskDefinition addMonitorTask(MonitorType monitorType, IpInterface ipInterface, long nodeId) {
 
         String monitorTypeValue = monitorType.getValueDescriptor().getName();
-        String ipAddress = ipInterface.getIpAddress().getAddress();
+        String ipAddress = ipInterface.getIpAddress().getHostAddress();
 
         String name = String.format("%s-monitor", monitorTypeValue.toLowerCase());
         String pluginName = String.format("%sMonitor", monitorTypeValue);

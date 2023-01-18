@@ -40,5 +40,5 @@ public class AzureCredential {
     private String clientId;
     private String subscriptionId;
     private String directoryId;
-    private Long createTime;
+    private Long createTimeMsec;
 }

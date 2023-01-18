@@ -38,5 +38,6 @@ public interface AzureCredentialMapper extends DateTimeMapper {
     AzureCredential dtoToModel(AzureCredentialCreateDTO dto);
 
     @Mapping(source = "monitoringLocation.location", target = "location")
+    @Mapping(source = "createTime", target = "createTimeMsec")
     AzureCredentialDTO modelToDto(AzureCredential model);
 }

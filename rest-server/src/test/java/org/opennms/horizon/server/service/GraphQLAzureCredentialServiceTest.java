@@ -76,7 +76,7 @@ class GraphQLAzureCredentialServiceTest {
             .setClientId("client-id")
             .setDirectoryId("directory-id")
             .setSubscriptionId("subscription-id")
-            .setCreateTime(Instant.now().toEpochMilli())
+            .setCreateTimeMsec(Instant.now().toEpochMilli())
             .build();
 
         doReturn(accessToken).when(mockHeaderUtil).getAuthHeader(any(ResolutionEnvironment.class));
@@ -108,7 +108,7 @@ class GraphQLAzureCredentialServiceTest {
             "        clientId, " +
             "        subscriptionId, " +
             "        directoryId, " +
-            "        createTime " +
+            "        createTimeMsec " +
             "    } " +
             "}");
 
@@ -126,7 +126,7 @@ class GraphQLAzureCredentialServiceTest {
             .jsonPath("$.data.addAzureCredential.clientId").isEqualTo(azureCredentialDTO1.getClientId())
             .jsonPath("$.data.addAzureCredential.subscriptionId").isEqualTo(azureCredentialDTO1.getSubscriptionId())
             .jsonPath("$.data.addAzureCredential.directoryId").isEqualTo(azureCredentialDTO1.getDirectoryId())
-            .jsonPath("$.data.addAzureCredential.createTime").isEqualTo(azureCredentialDTO1.getCreateTime());
+            .jsonPath("$.data.addAzureCredential.createTimeMsec").isEqualTo(azureCredentialDTO1.getCreateTimeMsec());
         verify(mockClient).createNewAzureCredential(any(AzureCredentialCreateDTO.class), eq(accessToken));
         verify(mockHeaderUtil, times(1)).getAuthHeader(any(ResolutionEnvironment.class));
     }

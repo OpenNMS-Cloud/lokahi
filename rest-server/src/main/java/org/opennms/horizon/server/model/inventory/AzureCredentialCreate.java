@@ -25,33 +25,18 @@
  *     http://www.opennms.org/
  *     http://www.opennms.com/
  *******************************************************************************/
-syntax = "proto3";
 
-import "google/protobuf/empty.proto";
-import "google/protobuf/wrappers.proto";
+package org.opennms.horizon.server.model.inventory;
 
-package opennms.inventory;
-option java_multiple_files = true;
-option java_package = "org.opennms.horizon.inventory.dto";
+import lombok.Getter;
+import lombok.Setter;
 
-message AzureCredentialDTO {
-  int64 id = 1;
-  string location = 2;
-  string tenant_id = 3;
-  string client_id = 4;
-  string subscription_id = 5;
-  string directory_id = 6;
-  int64 create_time = 7;
-}
-
-message AzureCredentialCreateDTO {
-  string location = 1;
-  string client_id = 2;
-  string client_secret = 3;
-  string subscription_id = 4;
-  string directory_id = 5;
-}
-
-service AzureCredentialService {
-  rpc createCredentials(AzureCredentialCreateDTO) returns (AzureCredentialDTO) {};
+@Getter
+@Setter
+public class AzureCredentialCreate {
+    private String location;
+    private String clientId;
+    private String clientSecret;
+    private String subscriptionId;
+    private String directoryId;
 }

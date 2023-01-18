@@ -25,33 +25,23 @@
  *     http://www.opennms.org/
  *     http://www.opennms.com/
  *******************************************************************************/
-syntax = "proto3";
 
-import "google/protobuf/empty.proto";
-import "google/protobuf/wrappers.proto";
+package org.opennms.horizon.server.mapper;
 
-package opennms.inventory;
-option java_multiple_files = true;
-option java_package = "org.opennms.horizon.inventory.dto";
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.NullValueCheckStrategy;
+import org.opennms.horizon.inventory.dto.AzureCredentialCreateDTO;
+import org.opennms.horizon.inventory.dto.AzureCredentialDTO;
+import org.opennms.horizon.server.model.inventory.AzureCredential;
+import org.opennms.horizon.server.model.inventory.AzureCredentialCreate;
 
-message AzureCredentialDTO {
-  int64 id = 1;
-  string location = 2;
-  string tenant_id = 3;
-  string client_id = 4;
-  string subscription_id = 5;
-  string directory_id = 6;
-  int64 create_time = 7;
-}
 
-message AzureCredentialCreateDTO {
-  string location = 1;
-  string client_id = 2;
-  string client_secret = 3;
-  string subscription_id = 4;
-  string directory_id = 5;
-}
+@Mapper(componentModel = "spring")
+public interface AzureCredentialMapper {
 
-service AzureCredentialService {
-  rpc createCredentials(AzureCredentialCreateDTO) returns (AzureCredentialDTO) {};
+    AzureCredential protoToAzureCredential(AzureCredentialDTO azureCredentialDTO);
+
+    @Mapping(target = "location", source = "location", nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
+    AzureCredentialCreateDTO azureCredentialCreateToProto(AzureCredentialCreate request);
 }

@@ -1,8 +1,8 @@
 /*******************************************************************************
  * This file is part of OpenNMS(R).
  *
- * Copyright (C) 2018-2018 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2018 The OpenNMS Group, Inc.
+ * Copyright (C) 2022 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
  *
@@ -26,10 +26,15 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.minion.flows.parser.factory;
+package org.opennms.horizon.shared.azure.http;
 
-public interface Identity {
-    String getId();
-    String getLocation();
-    String getType();
+public class AzureHttpException extends Exception {
+
+    public AzureHttpException(String message) {
+        super(message);
+    }
+
+    public AzureHttpException(String message, Throwable t) {
+        super(message, t);
+    }
 }

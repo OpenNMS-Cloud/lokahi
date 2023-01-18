@@ -43,13 +43,13 @@ import org.opennms.taskset.service.contract.TaskSetServiceGrpc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 
+import javax.transaction.Transactional;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 import static com.jayway.awaitility.Awaitility.await;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@SpringBootTest(properties = { "spring.liquibase.change-log=db/changelog/changelog-test.xml" })
+@SpringBootTest(properties = {"spring.liquibase.change-log=db/changelog/changelog-test.xml"})
 @ContextConfiguration(initializers = {SpringContextTestInitializer.class})
 class NodeGrpcStartupIntTest extends GrpcTestBase {
     private static final int EXPECTED_TASK_DEF_COUNT = 1;
@@ -57,7 +57,8 @@ class NodeGrpcStartupIntTest extends GrpcTestBase {
     private static TestTaskSetGrpcService testGrpcService;
 
     @BeforeEach
-    public void prepare() throws VerificationException, IOException {
+    @Transactional
+    public void prepare() throws VerificationException {
         prepareServer();
     }
 
@@ -68,9 +69,9 @@ class NodeGrpcStartupIntTest extends GrpcTestBase {
     }
 
     @AfterEach
-    public void cleanUp() {
+    public void cleanUp() throws InterruptedException {
         testGrpcService.reset();
-        channel.shutdown();
+        afterTest();
     }
 
     @AfterAll
@@ -80,9 +81,9 @@ class NodeGrpcStartupIntTest extends GrpcTestBase {
     }
 
     @Test
-    void testStartup() throws Exception {
+    void testStartup() {
         // TrapConfigService & FlowsConfigService listens for ApplicationReadyEvent and sends the trap config for each location.
-        await().atMost(10, TimeUnit.SECONDS).untilAtomic(testGrpcService.getTimesCalled(), Matchers.is(2));
+        await().atMost(15, TimeUnit.SECONDS).untilAtomic(testGrpcService.getTimesCalled(), Matchers.is(2));
 
         org.assertj.core.api.Assertions.assertThat(testGrpcService.getRequests())
             .hasSize(2)

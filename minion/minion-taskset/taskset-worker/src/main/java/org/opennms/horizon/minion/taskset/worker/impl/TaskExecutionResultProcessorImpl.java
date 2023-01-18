@@ -1,17 +1,20 @@
 package org.opennms.horizon.minion.taskset.worker.impl;
 
 import com.google.protobuf.Any;
+import com.google.protobuf.Message;
 import org.opennms.horizon.minion.plugin.api.CollectionSet;
+import org.opennms.horizon.minion.plugin.api.ScanResultsResponse;
 import org.opennms.horizon.minion.plugin.api.ServiceDetectorResponse;
+import org.opennms.horizon.minion.plugin.api.ServiceMonitorResponse;
+import org.opennms.horizon.minion.taskset.worker.TaskExecutionResultProcessor;
 import org.opennms.horizon.shared.ipc.rpc.IpcIdentity;
 import org.opennms.horizon.shared.ipc.sink.api.SyncDispatcher;
 import org.opennms.taskset.contract.CollectorResponse;
 import org.opennms.taskset.contract.DetectorResponse;
 import org.opennms.taskset.contract.MonitorResponse;
+import org.opennms.taskset.contract.ScannerResponse;
 import org.opennms.taskset.contract.TaskResult;
 import org.opennms.taskset.contract.TaskSetResults;
-import org.opennms.horizon.minion.taskset.worker.TaskExecutionResultProcessor;
-import org.opennms.horizon.minion.plugin.api.ServiceMonitorResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,6 +41,13 @@ public class TaskExecutionResultProcessorImpl implements TaskExecutionResultProc
 //----------------------------------------
 
     @Override
+    public void queueSendResult(String id, ScanResultsResponse response) {
+        TaskSetResults taskSetResults = formatTaskSetResults(id, response);
+        log.info("Scan Status: id = {}, results = {} ", id, response.getResults());
+        taskSetSinkDispatcher.send(taskSetResults);
+    }
+
+    @Override
     public void queueSendResult(String id, ServiceDetectorResponse response) {
         log.info("Detect Status: id = {} , detected = {}; ", id, response.isServiceDetected());
 
@@ -56,15 +66,34 @@ public class TaskExecutionResultProcessorImpl implements TaskExecutionResultProc
     }
 
     @Override
-    public void queueSendResult(String uuid, CollectionSet collectionSet) {
-        TaskSetResults taskSetResults = formatTaskSetResults(uuid, collectionSet);
-        log.info("Collect Status: id = {}, status = {} ", uuid, collectionSet.getStatus());
+    public void queueSendResult(String id, CollectionSet collectionSet) {
+        TaskSetResults taskSetResults = formatTaskSetResults(id, collectionSet);
+        log.info("Collect Status: id = {}, status = {} ", id, collectionSet.getStatus());
         taskSetSinkDispatcher.send(taskSetResults);
     }
 
 //========================================
 // Internals
 //----------------------------------------
+
+    private TaskSetResults formatTaskSetResults(String id, ScanResultsResponse result) {
+        ScannerResponse scannerResponse = formatScanResultsResponse(result);
+
+        TaskResult taskResult =
+            TaskResult.newBuilder()
+                .setId(id)
+                .setScannerResponse(scannerResponse)
+                .setLocation(identity.getLocation())
+                .setSystemId(identity.getId())
+                .build();
+
+        TaskSetResults taskSetResults =
+            TaskSetResults.newBuilder()
+                .addResults(taskResult)
+                .build();
+
+        return taskSetResults;
+    }
 
     private TaskSetResults formatTaskSetResults(String id, ServiceMonitorResponse result) {
         MonitorResponse monitorResponse = formatMonitorResponse(result);
@@ -102,6 +131,13 @@ public class TaskExecutionResultProcessorImpl implements TaskExecutionResultProc
                 .build();
 
         return taskSetResults;
+    }
+
+    private ScannerResponse formatScanResultsResponse(ScanResultsResponse response) {
+        return ScannerResponse.newBuilder()
+            .setResult(Any.pack(Optional.of(response).map(ScanResultsResponse::getResults).orElse(ScannerResponse.getDefaultInstance().getResult())))
+            .setReason(Optional.of(response).map(ScanResultsResponse::getReason).orElse(ScannerResponse.getDefaultInstance().getReason()))
+            .build();
     }
 
     private DetectorResponse formatDetectorResponse(ServiceDetectorResponse response) {

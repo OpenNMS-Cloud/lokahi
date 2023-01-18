@@ -12,7 +12,7 @@
     <artifactId>twin-core</artifactId>
     <packaging>bundle</packaging>
 
-    <name>OpenNms Horizon :: Minion :: Ipc :: Twin :: Core</name>
+    <name>OpenNMS Horizon Stream :: Minion :: Ipc :: Twin :: Core</name>
 
     <dependencies>
         <dependency>

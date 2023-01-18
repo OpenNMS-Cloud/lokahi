@@ -53,6 +53,10 @@ public class ConfigurationUtil {
     @Value("${grpc.url.events}")
     private String eventsGrpcAddress;
 
+    @Value("${grpc.server.deadline:60000}")
+    private long deadline;
+
+
     @Bean
     public ServerHeaderUtil createHeaderUtil(JWTValidator validator) {
         return new ServerHeaderUtil(validator);
@@ -79,11 +83,11 @@ public class ConfigurationUtil {
 
     @Bean(destroyMethod = "shutdown", initMethod = "initialStubs")
     public InventoryClient createInventoryClient(@Qualifier("inventory") ManagedChannel channel) {
-        return new InventoryClient(channel);
+        return new InventoryClient(channel, deadline);
     }
 
     @Bean(destroyMethod = "shutdown", initMethod = "initialStubs")
     public EventsClient createEventsClient(@Qualifier("events") ManagedChannel channel) {
-        return new EventsClient(channel);
+        return new EventsClient(channel, deadline);
     }
 }

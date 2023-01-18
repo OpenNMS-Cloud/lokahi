@@ -51,15 +51,24 @@ public class AzureCredentialGrpcService extends AzureCredentialServiceGrpc.Azure
 
     @Override
     public void createCredentials(AzureCredentialCreateDTO request, StreamObserver<AzureCredentialDTO> responseObserver) {
-
         Optional<String> tenantIdOptional = tenantLookup.lookupTenantId(Context.current());
 
         tenantIdOptional.ifPresentOrElse(tenantId -> {
 
-            AzureCredentialDTO credentials = service.createCredentials(tenantId, request);
+            try {
+                AzureCredentialDTO credentials = service.createCredentials(tenantId, request);
 
-            responseObserver.onNext(credentials);
-            responseObserver.onCompleted();
+                responseObserver.onNext(credentials);
+                responseObserver.onCompleted();
+
+            } catch (Exception e) {
+
+                Status status = Status.newBuilder()
+                    .setCode(Code.INTERNAL_VALUE)
+                    .setMessage(e.getMessage())
+                    .build();
+                responseObserver.onError(StatusProto.toStatusRuntimeException(status));
+            }
         }, () -> {
 
             Status status = Status.newBuilder()

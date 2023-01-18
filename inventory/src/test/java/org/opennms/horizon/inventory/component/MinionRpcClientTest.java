@@ -92,7 +92,7 @@ class MinionRpcClientTest {
             .addService(mockRequestService)
             .directExecutor().build().start());
         ManagedChannel channel = grpcCleanup.register(InProcessChannelBuilder.forName(MinionRpcClientTest.class.getName()).directExecutor().build());
-        client = new MinionRpcClient(channel, (ctx) -> Optional.ofNullable(GrpcConstants.TENANT_ID_CONTEXT_KEY.get()));
+        client = new MinionRpcClient(channel, (ctx) -> Optional.ofNullable(GrpcConstants.TENANT_ID_CONTEXT_KEY.get()), 5000);
         client.init();
     }
 

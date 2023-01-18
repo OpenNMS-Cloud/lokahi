@@ -40,13 +40,6 @@
             <classifier>features</classifier>
             <type>xml</type>
         </dependency>
-        <dependency>
-            <groupId>org.opennms.horizon.minion</groupId>
-            <artifactId>grpc-features</artifactId>
-            <version>${project.version}</version>
-            <classifier>features</classifier>
-            <type>xml</type>
-        </dependency>
     </dependencies>
 
 
@@ -73,10 +66,6 @@
                                 <descriptor>mvn:org.opennms.horizon.minion/plugin-features/${project.version}/xml/features</descriptor>
                                 <descriptor>file:${project.build.directory}/feature/feature.xml</descriptor>
                             </descriptors>
-                            <javase>11</javase>
-                            <framework>
-                                <feature>framework</feature>
-                            </framework>
                             <features>
                                 <feature>minion-flows</feature>
                             </features>

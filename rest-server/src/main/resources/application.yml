@@ -33,3 +33,5 @@ grpc:
   url:
     inventory: localhost:29065
     events: localhost:30065
+  server:
+    deadline: 60000

@@ -46,7 +46,7 @@
               </div>
           </div>
           <div />
-          <MetricChip :metric="{timestamp: node.latency?.timestamp, label: 'ICMP Latency'}" @click="openLatencyGraph(node)" :data-metric="node.latency?.timestamp" class="bg-status pointer" data-test="node-item-latency" />
+          <MetricChip :metric="{value: node.latency?.value, label: 'ICMP Latency'}" @click="openLatencyGraph(node)" :data-metric="node.latency?.value" class="bg-status pointer" data-test="node-item-latency" />
           <MetricChip :metric="{label: 'Status', status: node.status}" class="bg-status" data-test="node-item-status" />
         </div>
       </TransitionGroup>

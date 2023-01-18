@@ -11,7 +11,7 @@
     <artifactId>task-set-ignite-client</artifactId>
     <packaging>bundle</packaging>
 
-    <name>OpenNMS Horizon :: Shared :: Task Set Service :: Ignite Client</name>
+    <name>OpenNMS Horizon Stream :: Shared :: Task Set Service :: Ignite Client</name>
     <description>
         Ignite client code for accessing the Task Set Service remotely via Ignite service.
     </description>

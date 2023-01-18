@@ -26,6 +26,8 @@ package org.opennms.horizon.minion.flows.parser; /******************************
  *     http://www.opennms.com/
  *******************************************************************************/
 
+import org.opennms.horizon.grpc.telemetry.contract.TelemetryMessage;
+import org.opennms.horizon.minion.flows.parser.FlowSinkModule;
 import org.opennms.horizon.minion.flows.parser.factory.Netflow9UdpParserFactory;
 import org.opennms.horizon.shared.ipc.sink.api.AsyncDispatcher;
 import org.opennms.horizon.shared.ipc.sink.api.MessageDispatcherFactory;
@@ -43,12 +45,13 @@ public class TelemetryRegistryImpl implements TelemetryRegistry {
 
     private final MessageDispatcherFactory messageDispatcherFactory;
 
-    private final UdpListenerModule udpListenerModule;
+    private final FlowSinkModule flowSinkModule;
 
-    public TelemetryRegistryImpl(Netflow9UdpParserFactory netflow9UdpParserFactory, MessageDispatcherFactory messageDispatcherFactory, UdpListenerModule udpListenerModule) {
+    public TelemetryRegistryImpl(Netflow9UdpParserFactory netflow9UdpParserFactory,
+                                 MessageDispatcherFactory messageDispatcherFactory, FlowSinkModule flowSinkModule) {
         this.netflow9UdpParserFactory = netflow9UdpParserFactory;
         this.messageDispatcherFactory = messageDispatcherFactory;
-        this.udpListenerModule = udpListenerModule;
+        this.flowSinkModule = flowSinkModule;
     }
 
     @Override
@@ -62,7 +65,8 @@ public class TelemetryRegistryImpl implements TelemetryRegistry {
     }
 
     @Override
-    public AsyncDispatcher<UdpListenerMessage> getDispatcher(String queueName) {
-        return messageDispatcherFactory.createAsyncDispatcher(udpListenerModule);
+    public AsyncDispatcher<TelemetryMessage> getDispatcher(String queueName) {
+        return messageDispatcherFactory.createAsyncDispatcher(flowSinkModule);
+
     }
 }

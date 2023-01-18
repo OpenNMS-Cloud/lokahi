@@ -32,4 +32,8 @@ public class InventoryRuntimeException extends RuntimeException {
     public InventoryRuntimeException(String message) {
         super(message);
     }
+
+    public InventoryRuntimeException(String message, Throwable t) {
+        super(message, t);
+    }
 }

@@ -1,0 +1,10 @@
+name: 'Install shared-lib and parent-pom'
+description: 'Installs shared-lib and parent-pom, which are prerequisites for other pipelines. Does not perform tests.'
+runs:
+  using: "composite"
+  steps:
+    - name: build
+      run: |
+        mvn install -f parent-pom -DskipTests
+        mvn install -f shared-lib -DskipTests
+      shell: bash

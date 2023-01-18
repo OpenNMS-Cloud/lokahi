@@ -3,24 +3,29 @@
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <version>0.1.0-SNAPSHOT</version>
+
     <parent>
         <groupId>org.opennms.horizon</groupId>
         <artifactId>horizon-parent</artifactId>
         <version>0.1.0-SNAPSHOT</version>
-        <relativePath/> <!-- lookup parent from repository -->
+        <relativePath>../parent-pom</relativePath>
     </parent>
+
+    <name>OpenNMS Horizon Stream :: Inventory</name>
+    <description>
+        A microservice responsible for tracking the state of the network and how to monitor devices.
+    </description>
+
     <artifactId>inventory</artifactId>
-    <name>OpenNMS Horizon :: Inventory</name>
-    <description>inventory</description>
+    <version>0.1.0-SNAPSHOT</version>
+
     <properties>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
         <!--  below image name and tag are used with cucumber it-->
         <docker.image.name>opennms/horizon-stream-inventory</docker.image.name>
         <docker.image.tag>local</docker.image.tag>
         <skipJib>false</skipJib>
     </properties>
+
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -79,6 +84,11 @@
         <dependency>
             <groupId>org.opennms.horizon.shared</groupId>
             <artifactId>inventory</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.opennms.horizon.shared</groupId>
+            <artifactId>azure-http</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -268,6 +278,12 @@
             <version>1.7.0</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.github.tomakehurst</groupId>
+            <artifactId>wiremock</artifactId>
+            <version>${wiremock.version}</version>
+            <scope>test</scope>
+        </dependency>
 
         <dependency>
             <groupId>org.testcontainers</groupId>
@@ -331,7 +347,7 @@
                 <configuration>
                     <skip>${skipJib}</skip>
                     <from>
-                        <image>openjdk:11</image>
+                        <image>openjdk:17</image>
                     </from>
                     <to>
                         <image>${docker.image.name}:${docker.image.tag}</image>

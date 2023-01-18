@@ -12,7 +12,7 @@
     </parent>
 
     <artifactId>horizon-common-logging</artifactId>
-    <name>OpenNMS Horizon :: Shared Library:: Logging</name>
+    <name>OpenNMS Horizon Stream :: Shared Library:: Logging</name>
     <packaging>bundle</packaging>
 
     <dependencies>
@@ -27,10 +27,8 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.10.1</version>
+                <version>${maven-compiler-plugin.version}</version>
                 <configuration>
-                    <source>11</source>
-                    <target>11</target>
                     <annotationProcessorPaths>
                         <path>
                             <groupId>org.projectlombok</groupId>

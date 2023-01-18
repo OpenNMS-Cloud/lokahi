@@ -47,7 +47,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class TaskExecutorLocalCollectorServiceImpl implements TaskExecutorLocalService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(TaskExecutorLocalMonitorServiceImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(TaskExecutorLocalCollectorServiceImpl.class);
 
     private AtomicBoolean active = new AtomicBoolean(false);
 

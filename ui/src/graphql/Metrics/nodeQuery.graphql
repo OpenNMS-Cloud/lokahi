@@ -6,6 +6,8 @@ fragment NodeLatencyParts on Query {
       monitor: $monitor
       instance: $instance
     }
+    timeRange: $timeRange
+    timeRangeUnit: $timeRangeUnit
   ) {
     status
     ...MetricParts

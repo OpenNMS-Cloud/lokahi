@@ -2,18 +2,24 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
+
     <parent>
 		<groupId>org.opennms.horizon</groupId>
 		<artifactId>horizon-parent</artifactId>
 		<version>0.1.0-SNAPSHOT</version>
-		<relativePath/> <!-- lookup parent from repository -->
+        <relativePath>../parent-pom</relativePath>
 	</parent>
-	<artifactId>metrics-processor</artifactId>
-    <name>OpenNMS Horizon :: Metrics Processor</name>
+
+    <name>OpenNMS Horizon Stream :: Metrics Processor</name>
+    <description>
+        A microservice responsible for processing device metrics.
+    </description>
+
+    <artifactId>metrics-processor</artifactId>
 	<version>0.1.0-SNAPSHOT</version>
-	<description>metrics-processor</description>
+
     <properties>
-        <java.version>11</java.version>
+        <java.version>17</java.version>
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -137,7 +143,7 @@
             <plugin>
                 <groupId>kr.motd.maven</groupId>
                 <artifactId>os-maven-plugin</artifactId>
-                <version>1.6.2</version>
+                <version>${os-maven-plugin.version}</version>
                 <executions>
                     <execution>
                         <phase>initialize</phase>
@@ -150,7 +156,7 @@
             <plugin>
                 <groupId>org.xolstice.maven.plugins</groupId>
                 <artifactId>protobuf-maven-plugin</artifactId>
-                <version>0.6.1</version>
+                <version>${protobuf-maven-plugin.version}</version>
                 <configuration>
                     <protocArtifact>com.google.protobuf:protoc:${protobuf.version}:exe:${os.detected.classifier}</protocArtifact>
                     <pluginId>grpc-java</pluginId>

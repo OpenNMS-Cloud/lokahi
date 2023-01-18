@@ -38,6 +38,8 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
@@ -73,10 +75,10 @@ public class AzureCredential {
     private String directoryId;
 
     @NotNull
-    @Column(name = "resource_group")
-    private String resourceGroup; //maybe need to be 1-to-many Credential to ResourceGroups later
-
-    @NotNull
     @Column(name = "create_time", columnDefinition = "TIMESTAMP")
     private LocalDateTime createTime;
+
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "monitoring_location_id", referencedColumnName = "id")
+    private MonitoringLocation monitoringLocation;
 }

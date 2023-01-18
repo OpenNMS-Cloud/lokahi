@@ -2,7 +2,7 @@ query NodesList {
   ...NodesParts
 }
 
-query NodeLatencyMetric($id: Long!, $monitor: String!, $instance: String!) {
+query NodeLatencyMetric($id: Long!, $monitor: String!, $instance: String!, $timeRange: Int!, $timeRangeUnit: TimeRangeUnit!) {
   ...NodeLatencyParts
   ...NodeStatusParts
 }

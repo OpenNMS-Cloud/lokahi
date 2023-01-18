@@ -4,8 +4,27 @@
     <li @click="onLineChart" data-test="line-chart" class="pointer"><Icon :icon="lineChartIcon" /></li>
     <!-- <li @click="onPieChart" data-test="pie-chart"><Icon :icon="pieChartIcon" /></li> -->
     <li @click="onWarning" data-test="warning" class="pointer"><Icon :icon="warningIcon" /></li>
-    <!-- <li @click="onDelete" data-test="delete"><Icon :icon="deleteIcon" /></li> -->
+    <li @click="onDelete" data-test="delete"><Icon :icon="deleteIcon" /></li>
   </ul>
+  <PrimaryModal :visible="isVisible" :title="modal.title" :class="modal.cssClass">
+    <template #content>
+      <p>{{ modal.content }}</p>
+    </template>
+    <template #footer>
+      <FeatherButton 
+        data-testid="cancel-btn" 
+        secondary 
+        @click="closeModal">
+          {{ modal.cancelLabel }}
+      </FeatherButton>
+      <FeatherButton 
+        data-testid="save-btn" 
+        primary
+        @click="deleteHandler">
+          {{ modal.saveLabel }}
+      </FeatherButton>
+    </template>
+  </PrimaryModal>
 </template>
 
 <script lang="ts" setup>
@@ -15,7 +34,17 @@ import PieChart from '@material-design-icons/svg/outlined/pie_chart.svg'
 import Warning from '@featherds/icon/notification/Warning'
 import Delete from '@featherds/icon/action/Delete'
 import { IIcon } from '@/types'
+import { ModalPrimary } from '@/types/modal'
 import { NodeContent } from '@/types/inventory'
+import useSnackbar from '@/composables/useSnackbar'
+import useModal from '@/composables/useModal'
+import { useInventoryQueries } from '@/store/Queries/inventoryQueries'
+import { useNodeMutations } from '@/store/Mutations/nodeMutations'
+
+const { showSnackbar } = useSnackbar()
+const { openModal, closeModal, isVisible } = useModal()
+const inventoryQueries = useInventoryQueries()
+const nodeMutations = useNodeMutations()
 
 const router = useRouter()
 const props = defineProps<{ node: NodeContent}>()
@@ -58,12 +87,46 @@ const warningIcon: IIcon = {
   tooltip: 'Events/Alarms'
 }
 
-const onDelete = () => {
-  console.log('delete')
+const modal = ref<ModalPrimary>({
+  title: '',
+  cssClass: '',
+  content: '',
+  id: '',
+  cancelLabel: 'cancel',
+  saveLabel: 'delete',
+  hideTitle: true
+})
+
+const deleteHandler = async () => {
+  const deleteNode = await nodeMutations.deleteNode({id: modal.value.id})
+
+  if (!deleteNode.error) {
+    closeModal()
+    showSnackbar({
+      msg: 'Node successfully deleted.'
+    })
+    // Timeout because minion may not be available right away
+    // TODO: Replace timeout with websocket/polling
+    setTimeout(() => {
+      inventoryQueries.fetch()
+    }, 350)
+  }
 }
+const onDelete = () => {
+  modal.value = {
+    ...modal.value,
+    title: props.node.label || '',
+    cssClass: 'modal-delete',
+    content: 'Do you want to delete?',
+    id: props.node.id
+  }
+
+  openModal()
+}
+
 const deleteIcon: IIcon = {
   image: markRaw(Delete),
-  title: 'Delete'
+  tooltip: 'Delete'
 }
 </script>
 

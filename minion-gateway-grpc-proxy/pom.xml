@@ -7,17 +7,17 @@
         <groupId>org.opennms.horizon</groupId>
         <artifactId>horizon-parent</artifactId>
         <version>0.1.0-SNAPSHOT</version>
-        <relativePath/> <!-- lookup parent from repository -->
+        <relativePath>../parent-pom</relativePath>
     </parent>
 
     <groupId>org.opennms.horizon.minion.gateway.grpc-proxy</groupId>
     <artifactId>minion-gateway-grpc-proxy</artifactId>
     <packaging>pom</packaging>
 
-    <name>OpenNMS Horizon :: Minion Gateway GRPC Proxy</name>
+    <name>OpenNMS Horizon Stream :: Minion Gateway gRPC Proxy</name>
     <description>
-        Proxy service for GRPC communication with the Minion Gateway.
-        Covers GRPC communications from Minion, and potentially other external services.
+        Proxy service for gRPC communication with the Minion Gateway.
+        Covers gRPC communications from Minion, and potentially other external services.
     </description>
 
     <properties>

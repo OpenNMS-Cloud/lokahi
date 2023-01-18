@@ -1,7 +1,10 @@
+# syntax=docker/dockerfile:1
+
 ##
 ## RELEASE IMAGE
 ##
-FROM opennms/deploy-base:jre-1.3.0.b138
+#FROM opennms/deploy-base:jre-1.3.0.b138
+FROM eclipse-temurin:17
 
 RUN mkdir -p /opt
 
@@ -15,13 +18,13 @@ RUN sed -i 's/^karaf.clean.cache *=.*/karaf.clean.cache = true/' /opt/karaf/etc/
 
 # Create SSH Key-Pair to use with the Karaf Shell
 # This is a workaround to be able to use our health:check which does not work with the karaf/bin/client command
-RUN mkdir /opt/karaf/.ssh && \
-    ssh-keygen -t rsa -f /opt/karaf/.ssh/id_rsa -q -N "" && \
-    chmod 700 /opt/karaf/.ssh && \
-    chmod 600 /opt/karaf/.ssh/id_rsa && \
-    chown 10001 /opt/karaf/.ssh -R && \
-    echo minion=$(cat /opt/karaf/.ssh/id_rsa.pub | awk '{print $2}'),viewer > /opt/karaf/etc/keys.properties && \
-    echo "_g_\\:admingroup = group,admin,manager,viewer,systembundles,ssh" >> /opt/karaf/etc/keys.properties
+#RUN mkdir /opt/karaf/.ssh && \
+#    ssh-keygen -t rsa -f /opt/karaf/.ssh/id_rsa -q -N "" && \
+#    chmod 700 /opt/karaf/.ssh && \
+#    chmod 600 /opt/karaf/.ssh/id_rsa && \
+#    chown 10001 /opt/karaf/.ssh -R && \
+#    echo minion=$(cat /opt/karaf/.ssh/id_rsa.pub | awk '{print $2}'),viewer > /opt/karaf/etc/keys.properties && \
+#    echo "_g_\\:admingroup = group,admin,manager,viewer,systembundles,ssh" >> /opt/karaf/etc/keys.properties
 
 # Allow users in the root group to access them with the same authorization as the directory and file owner
 RUN chmod -R g=u /opt/karaf/
@@ -53,8 +56,6 @@ LABEL org.opencontainers.image.created="${BUILD_DATE}" \
 WORKDIR /opt/karaf
 
 USER 10001
-
-ENV KARAF_SYSTEM_OPTS "--add-opens java.base/java.nio=ALL-UNNAMED --add-opens java.base/java.lang.invoke=ALL-UNNAMED"
 
 ENTRYPOINT [ "/opt/karaf/bin/karaf" ]
 

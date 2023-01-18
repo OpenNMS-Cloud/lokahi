@@ -12,7 +12,7 @@
     <artifactId>minion-features</artifactId>
     <packaging>feature</packaging>
 
-    <name>OpenNms Horizon :: Minion :: Features</name>
+    <name>OpenNMS Horizon Stream :: Minion :: Features</name>
 
     <dependencies>
 
@@ -72,6 +72,13 @@
             <classifier>features</classifier>
             <type>xml</type>
         </dependency>
+        <dependency>
+            <groupId>org.opennms.horizon.minion</groupId>
+            <artifactId>azure-plugin</artifactId>
+            <version>${project.version}</version>
+            <classifier>features</classifier>
+            <type>xml</type>
+        </dependency>
     </dependencies>
 
     <build>
@@ -92,10 +99,6 @@
                                 <descriptor>mvn:org.apache.aries.jax.rs/org.apache.aries.jax.rs.features/${aries.jax.rs.whiteboard.version}/xml</descriptor>
                                 <descriptor>file:${project.build.directory}/feature/feature.xml</descriptor>
                             </descriptors>
-                            <javase>11</javase>
-                            <framework>
-                                <feature>framework</feature>
-                            </framework>
                             <features>
                                 <feature>minion-ng*</feature>
                             </features>

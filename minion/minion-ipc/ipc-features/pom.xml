@@ -12,7 +12,7 @@
     <artifactId>ipc-features</artifactId>
     <packaging>feature</packaging>
 
-    <name>OpenNms Horizon :: Minion :: IPC :: Features</name>
+    <name>OpenNMS Horizon Stream :: Minion :: IPC :: Features</name>
 
     <dependencies>
         <dependency>
@@ -82,10 +82,6 @@
                                 <descriptor>mvn:org.opennms.horizon.minion/observability-features/${project.version}/xml/features</descriptor>
                                 <descriptor>file:${project.build.directory}/feature/feature.xml</descriptor>
                             </descriptors>
-                            <javase>11</javase>
-                            <framework>
-                                <feature>framework</feature>
-                            </framework>
                             <features>
                                 <feature>ipc*</feature>
                             </features>

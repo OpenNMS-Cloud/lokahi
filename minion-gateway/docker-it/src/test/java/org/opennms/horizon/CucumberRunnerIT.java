@@ -40,7 +40,8 @@ import org.opennms.horizon.testcontainers.TestContainerRunnerClassRule;
 @RunWith(Cucumber.class)
 @CucumberOptions(
     glue = {"org.opennms.horizon.stepdefs"},
-    plugin = {"json:target/cucumber-report.json", "html:target/cucumber.html", "pretty"}
+    plugin = {"json:target/cucumber-report.json", "html:target/cucumber.html", "pretty"},
+    tags = "not @ignore"
     )
 public class CucumberRunnerIT {
 

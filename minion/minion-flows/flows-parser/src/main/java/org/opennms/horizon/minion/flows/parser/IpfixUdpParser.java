@@ -34,6 +34,9 @@ import static org.opennms.horizon.minion.flows.listeners.utils.BufferUtils.uint1
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 
+import org.opennms.horizon.grpc.telemetry.contract.TelemetryMessage;
+import org.opennms.horizon.minion.flows.listeners.Dispatchable;
+import org.opennms.horizon.minion.flows.listeners.UdpParser;
 import org.opennms.horizon.minion.flows.parser.factory.DnsResolver;
 import org.opennms.horizon.minion.flows.parser.ie.RecordProvider;
 import org.opennms.horizon.minion.flows.parser.ipfix.proto.Header;
@@ -41,6 +44,7 @@ import org.opennms.horizon.minion.flows.parser.ipfix.proto.Packet;
 import org.opennms.horizon.minion.flows.parser.session.Session;
 import org.opennms.horizon.minion.flows.parser.session.UdpSessionManager;
 import org.opennms.horizon.minion.flows.parser.transport.IpFixMessageBuilder;
+import org.opennms.horizon.shared.ipc.rpc.IpcIdentity;
 import org.opennms.horizon.shared.ipc.sink.api.AsyncDispatcher;
 import org.opennms.horizon.shared.utils.InetAddressUtils;
 
@@ -49,19 +53,17 @@ import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 
 import io.netty.buffer.ByteBuf;
-import org.opennms.horizon.minion.flows.listeners.Dispatchable;
-import org.opennms.horizon.minion.flows.listeners.UdpParser;
-import org.opennms.horizon.minion.flows.listeners.factory.UdpListenerMessage;
 
 public class IpfixUdpParser extends UdpParserBase implements UdpParser, Dispatchable {
 
     private final IpFixMessageBuilder messageBuilder = new IpFixMessageBuilder();
 
     public IpfixUdpParser(final String name,
-                          final AsyncDispatcher<UdpListenerMessage> dispatcher,
+                          final AsyncDispatcher<TelemetryMessage> dispatcher,
+                          final IpcIdentity identity,
                           final DnsResolver dnsResolver,
                           final MetricRegistry metricRegistry) {
-        super(Protocol.IPFIX, name, dispatcher, dnsResolver, metricRegistry);
+        super(Protocol.IPFIX, name, dispatcher, identity, dnsResolver, metricRegistry);
     }
 
     public IpFixMessageBuilder getMessageBuilder() {

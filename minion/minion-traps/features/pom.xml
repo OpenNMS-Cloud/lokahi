@@ -12,7 +12,7 @@
     <artifactId>traps-features</artifactId>
     <packaging>feature</packaging>
 
-    <name>OpenNms Horizon :: Minion :: Traps :: Features</name>
+    <name>OpenNMS Horizon Stream :: Minion :: Traps :: Features</name>
 
     <dependencies>
         <dependency>
@@ -89,10 +89,6 @@
                                 <descriptor>mvn:org.opennms.horizon.minion/plugin-features/${project.version}/xml/features</descriptor>
                                 <descriptor>file:${project.build.directory}/feature/feature.xml</descriptor>
                             </descriptors>
-                            <javase>11</javase>
-                            <framework>
-                                <feature>framework</feature>
-                            </framework>
                             <features>
                                 <feature>minion-traps</feature>
                             </features>

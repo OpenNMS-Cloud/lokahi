@@ -120,11 +120,11 @@ public class DetectorTaskSetService {
                 configuration =
                     Any.pack(IcmpDetectorRequest.newBuilder()
                         .setHost(ipAddress)
-                        .setTimeout(TaskUtils.Icmp.DEFAULT_TIMEOUT)
-                        .setDscp(TaskUtils.Icmp.DEFAULT_DSCP)
-                        .setAllowFragmentation(TaskUtils.Icmp.DEFAULT_ALLOW_FRAGMENTATION)
-                        .setPacketSize(TaskUtils.Icmp.DEFAULT_PACKET_SIZE)
-                        .setRetries(TaskUtils.Icmp.DEFAULT_RETRIES)
+                        .setTimeout(TaskUtils.ICMP_DEFAULT_TIMEOUT_MS)
+                        .setDscp(TaskUtils.ICMP_DEFAULT_DSCP)
+                        .setAllowFragmentation(TaskUtils.ICMP_DEFAULT_ALLOW_FRAGMENTATION)
+                        .setPacketSize(TaskUtils.ICMP_DEFAULT_PACKET_SIZE)
+                        .setRetries(TaskUtils.ICMP_DEFAULT_RETRIES)
                         .build());
                 break;
             }
@@ -132,8 +132,8 @@ public class DetectorTaskSetService {
                 configuration =
                     Any.pack(SnmpDetectorRequest.newBuilder()
                         .setHost(ipAddress)
-                        .setTimeout(TaskUtils.Snmp.DEFAULT_TIMEOUT)
-                        .setRetries(TaskUtils.Snmp.DEFAULT_RETRIES)
+                        .setTimeout(TaskUtils.SNMP_DEFAULT_TIMEOUT_MS)
+                        .setRetries(TaskUtils.SNMP_DEFAULT_RETRIES)
                         .build());
 
                 break;

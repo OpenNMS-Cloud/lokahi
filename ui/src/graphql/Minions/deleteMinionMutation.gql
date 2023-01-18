@@ -1,0 +1,3 @@
+mutation DeleteMinion ($id: String!) {
+  deleteMinion (id: $id)
+}

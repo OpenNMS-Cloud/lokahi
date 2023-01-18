@@ -1,19 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
 
     <parent>
         <groupId>org.opennms.horizon</groupId>
         <artifactId>horizon-parent</artifactId>
         <version>0.1.0-SNAPSHOT</version>
+        <relativePath>../parent-pom</relativePath>
     </parent>
 
-    <modelVersion>4.0.0</modelVersion>
+    <name>OpenNMS Horizon Stream :: Minion</name>
+    <description>
+        A Karaf-based Java program that's responsible for monitoring devices on a network.
+    </description>
 
     <groupId>org.opennms.horizon.minion</groupId>
     <artifactId>minion</artifactId>
     <packaging>pom</packaging>
-    <name>OpenNMS Horizon Minion</name>
     <inceptionYear>2022</inceptionYear>
 
     <modules>
@@ -175,7 +179,7 @@
                 <plugin>
                     <groupId>io.fabric8</groupId>
                     <artifactId>docker-maven-plugin</artifactId>
-                    <version>0.38.1</version>
+                    <version>0.40.3</version>
                     <extensions>true</extensions>
                 </plugin>
                 <plugin>
@@ -216,6 +220,12 @@
                     <artifactId>karaf-maven-plugin</artifactId>
                     <version>${karaf.version}</version>
                     <extensions>true</extensions>
+                    <configuration combine.children="append">
+                        <javase>${java.version}</javase>
+                        <framework>
+                            <feature>framework</feature>
+                        </framework>
+                    </configuration>
                 </plugin>
             </plugins>
         </pluginManagement>

@@ -1,37 +1,46 @@
 <blueprint xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0"
-  xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
-  xsi:schemaLocation="http://www.osgi.org/xmlns/blueprint/v1.0.0 http://www.osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd">
+           xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
+           xsi:schemaLocation="http://www.osgi.org/xmlns/blueprint/v1.0.0 http://www.osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd">
 
-  <bean id="registrationService" class="org.opennms.horizon.minion.plugin.api.DummyRegistrationService" />
+    <bean id="registrationService" class="org.opennms.horizon.minion.plugin.api.DummyRegistrationService"/>
 
-  <bean id="listenerFactoryRegistry" class="org.opennms.horizon.minion.plugin.api.registries.ListenerFactoryRegistryImpl">
-    <argument ref="blueprintBundleContext"/>
-  </bean>
-  <service ref="listenerFactoryRegistry" interface="org.opennms.horizon.minion.plugin.api.registries.ListenerFactoryRegistry" />
+    <bean id="listenerFactoryRegistry"
+          class="org.opennms.horizon.minion.plugin.api.registries.ListenerFactoryRegistryImpl">
+        <argument ref="blueprintBundleContext"/>
+    </bean>
+    <service ref="listenerFactoryRegistry"
+             interface="org.opennms.horizon.minion.plugin.api.registries.ListenerFactoryRegistry"/>
 
-  <bean id="serviceConnectorFactoryRegistry" class="org.opennms.horizon.minion.plugin.api.registries.ServiceConnectorFactoryRegistryImpl">
-    <argument ref="blueprintBundleContext"/>
-  </bean>
-  <service ref="serviceConnectorFactoryRegistry" interface="org.opennms.horizon.minion.plugin.api.registries.ServiceConnectorFactoryRegistry"/>
+    <bean id="serviceConnectorFactoryRegistry"
+          class="org.opennms.horizon.minion.plugin.api.registries.ServiceConnectorFactoryRegistryImpl">
+        <argument ref="blueprintBundleContext"/>
+    </bean>
+    <service ref="serviceConnectorFactoryRegistry"
+             interface="org.opennms.horizon.minion.plugin.api.registries.ServiceConnectorFactoryRegistry"/>
 
-  <!-- plugin configuration framework -->
-  <bean id="detectorRegistry" class="org.opennms.horizon.minion.plugin.api.registries.DetectorRegistryImpl">
-    <argument ref="blueprintBundleContext" />
-    <argument ref="registrationService" />
-  </bean>
-  <service ref="detectorRegistry" interface="org.opennms.horizon.minion.plugin.api.registries.DetectorRegistry" />
+    <!-- plugin configuration framework -->
+    <bean id="detectorRegistry" class="org.opennms.horizon.minion.plugin.api.registries.DetectorRegistryImpl">
+        <argument ref="blueprintBundleContext"/>
+        <argument ref="registrationService"/>
+    </bean>
+    <service ref="detectorRegistry" interface="org.opennms.horizon.minion.plugin.api.registries.DetectorRegistry"/>
 
-  <bean id="monitorRegistry" class="org.opennms.horizon.minion.plugin.api.registries.MonitorRegistryImpl">
-    <argument ref="blueprintBundleContext" />
-    <argument ref="registrationService" />
-  </bean>
-  <service ref="monitorRegistry" interface="org.opennms.horizon.minion.plugin.api.registries.MonitorRegistry" />
+    <bean id="monitorRegistry" class="org.opennms.horizon.minion.plugin.api.registries.MonitorRegistryImpl">
+        <argument ref="blueprintBundleContext"/>
+        <argument ref="registrationService"/>
+    </bean>
+    <service ref="monitorRegistry" interface="org.opennms.horizon.minion.plugin.api.registries.MonitorRegistry"/>
 
     <bean id="collectorRegistry" class="org.opennms.horizon.minion.plugin.api.registries.CollectorRegistryImpl">
-        <argument ref="blueprintBundleContext" />
-        <argument ref="registrationService" />
+        <argument ref="blueprintBundleContext"/>
+        <argument ref="registrationService"/>
     </bean>
-    <service ref="collectorRegistry" interface="org.opennms.horizon.minion.plugin.api.registries.CollectorRegistry" />
+    <service ref="collectorRegistry" interface="org.opennms.horizon.minion.plugin.api.registries.CollectorRegistry"/>
+
+    <bean id="scannerRegistry" class="org.opennms.horizon.minion.plugin.api.registries.ScannerRegistryImpl">
+        <argument ref="blueprintBundleContext"/>
+        <argument ref="registrationService"/>
+    </bean>
+    <service ref="scannerRegistry" interface="org.opennms.horizon.minion.plugin.api.registries.ScannerRegistry"/>
 
 </blueprint>

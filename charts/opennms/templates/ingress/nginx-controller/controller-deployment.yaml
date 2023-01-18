@@ -1,3 +1,4 @@
+{{- if .Values.Ingress.Enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -138,3 +139,4 @@ spec:
       - name: webhook-cert
         secret:
           secretName: ingress-nginx-admission
+{{- end }}

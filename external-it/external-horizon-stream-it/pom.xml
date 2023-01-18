@@ -11,18 +11,23 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
+    <name>OpenNMS Horizon Stream :: External IT</name>
+    <description>
+        A Spring Boot based application that runs E2E tests against a fully deployed Horizon Stream cluster.
+
+        Intended to be used in CI pipelines.
+    </description>
+
     <groupId>org.opennms.horizon.exttest</groupId>
     <artifactId>external-horizon-stream-it</artifactId>
     <version>0.1.0-SNAPSHOT</version>
-
-    <name>External IT :: Horizon</name>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
         <cucumber.version>7.1.0</cucumber.version>
-        <java.version>11</java.version>
+        <java.version>17</java.version>
         <junit.version>4.13.2</junit.version>
         <keycloak.version>17.0.0</keycloak.version>
         <rest-assured.version>4.3.3</rest-assured.version>

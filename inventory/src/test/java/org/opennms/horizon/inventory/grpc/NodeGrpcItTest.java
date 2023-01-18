@@ -31,6 +31,7 @@ package org.opennms.horizon.inventory.grpc;
 import static com.jayway.awaitility.Awaitility.await;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -54,8 +55,11 @@ import org.keycloak.common.VerificationException;
 import org.opennms.horizon.inventory.SpringContextTestInitializer;
 import org.opennms.horizon.inventory.dto.NodeCreateDTO;
 import org.opennms.horizon.inventory.dto.NodeDTO;
+import org.opennms.horizon.inventory.dto.NodeList;
 import org.opennms.horizon.inventory.dto.NodeServiceGrpc;
 import org.opennms.horizon.inventory.grpc.taskset.TestTaskSetGrpcService;
+import org.opennms.horizon.inventory.mapper.NodeMapper;
+import org.opennms.horizon.inventory.mapper.NodeMapperImpl;
 import org.opennms.horizon.inventory.model.IpInterface;
 import org.opennms.horizon.inventory.model.MonitoringLocation;
 import org.opennms.horizon.inventory.model.Node;
@@ -138,6 +142,11 @@ class NodeGrpcItTest extends GrpcTestBase {
         NodeDTO node = serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).createNode(createDTO);
 
         assertEquals(label, node.getNodeLabel());
+        assertThat(node.getObjectId()).isEmpty();
+        assertThat(node.getSystemName()).isEmpty();
+        assertThat(node.getSystemDesc()).isEmpty();
+        assertThat(node.getSystemLocation()).isEmpty();
+        assertThat(node.getSystemContact()).isEmpty();
         await().atMost(10, TimeUnit.SECONDS).untilAtomic(testGrpcService.getTimesCalled(), Matchers.is(3));
 
         org.assertj.core.api.Assertions.assertThat(testGrpcService.getRequests())
@@ -391,5 +400,47 @@ class NodeGrpcItTest extends GrpcTestBase {
         assertThat(status.getCode()).isEqualTo(Code.NOT_FOUND_VALUE);
         verify(spyInterceptor).verifyAccessToken(authHeader);
         verify(spyInterceptor).interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));
+    }
+
+    @Test
+    void testGetNodeWithNodeInfo() throws VerificationException {
+        Node node = prepareNodeWithNodInfo();
+        NodeDTO nodeDTO = serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader)))
+            .getNodeById(Int64Value.of(node.getId()));
+        assertNodeDTO(nodeDTO, node);
+        verify(spyInterceptor).verifyAccessToken(authHeader);
+        verify(spyInterceptor).interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));
+    }
+
+    @Test
+    void testListNodeWithNodInfo() throws VerificationException {
+        Node node = prepareNodeWithNodInfo();
+        NodeList nodeList = serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader)))
+            .listNodes(Empty.newBuilder().build());
+        assertThat(nodeList.getNodesList().size()).isEqualTo(1);
+        assertNodeDTO(nodeList.getNodes(0), node);
+        verify(spyInterceptor).verifyAccessToken(authHeader);
+        verify(spyInterceptor).interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));
+    }
+
+    private void assertNodeDTO(NodeDTO actual, Node node) {
+        NodeMapper mapper = new NodeMapperImpl();
+        node.setMonitoringLocationId(node.getMonitoringLocation().getId());
+        NodeDTO expected = mapper.modelToDTO(node);
+        assertThat(actual).isEqualTo(expected);
+    }
+
+    private Node prepareNodeWithNodInfo() {
+        MonitoringLocation location = new MonitoringLocation();
+        location.setLocation("test-location");
+        location.setTenantId(tenantId);
+        monitoringLocationRepository.save(location);
+        Node node = new Node();
+        node.setNodeLabel("test-node");
+        node.setMonitoringLocation(location);
+        node.setTenantId(tenantId);
+        node.setCreateTime(LocalDateTime.now());
+        nodeRepository.save(node);
+        return node;
     }
 }

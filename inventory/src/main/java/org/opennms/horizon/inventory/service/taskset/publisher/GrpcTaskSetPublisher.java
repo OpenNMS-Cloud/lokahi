@@ -28,8 +28,12 @@
 
 package org.opennms.horizon.inventory.service.taskset.publisher;
 
-import io.grpc.Context;
-import io.grpc.ManagedChannel;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+
 import org.opennms.horizon.inventory.grpc.TenantIdClientInterceptor;
 import org.opennms.horizon.inventory.grpc.TenantLookup;
 import org.opennms.horizon.shared.constants.GrpcConstants;
@@ -43,10 +47,8 @@ import org.opennms.taskset.service.contract.TaskSetServiceGrpc.TaskSetServiceBlo
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import io.grpc.Context;
+import io.grpc.ManagedChannel;
 
 public class GrpcTaskSetPublisher implements TaskSetPublisher {
 
@@ -54,13 +56,15 @@ public class GrpcTaskSetPublisher implements TaskSetPublisher {
     private static final Logger log = LoggerFactory.getLogger(GrpcTaskSetPublisher.class);
     private final ManagedChannel channel;
     private final TenantLookup tenantLookup;
+    private final long deadline;
     private final Map<String, Map<String, TaskSet>> taskSetsByTenantLocation = new HashMap<>();
 
     private TaskSetServiceBlockingStub taskSetServiceStub;
 
-    public GrpcTaskSetPublisher(ManagedChannel channel, TenantLookup tenantLookup) {
+    public GrpcTaskSetPublisher(ManagedChannel channel, TenantLookup tenantLookup, long deadline) {
         this.channel = channel;
         this.tenantLookup = tenantLookup;
+        this.deadline = deadline;
     }
 
     private void init() {
@@ -78,7 +82,7 @@ public class GrpcTaskSetPublisher implements TaskSetPublisher {
                     .build();
 
             PublishTaskSetResponse response = Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, tenantId).call(() ->
-                taskSetServiceStub.publishTaskSet(request)
+                taskSetServiceStub.withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).publishTaskSet(request)
             );
 
             log.debug("Publish task set complete: location={}, response={}", location, response);

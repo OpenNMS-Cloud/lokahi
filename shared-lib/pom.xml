@@ -3,17 +3,19 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
     <parent>
         <groupId>org.opennms.horizon</groupId>
         <artifactId>horizon-parent</artifactId>
         <version>0.1.0-SNAPSHOT</version>
+        <relativePath>../parent-pom</relativePath>
     </parent>
+
+    <name>OpenNMS Horizon Stream :: Shared Library</name>
+    <description>A library of shared code across different Java-based microservices.</description>
 
     <groupId>org.opennms.horizon.shared</groupId>
     <artifactId>shared-lib</artifactId>
     <version>0.1.0-SNAPSHOT</version>
-    <name>OpenNMS Horizon :: Shared Library</name>
     <packaging>pom</packaging>
 
     <modules>
@@ -31,6 +33,7 @@
         <module>events</module>
         <module>horizon-grpc-common-constants</module>
         <module>datachoices</module>
+        <module>azure</module>
     </modules>
 
     <build>

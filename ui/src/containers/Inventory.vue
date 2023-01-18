@@ -5,7 +5,7 @@
       <FeatherTab v-for="tab in tabs" :key="tab.label">{{ tab.label }}</FeatherTab>
     </template>
     <FeatherTabPanel>
-      <Filter v-if="tabMonitoredContent.length" />
+      <InventoryFilter v-if="tabMonitoredContent.length" />
       <InventoryMonitoredNodesTabContent v-if="tabMonitoredContent.length" :tabContent="tabMonitoredContent" />
     </FeatherTabPanel>
     <!-- <FeatherTabPanel>
@@ -220,7 +220,7 @@ import { useInventoryQueries } from '@/store/Queries/inventoryQueries'
 const heading = 'Network Inventory'
 const tabs = [
   { label: 'Monitored Nodes' },
-  { label: 'Umonitored Nodes' },
+  { label: 'Unmonitored Nodes' },
   { label: 'Detected Nodes' }
 ]
 

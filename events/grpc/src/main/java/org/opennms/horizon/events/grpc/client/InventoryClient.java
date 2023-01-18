@@ -28,6 +28,8 @@
 
 package org.opennms.horizon.events.grpc.client;
 
+import java.util.concurrent.TimeUnit;
+
 import org.opennms.horizon.inventory.dto.NodeIdQuery;
 import org.opennms.horizon.inventory.dto.NodeServiceGrpc;
 import org.opennms.horizon.shared.constants.GrpcConstants;
@@ -40,6 +42,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class InventoryClient {
     private final ManagedChannel channel;
+    private final long deadline;
     private NodeServiceGrpc.NodeServiceBlockingStub nodeStub;
 
     protected void initialStubs() {
@@ -60,6 +63,7 @@ public class InventoryClient {
         NodeIdQuery query = NodeIdQuery.newBuilder()
             .setIpAddress(ipAddress).setLocation(location).build();
         return nodeStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
+            .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
             .getNodeIdFromQuery(query).getValue();
     }
 }

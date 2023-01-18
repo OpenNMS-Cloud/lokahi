@@ -26,11 +26,11 @@ export enum TimeUnit {
   MSecs
 }
 
-export declare type fncVoid = () => void;
-export declare type fncArgVoid = (...args: unknown[]) => void;
+export declare type fncVoid = () => void
+export declare type fncArgVoid = (...args: unknown[]) => void
 
 export interface IIcon {
-  image: any,
+  image: any
   title?: string
   tooltip?: string
 }

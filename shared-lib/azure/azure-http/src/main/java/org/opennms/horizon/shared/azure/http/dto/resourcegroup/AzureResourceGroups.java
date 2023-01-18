@@ -26,21 +26,18 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.minion.flows.parser.factory;
+package org.opennms.horizon.shared.azure.http.dto.resourcegroup;
 
-public class IdentityImpl implements Identity {
-    @Override
-    public String getId() {
-        return null;
-    }
+import com.google.gson.annotations.SerializedName;
+import lombok.Getter;
+import lombok.Setter;
 
-    @Override
-    public String getLocation() {
-        return null;
-    }
+import java.util.ArrayList;
+import java.util.List;
 
-    @Override
-    public String getType() {
-        return null;
-    }
+@Getter
+@Setter
+public class AzureResourceGroups {
+    @SerializedName("value")
+    private List<AzureValue> value = new ArrayList<>();
 }

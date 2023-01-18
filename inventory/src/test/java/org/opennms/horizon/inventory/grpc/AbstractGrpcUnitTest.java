@@ -34,6 +34,7 @@ import static org.mockito.Mockito.spy;
 
 import java.io.IOException;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.Rule;
 import org.keycloak.adapters.KeycloakDeployment;
@@ -48,12 +49,11 @@ import io.grpc.inprocess.InProcessServerBuilder;
 import io.grpc.testing.GrpcCleanupRule;
 
 public abstract class AbstractGrpcUnitTest {
-    @Rule
-    public final GrpcCleanupRule grpCleanup = new GrpcCleanupRule();
 
     protected InventoryServerInterceptor spyInterceptor;
     protected TenantLookup tenantLookup = new GrpcTenantLookupImpl();
     protected String serverName;
+    protected Server server;
 
     protected final String tenantId = "test-tenant";
     protected final String authHeader = "Bearer esgs12345";
@@ -61,11 +61,15 @@ public abstract class AbstractGrpcUnitTest {
     protected void startServer(BindableService service) throws IOException, VerificationException {
         spyInterceptor = spy(new InventoryServerInterceptor(mock(KeycloakDeployment.class)));
         serverName = InProcessServerBuilder.generateName();
-        Server server = InProcessServerBuilder.forName(serverName)
+        server = InProcessServerBuilder.forName(serverName)
             .addService(ServerInterceptors.intercept(service, spyInterceptor)).directExecutor().build();
         server.start();
-        grpCleanup.register(server);
         doReturn(Optional.of(tenantId)).when(spyInterceptor).verifyAccessToken(authHeader);
+    }
+
+    protected void stopServer() throws InterruptedException {
+        server.shutdownNow();
+        server.awaitTermination(10, TimeUnit.SECONDS);
     }
 
     protected Metadata createHeaders() {

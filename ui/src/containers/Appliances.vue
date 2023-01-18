@@ -56,6 +56,7 @@ const gapWidth = computed<string>(() => appliancesStore.minionsTableOpen ? '20px
   }
 }
 
+// TODO: transform below using mediaQueriesMixins.scss
 // small screen / tablet / mobile
 $breakpoint: 1024px;
 @media (max-width: $breakpoint) {

@@ -34,7 +34,8 @@ describe.skip('MinionsTable.vue', () => {
       ['Minion', 'col-minion'],
       ['Latency', 'col-latency'],
       ['Uptime', 'col-uptime'],
-      ['Status', 'col-status']
+      ['Status', 'col-status'],
+      ['Status', 'col-delete']
     ]
 
     it.each(requiredColumns)('should have "%s" column', (_, dataTest) => {

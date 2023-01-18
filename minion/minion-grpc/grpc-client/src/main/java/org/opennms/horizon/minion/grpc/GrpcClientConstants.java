@@ -32,7 +32,7 @@ public interface GrpcClientConstants {
 
     String GRPC_CLIENT_PID = "org.opennms.core.ipc.grpc.client";
     String GRPC_HOST = "host";
-    String DEFAULT_GRPC_HOST  = "localhost";
+    String DEFAULT_GRPC_HOST = "localhost";
     String GRPC_PORT = "port";
     int DEFAULT_GRPC_PORT = 8990;
     String TLS_ENABLED = "tls.enabled";

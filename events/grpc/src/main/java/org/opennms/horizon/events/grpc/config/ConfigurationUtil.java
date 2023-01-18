@@ -28,14 +28,15 @@
 
 package org.opennms.horizon.events.grpc.config;
 
-import io.grpc.ManagedChannel;
-import io.grpc.ManagedChannelBuilder;
-import lombok.extern.slf4j.Slf4j;
 import org.opennms.horizon.events.grpc.client.InventoryClient;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import io.grpc.ManagedChannel;
+import io.grpc.ManagedChannelBuilder;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Configuration
@@ -43,6 +44,8 @@ public class ConfigurationUtil {
 
     @Value("${grpc.url.inventory}")
     private String inventoryGrpcAddress;
+    @Value("${grpc.server.deadline:60000}")
+    private long deadline;
 
     @Bean(name = "inventory")
     public ManagedChannel createInventoryChannel() {
@@ -53,6 +56,6 @@ public class ConfigurationUtil {
 
     @Bean(destroyMethod = "shutdown", initMethod = "initialStubs")
     public InventoryClient createInventoryClient(@Qualifier("inventory") ManagedChannel channel) {
-        return new InventoryClient(channel);
+        return new InventoryClient(channel, deadline);
     }
 }

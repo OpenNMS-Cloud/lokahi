@@ -85,6 +85,18 @@
             <artifactId>junit</artifactId>
             <scope>test</scope>
         </dependency>
+
+        <dependency>
+            <!--
+                temporarily required for test-containers on m1 mac
+                https://github.com/testcontainers/testcontainers-java/issues/3610
+            -->
+            <groupId>net.java.dev.jna</groupId>
+            <artifactId>jna</artifactId>
+            <version>5.12.1</version>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
 
     <build>

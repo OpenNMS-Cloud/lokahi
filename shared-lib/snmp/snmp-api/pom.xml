@@ -10,7 +10,7 @@
   </parent>
 
   <artifactId>snmp-api</artifactId>
-  <name>OpenNMS Horizon :: Shared Library :: Snmp :: Api</name>
+  <name>OpenNMS Horizon Stream :: Shared Library :: Snmp :: Api</name>
   <packaging>bundle</packaging>
 
   <dependencies>
@@ -106,7 +106,7 @@
                                 <descriptor>mvn:org.apache.karaf.features/standard/${karaf.version}/xml/features</descriptor>
                                 <descriptor>file:${project.build.directory}/feature/feature.xml</descriptor>
                             </descriptors>
-                            <javase>11</javase>
+                            <javase>17</javase>
                             <framework>
                                 <feature>framework</feature>
                             </framework>

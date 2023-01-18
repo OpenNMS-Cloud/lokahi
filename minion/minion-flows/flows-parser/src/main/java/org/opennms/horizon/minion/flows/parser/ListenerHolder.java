@@ -47,12 +47,8 @@ public class ListenerHolder implements Listener {
         listenerMap.clear();
     }
 
-    public void replaceAll(List<FlowsListener> listeners) {
-        this.clear();
-        listeners.stream().collect(Collectors.toMap(FlowsListener::getName, Function.identity()));
-        for(FlowsListener listener: listeners){
-            this.listenerMap.put(listener.getName(), listener);
-        }
+    public FlowsListener get(String name) {
+        return this.listenerMap.get(name);
     }
 
     public void put(FlowsListener listener) {

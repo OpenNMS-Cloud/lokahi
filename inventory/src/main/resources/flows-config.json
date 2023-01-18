@@ -1,7 +1,7 @@
 {
   "listeners": [{
     "name": "Netflow-5-UDP-8877",
-    "className": "org.opennms.horizon.minion.flows.listeners.UdpListener",
+    "className": "UdpListener",
     "enabled": true,
     "parameters": [{
       "key": "port",
@@ -9,7 +9,7 @@
     }],
     "parsers": [{
       "name": "Netflow-5-Parser",
-      "className": "org.opennms.horizon.minion.flows.parser.Netflow5UdpParser",
+      "className": "Netflow5UdpParser",
       "queue": {
         "name": "Netflow-5",
         "adapters": [{
@@ -28,7 +28,7 @@
     }]
   }, {
     "name": "IPFIX-TCP-4730",
-    "className": "org.opennms.horizon.minion.flows.listeners.TcpListener",
+    "className": "TcpListener",
     "enabled": true,
     "parameters": [{
       "key": "port",
@@ -36,7 +36,7 @@
     }],
     "parsers": [{
       "name": "IPFIX-TCP-Parser",
-      "className": "org.opennms.horizon.minion.flows.parser.IpfixTcpParser",
+      "className": "IpfixTcpParser",
       "queue": {
         "name": "IPFIX",
         "adapters": [{

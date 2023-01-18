@@ -48,6 +48,7 @@ public class TcpListenerFactory implements ListenerFactory {
 
     public TcpListenerFactory(TelemetryRegistry telemetryRegistry) {
         this.telemetryRegistry = Objects.requireNonNull(telemetryRegistry);
+        telemetryRegistry.addListenerFactory(this);
     }
 
     @Override

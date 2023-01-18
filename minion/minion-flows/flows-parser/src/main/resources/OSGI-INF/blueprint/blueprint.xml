@@ -22,42 +22,53 @@
         </service-properties>
     </service>
 
+    <bean id="listenerHolder" class="org.opennms.horizon.minion.flows.parser.ListenerHolder"/>
+
     <bean id="telemetryRegistry" class="org.opennms.horizon.minion.flows.parser.TelemetryRegistryImpl">
-        <argument ref="netflow9UdpParserFactory"/>
         <argument ref="messageDispatcherFactory"/>
-        <argument ref="flowSinkModule"/>
+        <argument ref="identity"/>
+        <argument ref="listenerHolder"/>
     </bean>
+    <service ref="telemetryRegistry" interface="org.opennms.horizon.minion.flows.listeners.factory.TelemetryRegistry"/>
+
     <bean id="flowSinkModule" class="org.opennms.horizon.minion.flows.parser.FlowSinkModule" >
         <argument ref="identity" />
     </bean>
 
-    <cm:property-placeholder id="identityProperties" persistent-id="org.horizon.identity" update-strategy="reload"
-                             placeholder-prefix="$[" placeholder-suffix="]">
-        <cm:default-properties>
-            <cm:property name="id" value="UNKNOWN"/>
-            <cm:property name="location" value="Default"/>
-        </cm:default-properties>
-    </cm:property-placeholder>
-
-    <!-- Netflow 9 UDP Parser Factory -->
-    <bean id="netflow9UdpParserFactory"
-          class="org.opennms.horizon.minion.flows.parser.factory.Netflow9UdpParserFactory">
+    <!-- Netflow 5 UDP Parser Factory -->
+    <bean id="netflow5UdpParserFactory"
+          class="org.opennms.horizon.minion.flows.parser.factory.Netflow5UdpParserFactory">
         <argument ref="telemetryRegistry"/>
         <argument ref="dnsResolver"/>
-        <argument ref="flowSinkModule"/>
+        <argument ref="identity"/>
     </bean>
-    <service ref="netflow9UdpParserFactory" interface="org.opennms.horizon.minion.flows.parser.factory.ParserFactory">
-    </service>
+    <service ref="netflow5UdpParserFactory" interface="org.opennms.horizon.minion.flows.parser.factory.ParserFactory"/>
+
+    <!-- Netflow 9 UDP Parser Factory -->
+    <bean id="netflow9UdpParserFactory" class="org.opennms.horizon.minion.flows.parser.factory.Netflow9UdpParserFactory">
+        <argument ref="telemetryRegistry"/>
+        <argument ref="dnsResolver"/>
+        <argument ref="identity"/>
+    </bean>
+    <service ref="netflow9UdpParserFactory" interface="org.opennms.horizon.minion.flows.parser.factory.ParserFactory"/>
 
     <!-- Ipfix TCP Parser Factory -->
     <bean id="ipfixTcpParserFactory"
           class="org.opennms.horizon.minion.flows.parser.factory.IpfixTcpParserFactory">
         <argument ref="telemetryRegistry"/>
         <argument ref="dnsResolver"/>
-        <argument ref="flowSinkModule"/>
+        <argument ref="identity"/>
     </bean>
+    <service ref="ipfixTcpParserFactory" interface="org.opennms.horizon.minion.flows.parser.factory.ParserFactory"/>
 
-    <bean id="listenerHolder" class="org.opennms.horizon.minion.flows.parser.ListenerHolder"/>
+    <!-- Ipfix UDP Parser Factory -->
+    <bean id="ipfixUpdParserFactory"
+          class="org.opennms.horizon.minion.flows.parser.factory.IpfixUdpParserFactory">
+        <argument ref="telemetryRegistry"/>
+        <argument ref="dnsResolver"/>
+        <argument ref="identity"/>
+    </bean>
+    <service ref="ipfixUpdParserFactory" interface="org.opennms.horizon.minion.flows.parser.factory.ParserFactory"/>
 
     <!-- UDP Listener Factory -->
     <bean id="udpListenerFactory" class="org.opennms.horizon.minion.flows.listeners.factory.UdpListenerFactory">
@@ -70,11 +81,7 @@
     </bean>
 
     <bean id="configManager" class="org.opennms.horizon.minion.flows.parser.ConfigManager">
-        <argument ref="messageDispatcherFactory"/>
-        <argument ref="identity"/>
-        <argument ref="listenerHolder"/>
-        <argument ref="udpListenerFactory"/>
-        <argument ref="tcpListenerFactory"/>
+        <argument ref="telemetryRegistry"/>
     </bean>
 
     <service ref="configManager" interface="org.opennms.horizon.minion.plugin.api.ListenerFactory">

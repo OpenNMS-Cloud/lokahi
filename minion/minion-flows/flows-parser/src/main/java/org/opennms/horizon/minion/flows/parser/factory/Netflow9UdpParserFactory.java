@@ -28,30 +28,29 @@
 
 package org.opennms.horizon.minion.flows.parser.factory;
 
-import java.util.Objects;
-
-import org.opennms.horizon.minion.flows.listeners.factory.TelemetryRegistry;
-import org.opennms.horizon.minion.flows.parser.FlowSinkModule;
-import org.opennms.horizon.shared.ipc.sink.api.AsyncDispatcher;
-
 import com.codahale.metrics.MetricRegistry;
-
 import org.opennms.horizon.minion.flows.listeners.Parser;
-import org.opennms.horizon.minion.flows.listeners.factory.UdpListenerMessage;
+import org.opennms.horizon.minion.flows.listeners.factory.TelemetryRegistry;
 import org.opennms.horizon.minion.flows.parser.Netflow9UdpParser;
+import org.opennms.horizon.shared.ipc.rpc.IpcIdentity;
 import org.opennms.sink.flows.contract.ParserConfig;
+
+import java.util.Objects;
 
 public class Netflow9UdpParserFactory implements ParserFactory {
 
-    private final DnsResolver dnsResolver;
     private final TelemetryRegistry telemetryRegistry;
-    private final FlowSinkModule flowSinkModule;
+    private final IpcIdentity identity;
+    private final DnsResolver dnsResolver;
 
     public Netflow9UdpParserFactory(final TelemetryRegistry telemetryRegistry,
-                                    final DnsResolver dnsResolver, FlowSinkModule flowSinkModule) {
-        this.dnsResolver = Objects.requireNonNull(dnsResolver);
+                                    final IpcIdentity identity,
+                                    final DnsResolver dnsResolver) {
         this.telemetryRegistry = Objects.requireNonNull(telemetryRegistry);
-        this.flowSinkModule = Objects.requireNonNull(flowSinkModule);
+        this.identity = Objects.requireNonNull(identity);
+        this.dnsResolver = Objects.requireNonNull(dnsResolver);
+
+        telemetryRegistry.addParserFactory(this);
     }
 
     @Override
@@ -61,7 +60,7 @@ public class Netflow9UdpParserFactory implements ParserFactory {
 
     @Override
     public Parser createBean(final ParserConfig parserConfig) {
-        final AsyncDispatcher<UdpListenerMessage> dispatcher = telemetryRegistry.getDispatcher(parserConfig.getQueue().getName());
-        return new Netflow9UdpParser(parserConfig.getName(), dispatcher, dnsResolver, new MetricRegistry());
+        final var dispatcher = telemetryRegistry.getDispatcher(parserConfig.getQueue().getName());
+        return new Netflow9UdpParser(parserConfig.getName(), dispatcher, identity, dnsResolver, new MetricRegistry());
     }
 }

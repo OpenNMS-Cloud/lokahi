@@ -1,8 +1,8 @@
 /*******************************************************************************
  * This file is part of OpenNMS(R).
  *
- * Copyright (C) 2018 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2018 The OpenNMS Group, Inc.
+ * Copyright (C) 2018-2023 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
  *
@@ -28,29 +28,27 @@
 
 package org.opennms.horizon.minion.flows.parser.factory;
 
-import java.util.Objects;
-
-import org.opennms.horizon.grpc.telemetry.contract.TelemetryMessage;
-import org.opennms.horizon.minion.flows.parser.FlowSinkModule;
-import org.opennms.horizon.shared.ipc.sink.api.AsyncDispatcher;
-
 import org.opennms.horizon.minion.flows.listeners.Parser;
 import org.opennms.horizon.minion.flows.listeners.factory.TelemetryRegistry;
 import org.opennms.horizon.minion.flows.parser.IpfixTcpParser;
+import org.opennms.horizon.shared.ipc.rpc.IpcIdentity;
 import org.opennms.sink.flows.contract.ParserConfig;
+
+import java.util.Objects;
 
 public class IpfixTcpParserFactory implements ParserFactory {
 
     private final TelemetryRegistry telemetryRegistry;
     private final DnsResolver dnsResolver;
-    private final FlowSinkModule flowSinkModule;
+    private final IpcIdentity identity;
 
-    public IpfixTcpParserFactory(final TelemetryRegistry telemetryRegistry, final DnsResolver dnsResolver,
-                                 final FlowSinkModule flowSinkModule) {
+    public IpfixTcpParserFactory(final TelemetryRegistry telemetryRegistry,
+                                 final IpcIdentity identity,
+                                 final DnsResolver dnsResolver) {
         this.telemetryRegistry = Objects.requireNonNull(telemetryRegistry);
         this.identity = Objects.requireNonNull(identity);
         this.dnsResolver = Objects.requireNonNull(dnsResolver);
-        this.flowSinkModule = Objects.requireNonNull(flowSinkModule);
+        telemetryRegistry.addParserFactory(this);
     }
 
     @Override
@@ -60,7 +58,7 @@ public class IpfixTcpParserFactory implements ParserFactory {
 
     @Override
     public Parser createBean(ParserConfig parserConfig) {
-        final AsyncDispatcher<UdpListenerMessage> dispatcher = telemetryRegistry.getDispatcher(parserConfig.getQueue().getName());
-        return new IpfixTcpParser(parserConfig.getName(), dispatcher, dnsResolver, telemetryRegistry.getMetricRegistry());
+        final var dispatcher = telemetryRegistry.getDispatcher(parserConfig.getQueue().getName());
+        return new IpfixTcpParser(parserConfig.getName(), dispatcher, identity, dnsResolver, telemetryRegistry.getMetricRegistry());
     }
 }

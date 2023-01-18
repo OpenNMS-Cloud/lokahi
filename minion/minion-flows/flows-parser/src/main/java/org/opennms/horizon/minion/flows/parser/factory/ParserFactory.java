@@ -33,10 +33,9 @@ import org.opennms.horizon.minion.flows.listeners.factory.TelemetryBeanFactory;
 import org.opennms.sink.flows.contract.ParserConfig;
 
 /**
- * Factory to create {@link Parser} from a {@link ParserDefinition}
+ * Factory to create {@link Parser} from a {@link ParserConfig}
  *
  * @author mvrueden
  */
 public interface ParserFactory extends TelemetryBeanFactory<Parser, ParserConfig> {
-
 }

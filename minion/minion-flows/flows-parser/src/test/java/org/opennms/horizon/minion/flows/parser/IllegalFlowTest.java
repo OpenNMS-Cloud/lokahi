@@ -31,6 +31,13 @@ package org.opennms.horizon.minion.flows.parser;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.mock;
+import com.codahale.metrics.MetricRegistry;
+import org.junit.Ignore;
+import org.opennms.horizon.grpc.telemetry.contract.TelemetryMessage;
+import org.opennms.horizon.minion.flows.listeners.UdpListener;
+import org.opennms.horizon.minion.flows.parser.factory.DnsResolver;
+import org.opennms.horizon.shared.ipc.rpc.IpcIdentity;
+import org.opennms.horizon.shared.ipc.sink.api.AsyncDispatcher;
 
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -44,15 +51,6 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import org.junit.Ignore;
-import org.opennms.horizon.grpc.telemetry.contract.TelemetryMessage;
-import org.opennms.horizon.minion.flows.listeners.UdpListener;
-import org.opennms.horizon.minion.flows.parser.factory.DnsResolver;
-import org.opennms.horizon.shared.ipc.rpc.IpcIdentity;
-import org.opennms.horizon.shared.ipc.sink.api.AsyncDispatcher;
-
-import com.codahale.metrics.MetricRegistry;
 
 public class IllegalFlowTest {
     private final static Path FOLDER = Paths.get("src/test/resources/flows");

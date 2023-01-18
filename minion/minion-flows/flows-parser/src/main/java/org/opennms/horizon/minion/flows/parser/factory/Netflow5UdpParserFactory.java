@@ -1,8 +1,8 @@
 /*******************************************************************************
  * This file is part of OpenNMS(R).
  *
- * Copyright (C) 2018 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2018 The OpenNMS Group, Inc.
+ * Copyright (C) 2018-2023 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
  *
@@ -28,32 +28,26 @@
 
 package org.opennms.horizon.minion.flows.parser.factory;
 
-import java.util.Objects;
-
-import org.opennms.horizon.minion.flows.listeners.factory.TelemetryRegistry;
-import org.opennms.horizon.minion.flows.parser.FlowSinkModule;
-import org.opennms.horizon.shared.ipc.sink.api.AsyncDispatcher;
-
 import com.codahale.metrics.MetricRegistry;
-
 import org.opennms.horizon.minion.flows.listeners.Parser;
-import org.opennms.horizon.minion.flows.listeners.factory.UdpListenerMessage;
+import org.opennms.horizon.minion.flows.listeners.factory.TelemetryRegistry;
 import org.opennms.horizon.minion.flows.parser.Netflow5UdpParser;
+import org.opennms.horizon.shared.ipc.rpc.IpcIdentity;
 import org.opennms.sink.flows.contract.ParserConfig;
+
+import java.util.Objects;
 
 public class Netflow5UdpParserFactory implements ParserFactory {
 
+    private final TelemetryRegistry telemetryRegistry;
+    private final IpcIdentity identity;
     private final DnsResolver dnsResolver;
 
-    private final TelemetryRegistry telemetryRegistry;
-
-    private final FlowSinkModule flowSinkModule;
-
-    public Netflow5UdpParserFactory(final TelemetryRegistry telemetryRegistry, final DnsResolver dnsResolver,
-                                    final FlowSinkModule flowSinkModule) {
-        this.dnsResolver = Objects.requireNonNull(dnsResolver);
+    public Netflow5UdpParserFactory(final TelemetryRegistry telemetryRegistry, final IpcIdentity identity, final DnsResolver dnsResolver) {
         this.telemetryRegistry = Objects.requireNonNull(telemetryRegistry);
-        this.flowSinkModule = Objects.requireNonNull(flowSinkModule);
+        this.identity = Objects.requireNonNull(identity);
+        this.dnsResolver = Objects.requireNonNull(dnsResolver);
+        telemetryRegistry.addParserFactory(this);
     }
 
     @Override
@@ -63,7 +57,7 @@ public class Netflow5UdpParserFactory implements ParserFactory {
 
     @Override
     public Parser createBean(final ParserConfig parserConfig) {
-        final AsyncDispatcher<UdpListenerMessage> dispatcher = telemetryRegistry.getDispatcher(parserConfig.getQueue().getName());
-        return new Netflow5UdpParser(parserConfig.getName(), dispatcher, dnsResolver, new MetricRegistry());
+        final var dispatcher = telemetryRegistry.getDispatcher(parserConfig.getQueue().getName());
+        return new Netflow5UdpParser(parserConfig.getName(), dispatcher, identity, dnsResolver, new MetricRegistry());
     }
 }

@@ -60,7 +60,7 @@ public class ConfigurationGrpcService extends ConfigurationServiceGrpc.Configura
         List<ConfigurationDTO> result = tenantLookup.lookupTenantId(Context.current())
             .map(service::findByTenantId)
             .orElseThrow();
-        responseObserver.onNext(ConfigurationList.newBuilder().addAllConfiguration(result).build());
+        responseObserver.onNext(ConfigurationList.newBuilder().addAllConfigurations(result).build());
         responseObserver.onCompleted();
     }
 
@@ -70,7 +70,7 @@ public class ConfigurationGrpcService extends ConfigurationServiceGrpc.Configura
             .map(tenantId -> service.findByTenantIdAndKey(tenantId, key.getValue()))
             .orElseThrow();
         if (!configurationDTOS.isEmpty()) {
-            responseObserver.onNext(ConfigurationList.newBuilder().addAllConfiguration(configurationDTOS).build());
+            responseObserver.onNext(ConfigurationList.newBuilder().addAllConfigurations(configurationDTOS).build());
             responseObserver.onCompleted();
         } else {
             Status status = Status.newBuilder()
@@ -87,7 +87,7 @@ public class ConfigurationGrpcService extends ConfigurationServiceGrpc.Configura
             .map(tenantId -> service.findByTenantIdAndKeyAndLocation(tenantId, configurationKeyAndLocation.getKey(), configurationKeyAndLocation.getLocation()))
             .orElseThrow();
         if (!configurationDTOS.isEmpty()) {
-            responseObserver.onNext(ConfigurationList.newBuilder().addAllConfiguration(configurationDTOS).build());
+            responseObserver.onNext(ConfigurationList.newBuilder().addAllConfigurations(configurationDTOS).build());
             responseObserver.onCompleted();
         } else {
             Status status = Status.newBuilder()

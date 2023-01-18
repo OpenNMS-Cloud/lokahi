@@ -79,9 +79,9 @@ public class GrpcConfig {
     @Bean(destroyMethod = "stopServer")
     public GrpcServerManager startServer(MonitoringLocationGrpcService locationGrpc, MonitoringSystemGrpcService systemGrpc,
                                          NodeGrpcService nodeGrpcService, AzureCredentialGrpcService azureCredentialGrpcService,
-                                         InventoryServerInterceptor interceptor) {
+                                         InventoryServerInterceptor interceptor, ConfigurationGrpcService configurationGrpc) {
         GrpcServerManager manager = new GrpcServerManager(port, interceptor);
-        manager.startServer(locationGrpc, systemGrpc, nodeGrpcService, azureCredentialGrpcService);
+        manager.startServer(locationGrpc, systemGrpc, nodeGrpcService, azureCredentialGrpcService, configurationGrpc);
         return manager;
     }
 }

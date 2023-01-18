@@ -51,6 +51,7 @@ import org.opennms.horizon.inventory.service.ConfigurationService;
 
 import com.google.protobuf.Empty;
 
+import io.grpc.ManagedChannel;
 import io.grpc.Metadata;
 import io.grpc.ServerCall;
 import io.grpc.ServerCallHandler;
@@ -60,33 +61,35 @@ import io.grpc.stub.MetadataUtils;
 //This is an example of gRPC integration tests underline mock services.
 public class ConfigurationGrpcTest extends AbstractGrpcUnitTest {
     private ConfigurationServiceGrpc.ConfigurationServiceBlockingStub stub;
-    private ConfigurationService mockLocationService;
+    private ConfigurationService mockConfigurationService;
     private ConfigurationDTO configuration1, configuration2;
+    private ManagedChannel channel;
 
     @BeforeEach
     public void prepareTest() throws VerificationException, IOException {
-        mockLocationService = mock(ConfigurationService.class);
-        ConfigurationGrpcService grpcService = new ConfigurationGrpcService(mockLocationService, tenantLookup);
+        mockConfigurationService = mock(ConfigurationService.class);
+        ConfigurationGrpcService grpcService = new ConfigurationGrpcService(mockConfigurationService, tenantLookup);
         startServer(grpcService);
-        stub = ConfigurationServiceGrpc.newBlockingStub(grpCleanup.register(InProcessChannelBuilder.forName(serverName).directExecutor().build()));
+        channel = InProcessChannelBuilder.forName(serverName).directExecutor().build();
+        stub = ConfigurationServiceGrpc.newBlockingStub(channel);
         configuration1 = ConfigurationDTO.newBuilder().setTenantId(tenantId).build();
         configuration2 = ConfigurationDTO.newBuilder().setTenantId(tenantId).build();
     }
 
     @AfterEach
     public void afterTest() {
-        verifyNoMoreInteractions(mockLocationService);
+        verifyNoMoreInteractions(mockConfigurationService);
         verifyNoMoreInteractions(spyInterceptor);
-        reset(mockLocationService, spyInterceptor);
+        reset(mockConfigurationService, spyInterceptor);
     }
 
 
     @Test
     void testListConfigurations() throws VerificationException {
-        doReturn(Arrays.asList(configuration1, configuration2)).when(mockLocationService).findByTenantId(anyString());
+        doReturn(Arrays.asList(configuration1, configuration2)).when(mockConfigurationService).findByTenantId(anyString());
         ConfigurationList result = stub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createHeaders())).listConfigurations(Empty.newBuilder().build());
-        assertThat(result.getConfigurationList().size()).isEqualTo(2);
-        verify(mockLocationService).findByTenantId(tenantId);
+        assertThat(result.getConfigurationsList().size()).isEqualTo(2);
+        verify(mockConfigurationService).findByTenantId(tenantId);
         verify(spyInterceptor).verifyAccessToken(authHeader);
         verify(spyInterceptor).interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));
     }

@@ -46,6 +46,9 @@ import org.opennms.horizon.inventory.mapper.ConfigurationMapper;
 import org.opennms.horizon.inventory.model.Configuration;
 import org.opennms.horizon.inventory.repository.ConfigurationRepository;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 public class ConfigurationServiceTest {
     private ConfigurationRepository mockConfigurationRepo;
     private ConfigurationService service;
@@ -53,11 +56,10 @@ public class ConfigurationServiceTest {
     private ConfigurationDTO testConfiguration;
 
     private final String location = "test location";
-    private final String systemId = "test-monitoring-system-12345";
 
     private final String tenantId = "test-tenant";
     private final String key = "test-key";
-    private final String value = "test-value";
+    private final String value = "\"{\"test\":\"value\"}\"";
 
     @BeforeEach
     public void setUP() {
@@ -78,7 +80,7 @@ public class ConfigurationServiceTest {
     }
 
     @Test
-    void testCreateSingle() {
+    void testCreateSingle() throws JsonProcessingException {
         doReturn(Collections.singletonList(testConfiguration)).when(mockConfigurationRepo).findByTenantIdAndKey(tenantId, key);
         service.createSingle(testConfiguration);
         verify(mockConfigurationRepo).findByTenantIdAndKeyAndLocation(tenantId, key, location);
@@ -88,6 +90,6 @@ public class ConfigurationServiceTest {
         assertThat(result.getTenantId()).isEqualTo(tenantId);
         assertThat(result.getLocation()).isEqualTo(location);
         assertThat(result.getKey()).isEqualTo(key);
-        assertThat(result.getValue()).isEqualTo(value);
+        assertThat(result.getValue()).isEqualTo(new ObjectMapper().readTree(value));
     }
 }

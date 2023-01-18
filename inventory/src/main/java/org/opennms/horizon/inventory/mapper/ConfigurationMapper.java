@@ -32,13 +32,20 @@ import org.mapstruct.Mapper;
 import org.opennms.horizon.inventory.dto.ConfigurationDTO;
 import org.opennms.horizon.inventory.model.Configuration;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 @Mapper(componentModel = "spring")
 public interface ConfigurationMapper {
     Configuration dtoToModel(ConfigurationDTO dto);
-
     ConfigurationDTO modelToDTO(Configuration model);
 
-    default String map(Object value) {
-        return value.toString();
+    default JsonNode map(String value) throws JsonProcessingException {
+        return new ObjectMapper().readTree(value);
+    }
+
+    default String map(JsonNode value) throws JsonProcessingException {
+        return new ObjectMapper().writeValueAsString(value);
     }
 }

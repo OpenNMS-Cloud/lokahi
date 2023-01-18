@@ -56,7 +56,7 @@ runs:
 
     - name: Coverage Report
       if: ${{ inputs.enable-sonar-scan == 'true' }}
-      run: yarn test -- --coverage --watch false
+      run: yarn test:coverage:sonar
       working-directory: ui
       shell: bash
 

@@ -48,7 +48,7 @@ public class FlowsConfigServiceTest {
         Assert.assertNotNull(config);
         Assert.assertEquals("Netflow-5-UDP-8877", config.getListeners(0).getName());
         Assert.assertEquals(1, config.getListeners(0).getParsersList().size());
-        Assert.assertEquals(1, config.getListeners(0).getParsers(0).getQueue()
-            .getAdapters(0).getPackagesCount());
+        Assert.assertEquals(2, config.getListeners(0).getParsers(0).getQueue()
+            .getAdapters(0).getParametersCount());
     }
 }

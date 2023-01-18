@@ -56,7 +56,7 @@ public class IpfixTcpParser extends ParserBase implements TcpParser {
     private final Set<TcpSession> sessions = Sets.newConcurrentHashSet();
 
     public IpfixTcpParser(final String name,
-                          final AsyncDispatcher<TelemetryMessage>  dispatcher,
+                          final AsyncDispatcher<TelemetryMessage> dispatcher,
                           final IpcIdentity identity,
                           final DnsResolver dnsResolver,
                           final MetricRegistry metricRegistry) {
@@ -116,8 +116,8 @@ public class IpfixTcpParser extends ParserBase implements TcpParser {
         final ParserState.Builder parser = ParserState.builder();
 
         this.sessions.stream()
-                     .flatMap(TcpSession::dumpInternalState)
-                     .forEach(parser::withExporter);
+            .flatMap(TcpSession::dumpInternalState)
+            .forEach(parser::withExporter);
 
         return parser.build();
     }

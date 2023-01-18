@@ -38,7 +38,7 @@ import org.opennms.sink.flows.contract.ListenerConfig;
 import org.opennms.sink.flows.contract.ParserConfig;
 
 @Command(scope = "opennms", name = "init-flow",
-    description = "manually init a flow listener for testing"
+    description = "manually init a flow listener for testing")
 @Service
 public class InitListener implements Action {
 

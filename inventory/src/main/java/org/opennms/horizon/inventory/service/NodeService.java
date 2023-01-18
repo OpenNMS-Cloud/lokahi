@@ -41,11 +41,10 @@ import org.opennms.horizon.inventory.repository.IpInterfaceRepository;
 import org.opennms.horizon.inventory.repository.MonitoringLocationRepository;
 import org.opennms.horizon.inventory.repository.NodeRepository;
 import org.opennms.horizon.shared.constants.GrpcConstants;
+import org.opennms.horizon.shared.utils.InetAddressUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -82,15 +81,11 @@ public class NodeService {
 
     private void saveIpInterfaces(NodeCreateDTO request, Node node, String tenantId) {
         if (request.hasManagementIp()) {
-            try {
                 IpInterface ipInterface = new IpInterface();
                 ipInterface.setNode(node);
                 ipInterface.setTenantId(tenantId);
-                ipInterface.setIpAddress(InetAddress.getByName(request.getManagementIp()));
+                ipInterface.setIpAddress(InetAddressUtils.getInetAddress(request.getManagementIp()));
                 ipInterfaceRepository.save(ipInterface);
-            } catch (UnknownHostException e) {
-                e.printStackTrace();
-            }
         }
     }
 

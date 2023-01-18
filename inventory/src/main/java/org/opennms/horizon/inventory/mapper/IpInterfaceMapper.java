@@ -32,6 +32,7 @@ package org.opennms.horizon.inventory.mapper;
 import org.mapstruct.Mapper;
 import org.opennms.horizon.inventory.dto.IpInterfaceDTO;
 import org.opennms.horizon.inventory.model.IpInterface;
+import org.opennms.horizon.shared.utils.InetAddressUtils;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -39,20 +40,14 @@ import java.net.UnknownHostException;
 @Mapper(componentModel = "spring")
 public interface IpInterfaceMapper {
     IpInterface dtoToModel(IpInterfaceDTO dto);
+
     IpInterfaceDTO modelToDTO(IpInterface model);
 
     default InetAddress map(String value) throws UnknownHostException {
-        if (value == null || value.length() == 0) {
-            return null;
-        } else {
-            return InetAddress.getByName(value);
-        }
+        return InetAddressUtils.getInetAddress(value);
     }
+
     default String map(InetAddress value) {
-        if (value == null) {
-            return "";
-        } else {
-            return value.getHostAddress();
-        }
+        return InetAddressUtils.toIpAddrString(value);
     }
 }

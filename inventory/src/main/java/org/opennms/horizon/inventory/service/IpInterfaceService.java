@@ -5,10 +5,9 @@ import org.opennms.horizon.inventory.dto.IpInterfaceDTO;
 import org.opennms.horizon.inventory.mapper.IpInterfaceMapper;
 import org.opennms.horizon.inventory.model.IpInterface;
 import org.opennms.horizon.inventory.repository.IpInterfaceRepository;
+import org.opennms.horizon.shared.utils.InetAddressUtils;
 import org.springframework.stereotype.Service;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -29,12 +28,7 @@ public class IpInterfaceService {
     }
 
     public Optional<IpInterfaceDTO> findByIpAddressAndLocationAndTenantId(String ipAddress, String location, String tenantId) {
-        try {
-            Optional<IpInterface> optional = modelRepo.findByIpAddressAndLocationAndTenantId(InetAddress.getByName(ipAddress), location, tenantId);
+            Optional<IpInterface> optional = modelRepo.findByIpAddressAndLocationAndTenantId(InetAddressUtils.getInetAddress(ipAddress), location, tenantId);
             return optional.map(mapper::modelToDTO);
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
-        }
-        return Optional.empty();
     }
 }

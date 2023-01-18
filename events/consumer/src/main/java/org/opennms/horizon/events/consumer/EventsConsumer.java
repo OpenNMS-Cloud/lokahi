@@ -35,6 +35,7 @@ import org.opennms.horizon.events.persistence.model.EventParameters;
 import org.opennms.horizon.events.persistence.repository.EventRepository;
 import org.opennms.horizon.events.proto.EventLog;
 import org.opennms.horizon.shared.constants.GrpcConstants;
+import org.opennms.horizon.shared.utils.InetAddressUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,11 +45,11 @@ import org.springframework.messaging.handler.annotation.Headers;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 
-import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -93,14 +94,14 @@ public class EventsConsumer {
             } catch (UnknownHostException e) {
                 return null;
             }
-        }).collect(Collectors.toList());
+        }).filter(Objects::nonNull).collect(Collectors.toList());
     }
 
     private Event mapEventFromProto(org.opennms.horizon.events.proto.Event eventProto, String tenantId) throws UnknownHostException {
         var event = new Event();
         event.setTenantId(tenantId);
         event.setEventUei(eventProto.getUei());
-        event.setIpAddress(InetAddress.getByName(eventProto.getIpAddress()));
+        event.setIpAddress(InetAddressUtils.getInetAddress(eventProto.getIpAddress()));
         event.setNodeId(event.getNodeId());
         event.setProducedTime(LocalDateTime.now());
         var eventParameters = new EventParameters();

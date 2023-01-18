@@ -9,6 +9,7 @@ import org.opennms.horizon.events.persistence.model.EventParameters;
 import org.opennms.horizon.events.proto.EventDTO;
 import org.opennms.horizon.events.proto.EventInfoDTO;
 import org.opennms.horizon.events.proto.EventParameterDTO;
+import org.opennms.horizon.shared.utils.InetAddressUtils;
 
 import java.net.InetAddress;
 import java.util.List;
@@ -49,7 +50,7 @@ public interface EventMapper extends DateTimeMapper {
         if (value == null) {
             return "";
         } else {
-            return value.getHostAddress();
+            return InetAddressUtils.toIpAddrString(value);
         }
     }
 }

@@ -34,6 +34,7 @@ import org.opennms.azure.contract.AzureCollectorRequest;
 import org.opennms.horizon.azure.api.AzureScanItem;
 import org.opennms.horizon.inventory.model.AzureCredential;
 import org.opennms.horizon.inventory.model.IpInterface;
+import org.opennms.horizon.shared.utils.InetAddressUtils;
 import org.opennms.horizon.snmp.api.SnmpConfiguration;
 import org.opennms.horizon.snmp.api.Version;
 import org.opennms.snmp.contract.SnmpCollectorRequest;
@@ -71,7 +72,7 @@ public class CollectorTaskSetService {
 
     private TaskDefinition addCollectorTask(MonitorType monitorType, IpInterface ipInterface, long nodeId) {
         String monitorTypeValue = monitorType.getValueDescriptor().getName();
-        String ipAddress = ipInterface.getIpAddress().getHostAddress();
+        String ipAddress = InetAddressUtils.toIpAddrString(ipInterface.getIpAddress());
 
         String name = String.format("%s-collector", monitorTypeValue.toLowerCase());
         String pluginName = String.format("%sCollector", monitorTypeValue);

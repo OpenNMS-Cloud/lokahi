@@ -45,15 +45,11 @@ public class FlowSinkModule implements SinkModule<TelemetryMessage, TelemetryMes
 
     private final IpcIdentity identity;
 
-    private String id = "Flow";
+    private final String id;
 
     public FlowSinkModule(IpcIdentity identity, String id) {
         this.identity = Objects.requireNonNull(identity);
         this.id = Objects.requireNonNull(id);
-    }
-
-    public FlowSinkModule(IpcIdentity identity) {
-        this.identity = Objects.requireNonNull(identity);
     }
 
     @Override

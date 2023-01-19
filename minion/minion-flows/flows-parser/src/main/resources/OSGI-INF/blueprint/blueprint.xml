@@ -31,10 +31,6 @@
     </bean>
     <service ref="telemetryRegistry" interface="org.opennms.horizon.minion.flows.listeners.factory.TelemetryRegistry"/>
 
-    <bean id="flowSinkModule" class="org.opennms.horizon.minion.flows.parser.FlowSinkModule" >
-        <argument ref="identity" />
-    </bean>
-
     <!-- Netflow 5 UDP Parser Factory -->
     <bean id="netflow5UdpParserFactory"
           class="org.opennms.horizon.minion.flows.parser.factory.Netflow5UdpParserFactory">

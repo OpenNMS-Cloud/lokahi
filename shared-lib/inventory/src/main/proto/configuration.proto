@@ -43,7 +43,7 @@ message ConfigurationDTO {
 }
 
 message ConfigurationList {
-  repeated ConfigurationDTO configuration = 1;
+  repeated ConfigurationDTO configurations = 1;
 }
 
 message ConfigurationKeyAndLocation {

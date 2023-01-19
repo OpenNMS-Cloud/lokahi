@@ -66,7 +66,7 @@ public class ScannerResponseService {
 
             // other scan types
 
-            case AZURE: {
+            case AZURE_SCAN -> {
                 AzureScanResponse azureResponse = result.unpack(AzureScanResponse.class);
                 List<AzureScanItem> resultsList = azureResponse.getResultsList();
 
@@ -80,18 +80,15 @@ public class ScannerResponseService {
 
                     processAzureScanItem(tenantId, location, ipAddress, item);
                 }
-                break;
             }
-            case UNRECOGNIZED: {
-                log.warn("Unrecognized scan type");
-            }
+            case UNRECOGNIZED -> log.warn("Unrecognized scan type");
         }
     }
 
     private ScanType getType(ScannerResponse response) {
         Any result = response.getResult();
         if (result.is(AzureScanResponse.class)) {
-            return ScanType.AZURE;
+            return ScanType.AZURE_SCAN;
         }
         return ScanType.UNRECOGNIZED;
     }

@@ -43,3 +43,25 @@ message AzureScanItem {
   string resourceGroup = 3;
   int64 credential_id = 4;
 }
+
+message AzureResponseMetric {
+  repeated AzureResultMetric results = 2;
+}
+
+enum AzureValueType {
+  INT64 = 0;
+}
+
+message AzureValueMetric {
+  AzureValueType type = 1;
+  oneof value {
+    uint64 uint64 = 2;
+  };
+}
+
+message AzureResultMetric {
+  string resourceName = 1;
+  string resourceGroup = 2;
+  AzureValueMetric value = 3;
+  string alias = 4;
+}

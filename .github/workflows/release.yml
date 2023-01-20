@@ -54,7 +54,7 @@ jobs:
   build-all:
     needs: tag
     #uses: ./.github/workflows/develop.yml
-    uses: ./.github/workflows/feature-ui.yml
+    uses: ./.github/workflows/feature-events.yml
     secrets: inherit
     with:
       image-tag: ${{ inputs.image-tag || github.sha }}
@@ -65,7 +65,7 @@ jobs:
     strategy:
       matrix:
         image: [
-          'horizon-stream-ui',
+          'horizon-stream-events',
         ]
         #image: [
         #  'horizon-stream-alarm',

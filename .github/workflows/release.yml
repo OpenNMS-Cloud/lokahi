@@ -1,10 +1,20 @@
 name: release
 
-on:
-  workflow_dispatch:
+  push:
+    branches:
+      - 'release'
+  pull_request:
+    branches:
+      - 'release'
+  workflow_call:
     inputs:
-      release_version:
-        required: true
+      image-tag:
+        description: 'Tag for all images'
+        required: false
+        type: string
+      image-registry:
+        description: 'Docker image registry for all images'
+        required: false
         type: string
 
 jobs:

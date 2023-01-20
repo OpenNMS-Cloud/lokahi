@@ -18,6 +18,10 @@ on:
         required: false
         type: string
 
+env:
+  IMAGE_TAG: ${{ inputs.image-tag || github.sha }}
+  IMAGE_REGISTRY: ${{ inputs.image-registry || 'ghcr.io' }}
+
 jobs:
   tag:
     runs-on: ubuntu-latest

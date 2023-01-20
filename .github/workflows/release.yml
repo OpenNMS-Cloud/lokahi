@@ -22,7 +22,8 @@ jobs:
   tag:
     runs-on: ubuntu-latest
     outputs:
-      image-tag: ${{ steps.extract-tag.outputs.image-tag }}
+      image-tag: local
+      #image-tag: ${{ steps.extract-tag.outputs.image-tag }}
     steps:
     - name: init
       id: extract-tag

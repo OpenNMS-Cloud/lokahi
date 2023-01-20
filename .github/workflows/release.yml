@@ -64,20 +64,20 @@ jobs:
     strategy:
       matrix:
         image: [
-          'opennms-cloud/horizon-stream-alarm',
-          'opennms-cloud/horizon-stream-datachoices',
-          'opennms-cloud/horizon-stream-events',
-          'opennms-cloud/horizon-stream-grafana',
-          'opennms-cloud/horizon-stream-inventory',
-          'opennms-cloud/horizon-stream-keycloak-ui',
-          'opennms-cloud/horizon-stream-metrics-processor',
-          'opennms-cloud/horizon-stream-minion',
-          'opennms-cloud/horizon-stream-minion-gateway',
-          'opennms-cloud/horizon-stream-minion-gateway-grpc-proxy',
-          'opennms-cloud/horizon-stream-notifications',
-          'opennms-cloud/horizon-stream-operator',
-          'opennms-cloud/horizon-stream-rest-server',
-          'opennms-cloud/horizon-stream-ui',
+          'horizon-stream-alarm',
+          'horizon-stream-datachoices',
+          'horizon-stream-events',
+          'horizon-stream-grafana',
+          'horizon-stream-inventory',
+          'horizon-stream-keycloak-ui',
+          'horizon-stream-metrics-processor',
+          'horizon-stream-minion',
+          'horizon-stream-minion-gateway',
+          'horizon-stream-minion-gateway-grpc-proxy',
+          'horizon-stream-notifications',
+          'horizon-stream-operator',
+          'horizon-stream-rest-server',
+          'horizon-stream-ui',
         ]
     environment: docker-publish-account
     # Environment that contains the required secrets.
@@ -100,23 +100,19 @@ jobs:
           echo "github.sha - " ${{ env.IMAGE_TAG }}
 
           docker pull ghcr.io/opennms-cloud/horizon-stream-minion-gateway:eb00131f443b3c830defcc171dd50009386d7fd7 
-
           docker pull ghcr.io/${{ matrix.image }}:${{ env.IMAGE_TAG }}
           docker images
 
-          echo "Test - matrix " ${{ matrix.image }}
+          echo "Test - matrix " opennms-cloud/${{ matrix.image }}
           echo "Test - image_tag " ${{ env.IMAGE_TAG }} 
           echo "Test - release_tag " ${{ env.RELEASE_TAG }}
-          docker tag ${{ matrix.image }}:${{ env.RELEASE_TAG }}
-          docker tag ghcr.io/opennms-cloud/horizon-stream-minion-gateway:eb00131f443b3c830defcc171dd50009386d7fd7 \
-            opennms/horizon-stream-minion-gateway:latest
-          docker tag ghcr.io/${{ matrix.image }}:${{ env.IMAGE_TAG }} \
-            opennms/horizon-stream-minion-gateway:latest-2
+          docker tag ghcr.io/opennms-cloud/horizon-stream-minion-gateway:eb00131f443b3c830defcc171dd50009386d7fd7 opennms/horizon-stream-minion-gateway:latest
+          docker tag ghcr.io/opennms-cloud/${{ matrix.image }}:${{ env.IMAGE_TAG }} opennms/horizon-stream-minion-gateway:latest-2
           docker images
 
           # Tag and save the image as a file to be published. Both release version and latest.
-          docker tag ghcr.io/${{ matrix.image }}:${{ env.IMAGE_TAG }} ${{ matrix.image }}:latest
-          docker tag ghcr.io/${{ matrix.image }}:${{ env.IMAGE_TAG }} ${{ matrix.image }}:${{ env.RELEASE_TAG }}
+          docker tag ghcr.io/opennms-cloud/${{ matrix.image }}:${{ env.IMAGE_TAG }} ${{ matrix.image }}:latest
+          docker tag ghcr.io/opennms-cloud/${{ matrix.image }}:${{ env.IMAGE_TAG }} ${{ matrix.image }}:${{ env.RELEASE_TAG }}
 
           docker images
 

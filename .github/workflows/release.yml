@@ -22,7 +22,8 @@ env:
 
 jobs:
   build-all:
-    uses: ./.github/workflows/develop.yml
+    #uses: ./.github/workflows/develop.yml
+    uses: ./.github/workflows/feature-events.yml
     secrets: inherit
     with:
       image-tag: ${{ inputs.image-tag || github.sha }}
@@ -33,21 +34,24 @@ jobs:
     strategy:
       matrix:
         image: [
-          'horizon-stream-alarm',
-          'horizon-stream-datachoices',
           'horizon-stream-events',
-          'horizon-stream-grafana',
-          'horizon-stream-inventory',
-          'horizon-stream-keycloak-ui',
-          'horizon-stream-metrics-processor',
-          'horizon-stream-minion',
-          'horizon-stream-minion-gateway',
-          'horizon-stream-minion-gateway-grpc-proxy',
-          'horizon-stream-notifications',
-          'horizon-stream-operator',
-          'horizon-stream-rest-server',
-          'horizon-stream-ui',
         ]
+        #image: [
+        #  'horizon-stream-alarm',
+        #  'horizon-stream-datachoices',
+        #  'horizon-stream-events',
+        #  'horizon-stream-grafana',
+        #  'horizon-stream-inventory',
+        #  'horizon-stream-keycloak-ui',
+        #  'horizon-stream-metrics-processor',
+        #  'horizon-stream-minion',
+        #  'horizon-stream-minion-gateway',
+        #  'horizon-stream-minion-gateway-grpc-proxy',
+        #  'horizon-stream-notifications',
+        #  'horizon-stream-operator',
+        #  'horizon-stream-rest-server',
+        #  'horizon-stream-ui',
+        #]
     environment: docker-publish-account
     # Environment that contains the required secrets.
     steps:
@@ -90,7 +94,7 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Publish images
+      - name: Pull images
         run: |
 
           docker pull ghcr.io/opennms-cloud/${{ matrix.image }}:${{ env.IMAGE_TAG }}

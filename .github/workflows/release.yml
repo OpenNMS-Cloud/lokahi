@@ -54,7 +54,7 @@ jobs:
     uses: ./.github/workflows/develop.yml
     secrets: inherit
     with:
-      image-tag: ${{ needs.tag.outputs.image-tag }}
+      image-tag: local
       image-registry: 'docker.io'
   release:
     needs: [tag, build-all]

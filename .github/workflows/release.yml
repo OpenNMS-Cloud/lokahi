@@ -64,20 +64,20 @@ jobs:
     strategy:
       matrix:
         image: [
-          'opennms/horizon-stream-alarm',
-          'opennms/horizon-stream-datachoices',
-          'opennms/horizon-stream-events',
-          'opennms/horizon-stream-grafana',
-          'opennms/horizon-stream-inventory',
-          'opennms/horizon-stream-keycloak-ui',
-          'opennms/horizon-stream-metrics-processor',
-          'opennms/horizon-stream-minion',
-          'opennms/horizon-stream-minion-gateway',
-          'opennms/horizon-stream-minion-gateway-grpc-proxy',
-          'opennms/horizon-stream-notifications',
-          'opennms/horizon-stream-operator',
-          'opennms/horizon-stream-rest-server',
-          'opennms/horizon-stream-ui',
+          'opennms-cloud/horizon-stream-alarm',
+          'opennms-cloud/horizon-stream-datachoices',
+          'opennms-cloud/horizon-stream-events',
+          'opennms-cloud/horizon-stream-grafana',
+          'opennms-cloud/horizon-stream-inventory',
+          'opennms-cloud/horizon-stream-keycloak-ui',
+          'opennms-cloud/horizon-stream-metrics-processor',
+          'opennms-cloud/horizon-stream-minion',
+          'opennms-cloud/horizon-stream-minion-gateway',
+          'opennms-cloud/horizon-stream-minion-gateway-grpc-proxy',
+          'opennms-cloud/horizon-stream-notifications',
+          'opennms-cloud/horizon-stream-operator',
+          'opennms-cloud/horizon-stream-rest-server',
+          'opennms-cloud/horizon-stream-ui',
         ]
     environment: docker-publish-account
     # Environment that contains the required secrets.
@@ -97,11 +97,7 @@ jobs:
       - name: Publish images
         run: |
 
-          docker images
-
           echo "github.sha - " ${{ env.IMAGE_TAG }}
-
-          docker pull ghcr.io/opennms-cloud/horizon-stream-metrics-processor:${{ env.IMAGE_TAG }}
 
           docker images
 

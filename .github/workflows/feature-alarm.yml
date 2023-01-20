@@ -27,7 +27,7 @@ env:
 
 jobs:
   build-and-test:
-    name: Build and test
+    name: Build and test - Alarm
     runs-on: ubuntu-latest
     steps:
 

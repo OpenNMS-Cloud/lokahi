@@ -27,7 +27,7 @@ env:
 
 jobs:
   build-and-test:
-    name: Build and test
+    name: Build and test - Rest Server
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3

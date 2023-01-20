@@ -9,7 +9,7 @@ on:
 
 jobs:
   build-and-test:
-    name: Build and test
+    name: Build and test - Parent Pom
     runs-on: ubuntu-latest
     defaults:
       run:

@@ -85,7 +85,7 @@ jobs:
         # Is required to call actions.
 
       - name: Log in to the Container registry
-        description: Need to pull images from github container registry first.
+        # Need to pull images from github container registry first.
         uses: docker/login-action@v2
         with:
           registry: ghcr.io
@@ -110,7 +110,7 @@ jobs:
           #docker push ${{ matrix.image }}:latest
 
       - name: Log in to Dockerhub
-        description: Need to log into Dockerhub to push images.
+        # Need to log into Dockerhub to push images.
         uses: docker/login-action@v2
         with:
           registry: docker.io

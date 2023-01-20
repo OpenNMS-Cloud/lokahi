@@ -3,10 +3,10 @@ name: release
 on:
   push:
     branches:
-      - 'release'
-  pull_request:
-    branches:
-      - 'develop'
+      - 'jira/HS-872-fix-release-cicd-Wrkflw-since-merg-pipeline-refactor'
+  #pull_request:
+  #  branches:
+  #    - 'develop'
   workflow_call:
     inputs:
       image-tag:
@@ -29,7 +29,7 @@ jobs:
       run: |
         TAG=$(echo ${{ github.event.head_commit.message }} | awk '{ print $2 }')
         
-        echo ""${{ github.event.head_commit.message }}
+        echo "test - "${{ github.event.head_commit.message }}
 
         echo "Head commit message: ${{ github.event.head_commit.message }}"
         echo "Extracted tag: $TAG."

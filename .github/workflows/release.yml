@@ -97,7 +97,7 @@ jobs:
 
           # Tag and save the image as a file to be published. Both release version and latest.
           docker tag ghcr.io/opennms-cloud/${{ matrix.image }}:${{ env.IMAGE_TAG }} opennms/${{ matrix.image }}:latest
-          docker tag ghcr.io/opennms-cloud/${{ matrix.image }}:${{ env.IMAGE_TAG }} opennms/${{ matrix.image }}:${{ env.RELEASE_TAG }}
+          docker tag ghcr.io/opennms-cloud/${{ matrix.image }}:${{ env.IMAGE_TAG }} opennms/${{ matrix.image }}:test-${{ env.RELEASE_TAG }}
 
           docker images
 
@@ -117,5 +117,5 @@ jobs:
           docker images
    
           #docker push opennms/${{ matrix.image }}:latest
-          #docker push opennms/${{ matrix.image }}:${{ env.RELEASE_TAG }}
+          docker push opennms/${{ matrix.image }}:test-${{ env.RELEASE_TAG }}
 

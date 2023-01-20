@@ -3,10 +3,11 @@ name: release
 on:
   push:
     branches:
-      - 'release'
+      - 'develop'
+      #- 'release'
   pull_request:
     branches:
-      - 'release'
+      - 'develop'
   workflow_call:
     inputs:
       image-tag:

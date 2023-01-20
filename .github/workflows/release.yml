@@ -26,8 +26,7 @@ jobs:
   tag:
     runs-on: ubuntu-latest
     outputs:
-      image-tag: local
-      #image-tag: ${{ steps.extract-tag.outputs.image-tag }}
+      image-tag: ${{ steps.extract-tag.outputs.image-tag }}
     steps:
     - name: init
       id: extract-tag
@@ -51,8 +50,7 @@ jobs:
         fi
 
         echo "release-tag=$TAG" >> $GITHUB_OUTPUT
-
-        echo "test - " ${{ needs.tag.outputs.image-tag }}
+        echo "RELEASE_TAG=$TAG" >> $GITHUB_ENV
   build-all:
     needs: tag
     uses: ./.github/workflows/develop.yml
@@ -101,14 +99,17 @@ jobs:
 
           docker images
 
-          echo "github.sha - " ${{ inputs.image-tag }}
+          echo "github.sha - " ${{ env.IMAGE_TAG }}
 
-          docker pull ghcr.io/opennms-cloud/horizon-stream-metrics-processor:${{ inputs.image-tag }}
+          docker pull ghcr.io/opennms-cloud/horizon-stream-metrics-processor:${{ env.IMAGE_TAG }}
 
           docker images
 
           # Tag and save the image as a file to be published. Both release version and latest.
-          docker tag ghcr.io/${{ matrix.image }}:${{ needs.tag.outputs.image-tag }} ${{ matrix.image }}:latest
+          docker tag ghcr.io/${{ matrix.image }}:${{ env.IMAGE_TAG }} ${{ matrix.image }}:latest
+          docker tag ghcr.io/${{ matrix.image }}:${{ env.IMAGE_TAG }} ${{ matrix.image }}:${{ env.RELEASE_TAG }}
+
+          docker images
 
           #docker push ${{ matrix.image }}:latest
 

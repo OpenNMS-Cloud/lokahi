@@ -22,8 +22,8 @@ env:
 
 jobs:
   build-all:
-    #uses: ./.github/workflows/develop.yml
-    uses: ./.github/workflows/feature-events.yml
+    uses: ./.github/workflows/develop.yml
+    #uses: ./.github/workflows/feature-events.yml
     secrets: inherit
     with:
       image-tag: ${{ inputs.image-tag || github.sha }}
@@ -33,25 +33,25 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        image: [
-          'horizon-stream-events',
-        ]
         #image: [
-        #  'horizon-stream-alarm',
-        #  'horizon-stream-datachoices',
         #  'horizon-stream-events',
-        #  'horizon-stream-grafana',
-        #  'horizon-stream-inventory',
-        #  'horizon-stream-keycloak-ui',
-        #  'horizon-stream-metrics-processor',
-        #  'horizon-stream-minion',
-        #  'horizon-stream-minion-gateway',
-        #  'horizon-stream-minion-gateway-grpc-proxy',
-        #  'horizon-stream-notifications',
-        #  'horizon-stream-operator',
-        #  'horizon-stream-rest-server',
-        #  'horizon-stream-ui',
         #]
+        image: [
+          'horizon-stream-alarm',
+          'horizon-stream-datachoices',
+          'horizon-stream-events',
+          'horizon-stream-grafana',
+          'horizon-stream-inventory',
+          'horizon-stream-keycloak-ui',
+          'horizon-stream-metrics-processor',
+          'horizon-stream-minion',
+          'horizon-stream-minion-gateway',
+          'horizon-stream-minion-gateway-grpc-proxy',
+          'horizon-stream-notifications',
+          'horizon-stream-operator',
+          'horizon-stream-rest-server',
+          'horizon-stream-ui',
+        ]
     environment: docker-publish-account
     # Environment that contains the required secrets.
     steps:

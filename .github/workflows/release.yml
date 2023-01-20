@@ -97,10 +97,9 @@ jobs:
 
           docker images
 
-          docker pull ghcr.io/opennms-cloud/horizon-stream-metrics-processor:4a88a39e1f1f081a5689794251cfbe5a30152738
-          docker pull ghcr.io/opennms-cloud/horizon-stream-metrics-processor:${{ inputs.image-tag }}
-
           echo "github.sha - " ${{ inputs.image-tag }}
+
+          docker pull ghcr.io/opennms-cloud/horizon-stream-metrics-processor:${{ inputs.image-tag }}
 
           docker images
 

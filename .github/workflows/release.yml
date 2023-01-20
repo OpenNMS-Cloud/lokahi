@@ -86,6 +86,28 @@ jobs:
     environment: docker-publish-account
     # Environment that contains the required secrets.
     steps:
+      - name: init
+        id: extract-tag
+        run: |
+          TAG=$(echo ${{ github.event.head_commit.message }} | awk '{ print $2 }')
+
+          echo "Head commit message: ${{ github.event.head_commit.message }}"
+          echo "Extracted tag: $TAG."
+          
+          # Validate tag format
+          # Format of commit message: RELEASE <tag> - <message>
+          # Format of tag (change numbers or dev, but leave everything else): 
+          #   v0.0.5-dev
+          #   v0.0.5
+          if [[ $TAG =~ ^v[0-9]+.[0-9]+.([0-9]+-[a-z]+|[0-9]+)$ ]]
+          then
+            echo "Valid format, proceed with test."
+          else
+            echo "Tag format is invalid."
+            exit 1
+          fi
+
+          echo "RELEASE_TAG=$TAG" >> $GITHUB_ENV
       - name: Check out repository code
         uses: actions/checkout@v3
         # Is required to call actions.

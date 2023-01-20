@@ -28,7 +28,7 @@ jobs:
       image-tag: ${{ inputs.image-tag || github.sha }}
       image-registry: 'ghcr.io'
   release:
-    needs: [tag, build-all]
+    needs: [build-all]
     runs-on: ubuntu-latest
     strategy:
       matrix:

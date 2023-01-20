@@ -26,7 +26,7 @@ jobs:
   tag:
     runs-on: ubuntu-latest
     outputs:
-      image-tag: ${{ steps.extract-tag.outputs.image-tag }}
+      release-tag: ${{ steps.extract-tag.outputs.release-tag }}
     steps:
     - name: init
       id: extract-tag
@@ -53,7 +53,8 @@ jobs:
         echo "RELEASE_TAG=$TAG" >> $GITHUB_ENV
   build-all:
     needs: tag
-    uses: ./.github/workflows/develop.yml
+    #uses: ./.github/workflows/develop.yml
+    uses: ./.github/workflows/feature-ui.yml
     secrets: inherit
     with:
       image-tag: ${{ inputs.image-tag || github.sha }}
@@ -64,21 +65,24 @@ jobs:
     strategy:
       matrix:
         image: [
-          'horizon-stream-alarm',
-          'horizon-stream-datachoices',
-          'horizon-stream-events',
-          'horizon-stream-grafana',
-          'horizon-stream-inventory',
-          'horizon-stream-keycloak-ui',
-          'horizon-stream-metrics-processor',
-          'horizon-stream-minion',
-          'horizon-stream-minion-gateway',
-          'horizon-stream-minion-gateway-grpc-proxy',
-          'horizon-stream-notifications',
-          'horizon-stream-operator',
-          'horizon-stream-rest-server',
           'horizon-stream-ui',
         ]
+        #image: [
+        #  'horizon-stream-alarm',
+        #  'horizon-stream-datachoices',
+        #  'horizon-stream-events',
+        #  'horizon-stream-grafana',
+        #  'horizon-stream-inventory',
+        #  'horizon-stream-keycloak-ui',
+        #  'horizon-stream-metrics-processor',
+        #  'horizon-stream-minion',
+        #  'horizon-stream-minion-gateway',
+        #  'horizon-stream-minion-gateway-grpc-proxy',
+        #  'horizon-stream-notifications',
+        #  'horizon-stream-operator',
+        #  'horizon-stream-rest-server',
+        #  'horizon-stream-ui',
+        #]
     environment: docker-publish-account
     # Environment that contains the required secrets.
     steps:
@@ -106,6 +110,7 @@ jobs:
           echo "Test - matrix " opennms-cloud/${{ matrix.image }}
           echo "Test - image_tag " ${{ env.IMAGE_TAG }} 
           echo "Test - release_tag " ${{ env.RELEASE_TAG }}
+          echo "Test - release_tag " ${{needs.job1.outputs.release-tag }}
           docker tag ghcr.io/opennms-cloud/horizon-stream-minion-gateway:eb00131f443b3c830defcc171dd50009386d7fd7 opennms/horizon-stream-minion-gateway:latest
           docker tag ghcr.io/opennms-cloud/${{ matrix.image }}:${{ env.IMAGE_TAG }} opennms/horizon-stream-minion-gateway:latest-2
           docker images

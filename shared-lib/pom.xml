@@ -25,6 +25,7 @@
         <module>horizon-common-utils</module>
         <module>horizon-ipc</module>
         <module>inventory</module>
+        <module>notifications</module>
         <module>snmp</module>
         <module>icmp-api</module>
         <module>protobuf</module>

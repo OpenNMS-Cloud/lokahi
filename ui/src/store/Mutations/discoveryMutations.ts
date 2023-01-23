@@ -6,11 +6,13 @@ import { AddAzureCredentialDocument } from '@/types/graphql'
 export const useDiscoveryMutations = defineStore('discoveryMutations', () => {
   const {
     execute: addAzureCreds,
-    error
+    error,
+    isFetching
   } = useMutation(AddAzureCredentialDocument)
 
   return {
     addAzureCreds,
-    azureError: computed(() => error)
+    azureError: computed(() => error),
+    isFetching: computed(() => isFetching)
   }
 })

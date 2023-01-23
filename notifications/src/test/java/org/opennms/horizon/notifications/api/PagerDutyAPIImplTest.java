@@ -34,7 +34,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.opennms.horizon.shared.dto.notifications.PagerDutyConfigDTO;
+import org.opennms.horizon.notifications.dto.PagerDutyConfigDTO;
 import org.opennms.horizon.shared.dto.event.AlarmDTO;
 import org.opennms.horizon.shared.dto.event.EventDTO;
 import org.opennms.horizon.shared.dto.event.EventParameterDTO;
@@ -73,7 +73,7 @@ public class PagerDutyAPIImplTest {
     }
 
     private PagerDutyConfigDTO getConfigDTO() {
-        return new PagerDutyConfigDTO("integration_key");
+        return PagerDutyConfigDTO.newBuilder().setIntegrationKey("integration_key").build();
     }
 
     private AlarmDTO getAlarm(boolean includeParams) {

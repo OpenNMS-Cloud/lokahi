@@ -58,14 +58,14 @@
       >
         CLOSE
       </FeatherButton>
-      <FeatherButton
-        v-if="selectedTool === DiscoveryType.Azure"
-        :disabled="!isAzureEnabled"
+      <ButtonWithSpinner v-if="selectedTool === DiscoveryType.Azure"
         primary
+        :isFetching="isFetching" 
+        :disabled="!isAzureEnabled"
         @click="saveAzureDiscovery"
       >
         SAVE DISCOVERY
-      </FeatherButton>
+      </ButtonWithSpinner>
     </template>
   </PrimaryModal>
   <FeatherDrawer
@@ -89,8 +89,10 @@ import AzureForm from '@/components/Discovery/AzureForm.vue'
 import { DiscoveryType } from '@/components/Discovery/discovery.constants'
 import useModal from '@/composables/useModal'
 import { useDiscoveryStore } from '@/store/Views/discoveryStore'
+import { useDiscoveryMutations } from '@/store/Mutations/discoveryMutations'
 import useSnackbar from '@/composables/useSnackbar'
 
+const { isFetching } = useDiscoveryMutations()
 const { showSnackbar } = useSnackbar()
 const store = useDiscoveryStore()
 const { openModal, closeModal, isVisible } = useModal()

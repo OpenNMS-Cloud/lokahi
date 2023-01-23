@@ -68,5 +68,5 @@ spec:
                   name: {{ .Values.Keycloak.ServiceName }}-initial-admin
                   key: password
           ports:
-            - name: http
-              containerPort: {{ .Values.OpenNMS.Notification.Port }}
+            - name: grpc
+              containerPort: {{ .Values.OpenNMS.Notification.GrpcPort }}

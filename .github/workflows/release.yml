@@ -60,7 +60,7 @@ jobs:
           'horizon-stream-minion',
           'horizon-stream-minion-gateway',
           'horizon-stream-minion-gateway-grpc-proxy',
-          'horizon-stream-notifications',
+          'horizon-stream-notification',
           'horizon-stream-rest-server',
           'horizon-stream-ui',
         ]

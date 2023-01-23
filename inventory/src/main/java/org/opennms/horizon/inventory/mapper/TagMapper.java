@@ -35,8 +35,6 @@ import org.opennms.horizon.inventory.model.Tag;
 @Mapper(componentModel = "spring")
 public interface TagMapper {
 
-    Tag dtoToModel(TagDTO dto);
-
     TagDTO modelToDTO(Tag model);
 
     Tag createDtoToModel(TagCreateDTO request);

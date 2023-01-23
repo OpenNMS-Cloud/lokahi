@@ -1,7 +1,5 @@
 <template>
-  {{  submitted }}
-  err: {{  error }}
-  <CustomFeatherStepper class="discovery-stepper">
+  <CustomFeatherStepper ref="stepper" class="discovery-stepper">
     <DiscoveryStep1 :disableNextBtn="!store.selectedLocations.length" />
     <DiscoveryStep2 :disableNextBtn="step2Disabled" @slideNext="step2Submit"/>
     <DiscoveryStep3 :hideNextBtn="true" @slideNext="callback" />
@@ -10,23 +8,27 @@
 
 <script setup lang="ts">
 import { useDiscoveryStore } from '@/store/Views/discoveryStore'
-import useValidation from './useValidation'
+import useDiscoveryValidation from './useDiscoveryValidation'
 
-const { setSubmitted, error, submitted } = useValidation()
+const { validate, error } = useDiscoveryValidation()
 const store = useDiscoveryStore()
+
 defineProps<{
   callback: () => void
 }>()
+
+const stepper = ref()
 
 const step2Disabled = computed(() => {
   return Boolean(!store.ipAddresses.length) && 
   (!store.ipRange.cidr || !store.ipRange.fromIp || !store.ipRange.toIp)
 })
 
-const step2Submit = (event: Event) => {
-  setSubmitted()
-  if (error.value) {
-    event.stopPropagation()
+const step2Submit = () => {
+  validate()
+  console.log(error.value)
+  if (!error.value) {
+    stepper.value.next()
   }
 }
 </script>

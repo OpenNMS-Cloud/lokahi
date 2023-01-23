@@ -49,6 +49,7 @@ declare module '@vue/runtime-core' {
     FeatherListHeader: typeof import('@featherds/list')['FeatherListHeader']
     FeatherListItem: typeof import('@featherds/list')['FeatherListItem']
     FeatherPopover: typeof import('@featherds/popover')['FeatherPopover']
+    FeatherProtectedInput: typeof import('@featherds/protected-input')['FeatherProtectedInput']
     FeatherRadio: typeof import('@featherds/radio')['FeatherRadio']
     FeatherRadioGroup: typeof import('@featherds/radio')['FeatherRadioGroup']
     FeatherSelect: typeof import('@featherds/select')['FeatherSelect']

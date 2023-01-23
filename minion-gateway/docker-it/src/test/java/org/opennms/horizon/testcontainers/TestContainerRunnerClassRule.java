@@ -53,14 +53,12 @@ public class TestContainerRunnerClassRule extends ExternalResource {
     private String confluentPlatformVersion = "7.3.0";
 
     private KafkaContainer kafkaContainer;
-    private GenericContainer zookeeperContainer;
     private GenericContainer applicationContainer;
 
     private Network network;
 
     public TestContainerRunnerClassRule() {
         kafkaContainer = new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka").withTag(confluentPlatformVersion));
-        zookeeperContainer = new GenericContainer(DockerImageName.parse("confluentinc/cp-zookeeper").withTag(confluentPlatformVersion));
         applicationContainer = new GenericContainer(DockerImageName.parse(dockerImage).toString());
     }
 
@@ -72,7 +70,6 @@ public class TestContainerRunnerClassRule extends ExternalResource {
 
         LOG.info("USING TEST DOCKER NETWORK {}", network.getId());
 
-        startZookeeperContainer();
         startKafkaContainer();
         startApplicationContainer();
     }
@@ -81,31 +78,17 @@ public class TestContainerRunnerClassRule extends ExternalResource {
     protected void after() {
         applicationContainer.stop();
         kafkaContainer.stop();
-        zookeeperContainer.stop();
     }
 
 //========================================
 // Container Startups
 //----------------------------------------
 
-    private void startZookeeperContainer() {
-
-        zookeeperContainer
-            .withNetwork(network)
-            .withNetworkAliases("zookeeper")
-            .withEnv("ZOOKEEPER_CLIENT_PORT", String.valueOf(KafkaContainer.ZOOKEEPER_PORT))
-            .withLogConsumer(new Slf4jLogConsumer(LOG).withPrefix("ZOOKEEPER"))
-        ;
-
-    }
-
     private void startKafkaContainer() {
         kafkaContainer
             .withEmbeddedZookeeper()
             .withNetwork(network)
             .withNetworkAliases("kafka", "kafka-host")
-            .dependsOn(zookeeperContainer)
-            .withExternalZookeeper("zookeeper:" + KafkaContainer.ZOOKEEPER_PORT)
             .withLogConsumer(new Slf4jLogConsumer(LOG).withPrefix("KAFKA"))
             .start();
         ;
@@ -119,7 +102,6 @@ public class TestContainerRunnerClassRule extends ExternalResource {
         applicationContainer
             .withNetwork(network)
             .withNetworkAliases("application", "application-host")
-            .dependsOn(zookeeperContainer, kafkaContainer)
             .withExposedPorts(8080, 8990, 8991, 5005)
             .withStartupTimeout(Duration.ofMinutes(5))
             .withEnv("JAVA_TOOL_OPTIONS", "-Djava.security.egd=file:/dev/./urandom -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005")

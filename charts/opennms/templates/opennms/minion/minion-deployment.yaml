@@ -13,6 +13,7 @@ spec:
   template:
     metadata:
       labels:
+        appdomain: opennms
         app: {{ .Values.OpenNMS.Minion.ServiceName }}
       annotations:
         linkerd.io/inject: enabled

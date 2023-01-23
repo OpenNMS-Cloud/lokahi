@@ -32,6 +32,7 @@ import "icmp.proto";
 import "snmp.proto";
 import "traps-config.proto";
 import "azure.proto";
+import "nodescan.proto";
 import "flows-config.proto";
 
 package opennms.taskset;
@@ -51,6 +52,7 @@ enum TaskType {
 
 enum ScanType {
   AZURE = 0;
+  NODE_SCAN = 1;
 }
 
 enum MonitorType {
@@ -62,14 +64,12 @@ enum MonitorType {
 
 message TaskDefinition {
   string id = 1;
-
   string description = 2;
   TaskType type = 3;
   string plugin_name = 4;
   string schedule = 5;
   uint64 node_id = 6;
   google.protobuf.Any configuration = 7;
-
 }
 
 message TaskSet {

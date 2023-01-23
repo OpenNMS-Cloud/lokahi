@@ -38,9 +38,26 @@ import io.grpc.ServerCallHandler;
 import io.grpc.StatusRuntimeException;
 import io.grpc.protobuf.StatusProto;
 import io.grpc.stub.MetadataUtils;
+import static com.jayway.awaitility.Awaitility.await;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.internal.verification.VerificationModeFactory.times;
+
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -48,6 +65,7 @@ import org.keycloak.common.VerificationException;
 import org.opennms.horizon.inventory.SpringContextTestInitializer;
 import org.opennms.horizon.inventory.dto.NodeCreateDTO;
 import org.opennms.horizon.inventory.dto.NodeDTO;
+import org.opennms.horizon.inventory.dto.NodeIdList;
 import org.opennms.horizon.inventory.dto.NodeList;
 import org.opennms.horizon.inventory.dto.NodeServiceGrpc;
 import org.opennms.horizon.inventory.grpc.taskset.TestTaskSetGrpcService;
@@ -66,29 +84,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 
-import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.TimeUnit;
-
-import static com.jayway.awaitility.Awaitility.await;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.internal.verification.VerificationModeFactory.times;
+import com.google.protobuf.BoolValue;
 
 @SpringBootTest
 @ContextConfiguration(initializers = {SpringContextTestInitializer.class})
 class NodeGrpcItTest extends GrpcTestBase {
-    private static final int EXPECTED_TASK_DEF_COUNT_FOR_NEW_LOCATION = 4;
-    private static final int EXPECTED_TASK_DEF_COUNT_WITHOUT_NEW_LOCATION = 2;
+    private static final int EXPECTED_TASK_DEF_COUNT_FOR_NEW_LOCATION = 5;
+    private static final int EXPECTED_TASK_DEF_COUNT_WITHOUT_NEW_LOCATION = 3;
     private NodeServiceGrpc.NodeServiceBlockingStub serviceStub;
 
     @Autowired
@@ -145,10 +149,10 @@ class NodeGrpcItTest extends GrpcTestBase {
         assertThat(node.getSystemDesc()).isEmpty();
         assertThat(node.getSystemLocation()).isEmpty();
         assertThat(node.getSystemContact()).isEmpty();
-        await().atMost(10, TimeUnit.SECONDS).untilAtomic(testGrpcService.getTimesCalled(), Matchers.is(3));
+        await().atMost(10, TimeUnit.SECONDS).untilAtomic(testGrpcService.getTimesCalled(), Matchers.is(4));
 
         org.assertj.core.api.Assertions.assertThat(testGrpcService.getRequests())
-            .hasSize(3)
+            .hasSize(4)
             .extracting(PublishTaskSetRequest::getTaskSet)
             .isNotNull()
             .extracting(TaskSet::getTaskDefinitionCount)
@@ -213,10 +217,10 @@ class NodeGrpcItTest extends GrpcTestBase {
         NodeDTO node = serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(differentTenantHeader))).createNode(createDTO);
 
         assertEquals(label, node.getNodeLabel());
-        await().atMost(10, TimeUnit.SECONDS).untilAtomic(testGrpcService.getTimesCalled(), Matchers.is(3));
+        await().atMost(10, TimeUnit.SECONDS).untilAtomic(testGrpcService.getTimesCalled(), Matchers.is(4));
 
         org.assertj.core.api.Assertions.assertThat(testGrpcService.getRequests())
-            .hasSize(3)
+            .hasSize(4)
             .extracting(PublishTaskSetRequest::getTaskSet)
             .isNotNull()
             .extracting(TaskSet::getTaskDefinitionCount)
@@ -242,10 +246,10 @@ class NodeGrpcItTest extends GrpcTestBase {
         NodeDTO node = serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).createNode(createDTO);
 
         assertEquals(label, node.getNodeLabel());
-        await().atMost(10, TimeUnit.SECONDS).untilAtomic(testGrpcService.getTimesCalled(), Matchers.is(3));
+        await().atMost(10, TimeUnit.SECONDS).untilAtomic(testGrpcService.getTimesCalled(), Matchers.is(4));
 
         org.assertj.core.api.Assertions.assertThat(testGrpcService.getRequests())
-            .hasSize(3)
+            .hasSize(4)
             .extracting(PublishTaskSetRequest::getTaskSet)
             .isNotNull()
             .extracting(TaskSet::getTaskDefinitionCount)
@@ -274,16 +278,16 @@ class NodeGrpcItTest extends GrpcTestBase {
         NodeDTO node = serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).createNode(createDTO);
 
         assertEquals(label, node.getNodeLabel());
-        await().atMost(10, TimeUnit.SECONDS).untilAtomic(testGrpcService.getTimesCalled(), Matchers.is(1));
+        await().atMost(10, TimeUnit.SECONDS).untilAtomic(testGrpcService.getTimesCalled(), Matchers.is(2));
         verify(spyInterceptor).verifyAccessToken(authHeader);
         verify(spyInterceptor).interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));
 
         List<PublishTaskSetRequest> grpcRequests = testGrpcService.getRequests();
-        assertEquals(1, grpcRequests.size());
+        assertEquals(2, grpcRequests.size());
 
-        PublishTaskSetRequest request = grpcRequests.get(0);
+        PublishTaskSetRequest request = grpcRequests.get(1);
         TaskSet taskSet = request.getTaskSet();
-        assertNotNull(taskSet);
+        Assertions.assertNotNull(taskSet);
         assertEquals(EXPECTED_TASK_DEF_COUNT_WITHOUT_NEW_LOCATION, taskSet.getTaskDefinitionCount());
     }
 
@@ -402,7 +406,7 @@ class NodeGrpcItTest extends GrpcTestBase {
 
     @Test
     void testGetNodeWithNodeInfo() throws VerificationException {
-        Node node = prepareNodeWithNodInfo();
+        Node node = prepareNodes(1, true).get(0);
         NodeDTO nodeDTO = serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader)))
             .getNodeById(Int64Value.of(node.getId()));
         assertNodeDTO(nodeDTO, node);
@@ -412,11 +416,37 @@ class NodeGrpcItTest extends GrpcTestBase {
 
     @Test
     void testListNodeWithNodInfo() throws VerificationException {
-        Node node = prepareNodeWithNodInfo();
+        Node node = prepareNodes(1, true).get(0);
         NodeList nodeList = serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader)))
             .listNodes(Empty.newBuilder().build());
         assertThat(nodeList.getNodesList().size()).isEqualTo(1);
         assertNodeDTO(nodeList.getNodes(0), node);
+        verify(spyInterceptor).verifyAccessToken(authHeader);
+        verify(spyInterceptor).interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));
+    }
+
+   @Test
+    void testStartScanByLocation() throws VerificationException {
+        List<Long> ids = prepareNodes(2, false).stream().map(n -> n.getId()).collect(Collectors.toList());
+        BoolValue result = serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader)))
+                .startNodeScanByIds(NodeIdList.newBuilder().build().newBuilder().addAllIds(ids).build());
+        assertThat(result.getValue()).isTrue();
+        await().atMost(10, TimeUnit.SECONDS).untilAtomic(testGrpcService.getTimesCalled(), Matchers.is(1));
+        verify(spyInterceptor).verifyAccessToken(authHeader);
+        verify(spyInterceptor).interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));
+        org.assertj.core.api.Assertions.assertThat(testGrpcService.getRequests())
+            .extracting(PublishTaskSetRequest::getTaskSet)
+            .extracting(TaskSet::getTaskDefinitionCount)
+            .containsExactly(2);
+    }
+
+    @Test
+    void testStartScanByLocationNotfound() throws VerificationException {
+        StatusRuntimeException exception = assertThrows(StatusRuntimeException.class, () -> serviceStub
+            .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader)))
+            .startNodeScanByIds(NodeIdList.newBuilder().addAllIds(List.of(1L)).build()));
+        Status status = StatusProto.fromThrowable(exception);
+        assertThat(status.getCode()).isEqualTo(Code.NOT_FOUND_VALUE);
         verify(spyInterceptor).verifyAccessToken(authHeader);
         verify(spyInterceptor).interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));
     }
@@ -428,17 +458,28 @@ class NodeGrpcItTest extends GrpcTestBase {
         assertThat(actual).isEqualTo(expected);
     }
 
-    private Node prepareNodeWithNodInfo() {
+    private List<Node> prepareNodes(int number, boolean withNodeInfo) {
         MonitoringLocation location = new MonitoringLocation();
         location.setLocation("test-location");
         location.setTenantId(tenantId);
         monitoringLocationRepository.save(location);
-        Node node = new Node();
-        node.setNodeLabel("test-node");
-        node.setMonitoringLocation(location);
-        node.setTenantId(tenantId);
-        node.setCreateTime(LocalDateTime.now());
-        nodeRepository.save(node);
-        return node;
+        List<Node> list = new ArrayList<>();
+        for(int i = 0; i < number; i++) {
+            Node node = new Node();
+            node.setNodeLabel("test-node" + (i + 1));
+            node.setMonitoringLocation(location);
+            node.setTenantId(tenantId);
+            node.setCreateTime(LocalDateTime.now());
+            if(withNodeInfo) {
+                node.setObjectId("12345." + i);
+                node.setSystemLocation("systemLocation" +i);
+                node.setSystemName("systemName"+1);
+                node.setSystemDesc("desc"+1);
+                node.setSystemContact("contact"+1);
+            }
+            nodeRepository.save(node);
+            list.add(node);
+        }
+        return list;
     }
 }

@@ -43,7 +43,6 @@
         Main executable for the Minion Gateway gRPC Proxy.
     </description>
 
-
     <dependencyManagement>
         <dependencies>
             <dependency>

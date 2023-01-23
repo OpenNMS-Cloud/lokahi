@@ -27,52 +27,51 @@
  *******************************************************************************/
 syntax = "proto3";
 
-import "google/protobuf/empty.proto";
-import "google/protobuf/wrappers.proto";
-import "ipInterface.proto";
-
-package opennms.inventory;
+package opennms.node.scan;
 option java_multiple_files = true;
-option java_package = "org.opennms.horizon.inventory.dto";
+option java_package = "org.opennms.node.scan.contract";
 
-message NodeDTO {
-  int64 id = 1;
-  string tenant_id = 2;
-  string node_label = 3;
-  int64 create_time = 4;
-  int64 monitoring_location_id = 5;
-  repeated opennms.inventory.IpInterfaceDTO ip_interfaces = 6;
-  string object_id = 7;
-  string system_name = 8;
-  string system_desc = 9;
-  string system_location = 10;
-  string system_contact = 11;
+message NodeScanRequest {
+  int64 nodeId = 1;
+  repeated string ipAddresses = 2;
 }
 
-message NodeCreateDTO {
-  string label = 1;
-  string location = 2;
-  optional string management_ip = 3;
+//Scan Results
+message NodeInfoResult {
+  string objectId = 1;
+  string systemName = 2;
+  string systemDesc = 3;
+  string systemLocation = 4;
+  string systemContact = 5;
 }
 
-message NodeList {
-  repeated NodeDTO nodes = 1;
+message ServiceResult {
+  string serviceName = 1;
+  string status = 2;
 }
 
-message NodeIdQuery {
-  string location = 1;
-  string ip_address = 2;
+message IpInterfaceResult {
+  string ipAddress = 1;
+  string ipHostName = 2;
+  string netMask = 3;
+  bool isSNMPPrimary = 4;
 }
 
-message NodeIdList {
-  repeated int64 ids = 1;
+message IfServiceResult {
+  IpInterfaceResult ipInterface = 1;
+  repeated ServiceResult services = 2;
 }
 
-service NodeService {
-  rpc createNode(NodeCreateDTO) returns (NodeDTO) {};
-  rpc listNodes(google.protobuf.Empty) returns (NodeList) {};
-  rpc getNodeById(google.protobuf.Int64Value) returns (NodeDTO) {};
-  rpc getNodeIdFromQuery(NodeIdQuery) returns (google.protobuf.Int64Value) {};
-  rpc deleteNode(google.protobuf.Int64Value) returns(google.protobuf.BoolValue) {};
-  rpc startNodeScanByIds(NodeIdList) returns(google.protobuf.BoolValue) {};
+message SnmpInterfaceResult {
+  string physicalAddr = 1;
+  int32 ifIndex =2;
+  string ifDesc = 3;
+  int32 ifType = 4;
+  string ifName = 5;
+  int64 ifSpeed = 6;
+  int32 ifAdminStatus = 7;
+  int32 ifOperatorStatus = 8;
+  string ifAlias = 9;
 }
+
+

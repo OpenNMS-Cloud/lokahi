@@ -33,6 +33,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import java.io.IOException;
@@ -51,6 +52,7 @@ import org.opennms.horizon.inventory.mapper.NodeMapper;
 import org.opennms.horizon.inventory.service.IpInterfaceService;
 import org.opennms.horizon.inventory.service.NodeService;
 import org.opennms.horizon.inventory.service.taskset.DetectorTaskSetService;
+import org.opennms.horizon.inventory.service.taskset.ScannerTaskSetService;
 
 import com.google.protobuf.Int64Value;
 import com.google.rpc.Code;
@@ -66,6 +68,7 @@ public class NodeGrpcTest extends AbstractGrpcUnitTest {
     private IpInterfaceService mockIpInterfaceService;
     private NodeMapper mockNodeMapper;
     private DetectorTaskSetService mockTaskSetService;
+    private ScannerTaskSetService mockScannerTaskService;
     private NodeServiceGrpc.NodeServiceBlockingStub stub;
     private ManagedChannel channel;
 
@@ -75,7 +78,8 @@ public class NodeGrpcTest extends AbstractGrpcUnitTest {
         mockIpInterfaceService = mock(IpInterfaceService.class);
         mockNodeMapper = mock(NodeMapper.class);
         mockTaskSetService = mock(DetectorTaskSetService.class);
-        NodeGrpcService grpcService = new NodeGrpcService(mockNodeService, mockIpInterfaceService, mockNodeMapper, tenantLookup, mockTaskSetService);
+        NodeGrpcService grpcService = new NodeGrpcService(mockNodeService, mockIpInterfaceService, mockNodeMapper,
+            tenantLookup, mockTaskSetService, mockScannerTaskService);
         startServer(grpcService);
         channel = InProcessChannelBuilder.forName(serverName).directExecutor().build();
         stub = NodeServiceGrpc.newBlockingStub(channel);

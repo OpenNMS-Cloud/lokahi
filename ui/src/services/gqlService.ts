@@ -40,6 +40,10 @@ const errorNotificationPlugin = definePlugin(({ afterQuery }) => {
       notificationMsg = 'Server error has occured.'
     }
 
+    else if ('INTERNAL:') {
+      notificationMsg = error.message.split('INTERNAL:')[1]
+    }
+
     showSnackbar({
       msg: notificationMsg,
       error: true

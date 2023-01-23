@@ -21,6 +21,7 @@
     <version>0.1.0-SNAPSHOT</version>
 
 	<properties>
+        <application.docker.image.name>opennms/horizon-stream-rest-server</application.docker.image.name>
 		<java.version>17</java.version>
 		<graphql.spqr.version>0.0.6</graphql.spqr.version>
 	</properties>
@@ -88,6 +89,11 @@
         <dependency>
             <groupId>org.opennms.horizon.shared</groupId>
             <artifactId>events</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.opennms.horizon.shared</groupId>
+            <artifactId>notifications</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -222,7 +228,6 @@
 			<plugin>
 				<groupId>com.google.cloud.tools</groupId>
 				<artifactId>jib-maven-plugin</artifactId>
-				<version>3.2.1</version>
 			</plugin>
 		</plugins>
 	</build>

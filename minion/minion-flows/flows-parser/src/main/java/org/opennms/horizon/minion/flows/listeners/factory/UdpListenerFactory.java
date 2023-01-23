@@ -34,10 +34,12 @@ import java.util.stream.Collectors;
 
 import com.codahale.metrics.MetricRegistry;
 
-import org.opennms.horizon.minion.flows.listeners.Listener;
+import org.opennms.horizon.minion.flows.listeners.FlowsListener;
 import org.opennms.horizon.minion.flows.listeners.Parser;
 import org.opennms.horizon.minion.flows.listeners.UdpListener;
 import org.opennms.horizon.minion.flows.listeners.UdpParser;
+import org.opennms.sink.flows.contract.FlowsConfig;
+import org.opennms.sink.flows.contract.ListenerConfig;
 
 public class UdpListenerFactory implements ListenerFactory {
 
@@ -45,17 +47,18 @@ public class UdpListenerFactory implements ListenerFactory {
 
     public UdpListenerFactory(TelemetryRegistry telemetryRegistry) {
         this.telemetryRegistry = Objects.requireNonNull(telemetryRegistry);
+        telemetryRegistry.addListenerFactory(this);
     }
 
     @Override
-    public Class<? extends Listener> getBeanClass() {
+    public Class<? extends FlowsListener> getBeanClass() {
         return UdpListener.class;
     }
 
     @Override
-    public Listener createBean(ListenerDefinition listenerDefinition) {
+    public FlowsListener createBean(ListenerConfig listenerConfig) {
         // Ensure each defined parser is of type UdpParser
-        final List<Parser> parsers = listenerDefinition.getParsers().stream()
+        final List<Parser> parsers = listenerConfig.getParsersList().stream()
                 .map(telemetryRegistry::getParser)
                 .collect(Collectors.toList());
         final List<Parser> udpParsers = parsers.stream()
@@ -64,6 +67,6 @@ public class UdpListenerFactory implements ListenerFactory {
         if (parsers.size() != udpParsers.size()) {
             throw new IllegalArgumentException("Each parser must be of type UdpParser but was not: " + parsers);
         }
-        return new UdpListener(listenerDefinition.getName(), udpParsers, new MetricRegistry());
+        return new UdpListener(listenerConfig.getName(), udpParsers, new MetricRegistry());
     }
 }

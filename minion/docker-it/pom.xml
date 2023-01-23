@@ -4,10 +4,9 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.opennms.horizon</groupId>
-        <artifactId>horizon-parent</artifactId>
+        <groupId>org.opennms.horizon.minion</groupId>
+        <artifactId>minion</artifactId>
         <version>0.1.0-SNAPSHOT</version>
-        <relativePath>../../parent-pom</relativePath>
     </parent>
 
     <name>OpenNMS Horizon Stream :: Docker IT</name>
@@ -21,10 +20,6 @@
     </description>
 
     <artifactId>docker-it</artifactId>
-
-    <properties>
-        <docker.image.tag>local</docker.image.tag>
-    </properties>
 
     <dependencies>
         <dependency>
@@ -164,7 +159,7 @@
                             <name>mock-minion-gateway-it-image</name>
                             <alias>minion-gateway</alias>
                             <build>
-                                <from>opennms/horizon-stream-mock-minion-gateway:local</from>
+                                <from>opennms/horizon-stream-mock-minion-gateway:latest</from>
                             </build>
                             <run>
                                 <env>
@@ -193,7 +188,7 @@
                             <name>opennms-horizon-application-it-image</name>
                             <alias>application</alias>
                             <build>
-                                <from>opennms/horizon-stream-minion:${docker.image.tag}</from>
+                                <from>${application.docker.image}</from>
                                 <assembly>
                                     <user>minion-poc</user>
                                     <targetDir>/</targetDir>

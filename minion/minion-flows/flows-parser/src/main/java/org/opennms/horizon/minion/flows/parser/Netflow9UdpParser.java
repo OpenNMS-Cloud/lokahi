@@ -1,8 +1,8 @@
 /*******************************************************************************
  * This file is part of OpenNMS(R).
  *
- * Copyright (C) 2018 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2018 The OpenNMS Group, Inc.
+ * Copyright (C) 2018-2023 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
  *
@@ -28,13 +28,13 @@
 
 package org.opennms.horizon.minion.flows.parser;
 
-import static org.opennms.horizon.minion.flows.listeners.utils.BufferUtils.slice;
-import static org.opennms.horizon.minion.flows.listeners.utils.BufferUtils.uint16;
-
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-
+import com.codahale.metrics.MetricRegistry;
+import com.google.common.base.MoreObjects;
+import com.google.common.base.Objects;
+import io.netty.buffer.ByteBuf;
 import org.opennms.horizon.grpc.telemetry.contract.TelemetryMessage;
+import org.opennms.horizon.minion.flows.listeners.Dispatchable;
+import org.opennms.horizon.minion.flows.listeners.UdpParser;
 import org.opennms.horizon.minion.flows.parser.factory.DnsResolver;
 import org.opennms.horizon.minion.flows.parser.ie.RecordProvider;
 import org.opennms.horizon.minion.flows.parser.netflow9.proto.Header;
@@ -46,13 +46,11 @@ import org.opennms.horizon.shared.ipc.rpc.IpcIdentity;
 import org.opennms.horizon.shared.ipc.sink.api.AsyncDispatcher;
 import org.opennms.horizon.shared.utils.InetAddressUtils;
 
-import com.codahale.metrics.MetricRegistry;
-import com.google.common.base.MoreObjects;
-import com.google.common.base.Objects;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
 
-import io.netty.buffer.ByteBuf;
-import org.opennms.horizon.minion.flows.listeners.Dispatchable;
-import org.opennms.horizon.minion.flows.listeners.UdpParser;
+import static org.opennms.horizon.minion.flows.listeners.utils.BufferUtils.slice;
+import static org.opennms.horizon.minion.flows.listeners.utils.BufferUtils.uint16;
 
 public class Netflow9UdpParser extends UdpParserBase implements UdpParser, Dispatchable {
 
@@ -105,7 +103,7 @@ public class Netflow9UdpParser extends UdpParserBase implements UdpParser, Dispa
             if (o == null || getClass() != o.getClass()) return false;
             final SessionKey that = (SessionKey) o;
             return Objects.equal(this.localAddress, that.localAddress) &&
-                    Objects.equal(this.remoteAddress, that.remoteAddress);
+                Objects.equal(this.remoteAddress, that.remoteAddress);
         }
 
         @Override
@@ -116,9 +114,9 @@ public class Netflow9UdpParser extends UdpParserBase implements UdpParser, Dispa
         @Override
         public String toString() {
             return MoreObjects.toStringHelper(this)
-                    .add("remoteAddress", remoteAddress)
-                    .add("localAddress", localAddress)
-                    .toString();
+                .add("remoteAddress", remoteAddress)
+                .add("localAddress", localAddress)
+                .toString();
         }
 
         @Override

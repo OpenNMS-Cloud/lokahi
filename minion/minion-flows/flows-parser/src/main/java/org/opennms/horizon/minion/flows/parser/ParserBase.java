@@ -28,6 +28,31 @@
 
 package org.opennms.horizon.minion.flows.parser;
 
+import com.codahale.metrics.Counter;
+import com.codahale.metrics.Meter;
+import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Timer;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
+import com.google.common.collect.Lists;
+import com.google.protobuf.ByteString;
+import com.swrve.ratelimitedlogger.RateLimitedLog;
+import org.opennms.horizon.grpc.telemetry.contract.TelemetryMessage;
+import org.opennms.horizon.minion.flows.listeners.Parser;
+import org.opennms.horizon.minion.flows.parser.factory.DnsResolver;
+import org.opennms.horizon.minion.flows.parser.flowmessage.FlowMessage;
+import org.opennms.horizon.minion.flows.parser.ie.RecordProvider;
+import org.opennms.horizon.minion.flows.parser.session.SequenceNumberTracker;
+import org.opennms.horizon.minion.flows.parser.session.Session;
+import org.opennms.horizon.minion.flows.parser.transport.MessageBuilder;
+import org.opennms.horizon.shared.ipc.rpc.IpcIdentity;
+import org.opennms.horizon.shared.ipc.sink.api.AsyncDispatcher;
+import org.opennms.horizon.shared.logging.LogPreservingThreadFactory;
+import org.opennms.horizon.shared.utils.InetAddressUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.time.Duration;
@@ -44,38 +69,13 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import org.opennms.horizon.grpc.telemetry.contract.TelemetryMessage;
-import org.opennms.horizon.minion.flows.listeners.Parser;
-import org.opennms.horizon.minion.flows.parser.factory.DnsResolver;
-import org.opennms.horizon.minion.flows.parser.flowmessage.FlowMessage;
-import org.opennms.horizon.minion.flows.parser.ie.RecordProvider;
-import org.opennms.horizon.minion.flows.parser.session.SequenceNumberTracker;
-import org.opennms.horizon.minion.flows.parser.session.Session;
-import org.opennms.horizon.minion.flows.parser.transport.MessageBuilder;
-import org.opennms.horizon.shared.ipc.rpc.IpcIdentity;
-import org.opennms.horizon.shared.ipc.sink.api.AsyncDispatcher;
-import org.opennms.horizon.shared.logging.LogPreservingThreadFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.codahale.metrics.Counter;
-import com.codahale.metrics.Meter;
-import com.codahale.metrics.MetricRegistry;
-import com.codahale.metrics.Timer;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
-import com.google.common.collect.Lists;
-import com.google.protobuf.ByteString;
-import com.swrve.ratelimitedlogger.RateLimitedLog;
-
 public abstract class ParserBase implements Parser {
     private static final Logger LOG = LoggerFactory.getLogger(ParserBase.class);
 
     private final RateLimitedLog SEQUENCE_ERRORS_LOGGER = RateLimitedLog
-            .withRateLimit(LOG)
-            .maxRate(5).every(Duration.ofSeconds(30))
-            .build();
+        .withRateLimit(LOG)
+        .maxRate(5).every(Duration.ofSeconds(30))
+        .build();
 
     private static final int DEFAULT_NUM_THREADS = Runtime.getRuntime().availableProcessors() * 2;
 
@@ -155,14 +155,14 @@ public abstract class ParserBase implements Parser {
             r.run();
         });
 
-        recordsReceived = metricRegistry.meter(MetricRegistry.name("parsers",  name, "recordsReceived"));
-        recordsDispatched = metricRegistry.meter(MetricRegistry.name("parsers",  name, "recordsDispatched"));
-        recordEnrichmentTimer = metricRegistry.timer(MetricRegistry.name("parsers",  name, "recordEnrichment"));
-        recordEnrichmentErrors = metricRegistry.counter(MetricRegistry.name("parsers",  name, "recordEnrichmentErrors"));
-        invalidFlows = metricRegistry.meter(MetricRegistry.name("parsers",  name, "invalidFlows"));
-        recordsScheduled = metricRegistry.meter(MetricRegistry.name("parsers",  name, "recordsScheduled"));
-        recordsCompleted = metricRegistry.meter(MetricRegistry.name("parsers",  name, "recordsCompleted"));
-        recordDispatchErrors = metricRegistry.counter(MetricRegistry.name("parsers",  name, "recordDispatchErrors"));
+        recordsReceived = metricRegistry.meter(MetricRegistry.name("parsers", name, "recordsReceived"));
+        recordsDispatched = metricRegistry.meter(MetricRegistry.name("parsers", name, "recordsDispatched"));
+        recordEnrichmentTimer = metricRegistry.timer(MetricRegistry.name("parsers", name, "recordEnrichment"));
+        recordEnrichmentErrors = metricRegistry.counter(MetricRegistry.name("parsers", name, "recordEnrichmentErrors"));
+        invalidFlows = metricRegistry.meter(MetricRegistry.name("parsers", name, "invalidFlows"));
+        recordsScheduled = metricRegistry.meter(MetricRegistry.name("parsers", name, "recordsScheduled"));
+        recordsCompleted = metricRegistry.meter(MetricRegistry.name("parsers", name, "recordsCompleted"));
+        recordDispatchErrors = metricRegistry.counter(MetricRegistry.name("parsers", name, "recordDispatchErrors"));
         sequenceErrors = metricRegistry.counter(MetricRegistry.name("parsers", name, "sequenceErrors"));
 
         // Call setters since these also perform additional handling
@@ -176,23 +176,23 @@ public abstract class ParserBase implements Parser {
     @Override
     public void start(ScheduledExecutorService executorService) {
         executor = new ThreadPoolExecutor(
-                // corePoolSize must be > 0 since we use the RejectedExecutionHandler to block when the queue is full
-                1, threads,
-                60L, TimeUnit.SECONDS,
-                new SynchronousQueue<>(),
-                threadFactory,
-                (r, executor) -> {
-                    // We enter this block when the queue is full and the caller is attempting to submit additional tasks
-                    try {
-                        // If we're not shutdown, then block until there's room in the queue
-                        if (!executor.isShutdown()) {
-                            executor.getQueue().put(r);
-                        }
-                    } catch (InterruptedException e) {
-                        Thread.currentThread().interrupt();
-                        throw new RejectedExecutionException("Executor interrupted while waiting for capacity in the work queue.", e);
+            // corePoolSize must be > 0 since we use the RejectedExecutionHandler to block when the queue is full
+            1, threads,
+            60L, TimeUnit.SECONDS,
+            new SynchronousQueue<>(),
+            threadFactory,
+            (r, executor) -> {
+                // We enter this block when the queue is full and the caller is attempting to submit additional tasks
+                try {
+                    // If we're not shutdown, then block until there's room in the queue
+                    if (!executor.isShutdown()) {
+                        executor.getQueue().put(r);
                     }
-                });
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    throw new RejectedExecutionException("Executor interrupted while waiting for capacity in the work queue.", e);
+                }
+            });
     }
 
     @Override
@@ -297,7 +297,7 @@ public abstract class ParserBase implements Parser {
                         final FlowMessage.Builder flowMessage;
                         try {
                             flowMessage = this.getMessageBuilder().buildMessage(record, enrichment);
-                        } catch (final  Exception e) {
+                        } catch (final Exception e) {
                             throw new RuntimeException(e);
                         }
 
@@ -318,9 +318,10 @@ public abstract class ParserBase implements Parser {
                         }
 
                         // Build the message to dispatch
-                        final TelemetryMessage telemetryMessage = TelemetryMessage.newBuilder()
-                            .setBytes(ByteString.copyFrom(flowMessage.build().toByteArray()))
-                            .build();
+                        final var telemetryMessage = TelemetryMessage.newBuilder()
+                            .setSourceAddress(InetAddressUtils.str(remoteAddress.getAddress()))
+                            .setSourcePort(remoteAddress.getPort())
+                            .setBytes(ByteString.copyFrom(flowMessage.build().toByteArray())).build();
 
                         // Dispatch
                         dispatcher.send(telemetryMessage).whenComplete((b, exx) -> {
@@ -353,14 +354,14 @@ public abstract class ParserBase implements Parser {
 
         // Return a future which is completed when all records are finished dispatching (i.e. written to Kafka)
         final CompletableFuture<Void> future = new CompletableFuture<>();
-        futureOfFutures.whenComplete((futures,ex) -> {
+        futureOfFutures.whenComplete((futures, ex) -> {
             if (ex != null) {
                 LOG.warn("Error preparing records for dispatch.", ex);
                 future.completeExceptionally(ex);
                 return;
             }
             // Dispatch was triggered for all the records, now wait for the dispatching to complete
-            CompletableFuture.allOf(futures).whenComplete((any,exx) -> {
+            CompletableFuture.allOf(futures).whenComplete((any, exx) -> {
                 if (exx != null) {
                     LOG.warn("One or more of the records were not successfully dispatched.", exx);
                     future.completeExceptionally(exx);
@@ -405,16 +406,16 @@ public abstract class ParserBase implements Parser {
 
         if (flow.getFirstSwitched().getValue() > flow.getLastSwitched().getValue()) {
             corrections.add(String.format("Malformed flow: lastSwitched must be greater than firstSwitched: srcAddress=%s, dstAddress=%s, firstSwitched=%d, lastSwitched=%d, duration=%d",
-                                  flow.getSrcAddress(),
-                                  flow.getDstAddress(),
-                                  flow.getFirstSwitched().getValue(),
-                                  flow.getLastSwitched().getValue(),
-                                  flow.getLastSwitched().getValue() - flow.getFirstSwitched().getValue()));
+                flow.getSrcAddress(),
+                flow.getDstAddress(),
+                flow.getFirstSwitched().getValue(),
+                flow.getLastSwitched().getValue(),
+                flow.getLastSwitched().getValue() - flow.getFirstSwitched().getValue()));
 
             // Re-calculate a (somewhat) valid timout from the flow timestamps
             final long timeout = (flow.hasDeltaSwitched() && flow.getDeltaSwitched().getValue() != flow.getFirstSwitched().getValue())
-                    ? (flow.getLastSwitched().getValue() - flow.getDeltaSwitched().getValue())
-                    : 0L;
+                ? (flow.getLastSwitched().getValue() - flow.getDeltaSwitched().getValue())
+                : 0L;
 
             flow.getLastSwitchedBuilder().setValue(flow.getTimestamp());
             flow.getFirstSwitchedBuilder().setValue(flow.getTimestamp() - timeout);

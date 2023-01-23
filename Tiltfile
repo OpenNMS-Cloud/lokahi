@@ -61,7 +61,7 @@ def jib_project(resource_name, image_name, base_path, k8s_resource_name, resourc
 
     custom_build(
         image_name,
-        'mvn jib:dockerBuild -Dimage=$EXPECTED_REF -f {} -Djib.from.platforms=linux/{} {}'.format(base_path, cluster_arch_cmd, submodule_flag),
+        'mvn jib:dockerBuild -Dapplication.docker.image=$EXPECTED_REF -f {} -Djib.from.platforms=linux/{} {}'.format(base_path, cluster_arch_cmd, submodule_flag),
         deps=['{}{}/target/classes'.format(base_path, submodule_path), '{}{}/pom.xml'.format(base_path, submodule_path), '{}{}/src/main/resources'.format(base_path, submodule_path)],
         live_update=[
             sync('{}{}/target/classes/org/opennms'.format(base_path, submodule_path), '/app/classes/org/opennms'),
@@ -113,7 +113,7 @@ jib_project(
     'opennms/horizon-stream-notification',
     'notifications',
     'opennms-notifications',
-    port_forwards=['15080:9090', '15050:5005'],
+    port_forwards=['31065:6565', '15050:5005'],
 )
 
 ### Vue.js App ###
@@ -213,7 +213,7 @@ jib_project(
 ### Minion ###
 custom_build(
     'opennms/horizon-stream-minion',
-    'mvn install -f minion -Ddocker.image=$EXPECTED_REF -Dtest=false -DfailIfNoTests=false -DskipITs=true -DskipTests=true',
+    'mvn install -f minion -Dapplication.docker.image=$EXPECTED_REF -Dtest=false -DfailIfNoTests=false -DskipITs=true -DskipTests=true',
     deps=['./minion'],
     ignore=['**/target', '**/dependency-reduced-pom.xml'],
 )

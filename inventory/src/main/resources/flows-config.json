@@ -1,0 +1,57 @@
+{
+  "listeners": [{
+    "name": "Netflow-5-UDP-8877",
+    "className": "UdpListener",
+    "enabled": true,
+    "parameters": [{
+      "key": "port",
+      "value": "8877"
+    }],
+    "parsers": [{
+      "name": "Netflow-5-Parser",
+      "className": "Netflow5UdpParser",
+      "queue": {
+        "name": "Netflow-5",
+        "adapters": [{
+          "name": "Netflow-5-Adapter",
+          "className": "org.opennms.horizon.flows.adapter.netflow5.Netflow5Adapter",
+          "enabled": true,
+          "parameters": [{
+            "key": "applicationDataCollection",
+            "value": "false"
+          }, {
+            "key": "applicationThresholding",
+            "value": "false"
+          }]
+        }]
+      }
+    }]
+  }, {
+    "name": "IPFIX-TCP-4730",
+    "className": "TcpListener",
+    "enabled": true,
+    "parameters": [{
+      "key": "port",
+      "value": "4730"
+    }],
+    "parsers": [{
+      "name": "IPFIX-TCP-Parser",
+      "className": "IpfixTcpParser",
+      "queue": {
+        "name": "IPFIX",
+        "adapters": [{
+          "name": "IPFIX-Adapter",
+          "className": "org.opennms.horizon.flows.adapter.ipfix.IpfixAdapter",
+          "enabled": true,
+          "parameters": [{
+            "key": "applicationDataCollection",
+            "value": "false"
+          }, {
+            "key": "applicationThresholding",
+            "value": "false"
+          }]
+        }]
+      }
+    }]
+  }]
+}

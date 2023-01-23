@@ -40,27 +40,42 @@
       </Card>
     </div>
   </div>
-   <PrimaryModal :visible="isVisible" title="''" hide-title>
+  <PrimaryModal
+    :visible="isVisible"
+    title="''"
+    hide-title
+  >
     <template #content>
-      <component :is="modalContent?.component" v-bind="modalContent?.props" />
+      <component
+        :is="modalContent?.component"
+        v-bind="modalContent?.props"
+      />
     </template>
     <template v-slot:footer>
-      <FeatherButton 
-        secondary 
-        @click="closeModal">
-          Close
+      <FeatherButton
+        secondary
+        @click="closeModal"
+      >
+        CLOSE
       </FeatherButton>
+      <ButtonWithSpinner v-if="selectedTool === DiscoveryType.Azure"
+        primary
+        :isFetching="isFetching" 
+        :disabled="!isAzureEnabled"
+        @click="saveAzureDiscovery"
+      >
+        SAVE DISCOVERY
+      </ButtonWithSpinner>
     </template>
   </PrimaryModal>
-   <FeatherDrawer
-    id="map-left-drawer"
+  <FeatherDrawer
     :left="false"
     :modelValue="isDrawerOpen"
     @update:modelValue="closeDrawer"
     :labels="{ close: 'close', title: 'Instructions' }"
   >
     <div class="container">
-      <slot name="search"><DiscoveryInstructions :tool="selectedTool"/></slot>
+      <slot name="search"><DiscoveryInstructions :tool="selectedTool" /></slot>
       <slot name="view"></slot>
     </div>
   </FeatherDrawer>
@@ -70,8 +85,16 @@
 import ActiveDiscoveryImg from '@/assets/active-discovery.png'
 import PassiveDiscoveryImg from '@/assets/passive-discovery.png'
 import DiscoveryStepper from '@/components/Discovery/DiscoveryStepper.vue'
+import AzureForm from '@/components/Discovery/AzureForm.vue'
 import { DiscoveryType } from '@/components/Discovery/discovery.constants'
 import useModal from '@/composables/useModal'
+import { useDiscoveryStore } from '@/store/Views/discoveryStore'
+import { useDiscoveryMutations } from '@/store/Mutations/discoveryMutations'
+import useSnackbar from '@/composables/useSnackbar'
+
+const { isFetching } = useDiscoveryMutations()
+const { showSnackbar } = useSnackbar()
+const store = useDiscoveryStore()
 const { openModal, closeModal, isVisible } = useModal()
 const selectedTool = ref()
 const isDrawerOpen = ref(false)
@@ -81,8 +104,16 @@ const modalContent = computed(() => {
     case DiscoveryType.ICMP:
       return { component: DiscoveryStepper, props: { callback: closeModal }}
     case DiscoveryType.Azure:
-      // return Azure content
+      return { component: AzureForm }
   }
+})
+
+const isAzureEnabled = computed(() => {
+  return Boolean(store.selectedLocations.length 
+    && store.azure.clientId 
+    && store.azure.clientSecret
+    && store.azure.directoryId
+    && store.azure.subscriptionId)
 })
 
 const showSettings = (tool: DiscoveryType) => {
@@ -99,6 +130,16 @@ const showInstructions = (tool: DiscoveryType) => {
 const showConfigActiveTool = (tool: DiscoveryType) => {
   selectedTool.value = tool
   openModal()
+}
+
+const saveAzureDiscovery = async () => {
+  const success = await store.saveDiscoveryAzure()
+  if (success) {
+    closeModal()
+    showSnackbar({
+      msg: 'Azure successfully discovered.'
+    })
+  }
 }
 
 const closeDrawer = () => {
@@ -132,5 +173,8 @@ const closeDrawer = () => {
     flex-direction: column;
     margin-top: 18px;
   }
+}
+.feather-input-sub-text {
+  display: none;
 }
 </style>

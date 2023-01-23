@@ -1,56 +1,150 @@
-name: develop
+name: Develop Workflow
 
 on:
   push:
     branches:
       - 'develop'
   pull_request:
-    #types: [ labeled, closed]
-    types: [ labeled]
+# This workflow is triggered instead of individual workflows that filter based on paths.
+# If we want to fully separate individual workflows out of this one, we need fully reproducible builds.
+# Just use this one for now. The downside is it will run redundant workflows for code that didn't change.
+#    types: [labeled]
     branches:
       - 'develop'
-
-# For now, we have put all steps into a single job, this will allow for just
-# one vm to run. We use actions to factor out the functionality. If there is a
-# requirement to create additional jobs, maybe to run concurrent jobs, then we
-# can split them up later.
+  workflow_call:
+    inputs:
+      image-tag:
+        description: 'Tag for all images'
+        required: false
+        type: string
+      image-registry:
+        description: 'Docker image registry for all images'
+        required: false
+        type: string
 
 jobs:
-  scan:
-    # Workaround for issues caused by running sonar scans on self-hosted runner
-    # Run the problematic scans on a hosted runner, separately
-    # only trigger these scans on develop branch, scans on other branches are covered by other workflows
-    if: ${{ github.event.ref == 'refs/heads/develop' }}
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
-
-      - name: Scan UI with SonarCloud
-        uses: ./.github/actions/ui
-        with:
-          dir-location: 'ui'
-          enable-sonar-scan: true
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          sonar-token: ${{ secrets.SONAR_TOKEN }}
-
-  develop:
-    # If label for PR, closed on PR, or develop branch on push, then run., 
-    if: ${{ ( github.event.label.name == 'actions-develop' ) || ( github.event.action == 'closed' ) || ( github.event.ref == 'refs/heads/develop' ) }}
+  alarm:
+    name: Alarm Service
+    uses: ./.github/workflows/feature-alarm.yml
+    secrets: inherit
+    with:
+      image-tag: ${{ inputs.image-tag || github.sha }}
+      image-registry: ${{ inputs.image-registry || 'ghcr.io' }}
+  datachoices:
+    name: DataChoices Service
+    uses: ./.github/workflows/feature-datachoices.yml
+    secrets: inherit
+    with:
+      image-tag: ${{ inputs.image-tag || github.sha }}
+      image-registry: ${{ inputs.image-registry || 'ghcr.io' }}
+  events:
+    name: Event Service
+    uses: ./.github/workflows/feature-events.yml
+    secrets: inherit
+    with:
+      image-tag: ${{ inputs.image-tag || github.sha }}
+      image-registry: ${{ inputs.image-registry || 'ghcr.io' }}
+  grafana:
+    name: Grafana
+    uses: ./.github/workflows/feature-grafana.yml
+    secrets: inherit
+    with:
+      image-tag: ${{ inputs.image-tag || github.sha }}
+      image-registry: ${{ inputs.image-registry || 'ghcr.io' }}
+  inventory:
+    name: Inventory Service
+    uses: ./.github/workflows/feature-inventory.yml
+    secrets: inherit
+    with:
+      image-tag: ${{ inputs.image-tag || github.sha }}
+      image-registry: ${{ inputs.image-registry || 'ghcr.io' }}
+  keycloak-ui:
+    name: Keycloak
+    uses: ./.github/workflows/feature-keycloak-ui.yml
+    secrets: inherit
+    with:
+      image-tag: ${{ inputs.image-tag || github.sha }}
+      image-registry: ${{ inputs.image-registry || 'ghcr.io' }}
+  metrics-processor:
+    name: Metrics Processor Service
+    uses: ./.github/workflows/feature-metrics-processor.yml
+    secrets: inherit
+    with:
+      image-tag: ${{ inputs.image-tag || github.sha }}
+      image-registry: ${{ inputs.image-registry || 'ghcr.io' }}
+  minion:
+    name: Minion
+    uses: ./.github/workflows/feature-minion.yml
+    secrets: inherit
+    with:
+      image-tag: ${{ inputs.image-tag || github.sha }}
+      image-registry: ${{ inputs.image-registry || 'ghcr.io' }}
+  minion-gateway:
+    name: Minion Gateway Service
+    uses: ./.github/workflows/feature-minion-gateway.yml
+    secrets: inherit
+    with:
+      image-tag: ${{ inputs.image-tag || github.sha }}
+      image-registry: ${{ inputs.image-registry || 'ghcr.io' }}
+  minion-gateway-grpc-proxy:
+    name: Minion Gateway GRPC Proxy
+    uses: ./.github/workflows/feature-minion-gateway-grpc-proxy.yml
+    secrets: inherit
+    with:
+      image-tag: ${{ inputs.image-tag || github.sha }}
+      image-registry: ${{ inputs.image-registry || 'ghcr.io' }}
+  notifications:
+    name: Notification Service
+    uses: ./.github/workflows/feature-notifications.yml
+    secrets: inherit
+    with:
+      image-tag: ${{ inputs.image-tag || github.sha }}
+      image-registry: ${{ inputs.image-registry || 'ghcr.io' }}
+  parent-pom:
+    name: Parent POM
+    uses: ./.github/workflows/feature-parent-pom.yml
+    secrets: inherit
+  rest-server:
+    name: Vue.js BFF
+    uses: ./.github/workflows/feature-rest-server.yml
+    secrets: inherit
+    with:
+      image-tag: ${{ inputs.image-tag || github.sha }}
+      image-registry: ${{ inputs.image-registry || 'ghcr.io' }}
+  shared-lib:
+    name: Shared Library
+    uses: ./.github/workflows/feature-shared-lib.yml
+    secrets: inherit
+  ui:
+    name: Vue.js UI
+    uses: ./.github/workflows/feature-ui.yml
+    secrets: inherit
+    with:
+      image-tag: ${{ inputs.image-tag || github.sha }}
+      image-registry: ${{ inputs.image-registry || 'ghcr.io' }}
+  external-it:
+    name: End-to-end Tests
+    needs: [
+      alarm,
+      datachoices,
+      events,
+      grafana,
+      inventory,
+      keycloak-ui,
+      metrics-processor,
+      minion,
+      minion-gateway,
+      minion-gateway-grpc-proxy,
+      notifications,
+      rest-server,
+      ui
+    ]
     runs-on:
       labels: ubuntu-latest-8-cores
+    timeout-minutes: 30 # Prevents hung workflows on the larger runners from costing more than necessary
     steps:
+
       - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
-
-      - name: init
-        run: |
-
-          # In case a previous workflow, using self-hosted runner, failed with
-          # kind cluster still running, delete it. It uses a lot of space. 
-          kind delete clusters kind
 
       - name: Set up JDK 17
         uses: actions/setup-java@v3
@@ -58,161 +152,40 @@ jobs:
           distribution: temurin
           java-version: 17
 
-      - name: Set up Maven
-        uses: stCarolas/setup-maven@v4.5
+      - name: Cache Maven dependencies
+        uses: ./.github/actions/maven-cache
         with:
-          maven-version: 3.8.2
+          cache-key-hash: ${{ hashFiles('external-it/**/pom.xml') }}
 
-      - name: feature-ui
-        id: action-feature-ui
-        uses: ./.github/actions/ui
-        with:
-          dir-location: 'ui'
-          # leave false, sonar scans don't work on self-hosted runner, covered in the scan job
-          enable-sonar-scan: false
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          sonar-token: ${{ secrets.SONAR_TOKEN }}
-  
-      - name: feature-grafana
-        id: action-feature-grafana
-        uses: ./.github/actions/grafana
-        with:
-          dir-location: 'grafana'
+      - name: Create & set up cluster
+        run: |          
+          # Setup localhost DNS
+          sudo echo "127.0.0.1 onmshs" | sudo tee -a /etc/hosts
+          
+          # Build cluster with Horizon Stream installed.
+          ./install-local.sh cicd onmshs "${{ inputs.image-tag || github.sha }}" "${{ inputs.image-registry || 'ghcr.io' }}/opennms-cloud"
 
-      - name: feature-keycloak-ui
-        id: action-feature-keycloak-ui
-        uses: ./.github/actions/keycloak-ui
-        with:
-          dir-location: 'keycloak-ui'
-    
-      # Used for sonar scans on the develop branch, not necessary as a prerequisite for other builds
-      - name: parent-pom
-        id: action-parent-pom
-        if: ${{ github.event.ref == 'refs/heads/develop' }}
-        uses: ./.github/actions/parent-pom
-        with:
-          dir-location: 'parent-pom'
-          enable-sonar-scan: true
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          sonar-token: ${{ secrets.SONAR_TOKEN }}
+        shell: bash
+        working-directory: install-local
 
-        # Used for tests and sonar scans on the develop branch, not necessary as a prerequisite for other builds
-      - name: shared-lib
-        id: action-shared-lib
-        if: ${{ github.event.ref == 'refs/heads/develop' }}
-        uses: ./.github/actions/shared-lib
-        with:
-          dir-location: 'shared-lib'
-          enable-sonar-scan: true
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          sonar-token: ${{ secrets.SONAR_TOKEN }}
-
-        # Installs prerequisites for other builds
-      - name: shared-lib-prereq
-        id: action-shared-lib-prereq
-        uses: ./.github/actions/shared-lib-prereq
-
-      - name: feature-metrics-processor
-        id: action-feature-metrics-processor
-        uses: ./.github/actions/metrics-processor
-        with:
-          # only enable scans on develop branch, scans on other branches are covered by other workflows
-          enable-sonar-scan: ${{ github.event.ref == 'refs/heads/develop' }}
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          sonar-token: ${{ secrets.SONAR_TOKEN }}
-
-      - name: feature-alarm
-        id: action-feature-alarm
-        uses: ./.github/actions/alarm
-        with:
-          dir-location: 'alarm'
-          # only enable scans on develop branch, scans on other branches are covered by other workflows
-          enable-sonar-scan: ${{ github.event.ref == 'refs/heads/develop' }}
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          sonar-token: ${{ secrets.SONAR_TOKEN }}
-
-      - name: feature-rest-server
-        id: action-rest-server
-        uses: ./.github/actions/rest-server
-        with:
-          dir-location: 'rest-server'
-          # only enable scans on develop branch, scans on other branches are covered by other workflows
-          enable-sonar-scan: ${{ github.event.ref == 'refs/heads/develop' }}
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          sonar-token: ${{ secrets.SONAR_TOKEN }}
-
-      - name: feature-inventory
-        id: action-inventory
-        uses: ./.github/actions/inventory
-        with:
-          dir-location: 'inventory'
-          # only enable scans on develop branch, scans on other branches are covered by other workflows
-          enable-sonar-scan: ${{ github.event.ref == 'refs/heads/develop' }}
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          sonar-token: ${{ secrets.SONAR_TOKEN }}
-
-      - name: feature-events
-        id: action-events
-        uses: ./.github/actions/events
-        with:
-          # only enable scans on develop branch, scans on other branches are covered by other workflows
-          enable-sonar-scan: ${{ github.event.ref == 'refs/heads/develop' }}
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          sonar-token: ${{ secrets.SONAR_TOKEN }}
-
-      - name: feature-notifications
-        id: action-notifications
-        uses: ./.github/actions/notifications
-        with:
-          dir-location: 'notifications'
-          # only enable scans on develop branch, scans on other branches are covered by other workflows
-          enable-sonar-scan: ${{ github.event.ref == 'refs/heads/develop' }}
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          sonar-token: ${{ secrets.SONAR_TOKEN }}
-
-      - name: feature-minion
-        id: action-minion
-        uses: ./.github/actions/minion
-        with:
-          dir-location: 'minion'
-          # only enable scans on develop branch, scans on other branches are covered by other workflows
-          enable-sonar-scan: ${{ github.event.ref == 'refs/heads/develop' }}
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          sonar-token: ${{ secrets.SONAR_TOKEN }}
-
-      - name: feature-minion-gateway
-        id: action-minion-gateway
-        uses: ./.github/actions/minion-gateway
-        with:
-          dir-location: 'minion-gateway'
-          # only enable scans on develop branch, scans on other branches are covered by other workflows
-          enable-sonar-scan: ${{ github.event.ref == 'refs/heads/develop' }}
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          sonar-token: ${{ secrets.SONAR_TOKEN }}
-
-      - name: feature-minion-gateway-grpc-proxy
-        id: action-minion-gateway-grpc-proxy
-        uses: ./.github/actions/minion-gateway-grpc-proxy
-        with:
-          dir-location: 'minion-gateway-grpc-proxy'
-          # only enable scans on develop branch, scans on other branches are covered by other workflows
-          enable-sonar-scan: ${{ github.event.ref == 'refs/heads/develop' }}
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          sonar-token: ${{ secrets.SONAR_TOKEN }}
-
-      - name: feature-datachoices
-        id: action-datachoices
-        uses: ./.github/actions/datachoices
-        with:
-          dir-location: 'datachoices'
-          # only enable scans on develop branch, scans on other branches are covered by other workflows
-          enable-sonar-scan: ${{ github.event.ref == 'refs/heads/develop' }}
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          sonar-token: ${{ secrets.SONAR_TOKEN }}
-
-      - name: external-it
-        id: action-external-it
-        uses: ./.github/actions/external-it
-        with:
-          dir-location: 'external-it'
-
+      - name: Set up & run Cucumber tests
+        run: |
+          # Cucumber test
+          mvn install
+          HORIZON_STREAM_BASE_URL=http://localhost:11080 
+          KEYCLOAK_BASE_URL=https://onmshs/auth
+          KEYCLOAK_REALM=opennms
+          KEYCLOAK_USERNAME=admin
+          KEYCLOAK_PASSWORD=admin
+          export HORIZON_STREAM_BASE_URL KEYCLOAK_BASE_URL KEYCLOAK_REALM KEYCLOAK_USERNAME KEYCLOAK_PASSWORD
+          PROJECT_VERSION="$(mvn -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive -q org.codehaus.mojo:exec-maven-plugin:1.6.0:exec)"
+          java -jar "external-horizon-stream-it/target/external-horizon-stream-it-${PROJECT_VERSION}.jar"
+          
+          ## If fail, exit which kills the ci-cd workflow.
+          ##for i in $(jq '.[0].elements[].steps[].result.status' external-it/external-horizon-stream-it/cucumber.reports/cucumber-report.json);do
+          ##  if [[ $i != '"passed"' ]];then
+          ##    exit;
+          ##  fi
+          ##done
+        shell: bash
+        working-directory: external-it

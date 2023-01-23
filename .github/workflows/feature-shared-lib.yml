@@ -1,17 +1,15 @@
-name: feature-shared-lib
+name: Shared Library
 
 on:
-  pull_request:
-    paths:
-      - 'shared-lib/**'
+# Currently triggered by develop workflow, so this trigger is disabled for now until we can fully separate them
+#  pull_request:
+#    paths:
+#      - 'shared-lib/**'
   workflow_call:
 
-#concurrency:
-#  group: ${{ github.workflow }}-${{ github.ref }}
-#  cancel-in-progress: true
-
 jobs:
-  install:
+  build-and-test:
+    name: Build and test
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -27,15 +25,15 @@ jobs:
           distribution: temurin
           java-version: 17
 
-      - name: Cache Maven Dependencies
+      - name: Cache Maven dependencies
         uses: ./.github/actions/maven-cache
         with:
           cache-key-hash: ${{ hashFiles('parent-pom/pom.xml', 'shared-lib/**/pom.xml') }}
 
-      - name: feature-shared-lib
-        uses: ./.github/actions/shared-lib
+      - name: Maven Install & Sonar Scan
+        uses: ./.github/actions/maven-install-sonar
         with:
-          dir-location: 'shared-lib'
-          enable-sonar-scan: true
+          working-directory: 'shared-lib'
           github-token: ${{ secrets.GITHUB_TOKEN }}
           sonar-token: ${{ secrets.SONAR_TOKEN }}
+          project-key: 'opennms_horizon-stream_shared-lib'

@@ -22,8 +22,8 @@
 
     <properties>
         <skip-docker-image-build>true</skip-docker-image-build>
-        <docker.image.tag>local</docker.image.tag>
-        <docker.image.skipPush>false</docker.image.skipPush>
+        <application.docker.image.name>opennms/horizon-stream-minion-gateway</application.docker.image.name>
+        <application.docker.image.skipPush>false</application.docker.image.skipPush>
         <docker.it.network>rest-server-it-network</docker.it.network>
         <skipITs>false</skipITs>
     </properties>
@@ -65,7 +65,6 @@
                 <plugin>
                     <groupId>com.google.cloud.tools</groupId>
                     <artifactId>jib-maven-plugin</artifactId>
-                    <version>3.2.1</version>
                     <configuration>
                         <!-- jib-maven-plugin needs to be executed only on specific submodules.
                              This disables jib by default, which allows you to run jib goals on this parent pom without

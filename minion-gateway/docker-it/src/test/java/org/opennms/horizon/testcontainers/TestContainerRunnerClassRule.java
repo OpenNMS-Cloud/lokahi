@@ -48,6 +48,8 @@ public class TestContainerRunnerClassRule extends ExternalResource {
 
     private Logger LOG = DEFAULT_LOGGER;
 
+    private final String dockerImage = System.getProperty("application.docker.image");
+
     private String confluentPlatformVersion = "7.3.0";
 
     private KafkaContainer kafkaContainer;
@@ -59,7 +61,7 @@ public class TestContainerRunnerClassRule extends ExternalResource {
     public TestContainerRunnerClassRule() {
         kafkaContainer = new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka").withTag(confluentPlatformVersion));
         zookeeperContainer = new GenericContainer(DockerImageName.parse("confluentinc/cp-zookeeper").withTag(confluentPlatformVersion));
-        applicationContainer = new GenericContainer(DockerImageName.parse("opennms/horizon-stream-minion-gateway").withTag("local").toString());
+        applicationContainer = new GenericContainer(DockerImageName.parse(dockerImage).toString());
     }
 
     @Override

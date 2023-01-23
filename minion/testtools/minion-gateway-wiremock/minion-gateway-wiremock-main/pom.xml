@@ -20,8 +20,9 @@
 
     <properties>
         <java.version>17</java.version>
-        <docker.image.name>opennms/horizon-stream-mock-minion-gateway</docker.image.name>
-        <docker.image.tag>local</docker.image.tag>
+        <mock-gateway.docker.image>${mock-gateway.docker.image.name}:${mock-gateway.docker.image.tag}</mock-gateway.docker.image>
+        <mock-gateway.docker.image.name>opennms/horizon-stream-mock-minion-gateway</mock-gateway.docker.image.name>
+        <mock-gateway.docker.image.tag>latest</mock-gateway.docker.image.tag>
         <skipJib>false</skipJib>
     </properties>
 
@@ -136,7 +137,6 @@
             <plugin>
                 <groupId>com.google.cloud.tools</groupId>
                 <artifactId>jib-maven-plugin</artifactId>
-                <version>3.2.1</version>
                 <executions>
                     <execution>
                         <id>build-docker-image</id>
@@ -149,11 +149,8 @@
                 <configuration>
                     <skip>${skipJib}</skip>
                     <to>
-                        <image>${docker.image.name}:${docker.image.tag}</image>
+                        <image>${mock-gateway.docker.image}</image>
                     </to>
-                    <container>
-                        <creationTime>USE_CURRENT_TIMESTAMP</creationTime>
-                    </container>
                 </configuration>
             </plugin>
         </plugins>

@@ -8,6 +8,8 @@ option java_outer_classname = "TelemetryProtos";
 message TelemetryMessage {
     uint64 timestamp = 1;
     bytes bytes = 2;
+    optional string source_address = 3;
+    optional uint32 source_port = 4;
 }
 
 message TelemetryMessageLog {

@@ -64,7 +64,7 @@ import io.netty.handler.codec.ByteToMessageDecoder;
 import io.netty.util.concurrent.GlobalEventExecutor;
 import io.netty.util.internal.SocketUtils;
 
-public class TcpListener implements GracefulShutdownListener, Listener {
+public class TcpListener implements GracefulShutdownListener, FlowsListener {
     private static final Logger LOG = LoggerFactory.getLogger(TcpListener.class);
 
     private final String name;
@@ -100,89 +100,89 @@ public class TcpListener implements GracefulShutdownListener, Listener {
         this.parser.start(this.bossGroup);
 
         final InetSocketAddress address = this.host != null
-                ? SocketUtils.socketAddress(this.host, this.port)
-                : new InetSocketAddress(this.port);
+            ? SocketUtils.socketAddress(this.host, this.port)
+            : new InetSocketAddress(this.port);
 
         this.socketFuture = new ServerBootstrap()
-                .group(this.bossGroup, this.workerGroup)
-                .channel(NioServerSocketChannel.class)
-                .option(ChannelOption.SO_REUSEADDR, true)
-                .option(ChannelOption.SO_BACKLOG, 128)
-                .childOption(ChannelOption.SO_KEEPALIVE, true)
-                .childHandler(new ChannelInitializer<SocketChannel>() {
-                    @Override
-                    protected void initChannel(final SocketChannel ch) {
-                        final TcpParser.Handler session = TcpListener.this.parser.accept(ch.remoteAddress(), ch.localAddress());
-                        ch.pipeline()
-                                .addFirst(new ChannelInboundHandlerAdapter() {
-                                    @Override
-                                    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-                                        packetsReceived.mark();
-                                        super.channelRead(ctx, msg);
-                                    }
-                                })
-                                .addLast(new ByteToMessageDecoder() {
-                                    @Override
-                                    protected void decode(final ChannelHandlerContext ctx,
-                                                          final ByteBuf in,
-                                                          final List<Object> out) throws Exception {
-                                        session.parse(in).ifPresent(out::add);
-                                    }
+            .group(this.bossGroup, this.workerGroup)
+            .channel(NioServerSocketChannel.class)
+            .option(ChannelOption.SO_REUSEADDR, true)
+            .option(ChannelOption.SO_BACKLOG, 128)
+            .childOption(ChannelOption.SO_KEEPALIVE, true)
+            .childHandler(new ChannelInitializer<SocketChannel>() {
+                @Override
+                protected void initChannel(final SocketChannel ch) {
+                    final TcpParser.Handler session = TcpListener.this.parser.accept(ch.remoteAddress(), ch.localAddress());
+                    ch.pipeline()
+                        .addFirst(new ChannelInboundHandlerAdapter() {
+                            @Override
+                            public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+                                packetsReceived.mark();
+                                super.channelRead(ctx, msg);
+                            }
+                        })
+                        .addLast(new ByteToMessageDecoder() {
+                            @Override
+                            protected void decode(final ChannelHandlerContext ctx,
+                                                  final ByteBuf in,
+                                                  final List<Object> out) throws Exception {
+                                session.parse(in).ifPresent(out::add);
+                            }
 
-                                    @Override
-                                    public void channelActive(ChannelHandlerContext ctx) throws Exception {
-                                        super.channelActive(ctx);
-                                        session.active();
-                                    }
+                            @Override
+                            public void channelActive(ChannelHandlerContext ctx) throws Exception {
+                                super.channelActive(ctx);
+                                session.active();
+                            }
 
-                                    @Override
-                                    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-                                        super.channelInactive(ctx);
-                                        session.inactive();
+                            @Override
+                            public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+                                super.channelInactive(ctx);
+                                session.inactive();
+                            }
+                        })
+                        .addLast(new SimpleChannelInboundHandler<CompletableFuture<?>>() {
+                            @Override
+                            protected void channelRead0(final ChannelHandlerContext ctx,
+                                                        final CompletableFuture<?> future) {
+                                future.handle((result, ex) -> {
+                                    if (ex != null) {
+                                        ctx.fireExceptionCaught(ex);
                                     }
-                                })
-                                .addLast(new SimpleChannelInboundHandler<CompletableFuture<?>>() {
-                                    @Override
-                                    protected void channelRead0(final ChannelHandlerContext ctx,
-                                                                final CompletableFuture<?> future) {
-                                        future.handle((result, ex) -> {
-                                            if (ex != null) {
-                                                ctx.fireExceptionCaught(ex);
-                                            }
-                                            return result;
-                                        });
-                                    }
-                                })
-                                .addLast(new ChannelInboundHandlerAdapter() {
-                                    @Override
-                                    public void exceptionCaught(final ChannelHandlerContext ctx, final Throwable cause) {
-                                        LOG.warn("Invalid packet: {}", cause.getMessage());
-                                        LOG.debug("", cause);
-
-                                        session.inactive();
-
-                                        ctx.close();
-                                    }
+                                    return result;
                                 });
-                    }
+                            }
+                        })
+                        .addLast(new ChannelInboundHandlerAdapter() {
+                            @Override
+                            public void exceptionCaught(final ChannelHandlerContext ctx, final Throwable cause) {
+                                LOG.warn("Invalid packet: {}", cause.getMessage());
+                                LOG.debug("", cause);
 
-                    @Override
-                    public void channelActive(final ChannelHandlerContext ctx) throws Exception {
-                        TcpListener.this.channels.add(ctx.channel());
-                        super.channelActive(ctx);
-                    }
+                                session.inactive();
 
-                    @Override
-                    public void channelInactive(final ChannelHandlerContext ctx) throws Exception {
-                        TcpListener.this.channels.remove(ctx.channel());
-                        super.channelInactive(ctx);
-                    }
-                })
-                .bind(address)
-                .sync();
+                                ctx.close();
+                            }
+                        });
+                }
+
+                @Override
+                public void channelActive(final ChannelHandlerContext ctx) throws Exception {
+                    TcpListener.this.channels.add(ctx.channel());
+                    super.channelActive(ctx);
+                }
+
+                @Override
+                public void channelInactive(final ChannelHandlerContext ctx) throws Exception {
+                    TcpListener.this.channels.remove(ctx.channel());
+                    super.channelInactive(ctx);
+                }
+            })
+            .bind(address)
+            .sync();
     }
 
-    public void stop() throws InterruptedException {
+    public void stop() {
         NettyEventListener workerListener = new NettyEventListener("worker");
         NettyEventListener bossListener = new NettyEventListener("boss");
 
@@ -198,9 +198,13 @@ public class TcpListener implements GracefulShutdownListener, Listener {
 
         if (this.socketFuture != null) {
             LOG.info("Closing channel...");
-            this.socketFuture.channel().close().sync();
-            if (this.socketFuture.channel().parent() != null) {
-                this.socketFuture.channel().parent().close().sync();
+            try {
+                this.socketFuture.channel().close().sync();
+                if (this.socketFuture.channel().parent() != null) {
+                    this.socketFuture.channel().parent().close().sync();
+                }
+            } catch (InterruptedException e) {
+                LOG.warn("Fail to close channel. {}", e);
             }
         }
 
@@ -228,7 +232,7 @@ public class TcpListener implements GracefulShutdownListener, Listener {
             @Override
             public String get() {
                 return name + "[" + workerListener.getName() + ":" + workerListener.isDone() + ","
-                        + bossListener.getName() + ":" + bossListener.isDone() + "]";
+                    + bossListener.getName() + ":" + bossListener.isDone() + "]";
             }
 
             @Override
@@ -245,7 +249,7 @@ public class TcpListener implements GracefulShutdownListener, Listener {
 
     @Override
     public String getDescription() {
-        return String.format("TCP %s:%s",  this.host != null ? this.host : "*", this.port);
+        return String.format("TCP %s:%s", this.host != null ? this.host : "*", this.port);
     }
 
     @Override

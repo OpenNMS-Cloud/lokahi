@@ -5,15 +5,12 @@ inputs:
     description: 'The directory containing the top-level pom'
     required: false
     default: '.'
-  enable-sonar-scan:
-    description: 'Enables code scanning with SonarCloud.'
-    required: true
   github-token:
-    description: 'GITHUB_TOKEN secret for the workflow so SonarCloud can get PR information. Required if enable-sonar-scan is true.'
-    required: false
+    description: 'GITHUB_TOKEN secret for the workflow so SonarCloud can get PR information'
+    required: true
   sonar-token:
-    description: 'SONAR_TOKEN secret to authenticate job with SonarCloud. Required if enable-sonar-scan is true.'
-    required: false
+    description: 'SONAR_TOKEN secret to authenticate job with SonarCloud'
+    required: true
   project-key:
     description: 'The Sonar project key'
     required: true
@@ -29,10 +26,7 @@ runs:
 
     - run: |
         mvn -B install \
-            -T 1C \
-            -Dorg.slf4j.simpleLogger.showThreadName=true \
-            -Dorg.slf4j.simpleLogger.showDateTime=true \
-            -Dorg.slf4j.simpleLogger.dateTimeFormat="yyyy-MM-dd HH:mm:ss"
+            org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=$SONAR_PROJECT_KEY
       shell: bash
       working-directory: ${{ inputs.working-directory }}
       env:

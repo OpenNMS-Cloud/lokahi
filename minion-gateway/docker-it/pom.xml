@@ -151,6 +151,9 @@
                     <reuseForks>true</reuseForks>
                     <useSystemClassLoader>false</useSystemClassLoader>
                     <trimStackTrace>false</trimStackTrace>
+                    <systemPropertyVariables>
+                        <application.docker.image>${application.docker.image}</application.docker.image>
+                    </systemPropertyVariables>
                 </configuration>
             </plugin>
 

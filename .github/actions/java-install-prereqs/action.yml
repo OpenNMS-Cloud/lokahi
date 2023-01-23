@@ -1,0 +1,11 @@
+name: 'Install Java Prereqs'
+description: 'Builds prerequisite Maven projects and installs them into the runner''s Maven repository'
+
+runs:
+  using: "composite"
+  steps:
+    - name: Install parent-pom and shared-lib
+      run: |
+        mvn -B install -f parent-pom -DskipTests
+        mvn -B install -f shared-lib -DskipTests
+      shell: bash

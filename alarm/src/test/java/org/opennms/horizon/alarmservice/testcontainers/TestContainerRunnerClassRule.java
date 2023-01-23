@@ -43,16 +43,17 @@ import org.testcontainers.utility.DockerImageName;
 @SuppressWarnings("rawtypes")
 public class TestContainerRunnerClassRule extends ExternalResource {
 
-    public static final String KAFKA_BOOTSTRAP_SERVER_PROPERTYNAME = "kafka.bootstrap-servers";
-
     private static final Logger DEFAULT_LOGGER = LoggerFactory.getLogger(TestContainerRunnerClassRule.class);
+
+    private final String KAFKA_BOOTSTRAP_SERVER_PROPERTYNAME = "kafka.bootstrap-servers";
+
+    private final String dockerImage = System.getProperty("application.docker.image");
 
     private Logger LOG = DEFAULT_LOGGER;
 
     private String confluentPlatformVersion = "7.3.0";
 
     private KafkaContainer kafkaContainer;
-    private GenericContainer zookeeperContainer;
     private GenericContainer applicationContainer;
     private PostgreSQLContainer postgreSQLContainer;
 
@@ -60,8 +61,7 @@ public class TestContainerRunnerClassRule extends ExternalResource {
 
     public TestContainerRunnerClassRule() {
         kafkaContainer = new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka").withTag(confluentPlatformVersion));
-        zookeeperContainer = new GenericContainer(DockerImageName.parse("confluentinc/cp-zookeeper").withTag(confluentPlatformVersion));
-        applicationContainer = new GenericContainer(DockerImageName.parse("opennms/horizon-stream-alarm").withTag("local").toString());
+        applicationContainer = new GenericContainer(DockerImageName.parse(dockerImage).toString());
         postgreSQLContainer = new PostgreSQLContainer(DockerImageName.parse("postgres").withTag("14.5-alpine").toString());
     }
 
@@ -73,7 +73,6 @@ public class TestContainerRunnerClassRule extends ExternalResource {
 
         LOG.info("USING TEST DOCKER NETWORK {}", network.getId());
 
-        startZookeeperContainer();
         startKafkaContainer();
         startPostgresContainer();
         startApplicationContainer();
@@ -84,23 +83,11 @@ public class TestContainerRunnerClassRule extends ExternalResource {
         applicationContainer.stop();
         postgreSQLContainer.stop();
         kafkaContainer.stop();
-        zookeeperContainer.stop();
     }
 
 //========================================
 // Container Startups
 //----------------------------------------
-
-    private void startZookeeperContainer() {
-
-        zookeeperContainer
-            .withNetwork(network)
-            .withNetworkAliases("zookeeper")
-            .withEnv("ZOOKEEPER_CLIENT_PORT", String.valueOf(KafkaContainer.ZOOKEEPER_PORT))
-            .withLogConsumer(new Slf4jLogConsumer(LOG).withPrefix("ZOOKEEPER"))
-        ;
-
-    }
 
     private void startPostgresContainer() {
 
@@ -118,8 +105,6 @@ public class TestContainerRunnerClassRule extends ExternalResource {
             .withEmbeddedZookeeper()
             .withNetwork(network)
             .withNetworkAliases("kafka", "kafka-host")
-            .dependsOn(zookeeperContainer)
-            .withExternalZookeeper("zookeeper:" + KafkaContainer.ZOOKEEPER_PORT)
             .withLogConsumer(new Slf4jLogConsumer(LOG).withPrefix("KAFKA"))
             .start();
         ;
@@ -133,9 +118,8 @@ public class TestContainerRunnerClassRule extends ExternalResource {
         applicationContainer
             .withNetwork(network)
             .withNetworkAliases("application", "application-host")
-            .dependsOn(zookeeperContainer, kafkaContainer, postgreSQLContainer)
+            .dependsOn(kafkaContainer, postgreSQLContainer)
             .withExposedPorts(8080, 5005)
-            .withStartupTimeout(Duration.ofMinutes(5))
             .withEnv("JAVA_TOOL_OPTIONS", "-Djava.security.egd=file:/dev/./urandom -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005")
             .withEnv("SPRING_KAFKA_BOOTSTRAP_SERVERS", "kafka-host:9092")
             .withEnv("SPRING_DATASOURCE_URL", "jdbc:postgresql://postgres:5432/" + postgreSQLContainer.getDatabaseName())
@@ -143,7 +127,7 @@ public class TestContainerRunnerClassRule extends ExternalResource {
             .withEnv("SPRING_DATASOURCE_PASSWORD", postgreSQLContainer.getPassword())
             .withLogConsumer(new Slf4jLogConsumer(LOG).withPrefix("APPLICATION"))
             .waitingFor(Wait.forLogMessage(".*Started AlarmServiceMain.*", 1)
-            .withStartupTimeout(Duration.ofSeconds(45))
+            .withStartupTimeout(Duration.ofMinutes(2))
         );
             ;
 

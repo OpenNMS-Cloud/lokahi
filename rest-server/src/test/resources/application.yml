@@ -1,8 +1,3 @@
-# keycloak admin client properties
-horizon-stream:
-  notifications:
-    url: http://localhost:15080
-
 tsdb.url: http://localhost:59090/api/v1/query
 
 keycloak:
@@ -14,3 +9,4 @@ grpc:
   url:
     inventory: localhost:29065
     events: localhost:30065
+    notification: localhost:31065

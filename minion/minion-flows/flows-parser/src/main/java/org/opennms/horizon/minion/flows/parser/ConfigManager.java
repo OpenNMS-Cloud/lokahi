@@ -1,8 +1,8 @@
-package org.opennms.horizon.minion.flows.parser; /*******************************************************************************
+/*******************************************************************************
  * This file is part of OpenNMS(R).
  *
- * Copyright (C) 2022 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
+ * Copyright (C) 2022-2023 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
  *
@@ -26,44 +26,47 @@ package org.opennms.horizon.minion.flows.parser; /******************************
  *     http://www.opennms.com/
  *******************************************************************************/
 
+package org.opennms.horizon.minion.flows.parser;
 
+import com.google.protobuf.Any;
+import com.google.protobuf.InvalidProtocolBufferException;
+import org.opennms.horizon.minion.flows.listeners.factory.TelemetryRegistry;
+import org.opennms.horizon.minion.plugin.api.Listener;
+import org.opennms.horizon.minion.plugin.api.ListenerFactory;
+import org.opennms.horizon.minion.plugin.api.ServiceMonitorResponse;
+import org.opennms.sink.flows.contract.FlowsConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.opennms.horizon.minion.flows.listeners.UdpListener;
-import org.opennms.horizon.minion.flows.listeners.factory.ListenerDefinition;
-import org.opennms.horizon.minion.flows.listeners.factory.UdpListenerFactory;
+import java.util.Objects;
+import java.util.function.Consumer;
 
-
-public class ConfigManager {
+public class ConfigManager implements ListenerFactory {
 
     private static final Logger LOG = LoggerFactory.getLogger(ConfigManager.class);
 
-    private final UdpListenerFactory udpListenerFactory;
+    private final TelemetryRegistry telemetryRegistry;
 
-    private final ListenerDefinition listenerDefinition;
+    private FlowsConfig flowsConfig;
 
-    private static final boolean ENABLE_UDP_LISTENER = false;
-
-    public ConfigManager(UdpListenerFactory udpListenerFactory, ListenerDefinition listenerDefinition) {
-        this.udpListenerFactory = udpListenerFactory;
-        this.listenerDefinition = listenerDefinition;
-        configure();
+    public ConfigManager(TelemetryRegistry telemetryRegistry) {
+        this.telemetryRegistry = Objects.requireNonNull(telemetryRegistry);
     }
 
-    public synchronized void configure() {
-        LOG.debug("Init Udp ConfigManager.. ");
-        UdpListener udpListener = (UdpListener) udpListenerFactory.createBean(listenerDefinition);
-        try {
-            if (ENABLE_UDP_LISTENER) {
-                udpListener.start();
-                LOG.info("UDP Listener started.. ");
-            } else {
-                LOG.info("UDP Listener currently disabled. ");
-            }
-        } catch (InterruptedException e) {
-            LOG.error("Starting of UDP Listener failed: ", e);
-            Thread.currentThread().interrupt();
+    @Override
+    public Listener create(Consumer<ServiceMonitorResponse> resultProcessor, Any config) {
+        LOG.info("FlowsConfig: {}", config.toString());
+        if (!config.is(FlowsConfig.class)) {
+            throw new IllegalArgumentException("configuration must be FlowsConfig; type-url=" + config.getTypeUrl());
         }
+        var holder = telemetryRegistry.getListenerHolder();
+        try {
+            this.flowsConfig = config.unpack(FlowsConfig.class);
+            holder.clear();
+            flowsConfig.getListenersList().stream().map(telemetryRegistry::getListener);
+        } catch (InvalidProtocolBufferException e) {
+            throw new IllegalArgumentException("Error while parsing config with type-url=" + config.getTypeUrl());
+        }
+        return holder;
     }
 }

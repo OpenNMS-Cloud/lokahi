@@ -39,10 +39,9 @@
     </modules>
 
     <properties>
+        <application.docker.image.name>opennms/horizon-stream-minion</application.docker.image.name>
         <skipUTs>false</skipUTs>
         <skipITs>false</skipITs>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     </properties>
 
     <dependencyManagement>
@@ -199,10 +198,6 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-resources-plugin</artifactId>
-                    <version>3.2.0</version>
-                    <configuration>
-                        <propertiesEncoding>${project.build.sourceEncoding}</propertiesEncoding>
-                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>

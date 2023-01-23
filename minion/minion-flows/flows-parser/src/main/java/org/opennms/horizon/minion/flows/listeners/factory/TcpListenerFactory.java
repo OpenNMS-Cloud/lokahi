@@ -38,8 +38,9 @@ import org.opennms.horizon.minion.flows.listeners.TcpParser;
 
 import com.codahale.metrics.MetricRegistry;
 
-import org.opennms.horizon.minion.flows.listeners.Listener;
+import org.opennms.horizon.minion.flows.listeners.FlowsListener;
 import org.opennms.horizon.minion.flows.listeners.TcpListener;
+import org.opennms.sink.flows.contract.ListenerConfig;
 
 public class TcpListenerFactory implements ListenerFactory {
 
@@ -47,27 +48,28 @@ public class TcpListenerFactory implements ListenerFactory {
 
     public TcpListenerFactory(TelemetryRegistry telemetryRegistry) {
         this.telemetryRegistry = Objects.requireNonNull(telemetryRegistry);
+        telemetryRegistry.addListenerFactory(this);
     }
 
     @Override
-    public Class<? extends Listener> getBeanClass() {
+    public Class<? extends FlowsListener> getBeanClass() {
         return TcpListener.class;
     }
 
     @Override
-    public Listener createBean(ListenerDefinition listenerDefinition) {
+    public FlowsListener createBean(ListenerConfig listenerConfig) {
         // TcpListener only supports one parser at a time
-        if (listenerDefinition.getParsers().size() != 1) {
+        if (listenerConfig.getParsersCount() != 1) {
             throw new IllegalArgumentException("The simple TCP listener supports exactly one parser");
         }
         // Ensure each defined parser is of type TcpParser
-        final List<TcpParser> parser = listenerDefinition.getParsers().stream()
+        final List<TcpParser> parser = listenerConfig.getParsersList().stream()
                 .map(telemetryRegistry::getParser)
                 .filter(p -> nonNull(p) && p instanceof TcpParser)
                 .map(p -> (TcpParser) p).collect(Collectors.toList());
-        if (parser.size() != listenerDefinition.getParsers().size()) {
+        if (parser.size() != listenerConfig.getParsersCount()) {
             throw new IllegalArgumentException("Each parser must be of type TcpParser but was not.");
         }
-        return new TcpListener(listenerDefinition.getName(), parser.iterator().next(), new MetricRegistry());
+        return new TcpListener(listenerConfig.getName(), parser.iterator().next(), new MetricRegistry());
     }
 }

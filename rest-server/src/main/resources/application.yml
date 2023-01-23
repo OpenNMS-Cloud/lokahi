@@ -19,11 +19,6 @@ graphql:
       - org.opennms.horizon.server.model.inventory
       - org.opennms.horizon.server.model.events
 
-# keycloak admin client properties
-horizon-stream:
-  notifications:
-    url: http://localhost:15080
-
 logging:
   file.path: /var/log/restServer
 
@@ -33,5 +28,6 @@ grpc:
   url:
     inventory: localhost:29065
     events: localhost:30065
+    notification: localhost:31065
   server:
     deadline: 60000

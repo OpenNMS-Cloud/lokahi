@@ -1,8 +1,8 @@
-package org.opennms.horizon.minion.flows.parser; /*******************************************************************************
+/*******************************************************************************
  * This file is part of OpenNMS(R).
  *
- * Copyright (C) 2022 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
+ * Copyright (C) 2022-2023 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
  *
@@ -25,38 +25,98 @@ package org.opennms.horizon.minion.flows.parser; /******************************
  *     http://www.opennms.org/
  *     http://www.opennms.com/
  *******************************************************************************/
-
-import org.opennms.horizon.grpc.telemetry.contract.TelemetryMessage;
-import org.opennms.horizon.minion.flows.parser.FlowSinkModule;
-import org.opennms.horizon.minion.flows.parser.factory.Netflow9UdpParserFactory;
-import org.opennms.horizon.shared.ipc.sink.api.AsyncDispatcher;
-import org.opennms.horizon.shared.ipc.sink.api.MessageDispatcherFactory;
+package org.opennms.horizon.minion.flows.parser;
 
 import com.codahale.metrics.MetricRegistry;
-
+import lombok.Getter;
+import org.opennms.horizon.grpc.telemetry.contract.TelemetryMessage;
+import org.opennms.horizon.minion.flows.listeners.FlowsListener;
 import org.opennms.horizon.minion.flows.listeners.Parser;
-import org.opennms.horizon.minion.flows.listeners.factory.ParserDefinition;
+import org.opennms.horizon.minion.flows.listeners.TcpListener;
+import org.opennms.horizon.minion.flows.listeners.UdpListener;
+import org.opennms.horizon.minion.flows.listeners.factory.ListenerFactory;
 import org.opennms.horizon.minion.flows.listeners.factory.TelemetryRegistry;
-import org.opennms.horizon.minion.flows.listeners.factory.UdpListenerMessage;
+import org.opennms.horizon.minion.flows.parser.factory.ParserFactory;
+import org.opennms.horizon.shared.ipc.rpc.IpcIdentity;
+import org.opennms.horizon.shared.ipc.sink.api.AsyncDispatcher;
+import org.opennms.horizon.shared.ipc.sink.api.MessageDispatcherFactory;
+import org.opennms.sink.flows.contract.ListenerConfig;
+import org.opennms.sink.flows.contract.ParserConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 public class TelemetryRegistryImpl implements TelemetryRegistry {
-
-    private final Netflow9UdpParserFactory netflow9UdpParserFactory;
+    private static final Logger LOG = LoggerFactory.getLogger(TelemetryRegistryImpl.class);
 
     private final MessageDispatcherFactory messageDispatcherFactory;
 
-    private final FlowSinkModule flowSinkModule;
+    private final IpcIdentity identity;
 
-    public TelemetryRegistryImpl(Netflow9UdpParserFactory netflow9UdpParserFactory,
-                                 MessageDispatcherFactory messageDispatcherFactory, FlowSinkModule flowSinkModule) {
-        this.netflow9UdpParserFactory = netflow9UdpParserFactory;
-        this.messageDispatcherFactory = messageDispatcherFactory;
-        this.flowSinkModule = flowSinkModule;
+    private final List<ListenerFactory> listenerFactories = new ArrayList<>();
+    private final List<ParserFactory> parserFactoryList = new ArrayList<>();
+
+    // maintain a list of dispatchers to prevent already exist exception
+    private final Map<String, AsyncDispatcher<TelemetryMessage>> dispatcherMap = new HashMap<>();
+
+    @Getter
+    private final ListenerHolder listenerHolder;
+
+    public TelemetryRegistryImpl(MessageDispatcherFactory messageDispatcherFactory,
+                                 IpcIdentity identity,
+                                 ListenerHolder listenerHolder) {
+        this.messageDispatcherFactory = Objects.requireNonNull(messageDispatcherFactory);
+        this.identity = Objects.requireNonNull(identity);
+        this.listenerHolder = Objects.requireNonNull(listenerHolder);
+    }
+
+
+    @Override
+    public void addListenerFactory(ListenerFactory factory) {
+        Objects.requireNonNull(factory);
+        listenerFactories.add(factory);
     }
 
     @Override
-    public Parser getParser(ParserDefinition parserDefinition) {
-        return netflow9UdpParserFactory.createBean(parserDefinition);
+    public void addParserFactory(ParserFactory factory) {
+        Objects.requireNonNull(factory);
+        parserFactoryList.add(factory);
+    }
+
+    @Override
+    public FlowsListener getListener(ListenerConfig listenerConfig) {
+        var listener = listenerHolder.get(listenerConfig.getName());
+        if (listener != null) {
+            return listener;
+        }
+        if (!listenerConfig.getEnabled()) {
+            LOG.info("Listener: {} currently disabled. ", listenerConfig.getName());
+            return null;
+        }
+        for (var factory : listenerFactories) {
+            if (factory.getClass().getName().contains(listenerConfig.getClassName())) {
+                listener = factory.createBean(listenerConfig);
+                listenerHolder.put(listener);
+                return listener;
+            }
+        }
+        LOG.error("Unknown listener class: {}", listenerConfig.getClassName());
+        return null;
+    }
+
+    @Override
+    public Parser getParser(ParserConfig parserConfig) {
+        for (var factory : parserFactoryList) {
+            if (factory.getClass().getName().contains(parserConfig.getClassName())) {
+                return factory.createBean(parserConfig);
+            }
+        }
+        throw new IllegalArgumentException("Invalid parser class.");
     }
 
     @Override
@@ -66,7 +126,13 @@ public class TelemetryRegistryImpl implements TelemetryRegistry {
 
     @Override
     public AsyncDispatcher<TelemetryMessage> getDispatcher(String queueName) {
-        return messageDispatcherFactory.createAsyncDispatcher(flowSinkModule);
-
+        var dispatcher = dispatcherMap.get(queueName);
+        if (dispatcher != null) {
+            return dispatcher;
+        }
+        var sink = new FlowSinkModule(identity, queueName);
+        dispatcher = messageDispatcherFactory.createAsyncDispatcher(sink);
+        dispatcherMap.put(queueName, dispatcher);
+        return dispatcher;
     }
 }

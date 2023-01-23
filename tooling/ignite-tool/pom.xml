@@ -18,8 +18,8 @@
     <artifactId>opennms-ignite-tool</artifactId>
 
     <properties>
-        <docker.image.tag>local</docker.image.tag>
-        <docker.image.skipPush>false</docker.image.skipPush>
+        <application.docker.image.name>opennms-ignite-tool</application.docker.image.name>
+        <application.docker.image.skipPush>false</application.docker.image.skipPush>
     </properties>
 
     <dependencyManagement>
@@ -96,7 +96,6 @@
             <plugin>
                 <groupId>com.google.cloud.tools</groupId>
                 <artifactId>jib-maven-plugin</artifactId>
-                <version>3.2.1</version>
             </plugin>
             <plugin>
                 <groupId>org.apache.felix</groupId>

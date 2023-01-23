@@ -1,26 +1,88 @@
-name: feature-ui
+name: Vue.js UI
 
 on:
-  pull_request:
-    paths:
-      - 'ui/**'
+# Currently triggered by develop workflow, so this trigger is disabled for now until we can fully separate them
+#  pull_request:
+#    paths:
+#      - 'ui/**'
+  workflow_call:
+    inputs:
+      image:
+        description: 'Name of the image to build'
+        required: false
+        type: string
+      image-tag:
+        description: 'Tag for the built image'
+        required: false
+        type: string
+      image-registry:
+        description: 'Docker image registry to tag and push to'
+        required: false
+        type: string
+
+env:
+  IMAGE: ${{ inputs.image || 'horizon-stream-ui' }}
+  IMAGE_TAG: ${{ inputs.image-tag || github.sha }}
+  IMAGE_REGISTRY: ${{ inputs.image-registry || 'ghcr.io' }}
 
 jobs:
 
   build-and-test:
+    name: Build and test
     runs-on: ubuntu-latest
-
     steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+      - name: Check out repository code
+        uses: actions/checkout@v3
+        # Is required to call actions.
 
-      - name: feature-ui
-        id: action-feature-ui
-        uses: ./.github/actions/ui
-        with:
-          dir-location: 'ui'
-          enable-sonar-scan: true
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          sonar-token: ${{ secrets.SONAR_TOKEN }}
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
 
+      - name: Log in to the Container registry
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ env.IMAGE_REGISTRY }}
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate Docker metadata
+        id: docker-metadata
+        uses: docker/metadata-action@v4.3.0
+        with:
+          images: |
+            ${{ env.IMAGE_REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE }}
+          tags: |
+            type=raw,value=${{ env.IMAGE_TAG }}
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          cache: 'yarn'
+          cache-dependency-path: ui/yarn.lock
+
+      - name: Install dependencies
+        run: 'yarn install --frozen-lockfile'
+        working-directory: 'ui'
+
+      - name: Test and coverage report
+        timeout-minutes: 5 # This step can hang forever, see https://opennms.atlassian.net/browse/HS-841
+        continue-on-error: true
+        run: 'yarn test:coverage:sonar'
+        working-directory: 'ui'
+
+      - name: SonarCloud scan
+        uses: SonarSource/sonarcloud-github-action@master
+        with:
+          projectBaseDir: ui
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+      - name: Build and push image
+        uses: docker/build-push-action@v3
+        with:
+          push: true
+          context: '{{defaultContext}}:ui'
+          tags: ${{ steps.docker-metadata.outputs.tags }}
+          cache-from: type=gha
+          cache-to: type=gha

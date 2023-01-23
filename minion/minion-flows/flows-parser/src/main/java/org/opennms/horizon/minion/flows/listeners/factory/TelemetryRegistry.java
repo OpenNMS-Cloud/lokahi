@@ -1,8 +1,8 @@
 /*******************************************************************************
  * This file is part of OpenNMS(R).
  *
- * Copyright (C) 2018-2018 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2018 The OpenNMS Group, Inc.
+ * Copyright (C) 2018-2023 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
  *
@@ -28,19 +28,28 @@
 
 package org.opennms.horizon.minion.flows.listeners.factory;
 
-
-import org.opennms.horizon.grpc.telemetry.contract.TelemetryMessage;
-import org.opennms.horizon.shared.ipc.sink.api.AsyncDispatcher;
-
-import org.opennms.horizon.minion.flows.listeners.Parser;
-
 import com.codahale.metrics.MetricRegistry;
-import com.google.protobuf.Message;
+import org.opennms.horizon.grpc.telemetry.contract.TelemetryMessage;
+import org.opennms.horizon.minion.flows.listeners.FlowsListener;
+import org.opennms.horizon.minion.flows.listeners.Parser;
+import org.opennms.horizon.minion.flows.parser.ListenerHolder;
+import org.opennms.horizon.minion.flows.parser.factory.ParserFactory;
+import org.opennms.horizon.shared.ipc.sink.api.AsyncDispatcher;
+import org.opennms.sink.flows.contract.ListenerConfig;
+import org.opennms.sink.flows.contract.ParserConfig;
 
 public interface TelemetryRegistry {
-    Parser getParser(ParserDefinition parserDefinition);
+    void addListenerFactory(ListenerFactory factory);
+
+    void addParserFactory(ParserFactory factory);
+
+    FlowsListener getListener(ListenerConfig listenerConfig);
+
+    Parser getParser(ParserConfig parserConfig);
 
     MetricRegistry getMetricRegistry();
 
     AsyncDispatcher<TelemetryMessage> getDispatcher(String queueName);
+
+    ListenerHolder getListenerHolder();
 }

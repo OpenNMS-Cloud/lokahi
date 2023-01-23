@@ -31,12 +31,21 @@ package org.opennms.horizon.notifications.api;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.opennms.horizon.notifications.api.dto.*;
-import org.opennms.horizon.notifications.exceptions.*;
+import org.opennms.horizon.notifications.api.dto.AlarmSeverity;
+import org.opennms.horizon.notifications.api.dto.AlarmType;
+import org.opennms.horizon.notifications.api.dto.PagerDutyEventAction;
+import org.opennms.horizon.notifications.api.dto.PagerDutyEventDTO;
+import org.opennms.horizon.notifications.api.dto.PagerDutyPayloadDTO;
+import org.opennms.horizon.notifications.api.dto.PagerDutySeverity;
+import org.opennms.horizon.notifications.dto.PagerDutyConfigDTO;
+import org.opennms.horizon.notifications.exceptions.NotificationAPIException;
+import org.opennms.horizon.notifications.exceptions.NotificationBadDataException;
+import org.opennms.horizon.notifications.exceptions.NotificationConfigUninitializedException;
+import org.opennms.horizon.notifications.exceptions.NotificationException;
+import org.opennms.horizon.notifications.exceptions.NotificationInternalException;
 import org.opennms.horizon.shared.dto.event.AlarmDTO;
 import org.opennms.horizon.shared.dto.event.EventDTO;
 import org.opennms.horizon.shared.dto.event.EventParameterDTO;
-import org.opennms.horizon.shared.dto.notifications.PagerDutyConfigDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -104,7 +113,7 @@ public class PagerDutyAPIImpl implements PagerDutyAPI {
 
     private String getPagerDutyIntegrationKey() throws NotificationConfigUninitializedException {
         PagerDutyConfigDTO config = pagerDutyDao.getConfig();
-        return config.getIntegrationkey();
+        return config.getIntegrationKey();
     }
 
     private String getEvent(AlarmDTO alarm) throws NotificationConfigUninitializedException, JsonProcessingException {

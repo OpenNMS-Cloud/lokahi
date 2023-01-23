@@ -1,19 +1,54 @@
-name: feature-minion-gateway
+name: Minion Gateway Service
 
 on:
-  pull_request:
-    paths:
-      - 'minion-gateway/**'
+# Currently triggered by develop workflow, so this trigger is disabled for now until we can fully separate them
+#  pull_request:
+#    paths:
+#      - 'minion-gateway/**'
+  workflow_call:
+    inputs:
+      image:
+        description: 'Name of the image to build'
+        required: false
+        type: string
+      image-tag:
+        description: 'Tag for the built image'
+        required: false
+        type: string
+      image-registry:
+        description: 'Docker image registry to tag and push to'
+        required: false
+        type: string
+
+env:
+  IMAGE: ${{ inputs.image || 'horizon-stream-minion-gateway' }}
+  IMAGE_TAG: ${{ inputs.image-tag || github.sha }}
+  IMAGE_REGISTRY: ${{ inputs.image-registry || 'ghcr.io' }}
 
 jobs:
-
   build-and-test:
+    name: Build and test
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ env.IMAGE_REGISTRY }}
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate Docker metadata
+        id: docker-metadata
+        uses: docker/metadata-action@v4.3.0
+        with:
+          images: |
+            ${{ env.IMAGE_REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE }}
+          tags: |
+            type=raw,value=${{ env.IMAGE_TAG }}
 
       - name: Set up JDK 17
         uses: actions/setup-java@v3
@@ -21,20 +56,19 @@ jobs:
           distribution: temurin
           java-version: 17
 
-      - name: Cache Maven Dependencies
+      - name: Cache Maven dependencies
         uses: ./.github/actions/maven-cache
         with:
           cache-key-hash: ${{ hashFiles('minion-gateway/**/pom.xml', 'parent-pom/pom.xml', 'shared-lib/**/pom.xml') }}
 
-      - name: shared-lib
-        id: action-shared-lib
-        uses: ./.github/actions/shared-lib-prereq
+      - name: Build and install prerequisites
+        uses: ./.github/actions/java-install-prereqs
 
-      - name: feature-minion-gateway
-        id: action-feature-minion-gateway
-        uses: ./.github/actions/minion-gateway
+      - name: Jib Maven build, scan, and push
+        uses: ./.github/actions/jib-maven-sonar
         with:
-          dir-location: 'minion-gateway'
-          enable-sonar-scan: true
+          working-directory: 'minion-gateway'
+          image: ${{ steps.docker-metadata.outputs.tags }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
           sonar-token: ${{ secrets.SONAR_TOKEN }}
+          project-key: 'opennms_horizon-stream_minion-gateway'

@@ -1,415 +1,83 @@
 name: release
 
 on:
-  push:
-    branches:
-      - 'release'
-
-# For now, we have put all steps into a single job, this will allow for just
-# one vm to run. We use actions to factor out the functionality. If there is a
-# requirement to create additional jobs, maybe to run concurrent jobs, then we
-# can split them up later.
+  workflow_dispatch:
+    inputs:
+      release_version:
+        required: true
+        type: string
 
 jobs:
+  tag:
+    runs-on: ubuntu-latest
+    outputs:
+      image-tag: ${{ steps.extract-tag.outputs.image-tag }}
+    steps:
+    - name: init
+      id: extract-tag
+      run: |
+        TAG=$(echo ${{ github.event.head_commit.message }} | awk '{ print $2 }')
+        
+        echo "Head commit message: ${{ github.event.head_commit.message }}"
+        echo "Extracted tag: $TAG."
+        
+        # Validate tag format
+        # Format of commit message: RELEASE <tag> - <message>
+        # Format of tag (change numbers or dev, but leave everything else): 
+        #   v0.0.5-dev
+        #   v0.0.5
+        if [[ $TAG =~ ^v[0-9]+.[0-9]+.([0-9]+-[a-z]+|[0-9]+)$ ]]
+        then
+          echo "Valid format, proceed with test."
+        else
+          echo "Tag format is invalid."
+          exit 1
+        fi
+
+        echo "release-tag=$TAG" >> $GITHUB_OUTPUT
+  build-all:
+    needs: tag
+    uses: ./.github/workflows/develop.yml
+    secrets: inherit
+    with:
+      image-tag: ${{ needs.tag.outputs.image-tag }}
+      image-registry: 'docker.io'
   release:
-    runs-on:
-      labels: ubuntu-latest-8-cores
+    needs: [tag, build-all]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        image: [
+          'opennms/horizon-stream-alarm',
+          'opennms/horizon-stream-datachoices',
+          'opennms/horizon-stream-events',
+          'opennms/horizon-stream-grafana',
+          'opennms/horizon-stream-inventory',
+          'opennms/horizon-stream-keycloak-ui',
+          'opennms/horizon-stream-metrics-processor',
+          'opennms/horizon-stream-minion',
+          'opennms/horizon-stream-minion-gateway',
+          'opennms/horizon-stream-minion-gateway-grpc-proxy',
+          'opennms/horizon-stream-notifications',
+          'opennms/horizon-stream-operator',
+          'opennms/horizon-stream-rest-server',
+          'opennms/horizon-stream-ui',
+        ]
     environment: docker-publish-account
     # Environment that contains the required secrets.
     steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+      - name: Check out repository code
+        uses: actions/checkout@v3
+        # Is required to call actions.
 
-      - name: init
+      - name: Log in to the Container registry
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_LOGIN }}
+          password: ${{ secrets.DOCKERHUB_PASS }}
+
+      - name: Publish images
         run: |
-
-          # In case a workflow, using the self-hosted runner, has failed and
-          # the kind cluster is still running.
-          kind delete clusters kind
-
-          TAG=$(echo ${{ github.event.head_commit.message }} | awk '{ print $2 }')
-
-          echo "Head commit message: ${{ github.event.head_commit.message }}"
-          echo "Extracted tag: $TAG."
-
-          echo "RELEASE_TAG=$TAG" >> $GITHUB_ENV
-
-          # Validate tag format
-          # Format of commit message: RELEASE <tag> - <message>
-          # Format of tag (change numbers or dev, but leave everything else): 
-          #   v0.0.5-dev
-          #   v0.0.5
-          if [[ $TAG =~ ^v[0-9]+.[0-9]+.([0-9]+-[a-z]+|[0-9]+)$ ]]
-          then
-            echo "Valid format, proceed with test."
-          else
-            echo "Tag format is invalid."
-            exit 1
-          fi
-
-      - name: feature-ui
-        id: action-feature-ui
-        uses: ./.github/actions/ui
-        with:
-          dir-location: 'ui'
-          enable-sonar-scan: false
-
-      - name: feature-grafana
-        id: action-feature-grafana
-        uses: ./.github/actions/grafana
-        with:
-          dir-location: 'grafana'
-
-      - name: feature-keycloak-ui
-        id: action-feature-keycloak-ui
-        uses: ./.github/actions/keycloak-ui
-        with:
-          dir-location: 'keycloak-ui'
-
-      # Build and test shared-lib, artifacts not used as a prerequisite.
-      - name: shared-lib
-        id: action-shared-lib
-        uses: ./.github/actions/shared-lib
-        with:
-          dir-location: 'shared-lib'
-          enable-sonar-scan: false
-
-      # Installs prerequisites for other builds
-      - name: shared-lib-prereq
-        id: action-shared-lib-prereq
-        uses: ./.github/actions/shared-lib-prereq
-
-      - name: feature-metrics-processor
-        id: action-feature-metrics-processor
-        uses: ./.github/actions/metrics-processor
-        with:
-          enable-sonar-scan: false
-
-      - name: feature-alarm
-        id: action-feature-alarm
-        uses: ./.github/actions/alarm
-        with:
-          dir-location: 'alarm'
-          enable-sonar-scan: false
-
-      - name: feature-rest-server
-        id: action-rest-server
-        uses: ./.github/actions/rest-server
-        with:
-          dir-location: 'rest-server'
-          enable-sonar-scan: false
-
-      - name: feature-inventory
-        id: action-inventory
-        uses: ./.github/actions/inventory
-        with:
-          dir-location: 'inventory'
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          sonar-token: ${{ secrets.SONAR_TOKEN }}
-
-      - name: feature-alarm
-        id: action-alarm
-        uses: ./.github/actions/alarm
-        with:
-          dir-location: 'alarm'
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          sonar-token: ${{ secrets.SONAR_TOKEN }}
-
-      - name: feature-notifications
-        id: action-notifications
-        uses: ./.github/actions/notifications
-        with:
-          dir-location: 'notifications'
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          sonar-token: ${{ secrets.SONAR_TOKEN }}
-
-      - name: feature-events
-        id: action-events
-        uses: ./.github/actions/events
-        with:
-          dir-location: 'events'
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          sonar-token: ${{ secrets.SONAR_TOKEN }}
-
-      - name: feature-minion
-        id: action-minion
-        uses: ./.github/actions/minion
-        with:
-          dir-location: 'minion'
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          sonar-token: ${{ secrets.SONAR_TOKEN }}
-
-      - name: feature-minion-gateway
-        id: action-minion-gateway
-        uses: ./.github/actions/minion-gateway
-        with:
-          dir-location: 'minion-gateway'
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          sonar-token: ${{ secrets.SONAR_TOKEN }}
-
-      - name: feature-minion-gateway-grpc-proxy
-        id: action-minion-gateway-grpc-proxy
-        uses: ./.github/actions/minion-gateway-grpc-proxy
-        with:
-          dir-location: 'minion-gateway-grpc-proxy'
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          sonar-token: ${{ secrets.SONAR_TOKEN }}
-
-      - name: feature-datachoices
-        id: action-datachoices
-        uses: ./.github/actions/datachoices
-        with:
-          dir-location: 'datachoices'
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          sonar-token: ${{ secrets.SONAR_TOKEN }}
-
-      - name: external-it
-        id: action-external-it
-        uses: ./.github/actions/external-it
-        with:
-          dir-location: 'external-it'
-      
-      - name: dockerhub-login
-        run: |
-
-          # This and the following steps are put here rather than put into an
-          # action because it is only ever called from this workflow.
-
-          # Login to dockerhub. The session doesn't seem to carry across steps,
-          # re-test to confirm.
-          #docker login -u ${{ secrets.DOCKERHUB_LOGIN }} -p ${{ secrets.DOCKERHUB_PASS }}
-          echo ${{ secrets.DOCKERHUB_PASS }} | docker login -u ${{ secrets.DOCKERHUB_LOGIN }} --password-stdin
-
-      - name: publish-image-minion
-        run: |
-
-          # Login to dockerhub.
-          echo ${{ secrets.DOCKERHUB_PASS }} | docker login -u ${{ secrets.DOCKERHUB_LOGIN }} --password-stdin
-
-          # Publish minion image
-          cd minion/
-
           # Tag and save the image as a file to be published. Both release version and latest.
-          docker tag opennms/horizon-stream-minion:local opennms/horizon-stream-minion:${{ env.RELEASE_TAG }}
-          docker tag opennms/horizon-stream-minion:local opennms/horizon-stream-minion:latest
-
-          docker buildx create --use --driver docker-container --name maven
-          
-          # Not sure how to push this without build for multi-arch.
-          docker buildx build --push \
-            --tag opennms/horizon-stream-minion:latest \
-            --tag opennms/horizon-stream-minion:${{ env.RELEASE_TAG }} \
-            docker-assembly/target/docker/opennms/horizon-stream-minion/local/build/ \
-            -f docker-assembly/src/main/docker/app/Dockerfile \
-            --platform linux/amd64,linux/arm64,linux/arm/v7
-
-      - name: publish-image-minion-gateway
-        run: |
-
-          # Login to dockerhub.
-          echo ${{ secrets.DOCKERHUB_PASS }} | docker login -u ${{ secrets.DOCKERHUB_LOGIN }} --password-stdin
-
-          # Publish minion-gateway image
-          cd minion-gateway/
-
-          # Tag and save the image as a file to be published. Both release version and latest.
-          docker tag opennms/horizon-stream-minion-gateway:local opennms/horizon-stream-minion-gateway:${{ env.RELEASE_TAG }}
-          docker tag opennms/horizon-stream-minion-gateway:local opennms/horizon-stream-minion-gateway:latest
-
-          docker push opennms/horizon-stream-minion-gateway:${{ env.RELEASE_TAG }}
-          docker push opennms/horizon-stream-minion-gateway:latest
-
-      - name: publish-image-minion-gateway-grpc-proxy
-        run: |
-
-          # Login to dockerhub.
-          echo ${{ secrets.DOCKERHUB_PASS }} | docker login -u ${{ secrets.DOCKERHUB_LOGIN }} --password-stdin
-
-          # Publish minion-gateway-grpc-proxy image
-          cd minion-gateway-grpc-proxy/
-
-          # Tag and save the image as a file to be published. Both release version and latest.
-          docker tag opennms/horizon-stream-minion-gateway-grpc-proxy:local opennms/horizon-stream-minion-gateway-grpc-proxy:${{ env.RELEASE_TAG }}
-          docker tag opennms/horizon-stream-minion-gateway-grpc-proxy:local opennms/horizon-stream-minion-gateway-grpc-proxy:latest
-
-          docker push opennms/horizon-stream-minion-gateway-grpc-proxy:${{ env.RELEASE_TAG }}
-          docker push opennms/horizon-stream-minion-gateway-grpc-proxy:latest
-
-      - name: publish-image-ui
-        run: |
-
-          # Login to dockerhub.
-          echo ${{ secrets.DOCKERHUB_PASS }} | docker login -u ${{ secrets.DOCKERHUB_LOGIN }} --password-stdin
-
-          # Tag and save the image as a file to be published. Both release version and latest.
-          docker tag opennms/horizon-stream-ui:local opennms/horizon-stream-ui:${{ env.RELEASE_TAG }}
-          docker tag opennms/horizon-stream-ui:local opennms/horizon-stream-ui:latest
-
-          docker push opennms/horizon-stream-ui:${{ env.RELEASE_TAG }}
-          docker push opennms/horizon-stream-ui:latest
-
-      - name: publish-image-keycloak-ui
-        run: |
-
-          # Login to dockerhub.
-          echo ${{ secrets.DOCKERHUB_PASS }} | docker login -u ${{ secrets.DOCKERHUB_LOGIN }} --password-stdin
-
-          # Tag and save the image as a file to be published. Both release version and latest.
-          docker tag opennms/horizon-stream-keycloak:local opennms/horizon-stream-keycloak:${{ env.RELEASE_TAG }}
-          docker tag opennms/horizon-stream-keycloak:local opennms/horizon-stream-keycloak:latest
-
-          docker push opennms/horizon-stream-keycloak:${{ env.RELEASE_TAG }}
-          docker push opennms/horizon-stream-keycloak:latest
-
-      - name: publish-image-grafana
-        run: |
-
-          # Login to dockerhub.
-          echo ${{ secrets.DOCKERHUB_PASS }} | docker login -u ${{ secrets.DOCKERHUB_LOGIN }} --password-stdin
-
-          # Tag and save the image as a file to be published. Both release version and latest.
-          docker tag opennms/horizon-stream-grafana:local opennms/horizon-stream-grafana:${{ env.RELEASE_TAG }}
-          docker tag opennms/horizon-stream-grafana:local opennms/horizon-stream-grafana:latest
-
-          docker push opennms/horizon-stream-grafana:${{ env.RELEASE_TAG }}
-          docker push opennms/horizon-stream-grafana:latest
-
-      - name: publish-image-rest-server
-        run: |
-
-          # Login to dockerhub. Probably could remove this, session created in previous step.
-          echo ${{ secrets.DOCKERHUB_PASS }} | docker login -u ${{ secrets.DOCKERHUB_LOGIN }} --password-stdin
-
-          # Test build images
-          docker images
-
-          # Tag and save the image as a file to be published. Both release version and latest.
-          docker tag opennms/horizon-stream-rest-server:local opennms/horizon-stream-rest-server:${{ env.RELEASE_TAG }}
-          docker tag opennms/horizon-stream-rest-server:local opennms/horizon-stream-rest-server:latest
-
-          docker push opennms/horizon-stream-rest-server:${{ env.RELEASE_TAG }}
-          docker push opennms/horizon-stream-rest-server:latest
-
-      - name: publish-image-inventory
-        run: |
-
-          # Login to dockerhub. Probably could remove this, session created in previous step.
-          echo ${{ secrets.DOCKERHUB_PASS }} | docker login -u ${{ secrets.DOCKERHUB_LOGIN }} --password-stdin
-
-          # Test build images
-          docker images
-
-          # Tag and save the image as a file to be published. Both release version and latest.
-          docker tag opennms/horizon-stream-inventory:local opennms/horizon-stream-inventory:${{ env.RELEASE_TAG }}
-          docker tag opennms/horizon-stream-inventory:local opennms/horizon-stream-inventory:latest
-
-          docker push opennms/horizon-stream-inventory:${{ env.RELEASE_TAG }}
-          docker push opennms/horizon-stream-inventory:latest
-
-      - name: publish-image-alarm
-        run: |
-
-          # Login to dockerhub. Probably could remove this, session created in previous step.
-          echo ${{ secrets.DOCKERHUB_PASS }} | docker login -u ${{ secrets.DOCKERHUB_LOGIN }} --password-stdin
-
-          # Test build images
-          docker images
-
-          # Tag and save the image as a file to be published. Both release version and latest.
-          docker tag opennms/horizon-stream-alarm:local opennms/horizon-stream-alarm:${{ env.RELEASE_TAG }}
-          docker tag opennms/horizon-stream-alarm:local opennms/horizon-stream-alarm:latest
-
-          docker push opennms/horizon-stream-alarm:${{ env.RELEASE_TAG }}
-          docker push opennms/horizon-stream-alarm:latest
-      
-      - name: publish-image-metrics-processor
-        run: |
-
-          # Login to dockerhub. Probably could remove this, session created in previous step.
-          echo ${{ secrets.DOCKERHUB_PASS }} | docker login -u ${{ secrets.DOCKERHUB_LOGIN }} --password-stdin
-
-          # Test build images
-          docker images
-
-          # Tag and save the image as a file to be published. Both release version and latest.
-          docker tag opennms/horizon-stream-metrics-processor:local opennms/horizon-stream-metrics-processor:${{ env.RELEASE_TAG }}
-          docker tag opennms/horizon-stream-metrics-processor:local opennms/horizon-stream-metrics-processor:latest
-
-          docker push opennms/horizon-stream-metrics-processor:${{ env.RELEASE_TAG }}
-          docker push opennms/horizon-stream-metrics-processor:latest
-
-      - name: publish-image-alarm
-        run: |
-
-          # Login to dockerhub. Probably could remove this, session created in previous step.
-          echo ${{ secrets.DOCKERHUB_PASS }} | docker login -u ${{ secrets.DOCKERHUB_LOGIN }} --password-stdin
-
-          # Test build images
-          docker images
-
-          # Tag and save the image as a file to be published. Both release version and latest.
-          docker tag opennms/horizon-stream-alarm:local opennms/horizon-stream-alarm:${{ env.RELEASE_TAG }}
-          docker tag opennms/horizon-stream-alarm:local opennms/horizon-stream-alarm:latest
-
-          docker push opennms/horizon-stream-alarm:${{ env.RELEASE_TAG }}
-          docker push opennms/horizon-stream-alarm:latest
-
-      - name: publish-image-events
-        run: |
-
-          # Login to dockerhub. Probably could remove this, session created in previous step.
-          echo ${{ secrets.DOCKERHUB_PASS }} | docker login -u ${{ secrets.DOCKERHUB_LOGIN }} --password-stdin
-
-          # Test build images
-          docker images
-
-          # Tag and save the image as a file to be published. Both release version and latest.
-          docker tag opennms/horizon-stream-events:local opennms/horizon-stream-events:${{ env.RELEASE_TAG }}
-          docker tag opennms/horizon-stream-events:local opennms/horizon-stream-events:latest
-
-          docker push opennms/horizon-stream-events:${{ env.RELEASE_TAG }}
-          docker push opennms/horizon-stream-events:latest
-
-      - name: publish-image-notifications
-        run: |
-
-          # Login to dockerhub. Probably could remove this, session created in previous step.
-          echo ${{ secrets.DOCKERHUB_PASS }} | docker login -u ${{ secrets.DOCKERHUB_LOGIN }} --password-stdin
-
-          # Test build images
-          docker images
-
-          # Tag and save the image as a file to be published. Both release version and latest.
-          docker tag opennms/horizon-stream-notification:local opennms/horizon-stream-notification:${{ env.RELEASE_TAG }}
-          docker tag opennms/horizon-stream-notification:local opennms/horizon-stream-notification:latest
-
-          docker push opennms/horizon-stream-notification:${{ env.RELEASE_TAG }}
-          docker push opennms/horizon-stream-notification:latest
-
-      - name: publish-image-datachoices
-        run: |
-
-          # Login to dockerhub. Probably could remove this, session created in previous step.
-          echo ${{ secrets.DOCKERHUB_PASS }} | docker login -u ${{ secrets.DOCKERHUB_LOGIN }} --password-stdin
-
-          # Test build images
-          docker images
-
-          # Tag and save the image as a file to be published. Both release version and latest.
-          docker tag opennms/horizon-stream-datachoices:local opennms/horizon-stream-datachoices:${{ env.RELEASE_TAG }}
-          docker tag opennms/horizon-stream-datachoices:local opennms/horizon-stream-datachoices:latest
-
-          docker push opennms/horizon-stream-datachoices:${{ env.RELEASE_TAG }}
-          docker push opennms/horizon-stream-datachoices:latest
-
-      #- name: tag-release-branch
-      #  run: |
-
-      #    # The following checkouts the release branch and merges develop into
-      #    # it and then tags release.
-      #    git fetch
-      #    git tag ${{ env.RELEASE_TAG }}
-      #    git push origin ${{ env.RELEASE_TAG }}
-
-
+          docker tag ${{ matrix.image }}:${{ needs.tag.outputs.image-tag }} ${{ matrix.image }}:latest
+          docker push ${{ matrix.image }}:latest

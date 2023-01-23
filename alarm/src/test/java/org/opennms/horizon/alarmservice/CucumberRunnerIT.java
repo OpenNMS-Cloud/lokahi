@@ -43,10 +43,9 @@ import org.opennms.horizon.alarmservice.testcontainers.TestContainerRunnerClassR
  */
 @RunWith(Cucumber.class)
 @CucumberOptions(
-    glue = {"org.opennms.horizon.alarmservice"},
+    glue = {"org.opennms.horizon.alarmservice.stepdefs"},
     plugin = {"json:target/cucumber-report.json", "html:target/cucumber.html", "pretty"}
-    )
-
+)
 public class CucumberRunnerIT {
 
     // ClassRule must be public

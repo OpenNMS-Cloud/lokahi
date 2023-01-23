@@ -1,0 +1,11 @@
+apiVersion: v1
+entries:
+  opennms:
+  - apiVersion: v2
+    created: "2023-01-19T16:06:34.022747-05:00"
+    digest: a4f829d8dfd7c04983e0c3761faa54dce0b17230538b53cebeaf681cecd23712
+    name: opennms
+    urls:
+    - https://opennms-cloud.github.io/horizon-stream/charts/packaged/opennms-0.6.0.tgz
+    version: 0.6.0
+generated: "2023-01-19T16:06:34.020566-05:00"

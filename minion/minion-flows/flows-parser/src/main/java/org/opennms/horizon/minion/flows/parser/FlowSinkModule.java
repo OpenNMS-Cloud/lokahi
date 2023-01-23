@@ -39,17 +39,22 @@ import org.opennms.horizon.shared.ipc.sink.api.AsyncPolicy;
 import org.opennms.horizon.shared.ipc.sink.api.SinkModule;
 
 
+import java.util.Objects;
+
 public class FlowSinkModule implements SinkModule<TelemetryMessage, TelemetryMessageLog> {
 
     private final IpcIdentity identity;
 
-    public FlowSinkModule(IpcIdentity identity) {
-        this.identity = identity;
+    private final String id;
+
+    public FlowSinkModule(IpcIdentity identity, String id) {
+        this.identity = Objects.requireNonNull(identity);
+        this.id = Objects.requireNonNull(id);
     }
 
     @Override
     public String getId() {
-        return "Flow";
+        return id;
     }
 
     @Override

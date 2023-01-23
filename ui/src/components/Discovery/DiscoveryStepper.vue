@@ -1,6 +1,6 @@
 <template>
   <CustomFeatherStepper class="discovery-stepper">
-    <DiscoveryStep1 :disableNextBtn="!store.selectedLocationIds.length" />
+    <DiscoveryStep1 :disableNextBtn="!store.selectedLocations.length" />
     <DiscoveryStep2 :disableNextBtn="step2Disabled"/>
     <DiscoveryStep3 :hideNextBtn="true" @slideNext="callback" />
   </CustomFeatherStepper>

@@ -1,22 +1,46 @@
 import { defineStore } from 'pinia'
+import { useDiscoveryMutations } from '../Mutations/discoveryMutations'
 
 export const useDiscoveryStore = defineStore('discoveryStore', {
   state: () => ({
-    selectedLocationIds: <string[]>[],
+    selectedLocations: <string[]>[],
     ipAddresses: <string[]>[],
     ipRange: {
       cidr: '',
       fromIp: '',
       toIp: ''
+    },
+    azure: {
+      clientId: '',
+      clientSecret: '',
+      subscriptionId: '',
+      directoryId: ''
     }
   }),
   actions: {
-    selectLocation(id: string) {
-      if (this.selectedLocationIds.includes(id)) {
-        this.selectedLocationIds = this.selectedLocationIds.filter(x => x !== id)
-      } else {
-        this.selectedLocationIds.push(id)
+    selectLocation(location: string, single?: boolean) {
+      if (single) {
+        this.selectedLocations = [location]
+        return
       }
+
+      if (this.selectedLocations.includes(location)) {
+        this.selectedLocations = this.selectedLocations.filter((x) => x !== location)
+      } else {
+        this.selectedLocations.push(location)
+      }
+    },
+    async saveDiscoveryAzure() {
+      const { addAzureCreds, azureError } = useDiscoveryMutations()
+
+      await addAzureCreds({
+        azureCredential: {
+          location: this.selectedLocations[0],
+          ...this.azure
+        }
+      })
+
+      return !azureError.value
     }
   }
 })

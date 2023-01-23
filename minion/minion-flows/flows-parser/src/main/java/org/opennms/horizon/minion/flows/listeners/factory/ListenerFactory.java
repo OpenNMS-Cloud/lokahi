@@ -28,13 +28,14 @@
 
 package org.opennms.horizon.minion.flows.listeners.factory;
 
-import org.opennms.horizon.minion.flows.listeners.Listener;
+import org.opennms.horizon.minion.flows.listeners.FlowsListener;
+import org.opennms.sink.flows.contract.ListenerConfig;
 
 /**
- * Factory to create beans of type {@link Listener} defined by a {@link ListenerDefinition}
+ * Factory to create beans of type {@link FlowsListener} defined by a {@link ListenerDefinition}
  *
  * @author mvrueden
  */
-public interface ListenerFactory extends TelemetryBeanFactory<Listener, ListenerDefinition> {
+public interface ListenerFactory extends TelemetryBeanFactory<FlowsListener, ListenerConfig> {
 
 }

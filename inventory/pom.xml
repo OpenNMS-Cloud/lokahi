@@ -20,9 +20,7 @@
     <version>0.1.0-SNAPSHOT</version>
 
     <properties>
-        <!--  below image name and tag are used with cucumber it-->
-        <docker.image.name>opennms/horizon-stream-inventory</docker.image.name>
-        <docker.image.tag>local</docker.image.tag>
+        <application.docker.image.name>opennms/horizon-stream-inventory</application.docker.image.name>
         <skipJib>false</skipJib>
     </properties>
 
@@ -337,18 +335,11 @@
             <plugin>
                 <groupId>com.google.cloud.tools</groupId>
                 <artifactId>jib-maven-plugin</artifactId>
-                <version>${jib.version}</version>
                 <configuration>
                     <skip>${skipJib}</skip>
                     <from>
                         <image>openjdk:17</image>
                     </from>
-                    <to>
-                        <image>${docker.image.name}:${docker.image.tag}</image>
-                    </to>
-                    <container>
-                        <creationTime>USE_CURRENT_TIMESTAMP</creationTime>
-                    </container>
                 </configuration>
                 <executions>
                     <execution>
@@ -416,6 +407,9 @@
                     <reuseForks>true</reuseForks>
                     <useSystemClassLoader>false</useSystemClassLoader>
                     <trimStackTrace>false</trimStackTrace>
+                    <systemPropertyVariables>
+                        <application.docker.image>${application.docker.image}</application.docker.image>
+                    </systemPropertyVariables>
                 </configuration>
             </plugin>
         </plugins>

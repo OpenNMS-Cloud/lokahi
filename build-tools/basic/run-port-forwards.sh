@@ -13,7 +13,6 @@ kubectl --context kind-kind port-forward --pod-running-timeout 1s --namespace de
 kubectl --context kind-kind port-forward --pod-running-timeout 1s --namespace default deployment/opennms-inventory 29050:5005 &
 kubectl --context kind-kind port-forward --pod-running-timeout 1s --namespace default deployment/opennms-alarm 32080:8080 &
 kubectl --context kind-kind port-forward --pod-running-timeout 1s --namespace default deployment/opennms-alarm 32050:5005 &
-kubectl --context kind-kind port-forward --pod-running-timeout 1s --namespace default deployment/opennms-notifications 15080:8080 &
 kubectl --context kind-kind port-forward --pod-running-timeout 1s --namespace default deployment/opennms-notifications 15050:5005 &
 kubectl --context kind-kind port-forward --pod-running-timeout 1s --namespace default deployment/opennms-core 11080:8181 &
 kubectl --context kind-kind port-forward --pod-running-timeout 1s --namespace default deployment/opennms-core 11022:8101 &

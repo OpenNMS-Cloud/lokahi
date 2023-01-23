@@ -17,8 +17,16 @@
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <java.version>17</java.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <sonar.organization>opennms</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+
+        <!-- Jib properties -->
+        <application.docker.image>${application.docker.image.name}:${application.docker.image.tag}</application.docker.image>
+        <!-- application.docker.image.name MUST be set by child modules that use Jib. -->
+        <application.docker.image.name>INVALID</application.docker.image.name>
+        <application.docker.image.tag>latest</application.docker.image.tag>
 
         <!-- Dependency properties -->
         <dropwizard.metrics.version>4.2.10</dropwizard.metrics.version>
@@ -77,6 +85,7 @@
         <liquibaseVersion>4.17.0</liquibaseVersion>
         <log4j2.version>2.17.1</log4j2.version>
         <mapstruct.version>1.5.3.Final</mapstruct.version>
+        <maven-resources.version>3.3.0</maven-resources.version>
         <mina.version>2.1.5</mina.version>
         <netty3.version>3.10.6.Final</netty3.version>
         <netty4.version>4.1.78.Final</netty4.version>
@@ -891,6 +900,24 @@
                     <artifactId>jacoco-maven-plugin</artifactId>
                     <version>${jacoco.version}</version>
                 </plugin>
+
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-resources-plugin</artifactId>
+                    <version>${maven-resources.version}</version>
+                </plugin>
+
+                <plugin>
+                    <groupId>com.google.cloud.tools</groupId>
+                    <artifactId>jib-maven-plugin</artifactId>
+                    <version>${jib.version}</version>
+                    <configuration>
+                        <to>
+                            <image>${application.docker.image}</image>
+                        </to>
+                    </configuration>
+                </plugin>
+
             </plugins>
         </pluginManagement>
     </build>

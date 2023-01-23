@@ -28,34 +28,29 @@
 
 package org.opennms.horizon.minion.flows.parser.factory;
 
-import java.util.Objects;
-
-import org.opennms.horizon.grpc.telemetry.contract.TelemetryMessage;
-import org.opennms.horizon.minion.flows.parser.FlowSinkModule;
-import org.opennms.horizon.shared.ipc.rpc.IpcIdentity;
-import org.opennms.horizon.shared.ipc.sink.api.AsyncDispatcher;
-import org.opennms.horizon.shared.ipc.sink.api.MessageDispatcherFactory;
-
 import com.codahale.metrics.MetricRegistry;
-
 import org.opennms.horizon.minion.flows.listeners.Parser;
-import org.opennms.horizon.minion.flows.listeners.factory.ParserDefinition;
+import org.opennms.horizon.minion.flows.listeners.factory.TelemetryRegistry;
 import org.opennms.horizon.minion.flows.parser.Netflow9UdpParser;
+import org.opennms.horizon.shared.ipc.rpc.IpcIdentity;
+import org.opennms.sink.flows.contract.ParserConfig;
+
+import java.util.Objects;
 
 public class Netflow9UdpParserFactory implements ParserFactory {
 
-    private final DnsResolver dnsResolver;
+    private final TelemetryRegistry telemetryRegistry;
     private final IpcIdentity identity;
-    private final MessageDispatcherFactory messageDispatcherFactory;
-    private final FlowSinkModule flowSinkModule;
+    private final DnsResolver dnsResolver;
 
-    public Netflow9UdpParserFactory(final MessageDispatcherFactory messageDispatcherFactory,
+    public Netflow9UdpParserFactory(final TelemetryRegistry telemetryRegistry,
                                     final IpcIdentity identity,
-                                    final DnsResolver dnsResolver, FlowSinkModule flowSinkModule) {
+                                    final DnsResolver dnsResolver) {
+        this.telemetryRegistry = Objects.requireNonNull(telemetryRegistry);
         this.identity = Objects.requireNonNull(identity);
         this.dnsResolver = Objects.requireNonNull(dnsResolver);
-        this.messageDispatcherFactory = Objects.requireNonNull(messageDispatcherFactory);
-        this.flowSinkModule = Objects.requireNonNull(flowSinkModule);
+
+        telemetryRegistry.addParserFactory(this);
     }
 
     @Override
@@ -64,8 +59,8 @@ public class Netflow9UdpParserFactory implements ParserFactory {
     }
 
     @Override
-    public Parser createBean(final ParserDefinition parserDefinition) {
-        final AsyncDispatcher<TelemetryMessage> dispatcher = messageDispatcherFactory.createAsyncDispatcher(flowSinkModule);
-        return new Netflow9UdpParser(parserDefinition.getFullName(), dispatcher, identity, dnsResolver, new MetricRegistry());
+    public Parser createBean(final ParserConfig parserConfig) {
+        final var dispatcher = telemetryRegistry.getDispatcher(parserConfig.getQueue().getName());
+        return new Netflow9UdpParser(parserConfig.getName(), dispatcher, identity, dnsResolver, new MetricRegistry());
     }
 }

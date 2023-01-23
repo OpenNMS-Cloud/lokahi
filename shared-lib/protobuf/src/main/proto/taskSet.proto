@@ -32,6 +32,7 @@ import "icmp.proto";
 import "snmp.proto";
 import "traps-config.proto";
 import "azure.proto";
+import "flows-config.proto";
 
 package opennms.taskset;
 option java_multiple_files = true;

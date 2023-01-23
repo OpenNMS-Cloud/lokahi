@@ -8,6 +8,7 @@ mock-graphql
 node_modules
 .env.local
 .env.*.local
+coverage
 
 # only used during development with Tilt
 !.env.development.local

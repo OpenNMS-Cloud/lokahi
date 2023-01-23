@@ -9,7 +9,7 @@ import { VILLUS_CLIENT, createClient } from 'villus'
  */
 const wrapper = (mountingOption: Record<string, any>): any => {
   const { component, global = {}, type = 'mount', attachTo, props } = mountingOption
-  const  { stubs = {}, plugins = [], provide = {} } = global
+  const  { stubs = {}, plugins = [], provide = {}, directives = {} } = global
 
   const globalOptions: Record<string, any> = {
     global: {
@@ -23,7 +23,8 @@ const wrapper = (mountingOption: Record<string, any>): any => {
           url: 'https://test/graphql'
         }),
         ...provide
-      }
+      },
+      directives: { ...directives }
     },
     props,
     attachTo

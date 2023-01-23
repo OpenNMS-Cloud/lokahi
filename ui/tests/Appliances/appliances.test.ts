@@ -6,9 +6,16 @@ import AppliancesAddNodeCtrl from '@/components/Appliances/AppliancesAddNodeCtrl
 import useKeycloak from '@/composables/useKeycloak'
 import { KeycloakInstance } from '@dsb-norge/vue-keycloak-js/dist/types'
 import setupWrapper from 'tests/setupWrapper'
+import dateFormatDirective from '@/directives/v-date'
 
 const wrapper = setupWrapper({
-  component: Appliances
+  type: 'shallow',
+  component: Appliances,
+  global: {
+    directives: {
+      date: dateFormatDirective
+    }
+  }
 })
 
 it('should have a header', async () => {

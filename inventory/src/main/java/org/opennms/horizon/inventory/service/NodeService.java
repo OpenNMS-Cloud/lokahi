@@ -28,6 +28,7 @@
 
 package org.opennms.horizon.inventory.service;
 
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.vladmihalcea.hibernate.type.basic.Inet;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -41,7 +42,13 @@ import org.opennms.horizon.inventory.model.Node;
 import org.opennms.horizon.inventory.repository.IpInterfaceRepository;
 import org.opennms.horizon.inventory.repository.MonitoringLocationRepository;
 import org.opennms.horizon.inventory.repository.NodeRepository;
+import org.opennms.horizon.inventory.service.taskset.CollectorTaskSetService;
+import org.opennms.horizon.inventory.service.taskset.DetectorTaskSetService;
+import org.opennms.horizon.inventory.service.taskset.MonitorTaskSetService;
+import org.opennms.horizon.inventory.taskset.api.TaskSetPublisher;
 import org.opennms.horizon.shared.constants.GrpcConstants;
+import org.opennms.taskset.contract.MonitorType;
+import org.opennms.taskset.contract.TaskDefinition;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -51,6 +58,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 import java.util.stream.Collectors;
 
 
@@ -59,10 +69,18 @@ import java.util.stream.Collectors;
 @Slf4j
 public class NodeService {
 
+    private final ThreadFactory threadFactory = new ThreadFactoryBuilder()
+        .setNameFormat("delete-node-task-publish-%d")
+        .build();
+    private final ExecutorService executorService = Executors.newFixedThreadPool(10, threadFactory);
     private final NodeRepository nodeRepository;
     private final MonitoringLocationRepository monitoringLocationRepository;
     private final IpInterfaceRepository ipInterfaceRepository;
     private final ConfigUpdateService configUpdateService;
+    private final DetectorTaskSetService detectorTaskSetService;
+    private final MonitorTaskSetService monitorTaskSetService;
+    private final CollectorTaskSetService collectorTaskSetService;
+    private final TaskSetPublisher taskSetPublisher;
 
     private final NodeMapper mapper;
 
@@ -74,8 +92,9 @@ public class NodeService {
             .map(mapper::modelToDTO)
             .collect(Collectors.toList());
     }
+
     @Transactional(readOnly = true)
-    public Optional<NodeDTO> getByIdAndTenantId(long id, String tenantId){
+    public Optional<NodeDTO> getByIdAndTenantId(long id, String tenantId) {
         return nodeRepository.findByIdAndTenantId(id, tenantId).map(mapper::modelToDTO);
     }
 
@@ -92,7 +111,7 @@ public class NodeService {
     }
 
     private MonitoringLocation saveMonitoringLocation(NodeCreateDTO request, String tenantId) {
-        String location = StringUtils.isEmpty(request.getLocation()) ? GrpcConstants.DEFAULT_LOCATION: request.getLocation();
+        String location = StringUtils.isEmpty(request.getLocation()) ? GrpcConstants.DEFAULT_LOCATION : request.getLocation();
         Optional<MonitoringLocation> found =
             monitoringLocationRepository.findByLocationAndTenantId(location, tenantId);
 
@@ -137,14 +156,43 @@ public class NodeService {
         Map<String, Map<String, List<NodeDTO>>> nodesByTenantLocation = new HashMap<>();
         nodeRepository.findAll().forEach(node -> {
             Map<String, List<NodeDTO>> nodeByLocation = nodesByTenantLocation.computeIfAbsent(node.getTenantId(), (tenantId) -> new HashMap<>());
-            List<NodeDTO> nodeList = nodeByLocation.computeIfAbsent(node.getMonitoringLocation().getLocation(), location-> new ArrayList<>());
+            List<NodeDTO> nodeList = nodeByLocation.computeIfAbsent(node.getMonitoringLocation().getLocation(), location -> new ArrayList<>());
             nodeList.add(mapper.modelToDTO(node));
         });
         return nodesByTenantLocation;
     }
 
+    @Transactional
     public void deleteNode(long id) {
-        nodeRepository.deleteById(id);
+        Optional<Node> optionalNode = nodeRepository.findById(id);
+        if (optionalNode.isEmpty()) {
+            log.warn("Node with ID {} doesn't exist", id);
+            throw new IllegalArgumentException("Node with ID : " + id + "doesn't exist");
+        } else {
+            var node = optionalNode.get();
+            var tenantId = node.getTenantId();
+            var location = node.getMonitoringLocation().getLocation();
+            var tasks = getTasksForNode(node);
+            nodeRepository.deleteById(id);
+            executorService.execute(() -> taskSetPublisher.publishTaskDeletion(tenantId, location, tasks));
+        }
+
+    }
+
+    public List<TaskDefinition> getTasksForNode(Node node) {
+        var detectorTasks = detectorTaskSetService.getDetectorTasks(node);
+        var tasks = new ArrayList<TaskDefinition>(detectorTasks);
+        node.getIpInterfaces().forEach(ipInterface -> {
+            ipInterface.getMonitoredServices().forEach((ms) -> {
+                String serviceName = ms.getMonitoredServiceType().getServiceName();
+                var monitorType = MonitorType.valueOf(serviceName);
+                var monitorTask = monitorTaskSetService.getMonitorTask(monitorType, ipInterface, node.getId());
+                tasks.add(monitorTask);
+                var collectorTask = collectorTaskSetService.getCollectorTask(monitorType, ipInterface, node.getId());
+                tasks.add(collectorTask);
+            });
+        });
+        return tasks;
     }
 
 }

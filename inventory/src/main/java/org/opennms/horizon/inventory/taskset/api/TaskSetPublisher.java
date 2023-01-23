@@ -1,8 +1,8 @@
-/*
+/*******************************************************************************
  * This file is part of OpenNMS(R).
  *
- * Copyright (C) 2022 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
+ * Copyright (C) 2023 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
  *
@@ -24,16 +24,17 @@
  *     OpenNMS(R) Licensing <license@opennms.org>
  *     http://www.opennms.org/
  *     http://www.opennms.com/
- */
+ *******************************************************************************/
 
-package org.opennms.taskset.service.api;
+package org.opennms.horizon.inventory.taskset.api;
 
-import org.opennms.taskset.contract.TaskSet;
+import org.opennms.taskset.contract.TaskDefinition;
+
+import java.util.List;
 
 public interface TaskSetPublisher {
 
-    String TASK_SET_PUBLISH_SERVICE = "task-set.pub-task";
+    void publishNewTasks(String tenantId, String location, List<TaskDefinition> taskList);
 
-    void publishTaskSet(String tenantId, String location, TaskSet taskSet);
-
+    void publishTaskDeletion(String tenantId, String location, List<TaskDefinition> taskList);
 }

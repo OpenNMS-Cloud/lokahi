@@ -28,18 +28,14 @@
 
 package org.opennms.horizon.inventory.service.taskset.publisher;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
-
+import io.grpc.Context;
+import io.grpc.ManagedChannel;
 import org.opennms.horizon.inventory.grpc.TenantIdClientInterceptor;
 import org.opennms.horizon.inventory.grpc.TenantLookup;
+import org.opennms.horizon.inventory.taskset.api.TaskSetPublisher;
 import org.opennms.horizon.shared.constants.GrpcConstants;
 import org.opennms.taskset.contract.TaskDefinition;
 import org.opennms.taskset.contract.TaskSet;
-import org.opennms.taskset.service.api.TaskSetPublisher;
 import org.opennms.taskset.service.contract.PublishTaskSetRequest;
 import org.opennms.taskset.service.contract.PublishTaskSetResponse;
 import org.opennms.taskset.service.contract.TaskSetServiceGrpc;
@@ -47,13 +43,17 @@ import org.opennms.taskset.service.contract.TaskSetServiceGrpc.TaskSetServiceBlo
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.grpc.Context;
-import io.grpc.ManagedChannel;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 public class GrpcTaskSetPublisher implements TaskSetPublisher {
 
     public static final String TASK_SET_PUBLISH_BEAN_NAME = "taskSetServiceBlockingStub";
-    private static final Logger log = LoggerFactory.getLogger(GrpcTaskSetPublisher.class);
+    private static final Logger LOG = LoggerFactory.getLogger(GrpcTaskSetPublisher.class);
     private final ManagedChannel channel;
     private final TenantLookup tenantLookup;
     private final long deadline;
@@ -72,8 +72,7 @@ public class GrpcTaskSetPublisher implements TaskSetPublisher {
             .withInterceptors(new TenantIdClientInterceptor(tenantLookup));
     }
 
-    @Override
-    public void publishTaskSet(String tenantId, String location, TaskSet taskSet) {
+    private void publishTaskSet(String tenantId, String location, TaskSet taskSet) {
         try {
             PublishTaskSetRequest request =
                 PublishTaskSetRequest.newBuilder()
@@ -85,21 +84,27 @@ public class GrpcTaskSetPublisher implements TaskSetPublisher {
                 taskSetServiceStub.withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).publishTaskSet(request)
             );
 
-            log.debug("Publish task set complete: location={}, response={}", location, response);
+            LOG.info("Publish task set complete: location={}, response={}", location, response);
         } catch (Exception e) {
-            log.error("Error publishing taskset", e);
+            LOG.error("Error publishing taskset", e);
             throw new RuntimeException("failed to publish taskset", e);
         }
     }
 
     @Override
     public synchronized void publishNewTasks(String tenantId, String location, List<TaskDefinition> taskList) {
-        var taskSet = buildTaskSetWithNewTasks(tenantId, location, taskList);
+        var taskSet = buildNewTaskSets(tenantId, location, taskList);
         publishTaskSet(tenantId, location, taskSet);
     }
 
+    @Override
+    public synchronized void publishTaskDeletion(String tenantId, String location, List<TaskDefinition> taskList) {
+        var optionalTaskSet = buildTaskSetForRemoval(tenantId, location, taskList);
+        optionalTaskSet.ifPresent(taskSet -> publishTaskSet(tenantId, location, taskSet));
+    }
 
-    private TaskSet buildTaskSetWithNewTasks(String tenantId, String location, List<TaskDefinition> taskList) {
+
+    TaskSet buildNewTaskSets(String tenantId, String location, List<TaskDefinition> taskList) {
         Map<String, TaskSet> taskSetsByLocation = taskSetsByTenantLocation.computeIfAbsent(tenantId, (unusedTenantId) -> new HashMap<>());
         TaskSet existingTaskSet = taskSetsByLocation.get(location);
         TaskSet taskSet;
@@ -115,5 +120,21 @@ public class GrpcTaskSetPublisher implements TaskSetPublisher {
 
         taskSetsByLocation.put(location, taskSet);
         return taskSet;
+    }
+
+    Optional<TaskSet> buildTaskSetForRemoval(String tenantId, String location, List<TaskDefinition> taskList) {
+        Map<String, TaskSet> taskSetsByLocation = taskSetsByTenantLocation.computeIfAbsent(tenantId, (unusedTenantId) -> new HashMap<>());
+        TaskSet existingTaskSet = taskSetsByLocation.get(location);
+        TaskSet updatedTaskSet = null;
+
+        if (existingTaskSet != null) {
+            List<TaskDefinition> existingTasks = new ArrayList<>(existingTaskSet.getTaskDefinitionList());
+            taskList.forEach(task -> existingTasks.removeIf(existingTask -> task.getId().equals(existingTask.getId())));
+            updatedTaskSet = TaskSet.newBuilder()
+                .addAllTaskDefinition(existingTasks).build();
+            taskSetsByLocation.put(location, updatedTaskSet);
+            return Optional.of(updatedTaskSet);
+        }
+        return Optional.empty();
     }
 }

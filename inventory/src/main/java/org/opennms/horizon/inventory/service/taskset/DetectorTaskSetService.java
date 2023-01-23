@@ -35,12 +35,12 @@ import org.opennms.horizon.inventory.model.IpInterface;
 import org.opennms.horizon.inventory.model.MonitoringLocation;
 import org.opennms.horizon.inventory.model.Node;
 import org.opennms.horizon.inventory.repository.IpInterfaceRepository;
+import org.opennms.horizon.inventory.taskset.api.TaskSetPublisher;
 import org.opennms.icmp.contract.IcmpDetectorRequest;
 import org.opennms.snmp.contract.SnmpDetectorRequest;
 import org.opennms.taskset.contract.MonitorType;
 import org.opennms.taskset.contract.TaskDefinition;
 import org.opennms.taskset.contract.TaskType;
-import org.opennms.taskset.service.api.TaskSetPublisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -65,7 +65,14 @@ public class DetectorTaskSetService {
 
     @Transactional
     public void sendDetectorTasks(Node node) {
+        var tasks = getDetectorTasks(node);
+        String tenantId = node.getTenantId();
+        MonitoringLocation monitoringLocation = node.getMonitoringLocation();
+        String location = monitoringLocation.getLocation();
+        taskSetPublisher.publishNewTasks(tenantId, location, tasks);
+    }
 
+    public List<TaskDefinition> getDetectorTasks(Node node) {
         List<IpInterface> ipInterfaces =
             ipInterfaceRepository.findByNodeId(node.getId());
         List<TaskDefinition> tasks = new ArrayList<>();
@@ -73,10 +80,7 @@ public class DetectorTaskSetService {
             var list = addDetectorTasks(node, ipInterfaces, monitorType);
             tasks.addAll(list);
         }
-        String tenantId = node.getTenantId();
-        MonitoringLocation monitoringLocation = node.getMonitoringLocation();
-        String location = monitoringLocation.getLocation();
-        taskSetPublisher.publishNewTasks(tenantId, location, tasks);
+        return tasks;
     }
 
     public void sendDetectorTaskForNodes(Map<String, Map<String, List<NodeDTO>>> nodeListMap) {

@@ -34,17 +34,20 @@ import org.opennms.azure.contract.AzureMonitorRequest;
 import org.opennms.horizon.azure.api.AzureScanItem;
 import org.opennms.horizon.inventory.model.AzureCredential;
 import org.opennms.horizon.inventory.model.IpInterface;
+import org.opennms.horizon.inventory.model.Node;
+import org.opennms.horizon.inventory.taskset.api.TaskSetPublisher;
 import org.opennms.icmp.contract.IcmpMonitorRequest;
 import org.opennms.snmp.contract.SnmpMonitorRequest;
 import org.opennms.taskset.contract.MonitorType;
 import org.opennms.taskset.contract.TaskDefinition;
 import org.opennms.taskset.contract.TaskType;
-import org.opennms.taskset.service.api.TaskSetPublisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import static org.opennms.horizon.inventory.service.taskset.TaskUtils.identityForAzureTask;
 import static org.opennms.horizon.inventory.service.taskset.TaskUtils.identityForIpTask;
@@ -60,7 +63,7 @@ public class MonitorTaskSetService {
     public void sendMonitorTask(String location, MonitorType monitorType, IpInterface ipInterface, long nodeId) {
         String tenantId = ipInterface.getTenantId();
 
-        var task = addMonitorTask(monitorType, ipInterface, nodeId);
+        var task = getMonitorTask(monitorType, ipInterface, nodeId);
         if (task != null) {
             taskSetPublisher.publishNewTasks(tenantId, location, Arrays.asList(task));
         }
@@ -74,7 +77,7 @@ public class MonitorTaskSetService {
         taskSetPublisher.publishNewTasks(tenantId, location, Arrays.asList(task));
     }
 
-    private TaskDefinition addMonitorTask(MonitorType monitorType, IpInterface ipInterface, long nodeId) {
+    public TaskDefinition getMonitorTask(MonitorType monitorType, IpInterface ipInterface, long nodeId) {
 
         String monitorTypeValue = monitorType.getValueDescriptor().getName();
         String ipAddress = ipInterface.getIpAddress().getAddress();
@@ -157,6 +160,11 @@ public class MonitorTaskSetService {
             .setConfiguration(configuration)
             .setSchedule(TaskUtils.AZURE_MONITOR_SCHEDULE)
             .build();
+    }
+
+    public List<TaskDefinition> getMonitorTasks(Node node) {
+        node.getIpInterfaces();
+        return new ArrayList<>();
     }
 
 }

@@ -31,8 +31,8 @@ package org.opennms.horizon.inventory.service;
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
+import org.opennms.horizon.inventory.taskset.api.TaskSetPublisher;
 import org.opennms.sink.flows.contract.FlowsConfig;
-import org.opennms.taskset.service.api.TaskSetPublisher;
 
 public class FlowsConfigServiceTest {
     @Mock

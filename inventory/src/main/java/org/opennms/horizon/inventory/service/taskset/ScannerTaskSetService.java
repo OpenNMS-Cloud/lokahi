@@ -33,9 +33,9 @@ import com.google.protobuf.Any;
 import lombok.RequiredArgsConstructor;
 import org.opennms.azure.contract.AzureScanRequest;
 import org.opennms.horizon.inventory.model.AzureCredential;
+import org.opennms.horizon.inventory.taskset.api.TaskSetPublisher;
 import org.opennms.taskset.contract.TaskDefinition;
 import org.opennms.taskset.contract.TaskType;
-import org.opennms.taskset.service.api.TaskSetPublisher;
 import org.springframework.stereotype.Component;
 
 import java.util.List;

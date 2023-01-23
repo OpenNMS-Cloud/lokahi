@@ -1,5 +1,6 @@
 package org.opennms.horizon.inventory.model;
 
+import jakarta.persistence.ManyToMany;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -49,6 +50,9 @@ public class Node {
 
     @OneToMany(mappedBy = "node", orphanRemoval = true, cascade = CascadeType.ALL)
     private List<IpInterface> ipInterfaces = new ArrayList<>();
+
+    @ManyToMany(mappedBy = "nodes", cascade = CascadeType.ALL)
+    private List<Tag> tags = new ArrayList<>();
 
     @Column(name = "system_objectid")
     private String objectId;

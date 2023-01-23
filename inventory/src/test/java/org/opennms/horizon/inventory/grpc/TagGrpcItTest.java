@@ -1,0 +1,308 @@
+/*******************************************************************************
+ * This file is part of OpenNMS(R).
+ *
+ * Copyright (C) 2022 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
+ *
+ * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *
+ * OpenNMS(R) is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published
+ * by the Free Software Foundation, either version 3 of the License,
+ * or (at your option) any later version.
+ *
+ * OpenNMS(R) is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with OpenNMS(R).  If not, see:
+ *      http://www.gnu.org/licenses/
+ *
+ * For more information contact:
+ *     OpenNMS(R) Licensing <license@opennms.org>
+ *     http://www.opennms.org/
+ *     http://www.opennms.com/
+ *******************************************************************************/
+
+package org.opennms.horizon.inventory.grpc;
+
+import io.grpc.Metadata;
+import io.grpc.ServerCall;
+import io.grpc.ServerCallHandler;
+import io.grpc.stub.MetadataUtils;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.keycloak.common.VerificationException;
+import org.opennms.horizon.inventory.SpringContextTestInitializer;
+import org.opennms.horizon.inventory.dto.TagCreateDTO;
+import org.opennms.horizon.inventory.dto.TagRemoveDTO;
+import org.opennms.horizon.inventory.dto.TagServiceGrpc;
+import org.opennms.horizon.inventory.model.MonitoringLocation;
+import org.opennms.horizon.inventory.model.Node;
+import org.opennms.horizon.inventory.model.Tag;
+import org.opennms.horizon.inventory.repository.MonitoringLocationRepository;
+import org.opennms.horizon.inventory.repository.NodeRepository;
+import org.opennms.horizon.inventory.repository.TagRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ContextConfiguration;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
+
+@SpringBootTest
+@ContextConfiguration(initializers = {SpringContextTestInitializer.class})
+class TagGrpcItTest extends GrpcTestBase {
+    private static final String TEST_NODE_LABEL = "node-label";
+    private static final String TEST_LOCATION = "test-location";
+    private static final String TEST_TAG_NAME_1 = "tag-name-1";
+    private static final String TEST_TAG_NAME_2 = "tag-name-2";
+
+    private TagServiceGrpc.TagServiceBlockingStub serviceStub;
+
+    @Autowired
+    private TagRepository tagRepository;
+
+    @Autowired
+    private NodeRepository nodeRepository;
+
+    @Autowired
+    private MonitoringLocationRepository locationRepository;
+
+    @BeforeEach
+    public void prepare() throws VerificationException {
+        prepareServer();
+        serviceStub = TagServiceGrpc.newBlockingStub(channel);
+    }
+
+    @AfterEach
+    public void cleanUp() throws InterruptedException {
+        tagRepository.deleteAll();
+        nodeRepository.deleteAll();
+        locationRepository.deleteAll();
+        afterTest();
+    }
+
+    @Test
+    void testCreateTag() throws Exception {
+        long nodeId = setupDatabase();
+
+        TagCreateDTO createDTO = TagCreateDTO.newBuilder()
+            .setName(TEST_TAG_NAME_1)
+            .setNodeId(nodeId)
+            .build();
+
+        serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).createTag(createDTO);
+
+        List<Tag> allTags = tagRepository.findAll();
+        assertEquals(1, allTags.size());
+
+        Tag savedTag = allTags.get(0);
+        assertEquals(createDTO.getName(), savedTag.getName());
+        assertEquals(tenantId, savedTag.getTenantId());
+
+        List<Node> nodes = savedTag.getNodes();
+        assertEquals(1, nodes.size());
+
+        Node node = nodes.get(0);
+        assertEquals(nodeId, node.getId());
+        assertEquals(tenantId, node.getTenantId());
+
+        verify(spyInterceptor).verifyAccessToken(authHeader);
+        verify(spyInterceptor).interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));
+    }
+
+    @Test
+    void testCreateTagAlreadyCreatedOnce() throws Exception {
+        long nodeId = setupDatabase();
+
+        TagCreateDTO createDTO = TagCreateDTO.newBuilder()
+            .setName(TEST_TAG_NAME_1)
+            .setNodeId(nodeId)
+            .build();
+
+        for (int index = 0; index < 2; index++) {
+            serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).createTag(createDTO);
+        }
+
+        List<Tag> allTags = tagRepository.findAll();
+        assertEquals(1, allTags.size());
+
+        Tag savedTag = allTags.get(0);
+        assertEquals(createDTO.getName(), savedTag.getName());
+        assertEquals(tenantId, savedTag.getTenantId());
+
+        List<Node> nodes = savedTag.getNodes();
+        assertEquals(1, nodes.size());
+
+        Node node = nodes.get(0);
+        assertEquals(nodeId, node.getId());
+        assertEquals(tenantId, node.getTenantId());
+
+        verify(spyInterceptor, times(2)).verifyAccessToken(authHeader);
+        verify(spyInterceptor, times(2)).interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));
+    }
+
+    @Test
+    void testCreateTwoTagsOnNode() throws Exception {
+        long nodeId = setupDatabase();
+
+        TagCreateDTO createDTO1 = TagCreateDTO.newBuilder()
+            .setName(TEST_TAG_NAME_1)
+            .setNodeId(nodeId)
+            .build();
+
+        serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).createTag(createDTO1);
+
+        TagCreateDTO createDTO2 = TagCreateDTO.newBuilder()
+            .setName(TEST_TAG_NAME_2)
+            .setNodeId(nodeId)
+            .build();
+
+        serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).createTag(createDTO2);
+
+        List<Tag> allTags = tagRepository.findAll();
+        assertEquals(2, allTags.size());
+
+        //tag 1
+        Tag savedTag = allTags.get(0);
+        assertEquals(createDTO1.getName(), savedTag.getName());
+        assertEquals(tenantId, savedTag.getTenantId());
+
+        List<Node> nodes = savedTag.getNodes();
+        assertEquals(1, nodes.size());
+
+        Node node = nodes.get(0);
+        assertEquals(nodeId, node.getId());
+        assertEquals(tenantId, node.getTenantId());
+
+
+        //tag 2
+        savedTag = allTags.get(1);
+        assertEquals(createDTO2.getName(), savedTag.getName());
+        assertEquals(tenantId, savedTag.getTenantId());
+
+        nodes = savedTag.getNodes();
+        assertEquals(1, nodes.size());
+
+        node = nodes.get(0);
+        assertEquals(nodeId, node.getId());
+        assertEquals(tenantId, node.getTenantId());
+
+
+        verify(spyInterceptor, times(2)).verifyAccessToken(authHeader);
+        verify(spyInterceptor, times(2)).interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));
+    }
+
+    @Test
+    void testCreateTagThenRemoveTag() throws Exception {
+        long nodeId = setupDatabase();
+
+        TagCreateDTO createDTO = TagCreateDTO.newBuilder()
+            .setName(TEST_TAG_NAME_1)
+            .setNodeId(nodeId)
+            .build();
+
+        serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).createTag(createDTO);
+
+        List<Tag> allTags = tagRepository.findAll();
+        assertEquals(1, allTags.size());
+
+        Tag savedTag = allTags.get(0);
+        assertEquals(createDTO.getName(), savedTag.getName());
+        assertEquals(tenantId, savedTag.getTenantId());
+
+        List<Node> nodes = savedTag.getNodes();
+        assertEquals(1, nodes.size());
+
+        Node node = nodes.get(0);
+        assertEquals(nodeId, node.getId());
+        assertEquals(tenantId, node.getTenantId());
+
+        TagRemoveDTO removeDTO = TagRemoveDTO.newBuilder()
+            .setTagId(savedTag.getId()).setNodeId(node.getId()).build();
+
+        serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).removeTag(removeDTO);
+
+        allTags = tagRepository.findAll();
+        assertEquals(0, allTags.size());
+
+        verify(spyInterceptor, times(2)).verifyAccessToken(authHeader);
+        verify(spyInterceptor, times(2)).interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));
+    }
+
+    @Test
+    void testMultipleCreateTagThenRemoveOne() throws Exception {
+        long nodeId = setupDatabase();
+
+        TagCreateDTO createDTO1 = TagCreateDTO.newBuilder()
+            .setName(TEST_TAG_NAME_1)
+            .setNodeId(nodeId)
+            .build();
+
+        serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).createTag(createDTO1);
+
+        TagCreateDTO createDTO2 = TagCreateDTO.newBuilder()
+            .setName(TEST_TAG_NAME_2)
+            .setNodeId(nodeId)
+            .build();
+
+        serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).createTag(createDTO2);
+
+        List<Tag> allTags = tagRepository.findAll();
+        assertEquals(2, allTags.size());
+
+        long lastSavedTagId = -1;
+
+        for (Tag savedTag : allTags) {
+            assertNotNull(savedTag.getName());
+            assertEquals(tenantId, savedTag.getTenantId());
+
+            List<Node> nodes = savedTag.getNodes();
+            assertEquals(1, nodes.size());
+
+            Node node = nodes.get(0);
+            assertEquals(nodeId, node.getId());
+            assertEquals(tenantId, node.getTenantId());
+
+            lastSavedTagId = savedTag.getId();
+        }
+
+        TagRemoveDTO removeDTO = TagRemoveDTO.newBuilder()
+            .setTagId(lastSavedTagId).setNodeId(nodeId).build();
+
+        serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).removeTag(removeDTO);
+
+        allTags = tagRepository.findAll();
+        assertEquals(1, allTags.size());
+
+        verify(spyInterceptor, times(3)).verifyAccessToken(authHeader);
+        verify(spyInterceptor, times(3)).interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));
+    }
+
+    protected long setupDatabase() {
+        MonitoringLocation location = new MonitoringLocation();
+        location.setLocation(TEST_LOCATION);
+        location.setTenantId(tenantId);
+        location = locationRepository.saveAndFlush(location);
+
+        Node node = new Node();
+        node.setNodeLabel(TEST_NODE_LABEL);
+        node.setCreateTime(LocalDateTime.now());
+        node.setTenantId(tenantId);
+        node.setMonitoringLocation(location);
+        node.setMonitoringLocationId(location.getId());
+        node = nodeRepository.saveAndFlush(node);
+        return node.getId();
+    }
+}

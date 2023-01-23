@@ -56,7 +56,7 @@ jobs:
           'horizon-stream-events',
           'horizon-stream-grafana',
           'horizon-stream-inventory',
-          'horizon-stream-keycloak-ui',
+          'horizon-stream-keycloak',
           'horizon-stream-metrics-processor',
           'horizon-stream-minion',
           'horizon-stream-minion-gateway',

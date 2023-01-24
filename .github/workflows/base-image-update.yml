@@ -9,6 +9,7 @@ jobs:
   pull-and-push:
     name: Pull & Push
     runs-on: ubuntu-latest
+    environment: docker-publish-account
     steps:
 
       - uses: actions/checkout@v3

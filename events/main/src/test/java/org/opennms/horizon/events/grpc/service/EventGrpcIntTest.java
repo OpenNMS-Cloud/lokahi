@@ -2,7 +2,6 @@ package org.opennms.horizon.events.grpc.service;
 
 import com.google.protobuf.Empty;
 import com.google.protobuf.Int64Value;
-import com.vladmihalcea.hibernate.type.basic.Inet;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,6 +22,8 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.PostgreSQLContainer;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -35,7 +36,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @SpringBootTest
 class EventGrpcIntTest extends GrpcTestBase {
     private static final String TEST_UEI = "uei";
-    private static final Inet TEST_IP_ADDRESS = new Inet("192.168.1.1");
+    private static final String TEST_IP_ADDRESS = "192.168.1.1";
     private static final String TEST_NAME = "ifIndex";
     private static final String TEST_TYPE = "int32";
     private static final String TEST_VALUE = "64";
@@ -83,7 +84,7 @@ class EventGrpcIntTest extends GrpcTestBase {
     }
 
     @Test
-    void testListEvents() {
+    void testListEvents() throws UnknownHostException {
         setupGrpc();
         initStub();
 
@@ -106,7 +107,7 @@ class EventGrpcIntTest extends GrpcTestBase {
     }
 
     @Test
-    void testListEventsDifferentTenantId() {
+    void testListEventsDifferentTenantId() throws UnknownHostException {
         setupGrpcWithDifferentTenantID();
         initStub();
 
@@ -123,7 +124,7 @@ class EventGrpcIntTest extends GrpcTestBase {
     }
 
     @Test
-    void testFindAllEventsByNodeId() {
+    void testFindAllEventsByNodeId() throws UnknownHostException {
         setupGrpc();
         initStub();
 
@@ -158,7 +159,7 @@ class EventGrpcIntTest extends GrpcTestBase {
     }
 
     @Test
-    void testFindAllEventsByNodeIdDifferentTenantId() {
+    void testFindAllEventsByNodeIdDifferentTenantId() throws UnknownHostException {
         setupGrpcWithDifferentTenantID();
         initStub();
 
@@ -173,14 +174,14 @@ class EventGrpcIntTest extends GrpcTestBase {
         assertEquals(0, eventsNode1.size());
     }
 
-    private void populateDatabase(long nodeId) {
+    private void populateDatabase(long nodeId) throws UnknownHostException {
 
         Event event = new Event();
         event.setTenantId(tenantId);
         event.setEventUei(TEST_UEI);
         event.setProducedTime(LocalDateTime.now());
         event.setNodeId(nodeId);
-        event.setIpAddress(TEST_IP_ADDRESS);
+        event.setIpAddress(InetAddress.getByName(TEST_IP_ADDRESS));
 
         EventParameters parms = new EventParameters();
         EventParameter param = new EventParameter();
@@ -209,7 +210,7 @@ class EventGrpcIntTest extends GrpcTestBase {
         assertEquals(tenantId, event.getTenantId());
         assertEquals(TEST_UEI, event.getUei());
         assertNotEquals(0, event.getProducedTime());
-        assertEquals(TEST_IP_ADDRESS.getAddress(), event.getIpAddress());
+        assertEquals(TEST_IP_ADDRESS, event.getIpAddress());
 
         assertNotNull(event.getEventParamsList());
         event.getEventParamsList().forEach(parameter -> {

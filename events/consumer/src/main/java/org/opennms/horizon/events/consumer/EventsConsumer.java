@@ -29,13 +29,13 @@
 package org.opennms.horizon.events.consumer;
 
 import com.google.protobuf.InvalidProtocolBufferException;
-import com.vladmihalcea.hibernate.type.basic.Inet;
 import org.opennms.horizon.events.persistence.model.Event;
 import org.opennms.horizon.events.persistence.model.EventParameter;
 import org.opennms.horizon.events.persistence.model.EventParameters;
 import org.opennms.horizon.events.persistence.repository.EventRepository;
 import org.opennms.horizon.events.proto.EventLog;
 import org.opennms.horizon.shared.constants.GrpcConstants;
+import org.opennms.horizon.shared.utils.InetAddressUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,9 +45,11 @@ import org.springframework.messaging.handler.annotation.Headers;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 
+import java.net.UnknownHostException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -86,14 +88,20 @@ public class EventsConsumer {
     }
 
     List<Event> mapEventsFromLog(EventLog eventLog, String tenantId) {
-        return eventLog.getEventList().stream().map(eventProto -> mapEventFromProto(eventProto, tenantId)).collect(Collectors.toList());
+        return eventLog.getEventList().stream().map(eventProto -> {
+            try {
+                return mapEventFromProto(eventProto, tenantId);
+            } catch (UnknownHostException e) {
+                return null;
+            }
+        }).filter(Objects::nonNull).collect(Collectors.toList());
     }
 
-    private Event mapEventFromProto(org.opennms.horizon.events.proto.Event eventProto, String tenantId) {
+    private Event mapEventFromProto(org.opennms.horizon.events.proto.Event eventProto, String tenantId) throws UnknownHostException {
         var event = new Event();
         event.setTenantId(tenantId);
         event.setEventUei(eventProto.getUei());
-        event.setIpAddress(new Inet(eventProto.getIpAddress()));
+        event.setIpAddress(InetAddressUtils.getInetAddress(eventProto.getIpAddress()));
         event.setNodeId(event.getNodeId());
         event.setProducedTime(LocalDateTime.now());
         var eventParameters = new EventParameters();

@@ -28,6 +28,7 @@
 
 package org.opennms.horizon.events;
 
+import jakarta.annotation.PostConstruct;
 import org.opennms.horizon.events.api.EventConfDao;
 import org.opennms.horizon.events.conf.xml.EnterpriseIdPartition;
 import org.opennms.horizon.events.conf.xml.Event;
@@ -39,7 +40,6 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;

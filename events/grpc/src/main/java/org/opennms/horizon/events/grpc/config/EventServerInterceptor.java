@@ -28,18 +28,6 @@
 
 package org.opennms.horizon.events.grpc.config;
 
-import java.util.NoSuchElementException;
-import java.util.Optional;
-
-import org.apache.commons.lang3.StringUtils;
-import org.keycloak.TokenVerifier;
-import org.keycloak.adapters.KeycloakDeployment;
-import org.keycloak.adapters.rotation.AdapterTokenVerifier;
-import org.keycloak.common.VerificationException;
-import org.keycloak.representations.AccessToken;
-import org.keycloak.util.TokenUtil;
-import org.opennms.horizon.shared.constants.GrpcConstants;
-
 import io.grpc.Context;
 import io.grpc.Contexts;
 import io.grpc.Metadata;
@@ -49,6 +37,17 @@ import io.grpc.ServerInterceptor;
 import io.grpc.Status;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.keycloak.TokenVerifier;
+import org.keycloak.adapters.KeycloakDeployment;
+import org.keycloak.adapters.rotation.AdapterTokenVerifier;
+import org.keycloak.common.VerificationException;
+import org.keycloak.representations.AccessToken;
+import org.keycloak.util.TokenUtil;
+import org.opennms.horizon.shared.constants.GrpcConstants;
+
+import java.util.NoSuchElementException;
+import java.util.Optional;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -58,6 +57,20 @@ public class EventServerInterceptor implements ServerInterceptor {
 
     @Override
     public <ReqT, RespT> ServerCall.Listener<ReqT> interceptCall(ServerCall<ReqT, RespT> serverCall, Metadata headers, ServerCallHandler<ReqT, RespT> callHandler) {
+
+        // TODO: Remove this once we have inter-service authentication in place
+        if (headers.containsKey(GrpcConstants.AUTHORIZATION_BYPASS_KEY)) {
+
+            if (headers.containsKey(GrpcConstants.TENANT_ID_BYPASS_KEY)) {
+                String tenantId = headers.get(GrpcConstants.TENANT_ID_BYPASS_KEY);
+                log.info("Bypassing authorization with tenant id: {}", tenantId);
+
+                Context context = Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, tenantId);
+                return Contexts.interceptCall(context, serverCall, headers, callHandler);
+            }
+            return callHandler.startCall(serverCall, headers);
+        }
+
         log.debug("Received metadata: {}", headers);
         String authHeader = headers.get(GrpcConstants.AUTHORIZATION_METADATA_KEY);
         try {

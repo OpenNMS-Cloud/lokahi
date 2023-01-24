@@ -44,6 +44,11 @@
             <artifactId>persistence</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.opennms.horizon.shared</groupId>
+            <artifactId>horizon-common-utils</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 
 

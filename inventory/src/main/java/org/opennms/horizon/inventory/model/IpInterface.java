@@ -1,33 +1,24 @@
 package org.opennms.horizon.inventory.model;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.validation.constraints.NotNull;
-
-import org.hibernate.annotations.TypeDef;
-
-import com.vladmihalcea.hibernate.type.basic.Inet;
-import com.vladmihalcea.hibernate.type.basic.PostgreSQLInetType;
-
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+
+import javax.validation.constraints.NotNull;
+import java.net.InetAddress;
 
 @Getter
 @Setter
 @RequiredArgsConstructor
 @Entity
-@TypeDef(
-    name = "ipv4",
-    typeClass = PostgreSQLInetType.class,
-    defaultForType = Inet.class
-)
 public class IpInterface {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -46,5 +37,5 @@ public class IpInterface {
 
     @NotNull
     @Column(name = "ip_address", columnDefinition = "inet")
-    private Inet ipAddress;
+    private InetAddress ipAddress;
 }

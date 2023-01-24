@@ -30,7 +30,7 @@ package org.opennms.horizon.events.util;
 
 import org.opennms.horizon.shared.utils.IPAddress;
 
-import javax.xml.bind.annotation.adapters.XmlAdapter;
+import jakarta.xml.bind.annotation.adapters.XmlAdapter;
 import java.net.InetAddress;
 
 public class InetAddressXmlAdapter extends XmlAdapter<String, InetAddress> {

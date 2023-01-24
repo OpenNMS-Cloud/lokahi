@@ -43,7 +43,7 @@ import org.opennms.taskset.service.contract.TaskSetServiceGrpc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 
-import javax.transaction.Transactional;
+import jakarta.transaction.Transactional;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 

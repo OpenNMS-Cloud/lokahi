@@ -19,12 +19,6 @@
         Basic Java language common utilities.
     </description>
 
-    <dependencies>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-        </dependency>
-    </dependencies>
 
     <build>
         <plugins>

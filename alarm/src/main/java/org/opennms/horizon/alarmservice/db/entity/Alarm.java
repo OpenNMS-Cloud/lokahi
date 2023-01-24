@@ -29,32 +29,25 @@
 package org.opennms.horizon.alarmservice.db.entity;
 
 import com.google.common.base.MoreObjects;
-import java.io.Serializable;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.ElementCollection;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.MapKeyColumn;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.persistence.Transient;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.MapKeyColumn;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.SequenceGenerator;
+import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
+import jakarta.persistence.Transient;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -63,6 +56,14 @@ import lombok.ToString.Exclude;
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.Formula;
 import org.opennms.horizon.alarmservice.model.AlarmSeverity;
+
+import java.io.Serializable;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Entity
 @Table(name="alarm")
@@ -196,7 +197,7 @@ public class Alarm extends TenantAwareEntity implements Serializable {
     @Column(name="attribute_value", nullable=false)
     private Map<String, String> details;
 
-    @OneToOne(cascade=CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToOne(cascade= CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name="sticky_memo_id")
     @Exclude
     private Memo stickyMemo;

@@ -34,6 +34,7 @@ import org.opennms.azure.contract.AzureMonitorRequest;
 import org.opennms.horizon.azure.api.AzureScanItem;
 import org.opennms.horizon.inventory.model.AzureCredential;
 import org.opennms.horizon.inventory.model.IpInterface;
+import org.opennms.horizon.shared.utils.InetAddressUtils;
 import org.opennms.icmp.contract.IcmpMonitorRequest;
 import org.opennms.snmp.contract.SnmpMonitorRequest;
 import org.opennms.taskset.contract.MonitorType;
@@ -77,7 +78,7 @@ public class MonitorTaskSetService {
     private TaskDefinition addMonitorTask(MonitorType monitorType, IpInterface ipInterface, long nodeId) {
 
         String monitorTypeValue = monitorType.getValueDescriptor().getName();
-        String ipAddress = ipInterface.getIpAddress().getAddress();
+        String ipAddress = InetAddressUtils.toIpAddrString(ipInterface.getIpAddress());
 
         String name = String.format("%s-monitor", monitorTypeValue.toLowerCase());
         String pluginName = String.format("%sMonitor", monitorTypeValue);

@@ -28,6 +28,16 @@
 
 package org.opennms.horizon.events.util;
 
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.JAXBElement;
+import jakarta.xml.bind.JAXBException;
+import jakarta.xml.bind.Marshaller;
+import jakarta.xml.bind.Unmarshaller;
+import jakarta.xml.bind.ValidationEvent;
+import jakarta.xml.bind.ValidationEventHandler;
+import jakarta.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlSchema;
+import jakarta.xml.bind.annotation.XmlSeeAlso;
 import org.apache.commons.io.IOUtils;
 import org.eclipse.persistence.jaxb.MarshallerProperties;
 import org.slf4j.Logger;
@@ -45,17 +55,7 @@ import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.XMLReaderFactory;
 
 import javax.xml.XMLConstants;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
-import javax.xml.bind.ValidationEvent;
-import javax.xml.bind.ValidationEventHandler;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlSchema;
-import javax.xml.bind.annotation.XmlSeeAlso;
-import javax.xml.stream.FactoryConfigurationError;
+import javax.xml.parsers.FactoryConfigurationError;
 import javax.xml.transform.Source;
 import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamSource;

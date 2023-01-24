@@ -17,9 +17,10 @@ jobs:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
 
       - name: Log in to the Container registry
+        # Need to pull images from github container registry first.
         uses: docker/login-action@v2
         with:
-          registry: ${{ env.IMAGE_REGISTRY }}
+          registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
 

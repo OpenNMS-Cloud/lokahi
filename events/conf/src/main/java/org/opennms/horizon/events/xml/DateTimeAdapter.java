@@ -30,7 +30,7 @@ package org.opennms.horizon.events.xml;
 
 import org.opennms.horizon.events.EventConstants;
 
-import javax.xml.bind.annotation.adapters.XmlAdapter;
+import jakarta.xml.bind.annotation.adapters.XmlAdapter;
 import java.util.Date;
 
 public class DateTimeAdapter extends XmlAdapter<String, Date> {

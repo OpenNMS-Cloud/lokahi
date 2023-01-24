@@ -1,83 +1,222 @@
 name: release
 
 on:
-  workflow_dispatch:
+  push:
+    branches:
+      - 'release'
+  workflow_call:
     inputs:
-      release_version:
-        required: true
+      image-tag:
+        description: 'Tag for all images'
+        required: false
+        type: string
+      image-registry:
+        description: 'Docker image registry for all images'
+        required: false
         type: string
 
-jobs:
-  tag:
-    runs-on: ubuntu-latest
-    outputs:
-      image-tag: ${{ steps.extract-tag.outputs.image-tag }}
-    steps:
-    - name: init
-      id: extract-tag
-      run: |
-        TAG=$(echo ${{ github.event.head_commit.message }} | awk '{ print $2 }')
-        
-        echo "Head commit message: ${{ github.event.head_commit.message }}"
-        echo "Extracted tag: $TAG."
-        
-        # Validate tag format
-        # Format of commit message: RELEASE <tag> - <message>
-        # Format of tag (change numbers or dev, but leave everything else): 
-        #   v0.0.5-dev
-        #   v0.0.5
-        if [[ $TAG =~ ^v[0-9]+.[0-9]+.([0-9]+-[a-z]+|[0-9]+)$ ]]
-        then
-          echo "Valid format, proceed with test."
-        else
-          echo "Tag format is invalid."
-          exit 1
-        fi
+env:
+  IMAGE_TAG: ${{ inputs.image-tag || github.sha }}
+  IMAGE_REGISTRY: ${{ inputs.image-registry || 'ghcr.io' }}
 
-        echo "release-tag=$TAG" >> $GITHUB_OUTPUT
+jobs:
   build-all:
-    needs: tag
     uses: ./.github/workflows/develop.yml
     secrets: inherit
     with:
-      image-tag: ${{ needs.tag.outputs.image-tag }}
-      image-registry: 'docker.io'
-  release:
-    needs: [tag, build-all]
+      image-tag: ${{ inputs.image-tag || github.sha }}
+      image-registry: 'ghcr.io'
+  minion:
+    # This requires a separate step in order to publish multi-arch images. We
+    # tried to get this working through Maven, but was not able to get it
+    # working.
+    needs: [build-all]
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        image: [
-          'opennms/horizon-stream-alarm',
-          'opennms/horizon-stream-datachoices',
-          'opennms/horizon-stream-events',
-          'opennms/horizon-stream-grafana',
-          'opennms/horizon-stream-inventory',
-          'opennms/horizon-stream-keycloak-ui',
-          'opennms/horizon-stream-metrics-processor',
-          'opennms/horizon-stream-minion',
-          'opennms/horizon-stream-minion-gateway',
-          'opennms/horizon-stream-minion-gateway-grpc-proxy',
-          'opennms/horizon-stream-notifications',
-          'opennms/horizon-stream-operator',
-          'opennms/horizon-stream-rest-server',
-          'opennms/horizon-stream-ui',
-        ]
     environment: docker-publish-account
     # Environment that contains the required secrets.
     steps:
+      - name: init
+        id: extract-tag
+        run: |
+
+          # This needs to be in this job, when run at the beginning of the
+          # workflow, neither the output nor the env variables seem to persist
+          # to this job.
+
+          TAG=$(echo ${{ github.event.head_commit.message }} | awk '{ print $2 }')
+
+          echo "Head commit message: ${{ github.event.head_commit.message }}"
+          echo "Extracted tag: $TAG."
+          
+          # Validate tag format
+          # Format of commit message: RELEASE <tag> - <message>
+          # Format of tag (change numbers or dev, but leave everything else): 
+          #   v0.0.5-dev
+          #   v0.0.5
+          if [[ $TAG =~ ^v[0-9]+.[0-9]+.([0-9]+-[a-z]+|[0-9]+)$ ]]
+          then
+            echo "Valid format, proceed with test."
+          else
+            echo "Tag format is invalid."
+            exit 1
+          fi
+
+          echo "RELEASE_TAG=$TAG" >> $GITHUB_ENV
+
       - name: Check out repository code
         uses: actions/checkout@v3
         # Is required to call actions.
 
       - name: Log in to the Container registry
+        # Need to pull images from github container registry first.
+        # Need to pull base images eventually.
         uses: docker/login-action@v2
         with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Log in to Dockerhub
+        # Need to log into Dockerhub to push images.
+        uses: docker/login-action@v2
+        with:
+          registry: docker.io
           username: ${{ secrets.DOCKERHUB_LOGIN }}
           password: ${{ secrets.DOCKERHUB_PASS }}
 
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Cache SonarCloud packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-${{ runner.arch }}-sonar
+
+      - name: Set up Maven
+        uses: stCarolas/setup-maven@v4.5
+        with:
+          maven-version: 3.8.2
+
+      - name: Cache Maven dependencies
+        uses: ./.github/actions/maven-cache
+        with:
+          cache-key-hash: ${{ hashFiles('minion/**/pom.xml', 'parent-pom/pom.xml', 'shared-lib/**/pom.xml') }}
+
+      - name: Build and install prerequisites
+        uses: ./.github/actions/java-install-prereqs
+
+
+      - name: Build & Push Images
+        run: |
+
+          ls -1
+
+          mvn clean install
+
+          ls -1R docker-assembly/
+
+          docker buildx create --use --driver docker-container --name maven
+
+          # Not sure how to push this without build for multi-arch.
+          docker buildx build --push \
+            --tag opennms/horizon-stream-minion:latest \
+            --tag opennms/horizon-stream-minion:${{ env.RELEASE_TAG }} \
+            docker-assembly/target/docker/opennms/horizon-stream-minion/latest/build/ \
+            -f docker-assembly/src/main/docker/app/Dockerfile \
+            --platform linux/amd64,linux/arm64,linux/arm/v7
+
+        working-directory: minion
+        shell: bash
+      
+  release:
+    needs: [build-all]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        image: [
+          'horizon-stream-alarm',
+          'horizon-stream-datachoices',
+          'horizon-stream-events',
+          'horizon-stream-grafana',
+          'horizon-stream-inventory',
+          'horizon-stream-keycloak',
+          'horizon-stream-metrics-processor',
+          'horizon-stream-minion-gateway',
+          'horizon-stream-minion-gateway-grpc-proxy',
+          'horizon-stream-notification',
+          'horizon-stream-rest-server',
+          'horizon-stream-ui',
+        ]
+    environment: docker-publish-account
+    # Environment that contains the required secrets.
+    steps:
+      - name: init
+        id: extract-tag
+        run: |
+
+          # This needs to be in this job, when run at the beginning of the
+          # workflow, neither the output nor the env variables seem to persist
+          # to this job.
+
+          TAG=$(echo ${{ github.event.head_commit.message }} | awk '{ print $2 }')
+
+          echo "Head commit message: ${{ github.event.head_commit.message }}"
+          echo "Extracted tag: $TAG."
+          
+          # Validate tag format
+          # Format of commit message: RELEASE <tag> - <message>
+          # Format of tag (change numbers or dev, but leave everything else): 
+          #   v0.0.5-dev
+          #   v0.0.5
+          if [[ $TAG =~ ^v[0-9]+.[0-9]+.([0-9]+-[a-z]+|[0-9]+)$ ]]
+          then
+            echo "Valid format, proceed with test."
+          else
+            echo "Tag format is invalid."
+            exit 1
+          fi
+
+          echo "RELEASE_TAG=$TAG" >> $GITHUB_ENV
+      - name: Check out repository code
+        uses: actions/checkout@v3
+        # Is required to call actions.
+
+      - name: Log in to the Container registry
+        # Need to pull images from github container registry first.
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Log in to Dockerhub
+        # Need to log into Dockerhub to push images.
+        uses: docker/login-action@v2
+        with:
+          registry: docker.io
+          username: ${{ secrets.DOCKERHUB_LOGIN }}
+          password: ${{ secrets.DOCKERHUB_PASS }}
+
+      - name: Pull images
+        run: |
+
+          docker pull ghcr.io/opennms-cloud/${{ matrix.image }}:${{ env.IMAGE_TAG }}
+
+          # Tag and save the image as a file to be published. Both release version and latest.
+          docker tag ghcr.io/opennms-cloud/${{ matrix.image }}:${{ env.IMAGE_TAG }} opennms/${{ matrix.image }}:latest
+          docker tag ghcr.io/opennms-cloud/${{ matrix.image }}:${{ env.IMAGE_TAG }} opennms/${{ matrix.image }}:${{ env.RELEASE_TAG }}
+
+          docker images
+
       - name: Publish images
         run: |
-          # Tag and save the image as a file to be published. Both release version and latest.
-          docker tag ${{ matrix.image }}:${{ needs.tag.outputs.image-tag }} ${{ matrix.image }}:latest
-          docker push ${{ matrix.image }}:latest
+
+          docker images
+   
+          #docker push opennms/${{ matrix.image }}:latest
+          docker push opennms/${{ matrix.image }}:${{ env.RELEASE_TAG }}
+

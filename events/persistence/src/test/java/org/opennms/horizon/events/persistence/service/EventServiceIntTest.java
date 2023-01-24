@@ -28,7 +28,6 @@
 
 package org.opennms.horizon.events.persistence.service;
 
-import com.vladmihalcea.hibernate.type.basic.Inet;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -47,6 +46,8 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.PostgreSQLContainer;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -60,7 +61,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class EventServiceIntTest {
     private static final String TEST_TENANT_ID = "tenant-id";
     private static final String TEST_UEI = "uei";
-    private static final Inet TEST_IP_ADDRESS = new Inet("192.168.1.1");
+    private static final String TEST_IP_ADDRESS = "192.168.1.1";
     private static final String TEST_NAME = "ifIndex";
     private static final String TEST_TYPE = "int32";
     private static final String TEST_VALUE = "64";
@@ -105,7 +106,7 @@ class EventServiceIntTest {
     }
 
     @Test
-    void testFindAllEvents() {
+    void testFindAllEvents() throws UnknownHostException {
         int count = 10;
 
         for (int index = 0; index < count; index++) {
@@ -124,7 +125,7 @@ class EventServiceIntTest {
 
 
     @Test
-    void testFindAllEventsByNodeId() {
+    void testFindAllEventsByNodeId() throws UnknownHostException {
         for (int index = 0; index < 3; index++) {
             populateDatabase(1);
         }
@@ -147,14 +148,14 @@ class EventServiceIntTest {
         }
     }
 
-    private void populateDatabase(long nodeId) {
+    private void populateDatabase(long nodeId) throws UnknownHostException {
 
         Event event = new Event();
         event.setTenantId(TEST_TENANT_ID);
         event.setEventUei(TEST_UEI);
         event.setProducedTime(LocalDateTime.now());
         event.setNodeId(nodeId);
-        event.setIpAddress(TEST_IP_ADDRESS);
+        event.setIpAddress(InetAddress.getByName(TEST_IP_ADDRESS));
 
         EventParameters parms = new EventParameters();
         EventParameter param = new EventParameter();
@@ -183,7 +184,7 @@ class EventServiceIntTest {
         assertEquals(TEST_TENANT_ID, event.getTenantId());
         assertEquals(TEST_UEI, event.getUei());
         assertNotEquals(0, event.getProducedTime());
-        assertEquals(TEST_IP_ADDRESS.getAddress(), event.getIpAddress());
+        assertEquals(TEST_IP_ADDRESS, event.getIpAddress());
 
         assertNotNull(event.getEventParamsList());
         event.getEventParamsList().forEach(parameter -> {

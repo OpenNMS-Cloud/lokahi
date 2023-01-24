@@ -26,7 +26,7 @@ env:
 
 jobs:
   build-and-test:
-    name: Build and test
+    name: Build and test - Operator
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository code

@@ -8,6 +8,7 @@ import org.opennms.horizon.inventory.repository.SnmpInterfaceRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -22,6 +23,7 @@ public class SnmpInterfaceService {
         return all
             .stream()
             .map(mapper::modelToDTO)
+            .filter(Objects::nonNull)
             .collect(Collectors.toList());
     }
 }

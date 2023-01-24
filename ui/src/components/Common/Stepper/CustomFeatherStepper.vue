@@ -82,10 +82,24 @@ const disableNextBtn = computed(() => {
   }
 })
 
+// exposed for explicit manual use
+const next = () => {
+  if (currentStep.value === stepNumbers.value.length) return
+  currentStep.value++
+  updateContent()
+}
+// exposed for explicit manual use
+const prev = () => {
+  if (currentStep.value === 1) return
+  currentStep.value--
+  updateContent()
+}
+
 const slideNext = () => {
   // check and use slideNext event passed from the step
   if (currentContent.value?.props && currentContent.value?.props.onSlideNext) {
     currentContent.value.props.onSlideNext()
+    return
   }
 
   // if last step, don't increase step count
@@ -99,6 +113,7 @@ const slidePrev = () => {
   // check and use slidePrev event passed from the step
   if (currentContent.value?.props && currentContent.value?.props.onSlidePrev) {
     currentContent.value.props.onSlidePrev()
+    return
   }
 
   currentStep.value--
@@ -118,6 +133,11 @@ onMounted(() => {
   // spread number of steps into array (using .length), start with 1 instead of 0
   stepNumbers.value = Array.from({ length: slots.default().length }, (_, i) => i + 1)
   updateContent()
+})
+
+defineExpose({
+  next,
+  prev
 })
 </script>
 

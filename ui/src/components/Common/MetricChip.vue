@@ -35,7 +35,7 @@ const propsData = computed(() => {
     let bgColor = 'unknown'
 
     if(props.metric.value !== undefined) {
-      bgColor = props.metric.value >= 0 ? 'up' : 'down'
+      bgColor = props.metric.value > 0 ? 'up' : 'down'
     }
     
     chip = {

@@ -1,6 +1,5 @@
 package org.opennms.horizon.inventory.service.taskset.response;
 
-import com.vladmihalcea.hibernate.type.basic.Inet;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -18,6 +17,7 @@ import org.opennms.horizon.inventory.repository.MonitoredServiceRepository;
 import org.opennms.horizon.inventory.repository.MonitoredServiceTypeRepository;
 import org.opennms.horizon.inventory.repository.MonitoringLocationRepository;
 import org.opennms.horizon.inventory.repository.NodeRepository;
+import org.opennms.horizon.shared.utils.InetAddressUtils;
 import org.opennms.taskset.contract.DetectorResponse;
 import org.opennms.taskset.contract.MonitorType;
 import org.opennms.taskset.service.contract.PublishTaskSetRequest;
@@ -26,8 +26,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 
-import javax.transaction.Transactional;
+import jakarta.transaction.Transactional;
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -88,7 +90,7 @@ class DetectorResponseServiceIntTest extends GrpcTestBase {
 
     @Test
     @Transactional
-    void testAccept() {
+    void testAccept() throws UnknownHostException {
         populateDatabase();
 
         DetectorResponse response = DetectorResponse.newBuilder()
@@ -110,7 +112,7 @@ class DetectorResponseServiceIntTest extends GrpcTestBase {
         MonitoredService monitoredService = monitoredServices.get(0);
         IpInterface ipInterface = monitoredService.getIpInterface();
 
-        assertEquals(TEST_IP_ADDRESS, ipInterface.getIpAddress().getAddress());
+        assertEquals(TEST_IP_ADDRESS, InetAddressUtils.toIpAddrString(ipInterface.getIpAddress()));
         assertEquals(TEST_TENANT_ID, monitoredService.getTenantId());
 
         MonitoredServiceType relatedType = monitoredService.getMonitoredServiceType();
@@ -121,7 +123,7 @@ class DetectorResponseServiceIntTest extends GrpcTestBase {
 
     @Test
     @Transactional
-    void testAcceptMultipleSameIpAddress() {
+    void testAcceptMultipleSameIpAddress() throws UnknownHostException {
         populateDatabase();
 
         DetectorResponse response = DetectorResponse.newBuilder()
@@ -147,7 +149,7 @@ class DetectorResponseServiceIntTest extends GrpcTestBase {
         MonitoredService monitoredService = monitoredServices.get(0);
         IpInterface ipInterface = monitoredService.getIpInterface();
 
-        assertEquals(TEST_IP_ADDRESS, ipInterface.getIpAddress().getAddress());
+        assertEquals(TEST_IP_ADDRESS, InetAddressUtils.toIpAddrString(ipInterface.getIpAddress()));
         assertEquals(TEST_TENANT_ID, monitoredService.getTenantId());
 
         MonitoredServiceType relatedType = monitoredService.getMonitoredServiceType();
@@ -158,7 +160,7 @@ class DetectorResponseServiceIntTest extends GrpcTestBase {
 
     @Test
     @Transactional
-    void testAcceptNotDetected() {
+    void testAcceptNotDetected() throws UnknownHostException {
         populateDatabase();
 
         DetectorResponse response = DetectorResponse.newBuilder()
@@ -178,7 +180,7 @@ class DetectorResponseServiceIntTest extends GrpcTestBase {
 
     @Test
     @Transactional
-    void testAcceptMultipleSameIpAddressDifferentMonitorType() {
+    void testAcceptMultipleSameIpAddressDifferentMonitorType() throws UnknownHostException {
         populateDatabase();
 
         DetectorResponse.Builder builder = DetectorResponse.newBuilder()
@@ -216,7 +218,7 @@ class DetectorResponseServiceIntTest extends GrpcTestBase {
         for (MonitoredService monitoredService : monitoredServices) {
             IpInterface ipInterface = monitoredService.getIpInterface();
 
-            assertEquals(TEST_IP_ADDRESS, ipInterface.getIpAddress().getAddress());
+            assertEquals(TEST_IP_ADDRESS, InetAddressUtils.toIpAddrString(ipInterface.getIpAddress()));
             assertEquals(TEST_TENANT_ID, monitoredService.getTenantId());
         }
         
@@ -228,7 +230,7 @@ class DetectorResponseServiceIntTest extends GrpcTestBase {
         assertEquals(monitorTypes.length + 1, grpcRequests.size());
     }
 
-    private void populateDatabase() {
+    private void populateDatabase() throws UnknownHostException {
 
         MonitoringLocation monitoringLocation = new MonitoringLocation();
         monitoringLocation.setLocation(TEST_LOCATION);
@@ -243,7 +245,7 @@ class DetectorResponseServiceIntTest extends GrpcTestBase {
         node = nodeRepository.save(node);
 
         IpInterface ipInterface = new IpInterface();
-        ipInterface.setIpAddress(new Inet(TEST_IP_ADDRESS));
+        ipInterface.setIpAddress(InetAddress.getByName(TEST_IP_ADDRESS));
         ipInterface.setTenantId(TEST_TENANT_ID);
         ipInterface.setNode(node);
 

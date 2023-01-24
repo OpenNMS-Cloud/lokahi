@@ -52,7 +52,8 @@ public abstract class GrpcTestBase {
 
     protected void setupGrpc() {
         Metadata metadata = new Metadata();
-        metadata.put(GrpcConstants.TENANT_ID_REQUEST_KEY, tenantId);
+        metadata.put(GrpcConstants.AUTHORIZATION_BYPASS_KEY, String.valueOf(true));
+        metadata.put(GrpcConstants.TENANT_ID_BYPASS_KEY, tenantId);
         channel = ManagedChannelBuilder.forAddress("localhost", 6767)
             .intercept(MetadataUtils.newAttachHeadersInterceptor(metadata))
             .usePlaintext().build();
@@ -60,7 +61,8 @@ public abstract class GrpcTestBase {
 
     protected void setupGrpcWithDifferentTenantID() {
         Metadata metadata = new Metadata();
-        metadata.put(GrpcConstants.TENANT_ID_REQUEST_KEY, new UUID(5, 5).toString());
+        metadata.put(GrpcConstants.AUTHORIZATION_BYPASS_KEY, String.valueOf(true));
+        metadata.put(GrpcConstants.TENANT_ID_BYPASS_KEY, new UUID(5, 5).toString());
         channel = ManagedChannelBuilder.forAddress("localhost", 6767)
             .intercept(MetadataUtils.newAttachHeadersInterceptor(metadata))
             .usePlaintext().build();

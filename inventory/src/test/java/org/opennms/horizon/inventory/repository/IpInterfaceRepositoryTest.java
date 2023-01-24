@@ -29,7 +29,6 @@
 package org.opennms.horizon.inventory.repository;
 
 
-import com.vladmihalcea.hibernate.type.basic.Inet;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.opennms.horizon.inventory.SpringContextTestInitializer;
@@ -41,6 +40,8 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ContextConfiguration;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 
@@ -65,12 +66,12 @@ class IpInterfaceRepositoryTest {
     private MonitoringLocationRepository monitoringLocationRepository;
 
     @BeforeEach
-    public void setup() {
+    public void setup() throws UnknownHostException {
         loadNodes();
     }
 
     @Test
-    void testFindByIpInterfaceForAGivenLocationAndIpAddress() {
+    void testFindByIpInterfaceForAGivenLocationAndIpAddress() throws UnknownHostException {
         var node = nodeRepository.findByNodeLabel("node1");
         assertNotNull(node);
         var locationList = monitoringLocationRepository.findByLocation("location1");
@@ -80,24 +81,24 @@ class IpInterfaceRepositoryTest {
 
         for (int i = 0; i < NUM_NODES; i++) {
             var optional = ipInterfaceRepository.findByIpAddressAndLocationAndTenantId(
-                new Inet("192.168.1." + i), "location" + i, "tenant" + i);
+                InetAddress.getByName("192.168.1." + i), "location" + i, "tenant" + i);
             assertThat(optional).isNotEmpty();
-            assertThat(optional.get().getIpAddress()).isEqualTo(new Inet("192.168.1." + i));
+            assertThat(optional.get().getIpAddress()).isEqualTo(InetAddress.getByName("192.168.1." + i));
 
             // Check with invalid location
             var optionalInterface = ipInterfaceRepository.findByIpAddressAndLocationAndTenantId(
-                new Inet("192.168.1." + i), "location" + i + 3, "tenant" + i);
+                InetAddress.getByName("192.168.1." + i), "location" + i + 3, "tenant" + i);
             assertThat(optionalInterface).isEmpty();
 
             // Check with invalid tenant
             optionalInterface = ipInterfaceRepository.findByIpAddressAndLocationAndTenantId(
-                new Inet("192.168.1." + i), "location" + i, "tenant2" + i + 3);
+                InetAddress.getByName("192.168.1." + i), "location" + i, "tenant2" + i + 3);
             assertThat(optionalInterface).isEmpty();
         }
 
     }
 
-    private void loadNodes() {
+    private void loadNodes() throws UnknownHostException {
         for (int i = 0; i < NUM_NODES; i++) {
             var node = new Node();
             node.setNodeLabel("node" + i);
@@ -111,7 +112,7 @@ class IpInterfaceRepositoryTest {
             var ipInterface = new IpInterface();
             ipInterface.setTenantId("tenant" + i);
             ipInterface.setNode(node);
-            ipInterface.setIpAddress(new Inet("192.168.1." + i));
+            ipInterface.setIpAddress(InetAddress.getByName("192.168.1." + i));
             var ipInterfaces = new ArrayList<IpInterface>();
             ipInterfaces.add(ipInterface);
             node.setIpInterfaces(ipInterfaces);

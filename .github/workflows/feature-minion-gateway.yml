@@ -27,7 +27,7 @@ env:
 
 jobs:
   build-and-test:
-    name: Build and test
+    name: Build and test - Minion Gateway
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -40,6 +40,12 @@ jobs:
           registry: ${{ env.IMAGE_REGISTRY }}
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_LOGIN }}
+          password: ${{ secrets.DOCKERHUB_PASS }}
 
       - name: Generate Docker metadata
         id: docker-metadata

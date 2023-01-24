@@ -30,7 +30,6 @@ package org.opennms.horizon.events.persistence;
 
 
 import com.google.protobuf.InvalidProtocolBufferException;
-import com.vladmihalcea.hibernate.type.basic.Inet;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -48,6 +47,8 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.PostgreSQLContainer;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -57,7 +58,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @ContextConfiguration(classes = EventsTestApp.class)
-class EventRepositoryIT {
+class EventRepositoryTest {
 
 
     private static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:14.5-alpine")
@@ -85,12 +86,12 @@ class EventRepositoryIT {
     private EventRepository eventRepository;
 
     @Test
-    void testPersistence() throws InvalidProtocolBufferException {
+    void testPersistence() throws InvalidProtocolBufferException, UnknownHostException {
         var event = new Event();
         event.setEventUei("uei");
         event.setTenantId("test");
         event.setProducedTime(LocalDateTime.now());
-        event.setIpAddress(new Inet("192.168.1.1"));
+        event.setIpAddress(InetAddress.getByName("192.168.1.1"));
         var parms = new EventParameters();
         var parm = new EventParameter();
         parm.setName("ifIndex");
@@ -105,7 +106,7 @@ class EventRepositoryIT {
         assertNotNull(retrieved);
         Assertions.assertEquals("snmp", EventInfo.parseFrom(retrieved.getEventInfo()).getSnmp().getId());
         Assertions.assertEquals("public", EventInfo.parseFrom(retrieved.getEventInfo()).getSnmp().getCommunity());
-        assertEquals("192.168.1.1", retrieved.getIpAddress().getAddress());
+        assertEquals("192.168.1.1", retrieved.getIpAddress().getHostAddress());
         assertEquals(parm, retrieved.getEventParameters().getParameters().get(0));
     }
 }

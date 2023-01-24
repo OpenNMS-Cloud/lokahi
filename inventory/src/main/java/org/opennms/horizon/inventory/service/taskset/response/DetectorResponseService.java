@@ -28,7 +28,6 @@
 
 package org.opennms.horizon.inventory.service.taskset.response;
 
-import com.vladmihalcea.hibernate.type.basic.Inet;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.opennms.horizon.inventory.dto.MonitoredServiceDTO;
@@ -40,10 +39,12 @@ import org.opennms.horizon.inventory.service.MonitoredServiceService;
 import org.opennms.horizon.inventory.service.MonitoredServiceTypeService;
 import org.opennms.horizon.inventory.service.taskset.CollectorTaskSetService;
 import org.opennms.horizon.inventory.service.taskset.MonitorTaskSetService;
+import org.opennms.horizon.shared.utils.InetAddressUtils;
 import org.opennms.taskset.contract.DetectorResponse;
 import org.opennms.taskset.contract.MonitorType;
 import org.springframework.stereotype.Component;
 
+import java.net.InetAddress;
 import java.util.Optional;
 
 @Slf4j
@@ -59,8 +60,7 @@ public class DetectorResponseService {
     public void accept(String tenantId, String location, DetectorResponse response) {
         log.info("Received Detector Response = {} for tenant = {} and location = {}", response, tenantId, location);
 
-        Inet ipAddress = new Inet(response.getIpAddress());
-
+        InetAddress ipAddress = InetAddressUtils.getInetAddress(response.getIpAddress());
         Optional<IpInterface> ipInterfaceOpt = ipInterfaceRepository
             .findByIpAddressAndLocationAndTenantId(ipAddress, location, tenantId);
 
@@ -79,7 +79,7 @@ public class DetectorResponseService {
                 log.info("{} not detected on ip address = {}", response.getMonitorType(), ipAddress.getAddress());
             }
         } else {
-            log.warn("Failed to find IP Interface during detection for ip = {}", ipAddress.toInetAddress());
+            log.warn("Failed to find IP Interface during detection for ip = {}", ipAddress.getHostAddress());
         }
     }
 

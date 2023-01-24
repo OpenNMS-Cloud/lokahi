@@ -1,8 +1,8 @@
 /*******************************************************************************
  * This file is part of OpenNMS(R).
  *
- * Copyright (C) 2022 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
+ * Copyright (C) 2023 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
  *
@@ -29,12 +29,9 @@
 package org.opennms.miniongateway.grpc.server.traps;
 
 import com.google.protobuf.Message;
-import java.nio.charset.StandardCharsets;
-import java.util.LinkedList;
-import java.util.List;
 import org.apache.kafka.clients.producer.ProducerRecord;
-import org.apache.kafka.common.header.Header;
 import org.apache.kafka.common.header.internals.RecordHeader;
+import org.opennms.horizon.shared.constants.GrpcConstants;
 import org.opennms.horizon.shared.grpc.common.TenantIDGrpcServerInterceptor;
 import org.opennms.horizon.shared.ipc.sink.api.MessageConsumer;
 import org.opennms.horizon.shared.ipc.sink.api.SinkModule;
@@ -46,13 +43,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
+import java.nio.charset.StandardCharsets;
+
 /**
  * Forwarder of Trap messages - received via GRPC and forwarded to Kafka.
  */
 @Component
 public class TrapsKafkaForwarder implements MessageConsumer<Message, Message> {
 
-    public static final String TENANT_ID_HEADER_NAME = "tenant-id";
     public static final String DEFAULT_TASK_RESULTS_TOPIC = "traps";
 
     private final Logger logger = LoggerFactory.getLogger(TrapsKafkaForwarder.class);
@@ -77,32 +75,13 @@ public class TrapsKafkaForwarder implements MessageConsumer<Message, Message> {
         // Retrieve the Tenant ID from the TenantID GRPC Interceptor
         String tenantId = tenantIDGrpcInterceptor.readCurrentContextTenantId();
         logger.info("Received traps; sending to Kafka: tenant-id: {}; kafka-topic={}; message={}", tenantId, kafkaTopic, messageLog);
-
         byte[] rawContent = messageLog.toByteArray();
-        this.kafkaTemplate.send(kafkaTopic, rawContent);
+        var producerRecord = new ProducerRecord<String, byte[]>(kafkaTopic, rawContent);
+        // add tenant id to kafka header
+        producerRecord.headers().add(new RecordHeader(GrpcConstants.TENANT_ID_KEY,
+            tenantId.getBytes(StandardCharsets.UTF_8)));
+
+        this.kafkaTemplate.send(producerRecord);
     }
 
-//========================================
-// INTERNALS
-//----------------------------------------
-
-    /**
-     * Format the record to send to Kafka, with the needed content and the headers.
-     *
-     * @param rawContent content to include as the message payload.
-     * @param tenantId Tenant ID to include in the message headers.
-     * @return ProducerRecord to send to Kafka.
-     */
-    private ProducerRecord<String, byte[]> formatProducerRecord(byte[] rawContent, String tenantId) {
-        List<Header> headers = new LinkedList<>();
-        headers.add(new RecordHeader(TENANT_ID_HEADER_NAME, tenantId.getBytes(StandardCharsets.UTF_8)));
-
-        return new ProducerRecord<String, byte[]>(
-            kafkaTopic,
-            null,
-            null,
-            rawContent,
-            headers
-        );
-    }
 }

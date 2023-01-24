@@ -1,13 +1,36 @@
+/*******************************************************************************
+ * This file is part of OpenNMS(R).
+ *
+ * Copyright (C) 2023 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
+ *
+ * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *
+ * OpenNMS(R) is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published
+ * by the Free Software Foundation, either version 3 of the License,
+ * or (at your option) any later version.
+ *
+ * OpenNMS(R) is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with OpenNMS(R).  If not, see:
+ *      http://www.gnu.org/licenses/
+ *
+ * For more information contact:
+ *     OpenNMS(R) Licensing <license@opennms.org>
+ *     http://www.opennms.org/
+ *     http://www.opennms.com/
+ *******************************************************************************/
+
 package org.opennms.miniongateway.grpc.server.heartbeat;
 
 import com.google.protobuf.Message;
 import com.swrve.ratelimitedlogger.RateLimitedLog;
-import java.nio.charset.StandardCharsets;
-import java.time.Duration;
-import java.util.LinkedList;
-import java.util.List;
 import org.apache.kafka.clients.producer.ProducerRecord;
-import org.apache.kafka.common.header.Header;
 import org.apache.kafka.common.header.internals.RecordHeader;
 import org.opennms.horizon.shared.constants.GrpcConstants;
 import org.opennms.horizon.shared.grpc.common.TenantIDGrpcServerInterceptor;
@@ -20,6 +43,9 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
+
+import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 
 /**
  * Forwarder of Heartbeat messages - received via GRPC and forwarded to Kafka.
@@ -58,32 +84,12 @@ public class HeartbeatKafkaForwarder implements MessageConsumer<Message, Message
         logger.info("Received heartbeat; sending to Kafka: tenant-id: {}; kafka-topic={}; message={}", tenantId, kafkaTopic, messageLog);
         byte[] rawContent = messageLog.toByteArray();
 
-        ProducerRecord<String, byte[]> producerRecord = formatProducerRecord(rawContent, tenantId);
+        var producerRecord = new ProducerRecord<String, byte[]>(kafkaTopic, rawContent);
+        // add tenant id to kafka header
+        producerRecord.headers().add(new RecordHeader(GrpcConstants.TENANT_ID_KEY,
+            tenantId.getBytes(StandardCharsets.UTF_8)));
 
         this.kafkaTemplate.send(producerRecord);
     }
 
-//========================================
-// INTERNALS
-//----------------------------------------
-
-    /**
-     * Format the record to send to Kafka, with the needed content and the headers.
-     *
-     * @param rawContent content to include as the message payload.
-     * @param tenantId Tenant ID to include in the message headers.
-     * @return ProducerRecord to send to Kafka.
-     */
-    private ProducerRecord<String, byte[]> formatProducerRecord(byte[] rawContent, String tenantId) {
-        List<Header> headers = new LinkedList<>();
-        headers.add(new RecordHeader(GrpcConstants.TENANT_ID_KEY, tenantId.getBytes(StandardCharsets.UTF_8)));
-
-        return new ProducerRecord<String, byte[]>(
-            kafkaTopic,
-            null,
-            null,
-            rawContent,
-            headers
-        );
-    }
 }

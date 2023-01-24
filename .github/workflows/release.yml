@@ -21,18 +21,18 @@ env:
   IMAGE_REGISTRY: ${{ inputs.image-registry || 'ghcr.io' }}
 
 jobs:
-  build-all:
-    uses: ./.github/workflows/develop.yml
-    #uses: ./.github/workflows/feature-events.yml
-    secrets: inherit
-    with:
-      image-tag: ${{ inputs.image-tag || github.sha }}
-      image-registry: 'ghcr.io'
+#  build-all:
+#    uses: ./.github/workflows/develop.yml
+#    #uses: ./.github/workflows/feature-events.yml
+#    secrets: inherit
+#    with:
+#      image-tag: ${{ inputs.image-tag || github.sha }}
+#      image-registry: 'ghcr.io'
   minion:
     # This requires a separate step in order to publish multi-arch images. We
     # tried to get this working through Maven, but was not able to get it
     # working.
-    needs: [build-all]
+#    needs: [build-all]
     runs-on: ubuntu-latest
     environment: docker-publish-account
     # Environment that contains the required secrets.

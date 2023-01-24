@@ -119,7 +119,7 @@ jobs:
 
           mvn clean install
 
-          ls -1
+          ls -1R docker-assembly/
 
           docker buildx create --use --driver docker-container --name maven
 

@@ -1,7 +1,7 @@
 name: Base Image Update
 
 on:
-  pull_request:
+  push:
     paths:
       - '.github/base-image-tag-ref.json'
 

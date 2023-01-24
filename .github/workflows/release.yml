@@ -219,5 +219,5 @@ jobs:
           docker images
    
           #docker push opennms/${{ matrix.image }}:latest
-          docker push opennms/${{ matrix.image }}:test-${{ env.RELEASE_TAG }}
+          docker push opennms/${{ matrix.image }}:${{ env.RELEASE_TAG }}
 

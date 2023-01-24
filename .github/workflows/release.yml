@@ -115,7 +115,11 @@ jobs:
       - name: Build & Push Images
         run: |
 
+          ls -1
+
           mvn clean install
+
+          ls -1
 
           docker buildx create --use --driver docker-container --name maven
 

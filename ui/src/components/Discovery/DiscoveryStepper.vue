@@ -26,7 +26,6 @@ const step2Disabled = computed(() => {
 
 const step2Submit = () => {
   validate()
-  console.log(error.value)
   if (!error.value) {
     stepper.value.next()
   }

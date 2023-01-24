@@ -49,7 +49,7 @@ const { validation } = useDiscoveryValidation()
 const ipAddressesStr = ref<string>('')
 const updateIpsPayload = () => {
   if (ipAddressesStr.value) {
-    store.ipAddresses = ipAddressesStr.value.split(',')
+    store.ipAddresses = ipAddressesStr.value.split(',').map(x => x.trim())
   } else {
     store.ipAddresses = []
   }

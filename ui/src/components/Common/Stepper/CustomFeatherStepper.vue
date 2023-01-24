@@ -90,6 +90,7 @@ const next = () => {
 }
 // exposed for explicit manual use
 const prev = () => {
+  if (currentStep.value === 1) return
   currentStep.value--
   updateContent()
 }

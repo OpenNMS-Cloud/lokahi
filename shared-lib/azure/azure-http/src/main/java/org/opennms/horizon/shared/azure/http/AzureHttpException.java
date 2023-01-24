@@ -28,13 +28,29 @@
 
 package org.opennms.horizon.shared.azure.http;
 
+import lombok.Getter;
+import org.opennms.horizon.shared.azure.http.dto.error.AzureErrorDescription;
+
+@Getter
 public class AzureHttpException extends Exception {
+    private final transient AzureErrorDescription description;
+
+    public AzureHttpException(String message, AzureErrorDescription description) {
+        super(message);
+        this.description = description;
+    }
 
     public AzureHttpException(String message) {
         super(message);
+        this.description = null;
     }
 
     public AzureHttpException(String message, Throwable t) {
         super(message, t);
+        this.description = null;
+    }
+
+    public boolean hasDescription() {
+        return this.description != null;
     }
 }

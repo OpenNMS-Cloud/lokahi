@@ -115,6 +115,8 @@ jobs:
       - name: Build & Push Images
         run: |
 
+          mvn clean install
+
           docker buildx create --use --driver docker-container --name maven
 
           # Not sure how to push this without build for multi-arch.

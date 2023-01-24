@@ -54,10 +54,10 @@ import org.opennms.horizon.minion.flows.parser.flowmessage.NetflowVersion;
 import org.opennms.horizon.minion.flows.parser.flowmessage.SamplingAlgorithm;
 import org.opennms.horizon.minion.flows.parser.ie.Value;
 
-public class IpFixMessageBuilder implements MessageBuilder {
+import lombok.NoArgsConstructor;
 
-    public IpFixMessageBuilder() {
-    }
+@NoArgsConstructor
+public class IpFixMessageBuilder implements MessageBuilder {
 
     @Override
     public FlowMessage.Builder buildMessage(final Iterable<Value<?>> values, final RecordEnrichment enrichment) {

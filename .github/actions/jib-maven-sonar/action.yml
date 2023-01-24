@@ -34,8 +34,8 @@ runs:
         SONAR_TOKEN: ${{ inputs.sonar-token }}
         SONAR_PROJECT_KEY: ${{ inputs.project-key }}
       run: |
-        BASE_IMAGE=$(cat .github/base-image-tag-ref.json | jq .image_tag_java | sed 's/\"//g')
-        echo "test - $BASE_IMAGE"
+        BASE_IMAGE=$(cat ../.github/base-image-tag-ref.json | jq .image_tag_java | sed 's/\"//g')
+        echo "test - $HOME - $BASE_IMAGE"
         docker images
         docker pull $BASE_IMAGE
         docker images

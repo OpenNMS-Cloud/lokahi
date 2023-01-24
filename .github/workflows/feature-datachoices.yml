@@ -27,7 +27,7 @@ env:
 
 jobs:
   build-and-test:
-    name: Build and test - Data Choices
+    name: Build and test - DataChoices
     runs-on: ubuntu-latest
     steps:
 

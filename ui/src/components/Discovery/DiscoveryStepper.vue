@@ -2,7 +2,7 @@
   <CustomFeatherStepper ref="stepper" class="discovery-stepper">
     <DiscoveryStep1 :disableNextBtn="!store.selectedLocations.length" />
     <DiscoveryStep2 :disableNextBtn="step2Disabled" @slideNext="step2Submit"/>
-    <DiscoveryStep3 :hideNextBtn="true" @slideNext="callback" />
+    <DiscoveryStep3 :hideNextBtn="true" />
   </CustomFeatherStepper>
 </template>
 
@@ -12,11 +12,6 @@ import useDiscoveryValidation from './useDiscoveryValidation'
 
 const { validate, error } = useDiscoveryValidation()
 const store = useDiscoveryStore()
-
-defineProps<{
-  callback: () => void
-}>()
-
 const stepper = ref()
 
 const step2Disabled = computed(() => {

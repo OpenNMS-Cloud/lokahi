@@ -60,6 +60,7 @@ import org.opennms.horizon.inventory.model.Node;
 import org.opennms.horizon.inventory.repository.IpInterfaceRepository;
 import org.opennms.horizon.inventory.repository.MonitoringLocationRepository;
 import org.opennms.horizon.inventory.repository.NodeRepository;
+import org.opennms.horizon.inventory.repository.TagRepository;
 import org.opennms.horizon.shared.constants.GrpcConstants;
 
 public class NodeServiceTest {
@@ -68,6 +69,7 @@ public class NodeServiceTest {
     private NodeRepository mockNodeRepository;
     private MonitoringLocationRepository mockMonitoringLocationRepository;
     private IpInterfaceRepository mockIpInterfaceRepository;
+    private TagRepository tagRepository;
     private ConfigUpdateService mockConfigUpdateService;
     private final String tenantID = "test-tenant";
 
@@ -77,8 +79,9 @@ public class NodeServiceTest {
         mockNodeRepository = mock(NodeRepository.class);
         mockMonitoringLocationRepository = mock(MonitoringLocationRepository.class);
         mockIpInterfaceRepository = mock(IpInterfaceRepository.class);
+        tagRepository = mock(TagRepository.class);
         mockConfigUpdateService = mock(ConfigUpdateService.class);
-        nodeService = new NodeService(mockNodeRepository, mockMonitoringLocationRepository, mockIpInterfaceRepository,
+        nodeService = new NodeService(mockNodeRepository, mockMonitoringLocationRepository, mockIpInterfaceRepository, tagRepository,
             mockConfigUpdateService, nodeMapper);
     }
 

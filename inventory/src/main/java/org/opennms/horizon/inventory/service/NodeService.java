@@ -156,14 +156,12 @@ public class NodeService {
     @Transactional
     public void deleteNode(long id) {
         nodeRepository.findById(id).ifPresent(node -> {
-            deleteAssociatedTags(node);
+            removeAssociatedTags(node);
             nodeRepository.delete(node);
         });
     }
 
-    // Only deleting tags which don't have
-    // another association with a node
-    private void deleteAssociatedTags(Node node) {
+    private void removeAssociatedTags(Node node) {
         for (Tag tag : node.getTags()) {
             if (tag.getNodes().size() == 1) {
                 tagRepository.delete(tag);

@@ -73,6 +73,12 @@ spec:
               containerPort: {{ .Values.OpenNMS.Minion.TrapsListenerPort }}
             - name: ssh
               containerPort: {{ .Values.OpenNMS.Minion.SshPort }}
+            - name: netflow5
+              protocol: UDP
+              containerPort: {{ .Values.OpenNMS.Minion.Netflow5ListenerPort }}
+            - name: netflow9
+              protocol: UDP
+              containerPort: {{ .Values.OpenNMS.Minion.Netflow9ListenerPort }}
           volumeMounts:
             - name: minion-config-volume
               mountPath: "/opt/karaf/etc/org.opennms.core.ipc.grpc.client.cfg"

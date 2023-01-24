@@ -56,11 +56,12 @@ public class Netflow5UdpParser extends UdpParserBase implements UdpParser, Dispa
     private final Netflow5MessageBuilder messageBuilder = new Netflow5MessageBuilder();
 
     public Netflow5UdpParser(final String name,
+                             final String queueName,
                              final AsyncDispatcher<TelemetryMessage> dispatcher,
                              final IpcIdentity identity,
                              final DnsResolver dnsResolver,
                              final MetricRegistry metricRegistry) {
-        super(Protocol.NETFLOW5, name, dispatcher, identity, dnsResolver, metricRegistry);
+        super(Protocol.NETFLOW5, name, queueName, dispatcher, identity, dnsResolver, metricRegistry);
     }
 
     public Netflow5MessageBuilder getMessageBuilder() {

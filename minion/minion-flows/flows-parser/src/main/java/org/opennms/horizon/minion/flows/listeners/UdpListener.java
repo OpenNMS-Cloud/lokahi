@@ -85,7 +85,14 @@ public class UdpListener implements GracefulShutdownListener, FlowsListener {
     private Future<String> stopFuture;
 
     public UdpListener(final String name, final List<Parser> parsers, final MetricRegistry metrics) {
+        this(name, 0, parsers, metrics);
+    }
+
+    public UdpListener(final String name, final int port, final List<Parser> parsers, final MetricRegistry metrics) {
         this.name = Objects.requireNonNull(name);
+        if (port != 0) {
+            this.port = port;
+        }
         this.parsers = Objects.requireNonNull(parsers);
         Objects.requireNonNull(metrics);
 

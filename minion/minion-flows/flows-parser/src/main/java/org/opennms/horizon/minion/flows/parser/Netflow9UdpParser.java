@@ -57,11 +57,12 @@ public class Netflow9UdpParser extends UdpParserBase implements UdpParser, Dispa
     private final Netflow9MessageBuilder messageBuilder = new Netflow9MessageBuilder();
 
     public Netflow9UdpParser(final String name,
+                             final String queueName,
                              final AsyncDispatcher<TelemetryMessage> dispatcher,
                              final IpcIdentity identity,
                              final DnsResolver dnsResolver,
                              final MetricRegistry metricRegistry) {
-        super(Protocol.NETFLOW9, name, dispatcher, identity, dnsResolver, metricRegistry);
+        super(Protocol.NETFLOW9, name, queueName, dispatcher, identity, dnsResolver, metricRegistry);
     }
 
     public Netflow9MessageBuilder getMessageBuilder() {

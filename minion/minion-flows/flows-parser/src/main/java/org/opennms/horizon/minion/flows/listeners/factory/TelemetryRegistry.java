@@ -49,7 +49,7 @@ public interface TelemetryRegistry {
 
     MetricRegistry getMetricRegistry();
 
-    AsyncDispatcher<TelemetryMessage> getDispatcher(String queueName);
+    AsyncDispatcher<TelemetryMessage> getDispatcher();
 
     ListenerHolder getListenerHolder();
 }

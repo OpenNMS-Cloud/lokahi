@@ -56,11 +56,12 @@ public class IpfixTcpParser extends ParserBase implements TcpParser {
     private final Set<TcpSession> sessions = Sets.newConcurrentHashSet();
 
     public IpfixTcpParser(final String name,
+                          final String queueName,
                           final AsyncDispatcher<TelemetryMessage> dispatcher,
                           final IpcIdentity identity,
                           final DnsResolver dnsResolver,
                           final MetricRegistry metricRegistry) {
-        super(Protocol.IPFIX, name, dispatcher, identity, dnsResolver, metricRegistry);
+        super(Protocol.IPFIX, name, queueName, dispatcher, identity, dnsResolver, metricRegistry);
     }
 
     @Override

@@ -138,7 +138,7 @@ public class ClockSkewTest {
     private static class ParserBaseExt extends ParserBase {
 
         public ParserBaseExt(Protocol protocol, String name, AsyncDispatcher<TelemetryMessage> dispatcher, IpcIdentity identity, DnsResolver dnsResolver, MetricRegistry metricRegistry) {
-            super(protocol, name, dispatcher, identity, dnsResolver, metricRegistry);
+            super(protocol, name, name, dispatcher, identity, dnsResolver, metricRegistry);
         }
 
         @Override

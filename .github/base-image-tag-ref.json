@@ -1,5 +1,5 @@
 {
-  "imagetag1a": "tagtest:1",
+  "image-tag-minion": "opennms/deploy-base:jre-1.3.0.b138", // Ref: minion/docker-assembly/src/main/docker/app/Dockerfile
   "imagetag2a": "tagtest:2",
   "imagetag3a": "tagtest:3",
   "Description":"Tags and images to pull down and push to github private repo when updated."

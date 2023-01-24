@@ -71,6 +71,40 @@ public enum SamplingAlgorithm
     UNRECOGNIZED(-1),
     ;
 
+    /**
+     * <code>UNASSIGNED = 0;</code>
+     */
+    public static final int UNASSIGNED_VALUE = 0;
+    /**
+     * <code>SYSTEMATIC_COUNT_BASED_SAMPLING = 1;</code>
+     */
+    public static final int SYSTEMATIC_COUNT_BASED_SAMPLING_VALUE = 1;
+    /**
+     * <code>SYSTEMATIC_TIME_BASED_SAMPLING = 2;</code>
+     */
+    public static final int SYSTEMATIC_TIME_BASED_SAMPLING_VALUE = 2;
+    /**
+     * <code>RANDOM_N_OUT_OF_N_SAMPLING = 3;</code>
+     */
+    public static final int RANDOM_N_OUT_OF_N_SAMPLING_VALUE = 3;
+    /**
+     * <code>UNIFORM_PROBABILISTIC_SAMPLING = 4;</code>
+     */
+    public static final int UNIFORM_PROBABILISTIC_SAMPLING_VALUE = 4;
+    /**
+     * <code>PROPERTY_MATCH_FILTERING = 5;</code>
+     */
+    public static final int PROPERTY_MATCH_FILTERING_VALUE = 5;
+    /**
+     * <code>HASH_BASED_FILTERING = 6;</code>
+     */
+    public static final int HASH_BASED_FILTERING_VALUE = 6;
+    /**
+     * <code>FLOW_STATE_DEPENDENT_INTERMEDIATE_FLOW_SELECTION_PROCESS = 7;</code>
+     */
+    public static final int FLOW_STATE_DEPENDENT_INTERMEDIATE_FLOW_SELECTION_PROCESS_VALUE = 7;
+
+
     public final int getNumber() {
         if (this == UNRECOGNIZED) {
             throw new IllegalArgumentException(
@@ -123,6 +157,21 @@ public enum SamplingAlgorithm
     public static com.google.protobuf.Descriptors.EnumDescriptor getDescriptor() {
         return FlowProtos.getDescriptor().getEnumTypes().get(1);
     }
+
+    private static final SamplingAlgorithm[] VALUES = values();
+
+    public static SamplingAlgorithm valueOf(
+        com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
+        if (desc.getType() != getDescriptor()) {
+            throw new IllegalArgumentException(
+                "EnumValueDescriptor is not for this type.");
+        }
+        if (desc.getIndex() == -1) {
+            return UNRECOGNIZED;
+        }
+        return VALUES[desc.getIndex()];
+    }
+
 
     private final int value;
 

@@ -1,0 +1,123 @@
+/*******************************************************************************
+ * This file is part of OpenNMS(R).
+ *
+ * Copyright (C) 2006-2022 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
+ *
+ * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *
+ * OpenNMS(R) is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published
+ * by the Free Software Foundation, either version 3 of the License,
+ * or (at your option) any later version.
+ *
+ * OpenNMS(R) is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with OpenNMS(R).  If not, see:
+ *      http://www.gnu.org/licenses/
+ *
+ * For more information contact:
+ *     OpenNMS(R) Licensing <license@opennms.org>
+ *     http://www.opennms.org/
+ *     http://www.opennms.com/
+ *******************************************************************************/
+
+package org.opennms.horizon.flows.processing.impl;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public class AddEventVisitor extends AbstractEntityVisitor {
+
+    private static final Logger LOG = LoggerFactory.getLogger(AddEventVisitor.class);
+
+    private static final String m_eventSource = "Provisiond";
+    private final EventForwarder m_eventForwarder;
+    private String monitorKey;
+
+    public AddEventVisitor(EventForwarder eventForwarder) {
+        this(eventForwarder, null);
+    }
+
+    /**
+     * <p>Constructor for AddEventVisitor.</p>
+     *
+     * @param eventForwarder a {@link EventForwarder} object.
+     * @param monitorKey a {@link String} object. (optional)
+     */
+    public AddEventVisitor(EventForwarder eventForwarder, String monitorKey) {
+        m_eventForwarder = eventForwarder;
+        this.monitorKey = monitorKey;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public void visitNode(OnmsNode node) {
+        LOG.info("Sending nodeAdded Event for {}\n", node);
+        m_eventForwarder.sendNow(createNodeAddedEvent(node));
+        if (node.getCategories().size() > 0) {
+            // Collect the category names into an array
+            String[] categoriesAdded = node.getCategories().stream().map(OnmsCategory::getName).toArray(String[]::new);
+            m_eventForwarder.sendNow(createNodeCategoryMembershipChangedEvent(node, categoriesAdded, new String[0]));
+        }
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public void visitIpInterface(OnmsIpInterface iface) {
+        LOG.info("Sending nodeGainedInterface Event for {}\n", iface);
+        m_eventForwarder.sendNow(createNodeGainedInterfaceEvent(iface));
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public void visitMonitoredService(OnmsMonitoredService monSvc) {
+        LOG.info("Sending nodeGainedService Event for {}\n", monSvc);
+        m_eventForwarder.sendNow(createNodeGainedServiceEvent(monSvc));
+    }
+
+    /**
+     * <p>createNodeAddedEvent</p>
+     *
+     * @param node a {@link OnmsNode} object.
+     * @return a {@link Event} object.
+     */
+    protected Event createNodeAddedEvent(OnmsNode node) {
+        return EventUtils.createNodeAddedEvent(m_eventSource, node.getId(), node.getLabel(), node.getLabelSource(), monitorKey);
+    }
+
+    private Event createNodeCategoryMembershipChangedEvent(final OnmsNode node, String[] categoriesAdded, String[] categoriesDeleted) {
+        return EventUtils.createNodeCategoryMembershipChangedEvent(m_eventSource, node.getId(), node.getLabel(), categoriesAdded, categoriesDeleted);
+    }
+
+    /**
+     * <p>createNodeGainedInterfaceEvent</p>
+     *
+     * @param iface a {@link OnmsIpInterface} object.
+     * @return a {@link Event} object.
+     */
+    protected Event createNodeGainedInterfaceEvent(OnmsIpInterface iface) {
+        return EventUtils.createNodeGainedInterfaceEvent(m_eventSource, iface.getNode().getId(), iface.getIpAddress());
+    }
+
+    /**
+     * <p>createNodeGainedServiceEvent</p>
+     *
+     * @param monSvc a {@link OnmsMonitoredService} object.
+     * @return a {@link Event} object.
+     */
+    protected Event createNodeGainedServiceEvent(final OnmsMonitoredService monSvc) {
+        final OnmsIpInterface iface = monSvc.getIpInterface();
+        final OnmsNode node = iface.getNode();
+        LOG.debug("ipinterface = {}", iface);
+        LOG.debug("snmpinterface = {}", iface.getSnmpInterface());
+        LOG.debug("node = {}", node);
+        return EventUtils.createNodeGainedServiceEvent(m_eventSource, monSvc.getNodeId(), iface.getIpAddress(), monSvc.getServiceType().getName(), node.getLabel(), node.getLabelSource(), node.getSysName(), node.getSysDescription());
+    }
+
+
+}

@@ -44,6 +44,14 @@ public class IPAddress implements Comparable<IPAddress> {
         m_inetAddress = inetAddress;
     }
 
+    public IPAddress(final byte[] ipAddrOctets) {
+        try {
+            m_inetAddress = InetAddress.getByAddress(ipAddrOctets);
+        } catch (final UnknownHostException e) {
+            throw new IllegalArgumentException("Cannot convert bytes to an InetAddress.", e);
+        }
+    }
+
     @Override
     public boolean equals(final Object obj) {
         if (obj instanceof IPAddress) {

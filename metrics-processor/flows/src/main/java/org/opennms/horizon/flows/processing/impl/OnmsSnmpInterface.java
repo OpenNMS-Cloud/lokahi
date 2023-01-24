@@ -1,0 +1,739 @@
+/*******************************************************************************
+ * This file is part of OpenNMS(R).
+ *
+ * Copyright (C) 2006-2014 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2014 The OpenNMS Group, Inc.
+ *
+ * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *
+ * OpenNMS(R) is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published
+ * by the Free Software Foundation, either version 3 of the License,
+ * or (at your option) any later version.
+ *
+ * OpenNMS(R) is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with OpenNMS(R).  If not, see:
+ *      http://www.gnu.org/licenses/
+ *
+ * For more information contact:
+ *     OpenNMS(R) Licensing <license@opennms.org>
+ *     http://www.opennms.org/
+ *     http://www.opennms.com/
+ *******************************************************************************/
+
+package org.opennms.horizon.flows.processing.impl;
+
+import java.beans.Transient;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
+
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.common.base.MoreObjects;
+
+
+public class OnmsSnmpInterface extends OnmsEntity {
+    private static final Logger LOG = LoggerFactory.getLogger(OnmsSnmpInterface.class);
+
+    private Integer m_id;
+
+    /** identifier field */
+    private String m_physAddr;
+
+    /** identifier field */
+    private Integer m_ifIndex;
+
+    /** identifier field */
+    private String m_ifDescr;
+
+    /** identifier field */
+    private Integer m_ifType;
+
+    /** identifier field */
+    private String m_ifName;
+
+    /** identifier field */
+    private Long m_ifSpeed;
+
+    /** identifier field */
+    private Integer m_ifAdminStatus;
+
+    /** identifier field */
+    private Integer m_ifOperStatus;
+
+    /** identifier field */
+    private String m_ifAlias;
+    
+    private Date m_lastCapsdPoll;
+
+    private String m_collect = "N";
+    
+    private String m_poll;
+
+    private Date m_lastSnmpPoll;
+
+    private OnmsNode m_node;
+
+    private Set<OnmsIpInterface> m_ipInterfaces = new HashSet<>();
+
+    /** timestamps for a flow exporting node */
+    private Date m_lastIngressFlow;
+    private Date m_lastEgressFlow;
+    public static final int MAX_FLOW_AGE = SystemProperties.getInteger("org.opennms.features.telemetry.maxFlowAgeSeconds", 604800);
+    public static final boolean INGRESS_AND_EGRESS_REQUIRED = Boolean.getBoolean("org.opennms.features.telemetry.ingressAndEgressRequired");
+
+    public static enum CollectDefinitionSource {NONE, USER, POLICY};
+
+    /**
+     * <p>Constructor for OnmsSnmpInterface.</p>
+     * @param node a {@link OnmsNode} object.
+     * @param ifIndex a int.
+     */
+    public OnmsSnmpInterface(OnmsNode node, int ifIndex) {
+        this(node, Integer.valueOf(ifIndex));
+    }
+
+    /**
+     * <p>Constructor for OnmsSnmpInterface.</p>
+     * @param node a {@link OnmsNode} object.
+     * @param ifIndex a {@link Integer} object.
+     */
+    public OnmsSnmpInterface(OnmsNode node, Integer ifIndex) {
+        m_ifIndex = ifIndex;
+        m_node = node;
+        if (node != null) {
+            node.getSnmpInterfaces().add(this);
+        }
+    }
+
+    /**
+     * default constructor
+     */
+    public OnmsSnmpInterface() {
+    }
+
+    /**
+     * Unique identifier for snmpInterface.
+     *
+     * @return a {@link Integer} object.
+     */
+    public Integer getId() {
+        return m_id;
+    }
+
+    /**
+     * <p>setId</p>
+     *
+     * @param id a {@link Integer} object.
+     */
+    public void setId(Integer id) {
+        m_id = id;
+    }
+
+    /**
+     * <p>getPhysAddr</p>
+     *
+     * @return a {@link String} object.
+     */
+    public String getPhysAddr() {
+        return m_physAddr;
+    }
+
+    /**
+     * <p>setPhysAddr</p>
+     *
+     * @param snmpphysaddr a {@link String} object.
+     */
+    public void setPhysAddr(String snmpphysaddr) {
+        m_physAddr = snmpphysaddr;
+    }
+
+    /**
+     * <p>getIfIndex</p>
+     *
+     * @return a {@link Integer} object.
+     */
+    public Integer getIfIndex() {
+        return m_ifIndex;
+    }
+
+    /**
+     * <p>setIfIndex</p>
+     *
+     * @param snmpifindex a {@link Integer} object.
+     */
+    public void setIfIndex(Integer snmpifindex) {
+        m_ifIndex = snmpifindex;
+    }
+
+    /**
+     * <p>getIfDescr</p>
+     *
+     * @return a {@link String} object.
+     */
+    public String getIfDescr() {
+        return m_ifDescr;
+    }
+
+    /**
+     * <p>setIfDescr</p>
+     *
+     * @param snmpifdescr a {@link String} object.
+     */
+    public void setIfDescr(String snmpifdescr) {
+        m_ifDescr = snmpifdescr;
+    }
+
+    /**
+     * <p>getIfType</p>
+     *
+     * @return a {@link Integer} object.
+     */
+    public Integer getIfType() {
+        return m_ifType;
+    }
+
+    /**
+     * <p>setIfType</p>
+     *
+     * @param snmpiftype a {@link Integer} object.
+     */
+    public void setIfType(Integer snmpiftype) {
+        m_ifType = snmpiftype;
+    }
+
+    /**
+     * <p>getIfName</p>
+     *
+     * @return a {@link String} object.
+     */
+    public String getIfName() {
+        return m_ifName;
+    }
+
+    /**
+     * <p>setIfName</p>
+     *
+     * @param snmpifname a {@link String} object.
+     */
+    public void setIfName(String snmpifname) {
+        m_ifName = snmpifname;
+    }
+
+    /**
+     * <p>getIfSpeed</p>
+     *
+     * @return a {@link Long} object.
+     */
+
+    public Long getIfSpeed() {
+        return m_ifSpeed;
+    }
+
+    /**
+     * <p>setIfSpeed</p>
+     *
+     * @param snmpifspeed a {@link Long} object.
+     */
+    public void setIfSpeed(Long snmpifspeed) {
+        m_ifSpeed = snmpifspeed;
+    }
+
+    /**
+     * <p>getIfAdminStatus</p>
+     *
+     * @return a {@link Integer} object.
+     */
+    public Integer getIfAdminStatus() {
+        return m_ifAdminStatus;
+    }
+
+    /**
+     * <p>setIfAdminStatus</p>
+     *
+     * @param snmpifadminstatus a {@link Integer} object.
+     */
+    public void setIfAdminStatus(Integer snmpifadminstatus) {
+        m_ifAdminStatus = snmpifadminstatus;
+    }
+
+    /**
+     * <p>getIfOperStatus</p>
+     *
+     * @return a {@link Integer} object.
+     */
+    public Integer getIfOperStatus() {
+        return m_ifOperStatus;
+    }
+
+    /**
+     * <p>setIfOperStatus</p>
+     *
+     * @param snmpifoperstatus a {@link Integer} object.
+     */
+    public void setIfOperStatus(Integer snmpifoperstatus) {
+        m_ifOperStatus = snmpifoperstatus;
+    }
+
+    /**
+     * <p>getIfAlias</p>
+     *
+     * @return a {@link String} object.
+     */
+    public String getIfAlias() {
+        return m_ifAlias;
+    }
+
+    /**
+     * <p>setIfAlias</p>
+     *
+     * @param snmpifalias a {@link String} object.
+     */
+    public void setIfAlias(String snmpifalias) {
+        m_ifAlias = snmpifalias;
+    }
+    
+    /**
+     * <p>getLastCapsdPoll</p>
+     *
+     * @return a {@link Date} object.
+     */
+    public Date getLastCapsdPoll() {
+        return m_lastCapsdPoll;
+    }
+    
+    /**
+     * <p>setLastCapsdPoll</p>
+     *
+     * @param lastCapsdPoll a {@link Date} object.
+     */
+    public void setLastCapsdPoll(Date lastCapsdPoll) {
+        m_lastCapsdPoll = lastCapsdPoll;
+    }
+    
+    /**
+     * <p>getCollect</p>
+     *
+     * @return a {@link String} object.
+     */
+    public String getCollect() {
+        return m_collect;
+    }
+    
+    /**
+     * <p>setCollect</p>
+     *
+     * @param collect a {@link String} object.
+     */
+    public void setCollect(String collect) {
+        m_collect = collect;
+    }
+
+    /**
+     * <p>getPoll</p>
+     *
+     * @return a {@link String} object.
+     */
+    public String getPoll() {
+        return m_poll;
+    }
+    
+    /**
+     * <p>setPoll</p>
+     *
+     * @param poll a {@link String} object.
+     */
+    public void setPoll(String poll) {
+        m_poll = poll;
+    }
+
+    /**
+     * <p>getLastSnmpPoll</p>
+     *
+     * @return a {@link Date} object.
+     */
+    public Date getLastSnmpPoll() {
+        return m_lastSnmpPoll;
+    }
+    
+    /**
+     * <p>setLastSnmpPoll</p>
+     *
+     * @param lastSnmpPoll a {@link Date} object.
+     */
+    public void setLastSnmpPoll(Date lastSnmpPoll) {
+        m_lastSnmpPoll = lastSnmpPoll;
+    }
+
+    /**
+     * <p>isCollectionUserSpecified</p>
+     *
+     * @return a boolean.
+     */
+    @Transient
+    public boolean isCollectionUserSpecified(){
+        return m_collect.startsWith("U");
+    }
+
+    /**
+     * <p>isCollectionPolicySpecified</p>
+     *
+     * @return a boolean.
+     */
+    @Transient
+    public boolean isCollectionPolicySpecified() {
+        return m_collect.startsWith("P");
+    }
+
+    /**
+     * <p>getCollectionDefinitionSource</p>
+     *
+     * @return The source of the current collection policy for this interface
+     */
+    @Transient CollectDefinitionSource getCollectionDefinitionSource() {
+        if (isCollectionUserSpecified()) {
+            return CollectDefinitionSource.USER;
+        } else if (isCollectionPolicySpecified()) {
+            return CollectDefinitionSource.POLICY;
+        } else {
+            return CollectDefinitionSource.NONE;
+        }
+    }
+
+    /**
+     * <p>isCollectionEnabled</p>
+     *
+     * @return a boolean.
+     */
+    @Transient
+    public boolean isCollectionEnabled() {
+        return m_collect.endsWith("C");
+    }
+    
+    /**
+     * <p>setCollectionEnabled</p>
+     *
+     * @param shouldCollect a boolean.
+     */
+    public void setCollectionEnabled(boolean shouldCollect) {
+        setCollectionEnabled(shouldCollect, CollectDefinitionSource.NONE);
+    }
+    
+    /**
+     * <p>setCollectionEnabled</p>
+     *
+     * @param shouldCollect a boolean.
+     * @param source what is driving this change.
+     */
+    public void setCollectionEnabled(boolean shouldCollect, CollectDefinitionSource source){
+        switch (source) {
+            case USER:
+                m_collect = shouldCollect ? "UC":"UN";
+                break;
+            case POLICY:
+                // Don't let policies override user input
+                if (!isCollectionUserSpecified()) {
+                    m_collect = shouldCollect ? "PC" : "PN";
+                }
+                break;
+            case NONE:
+                // Don't let provisiond override either
+                if (!isCollectionUserSpecified() || !isCollectionPolicySpecified()) {
+                    m_collect = shouldCollect ? "C" : "N";
+                }
+                break;
+        }
+    }
+
+    /**
+     * <p>isPollEnabled</p>
+     *
+     * @return a boolean.
+     */
+    @Transient
+    public boolean isPollEnabled() {
+        return "P".equals(m_poll);
+    }
+
+    /**
+     * <p>getNode</p>
+     *
+     * @return a {@link OnmsNode} object.
+     */
+    public OnmsNode getNode() {
+        return m_node;
+    }
+
+    /**
+     * <p>setNode</p>
+     *
+     * @param node a {@link OnmsNode} object.
+     */
+    public void setNode(OnmsNode node) {
+        m_node = node;
+    }
+
+    @Transient
+    public Integer getNodeId() {
+        if (m_node != null) {
+            return m_node.getId();
+        }
+        return null;
+    }
+
+    @Transient
+    public boolean getHasFlows() {
+        if (INGRESS_AND_EGRESS_REQUIRED) {
+            return getHasIngressFlows() && getHasEgressFlows();
+        } else {
+            return getHasIngressFlows() || getHasEgressFlows();
+        }
+    }
+
+    @Transient
+    public boolean getHasIngressFlows() {
+        if (m_lastIngressFlow == null) {
+            return false;
+        }
+        return (System.currentTimeMillis() - m_lastIngressFlow.getTime()) / 1000 < MAX_FLOW_AGE;
+    }
+
+    @Transient
+    public boolean getHasEgressFlows() {
+        if (m_lastEgressFlow == null) {
+            return false;
+        }
+        return (System.currentTimeMillis() - m_lastEgressFlow.getTime()) / 1000 < MAX_FLOW_AGE;
+    }
+
+    public Date getLastIngressFlow() {
+        return m_lastIngressFlow;
+    }
+
+    public void setLastIngressFlow(Date lastIngressFlow) {
+        this.m_lastIngressFlow = lastIngressFlow;
+    }
+
+    public Date getLastEgressFlow() {
+        return m_lastEgressFlow;
+    }
+
+    public void setLastEgressFlow(Date lastEgressFlow) {
+        this.m_lastEgressFlow = lastEgressFlow;
+    }
+
+    /**
+     * <p>toString</p>
+     *
+     * @return a {@link String} object.
+     */
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+            .add("snmpphysaddr", getPhysAddr())
+            .add("snmpifindex", getIfIndex())
+            .add("snmpifdescr", getIfDescr())
+            .add("snmpiftype", getIfType())
+            .add("snmpifname", getIfName())
+            .add("snmpifspeed", getIfSpeed())
+            .add("snmpifadminstatus", getIfAdminStatus())
+            .add("snmpifoperstatus", getIfOperStatus())
+            .add("snmpifalias", getIfAlias())
+            .add("snmpCollect", getCollect())
+            .add("snmpPoll", getPoll())
+            .add("nodeId", getNodeId())
+            .add("lastCapsdPoll", getLastCapsdPoll())
+            .add("lastSnmpPoll", getLastSnmpPoll())
+            .add("lastIngressFlow", m_lastIngressFlow)
+            .add("lastEgressFlow", m_lastEgressFlow)
+            .toString();
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public void visit(EntityVisitor visitor) {
+        visitor.visitSnmpInterface(this);
+        visitor.visitSnmpInterfaceComplete(this);
+    }
+
+    /**
+     * <p>getIpInterfaces</p>
+     *
+     * @return a {@link Set} object.
+     */
+    public Set<OnmsIpInterface> getIpInterfaces() {
+        return m_ipInterfaces;
+    }
+
+    /**
+     * <p>setIpInterfaces</p>
+     *
+     * @param ipInterfaces a {@link Set} object.
+     */
+    public void setIpInterfaces(Set<OnmsIpInterface> ipInterfaces) {
+        m_ipInterfaces = ipInterfaces;
+    }
+
+    // @Transient
+    // public Set getIpInterfaces() {
+    //		
+    // Set ifsForSnmpIface = new LinkedHashSet();
+    // for (Iterator it = getNode().getIpInterfaces().iterator();
+    // it.hasNext();) {
+    // OnmsIpInterface iface = (OnmsIpInterface) it.next();
+    // if (getIfIndex().equals(iface.getIfIndex()))
+    // ifsForSnmpIface.add(iface);
+    // }
+    // return ifsForSnmpIface;
+    // }
+
+    /**
+     * <p>getPrimaryIpInterface</p>
+     *
+     * @return an {@link OnmsIpInterface} object.
+     */
+    @Transient
+    public OnmsIpInterface getPrimaryIpInterface() {
+        return getNode().getPrimaryInterface();
+    }
+
+    
+
+    /**
+     * <p>computePhysAddrForRRD</p>
+     *
+     * @return a {@link String} object.
+     */
+    public String computePhysAddrForRRD() {
+        /*
+         * In order to assure the uniqueness of the RRD file names we now
+         * append the MAC/physical address to the end of label if it is
+         * available.
+         */
+        String physAddrForRRD = null;
+
+        if (getPhysAddr() != null) {
+            String parsedPhysAddr = AlphaNumeric.parseAndTrim(getPhysAddr());
+            if (parsedPhysAddr.length() == 12) {
+                physAddrForRRD = parsedPhysAddr;
+            } else {
+                    LOG.debug("physAddrForRRD: physical address len is NOT 12, physAddr={}", parsedPhysAddr);
+            }
+        }
+        LOG.debug("computed physAddr for {} to be {}", this, physAddrForRRD);
+        return physAddrForRRD;
+    }
+
+    /**
+     * <p>computeNameForRRD</p>
+     *
+     * @return a {@link String} object.
+     */
+    public String computeNameForRRD() {
+        /*
+         * Determine the label for this interface. The label will be used to
+         * create the RRD file name which holds SNMP data retreived from the
+         * remote agent. If available ifName is used to generate the label
+         * since it is guaranteed to be unique. Otherwise ifDescr is used. In
+         * either case, all non alpha numeric characters are converted to
+         * underscores to ensure that the resuling string will make a decent
+         * file name and that RRD won't have any problems using it
+         */
+	String firstChoice = RrdLabelUtils.PREFER_IFDESCR ? getIfDescr() : getIfName();
+	String secondChoice = RrdLabelUtils.PREFER_IFDESCR ? getIfName() : getIfDescr();
+        String label = null;
+        if (firstChoice != null) {
+            label = RrdLabelUtils.DONT_SANITIZE_IFNAME ? firstChoice : AlphaNumeric.parseAndReplace(firstChoice, '_');
+        } else if (secondChoice != null) {
+            label = RrdLabelUtils.DONT_SANITIZE_IFNAME ? secondChoice : AlphaNumeric.parseAndReplace(secondChoice, '_');
+        } else {
+            // TODO: Use IfLabel.NO_IFLABEL instead of "no_ifLabel"
+            LOG.info("Interface ({}) has no ifName and no ifDescr...setting to label to 'no_ifLabel'.", this);
+            label = "no_ifLabel";
+        }
+        return label;
+    }
+
+    /**
+     * <p>computeLabelForRRD</p>
+     *
+     * @return a {@link String} object.
+     */
+    public String computeLabelForRRD() {
+        return RrdLabelUtils.computeLabelForRRD(getIfName(), getIfDescr(), getPhysAddr());
+    }
+
+    /**
+     * <p>addIpInterface</p>
+     *
+     * @param iface a {@link org.opennms.netmgt.model.OnmsIpInterface} object.
+     */
+    public void addIpInterface(OnmsIpInterface iface) {
+        iface.setSnmpInterface(this);
+        m_ipInterfaces.add(iface);
+    }
+
+    /**
+     * <p>mergeSnmpInterfaceAttributes</p>
+     *
+     * @param scannedSnmpIface a {@link OnmsSnmpInterface} object.
+     */
+    public void mergeSnmpInterfaceAttributes(OnmsSnmpInterface scannedSnmpIface) {
+        
+        if (hasNewValue(scannedSnmpIface.getIfAdminStatus(), getIfAdminStatus())) {
+            setIfAdminStatus(scannedSnmpIface.getIfAdminStatus());
+        }
+        
+        if (hasNewValue(scannedSnmpIface.getIfAlias(), getIfAlias())) {
+            setIfAlias(scannedSnmpIface.getIfAlias());
+        }
+        
+        if (hasNewValue(scannedSnmpIface.getIfDescr(), getIfDescr())) {
+            setIfDescr(scannedSnmpIface.getIfDescr());
+        }
+            
+        if (hasNewValue(scannedSnmpIface.getIfName(), getIfName())) {
+            setIfName(scannedSnmpIface.getIfName());
+        }
+        
+        if (hasNewValue(scannedSnmpIface.getIfOperStatus(), getIfOperStatus())) {
+            setIfOperStatus(scannedSnmpIface.getIfOperStatus());
+        }
+        
+        if (hasNewValue(scannedSnmpIface.getIfSpeed(), getIfSpeed())) {
+            setIfSpeed(scannedSnmpIface.getIfSpeed());
+        }
+        
+        if (hasNewValue(scannedSnmpIface.getIfType(), getIfType())) {
+            setIfType(scannedSnmpIface.getIfType());
+        }
+        
+        if (hasNewValue(scannedSnmpIface.getPhysAddr(), getPhysAddr())) {
+            setPhysAddr(scannedSnmpIface.getPhysAddr());
+        }
+        
+        if (hasNewValue(scannedSnmpIface.getLastCapsdPoll(), getLastCapsdPoll())) {
+            setLastCapsdPoll(scannedSnmpIface.getLastCapsdPoll());
+        }
+        
+        if (hasNewValue(scannedSnmpIface.getPoll(), getPoll())) {
+            setPoll(scannedSnmpIface.getPoll());
+        }
+
+        if (hasNewValue(scannedSnmpIface.getLastSnmpPoll(), getLastSnmpPoll())) {
+            setLastSnmpPoll(scannedSnmpIface.getLastSnmpPoll());
+        }
+        
+        setCollectionEnabled(scannedSnmpIface.isCollectionEnabled(), scannedSnmpIface.getCollectionDefinitionSource());
+
+    }
+
+}

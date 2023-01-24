@@ -40,6 +40,7 @@ import io.grpc.protobuf.StatusProto;
 import io.grpc.stub.MetadataUtils;
 import static com.jayway.awaitility.Awaitility.await;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -68,15 +69,20 @@ import org.opennms.horizon.inventory.dto.NodeDTO;
 import org.opennms.horizon.inventory.dto.NodeIdList;
 import org.opennms.horizon.inventory.dto.NodeList;
 import org.opennms.horizon.inventory.dto.NodeServiceGrpc;
+import org.opennms.horizon.inventory.dto.TagCreateDTO;
+import org.opennms.horizon.inventory.dto.TagDTO;
 import org.opennms.horizon.inventory.grpc.taskset.TestTaskSetGrpcService;
 import org.opennms.horizon.inventory.mapper.NodeMapper;
 import org.opennms.horizon.inventory.mapper.NodeMapperImpl;
 import org.opennms.horizon.inventory.model.IpInterface;
 import org.opennms.horizon.inventory.model.MonitoringLocation;
 import org.opennms.horizon.inventory.model.Node;
+import org.opennms.horizon.inventory.model.Tag;
 import org.opennms.horizon.inventory.repository.IpInterfaceRepository;
 import org.opennms.horizon.inventory.repository.MonitoringLocationRepository;
 import org.opennms.horizon.inventory.repository.NodeRepository;
+import org.opennms.horizon.inventory.repository.TagRepository;
+import org.opennms.horizon.inventory.service.TagService;
 import org.opennms.taskset.contract.TaskSet;
 import org.opennms.taskset.service.contract.PublishTaskSetRequest;
 import org.opennms.taskset.service.contract.TaskSetServiceGrpc;
@@ -101,6 +107,10 @@ class NodeGrpcItTest extends GrpcTestBase {
     private MonitoringLocationRepository monitoringLocationRepository;
     @Autowired
     private IpInterfaceRepository ipInterfaceRepository;
+    @Autowired
+    private TagService tagService;
+    @Autowired
+    private TagRepository tagRepository;
     private static TestTaskSetGrpcService testGrpcService;
 
     @BeforeAll
@@ -123,6 +133,7 @@ class NodeGrpcItTest extends GrpcTestBase {
 
     @AfterEach
     public void cleanUp() throws InterruptedException {
+        tagRepository.deleteAll();
         ipInterfaceRepository.deleteAll();
         nodeRepository.deleteAll();
         monitoringLocationRepository.deleteAll();
@@ -392,6 +403,69 @@ class NodeGrpcItTest extends GrpcTestBase {
         assertThat(serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).deleteNode(Int64Value.of(node.getId())));
         verify(spyInterceptor, times(2)).verifyAccessToken(authHeader);
         verify(spyInterceptor, times(2)).interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));
+    }
+
+    @Test
+    void testDeleteNodeWithTags() throws VerificationException {
+        MonitoringLocation location = new MonitoringLocation();
+        location.setLocation("location");
+        location.setTenantId(tenantId);
+        location = monitoringLocationRepository.saveAndFlush(location);
+
+        Node node1 = new Node();
+        node1.setNodeLabel("test-node-label-1");
+        node1.setCreateTime(LocalDateTime.now());
+        node1.setTenantId(tenantId);
+        node1.setMonitoringLocation(location);
+        node1.setMonitoringLocationId(location.getId());
+        node1 = nodeRepository.saveAndFlush(node1);
+
+        Node node2 = new Node();
+        node2.setNodeLabel("test-node-label-2");
+        node2.setCreateTime(LocalDateTime.now());
+        node2.setTenantId(tenantId);
+        node2.setMonitoringLocation(location);
+        node2.setMonitoringLocationId(location.getId());
+        node2 = nodeRepository.saveAndFlush(node2);
+
+        TagCreateDTO createTagDTO1 = TagCreateDTO.newBuilder()
+            .setName("test-tag-name-1")
+            .setNodeId(node1.getId())
+            .build();
+
+        tagService.createTag(tenantId, createTagDTO1);
+
+        TagCreateDTO createTagDTO2 = TagCreateDTO.newBuilder()
+            .setName("test-tag-name-2")
+            .setNodeId(node1.getId())
+            .build();
+
+        tagService.createTag(tenantId, createTagDTO2);
+
+        //add same tag to another node
+        TagCreateDTO createTagDTO3 = TagCreateDTO.newBuilder()
+            .setName("test-tag-name-3")
+            .setNodeId(node2.getId())
+            .build();
+
+        TagDTO tag3 = tagService.createTag(tenantId, createTagDTO3);
+
+        serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).deleteNode(Int64Value.of(node1.getId()));
+        nodeRepository.flush();
+        tagRepository.flush();
+
+        List<Node> allNodes = nodeRepository.findAll();
+        assertEquals(1, allNodes.size());
+        Node savedNode = allNodes.get(0);
+        assertEquals(node2.getId(), savedNode.getId());
+
+        List<Tag> allTags = tagRepository.findAll();
+        assertEquals(1, allTags.size());
+        Tag savedTag = allTags.get(0);
+        assertEquals(tag3.getId(), savedTag.getId());
+
+        verify(spyInterceptor).verifyAccessToken(authHeader);
+        verify(spyInterceptor).interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));
     }
 
     @Test

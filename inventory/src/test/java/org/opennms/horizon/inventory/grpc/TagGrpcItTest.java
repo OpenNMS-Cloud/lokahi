@@ -63,7 +63,8 @@ import static org.mockito.Mockito.verify;
 @SpringBootTest
 @ContextConfiguration(initializers = {SpringContextTestInitializer.class})
 class TagGrpcItTest extends GrpcTestBase {
-    private static final String TEST_NODE_LABEL = "node-label";
+    private static final String TEST_NODE_LABEL_1 = "node-label-1";
+    private static final String TEST_NODE_LABEL_2 = "node-label-2";
     private static final String TEST_LOCATION = "test-location";
     private static final String TEST_TAG_NAME_1 = "tag-name-1";
     private static final String TEST_TAG_NAME_2 = "tag-name-2";
@@ -290,14 +291,80 @@ class TagGrpcItTest extends GrpcTestBase {
         verify(spyInterceptor, times(3)).interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));
     }
 
-    protected long setupDatabase() {
+    @Test
+    void testCreateTwoTagsTwoNodes() throws Exception {
+        MonitoringLocation location = new MonitoringLocation();
+        location.setLocation(TEST_LOCATION);
+        location.setTenantId(tenantId);
+        location = locationRepository.saveAndFlush(location);
+
+        Node node1 = new Node();
+        node1.setNodeLabel(TEST_NODE_LABEL_1);
+        node1.setCreateTime(LocalDateTime.now());
+        node1.setTenantId(tenantId);
+        node1.setMonitoringLocation(location);
+        node1.setMonitoringLocationId(location.getId());
+        node1 = nodeRepository.saveAndFlush(node1);
+
+        Node node2 = new Node();
+        node2.setNodeLabel(TEST_NODE_LABEL_2);
+        node2.setCreateTime(LocalDateTime.now());
+        node2.setTenantId(tenantId);
+        node2.setMonitoringLocation(location);
+        node2.setMonitoringLocationId(location.getId());
+        node2 = nodeRepository.saveAndFlush(node2);
+
+        TagCreateDTO createDTO1 = TagCreateDTO.newBuilder()
+            .setName(TEST_TAG_NAME_1)
+            .setNodeId(node1.getId())
+            .build();
+
+        serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).createTag(createDTO1);
+
+        TagCreateDTO createDTO2 = TagCreateDTO.newBuilder()
+            .setName(TEST_TAG_NAME_2)
+            .setNodeId(node1.getId())
+            .build();
+
+        serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).createTag(createDTO2);
+
+        //add same tag to another node
+        TagCreateDTO createDTO3 = TagCreateDTO.newBuilder()
+            .setName(TEST_TAG_NAME_2)
+            .setNodeId(node2.getId())
+            .build();
+
+        serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).createTag(createDTO3);
+
+        List<Tag> allTags = tagRepository.findAll();
+        assertEquals(2, allTags.size());
+
+        List<Node> allNodes = nodeRepository.findAll();
+        assertEquals(2, allNodes.size());
+
+        Node savedNode1 = allNodes.get(0);
+        assertEquals(node1.getId(), savedNode1.getId());
+        assertEquals(2, savedNode1.getTags().size());
+        assertEquals(TEST_TAG_NAME_1, savedNode1.getTags().get(0).getName());
+        assertEquals(TEST_TAG_NAME_2, savedNode1.getTags().get(1).getName());
+
+        Node savedNode2 = allNodes.get(1);
+        assertEquals(node2.getId(), savedNode2.getId());
+        assertEquals(1, savedNode2.getTags().size());
+        assertEquals(TEST_TAG_NAME_2, savedNode2.getTags().get(0).getName());
+
+        verify(spyInterceptor, times(3)).verifyAccessToken(authHeader);
+        verify(spyInterceptor, times(3)).interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));
+    }
+
+    private long setupDatabase() {
         MonitoringLocation location = new MonitoringLocation();
         location.setLocation(TEST_LOCATION);
         location.setTenantId(tenantId);
         location = locationRepository.saveAndFlush(location);
 
         Node node = new Node();
-        node.setNodeLabel(TEST_NODE_LABEL);
+        node.setNodeLabel(TEST_NODE_LABEL_1);
         node.setCreateTime(LocalDateTime.now());
         node.setTenantId(tenantId);
         node.setMonitoringLocation(location);

@@ -51,7 +51,7 @@ public class Node {
     @OneToMany(mappedBy = "node", orphanRemoval = true, cascade = CascadeType.ALL)
     private List<IpInterface> ipInterfaces = new ArrayList<>();
 
-    @ManyToMany(mappedBy = "nodes", cascade = CascadeType.ALL)
+    @ManyToMany(mappedBy = "nodes")
     private List<Tag> tags = new ArrayList<>();
 
     @Column(name = "system_objectid")

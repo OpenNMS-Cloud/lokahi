@@ -43,9 +43,11 @@ import org.opennms.horizon.inventory.mapper.NodeMapper;
 import org.opennms.horizon.inventory.model.IpInterface;
 import org.opennms.horizon.inventory.model.MonitoringLocation;
 import org.opennms.horizon.inventory.model.Node;
+import org.opennms.horizon.inventory.model.Tag;
 import org.opennms.horizon.inventory.repository.IpInterfaceRepository;
 import org.opennms.horizon.inventory.repository.MonitoringLocationRepository;
 import org.opennms.horizon.inventory.repository.NodeRepository;
+import org.opennms.horizon.inventory.repository.TagRepository;
 import org.opennms.horizon.shared.constants.GrpcConstants;
 import org.opennms.horizon.shared.utils.InetAddressUtils;
 import org.springframework.stereotype.Service;
@@ -63,16 +65,19 @@ public class NodeService {
     private final NodeRepository nodeRepository;
     private final MonitoringLocationRepository monitoringLocationRepository;
     private final IpInterfaceRepository ipInterfaceRepository;
+    private final TagRepository tagRepository;
     private final ConfigUpdateService configUpdateService;
     private final NodeMapper mapper;
+
     @Transactional(readOnly = true)
     public List<NodeDTO> findByTenantId(String tenantId) {
         List<Node> all = nodeRepository.findByTenantId(tenantId);
         return all
             .stream()
             .map(mapper::modelToDTO)
-            .collect(Collectors.toList());
+            .toList();
     }
+
     @Transactional(readOnly = true)
     public Optional<NodeDTO> getByIdAndTenantId(long id, String tenantId){
         return nodeRepository.findByIdAndTenantId(id, tenantId).map(mapper::modelToDTO);
@@ -148,9 +153,23 @@ public class NodeService {
             Collectors.mapping(mapper::modelToDTO, Collectors.toList())));
     }
 
-
+    @Transactional
     public void deleteNode(long id) {
-        nodeRepository.deleteById(id);
+        nodeRepository.findById(id).ifPresent(node -> {
+            deleteAssociatedTags(node);
+            nodeRepository.delete(node);
+        });
     }
 
+    // Only deleting tags which don't have
+    // another association with a node
+    private void deleteAssociatedTags(Node node) {
+        for (Tag tag : node.getTags()) {
+            if (tag.getNodes().size() == 1) {
+                tagRepository.delete(tag);
+            } else {
+                tag.getNodes().remove(node);
+            }
+        }
+    }
 }

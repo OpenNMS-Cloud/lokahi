@@ -125,7 +125,7 @@ jobs:
           # Not sure how to push this without build for multi-arch.
           docker buildx build --push \
             --tag opennms/horizon-stream-minion:latest \
-            --tag opennms/horizon-stream-minion:test-${{ env.RELEASE_TAG }} \
+            --tag opennms/horizon-stream-minion:${{ env.RELEASE_TAG }} \
             docker-assembly/target/docker/opennms/horizon-stream-minion/latest/build/ \
             -f docker-assembly/src/main/docker/app/Dockerfile \
             --platform linux/amd64,linux/arm64,linux/arm/v7
@@ -209,7 +209,7 @@ jobs:
 
           # Tag and save the image as a file to be published. Both release version and latest.
           docker tag ghcr.io/opennms-cloud/${{ matrix.image }}:${{ env.IMAGE_TAG }} opennms/${{ matrix.image }}:latest
-          docker tag ghcr.io/opennms-cloud/${{ matrix.image }}:${{ env.IMAGE_TAG }} opennms/${{ matrix.image }}:test-${{ env.RELEASE_TAG }}
+          docker tag ghcr.io/opennms-cloud/${{ matrix.image }}:${{ env.IMAGE_TAG }} opennms/${{ matrix.image }}:${{ env.RELEASE_TAG }}
 
           docker images
 

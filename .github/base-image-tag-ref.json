@@ -1,0 +1,6 @@
+{
+  "imagetag1": "tagtest:1",
+  "imagetag2": "tagtest:2",
+  "imagetag3": "tagtest:3",
+  "Description":"Tags and images to pull down and push to github private repo when updated."
+}

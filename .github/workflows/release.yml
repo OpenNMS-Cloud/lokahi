@@ -115,13 +115,6 @@ jobs:
       - name: Build & Push Images
         run: |
 
-          pwd
-
-          mvn -B verify \
-              jib:build -Dapplication.docker.image=$IMAGE \
-              org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
-              -Dsonar.projectKey=$SONAR_PROJECT_KEY
-
           docker buildx create --use --driver docker-container --name maven
 
           # Not sure how to push this without build for multi-arch.

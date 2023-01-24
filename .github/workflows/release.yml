@@ -22,7 +22,6 @@ env:
 jobs:
   build-all:
     uses: ./.github/workflows/develop.yml
-    #uses: ./.github/workflows/feature-events.yml
     secrets: inherit
     with:
       image-tag: ${{ inputs.image-tag || github.sha }}

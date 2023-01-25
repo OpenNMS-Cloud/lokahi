@@ -43,9 +43,9 @@ import java.util.Objects;
 
 public class FlowSinkModule implements SinkModule<TelemetryMessage, TelemetryMessageLog> {
 
-    private final IpcIdentity identity;
+    private static final String ID = "Flow";
 
-    private final String id = "Flow";
+    private final IpcIdentity identity;
 
     public FlowSinkModule(IpcIdentity identity) {
         this.identity = Objects.requireNonNull(identity);
@@ -53,7 +53,7 @@ public class FlowSinkModule implements SinkModule<TelemetryMessage, TelemetryMes
 
     @Override
     public String getId() {
-        return id;
+        return ID;
     }
 
     @Override

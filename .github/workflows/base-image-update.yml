@@ -26,11 +26,8 @@ jobs:
 
       - name: Pull Image & Push
         run: |
-          cat .github/base-image-tag-ref.json | jq
-          
-          IMAGE=$(cat .github/base-image-tag-ref.json | jq .image_tag_java | sed 's/\"//g')
 
-          echo "test - " $IMAGE
+          IMAGE=$(cat .github/base-image-tag-ref.json | jq .image_tag_java | sed 's/\"//g')
 
           docker pull $IMAGE
           docker tag $IMAGE ghcr.io/opennms-cloud/$IMAGE

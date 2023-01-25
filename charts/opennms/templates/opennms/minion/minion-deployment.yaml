@@ -60,6 +60,8 @@ spec:
               value: "true"
             - name: KUBERNETES_SERVICE_NAME
               value: "{{ .Values.OpenNMS.Minion.ServiceName }}"
+            - name: KUBERNETES_NAMESPACE
+              value: "{{ .Release.Namespace }}"
             - name: JAVA_TOOL_OPTIONS
               value: "-agentlib:jdwp=transport=dt_socket,server=y,address=5005,suspend=n,quiet=y" # FIXME: Permanent debug port, enable only for dev mode
             - name: MINION_LOCATION

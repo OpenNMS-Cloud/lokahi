@@ -7,6 +7,7 @@
     <cm:default-properties>
       <cm:property name="useKubernetes" value="false"/>
       <cm:property name="kubernetes.service.name" value="poc-distributed-scheduling"/>
+      <cm:property name="kubernetes.namespace" value="default"/>
       <cm:property name="workflow.scheduler.threads" value="20"/>
     </cm:default-properties>
   </cm:property-placeholder>
@@ -25,6 +26,7 @@
     <argument ref="igniteMetrics" />
     <argument value="${useKubernetes}"/>
     <argument value="${kubernetes.service.name}"/>
+    <argument value="${kubernetes.namespace}"/>
   </bean>
 
   <bean id="ignite" class="org.opennms.horizon.minion.taskset.worker.ignite.IgnitionFactory" factory-method="create" destroy-method="close">

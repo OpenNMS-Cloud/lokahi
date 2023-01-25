@@ -40,8 +40,7 @@ import org.opennms.horizon.inventory.model.Node;
 import org.opennms.horizon.inventory.repository.AzureCredentialRepository;
 import org.opennms.horizon.inventory.repository.NodeRepository;
 import org.opennms.horizon.inventory.service.NodeService;
-import org.opennms.horizon.inventory.service.taskset.CollectorTaskSetService;
-import org.opennms.horizon.inventory.service.taskset.MonitorTaskSetService;
+import org.opennms.horizon.inventory.service.taskset.TaskSetHandler;
 import org.opennms.taskset.contract.ScanType;
 import org.opennms.taskset.contract.ScannerResponse;
 import org.springframework.stereotype.Component;
@@ -56,8 +55,7 @@ public class ScannerResponseService {
     private final AzureCredentialRepository azureCredentialRepository;
     private final NodeRepository nodeRepository;
     private final NodeService nodeService;
-    private final MonitorTaskSetService monitorTaskSetService;
-    private final CollectorTaskSetService collectorTaskSetService;
+    private final TaskSetHandler taskSetHandler;
 
     public void accept(String tenantId, String location, ScannerResponse response) throws InvalidProtocolBufferException {
         Any result = response.getResult();
@@ -118,8 +116,8 @@ public class ScannerResponseService {
                 .build();
             Node node = nodeService.createNode(createDTO, tenantId);
 
-            monitorTaskSetService.sendAzureMonitorTasks(credential, item, ipAddress, node.getId());
-            collectorTaskSetService.sendAzureCollectorTasks(credential, item, ipAddress, node.getId());
+            taskSetHandler.sendAzureMonitorTasks(credential, item, ipAddress, node.getId());
+            taskSetHandler.sendAzureCollectorTasks(credential, item, ipAddress, node.getId());
 
         } else {
             log.warn("Node already exists for tenant: {}, location: {}, label: {}", tenantId, location, nodeLabel);

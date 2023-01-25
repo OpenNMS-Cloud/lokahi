@@ -8,8 +8,8 @@ metadata:
 spec:
   type: ClusterIP
   ports:
-    - port: {{ .Values.OpenNMS.Notification.Port }}
+    - port: {{ .Values.OpenNMS.Notification.GrpcPort }}
       protocol: TCP
-      name: http
+      name: grpc
   selector:
     app: {{ .Values.OpenNMS.Notification.ServiceName }}

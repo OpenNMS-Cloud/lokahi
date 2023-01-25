@@ -13,6 +13,7 @@ spec:
   template:
     metadata:
       labels:
+        appdomain: opennms
         app: {{ .Values.OpenNMS.Notification.ServiceName }}
     spec:
       {{- if .Values.NodeRestrictions.Enabled }}
@@ -68,5 +69,5 @@ spec:
                   name: {{ .Values.Keycloak.ServiceName }}-initial-admin
                   key: password
           ports:
-            - name: http
-              containerPort: {{ .Values.OpenNMS.Notification.Port }}
+            - name: grpc
+              containerPort: {{ .Values.OpenNMS.Notification.GrpcPort }}

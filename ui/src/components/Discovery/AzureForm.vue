@@ -10,11 +10,10 @@
         label="ClientID"
       >
       </FeatherInput>
-      <FeatherInput
+      <FeatherProtectedInput
         v-model="store.azure.clientSecret"
         label="Client Secret"
-      >
-      </FeatherInput>
+      />
       <FeatherInput
         v-model="store.azure.subscriptionId"
         label="SubscriptionID"

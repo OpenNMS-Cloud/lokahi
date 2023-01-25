@@ -43,6 +43,7 @@ import org.opennms.horizon.inventory.dto.MonitoringSystemDTO;
 import org.opennms.horizon.inventory.dto.MonitoringSystemServiceGrpc;
 import org.opennms.horizon.inventory.dto.NodeCreateDTO;
 import org.opennms.horizon.inventory.dto.NodeDTO;
+import org.opennms.horizon.inventory.dto.NodeIdList;
 import org.opennms.horizon.inventory.dto.NodeServiceGrpc;
 import org.opennms.horizon.server.config.DataLoaderFactory;
 import org.opennms.horizon.shared.constants.GrpcConstants;
@@ -139,6 +140,12 @@ public class InventoryClient {
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
         return systemStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).deleteMonitoringSystem(StringValue.of(systemId)).getValue();
+    }
+
+    public boolean startScanByNodeIds(List<Long> ids, String accessToken) {
+        Metadata metadata = new Metadata();
+        metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
+        return nodeStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).startNodeScanByIds(NodeIdList.newBuilder().addAllIds(ids).build()).getValue();
     }
 
     public AzureCredentialDTO createNewAzureCredential(AzureCredentialCreateDTO azureCredential, String accessToken) {

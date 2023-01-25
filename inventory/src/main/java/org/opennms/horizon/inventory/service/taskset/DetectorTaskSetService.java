@@ -29,6 +29,7 @@
 package org.opennms.horizon.inventory.service.taskset;
 
 import com.google.protobuf.Any;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.opennms.horizon.inventory.dto.NodeDTO;
 import org.opennms.horizon.inventory.model.IpInterface;
@@ -36,6 +37,7 @@ import org.opennms.horizon.inventory.model.MonitoringLocation;
 import org.opennms.horizon.inventory.model.Node;
 import org.opennms.horizon.inventory.repository.IpInterfaceRepository;
 import org.opennms.horizon.inventory.taskset.api.TaskSetPublisher;
+import org.opennms.horizon.shared.utils.InetAddressUtils;
 import org.opennms.icmp.contract.IcmpDetectorRequest;
 import org.opennms.snmp.contract.SnmpDetectorRequest;
 import org.opennms.taskset.contract.MonitorType;
@@ -45,7 +47,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -103,7 +104,7 @@ public class DetectorTaskSetService {
     private List<TaskDefinition> addDetectorTasks(Node node, List<IpInterface> ipInterfaces, MonitorType monitorType) {
         List<TaskDefinition> tasks = new ArrayList<>();
         for (IpInterface ipInterface : ipInterfaces) {
-            var task = addDetectorTask(node.getId(), node.getTenantId(), ipInterface.getIpAddress().getAddress(),
+            var task = addDetectorTask(node.getId(), node.getTenantId(), InetAddressUtils.toIpAddrString(ipInterface.getIpAddress()),
                 node.getMonitoringLocation().getLocation(), monitorType);
             if (task != null) {
                 tasks.add(task);
@@ -120,36 +121,23 @@ public class DetectorTaskSetService {
         Any configuration = null;
 
         switch (monitorType) {
-            case ICMP: {
-                configuration =
-                    Any.pack(IcmpDetectorRequest.newBuilder()
-                        .setHost(ipAddress)
-                        .setTimeout(TaskUtils.ICMP_DEFAULT_TIMEOUT_MS)
-                        .setDscp(TaskUtils.ICMP_DEFAULT_DSCP)
-                        .setAllowFragmentation(TaskUtils.ICMP_DEFAULT_ALLOW_FRAGMENTATION)
-                        .setPacketSize(TaskUtils.ICMP_DEFAULT_PACKET_SIZE)
-                        .setRetries(TaskUtils.ICMP_DEFAULT_RETRIES)
-                        .build());
-                break;
-            }
-            case SNMP: {
-                configuration =
-                    Any.pack(SnmpDetectorRequest.newBuilder()
-                        .setHost(ipAddress)
-                        .setTimeout(TaskUtils.SNMP_DEFAULT_TIMEOUT_MS)
-                        .setRetries(TaskUtils.SNMP_DEFAULT_RETRIES)
-                        .build());
-
-                break;
-            }
-            case UNRECOGNIZED: {
-                log.warn("Unrecognized monitor type");
-                break;
-            }
-            case UNKNOWN: {
-                log.warn("Unknown monitor type");
-                break;
-            }
+            case ICMP -> configuration =
+                Any.pack(IcmpDetectorRequest.newBuilder()
+                    .setHost(ipAddress)
+                    .setTimeout(TaskUtils.ICMP_DEFAULT_TIMEOUT_MS)
+                    .setDscp(TaskUtils.ICMP_DEFAULT_DSCP)
+                    .setAllowFragmentation(TaskUtils.ICMP_DEFAULT_ALLOW_FRAGMENTATION)
+                    .setPacketSize(TaskUtils.ICMP_DEFAULT_PACKET_SIZE)
+                    .setRetries(TaskUtils.ICMP_DEFAULT_RETRIES)
+                    .build());
+            case SNMP -> configuration =
+                Any.pack(SnmpDetectorRequest.newBuilder()
+                    .setHost(ipAddress)
+                    .setTimeout(TaskUtils.SNMP_DEFAULT_TIMEOUT_MS)
+                    .setRetries(TaskUtils.SNMP_DEFAULT_RETRIES)
+                    .build());
+            case UNRECOGNIZED -> log.warn("Unrecognized monitor type");
+            case UNKNOWN -> log.warn("Unknown monitor type");
         }
         if (configuration != null) {
             String taskId = identityForIpTask(ipAddress, name);

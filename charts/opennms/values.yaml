@@ -129,7 +129,7 @@ OpenNMS:
     Image: opennms/horizon-stream-notification
     ImagePullPolicy: IfNotPresent
     Replicas: 1
-    Port: 8080
+    GrpcPort: 6565
     Resources:
       Limits:
         Cpu: "1"

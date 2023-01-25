@@ -65,10 +65,12 @@ public class TaskExecutorLocalScannerServiceImpl implements TaskExecutorLocalSer
     public void start() throws Exception {
         try {
             Scanner scanner = lookupScanner(taskDefinition);
-
-            future = scanner.scan(taskDefinition.getConfiguration());
-            future.whenComplete(this::handleExecutionComplete);
-
+            //TODO: add node scanner
+            log.info("Create Scanner for {}", taskDefinition.getPluginName());
+            if(scanner != null) {
+                future = scanner.scan(taskDefinition.getConfiguration());
+                future.whenComplete(this::handleExecutionComplete);
+            }
         } catch (Exception exc) {
             log.warn("error executing workflow = " + taskDefinition.getId(), exc);
         }
@@ -76,9 +78,7 @@ public class TaskExecutorLocalScannerServiceImpl implements TaskExecutorLocalSer
 
     @Override
     public void cancel() {
-        if (future != null
-            && !future.isCancelled()) {
-
+        if (future != null && !future.isCancelled()) {
             future.cancel(true);
         }
         future = null;
@@ -98,7 +98,9 @@ public class TaskExecutorLocalScannerServiceImpl implements TaskExecutorLocalSer
         String pluginName = taskDefinition.getPluginName();
 
         ScannerManager result = scannerRegistry.getService(pluginName);
-
-        return result.create();
+        if(result != null) { //TODO: add node scanner plugin
+            return result.create();
+        }
+        return null;
     }
 }

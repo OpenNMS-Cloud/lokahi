@@ -9,7 +9,7 @@
         <version>0.1.0-SNAPSHOT</version>
     </parent>
 
-    <name>OpenNMS Horizon Stream :: Docker IT</name>
+    <name>OpenNMS Horizon Stream :: Minion :: Docker IT</name>
     <description>
         Docker build-time, Black Box, System Integration Tests for the OpenNMS Horizon project.
 
@@ -106,6 +106,11 @@
         </dependency>
 
         <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>testcontainers</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-slf4j-impl</artifactId>
         </dependency>
@@ -140,121 +145,6 @@
                 </configuration>
             </plugin>
 
-
-            <!--         -->
-            <!--  DOCKER -->
-            <!--         -->
-            <plugin>
-                <groupId>io.fabric8</groupId>
-                <artifactId>docker-maven-plugin</artifactId>
-                <configuration>
-                    <skip>${skipITs}</skip>
-                    <showLogs>true</showLogs>
-                    <autoCreateCustomNetworks>true</autoCreateCustomNetworks>
-                    <images>
-                        <!--                           -->
-                        <!-- MOCK MINION-GATEWAY IMAGE -->
-                        <!--                           -->
-                        <image>
-                            <name>mock-minion-gateway-it-image</name>
-                            <alias>minion-gateway</alias>
-                            <build>
-                                <from>opennms/horizon-stream-mock-minion-gateway:latest</from>
-                            </build>
-                            <run>
-                                <env>
-                                    <JAVA_TOOL_OPTIONS>-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005</JAVA_TOOL_OPTIONS>
-                                </env>
-                                <ports>
-                                    <port>mock-miniongateway.http.port:8080</port>
-                                    <port>mock-miniongateway.grpc.port:8990</port>
-                                </ports>
-                                <wait>
-                                    <log>Started MinionGatewayWiremockMain in .* seconds</log>
-                                    <time>120000</time>
-                                </wait>
-                                <network>
-                                    <mode>custom</mode>
-                                    <name>minion-docker-it-network</name>
-                                    <alias>minion-gateway</alias>
-                                </network>
-                            </run>
-                        </image>
-
-                        <!--                    -->
-                        <!-- APPLICATION IMAGE  -->
-                        <!--                    -->
-                        <image>
-                            <name>opennms-horizon-application-it-image</name>
-                            <alias>application</alias>
-                            <build>
-                                <from>${application.docker.image}</from>
-                                <assembly>
-                                    <user>minion-poc</user>
-                                    <targetDir>/</targetDir>
-
-                                    <inline xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                                            xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2"
-                                            xsi:schemaLocation="
-                                             http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2
-                                             http://maven.apache.org/xsd/assembly-1.1.2.xsd
-                                             ">
-
-                                        <fileSets>
-                                            <fileSet>
-                                                <directory>${project.build.testOutputDirectory}/karaf/etc</directory>
-                                                <outputDirectory>/opt/karaf/etc</outputDirectory>
-                                            </fileSet>
-                                        </fileSets>
-                                    </inline>
-                                </assembly>
-                            </build>
-                            <run>
-                                <hostname>test-minion-001</hostname>
-                                <ports>
-                                    <port>karaf-ssh-port:8101</port>
-                                    <port>karaf-http-port:8181</port>
-                                    <!--<port>5005:5005</port>-->
-                                </ports>
-                                <env>
-                                    <MINION_LOCATION>Default</MINION_LOCATION>
-                                    <!-- Need to make sure address=* is in the DEBUG OPTS otherwise it listens on the container's localhost only -->
-                                    <JAVA_OPTS>-Djava.security.egd=file:/dev/./urandom
-                                        -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005
-                                    </JAVA_OPTS>
-                                    <USE_KUBERNETES>false</USE_KUBERNETES>
-                                </env>
-                                <wait>
-                                    <log>Blueprint bundle org.opennms.horizon.minion.taskset-worker/.* has been started</log>
-                                    <time>300000</time>
-                                </wait>
-                                <network>
-                                    <mode>custom</mode>
-                                    <name>minion-docker-it-network</name>
-                                    <alias>minion</alias>
-                                </network>
-                            </run>
-                        </image>
-                    </images>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>start-before-integration-test</id>
-                        <phase>pre-integration-test</phase>
-                        <goals>
-                            <goal>build</goal>
-                            <goal>start</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>stop-after-integration-test</id>
-                        <phase>post-integration-test</phase>
-                        <goals>
-                            <goal>stop</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
 
             <!--                -->
             <!-- TEST EXECUTION -->
@@ -294,14 +184,7 @@
                     <reuseForks>true</reuseForks>
                     <useSystemClassLoader>false</useSystemClassLoader>
                     <systemProperties>
-                        <property>
-                            <name>mock-miniongateway.base-url</name>
-                            <value>http://localhost:${mock-miniongateway.http.port}</value>
-                        </property>
-                        <property>
-                            <name>application.base-url</name>
-                            <value>http://localhost:${karaf-http-port}</value>
-                        </property>
+                        <application.docker.image>${application.docker.image}</application.docker.image>
                     </systemProperties>
                 </configuration>
             </plugin>

@@ -14,8 +14,9 @@ import org.mockito.Captor;
 import org.opennms.horizon.notifications.NotificationsApplication;
 import org.opennms.horizon.notifications.api.PagerDutyAPIImpl;
 import org.opennms.horizon.notifications.exceptions.NotificationException;
+import org.opennms.horizon.notifications.service.NotificationService;
 import org.opennms.horizon.shared.dto.event.AlarmDTO;
-import org.opennms.horizon.shared.dto.notifications.PagerDutyConfigDTO;
+import org.opennms.horizon.notifications.dto.PagerDutyConfigDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -67,20 +68,14 @@ class AlarmKafkaConsumerIntegrationTest {
     @SpyBean
     private AlarmKafkaConsumer alarmKafkaConsumer;
 
+    @Autowired
+    private NotificationService notificationService;
+
     @Captor
     ArgumentCaptor<AlarmDTO> alarmCaptor;
 
-    @Autowired
-    private TestRestTemplate testRestTemplate;
-
     @MockBean
     private RestTemplate restTemplate;
-
-    @SpyBean
-    private PagerDutyAPIImpl pagerDutyAPI;
-
-    @LocalServerPort
-    private Integer port;
 
     @BeforeAll
     void setUp() {
@@ -94,13 +89,14 @@ class AlarmKafkaConsumerIntegrationTest {
     private void setupConfig() throws NotificationException {
         String integrationKey = "not_verified";
 
-        PagerDutyConfigDTO config = new PagerDutyConfigDTO(integrationKey);
-        HttpHeaders headers = new HttpHeaders();
-        HttpEntity<PagerDutyConfigDTO> request = new HttpEntity<>(config, headers);
-
-        testRestTemplate
-            .withBasicAuth("testUser", "testPassword")
-            .postForEntity("http://localhost:" + port + "/notifications/config", request, String.class);
+        PagerDutyConfigDTO config = PagerDutyConfigDTO.newBuilder().setIntegrationKey(integrationKey).build();
+        notificationService.postPagerDutyConfig(config);
+//        HttpHeaders headers = new HttpHeaders();
+//        HttpEntity<PagerDutyConfigDTO> request = new HttpEntity<>(config, headers);
+//
+//        testRestTemplate
+//            .withBasicAuth("testUser", "testPassword")
+//            .postForEntity("http://localhost:" + port + "/notifications/config", request, String.class);
     }
 
     @Test

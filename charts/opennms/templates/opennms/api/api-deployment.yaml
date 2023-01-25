@@ -16,6 +16,7 @@ spec:
   template:
     metadata:
       labels:
+        appdomain: opennms
         app: {{ .Values.OpenNMS.API.ServiceName }}
     spec:
       {{ if .Values.NodeRestrictions.Enabled }}
@@ -47,8 +48,6 @@ spec:
               value: "-agentlib:jdwp=transport=dt_socket,server=y,address=5005,suspend=n,quiet=y"  # FIXME: Permanent debug port, enable only for dev mode
             - name: SPRING_CACHE_CAFFEINE_SPEC
               value: "maximumSize=10000,expireAfterWrite=60s"
-            - name: HORIZON_STREAM_NOTIFICATIONS_URL
-              value: "http://{{ .Values.OpenNMS.Notification.ServiceName }}:{{ .Values.OpenNMS.Notification.Port }}"
             - name: TSDB_URL
               value: "http://{{ .Values.Cortex.ServiceName }}:{{ .Values.Cortex.Port }}/prometheus/api/v1/query"
             - name: SPRING_WEBFLUX_BASE_PATH
@@ -59,6 +58,8 @@ spec:
               value: "{{ .Values.OpenNMS.Inventory.ServiceName }}:{{ .Values.OpenNMS.Inventory.GrpcPort }}"
             - name: GRPC_URL_EVENTS
               value: "{{ .Values.OpenNMS.Events.ServiceName }}:{{ .Values.OpenNMS.Events.GrpcPort }}"
+            - name: GRPC_URL_NOTIFICATION
+              value: "{{ .Values.OpenNMS.Notification.ServiceName }}:{{ .Values.OpenNMS.Notification.GrpcPort }}"
           ports:
             - containerPort: {{ .Values.OpenNMS.API.Port }}
           {{/*  TODO    livenessProbe:*/}}

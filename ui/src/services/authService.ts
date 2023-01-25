@@ -1,4 +1,4 @@
-import axios from 'axios'
+import axios, { AxiosRequestHeaders } from 'axios'
 import useSpinner from '@/composables/useSpinner'
 import keycloakConfig from '../../keycloak.config'
 import useKeycloak from '@/composables/useKeycloak'
@@ -14,7 +14,7 @@ auth.interceptors.request.use(
   (config) => {
     config.headers = {
       Authorization: `Bearer ${keycloak.value?.tokenParsed}`
-    }
+    } as unknown as AxiosRequestHeaders
     return config
   },
   (error) => {

@@ -1,0 +1,77 @@
+/*******************************************************************************
+ * This file is part of OpenNMS(R).
+ *
+ * Copyright (C) 2022 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
+ *
+ * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *
+ * OpenNMS(R) is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published
+ * by the Free Software Foundation, either version 3 of the License,
+ * or (at your option) any later version.
+ *
+ * OpenNMS(R) is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with OpenNMS(R).  If not, see:
+ *      http://www.gnu.org/licenses/
+ *
+ * For more information contact:
+ *     OpenNMS(R) Licensing <license@opennms.org>
+ *     http://www.opennms.org/
+ *     http://www.opennms.com/
+ *******************************************************************************/
+syntax = "proto3";
+
+package opennms.node.scan;
+option java_multiple_files = true;
+option java_package = "org.opennms.node.scan.contract";
+
+message NodeScanRequest {
+  int64 nodeId = 1;
+  repeated string ipAddresses = 2;
+}
+
+//Scan Results
+message NodeInfoResult {
+  string objectId = 1;
+  string systemName = 2;
+  string systemDesc = 3;
+  string systemLocation = 4;
+  string systemContact = 5;
+}
+
+message ServiceResult {
+  string serviceName = 1;
+  string status = 2;
+}
+
+message IpInterfaceResult {
+  string ipAddress = 1;
+  string ipHostName = 2;
+  string netMask = 3;
+  bool isSNMPPrimary = 4;
+}
+
+message IfServiceResult {
+  IpInterfaceResult ipInterface = 1;
+  repeated ServiceResult services = 2;
+}
+
+message SnmpInterfaceResult {
+  string physicalAddr = 1;
+  int32 ifIndex =2;
+  string ifDesc = 3;
+  int32 ifType = 4;
+  string ifName = 5;
+  int64 ifSpeed = 6;
+  int32 ifAdminStatus = 7;
+  int32 ifOperatorStatus = 8;
+  string ifAlias = 9;
+}
+
+

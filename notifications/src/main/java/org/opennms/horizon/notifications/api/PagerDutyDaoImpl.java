@@ -28,8 +28,8 @@
 
 package org.opennms.horizon.notifications.api;
 
+import org.opennms.horizon.notifications.dto.PagerDutyConfigDTO;
 import org.opennms.horizon.notifications.exceptions.NotificationConfigUninitializedException;
-import org.opennms.horizon.shared.dto.notifications.PagerDutyConfigDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,9 +54,8 @@ public class PagerDutyDaoImpl implements PagerDutyDao{
             configList = jdbcTemplate.query(
                 sql,
                 (rs, rowNum) ->
-                    new PagerDutyConfigDTO(
-                        rs.getString("integrationKey")
-                    )
+                    PagerDutyConfigDTO.newBuilder().setIntegrationKey(rs.getString("integrationKey"))
+                        .build()
             );
         } catch (BadSqlGrammarException e) {
             throw new NotificationConfigUninitializedException("PagerDuty config not initialized. Table does not exist.", e);
@@ -74,9 +73,9 @@ public class PagerDutyDaoImpl implements PagerDutyDao{
         int count = getRowCount();
 
         if (count == 0) {
-            jdbcTemplate.update("INSERT INTO pager_duty_config(integrationkey) VALUES(?)", config.getIntegrationkey());
+            jdbcTemplate.update("INSERT INTO pager_duty_config(integrationkey) VALUES(?)", config.getIntegrationKey());
         } else {
-            jdbcTemplate.update("UPDATE pager_duty_config SET integrationkey=?", config.getIntegrationkey());
+            jdbcTemplate.update("UPDATE pager_duty_config SET integrationkey=?", config.getIntegrationKey());
         }
     }
 

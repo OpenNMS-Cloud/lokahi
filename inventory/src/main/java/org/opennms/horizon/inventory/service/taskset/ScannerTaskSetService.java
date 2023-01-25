@@ -38,12 +38,20 @@ import org.opennms.taskset.contract.TaskDefinition;
 import org.opennms.taskset.contract.TaskType;
 import org.springframework.stereotype.Component;
 
+import static org.opennms.horizon.inventory.service.taskset.TaskUtils.identityForAzureTask;
+
+
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
+import java.util.stream.Collectors;
 
-import static org.opennms.horizon.inventory.service.taskset.TaskUtils.identityForAzureTask;
+import org.opennms.horizon.inventory.dto.IpInterfaceDTO;
+import org.opennms.horizon.inventory.dto.NodeDTO;
+import org.opennms.node.scan.contract.NodeScanRequest;
+
+
 
 @Component
 @RequiredArgsConstructor
@@ -57,6 +65,11 @@ public class ScannerTaskSetService {
 
     public void sendAzureScannerTaskAsync(AzureCredential credential) {
         executorService.execute(() -> sendAzureScannerTask(credential));
+    }
+
+    public void sendNodeScannerTask(List<NodeDTO> nodes, String location, String tenantId) {
+        List<TaskDefinition> tasks = nodes.stream().map(this::createNodeScanTask).collect(Collectors.toList());
+        taskSetPublisher.publishNewTasks(tenantId, location, tasks);
     }
 
     private void sendAzureScannerTask(AzureCredential credential) {
@@ -86,6 +99,23 @@ public class ScannerTaskSetService {
             .setPluginName("AZUREScanner")
             .setId(taskId)
             .setConfiguration(configuration)
+            .setSchedule(TaskUtils.DEFAULT_SCHEDULE)
+            .build();
+    }
+
+    private TaskDefinition createNodeScanTask(NodeDTO node) {
+        List<String> ipAddresses = node.getIpInterfacesList().stream().map(IpInterfaceDTO::getIpAddress).collect(Collectors.toList());
+        String taskId = "node-scan=" + node.getNodeLabel() + "-" + node.getId();
+        Any taskConfig = Any.pack(NodeScanRequest.newBuilder()
+            .setNodeId(node.getId())
+            .addAllIpAddresses(ipAddresses).build());
+
+        return TaskDefinition.newBuilder()
+            .setType(TaskType.SCANNER)
+            .setPluginName("NodeScanner")
+            .setId(taskId)
+            .setNodeId(node.getId())
+            .setConfiguration(taskConfig)
             .setSchedule(TaskUtils.DEFAULT_SCHEDULE)
             .build();
     }

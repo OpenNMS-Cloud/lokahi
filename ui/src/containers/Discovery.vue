@@ -46,10 +46,7 @@
     hide-title
   >
     <template #content>
-      <component
-        :is="modalContent?.component"
-        v-bind="modalContent?.props"
-      />
+      <component :is="modalContent" />
     </template>
     <template v-slot:footer>
       <FeatherButton
@@ -58,14 +55,14 @@
       >
         CLOSE
       </FeatherButton>
-      <FeatherButton
-        v-if="selectedTool === DiscoveryType.Azure"
-        :disabled="!isAzureEnabled"
+      <ButtonWithSpinner v-if="selectedTool === DiscoveryType.Azure"
         primary
+        :isFetching="isFetching" 
+        :disabled="!isAzureEnabled"
         @click="saveAzureDiscovery"
       >
         SAVE DISCOVERY
-      </FeatherButton>
+      </ButtonWithSpinner>
     </template>
   </PrimaryModal>
   <FeatherDrawer
@@ -89,8 +86,10 @@ import AzureForm from '@/components/Discovery/AzureForm.vue'
 import { DiscoveryType } from '@/components/Discovery/discovery.constants'
 import useModal from '@/composables/useModal'
 import { useDiscoveryStore } from '@/store/Views/discoveryStore'
+import { useDiscoveryMutations } from '@/store/Mutations/discoveryMutations'
 import useSnackbar from '@/composables/useSnackbar'
 
+const { isFetching } = useDiscoveryMutations()
 const { showSnackbar } = useSnackbar()
 const store = useDiscoveryStore()
 const { openModal, closeModal, isVisible } = useModal()
@@ -100,9 +99,9 @@ const isDrawerOpen = ref(false)
 const modalContent = computed(() => {
   switch(selectedTool.value) {
     case DiscoveryType.ICMP:
-      return { component: DiscoveryStepper, props: { callback: closeModal }}
+      return DiscoveryStepper
     case DiscoveryType.Azure:
-      return { component: AzureForm }
+      return AzureForm
   }
 })
 
@@ -118,7 +117,6 @@ const showSettings = (tool: DiscoveryType) => {
   selectedTool.value = tool
   openModal()
 }
-
 
 const showInstructions = (tool: DiscoveryType) => {
   selectedTool.value = tool

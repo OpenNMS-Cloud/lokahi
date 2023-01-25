@@ -35,14 +35,10 @@ runs:
         SONAR_PROJECT_KEY: ${{ inputs.project-key }}
       run: |
         BASE_IMAGE=ghcr.io/opennms-cloud/$(cat ../.github/base-image-tag-ref.json | jq .image_tag_java | sed 's/\"//g')
-        echo "test - $HOME - $BASE_IMAGE"
-        pwd
-        docker images
         docker pull $BASE_IMAGE
-        docker images
 
         mvn -B verify \
-            jib:build -Dapplication.docker.image=$IMAGE \
+            jib:build -Dapplication.docker.image=$BASE_IMAGE \
             -Djib.from.image=eclipse-temurin:17 \
             org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=$SONAR_PROJECT_KEY
       shell: bash

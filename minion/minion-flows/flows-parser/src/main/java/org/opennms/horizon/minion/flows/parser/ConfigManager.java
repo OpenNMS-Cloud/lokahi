@@ -63,7 +63,7 @@ public class ConfigManager implements ListenerFactory {
         try {
             this.flowsConfig = config.unpack(FlowsConfig.class);
             holder.clear();
-            flowsConfig.getListenersList().stream().forEach(telemetryRegistry::getListener);
+            flowsConfig.getListenersList().forEach(telemetryRegistry::getListener);
         } catch (InvalidProtocolBufferException e) {
             throw new IllegalArgumentException("Error while parsing config with type-url=" + config.getTypeUrl());
         }

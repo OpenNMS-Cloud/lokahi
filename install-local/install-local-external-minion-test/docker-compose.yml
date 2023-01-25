@@ -17,6 +17,9 @@ services:
     volumes:
       - ./grpc.cfg:/opt/karaf/etc/org.opennms.core.ipc.grpc.client.cfg
       - ./id.cfg:/opt/karaf/etc/org.opennms.identity.cfg
+    ports:
+      - "8877:8877/udp" # netflow5
+      - "4729:4729/udp" # netflow9
     networks:
       localnet:
         ipv4_address: 172.4.1.1

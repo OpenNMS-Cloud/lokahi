@@ -1,11 +1,15 @@
 import DiscoveryStepper from '@/components/Discovery/DiscoveryStepper.vue'
 import DiscoveryStep1 from '@/components/Discovery/DiscoveryStep1.vue'
 import mount from 'tests/mountWithPiniaVillus'
+import setupWrapper from 'tests/setupWrapper'
 
-const wrapper = mount({ 
+const wrapper = setupWrapper({ 
   component: DiscoveryStepper,
   attachTo: document.body,
-  shallow: true
+  type: 'shallow',
+  props: {
+    callback: () => {}
+  }
 })
 
 const step1Wrapper = mount({ 

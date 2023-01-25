@@ -7,6 +7,7 @@
         v-model="ipAddressesStr"
         hint="ex: 172.16.32.1, 172.16.32.2 ..."
         @update:modelValue="updateIpsPayload"
+        :error="validation.ipAddressesError"
       />
     </div>
 
@@ -18,18 +19,21 @@
           v-model="store.ipRange.cidr"
           hint="ex: 172.16.0.0/16"
           class="input"
+          :error="validation.cidrError"
         />
         <FeatherInput
           label="From"
           v-model="store.ipRange.fromIp"
           hint="ex: 172.16.0.0"
           class="input"
+          :error="validation.fromIpError"
         />      
         <FeatherInput
           label="To"
           v-model="store.ipRange.toIp"
           hint="ex: 172.16.255.255"
           class="input"
+          :error="validation.toIpError"
         />
       </div>
     </div>
@@ -38,11 +42,14 @@
 
 <script setup lang="ts">
 import { useDiscoveryStore } from '@/store/Views/discoveryStore'
+import useDiscoveryValidation from './useDiscoveryValidation'
+
 const store = useDiscoveryStore()
+const { validation } = useDiscoveryValidation()
 const ipAddressesStr = ref<string>('')
 const updateIpsPayload = () => {
   if (ipAddressesStr.value) {
-    store.ipAddresses = ipAddressesStr.value.split(',')
+    store.ipAddresses = ipAddressesStr.value.split(',').map(x => x.trim())
   } else {
     store.ipAddresses = []
   }

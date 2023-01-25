@@ -46,10 +46,7 @@
     hide-title
   >
     <template #content>
-      <component
-        :is="modalContent?.component"
-        v-bind="modalContent?.props"
-      />
+      <component :is="modalContent" />
     </template>
     <template v-slot:footer>
       <FeatherButton
@@ -102,9 +99,9 @@ const isDrawerOpen = ref(false)
 const modalContent = computed(() => {
   switch(selectedTool.value) {
     case DiscoveryType.ICMP:
-      return { component: DiscoveryStepper, props: { callback: closeModal }}
+      return DiscoveryStepper
     case DiscoveryType.Azure:
-      return { component: AzureForm }
+      return AzureForm
   }
 })
 
@@ -120,7 +117,6 @@ const showSettings = (tool: DiscoveryType) => {
   selectedTool.value = tool
   openModal()
 }
-
 
 const showInstructions = (tool: DiscoveryType) => {
   selectedTool.value = tool

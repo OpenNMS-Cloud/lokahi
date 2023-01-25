@@ -856,15 +856,18 @@
             </dependency>
             <dependency>
                 <groupId>org.testcontainers</groupId>
+                <artifactId>testcontainers</artifactId>
+                <version>${testcontainers.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.testcontainers</groupId>
                 <artifactId>postgresql</artifactId>
                 <version>${testcontainers.version}</version>
-                <scope>test</scope> <!-- TODO: do not specify scope in dependencyManagement in case a project wants to use a different scope -->
             </dependency>
             <dependency>
                 <groupId>org.testcontainers</groupId>
                 <artifactId>kafka</artifactId>
                 <version>${testcontainers.version}</version>
-                <scope>test</scope> <!-- TODO: do not specify scope in dependencyManagement in case a project wants to use a different scope -->
             </dependency>
 
         </dependencies>

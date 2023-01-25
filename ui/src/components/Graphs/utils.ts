@@ -55,8 +55,8 @@ export const downloadCanvas = (canvas: HTMLCanvasElement, filename: string) => {
  * Loops and downloads to PDF.
  */
 export const downloadMultipleCanvases = (page: HTMLElement, canvases: HTMLCollectionOf<HTMLCanvasElement>) => {
-  const pageHeight = page.offsetHeight
-  const pageWidth = page.offsetWidth
+  const pageHeight = page.offsetHeight + 500
+  const pageWidth = page.offsetWidth + 500
 
   // create a new canvas object that we will populate with all other canvas objects
   const pageCanvas = document.createElement('canvas')
@@ -73,20 +73,20 @@ export const downloadMultipleCanvases = (page: HTMLElement, canvases: HTMLCollec
   for (let i = 0; i < canvases.length; i++) {
     const canvasHeight = canvases[i].offsetHeight
     const canvasWidth = canvases[i].offsetWidth
-    
+
     // draw the canvas into the new canvas
     pdfctx.drawImage(canvases[i], pdfctxX, pdfctxY, canvasWidth, canvasHeight)
     pdfctxX += canvasWidth + widthBuffer
     
-    // our page is in a grid pattern so replicate that in the new canvas
-    if (i % 2 === 1) {
+    // linebreak every three graphs
+    if ((i + 1) % 3 === 0) {
       pdfctxX = 0;
       pdfctxY += canvasHeight
     }
   }
   
-  // create new pdf and add our new canvas as an image
-  const pdf = new jsPDF('p', 'pt', [pageWidth, pageHeight])
+  // create new landscape pdf and add our new canvas
+  const pdf = new jsPDF('l', 'pt', [pageWidth, pageHeight])
   pdf.addImage(pageCanvas, 'PNG', 0, 0, pageWidth, pageHeight)
   pdf.save('graphs.pdf')
 }

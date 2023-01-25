@@ -13,10 +13,7 @@
 </template>
 
 <script lang="ts" setup>
-import { FeatherTab, FeatherTabContainer, FeatherTabPanel } from '@featherds/tabs'
-
 import { useMonitoringPoliciesStore } from '@/store/Views/monitoringPoliciesStore'
-
 const store = useMonitoringPoliciesStore()
 </script>
 

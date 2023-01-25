@@ -2,7 +2,7 @@ export interface IPolicy {
   id: string
   name: string
   tags: string[]
-  rules: string[]
+  rules: IRule[]
 }
 
 export interface IRule {

@@ -1,28 +1,36 @@
 import { defineStore } from 'pinia'
-import { without } from 'lodash'
+import { cloneDeep, without } from 'lodash'
 import { IPolicy, IRule } from '@/types/policies'
 
 type TState = {
+  existingPolicies: IPolicy[]
+  existingRules: IRule[]
   selectedPolicy: IPolicy
   selectedRule: IRule
 }
 
+const defaultPolicy: IPolicy = {
+  id: '',
+  name: '',
+  tags: [],
+  rules: []
+}
+
+const defaultRule: IRule = {
+  id: '',
+  name: '',
+  componentType: 'cpu',
+  detectionMethod: 'thresholdAlert',
+  metricName: 'interfaceUtil',
+  conditions: []
+}
+
 export const useMonitoringPoliciesStore = defineStore('monitoringPoliciesStore', {
   state: (): TState => ({
-    selectedPolicy: {
-      id: '',
-      name: '',
-      tags: [],
-      rules: []
-    },
-    selectedRule: {
-      id: '',
-      name: '',
-      componentType: 'cpu',
-      detectionMethod: 'thresholdAlert',
-      metricName: 'interfaceUtil',
-      conditions: []
-    }
+    existingRules: [],
+    existingPolicies: [],
+    selectedPolicy: cloneDeep(defaultPolicy),
+    selectedRule: cloneDeep(defaultRule)
   }),
   actions: {
     removeTag(tag: string) {
@@ -44,6 +52,15 @@ export const useMonitoringPoliciesStore = defineStore('monitoringPoliciesStore',
     },
     removeCondition(id: number) {
       this.selectedRule.conditions = this.selectedRule.conditions.filter((c) => c.id !== id)
+    },
+    saveRule() {
+      this.selectedPolicy.rules.push(this.selectedRule)
+      this.existingRules.push(this.selectedRule)
+      this.selectedRule = cloneDeep(defaultRule) // clear form
+    },
+    savePolicy() {
+      this.existingPolicies.push(this.selectedPolicy)
+      this.selectedPolicy = cloneDeep(defaultPolicy) // clear form
     }
   }
 })

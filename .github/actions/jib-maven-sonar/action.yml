@@ -39,7 +39,7 @@ runs:
 
         mvn -B verify \
             jib:build -Dapplication.docker.image=$IMAGE \
-            -Djib.from.image=$BASE_IMAGE \
             org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=$SONAR_PROJECT_KEY
+            #-Djib.from.image=$BASE_IMAGE \
       shell: bash
       working-directory: ${{ inputs.working-directory }}

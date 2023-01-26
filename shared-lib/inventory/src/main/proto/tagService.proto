@@ -40,17 +40,25 @@ message TagDTO {
   string name = 3;
 }
 
-message TagCreateDTO {
-  int64 node_id = 1;
-  string name = 2;
+message TagListDTO {
+  repeated TagDTO tags = 1;
 }
 
-message TagRemoveDTO {
-  int64 node_id = 2;
-  int64 tag_id = 1;
+message TagCreateListDTO {
+  int64 node_id = 1;
+  repeated TagCreateDTO tags = 2;
+}
+
+message TagCreateDTO {
+  string name = 1;
+}
+
+message TagRemoveListDTO {
+  int64 node_id = 1;
+  repeated google.protobuf.Int64Value tag_ids = 2;
 }
 
 service TagService {
-  rpc createTag(TagCreateDTO) returns (TagDTO) {};
-  rpc removeTag(TagRemoveDTO) returns (google.protobuf.BoolValue) {};
+  rpc addTags(TagCreateListDTO) returns (TagListDTO) {};
+  rpc removeTags(TagRemoveListDTO) returns (google.protobuf.BoolValue) {};
 }

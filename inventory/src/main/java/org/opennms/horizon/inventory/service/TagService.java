@@ -28,10 +28,12 @@
 
 package org.opennms.horizon.inventory.service;
 
+import com.google.protobuf.Int64Value;
 import lombok.RequiredArgsConstructor;
 import org.opennms.horizon.inventory.dto.TagCreateDTO;
+import org.opennms.horizon.inventory.dto.TagCreateListDTO;
 import org.opennms.horizon.inventory.dto.TagDTO;
-import org.opennms.horizon.inventory.dto.TagRemoveDTO;
+import org.opennms.horizon.inventory.dto.TagRemoveListDTO;
 import org.opennms.horizon.inventory.exception.InventoryRuntimeException;
 import org.opennms.horizon.inventory.mapper.TagMapper;
 import org.opennms.horizon.inventory.model.Node;
@@ -41,6 +43,8 @@ import org.opennms.horizon.inventory.repository.TagRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -51,19 +55,40 @@ public class TagService {
     private final TagMapper mapper;
 
     @Transactional
-    public TagDTO createTag(String tenantId, TagCreateDTO request) {
-        long nodeId = request.getNodeId();
-        String tagName = request.getName();
+    public List<TagDTO> addTags(String tenantId, TagCreateListDTO request) {
+        if (request.getTagsList().isEmpty()) {
+            return Collections.emptyList();
+        }
+        Node node = getNode(tenantId, request.getNodeId());
 
-        Optional<Tag> tagOpt = repository.find(tenantId, nodeId, tagName);
+        return request.getTagsList().stream()
+            .map(tagCreateDTO -> createSingle(tenantId, node, tagCreateDTO))
+            .toList();
+    }
+
+    @Transactional
+    public void removeTags(String tenantId, TagRemoveListDTO request) {
+        Node node = getNode(tenantId, request.getNodeId());
+
+        request.getTagIdsList().stream()
+            .map(Int64Value::getValue)
+            .map(tagId -> getTag(tenantId, tagId))
+            .toList()
+            .forEach(tag -> removeSingle(node, tag));
+    }
+
+    private TagDTO createSingle(String tenantId, Node node, TagCreateDTO tagCreateDTO) {
+        String tagName = tagCreateDTO.getName();
+
+        Optional<Tag> tagOpt = repository
+            .findByTenantIdNodeIdAndName(tenantId, node.getId(), tagName);
+
         if (tagOpt.isPresent()) {
             return mapper.modelToDTO(tagOpt.get());
         }
 
-        Node node = getNode(tenantId, nodeId);
-
-        tagOpt = repository.find(tenantId, tagName);
-        Tag tag = tagOpt.orElseGet(() -> mapCreateTag(tenantId, request));
+        tagOpt = repository.findByTenantIdAndName(tenantId, tagName);
+        Tag tag = tagOpt.orElseGet(() -> mapCreateTag(tenantId, tagCreateDTO));
 
         tag.getNodes().add(node);
         tag = repository.save(tag);
@@ -71,18 +96,11 @@ public class TagService {
         return mapper.modelToDTO(tag);
     }
 
-    @Transactional
-    public void removeTag(String tenantId, TagRemoveDTO request) {
-        long tagId = request.getTagId();
-        long nodeId = request.getNodeId();
-
-        Tag tag = getTag(tenantId, tagId);
-
+    private void removeSingle(Node node, Tag tag) {
         if (tag.getNodes().isEmpty()) {
             repository.delete(tag);
         } else {
-            Node node = getNode(tenantId, nodeId);
-            tag.getNodes().removeIf(it -> it.getId() == node.getId());
+            tag.getNodes().remove(node);
             if (tag.getNodes().isEmpty()) {
                 repository.delete(tag);
             } else {

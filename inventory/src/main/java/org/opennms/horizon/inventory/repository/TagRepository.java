@@ -39,12 +39,7 @@ import java.util.Optional;
 public interface TagRepository extends JpaRepository<Tag, Long> {
     Optional<Tag> findByTenantIdAndId(String tenantId, Long id);
 
-    @Query("SELECT tag " +
-        "FROM Tag tag " +
-        "WHERE tag.tenantId = :tenantId " +
-        "AND tag.name = :name")
-    Optional<Tag> find(@Param("tenantId") String tenantId,
-                       @Param("name") String name);
+    Optional<Tag> findByTenantIdAndName(String tenantId, String name);
 
     @Query("SELECT tag " +
         "FROM Tag tag " +
@@ -52,7 +47,7 @@ public interface TagRepository extends JpaRepository<Tag, Long> {
         "WHERE tag.tenantId = :tenantId " +
         "AND node.id = :nodeId " +
         "AND tag.name = :name")
-    Optional<Tag> find(@Param("tenantId") String tenantId,
-                       @Param("nodeId") Long nodeId,
-                       @Param("name") String name);
+    Optional<Tag> findByTenantIdNodeIdAndName(@Param("tenantId") String tenantId,
+                                              @Param("nodeId") Long nodeId,
+                                              @Param("name") String name);
 }

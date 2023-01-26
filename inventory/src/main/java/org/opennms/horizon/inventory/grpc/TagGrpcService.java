@@ -36,13 +36,15 @@ import io.grpc.protobuf.StatusProto;
 import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.opennms.horizon.inventory.dto.TagCreateDTO;
+import org.opennms.horizon.inventory.dto.TagCreateListDTO;
 import org.opennms.horizon.inventory.dto.TagDTO;
-import org.opennms.horizon.inventory.dto.TagRemoveDTO;
+import org.opennms.horizon.inventory.dto.TagListDTO;
+import org.opennms.horizon.inventory.dto.TagRemoveListDTO;
 import org.opennms.horizon.inventory.dto.TagServiceGrpc;
 import org.opennms.horizon.inventory.service.TagService;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -53,17 +55,15 @@ public class TagGrpcService extends TagServiceGrpc.TagServiceImplBase {
     private final TenantLookup tenantLookup;
 
     @Override
-    public void createTag(TagCreateDTO request, StreamObserver<TagDTO> responseObserver) {
+    public void addTags(TagCreateListDTO request, StreamObserver<TagListDTO> responseObserver) {
         Optional<String> tenantIdOptional = tenantLookup.lookupTenantId(Context.current());
 
         tenantIdOptional.ifPresentOrElse(tenantId -> {
-
             try {
-                TagDTO tag = service.createTag(tenantId, request);
+                List<TagDTO> tags = service.addTags(tenantId, request);
 
-                responseObserver.onNext(tag);
+                responseObserver.onNext(TagListDTO.newBuilder().addAllTags(tags).build());
                 responseObserver.onCompleted();
-
             } catch (Exception e) {
 
                 Status status = Status.newBuilder()
@@ -83,17 +83,15 @@ public class TagGrpcService extends TagServiceGrpc.TagServiceImplBase {
     }
 
     @Override
-    public void removeTag(TagRemoveDTO request, StreamObserver<BoolValue> responseObserver) {
+    public void removeTags(TagRemoveListDTO request, StreamObserver<BoolValue> responseObserver) {
         Optional<String> tenantIdOptional = tenantLookup.lookupTenantId(Context.current());
 
         tenantIdOptional.ifPresentOrElse(tenantId -> {
-
             try {
-                service.removeTag(tenantId, request);
+                service.removeTags(tenantId, request);
 
                 responseObserver.onNext(BoolValue.of(true));
                 responseObserver.onCompleted();
-
             } catch (Exception e) {
 
                 Status status = Status.newBuilder()

@@ -33,10 +33,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
-import org.opennms.horizon.minion.flows.parser.flowmessage.FlowMessage;
-import org.opennms.horizon.minion.flows.parser.ie.Value;
-import org.opennms.horizon.minion.flows.parser.ie.values.UnsignedValue;
-import org.opennms.horizon.minion.flows.parser.transport.Netflow9MessageBuilder;
+import org.opennms.horizon.shared.flows.FlowMessage;
+import org.opennms.horizon.shared.flows.transport.Netflow9MessageBuilder;
+import org.opennms.horizon.shared.flows.values.UnsignedValue;
+import org.opennms.horizon.shared.flows.values.Value;
 
 import com.google.common.collect.ImmutableList;
 

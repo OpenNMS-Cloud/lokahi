@@ -29,9 +29,9 @@
 package org.opennms.horizon.flows.adapter;
 
 import org.opennms.horizon.flows.adapter.common.Adapter;
-import org.opennms.horizon.minion.flows.listeners.factory.TelemetryBeanFactory;
 
 import org.opennms.horizon.flows.adapter.common.AdapterDefinition;
+import org.opennms.horizon.shared.flows.TelemetryBeanFactory;
 
 /**
  * Factory to create {@link Adapter} from a {@link AdapterDefinition}

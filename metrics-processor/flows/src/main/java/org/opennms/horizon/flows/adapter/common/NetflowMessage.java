@@ -36,10 +36,10 @@ import java.util.Optional;
 import org.opennms.horizon.flows.processing.enrichment.Flow;
 import org.opennms.horizon.flows.processing.enrichment.Locality;
 import org.opennms.horizon.flows.processing.enrichment.NodeInfo;
-import org.opennms.horizon.minion.flows.parser.flowmessage.Direction;
-import org.opennms.horizon.minion.flows.parser.flowmessage.FlowMessage;
-import org.opennms.horizon.minion.flows.parser.flowmessage.NetflowVersion;
-import org.opennms.horizon.minion.flows.parser.flowmessage.SamplingAlgorithm;
+import org.opennms.horizon.shared.flows.Direction;
+import org.opennms.horizon.shared.flows.FlowMessage;
+import org.opennms.horizon.shared.flows.NetflowVersion;
+import org.opennms.horizon.shared.flows.SamplingAlgorithm;
 
 import com.google.common.base.Strings;
 

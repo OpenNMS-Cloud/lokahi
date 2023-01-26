@@ -29,27 +29,25 @@
 package org.opennms.horizon.minion.flows.parser.netflow9;
 
 import static org.junit.Assert.assertEquals;
-import static org.opennms.horizon.minion.flows.listeners.utils.BufferUtils.slice;
+import static org.opennms.horizon.shared.flows.BufferUtils.slice;
 
 import java.io.IOException;
 import java.net.InetAddress;
-import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import org.opennms.horizon.minion.flows.parser.netflow9.proto.Header;
-import org.opennms.horizon.minion.flows.parser.netflow9.proto.Packet;
-import org.opennms.horizon.minion.flows.parser.session.SequenceNumberTracker;
-import org.opennms.horizon.minion.flows.parser.session.Session;
-import org.opennms.horizon.minion.flows.parser.session.TcpSession;
+import org.opennms.horizon.shared.flows.netflow9.proto.Header;
+import org.opennms.horizon.shared.flows.netflow9.proto.Packet;
+import org.opennms.horizon.shared.flows.session.SequenceNumberTracker;
+import org.opennms.horizon.shared.flows.session.Session;
+import org.opennms.horizon.shared.flows.session.TcpSession;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;

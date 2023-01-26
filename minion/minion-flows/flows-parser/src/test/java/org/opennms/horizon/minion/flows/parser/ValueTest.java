@@ -36,16 +36,17 @@ import java.util.Optional;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.opennms.horizon.minion.flows.parser.ie.values.BooleanValue;
-import org.opennms.horizon.minion.flows.parser.ie.values.DateTimeValue;
-import org.opennms.horizon.minion.flows.parser.ie.values.FloatValue;
-import org.opennms.horizon.minion.flows.parser.ie.values.IPv4AddressValue;
-import org.opennms.horizon.minion.flows.parser.ie.values.IPv6AddressValue;
-import org.opennms.horizon.minion.flows.parser.ie.values.MacAddressValue;
-import org.opennms.horizon.minion.flows.parser.ie.values.OctetArrayValue;
-import org.opennms.horizon.minion.flows.parser.ie.values.SignedValue;
-import org.opennms.horizon.minion.flows.parser.ie.values.StringValue;
-import org.opennms.horizon.minion.flows.parser.ie.values.UnsignedValue;
+import org.opennms.horizon.shared.flows.exceptions.InvalidPacketException;
+import org.opennms.horizon.shared.flows.values.BooleanValue;
+import org.opennms.horizon.shared.flows.values.DateTimeValue;
+import org.opennms.horizon.shared.flows.values.FloatValue;
+import org.opennms.horizon.shared.flows.values.IPv4AddressValue;
+import org.opennms.horizon.shared.flows.values.IPv6AddressValue;
+import org.opennms.horizon.shared.flows.values.MacAddressValue;
+import org.opennms.horizon.shared.flows.values.OctetArrayValue;
+import org.opennms.horizon.shared.flows.values.SignedValue;
+import org.opennms.horizon.shared.flows.values.StringValue;
+import org.opennms.horizon.shared.flows.values.UnsignedValue;
 
 import io.netty.buffer.Unpooled;
 

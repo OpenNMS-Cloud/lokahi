@@ -32,7 +32,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
-import static org.opennms.horizon.minion.flows.listeners.utils.BufferUtils.slice;
+import static org.opennms.horizon.shared.flows.BufferUtils.slice;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -46,19 +46,19 @@ import java.util.Optional;
 
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.Test;
-import org.opennms.horizon.minion.flows.parser.InvalidPacketException;
-import org.opennms.horizon.minion.flows.parser.flowmessage.Direction;
-import org.opennms.horizon.minion.flows.parser.flowmessage.FlowMessage;
-import org.opennms.horizon.minion.flows.parser.flowmessage.NetflowVersion;
-import org.opennms.horizon.minion.flows.parser.flowmessage.SamplingAlgorithm;
-import org.opennms.horizon.minion.flows.parser.proto.Header;
-import org.opennms.horizon.minion.flows.parser.proto.Packet;
-import org.opennms.horizon.minion.flows.parser.transport.Netflow5MessageBuilder;
 
 import org.opennms.horizon.flows.adapter.common.NetflowMessage;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import org.opennms.horizon.flows.processing.enrichment.Flow;
+import org.opennms.horizon.shared.flows.Direction;
+import org.opennms.horizon.shared.flows.FlowMessage;
+import org.opennms.horizon.shared.flows.NetflowVersion;
+import org.opennms.horizon.shared.flows.SamplingAlgorithm;
+import org.opennms.horizon.shared.flows.exceptions.InvalidPacketException;
+import org.opennms.horizon.shared.flows.proto.Header;
+import org.opennms.horizon.shared.flows.proto.Packet;
+import org.opennms.horizon.shared.flows.transport.Netflow5MessageBuilder;
 
 public class Netflow5ConverterTest {
 

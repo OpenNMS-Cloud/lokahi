@@ -39,7 +39,7 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import org.opennms.horizon.minion.flows.parser.flowmessage.Direction;
+import org.opennms.horizon.shared.flows.Direction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

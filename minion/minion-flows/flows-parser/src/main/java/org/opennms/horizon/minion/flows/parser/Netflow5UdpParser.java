@@ -28,19 +28,19 @@
 
 package org.opennms.horizon.minion.flows.parser;
 
-import static org.opennms.horizon.minion.flows.listeners.utils.BufferUtils.slice;
+import static org.opennms.horizon.shared.flows.BufferUtils.slice;
 
 import java.net.InetSocketAddress;
 
 import org.opennms.horizon.grpc.telemetry.contract.TelemetryMessage;
 import org.opennms.horizon.minion.flows.parser.factory.DnsResolver;
-import org.opennms.horizon.minion.flows.parser.ie.RecordProvider;
-import org.opennms.horizon.minion.flows.parser.proto.Header;
-import org.opennms.horizon.minion.flows.parser.proto.Packet;
-import org.opennms.horizon.minion.flows.parser.session.Session;
-import org.opennms.horizon.minion.flows.parser.session.UdpSessionManager;
-import org.opennms.horizon.minion.flows.parser.transport.Netflow5MessageBuilder;
-import org.opennms.horizon.grpc.telemetry.contract.TelemetryMessage;
+import org.opennms.horizon.shared.flows.proto.Header;
+import org.opennms.horizon.shared.flows.proto.Packet;
+import org.opennms.horizon.shared.flows.session.RecordProvider;
+import org.opennms.horizon.shared.flows.session.Session;
+import org.opennms.horizon.shared.flows.session.UdpSessionManager;
+import org.opennms.horizon.shared.flows.transport.Netflow5MessageBuilder;
+import org.opennms.horizon.shared.flows.values.Protocol;
 import org.opennms.horizon.shared.ipc.rpc.IpcIdentity;
 import org.opennms.horizon.shared.ipc.sink.api.AsyncDispatcher;
 
@@ -49,7 +49,7 @@ import com.codahale.metrics.MetricRegistry;
 import io.netty.buffer.ByteBuf;
 import org.opennms.horizon.minion.flows.listeners.Dispatchable;
 import org.opennms.horizon.minion.flows.listeners.UdpParser;
-import org.opennms.horizon.minion.flows.listeners.utils.BufferUtils;
+import org.opennms.horizon.shared.flows.BufferUtils;
 
 public class Netflow5UdpParser extends UdpParserBase implements UdpParser, Dispatchable {
 

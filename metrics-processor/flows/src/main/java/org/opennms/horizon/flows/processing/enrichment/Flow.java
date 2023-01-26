@@ -32,9 +32,10 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Optional;
 
-import org.opennms.horizon.minion.flows.parser.flowmessage.Direction;
-import org.opennms.horizon.minion.flows.parser.flowmessage.NetflowVersion;
-import org.opennms.horizon.minion.flows.parser.flowmessage.SamplingAlgorithm;
+import org.opennms.horizon.shared.flows.Direction;
+import org.opennms.horizon.shared.flows.NetflowVersion;
+import org.opennms.horizon.shared.flows.SamplingAlgorithm;
+
 
 public interface Flow {
 

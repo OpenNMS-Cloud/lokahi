@@ -52,7 +52,7 @@ import java.util.stream.Collectors;
 
 import org.opennms.horizon.flows.processing.ProcessingOptions;
 import org.opennms.horizon.flows.processing.enrichment.EnrichedFlow;
-import org.opennms.horizon.minion.flows.parser.flowmessage.Direction;
+import org.opennms.horizon.shared.flows.Direction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

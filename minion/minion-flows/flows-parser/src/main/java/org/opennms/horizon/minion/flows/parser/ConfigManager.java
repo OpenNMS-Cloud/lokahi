@@ -30,7 +30,6 @@ package org.opennms.horizon.minion.flows.parser;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.InvalidProtocolBufferException;
-import org.opennms.horizon.minion.flows.listeners.factory.TelemetryRegistry;
 import org.opennms.horizon.minion.plugin.api.Listener;
 import org.opennms.horizon.minion.plugin.api.ListenerFactory;
 import org.opennms.horizon.minion.plugin.api.ServiceMonitorResponse;

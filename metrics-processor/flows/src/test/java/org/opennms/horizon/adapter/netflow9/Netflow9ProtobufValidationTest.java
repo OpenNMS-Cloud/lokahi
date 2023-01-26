@@ -29,7 +29,7 @@
 package org.opennms.horizon.adapter.netflow9;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.opennms.horizon.minion.flows.listeners.utils.BufferUtils.slice;
+import static org.opennms.horizon.shared.flows.BufferUtils.slice;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -44,20 +44,20 @@ import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.opennms.horizon.adapter.Utils;
-import org.opennms.horizon.minion.flows.parser.InvalidPacketException;
-import org.opennms.horizon.minion.flows.parser.flowmessage.Direction;
-import org.opennms.horizon.minion.flows.parser.flowmessage.FlowMessage;
-import org.opennms.horizon.minion.flows.parser.netflow9.proto.Header;
-import org.opennms.horizon.minion.flows.parser.netflow9.proto.Packet;
-import org.opennms.horizon.minion.flows.parser.session.SequenceNumberTracker;
-import org.opennms.horizon.minion.flows.parser.session.Session;
-import org.opennms.horizon.minion.flows.parser.session.TcpSession;
-import org.opennms.horizon.minion.flows.parser.transport.Netflow9MessageBuilder;
 
 import org.opennms.horizon.flows.adapter.common.NetflowMessage;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import org.opennms.horizon.flows.processing.enrichment.Flow;
+import org.opennms.horizon.shared.flows.Direction;
+import org.opennms.horizon.shared.flows.FlowMessage;
+import org.opennms.horizon.shared.flows.exceptions.InvalidPacketException;
+import org.opennms.horizon.shared.flows.netflow9.proto.Header;
+import org.opennms.horizon.shared.flows.netflow9.proto.Packet;
+import org.opennms.horizon.shared.flows.session.SequenceNumberTracker;
+import org.opennms.horizon.shared.flows.session.Session;
+import org.opennms.horizon.shared.flows.session.TcpSession;
+import org.opennms.horizon.shared.flows.transport.Netflow9MessageBuilder;
 
 
 /**

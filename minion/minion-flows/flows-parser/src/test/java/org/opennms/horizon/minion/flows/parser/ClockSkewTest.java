@@ -37,8 +37,9 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.opennms.horizon.grpc.telemetry.contract.TelemetryMessage;
 import org.opennms.horizon.minion.flows.parser.factory.DnsResolver;
-import org.opennms.horizon.minion.flows.parser.flowmessage.FlowMessage;
-import org.opennms.horizon.minion.flows.parser.transport.MessageBuilder;
+import org.opennms.horizon.shared.flows.FlowMessage;
+import org.opennms.horizon.shared.flows.transport.MessageBuilder;
+import org.opennms.horizon.shared.flows.values.Protocol;
 import org.opennms.horizon.shared.ipc.rpc.IpcIdentity;
 import org.opennms.horizon.shared.ipc.sink.api.AsyncDispatcher;
 

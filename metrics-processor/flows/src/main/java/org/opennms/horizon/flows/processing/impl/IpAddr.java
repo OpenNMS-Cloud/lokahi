@@ -33,7 +33,7 @@ import java.net.UnknownHostException;
 import java.util.Objects;
 
 import org.apache.commons.lang3.ArrayUtils;
-import org.opennms.horizon.minion.flows.parser.IPAddress;
+import org.opennms.horizon.shared.utils.IPAddress;
 
 import com.google.common.primitives.Ints;
 import com.google.common.primitives.Longs;

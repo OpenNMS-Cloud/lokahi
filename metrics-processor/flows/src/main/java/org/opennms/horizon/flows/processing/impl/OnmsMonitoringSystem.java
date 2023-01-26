@@ -30,17 +30,9 @@ package org.opennms.horizon.flows.processing.impl;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.net.InetAddress;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementWrapper;
-import javax.xml.bind.annotation.XmlID;
 
 
 import com.google.common.base.MoreObjects;
@@ -61,7 +53,6 @@ import com.google.common.base.MoreObjects;
  * 
  * @author Seth
  */
-@XmlAccessorType(XmlAccessType.NONE)
 public class OnmsMonitoringSystem implements Serializable {
 
     @Serial
@@ -71,17 +62,12 @@ public class OnmsMonitoringSystem implements Serializable {
     public static final String TYPE_MINION = "Minion";
     public static final String TYPE_SENTINEL = "Sentinel";
 
-    @XmlID
-    @XmlAttribute(name="id")
     private String m_id;
 
-    @XmlAttribute(name="label")
     private String m_label;
 
-    @XmlAttribute(name="location")
     private String m_location;
 
-    @XmlAttribute(name="type")
     private String m_type;
 
     // TODO: Add type converter
@@ -93,14 +79,10 @@ public class OnmsMonitoringSystem implements Serializable {
     private String m_status;
     */
 
-    @XmlAttribute(name="date")
     private Date m_lastUpdated;
     
-    @XmlAttribute(name = "lastCheckedIn")
     private Date m_lastCheckedIn;
 
-    @XmlElementWrapper(name="properties")
-    @XmlElement(name="property")
     private Map<String,String> m_properties = new HashMap<String,String>();
 
     /**

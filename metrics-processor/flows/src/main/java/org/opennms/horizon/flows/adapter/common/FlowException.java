@@ -28,8 +28,6 @@
 
 package org.opennms.horizon.flows.adapter.common;
 
-import java.util.List;
-
 public class FlowException extends Exception {
     public FlowException(String message) {
         super(message);

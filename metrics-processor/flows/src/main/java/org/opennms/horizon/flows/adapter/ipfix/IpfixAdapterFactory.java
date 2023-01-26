@@ -31,10 +31,10 @@ package org.opennms.horizon.flows.adapter.ipfix;
 import java.util.Objects;
 
 import org.opennms.horizon.flows.adapter.AdapterFactory;
+import org.opennms.horizon.flows.adapter.TelemetryRegistry;
 import org.opennms.horizon.flows.adapter.common.Adapter;
 import org.opennms.horizon.flows.adapter.common.AdapterDefinition;
 import org.opennms.horizon.flows.processing.Pipeline;
-import org.opennms.horizon.minion.flows.listeners.factory.TelemetryRegistry;
 
 public class IpfixAdapterFactory implements AdapterFactory {
     private TelemetryRegistry telemetryRegistry;

@@ -32,12 +32,8 @@ package org.opennms.horizon.flows.processing.impl;
  //- Imported classes and packages -/
 //---------------------------------/
 
+import java.io.Serial;
 import java.io.Serializable;
-
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
 
 /**
  * parm value
@@ -45,11 +41,10 @@ import javax.xml.bind.annotation.XmlTransient;
  * @version $Revision$ $Date$
  */
 
-@XmlRootElement(name="value")
-@XmlAccessorType(XmlAccessType.FIELD)
 //@ValidateUsing("event.xsd")
 public class Value implements Serializable {
-	private static final long serialVersionUID = 6267247580169994541L;
+	@Serial
+    private static final long serialVersionUID = 6267247580169994541L;
 
       //--------------------------/
      //- Class/Member Variables -/
@@ -70,7 +65,6 @@ public class Value implements Serializable {
      */
     private String _encoding = "text";
 
-	@XmlTransient
     private Boolean _expand = Boolean.FALSE;
 
 

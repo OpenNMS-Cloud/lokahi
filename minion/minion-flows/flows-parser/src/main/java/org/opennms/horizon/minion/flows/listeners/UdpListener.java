@@ -36,7 +36,7 @@ import java.util.Objects;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
-import org.opennms.horizon.minion.flows.listeners.utils.BufferUtils;
+import org.opennms.horizon.shared.flows.BufferUtils;
 import org.opennms.horizon.minion.flows.listeners.utils.NettyEventListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -36,8 +36,6 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.opennms.horizon.minion.flows.parser.flowmessage.FlowMessage;
-
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
@@ -47,6 +45,7 @@ import com.google.protobuf.util.JsonFormat;
 
 import org.opennms.horizon.flows.adapter.common.NetflowMessage;
 import org.opennms.horizon.flows.processing.enrichment.Flow;
+import org.opennms.horizon.shared.flows.FlowMessage;
 
 public class Utils {
     public static List<Flow> getJsonFlowFromResources(final Instant receivedAt, String... resources) {

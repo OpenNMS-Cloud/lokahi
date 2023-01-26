@@ -34,11 +34,11 @@ import java.time.Instant;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
-import org.opennms.horizon.minion.flows.parser.flowmessage.FlowMessage;
-import org.opennms.horizon.minion.flows.parser.ie.Value;
-import org.opennms.horizon.minion.flows.parser.ie.values.DateTimeValue;
-import org.opennms.horizon.minion.flows.parser.ie.values.UnsignedValue;
-import org.opennms.horizon.minion.flows.parser.transport.IpFixMessageBuilder;
+import org.opennms.horizon.shared.flows.FlowMessage;
+import org.opennms.horizon.shared.flows.transport.IpFixMessageBuilder;
+import org.opennms.horizon.shared.flows.values.DateTimeValue;
+import org.opennms.horizon.shared.flows.values.UnsignedValue;
+import org.opennms.horizon.shared.flows.values.Value;
 
 import com.google.common.collect.ImmutableList;
 

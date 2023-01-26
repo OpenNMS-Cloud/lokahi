@@ -31,11 +31,12 @@ package org.opennms.horizon.minion.flows.parser;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import org.junit.Test;
-import org.opennms.horizon.minion.flows.parser.netflow9.proto.Header;
-import org.opennms.horizon.minion.flows.parser.netflow9.proto.Packet;
-import org.opennms.horizon.minion.flows.parser.session.SequenceNumberTracker;
-import org.opennms.horizon.minion.flows.parser.session.Session;
-import org.opennms.horizon.minion.flows.parser.session.TcpSession;
+import org.opennms.horizon.shared.flows.exceptions.InvalidPacketException;
+import org.opennms.horizon.shared.flows.netflow9.proto.Header;
+import org.opennms.horizon.shared.flows.netflow9.proto.Packet;
+import org.opennms.horizon.shared.flows.session.SequenceNumberTracker;
+import org.opennms.horizon.shared.flows.session.Session;
+import org.opennms.horizon.shared.flows.session.TcpSession;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -51,7 +52,7 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
-import static org.opennms.horizon.minion.flows.listeners.utils.BufferUtils.slice;
+import static org.opennms.horizon.shared.flows.BufferUtils.slice;
 
 public class PayloadTest {
 

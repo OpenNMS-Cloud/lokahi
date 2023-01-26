@@ -30,7 +30,7 @@ package org.opennms.horizon.minion.flows.parser;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
-import static org.opennms.horizon.minion.flows.listeners.utils.BufferUtils.slice;
+import static org.opennms.horizon.shared.flows.BufferUtils.slice;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -43,11 +43,11 @@ import java.util.Objects;
 import java.util.function.Consumer;
 
 import org.junit.Test;
-import org.opennms.horizon.minion.flows.parser.ipfix.proto.Header;
-import org.opennms.horizon.minion.flows.parser.ipfix.proto.Packet;
-import org.opennms.horizon.minion.flows.parser.session.SequenceNumberTracker;
-import org.opennms.horizon.minion.flows.parser.session.Session;
-import org.opennms.horizon.minion.flows.parser.session.TcpSession;
+import org.opennms.horizon.shared.flows.ipfix.proto.Header;
+import org.opennms.horizon.shared.flows.ipfix.proto.Packet;
+import org.opennms.horizon.shared.flows.session.SequenceNumberTracker;
+import org.opennms.horizon.shared.flows.session.Session;
+import org.opennms.horizon.shared.flows.session.TcpSession;
 
 import com.google.common.base.Throwables;
 
@@ -57,7 +57,7 @@ import io.netty.buffer.Unpooled;
 public class ParserTest {
 
     @Test
-    public void canReadValidIPFIX() throws IOException, URISyntaxException {
+    public void canReadValidIPFIX() {
         execute("/flows/ipfix.dat", buffer -> {
             try {
 

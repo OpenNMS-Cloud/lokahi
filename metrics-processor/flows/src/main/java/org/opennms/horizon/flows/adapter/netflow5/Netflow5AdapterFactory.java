@@ -30,8 +30,8 @@ package org.opennms.horizon.flows.adapter.netflow5;
 
 import java.util.Objects;
 
+import org.opennms.horizon.flows.adapter.TelemetryRegistry;
 import org.opennms.horizon.flows.adapter.common.Adapter;
-import org.opennms.horizon.minion.flows.listeners.factory.TelemetryRegistry;
 
 import org.opennms.horizon.flows.adapter.AdapterFactory;
 import org.opennms.horizon.flows.adapter.common.AdapterDefinition;

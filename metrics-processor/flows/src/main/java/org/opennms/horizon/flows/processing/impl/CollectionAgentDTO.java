@@ -37,7 +37,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.xml.bind.annotation.XmlAttribute;
 
 import org.opennms.horizon.shared.snmp.InetAddrUtils;
 
@@ -51,25 +50,18 @@ public class CollectionAgentDTO implements CollectionAgent {
 
     private Boolean storeByForeignSource;
 
-    @XmlAttribute(name = "node-id")
     private int nodeId;
 
-    @XmlAttribute(name = "node-label")
     private String nodeLabel;
 
-    @XmlAttribute(name = "foreign-source")
     private String foreignSource;
 
-    @XmlAttribute(name = "foreign-id")
     private String foreignId;
 
-    @XmlAttribute(name = "location")
     private String location;
 
-    @XmlAttribute(name = "storage-resource-path")
     private String storageResourcePath;
 
-    @XmlAttribute(name = "sys-up-time")
     private long sysUpTime;
 
     public CollectionAgentDTO() { }

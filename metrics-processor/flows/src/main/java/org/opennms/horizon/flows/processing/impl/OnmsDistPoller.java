@@ -31,12 +31,10 @@ package org.opennms.horizon.flows.processing.impl;
 import java.io.Serial;
 import java.io.Serializable;
 
-import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  * Represents an OpenNMS Distributed Poller.
  */
-@XmlRootElement(name="distPoller")
 public class OnmsDistPoller extends OnmsMonitoringSystem implements Serializable {
 
     @Serial

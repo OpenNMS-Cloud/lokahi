@@ -78,7 +78,7 @@ public class IllegalFlowTest {
 
         // setting up nf9 parser
 
-        final Netflow9UdpParser parser = new Netflow9UdpParser("FLOW", new AsyncDispatcher<>() {
+        final Netflow9UdpParser parser = new Netflow9UdpParser("FLOW", "FLOW_QUEUE", new AsyncDispatcher<>() {
             @Override
             public CompletableFuture<AsyncDispatcher.DispatchStatus> send(TelemetryMessage message) {
                 messagesSent.incrementAndGet();

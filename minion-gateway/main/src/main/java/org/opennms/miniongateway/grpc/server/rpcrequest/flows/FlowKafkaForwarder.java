@@ -99,8 +99,10 @@ public class FlowKafkaForwarder implements MessageConsumer<Message, Message> {
         List<Header> headers = new LinkedList<>();
         headers.add(new RecordHeader(TENANT_ID_HEADER_NAME, tenantId.getBytes(StandardCharsets.UTF_8)));
 
-        return new ProducerRecord(
+        return new ProducerRecord<String, byte[]>(
             kafkaTopic,
+            null,
+            null,
             rawContent,
             headers
         );

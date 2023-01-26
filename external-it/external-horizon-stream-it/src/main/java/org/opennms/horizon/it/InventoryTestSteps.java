@@ -12,6 +12,9 @@ import org.apache.http.entity.ContentType;
 import org.apache.http.protocol.HTTP;
 import org.awaitility.Awaitility;
 import org.junit.Assert;
+import org.opennms.horizon.it.gqlmodels.CreateNodeData;
+import org.opennms.horizon.it.gqlmodels.GQLQuery;
+import org.opennms.horizon.it.gqlmodels.querywrappers.CreateNodeResult;
 import org.opennms.horizon.it.gqlmodels.querywrappers.FindAllMinionsQueryResult;
 import org.opennms.horizon.it.gqlmodels.MinionData;
 import org.slf4j.Logger;
@@ -21,6 +24,7 @@ import javax.ws.rs.core.HttpHeaders;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
@@ -107,6 +111,38 @@ public class InventoryTestSteps {
     @Then("Verify at least one minion was found for the location")
     public void verifyAtLeastOneMinionWasFoundForTheLocation() {
         assertTrue(minionsAtLocation.size() > 0);
+    }
+
+    @Then("Add a device with label {string} IP address {string} and location {string}")
+    public void addADeviceWithLabelIPAddressAndLocation(String label, String ipAddress, String location) throws MalformedURLException {
+        URL url = formatIngressUrl("/api/graphql");
+        String accessToken = userAccessTokenSupplier.get();
+
+        String query = GQLQueryConstants.CREATE_NODE_QUERY;
+
+        CreateNodeData nodeVariable = new CreateNodeData();
+        nodeVariable.setLabel(label);
+        nodeVariable.setLocation(location);
+        nodeVariable.setManagementIp(ipAddress);
+
+        Map<String, Object> queryVariables = Map.of("node", nodeVariable);
+
+        GQLQuery gqlQuery = new GQLQuery();
+        gqlQuery.setQuery(query);
+        gqlQuery.setVariables(queryVariables);
+
+        Response restAssuredResponse = executePost(url, accessToken, gqlQuery);
+
+        LOG.debug("createNode response: payload={}", restAssuredResponse.getBody().asString());
+
+        assertEquals("add-device query failed: status=" + restAssuredResponse.getStatusCode() + "; body=" + restAssuredResponse.getBody().asString(),
+            200, restAssuredResponse.getStatusCode());
+
+        CreateNodeResult createNodeResult = restAssuredResponse.getBody().as(CreateNodeResult.class);
+
+        // GRAPHQL errors result in 200 http response code and a body with "errors" detail
+        assertTrue("create-node errors: " + createNodeResult.getErrors(),
+            ( createNodeResult.getErrors() == null ) || ( createNodeResult.getErrors().isEmpty() ));
     }
 
 //========================================

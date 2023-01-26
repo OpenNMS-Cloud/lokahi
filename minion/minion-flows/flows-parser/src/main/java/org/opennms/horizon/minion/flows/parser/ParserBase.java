@@ -1,8 +1,8 @@
 /*******************************************************************************
  * This file is part of OpenNMS(R).
  *
- * Copyright (C) 2017 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2017 The OpenNMS Group, Inc.
+ * Copyright (C) 2017-2023 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
  *
@@ -89,6 +89,8 @@ public abstract class ParserBase implements Parser {
 
     private final String name;
 
+    private final String queueName;
+
     private final AsyncDispatcher<TelemetryMessage> dispatcher;
 
     private final IpcIdentity identity;
@@ -133,6 +135,7 @@ public abstract class ParserBase implements Parser {
 
     public ParserBase(final Protocol protocol,
                       final String name,
+                      final String queueName,
                       final AsyncDispatcher<TelemetryMessage> dispatcher,
                       final IpcIdentity identity,
                       final DnsResolver dnsResolver,
@@ -140,6 +143,7 @@ public abstract class ParserBase implements Parser {
         this.protocol = Objects.requireNonNull(protocol);
         this.name = Objects.requireNonNull(name);
         this.dispatcher = Objects.requireNonNull(dispatcher);
+        this.queueName = Objects.requireNonNull(queueName);
         this.identity = Objects.requireNonNull(identity);
         this.dnsResolver = Objects.requireNonNull(dnsResolver);
         Objects.requireNonNull(metricRegistry);
@@ -197,7 +201,9 @@ public abstract class ParserBase implements Parser {
 
     @Override
     public void stop() {
-        executor.shutdown();
+        if (executor != null) {
+            executor.shutdown();
+        }
     }
 
     @Override
@@ -321,7 +327,8 @@ public abstract class ParserBase implements Parser {
                         final var telemetryMessage = TelemetryMessage.newBuilder()
                             .setSourceAddress(InetAddressUtils.str(remoteAddress.getAddress()))
                             .setSourcePort(remoteAddress.getPort())
-                            .setBytes(ByteString.copyFrom(flowMessage.build().toByteArray())).build();
+                            .setBytes(ByteString.copyFrom(flowMessage.build().toByteArray()))
+                            .setQueue(this.getName()).build();
 
                         // Dispatch
                         dispatcher.send(telemetryMessage).whenComplete((b, exx) -> {

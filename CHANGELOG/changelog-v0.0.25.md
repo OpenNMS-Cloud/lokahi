@@ -1,0 +1,21 @@
+Changes:
+* 1a7f347e8 Merge pull request #615 from OpenNMS-Cloud/feature/HS-811
+* 388e4fbbe Merge pull request #610 from OpenNMS-Cloud/jira/DC-431
+* 3d53e7553 Merge pull request #613 from OpenNMS/feature/HS-810_remove_prometheus
+* 41a78abf5 Merge pull request #640 from OpenNMS-Cloud/yli/jira/HS-806_node_scan_task_responses
+* 53e29c91d Merge pull request #627 from OpenNMS-Cloud/feature/HS-816-refactor-onms-handler
+* 5f37ab3fa Merge pull request #626 from OpenNMS-Cloud/yli/jira/HS-805_data_model_and_db
+* 7152dd9df Merge pull request #625 from OpenNMS-Cloud/jira/DC-456
+* 7b8cf82b8 Merge pull request #512 from OpenNMS/feature/HS-521
+* 7b99b54a6 Merge pull request #641 from OpenNMS-Cloud/jh/jira/HS-842
+* 81a4ba516 Merge pull request #587 from OpenNMS-Cloud/jira/HS-782-minion-delete
+* 820b407c6 Merge pull request #642 from OpenNMS-Cloud/feature/HS-811
+* 92bf543e4 Merge pull request #589 from OpenNMS-Cloud/jira/HS-783-delete-node
+* 9fbe12192 Merge pull request #639 from OpenNMS-Cloud/feature/HS-862
+* b67bf827d Merge pull request #612 from OpenNMS/feature/HS-771
+* c465cffae Merge pull request #650 from OpenNMS-Cloud/feature/HS-867
+* d9c2d0b64 Merge pull request #609 from OpenNMS/jira/DC-496
+* de4cdcabe Merge pull request #628 from OpenNMS-Cloud/feature/HS-840-remove-packaged-helm-charts
+* e473ef261 Merge pull request #622 from OpenNMS-Cloud/feature/HS-817
+* ea8cf35c2 Merge pull request #590 from OpenNMS-Cloud/jira/HS-792-add-metric-timerange
+* ffb58b766 Merge pull request #601 from OpenNMS-Cloud/feature/HS-775_add_deadline_grpc_call

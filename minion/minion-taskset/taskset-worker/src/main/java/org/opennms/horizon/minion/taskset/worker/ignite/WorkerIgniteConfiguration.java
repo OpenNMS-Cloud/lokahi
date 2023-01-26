@@ -27,6 +27,7 @@ public class WorkerIgniteConfiguration {
     private final MetricExporterSpi metricExporterSpi;
     private final boolean useKubernetes;
     private final String kubernetesServiceName;
+    private final String kubernetesNamespace;
 
     public IgniteConfiguration prepareIgniteConfiguration() {
         IgniteConfiguration igniteConfiguration = new IgniteConfiguration();
@@ -80,6 +81,10 @@ public class WorkerIgniteConfiguration {
 
         KubernetesConnectionConfiguration connectionConfiguration = new KubernetesConnectionConfiguration();
         connectionConfiguration.setServiceName(kubernetesServiceName);
+
+        if ((kubernetesNamespace != null) && (! kubernetesNamespace.isEmpty())) {
+            connectionConfiguration.setNamespace(kubernetesNamespace);
+        }
 
         TcpDiscoveryKubernetesIpFinder ipFinder = new TcpDiscoveryKubernetesIpFinder(connectionConfiguration);
         tcpDiscoverySpi.setIpFinder(ipFinder);

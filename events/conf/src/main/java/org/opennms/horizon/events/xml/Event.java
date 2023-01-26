@@ -32,9 +32,9 @@ package org.opennms.horizon.events.xml;
 import org.opennms.horizon.events.util.InetAddressXmlAdapter;
 import org.opennms.horizon.events.util.StringUtils;
 
-import javax.validation.Valid;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotNull;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlAttribute;

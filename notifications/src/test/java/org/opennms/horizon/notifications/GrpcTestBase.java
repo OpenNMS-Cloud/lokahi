@@ -26,7 +26,7 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.notifications.grpc.config;
+package org.opennms.horizon.notifications;
 
 import io.grpc.BindableService;
 import io.grpc.ManagedChannel;
@@ -37,6 +37,7 @@ import io.grpc.inprocess.InProcessServerBuilder;
 import org.keycloak.common.VerificationException;
 import org.opennms.horizon.notifications.grpc.config.NotificationServerInterceptor;
 import org.opennms.horizon.shared.constants.GrpcConstants;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -58,6 +59,7 @@ public abstract class GrpcTestBase {
     protected final String headerWithoutTenant = "Bearer esgs12345invalid";
     protected final String differentTenantHeader = "Bearer esgs12345different";
     protected ManagedChannel channel;
+    @Autowired
     @SpyBean
     protected NotificationServerInterceptor spyInterceptor;
 

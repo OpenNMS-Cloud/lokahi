@@ -9,4 +9,6 @@ public abstract class GQLQueryConstants {
     public static final String LIST_MINION_INSTANCE_ECHO_METRICS_QUERY =
         "query { metric(name:\"response_time_msec\", labels: {monitor:\"ECHO\", instance:\"%s\"}) { status, data { result { metric }}} }";
 
+    public static final String CREATE_NODE_QUERY =
+        "mutation AddNode($node: NodeCreateInput!) { addNode(node: $node) { createTime id monitoringLocationId nodeLabel tenantId }}";
 }

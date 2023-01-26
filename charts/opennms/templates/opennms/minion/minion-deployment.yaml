@@ -60,6 +60,8 @@ spec:
               value: "true"
             - name: KUBERNETES_SERVICE_NAME
               value: "{{ .Values.OpenNMS.Minion.ServiceName }}"
+            - name: KUBERNETES_NAMESPACE
+              value: "{{ .Release.Namespace }}"
             - name: JAVA_TOOL_OPTIONS
               value: "-agentlib:jdwp=transport=dt_socket,server=y,address=5005,suspend=n,quiet=y" # FIXME: Permanent debug port, enable only for dev mode
             - name: MINION_LOCATION
@@ -74,6 +76,12 @@ spec:
               containerPort: {{ .Values.OpenNMS.Minion.TrapsListenerPort }}
             - name: ssh
               containerPort: {{ .Values.OpenNMS.Minion.SshPort }}
+            - name: netflow5
+              protocol: UDP
+              containerPort: {{ .Values.OpenNMS.Minion.Netflow5ListenerPort }}
+            - name: netflow9
+              protocol: UDP
+              containerPort: {{ .Values.OpenNMS.Minion.Netflow9ListenerPort }}
           volumeMounts:
             - name: minion-config-volume
               mountPath: "/opt/karaf/etc/org.opennms.core.ipc.grpc.client.cfg"

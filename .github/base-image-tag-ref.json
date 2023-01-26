@@ -1,0 +1,5 @@
+{
+  "image_tag_java": "eclipse-temurin:17-jre",
+  "test": "1",
+  "Description":"Tags and images to pull down and push to github private repo when updated."
+}

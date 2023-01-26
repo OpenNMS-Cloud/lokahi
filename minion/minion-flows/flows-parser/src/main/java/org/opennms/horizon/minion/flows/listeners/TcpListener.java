@@ -87,7 +87,17 @@ public class TcpListener implements GracefulShutdownListener, FlowsListener {
     public TcpListener(final String name,
                        final TcpParser parser,
                        final MetricRegistry metrics) {
+        this(name, 0, parser, metrics);
+    }
+
+    public TcpListener(final String name,
+                       final int port,
+                       final TcpParser parser,
+                       final MetricRegistry metrics) {
         this.name = Objects.requireNonNull(name);
+        if (port != 0) {
+            this.port = port;
+        }
         this.parser = Objects.requireNonNull(parser);
 
         packetsReceived = metrics.meter(MetricRegistry.name("org/opennms/horizon/minion/flows/listeners", name, "packetsReceived"));

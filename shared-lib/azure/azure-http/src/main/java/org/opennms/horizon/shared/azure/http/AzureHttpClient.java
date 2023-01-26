@@ -31,6 +31,8 @@ package org.opennms.horizon.shared.azure.http;
 import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
 import org.opennms.horizon.shared.azure.http.dto.AzureHttpParams;
+import org.opennms.horizon.shared.azure.http.dto.error.AzureErrorDescription;
+import org.opennms.horizon.shared.azure.http.dto.error.AzureHttpError;
 import org.opennms.horizon.shared.azure.http.dto.instanceview.AzureInstanceView;
 import org.opennms.horizon.shared.azure.http.dto.login.AzureOAuthToken;
 import org.opennms.horizon.shared.azure.http.dto.metrics.AzureMetrics;
@@ -182,15 +184,18 @@ public class AzureHttpClient {
             try {
                 HttpResponse<String> httpResponse = client.send(request, HttpResponse.BodyHandlers.ofString());
 
-                if (httpResponse.statusCode() == STATUS_CODE_SUCCESSFUL) {
+                String httpBody = httpResponse.body();
 
-                    String httpBody = httpResponse.body();
+                if (httpResponse.statusCode() == STATUS_CODE_SUCCESSFUL) {
                     return gson.fromJson(httpBody, clazz);
                 }
 
+                AzureHttpError error = gson.fromJson(httpBody, AzureHttpError.class);
+                AzureErrorDescription description = error.getError();
+
                 String message = String.format("Failed to get for endpoint: %s, status: %d, body: %s, retry: %d/%d",
                     endpoint, httpResponse.statusCode(), httpResponse.body(), retryCount, retries);
-                exception = new AzureHttpException(message);
+                exception = new AzureHttpException(message, description);
 
             } catch (IOException | InterruptedException e) {
                 String message = String.format("Failed to get for endpoint: %s, retry: %d/%d",

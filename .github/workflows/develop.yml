@@ -5,11 +5,10 @@ on:
     branches:
       - 'develop'
   pull_request:
-    # This workflow is triggered instead of individual workflows that filter based
-    # on paths.  If we want to fully separate individual workflows out of this one,
-    # we need fully reproducible builds.  Just use this one for now. The downside
-    # is it will run redundant workflows for code that didn't change.
-    #types: [labeled]
+# This workflow is triggered instead of individual workflows that filter based on paths.
+# If we want to fully separate individual workflows out of this one, we need fully reproducible builds.
+# Just use this one for now. The downside is it will run redundant workflows for code that didn't change.
+#    types: [labeled]
     branches:
       - 'develop'
   workflow_call:
@@ -224,4 +223,4 @@ jobs:
 
             echo ""
             echo "=== K8S APPLICATION LOGS ==="
-            kubectl logs -n hs-instance -l appdomain=opennms
+            kubectl logs -n hs-instance -l appdomain=opennms --tail=-1 --prefix --all-containers

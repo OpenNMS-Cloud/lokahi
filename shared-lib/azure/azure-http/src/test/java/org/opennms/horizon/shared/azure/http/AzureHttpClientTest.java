@@ -66,6 +66,7 @@ import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMoc
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 import static org.opennms.horizon.shared.azure.http.AzureHttpClient.INSTANCE_VIEW_ENDPOINT;
 import static org.opennms.horizon.shared.azure.http.AzureHttpClient.METRICS_ENDPOINT;
 import static org.opennms.horizon.shared.azure.http.AzureHttpClient.OAUTH2_TOKEN_ENDPOINT;
@@ -144,14 +145,18 @@ public class AzureHttpClientTest {
         wireMock.stubFor(post(url)
             .withHeader("Content-Type", new EqualToPattern("application/x-www-form-urlencoded"))
             .willReturn(ResponseDefinitionBuilder.responseDefinition()
+                .withBody("{\"error\":{\"code\":\"AuthorizationFailed\",\"message\":\"authorization failed message\"}}")
                 .withStatus(HttpStatus.SC_INTERNAL_SERVER_ERROR)));
 
         AzureHttpException e = assertThrows(AzureHttpException.class, () -> {
             this.client.login(TEST_DIRECTORY_ID, TEST_CLIENT_ID, TEST_CLIENT_SECRET, TEST_TIMEOUT, TEST_RETRIES);
         });
 
+        assertTrue(e.hasDescription());
+        assertEquals("AuthorizationFailed: authorization failed message", e.getDescription().toString());
+
         verify(exactly(TEST_RETRIES), postRequestedFor(urlEqualTo(url)));
-        assertEquals("Failed to get for endpoint: /%s/oauth2/token, status: 500, body: , retry: 2/2", e.getMessage());
+        assertEquals("Failed to get for endpoint: /%s/oauth2/token, status: 500, body: {\"error\":{\"code\":\"AuthorizationFailed\",\"message\":\"authorization failed message\"}}, retry: 2/2", e.getMessage());
     }
 
     @Test

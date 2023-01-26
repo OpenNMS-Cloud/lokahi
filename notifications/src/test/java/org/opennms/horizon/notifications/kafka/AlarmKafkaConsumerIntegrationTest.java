@@ -12,7 +12,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Captor;
 import org.opennms.horizon.notifications.NotificationsApplication;
-import org.opennms.horizon.notifications.api.PagerDutyAPIImpl;
 import org.opennms.horizon.notifications.exceptions.NotificationException;
 import org.opennms.horizon.notifications.service.NotificationService;
 import org.opennms.horizon.shared.dto.event.AlarmDTO;
@@ -22,10 +21,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
-import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.test.EmbeddedKafkaBroker;
@@ -91,12 +87,6 @@ class AlarmKafkaConsumerIntegrationTest {
 
         PagerDutyConfigDTO config = PagerDutyConfigDTO.newBuilder().setIntegrationKey(integrationKey).build();
         notificationService.postPagerDutyConfig(config);
-//        HttpHeaders headers = new HttpHeaders();
-//        HttpEntity<PagerDutyConfigDTO> request = new HttpEntity<>(config, headers);
-//
-//        testRestTemplate
-//            .withBasicAuth("testUser", "testPassword")
-//            .postForEntity("http://localhost:" + port + "/notifications/config", request, String.class);
     }
 
     @Test

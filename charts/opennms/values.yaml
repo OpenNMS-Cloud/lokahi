@@ -50,6 +50,8 @@ OpenNMS:
     Port: 8181
     SshPort: 8101
     TrapsListenerPort: 1162
+    Netflow5ListenerPort: 8877
+    Netflow9ListenerPort: 4729
     Resources:
       Limits:
         Cpu: "1"

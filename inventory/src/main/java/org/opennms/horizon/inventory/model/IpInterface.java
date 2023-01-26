@@ -39,12 +39,13 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
-import javax.validation.constraints.NotNull;
 import java.net.InetAddress;
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -72,6 +73,6 @@ public class IpInterface {
     private InetAddress ipAddress;
 
     @OneToMany(mappedBy = "ipInterface", orphanRemoval = true, cascade = CascadeType.ALL)
-    private List<MonitoredService> monitoredServices;
+    private List<MonitoredService> monitoredServices = new ArrayList<>();
 
 }

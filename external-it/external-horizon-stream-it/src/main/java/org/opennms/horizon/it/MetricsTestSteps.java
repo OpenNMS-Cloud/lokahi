@@ -70,8 +70,8 @@ public class MetricsTestSteps {
 // Test Step Definitions
 //----------------------------------------
 
-    @Then("Read the {string} from Prometheus with label {string} set to the Minion System ID for each Minion found with timeout {int}ms")
-    public void readTheFromPrometheusWithLabelSetToTheMinionSystemID(String metricName, String labelName, long timeout) throws MalformedURLException {
+    @Then("Read the {string} metrics with label {string} set to the Minion System ID for each Minion found with timeout {int}ms")
+    public void readTheMetricsWithLabelSetToTheMinionSystemID(String metricName, String labelName, long timeout) throws MalformedURLException {
         Awaitility
             .await()
             .ignoreExceptions()
@@ -79,6 +79,18 @@ public class MetricsTestSteps {
             .until(() -> this.commonCheckMinionMetrics(metricName, labelName))
             ;
     }
+
+
+    @Then("Read the {string} metrics with label {string} set to {string} with timeout {int}ms")
+    public void readTheMetricsWithLabelSetToWithTimeoutMs(String metricName, String labelName, String labelValue, int timeout) {
+        Awaitility
+            .await()
+            .ignoreExceptions()
+            .atMost(timeout, TimeUnit.MILLISECONDS)
+            .until(() -> this.commonCheckDeviceMetrics(metricName, labelName, labelValue))
+        ;
+    }
+
 
 //========================================
 // Internals
@@ -124,7 +136,7 @@ public class MetricsTestSteps {
         return restAssuredResponse;
     }
 
-    private List<Pair<MinionData, MetricQueryResult>> commonQueryMetrics(String metricName, String labelName) throws MalformedURLException {
+    private List<Pair<MinionData, MetricQueryResult>> commonQueryMinionMetrics(String metricName, String labelName) throws MalformedURLException {
         String accessToken = userAccessTokenSupplier.get();
 
         URL url = formatIngressUrl("/api/graphql");
@@ -151,19 +163,53 @@ public class MetricsTestSteps {
     }
 
     private boolean commonCheckMinionMetrics(String metricName, String labelName) throws MalformedURLException {
-        List<Pair<MinionData, MetricQueryResult>> minionMetrics = commonQueryMetrics(metricName, labelName);
+        List<Pair<MinionData, MetricQueryResult>> minionMetrics = commonQueryMinionMetrics(metricName, labelName);
         for (Pair<MinionData, MetricQueryResult> oneMinionMetric : minionMetrics) {
             MetricQueryResult metricQueryResult = oneMinionMetric.getRight();
 
-            LOG.info("METRIC FOR MINION: metric-name={}; monitor={}; value={}",
+            LOG.info("METRIC FOR MINION: metric-name={}; monitor={}; systemId={}; value={}; size={}",
                 metricQueryResult.getData().getMetric().getData().getResult().get(0).getMetric().get("__name__"),
                 metricQueryResult.getData().getMetric().getData().getResult().get(0).getMetric().get("monitor"),
-                metricQueryResult.getData().getMetric().getData().getResult().get(0).getValue().get(0)
+                metricQueryResult.getData().getMetric().getData().getResult().get(0).getMetric().get("system_id"),
+                metricQueryResult.getData().getMetric().getData().getResult().get(0).getValue().get(1),
+                metricQueryResult.getData().getMetric().getData().getResult().size()
             );
 
             assertEquals(1, metricQueryResult.getData().getMetric().getData().getResult().size());
             assertEquals("response_time_msec", metricQueryResult.getData().getMetric().getData().getResult().get(0).getMetric().get("__name__"));
         }
+
+        return true;
+    }
+
+    private MetricQueryResult commonQueryDeviceMetrics(String metricName, String labelName, String labelValue) throws MalformedURLException {
+        String accessToken = userAccessTokenSupplier.get();
+
+        URL url = formatIngressUrl("/api/graphql");
+
+        String query =
+            String.format(GQLQueryConstants.GET_LABELED_METRICS_QUERY, metricName, labelName, labelValue);
+
+        GQLQuery gqlQuery = new GQLQuery();
+        gqlQuery.setQuery(query);
+
+        Response restAssuredResponse = executePost(url, accessToken, gqlQuery);
+
+        assertEquals(200, restAssuredResponse.getStatusCode());
+
+        MetricQueryResult metricQueryResult = restAssuredResponse.getBody().as(MetricQueryResult.class);
+
+        return metricQueryResult;
+    }
+
+    private boolean commonCheckDeviceMetrics(String metricName, String labelName, String labelValue) throws MalformedURLException {
+        MetricQueryResult metricQueryResult = commonQueryDeviceMetrics(metricName, labelName, labelValue);
+
+        assertEquals(1, metricQueryResult.getData().getMetric().getData().getResult().size());
+
+        LOG.info("READ metric for device: metric-name={}; label-name={}; label-value={}; metric-value={}",
+            metricName, labelName, labelValue,
+            metricQueryResult.getData().getMetric().getData().getResult().get(0).getValue().get(1));
 
         return true;
     }

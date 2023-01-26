@@ -2120,6 +2120,11 @@
   resolved "https://registry.yarnpkg.com/@vue/test-utils/-/test-utils-2.2.7.tgz#0d93d635031a4cca2de70b825aef3fe20a41e702"
   integrity sha512-BMuoruUFTEqhLoOgsMcgNVMiByYbfHCKGr2C4CPdGtz/affUtDVX5zr1RnPuq0tYSiaqq+Enw5voUpG6JY8Q7g==
 
+"@vueform/slider@^2.1.7":
+  version "2.1.7"
+  resolved "https://registry.yarnpkg.com/@vueform/slider/-/slider-2.1.7.tgz#8e228bd18529980d34acf6711dd6afe053a8e23d"
+  integrity sha512-wKyiVVN03RKTV2vp7r50PDq5hcM4kVVzUO2ex+BAAtrn5oX08iU5NzWTWCuH7dCkiLMDRUVravDu3B0NwaxZMQ==
+
 "@vueuse/core@^9.11.1":
   version "9.11.1"
   resolved "https://registry.yarnpkg.com/@vueuse/core/-/core-9.11.1.tgz#1552aef67144220da7e6b797372a194a9c7ff52e"

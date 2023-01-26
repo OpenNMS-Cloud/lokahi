@@ -1,0 +1,37 @@
+name: Base Image Update
+
+on:
+  push:
+    paths:
+      - '.github/base-image-tag-ref.json'
+
+jobs:
+  pull-and-push:
+    name: Pull & Push
+    runs-on: ubuntu-latest
+    environment: docker-publish-account
+    steps:
+
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+
+      - name: Log in to the Container registry
+        # Need to pull images from github container registry first.
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Pull Image & Push
+        run: |
+
+          IMAGE=$(cat .github/base-image-tag-ref.json | jq .image_tag_java | sed 's/\"//g')
+
+          docker pull $IMAGE
+          docker tag $IMAGE ghcr.io/opennms-cloud/$IMAGE
+          docker push ghcr.io/opennms-cloud/$IMAGE
+
+        shell: bash
+        working-directory: ${{ inputs.working-directory }}

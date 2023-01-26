@@ -1,8 +1,8 @@
 /*******************************************************************************
  * This file is part of OpenNMS(R).
  *
- * Copyright (C) 2018 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2018 The OpenNMS Group, Inc.
+ * Copyright (C) 2018-2023 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
  *
@@ -62,11 +62,12 @@ public abstract class UdpParserBase extends ParserBase implements UdpParser {
 
     public UdpParserBase(final Protocol protocol,
                          final String name,
+                         final String queueName,
                          final AsyncDispatcher<TelemetryMessage> dispatcher,
                          final IpcIdentity identity,
                          final DnsResolver dnsResolver,
                          final MetricRegistry metricRegistry) {
-        super(protocol, name, dispatcher, identity, dnsResolver, metricRegistry);
+        super(protocol, name, queueName, dispatcher, identity, dnsResolver, metricRegistry);
 
         this.packetsReceived = metricRegistry.meter(MetricRegistry.name("parsers",  name, "packetsReceived"));
         this.parserErrors = metricRegistry.counter(MetricRegistry.name("parsers",  name, "parserErrors"));
@@ -111,7 +112,9 @@ public abstract class UdpParserBase extends ParserBase implements UdpParser {
 
     @Override
     public void stop() {
-        this.housekeepingFuture.cancel(false);
+        if (housekeepingFuture != null) {
+            this.housekeepingFuture.cancel(false);
+        }
         super.stop();
     }
 

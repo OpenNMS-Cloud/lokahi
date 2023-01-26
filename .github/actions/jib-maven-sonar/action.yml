@@ -34,8 +34,12 @@ runs:
         SONAR_TOKEN: ${{ inputs.sonar-token }}
         SONAR_PROJECT_KEY: ${{ inputs.project-key }}
       run: |
+        BASE_IMAGE=ghcr.io/opennms-cloud/$(cat ../.github/base-image-tag-ref.json | jq .image_tag_java | sed 's/\"//g')
+        docker pull $BASE_IMAGE
+
         mvn -B verify \
             jib:build -Dapplication.docker.image=$IMAGE \
+            -Djib.from.image=$BASE_IMAGE \
             org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=$SONAR_PROJECT_KEY
       shell: bash
       working-directory: ${{ inputs.working-directory }}

@@ -32,8 +32,6 @@ import lombok.Getter;
 import org.opennms.horizon.grpc.telemetry.contract.TelemetryMessage;
 import org.opennms.horizon.minion.flows.listeners.FlowsListener;
 import org.opennms.horizon.minion.flows.listeners.Parser;
-import org.opennms.horizon.minion.flows.listeners.TcpListener;
-import org.opennms.horizon.minion.flows.listeners.UdpListener;
 import org.opennms.horizon.minion.flows.listeners.factory.ListenerFactory;
 import org.opennms.horizon.minion.flows.listeners.factory.TelemetryRegistry;
 import org.opennms.horizon.minion.flows.parser.factory.ParserFactory;
@@ -46,23 +44,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 public class TelemetryRegistryImpl implements TelemetryRegistry {
     private static final Logger LOG = LoggerFactory.getLogger(TelemetryRegistryImpl.class);
 
-    private final MessageDispatcherFactory messageDispatcherFactory;
-
-    private final IpcIdentity identity;
-
     private final List<ListenerFactory> listenerFactories = new ArrayList<>();
     private final List<ParserFactory> parserFactoryList = new ArrayList<>();
 
-    // maintain a list of dispatchers to prevent already exist exception
-    private final Map<String, AsyncDispatcher<TelemetryMessage>> dispatcherMap = new HashMap<>();
+    private final AsyncDispatcher<TelemetryMessage> dispatcher;
 
     @Getter
     private final ListenerHolder listenerHolder;
@@ -70,11 +61,12 @@ public class TelemetryRegistryImpl implements TelemetryRegistry {
     public TelemetryRegistryImpl(MessageDispatcherFactory messageDispatcherFactory,
                                  IpcIdentity identity,
                                  ListenerHolder listenerHolder) {
-        this.messageDispatcherFactory = Objects.requireNonNull(messageDispatcherFactory);
-        this.identity = Objects.requireNonNull(identity);
+        Objects.requireNonNull(messageDispatcherFactory);
+        Objects.requireNonNull(identity);
         this.listenerHolder = Objects.requireNonNull(listenerHolder);
+        var sink = new FlowSinkModule(identity);
+        dispatcher = messageDispatcherFactory.createAsyncDispatcher(sink);
     }
-
 
     @Override
     public void addListenerFactory(ListenerFactory factory) {
@@ -125,14 +117,7 @@ public class TelemetryRegistryImpl implements TelemetryRegistry {
     }
 
     @Override
-    public AsyncDispatcher<TelemetryMessage> getDispatcher(String queueName) {
-        var dispatcher = dispatcherMap.get(queueName);
-        if (dispatcher != null) {
-            return dispatcher;
-        }
-        var sink = new FlowSinkModule(identity, queueName);
-        dispatcher = messageDispatcherFactory.createAsyncDispatcher(sink);
-        dispatcherMap.put(queueName, dispatcher);
+    public AsyncDispatcher<TelemetryMessage> getDispatcher() {
         return dispatcher;
     }
 }

@@ -60,6 +60,7 @@
         <jaeger.version>0.34.0</jaeger.version>
         <jakarta.annotation.version>2.1.1</jakarta.annotation.version>
         <jakarta.activation.version>2.1.1</jakarta.activation.version>
+        <jakarta.validation.version>3.0.2</jakarta.validation.version>
         <jakarta.xml.version>4.0.0</jakarta.xml.version>
         <jakarta.mail.version>1.6.7</jakarta.mail.version>
         <jakarta.servlet.version>6.0.0</jakarta.servlet.version>

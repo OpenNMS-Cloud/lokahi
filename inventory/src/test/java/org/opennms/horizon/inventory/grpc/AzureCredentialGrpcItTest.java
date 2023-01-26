@@ -32,6 +32,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder;
+import com.github.tomakehurst.wiremock.common.Json;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import com.github.tomakehurst.wiremock.matching.EqualToPattern;
 import com.google.rpc.Code;
@@ -60,6 +61,8 @@ import org.opennms.horizon.inventory.model.AzureCredential;
 import org.opennms.horizon.inventory.repository.AzureCredentialRepository;
 import org.opennms.horizon.inventory.repository.MonitoringLocationRepository;
 import org.opennms.horizon.shared.azure.http.dto.AzureHttpParams;
+import org.opennms.horizon.shared.azure.http.dto.error.AzureErrorDescription;
+import org.opennms.horizon.shared.azure.http.dto.error.AzureHttpError;
 import org.opennms.horizon.shared.azure.http.dto.login.AzureOAuthToken;
 import org.opennms.horizon.shared.azure.http.dto.subscription.AzureSubscription;
 import org.opennms.taskset.service.contract.TaskSetServiceGrpc;
@@ -191,6 +194,30 @@ class AzureCredentialGrpcItTest extends GrpcTestBase {
     }
 
     @Test
+    void testCreateAzureCredentialsFailedSubscription() throws Exception {
+        mockAzureLogin();
+        mockAzureGetSubscriptionFailed();
+
+        AzureCredentialCreateDTO createDTO = AzureCredentialCreateDTO.newBuilder()
+            .setLocation(DEFAULT_LOCATION)
+            .setClientId(TEST_CLIENT_ID)
+            .setClientSecret(TEST_CLIENT_SECRET)
+            .setSubscriptionId(TEST_SUBSCRIPTION_ID)
+            .setDirectoryId(TEST_DIRECTORY_ID)
+            .build();
+
+        StatusRuntimeException exception = assertThrows(StatusRuntimeException.class, () -> serviceStub.withInterceptors(MetadataUtils
+                .newAttachHeadersInterceptor(createAuthHeader(authHeader)))
+            .createCredentials(createDTO));
+        Status status = StatusProto.fromThrowable(exception);
+        assertEquals("Code: Message", status.getMessage());
+        assertThat(status.getCode()).isEqualTo(Code.INTERNAL_VALUE);
+        assertEquals(0, testGrpcService.getTimesCalled().intValue());
+        verify(spyInterceptor).verifyAccessToken(authHeader);
+        verify(spyInterceptor).interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));
+    }
+
+    @Test
     void testCreateAzureCredentialsDisabledSubscription() throws Exception {
         mockAzureLogin();
         mockAzureGetSubscription(false);
@@ -257,6 +284,25 @@ class AzureCredentialGrpcItTest extends GrpcTestBase {
         wireMock.stubFor(get(url)
             .withHeader("Authorization", new EqualToPattern("Bearer " + token.getAccessToken()))
             .willReturn(ResponseDefinitionBuilder.okForJson(azureSubscription)));
+    }
+
+    private void mockAzureGetSubscriptionFailed() {
+        AzureOAuthToken token = getAzureOAuthToken();
+
+        String url = String.format(SUBSCRIPTION_ENDPOINT, TEST_SUBSCRIPTION_ID)
+            + "?api-version=" + this.params.getApiVersion();
+
+        AzureHttpError error = new AzureHttpError();
+        AzureErrorDescription description = new AzureErrorDescription();
+        description.setCode("Code");
+        description.setMessage("Message");
+        error.setError(description);
+
+        wireMock.stubFor(get(url)
+            .withHeader("Authorization", new EqualToPattern("Bearer " + token.getAccessToken()))
+            .willReturn(ResponseDefinitionBuilder.responseDefinition()
+                .withStatus(500).withHeader("Content-Type", "application/json")
+                .withBody(Json.write(error))));
     }
 
     private AzureOAuthToken getAzureOAuthToken() {

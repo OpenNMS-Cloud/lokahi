@@ -34,7 +34,7 @@ package org.opennms.horizon.events.xml;
 
 import org.opennms.horizon.events.util.ValidateUsing;
 
-import javax.validation.constraints.Size;
+import jakarta.validation.constraints.Size;
 import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlElement;

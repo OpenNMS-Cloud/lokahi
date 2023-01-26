@@ -102,7 +102,7 @@ public class EventsConsumer {
         event.setTenantId(tenantId);
         event.setEventUei(eventProto.getUei());
         event.setIpAddress(InetAddressUtils.getInetAddress(eventProto.getIpAddress()));
-        event.setNodeId(event.getNodeId());
+        event.setNodeId(eventProto.getNodeId());
         event.setProducedTime(LocalDateTime.now());
         var eventParameters = new EventParameters();
         var paramsList = eventProto.getEventParamsList().stream().map(this::mapEventParam).collect(Collectors.toList());

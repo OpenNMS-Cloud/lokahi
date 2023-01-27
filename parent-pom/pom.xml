@@ -22,6 +22,8 @@
         <sonar.organization>opennms</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
 
+        <skipITs>false</skipITs>
+
         <!-- Jib properties -->
         <application.docker.image>${application.docker.image.name}:${application.docker.image.tag}</application.docker.image>
         <!-- application.docker.image.name MUST be set by child modules that use Jib. -->
@@ -82,6 +84,7 @@
         <jsr250.version>1.0</jsr250.version>
         <jsr305.version>3.0.2</jsr305.version>
         <karaf.version>4.4.2</karaf.version>
+        <karaf.maven-plugin.version>${karaf.version}</karaf.maven-plugin.version> <!-- use separate property in case a need to separate from the base Karaf version arises -->
         <keycloak.version>18.0.0</keycloak.version>
         <liquibaseVersion>4.17.0</liquibaseVersion>
         <log4j2.version>2.17.1</log4j2.version>
@@ -927,6 +930,11 @@
                     </configuration>
                 </plugin>
 
+                <plugin>
+                    <groupId>org.apache.karaf.tooling</groupId>
+                    <artifactId>karaf-maven-plugin</artifactId>
+                    <version>${karaf.maven-plugin.version}</version>
+                </plugin>
             </plugins>
         </pluginManagement>
     </build>
@@ -961,6 +969,20 @@
                     </plugin>
                 </plugins>
             </build>
+        </profile>
+
+        <!-- rapid-build PROFILE to speed up local development at the cost of reduced testing/validations -->
+        <profile>
+            <id>rapid-build</id>
+            <activation>
+                <file>
+                    <exists>${user.home}/.OPENNMS-RAPID-BUILD</exists>
+                </file>
+            </activation>
+            <properties>
+                <skipITs>true</skipITs>
+                <features.verify.skip>true</features.verify.skip> <!-- built-in property of karaf-maven-plugin -->
+            </properties>
         </profile>
     </profiles>
 

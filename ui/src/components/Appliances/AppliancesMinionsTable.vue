@@ -8,7 +8,6 @@
         data-test="hide-minions-btn"
         icon="Hide Minions" 
         @click="appliancesStore.hideMinionsTable"
-        v-if="!widgetProps?.isWidget"
       >
         <FeatherIcon :icon="ChevronLeft" />
       </FeatherButton>
@@ -73,7 +72,7 @@ import { useAppliancesQueries } from '@/store/Queries/appliancesQueries'
 import { useAppliancesStore } from '@/store/Views/appliancesStore'
 import ChevronLeft from '@featherds/icon/navigation/ChevronLeft'
 import Delete from '@featherds/icon/action/Delete'
-import { Monitor, WidgetProps } from '@/types'
+import { Monitor } from '@/types'
 import { ModalPrimary } from '@/types/modal'
 import { GraphProps } from '@/types/graphs'
 import { ExtendedMinion } from '@/types/minion'
@@ -82,8 +81,6 @@ import MetricChip from '../Common/MetricChip.vue'
 import useSnackbar from '@/composables/useSnackbar'
 import useModal from '@/composables/useModal'
 import { useMinionMutations } from '@/store/Mutations/minionMutations'
-
-defineProps<{widgetProps?: WidgetProps}>()
 
 const { showSnackbar } = useSnackbar()
 const { openModal, closeModal, isVisible } = useModal()

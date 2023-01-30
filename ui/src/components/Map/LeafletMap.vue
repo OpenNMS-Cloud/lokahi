@@ -1,6 +1,6 @@
 <template>
   <div v-if="nodesReady" class="geo-map">
-    <SeverityFilter v-if="!widgetProps?.isWidget" />
+    <SeverityFilter />
     <LMap
       ref="map"
       :center="center"
@@ -90,11 +90,8 @@ import { useMapStore } from '@/store/Views/mapStore'
 import useSpinner from '@/composables/useSpinner'
 import { Node } from '@/types/graphql'
 import useTheme from '@/composables/useTheme'
-import { WidgetProps } from '@/types'
 // @ts-ignore
 import { Map as LeafletMap, divIcon, MarkerCluster as Cluster } from 'leaflet'
-
-defineProps<{widgetProps?: WidgetProps}>()
 
 const markerCluster = ref()
 const computedEdges = ref<number[][][]>()

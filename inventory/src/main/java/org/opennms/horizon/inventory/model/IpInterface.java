@@ -75,4 +75,6 @@ public class IpInterface {
     @OneToMany(mappedBy = "ipInterface", orphanRemoval = true, cascade = CascadeType.ALL)
     private List<MonitoredService> monitoredServices = new ArrayList<>();
 
+    @Column(name = "snmp_primary")
+    private Boolean snmpPrimary;
 }

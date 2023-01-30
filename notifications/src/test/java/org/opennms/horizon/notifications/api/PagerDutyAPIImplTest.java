@@ -35,6 +35,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.opennms.horizon.notifications.dto.PagerDutyConfigDTO;
+import org.opennms.horizon.notifications.repository.PagerDutyConfigRepository;
 import org.opennms.horizon.shared.dto.event.AlarmDTO;
 import org.opennms.horizon.shared.dto.event.EventDTO;
 import org.opennms.horizon.shared.dto.event.EventParameterDTO;

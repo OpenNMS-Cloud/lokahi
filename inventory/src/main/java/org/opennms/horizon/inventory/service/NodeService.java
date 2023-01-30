@@ -31,6 +31,15 @@ package org.opennms.horizon.inventory.service;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 import org.apache.commons.lang3.StringUtils;
 import org.opennms.horizon.inventory.dto.NodeCreateDTO;
 import org.opennms.horizon.inventory.dto.NodeDTO;
@@ -52,16 +61,10 @@ import org.opennms.taskset.contract.TaskDefinition;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
-import java.util.stream.Collectors;
 
 
 @Service
@@ -103,6 +106,7 @@ public class NodeService {
             ipInterface.setNode(node);
             ipInterface.setTenantId(tenantId);
             ipInterface.setIpAddress(InetAddressUtils.getInetAddress(request.getManagementIp()));
+            ipInterface.setSnmpPrimary(true);
             ipInterfaceRepository.save(ipInterface);
         }
     }

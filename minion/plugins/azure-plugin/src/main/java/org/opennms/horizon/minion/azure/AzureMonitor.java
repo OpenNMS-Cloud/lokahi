@@ -76,7 +76,7 @@ public class AzureMonitor extends AbstractServiceMonitor {
 
                 future.complete(
                     ServiceMonitorResponseImpl.builder()
-                        .monitorType(MonitorType.ICMP) // HACK: using ICMP because the UI makes a query with ICMP for status
+                        .monitorType(MonitorType.AZURE)
                         .status(ServiceMonitorResponse.Status.Up)
                         .responseTime(System.currentTimeMillis() - startMs)
                         .nodeId(svc.getNodeId())
@@ -86,7 +86,7 @@ public class AzureMonitor extends AbstractServiceMonitor {
             } else {
                 future.complete(
                     ServiceMonitorResponseImpl.builder()
-                        .monitorType(MonitorType.ICMP)
+                        .monitorType(MonitorType.AZURE)
                         .status(ServiceMonitorResponse.Status.Down)
                         .nodeId(svc.getNodeId())
                         .ipAddress(request.getHost())
@@ -99,7 +99,7 @@ public class AzureMonitor extends AbstractServiceMonitor {
             future.complete(
                 ServiceMonitorResponseImpl.builder()
                     .reason("Failed to monitor for azure resource: " + e.getMessage())
-                    .monitorType(MonitorType.ICMP)
+                    .monitorType(MonitorType.AZURE)
                     .status(ServiceMonitorResponse.Status.Down)
                     .nodeId(svc.getNodeId())
                     .build()

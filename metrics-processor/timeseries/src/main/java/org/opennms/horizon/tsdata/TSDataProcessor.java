@@ -35,6 +35,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
+import org.opennms.horizon.azure.api.AzureResponseMetric;
+import org.opennms.horizon.azure.api.AzureResultMetric;
+import org.opennms.horizon.azure.api.AzureValueType;
 import org.opennms.horizon.timeseries.cortex.CortexTSS;
 import org.opennms.horizon.shared.constants.GrpcConstants;
 import org.opennms.horizon.snmp.api.SnmpResponseMetric;
@@ -163,47 +166,96 @@ public class TSDataProcessor {
 
         String[] labelValues = {response.getIpAddress(), result.getLocation(), result.getSystemId(),
             response.getMonitorType().name(), String.valueOf(response.getNodeId())};
-        if (response.hasResult() && response.getMonitorType().equals(MonitorType.SNMP)) {
-            Any collectorMetric = response.getResult();
-            var snmpResponse = collectorMetric.unpack(SnmpResponseMetric.class);
-            long now = Instant.now().toEpochMilli();
-            for (SnmpResultMetric snmpResult : snmpResponse.getResultsList()) {
-                try {
-                    PrometheusTypes.TimeSeries.Builder builder = prometheus.PrometheusTypes.TimeSeries.newBuilder();
-                    builder.addLabels(PrometheusTypes.Label.newBuilder()
-                        .setName(METRIC_NAME_LABEL)
-                        .setValue(CortexTSS.sanitizeMetricName(snmpResult.getAlias())));
-                    for (int i = 0; i < MONITOR_METRICS_LABEL_NAMES.length; i++) {
-                        builder.addLabels(prometheus.PrometheusTypes.Label.newBuilder()
-                            .setName(CortexTSS.sanitizeLabelName(MONITOR_METRICS_LABEL_NAMES[i]))
-                            .setValue(CortexTSS.sanitizeLabelValue(labelValues[i])));
-                    }
-                    int type = snmpResult.getValue().getTypeValue();
-                    switch (type) {
-                        case SnmpValueType.INT32_VALUE:
-                            builder.addSamples(PrometheusTypes.Sample.newBuilder()
-                                .setTimestamp(now)
-                                .setValue(snmpResult.getValue().getSint64()));
-                            break;
-                        case SnmpValueType.COUNTER32_VALUE:
-                            // TODO: Can't set a counter through prometheus API, may be possible with remote write
-                        case SnmpValueType.TIMETICKS_VALUE:
-                        case SnmpValueType.GAUGE32_VALUE:
-                            builder.addSamples(PrometheusTypes.Sample.newBuilder()
-                                .setTimestamp(now)
-                                .setValue(snmpResult.getValue().getUint64()));
-                            break;
-                        case SnmpValueType.COUNTER64_VALUE:
-                            double metric = new BigInteger(snmpResult.getValue().getBytes().toByteArray()).doubleValue();
-                            builder.addSamples(PrometheusTypes.Sample.newBuilder()
-                                .setTimestamp(now)
-                                .setValue(metric));
-                            break;
-                    }
-                    cortexTSS.store(tenantId, builder);
-                } catch (Exception e) {
-                    log.warn("Exception parsing metrics ", e);
+
+        if (response.hasResult()) {
+            MonitorType monitorType = response.getMonitorType();
+            if (monitorType.equals(MonitorType.SNMP)) {
+                processSnmpCollectorResponse(tenantId, response, labelValues);
+            } else if (monitorType.equals(MonitorType.AZURE)) {
+                processAzureCollectorResponse(tenantId, response, labelValues);
+            } else {
+                log.warn("Unrecognized monitor type");
+            }
+        } else {
+            log.warn("No result in response");
+        }
+    }
+
+    private void processSnmpCollectorResponse(String tenantId, CollectorResponse response, String[] labelValues)  throws IOException {
+        Any collectorMetric = response.getResult();
+        var snmpResponse = collectorMetric.unpack(SnmpResponseMetric.class);
+        long now = Instant.now().toEpochMilli();
+        for (SnmpResultMetric snmpResult : snmpResponse.getResultsList()) {
+            try {
+                PrometheusTypes.TimeSeries.Builder builder = prometheus.PrometheusTypes.TimeSeries.newBuilder();
+                builder.addLabels(PrometheusTypes.Label.newBuilder()
+                    .setName(METRIC_NAME_LABEL)
+                    .setValue(CortexTSS.sanitizeMetricName(snmpResult.getAlias())));
+                for (int i = 0; i < MONITOR_METRICS_LABEL_NAMES.length; i++) {
+                    builder.addLabels(prometheus.PrometheusTypes.Label.newBuilder()
+                        .setName(CortexTSS.sanitizeLabelName(MONITOR_METRICS_LABEL_NAMES[i]))
+                        .setValue(CortexTSS.sanitizeLabelValue(labelValues[i])));
                 }
+                int type = snmpResult.getValue().getTypeValue();
+                switch (type) {
+                    case SnmpValueType.INT32_VALUE:
+                        builder.addSamples(PrometheusTypes.Sample.newBuilder()
+                            .setTimestamp(now)
+                            .setValue(snmpResult.getValue().getSint64()));
+                        break;
+                    case SnmpValueType.COUNTER32_VALUE:
+                        // TODO: Can't set a counter through prometheus API, may be possible with remote write
+                    case SnmpValueType.TIMETICKS_VALUE:
+                    case SnmpValueType.GAUGE32_VALUE:
+                        builder.addSamples(PrometheusTypes.Sample.newBuilder()
+                            .setTimestamp(now)
+                            .setValue(snmpResult.getValue().getUint64()));
+                        break;
+                    case SnmpValueType.COUNTER64_VALUE:
+                        double metric = new BigInteger(snmpResult.getValue().getBytes().toByteArray()).doubleValue();
+                        builder.addSamples(PrometheusTypes.Sample.newBuilder()
+                            .setTimestamp(now)
+                            .setValue(metric));
+                        break;
+                }
+                cortexTSS.store(tenantId, builder);
+            } catch (Exception e) {
+                log.warn("Exception parsing metrics ", e);
+            }
+        }
+    }
+
+    private void processAzureCollectorResponse(String tenantId, CollectorResponse response, String[] labelValues) throws InvalidProtocolBufferException {
+        Any collectorMetric = response.getResult();
+        var azureResponse = collectorMetric.unpack(AzureResponseMetric.class);
+        long now = Instant.now().toEpochMilli();
+
+        for (AzureResultMetric azureResult : azureResponse.getResultsList()) {
+            try {
+                PrometheusTypes.TimeSeries.Builder builder = PrometheusTypes.TimeSeries.newBuilder();
+                builder.addLabels(PrometheusTypes.Label.newBuilder()
+                    .setName(METRIC_NAME_LABEL)
+                    .setValue(CortexTSS.sanitizeMetricName(azureResult.getAlias())));
+
+                for (int i = 0; i < MONITOR_METRICS_LABEL_NAMES.length; i++) {
+                    builder.addLabels(PrometheusTypes.Label.newBuilder()
+                        .setName(CortexTSS.sanitizeLabelName(MONITOR_METRICS_LABEL_NAMES[i]))
+                        .setValue(CortexTSS.sanitizeLabelValue(labelValues[i])));
+                }
+
+                int type = azureResult.getValue().getTypeValue();
+                switch (type) {
+                    case AzureValueType.INT64_VALUE:
+                        builder.addSamples(PrometheusTypes.Sample.newBuilder()
+                            .setTimestamp(now)
+                            .setValue(azureResult.getValue().getUint64()));
+                        break;
+                    default:
+                        log.warn("Unrecognized azure value type");
+                }
+                cortexTSS.store(tenantId, builder);
+            } catch (Exception e) {
+                log.warn("Exception parsing azure metrics ", e);
             }
         }
     }

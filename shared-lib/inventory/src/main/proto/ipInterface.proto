@@ -38,4 +38,5 @@ message IpInterfaceDTO {
   string tenant_id = 2;
   int64 node_id = 3;
   string ip_address = 4;
+  bool snmp_primary = 5;
 }

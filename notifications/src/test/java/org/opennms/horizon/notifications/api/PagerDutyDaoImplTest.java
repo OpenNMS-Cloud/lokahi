@@ -36,10 +36,14 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.opennms.horizon.notifications.dto.PagerDutyConfigDTO;
 import org.opennms.horizon.notifications.exceptions.NotificationConfigUninitializedException;
+import org.opennms.horizon.notifications.mapper.PagerDutyConfigMapper;
+import org.opennms.horizon.notifications.model.PagerDutyConfig;
+import org.opennms.horizon.notifications.repository.PagerDutyConfigRepository;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -56,23 +60,26 @@ public class PagerDutyDaoImplTest {
     PagerDutyDaoImpl pagerDutyDao;
 
     @Mock
-    JdbcTemplate jdbcTemplate;
+    PagerDutyConfigRepository pagerDutyConfigRepository;
+
+    @Mock
+    PagerDutyConfigMapper pagerDutyConfigMapper;
 
     @Test
     public void updateConfig() throws Exception {
-        Mockito.when(jdbcTemplate.queryForObject(anyString(), any(Class.class))).thenReturn(Integer.valueOf(1));
+        Mockito.when(pagerDutyConfigRepository.findAll()).thenReturn(Arrays.asList(new PagerDutyConfig()));
         PagerDutyConfigDTO config = getConfigDTO();
         pagerDutyDao.saveConfig(config);
 
-        Mockito.verify(jdbcTemplate, times(1)).update(anyString(), anyString());
+        Mockito.verify(pagerDutyConfigRepository, times(1)).save(any());
     }
     @Test
     public void insertConfig() throws Exception {
-        Mockito.when(jdbcTemplate.queryForObject(anyString(), any(Class.class))).thenReturn(Integer.valueOf(0));
+        Mockito.when(pagerDutyConfigRepository.findAll()).thenReturn(new ArrayList<>());
         PagerDutyConfigDTO config = getConfigDTO();
         pagerDutyDao.saveConfig(config);
 
-        Mockito.verify(jdbcTemplate, times(1)).update(anyString(), anyString());
+        Mockito.verify(pagerDutyConfigRepository, times(1)).save(any());
     }
 
     @Test
@@ -86,27 +93,12 @@ public class PagerDutyDaoImplTest {
 
     @Test
     public void getInitialisedConfig() throws Exception {
-        List<PagerDutyConfigDTO> configs = Arrays.asList(getConfigDTO());
-        Mockito.when(jdbcTemplate.query(any(String.class), any(RowMapper.class))).thenReturn(configs);
+        List<PagerDutyConfig> configs = Arrays.asList(new PagerDutyConfig());
+        Mockito.when(pagerDutyConfigRepository.findAll()).thenReturn(configs);
+        Mockito.when(pagerDutyConfigMapper.modelToDTO(any())).thenReturn(getConfigDTO());
         PagerDutyConfigDTO config = pagerDutyDao.getConfig();
 
         assertEquals("integration_key", config.getIntegrationKey());
-    }
-
-    @Test
-    public void getUnInitialisedConfigNoTable() {
-        doThrow(BadSqlGrammarException.class)
-            .when(jdbcTemplate).query(any(String.class), any(RowMapper.class));
-
-        boolean exceptionCaught = false;
-        try{
-            pagerDutyDao.getConfig();
-        } catch (NotificationConfigUninitializedException e) {
-            assertEquals("PagerDuty config not initialized. Table does not exist.", e.getMessage());
-            exceptionCaught = true;
-        }
-
-        assertTrue(exceptionCaught);
     }
 
     private PagerDutyConfigDTO getConfigDTO() {

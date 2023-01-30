@@ -1,0 +1,16 @@
+<blueprint xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
+           xsi:schemaLocation="http://www.osgi.org/xmlns/blueprint/v1.0.0 http://www.osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd">
+
+    <reference availability="optional" id="snmpHelper" interface="org.opennms.horizon.shared.snmp.SnmpHelper" />
+
+    <bean id="nodeScannerManager" class="org.opennms.horizon.minion.nodescan.NodeScannerManager">
+        <argument ref="snmpHelper"/>
+    </bean>
+
+    <service ref="nodeScannerManager" interface="org.opennms.horizon.minion.plugin.api.ScannerManager">
+        <service-properties>
+            <entry key="scanner.name" value="NodeScanner" />
+        </service-properties>
+    </service>
+</blueprint>

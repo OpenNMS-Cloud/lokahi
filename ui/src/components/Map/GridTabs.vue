@@ -9,7 +9,6 @@
 </template>
 <script setup lang="ts">
 import { useMapStore } from '@/store/Views/mapStore'
-import { FeatherTab, FeatherTabContainer } from '@featherds/tabs'
 
 const mapStore = useMapStore()
 const router = useRouter()

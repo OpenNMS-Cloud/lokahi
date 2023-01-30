@@ -38,4 +38,5 @@ public class IpInterface {
     private String tenantId;
     private long nodeId;
     private String ipAddress;
+    private Boolean snmpPrimary;
 }

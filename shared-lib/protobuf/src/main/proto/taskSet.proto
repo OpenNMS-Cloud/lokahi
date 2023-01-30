@@ -51,7 +51,7 @@ enum TaskType {
 
 
 enum ScanType {
-  AZURE = 0;
+  AZURE_SCAN = 0;
   NODE_SCAN = 1;
 }
 
@@ -60,6 +60,7 @@ enum MonitorType {
   ICMP = 1;
   SNMP = 2;
   ECHO = 3;
+  AZURE = 4;
 }
 
 message TaskDefinition {

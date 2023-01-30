@@ -14,6 +14,7 @@
     <repository>mvn:org.opennms.horizon.minion/traps-features/${project.version}/xml/features</repository>
     <repository>mvn:org.opennms.horizon.minion/flows-features/${project.version}/xml/features</repository>
     <repository>mvn:org.opennms.horizon.minion/azure-plugin/${project.version}/xml/features</repository>
+    <repository>mvn:org.opennms.horizon.minion/nodescan-plugin/${project.version}/xml/features</repository>
 
 
     <feature name="minion-ng">
@@ -25,6 +26,7 @@
         <feature>minion-traps</feature>
         <feature>minion-flows</feature>
         <feature>azure-plugins</feature>
+        <feature>node-scan-plugin</feature>
     </feature>
 
 

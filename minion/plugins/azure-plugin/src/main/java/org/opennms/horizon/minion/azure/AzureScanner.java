@@ -46,7 +46,6 @@ import org.slf4j.LoggerFactory;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 
 public class AzureScanner implements Scanner {
     private static final Logger log = LoggerFactory.getLogger(AzureScanner.class);
@@ -92,7 +91,7 @@ public class AzureScanner implements Scanner {
                         .setResourceGroup(resourceGroup)
                         .setCredentialId(request.getCredentialId())
                         .build())
-                    .collect(Collectors.toList()));
+                    .toList());
             }
 
             future.complete(

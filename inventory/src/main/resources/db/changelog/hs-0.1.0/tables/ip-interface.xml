@@ -25,7 +25,6 @@
             <column name="ip_address" type="INET">
                 <constraints nullable="false"/>
             </column>
-
         </createTable>
 
         <addPrimaryKey tableName="ip_interface" columnNames="id" constraintName="pk_ip_interface_id"/>

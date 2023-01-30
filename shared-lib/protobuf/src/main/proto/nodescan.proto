@@ -27,6 +27,8 @@
  *******************************************************************************/
 syntax = "proto3";
 
+import "google/protobuf/any.proto";
+
 package opennms.node.scan;
 option java_multiple_files = true;
 option java_package = "org.opennms.node.scan.contract";
@@ -72,6 +74,14 @@ message SnmpInterfaceResult {
   int32 ifAdminStatus = 7;
   int32 ifOperatorStatus = 8;
   string ifAlias = 9;
+}
+
+message NodeScanResult {
+  NodeInfoResult nodeInfo = 1;
+  repeated IfServiceResult ifServices = 2;
+  repeated SnmpInterfaceResult snmpInterfaces = 3;
+  //TODO: might be changed
+  repeated google.protobuf.Any otherResults = 4;
 }
 
 

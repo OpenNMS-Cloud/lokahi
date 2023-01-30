@@ -9,7 +9,10 @@ const mismatchedDirNames: Record<string, string> = {
   'radio-group': 'radio',
   'chip': 'chips',
   'chip-list': 'chips',
-  'dropdown-item': 'dropdown'
+  'dropdown-item': 'dropdown',
+  'tab': 'tabs',
+  'tab-container': 'tabs',
+  'tab-panel': 'tabs'
 }
 
 const getDirectory = (partialComponentName: string): string => {

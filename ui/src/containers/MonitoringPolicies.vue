@@ -8,7 +8,9 @@
         <FeatherTab>Existing Policies</FeatherTab>
       </template>
       <FeatherTabPanel class="panel"><AddNewPolicy /></FeatherTabPanel>
-      <FeatherTabPanel class="panel"> Content for Policy List </FeatherTabPanel>
+      <FeatherTabPanel class="panel">
+        <ExistingItems :list="store.existingPolicies" />
+      </FeatherTabPanel>
     </FeatherTabContainer>
 
     <div class="title-rule">Rules</div>
@@ -18,13 +20,17 @@
         <FeatherTab>Existing Rules</FeatherTab>
       </template>
       <FeatherTabPanel class="panel"><AddNewRule /><DetectionMethod /><AlertConditions /></FeatherTabPanel>
-      <FeatherTabPanel class="panel"> Content for Existing Rule List </FeatherTabPanel>
+      <FeatherTabPanel class="panel">
+        <ExistingItems :list="store.existingRules" />
+      </FeatherTabPanel>
     </FeatherTabContainer>
+    <SaveButtons />
   </div>
 </template>
 
 <script setup lang="ts">
-import { FeatherTab, FeatherTabContainer, FeatherTabPanel } from '@featherds/tabs'
+import { useMonitoringPoliciesStore } from '@/store/Views/monitoringPoliciesStore'
+const store = useMonitoringPoliciesStore()
 </script>
 
 <style scoped lang="scss">
@@ -43,7 +49,7 @@ import { FeatherTab, FeatherTabContainer, FeatherTabPanel } from '@featherds/tab
     border: 1px var(variables.$shade-4) solid;
   }
   .tab-container {
-    margin-bottom: var(variables.$spacing-xxl);
+    margin-bottom: var(variables.$spacing-m);
   }
   .title-rule {
     @include typography.headline3;

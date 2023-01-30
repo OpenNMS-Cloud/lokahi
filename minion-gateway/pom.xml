@@ -25,7 +25,6 @@
         <application.docker.image.name>opennms/horizon-stream-minion-gateway</application.docker.image.name>
         <application.docker.image.skipPush>false</application.docker.image.skipPush>
         <docker.it.network>rest-server-it-network</docker.it.network>
-        <skipITs>false</skipITs>
     </properties>
 
     <modules>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+ 
+<databaseChangeLog
+	xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd
+		http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+
+	<changeSet author="jhutc" id="pager_duty_config_update">
+		<validCheckSum>ANY</validCheckSum>
+		<preConditions onFail="MARK_RAN">
+			<tableExists tableName="pager_duty_config" />
+		</preConditions> 
+
+		<addColumn tableName="pager_duty_config">
+            <column name="id" type="BIGINT" autoIncrement="true"/>
+		</addColumn>
+
+        <addPrimaryKey tableName="pager_duty_config" columnNames="id"
+                       constraintName="pk_pager_duty_config_id"/>
+
+    </changeSet>
+
+</databaseChangeLog>

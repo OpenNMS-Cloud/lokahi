@@ -30,6 +30,10 @@ package org.opennms.horizon.minion.azure;
 
 import com.google.protobuf.Any;
 import org.opennms.azure.contract.AzureCollectorRequest;
+import org.opennms.horizon.azure.api.AzureResponseMetric;
+import org.opennms.horizon.azure.api.AzureResultMetric;
+import org.opennms.horizon.azure.api.AzureValueMetric;
+import org.opennms.horizon.azure.api.AzureValueType;
 import org.opennms.horizon.minion.plugin.api.CollectionRequest;
 import org.opennms.horizon.minion.plugin.api.CollectionSet;
 import org.opennms.horizon.minion.plugin.api.ServiceCollector;
@@ -39,10 +43,6 @@ import org.opennms.horizon.shared.azure.http.AzureHttpException;
 import org.opennms.horizon.shared.azure.http.dto.instanceview.AzureInstanceView;
 import org.opennms.horizon.shared.azure.http.dto.login.AzureOAuthToken;
 import org.opennms.horizon.shared.azure.http.dto.metrics.AzureMetrics;
-import org.opennms.horizon.snmp.api.SnmpResponseMetric;
-import org.opennms.horizon.snmp.api.SnmpResultMetric;
-import org.opennms.horizon.snmp.api.SnmpValueMetric;
-import org.opennms.horizon.snmp.api.SnmpValueType;
 import org.opennms.taskset.contract.MonitorType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,7 +51,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 
 public class AzureCollector implements ServiceCollector {
     private final Logger log = LoggerFactory.getLogger(AzureCollector.class);
@@ -102,14 +101,14 @@ public class AzureCollector implements ServiceCollector {
 
                 collect(request, token, collectedData);
 
-                SnmpResponseMetric results = SnmpResponseMetric.newBuilder()
+                AzureResponseMetric results = AzureResponseMetric.newBuilder()
                     .addAllResults(mapCollectedDataToResults(request, collectedData))
                     .build();
 
                 future.complete(ServiceCollectorResponseImpl.builder()
                     .results(results)
                     .nodeId(collectionRequest.getNodeId())
-                    .monitorType(MonitorType.SNMP)
+                    .monitorType(MonitorType.AZURE)
                     .status(true)
                     .ipAddress(request.getHost())
                     .timeStamp(System.currentTimeMillis())
@@ -118,7 +117,7 @@ public class AzureCollector implements ServiceCollector {
             } else {
                 future.complete(ServiceCollectorResponseImpl.builder()
                     .nodeId(collectionRequest.getNodeId())
-                    .monitorType(MonitorType.SNMP)
+                    .monitorType(MonitorType.AZURE)
                     .status(false)
                     .ipAddress(request.getHost())
                     .build());
@@ -127,7 +126,7 @@ public class AzureCollector implements ServiceCollector {
             log.error("Failed to collect for azure resource", e);
             future.complete(ServiceCollectorResponseImpl.builder()
                 .nodeId(collectionRequest.getNodeId())
-                .monitorType(MonitorType.SNMP)
+                .monitorType(MonitorType.AZURE)
                 .status(false)
                 .build());
         }
@@ -150,24 +149,24 @@ public class AzureCollector implements ServiceCollector {
         metrics.collect(collectedData);
     }
 
-    private List<SnmpResultMetric> mapCollectedDataToResults(AzureCollectorRequest request,
-                                                             Map<String, Double> collectedData) {
+    private List<AzureResultMetric> mapCollectedDataToResults(AzureCollectorRequest request,
+                                                              Map<String, Double> collectedData) {
         return collectedData.entrySet().stream()
             .map(collectedMetric -> mapMetric(request, collectedMetric))
-            .collect(Collectors.toList());
+            .toList();
     }
 
-    private SnmpResultMetric mapMetric(AzureCollectorRequest request,
-                                       Map.Entry<String, Double> collectedMetric) {
+    private AzureResultMetric mapMetric(AzureCollectorRequest request,
+                                        Map.Entry<String, Double> collectedMetric) {
 
-        return SnmpResultMetric.newBuilder()
-            .setBase(request.getResourceGroup())
-            .setInstance(request.getResource())
+        return AzureResultMetric.newBuilder()
+            .setResourceGroup(request.getResourceGroup())
+            .setResourceName(request.getResource())
             .setAlias(getAlias(collectedMetric.getKey()))
             .setValue(
-                SnmpValueMetric.newBuilder()
-                    .setType(SnmpValueType.INT32)
-                    .setSint64(collectedMetric.getValue().longValue())
+                AzureValueMetric.newBuilder()
+                    .setType(AzureValueType.INT64)
+                    .setUint64(collectedMetric.getValue().longValue())
                     .build())
             .build();
     }

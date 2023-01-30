@@ -16,6 +16,11 @@ const router = createRouter({
       }
     },
     {
+      path: '/dashboard', // Temporary route - will change to '/' once complete.
+      name: 'Dashboard',
+      component: () => import('@/containers/Dashboard.vue')
+    },
+    {
       path: '/graphs/:id',
       name: 'Graphs',
       component: () => import('@/containers/Graphs.vue')

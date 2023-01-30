@@ -50,6 +50,7 @@ import static org.mockito.internal.verification.VerificationModeFactory.times;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -70,6 +71,7 @@ import org.opennms.horizon.inventory.dto.NodeIdList;
 import org.opennms.horizon.inventory.dto.NodeList;
 import org.opennms.horizon.inventory.dto.NodeServiceGrpc;
 import org.opennms.horizon.inventory.dto.TagCreateDTO;
+import org.opennms.horizon.inventory.dto.TagCreateListDTO;
 import org.opennms.horizon.inventory.dto.TagDTO;
 import org.opennms.horizon.inventory.grpc.taskset.TestTaskSetGrpcService;
 import org.opennms.horizon.inventory.mapper.NodeMapper;
@@ -428,27 +430,28 @@ class NodeGrpcItTest extends GrpcTestBase {
         node2.setMonitoringLocationId(location.getId());
         node2 = nodeRepository.saveAndFlush(node2);
 
-        TagCreateDTO createTagDTO1 = TagCreateDTO.newBuilder()
+        TagCreateDTO createDTO1 = TagCreateDTO.newBuilder()
             .setName("test-tag-name-1")
-            .setNodeId(node1.getId())
             .build();
 
-        tagService.createTag(tenantId, createTagDTO1);
-
-        TagCreateDTO createTagDTO2 = TagCreateDTO.newBuilder()
+        TagCreateDTO createDTO2 = TagCreateDTO.newBuilder()
             .setName("test-tag-name-2")
-            .setNodeId(node1.getId())
             .build();
 
-        tagService.createTag(tenantId, createTagDTO2);
+        TagCreateListDTO createListDTO1 = TagCreateListDTO.newBuilder()
+            .addAllTags(List.of(createDTO1, createDTO2)).setNodeId(node1.getId()).build();
 
-        //add same tag to another node
-        TagCreateDTO createTagDTO3 = TagCreateDTO.newBuilder()
-            .setName("test-tag-name-3")
-            .setNodeId(node2.getId())
+        tagService.addTags(tenantId, createListDTO1);
+
+        TagCreateDTO createDTO3 = TagCreateDTO.newBuilder()
+            .setName("test-tag-name-2")
             .build();
 
-        TagDTO tag3 = tagService.createTag(tenantId, createTagDTO3);
+        TagCreateListDTO createListDTO3 = TagCreateListDTO.newBuilder()
+            .addAllTags(List.of(createDTO3)).setNodeId(node2.getId()).build();
+
+        List<TagDTO> tagsList3 = tagService.addTags(tenantId, createListDTO3);
+        TagDTO tag3 = tagsList3.get(0);
 
         serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).deleteNode(Int64Value.of(node1.getId()));
         nodeRepository.flush();

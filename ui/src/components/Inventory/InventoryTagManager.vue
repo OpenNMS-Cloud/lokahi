@@ -1,43 +1,77 @@
 <template>
-  <div class="tag-manager-box" v-if="isTaggingBoxOpen">
-    <section class="select-tags">
+  <div
+    class="tag-manager-box"
+    v-if="isTaggingBoxOpen"
+  >
+    <section
+      class="select-tags"
+      data-testid="select-tags"
+    >
       <div class="top">
         <div class="heading-total-selected">
           <h4>Select Tags:</h4>
           <div class="total-selected">
-            <div>TOTAL: <span>{{ tags.length }}</span><span class="pipe">|</span></div>
-            <div>SELECTED: <span>{{ selectedTags.length }}</span></div>
+            <div>
+              TOTAL: <span>{{ tags.length }}</span
+              ><span class="pipe">|</span>
+            </div>
+            <div>
+              SELECTED: <span>{{ selectedTags.length }}</span>
+            </div>
           </div>
         </div>
         <div class="search-add">
           <!-- Add tag -->
-          <InputButtonPopover :handler="addTag" label="Add Tag" />
+          <InputButtonPopover
+            :handler="addTag"
+            label="Add Tag"
+          />
           <!-- Search tags input -->
           <FeatherInput
             :modelValue="searchValue"
             @update:model-value="tagsFiltering"
             clear="clear"
             label="Search Tags"
-            class="search" />
+            class="search"
+          />
         </div>
       </div>
-      <FeatherChipList condensed label="Tags" :key="selectedTags.toString()">
-        <FeatherChip 
-          v-for="tag of tags" 
-          :key="tag" 
+      <FeatherChipList
+        condensed
+        label="Tags"
+        :key="selectedTags.toString()"
+      >
+        <FeatherChip
+          v-for="tag of tags"
+          :key="tag"
           class="pointer"
-          :class="{ 'selected' : selectedTags.includes(tag) }"
+          :class="{ selected: selectedTags.includes(tag) }"
           @click="taggingStore.toggleTag(tag)"
         >
           {{ tag }}
         </FeatherChip>
       </FeatherChipList>
     </section>
-    <section class="tag-nodes">
+    <section
+      class="tag-nodes"
+      data-testid="tag-nodes"
+    >
       <h4>Tag Nodes:</h4>
-      <FeatherRadioGroup label="" v-model="taggingStore.tagNodesSelected" class="select-tag-nodes">
-        <FeatherRadio :value="TagNodesType.All" :disabled="selectedTags.length === 0">All</FeatherRadio>
-        <FeatherRadio :value="TagNodesType.Individual" :disabled="selectedTags.length === 0">Individual</FeatherRadio>
+      <FeatherRadioGroup
+        label=""
+        v-model="taggingStore.tagNodesSelected"
+        class="select-tag-nodes"
+      >
+        <FeatherRadio
+          :value="TagNodesType.All"
+          :disabled="selectedTags.length === 0"
+          >All</FeatherRadio
+        >
+        <FeatherRadio
+          :value="TagNodesType.Individual"
+          :disabled="selectedTags.length === 0"
+          >Individual</FeatherRadio
+        >
         <FeatherRadio :value="TagNodesType.Clear">Clear</FeatherRadio>
       </FeatherRadioGroup>
     </section>
@@ -65,7 +99,7 @@ watchEffect(() => {
 })
 
 const isTaggingBoxOpen = computed(() => {
-  if(!inventoryStore.isTaggingBoxOpen) {
+  if (!inventoryStore.isTaggingBoxOpen) {
     taggingQueries.resetTags()
   } else {
     taggingQueries.fetchTags()
@@ -79,7 +113,7 @@ const addTag = (val: string) => {
 }
 
 const tagsFiltering = (val: string) => {
-  if(!val?.length) {
+  if (!val?.length) {
     tags.value = taggingQueries.tags
   } else {
     tags.value = taggingQueries.tags.filter((tag: string) => tag.includes(val))
@@ -88,10 +122,10 @@ const tagsFiltering = (val: string) => {
 </script>
 
 <style scoped lang="scss">
-@use "@featherds/styles/themes/variables";
-@use "@featherds/styles/mixins/typography";
-@use "@/styles/vars";
-@use "@/styles/mediaQueries";
+@use '@featherds/styles/themes/variables';
+@use '@featherds/styles/mixins/typography';
+@use '@/styles/vars';
+@use '@/styles/mediaQueries';
 
 .tag-manager-box {
   display: flex;
@@ -176,7 +210,7 @@ const tagsFiltering = (val: string) => {
 .tag-nodes {
   display: flex;
   flex-direction: row;
-  width: 100%;;
+  width: 100%;
   min-width: 445px;
   margin-top: var(variables.$spacing-m);
   padding-top: var(variables.$spacing-m);

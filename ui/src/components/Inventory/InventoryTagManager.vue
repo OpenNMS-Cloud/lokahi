@@ -1,11 +1,12 @@
 <template>
   <div
-    class="tag-manager-box"
     v-if="isTaggingBoxOpen"
+    class="tag-manager-box"
+    data-test="tag-manager-box"
   >
     <section
       class="select-tags"
-      data-testid="select-tags"
+      data-test="select-tags"
     >
       <div class="top">
         <div class="heading-total-selected">
@@ -54,7 +55,7 @@
     </section>
     <section
       class="tag-nodes"
-      data-testid="tag-nodes"
+      data-test="tag-nodes"
     >
       <h4>Tag Nodes:</h4>
       <FeatherRadioGroup

@@ -127,7 +127,7 @@ class ScannerResponseServiceIntTest extends GrpcTestBase {
         service.accept(TEST_TENANT_ID, TEST_LOCATION, response);
 
         // monitor and collect tasks
-        assertEquals(2, testGrpcService.getTimesCalled().get());
+        assertEquals(2, testGrpcService.getRequests().size());
 
         List<Node> allNodes = nodeRepository.findAll();
         assertEquals(1, allNodes.size());

@@ -169,7 +169,7 @@ class AzureCredentialGrpcItTest extends GrpcTestBase {
         assertTrue(credentials.getId() > 0);
 
         //2 calls because the trap listener also gets called on startup
-        await().atMost(10, TimeUnit.SECONDS).untilAtomic(testGrpcService.getTimesCalled(), Matchers.is(3));
+        await().atMost(10, TimeUnit.SECONDS).until(() -> testGrpcService.getRequests().size(), Matchers.is(3));
 
         assertEquals(createDTO.getClientId(), credentials.getClientId());
         assertEquals(createDTO.getSubscriptionId(), credentials.getSubscriptionId());
@@ -212,7 +212,7 @@ class AzureCredentialGrpcItTest extends GrpcTestBase {
         Status status = StatusProto.fromThrowable(exception);
         assertEquals("Code: Message", status.getMessage());
         assertThat(status.getCode()).isEqualTo(Code.INTERNAL_VALUE);
-        assertEquals(0, testGrpcService.getTimesCalled().intValue());
+        assertEquals(0, testGrpcService.getRequests().size());
         verify(spyInterceptor).verifyAccessToken(authHeader);
         verify(spyInterceptor).interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));
     }
@@ -235,7 +235,7 @@ class AzureCredentialGrpcItTest extends GrpcTestBase {
             .createCredentials(createDTO));
         Status status = StatusProto.fromThrowable(exception);
         assertThat(status.getCode()).isEqualTo(Code.INTERNAL_VALUE);
-        assertEquals(0, testGrpcService.getTimesCalled().intValue());
+        assertEquals(0, testGrpcService.getRequests().size());
         verify(spyInterceptor).verifyAccessToken(authHeader);
         verify(spyInterceptor).interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));
     }

@@ -118,7 +118,7 @@ class DetectorResponseServiceIntTest extends GrpcTestBase {
         MonitoredServiceType relatedType = monitoredService.getMonitoredServiceType();
         assertEquals(monitoredServiceType, relatedType);
 
-        assertEquals(2, testGrpcService.getTimesCalled().intValue());
+        assertEquals(2, testGrpcService.getRequests().size());
     }
 
     @Test
@@ -155,7 +155,7 @@ class DetectorResponseServiceIntTest extends GrpcTestBase {
         MonitoredServiceType relatedType = monitoredService.getMonitoredServiceType();
         assertEquals(monitoredServiceType, relatedType);
 
-        assertEquals(numberOfCalls*2, testGrpcService.getTimesCalled().intValue());
+        assertEquals(numberOfCalls*2, testGrpcService.getRequests().size());
     }
 
     @Test
@@ -175,7 +175,7 @@ class DetectorResponseServiceIntTest extends GrpcTestBase {
         List<MonitoredService> monitoredServices = monitoredServiceRepository.findAll();
         assertEquals(0, monitoredServices.size());
 
-        assertEquals(0, testGrpcService.getTimesCalled().intValue());
+        assertEquals(0, testGrpcService.getRequests().size());
     }
 
     @Test
@@ -221,9 +221,9 @@ class DetectorResponseServiceIntTest extends GrpcTestBase {
             assertEquals(TEST_IP_ADDRESS, InetAddressUtils.toIpAddrString(ipInterface.getIpAddress()));
             assertEquals(TEST_TENANT_ID, monitoredService.getTenantId());
         }
-        
+
         // fragile test : extra 1 call for SNMP collector
-        assertEquals(numberOfCalls + 1, testGrpcService.getTimesCalled().intValue());
+        assertEquals(numberOfCalls + 1, testGrpcService.getRequests().size());
 
         List<PublishTaskSetRequest> grpcRequests = testGrpcService.getRequests();
         // fragile test : extra 1 call for SNMP collector

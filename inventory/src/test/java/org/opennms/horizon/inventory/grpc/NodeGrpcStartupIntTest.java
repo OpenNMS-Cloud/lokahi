@@ -83,7 +83,7 @@ class NodeGrpcStartupIntTest extends GrpcTestBase {
     @Test
     void testStartup() {
         // TrapConfigService & FlowsConfigService listens for ApplicationReadyEvent and sends the trap config for each location.
-        await().atMost(15, TimeUnit.SECONDS).untilAtomic(testGrpcService.getTimesCalled(), Matchers.is(2));
+        await().atMost(15, TimeUnit.SECONDS).until(() -> testGrpcService.getRequests().size(), Matchers.is(2));
 
         org.assertj.core.api.Assertions.assertThat(testGrpcService.getRequests())
             .hasSize(2)

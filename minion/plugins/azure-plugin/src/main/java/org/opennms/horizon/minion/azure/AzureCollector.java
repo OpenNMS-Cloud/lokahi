@@ -66,8 +66,8 @@ public class AzureCollector implements ServiceCollector {
 
     static {
         // Azure Metric Key - Metrics Processor Key
-        AZURE_METRIC_TO_ALIAS.put("Network In Total", "ifInOctets");
-        AZURE_METRIC_TO_ALIAS.put("Network Out Total", "ifOutOctets");
+        AZURE_METRIC_TO_ALIAS.put("Network In Total", "network_in_total_bytes");
+        AZURE_METRIC_TO_ALIAS.put("Network Out Total", "network_out_total_bytes");
     }
 
     private static final String METRIC_DELIMITER = ",";

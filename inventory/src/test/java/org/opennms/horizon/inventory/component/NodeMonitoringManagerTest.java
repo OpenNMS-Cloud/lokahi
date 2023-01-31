@@ -43,6 +43,7 @@ import org.opennms.horizon.inventory.service.NodeService;
 import org.opennms.horizon.inventory.service.taskset.DetectorTaskSetService;
 import org.opennms.horizon.shared.constants.GrpcConstants;
 import org.opennms.horizon.shared.events.EventConstants;
+import org.opennms.taskset.contract.ScanType;
 
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
@@ -92,10 +93,10 @@ class NodeMonitoringManagerTest {
 
     @Test
     void testReceiveEventAndCreateNewNode() {
-        doReturn(node).when(nodeService).createNode(any(NodeCreateDTO.class), eq(tenantId));
+        doReturn(node).when(nodeService).createNode(any(NodeCreateDTO.class), eq(ScanType.NODE_SCAN), eq(tenantId));
         ArgumentCaptor<NodeCreateDTO> argumentCaptor = ArgumentCaptor.forClass(NodeCreateDTO.class);
         consumer.receiveTrapEvent(event.toByteArray(), headers);
-        verify(nodeService).createNode(argumentCaptor.capture(), eq(tenantId));
+        verify(nodeService).createNode(argumentCaptor.capture(), eq(ScanType.NODE_SCAN), eq(tenantId));
         NodeCreateDTO createDTO = argumentCaptor.getValue();
         assertThat(createDTO.getLocation()).isEqualTo(event.getLocation());
         assertThat(createDTO.getManagementIp()).isEqualTo(event.getIpAddress());

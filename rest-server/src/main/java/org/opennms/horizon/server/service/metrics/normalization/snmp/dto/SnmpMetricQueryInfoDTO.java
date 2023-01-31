@@ -26,14 +26,26 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.server.model;
+package org.opennms.horizon.server.service.metrics.normalization.snmp.dto;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Builder;
+import lombok.Data;
 
-@Getter
-@Setter
-public class TimeSeriesQueryResult {
-    private String status;
-    private TSData data;
+import java.util.List;
+
+@Data
+@Builder
+public class SnmpMetricQueryInfoDTO {
+    private static final String OR_DELIMITER = "|";
+
+    private String metric;
+    private List<String> dependents;
+
+    public String getNamesOrRegex() {
+        StringBuilder sb = new StringBuilder(metric);
+        if (!dependents.isEmpty()) {
+            sb.append(OR_DELIMITER).append(String.join(OR_DELIMITER, dependents));
+        }
+        return sb.toString();
+    }
 }

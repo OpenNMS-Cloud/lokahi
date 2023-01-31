@@ -55,6 +55,7 @@ import org.opennms.horizon.inventory.service.NodeService;
 import org.opennms.horizon.inventory.service.taskset.DetectorTaskSetService;
 import org.opennms.horizon.inventory.service.taskset.ScannerTaskSetService;
 import org.opennms.horizon.shared.constants.GrpcConstants;
+import org.opennms.taskset.contract.ScanType;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -85,7 +86,7 @@ public class NodeGrpcService extends NodeServiceGrpc.NodeServiceImplBase {
         boolean valid = tenantId.map(id -> validateInput(request, id, responseObserver)).orElseThrow();
 
         if (valid) {
-            Node node = nodeService.createNode(request, tenantId.orElseThrow());
+            Node node = nodeService.createNode(request, ScanType.NODE_SCAN, tenantId.orElseThrow());
             responseObserver.onNext(nodeMapper.modelToDTO(node));
             responseObserver.onCompleted();
 

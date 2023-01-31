@@ -26,14 +26,26 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.server.model;
+package org.opennms.horizon.server.service.metrics.normalization;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
-@Getter
-@Setter
-public class TimeSeriesQueryResult {
-    private String status;
-    private TSData data;
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public final class Constants {
+    public static final String AZURE_MONITOR_TYPE = "AZURE";
+    public static final String SNMP_MONITOR_TYPE = "SNMP";
+
+    public static final String NODE_SCAN_TYPE = "NODE_SCAN";
+    public static final String AZURE_SCAN_TYPE = "NODE_SCAN";
+
+    // Common Metric Name
+    public static final String NETWORK_IN_TOTAL_BYTES = "network_in_total_bytes";
+    public static final String NETWORK_OUT_TOTAL_BYTES = "network_out_total_bytes";
+
+    // SNMP Specific Metric Names
+    public static final String IF_IN_OCTETS = "ifInOctets";
+    public static final String IF_OUT_OCTETS = "ifOutOctets";
+    public static final String SYS_UP_TIME = "sysUpTime";
+
 }

@@ -39,6 +39,7 @@ public class Node {
     private long id;
     private String tenantId;
     private String nodeLabel;
+    private String scanType;
     private long createTime;
     private long monitoringLocationId;
     private List<IpInterface> ipInterfaces;

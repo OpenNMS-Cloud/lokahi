@@ -40,6 +40,7 @@ import org.opennms.horizon.inventory.service.NodeService;
 import org.opennms.horizon.inventory.service.taskset.DetectorTaskSetService;
 import org.opennms.horizon.shared.constants.GrpcConstants;
 import org.opennms.horizon.shared.events.EventConstants;
+import org.opennms.taskset.contract.ScanType;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.event.EventListener;
@@ -79,7 +80,7 @@ public class NodeMonitoringManager {
                         .setManagementIp(event.getIpAddress())
                         .setLabel("trap-" + event.getIpAddress())
                         .build();
-                    Node newNode = nodeService.createNode(createDTO, tenantId);
+                    Node newNode = nodeService.createNode(createDTO, ScanType.NODE_SCAN, tenantId);
                     detectorService.sendDetectorTasks(newNode);
                 });
             }

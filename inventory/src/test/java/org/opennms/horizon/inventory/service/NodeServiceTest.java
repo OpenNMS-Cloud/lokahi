@@ -50,6 +50,7 @@ import org.opennms.horizon.inventory.service.taskset.ScannerTaskSetService;
 import org.opennms.horizon.inventory.taskset.api.TaskSetPublisher;
 import org.opennms.horizon.inventory.repository.TagRepository;
 import org.opennms.horizon.shared.constants.GrpcConstants;
+import org.opennms.taskset.contract.ScanType;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -128,7 +129,7 @@ public class NodeServiceTest {
             .setManagementIp("127.0.0.1")
             .build();
 
-        nodeService.createNode(nodeCreateDTO, tenant);
+        nodeService.createNode(nodeCreateDTO, ScanType.NODE_SCAN, tenant);
         verify(mockNodeRepository).save(any(Node.class));
         verify(mockIpInterfaceRepository).save(any(IpInterface.class));
         verify(mockMonitoringLocationRepository).save(any(MonitoringLocation.class));
@@ -149,7 +150,7 @@ public class NodeServiceTest {
 
         doReturn(Optional.of(new MonitoringLocation())).when(mockMonitoringLocationRepository).findByLocationAndTenantId(location, tenantId);
 
-        nodeService.createNode(nodeCreateDTO, tenantId);
+        nodeService.createNode(nodeCreateDTO, ScanType.NODE_SCAN, tenantId);
         verify(mockNodeRepository).save(any(Node.class));
         verify(mockIpInterfaceRepository).save(any(IpInterface.class));
         verify(mockMonitoringLocationRepository).findByLocationAndTenantId(location, tenantId);
@@ -171,7 +172,7 @@ public class NodeServiceTest {
             .setLocation(location)
             .build();
 
-        nodeService.createNode(nodeCreateDTO, tenant);
+        nodeService.createNode(nodeCreateDTO, ScanType.NODE_SCAN, tenant);
         verify(mockNodeRepository).save(any(Node.class));
         verify(mockMonitoringLocationRepository).findByLocationAndTenantId(location, tenant);
         verify(mockMonitoringLocationRepository).save(any(MonitoringLocation.class));
@@ -185,7 +186,7 @@ public class NodeServiceTest {
             .setManagementIp("127.0.0.1").build();
         MonitoringLocation location = new MonitoringLocation();
         doReturn(Optional.of(location)).when(mockMonitoringLocationRepository).findByLocationAndTenantId(GrpcConstants.DEFAULT_LOCATION, tenantID);
-        nodeService.createNode(nodeCreate, tenantID);
+        nodeService.createNode(nodeCreate, ScanType.NODE_SCAN, tenantID);
         verify(mockMonitoringLocationRepository).findByLocationAndTenantId(GrpcConstants.DEFAULT_LOCATION, tenantID);
         verify(mockNodeRepository).save(any(Node.class));
         verify(mockIpInterfaceRepository).save(any(IpInterface.class));
@@ -199,7 +200,7 @@ public class NodeServiceTest {
         doReturn(Optional.empty()).when(mockMonitoringLocationRepository).findByLocationAndTenantId(GrpcConstants.DEFAULT_LOCATION, tenantID);
         doReturn(new MonitoringLocation()).when(mockMonitoringLocationRepository).save(any(MonitoringLocation.class));
         ArgumentCaptor<MonitoringLocation> captor = ArgumentCaptor.forClass(MonitoringLocation.class);
-        nodeService.createNode(nodeCreate, tenantID);
+        nodeService.createNode(nodeCreate, ScanType.NODE_SCAN, tenantID);
         verify(mockMonitoringLocationRepository).findByLocationAndTenantId(GrpcConstants.DEFAULT_LOCATION, tenantID);
         verify(mockMonitoringLocationRepository).save(captor.capture());
         assertThat(captor.getValue().getLocation()).isEqualTo(GrpcConstants.DEFAULT_LOCATION);

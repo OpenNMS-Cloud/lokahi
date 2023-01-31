@@ -49,6 +49,7 @@ message NodeDTO {
   string system_location = 10;
   string system_contact = 11;
   repeated opennms.inventory.SnmpInterfaceDTO snmpInterfaces = 12;
+  string scan_type = 13;
 }
 
 message NodeCreateDTO {

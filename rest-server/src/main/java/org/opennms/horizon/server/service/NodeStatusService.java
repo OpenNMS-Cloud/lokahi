@@ -37,6 +37,7 @@ import org.opennms.horizon.server.model.TimeRangeUnit;
 import org.opennms.horizon.server.model.TimeSeriesQueryResult;
 import org.opennms.horizon.server.model.status.NodeStatus;
 import org.opennms.horizon.server.service.grpc.InventoryClient;
+import org.opennms.horizon.server.service.metrics.TSDBMetricsService;
 import org.opennms.horizon.server.utils.ServerHeaderUtil;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
@@ -57,7 +58,7 @@ public class NodeStatusService {
     private static final String MONITOR_KEY = "monitor";
     private static final String INSTANCE_KEY = "instance";
     private final InventoryClient client;
-    private final PrometheusTSDBServiceImpl prometheusTSDBService;
+    private final TSDBMetricsService tsdbMetricsService;
     private final ServerHeaderUtil headerUtil;
 
     public Mono<NodeStatus> getNodeStatus(long id, String monitorType, ResolutionEnvironment env) {
@@ -112,7 +113,7 @@ public class NodeStatusService {
         labels.put(MONITOR_KEY, monitorType);
         labels.put(INSTANCE_KEY, ipAddress);
 
-        return prometheusTSDBService
+        return tsdbMetricsService
             .getMetric(env, RESPONSE_TIME_METRIC, labels, TIME_RANGE_IN_SECONDS, TimeRangeUnit.SECOND);
     }
 }

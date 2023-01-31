@@ -53,6 +53,7 @@ import org.opennms.horizon.shared.utils.InetAddressUtils;
 import org.opennms.taskset.contract.MonitorType;
 import org.opennms.taskset.contract.TaskDefinition;
 import org.opennms.node.scan.contract.NodeInfoResult;
+import org.opennms.taskset.contract.ScanType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -139,11 +140,14 @@ public class NodeService {
         }
     }
 
-    private Node saveNode(NodeCreateDTO request, MonitoringLocation monitoringLocation, String tenantId) {
+    private Node saveNode(NodeCreateDTO request, MonitoringLocation monitoringLocation,
+                          ScanType scanType, String tenantId) {
+
         Node node = new Node();
 
         node.setTenantId(tenantId);
         node.setNodeLabel(request.getLabel());
+        node.setScanType(scanType);
         node.setCreateTime(LocalDateTime.now());
         node.setMonitoringLocation(monitoringLocation);
         node.setMonitoringLocationId(monitoringLocation.getId());
@@ -152,9 +156,9 @@ public class NodeService {
     }
 
     @Transactional
-    public Node createNode(NodeCreateDTO request, String tenantId) {
+    public Node createNode(NodeCreateDTO request, ScanType scanType, String tenantId) {
         MonitoringLocation monitoringLocation = saveMonitoringLocation(request, tenantId);
-        Node node = saveNode(request, monitoringLocation, tenantId);
+        Node node = saveNode(request, monitoringLocation, scanType, tenantId);
         saveIpInterfaces(request, node, tenantId);
 
         return node;

@@ -73,9 +73,6 @@ public class ScannerResponseService {
         Any result = response.getResult();
 
         switch (getType(response)) {
-
-            // other scan types
-
             case AZURE_SCAN -> {
                 AzureScanResponse azureResponse = result.unpack(AzureScanResponse.class);
                 List<AzureScanItem> resultsList = azureResponse.getResultsList();
@@ -150,7 +147,7 @@ public class ScannerResponseService {
                 .setManagementIp(ipAddress)
                 .setLabel(nodeLabel)
                 .build();
-            Node node = nodeService.createNode(createDTO, tenantId);
+            Node node = nodeService.createNode(createDTO, ScanType.AZURE_SCAN, tenantId);
 
             taskSetHandler.sendAzureMonitorTasks(credential, item, ipAddress, node.getId());
             taskSetHandler.sendAzureCollectorTasks(credential, item, ipAddress, node.getId());

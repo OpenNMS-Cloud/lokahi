@@ -26,14 +26,23 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.server.model;
+package org.opennms.horizon.server.service.metrics.normalization.snmp.dto;
 
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
-public class TimeSeriesQueryResult {
-    private String status;
-    private TSData data;
+public class SnmpWalkDataDTO {
+    private Double octet;
+    private Double sysUpTime;
+    private double throughputBytesPerSec;
+
+    public double getOctetDelta(double octet) {
+        return Math.abs(this.octet - octet);
+    }
+
+    public double getSysUpTimeDelta(double sysUpTime) {
+        return Math.abs(this.sysUpTime - sysUpTime);
+    }
 }

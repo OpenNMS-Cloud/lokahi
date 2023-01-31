@@ -21,8 +21,6 @@
     <LineGraph :graph="bytesInOut" />
     <LineGraph :graph="bytesIn" />
     <LineGraph :graph="bytesOut" />
-    <LineGraph :graph="hcIn" />
-    <LineGraph :graph="hcOut" />
   </div>
 </template>
 
@@ -54,7 +52,7 @@ const nodeLatency = computed<GraphProps>(() => {
 const bytesIn = computed<GraphProps>(() => {
   return {
     label: 'Bytes Inbound',
-    metrics: ['ifInOctets'],
+    metrics: ['network_in_total_bytes'],
     monitor: 'SNMP',
     nodeId: route.params.id as string,
     instance: instance.value,
@@ -66,7 +64,7 @@ const bytesIn = computed<GraphProps>(() => {
 const bytesOut = computed<GraphProps>(() => {
   return {
     label: 'Bytes Outbound',
-    metrics: ['ifOutOctets'],
+    metrics: ['network_out_total_bytes'],
     monitor: 'SNMP',
     nodeId: route.params.id as string,
     instance: instance.value,
@@ -78,31 +76,7 @@ const bytesOut = computed<GraphProps>(() => {
 const bytesInOut = computed<GraphProps>(() => {
   return {
     label: 'Bytes Inbound / Outbound',
-    metrics: ['ifInOctets', 'ifOutOctets'],
-    monitor: 'SNMP',
-    nodeId: route.params.id as string,
-    instance: instance.value,
-    timeRange: 10,
-    timeRangeUnit: TimeRangeUnit.Minute
-  }
-})
-
-const hcIn = computed<GraphProps>(() => {
-  return {
-    label: 'ifHCInOctets',
-    metrics: ['ifHCInOctets'],
-    monitor: 'SNMP',
-    nodeId: route.params.id as string,
-    instance: instance.value,
-    timeRange: 10,
-    timeRangeUnit: TimeRangeUnit.Minute
-  }
-})
-
-const hcOut = computed<GraphProps>(() => {
-  return {
-    label: 'ifHCOutOctets',
-    metrics: ['ifHCOutOctets'],
+    metrics: ['network_in_total_bytes', 'network_out_total_bytes'],
     monitor: 'SNMP',
     nodeId: route.params.id as string,
     instance: instance.value,

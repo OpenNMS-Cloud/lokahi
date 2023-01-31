@@ -66,6 +66,7 @@ import org.opennms.horizon.server.model.TSResult;
 import org.opennms.horizon.server.model.TimeRangeUnit;
 import org.opennms.horizon.server.model.TimeSeriesQueryResult;
 import org.opennms.horizon.server.service.grpc.InventoryClient;
+import org.opennms.horizon.server.service.metrics.TSDBMetricsService;
 import org.opennms.horizon.server.utils.ServerHeaderUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -87,7 +88,7 @@ public class GraphQLNodeServiceTest {
     @MockBean
     private ServerHeaderUtil mockHeaderUtil;
     @MockBean
-    private PrometheusTSDBServiceImpl prometheusTSDBService;
+    private TSDBMetricsService tsdbMetricsService;
     private final String accessToken = "test-token-12345";
     private MonitoringLocationDTO locationDTO1, locationDTO2;
     private NodeDTO nodeDTO1, nodeDTO2, nodeDTO3, nodeDTO4;
@@ -248,7 +249,7 @@ public class GraphQLNodeServiceTest {
         TimeSeriesQueryResult tsQueryResult = buildTsQueryResult(true);
 
         doReturn(nodeDTO4).when(mockClient).getNodeById(anyLong(), eq(accessToken));
-        doReturn(Mono.just(tsQueryResult)).when(prometheusTSDBService)
+        doReturn(Mono.just(tsQueryResult)).when(tsdbMetricsService)
             .getMetric(any(ResolutionEnvironment.class), anyString(), anyMap(), anyInt(), any(TimeRangeUnit.class));
 
         String query = String.format("query { nodeStatus(id: %d) { id, status }}", nodeDTO4.getId());
@@ -272,7 +273,7 @@ public class GraphQLNodeServiceTest {
         TimeSeriesQueryResult tsQueryResult = buildTsQueryResult(false);
 
         doReturn(nodeDTO4).when(mockClient).getNodeById(anyLong(), eq(accessToken));
-        doReturn(Mono.just(tsQueryResult)).when(prometheusTSDBService)
+        doReturn(Mono.just(tsQueryResult)).when(tsdbMetricsService)
             .getMetric(any(ResolutionEnvironment.class), anyString(), anyMap(), anyInt(), any(TimeRangeUnit.class));
 
         String query = String.format("query { nodeStatus(id: %d) { id, status }}", nodeDTO4.getId());

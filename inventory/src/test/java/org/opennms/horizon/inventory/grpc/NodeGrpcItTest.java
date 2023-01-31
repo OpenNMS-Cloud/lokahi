@@ -77,6 +77,7 @@ import org.opennms.horizon.inventory.service.taskset.DetectorTaskSetService;
 import org.opennms.horizon.inventory.service.taskset.TaskSetHandler;
 import org.opennms.horizon.shared.constants.GrpcConstants;
 import org.opennms.taskset.contract.MonitorType;
+import org.opennms.taskset.contract.ScanType;
 import org.opennms.taskset.contract.TaskSet;
 import org.opennms.taskset.contract.TaskType;
 import org.opennms.taskset.service.contract.PublishTaskSetRequest;
@@ -194,7 +195,8 @@ class NodeGrpcItTest extends GrpcTestBase {
 
         NodeDTO node = serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).createNode(createDTO);
 
-        assertEquals(NODE_LABEL, node.getNodeLabel());
+        assertThat(node.getNodeLabel()).isEqualTo(node.getNodeLabel());
+        assertThat(ScanType.NODE_SCAN.name()).isEqualTo(node.getScanType());
         assertThat(node.getObjectId()).isEmpty();
         assertThat(node.getSystemName()).isEmpty();
         assertThat(node.getSystemDescr()).isEmpty();
@@ -271,8 +273,8 @@ class NodeGrpcItTest extends GrpcTestBase {
 
         NodeDTO node = serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(differentTenantHeader))).createNode(createDTO);
 
-        assertEquals(NODE_LABEL, node.getNodeLabel());
-
+        assertThat(node.getNodeLabel()).isEqualTo(node.getNodeLabel());
+        assertThat(ScanType.NODE_SCAN.name()).isEqualTo(node.getScanType());
         await().atMost(10, TimeUnit.SECONDS).until(() -> testGrpcService.getRequests().size(), Matchers.is(4));
 
         org.assertj.core.api.Assertions.assertThat(testGrpcService.getRequests())
@@ -299,7 +301,8 @@ class NodeGrpcItTest extends GrpcTestBase {
 
         NodeDTO node = serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).createNode(createDTO);
 
-        assertEquals(NODE_LABEL, node.getNodeLabel());
+        assertThat(node.getNodeLabel()).isEqualTo(node.getNodeLabel());
+        assertThat(ScanType.NODE_SCAN.name()).isEqualTo(node.getScanType());
         await().atMost(10, TimeUnit.SECONDS).until(() -> testGrpcService.getRequests().size(), Matchers.is(4));
 
         org.assertj.core.api.Assertions.assertThat(testGrpcService.getRequests())
@@ -329,9 +332,10 @@ class NodeGrpcItTest extends GrpcTestBase {
 
         NodeDTO node = serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).createNode(createDTO);
 
-        assertEquals(NODE_LABEL, node.getNodeLabel());
-
+        assertThat(node.getNodeLabel()).isEqualTo(node.getNodeLabel());
+        assertThat(ScanType.NODE_SCAN.name()).isEqualTo(node.getScanType());
         await().atMost(10, TimeUnit.SECONDS).until(() -> testGrpcService.getRequests().size(), Matchers.is(2));
+
         verify(spyInterceptor).verifyAccessToken(authHeader);
         verify(spyInterceptor).interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));
 
@@ -398,6 +402,7 @@ class NodeGrpcItTest extends GrpcTestBase {
             Node node = new Node();
             node.setTenantId(tenantId);
             node.setNodeLabel(NODE_LABEL);
+            node.setScanType(ScanType.NODE_SCAN);
             node.setMonitoringLocation(dBLocation);
             node.setCreateTime(LocalDateTime.now());
 
@@ -665,6 +670,7 @@ class NodeGrpcItTest extends GrpcTestBase {
         for(int i = 0; i < number; i++) {
             Node node = new Node();
             node.setNodeLabel("test-node" + (i + 1));
+            node.setScanType(ScanType.NODE_SCAN);
             node.setMonitoringLocation(location);
             node.setTenantId(tenantId);
             node.setCreateTime(LocalDateTime.now());

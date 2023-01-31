@@ -62,7 +62,7 @@ public class TagService {
         Node node = getNode(tenantId, request.getNodeId());
 
         return request.getTagsList().stream()
-            .map(tagCreateDTO -> createSingle(tenantId, node, tagCreateDTO))
+            .map(tagCreateDTO -> createTag(tenantId, node, tagCreateDTO))
             .toList();
     }
 
@@ -74,10 +74,10 @@ public class TagService {
             .map(Int64Value::getValue)
             .map(tagId -> getTag(tenantId, tagId))
             .toList()
-            .forEach(tag -> removeSingle(node, tag));
+            .forEach(tag -> removeTagFromNode(node, tag));
     }
 
-    private TagDTO createSingle(String tenantId, Node node, TagCreateDTO tagCreateDTO) {
+    private TagDTO createTag(String tenantId, Node node, TagCreateDTO tagCreateDTO) {
         String tagName = tagCreateDTO.getName();
 
         Optional<Tag> tagOpt = repository
@@ -96,7 +96,7 @@ public class TagService {
         return mapper.modelToDTO(tag);
     }
 
-    private void removeSingle(Node node, Tag tag) {
+    private void removeTagFromNode(Node node, Tag tag) {
         if (tag.getNodes().isEmpty()) {
             repository.delete(tag);
         } else {

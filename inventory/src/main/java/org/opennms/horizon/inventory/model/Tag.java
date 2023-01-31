@@ -67,5 +67,5 @@ public class Tag {
         name = "node_tag",
         joinColumns = @JoinColumn(name = "tag_id"),
         inverseJoinColumns = @JoinColumn(name = "node_id"))
-    List<Node> nodes = new ArrayList<>();
+    private List<Node> nodes = new ArrayList<>();
 }

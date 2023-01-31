@@ -3,7 +3,7 @@
 # This Dockerfile performs a multi-stage build and must be built with BuildKit: `docker buildx build .`.
 # By default, it will produce an optimized image with the production build, served as static content with nginx.
 # Target the development stage to produce a larger dev image running Vite dev server. Good for Tilt live reload.
-FROM node:17-alpine as sources
+FROM node:18-alpine as sources
 
 WORKDIR /app
 

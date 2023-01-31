@@ -10,13 +10,22 @@
     "resolveJsonModule": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "lib": ["esnext", "dom"],
+    "lib": [
+      "esnext",
+      "dom"
+    ],
     "allowJs": true, // needed for marker cluster
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": [
+        "src/*"
+      ]
     },
     "forceConsistentCasingInFileNames": true,
-    "types": ["vitest/globals"]
+    "types": [
+      "vitest/globals",
+      "@testing-library/cypress",
+      "@testing-library/vue"
+    ]
   },
   "include": [
     "src/**/*.ts",
@@ -26,8 +35,10 @@
     "auto-imports.d.ts",
     "components.d.ts",
     "keycloak.config.ts",
-    "tests"
+    "cypress"
   ],
-  "exclude": ["node_modules"]
+  "exclude": [
+    "node_modules",
+    "tests"
+  ]
 }
-

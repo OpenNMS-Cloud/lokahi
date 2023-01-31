@@ -5,10 +5,11 @@ on:
     branches:
       - 'develop'
   pull_request:
-# This workflow is triggered instead of individual workflows that filter based on paths.
-# If we want to fully separate individual workflows out of this one, we need fully reproducible builds.
-# Just use this one for now. The downside is it will run redundant workflows for code that didn't change.
-#    types: [labeled]
+    # This workflow is triggered instead of individual workflows that filter based
+    # on paths.  If we want to fully separate individual workflows out of this one,
+    # we need fully reproducible builds.  Just use this one for now. The downside
+    # is it will run redundant workflows for code that didn't change.
+    #types: [labeled]
     branches:
       - 'develop'
   workflow_call:
@@ -21,6 +22,9 @@ on:
         description: 'Docker image registry for all images'
         required: false
         type: string
+
+env:
+  INGRESS_BASE_URL: https://onmshs
 
 jobs:
   alarm:
@@ -181,14 +185,20 @@ jobs:
           date
           kubectl -n hs-instance get all
 
+      - name: Cypress run
+        uses: cypress-io/github-action@v5
+        with:
+          working-directory: ui
+          command: npx cypress run --config baseUrl=${{ env.INGRESS_BASE_URL }}
+      
       - name: Set up & run Cucumber tests
         shell: bash
         working-directory: external-it
         run: |
           # Cucumber test
           mvn install
-          INGRESS_BASE_URL=https://onmshs
-          KEYCLOAK_BASE_URL=https://onmshs/auth
+          INGRESS_BASE_URL=${{ env.INGRESS_BASE_URL }}
+          KEYCLOAK_BASE_URL=${{ env.INGRESS_BASE_URL }}/auth
           KEYCLOAK_REALM=opennms
           KEYCLOAK_USERNAME=admin
           KEYCLOAK_PASSWORD=admin

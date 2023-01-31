@@ -28,6 +28,9 @@
 
 package org.opennms.horizon.minion.flows.parser;
 
+import static org.opennms.horizon.minion.flows.listeners.utils.BufferUtils.slice;
+import static org.opennms.horizon.minion.flows.listeners.utils.BufferUtils.uint16;
+
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
@@ -36,13 +39,12 @@ import org.opennms.horizon.grpc.telemetry.contract.TelemetryMessage;
 import org.opennms.horizon.minion.flows.listeners.Dispatchable;
 import org.opennms.horizon.minion.flows.listeners.UdpParser;
 import org.opennms.horizon.minion.flows.parser.factory.DnsResolver;
-import org.opennms.horizon.shared.flows.netflow9.proto.Header;
-import org.opennms.horizon.shared.flows.netflow9.proto.Packet;
-import org.opennms.horizon.shared.flows.session.RecordProvider;
-import org.opennms.horizon.shared.flows.session.Session;
-import org.opennms.horizon.shared.flows.session.UdpSessionManager;
-import org.opennms.horizon.shared.flows.transport.Netflow9MessageBuilder;
-import org.opennms.horizon.shared.flows.values.Protocol;
+import org.opennms.horizon.minion.flows.parser.ie.RecordProvider;
+import org.opennms.horizon.minion.flows.parser.netflow9.proto.Header;
+import org.opennms.horizon.minion.flows.parser.netflow9.proto.Packet;
+import org.opennms.horizon.minion.flows.parser.session.Session;
+import org.opennms.horizon.minion.flows.parser.session.UdpSessionManager;
+import org.opennms.horizon.minion.flows.parser.transport.Netflow9MessageBuilder;
 import org.opennms.horizon.shared.ipc.rpc.IpcIdentity;
 import org.opennms.horizon.shared.ipc.sink.api.AsyncDispatcher;
 import org.opennms.horizon.shared.utils.InetAddressUtils;
@@ -50,8 +52,6 @@ import org.opennms.horizon.shared.utils.InetAddressUtils;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 
-import static org.opennms.horizon.shared.flows.BufferUtils.slice;
-import static org.opennms.horizon.shared.flows.BufferUtils.uint16;
 
 public class Netflow9UdpParser extends UdpParserBase implements UdpParser, Dispatchable {
 

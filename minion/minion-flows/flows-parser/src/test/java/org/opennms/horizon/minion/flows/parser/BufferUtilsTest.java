@@ -28,14 +28,15 @@
 
 package org.opennms.horizon.minion.flows.parser;
 
-import static org.opennms.horizon.shared.flows.BufferUtils.sfloat;
-import static org.opennms.horizon.shared.flows.BufferUtils.sint;
-import static org.opennms.horizon.shared.flows.BufferUtils.uint;
-import static org.opennms.horizon.shared.flows.BufferUtils.uint16;
-import static org.opennms.horizon.shared.flows.BufferUtils.uint24;
-import static org.opennms.horizon.shared.flows.BufferUtils.uint32;
-import static org.opennms.horizon.shared.flows.BufferUtils.uint64;
-import static org.opennms.horizon.shared.flows.BufferUtils.uint8;
+
+import static org.opennms.horizon.minion.flows.listeners.utils.BufferUtils.sfloat;
+import static org.opennms.horizon.minion.flows.listeners.utils.BufferUtils.sint;
+import static org.opennms.horizon.minion.flows.listeners.utils.BufferUtils.uint;
+import static org.opennms.horizon.minion.flows.listeners.utils.BufferUtils.uint16;
+import static org.opennms.horizon.minion.flows.listeners.utils.BufferUtils.uint24;
+import static org.opennms.horizon.minion.flows.listeners.utils.BufferUtils.uint32;
+import static org.opennms.horizon.minion.flows.listeners.utils.BufferUtils.uint64;
+import static org.opennms.horizon.minion.flows.listeners.utils.BufferUtils.uint8;
 
 import org.junit.Assert;
 import org.junit.Test;

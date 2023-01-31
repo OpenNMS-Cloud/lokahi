@@ -29,7 +29,7 @@
 package org.opennms.horizon.minion.flows.parser.factory;
 
 import org.opennms.horizon.minion.flows.listeners.Parser;
-import org.opennms.horizon.shared.flows.TelemetryBeanFactory;
+import org.opennms.horizon.minion.flows.listeners.factory.TelemetryBeanFactory;
 import org.opennms.sink.flows.contract.ParserConfig;
 
 /**

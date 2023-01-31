@@ -32,7 +32,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
-import org.opennms.horizon.shared.flows.session.SequenceNumberTracker;
+import org.opennms.horizon.minion.flows.parser.session.SequenceNumberTracker;
 
 public class SequenceNumberTrackerTest {
 

@@ -29,7 +29,7 @@
 package org.opennms.horizon.minion.flows.parser.netflow9;
 
 import static org.junit.Assert.assertEquals;
-import static org.opennms.horizon.shared.flows.BufferUtils.slice;
+import static org.opennms.horizon.minion.flows.listeners.utils.BufferUtils.slice;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -43,11 +43,11 @@ import java.util.List;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import org.opennms.horizon.shared.flows.netflow9.proto.Header;
-import org.opennms.horizon.shared.flows.netflow9.proto.Packet;
-import org.opennms.horizon.shared.flows.session.SequenceNumberTracker;
-import org.opennms.horizon.shared.flows.session.Session;
-import org.opennms.horizon.shared.flows.session.TcpSession;
+import org.opennms.horizon.minion.flows.parser.netflow9.proto.Header;
+import org.opennms.horizon.minion.flows.parser.netflow9.proto.Packet;
+import org.opennms.horizon.minion.flows.parser.session.SequenceNumberTracker;
+import org.opennms.horizon.minion.flows.parser.session.Session;
+import org.opennms.horizon.minion.flows.parser.session.TcpSession;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;

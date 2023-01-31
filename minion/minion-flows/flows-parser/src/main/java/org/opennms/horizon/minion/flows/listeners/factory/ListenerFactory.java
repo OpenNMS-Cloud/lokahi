@@ -29,7 +29,6 @@
 package org.opennms.horizon.minion.flows.listeners.factory;
 
 import org.opennms.horizon.minion.flows.listeners.FlowsListener;
-import org.opennms.horizon.shared.flows.TelemetryBeanFactory;
 import org.opennms.sink.flows.contract.ListenerConfig;
 
 /**

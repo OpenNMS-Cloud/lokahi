@@ -45,11 +45,9 @@ import java.util.stream.Collectors;
 
 import org.junit.Test;
 import org.opennms.horizon.minion.flows.parser.factory.DnsResolver;
-import org.opennms.horizon.shared.flows.RecordEnrichment;
-import org.opennms.horizon.shared.flows.exceptions.InvalidPacketException;
-import org.opennms.horizon.shared.flows.proto.Header;
-import org.opennms.horizon.shared.flows.proto.Packet;
-import org.opennms.horizon.shared.flows.proto.Record;
+import org.opennms.horizon.minion.flows.parser.proto.Header;
+import org.opennms.horizon.minion.flows.parser.proto.Packet;
+import org.opennms.horizon.minion.flows.parser.proto.Record;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;

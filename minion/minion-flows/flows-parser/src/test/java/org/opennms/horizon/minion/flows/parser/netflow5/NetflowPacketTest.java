@@ -31,7 +31,7 @@ package org.opennms.horizon.minion.flows.parser.netflow5;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertThat;
-import static org.opennms.horizon.shared.flows.BufferUtils.slice;
+import static org.opennms.horizon.minion.flows.listeners.utils.BufferUtils.slice;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -43,10 +43,11 @@ import java.util.Objects;
 import java.util.function.Consumer;
 
 import org.junit.Test;
-import org.opennms.horizon.shared.flows.exceptions.InvalidPacketException;
-import org.opennms.horizon.shared.flows.proto.Header;
-import org.opennms.horizon.shared.flows.proto.Packet;
-import org.opennms.horizon.shared.flows.proto.Record;
+import org.opennms.horizon.minion.flows.parser.InvalidPacketException;
+import org.opennms.horizon.minion.flows.parser.proto.Header;
+import org.opennms.horizon.minion.flows.parser.proto.Packet;
+import org.opennms.horizon.minion.flows.parser.proto.Record;
+
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;

@@ -30,7 +30,7 @@ package org.opennms.horizon.minion.flows.parser;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.opennms.horizon.shared.flows.BufferUtils.slice;
+import static org.opennms.horizon.minion.flows.listeners.utils.BufferUtils.slice;
 
 import java.net.InetAddress;
 import java.nio.ByteBuffer;
@@ -43,16 +43,15 @@ import java.util.Optional;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.opennms.horizon.shared.flows.FlowMessage;
-import org.opennms.horizon.shared.flows.RecordEnrichment;
-import org.opennms.horizon.shared.flows.netflow9.proto.Header;
-import org.opennms.horizon.shared.flows.netflow9.proto.Packet;
-import org.opennms.horizon.shared.flows.values.UnsignedValue;
-import org.opennms.horizon.shared.flows.session.SequenceNumberTracker;
-import org.opennms.horizon.shared.flows.session.Session;
-import org.opennms.horizon.shared.flows.session.TcpSession;
-import org.opennms.horizon.shared.flows.transport.Netflow9MessageBuilder;
-import org.opennms.horizon.shared.flows.values.Value;
+import org.opennms.horizon.minion.flows.parser.flowmessage.FlowMessage;
+import org.opennms.horizon.minion.flows.parser.ie.Value;
+import org.opennms.horizon.minion.flows.parser.ie.values.UnsignedValue;
+import org.opennms.horizon.minion.flows.parser.netflow9.proto.Header;
+import org.opennms.horizon.minion.flows.parser.netflow9.proto.Packet;
+import org.opennms.horizon.minion.flows.parser.session.SequenceNumberTracker;
+import org.opennms.horizon.minion.flows.parser.session.Session;
+import org.opennms.horizon.minion.flows.parser.session.TcpSession;
+import org.opennms.horizon.minion.flows.parser.transport.Netflow9MessageBuilder;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;

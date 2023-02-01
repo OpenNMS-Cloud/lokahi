@@ -45,6 +45,7 @@ import org.opennms.horizon.inventory.repository.MonitoringLocationRepository;
 import org.opennms.horizon.inventory.repository.NodeRepository;
 import org.opennms.horizon.inventory.service.taskset.DetectorTaskSetService;
 import org.opennms.horizon.inventory.taskset.api.TaskSetPublisher;
+import org.opennms.horizon.inventory.repository.TagRepository;
 import org.opennms.horizon.shared.constants.GrpcConstants;
 
 import java.time.LocalDateTime;
@@ -70,6 +71,7 @@ public class NodeServiceTest {
     private NodeRepository mockNodeRepository;
     private MonitoringLocationRepository mockMonitoringLocationRepository;
     private IpInterfaceRepository mockIpInterfaceRepository;
+    private TagRepository tagRepository;
     private ConfigUpdateService mockConfigUpdateService;
     private final String tenantID = "test-tenant";
 
@@ -79,12 +81,14 @@ public class NodeServiceTest {
         mockNodeRepository = mock(NodeRepository.class);
         mockMonitoringLocationRepository = mock(MonitoringLocationRepository.class);
         mockIpInterfaceRepository = mock(IpInterfaceRepository.class);
+        tagRepository = mock(TagRepository.class);
         mockConfigUpdateService = mock(ConfigUpdateService.class);
         var detectorTasksetService = mock(DetectorTaskSetService.class);
         var taskSetPublisher = mock(TaskSetPublisher.class);
 
         nodeService = new NodeService(mockNodeRepository, mockMonitoringLocationRepository, mockIpInterfaceRepository,
-            mockConfigUpdateService,  detectorTasksetService, taskSetPublisher, nodeMapper);
+            tagRepository, mockConfigUpdateService,  detectorTasksetService, taskSetPublisher, nodeMapper);
+
     }
 
     @AfterEach

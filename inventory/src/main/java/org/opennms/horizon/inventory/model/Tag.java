@@ -1,8 +1,8 @@
 /*******************************************************************************
  * This file is part of OpenNMS(R).
  *
- * Copyright (C) 2023 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
+ * Copyright (C) 2022 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
  *
@@ -28,23 +28,19 @@
 
 package org.opennms.horizon.inventory.model;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
 import jakarta.validation.constraints.NotNull;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -52,7 +48,8 @@ import java.util.List;
 @Setter
 @RequiredArgsConstructor
 @Entity
-public class Node {
+public class Tag {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
@@ -62,35 +59,13 @@ public class Node {
     private String tenantId;
 
     @NotNull
-    @Column(name = "node_label")
-    private String nodeLabel;
+    @Column(name = "name")
+    private String name;
 
-    @NotNull
-    @Column(name = "create_time", columnDefinition = "TIMESTAMP")
-    private LocalDateTime createTime;
-
-    @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    @JoinColumn(name = "monitoring_location_id", referencedColumnName = "id")
-    private MonitoringLocation monitoringLocation;
-
-    @Column(name = "monitoring_location_id", insertable = false, updatable = false)
-    private long monitoringLocationId;
-
-    @OneToMany(mappedBy = "node", orphanRemoval = true, cascade = CascadeType.ALL)
-    private List<IpInterface> ipInterfaces = new ArrayList<>();
-
-    @ManyToMany(mappedBy = "nodes")
-    private List<Tag> tags = new ArrayList<>();
-
-    @Column(name = "system_objectid")
-    private String objectId;
-    @Column(name = "system_name")
-    private String systemName;
-    @Column(name = "system_desc")
-    private String systemDesc;
-    @Column(name = "system_location")
-    private String systemLocation;
-    @Column(name = "system_contact")
-    private String systemContact;
-
+    @ManyToMany
+    @JoinTable(
+        name = "node_tag",
+        joinColumns = @JoinColumn(name = "tag_id"),
+        inverseJoinColumns = @JoinColumn(name = "node_id"))
+    private List<Node> nodes = new ArrayList<>();
 }

@@ -38,6 +38,7 @@ import org.opennms.horizon.inventory.mapper.NodeMapper;
 import org.opennms.horizon.inventory.model.IpInterface;
 import org.opennms.horizon.inventory.model.MonitoringLocation;
 import org.opennms.horizon.inventory.model.Node;
+import org.opennms.horizon.inventory.model.Tag;
 import org.opennms.horizon.inventory.repository.IpInterfaceRepository;
 import org.opennms.horizon.inventory.repository.MonitoringLocationRepository;
 import org.opennms.horizon.inventory.repository.NodeRepository;
@@ -45,6 +46,7 @@ import org.opennms.horizon.inventory.service.taskset.CollectorTaskSetUtils;
 import org.opennms.horizon.inventory.service.taskset.DetectorTaskSetService;
 import org.opennms.horizon.inventory.service.taskset.MonitorTaskSetUtils;
 import org.opennms.horizon.inventory.taskset.api.TaskSetPublisher;
+import org.opennms.horizon.inventory.repository.TagRepository;
 import org.opennms.horizon.shared.constants.GrpcConstants;
 import org.opennms.horizon.shared.utils.InetAddressUtils;
 import org.opennms.taskset.contract.MonitorType;
@@ -76,6 +78,7 @@ public class NodeService {
     private final NodeRepository nodeRepository;
     private final MonitoringLocationRepository monitoringLocationRepository;
     private final IpInterfaceRepository ipInterfaceRepository;
+    private final TagRepository tagRepository;
     private final ConfigUpdateService configUpdateService;
     private final DetectorTaskSetService detectorTaskSetService;
     private final TaskSetPublisher taskSetPublisher;
@@ -89,7 +92,7 @@ public class NodeService {
         return all
             .stream()
             .map(mapper::modelToDTO)
-            .collect(Collectors.toList());
+            .toList();
     }
 
     @Transactional(readOnly = true)
@@ -178,6 +181,7 @@ public class NodeService {
             var tenantId = node.getTenantId();
             var location = node.getMonitoringLocation().getLocation();
             var tasks = getTasksForNode(node);
+            removeAssociatedTags(node);
             nodeRepository.deleteById(id);
             executorService.execute(() -> taskSetPublisher.publishTaskDeletion(tenantId, location, tasks));
         }
@@ -199,4 +203,13 @@ public class NodeService {
         return tasks;
     }
 
+    private void removeAssociatedTags(Node node) {
+        for (Tag tag : node.getTags()) {
+            if (tag.getNodes().size() == 1) {
+                tagRepository.delete(tag);
+            } else {
+                tag.getNodes().remove(node);
+            }
+        }
+    }
 }

@@ -28,19 +28,21 @@
 
 package org.opennms.horizon.flows.adapter.common;
 
+import static org.opennms.horizon.flows.copied.Direction.EGRESS;
+import static org.opennms.horizon.flows.copied.Direction.INGRESS;
+
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Objects;
 import java.util.Optional;
 
+import org.opennms.horizon.flows.copied.Direction;
+import org.opennms.horizon.flows.copied.FlowMessage;
+import org.opennms.horizon.flows.copied.NetflowVersion;
+import org.opennms.horizon.flows.copied.SamplingAlgorithm;
 import org.opennms.horizon.flows.processing.enrichment.Flow;
 import org.opennms.horizon.flows.processing.enrichment.Locality;
 import org.opennms.horizon.flows.processing.enrichment.NodeInfo;
-import org.opennms.horizon.shared.flows.Direction;
-import org.opennms.horizon.shared.flows.FlowMessage;
-import org.opennms.horizon.shared.flows.NetflowVersion;
-import org.opennms.horizon.shared.flows.SamplingAlgorithm;
-
 import com.google.common.base.Strings;
 
 public class NetflowMessage implements Flow {
@@ -122,9 +124,9 @@ public class NetflowMessage implements Flow {
     public Direction getDirection() {
         switch (flowMessageProto.getDirection()) {
             case INGRESS:
-                return Direction.INGRESS;
+                return INGRESS;
             case EGRESS:
-                return Direction.EGRESS;
+                return EGRESS;
             default:
                 return Direction.UNKNOWN;
         }

@@ -1,8 +1,8 @@
 /*******************************************************************************
  * This file is part of OpenNMS(R).
  *
- * Copyright (C) 2017-2017 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2017 The OpenNMS Group, Inc.
+ * Copyright (C) 2018-2018 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2018 The OpenNMS Group, Inc.
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
  *
@@ -26,18 +26,17 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.flows.adapter;
-
-import org.opennms.horizon.flows.adapter.common.Adapter;
-
-import org.opennms.horizon.flows.adapter.common.AdapterDefinition;
-import org.opennms.horizon.flows.copied.TelemetryBeanFactory;
+package org.opennms.horizon.flows.copied;
 
 /**
- * Factory to create {@link Adapter} from a {@link AdapterDefinition}
+ * The {@link TelemetryBeanFactory} is used to create a {@link TelemetryBeanDefinition}.
+ *
+ * @param <T> the type of the bean which is created by this factory
+ * @param <B> The type of the bean definition which defines the bean to create.
  *
  * @author mvrueden
  */
-public interface AdapterFactory extends TelemetryBeanFactory<Adapter, AdapterDefinition> {
-
+public interface TelemetryBeanFactory<T, B> {
+    Class<? extends T> getBeanClass();
+    T createBean(B beanDefinition);
 }

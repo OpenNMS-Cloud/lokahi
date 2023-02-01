@@ -26,18 +26,36 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.flows.adapter;
+package org.opennms.horizon.flows.copied;
 
-import org.opennms.horizon.flows.adapter.common.Adapter;
+import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
+import java.util.Date;
 
-import org.opennms.horizon.flows.adapter.common.AdapterDefinition;
-import org.opennms.horizon.flows.copied.TelemetryBeanFactory;
+public class TelemetryMessage implements Message {
+    private final InetSocketAddress source;
+    private final ByteBuffer buffer;
+    private final Date receivedAt;
 
-/**
- * Factory to create {@link Adapter} from a {@link AdapterDefinition}
- *
- * @author mvrueden
- */
-public interface AdapterFactory extends TelemetryBeanFactory<Adapter, AdapterDefinition> {
+    public TelemetryMessage(InetSocketAddress source, ByteBuffer buffer) {
+        this(source, buffer, new Date());
+    }
 
+    public TelemetryMessage(InetSocketAddress source, ByteBuffer buffer, Date receivedAt) {
+        this.source = source;
+        this.buffer = buffer;
+        this.receivedAt = receivedAt;
+    }
+
+    public InetSocketAddress getSource() {
+        return source;
+    }
+
+    public ByteBuffer getBuffer() {
+        return buffer;
+    }
+
+    public Date getReceivedAt() {
+        return receivedAt;
+    }
 }

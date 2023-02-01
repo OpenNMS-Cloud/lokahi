@@ -28,8 +28,9 @@
 
 package org.opennms.horizon.flows.adapter;
 
-import org.opennms.horizon.grpc.telemetry.contract.TelemetryMessage;
-import org.opennms.horizon.shared.ipc.sink.api.AsyncDispatcher;
+
+import org.opennms.horizon.flows.copied.AsyncDispatcher;
+import org.opennms.horizon.flows.copied.TelemetryMessage;
 
 import com.codahale.metrics.MetricRegistry;
 

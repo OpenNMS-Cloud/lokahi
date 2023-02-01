@@ -32,9 +32,9 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Optional;
 
-import org.opennms.horizon.shared.flows.Direction;
-import org.opennms.horizon.shared.flows.NetflowVersion;
-import org.opennms.horizon.shared.flows.SamplingAlgorithm;
+import org.opennms.horizon.flows.copied.Direction;
+import org.opennms.horizon.flows.copied.NetflowVersion;
+import org.opennms.horizon.flows.copied.SamplingAlgorithm;
 
 
 public class EnrichedFlow implements Flow {

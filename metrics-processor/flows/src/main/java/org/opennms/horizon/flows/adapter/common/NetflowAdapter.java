@@ -32,9 +32,9 @@ import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
 
+import org.opennms.horizon.flows.copied.FlowMessage;
 import org.opennms.horizon.flows.processing.Pipeline;
 import org.opennms.horizon.flows.processing.enrichment.Flow;
-import org.opennms.horizon.shared.flows.FlowMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

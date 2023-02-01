@@ -1,8 +1,8 @@
 /*******************************************************************************
  * This file is part of OpenNMS(R).
  *
- * Copyright (C) 2017-2017 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2017 The OpenNMS Group, Inc.
+ * Copyright (C) 2016 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2016 The OpenNMS Group, Inc.
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
  *
@@ -26,18 +26,13 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.flows.adapter;
-
-import org.opennms.horizon.flows.adapter.common.Adapter;
-
-import org.opennms.horizon.flows.adapter.common.AdapterDefinition;
-import org.opennms.horizon.flows.copied.TelemetryBeanFactory;
+package org.opennms.horizon.flows.copied;
 
 /**
- * Factory to create {@link Adapter} from a {@link AdapterDefinition}
+ * Marker interface for messages that are produced and consumed by a SinkModule.
  *
- * @author mvrueden
+ * @author jwhite
  */
-public interface AdapterFactory extends TelemetryBeanFactory<Adapter, AdapterDefinition> {
+public interface Message {
 
 }

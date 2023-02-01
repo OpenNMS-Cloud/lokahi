@@ -30,7 +30,7 @@ package org.opennms.horizon.flows.adapter.common;
 
 import java.util.List;
 
-import org.opennms.horizon.shared.flows.TelemetryBeanDefinition;
+import org.opennms.horizon.flows.copied.TelemetryBeanDefinition;
 
 /**
  * Telemetry adapter definition.

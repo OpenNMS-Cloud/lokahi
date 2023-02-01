@@ -1,7 +1,7 @@
 /*******************************************************************************
  * This file is part of OpenNMS(R).
  *
- * Copyright (C) 2017-2017 The OpenNMS Group, Inc.
+ * Copyright (C) 2017 The OpenNMS Group, Inc.
  * OpenNMS(R) is Copyright (C) 1999-2017 The OpenNMS Group, Inc.
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
@@ -26,18 +26,22 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.flows.adapter;
+package org.opennms.horizon.minion.flows.parser.transport;
 
-import org.opennms.horizon.flows.adapter.common.Adapter;
+import java.util.Objects;
 
-import org.opennms.horizon.flows.adapter.common.AdapterDefinition;
-import org.opennms.horizon.flows.copied.TelemetryBeanFactory;
+import org.opennms.horizon.minion.flows.parser.proto.Header;
 
-/**
- * Factory to create {@link Adapter} from a {@link AdapterDefinition}
- *
- * @author mvrueden
- */
-public interface AdapterFactory extends TelemetryBeanFactory<Adapter, AdapterDefinition> {
+public enum Protocol {
+    NETFLOW5(Header.VERSION, "Netflow v5"),
+    NETFLOW9(org.opennms.horizon.minion.flows.parser.netflow9.proto.Header.VERSION, "Netflow v9"),
+    IPFIX(org.opennms.horizon.minion.flows.parser.ipfix.proto.Header.VERSION, "IPFix");
 
+    public final int version;
+    public final String description;
+
+    Protocol(final int version, final String description) {
+        this.version = version;
+        this.description = Objects.requireNonNull(description);
+    }
 }

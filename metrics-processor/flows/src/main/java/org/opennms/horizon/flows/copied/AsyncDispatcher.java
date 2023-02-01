@@ -1,8 +1,8 @@
 /*******************************************************************************
  * This file is part of OpenNMS(R).
  *
- * Copyright (C) 2017-2017 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2017 The OpenNMS Group, Inc.
+ * Copyright (C) 2016-2020 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2020 The OpenNMS Group, Inc.
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
  *
@@ -26,18 +26,45 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.flows.adapter;
+package org.opennms.horizon.flows.copied;
 
-import org.opennms.horizon.flows.adapter.common.Adapter;
-
-import org.opennms.horizon.flows.adapter.common.AdapterDefinition;
-import org.opennms.horizon.flows.copied.TelemetryBeanFactory;
+import java.util.concurrent.CompletableFuture;
 
 /**
- * Factory to create {@link Adapter} from a {@link AdapterDefinition}
+ * Used to asynchronously dispatch messages.
  *
- * @author mvrueden
+ * Instances of these should be created by the { MessageDispatcherFactory}.
+ *
+ * @author jwhite
  */
-public interface AdapterFactory extends TelemetryBeanFactory<Adapter, AdapterDefinition> {
+public interface AsyncDispatcher<S extends Message> extends AutoCloseable {
+
+    /**
+     * Asynchronously send the given message.
+     *
+     * @param message the message to send
+     * @return a future that is resolved once the message was dispatched or queued
+     */
+    CompletableFuture<DispatchStatus> send(S message);
+
+    /**
+     * Returns the number of messages that are currently queued
+     * awaiting for dispatch.
+     *
+     * @return current queue size
+     */
+    int getQueueSize();
+    
+    enum DispatchStatus {
+        /**
+         * The message was actually dispatched.
+         */
+        DISPATCHED,
+
+        /**
+         * The message has been queued to be dispatched later.
+         */
+        QUEUED
+    }
 
 }

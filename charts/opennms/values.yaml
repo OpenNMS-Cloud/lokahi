@@ -179,6 +179,7 @@ Postgres:
   AlarmPassword: notset
   EventsPassword: notset
   DataChoicesPassword: notset
+  MinionGatewayPassword: notset
   NotificationPassword: notset
   GrafanaPassword: notset
   VolumeSize: 10Gi

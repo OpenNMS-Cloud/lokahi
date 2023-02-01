@@ -39,6 +39,7 @@ import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import java.util.function.BiConsumer;
+import org.apache.ignite.Ignite;
 import org.opennms.cloud.grpc.minion.CloudToMinionMessage;
 import org.opennms.cloud.grpc.minion.TwinResponseProto;
 import org.opennms.horizon.shared.grpc.common.GrpcIpcUtils;
@@ -64,7 +65,8 @@ public class GrpcTwinPublisher extends AbstractTwinPublisher {
             .build();
     private final ExecutorService twinRpcExecutor = Executors.newCachedThreadPool(twinRpcThreadFactory);
 
-    public GrpcTwinPublisher() {
+    public GrpcTwinPublisher(Ignite ignite) {
+        super(ignite);
     }
 
     @Override

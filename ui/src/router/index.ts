@@ -1,8 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import Appliances from '@/containers/Appliances.vue'
-import { useWidgets, Widgets } from '@/composables/useWidgets' 
-
-const { setAvailableWidgets } = useWidgets()
 
 const router = createRouter({
   history: createWebHistory(),
@@ -10,10 +7,7 @@ const router = createRouter({
     {
       path: '/',
       name: 'Appliances',
-      component: Appliances,
-      beforeEnter: () => {
-        setAvailableWidgets(Widgets.GEOMAP)
-      }
+      component: Appliances
     },
     {
       path: '/dashboard', // Temporary route - will change to '/' once complete.
@@ -29,9 +23,6 @@ const router = createRouter({
       path: '/map',
       name: 'Map',
       component: () => import('@/containers/Map.vue'),
-      beforeEnter: () => {
-        setAvailableWidgets(Widgets.DEVICES, Widgets.MINIONS)
-      },
       children: [
         {
           path: '',
@@ -68,10 +59,7 @@ const router = createRouter({
     {
       path: '/node/:id',
       name: 'Node',
-      component: () => import('@/containers/NodeStatus.vue'),
-      beforeEnter: () => {
-        setAvailableWidgets(Widgets.TAGS)
-      }
+      component: () => import('@/containers/NodeStatus.vue')
     },
     {
       path: '/:pathMatch(.*)*', // catch other paths and redirect

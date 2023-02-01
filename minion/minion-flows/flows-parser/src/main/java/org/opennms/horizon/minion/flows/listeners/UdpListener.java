@@ -127,6 +127,7 @@ public class UdpListener implements GracefulShutdownListener, FlowsListener {
             .handler(new DefaultChannelInitializer())
             .bind(address)
             .sync();
+        LOG.info("Udp Flow Listener started at {}:{}", address.getHostName(), address.getPort());
     }
 
     public void stop() {

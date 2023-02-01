@@ -34,6 +34,7 @@ import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.KafkaContainer;
 import org.testcontainers.containers.Network;
+import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.utility.DockerImageName;
 
@@ -45,6 +46,7 @@ public class TestContainerRunnerClassRule extends ExternalResource {
     public static final String KAFKA_BOOTSTRAP_SERVER_PROPERTYNAME = "kafka.bootstrap-servers";
 
     private static final Logger DEFAULT_LOGGER = LoggerFactory.getLogger(TestContainerRunnerClassRule.class);
+    private final PostgreSQLContainer postgreSQLContainer;
 
     private Logger LOG = DEFAULT_LOGGER;
 
@@ -59,6 +61,7 @@ public class TestContainerRunnerClassRule extends ExternalResource {
 
     public TestContainerRunnerClassRule() {
         kafkaContainer = new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka").withTag(confluentPlatformVersion));
+        postgreSQLContainer = new PostgreSQLContainer<>("postgres:14.5-alpine");
         applicationContainer = new GenericContainer(DockerImageName.parse(dockerImage).toString());
     }
 
@@ -71,12 +74,14 @@ public class TestContainerRunnerClassRule extends ExternalResource {
         LOG.info("USING TEST DOCKER NETWORK {}", network.getId());
 
         startKafkaContainer();
+        startPostgresqlContainer();
         startApplicationContainer();
     }
 
     @Override
     protected void after() {
         applicationContainer.stop();
+        postgreSQLContainer.stop();
         kafkaContainer.stop();
     }
 
@@ -96,6 +101,18 @@ public class TestContainerRunnerClassRule extends ExternalResource {
         String bootstrapServers = kafkaContainer.getBootstrapServers();
         System.setProperty(KAFKA_BOOTSTRAP_SERVER_PROPERTYNAME, bootstrapServers);
         LOG.info("KAFKA LOCALHOST BOOTSTRAP SERVERS {}", bootstrapServers);
+    }
+
+    private void startPostgresqlContainer() {
+        postgreSQLContainer
+            .withDatabaseName("minion_gateway")
+            .withUsername("ignite")
+            .withPassword("ignite")
+            .withLogConsumer(new Slf4jLogConsumer(LOG).withPrefix("POSTGRES"))
+            .withNetwork(network)
+            .withNetworkAliases("postgres")
+            .start();
+        LOG.info("PostgresSQL container started and available at {}", postgreSQLContainer.getJdbcUrl());
     }
 
     private void startApplicationContainer() {

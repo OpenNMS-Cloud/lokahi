@@ -37,15 +37,28 @@ import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
 import java.io.IOException;
+import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Queue;
+import java.util.UUID;
 import java.util.function.BiConsumer;
+import javax.cache.Cache;
+import javax.cache.Cache.Entry;
+import org.apache.ignite.Ignite;
+import org.apache.ignite.IgniteCache;
+import org.apache.ignite.cache.CacheAtomicityMode;
+import org.apache.ignite.cache.query.QueryCursor;
+import org.apache.ignite.cache.query.ScanQuery;
+import org.apache.ignite.configuration.CacheConfiguration;
+import org.apache.ignite.lang.IgniteBiPredicate;
 import org.opennms.cloud.grpc.minion.TwinRequestProto;
 import org.opennms.cloud.grpc.minion.TwinResponseProto;
 import org.opennms.horizon.shared.protobuf.marshalling.ProtoBufJsonSerializer;
+import org.opennms.miniongateway.grpc.server.model.TenantKey;
 import org.opennms.taskset.contract.TaskSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,13 +68,16 @@ import org.slf4j.MDC.MDCCloseable;
 public abstract class AbstractTwinPublisher implements TwinPublisher, TwinProvider {
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractTwinPublisher.class);
+    public static final String TWIN_TRACKER_CACHE_NAME = "twinCache";
 
-    private final Map<SessionKey, TwinTracker> twinTrackerMap = new HashMap<>();
+    protected final IgniteCache<SessionKey, TwinTracker> twinTrackerMap;
     protected final ObjectMapper objectMapper = new ObjectMapper();
 
-    public AbstractTwinPublisher() {
+    public AbstractTwinPublisher(Ignite ignite) {
         //TODO: Should probably pass a var args of classes from the impl ctor?
         configureProtobufJson(TaskSet.class);
+
+        twinTrackerMap = ignite.cache(TWIN_TRACKER_CACHE_NAME);
     }
 
     /**
@@ -185,7 +201,15 @@ public abstract class AbstractTwinPublisher implements TwinPublisher, TwinProvid
     }
 
     public synchronized void forEachSession(String tenantId, BiConsumer<SessionKey, TwinTracker> consumer) {
-        twinTrackerMap.entrySet().stream().filter(entry -> tenantId.equals(entry.getKey().tenantId)).forEach(entry -> consumer.accept(entry.getKey(), entry.getValue()));
+        ScanQuery<SessionKey, TwinTracker> query = new ScanQuery<>();
+        query.setFilter(new IgniteBiPredicate<SessionKey, TwinTracker>() {
+            @Override
+            public boolean apply(SessionKey sessionKey, TwinTracker twinTracker) {
+                return tenantId.equals(sessionKey.tenantId);
+            }
+        });
+        QueryCursor<Entry<SessionKey, TwinTracker>> cursor = twinTrackerMap.query(query);
+        cursor.forEach(entry -> consumer.accept(entry.getKey(), entry.getValue()));
     }
 
     private class SessionImpl<T> implements Session<T> {
@@ -215,7 +239,7 @@ public abstract class AbstractTwinPublisher implements TwinPublisher, TwinProvid
         }
     }
 
-    public static class SessionKey {
+    public static class SessionKey implements Serializable {
 
         public final String key;
         public final String tenantId;

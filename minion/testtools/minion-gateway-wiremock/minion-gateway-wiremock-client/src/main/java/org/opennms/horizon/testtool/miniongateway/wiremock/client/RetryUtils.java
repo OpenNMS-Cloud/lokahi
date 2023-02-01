@@ -49,14 +49,14 @@ public class RetryUtils {
      * @param operation the operation to execute on each iteration
      * @param completionPredicate predicate that indicates whether the operation's result completes the retries; when
      *                           false, retry logic will be applied
-     * @param iterationDelay the delay, in milliseconds, between individual iterations
-     * @param timeout total time, in milliseconds, before counting the operation as timed-out
+     * @param iterationDelayInMs the delay, in milliseconds, between individual iterations
+     * @param timeoutInMs total time, in milliseconds, before counting the operation as timed-out
      * @param initResult initial value to use for result which will be tested, and potentially returned, when the
      *                  operation throws exceptions, followed ultimately by reaching the timeout
      * @param <T>
      * @return
      */
-    public <T> T retry(Supplier<T> operation, Predicate<T> completionPredicate, long iterationDelay, long timeout, T initResult)
+    public <T> T retry(Supplier<T> operation, Predicate<T> completionPredicate, long iterationDelayInMs, long timeoutInMs, T initResult)
         throws InterruptedException {
 
         T result = initResult;
@@ -64,7 +64,7 @@ public class RetryUtils {
         // Calculate timeout
         long now  = System.nanoTime();
         long start = now;
-        long end = start + ( timeout * 1000000L );
+        long end = start + ( timeoutInMs * 1000000L );
 
         // Prepare storage for exceptions caught be operation
         Exception[] finalExceptionStore = new Exception[1];
@@ -76,7 +76,7 @@ public class RetryUtils {
         // Loop until the operation is successful, or timeout is reached.  Note that a timeout of 0 means no retries
         //  will occur - only the initial attempt.
         while (( ! successful ) && ( now < end)) {
-            Thread.sleep(iterationDelay);
+            Thread.sleep(iterationDelayInMs);
 
             result = this.safeRunOnce(operation, result, exc -> finalExceptionStore[0] = exc);
             successful = completionPredicate.test(result);

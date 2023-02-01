@@ -1,8 +1,10 @@
 package org.opennms.horizon.testtool.miniongateway.wiremock.rest;
 
 import org.opennms.cloud.grpc.minion.Identity;
+import org.opennms.cloud.grpc.minion.SinkMessage;
 import org.opennms.horizon.testtool.miniongateway.wiremock.api.MockGrpcServiceApi;
 import org.opennms.horizon.testtool.miniongateway.wiremock.api.MockTwinHandler;
+import org.opennms.horizon.testtool.miniongateway.wiremock.api.SinkMessageDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,6 +53,18 @@ public class MinionGatewayWiremockRestController {
     public Object getConnectedMinionList() {
         var minions = mockGrpcServiceApi.getConnectedMinions();
         return minions.stream().map(this::minionIdentityToMap);
+    }
+
+    /** Returns the received flows. */
+    @GetMapping(
+        path="/sinkMessages",
+        produces = MimeTypeUtils.APPLICATION_JSON_VALUE
+    )
+    public Object getSinkMessages() {
+        return mockGrpcServiceApi
+            .getReceivedSinkMessages()
+            .stream()
+            .map(SinkMessageDto::from);
     }
 
 //========================================

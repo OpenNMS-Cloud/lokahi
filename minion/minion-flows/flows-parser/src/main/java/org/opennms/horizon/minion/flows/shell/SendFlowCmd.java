@@ -29,6 +29,7 @@
 
 package org.opennms.horizon.minion.flows.shell;
 
+import lombok.Setter;
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.Option;
@@ -47,6 +48,7 @@ import static com.google.common.io.ByteStreams.toByteArray;
  */
 @Command(scope = "opennms", name = "send-flow", description = "Sends flow data for test purposes")
 @Service
+@Setter
 @SuppressWarnings("java:S106") // System.out is used intentionally: we want to see it in the Karaf shell
 public class SendFlowCmd implements Action {
 

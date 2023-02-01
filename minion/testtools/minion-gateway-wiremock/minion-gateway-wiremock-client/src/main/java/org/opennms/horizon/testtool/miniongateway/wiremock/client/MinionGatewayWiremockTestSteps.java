@@ -9,11 +9,12 @@ import io.restassured.config.HttpClientConfig;
 import io.restassured.config.RestAssuredConfig;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
+import lombok.SneakyThrows;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpHeaders;
 import org.apache.http.entity.ContentType;
 import org.apache.http.protocol.HTTP;
-import org.opennms.cloud.grpc.minion.Identity;
+import org.opennms.horizon.testtool.miniongateway.wiremock.api.SinkMessageDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,11 +23,12 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class MinionGatewayWiremockTestSteps {
 
@@ -115,6 +117,20 @@ public class MinionGatewayWiremockTestSteps {
         assertTrue("Minion is connected: minion-id=" + minionId + "; location=" + location, found);
     }
 
+    @Then("Verify gateway has received netflow packages")
+    public void checkIfGatewayReceivedNetflowPackages() throws InterruptedException {
+
+        final List<SinkMessageDto> messages = retryUtils.retry(
+            this::getFlowMessages,
+            list -> !list.isEmpty(),
+            500,
+            30000,
+            Collections.emptyList()
+        );
+        assertFalse(messages.isEmpty());
+    }
+
+
 //========================================
 // Internals
 //----------------------------------------
@@ -198,5 +214,27 @@ public class MinionGatewayWiremockTestSteps {
         }
 
         return found;
+    }
+
+    @SneakyThrows
+    private List<SinkMessageDto> getFlowMessages() {
+        RestAssuredConfig restAssuredConfig = RestAssuredConfig.config()
+            .httpClient(HttpClientConfig.httpClientConfig()
+            );
+
+        RequestSpecification requestSpecification =
+            RestAssured
+                .given()
+                .config(restAssuredConfig);
+
+        final SinkMessageDto[] result = requestSpecification
+            .get(formatUrl(BASE_PATH + "/sinkMessages"))
+            .thenReturn()
+            .as(SinkMessageDto[].class);
+        List<SinkMessageDto> messages = Arrays.stream(result)
+            .filter(msg -> "Flow".equals(msg.getModuleId()))
+            .collect(Collectors.toList());
+        log.info("Cloud Gateway received:\n   {} SinkMessages in total\n   {} of these were Flow messages", result.length, messages.size());
+        return messages;
     }
 }

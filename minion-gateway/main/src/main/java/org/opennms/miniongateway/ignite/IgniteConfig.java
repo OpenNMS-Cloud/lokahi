@@ -3,7 +3,6 @@ package org.opennms.miniongateway.ignite;
 import org.apache.ignite.Ignite;
 import org.apache.ignite.IgniteCheckedException;
 import org.apache.ignite.IgniteSpring;
-import org.apache.ignite.Ignition;
 import org.apache.ignite.configuration.ClientConnectorConfiguration;
 import org.apache.ignite.configuration.DataStorageConfiguration;
 import org.apache.ignite.configuration.IgniteConfiguration;
@@ -12,11 +11,14 @@ import org.apache.ignite.kubernetes.configuration.KubernetesConnectionConfigurat
 import org.apache.ignite.spi.discovery.tcp.TcpDiscoverySpi;
 import org.apache.ignite.spi.discovery.tcp.ipfinder.kubernetes.TcpDiscoveryKubernetesIpFinder;
 import org.apache.ignite.spi.discovery.tcp.ipfinder.multicast.TcpDiscoveryMulticastIpFinder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.ImportResource;
 
 @Configuration
 public class IgniteConfig {
@@ -27,16 +29,23 @@ public class IgniteConfig {
     @Value("${ignite.kubernetes-service-name:unknown}")
     private String kubernetesServiceName;
 
+    @Value("${ignite.config:file*:/config/ignite.xml}")
+    private String igniteConfig;
+
     @Autowired
     private ApplicationContext applicationContext;
+    private final Logger logger = LoggerFactory.getLogger(IgniteConfig.class);
 
 //========================================
 // Beans
 //----------------------------------------
 
     @Bean
-    public Ignite ignite() {
-        IgniteConfiguration igniteConfiguration = this.prepareIgniteConfiguration();
+    public Ignite ignite(@Autowired(required=false) IgniteConfiguration cfg) {
+        if (cfg == null) {
+            cfg = new IgniteConfiguration();
+        }
+        IgniteConfiguration igniteConfiguration = this.prepareIgniteConfiguration(cfg);
 
         try {
             return IgniteSpring.start(igniteConfiguration, applicationContext);
@@ -49,8 +58,8 @@ public class IgniteConfig {
 // Internals
 //----------------------------------------
 
-    private IgniteConfiguration prepareIgniteConfiguration() {
-        org.apache.ignite.configuration.IgniteConfiguration igniteConfiguration = new org.apache.ignite.configuration.IgniteConfiguration();
+    private IgniteConfiguration prepareIgniteConfiguration(IgniteConfiguration igniteConfiguration) {
+        igniteConfiguration.setClassLoader(applicationContext.getClassLoader());
 
         // enable compute calls from thin client
         ThinClientConfiguration thinClientConfiguration = new ThinClientConfiguration();
@@ -65,8 +74,6 @@ public class IgniteConfig {
         } else {
             configureClusterNodeDiscovery(igniteConfiguration);
         }
-
-        configureDataStorage(igniteConfiguration);
 
         return igniteConfiguration;
     }
@@ -91,12 +98,5 @@ public class IgniteConfig {
         tcpDiscoverySpi.setIpFinder(ipFinder);
 
         igniteConfiguration.setDiscoverySpi(tcpDiscoverySpi);
-    }
-
-    private void configureDataStorage(org.apache.ignite.configuration.IgniteConfiguration igniteConfiguration) {
-        DataStorageConfiguration dataStorageConfiguration = new DataStorageConfiguration();
-        dataStorageConfiguration.getDefaultDataRegionConfiguration().setPersistenceEnabled(false);
-
-        igniteConfiguration.setDataStorageConfiguration(dataStorageConfiguration);
     }
 }

@@ -43,6 +43,12 @@
         </dependency>
 
         <dependency>
+            <groupId>org.opennms.horizon.minion</groupId>
+            <artifactId>minion-gateway-wiremock-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>io.cucumber</groupId>
             <artifactId>cucumber-java</artifactId>
         </dependency>

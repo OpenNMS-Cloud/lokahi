@@ -1,8 +1,8 @@
-/*
+/*******************************************************************************
  * This file is part of OpenNMS(R).
  *
- * Copyright (C) 2022 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
+ * Copyright (C) 2006-2014 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2014 The OpenNMS Group, Inc.
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
  *
@@ -24,32 +24,21 @@
  *     OpenNMS(R) Licensing <license@opennms.org>
  *     http://www.opennms.org/
  *     http://www.opennms.com/
- */
+ *******************************************************************************/
 
-package org.opennms.taskset.service.model;
+package org.opennms.horizon.notifications.model;
 
-import org.opennms.taskset.contract.TaskSet;
+import jakarta.persistence.Column;
+import jakarta.persistence.MappedSuperclass;
+import lombok.Getter;
+import lombok.Setter;
+import org.hibernate.annotations.TenantId;
 
-public class LocatedTaskSet {
-    private final String tenantId;
-    private final String location;
-    private final TaskSet taskSet;
-
-    public LocatedTaskSet(String tenantId, String location, TaskSet taskSet) {
-        this.tenantId = tenantId;
-        this.location = location;
-        this.taskSet = taskSet;
-    }
-
-    public String getTenantId() {
-        return tenantId;
-    }
-
-    public String getLocation() {
-        return location;
-    }
-
-    public TaskSet getTaskSet() {
-        return taskSet;
-    }
+@Getter
+@Setter
+@MappedSuperclass
+public abstract class TenantAwareEntity {
+    @TenantId
+    @Column(name = "tenant_id")
+    private String tenantId;
 }

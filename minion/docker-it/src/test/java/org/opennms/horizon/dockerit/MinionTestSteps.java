@@ -28,6 +28,21 @@
 
 package org.opennms.horizon.dockerit;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.List;
+import java.util.Objects;
+
+import org.apache.commons.lang3.StringUtils;
+import org.opennms.horizon.minion.flows.shell.SendFlowCmd;
+import org.opennms.horizon.testtool.miniongateway.wiremock.client.MinionGatewayWiremockTestSteps;
+import org.opennms.horizon.testtool.miniongateway.wiremock.client.RetryUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.restassured.RestAssured;
@@ -36,18 +51,6 @@ import io.restassured.config.RestAssuredConfig;
 import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
-import org.opennms.horizon.testtool.miniongateway.wiremock.client.MinionGatewayWiremockTestSteps;
-import org.opennms.horizon.testtool.miniongateway.wiremock.client.RetryUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.List;
-import java.util.Objects;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 public class MinionTestSteps {
 
@@ -64,6 +67,8 @@ public class MinionTestSteps {
     // Test Configuration
     //
     private String applicationBaseUrl;
+    private String applicationHostName;
+    private int netflow5ListenerPort;
 
     //
     // Test Runtime Data
@@ -93,6 +98,20 @@ public class MinionTestSteps {
         log.info("Using BASE URL {}", applicationBaseUrl);
     }
 
+    @Given("Application Host Name in system property {string}")
+    public void applicationHostNameInSystemProperty(String systemProperty) {
+        applicationHostName = System.getProperty(systemProperty);
+
+        log.info("Using application host name {}", applicationHostName);
+    }
+
+    @Given("Netflow Listener Port in system property {string}")
+    public void netflow5ListenerPortInSystemProperty(String systemProperty) {
+        netflow5ListenerPort = Integer.parseInt(StringUtils.split(System.getProperty(systemProperty), "/")[0]);
+        log.info("Using netflow5ListenerPort {}", netflow5ListenerPort);
+    }
+
+
     @Then("Send GET request to application at path {string}")
     public void sendGETRequestToApplicationAtPath(String path) throws Exception {
         commonSendGetRequestToApplication(path);
@@ -102,7 +121,7 @@ public class MinionTestSteps {
     public void sendGETRequestToApplicationAtPathUntilSuccessWithTimeoutMs(String path, int timeout) throws InterruptedException {
         retryUtils.retry(
             () -> retryableSendGetRequestToApplication(path),
-            (response) -> ( response != null ) && isSuccessHttpStatusCode(response.getStatusCode()),
+            (response) -> (response != null) && isSuccessHttpStatusCode(response.getStatusCode()),
             100,
             timeout,
             null
@@ -137,6 +156,15 @@ public class MinionTestSteps {
         }
     }
 
+    @Then("Send net flow package")
+    public void sendNetflowPackage() throws Exception {
+        SendFlowCmd cmd = new SendFlowCmd();
+        cmd.setHost(applicationHostName);
+        cmd.setPort(netflow5ListenerPort); // netflow 5 port enabled by default
+        cmd.setFile("netflow5.dat");
+        cmd.execute();
+    }
+
 //========================================
 // Utility Rules
 //----------------------------------------
@@ -156,7 +184,7 @@ public class MinionTestSteps {
 //----------------------------------------
 
     private boolean isSuccessHttpStatusCode(int code) {
-        return ( ( (code) >= 200 ) && ( code <= 299 ) );
+        return (((code) >= 200) && (code <= 299));
     }
 
     private RestAssuredConfig createRestAssuredTestConfig() {
@@ -177,7 +205,7 @@ public class MinionTestSteps {
 
             if (actualValue != null) {
                 actualTrimmed = actualValue.trim();
-            }  else {
+            } else {
                 actualTrimmed = null;
             }
 
@@ -235,7 +263,7 @@ public class MinionTestSteps {
             return true;
         }
 
-        if (! Objects.equals(newResponse.getBody().asString(), rememberedRestAssuredResponse.getBody().asString())) {
+        if (!Objects.equals(newResponse.getBody().asString(), rememberedRestAssuredResponse.getBody().asString())) {
             log.info("BODY CHANGE: {} -> {}", rememberedRestAssuredResponse.getBody().asString(), newResponse.getBody().asString());
             return true;
         }

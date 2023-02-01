@@ -9,12 +9,13 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.TenantId;
 
 @Getter
 @Setter
 @RequiredArgsConstructor
 @Entity
-public class PagerDutyConfig {
+public class PagerDutyConfig extends TenantAwareEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;

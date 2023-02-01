@@ -40,7 +40,21 @@
 
         <dependency>
             <groupId>org.opennms.horizon.minion</groupId>
+            <artifactId>minion-gateway-wiremock-api</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.opennms.horizon.minion</groupId>
             <artifactId>minion-gateway-wiremock-client</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.opennms.horizon.minion</groupId>
+            <artifactId>flows-parser</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>

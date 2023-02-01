@@ -112,3 +112,6 @@ spec:
             - mountPath: "/docker-entrypoint-initdb.d/postgres.datachoices.initial.script.sql"
               name: postgres-initial-script
               subPath: "postgres.datachoices.initial.script.sql"
+            - mountPath: "/docker-entrypoint-initdb.d/postgres.minion_gateway.initial.script.sql"
+              name: postgres-initial-script
+              subPath: "postgres.minion_gateway.initial.script.sql"

@@ -28,12 +28,20 @@
 
 package org.opennms.taskset.service.api;
 
+import org.opennms.taskset.contract.TaskDefinition;
 import org.opennms.taskset.contract.TaskSet;
 
+import java.util.List;
+
+/**
+ * This interface is internal implementation detail, it will be moved.
+ */
+@Deprecated
 public interface TaskSetPublisher {
 
     String TASK_SET_PUBLISH_SERVICE = "task-set.pub-task";
 
     void publishTaskSet(String tenantId, String location, TaskSet taskSet);
 
+    void publishNewTasks(String tenantId, String location, List<TaskDefinition> taskList);
 }

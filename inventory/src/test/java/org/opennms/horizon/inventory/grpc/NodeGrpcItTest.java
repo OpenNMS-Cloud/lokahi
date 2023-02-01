@@ -73,6 +73,8 @@ import org.opennms.horizon.inventory.repository.NodeRepository;
 import org.opennms.horizon.inventory.repository.TagRepository;
 import org.opennms.horizon.inventory.service.NodeService;
 import org.opennms.horizon.inventory.service.TagService;
+import org.opennms.horizon.inventory.service.taskset.DetectorTaskSetService;
+import org.opennms.horizon.inventory.service.taskset.TaskSetHandler;
 import org.opennms.taskset.contract.MonitorType;
 import org.opennms.taskset.contract.TaskSet;
 import org.opennms.taskset.service.contract.PublishTaskSetRequest;
@@ -119,9 +121,12 @@ class NodeGrpcItTest extends GrpcTestBase {
     private NodeService nodeService;
     @Autowired
     private TagService tagService;
-
+    @Autowired
+    private TaskSetHandler taskSetHandler;
     @Autowired
     private TagRepository tagRepository;
+    @Autowired
+    private DetectorTaskSetService detectorTaskSetService;
 
     private static TestTaskSetGrpcService testGrpcService;
 
@@ -311,7 +316,7 @@ class NodeGrpcItTest extends GrpcTestBase {
 
     @Test
     @Transactional
-    public void testNodeDeletion() throws UnknownHostException, VerificationException {
+    public void testNodeDeletionWithTaskSets() throws UnknownHostException {
         String location = "location";
         String ip = "127.0.0.1";
         populateTables(location, ip, MonitorType.SNMP);
@@ -324,9 +329,23 @@ class NodeGrpcItTest extends GrpcTestBase {
         // Should have two detector tasks ( ICMP/SNMP)
         // one monitor task (SNMP) and one SNMP Collector task
         Assertions.assertEquals(tasks.size(), 4);
+        testGrpcService.reset();
+        detectorTaskSetService.sendDetectorTasks(node);
+        taskSetHandler.sendMonitorTask(location, MonitorType.SNMP, node.getIpInterfaces().get(0), node.getId());
+        taskSetHandler.sendCollectorTask(location, MonitorType.SNMP, node.getIpInterfaces().get(0), node.getId());
+        var taskDefinitions = testGrpcService.getTaskDefinitions(location);
+        var snmpTaskDefinitions = taskDefinitions.stream().filter(taskDefinition ->
+            taskDefinition.getPluginName().contains(MonitorType.SNMP.name()) && taskDefinition.getNodeId() == node.getId()).toList();
+        Assertions.assertEquals(snmpTaskDefinitions.size(), 3);
+        testGrpcService.reset();
         nodeService.deleteNode(node.getId());
         optional = nodeRepository.findById(node.getId());
         Assertions.assertFalse(optional.isPresent());
+        await().atMost(10, TimeUnit.SECONDS).until(() -> testGrpcService.getRequests(), Matchers.hasSize(1));
+        taskDefinitions = testGrpcService.getTaskDefinitions(location);
+        snmpTaskDefinitions = taskDefinitions.stream().filter(taskDefinition ->
+            taskDefinition.getPluginName().contains(MonitorType.SNMP.name()) && taskDefinition.getNodeId() == node.getId()).toList();
+        Assertions.assertEquals(snmpTaskDefinitions.size(), 0);
     }
 
     private synchronized void populateTables(String location, String ip) throws UnknownHostException {
@@ -437,7 +456,6 @@ class NodeGrpcItTest extends GrpcTestBase {
 
     @Test
     void testDeleteNode() throws VerificationException {
-        String label = "label";
 
         NodeCreateDTO createDTO = NodeCreateDTO.newBuilder()
             .setLocation("location")

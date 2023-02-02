@@ -1,6 +1,5 @@
 package org.opennms.horizon.minion.taskset.worker.ignite;
 
-import java.util.Arrays;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.apache.ignite.Ignite;
@@ -20,6 +19,9 @@ import org.apache.ignite.spi.metric.MetricExporterSpi;
 import org.opennms.horizon.minion.taskset.worker.ignite.classloader.CompoundClassLoader;
 import org.opennms.horizon.minion.taskset.worker.impl.TaskSetLifecycleManagerImpl;
 
+import java.util.Arrays;
+import java.util.Optional;
+
 @Data
 @AllArgsConstructor
 public class WorkerIgniteConfiguration {
@@ -34,7 +36,13 @@ public class WorkerIgniteConfiguration {
 
         igniteConfiguration.setClientMode(false);
         igniteConfiguration.setMetricsLogFrequency(0);  // DISABLE IGNITE METRICS
-
+        String minionId = System.getenv("MINION_ID");
+        Optional.ofNullable(minionId).ifPresentOrElse(igniteConfiguration::setConsistentId, () -> {
+            String host = System.getenv("HOSTNAME");
+            if (host != null) {
+                igniteConfiguration.setConsistentId(host);
+            }
+        });
         if (useKubernetes) {
             configureClusterNodeDiscoveryKubernetes(igniteConfiguration);
         } else {

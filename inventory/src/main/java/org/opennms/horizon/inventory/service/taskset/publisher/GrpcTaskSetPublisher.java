@@ -124,13 +124,12 @@ public class GrpcTaskSetPublisher implements TaskSetPublisher {
 
     Optional<TaskSet> buildTaskSetForRemoval(String tenantId, String location, List<TaskDefinition> taskList) {
         Map<String, TaskSet> taskSetsByLocation = taskSetsByTenantLocation.computeIfAbsent(tenantId, (unusedTenantId) -> new HashMap<>());
-        TaskSet existingTaskSet = taskSetsByLocation.get(location);
-        TaskSet updatedTaskSet = null;
+        TaskSet existingTaskSet = taskSetsByLocation.get(location); 
 
         if (existingTaskSet != null) {
             List<TaskDefinition> existingTasks = new ArrayList<>(existingTaskSet.getTaskDefinitionList());
             taskList.forEach(task -> existingTasks.removeIf(existingTask -> task.getId().equals(existingTask.getId())));
-            updatedTaskSet = TaskSet.newBuilder()
+            TaskSet updatedTaskSet = TaskSet.newBuilder()
                 .addAllTaskDefinition(existingTasks).build();
             taskSetsByLocation.put(location, updatedTaskSet);
             return Optional.of(updatedTaskSet);

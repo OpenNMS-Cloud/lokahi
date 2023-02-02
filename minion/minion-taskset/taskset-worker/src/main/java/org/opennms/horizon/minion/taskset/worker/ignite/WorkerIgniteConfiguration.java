@@ -36,13 +36,11 @@ public class WorkerIgniteConfiguration {
 
         igniteConfiguration.setClientMode(false);
         igniteConfiguration.setMetricsLogFrequency(0);  // DISABLE IGNITE METRICS
-        String minionId = System.getenv("MINION_ID");
-        Optional.ofNullable(minionId).ifPresentOrElse(igniteConfiguration::setConsistentId, () -> {
-            String host = System.getenv("HOSTNAME");
-            if (host != null) {
-                igniteConfiguration.setConsistentId(host);
-            }
-        });
+
+        Optional.ofNullable(System.getenv("MINION_ID"))
+            .or(() -> Optional.ofNullable(System.getenv("HOSTNAME")))
+            .ifPresent(igniteConfiguration::setConsistentId);
+
         if (useKubernetes) {
             configureClusterNodeDiscoveryKubernetes(igniteConfiguration);
         } else {

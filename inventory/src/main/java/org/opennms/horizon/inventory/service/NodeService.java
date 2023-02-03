@@ -149,6 +149,9 @@ public class NodeService {
     @Transactional
     public Map<String, List<NodeDTO>> listNodeByIds(List<Long> ids, String tenantId) {
         List<Node> nodeList = nodeRepository.findByIdInAndTenantId(ids, tenantId);
+        if(nodeList.isEmpty()) {
+            return new HashMap<>();
+        }
         return nodeList.stream().collect(Collectors.groupingBy(node -> node.getMonitoringLocation().getLocation(),
             Collectors.mapping(mapper::modelToDTO, Collectors.toList())));
     }

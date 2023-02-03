@@ -29,8 +29,10 @@
 package org.opennms.horizon.inventory.service.taskset;
 
 import static org.opennms.horizon.inventory.service.taskset.TaskUtils.identityForAzureTask;
+import static org.opennms.horizon.inventory.service.taskset.TaskUtils.identityForNodeScan;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
@@ -66,8 +68,13 @@ public class ScannerTaskSetService {
     }
 
     public void sendNodeScannerTask(List<NodeDTO> nodes, String location, String tenantId) {
-            List<TaskDefinition> tasks = nodes.stream().map(this::createNodeScanTask).collect(Collectors.toList());
-            taskSetPublisher.publishNewTasks(tenantId, location, tasks);
+            List<TaskDefinition> tasks = nodes.stream().map(this::createNodeScanTask)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(Collectors.toList());
+            if(!tasks.isEmpty()) {
+                taskSetPublisher.publishNewTasks(tenantId, location, tasks);
+            }
     }
 
     private void sendAzureScannerTask(AzureCredential credential) {
@@ -101,20 +108,24 @@ public class ScannerTaskSetService {
             .build();
     }
 
-    private TaskDefinition createNodeScanTask(NodeDTO node) {
-        List<String> ipAddresses = node.getIpInterfacesList().stream().map(IpInterfaceDTO::getIpAddress).collect(Collectors.toList());
-        String taskId = "node-scan=" + node.getNodeLabel() + "-" + node.getId() ;
-        Any taskConfig = Any.pack(NodeScanRequest.newBuilder()
-            .setNodeId(node.getId())
-            .addAllIpAddresses(ipAddresses).build());
+    private Optional<TaskDefinition> createNodeScanTask(NodeDTO node) {
+        Optional<IpInterfaceDTO> ipInterface = node.getIpInterfacesList().stream()
+            .filter(IpInterfaceDTO::getSnmpPrimary).findFirst()
+            .or(()->Optional.ofNullable(node.getIpInterfaces(0)));
+        return ipInterface.map(ip -> {
+            String taskId = identityForNodeScan(node.getId());
+            Any taskConfig = Any.pack(NodeScanRequest.newBuilder()
+                .setNodeId(node.getId())
+                .setPrimaryIp(ip.getIpAddress()).build());
 
-        return TaskDefinition.newBuilder()
-            .setType(TaskType.SCANNER)
-            .setPluginName("NodeScanner")
-            .setId(taskId)
-            .setNodeId(node.getId())
-            .setConfiguration(taskConfig)
-            .setSchedule(TaskUtils.DEFAULT_SCHEDULE)
-            .build();
+            return TaskDefinition.newBuilder()
+                .setType(TaskType.SCANNER)
+                .setPluginName("NodeScanner")
+                .setId(taskId)
+                .setNodeId(node.getId())
+                .setConfiguration(taskConfig)
+                .setSchedule(TaskUtils.DEFAULT_SCHEDULE)
+                .build();
+        }).or(Optional::empty);
     }
 }

@@ -6,7 +6,6 @@ import {
   ListMinionsAndDevicesForTablesDocument,
   ListMinionMetricsDocument,
   ListNodeMetricsDocument,
-  TsResult,
   Minion,
   Node,
   TimeRangeUnit

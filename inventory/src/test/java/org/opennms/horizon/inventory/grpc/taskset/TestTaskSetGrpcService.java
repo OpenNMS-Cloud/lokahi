@@ -18,7 +18,7 @@ public class TestTaskSetGrpcService extends TaskSetServiceGrpc.TaskSetServiceImp
     private final List<PublishTaskSetRequest> requests = new ArrayList<>();
 
     @Override
-    public void publishTaskSet(PublishTaskSetRequest request,
+    public synchronized void publishTaskSet(PublishTaskSetRequest request,
                                StreamObserver<PublishTaskSetResponse> responseObserver) {
         this.timesCalled.incrementAndGet();
         this.requests.add(request);

@@ -42,6 +42,7 @@ import org.opennms.horizon.inventory.repository.NodeRepository;
 import org.opennms.horizon.inventory.service.NodeService;
 import org.opennms.horizon.inventory.service.taskset.CollectorTaskSetService;
 import org.opennms.horizon.inventory.service.taskset.MonitorTaskSetService;
+import org.opennms.node.scan.contract.NodeScanResult;
 import org.opennms.taskset.contract.ScanType;
 import org.opennms.taskset.contract.ScannerResponse;
 import org.springframework.stereotype.Component;
@@ -80,8 +81,12 @@ public class ScannerResponseService {
 
                     processAzureScanItem(tenantId, location, ipAddress, item);
                 }
+                break;
             }
+            //TODO process the node scan results
+            case NODE_SCAN -> log.info("received node scan result: {}", result.unpack(NodeScanResult.class));
             case UNRECOGNIZED -> log.warn("Unrecognized scan type");
+
         }
     }
 
@@ -89,6 +94,8 @@ public class ScannerResponseService {
         Any result = response.getResult();
         if (result.is(AzureScanResponse.class)) {
             return ScanType.AZURE_SCAN;
+        } else if(result.is(NodeScanResult.class)) {
+            return ScanType.NODE_SCAN;
         }
         return ScanType.UNRECOGNIZED;
     }

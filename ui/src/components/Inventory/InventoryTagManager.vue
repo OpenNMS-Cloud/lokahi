@@ -1,8 +1,7 @@
 <template>
   <div
-    v-if="isTaggingBoxOpen"
     class="tag-manager-box"
-    data-test="tag-manager-box"
+    v-if="isTaggingBoxOpen"
   >
     <section
       class="select-tags"
@@ -10,8 +9,11 @@
     >
       <div class="top">
         <div class="heading-total-selected">
-          <h4>Select Tags:</h4>
-          <div class="total-selected">
+          <h4 data-test="heading">Select Tags:</h4>
+          <div
+            class="total-selected"
+            data-test="total-selected"
+          >
             <div>
               TOTAL: <span>{{ tags.length }}</span
               ><span class="pipe">|</span>
@@ -22,18 +24,18 @@
           </div>
         </div>
         <div class="search-add">
-          <!-- Add tag -->
           <InputButtonPopover
             :handler="addTag"
             label="Add Tag"
+            data-test="select-tags"
           />
-          <!-- Search tags input -->
           <FeatherInput
             :modelValue="searchValue"
             @update:model-value="tagsFiltering"
             clear="clear"
             label="Search Tags"
             class="search"
+            data-test="search-tags"
           />
         </div>
       </div>
@@ -41,6 +43,7 @@
         condensed
         label="Tags"
         :key="selectedTags.toString()"
+        data-test="tags-list"
       >
         <FeatherChip
           v-for="tag of tags"
@@ -61,7 +64,6 @@
       <FeatherRadioGroup
         label=""
         v-model="taggingStore.tagNodesSelected"
-        class="select-tag-nodes"
       >
         <FeatherRadio
           :value="TagNodesType.All"
@@ -85,34 +87,27 @@ import { useTaggingQueries } from '@/store/Queries/taggingQueries'
 import { useTaggingStore } from '@/store/Components/taggingStore'
 import { useTaggingMutations } from '@/store/Mutations/taggingMutations'
 import { TagNodesType } from '@/types/tags'
-
 const inventoryStore = useInventoryStore()
 const taggingQueries = useTaggingQueries()
 const taggingStore = useTaggingStore()
 const taggingMutations = useTaggingMutations()
-
 const searchValue = ref()
 const tags = ref()
 const selectedTags = computed(() => taggingStore.selectedTags)
-
 watchEffect(() => {
   tags.value = taggingQueries.tags
 })
-
 const isTaggingBoxOpen = computed(() => {
   if (!inventoryStore.isTaggingBoxOpen) {
     taggingQueries.resetTags()
   } else {
     taggingQueries.fetchTags()
   }
-
   return inventoryStore.isTaggingBoxOpen
 })
-
 const addTag = (val: string) => {
   taggingMutations.editTag(val, true)
 }
-
 const tagsFiltering = (val: string) => {
   if (!val?.length) {
     tags.value = taggingQueries.tags
@@ -127,7 +122,6 @@ const tagsFiltering = (val: string) => {
 @use '@featherds/styles/mixins/typography';
 @use '@/styles/vars';
 @use '@/styles/mediaQueries';
-
 .tag-manager-box {
   display: flex;
   flex-direction: row;
@@ -143,7 +137,6 @@ const tagsFiltering = (val: string) => {
     padding-top: 3px;
   }
 }
-
 .select-tags {
   display: flex;
   flex-direction: column;
@@ -169,7 +162,6 @@ const tagsFiltering = (val: string) => {
           }
         }
       }
-
       @include mediaQueries.screen-md {
         display: flex;
         flex-direction: row;
@@ -190,7 +182,6 @@ const tagsFiltering = (val: string) => {
         }
       }
     }
-
     @include mediaQueries.screen-md {
       margin-bottom: 0;
     }
@@ -198,7 +189,6 @@ const tagsFiltering = (val: string) => {
   .tag-chip-list {
     margin-top: 0;
   }
-
   @include mediaQueries.screen-lg {
     width: 75%;
     min-width: 0;
@@ -207,7 +197,6 @@ const tagsFiltering = (val: string) => {
     width: 80%;
   }
 }
-
 .tag-nodes {
   display: flex;
   flex-direction: row;
@@ -216,7 +205,6 @@ const tagsFiltering = (val: string) => {
   margin-top: var(variables.$spacing-m);
   padding-top: var(variables.$spacing-m);
   border-top: 1px solid var(variables.$secondary-text-on-surface);
-
   :deep(.select-tag-nodes) {
     margin-left: var(variables.$spacing-m);
     > label {
@@ -226,7 +214,6 @@ const tagsFiltering = (val: string) => {
       display: none;
     }
   }
-
   @include mediaQueries.screen-lg {
     width: 20%;
     min-width: 0;
@@ -237,7 +224,6 @@ const tagsFiltering = (val: string) => {
     padding-left: var(variables.$spacing-l);
     display: block;
   }
-
   @include mediaQueries.screen-xxl {
     width: 15%;
   }

@@ -39,12 +39,12 @@ import org.springframework.stereotype.Component;
 import java.util.Map;
 import java.util.Optional;
 
-//@Component
+@Component
 class TenantIdentifierResolver implements CurrentTenantIdentifierResolver, HibernatePropertiesCustomizer {
     private static final Logger LOG = LoggerFactory.getLogger(TenantIdentifierResolver.class);
     private static final String DEFAULT_TENANT_ID = "opennms-prime";
 
-    //@Autowired
+    @Autowired
     TenantLookup tenantLookup;
 
     @Override

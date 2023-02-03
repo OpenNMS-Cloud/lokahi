@@ -31,9 +31,9 @@ package org.opennms.horizon.alarmservice.db.tenant;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-//@Configuration
+@Configuration
 public class TenantConfig {
-    //@Bean
+    @Bean
     public TenantLookup createTenantLookup(){
         return new GrpcTenantLookupImpl();
     }

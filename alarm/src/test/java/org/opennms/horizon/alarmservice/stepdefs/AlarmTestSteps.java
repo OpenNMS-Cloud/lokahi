@@ -178,8 +178,8 @@ public class AlarmTestSteps {
         commonSendPOSTRequestToApplication(path+"/"+ alarmDTO.getAlarmId());
     }
 
-    @Then("Send Event message to Kafka at topic {string} with alarm reduction key {string}")
-    public void sendMessageToKafkaAtTopic(String topic, String alarmReductionKey) throws Exception {
+    @Then("Send Event message to Kafka at topic {string} with alarm reduction key {string} with tenant {string}")
+    public void sendMessageToKafkaAtTopic(String topic, String alarmReductionKey, String tenantId) throws Exception {
 
         testAlarmReductionKey = alarmReductionKey;
 
@@ -196,7 +196,7 @@ public class AlarmTestSteps {
                 .setAlarmData(alarmData)
                 .build();
 
-        kafkaTestHelper.sendToTopic(topic, event.toByteArray());
+        kafkaTestHelper.sendToTopic(topic, event.toByteArray(), tenantId);
     }
 
     @Then("send GET request to application at path {string}, with timeout {int}ms, until JSON response matches the following JSON path expressions")

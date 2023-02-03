@@ -1,7 +1,6 @@
 <template>
   <div class="container">
     <PageHeader heading="Discovery" />
-    <LocationsAutocomplete />
     <div>
       <Infobar />
     </div>

@@ -9,7 +9,7 @@
       :loading="loading"
       :results="filteredLocations"
       @search="search"
-      @update:modelValue="setLocation"
+      @update:modelValue="deboncedFn"
     ></FeatherAutocomplete>
 
     <!-- Locations selection -->
@@ -17,7 +17,7 @@
       <FeatherChip
         v-for="location in selectedLocations"
         :key="location.id"
-        class="pointer"
+        class="location-chip"
       >
         {{ location.location }}
         <FeatherIcon
@@ -34,41 +34,30 @@
 import { useDiscoveryQueries } from '@/store/Queries/discoveryQueries'
 import Cancel from '@featherds/icon/navigation/Cancel'
 import { markRaw } from 'vue'
+import { debounce } from 'lodash'
+import { Location } from '@/types/graphql'
+import { IAutocompleteItemType } from '@featherds/autocomplete'
+
 const Icons = markRaw({
   Cancel
 })
 const emit = defineEmits(['location-selected'])
-
+type TLocationAutocomplete = Location & { _text: string }
 const discoveryQueries = useDiscoveryQueries()
-const searchValue = ref<string>(undefined)
-const selectedLocations = ref([])
+const searchValue = ref<Location | undefined>()
+const selectedLocations = ref<TLocationAutocomplete[]>([])
 const loading = ref(false)
-const locations = ref()
-const filteredLocations = ref()
-//const filteredLocations = computed(() => discoveryQueries.locations)
-locations.value = [
-  {
-    id: 1,
-    location: 'Default',
-    tenantId: 'opennms-prime'
-  },
-  {
-    id: 2,
-    location: 'Montreal',
-    tenantId: 'opennms-prime'
-  },
-  {
-    id: 3,
-    location: 'Ottawa',
-    tenantId: 'opennms-prime'
-  },
-  {
-    id: 4,
-    location: 'Toronto',
-    tenantId: 'opennms-prime'
-  }
-]
+const locations = ref() //locations without selected items
+const filteredLocations = ref() //results in autocomplete
+const computedLocations = computed(() => discoveryQueries.locations)
+
 onMounted(() => discoveryQueries.getLocations())
+watchEffect(() => {
+  if (computedLocations) {
+    filteredLocations.value = computedLocations
+    locations.value = computedLocations
+  }
+})
 
 const search = (q: string) => {
   if (!q) {
@@ -78,28 +67,35 @@ const search = (q: string) => {
   loading.value = true
   const query = q.toLowerCase()
   filteredLocations.value = locations.value
-    .filter((x: any) => x.location.toLowerCase().indexOf(query) > -1)
-    .map((x) => ({
-      _text: x.location,
-      id: x.id
+    .filter((x: any) => x.location?.toLowerCase().indexOf(query) > -1)
+    .map((x: any) => ({
+      _text: x?.location,
+      id: x?.id
     }))
   loading.value = false
 }
 
-const setLocation = (selected) => {
-  if (selected) {
-    selectedLocations.value.push({
-      id: selected.id,
-      location: selected._text
-    })
-    locations.value = locations.value.filter((l) => l.id !== selected.id)
-    emit('location-selected', selectedLocations)
+//using debounce temporary because of bug in feather/autocomplete
+const deboncedFn = debounce(
+  (selected: IAutocompleteItemType | IAutocompleteItemType[] | undefined) => {
+    if (selected) {
+      const selectedLocation = selected as TLocationAutocomplete
+      selectedLocation.location = selectedLocation._text
+      selectedLocations.value.push(selectedLocation)
+      locations.value = locations.value.filter((l: Location) => l.id !== selectedLocation.id)
+      emit('location-selected', selectedLocations.value)
+    }
+  },
+  200,
+  {
+    leading: false,
+    trailing: true
   }
-}
+)
 
-const removeLocation = (location) => {
+const removeLocation = (location: Location) => {
   if (location?.id) {
-    selectedLocations.value = selectedLocations.value.filter((l) => l.id !== location.id)
+    selectedLocations.value = selectedLocations.value.filter((l: Location) => l.id !== location.id)
     locations.value.push(location)
     emit('location-selected', selectedLocations)
   }
@@ -115,6 +111,10 @@ const removeLocation = (location) => {
   .search {
     width: 300px;
     margin-right: var(variables.$spacing-m);
+  }
+  .location-chip {
+    margin-bottom: var(variables.$spacing-s);
+    cursor: pointer;
   }
 }
 </style>

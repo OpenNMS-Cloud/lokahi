@@ -48,6 +48,41 @@ export const useInventoryQueries = defineStore('inventoryQueries', () => {
 
     if (allNodes?.length) {
       allNodes.forEach(async ({ id, nodeLabel, location, ipInterfaces }) => {
+
+        // stop-gap measure to display nodes without IP addresses
+        // may be removed once BE disassociates instance with IP
+        if (!ipInterfaces?.[0]?.ipAddress) {
+          nodes.value.push({
+            id: id,
+            label: nodeLabel,
+            status: '',
+            metrics: [
+              {
+                type: 'latency',
+                label: 'Latency',
+                value: 0,
+                status: ''
+              },
+              {
+                type: 'status',
+                label: 'Status',
+                status: 'NO IP'
+              }
+            ],
+            anchor: {
+              profileValue: '--',
+              profileLink: '',
+              locationValue: location?.location || '--',
+              locationLink: '',
+              managementIpValue: '',
+              managementIpLink: '',
+              tagValue: '--',
+              tagLink: ''
+            }
+          })
+          return
+        }
+
         const { data, isFetching } = await fetchNodeMetrics(id, ipInterfaces?.[0].ipAddress as string) // currently only 1 interface per node
 
         if (data.value && !isFetching.value) {

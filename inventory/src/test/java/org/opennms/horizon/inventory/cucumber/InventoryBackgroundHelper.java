@@ -43,6 +43,7 @@ import org.opennms.horizon.shared.constants.GrpcConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.InetAddress;
 import java.util.Map;
 import java.util.Objects;
 import java.util.TreeMap;
@@ -52,6 +53,7 @@ import java.util.concurrent.TimeUnit;
 public class InventoryBackgroundHelper {
     private static final Logger LOG = LoggerFactory.getLogger(InventoryBackgroundHelper.class);
     private static final int DEADLINE_DURATION = 30;
+    private static final String LOCALHOST = "localhost";
     private Integer externalGrpcPort;
     private String kafkaBootstrapUrl;
     private String tenantId;
@@ -83,7 +85,7 @@ public class InventoryBackgroundHelper {
 
     public void createGrpcConnectionForInventory() {
         NettyChannelBuilder channelBuilder =
-            NettyChannelBuilder.forAddress("localhost", externalGrpcPort);
+            NettyChannelBuilder.forAddress(LOCALHOST, externalGrpcPort);
 
         ManagedChannel managedChannel = channelBuilder.usePlaintext().build();
         managedChannel.getState(true);

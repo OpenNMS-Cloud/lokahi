@@ -67,6 +67,8 @@ public class CucumberRunnerIT {
 
     private static Network network;
 
+    private static final String dockerImage = System.getProperty("application.docker.image");
+
     @BeforeAll
     public static void before() throws Throwable {
         network = Network.newNetwork();
@@ -102,7 +104,7 @@ public class CucumberRunnerIT {
 
     @SuppressWarnings({"unchecked"})
     private static void startApplicationContainer() {
-        applicationContainer = new GenericContainer(DockerImageName.parse("opennms/horizon-stream-inventory").toString());
+        applicationContainer = new GenericContainer(DockerImageName.parse(dockerImage).toString());
         applicationContainer
             .withNetwork(network)
             .withNetworkAliases("application", "application-host")

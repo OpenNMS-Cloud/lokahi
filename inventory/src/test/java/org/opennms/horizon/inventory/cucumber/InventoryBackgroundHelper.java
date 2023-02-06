@@ -10,6 +10,7 @@ import org.opennms.horizon.inventory.dto.ConfigurationServiceGrpc;
 import org.opennms.horizon.inventory.dto.MonitoringLocationServiceGrpc;
 import org.opennms.horizon.inventory.dto.MonitoringSystemServiceGrpc;
 import org.opennms.horizon.inventory.dto.NodeServiceGrpc;
+import org.opennms.horizon.inventory.dto.TagServiceGrpc;
 import org.opennms.horizon.shared.constants.GrpcConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,6 +23,7 @@ import java.util.concurrent.TimeUnit;
 @Getter
 public class InventoryBackgroundHelper {
     protected static final Logger LOG = LoggerFactory.getLogger(InventoryBackgroundHelper.class);
+    private static final int DEADLINE_DURATION = 30;
     private Integer externalGrpcPort;
     private String kafkaBootstrapUrl;
     private String tenantId;
@@ -29,6 +31,7 @@ public class InventoryBackgroundHelper {
     private MonitoringLocationServiceGrpc.MonitoringLocationServiceBlockingStub monitoringLocationStub;
     private NodeServiceGrpc.NodeServiceBlockingStub nodeServiceBlockingStub;
     private ConfigurationServiceGrpc.ConfigurationServiceBlockingStub configurationServiceBlockingStub;
+    private TagServiceGrpc.TagServiceBlockingStub tagServiceBlockingStub;
 
     private final Map<String, String> grpcHeaders = new TreeMap<>();
 
@@ -57,15 +60,17 @@ public class InventoryBackgroundHelper {
         ManagedChannel managedChannel = channelBuilder.usePlaintext().build();
         managedChannel.getState(true);
         monitoringSystemStub = MonitoringSystemServiceGrpc.newBlockingStub(managedChannel)
-            .withInterceptors(prepareGrpcHeaderInterceptor()).withDeadlineAfter(30, TimeUnit.SECONDS);
+            .withInterceptors(prepareGrpcHeaderInterceptor()).withDeadlineAfter(DEADLINE_DURATION, TimeUnit.SECONDS);
         monitoringLocationStub = MonitoringLocationServiceGrpc.newBlockingStub(managedChannel)
-            .withInterceptors(prepareGrpcHeaderInterceptor()).withDeadlineAfter(30, TimeUnit.SECONDS);
+            .withInterceptors(prepareGrpcHeaderInterceptor()).withDeadlineAfter(DEADLINE_DURATION, TimeUnit.SECONDS);
         nodeServiceBlockingStub = NodeServiceGrpc.newBlockingStub(managedChannel)
-            .withInterceptors(prepareGrpcHeaderInterceptor()).withDeadlineAfter(30, TimeUnit.SECONDS);
+            .withInterceptors(prepareGrpcHeaderInterceptor()).withDeadlineAfter(DEADLINE_DURATION, TimeUnit.SECONDS);
         nodeServiceBlockingStub = NodeServiceGrpc.newBlockingStub(managedChannel)
-            .withInterceptors(prepareGrpcHeaderInterceptor()).withDeadlineAfter(30, TimeUnit.SECONDS);
+            .withInterceptors(prepareGrpcHeaderInterceptor()).withDeadlineAfter(DEADLINE_DURATION, TimeUnit.SECONDS);
         configurationServiceBlockingStub = ConfigurationServiceGrpc.newBlockingStub(managedChannel)
-            .withInterceptors(prepareGrpcHeaderInterceptor()).withDeadlineAfter(30, TimeUnit.SECONDS);
+            .withInterceptors(prepareGrpcHeaderInterceptor()).withDeadlineAfter(DEADLINE_DURATION, TimeUnit.SECONDS);
+        tagServiceBlockingStub = TagServiceGrpc.newBlockingStub(managedChannel)
+            .withInterceptors(prepareGrpcHeaderInterceptor()).withDeadlineAfter(DEADLINE_DURATION, TimeUnit.SECONDS);
     }
 
     private ClientInterceptor prepareGrpcHeaderInterceptor() {

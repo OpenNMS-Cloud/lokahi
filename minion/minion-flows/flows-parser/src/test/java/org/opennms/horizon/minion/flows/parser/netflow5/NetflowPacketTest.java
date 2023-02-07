@@ -43,10 +43,11 @@ import java.util.Objects;
 import java.util.function.Consumer;
 
 import org.junit.Test;
+import org.opennms.horizon.minion.flows.parser.InvalidPacketException;
 import org.opennms.horizon.minion.flows.parser.proto.Header;
 import org.opennms.horizon.minion.flows.parser.proto.Packet;
 import org.opennms.horizon.minion.flows.parser.proto.Record;
-import org.opennms.horizon.minion.flows.parser.InvalidPacketException;
+
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;

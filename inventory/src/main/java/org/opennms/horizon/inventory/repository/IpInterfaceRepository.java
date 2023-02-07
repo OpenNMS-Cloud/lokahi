@@ -28,15 +28,15 @@
 
 package org.opennms.horizon.inventory.repository;
 
+import java.net.InetAddress;
+import java.util.List;
+import java.util.Optional;
+
 import org.opennms.horizon.inventory.model.IpInterface;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-
-import java.net.InetAddress;
-import java.util.List;
-import java.util.Optional;
 
 @Repository
 public interface IpInterfaceRepository extends JpaRepository<IpInterface, Long> {
@@ -52,4 +52,6 @@ public interface IpInterfaceRepository extends JpaRepository<IpInterface, Long> 
                                                                 @Param("tenantId") String tenantId);
 
     List<IpInterface> findByNodeId(long nodeId);
+
+    Optional<IpInterface> findByNodeIdAndTenantIdAndIpAddress(long nodeId, String tenantId, InetAddress ipAddress);
 }

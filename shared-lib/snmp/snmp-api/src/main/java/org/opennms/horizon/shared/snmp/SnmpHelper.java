@@ -11,6 +11,11 @@ import java.util.concurrent.CompletableFuture;
 public interface SnmpHelper {
 
     /**
+     * Object identifier used to retrieve device system information
+     */
+    String SYSTEM_OID = ".1.3.6.1.2.1.1";
+
+    /**
      * Object identifier used to retrieve interface count. This is the MIB-II
      * interfaces.ifNumber value.
      */

@@ -16,7 +16,7 @@ inputs:
     required: true
   project-key:
     description: 'The Sonar project key'
-    required: true
+    required: false
 
 runs:
   using: "composite"
@@ -28,6 +28,7 @@ runs:
         key: ${{ runner.os }}-${{ runner.arch }}-sonar
 
     - name: Build Image & Scan
+      if: ${{ inputs.project-key != '' }}
       env:
         IMAGE: ${{ inputs.image }}
         GITHUB_TOKEN: ${{ inputs.github-token }}
@@ -35,11 +36,26 @@ runs:
         SONAR_PROJECT_KEY: ${{ inputs.project-key }}
       run: |
         BASE_IMAGE=ghcr.io/opennms-cloud/$(cat ../.github/base-image-tag-ref.json | jq .image_tag_java | sed 's/\"//g')
-        docker pull $BASE_IMAGE
 
-        mvn -B verify \
-            jib:build -Dapplication.docker.image=$IMAGE \
-            -Djib.from.image=$BASE_IMAGE \
-            org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=$SONAR_PROJECT_KEY
+        mvn -B -Dstyle.color=always \
+            -Pcoverage verify \
+            jib:build -Dapplication.docker.image=$IMAGE -Djib.from.image=$BASE_IMAGE \
+            sonar:sonar -Dsonar.projectKey=$SONAR_PROJECT_KEY
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+
+    - name: Build Image & Scan
+      if: ${{ inputs.project-key == '' }}
+      env:
+        IMAGE: ${{ inputs.image }}
+        GITHUB_TOKEN: ${{ inputs.github-token }}
+        SONAR_TOKEN: ${{ inputs.sonar-token }}
+      run: |
+        BASE_IMAGE=ghcr.io/opennms-cloud/$(cat ../.github/base-image-tag-ref.json | jq .image_tag_java | sed 's/\"//g')
+
+        mvn -B -Dstyle.color=always \
+            -Pcoverage verify \
+            jib:build -Dapplication.docker.image=$IMAGE -Djib.from.image=$BASE_IMAGE \
+            sonar:sonar
       shell: bash
       working-directory: ${{ inputs.working-directory }}

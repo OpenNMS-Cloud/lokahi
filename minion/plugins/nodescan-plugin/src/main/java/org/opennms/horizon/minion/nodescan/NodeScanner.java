@@ -28,14 +28,25 @@
 
 package org.opennms.horizon.minion.nodescan;
 
+import java.net.InetAddress;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 import org.opennms.horizon.minion.plugin.api.ScanResultsResponse;
 import org.opennms.horizon.minion.plugin.api.ScanResultsResponseImpl;
 import org.opennms.horizon.minion.plugin.api.Scanner;
+import org.opennms.horizon.shared.snmp.SnmpAgentConfig;
+import org.opennms.horizon.shared.snmp.SnmpConfiguration;
 import org.opennms.horizon.shared.snmp.SnmpHelper;
+import org.opennms.horizon.shared.snmp.SnmpWalker;
+import org.opennms.node.scan.contract.IpTableScanResult;
+import org.opennms.node.scan.contract.NodeInfoResult;
 import org.opennms.node.scan.contract.NodeScanRequest;
-import org.opennms.taskset.contract.ScannerResponse;
+import org.opennms.node.scan.contract.NodeScanResult;
+import org.opennms.node.scan.contract.SnmpInterfaceResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,7 +54,6 @@ import com.google.protobuf.Any;
 
 public class NodeScanner implements Scanner {
     private static final Logger LOGGER = LoggerFactory.getLogger(NodeScanner.class);
-    private static final String DEFAULT_OBJECT_IDENTIFIER = ".1.3.6.1.2.1.1.2.0";
     private final SnmpHelper snmpHelper;
 
     public NodeScanner(SnmpHelper snmpHelper) {
@@ -53,20 +63,97 @@ public class NodeScanner implements Scanner {
     @Override
     public CompletableFuture<ScanResultsResponse> scan(Any config) {
         LOGGER.info("Received node scan config {}", config);
+
         if(!config.is(NodeScanRequest.class)) {
             throw new IllegalArgumentException("Task config must be a NodeScanRequest, this is wrong type: " + config.getTypeUrl());
         }
-        CompletableFuture<ScanResultsResponse> resultFuture = new CompletableFuture<>();
-        try {
-            NodeScanRequest scanRequest = config.unpack(NodeScanRequest.class);
-            //TODO: how to create node scan response, add more detector tools
-            ScannerResponse scannerResponse = ScannerResponse.newBuilder().build();
-            resultFuture.complete(ScanResultsResponseImpl.builder().results(scannerResponse).build());
-        } catch (Exception e) {
-            LOGGER.error("Failed to scan node with task config: {}", config);
-            resultFuture.complete(ScanResultsResponseImpl.builder()
-                .reason("Failed to scan node with task config: "+ config + " " + e).build());
+
+        return CompletableFuture.supplyAsync(() ->{
+            try {
+                NodeScanRequest scanRequest = config.unpack(NodeScanRequest.class);
+                SnmpAgentConfig agentConfig = new SnmpAgentConfig(InetAddress.getByName(scanRequest.getPrimaryIp()), SnmpConfiguration.DEFAULTS);
+                agentConfig.setVersion(SnmpConfiguration.VERSION2C);
+                NodeInfoResult nodeInfo = scanSystem(agentConfig);
+
+
+                List<IpTableScanResult> ipAddrTblResults = scanIpAddrTable(agentConfig);
+                List<SnmpInterfaceResult> snmpInterfaceResults = scanSnmpInterface(agentConfig);
+                List<SnmpInterfaceResult> mergedSNMPInterfaces = mergeSNMPResult(ipAddrTblResults.stream()
+                    .map(IpTableScanResult::getSnmpInterface).toList(), snmpInterfaceResults);
+                NodeScanResult scanResult = NodeScanResult.newBuilder()
+                    .setNodeId(scanRequest.getNodeId())
+                    .setNodeInfo(nodeInfo)
+                    .addAllIpInterfaces(ipAddrTblResults.stream().map(IpTableScanResult::getIpInterface).toList())
+                    .addAllSnmpInterfaces(mergedSNMPInterfaces)
+                    .build();
+                return ScanResultsResponseImpl.builder().results(scanResult).build();
+            } catch (Exception e) {
+                LOGGER.error("Error while node scan", e);
+                throw new RuntimeException(e);
+            }
+        });
+    }
+
+    private List<SnmpInterfaceResult> mergeSNMPResult(List<SnmpInterfaceResult> ipTableResults, List<SnmpInterfaceResult> snmpIfTableResults) {
+        List<SnmpInterfaceResult> merged = new ArrayList<>();
+        Map<Integer, SnmpInterfaceResult> ipTableMap = ipTableResults.stream().collect(Collectors.toMap(SnmpInterfaceResult::getIfIndex, r->r));
+        snmpIfTableResults.forEach(r->{
+            SnmpInterfaceResult.Builder builder = SnmpInterfaceResult.newBuilder(r);
+            SnmpInterfaceResult tmp = ipTableMap.get(r.getIfIndex());
+            if(tmp != null) {
+                builder.setIpAddress(tmp.getIpAddress());
+            }
+            merged.add(builder.build());
+        });
+        return merged;
+    }
+
+    private List<SnmpInterfaceResult> scanSnmpInterface(SnmpAgentConfig agentConfig) throws InterruptedException {
+        List<SnmpInterfaceResult> results = new ArrayList<>();
+        SNMPInterfaceTableTracker tracker = new SNMPInterfaceTableTracker() {
+            @Override
+            public void processPhysicalInterfaceRow(PhysicalInterfaceRow row) {
+                results.add(row.createInterfaceFromRow());
+            }
+        };
+        try(SnmpWalker walker = snmpHelper.createWalker(agentConfig, "snmpInterfaceTable", tracker)) {
+            walker.start();
+            walker.waitFor();
         }
-        return resultFuture;
+        return results;
+    }
+
+    private List<IpTableScanResult> scanIpAddrTable(SnmpAgentConfig agentConfig) throws InterruptedException {
+        List<IpTableScanResult> results = new ArrayList<>();
+        IPAddrTracker tracker = new IPAddrTracker() {
+            @Override
+            public void processIPInterfaceRow(IPInterfaceRow row) {
+                results.add(row.createInterfaceFromRow());
+            }
+        };
+        try(var walker = snmpHelper.createWalker(agentConfig, "ipAddrEntry", tracker)) {
+            walker.start();
+            walker.waitFor();
+        }
+        IPAddressTableTracker ipAddressTableTracker = new IPAddressTableTracker() {
+            @Override
+            public void processIPAddressRow(IPAddressRow row) {
+                results.add(row.createInterfaceFromRow());
+            }
+        };
+        try(var walker = snmpHelper.createWalker(agentConfig, "ipAddressTableEntry", ipAddressTableTracker)) {
+            walker.start();
+            walker.waitFor();
+        }
+        return results;
+    }
+
+    private NodeInfoResult scanSystem(SnmpAgentConfig agentConfig) throws InterruptedException {
+        SystemGroupTracker tracker = new SystemGroupTracker(agentConfig.getAddress());
+        try(var walker = snmpHelper.createWalker(agentConfig, "systemGroup", tracker)) {
+            walker.start();
+            walker.waitFor();
+        }
+        return tracker.createNodeInfo();
     }
 }

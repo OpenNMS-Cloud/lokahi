@@ -57,7 +57,7 @@ import io.netty.buffer.Unpooled;
 public class ParserTest {
 
     @Test
-    public void canReadValidIPFIX() throws IOException, URISyntaxException {
+    public void canReadValidIPFIX() {
         execute("/flows/ipfix.dat", buffer -> {
             try {
 

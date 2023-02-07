@@ -36,4 +36,3 @@ jobs:
           working-directory: 'shared-lib'
           github-token: ${{ secrets.GITHUB_TOKEN }}
           sonar-token: ${{ secrets.SONAR_TOKEN }}
-          project-key: 'opennms_horizon-stream_shared-lib'

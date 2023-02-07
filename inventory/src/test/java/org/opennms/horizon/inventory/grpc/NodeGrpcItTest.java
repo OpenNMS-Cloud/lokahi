@@ -28,6 +28,7 @@
 
 package org.opennms.horizon.inventory.grpc;
 
+
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Int64Value;
@@ -40,6 +41,23 @@ import io.grpc.StatusRuntimeException;
 import io.grpc.protobuf.StatusProto;
 import io.grpc.stub.MetadataUtils;
 import jakarta.transaction.Transactional;
+import static com.jayway.awaitility.Awaitility.await;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.internal.verification.VerificationModeFactory.times;
+
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -59,7 +77,6 @@ import org.opennms.horizon.inventory.dto.TagCreateListDTO;
 import org.opennms.horizon.inventory.dto.TagDTO;
 import org.opennms.horizon.inventory.grpc.taskset.TestTaskSetGrpcService;
 import org.opennms.horizon.inventory.mapper.NodeMapper;
-import org.opennms.horizon.inventory.mapper.NodeMapperImpl;
 import org.opennms.horizon.inventory.model.IpInterface;
 import org.opennms.horizon.inventory.model.MonitoredService;
 import org.opennms.horizon.inventory.model.MonitoredServiceType;
@@ -82,31 +99,18 @@ import org.opennms.taskset.service.contract.TaskSetServiceGrpc;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
-
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-
-import static com.jayway.awaitility.Awaitility.await;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.internal.verification.VerificationModeFactory.times;
+
+
 
 @SpringBootTest
 @ContextConfiguration(initializers = {SpringContextTestInitializer.class})
 class NodeGrpcItTest extends GrpcTestBase {
-    private static final int EXPECTED_TASK_DEF_COUNT_FOR_NEW_LOCATION = 5;
-    private static final int EXPECTED_TASK_DEF_COUNT_WITHOUT_NEW_LOCATION = 3;
+    private static final int EXPECTED_TASK_DEF_COUNT_FOR_NEW_LOCATION = 4;
+    private static final int EXPECTED_TASK_DEF_COUNT_WITHOUT_NEW_LOCATION = 2;
     private static final String NODE_LABEL = "label";
+
     private NodeServiceGrpc.NodeServiceBlockingStub serviceStub;
 
     @Autowired
@@ -119,6 +123,9 @@ class NodeGrpcItTest extends GrpcTestBase {
     private MonitoredServiceTypeRepository monitoredServiceTypeRepository;
     @Autowired
     private NodeService nodeService;
+    @Autowired
+    private NodeMapper mapper;
+
     @Autowired
     private TagService tagService;
     @Autowired
@@ -173,13 +180,12 @@ class NodeGrpcItTest extends GrpcTestBase {
         assertEquals(NODE_LABEL, node.getNodeLabel());
         assertThat(node.getObjectId()).isEmpty();
         assertThat(node.getSystemName()).isEmpty();
-        assertThat(node.getSystemDesc()).isEmpty();
+        assertThat(node.getSystemDescr()).isEmpty();
         assertThat(node.getSystemLocation()).isEmpty();
         assertThat(node.getSystemContact()).isEmpty();
         await().atMost(10, TimeUnit.SECONDS).until(() -> testGrpcService.getRequests().size(), Matchers.is(4));
 
         org.assertj.core.api.Assertions.assertThat(testGrpcService.getRequests())
-            .hasSize(4)
             .extracting(PublishTaskSetRequest::getTaskSet)
             .isNotNull()
             .extracting(TaskSet::getTaskDefinitionCount)
@@ -195,11 +201,16 @@ class NodeGrpcItTest extends GrpcTestBase {
             .setLabel("test-node")
             .setManagementIp("invalid ip")
             .build();
-        StatusRuntimeException exception = assertThrows(StatusRuntimeException.class, () -> serviceStub
-            .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).createNode(createDTO));
-        Status status = StatusProto.fromThrowable(exception);
-        assertThat(status.getCode()).isEqualTo(Code.INVALID_ARGUMENT_VALUE);
-        assertEquals(0, testGrpcService.getRequests().size());
+
+        assertThatThrownBy(() -> serviceStub
+            .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader)))
+            .createNode(createDTO))
+            .isInstanceOf(StatusRuntimeException.class)
+            .extracting(StatusProto::fromThrowable)
+            .extracting(Status::getCode).isEqualTo(Code.INVALID_ARGUMENT_VALUE);
+
+        assertThat(testGrpcService.getRequests()).asList().isEmpty();
+
         verify(spyInterceptor).verifyAccessToken(authHeader);
         verify(spyInterceptor).interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));
     }
@@ -215,13 +226,15 @@ class NodeGrpcItTest extends GrpcTestBase {
             .setLabel(NODE_LABEL)
             .setManagementIp(ip)
             .build();
+        assertThatThrownBy(() -> serviceStub
+            .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).createNode(createDTO))
+            .isInstanceOf(StatusRuntimeException.class)
+            .extracting(StatusProto::fromThrowable)
+            .extracting(Status::getCode, Status::getMessage)
+            .containsExactly(Code.ALREADY_EXISTS_VALUE, "Ip address already exists for location");
 
-        StatusRuntimeException exception = assertThrows(StatusRuntimeException.class, () -> serviceStub
-            .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).createNode(createDTO));
-        Status status = StatusProto.fromThrowable(exception);
-        assertThat(status.getCode()).isEqualTo(Code.ALREADY_EXISTS_VALUE);
-        assertThat(status.getMessage()).isEqualTo("Ip address already exists for location");
-        assertEquals(0, testGrpcService.getRequests().size());
+        assertThat(testGrpcService.getRequests()).asList().isEmpty();
+
         verify(spyInterceptor).verifyAccessToken(authHeader);
         verify(spyInterceptor).interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));
     }
@@ -242,10 +255,10 @@ class NodeGrpcItTest extends GrpcTestBase {
         NodeDTO node = serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(differentTenantHeader))).createNode(createDTO);
 
         assertEquals(NODE_LABEL, node.getNodeLabel());
+
         await().atMost(10, TimeUnit.SECONDS).until(() -> testGrpcService.getRequests().size(), Matchers.is(4));
 
         org.assertj.core.api.Assertions.assertThat(testGrpcService.getRequests())
-            .hasSize(4)
             .extracting(PublishTaskSetRequest::getTaskSet)
             .isNotNull()
             .extracting(TaskSet::getTaskDefinitionCount)
@@ -273,7 +286,6 @@ class NodeGrpcItTest extends GrpcTestBase {
         await().atMost(10, TimeUnit.SECONDS).until(() -> testGrpcService.getRequests().size(), Matchers.is(4));
 
         org.assertj.core.api.Assertions.assertThat(testGrpcService.getRequests())
-            .hasSize(4)
             .extracting(PublishTaskSetRequest::getTaskSet)
             .isNotNull()
             .extracting(TaskSet::getTaskDefinitionCount)
@@ -301,17 +313,18 @@ class NodeGrpcItTest extends GrpcTestBase {
         NodeDTO node = serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).createNode(createDTO);
 
         assertEquals(NODE_LABEL, node.getNodeLabel());
+
         await().atMost(10, TimeUnit.SECONDS).until(() -> testGrpcService.getRequests().size(), Matchers.is(2));
         verify(spyInterceptor).verifyAccessToken(authHeader);
         verify(spyInterceptor).interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));
 
         List<PublishTaskSetRequest> grpcRequests = testGrpcService.getRequests();
-        assertEquals(2, grpcRequests.size());
+        assertThat(grpcRequests).asList().hasSize(2);
 
-        PublishTaskSetRequest request = grpcRequests.get(1);
+        PublishTaskSetRequest request = grpcRequests.get(0);
         TaskSet taskSet = request.getTaskSet();
         Assertions.assertNotNull(taskSet);
-        assertEquals(EXPECTED_TASK_DEF_COUNT_WITHOUT_NEW_LOCATION, taskSet.getTaskDefinitionCount());
+        assertThat(taskSet.getTaskDefinitionCount()).isEqualTo(EXPECTED_TASK_DEF_COUNT_WITHOUT_NEW_LOCATION);
     }
 
     @Test
@@ -397,20 +410,21 @@ class NodeGrpcItTest extends GrpcTestBase {
 
     @Test
     void testCreateNodeMissingTenantId() throws Exception {
-        String label = "label";
 
         NodeCreateDTO createDTO = NodeCreateDTO.newBuilder()
             .setLocation("location")
             .setLabel(NODE_LABEL)
             .setManagementIp("127.0.0.1")
             .build();
+        assertThatThrownBy(() -> serviceStub
+            .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(headerWithoutTenant))).createNode(createDTO))
+            .isInstanceOf(StatusRuntimeException.class)
+            .extracting(StatusProto::fromThrowable)
+            .extracting(Status::getCode, Status::getMessage)
+            .containsExactly(Code.UNAUTHENTICATED_VALUE, "Missing tenant id");
 
-        StatusRuntimeException exception = assertThrows(StatusRuntimeException.class, () -> serviceStub
-            .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(headerWithoutTenant))).createNode(createDTO));
-        Status status = StatusProto.fromThrowable(exception);
-        assertThat(status.getCode()).isEqualTo(Code.UNAUTHENTICATED_VALUE);
-        assertThat(status.getMessage()).isEqualTo("Missing tenant id");
-        assertEquals(0, testGrpcService.getRequests().size());
+        assertThat(testGrpcService.getRequests()).asList().isEmpty();
+
         verify(spyInterceptor).verifyAccessToken(headerWithoutTenant);
         verify(spyInterceptor).interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));
     }
@@ -425,12 +439,14 @@ class NodeGrpcItTest extends GrpcTestBase {
             .setManagementIp("BAD")
             .build();
 
-        StatusRuntimeException exception = assertThrows(StatusRuntimeException.class, () -> serviceStub
-            .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).createNode(createDTO));
-        Status status = StatusProto.fromThrowable(exception);
-        assertThat(status.getCode()).isEqualTo(Code.INVALID_ARGUMENT_VALUE);
-        assertThat(status.getMessage()).isEqualTo("Bad management_ip: BAD");
-        assertEquals(0, testGrpcService.getRequests().size());
+        assertThatThrownBy(() -> serviceStub
+            .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).createNode(createDTO))
+            .isInstanceOf(StatusRuntimeException.class)
+            .extracting(StatusProto::fromThrowable)
+            .extracting(Status::getCode, Status::getMessage)
+            .containsExactly(Code.INVALID_ARGUMENT_VALUE, "Bad management_ip: BAD");
+        assertThat(testGrpcService.getRequests()).asList().isEmpty();
+
         verify(spyInterceptor).verifyAccessToken(authHeader);
         verify(spyInterceptor).interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));
     }
@@ -443,12 +459,12 @@ class NodeGrpcItTest extends GrpcTestBase {
         populateTables(location, ip);
         var nodeList = serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader)))
             .listNodes(Empty.newBuilder().build());
-        assertEquals(1, nodeList.getNodesCount());
-        assertEquals(1, nodeList.getNodes(0).getIpInterfacesList().size());
+        assertThat(nodeList.getNodesCount()).isEqualTo(1);
+        assertThat(nodeList.getNodes(0).getIpInterfacesList()).asList().hasSize(1);
         var nodeId = nodeList.getNodes(0).getId();
         var node = serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader)))
                 .getNodeById(Int64Value.newBuilder().setValue(nodeId).build());
-        assertEquals(1, node.getIpInterfacesList().size());
+        assertThat(node.getIpInterfacesList()).asList().hasSize(1);
         verify(spyInterceptor, times(2)).verifyAccessToken(authHeader);
         verify(spyInterceptor, times(2)).interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));
 
@@ -520,14 +536,14 @@ class NodeGrpcItTest extends GrpcTestBase {
         tagRepository.flush();
 
         List<Node> allNodes = nodeRepository.findAll();
-        assertEquals(1, allNodes.size());
+        assertThat(allNodes).asList().hasSize(1);
         Node savedNode = allNodes.get(0);
-        assertEquals(node2.getId(), savedNode.getId());
+        assertThat(savedNode.getId()).isEqualTo(node2.getId());
 
         List<Tag> allTags = tagRepository.findAll();
-        assertEquals(1, allTags.size());
+        assertThat(allTags).asList().hasSize(1);
         Tag savedTag = allTags.get(0);
-        assertEquals(tag3.getId(), savedTag.getId());
+        assertThat(savedTag.getId()).isEqualTo(tag3.getId());
 
         verify(spyInterceptor).verifyAccessToken(authHeader);
         verify(spyInterceptor).interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));
@@ -535,16 +551,17 @@ class NodeGrpcItTest extends GrpcTestBase {
 
     @Test
     void testDeleteNodeNotFound() throws VerificationException {
-        StatusRuntimeException exception = assertThrows(StatusRuntimeException.class, () -> serviceStub
-            .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).deleteNode(Int64Value.of(100L)));
-        Status status = StatusProto.fromThrowable(exception);
-        assertThat(status.getCode()).isEqualTo(Code.NOT_FOUND_VALUE);
+        assertThatThrownBy(() -> serviceStub
+            .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).deleteNode(Int64Value.of(100L)))
+            .isInstanceOf(StatusRuntimeException.class)
+            .extracting(StatusProto::fromThrowable)
+            .extracting(Status::getCode).isEqualTo(Code.NOT_FOUND_VALUE);
         verify(spyInterceptor).verifyAccessToken(authHeader);
         verify(spyInterceptor).interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));
     }
 
     @Test
-    void testGetNodeWithNodeInfo() throws VerificationException {
+    void testGetNodeWithNodeInfo() throws VerificationException, UnknownHostException {
         Node node = prepareNodes(1, true).get(0);
         NodeDTO nodeDTO = serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader)))
             .getNodeById(Int64Value.of(node.getId()));
@@ -554,7 +571,7 @@ class NodeGrpcItTest extends GrpcTestBase {
     }
 
     @Test
-    void testListNodeWithNodInfo() throws VerificationException {
+    void testListNodeWithNodInfo() throws VerificationException, UnknownHostException {
         Node node = prepareNodes(1, true).get(0);
         NodeList nodeList = serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader)))
             .listNodes(Empty.newBuilder().build());
@@ -565,10 +582,10 @@ class NodeGrpcItTest extends GrpcTestBase {
     }
 
    @Test
-    void testStartScanByLocation() throws VerificationException {
-        List<Long> ids = prepareNodes(2, false).stream().map(n -> n.getId()).collect(Collectors.toList());
+    void testStartScanByIds() throws VerificationException, UnknownHostException {
+        List<Long> ids = prepareNodes(2, false).stream().map(Node::getId).collect(Collectors.toList());
         BoolValue result = serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader)))
-                .startNodeScanByIds(NodeIdList.newBuilder().build().newBuilder().addAllIds(ids).build());
+                .startNodeScanByIds(NodeIdList.newBuilder().addAllIds(ids).build());
         assertThat(result.getValue()).isTrue();
         await().atMost(10, TimeUnit.SECONDS).until(() -> testGrpcService.getRequests().size(), Matchers.is(1));
         verify(spyInterceptor).verifyAccessToken(authHeader);
@@ -580,24 +597,23 @@ class NodeGrpcItTest extends GrpcTestBase {
     }
 
     @Test
-    void testStartScanByLocationNotfound() throws VerificationException {
-        StatusRuntimeException exception = assertThrows(StatusRuntimeException.class, () -> serviceStub
-            .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader)))
-            .startNodeScanByIds(NodeIdList.newBuilder().addAllIds(List.of(1L)).build()));
-        Status status = StatusProto.fromThrowable(exception);
-        assertThat(status.getCode()).isEqualTo(Code.NOT_FOUND_VALUE);
+    void testStartScanByIdNotfound() throws VerificationException {
+        assertThatThrownBy(() -> serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader)))
+            .startNodeScanByIds(NodeIdList.newBuilder().addAllIds(List.of(1L)).build()))
+            .isInstanceOf(StatusRuntimeException.class)
+            .extracting(StatusProto::fromThrowable)
+            .extracting(Status::getCode).isEqualTo(Code.NOT_FOUND_VALUE);
         verify(spyInterceptor).verifyAccessToken(authHeader);
         verify(spyInterceptor).interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));
     }
 
     private void assertNodeDTO(NodeDTO actual, Node node) {
-        NodeMapper mapper = new NodeMapperImpl();
         node.setMonitoringLocationId(node.getMonitoringLocation().getId());
         NodeDTO expected = mapper.modelToDTO(node);
         assertThat(actual).isEqualTo(expected);
     }
 
-    private List<Node> prepareNodes(int number, boolean withNodeInfo) {
+    private List<Node> prepareNodes(int number, boolean withNodeInfo) throws UnknownHostException {
         MonitoringLocation location = new MonitoringLocation();
         location.setLocation("test-location");
         location.setTenantId(tenantId);
@@ -613,12 +629,29 @@ class NodeGrpcItTest extends GrpcTestBase {
                 node.setObjectId("12345." + i);
                 node.setSystemLocation("systemLocation" +i);
                 node.setSystemName("systemName"+1);
-                node.setSystemDesc("desc"+1);
+                node.setSystemDescr("desc"+1);
                 node.setSystemContact("contact"+1);
             }
             nodeRepository.save(node);
             list.add(node);
         }
+        createIpInterFaces(list);
         return list;
     }
+
+    private void createIpInterFaces(List<Node> nodeList) throws UnknownHostException {
+        String ip = "127.0.0.";
+        for(int i = 0; i< nodeList.size(); i++) {
+            Node node = nodeList.get(i);
+            IpInterface ipInterface = new IpInterface();
+            ipInterface.setNodeId(node.getId());
+            ipInterface.setNode(node);
+            ipInterface.setSnmpPrimary(true);
+            ipInterface.setIpAddress(InetAddress.getByName(ip + i));
+            ipInterface.setTenantId(tenantId);
+            ipInterfaceRepository.save(ipInterface);
+            node.setIpInterfaces(List.of(ipInterface));
+        }
+    }
+
 }

@@ -139,18 +139,4 @@
             </plugin>
         </plugins>
     </build>
-
-
-    <profiles>
-        <!-- Build docker images on request. -->
-        <profile>
-            <id>build-docker-images-enabled</id>
-            <activation>
-                <activeByDefault>false</activeByDefault>
-            </activation>
-            <properties>
-                <skip-docker-image-build>false</skip-docker-image-build>
-            </properties>
-        </profile>
-    </profiles>
 </project>

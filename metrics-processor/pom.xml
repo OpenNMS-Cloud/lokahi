@@ -20,6 +20,7 @@
     <properties>
         <application.docker.image.name>opennms/horizon-stream-metrics-processor</application.docker.image.name>
         <java.version>17</java.version>
+        <sonar.projectKey>opennms_horizon-stream_metrics-processor</sonar.projectKey>
     </properties>
 
     <packaging>pom</packaging>

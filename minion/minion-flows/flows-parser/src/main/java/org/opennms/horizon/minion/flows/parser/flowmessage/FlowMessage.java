@@ -31,18 +31,18 @@
 
 package org.opennms.horizon.minion.flows.parser.flowmessage;
 
+import java.io.Serial;
 import java.util.Objects;
 
-import com.google.protobuf.DoubleValue;
-import com.google.protobuf.UInt32Value;
-import com.google.protobuf.UInt64Value;
 
 /**
  * Protobuf type {@code FlowMessage}
  */
 public final class FlowMessage extends
     com.google.protobuf.GeneratedMessageV3 implements
+    // @@protoc_insertion_point(message_implements:FlowMessage)
     FlowMessageOrBuilder {
+    @Serial
     private static final long serialVersionUID = 0L;
 
     // Use FlowMessage.newBuilder() to construct.
@@ -71,11 +71,14 @@ public final class FlowMessage extends
     }
 
     @Override
-    public com.google.protobuf.UnknownFieldSet getUnknownFields() {
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
         return this.unknownFields;
     }
 
-    private FlowMessage(com.google.protobuf.CodedInputStream input, com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+    private FlowMessage(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
         this();
         if (extensionRegistry == null) {
@@ -110,15 +113,21 @@ public final class FlowMessage extends
                         break;
                     }
                     case 24: {
-                        direction_ = input.readEnum();
+                        int rawValue = input.readEnum();
+
+                        direction_ = rawValue;
                         break;
                     }
                     case 34: {
-                        dstAddress_ = input.readStringRequireUtf8();
+                        String s = input.readStringRequireUtf8();
+
+                        dstAddress_ = s;
                         break;
                     }
                     case 42: {
-                        dstHostname_ = input.readStringRequireUtf8();
+                        String s = input.readStringRequireUtf8();
+
+                        dstHostname_ = s;
                         break;
                     }
                     case 50: {
@@ -304,13 +313,15 @@ public final class FlowMessage extends
                         break;
                     }
                     case 162: {
+                        String s = input.readStringRequireUtf8();
 
-                        nextHopAddress_ = input.readStringRequireUtf8();
+                        nextHopAddress_ = s;
                         break;
                     }
                     case 170: {
+                        String s = input.readStringRequireUtf8();
 
-                        nextHopHostname_ = input.readStringRequireUtf8();
+                        nextHopHostname_ = s;
                         break;
                     }
                     case 178: {
@@ -327,8 +338,9 @@ public final class FlowMessage extends
                         break;
                     }
                     case 184: {
+                        int rawValue = input.readEnum();
 
-                        samplingAlgorithm_ = input.readEnum();
+                        samplingAlgorithm_ = rawValue;
                         break;
                     }
                     case 194: {
@@ -345,13 +357,15 @@ public final class FlowMessage extends
                         break;
                     }
                     case 210: {
+                        String s = input.readStringRequireUtf8();
 
-                        srcAddress_ = input.readStringRequireUtf8();
+                        srcAddress_ = s;
                         break;
                     }
                     case 218: {
+                        String s = input.readStringRequireUtf8();
 
-                        srcHostname_ = input.readStringRequireUtf8();
+                        srcHostname_ = s;
                         break;
                     }
                     case 226: {
@@ -420,8 +434,9 @@ public final class FlowMessage extends
                         break;
                     }
                     case 264: {
+                        int rawValue = input.readEnum();
 
-                        netflowVersion_ = input.readEnum();
+                        netflowVersion_ = rawValue;
                         break;
                     }
                     case 274: {
@@ -438,8 +453,9 @@ public final class FlowMessage extends
                         break;
                     }
                     case 282: {
+                        String s = input.readStringRequireUtf8();
 
-                        nodeIdentifier_ = input.readStringRequireUtf8();
+                        nodeIdentifier_ = s;
                         break;
                     }
                     default: {
@@ -1691,7 +1707,8 @@ public final class FlowMessage extends
      *
      * <code>string node_identifier = 35;</code>
      */
-    public synchronized com.google.protobuf.ByteString getNodeIdentifierBytes() {
+    public synchronized com.google.protobuf.ByteString
+    getNodeIdentifierBytes() {
         Object ref = nodeIdentifier_;
         if (ref instanceof String) {
             com.google.protobuf.ByteString b =
@@ -1707,7 +1724,7 @@ public final class FlowMessage extends
     private byte memoizedIsInitialized = -1;
 
     @Override
-    public boolean isInitialized() {
+    public final boolean isInitialized() {
         byte isInitialized = memoizedIsInitialized;
         if (isInitialized == 1) return true;
         if (isInitialized == 0) return false;
@@ -1717,7 +1734,8 @@ public final class FlowMessage extends
     }
 
     @Override
-    public void writeTo(com.google.protobuf.CodedOutputStream output) throws java.io.IOException {
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+        throws java.io.IOException {
         if (timestamp_ != 0L) {
             output.writeUInt64(1, timestamp_);
         }
@@ -2096,7 +2114,8 @@ public final class FlowMessage extends
         }
         if (hasTos() != other.hasTos()) return false;
         if (hasTos()) {
-            if (!getTos().equals(other.getTos())) return false;
+            if (!getTos()
+                .equals(other.getTos())) return false;
         }
         if (netflowVersion_ != other.netflowVersion_) return false;
         if (hasVlan() != other.hasVlan()) return false;
@@ -2106,7 +2125,8 @@ public final class FlowMessage extends
         }
         if (!getNodeIdentifier()
             .equals(other.getNodeIdentifier())) return false;
-        return unknownFields.equals(other.unknownFields);
+        if (!unknownFields.equals(other.unknownFields)) return false;
+        return true;
     }
 
     @Override
@@ -2236,6 +2256,87 @@ public final class FlowMessage extends
         return hash;
     }
 
+    public static FlowMessage parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+    }
+
+    public static FlowMessage parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+    }
+
+    public static FlowMessage parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+    }
+
+    public static FlowMessage parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+    }
+
+    public static FlowMessage parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+    }
+
+    public static FlowMessage parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+    }
+
+    public static FlowMessage parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseWithIOException(PARSER, input);
+    }
+
+    public static FlowMessage parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public static FlowMessage parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseDelimitedWithIOException(PARSER, input);
+    }
+
+    public static FlowMessage parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public static FlowMessage parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseWithIOException(PARSER, input);
+    }
+
+    public static FlowMessage parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
     @Override
     public Builder newBuilderForType() {
         return newBuilder();
@@ -2243,6 +2344,10 @@ public final class FlowMessage extends
 
     public static Builder newBuilder() {
         return DEFAULT_INSTANCE.toBuilder();
+    }
+
+    public static Builder newBuilder(FlowMessage prototype) {
+        return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
 
     @Override
@@ -2254,7 +2359,8 @@ public final class FlowMessage extends
     @Override
     protected Builder newBuilderForType(
         BuilderParent parent) {
-        return new Builder(parent);
+        Builder builder = new Builder(parent);
+        return builder;
     }
 
     /**
@@ -2262,7 +2368,12 @@ public final class FlowMessage extends
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:FlowMessage)
         FlowMessageOrBuilder {
+        public static com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+            return FlowProtos.internal_static_FlowMessage_descriptor;
+        }
 
         @Override
         protected FieldAccessorTable
@@ -2272,12 +2383,21 @@ public final class FlowMessage extends
                     FlowMessage.class, Builder.class);
         }
 
+        // Construct using transport.FlowMessage.newBuilder()
         private Builder() {
+            maybeForceBuilderInitialization();
         }
 
         private Builder(
             BuilderParent parent) {
             super(parent);
+            maybeForceBuilderInitialization();
+        }
+
+        private void maybeForceBuilderInitialization() {
+            if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+            }
         }
 
         @Override
@@ -2765,7 +2885,7 @@ public final class FlowMessage extends
         }
 
         @Override
-        public boolean isInitialized() {
+        public final boolean isInitialized() {
             return true;
         }
 
@@ -2808,10 +2928,25 @@ public final class FlowMessage extends
          *
          * <code>uint64 timestamp = 1;</code>
          */
-        public void setTimestamp(long value) {
+        public Builder setTimestamp(long value) {
 
             timestamp_ = value;
             onChanged();
+            return this;
+        }
+
+        /**
+         * <pre>
+         * Flow timestamp in milliseconds.
+         * </pre>
+         *
+         * <code>uint64 timestamp = 1;</code>
+         */
+        public Builder clearTimestamp() {
+
+            timestamp_ = 0L;
+            onChanged();
+            return this;
         }
 
         private com.google.protobuf.UInt64Value numBytes_;
@@ -2872,7 +3007,26 @@ public final class FlowMessage extends
          *
          * <code>.google.protobuf.UInt64Value num_bytes = 2;</code>
          */
-        public void mergeNumBytes(UInt64Value value) {
+        public Builder setNumBytes(
+            com.google.protobuf.UInt64Value.Builder builderForValue) {
+            if (numBytesBuilder_ == null) {
+                numBytes_ = builderForValue.build();
+                onChanged();
+            } else {
+                numBytesBuilder_.setMessage(builderForValue.build());
+            }
+
+            return this;
+        }
+
+        /**
+         * <pre>
+         * Number of bytes transferred in the flow
+         * </pre>
+         *
+         * <code>.google.protobuf.UInt64Value num_bytes = 2;</code>
+         */
+        public Builder mergeNumBytes(com.google.protobuf.UInt64Value value) {
             if (numBytesBuilder_ == null) {
                 if (numBytes_ != null) {
                     numBytes_ =
@@ -2884,6 +3038,40 @@ public final class FlowMessage extends
             } else {
                 numBytesBuilder_.mergeFrom(value);
             }
+
+            return this;
+        }
+
+        /**
+         * <pre>
+         * Number of bytes transferred in the flow
+         * </pre>
+         *
+         * <code>.google.protobuf.UInt64Value num_bytes = 2;</code>
+         */
+        public Builder clearNumBytes() {
+            if (numBytesBuilder_ == null) {
+                numBytes_ = null;
+                onChanged();
+            } else {
+                numBytes_ = null;
+                numBytesBuilder_ = null;
+            }
+
+            return this;
+        }
+
+        /**
+         * <pre>
+         * Number of bytes transferred in the flow
+         * </pre>
+         *
+         * <code>.google.protobuf.UInt64Value num_bytes = 2;</code>
+         */
+        public com.google.protobuf.UInt64Value.Builder getNumBytesBuilder() {
+
+            onChanged();
+            return getNumBytesFieldBuilder().getBuilder();
         }
 
         /**
@@ -2900,6 +3088,27 @@ public final class FlowMessage extends
                 return numBytes_ == null ?
                     com.google.protobuf.UInt64Value.getDefaultInstance() : numBytes_;
             }
+        }
+
+        /**
+         * <pre>
+         * Number of bytes transferred in the flow
+         * </pre>
+         *
+         * <code>.google.protobuf.UInt64Value num_bytes = 2;</code>
+         */
+        private com.google.protobuf.SingleFieldBuilderV3<
+            com.google.protobuf.UInt64Value, com.google.protobuf.UInt64Value.Builder, com.google.protobuf.UInt64ValueOrBuilder>
+        getNumBytesFieldBuilder() {
+            if (numBytesBuilder_ == null) {
+                numBytesBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+                    com.google.protobuf.UInt64Value, com.google.protobuf.UInt64Value.Builder, com.google.protobuf.UInt64ValueOrBuilder>(
+                    getNumBytes(),
+                    getParentForChildren(),
+                    isClean());
+                numBytes_ = null;
+            }
+            return numBytesBuilder_;
         }
 
         private int direction_ = 0;
@@ -2922,9 +3131,10 @@ public final class FlowMessage extends
          *
          * <code>.Direction direction = 3;</code>
          */
-        public void setDirectionValue(int value) {
+        public Builder setDirectionValue(int value) {
             direction_ = value;
             onChanged();
+            return this;
         }
 
         /**
@@ -2953,6 +3163,20 @@ public final class FlowMessage extends
             }
 
             direction_ = value.getNumber();
+            onChanged();
+            return this;
+        }
+
+        /**
+         * <pre>
+         * Direction of the flow (egress vs ingress)
+         * </pre>
+         *
+         * <code>.Direction direction = 3;</code>
+         */
+        public Builder clearDirection() {
+
+            direction_ = 0;
             onChanged();
             return this;
         }
@@ -3007,11 +3231,45 @@ public final class FlowMessage extends
          *
          * <code>string dst_address = 4;</code>
          */
-        public synchronized void setDstAddress(
+        public synchronized Builder setDstAddress(
             String value) {
             Objects.requireNonNull(value);
             dstAddress_ = value;
             onChanged();
+            return this;
+        }
+
+        /**
+         * <pre>
+         *  Destination address.
+         * </pre>
+         *
+         * <code>string dst_address = 4;</code>
+         */
+        public synchronized Builder clearDstAddress() {
+
+            dstAddress_ = getDefaultInstance().getDstAddress();
+            onChanged();
+            return this;
+        }
+
+        /**
+         * <pre>
+         *  Destination address.
+         * </pre>
+         *
+         * <code>string dst_address = 4;</code>
+         */
+        public synchronized Builder setDstAddressBytes(
+            com.google.protobuf.ByteString value) {
+            if (value == null) {
+                throw new NullPointerException();
+            }
+            checkByteStringIsUtf8(value);
+
+            dstAddress_ = value;
+            onChanged();
+            return this;
         }
 
         private Object dstHostname_ = "";
@@ -3064,10 +3322,44 @@ public final class FlowMessage extends
          *
          * <code>string dst_hostname = 5;</code>
          */
-        public void setDstHostname(String value) {
+        public Builder setDstHostname(String value) {
             Objects.requireNonNull(value);
             dstHostname_ = value;
             onChanged();
+            return this;
+        }
+
+        /**
+         * <pre>
+         * Destination address hostname.
+         * </pre>
+         *
+         * <code>string dst_hostname = 5;</code>
+         */
+        public Builder clearDstHostname() {
+
+            dstHostname_ = getDefaultInstance().getDstHostname();
+            onChanged();
+            return this;
+        }
+
+        /**
+         * <pre>
+         * Destination address hostname.
+         * </pre>
+         *
+         * <code>string dst_hostname = 5;</code>
+         */
+        public Builder setDstHostnameBytes(
+            com.google.protobuf.ByteString value) {
+            if (value == null) {
+                throw new NullPointerException();
+            }
+            checkByteStringIsUtf8(value);
+
+            dstHostname_ = value;
+            onChanged();
+            return this;
         }
 
         private com.google.protobuf.UInt64Value dstAs_;
@@ -3107,7 +3399,7 @@ public final class FlowMessage extends
          *
          * <code>.google.protobuf.UInt64Value dst_as = 6;</code>
          */
-        public void setDstAs(UInt64Value value) {
+        public Builder setDstAs(com.google.protobuf.UInt64Value value) {
             if (dstAsBuilder_ == null) {
                 if (value == null) {
                     throw new NullPointerException();
@@ -3118,6 +3410,7 @@ public final class FlowMessage extends
                 dstAsBuilder_.setMessage(value);
             }
 
+            return this;
         }
 
         /**
@@ -3127,7 +3420,26 @@ public final class FlowMessage extends
          *
          * <code>.google.protobuf.UInt64Value dst_as = 6;</code>
          */
-        public void mergeDstAs(UInt64Value value) {
+        public Builder setDstAs(
+            com.google.protobuf.UInt64Value.Builder builderForValue) {
+            if (dstAsBuilder_ == null) {
+                dstAs_ = builderForValue.build();
+                onChanged();
+            } else {
+                dstAsBuilder_.setMessage(builderForValue.build());
+            }
+
+            return this;
+        }
+
+        /**
+         * <pre>
+         * Destination autonomous system (AS).
+         * </pre>
+         *
+         * <code>.google.protobuf.UInt64Value dst_as = 6;</code>
+         */
+        public Builder mergeDstAs(com.google.protobuf.UInt64Value value) {
             if (dstAsBuilder_ == null) {
                 if (dstAs_ != null) {
                     dstAs_ =
@@ -3140,6 +3452,39 @@ public final class FlowMessage extends
                 dstAsBuilder_.mergeFrom(value);
             }
 
+            return this;
+        }
+
+        /**
+         * <pre>
+         * Destination autonomous system (AS).
+         * </pre>
+         *
+         * <code>.google.protobuf.UInt64Value dst_as = 6;</code>
+         */
+        public Builder clearDstAs() {
+            if (dstAsBuilder_ == null) {
+                dstAs_ = null;
+                onChanged();
+            } else {
+                dstAs_ = null;
+                dstAsBuilder_ = null;
+            }
+
+            return this;
+        }
+
+        /**
+         * <pre>
+         * Destination autonomous system (AS).
+         * </pre>
+         *
+         * <code>.google.protobuf.UInt64Value dst_as = 6;</code>
+         */
+        public com.google.protobuf.UInt64Value.Builder getDstAsBuilder() {
+
+            onChanged();
+            return getDstAsFieldBuilder().getBuilder();
         }
 
         /**
@@ -3156,6 +3501,27 @@ public final class FlowMessage extends
                 return dstAs_ == null ?
                     com.google.protobuf.UInt64Value.getDefaultInstance() : dstAs_;
             }
+        }
+
+        /**
+         * <pre>
+         * Destination autonomous system (AS).
+         * </pre>
+         *
+         * <code>.google.protobuf.UInt64Value dst_as = 6;</code>
+         */
+        private com.google.protobuf.SingleFieldBuilderV3<
+            com.google.protobuf.UInt64Value, com.google.protobuf.UInt64Value.Builder, com.google.protobuf.UInt64ValueOrBuilder>
+        getDstAsFieldBuilder() {
+            if (dstAsBuilder_ == null) {
+                dstAsBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+                    com.google.protobuf.UInt64Value, com.google.protobuf.UInt64Value.Builder, com.google.protobuf.UInt64ValueOrBuilder>(
+                    getDstAs(),
+                    getParentForChildren(),
+                    isClean());
+                dstAs_ = null;
+            }
+            return dstAsBuilder_;
         }
 
         private com.google.protobuf.UInt32Value dstMaskLen_;
@@ -3195,7 +3561,7 @@ public final class FlowMessage extends
          *
          * <code>.google.protobuf.UInt32Value dst_mask_len = 7;</code>
          */
-        public void setDstMaskLen(UInt32Value value) {
+        public Builder setDstMaskLen(com.google.protobuf.UInt32Value value) {
             if (dstMaskLenBuilder_ == null) {
                 if (value == null) {
                     throw new NullPointerException();
@@ -3206,6 +3572,7 @@ public final class FlowMessage extends
                 dstMaskLenBuilder_.setMessage(value);
             }
 
+            return this;
         }
 
         /**
@@ -3215,7 +3582,26 @@ public final class FlowMessage extends
          *
          * <code>.google.protobuf.UInt32Value dst_mask_len = 7;</code>
          */
-        public void mergeDstMaskLen(UInt32Value value) {
+        public Builder setDstMaskLen(
+            com.google.protobuf.UInt32Value.Builder builderForValue) {
+            if (dstMaskLenBuilder_ == null) {
+                dstMaskLen_ = builderForValue.build();
+                onChanged();
+            } else {
+                dstMaskLenBuilder_.setMessage(builderForValue.build());
+            }
+
+            return this;
+        }
+
+        /**
+         * <pre>
+         * The number of contiguous bits in the source address subnet mask.
+         * </pre>
+         *
+         * <code>.google.protobuf.UInt32Value dst_mask_len = 7;</code>
+         */
+        public Builder mergeDstMaskLen(com.google.protobuf.UInt32Value value) {
             if (dstMaskLenBuilder_ == null) {
                 if (dstMaskLen_ != null) {
                     dstMaskLen_ =
@@ -3228,6 +3614,39 @@ public final class FlowMessage extends
                 dstMaskLenBuilder_.mergeFrom(value);
             }
 
+            return this;
+        }
+
+        /**
+         * <pre>
+         * The number of contiguous bits in the source address subnet mask.
+         * </pre>
+         *
+         * <code>.google.protobuf.UInt32Value dst_mask_len = 7;</code>
+         */
+        public Builder clearDstMaskLen() {
+            if (dstMaskLenBuilder_ == null) {
+                dstMaskLen_ = null;
+                onChanged();
+            } else {
+                dstMaskLen_ = null;
+                dstMaskLenBuilder_ = null;
+            }
+
+            return this;
+        }
+
+        /**
+         * <pre>
+         * The number of contiguous bits in the source address subnet mask.
+         * </pre>
+         *
+         * <code>.google.protobuf.UInt32Value dst_mask_len = 7;</code>
+         */
+        public com.google.protobuf.UInt32Value.Builder getDstMaskLenBuilder() {
+
+            onChanged();
+            return getDstMaskLenFieldBuilder().getBuilder();
         }
 
         /**
@@ -3244,6 +3663,27 @@ public final class FlowMessage extends
                 return dstMaskLen_ == null ?
                     com.google.protobuf.UInt32Value.getDefaultInstance() : dstMaskLen_;
             }
+        }
+
+        /**
+         * <pre>
+         * The number of contiguous bits in the source address subnet mask.
+         * </pre>
+         *
+         * <code>.google.protobuf.UInt32Value dst_mask_len = 7;</code>
+         */
+        private com.google.protobuf.SingleFieldBuilderV3<
+            com.google.protobuf.UInt32Value, com.google.protobuf.UInt32Value.Builder, com.google.protobuf.UInt32ValueOrBuilder>
+        getDstMaskLenFieldBuilder() {
+            if (dstMaskLenBuilder_ == null) {
+                dstMaskLenBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+                    com.google.protobuf.UInt32Value, com.google.protobuf.UInt32Value.Builder, com.google.protobuf.UInt32ValueOrBuilder>(
+                    getDstMaskLen(),
+                    getParentForChildren(),
+                    isClean());
+                dstMaskLen_ = null;
+            }
+            return dstMaskLenBuilder_;
         }
 
         private com.google.protobuf.UInt32Value dstPort_;
@@ -3283,7 +3723,7 @@ public final class FlowMessage extends
          *
          * <code>.google.protobuf.UInt32Value dst_port = 8;</code>
          */
-        public void setDstPort(UInt32Value value) {
+        public Builder setDstPort(com.google.protobuf.UInt32Value value) {
             if (dstPortBuilder_ == null) {
                 if (value == null) {
                     throw new NullPointerException();
@@ -3294,6 +3734,7 @@ public final class FlowMessage extends
                 dstPortBuilder_.setMessage(value);
             }
 
+            return this;
         }
 
         /**
@@ -3303,7 +3744,26 @@ public final class FlowMessage extends
          *
          * <code>.google.protobuf.UInt32Value dst_port = 8;</code>
          */
-        public void mergeDstPort(UInt32Value value) {
+        public Builder setDstPort(
+            com.google.protobuf.UInt32Value.Builder builderForValue) {
+            if (dstPortBuilder_ == null) {
+                dstPort_ = builderForValue.build();
+                onChanged();
+            } else {
+                dstPortBuilder_.setMessage(builderForValue.build());
+            }
+
+            return this;
+        }
+
+        /**
+         * <pre>
+         * Destination port.
+         * </pre>
+         *
+         * <code>.google.protobuf.UInt32Value dst_port = 8;</code>
+         */
+        public Builder mergeDstPort(com.google.protobuf.UInt32Value value) {
             if (dstPortBuilder_ == null) {
                 if (dstPort_ != null) {
                     dstPort_ =
@@ -3316,8 +3776,40 @@ public final class FlowMessage extends
                 dstPortBuilder_.mergeFrom(value);
             }
 
+            return this;
         }
 
+        /**
+         * <pre>
+         * Destination port.
+         * </pre>
+         *
+         * <code>.google.protobuf.UInt32Value dst_port = 8;</code>
+         */
+        public Builder clearDstPort() {
+            if (dstPortBuilder_ == null) {
+                dstPort_ = null;
+                onChanged();
+            } else {
+                dstPort_ = null;
+                dstPortBuilder_ = null;
+            }
+
+            return this;
+        }
+
+        /**
+         * <pre>
+         * Destination port.
+         * </pre>
+         *
+         * <code>.google.protobuf.UInt32Value dst_port = 8;</code>
+         */
+        public com.google.protobuf.UInt32Value.Builder getDstPortBuilder() {
+
+            onChanged();
+            return getDstPortFieldBuilder().getBuilder();
+        }
 
         /**
          * <pre>
@@ -3333,6 +3825,27 @@ public final class FlowMessage extends
                 return dstPort_ == null ?
                     com.google.protobuf.UInt32Value.getDefaultInstance() : dstPort_;
             }
+        }
+
+        /**
+         * <pre>
+         * Destination port.
+         * </pre>
+         *
+         * <code>.google.protobuf.UInt32Value dst_port = 8;</code>
+         */
+        private com.google.protobuf.SingleFieldBuilderV3<
+            com.google.protobuf.UInt32Value, com.google.protobuf.UInt32Value.Builder, com.google.protobuf.UInt32ValueOrBuilder>
+        getDstPortFieldBuilder() {
+            if (dstPortBuilder_ == null) {
+                dstPortBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+                    com.google.protobuf.UInt32Value, com.google.protobuf.UInt32Value.Builder, com.google.protobuf.UInt32ValueOrBuilder>(
+                    getDstPort(),
+                    getParentForChildren(),
+                    isClean());
+                dstPort_ = null;
+            }
+            return dstPortBuilder_;
         }
 
         private com.google.protobuf.UInt32Value engineId_;
@@ -3372,7 +3885,7 @@ public final class FlowMessage extends
          *
          * <code>.google.protobuf.UInt32Value engine_id = 9;</code>
          */
-        public void setEngineId(UInt32Value value) {
+        public Builder setEngineId(com.google.protobuf.UInt32Value value) {
             if (engineIdBuilder_ == null) {
                 if (value == null) {
                     throw new NullPointerException();
@@ -3382,8 +3895,9 @@ public final class FlowMessage extends
             } else {
                 engineIdBuilder_.setMessage(value);
             }
-        }
 
+            return this;
+        }
 
         /**
          * <pre>
@@ -3392,7 +3906,26 @@ public final class FlowMessage extends
          *
          * <code>.google.protobuf.UInt32Value engine_id = 9;</code>
          */
-        public void mergeEngineId(UInt32Value value) {
+        public Builder setEngineId(
+            com.google.protobuf.UInt32Value.Builder builderForValue) {
+            if (engineIdBuilder_ == null) {
+                engineId_ = builderForValue.build();
+                onChanged();
+            } else {
+                engineIdBuilder_.setMessage(builderForValue.build());
+            }
+
+            return this;
+        }
+
+        /**
+         * <pre>
+         * Slot number of the flow-switching engine.
+         * </pre>
+         *
+         * <code>.google.protobuf.UInt32Value engine_id = 9;</code>
+         */
+        public Builder mergeEngineId(com.google.protobuf.UInt32Value value) {
             if (engineIdBuilder_ == null) {
                 if (engineId_ != null) {
                     engineId_ =
@@ -3405,6 +3938,39 @@ public final class FlowMessage extends
                 engineIdBuilder_.mergeFrom(value);
             }
 
+            return this;
+        }
+
+        /**
+         * <pre>
+         * Slot number of the flow-switching engine.
+         * </pre>
+         *
+         * <code>.google.protobuf.UInt32Value engine_id = 9;</code>
+         */
+        public Builder clearEngineId() {
+            if (engineIdBuilder_ == null) {
+                engineId_ = null;
+                onChanged();
+            } else {
+                engineId_ = null;
+                engineIdBuilder_ = null;
+            }
+
+            return this;
+        }
+
+        /**
+         * <pre>
+         * Slot number of the flow-switching engine.
+         * </pre>
+         *
+         * <code>.google.protobuf.UInt32Value engine_id = 9;</code>
+         */
+        public com.google.protobuf.UInt32Value.Builder getEngineIdBuilder() {
+
+            onChanged();
+            return getEngineIdFieldBuilder().getBuilder();
         }
 
         /**
@@ -3421,6 +3987,27 @@ public final class FlowMessage extends
                 return engineId_ == null ?
                     com.google.protobuf.UInt32Value.getDefaultInstance() : engineId_;
             }
+        }
+
+        /**
+         * <pre>
+         * Slot number of the flow-switching engine.
+         * </pre>
+         *
+         * <code>.google.protobuf.UInt32Value engine_id = 9;</code>
+         */
+        private com.google.protobuf.SingleFieldBuilderV3<
+            com.google.protobuf.UInt32Value, com.google.protobuf.UInt32Value.Builder, com.google.protobuf.UInt32ValueOrBuilder>
+        getEngineIdFieldBuilder() {
+            if (engineIdBuilder_ == null) {
+                engineIdBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+                    com.google.protobuf.UInt32Value, com.google.protobuf.UInt32Value.Builder, com.google.protobuf.UInt32ValueOrBuilder>(
+                    getEngineId(),
+                    getParentForChildren(),
+                    isClean());
+                engineId_ = null;
+            }
+            return engineIdBuilder_;
         }
 
         private com.google.protobuf.UInt32Value engineType_;
@@ -3460,7 +4047,7 @@ public final class FlowMessage extends
          *
          * <code>.google.protobuf.UInt32Value engine_type = 10;</code>
          */
-        public void setEngineType(UInt32Value value) {
+        public Builder setEngineType(com.google.protobuf.UInt32Value value) {
             if (engineTypeBuilder_ == null) {
                 if (value == null) {
                     throw new NullPointerException();
@@ -3471,6 +4058,7 @@ public final class FlowMessage extends
                 engineTypeBuilder_.setMessage(value);
             }
 
+            return this;
         }
 
         /**
@@ -3480,7 +4068,26 @@ public final class FlowMessage extends
          *
          * <code>.google.protobuf.UInt32Value engine_type = 10;</code>
          */
-        public void mergeEngineType(UInt32Value value) {
+        public Builder setEngineType(
+            com.google.protobuf.UInt32Value.Builder builderForValue) {
+            if (engineTypeBuilder_ == null) {
+                engineType_ = builderForValue.build();
+                onChanged();
+            } else {
+                engineTypeBuilder_.setMessage(builderForValue.build());
+            }
+
+            return this;
+        }
+
+        /**
+         * <pre>
+         * Type of flow-switching engine.
+         * </pre>
+         *
+         * <code>.google.protobuf.UInt32Value engine_type = 10;</code>
+         */
+        public Builder mergeEngineType(com.google.protobuf.UInt32Value value) {
             if (engineTypeBuilder_ == null) {
                 if (engineType_ != null) {
                     engineType_ =
@@ -3493,6 +4100,39 @@ public final class FlowMessage extends
                 engineTypeBuilder_.mergeFrom(value);
             }
 
+            return this;
+        }
+
+        /**
+         * <pre>
+         * Type of flow-switching engine.
+         * </pre>
+         *
+         * <code>.google.protobuf.UInt32Value engine_type = 10;</code>
+         */
+        public Builder clearEngineType() {
+            if (engineTypeBuilder_ == null) {
+                engineType_ = null;
+                onChanged();
+            } else {
+                engineType_ = null;
+                engineTypeBuilder_ = null;
+            }
+
+            return this;
+        }
+
+        /**
+         * <pre>
+         * Type of flow-switching engine.
+         * </pre>
+         *
+         * <code>.google.protobuf.UInt32Value engine_type = 10;</code>
+         */
+        public com.google.protobuf.UInt32Value.Builder getEngineTypeBuilder() {
+
+            onChanged();
+            return getEngineTypeFieldBuilder().getBuilder();
         }
 
         /**
@@ -3509,6 +4149,27 @@ public final class FlowMessage extends
                 return engineType_ == null ?
                     com.google.protobuf.UInt32Value.getDefaultInstance() : engineType_;
             }
+        }
+
+        /**
+         * <pre>
+         * Type of flow-switching engine.
+         * </pre>
+         *
+         * <code>.google.protobuf.UInt32Value engine_type = 10;</code>
+         */
+        private com.google.protobuf.SingleFieldBuilderV3<
+            com.google.protobuf.UInt32Value, com.google.protobuf.UInt32Value.Builder, com.google.protobuf.UInt32ValueOrBuilder>
+        getEngineTypeFieldBuilder() {
+            if (engineTypeBuilder_ == null) {
+                engineTypeBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+                    com.google.protobuf.UInt32Value, com.google.protobuf.UInt32Value.Builder, com.google.protobuf.UInt32ValueOrBuilder>(
+                    getEngineType(),
+                    getParentForChildren(),
+                    isClean());
+                engineType_ = null;
+            }
+            return engineTypeBuilder_;
         }
 
         private com.google.protobuf.UInt64Value deltaSwitched_;
@@ -3548,7 +4209,7 @@ public final class FlowMessage extends
          *
          * <code>.google.protobuf.UInt64Value delta_switched = 11;</code>
          */
-        public void setDeltaSwitched(UInt64Value value) {
+        public Builder setDeltaSwitched(com.google.protobuf.UInt64Value value) {
             if (deltaSwitchedBuilder_ == null) {
                 if (value == null) {
                     throw new NullPointerException();
@@ -3558,6 +4219,8 @@ public final class FlowMessage extends
             } else {
                 deltaSwitchedBuilder_.setMessage(value);
             }
+
+            return this;
         }
 
         /**
@@ -3567,7 +4230,26 @@ public final class FlowMessage extends
          *
          * <code>.google.protobuf.UInt64Value delta_switched = 11;</code>
          */
-        public void mergeDeltaSwitched(UInt64Value value) {
+        public Builder setDeltaSwitched(
+            com.google.protobuf.UInt64Value.Builder builderForValue) {
+            if (deltaSwitchedBuilder_ == null) {
+                deltaSwitched_ = builderForValue.build();
+                onChanged();
+            } else {
+                deltaSwitchedBuilder_.setMessage(builderForValue.build());
+            }
+
+            return this;
+        }
+
+        /**
+         * <pre>
+         * Unix timestamp in ms at which the previous exported packet-
+         * </pre>
+         *
+         * <code>.google.protobuf.UInt64Value delta_switched = 11;</code>
+         */
+        public Builder mergeDeltaSwitched(com.google.protobuf.UInt64Value value) {
             if (deltaSwitchedBuilder_ == null) {
                 if (deltaSwitched_ != null) {
                     deltaSwitched_ =
@@ -3579,6 +4261,27 @@ public final class FlowMessage extends
             } else {
                 deltaSwitchedBuilder_.mergeFrom(value);
             }
+
+            return this;
+        }
+
+        /**
+         * <pre>
+         * Unix timestamp in ms at which the previous exported packet-
+         * </pre>
+         *
+         * <code>.google.protobuf.UInt64Value delta_switched = 11;</code>
+         */
+        public Builder clearDeltaSwitched() {
+            if (deltaSwitchedBuilder_ == null) {
+                deltaSwitched_ = null;
+                onChanged();
+            } else {
+                deltaSwitched_ = null;
+                deltaSwitchedBuilder_ = null;
+            }
+
+            return this;
         }
 
         /**
@@ -3589,6 +4292,7 @@ public final class FlowMessage extends
          * <code>.google.protobuf.UInt64Value delta_switched = 11;</code>
          */
         public com.google.protobuf.UInt64Value.Builder getDeltaSwitchedBuilder() {
+
             onChanged();
             return getDeltaSwitchedFieldBuilder().getBuilder();
         }
@@ -3620,7 +4324,8 @@ public final class FlowMessage extends
             com.google.protobuf.UInt64Value, com.google.protobuf.UInt64Value.Builder, com.google.protobuf.UInt64ValueOrBuilder>
         getDeltaSwitchedFieldBuilder() {
             if (deltaSwitchedBuilder_ == null) {
-                deltaSwitchedBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<>(
+                deltaSwitchedBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+                    com.google.protobuf.UInt64Value, com.google.protobuf.UInt64Value.Builder, com.google.protobuf.UInt64ValueOrBuilder>(
                     getDeltaSwitched(),
                     getParentForChildren(),
                     isClean());
@@ -3666,7 +4371,7 @@ public final class FlowMessage extends
          *
          * <code>.google.protobuf.UInt64Value first_switched = 12;</code>
          */
-        public void setFirstSwitched(UInt64Value value) {
+        public Builder setFirstSwitched(com.google.protobuf.UInt64Value value) {
             if (firstSwitchedBuilder_ == null) {
                 if (value == null) {
                     throw new NullPointerException();
@@ -3677,6 +4382,7 @@ public final class FlowMessage extends
                 firstSwitchedBuilder_.setMessage(value);
             }
 
+            return this;
         }
 
         /**
@@ -3686,7 +4392,26 @@ public final class FlowMessage extends
          *
          * <code>.google.protobuf.UInt64Value first_switched = 12;</code>
          */
-        public void mergeFirstSwitched(UInt64Value value) {
+        public Builder setFirstSwitched(
+            com.google.protobuf.UInt64Value.Builder builderForValue) {
+            if (firstSwitchedBuilder_ == null) {
+                firstSwitched_ = builderForValue.build();
+                onChanged();
+            } else {
+                firstSwitchedBuilder_.setMessage(builderForValue.build());
+            }
+
+            return this;
+        }
+
+        /**
+         * <pre>
+         * -associated with this flow was switched.
+         * </pre>
+         *
+         * <code>.google.protobuf.UInt64Value first_switched = 12;</code>
+         */
+        public Builder mergeFirstSwitched(com.google.protobuf.UInt64Value value) {
             if (firstSwitchedBuilder_ == null) {
                 if (firstSwitched_ != null) {
                     firstSwitched_ =
@@ -3698,6 +4423,27 @@ public final class FlowMessage extends
             } else {
                 firstSwitchedBuilder_.mergeFrom(value);
             }
+
+            return this;
+        }
+
+        /**
+         * <pre>
+         * -associated with this flow was switched.
+         * </pre>
+         *
+         * <code>.google.protobuf.UInt64Value first_switched = 12;</code>
+         */
+        public Builder clearFirstSwitched() {
+            if (firstSwitchedBuilder_ == null) {
+                firstSwitched_ = null;
+                onChanged();
+            } else {
+                firstSwitched_ = null;
+                firstSwitchedBuilder_ = null;
+            }
+
+            return this;
         }
 
         /**
@@ -3740,7 +4486,8 @@ public final class FlowMessage extends
             com.google.protobuf.UInt64Value, com.google.protobuf.UInt64Value.Builder, com.google.protobuf.UInt64ValueOrBuilder>
         getFirstSwitchedFieldBuilder() {
             if (firstSwitchedBuilder_ == null) {
-                firstSwitchedBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<>(
+                firstSwitchedBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+                    com.google.protobuf.UInt64Value, com.google.protobuf.UInt64Value.Builder, com.google.protobuf.UInt64ValueOrBuilder>(
                     getFirstSwitched(),
                     getParentForChildren(),
                     isClean());
@@ -3786,7 +4533,7 @@ public final class FlowMessage extends
          *
          * <code>.google.protobuf.UInt64Value last_switched = 13;</code>
          */
-        public void setLastSwitched(UInt64Value value) {
+        public Builder setLastSwitched(com.google.protobuf.UInt64Value value) {
             if (lastSwitchedBuilder_ == null) {
                 if (value == null) {
                     throw new NullPointerException();
@@ -3796,6 +4543,8 @@ public final class FlowMessage extends
             } else {
                 lastSwitchedBuilder_.setMessage(value);
             }
+
+            return this;
         }
 
         /**
@@ -3805,7 +4554,26 @@ public final class FlowMessage extends
          *
          * <code>.google.protobuf.UInt64Value last_switched = 13;</code>
          */
-        public void mergeLastSwitched(UInt64Value value) {
+        public Builder setLastSwitched(
+            com.google.protobuf.UInt64Value.Builder builderForValue) {
+            if (lastSwitchedBuilder_ == null) {
+                lastSwitched_ = builderForValue.build();
+                onChanged();
+            } else {
+                lastSwitchedBuilder_.setMessage(builderForValue.build());
+            }
+
+            return this;
+        }
+
+        /**
+         * <pre>
+         * -associated with this flow was switched.
+         * </pre>
+         *
+         * <code>.google.protobuf.UInt64Value last_switched = 13;</code>
+         */
+        public Builder mergeLastSwitched(com.google.protobuf.UInt64Value value) {
             if (lastSwitchedBuilder_ == null) {
                 if (lastSwitched_ != null) {
                     lastSwitched_ =
@@ -3817,6 +4585,27 @@ public final class FlowMessage extends
             } else {
                 lastSwitchedBuilder_.mergeFrom(value);
             }
+
+            return this;
+        }
+
+        /**
+         * <pre>
+         * -associated with this flow was switched.
+         * </pre>
+         *
+         * <code>.google.protobuf.UInt64Value last_switched = 13;</code>
+         */
+        public Builder clearLastSwitched() {
+            if (lastSwitchedBuilder_ == null) {
+                lastSwitched_ = null;
+                onChanged();
+            } else {
+                lastSwitched_ = null;
+                lastSwitchedBuilder_ = null;
+            }
+
+            return this;
         }
 
         /**
@@ -3859,7 +4648,8 @@ public final class FlowMessage extends
             com.google.protobuf.UInt64Value, com.google.protobuf.UInt64Value.Builder, com.google.protobuf.UInt64ValueOrBuilder>
         getLastSwitchedFieldBuilder() {
             if (lastSwitchedBuilder_ == null) {
-                lastSwitchedBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<>(
+                lastSwitchedBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+                    com.google.protobuf.UInt64Value, com.google.protobuf.UInt64Value.Builder, com.google.protobuf.UInt64ValueOrBuilder>(
                     getLastSwitched(),
                     getParentForChildren(),
                     isClean());
@@ -3905,7 +4695,7 @@ public final class FlowMessage extends
          *
          * <code>.google.protobuf.UInt32Value num_flow_records = 14;</code>
          */
-        public void setNumFlowRecords(UInt32Value value) {
+        public Builder setNumFlowRecords(com.google.protobuf.UInt32Value value) {
             if (numFlowRecordsBuilder_ == null) {
                 if (value == null) {
                     throw new NullPointerException();
@@ -3915,6 +4705,8 @@ public final class FlowMessage extends
             } else {
                 numFlowRecordsBuilder_.setMessage(value);
             }
+
+            return this;
         }
 
         /**
@@ -3924,7 +4716,26 @@ public final class FlowMessage extends
          *
          * <code>.google.protobuf.UInt32Value num_flow_records = 14;</code>
          */
-        public void mergeNumFlowRecords(UInt32Value value) {
+        public Builder setNumFlowRecords(
+            com.google.protobuf.UInt32Value.Builder builderForValue) {
+            if (numFlowRecordsBuilder_ == null) {
+                numFlowRecords_ = builderForValue.build();
+                onChanged();
+            } else {
+                numFlowRecordsBuilder_.setMessage(builderForValue.build());
+            }
+
+            return this;
+        }
+
+        /**
+         * <pre>
+         * Number of flow records in the associated packet.
+         * </pre>
+         *
+         * <code>.google.protobuf.UInt32Value num_flow_records = 14;</code>
+         */
+        public Builder mergeNumFlowRecords(com.google.protobuf.UInt32Value value) {
             if (numFlowRecordsBuilder_ == null) {
                 if (numFlowRecords_ != null) {
                     numFlowRecords_ =
@@ -3936,6 +4747,40 @@ public final class FlowMessage extends
             } else {
                 numFlowRecordsBuilder_.mergeFrom(value);
             }
+
+            return this;
+        }
+
+        /**
+         * <pre>
+         * Number of flow records in the associated packet.
+         * </pre>
+         *
+         * <code>.google.protobuf.UInt32Value num_flow_records = 14;</code>
+         */
+        public Builder clearNumFlowRecords() {
+            if (numFlowRecordsBuilder_ == null) {
+                numFlowRecords_ = null;
+                onChanged();
+            } else {
+                numFlowRecords_ = null;
+                numFlowRecordsBuilder_ = null;
+            }
+
+            return this;
+        }
+
+        /**
+         * <pre>
+         * Number of flow records in the associated packet.
+         * </pre>
+         *
+         * <code>.google.protobuf.UInt32Value num_flow_records = 14;</code>
+         */
+        public com.google.protobuf.UInt32Value.Builder getNumFlowRecordsBuilder() {
+
+            onChanged();
+            return getNumFlowRecordsFieldBuilder().getBuilder();
         }
 
         /**
@@ -3952,6 +4797,27 @@ public final class FlowMessage extends
                 return numFlowRecords_ == null ?
                     com.google.protobuf.UInt32Value.getDefaultInstance() : numFlowRecords_;
             }
+        }
+
+        /**
+         * <pre>
+         * Number of flow records in the associated packet.
+         * </pre>
+         *
+         * <code>.google.protobuf.UInt32Value num_flow_records = 14;</code>
+         */
+        private com.google.protobuf.SingleFieldBuilderV3<
+            com.google.protobuf.UInt32Value, com.google.protobuf.UInt32Value.Builder, com.google.protobuf.UInt32ValueOrBuilder>
+        getNumFlowRecordsFieldBuilder() {
+            if (numFlowRecordsBuilder_ == null) {
+                numFlowRecordsBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+                    com.google.protobuf.UInt32Value, com.google.protobuf.UInt32Value.Builder, com.google.protobuf.UInt32ValueOrBuilder>(
+                    getNumFlowRecords(),
+                    getParentForChildren(),
+                    isClean());
+                numFlowRecords_ = null;
+            }
+            return numFlowRecordsBuilder_;
         }
 
         private com.google.protobuf.UInt64Value numPackets_;
@@ -3991,7 +4857,7 @@ public final class FlowMessage extends
          *
          * <code>.google.protobuf.UInt64Value num_packets = 15;</code>
          */
-        public void setNumPackets(UInt64Value value) {
+        public Builder setNumPackets(com.google.protobuf.UInt64Value value) {
             if (numPacketsBuilder_ == null) {
                 if (value == null) {
                     throw new NullPointerException();
@@ -4001,6 +4867,8 @@ public final class FlowMessage extends
             } else {
                 numPacketsBuilder_.setMessage(value);
             }
+
+            return this;
         }
 
         /**
@@ -4010,7 +4878,26 @@ public final class FlowMessage extends
          *
          * <code>.google.protobuf.UInt64Value num_packets = 15;</code>
          */
-        public void mergeNumPackets(UInt64Value value) {
+        public Builder setNumPackets(
+            com.google.protobuf.UInt64Value.Builder builderForValue) {
+            if (numPacketsBuilder_ == null) {
+                numPackets_ = builderForValue.build();
+                onChanged();
+            } else {
+                numPacketsBuilder_.setMessage(builderForValue.build());
+            }
+
+            return this;
+        }
+
+        /**
+         * <pre>
+         * Number of packets in the flow.
+         * </pre>
+         *
+         * <code>.google.protobuf.UInt64Value num_packets = 15;</code>
+         */
+        public Builder mergeNumPackets(com.google.protobuf.UInt64Value value) {
             if (numPacketsBuilder_ == null) {
                 if (numPackets_ != null) {
                     numPackets_ =
@@ -4022,6 +4909,40 @@ public final class FlowMessage extends
             } else {
                 numPacketsBuilder_.mergeFrom(value);
             }
+
+            return this;
+        }
+
+        /**
+         * <pre>
+         * Number of packets in the flow.
+         * </pre>
+         *
+         * <code>.google.protobuf.UInt64Value num_packets = 15;</code>
+         */
+        public Builder clearNumPackets() {
+            if (numPacketsBuilder_ == null) {
+                numPackets_ = null;
+                onChanged();
+            } else {
+                numPackets_ = null;
+                numPacketsBuilder_ = null;
+            }
+
+            return this;
+        }
+
+        /**
+         * <pre>
+         * Number of packets in the flow.
+         * </pre>
+         *
+         * <code>.google.protobuf.UInt64Value num_packets = 15;</code>
+         */
+        public com.google.protobuf.UInt64Value.Builder getNumPacketsBuilder() {
+
+            onChanged();
+            return getNumPacketsFieldBuilder().getBuilder();
         }
 
         /**
@@ -4040,9 +4961,30 @@ public final class FlowMessage extends
             }
         }
 
+        /**
+         * <pre>
+         * Number of packets in the flow.
+         * </pre>
+         *
+         * <code>.google.protobuf.UInt64Value num_packets = 15;</code>
+         */
+        private com.google.protobuf.SingleFieldBuilderV3<
+            com.google.protobuf.UInt64Value, com.google.protobuf.UInt64Value.Builder, com.google.protobuf.UInt64ValueOrBuilder>
+        getNumPacketsFieldBuilder() {
+            if (numPacketsBuilder_ == null) {
+                numPacketsBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+                    com.google.protobuf.UInt64Value, com.google.protobuf.UInt64Value.Builder, com.google.protobuf.UInt64ValueOrBuilder>(
+                    getNumPackets(),
+                    getParentForChildren(),
+                    isClean());
+                numPackets_ = null;
+            }
+            return numPacketsBuilder_;
+        }
+
         private com.google.protobuf.UInt64Value flowSeqNum_;
-        private com.google.protobuf.SingleFieldBuilderV3<com.google.protobuf.UInt64Value, com.google.protobuf.UInt64Value.Builder,
-            com.google.protobuf.UInt64ValueOrBuilder> flowSeqNumBuilder_;
+        private com.google.protobuf.SingleFieldBuilderV3<
+            com.google.protobuf.UInt64Value, com.google.protobuf.UInt64Value.Builder, com.google.protobuf.UInt64ValueOrBuilder> flowSeqNumBuilder_;
 
         /**
          * <pre>
@@ -4098,7 +5040,26 @@ public final class FlowMessage extends
          *
          * <code>.google.protobuf.UInt64Value flow_seq_num = 16;</code>
          */
-        public void mergeFlowSeqNum(UInt64Value value) {
+        public Builder setFlowSeqNum(
+            com.google.protobuf.UInt64Value.Builder builderForValue) {
+            if (flowSeqNumBuilder_ == null) {
+                flowSeqNum_ = builderForValue.build();
+                onChanged();
+            } else {
+                flowSeqNumBuilder_.setMessage(builderForValue.build());
+            }
+
+            return this;
+        }
+
+        /**
+         * <pre>
+         * Flow packet sequence number.
+         * </pre>
+         *
+         * <code>.google.protobuf.UInt64Value flow_seq_num = 16;</code>
+         */
+        public Builder mergeFlowSeqNum(com.google.protobuf.UInt64Value value) {
             if (flowSeqNumBuilder_ == null) {
                 if (flowSeqNum_ != null) {
                     flowSeqNum_ =
@@ -4110,6 +5071,40 @@ public final class FlowMessage extends
             } else {
                 flowSeqNumBuilder_.mergeFrom(value);
             }
+
+            return this;
+        }
+
+        /**
+         * <pre>
+         * Flow packet sequence number.
+         * </pre>
+         *
+         * <code>.google.protobuf.UInt64Value flow_seq_num = 16;</code>
+         */
+        public Builder clearFlowSeqNum() {
+            if (flowSeqNumBuilder_ == null) {
+                flowSeqNum_ = null;
+                onChanged();
+            } else {
+                flowSeqNum_ = null;
+                flowSeqNumBuilder_ = null;
+            }
+
+            return this;
+        }
+
+        /**
+         * <pre>
+         * Flow packet sequence number.
+         * </pre>
+         *
+         * <code>.google.protobuf.UInt64Value flow_seq_num = 16;</code>
+         */
+        public com.google.protobuf.UInt64Value.Builder getFlowSeqNumBuilder() {
+
+            onChanged();
+            return getFlowSeqNumFieldBuilder().getBuilder();
         }
 
         /**
@@ -4126,6 +5121,27 @@ public final class FlowMessage extends
                 return flowSeqNum_ == null ?
                     com.google.protobuf.UInt64Value.getDefaultInstance() : flowSeqNum_;
             }
+        }
+
+        /**
+         * <pre>
+         * Flow packet sequence number.
+         * </pre>
+         *
+         * <code>.google.protobuf.UInt64Value flow_seq_num = 16;</code>
+         */
+        private com.google.protobuf.SingleFieldBuilderV3<
+            com.google.protobuf.UInt64Value, com.google.protobuf.UInt64Value.Builder, com.google.protobuf.UInt64ValueOrBuilder>
+        getFlowSeqNumFieldBuilder() {
+            if (flowSeqNumBuilder_ == null) {
+                flowSeqNumBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+                    com.google.protobuf.UInt64Value, com.google.protobuf.UInt64Value.Builder, com.google.protobuf.UInt64ValueOrBuilder>(
+                    getFlowSeqNum(),
+                    getParentForChildren(),
+                    isClean());
+                flowSeqNum_ = null;
+            }
+            return flowSeqNumBuilder_;
         }
 
         private com.google.protobuf.UInt32Value inputSnmpIfindex_;
@@ -4165,7 +5181,7 @@ public final class FlowMessage extends
          *
          * <code>.google.protobuf.UInt32Value input_snmp_ifindex = 17;</code>
          */
-        public void setInputSnmpIfindex(UInt32Value value) {
+        public Builder setInputSnmpIfindex(com.google.protobuf.UInt32Value value) {
             if (inputSnmpIfindexBuilder_ == null) {
                 if (value == null) {
                     throw new NullPointerException();
@@ -4176,6 +5192,7 @@ public final class FlowMessage extends
                 inputSnmpIfindexBuilder_.setMessage(value);
             }
 
+            return this;
         }
 
         /**
@@ -4185,7 +5202,26 @@ public final class FlowMessage extends
          *
          * <code>.google.protobuf.UInt32Value input_snmp_ifindex = 17;</code>
          */
-        public void mergeInputSnmpIfindex(UInt32Value value) {
+        public Builder setInputSnmpIfindex(
+            com.google.protobuf.UInt32Value.Builder builderForValue) {
+            if (inputSnmpIfindexBuilder_ == null) {
+                inputSnmpIfindex_ = builderForValue.build();
+                onChanged();
+            } else {
+                inputSnmpIfindexBuilder_.setMessage(builderForValue.build());
+            }
+
+            return this;
+        }
+
+        /**
+         * <pre>
+         * Input SNMP ifIndex.
+         * </pre>
+         *
+         * <code>.google.protobuf.UInt32Value input_snmp_ifindex = 17;</code>
+         */
+        public Builder mergeInputSnmpIfindex(com.google.protobuf.UInt32Value value) {
             if (inputSnmpIfindexBuilder_ == null) {
                 if (inputSnmpIfindex_ != null) {
                     inputSnmpIfindex_ =
@@ -4198,6 +5234,39 @@ public final class FlowMessage extends
                 inputSnmpIfindexBuilder_.mergeFrom(value);
             }
 
+            return this;
+        }
+
+        /**
+         * <pre>
+         * Input SNMP ifIndex.
+         * </pre>
+         *
+         * <code>.google.protobuf.UInt32Value input_snmp_ifindex = 17;</code>
+         */
+        public Builder clearInputSnmpIfindex() {
+            if (inputSnmpIfindexBuilder_ == null) {
+                inputSnmpIfindex_ = null;
+                onChanged();
+            } else {
+                inputSnmpIfindex_ = null;
+                inputSnmpIfindexBuilder_ = null;
+            }
+
+            return this;
+        }
+
+        /**
+         * <pre>
+         * Input SNMP ifIndex.
+         * </pre>
+         *
+         * <code>.google.protobuf.UInt32Value input_snmp_ifindex = 17;</code>
+         */
+        public com.google.protobuf.UInt32Value.Builder getInputSnmpIfindexBuilder() {
+
+            onChanged();
+            return getInputSnmpIfindexFieldBuilder().getBuilder();
         }
 
         /**
@@ -4214,6 +5283,27 @@ public final class FlowMessage extends
                 return inputSnmpIfindex_ == null ?
                     com.google.protobuf.UInt32Value.getDefaultInstance() : inputSnmpIfindex_;
             }
+        }
+
+        /**
+         * <pre>
+         * Input SNMP ifIndex.
+         * </pre>
+         *
+         * <code>.google.protobuf.UInt32Value input_snmp_ifindex = 17;</code>
+         */
+        private com.google.protobuf.SingleFieldBuilderV3<
+            com.google.protobuf.UInt32Value, com.google.protobuf.UInt32Value.Builder, com.google.protobuf.UInt32ValueOrBuilder>
+        getInputSnmpIfindexFieldBuilder() {
+            if (inputSnmpIfindexBuilder_ == null) {
+                inputSnmpIfindexBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+                    com.google.protobuf.UInt32Value, com.google.protobuf.UInt32Value.Builder, com.google.protobuf.UInt32ValueOrBuilder>(
+                    getInputSnmpIfindex(),
+                    getParentForChildren(),
+                    isClean());
+                inputSnmpIfindex_ = null;
+            }
+            return inputSnmpIfindexBuilder_;
         }
 
         private com.google.protobuf.UInt32Value outputSnmpIfindex_;
@@ -4253,7 +5343,7 @@ public final class FlowMessage extends
          *
          * <code>.google.protobuf.UInt32Value output_snmp_ifindex = 18;</code>
          */
-        public void setOutputSnmpIfindex(UInt32Value value) {
+        public Builder setOutputSnmpIfindex(com.google.protobuf.UInt32Value value) {
             if (outputSnmpIfindexBuilder_ == null) {
                 if (value == null) {
                     throw new NullPointerException();
@@ -4263,6 +5353,8 @@ public final class FlowMessage extends
             } else {
                 outputSnmpIfindexBuilder_.setMessage(value);
             }
+
+            return this;
         }
 
         /**
@@ -4272,7 +5364,26 @@ public final class FlowMessage extends
          *
          * <code>.google.protobuf.UInt32Value output_snmp_ifindex = 18;</code>
          */
-        public void mergeOutputSnmpIfindex(UInt32Value value) {
+        public Builder setOutputSnmpIfindex(
+            com.google.protobuf.UInt32Value.Builder builderForValue) {
+            if (outputSnmpIfindexBuilder_ == null) {
+                outputSnmpIfindex_ = builderForValue.build();
+                onChanged();
+            } else {
+                outputSnmpIfindexBuilder_.setMessage(builderForValue.build());
+            }
+
+            return this;
+        }
+
+        /**
+         * <pre>
+         * Output SNMP ifIndex.
+         * </pre>
+         *
+         * <code>.google.protobuf.UInt32Value output_snmp_ifindex = 18;</code>
+         */
+        public Builder mergeOutputSnmpIfindex(com.google.protobuf.UInt32Value value) {
             if (outputSnmpIfindexBuilder_ == null) {
                 if (outputSnmpIfindex_ != null) {
                     outputSnmpIfindex_ =
@@ -4284,6 +5395,40 @@ public final class FlowMessage extends
             } else {
                 outputSnmpIfindexBuilder_.mergeFrom(value);
             }
+
+            return this;
+        }
+
+        /**
+         * <pre>
+         * Output SNMP ifIndex.
+         * </pre>
+         *
+         * <code>.google.protobuf.UInt32Value output_snmp_ifindex = 18;</code>
+         */
+        public Builder clearOutputSnmpIfindex() {
+            if (outputSnmpIfindexBuilder_ == null) {
+                outputSnmpIfindex_ = null;
+                onChanged();
+            } else {
+                outputSnmpIfindex_ = null;
+                outputSnmpIfindexBuilder_ = null;
+            }
+
+            return this;
+        }
+
+        /**
+         * <pre>
+         * Output SNMP ifIndex.
+         * </pre>
+         *
+         * <code>.google.protobuf.UInt32Value output_snmp_ifindex = 18;</code>
+         */
+        public com.google.protobuf.UInt32Value.Builder getOutputSnmpIfindexBuilder() {
+
+            onChanged();
+            return getOutputSnmpIfindexFieldBuilder().getBuilder();
         }
 
         /**
@@ -4300,6 +5445,27 @@ public final class FlowMessage extends
                 return outputSnmpIfindex_ == null ?
                     com.google.protobuf.UInt32Value.getDefaultInstance() : outputSnmpIfindex_;
             }
+        }
+
+        /**
+         * <pre>
+         * Output SNMP ifIndex.
+         * </pre>
+         *
+         * <code>.google.protobuf.UInt32Value output_snmp_ifindex = 18;</code>
+         */
+        private com.google.protobuf.SingleFieldBuilderV3<
+            com.google.protobuf.UInt32Value, com.google.protobuf.UInt32Value.Builder, com.google.protobuf.UInt32ValueOrBuilder>
+        getOutputSnmpIfindexFieldBuilder() {
+            if (outputSnmpIfindexBuilder_ == null) {
+                outputSnmpIfindexBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+                    com.google.protobuf.UInt32Value, com.google.protobuf.UInt32Value.Builder, com.google.protobuf.UInt32ValueOrBuilder>(
+                    getOutputSnmpIfindex(),
+                    getParentForChildren(),
+                    isClean());
+                outputSnmpIfindex_ = null;
+            }
+            return outputSnmpIfindexBuilder_;
         }
 
         private com.google.protobuf.UInt32Value ipProtocolVersion_;
@@ -4339,7 +5505,7 @@ public final class FlowMessage extends
          *
          * <code>.google.protobuf.UInt32Value ip_protocol_version = 19;</code>
          */
-        public void setIpProtocolVersion(UInt32Value value) {
+        public Builder setIpProtocolVersion(com.google.protobuf.UInt32Value value) {
             if (ipProtocolVersionBuilder_ == null) {
                 if (value == null) {
                     throw new NullPointerException();
@@ -4349,6 +5515,8 @@ public final class FlowMessage extends
             } else {
                 ipProtocolVersionBuilder_.setMessage(value);
             }
+
+            return this;
         }
 
         /**
@@ -4358,7 +5526,26 @@ public final class FlowMessage extends
          *
          * <code>.google.protobuf.UInt32Value ip_protocol_version = 19;</code>
          */
-        public void mergeIpProtocolVersion(UInt32Value value) {
+        public Builder setIpProtocolVersion(
+            com.google.protobuf.UInt32Value.Builder builderForValue) {
+            if (ipProtocolVersionBuilder_ == null) {
+                ipProtocolVersion_ = builderForValue.build();
+                onChanged();
+            } else {
+                ipProtocolVersionBuilder_.setMessage(builderForValue.build());
+            }
+
+            return this;
+        }
+
+        /**
+         * <pre>
+         * IPv4 vs IPv6.
+         * </pre>
+         *
+         * <code>.google.protobuf.UInt32Value ip_protocol_version = 19;</code>
+         */
+        public Builder mergeIpProtocolVersion(com.google.protobuf.UInt32Value value) {
             if (ipProtocolVersionBuilder_ == null) {
                 if (ipProtocolVersion_ != null) {
                     ipProtocolVersion_ =
@@ -4370,6 +5557,40 @@ public final class FlowMessage extends
             } else {
                 ipProtocolVersionBuilder_.mergeFrom(value);
             }
+
+            return this;
+        }
+
+        /**
+         * <pre>
+         * IPv4 vs IPv6.
+         * </pre>
+         *
+         * <code>.google.protobuf.UInt32Value ip_protocol_version = 19;</code>
+         */
+        public Builder clearIpProtocolVersion() {
+            if (ipProtocolVersionBuilder_ == null) {
+                ipProtocolVersion_ = null;
+                onChanged();
+            } else {
+                ipProtocolVersion_ = null;
+                ipProtocolVersionBuilder_ = null;
+            }
+
+            return this;
+        }
+
+        /**
+         * <pre>
+         * IPv4 vs IPv6.
+         * </pre>
+         *
+         * <code>.google.protobuf.UInt32Value ip_protocol_version = 19;</code>
+         */
+        public com.google.protobuf.UInt32Value.Builder getIpProtocolVersionBuilder() {
+
+            onChanged();
+            return getIpProtocolVersionFieldBuilder().getBuilder();
         }
 
         /**
@@ -4386,6 +5607,27 @@ public final class FlowMessage extends
                 return ipProtocolVersion_ == null ?
                     com.google.protobuf.UInt32Value.getDefaultInstance() : ipProtocolVersion_;
             }
+        }
+
+        /**
+         * <pre>
+         * IPv4 vs IPv6.
+         * </pre>
+         *
+         * <code>.google.protobuf.UInt32Value ip_protocol_version = 19;</code>
+         */
+        private com.google.protobuf.SingleFieldBuilderV3<
+            com.google.protobuf.UInt32Value, com.google.protobuf.UInt32Value.Builder, com.google.protobuf.UInt32ValueOrBuilder>
+        getIpProtocolVersionFieldBuilder() {
+            if (ipProtocolVersionBuilder_ == null) {
+                ipProtocolVersionBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+                    com.google.protobuf.UInt32Value, com.google.protobuf.UInt32Value.Builder, com.google.protobuf.UInt32ValueOrBuilder>(
+                    getIpProtocolVersion(),
+                    getParentForChildren(),
+                    isClean());
+                ipProtocolVersion_ = null;
+            }
+            return ipProtocolVersionBuilder_;
         }
 
         private Object nextHopAddress_ = "";
@@ -4438,7 +5680,7 @@ public final class FlowMessage extends
          *
          * <code>string next_hop_address = 20;</code>
          */
-        public void setNextHopAddress(
+        public Builder setNextHopAddress(
             String value) {
             if (value == null) {
                 throw new NullPointerException();
@@ -4446,6 +5688,40 @@ public final class FlowMessage extends
 
             nextHopAddress_ = value;
             onChanged();
+            return this;
+        }
+
+        /**
+         * <pre>
+         * Next hop IpAddress.
+         * </pre>
+         *
+         * <code>string next_hop_address = 20;</code>
+         */
+        public Builder clearNextHopAddress() {
+
+            nextHopAddress_ = getDefaultInstance().getNextHopAddress();
+            onChanged();
+            return this;
+        }
+
+        /**
+         * <pre>
+         * Next hop IpAddress.
+         * </pre>
+         *
+         * <code>string next_hop_address = 20;</code>
+         */
+        public Builder setNextHopAddressBytes(
+            com.google.protobuf.ByteString value) {
+            if (value == null) {
+                throw new NullPointerException();
+            }
+            checkByteStringIsUtf8(value);
+
+            nextHopAddress_ = value;
+            onChanged();
+            return this;
         }
 
         private Object nextHopHostname_ = "";
@@ -4498,7 +5774,7 @@ public final class FlowMessage extends
          *
          * <code>string next_hop_hostname = 21;</code>
          */
-        public void setNextHopHostname(
+        public Builder setNextHopHostname(
             String value) {
             if (value == null) {
                 throw new NullPointerException();
@@ -4506,6 +5782,40 @@ public final class FlowMessage extends
 
             nextHopHostname_ = value;
             onChanged();
+            return this;
+        }
+
+        /**
+         * <pre>
+         * Next hop hostname.
+         * </pre>
+         *
+         * <code>string next_hop_hostname = 21;</code>
+         */
+        public Builder clearNextHopHostname() {
+
+            nextHopHostname_ = getDefaultInstance().getNextHopHostname();
+            onChanged();
+            return this;
+        }
+
+        /**
+         * <pre>
+         * Next hop hostname.
+         * </pre>
+         *
+         * <code>string next_hop_hostname = 21;</code>
+         */
+        public Builder setNextHopHostnameBytes(
+            com.google.protobuf.ByteString value) {
+            if (value == null) {
+                throw new NullPointerException();
+            }
+            checkByteStringIsUtf8(value);
+
+            nextHopHostname_ = value;
+            onChanged();
+            return this;
         }
 
         private com.google.protobuf.UInt32Value protocol_;
@@ -4585,14 +5895,52 @@ public final class FlowMessage extends
          *
          * <code>.google.protobuf.UInt32Value protocol = 22;</code>
          */
-        public void mergeProtocol(UInt32Value value) {
+        public Builder mergeProtocol(com.google.protobuf.UInt32Value value) {
             if (protocolBuilder_ == null) {
-                protocol_ = protocol_ != null ? UInt32Value.newBuilder(protocol_).mergeFrom(value).buildPartial() : value;
+                if (protocol_ != null) {
+                    protocol_ =
+                        com.google.protobuf.UInt32Value.newBuilder(protocol_).mergeFrom(value).buildPartial();
+                } else {
+                    protocol_ = value;
+                }
                 onChanged();
             } else {
                 protocolBuilder_.mergeFrom(value);
             }
 
+            return this;
+        }
+
+        /**
+         * <pre>
+         * IP protocol number i.e 6 for TCP, 17 for UDP
+         * </pre>
+         *
+         * <code>.google.protobuf.UInt32Value protocol = 22;</code>
+         */
+        public Builder clearProtocol() {
+            if (protocolBuilder_ == null) {
+                protocol_ = null;
+                onChanged();
+            } else {
+                protocol_ = null;
+                protocolBuilder_ = null;
+            }
+
+            return this;
+        }
+
+        /**
+         * <pre>
+         * IP protocol number i.e 6 for TCP, 17 for UDP
+         * </pre>
+         *
+         * <code>.google.protobuf.UInt32Value protocol = 22;</code>
+         */
+        public com.google.protobuf.UInt32Value.Builder getProtocolBuilder() {
+
+            onChanged();
+            return getProtocolFieldBuilder().getBuilder();
         }
 
         /**
@@ -4609,6 +5957,27 @@ public final class FlowMessage extends
                 return protocol_ == null ?
                     com.google.protobuf.UInt32Value.getDefaultInstance() : protocol_;
             }
+        }
+
+        /**
+         * <pre>
+         * IP protocol number i.e 6 for TCP, 17 for UDP
+         * </pre>
+         *
+         * <code>.google.protobuf.UInt32Value protocol = 22;</code>
+         */
+        private com.google.protobuf.SingleFieldBuilderV3<
+            com.google.protobuf.UInt32Value, com.google.protobuf.UInt32Value.Builder, com.google.protobuf.UInt32ValueOrBuilder>
+        getProtocolFieldBuilder() {
+            if (protocolBuilder_ == null) {
+                protocolBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+                    com.google.protobuf.UInt32Value, com.google.protobuf.UInt32Value.Builder, com.google.protobuf.UInt32ValueOrBuilder>(
+                    getProtocol(),
+                    getParentForChildren(),
+                    isClean());
+                protocol_ = null;
+            }
+            return protocolBuilder_;
         }
 
         private int samplingAlgorithm_ = 0;
@@ -4631,9 +6000,10 @@ public final class FlowMessage extends
          *
          * <code>.SamplingAlgorithm sampling_algorithm = 23;</code>
          */
-        public void setSamplingAlgorithmValue(int value) {
+        public Builder setSamplingAlgorithmValue(int value) {
             samplingAlgorithm_ = value;
             onChanged();
+            return this;
         }
 
         /**
@@ -4656,13 +6026,28 @@ public final class FlowMessage extends
          *
          * <code>.SamplingAlgorithm sampling_algorithm = 23;</code>
          */
-        public void setSamplingAlgorithm(SamplingAlgorithm value) {
+        public Builder setSamplingAlgorithm(SamplingAlgorithm value) {
             if (value == null) {
                 throw new NullPointerException();
             }
 
             samplingAlgorithm_ = value.getNumber();
             onChanged();
+            return this;
+        }
+
+        /**
+         * <pre>
+         * Sampling algorithm ID.
+         * </pre>
+         *
+         * <code>.SamplingAlgorithm sampling_algorithm = 23;</code>
+         */
+        public Builder clearSamplingAlgorithm() {
+
+            samplingAlgorithm_ = 0;
+            onChanged();
+            return this;
         }
 
         private com.google.protobuf.DoubleValue samplingInterval_;
@@ -4702,7 +6087,7 @@ public final class FlowMessage extends
          *
          * <code>.google.protobuf.DoubleValue sampling_interval = 24;</code>
          */
-        public void setSamplingInterval(DoubleValue value) {
+        public Builder setSamplingInterval(com.google.protobuf.DoubleValue value) {
             if (samplingIntervalBuilder_ == null) {
                 if (value == null) {
                     throw new NullPointerException();
@@ -4712,6 +6097,8 @@ public final class FlowMessage extends
             } else {
                 samplingIntervalBuilder_.setMessage(value);
             }
+
+            return this;
         }
 
         /**
@@ -4721,7 +6108,26 @@ public final class FlowMessage extends
          *
          * <code>.google.protobuf.DoubleValue sampling_interval = 24;</code>
          */
-        public void mergeSamplingInterval(DoubleValue value) {
+        public Builder setSamplingInterval(
+            com.google.protobuf.DoubleValue.Builder builderForValue) {
+            if (samplingIntervalBuilder_ == null) {
+                samplingInterval_ = builderForValue.build();
+                onChanged();
+            } else {
+                samplingIntervalBuilder_.setMessage(builderForValue.build());
+            }
+
+            return this;
+        }
+
+        /**
+         * <pre>
+         * Sampling interval.
+         * </pre>
+         *
+         * <code>.google.protobuf.DoubleValue sampling_interval = 24;</code>
+         */
+        public Builder mergeSamplingInterval(com.google.protobuf.DoubleValue value) {
             if (samplingIntervalBuilder_ == null) {
                 if (samplingInterval_ != null) {
                     samplingInterval_ =
@@ -4733,6 +6139,40 @@ public final class FlowMessage extends
             } else {
                 samplingIntervalBuilder_.mergeFrom(value);
             }
+
+            return this;
+        }
+
+        /**
+         * <pre>
+         * Sampling interval.
+         * </pre>
+         *
+         * <code>.google.protobuf.DoubleValue sampling_interval = 24;</code>
+         */
+        public Builder clearSamplingInterval() {
+            if (samplingIntervalBuilder_ == null) {
+                samplingInterval_ = null;
+                onChanged();
+            } else {
+                samplingInterval_ = null;
+                samplingIntervalBuilder_ = null;
+            }
+
+            return this;
+        }
+
+        /**
+         * <pre>
+         * Sampling interval.
+         * </pre>
+         *
+         * <code>.google.protobuf.DoubleValue sampling_interval = 24;</code>
+         */
+        public com.google.protobuf.DoubleValue.Builder getSamplingIntervalBuilder() {
+
+            onChanged();
+            return getSamplingIntervalFieldBuilder().getBuilder();
         }
 
         /**
@@ -4749,6 +6189,27 @@ public final class FlowMessage extends
                 return samplingInterval_ == null ?
                     com.google.protobuf.DoubleValue.getDefaultInstance() : samplingInterval_;
             }
+        }
+
+        /**
+         * <pre>
+         * Sampling interval.
+         * </pre>
+         *
+         * <code>.google.protobuf.DoubleValue sampling_interval = 24;</code>
+         */
+        private com.google.protobuf.SingleFieldBuilderV3<
+            com.google.protobuf.DoubleValue, com.google.protobuf.DoubleValue.Builder, com.google.protobuf.DoubleValueOrBuilder>
+        getSamplingIntervalFieldBuilder() {
+            if (samplingIntervalBuilder_ == null) {
+                samplingIntervalBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+                    com.google.protobuf.DoubleValue, com.google.protobuf.DoubleValue.Builder, com.google.protobuf.DoubleValueOrBuilder>(
+                    getSamplingInterval(),
+                    getParentForChildren(),
+                    isClean());
+                samplingInterval_ = null;
+            }
+            return samplingIntervalBuilder_;
         }
 
         private Object srcAddress_ = "";
@@ -4801,7 +6262,7 @@ public final class FlowMessage extends
          *
          * <code>string src_address = 26;</code>
          */
-        public void setSrcAddress(
+        public Builder setSrcAddress(
             String value) {
             if (value == null) {
                 throw new NullPointerException();
@@ -4809,6 +6270,40 @@ public final class FlowMessage extends
 
             srcAddress_ = value;
             onChanged();
+            return this;
+        }
+
+        /**
+         * <pre>
+         * Source address.
+         * </pre>
+         *
+         * <code>string src_address = 26;</code>
+         */
+        public Builder clearSrcAddress() {
+
+            srcAddress_ = getDefaultInstance().getSrcAddress();
+            onChanged();
+            return this;
+        }
+
+        /**
+         * <pre>
+         * Source address.
+         * </pre>
+         *
+         * <code>string src_address = 26;</code>
+         */
+        public Builder setSrcAddressBytes(
+            com.google.protobuf.ByteString value) {
+            if (value == null) {
+                throw new NullPointerException();
+            }
+            checkByteStringIsUtf8(value);
+
+            srcAddress_ = value;
+            onChanged();
+            return this;
         }
 
         private Object srcHostname_ = "";
@@ -4845,7 +6340,8 @@ public final class FlowMessage extends
             Object ref = srcHostname_;
             if (ref instanceof String) {
                 com.google.protobuf.ByteString b =
-                    com.google.protobuf.ByteString.copyFromUtf8((String) ref);
+                    com.google.protobuf.ByteString.copyFromUtf8(
+                        (String) ref);
                 srcHostname_ = b;
                 return b;
             } else {
@@ -4860,7 +6356,7 @@ public final class FlowMessage extends
          *
          * <code>string src_hostname = 27;</code>
          */
-        public void setSrcHostname(
+        public Builder setSrcHostname(
             String value) {
             if (value == null) {
                 throw new NullPointerException();
@@ -4868,6 +6364,40 @@ public final class FlowMessage extends
 
             srcHostname_ = value;
             onChanged();
+            return this;
+        }
+
+        /**
+         * <pre>
+         * Source hostname.
+         * </pre>
+         *
+         * <code>string src_hostname = 27;</code>
+         */
+        public Builder clearSrcHostname() {
+
+            srcHostname_ = getDefaultInstance().getSrcHostname();
+            onChanged();
+            return this;
+        }
+
+        /**
+         * <pre>
+         * Source hostname.
+         * </pre>
+         *
+         * <code>string src_hostname = 27;</code>
+         */
+        public Builder setSrcHostnameBytes(
+            com.google.protobuf.ByteString value) {
+            if (value == null) {
+                throw new NullPointerException();
+            }
+            checkByteStringIsUtf8(value);
+
+            srcHostname_ = value;
+            onChanged();
+            return this;
         }
 
         private com.google.protobuf.UInt64Value srcAs_;
@@ -4907,7 +6437,7 @@ public final class FlowMessage extends
          *
          * <code>.google.protobuf.UInt64Value src_as = 28;</code>
          */
-        public void setSrcAs(UInt64Value value) {
+        public Builder setSrcAs(com.google.protobuf.UInt64Value value) {
             if (srcAsBuilder_ == null) {
                 if (value == null) {
                     throw new NullPointerException();
@@ -4917,6 +6447,8 @@ public final class FlowMessage extends
             } else {
                 srcAsBuilder_.setMessage(value);
             }
+
+            return this;
         }
 
         /**
@@ -4926,7 +6458,26 @@ public final class FlowMessage extends
          *
          * <code>.google.protobuf.UInt64Value src_as = 28;</code>
          */
-        public void mergeSrcAs(UInt64Value value) {
+        public Builder setSrcAs(
+            com.google.protobuf.UInt64Value.Builder builderForValue) {
+            if (srcAsBuilder_ == null) {
+                srcAs_ = builderForValue.build();
+                onChanged();
+            } else {
+                srcAsBuilder_.setMessage(builderForValue.build());
+            }
+
+            return this;
+        }
+
+        /**
+         * <pre>
+         * Source AS number.
+         * </pre>
+         *
+         * <code>.google.protobuf.UInt64Value src_as = 28;</code>
+         */
+        public Builder mergeSrcAs(com.google.protobuf.UInt64Value value) {
             if (srcAsBuilder_ == null) {
                 if (srcAs_ != null) {
                     srcAs_ =
@@ -4938,6 +6489,40 @@ public final class FlowMessage extends
             } else {
                 srcAsBuilder_.mergeFrom(value);
             }
+
+            return this;
+        }
+
+        /**
+         * <pre>
+         * Source AS number.
+         * </pre>
+         *
+         * <code>.google.protobuf.UInt64Value src_as = 28;</code>
+         */
+        public Builder clearSrcAs() {
+            if (srcAsBuilder_ == null) {
+                srcAs_ = null;
+                onChanged();
+            } else {
+                srcAs_ = null;
+                srcAsBuilder_ = null;
+            }
+
+            return this;
+        }
+
+        /**
+         * <pre>
+         * Source AS number.
+         * </pre>
+         *
+         * <code>.google.protobuf.UInt64Value src_as = 28;</code>
+         */
+        public com.google.protobuf.UInt64Value.Builder getSrcAsBuilder() {
+
+            onChanged();
+            return getSrcAsFieldBuilder().getBuilder();
         }
 
         /**
@@ -4954,6 +6539,27 @@ public final class FlowMessage extends
                 return srcAs_ == null ?
                     com.google.protobuf.UInt64Value.getDefaultInstance() : srcAs_;
             }
+        }
+
+        /**
+         * <pre>
+         * Source AS number.
+         * </pre>
+         *
+         * <code>.google.protobuf.UInt64Value src_as = 28;</code>
+         */
+        private com.google.protobuf.SingleFieldBuilderV3<
+            com.google.protobuf.UInt64Value, com.google.protobuf.UInt64Value.Builder, com.google.protobuf.UInt64ValueOrBuilder>
+        getSrcAsFieldBuilder() {
+            if (srcAsBuilder_ == null) {
+                srcAsBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+                    com.google.protobuf.UInt64Value, com.google.protobuf.UInt64Value.Builder, com.google.protobuf.UInt64ValueOrBuilder>(
+                    getSrcAs(),
+                    getParentForChildren(),
+                    isClean());
+                srcAs_ = null;
+            }
+            return srcAsBuilder_;
         }
 
         private com.google.protobuf.UInt32Value srcMaskLen_;
@@ -4993,7 +6599,7 @@ public final class FlowMessage extends
          *
          * <code>.google.protobuf.UInt32Value src_mask_len = 29;</code>
          */
-        public void setSrcMaskLen(UInt32Value value) {
+        public Builder setSrcMaskLen(com.google.protobuf.UInt32Value value) {
             if (srcMaskLenBuilder_ == null) {
                 if (value == null) {
                     throw new NullPointerException();
@@ -5003,6 +6609,8 @@ public final class FlowMessage extends
             } else {
                 srcMaskLenBuilder_.setMessage(value);
             }
+
+            return this;
         }
 
         /**
@@ -5012,7 +6620,26 @@ public final class FlowMessage extends
          *
          * <code>.google.protobuf.UInt32Value src_mask_len = 29;</code>
          */
-        public void mergeSrcMaskLen(UInt32Value value) {
+        public Builder setSrcMaskLen(
+            com.google.protobuf.UInt32Value.Builder builderForValue) {
+            if (srcMaskLenBuilder_ == null) {
+                srcMaskLen_ = builderForValue.build();
+                onChanged();
+            } else {
+                srcMaskLenBuilder_.setMessage(builderForValue.build());
+            }
+
+            return this;
+        }
+
+        /**
+         * <pre>
+         * The number of contiguous bits in the destination address subnet mask.
+         * </pre>
+         *
+         * <code>.google.protobuf.UInt32Value src_mask_len = 29;</code>
+         */
+        public Builder mergeSrcMaskLen(com.google.protobuf.UInt32Value value) {
             if (srcMaskLenBuilder_ == null) {
                 if (srcMaskLen_ != null) {
                     srcMaskLen_ =
@@ -5025,6 +6652,39 @@ public final class FlowMessage extends
                 srcMaskLenBuilder_.mergeFrom(value);
             }
 
+            return this;
+        }
+
+        /**
+         * <pre>
+         * The number of contiguous bits in the destination address subnet mask.
+         * </pre>
+         *
+         * <code>.google.protobuf.UInt32Value src_mask_len = 29;</code>
+         */
+        public Builder clearSrcMaskLen() {
+            if (srcMaskLenBuilder_ == null) {
+                srcMaskLen_ = null;
+                onChanged();
+            } else {
+                srcMaskLen_ = null;
+                srcMaskLenBuilder_ = null;
+            }
+
+            return this;
+        }
+
+        /**
+         * <pre>
+         * The number of contiguous bits in the destination address subnet mask.
+         * </pre>
+         *
+         * <code>.google.protobuf.UInt32Value src_mask_len = 29;</code>
+         */
+        public com.google.protobuf.UInt32Value.Builder getSrcMaskLenBuilder() {
+
+            onChanged();
+            return getSrcMaskLenFieldBuilder().getBuilder();
         }
 
         /**
@@ -5041,6 +6701,27 @@ public final class FlowMessage extends
                 return srcMaskLen_ == null ?
                     com.google.protobuf.UInt32Value.getDefaultInstance() : srcMaskLen_;
             }
+        }
+
+        /**
+         * <pre>
+         * The number of contiguous bits in the destination address subnet mask.
+         * </pre>
+         *
+         * <code>.google.protobuf.UInt32Value src_mask_len = 29;</code>
+         */
+        private com.google.protobuf.SingleFieldBuilderV3<
+            com.google.protobuf.UInt32Value, com.google.protobuf.UInt32Value.Builder, com.google.protobuf.UInt32ValueOrBuilder>
+        getSrcMaskLenFieldBuilder() {
+            if (srcMaskLenBuilder_ == null) {
+                srcMaskLenBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+                    com.google.protobuf.UInt32Value, com.google.protobuf.UInt32Value.Builder, com.google.protobuf.UInt32ValueOrBuilder>(
+                    getSrcMaskLen(),
+                    getParentForChildren(),
+                    isClean());
+                srcMaskLen_ = null;
+            }
+            return srcMaskLenBuilder_;
         }
 
         private com.google.protobuf.UInt32Value srcPort_;
@@ -5080,7 +6761,7 @@ public final class FlowMessage extends
          *
          * <code>.google.protobuf.UInt32Value src_port = 30;</code>
          */
-        public void setSrcPort(UInt32Value value) {
+        public Builder setSrcPort(com.google.protobuf.UInt32Value value) {
             if (srcPortBuilder_ == null) {
                 if (value == null) {
                     throw new NullPointerException();
@@ -5090,6 +6771,8 @@ public final class FlowMessage extends
             } else {
                 srcPortBuilder_.setMessage(value);
             }
+
+            return this;
         }
 
         /**
@@ -5099,7 +6782,26 @@ public final class FlowMessage extends
          *
          * <code>.google.protobuf.UInt32Value src_port = 30;</code>
          */
-        public void mergeSrcPort(UInt32Value value) {
+        public Builder setSrcPort(
+            com.google.protobuf.UInt32Value.Builder builderForValue) {
+            if (srcPortBuilder_ == null) {
+                srcPort_ = builderForValue.build();
+                onChanged();
+            } else {
+                srcPortBuilder_.setMessage(builderForValue.build());
+            }
+
+            return this;
+        }
+
+        /**
+         * <pre>
+         * Source port.
+         * </pre>
+         *
+         * <code>.google.protobuf.UInt32Value src_port = 30;</code>
+         */
+        public Builder mergeSrcPort(com.google.protobuf.UInt32Value value) {
             if (srcPortBuilder_ == null) {
                 if (srcPort_ != null) {
                     srcPort_ =
@@ -5111,6 +6813,40 @@ public final class FlowMessage extends
             } else {
                 srcPortBuilder_.mergeFrom(value);
             }
+
+            return this;
+        }
+
+        /**
+         * <pre>
+         * Source port.
+         * </pre>
+         *
+         * <code>.google.protobuf.UInt32Value src_port = 30;</code>
+         */
+        public Builder clearSrcPort() {
+            if (srcPortBuilder_ == null) {
+                srcPort_ = null;
+                onChanged();
+            } else {
+                srcPort_ = null;
+                srcPortBuilder_ = null;
+            }
+
+            return this;
+        }
+
+        /**
+         * <pre>
+         * Source port.
+         * </pre>
+         *
+         * <code>.google.protobuf.UInt32Value src_port = 30;</code>
+         */
+        public com.google.protobuf.UInt32Value.Builder getSrcPortBuilder() {
+
+            onChanged();
+            return getSrcPortFieldBuilder().getBuilder();
         }
 
         /**
@@ -5127,6 +6863,27 @@ public final class FlowMessage extends
                 return srcPort_ == null ?
                     com.google.protobuf.UInt32Value.getDefaultInstance() : srcPort_;
             }
+        }
+
+        /**
+         * <pre>
+         * Source port.
+         * </pre>
+         *
+         * <code>.google.protobuf.UInt32Value src_port = 30;</code>
+         */
+        private com.google.protobuf.SingleFieldBuilderV3<
+            com.google.protobuf.UInt32Value, com.google.protobuf.UInt32Value.Builder, com.google.protobuf.UInt32ValueOrBuilder>
+        getSrcPortFieldBuilder() {
+            if (srcPortBuilder_ == null) {
+                srcPortBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+                    com.google.protobuf.UInt32Value, com.google.protobuf.UInt32Value.Builder, com.google.protobuf.UInt32ValueOrBuilder>(
+                    getSrcPort(),
+                    getParentForChildren(),
+                    isClean());
+                srcPort_ = null;
+            }
+            return srcPortBuilder_;
         }
 
         private com.google.protobuf.UInt32Value tcpFlags_;
@@ -5166,7 +6923,7 @@ public final class FlowMessage extends
          *
          * <code>.google.protobuf.UInt32Value tcp_flags = 31;</code>
          */
-        public void setTcpFlags(UInt32Value value) {
+        public Builder setTcpFlags(com.google.protobuf.UInt32Value value) {
             if (tcpFlagsBuilder_ == null) {
                 if (value == null) {
                     throw new NullPointerException();
@@ -5177,6 +6934,7 @@ public final class FlowMessage extends
                 tcpFlagsBuilder_.setMessage(value);
             }
 
+            return this;
         }
 
         /**
@@ -5186,7 +6944,26 @@ public final class FlowMessage extends
          *
          * <code>.google.protobuf.UInt32Value tcp_flags = 31;</code>
          */
-        public void mergeTcpFlags(UInt32Value value) {
+        public Builder setTcpFlags(
+            com.google.protobuf.UInt32Value.Builder builderForValue) {
+            if (tcpFlagsBuilder_ == null) {
+                tcpFlags_ = builderForValue.build();
+                onChanged();
+            } else {
+                tcpFlagsBuilder_.setMessage(builderForValue.build());
+            }
+
+            return this;
+        }
+
+        /**
+         * <pre>
+         * TCP Flags.
+         * </pre>
+         *
+         * <code>.google.protobuf.UInt32Value tcp_flags = 31;</code>
+         */
+        public Builder mergeTcpFlags(com.google.protobuf.UInt32Value value) {
             if (tcpFlagsBuilder_ == null) {
                 if (tcpFlags_ != null) {
                     tcpFlags_ =
@@ -5199,6 +6976,39 @@ public final class FlowMessage extends
                 tcpFlagsBuilder_.mergeFrom(value);
             }
 
+            return this;
+        }
+
+        /**
+         * <pre>
+         * TCP Flags.
+         * </pre>
+         *
+         * <code>.google.protobuf.UInt32Value tcp_flags = 31;</code>
+         */
+        public Builder clearTcpFlags() {
+            if (tcpFlagsBuilder_ == null) {
+                tcpFlags_ = null;
+                onChanged();
+            } else {
+                tcpFlags_ = null;
+                tcpFlagsBuilder_ = null;
+            }
+
+            return this;
+        }
+
+        /**
+         * <pre>
+         * TCP Flags.
+         * </pre>
+         *
+         * <code>.google.protobuf.UInt32Value tcp_flags = 31;</code>
+         */
+        public com.google.protobuf.UInt32Value.Builder getTcpFlagsBuilder() {
+
+            onChanged();
+            return getTcpFlagsFieldBuilder().getBuilder();
         }
 
         /**
@@ -5215,6 +7025,27 @@ public final class FlowMessage extends
                 return tcpFlags_ == null ?
                     com.google.protobuf.UInt32Value.getDefaultInstance() : tcpFlags_;
             }
+        }
+
+        /**
+         * <pre>
+         * TCP Flags.
+         * </pre>
+         *
+         * <code>.google.protobuf.UInt32Value tcp_flags = 31;</code>
+         */
+        private com.google.protobuf.SingleFieldBuilderV3<
+            com.google.protobuf.UInt32Value, com.google.protobuf.UInt32Value.Builder, com.google.protobuf.UInt32ValueOrBuilder>
+        getTcpFlagsFieldBuilder() {
+            if (tcpFlagsBuilder_ == null) {
+                tcpFlagsBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+                    com.google.protobuf.UInt32Value, com.google.protobuf.UInt32Value.Builder, com.google.protobuf.UInt32ValueOrBuilder>(
+                    getTcpFlags(),
+                    getParentForChildren(),
+                    isClean());
+                tcpFlags_ = null;
+            }
+            return tcpFlagsBuilder_;
         }
 
         private com.google.protobuf.UInt32Value tos_;
@@ -5254,7 +7085,7 @@ public final class FlowMessage extends
          *
          * <code>.google.protobuf.UInt32Value tos = 32;</code>
          */
-        public void setTos(UInt32Value value) {
+        public Builder setTos(com.google.protobuf.UInt32Value value) {
             if (tosBuilder_ == null) {
                 if (value == null) {
                     throw new NullPointerException();
@@ -5264,6 +7095,8 @@ public final class FlowMessage extends
             } else {
                 tosBuilder_.setMessage(value);
             }
+
+            return this;
         }
 
         /**
@@ -5273,7 +7106,26 @@ public final class FlowMessage extends
          *
          * <code>.google.protobuf.UInt32Value tos = 32;</code>
          */
-        public void mergeTos(UInt32Value value) {
+        public Builder setTos(
+            com.google.protobuf.UInt32Value.Builder builderForValue) {
+            if (tosBuilder_ == null) {
+                tos_ = builderForValue.build();
+                onChanged();
+            } else {
+                tosBuilder_.setMessage(builderForValue.build());
+            }
+
+            return this;
+        }
+
+        /**
+         * <pre>
+         * TOS
+         * </pre>
+         *
+         * <code>.google.protobuf.UInt32Value tos = 32;</code>
+         */
+        public Builder mergeTos(com.google.protobuf.UInt32Value value) {
             if (tosBuilder_ == null) {
                 if (tos_ != null) {
                     tos_ =
@@ -5285,6 +7137,40 @@ public final class FlowMessage extends
             } else {
                 tosBuilder_.mergeFrom(value);
             }
+
+            return this;
+        }
+
+        /**
+         * <pre>
+         * TOS
+         * </pre>
+         *
+         * <code>.google.protobuf.UInt32Value tos = 32;</code>
+         */
+        public Builder clearTos() {
+            if (tosBuilder_ == null) {
+                tos_ = null;
+                onChanged();
+            } else {
+                tos_ = null;
+                tosBuilder_ = null;
+            }
+
+            return this;
+        }
+
+        /**
+         * <pre>
+         * TOS
+         * </pre>
+         *
+         * <code>.google.protobuf.UInt32Value tos = 32;</code>
+         */
+        public com.google.protobuf.UInt32Value.Builder getTosBuilder() {
+
+            onChanged();
+            return getTosFieldBuilder().getBuilder();
         }
 
         /**
@@ -5301,6 +7187,27 @@ public final class FlowMessage extends
                 return tos_ == null ?
                     com.google.protobuf.UInt32Value.getDefaultInstance() : tos_;
             }
+        }
+
+        /**
+         * <pre>
+         * TOS
+         * </pre>
+         *
+         * <code>.google.protobuf.UInt32Value tos = 32;</code>
+         */
+        private com.google.protobuf.SingleFieldBuilderV3<
+            com.google.protobuf.UInt32Value, com.google.protobuf.UInt32Value.Builder, com.google.protobuf.UInt32ValueOrBuilder>
+        getTosFieldBuilder() {
+            if (tosBuilder_ == null) {
+                tosBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+                    com.google.protobuf.UInt32Value, com.google.protobuf.UInt32Value.Builder, com.google.protobuf.UInt32ValueOrBuilder>(
+                    getTos(),
+                    getParentForChildren(),
+                    isClean());
+                tos_ = null;
+            }
+            return tosBuilder_;
         }
 
         private int netflowVersion_ = 0;
@@ -5323,9 +7230,10 @@ public final class FlowMessage extends
          *
          * <code>.NetflowVersion netflow_version = 33;</code>
          */
-        public void setNetflowVersionValue(int value) {
+        public Builder setNetflowVersionValue(int value) {
             netflowVersion_ = value;
             onChanged();
+            return this;
         }
 
         /**
@@ -5348,12 +7256,28 @@ public final class FlowMessage extends
          *
          * <code>.NetflowVersion netflow_version = 33;</code>
          */
-        public void setNetflowVersion(NetflowVersion value) {
+        public Builder setNetflowVersion(NetflowVersion value) {
             if (value == null) {
                 throw new NullPointerException();
             }
+
             netflowVersion_ = value.getNumber();
             onChanged();
+            return this;
+        }
+
+        /**
+         * <pre>
+         * Netflow version
+         * </pre>
+         *
+         * <code>.NetflowVersion netflow_version = 33;</code>
+         */
+        public Builder clearNetflowVersion() {
+
+            netflowVersion_ = 0;
+            onChanged();
+            return this;
         }
 
         private com.google.protobuf.UInt32Value vlan_;
@@ -5393,7 +7317,7 @@ public final class FlowMessage extends
          *
          * <code>.google.protobuf.UInt32Value vlan = 34;</code>
          */
-        public void setVlan(UInt32Value value) {
+        public Builder setVlan(com.google.protobuf.UInt32Value value) {
             if (vlanBuilder_ == null) {
                 if (value == null) {
                     throw new NullPointerException();
@@ -5403,6 +7327,8 @@ public final class FlowMessage extends
             } else {
                 vlanBuilder_.setMessage(value);
             }
+
+            return this;
         }
 
         /**
@@ -5412,7 +7338,26 @@ public final class FlowMessage extends
          *
          * <code>.google.protobuf.UInt32Value vlan = 34;</code>
          */
-        public void mergeVlan(UInt32Value value) {
+        public Builder setVlan(
+            com.google.protobuf.UInt32Value.Builder builderForValue) {
+            if (vlanBuilder_ == null) {
+                vlan_ = builderForValue.build();
+                onChanged();
+            } else {
+                vlanBuilder_.setMessage(builderForValue.build());
+            }
+
+            return this;
+        }
+
+        /**
+         * <pre>
+         * VLAN ID.
+         * </pre>
+         *
+         * <code>.google.protobuf.UInt32Value vlan = 34;</code>
+         */
+        public Builder mergeVlan(com.google.protobuf.UInt32Value value) {
             if (vlanBuilder_ == null) {
                 if (vlan_ != null) {
                     vlan_ =
@@ -5424,6 +7369,40 @@ public final class FlowMessage extends
             } else {
                 vlanBuilder_.mergeFrom(value);
             }
+
+            return this;
+        }
+
+        /**
+         * <pre>
+         * VLAN ID.
+         * </pre>
+         *
+         * <code>.google.protobuf.UInt32Value vlan = 34;</code>
+         */
+        public Builder clearVlan() {
+            if (vlanBuilder_ == null) {
+                vlan_ = null;
+                onChanged();
+            } else {
+                vlan_ = null;
+                vlanBuilder_ = null;
+            }
+
+            return this;
+        }
+
+        /**
+         * <pre>
+         * VLAN ID.
+         * </pre>
+         *
+         * <code>.google.protobuf.UInt32Value vlan = 34;</code>
+         */
+        public com.google.protobuf.UInt32Value.Builder getVlanBuilder() {
+
+            onChanged();
+            return getVlanFieldBuilder().getBuilder();
         }
 
         /**
@@ -5440,6 +7419,27 @@ public final class FlowMessage extends
                 return vlan_ == null ?
                     com.google.protobuf.UInt32Value.getDefaultInstance() : vlan_;
             }
+        }
+
+        /**
+         * <pre>
+         * VLAN ID.
+         * </pre>
+         *
+         * <code>.google.protobuf.UInt32Value vlan = 34;</code>
+         */
+        private com.google.protobuf.SingleFieldBuilderV3<
+            com.google.protobuf.UInt32Value, com.google.protobuf.UInt32Value.Builder, com.google.protobuf.UInt32ValueOrBuilder>
+        getVlanFieldBuilder() {
+            if (vlanBuilder_ == null) {
+                vlanBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+                    com.google.protobuf.UInt32Value, com.google.protobuf.UInt32Value.Builder, com.google.protobuf.UInt32ValueOrBuilder>(
+                    getVlan(),
+                    getParentForChildren(),
+                    isClean());
+                vlan_ = null;
+            }
+            return vlanBuilder_;
         }
 
         private Object nodeIdentifier_ = "";
@@ -5475,7 +7475,9 @@ public final class FlowMessage extends
         getNodeIdentifierBytes() {
             Object ref = nodeIdentifier_;
             if (ref instanceof String) {
-                com.google.protobuf.ByteString b = com.google.protobuf.ByteString.copyFromUtf8((String) ref);
+                com.google.protobuf.ByteString b =
+                    com.google.protobuf.ByteString.copyFromUtf8(
+                        (String) ref);
                 nodeIdentifier_ = b;
                 return b;
             } else {
@@ -5490,7 +7492,7 @@ public final class FlowMessage extends
          *
          * <code>string node_identifier = 35;</code>
          */
-        public void setNodeIdentifier(
+        public Builder setNodeIdentifier(
             String value) {
             if (value == null) {
                 throw new NullPointerException();
@@ -5498,21 +7500,59 @@ public final class FlowMessage extends
 
             nodeIdentifier_ = value;
             onChanged();
+            return this;
+        }
+
+        /**
+         * <pre>
+         * node lookup identifier.
+         * </pre>
+         *
+         * <code>string node_identifier = 35;</code>
+         */
+        public Builder clearNodeIdentifier() {
+
+            nodeIdentifier_ = getDefaultInstance().getNodeIdentifier();
+            onChanged();
+            return this;
+        }
+
+        /**
+         * <pre>
+         * node lookup identifier.
+         * </pre>
+         *
+         * <code>string node_identifier = 35;</code>
+         */
+        public Builder setNodeIdentifierBytes(
+            com.google.protobuf.ByteString value) {
+            if (value == null) {
+                throw new NullPointerException();
+            }
+            checkByteStringIsUtf8(value);
+
+            nodeIdentifier_ = value;
+            onChanged();
+            return this;
         }
 
         @Override
-        public Builder setUnknownFields(
+        public final Builder setUnknownFields(
             final com.google.protobuf.UnknownFieldSet unknownFields) {
             return super.setUnknownFields(unknownFields);
         }
 
         @Override
-        public Builder mergeUnknownFields(
+        public final Builder mergeUnknownFields(
             final com.google.protobuf.UnknownFieldSet unknownFields) {
             return super.mergeUnknownFields(unknownFields);
         }
+
+
+        // @@protoc_insertion_point(builder_scope:FlowMessage)
     }
 
+    // @@protoc_insertion_point(class_scope:FlowMessage)
     private static final FlowMessage DEFAULT_INSTANCE;
 
     static {
@@ -5524,7 +7564,7 @@ public final class FlowMessage extends
     }
 
     private static final com.google.protobuf.Parser<FlowMessage>
-        PARSER = new com.google.protobuf.AbstractParser<>() {
+        PARSER = new com.google.protobuf.AbstractParser<FlowMessage>() {
         @Override
         public FlowMessage parsePartialFrom(
             com.google.protobuf.CodedInputStream input,

@@ -29,7 +29,7 @@
         <argument ref="identity"/>
         <argument ref="listenerHolder"/>
     </bean>
-    <service ref="telemetryRegistry" interface="org.opennms.horizon.minion.flows.listeners.factory.TelemetryRegistry"/>
+    <service ref="telemetryRegistry" interface="org.opennms.horizon.minion.flows.parser.TelemetryRegistry"/>
 
     <!-- Netflow 5 UDP Parser Factory -->
     <bean id="netflow5UdpParserFactory"

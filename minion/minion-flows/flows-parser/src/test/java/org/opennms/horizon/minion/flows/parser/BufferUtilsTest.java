@@ -28,6 +28,7 @@
 
 package org.opennms.horizon.minion.flows.parser;
 
+
 import static org.opennms.horizon.minion.flows.listeners.utils.BufferUtils.sfloat;
 import static org.opennms.horizon.minion.flows.listeners.utils.BufferUtils.sint;
 import static org.opennms.horizon.minion.flows.listeners.utils.BufferUtils.uint;

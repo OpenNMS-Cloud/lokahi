@@ -13,7 +13,7 @@ inputs:
     required: true
   project-key:
     description: 'The Sonar project key'
-    required: true
+    required: false
 
 runs:
   using: "composite"
@@ -24,12 +24,26 @@ runs:
         path: ~/.sonar/cache
         key: ${{ runner.os }}-${{ runner.arch }}-sonar
 
-    - run: |
-        mvn -B install \
-            org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=$SONAR_PROJECT_KEY
+    - name: Install & Sonar scan
+      if: ${{ inputs.project-key != '' }}
+      run: |
+        mvn -B -Dstyle.color=always \
+            -Pcoverage install sonar:sonar \
+            -Dsonar.projectKey=$SONAR_PROJECT_KEY
       shell: bash
       working-directory: ${{ inputs.working-directory }}
       env:
         GITHUB_TOKEN: ${{ inputs.github-token }}
         SONAR_TOKEN: ${{ inputs.sonar-token }}
         SONAR_PROJECT_KEY: ${{ inputs.project-key }}
+
+    - name: Install & Sonar scan
+      if: ${{ inputs.project-key == '' }}
+      run: |
+        mvn -B -Dstyle.color=always \
+            -Pcoverage install sonar:sonar
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      env:
+        GITHUB_TOKEN: ${{ inputs.github-token }}
+        SONAR_TOKEN: ${{ inputs.sonar-token }}

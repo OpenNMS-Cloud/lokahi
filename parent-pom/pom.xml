@@ -19,16 +19,22 @@
         <java.version>17</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <sonar.organization>opennms</sonar.organization>
-        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
 
         <skipITs>false</skipITs>
 
-        <!-- Jib properties -->
+        <!-- Docker properties -->
+        <application.docker.skip>false</application.docker.skip>
         <application.docker.image>${application.docker.image.name}:${application.docker.image.tag}</application.docker.image>
-        <!-- application.docker.image.name MUST be set by child modules that use Jib. -->
+        <!-- application.docker.image.name MUST be set by child modules that use jib-maven-plugin. -->
         <application.docker.image.name>INVALID</application.docker.image.name>
         <application.docker.image.tag>latest</application.docker.image.tag>
+
+        <!-- Sonar properties -->
+        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+        <sonar.organization>opennms</sonar.organization>
+        <sonar.moduleKey>${project.artifactId}</sonar.moduleKey>
+        <!-- sonar.projectKey MUST be set by child modules that use sonar-maven-plugin. -->
+        <sonar.projectKey/>
 
         <!-- Dependency properties -->
         <dropwizard.metrics.version>4.2.10</dropwizard.metrics.version>
@@ -113,6 +119,7 @@
         <spring-boot.version>3.0.1</spring-boot.version>
         <spring-security.version>6.0.1</spring-security.version>
         <spring-kafka.version>3.0.1</spring-kafka.version>
+        <sonar-maven.version>3.9.1.2184</sonar-maven.version>
         <swagger.version>2.1.1</swagger.version>
         <lombok.version>1.18.24</lombok.version>
         <lombok.binding.version>0.2.0</lombok.binding.version>
@@ -759,6 +766,12 @@
                 <scope>test</scope> <!-- TODO: do not specify scope in dependencyManagement in case a project wants to use a different scope -->
             </dependency>
             <dependency>
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-junit-jupiter</artifactId>
+                <version>${mockito.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
                 <groupId>org.opennms</groupId>
                 <artifactId>jicmp-api</artifactId>
                 <version>${jicmp.version}</version>
@@ -924,12 +937,18 @@
                     <artifactId>jib-maven-plugin</artifactId>
                     <version>${jib.version}</version>
                     <configuration>
+                        <!--suppress MavenModelInspection -->
+                        <skip>${application.docker.skip}</skip>
                         <to>
                             <image>${application.docker.image}</image>
                         </to>
                     </configuration>
                 </plugin>
-
+                <plugin>
+                    <groupId>org.sonarsource.scanner.maven</groupId>
+                    <artifactId>sonar-maven-plugin</artifactId>
+                    <version>${sonar-maven.version}</version>
+                </plugin>
                 <plugin>
                     <groupId>org.apache.karaf.tooling</groupId>
                     <artifactId>karaf-maven-plugin</artifactId>

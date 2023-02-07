@@ -18,6 +18,7 @@
 
     <properties>
         <application.docker.image.name>opennms/horizon-stream-datachoices</application.docker.image.name>
+        <sonar.projectKey>opennms_horizon-stream_datachoices</sonar.projectKey>
     </properties>
 
     <dependencyManagement>

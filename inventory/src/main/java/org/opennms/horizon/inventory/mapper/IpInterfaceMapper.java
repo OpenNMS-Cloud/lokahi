@@ -29,19 +29,25 @@
 package org.opennms.horizon.inventory.mapper;
 
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+
+import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
+import org.mapstruct.NullValueCheckStrategy;
 import org.opennms.horizon.inventory.dto.IpInterfaceDTO;
 import org.opennms.horizon.inventory.model.IpInterface;
 import org.opennms.horizon.shared.utils.InetAddressUtils;
-
-import java.net.InetAddress;
-import java.net.UnknownHostException;
+import org.opennms.node.scan.contract.IpInterfaceResult;
 
 @Mapper(componentModel = "spring")
 public interface IpInterfaceMapper {
     IpInterface dtoToModel(IpInterfaceDTO dto);
 
+    @BeanMapping(nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
     IpInterfaceDTO modelToDTO(IpInterface model);
+
+    IpInterface fromScanResult(IpInterfaceResult result);
 
     default InetAddress map(String value) throws UnknownHostException {
         return InetAddressUtils.getInetAddress(value);

@@ -76,6 +76,21 @@ public enum NetflowVersion
     }
   }
 
+    private static final NetflowVersion[] VALUES = values();
+
+    public static NetflowVersion valueOf(
+        com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
+        if (desc.getType() != getDescriptor()) {
+            throw new IllegalArgumentException(
+                "EnumValueDescriptor is not for this type.");
+        }
+        if (desc.getIndex() == -1) {
+            return UNRECOGNIZED;
+        }
+        return VALUES[desc.getIndex()];
+    }
+
+
     public final com.google.protobuf.Descriptors.EnumValueDescriptor
       getValueDescriptor() {
     return getDescriptor().getValues().get(ordinal());

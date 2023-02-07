@@ -77,4 +77,10 @@ public class IpInterface {
 
     @Column(name = "snmp_primary")
     private Boolean snmpPrimary;
+
+    @Column(name = "ip_hostname")
+    private String hostname;
+
+    @Column(name = "netmask")
+    private String netmask;
 }

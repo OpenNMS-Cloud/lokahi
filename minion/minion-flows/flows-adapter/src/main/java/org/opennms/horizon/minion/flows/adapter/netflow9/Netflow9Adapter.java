@@ -1,8 +1,8 @@
 /*******************************************************************************
  * This file is part of OpenNMS(R).
  *
- * Copyright (C) 2018-2023 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
+ * Copyright (C) 2017-2017 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2017 The OpenNMS Group, Inc.
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
  *
@@ -26,30 +26,20 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.minion.flows.listeners.factory;
+package org.opennms.horizon.minion.flows.adapter.netflow9;
 
 import com.codahale.metrics.MetricRegistry;
-import org.opennms.horizon.grpc.telemetry.contract.TelemetryMessage;
-import org.opennms.horizon.minion.flows.listeners.FlowsListener;
-import org.opennms.horizon.minion.flows.listeners.Parser;
-import org.opennms.horizon.minion.flows.parser.ListenerHolder;
-import org.opennms.horizon.minion.flows.parser.factory.ParserFactory;
-import org.opennms.horizon.shared.ipc.sink.api.AsyncDispatcher;
-import org.opennms.sink.flows.contract.ListenerConfig;
-import org.opennms.sink.flows.contract.ParserConfig;
 
-public interface TelemetryRegistry {
-    void addListenerFactory(ListenerFactory factory);
+import org.opennms.horizon.minion.flows.adapter.common.AdapterDefinition;
+import org.opennms.horizon.minion.flows.adapter.common.NetflowAdapter;
+import org.opennms.horizon.minion.flows.adapter.imported.Pipeline;
 
-    void addParserFactory(ParserFactory factory);
+public class Netflow9Adapter extends NetflowAdapter {
 
-    FlowsListener getListener(ListenerConfig listenerConfig);
+    public Netflow9Adapter(final AdapterDefinition adapterConfig,
+                           final MetricRegistry metricRegistry,
+                           final Pipeline pipeline) {
+        super(adapterConfig, metricRegistry, pipeline);
+    }
 
-    Parser getParser(ParserConfig parserConfig);
-
-    MetricRegistry getMetricRegistry();
-
-    AsyncDispatcher<TelemetryMessage> getDispatcher();
-
-    ListenerHolder getListenerHolder();
 }

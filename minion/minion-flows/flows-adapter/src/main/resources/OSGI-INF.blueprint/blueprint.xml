@@ -1,0 +1,44 @@
+<blueprint
+    xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.3.0"
+    xsi:schemaLocation="
+                http://www.osgi.org/xmlns/blueprint/v1.0.0 https://osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd">
+
+    <reference id="pipeline" interface="org.opennms.horizon.minion.flows.adapter.imported.Pipeline" availability="mandatory" />
+    <reference id="telemetryRegistry" interface="org.opennms.horizon.minion.flows.parser.TelemetryRegistry" availability="mandatory" />
+
+    <!-- Netflow5 Factory and Adapter -->
+    <bean id="netflow5Factory" class="org.opennms.horizon.minion.flows.adapter.netflow5.Netflow5AdapterFactory">
+        <property name="telemetryRegistry" ref="telemetryRegistry"/>
+        <property name="pipeline" ref="pipeline" />
+    </bean>
+    <service ref="netflow5Factory" interface="org.opennms.horizon.minion.flows.adapter.common.AdapterFactory">
+        <service-properties>
+            <entry key="registration.export" value="true" />
+        </service-properties>
+    </service>
+
+    <!-- Netflow9 Factory and Adapter -->
+    <bean id="netflow9Factory" class="org.opennms.horizon.minion.flows.adapter.netflow9.Netflow9AdapterFactory">
+        <property name="telemetryRegistry" ref="telemetryRegistry"/>
+        <property name="pipeline" ref="pipeline" />
+    </bean>
+    <service ref="netflow9Factory" interface="org.opennms.horizon.minion.flows.adapter.common.AdapterFactory">
+        <service-properties>
+            <entry key="registration.export" value="true" />
+        </service-properties>
+    </service>
+
+    <!-- IPFix Factory and Adapter -->
+    <bean id="ipfixFactory" class="org.opennms.horizon.minion.flows.adapter.ipfix.IpfixAdapterFactory">
+        <property name="telemetryRegistry" ref="telemetryRegistry"/>
+        <property name="pipeline" ref="pipeline" />
+    </bean>
+    <service ref="ipfixFactory" interface="org.opennms.horizon.minion.flows.adapter.common.AdapterFactory">
+        <service-properties>
+            <entry key="registration.export" value="true" />
+        </service-properties>
+    </service>
+
+</blueprint>

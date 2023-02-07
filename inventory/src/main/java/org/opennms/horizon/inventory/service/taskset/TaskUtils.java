@@ -20,6 +20,7 @@ public interface TaskUtils {
 
     String IP_LABEL = "ip=";
     String AZURE_LABEL = "azure=";
+    String NODE_SCAN ="nodeScan=node_id/";
 
     static String identityForIpTask(String ipAddress, String name) {
         return IP_LABEL + ipAddress + "/" + name;
@@ -27,5 +28,9 @@ public interface TaskUtils {
 
     static String identityForAzureTask(String name) {
         return AZURE_LABEL + name;
+    }
+
+    static String identityForNodeScan(long nodeId) {
+        return NODE_SCAN + nodeId;
     }
 }

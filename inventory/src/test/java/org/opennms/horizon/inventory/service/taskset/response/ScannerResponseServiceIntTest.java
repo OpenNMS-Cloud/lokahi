@@ -28,8 +28,18 @@
 
 package org.opennms.horizon.inventory.service.taskset.response;
 
-import com.google.protobuf.Any;
-import jakarta.transaction.Transactional;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.fail;
+
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.IntStream;
+
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -37,30 +47,35 @@ import org.junit.jupiter.api.Test;
 import org.opennms.horizon.azure.api.AzureScanItem;
 import org.opennms.horizon.azure.api.AzureScanResponse;
 import org.opennms.horizon.inventory.SpringContextTestInitializer;
+import org.opennms.horizon.inventory.dto.NodeCreateDTO;
 import org.opennms.horizon.inventory.grpc.GrpcTestBase;
 import org.opennms.horizon.inventory.grpc.taskset.TestTaskSetGrpcService;
 import org.opennms.horizon.inventory.model.AzureCredential;
 import org.opennms.horizon.inventory.model.IpInterface;
 import org.opennms.horizon.inventory.model.MonitoringLocation;
 import org.opennms.horizon.inventory.model.Node;
+import org.opennms.horizon.inventory.model.SnmpInterface;
 import org.opennms.horizon.inventory.repository.AzureCredentialRepository;
 import org.opennms.horizon.inventory.repository.IpInterfaceRepository;
 import org.opennms.horizon.inventory.repository.MonitoringLocationRepository;
 import org.opennms.horizon.inventory.repository.NodeRepository;
+import org.opennms.horizon.inventory.repository.SnmpInterfaceRepository;
+import org.opennms.horizon.inventory.service.NodeService;
 import org.opennms.horizon.shared.utils.InetAddressUtils;
+import org.opennms.node.scan.contract.IpInterfaceResult;
+import org.opennms.node.scan.contract.NodeInfoResult;
+import org.opennms.node.scan.contract.NodeScanResult;
+import org.opennms.node.scan.contract.SnmpInterfaceResult;
 import org.opennms.taskset.contract.ScannerResponse;
 import org.opennms.taskset.service.contract.TaskSetServiceGrpc;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 
-import java.io.IOException;
-import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.List;
+import com.google.protobuf.Any;
+import com.google.protobuf.InvalidProtocolBufferException;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import jakarta.transaction.Transactional;
 
 
 @SpringBootTest
@@ -83,6 +98,12 @@ class ScannerResponseServiceIntTest extends GrpcTestBase {
 
     @Autowired
     private IpInterfaceRepository ipInterfaceRepository;
+
+    @Autowired
+    private SnmpInterfaceRepository snmpInterfaceRepository;
+
+    @Autowired
+    private NodeService nodeService;
 
     private static TestTaskSetGrpcService testGrpcService;
 
@@ -145,6 +166,100 @@ class ScannerResponseServiceIntTest extends GrpcTestBase {
         assertEquals("127.0.0.1", InetAddressUtils.toIpAddrString(ipInterface.getIpAddress()));
     }
 
+    @Test
+    void testAcceptNodeScanResult() throws InvalidProtocolBufferException {
+        String managedIp = "127.0.0.1";
+        Node node = createNode(managedIp);
+        int ifIndex = 1;
+        SnmpInterface snmpIf = createSnmpInterface(node, ifIndex);
+        NodeScanResult result = createNodeScanResult(node.getId(), managedIp, ifIndex);
+
+        service.accept(TEST_TENANT_ID, TEST_LOCATION, ScannerResponse.newBuilder().setResult(Any.pack(result)).build());
+        assertNodeSystemGroup(node, null);
+        nodeRepository.findByIdAndTenantId(node.getId(), TEST_TENANT_ID).ifPresentOrElse(dbNode ->
+            assertNodeSystemGroup(dbNode, result.getNodeInfo()), () -> fail("Node not found"));
+
+        assertIpInterface(node.getIpInterfaces().get(0), null);
+        List<IpInterface> ipIfList = ipInterfaceRepository.findByNodeId(node.getId());
+        assertThat(ipIfList.get(0)).extracting(ipIf -> ipIf.getIpAddress().getHostAddress()).isEqualTo(managedIp);
+        assertThat(ipIfList).asList().hasSize(result.getIpInterfacesList().size());
+        IntStream.range(0, ipIfList.size())
+            .forEach(i -> assertIpInterface(ipIfList.get(i), result.getIpInterfaces(i)));
+
+        List<SnmpInterface> snmpInterfaceList = snmpInterfaceRepository.findByTenantId(TEST_TENANT_ID);
+        assertThat(snmpInterfaceList).asList().hasSize(2);
+        assertThat(snmpIf.getIfIndex()).isEqualTo(ifIndex);
+        assertSnmpInterfaces(snmpIf, null);
+        IntStream.range(0, snmpInterfaceList.size())
+            .forEach(i -> assertSnmpInterfaces(snmpInterfaceList.get(i), result.getSnmpInterfaces(i)));
+
+    }
+    private Node createNode(String ipAddress) {
+        NodeCreateDTO createDTO = NodeCreateDTO.newBuilder()
+            .setLabel("test-node")
+            .setManagementIp(ipAddress)
+            .setLocation(TEST_LOCATION)
+            .build();
+        return nodeService.createNode(createDTO, TEST_TENANT_ID);
+    }
+
+    private SnmpInterface createSnmpInterface(Node node, int ifIndex) {
+        SnmpInterface snmpIf = new SnmpInterface();
+        snmpIf.setTenantId(TEST_TENANT_ID);
+        snmpIf.setNode(node);
+        snmpIf.setIfIndex(ifIndex);
+        snmpInterfaceRepository.save(snmpIf);
+        return snmpIf;
+    }
+
+    private NodeScanResult createNodeScanResult(long nodeId, String ipAddress, int ifIndex) {
+        NodeInfoResult nodeInfo = NodeInfoResult.newBuilder()
+            .setObjectId(".1.2.3.4.5")
+            .setSystemName("Test System")
+            .setSystemDescr("Test device")
+            .setSystemLocation("Somewhere")
+            .setSystemContact("admin@opennms.com")
+            .build();
+        IpInterfaceResult ipIf1 = IpInterfaceResult.newBuilder()
+                .setIpAddress(ipAddress)
+                .setIpHostName("hostname1")
+                .setNetmask("255.255.255.0")
+                .build();
+        IpInterfaceResult ipIf2 = IpInterfaceResult.newBuilder()
+                .setIpAddress("192.168.2.3")
+                .setNetmask("255.255.0.0")
+                .setIpHostName("hostname-2")
+                .build();
+        SnmpInterfaceResult snmpIf1 = SnmpInterfaceResult.newBuilder()
+            .setIfIndex(ifIndex)
+            .setIfDescr("SNMP Interface1")
+            .setIfName("testIf1")
+            .setIfSpeed(1000L)
+            .setIfAdminStatus(1)
+            .setIfOperatorStatus(2)
+            .setIfAlias("alias1")
+            .setIpAddress(ipAddress)
+            .setPhysicalAddr("0sdfasdf")
+            .build();
+        SnmpInterfaceResult snmpIf2 = SnmpInterfaceResult.newBuilder()
+            .setIfIndex(ifIndex+2)
+            .setIfDescr("SNMP Interface2")
+            .setIfName("testIf2")
+            .setIfSpeed(2000L)
+            .setIfAdminStatus(4)
+            .setIfOperatorStatus(5)
+            .setIfAlias("alias2")
+            .setPhysicalAddr("owradfasdqwr00")
+            .build();
+
+        return NodeScanResult.newBuilder()
+            .setNodeId(nodeId)
+            .setNodeInfo(nodeInfo)
+            .addAllIpInterfaces(List.of(ipIf1, ipIf2))
+            .addAllSnmpInterfaces(List.of(snmpIf1, snmpIf2))
+            .build();
+    }
+
     private AzureCredential createAzureCredential() {
 
         MonitoringLocation location = new MonitoringLocation();
@@ -164,4 +279,77 @@ class ScannerResponseServiceIntTest extends GrpcTestBase {
         return credentialRepository.save(credential);
     }
 
+    private void assertNodeSystemGroup(Node node, NodeInfoResult nodeInfo) {
+        if(nodeInfo != null) {
+            assertThat(node)
+                .extracting(Node::getObjectId,
+                    Node::getSystemName,
+                    Node::getSystemDescr,
+                    Node::getSystemLocation,
+                    Node::getSystemContact)
+                .containsExactly(nodeInfo.getObjectId(),
+                    nodeInfo.getSystemName(),
+                    nodeInfo.getSystemDescr(),
+                    nodeInfo.getSystemLocation(),
+                    nodeInfo.getSystemContact());
+        } else {
+            assertThat(node)
+                .extracting(Node::getObjectId,
+                    Node::getSystemName,
+                    Node::getSystemDescr,
+                    Node::getSystemLocation,
+                    Node::getSystemContact)
+                .containsExactly(null,null, null, null, null);
+        }
+    }
+
+    private void assertIpInterface(IpInterface ipInterface, IpInterfaceResult scanResult) {
+        if(scanResult != null) {
+            assertThat(ipInterface)
+                .extracting(ipIf -> ipIf.getIpAddress().getHostAddress(), IpInterface::getHostname, IpInterface::getNetmask)
+                .containsExactly(scanResult.getIpAddress(), scanResult.getIpHostName(), scanResult.getNetmask());
+        } else {
+            assertThat(ipInterface)
+                .extracting(IpInterface::getHostname, IpInterface::getNetmask)
+                .containsExactly(null, null);
+        }
+    }
+
+   private void assertSnmpInterfaces(SnmpInterface snmpIf, SnmpInterfaceResult result) {
+        if(result != null) {
+            assertThat(snmpIf)
+                .extracting(SnmpInterface::getIfIndex,
+                    SnmpInterface::getIfName,
+                    SnmpInterface::getIfDescr,
+                    SnmpInterface::getIfType,
+                    SnmpInterface::getIfSpeed,
+                    SnmpInterface::getIfAdminStatus,
+                    SnmpInterface::getIfOperatorStatus,
+                    SnmpInterface::getIfAlias,
+                    snmpInterface -> snmpInterface.getIpAddress() == null ? null: snmpInterface.getIpAddress().getHostAddress(),
+                    SnmpInterface::getPhysicalAddr)
+                .containsExactly(result.getIfIndex(),
+                    result.getIfName(),
+                    result.getIfDescr(),
+                    result.getIfType(),
+                    result.getIfSpeed(),
+                    result.getIfAdminStatus(),
+                    result.getIfOperatorStatus(),
+                    result.getIfAlias(),
+                    StringUtils.isEmpty(result.getIpAddress())? null: result.getIpAddress(),
+                    result.getPhysicalAddr());
+        } else {
+            assertThat(snmpIf)
+                .extracting(SnmpInterface::getIfName,
+                    SnmpInterface::getIfDescr,
+                    SnmpInterface::getIfType,
+                    SnmpInterface::getIfSpeed,
+                    SnmpInterface::getIfAdminStatus,
+                    SnmpInterface::getIfOperatorStatus,
+                    SnmpInterface::getIfAlias,
+                    SnmpInterface::getIpAddress,
+                    SnmpInterface::getPhysicalAddr)
+                .containsExactly(null,null,0,0L,0,0,null,null,null);
+        }
+    }
 }

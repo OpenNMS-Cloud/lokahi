@@ -36,6 +36,26 @@
             <artifactId>snmp-api</artifactId>
             <version>${project.version}</version>
         </dependency>
+
+    <!--  test  -->
+        <dependency>
+            <groupId>org.opennms.horizon.shared</groupId>
+            <artifactId>snmp-impl</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>${jupiter.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>${jupiter.version}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>

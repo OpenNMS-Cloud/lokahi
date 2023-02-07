@@ -42,15 +42,16 @@ import org.opennms.horizon.inventory.model.Tag;
 import org.opennms.horizon.inventory.repository.IpInterfaceRepository;
 import org.opennms.horizon.inventory.repository.MonitoringLocationRepository;
 import org.opennms.horizon.inventory.repository.NodeRepository;
-import org.opennms.horizon.inventory.service.taskset.CollectorTaskSetUtils;
+import org.opennms.horizon.inventory.service.taskset.CollectorTaskSetService;
 import org.opennms.horizon.inventory.service.taskset.DetectorTaskSetService;
-import org.opennms.horizon.inventory.service.taskset.MonitorTaskSetUtils;
+import org.opennms.horizon.inventory.service.taskset.MonitorTaskSetService;
 import org.opennms.horizon.inventory.taskset.api.TaskSetPublisher;
 import org.opennms.horizon.inventory.repository.TagRepository;
 import org.opennms.horizon.shared.constants.GrpcConstants;
 import org.opennms.horizon.shared.utils.InetAddressUtils;
 import org.opennms.taskset.contract.MonitorType;
 import org.opennms.taskset.contract.TaskDefinition;
+import org.opennms.node.scan.contract.NodeInfoResult;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -81,6 +82,8 @@ public class NodeService {
     private final TagRepository tagRepository;
     private final ConfigUpdateService configUpdateService;
     private final DetectorTaskSetService detectorTaskSetService;
+    private final CollectorTaskSetService collectorTaskSetService;
+    private final MonitorTaskSetService monitorTaskSetService;
     private final TaskSetPublisher taskSetPublisher;
 
 
@@ -102,12 +105,15 @@ public class NodeService {
 
     private void saveIpInterfaces(NodeCreateDTO request, Node node, String tenantId) {
         if (request.hasManagementIp()) {
+
             IpInterface ipInterface = new IpInterface();
             ipInterface.setNode(node);
             ipInterface.setTenantId(tenantId);
             ipInterface.setIpAddress(InetAddressUtils.getInetAddress(request.getManagementIp()));
             ipInterface.setSnmpPrimary(true);
             ipInterfaceRepository.save(ipInterface);
+            node.setIpInterfaces(List.of(ipInterface));
+
         }
     }
 
@@ -166,6 +172,9 @@ public class NodeService {
     @Transactional
     public Map<String, List<NodeDTO>> listNodeByIds(List<Long> ids, String tenantId) {
         List<Node> nodeList = nodeRepository.findByIdInAndTenantId(ids, tenantId);
+        if(nodeList.isEmpty()) {
+            return new HashMap<>();
+        }
         return nodeList.stream().collect(Collectors.groupingBy(node -> node.getMonitoringLocation().getLocation(),
             Collectors.mapping(mapper::modelToDTO, Collectors.toList())));
     }
@@ -194,13 +203,18 @@ public class NodeService {
             ipInterface.getMonitoredServices().forEach((ms) -> {
                 String serviceName = ms.getMonitoredServiceType().getServiceName();
                 var monitorType = MonitorType.valueOf(serviceName);
-                var monitorTask = MonitorTaskSetUtils.getMonitorTask(monitorType, ipInterface, node.getId());
+                var monitorTask = monitorTaskSetService.getMonitorTask(monitorType, ipInterface, node.getId());
                 Optional.ofNullable(monitorTask).ifPresent(tasks::add);
-                var collectorTask = CollectorTaskSetUtils.getCollectorTask(monitorType, ipInterface, node.getId());
+                var collectorTask = collectorTaskSetService.getCollectorTask(monitorType, ipInterface, node.getId());
                 Optional.ofNullable(collectorTask).ifPresent(tasks::add);
             });
         });
         return tasks;
+    }
+
+    public void updateNodeInfo(Node node, NodeInfoResult nodeInfo) {
+        mapper.updateFromNodeInfo(nodeInfo, node);
+        nodeRepository.save(node);
     }
 
     private void removeAssociatedTags(Node node) {

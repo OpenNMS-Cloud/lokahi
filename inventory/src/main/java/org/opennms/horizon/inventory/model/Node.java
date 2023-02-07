@@ -79,6 +79,9 @@ public class Node {
     @OneToMany(mappedBy = "node", orphanRemoval = true, cascade = CascadeType.ALL)
     private List<IpInterface> ipInterfaces = new ArrayList<>();
 
+    @OneToMany(mappedBy = "node", orphanRemoval = true, cascade = CascadeType.ALL)
+    private List<SnmpInterface> snmpInterfaces = new ArrayList<>();
+
     @ManyToMany(mappedBy = "nodes")
     private List<Tag> tags = new ArrayList<>();
 
@@ -87,10 +90,9 @@ public class Node {
     @Column(name = "system_name")
     private String systemName;
     @Column(name = "system_desc")
-    private String systemDesc;
+    private String systemDescr;
     @Column(name = "system_location")
     private String systemLocation;
     @Column(name = "system_contact")
     private String systemContact;
-
 }

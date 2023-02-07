@@ -43,7 +43,9 @@ import org.opennms.horizon.inventory.model.Node;
 import org.opennms.horizon.inventory.repository.IpInterfaceRepository;
 import org.opennms.horizon.inventory.repository.MonitoringLocationRepository;
 import org.opennms.horizon.inventory.repository.NodeRepository;
+import org.opennms.horizon.inventory.service.taskset.CollectorTaskSetService;
 import org.opennms.horizon.inventory.service.taskset.DetectorTaskSetService;
+import org.opennms.horizon.inventory.service.taskset.MonitorTaskSetService;
 import org.opennms.horizon.inventory.taskset.api.TaskSetPublisher;
 import org.opennms.horizon.inventory.repository.TagRepository;
 import org.opennms.horizon.shared.constants.GrpcConstants;
@@ -74,6 +76,7 @@ public class NodeServiceTest {
     private TagRepository tagRepository;
     private ConfigUpdateService mockConfigUpdateService;
     private final String tenantID = "test-tenant";
+    private Node node;
 
     @BeforeEach
     void prepareTest() {
@@ -83,12 +86,20 @@ public class NodeServiceTest {
         mockIpInterfaceRepository = mock(IpInterfaceRepository.class);
         tagRepository = mock(TagRepository.class);
         mockConfigUpdateService = mock(ConfigUpdateService.class);
-        var detectorTasksetService = mock(DetectorTaskSetService.class);
-        var taskSetPublisher = mock(TaskSetPublisher.class);
 
-        nodeService = new NodeService(mockNodeRepository, mockMonitoringLocationRepository, mockIpInterfaceRepository,
-            tagRepository, mockConfigUpdateService,  detectorTasksetService, taskSetPublisher, nodeMapper);
+        nodeService = new NodeService(mockNodeRepository,
+            mockMonitoringLocationRepository,
+            mockIpInterfaceRepository,
+            tagRepository,
+            mockConfigUpdateService,
+            mock(DetectorTaskSetService.class),
+            mock(CollectorTaskSetService.class),
+            mock(MonitorTaskSetService.class),
+            mock(TaskSetPublisher.class),
+            nodeMapper);
 
+        node = new Node();
+        doReturn(node).when(mockNodeRepository).save(any(node.getClass()));
     }
 
     @AfterEach

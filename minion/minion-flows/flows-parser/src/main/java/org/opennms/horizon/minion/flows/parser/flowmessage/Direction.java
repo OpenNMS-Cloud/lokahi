@@ -95,6 +95,20 @@ public enum Direction
         return getDescriptor().getValues().get(ordinal());
     }
 
+    private static final Direction[] VALUES = values();
+
+    public static Direction valueOf(
+        com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
+        if (desc.getType() != getDescriptor()) {
+            throw new IllegalArgumentException(
+                "EnumValueDescriptor is not for this type.");
+        }
+        if (desc.getIndex() == -1) {
+            return UNRECOGNIZED;
+        }
+        return VALUES[desc.getIndex()];
+    }
+
     public final com.google.protobuf.Descriptors.EnumDescriptor
     getDescriptorForType() {
         return getDescriptor();

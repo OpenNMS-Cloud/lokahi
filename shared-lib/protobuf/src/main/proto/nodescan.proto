@@ -35,53 +35,56 @@ option java_package = "org.opennms.node.scan.contract";
 
 message NodeScanRequest {
   int64 nodeId = 1;
-  repeated string ipAddresses = 2;
+  string primaryIp = 2;
+  repeated string ipAddresses = 3; //reserved for service scan
 }
 
 //Scan Results
 message NodeInfoResult {
   string objectId = 1;
   string systemName = 2;
-  string systemDesc = 3;
+  string systemDescr = 3;
   string systemLocation = 4;
   string systemContact = 5;
+  int64 systemUptime = 6;
 }
 
+//for service detector
 message ServiceResult {
-  string serviceName = 1;
-  string status = 2;
+  string ipAddress = 1;
+  string serviceName = 2;
+  string status = 3;
 }
 
 message IpInterfaceResult {
   string ipAddress = 1;
   string ipHostName = 2;
-  string netMask = 3;
-  bool isSNMPPrimary = 4;
-}
-
-message IfServiceResult {
-  IpInterfaceResult ipInterface = 1;
-  repeated ServiceResult services = 2;
+  string netmask = 3;
 }
 
 message SnmpInterfaceResult {
   string physicalAddr = 1;
-  int32 ifIndex =2;
-  string ifDesc = 3;
+  int32 ifIndex = 2;
+  string ifDescr = 3;
   int32 ifType = 4;
   string ifName = 5;
   int64 ifSpeed = 6;
   int32 ifAdminStatus = 7;
   int32 ifOperatorStatus = 8;
   string ifAlias = 9;
+  string ipAddress = 10;
+}
+
+message IpTableScanResult {
+  IpInterfaceResult ipInterface = 1;
+  SnmpInterfaceResult snmpInterface = 2;
 }
 
 message NodeScanResult {
-  NodeInfoResult nodeInfo = 1;
-  repeated IfServiceResult ifServices = 2;
-  repeated SnmpInterfaceResult snmpInterfaces = 3;
-  //TODO: might be changed
-  repeated google.protobuf.Any otherResults = 4;
+  int64 nodeId = 1;
+  NodeInfoResult nodeInfo = 2;
+  repeated IpInterfaceResult ipInterfaces = 3;
+  repeated SnmpInterfaceResult snmpInterfaces = 4;
 }
 
 

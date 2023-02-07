@@ -50,12 +50,19 @@ const loading = ref(false)
 const locations = ref() //locations without selected items
 const filteredLocations = ref() //results in autocomplete
 const computedLocations = computed(() => discoveryQueries.locations)
+const props = defineProps({
+  type: {
+    type: String,
+    required: false,
+    default: 'multiple'
+  }
+})
 
 onMounted(() => discoveryQueries.getLocations())
 watchEffect(() => {
   if (computedLocations) {
-    filteredLocations.value = computedLocations
-    locations.value = computedLocations
+    filteredLocations.value = computedLocations.value as Location[]
+    locations.value = computedLocations.value as Location[]
   }
 })
 
@@ -81,7 +88,11 @@ const deboncedFn = debounce(
     if (selected) {
       const selectedLocation = selected as TLocationAutocomplete
       selectedLocation.location = selectedLocation._text
-      selectedLocations.value.push(selectedLocation)
+      if (props.type === 'single') {
+        selectedLocations.value = [selectedLocation]
+      } else {
+        selectedLocations.value.push(selectedLocation)
+      }
       locations.value = locations.value.filter((l: Location) => l.id !== selectedLocation.id)
       emit('location-selected', selectedLocations.value)
     }
@@ -97,7 +108,7 @@ const removeLocation = (location: Location) => {
   if (location?.id) {
     selectedLocations.value = selectedLocations.value.filter((l: Location) => l.id !== location.id)
     locations.value.push(location)
-    emit('location-selected', selectedLocations)
+    emit('location-selected', selectedLocations.value)
   }
 }
 </script>

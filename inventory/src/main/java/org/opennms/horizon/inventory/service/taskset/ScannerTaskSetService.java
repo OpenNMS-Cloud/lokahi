@@ -36,7 +36,6 @@ import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
-import java.util.stream.Collectors;
 
 import org.opennms.azure.contract.AzureScanRequest;
 import org.opennms.horizon.inventory.dto.IpInterfaceDTO;
@@ -69,9 +68,7 @@ public class ScannerTaskSetService {
 
     public void sendNodeScannerTask(List<NodeDTO> nodes, String location, String tenantId) {
             List<TaskDefinition> tasks = nodes.stream().map(this::createNodeScanTask)
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .collect(Collectors.toList());
+                .flatMap(Optional::stream).toList();
             if(!tasks.isEmpty()) {
                 taskSetPublisher.publishNewTasks(tenantId, location, tasks);
             }
@@ -111,7 +108,7 @@ public class ScannerTaskSetService {
     private Optional<TaskDefinition> createNodeScanTask(NodeDTO node) {
         Optional<IpInterfaceDTO> ipInterface = node.getIpInterfacesList().stream()
             .filter(IpInterfaceDTO::getSnmpPrimary).findFirst()
-            .or(()->Optional.ofNullable(node.getIpInterfaces(0)));
+            .or(() -> node.getIpInterfacesList().stream().findAny());
         return ipInterface.map(ip -> {
             String taskId = identityForNodeScan(node.getId());
             Any taskConfig = Any.pack(NodeScanRequest.newBuilder()

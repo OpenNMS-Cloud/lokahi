@@ -24,6 +24,7 @@
         <application.docker.image.name>opennms/horizon-stream-rest-server</application.docker.image.name>
 		<java.version>17</java.version>
 		<graphql.spqr.version>0.0.6</graphql.spqr.version>
+        <sonar.projectKey>opennms_horizon-stream_bff</sonar.projectKey>
 	</properties>
     <dependencyManagement>
         <dependencies>
@@ -49,11 +50,11 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-devtools</artifactId>
 		</dependency>
-        <dependency>
+        <!--<dependency>
             <groupId>org.opennms.horizon.shared</groupId>
             <artifactId>dto-model</artifactId>
             <version>${project.version}</version>
-        </dependency>
+        </dependency>-->
         <dependency>
             <groupId>org.opennms.horizon.shared</groupId>
             <artifactId>grpc-common-constants</artifactId>

@@ -116,7 +116,7 @@ public class IPAddrTracker extends TableTracker {
             final InetAddress inetAddress = InetAddressUtils.addr(ipAddr);
             IpInterfaceResult.Builder ipInterFaceBuilder = IpInterfaceResult.newBuilder();
             ipInterFaceBuilder.setIpAddress(inetAddress.getHostAddress());
-            ipInterFaceBuilder.setNetMask(netMask.getHostAddress());
+            ipInterFaceBuilder.setNetmask(netMask.getHostAddress());
             ipInterFaceBuilder.setIpHostName(inetAddress.getHostName());
 
             IpTableScanResult.Builder resultBuilder = IpTableScanResult.newBuilder();

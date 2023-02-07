@@ -43,10 +43,10 @@ message NodeScanRequest {
 message NodeInfoResult {
   string objectId = 1;
   string systemName = 2;
-  string systemDesc = 3;
+  string systemDescr = 3;
   string systemLocation = 4;
   string systemContact = 5;
-  int64 systemUpTime = 6;
+  int64 systemUptime = 6;
 }
 
 //for service detector
@@ -59,13 +59,13 @@ message ServiceResult {
 message IpInterfaceResult {
   string ipAddress = 1;
   string ipHostName = 2;
-  string netMask = 3;
+  string netmask = 3;
 }
 
 message SnmpInterfaceResult {
   string physicalAddr = 1;
-  int32 ifIndex =2;
-  string ifDesc = 3;
+  int32 ifIndex = 2;
+  string ifDescr = 3;
   int32 ifType = 4;
   string ifName = 5;
   int64 ifSpeed = 6;
@@ -81,9 +81,10 @@ message IpTableScanResult {
 }
 
 message NodeScanResult {
-  NodeInfoResult nodeInfo = 1;
-  repeated IpInterfaceResult ipInterfaces = 2;
-  repeated SnmpInterfaceResult snmpInterfaces = 3;
+  int64 nodeId = 1;
+  NodeInfoResult nodeInfo = 2;
+  repeated IpInterfaceResult ipInterfaces = 3;
+  repeated SnmpInterfaceResult snmpInterfaces = 4;
 }
 
 

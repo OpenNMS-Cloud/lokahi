@@ -26,7 +26,7 @@
  *     http://www.opennms.com/
  */
 
-package org.opennms.horizon.inventory;
+package org.opennms.horizon.inventory.cucumber;
 
 import io.cucumber.java.AfterAll;
 import io.cucumber.java.BeforeAll;

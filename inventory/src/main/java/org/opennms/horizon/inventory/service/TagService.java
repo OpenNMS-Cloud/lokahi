@@ -130,4 +130,9 @@ public class TagService {
         }
         return tagOpt.get();
     }
+
+    public List<TagDTO> getTagsByNodeId(String tenantId, long nodeId) {
+        return repository.findByTenantIdAndNodeId(tenantId, nodeId)
+            .stream().map(mapper::modelToDTO).toList();
+    }
 }

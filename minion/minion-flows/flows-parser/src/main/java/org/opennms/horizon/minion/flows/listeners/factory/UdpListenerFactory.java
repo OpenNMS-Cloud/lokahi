@@ -39,7 +39,7 @@ import org.opennms.horizon.minion.flows.listeners.FlowsListener;
 import org.opennms.horizon.minion.flows.listeners.Parser;
 import org.opennms.horizon.minion.flows.listeners.UdpListener;
 import org.opennms.horizon.minion.flows.listeners.UdpParser;
-import org.opennms.sink.flows.contract.FlowsConfig;
+import org.opennms.horizon.minion.flows.parser.TelemetryRegistry;
 import org.opennms.sink.flows.contract.ListenerConfig;
 import org.opennms.sink.flows.contract.Parameter;
 

@@ -127,7 +127,7 @@ public class TestContainerRunnerClassRule extends ExternalResource {
             .withEnv("SPRING_DATASOURCE_PASSWORD", postgreSQLContainer.getPassword())
             .withLogConsumer(new Slf4jLogConsumer(LOG).withPrefix("APPLICATION"))
             .waitingFor(Wait.forLogMessage(".*Started AlarmServiceMain.*", 1)
-            .withStartupTimeout(Duration.ofMinutes(2))
+            .withStartupTimeout(Duration.ofMinutes(3))
         );
             ;
 

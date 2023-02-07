@@ -28,6 +28,8 @@
 
 package org.opennms.horizon.minion.flows.parser;
 
+import static org.opennms.horizon.minion.flows.listeners.utils.BufferUtils.slice;
+
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.collect.Sets;
 import io.netty.buffer.ByteBuf;
@@ -47,7 +49,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
-import static org.opennms.horizon.minion.flows.listeners.utils.BufferUtils.slice;
 
 public class IpfixTcpParser extends ParserBase implements TcpParser {
 

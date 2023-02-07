@@ -45,10 +45,10 @@ import org.opennms.horizon.minion.flows.parser.flowmessage.NetflowVersion;
 import org.opennms.horizon.minion.flows.parser.flowmessage.SamplingAlgorithm;
 import org.opennms.horizon.minion.flows.parser.ie.Value;
 
-public class Netflow5MessageBuilder implements MessageBuilder {
+import lombok.NoArgsConstructor;
 
-    public Netflow5MessageBuilder() {
-    }
+@NoArgsConstructor
+public class Netflow5MessageBuilder implements MessageBuilder {
 
     @Override
     public FlowMessage.Builder buildMessage(final Iterable<Value<?>> values, final RecordEnrichment enrichment) {

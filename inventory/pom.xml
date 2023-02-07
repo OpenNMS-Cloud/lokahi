@@ -21,7 +21,7 @@
 
     <properties>
         <application.docker.image.name>opennms/horizon-stream-inventory</application.docker.image.name>
-        <skipJib>false</skipJib>
+        <sonar.projectKey>opennms_horizon-stream_inventory</sonar.projectKey>
     </properties>
 
     <dependencyManagement>
@@ -170,6 +170,11 @@
             <artifactId>slf4j-api</artifactId>
             <version>${slf4j.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.hibernate.validator</groupId>
+            <artifactId>hibernate-validator</artifactId>
+            <version>${hibernate.version}</version>
+        </dependency>
 
         <!-- Test Dependencies -->
         <dependency>
@@ -188,6 +193,11 @@
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
             <version>${mockito.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-junit-jupiter</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -336,7 +346,6 @@
                 <groupId>com.google.cloud.tools</groupId>
                 <artifactId>jib-maven-plugin</artifactId>
                 <configuration>
-                    <skip>${skipJib}</skip>
                     <from>
                         <image>openjdk:17</image>
                     </from>

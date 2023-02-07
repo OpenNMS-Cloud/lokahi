@@ -36,4 +36,5 @@ jobs:
           working-directory: 'parent-pom'
           github-token: ${{ secrets.GITHUB_TOKEN }}
           sonar-token: ${{ secrets.SONAR_TOKEN }}
+          # sonar.projectKey cannot be defined in this project's pom.xml, all child projects would inherit its value
           project-key: 'opennms_horizon-stream_parent-pom'

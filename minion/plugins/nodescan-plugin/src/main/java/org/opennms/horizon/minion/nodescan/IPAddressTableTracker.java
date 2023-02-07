@@ -207,7 +207,7 @@ public class IPAddressTableTracker extends TableTracker {
             final InetAddress inetAddress = InetAddressUtils.addr(ipAddr);
             IpInterfaceResult.Builder ipInterfaceBuilder = IpInterfaceResult.newBuilder();
             ipInterfaceBuilder.setIpAddress(inetAddress.getHostAddress());
-            ipInterfaceBuilder.setNetMask(netMask.getHostAddress());
+            ipInterfaceBuilder.setNetmask(netMask.getHostAddress());
             ipInterfaceBuilder.setIpHostName(inetAddress.getHostName());
 
             IpTableScanResult.Builder resultBuilder = IpTableScanResult.newBuilder();

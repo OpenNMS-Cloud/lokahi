@@ -78,13 +78,12 @@ jobs:
 
       - name: Build & Sonar Scan
         run: |
-          mvn -B verify \
-              -Prun-it -Dapplication.docker.image=${{ steps.docker-metadata.outputs.tags }} \
-              org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=$SONAR_PROJECT_KEY
+          mvn -B -Dstyle.color=always \
+              -Pcoverage,run-it verify sonar:sonar \
+              -Dapplication.docker.image=${{ steps.docker-metadata.outputs.tags }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_PROJECT_KEY: 'opennms_horizon-stream_minion'
         working-directory: 'minion'
 
       - name: Push Image

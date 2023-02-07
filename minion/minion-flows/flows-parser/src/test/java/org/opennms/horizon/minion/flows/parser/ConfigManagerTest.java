@@ -34,7 +34,6 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.opennms.horizon.grpc.telemetry.contract.TelemetryMessage;
 import org.opennms.horizon.minion.flows.listeners.factory.TcpListenerFactory;
-import org.opennms.horizon.minion.flows.listeners.factory.TelemetryRegistry;
 import org.opennms.horizon.minion.flows.listeners.factory.UdpListenerFactory;
 import org.opennms.horizon.minion.flows.parser.factory.DnsResolver;
 import org.opennms.horizon.minion.flows.parser.factory.IpfixTcpParserFactory;

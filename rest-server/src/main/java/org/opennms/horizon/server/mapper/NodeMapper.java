@@ -31,6 +31,7 @@ package org.opennms.horizon.server.mapper;
 import org.mapstruct.CollectionMappingStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.Mappings;
 import org.mapstruct.NullValueCheckStrategy;
 import org.opennms.horizon.inventory.dto.NodeCreateDTO;
 import org.opennms.horizon.inventory.dto.NodeDTO;
@@ -38,12 +39,15 @@ import org.opennms.horizon.server.model.inventory.Node;
 import org.opennms.horizon.server.model.inventory.NodeCreate;
 
 
-@Mapper(componentModel = "spring", uses = IpInterfaceMapper.class,
+@Mapper(componentModel = "spring", uses = {IpInterfaceMapper.class, SnmpInterfaceMapper.class},
     // Needed for grpc proto mapping
     collectionMappingStrategy = CollectionMappingStrategy.ADDER_PREFERRED)
 public interface NodeMapper {
 
-    @Mapping(source = "ipInterfacesList", target = "ipInterfaces")
+    @Mappings({
+        @Mapping(source = "ipInterfacesList", target = "ipInterfaces"),
+        @Mapping(source = "snmpInterfacesList", target = "snmpInterfaces")
+    })
     Node protoToNode(NodeDTO nodeDTO);
 
     @Mapping(target = "location", source = "location", nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)

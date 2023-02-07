@@ -23,7 +23,6 @@
         <mock-gateway.docker.image>${mock-gateway.docker.image.name}:${mock-gateway.docker.image.tag}</mock-gateway.docker.image>
         <mock-gateway.docker.image.name>opennms/horizon-stream-mock-minion-gateway</mock-gateway.docker.image.name>
         <mock-gateway.docker.image.tag>latest</mock-gateway.docker.image.tag>
-        <skipJib>false</skipJib>
     </properties>
 
     <dependencyManagement>
@@ -147,7 +146,6 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <skip>${skipJib}</skip>
                     <to>
                         <image>${mock-gateway.docker.image}</image>
                     </to>

@@ -297,7 +297,7 @@ public class SystemGroupTracker extends AggregateTracker {
                 builder.setSystemContact(getSysContact());
             }
             if(getSysDescr()!=null) {
-                builder.setSystemDesc(getSysDescr());
+                builder.setSystemDescr(getSysDescr());
             }
             if(getSysObjectID()!=null) {
                 builder.setObjectId(getSysObjectID());

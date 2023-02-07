@@ -212,7 +212,7 @@ public class SNMPInterfaceTableTracker extends TableTracker {
                 .setIfIndex(getIfIndex())
                 .setIfAdminStatus(getIfAdminStatus())
                 .setIfAlias(getIfAlias())
-                .setIfDesc(getIfDescr())
+                .setIfDescr(getIfDescr())
                 .setIfName(getIfName())
                 .setIfOperatorStatus(getIfOperStatus())
                 .setIfSpeed(getIfSpeed())

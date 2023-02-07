@@ -49,6 +49,8 @@ public class EventConsumer {
 
     @KafkaListener(topics = "${kafka.topics.alarm-events}", concurrency = "1")
     public void receiveMessage(byte[] data) {
+        //String tenantId = getTenantIdFromHeaders();
+        // Place into grpc context
         try {
             Event event = Event.parseFrom(data);
             log.info("Received alarm event message");

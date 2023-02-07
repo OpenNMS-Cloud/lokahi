@@ -40,4 +40,11 @@ message SnmpInterfaceDTO {
   string ip_address = 4;
   int32 if_index = 5;
   string if_descr = 6;
+  int32 ifType = 7;
+  string ifName = 8;
+  int64 ifSpeed = 9;
+  int32 ifAdminStatus = 10;
+  int32 ifOperatorStatus = 11;
+  string ifAlias = 12;
+  string physicalAddr = 13;
 }

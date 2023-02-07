@@ -30,6 +30,7 @@ syntax = "proto3";
 import "google/protobuf/empty.proto";
 import "google/protobuf/wrappers.proto";
 import "ipInterface.proto";
+import "snmpInterface.proto";
 
 package opennms.inventory;
 option java_multiple_files = true;
@@ -44,9 +45,10 @@ message NodeDTO {
   repeated opennms.inventory.IpInterfaceDTO ip_interfaces = 6;
   string object_id = 7;
   string system_name = 8;
-  string system_desc = 9;
+  string system_descr = 9;
   string system_location = 10;
   string system_contact = 11;
+  repeated opennms.inventory.SnmpInterfaceDTO snmpInterfaces = 12;
 }
 
 message NodeCreateDTO {

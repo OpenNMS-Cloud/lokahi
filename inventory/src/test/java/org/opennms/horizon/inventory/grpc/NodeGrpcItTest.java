@@ -158,10 +158,10 @@ class NodeGrpcItTest extends GrpcTestBase {
         assertThat(node.getNodeLabel()).isEqualTo(label);
         assertThat(node.getObjectId()).isEmpty();
         assertThat(node.getSystemName()).isEmpty();
-        assertThat(node.getSystemDesc()).isEmpty();
+        assertThat(node.getSystemDescr()).isEmpty();
         assertThat(node.getSystemLocation()).isEmpty();
         assertThat(node.getSystemContact()).isEmpty();
-        await().atMost(10, TimeUnit.SECONDS).until(()-> testGrpcService.getRequests().size(), Matchers.is(3));
+        await().atMost(10, TimeUnit.SECONDS).until(()-> testGrpcService.getRequests().size(), Matchers.is(4));
 
         org.assertj.core.api.Assertions.assertThat(testGrpcService.getRequests())
             .extracting(PublishTaskSetRequest::getTaskSet)
@@ -232,7 +232,7 @@ class NodeGrpcItTest extends GrpcTestBase {
         NodeDTO node = serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(differentTenantHeader))).createNode(createDTO);
 
         assertThat(node.getNodeLabel()).isEqualTo(label);
-        await().atMost(10, TimeUnit.SECONDS).until(() -> testGrpcService.getRequests().size(), Matchers.is(3));
+        await().atMost(10, TimeUnit.SECONDS).until(() -> testGrpcService.getRequests().size(), Matchers.is(4));
 
         org.assertj.core.api.Assertions.assertThat(testGrpcService.getRequests())
             .extracting(PublishTaskSetRequest::getTaskSet)
@@ -260,7 +260,7 @@ class NodeGrpcItTest extends GrpcTestBase {
         NodeDTO node = serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).createNode(createDTO);
 
         assertThat(node.getNodeLabel()).isEqualTo(label);
-        await().atMost(10, TimeUnit.SECONDS).until(() -> testGrpcService.getRequests().size(), Matchers.is(3));
+        await().atMost(10, TimeUnit.SECONDS).until(() -> testGrpcService.getRequests().size(), Matchers.is(4));
 
         org.assertj.core.api.Assertions.assertThat(testGrpcService.getRequests())
             .extracting(PublishTaskSetRequest::getTaskSet)
@@ -291,12 +291,12 @@ class NodeGrpcItTest extends GrpcTestBase {
         NodeDTO node = serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).createNode(createDTO);
 
         assertThat(node.getNodeLabel()).isEqualTo(label);
-        await().atMost(10, TimeUnit.SECONDS).until(() -> testGrpcService.getRequests().size(), Matchers.is(1));
+        await().atMost(10, TimeUnit.SECONDS).until(() -> testGrpcService.getRequests().size(), Matchers.is(2));
         verify(spyInterceptor).verifyAccessToken(authHeader);
         verify(spyInterceptor).interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));
 
         List<PublishTaskSetRequest> grpcRequests = testGrpcService.getRequests();
-        assertThat(grpcRequests).asList().hasSize(1);
+        assertThat(grpcRequests).asList().hasSize(2);
 
         PublishTaskSetRequest request = grpcRequests.get(0);
         TaskSet taskSet = request.getTaskSet();
@@ -553,7 +553,7 @@ class NodeGrpcItTest extends GrpcTestBase {
                 node.setObjectId("12345." + i);
                 node.setSystemLocation("systemLocation" +i);
                 node.setSystemName("systemName"+1);
-                node.setSystemDesc("desc"+1);
+                node.setSystemDescr("desc"+1);
                 node.setSystemContact("contact"+1);
             }
             nodeRepository.save(node);

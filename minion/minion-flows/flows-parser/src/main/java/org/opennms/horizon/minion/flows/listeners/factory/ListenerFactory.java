@@ -32,7 +32,7 @@ import org.opennms.horizon.minion.flows.listeners.FlowsListener;
 import org.opennms.sink.flows.contract.ListenerConfig;
 
 /**
- * Factory to create beans of type {@link FlowsListener} defined by a {@link ListenerDefinition}
+ * Factory to create beans of type {@link FlowsListener} defined by a {@link ListenerConfig}
  *
  * @author mvrueden
  */

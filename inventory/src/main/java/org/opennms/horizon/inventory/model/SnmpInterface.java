@@ -44,4 +44,25 @@ public class SnmpInterface {
 
     @Column(name = "if_descr")
     private String ifDescr;
+
+    @Column(name = "if_type")
+    private int ifType;
+
+    @Column(name = "if_name")
+    private String ifName;
+
+    @Column(name = "if_speed")
+    private long ifSpeed;
+
+    @Column(name = "if_admin_status")
+    private int ifAdminStatus;
+
+    @Column(name = "if_operator_status")
+    private int ifOperatorStatus;
+
+    @Column(name = "if_alias")
+    private String ifAlias;
+
+    @Column(name = "physical_address")
+    private String physicalAddr;
 }

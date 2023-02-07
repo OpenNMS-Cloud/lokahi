@@ -50,6 +50,7 @@ import org.opennms.horizon.inventory.repository.NodeRepository;
 import org.opennms.horizon.inventory.repository.TagRepository;
 import org.opennms.horizon.shared.constants.GrpcConstants;
 import org.opennms.horizon.shared.utils.InetAddressUtils;
+import org.opennms.node.scan.contract.NodeInfoResult;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -91,6 +92,7 @@ public class NodeService {
                 ipInterface.setIpAddress(InetAddressUtils.getInetAddress(request.getManagementIp()));
                 ipInterface.setSnmpPrimary(true);
                 ipInterfaceRepository.save(ipInterface);
+                node.setIpInterfaces(List.of(ipInterface));
         }
     }
 
@@ -162,6 +164,11 @@ public class NodeService {
             removeAssociatedTags(node);
             nodeRepository.delete(node);
         });
+    }
+
+    public void updateNodeInfo(Node node, NodeInfoResult nodeInfo) {
+        mapper.updateFromNodeInfo(nodeInfo, node);
+        nodeRepository.save(node);
     }
 
     private void removeAssociatedTags(Node node) {

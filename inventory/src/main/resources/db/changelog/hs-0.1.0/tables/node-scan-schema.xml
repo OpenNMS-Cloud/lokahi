@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+    <changeSet id="0.1.0-node-scan-schema-change" author="yli">
+        <addColumn tableName="ip_interface">
+            <column name="ip_hostname" type="text"/>
+            <column name="netmask" type="text" />
+        </addColumn>
+        <addColumn tableName="snmp_interface">
+            <column name="if_type" type="integer"/>
+            <column name="if_name" type="text" />
+            <column name="if_speed" type="bigint" />
+            <column name="if_admin_status" type="integer" />
+            <column name="if_operator_status" type="integer" />
+            <column name="if_alias" type="text" />
+            <column name="physical_address" type="text"/>
+        </addColumn>
+    </changeSet>
+</databaseChangeLog>

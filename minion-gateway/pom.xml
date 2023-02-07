@@ -21,10 +21,9 @@
     <packaging>pom</packaging>
 
     <properties>
-        <skip-docker-image-build>true</skip-docker-image-build>
         <application.docker.image.name>opennms/horizon-stream-minion-gateway</application.docker.image.name>
-        <application.docker.image.skipPush>false</application.docker.image.skipPush>
         <docker.it.network>rest-server-it-network</docker.it.network>
+        <sonar.projectKey>opennms_horizon-stream_minion-gateway</sonar.projectKey>
     </properties>
 
     <modules>

@@ -4,8 +4,10 @@ import lombok.RequiredArgsConstructor;
 import org.opennms.horizon.inventory.dto.IpInterfaceDTO;
 import org.opennms.horizon.inventory.mapper.IpInterfaceMapper;
 import org.opennms.horizon.inventory.model.IpInterface;
+import org.opennms.horizon.inventory.model.Node;
 import org.opennms.horizon.inventory.repository.IpInterfaceRepository;
 import org.opennms.horizon.shared.utils.InetAddressUtils;
+import org.opennms.node.scan.contract.IpInterfaceResult;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -30,5 +32,21 @@ public class IpInterfaceService {
     public Optional<IpInterfaceDTO> findByIpAddressAndLocationAndTenantId(String ipAddress, String location, String tenantId) {
             Optional<IpInterface> optional = modelRepo.findByIpAddressAndLocationAndTenantId(InetAddressUtils.getInetAddress(ipAddress), location, tenantId);
             return optional.map(mapper::modelToDTO);
+    }
+
+    public void creatUpdateFromScanResult(String tenantId, Node node, IpInterfaceResult result) {
+        modelRepo.findByNodeIdAndTenantIdAndIpAddress(node.getId(), tenantId, InetAddressUtils.getInetAddress(result.getIpAddress()))
+            .ifPresentOrElse(ipInterface -> {
+                ipInterface.setHostname(result.getIpHostName());
+                ipInterface.setNetmask(result.getNetmask());
+                modelRepo.save(ipInterface);
+            }, () -> {
+                IpInterface ipInterface = mapper.fromScanResult(result);
+                ipInterface.setNode(node);
+                ipInterface.setTenantId(tenantId);
+                ipInterface.setSnmpPrimary(false);
+                ipInterface.setHostname(result.getIpHostName());
+                modelRepo.save(ipInterface);
+            });
     }
 }

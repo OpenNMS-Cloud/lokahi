@@ -30,8 +30,8 @@ package org.opennms.horizon.minion.flows.parser.factory;
 
 import com.codahale.metrics.MetricRegistry;
 import org.opennms.horizon.minion.flows.listeners.Parser;
-import org.opennms.horizon.minion.flows.listeners.factory.TelemetryRegistry;
 import org.opennms.horizon.minion.flows.parser.Netflow9UdpParser;
+import org.opennms.horizon.minion.flows.parser.TelemetryRegistry;
 import org.opennms.horizon.shared.ipc.rpc.IpcIdentity;
 import org.opennms.sink.flows.contract.ParserConfig;
 

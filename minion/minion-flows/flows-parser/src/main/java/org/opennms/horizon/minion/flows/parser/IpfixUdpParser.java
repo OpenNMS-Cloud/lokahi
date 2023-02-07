@@ -28,6 +28,9 @@
 
 package org.opennms.horizon.minion.flows.parser;
 
+import static org.opennms.horizon.minion.flows.listeners.utils.BufferUtils.slice;
+import static org.opennms.horizon.minion.flows.listeners.utils.BufferUtils.uint16;
+
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
@@ -49,8 +52,6 @@ import org.opennms.horizon.shared.utils.InetAddressUtils;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 
-import static org.opennms.horizon.minion.flows.listeners.utils.BufferUtils.slice;
-import static org.opennms.horizon.minion.flows.listeners.utils.BufferUtils.uint16;
 
 public class IpfixUdpParser extends UdpParserBase implements UdpParser, Dispatchable {
 

@@ -72,6 +72,7 @@ public class NodeServiceTest {
     private TagRepository tagRepository;
     private ConfigUpdateService mockConfigUpdateService;
     private final String tenantID = "test-tenant";
+    private Node node;
 
     @BeforeEach
     void prepareTest() {
@@ -83,6 +84,8 @@ public class NodeServiceTest {
         mockConfigUpdateService = mock(ConfigUpdateService.class);
         nodeService = new NodeService(mockNodeRepository, mockMonitoringLocationRepository, mockIpInterfaceRepository, tagRepository,
             mockConfigUpdateService, nodeMapper);
+        node = new Node();
+        doReturn(node).when(mockNodeRepository).save(any(node.getClass()));
     }
 
     @AfterEach

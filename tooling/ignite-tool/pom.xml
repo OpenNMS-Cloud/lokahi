@@ -19,7 +19,6 @@
 
     <properties>
         <application.docker.image.name>opennms-ignite-tool</application.docker.image.name>
-        <application.docker.image.skipPush>false</application.docker.image.skipPush>
     </properties>
 
     <dependencyManagement>

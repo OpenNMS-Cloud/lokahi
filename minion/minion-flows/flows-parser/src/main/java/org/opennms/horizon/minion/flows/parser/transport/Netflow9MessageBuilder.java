@@ -50,14 +50,14 @@ import org.opennms.horizon.minion.flows.parser.flowmessage.NetflowVersion;
 import org.opennms.horizon.minion.flows.parser.flowmessage.SamplingAlgorithm;
 import org.opennms.horizon.minion.flows.parser.ie.Value;
 
+import lombok.NoArgsConstructor;
+
+@NoArgsConstructor
 public class Netflow9MessageBuilder implements MessageBuilder {
 
     private Long flowActiveTimeoutFallback;
     private Long flowInactiveTimeoutFallback;
     private Long flowSamplingIntervalFallback;
-
-    public Netflow9MessageBuilder() {
-    }
 
     @Override
     public FlowMessage.Builder buildMessage(final Iterable<Value<?>> values, final RecordEnrichment enrichment) {

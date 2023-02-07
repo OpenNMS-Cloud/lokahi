@@ -27,10 +27,6 @@
         </dependencies>
     </dependencyManagement>
 
-    <properties>
-        <skipJib>false</skipJib>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>org.opennms.horizon.minion.gateway</groupId>
@@ -172,7 +168,8 @@
                 <groupId>com.google.cloud.tools</groupId>
                 <artifactId>jib-maven-plugin</artifactId>
                 <configuration>
-                    <skip>${skipJib}</skip>
+                    <!--suppress MavenModelInspection -->
+                    <skip>${application.docker.skip}</skip>
                     <container>
                         <jvmFlags>
                             <jvmFlag>--add-opens=jdk.management/com.sun.management.internal=ALL-UNNAMED</jvmFlag>

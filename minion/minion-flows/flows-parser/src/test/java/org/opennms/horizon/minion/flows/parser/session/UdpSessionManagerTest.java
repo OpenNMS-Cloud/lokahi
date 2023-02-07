@@ -31,12 +31,13 @@ package org.opennms.horizon.minion.flows.parser.session;
 import io.netty.buffer.ByteBuf;
 import org.junit.Assert;
 import org.junit.Test;
-import org.opennms.horizon.minion.flows.parser.ie.Value;
-import org.opennms.horizon.minion.flows.parser.ie.values.StringValue;
+
 import org.opennms.horizon.minion.flows.parser.InvalidPacketException;
 import org.opennms.horizon.minion.flows.parser.IpfixUdpParser;
 import org.opennms.horizon.minion.flows.parser.MissingTemplateException;
 import org.opennms.horizon.minion.flows.parser.Netflow9UdpParser;
+import org.opennms.horizon.minion.flows.parser.ie.Value;
+import org.opennms.horizon.minion.flows.parser.ie.values.StringValue;
 
 import java.net.InetSocketAddress;
 import java.time.Duration;

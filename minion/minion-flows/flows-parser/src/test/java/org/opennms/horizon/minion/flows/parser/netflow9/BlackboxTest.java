@@ -33,14 +33,12 @@ import static org.opennms.horizon.minion.flows.listeners.utils.BufferUtils.slice
 
 import java.io.IOException;
 import java.net.InetAddress;
-import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

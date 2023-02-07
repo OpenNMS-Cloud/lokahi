@@ -41,15 +41,17 @@ import org.opennms.taskset.contract.TaskDefinition;
 import org.opennms.taskset.contract.TaskType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import static org.opennms.horizon.inventory.service.taskset.TaskUtils.identityForAzureTask;
 import static org.opennms.horizon.inventory.service.taskset.TaskUtils.identityForIpTask;
 
-public class MonitorTaskSetUtils {
+@Component
+public class MonitorTaskSetService {
 
-    private static final Logger log = LoggerFactory.getLogger(MonitorTaskSetUtils.class);
+    private static final Logger log = LoggerFactory.getLogger(MonitorTaskSetService.class);
 
-    public static TaskDefinition getMonitorTask(MonitorType monitorType, IpInterface ipInterface, long nodeId) {
+    public TaskDefinition getMonitorTask(MonitorType monitorType, IpInterface ipInterface, long nodeId) {
 
         String monitorTypeValue = monitorType.getValueDescriptor().getName();
         String ipAddress = InetAddressUtils.toIpAddrString(ipInterface.getIpAddress());
@@ -94,7 +96,7 @@ public class MonitorTaskSetUtils {
         return taskDefinition;
     }
 
-    static TaskDefinition addAzureMonitorTask(AzureCredential credential, AzureScanItem scanItem, String ipAddress, long nodeId) {
+    public TaskDefinition addAzureMonitorTask(AzureCredential credential, AzureScanItem scanItem, String ipAddress, long nodeId) {
 
         Any configuration =
             Any.pack(AzureMonitorRequest.newBuilder()

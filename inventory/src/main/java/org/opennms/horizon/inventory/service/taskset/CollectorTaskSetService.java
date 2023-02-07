@@ -48,9 +48,9 @@ import static org.opennms.horizon.inventory.service.taskset.TaskUtils.identityFo
 
 @Component
 @RequiredArgsConstructor
-public class CollectorTaskSetUtils {
+public class CollectorTaskSetService {
 
-    public static TaskDefinition getCollectorTask(MonitorType monitorType, IpInterface ipInterface, long nodeId) {
+    public TaskDefinition getCollectorTask(MonitorType monitorType, IpInterface ipInterface, long nodeId) {
         String monitorTypeValue = monitorType.getValueDescriptor().getName();
         String ipAddress = InetAddressUtils.toIpAddrString(ipInterface.getIpAddress());
 
@@ -83,7 +83,7 @@ public class CollectorTaskSetUtils {
         return taskDefinition;
     }
 
-    static TaskDefinition addAzureCollectorTask(AzureCredential credential, AzureScanItem scanItem, String ipAddress, long nodeId) {
+    public TaskDefinition addAzureCollectorTask(AzureCredential credential, AzureScanItem scanItem, String ipAddress, long nodeId) {
         Any configuration =
             Any.pack(AzureCollectorRequest.newBuilder()
                 .setResource(scanItem.getName())

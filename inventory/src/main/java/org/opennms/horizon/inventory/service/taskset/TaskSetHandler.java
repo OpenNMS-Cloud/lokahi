@@ -41,20 +41,19 @@ import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
 
-import static org.opennms.horizon.inventory.service.taskset.CollectorTaskSetUtils.addAzureCollectorTask;
-import static org.opennms.horizon.inventory.service.taskset.MonitorTaskSetUtils.addAzureMonitorTask;
-
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class TaskSetHandler {
 
     private final TaskSetPublisher taskSetPublisher;
+    private final MonitorTaskSetService monitorTaskSetService;
+    private final CollectorTaskSetService collectorTaskSetService;
 
     public void sendMonitorTask(String location, MonitorType monitorType, IpInterface ipInterface, long nodeId) {
         String tenantId = ipInterface.getTenantId();
 
-        var task = MonitorTaskSetUtils.getMonitorTask(monitorType, ipInterface, nodeId);
+        var task = monitorTaskSetService.getMonitorTask(monitorType, ipInterface, nodeId);
         if (task != null) {
             taskSetPublisher.publishNewTasks(tenantId, location, Arrays.asList(task));
         }
@@ -64,13 +63,13 @@ public class TaskSetHandler {
         String tenantId = credential.getTenantId();
         String location = credential.getMonitoringLocation().getLocation();
 
-        TaskDefinition task = addAzureMonitorTask(credential, item, ipAddress, nodeId);
+        TaskDefinition task = monitorTaskSetService.addAzureMonitorTask(credential, item, ipAddress, nodeId);
         taskSetPublisher.publishNewTasks(tenantId, location, Arrays.asList(task));
     }
 
     public void sendCollectorTask(String location, MonitorType monitorType, IpInterface ipInterface, long nodeId) {
         String tenantId = ipInterface.getTenantId();
-        var task = CollectorTaskSetUtils.getCollectorTask(monitorType, ipInterface, nodeId);
+        var task = collectorTaskSetService.getCollectorTask(monitorType, ipInterface, nodeId);
         if (task != null) {
             taskSetPublisher.publishNewTasks(tenantId, location, Arrays.asList(task));
         }
@@ -80,7 +79,7 @@ public class TaskSetHandler {
         String tenantId = credential.getTenantId();
         String location = credential.getMonitoringLocation().getLocation();
 
-        TaskDefinition task = addAzureCollectorTask(credential, item, ipAddress, nodeId);
+        TaskDefinition task = collectorTaskSetService.addAzureCollectorTask(credential, item, ipAddress, nodeId);
         taskSetPublisher.publishNewTasks(tenantId, location, Arrays.asList(task));
     }
 

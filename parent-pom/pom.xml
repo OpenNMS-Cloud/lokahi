@@ -22,7 +22,10 @@
 
         <skipITs>false</skipITs>
 
-        <!-- Docker properties -->
+        <!-- DT = Developer (Manual) Test; do not automatically execute during builds -->
+        <skipDTs>true</skipDTs>
+
+        <!-- Jib properties -->
         <application.docker.skip>false</application.docker.skip>
         <application.docker.image>${application.docker.image.name}:${application.docker.image.tag}</application.docker.image>
         <!-- application.docker.image.name MUST be set by child modules that use jib-maven-plugin. -->
@@ -208,6 +211,11 @@
                 <groupId>com.helger</groupId>
                 <artifactId>dhcp4java</artifactId>
                 <version>${dhcp4java.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.jayway.awaitility</groupId>
+                <artifactId>awaitility</artifactId>
+                <version>${jayway-awaitility.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.swrve</groupId>
@@ -712,6 +720,11 @@
             </dependency>
             <dependency>
                 <groupId>io.cucumber</groupId>
+                <artifactId>cucumber-junit-platform-engine</artifactId>
+                <version>${cucumber.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.cucumber</groupId>
                 <artifactId>cucumber-junit</artifactId>
                 <version>${cucumber.version}</version>
             </dependency>
@@ -958,6 +971,68 @@
                     <groupId>org.apache.karaf.tooling</groupId>
                     <artifactId>karaf-maven-plugin</artifactId>
                     <version>${karaf.maven-plugin.version}</version>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-failsafe-plugin</artifactId>
+                    <version>${failsafe.version}</version>
+                    <executions>
+                        <execution>
+                            <id>horizon-integration-test</id>
+                            <goals>
+                                <goal>integration-test</goal>
+                            </goals>
+                            <phase>integration-test</phase>
+                            <configuration>
+                                <skipITs>${skipITs}</skipITs>
+                                <excludes>
+                                    <exclude>none</exclude>
+                                </excludes>
+                                <includes>
+                                    <include>**/*IT.java</include>
+                                </includes>
+                            </configuration>
+                        </execution>
+
+                        <execution>
+                            <id>horizon-developer-test</id>
+                            <goals>
+                                <goal>integration-test</goal>
+                            </goals>
+                            <phase>integration-test</phase>
+                            <configuration>
+                                <skipITs>${skipDTs}</skipITs>
+                                <excludes>
+                                    <exclude>**/*IT.java</exclude>
+                                </excludes>
+                                <includes>
+                                    <include>**/*DT.java</include>
+                                </includes>
+                                <argLine>--add-opens=jdk.management/com.sun.management.internal=ALL-UNNAMED
+                                    --add-opens=java.base/jdk.internal.misc=ALL-UNNAMED
+                                    --add-opens=java.base/sun.nio.ch=ALL-UNNAMED
+                                    --add-opens=java.management/com.sun.jmx.mbeanserver=ALL-UNNAMED
+                                    --add-opens=jdk.internal.jvmstat/sun.jvmstat.monitor=ALL-UNNAMED
+                                    --add-opens=java.base/sun.reflect.generics.reflectiveObjects=ALL-UNNAMED
+                                    --add-opens=java.base/java.io=ALL-UNNAMED
+                                    --add-opens=java.base/java.nio=ALL-UNNAMED
+                                    --add-opens=java.base/java.util=ALL-UNNAMED
+                                    --add-opens=java.base/java.lang=ALL-UNNAMED
+                                    --add-opens=java.base/java.util.concurrent=ALL-UNNAMED
+                                </argLine>
+                            </configuration>
+                        </execution>
+
+                        <!-- Fail the build on IT Failures.  Executed as a separate step so that post-integration-test -->
+                        <!--  phase executes even after an IT failure.                                                 -->
+                        <execution>
+                            <id>horizon-verify-it</id>
+                            <goals>
+                                <goal>verify</goal>
+                            </goals>
+                        </execution>
+                    </executions>
                 </plugin>
             </plugins>
         </pluginManagement>

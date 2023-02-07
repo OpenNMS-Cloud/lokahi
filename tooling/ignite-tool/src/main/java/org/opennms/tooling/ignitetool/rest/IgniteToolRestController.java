@@ -55,8 +55,6 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
-import static org.opennms.taskset.service.api.TaskSetPublisher.TASK_SET_PUBLISH_SERVICE;
-
 @SuppressWarnings("rawtypes")
 @RestController
 @RequestMapping("/ignite")

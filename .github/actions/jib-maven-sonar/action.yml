@@ -39,7 +39,7 @@ runs:
 
         mvn -B -Dstyle.color=always \
             -Pcoverage verify \
-            jib:build -Dapplication.docker.image=$IMAGE -Djib.from.image=$BASE_IMAGE \
+            -Dapplication.docker.image=$IMAGE -Djib.from.image=$BASE_IMAGE \
             sonar:sonar -Dsonar.projectKey=$SONAR_PROJECT_KEY
       shell: bash
       working-directory: ${{ inputs.working-directory }}
@@ -55,7 +55,7 @@ runs:
 
         mvn -B -Dstyle.color=always \
             -Pcoverage verify \
-            jib:build -Dapplication.docker.image=$IMAGE -Djib.from.image=$BASE_IMAGE \
+            -Dapplication.docker.image=$IMAGE -Djib.from.image=$BASE_IMAGE \
             sonar:sonar
       shell: bash
       working-directory: ${{ inputs.working-directory }}

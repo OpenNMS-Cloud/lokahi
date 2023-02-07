@@ -71,7 +71,7 @@
     "vue-router": "4.1.6"
   },
   "devDependencies": {
-    "@graphql-codegen/cli": "2.16.4",
+    "@graphql-codegen/cli": "2.16.3",
     "@graphql-codegen/typed-document-node": "^2.3.12",
     "@graphql-codegen/typescript": "2.8.7",
     "@graphql-codegen/typescript-operations": "^2.5.12",

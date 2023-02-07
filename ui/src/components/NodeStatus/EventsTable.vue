@@ -3,10 +3,10 @@
     <div class="header">
       <div class="title-container">
         <span class="title">
-          Events ({{ nodeData.node.nodeLabel }})
+          Events
         </span>
       </div>
-      <FeatherInput
+      <!-- <FeatherInput
         class="search"
         v-model="searchValue"
         label="Event">
@@ -21,7 +21,7 @@
         <FeatherButton icon="Sort">
           <FeatherIcon :icon="Sort" />
         </FeatherButton>
-      </div>
+      </div> -->
     </div>
     <div class="container">
       <table class="data-table" aria-label="Events Table" data-test="data-table">
@@ -46,12 +46,12 @@
       </table>
     </div>
     <div>
-      <FeatherPagination
+      <!-- <FeatherPagination
         v-model="page"
         :pageSize="pageSize"
         :total="total"
         @update:pageSize="updatePageSize"
-      />
+      /> -->
     </div>
   </TableCard>
 </template>
@@ -79,8 +79,7 @@ const nodeData = computed(() => {
   total.value = events?.length || 0
 
   return {
-    events,
-    node: nodeStatusStore.fetchedData?.node
+    events
   }
 })
 

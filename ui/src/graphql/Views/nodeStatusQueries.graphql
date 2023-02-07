@@ -10,7 +10,38 @@ fragment EventsByNodeIdParts on Query {
 
 fragment NodeByIdParts on Query {
   node: findNodeById(id: $id) {
+    id
     nodeLabel
+    objectId
+    systemContact
+    systemDescr
+    systemLocation
+    systemName
+    location {
+      location
+    }
+    ipInterfaces {
+      id
+      hostname
+      ipAddress
+      netmask
+      nodeId
+      snmpPrimary
+    }
+    snmpInterfaces {
+      id
+      ifAdminStatus
+      ifAlias
+      ifDescr
+      ifIndex
+      ifName
+      ifOperatorStatus
+      ifSpeed
+      ifType
+      ipAddress
+      nodeId
+      physicalAddr
+    }
   }
 }
 

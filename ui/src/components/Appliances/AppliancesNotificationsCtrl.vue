@@ -42,13 +42,13 @@
 import { useNotificationMutations } from '@/store/Mutations/notificationMutations'
 import useModal from '@/composables/useModal'
 import useSnackbar from '@/composables/useSnackbar'
-import { PagerDutyConfigDtoInput } from '@/types/graphql'
+import { PagerDutyConfigInput } from '@/types/graphql'
 
 const { showSnackbar } = useSnackbar()
 const { openModal, closeModal, isVisible } = useModal()
 const notificationMutations = useNotificationMutations()
 
-const config: PagerDutyConfigDtoInput = reactive({
+const config: PagerDutyConfigInput = reactive({
   integrationkey: undefined
 })
 

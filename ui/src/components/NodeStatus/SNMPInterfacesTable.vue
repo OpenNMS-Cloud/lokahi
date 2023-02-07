@@ -11,9 +11,9 @@
       <table class="data-table" aria-label="SNMP Interfaces Table">
         <thead>
           <tr>
+            <th scope="col">Alias</th>
             <th scope="col">IP Addr</th>
             <th scope="col">Physical Addr</th>
-            <th scope="col">Alias</th>
             <th scope="col">Index</th>
             <th scope="col">Desc</th>
             <th scope="col">Type</th>
@@ -26,9 +26,9 @@
         <TransitionGroup name="data-table" tag="tbody">
           <tr v-for="snmpInterface in nodeData.node.snmpInterfaces" :key="snmpInterface.id">
             <td>{{ snmpInterface.ifAlias }}</td>
-            <td>{{ snmpInterface.ifIndex }}</td>
             <td>{{ snmpInterface.ipAddress }}</td>
             <td>{{ snmpInterface.physicalAddr }}</td>
+            <td>{{ snmpInterface.ifIndex }}</td>
             <td>{{ snmpInterface.ifDescr }}</td>
             <td>{{ snmpInterface.ifType }}</td>
             <td>{{ snmpInterface.ifName }}</td>

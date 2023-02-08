@@ -121,7 +121,7 @@ public class CollectorTaskSetService {
                 .build());
 
         String name = String.join("-", "azure", "collector", scanItem.getId());
-        String taskId = identityForAzureTask(name);
+        String taskId = identityForAzureTask(name, credential.getId());
         return TaskDefinition.newBuilder()
             .setType(TaskType.COLLECTOR)
             .setPluginName("AZURECollector")

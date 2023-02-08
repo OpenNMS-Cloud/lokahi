@@ -26,8 +26,8 @@ public interface TaskUtils {
         return IP_LABEL + ipAddress + "/" + name;
     }
 
-    static String identityForAzureTask(String name) {
-        return AZURE_LABEL + name;
+    static String identityForAzureTask(String name, long id) {
+        return AZURE_LABEL + name + "-" + id;
     }
 
     static String identityForNodeScan(long nodeId) {

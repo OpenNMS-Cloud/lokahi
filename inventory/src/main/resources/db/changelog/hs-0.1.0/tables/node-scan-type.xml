@@ -6,7 +6,7 @@
 
     <changeSet id="0.1.0-node-scan-type" author="tbigg">
         <addColumn tableName="node">
-            <column name="scan_type" type="text" />
+            <column name="scan_type" type="text" defaultValue="NODE_SCAN" />
         </addColumn>
     </changeSet>
 </databaseChangeLog>

@@ -71,6 +71,9 @@ class AlarmKafkaConsumerIntegrationTestNoConfig {
     @Captor
     ArgumentCaptor<AlarmDTO> alarmCaptor;
 
+    @Captor
+    ArgumentCaptor<Map<String, Object>> headerCaptor;
+
     @Autowired
     private TestRestTemplate testRestTemplate;
 
@@ -102,8 +105,8 @@ class AlarmKafkaConsumerIntegrationTestNoConfig {
         stringProducer.send(producerRecord);
         stringProducer.flush();
 
-        //verify(alarmKafkaConsumer, timeout(KAFKA_TIMEOUT).times(1))
-        //    .consume(alarmCaptor.capture());
+        verify(alarmKafkaConsumer, timeout(KAFKA_TIMEOUT).times(1))
+            .consume(alarmCaptor.capture(),headerCaptor.capture());
 
         AlarmDTO capturedAlarm = alarmCaptor.getValue();
         assertEquals(id, capturedAlarm.getId());

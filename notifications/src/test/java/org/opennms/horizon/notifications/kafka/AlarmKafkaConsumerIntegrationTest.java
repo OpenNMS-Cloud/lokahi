@@ -40,6 +40,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 
@@ -73,6 +74,9 @@ class AlarmKafkaConsumerIntegrationTest {
     @Captor
     ArgumentCaptor<AlarmDTO> alarmCaptor;
 
+    @Captor
+    ArgumentCaptor<Map<String, Object>> headerCaptor;
+
     @MockBean
     private RestTemplate restTemplate;
 
@@ -103,18 +107,18 @@ class AlarmKafkaConsumerIntegrationTest {
         stringProducer.send(producerRecord);
         stringProducer.flush();
 
-        //verify(alarmKafkaConsumer, timeout(KAFKA_TIMEOUT).times(1))
-        //    .consume(alarmCaptor.capture());
+        verify(alarmKafkaConsumer, timeout(KAFKA_TIMEOUT).times(1))
+            .consume(alarmCaptor.capture(), headerCaptor.capture());
 
         AlarmDTO capturedAlarm = alarmCaptor.getValue();
         assertEquals(id, capturedAlarm.getId());
 
         // This is the call to the PagerDuty API, it will fail due to an invalid token, but we just need to
         // verify that the call has been attempted.
-        verify(restTemplate, timeout(HTTP_TIMEOUT).times(1)).exchange(ArgumentMatchers.any(URI.class),
+        verify(restTemplate, timeout(HTTP_TIMEOUT).times(1)).exchange(any(URI.class),
             ArgumentMatchers.eq(HttpMethod.POST),
-            ArgumentMatchers.any(HttpEntity.class),
-            ArgumentMatchers.any(Class.class));
+            any(HttpEntity.class),
+            any(Class.class));
     }
 
     @AfterAll

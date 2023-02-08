@@ -32,15 +32,16 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.protobuf.Any;
 import lombok.RequiredArgsConstructor;
 import org.opennms.azure.contract.AzureScanRequest;
+import org.opennms.horizon.inventory.dto.IpInterfaceDTO;
+import org.opennms.horizon.inventory.dto.NodeDTO;
+import org.opennms.horizon.inventory.mapper.NodeMapper;
 import org.opennms.horizon.inventory.model.AzureCredential;
+import org.opennms.horizon.inventory.model.Node;
 import org.opennms.horizon.inventory.taskset.api.TaskSetPublisher;
+import org.opennms.node.scan.contract.NodeScanRequest;
 import org.opennms.taskset.contract.TaskDefinition;
 import org.opennms.taskset.contract.TaskType;
 import org.springframework.stereotype.Component;
-
-import static org.opennms.horizon.inventory.service.taskset.TaskUtils.identityForAzureTask;
-import static org.opennms.horizon.inventory.service.taskset.TaskUtils.identityForNodeScan;
-
 
 import java.util.List;
 import java.util.Optional;
@@ -48,9 +49,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 
-import org.opennms.horizon.inventory.dto.IpInterfaceDTO;
-import org.opennms.horizon.inventory.dto.NodeDTO;
-import org.opennms.node.scan.contract.NodeScanRequest;
+import static org.opennms.horizon.inventory.service.taskset.TaskUtils.identityForAzureTask;
+import static org.opennms.horizon.inventory.service.taskset.TaskUtils.identityForNodeScan;
 
 
 
@@ -63,6 +63,7 @@ public class ScannerTaskSetService {
     private final ExecutorService executorService = Executors.newFixedThreadPool(10, threadFactory);
 
     private final TaskSetPublisher taskSetPublisher;
+    private final NodeMapper nodeMapper;
 
     public void sendAzureScannerTaskAsync(AzureCredential credential) {
         executorService.execute(() -> sendAzureScannerTask(credential));
@@ -75,6 +76,11 @@ public class ScannerTaskSetService {
             if(!tasks.isEmpty()) {
                 taskSetPublisher.publishNewTasks(tenantId, location, tasks);
             }
+    }
+
+    public Optional<TaskDefinition> getNodeScanTasks(Node node) {
+        var nodeDto = nodeMapper.modelToDTO(node);
+        return createNodeScanTask(nodeDto);
     }
 
     private void sendAzureScannerTask(AzureCredential credential) {

@@ -45,6 +45,7 @@ import org.opennms.horizon.inventory.repository.NodeRepository;
 import org.opennms.horizon.inventory.service.taskset.CollectorTaskSetService;
 import org.opennms.horizon.inventory.service.taskset.DetectorTaskSetService;
 import org.opennms.horizon.inventory.service.taskset.MonitorTaskSetService;
+import org.opennms.horizon.inventory.service.taskset.ScannerTaskSetService;
 import org.opennms.horizon.inventory.taskset.api.TaskSetPublisher;
 import org.opennms.horizon.inventory.repository.TagRepository;
 import org.opennms.horizon.shared.constants.GrpcConstants;
@@ -84,6 +85,7 @@ public class NodeService {
     private final DetectorTaskSetService detectorTaskSetService;
     private final CollectorTaskSetService collectorTaskSetService;
     private final MonitorTaskSetService monitorTaskSetService;
+    private final ScannerTaskSetService scannerTaskSetService;
     private final TaskSetPublisher taskSetPublisher;
 
 
@@ -197,8 +199,10 @@ public class NodeService {
     }
 
     public List<TaskDefinition> getTasksForNode(Node node) {
+        var tasks = new ArrayList<TaskDefinition>();
         var detectorTasks = detectorTaskSetService.getDetectorTasks(node);
-        var tasks = new ArrayList<TaskDefinition>(detectorTasks);
+        scannerTaskSetService.getNodeScanTasks(node).ifPresent(tasks::add);
+        tasks.addAll(detectorTasks);
         node.getIpInterfaces().forEach(ipInterface -> {
             ipInterface.getMonitoredServices().forEach((ms) -> {
                 String serviceName = ms.getMonitoredServiceType().getServiceName();

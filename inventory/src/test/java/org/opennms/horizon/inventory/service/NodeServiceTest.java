@@ -46,6 +46,7 @@ import org.opennms.horizon.inventory.repository.NodeRepository;
 import org.opennms.horizon.inventory.service.taskset.CollectorTaskSetService;
 import org.opennms.horizon.inventory.service.taskset.DetectorTaskSetService;
 import org.opennms.horizon.inventory.service.taskset.MonitorTaskSetService;
+import org.opennms.horizon.inventory.service.taskset.ScannerTaskSetService;
 import org.opennms.horizon.inventory.taskset.api.TaskSetPublisher;
 import org.opennms.horizon.inventory.repository.TagRepository;
 import org.opennms.horizon.shared.constants.GrpcConstants;
@@ -87,6 +88,7 @@ public class NodeServiceTest {
         tagRepository = mock(TagRepository.class);
         mockConfigUpdateService = mock(ConfigUpdateService.class);
 
+
         nodeService = new NodeService(mockNodeRepository,
             mockMonitoringLocationRepository,
             mockIpInterfaceRepository,
@@ -95,6 +97,7 @@ public class NodeServiceTest {
             mock(DetectorTaskSetService.class),
             mock(CollectorTaskSetService.class),
             mock(MonitorTaskSetService.class),
+            mock(ScannerTaskSetService.class),
             mock(TaskSetPublisher.class),
             nodeMapper);
 

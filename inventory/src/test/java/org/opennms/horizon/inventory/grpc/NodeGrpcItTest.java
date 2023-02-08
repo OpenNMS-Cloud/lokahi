@@ -41,23 +41,6 @@ import io.grpc.StatusRuntimeException;
 import io.grpc.protobuf.StatusProto;
 import io.grpc.stub.MetadataUtils;
 import jakarta.transaction.Transactional;
-import static com.jayway.awaitility.Awaitility.await;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.internal.verification.VerificationModeFactory.times;
-
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -99,8 +82,24 @@ import org.opennms.taskset.service.contract.TaskSetServiceGrpc;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
+
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+
+import static com.jayway.awaitility.Awaitility.await;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.internal.verification.VerificationModeFactory.times;
 
 
 
@@ -125,7 +124,6 @@ class NodeGrpcItTest extends GrpcTestBase {
     private NodeService nodeService;
     @Autowired
     private NodeMapper mapper;
-
     @Autowired
     private TagService tagService;
     @Autowired
@@ -341,7 +339,7 @@ class NodeGrpcItTest extends GrpcTestBase {
         var tasks = nodeService.getTasksForNode(node);
         // Should have two detector tasks ( ICMP/SNMP)
         // one monitor task (SNMP) and one SNMP Collector task
-        Assertions.assertEquals(tasks.size(), 4);
+        Assertions.assertEquals(tasks.size(), 5);
         testGrpcService.reset();
         detectorTaskSetService.sendDetectorTasks(node);
         taskSetHandler.sendMonitorTask(location, MonitorType.SNMP, node.getIpInterfaces().get(0), node.getId());

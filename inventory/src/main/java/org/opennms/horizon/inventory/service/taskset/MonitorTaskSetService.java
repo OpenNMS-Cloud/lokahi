@@ -82,7 +82,7 @@ public class MonitorTaskSetService {
         }
 
         if (configuration != null) {
-            String taskId = identityForIpTask(ipAddress, name);
+            String taskId = identityForIpTask(nodeId, ipAddress, name);
             TaskDefinition.Builder builder =
                 TaskDefinition.newBuilder()
                     .setType(TaskType.MONITOR)

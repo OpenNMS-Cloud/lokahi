@@ -69,7 +69,7 @@ public class CollectorTaskSetService {
                     .setNodeId(nodeId)
                     .build());
 
-            String taskId = identityForIpTask(ipAddress, name);
+            String taskId = identityForIpTask(nodeId, ipAddress, name);
             TaskDefinition.Builder builder =
                 TaskDefinition.newBuilder()
                     .setType(TaskType.COLLECTOR)

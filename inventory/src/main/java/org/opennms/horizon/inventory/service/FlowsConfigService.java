@@ -32,6 +32,7 @@ import com.google.common.io.Resources;
 import com.google.protobuf.Any;
 import lombok.RequiredArgsConstructor;
 import org.opennms.horizon.inventory.dto.MonitoringLocationDTO;
+import org.opennms.horizon.inventory.service.taskset.TaskUtils;
 import org.opennms.horizon.inventory.taskset.api.TaskSetPublisher;
 import org.opennms.horizon.shared.protobuf.util.ProtobufUtil;
 import org.opennms.sink.flows.contract.FlowsConfig;
@@ -78,7 +79,7 @@ public class FlowsConfigService {
 
     private void publishFlowsConfig(String tenantId, String location, FlowsConfig flowsConfig) {
         TaskDefinition taskDefinition = TaskDefinition.newBuilder()
-            .setId("flows-config")
+            .setId(TaskUtils.identityForConfig("flows-config", location))
             .setPluginName("flows.parsers.config")
             .setType(TaskType.LISTENER)
             .setConfiguration(Any.pack(flowsConfig))

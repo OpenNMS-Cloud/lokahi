@@ -55,6 +55,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class TrapConfigService {
     private static final Logger LOG = LoggerFactory.getLogger(TrapConfigService.class);
+    public final static String TRAPS_CONFIG  = "traps-config";
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final MonitoringLocationService monitoringLocationService;
     private final TaskSetPublisher taskSetPublisher;
@@ -104,7 +105,7 @@ public class TrapConfigService {
 
     private void publishTrapConfig(String tenantId, String location, TrapConfig trapConfig) {
         TaskDefinition taskDefinition = TaskDefinition.newBuilder()
-            .setId(TaskUtils.identityForConfig("traps-config", location))
+            .setId(TaskUtils.identityForConfig(TRAPS_CONFIG, location))
             .setPluginName("trapd.listener.config")
             .setType(TaskType.LISTENER)
             .setConfiguration(Any.pack(trapConfig))

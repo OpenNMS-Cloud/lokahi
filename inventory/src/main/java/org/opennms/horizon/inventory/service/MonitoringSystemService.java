@@ -24,13 +24,13 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Slf4j
 public class MonitoringSystemService {
-    private final MonitoringSystemRepository modelRepo;
+    private final MonitoringSystemRepository systemRepository;
     private final MonitoringLocationRepository locationRepository;
     private final MonitoringSystemMapper mapper;
     private final ConfigUpdateService configUpdateService;
 
     public List<MonitoringSystemDTO> findByTenantId(String tenantId) {
-        List<MonitoringSystem> all = modelRepo.findByTenantId(tenantId);
+        List<MonitoringSystem> all = systemRepository.findByTenantId(tenantId);
         return all
             .stream()
             .map(mapper::modelToDTO)
@@ -38,12 +38,12 @@ public class MonitoringSystemService {
     }
 
     public Optional<MonitoringSystemDTO> findBySystemId(String systemId, String tenantId) {
-        return modelRepo.findBySystemIdAndTenantId(systemId, tenantId).map(mapper::modelToDTO);
+        return systemRepository.findBySystemIdAndTenantId(systemId, tenantId).map(mapper::modelToDTO);
     }
 
     public Optional<Long> addMonitoringSystemFromHeartbeat(HeartbeatMessage message, String tenantId) {
         Identity identity = message.getIdentity();
-        Optional<MonitoringSystem> msOp = modelRepo.findBySystemIdAndTenantId(identity.getSystemId(), tenantId);
+        Optional<MonitoringSystem> msOp = systemRepository.findBySystemIdAndTenantId(identity.getSystemId(), tenantId);
         if(msOp.isEmpty()) {
             Optional<MonitoringLocation> locationOp = locationRepository.findByLocationAndTenantId(identity.getLocation(), tenantId);
             MonitoringLocation location = new MonitoringLocation();
@@ -64,12 +64,12 @@ public class MonitoringSystemService {
             monitoringSystem.setLastCheckedIn(LocalDateTime.now());
             monitoringSystem.setLabel(identity.getSystemId().toUpperCase());
             monitoringSystem.setMonitoringLocationId(location.getId());
-            modelRepo.save(monitoringSystem);
+            systemRepository.save(monitoringSystem);
             return Optional.of(monitoringSystem.getId()); //only return new ID
         } else {
             MonitoringSystem monitoringSystem = msOp.get();
             monitoringSystem.setLastCheckedIn(LocalDateTime.now());
-            modelRepo.save(monitoringSystem);
+            systemRepository.save(monitoringSystem);
             return Optional.empty();
         }
 
@@ -79,16 +79,30 @@ public class MonitoringSystemService {
     @Transactional
     public List<MonitoringSystemBean> listAllForMonitoring() {
         List<MonitoringSystemBean> list = new ArrayList<>();
-        modelRepo.findAll().forEach(s->list.add(new MonitoringSystemBean(s.getSystemId(), s.getTenantId(), s.getMonitoringLocation().getLocation())));
+        systemRepository.findAll().forEach(s->list.add(new MonitoringSystemBean(s.getSystemId(), s.getTenantId(), s.getMonitoringLocation().getLocation())));
         return list;
     }
 
     @Transactional
     public Optional<MonitoringSystemBean> getByIdForMonitoring(long id) {
-        return modelRepo.findById(id).map(s->new MonitoringSystemBean(s.getSystemId(), s.getTenantId(), s.getMonitoringLocation().getLocation()));
+        return systemRepository.findById(id).map(s->new MonitoringSystemBean(s.getSystemId(), s.getTenantId(), s.getMonitoringLocation().getLocation()));
     }
 
+    @Transactional
     public void deleteMonitoringSystem(long id) {
-        modelRepo.deleteById(id);
+
+        var optionalMS = systemRepository.findById(id);
+        if (optionalMS.isPresent()) {
+            var monitoringSystem = optionalMS.get();
+            var location = monitoringSystem.getMonitoringLocation().getLocation();
+            var tenantId = monitoringSystem.getTenantId();
+
+            var retrieved = systemRepository.findByMonitoringLocationIdAndTenantId(optionalMS.get().getMonitoringLocationId(), tenantId);
+            systemRepository.deleteById(id);
+            if (retrieved.size() == 1 && retrieved.get(0).getSystemId().equals(monitoringSystem.getSystemId())) {
+                locationRepository.delete(monitoringSystem.getMonitoringLocation());
+                configUpdateService.removeConfigsFromTaskSet(tenantId, location);
+            }
+        }
     }
 }

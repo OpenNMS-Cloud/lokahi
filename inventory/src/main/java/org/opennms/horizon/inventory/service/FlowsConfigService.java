@@ -54,6 +54,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class FlowsConfigService {
     private static final Logger LOG = LoggerFactory.getLogger(FlowsConfigService.class);
+    public final static String FLOWS_CONFIG  = "flows-config";
     private final MonitoringLocationService monitoringLocationService;
     private final TaskSetPublisher taskSetPublisher;
 
@@ -79,7 +80,7 @@ public class FlowsConfigService {
 
     private void publishFlowsConfig(String tenantId, String location, FlowsConfig flowsConfig) {
         TaskDefinition taskDefinition = TaskDefinition.newBuilder()
-            .setId(TaskUtils.identityForConfig("flows-config", location))
+            .setId(TaskUtils.identityForConfig(FLOWS_CONFIG, location))
             .setPluginName("flows.parsers.config")
             .setType(TaskType.LISTENER)
             .setConfiguration(Any.pack(flowsConfig))

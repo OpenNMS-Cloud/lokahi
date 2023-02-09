@@ -31,11 +31,18 @@ package org.opennms.horizon.inventory.service;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.opennms.horizon.inventory.service.taskset.TaskUtils;
+import org.opennms.horizon.inventory.taskset.api.TaskSetPublisher;
+import org.opennms.taskset.contract.TaskDefinition;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
+
+import static org.opennms.horizon.inventory.service.FlowsConfigService.FLOWS_CONFIG;
+import static org.opennms.horizon.inventory.service.TrapConfigService.TRAPS_CONFIG;
 
 @Service
 @RequiredArgsConstructor
@@ -48,6 +55,7 @@ public class ConfigUpdateService {
     private final ExecutorService executorService = Executors.newFixedThreadPool(10, threadFactory);
     private final TrapConfigService trapConfigService;
     private final FlowsConfigService flowsConfigService;
+    private final TaskSetPublisher taskSetPublisher;
 
     private void sendConfigUpdatesToMinion(String tenantId, String location) {
         try {
@@ -64,6 +72,20 @@ public class ConfigUpdateService {
 
     public void sendConfigUpdate(String tenantId, String location) {
         executorService.execute(() -> sendConfigUpdatesToMinion(tenantId, location));
+    }
+
+    public void removeConfigsFromTaskSet(String tenantId, String location) {
+
+        executorService.execute(() -> {
+            TaskDefinition trapsConfig = TaskDefinition.newBuilder()
+                .setId(TaskUtils.identityForConfig(TRAPS_CONFIG, location)).build();
+            TaskDefinition flowsConfig = TaskDefinition.newBuilder()
+                .setId(TaskUtils.identityForConfig(FLOWS_CONFIG, location)).build();
+            var tasks = new ArrayList<TaskDefinition>();
+            tasks.add(trapsConfig);
+            tasks.add(flowsConfig);
+            taskSetPublisher.publishTaskDeletion(tenantId, location, tasks);
+        });
     }
 
 }

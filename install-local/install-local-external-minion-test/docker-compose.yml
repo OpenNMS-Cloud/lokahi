@@ -3,6 +3,11 @@ version: '3.5'
 services:
   minion-localnet:
     image: docker.io/opennms/horizon-stream-minion:latest
+    #image: docker.io/opennms/horizon-stream-minion:v0.0.27-dev
+    # If you have not downloaded latest, then use latest, but if you have it
+    # downloaded, use specific versions to trigger new download. See
+    # https://hub.docker.com/r/opennms/horizon-stream-minion/tags for recent
+    # tags.
     extra_hosts:
       minion.onmshs: 10.0.0.55
     environment:

@@ -14,9 +14,6 @@ services:
       MINION_GATEWAY_HOST: minion.onmshs
       MINION_GATEWAY_PORT: 8990
       MINION_GATEWAY_TLS: false
-    volumes:
-      - ./grpc.cfg:/opt/karaf/etc/org.opennms.core.ipc.grpc.client.cfg
-      - ./id.cfg:/opt/karaf/etc/org.opennms.identity.cfg
     ports:
       - "8877:8877/udp" # netflow5
       - "4729:4729/udp" # netflow9
@@ -24,19 +21,19 @@ services:
       localnet:
         ipv4_address: 172.4.1.1
 
-  snmpd-temp-a:
+  temp-a:
     image: polinux/snmpd
     networks:
       localnet:
         ipv4_address: 172.4.2.1
 
-  snmpd-temp-b:
+  temp-b:
     image: polinux/snmpd
     networks:
       localnet:
         ipv4_address: 172.4.2.2
 
-  snmpd-temp-c:
+  temp-c:
     image: polinux/snmpd
     networks:
       localnet:

@@ -60,6 +60,11 @@ spec:
               value: "http://{{ .Values.Keycloak.ServiceName }}:8080/auth/"
             - name: KEYCLOAK_REALM
               value: "{{ .Values.Keycloak.RealmName }}"
+            - name: INVENTORY_ENCRYPTION_KEY
+              valueFrom:
+                secretKeyRef:
+                  key: encryptionKey
+                  name: {{ .Values.OpenNMS.Inventory.ServiceName }}-encryption-key
           ports:
             - name: http
               containerPort: {{ .Values.OpenNMS.Inventory.Port }}

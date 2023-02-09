@@ -50,6 +50,7 @@ OpenNMS:
       Requests:
         Cpu: '0'
         Memory: '0'
+    EncryptionKey: encryption-key
   Notification:
     Resources:
       Limits:

@@ -50,10 +50,14 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Properties;
 import javax.ws.rs.core.MediaType;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.producer.KafkaProducer;
+import org.apache.kafka.common.header.Header;
+import org.apache.kafka.common.header.Headers;
 import org.opennms.horizon.alarmservice.RetryUtils;
 import org.opennms.horizon.alarmservice.kafkahelper.KafkaTestHelper;
 import org.opennms.horizon.alarmservice.model.AlarmDTO;
@@ -62,6 +66,7 @@ import org.opennms.horizon.alarmservice.rest.AlarmCollectionDTO;
 import org.opennms.horizon.alarmservice.rest.support.MultivaluedMapImpl;
 import org.opennms.horizon.events.proto.AlarmData;
 import org.opennms.horizon.events.proto.Event;
+import org.opennms.horizon.shared.constants.GrpcConstants;
 
 @Slf4j
 public class AlarmTestSteps {
@@ -298,6 +303,30 @@ public class AlarmTestSteps {
         List<AlarmDTO> alarmDTOList = alarmCollectionDTO.getAlarms();
         AlarmDTO alarmDTO = findCurrentTestAlarm(alarmDTOList);
         assertEquals(alarmDTO.getLastEventSeverity(), alarmDTO.getSeverity());
+    }
+
+    @Then("Verify topic {string} has {int} messages with tenant {string}")
+    public void verifyTopicContainsTenant(String topic, int expectedMessages, String tenant) {
+        int foundMessages = 0;
+
+        List<ConsumerRecord<String, byte[]>> records = kafkaTestHelper.getConsumedMessages(topic);
+        for (ConsumerRecord record: records) {
+            Headers headers = record.headers();
+
+            for (Header header: headers) {
+                if (header.key().equals(GrpcConstants.TENANT_ID_KEY)) {
+                    byte[] headerValue = header.value();
+                    String tenantId = new String(headerValue);
+
+                    if(tenant.equals(tenantId)) {
+                        foundMessages++;
+                    }
+                    break;
+                }
+            }
+        }
+
+        assertEquals(expectedMessages, foundMessages);
     }
 
     @Then("Remember alarm id")

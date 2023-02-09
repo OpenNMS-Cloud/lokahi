@@ -50,6 +50,8 @@ import org.opennms.horizon.shared.constants.GrpcConstants;
 @Slf4j
 public class KafkaTestHelper {
 
+    private static int unique = 0;
+
     @Getter
     @Setter
     private String kafkaBootstrapUrl;
@@ -66,7 +68,7 @@ public class KafkaTestHelper {
 
     public boolean startConsumerAndProducer(String consumerTopic, String producerTopic) {
         try {
-            KafkaConsumer<String, byte[]> consumer = this.createKafkaConsumer("test-consumer-group", "test-consumer-for-" + consumerTopic);
+            KafkaConsumer<String, byte[]> consumer = this.createKafkaConsumer("test-consumer-group"+ ++unique, "test-consumer-for-" + consumerTopic);
             kafkaProducer = this.createKafkaProducer();
             KafkaProcessor<String, byte[]> processor = new KafkaProcessor<>(consumer, kafkaProducer, records -> processRecords(consumerTopic, records));
 

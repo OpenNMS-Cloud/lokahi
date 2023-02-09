@@ -5,21 +5,26 @@ Feature: Alarm Service Basic Functionality
     Given Application Base URL in system property "application.base-url"
     Given Kafka Bootstrap URL in system property "kafka.bootstrap-servers"
     Given Kafka topics "events" "alarms"
+#    Given Kafka topics "alarms" "alarms"
 
   Scenario: Verify when an event is received from Kafka, a new Alarm is created
     Then Send Event message to Kafka at topic "events" with alarm reduction key "alarm.reduction-key.010" with tenant "opennms-prime"
     Then send GET request to application at path "/alarms/list", with timeout 5000ms, until JSON response matches the following JSON path expressions
       | totalCount == 1 |
+#    Then Verify topic "alarms" has 1 messages with tenant "opennms-prime"
 
   Scenario: Verify when an event is received from Kafka, a new Alarm is created
     Then Send Event message to Kafka at topic "events" with alarm reduction key "alarm.reduction-key.020" with tenant "opennms-prime"
     Then send GET request to application at path "/alarms/list", with timeout 5000ms, until JSON response matches the following JSON path expressions
       | totalCount == 2 |
+#    Then Verify topic "alarms" has 2 messages with tenant "opennms-prime"
 
   Scenario: Verify when an event is received from Kafka with a different tenant id, you do not see the new alarm
     Then Send Event message to Kafka at topic "events" with alarm reduction key "alarm.reduction-key.020" with tenant "other-tenant"
     Then send GET request to application at path "/alarms/list", with timeout 5000ms, until JSON response matches the following JSON path expressions
       | totalCount == 2 |
+#    Then Verify topic "alarms" has 2 messages with tenant "opennms-prime"
+#    Then Verify topic "alarms" has 1 messages with tenant "other-tenant"
 
   Scenario: Verify alarm can be deleted
     Then Send Event message to Kafka at topic "events" with alarm reduction key "alarm.reduction-key.030" with tenant "opennms-prime"

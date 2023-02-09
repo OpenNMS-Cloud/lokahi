@@ -27,20 +27,24 @@
  *******************************************************************************/
 package org.opennms.horizon.inventory.mapper;
 
+import jakarta.persistence.AttributeConverter;
+import org.opennms.horizon.inventory.exception.InventoryRuntimeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
-import jakarta.persistence.AttributeConverter;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.Key;
+import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Base64;
 
@@ -51,18 +55,21 @@ public class EncryptAttributeConverter implements AttributeConverter<String, Str
     private static final String TRANSFORMATION = "AES/CBC/PKCS5Padding";
     private static final SecureRandom RANDOM = new SecureRandom();
 
+    @Value("${inventory.encryption.key}")
+    private String encryptionKey;
+
     private Key key;
     private Cipher cipher;
     private IvParameterSpec ivParams;
 
     @PostConstruct
-    public void init() throws Exception {
-        // todo: IMPORTANT change this. generate random and externalize
-        String secret = randomString(16);
-
-        this.key = new SecretKeySpec(secret.getBytes(), ALGORITHM);
-        this.cipher = Cipher.getInstance(TRANSFORMATION);
-
+    public void init() {
+        this.key = new SecretKeySpec(encryptionKey.getBytes(), ALGORITHM);
+        try {
+            this.cipher = Cipher.getInstance(TRANSFORMATION);
+        } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
+            throw new InventoryRuntimeException("Failed to get cipher", e);
+        }
         byte[] bytesIV = new byte[this.cipher.getBlockSize()];
         RANDOM.nextBytes(bytesIV);
         this.ivParams = new IvParameterSpec(bytesIV);
@@ -90,15 +97,5 @@ public class EncryptAttributeConverter implements AttributeConverter<String, Str
             log.error("Failed to convert to entity attribute, reading encrypted value...", e);
             return value;
         }
-    }
-
-    private static final String LETTERS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-
-    private String randomString(int length) {
-        StringBuilder sb = new StringBuilder(length);
-        for (int index = 0; index < length; index++) {
-            sb.append(LETTERS.charAt(RANDOM.nextInt(LETTERS.length())));
-        }
-        return sb.toString();
     }
 }

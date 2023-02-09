@@ -52,6 +52,7 @@ type MetricsProcessorValues struct {
 
 type InventoryValues struct {
 	ServiceValues `yaml:",inline"`
+	EncryptionKey string `yaml:"EncryptionKey"`
 }
 
 type AlarmValues struct {

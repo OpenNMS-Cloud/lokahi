@@ -43,6 +43,8 @@ keycloak:
   base-url: http://onms-keycloak:8080/auth
 
 inventory:
+  encryption:
+    key: test-encryption-key
   azure:
     login-url: http://localhost:12345
     management-url: http://localhost:12345

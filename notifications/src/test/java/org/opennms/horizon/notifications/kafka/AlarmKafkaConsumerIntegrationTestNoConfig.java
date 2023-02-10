@@ -40,6 +40,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 
@@ -69,9 +70,6 @@ class AlarmKafkaConsumerIntegrationTestNoConfig {
 
     @Captor
     ArgumentCaptor<AlarmDTO> alarmCaptor;
-
-    @Captor
-    ArgumentCaptor<Map<String, Object>> headerCaptor;
 
     @Autowired
     private TestRestTemplate testRestTemplate;
@@ -105,17 +103,17 @@ class AlarmKafkaConsumerIntegrationTestNoConfig {
         stringProducer.flush();
 
         verify(alarmKafkaConsumer, timeout(KAFKA_TIMEOUT).times(1))
-            .consume(alarmCaptor.capture(),headerCaptor.capture());
+            .consume(alarmCaptor.capture(),any());
 
         AlarmDTO capturedAlarm = alarmCaptor.getValue();
         assertEquals(id, capturedAlarm.getId());
 
         // This is the call to the PagerDuty API, we won't get this far, as we will get an exception when we try
         // to get the token, as the config table hasn't been setup.
-        verify(restTemplate, timeout(HTTP_TIMEOUT).times(0)).exchange(ArgumentMatchers.any(URI.class),
+        verify(restTemplate, timeout(HTTP_TIMEOUT).times(0)).exchange(any(URI.class),
             ArgumentMatchers.eq(HttpMethod.POST),
-            ArgumentMatchers.any(HttpEntity.class),
-            ArgumentMatchers.any(Class.class));
+            any(HttpEntity.class),
+            any(Class.class));
     }
 
     @AfterAll

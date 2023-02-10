@@ -74,9 +74,6 @@ class AlarmKafkaConsumerIntegrationTest {
     @Captor
     ArgumentCaptor<AlarmDTO> alarmCaptor;
 
-    @Captor
-    ArgumentCaptor<Map<String, Object>> headerCaptor;
-
     @MockBean
     private RestTemplate restTemplate;
 
@@ -108,7 +105,7 @@ class AlarmKafkaConsumerIntegrationTest {
         stringProducer.flush();
 
         verify(alarmKafkaConsumer, timeout(KAFKA_TIMEOUT).times(1))
-            .consume(alarmCaptor.capture(), headerCaptor.capture());
+            .consume(alarmCaptor.capture(), any());
 
         AlarmDTO capturedAlarm = alarmCaptor.getValue();
         assertEquals(id, capturedAlarm.getId());

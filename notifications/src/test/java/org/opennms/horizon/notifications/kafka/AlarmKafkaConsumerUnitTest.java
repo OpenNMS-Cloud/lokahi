@@ -37,10 +37,8 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.opennms.horizon.notifications.exceptions.NotificationException;
 import org.opennms.horizon.notifications.exceptions.NotificationInternalException;
 import org.opennms.horizon.notifications.service.NotificationService;
-import org.opennms.horizon.shared.constants.GrpcConstants;
 import org.opennms.horizon.shared.dto.event.AlarmDTO;
 
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -68,7 +66,6 @@ public class AlarmKafkaConsumerUnitTest {
             .when(notificationService).postNotification(any());
 
         AlarmDTO alarmDTO = new AlarmDTO();
-        Map<String, Object> headers = new HashMap<>();
-        alarmKafkaConsumer.consume(alarmDTO,headers);
+        alarmKafkaConsumer.consumeAlarm(alarmDTO);
     }
 }

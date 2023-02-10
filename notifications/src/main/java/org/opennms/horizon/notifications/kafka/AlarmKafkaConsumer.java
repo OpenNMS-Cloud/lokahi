@@ -13,8 +13,6 @@ import org.springframework.messaging.handler.annotation.Headers;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Service;
 
-import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -42,11 +40,11 @@ public class AlarmKafkaConsumer {
 
         Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, tenantId).run(()->
         {
-            consumeAlarm((alarm));
+            consumeAlarm(alarm);
         });
     }
 
-    private void consumeAlarm(AlarmDTO alarm) {
+    public void consumeAlarm(AlarmDTO alarm){
         try {
             notificationService.postNotification(alarm);
         } catch (NotificationException e) {

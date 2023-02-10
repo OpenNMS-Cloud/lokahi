@@ -1,8 +1,8 @@
 /*******************************************************************************
  * This file is part of OpenNMS(R).
  *
- * Copyright (C) 2019 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2019 The OpenNMS Group, Inc.
+ * Copyright (C) 2018-2018 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2018 The OpenNMS Group, Inc.
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
  *
@@ -26,39 +26,25 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.flows.meta.api;
+package org.opennms.horizon.flows.classification.internal.matcher;
 
-import com.google.common.collect.ImmutableList;
+import org.opennms.horizon.flows.classification.ClassificationRequest;
+import org.opennms.horizon.flows.classification.FilterService;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.Objects;
 
-public class FallbackScope implements Scope {
-    private final List<Scope> scopes;
+public class FilterMatcher implements Matcher {
 
-    public FallbackScope(final List<Scope> scopes) {
-        this.scopes = ImmutableList.copyOf(scopes).reverse();
-    }
+    private final FilterService filterService;
+    private final String filterExpression;
 
-    public FallbackScope(final Scope... scopes) {
-        this.scopes = ImmutableList.copyOf(scopes).reverse();
+    public FilterMatcher(String filterExpression, FilterService filterService) {
+        this.filterExpression = Objects.requireNonNull(filterExpression);
+        this.filterService = Objects.requireNonNull(filterService);
     }
 
     @Override
-    public Optional<ScopeValue> get(final ContextKey contextKey) {
-        return this.scopes.stream()
-                .map(scope -> scope.get(contextKey))
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .findFirst();
-    }
-
-    @Override
-    public Set<ContextKey> keys() {
-        return this.scopes.stream()
-                .flatMap(scope -> scope.keys().stream())
-                .collect(Collectors.toSet());
+    public boolean matches(ClassificationRequest request) {
+        return this.filterService.matches(request.getExporterAddress(), filterExpression);
     }
 }

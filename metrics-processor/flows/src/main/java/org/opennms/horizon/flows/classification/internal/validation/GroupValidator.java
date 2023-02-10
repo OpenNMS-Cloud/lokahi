@@ -26,51 +26,33 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.flows.classification.csv;
+package org.opennms.horizon.flows.classification.internal.validation;
 
+import org.opennms.horizon.flows.classification.error.ErrorContext;
+import org.opennms.horizon.flows.classification.error.Errors;
+import org.opennms.horizon.flows.classification.exception.ClassificationException;
+import org.opennms.horizon.flows.classification.persistence.api.ClassificationRuleDao;
+import org.opennms.horizon.flows.classification.persistence.api.Group;
 import org.opennms.horizon.flows.classification.persistence.api.Rule;
-import org.opennms.horizon.flows.classification.error.Error;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.Objects;
 
-public class CsvImportResult {
+public class GroupValidator {
 
-    final Map<Long, Error> errorMap = new HashMap<>();
-    final List<Rule> rules = new ArrayList<>();
-    private Error error;
+    private final ClassificationRuleDao ruleDao;
 
-    public void markError(long rowNumber, Error error) {
-        errorMap.put(rowNumber, error);
+    public GroupValidator(final ClassificationRuleDao ruleDao) {
+        this.ruleDao = Objects.requireNonNull(ruleDao);
     }
 
-    public boolean hasError(long rowNumber) {
-        return errorMap.containsKey(rowNumber);
-    }
-
-    public void setError(Error error) {
-        this.error = error;
-    }
-
-    public void markSuccess(Rule rule) {
-        rules.add(rule);
-    }
-
-    public List<Rule> getRules() {
-        return rules;
-    }
-
-    public boolean isSuccess() {
-        return error == null && errorMap.isEmpty();
-    }
-
-    public Error getError() {
-        return error;
-    }
-
-    public Map<Long, Error> getErrorMap() {
-        return errorMap;
+    // verify if adding the given rule to the given group would not result in any conflict(s)
+    public void validate(Group group, Rule potentialNewRule) {
+        if (potentialNewRule != null) {
+            Objects.requireNonNull(group);
+            final Rule existingRule = ruleDao.findByDefinition(potentialNewRule, group);
+            if (existingRule != null) {
+                throw new ClassificationException(ErrorContext.Name, Errors.GROUP_DUPLICATE_RULE);
+            }
+        }
     }
 }

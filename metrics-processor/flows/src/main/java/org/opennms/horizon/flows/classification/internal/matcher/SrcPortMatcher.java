@@ -26,51 +26,15 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.flows.classification.csv;
+package org.opennms.horizon.flows.classification.internal.matcher;
 
-import org.opennms.horizon.flows.classification.persistence.api.Rule;
-import org.opennms.horizon.flows.classification.error.Error;
+import org.opennms.horizon.flows.classification.internal.value.PortValue;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-public class CsvImportResult {
-
-    final Map<Long, Error> errorMap = new HashMap<>();
-    final List<Rule> rules = new ArrayList<>();
-    private Error error;
-
-    public void markError(long rowNumber, Error error) {
-        errorMap.put(rowNumber, error);
+public class SrcPortMatcher extends PortMatcher {
+    public SrcPortMatcher(PortValue ports) {
+        super(ports, (request) -> request.getSrcPort());
     }
-
-    public boolean hasError(long rowNumber) {
-        return errorMap.containsKey(rowNumber);
-    }
-
-    public void setError(Error error) {
-        this.error = error;
-    }
-
-    public void markSuccess(Rule rule) {
-        rules.add(rule);
-    }
-
-    public List<Rule> getRules() {
-        return rules;
-    }
-
-    public boolean isSuccess() {
-        return error == null && errorMap.isEmpty();
-    }
-
-    public Error getError() {
-        return error;
-    }
-
-    public Map<Long, Error> getErrorMap() {
-        return errorMap;
+    public SrcPortMatcher(String ports) {
+        this(PortValue.of(ports));
     }
 }

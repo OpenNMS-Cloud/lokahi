@@ -26,51 +26,16 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.flows.classification.csv;
+package org.opennms.horizon.flows.classification.internal.matcher;
 
-import org.opennms.horizon.flows.classification.persistence.api.Rule;
-import org.opennms.horizon.flows.classification.error.Error;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import org.opennms.horizon.flows.classification.internal.value.IpValue;
 
-public class CsvImportResult {
-
-    final Map<Long, Error> errorMap = new HashMap<>();
-    final List<Rule> rules = new ArrayList<>();
-    private Error error;
-
-    public void markError(long rowNumber, Error error) {
-        errorMap.put(rowNumber, error);
+public class DstAddressMatcher extends IpMatcher {
+    public DstAddressMatcher(IpValue input) {
+        super(input, (request) -> request.getDstAddress());
     }
-
-    public boolean hasError(long rowNumber) {
-        return errorMap.containsKey(rowNumber);
-    }
-
-    public void setError(Error error) {
-        this.error = error;
-    }
-
-    public void markSuccess(Rule rule) {
-        rules.add(rule);
-    }
-
-    public List<Rule> getRules() {
-        return rules;
-    }
-
-    public boolean isSuccess() {
-        return error == null && errorMap.isEmpty();
-    }
-
-    public Error getError() {
-        return error;
-    }
-
-    public Map<Long, Error> getErrorMap() {
-        return errorMap;
+    public DstAddressMatcher(String input) {
+        this(IpValue.of(input));
     }
 }

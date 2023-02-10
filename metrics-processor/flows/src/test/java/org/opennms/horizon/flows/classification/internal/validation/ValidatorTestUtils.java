@@ -26,51 +26,33 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.flows.classification.csv;
+package org.opennms.horizon.flows.classification.internal.validation;
 
-import org.opennms.horizon.flows.classification.persistence.api.Rule;
-import org.opennms.horizon.flows.classification.error.Error;
+import org.opennms.horizon.flows.classification.error.ErrorTemplate;
+import org.opennms.horizon.flows.classification.exception.ClassificationException;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
-public class CsvImportResult {
-
-    final Map<Long, Error> errorMap = new HashMap<>();
-    final List<Rule> rules = new ArrayList<>();
-    private Error error;
-
-    public void markError(long rowNumber, Error error) {
-        errorMap.put(rowNumber, error);
+public class ValidatorTestUtils {
+    protected interface Block {
+        void execute();
     }
 
-    public boolean hasError(long rowNumber) {
-        return errorMap.containsKey(rowNumber);
+    protected static void verify(final Block block) {
+        verify(block, null);
     }
 
-    public void setError(Error error) {
-        this.error = error;
-    }
-
-    public void markSuccess(Rule rule) {
-        rules.add(rule);
-    }
-
-    public List<Rule> getRules() {
-        return rules;
-    }
-
-    public boolean isSuccess() {
-        return error == null && errorMap.isEmpty();
-    }
-
-    public Error getError() {
-        return error;
-    }
-
-    public Map<Long, Error> getErrorMap() {
-        return errorMap;
+    protected static void verify(final Block block, final ErrorTemplate expectedErrorTemplate) {
+        try {
+            block.execute();
+            if (expectedErrorTemplate != null) {
+                fail("Expected validation to fail, but succeeded");
+            }
+        } catch (ClassificationException ex) {
+            // Arguments may vary, so just verify the template
+            assertThat(ex.getError().getTemplate(), is(expectedErrorTemplate));
+        }
     }
 }

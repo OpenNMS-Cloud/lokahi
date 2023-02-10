@@ -26,51 +26,28 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.flows.classification.csv;
+package org.opennms.horizon.flows.classification.internal;
 
-import org.opennms.horizon.flows.classification.persistence.api.Rule;
-import org.opennms.horizon.flows.classification.error.Error;
+import org.opennms.horizon.flows.classification.ClassificationEngine;
+import org.opennms.horizon.flows.dao.SessionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+// Is required to initialize the classification engine properly, as it requires a transaction to load correctly.
+// While starting the bundle, the initialization occurs from within the blueprint container, thus no transaction is available
+// This bean wraps the loading in a transaction, ensuring loading can occurr correctly
+public class ClassificationEngineInitializer {
 
-public class CsvImportResult {
+    private static final Logger LOG = LoggerFactory.getLogger(ClassificationEngineInitializer.class);
 
-    final Map<Long, Error> errorMap = new HashMap<>();
-    final List<Rule> rules = new ArrayList<>();
-    private Error error;
-
-    public void markError(long rowNumber, Error error) {
-        errorMap.put(rowNumber, error);
-    }
-
-    public boolean hasError(long rowNumber) {
-        return errorMap.containsKey(rowNumber);
-    }
-
-    public void setError(Error error) {
-        this.error = error;
-    }
-
-    public void markSuccess(Rule rule) {
-        rules.add(rule);
-    }
-
-    public List<Rule> getRules() {
-        return rules;
-    }
-
-    public boolean isSuccess() {
-        return error == null && errorMap.isEmpty();
-    }
-
-    public Error getError() {
-        return error;
-    }
-
-    public Map<Long, Error> getErrorMap() {
-        return errorMap;
+    public ClassificationEngineInitializer(ClassificationEngine engine, SessionUtils sessionUtils) {
+        sessionUtils.withReadOnlyTransaction(() -> {
+            try {
+                engine.reload();
+            } catch (InterruptedException e) {
+                LOG.error("reload was interrupted", e);
+            }
+            return null;
+        });
     }
 }

@@ -1,8 +1,8 @@
 /*******************************************************************************
  * This file is part of OpenNMS(R).
  *
- * Copyright (C) 2019 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2019 The OpenNMS Group, Inc.
+ * Copyright (C) 2002-2014 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2014 The OpenNMS Group, Inc.
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
  *
@@ -26,26 +26,49 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.flows.meta.api;
+package org.opennms.horizon.flows.classification.persistence.api;
 
-import java.util.Collections;
-import java.util.Optional;
-import java.util.Set;
+import java.io.Serializable;
+import java.util.List;
 
-public final class EmptyScope implements Scope {
+/**
+ * OnmsDao interface.
+ * @param <T> The type of the Entity this DAO is intended to manage.
+ * @param <K> The key of the Entity.
+ */
+public interface OnmsDao<T, K extends Serializable> {
+    
+    /**
+     * This is used to lock the table in order to implement upsert type operations
+     */
+    void lock();
 
-    public final static EmptyScope EMPTY = new EmptyScope();
+    void initialize(Object obj);
 
-    private EmptyScope() {
-    }
+    void flush();
 
-    @Override
-    public Optional<ScopeValue> get(ContextKey contextKey) {
-        return Optional.empty();
-    }
+    void clear();
 
-    @Override
-    public Set<ContextKey> keys() {
-        return Collections.emptySet();
-    }
+    int countAll();
+
+    void delete(T entity);
+
+    void delete(K key);
+
+    List<T> findAll();
+
+//    List<T> findMatching(Criteria criteria);
+//
+//    int countMatching(final Criteria onmsCrit);
+
+    T get(K id);
+
+    T load(K id);
+
+    K save(T entity);
+
+    void saveOrUpdate(T entity);
+
+    void update(T entity);
+
 }

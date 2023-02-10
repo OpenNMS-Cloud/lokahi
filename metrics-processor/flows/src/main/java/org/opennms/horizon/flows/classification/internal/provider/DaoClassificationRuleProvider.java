@@ -1,8 +1,8 @@
 /*******************************************************************************
  * This file is part of OpenNMS(R).
  *
- * Copyright (C) 2019 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2019 The OpenNMS Group, Inc.
+ * Copyright (C) 2017-2017 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2017 The OpenNMS Group, Inc.
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
  *
@@ -26,24 +26,25 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.flows.meta.api;
+package org.opennms.horizon.flows.classification.internal.provider;
 
-import java.net.InetAddress;
+import org.opennms.horizon.flows.classification.ClassificationRuleProvider;
+import org.opennms.horizon.flows.classification.persistence.api.ClassificationRuleDao;
+import org.opennms.horizon.flows.classification.persistence.api.Rule;
 
-public interface EntityScopeProvider {
+import java.util.List;
+import java.util.Objects;
 
-    interface Contexts {
-        String ASSET = "asset";
-        String INTERFACE = "interface";
-        String NODE = "node";
-        String SERVICE = "service";
+public class DaoClassificationRuleProvider implements ClassificationRuleProvider {
+
+    private final ClassificationRuleDao dao;
+
+    public DaoClassificationRuleProvider(ClassificationRuleDao classificationRuleDao) {
+        this.dao = Objects.requireNonNull(classificationRuleDao);
     }
 
-    Scope getScopeForNode(final Integer nodeId);
-
-    Scope getScopeForInterface(final Integer nodeId, final String ipAddress);
-
-    Scope getScopeForInterfaceByIfIndex(final Integer nodeId, final int ifIndex);
-
-    Scope getScopeForService(final Integer nodeId, final InetAddress ipAddress, final String serviceName);
+    @Override
+    public List<Rule> getRules() {
+        return dao.findAllEnabledRules();
+    }
 }

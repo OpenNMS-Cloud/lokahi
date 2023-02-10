@@ -26,51 +26,34 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.flows.classification.csv;
+package org.opennms.horizon.flows.classification.internal;
 
-import org.opennms.horizon.flows.classification.persistence.api.Rule;
-import org.opennms.horizon.flows.classification.error.Error;
+import org.opennms.horizon.flows.api.FilterDao;
+import org.opennms.horizon.flows.api.FilterParseException;
+import org.opennms.horizon.flows.classification.FilterService;
+import org.opennms.horizon.flows.classification.exception.InvalidFilterException;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.Objects;
 
-public class CsvImportResult {
+public class DefaultFilterService implements FilterService {
 
-    final Map<Long, Error> errorMap = new HashMap<>();
-    final List<Rule> rules = new ArrayList<>();
-    private Error error;
+    private final FilterDao filterDao;
 
-    public void markError(long rowNumber, Error error) {
-        errorMap.put(rowNumber, error);
+    public DefaultFilterService(FilterDao filterDao) {
+        this.filterDao = Objects.requireNonNull(filterDao);
     }
 
-    public boolean hasError(long rowNumber) {
-        return errorMap.containsKey(rowNumber);
+    @Override
+    public void validate(final String filterExpression) throws InvalidFilterException {
+        try {
+            this.filterDao.validateRule(filterExpression);
+        } catch (FilterParseException ex) {
+            throw new InvalidFilterException(filterExpression, ex);
+        }
     }
 
-    public void setError(Error error) {
-        this.error = error;
-    }
-
-    public void markSuccess(Rule rule) {
-        rules.add(rule);
-    }
-
-    public List<Rule> getRules() {
-        return rules;
-    }
-
-    public boolean isSuccess() {
-        return error == null && errorMap.isEmpty();
-    }
-
-    public Error getError() {
-        return error;
-    }
-
-    public Map<Long, Error> getErrorMap() {
-        return errorMap;
+    @Override
+    public boolean matches(final String address, final String filterExpression) {
+        return filterDao.isValid(address, filterExpression);
     }
 }

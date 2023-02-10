@@ -28,7 +28,6 @@
 
 package org.opennms.horizon.notifications.kafka;
 
-import org.apache.kafka.common.header.internals.RecordHeader;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;

@@ -112,10 +112,10 @@ class AlarmKafkaConsumerIntegrationTest {
 
         // This is the call to the PagerDuty API, it will fail due to an invalid token, but we just need to
         // verify that the call has been attempted.
-        verify(restTemplate, timeout(HTTP_TIMEOUT).times(1)).exchange(any(URI.class),
+        verify(restTemplate, timeout(HTTP_TIMEOUT).times(1)).exchange(ArgumentMatchers.any(URI.class),
             ArgumentMatchers.eq(HttpMethod.POST),
-            any(HttpEntity.class),
-            any(Class.class));
+            ArgumentMatchers.any(HttpEntity.class),
+            ArgumentMatchers.any(Class.class));
     }
 
     @AfterAll

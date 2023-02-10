@@ -27,7 +27,7 @@ public class AlarmKafkaConsumer {
         topics = "${horizon.kafka.alarms.topic}",
         concurrency = "${horizon.kafka.alarms.concurrency}"
     )
-   public void consume(@Payload AlarmDTO alarm, @Headers Map<String, Object> headers) {
+    public void consume(@Payload AlarmDTO alarm, @Headers Map<String, Object> headers) {
 
         LOG.info("Received alarm from kafka {}", alarm);
         Optional<String> tenantOptional = getTenantId(headers);

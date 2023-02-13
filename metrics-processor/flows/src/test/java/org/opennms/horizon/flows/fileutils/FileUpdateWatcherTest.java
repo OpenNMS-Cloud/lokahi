@@ -1,8 +1,8 @@
 /*******************************************************************************
  * This file is part of OpenNMS(R).
  *
- * Copyright (C) 2007-2014 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2014 The OpenNMS Group, Inc.
+ * Copyright (C) 2007-2023 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
  *
@@ -26,7 +26,7 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.core.fileutils;
+package org.opennms.horizon.flows.fileutils;
 
 import static com.jayway.awaitility.Awaitility.await;
 import static java.util.concurrent.TimeUnit.SECONDS;
@@ -42,6 +42,8 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+import org.opennms.horizon.flows.fileutils.FileUpdateCallback;
+import org.opennms.horizon.flows.fileutils.FileUpdateWatcher;
 
 public class FileUpdateWatcherTest {
     
@@ -56,9 +58,6 @@ public class FileUpdateWatcherTest {
     
     @Before
     public void before() throws IOException {
-        // filewatcher doesn't work right on OSX
-        Assume.assumeFalse(System.getProperty("os.name").startsWith("Mac OS X"));
-
         testFile = tempFolder.newFile("testWatcher.log");
         fileWatcher = new FileUpdateWatcher(testFile.getAbsolutePath(), fileReload());
 
@@ -71,13 +70,16 @@ public class FileUpdateWatcherTest {
             public void reload() {
                 reloadCalled.set(true);     
             }
-            
         };
     }
 
     @Test
     public void testFileUpdateWatcher() throws IOException {
-        
+        if(System.getProperty("os.name").startsWith("Mac OS X")){
+            System.out.println("SKIP: filewatcher doesn't work right on OSX");
+            return;
+        }
+
         String hello = "Hello";
         BufferedWriter writer = new BufferedWriter(new FileWriter(testFile));
         writer.write(hello);

@@ -30,13 +30,13 @@ package org.opennms.horizon.flows.classification;
 
 import com.google.common.collect.Lists;
 import org.junit.Test;
-import org.opennms.netmgt.flows.classification.FilterService;
-import org.opennms.netmgt.flows.classification.internal.value.IpRange;
-import org.opennms.netmgt.flows.classification.persistence.api.Protocol;
-import org.opennms.netmgt.flows.classification.persistence.api.ProtocolType;
-import org.opennms.netmgt.flows.classification.persistence.api.Protocols;
-import org.opennms.netmgt.flows.classification.persistence.api.Rule;
-import org.opennms.netmgt.flows.classification.persistence.api.RuleBuilder;
+import org.opennms.horizon.flows.classification.internal.DefaultClassificationEngine;
+import org.opennms.horizon.flows.classification.internal.value.IpRange;
+import org.opennms.horizon.flows.classification.persistence.api.Protocol;
+import org.opennms.horizon.flows.classification.persistence.api.ProtocolType;
+import org.opennms.horizon.flows.classification.persistence.api.Protocols;
+import org.opennms.horizon.flows.classification.persistence.api.Rule;
+import org.opennms.horizon.flows.classification.persistence.api.RuleBuilder;
 
 import java.util.ArrayList;
 import java.util.List;

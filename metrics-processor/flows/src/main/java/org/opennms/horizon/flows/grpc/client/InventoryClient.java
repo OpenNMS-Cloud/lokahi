@@ -58,7 +58,7 @@ public class InventoryClient {
         }
     }
 
-    public NodeDTO getNodeById(int nodeId, String tenantId) {
+    public NodeDTO getNodeById(long nodeId, String tenantId) {
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_BYPASS_KEY, String.valueOf(true));
         metadata.put(GrpcConstants.TENANT_ID_BYPASS_KEY, tenantId);
@@ -78,17 +78,5 @@ public class InventoryClient {
         return nodeStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
             .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
             .getNodeIdFromQuery(query).getValue();
-    }
-
-    public IpInterfaceDTO getIpInterfaceFromQuery(String ipAddress, String location, String tenantId) {
-        Metadata metadata = new Metadata();
-        metadata.put(GrpcConstants.AUTHORIZATION_BYPASS_KEY, String.valueOf(true));
-        metadata.put(GrpcConstants.TENANT_ID_BYPASS_KEY, tenantId);
-
-        NodeIdQuery query = NodeIdQuery.newBuilder()
-            .setIpAddress(ipAddress).setLocation(location).build();
-        return nodeStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
-            .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
-            .getIpInterfaceFromQuery(query);
     }
 }

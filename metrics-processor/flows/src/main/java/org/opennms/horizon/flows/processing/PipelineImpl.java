@@ -111,7 +111,7 @@ public class PipelineImpl implements Pipeline {
         LOG.debug("Enriching {} flow documents.", flows.size());
         final List<EnrichedFlow> enrichedFlows;
         try (final Timer.Context ctx = this.logEnrichementTimer.time()) {
-            enrichedFlows = documentEnricher.enrich(flows, source, tenantId);
+            enrichedFlows = documentEnricher.enrich(flows, source);
         } catch (Exception e) {
             throw new FlowException("Failed to enrich one or more flows.", e);
         }

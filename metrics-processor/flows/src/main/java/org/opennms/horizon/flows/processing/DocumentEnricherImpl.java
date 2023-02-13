@@ -125,7 +125,7 @@ public class DocumentEnricherImpl {
         this.mangler = Objects.requireNonNull(mangler);
     }
 
-    public List<EnrichedFlow> enrich(final Collection<Flow> flows, final FlowSource source, final String tenantId) {
+    public List<EnrichedFlow> enrich(final Collection<Flow> flows, final FlowSource source) {
         if (flows.isEmpty()) {
             LOG.info("Nothing to enrich.");
             return Collections.emptyList();
@@ -142,12 +142,12 @@ public class DocumentEnricherImpl {
             document.setLocation(source.getLocation());
 
             // Node data
-            getNodeInfoFromCache(source.getLocation(), source.getSourceAddress(), source.getContextKey(), flow.getNodeIdentifier(), tenantId).ifPresent(document::setExporterNodeInfo);
+            getNodeInfoFromCache(source.getLocation(), source.getSourceAddress(), source.getContextKey(), flow.getNodeIdentifier(), source.getTenantId()).ifPresent(document::setExporterNodeInfo);
             if (flow.getDstAddr() != null) {
-                getNodeInfoFromCache(source.getLocation(), flow.getDstAddr(), null, null, tenantId).ifPresent(document::setSrcNodeInfo);
+                getNodeInfoFromCache(source.getLocation(), flow.getDstAddr(), null, null, source.getTenantId()).ifPresent(document::setSrcNodeInfo);
             }
             if (flow.getSrcAddr() != null) {
-                getNodeInfoFromCache(source.getLocation(), flow.getSrcAddr(), null, null, tenantId).ifPresent(document::setDstNodeInfo);
+                getNodeInfoFromCache(source.getLocation(), flow.getSrcAddr(), null, null, source.getTenantId()).ifPresent(document::setDstNodeInfo);
             }
 
             // Locality
@@ -292,12 +292,14 @@ public class DocumentEnricherImpl {
     private Optional<NodeInfo> mapOnmsNodeToNodeDocument(final NodeDTO nodeDTO, final long interfaceId) {
         if(nodeDTO != null) {
             final NodeInfo nodeDocument = new NodeInfo();
-// SKIP for now due to inventory don't have those info
+            nodeDocument.setNodeId(nodeDTO.getId());
+            nodeDocument.setInterfaceId(interfaceId);
+            nodeDocument.setForeignId(String.valueOf(nodeDTO.getId())); // temp make it same as nodeId
+            nodeDocument.setForeignSource(nodeDTO.getSystemLocation());
+// SKIP for now due to inventory don't have this info
 //            nodeDocument.setForeignSource(onmsNode.getForeignSource());
 //            nodeDocument.setForeignId(onmsNode.getForeignId());
 //            nodeDocument.setCategories(onmsNode.getCategories().stream().map(OnmsCategory::getName).collect(Collectors.toList()));
-            nodeDocument.setNodeId(nodeDTO.getId());
-            nodeDocument.setInterfaceId(interfaceId);
 
             return Optional.of(nodeDocument);
         }

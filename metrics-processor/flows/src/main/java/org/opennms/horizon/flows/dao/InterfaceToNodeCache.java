@@ -1,8 +1,8 @@
 /*******************************************************************************
  * This file is part of OpenNMS(R).
  *
- * Copyright (C) 2003-2014 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2014 The OpenNMS Group, Inc.
+ * Copyright (C) 2003-2023 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
  *
@@ -36,9 +36,9 @@ public interface InterfaceToNodeCache {
 
 	void dataSourceSync();
 
-	boolean setNodeId(String location, InetAddress ipAddr, int nodeId);
+	boolean setNodeId(String location, InetAddress ipAddr, long nodeId, String tenantId);
 
-	boolean removeNodeId(String location, InetAddress ipAddr, int nodeId);
+	boolean removeNodeId(String location, InetAddress ipAddr, long nodeId);
 
 	int size();
 
@@ -49,18 +49,18 @@ public interface InterfaceToNodeCache {
 
 	Optional<Entry> getFirst(String location, InetAddress ipAddr, String tenantId);
 
-	default Optional<Integer> getFirstNodeId(String location, InetAddress ipAddr, String tenantId) {
+	default Optional<Long> getFirstNodeId(String location, InetAddress ipAddr, String tenantId) {
 		return this.getFirst(location, ipAddr, tenantId).map(e -> e.nodeId);
 	}
 
 	void removeInterfacesForNode(int nodeId);
 
 	class Entry {
-		public final int nodeId;
-		public final int interfaceId;
+		public final long nodeId;
+		public final long interfaceId;
 		public final String tenantId;
 
-		public Entry(final int nodeId, final int interfaceId, final String tenantId) {
+		public Entry(final long nodeId, final long interfaceId, final String tenantId) {
 			this.nodeId = nodeId;
 			this.interfaceId = interfaceId;
 			this.tenantId = tenantId;

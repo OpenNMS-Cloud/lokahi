@@ -91,7 +91,7 @@
         <jsr305.version>3.0.2</jsr305.version>
         <karaf.version>4.4.2</karaf.version>
         <karaf.maven-plugin.version>${karaf.version}</karaf.maven-plugin.version> <!-- use separate property in case a need to separate from the base Karaf version arises -->
-        <keycloak.version>18.0.0</keycloak.version>
+        <keycloak.version>20.0.3</keycloak.version>
         <liquibaseVersion>4.17.0</liquibaseVersion>
         <log4j2.version>2.17.1</log4j2.version>
         <mapstruct.version>1.5.3.Final</mapstruct.version>

@@ -93,8 +93,7 @@
         <karaf.maven-plugin.version>${karaf.version}</karaf.maven-plugin.version> <!-- use separate property in case a need to separate from the base Karaf version arises -->
         <keycloak.version>18.0.0</keycloak.version>
         <liquibaseVersion>4.17.0</liquibaseVersion>
-        <log4j2.version>2.17.1</log4j2.version>
-        <!-- <log4j2.version>2.19.0</log4j2.version> -->
+        <log4j2.version>2.19.0</log4j2.version>
         <mapstruct.version>1.5.3.Final</mapstruct.version>
         <maven-resources.version>3.3.0</maven-resources.version>
         <mina.version>2.1.5</mina.version>

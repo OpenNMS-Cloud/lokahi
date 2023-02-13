@@ -96,10 +96,9 @@ public class MonitoringSystemService {
             var monitoringSystem = optionalMS.get();
             var location = monitoringSystem.getMonitoringLocation().getLocation();
             var tenantId = monitoringSystem.getTenantId();
-
-            var retrieved = systemRepository.findByMonitoringLocationIdAndTenantId(optionalMS.get().getMonitoringLocationId(), tenantId);
             systemRepository.deleteById(id);
-            if (retrieved.size() == 1 && retrieved.get(0).getSystemId().equals(monitoringSystem.getSystemId())) {
+            var retrieved = systemRepository.findByMonitoringLocationIdAndTenantId(optionalMS.get().getMonitoringLocationId(), tenantId);
+            if (retrieved.size() == 0) {
                 locationRepository.delete(monitoringSystem.getMonitoringLocation());
                 configUpdateService.removeConfigsFromTaskSet(tenantId, location);
             }

@@ -26,11 +26,14 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.minion.snmp;
+package org.opennms.horizon.shared.snmp.config;
 
-import java.util.ArrayList;
 import org.opennms.horizon.shared.snmp.conf.xml.Definition;
 import org.opennms.horizon.shared.snmp.conf.xml.Range;
+import org.opennms.horizon.shared.utils.IPAddressRange;
+import org.opennms.horizon.shared.utils.IPAddressRangeSet;
+
+import java.util.ArrayList;
 
 /**
  * This is a wrapper class for the Definition class from the config package.  Has the logic for 

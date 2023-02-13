@@ -26,7 +26,7 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.minion.snmp;
+package org.opennms.horizon.shared.utils;
 
 import java.util.Collections;
 import java.util.Iterator;

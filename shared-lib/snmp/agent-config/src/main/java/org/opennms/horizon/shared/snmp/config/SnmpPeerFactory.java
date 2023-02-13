@@ -26,14 +26,26 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.minion.snmp;
+package org.opennms.horizon.shared.snmp.config;
 
-
-import static org.opennms.horizon.shared.snmp.SnmpConfiguration.DEFAULT_SECURITY_LEVEL;
-import static org.opennms.horizon.shared.snmp.SnmpConfiguration.DEFAULT_SECURITY_NAME;
 
 import com.googlecode.concurentlocks.ReadWriteUpdateLock;
 import com.googlecode.concurentlocks.ReentrantReadWriteUpdateLock;
+import org.apache.commons.io.IOUtils;
+import org.opennms.horizon.shared.snmp.SnmpAgentConfig;
+import org.opennms.horizon.shared.snmp.SnmpConfiguration;
+import org.opennms.horizon.shared.snmp.conf.SnmpAgentConfigFactory;
+import org.opennms.horizon.shared.snmp.conf.xml.AddressSnmpConfigVisitor;
+import org.opennms.horizon.shared.snmp.conf.xml.Definition;
+import org.opennms.horizon.shared.snmp.conf.xml.Range;
+import org.opennms.horizon.shared.snmp.conf.xml.SnmpConfig;
+import org.opennms.horizon.shared.snmp.conf.xml.SnmpProfile;
+import org.opennms.horizon.shared.utils.ByteArrayComparator;
+import org.opennms.horizon.shared.utils.InetAddressUtils;
+import org.opennms.horizon.shared.utils.LocationUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -48,24 +60,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
-import org.apache.commons.io.IOUtils;
-//import org.opennms.core.spring.FileReloadCallback;
-//import org.opennms.core.spring.FileReloadContainer;
-//import org.opennms.core.xml.JaxbUtils;
-//import org.opennms.horizon.core.lib.LocationUtils;
-import org.opennms.horizon.shared.snmp.SnmpAgentConfig;
-import org.opennms.horizon.shared.snmp.SnmpConfiguration;
-import org.opennms.horizon.shared.snmp.conf.SnmpAgentConfigFactory;
-import org.opennms.horizon.shared.snmp.conf.xml.AddressSnmpConfigVisitor;
-import org.opennms.horizon.shared.snmp.conf.xml.Definition;
-import org.opennms.horizon.shared.snmp.conf.xml.Range;
-import org.opennms.horizon.shared.snmp.conf.xml.SnmpConfig;
-import org.opennms.horizon.shared.snmp.conf.xml.SnmpProfile;
-import org.opennms.horizon.shared.utils.ByteArrayComparator;
-import org.opennms.horizon.shared.utils.InetAddressUtils;
-import org.opennms.horizon.shared.utils.LocationUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 
 /**
  * This class is the main repository for SNMP configuration information used by
@@ -364,10 +359,10 @@ public class SnmpPeerFactory implements SnmpAgentConfigFactory {
         } else {
             definition.addSpecific(snmpAgentConfig.getAddress().getHostAddress());
         }
-        if (DEFAULT_SECURITY_LEVEL != snmpAgentConfig.getSecurityLevel()) {
+        if (SnmpConfiguration.DEFAULT_SECURITY_LEVEL != snmpAgentConfig.getSecurityLevel()) {
             definition.setSecurityLevel(snmpAgentConfig.getSecurityLevel());
         }
-        if (!DEFAULT_SECURITY_NAME.equals(snmpAgentConfig.getSecurityName())) {
+        if (!SnmpConfiguration.DEFAULT_SECURITY_NAME.equals(snmpAgentConfig.getSecurityName())) {
             definition.setSecurityName(snmpAgentConfig.getSecurityName());
         }
         definition.setAuthProtocol(snmpAgentConfig.getAuthProtocol());

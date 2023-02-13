@@ -26,16 +26,23 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.minion.snmp;
+package org.opennms.horizon.shared.snmp.config;
 
-import java.math.BigInteger;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
+import org.opennms.horizon.shared.snmp.conf.xml.Definition;
+import org.opennms.horizon.shared.snmp.conf.xml.Range;
+import org.opennms.horizon.shared.utils.InetAddressUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.math.BigInteger;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+
 //import org.opennms.core.utils.InetAddressUtils;
 //import org.opennms.netmgt.config.snmp.Definition;
 //import org.opennms.netmgt.config.snmp.Range;
@@ -51,11 +58,6 @@ import org.apache.commons.lang.builder.ToStringStyle;
 //import org.opennms.horizon.events.model.IParm;
 //import org.opennms.horizon.events.model.IValue;
 //import org.opennms.horizon.events.xml.Event;
-import org.opennms.horizon.shared.snmp.conf.xml.Definition;
-import org.opennms.horizon.shared.snmp.conf.xml.Range;
-import org.opennms.horizon.shared.utils.InetAddressUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Class for handling data passed as parms in a configureSNMP event.  Provides for

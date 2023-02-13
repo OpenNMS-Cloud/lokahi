@@ -28,16 +28,7 @@
 
 package org.opennms.horizon.minion.snmp;
 
-import com.google.common.collect.ImmutableMap;
-import java.io.IOException;
-import java.math.BigInteger;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.Map;
-import java.util.regex.Pattern;
-
 import lombok.Setter;
-import org.opennms.horizon.minion.plugin.api.AbstractServiceMonitor;
 import org.opennms.horizon.minion.plugin.api.MonitoredService;
 import org.opennms.horizon.shared.snmp.SnmpAgentConfig;
 import org.opennms.horizon.shared.snmp.SnmpValue;
@@ -45,15 +36,20 @@ import org.opennms.snmp.contract.SnmpMonitorRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.math.BigInteger;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.regex.Pattern;
+
 /**
  * <p>Abstract SnmpMonitorStrategy class.</p>
  *
  * @author david
  * @version $Id: $
  */
-public abstract class SnmpMonitorStrategy extends AbstractServiceMonitor {
+public class SnmpMonitorUtils {
 
-    private static final Logger LOG = LoggerFactory.getLogger(SnmpMonitorStrategy.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SnmpMonitorUtils.class);
 
     /**
      * Constant for less-than operand
@@ -72,28 +68,20 @@ public abstract class SnmpMonitorStrategy extends AbstractServiceMonitor {
     /** Constant <code>MATCHES="~"</code> */
     public static final String MATCHES = "~";
     
-    protected boolean hex = false;
+    protected static boolean hex = false;
 
     // Wrap InetAddress static calls in a test-friendly injectable
     @Setter
     private FunctionWithException<String, InetAddress, UnknownHostException> inetLookupOperation = InetAddress::getByName;
 
-    @Override
-    public Map<String, Object> getRuntimeAttributes(MonitoredService svc, Map<String, Object> parameters) {
-        try {
-            SnmpPeerFactory.init();
-        } catch (IOException e) {
-            LOG.error("SnmpPeerFactory initialization failed.", e);
-        }
-        return ImmutableMap.of("agent", SnmpPeerFactory.getInstance().getAgentConfig(svc.getAddress(), svc.getNodeLocation()));
-    }
 
     public SnmpAgentConfig getAgentConfig(MonitoredService svc, SnmpMonitorRequest snmpMonitorRequest) throws UnknownHostException {
         // return getKeyedInstance(parameters, "agent", () -> { return new SnmpAgentConfig(svc.getAddress()); });
         return new SnmpAgentConfig(inetLookupOperation.call(snmpMonitorRequest.getHost()));
     }
 
-    public String getStringValue(SnmpValue result) {
+    public static String getStringValue(SnmpValue result) {
+        // TODO: what is hex ?
     	if (hex)
     		return result.toHexString();
     	return result.toString();
@@ -103,12 +91,12 @@ public abstract class SnmpMonitorStrategy extends AbstractServiceMonitor {
      * Verifies that the result of the SNMP query meets the criteria specified
      * by the operator and the operand from the configuration file.
      *
-     * @param result a {@link org.opennms.netmgt.snmp.SnmpValue} object.
+     * @param result a {@link org.opennms.horizon.shared.snmp.SnmpValue} object.
      * @param operator a {@link String} object.
      * @param operand a {@link String} object.
      * @return a boolean.
      */
-    public boolean meetsCriteria(SnmpValue result, String operator, String operand) {
+    public static boolean meetsCriteria(SnmpValue result, String operator, String operand) {
 
         Boolean retVal = null;
         
@@ -145,11 +133,10 @@ public abstract class SnmpMonitorStrategy extends AbstractServiceMonitor {
     /**
      * @param operator
      * @param operand
-     * @param retVal
      * @param value
      * @return
      */
-    private Boolean checkStringCriteria(final String operator, String operand, String value) {
+    private static Boolean checkStringCriteria(final String operator, String operand, String value) {
         Boolean retVal = null;
         
         if (value == null) {
@@ -177,10 +164,9 @@ public abstract class SnmpMonitorStrategy extends AbstractServiceMonitor {
      * @param result
      * @param operator
      * @param operand
-     * @param retVal
      * @return
      */
-    private Boolean isCriteriaNull(Object result, String operator, String operand) {
+    private static Boolean isCriteriaNull(Object result, String operator, String operand) {
         
         if (result == null)
             return Boolean.FALSE;

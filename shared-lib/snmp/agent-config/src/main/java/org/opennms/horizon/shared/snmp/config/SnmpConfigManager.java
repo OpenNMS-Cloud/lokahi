@@ -26,14 +26,15 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.minion.snmp;
+package org.opennms.horizon.shared.snmp.config;
+
+import org.opennms.horizon.shared.snmp.conf.xml.Definition;
+import org.opennms.horizon.shared.snmp.conf.xml.SnmpConfig;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
-import org.opennms.horizon.shared.snmp.conf.xml.Definition;
-import org.opennms.horizon.shared.snmp.conf.xml.SnmpConfig;
 
 /**
  * This class handles merging a new Definition into the current running SNMP

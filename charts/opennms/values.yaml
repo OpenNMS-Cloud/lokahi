@@ -112,7 +112,7 @@ OpenNMS:
       Requests:
         Cpu: 100m
         Memory: 250Mi
-    EncryptionKey: encryption-key
+    EncryptionKey: ~
   Alarm:
     ServiceName: opennms-alarm
     Image: opennms/horizon-stream-alarm

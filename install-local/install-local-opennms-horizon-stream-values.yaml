@@ -64,7 +64,6 @@ OpenNMS:
       Requests:
         Cpu: "0"
         Memory: "0"
-    EncryptionKey: encryption-key
   Alarm:
     Image: opennms/horizon-stream-alarm:latest
     Resources:

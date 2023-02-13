@@ -111,7 +111,6 @@ class AzureCredentialGrpcItTest extends GrpcTestBase {
     //marking as a @Rule doesn't work, need to manually start/stop in before/after
     public WireMockRule wireMock = new WireMockRule(wireMockConfig().port(12345));
 
-
     private static TestTaskSetGrpcService testGrpcService;
 
     private final ObjectMapper snakeCaseMapper;

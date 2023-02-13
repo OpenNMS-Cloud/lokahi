@@ -44,7 +44,7 @@ keycloak:
 
 inventory:
   encryption:
-    key: test-encryption-key
+    key: test-encryption-key-of-length-32
   azure:
     login-url: http://localhost:12345
     management-url: http://localhost:12345

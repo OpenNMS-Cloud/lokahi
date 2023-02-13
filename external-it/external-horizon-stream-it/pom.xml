@@ -26,7 +26,7 @@
         <cucumber.version>7.1.0</cucumber.version>
         <java.version>17</java.version>
         <junit.version>4.13.2</junit.version>
-        <keycloak.version>17.0.0</keycloak.version>
+        <keycloak.version>20.0.3</keycloak.version>
         <rest-assured.version>4.3.3</rest-assured.version>
         <slf4j.version>1.7.33</slf4j.version>
     </properties>

@@ -62,4 +62,5 @@ service TagService {
   rpc addTags(TagCreateListDTO) returns (TagListDTO) {};
   rpc removeTags(TagRemoveListDTO) returns (google.protobuf.BoolValue) {};
   rpc getTagsByNodeId(google.protobuf.Int64Value) returns (TagListDTO) {};
+  rpc getTags(google.protobuf.Empty) returns (TagListDTO) {};
 }

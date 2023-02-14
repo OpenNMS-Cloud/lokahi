@@ -29,6 +29,7 @@
 package org.opennms.horizon.inventory.grpc;
 
 import com.google.protobuf.BoolValue;
+import com.google.protobuf.Empty;
 import com.google.protobuf.Int64Value;
 import com.google.rpc.Code;
 import com.google.rpc.Status;
@@ -118,6 +119,34 @@ public class TagGrpcService extends TagServiceGrpc.TagServiceImplBase {
         tenantIdOptional.ifPresentOrElse(tenantId -> {
             try {
                 List<TagDTO> tags = service.getTagsByNodeId(tenantId, request.getValue());
+
+                responseObserver.onNext(TagListDTO.newBuilder().addAllTags(tags).build());
+                responseObserver.onCompleted();
+            } catch (Exception e) {
+
+                Status status = Status.newBuilder()
+                    .setCode(Code.INTERNAL_VALUE)
+                    .setMessage(e.getMessage())
+                    .build();
+                responseObserver.onError(StatusProto.toStatusRuntimeException(status));
+            }
+        }, () -> {
+
+            Status status = Status.newBuilder()
+                .setCode(Code.INVALID_ARGUMENT_VALUE)
+                .setMessage("Tenant Id can't be empty")
+                .build();
+            responseObserver.onError(StatusProto.toStatusRuntimeException(status));
+        });
+    }
+
+    @Override
+    public void getTags(Empty request, StreamObserver<TagListDTO> responseObserver) {
+        Optional<String> tenantIdOptional = tenantLookup.lookupTenantId(Context.current());
+
+        tenantIdOptional.ifPresentOrElse(tenantId -> {
+            try {
+                List<TagDTO> tags = service.getTags(tenantId);
 
                 responseObserver.onNext(TagListDTO.newBuilder().addAllTags(tags).build());
                 responseObserver.onCompleted();

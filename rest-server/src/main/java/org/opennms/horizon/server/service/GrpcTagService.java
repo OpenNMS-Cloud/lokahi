@@ -80,4 +80,10 @@ public class GrpcTagService {
         List<TagDTO> tagsList = client.getTagsByNodeId(nodeId, headerUtil.getAuthHeader(env)).getTagsList();
         return Mono.just(tagsList.stream().map(mapper::protoToTag).toList());
     }
+
+    @GraphQLQuery
+    public Mono<List<Tag>> getTags(@GraphQLEnvironment ResolutionEnvironment env) {
+        List<TagDTO> tagsList = client.getTags(headerUtil.getAuthHeader(env)).getTagsList();
+        return Mono.just(tagsList.stream().map(mapper::protoToTag).toList());
+    }
 }

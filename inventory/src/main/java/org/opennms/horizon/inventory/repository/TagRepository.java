@@ -59,4 +59,6 @@ public interface TagRepository extends JpaRepository<Tag, Long> {
         "AND node.id = :nodeId ")
     List<Tag> findByTenantIdAndNodeId(@Param("tenantId") String tenantId,
                                       @Param("nodeId") long nodeId);
+
+    List<Tag> findByTenantId(String tenantId);
 }

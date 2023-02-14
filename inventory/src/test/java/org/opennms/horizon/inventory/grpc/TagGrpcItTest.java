@@ -28,6 +28,7 @@
 
 package org.opennms.horizon.inventory.grpc;
 
+import com.google.protobuf.Empty;
 import com.google.protobuf.Int64Value;
 import io.grpc.Metadata;
 import io.grpc.ServerCall;
@@ -403,6 +404,40 @@ class TagGrpcItTest extends GrpcTestBase {
         assertEquals(2, allTags.size());
 
         TagListDTO tagsByNodeId = serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).getTagsByNodeId(Int64Value.newBuilder().setValue(nodeId).build());
+        List<TagDTO> tagsList = tagsByNodeId.getTagsList();
+        assertEquals(2, tagsList.size());
+
+        verify(spyInterceptor, times(3)).verifyAccessToken(authHeader);
+        verify(spyInterceptor, times(3)).interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));
+
+    }
+
+    @Test
+    void testGetTagList() throws Exception {
+        long nodeId = setupDatabase();
+
+        TagCreateDTO createDTO1 = TagCreateDTO.newBuilder()
+            .setName(TEST_TAG_NAME_1)
+            .build();
+
+        TagCreateListDTO createListDTO1 = TagCreateListDTO.newBuilder()
+            .addAllTags(Collections.singletonList(createDTO1)).setNodeId(nodeId).build();
+
+        serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).addTags(createListDTO1);
+
+        TagCreateDTO createDTO2 = TagCreateDTO.newBuilder()
+            .setName(TEST_TAG_NAME_2)
+            .build();
+
+        TagCreateListDTO createListDTO2 = TagCreateListDTO.newBuilder()
+            .addAllTags(Collections.singletonList(createDTO2)).setNodeId(nodeId).build();
+
+        serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).addTags(createListDTO2);
+
+        List<Tag> allTags = tagRepository.findAll();
+        assertEquals(2, allTags.size());
+
+        TagListDTO tagsByNodeId = serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).getTags(Empty.getDefaultInstance());
         List<TagDTO> tagsList = tagsByNodeId.getTagsList();
         assertEquals(2, tagsList.size());
 

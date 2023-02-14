@@ -135,4 +135,9 @@ public class TagService {
         return repository.findByTenantIdAndNodeId(tenantId, nodeId)
             .stream().map(mapper::modelToDTO).toList();
     }
+
+    public List<TagDTO> getTags(String tenantId) {
+        return repository.findByTenantId(tenantId)
+            .stream().map(mapper::modelToDTO).toList();
+    }
 }

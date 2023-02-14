@@ -128,6 +128,21 @@ public class NodeTaggingStepDefinitions {
             .setLocation("location").setManagementIp("127.0.0.1").build());
     }
 
+    @Given("Another node with tags {string}")
+    public void anotherNodeWithTags(String tags) {
+        var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
+        NodeDTO node = nodeServiceBlockingStub.createNode(NodeCreateDTO.newBuilder().setLabel("Another Node")
+            .setLocation("location").setManagementIp("127.0.0.2").build());
+        String[] tagArray = tags.split(",");
+        var tagServiceBlockingStub = backgroundHelper.getTagServiceBlockingStub();
+        List<TagCreateDTO> tagCreateList = new ArrayList<>();
+        for (String name : tagArray) {
+            tagCreateList.add(TagCreateDTO.newBuilder().setName(name).build());
+        }
+        tagServiceBlockingStub.addTags(TagCreateListDTO.newBuilder()
+            .addAllTags(tagCreateList).setNodeId(node.getId()).build());
+    }
+
     /*
      * SCENARIO WHEN
      * *********************************************************************************
@@ -164,6 +179,12 @@ public class NodeTaggingStepDefinitions {
         }
         fetchedTagList = tagServiceBlockingStub.getTagsByNodeId(Int64Value.newBuilder()
             .setValue(node.getId()).build());
+    }
+
+    @When("A GRPC request to fetch all tags")
+    public void aGRPCRequestToFetchAllTags() {
+        var tagServiceBlockingStub = backgroundHelper.getTagServiceBlockingStub();
+        fetchedTagList = tagServiceBlockingStub.getTags(Empty.getDefaultInstance());
     }
 
     /*

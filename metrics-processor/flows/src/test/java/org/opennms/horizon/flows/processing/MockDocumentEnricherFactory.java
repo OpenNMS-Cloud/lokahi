@@ -30,7 +30,6 @@ package org.opennms.horizon.flows.processing;
 
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.collect.Lists;
-import io.grpc.ManagedChannel;
 import org.opennms.horizon.flows.cache.CacheConfigBuilder;
 import org.opennms.horizon.flows.classification.ClassificationEngine;
 import org.opennms.horizon.flows.classification.FilterService;

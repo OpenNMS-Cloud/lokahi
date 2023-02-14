@@ -1,8 +1,8 @@
 /*******************************************************************************
  * This file is part of OpenNMS(R).
  *
- * Copyright (C) 2022 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
+ * Copyright (C) 2022-2023 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
  *
@@ -57,16 +57,6 @@ public class PipelineImpl implements Pipeline {
     private final Timer logEnrichementTimer;
 
     /**
-     * Time taken to apply thresholding to a log
-     */
-    private final Timer logThresholdingTimer;
-
-    /**
-     * Time taken to mark the flows in a log
-     */
-    private final Timer logMarkingTimer;
-
-    /**
      * Number of flows in a log
      */
     private final Histogram flowsPerLog;
@@ -90,8 +80,6 @@ public class PipelineImpl implements Pipeline {
         this.flowsPerLog = metricRegistry.histogram("flowsPerLog");
 
         this.logEnrichementTimer = metricRegistry.timer("logEnrichment");
-        this.logMarkingTimer = metricRegistry.timer("logMarking");
-        this.logThresholdingTimer = metricRegistry.timer("logThresholding");
 
         this.metricRegistry = Objects.requireNonNull(metricRegistry);
     }

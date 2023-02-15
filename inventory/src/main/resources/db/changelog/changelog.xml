@@ -18,4 +18,5 @@
     <include file="/db/changelog/hs-0.1.0/tables/ip-interface-snmp-primary.xml" />
     <include file="db/changelog/hs-0.1.0/tables/tag.xml"/>
     <include file="db/changelog/hs-0.1.0/tables/node-scan-schema.xml" />
+    <include file="db/changelog/hs-0.1.0/tables/add-configuration-type.xml" />
 </databaseChangeLog>

@@ -41,6 +41,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
 import org.mockito.ArgumentCaptor;
+import org.opennms.horizon.inventory.dto.ConfigType;
 import org.opennms.horizon.inventory.dto.ConfigurationDTO;
 import org.opennms.horizon.inventory.mapper.ConfigurationMapper;
 import org.opennms.horizon.inventory.model.Configuration;
@@ -60,16 +61,20 @@ public class ConfigurationServiceTest {
     private final String tenantId = "test-tenant";
     private final String key = "test-key";
     private final String value = "\"{\"test\":\"value\"}\"";
+    private final ConfigType type = ConfigType.DISCOVERY;
+    private ObjectMapper objectMapper;
 
     @BeforeEach
     public void setUP() {
+        objectMapper = new ObjectMapper();
         mockConfigurationRepo = mock(ConfigurationRepository.class);
         ConfigurationMapper mapper = Mappers.getMapper(ConfigurationMapper.class);
-        service = new ConfigurationService(mockConfigurationRepo, mapper);
+        service = new ConfigurationService(mockConfigurationRepo, mapper) {};
         testConfiguration = ConfigurationDTO.newBuilder()
             .setLocation(location)
             .setTenantId(tenantId)
             .setKey(key)
+            .setType(type)
             .setValue(value)
             .build();
     }
@@ -81,16 +86,16 @@ public class ConfigurationServiceTest {
 
     @Test
     void testCreateSingle() throws JsonProcessingException {
-        doReturn(Optional.empty()).when(mockConfigurationRepo).getByTenantIdAndKey(tenantId, key);
+        doReturn(Optional.empty()).when(mockConfigurationRepo).getByTenantIdAndKeyAndType(tenantId, key, type);
         service.createSingle(testConfiguration);
-        verify(mockConfigurationRepo).getByTenantIdAndKey(tenantId, key);
+        verify(mockConfigurationRepo).getByTenantIdAndKeyAndType(tenantId, key, type);
         ArgumentCaptor<Configuration> configurationArgumentCaptor = ArgumentCaptor.forClass(Configuration.class);
         verify(mockConfigurationRepo).save(configurationArgumentCaptor.capture());
         Configuration result = configurationArgumentCaptor.getValue();
-        assertThat(result.getTenantId()).isEqualTo(tenantId);
-        assertThat(result.getLocation()).isEqualTo(location);
-        assertThat(result.getKey()).isEqualTo(key);
-        assertThat(result.getValue()).isEqualTo(new ObjectMapper().readTree(value));
+        assertThat(result).isNotNull()
+            .extracting(Configuration::getTenantId, Configuration::getLocation, Configuration::getKey,
+                Configuration::getType, Configuration::getValue)
+            .containsExactly(tenantId, location, key, type, objectMapper.readTree(value));
     }
 
     @Test
@@ -99,15 +104,15 @@ public class ConfigurationServiceTest {
         configuration.setTenantId(tenantId);
         configuration.setLocation(location);
         configuration.setKey(key);
+        configuration.setType(ConfigType.UNRECOGNIZED);
         configuration.setId(1L);
         configuration.setValue(new ObjectMapper().readTree(value));
-        doReturn(Optional.of(configuration)).when(mockConfigurationRepo).getByTenantIdAndKey(tenantId, key);
+        doReturn(Optional.of(configuration)).when(mockConfigurationRepo).getByTenantIdAndKeyAndType(tenantId, key, type);
         Configuration result = service.createSingle(testConfiguration);
-        assertThat(result.getTenantId()).isEqualTo(tenantId);
-        assertThat(result.getLocation()).isEqualTo(location);
-        assertThat(result.getKey()).isEqualTo(key);
-        assertThat(result.getValue()).isEqualTo(new ObjectMapper().readTree(value));
-        assertThat(result.getId()).isEqualTo(1L);
-        verify(mockConfigurationRepo).getByTenantIdAndKey(tenantId, key);
+        assertThat(result).isNotNull()
+            .extracting(Configuration::getId, Configuration::getTenantId, Configuration::getLocation, Configuration::getKey,
+                Configuration::getType, Configuration::getValue)
+            .containsExactly(1L, tenantId, location, key, ConfigType.UNRECOGNIZED, objectMapper.readTree(value));
+        verify(mockConfigurationRepo).getByTenantIdAndKeyAndType(tenantId, key, type);
     }
 }

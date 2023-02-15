@@ -1,0 +1,14 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+    <changeSet id="0.1.0-add-configuration-type" author="yli">
+        <dropUniqueConstraint tableName="configuration" constraintName="key_constraint" />
+        <addColumn tableName="configuration">
+            <column name="config_type" type="text">
+                <constraints nullable="false" />
+            </column>
+        </addColumn>
+        <addUniqueConstraint tableName="configuration" columnNames="key, config_type, tenant_id" constraintName="key_type_unique_constraint" />
+    </changeSet>
+</databaseChangeLog>

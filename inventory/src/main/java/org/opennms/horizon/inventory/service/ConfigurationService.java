@@ -32,57 +32,41 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.opennms.horizon.inventory.dto.ConfigType;
 import org.opennms.horizon.inventory.dto.ConfigurationDTO;
 import org.opennms.horizon.inventory.mapper.ConfigurationMapper;
 import org.opennms.horizon.inventory.model.Configuration;
 import org.opennms.horizon.inventory.repository.ConfigurationRepository;
-import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
 
-@Service
-@RequiredArgsConstructor
-public class ConfigurationService {
-    private final ConfigurationRepository modelRepo;
 
+@RequiredArgsConstructor
+abstract public class ConfigurationService {
+    private final ConfigurationRepository modelRepo;
     private final ConfigurationMapper mapper;
 
     public Configuration createSingle(ConfigurationDTO newConfigurationDTO) {
-
-        Optional<Configuration> configuration = modelRepo.getByTenantIdAndKey(
+        Optional<Configuration> configuration = modelRepo.getByTenantIdAndKeyAndType(
             newConfigurationDTO.getTenantId(),
-            newConfigurationDTO.getKey());
+            newConfigurationDTO.getKey(), newConfigurationDTO.getType());
 
         return configuration.orElseGet(() -> modelRepo.save(mapper.dtoToModel(newConfigurationDTO)));
     }
 
-    public List<ConfigurationDTO> findByTenantId(String tenantId) {
-        List<Configuration> all = modelRepo.findByTenantId(tenantId);
-        return all
-            .stream()
+    public List<ConfigurationDTO> findByTenantIdAndType(String tenantId, ConfigType type) {
+        return modelRepo.findByTenantIdAndType(tenantId, type).stream()
             .map(mapper::modelToDTO)
             .collect(Collectors.toList());
     }
 
-    public List<ConfigurationDTO> findAll() {
-        List<Configuration> all = modelRepo.findAll();
-        return all
-            .stream()
+    public List<ConfigurationDTO> findByLocationAndType(String tenantId, String location, ConfigType type) {
+        return modelRepo.findByTenantIdAndLocationAndType(tenantId, location, type).stream()
             .map(mapper::modelToDTO)
             .collect(Collectors.toList());
     }
 
-    public List<ConfigurationDTO> findByLocation(String tenantId, String location) {
-        List<Configuration> all = modelRepo.findByTenantIdAndLocation(tenantId, location);
-        return all
-            .stream()
-            .map(mapper::modelToDTO)
-            .collect(Collectors.toList());
-    }
-
-    public Optional<ConfigurationDTO> findByKey(String tenantId, String key) {
-        Optional<Configuration> configuration = modelRepo.getByTenantIdAndKey(tenantId, key);
-        return configuration
-            .map(mapper::modelToDTO);
+    public Optional<ConfigurationDTO> findByKeyAndType(String tenantId, String key, ConfigType type) {
+        return modelRepo.getByTenantIdAndKeyAndType(tenantId, key, type).map(mapper::modelToDTO);
     }
 }

@@ -60,5 +60,22 @@ public interface TagRepository extends JpaRepository<Tag, Long> {
     List<Tag> findByTenantIdAndNodeId(@Param("tenantId") String tenantId,
                                       @Param("nodeId") long nodeId);
 
+    @Query("SELECT tag " +
+        "FROM Tag tag " +
+        "WHERE tag.tenantId = :tenantId " +
+        "AND LOWER(tag.name) LIKE LOWER(CONCAT('%', :searchTerm, '%'))")
+    List<Tag> findByTenantIdAndSearchTerm(@Param("tenantId") String tenantId,
+                                          @Param("searchTerm") String searchTerm);
+
+    @Query("SELECT tag " +
+        "FROM Tag tag " +
+        "JOIN tag.nodes node " +
+        "WHERE tag.tenantId = :tenantId " +
+        "AND node.id = :nodeId " +
+        "AND LOWER(tag.name) LIKE LOWER(CONCAT('%', :searchTerm, '%'))")
+    List<Tag> findByTenantIdAndNodeIdAndSearchTerm(@Param("tenantId") String tenantId,
+                                                   @Param("nodeId") long nodeId,
+                                                   @Param("searchTerm") String searchTerm);
+
     List<Tag> findByTenantId(String tenantId);
 }

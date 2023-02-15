@@ -38,9 +38,12 @@ import io.grpc.protobuf.StatusProto;
 import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.opennms.horizon.inventory.dto.ListAllTagsParamsDTO;
+import org.opennms.horizon.inventory.dto.ListTagsByNodeIdParamsDTO;
 import org.opennms.horizon.inventory.dto.TagCreateListDTO;
 import org.opennms.horizon.inventory.dto.TagDTO;
 import org.opennms.horizon.inventory.dto.TagListDTO;
+import org.opennms.horizon.inventory.dto.TagListParamsDTO;
 import org.opennms.horizon.inventory.dto.TagRemoveListDTO;
 import org.opennms.horizon.inventory.dto.TagServiceGrpc;
 import org.opennms.horizon.inventory.service.TagService;
@@ -113,13 +116,12 @@ public class TagGrpcService extends TagServiceGrpc.TagServiceImplBase {
     }
 
     @Override
-    public void getTagsByNodeId(Int64Value request, StreamObserver<TagListDTO> responseObserver) {
+    public void getTagsByNodeId(ListTagsByNodeIdParamsDTO request, StreamObserver<TagListDTO> responseObserver) {
         Optional<String> tenantIdOptional = tenantLookup.lookupTenantId(Context.current());
 
         tenantIdOptional.ifPresentOrElse(tenantId -> {
             try {
-                List<TagDTO> tags = service.getTagsByNodeId(tenantId, request.getValue());
-
+                List<TagDTO> tags = service.getTagsByNodeId(tenantId, request);
                 responseObserver.onNext(TagListDTO.newBuilder().addAllTags(tags).build());
                 responseObserver.onCompleted();
             } catch (Exception e) {
@@ -141,13 +143,12 @@ public class TagGrpcService extends TagServiceGrpc.TagServiceImplBase {
     }
 
     @Override
-    public void getTags(Empty request, StreamObserver<TagListDTO> responseObserver) {
+    public void getTags(ListAllTagsParamsDTO request, StreamObserver<TagListDTO> responseObserver) {
         Optional<String> tenantIdOptional = tenantLookup.lookupTenantId(Context.current());
 
         tenantIdOptional.ifPresentOrElse(tenantId -> {
             try {
-                List<TagDTO> tags = service.getTags(tenantId);
-
+                List<TagDTO> tags = service.getTags(tenantId, request);
                 responseObserver.onNext(TagListDTO.newBuilder().addAllTags(tags).build());
                 responseObserver.onCompleted();
             } catch (Exception e) {

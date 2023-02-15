@@ -35,12 +35,15 @@ import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import org.opennms.horizon.inventory.cucumber.InventoryBackgroundHelper;
+import org.opennms.horizon.inventory.dto.ListAllTagsParamsDTO;
+import org.opennms.horizon.inventory.dto.ListTagsByNodeIdParamsDTO;
 import org.opennms.horizon.inventory.dto.NodeCreateDTO;
 import org.opennms.horizon.inventory.dto.NodeDTO;
 import org.opennms.horizon.inventory.dto.TagCreateDTO;
 import org.opennms.horizon.inventory.dto.TagCreateListDTO;
 import org.opennms.horizon.inventory.dto.TagDTO;
 import org.opennms.horizon.inventory.dto.TagListDTO;
+import org.opennms.horizon.inventory.dto.TagListParamsDTO;
 import org.opennms.horizon.inventory.dto.TagRemoveListDTO;
 
 import java.util.ArrayList;
@@ -162,8 +165,9 @@ public class NodeTaggingStepDefinitions {
     @When("A GRPC request to fetch tags for node")
     public void aGrpcRequestToFetchTagsForNode() {
         var tagServiceBlockingStub = backgroundHelper.getTagServiceBlockingStub();
-        fetchedTagList = tagServiceBlockingStub.getTagsByNodeId(Int64Value.newBuilder()
-            .setValue(node.getId()).build());
+        ListTagsByNodeIdParamsDTO params = ListTagsByNodeIdParamsDTO.newBuilder()
+            .setNodeId(node.getId()).setParams(TagListParamsDTO.newBuilder().build()).build();
+        fetchedTagList = tagServiceBlockingStub.getTagsByNodeId(params);
     }
 
     @When("A GRPC request to remove tag {string} for node")
@@ -177,14 +181,34 @@ public class NodeTaggingStepDefinitions {
                 break;
             }
         }
-        fetchedTagList = tagServiceBlockingStub.getTagsByNodeId(Int64Value.newBuilder()
-            .setValue(node.getId()).build());
+        ListTagsByNodeIdParamsDTO params = ListTagsByNodeIdParamsDTO.newBuilder()
+            .setNodeId(node.getId()).setParams(TagListParamsDTO.newBuilder().build()).build();
+        fetchedTagList = tagServiceBlockingStub.getTagsByNodeId(params);
     }
 
     @When("A GRPC request to fetch all tags")
     public void aGRPCRequestToFetchAllTags() {
         var tagServiceBlockingStub = backgroundHelper.getTagServiceBlockingStub();
-        fetchedTagList = tagServiceBlockingStub.getTags(Empty.getDefaultInstance());
+        ListAllTagsParamsDTO params = ListAllTagsParamsDTO.newBuilder()
+            .setParams(TagListParamsDTO.newBuilder().build()).build();
+        fetchedTagList = tagServiceBlockingStub.getTags(params);
+    }
+
+    @When("A GRPC request to fetch all tags for node with searchTerm {string}")
+    public void aGRPCRequestToFetchAllTagsForNodeWithSearchTerm(String searchTerm) {
+        var tagServiceBlockingStub = backgroundHelper.getTagServiceBlockingStub();
+        ListTagsByNodeIdParamsDTO params = ListTagsByNodeIdParamsDTO.newBuilder()
+            .setNodeId(node.getId())
+            .setParams(TagListParamsDTO.newBuilder().setSearchTerm(searchTerm).build()).build();
+        fetchedTagList = tagServiceBlockingStub.getTagsByNodeId(params);
+    }
+
+    @When("A GRPC request to fetch all tags with searchTerm {string}")
+    public void aGRPCRequestToFetchAllTagsWithSearchTerm(String searchTerm) {
+        var tagServiceBlockingStub = backgroundHelper.getTagServiceBlockingStub();
+        ListAllTagsParamsDTO params = ListAllTagsParamsDTO.newBuilder()
+            .setParams(TagListParamsDTO.newBuilder().setSearchTerm(searchTerm).build()).build();
+        fetchedTagList = tagServiceBlockingStub.getTags(params);
     }
 
     /*

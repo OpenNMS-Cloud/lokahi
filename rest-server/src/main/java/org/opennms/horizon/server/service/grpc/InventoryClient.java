@@ -29,14 +29,19 @@
 package org.opennms.horizon.server.service.grpc;
 
 
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-
+import com.google.protobuf.Empty;
+import com.google.protobuf.Int64Value;
+import com.google.protobuf.StringValue;
+import io.grpc.ManagedChannel;
+import io.grpc.Metadata;
+import io.grpc.stub.MetadataUtils;
+import lombok.RequiredArgsConstructor;
 import org.opennms.horizon.inventory.dto.AzureCredentialCreateDTO;
 import org.opennms.horizon.inventory.dto.AzureCredentialDTO;
 import org.opennms.horizon.inventory.dto.AzureCredentialServiceGrpc;
 import org.opennms.horizon.inventory.dto.IdList;
+import org.opennms.horizon.inventory.dto.ListAllTagsParamsDTO;
+import org.opennms.horizon.inventory.dto.ListTagsByNodeIdParamsDTO;
 import org.opennms.horizon.inventory.dto.MonitoringLocationDTO;
 import org.opennms.horizon.inventory.dto.MonitoringLocationServiceGrpc;
 import org.opennms.horizon.inventory.dto.MonitoringSystemDTO;
@@ -47,19 +52,16 @@ import org.opennms.horizon.inventory.dto.NodeIdList;
 import org.opennms.horizon.inventory.dto.NodeServiceGrpc;
 import org.opennms.horizon.inventory.dto.TagCreateListDTO;
 import org.opennms.horizon.inventory.dto.TagListDTO;
+import org.opennms.horizon.inventory.dto.TagListParamsDTO;
 import org.opennms.horizon.inventory.dto.TagRemoveListDTO;
 import org.opennms.horizon.inventory.dto.TagServiceGrpc;
 import org.opennms.horizon.server.config.DataLoaderFactory;
 import org.opennms.horizon.shared.constants.GrpcConstants;
+import org.springframework.util.StringUtils;
 
-import com.google.protobuf.Empty;
-import com.google.protobuf.Int64Value;
-import com.google.protobuf.StringValue;
-
-import io.grpc.ManagedChannel;
-import io.grpc.Metadata;
-import io.grpc.stub.MetadataUtils;
-import lombok.RequiredArgsConstructor;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 public class InventoryClient {
@@ -172,15 +174,32 @@ public class InventoryClient {
         tagStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).removeTags(tagRemoveList);
     }
 
-    public TagListDTO getTagsByNodeId(long nodeId, String accessToken) {
+    public TagListDTO getTagsByNodeId(long nodeId, String searchTerm, String accessToken) {
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
-        return tagStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).getTagsByNodeId(Int64Value.of(nodeId));
+        ListTagsByNodeIdParamsDTO params = ListTagsByNodeIdParamsDTO.newBuilder()
+            .setNodeId(nodeId)
+            .setParams(buildTagListParams(searchTerm))
+            .build();
+        return tagStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
+            .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).getTagsByNodeId(params);
     }
 
-    public TagListDTO getTags(String accessToken) {
+    public TagListDTO getTags(String searchTerm, String accessToken) {
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
-        return tagStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).getTags(Empty.getDefaultInstance());
+        ListAllTagsParamsDTO params = ListAllTagsParamsDTO.newBuilder()
+            .setParams(buildTagListParams(searchTerm))
+            .build();
+        return tagStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
+            .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).getTags(params);
+    }
+
+    private TagListParamsDTO buildTagListParams(String searchTerm) {
+        TagListParamsDTO.Builder paramBuilder = TagListParamsDTO.newBuilder();
+        if (StringUtils.hasText(searchTerm)) {
+            paramBuilder.setSearchTerm(searchTerm);
+        }
+        return paramBuilder.build();
     }
 }

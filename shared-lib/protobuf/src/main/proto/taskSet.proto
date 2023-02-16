@@ -53,6 +53,7 @@ enum TaskType {
 enum ScanType {
   AZURE_SCAN = 0;
   NODE_SCAN = 1;
+  DISCOVERY_SCAN = 2;
 }
 
 enum MonitorType {

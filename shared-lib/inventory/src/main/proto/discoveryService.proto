@@ -27,34 +27,20 @@
  *******************************************************************************/
 syntax = "proto3";
 
-import "google/protobuf/any.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/wrappers.proto";
 
-package opennms.icmp;
+package opennms.inventory;
 option java_multiple_files = true;
-option java_package = "org.opennms.icmp.contract";
+option java_package = "org.opennms.horizon.inventory.dto";
 
-message IcmpDetectorRequest {
-  string host = 1;
-
-  int64 timeout = 2;
-  int32 dscp = 3;
-  bool allow_fragmentation = 4;
-  int32 packet_size = 5;
-  int32 retries = 6;
+message DiscoveryRequest {
+  repeated string ipAddresses = 1;
+  string location = 2;
+  string requisitionName = 3;
+  string defaultConfig = 4;
 }
 
-message IcmpMonitorRequest {
-  string host = 1;
-  int64 timeout = 2;
-  int32 dscp = 3;
-  bool allow_fragmentation = 4;
-  int32 packet_size = 5;
-  int32 retries = 6;
-}
-
-message IcmpScannerRequest {
-  repeated string host = 1;
-  int64 timeout = 2;
-  int32 packets_per_seconds = 3;
-  int32 retries = 4;
+service DiscoveryService {
+  rpc discoverServices(DiscoveryRequest) returns (google.protobuf.Empty) {};
 }

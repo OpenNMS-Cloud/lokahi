@@ -22,6 +22,7 @@ public interface TaskUtils {
     String AZURE_LABEL = "azure=";
     String NODE_SCAN ="nodeScan=node_id/";
     String NODE_ID = "nodeId:";
+    String REQUISTION_NAME = "requisition:";
 
     static String identityForIpTask(long nodeId, String ipAddress, String name) {
         return NODE_ID  + nodeId + "/" + IP_LABEL + ipAddress + "/" + name;
@@ -37,5 +38,9 @@ public interface TaskUtils {
 
     static String identityForConfig(String configName, String location) {
         return configName + "@" + location;
+    }
+
+    static String identityForDiscoveryTask(String ipAddress, String location, String requisitionName) {
+        return REQUISTION_NAME + requisitionName + "/"+ IP_LABEL + ipAddress + "/" + location;
     }
 }

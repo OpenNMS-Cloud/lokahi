@@ -26,9 +26,16 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.inventory.service.taskset.publiser;
+package org.opennms.horizon.inventory.service.taskset;
 
-import com.google.protobuf.InvalidProtocolBufferException;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+
+import java.util.List;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -40,18 +47,12 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.opennms.horizon.inventory.dto.IpInterfaceDTO;
 import org.opennms.horizon.inventory.dto.NodeDTO;
-import org.opennms.horizon.inventory.service.taskset.ScannerTaskSetService;
 import org.opennms.horizon.inventory.taskset.api.TaskSetPublisher;
+import org.opennms.icmp.contract.IcmpScannerRequest;
 import org.opennms.node.scan.contract.NodeScanRequest;
 import org.opennms.taskset.contract.TaskDefinition;
 
-import java.util.List;
-
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
+import com.google.protobuf.InvalidProtocolBufferException;
 
 @ExtendWith(MockitoExtension.class)
 public class ScannerTaskSetServiceTest {
@@ -110,5 +111,20 @@ public class ScannerTaskSetServiceTest {
         NodeDTO node = nodeBuilder.build();
         service.sendNodeScannerTask(List.of(node), location, tenantId);
         verifyNoInteractions(mockPublisher);
+    }
+
+    @Test
+    void testSendDiscoveryScan() throws InvalidProtocolBufferException {
+        List<String> ipAddresses = List.of("127.0.0.1", "127.0.0.2");
+        service.sendDiscoveryScannerTask(ipAddresses, location, tenantId, "requisitionName");
+        verify(mockPublisher).publishNewTasks(eq(tenantId), eq(location), taskListCaptor.capture());
+        List<TaskDefinition> tasks = taskListCaptor.getValue();
+        assertThat(tasks).asList().hasSize(1);
+        assertThat(tasks.get(0).getId()).isEqualTo("requisition:requisitionName/ip=127.0.0.1/testLocation");
+        assertThat(tasks.get(0).getPluginName()).isEqualTo("Discovery");
+        assertThat(tasks.get(0).getConfiguration()).isNotNull();
+        IcmpScannerRequest request = tasks.get(0).getConfiguration().unpack(IcmpScannerRequest.class);
+        assertThat(request).extracting(icmpScannerRequest -> icmpScannerRequest.getHost(0), icmpScannerRequest -> icmpScannerRequest.getHost(1))
+            .containsExactly("127.0.0.1", "127.0.0.2");
     }
 }

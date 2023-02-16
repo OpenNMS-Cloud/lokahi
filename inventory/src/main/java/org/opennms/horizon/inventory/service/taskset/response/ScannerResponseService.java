@@ -31,6 +31,7 @@ package org.opennms.horizon.inventory.service.taskset.response;
 import java.util.List;
 import java.util.Optional;
 
+import org.opennms.discovery.scan.contract.DiscoveryScanResult;
 import org.opennms.horizon.azure.api.AzureScanItem;
 import org.opennms.horizon.azure.api.AzureScanResponse;
 import org.opennms.horizon.inventory.dto.NodeCreateDTO;
@@ -40,8 +41,8 @@ import org.opennms.horizon.inventory.repository.AzureCredentialRepository;
 import org.opennms.horizon.inventory.repository.NodeRepository;
 import org.opennms.horizon.inventory.service.IpInterfaceService;
 import org.opennms.horizon.inventory.service.NodeService;
-import org.opennms.horizon.inventory.service.taskset.TaskSetHandler;
 import org.opennms.horizon.inventory.service.SnmpInterfaceService;
+import org.opennms.horizon.inventory.service.taskset.TaskSetHandler;
 import org.opennms.node.scan.contract.NodeScanResult;
 import org.opennms.taskset.contract.ScanType;
 import org.opennms.taskset.contract.ScannerResponse;
@@ -92,6 +93,11 @@ public class ScannerResponseService {
                 log.debug("received node scan result: {}", nodeScanResult);
                 processNodeScanResponse(tenantId, nodeScanResult);
             }
+            case DISCOVERY_SCAN -> {
+                DiscoveryScanResult discoveryScanResult = result.unpack(DiscoveryScanResult.class);
+                log.debug("received discovery result: {}", discoveryScanResult);
+                processDiscoveryScanResponse(tenantId, location, discoveryScanResult);
+            }
             case UNRECOGNIZED -> log.warn("Unrecognized scan type");
 
         }
@@ -103,8 +109,21 @@ public class ScannerResponseService {
             return ScanType.AZURE_SCAN;
         } else if(result.is(NodeScanResult.class)) {
             return ScanType.NODE_SCAN;
+        } else if(result.is(DiscoveryScanResult.class)) {
+            return ScanType.DISCOVERY_SCAN;
         }
         return ScanType.UNRECOGNIZED;
+    }
+
+    private void processDiscoveryScanResponse(String tenantId, String location, DiscoveryScanResult discoveryScanResult) {
+        for (String ipAddress : discoveryScanResult.getIpAddressesList()) {
+            NodeCreateDTO createDTO = NodeCreateDTO.newBuilder()
+                .setLocation(location)
+                .setManagementIp(ipAddress)
+                .setLabel(ipAddress)
+                .build();
+            nodeService.createNode(createDTO, tenantId);
+        }
     }
 
     private void processAzureScanItem(String tenantId, String location, String ipAddress, AzureScanItem item) {

@@ -28,20 +28,9 @@
 
 package org.opennms.horizon.inventory.service.taskset;
 
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import com.google.protobuf.Any;
-import lombok.RequiredArgsConstructor;
-import org.opennms.azure.contract.AzureScanRequest;
-import org.opennms.horizon.inventory.dto.IpInterfaceDTO;
-import org.opennms.horizon.inventory.dto.NodeDTO;
-import org.opennms.horizon.inventory.mapper.NodeMapper;
-import org.opennms.horizon.inventory.model.AzureCredential;
-import org.opennms.horizon.inventory.model.Node;
-import org.opennms.horizon.inventory.taskset.api.TaskSetPublisher;
-import org.opennms.node.scan.contract.NodeScanRequest;
-import org.opennms.taskset.contract.TaskDefinition;
-import org.opennms.taskset.contract.TaskType;
-import org.springframework.stereotype.Component;
+import static org.opennms.horizon.inventory.service.taskset.TaskUtils.identityForAzureTask;
+import static org.opennms.horizon.inventory.service.taskset.TaskUtils.identityForDiscoveryTask;
+import static org.opennms.horizon.inventory.service.taskset.TaskUtils.identityForNodeScan;
 
 import java.util.List;
 import java.util.Optional;
@@ -49,8 +38,23 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 
-import static org.opennms.horizon.inventory.service.taskset.TaskUtils.identityForAzureTask;
-import static org.opennms.horizon.inventory.service.taskset.TaskUtils.identityForNodeScan;
+import org.opennms.azure.contract.AzureScanRequest;
+import org.opennms.horizon.inventory.dto.IpInterfaceDTO;
+import org.opennms.horizon.inventory.dto.NodeDTO;
+import org.opennms.horizon.inventory.mapper.NodeMapper;
+import org.opennms.horizon.inventory.model.AzureCredential;
+import org.opennms.horizon.inventory.model.Node;
+import org.opennms.horizon.inventory.taskset.api.TaskSetPublisher;
+import org.opennms.icmp.contract.IcmpScannerRequest;
+import org.opennms.node.scan.contract.NodeScanRequest;
+import org.opennms.taskset.contract.TaskDefinition;
+import org.opennms.taskset.contract.TaskType;
+import org.springframework.stereotype.Component;
+
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import com.google.protobuf.Any;
+
+import lombok.RequiredArgsConstructor;
 
 
 
@@ -81,6 +85,30 @@ public class ScannerTaskSetService {
     public Optional<TaskDefinition> getNodeScanTasks(Node node) {
         var nodeDto = nodeMapper.modelToDTO(node);
         return createNodeScanTask(nodeDto);
+    }
+
+    public void sendDiscoveryScannerTask(List<String> ipAddresses, String location, String tenantId, String requisitionName) {
+        Optional<TaskDefinition> tasks = createDiscoveryTask(ipAddresses, location, requisitionName);
+        tasks.ifPresent(taskDefinition -> taskSetPublisher.publishNewTasks(tenantId, location, List.of(taskDefinition)));
+    }
+
+    private Optional<TaskDefinition> createDiscoveryTask(List<String> ipAddresses, String location, String requisitionName) {
+        Any configuration =
+            Any.pack(IcmpScannerRequest.newBuilder()
+                .addAllHost(ipAddresses)
+                .setRetries(1)
+                .setTimeout(2000)
+                .setPacketsPerSeconds(1)
+                .build());
+
+        String taskId = identityForDiscoveryTask(ipAddresses.get(0), location, requisitionName);
+        return Optional.of(TaskDefinition.newBuilder()
+            .setType(TaskType.SCANNER)
+            .setPluginName("Discovery")
+            .setId(taskId)
+            .setConfiguration(configuration)
+            .setSchedule(TaskUtils.DEFAULT_SCHEDULE)
+            .build());
     }
 
     private void sendAzureScannerTask(AzureCredential credential) {

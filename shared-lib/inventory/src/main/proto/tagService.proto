@@ -58,9 +58,23 @@ message TagRemoveListDTO {
   repeated google.protobuf.Int64Value tag_ids = 2;
 }
 
+message ListTagsByNodeIdParamsDTO {
+  int64 node_id = 1;
+  optional TagListParamsDTO params = 2;
+}
+
+message ListAllTagsParamsDTO {
+  optional TagListParamsDTO params = 1;
+}
+
+message TagListParamsDTO {
+  optional string searchTerm = 1;
+  // may require pagination fields or other common list params
+}
+
 service TagService {
   rpc addTags(TagCreateListDTO) returns (TagListDTO) {};
   rpc removeTags(TagRemoveListDTO) returns (google.protobuf.BoolValue) {};
-  rpc getTagsByNodeId(google.protobuf.Int64Value) returns (TagListDTO) {};
-  rpc getTags(google.protobuf.Empty) returns (TagListDTO) {};
+  rpc getTagsByNodeId(ListTagsByNodeIdParamsDTO) returns (TagListDTO) {};
+  rpc getTags(ListAllTagsParamsDTO) returns (TagListDTO) {};
 }

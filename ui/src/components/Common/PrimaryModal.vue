@@ -11,7 +11,6 @@
       </template>
   </FeatherDialog>
 </template>
-// TODO: need to fix the error when modal closed: Uncaught TypeError: Cannot read properties of null (reading 'contains')
 <script setup lang="ts">
 const props = defineProps({
   visible: {
@@ -20,7 +19,7 @@ const props = defineProps({
   },
   title: {
     type: String,
-    required: true
+    required: false
   },
   hideTitle: {
     type: Boolean,
@@ -31,12 +30,14 @@ const props = defineProps({
 const isVisible = computed(() => props.visible)
 
 const labels = reactive({
-  title: '',
+  title: ' ',
   close: 'Close'
 })
 
 watchEffect(() => {
-  labels.title = props.title
+  if (props.title) {
+    labels.title = props.title
+  }
 })
 </script>
 

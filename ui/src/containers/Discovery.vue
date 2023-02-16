@@ -49,11 +49,10 @@
         <DiscoveryTypeSelector @discovery-option-selected="(type: DiscoveryType) => (discoverySelectedType = type)" />
       </div>
       <div v-if="discoverySelectedType === DiscoveryType.ICMP">ICMP/SNMP</div>
-      <div v-else-if="discoverySelectedType === DiscoveryType.Azure">AZURE</div>
-      <DiscoverySyslogSNMPTrapsForm
-        v-else-if="discoverySelectedType === DiscoveryType.SyslogSNMPTraps"
-        @cancel-editing="discoverySelectedType = DiscoveryType.None"
-      />
+      <div v-else-if="discoverySelectedType === DiscoveryType.Azure">
+        <DiscoveryAzureForm :successCallback="(name) => successModal.openSuccessModal(name)" />
+      </div>
+      <DiscoverySyslogSNMPTrapsForm v-else-if="discoverySelectedType === DiscoveryType.SyslogSNMPTraps" />
       <div
         v-else
         class="get-started"
@@ -62,6 +61,7 @@
       </div>
     </section>
   </div>
+  <DiscoverySuccessModal ref="successModal" />
 </template>
 
 <script lang="ts" setup>
@@ -77,6 +77,7 @@ const addIcon: IIcon = {
   image: markRaw(AddIcon)
 }
 
+const successModal = ref()
 const isDiscoveryEditingShown = ref(false)
 const discoverySelectedType = ref(DiscoveryType.None)
 
@@ -184,10 +185,6 @@ const showDiscovery = (id: number) => {
   }
 }
 
-.feather-input-sub-text {
-  display: none !important;
-}
-
 .discovery {
   width: 100%;
   min-width: 400px;
@@ -215,9 +212,5 @@ const showDiscovery = (id: number) => {
   display: flex;
   justify-content: center;
   align-items: center;
-}
-
-:deep(.feather-input-sub-text) {
-  display: none !important;
 }
 </style>

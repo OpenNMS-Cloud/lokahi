@@ -21,6 +21,16 @@ Feature: Node Tagging
     When A GRPC request to fetch tags for node
     Then The response should contain an empty list of tags
 
+  Scenario: Get a list of tags for node and name like provided search term
+    Given A new node with tags "abc,bcd"
+    When A GRPC request to fetch all tags for node with name like "cd"
+    Then The response should contain only tags "bcd"
+
+  Scenario: Get an empty list of tags for node and name like provided search term
+    Given A new node with tags "abc,bcd"
+    When A GRPC request to fetch all tags for node with name like "xyz"
+    Then The response should contain an empty list of tags
+
   Scenario: Remove tags from node
     Given A new node with tags "tag1,tag2"
     When A GRPC request to remove tag "tag1" for node
@@ -32,7 +42,14 @@ Feature: Node Tagging
     When A GRPC request to fetch all tags
     Then The response should contain only tags "tag1,tag2,tag3"
 
-  Scenario: Get an empty list of tags
-    Given A new node with no tags
-    When A GRPC request to fetch all tags
+  Scenario: Get a list of tags with name like provided search term
+    Given A new node with tags "abc,bcd"
+    Given Another node with tags "cde,defg"
+    When A GRPC request to fetch all tags with name like "cd"
+    Then The response should contain only tags "bcd,cde"
+
+  Scenario: Get an empty list of tags with name like provided search term
+    Given A new node with tags "abc,bcd"
+    Given Another node with tags "cde,defg"
+    When A GRPC request to fetch all tags with name like "xyz"
     Then The response should contain an empty list of tags

@@ -76,14 +76,17 @@ public class GrpcTagService {
     }
 
     @GraphQLQuery
-    public Mono<List<Tag>> getTagsByNodeId(@GraphQLArgument(name = "nodeId") Long nodeId, @GraphQLEnvironment ResolutionEnvironment env) {
-        List<TagDTO> tagsList = client.getTagsByNodeId(nodeId, headerUtil.getAuthHeader(env)).getTagsList();
+    public Mono<List<Tag>> getTagsByNodeId(@GraphQLArgument(name = "nodeId") Long nodeId,
+                                           @GraphQLArgument(name = "searchTerm") String searchTerm,
+                                           @GraphQLEnvironment ResolutionEnvironment env) {
+        List<TagDTO> tagsList = client.getTagsByNodeId(nodeId, searchTerm, headerUtil.getAuthHeader(env)).getTagsList();
         return Mono.just(tagsList.stream().map(mapper::protoToTag).toList());
     }
 
     @GraphQLQuery
-    public Mono<List<Tag>> getTags(@GraphQLEnvironment ResolutionEnvironment env) {
-        List<TagDTO> tagsList = client.getTags(headerUtil.getAuthHeader(env)).getTagsList();
+    public Mono<List<Tag>> getTags(@GraphQLArgument(name = "searchTerm") String searchTerm,
+                                   @GraphQLEnvironment ResolutionEnvironment env) {
+        List<TagDTO> tagsList = client.getTags(searchTerm, headerUtil.getAuthHeader(env)).getTagsList();
         return Mono.just(tagsList.stream().map(mapper::protoToTag).toList());
     }
 }

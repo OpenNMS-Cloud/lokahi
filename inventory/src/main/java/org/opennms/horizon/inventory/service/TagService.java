@@ -30,9 +30,13 @@ package org.opennms.horizon.inventory.service;
 
 import com.google.protobuf.Int64Value;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
+import org.opennms.horizon.inventory.dto.ListAllTagsParamsDTO;
+import org.opennms.horizon.inventory.dto.ListTagsByNodeIdParamsDTO;
 import org.opennms.horizon.inventory.dto.TagCreateDTO;
 import org.opennms.horizon.inventory.dto.TagCreateListDTO;
 import org.opennms.horizon.inventory.dto.TagDTO;
+import org.opennms.horizon.inventory.dto.TagListParamsDTO;
 import org.opennms.horizon.inventory.dto.TagRemoveListDTO;
 import org.opennms.horizon.inventory.exception.InventoryRuntimeException;
 import org.opennms.horizon.inventory.mapper.TagMapper;
@@ -131,12 +135,31 @@ public class TagService {
         return tagOpt.get();
     }
 
-    public List<TagDTO> getTagsByNodeId(String tenantId, long nodeId) {
+    public List<TagDTO> getTagsByNodeId(String tenantId, ListTagsByNodeIdParamsDTO listParams) {
+        long nodeId = listParams.getNodeId();
+        if (listParams.hasParams()) {
+            TagListParamsDTO params = listParams.getParams();
+            String searchTerm = params.getSearchTerm();
+
+            if (StringUtils.isNotEmpty(searchTerm)) {
+                return repository.findByTenantIdAndNodeIdAndNameLike(tenantId, nodeId, searchTerm)
+                    .stream().map(mapper::modelToDTO).toList();
+            }
+        }
         return repository.findByTenantIdAndNodeId(tenantId, nodeId)
             .stream().map(mapper::modelToDTO).toList();
     }
 
-    public List<TagDTO> getTags(String tenantId) {
+    public List<TagDTO> getTags(String tenantId, ListAllTagsParamsDTO listParams) {
+        if (listParams.hasParams()) {
+            TagListParamsDTO params = listParams.getParams();
+            String searchTerm = params.getSearchTerm();
+
+            if (StringUtils.isNotEmpty(searchTerm)) {
+                return repository.findByTenantIdAndNameLike(tenantId, searchTerm)
+                    .stream().map(mapper::modelToDTO).toList();
+            }
+        }
         return repository.findByTenantId(tenantId)
             .stream().map(mapper::modelToDTO).toList();
     }

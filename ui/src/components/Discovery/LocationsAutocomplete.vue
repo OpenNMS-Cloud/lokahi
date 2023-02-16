@@ -133,21 +133,11 @@ const removeLocation = (location: Location) => {
   display: flex;
   align-items: baseline;
   flex-direction: column;
-  margin-bottom: var(variables.$spacing-l);
 
-  @include mediaQueriesMixins.screen-md {
-    flex-direction: row;
-  }
   .search {
     width: 100%;
-
-    @include mediaQueriesMixins.screen-md {
-      width: 300px;
-      margin-right: var(variables.$spacing-m);
-    }
   }
   .location-chip {
-    //margin-bottom: var(variables.$spacing-s);
     cursor: pointer;
   }
 }

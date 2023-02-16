@@ -128,7 +128,7 @@ class GraphQLTagServiceTest {
         TagDTO tagDTO1 = TagDTO.newBuilder().setName(TEST_TAG_NAME_1).setTenantId(TEST_TENANT_ID).setId(1L).build();
         TagDTO tagDTO2 = TagDTO.newBuilder().setName(TEST_TAG_NAME_2).setTenantId(TEST_TENANT_ID).setId(2L).build();
         TagListDTO tagListDTO = TagListDTO.newBuilder().addTags(tagDTO1).addTags(tagDTO2).build();
-        when(mockClient.getTagsByNodeId(anyLong(), anyString())).thenReturn(tagListDTO);
+        when(mockClient.getTagsByNodeId(anyLong(), any(), anyString())).thenReturn(tagListDTO);
 
         String getRequest = "query { " +
             "    tagsByNodeId (nodeId: 1) { " +
@@ -152,7 +152,41 @@ class GraphQLTagServiceTest {
             .jsonPath("$.data.tagsByNodeId[1].tenantId").isNotEmpty()
             .jsonPath("$.data.tagsByNodeId[1].name").isEqualTo(TEST_TAG_NAME_2);
 
-        verify(mockClient, times(1)).getTagsByNodeId(1L, accessToken);
+        verify(mockClient, times(1)).getTagsByNodeId(1L, null, accessToken);
+        verify(mockHeaderUtil, times(1)).getAuthHeader(any(ResolutionEnvironment.class));
+    }
+
+    @Test
+    void testGetTagsFromNodeWithSearchTerm() throws JSONException {
+
+        TagDTO tagDTO1 = TagDTO.newBuilder().setName(TEST_TAG_NAME_1).setTenantId(TEST_TENANT_ID).setId(1L).build();
+        TagDTO tagDTO2 = TagDTO.newBuilder().setName(TEST_TAG_NAME_2).setTenantId(TEST_TENANT_ID).setId(2L).build();
+        TagListDTO tagListDTO = TagListDTO.newBuilder().addTags(tagDTO1).addTags(tagDTO2).build();
+        when(mockClient.getTagsByNodeId(anyLong(), anyString(), anyString())).thenReturn(tagListDTO);
+
+        String getRequest = "query { " +
+            "    tagsByNodeId (nodeId: 1, searchTerm: \"abc\") { " +
+            "        id, " +
+            "        tenantId, " +
+            "        name " +
+            "    }" +
+            "}";
+        webClient.post()
+            .uri(GRAPHQL_PATH)
+            .accept(MediaType.APPLICATION_JSON)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(createPayload(getRequest))
+            .exchange()
+            .expectStatus().isOk()
+            .expectBody()
+            .jsonPath("$.data.tagsByNodeId[0].id").isEqualTo(1)
+            .jsonPath("$.data.tagsByNodeId[0].tenantId").isNotEmpty()
+            .jsonPath("$.data.tagsByNodeId[0].name").isEqualTo(TEST_TAG_NAME_1)
+            .jsonPath("$.data.tagsByNodeId[1].id").isEqualTo(2)
+            .jsonPath("$.data.tagsByNodeId[1].tenantId").isNotEmpty()
+            .jsonPath("$.data.tagsByNodeId[1].name").isEqualTo(TEST_TAG_NAME_2);
+
+        verify(mockClient, times(1)).getTagsByNodeId(1L, "abc", accessToken);
         verify(mockHeaderUtil, times(1)).getAuthHeader(any(ResolutionEnvironment.class));
     }
 
@@ -162,7 +196,7 @@ class GraphQLTagServiceTest {
         TagDTO tagDTO1 = TagDTO.newBuilder().setName(TEST_TAG_NAME_1).setTenantId(TEST_TENANT_ID).setId(1L).build();
         TagDTO tagDTO2 = TagDTO.newBuilder().setName(TEST_TAG_NAME_2).setTenantId(TEST_TENANT_ID).setId(2L).build();
         TagListDTO tagListDTO = TagListDTO.newBuilder().addTags(tagDTO1).addTags(tagDTO2).build();
-        when(mockClient.getTags(anyString())).thenReturn(tagListDTO);
+        when(mockClient.getTags(any(), anyString())).thenReturn(tagListDTO);
 
         String getRequest = "query { " +
             "    tags { " +
@@ -186,7 +220,41 @@ class GraphQLTagServiceTest {
             .jsonPath("$.data.tags[1].tenantId").isNotEmpty()
             .jsonPath("$.data.tags[1].name").isEqualTo(TEST_TAG_NAME_2);
 
-        verify(mockClient, times(1)).getTags(accessToken);
+        verify(mockClient, times(1)).getTags(null, accessToken);
+        verify(mockHeaderUtil, times(1)).getAuthHeader(any(ResolutionEnvironment.class));
+    }
+
+    @Test
+    void testGetTagsWithSearchTerm() throws JSONException {
+
+        TagDTO tagDTO1 = TagDTO.newBuilder().setName(TEST_TAG_NAME_1).setTenantId(TEST_TENANT_ID).setId(1L).build();
+        TagDTO tagDTO2 = TagDTO.newBuilder().setName(TEST_TAG_NAME_2).setTenantId(TEST_TENANT_ID).setId(2L).build();
+        TagListDTO tagListDTO = TagListDTO.newBuilder().addTags(tagDTO1).addTags(tagDTO2).build();
+        when(mockClient.getTags(anyString(), anyString())).thenReturn(tagListDTO);
+
+        String getRequest = "query { " +
+            "    tags (searchTerm: \"abc\") { " +
+            "        id, " +
+            "        tenantId, " +
+            "        name " +
+            "    }" +
+            "}";
+        webClient.post()
+            .uri(GRAPHQL_PATH)
+            .accept(MediaType.APPLICATION_JSON)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(createPayload(getRequest))
+            .exchange()
+            .expectStatus().isOk()
+            .expectBody()
+            .jsonPath("$.data.tags[0].id").isEqualTo(1)
+            .jsonPath("$.data.tags[0].tenantId").isNotEmpty()
+            .jsonPath("$.data.tags[0].name").isEqualTo(TEST_TAG_NAME_1)
+            .jsonPath("$.data.tags[1].id").isEqualTo(2)
+            .jsonPath("$.data.tags[1].tenantId").isNotEmpty()
+            .jsonPath("$.data.tags[1].name").isEqualTo(TEST_TAG_NAME_2);
+
+        verify(mockClient, times(1)).getTags("abc", accessToken);
         verify(mockHeaderUtil, times(1)).getAuthHeader(any(ResolutionEnvironment.class));
     }
 

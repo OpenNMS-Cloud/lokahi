@@ -1,5 +1,15 @@
 import { defineStore } from 'pinia'
 import { useDiscoveryMutations } from '../Mutations/discoveryMutations'
+import { cloneDeep } from 'lodash'
+
+const defaultAzureForm = {
+  name: '',
+  clientId: '',
+  clientSecret: '',
+  subscriptionId: '',
+  directoryId: '',
+  tags: []
+}
 
 export const useDiscoveryStore = defineStore('discoveryStore', {
   state: () => ({
@@ -10,12 +20,7 @@ export const useDiscoveryStore = defineStore('discoveryStore', {
       fromIp: '',
       toIp: ''
     },
-    azure: {
-      clientId: '',
-      clientSecret: '',
-      subscriptionId: '',
-      directoryId: ''
-    }
+    azure: cloneDeep(defaultAzureForm)
   }),
   actions: {
     selectLocation(location: string, single?: boolean) {
@@ -41,6 +46,9 @@ export const useDiscoveryStore = defineStore('discoveryStore', {
       })
 
       return !azureError.value
+    },
+    clearAzureForm() {
+      this.azure = cloneDeep(defaultAzureForm)
     }
   }
 })

@@ -194,8 +194,8 @@ public class NodeTaggingStepDefinitions {
         fetchedTagList = tagServiceBlockingStub.getTags(params);
     }
 
-    @When("A GRPC request to fetch all tags for node with searchTerm {string}")
-    public void aGRPCRequestToFetchAllTagsForNodeWithSearchTerm(String searchTerm) {
+    @When("A GRPC request to fetch all tags for node with name like {string}")
+    public void aGRPCRequestToFetchAllTagsForNodeWithNameLike(String searchTerm) {
         var tagServiceBlockingStub = backgroundHelper.getTagServiceBlockingStub();
         ListTagsByNodeIdParamsDTO params = ListTagsByNodeIdParamsDTO.newBuilder()
             .setNodeId(node.getId())
@@ -203,8 +203,8 @@ public class NodeTaggingStepDefinitions {
         fetchedTagList = tagServiceBlockingStub.getTagsByNodeId(params);
     }
 
-    @When("A GRPC request to fetch all tags with searchTerm {string}")
-    public void aGRPCRequestToFetchAllTagsWithSearchTerm(String searchTerm) {
+    @When("A GRPC request to fetch all tags with name like {string}")
+    public void aGRPCRequestToFetchAllTagsWithNameLike(String searchTerm) {
         var tagServiceBlockingStub = backgroundHelper.getTagServiceBlockingStub();
         ListAllTagsParamsDTO params = ListAllTagsParamsDTO.newBuilder()
             .setParams(TagListParamsDTO.newBuilder().setSearchTerm(searchTerm).build()).build();

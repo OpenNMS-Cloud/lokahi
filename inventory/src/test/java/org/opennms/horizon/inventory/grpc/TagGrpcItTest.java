@@ -28,7 +28,6 @@
 
 package org.opennms.horizon.inventory.grpc;
 
-import com.google.protobuf.Empty;
 import com.google.protobuf.Int64Value;
 import io.grpc.Metadata;
 import io.grpc.ServerCall;
@@ -416,7 +415,7 @@ class TagGrpcItTest extends GrpcTestBase {
     }
 
     @Test
-    void testGetTagListForNodeWithSearchTerm() throws Exception {
+    void testGetTagListForNodeWithNameLike() throws Exception {
         long nodeId = setupDatabase();
 
         TagCreateDTO createDTO1 = TagCreateDTO.newBuilder()
@@ -451,7 +450,7 @@ class TagGrpcItTest extends GrpcTestBase {
     }
 
     @Test
-    void testGetTagListForNodeWithSearchTermNoResults() throws Exception {
+    void testGetTagListForNodeWithNameLikeNoResults() throws Exception {
         long nodeId = setupDatabase();
 
         TagCreateDTO createDTO1 = TagCreateDTO.newBuilder()
@@ -520,7 +519,7 @@ class TagGrpcItTest extends GrpcTestBase {
     }
 
     @Test
-    void testGetTagListWithSearchTerm() throws Exception {
+    void testGetTagListWithNameLike() throws Exception {
         long nodeId = setupDatabase();
 
         TagCreateDTO createDTO1 = TagCreateDTO.newBuilder()
@@ -554,7 +553,7 @@ class TagGrpcItTest extends GrpcTestBase {
     }
 
     @Test
-    void testGetTagListWithSearchTermNoResults() throws Exception {
+    void testGetTagListWithNameLikeNoResults() throws Exception {
         long nodeId = setupDatabase();
 
         TagCreateDTO createDTO1 = TagCreateDTO.newBuilder()

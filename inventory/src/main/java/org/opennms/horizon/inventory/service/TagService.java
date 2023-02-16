@@ -142,7 +142,7 @@ public class TagService {
             String searchTerm = params.getSearchTerm();
 
             if (StringUtils.isNotEmpty(searchTerm)) {
-                return repository.findByTenantIdAndNodeIdAndSearchTerm(tenantId, nodeId, searchTerm)
+                return repository.findByTenantIdAndNodeIdAndNameLike(tenantId, nodeId, searchTerm)
                     .stream().map(mapper::modelToDTO).toList();
             }
         }
@@ -156,7 +156,7 @@ public class TagService {
             String searchTerm = params.getSearchTerm();
 
             if (StringUtils.isNotEmpty(searchTerm)) {
-                return repository.findByTenantIdAndSearchTerm(tenantId, searchTerm)
+                return repository.findByTenantIdAndNameLike(tenantId, searchTerm)
                     .stream().map(mapper::modelToDTO).toList();
             }
         }

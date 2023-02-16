@@ -34,20 +34,19 @@ package opennms.inventory;
 option java_multiple_files = true;
 option java_package = "org.opennms.horizon.inventory.dto";
 
+enum ConfigKey {
+  DISCOVERY = 0;
+  SNMP = 1;
+}
+
 message ConfigurationDTO {
   int64 id = 1;
   string tenant_id = 2;
   string location = 3;
-  string key = 4;
+  ConfigKey key = 4;
   string value = 5;
 }
 
 message ConfigurationList {
   repeated ConfigurationDTO configurations = 1;
-}
-
-service ConfigurationService {
-  rpc listConfigurations(google.protobuf.Empty) returns (ConfigurationList) {};
-  rpc getConfigurationsByKey(google.protobuf.StringValue) returns (ConfigurationDTO) {};
-  rpc listConfigurationsByLocation(google.protobuf.StringValue) returns (ConfigurationList) {};
 }

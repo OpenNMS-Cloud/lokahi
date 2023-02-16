@@ -32,17 +32,17 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.opennms.horizon.inventory.dto.ConfigKey;
 import org.opennms.horizon.inventory.dto.ConfigurationDTO;
 import org.opennms.horizon.inventory.mapper.ConfigurationMapper;
 import org.opennms.horizon.inventory.model.Configuration;
 import org.opennms.horizon.inventory.repository.ConfigurationRepository;
-import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
 
-@Service
+
 @RequiredArgsConstructor
-public class ConfigurationService {
+public abstract class ConfigurationService {
     private final ConfigurationRepository modelRepo;
 
     private final ConfigurationMapper mapper;
@@ -54,6 +54,15 @@ public class ConfigurationService {
             newConfigurationDTO.getKey());
 
         return configuration.orElseGet(() -> modelRepo.save(mapper.dtoToModel(newConfigurationDTO)));
+    }
+
+    public Configuration createOrUpdate(ConfigurationDTO configDTO) {
+        return modelRepo.getByTenantIdAndKey(configDTO.getTenantId(), configDTO.getKey())
+            .map(config -> {
+                mapper.updateFromDTO(configDTO, config);
+                modelRepo.save(config);
+                return config;
+            }).orElseGet(() -> modelRepo.save(mapper.dtoToModel(configDTO)));
     }
 
     public List<ConfigurationDTO> findByTenantId(String tenantId) {
@@ -80,7 +89,7 @@ public class ConfigurationService {
             .collect(Collectors.toList());
     }
 
-    public Optional<ConfigurationDTO> findByKey(String tenantId, String key) {
+    public Optional<ConfigurationDTO> findByKey(String tenantId, ConfigKey key) {
         Optional<Configuration> configuration = modelRepo.getByTenantIdAndKey(tenantId, key);
         return configuration
             .map(mapper::modelToDTO);

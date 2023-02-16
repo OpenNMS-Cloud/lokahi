@@ -29,6 +29,9 @@
 package org.opennms.horizon.inventory.mapper;
 
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
+import org.mapstruct.Mappings;
 import org.opennms.horizon.inventory.dto.ConfigurationDTO;
 import org.opennms.horizon.inventory.model.Configuration;
 
@@ -40,6 +43,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public interface ConfigurationMapper {
     Configuration dtoToModel(ConfigurationDTO dto);
     ConfigurationDTO modelToDTO(Configuration model);
+
+    @Mappings({
+        @Mapping(target = "id", ignore = true),
+        @Mapping(target = "tenantId", ignore = true),
+        @Mapping(target = "location", ignore = true),
+        @Mapping(target = "key", ignore = true)
+    })
+    void updateFromDTO(ConfigurationDTO configDTO, @MappingTarget Configuration configuration);
 
     default JsonNode map(String value) throws JsonProcessingException {
         return new ObjectMapper().readTree(value);

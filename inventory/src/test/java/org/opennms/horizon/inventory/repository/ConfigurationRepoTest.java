@@ -38,6 +38,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.opennms.horizon.inventory.SpringContextTestInitializer;
+import org.opennms.horizon.inventory.dto.ConfigKey;
 import org.opennms.horizon.inventory.model.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -63,25 +64,25 @@ public class ConfigurationRepoTest {
         configuration1 = new Configuration();
         configuration1.setLocation("test-location1");
         configuration1.setTenantId(tenantId1);
-        configuration1.setKey("test-key1");
+        configuration1.setKey(ConfigKey.DISCOVERY);
         configuration1.setValue(new ObjectMapper().readTree("{\"test\": \"value1\"}"));
 
         configuration2 = new Configuration();
         configuration2.setLocation("test-location1");
         configuration2.setTenantId(tenantId1);
-        configuration2.setKey("test-key2");
+        configuration2.setKey(ConfigKey.SNMP);
         configuration2.setValue(new ObjectMapper().readTree("{\"test\": \"value2\"}"));
 
         configuration3 = new Configuration();
         configuration3.setLocation("test-location3");
         configuration3.setTenantId(new UUID(5, 6).toString());
-        configuration3.setKey("test-key3");
+        configuration3.setKey(ConfigKey.SNMP);
         configuration3.setValue(new ObjectMapper().readTree("{\"test\": \"value3\"}"));
 
         configuration4 = new Configuration();
         configuration4.setLocation("test-location1");
         configuration4.setTenantId(tenantId2);
-        configuration4.setKey("test-key1");
+        configuration4.setKey(ConfigKey.DISCOVERY);
         configuration4.setValue(new ObjectMapper().readTree("{\"test\": \"value4\"}"));
 
         repository.save(configuration1);
@@ -110,7 +111,7 @@ public class ConfigurationRepoTest {
 
     @Test
     void testFindByKeyNotExist() {
-        Optional<Configuration> result = repository.getByTenantIdAndKey(configuration1.getTenantId(), "Invalid key");
+        Optional<Configuration> result = repository.getByTenantIdAndKey(configuration1.getTenantId(), ConfigKey.UNRECOGNIZED);
         assertThat(result.isPresent()).isFalse();
     }
 
@@ -122,7 +123,7 @@ public class ConfigurationRepoTest {
 
     @Test
     void testFindByTenantIdAndRandomKey() {
-        Optional<Configuration> result = repository.getByTenantIdAndKey(configuration1.getTenantId(), "random key");
+        Optional<Configuration> result = repository.getByTenantIdAndKey(configuration1.getTenantId(), ConfigKey.UNRECOGNIZED);
         assertThat(result.isPresent()).isFalse();
     }
 

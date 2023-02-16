@@ -41,6 +41,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
 import org.mockito.ArgumentCaptor;
+import org.opennms.horizon.inventory.dto.ConfigKey;
 import org.opennms.horizon.inventory.dto.ConfigurationDTO;
 import org.opennms.horizon.inventory.mapper.ConfigurationMapper;
 import org.opennms.horizon.inventory.model.Configuration;
@@ -58,20 +59,22 @@ public class ConfigurationServiceTest {
     private final String location = "test location";
 
     private final String tenantId = "test-tenant";
-    private final String key = "test-key";
-    private final String value = "\"{\"test\":\"value\"}\"";
+    private final ConfigKey key = ConfigKey.DISCOVERY;
+    private final String value = "{\"test\":\"value\"}";
+    private ArgumentCaptor<Configuration> configArgCaptor;
 
     @BeforeEach
     public void setUP() {
         mockConfigurationRepo = mock(ConfigurationRepository.class);
         ConfigurationMapper mapper = Mappers.getMapper(ConfigurationMapper.class);
-        service = new ConfigurationService(mockConfigurationRepo, mapper);
+        service = new ConfigurationService(mockConfigurationRepo, mapper){};
         testConfiguration = ConfigurationDTO.newBuilder()
             .setLocation(location)
             .setTenantId(tenantId)
             .setKey(key)
             .setValue(value)
             .build();
+        configArgCaptor = ArgumentCaptor.forClass(Configuration.class);
     }
 
     @AfterEach
@@ -84,13 +87,11 @@ public class ConfigurationServiceTest {
         doReturn(Optional.empty()).when(mockConfigurationRepo).getByTenantIdAndKey(tenantId, key);
         service.createSingle(testConfiguration);
         verify(mockConfigurationRepo).getByTenantIdAndKey(tenantId, key);
-        ArgumentCaptor<Configuration> configurationArgumentCaptor = ArgumentCaptor.forClass(Configuration.class);
-        verify(mockConfigurationRepo).save(configurationArgumentCaptor.capture());
-        Configuration result = configurationArgumentCaptor.getValue();
-        assertThat(result.getTenantId()).isEqualTo(tenantId);
-        assertThat(result.getLocation()).isEqualTo(location);
-        assertThat(result.getKey()).isEqualTo(key);
-        assertThat(result.getValue()).isEqualTo(new ObjectMapper().readTree(value));
+        verify(mockConfigurationRepo).save(configArgCaptor.capture());
+        Configuration result = configArgCaptor.getValue();
+        assertThat(result).isNotNull()
+            .extracting(Configuration::getTenantId, Configuration::getLocation, Configuration::getKey, Configuration::getValue)
+            .containsExactly(tenantId, location, key, new ObjectMapper().readTree(value));
     }
 
     @Test
@@ -102,12 +103,44 @@ public class ConfigurationServiceTest {
         configuration.setId(1L);
         configuration.setValue(new ObjectMapper().readTree(value));
         doReturn(Optional.of(configuration)).when(mockConfigurationRepo).getByTenantIdAndKey(tenantId, key);
-        Configuration result = service.createSingle(testConfiguration);
-        assertThat(result.getTenantId()).isEqualTo(tenantId);
-        assertThat(result.getLocation()).isEqualTo(location);
-        assertThat(result.getKey()).isEqualTo(key);
-        assertThat(result.getValue()).isEqualTo(new ObjectMapper().readTree(value));
-        assertThat(result.getId()).isEqualTo(1L);
+        Configuration result = service.createSingle (testConfiguration);
+        assertThat(result).isNotNull()
+            .extracting(Configuration::getId, Configuration::getTenantId, Configuration::getLocation, Configuration::getKey,
+                Configuration::getValue)
+            .containsExactly(1L, tenantId, location, key, new ObjectMapper().readTree(value));
+        verify(mockConfigurationRepo).getByTenantIdAndKey(tenantId, key);
+    }
+
+    @Test
+    void testCreateOrUpdateNew() throws JsonProcessingException {
+        doReturn(Optional.empty()).when(mockConfigurationRepo).getByTenantIdAndKey(tenantId, key);
+        service.createOrUpdate(testConfiguration);
+        verify(mockConfigurationRepo).getByTenantIdAndKey(tenantId, key);
+        verify(mockConfigurationRepo).save(configArgCaptor.capture());
+        Configuration result = configArgCaptor.getValue();
+        assertThat(result).isNotNull()
+            .extracting(Configuration::getTenantId, Configuration::getLocation, Configuration::getKey, Configuration::getValue)
+            .containsExactly(tenantId, location, key, new ObjectMapper().readTree(value));
+    }
+
+    @Test
+    void testCreateOrUpdateExist() throws JsonProcessingException {
+        String oldValue = "{\"old_value\": \"will be changed\"}";
+        Configuration configuration = new Configuration();
+        configuration.setTenantId(tenantId);
+        configuration.setLocation(location);
+        configuration.setKey(key);
+        configuration.setId(1L);
+        configuration.setValue(new ObjectMapper().readTree(oldValue));
+
+        doReturn(Optional.of(configuration)).when(mockConfigurationRepo).getByTenantIdAndKey(tenantId, key);
+        service.createOrUpdate(testConfiguration);
+        verify(mockConfigurationRepo).save(configArgCaptor.capture());
+        Configuration arg = configArgCaptor.getValue();
+        assertThat(arg).isNotNull()
+            .extracting(Configuration::getId, Configuration::getTenantId, Configuration::getLocation, Configuration::getKey,
+                Configuration::getValue)
+            .containsExactly(1L, tenantId, location, key, new ObjectMapper().readTree(value)); //updated with the new value;
         verify(mockConfigurationRepo).getByTenantIdAndKey(tenantId, key);
     }
 }

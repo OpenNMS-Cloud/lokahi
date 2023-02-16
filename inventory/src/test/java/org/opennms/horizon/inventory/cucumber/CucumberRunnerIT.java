@@ -30,12 +30,14 @@ package org.opennms.horizon.inventory.cucumber;
 
 import io.cucumber.java.AfterAll;
 import io.cucumber.java.BeforeAll;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.platform.suite.api.ConfigurationParameter;
 import org.junit.platform.suite.api.IncludeEngines;
 import org.junit.platform.suite.api.SelectClasspathResource;
 import org.junit.platform.suite.api.Suite;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.KafkaContainer;
 import org.testcontainers.containers.Network;
@@ -60,9 +62,11 @@ public class CucumberRunnerIT {
     public static final String KAFKA_BOOTSTRAP_SERVER_PROPERTYNAME = "kafka.bootstrap-servers";
 
     private static final String confluentPlatformVersion = "7.3.0";
+    private static final String wireMockVersion = "2.35.0";
 
     private static KafkaContainer kafkaContainer;
     private static GenericContainer applicationContainer;
+    private static GenericContainer wireMockContainer;
     private static PostgreSQLContainer postgreSQLContainer;
 
     private static Network network;
@@ -82,8 +86,17 @@ public class CucumberRunnerIT {
             .withDatabaseName("inventory").withUsername("inventory")
             .withPassword("password");
 
-        postgreSQLContainer.start();
+        wireMockContainer = new GenericContainer(DockerImageName.parse("wiremock/wiremock").withTag(wireMockVersion))
+            .withNetwork(network)
+            .withNetworkAliases("wiremock")
+            .withExposedPorts(8080)
+            .withClasspathResourceMapping("wiremock", "/home/wiremock/mappings", BindMode.READ_ONLY)
+            .withCommand("--global-response-templating", "--disable-banner", "--verbose")
+            .withLogConsumer(new Slf4jLogConsumer(LOG).withPrefix("WIREMOCK"));
+
         kafkaContainer.start();
+        postgreSQLContainer.start();
+        wireMockContainer.start();
 
         String bootstrapServers = kafkaContainer.getBootstrapServers();
         System.setProperty(KAFKA_BOOTSTRAP_SERVER_PROPERTYNAME, bootstrapServers);
@@ -91,24 +104,29 @@ public class CucumberRunnerIT {
 
         startApplicationContainer();
 
+        var externalGrpcPort = applicationContainer.getMappedPort(6565); // application-external-grpc-port
+        var debuggerPort = applicationContainer.getMappedPort(5005);
+        System.setProperty("application-external-grpc-port", String.valueOf(externalGrpcPort));
+        LOG.info("APPLICATION MAPPED PORTS:  external-grpc={};  debugger={}", externalGrpcPort, debuggerPort);
     }
 
     @AfterAll
     public static void shutdown() {
-
         applicationContainer.stop();
         kafkaContainer.stop();
+        wireMockContainer.stop();
         postgreSQLContainer.stop();
-
     }
 
     @SuppressWarnings({"unchecked"})
     private static void startApplicationContainer() {
+        String wiremockUrl = "http://" + wireMockContainer.getNetworkAliases().get(0) + ":8080";
+
         applicationContainer = new GenericContainer(DockerImageName.parse(dockerImage).toString());
         applicationContainer
             .withNetwork(network)
             .withNetworkAliases("application", "application-host")
-            .dependsOn(kafkaContainer, postgreSQLContainer)
+            .dependsOn(kafkaContainer, wireMockContainer, postgreSQLContainer)
             .withExposedPorts(6565, 5005)
             .withStartupTimeout(Duration.ofMinutes(5))
             .withEnv("JAVA_TOOL_OPTIONS", "-Djava.security.egd=file:/dev/./urandom -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005")
@@ -117,17 +135,13 @@ public class CucumberRunnerIT {
                 + postgreSQLContainer.getNetworkAliases().get(0) + ":5432" + "/" + postgreSQLContainer.getDatabaseName())
             .withEnv("SPRING_DATASOURCE_USERNAME", postgreSQLContainer.getUsername())
             .withEnv("SPRING_DATASOURCE_PASSWORD", postgreSQLContainer.getPassword())
+            .withEnv("INVENTORY_AZURE_LOGIN_URL", wiremockUrl)
+            .withEnv("INVENTORY_AZURE_MANAGEMENT_URL", wiremockUrl)
+            .withEnv("INVENTORY_ENCRYPTION_KEY", RandomStringUtils.randomAlphanumeric(32))
             .withLogConsumer(new Slf4jLogConsumer(LOG).withPrefix("APPLICATION"));
 
         // DEBUGGING: uncomment to force local port 5005
         //applicationContainer.getPortBindings().add("5005:5005");
         applicationContainer.start();
-
-
-        var externalGrpcPort = applicationContainer.getMappedPort(6565); // application-external-grpc-port
-        var debuggerPort = applicationContainer.getMappedPort(5005);
-        LOG.info("APPLICATION MAPPED PORTS:  external-grpc={};  debugger={}", externalGrpcPort, debuggerPort);
-        System.setProperty("application-external-grpc-port", String.valueOf(externalGrpcPort));
     }
-
 }

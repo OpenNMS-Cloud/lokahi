@@ -269,6 +269,7 @@ class ScannerResponseServiceIntTest extends GrpcTestBase {
 
         AzureCredential credential = new AzureCredential();
         credential.setTenantId(TEST_TENANT_ID);
+        credential.setName("name");
         credential.setClientId("client-id");
         credential.setClientSecret("client-secret");
         credential.setDirectoryId("directory-id");

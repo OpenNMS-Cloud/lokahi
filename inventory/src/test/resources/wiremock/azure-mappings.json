@@ -1,0 +1,30 @@
+{
+  "mappings": [
+    {
+      "request": {
+        "method": "POST",
+        "url": "/test-directory-id/oauth2/token?api-version=2018-01-01"
+      },
+      "response": {
+        "status": 200,
+        "body": "{\"token_type\":\"Bearer\",\"expires_in\":\"3599\",\"ext_expires_in\":\"3599\",\"expires_on\":\"1676583013\",\"not_before\":\"1676579113\",\"resource\":\"http://wiremock:8080\",\"access_token\":\"test-access-token\"}",
+        "headers": {
+          "Content-Type": "application/json"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "/subscriptions/test-subscription-id?api-version=2018-01-01"
+      },
+      "response": {
+        "status": 200,
+        "body": "{\"subscriptionId\":\"test-subscription-id\",\"state\":\"Enabled\"}",
+        "headers": {
+          "Content-Type": "application/json"
+        }
+      }
+    }
+  ]
+}

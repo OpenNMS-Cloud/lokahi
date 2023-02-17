@@ -31,11 +31,6 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.opennms.horizon.shared</groupId>
-            <artifactId>grpc-common-constants</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
             <groupId>io.grpc</groupId>
             <artifactId>grpc-okhttp</artifactId>
             <version>${grpc.version}</version>
@@ -49,12 +44,6 @@
             <groupId>org.opennms.horizon</groupId>
             <artifactId>flows</artifactId>
             <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.grpc</groupId>
-            <artifactId>grpc-testing</artifactId>
-            <version>${grpc.version}</version>
-            <scope>test</scope>
         </dependency>
     </dependencies>
 </project>

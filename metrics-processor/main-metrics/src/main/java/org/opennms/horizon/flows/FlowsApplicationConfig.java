@@ -91,11 +91,11 @@ public class FlowsApplicationConfig {
     public Pipeline createPipeLine(DocumentEnricherImpl documentEnricher) {
         return new PipelineImpl(documentEnricher);
     }
-
-    @Bean
-    public ClassificationEngine createClassificationEngine(){
-        return new DefaultClassificationEngine();
-    }
+//
+//    @Bean
+//    public ClassificationEngine createClassificationEngine(){
+//        return new DefaultClassificationEngine();
+//    }
     @Bean
     public DocumentEnricherImpl createDocumentEnricher(final MetricRegistry metricRegistry,
                                                        final InventoryClient inventoryClient,

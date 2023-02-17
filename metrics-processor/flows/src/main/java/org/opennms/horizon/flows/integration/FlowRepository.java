@@ -28,7 +28,8 @@
 
 package org.opennms.horizon.flows.integration;
 
-import org.opennms.horizon.flows.integration.Flow;
+import org.opennms.dataplatform.flows.document.FlowDocument;
+import org.opennms.horizon.flows.processing.EnrichedFlow;
 
 import java.util.Collection;
 
@@ -37,15 +38,14 @@ import java.util.Collection;
  *
  * After parsing and processing of received flows, the result is passed to all exposed instances of this interface.
  */
-@Exposable
 public interface FlowRepository {
 
     /**
      * Persist a batch of flows.
      *
-     * @param flows the flows which should be persisted
+     * @param enrichedFlows the flows which should be persisted
      *
      * @throws FlowException on any error happening during processing.
      */
-    void persist(final Collection<? extends Flow> flows) throws FlowException;
+    void persist(final Collection<? extends EnrichedFlow> enrichedFlows) throws FlowException;
 }

@@ -74,6 +74,7 @@ public class CucumberRunnerIT {
     private static final String dockerImage = System.getProperty("application.docker.image");
 
     @BeforeAll
+    @SuppressWarnings({"unchecked"})
     public static void before() throws Throwable {
         network = Network.newNetwork();
         kafkaContainer = new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka").withTag(confluentPlatformVersion))

@@ -36,6 +36,7 @@ import lombok.Setter;
 public class AzureCredential {
     private Long id;
     private String location;
+    private String name;
     private String tenantId;
     private String clientId;
     private String subscriptionId;

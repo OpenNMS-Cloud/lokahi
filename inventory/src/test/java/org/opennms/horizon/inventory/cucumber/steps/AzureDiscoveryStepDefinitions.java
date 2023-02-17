@@ -35,6 +35,12 @@ import io.cucumber.java.en.When;
 import org.opennms.horizon.inventory.cucumber.InventoryBackgroundHelper;
 import org.opennms.horizon.inventory.dto.AzureCredentialCreateDTO;
 import org.opennms.horizon.inventory.dto.AzureCredentialDTO;
+import org.opennms.horizon.inventory.dto.ListTagsByEntityIdParamsDTO;
+import org.opennms.horizon.inventory.dto.TagCreateDTO;
+import org.opennms.horizon.inventory.dto.TagDTO;
+import org.opennms.horizon.inventory.dto.TagListDTO;
+
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -45,6 +51,7 @@ public class AzureDiscoveryStepDefinitions {
     private static InventoryBackgroundHelper backgroundHelper;
     private AzureCredentialCreateDTO createCredentialsDto;
     private AzureCredentialDTO azureCredentialsDto;
+    private TagCreateDTO tagCreateDto1;
 
     @BeforeAll
     public static void beforeAll() {
@@ -81,6 +88,8 @@ public class AzureDiscoveryStepDefinitions {
      */
     @Given("Azure Test Credentials")
     public void generatedTestCredentials() {
+        tagCreateDto1 = TagCreateDTO.newBuilder()
+            .setName("test-tag-name-1").build();
         createCredentialsDto = AzureCredentialCreateDTO.newBuilder()
             .setLocation("Default")
             .setName("test-azure-discovery-name")
@@ -88,6 +97,7 @@ public class AzureDiscoveryStepDefinitions {
             .setClientSecret("test-client-secret")
             .setSubscriptionId("test-subscription-id")
             .setDirectoryId("test-directory-id")
+            .addAllTags(List.of(tagCreateDto1))
             .build();
     }
 
@@ -114,5 +124,14 @@ public class AzureDiscoveryStepDefinitions {
         assertEquals(createCredentialsDto.getDirectoryId(), azureCredentialsDto.getDirectoryId());
         assertNotNull(azureCredentialsDto.getLocation());
         assertTrue(azureCredentialsDto.getCreateTimeMsec() > 0);
+
+        var tagServiceBlockingStub = backgroundHelper.getTagServiceBlockingStub();
+        ListTagsByEntityIdParamsDTO params = ListTagsByEntityIdParamsDTO.newBuilder()
+            .setAzureCredentialId(azureCredentialsDto.getId()).build();
+        TagListDTO tagList = tagServiceBlockingStub.getTagsByEntityId(params);
+        assertEquals(1, tagList.getTagsCount());
+
+        TagDTO tagDTO = tagList.getTags(0);
+        assertEquals(tagCreateDto1.getName(), tagDTO.getName());
     }
 }

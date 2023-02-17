@@ -49,7 +49,6 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
-import java.util.function.Function;
 
 @RequiredArgsConstructor
 @GraphQLApi
@@ -80,6 +79,14 @@ public class GrpcTagService {
                                            @GraphQLArgument(name = "searchTerm") String searchTerm,
                                            @GraphQLEnvironment ResolutionEnvironment env) {
         List<TagDTO> tagsList = client.getTagsByNodeId(nodeId, searchTerm, headerUtil.getAuthHeader(env)).getTagsList();
+        return Mono.just(tagsList.stream().map(mapper::protoToTag).toList());
+    }
+
+    @GraphQLQuery
+    public Mono<List<Tag>> getTagsByAzureCredentialId(@GraphQLArgument(name = "azureCredentialId") Long azureCredentialId,
+                                                      @GraphQLArgument(name = "searchTerm") String searchTerm,
+                                                      @GraphQLEnvironment ResolutionEnvironment env) {
+        List<TagDTO> tagsList = client.getTagsByAzureCredentialId(azureCredentialId, searchTerm, headerUtil.getAuthHeader(env)).getTagsList();
         return Mono.just(tagsList.stream().map(mapper::protoToTag).toList());
     }
 

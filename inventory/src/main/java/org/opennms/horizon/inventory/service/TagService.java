@@ -31,8 +31,9 @@ package org.opennms.horizon.inventory.service;
 import com.google.protobuf.Int64Value;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
+import org.opennms.horizon.inventory.dto.DeleteTagsDTO;
 import org.opennms.horizon.inventory.dto.ListAllTagsParamsDTO;
-import org.opennms.horizon.inventory.dto.ListTagsByNodeIdParamsDTO;
+import org.opennms.horizon.inventory.dto.ListTagsByEntityIdParamsDTO;
 import org.opennms.horizon.inventory.dto.TagCreateDTO;
 import org.opennms.horizon.inventory.dto.TagCreateListDTO;
 import org.opennms.horizon.inventory.dto.TagDTO;
@@ -40,8 +41,10 @@ import org.opennms.horizon.inventory.dto.TagListParamsDTO;
 import org.opennms.horizon.inventory.dto.TagRemoveListDTO;
 import org.opennms.horizon.inventory.exception.InventoryRuntimeException;
 import org.opennms.horizon.inventory.mapper.TagMapper;
+import org.opennms.horizon.inventory.model.AzureCredential;
 import org.opennms.horizon.inventory.model.Node;
 import org.opennms.horizon.inventory.model.Tag;
+import org.opennms.horizon.inventory.repository.AzureCredentialRepository;
 import org.opennms.horizon.inventory.repository.NodeRepository;
 import org.opennms.horizon.inventory.repository.TagRepository;
 import org.springframework.stereotype.Service;
@@ -56,6 +59,7 @@ import java.util.Optional;
 public class TagService {
     private final TagRepository repository;
     private final NodeRepository nodeRepository;
+    private final AzureCredentialRepository azureCredentialRepository;
     private final TagMapper mapper;
 
     @Transactional
@@ -63,25 +67,78 @@ public class TagService {
         if (request.getTagsList().isEmpty()) {
             return Collections.emptyList();
         }
-        Node node = getNode(tenantId, request.getNodeId());
-
-        return request.getTagsList().stream()
-            .map(tagCreateDTO -> createTag(tenantId, node, tagCreateDTO))
-            .toList();
+        if (request.hasNodeId()) {
+            Node node = getNode(tenantId, request.getNodeId());
+            return request.getTagsList().stream()
+                .map(tagCreateDTO -> addTagToNode(tenantId, node, tagCreateDTO))
+                .toList();
+        } else if (request.hasAzureCredentialId()) {
+            AzureCredential credential = getAzureCredential(tenantId, request.getAzureCredentialId());
+            return request.getTagsList().stream()
+                .map(tagCreateDTO -> addTagToAzureCredential(tenantId, credential, tagCreateDTO))
+                .toList();
+        } else {
+            throw new InventoryRuntimeException("Invalid ID provided");
+        }
     }
 
     @Transactional
     public void removeTags(String tenantId, TagRemoveListDTO request) {
-        Node node = getNode(tenantId, request.getNodeId());
-
-        request.getTagIdsList().stream()
+        List<Tag> tags = request.getTagIdsList().stream()
             .map(Int64Value::getValue)
             .map(tagId -> getTag(tenantId, tagId))
-            .toList()
-            .forEach(tag -> removeTagFromNode(node, tag));
+            .toList();
+
+        if (request.hasNodeId()) {
+            Node node = getNode(tenantId, request.getNodeId());
+            tags.forEach(tag -> tag.getNodes().remove(node));
+        } else if (request.hasAzureCredentialId()) {
+            AzureCredential azureCredential = getAzureCredential(tenantId, request.getAzureCredentialId());
+            tags.forEach(tag -> tag.getAzureCredentials().remove(azureCredential));
+        }
     }
 
-    private TagDTO createTag(String tenantId, Node node, TagCreateDTO tagCreateDTO) {
+    public List<TagDTO> getTagsByEntityId(String tenantId, ListTagsByEntityIdParamsDTO listParams) {
+        if (listParams.hasNodeId()) {
+            return getTagsByNodeId(tenantId, listParams);
+        } else if (listParams.hasAzureCredentialId()) {
+            return getTagsByAzureCredentialId(tenantId, listParams);
+        } else {
+            throw new InventoryRuntimeException("Invalid ID provided");
+        }
+    }
+
+    public List<TagDTO> getTags(String tenantId, ListAllTagsParamsDTO listParams) {
+        if (listParams.hasParams()) {
+            TagListParamsDTO params = listParams.getParams();
+            String searchTerm = params.getSearchTerm();
+
+            if (StringUtils.isNotEmpty(searchTerm)) {
+                return repository.findByTenantIdAndNameLike(tenantId, searchTerm)
+                    .stream().map(mapper::modelToDTO).toList();
+            }
+        }
+        return repository.findByTenantId(tenantId)
+            .stream().map(mapper::modelToDTO).toList();
+    }
+
+    public void deleteTags(String tenantId, DeleteTagsDTO request) {
+        if (request.getTagIdsList().isEmpty()) {
+            return;
+        }
+        for (Int64Value tagId : request.getTagIdsList()) {
+            Optional<Tag> tagOpt = repository.findByTenantIdAndId(tenantId, tagId.getValue());
+            if (tagOpt.isPresent()) {
+                Tag tag = tagOpt.get();
+                tag.getNodes().clear();
+                tag.getAzureCredentials().clear();
+
+                repository.delete(tag);
+            }
+        }
+    }
+
+    private TagDTO addTagToNode(String tenantId, Node node, TagCreateDTO tagCreateDTO) {
         String tagName = tagCreateDTO.getName();
 
         Optional<Tag> tagOpt = repository
@@ -100,17 +157,23 @@ public class TagService {
         return mapper.modelToDTO(tag);
     }
 
-    private void removeTagFromNode(Node node, Tag tag) {
-        if (tag.getNodes().isEmpty()) {
-            repository.delete(tag);
-        } else {
-            tag.getNodes().remove(node);
-            if (tag.getNodes().isEmpty()) {
-                repository.delete(tag);
-            } else {
-                repository.save(tag);
-            }
+    private TagDTO addTagToAzureCredential(String tenantId, AzureCredential credential, TagCreateDTO tagCreateDTO) {
+        String tagName = tagCreateDTO.getName();
+
+        Optional<Tag> tagOpt = repository
+            .findByTenantIdAzureCredentialIdAndName(tenantId, credential.getId(), tagName);
+
+        if (tagOpt.isPresent()) {
+            return mapper.modelToDTO(tagOpt.get());
         }
+
+        tagOpt = repository.findByTenantIdAndName(tenantId, tagName);
+        Tag tag = tagOpt.orElseGet(() -> mapCreateTag(tenantId, tagCreateDTO));
+
+        tag.getAzureCredentials().add(credential);
+        tag = repository.save(tag);
+
+        return mapper.modelToDTO(tag);
     }
 
     private Tag mapCreateTag(String tenantId, TagCreateDTO request) {
@@ -135,7 +198,15 @@ public class TagService {
         return tagOpt.get();
     }
 
-    public List<TagDTO> getTagsByNodeId(String tenantId, ListTagsByNodeIdParamsDTO listParams) {
+    private AzureCredential getAzureCredential(String tenantId, long credentialId) {
+        Optional<AzureCredential> azureCredentialOpt = azureCredentialRepository.findByTenantIdAndId(tenantId, credentialId);
+        if (azureCredentialOpt.isEmpty()) {
+            throw new InventoryRuntimeException("Azure Credential not found for id: " + credentialId);
+        }
+        return azureCredentialOpt.get();
+    }
+
+    private List<TagDTO> getTagsByNodeId(String tenantId, ListTagsByEntityIdParamsDTO listParams) {
         long nodeId = listParams.getNodeId();
         if (listParams.hasParams()) {
             TagListParamsDTO params = listParams.getParams();
@@ -150,17 +221,18 @@ public class TagService {
             .stream().map(mapper::modelToDTO).toList();
     }
 
-    public List<TagDTO> getTags(String tenantId, ListAllTagsParamsDTO listParams) {
+    private List<TagDTO> getTagsByAzureCredentialId(String tenantId, ListTagsByEntityIdParamsDTO listParams) {
+        long azureCredentialId = listParams.getAzureCredentialId();
         if (listParams.hasParams()) {
             TagListParamsDTO params = listParams.getParams();
             String searchTerm = params.getSearchTerm();
 
             if (StringUtils.isNotEmpty(searchTerm)) {
-                return repository.findByTenantIdAndNameLike(tenantId, searchTerm)
+                return repository.findByTenantIdAndAzureCredentialIdAndNameLike(tenantId, azureCredentialId, searchTerm)
                     .stream().map(mapper::modelToDTO).toList();
             }
         }
-        return repository.findByTenantId(tenantId)
+        return repository.findByTenantIdAndAzureCredentialId(tenantId, azureCredentialId)
             .stream().map(mapper::modelToDTO).toList();
     }
 }

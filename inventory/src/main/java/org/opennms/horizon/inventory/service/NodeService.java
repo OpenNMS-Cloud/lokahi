@@ -223,11 +223,7 @@ public class NodeService {
 
     private void removeAssociatedTags(Node node) {
         for (Tag tag : node.getTags()) {
-            if (tag.getNodes().size() == 1) {
-                tagRepository.delete(tag);
-            } else {
-                tag.getNodes().remove(node);
-            }
+            tag.getNodes().remove(node);
         }
     }
 }

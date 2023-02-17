@@ -33,6 +33,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -78,4 +79,32 @@ public interface TagRepository extends JpaRepository<Tag, Long> {
                                                  @Param("searchTerm") String searchTerm);
 
     List<Tag> findByTenantId(String tenantId);
+
+    @Query("SELECT tag " +
+        "FROM Tag tag " +
+        "JOIN tag.azureCredentials azureCredentials " +
+        "WHERE tag.tenantId = :tenantId " +
+        "AND azureCredentials.id = :azureCredentialId " +
+        "AND tag.name = :name")
+    Optional<Tag> findByTenantIdAzureCredentialIdAndName(@Param("tenantId") String tenantId,
+                                                         @Param("azureCredentialId") Long azureCredentialId,
+                                                         @Param("name") String name);
+
+    @Query("SELECT tag " +
+        "FROM Tag tag " +
+        "JOIN tag.azureCredentials azureCredential " +
+        "WHERE tag.tenantId = :tenantId " +
+        "AND azureCredential.id = :azureCredentialId ")
+    List<Tag> findByTenantIdAndAzureCredentialId(@Param("tenantId") String tenantId,
+                                                 @Param("azureCredentialId") long azureCredentialId);
+
+    @Query("SELECT tag " +
+        "FROM Tag tag " +
+        "JOIN tag.azureCredentials azureCredential " +
+        "WHERE tag.tenantId = :tenantId " +
+        "AND azureCredential.id = :azureCredentialId " +
+        "AND LOWER(azureCredential.name) LIKE LOWER(CONCAT('%', :searchTerm, '%'))")
+    List<Tag> findByTenantIdAndAzureCredentialIdAndNameLike(@Param("tenantId") String tenantId,
+                                                            @Param("azureCredentialId") long nodeId,
+                                                            @Param("searchTerm") String searchTerm);
 }

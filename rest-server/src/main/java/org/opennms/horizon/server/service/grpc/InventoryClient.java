@@ -41,7 +41,7 @@ import org.opennms.horizon.inventory.dto.AzureCredentialDTO;
 import org.opennms.horizon.inventory.dto.AzureCredentialServiceGrpc;
 import org.opennms.horizon.inventory.dto.IdList;
 import org.opennms.horizon.inventory.dto.ListAllTagsParamsDTO;
-import org.opennms.horizon.inventory.dto.ListTagsByNodeIdParamsDTO;
+import org.opennms.horizon.inventory.dto.ListTagsByEntityIdParamsDTO;
 import org.opennms.horizon.inventory.dto.MonitoringLocationDTO;
 import org.opennms.horizon.inventory.dto.MonitoringLocationServiceGrpc;
 import org.opennms.horizon.inventory.dto.MonitoringSystemDTO;
@@ -133,7 +133,7 @@ public class InventoryClient {
         return keys.stream().map(DataLoaderFactory.Key::getToken).findFirst().map(accessToken -> {
             Metadata metadata = new Metadata();
             metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
-            List<Int64Value> idValues = keys.stream().map(k->Int64Value.of(k.getId())).collect(Collectors.toList());
+            List<Int64Value> idValues = keys.stream().map(k->Int64Value.of(k.getId())).toList();
             return locationStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).listLocationsByIds(IdList.newBuilder().addAllIds(idValues).build()).getLocationsList();
         }).orElseThrow();
     }
@@ -177,12 +177,23 @@ public class InventoryClient {
     public TagListDTO getTagsByNodeId(long nodeId, String searchTerm, String accessToken) {
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
-        ListTagsByNodeIdParamsDTO params = ListTagsByNodeIdParamsDTO.newBuilder()
+        ListTagsByEntityIdParamsDTO params = ListTagsByEntityIdParamsDTO.newBuilder()
             .setNodeId(nodeId)
             .setParams(buildTagListParams(searchTerm))
             .build();
         return tagStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
-            .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).getTagsByNodeId(params);
+            .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).getTagsByEntityId(params);
+    }
+
+    public TagListDTO getTagsByAzureCredentialId(long azureCredentialId, String searchTerm, String accessToken) {
+        Metadata metadata = new Metadata();
+        metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
+        ListTagsByEntityIdParamsDTO params = ListTagsByEntityIdParamsDTO.newBuilder()
+            .setAzureCredentialId(azureCredentialId)
+            .setParams(buildTagListParams(searchTerm))
+            .build();
+        return tagStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
+            .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).getTagsByEntityId(params);
     }
 
     public TagListDTO getTags(String searchTerm, String accessToken) {

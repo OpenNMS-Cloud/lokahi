@@ -68,11 +68,7 @@ public class MockDocumentEnricherFactory {
 
     public MockDocumentEnricherFactory(final long clockSkewCorrectionThreshold, Map<Long, NodeDTO> nodeIdToDto) throws InterruptedException {
         client = createInventoryClient(nodeIdToDto);
-
-//        ipInterfaceDao = new MockIpInterfaceDao();
         interfaceToNodeCache = new MockInterfaceToNodeCache();
-//        assetRecordDao = new MockAssetRecordDao();
-//        categoryDao = new MockCategoryDao();
 
         classificationEngine = new DefaultClassificationEngine(() -> Lists.newArrayList(
             new RuleBuilder().withName("http").withDstPort("80").withProtocol("tcp,udp").build(),
@@ -83,7 +79,7 @@ public class MockDocumentEnricherFactory {
         enricher = new DocumentEnricherImpl(
             new MetricRegistry(),
             client,
-            interfaceToNodeCache, new MockSessionUtils(), classificationEngine,
+            interfaceToNodeCache, classificationEngine,
             new CacheConfigBuilder()
                 .withName("flows.node")
                 .withMaximumSize(1000)

@@ -38,6 +38,7 @@ import com.google.rpc.Code;
 import com.google.rpc.Status;
 import io.grpc.Context;
 import io.grpc.protobuf.StatusProto;
+import io.grpc.stub.ServerCalls;
 import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -193,6 +194,18 @@ public class NodeGrpcService extends NodeServiceGrpc.NodeServiceImplBase {
                     .setMessage("No nodes exist with ids " + request.getIdsList()).build();
                 responseObserver.onError(StatusProto.toStatusRuntimeException(status));
             }
+        }, () -> responseObserver.onError(StatusProto.toStatusRuntimeException(createTenantIdMissingStatus())));
+    }
+
+    @Override
+    public void getIpInterfaceFromQuery(NodeIdQuery request, StreamObserver<IpInterfaceDTO> responseObserver) {
+        tenantLookup.lookupTenantId(Context.current()).ifPresentOrElse(tenantId -> {
+            ipInterfaceService.findByIpAddressAndLocationAndTenantId(request.getIpAddress(), request.getLocation(), tenantId).ifPresentOrElse(ipInterface -> {
+                responseObserver.onNext(ipInterface);
+                responseObserver.onCompleted();
+            }, () -> responseObserver.onError(StatusProto.toStatusRuntimeException(Status.newBuilder()
+                .setCode(Code.NOT_FOUND_VALUE)
+                .setMessage(String.format("IpInterface with IP: %s doesn't exist.", request.getIpAddress())).build())));
         }, () -> responseObserver.onError(StatusProto.toStatusRuntimeException(createTenantIdMissingStatus())));
     }
 

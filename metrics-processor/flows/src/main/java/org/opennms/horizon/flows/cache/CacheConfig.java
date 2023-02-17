@@ -31,6 +31,7 @@ package org.opennms.horizon.flows.cache;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.base.MoreObjects;
 import com.google.common.cache.CacheBuilder;
+import org.springframework.stereotype.Component;
 
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
@@ -41,6 +42,7 @@ import java.util.concurrent.TimeUnit;
  *
  * @see CacheBuilder
  */
+
 public class CacheConfig {
 
     private String name;

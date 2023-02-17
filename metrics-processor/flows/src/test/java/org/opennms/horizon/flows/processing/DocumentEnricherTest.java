@@ -29,28 +29,27 @@
 package org.opennms.horizon.flows.processing;
 
 import com.google.common.collect.Lists;
+import com.google.protobuf.UInt32Value;
+import com.google.protobuf.UInt64Value;
 import com.spotify.hamcrest.pojo.IsPojo;
 import org.hamcrest.Matchers;
 import org.junit.Assert;
 import org.junit.Test;
-import org.opennms.horizon.flows.api.FlowSource;
 import org.opennms.horizon.flows.classification.ClassificationRequest;
 import org.opennms.horizon.flows.classification.IpAddr;
 import org.opennms.horizon.flows.dao.InterfaceToNodeCache;
-import org.opennms.horizon.flows.api.Flow;
-
+import org.opennms.horizon.grpc.flows.contract.FlowDocument;
+import org.opennms.horizon.grpc.flows.contract.FlowSource;
 import org.opennms.horizon.inventory.dto.NodeDTO;
 import org.opennms.horizon.shared.utils.InetAddressUtils;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 public class DocumentEnricherTest {
 
@@ -72,18 +71,18 @@ public class DocumentEnricherTest {
         interfaceToNodeCache.setNodeId("Default", InetAddressUtils.addr("10.0.0.3"), 3, "tenantId");
 
 
-        final List<Flow> documents = Lists.newArrayList();
+        final List<FlowDocument> documents = Lists.newArrayList();
         documents.add(createFlowDocument("10.0.0.1", "10.0.0.2"));
         documents.add(createFlowDocument("10.0.0.1", "10.0.0.3"));
-        enricher.enrich(documents, new FlowSource("Default", "tenantId", "127.0.0.1", null));
+        enricher.enrich(documents, getFlowSource(), "tenantId");
 
-        // get is also called for each save, so we account for those as well
+        // get is also called for each save, so we account for those as well ( 6 > 3 due to metadata cache disabled)
         Assert.assertEquals(3, nodeDaoGetCounter.get());
 
         // Try to enrich flow documents to existing IpAddresses.
         documents.clear();
         documents.add(createFlowDocument("10.0.0.2", "10.0.0.3"));
-        enricher.enrich(documents, new FlowSource("Default", "tenantId","127.0.0.1", null));
+        enricher.enrich(documents, getFlowSource(), "tenantId");
         // Since above two addresses are cached, no extra calls to nodeDao.
         Assert.assertEquals(3, nodeDaoGetCounter.get());
 
@@ -91,31 +90,30 @@ public class DocumentEnricherTest {
         interfaceToNodeCache.setNodeId("Default", InetAddressUtils.addr("10.0.0.4"), 2, "tenantId");
         interfaceToNodeCache.setNodeId("Default", InetAddressUtils.addr("10.0.0.5"), 3, "tenantId");
         documents.add(createFlowDocument("10.0.0.4", "10.0.0.5"));
-        enricher.enrich(documents, new FlowSource("Default", "tenantId", "127.0.0.1", null));
+        enricher.enrich(documents, getFlowSource(), "tenantId");
         // Since above two addresses are added to same nodes, no extra calls to nodeDao
         Assert.assertEquals(3, nodeDaoGetCounter.get());
     }
 
-    private static Flow createFlowDocument(String sourceIp, String destIp) {
+    private static FlowDocument createFlowDocument(String sourceIp, String destIp) {
         return createFlowDocument(sourceIp, destIp, 0);
     }
 
-    private static Flow createFlowDocument(String sourceIp, String destIp, final long timeOffset) {
+    private static FlowDocument createFlowDocument(String sourceIp, String destIp, final long timeOffset) {
         final var now = Instant.now();
 
-        final Flow flow = mock(Flow.class);
-        when(flow.getReceivedAt()).thenReturn(now.plus(timeOffset, ChronoUnit.MILLIS));
-        when(flow.getTimestamp()).thenReturn(now);
-        when(flow.getFirstSwitched()).thenReturn(now.minus(20_000L, ChronoUnit.MILLIS));
-        when(flow.getDeltaSwitched()).thenReturn(now.minus(10_000L, ChronoUnit.MILLIS));
-        when(flow.getLastSwitched()).thenReturn(now.minus(5_000L, ChronoUnit.MILLIS));
-        when(flow.getSrcAddr()).thenReturn(sourceIp);
-        when(flow.getSrcPort()).thenReturn(510);
-        when(flow.getDstAddr()).thenReturn(destIp);
-        when(flow.getDstPort()).thenReturn(80);
-        when(flow.getProtocol()).thenReturn(6); // TCP
+        final var flow = FlowDocument.newBuilder()
+            .setTimestamp(now.toEpochMilli())
+            .setFirstSwitched(UInt64Value.of(now.minus(20_000L, ChronoUnit.MILLIS).toEpochMilli()))
+            .setDeltaSwitched(UInt64Value.of(now.minus(10_000L, ChronoUnit.MILLIS).toEpochMilli()))
+            .setLastSwitched(UInt64Value.of(now.minus(5_000L, ChronoUnit.MILLIS).toEpochMilli()))
+            .setSrcAddress(sourceIp)
+            .setSrcPort(UInt32Value.of(510))
+            .setDstAddress(destIp)
+            .setDstPort(UInt32Value.of(80))
+            .setProtocol(UInt32Value.of(6)); // TCP
 
-        return flow;
+        return flow.build();
     }
 
     private static NodeDTO createNodeDTO(long nodeId, String foreignSource) {
@@ -208,29 +206,38 @@ public class DocumentEnricherTest {
         final MockDocumentEnricherFactory factory = new MockDocumentEnricherFactory(2400_000L, new HashMap<>());
         final DocumentEnricherImpl enricher = factory.getEnricher();
 
-        final Flow flow1 = createFlowDocument("10.0.0.1", "10.0.0.3");
-        final Flow flow2 = createFlowDocument("10.0.0.1", "10.0.0.3", -3600_000L);
-        final Flow flow3 = createFlowDocument("10.0.0.1", "10.0.0.3", +3600_000L);
+        final FlowDocument flow1 = createFlowDocument("10.0.0.1", "10.0.0.3");
+        final FlowDocument flow2 = createFlowDocument("10.0.0.1", "10.0.0.3", -3600_000L);
+        final FlowDocument flow3 = createFlowDocument("10.0.0.1", "10.0.0.3", +3600_000L);
 
-        final List<Flow> flows = Lists.newArrayList(flow1, flow2, flow3);
+        final List<FlowDocument> flows = Lists.newArrayList(flow1, flow2, flow3);
 
-        final List<EnrichedFlow> docs = enricher.enrich(flows, new FlowSource("Default", "tenantId", "127.0.0.1", null));
+        final List<EnrichedFlow> docs = enricher.enrich(flows, getFlowSource(), "tenantId");
+        List<EnrichedFlow> docs1 = new ArrayList<>();
+        docs1.add(docs.get(0));
+        Assert.assertThat(docs.get(0), Matchers.is(
+            IsPojo.pojo(EnrichedFlow.class)
+                .where(EnrichedFlow::getTimestamp, Matchers.is(Instant.ofEpochMilli(flow1.getTimestamp())))
+                .where(EnrichedFlow::getFirstSwitched, Matchers.is(Instant.ofEpochMilli(flow1.getFirstSwitched().getValue())))
+                .where(EnrichedFlow::getDeltaSwitched, Matchers.is(Instant.ofEpochMilli(flow1.getDeltaSwitched().getValue())))
+                .where(EnrichedFlow::getLastSwitched, Matchers.is(Instant.ofEpochMilli(flow1.getLastSwitched().getValue())))));
 
-        Assert.assertThat(docs, Matchers.contains(
-                IsPojo.pojo(EnrichedFlow.class)
-                      .where(EnrichedFlow::getTimestamp, Matchers.is(flow1.getTimestamp()))
-                      .where(EnrichedFlow::getFirstSwitched, Matchers.is(flow1.getFirstSwitched()))
-                      .where(EnrichedFlow::getDeltaSwitched, Matchers.is(flow1.getDeltaSwitched()))
-                      .where(EnrichedFlow::getLastSwitched, Matchers.is(flow1.getLastSwitched())),
-                IsPojo.pojo(EnrichedFlow.class)
-                      .where(EnrichedFlow::getTimestamp, Matchers.is(flow2.getTimestamp().minus( 3600_000L, ChronoUnit.MILLIS)))
-                      .where(EnrichedFlow::getFirstSwitched, Matchers.is(flow2.getFirstSwitched().minus(3600_000L, ChronoUnit.MILLIS)))
-                      .where(EnrichedFlow::getDeltaSwitched, Matchers.is(flow2.getDeltaSwitched().minus(3600_000L, ChronoUnit.MILLIS)))
-                      .where(EnrichedFlow::getLastSwitched, Matchers.is(flow2.getLastSwitched().minus(3600_000L, ChronoUnit.MILLIS))),
-                IsPojo.pojo(EnrichedFlow.class)
-                      .where(EnrichedFlow::getTimestamp, Matchers.is(flow3.getTimestamp().plus(3600_000L, ChronoUnit.MILLIS)))
-                      .where(EnrichedFlow::getFirstSwitched, Matchers.is(flow3.getFirstSwitched().plus(3600_000L, ChronoUnit.MILLIS)))
-                      .where(EnrichedFlow::getDeltaSwitched, Matchers.is(flow3.getDeltaSwitched().plus(3600_000L, ChronoUnit.MILLIS)))
-                      .where(EnrichedFlow::getLastSwitched, Matchers.is(flow3.getLastSwitched().plus(3600_000L, ChronoUnit.MILLIS)))));
+        Assert.assertThat(docs.get(1), Matchers.is(
+            IsPojo.pojo(EnrichedFlow.class)
+                .where(EnrichedFlow::getTimestamp, Matchers.is(Instant.ofEpochMilli(flow2.getTimestamp())))
+                .where(EnrichedFlow::getFirstSwitched, Matchers.is(Instant.ofEpochMilli(flow2.getFirstSwitched().getValue())))
+                .where(EnrichedFlow::getDeltaSwitched, Matchers.is(Instant.ofEpochMilli(flow2.getDeltaSwitched().getValue())))
+                .where(EnrichedFlow::getLastSwitched, Matchers.is(Instant.ofEpochMilli(flow2.getLastSwitched().getValue())))));
+
+        Assert.assertThat(docs.get(2), Matchers.is(
+            IsPojo.pojo(EnrichedFlow.class)
+                .where(EnrichedFlow::getTimestamp, Matchers.is(Instant.ofEpochMilli(flow3.getTimestamp())))
+                .where(EnrichedFlow::getFirstSwitched, Matchers.is(Instant.ofEpochMilli(flow3.getFirstSwitched().getValue())))
+                .where(EnrichedFlow::getDeltaSwitched, Matchers.is(Instant.ofEpochMilli(flow3.getDeltaSwitched().getValue())))
+                .where(EnrichedFlow::getLastSwitched, Matchers.is(Instant.ofEpochMilli(flow3.getLastSwitched().getValue())))));
+    }
+
+    private FlowSource getFlowSource(){
+        return FlowSource.newBuilder().setLocation("Default").setSourceAddress("127.0.0.1").build();
     }
 }

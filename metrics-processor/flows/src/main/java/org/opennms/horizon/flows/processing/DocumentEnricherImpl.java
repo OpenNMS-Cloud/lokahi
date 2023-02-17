@@ -31,8 +31,6 @@ package org.opennms.horizon.flows.processing;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.google.common.cache.CacheLoader;
-import org.opennms.horizon.flows.api.Flow;
-import org.opennms.horizon.flows.api.FlowSource;
 import org.opennms.horizon.flows.cache.Cache;
 import org.opennms.horizon.flows.cache.CacheBuilder;
 import org.opennms.horizon.flows.cache.CacheConfig;
@@ -41,16 +39,17 @@ import org.opennms.horizon.flows.classification.ClassificationEngine;
 import org.opennms.horizon.flows.classification.ClassificationRequest;
 import org.opennms.horizon.flows.classification.persistence.api.Protocols;
 import org.opennms.horizon.flows.dao.InterfaceToNodeCache;
-import org.opennms.horizon.flows.dao.SessionUtils;
 import org.opennms.horizon.flows.grpc.client.InventoryClient;
-import org.opennms.horizon.flows.meta.api.ContextKey;
+import org.opennms.horizon.grpc.flows.contract.ContextKey;
+import org.opennms.horizon.grpc.flows.contract.FlowDocument;
+import org.opennms.horizon.grpc.flows.contract.FlowSource;
 import org.opennms.horizon.inventory.dto.NodeDTO;
 import org.opennms.horizon.shared.utils.InetAddressUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.InetAddress;
-import java.time.Duration;
+import java.time.Instant;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -68,8 +67,6 @@ public class DocumentEnricherImpl {
     private InventoryClient inventoryClient;
 
     private final InterfaceToNodeCache interfaceToNodeCache;
-
-    private final SessionUtils sessionUtils;
 
     private final ClassificationEngine classificationEngine;
 
@@ -89,14 +86,12 @@ public class DocumentEnricherImpl {
     public DocumentEnricherImpl(final MetricRegistry metricRegistry,
                                 final InventoryClient inventoryClient,
                                 final InterfaceToNodeCache interfaceToNodeCache,
-                                final SessionUtils sessionUtils,
                                 final ClassificationEngine classificationEngine,
                                 final CacheConfig cacheConfig,
                                 final long clockSkewCorrectionThreshold,
                                 final DocumentMangler mangler) {
         this.inventoryClient = Objects.requireNonNull(inventoryClient);
         this.interfaceToNodeCache = Objects.requireNonNull(interfaceToNodeCache);
-        this.sessionUtils = Objects.requireNonNull(sessionUtils);
         this.classificationEngine = Objects.requireNonNull(classificationEngine);
 
         this.nodeInfoCache = new CacheBuilder()
@@ -107,6 +102,8 @@ public class DocumentEnricherImpl {
                         return getNodeInfo(entry);
                     }
                 }).build();
+
+
 // TODO: HS-961
 //       final CacheConfig nodeMetadataCacheConfig = buildMetadataCacheConfig(cacheConfig);
 //       this.nodeMetadataCache = new CacheBuilder()
@@ -125,13 +122,13 @@ public class DocumentEnricherImpl {
         this.mangler = Objects.requireNonNull(mangler);
     }
 
-    public List<EnrichedFlow> enrich(final Collection<Flow> flows, final FlowSource source) {
+    public List<EnrichedFlow> enrich(final Collection<FlowDocument> flows, final FlowSource source, final String tenantId) {
         if (flows.isEmpty()) {
             LOG.info("Nothing to enrich.");
             return Collections.emptyList();
         }
 
-        return sessionUtils.withTransaction(() -> flows.stream().flatMap(flow -> {
+        return flows.stream().flatMap(flow -> {
             final EnrichedFlow document = this.mangler.mangle(EnrichedFlow.from(flow));
             if (document == null) {
                 return Stream.empty();
@@ -142,20 +139,20 @@ public class DocumentEnricherImpl {
             document.setLocation(source.getLocation());
 
             // Node data
-            getNodeInfoFromCache(source.getLocation(), source.getSourceAddress(), source.getContextKey(), flow.getNodeIdentifier(), source.getTenantId()).ifPresent(document::setExporterNodeInfo);
-            if (flow.getDstAddr() != null) {
-                getNodeInfoFromCache(source.getLocation(), flow.getDstAddr(), null, null, source.getTenantId()).ifPresent(document::setSrcNodeInfo);
+            getNodeInfoFromCache(source.getLocation(), source.getSourceAddress(), source.getContextKey(), flow.getExporterIdentifier(), tenantId).ifPresent(document::setExporterNodeInfo);
+            if (flow.getDstAddress() != null) {
+                getNodeInfoFromCache(source.getLocation(), flow.getDstAddress(), null, null, tenantId).ifPresent(document::setSrcNodeInfo);
             }
-            if (flow.getSrcAddr() != null) {
-                getNodeInfoFromCache(source.getLocation(), flow.getSrcAddr(), null, null, source.getTenantId()).ifPresent(document::setDstNodeInfo);
+            if (flow.getSrcAddress() != null) {
+                getNodeInfoFromCache(source.getLocation(), flow.getSrcAddress(), null, null, tenantId).ifPresent(document::setDstNodeInfo);
             }
 
             // Locality
-            if (flow.getSrcAddr() != null) {
-                document.setSrcLocality(isPrivateAddress(flow.getSrcAddr()) ? EnrichedFlow.Locality.PRIVATE : EnrichedFlow.Locality.PUBLIC);
+            if (flow.getSrcAddress() != null) {
+                document.setSrcLocality(isPrivateAddress(flow.getSrcAddress()) ? EnrichedFlow.Locality.PRIVATE : EnrichedFlow.Locality.PUBLIC);
             }
-            if (flow.getDstAddr() != null) {
-                document.setDstLocality(isPrivateAddress(flow.getDstAddr()) ? EnrichedFlow.Locality.PRIVATE : EnrichedFlow.Locality.PUBLIC);
+            if (flow.getDstAddress() != null) {
+                document.setDstLocality(isPrivateAddress(flow.getDstAddress()) ? EnrichedFlow.Locality.PRIVATE : EnrichedFlow.Locality.PUBLIC);
             }
 
             if (EnrichedFlow.Locality.PUBLIC.equals(document.getDstLocality()) || EnrichedFlow.Locality.PUBLIC.equals(document.getSrcLocality())) {
@@ -173,23 +170,20 @@ public class DocumentEnricherImpl {
             }
 
             // Fix skewed clock
-            // If received time and export time differ to much, correct all timestamps by the difference
+            // If received time and export time differ too much, correct all timestamps by the difference
             if (this.clockSkewCorrectionThreshold > 0) {
-                final var skew = Duration.between(flow.getReceivedAt(), flow.getTimestamp());
-                if (skew.abs().toMillis() >= this.clockSkewCorrectionThreshold) {
-                    // The applied correction is the negative skew
-                    document.setClockCorrection(skew.negated());
+                if (flow.getClockCorrection() >= this.clockSkewCorrectionThreshold) {
 
                     // Fix the skew on all timestamps of the flow
-                    document.setTimestamp(flow.getTimestamp().minus(skew));
-                    document.setFirstSwitched(flow.getFirstSwitched().minus(skew));
-                    document.setDeltaSwitched(flow.getDeltaSwitched().minus(skew));
-                    document.setLastSwitched(flow.getLastSwitched().minus(skew));
+                    document.setTimestamp(Instant.ofEpochMilli(flow.getTimestamp() - flow.getClockCorrection()));
+                    document.setFirstSwitched(Instant.ofEpochMilli(flow.getFirstSwitched().getValue() - flow.getClockCorrection()));
+                    document.setDeltaSwitched(Instant.ofEpochMilli(flow.getDeltaSwitched().getValue() - flow.getClockCorrection()));
+                    document.setLastSwitched(Instant.ofEpochMilli(flow.getLastSwitched().getValue() - flow.getClockCorrection()));
                 }
             }
 
             return Stream.of(document);
-        }).collect(Collectors.toList()));
+        }).collect(Collectors.toList());
     }
 
     private static boolean isPrivateAddress(String ipAddress) {

@@ -45,7 +45,7 @@ public class MockInterfaceToNodeCache extends AbstractInterfaceToNodeCache {
     }
 
     @Override
-    public boolean removeNodeId(String location, InetAddress ipAddr, long nodeId) {
+    public boolean removeNodeId(String location, InetAddress ipAddr, long nodeId, String tenantId) {
         return keyToEntry.remove(new Key(location, ipAddr)) != null;
     }
 
@@ -53,9 +53,6 @@ public class MockInterfaceToNodeCache extends AbstractInterfaceToNodeCache {
     public Optional<Entry> getFirst(String location, InetAddress ipAddr, String tenantId) {
         return Optional.ofNullable(keyToEntry.get(new Key(location, ipAddr)));
     }
-
-    @Override
-    public void dataSourceSync() {}
 
     @Override
     public int size() { return keyToEntry.size(); }
@@ -66,7 +63,7 @@ public class MockInterfaceToNodeCache extends AbstractInterfaceToNodeCache {
     }
 
     @Override
-    public void removeInterfacesForNode(int nodeId) {
+    public void removeInterfacesForNode(long nodeId) {
     }
 
     private static class Key {

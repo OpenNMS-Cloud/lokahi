@@ -33,12 +33,12 @@ import com.codahale.metrics.Histogram;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.google.common.collect.Maps;
-import org.opennms.horizon.flows.api.Flow;
-import org.opennms.horizon.flows.api.FlowSource;
 import org.opennms.horizon.flows.integration.FlowException;
 import org.opennms.horizon.flows.integration.FlowRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.opennms.horizon.grpc.flows.contract.FlowDocument;
+import org.opennms.horizon.grpc.flows.contract.FlowSource;
 
 import java.util.Collection;
 import java.util.List;
@@ -72,8 +72,9 @@ public class PipelineImpl implements Pipeline {
 
     private final Map<String, Persister> persisters = Maps.newConcurrentMap();
 
-    public PipelineImpl(final MetricRegistry metricRegistry,
-                        final DocumentEnricherImpl documentEnricher) {
+    public PipelineImpl(final DocumentEnricherImpl documentEnricher) {
+        this.metricRegistry = new MetricRegistry();
+
         this.documentEnricher = Objects.requireNonNull(documentEnricher);
 
         this.emptyFlows = metricRegistry.counter("emptyFlows");
@@ -81,25 +82,24 @@ public class PipelineImpl implements Pipeline {
 
         this.logEnrichementTimer = metricRegistry.timer("logEnrichment");
 
-        this.metricRegistry = Objects.requireNonNull(metricRegistry);
     }
 
-    public void process(final List<Flow> flows, final FlowSource source, final ProcessingOptions processingOptions, final String tenantId) throws FlowException {
+    public void process(final List<FlowDocument> flows, final FlowSource source, String tenantId) throws FlowException {
         // Track the number of flows per call
         this.flowsPerLog.update(flows.size());
-        
+
         // Filter empty logs
         if (flows.isEmpty()) {
             this.emptyFlows.inc();
             LOG.info("Received empty flows from {} @ {}. Nothing to do.", source.getSourceAddress(), source.getLocation());
             return;
         }
-        
+
         // Enrich with model data
         LOG.debug("Enriching {} flow documents.", flows.size());
         final List<EnrichedFlow> enrichedFlows;
         try (final Timer.Context ctx = this.logEnrichementTimer.time()) {
-            enrichedFlows = documentEnricher.enrich(flows, source);
+            enrichedFlows = documentEnricher.enrich(flows, source, tenantId);
         } catch (Exception e) {
             throw new FlowException("Failed to enrich one or more flows.", e);
         }
@@ -121,7 +121,7 @@ public class PipelineImpl implements Pipeline {
 
         final String pid = Objects.toString(properties.get(REPOSITORY_ID));
         this.persisters.put(pid, new Persister(repository,
-                                               this.metricRegistry.timer(MetricRegistry.name("logPersisting", pid))));
+            this.metricRegistry.timer(MetricRegistry.name("logPersisting", pid))));
     }
 
     @SuppressWarnings("rawtypes")

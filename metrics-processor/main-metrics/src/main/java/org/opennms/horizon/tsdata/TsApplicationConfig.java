@@ -28,6 +28,7 @@
 
 package org.opennms.horizon.tsdata;
 
+import com.codahale.metrics.MetricRegistry;
 import org.opennms.horizon.timeseries.cortex.CortexTSS;
 import org.opennms.horizon.timeseries.cortex.CortexTSSConfig;
 import org.springframework.beans.factory.annotation.Value;
@@ -35,7 +36,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class ApplicationConfig {
+public class TsApplicationConfig {
     @Value("${cortex.write.url}")
     private String cortexWriteURL;
 
@@ -60,8 +61,8 @@ public class ApplicationConfig {
     }
 
     @Bean
-    public CortexTSS createCortex() {
-        return new CortexTSS(cortexTSSConfig());
+    public CortexTSS createCortex(CortexTSSConfig cortexTSSConfig, MetricRegistry metricRegistry) {
+        return new CortexTSS(cortexTSSConfig, metricRegistry);
     }
 }
 

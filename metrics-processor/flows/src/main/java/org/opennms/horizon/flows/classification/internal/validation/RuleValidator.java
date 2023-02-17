@@ -39,6 +39,7 @@ import org.opennms.horizon.flows.classification.internal.value.StringValue;
 import org.opennms.horizon.flows.classification.persistence.api.Protocols;
 import org.opennms.horizon.flows.classification.persistence.api.Rule;
 import org.opennms.horizon.shared.utils.IPAddress;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 import java.util.Objects;
@@ -52,7 +53,7 @@ public class RuleValidator {
 
     private final FilterService filterService;
 
-    public RuleValidator(FilterService filterService) {
+    public RuleValidator(@Autowired FilterService filterService) {
         this.filterService = Objects.requireNonNull(filterService);
     }
 
@@ -102,7 +103,7 @@ public class RuleValidator {
     }
 
     protected static void validateProtocol(String protocol) throws InvalidRuleException {
-        if (Strings.isNullOrEmpty(protocol)){
+        if (Strings.isNullOrEmpty(protocol)) {
             throw new InvalidRuleException(ErrorContext.Protocol, Errors.RULE_PROTOCOL_IS_REQUIRED);
         }
         // Verify protocol actually exists
@@ -138,7 +139,7 @@ public class RuleValidator {
             final List<StringValue> range = eachRange.splitBy("-");
 
             // Verify each value is a number value
-            for (int i=0; i<Math.min(range.size(), 2); i++) {
+            for (int i = 0; i < Math.min(range.size(), 2); i++) {
                 verifyPortValue(errorContext, range.get(i).getValue());
             }
 

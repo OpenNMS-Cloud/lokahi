@@ -34,11 +34,9 @@ import java.util.Optional;
 
 public interface InterfaceToNodeCache {
 
-	void dataSourceSync();
-
 	boolean setNodeId(String location, InetAddress ipAddr, long nodeId, String tenantId);
 
-	boolean removeNodeId(String location, InetAddress ipAddr, long nodeId);
+	boolean removeNodeId(String location, InetAddress ipAddr, long nodeId, String tenantId);
 
 	int size();
 
@@ -53,7 +51,7 @@ public interface InterfaceToNodeCache {
 		return this.getFirst(location, ipAddr, tenantId).map(e -> e.nodeId);
 	}
 
-	void removeInterfacesForNode(int nodeId);
+	void removeInterfacesForNode(long nodeId);
 
 	class Entry {
 		public final long nodeId;

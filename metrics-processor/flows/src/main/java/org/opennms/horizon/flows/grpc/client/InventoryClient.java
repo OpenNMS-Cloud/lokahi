@@ -28,19 +28,18 @@
 
 package org.opennms.horizon.flows.grpc.client;
 
-import java.util.concurrent.TimeUnit;
-
 import com.google.protobuf.Int64Value;
+import io.grpc.ManagedChannel;
+import io.grpc.Metadata;
+import io.grpc.stub.MetadataUtils;
+import lombok.RequiredArgsConstructor;
 import org.opennms.horizon.inventory.dto.IpInterfaceDTO;
 import org.opennms.horizon.inventory.dto.NodeDTO;
 import org.opennms.horizon.inventory.dto.NodeIdQuery;
 import org.opennms.horizon.inventory.dto.NodeServiceGrpc;
 import org.opennms.horizon.shared.constants.GrpcConstants;
 
-import io.grpc.ManagedChannel;
-import io.grpc.Metadata;
-import io.grpc.stub.MetadataUtils;
-import lombok.RequiredArgsConstructor;
+import java.util.concurrent.TimeUnit;
 
 @RequiredArgsConstructor
 public class InventoryClient {
@@ -58,10 +57,15 @@ public class InventoryClient {
         }
     }
 
-    public NodeDTO getNodeById(long nodeId, String tenantId) {
-        Metadata metadata = new Metadata();
-        metadata.put(GrpcConstants.AUTHORIZATION_BYPASS_KEY, String.valueOf(true));
+    private Metadata getMetadata(boolean bypassAuthorization, String tenantId){
+        var metadata = new Metadata();
+        metadata.put(GrpcConstants.AUTHORIZATION_BYPASS_KEY, String.valueOf(bypassAuthorization));
         metadata.put(GrpcConstants.TENANT_ID_BYPASS_KEY, tenantId);
+        return metadata;
+    }
+
+    public NodeDTO getNodeById(long nodeId, String tenantId) {
+        Metadata metadata = getMetadata(true, tenantId);
 
         return nodeStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
             .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
@@ -69,14 +73,22 @@ public class InventoryClient {
     }
 
     public long getNodeIdFromQuery(String tenantId, String ipAddress, String location) {
-        Metadata metadata = new Metadata();
-        metadata.put(GrpcConstants.AUTHORIZATION_BYPASS_KEY, String.valueOf(true));
-        metadata.put(GrpcConstants.TENANT_ID_BYPASS_KEY, tenantId);
+        Metadata metadata = getMetadata(true, tenantId);
 
         NodeIdQuery query = NodeIdQuery.newBuilder()
             .setIpAddress(ipAddress).setLocation(location).build();
         return nodeStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
             .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
             .getNodeIdFromQuery(query).getValue();
+    }
+
+    public IpInterfaceDTO getIpInterfaceFromQuery(String tenantId, String ipAddress, String location) {
+        Metadata metadata = getMetadata(true, tenantId);
+
+        NodeIdQuery query = NodeIdQuery.newBuilder()
+            .setIpAddress(ipAddress).setLocation(location).build();
+        return nodeStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
+            .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
+            .getIpInterfaceFromQuery(query);
     }
 }

@@ -31,6 +31,9 @@ package org.opennms.horizon.flows.classification.csv;
 import com.google.common.collect.Lists;
 import org.junit.Before;
 import org.junit.Test;
+import org.opennms.horizon.flows.classification.FilterService;
+import org.opennms.horizon.flows.classification.exception.InvalidFilterException;
+import org.opennms.horizon.flows.classification.internal.CachingFilterService;
 import org.opennms.horizon.flows.classification.internal.csv.CsvServiceImpl;
 import org.opennms.horizon.flows.classification.internal.validation.RuleValidator;
 import org.opennms.horizon.flows.classification.persistence.api.Group;
@@ -132,5 +135,14 @@ public class CsvServiceTest {
         final CsvImportResult csvImportResult = csvService.parseCSV(group, new ByteArrayInputStream("\n\n".getBytes()), false);
         assertThat(csvImportResult.getErrorMap().size(), is(2));
     }
+
+//    @Test
+//    public void test(){
+//        FilterService filterService = new CachingFilterService();
+//        RuleValidator ruleValidator = new RuleValidator();
+//        final CsvService csvService = new CsvServiceImpl(ruleValidator);
+//
+//        final List<Rule> rules = csvService.parseCSV(group, new ByteArrayInputStream(";;;;;;;".getBytes()), false).getRules();
+//    }
 }
 

@@ -28,7 +28,7 @@
 
 package org.opennms.horizon.flows.processing;
 
-import org.opennms.horizon.flows.api.Flow;
+import org.opennms.horizon.grpc.flows.contract.FlowDocument;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -510,46 +510,69 @@ public class EnrichedFlow implements org.opennms.horizon.flows.integration.Flow 
                                                             this.getApplication());
     }
 
-    public static EnrichedFlow from(final Flow flow) {
+    public static EnrichedFlow from(final FlowDocument flow) {
         final var enriched = new EnrichedFlow();
 
-        enriched.setReceivedAt(flow.getReceivedAt());
-        enriched.setTimestamp(flow.getTimestamp());
-        enriched.setBytes(flow.getBytes());
-        enriched.setDirection(flow.getDirection());
-        enriched.setDstAddr(flow.getDstAddr());
-        flow.getDstAddrHostname().ifPresent(enriched::setDstAddrHostname);
-        enriched.setDstAs(flow.getDstAs());
-        enriched.setDstMaskLen(flow.getDstMaskLen());
-        enriched.setDstPort(flow.getDstPort());
-        enriched.setEngineId(flow.getEngineId());
-        enriched.setEngineType(flow.getEngineType());
-        enriched.setDeltaSwitched(flow.getDeltaSwitched());
-        enriched.setFirstSwitched(flow.getFirstSwitched());
-        enriched.setFlowRecords(flow.getFlowRecords());
-        enriched.setFlowSeqNum(flow.getFlowSeqNum());
-        enriched.setInputSnmp(flow.getInputSnmp());
-        enriched.setIpProtocolVersion(flow.getIpProtocolVersion());
-        enriched.setLastSwitched(flow.getLastSwitched());
-        enriched.setNextHop(flow.getNextHop());
-        flow.getNextHopHostname().ifPresent(enriched::setNextHopHostname);
-        enriched.setOutputSnmp(flow.getOutputSnmp());
-        enriched.setPackets(flow.getPackets());
-        enriched.setProtocol(flow.getProtocol());
-        enriched.setSamplingAlgorithm(flow.getSamplingAlgorithm());
-        enriched.setSamplingInterval(flow.getSamplingInterval());
-        enriched.setSrcAddr(flow.getSrcAddr());
-        flow.getSrcAddrHostname().ifPresent(enriched::setSrcAddrHostname);
-        enriched.setSrcAs(flow.getSrcAs());
-        enriched.setSrcMaskLen(flow.getSrcMaskLen());
-        enriched.setSrcPort(flow.getSrcPort());
-        enriched.setTcpFlags(flow.getTcpFlags());
-        enriched.setTos(flow.getTos());
-        enriched.setDscp(flow.getDscp());
-        enriched.setEcn(flow.getEcn());
-        enriched.setNetflowVersion(flow.getNetflowVersion());
-        enriched.setVlan(flow.getVlan());
+        enriched.setReceivedAt(Instant.ofEpochMilli(flow.getTimestamp()));
+        enriched.setTimestamp(Instant.ofEpochMilli(flow.getTimestamp()));
+        enriched.setDirection(org.opennms.horizon.flows.integration.Flow.Direction.valueOf(flow.getDirection().name()));
+        enriched.setDstAddr(flow.getDstAddress());
+        enriched.setDstAddrHostname(flow.getDstHostname());
+        enriched.setDstAs(flow.getDstAs().getValue());
+        enriched.setDstMaskLen(flow.getDstMaskLen().getValue());
+        enriched.setDstPort(flow.getDstPort().getValue());
+        enriched.setEngineId(flow.getEngineId().getValue());
+        enriched.setEngineType(flow.getEngineType().getValue());
+        enriched.setDeltaSwitched(Instant.ofEpochMilli(flow.getDeltaSwitched().getValue()));
+        enriched.setFirstSwitched(Instant.ofEpochMilli(flow.getFirstSwitched().getValue()));
+        enriched.setFlowRecords(flow.getNumFlowRecords().getValue());
+        enriched.setFlowSeqNum(flow.getFlowSeqNum().getValue());
+        enriched.setInputSnmp(flow.getInputSnmpIfindex().getValue());
+        enriched.setIpProtocolVersion(flow.getIpProtocolVersion().getValue());
+        enriched.setLastSwitched(Instant.ofEpochMilli(flow.getLastSwitched().getValue()));
+        enriched.setNextHop(flow.getNextHopAddress());
+        enriched.setNextHopHostname(flow.getNextHopHostname());
+        // temp cast to Long (notified cloud storage InputSnmp & OutputSnmp are not the same datatype)
+        enriched.setOutputSnmp(Long.valueOf(flow.getOutputSnmpIfindex().getValue()));
+        enriched.setPackets(flow.getNumPackets().getValue());
+        enriched.setProtocol(flow.getProtocol().getValue());
+        enriched.setSamplingAlgorithm(convertSamplingAlgorithm(flow.getSamplingAlgorithm()));
+        enriched.setSamplingInterval(flow.getSamplingInterval().getValue());
+        enriched.setSrcAddr(flow.getSrcAddress());
+        enriched.setSrcAddrHostname(flow.getSrcHostname());
+        enriched.setSrcAs(flow.getSrcAs().getValue());
+        enriched.setSrcMaskLen(flow.getSrcMaskLen().getValue());
+        enriched.setSrcPort(flow.getSrcPort().getValue());
+        enriched.setTcpFlags(flow.getTcpFlags().getValue());
+        enriched.setTos(flow.getTos().getValue());
+        enriched.setDscp(flow.getDscp().getValue());
+        enriched.setEcn(flow.getEcn().getValue());
+        enriched.setNetflowVersion(org.opennms.horizon.flows.integration.Flow.NetflowVersion.valueOf(flow.getNetflowVersion().name()));
+        enriched.setVlan(flow.getVlan().getValue());
 
         return enriched;
+    }
+
+    static SamplingAlgorithm convertSamplingAlgorithm(org.opennms.horizon.grpc.flows.contract.SamplingAlgorithm samplingAlgorithm){
+        switch(samplingAlgorithm){
+            case UNASSIGNED:
+                return SamplingAlgorithm.Unassigned;
+            case SYSTEMATIC_COUNT_BASED_SAMPLING:
+                return SamplingAlgorithm.SystematicCountBasedSampling;
+            case SYSTEMATIC_TIME_BASED_SAMPLING:
+                return SamplingAlgorithm.SystematicTimeBasedSampling;
+            case RANDOM_N_OUT_OF_N_SAMPLING:
+                return SamplingAlgorithm.RandomNOutOfNSampling;
+            case UNIFORM_PROBABILISTIC_SAMPLING:
+                return SamplingAlgorithm.UniformProbabilisticSampling;
+            case PROPERTY_MATCH_FILTERING:
+                return SamplingAlgorithm.PropertyMatchFiltering;
+            case HASH_BASED_FILTERING:
+                return SamplingAlgorithm.HashBasedFiltering;
+            case FLOW_STATE_DEPENDENT_INTERMEDIATE_FLOW_SELECTION_PROCESS:
+                return SamplingAlgorithm.FlowStateDependentIntermediateFlowSelectionProcess;
+            default:
+                return SamplingAlgorithm.Unassigned;
+        }
     }
 }

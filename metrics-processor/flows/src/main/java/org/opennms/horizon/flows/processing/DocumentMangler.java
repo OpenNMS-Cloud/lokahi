@@ -34,6 +34,7 @@ import com.swrve.ratelimitedlogger.RateLimitedLog;
 import org.opennms.horizon.flows.fileutils.FileUpdateWatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import javax.script.Compilable;
 import javax.script.CompiledScript;

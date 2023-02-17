@@ -122,6 +122,7 @@ public class TagService {
             .stream().map(mapper::modelToDTO).toList();
     }
 
+    @Transactional
     public void deleteTags(String tenantId, DeleteTagsDTO request) {
         if (request.getTagIdsList().isEmpty()) {
             return;

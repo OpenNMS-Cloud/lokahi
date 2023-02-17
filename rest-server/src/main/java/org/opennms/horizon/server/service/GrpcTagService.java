@@ -30,19 +30,13 @@ package org.opennms.horizon.server.service;
 
 import io.leangen.graphql.annotations.GraphQLArgument;
 import io.leangen.graphql.annotations.GraphQLEnvironment;
-import io.leangen.graphql.annotations.GraphQLMutation;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.execution.ResolutionEnvironment;
 import io.leangen.graphql.spqr.spring.annotations.GraphQLApi;
 import lombok.RequiredArgsConstructor;
-import org.opennms.horizon.inventory.dto.TagCreateListDTO;
 import org.opennms.horizon.inventory.dto.TagDTO;
-import org.opennms.horizon.inventory.dto.TagListDTO;
-import org.opennms.horizon.inventory.dto.TagRemoveListDTO;
 import org.opennms.horizon.server.mapper.TagMapper;
 import org.opennms.horizon.server.model.inventory.tag.Tag;
-import org.opennms.horizon.server.model.inventory.tag.TagListAdd;
-import org.opennms.horizon.server.model.inventory.tag.TagListRemove;
 import org.opennms.horizon.server.service.grpc.InventoryClient;
 import org.opennms.horizon.server.utils.ServerHeaderUtil;
 import org.springframework.stereotype.Service;
@@ -57,22 +51,6 @@ public class GrpcTagService {
     private final InventoryClient client;
     private final TagMapper mapper;
     private final ServerHeaderUtil headerUtil;
-
-    @GraphQLMutation
-    public Mono<List<Tag>> addTags(TagListAdd tags, @GraphQLEnvironment ResolutionEnvironment env) {
-        String authHeader = headerUtil.getAuthHeader(env);
-        TagCreateListDTO tagCreateListDTO = mapper.tagListAddToProto(tags);
-        TagListDTO tagListDTO = client.addTags(tagCreateListDTO, authHeader);
-        return Mono.just(tagListDTO.getTagsList().stream().map(mapper::protoToTag).toList());
-    }
-
-    @GraphQLMutation
-    public Mono<Void> removeTags(TagListRemove tags, @GraphQLEnvironment ResolutionEnvironment env) {
-        String authHeader = headerUtil.getAuthHeader(env);
-        TagRemoveListDTO tagRemoveListDTO = mapper.tagListRemoveToProto(tags);
-        client.removeTags(tagRemoveListDTO, authHeader);
-        return Mono.empty();
-    }
 
     @GraphQLQuery
     public Mono<List<Tag>> getTagsByNodeId(@GraphQLArgument(name = "nodeId") Long nodeId,

@@ -31,18 +31,10 @@ package org.opennms.horizon.server.mapper;
 import com.google.protobuf.Int64Value;
 import org.mapstruct.CollectionMappingStrategy;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.NullValueCheckStrategy;
 import org.opennms.horizon.inventory.dto.TagCreateDTO;
-import org.opennms.horizon.inventory.dto.TagCreateListDTO;
 import org.opennms.horizon.inventory.dto.TagDTO;
-import org.opennms.horizon.inventory.dto.TagRemoveListDTO;
 import org.opennms.horizon.server.model.inventory.tag.Tag;
 import org.opennms.horizon.server.model.inventory.tag.TagCreate;
-import org.opennms.horizon.server.model.inventory.tag.TagListAdd;
-import org.opennms.horizon.server.model.inventory.tag.TagListRemove;
-
-import java.util.List;
 
 
 @Mapper(componentModel = "spring", uses = {},
@@ -51,13 +43,7 @@ import java.util.List;
 public interface TagMapper {
     Tag protoToTag(TagDTO tagDTO);
 
-    @Mapping(target = "tagsList", source = "tags", nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
-    TagCreateListDTO tagListAddToProto(TagListAdd tags);
-
     TagCreateDTO tagCreateToProto(TagCreate tagCreate);
-
-    @Mapping(target = "tagIdsList", source = "tagIds", nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
-    TagRemoveListDTO tagListRemoveToProto(TagListRemove tags);
 
     default Int64Value longToInt64Value(Long value) {
         return Int64Value.of(value);

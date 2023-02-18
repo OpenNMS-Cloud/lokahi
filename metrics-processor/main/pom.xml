@@ -14,7 +14,7 @@
         A microservice responsible for processing device metrics.
     </description>
 
-    <artifactId>main-metrics</artifactId>
+    <artifactId>main</artifactId>
     <version>0.1.0-SNAPSHOT</version>
 
     <dependencyManagement>
@@ -31,11 +31,6 @@
 
     <dependencies>
         <dependency>
-            <groupId>io.grpc</groupId>
-            <artifactId>grpc-okhttp</artifactId>
-            <version>${grpc.version}</version>
-        </dependency>
-        <dependency>
             <groupId>org.opennms.horizon</groupId>
             <artifactId>timeseries</artifactId>
             <version>${project.version}</version>
@@ -44,6 +39,16 @@
             <groupId>org.opennms.horizon</groupId>
             <artifactId>flows</artifactId>
             <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-okhttp</artifactId>
+            <version>${grpc.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>okhttp</artifactId>
+            <version>${okhttp.version}</version>
         </dependency>
     </dependencies>
 </project>

@@ -31,9 +31,18 @@ package org.opennms.horizon.flows;
 import com.codahale.metrics.MetricRegistry;
 import org.opennms.horizon.flows.cache.CacheConfig;
 import org.opennms.horizon.flows.classification.ClassificationEngine;
+import org.opennms.horizon.flows.classification.ClassificationRuleProvider;
+import org.opennms.horizon.flows.classification.FilterService;
+import org.opennms.horizon.flows.classification.csv.CsvService;
 import org.opennms.horizon.flows.classification.internal.DefaultClassificationEngine;
+import org.opennms.horizon.flows.classification.internal.DefaultFilterService;
+import org.opennms.horizon.flows.classification.internal.csv.CsvServiceImpl;
+import org.opennms.horizon.flows.classification.internal.provider.CsvClassificationRuleProvider;
+import org.opennms.horizon.flows.classification.internal.validation.RuleValidator;
 import org.opennms.horizon.flows.dao.InterfaceToNodeCache;
 import org.opennms.horizon.flows.grpc.client.InventoryClient;
+import org.opennms.horizon.flows.integration.FlowRepository;
+import org.opennms.horizon.flows.integration.FlowRepositoryImpl;
 import org.opennms.horizon.flows.processing.DocumentEnricherImpl;
 import org.opennms.horizon.flows.processing.DocumentMangler;
 import org.opennms.horizon.flows.processing.InterfaceToNodeCacheDaoImpl;
@@ -44,6 +53,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import javax.script.ScriptEngineManager;
+import java.util.HashMap;
 
 @Configuration
 public class FlowsApplicationConfig {
@@ -78,31 +88,62 @@ public class FlowsApplicationConfig {
     }
 
     @Bean
-    public DocumentMangler createDocumentMangler(){
+    public DocumentMangler createDocumentMangler() {
         return new DocumentMangler(new ScriptEngineManager());
     }
 
     @Bean
-    public InterfaceToNodeCache createInterfaceToNodeCache(InventoryClient client){
+    public InterfaceToNodeCache createInterfaceToNodeCache(final InventoryClient client) {
         return new InterfaceToNodeCacheDaoImpl(client);
     }
 
     @Bean
-    public Pipeline createPipeLine(DocumentEnricherImpl documentEnricher) {
-        return new PipelineImpl(documentEnricher);
+    public Pipeline createPipeLine(final DocumentEnricherImpl documentEnricher, final FlowRepository flowRepository) {
+        var pipeLine = new PipelineImpl(documentEnricher);
+        var properties = new HashMap<>();
+        properties.put(PipelineImpl.REPOSITORY_ID, "DataPlatform");
+        pipeLine.onBind(flowRepository, properties);
+        return pipeLine;
     }
-//
-//    @Bean
-//    public ClassificationEngine createClassificationEngine(){
-//        return new DefaultClassificationEngine();
-//    }
+
+    @Bean
+    public FlowRepository createFlowRepositoryImpl() {
+        return new FlowRepositoryImpl();
+    }
+
+    @Bean
+    public FilterService createFilterService() {
+        return new DefaultFilterService();
+    }
+
+    @Bean
+    public RuleValidator createRuleValidator(FilterService filterService) {
+        return new RuleValidator(filterService);
+    }
+
+    @Bean
+    CsvService createCsvService(RuleValidator ruleValidator) {
+        return new CsvServiceImpl(ruleValidator);
+    }
+
+    @Bean
+    ClassificationRuleProvider createClassificationRuleProvider(final CsvService csvService) {
+        return new CsvClassificationRuleProvider("pre-defined-rules.csv", csvService);
+    }
+
+    @Bean
+    public ClassificationEngine createClassificationEngine(ClassificationRuleProvider classificationRuleProvider,
+                                                           FilterService filterService) throws InterruptedException {
+        return new DefaultClassificationEngine(classificationRuleProvider, filterService);
+    }
+
     @Bean
     public DocumentEnricherImpl createDocumentEnricher(final MetricRegistry metricRegistry,
                                                        final InventoryClient inventoryClient,
                                                        final InterfaceToNodeCache interfaceToNodeCache,
                                                        final ClassificationEngine classificationEngine,
                                                        final CacheConfig cacheConfig,
-                                                       final DocumentMangler mangler){
+                                                       final DocumentMangler mangler) {
         return new DocumentEnricherImpl(metricRegistry, inventoryClient, interfaceToNodeCache, classificationEngine,
             cacheConfig, clockSkewCorrectionThreshold, mangler);
     }

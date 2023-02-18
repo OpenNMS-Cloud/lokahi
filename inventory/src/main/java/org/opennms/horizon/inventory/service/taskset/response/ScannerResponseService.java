@@ -28,10 +28,10 @@
 
 package org.opennms.horizon.inventory.service.taskset.response;
 
-import java.util.List;
-import java.util.Optional;
-
-import org.opennms.discovery.scan.contract.DiscoveryScanResult;
+import com.google.protobuf.Any;
+import com.google.protobuf.InvalidProtocolBufferException;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.opennms.horizon.azure.api.AzureScanItem;
 import org.opennms.horizon.azure.api.AzureScanResponse;
 import org.opennms.horizon.inventory.dto.NodeCreateDTO;
@@ -44,15 +44,14 @@ import org.opennms.horizon.inventory.service.NodeService;
 import org.opennms.horizon.inventory.service.SnmpInterfaceService;
 import org.opennms.horizon.inventory.service.taskset.TaskSetHandler;
 import org.opennms.node.scan.contract.NodeScanResult;
+import org.opennms.taskset.contract.DiscoveryScanResult;
+import org.opennms.taskset.contract.PingResponse;
 import org.opennms.taskset.contract.ScanType;
 import org.opennms.taskset.contract.ScannerResponse;
 import org.springframework.stereotype.Component;
 
-import com.google.protobuf.Any;
-import com.google.protobuf.InvalidProtocolBufferException;
-
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Component
@@ -116,11 +115,11 @@ public class ScannerResponseService {
     }
 
     private void processDiscoveryScanResponse(String tenantId, String location, DiscoveryScanResult discoveryScanResult) {
-        for (String ipAddress : discoveryScanResult.getIpAddressesList()) {
+        for (PingResponse pingResponse : discoveryScanResult.getPingResponseList()) {
             NodeCreateDTO createDTO = NodeCreateDTO.newBuilder()
                 .setLocation(location)
-                .setManagementIp(ipAddress)
-                .setLabel(ipAddress)
+                .setManagementIp(pingResponse.getIpAddress())
+                .setLabel(pingResponse.getIpAddress())
                 .build();
             nodeService.createNode(createDTO, tenantId);
         }

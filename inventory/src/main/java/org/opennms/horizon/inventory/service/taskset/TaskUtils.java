@@ -4,6 +4,10 @@ public interface TaskUtils {
 
     String DEFAULT_SCHEDULE = "60000";
 
+
+    // TODO: Change this to use ISO-8601 period format
+    // Schedule Scans every 24 hrs.
+    String DEFAULT_SCHEDULE_FOR_SCAN = "60000*60*24";
     int ICMP_DEFAULT_TIMEOUT_MS = 800;
     int ICMP_DEFAULT_RETRIES = 2;
     int ICMP_DEFAULT_DSCP = 0;

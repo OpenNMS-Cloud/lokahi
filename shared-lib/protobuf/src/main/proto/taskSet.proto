@@ -127,3 +127,12 @@ message CollectorResponse {
   google.protobuf.Any result = 4;
   MonitorType monitor_type = 5;
 }
+
+message DiscoveryScanResult {
+  repeated PingResponse ping_response = 1;
+}
+
+message PingResponse {
+  string ip_address = 1;
+  double rtt = 2;
+}

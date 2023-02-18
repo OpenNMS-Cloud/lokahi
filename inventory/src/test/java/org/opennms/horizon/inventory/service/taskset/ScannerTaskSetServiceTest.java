@@ -28,14 +28,7 @@
 
 package org.opennms.horizon.inventory.service.taskset;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-
-import java.util.List;
-
+import com.google.protobuf.InvalidProtocolBufferException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -48,11 +41,17 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.opennms.horizon.inventory.dto.IpInterfaceDTO;
 import org.opennms.horizon.inventory.dto.NodeDTO;
 import org.opennms.horizon.inventory.taskset.api.TaskSetPublisher;
-import org.opennms.icmp.contract.IcmpScannerRequest;
+import org.opennms.icmp.contract.PingSweepRequest;
 import org.opennms.node.scan.contract.NodeScanRequest;
 import org.opennms.taskset.contract.TaskDefinition;
 
-import com.google.protobuf.InvalidProtocolBufferException;
+import java.util.List;
+
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 @ExtendWith(MockitoExtension.class)
 public class ScannerTaskSetServiceTest {
@@ -71,7 +70,7 @@ public class ScannerTaskSetServiceTest {
     @BeforeEach
     void prepareTest() {
         ipInterface1 = IpInterfaceDTO.newBuilder().setIpAddress("127.0.0.1").setSnmpPrimary(true).build();
-        ipInterface2 = IpInterfaceDTO.newBuilder().setIpAddress("127.0.0.1").build();
+        ipInterface2 = IpInterfaceDTO.newBuilder().setIpAddress("127.0.0.2").build();
         nodeBuilder = NodeDTO.newBuilder().setId(1L);
     }
 
@@ -121,10 +120,11 @@ public class ScannerTaskSetServiceTest {
         List<TaskDefinition> tasks = taskListCaptor.getValue();
         assertThat(tasks).asList().hasSize(1);
         assertThat(tasks.get(0).getId()).isEqualTo("requisition:requisitionName/ip=127.0.0.1/testLocation");
-        assertThat(tasks.get(0).getPluginName()).isEqualTo("Discovery");
+        assertThat(tasks.get(0).getPluginName()).isEqualTo("Discovery-Ping");
         assertThat(tasks.get(0).getConfiguration()).isNotNull();
-        IcmpScannerRequest request = tasks.get(0).getConfiguration().unpack(IcmpScannerRequest.class);
-        assertThat(request).extracting(icmpScannerRequest -> icmpScannerRequest.getHost(0), icmpScannerRequest -> icmpScannerRequest.getHost(1))
+        PingSweepRequest request = tasks.get(0).getConfiguration().unpack(PingSweepRequest.class);
+        assertThat(request).extracting(icmpScannerRequest -> icmpScannerRequest.getIpRange(0).getBegin(), icmpScannerRequest ->
+                icmpScannerRequest.getIpRange(1).getBegin())
             .containsExactly("127.0.0.1", "127.0.0.2");
     }
 }

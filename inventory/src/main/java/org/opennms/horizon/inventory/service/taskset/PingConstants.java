@@ -1,8 +1,8 @@
 /*******************************************************************************
  * This file is part of OpenNMS(R).
  *
- * Copyright (C) 2022 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
+ * Copyright (C) 2023 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
  *
@@ -25,22 +25,16 @@
  *     http://www.opennms.org/
  *     http://www.opennms.com/
  *******************************************************************************/
-syntax = "proto3";
 
-import "google/protobuf/empty.proto";
-import "google/protobuf/wrappers.proto";
+package org.opennms.horizon.inventory.service.taskset;
 
-package opennms.inventory;
-option java_multiple_files = true;
-option java_package = "org.opennms.horizon.inventory.dto";
+// TODO: Make this common for Minion/Inventory
+public interface PingConstants {
 
-message DiscoveryRequest {
-  repeated string ipAddresses = 1;
-  string location = 2;
-  string requisitionName = 3;
-  string defaultConfig = 4;
-}
-
-service DiscoveryService {
-  rpc discoverServices(DiscoveryRequest) returns (google.protobuf.Empty) {};
+    int DEFAULT_RETRIES = 2;
+    int DEFAULT_TIMEOUT = 800;
+    int DEFAULT_PACKET_SIZE = 64;
+    double DEFAULT_PACKETS_PER_SECOND = 1.0;
+    boolean DEFAULT_ALLOW_FRAGMENTATION = true;
+    int DEFAULT_DSCP = 0;
 }

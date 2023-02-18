@@ -1,8 +1,8 @@
 /*******************************************************************************
  * This file is part of OpenNMS(R).
  *
- * Copyright (C) 2022 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
+ * Copyright (C) 2023 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
  *
@@ -25,19 +25,34 @@
  *     http://www.opennms.org/
  *     http://www.opennms.com/
  *******************************************************************************/
-syntax = "proto3";
 
-import "google/protobuf/any.proto";
+package org.opennms.horizon.minion.icmp;
 
-package opennms.discovery.scan;
-option java_multiple_files = true;
-option java_package = "org.opennms.discovery.scan.contract";
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import org.opennms.horizon.minion.plugin.api.Scanner;
+import org.opennms.horizon.minion.plugin.api.ScannerManager;
+import org.opennms.horizon.shared.icmp.PingerFactory;
 
-message DiscoveryScanResult {
-  repeated string ipAddresses = 1;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
+
+public class PingScanManager implements ScannerManager {
+
+
+    private final ThreadFactory threadFactory = new ThreadFactoryBuilder()
+        .setNameFormat("ping-sweep-%d")
+        .build();
+
+    private final ExecutorService executor = Executors.newCachedThreadPool(threadFactory);
+    private final PingerFactory pingerFactory;
+
+    public PingScanManager(PingerFactory pingerFactory) {
+        this.pingerFactory = pingerFactory;
+    }
+
+    @Override
+    public Scanner create() {
+        return new PingScan(pingerFactory, executor);
+    }
 }
-
-
-
-
-

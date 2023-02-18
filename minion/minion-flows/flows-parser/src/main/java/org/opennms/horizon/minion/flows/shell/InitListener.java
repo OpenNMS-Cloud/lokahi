@@ -61,7 +61,7 @@ public class InitListener implements Action {
     public Object execute() {
         ListenerConfig config = ListenerConfig.newBuilder().setClassName(listenerClass).setName(name + "_listener")
             .addParsers(ParserConfig.newBuilder().setClassName(parserClass).setName(name + "_parser")).build();
-        registry.getListener(config);
+        registry.createListener(config);
         System.out.println("Listener started.");
         return null;
     }

@@ -31,6 +31,7 @@ package org.opennms.horizon.minion.flows.listeners;
 import java.net.InetSocketAddress;
 import java.time.Duration;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Future;
@@ -71,7 +72,7 @@ public class UdpListener implements GracefulShutdownListener, FlowsListener {
         .build();
 
     private final String name;
-    private final List<Parser> parsers;
+    private final List<UdpParser> parsers;
 
     private final Meter packetsReceived;
 
@@ -84,11 +85,11 @@ public class UdpListener implements GracefulShutdownListener, FlowsListener {
 
     private Future<String> stopFuture;
 
-    public UdpListener(final String name, final List<Parser> parsers, final MetricRegistry metrics) {
+    public UdpListener(final String name, final List<UdpParser> parsers, final MetricRegistry metrics) {
         this(name, 0, parsers, metrics);
     }
 
-    public UdpListener(final String name, final int port, final List<Parser> parsers, final MetricRegistry metrics) {
+    public UdpListener(final String name, final int port, final List<UdpParser> parsers, final MetricRegistry metrics) {
         this.name = Objects.requireNonNull(name);
         if (port != 0) {
             this.port = port;
@@ -105,7 +106,7 @@ public class UdpListener implements GracefulShutdownListener, FlowsListener {
 
         packetsReceived = metrics.meter(MetricRegistry.name("org/opennms/horizon/minion/flows/listeners", name, "packetsReceived"));
     }
-
+    // check
     public void start() throws InterruptedException {
         // Netty defaults to 2 * num cores when the number of threads is set to 0
         this.bossGroup = new NioEventLoopGroup(0, new ThreadFactoryBuilder()
@@ -213,11 +214,6 @@ public class UdpListener implements GracefulShutdownListener, FlowsListener {
     @Override
     public String getDescription() {
         return String.format("UDP %s:%s", this.host != null ? this.host : "*", this.port);
-    }
-
-    @Override
-    public Collection<Parser> getParsers() {
-        return this.parsers;
     }
 
     @Override

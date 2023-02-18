@@ -31,13 +31,18 @@ package org.opennms.horizon.minion.flows.parser;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import com.codahale.metrics.MetricRegistry;
 import org.junit.Ignore;
-import org.opennms.horizon.grpc.telemetry.contract.TelemetryMessage;
+import org.mockito.ArgumentMatchers;
+import org.opennms.horizon.grpc.flows.contract.FlowDocument;
+import org.opennms.horizon.grpc.flows.contract.FlowDocumentLog;
 import org.opennms.horizon.minion.flows.listeners.UdpListener;
 import org.opennms.horizon.minion.flows.parser.factory.DnsResolver;
 import org.opennms.horizon.shared.ipc.rpc.IpcIdentity;
 import org.opennms.horizon.shared.ipc.sink.api.AsyncDispatcher;
+import org.opennms.horizon.shared.ipc.sink.api.MessageDispatcherFactory;
 
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -52,6 +57,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+// No flows are illegal ✊
 public class IllegalFlowTest {
     private final static Path FOLDER = Paths.get("src/test/resources/flows");
     private final AtomicInteger messagesSent = new AtomicInteger();
@@ -78,9 +84,9 @@ public class IllegalFlowTest {
 
         // setting up nf9 parser
 
-        final Netflow9UdpParser parser = new Netflow9UdpParser("FLOW", "FLOW_QUEUE", new AsyncDispatcher<>() {
+        final Netflow9UdpParser parser = new Netflow9UdpParser("FLOW", new AsyncDispatcher<>() {
             @Override
-            public CompletableFuture<AsyncDispatcher.DispatchStatus> send(TelemetryMessage message) {
+            public CompletableFuture<AsyncDispatcher.DispatchStatus> send(FlowDocumentLog message) {
                 messagesSent.incrementAndGet();
                 return CompletableFuture.completedFuture(DispatchStatus.DISPATCHED);
             }

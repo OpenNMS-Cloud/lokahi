@@ -37,7 +37,7 @@ import java.util.Map;
 
 public class ListenerHolder implements Listener {
 
-    private Map<String, FlowsListener> listenerMap = new HashMap<>();
+    private final Map<String, FlowsListener> listenerMap = new HashMap<>();
 
     public void clear() {
         stop(); // stop all before remove prevent resource leakage

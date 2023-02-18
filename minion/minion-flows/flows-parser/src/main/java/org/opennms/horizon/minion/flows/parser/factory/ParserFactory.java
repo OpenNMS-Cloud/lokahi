@@ -29,7 +29,6 @@
 package org.opennms.horizon.minion.flows.parser.factory;
 
 import org.opennms.horizon.minion.flows.listeners.Parser;
-import org.opennms.horizon.minion.flows.listeners.factory.TelemetryBeanFactory;
 import org.opennms.sink.flows.contract.ParserConfig;
 
 /**
@@ -37,5 +36,8 @@ import org.opennms.sink.flows.contract.ParserConfig;
  *
  * @author mvrueden
  */
-public interface ParserFactory extends TelemetryBeanFactory<Parser, ParserConfig> {
+public interface ParserFactory {
+    Class<? extends Parser> getParserClass();
+    
+    Parser create(ParserConfig config);
 }

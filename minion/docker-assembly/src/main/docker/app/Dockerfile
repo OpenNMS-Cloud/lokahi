@@ -81,4 +81,5 @@ ENV IGNITE_UPDATE_NOTIFIER="false" \
 ## -- HTTP                 8181/TCP
 ## -- SNMP Trapd           1162/UDP
 ## -- Syslog               1514/UDP
-EXPOSE 5005/tcp 8101/tcp 8181/tcp 1162/udp 1514/udp
+## -- Flows                9999/UDP
+EXPOSE 5005/tcp 8101/tcp 8181/tcp 1162/udp 1514/udp 9999/udp

@@ -58,8 +58,7 @@ public class TaskListenerRetryable implements RetryableExecutor {
             log.info("Staring listener: plugin-name={}; workflow-id={}", taskDefinition.getPluginName(), taskDefinition.getId());
 
             listener = listenerFactory.create(
-                serviceMonitorResponse -> resultProcessor.queueSendResult(taskDefinition.getId(), serviceMonitorResponse),
-                taskDefinition.getConfiguration()
+                    taskDefinition.getConfiguration()
             );
 
             listener.start();

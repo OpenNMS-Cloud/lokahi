@@ -40,6 +40,4 @@ import java.util.Collection;
 public interface FlowsListener extends org.opennms.horizon.minion.plugin.api.Listener {
     String getName();
     String getDescription();
-
-    Collection<Parser> getParsers();
 }

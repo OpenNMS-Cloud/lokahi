@@ -33,7 +33,9 @@ import com.codahale.metrics.Gauge;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import io.netty.buffer.ByteBuf;
-import org.opennms.horizon.grpc.telemetry.contract.TelemetryMessage;
+
+import org.opennms.horizon.grpc.flows.contract.FlowDocument;
+import org.opennms.horizon.grpc.flows.contract.FlowDocumentLog;
 import org.opennms.horizon.minion.flows.listeners.UdpParser;
 import org.opennms.horizon.minion.flows.parser.factory.DnsResolver;
 import org.opennms.horizon.minion.flows.parser.ie.RecordProvider;
@@ -62,17 +64,17 @@ public abstract class UdpParserBase extends ParserBase implements UdpParser {
 
     public UdpParserBase(final Protocol protocol,
                          final String name,
-                         final String queueName,
-                         final AsyncDispatcher<TelemetryMessage> dispatcher,
+                         final AsyncDispatcher<FlowDocumentLog> dispatcher,
                          final IpcIdentity identity,
                          final DnsResolver dnsResolver,
                          final MetricRegistry metricRegistry) {
-        super(protocol, name, queueName, dispatcher, identity, dnsResolver, metricRegistry);
+        super(protocol, name, dispatcher, identity, dnsResolver, metricRegistry);
 
         this.packetsReceived = metricRegistry.meter(MetricRegistry.name("parsers",  name, "packetsReceived"));
         this.parserErrors = metricRegistry.counter(MetricRegistry.name("parsers",  name, "parserErrors"));
 
         String sessionCountGauge = MetricRegistry.name("parsers",  name, "sessionCount");
+
         // Register only if it's not already there in the registry.
         if (!metricRegistry.getGauges().containsKey(sessionCountGauge)) {
             metricRegistry.register(sessionCountGauge, (Gauge<Integer>) () -> (this.sessionManager != null) ? this.sessionManager.count() : null);

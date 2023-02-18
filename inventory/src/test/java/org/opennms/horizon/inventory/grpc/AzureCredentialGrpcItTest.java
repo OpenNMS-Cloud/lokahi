@@ -91,6 +91,7 @@ import static org.opennms.horizon.shared.azure.http.AzureHttpClient.SUBSCRIPTION
 @SpringBootTest
 @ContextConfiguration(initializers = {SpringContextTestInitializer.class})
 class AzureCredentialGrpcItTest extends GrpcTestBase {
+    private static final String TEST_NAME = "name";
     private static final String TEST_CLIENT_ID = "client-id";
     private static final String TEST_CLIENT_SECRET = "client-secret";
     private static final String TEST_SUBSCRIPTION_ID = "subscription-id";
@@ -155,6 +156,7 @@ class AzureCredentialGrpcItTest extends GrpcTestBase {
 
         AzureCredentialCreateDTO createDTO = AzureCredentialCreateDTO.newBuilder()
             .setLocation(DEFAULT_LOCATION)
+            .setName(TEST_NAME)
             .setClientId(TEST_CLIENT_ID)
             .setClientSecret(TEST_CLIENT_SECRET)
             .setSubscriptionId(TEST_SUBSCRIPTION_ID)
@@ -181,6 +183,7 @@ class AzureCredentialGrpcItTest extends GrpcTestBase {
         AzureCredential azureCredential = list.get(0);
         assertTrue(azureCredential.getId() > 0);
         assertNotNull(azureCredential.getMonitoringLocation());
+        assertEquals(createDTO.getName(), azureCredential.getName());
         assertEquals(createDTO.getLocation(), azureCredential.getMonitoringLocation().getLocation());
         assertEquals(createDTO.getClientId(), azureCredential.getClientId());
         assertEquals(createDTO.getClientSecret(), azureCredential.getClientSecret());
@@ -198,6 +201,7 @@ class AzureCredentialGrpcItTest extends GrpcTestBase {
         mockAzureGetSubscriptionFailed();
 
         AzureCredentialCreateDTO createDTO = AzureCredentialCreateDTO.newBuilder()
+            .setName(TEST_NAME)
             .setLocation(DEFAULT_LOCATION)
             .setClientId(TEST_CLIENT_ID)
             .setClientSecret(TEST_CLIENT_SECRET)
@@ -222,6 +226,7 @@ class AzureCredentialGrpcItTest extends GrpcTestBase {
         mockAzureGetSubscription(false);
 
         AzureCredentialCreateDTO createDTO = AzureCredentialCreateDTO.newBuilder()
+            .setName(TEST_NAME)
             .setLocation(DEFAULT_LOCATION)
             .setClientId(TEST_CLIENT_ID)
             .setClientSecret(TEST_CLIENT_SECRET)
@@ -243,6 +248,7 @@ class AzureCredentialGrpcItTest extends GrpcTestBase {
     void testCreateAzureCredentialsWithoutTenantId() throws VerificationException {
 
         AzureCredentialCreateDTO createDTO = AzureCredentialCreateDTO.newBuilder()
+            .setName(TEST_NAME)
             .setLocation(DEFAULT_LOCATION)
             .setClientId(TEST_CLIENT_ID)
             .setClientSecret(TEST_CLIENT_SECRET)

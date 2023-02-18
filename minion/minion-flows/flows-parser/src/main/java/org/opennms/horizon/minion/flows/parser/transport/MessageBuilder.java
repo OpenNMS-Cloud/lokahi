@@ -28,10 +28,10 @@
 
 package org.opennms.horizon.minion.flows.parser.transport;
 
-import org.opennms.horizon.minion.flows.parser.flowmessage.FlowMessage;
 import org.opennms.horizon.minion.flows.parser.RecordEnrichment;
 import org.opennms.horizon.minion.flows.parser.ie.Value;
+import org.opennms.horizon.grpc.flows.contract.FlowDocument;
 
 public interface MessageBuilder {
-    FlowMessage.Builder buildMessage(final Iterable<Value<?>> values, final RecordEnrichment enrichment);
+    FlowDocument.Builder buildMessage(final Iterable<Value<?>> values, final RecordEnrichment enrichment);
 }

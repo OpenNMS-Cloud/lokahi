@@ -33,7 +33,9 @@ import static org.opennms.horizon.minion.flows.listeners.utils.BufferUtils.slice
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.collect.Sets;
 import io.netty.buffer.ByteBuf;
-import org.opennms.horizon.grpc.telemetry.contract.TelemetryMessage;
+
+import org.opennms.horizon.grpc.flows.contract.FlowDocument;
+import org.opennms.horizon.grpc.flows.contract.FlowDocumentLog;
 import org.opennms.horizon.minion.flows.listeners.TcpParser;
 import org.opennms.horizon.minion.flows.parser.factory.DnsResolver;
 import org.opennms.horizon.minion.flows.parser.ipfix.proto.Header;
@@ -57,12 +59,11 @@ public class IpfixTcpParser extends ParserBase implements TcpParser {
     private final Set<TcpSession> sessions = Sets.newConcurrentHashSet();
 
     public IpfixTcpParser(final String name,
-                          final String queueName,
-                          final AsyncDispatcher<TelemetryMessage> dispatcher,
+                          final AsyncDispatcher<FlowDocumentLog> dispatcher,
                           final IpcIdentity identity,
                           final DnsResolver dnsResolver,
                           final MetricRegistry metricRegistry) {
-        super(Protocol.IPFIX, name, queueName, dispatcher, identity, dnsResolver, metricRegistry);
+        super(Protocol.IPFIX, name, dispatcher, identity, dnsResolver, metricRegistry);
     }
 
     @Override

@@ -36,6 +36,8 @@ import org.opennms.sink.flows.contract.ParserConfig;
 
 import java.util.Objects;
 
+import com.codahale.metrics.MetricRegistry;
+
 public class IpfixTcpParserFactory implements ParserFactory {
 
     private final TelemetryRegistry telemetryRegistry;
@@ -52,13 +54,17 @@ public class IpfixTcpParserFactory implements ParserFactory {
     }
 
     @Override
-    public Class<? extends Parser> getBeanClass() {
+    public Class<? extends Parser> getParserClass() {
         return IpfixTcpParser.class;
     }
 
     @Override
-    public Parser createBean(ParserConfig parserConfig) {
+    public Parser create(ParserConfig parserConfig) {
         final var dispatcher = telemetryRegistry.getDispatcher();
-        return new IpfixTcpParser(parserConfig.getName(), parserConfig.getQueue().getName(), dispatcher, identity, dnsResolver, telemetryRegistry.getMetricRegistry());
+        return new IpfixTcpParser(parserConfig.getName(),
+            dispatcher,
+            this.identity,
+            this.dnsResolver,
+            new MetricRegistry());
     }
 }

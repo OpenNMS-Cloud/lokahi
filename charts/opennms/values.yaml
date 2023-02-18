@@ -52,6 +52,7 @@ OpenNMS:
     TrapsListenerPort: 1162
     Netflow5ListenerPort: 8877
     Netflow9ListenerPort: 4729
+    NetflowListenerPort: 9999
     Resources:
       Limits:
         Cpu: "1"

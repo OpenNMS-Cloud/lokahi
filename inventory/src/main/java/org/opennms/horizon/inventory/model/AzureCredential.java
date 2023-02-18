@@ -58,6 +58,10 @@ public class AzureCredential {
     private String tenantId;
 
     @NotNull
+    @Column(name = "name")
+    private String name;
+
+    @NotNull
     @Column(name = "client_id")
     private String clientId;
 

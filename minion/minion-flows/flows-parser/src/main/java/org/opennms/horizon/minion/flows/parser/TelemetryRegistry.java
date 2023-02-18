@@ -29,7 +29,9 @@
 package org.opennms.horizon.minion.flows.parser;
 
 import com.codahale.metrics.MetricRegistry;
-import org.opennms.horizon.grpc.telemetry.contract.TelemetryMessage;
+
+import org.opennms.horizon.grpc.flows.contract.FlowDocument;
+import org.opennms.horizon.grpc.flows.contract.FlowDocumentLog;
 import org.opennms.horizon.minion.flows.listeners.FlowsListener;
 import org.opennms.horizon.minion.flows.listeners.Parser;
 import org.opennms.horizon.minion.flows.parser.factory.ParserFactory;
@@ -43,13 +45,13 @@ public interface TelemetryRegistry {
 
     void addParserFactory(ParserFactory factory);
 
-    FlowsListener getListener(ListenerConfig listenerConfig);
+    FlowsListener createListener(ListenerConfig listenerConfig);
 
-    Parser getParser(ParserConfig parserConfig);
+    Parser createParser(ParserConfig parserConfig);
 
     MetricRegistry getMetricRegistry();
 
-    AsyncDispatcher<TelemetryMessage> getDispatcher();
-
     ListenerHolder getListenerHolder();
+
+    AsyncDispatcher<FlowDocumentLog> getDispatcher();
 }

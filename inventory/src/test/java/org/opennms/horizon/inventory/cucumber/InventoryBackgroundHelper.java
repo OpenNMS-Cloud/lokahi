@@ -34,6 +34,7 @@ import io.grpc.Metadata;
 import io.grpc.netty.shaded.io.grpc.netty.NettyChannelBuilder;
 import io.grpc.stub.MetadataUtils;
 import lombok.Getter;
+import org.opennms.horizon.inventory.dto.AzureCredentialServiceGrpc;
 import org.opennms.horizon.inventory.dto.MonitoringLocationServiceGrpc;
 import org.opennms.horizon.inventory.dto.MonitoringSystemServiceGrpc;
 import org.opennms.horizon.inventory.dto.NodeServiceGrpc;
@@ -59,6 +60,7 @@ public class InventoryBackgroundHelper {
     private MonitoringLocationServiceGrpc.MonitoringLocationServiceBlockingStub monitoringLocationStub;
     private NodeServiceGrpc.NodeServiceBlockingStub nodeServiceBlockingStub;
     private TagServiceGrpc.TagServiceBlockingStub tagServiceBlockingStub;
+    private AzureCredentialServiceGrpc.AzureCredentialServiceBlockingStub azureCredentialServiceBlockingStub;
 
     private final Map<String, String> grpcHeaders = new TreeMap<>();
 
@@ -95,6 +97,8 @@ public class InventoryBackgroundHelper {
         nodeServiceBlockingStub = NodeServiceGrpc.newBlockingStub(managedChannel)
             .withInterceptors(prepareGrpcHeaderInterceptor()).withDeadlineAfter(DEADLINE_DURATION, TimeUnit.SECONDS);
         tagServiceBlockingStub = TagServiceGrpc.newBlockingStub(managedChannel)
+            .withInterceptors(prepareGrpcHeaderInterceptor()).withDeadlineAfter(DEADLINE_DURATION, TimeUnit.SECONDS);
+        azureCredentialServiceBlockingStub = AzureCredentialServiceGrpc.newBlockingStub(managedChannel)
             .withInterceptors(prepareGrpcHeaderInterceptor()).withDeadlineAfter(DEADLINE_DURATION, TimeUnit.SECONDS);
     }
 

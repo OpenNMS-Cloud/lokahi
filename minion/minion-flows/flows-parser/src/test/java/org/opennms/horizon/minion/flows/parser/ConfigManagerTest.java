@@ -32,11 +32,13 @@ import com.google.common.io.Resources;
 import com.google.protobuf.Any;
 import org.junit.Assert;
 import org.junit.Test;
-import org.opennms.horizon.grpc.telemetry.contract.TelemetryMessage;
+import org.opennms.horizon.grpc.flows.contract.FlowDocument;
+import org.opennms.horizon.grpc.flows.contract.FlowDocumentLog;
 import org.opennms.horizon.minion.flows.listeners.factory.TcpListenerFactory;
 import org.opennms.horizon.minion.flows.listeners.factory.UdpListenerFactory;
 import org.opennms.horizon.minion.flows.parser.factory.DnsResolver;
 import org.opennms.horizon.minion.flows.parser.factory.IpfixTcpParserFactory;
+import org.opennms.horizon.minion.flows.parser.factory.IpfixUdpParserFactory;
 import org.opennms.horizon.minion.flows.parser.factory.Netflow5UdpParserFactory;
 import org.opennms.horizon.minion.flows.parser.factory.Netflow9UdpParserFactory;
 import org.opennms.horizon.shared.ipc.rpc.IpcIdentity;
@@ -61,23 +63,26 @@ public class ConfigManagerTest {
         IpcIdentity identity = mock(IpcIdentity.class);
         DnsResolver dnsResolver = mock(DnsResolver.class);
 
-        AsyncDispatcher<TelemetryMessage> dispatcher = mock(AsyncDispatcher.class);
+        AsyncDispatcher<FlowDocumentLog> dispatcher = mock(AsyncDispatcher.class);
         MessageDispatcherFactory messageDispatcherFactory = mock(MessageDispatcherFactory.class);
         when(messageDispatcherFactory.createAsyncDispatcher(any(FlowSinkModule.class))).thenReturn(dispatcher);
-        TelemetryRegistry registry = new TelemetryRegistryImpl(messageDispatcherFactory, identity, holder);
+        TelemetryRegistry registry = new TelemetryRegistryImpl(messageDispatcherFactory, identity, dnsResolver, holder);
 
         UdpListenerFactory udpFactory = new UdpListenerFactory(registry);
-        TcpListenerFactory tcoFactory = new TcpListenerFactory(registry);
+        TcpListenerFactory tcpFactory = new TcpListenerFactory(registry);
         Netflow5UdpParserFactory netflow5UdpParserFactory = new Netflow5UdpParserFactory(registry, identity, dnsResolver);
         Netflow9UdpParserFactory netflow9UdpParserFactory = new Netflow9UdpParserFactory(registry, identity, dnsResolver);
         IpfixTcpParserFactory ipfixTcpParserFactory = new IpfixTcpParserFactory(registry, identity, dnsResolver);
+        IpfixUdpParserFactory ipfixUdpParserFactory = new IpfixUdpParserFactory(registry, identity, dnsResolver);
 
         ConfigManager manger = new ConfigManager(registry);
-        manger.create(null, readFlowsConfig());
+        manger.create(readFlowsConfig());
 
-        Assert.assertEquals(2, holder.size());
+        Assert.assertEquals(4, holder.size());
         Assert.assertNotNull(holder.get("IPFIX-TCP-4730"));
         Assert.assertNotNull(holder.get("Netflow-5-UDP-8877"));
+        Assert.assertNotNull(holder.get("Netflow-9-UDP-4729"));
+        Assert.assertNotNull(holder.get("Netflow-UDP-9999"));
     }
 
     Any readFlowsConfig() throws IOException {

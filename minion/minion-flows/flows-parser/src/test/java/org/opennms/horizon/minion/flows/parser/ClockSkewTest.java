@@ -28,6 +28,10 @@
 
 package org.opennms.horizon.minion.flows.parser;
 
+import static org.hamcrest.Matchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import java.net.InetAddress;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -35,17 +39,20 @@ import java.util.concurrent.CompletableFuture;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
-import org.opennms.horizon.grpc.telemetry.contract.TelemetryMessage;
+import org.mockito.ArgumentMatchers;
+import org.opennms.horizon.grpc.flows.contract.FlowDocument;
+import org.opennms.horizon.grpc.flows.contract.FlowDocumentLog;
 import org.opennms.horizon.minion.flows.parser.factory.DnsResolver;
-import org.opennms.horizon.minion.flows.parser.flowmessage.FlowMessage;
 import org.opennms.horizon.minion.flows.parser.transport.MessageBuilder;
 import org.opennms.horizon.shared.ipc.rpc.IpcIdentity;
 import org.opennms.horizon.shared.ipc.sink.api.AsyncDispatcher;
+import org.opennms.horizon.shared.ipc.sink.api.MessageDispatcherFactory;
 
 import com.codahale.metrics.MetricRegistry;
 
 public class ClockSkewTest {
     private int eventCount = 0;
+
 
     private final IpcIdentity identity = new IpcIdentity() {
         @Override
@@ -75,7 +82,7 @@ public class ClockSkewTest {
 
     private final ParserBase parserBase = new ParserBaseExt(Protocol.NETFLOW5, "name", new AsyncDispatcher<>() {
         @Override
-        public CompletableFuture<DispatchStatus> send(TelemetryMessage message) {
+        public CompletableFuture<DispatchStatus> send(FlowDocumentLog message) {
             return null;
         }
 
@@ -137,13 +144,13 @@ public class ClockSkewTest {
 
     private static class ParserBaseExt extends ParserBase {
 
-        public ParserBaseExt(Protocol protocol, String name, AsyncDispatcher<TelemetryMessage> dispatcher, IpcIdentity identity, DnsResolver dnsResolver, MetricRegistry metricRegistry) {
-            super(protocol, name, name, dispatcher, identity, dnsResolver, metricRegistry);
+        public ParserBaseExt(Protocol protocol, String name, AsyncDispatcher<FlowDocumentLog> dispatcher, IpcIdentity identity, DnsResolver dnsResolver, MetricRegistry metricRegistry) {
+            super(protocol, name, dispatcher, identity, dnsResolver, metricRegistry);
         }
 
         @Override
         protected MessageBuilder getMessageBuilder() {
-            return (values, enrichment) -> FlowMessage.newBuilder();
+            return (values, enrichment) -> FlowDocument.newBuilder();
         }
 
         @Override

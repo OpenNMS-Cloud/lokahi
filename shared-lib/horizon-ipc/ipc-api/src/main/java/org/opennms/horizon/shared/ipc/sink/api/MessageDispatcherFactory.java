@@ -28,6 +28,8 @@
 
 package org.opennms.horizon.shared.ipc.sink.api;
 
+import org.opennms.horizon.grpc.flows.contract.FlowDocumentLog;
+
 import com.google.protobuf.Message;
 
 /**
@@ -50,4 +52,6 @@ public interface MessageDispatcherFactory {
      * by the module's {@link AsyncPolicy}.
      */
     <S extends Message, T extends Message> AsyncDispatcher<S> createAsyncDispatcher(SinkModule<S, T> module);
+
+   // AsyncDispatcher<FlowDocumentLog> createAsyncDispatcher(org.opennms.horizon.minion.flows.parser.FlowSinkModule sink);
 }

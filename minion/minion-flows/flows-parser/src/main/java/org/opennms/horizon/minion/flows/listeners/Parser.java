@@ -37,6 +37,7 @@ import java.util.concurrent.ScheduledExecutorService;
  *
  * @author jwhite
  */
+// TODO: Parameter handling?
 public interface Parser {
     String getName();
     String getDescription();

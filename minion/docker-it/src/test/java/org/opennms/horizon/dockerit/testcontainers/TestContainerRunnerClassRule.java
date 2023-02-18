@@ -118,7 +118,7 @@ public class TestContainerRunnerClassRule extends ExternalResource {
             .withLogConsumer(new Slf4jLogConsumer(LOG).withPrefix("APPLICATION"));
 
         // DEBUGGING: uncomment to force local port 5005
-        // applicationContainer.getPortBindings().add("5005:5005");
+        applicationContainer.getPortBindings().add("5005:5005");
         applicationContainer.getPortBindings().addAll(List.of(ExposedPort.udp(UDP_NETFLOW5_PORT).toString(), ExposedPort.udp(UDP_NETFLOW9_PORT).toString()));
         applicationContainer.start();
 

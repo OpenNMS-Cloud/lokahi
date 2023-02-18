@@ -33,8 +33,6 @@ option java_package = "org.opennms.sink.flows.contract";
 
 message FlowsConfig {
   repeated ListenerConfig listeners = 1;
-  repeated ConnectorConfig connectors = 2;
-  repeated QueueConfig queues = 3;
 }
 
 message ListenerConfig {
@@ -54,47 +52,5 @@ message Parameter {
 message ParserConfig {
   string name = 1;
   string class_name = 2;
-  QueueConfig queue = 3;
   repeated Parameter parameters = 4;
-}
-
-message ConnectorConfig {
-  string name = 1;
-  string class_name = 2;
-  string service_name = 3;
-  string queue = 4;
-  bool enabled = 5;
-  repeated Parameter parameters = 6;
-  repeated PackageConfig packages = 7;
-}
-
-//  Telemetry protocol package configuration.
-message PackageConfig {
-  string name = 1;
-  Filter filter = 2;
-  repeated Parameter parameters = 4;
-  string filter_rule = 5;
-  map<string, string>  parameter_map = 6;
-}
-
-message Filter {
-  string content = 1;
-}
-
-message QueueConfig {
-  string name = 1;
-  int32 num_threads = 2;
-  int32 batch_size = 3;
-  int32 batch_interval = 4; // ms
-  int32 queue_size = 5;
-  bool use_routing_key = 6;
-  repeated AdapterConfig adapters = 7;
-}
-
-message AdapterConfig {
-  string name = 1;
-  string class_name = 2;
-  bool enabled = 3;
-  repeated Parameter parameters = 4;
-  repeated PackageConfig packages = 5;
 }

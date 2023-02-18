@@ -34,7 +34,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.junit.Test;
-import org.opennms.horizon.minion.flows.parser.flowmessage.FlowMessage;
+import org.opennms.horizon.grpc.flows.contract.FlowDocument;
 import org.opennms.horizon.minion.flows.parser.ie.Value;
 import org.opennms.horizon.minion.flows.parser.ie.values.UnsignedValue;
 import org.opennms.horizon.minion.flows.parser.transport.IpFixMessageBuilder;
@@ -43,11 +43,11 @@ import org.opennms.horizon.minion.flows.parser.transport.Netflow9MessageBuilder;
 public class NMS14130_Test {
 
     private interface FlowMessageFactory {
-        FlowMessage create(final Integer in, final Integer out, final Integer ingress, final Integer egress);
+        FlowDocument create(final Integer in, final Integer out, final Integer ingress, final Integer egress);
     }
 
     public void testIfIndex(final FlowMessageFactory flowMessageFactory) {
-        FlowMessage m;
+        FlowDocument m;
         m = flowMessageFactory.create(1,2, null, null);
         assertEquals(m.getInputSnmpIfindex().getValue(), 1);
         assertEquals(m.getOutputSnmpIfindex().getValue(), 2);

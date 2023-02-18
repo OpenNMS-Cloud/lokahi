@@ -40,14 +40,13 @@ import static org.opennms.horizon.minion.flows.parser.transport.MessageUtils.set
 
 import java.net.InetAddress;
 
-import org.opennms.horizon.minion.flows.parser.flowmessage.Direction;
-import org.opennms.horizon.minion.flows.parser.flowmessage.FlowMessage;
-
 import com.google.protobuf.UInt32Value;
 
+import org.opennms.horizon.grpc.flows.contract.Direction;
+import org.opennms.horizon.grpc.flows.contract.FlowDocument;
+import org.opennms.horizon.grpc.flows.contract.NetflowVersion;
+import org.opennms.horizon.grpc.flows.contract.SamplingAlgorithm;
 import org.opennms.horizon.minion.flows.parser.RecordEnrichment;
-import org.opennms.horizon.minion.flows.parser.flowmessage.NetflowVersion;
-import org.opennms.horizon.minion.flows.parser.flowmessage.SamplingAlgorithm;
 import org.opennms.horizon.minion.flows.parser.ie.Value;
 
 import lombok.NoArgsConstructor;
@@ -60,8 +59,8 @@ public class Netflow9MessageBuilder implements MessageBuilder {
     private Long flowSamplingIntervalFallback;
 
     @Override
-    public FlowMessage.Builder buildMessage(final Iterable<Value<?>> values, final RecordEnrichment enrichment) {
-        final FlowMessage.Builder builder = FlowMessage.newBuilder();
+    public FlowDocument.Builder buildMessage(final Iterable<Value<?>> values, final RecordEnrichment enrichment) {
+        final var builder = FlowDocument.newBuilder();
 
         InetAddress ipv4DstAddress = null;
         InetAddress ipv6DstAddress = null;
@@ -104,7 +103,7 @@ public class Netflow9MessageBuilder implements MessageBuilder {
                     getUInt64Value(value).ifPresent(builder::setFlowSeqNum);
                     break;
                 case "@sourceId":
-                    getUInt64Value(value).ifPresent(srcId -> builder.setNodeIdentifier(String.valueOf(srcId.getValue())));
+                    getUInt64Value(value).ifPresent(srcId -> builder.setExporterIdentifier(String.valueOf(srcId.getValue())));
                     break;
                 case "@sysUpTime":
                     sysUpTime = getLongValue(value);

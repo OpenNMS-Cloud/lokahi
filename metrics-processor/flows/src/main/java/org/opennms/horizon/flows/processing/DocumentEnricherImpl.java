@@ -31,6 +31,8 @@ package org.opennms.horizon.flows.processing;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.google.common.cache.CacheLoader;
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
 import org.opennms.horizon.flows.cache.Cache;
 import org.opennms.horizon.flows.cache.CacheBuilder;
 import org.opennms.horizon.flows.cache.CacheConfig;
@@ -277,7 +279,16 @@ public class DocumentEnricherImpl {
     private Optional<NodeInfo> getNodeInfo(final InterfaceToNodeCache.Entry entry) {
         final NodeDTO nodeDTO;
         try (Timer.Context ctx = this.nodeLoadTimer.time()) {
-            nodeDTO = inventoryClient.getNodeById(entry.nodeId, entry.tenantId);
+            try {
+                nodeDTO = inventoryClient.getNodeById(entry.nodeId, entry.tenantId);
+            } catch (StatusRuntimeException e) {
+                if (e.getStatus().getCode() == Status.NOT_FOUND.getCode()) {
+                    LOG.warn("Record not find for nodeId: {}, tenantId: {}", entry.nodeId, entry.tenantId);
+                    return Optional.empty();
+                } else {
+                    throw e;
+                }
+            }
         }
 
         return mapOnmsNodeToNodeDocument(nodeDTO, entry.interfaceId);

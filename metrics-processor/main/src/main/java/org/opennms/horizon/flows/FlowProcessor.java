@@ -31,7 +31,6 @@ package org.opennms.horizon.flows;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 import lombok.extern.slf4j.Slf4j;
-import org.opennms.dataplatform.flows.document.FlowDocument;
 import org.opennms.horizon.flows.processing.Pipeline;
 import org.opennms.horizon.grpc.flows.contract.FlowDocumentLog;
 import org.opennms.horizon.shared.constants.GrpcConstants;
@@ -60,15 +59,11 @@ public class FlowProcessor {
     public void consume(@Payload byte[] data, @Headers Map<String, Object> headers) {
         String tenantId = getTenantId(headers);
         try {
-            FlowDocument flowDocument = FlowDocument.parseFrom(data);
+            var flowDocumentLog = FlowDocumentLog.parseFrom(data);
             CompletableFuture.supplyAsync(() -> {
                 try {
-                    if (flowDocument != null) {
-                        log.info("Processing flow {}", flowDocument);
-                        pipeline.process(flowDocument, flowDocument.getFlowSource(), tenantId);
-                    } else {
-                        log.warn("FlowDocumentLog appears to be missing the messages", flowDocumentLog);
-                    }
+                    log.trace("Processing flow {}", flowDocumentLog);
+                    pipeline.process(flowDocumentLog.getMessageList(), flowDocumentLog.getFlowSource(), tenantId);
                 } catch (Exception exc) {
                     log.warn("Error processing flow: {} error: {}", flowDocumentLog, exc);
                 }

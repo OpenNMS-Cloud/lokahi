@@ -6,6 +6,7 @@ option java_package = "org.opennms.horizon.grpc.flows.contract";
 option java_outer_classname = "FlowsProtos";
 
 import "google/protobuf/wrappers.proto";
+import "opennms_minion_ipc.proto";
 
 
 enum Direction {
@@ -104,6 +105,8 @@ message FlowDocument {
 
     google.protobuf.UInt32Value dscp = 46; // DSCP; upper 6 bits of TOS
     google.protobuf.UInt32Value ecn = 47; // ECN; lower 2 bits of TOS
+
+    FlowSource flowSource = 51;
 }
 
 message FlowSource {
@@ -118,9 +121,7 @@ message ContextKey {
 }
 
 message FlowDocumentLog {
-  string location = 1;
-  string system_id = 2;
-
+  minion.Identity identity = 1;
+  FlowSource flowSource = 2;
   repeated FlowDocument message = 5;
-  FlowSource flowSource = 6;
 }

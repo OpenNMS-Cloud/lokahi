@@ -79,9 +79,7 @@ public class PipelineImpl implements Pipeline {
 
         this.emptyFlows = metricRegistry.counter("emptyFlows");
         this.flowsPerLog = metricRegistry.histogram("flowsPerLog");
-
         this.logEnrichementTimer = metricRegistry.timer("logEnrichment");
-
     }
 
     public void process(final List<FlowDocument> flows, final FlowSource source, String tenantId) throws FlowException {

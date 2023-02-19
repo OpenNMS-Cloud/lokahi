@@ -33,7 +33,6 @@ import com.google.protobuf.Any;
 import org.junit.Assert;
 import org.junit.Test;
 import org.opennms.horizon.grpc.flows.contract.FlowDocument;
-import org.opennms.horizon.grpc.flows.contract.FlowDocumentLog;
 import org.opennms.horizon.minion.flows.listeners.factory.TcpListenerFactory;
 import org.opennms.horizon.minion.flows.listeners.factory.UdpListenerFactory;
 import org.opennms.horizon.minion.flows.parser.factory.DnsResolver;
@@ -63,7 +62,7 @@ public class ConfigManagerTest {
         IpcIdentity identity = mock(IpcIdentity.class);
         DnsResolver dnsResolver = mock(DnsResolver.class);
 
-        AsyncDispatcher<FlowDocumentLog> dispatcher = mock(AsyncDispatcher.class);
+        AsyncDispatcher<FlowDocument> dispatcher = mock(AsyncDispatcher.class);
         MessageDispatcherFactory messageDispatcherFactory = mock(MessageDispatcherFactory.class);
         when(messageDispatcherFactory.createAsyncDispatcher(any(FlowSinkModule.class))).thenReturn(dispatcher);
         TelemetryRegistry registry = new TelemetryRegistryImpl(messageDispatcherFactory, identity, dnsResolver, holder);

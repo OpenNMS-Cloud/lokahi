@@ -15,7 +15,7 @@ grpc:
   server:
     deadline: 60000
   url:
-    inventory: localhost:29065
+    inventory: opennms-inventory:6565
 
 flows:
   clockSkewCorrectionThreshold: 0

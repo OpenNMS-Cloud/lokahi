@@ -28,6 +28,8 @@
 
 package org.opennms.horizon.flows.processing;
 
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
 import org.opennms.horizon.flows.dao.InterfaceToNodeCache;
 import org.opennms.horizon.flows.grpc.client.InventoryClient;
 import org.opennms.horizon.inventory.dto.IpInterfaceDTO;
@@ -164,15 +166,20 @@ public class InterfaceToNodeCacheDaoImpl extends AbstractInterfaceToNodeCache im
                     return values.stream().findFirst();
                 }
             } else {
-                m_lock.writeLock().lock();
-                var iface = client.getIpInterfaceFromQuery(tenantId, str(ipAddr), location);
-                var entries = new ArrayList<Entry>();
-                if (iface != null) {
-                    entries.add(convertToEntry(iface));
+                IpInterfaceDTO iface;
+                values = new HashSet<>();
+                try {
+                    iface = client.getIpInterfaceFromQuery(tenantId, str(ipAddr), location);
+                    values.add(convertToEntry(iface));
+                } catch(StatusRuntimeException e){
+                    if (e.getStatus().getCode() == Status.NOT_FOUND.getCode()) {
+                        LOG.warn("Record not find for location: {}, ipAddr: {}, tenantId: {}", location, ipAddr, tenantId);
+                    } else {
+                        throw e;
+                    }
                 }
                 // keep put even empty list to differentiate between no record and not cache
-                m_managedAddresses.put(new Key(location, ipAddr, tenantId), new HashSet<>(0));
-                m_lock.readLock().unlock();
+                m_managedAddresses.put(new Key(location, ipAddr, tenantId), values);
                 return (values.isEmpty()) ? Optional.empty() : values.stream().findFirst();
             }
         } finally {

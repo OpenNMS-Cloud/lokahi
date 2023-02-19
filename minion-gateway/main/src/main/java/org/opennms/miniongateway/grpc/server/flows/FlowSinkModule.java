@@ -30,7 +30,7 @@ package org.opennms.miniongateway.grpc.server.flows;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
-
+import org.opennms.horizon.grpc.flows.contract.FlowDocument;
 import org.opennms.horizon.grpc.flows.contract.FlowDocumentLog;
 import org.opennms.horizon.shared.ipc.sink.aggregation.IdentityAggregationPolicy;
 import org.opennms.horizon.shared.ipc.sink.api.AggregationPolicy;
@@ -67,16 +67,12 @@ public class FlowSinkModule implements SinkModule<Message, Message> {
 
     @Override
     public byte[] marshalSingleMessage(Message message) {
-        return message.toByteArray();
+        return marshal(message);
     }
 
     @Override
     public Message unmarshalSingleMessage(byte[] message) {
-        try {
-            return FlowDocumentLog.parseFrom(message);
-        } catch (InvalidProtocolBufferException e) {
-            throw new UnmarshalException(e);
-        }
+        return unmarshal(message);
     }
 
     @Override

@@ -30,6 +30,7 @@ package org.opennms.horizon.server.service;
 
 import io.leangen.graphql.execution.ResolutionEnvironment;
 import lombok.RequiredArgsConstructor;
+import org.opennms.horizon.inventory.dto.IpInterface;
 import org.opennms.horizon.inventory.dto.IpInterfaceDTO;
 import org.opennms.horizon.inventory.dto.NodeDTO;
 import org.opennms.horizon.server.model.TSResult;
@@ -66,10 +67,20 @@ public class NodeStatusService {
 
         if (node.getIpInterfacesCount() > 0) {
 
-            IpInterfaceDTO ipInterface = node.getIpInterfaces(0);
+            IpInterfaceDTO ipInterface = getPrimaryInterface(node);
             return getNodeStatusByInterface(id, monitorType, ipInterface, env);
         }
         return Mono.just(new NodeStatus(id, false));
+    }
+
+    private IpInterfaceDTO getPrimaryInterface(NodeDTO node) {
+        List<IpInterfaceDTO> ipInterfacesList = node.getIpInterfacesList();
+        for (IpInterfaceDTO ipInterface : ipInterfacesList) {
+            if (ipInterface.getSnmpPrimary()) {
+                return ipInterface;
+            }
+        }
+        return node.getIpInterfaces(0);
     }
 
     private Mono<NodeStatus> getNodeStatusByInterface(long id, String monitorType, IpInterfaceDTO ipInterface, ResolutionEnvironment env) {

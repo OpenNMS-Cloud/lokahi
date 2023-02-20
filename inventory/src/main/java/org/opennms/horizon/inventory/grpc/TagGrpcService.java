@@ -29,8 +29,6 @@
 package org.opennms.horizon.inventory.grpc;
 
 import com.google.protobuf.BoolValue;
-import com.google.protobuf.Empty;
-import com.google.protobuf.Int64Value;
 import com.google.rpc.Code;
 import com.google.rpc.Status;
 import io.grpc.Context;
@@ -38,12 +36,12 @@ import io.grpc.protobuf.StatusProto;
 import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.opennms.horizon.inventory.dto.DeleteTagsDTO;
 import org.opennms.horizon.inventory.dto.ListAllTagsParamsDTO;
-import org.opennms.horizon.inventory.dto.ListTagsByNodeIdParamsDTO;
+import org.opennms.horizon.inventory.dto.ListTagsByEntityIdParamsDTO;
 import org.opennms.horizon.inventory.dto.TagCreateListDTO;
 import org.opennms.horizon.inventory.dto.TagDTO;
 import org.opennms.horizon.inventory.dto.TagListDTO;
-import org.opennms.horizon.inventory.dto.TagListParamsDTO;
 import org.opennms.horizon.inventory.dto.TagRemoveListDTO;
 import org.opennms.horizon.inventory.dto.TagServiceGrpc;
 import org.opennms.horizon.inventory.service.TagService;
@@ -116,12 +114,12 @@ public class TagGrpcService extends TagServiceGrpc.TagServiceImplBase {
     }
 
     @Override
-    public void getTagsByNodeId(ListTagsByNodeIdParamsDTO request, StreamObserver<TagListDTO> responseObserver) {
+    public void getTagsByEntityId(ListTagsByEntityIdParamsDTO request, StreamObserver<TagListDTO> responseObserver) {
         Optional<String> tenantIdOptional = tenantLookup.lookupTenantId(Context.current());
 
         tenantIdOptional.ifPresentOrElse(tenantId -> {
             try {
-                List<TagDTO> tags = service.getTagsByNodeId(tenantId, request);
+                List<TagDTO> tags = service.getTagsByEntityId(tenantId, request);
                 responseObserver.onNext(TagListDTO.newBuilder().addAllTags(tags).build());
                 responseObserver.onCompleted();
             } catch (Exception e) {
@@ -150,6 +148,34 @@ public class TagGrpcService extends TagServiceGrpc.TagServiceImplBase {
             try {
                 List<TagDTO> tags = service.getTags(tenantId, request);
                 responseObserver.onNext(TagListDTO.newBuilder().addAllTags(tags).build());
+                responseObserver.onCompleted();
+            } catch (Exception e) {
+
+                Status status = Status.newBuilder()
+                    .setCode(Code.INTERNAL_VALUE)
+                    .setMessage(e.getMessage())
+                    .build();
+                responseObserver.onError(StatusProto.toStatusRuntimeException(status));
+            }
+        }, () -> {
+
+            Status status = Status.newBuilder()
+                .setCode(Code.INVALID_ARGUMENT_VALUE)
+                .setMessage("Tenant Id can't be empty")
+                .build();
+            responseObserver.onError(StatusProto.toStatusRuntimeException(status));
+        });
+    }
+
+    @Override
+    public void deleteTags(DeleteTagsDTO request, StreamObserver<BoolValue> responseObserver) {
+        Optional<String> tenantIdOptional = tenantLookup.lookupTenantId(Context.current());
+
+        tenantIdOptional.ifPresentOrElse(tenantId -> {
+            try {
+                service.deleteTags(tenantId, request);
+
+                responseObserver.onNext(BoolValue.of(true));
                 responseObserver.onCompleted();
             } catch (Exception e) {
 

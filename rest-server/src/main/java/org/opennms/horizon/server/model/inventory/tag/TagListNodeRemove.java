@@ -36,7 +36,7 @@ import java.util.List;
 
 @Getter
 @Setter
-public class TagListRemove {
+public class TagListNodeRemove {
 
     private long nodeId;
 

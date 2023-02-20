@@ -27,6 +27,7 @@
  *******************************************************************************/
 package org.opennms.horizon.inventory.model;
 
+import jakarta.persistence.ManyToMany;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -42,6 +43,8 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -81,4 +84,7 @@ public class AzureCredential extends TenantAwareEntity {
     @ManyToOne(optional = false)
     @JoinColumn(name = "monitoring_location_id", referencedColumnName = "id")
     private MonitoringLocation monitoringLocation;
+
+    @ManyToMany(mappedBy = "azureCredentials")
+    private List<Tag> tags = new ArrayList<>();
 }

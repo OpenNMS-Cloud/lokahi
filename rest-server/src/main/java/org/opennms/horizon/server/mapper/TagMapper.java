@@ -39,10 +39,8 @@ import org.opennms.horizon.inventory.dto.TagDTO;
 import org.opennms.horizon.inventory.dto.TagRemoveListDTO;
 import org.opennms.horizon.server.model.inventory.tag.Tag;
 import org.opennms.horizon.server.model.inventory.tag.TagCreate;
-import org.opennms.horizon.server.model.inventory.tag.TagListAdd;
-import org.opennms.horizon.server.model.inventory.tag.TagListRemove;
-
-import java.util.List;
+import org.opennms.horizon.server.model.inventory.tag.TagListNodeAdd;
+import org.opennms.horizon.server.model.inventory.tag.TagListNodeRemove;
 
 
 @Mapper(componentModel = "spring", uses = {},
@@ -52,12 +50,12 @@ public interface TagMapper {
     Tag protoToTag(TagDTO tagDTO);
 
     @Mapping(target = "tagsList", source = "tags", nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
-    TagCreateListDTO tagListAddToProto(TagListAdd tags);
+    TagCreateListDTO tagListAddToProto(TagListNodeAdd tags);
 
     TagCreateDTO tagCreateToProto(TagCreate tagCreate);
 
     @Mapping(target = "tagIdsList", source = "tagIds", nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
-    TagRemoveListDTO tagListRemoveToProto(TagListRemove tags);
+    TagRemoveListDTO tagListRemoveToProto(TagListNodeRemove tags);
 
     default Int64Value longToInt64Value(Long value) {
         return Int64Value.of(value);

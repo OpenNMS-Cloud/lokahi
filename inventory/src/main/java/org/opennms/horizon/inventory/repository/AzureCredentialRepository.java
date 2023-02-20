@@ -31,7 +31,10 @@ import org.opennms.horizon.inventory.model.AzureCredential;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
 public interface AzureCredentialRepository extends JpaRepository<AzureCredential, Long> {
 
+    Optional<AzureCredential> findByTenantIdAndId(String tenantId, long id);
 }

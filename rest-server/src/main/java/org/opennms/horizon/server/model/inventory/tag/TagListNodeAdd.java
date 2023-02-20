@@ -35,7 +35,7 @@ import java.util.List;
 
 @Getter
 @Setter
-public class TagListAdd {
+public class TagListNodeAdd {
 
     private long nodeId;
 

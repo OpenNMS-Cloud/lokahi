@@ -62,10 +62,13 @@ import org.opennms.horizon.inventory.config.MinionGatewayGrpcClientConfig;
 import org.opennms.horizon.inventory.dto.AzureCredentialCreateDTO;
 import org.opennms.horizon.inventory.dto.AzureCredentialDTO;
 import org.opennms.horizon.inventory.dto.AzureCredentialServiceGrpc;
+import org.opennms.horizon.inventory.dto.TagCreateDTO;
 import org.opennms.horizon.inventory.grpc.taskset.TestTaskSetGrpcService;
 import org.opennms.horizon.inventory.model.AzureCredential;
+import org.opennms.horizon.inventory.model.Tag;
 import org.opennms.horizon.inventory.repository.AzureCredentialRepository;
 import org.opennms.horizon.inventory.repository.MonitoringLocationRepository;
+import org.opennms.horizon.inventory.repository.TagRepository;
 import org.opennms.horizon.shared.azure.http.dto.AzureHttpParams;
 import org.opennms.horizon.shared.azure.http.dto.error.AzureErrorDescription;
 import org.opennms.horizon.shared.azure.http.dto.error.AzureHttpError;
@@ -84,6 +87,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.testcontainers.containers.PostgreSQLContainer;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
@@ -111,6 +115,7 @@ class AzureCredentialGrpcItTest extends GrpcTestBase {
     private static final String TEST_SUBSCRIPTION_ID = "subscription-id";
     private static final String TEST_DIRECTORY_ID = "directory-id";
     private static final String DEFAULT_LOCATION = "Default";
+    private static final String TEST_TAG_NAME_1 = "tag-name-1";
 
     private AzureCredentialServiceGrpc.AzureCredentialServiceBlockingStub serviceStub;
 
@@ -122,6 +127,9 @@ class AzureCredentialGrpcItTest extends GrpcTestBase {
 
     @Autowired
     private AzureHttpParams params;
+
+    @Autowired
+    private TagRepository tagRepository;
 
     //marking as a @Rule doesn't work, need to manually start/stop in before/after
     public WireMockRule wireMock = new WireMockRule(wireMockConfig().port(12345));
@@ -154,6 +162,7 @@ class AzureCredentialGrpcItTest extends GrpcTestBase {
         wireMock.stop();
         Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, tenantId).run(()->
         {
+            tagRepository.deleteAll();
             monitoringLocationRepository.deleteAll();
             azureCredentialRepository.deleteAll();
         });
@@ -172,6 +181,8 @@ class AzureCredentialGrpcItTest extends GrpcTestBase {
         mockAzureLogin();
         mockAzureGetSubscription(true);
 
+        TagCreateDTO tagCreateDto1 = TagCreateDTO.newBuilder().setName(TEST_TAG_NAME_1).build();
+
         AzureCredentialCreateDTO createDTO = AzureCredentialCreateDTO.newBuilder()
             .setLocation(DEFAULT_LOCATION)
             .setName(TEST_NAME)
@@ -179,6 +190,7 @@ class AzureCredentialGrpcItTest extends GrpcTestBase {
             .setClientSecret(TEST_CLIENT_SECRET)
             .setSubscriptionId(TEST_SUBSCRIPTION_ID)
             .setDirectoryId(TEST_DIRECTORY_ID)
+            .addAllTags(List.of(tagCreateDto1))
             .build();
 
         AzureCredentialDTO credentials = serviceStub.withInterceptors(MetadataUtils
@@ -210,7 +222,19 @@ class AzureCredentialGrpcItTest extends GrpcTestBase {
             assertEquals(createDTO.getSubscriptionId(), azureCredential.getSubscriptionId());
             assertEquals(createDTO.getDirectoryId(), azureCredential.getDirectoryId());
             assertNotNull(azureCredential.getCreateTime());
+
+            List<Tag> allTags = tagRepository.findAll();
+            assertEquals(1, allTags.size());
+
+            Tag tag = allTags.get(0);
+            assertEquals(tagCreateDto1.getName(), tag.getName());
+            assertEquals(1, tag.getAzureCredentials().size());
+
+            AzureCredential credential = tag.getAzureCredentials().get(0);
+            assertEquals(azureCredential.getId(), credential.getId());
         });
+
+
 
         verify(spyInterceptor).verifyAccessToken(authHeader);
         verify(spyInterceptor).interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));

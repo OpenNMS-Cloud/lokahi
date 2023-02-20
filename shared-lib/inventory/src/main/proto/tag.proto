@@ -45,8 +45,11 @@ message TagListDTO {
 }
 
 message TagCreateListDTO {
-  int64 node_id = 1;
-  repeated TagCreateDTO tags = 2;
+  oneof id {
+    int64 node_id = 1;
+    int64 azure_credential_id = 2;
+  }
+  repeated TagCreateDTO tags = 3;
 }
 
 message TagCreateDTO {
@@ -54,13 +57,19 @@ message TagCreateDTO {
 }
 
 message TagRemoveListDTO {
-  int64 node_id = 1;
-  repeated google.protobuf.Int64Value tag_ids = 2;
+  oneof id {
+    int64 node_id = 1;
+    int64 azure_credential_id = 2;
+  }
+  repeated google.protobuf.Int64Value tag_ids = 3;
 }
 
-message ListTagsByNodeIdParamsDTO {
-  int64 node_id = 1;
-  optional TagListParamsDTO params = 2;
+message ListTagsByEntityIdParamsDTO {
+  oneof id {
+    int64 node_id = 1;
+    int64 azure_credential_id = 2;
+  }
+  optional TagListParamsDTO params = 3;
 }
 
 message ListAllTagsParamsDTO {
@@ -72,9 +81,14 @@ message TagListParamsDTO {
   // may require pagination fields or other common list params
 }
 
+message DeleteTagsDTO {
+  repeated google.protobuf.Int64Value tag_ids = 1;
+}
+
 service TagService {
   rpc addTags(TagCreateListDTO) returns (TagListDTO) {};
   rpc removeTags(TagRemoveListDTO) returns (google.protobuf.BoolValue) {};
-  rpc getTagsByNodeId(ListTagsByNodeIdParamsDTO) returns (TagListDTO) {};
+  rpc getTagsByEntityId(ListTagsByEntityIdParamsDTO) returns (TagListDTO) {};
   rpc getTags(ListAllTagsParamsDTO) returns (TagListDTO) {};
+  rpc deleteTags(DeleteTagsDTO) returns (google.protobuf.BoolValue) {};
 }

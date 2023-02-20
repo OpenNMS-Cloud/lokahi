@@ -102,6 +102,14 @@ class GraphQLAzureCredentialServiceTest {
             "            clientSecret: \"client-secret\", " +
             "            subscriptionId: \"subscription-id\", " +
             "            directoryId: \"directory-id\" " +
+            "            tags: [ " +
+            "                {" +
+            "                    name:\"tag-1\"" +
+            "                }," +
+            "                {" +
+            "                    name:\"tag-2\"" +
+            "                }" +
+            "            ] " +
             "        } " +
             "    ) { " +
             "        id, " +

@@ -576,9 +576,7 @@ class NodeGrpcItTest extends GrpcTestBase {
         assertThat(savedNode.getId()).isEqualTo(node2.getId());
 
         List<Tag> allTags = tagRepository.findAll();
-        assertThat(allTags).asList().hasSize(1);
-        Tag savedTag = allTags.get(0);
-        assertThat(savedTag.getId()).isEqualTo(tag3.getId());
+        assertThat(allTags).asList().hasSize(2);
 
         verify(spyInterceptor).verifyAccessToken(authHeader);
         verify(spyInterceptor).interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));

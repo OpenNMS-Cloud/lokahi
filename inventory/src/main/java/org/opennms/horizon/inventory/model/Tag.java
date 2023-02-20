@@ -64,4 +64,11 @@ public class Tag extends TenantAwareEntity {
         joinColumns = @JoinColumn(name = "tag_id"),
         inverseJoinColumns = @JoinColumn(name = "node_id"))
     private List<Node> nodes = new ArrayList<>();
+
+    @ManyToMany
+    @JoinTable(
+        name = "azure_credential_tag",
+        joinColumns = @JoinColumn(name = "tag_id"),
+        inverseJoinColumns = @JoinColumn(name = "azure_credential_id"))
+    private List<AzureCredential> azureCredentials = new ArrayList<>();
 }

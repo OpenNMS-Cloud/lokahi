@@ -6,7 +6,9 @@ Feature: Azure Discovery
     Given [Azure] Grpc TenantId "tenant-stream"
     Given [Azure] Create Grpc Connection for Inventory
 
+  @run
   Scenario: Create new azure credentials
     Given Azure Test Credentials
     When A GRPC request to create azure credentials
+    And A GRPC request to get tags for azure credentials
     Then The response should assert for relevant fields

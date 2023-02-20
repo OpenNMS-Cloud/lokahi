@@ -20,21 +20,4 @@ public class MetricsProcessorApplication {
     public MetricRegistry metricRegistry(){
 	    return new MetricRegistry();
     }
-
-    @Value("${grpc.url.inventory}")
-    private String inventoryGrpcAddress;
-    @Value("${grpc.server.deadline:60000}")
-    private long deadline;
-
-    @Bean
-    public ManagedChannel createInventoryChannel() {
-        return ManagedChannelBuilder.forTarget(inventoryGrpcAddress)
-            .keepAliveWithoutCalls(true)
-            .usePlaintext().build();
-    }
-
-    @Bean(destroyMethod = "shutdown", initMethod = "initialStubs")
-    public InventoryClient createInventoryClient(ManagedChannel channel) {
-        return new InventoryClient(channel, deadline);
-    }
 }

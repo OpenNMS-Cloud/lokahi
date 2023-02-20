@@ -42,12 +42,12 @@ public class RangedValueTest {
         RangedValue value = new RangedValue("80-100");
         RangedValue value2 = new RangedValue(new StringValue("80-100"));
         RangedValue value3 = new RangedValue(80, 100);
-        for (int i=80; i<=100; i++) {
+        for (int i = 80; i <= 100; i++) {
             assertThat(value.isInRange(i), is(true));
             assertThat(value2.isInRange(i), is(true));
             assertThat(value3.isInRange(i), is(true));
         }
-        for (int i=-1000; i<=1000; i++) {
+        for (int i = -1000; i <= 1000; i++) {
             if (i >= 80 && i <= 100) continue; // skip for in range
             assertThat(value.isInRange(i), is(false));
             assertThat(value2.isInRange(i), is(false));
@@ -62,7 +62,7 @@ public class RangedValueTest {
 
         // Verify multi range
         RangedValue rangedValue = new RangedValue("80-100-200");
-        for(int i=80; i<=100; i++) {
+        for (int i = 80; i <= 100; i++) {
             assertThat(rangedValue.isInRange(i), is(true));
         }
     }

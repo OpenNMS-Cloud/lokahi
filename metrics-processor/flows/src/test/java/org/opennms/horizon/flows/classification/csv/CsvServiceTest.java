@@ -135,14 +135,4 @@ public class CsvServiceTest {
         final CsvImportResult csvImportResult = csvService.parseCSV(group, new ByteArrayInputStream("\n\n".getBytes()), false);
         assertThat(csvImportResult.getErrorMap().size(), is(2));
     }
-
-//    @Test
-//    public void test(){
-//        FilterService filterService = new CachingFilterService();
-//        RuleValidator ruleValidator = new RuleValidator();
-//        final CsvService csvService = new CsvServiceImpl(ruleValidator);
-//
-//        final List<Rule> rules = csvService.parseCSV(group, new ByteArrayInputStream(";;;;;;;".getBytes()), false).getRules();
-//    }
 }
-

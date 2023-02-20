@@ -1,8 +1,8 @@
 /*******************************************************************************
  * This file is part of OpenNMS(R).
  *
- * Copyright (C) 2017 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2017 The OpenNMS Group, Inc.
+ * Copyright (C) 2017-2023 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
  *
@@ -50,13 +50,8 @@ import static org.mockito.Mockito.when;
 
 public class MockDocumentEnricherFactory {
 
-//    private final NodeDao nodeDao;
-//    private final IpInterfaceDao ipInterfaceDao;
-
     private InventoryClient client;
     private final InterfaceToNodeCache interfaceToNodeCache;
-//    private final MockAssetRecordDao assetRecordDao;
-//    private final MockCategoryDao categoryDao;
     private final DocumentEnricherImpl enricher;
     private final ClassificationEngine classificationEngine;
 
@@ -86,14 +81,6 @@ public class MockDocumentEnricherFactory {
                 .withExpireAfterWrite(300)
                 .build(), clockSkewCorrectionThreshold,
             new DocumentMangler(new ScriptEngineManager()));
-
-//        // Required for mock node dao
-//        addServiceRegistry(nodeDao);
-//        addServiceRegistry(assetRecordDao);
-//        addServiceRegistry(categoryDao);
-//        DefaultServiceRegistry.INSTANCE.register(nodeDao, NodeDao.class);
-//        DefaultServiceRegistry.INSTANCE.register(assetRecordDao, AssetRecordDao.class);
-//        DefaultServiceRegistry.INSTANCE.register(categoryDao, CategoryDao.class);
     }
 
     public InterfaceToNodeCache getInterfaceToNodeCache() {
@@ -121,14 +108,4 @@ public class MockDocumentEnricherFactory {
         });
         return client;
     }
-
-//    private void addServiceRegistry(OnmsDao dao) {
-//        try {
-//            Field field = AbstractMockDao.class.getDeclaredField("m_serviceRegistry");
-//            field.setAccessible(true);
-//            field.set(dao, DefaultServiceRegistry.INSTANCE);
-//        } catch (NoSuchFieldException | IllegalAccessException e) {
-//            throw new RuntimeException(e);
-//        }
-//    }
 }

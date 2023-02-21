@@ -38,7 +38,11 @@ public class TestTaskSetGrpcService extends TaskSetServiceGrpc.TaskSetServiceImp
     }
 
     public Set<TaskDefinition> getTaskDefinitions(String location) {
-        return taskSetMap.get(location);
+        var taskSet = taskSetMap.get(location);
+        if (taskSet == null) {
+            return new HashSet<>();
+        }
+        return taskSet;
     }
 
 }

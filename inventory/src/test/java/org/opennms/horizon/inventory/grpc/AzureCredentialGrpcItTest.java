@@ -38,18 +38,14 @@ import com.github.tomakehurst.wiremock.matching.EqualToPattern;
 import com.google.rpc.Code;
 import com.google.rpc.Status;
 import io.grpc.Context;
-import io.grpc.ManagedChannel;
 import io.grpc.Metadata;
 import io.grpc.ServerCall;
 import io.grpc.ServerCallHandler;
 import io.grpc.StatusRuntimeException;
-import io.grpc.inprocess.InProcessChannelBuilder;
 import io.grpc.protobuf.StatusProto;
 import io.grpc.stub.MetadataUtils;
 import org.apache.http.HttpStatus;
 import org.hamcrest.Matchers;
-import org.jetbrains.annotations.NotNull;
-import org.junit.ClassRule;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -58,7 +54,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.keycloak.common.VerificationException;
 import org.opennms.horizon.inventory.SpringContextTestInitializer;
-import org.opennms.horizon.inventory.config.MinionGatewayGrpcClientConfig;
 import org.opennms.horizon.inventory.dto.AzureCredentialCreateDTO;
 import org.opennms.horizon.inventory.dto.AzureCredentialDTO;
 import org.opennms.horizon.inventory.dto.AzureCredentialServiceGrpc;
@@ -75,22 +70,15 @@ import org.opennms.horizon.shared.azure.http.dto.error.AzureHttpError;
 import org.opennms.horizon.shared.azure.http.dto.login.AzureOAuthToken;
 import org.opennms.horizon.shared.azure.http.dto.subscription.AzureSubscription;
 import org.opennms.horizon.shared.constants.GrpcConstants;
+import org.opennms.taskset.contract.TaskType;
 import org.opennms.taskset.service.contract.TaskSetServiceGrpc;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.config.BeanDefinitionCustomizer;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.util.TestPropertyValues;
-import org.springframework.context.ApplicationContextInitializer;
-import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
-import org.testcontainers.containers.PostgreSQLContainer;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Supplier;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
@@ -199,8 +187,8 @@ class AzureCredentialGrpcItTest extends GrpcTestBase {
 
         assertTrue(credentials.getId() > 0);
 
-        //2 calls because the trap listener also gets called on startup
-        await().atMost(10, TimeUnit.SECONDS).until(() -> testGrpcService.getRequests().size(), Matchers.is(3));
+        await().atMost(10, TimeUnit.SECONDS).until( () ->  testGrpcService.getTaskDefinitions(DEFAULT_LOCATION).stream()
+            .filter(taskDef -> taskDef.getType().equals(TaskType.SCANNER)).toList().size(), Matchers.is(1));
 
         assertEquals(createDTO.getClientId(), credentials.getClientId());
         assertEquals(createDTO.getSubscriptionId(), credentials.getSubscriptionId());

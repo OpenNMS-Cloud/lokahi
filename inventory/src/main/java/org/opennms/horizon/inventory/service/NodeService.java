@@ -34,6 +34,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.opennms.horizon.inventory.dto.NodeCreateDTO;
 import org.opennms.horizon.inventory.dto.NodeDTO;
+import org.opennms.horizon.inventory.dto.TagCreateListDTO;
 import org.opennms.horizon.inventory.mapper.NodeMapper;
 import org.opennms.horizon.inventory.model.IpInterface;
 import org.opennms.horizon.inventory.model.MonitoringLocation;
@@ -81,15 +82,13 @@ public class NodeService {
     private final NodeRepository nodeRepository;
     private final MonitoringLocationRepository monitoringLocationRepository;
     private final IpInterfaceRepository ipInterfaceRepository;
-    private final TagRepository tagRepository;
     private final ConfigUpdateService configUpdateService;
     private final DetectorTaskSetService detectorTaskSetService;
     private final CollectorTaskSetService collectorTaskSetService;
     private final MonitorTaskSetService monitorTaskSetService;
     private final ScannerTaskSetService scannerTaskSetService;
     private final TaskSetPublisher taskSetPublisher;
-
-
+    private final TagService tagService;
     private final NodeMapper mapper;
 
     @Transactional(readOnly = true)
@@ -160,6 +159,11 @@ public class NodeService {
         MonitoringLocation monitoringLocation = saveMonitoringLocation(request, tenantId);
         Node node = saveNode(request, monitoringLocation, scanType, tenantId);
         saveIpInterfaces(request, node, tenantId);
+
+        tagService.addTags(tenantId, TagCreateListDTO.newBuilder()
+            .setNodeId(node.getId())
+            .addAllTags(request.getTagsList())
+            .build());
 
         return node;
     }

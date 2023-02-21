@@ -39,7 +39,7 @@ import org.opennms.horizon.server.model.inventory.Node;
 import org.opennms.horizon.server.model.inventory.NodeCreate;
 
 
-@Mapper(componentModel = "spring", uses = {IpInterfaceMapper.class, SnmpInterfaceMapper.class},
+@Mapper(componentModel = "spring", uses = {TagMapper.class, IpInterfaceMapper.class, SnmpInterfaceMapper.class},
     // Needed for grpc proto mapping
     collectionMappingStrategy = CollectionMappingStrategy.ADDER_PREFERRED)
 public interface NodeMapper {
@@ -51,5 +51,6 @@ public interface NodeMapper {
     Node protoToNode(NodeDTO nodeDTO);
 
     @Mapping(target = "location", source = "location", nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
+    @Mapping(target = "tagsList", source = "tags", nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
     NodeCreateDTO nodeCreateToProto(NodeCreate request);
 }

@@ -75,7 +75,6 @@ public class NodeServiceTest {
     private NodeRepository mockNodeRepository;
     private MonitoringLocationRepository mockMonitoringLocationRepository;
     private IpInterfaceRepository mockIpInterfaceRepository;
-    private TagRepository tagRepository;
     private ConfigUpdateService mockConfigUpdateService;
     private final String tenantID = "test-tenant";
     private Node node;
@@ -86,20 +85,19 @@ public class NodeServiceTest {
         mockNodeRepository = mock(NodeRepository.class);
         mockMonitoringLocationRepository = mock(MonitoringLocationRepository.class);
         mockIpInterfaceRepository = mock(IpInterfaceRepository.class);
-        tagRepository = mock(TagRepository.class);
         mockConfigUpdateService = mock(ConfigUpdateService.class);
 
 
         nodeService = new NodeService(mockNodeRepository,
             mockMonitoringLocationRepository,
             mockIpInterfaceRepository,
-            tagRepository,
             mockConfigUpdateService,
             mock(DetectorTaskSetService.class),
             mock(CollectorTaskSetService.class),
             mock(MonitorTaskSetService.class),
             mock(ScannerTaskSetService.class),
             mock(TaskSetPublisher.class),
+            mock(TagService.class),
             nodeMapper);
 
         node = new Node();

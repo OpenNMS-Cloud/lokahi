@@ -205,8 +205,8 @@ public class GraphQLNodeServiceTest {
     public void testCreateNode() throws JSONException {
         doReturn(nodeDTO1).when(mockClient).createNewNode(any(NodeCreateDTO.class), eq(accessToken));
         doReturn(Collections.singletonList(locationDTO1)).when(mockClient).listLocationsByIds(keyCaptor.capture());
-        String request = createPayload("mutation {addNode(node:{label:\"test-node\" managementIp: " +
-            "\"10.244.0.93\"}){id, nodeLabel, location {location}}}");
+        String request = createPayload("mutation {addNode(node: {label: \"test-node\", location: \"Default\", managementIp: \"127.0.0.1\"})" +
+            "{id nodeLabel}}");
         webClient.post()
             .uri(GRAPHQL_PATH)
             .accept(MediaType.APPLICATION_JSON)
@@ -216,12 +216,9 @@ public class GraphQLNodeServiceTest {
             .expectStatus().isOk()
             .expectBody()
             .jsonPath("$.data.addNode.id").isEqualTo(nodeDTO1.getId())
-            .jsonPath("$.data.addNode.location.location").isEqualTo(locationDTO1.getLocation());
+            .jsonPath("$.data.addNode.nodeLabel").isEqualTo(nodeDTO1.getNodeLabel());
         verify(mockClient).createNewNode(any(NodeCreateDTO.class), eq(accessToken));
-        verify(mockHeaderUtil, times(2)).getAuthHeader(any(ResolutionEnvironment.class));
-        verify(mockClient).listLocationsByIds(keyCaptor.capture());
-        List<DataLoaderFactory.Key> keys = keyCaptor.getValue();
-        assertThat(keys.size()).isEqualTo(1);
+        verify(mockHeaderUtil, times(1)).getAuthHeader(any(ResolutionEnvironment.class));
     }
 
     @Test

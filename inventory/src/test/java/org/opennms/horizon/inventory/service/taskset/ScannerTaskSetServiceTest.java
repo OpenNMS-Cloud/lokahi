@@ -52,6 +52,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.opennms.horizon.inventory.service.taskset.TaskUtils.DISCOVERY_PROFILE;
 
 @ExtendWith(MockitoExtension.class)
 public class ScannerTaskSetServiceTest {
@@ -112,19 +113,23 @@ public class ScannerTaskSetServiceTest {
         verifyNoInteractions(mockPublisher);
     }
 
+
     @Test
-    void testSendDiscoveryScan() throws InvalidProtocolBufferException {
-        List<String> ipAddresses = List.of("127.0.0.1", "127.0.0.2");
-        service.sendDiscoveryScannerTask(ipAddresses, location, tenantId, "requisitionName");
-        verify(mockPublisher).publishNewTasks(eq(tenantId), eq(location), taskListCaptor.capture());
-        List<TaskDefinition> tasks = taskListCaptor.getValue();
-        assertThat(tasks).asList().hasSize(1);
-        assertThat(tasks.get(0).getId()).isEqualTo("requisition:requisitionName/ip=127.0.0.1/testLocation");
-        assertThat(tasks.get(0).getPluginName()).isEqualTo("Discovery-Ping");
-        assertThat(tasks.get(0).getConfiguration()).isNotNull();
-        PingSweepRequest request = tasks.get(0).getConfiguration().unpack(PingSweepRequest.class);
-        assertThat(request).extracting(icmpScannerRequest -> icmpScannerRequest.getIpRange(0).getBegin(), icmpScannerRequest ->
-                icmpScannerRequest.getIpRange(1).getBegin())
-            .containsExactly("127.0.0.1", "127.0.0.2");
+    void testCreateDiscoveryTaskSet() throws InvalidProtocolBufferException {
+        String discoveryProfile = "discovery-local";
+        List<String> ipAddresses = List.of("127.0.0.1 - 127.0.0.3", "127.0.0.5 - 127.0.0.8", " 127.0.0.9 ");
+        var taskDefOptional = service.createDiscoveryTask(ipAddresses, location, discoveryProfile);
+        assertThat(taskDefOptional).isPresent();
+
+        var taskDef = taskDefOptional.get();
+
+        assertThat(taskDef.getId()).isEqualTo(DISCOVERY_PROFILE + discoveryProfile + "/" + location);
+        assertThat(taskDef.getPluginName()).isEqualTo(ScannerTaskSetService.DISCOVERY_TASK_PLUGIN_NAME);
+        assertThat(taskDef.getConfiguration()).isNotNull();
+        var pingSweepRequest = taskDef.getConfiguration().unpack(PingSweepRequest.class);
+        assertThat(pingSweepRequest).extracting(PingSweepRequest::getIpRangeCount).isEqualTo(3);
+        var specific = pingSweepRequest.getIpRangeList().stream()
+            .filter(request -> request.getBegin().equals(request.getEnd())).findFirst();
+        assertThat(specific).isPresent();
     }
 }

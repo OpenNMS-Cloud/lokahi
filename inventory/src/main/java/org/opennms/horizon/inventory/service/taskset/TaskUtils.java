@@ -3,9 +3,6 @@ package org.opennms.horizon.inventory.service.taskset;
 public interface TaskUtils {
 
     String DEFAULT_SCHEDULE = "60000";
-
-
-    // TODO: Change this to use ISO-8601 period format
     // Schedule Scans every 24 hrs.
     String DEFAULT_SCHEDULE_FOR_SCAN = "60000*60*24";
     int ICMP_DEFAULT_TIMEOUT_MS = 800;
@@ -26,7 +23,7 @@ public interface TaskUtils {
     String AZURE_LABEL = "azure=";
     String NODE_SCAN ="nodeScan=node_id/";
     String NODE_ID = "nodeId:";
-    String REQUISTION_NAME = "requisition:";
+    String DISCOVERY_PROFILE = "discovery:";
 
     static String identityForIpTask(long nodeId, String ipAddress, String name) {
         return NODE_ID  + nodeId + "/" + IP_LABEL + ipAddress + "/" + name;
@@ -44,7 +41,7 @@ public interface TaskUtils {
         return configName + "@" + location;
     }
 
-    static String identityForDiscoveryTask(String ipAddress, String location, String requisitionName) {
-        return REQUISTION_NAME + requisitionName + "/"+ IP_LABEL + ipAddress + "/" + location;
+    static String identityForDiscoveryTask(String location, String discoveryProfile) {
+        return DISCOVERY_PROFILE + discoveryProfile + "/"  + location;
     }
 }

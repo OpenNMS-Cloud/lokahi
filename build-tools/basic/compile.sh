@@ -34,5 +34,5 @@ mvn clean install -DskipTests=true -f rest-server
 mvn clean install -DskipTests=true -f inventory
 mvn clean install -DskipTests=true -f notifications
 mvn clean install -DskipTests=true -f metrics-processor
-mvn clean install -DskipTests=true-f events
+mvn clean install -DskipTests=true -f events
 mvn clean install -DskipTests=true -f datachoices

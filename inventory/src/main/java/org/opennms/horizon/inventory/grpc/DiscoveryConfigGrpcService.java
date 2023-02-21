@@ -28,25 +28,24 @@
 
 package org.opennms.horizon.inventory.grpc;
 
-import java.util.List;
-
-import org.opennms.horizon.inventory.discovery.DiscoveryConfigDTO;
-import org.opennms.horizon.inventory.discovery.DiscoveryConfigList;
-import org.opennms.horizon.inventory.discovery.DiscoveryConfigOperationGrpc;
-import org.opennms.horizon.inventory.discovery.DiscoveryConfigRequest;
-import org.opennms.horizon.inventory.service.DiscoveryConfigService;
-import org.springframework.stereotype.Component;
-
 import com.google.protobuf.Empty;
 import com.google.protobuf.StringValue;
 import com.google.rpc.Code;
 import com.google.rpc.Status;
-
 import io.grpc.Context;
 import io.grpc.protobuf.StatusProto;
 import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.opennms.horizon.inventory.discovery.DiscoveryConfigDTO;
+import org.opennms.horizon.inventory.discovery.DiscoveryConfigList;
+import org.opennms.horizon.inventory.discovery.DiscoveryConfigOperationGrpc;
+import org.opennms.horizon.inventory.discovery.DiscoveryConfigRequest;
+import org.opennms.horizon.inventory.service.DiscoveryConfigService;
+import org.opennms.horizon.inventory.service.taskset.ScannerTaskSetService;
+import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 @Slf4j
 @Component
@@ -54,6 +53,7 @@ import lombok.extern.slf4j.Slf4j;
 public class DiscoveryConfigGrpcService extends DiscoveryConfigOperationGrpc.DiscoveryConfigOperationImplBase {
     private final TenantLookup tenantLookup;
     private final DiscoveryConfigService configService;
+    private final ScannerTaskSetService scannerTaskSetService;
 
     @Override
     public void createConfig(DiscoveryConfigRequest request, StreamObserver<DiscoveryConfigList> responseObserver) {
@@ -64,6 +64,8 @@ public class DiscoveryConfigGrpcService extends DiscoveryConfigOperationGrpc.Dis
                     DiscoveryConfigList list = DiscoveryConfigList.newBuilder().addAllDiscoverConfigs(dtoList).build();
                     responseObserver.onNext(list);
                     responseObserver.onCompleted();
+                    scannerTaskSetService.sendDiscoveryScannerTask(request.getIpAddressesList(),
+                        request.getLocation(), tenantId, request.getConfigName());
                 } catch (Exception e) {
                     responseObserver.onError(StatusProto.toStatusRuntimeException(createStatus(Code.INVALID_ARGUMENT_VALUE, "Invalid request " + request)));
                 }

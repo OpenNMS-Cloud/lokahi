@@ -74,7 +74,7 @@ public class ScannerTaskSetService {
         .build();
     private final ExecutorService executorService = Executors.newFixedThreadPool(10, threadFactory);
 
-    private final String DISCOVERY_TASK_PLUGIN_NAME = "Discovery-Ping";
+    public final static String DISCOVERY_TASK_PLUGIN_NAME = "Discovery-Ping";
     private final TaskSetPublisher taskSetPublisher;
     private final NodeMapper nodeMapper;
 
@@ -96,22 +96,27 @@ public class ScannerTaskSetService {
         return createNodeScanTask(nodeDto);
     }
 
-    public void sendDiscoveryScannerTask(List<String> ipAddresses, String location, String tenantId, String requisitionName) {
-        Optional<TaskDefinition> tasks = createDiscoveryTask(ipAddresses, location, requisitionName);
+    public void sendDiscoveryScannerTask(List<String> ipAddresses, String location, String tenantId, String discoveryProfile) {
+        executorService.execute(() -> createAndPublishTasks(ipAddresses, location, tenantId, discoveryProfile));
+    }
+
+    private void createAndPublishTasks(List<String> ipAddresses, String location, String tenantId, String discoveryProfile) {
+        Optional<TaskDefinition> tasks = createDiscoveryTask(ipAddresses, location, discoveryProfile);
         tasks.ifPresent(taskDefinition -> taskSetPublisher.publishNewTasks(tenantId, location, List.of(taskDefinition)));
     }
 
-    private Optional<TaskDefinition> createDiscoveryTask(List<String> ipAddresses, String location, String requisitionName) {
+    Optional<TaskDefinition> createDiscoveryTask(List<String> ipAddresses, String location, String discoveryProfile) {
 
         var ipRanges = new ArrayList<IpRange>();
         ipAddresses.forEach(ipAddressDTO -> {
 
+            ipAddressDTO = ipAddressDTO.trim();
             if (ipAddressDTO.contains("-")) {
                 var range = ipAddressDTO.split("-", 2);
                 try {
                     var ipRangeBuilder = IpRange.newBuilder();
-                    var begin = InetAddress.getByName(range[0]);
-                    var end = InetAddress.getByName(range[1]);
+                    var begin = InetAddress.getByName(range[0].trim());
+                    var end = InetAddress.getByName(range[1].trim());
                     ipRangeBuilder.setBegin(InetAddressUtils.str(begin));
                     ipRangeBuilder.setEnd(InetAddressUtils.str(end));
                     ipRanges.add(ipRangeBuilder.build());
@@ -143,7 +148,7 @@ public class ScannerTaskSetService {
                 .setPacketSize(PingConstants.DEFAULT_PACKET_SIZE)
                 .build());
 
-        String taskId = identityForDiscoveryTask(ipAddresses.get(0), location, requisitionName);
+        String taskId = identityForDiscoveryTask(location, discoveryProfile);
         return Optional.of(TaskDefinition.newBuilder()
             .setType(TaskType.SCANNER)
             .setPluginName(DISCOVERY_TASK_PLUGIN_NAME)

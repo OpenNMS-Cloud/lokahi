@@ -7,7 +7,10 @@
         :icon="deleteIcon"
       /> -->
     </div>
-    <form @submit.prevent="submitHandler">
+    <form
+      @submit.prevent="submitHandler"
+      novalidate
+    >
       <div class="form-content">
         <!-- location -->
         <LocationsAutocomplete @location-selected="locationsSelectedListener" />
@@ -17,7 +20,20 @@
           :get-items="discoveryQueries.getTagsUponTyping"
           :items="discoveryQueries.tagsUponTyping"
           :label="Common.tagsInput"
+          :schema="inputV.tags"
+          required
         />
+        <FeatherAutocomplete
+          class="my-autocomplete"
+          label="Users"
+          v-model="valueBar"
+          :loading="loading"
+          :results="results"
+          type="single"
+          @search="search"
+          :schema="fooV"
+          required
+        ></FeatherAutocomplete>
         <div class="content-editable-container">
           <DiscoveryContentEditable
             @is-content-invalid="isCommunityStringInvalidListerner"
@@ -49,7 +65,6 @@
         >
         <ButtonWithSpinner
           :isFetching="discoveryMutations.savingSyslogSNMPTraps"
-          :disabled="isFormInvalid"
           primary
           type="submit"
         >
@@ -69,6 +84,33 @@ import { ContentEditableType } from './discovery.constants'
 import { useDiscoveryQueries } from '@/store/Queries/discoveryQueries'
 import { useDiscoveryMutations } from '@/store/Mutations/discoveryMutations'
 import useSnackbar from '@/composables/useSnackbar'
+import { string } from 'yup'
+import { useForm } from '@featherds/input-helper'
+
+const names = ['William', 'Chris', 'Jane', 'Smith']
+let timeout = -1
+const loading = ref(false)
+const results = ref([])
+const valueBar = ref(undefined)
+const fooV = string().required('Required')
+const search = (q: string) => {
+  console.log('q', q)
+  const form = useForm()
+  const errors = form.validate()
+  console.log('errors', errors)
+  loading.value = true
+  clearTimeout(timeout)
+  timeout = window.setTimeout(() => {
+    results.value = names
+      .filter((x) => x.toLowerCase().indexOf(q) > -1)
+      .map((x) => ({
+        _text: x
+      }))
+    loading.value = false
+    console.log('results.value', results.value)
+    console.log('valueBar.value', valueBar.value)
+  }, 500)
+}
 
 const props = defineProps<{
   successCallback: (name: string) => void
@@ -80,11 +122,11 @@ const { showSnackbar } = useSnackbar()
 const discoveryQueries = useDiscoveryQueries()
 const discoveryMutations = useDiscoveryMutations()
 
-const isFormInvalid = ref(
+/* const isFormInvalid = ref(
   computed(() => {
     return isCommunityStringInvalid || isUDPPortInvalid
   })
-)
+) */
 
 let tagsSelected: Record<string, string>[] = []
 const tagsSelectedListener = (tags: Record<string, string>[]) => {
@@ -128,28 +170,37 @@ const UDPPortEnteredListener = (str: string) => {
   UDPPortEntered = str
 }
 
+const inputV = {
+  tags: string().required('Required')
+}
+const form = useForm()
+
 const submitHandler = async () => {
-  contentEditableCommunityStringRef.value.validateAndFormat()
-  contentEditableUDPPortRef.value.validateAndFormat()
+  const validationErrors = form.validate()
+  console.log('validationErrors', validationErrors)
+  if (!validationErrors.length) {
+    contentEditableCommunityStringRef.value.validateAndFormat()
+    contentEditableUDPPortRef.value.validateAndFormat()
 
-  const results: any = await discoveryMutations.saveSyslogSNMPTraps({
-    locations: locationsSelected,
-    tagsSelected: tagsSelected,
-    communityString: communityStringEntered,
-    UDPPort: UDPPortEntered
-  })
-
-  if (results.data) {
-    showSnackbar({
-      msg: 'Save Successfully!'
+    const results: any = await discoveryMutations.saveSyslogSNMPTraps({
+      locations: locationsSelected,
+      tagsSelected: tagsSelected,
+      communityString: communityStringEntered,
+      UDPPort: UDPPortEntered
     })
 
-    props.successCallback(results.data.saveDiscovery[0].name)
-  } else {
-    showSnackbar({
-      msg: results.errors[0].message,
-      error: true
-    })
+    if (results.data) {
+      showSnackbar({
+        msg: 'Save Successfully!'
+      })
+
+      props.successCallback(results.data.saveDiscovery[0].name)
+    } else {
+      showSnackbar({
+        msg: results.errors[0].message,
+        error: true
+      })
+    }
   }
 }
 

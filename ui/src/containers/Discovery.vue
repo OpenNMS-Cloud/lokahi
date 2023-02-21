@@ -58,12 +58,11 @@
             :discovery="selectedDiscovery"
           />
         </div>
-        <div v-else-if="discoverySelectedType === DiscoveryType.Azure">
-          <DiscoveryAzureForm
-            :successCallback="(name) => successModal.openSuccessModal(name)"
-            :cancel="handleCancel"
-          />
-        </div>
+        <DiscoveryAzureForm
+          v-else-if="discoverySelectedType === DiscoveryType.Azure"
+          :successCallback="(name) => successModal.openSuccessModal(name)"
+          :cancel="handleCancel"
+        />
         <DiscoverySyslogSNMPTrapsForm
           v-else-if="discoverySelectedType === DiscoveryType.SyslogSNMPTraps"
           :successCallback="(name) => successModal.openSuccessModal(name)"
@@ -98,10 +97,10 @@ const addIcon: IIcon = {
 }
 
 const successModal = ref()
-const isDiscoveryEditingShown = ref(false)
+const isDiscoveryEditingShown = ref(true)
 const showNewDiscovery = ref(false)
 const selectedDiscovery = ref<DiscoveryInput | null>(null)
-const discoverySelectedType = ref(DiscoveryType.None)
+const discoverySelectedType = ref(DiscoveryType.SyslogSNMPTraps)
 
 const handleNewDiscovery = () => {
   isDiscoveryEditingShown.value = true

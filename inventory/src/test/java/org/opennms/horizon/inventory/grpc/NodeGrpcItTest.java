@@ -630,7 +630,8 @@ class NodeGrpcItTest extends GrpcTestBase {
         assertThat(result.getValue()).isTrue();
         await().atMost(10, TimeUnit.SECONDS).until(() ->
             testGrpcService.getTaskDefinitions(TEST_LOCATION).stream().filter(taskDef ->
-                taskDef.getType().equals(TaskType.SCANNER)).collect(Collectors.toSet()).size(), Matchers.is(2));
+                taskDef.getType().equals(TaskType.SCANNER) && taskDef.getPluginName()
+                    .contains("NodeScanner")).collect(Collectors.toSet()).size(), Matchers.is(2));
         verify(spyInterceptor).verifyAccessToken(authHeader);
         verify(spyInterceptor).interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));
     }

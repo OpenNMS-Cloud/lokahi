@@ -31,6 +31,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.opennms.horizon.inventory.dto.AzureCredentialCreateDTO;
 import org.opennms.horizon.inventory.dto.AzureCredentialDTO;
+import org.opennms.horizon.inventory.dto.TagCreateListDTO;
 import org.opennms.horizon.inventory.exception.InventoryRuntimeException;
 import org.opennms.horizon.inventory.mapper.AzureCredentialMapper;
 import org.opennms.horizon.inventory.model.AzureCredential;
@@ -61,6 +62,7 @@ public class AzureCredentialService {
     private final MonitoringLocationRepository locationRepository;
     private final ConfigUpdateService configUpdateService;
     private final ScannerTaskSetService scannerTaskSetService;
+    private final TagService tagService;
 
     public AzureCredentialDTO createCredentials(String tenantId, AzureCredentialCreateDTO request) {
         validateCredentials(request);
@@ -72,6 +74,11 @@ public class AzureCredentialService {
         credential.setCreateTime(LocalDateTime.now());
         credential.setMonitoringLocation(monitoringLocation);
         credential = repository.save(credential);
+
+        tagService.addTags(tenantId, TagCreateListDTO.newBuilder()
+            .setAzureCredentialId(credential.getId())
+            .addAllTags(request.getTagsList())
+            .build());
 
         // Asynchronously send task sets to Minion
         scannerTaskSetService.sendAzureScannerTaskAsync(credential);
@@ -90,6 +97,8 @@ public class AzureCredentialService {
                 throw new InventoryRuntimeException(description.toString(), e);
             }
             throw new InventoryRuntimeException("Failed to login with azure credentials", e);
+        } catch (Exception e) {
+            throw new InventoryRuntimeException("Failed to login with azure credentials", e);
         }
         AzureSubscription subscription;
         try {
@@ -102,6 +111,9 @@ public class AzureCredentialService {
             }
             String message = String.format("Failed to get azure subscription %s", request.getSubscriptionId());
             throw new InventoryRuntimeException(message, e);
+        } catch (Exception e) {
+            String message = String.format("Failed to get azure subscription %s", request.getSubscriptionId());
+            throw new InventoryRuntimeException(message, e);
         }
         if (!subscription.getState().equalsIgnoreCase(SUB_ENABLED_STATE)) {
             String message = String.format("Subscription %s is not enabled", request.getSubscriptionId());
@@ -111,7 +123,7 @@ public class AzureCredentialService {
 
     private MonitoringLocation getMonitoringLocation(String tenantId, AzureCredentialCreateDTO request) {
         String location = StringUtils.isEmpty(request.getLocation())
-            ? GrpcConstants.DEFAULT_LOCATION: request.getLocation();
+            ? GrpcConstants.DEFAULT_LOCATION : request.getLocation();
 
         Optional<MonitoringLocation> locationOp = locationRepository
             .findByLocationAndTenantId(location, tenantId);

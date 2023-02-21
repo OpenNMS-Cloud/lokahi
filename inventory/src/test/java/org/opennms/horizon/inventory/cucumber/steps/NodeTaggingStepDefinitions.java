@@ -35,8 +35,9 @@ import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import org.opennms.horizon.inventory.cucumber.InventoryBackgroundHelper;
+import org.opennms.horizon.inventory.dto.DeleteTagsDTO;
 import org.opennms.horizon.inventory.dto.ListAllTagsParamsDTO;
-import org.opennms.horizon.inventory.dto.ListTagsByNodeIdParamsDTO;
+import org.opennms.horizon.inventory.dto.ListTagsByEntityIdParamsDTO;
 import org.opennms.horizon.inventory.dto.NodeCreateDTO;
 import org.opennms.horizon.inventory.dto.NodeDTO;
 import org.opennms.horizon.inventory.dto.TagCreateDTO;
@@ -45,10 +46,12 @@ import org.opennms.horizon.inventory.dto.TagDTO;
 import org.opennms.horizon.inventory.dto.TagListDTO;
 import org.opennms.horizon.inventory.dto.TagListParamsDTO;
 import org.opennms.horizon.inventory.dto.TagRemoveListDTO;
+import org.opennms.horizon.inventory.dto.TagServiceGrpc;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Function;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -96,6 +99,7 @@ public class NodeTaggingStepDefinitions {
      */
     @Given("A new node")
     public void aNewNode() {
+        deleteAllTags();
         deleteAllNodes();
 
         var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
@@ -106,6 +110,7 @@ public class NodeTaggingStepDefinitions {
 
     @Given("A new node with tags {string}")
     public void aNewNodeWithTags(String tags) {
+        deleteAllTags();
         deleteAllNodes();
 
         var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
@@ -124,6 +129,7 @@ public class NodeTaggingStepDefinitions {
 
     @Given("A new node with no tags")
     public void aNewNodeWithNoTags() {
+        deleteAllTags();
         deleteAllNodes();
 
         var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
@@ -165,9 +171,9 @@ public class NodeTaggingStepDefinitions {
     @When("A GRPC request to fetch tags for node")
     public void aGrpcRequestToFetchTagsForNode() {
         var tagServiceBlockingStub = backgroundHelper.getTagServiceBlockingStub();
-        ListTagsByNodeIdParamsDTO params = ListTagsByNodeIdParamsDTO.newBuilder()
+        ListTagsByEntityIdParamsDTO params = ListTagsByEntityIdParamsDTO.newBuilder()
             .setNodeId(node.getId()).setParams(TagListParamsDTO.newBuilder().build()).build();
-        fetchedTagList = tagServiceBlockingStub.getTagsByNodeId(params);
+        fetchedTagList = tagServiceBlockingStub.getTagsByEntityId(params);
     }
 
     @When("A GRPC request to remove tag {string} for node")
@@ -181,9 +187,9 @@ public class NodeTaggingStepDefinitions {
                 break;
             }
         }
-        ListTagsByNodeIdParamsDTO params = ListTagsByNodeIdParamsDTO.newBuilder()
+        ListTagsByEntityIdParamsDTO params = ListTagsByEntityIdParamsDTO.newBuilder()
             .setNodeId(node.getId()).setParams(TagListParamsDTO.newBuilder().build()).build();
-        fetchedTagList = tagServiceBlockingStub.getTagsByNodeId(params);
+        fetchedTagList = tagServiceBlockingStub.getTagsByEntityId(params);
     }
 
     @When("A GRPC request to fetch all tags")
@@ -197,10 +203,10 @@ public class NodeTaggingStepDefinitions {
     @When("A GRPC request to fetch all tags for node with name like {string}")
     public void aGRPCRequestToFetchAllTagsForNodeWithNameLike(String searchTerm) {
         var tagServiceBlockingStub = backgroundHelper.getTagServiceBlockingStub();
-        ListTagsByNodeIdParamsDTO params = ListTagsByNodeIdParamsDTO.newBuilder()
+        ListTagsByEntityIdParamsDTO params = ListTagsByEntityIdParamsDTO.newBuilder()
             .setNodeId(node.getId())
             .setParams(TagListParamsDTO.newBuilder().setSearchTerm(searchTerm).build()).build();
-        fetchedTagList = tagServiceBlockingStub.getTagsByNodeId(params);
+        fetchedTagList = tagServiceBlockingStub.getTagsByEntityId(params);
     }
 
     @When("A GRPC request to fetch all tags with name like {string}")
@@ -238,6 +244,13 @@ public class NodeTaggingStepDefinitions {
      * INTERNAL
      * *********************************************************************************
      */
+    private void deleteAllTags() {
+        var tagServiceBlockingStub = backgroundHelper.getTagServiceBlockingStub();
+        List<Int64Value> tagIds = tagServiceBlockingStub.getTags(ListAllTagsParamsDTO.newBuilder().build())
+            .getTagsList().stream().map(tagDTO -> Int64Value.of(tagDTO.getId())).toList();
+        tagServiceBlockingStub.deleteTags(DeleteTagsDTO.newBuilder().addAllTagIds(tagIds).build());
+    }
+
     private void deleteAllNodes() {
         var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
         for (NodeDTO nodeDTO : nodeServiceBlockingStub.listNodes(Empty.newBuilder().build()).getNodesList()) {

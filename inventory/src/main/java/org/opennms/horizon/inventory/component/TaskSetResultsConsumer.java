@@ -31,6 +31,7 @@ package org.opennms.horizon.inventory.component;
 import java.util.Map;
 import java.util.Optional;
 
+import io.grpc.Context;
 import org.opennms.horizon.inventory.exception.InventoryRuntimeException;
 import org.opennms.horizon.inventory.service.taskset.response.DetectorResponseService;
 import org.opennms.horizon.inventory.service.taskset.response.ScannerResponseService;
@@ -56,29 +57,31 @@ public class TaskSetResultsConsumer {
 
     @KafkaListener(topics = "${kafka.topics.task-set-results}", concurrency = "1")
     public void receiveMessage(@Payload byte[] data, @Headers Map<String, Object> headers) {
-        try {
-            String tenantId = getTenantId(headers);
-            TaskSetResults message = TaskSetResults.parseFrom(data);
+        String tenantId = getTenantId(headers);
+        Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, tenantId).run(()->
+        {
+            try {
+                TaskSetResults message = TaskSetResults.parseFrom(data);
+                for (TaskResult taskResult : message.getResultsList()) {
 
-            for (TaskResult taskResult : message.getResultsList()) {
+                    String location = taskResult.getLocation();
+                    log.info("Received taskset results from minion with tenant id: {}; location: {}", tenantId, location);
+                    if (taskResult.hasScannerResponse()) {
 
-                String location = taskResult.getLocation();
-                log.info("Received taskset results from minion with tenant id: {}; location: {}", tenantId, location);
-                if (taskResult.hasScannerResponse()) {
+                        ScannerResponse response = taskResult.getScannerResponse();
 
-                    ScannerResponse response = taskResult.getScannerResponse();
+                        scannerResponseService.accept(tenantId, location, response);
+                    } else if (taskResult.hasDetectorResponse()) {
 
-                    scannerResponseService.accept(tenantId, location, response);
-                } else if (taskResult.hasDetectorResponse()) {
+                        DetectorResponse response = taskResult.getDetectorResponse();
 
-                    DetectorResponse response = taskResult.getDetectorResponse();
-
-                    detectorResponseService.accept(tenantId, location, response);
+                        detectorResponseService.accept(tenantId, location, response);
+                    }
                 }
+            } catch (Exception e) {
+                log.error("Error while processing kafka message for TaskResults: ", e);
             }
-        } catch (Exception e) {
-            log.error("Error while processing kafka message for TaskResults: ", e);
-        }
+        });
     }
 
     private String getTenantId(Map<String, Object> headers) {

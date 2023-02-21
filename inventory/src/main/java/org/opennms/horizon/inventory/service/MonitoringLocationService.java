@@ -5,9 +5,11 @@ import org.opennms.horizon.inventory.dto.MonitoringLocationDTO;
 import org.opennms.horizon.inventory.mapper.MonitoringLocationMapper;
 import org.opennms.horizon.inventory.model.MonitoringLocation;
 import org.opennms.horizon.inventory.repository.MonitoringLocationRepository;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -17,6 +19,7 @@ public class MonitoringLocationService {
     private final MonitoringLocationRepository modelRepo;
 
     private final MonitoringLocationMapper mapper;
+    private final JdbcTemplate jdbcTemplate;
 
     public List<MonitoringLocationDTO> findByTenantId(String tenantId) {
         List<MonitoringLocation> all = modelRepo.findByTenantId(tenantId);
@@ -39,10 +42,15 @@ public class MonitoringLocationService {
     }
 
     public List<MonitoringLocationDTO> findAll() {
-        List<MonitoringLocation> all = modelRepo.findAll();
-        return all
-            .stream()
-            .map(mapper::modelToDTO)
-            .collect(Collectors.toList());
+        List<MonitoringLocationDTO> all = jdbcTemplate.query(
+            "Select id, tenant_id, location from monitoring_location",
+            (rs, rowNum) ->
+                MonitoringLocationDTO.newBuilder()
+                    .setId(rs.getLong("id"))
+                    .setLocation(rs.getString("location"))
+                    .setTenantId("tenant_id")
+                    .build()
+        );
+        return all;
     }
 }

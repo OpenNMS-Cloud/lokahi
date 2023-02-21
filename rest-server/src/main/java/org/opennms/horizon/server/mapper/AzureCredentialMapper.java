@@ -28,6 +28,7 @@
 
 package org.opennms.horizon.server.mapper;
 
+import org.mapstruct.CollectionMappingStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.NullValueCheckStrategy;
@@ -37,11 +38,14 @@ import org.opennms.horizon.server.model.inventory.AzureCredential;
 import org.opennms.horizon.server.model.inventory.AzureCredentialCreate;
 
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = {TagMapper.class},
+    // Needed for grpc proto mapping
+    collectionMappingStrategy = CollectionMappingStrategy.ADDER_PREFERRED)
 public interface AzureCredentialMapper {
 
     AzureCredential protoToAzureCredential(AzureCredentialDTO azureCredentialDTO);
 
     @Mapping(target = "location", source = "location", nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
+    @Mapping(target = "tagsList", source = "tags", nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
     AzureCredentialCreateDTO azureCredentialCreateToProto(AzureCredentialCreate request);
 }

@@ -33,18 +33,21 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import io.grpc.Context;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.opennms.horizon.inventory.SpringContextTestInitializer;
 import org.opennms.horizon.inventory.model.MonitoringLocation;
 import org.opennms.horizon.inventory.model.Node;
+import org.opennms.horizon.shared.constants.GrpcConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 
-@DataJpaTest
+@SpringBootTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @ContextConfiguration(initializers = {SpringContextTestInitializer.class})
 class NodeRepositoryTest {
@@ -61,55 +64,79 @@ class NodeRepositoryTest {
         location1 = new MonitoringLocation();
         location1.setLocation("location1");
         location1.setTenantId(tenantId1);
-        locationRepo.save(location1);
 
         location2 = new MonitoringLocation();
         location2.setLocation("location2");
         location2.setTenantId(tenantId2);
-        locationRepo.save(location2);
 
         node1 = new Node();
         node1.setNodeLabel("node1");
         node1.setTenantId(tenantId1);
         node1.setCreateTime(LocalDateTime.now());
         node1.setMonitoringLocation(location1);
-        nodeRepo.save(node1);
 
         node2 = new Node();
         node2.setNodeLabel("node2");
         node2.setTenantId(tenantId1);
         node2.setCreateTime(LocalDateTime.now());
         node2.setMonitoringLocation(location1);
-        nodeRepo.save(node2);
 
         node3 = new Node();
         node3.setNodeLabel("node3");
         node3.setTenantId(tenantId2);
         node3.setCreateTime(LocalDateTime.now());
         node3.setMonitoringLocation(location2);
-        nodeRepo.save(node3);
+
+        Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, tenantId1).run(()->
+        {
+            locationRepo.save(location1);
+            nodeRepo.save(node1);
+            nodeRepo.save(node2);
+        });
+        Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, tenantId2).run(()->
+        {
+            locationRepo.save(location2);
+            nodeRepo.save(node3);
+        });
     }
 
     @AfterEach
     void cleanUp() {
-        nodeRepo.deleteAll();
-        locationRepo.deleteAll();
+        Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, tenantId1).run(()->
+        {
+            nodeRepo.deleteAll();
+            locationRepo.deleteAll();
+        });
+        Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, tenantId2).run(()->
+        {
+            nodeRepo.deleteAll();
+            locationRepo.deleteAll();
+        });
     }
 
     @Test
     void testFindByIdIndAndTenant() {
-        List<Long> ids = List.of(node1.getId(), node2.getId(), node3.getId());
-        List<Node> nodes = nodeRepo.findByIdInAndTenantId(ids, tenantId1);
-        assertThat(nodes).hasSize(2)
-            .extracting(Node::getNodeLabel)
-            .containsExactly(node1.getNodeLabel(), node2.getNodeLabel());
+        Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, tenantId1).run(()->
+        {
+            List<Long> ids = List.of(node1.getId(), node2.getId(), node3.getId());
+            List<Node> nodes = nodeRepo.findByIdInAndTenantId(ids, tenantId1);
+            assertThat(nodes).hasSize(2)
+                .extracting(Node::getNodeLabel)
+                .containsExactly(node1.getNodeLabel(), node2.getNodeLabel());
+        });
     }
 
     @Test
     void testListByWrongIdsOrTenant() {
-        List<Node> list = nodeRepo.findByIdInAndTenantId(List.of(node1.getId(), node2.getId()), tenantId2);
-        assertThat(list).isEmpty();
-        List<Node> list2 = nodeRepo.findByIdInAndTenantId(List.of(node3.getId()), tenantId1);
-        assertThat(list2).isEmpty();
+        Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, tenantId2).run(()->
+        {
+            List<Node> list = nodeRepo.findByIdInAndTenantId(List.of(node1.getId(), node2.getId()), tenantId2);
+            assertThat(list).isEmpty();
+        });
+        Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, tenantId1).run(()->
+        {
+            List<Node> list2 = nodeRepo.findByIdInAndTenantId(List.of(node3.getId()), tenantId1);
+            assertThat(list2).isEmpty();
+        });
     }
 }

@@ -48,15 +48,11 @@ import java.util.List;
 @Setter
 @RequiredArgsConstructor
 @Entity
-public class Tag {
+public class Tag extends TenantAwareEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
-
-    @NotNull
-    @Column(name = "tenant_id")
-    private String tenantId;
 
     @NotNull
     @Column(name = "name")
@@ -68,4 +64,11 @@ public class Tag {
         joinColumns = @JoinColumn(name = "tag_id"),
         inverseJoinColumns = @JoinColumn(name = "node_id"))
     private List<Node> nodes = new ArrayList<>();
+
+    @ManyToMany
+    @JoinTable(
+        name = "azure_credential_tag",
+        joinColumns = @JoinColumn(name = "tag_id"),
+        inverseJoinColumns = @JoinColumn(name = "azure_credential_id"))
+    private List<AzureCredential> azureCredentials = new ArrayList<>();
 }

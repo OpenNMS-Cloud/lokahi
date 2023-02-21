@@ -1,4 +1,4 @@
-Feature: Node Tagging
+Feature: Tag
 
   Background: Common Test Setup
     Given [Tags] External GRPC Port in system property "application-external-grpc-port"

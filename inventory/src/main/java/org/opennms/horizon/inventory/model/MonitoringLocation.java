@@ -43,13 +43,10 @@ import lombok.Setter;
 @Setter
 @RequiredArgsConstructor
 @Entity
-public class MonitoringLocation {
+public class MonitoringLocation extends TenantAwareEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
-
-    @NotNull
-    private String tenantId;
 
     @NotNull
     private String location;

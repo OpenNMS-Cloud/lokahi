@@ -48,14 +48,10 @@ import lombok.Setter;
 @Setter
 @RequiredArgsConstructor
 @Entity
-public class MonitoredService {
+public class MonitoredService extends TenantAwareEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
-
-    @NotNull
-    @Column(name = "tenant_id")
-    private String tenantId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "monitored_service_type_id", referencedColumnName = "id")

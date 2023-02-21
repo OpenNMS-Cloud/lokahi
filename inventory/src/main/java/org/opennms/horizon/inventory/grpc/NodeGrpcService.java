@@ -54,6 +54,7 @@ import org.opennms.horizon.inventory.service.IpInterfaceService;
 import org.opennms.horizon.inventory.service.NodeService;
 import org.opennms.horizon.inventory.service.taskset.DetectorTaskSetService;
 import org.opennms.horizon.inventory.service.taskset.ScannerTaskSetService;
+import org.opennms.horizon.shared.constants.GrpcConstants;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -87,8 +88,9 @@ public class NodeGrpcService extends NodeServiceGrpc.NodeServiceImplBase {
             Node node = nodeService.createNode(request, tenantId.orElseThrow());
             responseObserver.onNext(nodeMapper.modelToDTO(node));
             responseObserver.onCompleted();
+
             // Asynchronously send task sets to Minion
-            executorService.execute(() -> sendTaskSetsToMinion(node));
+            executorService.execute(() -> sendTaskSetsToMinion(node, tenantId.orElseThrow()));
         }
     }
 
@@ -231,19 +233,25 @@ public class NodeGrpcService extends NodeServiceGrpc.NodeServiceImplBase {
         return valid;
     }
 
-    private void sendTaskSetsToMinion(Node node) {
-        try {
-            taskSetService.sendDetectorTasks(node);
-            scannerService.sendNodeScannerTask(List.of(nodeMapper.modelToDTO(node)),
-                node.getMonitoringLocation().getLocation(), node.getTenantId());
-        } catch (Exception e) {
-            log.error("Error while sending detector task for node with label {}", node.getNodeLabel());
-        }
+    private void sendTaskSetsToMinion(Node node, String tenantId) {
+        Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, tenantId).run(()->
+        {
+            try {
+                taskSetService.sendDetectorTasks(node);
+                scannerService.sendNodeScannerTask(List.of(nodeMapper.modelToDTO(node)),
+                    node.getMonitoringLocation().getLocation(), node.getTenantId());
+            } catch (Exception e) {
+                log.error("Error while sending detector task for node with label {}", node.getNodeLabel());
+            }
+        });
     }
 
     private void sendTaskSetsToMinion(Map<String, List<NodeDTO>> locationNodes, String tenantId) {
-        for(String location: locationNodes.keySet()) {
-            scannerService.sendNodeScannerTask(locationNodes.get(location), location, tenantId);
-        }
+        Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, tenantId).run(()->
+        {
+            for (String location : locationNodes.keySet()) {
+                scannerService.sendNodeScannerTask(locationNodes.get(location), location, tenantId);
+            }
+        });
     }
 }

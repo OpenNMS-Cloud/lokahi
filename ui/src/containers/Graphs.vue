@@ -1,11 +1,22 @@
 <template>
   <div class="header-container">
-    <PageHeader heading="Graphs" class="header" data-test="page-header" />
-    <FeatherButton text @click="onDownload" class="btn-download">
+    <PageHeader
+      heading="Graphs"
+      class="header"
+      data-test="page-header"
+    />
+    <FeatherButton
+      text
+      @click="onDownload"
+      class="btn-download"
+    >
       Download All
     </FeatherButton>
   </div>
-  <div id="graphs-container" v-if="store.fetchIsDone">
+  <div
+    id="graphs-container"
+    v-if="store.fetchIsDone"
+  >
     <LineGraph :graph="nodeLatency" />
     <LineGraph :graph="bytesInOut" />
     <LineGraph :graph="bytesIn" />
@@ -14,7 +25,7 @@
     <LineGraph :graph="hcOut" />
   </div>
 </template>
-  
+
 <script setup lang="ts">
 import { TimeRangeUnit } from '@/types/graphql'
 import { GraphProps } from '@/types/graphs'
@@ -24,7 +35,9 @@ import { useGraphsQueries } from '@/store/Queries/graphsQueries'
 
 const route = useRoute()
 const store = useGraphsQueries()
-const instance = computed(() => store.node.ipInterfaces?.[0].ipAddress as string)
+const instance = computed(
+  () => store.node.ipInterfaces?.filter(({ snmpPrimary }) => snmpPrimary === true)[0]?.ipAddress as string
+)
 
 const nodeLatency = computed<GraphProps>(() => {
   return {
@@ -109,16 +122,16 @@ onMounted(async () => {
   await store.fetchNode()
 })
 </script>
-  
+
 <style scoped lang="scss">
-@use "@featherds/styles/themes/variables";
+@use '@featherds/styles/themes/variables';
 
 .header-container {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
   margin: var(variables.$spacing-xl) var(variables.$spacing-l);
-  
+
   :deep(.spacing) {
     margin: 0;
   }
@@ -132,4 +145,3 @@ onMounted(async () => {
   margin: var(variables.$spacing-xl) var(variables.$spacing-l);
 }
 </style>
-  

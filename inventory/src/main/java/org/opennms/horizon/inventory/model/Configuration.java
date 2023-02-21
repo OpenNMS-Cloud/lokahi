@@ -48,15 +48,11 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-public class Configuration {
+public class Configuration extends TenantAwareEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
-
-    @NotNull
-    @Column(name = "tenant_id")
-    private String tenantId;
 
     @NotNull
     @Column(name = "key")

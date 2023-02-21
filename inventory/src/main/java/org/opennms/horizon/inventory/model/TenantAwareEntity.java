@@ -1,8 +1,8 @@
 /*******************************************************************************
  * This file is part of OpenNMS(R).
  *
- * Copyright (C) 2022 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
+ * Copyright (C) 2006-2014 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2014 The OpenNMS Group, Inc.
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
  *
@@ -26,19 +26,23 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.server.model.inventory.tag;
+package org.opennms.horizon.inventory.model;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.MappedSuperclass;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.TenantId;
 
-import java.util.ArrayList;
-import java.util.List;
-
+/**
+ * <p>Abstract Entity class.</p>
+ */
 @Getter
 @Setter
-public class TagListRemove {
+@MappedSuperclass
+public abstract class TenantAwareEntity {
 
-    private long nodeId;
-
-    private List<Long> tagIds = new ArrayList<>();
+    @TenantId
+    @Column
+    private String tenantId;
 }

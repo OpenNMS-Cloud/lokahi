@@ -31,13 +31,14 @@ package org.opennms.horizon.server.model.inventory.tag;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
 @Setter
-public class TagListAdd {
+public class TagListNodeRemove {
 
     private long nodeId;
 
-    private List<TagCreate> tags;
+    private List<Long> tagIds = new ArrayList<>();
 }

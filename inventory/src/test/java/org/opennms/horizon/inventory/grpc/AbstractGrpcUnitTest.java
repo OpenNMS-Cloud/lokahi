@@ -28,25 +28,20 @@
 
 package org.opennms.horizon.inventory.grpc;
 
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
-
-import java.io.IOException;
-import java.util.Optional;
-import java.util.concurrent.TimeUnit;
-
-import org.junit.Rule;
-import org.keycloak.adapters.KeycloakDeployment;
-import org.keycloak.common.VerificationException;
-import org.opennms.horizon.shared.constants.GrpcConstants;
-
 import io.grpc.BindableService;
 import io.grpc.Metadata;
 import io.grpc.Server;
 import io.grpc.ServerInterceptors;
 import io.grpc.inprocess.InProcessServerBuilder;
-import io.grpc.testing.GrpcCleanupRule;
+import org.keycloak.adapters.KeycloakDeployment;
+import org.keycloak.common.VerificationException;
+import org.opennms.horizon.shared.constants.GrpcConstants;
+
+import java.io.IOException;
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
+
+import static org.mockito.Mockito.*;
 
 public abstract class AbstractGrpcUnitTest {
 

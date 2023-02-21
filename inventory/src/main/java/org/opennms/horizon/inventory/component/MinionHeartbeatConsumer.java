@@ -31,6 +31,7 @@ package org.opennms.horizon.inventory.component;
 import java.util.Map;
 import java.util.Optional;
 
+import io.grpc.Context;
 import org.opennms.horizon.grpc.heartbeat.contract.HeartbeatMessage;
 import org.opennms.horizon.inventory.exception.InventoryRuntimeException;
 import org.opennms.horizon.inventory.service.MonitoringSystemService;
@@ -58,8 +59,11 @@ public class MinionHeartbeatConsumer {
             String tenantId = Optional.ofNullable(headers.get(GrpcConstants.TENANT_ID_KEY)).map(o -> new String((byte[])o))
                 .orElseThrow(()->new InventoryRuntimeException("Missing tenant id"));
             log.info("Received heartbeat message for minion with tenant id: {}; id: {}; location: {}", tenantId, message.getIdentity().getSystemId(), message.getIdentity().getLocation());
-            Optional<Long> newCreatedId = service.addMonitoringSystemFromHeartbeat(message, tenantId);
-            newCreatedId.ifPresent(minionRpc::addSystem);
+            Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, tenantId).run(()->
+            {
+                Optional<Long> newCreatedId = service.addMonitoringSystemFromHeartbeat(message, tenantId);
+                newCreatedId.ifPresent(minionRpc::addSystem);
+            });
         } catch (Exception e) {
             log.error("Error while processing heartbeat message: ", e);
         }

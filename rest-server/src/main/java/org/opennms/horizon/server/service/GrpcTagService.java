@@ -41,15 +41,14 @@ import org.opennms.horizon.inventory.dto.TagListDTO;
 import org.opennms.horizon.inventory.dto.TagRemoveListDTO;
 import org.opennms.horizon.server.mapper.TagMapper;
 import org.opennms.horizon.server.model.inventory.tag.Tag;
-import org.opennms.horizon.server.model.inventory.tag.TagListAdd;
-import org.opennms.horizon.server.model.inventory.tag.TagListRemove;
+import org.opennms.horizon.server.model.inventory.tag.TagListNodeAdd;
+import org.opennms.horizon.server.model.inventory.tag.TagListNodeRemove;
 import org.opennms.horizon.server.service.grpc.InventoryClient;
 import org.opennms.horizon.server.utils.ServerHeaderUtil;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
-import java.util.function.Function;
 
 @RequiredArgsConstructor
 @GraphQLApi
@@ -60,7 +59,7 @@ public class GrpcTagService {
     private final ServerHeaderUtil headerUtil;
 
     @GraphQLMutation
-    public Mono<List<Tag>> addTags(TagListAdd tags, @GraphQLEnvironment ResolutionEnvironment env) {
+    public Mono<List<Tag>> addTags(TagListNodeAdd tags, @GraphQLEnvironment ResolutionEnvironment env) {
         String authHeader = headerUtil.getAuthHeader(env);
         TagCreateListDTO tagCreateListDTO = mapper.tagListAddToProto(tags);
         TagListDTO tagListDTO = client.addTags(tagCreateListDTO, authHeader);
@@ -68,7 +67,7 @@ public class GrpcTagService {
     }
 
     @GraphQLMutation
-    public Mono<Void> removeTags(TagListRemove tags, @GraphQLEnvironment ResolutionEnvironment env) {
+    public Mono<Void> removeTags(TagListNodeRemove tags, @GraphQLEnvironment ResolutionEnvironment env) {
         String authHeader = headerUtil.getAuthHeader(env);
         TagRemoveListDTO tagRemoveListDTO = mapper.tagListRemoveToProto(tags);
         client.removeTags(tagRemoveListDTO, authHeader);
@@ -80,6 +79,14 @@ public class GrpcTagService {
                                            @GraphQLArgument(name = "searchTerm") String searchTerm,
                                            @GraphQLEnvironment ResolutionEnvironment env) {
         List<TagDTO> tagsList = client.getTagsByNodeId(nodeId, searchTerm, headerUtil.getAuthHeader(env)).getTagsList();
+        return Mono.just(tagsList.stream().map(mapper::protoToTag).toList());
+    }
+
+    @GraphQLQuery
+    public Mono<List<Tag>> getTagsByAzureCredentialId(@GraphQLArgument(name = "azureCredentialId") Long azureCredentialId,
+                                                      @GraphQLArgument(name = "searchTerm") String searchTerm,
+                                                      @GraphQLEnvironment ResolutionEnvironment env) {
+        List<TagDTO> tagsList = client.getTagsByAzureCredentialId(azureCredentialId, searchTerm, headerUtil.getAuthHeader(env)).getTagsList();
         return Mono.just(tagsList.stream().map(mapper::protoToTag).toList());
     }
 

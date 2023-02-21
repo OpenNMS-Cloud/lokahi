@@ -25,56 +25,19 @@
  *     http://www.opennms.org/
  *     http://www.opennms.com/
  *******************************************************************************/
-syntax = "proto3";
 
-import "google/protobuf/empty.proto";
-import "google/protobuf/wrappers.proto";
+package org.opennms.horizon.server.model.inventory.tag;
 
-package opennms.inventory;
-option java_multiple_files = true;
-option java_package = "org.opennms.horizon.inventory.dto";
+import lombok.Getter;
+import lombok.Setter;
 
-message TagDTO {
-  int64 id = 1;
-  string tenant_id = 2;
-  string name = 3;
-}
+import java.util.List;
 
-message TagListDTO {
-  repeated TagDTO tags = 1;
-}
+@Getter
+@Setter
+public class TagListNodeAdd {
 
-message TagCreateListDTO {
-  int64 node_id = 1;
-  repeated TagCreateDTO tags = 2;
-}
+    private long nodeId;
 
-message TagCreateDTO {
-  string name = 1;
-}
-
-message TagRemoveListDTO {
-  int64 node_id = 1;
-  repeated google.protobuf.Int64Value tag_ids = 2;
-}
-
-message ListTagsByNodeIdParamsDTO {
-  int64 node_id = 1;
-  optional TagListParamsDTO params = 2;
-}
-
-message ListAllTagsParamsDTO {
-  optional TagListParamsDTO params = 1;
-}
-
-message TagListParamsDTO {
-  optional string searchTerm = 1;
-  // may require pagination fields or other common list params
-}
-
-service TagService {
-  rpc addTags(TagCreateListDTO) returns (TagListDTO) {};
-  rpc removeTags(TagRemoveListDTO) returns (google.protobuf.BoolValue) {};
-  rpc getTagsByNodeId(ListTagsByNodeIdParamsDTO) returns (TagListDTO) {};
-  rpc getTags(ListAllTagsParamsDTO) returns (TagListDTO) {};
+    private List<TagCreate> tags;
 }

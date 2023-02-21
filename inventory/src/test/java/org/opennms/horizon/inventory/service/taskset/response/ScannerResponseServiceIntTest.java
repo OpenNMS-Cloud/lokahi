@@ -39,6 +39,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.IntStream;
 
+import io.grpc.Context;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -61,6 +62,7 @@ import org.opennms.horizon.inventory.repository.MonitoringLocationRepository;
 import org.opennms.horizon.inventory.repository.NodeRepository;
 import org.opennms.horizon.inventory.repository.SnmpInterfaceRepository;
 import org.opennms.horizon.inventory.service.NodeService;
+import org.opennms.horizon.shared.constants.GrpcConstants;
 import org.opennms.horizon.shared.utils.InetAddressUtils;
 import org.opennms.node.scan.contract.IpInterfaceResult;
 import org.opennms.node.scan.contract.NodeInfoResult;
@@ -114,12 +116,14 @@ class ScannerResponseServiceIntTest extends GrpcTestBase {
     }
 
     @AfterEach
-    @Transactional
     public void cleanUp() {
-        ipInterfaceRepository.deleteAll();
-        nodeRepository.deleteAll();
-        credentialRepository.deleteAll();
-        locationRepository.deleteAll();
+        Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, TEST_TENANT_ID).run(()->
+        {
+            ipInterfaceRepository.deleteAll();
+            nodeRepository.deleteAll();
+            credentialRepository.deleteAll();
+            locationRepository.deleteAll();
+        });
         testGrpcService.reset();
     }
 
@@ -130,70 +134,83 @@ class ScannerResponseServiceIntTest extends GrpcTestBase {
     }
 
     @Test
-    @Transactional
     void testAzureAccept() throws Exception {
-        AzureCredential credential = createAzureCredential();
+        Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, TEST_TENANT_ID).run(()->
+        {
+            AzureCredential credential = createAzureCredential();
 
-        AzureScanItem scanItem = AzureScanItem.newBuilder()
-            .setId("/subscriptions/sub-id/resourceGroups/resource-group/providers/Microsoft.Compute/virtualMachines/vm-name")
-            .setName("vm-name")
-            .setResourceGroup("resource-group")
-            .setCredentialId(credential.getId())
-            .build();
+            AzureScanItem scanItem = AzureScanItem.newBuilder()
+                .setId("/subscriptions/sub-id/resourceGroups/resource-group/providers/Microsoft.Compute/virtualMachines/vm-name")
+                .setName("vm-name")
+                .setResourceGroup("resource-group")
+                .setCredentialId(credential.getId())
+                .build();
 
-        List<AzureScanItem> azureScanItems = Collections.singletonList(scanItem);
-        AzureScanResponse azureScanResponse = AzureScanResponse.newBuilder().addAllResults(azureScanItems).build();
-        ScannerResponse response = ScannerResponse.newBuilder().setResult(Any.pack(azureScanResponse)).build();
+            List<AzureScanItem> azureScanItems = Collections.singletonList(scanItem);
+            AzureScanResponse azureScanResponse = AzureScanResponse.newBuilder().addAllResults(azureScanItems).build();
+            ScannerResponse response = ScannerResponse.newBuilder().setResult(Any.pack(azureScanResponse)).build();
 
-        service.accept(TEST_TENANT_ID, TEST_LOCATION, response);
+            try {
+                service.accept(TEST_TENANT_ID, TEST_LOCATION, response);
+            } catch (InvalidProtocolBufferException e) {
+                throw new RuntimeException(e);
+            }
 
-        // monitor and collect tasks
-        assertEquals(2, testGrpcService.getRequests().size());
+            // monitor and collect tasks
+            assertEquals(2, testGrpcService.getRequests().size());
 
-        List<Node> allNodes = nodeRepository.findAll();
-        assertEquals(1, allNodes.size());
+            List<Node> allNodes = nodeRepository.findAll();
+            assertEquals(1, allNodes.size());
 
-        Node node = allNodes.get(0);
-        assertNotNull(node);
-        assertEquals(TEST_TENANT_ID, node.getTenantId());
-        assertEquals("vm-name (resource-group)", node.getNodeLabel());
-        assertNotNull(node.getMonitoringLocation());
+            Node node = allNodes.get(0);
+            assertNotNull(node);
+            assertEquals(TEST_TENANT_ID, node.getTenantId());
+            assertEquals("vm-name (resource-group)", node.getNodeLabel());
+            assertNotNull(node.getMonitoringLocation());
 
-        List<IpInterface> allIpInterfaces = ipInterfaceRepository.findAll();
-        assertEquals(1, allIpInterfaces.size());
-        IpInterface ipInterface = allIpInterfaces.get(0);
-        assertEquals(TEST_TENANT_ID, ipInterface.getTenantId());
-        assertEquals("127.0.0.1", InetAddressUtils.toIpAddrString(ipInterface.getIpAddress()));
+            List<IpInterface> allIpInterfaces = ipInterfaceRepository.findAll();
+            assertEquals(1, allIpInterfaces.size());
+            IpInterface ipInterface = allIpInterfaces.get(0);
+            assertEquals(TEST_TENANT_ID, ipInterface.getTenantId());
+            assertEquals("127.0.0.1", InetAddressUtils.toIpAddrString(ipInterface.getIpAddress()));
+        });
     }
 
     @Test
-    void testAcceptNodeScanResult() throws InvalidProtocolBufferException {
-        String managedIp = "127.0.0.1";
-        Node node = createNode(managedIp);
-        int ifIndex = 1;
-        SnmpInterface snmpIf = createSnmpInterface(node, ifIndex);
-        NodeScanResult result = createNodeScanResult(node.getId(), managedIp, ifIndex);
+    void testAcceptNodeScanResult() {
+        Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, TEST_TENANT_ID).run(()->
+        {
+            String managedIp = "127.0.0.1";
+            Node node = createNode(managedIp);
+            int ifIndex = 1;
+            SnmpInterface snmpIf = createSnmpInterface(node, ifIndex);
+            NodeScanResult result = createNodeScanResult(node.getId(), managedIp, ifIndex);
 
-        service.accept(TEST_TENANT_ID, TEST_LOCATION, ScannerResponse.newBuilder().setResult(Any.pack(result)).build());
-        assertNodeSystemGroup(node, null);
-        nodeRepository.findByIdAndTenantId(node.getId(), TEST_TENANT_ID).ifPresentOrElse(dbNode ->
-            assertNodeSystemGroup(dbNode, result.getNodeInfo()), () -> fail("Node not found"));
+            try {
+                service.accept(TEST_TENANT_ID, TEST_LOCATION, ScannerResponse.newBuilder().setResult(Any.pack(result)).build());
+            } catch (InvalidProtocolBufferException e) {
+                throw new RuntimeException(e);
+            }
+            assertNodeSystemGroup(node, null);
+            nodeRepository.findByIdAndTenantId(node.getId(), TEST_TENANT_ID).ifPresentOrElse(dbNode ->
+                assertNodeSystemGroup(dbNode, result.getNodeInfo()), () -> fail("Node not found"));
 
-        assertIpInterface(node.getIpInterfaces().get(0), null);
-        List<IpInterface> ipIfList = ipInterfaceRepository.findByNodeId(node.getId());
-        assertThat(ipIfList.get(0)).extracting(ipIf -> ipIf.getIpAddress().getHostAddress()).isEqualTo(managedIp);
-        assertThat(ipIfList).asList().hasSize(result.getIpInterfacesList().size());
-        IntStream.range(0, ipIfList.size())
-            .forEach(i -> assertIpInterface(ipIfList.get(i), result.getIpInterfaces(i)));
+            assertIpInterface(node.getIpInterfaces().get(0), null);
+            List<IpInterface> ipIfList = ipInterfaceRepository.findByNodeId(node.getId());
+            assertThat(ipIfList.get(0)).extracting(ipIf -> ipIf.getIpAddress().getHostAddress()).isEqualTo(managedIp);
+            assertThat(ipIfList).asList().hasSize(result.getIpInterfacesList().size());
+            IntStream.range(0, ipIfList.size())
+                .forEach(i -> assertIpInterface(ipIfList.get(i), result.getIpInterfaces(i)));
 
-        List<SnmpInterface> snmpInterfaceList = snmpInterfaceRepository.findByTenantId(TEST_TENANT_ID);
-        assertThat(snmpInterfaceList).asList().hasSize(2);
-        assertThat(snmpIf.getIfIndex()).isEqualTo(ifIndex);
-        assertSnmpInterfaces(snmpIf, null);
-        IntStream.range(0, snmpInterfaceList.size())
-            .forEach(i -> assertSnmpInterfaces(snmpInterfaceList.get(i), result.getSnmpInterfaces(i)));
-
+            List<SnmpInterface> snmpInterfaceList = snmpInterfaceRepository.findByTenantId(TEST_TENANT_ID);
+            assertThat(snmpInterfaceList).asList().hasSize(2);
+            assertThat(snmpIf.getIfIndex()).isEqualTo(ifIndex);
+            assertSnmpInterfaces(snmpIf, null);
+            IntStream.range(0, snmpInterfaceList.size())
+                .forEach(i -> assertSnmpInterfaces(snmpInterfaceList.get(i), result.getSnmpInterfaces(i)));
+        });
     }
+
     private Node createNode(String ipAddress) {
         NodeCreateDTO createDTO = NodeCreateDTO.newBuilder()
             .setLabel("test-node")

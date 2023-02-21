@@ -30,6 +30,9 @@ package org.opennms.horizon.server.model.inventory;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.opennms.horizon.server.model.inventory.tag.TagCreate;
+
+import java.util.List;
 
 @Getter
 @Setter
@@ -40,4 +43,5 @@ public class AzureCredentialCreate {
     private String clientSecret;
     private String subscriptionId;
     private String directoryId;
+    private List<TagCreate> tags;
 }

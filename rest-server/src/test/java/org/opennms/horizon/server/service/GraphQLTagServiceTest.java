@@ -191,6 +191,74 @@ class GraphQLTagServiceTest {
     }
 
     @Test
+    void testGetTagsFromAzureCredential() throws JSONException {
+
+        TagDTO tagDTO1 = TagDTO.newBuilder().setName(TEST_TAG_NAME_1).setTenantId(TEST_TENANT_ID).setId(1L).build();
+        TagDTO tagDTO2 = TagDTO.newBuilder().setName(TEST_TAG_NAME_2).setTenantId(TEST_TENANT_ID).setId(2L).build();
+        TagListDTO tagListDTO = TagListDTO.newBuilder().addTags(tagDTO1).addTags(tagDTO2).build();
+        when(mockClient.getTagsByAzureCredentialId(anyLong(), any(), anyString())).thenReturn(tagListDTO);
+
+        String getRequest = "query { " +
+            "    tagsByAzureCredentialId (azureCredentialId: 1) { " +
+            "        id, " +
+            "        tenantId, " +
+            "        name " +
+            "    }" +
+            "}";
+        webClient.post()
+            .uri(GRAPHQL_PATH)
+            .accept(MediaType.APPLICATION_JSON)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(createPayload(getRequest))
+            .exchange()
+            .expectStatus().isOk()
+            .expectBody()
+            .jsonPath("$.data.tagsByAzureCredentialId[0].id").isEqualTo(1)
+            .jsonPath("$.data.tagsByAzureCredentialId[0].tenantId").isNotEmpty()
+            .jsonPath("$.data.tagsByAzureCredentialId[0].name").isEqualTo(TEST_TAG_NAME_1)
+            .jsonPath("$.data.tagsByAzureCredentialId[1].id").isEqualTo(2)
+            .jsonPath("$.data.tagsByAzureCredentialId[1].tenantId").isNotEmpty()
+            .jsonPath("$.data.tagsByAzureCredentialId[1].name").isEqualTo(TEST_TAG_NAME_2);
+
+        verify(mockClient, times(1)).getTagsByAzureCredentialId(1L, null, accessToken);
+        verify(mockHeaderUtil, times(1)).getAuthHeader(any(ResolutionEnvironment.class));
+    }
+
+    @Test
+    void testGetTagsFromAzureCredentialWithSearchTerm() throws JSONException {
+
+        TagDTO tagDTO1 = TagDTO.newBuilder().setName(TEST_TAG_NAME_1).setTenantId(TEST_TENANT_ID).setId(1L).build();
+        TagDTO tagDTO2 = TagDTO.newBuilder().setName(TEST_TAG_NAME_2).setTenantId(TEST_TENANT_ID).setId(2L).build();
+        TagListDTO tagListDTO = TagListDTO.newBuilder().addTags(tagDTO1).addTags(tagDTO2).build();
+        when(mockClient.getTagsByAzureCredentialId(anyLong(), anyString(), anyString())).thenReturn(tagListDTO);
+
+        String getRequest = "query { " +
+            "    tagsByAzureCredentialId (azureCredentialId: 1, searchTerm: \"abc\") { " +
+            "        id, " +
+            "        tenantId, " +
+            "        name " +
+            "    }" +
+            "}";
+        webClient.post()
+            .uri(GRAPHQL_PATH)
+            .accept(MediaType.APPLICATION_JSON)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(createPayload(getRequest))
+            .exchange()
+            .expectStatus().isOk()
+            .expectBody()
+            .jsonPath("$.data.tagsByAzureCredentialId[0].id").isEqualTo(1)
+            .jsonPath("$.data.tagsByAzureCredentialId[0].tenantId").isNotEmpty()
+            .jsonPath("$.data.tagsByAzureCredentialId[0].name").isEqualTo(TEST_TAG_NAME_1)
+            .jsonPath("$.data.tagsByAzureCredentialId[1].id").isEqualTo(2)
+            .jsonPath("$.data.tagsByAzureCredentialId[1].tenantId").isNotEmpty()
+            .jsonPath("$.data.tagsByAzureCredentialId[1].name").isEqualTo(TEST_TAG_NAME_2);
+
+        verify(mockClient, times(1)).getTagsByAzureCredentialId(1L, "abc", accessToken);
+        verify(mockHeaderUtil, times(1)).getAuthHeader(any(ResolutionEnvironment.class));
+    }
+
+    @Test
     void testGetTags() throws JSONException {
 
         TagDTO tagDTO1 = TagDTO.newBuilder().setName(TEST_TAG_NAME_1).setTenantId(TEST_TENANT_ID).setId(1L).build();

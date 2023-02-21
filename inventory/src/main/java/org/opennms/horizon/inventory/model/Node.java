@@ -52,14 +52,10 @@ import java.util.List;
 @Setter
 @RequiredArgsConstructor
 @Entity
-public class Node {
+public class Node extends TenantAwareEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
-
-    @NotNull
-    @Column(name = "tenant_id")
-    private String tenantId;
 
     @NotNull
     @Column(name = "node_label")

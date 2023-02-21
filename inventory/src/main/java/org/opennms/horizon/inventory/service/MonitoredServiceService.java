@@ -35,6 +35,7 @@ import org.opennms.horizon.inventory.model.IpInterface;
 import org.opennms.horizon.inventory.model.MonitoredService;
 import org.opennms.horizon.inventory.model.MonitoredServiceType;
 import org.opennms.horizon.inventory.repository.MonitoredServiceRepository;
+import org.opennms.horizon.inventory.repository.MonitoredServiceTypeRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -45,6 +46,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class MonitoredServiceService {
     private final MonitoredServiceRepository modelRepo;
+    private final MonitoredServiceTypeRepository typeRepo;
 
     private final MonitoredServiceMapper mapper;
 

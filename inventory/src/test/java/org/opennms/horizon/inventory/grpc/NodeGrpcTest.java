@@ -28,19 +28,13 @@
 
 package org.opennms.horizon.inventory.grpc;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-
-import java.io.IOException;
-import java.util.Optional;
-import java.util.concurrent.TimeUnit;
-
+import com.google.protobuf.Int64Value;
+import com.google.rpc.Code;
 import io.grpc.ManagedChannel;
+import io.grpc.StatusRuntimeException;
+import io.grpc.inprocess.InProcessChannelBuilder;
+import io.grpc.protobuf.StatusProto;
+import io.grpc.stub.MetadataUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -54,13 +48,12 @@ import org.opennms.horizon.inventory.service.NodeService;
 import org.opennms.horizon.inventory.service.taskset.DetectorTaskSetService;
 import org.opennms.horizon.inventory.service.taskset.ScannerTaskSetService;
 
-import com.google.protobuf.Int64Value;
-import com.google.rpc.Code;
+import java.io.IOException;
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
-import io.grpc.StatusRuntimeException;
-import io.grpc.inprocess.InProcessChannelBuilder;
-import io.grpc.protobuf.StatusProto;
-import io.grpc.stub.MetadataUtils;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.mockito.Mockito.*;
 
 public class NodeGrpcTest extends AbstractGrpcUnitTest {
 

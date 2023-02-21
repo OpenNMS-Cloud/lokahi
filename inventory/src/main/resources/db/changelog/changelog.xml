@@ -20,4 +20,5 @@
     <include file="db/changelog/hs-0.1.0/tables/node-scan-schema.xml" />
     <include file="db/changelog/hs-0.1.0/tables/azure-credential-name.xml" />
     <include file="db/changelog/hs-0.1.0/tables/azure-credential-tags.xml" />
+    <include file="db/changelog/hs-0.1.0/tables/ip-snmp-interfaces.xml" />
 </databaseChangeLog>

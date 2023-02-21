@@ -30,9 +30,7 @@ package org.opennms.horizon.minion.nodescan;
 
 import java.net.InetAddress;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 import org.opennms.horizon.minion.plugin.api.ScanResultsResponse;
@@ -42,7 +40,7 @@ import org.opennms.horizon.shared.snmp.SnmpAgentConfig;
 import org.opennms.horizon.shared.snmp.SnmpConfiguration;
 import org.opennms.horizon.shared.snmp.SnmpHelper;
 import org.opennms.horizon.shared.snmp.SnmpWalker;
-import org.opennms.node.scan.contract.IpTableScanResult;
+import org.opennms.node.scan.contract.IpInterfaceResult;
 import org.opennms.node.scan.contract.NodeInfoResult;
 import org.opennms.node.scan.contract.NodeScanRequest;
 import org.opennms.node.scan.contract.NodeScanResult;
@@ -76,15 +74,13 @@ public class NodeScanner implements Scanner {
                 NodeInfoResult nodeInfo = scanSystem(agentConfig);
 
 
-                List<IpTableScanResult> ipAddrTblResults = scanIpAddrTable(agentConfig);
+                List<IpInterfaceResult> ipInterfaceResults = scanIpAddrTable(agentConfig);
                 List<SnmpInterfaceResult> snmpInterfaceResults = scanSnmpInterface(agentConfig);
-                List<SnmpInterfaceResult> mergedSNMPInterfaces = mergeSNMPResult(ipAddrTblResults.stream()
-                    .map(IpTableScanResult::getSnmpInterface).toList(), snmpInterfaceResults);
                 NodeScanResult scanResult = NodeScanResult.newBuilder()
                     .setNodeId(scanRequest.getNodeId())
                     .setNodeInfo(nodeInfo)
-                    .addAllIpInterfaces(ipAddrTblResults.stream().map(IpTableScanResult::getIpInterface).toList())
-                    .addAllSnmpInterfaces(mergedSNMPInterfaces)
+                    .addAllIpInterfaces(ipInterfaceResults)
+                    .addAllSnmpInterfaces(snmpInterfaceResults)
                     .build();
                 return ScanResultsResponseImpl.builder().results(scanResult).build();
             } catch (Exception e) {
@@ -92,21 +88,6 @@ public class NodeScanner implements Scanner {
                 throw new RuntimeException(e);
             }
         });
-    }
-
-    private List<SnmpInterfaceResult> mergeSNMPResult(List<SnmpInterfaceResult> ipTableResults, List<SnmpInterfaceResult> snmpIfTableResults) {
-        List<SnmpInterfaceResult> merged = new ArrayList<>();
-        Map<Integer, SnmpInterfaceResult> ipTableMap = new HashMap<>();
-        ipTableResults.forEach(r -> ipTableMap.computeIfAbsent(r.getIfIndex(), k -> r));
-        snmpIfTableResults.forEach(r->{
-            SnmpInterfaceResult.Builder builder = SnmpInterfaceResult.newBuilder(r);
-            SnmpInterfaceResult tmp = ipTableMap.get(r.getIfIndex());
-            if(tmp != null) {
-                builder.setIpAddress(tmp.getIpAddress());
-            }
-            merged.add(builder.build());
-        });
-        return merged;
     }
 
     private List<SnmpInterfaceResult> scanSnmpInterface(SnmpAgentConfig agentConfig) throws InterruptedException {
@@ -124,8 +105,8 @@ public class NodeScanner implements Scanner {
         return results;
     }
 
-    private List<IpTableScanResult> scanIpAddrTable(SnmpAgentConfig agentConfig) throws InterruptedException {
-        List<IpTableScanResult> results = new ArrayList<>();
+    private List<IpInterfaceResult> scanIpAddrTable(SnmpAgentConfig agentConfig) throws InterruptedException {
+        List<IpInterfaceResult> results = new ArrayList<>();
         IPAddrTracker tracker = new IPAddrTracker() {
             @Override
             public void processIPInterfaceRow(IPInterfaceRow row) {

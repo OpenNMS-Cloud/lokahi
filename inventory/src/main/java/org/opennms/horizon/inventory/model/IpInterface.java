@@ -61,6 +61,13 @@ public class IpInterface extends TenantAwareEntity {
     @JoinColumn(name = "node_id", referencedColumnName = "id")
     private Node node;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name ="snmp_interface_id", referencedColumnName = "id")
+    private SnmpInterface snmpInterface;
+
+    @Column(name = "snmp_interface_id", insertable = false, updatable = false)
+    private Long snmpInterfaceId;
+
     @Column(name = "node_id", insertable = false, updatable = false)
     private long nodeId;
 

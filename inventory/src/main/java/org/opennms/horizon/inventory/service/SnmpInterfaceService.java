@@ -29,16 +29,17 @@ public class SnmpInterfaceService {
             .collect(Collectors.toList());
     }
 
-    public void createOrUpdateFromScanResult(String tenantId, Node node, SnmpInterfaceResult result) {
-        modelRepo.findByNodeIdAndTenantIdAndIfIndex(node.getId(), tenantId, result.getIfIndex())
-            .ifPresentOrElse(snmpIf -> {
-                mapper.updateFromScanResult(result, snmpIf);
-                modelRepo.save(snmpIf);
-            }, () -> {
-                SnmpInterface snmpIf = mapper.scanResultToModel(result);
-                snmpIf.setNode(node);
-                snmpIf.setTenantId(tenantId);
-                modelRepo.save(snmpIf);
+    public SnmpInterface createOrUpdateFromScanResult(String tenantId, Node node, SnmpInterfaceResult result) {
+        return modelRepo.findByNodeIdAndTenantIdAndIfIndex(node.getId(), tenantId, result.getIfIndex())
+            .map(snmp -> {
+               mapper.updateFromScanResult(result, snmp);
+               modelRepo.save(snmp);
+               return snmp;
+            }).orElseGet(() -> {
+                SnmpInterface snmp = mapper.scanResultToModel(result);
+                snmp.setNode(node);
+                snmp.setTenantId(tenantId);
+                return modelRepo.save(snmp);
             });
     }
 }

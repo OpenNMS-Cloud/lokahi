@@ -44,7 +44,7 @@ import org.opennms.horizon.shared.snmp.SnmpHelperImpl;
 import org.opennms.horizon.shared.snmp.SnmpWalker;
 import org.opennms.horizon.shared.snmp.StrategyResolver;
 import org.opennms.horizon.shared.snmp.snmp4j.Snmp4JStrategy;
-import org.opennms.node.scan.contract.IpTableScanResult;
+import org.opennms.node.scan.contract.IpInterfaceResult;
 import org.opennms.node.scan.contract.SnmpInterfaceResult;
 
 
@@ -67,7 +67,7 @@ public class NodeScanTest {
 
     @Test
     void testIpTableTracker() throws InterruptedException {
-        List<IpTableScanResult> list = new ArrayList<>();
+        List<IpInterfaceResult> list = new ArrayList<>();
 
         IPAddrTracker tracker = new IPAddrTracker() {
             @Override

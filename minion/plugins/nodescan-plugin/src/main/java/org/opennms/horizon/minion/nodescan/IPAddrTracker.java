@@ -39,8 +39,6 @@ import org.opennms.horizon.shared.snmp.SnmpValue;
 import org.opennms.horizon.shared.snmp.TableTracker;
 import org.opennms.horizon.shared.utils.InetAddressUtils;
 import org.opennms.node.scan.contract.IpInterfaceResult;
-import org.opennms.node.scan.contract.IpTableScanResult;
-import org.opennms.node.scan.contract.SnmpInterfaceResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -102,7 +100,7 @@ public class IPAddrTracker extends TableTracker {
             return value == null ? null : value.toInetAddress();
         }
 
-        public Optional<IpTableScanResult> createInterfaceFromRow() {
+        public Optional<IpInterfaceResult> createInterfaceFromRow() {
 
             final Integer ifIndex = getIfIndex();
             final String ipAddr = getIpAddress();
@@ -119,19 +117,10 @@ public class IPAddrTracker extends TableTracker {
             ipInterFaceBuilder.setIpAddress(inetAddress.getHostAddress());
             ipInterFaceBuilder.setNetmask(netMask.getHostAddress());
             ipInterFaceBuilder.setIpHostName(inetAddress.getHostName());
-
-            IpTableScanResult.Builder resultBuilder = IpTableScanResult.newBuilder();
-            resultBuilder.setIpInterface(ipInterFaceBuilder.build());
-
-            //Todo modify the scan result
-            if (ifIndex != null) {
-                resultBuilder.setSnmpInterface(
-                SnmpInterfaceResult.newBuilder()
-                    .setIpAddress(inetAddress.getHostAddress())
-                    .setIfIndex(ifIndex).build());
+            if(ifIndex != null) {
+                ipInterFaceBuilder.setIfIndex(ifIndex);
             }
-
-            return Optional.of(resultBuilder.build());
+            return Optional.of(ipInterFaceBuilder.build());
         }
     }
 

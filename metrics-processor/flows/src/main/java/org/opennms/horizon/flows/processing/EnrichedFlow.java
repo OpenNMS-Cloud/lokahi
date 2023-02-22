@@ -34,7 +34,34 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Optional;
 
-public class EnrichedFlow implements org.opennms.horizon.flows.integration.Flow {
+public class EnrichedFlow {
+    enum NetflowVersion {
+        V5,
+        V9,
+        IPFIX,
+        SFLOW,
+    }
+
+    enum Direction {
+        INGRESS,
+        EGRESS,
+        UNKNOWN,
+    }
+
+    enum SamplingAlgorithm {
+        Unassigned,
+        SystematicCountBasedSampling,
+        SystematicTimeBasedSampling,
+        RandomNOutOfNSampling,
+        UniformProbabilisticSampling,
+        PropertyMatchFiltering,
+        HashBasedFiltering,
+        FlowStateDependentIntermediateFlowSelectionProcess;
+    }
+
+    public enum Locality {
+        PUBLIC, PRIVATE
+    }
 
     private Instant receivedAt;
     private Instant timestamp;
@@ -87,7 +114,6 @@ public class EnrichedFlow implements org.opennms.horizon.flows.integration.Flow 
     public EnrichedFlow() {
     }
 
-    @Override
     public String getApplication() {
         return application;
     }
@@ -96,7 +122,7 @@ public class EnrichedFlow implements org.opennms.horizon.flows.integration.Flow 
         this.application = application;
     }
 
-    @Override
+
     public String getHost() {
         return host;
     }
@@ -105,7 +131,7 @@ public class EnrichedFlow implements org.opennms.horizon.flows.integration.Flow 
         this.host = host;
     }
 
-    @Override
+
     public String getLocation() {
         return location;
     }
@@ -114,7 +140,7 @@ public class EnrichedFlow implements org.opennms.horizon.flows.integration.Flow 
         this.location = location;
     }
 
-    @Override
+
     public Locality getSrcLocality() {
         return srcLocality;
     }
@@ -123,7 +149,7 @@ public class EnrichedFlow implements org.opennms.horizon.flows.integration.Flow 
         this.srcLocality = srcLocality;
     }
 
-    @Override
+
     public Locality getDstLocality() {
         return dstLocality;
     }
@@ -132,7 +158,7 @@ public class EnrichedFlow implements org.opennms.horizon.flows.integration.Flow 
         this.dstLocality = dstLocality;
     }
 
-    @Override
+
     public Locality getFlowLocality() {
         return flowLocality;
     }
@@ -141,7 +167,7 @@ public class EnrichedFlow implements org.opennms.horizon.flows.integration.Flow 
         this.flowLocality = flowLocality;
     }
 
-    @Override
+
     public NodeInfo getSrcNodeInfo() {
         return srcNodeInfo;
     }
@@ -150,7 +176,6 @@ public class EnrichedFlow implements org.opennms.horizon.flows.integration.Flow 
         this.srcNodeInfo = srcNodeInfo;
     }
 
-    @Override
     public NodeInfo getDstNodeInfo() {
         return dstNodeInfo;
     }
@@ -159,7 +184,6 @@ public class EnrichedFlow implements org.opennms.horizon.flows.integration.Flow 
         this.dstNodeInfo = dstNodeInfo;
     }
 
-    @Override
     public NodeInfo getExporterNodeInfo() {
         return exporterNodeInfo;
     }
@@ -168,7 +192,7 @@ public class EnrichedFlow implements org.opennms.horizon.flows.integration.Flow 
         this.exporterNodeInfo = exporterNodeInfo;
     }
 
-    @Override
+
     public Duration getClockCorrection() {
         return this.clockCorrection;
     }
@@ -177,72 +201,72 @@ public class EnrichedFlow implements org.opennms.horizon.flows.integration.Flow 
         this.clockCorrection = clockCorrection;
     }
 
-    @Override
+
     public Instant getTimestamp() {
         return this.timestamp;
     }
 
-    @Override
+
     public Instant getFirstSwitched() {
         return this.firstSwitched;
     }
 
-    @Override
+
     public Instant getDeltaSwitched() {
         return this.deltaSwitched;
     }
 
-    @Override
+
     public Instant getLastSwitched() {
         return this.lastSwitched;
     }
 
-    @Override
+
     public Instant getReceivedAt() {
         return this.receivedAt;
     }
 
-    @Override
+
     public Long getBytes() {
         return this.bytes;
     }
 
-    @Override
+
     public Direction getDirection() {
         return this.direction;
     }
 
-    @Override
+
     public String getDstAddr() {
         return this.dstAddr;
     }
 
-    @Override
+
     public Optional<String> getDstAddrHostname() {
         return Optional.ofNullable(this.dstAddrHostname);
     }
 
-    @Override
+
     public Long getDstAs() {
         return this.dstAs;
     }
 
-    @Override
+
     public Integer getDstMaskLen() {
         return this.dstMaskLen;
     }
 
-    @Override
+
     public Integer getDstPort() {
         return this.dstPort;
     }
 
-    @Override
+
     public Integer getEngineId() {
         return this.engineId;
     }
 
-    @Override
+
     public Integer getEngineType() {
         return this.engineType;
     }
@@ -255,22 +279,22 @@ public class EnrichedFlow implements org.opennms.horizon.flows.integration.Flow 
         this.firstSwitched = firstSwitched;
     }
 
-    @Override
+
     public int getFlowRecords() {
         return this.flowRecords;
     }
 
-    @Override
+
     public long getFlowSeqNum() {
         return this.flowSeqNum;
     }
 
-    @Override
+
     public Integer getInputSnmp() {
         return this.inputSnmp;
     }
 
-    @Override
+
     public Integer getIpProtocolVersion() {
         return this.ipProtocolVersion;
     }
@@ -279,82 +303,82 @@ public class EnrichedFlow implements org.opennms.horizon.flows.integration.Flow 
         this.lastSwitched = lastSwitched;
     }
 
-    @Override
+
     public String getNextHop() {
         return this.nextHop;
     }
 
-    @Override
+
     public Optional<String> getNextHopHostname() {
         return Optional.ofNullable(this.nextHopHostname);
     }
 
-    @Override
+
     public Long getOutputSnmp() {
         return this.outputSnmp;
     }
 
-    @Override
+
     public Long getPackets() {
         return this.packets;
     }
 
-    @Override
+
     public Integer getProtocol() {
         return this.protocol;
     }
 
-    @Override
+
     public SamplingAlgorithm getSamplingAlgorithm() {
         return this.samplingAlgorithm;
     }
 
-    @Override
+
     public Double getSamplingInterval() {
         return this.samplingInterval;
     }
 
-    @Override
+
     public String getSrcAddr() {
         return this.srcAddr;
     }
 
-    @Override
+
     public Optional<String> getSrcAddrHostname() {
         return Optional.ofNullable(this.srcAddrHostname);
     }
 
-    @Override
+
     public Long getSrcAs() {
         return this.srcAs;
     }
 
-    @Override
+
     public Integer getSrcMaskLen() {
         return this.srcMaskLen;
     }
 
-    @Override
+
     public Integer getSrcPort() {
         return this.srcPort;
     }
 
-    @Override
+
     public Integer getTcpFlags() {
         return this.tcpFlags;
     }
 
-    @Override
+
     public Integer getTos() {
         return this.tos;
     }
 
-    @Override
+
     public NetflowVersion getNetflowVersion() {
         return this.netflowVersion;
     }
 
-    @Override
+
     public Integer getVlan() {
         return this.vlan;
     }
@@ -475,7 +499,7 @@ public class EnrichedFlow implements org.opennms.horizon.flows.integration.Flow 
         this.tos = tos;
     }
 
-    @Override
+
     public Integer getDscp() {
         return this.dscp;
     }
@@ -484,7 +508,7 @@ public class EnrichedFlow implements org.opennms.horizon.flows.integration.Flow 
         this.dscp = dscp;
     }
 
-    @Override
+
     public Integer getEcn() {
         return this.ecn;
     }
@@ -501,7 +525,7 @@ public class EnrichedFlow implements org.opennms.horizon.flows.integration.Flow 
         this.vlan = vlan;
     }
 
-    @Override
+
     public String getConvoKey() {
         return ConversationKeyUtils.getConvoKeyAsJsonString(this.getLocation(),
                                                             this.getProtocol(),
@@ -515,7 +539,7 @@ public class EnrichedFlow implements org.opennms.horizon.flows.integration.Flow 
 
         enriched.setReceivedAt(Instant.ofEpochMilli(flow.getTimestamp()));
         enriched.setTimestamp(Instant.ofEpochMilli(flow.getTimestamp()));
-        enriched.setDirection(org.opennms.horizon.flows.integration.Flow.Direction.valueOf(flow.getDirection().name()));
+        enriched.setDirection(Direction.valueOf(flow.getDirection().name()));
         enriched.setDstAddr(flow.getDstAddress());
         enriched.setDstAddrHostname(flow.getDstHostname());
         enriched.setDstAs(flow.getDstAs().getValue());
@@ -547,7 +571,7 @@ public class EnrichedFlow implements org.opennms.horizon.flows.integration.Flow 
         enriched.setTos(flow.getTos().getValue());
         enriched.setDscp(flow.getDscp().getValue());
         enriched.setEcn(flow.getEcn().getValue());
-        enriched.setNetflowVersion(org.opennms.horizon.flows.integration.Flow.NetflowVersion.valueOf(flow.getNetflowVersion().name()));
+        enriched.setNetflowVersion(NetflowVersion.valueOf(flow.getNetflowVersion().name()));
         enriched.setVlan(flow.getVlan().getValue());
 
         return enriched;

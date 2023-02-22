@@ -163,7 +163,7 @@ public class DocumentEnricherTest {
         d1.setDstAddr("2.2.2.2");
         d1.setDstPort(2);
         d1.setProtocol(6);
-        d1.setDirection(org.opennms.horizon.flows.integration.Flow.Direction.INGRESS);
+        d1.setDirection(EnrichedFlow.Direction.INGRESS);
 
         final ClassificationRequest c1 = enricher.createClassificationRequest(d1);
         Assert.assertEquals(IpAddr.of("1.1.1.1"), c1.getSrcAddress());
@@ -177,7 +177,7 @@ public class DocumentEnricherTest {
         d2.setDstAddr("2.2.2.2");
         d2.setDstPort(2);
         d2.setProtocol(6);
-        d2.setDirection(org.opennms.horizon.flows.integration.Flow.Direction.EGRESS);
+        d2.setDirection(EnrichedFlow.Direction.EGRESS);
 
         // check that fields stay as theay are even when EGRESS is used
         final ClassificationRequest c2 = enricher.createClassificationRequest(d2);

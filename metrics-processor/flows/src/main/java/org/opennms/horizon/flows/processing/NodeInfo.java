@@ -30,7 +30,7 @@ package org.opennms.horizon.flows.processing;
 
 import java.util.List;
 
-public class NodeInfo implements org.opennms.horizon.flows.integration.Flow.NodeInfo{
+public class NodeInfo {
 
     // ID of the interface which was selected during IP to node lookup
     private long interfaceId;

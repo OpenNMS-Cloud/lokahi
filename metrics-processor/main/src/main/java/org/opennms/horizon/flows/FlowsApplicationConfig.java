@@ -37,7 +37,6 @@ import org.opennms.horizon.flows.classification.ClassificationRuleProvider;
 import org.opennms.horizon.flows.classification.FilterService;
 import org.opennms.horizon.flows.classification.csv.CsvService;
 import org.opennms.horizon.flows.classification.internal.DefaultClassificationEngine;
-import org.opennms.horizon.flows.classification.internal.DefaultCsvFilterService;
 import org.opennms.horizon.flows.classification.internal.csv.CsvServiceImpl;
 import org.opennms.horizon.flows.classification.internal.provider.CsvClassificationRuleProvider;
 import org.opennms.horizon.flows.classification.internal.validation.RuleValidator;
@@ -132,7 +131,7 @@ public class FlowsApplicationConfig {
 
     @Bean
     public FilterService createFilterService() {
-        return new DefaultCsvFilterService();
+        return FilterService.NOOP;
     }
 
     @Bean

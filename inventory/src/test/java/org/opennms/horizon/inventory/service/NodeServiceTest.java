@@ -35,6 +35,8 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.opennms.horizon.inventory.dto.NodeCreateDTO;
 import org.opennms.horizon.inventory.dto.NodeDTO;
+import org.opennms.horizon.inventory.dto.TagCreateDTO;
+import org.opennms.horizon.inventory.dto.TagCreateListDTO;
 import org.opennms.horizon.inventory.mapper.NodeMapper;
 import org.opennms.horizon.inventory.mapper.NodeMapperImpl;
 import org.opennms.horizon.inventory.model.IpInterface;
@@ -76,6 +78,7 @@ public class NodeServiceTest {
     private MonitoringLocationRepository mockMonitoringLocationRepository;
     private IpInterfaceRepository mockIpInterfaceRepository;
     private ConfigUpdateService mockConfigUpdateService;
+    private TagService tagService;
     private final String tenantID = "test-tenant";
     private Node node;
 
@@ -86,6 +89,7 @@ public class NodeServiceTest {
         mockMonitoringLocationRepository = mock(MonitoringLocationRepository.class);
         mockIpInterfaceRepository = mock(IpInterfaceRepository.class);
         mockConfigUpdateService = mock(ConfigUpdateService.class);
+        tagService = mock(TagService.class);
 
 
         nodeService = new NodeService(mockNodeRepository,
@@ -97,7 +101,7 @@ public class NodeServiceTest {
             mock(MonitorTaskSetService.class),
             mock(ScannerTaskSetService.class),
             mock(TaskSetPublisher.class),
-            mock(TagService.class),
+            tagService,
             nodeMapper);
 
         node = new Node();
@@ -125,6 +129,7 @@ public class NodeServiceTest {
             .setLabel("Label")
             .setLocation("loc")
             .setManagementIp("127.0.0.1")
+            .addTags(TagCreateDTO.newBuilder().setName("tag-name").build())
             .build();
 
         nodeService.createNode(nodeCreateDTO, ScanType.NODE_SCAN, tenant);
@@ -132,6 +137,7 @@ public class NodeServiceTest {
         verify(mockIpInterfaceRepository).save(any(IpInterface.class));
         verify(mockMonitoringLocationRepository).save(any(MonitoringLocation.class));
         verify(mockMonitoringLocationRepository).findByLocationAndTenantId(location, tenant);
+        verify(tagService).addTags(eq(tenant), any(TagCreateListDTO.class));
         verify(mockConfigUpdateService, timeout(5000)).sendConfigUpdate(tenant, location);
     }
 

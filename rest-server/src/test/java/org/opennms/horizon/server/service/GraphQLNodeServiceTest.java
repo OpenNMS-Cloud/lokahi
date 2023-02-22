@@ -205,7 +205,7 @@ public class GraphQLNodeServiceTest {
     public void testCreateNode() throws JSONException {
         doReturn(nodeDTO1).when(mockClient).createNewNode(any(NodeCreateDTO.class), eq(accessToken));
         doReturn(Collections.singletonList(locationDTO1)).when(mockClient).listLocationsByIds(keyCaptor.capture());
-        String request = createPayload("mutation {addNode(node: {label: \"test-node\", location: \"Default\", managementIp: \"127.0.0.1\"})" +
+        String request = createPayload("mutation {addNode(node: {label: \"test-node\", location: \"Default\", managementIp: \"127.0.0.1\", tags: [{name:\"tag-10\"}]})" +
             "{id nodeLabel}}");
         webClient.post()
             .uri(GRAPHQL_PATH)

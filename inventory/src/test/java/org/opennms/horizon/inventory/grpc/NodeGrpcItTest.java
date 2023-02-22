@@ -99,7 +99,6 @@ import java.util.stream.Collectors;
 import static com.jayway.awaitility.Awaitility.await;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.internal.verification.VerificationModeFactory.times;
@@ -191,6 +190,7 @@ class NodeGrpcItTest extends GrpcTestBase {
             .setLocation("location")
             .setLabel(NODE_LABEL)
             .setManagementIp("127.0.0.1")
+            .addAllTags(List.of(TagCreateDTO.newBuilder().setName("tag-name").build()))
             .build();
 
         NodeDTO node = serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).createNode(createDTO);

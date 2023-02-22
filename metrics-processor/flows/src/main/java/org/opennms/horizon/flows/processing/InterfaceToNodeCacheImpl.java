@@ -38,7 +38,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.InetAddress;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -62,8 +61,8 @@ import static org.opennms.horizon.shared.utils.InetAddressUtils.str;
  * @author <a href="mailto:tarus@opennms.org">Tarus Balog </a>
  * @author <a href="http://www.opennms.org/">OpenNMS </a>
  */
-public class InterfaceToNodeCacheDaoImpl extends AbstractInterfaceToNodeCache implements InterfaceToNodeCache {
-    private static final Logger LOG = LoggerFactory.getLogger(InterfaceToNodeCacheDaoImpl.class);
+public class InterfaceToNodeCacheImpl extends AbstractInterfaceToNodeCache implements InterfaceToNodeCache {
+    private static final Logger LOG = LoggerFactory.getLogger(InterfaceToNodeCacheImpl.class);
 
     private final InventoryClient client;
 
@@ -128,11 +127,11 @@ public class InterfaceToNodeCacheDaoImpl extends AbstractInterfaceToNodeCache im
     // in ms
     private final long refreshRate;
 
-    public InterfaceToNodeCacheDaoImpl(InventoryClient client) {
+    public InterfaceToNodeCacheImpl(InventoryClient client) {
         this(client, -1); // By default refreshing the cache is disabled
     }
 
-    public InterfaceToNodeCacheDaoImpl(InventoryClient client, long refreshRate) {
+    public InterfaceToNodeCacheImpl(InventoryClient client, long refreshRate) {
         this.client = Objects.requireNonNull(client);
         this.refreshRate = refreshRate;
         if (refreshRate > 0) {

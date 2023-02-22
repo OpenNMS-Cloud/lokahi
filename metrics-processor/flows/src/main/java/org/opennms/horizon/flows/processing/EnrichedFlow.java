@@ -525,15 +525,6 @@ public class EnrichedFlow {
         this.vlan = vlan;
     }
 
-
-    public String getConvoKey() {
-        return ConversationKeyUtils.getConvoKeyAsJsonString(this.getLocation(),
-                                                            this.getProtocol(),
-                                                            this.getSrcAddr(),
-                                                            this.getDstAddr(),
-                                                            this.getApplication());
-    }
-
     public static EnrichedFlow from(final FlowDocument flow) {
         final var enriched = new EnrichedFlow();
 

@@ -43,7 +43,7 @@ import org.opennms.horizon.flows.integration.FlowRepository;
 import org.opennms.horizon.flows.integration.FlowRepositoryImpl;
 import org.opennms.horizon.flows.processing.DocumentEnricherImpl;
 import org.opennms.horizon.flows.processing.DocumentMangler;
-import org.opennms.horizon.flows.processing.InterfaceToNodeCacheDaoImpl;
+import org.opennms.horizon.flows.processing.InterfaceToNodeCacheImpl;
 import org.opennms.horizon.flows.processing.Pipeline;
 import org.opennms.horizon.flows.processing.PipelineImpl;
 import org.springframework.beans.factory.annotation.Value;
@@ -110,7 +110,7 @@ public class FlowsApplicationConfig {
 
     @Bean
     public InterfaceToNodeCache createInterfaceToNodeCache(final InventoryClient client) {
-        return new InterfaceToNodeCacheDaoImpl(client);
+        return new InterfaceToNodeCacheImpl(client);
     }
 
     @Bean

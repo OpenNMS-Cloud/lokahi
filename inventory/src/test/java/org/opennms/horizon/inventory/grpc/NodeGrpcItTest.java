@@ -334,18 +334,14 @@ class NodeGrpcItTest extends GrpcTestBase {
 
         assertThat(node.getNodeLabel()).isEqualTo(node.getNodeLabel());
         assertThat(ScanType.NODE_SCAN.name()).isEqualTo(node.getScanType());
-        await().atMost(10, TimeUnit.SECONDS).until(() -> testGrpcService.getRequests().size(), Matchers.is(2));
+
+        await().atMost(10, TimeUnit.SECONDS).until(() ->
+            testGrpcService.getTaskDefinitions(secondLocation).stream()
+                .filter(taskDefinition -> taskDefinition.getType().equals(TaskType.SCANNER))
+                .collect(Collectors.toSet()).size(), Matchers.is(1));
 
         verify(spyInterceptor).verifyAccessToken(authHeader);
         verify(spyInterceptor).interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));
-
-        List<PublishTaskSetRequest> grpcRequests = testGrpcService.getRequests();
-        assertThat(grpcRequests).asList().hasSize(2);
-
-        PublishTaskSetRequest request = grpcRequests.get(0);
-        TaskSet taskSet = request.getTaskSet();
-        Assertions.assertNotNull(taskSet);
-        assertThat(taskSet.getTaskDefinitionCount()).isEqualTo(EXPECTED_TASK_DEF_COUNT_WITHOUT_NEW_LOCATION);
     }
 
     @Test

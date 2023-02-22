@@ -160,7 +160,7 @@ class ScannerResponseServiceIntTest extends GrpcTestBase {
             // monitor and collect tasks
             await().atMost(10, TimeUnit.SECONDS).until(() -> testGrpcService.getTaskDefinitions(TEST_LOCATION).stream()
                     .filter(taskDefinition -> taskDefinition.getPluginName().contains("AZURE")).collect(Collectors.toSet()), Matchers.hasSize(2));
-            
+
             List<Node> allNodes = nodeRepository.findAll();
             assertEquals(1, allNodes.size());
 

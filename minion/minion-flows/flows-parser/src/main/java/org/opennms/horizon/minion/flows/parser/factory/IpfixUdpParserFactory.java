@@ -28,13 +28,13 @@
 
 package org.opennms.horizon.minion.flows.parser.factory;
 
+import java.util.Objects;
+
 import org.opennms.horizon.minion.flows.listeners.Parser;
 import org.opennms.horizon.minion.flows.parser.IpfixUdpParser;
 import org.opennms.horizon.minion.flows.parser.TelemetryRegistry;
 import org.opennms.horizon.shared.ipc.rpc.IpcIdentity;
 import org.opennms.sink.flows.contract.ParserConfig;
-
-import java.util.Objects;
 
 import com.codahale.metrics.MetricRegistry;
 
@@ -50,7 +50,6 @@ public class IpfixUdpParserFactory implements ParserFactory {
         this.telemetryRegistry = Objects.requireNonNull(telemetryRegistry);
         this.identity = Objects.requireNonNull(identity);
         this.dnsResolver = Objects.requireNonNull(dnsResolver);
-        telemetryRegistry.addParserFactory(this);
     }
 
     @Override

@@ -28,29 +28,7 @@
 
 package org.opennms.horizon.minion.flows.parser;
 
-import com.codahale.metrics.Counter;
-import com.codahale.metrics.Meter;
-import com.codahale.metrics.MetricRegistry;
-import com.codahale.metrics.Timer;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
-import com.google.common.collect.Lists;
-import com.google.protobuf.UInt32Value;
-import com.swrve.ratelimitedlogger.RateLimitedLog;
-import org.opennms.dataplatform.flows.document.FlowDocument;
-import org.opennms.horizon.minion.flows.listeners.Parser;
-import org.opennms.horizon.minion.flows.parser.factory.DnsResolver;
-import org.opennms.horizon.minion.flows.parser.ie.RecordProvider;
-import org.opennms.horizon.minion.flows.parser.session.SequenceNumberTracker;
-import org.opennms.horizon.minion.flows.parser.session.Session;
-import org.opennms.horizon.minion.flows.parser.transport.MessageBuilder;
-import org.opennms.horizon.shared.ipc.rpc.IpcIdentity;
-import org.opennms.horizon.shared.ipc.sink.api.AsyncDispatcher;
-import org.opennms.horizon.shared.logging.LogPreservingThreadFactory;
-import org.opennms.horizon.shared.utils.InetAddressUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static java.util.Objects.nonNull;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -68,7 +46,30 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import static java.util.Objects.nonNull;
+import org.opennms.dataplatform.flows.document.FlowDocument;
+import org.opennms.horizon.minion.flows.listeners.Parser;
+import org.opennms.horizon.minion.flows.parser.factory.DnsResolver;
+import org.opennms.horizon.minion.flows.parser.ie.RecordProvider;
+import org.opennms.horizon.minion.flows.parser.session.SequenceNumberTracker;
+import org.opennms.horizon.minion.flows.parser.session.Session;
+import org.opennms.horizon.minion.flows.parser.transport.MessageBuilder;
+import org.opennms.horizon.shared.ipc.rpc.IpcIdentity;
+import org.opennms.horizon.shared.ipc.sink.api.AsyncDispatcher;
+import org.opennms.horizon.shared.logging.LogPreservingThreadFactory;
+import org.opennms.horizon.shared.utils.InetAddressUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.codahale.metrics.Counter;
+import com.codahale.metrics.Meter;
+import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Timer;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
+import com.google.common.collect.Lists;
+import com.google.protobuf.UInt32Value;
+import com.swrve.ratelimitedlogger.RateLimitedLog;
 
 public abstract class ParserBase implements Parser {
     private static final Logger LOG = LoggerFactory.getLogger(ParserBase.class);

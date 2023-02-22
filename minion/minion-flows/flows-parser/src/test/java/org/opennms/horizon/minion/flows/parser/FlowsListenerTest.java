@@ -33,18 +33,15 @@ import com.google.protobuf.Any;
 import org.junit.Assert;
 import org.junit.Test;
 import org.opennms.dataplatform.flows.document.FlowDocument;
-import org.opennms.horizon.minion.flows.listeners.factory.TcpListenerFactory;
-import org.opennms.horizon.minion.flows.listeners.factory.UdpListenerFactory;
+import org.opennms.horizon.minion.flows.listeners.TcpListener;
+import org.opennms.horizon.minion.flows.listeners.UdpListener;
 import org.opennms.horizon.minion.flows.parser.factory.DnsResolver;
-import org.opennms.horizon.minion.flows.parser.factory.IpfixTcpParserFactory;
-import org.opennms.horizon.minion.flows.parser.factory.IpfixUdpParserFactory;
-import org.opennms.horizon.minion.flows.parser.factory.Netflow5UdpParserFactory;
-import org.opennms.horizon.minion.flows.parser.factory.Netflow9UdpParserFactory;
 import org.opennms.horizon.shared.ipc.rpc.IpcIdentity;
 import org.opennms.horizon.shared.ipc.sink.api.AsyncDispatcher;
 import org.opennms.horizon.shared.ipc.sink.api.MessageDispatcherFactory;
 import org.opennms.horizon.shared.protobuf.util.ProtobufUtil;
 import org.opennms.sink.flows.contract.FlowsConfig;
+
 
 import java.io.IOException;
 import java.net.URL;
@@ -54,34 +51,31 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class ConfigManagerTest {
+public class FlowsListenerTest {
 
     @Test
     public void ableHandleConfig() throws IOException {
-        ListenerHolder holder = new ListenerHolder();
         IpcIdentity identity = mock(IpcIdentity.class);
         DnsResolver dnsResolver = mock(DnsResolver.class);
 
         AsyncDispatcher<FlowDocument> dispatcher = mock(AsyncDispatcher.class);
         MessageDispatcherFactory messageDispatcherFactory = mock(MessageDispatcherFactory.class);
         when(messageDispatcherFactory.createAsyncDispatcher(any(FlowSinkModule.class))).thenReturn(dispatcher);
-        TelemetryRegistry registry = new TelemetryRegistryImpl(messageDispatcherFactory, identity, dnsResolver, holder);
+        TelemetryRegistry registry = new TelemetryRegistryImpl(messageDispatcherFactory, identity, dnsResolver);
 
-        UdpListenerFactory udpFactory = new UdpListenerFactory(registry);
-        TcpListenerFactory tcpFactory = new TcpListenerFactory(registry);
-        Netflow5UdpParserFactory netflow5UdpParserFactory = new Netflow5UdpParserFactory(registry, identity, dnsResolver);
-        Netflow9UdpParserFactory netflow9UdpParserFactory = new Netflow9UdpParserFactory(registry, identity, dnsResolver);
-        IpfixTcpParserFactory ipfixTcpParserFactory = new IpfixTcpParserFactory(registry, identity, dnsResolver);
-        IpfixUdpParserFactory ipfixUdpParserFactory = new IpfixUdpParserFactory(registry, identity, dnsResolver);
+        FlowsListenerFactory manger = new FlowsListenerFactory(registry);
+        final var listener = manger.create(readFlowsConfig());
 
-        ConfigManager manger = new ConfigManager(registry);
-        manger.create(readFlowsConfig());
+        Assert.assertEquals(4, listener.getListeners().size());
+        Assert.assertEquals("Netflow-5-UDP-8877", listener.getListeners().get(0).getName());
+        Assert.assertEquals("Netflow-9-UDP-4729", listener.getListeners().get(1).getName());
+        Assert.assertEquals("IPFIX-TCP-4730", listener.getListeners().get(2).getName());
+        Assert.assertEquals("Netflow-UDP-9999", listener.getListeners().get(3).getName());
 
-        Assert.assertEquals(4, holder.size());
-        Assert.assertNotNull(holder.get("IPFIX-TCP-4730"));
-        Assert.assertNotNull(holder.get("Netflow-5-UDP-8877"));
-        Assert.assertNotNull(holder.get("Netflow-9-UDP-4729"));
-        Assert.assertNotNull(holder.get("Netflow-UDP-9999"));
+        Assert.assertEquals(3, listener.getListeners().get(3).getParsers().size());
+        Assert.assertEquals("Netflow-5-Parser", listener.getListeners().get(3).getParsers().get(0).getName());
+        Assert.assertEquals("Netflow-9-Parser", listener.getListeners().get(3).getParsers().get(1).getName());
+        Assert.assertEquals("IPFix-Parser", listener.getListeners().get(3).getParsers().get(2).getName());
     }
 
     Any readFlowsConfig() throws IOException {

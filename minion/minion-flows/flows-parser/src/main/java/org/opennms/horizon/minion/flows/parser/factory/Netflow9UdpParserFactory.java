@@ -49,8 +49,6 @@ public class Netflow9UdpParserFactory implements ParserFactory {
         this.telemetryRegistry = Objects.requireNonNull(telemetryRegistry);
         this.identity = Objects.requireNonNull(identity);
         this.dnsResolver = Objects.requireNonNull(dnsResolver);
-
-        telemetryRegistry.addParserFactory(this);
     }
 
     @Override

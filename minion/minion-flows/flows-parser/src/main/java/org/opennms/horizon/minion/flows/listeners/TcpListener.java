@@ -29,15 +29,10 @@
 package org.opennms.horizon.minion.flows.listeners;
 
 import java.net.InetSocketAddress;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import org.opennms.horizon.minion.flows.listeners.utils.NettyEventListener;
 import org.slf4j.Logger;
@@ -64,7 +59,7 @@ import io.netty.handler.codec.ByteToMessageDecoder;
 import io.netty.util.concurrent.GlobalEventExecutor;
 import io.netty.util.internal.SocketUtils;
 
-public class TcpListener implements GracefulShutdownListener, FlowsListener {
+public class TcpListener implements Listener {
     private static final Logger LOG = LoggerFactory.getLogger(TcpListener.class);
 
     private final String name;
@@ -81,8 +76,6 @@ public class TcpListener implements GracefulShutdownListener, FlowsListener {
     private ChannelFuture socketFuture;
 
     private final ChannelGroup channels = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
-
-    private Future<String> stopFuture;
 
     public TcpListener(final String name,
                        final TcpParser parser,
@@ -222,34 +215,6 @@ public class TcpListener implements GracefulShutdownListener, FlowsListener {
         if (this.parser != null) {
             this.parser.stop();
         }
-
-        stopFuture = new Future<String>() {
-            @Override
-            public boolean cancel(boolean mayInterruptIfRunning) {
-                return false;
-            }
-
-            @Override
-            public boolean isCancelled() {
-                return false;
-            }
-
-            @Override
-            public boolean isDone() {
-                return workerListener.isDone() && bossListener.isDone();
-            }
-
-            @Override
-            public String get() {
-                return name + "[" + workerListener.getName() + ":" + workerListener.isDone() + ","
-                    + bossListener.getName() + ":" + bossListener.isDone() + "]";
-            }
-
-            @Override
-            public String get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
-                return get();
-            }
-        };
     }
 
     @Override
@@ -258,8 +223,8 @@ public class TcpListener implements GracefulShutdownListener, FlowsListener {
     }
 
     @Override
-    public String getDescription() {
-        return String.format("TCP %s:%s", this.host != null ? this.host : "*", this.port);
+    public List<TcpParser> getParsers() {
+        return Collections.singletonList(this.parser);
     }
 
     public String getHost() {
@@ -276,10 +241,5 @@ public class TcpListener implements GracefulShutdownListener, FlowsListener {
 
     public void setPort(final int port) {
         this.port = port;
-    }
-
-    @Override
-    public Future getShutdownFuture() {
-        return stopFuture;
     }
 }

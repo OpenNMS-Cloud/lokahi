@@ -29,6 +29,7 @@
 package org.opennms.horizon.inventory.service;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import io.grpc.Context;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -48,13 +49,12 @@ import org.opennms.horizon.inventory.service.taskset.DetectorTaskSetService;
 import org.opennms.horizon.inventory.service.taskset.MonitorTaskSetService;
 import org.opennms.horizon.inventory.service.taskset.ScannerTaskSetService;
 import org.opennms.horizon.inventory.taskset.api.TaskSetPublisher;
-import org.opennms.horizon.inventory.repository.TagRepository;
 import org.opennms.horizon.shared.constants.GrpcConstants;
 import org.opennms.horizon.shared.utils.InetAddressUtils;
-import org.opennms.taskset.contract.MonitorType;
-import org.opennms.taskset.contract.TaskDefinition;
 import org.opennms.node.scan.contract.NodeInfoResult;
+import org.opennms.taskset.contract.MonitorType;
 import org.opennms.taskset.contract.ScanType;
+import org.opennms.taskset.contract.TaskDefinition;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -89,20 +89,20 @@ public class NodeService {
     private final ScannerTaskSetService scannerTaskSetService;
     private final TaskSetPublisher taskSetPublisher;
     private final TagService tagService;
-    private final NodeMapper mapper;
+    private final NodeMapper nodeMapper;
 
     @Transactional(readOnly = true)
     public List<NodeDTO> findByTenantId(String tenantId) {
         List<Node> all = nodeRepository.findByTenantId(tenantId);
         return all
             .stream()
-            .map(mapper::modelToDTO)
+            .map(nodeMapper::modelToDTO)
             .toList();
     }
 
     @Transactional(readOnly = true)
     public Optional<NodeDTO> getByIdAndTenantId(long id, String tenantId) {
-        return nodeRepository.findByIdAndTenantId(id, tenantId).map(mapper::modelToDTO);
+        return nodeRepository.findByIdAndTenantId(id, tenantId).map(nodeMapper::modelToDTO);
     }
 
     private void saveIpInterfaces(NodeCreateDTO request, Node node, String tenantId) {
@@ -164,7 +164,8 @@ public class NodeService {
             .setNodeId(node.getId())
             .addAllTags(request.getTagsList())
             .build());
-
+        // Asynchronously send tasks to Minion
+        executorService.execute(() -> sendTaskSetsToMinion(node, tenantId));
         return node;
     }
 
@@ -174,7 +175,7 @@ public class NodeService {
         nodeRepository.findAll().forEach(node -> {
             Map<String, List<NodeDTO>> nodeByLocation = nodesByTenantLocation.computeIfAbsent(node.getTenantId(), (tenantId) -> new HashMap<>());
             List<NodeDTO> nodeList = nodeByLocation.computeIfAbsent(node.getMonitoringLocation().getLocation(), location -> new ArrayList<>());
-            nodeList.add(mapper.modelToDTO(node));
+            nodeList.add(nodeMapper.modelToDTO(node));
         });
         return nodesByTenantLocation;
     }
@@ -186,7 +187,7 @@ public class NodeService {
             return new HashMap<>();
         }
         return nodeList.stream().collect(Collectors.groupingBy(node -> node.getMonitoringLocation().getLocation(),
-            Collectors.mapping(mapper::modelToDTO, Collectors.toList())));
+            Collectors.mapping(nodeMapper::modelToDTO, Collectors.toList())));
     }
 
     @Transactional
@@ -225,7 +226,7 @@ public class NodeService {
     }
 
     public void updateNodeInfo(Node node, NodeInfoResult nodeInfo) {
-        mapper.updateFromNodeInfo(nodeInfo, node);
+        nodeMapper.updateFromNodeInfo(nodeInfo, node);
         nodeRepository.save(node);
     }
 
@@ -233,5 +234,18 @@ public class NodeService {
         for (Tag tag : node.getTags()) {
             tag.getNodes().remove(node);
         }
+    }
+
+    private void sendTaskSetsToMinion(Node node, String tenantId) {
+        Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, tenantId).run(()->
+        {
+            try {
+                detectorTaskSetService.sendDetectorTasks(node);
+                scannerTaskSetService.sendNodeScannerTask(List.of(nodeMapper.modelToDTO(node)),
+                    node.getMonitoringLocation().getLocation(), node.getTenantId());
+            } catch (Exception e) {
+                log.error("Error while sending detector/nodescan task for node with label {}", node.getNodeLabel());
+            }
+        });
     }
 }

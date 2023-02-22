@@ -28,14 +28,12 @@
 
 package org.opennms.horizon.inventory.component;
 
-import java.util.Map;
-import java.util.Optional;
-
 import io.grpc.Context;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.opennms.horizon.events.proto.Event;
 import org.opennms.horizon.inventory.dto.NodeCreateDTO;
 import org.opennms.horizon.inventory.exception.InventoryRuntimeException;
-import org.opennms.horizon.inventory.model.Node;
 import org.opennms.horizon.inventory.service.NodeService;
 import org.opennms.horizon.inventory.service.taskset.DetectorTaskSetService;
 import org.opennms.horizon.shared.constants.GrpcConstants;
@@ -49,8 +47,8 @@ import org.springframework.messaging.handler.annotation.Headers;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.util.Map;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -80,8 +78,7 @@ public class NodeMonitoringManager {
                         .setManagementIp(event.getIpAddress())
                         .setLabel("trap-" + event.getIpAddress())
                         .build();
-                    Node newNode = nodeService.createNode(createDTO, ScanType.NODE_SCAN, tenantId);
-                    detectorService.sendDetectorTasks(newNode);
+                    nodeService.createNode(createDTO, ScanType.NODE_SCAN, tenantId);
                 });
             }
         } catch (Exception e) {

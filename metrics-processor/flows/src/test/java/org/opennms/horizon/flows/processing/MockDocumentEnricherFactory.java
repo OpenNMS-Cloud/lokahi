@@ -30,12 +30,10 @@ package org.opennms.horizon.flows.processing;
 
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.collect.Lists;
-import org.opennms.horizon.flows.cache.CacheConfigBuilder;
 import org.opennms.horizon.flows.classification.ClassificationEngine;
 import org.opennms.horizon.flows.classification.FilterService;
 import org.opennms.horizon.flows.classification.internal.DefaultClassificationEngine;
 import org.opennms.horizon.flows.classification.persistence.api.RuleBuilder;
-import org.opennms.horizon.flows.dao.InterfaceToNodeCache;
 import org.opennms.horizon.flows.grpc.client.InventoryClient;
 import org.opennms.horizon.inventory.dto.NodeDTO;
 
@@ -51,7 +49,6 @@ import static org.mockito.Mockito.when;
 public class MockDocumentEnricherFactory {
 
     private InventoryClient client;
-    private final InterfaceToNodeCache interfaceToNodeCache;
     private final DocumentEnricherImpl enricher;
     private final ClassificationEngine classificationEngine;
 
@@ -63,7 +60,6 @@ public class MockDocumentEnricherFactory {
 
     public MockDocumentEnricherFactory(final long clockSkewCorrectionThreshold, Map<Long, NodeDTO> nodeIdToDto) throws InterruptedException {
         client = createInventoryClient(nodeIdToDto);
-        interfaceToNodeCache = new MockInterfaceToNodeCache();
 
         classificationEngine = new DefaultClassificationEngine(() -> Lists.newArrayList(
             new RuleBuilder().withName("http").withDstPort("80").withProtocol("tcp,udp").build(),
@@ -74,17 +70,8 @@ public class MockDocumentEnricherFactory {
         enricher = new DocumentEnricherImpl(
             new MetricRegistry(),
             client,
-            interfaceToNodeCache, classificationEngine,
-            new CacheConfigBuilder()
-                .withName("flows.node")
-                .withMaximumSize(1000)
-                .withExpireAfterWrite(300)
-                .build(), clockSkewCorrectionThreshold,
-            new DocumentMangler(new ScriptEngineManager()));
-    }
-
-    public InterfaceToNodeCache getInterfaceToNodeCache() {
-        return interfaceToNodeCache;
+            classificationEngine,
+            clockSkewCorrectionThreshold);
     }
 
     public DocumentEnricherImpl getEnricher() {

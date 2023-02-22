@@ -37,63 +37,17 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.opennms.horizon.flows.classification.ClassificationRequest;
 import org.opennms.horizon.flows.classification.IpAddr;
-import org.opennms.horizon.flows.dao.InterfaceToNodeCache;
 import org.opennms.horizon.grpc.flows.contract.FlowDocument;
 import org.opennms.horizon.grpc.flows.contract.FlowSource;
 import org.opennms.horizon.inventory.dto.NodeDTO;
-import org.opennms.horizon.shared.utils.InetAddressUtils;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class DocumentEnricherTest {
-
-    @Test
-    public void verifyCacheUsage() throws InterruptedException {
-        Map<Long, NodeDTO> idToNodeDTO = new HashMap<>();
-
-        idToNodeDTO.put(1L, createNodeDTO(1, "my-requisition"));
-        idToNodeDTO.put(2L, createNodeDTO(2, "my-requisition"));
-        idToNodeDTO.put(3L, createNodeDTO(3, "my-requisition"));
-
-        final MockDocumentEnricherFactory factory = new MockDocumentEnricherFactory(idToNodeDTO);
-        final DocumentEnricherImpl enricher = factory.getEnricher();
-        final InterfaceToNodeCache interfaceToNodeCache = factory.getInterfaceToNodeCache();
-        final AtomicInteger nodeDaoGetCounter = factory.getNodeDaoGetCounter();
-
-        interfaceToNodeCache.setNodeId("Default", InetAddressUtils.addr("10.0.0.1"), 1, "tenantId");
-        interfaceToNodeCache.setNodeId("Default", InetAddressUtils.addr("10.0.0.2"), 2, "tenantId");
-        interfaceToNodeCache.setNodeId("Default", InetAddressUtils.addr("10.0.0.3"), 3, "tenantId");
-
-
-        final List<FlowDocument> documents = Lists.newArrayList();
-        documents.add(createFlowDocument("10.0.0.1", "10.0.0.2"));
-        documents.add(createFlowDocument("10.0.0.1", "10.0.0.3"));
-        enricher.enrich(documents, getFlowSource(), "tenantId");
-
-        // get is also called for each save, so we account for those as well ( 6 > 3 due to metadata cache disabled)
-        Assert.assertEquals(3, nodeDaoGetCounter.get());
-
-        // Try to enrich flow documents to existing IpAddresses.
-        documents.clear();
-        documents.add(createFlowDocument("10.0.0.2", "10.0.0.3"));
-        enricher.enrich(documents, getFlowSource(), "tenantId");
-        // Since above two addresses are cached, no extra calls to nodeDao.
-        Assert.assertEquals(3, nodeDaoGetCounter.get());
-
-        // Add two more interfaces to the system.
-        interfaceToNodeCache.setNodeId("Default", InetAddressUtils.addr("10.0.0.4"), 2, "tenantId");
-        interfaceToNodeCache.setNodeId("Default", InetAddressUtils.addr("10.0.0.5"), 3, "tenantId");
-        documents.add(createFlowDocument("10.0.0.4", "10.0.0.5"));
-        enricher.enrich(documents, getFlowSource(), "tenantId");
-        // Since above two addresses are added to same nodes, no extra calls to nodeDao
-        Assert.assertEquals(3, nodeDaoGetCounter.get());
-    }
 
     private static FlowDocument createFlowDocument(String sourceIp, String destIp) {
         return createFlowDocument(sourceIp, destIp, 0);

@@ -28,18 +28,14 @@
 
 package org.opennms.horizon.flows.classification;
 
-
-import org.opennms.horizon.flows.classification.exception.InvalidFilterException;
-
 public interface FilterService {
-    void validate(String filterExpression) throws InvalidFilterException;
+    void validate(String filterExpression) throws IllegalArgumentException;
 
     boolean matches(String address, String filterExpression);
 
     FilterService NOOP = new FilterService() {
         @Override
-        public void validate(String filterExpression) throws InvalidFilterException {
-
+        public void validate(String filterExpression) throws IllegalArgumentException {
         }
 
         @Override

@@ -31,26 +31,21 @@ package org.opennms.horizon.flows;
 import com.codahale.metrics.MetricRegistry;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
-import org.opennms.horizon.flows.cache.CacheConfig;
 import org.opennms.horizon.flows.classification.ClassificationEngine;
 import org.opennms.horizon.flows.classification.ClassificationRuleProvider;
 import org.opennms.horizon.flows.classification.FilterService;
 import org.opennms.horizon.flows.classification.csv.CsvImporter;
 import org.opennms.horizon.flows.classification.internal.DefaultClassificationEngine;
-import org.opennms.horizon.flows.dao.InterfaceToNodeCache;
 import org.opennms.horizon.flows.grpc.client.InventoryClient;
 import org.opennms.horizon.flows.integration.FlowRepository;
 import org.opennms.horizon.flows.integration.FlowRepositoryImpl;
 import org.opennms.horizon.flows.processing.DocumentEnricherImpl;
-import org.opennms.horizon.flows.processing.DocumentMangler;
-import org.opennms.horizon.flows.processing.InterfaceToNodeCacheImpl;
 import org.opennms.horizon.flows.processing.Pipeline;
 import org.opennms.horizon.flows.processing.PipelineImpl;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import javax.script.ScriptEngineManager;
 import java.io.IOException;
 import java.util.HashMap;
 
@@ -93,27 +88,6 @@ public class FlowsApplicationConfig {
     }
 
     @Bean
-    public CacheConfig createCacheConfig(final MetricRegistry metricRegistry) {
-        var config = new CacheConfig("nodes");
-        config.setMetricRegistry(metricRegistry);
-        config.setEnabled(nodeCacheEnabled);
-        config.setMaximumSize(nodeCacheMaximumSize);
-        config.setExpireAfterWrite(nodeCacheExpireAfterWrite);
-        config.setRecordStats(nodeCacheRecordStats);
-        return config;
-    }
-
-    @Bean
-    public DocumentMangler createDocumentMangler() {
-        return new DocumentMangler(new ScriptEngineManager());
-    }
-
-    @Bean
-    public InterfaceToNodeCache createInterfaceToNodeCache(final InventoryClient client) {
-        return new InterfaceToNodeCacheImpl(client);
-    }
-
-    @Bean
     public Pipeline createPipeLine(final DocumentEnricherImpl documentEnricher, final FlowRepository flowRepository) {
         var pipeLine = new PipelineImpl(documentEnricher);
         var properties = new HashMap<>();
@@ -141,12 +115,8 @@ public class FlowsApplicationConfig {
     @Bean
     public DocumentEnricherImpl createDocumentEnricher(final MetricRegistry metricRegistry,
                                                        final InventoryClient inventoryClient,
-                                                       final InterfaceToNodeCache interfaceToNodeCache,
-                                                       final ClassificationEngine classificationEngine,
-                                                       final CacheConfig cacheConfig,
-                                                       final DocumentMangler mangler) {
-        return new DocumentEnricherImpl(metricRegistry, inventoryClient, interfaceToNodeCache, classificationEngine,
-            cacheConfig, clockSkewCorrectionThreshold, mangler);
+                                                       final ClassificationEngine classificationEngine) {
+        return new DocumentEnricherImpl(metricRegistry, inventoryClient, classificationEngine,
+            clockSkewCorrectionThreshold);
     }
 }
-

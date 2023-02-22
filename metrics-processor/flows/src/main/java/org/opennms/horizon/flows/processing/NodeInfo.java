@@ -28,6 +28,8 @@
 
 package org.opennms.horizon.flows.processing;
 
+import lombok.RequiredArgsConstructor;
+
 import java.util.List;
 
 public class NodeInfo {

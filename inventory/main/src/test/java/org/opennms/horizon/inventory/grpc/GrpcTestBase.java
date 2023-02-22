@@ -100,6 +100,6 @@ public abstract class GrpcTestBase {
 
     private void cleanDataBase() {
         jdbcTemplate.execute("truncate table node, azure_credential, tag, configuration, monitored_service, " +
-            "monitoring_system, monitoring_location, active_discovery_config CASCADE");
+            "monitoring_system, monitoring_location, active_discovery_config, passive_discovery CASCADE");
     }
 }

@@ -33,7 +33,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -107,4 +106,32 @@ public interface TagRepository extends JpaRepository<Tag, Long> {
     List<Tag> findByTenantIdAndAzureCredentialIdAndNameLike(@Param("tenantId") String tenantId,
                                                             @Param("azureCredentialId") long azureCredentialId,
                                                             @Param("searchTerm") String searchTerm);
+
+    @Query("SELECT tag " +
+        "FROM Tag tag " +
+        "JOIN tag.passiveDiscoveries discovery " +
+        "WHERE tag.tenantId = :tenantId " +
+        "AND discovery.id = :passiveDiscoveryId " +
+        "AND LOWER(tag.name) LIKE LOWER(CONCAT('%', :searchTerm, '%'))")
+    List<Tag> findByTenantIdAndPassiveDiscoveryIdAndNameLike(@Param("tenantId") String tenantId,
+                                                             @Param("passiveDiscoveryId") long passiveDiscoveryId,
+                                                             @Param("searchTerm") String searchTerm);
+
+    @Query("SELECT tag " +
+        "FROM Tag tag " +
+        "JOIN tag.passiveDiscoveries discovery " +
+        "WHERE tag.tenantId = :tenantId " +
+        "AND discovery.id = :passiveDiscoveryId ")
+    List<Tag> findByTenantIdAndPassiveDiscoveryId(@Param("tenantId") String tenantId,
+                                                  @Param("passiveDiscoveryId") long passiveDiscoveryId);
+
+    @Query("SELECT tag " +
+        "FROM Tag tag " +
+        "JOIN tag.passiveDiscoveries discovery " +
+        "WHERE tag.tenantId = :tenantId " +
+        "AND discovery.id = :passiveDiscoveryId " +
+        "AND tag.name = :name")
+    Optional<Tag> findByTenantIdPassiveDiscoveryIdAndName(@Param("tenantId") String tenantId,
+                                                          @Param("passiveDiscoveryId") long passiveDiscoveryId,
+                                                          @Param("name") String name);
 }

@@ -24,4 +24,5 @@
     <include file="db/changelog/hs-0.1.0/tables/node-scan-type.xml" />
     <include file="/db/changelog/hs-0.1.0/tables/active-discovery-config.xml" />
     <include file="db/changelog/hs-0.1.0/tables/snmp-config.xml" />
+    <include file="db/changelog/hs-0.1.0/tables/passive-discovery.xml" />
 </databaseChangeLog>

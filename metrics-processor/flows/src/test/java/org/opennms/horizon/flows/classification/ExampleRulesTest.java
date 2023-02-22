@@ -31,6 +31,7 @@ import org.junit.Test;
 import org.opennms.horizon.flows.classification.internal.DefaultClassificationEngine;
 import org.opennms.horizon.flows.classification.internal.decision.Tree;
 
+import java.io.IOException;
 import java.util.Optional;
 import java.util.Stack;
 import java.util.stream.Collectors;
@@ -42,11 +43,11 @@ import static org.junit.Assert.assertThat;
 public class ExampleRulesTest {
 
     @Test
-    public void exampleRuleSet() throws InterruptedException {
+    public void exampleRuleSet() throws InterruptedException, IOException {
         testRuleSet("/example-rules.csv");
     }
 
-    public void testRuleSet(String resource) throws InterruptedException {
+    public void testRuleSet(String resource) throws InterruptedException, IOException {
         var rules = ClassificationEngineBenchmark.getRules(resource);
         var classificationEngine = new DefaultClassificationEngine(() -> rules, org.mockito.Mockito.mock(FilterService.class));
 

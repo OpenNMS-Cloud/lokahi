@@ -39,7 +39,6 @@ public class DefaultRuleDefinition implements RuleDefinition {
     private String srcAddress;
     private String protocol;
     private String exporterFilter;
-    private int groupPosition;
     private int position;
 
     @Override
@@ -78,11 +77,6 @@ public class DefaultRuleDefinition implements RuleDefinition {
     }
 
     @Override
-    public int getGroupPosition() {
-        return groupPosition;
-    }
-
-    @Override
     public int getPosition() {
         return position;
     }
@@ -114,11 +108,7 @@ public class DefaultRuleDefinition implements RuleDefinition {
     public void setExporterFilter(String exporterFilter) {
         this.exporterFilter = exporterFilter;
     }
-
-    public void setGroupPosition(int groupPosition) {
-        this.groupPosition = groupPosition;
-    }
-
+    
     public void setPosition(int position) {
         this.position = position;
     }
@@ -128,8 +118,7 @@ public class DefaultRuleDefinition implements RuleDefinition {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         DefaultRuleDefinition that = (DefaultRuleDefinition) o;
-        return Objects.equals(groupPosition, that.groupPosition)
-                && Objects.equals(name, that.name)
+        return Objects.equals(name, that.name)
                 && Objects.equals(dstAddress, that.dstAddress)
                 && Objects.equals(dstPort, that.dstPort)
                 && Objects.equals(srcPort, that.srcPort)
@@ -141,7 +130,7 @@ public class DefaultRuleDefinition implements RuleDefinition {
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, dstAddress, dstPort, srcPort, srcAddress, protocol, exporterFilter, groupPosition, position);
+        return Objects.hash(name, dstAddress, dstPort, srcPort, srcAddress, protocol, exporterFilter, position);
     }
 
 }

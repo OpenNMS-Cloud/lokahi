@@ -46,8 +46,6 @@ public interface RuleDefinition {
 
     String getExporterFilter();
 
-    int getGroupPosition();
-
     /** Defines the order in which the rules are evaluated. Lower positions go first */
     int getPosition();
 
@@ -93,7 +91,6 @@ public interface RuleDefinition {
         result.setSrcPort(getDstPort());
         result.setProtocol(getProtocol());
         result.setExporterFilter(getExporterFilter());
-        result.setGroupPosition(getGroupPosition());
         result.setPosition(getPosition());
         return result;
     }

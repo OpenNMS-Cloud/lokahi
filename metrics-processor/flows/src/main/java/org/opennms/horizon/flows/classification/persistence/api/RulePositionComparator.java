@@ -44,16 +44,6 @@ public class RulePositionComparator implements Comparator<RuleDefinition> {
     public int compare(RuleDefinition r1, RuleDefinition r2) {
         Objects.requireNonNull(r1);
         Objects.requireNonNull(r2);
-
-        // Sort by group position (lowest position first)
-        int groupPosition1 = r1.getGroupPosition();
-        int groupPosition2 = r2.getGroupPosition();
-        int result = Integer.compare(groupPosition1, groupPosition2);
-
-        // If group position is identical, sort by rule position (lowest position first)
-        if (result == 0) {
-            return Integer.compare(r1.getPosition(), r2.getPosition());
-        }
-        return result;
+        return Integer.compare(r1.getPosition(), r2.getPosition());
     }
 }

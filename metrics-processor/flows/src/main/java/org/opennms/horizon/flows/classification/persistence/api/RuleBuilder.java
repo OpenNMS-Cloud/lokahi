@@ -92,11 +92,6 @@ public class RuleBuilder {
         return this;
     }
 
-    public RuleBuilder withGroup(Group group) {
-        group.addRule(rule);
-        return this;
-    }
-
     public RuleBuilder fromRule(Rule rule) {
         Objects.requireNonNull(rule);
         withName(rule.getName());
@@ -107,9 +102,6 @@ public class RuleBuilder {
         withProtocol(rule.getProtocol());
         withOmnidirectional(rule.isOmnidirectional());
         withExporterFilter(rule.getExporterFilter());
-        if (rule.getGroup() != null) {
-            withGroup(rule.getGroup());
-        }
         return this;
     }
 

@@ -287,7 +287,6 @@ public class RandomClassificationEngineTest {
         return new Classifier(
                 matchers.toArray(new Matcher[matchers.size()]),
                 new Classifier.Result(matchedAspects, ruleDefinition.getName()),
-                ruleDefinition.getGroupPosition(),
                 ruleDefinition.getPosition()
         );
     }

@@ -90,19 +90,17 @@ public class Classifier implements Comparable<Classifier> {
         return new Classifier(
                 matchers.toArray(new Matcher[matchers.size()]),
                 new Result(matchedAspects, rule.ruleDefinition.getName()),
-                rule.ruleDefinition.getGroupPosition(),
                 rule.ruleDefinition.getPosition()
         );
     }
 
     public final Matcher[] matchers;
     public final Result result;
-    public final int groupPosition, position;
+    public final int position;
 
-    public Classifier(Matcher[] matchers, Result result, int groupPosition, int position) {
+    public Classifier(Matcher[] matchers, Result result, int position) {
         this.matchers = matchers;
         this.result = result;
-        this.groupPosition = groupPosition;
         this.position = position;
     }
 
@@ -117,15 +115,13 @@ public class Classifier implements Comparable<Classifier> {
 
     @Override
     public int compareTo(Classifier o) {
-        return groupPosition < o.groupPosition ? -1 : groupPosition > o.groupPosition ? 1 :
-                                                      position < o.position ? -1 : position > o.position ? 1 : 0;
+        return position < o.position ? -1 : position > o.position ? 1 : 0;
     }
 
     @Override
     public String toString() {
         return "Classifier{" +
                "result='" + result + '\'' +
-               ", groupPosition=" + groupPosition +
                ", position=" + position +
                '}';
     }

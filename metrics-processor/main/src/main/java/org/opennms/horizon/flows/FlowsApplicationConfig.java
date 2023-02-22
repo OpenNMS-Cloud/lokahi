@@ -35,11 +35,8 @@ import org.opennms.horizon.flows.cache.CacheConfig;
 import org.opennms.horizon.flows.classification.ClassificationEngine;
 import org.opennms.horizon.flows.classification.ClassificationRuleProvider;
 import org.opennms.horizon.flows.classification.FilterService;
-import org.opennms.horizon.flows.classification.csv.CsvService;
+import org.opennms.horizon.flows.classification.csv.CsvImporter;
 import org.opennms.horizon.flows.classification.internal.DefaultClassificationEngine;
-import org.opennms.horizon.flows.classification.internal.csv.CsvServiceImpl;
-import org.opennms.horizon.flows.classification.internal.provider.CsvClassificationRuleProvider;
-import org.opennms.horizon.flows.classification.internal.validation.RuleValidator;
 import org.opennms.horizon.flows.dao.InterfaceToNodeCache;
 import org.opennms.horizon.flows.grpc.client.InventoryClient;
 import org.opennms.horizon.flows.integration.FlowRepository;
@@ -54,6 +51,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import javax.script.ScriptEngineManager;
+import java.io.IOException;
 import java.util.HashMap;
 
 @Configuration
@@ -130,29 +128,14 @@ public class FlowsApplicationConfig {
     }
 
     @Bean
-    public FilterService createFilterService() {
-        return FilterService.NOOP;
-    }
+    public ClassificationEngine createClassificationEngine() throws InterruptedException, IOException {
+        final var rules = CsvImporter.parseCSV(
+            FlowProcessor.class.getResourceAsStream("/pre-defined-rules.csv"),
+            true);
 
-    @Bean
-    public RuleValidator createRuleValidator(FilterService filterService) {
-        return new RuleValidator(filterService);
-    }
-
-    @Bean
-    CsvService createCsvService(RuleValidator ruleValidator) {
-        return new CsvServiceImpl(ruleValidator);
-    }
-
-    @Bean
-    ClassificationRuleProvider createClassificationRuleProvider(final CsvService csvService) {
-        return new CsvClassificationRuleProvider("pre-defined-rules.csv", csvService);
-    }
-
-    @Bean
-    public ClassificationEngine createClassificationEngine(ClassificationRuleProvider classificationRuleProvider,
-                                                           FilterService filterService) throws InterruptedException {
-        return new DefaultClassificationEngine(classificationRuleProvider, filterService);
+        return new DefaultClassificationEngine(
+            ClassificationRuleProvider.forList(rules),
+            FilterService.NOOP);
     }
 
     @Bean

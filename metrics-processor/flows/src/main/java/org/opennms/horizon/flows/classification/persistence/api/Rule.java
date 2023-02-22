@@ -84,8 +84,6 @@ public class Rule implements RuleDefinition {
      */
     private String protocol;
 
-    private Group group;
-
     /**
      * The position of the rule within it's group.
      * Global order must consider group.position as well.
@@ -196,19 +194,6 @@ public class Rule implements RuleDefinition {
         this.exporterFilter = exporterFilter;
     }
 
-    public Group getGroup() {
-        return group;
-    }
-
-    @Override
-    public int getGroupPosition() {
-        return group == null ? 0 : group.getPosition();
-    }
-
-    public void setGroup(Group group) {
-        this.group = group;
-    }
-
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(getClass())
@@ -221,7 +206,6 @@ public class Rule implements RuleDefinition {
             .add("protocol", protocol)
             .add("omnidirectional", omnidirectional)
             .add("position", position)
-            .add("group", group)
             .toString();
     }
 }

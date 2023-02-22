@@ -1,8 +1,8 @@
 /*******************************************************************************
  * This file is part of OpenNMS(R).
  *
- * Copyright (C) 2018-2022 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
+ * Copyright (C) 2018-2023 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
  *
@@ -36,15 +36,11 @@ import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.Warmup;
 import org.openjdk.jmh.infra.Blackhole;
-import org.opennms.horizon.flows.classification.csv.CsvService;
-import org.opennms.horizon.flows.classification.csv.CsvServiceTest;
+import org.opennms.horizon.flows.classification.csv.CsvImporter;
 import org.opennms.horizon.flows.classification.internal.DefaultClassificationEngine;
-import org.opennms.horizon.flows.classification.internal.csv.CsvServiceImpl;
-import org.opennms.horizon.flows.classification.internal.validation.RuleValidator;
-import org.opennms.horizon.flows.classification.persistence.api.GroupBuilder;
-import org.opennms.horizon.flows.classification.persistence.api.Groups;
 import org.opennms.horizon.flows.classification.persistence.api.Rule;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -69,10 +65,10 @@ public class ClassificationEngineBenchmark {
         org.openjdk.jmh.Main.main(args);
     }
 
-    public static List<Rule> getRules(String resource) {
-        var group = new GroupBuilder().withName(Groups.USER_DEFINED).build();
-        final CsvService csvService = new CsvServiceImpl(org.mockito.Mockito.mock(RuleValidator.class));
-        final List<Rule> rules = csvService.parseCSV(group, CsvServiceTest.class.getResourceAsStream(resource), true).getRules();
+    public static List<Rule> getRules(String resource) throws IOException {
+        final var rules = CsvImporter.parseCSV(
+            ClassificationEngineBenchmark.class.getResourceAsStream(resource),
+            true);
         int cnt = 0;
         for (var r: rules) {
             r.setPosition(cnt++);
@@ -93,7 +89,7 @@ public class ClassificationEngineBenchmark {
         private List<ClassificationRequest> classificationRequests;
 
         @Setup
-        public void setup() throws InterruptedException {
+        public void setup() throws InterruptedException, IOException {
             var rules = getRules(ruleSet);
             classificationEngine = new DefaultClassificationEngine(() -> rules, org.mockito.Mockito.mock(FilterService.class));
             classificationRequests = RandomClassificationEngineTest.streamOfclassificationRequests(rules, 123456l).skip(index * BATCH_SIZE).limit(BATCH_SIZE).collect(Collectors.toList());

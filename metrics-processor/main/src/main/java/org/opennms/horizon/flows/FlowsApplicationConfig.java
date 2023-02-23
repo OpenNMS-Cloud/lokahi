@@ -88,8 +88,9 @@ public class FlowsApplicationConfig {
     }
 
     @Bean
-    public Pipeline createPipeLine(final DocumentEnricherImpl documentEnricher, final FlowRepository flowRepository) {
-        var pipeLine = new PipelineImpl(documentEnricher);
+    public Pipeline createPipeLine(final MetricRegistry metricRegistry, final DocumentEnricherImpl documentEnricher,
+                                   final FlowRepository flowRepository) {
+        var pipeLine = new PipelineImpl(metricRegistry, documentEnricher);
         var properties = new HashMap<>();
         properties.put(PipelineImpl.REPOSITORY_ID, "DataPlatform");
         pipeLine.onBind(flowRepository, properties);

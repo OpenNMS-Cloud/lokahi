@@ -29,6 +29,8 @@
 package org.opennms.horizon.flows.processing;
 
 import com.codahale.metrics.MetricRegistry;
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
 import org.opennms.horizon.flows.classification.ClassificationEngine;
 import org.opennms.horizon.flows.classification.ClassificationRequest;
 import org.opennms.horizon.flows.classification.persistence.api.Protocols;
@@ -36,6 +38,7 @@ import org.opennms.horizon.flows.grpc.client.InventoryClient;
 import org.opennms.horizon.grpc.flows.contract.ContextKey;
 import org.opennms.horizon.grpc.flows.contract.FlowDocument;
 import org.opennms.horizon.grpc.flows.contract.FlowSource;
+import org.opennms.horizon.inventory.dto.IpInterfaceDTO;
 import org.opennms.horizon.shared.utils.InetAddressUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -156,14 +159,24 @@ public class DocumentEnricherImpl {
 //                return nodeDocument;
 //            }
 //        }
-        final var iface = inventoryClient.getIpInterfaceFromQuery(tenantId, ipAddress, location);
-        if(iface == null){
-            return Optional.empty();
+        final IpInterfaceDTO iface;
+        try {
+            iface = inventoryClient.getIpInterfaceFromQuery(tenantId, ipAddress, location);
+        } catch (StatusRuntimeException e) {
+            if (Status.NOT_FOUND.getCode().equals(e.getStatus().getCode())){
+                return Optional.empty();
+            } else {
+                throw e;
+            }
         }
 
+        if (iface == null) {
+            return Optional.empty();
+        }
         var nodeInfo = new NodeInfo();
         nodeInfo.setNodeId(iface.getNodeId());
         nodeInfo.setInterfaceId(iface.getId());
+        nodeInfo.setForeignId(iface.getHostname()); // temporary due to no unique id in inventory
         return Optional.of(nodeInfo);
     }
 

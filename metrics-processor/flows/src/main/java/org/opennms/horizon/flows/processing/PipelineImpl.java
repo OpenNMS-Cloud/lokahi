@@ -72,9 +72,8 @@ public class PipelineImpl implements Pipeline {
 
     private final Map<String, Persister> persisters = Maps.newConcurrentMap();
 
-    public PipelineImpl(final DocumentEnricherImpl documentEnricher) {
-        this.metricRegistry = new MetricRegistry();
-
+    public PipelineImpl(final MetricRegistry metricRegistry, final DocumentEnricherImpl documentEnricher) {
+        this.metricRegistry = Objects.requireNonNull(metricRegistry);
         this.documentEnricher = Objects.requireNonNull(documentEnricher);
 
         this.emptyFlows = metricRegistry.counter("emptyFlows");

@@ -44,7 +44,6 @@ export const useAppliancesQueries = defineStore('appliancesQueries', {
     const fetchMinionMetrics = (instance: string) =>
       useQuery({
         query: ListMinionMetricsDocument,
-
         variables: {
           instance,
           monitor: Monitor.ECHO,

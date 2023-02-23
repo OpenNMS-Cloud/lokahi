@@ -28,6 +28,8 @@ export interface IIcon {
   image: any
   title?: string
   tooltip?: string
+  size?: string
+  cursorHover?: string
 }
 
 export const enum Monitor {

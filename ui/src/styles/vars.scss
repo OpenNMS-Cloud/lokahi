@@ -1,0 +1,11 @@
+$border-radius: (
+  xs: 3px,
+  s: 5px,
+  m: 10px
+) !default;
+
+@use "sass:map";
+
+$border-radius-xs: map.get($border-radius, 'xs');
+$border-radius-s: map.get($border-radius, 's');
+$border-radius-m: map.get($border-radius, 'm');

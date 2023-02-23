@@ -1,0 +1,23 @@
+fragment TagsParts on Query {
+  tags {
+    id
+    name
+    tenantId
+  }
+}
+
+query ListTags {
+  ...TagsParts
+}
+
+fragment TagsSearchParts on Query {
+  tags(searchTerm: $searchTerm) {
+    id
+    name
+    tenantId
+  }
+}
+
+query ListTagsSearch($searchTerm: String) {
+  ...TagsSearchParts
+}

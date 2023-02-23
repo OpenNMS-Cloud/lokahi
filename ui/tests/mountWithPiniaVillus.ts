@@ -3,7 +3,15 @@ import { createTestingPinia } from '@pinia/testing'
 import { VILLUS_CLIENT, createClient } from 'villus'
 
 /**
- * Mounting component with pinia/testing, villus and additional options. 
+ * Mounting component with pinia/testing, villus and additional options.
+ * Usage:
+ *  wrapper = mountWithPiniaVillus({
+ *    component: SomeComponent,
+ *    shallow: true,
+ *    props,
+ *    ...
+ *  })
+ *
  * @param mountingOption
  *            component
  *            shallow
@@ -15,17 +23,15 @@ import { VILLUS_CLIENT, createClient } from 'villus'
  * @returns mounted component
  */
 const wrapper = (mountingOption: Record<string, any>): any => {
-  const { component, shallow = false, global = {}, attachTo } = mountingOption
-  const  { stubs = {}, plugins = [], provide = {} } = global
+  const { component, shallow = false, props = {}, global = {}, attachTo } = mountingOption
+  const { stubs = {}, plugins = [], provide = {} } = global
 
   const globalOptions: Record<string, any> = {
     shallow,
+    props,
     global: {
       stubs: { ...stubs },
-      plugins: [ 
-        createTestingPinia(),
-        ...plugins 
-      ],
+      plugins: [createTestingPinia(), ...plugins],
       provide: {
         [VILLUS_CLIENT as unknown as string]: createClient({
           url: 'https://test/graphql'
@@ -35,7 +41,7 @@ const wrapper = (mountingOption: Record<string, any>): any => {
     },
     attachTo
   }
-  
+
   return mount(component, globalOptions)
 }
 

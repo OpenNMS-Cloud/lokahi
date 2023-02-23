@@ -1,3 +1,16 @@
 query ListLocationsForDiscovery {
   ...LocationsParts
 }
+
+query ListDiscoveryConfig {
+  listDiscoveryConfig {
+    configName
+    ipAddresses
+    retries
+    snmpConfig {
+      ports
+      readCommunities
+    }
+    timeout
+  }
+}

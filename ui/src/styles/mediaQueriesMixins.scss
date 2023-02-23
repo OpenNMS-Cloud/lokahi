@@ -1,5 +1,5 @@
 /* 
-Bootstrap breakpoints - Grid containers
+Bootstrap breakpoints - Grid containers.
 Define the maximum width for different screen sizes.
 */
 $grid-breakpoints: (
@@ -13,18 +13,21 @@ $grid-breakpoints: (
 
 @use "sass:map";
 
+@mixin screen-xs {
+  @media (max-width: map.get($grid-breakpoints, 'sm')) { @content; } // < 576
+}
 @mixin screen-sm {
-  @media (max-width: map.get($grid-breakpoints, 'sm')) { @content; }
+  @media (min-width: map.get($grid-breakpoints, 'sm')) { @content; } // < 768
 }
 @mixin screen-md {
-  @media (max-width: map.get($grid-breakpoints, 'md')) { @content; }
+  @media (min-width: map.get($grid-breakpoints, 'md')) { @content; } // < 992
 }
 @mixin screen-lg {
-  @media (min-width: map.get($grid-breakpoints, 'lg')) { @content; }
+  @media (min-width: map.get($grid-breakpoints, 'lg')) { @content; } // < 1200
 }
 @mixin screen-xl {
-  @media (min-width: map.get($grid-breakpoints, 'xl')) { @content; }
+  @media (min-width: map.get($grid-breakpoints, 'xl')) { @content; } // < 1400
 }
 @mixin screen-xxl {
-  @media (min-width: map.get($grid-breakpoints, 'xxl')) { @content; }
+  @media (min-width: map.get($grid-breakpoints, 'xxl')) { @content; } // > 1400
 }

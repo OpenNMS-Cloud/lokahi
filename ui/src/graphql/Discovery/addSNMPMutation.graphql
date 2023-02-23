@@ -1,0 +1,10 @@
+mutation CreateDiscoveryConfig($snmpInfo: CreateDiscoveryConfigRequestInput!) {
+  createDiscoveryConfig(request: $snmpInfo) {
+    configName
+    ipAddresses
+    snmpConfig {
+      ports
+      readCommunities
+    }
+  }
+}

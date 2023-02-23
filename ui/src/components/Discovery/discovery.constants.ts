@@ -1,6 +1,12 @@
 export enum DiscoveryType {
+  None,
   ICMP,
   Azure,
-  Syslog,
-  SNMP
+  SyslogSNMPTraps
+}
+
+export enum ContentEditableType {
+  IP,
+  CommunityString,
+  UDPPort
 }

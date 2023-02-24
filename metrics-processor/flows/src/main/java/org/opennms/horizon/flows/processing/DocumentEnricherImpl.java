@@ -58,8 +58,6 @@ import java.util.stream.Stream;
 public class DocumentEnricherImpl {
     private static final Logger LOG = LoggerFactory.getLogger(DocumentEnricherImpl.class);
 
-    private static final String NODE_METADATA_CACHE = "flows.node.metadata";
-
     private InventoryClient inventoryClient;
 
     private final ClassificationEngine classificationEngine;
@@ -87,6 +85,8 @@ public class DocumentEnricherImpl {
             if (document == null) {
                 return Stream.empty();
             }
+
+            document.setTenantId(tenantId);
 
             // Node data
             getNodeInfo(flow.getLocation(), flow.getExporterAddress(), tenantId).ifPresent(document::setExporterNode);

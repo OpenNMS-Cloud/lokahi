@@ -28,8 +28,6 @@
 
 package org.opennms.horizon.shared.ipc.sink.api;
 
-import org.opennms.horizon.grpc.flows.contract.FlowDocumentLog;
-
 import com.google.protobuf.Message;
 
 /**

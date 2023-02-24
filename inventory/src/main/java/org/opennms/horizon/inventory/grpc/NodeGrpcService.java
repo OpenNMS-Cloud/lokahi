@@ -241,17 +241,5 @@ public class NodeGrpcService extends NodeServiceGrpc.NodeServiceImplBase {
             }
         });
     }
-
-    private void sendTaskSetsToMinion(Node node, String tenantId) {
-        Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, tenantId).run(()->
-        {
-            try {
-                taskSetService.sendDetectorTasks(node);
-                scannerService.sendNodeScannerTask(List.of(nodeMapper.modelToDTO(node)),
-                    node.getMonitoringLocation().getLocation(), node.getTenantId());
-            } catch (Exception e) {
-                log.error("Error while sending detector/nodescan task for node with label {}", node.getNodeLabel());
-            }
-        });
-    }
+    
 }

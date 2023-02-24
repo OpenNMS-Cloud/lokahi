@@ -123,8 +123,8 @@ public class ScannerResponseService {
                 .setManagementIp(pingResponse.getIpAddress())
                 .setLabel(pingResponse.getIpAddress())
                 .build();
-            nodeService.createNode(createDTO, ScanType.DISCOVERY_SCAN, tenantId);
-
+            Node node = nodeService.createNode(createDTO, ScanType.DISCOVERY_SCAN, tenantId);
+            nodeService.sendNewNodeTaskSetAsync(node, tenantId);
         }
     }
 

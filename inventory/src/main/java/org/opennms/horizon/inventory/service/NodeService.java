@@ -164,8 +164,7 @@ public class NodeService {
             .setNodeId(node.getId())
             .addAllTags(request.getTagsList())
             .build());
-        // Asynchronously send tasks to Minion
-        executorService.execute(() -> sendTaskSetsToMinion(node, tenantId));
+
         return node;
     }
 
@@ -236,8 +235,13 @@ public class NodeService {
         }
     }
 
+    public void sendNewNodeTaskSetAsync(Node node, String tenantId) {
+        executorService.execute(() -> sendTaskSetsToMinion(node, tenantId));
+    }
+
     private void sendTaskSetsToMinion(Node node, String tenantId) {
-        Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, tenantId).run(()->
+
+        Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, tenantId).run(() ->
         {
             try {
                 detectorTaskSetService.sendDetectorTasks(node);

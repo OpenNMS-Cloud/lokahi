@@ -32,7 +32,7 @@ import com.codahale.metrics.MetricRegistry;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
-import org.opennms.horizon.grpc.flows.contract.FlowDocument;
+import org.opennms.dataplatform.flows.document.FlowDocument;
 import org.opennms.horizon.minion.flows.parser.factory.DnsResolver;
 import org.opennms.horizon.minion.flows.parser.transport.MessageBuilder;
 import org.opennms.horizon.shared.ipc.rpc.IpcIdentity;

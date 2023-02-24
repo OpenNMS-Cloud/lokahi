@@ -37,22 +37,27 @@
       <artifactId>commons-csv</artifactId>
       <version>1.9.0</version>
     </dependency>
-      <dependency>
-          <groupId>org.osgi</groupId>
-          <artifactId>osgi.core</artifactId>
-      </dependency>
-      <dependency>
-          <groupId>org.opennms.horizon.shared</groupId>
-          <artifactId>ipc-api</artifactId>
-          <version>${project.version}</version>
-      </dependency>
-      <dependency>
-          <groupId>org.opennms.horizon.minion</groupId>
-          <artifactId>plugins-api</artifactId>
-          <version>${project.version}</version>
-          <scope>compile</scope>
-      </dependency>
-
+    <dependency>
+        <groupId>org.osgi</groupId>
+        <artifactId>osgi.core</artifactId>
+    </dependency>
+    <dependency>
+        <groupId>org.opennms.horizon.shared</groupId>
+        <artifactId>flows</artifactId>
+        <version>${project.version}</version>
+        <scope>compile</scope>
+    </dependency>
+    <dependency>
+        <groupId>org.opennms.horizon.shared</groupId>
+        <artifactId>ipc-api</artifactId>
+        <version>${project.version}</version>
+    </dependency>
+    <dependency>
+        <groupId>org.opennms.horizon.minion</groupId>
+        <artifactId>plugins-api</artifactId>
+        <version>${project.version}</version>
+        <scope>compile</scope>
+    </dependency>
 
     <!-- Test -->
     <dependency>

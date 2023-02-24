@@ -1,12 +1,11 @@
 syntax = "proto3";
-package opennms.sink.flow;
 
+option go_package = "github.com/OpenNMS-Cloud/flows/api/flows/document";
 option java_multiple_files = true;
-option java_package = "org.opennms.horizon.grpc.flows.contract";
-option java_outer_classname = "FlowsProtos";
+package org.opennms.dataplatform.flows.document;
+
 
 import "google/protobuf/wrappers.proto";
-import "opennms_minion_ipc.proto";
 
 
 enum Direction {
@@ -41,9 +40,10 @@ enum Locality {
 
 message NodeInfo {
     string foreign_source = 1;
-    string foregin_id = 2;
-    uint32 node_id = 3;
+    string foreign_id = 2;
+    int64 node_id = 3;
     repeated string categories = 4;
+    int64 interface_id = 5;
 }
 
 message FlowDocument {
@@ -65,7 +65,7 @@ message FlowDocument {
     google.protobuf.UInt32Value num_flow_records = 14; // Number of flow records in the associated packet.
     google.protobuf.UInt64Value num_packets = 15; // Number of packets in the flow.
     google.protobuf.UInt64Value flow_seq_num = 16; // Flow packet sequence number.
-    google.protobuf.UInt32Value input_snmp_ifindex   = 17; // Input SNMP ifIndex.
+    google.protobuf.UInt32Value input_snmp_ifindex = 17; // Input SNMP ifIndex.
     google.protobuf.UInt32Value output_snmp_ifindex = 18; // Output SNMP ifIndex.
     google.protobuf.UInt32Value ip_protocol_version = 19; // IPv4 vs IPv6.
     string next_hop_address = 20; // Next hop IpAddress.
@@ -82,46 +82,29 @@ message FlowDocument {
     google.protobuf.UInt32Value tos = 32; // TOS
     NetflowVersion netflow_version = 33; // Netflow version
     google.protobuf.UInt32Value vlan = 34; // VLAN ID.
-
-    string exporter_address = 48; // Raw sending IP of the exporter
-    uint32 exporter_port = 49; // Raw sending port of the exporter
-    string exporter_identifier = 50; // Protocol specific exporter identifier
-
     NodeInfo src_node = 35;
     NodeInfo exporter_node = 36;
     NodeInfo dest_node = 37;
-
     string application = 38;
     string host = 39;
     string location = 40;
-
     Locality src_locality = 41;
     Locality dst_locality = 42;
     Locality flow_locality = 43;
-
     reserved 44; // former convo_key
-
-    uint64 clock_correction = 45; // Applied clock correction im milliseconds.
-
+    uint64 clock_correction = 45;// Applied clock correction im milliseconds.
     google.protobuf.UInt32Value dscp = 46; // DSCP; upper 6 bits of TOS
     google.protobuf.UInt32Value ecn = 47; // ECN; lower 2 bits of TOS
-
-    FlowSource flowSource = 51;
-}
-
-message FlowSource {
-  string location = 1;
-  string sourceAddress = 2;
-  ContextKey contextKey = 3;
-}
-
-message ContextKey {
-  string context = 1;
-  string key = 2;
+    string tenant_id = 48; //tenant id for multi-tenancy life
+    string exporter_address = 49; // Raw sending IP of the exporter
+    google.protobuf.UInt32Value exporter_port = 50; // Raw sending port of the exporter
+    string exporter_identifier = 52; // Protocol specific exporter identifier
+    uint64 received_at = 53; // Flow received at in milliseconds. for clock skew detection
 }
 
 message FlowDocumentLog {
-  minion.Identity identity = 1;
-  FlowSource flowSource = 2;
+  string location = 1;
+  string system_id = 2;
+
   repeated FlowDocument message = 5;
 }

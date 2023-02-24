@@ -35,11 +35,10 @@ import com.spotify.hamcrest.pojo.IsPojo;
 import org.hamcrest.Matchers;
 import org.junit.Assert;
 import org.junit.Test;
+import org.opennms.dataplatform.flows.document.Direction;
+import org.opennms.dataplatform.flows.document.FlowDocument;
 import org.opennms.horizon.flows.classification.ClassificationRequest;
 import org.opennms.horizon.flows.classification.IpAddr;
-import org.opennms.horizon.grpc.flows.contract.FlowDocument;
-import org.opennms.horizon.grpc.flows.contract.FlowSource;
-import org.opennms.horizon.inventory.dto.NodeDTO;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -55,8 +54,8 @@ public class DocumentEnricherTest {
 
     private static FlowDocument createFlowDocument(String sourceIp, String destIp, final long timeOffset) {
         final var now = Instant.now();
-
         final var flow = FlowDocument.newBuilder()
+            .setReceivedAt(now.plus(timeOffset, ChronoUnit.MILLIS).toEpochMilli())
             .setTimestamp(now.toEpochMilli())
             .setFirstSwitched(UInt64Value.of(now.minus(20_000L, ChronoUnit.MILLIS).toEpochMilli()))
             .setDeltaSwitched(UInt64Value.of(now.minus(10_000L, ChronoUnit.MILLIS).toEpochMilli()))
@@ -65,16 +64,11 @@ public class DocumentEnricherTest {
             .setSrcPort(UInt32Value.of(510))
             .setDstAddress(destIp)
             .setDstPort(UInt32Value.of(80))
-            .setProtocol(UInt32Value.of(6)); // TCP
+            .setProtocol(UInt32Value.of(6)) // TCP
+            .setLocation("Default")
+            .setExporterAddress("127.0.0.1");
 
         return flow.build();
-    }
-
-    private static NodeDTO createNodeDTO(long nodeId, String foreignSource) {
-        final var node = NodeDTO.newBuilder()
-            .setId(nodeId)
-            .setSystemLocation(foreignSource); // temp use SystemLocation as foreignSource
-        return node.build();
     }
 
     @Test
@@ -82,7 +76,7 @@ public class DocumentEnricherTest {
         final MockDocumentEnricherFactory factory = new MockDocumentEnricherFactory(new HashMap<>());
         final DocumentEnricherImpl enricher = factory.getEnricher();
 
-        final EnrichedFlow flowDocument = new EnrichedFlow();
+        final var flowDocument = FlowDocument.newBuilder();
 
         // verify that null values are handled correctly, see issue HZN-1329
         ClassificationRequest classificationRequest;
@@ -90,17 +84,17 @@ public class DocumentEnricherTest {
         classificationRequest = enricher.createClassificationRequest(flowDocument);
         Assert.assertEquals(false, classificationRequest.isClassifiable());
 
-        flowDocument.setDstPort(123);
+        flowDocument.setDstPort(UInt32Value.of(123));
 
         classificationRequest = enricher.createClassificationRequest(flowDocument);
         Assert.assertEquals(false, classificationRequest.isClassifiable());
 
-        flowDocument.setSrcPort(456);
+        flowDocument.setSrcPort(UInt32Value.of(456));
 
         classificationRequest = enricher.createClassificationRequest(flowDocument);
         Assert.assertEquals(false, classificationRequest.isClassifiable());
 
-        flowDocument.setProtocol(6);
+        flowDocument.setProtocol(UInt32Value.of(6));
 
         classificationRequest = enricher.createClassificationRequest(flowDocument);
         Assert.assertEquals(true, classificationRequest.isClassifiable());
@@ -111,13 +105,13 @@ public class DocumentEnricherTest {
         final MockDocumentEnricherFactory factory = new MockDocumentEnricherFactory(new HashMap<>());
         final DocumentEnricherImpl enricher = factory.getEnricher();
 
-        final EnrichedFlow d1 = new EnrichedFlow();
-        d1.setSrcAddr("1.1.1.1");
-        d1.setSrcPort(1);
-        d1.setDstAddr("2.2.2.2");
-        d1.setDstPort(2);
-        d1.setProtocol(6);
-        d1.setDirection(EnrichedFlow.Direction.INGRESS);
+        final var d1 = FlowDocument.newBuilder()
+        .setSrcAddress("1.1.1.1")
+        .setSrcPort(UInt32Value.of(1))
+        .setDstAddress("2.2.2.2")
+        .setDstPort(UInt32Value.of(2))
+        .setProtocol(UInt32Value.of(6))
+        .setDirection(Direction.INGRESS);
 
         final ClassificationRequest c1 = enricher.createClassificationRequest(d1);
         Assert.assertEquals(IpAddr.of("1.1.1.1"), c1.getSrcAddress());
@@ -125,13 +119,13 @@ public class DocumentEnricherTest {
         Assert.assertEquals(Integer.valueOf(1), c1.getSrcPort());
         Assert.assertEquals(Integer.valueOf(2), c1.getDstPort());
 
-        final EnrichedFlow d2 = new EnrichedFlow();
-        d2.setSrcAddr("1.1.1.1");
-        d2.setSrcPort(1);
-        d2.setDstAddr("2.2.2.2");
-        d2.setDstPort(2);
-        d2.setProtocol(6);
-        d2.setDirection(EnrichedFlow.Direction.EGRESS);
+        final var d2 = FlowDocument.newBuilder()
+        .setSrcAddress("1.1.1.1")
+        .setSrcPort(UInt32Value.of(1))
+        .setDstAddress("2.2.2.2")
+        .setDstPort(UInt32Value.of(2))
+        .setProtocol(UInt32Value.of(6))
+        .setDirection(Direction.EGRESS);
 
         // check that fields stay as theay are even when EGRESS is used
         final ClassificationRequest c2 = enricher.createClassificationRequest(d2);
@@ -140,13 +134,12 @@ public class DocumentEnricherTest {
         Assert.assertEquals(Integer.valueOf(1), c2.getSrcPort());
         Assert.assertEquals(Integer.valueOf(2), c2.getDstPort());
 
-        final EnrichedFlow d3 = new EnrichedFlow();
-        d3.setSrcAddr("1.1.1.1");
-        d3.setSrcPort(1);
-        d3.setDstAddr("2.2.2.2");
-        d3.setDstPort(2);
-        d3.setProtocol(6);
-        d3.setDirection(null);
+        final var d3 = FlowDocument.newBuilder()
+        .setSrcAddress("1.1.1.1")
+        .setSrcPort(UInt32Value.of(1))
+        .setDstAddress("2.2.2.2")
+        .setDstPort(UInt32Value.of(2))
+        .setProtocol(UInt32Value.of(6));
 
         final ClassificationRequest c3 = enricher.createClassificationRequest(d3);
         Assert.assertEquals(IpAddr.of("1.1.1.1"), c3.getSrcAddress());
@@ -166,32 +159,29 @@ public class DocumentEnricherTest {
 
         final List<FlowDocument> flows = Lists.newArrayList(flow1, flow2, flow3);
 
-        final List<EnrichedFlow> docs = enricher.enrich(flows, getFlowSource(), "tenantId");
-        List<EnrichedFlow> docs1 = new ArrayList<>();
+        final List<FlowDocument> docs = enricher.enrich(flows, "tenantId");
+        List<FlowDocument> docs1 = new ArrayList<>();
         docs1.add(docs.get(0));
         Assert.assertThat(docs.get(0), Matchers.is(
-            IsPojo.pojo(EnrichedFlow.class)
-                .where(EnrichedFlow::getTimestamp, Matchers.is(Instant.ofEpochMilli(flow1.getTimestamp())))
-                .where(EnrichedFlow::getFirstSwitched, Matchers.is(Instant.ofEpochMilli(flow1.getFirstSwitched().getValue())))
-                .where(EnrichedFlow::getDeltaSwitched, Matchers.is(Instant.ofEpochMilli(flow1.getDeltaSwitched().getValue())))
-                .where(EnrichedFlow::getLastSwitched, Matchers.is(Instant.ofEpochMilli(flow1.getLastSwitched().getValue())))));
+            IsPojo.pojo(FlowDocument.class)
+                .where(FlowDocument::getTimestamp, Matchers.equalTo(flow1.getTimestamp()))
+                .where(FlowDocument::getFirstSwitched, Matchers.equalTo(flow1.getFirstSwitched()))
+                .where(FlowDocument::getDeltaSwitched, Matchers.equalTo(flow1.getDeltaSwitched()))
+                .where(FlowDocument::getLastSwitched, Matchers.equalTo(flow1.getLastSwitched()))));
 
+        System.out.println(docs.get(1).getTimestamp() + "|" + (flow2.getTimestamp() - 3600_000L));
         Assert.assertThat(docs.get(1), Matchers.is(
-            IsPojo.pojo(EnrichedFlow.class)
-                .where(EnrichedFlow::getTimestamp, Matchers.is(Instant.ofEpochMilli(flow2.getTimestamp())))
-                .where(EnrichedFlow::getFirstSwitched, Matchers.is(Instant.ofEpochMilli(flow2.getFirstSwitched().getValue())))
-                .where(EnrichedFlow::getDeltaSwitched, Matchers.is(Instant.ofEpochMilli(flow2.getDeltaSwitched().getValue())))
-                .where(EnrichedFlow::getLastSwitched, Matchers.is(Instant.ofEpochMilli(flow2.getLastSwitched().getValue())))));
+            IsPojo.pojo(FlowDocument.class)
+                .where(FlowDocument::getTimestamp, Matchers.is(flow2.getTimestamp() - 3600_000L))
+                .where(FlowDocument::getFirstSwitched, Matchers.is(UInt64Value.of(flow2.getFirstSwitched().getValue() - 3600_000L)))
+                .where(FlowDocument::getDeltaSwitched, Matchers.is(UInt64Value.of(flow2.getDeltaSwitched().getValue() - 3600_000L)))
+                .where(FlowDocument::getLastSwitched, Matchers.is(UInt64Value.of(flow2.getLastSwitched().getValue() - 3600_000L)))));
 
         Assert.assertThat(docs.get(2), Matchers.is(
-            IsPojo.pojo(EnrichedFlow.class)
-                .where(EnrichedFlow::getTimestamp, Matchers.is(Instant.ofEpochMilli(flow3.getTimestamp())))
-                .where(EnrichedFlow::getFirstSwitched, Matchers.is(Instant.ofEpochMilli(flow3.getFirstSwitched().getValue())))
-                .where(EnrichedFlow::getDeltaSwitched, Matchers.is(Instant.ofEpochMilli(flow3.getDeltaSwitched().getValue())))
-                .where(EnrichedFlow::getLastSwitched, Matchers.is(Instant.ofEpochMilli(flow3.getLastSwitched().getValue())))));
-    }
-
-    private FlowSource getFlowSource(){
-        return FlowSource.newBuilder().setLocation("Default").setSourceAddress("127.0.0.1").build();
+            IsPojo.pojo(FlowDocument.class)
+                .where(FlowDocument::getTimestamp, Matchers.is(flow3.getTimestamp() + 3600_000L))
+                .where(FlowDocument::getFirstSwitched, Matchers.is(UInt64Value.of(flow3.getFirstSwitched().getValue() + 3600_000L)))
+                .where(FlowDocument::getDeltaSwitched, Matchers.is(UInt64Value.of(flow3.getDeltaSwitched().getValue() + 3600_000L)))
+                .where(FlowDocument::getLastSwitched, Matchers.is(UInt64Value.of(flow3.getLastSwitched().getValue() + 3600_000L)))));
     }
 }

@@ -29,7 +29,6 @@
 package org.opennms.horizon.flows.integration;
 
 import org.opennms.dataplatform.flows.document.FlowDocument;
-import org.opennms.horizon.flows.processing.EnrichedFlow;
 
 import java.util.Collection;
 
@@ -47,5 +46,5 @@ public interface FlowRepository {
      *
      * @throws FlowException on any error happening during processing.
      */
-    void persist(final Collection<? extends EnrichedFlow> enrichedFlows) throws FlowException;
+    void persist(final Collection<FlowDocument> enrichedFlows) throws FlowException;
 }

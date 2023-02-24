@@ -33,12 +33,11 @@ import com.codahale.metrics.Histogram;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.google.common.collect.Maps;
+import org.opennms.dataplatform.flows.document.FlowDocument;
 import org.opennms.horizon.flows.integration.FlowException;
 import org.opennms.horizon.flows.integration.FlowRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.opennms.horizon.grpc.flows.contract.FlowDocument;
-import org.opennms.horizon.grpc.flows.contract.FlowSource;
 
 import java.util.Collection;
 import java.util.List;
@@ -81,22 +80,22 @@ public class PipelineImpl implements Pipeline {
         this.logEnrichementTimer = metricRegistry.timer("logEnrichment");
     }
 
-    public void process(final List<FlowDocument> flows, final FlowSource source, String tenantId) throws FlowException {
+    public void process(final List<org.opennms.dataplatform.flows.document.FlowDocument> flows, String tenantId) throws FlowException {
         // Track the number of flows per call
         this.flowsPerLog.update(flows.size());
 
         // Filter empty logs
         if (flows.isEmpty()) {
             this.emptyFlows.inc();
-            LOG.info("Received empty flows from {} @ {}. Nothing to do.", source.getSourceAddress(), source.getLocation());
+            LOG.info("Received empty flows for {}. Nothing to do.", tenantId);
             return;
         }
 
         // Enrich with model data
         LOG.debug("Enriching {} flow documents.", flows.size());
-        final List<EnrichedFlow> enrichedFlows;
+        final List<FlowDocument> enrichedFlows;
         try (final Timer.Context ctx = this.logEnrichementTimer.time()) {
-            enrichedFlows = documentEnricher.enrich(flows, source, tenantId);
+            enrichedFlows = documentEnricher.enrich(flows, tenantId);
         } catch (Exception e) {
             throw new FlowException("Failed to enrich one or more flows.", e);
         }
@@ -141,7 +140,7 @@ public class PipelineImpl implements Pipeline {
             this.logTimer = Objects.requireNonNull(logTimer);
         }
 
-        public void persist(final Collection<EnrichedFlow> flows) throws FlowException {
+        public void persist(final Collection<FlowDocument> flows) throws FlowException {
             try (final var ctx = this.logTimer.time()) {
                 this.repository.persist(flows);
             }

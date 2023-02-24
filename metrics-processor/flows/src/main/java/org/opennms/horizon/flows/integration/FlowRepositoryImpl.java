@@ -1,7 +1,7 @@
 package org.opennms.horizon.flows.integration;
 
-import org.opennms.horizon.flows.processing.EnrichedFlow;
 import org.opennms.horizon.flows.processing.PipelineImpl;
+import org.opennms.dataplatform.flows.document.FlowDocument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,8 +11,8 @@ public class FlowRepositoryImpl implements FlowRepository {
     private static final Logger LOG = LoggerFactory.getLogger(PipelineImpl.class);
 
     @Override
-    public void persist(Collection<? extends EnrichedFlow> enrichedFlows) throws FlowException {
-        LOG.info("Persisting flow data: {}", enrichedFlows);
+    public void persist(Collection<FlowDocument> enrichedFlows) throws FlowException {
+        LOG.info("Persisting flow data: {}", enrichedFlows.toString());
         // implement in HS-925
     }
 }

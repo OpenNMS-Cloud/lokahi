@@ -26,13 +26,12 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-
 package org.opennms.horizon.flows;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 import lombok.extern.slf4j.Slf4j;
+import org.opennms.dataplatform.flows.document.FlowDocumentLog;
 import org.opennms.horizon.flows.processing.Pipeline;
-import org.opennms.horizon.grpc.flows.contract.FlowDocumentLog;
 import org.opennms.horizon.shared.constants.GrpcConstants;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -63,7 +62,7 @@ public class FlowProcessor {
             CompletableFuture.supplyAsync(() -> {
                 try {
                     log.trace("Processing flow {}", flowDocumentLog);
-                    pipeline.process(flowDocumentLog.getMessageList(), flowDocumentLog.getFlowSource(), tenantId);
+                    pipeline.process(flowDocumentLog.getMessageList(), tenantId);
                 } catch (Exception exc) {
                     log.warn("Error processing flow: {} error: {}", flowDocumentLog, exc);
                 }

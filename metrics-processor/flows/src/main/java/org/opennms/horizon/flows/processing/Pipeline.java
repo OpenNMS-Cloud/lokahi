@@ -28,13 +28,11 @@
 
 package org.opennms.horizon.flows.processing;
 
-import org.opennms.horizon.grpc.flows.contract.FlowDocument;
-import org.opennms.horizon.grpc.flows.contract.FlowSource;
+import org.opennms.dataplatform.flows.document.FlowDocument;
 import org.opennms.horizon.flows.integration.FlowException;
 
 import java.util.List;
 
 public interface Pipeline {
-    void process(final List<FlowDocument> flows,
-                 final FlowSource source, final String tenantId) throws FlowException;
+    void process(final List<FlowDocument> flows, final String tenantId) throws FlowException;
 }

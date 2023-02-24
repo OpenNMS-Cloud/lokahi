@@ -29,21 +29,23 @@
 package org.opennms.horizon.flows.processing;
 
 import com.codahale.metrics.MetricRegistry;
+import com.google.protobuf.UInt64Value;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
+import org.opennms.dataplatform.flows.document.FlowDocument;
+import org.opennms.dataplatform.flows.document.Locality;
+import org.opennms.dataplatform.flows.document.NodeInfo;
 import org.opennms.horizon.flows.classification.ClassificationEngine;
 import org.opennms.horizon.flows.classification.ClassificationRequest;
 import org.opennms.horizon.flows.classification.persistence.api.Protocols;
 import org.opennms.horizon.flows.grpc.client.InventoryClient;
-import org.opennms.horizon.grpc.flows.contract.ContextKey;
-import org.opennms.horizon.grpc.flows.contract.FlowDocument;
-import org.opennms.horizon.grpc.flows.contract.FlowSource;
 import org.opennms.horizon.inventory.dto.IpInterfaceDTO;
 import org.opennms.horizon.shared.utils.InetAddressUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.InetAddress;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.Collections;
@@ -74,43 +76,39 @@ public class DocumentEnricherImpl {
         this.clockSkewCorrectionThreshold = clockSkewCorrectionThreshold;
     }
 
-    public List<EnrichedFlow> enrich(final Collection<FlowDocument> flows, final FlowSource source, final String tenantId) {
+    public List<FlowDocument> enrich(final Collection<org.opennms.dataplatform.flows.document.FlowDocument> flows, final String tenantId) {
         if (flows.isEmpty()) {
             LOG.info("Nothing to enrich.");
             return Collections.emptyList();
         }
 
         return flows.stream().flatMap(flow -> {
-            final EnrichedFlow document = EnrichedFlow.from(flow);
+            final var document = FlowDocument.newBuilder(flow);
             if (document == null) {
                 return Stream.empty();
             }
 
-            // Metadata from message
-            document.setHost(source.getSourceAddress());
-            document.setLocation(source.getLocation());
-
             // Node data
-            getNodeInfo(source.getLocation(), source.getSourceAddress(), source.getContextKey(), flow.getExporterIdentifier(), tenantId).ifPresent(document::setExporterNodeInfo);
+            getNodeInfo(flow.getLocation(), flow.getExporterAddress(), tenantId).ifPresent(document::setExporterNode);
             if (flow.getDstAddress() != null) {
-                getNodeInfo(source.getLocation(), flow.getDstAddress(), null, null, tenantId).ifPresent(document::setSrcNodeInfo);
+                getNodeInfo(flow.getLocation(), flow.getDstAddress(), tenantId).ifPresent(document::setSrcNode);
             }
             if (flow.getSrcAddress() != null) {
-                getNodeInfo(source.getLocation(), flow.getSrcAddress(), null, null, tenantId).ifPresent(document::setDstNodeInfo);
+                getNodeInfo(flow.getLocation(), flow.getSrcAddress(), tenantId).ifPresent(document::setDestNode);
             }
 
             // Locality
             if (flow.getSrcAddress() != null) {
-                document.setSrcLocality(isPrivateAddress(flow.getSrcAddress()) ? EnrichedFlow.Locality.PRIVATE : EnrichedFlow.Locality.PUBLIC);
+                document.setSrcLocality(isPrivateAddress(flow.getSrcAddress()) ? Locality.PRIVATE : Locality.PUBLIC);
             }
             if (flow.getDstAddress() != null) {
-                document.setDstLocality(isPrivateAddress(flow.getDstAddress()) ? EnrichedFlow.Locality.PRIVATE : EnrichedFlow.Locality.PUBLIC);
+                document.setDstLocality(isPrivateAddress(flow.getDstAddress()) ? Locality.PRIVATE : Locality.PUBLIC);
             }
 
-            if (EnrichedFlow.Locality.PUBLIC.equals(document.getDstLocality()) || EnrichedFlow.Locality.PUBLIC.equals(document.getSrcLocality())) {
-                document.setFlowLocality(EnrichedFlow.Locality.PUBLIC);
-            } else if (EnrichedFlow.Locality.PRIVATE.equals(document.getDstLocality()) || EnrichedFlow.Locality.PRIVATE.equals(document.getSrcLocality())) {
-                document.setFlowLocality(EnrichedFlow.Locality.PRIVATE);
+            if (Locality.PUBLIC.equals(document.getDstLocality()) || Locality.PUBLIC.equals(document.getSrcLocality())) {
+                document.setFlowLocality(Locality.PUBLIC);
+            } else if (Locality.PRIVATE.equals(document.getDstLocality()) || Locality.PRIVATE.equals(document.getSrcLocality())) {
+                document.setFlowLocality(Locality.PRIVATE);
             }
 
             final ClassificationRequest classificationRequest = createClassificationRequest(document);
@@ -124,17 +122,20 @@ public class DocumentEnricherImpl {
             // Fix skewed clock
             // If received time and export time differ too much, correct all timestamps by the difference
             if (this.clockSkewCorrectionThreshold > 0) {
-                if (flow.getClockCorrection() >= this.clockSkewCorrectionThreshold) {
+                final var skew = Duration.between(Instant.ofEpochMilli(flow.getReceivedAt()), Instant.ofEpochMilli(flow.getTimestamp()));
+                if (skew.abs().toMillis() >= this.clockSkewCorrectionThreshold) {
+                    // The applied correction is the negative skew
+                    document.setClockCorrection(skew.negated().toMillis());
 
                     // Fix the skew on all timestamps of the flow
-                    document.setTimestamp(Instant.ofEpochMilli(flow.getTimestamp() - flow.getClockCorrection()));
-                    document.setFirstSwitched(Instant.ofEpochMilli(flow.getFirstSwitched().getValue() - flow.getClockCorrection()));
-                    document.setDeltaSwitched(Instant.ofEpochMilli(flow.getDeltaSwitched().getValue() - flow.getClockCorrection()));
-                    document.setLastSwitched(Instant.ofEpochMilli(flow.getLastSwitched().getValue() - flow.getClockCorrection()));
+                    document.setTimestamp(Instant.ofEpochMilli(flow.getTimestamp()).minus(skew).toEpochMilli());
+                    document.setFirstSwitched(UInt64Value.of(Instant.ofEpochMilli(flow.getFirstSwitched().getValue()).minus(skew).toEpochMilli()));
+                    document.setDeltaSwitched(UInt64Value.of(Instant.ofEpochMilli(flow.getDeltaSwitched().getValue()).minus(skew).toEpochMilli()));
+                    document.setLastSwitched(UInt64Value.of(Instant.ofEpochMilli(flow.getLastSwitched().getValue()).minus(skew).toEpochMilli()));
                 }
             }
 
-            return Stream.of(document);
+            return Stream.of(document.build());
         }).collect(Collectors.toList());
     }
 
@@ -144,26 +145,13 @@ public class DocumentEnricherImpl {
     }
 
     private Optional<NodeInfo> getNodeInfo(final String location, final String ipAddress,
-                                                    final ContextKey contextKey, final String value,
-                                                    final String tenantId) {
-        // TODO: HS-961
-//        if (contextKey != null && !Strings.isNullOrEmpty(value)) {
-//            final NodeMetadataKey metadataKey = new NodeMetadataKey(contextKey, value);
-//            try {
-//                nodeDocument = this.nodeMetadataCache.get(metadataKey);
-//            } catch (ExecutionException e) {
-//                LOG.error("Error while retrieving NodeDocument from NodeMetadataCache: {}.", e.getMessage(), e);
-//                throw new RuntimeException(e);
-//            }
-//            if(nodeDocument.isPresent()) {
-//                return nodeDocument;
-//            }
-//        }
+                                           final String tenantId) {
+
         final IpInterfaceDTO iface;
         try {
             iface = inventoryClient.getIpInterfaceFromQuery(tenantId, ipAddress, location);
         } catch (StatusRuntimeException e) {
-            if (Status.NOT_FOUND.getCode().equals(e.getStatus().getCode())){
+            if (Status.NOT_FOUND.getCode().equals(e.getStatus().getCode())) {
                 return Optional.empty();
             } else {
                 throw e;
@@ -173,22 +161,28 @@ public class DocumentEnricherImpl {
         if (iface == null) {
             return Optional.empty();
         }
-        var nodeInfo = new NodeInfo();
-        nodeInfo.setNodeId(iface.getNodeId());
-        nodeInfo.setInterfaceId(iface.getId());
-        nodeInfo.setForeignId(iface.getHostname()); // temporary due to no unique id in inventory
-        return Optional.of(nodeInfo);
+        return Optional.of(NodeInfo.newBuilder()
+            .setNodeId(iface.getNodeId())
+            .setInterfaceId(iface.getId())
+            .setForeignId(iface.getHostname()) // temp until we have better solution
+            .build());
     }
 
-    public static ClassificationRequest createClassificationRequest(EnrichedFlow document) {
+    public static ClassificationRequest createClassificationRequest(FlowDocument.Builder document) {
         final ClassificationRequest request = new ClassificationRequest();
-        request.setProtocol(Protocols.getProtocol(document.getProtocol()));
+        if (document.hasProtocol()) {
+            request.setProtocol(Protocols.getProtocol(document.getProtocol().getValue()));
+        }
         request.setLocation(document.getLocation());
         request.setExporterAddress(document.getHost());
-        request.setDstAddress(document.getDstAddr());
-        request.setDstPort(document.getDstPort());
-        request.setSrcAddress(document.getSrcAddr());
-        request.setSrcPort(document.getSrcPort());
+        request.setDstAddress(document.getDstAddress());
+        if (document.hasDstPort()) {
+            request.setDstPort(document.getDstPort().getValue());
+        }
+        request.setSrcAddress(document.getSrcAddress());
+        if (document.hasSrcPort()) {
+            request.setSrcPort(document.getSrcPort().getValue());
+        }
 
         return request;
     }

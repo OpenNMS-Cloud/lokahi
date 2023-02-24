@@ -27,7 +27,7 @@
         </dependency>
         <dependency>
             <groupId>org.opennms.horizon.shared</groupId>
-            <artifactId>ipc-grpc-contract</artifactId>
+            <artifactId>flows</artifactId>
             <version>${project.version}</version>
             <scope>compile</scope>
         </dependency>

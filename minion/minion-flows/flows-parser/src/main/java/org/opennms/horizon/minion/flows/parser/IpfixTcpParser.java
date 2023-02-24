@@ -31,7 +31,7 @@ package org.opennms.horizon.minion.flows.parser;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.collect.Sets;
 import io.netty.buffer.ByteBuf;
-import org.opennms.horizon.grpc.flows.contract.FlowDocument;
+import org.opennms.dataplatform.flows.document.FlowDocument;
 import org.opennms.horizon.minion.flows.listeners.TcpParser;
 import org.opennms.horizon.minion.flows.parser.factory.DnsResolver;
 import org.opennms.horizon.minion.flows.parser.ipfix.proto.Header;

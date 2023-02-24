@@ -30,7 +30,7 @@ package org.opennms.horizon.minion.flows.parser;
 
 import com.codahale.metrics.MetricRegistry;
 import org.junit.Ignore;
-import org.opennms.horizon.grpc.flows.contract.FlowDocument;
+import org.opennms.dataplatform.flows.document.FlowDocument;
 import org.opennms.horizon.minion.flows.listeners.UdpListener;
 import org.opennms.horizon.minion.flows.parser.factory.DnsResolver;
 import org.opennms.horizon.shared.ipc.rpc.IpcIdentity;

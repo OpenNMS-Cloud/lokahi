@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
+import org.opennms.horizon.inventory.discovery.DiscoveryConfigByLocationDTO;
 import org.opennms.horizon.inventory.discovery.DiscoveryConfigDTO;
 import org.opennms.horizon.inventory.discovery.DiscoveryConfigRequest;
 import org.opennms.horizon.inventory.dto.ConfigKey;
@@ -64,7 +65,7 @@ public class DiscoveryConfigService extends ConfigurationService {
         super(modelRepo, mapper);
     }
 
-    public List<DiscoveryConfigDTO> createOrUpdateConfig(DiscoveryConfigRequest request, String tenantId) {
+    public DiscoveryConfigByLocationDTO createOrUpdateConfig(DiscoveryConfigRequest request, String tenantId) {
         ObjectMapper objectMapper = new ObjectMapper();
         if (StringUtils.isEmpty(request.getConfigName()) || StringUtils.isEmpty(request.getLocation()) || request.getIpAddressesList().isEmpty()) {
             throw new InventoryRuntimeException("Invalid config request: " + request);
@@ -75,7 +76,8 @@ public class DiscoveryConfigService extends ConfigurationService {
                     DiscoveryConfigDTO discoveryConfig = requestToConfig(request);
                     ConfigurationDTO updatedConfig = mergeConfigValues(dbConfig, discoveryConfig);
                     Configuration newConfig = createOrUpdate(updatedConfig);
-                    return jsonArrayToConfiglist((ArrayNode) newConfig.getValue());
+                    return DiscoveryConfigByLocationDTO.newBuilder().setLocation(dbConfig.getLocation())
+                        .addAllDiscoveryConfig(jsonArrayToConfiglist((ArrayNode) newConfig.getValue())).build();
                 } catch (Exception e) {
                     log.error("Error while update config value: {} with request {}", dbConfig.getValue(), request);
                     throw new InventoryRuntimeException("Error while update config value", e);
@@ -91,7 +93,8 @@ public class DiscoveryConfigService extends ConfigurationService {
                         .setLocation(request.getLocation())
                         .setTenantId(tenantId).build();
                     Configuration result = createOrUpdate(newConfig);
-                    return jsonArrayToConfiglist((ArrayNode) result.getValue());
+                    return DiscoveryConfigByLocationDTO.newBuilder()
+                        .setLocation(result.getLocation()).addAllDiscoveryConfig(jsonArrayToConfiglist((ArrayNode) result.getValue())).build();
                 } catch (Exception e) {
                     log.error("Error while creating new config with request {}", request);
                     throw new InventoryRuntimeException("Error while creating new config", e);
@@ -99,7 +102,7 @@ public class DiscoveryConfigService extends ConfigurationService {
             });
     }
 
-    List<DiscoveryConfigDTO> jsonArrayToConfiglist(ArrayNode arrayNode) throws InvalidProtocolBufferException {
+    private List<DiscoveryConfigDTO> jsonArrayToConfiglist(ArrayNode arrayNode) throws InvalidProtocolBufferException {
         List<DiscoveryConfigDTO> list = new ArrayList<>();
         for(JsonNode node: arrayNode) {
             list.add(ProtobufUtil.fromJson(node.toString(), DiscoveryConfigDTO.class));
@@ -121,30 +124,38 @@ public class DiscoveryConfigService extends ConfigurationService {
             .setValue(arrayNode.toString()).build();
     }
 
-    public Optional<DiscoveryConfigDTO> getDiscoveryConfigByName(String name, String tenantId) {
+    public Optional<DiscoveryConfigByLocationDTO> getDiscoveryConfigByName(String name, String tenantId) {
         return findByKey(tenantId, ConfigKey.DISCOVERY)
             .map(config -> {
                 try {
                     return jsonArrayToConfiglist((ArrayNode) objectMapper.readTree(config.getValue()))
-                        .stream().filter(c -> c.getConfigName().equals(name)).findFirst();
+                        .stream().filter(c -> c.getConfigName().equals(name)).findFirst()
+                        .map(discovery -> DiscoveryConfigByLocationDTO.newBuilder()
+                        .setLocation(config.getLocation())
+                        .addAllDiscoveryConfig(List.of(discovery))
+                        .build());
                 } catch (Exception e) {
                     log.error("Error while get discovery config for name {}", name);
-                    return Optional.<DiscoveryConfigDTO>empty();
+                    return Optional.<DiscoveryConfigByLocationDTO>empty();
                 }
             })
             .orElse(null);
     }
 
-    public List<DiscoveryConfigDTO> listDiscoveryConfigs(String tenantId) {
+    public Optional<DiscoveryConfigByLocationDTO> listDiscoveryConfigs(String tenantId) {
 
         return findByKey(tenantId, ConfigKey.DISCOVERY)
             .map(config -> {
                 try {
-                    return jsonArrayToConfiglist((ArrayNode) objectMapper.readTree(config.getValue()));
+                    List<DiscoveryConfigDTO> list =  jsonArrayToConfiglist((ArrayNode) objectMapper.readTree(config.getValue()));
+                    return Optional.of(DiscoveryConfigByLocationDTO.newBuilder()
+                        .setLocation(config.getLocation())
+                        .addAllDiscoveryConfig(list)
+                        .build());
                 } catch (Exception e) {
                     log.error("Error while list discovery config", e);
-                    return new ArrayList<DiscoveryConfigDTO>();
+                    return Optional.<DiscoveryConfigByLocationDTO>empty();
                 }
-            }).orElseGet(ArrayList::new);
+            }).orElse(null);
     }
 }

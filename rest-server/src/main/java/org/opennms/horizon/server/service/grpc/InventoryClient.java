@@ -32,7 +32,7 @@ package org.opennms.horizon.server.service.grpc;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import org.opennms.horizon.inventory.discovery.DiscoveryConfigDTO;
+import org.opennms.horizon.inventory.discovery.DiscoveryConfigByLocationDTO;
 import org.opennms.horizon.inventory.discovery.DiscoveryConfigOperationGrpc;
 import org.opennms.horizon.inventory.discovery.DiscoveryConfigRequest;
 import org.opennms.horizon.inventory.dto.AzureCredentialCreateDTO;
@@ -93,21 +93,21 @@ public class InventoryClient {
         }
     }
 
-    public List<DiscoveryConfigDTO> createDiscoveryConfig(DiscoveryConfigRequest request, String accessToken) {
+    public DiscoveryConfigByLocationDTO createDiscoveryConfig(DiscoveryConfigRequest request, String accessToken) {
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
         return discoveryConfigStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
-            .createConfig(request).getDiscoverConfigsList();
+            .createConfig(request);
     }
 
-    public List<DiscoveryConfigDTO> listDiscoveryConfig(String accessToken) {
+    public DiscoveryConfigByLocationDTO listDiscoveryConfig(String accessToken) {
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
         return discoveryConfigStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
-            .listDiscoveryConfig(Empty.getDefaultInstance()).getDiscoverConfigsList();
+            .listDiscoveryConfig(Empty.getDefaultInstance());
     }
 
-    public DiscoveryConfigDTO getDiscoveryConfigByName(String name, String accessToken) {
+    public DiscoveryConfigByLocationDTO getDiscoveryConfigByName(String name, String accessToken) {
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
         return discoveryConfigStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)

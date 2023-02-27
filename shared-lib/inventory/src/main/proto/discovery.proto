@@ -51,17 +51,18 @@ message DiscoveryConfigDTO {
   SNMPConfigDTO snmpConf = 5;
 }
 
+message DiscoveryConfigByLocationDTO {
+  string location = 1;
+  repeated DiscoveryConfigDTO discoveryConfig = 2;
+}
+
 message SNMPConfigDTO {
   repeated string readCommunity = 1;
   repeated int32 ports = 2;
 }
 
-message DiscoveryConfigList {
-  repeated DiscoveryConfigDTO discoverConfigs = 1;
-}
-
 service DiscoveryConfigOperation {
-  rpc createConfig(DiscoveryConfigRequest) returns (DiscoveryConfigList);
-  rpc listDiscoveryConfig(google.protobuf.Empty) returns(DiscoveryConfigList);
-  rpc getDiscoveryConfigByName(google.protobuf.StringValue) returns (DiscoveryConfigDTO);
+  rpc createConfig(DiscoveryConfigRequest) returns (DiscoveryConfigByLocationDTO);
+  rpc listDiscoveryConfig(google.protobuf.Empty) returns(DiscoveryConfigByLocationDTO);
+  rpc getDiscoveryConfigByName(google.protobuf.StringValue) returns (DiscoveryConfigByLocationDTO);
 }

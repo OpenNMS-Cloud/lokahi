@@ -28,10 +28,11 @@
 
 package org.opennms.horizon.server.service;
 
+import org.opennms.horizon.inventory.discovery.DiscoveryConfigByLocationDTO;
 import org.opennms.horizon.inventory.discovery.DiscoveryConfigRequest;
 import org.opennms.horizon.server.mapper.DiscoveryConfigMapper;
 import org.opennms.horizon.server.model.inventory.discovery.CreateDiscoveryConfigRequest;
-import org.opennms.horizon.server.model.inventory.discovery.DiscoveryConfig;
+import org.opennms.horizon.server.model.inventory.discovery.DiscoveryConfigByLocation;
 import org.opennms.horizon.server.service.grpc.InventoryClient;
 import org.opennms.horizon.server.utils.ServerHeaderUtil;
 import org.springframework.stereotype.Service;
@@ -42,7 +43,6 @@ import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.execution.ResolutionEnvironment;
 import io.leangen.graphql.spqr.spring.annotations.GraphQLApi;
 import lombok.RequiredArgsConstructor;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @RequiredArgsConstructor
@@ -54,19 +54,22 @@ public class GrpcDiscoveryService {
     private final InventoryClient client;
 
     @GraphQLMutation
-    public Flux<DiscoveryConfig> createDiscoveryConfig(CreateDiscoveryConfigRequest request, @GraphQLEnvironment ResolutionEnvironment env) {
+    public Mono<DiscoveryConfigByLocation> createDiscoveryConfig(CreateDiscoveryConfigRequest request, @GraphQLEnvironment ResolutionEnvironment env) {
         DiscoveryConfigRequest requestDto = mapper.mapRequest(request);
-        return Flux.fromIterable(mapper.configDtoListToConfig(client.createDiscoveryConfig(requestDto, headerUtil.getAuthHeader(env))));
+        DiscoveryConfigByLocationDTO dto = client.createDiscoveryConfig(requestDto, headerUtil.getAuthHeader(env));
+        return Mono.just(new DiscoveryConfigByLocation(dto.getLocation(), mapper.configDtoListToConfig(dto.getDiscoveryConfigList())));
     }
 
     @GraphQLQuery
-    public Flux<DiscoveryConfig> listDiscoveryConfig(@GraphQLEnvironment ResolutionEnvironment env) {
-        return Flux.fromIterable(mapper.configDtoListToConfig(client.listDiscoveryConfig(headerUtil.getAuthHeader(env))));
+    public Mono<DiscoveryConfigByLocation> listDiscoveryConfig(@GraphQLEnvironment ResolutionEnvironment env) {
+        DiscoveryConfigByLocationDTO dto = client.listDiscoveryConfig(headerUtil.getAuthHeader(env));
+        return Mono.just(new DiscoveryConfigByLocation(dto.getLocation(), mapper.configDtoListToConfig(dto.getDiscoveryConfigList())));
     }
 
     @GraphQLQuery
-    public Mono<DiscoveryConfig> getDiscoveryConfigByName(String name, @GraphQLEnvironment ResolutionEnvironment env) {
-        return Mono.just(mapper.configDtoToModel(client.getDiscoveryConfigByName(name, headerUtil.getAuthHeader(env))));
+    public Mono<DiscoveryConfigByLocation> getDiscoveryConfigByName(String name, @GraphQLEnvironment ResolutionEnvironment env) {
+        DiscoveryConfigByLocationDTO dto = client.getDiscoveryConfigByName(name, headerUtil.getAuthHeader(env));
+        return Mono.just(new DiscoveryConfigByLocation(dto.getLocation(), mapper.configDtoListToConfig(dto.getDiscoveryConfigList())));
     }
 
 }

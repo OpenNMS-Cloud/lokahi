@@ -35,14 +35,13 @@ import static org.mockito.Mockito.verify;
 
 import java.util.List;
 
-import io.grpc.Context;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.keycloak.common.VerificationException;
 import org.opennms.horizon.inventory.SpringContextTestInitializer;
+import org.opennms.horizon.inventory.discovery.DiscoveryConfigByLocationDTO;
 import org.opennms.horizon.inventory.discovery.DiscoveryConfigDTO;
-import org.opennms.horizon.inventory.discovery.DiscoveryConfigList;
 import org.opennms.horizon.inventory.discovery.DiscoveryConfigOperationGrpc;
 import org.opennms.horizon.inventory.discovery.DiscoveryConfigRequest;
 import org.opennms.horizon.inventory.discovery.SNMPConfigDTO;
@@ -61,6 +60,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.google.protobuf.Empty;
 import com.google.protobuf.StringValue;
 
+import io.grpc.Context;
 import io.grpc.Metadata;
 import io.grpc.ServerCall;
 import io.grpc.ServerCallHandler;
@@ -101,10 +101,11 @@ public class DiscoveryConfigGrpcItTest extends GrpcTestBase {
             .setSnmpConf(snmpConfig)
             .addAllIpAddresses(List.of("127.0.0.1-127.0.0.10")).build();
 
-        DiscoveryConfigList result = serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader)))
+        DiscoveryConfigByLocationDTO result = serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader)))
             .createConfig(request);
         assertThat(result).isNotNull()
-            .extracting(DiscoveryConfigList::getDiscoverConfigsList).asList().hasSize(1);
+            .extracting(DiscoveryConfigByLocationDTO::getLocation, dto -> dto.getDiscoveryConfigList().size())
+            .containsExactly("test-location", 1);
 
         SNMPConfigDTO snmpConfig2 = SNMPConfigDTO.newBuilder()
             .addAllPorts(List.of(1161))
@@ -114,10 +115,10 @@ public class DiscoveryConfigGrpcItTest extends GrpcTestBase {
             .setLocation("test-location2")
             .setSnmpConf(snmpConfig2)
             .addAllIpAddresses(List.of("192.168.0.1")).build();
-        DiscoveryConfigList list2 = serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader)))
+        DiscoveryConfigByLocationDTO list2 = serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader)))
             .createConfig(request2);
         assertThat(list2).isNotNull()
-            .extracting(DiscoveryConfigList::getDiscoverConfigsList).asList().hasSize(2);
+            .extracting(DiscoveryConfigByLocationDTO::getDiscoveryConfigList).asList().hasSize(2);
         verify(spyInterceptor, times(2)).verifyAccessToken(authHeader);
         verify(spyInterceptor, times(2)).interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));
     }
@@ -138,12 +139,13 @@ public class DiscoveryConfigGrpcItTest extends GrpcTestBase {
             configRepo.save(configuration);
         });
 
-        DiscoveryConfigDTO discoveryConfig = serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader)))
+        DiscoveryConfigByLocationDTO discoveryConfig = serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader)))
                 .getDiscoveryConfigByName(StringValue.of(configName));
 
         assertThat(discoveryConfig).isNotNull()
-            .extracting(DiscoveryConfigDTO::getConfigName, c -> c.getIpAddressesList().get(0), c -> c.getSnmpConf().getReadCommunityList().get(0))
-            .containsExactly(configName, "127.0.0.1", "test-community");
+            .extracting(DiscoveryConfigByLocationDTO::getLocation, dto -> dto.getDiscoveryConfig(0).getConfigName(), dto -> dto.getDiscoveryConfig(0).getIpAddressesList().get(0),
+                dto -> dto.getDiscoveryConfig(0).getSnmpConf().getReadCommunityList().get(0))
+            .containsExactly(location, configName, "127.0.0.1", "test-community");
 
         verify(spyInterceptor).verifyAccessToken(authHeader);
         verify(spyInterceptor).interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));
@@ -170,11 +172,11 @@ public class DiscoveryConfigGrpcItTest extends GrpcTestBase {
             configRepo.save(configuration);
         });
 
-        DiscoveryConfigList result = serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader)))
+        DiscoveryConfigByLocationDTO result = serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader)))
             .listDiscoveryConfig(Empty.getDefaultInstance());
 
         assertThat(result).isNotNull()
-            .extracting(DiscoveryConfigList::getDiscoverConfigsList).asList().hasSize(2)
+            .extracting(DiscoveryConfigByLocationDTO::getDiscoveryConfigList).asList().hasSize(2)
             .extracting("configName")
             .contains(configName, "new-config");
 

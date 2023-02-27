@@ -28,25 +28,30 @@
 
 package org.opennms.horizon.inventory;
 
-import io.grpc.ManagedChannel;
-import io.grpc.inprocess.InProcessChannelBuilder;
+import java.io.IOException;
+import java.util.function.Supplier;
+
 import org.jetbrains.annotations.NotNull;
 import org.opennms.horizon.inventory.config.MinionGatewayGrpcClientConfig;
-import org.opennms.taskset.service.contract.TaskSetServiceGrpc;
+import org.opennms.horizon.inventory.grpc.taskset.TestTaskSetGrpcService;
 import org.springframework.beans.factory.config.BeanDefinitionCustomizer;
 import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.support.GenericApplicationContext;
 import org.testcontainers.containers.PostgreSQLContainer;
 
-import java.util.function.Supplier;
+import io.grpc.ManagedChannel;
+import io.grpc.Server;
+import io.grpc.inprocess.InProcessChannelBuilder;
+import io.grpc.inprocess.InProcessServerBuilder;
 
 public class SpringContextTestInitializer implements ApplicationContextInitializer<GenericApplicationContext> {
+    public static String GRPC_SERVICE_BEAN = "test-grpc-service";
+
 
     private static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:14.5-alpine")
         .withDatabaseName("inventory").withUsername("inventory")
         .withPassword("password").withExposedPorts(5432);
-
 
     static {
         postgres.start();
@@ -55,7 +60,11 @@ public class SpringContextTestInitializer implements ApplicationContextInitializ
     @Override
     public void initialize(@NotNull GenericApplicationContext context) {
         initDatasourceParams(context);
-        initMockGrpcTaskSetService(context);
+        try {
+            initMockGrpcTaskSetService(context);
+        } catch (IOException | InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private void initDatasourceParams(GenericApplicationContext context) {
@@ -69,10 +78,18 @@ public class SpringContextTestInitializer implements ApplicationContextInitializ
     // Creating this test bean in this class due to errors as we are sharing the context between test classes.
     // The Mock Grpc server was getting a different stub due to other tests interfering.
     // This overrides the appropriate bean from the beginning of when the spring context gets initialized.
-    private void initMockGrpcTaskSetService(GenericApplicationContext context) {
+    private void initMockGrpcTaskSetService(GenericApplicationContext context) throws IOException, InterruptedException {
+        String serverName = InProcessServerBuilder.generateName();
+        TestTaskSetGrpcService grpcService = new TestTaskSetGrpcService();
+        Server server = InProcessServerBuilder.forName(serverName).directExecutor()
+            .addService(grpcService).build();
+        server.start();
+        Thread.sleep(5000);
         registerBean(context, MinionGatewayGrpcClientConfig.MINION_GATEWAY_GRPC_CHANNEL, ManagedChannel.class,
-            () -> InProcessChannelBuilder.forName(TaskSetServiceGrpc.SERVICE_NAME).directExecutor().build()
+            () -> InProcessChannelBuilder.forName(serverName).directExecutor().build()
         );
+        registerBean(context, GRPC_SERVICE_BEAN, TestTaskSetGrpcService.class, () -> grpcService);
+
     }
 
     private <T> void registerBean(GenericApplicationContext context, String name, Class<T> clazz, Supplier<T> supplier) {

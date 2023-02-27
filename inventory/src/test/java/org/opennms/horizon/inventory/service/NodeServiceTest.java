@@ -32,13 +32,13 @@ import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mapstruct.factory.Mappers;
 import org.mockito.ArgumentCaptor;
 import org.opennms.horizon.inventory.dto.NodeCreateDTO;
 import org.opennms.horizon.inventory.dto.NodeDTO;
 import org.opennms.horizon.inventory.dto.TagCreateDTO;
 import org.opennms.horizon.inventory.dto.TagCreateListDTO;
 import org.opennms.horizon.inventory.mapper.NodeMapper;
-import org.opennms.horizon.inventory.mapper.NodeMapperImpl;
 import org.opennms.horizon.inventory.model.IpInterface;
 import org.opennms.horizon.inventory.model.MonitoringLocation;
 import org.opennms.horizon.inventory.model.Node;
@@ -50,7 +50,6 @@ import org.opennms.horizon.inventory.service.taskset.DetectorTaskSetService;
 import org.opennms.horizon.inventory.service.taskset.MonitorTaskSetService;
 import org.opennms.horizon.inventory.service.taskset.ScannerTaskSetService;
 import org.opennms.horizon.inventory.taskset.api.TaskSetPublisher;
-import org.opennms.horizon.inventory.repository.TagRepository;
 import org.opennms.horizon.shared.constants.GrpcConstants;
 import org.opennms.taskset.contract.ScanType;
 
@@ -73,18 +72,16 @@ import static org.mockito.Mockito.when;
 
 public class NodeServiceTest {
     private NodeService nodeService;
-    private NodeMapper nodeMapper;
     private NodeRepository mockNodeRepository;
     private MonitoringLocationRepository mockMonitoringLocationRepository;
     private IpInterfaceRepository mockIpInterfaceRepository;
     private ConfigUpdateService mockConfigUpdateService;
     private TagService tagService;
     private final String tenantID = "test-tenant";
-    private Node node;
 
     @BeforeEach
     void prepareTest() {
-        nodeMapper = new NodeMapperImpl();
+        NodeMapper nodeMapper = Mappers.getMapper(NodeMapper.class);
         mockNodeRepository = mock(NodeRepository.class);
         mockMonitoringLocationRepository = mock(MonitoringLocationRepository.class);
         mockIpInterfaceRepository = mock(IpInterfaceRepository.class);
@@ -104,7 +101,7 @@ public class NodeServiceTest {
             tagService,
             nodeMapper);
 
-        node = new Node();
+        Node node = new Node();
         doReturn(node).when(mockNodeRepository).save(any(node.getClass()));
     }
 

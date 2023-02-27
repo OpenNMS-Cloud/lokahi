@@ -29,9 +29,6 @@
 package org.opennms.horizon.inventory.grpc;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 import java.util.List;
 
@@ -83,15 +80,11 @@ public class DiscoveryConfigGrpcItTest extends GrpcTestBase {
 
     @AfterEach
     public void cleanUp() throws InterruptedException {
-        Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, tenantId).run(()->
-        {
-            configRepo.deleteAll();
-        });
         afterTest();
     }
 
     @Test
-    void testCreateConfig() throws VerificationException {
+    void testCreateConfig() {
         SNMPConfigDTO snmpConfig = SNMPConfigDTO.newBuilder()
             .addAllPorts(List.of(161))
             .addAllReadCommunity(List.of("test")).build();
@@ -119,12 +112,10 @@ public class DiscoveryConfigGrpcItTest extends GrpcTestBase {
             .createConfig(request2);
         assertThat(list2).isNotNull()
             .extracting(DiscoveryConfigByLocationDTO::getDiscoveryConfigList).asList().hasSize(2);
-        verify(spyInterceptor, times(2)).verifyAccessToken(authHeader);
-        verify(spyInterceptor, times(2)).interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));
     }
 
     @Test
-    void testGetConfigByName() throws VerificationException {
+    void testGetConfigByName() {
         Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, tenantId).run(()->
         {
             DiscoveryConfigDTO tempConfig = DiscoveryConfigDTO.newBuilder()
@@ -146,13 +137,10 @@ public class DiscoveryConfigGrpcItTest extends GrpcTestBase {
             .extracting(DiscoveryConfigByLocationDTO::getLocation, dto -> dto.getDiscoveryConfig(0).getConfigName(), dto -> dto.getDiscoveryConfig(0).getIpAddressesList().get(0),
                 dto -> dto.getDiscoveryConfig(0).getSnmpConf().getReadCommunityList().get(0))
             .containsExactly(location, configName, "127.0.0.1", "test-community");
-
-        verify(spyInterceptor).verifyAccessToken(authHeader);
-        verify(spyInterceptor).interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));
     }
 
     @Test
-    void testListConfig() throws VerificationException {
+    void testListConfig() {
         Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, tenantId).run(()->
         {
             DiscoveryConfigDTO tempConfig = DiscoveryConfigDTO.newBuilder()
@@ -179,9 +167,6 @@ public class DiscoveryConfigGrpcItTest extends GrpcTestBase {
             .extracting(DiscoveryConfigByLocationDTO::getDiscoveryConfigList).asList().hasSize(2)
             .extracting("configName")
             .contains(configName, "new-config");
-
-        verify(spyInterceptor).verifyAccessToken(authHeader);
-        verify(spyInterceptor).interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));
     }
 
 

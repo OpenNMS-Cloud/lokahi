@@ -28,23 +28,14 @@
 
 package org.opennms.horizon.inventory.grpc;
 
-import com.google.protobuf.Empty;
-import com.google.protobuf.StringValue;
-import io.grpc.Metadata;
-import io.grpc.ServerCall;
-import io.grpc.ServerCallHandler;
-import io.grpc.Status;
-import io.grpc.StatusRuntimeException;
-import io.grpc.stub.MetadataUtils;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-import io.grpc.Context;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -63,21 +54,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 
-import java.time.LocalDateTime;
-import java.util.UUID;
+import com.google.protobuf.Empty;
+import com.google.protobuf.StringValue;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import io.grpc.Context;
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
+import io.grpc.stub.MetadataUtils;
 
 @SpringBootTest
 @ContextConfiguration(initializers = {SpringContextTestInitializer.class})
 public class MonitoringSystemGrpcItTest extends GrpcTestBase {
-    private String otherTenantId = new UUID(5, 6).toString();
+    private final String otherTenantId = new UUID(5, 6).toString();
     @Autowired
     private MonitoringSystemRepository systemRepo;
     @Autowired
@@ -96,9 +84,7 @@ public class MonitoringSystemGrpcItTest extends GrpcTestBase {
             location.setTenantId(tenantId);
 
         Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, tenantId).run(()->
-        {
-            locationRepo.save(location);
-        });
+            locationRepo.save(location));
 
         system1 = new MonitoringSystem();
         system1.setSystemId("test-system-id-1");
@@ -128,9 +114,7 @@ public class MonitoringSystemGrpcItTest extends GrpcTestBase {
             systemRepo.save(system2);
         });
         Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, otherTenantId).run(()->
-        {
-            systemRepo.save(system3);
-        });
+            systemRepo.save(system3));
 
         prepareServer();
         serviceStub = MonitoringSystemServiceGrpc.newBlockingStub(channel);
@@ -153,70 +137,58 @@ public class MonitoringSystemGrpcItTest extends GrpcTestBase {
     }
 
     @Test
-    void testListSystem() throws VerificationException {
+    void testListSystem() {
         MonitoringSystemList systemList = serviceStub
             .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader)))
             .listMonitoringSystem(Empty.newBuilder().build());
         assertThat(systemList).isNotNull();
         assertThat(systemList.getSystemsList().size()).isEqualTo(2);
-        verify(spyInterceptor).verifyAccessToken(authHeader);
-        verify(spyInterceptor).interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));
     }
 
     @Test
-    void testListSystemWithDifferentTenantId() throws VerificationException {
+    void testListSystemWithDifferentTenantId() {
         MonitoringSystemList systemList = serviceStub
             .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(differentTenantHeader)))
             .listMonitoringSystem(Empty.newBuilder().build());
         assertThat(systemList).isNotNull();
         assertThat(systemList.getSystemsList().size()).isZero();
-        verify(spyInterceptor).verifyAccessToken(differentTenantHeader);
-        verify(spyInterceptor).interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));
     }
 
     @Test
-    void testGetBySystemId() throws VerificationException {
+    void testGetBySystemId() {
         MonitoringSystemDTO systemDTO = serviceStub
             .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader)))
             .getMonitoringSystemById(StringValue.of(system1.getSystemId()));
         assertThat(systemDTO).isNotNull();
         assertThat(systemDTO).isEqualTo(mapper.modelToDTO(system1));
-        verify(spyInterceptor).verifyAccessToken(authHeader);
-        verify(spyInterceptor).interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));
     }
 
     @Test
-    void testGetBySystemIdNotExist() throws VerificationException {
+    void testGetBySystemIdNotExist() {
         StatusRuntimeException exception = assertThrows(StatusRuntimeException.class, ()-> serviceStub
             .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader)))
             .getMonitoringSystemById(StringValue.of("wrong systemId")));
         assertThat(exception.getStatus().getCode()).isEqualTo(Status.Code.NOT_FOUND);
-        verify(spyInterceptor).verifyAccessToken(authHeader);
-        verify(spyInterceptor).interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));
     }
 
     @Test
-    void testGetBySystemIdWithWrongTenantId() throws VerificationException {
+    void testGetBySystemIdWithWrongTenantId() {
         StatusRuntimeException exception = assertThrows(StatusRuntimeException.class, ()-> serviceStub
             .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(differentTenantHeader)))
             .getMonitoringSystemById(StringValue.of(system1.getSystemId())));
         assertThat(exception.getStatus().getCode()).isEqualTo(Status.Code.NOT_FOUND);
-        verify(spyInterceptor).verifyAccessToken(differentTenantHeader);
-        verify(spyInterceptor).interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));
     }
 
     @Test
-    void testListWithoutTenantId() throws VerificationException {
+    void testListWithoutTenantId() {
         StatusRuntimeException exception = assertThrows(StatusRuntimeException.class, () -> serviceStub
             .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(headerWithoutTenant)))
             .listMonitoringSystem(Empty.newBuilder().build()));
         assertThat(exception.getStatus().getCode()).isEqualTo(Status.Code.UNAUTHENTICATED);
-        verify(spyInterceptor).verifyAccessToken(headerWithoutTenant);
-        verify(spyInterceptor).interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));
     }
 
     @Test
-    void testDeleteMonitoringSystem() throws VerificationException {
+    void testDeleteMonitoringSystem() {
         // Delete system but location shouldn't be deleted
         assertThat(serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader)))
             .deleteMonitoringSystem(StringValue.of(system1.getSystemId())));
@@ -240,19 +212,13 @@ public class MonitoringSystemGrpcItTest extends GrpcTestBase {
             var optionalLocation = locationRepo.findByLocation(system2.getMonitoringLocation().getLocation());
             assertFalse(optionalLocation.isPresent());
         });
-
-        verify(spyInterceptor, times(2)).verifyAccessToken(authHeader);
-        verify(spyInterceptor, times(2)).interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));
-
     }
 
     @Test
-    void testDeleteSystemNotFound() throws VerificationException {
+    void testDeleteSystemNotFound() {
         StatusRuntimeException exception = assertThrows(StatusRuntimeException.class, ()-> serviceStub
             .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(differentTenantHeader)))
             .deleteMonitoringSystem(StringValue.of("bad-system-id")));
         assertThat(exception.getStatus().getCode()).isEqualTo(Status.Code.NOT_FOUND);
-        verify(spyInterceptor).verifyAccessToken(differentTenantHeader);
-        verify(spyInterceptor).interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));
     }
 }

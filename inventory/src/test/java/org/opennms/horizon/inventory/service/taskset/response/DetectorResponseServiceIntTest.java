@@ -1,14 +1,17 @@
 package org.opennms.horizon.inventory.service.taskset.response;
 
-import io.grpc.Context;
-import org.junit.jupiter.api.AfterAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.time.LocalDateTime;
+import java.util.List;
+
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.opennms.horizon.inventory.SpringContextTestInitializer;
-import org.opennms.horizon.inventory.dto.MonitoredServiceDTO;
 import org.opennms.horizon.inventory.grpc.GrpcTestBase;
-import org.opennms.horizon.inventory.grpc.taskset.TestTaskSetGrpcService;
 import org.opennms.horizon.inventory.model.IpInterface;
 import org.opennms.horizon.inventory.model.MonitoredService;
 import org.opennms.horizon.inventory.model.MonitoredServiceType;
@@ -19,25 +22,16 @@ import org.opennms.horizon.inventory.repository.MonitoredServiceRepository;
 import org.opennms.horizon.inventory.repository.MonitoredServiceTypeRepository;
 import org.opennms.horizon.inventory.repository.MonitoringLocationRepository;
 import org.opennms.horizon.inventory.repository.NodeRepository;
-import org.opennms.horizon.inventory.service.MonitoredServiceService;
 import org.opennms.horizon.shared.constants.GrpcConstants;
 import org.opennms.horizon.shared.utils.InetAddressUtils;
 import org.opennms.taskset.contract.DetectorResponse;
 import org.opennms.taskset.contract.MonitorType;
 import org.opennms.taskset.contract.TaskType;
-import org.opennms.taskset.service.contract.TaskSetServiceGrpc;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import io.grpc.Context;
 
 
 @SpringBootTest
@@ -66,15 +60,9 @@ class DetectorResponseServiceIntTest extends GrpcTestBase {
     @Autowired
     private MonitoredServiceRepository monitoredServiceRepository;
 
-    @Autowired
-    private MonitoredServiceService monitoredServiceService;
-
-    private static TestTaskSetGrpcService testGrpcService;
-
-    @BeforeAll
-    public static void setup() throws IOException {
-        testGrpcService = new TestTaskSetGrpcService();
-        server = startMockServer(TaskSetServiceGrpc.SERVICE_NAME, testGrpcService);
+    @BeforeEach
+    void beforeTest() {
+        prepareTestGrpc();
     }
 
     @AfterEach
@@ -87,14 +75,6 @@ class DetectorResponseServiceIntTest extends GrpcTestBase {
             nodeRepository.deleteAll();
             monitoringLocationRepository.deleteAll();
         });
-
-        testGrpcService.reset();
-    }
-
-    @AfterAll
-    public static void tearDown() throws InterruptedException {
-        server.shutdownNow();
-        server.awaitTermination();
     }
 
     @Test
@@ -125,7 +105,7 @@ class DetectorResponseServiceIntTest extends GrpcTestBase {
         assertEquals(response.getMonitorType().name(), monitoredServiceType.getServiceName());
         assertEquals(TEST_TENANT_ID, monitoredServiceType.getTenantId());
 
-        List<MonitoredService> monitoredServices = monitoredServiceRepository.findAll();;
+        List<MonitoredService> monitoredServices = monitoredServiceRepository.findAll();
         assertEquals(1, monitoredServices.size());
 
         MonitoredService monitoredService = monitoredServices.get(0);
@@ -141,7 +121,7 @@ class DetectorResponseServiceIntTest extends GrpcTestBase {
     }
 
     @Test
-    void testAcceptMultipleSameIpAddress() throws UnknownHostException {
+    void testAcceptMultipleSameIpAddress() {
         Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, TEST_TENANT_ID).run(()->
         {
             try {
@@ -165,7 +145,7 @@ class DetectorResponseServiceIntTest extends GrpcTestBase {
     }
 
     @Test
-    void testAcceptNotDetected() throws UnknownHostException {
+    void testAcceptNotDetected() {
         Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, TEST_TENANT_ID).run(()->
         {
             try {
@@ -221,7 +201,7 @@ class DetectorResponseServiceIntTest extends GrpcTestBase {
             List<String> monitoredServiceNames =
                 monitoredServiceTypes.stream()
                     .map(MonitoredServiceType::getServiceName)
-                    .collect(Collectors.toList());
+                    .toList();
 
             assertEquals(monitorTypes.length, monitoredServiceNames.size());
 

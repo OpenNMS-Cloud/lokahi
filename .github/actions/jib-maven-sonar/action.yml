@@ -27,22 +27,33 @@ runs:
         path: ~/.sonar/cache
         key: ${{ runner.os }}-${{ runner.arch }}-sonar
 
-    - name: Clean up old artifact
+    - name: Clean up old artifacts from Maven Cache
       run: |
-        for subdir in *
-        do
-            case "$subdir" in
-                shared | horizon-parent)
-                    # Keep
-                    ;;
+        set -e
 
-                *)
-                    rm -rf "$subdir"
-                    ;;
+        if [ -d ~/.m2/repository/org/opennms/horizon ]
+        then
+          echo "Cleanup org.opennms.horizon maven content cached"
+
+          cd ~/.m2/repository/org/opennms/horizon
+
+          for subdir in *
+          do
+            case "$subdir" in
+              shared | horizon-parent)
+                # Keep
+                ;;
+  
+              *)
+                echo "- Cleanup ${PWD}/$subdir"
+                rm -rf "$subdir"
+                ;;
             esac
-        done
+          done
+        else
+          echo "NO org.opennms.horizon maven content cached"
+        fi
       shell: bash
-      working-directory: ~/.m2/repository/org/opennms/horizon
 
     - name: Build Image & Scan
       if: ${{ inputs.project-key != '' }}

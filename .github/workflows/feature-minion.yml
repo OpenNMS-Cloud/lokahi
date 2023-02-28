@@ -73,13 +73,18 @@ jobs:
         with:
           cache-key-hash: ${{ hashFiles('minion/**/pom.xml', 'parent-pom/pom.xml', 'shared-lib/**/pom.xml') }}
 
+      - name: Cleanup the Maven Cache
+        uses: ./.github/actions/maven-cache-cleanup-project-artifacts
+
       - name: Build and install prerequisites
         uses: ./.github/actions/java-install-prereqs
 
       - name: Build & Sonar Scan
         run: |
           mvn -B -Dstyle.color=always \
-              -Pcoverage,run-it verify sonar:sonar \
+              -Pcoverage,run-it \
+              install \
+              sonar:sonar \
               -Dapplication.docker.image=${{ steps.docker-metadata.outputs.tags }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

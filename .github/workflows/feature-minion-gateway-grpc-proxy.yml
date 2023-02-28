@@ -61,13 +61,17 @@ jobs:
         with:
           cache-key-hash: ${{ hashFiles('minion-gateway-grpc-proxy/**/pom.xml', 'parent-pom/pom.xml', 'shared-lib/**/pom.xml') }}
 
+      - name: Cleanup the Maven Cache
+        uses: ./.github/actions/maven-cache-cleanup-project-artifacts
+
       - name: Build and install prerequisites
         uses: ./.github/actions/java-install-prereqs
 
       - name: Jib Maven build and push
         run: |
           mvn -B -Dstyle.color=always \
-              -Pcoverage verify \
+              -Pcoverage \
+              install \
               jib:build -Dapplication.docker.image=${{ steps.docker-metadata.outputs.tags }}
         working-directory: minion-gateway-grpc-proxy
         shell: bash

@@ -29,8 +29,20 @@ runs:
 
     - name: Clean up old artifact
       run: |
-        rm -rf ~/.m2/repository/org/opennms
+        for subdir in *
+        do
+            case "$subdir" in
+                shared | horizon-parent)
+                    # Keep
+                    ;;
+
+                *)
+                    rm -rf "$subdir"
+                    ;;
+            esac
+        done
       shell: bash
+      working-directory: ~/.m2/repository/org/opennms/horizon
 
     - name: Build Image & Scan
       if: ${{ inputs.project-key != '' }}

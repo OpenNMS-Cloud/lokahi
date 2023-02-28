@@ -60,6 +60,7 @@
                         </annotationProcessorPaths>
                     </configuration>
                 </plugin>
+                <!-- TODO: remove this once the jib plugin does not run on all modules -->
                 <plugin>
                     <groupId>com.google.cloud.tools</groupId>
                     <artifactId>jib-maven-plugin</artifactId>

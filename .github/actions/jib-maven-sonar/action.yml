@@ -27,6 +27,11 @@ runs:
         path: ~/.sonar/cache
         key: ${{ runner.os }}-${{ runner.arch }}-sonar
 
+    - name: Clean up old artifact
+      run: |
+        rm -rf ~/.m2/repository/org/opennms
+      shell: bash
+
     - name: Build Image & Scan
       if: ${{ inputs.project-key != '' }}
       env:
@@ -38,7 +43,8 @@ runs:
         BASE_IMAGE=ghcr.io/opennms-cloud/$(cat ../.github/base-image-tag-ref.json | jq .image_tag_java | sed 's/\"//g')
 
         mvn -B -Dstyle.color=always \
-            -Pcoverage verify \
+            -Pcoverage \
+            install \
             -Dapplication.docker.image=$IMAGE -Djib.from.image=$BASE_IMAGE \
             sonar:sonar -Dsonar.projectKey=$SONAR_PROJECT_KEY
       shell: bash

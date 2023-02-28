@@ -28,14 +28,14 @@
 
 package org.opennms.horizon.inventory.repository;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import io.grpc.Context;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -46,6 +46,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
+
+import io.grpc.Context;
 
 @SpringBootTest
 @AutoConfigureTestDatabase(replace= AutoConfigureTestDatabase.Replace.NONE)
@@ -61,7 +63,7 @@ public class MonitoringLocationRepoTest {
     @BeforeEach
     public void setUp() {
         location1 = new MonitoringLocation();
-        location1.setLocation("test-location1");
+        location1.setLocation("test-Location1");
         location1.setTenantId(tenantId);
 
         location2 = new MonitoringLocation();
@@ -78,28 +80,22 @@ public class MonitoringLocationRepoTest {
             repository.save(location2);
         });
         Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, otherTenantId).run(()->
-        {
-            repository.save(location3);
-        });
+            repository.save(location3));
     }
 
     @AfterEach
     public void cleanUp() {
         Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, tenantId).run(()->
-        {
-            repository.deleteAll();
-        });
+            repository.deleteAll());
         Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, otherTenantId).run(()->
-        {
-            repository.deleteAll();
-        });
+            repository.deleteAll());
     }
 
     @Test
     void testFindByTenantId() {
         Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, tenantId).run(()->
         {
-            List<MonitoringLocation> result = repository.findByTenantId(tenantId);
+            List<MonitoringLocation> result = repository.findAll();
             assertThat(result.size()).isEqualTo(2);
         });
     }
@@ -109,7 +105,7 @@ public class MonitoringLocationRepoTest {
         final String tenant = new UUID(5,7).toString();
         Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, tenant).run(()->
         {
-            List<MonitoringLocation> result = repository.findByTenantId(tenant);
+            List<MonitoringLocation> result = repository.findAll();
             assertThat(result.isEmpty());
         });
     }
@@ -166,6 +162,14 @@ public class MonitoringLocationRepoTest {
         {
             List<MonitoringLocation> result = repository.findByIdIn(Arrays.asList(location1.getId(),location2.getId(),location3.getId()));
             assertThat(result.size()).isEqualTo(2);
+        });
+    }
+
+    @Test
+    void testSearchLocation() {
+        Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, tenantId).run(() -> {
+            List<MonitoringLocation> result = repository.findByLocationContainingIgnoreCase("locaT");
+            assertThat(result).hasSize(2);
         });
     }
 }

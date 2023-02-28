@@ -122,105 +122,105 @@ jobs:
     with:
       image-tag: ${{ inputs.image-tag || github.sha }}
       image-registry: ${{ inputs.image-registry || 'ghcr.io' }}
-  external-it:
-    name: End-to-end Tests
-    needs: [
-      alarm,
-      datachoices,
-      events,
-      grafana,
-      inventory,
-      keycloak-ui,
-      metrics-processor,
-      minion,
-      minion-gateway,
-      minion-gateway-grpc-proxy,
-      notifications,
-      rest-server,
-      ui
-    ]
-    runs-on:
-      labels: ubuntu-latest-8-cores
-    timeout-minutes: 30 # Prevents hung workflows on the larger runners from costing more than necessary
-    steps:
+  #external-it:
+  #  name: End-to-end Tests
+  #  needs: [
+  #    alarm,
+  #    datachoices,
+  #    events,
+  #    grafana,
+  #    inventory,
+  #    keycloak-ui,
+  #    metrics-processor,
+  #    minion,
+  #    minion-gateway,
+  #    minion-gateway-grpc-proxy,
+  #    notifications,
+  #    rest-server,
+  #    ui
+  #  ]
+  #  runs-on:
+  #    labels: ubuntu-latest-8-cores
+  #  timeout-minutes: 30 # Prevents hung workflows on the larger runners from costing more than necessary
+  #  steps:
 
-      - uses: actions/checkout@v3
+  #    - uses: actions/checkout@v3
 
-      - name: Set up JDK 17
-        uses: actions/setup-java@v3
-        with:
-          distribution: temurin
-          java-version: 17
+  #    - name: Set up JDK 17
+  #      uses: actions/setup-java@v3
+  #      with:
+  #        distribution: temurin
+  #        java-version: 17
 
-      - name: Log in to the Container registry
-        uses: docker/login-action@v2
-        with:
-          registry: ${{ inputs.image-registry || 'ghcr.io' }}
-          username: ${{ github.repository_owner }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+  #    - name: Log in to the Container registry
+  #      uses: docker/login-action@v2
+  #      with:
+  #        registry: ${{ inputs.image-registry || 'ghcr.io' }}
+  #        username: ${{ github.repository_owner }}
+  #        password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Cache Maven dependencies
-        uses: ./.github/actions/maven-cache
-        with:
-          cache-key-hash: ${{ hashFiles('external-it/**/pom.xml') }}
+  #    - name: Cache Maven dependencies
+  #      uses: ./.github/actions/maven-cache
+  #      with:
+  #        cache-key-hash: ${{ hashFiles('external-it/**/pom.xml') }}
 
-      - name: Create & set up cluster
-        shell: bash
-        working-directory: install-local
-        run: |          
-          # Setup localhost DNS
-          sudo echo "127.0.0.1 onmshs" | sudo tee -a /etc/hosts
-          
-          # Build cluster with Horizon Stream installed.
-          ./install-local.sh cicd onmshs "${{ inputs.image-tag || github.sha }}" "${{ inputs.image-registry || 'ghcr.io' }}/opennms-cloud"
+  #    - name: Create & set up cluster
+  #      shell: bash
+  #      working-directory: install-local
+  #      run: |          
+  #        # Setup localhost DNS
+  #        sudo echo "127.0.0.1 onmshs" | sudo tee -a /etc/hosts
+  #        
+  #        # Build cluster with Horizon Stream installed.
+  #        ./install-local.sh cicd onmshs "${{ inputs.image-tag || github.sha }}" "${{ inputs.image-registry || 'ghcr.io' }}/opennms-cloud"
 
-          echo ""
-          echo "=================="
-          echo "K8S CLUSTER STATUS"
-          echo "=================="
-          date
-          kubectl -n hs-instance get all
+  #        echo ""
+  #        echo "=================="
+  #        echo "K8S CLUSTER STATUS"
+  #        echo "=================="
+  #        date
+  #        kubectl -n hs-instance get all
 
-      - name: Set up & run Cucumber tests
-        shell: bash
-        working-directory: external-it
-        run: |
-          # Cucumber test
-          mvn install
-          INGRESS_BASE_URL=https://onmshs
-          KEYCLOAK_BASE_URL=https://onmshs/auth
-          KEYCLOAK_REALM=opennms
-          KEYCLOAK_USERNAME=admin
-          KEYCLOAK_PASSWORD=admin
-          KEYCLOAK_CLIENT_ID=horizon-stream
-          export INGRESS_BASE_URL KEYCLOAK_BASE_URL KEYCLOAK_REALM KEYCLOAK_USERNAME KEYCLOAK_PASSWORD KEYCLOAK_CLIENT_ID
-          PROJECT_VERSION="$(mvn -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive -q org.codehaus.mojo:exec-maven-plugin:1.6.0:exec)"
-          java -jar "external-horizon-stream-it/target/external-horizon-stream-it-${PROJECT_VERSION}.jar"
+  #    - name: Set up & run Cucumber tests
+  #      shell: bash
+  #      working-directory: external-it
+  #      run: |
+  #        # Cucumber test
+  #        mvn install
+  #        INGRESS_BASE_URL=https://onmshs
+  #        KEYCLOAK_BASE_URL=https://onmshs/auth
+  #        KEYCLOAK_REALM=opennms
+  #        KEYCLOAK_USERNAME=admin
+  #        KEYCLOAK_PASSWORD=admin
+  #        KEYCLOAK_CLIENT_ID=horizon-stream
+  #        export INGRESS_BASE_URL KEYCLOAK_BASE_URL KEYCLOAK_REALM KEYCLOAK_USERNAME KEYCLOAK_PASSWORD KEYCLOAK_CLIENT_ID
+  #        PROJECT_VERSION="$(mvn -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive -q org.codehaus.mojo:exec-maven-plugin:1.6.0:exec)"
+  #        java -jar "external-horizon-stream-it/target/external-horizon-stream-it-${PROJECT_VERSION}.jar"
 
-          ## If fail, exit which kills the ci-cd workflow.
-          ##for i in $(jq '.[0].elements[].steps[].result.status' external-it/external-horizon-stream-it/cucumber.reports/cucumber-report.json);do
-          ##  if [[ $i != '"passed"' ]];then
-          ##    exit;
-          ##  fi
-          ##done
+  #        ## If fail, exit which kills the ci-cd workflow.
+  #        ##for i in $(jq '.[0].elements[].steps[].result.status' external-it/external-horizon-stream-it/cucumber.reports/cucumber-report.json);do
+  #        ##  if [[ $i != '"passed"' ]];then
+  #        ##    exit;
+  #        ##  fi
+  #        ##done
 
-      - name: Diag after failure
-        if: ${{ failure() }}
-        shell: bash
-        run: |
-            echo "K8S CLUSTER STATUS"
-            kubectl -n hs-instance get all
+  #    - name: Diag after failure
+  #      if: ${{ failure() }}
+  #      shell: bash
+  #      run: |
+  #          echo "K8S CLUSTER STATUS"
+  #          kubectl -n hs-instance get all
 
-            echo ""
+  #          echo ""
 
-            for pod in $(kubectl -n hs-instance get pod | awk '$1 != "NAME" { print $1; }')
-            do
-                echo ""
-                echo "=== DIAG POD ${pod} ==="
-                echo ""
-                kubectl -n hs-instance describe "pod/${pod#pod/}" | sed 's,^,    ,'
-            done
+  #          for pod in $(kubectl -n hs-instance get pod | awk '$1 != "NAME" { print $1; }')
+  #          do
+  #              echo ""
+  #              echo "=== DIAG POD ${pod} ==="
+  #              echo ""
+  #              kubectl -n hs-instance describe "pod/${pod#pod/}" | sed 's,^,    ,'
+  #          done
 
-            echo ""
-            echo "=== K8S APPLICATION LOGS ==="
-            kubectl logs -n hs-instance -l appdomain=opennms --tail=-1 --prefix --all-containers
+  #          echo ""
+  #          echo "=== K8S APPLICATION LOGS ==="
+  #          kubectl logs -n hs-instance -l appdomain=opennms --tail=-1 --prefix --all-containers

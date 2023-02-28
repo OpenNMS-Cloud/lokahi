@@ -29,12 +29,9 @@
 package org.opennms.horizon.minion.flows.parser;
 
 
-import static org.opennms.horizon.minion.flows.listeners.utils.BufferUtils.slice;
-
-import java.net.InetSocketAddress;
-
-import org.opennms.horizon.grpc.flows.contract.FlowDocument;
-import org.opennms.horizon.grpc.flows.contract.FlowDocumentLog;
+import com.codahale.metrics.MetricRegistry;
+import io.netty.buffer.ByteBuf;
+import org.opennms.dataplatform.flows.document.FlowDocument;
 import org.opennms.horizon.minion.flows.listeners.Dispatchable;
 import org.opennms.horizon.minion.flows.listeners.UdpParser;
 import org.opennms.horizon.minion.flows.listeners.utils.BufferUtils;
@@ -48,16 +45,16 @@ import org.opennms.horizon.minion.flows.parser.transport.Netflow5MessageBuilder;
 import org.opennms.horizon.shared.ipc.rpc.IpcIdentity;
 import org.opennms.horizon.shared.ipc.sink.api.AsyncDispatcher;
 
-import com.codahale.metrics.MetricRegistry;
+import java.net.InetSocketAddress;
 
-import io.netty.buffer.ByteBuf;
+import static org.opennms.horizon.minion.flows.listeners.utils.BufferUtils.slice;
 
 public class Netflow5UdpParser extends UdpParserBase implements UdpParser, Dispatchable {
 
     private final Netflow5MessageBuilder messageBuilder = new Netflow5MessageBuilder();
 
     public Netflow5UdpParser(final String name,
-                             final AsyncDispatcher<FlowDocumentLog> dispatcher,
+                             final AsyncDispatcher<FlowDocument> dispatcher,
                              final IpcIdentity identity,
                              final DnsResolver dnsResolver,
                              final MetricRegistry metricRegistry) {

@@ -31,7 +31,6 @@ package org.opennms.horizon.server.service.grpc;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 import org.opennms.horizon.inventory.discovery.DiscoveryConfigDTO;
 import org.opennms.horizon.inventory.discovery.DiscoveryConfigOperationGrpc;
@@ -164,6 +163,13 @@ public class InventoryClient {
             List<Int64Value> idValues = keys.stream().map(k->Int64Value.of(k.getId())).toList();
             return locationStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).listLocationsByIds(IdList.newBuilder().addAllIds(idValues).build()).getLocationsList();
         }).orElseThrow();
+    }
+
+    public List<MonitoringLocationDTO> searchLocations(String searchTerm, String accessToken) {
+        Metadata metadata = new Metadata();
+        metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
+        return locationStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
+            .searchLocations(StringValue.of(searchTerm)).getLocationsList();
     }
 
     public boolean deleteNode(long nodeId, String accessToken) {

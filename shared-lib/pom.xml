@@ -39,6 +39,7 @@
         <module>horizon-grpc-common-constants</module>
         <module>datachoices</module>
         <module>azure</module>
+        <module>flows</module>
     </modules>
 
     <build>

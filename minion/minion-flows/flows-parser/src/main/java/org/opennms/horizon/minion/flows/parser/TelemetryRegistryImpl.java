@@ -27,12 +27,9 @@
  *******************************************************************************/
 package org.opennms.horizon.minion.flows.parser;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-
-import org.opennms.horizon.grpc.flows.contract.FlowDocument;
-import org.opennms.horizon.grpc.flows.contract.FlowDocumentLog;
+import com.codahale.metrics.MetricRegistry;
+import lombok.Getter;
+import org.opennms.dataplatform.flows.document.FlowDocument;
 import org.opennms.horizon.minion.flows.listeners.FlowsListener;
 import org.opennms.horizon.minion.flows.listeners.Parser;
 import org.opennms.horizon.minion.flows.listeners.factory.ListenerFactory;
@@ -41,15 +38,14 @@ import org.opennms.horizon.minion.flows.parser.factory.ParserFactory;
 import org.opennms.horizon.shared.ipc.rpc.IpcIdentity;
 import org.opennms.horizon.shared.ipc.sink.api.AsyncDispatcher;
 import org.opennms.horizon.shared.ipc.sink.api.MessageDispatcherFactory;
-import org.opennms.horizon.shared.ipc.sink.api.SinkModule;
 import org.opennms.sink.flows.contract.ListenerConfig;
 import org.opennms.sink.flows.contract.ParserConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.codahale.metrics.MetricRegistry;
-
-import lombok.Getter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 // TODO: this should be replace by using AlertingPluginRegistry to make plugins work.
 // TODO: AlertingPluginRegistry needs de-registration to make dynamic loading work.
@@ -61,7 +57,7 @@ public class TelemetryRegistryImpl implements TelemetryRegistry {
     private final List<ListenerFactory> listenerFactories = new ArrayList<>();
     private final List<ParserFactory> parserFactories = new ArrayList<>();
 
-    private final AsyncDispatcher<FlowDocumentLog> dispatcher;
+    private final AsyncDispatcher<FlowDocument> dispatcher;
 
     @Getter
     private final ListenerHolder listenerHolder;
@@ -127,7 +123,7 @@ public class TelemetryRegistryImpl implements TelemetryRegistry {
     }
 
     @Override
-    public AsyncDispatcher<FlowDocumentLog> getDispatcher() {
+    public AsyncDispatcher<FlowDocument> getDispatcher() {
         return dispatcher;
     }
 }

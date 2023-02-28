@@ -28,28 +28,26 @@
 
 package org.opennms.horizon.inventory.grpc;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
-import org.opennms.horizon.inventory.dto.IdList;
-import org.opennms.horizon.inventory.dto.MonitoringLocationDTO;
-import org.opennms.horizon.inventory.dto.MonitoringLocationList;
-import org.opennms.horizon.inventory.dto.MonitoringLocationServiceGrpc;
-import org.opennms.horizon.inventory.service.MonitoringLocationService;
-
 import com.google.protobuf.Empty;
 import com.google.protobuf.Int64Value;
 import com.google.protobuf.StringValue;
 import com.google.rpc.Code;
 import com.google.rpc.Status;
-
 import io.grpc.Context;
 import io.grpc.protobuf.StatusProto;
 import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.opennms.horizon.inventory.dto.IdList;
+import org.opennms.horizon.inventory.dto.MonitoringLocationDTO;
+import org.opennms.horizon.inventory.dto.MonitoringLocationList;
+import org.opennms.horizon.inventory.dto.MonitoringLocationServiceGrpc;
+import org.opennms.horizon.inventory.service.MonitoringLocationService;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -103,6 +101,14 @@ public class MonitoringLocationGrpcService extends MonitoringLocationServiceGrpc
     public void listLocationsByIds(IdList request, StreamObserver<MonitoringLocationList> responseObserver) {
         List<Long> idList = request.getIdsList().stream().map(Int64Value::getValue).collect(Collectors.toList());
         responseObserver.onNext(MonitoringLocationList.newBuilder().addAllLocations(service.findByLocationIds(idList)).build());
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void searchLocations(StringValue request, StreamObserver<MonitoringLocationList> responseObserver) {
+        List<MonitoringLocationDTO> locations = tenantLookup.lookupTenantId(Context.current())
+            .map(tenantId -> service.searchLocations(request.getValue())).orElseThrow();
+        responseObserver.onNext(MonitoringLocationList.newBuilder().addAllLocations(locations).build());
         responseObserver.onCompleted();
     }
 }

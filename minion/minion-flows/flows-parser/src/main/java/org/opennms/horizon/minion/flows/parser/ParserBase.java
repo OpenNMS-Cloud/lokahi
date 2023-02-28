@@ -28,8 +28,6 @@
 
 package org.opennms.horizon.minion.flows.parser;
 
-import static java.util.Objects.nonNull;
-
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
@@ -38,13 +36,9 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Lists;
+import com.google.protobuf.UInt32Value;
 import com.swrve.ratelimitedlogger.RateLimitedLog;
-
-import org.opennms.horizon.grpc.flows.contract.ContextKey;
-import org.opennms.horizon.grpc.flows.contract.FlowDocument;
-import org.opennms.horizon.grpc.flows.contract.FlowDocumentLog;
-import org.opennms.horizon.grpc.flows.contract.FlowDocumentLogOrBuilder;
-import org.opennms.horizon.grpc.flows.contract.FlowSource;
+import org.opennms.dataplatform.flows.document.FlowDocument;
 import org.opennms.horizon.minion.flows.listeners.Parser;
 import org.opennms.horizon.minion.flows.parser.factory.DnsResolver;
 import org.opennms.horizon.minion.flows.parser.ie.RecordProvider;
@@ -74,6 +68,8 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import static java.util.Objects.nonNull;
+
 public abstract class ParserBase implements Parser {
     private static final Logger LOG = LoggerFactory.getLogger(ParserBase.class);
 
@@ -94,7 +90,7 @@ public abstract class ParserBase implements Parser {
 
     private final String name;
 
-    private final AsyncDispatcher<FlowDocumentLog> dispatcher;
+    private final AsyncDispatcher<FlowDocument> dispatcher;
 
     private final IpcIdentity identity;
 
@@ -138,7 +134,7 @@ public abstract class ParserBase implements Parser {
 
     public ParserBase(final Protocol protocol,
                       final String name,
-                      final AsyncDispatcher<FlowDocumentLog> dispatcher,
+                      final AsyncDispatcher<FlowDocument> dispatcher,
                       final IpcIdentity identity,
                       final DnsResolver dnsResolver,
                       final MetricRegistry metricRegistry) {
@@ -301,9 +297,6 @@ public abstract class ParserBase implements Parser {
                     // if we can't keep up
                     final Runnable dispatch = () -> {
                         // Let's serialize
-                        final FlowDocumentLog.Builder flowDocumentLog = FlowDocumentLog.newBuilder();
-                        final FlowSource.Builder flowSource = FlowSource.newBuilder();
-                        ContextKey.Builder contextKey = ContextKey.newBuilder();
                         final FlowDocument.Builder flowDocument;
                         try {
                             flowDocument = this.getMessageBuilder().buildMessage(record, enrichment);
@@ -313,7 +306,7 @@ public abstract class ParserBase implements Parser {
 
                         flowDocument.setLocation(this.identity.getLocation());
                         flowDocument.setExporterAddress(InetAddressUtils.str(remoteAddress.getAddress()));
-                        flowDocument.setExporterPort(remoteAddress.getPort());
+                        flowDocument.setExporterPort(UInt32Value.of(remoteAddress.getPort()));
 
                         // Check if the flow is valid (and maybe correct it)
                         final List<String> corrections = this.correctFlow(flowDocument);
@@ -331,18 +324,8 @@ public abstract class ParserBase implements Parser {
                             }
                         }
 
-                        contextKey.setContext("");
-                        contextKey.setKey("");
-                        flowSource.setContextKey(contextKey);
-                        flowSource.setLocation(this.identity.getLocation());
-                        flowSource.setSourceAddress(InetAddressUtils.str(remoteAddress.getAddress()));
-                        flowDocumentLog.addMessage(flowDocument.build());
-                        flowDocumentLog.setLocation(this.identity.getLocation());
-                        flowDocumentLog.setSystemId(this.identity.getId());
-                        flowDocumentLog.setFlowSource(flowSource);
-
                         // Dispatch
-                        this.dispatcher.send(flowDocumentLog.build()).whenComplete((b, exx) -> {
+                        this.dispatcher.send(flowDocument.build()).whenComplete((b, exx) -> {
                             if (exx != null) {
                                 this.recordDispatchErrors.inc();
                                 future.completeExceptionally(exx);

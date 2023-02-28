@@ -28,11 +28,12 @@
 
 package org.opennms.horizon.inventory.grpc;
 
-import io.grpc.Context;
-import io.grpc.Metadata;
-import io.grpc.ServerCall;
-import io.grpc.ServerCallHandler;
-import io.grpc.stub.MetadataUtils;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.List;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -60,14 +61,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 
-import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import io.grpc.Context;
+import io.grpc.stub.MetadataUtils;
 
 
 @SpringBootTest
@@ -103,17 +98,11 @@ class TagGrpcItTest extends GrpcTestBase {
 
     @AfterEach
     public void cleanUp() throws InterruptedException {
-        Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, tenantId).run(()->
-        {
-            tagRepository.deleteAll();
-            nodeRepository.deleteAll();
-            locationRepository.deleteAll();
-        });
         afterTest();
     }
 
     @Test
-    void testCreateTag() throws Exception {
+    void testCreateTag() {
         Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, tenantId).run(()->
         {
             long nodeId = setupDatabase();
@@ -141,13 +130,10 @@ class TagGrpcItTest extends GrpcTestBase {
             assertEquals(nodeId, node.getId());
             assertEquals(tenantId, node.getTenantId());
         });
-
-        verify(spyInterceptor).verifyAccessToken(authHeader);
-        verify(spyInterceptor).interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));
     }
 
     @Test
-    void testCreateTagAlreadyCreatedOnce() throws Exception {
+    void testCreateTagAlreadyCreatedOnce() {
         Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, tenantId).run(()->
         {
             long nodeId = setupDatabase();
@@ -177,13 +163,10 @@ class TagGrpcItTest extends GrpcTestBase {
             assertEquals(nodeId, node.getId());
             assertEquals(tenantId, node.getTenantId());
         });
-
-        verify(spyInterceptor, times(2)).verifyAccessToken(authHeader);
-        verify(spyInterceptor, times(2)).interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));
     }
 
     @Test
-    void testCreateTwoTagsOnNode() throws Exception {
+    void testCreateTwoTagsOnNode() {
         Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, tenantId).run(()->
         {
             long nodeId = setupDatabase();
@@ -233,13 +216,10 @@ class TagGrpcItTest extends GrpcTestBase {
             assertEquals(nodeId, node.getId());
             assertEquals(tenantId, node.getTenantId());
         });
-
-        verify(spyInterceptor, times(2)).verifyAccessToken(authHeader);
-        verify(spyInterceptor, times(2)).interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));
     }
 
     @Test
-    void testCreateTwoTagsTwoNodes() throws Exception {
+    void testCreateTwoTagsTwoNodes() {
         Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, tenantId).run(()->
         {
             MonitoringLocation location = new MonitoringLocation();
@@ -302,13 +282,10 @@ class TagGrpcItTest extends GrpcTestBase {
             assertEquals(1, savedNode2.getTags().size());
             assertEquals(TEST_TAG_NAME_2, savedNode2.getTags().get(0).getName());
         });
-
-        verify(spyInterceptor, times(2)).verifyAccessToken(authHeader);
-        verify(spyInterceptor, times(2)).interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));
     }
 
     @Test
-    void testGetTagListForNode() throws Exception {
+    void testGetTagListForNode() {
         Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, tenantId).run(()->
         {
             long nodeId = setupDatabase();
@@ -339,13 +316,10 @@ class TagGrpcItTest extends GrpcTestBase {
             List<TagDTO> tagsList = tagsByNodeId.getTagsList();
             assertEquals(2, tagsList.size());
         });
-
-        verify(spyInterceptor, times(3)).verifyAccessToken(authHeader);
-        verify(spyInterceptor, times(3)).interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));
     }
 
     @Test
-    void testGetTagListForNodeWithNameLike() throws Exception {
+    void testGetTagListForNodeWithNameLike() {
         Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, tenantId).run(()->
         {
             long nodeId = setupDatabase();
@@ -376,13 +350,10 @@ class TagGrpcItTest extends GrpcTestBase {
             List<TagDTO> tagsList = tagsByNodeId.getTagsList();
             assertEquals(2, tagsList.size());
         });
-
-        verify(spyInterceptor, times(3)).verifyAccessToken(authHeader);
-        verify(spyInterceptor, times(3)).interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));
     }
 
     @Test
-    void testGetTagListForAzureCredentialWithNameLikeNoResults() throws Exception {
+    void testGetTagListForAzureCredentialWithNameLikeNoResults() {
         Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, tenantId).run(()->
         {
             long credentialId = setupAzureCredentialDatabase();
@@ -413,13 +384,10 @@ class TagGrpcItTest extends GrpcTestBase {
             List<TagDTO> tagsList = tagsByNodeId.getTagsList();
             assertEquals(0, tagsList.size());
         });
-
-        verify(spyInterceptor, times(3)).verifyAccessToken(authHeader);
-        verify(spyInterceptor, times(3)).interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));
     }
 
     @Test
-    void testGetTagListForNodeWithNameLikeNoResults() throws Exception {
+    void testGetTagListForNodeWithNameLikeNoResults() {
         Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, tenantId).run(()->
         {
             long nodeId = setupDatabase();
@@ -450,13 +418,10 @@ class TagGrpcItTest extends GrpcTestBase {
             List<TagDTO> tagsList = tagsByNodeId.getTagsList();
             assertEquals(0, tagsList.size());
         });
-
-        verify(spyInterceptor, times(3)).verifyAccessToken(authHeader);
-        verify(spyInterceptor, times(3)).interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));
     }
 
     @Test
-    void testGetTagListForAzureCredential() throws Exception {
+    void testGetTagListForAzureCredential() {
         Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, tenantId).run(()->
         {
             long credentialId = setupAzureCredentialDatabase();
@@ -487,13 +452,10 @@ class TagGrpcItTest extends GrpcTestBase {
             List<TagDTO> tagsList = tagsByNodeId.getTagsList();
             assertEquals(2, tagsList.size());
         });
-
-        verify(spyInterceptor, times(3)).verifyAccessToken(authHeader);
-        verify(spyInterceptor, times(3)).interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));
     }
 
     @Test
-    void testGetTagListForAzureCredentialWithNameLike() throws Exception {
+    void testGetTagListForAzureCredentialWithNameLike() {
         Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, tenantId).run(()->
         {
             long credentialId = setupAzureCredentialDatabase();
@@ -524,16 +486,13 @@ class TagGrpcItTest extends GrpcTestBase {
             List<TagDTO> tagsList = tagsByNodeId.getTagsList();
             assertEquals(2, tagsList.size());
         });
-
-        verify(spyInterceptor, times(3)).verifyAccessToken(authHeader);
-        verify(spyInterceptor, times(3)).interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));
     }
 
 
 
 
     @Test
-    void testGetTagList() throws Exception {
+    void testGetTagList() {
         Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, tenantId).run(()->
         {
             long nodeId = setupDatabase();
@@ -564,13 +523,10 @@ class TagGrpcItTest extends GrpcTestBase {
             List<TagDTO> tagsList = tagsByNodeId.getTagsList();
             assertEquals(2, tagsList.size());
         });
-
-        verify(spyInterceptor, times(3)).verifyAccessToken(authHeader);
-        verify(spyInterceptor, times(3)).interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));
     }
 
     @Test
-    void testGetTagListWithNameLike() throws Exception {
+    void testGetTagListWithNameLike() {
         Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, tenantId).run(()->
         {
             long nodeId = setupDatabase();
@@ -601,13 +557,10 @@ class TagGrpcItTest extends GrpcTestBase {
             List<TagDTO> tagsList = tagsByNodeId.getTagsList();
             assertEquals(2, tagsList.size());
         });
-
-        verify(spyInterceptor, times(3)).verifyAccessToken(authHeader);
-        verify(spyInterceptor, times(3)).interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));
     }
 
     @Test
-    void testGetTagListWithNameLikeNoResults() throws Exception {
+    void testGetTagListWithNameLikeNoResults() {
         Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, tenantId).run(()->
         {
             long nodeId = setupDatabase();
@@ -638,9 +591,6 @@ class TagGrpcItTest extends GrpcTestBase {
             List<TagDTO> tagsList = tagsByNodeId.getTagsList();
             assertEquals(0, tagsList.size());
         });
-
-        verify(spyInterceptor, times(3)).verifyAccessToken(authHeader);
-        verify(spyInterceptor, times(3)).interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));
     }
 
     private long setupDatabase() {

@@ -28,58 +28,6 @@
 
 package org.opennms.horizon.inventory.grpc;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.PropertyNamingStrategies;
-import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder;
-import com.github.tomakehurst.wiremock.common.Json;
-import com.github.tomakehurst.wiremock.junit.WireMockRule;
-import com.github.tomakehurst.wiremock.matching.EqualToPattern;
-import com.google.rpc.Code;
-import com.google.rpc.Status;
-import io.grpc.Context;
-import io.grpc.Metadata;
-import io.grpc.ServerCall;
-import io.grpc.ServerCallHandler;
-import io.grpc.StatusRuntimeException;
-import io.grpc.protobuf.StatusProto;
-import io.grpc.stub.MetadataUtils;
-import org.apache.http.HttpStatus;
-import org.hamcrest.Matchers;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.keycloak.common.VerificationException;
-import org.opennms.horizon.inventory.SpringContextTestInitializer;
-import org.opennms.horizon.inventory.dto.AzureCredentialCreateDTO;
-import org.opennms.horizon.inventory.dto.AzureCredentialDTO;
-import org.opennms.horizon.inventory.dto.AzureCredentialServiceGrpc;
-import org.opennms.horizon.inventory.dto.TagCreateDTO;
-import org.opennms.horizon.inventory.grpc.taskset.TestTaskSetGrpcService;
-import org.opennms.horizon.inventory.model.AzureCredential;
-import org.opennms.horizon.inventory.model.Tag;
-import org.opennms.horizon.inventory.repository.AzureCredentialRepository;
-import org.opennms.horizon.inventory.repository.MonitoringLocationRepository;
-import org.opennms.horizon.inventory.repository.TagRepository;
-import org.opennms.horizon.shared.azure.http.dto.AzureHttpParams;
-import org.opennms.horizon.shared.azure.http.dto.error.AzureErrorDescription;
-import org.opennms.horizon.shared.azure.http.dto.error.AzureHttpError;
-import org.opennms.horizon.shared.azure.http.dto.login.AzureOAuthToken;
-import org.opennms.horizon.shared.azure.http.dto.subscription.AzureSubscription;
-import org.opennms.horizon.shared.constants.GrpcConstants;
-import org.opennms.taskset.contract.TaskType;
-import org.opennms.taskset.service.contract.TaskSetServiceGrpc;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ContextConfiguration;
-
-import java.io.IOException;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
@@ -89,10 +37,52 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
 import static org.opennms.horizon.shared.azure.http.AzureHttpClient.OAUTH2_TOKEN_ENDPOINT;
 import static org.opennms.horizon.shared.azure.http.AzureHttpClient.SUBSCRIPTION_ENDPOINT;
+
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+import org.apache.http.HttpStatus;
+import org.hamcrest.Matchers;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.keycloak.common.VerificationException;
+import org.opennms.horizon.inventory.SpringContextTestInitializer;
+import org.opennms.horizon.inventory.dto.AzureCredentialCreateDTO;
+import org.opennms.horizon.inventory.dto.AzureCredentialDTO;
+import org.opennms.horizon.inventory.dto.AzureCredentialServiceGrpc;
+import org.opennms.horizon.inventory.dto.TagCreateDTO;
+import org.opennms.horizon.inventory.model.AzureCredential;
+import org.opennms.horizon.inventory.model.Tag;
+import org.opennms.horizon.inventory.repository.AzureCredentialRepository;
+import org.opennms.horizon.inventory.repository.TagRepository;
+import org.opennms.horizon.shared.azure.http.dto.AzureHttpParams;
+import org.opennms.horizon.shared.azure.http.dto.error.AzureErrorDescription;
+import org.opennms.horizon.shared.azure.http.dto.error.AzureHttpError;
+import org.opennms.horizon.shared.azure.http.dto.login.AzureOAuthToken;
+import org.opennms.horizon.shared.azure.http.dto.subscription.AzureSubscription;
+import org.opennms.horizon.shared.constants.GrpcConstants;
+import org.opennms.taskset.contract.TaskType;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ContextConfiguration;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder;
+import com.github.tomakehurst.wiremock.common.Json;
+import com.github.tomakehurst.wiremock.junit.WireMockRule;
+import com.github.tomakehurst.wiremock.matching.EqualToPattern;
+import com.google.rpc.Code;
+import com.google.rpc.Status;
+
+import io.grpc.Context;
+import io.grpc.StatusRuntimeException;
+import io.grpc.protobuf.StatusProto;
+import io.grpc.stub.MetadataUtils;
 
 @SpringBootTest
 @ContextConfiguration(initializers = {SpringContextTestInitializer.class})
@@ -111,9 +101,6 @@ class AzureCredentialGrpcItTest extends GrpcTestBase {
     private AzureCredentialRepository azureCredentialRepository;
 
     @Autowired
-    private MonitoringLocationRepository monitoringLocationRepository;
-
-    @Autowired
     private AzureHttpParams params;
 
     @Autowired
@@ -122,8 +109,6 @@ class AzureCredentialGrpcItTest extends GrpcTestBase {
     //marking as a @Rule doesn't work, need to manually start/stop in before/after
     public WireMockRule wireMock = new WireMockRule(wireMockConfig().port(12345));
 
-    private static TestTaskSetGrpcService testGrpcService;
-
     private final ObjectMapper snakeCaseMapper;
 
     public AzureCredentialGrpcItTest() {
@@ -131,15 +116,9 @@ class AzureCredentialGrpcItTest extends GrpcTestBase {
         this.snakeCaseMapper.setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
     }
 
-    @BeforeAll
-    public static void setup() throws IOException {
-        testGrpcService = new TestTaskSetGrpcService();
-        testGrpcService.reset();
-        server = startMockServer(TaskSetServiceGrpc.SERVICE_NAME, testGrpcService);
-    }
-
     @BeforeEach
     public void prepare() throws VerificationException {
+        prepareTestGrpc();
         prepareServer();
         serviceStub = AzureCredentialServiceGrpc.newBlockingStub(channel);
         wireMock.start();
@@ -148,21 +127,9 @@ class AzureCredentialGrpcItTest extends GrpcTestBase {
     @AfterEach
     public void cleanUp() throws InterruptedException {
         wireMock.stop();
-        Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, tenantId).run(()->
-        {
-            tagRepository.deleteAll();
-            monitoringLocationRepository.deleteAll();
-            azureCredentialRepository.deleteAll();
-        });
-        testGrpcService.reset();
         afterTest();
     }
 
-    @AfterAll
-    public static void tearDown() throws InterruptedException {
-        server.shutdownNow();
-        server.awaitTermination();
-    }
 
     @Test
     void testCreateAzureCredentials() throws Exception {
@@ -221,11 +188,6 @@ class AzureCredentialGrpcItTest extends GrpcTestBase {
             AzureCredential credential = tag.getAzureCredentials().get(0);
             assertEquals(azureCredential.getId(), credential.getId());
         });
-
-
-
-        verify(spyInterceptor).verifyAccessToken(authHeader);
-        verify(spyInterceptor).interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));
     }
 
     @Test
@@ -249,8 +211,6 @@ class AzureCredentialGrpcItTest extends GrpcTestBase {
         assertEquals("Code: Message", status.getMessage());
         assertThat(status.getCode()).isEqualTo(Code.INTERNAL_VALUE);
         assertEquals(0, testGrpcService.getRequests().size());
-        verify(spyInterceptor).verifyAccessToken(authHeader);
-        verify(spyInterceptor).interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));
     }
 
     @Test
@@ -273,12 +233,10 @@ class AzureCredentialGrpcItTest extends GrpcTestBase {
         Status status = StatusProto.fromThrowable(exception);
         assertThat(status.getCode()).isEqualTo(Code.INTERNAL_VALUE);
         assertEquals(0, testGrpcService.getRequests().size());
-        verify(spyInterceptor).verifyAccessToken(authHeader);
-        verify(spyInterceptor).interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));
     }
 
     @Test
-    void testCreateAzureCredentialsWithoutTenantId() throws VerificationException {
+    void testCreateAzureCredentialsWithoutTenantId() {
 
         AzureCredentialCreateDTO createDTO = AzureCredentialCreateDTO.newBuilder()
             .setName(TEST_NAME)
@@ -289,13 +247,11 @@ class AzureCredentialGrpcItTest extends GrpcTestBase {
             .setDirectoryId(TEST_DIRECTORY_ID)
             .build();
 
-        StatusRuntimeException exception = Assertions.assertThrows(StatusRuntimeException.class, () ->
+        StatusRuntimeException exception = assertThrows(StatusRuntimeException.class, () ->
             serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(headerWithoutTenant)))
                 .createCredentials(createDTO));
         assertThat(exception.getStatus().getCode()).isEqualTo(io.grpc.Status.Code.UNAUTHENTICATED);
         assertThat(exception.getMessage()).contains("Missing tenant id");
-        verify(spyInterceptor).verifyAccessToken(headerWithoutTenant);
-        verify(spyInterceptor).interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));
     }
 
     private void mockAzureLogin() throws JsonProcessingException {

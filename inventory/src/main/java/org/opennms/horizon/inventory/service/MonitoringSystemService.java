@@ -1,24 +1,23 @@
 package org.opennms.horizon.inventory.service;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 import org.opennms.cloud.grpc.minion.Identity;
 import org.opennms.horizon.grpc.heartbeat.contract.HeartbeatMessage;
 import org.opennms.horizon.inventory.dto.MonitoringSystemDTO;
 import org.opennms.horizon.inventory.mapper.MonitoringSystemMapper;
 import org.opennms.horizon.inventory.model.MonitoringLocation;
 import org.opennms.horizon.inventory.model.MonitoringSystem;
-import org.opennms.horizon.inventory.model.MonitoringSystemBean;
 import org.opennms.horizon.inventory.repository.MonitoringLocationRepository;
 import org.opennms.horizon.inventory.repository.MonitoringSystemRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
@@ -41,7 +40,7 @@ public class MonitoringSystemService {
         return systemRepository.findBySystemIdAndTenantId(systemId, tenantId).map(mapper::modelToDTO);
     }
 
-    public Optional<Long> addMonitoringSystemFromHeartbeat(HeartbeatMessage message, String tenantId) {
+    public void addMonitoringSystemFromHeartbeat(HeartbeatMessage message, String tenantId) {
         Identity identity = message.getIdentity();
         Optional<MonitoringSystem> msOp = systemRepository.findBySystemIdAndTenantId(identity.getSystemId(), tenantId);
         if(msOp.isEmpty()) {
@@ -65,27 +64,11 @@ public class MonitoringSystemService {
             monitoringSystem.setLabel(identity.getSystemId().toUpperCase());
             monitoringSystem.setMonitoringLocationId(location.getId());
             systemRepository.save(monitoringSystem);
-            return Optional.of(monitoringSystem.getId()); //only return new ID
         } else {
             MonitoringSystem monitoringSystem = msOp.get();
             monitoringSystem.setLastCheckedIn(LocalDateTime.now());
             systemRepository.save(monitoringSystem);
-            return Optional.empty();
         }
-
-    }
-
-    //For inventory internal use only
-    @Transactional
-    public List<MonitoringSystemBean> listAllForMonitoring() {
-        List<MonitoringSystemBean> list = new ArrayList<>();
-        systemRepository.findAll().forEach(s->list.add(new MonitoringSystemBean(s.getSystemId(), s.getTenantId(), s.getMonitoringLocation().getLocation())));
-        return list;
-    }
-
-    @Transactional
-    public Optional<MonitoringSystemBean> getByIdForMonitoring(long id) {
-        return systemRepository.findById(id).map(s->new MonitoringSystemBean(s.getSystemId(), s.getTenantId(), s.getMonitoringLocation().getLocation()));
     }
 
     @Transactional

@@ -39,7 +39,7 @@ spec:
                 - {{ .Values.NodeRestrictions.Value }}                                                 
       {{- end }}
       terminationGracePeriodSeconds: 120
-      {{- if .Values.Keycloak.PrivateRepoEnabled }}
+      {{- if .Values.OpenNMS.UI.PrivateRepoEnabled }}
       imagePullSecrets:
         - name: image-credentials
       {{- end }}

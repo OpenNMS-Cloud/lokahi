@@ -21,7 +21,7 @@ public class TaskSetServiceConfig {
 
         // Wire the publisher to listen for updates from the Task Set Storage
         taskSetStorageListener = result::publishTaskSet;
-        taskSetStorage.addAllTwinPublisherSessionListener(taskSetStorageListener);
+        taskSetStorage.addTaskSetStorageListener(taskSetStorageListener);
 
         return result;
     }

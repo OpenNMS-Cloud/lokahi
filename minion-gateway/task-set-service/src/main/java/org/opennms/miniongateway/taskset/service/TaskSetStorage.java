@@ -30,7 +30,5 @@ public interface TaskSetStorage {
      *
      * @param listener
      */
-    void addAllTwinPublisherSessionListener(TaskSetStorageListener listener);
-
-    void removeTwinPublisherListener(TaskSetStorageListener listener);
+    void addTaskSetStorageListener(TaskSetStorageListener listener);
 }

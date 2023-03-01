@@ -96,7 +96,7 @@ public class TaskSetIgniteStorageImpl implements TaskSetStorage {
     }
 
     @Override
-    public void addAllTwinPublisherSessionListener(TaskSetStorageListener listener) {
+    public void addTaskSetStorageListener(TaskSetStorageListener listener) {
         LOG.debug("Registering listener for all TaskSet updates: listener={}", System.identityHashCode(listener));
 
         var listenerFactory = new TaskSetTwinCacheListenerFactory(listener);
@@ -121,24 +121,6 @@ public class TaskSetIgniteStorageImpl implements TaskSetStorage {
         } else {
             // Why is the same TwinPublisher.Session being registered twice?
             LOG.warn("Internal error - publisher session is already registered to receive cache events");
-        }
-    }
-
-    @Override
-    public void removeTwinPublisherListener(TaskSetStorageListener listener) {
-        LOG.debug("Removing listener for TaskSet: listener={}", System.identityHashCode(listener));
-
-        MutableCacheEntryListenerConfiguration<TenantKey, TaskSet> oldListener;
-
-        synchronized (lock) {
-            oldListener = cacheListenerConfigForPublisherSession.get(listener);
-        }
-
-        if (oldListener != null) {
-            taskSetIgniteCache.deregisterCacheEntryListener(oldListener);
-        } else {
-            // Why is this TwinPublisher.session being removed when it was not registered?
-            LOG.warn("Internal error - publisher session is not registered on attempt to remove");
         }
     }
 }

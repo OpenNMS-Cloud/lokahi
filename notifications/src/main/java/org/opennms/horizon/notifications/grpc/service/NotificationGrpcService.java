@@ -24,7 +24,7 @@ public class NotificationGrpcService extends NotificationServiceGrpc.Notificatio
 
     @Override
     public void postPagerDutyConfig(PagerDutyConfigDTO request, StreamObserver<PagerDutyConfigDTO> responseObserver) {
-        Optional<String> tenantIdOptional = tenantLookup.lookupTenantId(Context.current());
+        Optional<String> tenantIdOptional = tenantLookup.lookupTenantId();
 
         tenantIdOptional.ifPresentOrElse(tenantId -> {
             notificationService.postPagerDutyConfig(request);

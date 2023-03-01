@@ -52,7 +52,7 @@ public class GrpcConfig {
 
     @Bean
     public TenantLookup createTenantLookup(){
-        return new GrpcTenantLookupImpl();
+        return new TenantContextLookupImpl();
     }
 
     @Bean

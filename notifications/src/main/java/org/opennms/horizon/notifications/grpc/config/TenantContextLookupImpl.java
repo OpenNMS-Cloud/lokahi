@@ -28,10 +28,13 @@
 
 package org.opennms.horizon.notifications.grpc.config;
 
-import io.grpc.Context;
+import org.opennms.horizon.notifications.tenant.TenantContext;
 
 import java.util.Optional;
 
-public interface TenantLookup {
-    Optional<String> lookupTenantId();
+public class TenantContextLookupImpl implements TenantLookup {
+    @Override
+    public Optional<String> lookupTenantId() {
+        return Optional.ofNullable(TenantContext.getTenantId());
+    }
 }

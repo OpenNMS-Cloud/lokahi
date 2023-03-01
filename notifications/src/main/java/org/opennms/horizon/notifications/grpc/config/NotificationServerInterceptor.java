@@ -28,8 +28,7 @@
 
 package org.opennms.horizon.notifications.grpc.config;
 
-import io.grpc.Context;
-import io.grpc.Contexts;
+import io.grpc.ForwardingServerCall;
 import io.grpc.Metadata;
 import io.grpc.ServerCall;
 import io.grpc.ServerCallHandler;
@@ -44,6 +43,7 @@ import org.keycloak.adapters.rotation.AdapterTokenVerifier;
 import org.keycloak.common.VerificationException;
 import org.keycloak.representations.AccessToken;
 import org.keycloak.util.TokenUtil;
+import org.opennms.horizon.notifications.tenant.TenantContext;
 import org.opennms.horizon.shared.constants.GrpcConstants;
 import org.springframework.stereotype.Component;
 
@@ -59,35 +59,43 @@ public class NotificationServerInterceptor implements ServerInterceptor {
     private final KeycloakDeployment keycloak;
     @Override
     public <ReqT, RespT> ServerCall.Listener<ReqT> interceptCall(ServerCall<ReqT, RespT> serverCall, Metadata headers, ServerCallHandler<ReqT, RespT> callHandler) {
+        ForwardingServerCall.SimpleForwardingServerCall<ReqT, RespT> forwardingServerCall = getForwardingServerCall(serverCall);
 
         // TODO: Remove this once we have inter-service authentication in place
         if (headers.containsKey(GrpcConstants.AUTHORIZATION_BYPASS_KEY)) {
-
             if (headers.containsKey(GrpcConstants.TENANT_ID_BYPASS_KEY)) {
                 String tenantId = headers.get(GrpcConstants.TENANT_ID_BYPASS_KEY);
                 log.info("Bypassing authorization with tenant id: {}", tenantId);
-
-                Context context = Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, tenantId);
-                return Contexts.interceptCall(context, serverCall, headers, callHandler);
+                TenantContext.setTenantId(tenantId);
             }
-            return callHandler.startCall(serverCall, headers);
+            return callHandler.startCall(forwardingServerCall, headers);
         }
 
         log.debug("Received metadata: {}", headers);
         String authHeader = headers.get(GrpcConstants.AUTHORIZATION_METADATA_KEY);
         try {
             Optional<String> tenantId = verifyAccessToken(authHeader);
-            Context context = tenantId.map(tnId -> Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, tnId)).orElseThrow();
-            return Contexts.interceptCall(context, serverCall, headers, callHandler);
+            TenantContext.setTenantId(tenantId.orElseThrow());
+            return callHandler.startCall(forwardingServerCall, headers);
         } catch (VerificationException e) {
             log.error("Failed to verify access token", e);
-            serverCall.close(Status.UNAUTHENTICATED.withDescription("Invalid access token"), new Metadata());
+            forwardingServerCall.close(Status.UNAUTHENTICATED.withDescription("Invalid access token"), new Metadata());
             return new ServerCall.Listener<>() {};
         }
         catch (NoSuchElementException e) {
-            serverCall.close(Status.UNAUTHENTICATED.withDescription("Missing tenant id"), new Metadata());
+            forwardingServerCall.close(Status.UNAUTHENTICATED.withDescription("Missing tenant id"), new Metadata());
             return new ServerCall.Listener<>() {};
         }
+    }
+
+    private <ReqT, RespT> ForwardingServerCall.SimpleForwardingServerCall<ReqT, RespT> getForwardingServerCall(ServerCall<ReqT,RespT> serverCall) {
+        return new ForwardingServerCall.SimpleForwardingServerCall<>(serverCall) {
+            @Override
+            public void close(Status status, Metadata trailers) {
+                TenantContext.clear();
+                super.close(status, trailers);
+            }
+        };
     }
 
     public Optional<String> verifyAccessToken(String authHeader) throws VerificationException {

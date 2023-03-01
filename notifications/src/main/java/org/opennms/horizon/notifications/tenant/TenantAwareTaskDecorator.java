@@ -1,8 +1,8 @@
 /*******************************************************************************
  * This file is part of OpenNMS(R).
  *
- * Copyright (C) 2022 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
+ * Copyright (C) 2023 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
  *
@@ -26,12 +26,24 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.notifications.grpc.config;
+package org.opennms.horizon.notifications.tenant;
 
-import io.grpc.Context;
+import org.springframework.core.task.TaskDecorator;
+import org.springframework.lang.NonNull;
 
-import java.util.Optional;
+public class TenantAwareTaskDecorator implements TaskDecorator {
 
-public interface TenantLookup {
-    Optional<String> lookupTenantId();
+    @Override
+    @NonNull
+    public Runnable decorate(@NonNull Runnable runnable) {
+        String tenantId = TenantContext.getTenantId();
+        return () -> {
+            try {
+                TenantContext.setTenantId(tenantId);
+                runnable.run();
+            } finally {
+                TenantContext.setTenantId(null);
+            }
+        };
+    }
 }

@@ -1,8 +1,8 @@
 /*******************************************************************************
  * This file is part of OpenNMS(R).
  *
- * Copyright (C) 2022 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
+ * Copyright (C) 2023 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
  *
@@ -26,16 +26,28 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.notifications.grpc.config;
+package org.opennms.horizon.notifications.tenant;
 
-import io.grpc.Context;
-import org.opennms.horizon.shared.constants.GrpcConstants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.Optional;
+public final class TenantContext {
+    private static final Logger LOG = LoggerFactory.getLogger(TenantContext.class);
 
-public class GrpcTenantLookupImpl implements TenantLookup {
-    @Override
-    public Optional<String> lookupTenantId(Context context) {
-        return Optional.ofNullable(GrpcConstants.TENANT_ID_CONTEXT_KEY.get());
+    private TenantContext() {}
+
+    private static InheritableThreadLocal<String> currentTenant = new InheritableThreadLocal<>();
+
+    public static void setTenantId(String tenantId) {
+        LOG.debug("Setting tenantId to " + tenantId);
+        currentTenant.set(tenantId);
+    }
+
+    public static String getTenantId() {
+        return currentTenant.get();
+    }
+
+    public static void clear(){
+        currentTenant.remove();
     }
 }

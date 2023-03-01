@@ -42,6 +42,7 @@ OpenNMS:
       Requests:
         Cpu: 100m
         Memory: 250Mi
+    PrivateRepoEnabled: false
   Minion:
     ServiceName: opennms-minion
     Image: opennms/horizon-stream-minion

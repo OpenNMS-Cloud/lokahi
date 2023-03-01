@@ -28,32 +28,7 @@ runs:
         key: ${{ runner.os }}-${{ runner.arch }}-sonar
 
     - name: Clean up old artifacts from Maven Cache
-      run: |
-        set -e
-
-        if [ -d ~/.m2/repository/org/opennms/horizon ]
-        then
-          echo "Cleanup org.opennms.horizon maven content cached"
-
-          cd ~/.m2/repository/org/opennms/horizon
-
-          for subdir in *
-          do
-            case "$subdir" in
-              shared | horizon-parent)
-                # Keep
-                ;;
-  
-              *)
-                echo "- Cleanup ${PWD}/$subdir"
-                rm -rf "$subdir"
-                ;;
-            esac
-          done
-        else
-          echo "NO org.opennms.horizon maven content cached"
-        fi
-      shell: bash
+      uses: ./.github/actions/maven-cache-cleanup-project-artifacts
 
     - name: Build Image & Scan
       if: ${{ inputs.project-key != '' }}

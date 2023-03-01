@@ -214,7 +214,7 @@ public abstract class AbstractTwinPublisher implements TwinPublisher, TwinProvid
         }
 
         @Override
-        public void publish(String tenantId, T obj) throws IOException {
+        public void publish(T obj) throws IOException {
             try (MDCCloseable mdc = MDC.putCloseable("prefix", TwinConstants.LOG_PREFIX)) {
                 LOG.info("Published an object update for the session with key {}", sessionKey.toString());
                 byte[] objInBytes = objectMapper.writeValueAsBytes(obj);

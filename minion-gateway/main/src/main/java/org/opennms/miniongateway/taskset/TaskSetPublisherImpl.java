@@ -64,7 +64,7 @@ public class TaskSetPublisherImpl implements TaskSetPublisher {
     public void publishTaskSet(String tenantId, String location, TaskSet taskSet) {
         try {
             Session<TaskSet> session = publisher.register("task-set", TaskSet.class, tenantId, location);
-            session.publish(tenantId, taskSet);
+            session.publish(taskSet);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

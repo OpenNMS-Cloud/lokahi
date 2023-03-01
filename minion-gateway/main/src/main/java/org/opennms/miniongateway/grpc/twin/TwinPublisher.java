@@ -46,10 +46,9 @@ public interface TwinPublisher extends Closeable {
      */
     interface Session<T> extends Closeable {
         /**
-         * @param tenantId tenant identifier.
          * @param obj an object that needs replication on Minion
          */
-        void publish(String tenantId, T obj) throws IOException;
+        void publish(T obj) throws IOException;
     }
 
     /**

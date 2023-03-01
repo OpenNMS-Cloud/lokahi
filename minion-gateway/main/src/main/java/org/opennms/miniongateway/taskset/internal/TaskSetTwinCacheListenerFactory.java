@@ -24,7 +24,7 @@ public class TaskSetTwinCacheListenerFactory implements Factory<TaskSetTwinCache
 
     @Override
     public TaskSetTwinCacheListener create() {
-        LOG.debug("Creating listener for task set updates: tenant-id={}");
+        LOG.debug("Creating listener for task set updates");
         return new TaskSetTwinCacheListener(downstreamSession);
     }
 }

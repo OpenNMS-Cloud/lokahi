@@ -12,6 +12,12 @@ type TState = {
 const defaultPolicy: IPolicy = {
   id: '',
   name: '',
+  memo: '',
+  notifications: {
+    email: false,
+    pagerDuty: false,
+    webhooks: false
+  },
   tags: [],
   rules: []
 }

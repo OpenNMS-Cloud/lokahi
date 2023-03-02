@@ -890,7 +890,7 @@
     "@featherds/styles" "^0.12.16"
     vue "^3.1.0-0"
 
-"@featherds/radio@^0.12.16":
+"@featherds/radio@0.12.16", "@featherds/radio@^0.12.16":
   version "0.12.16"
   resolved "https://registry.yarnpkg.com/@featherds/radio/-/radio-0.12.16.tgz#b6dc21852fcd28fbd78abd5df6c0ae29883e3fbf"
   integrity sha512-DTDrc/a0aTa0HnxRsTspYOvlW54Jra7XRCEOER9xdUdTuucYxmX8KKPaqlfnpVQzxny0y9T8ps5dkQobIJv1GQ==
@@ -963,7 +963,17 @@
     "@featherds/styles" "^0.12.16"
     vue "^3.1.0-0"
 
-"@featherds/tooltip@^0.12.16":
+"@featherds/textarea@0.12.16":
+  version "0.12.16"
+  resolved "https://registry.yarnpkg.com/@featherds/textarea/-/textarea-0.12.16.tgz#241f0360563cadd55cd770d5597d00c2111736cc"
+  integrity sha512-ygJGj6pLwkD/+K76egxq8jjPtLnSVohtvA/e3EyDPKefYIz3ri6u+mP8EyuWGXzozzeh9QJ6IOnhqrAGmo64fg==
+  dependencies:
+    "@featherds/input-helper" "^0.12.16"
+    "@featherds/styles" "^0.12.16"
+    "@featherds/utils" "^0.12.16"
+    vue "^3.1.0"
+
+"@featherds/tooltip@0.12.16":
   version "0.12.16"
   resolved "https://registry.yarnpkg.com/@featherds/tooltip/-/tooltip-0.12.16.tgz#c998d8dd386c0fa6dad5b7988436b8947e3fab3f"
   integrity sha512-mPr6JVy6GNy/8bOFqDcOJjemT/JvuzX26JZpgPjPgVEL86I5CPFHNVV7sxjWFeLw64qmloui8HVf82M3VEHZGQ==

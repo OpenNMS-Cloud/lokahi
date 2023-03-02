@@ -1,6 +1,12 @@
 export interface IPolicy {
   id: string
   name: string
+  memo: string
+  notifications: {
+    email: boolean
+    pagerDuty: boolean
+    webhooks: boolean
+  }
   tags: string[]
   rules: IRule[]
 }

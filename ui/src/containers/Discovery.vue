@@ -33,8 +33,10 @@
           @select-discovery="showDiscovery"
         />
         <DiscoveryListCard
+          passive
           title=" My Passive Discoveries"
           :list="[]"
+          @toggle-discovery="toggleDiscovery"
         />
       </div>
     </section>
@@ -140,6 +142,10 @@ const showDiscovery = (discovery: DiscoveryConfig) => {
   //type hardocoded for now
   discoverySelectedType.value = DiscoveryType.ICMP
   store.setSelectedDiscovery(discovery)
+}
+
+const toggleDiscovery = (item: any, isToggled: boolean) => {
+  // call mutation to turn on / off passive discovery, when available.
 }
 
 const handleCancel = () => {

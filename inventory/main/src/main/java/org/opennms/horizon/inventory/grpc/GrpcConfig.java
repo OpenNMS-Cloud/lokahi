@@ -80,9 +80,9 @@ public class GrpcConfig {
     public GrpcServerManager startServer(MonitoringLocationGrpcService locationGrpc, MonitoringSystemGrpcService systemGrpc,
                                          NodeGrpcService nodeGrpcService, AzureCredentialGrpcService azureCredentialGrpcService, TagGrpcService tagGrpcService,
                                          InventoryServerInterceptor interceptor,
-                                         DiscoveryConfigGrpcService discoveryConfigGrpcService) {
+                                         ActiveDiscoveryGrpcService activeDiscoveryGrpcService) {
         GrpcServerManager manager = new GrpcServerManager(port, interceptor);
-        manager.startServer(locationGrpc, systemGrpc, nodeGrpcService, azureCredentialGrpcService, tagGrpcService, discoveryConfigGrpcService);
+        manager.startServer(locationGrpc, systemGrpc, nodeGrpcService, azureCredentialGrpcService, tagGrpcService, activeDiscoveryGrpcService);
         return manager;
     }
 }

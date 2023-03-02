@@ -26,46 +26,34 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.server.mapper;
+package org.opennms.horizon.inventory.mapper;
 
 import org.mapstruct.CollectionMappingStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.Mappings;
 import org.opennms.horizon.inventory.discovery.ActiveDiscoveryDTO;
 import org.opennms.horizon.inventory.discovery.ActiveDiscoveryRequest;
-import org.opennms.horizon.inventory.discovery.SNMPConfigDTO;
-import org.opennms.horizon.server.model.inventory.discovery.CreateDiscoveryConfigRequest;
-import org.opennms.horizon.server.model.inventory.discovery.DiscoveryConfig;
-import org.opennms.horizon.server.model.inventory.discovery.SNMPConfig;
-
-import java.util.List;
+import org.opennms.horizon.inventory.model.ActiveDiscoveryConfig;
 
 @Mapper(componentModel = "spring", collectionMappingStrategy = CollectionMappingStrategy.ADDER_PREFERRED)
-public interface DiscoveryConfigMapper {
-    @Mappings({
-        @Mapping(source = "readCommunityList", target = "readCommunities"),
-        @Mapping(source = "portsList", target = "ports")
-    })
-    SNMPConfig snmpDtoToModel(SNMPConfigDTO snmpDto);
+public interface ActiveDiscoveryMapper {
 
-    @Mappings({
-        @Mapping(source = "readCommunities", target = "readCommunityList"),
-        @Mapping(source = "ports", target = "portsList")
-    })
-    SNMPConfigDTO snmpConfigToDTO(SNMPConfig snmpConfig);
+    @Mapping(target = "name", source = "configName")
+    @Mapping(target = "ipAddressEntries", source = "ipAddressesList")
+    @Mapping(target = "snmpCommunityStrings", source = "snmpConf.readCommunityList")
+    @Mapping(target = "snmpPorts", source = "snmpConf.portsList")
+    ActiveDiscoveryConfig mapRequest(ActiveDiscoveryRequest discoveryConfigRequest);
 
-    @Mappings({
-        @Mapping(target = "ipAddressesList", source = "ipAddresses"),
-        @Mapping(target = "snmpConf", source = "snmpConfig")
-    })
-    ActiveDiscoveryRequest mapRequest(CreateDiscoveryConfigRequest request);
+    @Mapping(target = "configName", source = "name")
+    @Mapping(target = "ipAddressesList", source = "ipAddressEntries")
+    @Mapping(target = "snmpConf.readCommunityList", source = "snmpCommunityStrings")
+    @Mapping(target = "snmpConf.portsList", source = "snmpPorts")
+    ActiveDiscoveryDTO modelToDto(ActiveDiscoveryConfig activeDiscoveryConfig);
 
-    @Mappings({
-        @Mapping(source = "ipAddressesList", target = "ipAddresses"),
-        @Mapping(source = "snmpConf", target = "snmpConfig")
-    })
-    DiscoveryConfig configDtoToModel(ActiveDiscoveryDTO configDTO);
+    @Mapping(target = "name", source = "configName")
+    @Mapping(target = "ipAddressEntries", source = "ipAddressesList")
+    @Mapping(target = "snmpCommunityStrings", source = "snmpConf.readCommunityList")
+    @Mapping(target = "snmpPorts", source = "snmpConf.portsList")
+    ActiveDiscoveryConfig dtoToModel(ActiveDiscoveryDTO discoveryConfigDTO);
 
-    List<DiscoveryConfig> configDtoListToConfig(List<ActiveDiscoveryDTO> dtoList);
 }

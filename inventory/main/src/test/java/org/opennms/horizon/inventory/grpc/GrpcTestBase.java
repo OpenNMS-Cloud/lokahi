@@ -28,13 +28,9 @@
 
 package org.opennms.horizon.inventory.grpc;
 
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.reset;
-
-import java.util.Optional;
-import java.util.concurrent.TimeUnit;
-
+import io.grpc.ManagedChannel;
+import io.grpc.ManagedChannelBuilder;
+import io.grpc.Metadata;
 import org.keycloak.common.VerificationException;
 import org.opennms.horizon.inventory.grpc.taskset.TestTaskSetGrpcService;
 import org.opennms.horizon.shared.constants.GrpcConstants;
@@ -45,9 +41,12 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 
-import io.grpc.ManagedChannel;
-import io.grpc.ManagedChannelBuilder;
-import io.grpc.Metadata;
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
+
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.reset;
 
 public abstract class GrpcTestBase {
     @DynamicPropertySource
@@ -101,6 +100,6 @@ public abstract class GrpcTestBase {
 
     private void cleanDataBase() {
         jdbcTemplate.execute("truncate table node, azure_credential, tag, configuration, monitored_service, " +
-            "monitoring_system, monitoring_location CASCADE");
+            "monitoring_system, monitoring_location, active_discovery_config CASCADE");
     }
 }

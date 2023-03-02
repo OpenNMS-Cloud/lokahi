@@ -955,6 +955,9 @@
                     <artifactId>jib-maven-plugin</artifactId>
                     <version>${jib.version}</version>
                     <configuration>
+                        <from>
+                            <image>eclipse-temurin:17-jre@sha256:592f2d372afeb13bc3c5a28e49c7ca6b5e5688e767cb0b9e21a70caaacfc4cec</image>
+                        </from>
                         <!--suppress MavenModelInspection -->
                         <skip>${application.docker.skip}</skip>
                         <to>

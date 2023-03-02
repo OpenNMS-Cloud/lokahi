@@ -28,17 +28,16 @@
 
 package org.opennms.horizon.server.model.inventory.discovery;
 
-import java.util.List;
-
 import lombok.Getter;
 import lombok.Setter;
+
+import java.util.List;
 
 @Getter
 @Setter
 public class DiscoveryConfig {
     private String configName;
-    private int retries;
-    private long timeout;
     private List<String> ipAddresses;
+    private String location;
     private SNMPConfig snmpConfig;
 }

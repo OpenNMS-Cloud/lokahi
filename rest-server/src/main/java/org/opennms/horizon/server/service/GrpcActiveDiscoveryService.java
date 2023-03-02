@@ -28,35 +28,34 @@
 
 package org.opennms.horizon.server.service;
 
-import org.opennms.horizon.inventory.discovery.DiscoveryConfigRequest;
-import org.opennms.horizon.server.mapper.DiscoveryConfigMapper;
-import org.opennms.horizon.server.model.inventory.discovery.CreateDiscoveryConfigRequest;
-import org.opennms.horizon.server.model.inventory.discovery.DiscoveryConfig;
-import org.opennms.horizon.server.service.grpc.InventoryClient;
-import org.opennms.horizon.server.utils.ServerHeaderUtil;
-import org.springframework.stereotype.Service;
-
 import io.leangen.graphql.annotations.GraphQLEnvironment;
 import io.leangen.graphql.annotations.GraphQLMutation;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.execution.ResolutionEnvironment;
 import io.leangen.graphql.spqr.spring.annotations.GraphQLApi;
 import lombok.RequiredArgsConstructor;
+import org.opennms.horizon.inventory.discovery.ActiveDiscoveryRequest;
+import org.opennms.horizon.server.mapper.DiscoveryConfigMapper;
+import org.opennms.horizon.server.model.inventory.discovery.CreateDiscoveryConfigRequest;
+import org.opennms.horizon.server.model.inventory.discovery.DiscoveryConfig;
+import org.opennms.horizon.server.service.grpc.InventoryClient;
+import org.opennms.horizon.server.utils.ServerHeaderUtil;
+import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @RequiredArgsConstructor
 @GraphQLApi
 @Service
-public class GrpcDiscoveryService {
+public class GrpcActiveDiscoveryService {
     private final DiscoveryConfigMapper mapper;
     private final ServerHeaderUtil headerUtil;
     private final InventoryClient client;
 
     @GraphQLMutation
-    public Flux<DiscoveryConfig> createDiscoveryConfig(CreateDiscoveryConfigRequest request, @GraphQLEnvironment ResolutionEnvironment env) {
-        DiscoveryConfigRequest requestDto = mapper.mapRequest(request);
-        return Flux.fromIterable(mapper.configDtoListToConfig(client.createDiscoveryConfig(requestDto, headerUtil.getAuthHeader(env))));
+    public Mono<DiscoveryConfig> createDiscoveryConfig(CreateDiscoveryConfigRequest request, @GraphQLEnvironment ResolutionEnvironment env) {
+        ActiveDiscoveryRequest requestDto = mapper.mapRequest(request);
+        return Mono.just(mapper.configDtoToModel(client.createDiscoveryConfig(requestDto, headerUtil.getAuthHeader(env))));
     }
 
     @GraphQLQuery

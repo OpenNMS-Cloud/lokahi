@@ -37,11 +37,11 @@ import io.grpc.protobuf.StatusProto;
 import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.opennms.horizon.inventory.discovery.DiscoveryConfigDTO;
-import org.opennms.horizon.inventory.discovery.DiscoveryConfigList;
-import org.opennms.horizon.inventory.discovery.DiscoveryConfigOperationGrpc;
-import org.opennms.horizon.inventory.discovery.DiscoveryConfigRequest;
-import org.opennms.horizon.inventory.service.DiscoveryConfigService;
+import org.opennms.horizon.inventory.discovery.ActiveDiscoveryDTO;
+import org.opennms.horizon.inventory.discovery.ActiveDiscoveryList;
+import org.opennms.horizon.inventory.discovery.ActiveDiscoveryOperationGrpc;
+import org.opennms.horizon.inventory.discovery.ActiveDiscoveryRequest;
+import org.opennms.horizon.inventory.service.ActiveDiscoveryService;
 import org.opennms.horizon.inventory.service.taskset.ScannerTaskSetService;
 import org.springframework.stereotype.Component;
 
@@ -50,19 +50,19 @@ import java.util.List;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class DiscoveryConfigGrpcService extends DiscoveryConfigOperationGrpc.DiscoveryConfigOperationImplBase {
+public class ActiveDiscoveryGrpcService extends ActiveDiscoveryOperationGrpc.ActiveDiscoveryOperationImplBase {
+
     private final TenantLookup tenantLookup;
-    private final DiscoveryConfigService configService;
+    private final ActiveDiscoveryService configService;
     private final ScannerTaskSetService scannerTaskSetService;
 
     @Override
-    public void createConfig(DiscoveryConfigRequest request, StreamObserver<DiscoveryConfigList> responseObserver) {
+    public void createConfig(ActiveDiscoveryRequest request, StreamObserver<ActiveDiscoveryDTO> responseObserver) {
         tenantLookup.lookupTenantId(Context.current())
             .ifPresentOrElse(tenantId -> {
                 try {
-                    List<DiscoveryConfigDTO> dtoList = configService.createOrUpdateConfig(request, tenantId);
-                    DiscoveryConfigList list = DiscoveryConfigList.newBuilder().addAllDiscoverConfigs(dtoList).build();
-                    responseObserver.onNext(list);
+                    var activeDiscoveryConfig = configService.createConfig(request, tenantId);
+                    responseObserver.onNext(activeDiscoveryConfig);
                     responseObserver.onCompleted();
                     scannerTaskSetService.sendDiscoveryScannerTask(request.getIpAddressesList(),
                         request.getLocation(), tenantId, request.getConfigName());
@@ -73,25 +73,25 @@ public class DiscoveryConfigGrpcService extends DiscoveryConfigOperationGrpc.Dis
     }
 
     @Override
-    public void listDiscoveryConfig(Empty request, StreamObserver<DiscoveryConfigList> responseObserver) {
+    public void listDiscoveryConfig(Empty request, StreamObserver<ActiveDiscoveryList> responseObserver) {
         tenantLookup.lookupTenantId(Context.current())
             .ifPresentOrElse(tenantId -> {
-                List<DiscoveryConfigDTO> list = configService.listDiscoveryConfigs(tenantId);
-                responseObserver.onNext(DiscoveryConfigList.newBuilder().addAllDiscoverConfigs(list).build());
+                List<ActiveDiscoveryDTO> list = configService.listDiscoveryConfigs(tenantId);
+                responseObserver.onNext(ActiveDiscoveryList.newBuilder().addAllDiscoverConfigs(list).build());
                 responseObserver.onCompleted();
             }, () -> responseObserver.onError(StatusProto.toStatusRuntimeException(createMissingTenant())));
     }
 
     @Override
-    public void getDiscoveryConfigByName(StringValue request, StreamObserver<DiscoveryConfigDTO> responseObserver) {
+    public void getDiscoveryConfigByName(StringValue request, StreamObserver<ActiveDiscoveryDTO> responseObserver) {
         tenantLookup.lookupTenantId(Context.current())
             .ifPresentOrElse(tenantId ->
-                configService.getDiscoveryConfigByName(request.getValue(), tenantId)
-                    .ifPresentOrElse(config -> {
-                        responseObserver.onNext(config);
-                        responseObserver.onCompleted();
-                    }, () -> responseObserver.onError(StatusProto.toStatusRuntimeException(createStatus(Code.NOT_FOUND_VALUE,
-                        "Can't find discovery config for name: " + request.getValue())))),
+                    configService.getDiscoveryConfigByName(request.getValue(), tenantId)
+                        .ifPresentOrElse(config -> {
+                            responseObserver.onNext(config);
+                            responseObserver.onCompleted();
+                        }, () -> responseObserver.onError(StatusProto.toStatusRuntimeException(createStatus(Code.NOT_FOUND_VALUE,
+                            "Can't find discovery config for name: " + request.getValue())))),
                 () -> responseObserver.onError(StatusProto.toStatusRuntimeException(createMissingTenant())));
     }
 
@@ -102,4 +102,5 @@ public class DiscoveryConfigGrpcService extends DiscoveryConfigOperationGrpc.Dis
     private Status createStatus(int code, String message) {
         return Status.newBuilder().setCode(code).setMessage(message).build();
     }
+
 }

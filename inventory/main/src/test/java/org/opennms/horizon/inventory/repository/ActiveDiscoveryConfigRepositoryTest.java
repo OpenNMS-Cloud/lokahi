@@ -1,21 +1,19 @@
 package org.opennms.horizon.inventory.repository;
 
-import java.util.Arrays;
-import java.util.Collections;
-
+import io.grpc.Context;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.opennms.horizon.inventory.SpringContextTestInitializer;
 import org.opennms.horizon.inventory.model.ActiveDiscoveryConfig;
-import org.opennms.horizon.inventory.model.DiscoveryConfig;
 import org.opennms.horizon.shared.constants.GrpcConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 
-import io.grpc.Context;
+import java.util.Arrays;
+import java.util.Collections;
 
 
 @SpringBootTest
@@ -26,34 +24,32 @@ public class ActiveDiscoveryConfigRepositoryTest {
     private static final String tenantId = "tenant-1";
 
     @Autowired
-    private ActiveDiscoveryConfigRepository repository;
+    private ActiveDiscoveryRepository repository;
 
     @Test
     public void testActiveDiscoveryConfigPersistence() {
         Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, tenantId).run(() ->
         {
-            var discoveryConfig = new DiscoveryConfig();
-            discoveryConfig.setSnmpPorts(Collections.singletonList(1161));
-            discoveryConfig.setCommunityString(Collections.singletonList("OpenNMS"));
-            discoveryConfig.setIpAddresses(Arrays.asList("127.0.0.1", "127.0.0.2"));
             var activeDiscoveryConfig = new ActiveDiscoveryConfig();
             activeDiscoveryConfig.setLocation("MINION");
-            activeDiscoveryConfig.setProfileName("Profile-1");
+            activeDiscoveryConfig.setName("Profile-1");
             activeDiscoveryConfig.setTenantId(tenantId);
-            activeDiscoveryConfig.setDiscoveryConfig(discoveryConfig);
+            activeDiscoveryConfig.setSnmpPorts(Collections.singletonList(1161));
+            activeDiscoveryConfig.setSnmpCommunityStrings(Collections.singletonList("OpenNMS"));
+            activeDiscoveryConfig.setIpAddressEntries(Arrays.asList("127.0.0.1", "127.0.0.2"));
             var persisted = repository.save(activeDiscoveryConfig);
             Assertions.assertNotNull(persisted);
             Assertions.assertEquals("MINION", activeDiscoveryConfig.getLocation());
-            Assertions.assertEquals("Profile-1", activeDiscoveryConfig.getProfileName());
-            Assertions.assertEquals("OpenNMS", activeDiscoveryConfig.getDiscoveryConfig().getCommunityString().get(0));
-            Assertions.assertEquals("127.0.0.1", activeDiscoveryConfig.getDiscoveryConfig().getIpAddresses().get(0));
-            Assertions.assertEquals("127.0.0.2", activeDiscoveryConfig.getDiscoveryConfig().getIpAddresses().get(1));
-            Assertions.assertEquals(1161, activeDiscoveryConfig.getDiscoveryConfig().getSnmpPorts().get(0));
+            Assertions.assertEquals("Profile-1", activeDiscoveryConfig.getName());
+            Assertions.assertEquals("OpenNMS", activeDiscoveryConfig.getSnmpCommunityStrings().get(0));
+            Assertions.assertEquals("127.0.0.1", activeDiscoveryConfig.getIpAddressEntries().get(0));
+            Assertions.assertEquals("127.0.0.2", activeDiscoveryConfig.getIpAddressEntries().get(1));
+            Assertions.assertEquals(1161, activeDiscoveryConfig.getSnmpPorts().get(0));
 
-            var optional = repository.findByLocation("MINION");
-            Assertions.assertTrue(optional.isPresent());
+            var list = repository.findByLocationAndTenantId("MINION", tenantId);
+            Assertions.assertFalse(list.isEmpty());
 
-            optional = repository.findByLocationAndProfileName("MINION", "Profile-1");
+            var optional = repository.findByLocationAndName("MINION", "Profile-1");
             Assertions.assertTrue(optional.isPresent());
         });
 

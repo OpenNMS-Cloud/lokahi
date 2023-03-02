@@ -35,4 +35,35 @@
         <addPrimaryKey tableName="active_discovery_config" columnNames="id" constraintName="pk_active_discovery_config_id"/>
 
     </changeSet>
+    
+    
+    <changeSet id="0.1.0-update-discovery-config" author="cgorantla">
+
+        <preConditions onFail="MARK_RAN">
+                <tableExists tableName="active_discovery_config"/>
+        </preConditions>
+
+        <dropColumn tableName="active_discovery_config" columnName="profile_name"/>
+        <dropColumn tableName="active_discovery_config" columnName="discovery_config"/>
+        <addColumn tableName="active_discovery_config">
+            <column name="name" type="text">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+        <addColumn tableName="active_discovery_config">
+            <column name="ip_address_entries" type="jsonb">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+        <addColumn tableName="active_discovery_config">
+            <column name="snmp_community_strings" type="jsonb">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+        <addColumn tableName="active_discovery_config">
+            <column name="snmp_ports" type="jsonb">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

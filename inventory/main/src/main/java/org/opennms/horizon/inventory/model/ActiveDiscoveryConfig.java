@@ -28,9 +28,6 @@
 
 package org.opennms.horizon.inventory.model;
 
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -40,6 +37,10 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
+import java.util.List;
 
 @Getter
 @Setter
@@ -55,11 +56,22 @@ public class ActiveDiscoveryConfig extends TenantAwareEntity {
     private String location;
 
     @NotNull
-    @Column(name = "profile_name")
-    private String profileName;
+    @Column(name = "name")
+    private String name;
 
     @NotNull
-    @Column(name = "discovery_config", columnDefinition = "jsonb")
-    @JdbcTypeCode( SqlTypes.JSON )
-    private DiscoveryConfig discoveryConfig;
+    @Column(name = "ip_address_entries", columnDefinition = "jsonb")
+    @JdbcTypeCode(SqlTypes.JSON)
+    private List<String> ipAddressEntries;
+
+
+    @NotNull
+    @Column(name = "snmp_community_strings", columnDefinition = "jsonb")
+    @JdbcTypeCode(SqlTypes.JSON)
+    private List<String> snmpCommunityStrings;
+
+    @NotNull
+    @Column(name = "snmp_ports", columnDefinition = "jsonb")
+    @JdbcTypeCode(SqlTypes.JSON)
+    private List<Integer> snmpPorts;
 }

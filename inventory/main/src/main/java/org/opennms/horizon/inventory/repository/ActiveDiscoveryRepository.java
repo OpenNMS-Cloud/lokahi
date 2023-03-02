@@ -28,17 +28,22 @@
 
 package org.opennms.horizon.inventory.repository;
 
-import java.util.Optional;
-
 import org.opennms.horizon.inventory.model.ActiveDiscoveryConfig;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+import java.util.Optional;
+
 @Repository
-public interface ActiveDiscoveryConfigRepository extends JpaRepository<ActiveDiscoveryConfig, Long> {
+public interface ActiveDiscoveryRepository extends JpaRepository<ActiveDiscoveryConfig, Long> {
 
-    Optional<ActiveDiscoveryConfig> findByLocation(String location);
+    List<ActiveDiscoveryConfig> findByLocationAndTenantId(String location, String tenantId);
 
-    Optional<ActiveDiscoveryConfig> findByLocationAndProfileName(String location, String profileName);
+    Optional<ActiveDiscoveryConfig> findByLocationAndName(String location, String name);
+
+    Optional<ActiveDiscoveryConfig> findByNameAndTenantId(String name, String tenantId);
+
+    List<ActiveDiscoveryConfig> findByTenantId(String tenantId);
 
 }

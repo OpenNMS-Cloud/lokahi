@@ -1,10 +1,8 @@
 package org.opennms.horizon.inventory.testtool.miniongateway.wiremock.client;
 
-import com.google.protobuf.Any;
-import com.google.protobuf.ByteString;
-import com.google.protobuf.Descriptors;
-import com.google.protobuf.GeneratedMessageV3;
+import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
+import com.google.protobuf.util.JsonFormat;
 import com.swrve.ratelimitedlogger.RateLimitedLog;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
@@ -19,19 +17,13 @@ import org.apache.commons.io.IOUtils;
 import org.apache.http.entity.ContentType;
 import org.apache.http.protocol.HTTP;
 import org.awaitility.Awaitility;
-import org.opennms.icmp.contract.IcmpDetectorRequest;
-import org.opennms.icmp.contract.IcmpMonitorRequest;
-import org.opennms.node.scan.contract.NodeScanRequest;
-import org.opennms.sink.flows.contract.FlowsConfig;
-import org.opennms.sink.traps.contract.TrapConfig;
-import org.opennms.snmp.contract.SnmpCollectorRequest;
-import org.opennms.snmp.contract.SnmpDetectorRequest;
-import org.opennms.snmp.contract.SnmpMonitorRequest;
+import org.opennms.horizon.inventory.testtool.miniongateway.wiremock.api.ProtobufConstants;
 import org.opennms.taskset.contract.MonitorType;
 import org.opennms.taskset.contract.TaskDefinition;
 import org.opennms.taskset.service.contract.AddSingleTaskOp;
 import org.opennms.taskset.service.contract.UpdateSingleTaskOp;
 import org.opennms.taskset.service.contract.UpdateTasksRequest;
+import org.opennms.taskset.service.contract.UpdateTasksRequestList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,10 +32,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
-import java.util.Base64;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -52,8 +41,6 @@ import java.util.function.Predicate;
 import static org.junit.Assert.*;
 
 public class MinionGatewayWiremockTestSteps {
-
-    public static final String GOOGLE_PROTOBUF_TYPE_PREFIX = "type.googleapis.com/";
 
     private static final Logger DEFAULT_LOGGER = LoggerFactory.getLogger(MinionGatewayWiremockTestSteps.class);
 
@@ -81,22 +68,6 @@ public class MinionGatewayWiremockTestSteps {
     private long nodeId;
 
     private Response restAssuredResponse;
-
-    private Map<String, Message.Builder> googleTypeUrlMap =
-        Map.of(
-            GOOGLE_PROTOBUF_TYPE_PREFIX + IcmpMonitorRequest.getDescriptor().getFullName(), IcmpMonitorRequest.newBuilder(),
-            GOOGLE_PROTOBUF_TYPE_PREFIX + SnmpMonitorRequest.getDescriptor().getFullName(), SnmpMonitorRequest.newBuilder(),
-
-            GOOGLE_PROTOBUF_TYPE_PREFIX + IcmpDetectorRequest.getDescriptor().getFullName(), IcmpDetectorRequest.newBuilder(),
-            GOOGLE_PROTOBUF_TYPE_PREFIX + SnmpDetectorRequest.getDescriptor().getFullName(), SnmpDetectorRequest.newBuilder(),
-
-            GOOGLE_PROTOBUF_TYPE_PREFIX + SnmpCollectorRequest.getDescriptor().getFullName(), SnmpCollectorRequest.newBuilder(),
-
-            GOOGLE_PROTOBUF_TYPE_PREFIX + NodeScanRequest.getDescriptor().getFullName(), NodeScanRequest.newBuilder(),
-            GOOGLE_PROTOBUF_TYPE_PREFIX + FlowsConfig.getDescriptor().getFullName(), FlowsConfig.newBuilder(),
-            GOOGLE_PROTOBUF_TYPE_PREFIX + TrapConfig.getDescriptor().getFullName(), TrapConfig.newBuilder()
-        );
-
 
 //========================================
 // Cucumber Step Definitions
@@ -267,7 +238,7 @@ public class MinionGatewayWiremockTestSteps {
      * @throws MalformedURLException
      */
     /** @noinspection rawtypes*/
-    private List<UpdateTasksRequest> restGetTaskSetUpdates() throws MalformedURLException {
+    private List<UpdateTasksRequest> restGetTaskSetUpdates() throws MalformedURLException, InvalidProtocolBufferException {
         URL requestUrl = formatUrl("/api/taskset/updates");
 
         RestAssuredConfig restAssuredConfig = createRestAssuredTestConfig();
@@ -287,165 +258,29 @@ public class MinionGatewayWiremockTestSteps {
 
         rateLimitedLog.info("MOCK get TaskSet updates: status-code={}; body={}", restAssuredResponse.getStatusCode(), restAssuredResponse.getBody().asString());
 
-        // The response must be a JSON array, with JSON object entries.
-        List payloadList = restAssuredResponse.getBody().as(List.class);
-        List<UpdateTasksRequest> result = new LinkedList<>();
+        String jsonText = restAssuredResponse.getBody().asString();
 
-        for (var entry : payloadList) {
-            UpdateTasksRequest updateTasksRequest =
-                (UpdateTasksRequest) unmarshalMapToProtobuf((Map) entry, UpdateTasksRequest.newBuilder());
-            result.add(updateTasksRequest);
-        }
+        // Unmarshal from the JSON text back into an UpdateTasksRequestList
+        UpdateTasksRequestList.Builder builder = UpdateTasksRequestList.newBuilder();
+        unmarshalJsonToProtobufBuilder(jsonText, builder);
+        UpdateTasksRequestList updateTasksRequestList = builder.build();
 
-        return result;
+        // Return the list of UpdateTaskRequest
+        return updateTasksRequestList.getUpdateTasksRequestList();
     }
 
 
 //========================================
-// PROTOBUF JSON DESERIALIZATION
+// Internals
 //----------------------------------------
 
-    /**
-     * Unmarhsal the given JSON data, in a Map, into the protobuf message for which the builder has been given.
-     *
-     * @param jsonData JSON content describing the message, which must be a Map.
-     * @param protobufBuilder protobuf builder for the message being unmarshalled.
-     * @param <T> type of the protobuf message that will be generated by unmarshalling.
-     * @return the protobuf message unmarshalled from the given JSON data.
-     */
-    private <T> T unmarshalMapToProtobuf(Map<String, Object> jsonData, Message.Builder protobufBuilder) {
-        try {
-            Message.Builder builder = protobufBuilder.clone();
+    private void unmarshalJsonToProtobufBuilder(String jsonText, Message.Builder builder) throws InvalidProtocolBufferException {
+        JsonFormat.TypeRegistry typeRegistry =
+            JsonFormat.TypeRegistry.newBuilder()
+                .add(ProtobufConstants.PROTOBUF_TYPE_LIST)
+                .build();
 
-            List<Descriptors.FieldDescriptor> fieldDescriptors = builder.getDescriptorForType().getFields();
-
-            for (Descriptors.FieldDescriptor fieldDescriptor : fieldDescriptors) {
-                var fieldName = fieldDescriptor.getName();
-
-                // Process the field only if it exists
-                if (jsonData.containsKey(fieldName)) {
-                    Object jsonValue = jsonData.get(fieldName);
-                    if (fieldDescriptor.isRepeated()) {
-                        unmarshalRepeatedField(jsonValue, fieldDescriptor, builder);
-                    } else if (fieldDescriptor.getJavaType() == Descriptors.FieldDescriptor.JavaType.ENUM) {
-                        unmarshalEnumField(jsonValue, fieldDescriptor, builder);
-                    } else if (fieldDescriptor.getJavaType() == Descriptors.FieldDescriptor.JavaType.MESSAGE) {
-                        unmarshalProtobufMessageField(jsonValue, fieldDescriptor, builder);
-                    } else {
-                        // Field is not a protobuf-message or other special type, so set it normally.
-                        builder.setField(fieldDescriptor, jsonData.get(fieldDescriptor.getName()));
-                    }
-                }
-            }
-
-            return (T) builder.build();
-        } catch (Exception exc) {
-            throw new RuntimeException("failed to decode protobuf message from jsonData as a map", exc);
-        }
+        JsonFormat.parser().usingTypeRegistry(typeRegistry).merge(jsonText, builder);
     }
 
-    /**
-     * Extract a Protobuf Message field with the given field name and value.
-     * @param jsonValue value from the JSON to be unmarshalled into the protobuf field; must be a Map.
-     * @param fieldDescriptor protobuf descriptor describing the content of the field.
-     * @param builder protobuf message builder for the message that contains the field being unmarshalled.
-     */
-    private void unmarshalProtobufMessageField(Object jsonValue, Descriptors.FieldDescriptor fieldDescriptor, Message.Builder builder) {
-        if (jsonValue instanceof Map) {
-            Map mapValue = (Map) jsonValue;
-
-            if (Objects.equals(fieldDescriptor.getFullName(), "google.protobuf.Any")) {
-                var any = unmarshalMapToAny(mapValue);
-                builder.setField(fieldDescriptor, any);
-            } else {
-                var message = unmarshalMapToProtobuf(mapValue, builder.getFieldBuilder(fieldDescriptor));
-                builder.setField(fieldDescriptor, message);
-            }
-        } else {
-            // JSON value is not a map - throw it
-            String typeName = "<null>";
-            if (jsonValue != null) {
-                typeName = jsonValue.getClass().getName();
-            }
-
-            throw new RuntimeException("INVALID protobuf message json-data; must be a map: type=" + typeName);
-        }
-    }
-
-    private void unmarshalEnumField(Object jsonValue, Descriptors.FieldDescriptor fieldDescriptor, Message.Builder builder) {
-        String enumValue = (String) jsonValue;
-        var enumValueDescriptor = fieldDescriptor.getEnumType().findValueByName(enumValue);
-        builder.setField(fieldDescriptor, enumValueDescriptor);
-    }
-
-
-    /**
-     * Extract a repeated field given the JSON value, protobuf field descriptor, and builder.
-     *
-     * @param jsonValue value to unmarshal from JSON back into the protobuf field.  Must be a List.
-     * @param fieldDescriptor protobuf descriptor for the field.
-     * @param builder protobuf message builder into which the field's value will be stored.
-     */
-    /** @noinspection rawtypes*/
-    private void unmarshalRepeatedField(Object jsonValue, Descriptors.FieldDescriptor fieldDescriptor, Message.Builder builder) {
-        // LIST
-        List jsonList = (List) jsonValue;
-        List resultList = new LinkedList();
-
-        for (var listEntry : jsonList) {
-            if (fieldDescriptor.getJavaType() == Descriptors.FieldDescriptor.JavaType.MESSAGE) {
-                Message.Builder fieldBuilder = builder.newBuilderForField(fieldDescriptor);
-                var convertedEntry =
-                    unmarshalMapToProtobuf((Map) listEntry, fieldBuilder);
-
-                resultList.add(convertedEntry);
-            } else if (fieldDescriptor.getJavaType() == Descriptors.FieldDescriptor.JavaType.ENUM) {
-                Message.Builder enumFieldBuilder = builder.newBuilderForField(fieldDescriptor);
-                unmarshalEnumField(listEntry, fieldDescriptor, enumFieldBuilder);
-            } else {
-                resultList.add(listEntry);
-            }
-        }
-
-        builder.setField(fieldDescriptor, resultList);
-    }
-
-    /**
-     * Unmarshal the given json data in a Map into the associated protobuf Any with the wrapped message contained.
-     *
-     * NOTE: the nested protobuf message type MUST be registered in the googleTypeUrlMap to be properly decoded; otherwise,
-     * the returned Any's content is stored without being unmarshalled first.
-     *
-     * @param jsonData the JSON data representing the Any field; must be a Map.
-     * @return the unmarshalled Any data.
-     */
-    /** @noinspection rawtypes*/
-    private Any unmarshalMapToAny(Map jsonData) {
-        Any result;
-
-        String typeUrl = (String) jsonData.get("typeUrl");
-
-        if (jsonData.containsKey("__ANY__")) {
-            byte[] raw = Base64.getDecoder().decode((String) jsonData.get("raw"));
-
-            result =
-                Any.newBuilder()
-                    .setTypeUrl(typeUrl)
-                    .setValue(ByteString.copyFrom(raw))
-                    .build()
-            ;
-        } else {
-            // Lookup the type and decode it, then pack into an "Any"
-            var builder = googleTypeUrlMap.get(typeUrl);
-
-            if (builder != null) {
-                GeneratedMessageV3 protobufMessageValue = (GeneratedMessageV3) unmarshalMapToProtobuf(jsonData, builder);
-                result = Any.pack(protobufMessageValue);
-            } else {
-                throw new RuntimeException("Unrecognized protobuf message type: type-url=" + typeUrl);
-            }
-        }
-
-        return result;
-    }
 }

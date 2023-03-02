@@ -22,6 +22,10 @@ message PublishTaskSetRequest {
 message PublishTaskSetResponse {
 }
 
+message UpdateTasksRequestList {
+  repeated UpdateTasksRequest updateTasksRequest = 1;
+}
+
 //
 // UPDATE TASKS
 //

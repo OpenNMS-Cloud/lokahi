@@ -1,4 +1,4 @@
-import BasicToggle from '@/components/Common/basicToggle.vue'
+import BasicToggle from '@/components/Common/BasicToggle.vue'
 import { mount } from '@vue/test-utils'
 
 const toggle = ref(false)

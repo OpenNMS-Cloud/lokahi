@@ -40,6 +40,8 @@ import java.util.Optional;
 import org.opennms.horizon.azure.api.AzureScanItem;
 import org.opennms.horizon.azure.api.AzureScanResponse;
 import org.opennms.horizon.inventory.dto.NodeCreateDTO;
+import org.opennms.horizon.inventory.dto.TagCreateDTO;
+import org.opennms.horizon.inventory.dto.TagCreateListDTO;
 import org.opennms.horizon.inventory.model.AzureCredential;
 import org.opennms.horizon.inventory.model.Node;
 import org.opennms.horizon.inventory.model.SnmpInterface;
@@ -48,6 +50,7 @@ import org.opennms.horizon.inventory.repository.NodeRepository;
 import org.opennms.horizon.inventory.service.IpInterfaceService;
 import org.opennms.horizon.inventory.service.NodeService;
 import org.opennms.horizon.inventory.service.SnmpInterfaceService;
+import org.opennms.horizon.inventory.service.TagService;
 import org.opennms.horizon.inventory.service.taskset.TaskSetHandler;
 import org.opennms.node.scan.contract.NodeScanResult;
 import org.opennms.taskset.contract.DiscoveryScanResult;
@@ -55,7 +58,7 @@ import org.opennms.taskset.contract.PingResponse;
 import org.opennms.taskset.contract.ScanType;
 import org.opennms.taskset.contract.ScannerResponse;
 import org.springframework.stereotype.Component;
-
+import org.springframework.transaction.annotation.Transactional;
 
 
 @Slf4j
@@ -68,7 +71,9 @@ public class ScannerResponseService {
     private final TaskSetHandler taskSetHandler;
     private final IpInterfaceService ipInterfaceService;
     private final SnmpInterfaceService snmpInterfaceService;
+    private final TagService tagService;
 
+    @Transactional
     public void accept(String tenantId, String location, ScannerResponse response) throws InvalidProtocolBufferException {
         Any result = response.getResult();
 
@@ -139,22 +144,26 @@ public class ScannerResponseService {
         String nodeLabel = String.format("%s (%s)", item.getName(), item.getResourceGroup());
         Optional<Node> nodeOpt = nodeRepository.findByTenantLocationAndNodeLabel(tenantId, location, nodeLabel);
 
-        if (nodeOpt.isEmpty()) {
-
-            //note: may need to relate AzureCredential with Node for recovery of monitoring
+        Node node;
+        if (nodeOpt.isPresent()) {
+            node = nodeOpt.get();
+            log.warn("Node already exists for tenant: {}, location: {}, label: {}", tenantId, location, nodeLabel);
+        } else {
             NodeCreateDTO createDTO = NodeCreateDTO.newBuilder()
                 .setLocation(location)
                 .setManagementIp(ipAddress)
                 .setLabel(nodeLabel)
                 .build();
-            Node node = nodeService.createNode(createDTO, ScanType.AZURE_SCAN, tenantId);
+            node = nodeService.createNode(createDTO, ScanType.AZURE_SCAN, tenantId);
 
             taskSetHandler.sendAzureMonitorTasks(credential, item, ipAddress, node.getId());
             taskSetHandler.sendAzureCollectorTasks(credential, item, ipAddress, node.getId());
-
-        } else {
-            log.warn("Node already exists for tenant: {}, location: {}, label: {}", tenantId, location, nodeLabel);
         }
+        List<TagCreateDTO> tags = credential.getTags().stream()
+            .map(tag -> TagCreateDTO.newBuilder().setName(tag.getName()).build())
+            .toList();
+        tagService.addTags(tenantId, TagCreateListDTO.newBuilder()
+            .setNodeId(node.getId()).addAllTags(tags).build());
     }
 
     private void processNodeScanResponse(String tenantId, NodeScanResult result ) {

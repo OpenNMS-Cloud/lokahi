@@ -51,11 +51,13 @@ import org.opennms.horizon.inventory.model.IpInterface;
 import org.opennms.horizon.inventory.model.MonitoringLocation;
 import org.opennms.horizon.inventory.model.Node;
 import org.opennms.horizon.inventory.model.SnmpInterface;
+import org.opennms.horizon.inventory.model.Tag;
 import org.opennms.horizon.inventory.repository.AzureCredentialRepository;
 import org.opennms.horizon.inventory.repository.IpInterfaceRepository;
 import org.opennms.horizon.inventory.repository.MonitoringLocationRepository;
 import org.opennms.horizon.inventory.repository.NodeRepository;
 import org.opennms.horizon.inventory.repository.SnmpInterfaceRepository;
+import org.opennms.horizon.inventory.repository.TagRepository;
 import org.opennms.horizon.inventory.service.NodeService;
 import org.opennms.horizon.shared.constants.GrpcConstants;
 import org.opennms.horizon.shared.utils.InetAddressUtils;
@@ -102,6 +104,9 @@ class ScannerResponseServiceIntTest extends GrpcTestBase {
     @Autowired
     private NodeService nodeService;
 
+    @Autowired
+    private TagRepository tagRepository;
+
     @BeforeEach
     void beforeTest() {
         prepareTestGrpc();
@@ -111,6 +116,7 @@ class ScannerResponseServiceIntTest extends GrpcTestBase {
     public void cleanUp() {
         Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, TEST_TENANT_ID).run(()->
         {
+            tagRepository.deleteAll();
             ipInterfaceRepository.deleteAll();
             nodeRepository.deleteAll();
             credentialRepository.deleteAll();
@@ -153,6 +159,9 @@ class ScannerResponseServiceIntTest extends GrpcTestBase {
             assertEquals(TEST_TENANT_ID, node.getTenantId());
             assertEquals("vm-name (resource-group)", node.getNodeLabel());
             assertNotNull(node.getMonitoringLocation());
+
+            List<Tag> tags = node.getTags();
+            assertEquals(1, tags.size());
 
             List<IpInterface> allIpInterfaces = ipInterfaceRepository.findAll();
             assertEquals(1, allIpInterfaces.size());
@@ -281,8 +290,14 @@ class ScannerResponseServiceIntTest extends GrpcTestBase {
         credential.setSubscriptionId("sub-id");
         credential.setCreateTime(LocalDateTime.now());
         credential.setMonitoringLocation(location);
+        credential = credentialRepository.save(credential);
 
-        return credentialRepository.save(credential);
+        Tag tag = new Tag();
+        tag.setName("tag-name");
+        tag.getAzureCredentials().add(credential);
+        tagRepository.save(tag);
+
+        return credential;
     }
 
     private void assertNodeSystemGroup(Node node, NodeInfoResult nodeInfo) {

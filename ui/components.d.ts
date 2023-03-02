@@ -88,7 +88,6 @@ declare module '@vue/runtime-core' {
     MetricChip: typeof import('./src/components/Common/MetricChip.vue')['default']
     MPolicyForm: typeof import('./src/components/MonitoringPolicies/MPolicyForm.vue')['default']
     MPolicyRuleForm: typeof import('./src/components/MonitoringPolicies/MPolicyRuleForm.vue')['default']
-    MPolicyRulesForm: typeof import('./src/components/MonitoringPolicies/MPolicyRulesForm.vue')['default']
     NavigationRail: typeof import('./src/components/Layout/NavigationRail.vue')['default']
     NetworkGraph: typeof import('./src/components/Topology/NetworkGraph.vue')['default']
     NodeInfoTable: typeof import('./src/components/NodeStatus/NodeInfoTable.vue')['default']

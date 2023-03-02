@@ -1,7 +1,7 @@
 <template>
   <div class="policy-form-container">
     <div>
-      <FeatherButton primary @click="policyFormIsDisplayed = true">
+      <FeatherButton primary @click="store.displayPolicyForm()">
         <FeatherIcon :icon="addIcon" />
         Create New Policy
       </FeatherButton>
@@ -10,7 +10,7 @@
         :list="[{ name: 'Test'}, { name: 'Testlongername'}]" 
       />
     </div>
-    <div class="policy-form" v-if="policyFormIsDisplayed">
+    <div class="policy-form" v-if="store.selectedPolicy">
       <div class="form-title">
         Create New Policy
       </div>
@@ -42,7 +42,6 @@ import Add from '@featherds/icon/action/Add'
 
 const store = useMonitoringPoliciesStore()
 const addIcon = markRaw(Add)
-const policyFormIsDisplayed = ref(false)
 </script>
 
 <style scoped lang="scss">

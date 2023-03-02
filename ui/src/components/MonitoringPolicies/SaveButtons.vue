@@ -1,5 +1,5 @@
 <template>
-  <div class="btns">
+  <div class="btns" v-if="store.selectedPolicy">
     <FeatherButton primary :disabled="!enableSaveRule" @click="store.saveRule">
       Save Rule
     </FeatherButton>

@@ -1,5 +1,5 @@
 <template>
-  <div class="rule-form-container">
+  <div class="rule-form-container" v-if="store.selectedPolicy">
     <div>
       <FeatherButton primary @click="ruleFormIsDisplayed = true">
         <FeatherIcon :icon="addIcon" />

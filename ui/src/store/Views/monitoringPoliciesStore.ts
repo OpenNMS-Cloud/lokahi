@@ -5,7 +5,7 @@ import { IPolicy, IRule } from '@/types/policies'
 type TState = {
   existingPolicies: IPolicy[]
   existingRules: IRule[]
-  selectedPolicy: IPolicy
+  selectedPolicy?: IPolicy
   selectedRule: IRule
 }
 
@@ -35,12 +35,15 @@ export const useMonitoringPoliciesStore = defineStore('monitoringPoliciesStore',
   state: (): TState => ({
     existingRules: [],
     existingPolicies: [],
-    selectedPolicy: cloneDeep(defaultPolicy),
+    selectedPolicy: undefined,
     selectedRule: cloneDeep(defaultRule)
   }),
   actions: {
+    displayPolicyForm(policy?: IPolicy) {
+      this.selectedPolicy = policy || cloneDeep(defaultPolicy)
+    },
     removeTag(tag: string) {
-      this.selectedPolicy.tags = without(this.selectedPolicy.tags, tag)
+      this.selectedPolicy!.tags = without(this.selectedPolicy!.tags, tag)
     },
     setMetricName(name: string) {
       this.selectedRule.metricName = name
@@ -60,12 +63,12 @@ export const useMonitoringPoliciesStore = defineStore('monitoringPoliciesStore',
       this.selectedRule.conditions = this.selectedRule.conditions.filter((c) => c.id !== id)
     },
     saveRule() {
-      this.selectedPolicy.rules.push(this.selectedRule)
+      this.selectedPolicy!.rules.push(this.selectedRule)
       this.existingRules.push(this.selectedRule)
       this.selectedRule = cloneDeep(defaultRule) // clear form
     },
     savePolicy() {
-      this.existingPolicies.push(this.selectedPolicy)
+      this.existingPolicies.push(this.selectedPolicy!)
       this.selectedPolicy = cloneDeep(defaultPolicy) // clear form
     }
   }

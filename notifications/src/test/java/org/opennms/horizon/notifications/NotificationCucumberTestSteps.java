@@ -152,27 +152,21 @@ public class NotificationCucumberTestSteps extends GrpcTestBase {
 
     @Then("verify {string} key is {string}")
     public void verifyKey(String tenantId, String key) {
-        TenantContext.setTenantId(tenantId);
-        try {
+        try (TenantContext tc = TenantContext.withTenantId(tenantId)){
             PagerDutyConfigDTO configDTO = pagerDutyDao.getConfig();
             assertEquals(key, configDTO.getIntegrationKey());
         } catch (NotificationConfigUninitializedException e) {
             fail("Config is not initialised as expected");
-        } finally {
-            TenantContext.clear();
         }
     }
 
     @Then("verify {string} key is not set")
     public void verifyKeyIsNotSet(String tenantId) {
-        TenantContext.setTenantId(tenantId);
-        try {
+        try (TenantContext tc = TenantContext.withTenantId(tenantId)){
             pagerDutyDao.getConfig();
             fail("Config should not be initialised");
         } catch (NotificationConfigUninitializedException e) {
             assertEquals("PagerDuty config not initialized. Row count=0", e.getMessage());
-        } finally {
-            TenantContext.clear();
         }
     }
 

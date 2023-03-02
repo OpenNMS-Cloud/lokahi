@@ -31,7 +31,7 @@ package org.opennms.horizon.notifications.tenant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public final class TenantContext {
+public final class TenantContext implements AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(TenantContext.class);
 
     private TenantContext() {}
@@ -49,5 +49,15 @@ public final class TenantContext {
 
     public static void clear(){
         currentTenant.remove();
+    }
+
+    public static TenantContext withTenantId(String tenantId) {
+        setTenantId(tenantId);
+        return new TenantContext();
+    }
+
+    @Override
+    public void close() {
+        clear();
     }
 }

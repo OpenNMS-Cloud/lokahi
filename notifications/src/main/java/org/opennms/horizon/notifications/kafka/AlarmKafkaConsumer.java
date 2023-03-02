@@ -3,6 +3,7 @@ package org.opennms.horizon.notifications.kafka;
 import io.grpc.Context;
 import org.opennms.horizon.notifications.exceptions.NotificationException;
 import org.opennms.horizon.notifications.service.NotificationService;
+import org.opennms.horizon.notifications.tenant.TenantContext;
 import org.opennms.horizon.shared.constants.GrpcConstants;
 import org.opennms.horizon.shared.dto.event.AlarmDTO;
 import org.slf4j.Logger;
@@ -36,12 +37,11 @@ public class AlarmKafkaConsumer {
            return;
         }
         String tenantId = tenantOptional.get();
-        LOG.info("Received tenantIda {}", tenantId);
+        LOG.info("Received tenantId {}", tenantId);
 
-        Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, tenantId).run(()->
-        {
+        try (TenantContext tc = TenantContext.withTenantId(tenantId)){
             consumeAlarm(alarm);
-        });
+        }
     }
 
     public void consumeAlarm(AlarmDTO alarm){

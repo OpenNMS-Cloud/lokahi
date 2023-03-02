@@ -58,16 +58,6 @@
                 </configuration>
             </plugin>
             <plugin>
-                <groupId>com.google.cloud.tools</groupId>
-                <artifactId>jib-maven-plugin</artifactId>
-                <configuration>
-                    <!-- jib-maven-plugin needs to be executed only on specific submodules.
-                         This disables jib by default, which allows you to run jib goals on this parent pom without
-                         specifying a submodule. Set skip=false on submodules that need jib. -->
-                    <skip>true</skip>
-                </configuration>
-            </plugin>
-            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>${surefire.version}</version>

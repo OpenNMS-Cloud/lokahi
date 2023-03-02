@@ -26,6 +26,7 @@
         <skipDTs>true</skipDTs>
 
         <!-- Jib properties -->
+        <application.jib.defaultGoal>dockerBuild</application.jib.defaultGoal> <!-- dockerBuild for local only; build to push also -->
         <application.docker.skip>false</application.docker.skip>
         <application.docker.image>${application.docker.image.name}:${application.docker.image.tag}</application.docker.image>
         <!-- application.docker.image.name MUST be set by child modules that use jib-maven-plugin. -->
@@ -1081,6 +1082,17 @@
             <properties>
                 <skipITs>true</skipITs>
                 <features.verify.skip>true</features.verify.skip> <!-- built-in property of karaf-maven-plugin -->
+            </properties>
+        </profile>
+
+        <profile>
+            <id>cicd</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <properties>
+                <!-- Build AND push the built image -->
+                <application.jib.defaultGoal>build</application.jib.defaultGoal>
             </properties>
         </profile>
     </profiles>

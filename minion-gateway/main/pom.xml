@@ -200,7 +200,7 @@
                         <id>build-docker-image</id>
                         <phase>install</phase>
                         <goals>
-                            <goal>dockerBuild</goal>
+                            <goal>${application.jib.defaultGoal}</goal>
                         </goals>
                     </execution>
                 </executions>

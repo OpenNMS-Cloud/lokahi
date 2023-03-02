@@ -41,7 +41,7 @@ runs:
         BASE_IMAGE=ghcr.io/opennms-cloud/$(cat ../.github/base-image-tag-ref.json | jq .image_tag_java | sed 's/\"//g')
 
         mvn -B -Dstyle.color=always \
-            -Pcoverage \
+            -Pcicd,coverage \
             install \
             -Dapplication.docker.image=$IMAGE -Djib.from.image=$BASE_IMAGE \
             sonar:sonar -Dsonar.projectKey=$SONAR_PROJECT_KEY
@@ -58,7 +58,7 @@ runs:
         BASE_IMAGE=ghcr.io/opennms-cloud/$(cat ../.github/base-image-tag-ref.json | jq .image_tag_java | sed 's/\"//g')
 
         mvn -B -Dstyle.color=always \
-            -Pcoverage \
+            -Pcicd,coverage \
             install \
             -Dapplication.docker.image=$IMAGE -Djib.from.image=$BASE_IMAGE \
             sonar:sonar

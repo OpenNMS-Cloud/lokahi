@@ -82,7 +82,7 @@ jobs:
       - name: Build & Sonar Scan
         run: |
           mvn -B -Dstyle.color=always \
-              -Pcoverage,run-it \
+              -Pcicd,coverage,run-it \
               install \
               sonar:sonar \
               -Dapplication.docker.image=${{ steps.docker-metadata.outputs.tags }}

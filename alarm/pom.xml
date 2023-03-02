@@ -270,7 +270,7 @@
 <!--                        Must be in package phase before docker runs-->
                         <phase>package</phase>
                         <goals>
-                            <goal>dockerBuild</goal>
+                            <goal>${application.jib.defaultGoal}</goal>
                         </goals>
                     </execution>
                 </executions>

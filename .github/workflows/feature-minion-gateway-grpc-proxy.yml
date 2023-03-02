@@ -70,7 +70,7 @@ jobs:
       - name: Jib Maven build and push
         run: |
           mvn -B -Dstyle.color=always \
-              -Pcoverage \
+              -Pcicd,coverage \
               install \
               jib:build -Dapplication.docker.image=${{ steps.docker-metadata.outputs.tags }}
         working-directory: minion-gateway-grpc-proxy

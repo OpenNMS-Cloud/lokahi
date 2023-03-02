@@ -8,7 +8,7 @@ const wrapper = mount(BasicToggle, {
   props: {
     toggle,
     onToggle
-  }
+  } as any // lets us pass emits fns to the test using onSomeFuntion...
 })
 
 test('The basic toggle mounts', () => {

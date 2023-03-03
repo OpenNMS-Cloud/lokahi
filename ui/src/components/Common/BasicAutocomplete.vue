@@ -20,7 +20,7 @@
       - ok when using arrow up/down and enter key to select item
  -->
 <template>
-  <div class="discovery-autocomplete">
+  <div>
     <FeatherAutocomplete
       :model-value="modelValue"
       @update:model-value="updateModelValue"
@@ -88,10 +88,10 @@ const props = defineProps({
   }
 })
 
-let loading = ref(false)
-let selectedItems = ref<IAutocomplete[]>([])
+const loading = ref(false)
+const selectedItems = ref<IAutocomplete[]>([])
 
-let results = computed(() => {
+const results = computed(() => {
   loading.value = false
 
   return props.items?.map((item: any) => ({

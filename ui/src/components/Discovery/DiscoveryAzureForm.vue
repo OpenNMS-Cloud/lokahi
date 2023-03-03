@@ -46,7 +46,7 @@
       class="locations"
     />
 
-    <DiscoveryAutocomplete
+    <BasicAutocomplete
       class="tags"
       @items-selected="tagsSelectedListener"
       :get-items="discoveryQueries.getTagsSearch"

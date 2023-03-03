@@ -26,7 +26,7 @@
           data-test="locations-autocomplete"
         />
         <DiscoveryHelpConfiguring data-test="help-configuring" />
-        <DiscoveryAutocomplete
+        <BasicAutocomplete
           @items-selected="tagsSelectedListener"
           :get-items="discoveryQueries.getTagsSearch"
           :items="discoveryQueries.tagsSearched"

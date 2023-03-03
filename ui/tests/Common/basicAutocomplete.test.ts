@@ -1,11 +1,11 @@
 import { mount } from '@vue/test-utils'
-import DiscoveryAutocomplete from '@/components/Discovery/DiscoveryAutocomplete.vue'
+import BasicAutocomplete from '@/components/Common/BasicAutocomplete.vue'
 
 let wrapper: any
 
-describe('DiscoveryAutocomplete', () => {
+describe('BasicAutocomplete', () => {
   beforeAll(() => {
-    wrapper = mount(DiscoveryAutocomplete, { shallow: true, props: { label: '', getItems: () => ({}), items: [] } })
+    wrapper = mount(BasicAutocomplete, { shallow: true, props: { label: '', getItems: () => ({}), items: [] } })
   })
 
   test('Mount component', () => {

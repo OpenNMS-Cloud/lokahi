@@ -36,8 +36,8 @@ import org.mapstruct.NullValueCheckStrategy;
 import org.opennms.horizon.inventory.discovery.ActiveDiscoveryDTO;
 import org.opennms.horizon.inventory.discovery.ActiveDiscoveryRequest;
 import org.opennms.horizon.inventory.discovery.SNMPConfigDTO;
+import org.opennms.horizon.server.model.inventory.discovery.ActiveDiscovery;
 import org.opennms.horizon.server.model.inventory.discovery.CreateDiscoveryConfigRequest;
-import org.opennms.horizon.server.model.inventory.discovery.DiscoveryConfig;
 import org.opennms.horizon.server.model.inventory.discovery.SNMPConfig;
 
 import java.util.List;
@@ -68,7 +68,7 @@ public interface DiscoveryConfigMapper {
         @Mapping(source = "ipAddressesList", target = "ipAddresses"),
         @Mapping(source = "snmpConf", target = "snmpConfig")
     })
-    DiscoveryConfig configDtoToModel(ActiveDiscoveryDTO configDTO);
+    ActiveDiscovery configDtoToModel(ActiveDiscoveryDTO configDTO);
 
-    List<DiscoveryConfig> configDtoListToConfig(List<ActiveDiscoveryDTO> dtoList);
+    List<ActiveDiscovery> configDtoListToConfig(List<ActiveDiscoveryDTO> dtoList);
 }

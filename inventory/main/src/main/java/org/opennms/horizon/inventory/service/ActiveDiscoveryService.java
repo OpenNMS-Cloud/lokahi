@@ -60,8 +60,9 @@ public class ActiveDiscoveryService {
         return entities.stream().map(mapper::modelToDto).toList();
     }
 
-    public Optional<ActiveDiscoveryDTO> getDiscoveryConfigByName(String name, String tenantId) {
-        var optional = repository.findByNameAndTenantId(name, tenantId);
+    public Optional<ActiveDiscoveryDTO> getDiscoveryConfigById(long id, String tenantId) {
+        var optional = repository.findByIdAndTenantId(id, tenantId);
         return optional.map(mapper::modelToDto);
     }
+
 }

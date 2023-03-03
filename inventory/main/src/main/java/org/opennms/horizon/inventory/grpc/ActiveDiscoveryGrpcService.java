@@ -29,7 +29,7 @@
 package org.opennms.horizon.inventory.grpc;
 
 import com.google.protobuf.Empty;
-import com.google.protobuf.StringValue;
+import com.google.protobuf.Int64Value;
 import com.google.rpc.Code;
 import com.google.rpc.Status;
 import io.grpc.Context;
@@ -83,10 +83,10 @@ public class ActiveDiscoveryGrpcService extends ActiveDiscoveryOperationGrpc.Act
     }
 
     @Override
-    public void getDiscoveryConfigByName(StringValue request, StreamObserver<ActiveDiscoveryDTO> responseObserver) {
+    public void getDiscoveryConfigById(Int64Value request, StreamObserver<ActiveDiscoveryDTO> responseObserver) {
         tenantLookup.lookupTenantId(Context.current())
             .ifPresentOrElse(tenantId ->
-                    configService.getDiscoveryConfigByName(request.getValue(), tenantId)
+                    configService.getDiscoveryConfigById(request.getValue(), tenantId)
                         .ifPresentOrElse(config -> {
                             responseObserver.onNext(config);
                             responseObserver.onCompleted();

@@ -36,8 +36,8 @@ import io.leangen.graphql.spqr.spring.annotations.GraphQLApi;
 import lombok.RequiredArgsConstructor;
 import org.opennms.horizon.inventory.discovery.ActiveDiscoveryRequest;
 import org.opennms.horizon.server.mapper.DiscoveryConfigMapper;
+import org.opennms.horizon.server.model.inventory.discovery.ActiveDiscovery;
 import org.opennms.horizon.server.model.inventory.discovery.CreateDiscoveryConfigRequest;
-import org.opennms.horizon.server.model.inventory.discovery.DiscoveryConfig;
 import org.opennms.horizon.server.service.grpc.InventoryClient;
 import org.opennms.horizon.server.utils.ServerHeaderUtil;
 import org.springframework.stereotype.Service;
@@ -53,19 +53,19 @@ public class GrpcActiveDiscoveryService {
     private final InventoryClient client;
 
     @GraphQLMutation
-    public Mono<DiscoveryConfig> createDiscoveryConfig(CreateDiscoveryConfigRequest request, @GraphQLEnvironment ResolutionEnvironment env) {
+    public Mono<ActiveDiscovery> createActiveDiscovery(CreateDiscoveryConfigRequest request, @GraphQLEnvironment ResolutionEnvironment env) {
         ActiveDiscoveryRequest requestDto = mapper.mapRequest(request);
         return Mono.just(mapper.configDtoToModel(client.createDiscoveryConfig(requestDto, headerUtil.getAuthHeader(env))));
     }
 
     @GraphQLQuery
-    public Flux<DiscoveryConfig> listDiscoveryConfig(@GraphQLEnvironment ResolutionEnvironment env) {
+    public Flux<ActiveDiscovery> listActiveDiscovery(@GraphQLEnvironment ResolutionEnvironment env) {
         return Flux.fromIterable(mapper.configDtoListToConfig(client.listDiscoveryConfig(headerUtil.getAuthHeader(env))));
     }
 
     @GraphQLQuery
-    public Mono<DiscoveryConfig> getDiscoveryConfigByName(String name, @GraphQLEnvironment ResolutionEnvironment env) {
-        return Mono.just(mapper.configDtoToModel(client.getDiscoveryConfigByName(name, headerUtil.getAuthHeader(env))));
+    public Mono<ActiveDiscovery> getActiveDiscoveryById(Long id, @GraphQLEnvironment ResolutionEnvironment env) {
+        return Mono.just(mapper.configDtoToModel(client.getDiscoveryConfigById(id, headerUtil.getAuthHeader(env))));
     }
 
 }

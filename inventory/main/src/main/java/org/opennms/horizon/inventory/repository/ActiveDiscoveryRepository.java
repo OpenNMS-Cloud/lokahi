@@ -42,8 +42,10 @@ public interface ActiveDiscoveryRepository extends JpaRepository<ActiveDiscovery
 
     Optional<ActiveDiscoveryConfig> findByLocationAndName(String location, String name);
 
-    Optional<ActiveDiscoveryConfig> findByNameAndTenantId(String name, String tenantId);
+    List<ActiveDiscoveryConfig> findByNameAndTenantId(String name, String tenantId);
 
     List<ActiveDiscoveryConfig> findByTenantId(String tenantId);
+
+    Optional<ActiveDiscoveryConfig> findByIdAndTenantId(long id, String tenantId);
 
 }

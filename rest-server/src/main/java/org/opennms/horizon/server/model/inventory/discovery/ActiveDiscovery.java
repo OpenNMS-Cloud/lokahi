@@ -35,7 +35,7 @@ import java.util.List;
 
 @Getter
 @Setter
-public class DiscoveryConfig {
+public class ActiveDiscovery {
     private long  id;
     private String configName;
     private List<String> ipAddresses;

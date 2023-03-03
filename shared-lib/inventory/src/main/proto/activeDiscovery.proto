@@ -67,5 +67,5 @@ message ActiveDiscoveryList {
 service ActiveDiscoveryOperation {
   rpc createConfig(ActiveDiscoveryRequest) returns (ActiveDiscoveryDTO);
   rpc listDiscoveryConfig(google.protobuf.Empty) returns(ActiveDiscoveryList);
-  rpc getDiscoveryConfigByName(google.protobuf.StringValue) returns (ActiveDiscoveryDTO);
+  rpc getDiscoveryConfigById(google.protobuf.Int64Value) returns (ActiveDiscoveryDTO);
 }

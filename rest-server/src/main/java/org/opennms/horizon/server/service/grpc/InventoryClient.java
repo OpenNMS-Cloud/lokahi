@@ -105,11 +105,11 @@ public class InventoryClient {
             .listDiscoveryConfig(Empty.getDefaultInstance()).getDiscoverConfigsList();
     }
 
-    public ActiveDiscoveryDTO getDiscoveryConfigByName(String name, String accessToken) {
+    public ActiveDiscoveryDTO getDiscoveryConfigById(Long id, String accessToken) {
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
         return activeDiscoveryStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
-            .getDiscoveryConfigByName(StringValue.of(name));
+            .getDiscoveryConfigById(Int64Value.of(id));
     }
 
     public NodeDTO createNewNode(NodeCreateDTO node, String accessToken) {

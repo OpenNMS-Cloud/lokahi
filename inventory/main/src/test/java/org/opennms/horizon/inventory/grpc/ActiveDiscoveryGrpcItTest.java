@@ -29,7 +29,7 @@
 package org.opennms.horizon.inventory.grpc;
 
 import com.google.protobuf.Empty;
-import com.google.protobuf.StringValue;
+import com.google.protobuf.Int64Value;
 import io.grpc.Context;
 import io.grpc.stub.MetadataUtils;
 import org.junit.jupiter.api.AfterEach;
@@ -104,7 +104,7 @@ public class ActiveDiscoveryGrpcItTest extends GrpcTestBase {
     }
 
     @Test
-    void testGetConfigByName() {
+    void testGetConfigById() {
         Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, tenantId).run(()->
         {
             ActiveDiscoveryDTO tempConfig = ActiveDiscoveryDTO.newBuilder()
@@ -113,15 +113,16 @@ public class ActiveDiscoveryGrpcItTest extends GrpcTestBase {
                 .setSnmpConf(SNMPConfigDTO.newBuilder().addAllReadCommunity(List.of("test-community")).build()).build();
             var model = configMapper.dtoToModel(tempConfig);
             model.setTenantId(tenantId);
-            configRepo.save(model);
+            var activeDiscovery = configRepo.save(model);
+            ActiveDiscoveryDTO discoveryConfig = serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader)))
+                .getDiscoveryConfigById(Int64Value.of(activeDiscovery.getId()));
+
+            assertThat(discoveryConfig).isNotNull()
+                .extracting(ActiveDiscoveryDTO::getConfigName, c -> c.getIpAddressesList().get(0), c -> c.getSnmpConf().getReadCommunityList().get(0))
+                .containsExactly(configName, "127.0.0.1", "test-community");
         });
 
-        ActiveDiscoveryDTO discoveryConfig = serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader)))
-                .getDiscoveryConfigByName(StringValue.of(configName));
 
-        assertThat(discoveryConfig).isNotNull()
-            .extracting(ActiveDiscoveryDTO::getConfigName, c -> c.getIpAddressesList().get(0), c -> c.getSnmpConf().getReadCommunityList().get(0))
-            .containsExactly(configName, "127.0.0.1", "test-community");
     }
 
     @Test

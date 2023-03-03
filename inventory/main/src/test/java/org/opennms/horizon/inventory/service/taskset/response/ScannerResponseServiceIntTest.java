@@ -33,17 +33,6 @@ import com.google.protobuf.Any;
 import com.google.protobuf.InvalidProtocolBufferException;
 import io.grpc.Context;
 import org.hamcrest.Matchers;
-
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.fail;
-
-import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.IntStream;
-
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -73,11 +62,11 @@ import org.opennms.node.scan.contract.NodeScanResult;
 import org.opennms.node.scan.contract.SnmpInterfaceResult;
 import org.opennms.taskset.contract.ScanType;
 import org.opennms.taskset.contract.ScannerResponse;
+import org.opennms.taskset.contract.TaskType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -137,6 +126,7 @@ class ScannerResponseServiceIntTest extends GrpcTestBase {
             credentialRepository.deleteAll();
             locationRepository.deleteAll();
         });
+        testGrpcService.reset();
     }
 
     @Test
@@ -164,7 +154,9 @@ class ScannerResponseServiceIntTest extends GrpcTestBase {
 
             // monitor and collect tasks
             await().atMost(10, TimeUnit.SECONDS).until(() -> testGrpcService.getTaskDefinitions(TEST_LOCATION).stream()
-                    .filter(taskDefinition -> taskDefinition.getPluginName().contains("AZURE")).collect(Collectors.toSet()), Matchers.hasSize(2));
+                    .filter(taskDefinition -> taskDefinition.getPluginName().contains("AZURE") &&
+                        (taskDefinition.getType().equals(TaskType.MONITOR) || taskDefinition.getType().equals(TaskType.COLLECTOR)))
+                .collect(Collectors.toSet()).size(), Matchers.is(2));
 
             List<Node> allNodes = nodeRepository.findAll();
             assertEquals(1, allNodes.size());

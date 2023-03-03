@@ -29,6 +29,7 @@
 package org.opennms.horizon.inventory.service;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import io.grpc.Context;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -48,13 +49,12 @@ import org.opennms.horizon.inventory.service.taskset.DetectorTaskSetService;
 import org.opennms.horizon.inventory.service.taskset.MonitorTaskSetService;
 import org.opennms.horizon.inventory.service.taskset.ScannerTaskSetService;
 import org.opennms.horizon.inventory.service.taskset.publisher.TaskSetPublisher;
-import org.opennms.horizon.inventory.repository.TagRepository;
 import org.opennms.horizon.shared.constants.GrpcConstants;
 import org.opennms.horizon.shared.utils.InetAddressUtils;
-import org.opennms.taskset.contract.MonitorType;
-import org.opennms.taskset.contract.TaskDefinition;
 import org.opennms.node.scan.contract.NodeInfoResult;
+import org.opennms.taskset.contract.MonitorType;
 import org.opennms.taskset.contract.ScanType;
+import org.opennms.taskset.contract.TaskDefinition;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -233,5 +233,23 @@ public class NodeService {
         for (Tag tag : node.getTags()) {
             tag.getNodes().remove(node);
         }
+    }
+
+    public void sendNewNodeTaskSetAsync(Node node, String tenantId) {
+        executorService.execute(() -> sendTaskSetsToMinion(node, tenantId));
+    }
+
+    private void sendTaskSetsToMinion(Node node, String tenantId) {
+
+        Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, tenantId).run(() ->
+        {
+            try {
+                detectorTaskSetService.sendDetectorTasks(node);
+                scannerTaskSetService.sendNodeScannerTask(List.of(mapper.modelToDTO(node)),
+                    node.getMonitoringLocation().getLocation(), node.getTenantId());
+            } catch (Exception e) {
+                log.error("Error while sending detector/nodescan task for node with label {}", node.getNodeLabel());
+            }
+        });
     }
 }

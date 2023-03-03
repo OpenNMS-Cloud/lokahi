@@ -32,11 +32,6 @@ import com.google.protobuf.Any;
 import com.google.protobuf.InvalidProtocolBufferException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
 import org.opennms.horizon.azure.api.AzureScanItem;
 import org.opennms.horizon.azure.api.AzureScanResponse;
 import org.opennms.horizon.inventory.dto.NodeCreateDTO;
@@ -59,6 +54,11 @@ import org.opennms.taskset.contract.ScanType;
 import org.opennms.taskset.contract.ScannerResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 
 @Slf4j
@@ -128,7 +128,8 @@ public class ScannerResponseService {
                 .setManagementIp(pingResponse.getIpAddress())
                 .setLabel(pingResponse.getIpAddress())
                 .build();
-            nodeService.createNode(createDTO, ScanType.DISCOVERY_SCAN, tenantId);
+            Node node = nodeService.createNode(createDTO, ScanType.DISCOVERY_SCAN, tenantId);
+            nodeService.sendNewNodeTaskSetAsync(node, tenantId);
         }
     }
 

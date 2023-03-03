@@ -33,10 +33,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
-import jakarta.persistence.ManyToOne;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -67,6 +64,10 @@ public class PassiveDiscovery extends TenantAwareEntity {
     private String name;
 
     @NotNull
+    @Column(name = "location")
+    private String location;
+
+    @NotNull
     @Column(name = "create_time", columnDefinition = "TIMESTAMP")
     private LocalDateTime createTime;
 
@@ -77,10 +78,6 @@ public class PassiveDiscovery extends TenantAwareEntity {
     @Column(name = "snmp_communities", columnDefinition = "jsonb")
     @JdbcTypeCode(SqlTypes.JSON)
     private List<String> snmpCommunities;
-
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "monitoring_location_id", referencedColumnName = "id")
-    private MonitoringLocation monitoringLocation;
 
     @ManyToMany(mappedBy = "passiveDiscoveries")
     private List<Tag> tags = new ArrayList<>();

@@ -29,17 +29,13 @@
 package org.opennms.horizon.inventory.service;
 
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.StringUtils;
 import org.opennms.horizon.inventory.dto.PassiveDiscoveryDTO;
 import org.opennms.horizon.inventory.dto.PassiveDiscoveryUpsertDTO;
 import org.opennms.horizon.inventory.dto.TagCreateListDTO;
 import org.opennms.horizon.inventory.exception.InventoryRuntimeException;
 import org.opennms.horizon.inventory.mapper.PassiveDiscoveryMapper;
-import org.opennms.horizon.inventory.model.MonitoringLocation;
 import org.opennms.horizon.inventory.model.PassiveDiscovery;
-import org.opennms.horizon.inventory.repository.MonitoringLocationRepository;
 import org.opennms.horizon.inventory.repository.PassiveDiscoveryRepository;
-import org.opennms.horizon.shared.constants.GrpcConstants;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -52,21 +48,16 @@ import java.util.Optional;
 public class PassiveDiscoveryService {
     private final PassiveDiscoveryMapper mapper;
     private final PassiveDiscoveryRepository repository;
-    private final MonitoringLocationRepository locationRepository;
-    private final ConfigUpdateService configUpdateService;
     private final TagService tagService;
 
     @Transactional
     public PassiveDiscoveryDTO createDiscovery(String tenantId, PassiveDiscoveryUpsertDTO request) {
         validateSnmpPorts(request);
 
-        MonitoringLocation monitoringLocation = getMonitoringLocation(tenantId, request);
-
         PassiveDiscovery discovery = mapper.dtoToModel(request);
         discovery.setTenantId(tenantId);
         discovery.setToggle(true);
         discovery.setCreateTime(LocalDateTime.now());
-        discovery.setMonitoringLocation(monitoringLocation);
         discovery = repository.save(discovery);
 
         tagService.addTags(tenantId, TagCreateListDTO.newBuilder()
@@ -87,11 +78,8 @@ public class PassiveDiscoveryService {
 
         validateSnmpPorts(request);
 
-        MonitoringLocation monitoringLocation = getMonitoringLocation(tenantId, request);
-
         PassiveDiscovery discovery = discoveryOpt.get();
         mapper.updateFromDto(request, discovery);
-        discovery.setMonitoringLocation(monitoringLocation);
         discovery = repository.save(discovery);
 
         tagService.updateTags(tenantId, TagCreateListDTO.newBuilder()
@@ -117,27 +105,5 @@ public class PassiveDiscoveryService {
                 throw new InventoryRuntimeException(message);
             }
         }
-    }
-
-    private MonitoringLocation getMonitoringLocation(String tenantId, PassiveDiscoveryUpsertDTO request) {
-        String location = StringUtils.isEmpty(request.getLocation())
-            ? GrpcConstants.DEFAULT_LOCATION : request.getLocation();
-
-        Optional<MonitoringLocation> locationOp = locationRepository
-            .findByLocationAndTenantId(location, tenantId);
-
-        if (locationOp.isPresent()) {
-            return locationOp.get();
-        }
-
-        MonitoringLocation monitoringLocation = new MonitoringLocation();
-        monitoringLocation.setLocation(location);
-        monitoringLocation.setTenantId(tenantId);
-        monitoringLocation = locationRepository.save(monitoringLocation);
-
-        // Send config updates asynchronously to Minion
-        configUpdateService.sendConfigUpdate(tenantId, location);
-
-        return monitoringLocation;
     }
 }

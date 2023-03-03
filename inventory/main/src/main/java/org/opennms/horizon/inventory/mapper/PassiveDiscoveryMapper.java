@@ -48,7 +48,6 @@ public interface PassiveDiscoveryMapper extends DateTimeMapper {
 
     @Mapping(source = "snmpPorts", target = "portsList")
     @Mapping(source = "createTime", target = "createTimeMsec")
-    @Mapping(source = "monitoringLocation.location", target = "location")
     PassiveDiscoveryDTO modelToDto(PassiveDiscovery model);
 
     @Mapping(target = "id", ignore = true)

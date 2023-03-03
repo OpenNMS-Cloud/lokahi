@@ -14,8 +14,14 @@ kafka:
 grpc:
   server:
     deadline: 60000
-  url:
-    inventory: opennms-inventory:6565
+  inventory:
+    url: opennms-inventory:6565
+  flow-ingestor:
+    # Temporary URL
+    url: flows.onms-dp-dev.dev.nonprod.dataservice.opennms.com:443
+    retry:
+      maxAttempts: 3
+      maxDelay: 5000
 
 flows:
   clockSkewCorrectionThreshold: 0

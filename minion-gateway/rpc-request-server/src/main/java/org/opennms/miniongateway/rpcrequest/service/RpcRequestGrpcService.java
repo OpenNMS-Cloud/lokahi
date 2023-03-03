@@ -41,7 +41,7 @@ public class RpcRequestGrpcService extends RpcRequestServiceGrpc.RpcRequestServi
     @PostConstruct
     public void start() throws IOException {
         grpcIpcServer.startServer(this);
-        log.info("Started RPC-Request GRPC Service");
+        log.info("Initiated RPC-Request GRPC Service");
     }
 
 //========================================

@@ -20,12 +20,13 @@
       <div class="my-discovery-inner">
         <FeatherAutocomplete
           class="search"
-          v-model="searchValue"
+          v-model="discoverySearchValue"
           :loading="searchLoading"
           :results="discoveriesResults"
           @search="search"
           label="Search Discovery"
           type="single"
+          @update:model-value="showDiscovery"
         />
         <DiscoveryListCard
           title=" My Active Discoveries"
@@ -33,8 +34,10 @@
           @select-discovery="showDiscovery"
         />
         <DiscoveryListCard
+          passive
           title=" My Passive Discoveries"
           :list="[]"
+          @toggle-discovery="toggleDiscovery"
         />
       </div>
     </section>
@@ -54,9 +57,9 @@
       <div>
         <div v-if="discoverySelectedType === DiscoveryType.ICMP">
           <DiscoverySnmpForm
-            @close-form="handleCancel"
             :successCallback="(name) => successModal.openSuccessModal(name)"
             :cancel="handleCancel"
+            :discovery="selectedDiscovery"
           />
         </div>
         <div v-else-if="discoverySelectedType === DiscoveryType.Azure">
@@ -89,17 +92,17 @@ import { IIcon } from '@/types'
 import { DiscoveryInput } from '@/types/discovery'
 import { DiscoveryType } from '@/components/Discovery/discovery.constants'
 import discoveryText from '@/components/Discovery/discovery.text'
-import { useDiscoveryStore } from '@/store/Views/discoveryStore'
 import { useDiscoveryQueries } from '@/store/Queries/discoveryQueries'
 import { DiscoveryConfig } from '@/types/graphql'
+import { IAutocompleteItemType } from '@featherds/autocomplete'
 
 const discoveryQueries = useDiscoveryQueries()
 onMounted(() => discoveryQueries.getDiscoveries())
 const activeDiscoveries = computed(() => discoveryQueries.discoveries)
 
 type TDiscoveryAutocomplete = DiscoveryInput & { _text: string }
-
-const store = useDiscoveryStore()
+//change when location will be added to type
+type TDiscoveryConfig = DiscoveryConfig & { location: string }
 
 const addIcon: IIcon = {
   image: markRaw(AddIcon)
@@ -108,38 +111,47 @@ const addIcon: IIcon = {
 const successModal = ref()
 const isDiscoveryEditingShown = ref(false)
 const showNewDiscovery = ref(false)
-const selectedDiscovery = ref<DiscoveryInput | null>(null)
+const selectedDiscovery = ref<TDiscoveryConfig | null>(null)
 const discoverySelectedType = ref(DiscoveryType.None)
 
 const handleNewDiscovery = () => {
   isDiscoveryEditingShown.value = true
   showNewDiscovery.value = true
-  store.setSelectedDiscovery(null)
+  selectedDiscovery.value = null
+  discoverySelectedType.value = DiscoveryType.None
 }
 
 const discoveriesResults = ref<TDiscoveryAutocomplete[]>([])
 const searchLoading = ref(false)
-const searchValue = ref(undefined)
+const discoverySearchValue = ref(undefined)
 
 const search = (q: string) => {
+  if (!q) return
   searchLoading.value = true
-  const results = store.activeDiscoveries
-    .filter((x) => x.name.toLowerCase().indexOf(q) > -1)
-    .map((x) => ({
-      _text: x.name,
-      id: x.id,
-      name: x.name
+  const results = activeDiscoveries.value
+    .filter((x: any) => x.configName?.toLowerCase().indexOf(q) > -1)
+    .map((x: any) => ({
+      _text: x.configName,
+      ...x
     }))
   discoveriesResults.value = results as TDiscoveryAutocomplete[]
   searchLoading.value = false
 }
 
-const showDiscovery = (discovery: DiscoveryConfig) => {
-  isDiscoveryEditingShown.value = true
-  showNewDiscovery.value = false
-  //type hardocoded for now
-  discoverySelectedType.value = DiscoveryType.ICMP
-  store.setSelectedDiscovery(discovery)
+const showDiscovery = (discovery: IAutocompleteItemType | IAutocompleteItemType[] | undefined) => {
+  if (discovery) {
+    isDiscoveryEditingShown.value = true
+    showNewDiscovery.value = false
+    //type hardocoded for now
+    discoverySelectedType.value = DiscoveryType.ICMP
+    selectedDiscovery.value = discovery as TDiscoveryConfig
+  } else {
+    discoverySearchValue.value = undefined
+  }
+}
+
+const toggleDiscovery = (item: any, isToggled: boolean) => {
+  // call mutation to turn on / off passive discovery, when available.
 }
 
 const handleCancel = () => {
@@ -196,12 +208,17 @@ const handleCancel = () => {
     }
 
     @include mediaQueriesMixins.screen-md {
+      max-width: 350px;
       margin-bottom: 0;
     }
 
     .search {
       background-color: var(variables.$surface);
       margin-bottom: var(variables.$spacing-m);
+
+      :deep(.feather-input-sub-text) {
+        display: none !important;
+      }
     }
   }
 

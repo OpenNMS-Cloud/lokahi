@@ -42,6 +42,7 @@ OpenNMS:
       Requests:
         Cpu: 100m
         Memory: 250Mi
+    PrivateRepoEnabled: false
   Minion:
     ServiceName: opennms-minion
     Image: opennms/horizon-stream-minion
@@ -206,6 +207,13 @@ Keycloak:
   AdminPassword: notset
   RealmName: opennms
   DynamicRealmConfig: true
+  PrivateRepoEnabled: false
+  ConfigmapName: keycloak-realm-configmap
+  IngressAnnotations:
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      add_header X-Content-Type-Options "nosniff";
+      add_header X-Frame-Options "sameorigin";
+      add_header server_tokens "off";
 Grafana:
   Enabled: true
   Path: /grafana

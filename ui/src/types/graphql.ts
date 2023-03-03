@@ -186,6 +186,7 @@ export type Node = {
   monitoringLocationId: Scalars['Long'];
   nodeLabel?: Maybe<Scalars['String']>;
   objectId?: Maybe<Scalars['String']>;
+  scanType?: Maybe<Scalars['String']>;
   snmpInterfaces?: Maybe<Array<Maybe<SnmpInterface>>>;
   systemContact?: Maybe<Scalars['String']>;
   systemDescr?: Maybe<Scalars['String']>;
@@ -198,6 +199,7 @@ export type NodeCreateInput = {
   label?: InputMaybe<Scalars['String']>;
   location?: InputMaybe<Scalars['String']>;
   managementIp?: InputMaybe<Scalars['String']>;
+  tags?: InputMaybe<Array<InputMaybe<TagCreateInput>>>;
 };
 
 export type NodeStatus = {

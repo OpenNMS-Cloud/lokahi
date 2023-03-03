@@ -20,7 +20,7 @@
       data-test="form"
     >
       <div class="form-content">
-        <LocationsAutocomplete
+        <DiscoveryLocationsAutocomplete
           @location-selected="locationsSelectedListener"
           ref="locationsAutocompleteRef"
           data-test="locations-autocomplete"

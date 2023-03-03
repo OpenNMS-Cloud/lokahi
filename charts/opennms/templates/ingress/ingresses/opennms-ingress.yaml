@@ -3,6 +3,10 @@ kind: Ingress
 metadata:
   name: opennms-ingress
   namespace: {{ .Release.Namespace }}
+  annotations:
+    {{- range $Annotation, $Value := .Values.Keycloak.IngressAnnotations }}
+    {{ $Annotation | quote }}: {{ $Value | quote }}
+    {{- end }}
 spec:
   ingressClassName: nginx
   defaultBackend:

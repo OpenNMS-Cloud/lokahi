@@ -29,18 +29,20 @@
 package org.opennms.miniongateway.taskset;
 
 import java.io.IOException;
-import java.util.List;
 import org.opennms.miniongateway.grpc.twin.GrpcTwinPublisher;
 import org.opennms.miniongateway.grpc.twin.TwinPublisher.Session;
-import org.opennms.taskset.contract.TaskDefinition;
 import org.opennms.taskset.contract.TaskSet;
-import org.opennms.taskset.service.api.TaskSetPublisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Process task set updates, publishing them to downstream minions and storing the latest version to provide to minions
  *  on request.
+ *
+ *  This is the EGRESS part of task set management flow:
+ *      1. (INGRESS) updates received from other services, such as inventory
+ *      2. (STORE + AGGREGATE) task set updates made against the Task Set store
+ *      3. (EGRESS) On storage events, updates pushed downstream to Minions via Twin
  */
 public class TaskSetPublisherImpl implements TaskSetPublisher {
 
@@ -67,10 +69,4 @@ public class TaskSetPublisherImpl implements TaskSetPublisher {
             throw new RuntimeException(e);
         }
     }
-
-    @Override
-    public void publishNewTasks(String tenantId, String location, List<TaskDefinition> taskList) {
-
-    }
-
 }

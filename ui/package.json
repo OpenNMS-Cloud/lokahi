@@ -68,7 +68,8 @@
     "villus": "^2.1.0",
     "vite-svg-loader": "^4.0.0",
     "vue": "^3.2.45",
-    "vue-router": "4.1.6"
+    "vue-router": "4.1.6",
+    "yup": "^1.0.2"
   },
   "devDependencies": {
     "@graphql-codegen/cli": "2.16.3",

@@ -27,6 +27,9 @@ runs:
         path: ~/.sonar/cache
         key: ${{ runner.os }}-${{ runner.arch }}-sonar
 
+    - name: Clean up old artifacts from Maven Cache
+      uses: ./.github/actions/maven-cache-cleanup-project-artifacts
+
     - name: Build Image & Scan
       if: ${{ inputs.project-key != '' }}
       env:
@@ -38,8 +41,9 @@ runs:
         BASE_IMAGE=ghcr.io/opennms-cloud/$(cat ../.github/base-image-tag-ref.json | jq .image_tag_java | sed 's/\"//g')
 
         mvn -B -Dstyle.color=always \
-            -Pcoverage verify \
-            jib:build -Dapplication.docker.image=$IMAGE -Djib.from.image=$BASE_IMAGE \
+            -Pcicd,coverage \
+            install \
+            -Dapplication.docker.image=$IMAGE -Djib.from.image=$BASE_IMAGE \
             sonar:sonar -Dsonar.projectKey=$SONAR_PROJECT_KEY
       shell: bash
       working-directory: ${{ inputs.working-directory }}
@@ -54,8 +58,9 @@ runs:
         BASE_IMAGE=ghcr.io/opennms-cloud/$(cat ../.github/base-image-tag-ref.json | jq .image_tag_java | sed 's/\"//g')
 
         mvn -B -Dstyle.color=always \
-            -Pcoverage verify \
-            jib:build -Dapplication.docker.image=$IMAGE -Djib.from.image=$BASE_IMAGE \
+            -Pcicd,coverage \
+            install \
+            -Dapplication.docker.image=$IMAGE -Djib.from.image=$BASE_IMAGE \
             sonar:sonar
       shell: bash
       working-directory: ${{ inputs.working-directory }}

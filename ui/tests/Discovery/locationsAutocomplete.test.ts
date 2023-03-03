@@ -1,4 +1,4 @@
-import LocationsAutocomplete from '@/components/Discovery/LocationsAutocomplete.vue'
+import DiscoveryLocationsAutocomplete from '@/components/Discovery/DiscoveryLocationsAutocomplete.vue'
 import mount from 'tests/mountWithPiniaVillus'
 let wrapper: any
 
@@ -24,7 +24,7 @@ const locationsMock = [
 describe('Locations Autocomplete component', () => {
   beforeAll(() => {
     wrapper = mount({
-      component: LocationsAutocomplete,
+      component: DiscoveryLocationsAutocomplete,
       props: {
         type: 'multiple'
       }
@@ -34,7 +34,7 @@ describe('Locations Autocomplete component', () => {
     wrapper.unmount()
   })
 
-  it('The LocationsAutocomplete component mounts correctly', () => {
+  it('The DiscoveryLocationsAutocomplete component mounts correctly', () => {
     expect(wrapper).toBeTruthy()
   })
 

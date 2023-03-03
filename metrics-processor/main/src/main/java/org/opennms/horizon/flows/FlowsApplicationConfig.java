@@ -29,25 +29,38 @@
 package org.opennms.horizon.flows;
 
 import com.codahale.metrics.MetricRegistry;
+
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
+import io.grpc.netty.shaded.io.grpc.netty.GrpcSslContexts;
+import io.grpc.netty.shaded.io.grpc.netty.NettyChannelBuilder;
+import io.grpc.netty.shaded.io.netty.handler.ssl.util.InsecureTrustManagerFactory;
+
 import org.opennms.horizon.flows.classification.ClassificationEngine;
 import org.opennms.horizon.flows.classification.ClassificationRuleProvider;
 import org.opennms.horizon.flows.classification.FilterService;
 import org.opennms.horizon.flows.classification.csv.CsvImporter;
 import org.opennms.horizon.flows.classification.internal.DefaultClassificationEngine;
+import org.opennms.horizon.flows.grpc.client.IngestorClient;
 import org.opennms.horizon.flows.grpc.client.InventoryClient;
 import org.opennms.horizon.flows.integration.FlowRepository;
 import org.opennms.horizon.flows.integration.FlowRepositoryImpl;
 import org.opennms.horizon.flows.processing.DocumentEnricherImpl;
 import org.opennms.horizon.flows.processing.Pipeline;
 import org.opennms.horizon.flows.processing.PipelineImpl;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.retry.backoff.FixedBackOffPolicy;
+import org.springframework.retry.policy.SimpleRetryPolicy;
+import org.springframework.retry.support.RetryTemplate;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.concurrent.TimeUnit;
+
+import javax.net.ssl.SSLException;
 
 @Configuration
 public class FlowsApplicationConfig {
@@ -70,21 +83,45 @@ public class FlowsApplicationConfig {
     @Value("${flows.nodeCache.recordStats:true}")
     private boolean nodeCacheRecordStats;
 
-    @Value("${grpc.url.inventory}")
+    @Value("${grpc.inventory.url}")
     private String inventoryGrpcAddress;
+
+    @Value("${grpc.flow-ingestor.url}")
+    private String ingestorGrpcAddress;
+
     @Value("${grpc.server.deadline:60000}")
     private long deadline;
 
-    @Bean
+    @Value("${grpc.flow-ingestor.retry.maxAttempts}")
+    private int maxNumberOfAttempts;
+
+    @Value("${grpc.flow-ingestor.retry.maxDelay}")
+    private int backOffPeriod;
+
+    @Bean(name = "inventoryChannel")
     public ManagedChannel createInventoryChannel() {
         return ManagedChannelBuilder.forTarget(inventoryGrpcAddress)
             .keepAliveWithoutCalls(true)
             .usePlaintext().build();
     }
 
+    @Bean(name = "ingestorChannel")
+    public ManagedChannel createIngestorChannel() throws SSLException {
+        return NettyChannelBuilder.forTarget(ingestorGrpcAddress)
+            .sslContext(GrpcSslContexts.forClient().trustManager(InsecureTrustManagerFactory.INSTANCE).build())
+            .keepAliveTime(10, TimeUnit.SECONDS)
+            .keepAliveTimeout(15, TimeUnit.SECONDS)
+            .build();
+    }
+
     @Bean(destroyMethod = "shutdown", initMethod = "initialStubs")
-    public InventoryClient createInventoryClient(ManagedChannel channel) {
+    public InventoryClient createInventoryClient(@Qualifier("inventoryChannel") ManagedChannel channel) {
         return new InventoryClient(channel, deadline);
+    }
+
+    @Bean(destroyMethod = "shutdown", initMethod = "initStubs")
+    public IngestorClient createIngestorClient(@Qualifier("ingestorChannel") ManagedChannel channel, RetryTemplate retryTemplate) {
+        return new IngestorClient(channel, deadline, retryTemplate);
     }
 
     @Bean
@@ -98,8 +135,8 @@ public class FlowsApplicationConfig {
     }
 
     @Bean
-    public FlowRepository createFlowRepositoryImpl() {
-        return new FlowRepositoryImpl();
+    public FlowRepository createFlowRepositoryImpl(final IngestorClient ingestorClient) {
+        return new FlowRepositoryImpl(ingestorClient);
     }
 
     @Bean
@@ -119,5 +156,17 @@ public class FlowsApplicationConfig {
                                                        final ClassificationEngine classificationEngine) {
         return new DocumentEnricherImpl(metricRegistry, inventoryClient, classificationEngine,
             clockSkewCorrectionThreshold);
+    }
+
+    @Bean
+    public RetryTemplate retryTemplate() {
+        RetryTemplate retryTemplate = new RetryTemplate();
+        FixedBackOffPolicy fixedBackOffPolicy = new FixedBackOffPolicy();
+        fixedBackOffPolicy.setBackOffPeriod(backOffPeriod);
+        retryTemplate.setBackOffPolicy(fixedBackOffPolicy);
+        SimpleRetryPolicy retryPolicy = new SimpleRetryPolicy();
+        retryPolicy.setMaxAttempts(maxNumberOfAttempts);
+        retryTemplate.setRetryPolicy(retryPolicy);
+        return retryTemplate;
     }
 }

@@ -39,6 +39,10 @@ spec:
                 - {{ .Values.NodeRestrictions.Value }}                                                 
       {{- end }}
       terminationGracePeriodSeconds: 120
+      {{- if .Values.OpenNMS.UI.PrivateRepoEnabled }}
+      imagePullSecrets:
+        - name: image-credentials
+      {{- end }}
       containers:
         - name: {{ .Values.OpenNMS.UI.ServiceName }}
           image: {{ .Values.OpenNMS.UI.Image }}

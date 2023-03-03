@@ -119,15 +119,16 @@ public class TestContainerRunnerClassRule extends ExternalResource {
         applicationContainer
             .withNetwork(network)
             .withNetworkAliases("application", "application-host")
-            .withExposedPorts(8080, 8990, 8991, 5005)
+            .withExposedPorts(8080, 8990, 8991)
+            // .withExposedPorts(8080, 8990, 8991, 5005)
             .withStartupTimeout(Duration.ofMinutes(5))
             .withEnv("JAVA_TOOL_OPTIONS", "-Djava.security.egd=file:/dev/./urandom -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005")
             .withEnv("KAFKA_BOOTSTRAP_SERVERS", "kafka-host:9092")
             .withLogConsumer(new Slf4jLogConsumer(LOG).withPrefix("APPLICATION"))
             ;
 
-        // DEBUGGING: uncomment to force local port 5005
-        // applicationContainer.getPortBindings().add("5005:5005");
+        // DEBUGGING: uncomment to force local port 5005, and remove 5005 from .withExposedPorts() above
+        applicationContainer.getPortBindings().add("5005:5005");
         applicationContainer.start();
 
         var httpPort = applicationContainer.getMappedPort(8080); // application-http-port

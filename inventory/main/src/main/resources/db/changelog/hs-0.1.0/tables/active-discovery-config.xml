@@ -57,12 +57,10 @@
         </addColumn>
         <addColumn tableName="active_discovery_config">
             <column name="snmp_community_strings" type="jsonb">
-                <constraints nullable="false"/>
             </column>
         </addColumn>
         <addColumn tableName="active_discovery_config">
             <column name="snmp_ports" type="jsonb">
-                <constraints nullable="false"/>
             </column>
         </addColumn>
     </changeSet>

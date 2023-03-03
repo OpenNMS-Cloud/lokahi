@@ -32,6 +32,7 @@ import org.mapstruct.CollectionMappingStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
+import org.mapstruct.NullValueCheckStrategy;
 import org.opennms.horizon.inventory.discovery.ActiveDiscoveryDTO;
 import org.opennms.horizon.inventory.discovery.ActiveDiscoveryRequest;
 import org.opennms.horizon.inventory.discovery.SNMPConfigDTO;
@@ -41,7 +42,8 @@ import org.opennms.horizon.server.model.inventory.discovery.SNMPConfig;
 
 import java.util.List;
 
-@Mapper(componentModel = "spring", collectionMappingStrategy = CollectionMappingStrategy.ADDER_PREFERRED)
+@Mapper(componentModel = "spring",
+    uses = {TagMapper.class}, collectionMappingStrategy = CollectionMappingStrategy.ADDER_PREFERRED)
 public interface DiscoveryConfigMapper {
     @Mappings({
         @Mapping(source = "readCommunityList", target = "readCommunities"),
@@ -57,7 +59,8 @@ public interface DiscoveryConfigMapper {
 
     @Mappings({
         @Mapping(target = "ipAddressesList", source = "ipAddresses"),
-        @Mapping(target = "snmpConf", source = "snmpConfig")
+        @Mapping(target = "snmpConf", source = "snmpConfig", nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS),
+        @Mapping(target = "tagsList", source = "tags", nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
     })
     ActiveDiscoveryRequest mapRequest(CreateDiscoveryConfigRequest request);
 

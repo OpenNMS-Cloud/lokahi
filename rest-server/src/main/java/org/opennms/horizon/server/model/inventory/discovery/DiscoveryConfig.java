@@ -36,6 +36,7 @@ import java.util.List;
 @Getter
 @Setter
 public class DiscoveryConfig {
+    private long  id;
     private String configName;
     private List<String> ipAddresses;
     private String location;

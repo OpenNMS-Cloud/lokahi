@@ -65,7 +65,7 @@ public class AzureCredentialService {
     private final TagService tagService;
 
     public AzureCredentialDTO createCredentials(String tenantId, AzureCredentialCreateDTO request) {
-        validateCredentials(request);
+        validateCredentials(tenantId, request);
 
         MonitoringLocation monitoringLocation = getMonitoringLocation(tenantId, request);
 
@@ -86,7 +86,8 @@ public class AzureCredentialService {
         return mapper.modelToDto(credential);
     }
 
-    private void validateCredentials(AzureCredentialCreateDTO request) {
+    private void validateCredentials(String tenantId, AzureCredentialCreateDTO request) {
+        validateAlreadyExists(tenantId, request);
         AzureOAuthToken token;
         try {
             token = client.login(request.getDirectoryId(), request.getClientId(),
@@ -118,6 +119,15 @@ public class AzureCredentialService {
         if (!subscription.getState().equalsIgnoreCase(SUB_ENABLED_STATE)) {
             String message = String.format("Subscription %s is not enabled", request.getSubscriptionId());
             throw new InventoryRuntimeException(message);
+        }
+    }
+
+    private void validateAlreadyExists(String tenantId, AzureCredentialCreateDTO request) {
+        Optional<AzureCredential> azureCredentialOpt = repository
+            .findByTenantIdAndSubscriptionIdAndDirectoryIdAndClientId(tenantId,
+                request.getSubscriptionId(), request.getDirectoryId(), request.getClientId());
+        if (azureCredentialOpt.isPresent()) {
+            throw new InventoryRuntimeException("Azure discovery already exists with the provided subscription, directory and client ID");
         }
     }
 

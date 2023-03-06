@@ -236,6 +236,32 @@ class AzureCredentialGrpcItTest extends GrpcTestBase {
     }
 
     @Test
+    void testCreateAzureCredentialsAlreadyExists() throws Exception {
+        mockAzureLogin();
+        mockAzureGetSubscription(true);
+
+        AzureCredentialCreateDTO createDTO = AzureCredentialCreateDTO.newBuilder()
+            .setName(TEST_NAME)
+            .setLocation(DEFAULT_LOCATION)
+            .setClientId(TEST_CLIENT_ID)
+            .setClientSecret(TEST_CLIENT_SECRET)
+            .setSubscriptionId(TEST_SUBSCRIPTION_ID)
+            .setDirectoryId(TEST_DIRECTORY_ID)
+            .build();
+
+        serviceStub.withInterceptors(MetadataUtils
+                .newAttachHeadersInterceptor(createAuthHeader(authHeader)))
+            .createCredentials(createDTO);
+
+        StatusRuntimeException exception = assertThrows(StatusRuntimeException.class, () -> serviceStub.withInterceptors(MetadataUtils
+                .newAttachHeadersInterceptor(createAuthHeader(authHeader)))
+            .createCredentials(createDTO));
+        Status status = StatusProto.fromThrowable(exception);
+        assertThat(status.getCode()).isEqualTo(Code.INTERNAL_VALUE);
+        assertThat(exception.getMessage()).contains("Azure discovery already exists with the provided subscription, directory and client ID");
+    }
+
+    @Test
     void testCreateAzureCredentialsWithoutTenantId() {
 
         AzureCredentialCreateDTO createDTO = AzureCredentialCreateDTO.newBuilder()

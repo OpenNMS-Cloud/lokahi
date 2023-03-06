@@ -3,8 +3,10 @@ package org.opennms.miniongateway.taskset.internal;
 import org.apache.ignite.Ignite;
 import org.apache.ignite.IgniteCache;
 import org.opennms.miniongateway.grpc.server.model.TenantKey;
+import org.opennms.miniongateway.taskset.service.TaskSetGrpcServiceUpdateProcessor;
 import org.opennms.miniongateway.taskset.service.TaskSetStorage;
 import org.opennms.miniongateway.taskset.service.TaskSetStorageListener;
+import org.opennms.miniongateway.taskset.service.TaskSetStorageUpdateFunction;
 import org.opennms.taskset.contract.TaskSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,7 +66,7 @@ public class TaskSetIgniteStorageImpl implements TaskSetStorage {
      * {@inheritDoc}
      */
     @Override
-    public void atomicUpdateTaskSetForLocation(String tenantId, String location, Function<TaskSet, TaskSet> updateOp) {
+    public void atomicUpdateTaskSetForLocation(String tenantId, String location, TaskSetStorageUpdateFunction updateFunction) {
         TenantKey tenantKey = new TenantKey(tenantId, location);
 
         Lock lock = taskSetIgniteCache.lock(tenantKey);
@@ -73,7 +75,7 @@ public class TaskSetIgniteStorageImpl implements TaskSetStorage {
             var currentTaskSet = taskSetIgniteCache.get(tenantKey);
 
             LOG.debug("Calling update function in (distributed) critical section - STARTED");
-            var updatedTaskSet = updateOp.apply(currentTaskSet);
+            var updatedTaskSet = updateFunction.process(currentTaskSet);
             LOG.debug("Calling update function in (distributed) critical section - FINISHED");
 
             // NOTE the rare instance equality check.  This is intentional.

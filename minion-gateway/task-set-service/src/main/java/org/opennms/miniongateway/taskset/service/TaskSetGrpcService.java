@@ -1,9 +1,9 @@
 package org.opennms.miniongateway.taskset.service;
 
 import io.grpc.stub.StreamObserver;
+import lombok.Setter;
 import org.opennms.horizon.shared.grpc.common.GrpcIpcServer;
 import org.opennms.horizon.shared.grpc.common.TenantIDGrpcServerInterceptor;
-import org.opennms.taskset.contract.TaskSet;
 import org.opennms.taskset.service.contract.TaskSetServiceGrpc;
 import org.opennms.taskset.service.contract.UpdateTasksRequest;
 import org.opennms.taskset.service.contract.UpdateTasksResponse;
@@ -15,9 +15,6 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * API Endpoints exposed to other services to perform operations on Task Sets, such as adding and removing Tasks from
@@ -37,13 +34,20 @@ public class TaskSetGrpcService extends TaskSetServiceGrpc.TaskSetServiceImplBas
 
     @Autowired
     @Qualifier("internalGrpcIpcServer")
+    @Setter // Testability
     private GrpcIpcServer grpcIpcServer;
 
     @Autowired
+    @Setter // Testability
     private TenantIDGrpcServerInterceptor tenantIDGrpcServerInterceptor;
 
     @Autowired
+    @Setter // Testability
     private TaskSetStorage taskSetStorage;
+
+    @Autowired
+    @Setter // Testability
+    private TaskSetGrpcServiceUpdateProcessorFactory taskSetGrpcServiceUpdateProcessorFactory;
 
 //========================================
 // Lifecycle
@@ -71,125 +75,24 @@ public class TaskSetGrpcService extends TaskSetServiceGrpc.TaskSetServiceImplBas
         // Retrieve the Tenant ID from the TenantID GRPC Interceptor
         String tenantId = tenantIDGrpcServerInterceptor.readCurrentContextTenantId();
 
-        AtomicInteger numAdded = new AtomicInteger(0);
-        AtomicInteger numRemoved = new AtomicInteger(0);
+        TaskSetGrpcServiceUpdateProcessor updateProcessor = taskSetGrpcServiceUpdateProcessorFactory.create(tenantId, request);
 
-        taskSetStorage.atomicUpdateTaskSetForLocation(
-            tenantId, request.getLocation(), (original) -> {
-                //
-                // CRITICAL SECTION
-                //
-                //  WARNING - this critical section is called with a distributed lock.  Keep it short and sweet.
-                //
-                return this.applyUpdateToStoredTaskSet(tenantId, request, original, numAdded, numRemoved);
-            });
+        try {
+            taskSetStorage.atomicUpdateTaskSetForLocation(tenantId, request.getLocation(), updateProcessor);
+        } catch (RuntimeException rtExc) {
+            // Log exceptions here that might otherwise get swallowed
+            LOG.warn("error applying task set updates", rtExc);
+            throw rtExc;
+        }
 
         UpdateTasksResponse response =
             UpdateTasksResponse.newBuilder()
-                .setNumAdded(numAdded.get())
-                .setNumRemoved(numRemoved.get())
+                .setNumNew(updateProcessor.getNumNew())
+                .setNumReplaced(updateProcessor.getNumReplaced())
+                .setNumRemoved(updateProcessor.getNumRemoved())
                 .build();
 
         responseObserver.onNext(response);
         responseObserver.onCompleted();
-    }
-
-//========================================
-// Internal Methods
-//----------------------------------------
-
-    /**
-     * Process the updates given to the Task Set.  Note that existing task definitions with the same IDs as added ones
-     *  are replaced by the new ones.
-     *
-     * @param tenantId ID of the Tenant to which the Task Set belongs.
-     * @param request details of the update request.
-     * @param original TaskSet to update.
-     * @param numAdded stores the total number of tasks added on completion
-     * @param numRemoved stores the total number of tasks removed on completion; not this includes any existing tasks
-     *                  replaced by new ones that were added.
-     * @return updated Task Set, or the original Task Set if no changes were actually made
-     */
-    private TaskSet
-    applyUpdateToStoredTaskSet(
-        String tenantId,
-        UpdateTasksRequest request,
-        TaskSet original,
-        AtomicInteger numAdded,
-        AtomicInteger numRemoved) {
-
-        int removed = 0;
-        int added = 0;
-        TaskSet.Builder updatedTaskSetBuilder = TaskSet.newBuilder();
-
-        // First scan the requested updates and collect all of the removal task IDs.  NOTE: also includes all of the IDs
-        //  for tasks that are being added to prevent duplicate task IDs in the end result.
-        var removeTaskIDs = collectRemovalIds(request);
-
-        if (original != null) {
-            // Next scan the task set and remove those requested tasks
-            removed = copyExistingTasksWithFilter(removeTaskIDs, original, updatedTaskSetBuilder);
-        }
-
-        // Finally, add any new tasks
-        added = addNewTasks(request, updatedTaskSetBuilder);
-
-        LOG.debug("Remove tasks: tenant={}; location={}; added-count={}; removed-count={}",
-            tenantId, request.getLocation(), added, removed);
-
-        // Determine the return value based on whether there was an actual change
-        TaskSet result;
-        if ((removed > 0) || (added > 0)) {
-            // Return the new, updated task set
-            numAdded.set(added);
-            numRemoved.set(removed);
-            result = updatedTaskSetBuilder.build();
-        } else {
-            // Return the original task set so the storage can ignore the update
-            result = original;
-        }
-
-        return result;
-    }
-
-    private Set<String> collectRemovalIds(UpdateTasksRequest request) {
-        Set<String> result = new HashSet<>();
-
-        for (var update : request.getUpdateList()) {
-            if (update.hasRemoveTask()) {
-                result.add(update.getRemoveTask().getTaskId());
-            } else if (update.hasAddTask()) {
-                // Include the "Add Task" ids so existing tasks with the same IDs are removed first.
-                result.add(update.getAddTask().getTaskDefinition().getId());
-            }
-        }
-
-        return result;
-    }
-
-    private int copyExistingTasksWithFilter(Set<String> removeTaskIDs, TaskSet original, TaskSet.Builder updatedTaskSetBuilder) {
-        int removed = 0;
-        for (var taskDefinition : original.getTaskDefinitionList()) {
-            if (!removeTaskIDs.contains(taskDefinition.getId())) {
-                updatedTaskSetBuilder.addTaskDefinition(taskDefinition);
-            } else {
-                removed++;
-            }
-        }
-
-        return removed;
-    }
-
-    private int addNewTasks(UpdateTasksRequest request, TaskSet.Builder updatedTaskSetBuilder) {
-        int added = 0;
-
-        for (var update : request.getUpdateList()) {
-            if (update.hasAddTask()) {
-                updatedTaskSetBuilder.addTaskDefinition((update.getAddTask().getTaskDefinition()));
-                added++;
-            }
-        }
-
-        return added;
     }
 }

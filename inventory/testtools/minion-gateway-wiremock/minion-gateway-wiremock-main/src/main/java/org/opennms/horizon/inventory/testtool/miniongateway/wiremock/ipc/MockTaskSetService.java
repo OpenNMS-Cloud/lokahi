@@ -48,8 +48,9 @@ public class MockTaskSetService extends TaskSetServiceGrpc.TaskSetServiceImplBas
 
         responseObserver.onNext(
             UpdateTasksResponse.newBuilder()
-                .setNumAdded(11)    // TODO: do we need more realistic numbers?
+                .setNumNew(11)      // TODO: do we need more realistic numbers?
                 .setNumRemoved(13)  // TODO: do we need more realistic numbers?
+                .setNumReplaced(15)
                 .build()
         );
         responseObserver.onCompleted();

@@ -98,6 +98,7 @@
         <keycloak.version>20.0.3</keycloak.version>
         <liquibaseVersion>4.17.0</liquibaseVersion>
         <log4j2.version>2.19.0</log4j2.version>
+        <logcaptor.version>2.7.10</logcaptor.version>
         <mapstruct.version>1.5.3.Final</mapstruct.version>
         <maven-resources.version>3.3.0</maven-resources.version>
         <mina.version>2.1.5</mina.version>
@@ -244,6 +245,11 @@
                         <artifactId>slf4j-api</artifactId>
                     </exclusion>
                 </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>io.github.hakky54</groupId>
+                <artifactId>logcaptor</artifactId>
+                <version>${logcaptor.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.prometheus</groupId>

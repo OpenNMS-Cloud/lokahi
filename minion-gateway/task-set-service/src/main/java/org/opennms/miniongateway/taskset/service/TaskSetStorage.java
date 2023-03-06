@@ -18,12 +18,12 @@ public interface TaskSetStorage {
      *
      * @param tenantId ID of the Tenant to which the Task Set belongs.
      * @param location location to which the Task Set belongs.
-     * @param updateOp function that receives the original Task Set for the location (or null if none currently exists)
-     *                 and returns one of the following: (1) null to indicate the task set should be removed; (2) the
-     *                 original task set itself, in which case the cache is not updated; (3) a new TaskSet instance, in
-     *                 which case the cache entry is updated to the new instance.
+     * @param updateFunction function that receives the original Task Set for the location (or null if none currently
+     *                       exists) and returns one of the following: (1) null to indicate the task set should be
+     *                       removed; (2) the original task set itself, in which case the cache is not updated; (3) a
+     *                       new TaskSet instance, in which case the cache entry is updated to the new instance.
      */
-    void atomicUpdateTaskSetForLocation(String tenantId, String location, Function<TaskSet, TaskSet> updateOp);
+    void atomicUpdateTaskSetForLocation(String tenantId, String location, TaskSetStorageUpdateFunction updateFunction);
 
     /**
      * Add a listener for all TaskSet updates.

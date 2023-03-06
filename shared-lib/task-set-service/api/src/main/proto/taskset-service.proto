@@ -35,8 +35,9 @@ message UpdateTasksRequest {
 }
 
 message UpdateTasksResponse {
-  int32 numAdded = 1;
+  int32 numNew = 1;
   int32 numRemoved = 2;
+  int32 numReplaced = 3;
 }
 
 message UpdateSingleTaskOp {

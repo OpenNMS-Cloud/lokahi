@@ -15,26 +15,26 @@ limitations under the License.
 package thirdparty
 
 import (
-    "github.com/OpenNMS-Cloud/opennms-operator/internal/handlers"
-    "github.com/OpenNMS-Cloud/opennms-operator/internal/model/values"
-    appsv1 "k8s.io/api/apps/v1"
-    corev1 "k8s.io/api/core/v1"
+	"github.com/OpenNMS-Cloud/opennms-operator/internal/handlers"
+	"github.com/OpenNMS-Cloud/opennms-operator/internal/model/values"
+	appsv1 "k8s.io/api/apps/v1"
+	corev1 "k8s.io/api/core/v1"
 )
 
 type KeycloakHandler struct {
-    handlers.ServiceHandlerObject
+	handlers.ServiceHandlerObject
 }
 
 func (h *KeycloakHandler) UpdateConfig(values values.TemplateValues) error {
-    var initialAdminSecret corev1.Secret
-    var realmConfigmap corev1.ConfigMap
-    var deployment appsv1.Deployment
-    var service corev1.Service
+	var initialAdminSecret corev1.Secret
+	var realmConfigmap corev1.ConfigMap
+	var deployment appsv1.Deployment
+	var service corev1.Service
 
-    h.AddToTemplates(handlers.Filepath("keycloak/keycloak-initial-cred-secret.yaml"), values, &initialAdminSecret)
-    h.AddToTemplates(handlers.Filepath("keycloak/keycloak-realm-configmap.yaml"), values, &realmConfigmap)
-    h.AddToTemplates(handlers.Filepath("keycloak/keycloak-deployment.yaml"), values, &deployment)
-    h.AddToTemplates(handlers.Filepath("keycloak/keycloak-service.yaml"), values, &service)
+	h.AddToTemplates(handlers.Filepath("keycloak/keycloak-initial-cred-secret.yaml"), values, &initialAdminSecret)
+	h.AddToTemplates(handlers.Filepath("keycloak/keycloak-realm-configmap-static.yaml"), values, &realmConfigmap)
+	h.AddToTemplates(handlers.Filepath("keycloak/keycloak-deployment.yaml"), values, &deployment)
+	h.AddToTemplates(handlers.Filepath("keycloak/keycloak-service.yaml"), values, &service)
 
-    return h.LoadTemplates()
+	return h.LoadTemplates()
 }

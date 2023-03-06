@@ -1,20 +1,23 @@
 <template>
-  <FeatherButton 
+  <FeatherButton
     primary
-    data-test="add-node-btn" 
+    data-test="add-node-btn"
     @click="openModal"
-  > 
+  >
     <template v-slot:icon>
-      <FeatherIcon 
-        :icon="Add" 
-        aria-hidden="true" 
-        focusable="false" 
+      <FeatherIcon
+        :icon="Add"
+        aria-hidden="true"
+        focusable="false"
       />
       Add Device
     </template>
   </FeatherButton>
 
-  <PrimaryModal title="Add Device" :visible="isVisible">
+  <PrimaryModal
+    title="Add Device"
+    :visible="isVisible"
+  >
     <template v-slot:content>
       <FeatherInput
         data-test="name-input"
@@ -62,19 +65,21 @@
     </template>
 
     <template v-slot:footer>
-      <FeatherButton 
-        data-test="cancel-btn" 
-        secondary 
-        @click="cancel">
-          Cancel
+      <FeatherButton
+        data-test="cancel-btn"
+        secondary
+        @click="cancel"
+      >
+        Cancel
       </FeatherButton>
-      
-      <FeatherButton 
-        data-test="save-btn" 
+
+      <FeatherButton
+        data-test="save-btn"
         primary
-        :disabled="!node.label" 
-        @click="save">
-          Save
+        :disabled="!node.label"
+        @click="save"
+      >
+        Save
       </FeatherButton>
     </template>
   </PrimaryModal>
@@ -93,7 +98,7 @@ const { openModal, closeModal, isVisible } = useModal()
 const nodeMutations = useNodeMutations()
 const applianceQueries = useAppliancesQueries()
 
-const defaultDevice: NodeCreateInput = { 
+const defaultDevice: NodeCreateInput = {
   label: undefined,
   location: undefined,
   // latitude: undefined,
@@ -107,15 +112,7 @@ const defaultDevice: NodeCreateInput = {
 const node = reactive({ ...defaultDevice })
 
 const save = async () => {
-  // convert the field value to undefined if their value is an empty string (entered then erased the input field returns an empty string) - empty string as value in payload causes error when adding node.
-  // Object.assign(node, {
-  //   port: node.port || undefined,
-  //   latitude: node.latitude || undefined,
-  //   longitude: node.longitude || undefined
-  // })
-
   await nodeMutations.addNode({ node })
-  
   if (!nodeMutations.error) {
     // clears node obj on successful save
     Object.assign(node, defaultDevice)
@@ -150,7 +147,7 @@ const selectLocation = () => {
   }
 }
 // sets default location when locations available
-watchEffect(() => { 
+watchEffect(() => {
   if (!node.location) {
     locationOption.value = applianceQueries.locations[0]
     selectLocation()
@@ -159,7 +156,7 @@ watchEffect(() => {
 </script>
 
 <style scoped lang="scss">
-@use "@featherds/styles/mixins/typography";
+@use '@featherds/styles/mixins/typography';
 
 .title {
   @include typography.headline3;

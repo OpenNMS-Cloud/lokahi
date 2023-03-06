@@ -39,4 +39,6 @@ public class IpInterface {
     private long nodeId;
     private String ipAddress;
     private Boolean snmpPrimary;
+    private String hostname;
+    private String netmask;
 }

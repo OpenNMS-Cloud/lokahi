@@ -7,13 +7,45 @@ option java_multiple_files = true;
 option java_package = "org.opennms.taskset.service.contract";
 
 service TaskSetService {
-  rpc publishTaskSet(PublishTaskSetRequest) returns (PublishTaskSetResponse) {}
+  rpc updateTasks(UpdateTasksRequest) returns (UpdateTasksResponse) {}
+
 }
 
+//
+// PUBLISH TASK SET (TODO - remove)
+//
 message PublishTaskSetRequest {
   string location = 1;
   opennms.taskset.TaskSet taskSet = 2;
 }
 
 message PublishTaskSetResponse {
+}
+
+//
+// UPDATE TASKS
+//
+message UpdateTasksRequest {
+  string location = 1;
+  repeated UpdateSingleTaskOp update = 2;
+}
+
+message UpdateTasksResponse {
+  int32 numAdded = 1;
+  int32 numRemoved = 2;
+}
+
+message UpdateSingleTaskOp {
+  oneof op {
+      AddSingleTaskOp addTask = 1;
+      RemoveSingleTaskOp removeTask = 2;
+  }
+}
+
+message AddSingleTaskOp {
+  TaskDefinition taskDefinition = 1;
+}
+
+message RemoveSingleTaskOp {
+  string taskId = 1;
 }

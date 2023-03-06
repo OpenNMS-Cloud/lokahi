@@ -30,6 +30,7 @@ package org.opennms.horizon.shared.snmp;
 
 import java.net.InetAddress;
 import java.util.Map;
+import java.util.Optional;
 import java.util.TreeMap;
 
 
@@ -52,9 +53,9 @@ public abstract class AbstractSnmpStore {
         return (val == null ? null : Long.valueOf(val.toLong()));
     }
 
-    public String getDisplayString(String key) {
+    public Optional<String> getDisplayString(String key) {
         SnmpValue val = getValue(key);
-        return (val == null ? null : val.toDisplayString());
+        return Optional.ofNullable(val == null ? null : val.toDisplayString());
     }
 
     public String getHexString(String key) {
@@ -67,8 +68,8 @@ public abstract class AbstractSnmpStore {
         return (val == null ? null : val.toInetAddress());
     }
 
-    public String getObjectID(String key) {
-        return (getValue(key) == null ? null : getValue(key).toString());
+    public Optional<String> getObjectID(String key) {
+        return Optional.ofNullable(getValue(key) == null ? null : getValue(key).toString());
     }
 
     public SnmpValue getValue(String key) {

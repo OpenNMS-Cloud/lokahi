@@ -34,6 +34,7 @@ import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.KafkaContainer;
 import org.testcontainers.containers.Network;
+import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.utility.DockerImageName;
 
@@ -45,6 +46,7 @@ public class TestContainerRunnerClassRule extends ExternalResource {
     public static final String KAFKA_BOOTSTRAP_SERVER_PROPERTYNAME = "kafka.bootstrap-servers";
 
     private static final Logger DEFAULT_LOGGER = LoggerFactory.getLogger(TestContainerRunnerClassRule.class);
+    private final PostgreSQLContainer postgreSQLContainer;
 
     private Logger LOG = DEFAULT_LOGGER;
 
@@ -59,6 +61,7 @@ public class TestContainerRunnerClassRule extends ExternalResource {
 
     public TestContainerRunnerClassRule() {
         kafkaContainer = new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka").withTag(confluentPlatformVersion));
+        postgreSQLContainer = new PostgreSQLContainer<>("postgres:14.5-alpine");
         applicationContainer = new GenericContainer(DockerImageName.parse(dockerImage).toString());
     }
 
@@ -71,12 +74,14 @@ public class TestContainerRunnerClassRule extends ExternalResource {
         LOG.info("USING TEST DOCKER NETWORK {}", network.getId());
 
         startKafkaContainer();
+        startPostgresqlContainer();
         startApplicationContainer();
     }
 
     @Override
     protected void after() {
         applicationContainer.stop();
+        postgreSQLContainer.stop();
         kafkaContainer.stop();
     }
 
@@ -98,19 +103,32 @@ public class TestContainerRunnerClassRule extends ExternalResource {
         LOG.info("KAFKA LOCALHOST BOOTSTRAP SERVERS {}", bootstrapServers);
     }
 
+    private void startPostgresqlContainer() {
+        postgreSQLContainer
+            .withDatabaseName("minion_gateway")
+            .withUsername("ignite")
+            .withPassword("ignite")
+            .withLogConsumer(new Slf4jLogConsumer(LOG).withPrefix("POSTGRES"))
+            .withNetwork(network)
+            .withNetworkAliases("postgres")
+            .start();
+        LOG.info("PostgresSQL container started and available at {}", postgreSQLContainer.getJdbcUrl());
+    }
+
     private void startApplicationContainer() {
         applicationContainer
             .withNetwork(network)
             .withNetworkAliases("application", "application-host")
-            .withExposedPorts(8080, 8990, 8991, 5005)
+            .withExposedPorts(8080, 8990, 8991)
+            // .withExposedPorts(8080, 8990, 8991, 5005)
             .withStartupTimeout(Duration.ofMinutes(5))
             .withEnv("JAVA_TOOL_OPTIONS", "-Djava.security.egd=file:/dev/./urandom -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005")
             .withEnv("KAFKA_BOOTSTRAP_SERVERS", "kafka-host:9092")
             .withLogConsumer(new Slf4jLogConsumer(LOG).withPrefix("APPLICATION"))
             ;
 
-        // DEBUGGING: uncomment to force local port 5005
-        // applicationContainer.getPortBindings().add("5005:5005");
+        // DEBUGGING: uncomment to force local port 5005, and remove 5005 from .withExposedPorts() above
+        applicationContainer.getPortBindings().add("5005:5005");
         applicationContainer.start();
 
         var httpPort = applicationContainer.getMappedPort(8080); // application-http-port

@@ -1,0 +1,79 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: minion-gateway-ignite-config
+  labels:
+    app: {{ .Values.OpenNMS.MinionGateway.ServiceName }}
+  namespace: {{ .Release.Namespace }}
+data:
+  ignite-cache-config.xml: |
+    <?xml version="1.0" encoding="utf-8" ?>
+    <!--                                                                                                  -->
+    <!-- DEVELOPER WARNING: make sure to update the version of this in the minion-gateway sources as well -->
+    <!--                                                                                                  -->
+    <beans xmlns="http://www.springframework.org/schema/beans"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+            http://www.springframework.org/schema/beans
+            http://www.springframework.org/schema/beans/spring-beans.xsd
+          ">
+
+        <bean id="igniteConfiguration" class="org.apache.ignite.configuration.IgniteConfiguration">
+            <description>Default configuration for Ignite to run a cluster.</description>
+            <property name="dataStorageConfiguration">
+                <bean class="org.apache.ignite.configuration.DataStorageConfiguration">
+                    <property name="defaultDataRegionConfiguration">
+                        <bean class="org.apache.ignite.configuration.DataRegionConfiguration">
+                            <property name="initialSize" value="#{128L * 1024 * 1024}" />
+                            <property name="maxSize" value="#{512L * 1024 * 1024}" />
+                            <property name="pageEvictionMode" value="RANDOM_LRU" />
+                            <property name="swapPath">
+                                <null />
+                            </property>
+                            <property name="evictionThreshold" value="0.75" />
+                            <property name="metricsEnabled" value="true" />
+                        </bean>
+                    </property>
+                    <property name="pageSize" value="#{16 * 1024}" />
+                </bean>
+            </property>
+            <property name="cacheConfiguration">
+                <array value-type="org.apache.ignite.configuration.CacheConfiguration">
+                    <bean class="org.apache.ignite.configuration.CacheConfiguration">
+                        <property name="name" value="twinCache"/>
+                        <property name="cacheMode" value="PARTITIONED" />
+                        <property name="cacheStoreFactory">
+                            <bean class="org.apache.ignite.cache.store.jdbc.CacheJdbcBlobStoreFactory">
+                                <property name="dataSourceBean" value="dataSource"/>
+                                <property name="createTableQuery" value="create table if not exists ENTRIES (akey bytea primary key, val bytea)"/>
+                            </bean>
+                        </property>
+                        <property name="writeThrough" value="true"/>
+                        <property name="readThrough" value="true"/>
+                    </bean>
+                    <bean class="org.apache.ignite.configuration.CacheConfiguration">
+                        <property name="name" value="taskSetCache"/>
+                        <property name="cacheMode" value="PARTITIONED" />
+                        <property name="atomicityMode" value="TRANSACTIONAL" />
+                        <property name="cacheStoreFactory">
+                            <bean class="org.apache.ignite.cache.store.jdbc.CacheJdbcBlobStoreFactory">
+                                <property name="dataSourceBean" value="dataSource"/>
+                                <property name="createTableQuery" value="create table if not exists ENTRIES (akey bytea primary key, val bytea)"/>
+                            </bean>
+                        </property>
+                        <property name="writeThrough" value="true"/>
+                        <property name="readThrough" value="true"/>
+                    </bean>
+                    <bean class="org.apache.ignite.configuration.CacheConfiguration">
+                        <property name="name" value="minionsByLocation" />
+                        <property name="atomicityMode" value="TRANSACTIONAL" />
+                    </bean>
+                    <bean class="org.apache.ignite.configuration.CacheConfiguration">
+                        <property name="name" value="minionsById" />
+                        <property name="atomicityMode" value="TRANSACTIONAL" />
+                    </bean>
+                </array>
+            </property>
+        </bean>
+
+    </beans>

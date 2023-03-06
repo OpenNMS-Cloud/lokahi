@@ -57,4 +57,10 @@
         <feature>plugins-api</feature>
     </feature>
 
+    <feature name="plugins-shell-commands" version="${project.version}">
+        <feature>plugins-api</feature>
+        <feature dependency="true">shell</feature>
+        <bundle>mvn:org.opennms.horizon.minion/shell-commands/${project.version}</bundle>
+      </feature>
+
 </features>

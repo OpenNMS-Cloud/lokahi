@@ -1,0 +1,32 @@
+name: 'Cleanup - remove project build artifacts from the M2 cache'
+description: 'Removes project build artifacts from the M2 cache to prevent stale content in builds'
+runs:
+  using: "composite"
+  steps:
+    - name: Clean up old artifacts from Maven Cache
+      run: |
+        set -e
+
+        if [ -d ~/.m2/repository/org/opennms/horizon ]
+        then
+          echo "Cleanup org.opennms.horizon maven content cached"
+
+          cd ~/.m2/repository/org/opennms/horizon
+
+          for subdir in *
+          do
+            case "$subdir" in
+              shared | horizon-parent)
+                # Keep
+                ;;
+  
+              *)
+                echo "- Cleanup ${PWD}/$subdir"
+                rm -rf "$subdir"
+                ;;
+            esac
+          done
+        else
+          echo "NO org.opennms.horizon maven content cached"
+        fi
+      shell: bash

@@ -72,4 +72,3 @@ jobs:
           image: ${{ steps.docker-metadata.outputs.tags }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
           sonar-token: ${{ secrets.SONAR_TOKEN }}
-          project-key: 'opennms_horizon-stream_datachoices'

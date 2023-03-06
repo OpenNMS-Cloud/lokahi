@@ -32,13 +32,10 @@ import com.google.protobuf.Any;
 import com.google.protobuf.InvalidProtocolBufferException;
 import org.opennms.horizon.minion.plugin.api.Listener;
 import org.opennms.horizon.minion.plugin.api.ListenerFactory;
-import org.opennms.horizon.minion.plugin.api.ServiceMonitorResponse;
 import org.opennms.horizon.shared.ipc.rpc.IpcIdentity;
 import org.opennms.horizon.shared.ipc.sink.api.MessageDispatcherFactory;
 import org.opennms.horizon.shared.snmp.SnmpHelper;
 import org.opennms.sink.traps.contract.TrapConfig;
-
-import java.util.function.Consumer;
 
 public class TrapListenerFactory implements ListenerFactory {
 
@@ -55,7 +52,7 @@ public class TrapListenerFactory implements ListenerFactory {
     }
 
     @Override
-    public Listener create(Consumer<ServiceMonitorResponse> resultProcessor, Any config) {
+    public Listener create(Any config) {
         if (!config.is(TrapConfig.class)) {
             throw new IllegalArgumentException("configuration must be TrapsConfig; type-url=" + config.getTypeUrl());
         }

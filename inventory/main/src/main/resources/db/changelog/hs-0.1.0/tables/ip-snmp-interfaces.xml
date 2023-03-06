@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+    <changeSet author="Yang li" id="0.1.0-ip-snmp-interface-update">
+        <dropColumn tableName="snmp_interface" columnName="ip_address" />
+        <addColumn tableName="ip_interface">
+            <column name="snmp_interface_id" type="bigint" />
+        </addColumn>
+        <addForeignKeyConstraint baseTableName="ip_interface" baseColumnNames="snmp_interface_id" constraintName="fk_ip_snmp_interface_id"
+                                 referencedTableName="snmp_interface"
+                                 referencedColumnNames="id" onDelete="SET NULL"/>
+    </changeSet>
+</databaseChangeLog>

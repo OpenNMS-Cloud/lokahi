@@ -12,7 +12,7 @@
     </dependency>
 
 
-**CucumberRunner*
+**CucumberRunner**
 
 	@CucumberOptions(
 	    glue = {"org.opennms.horizon.testtool.miniongateway.wiremock.client", ...}

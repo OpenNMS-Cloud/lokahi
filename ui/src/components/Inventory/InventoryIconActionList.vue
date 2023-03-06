@@ -1,27 +1,50 @@
 <template>
   <ul class="icon-action-list">
     <!-- <li @click="onBubbleChart" data-test="bubble-chart"><Icon :icon="bubbleChartIcon" /></li> -->
-    <li @click="onLineChart" data-test="line-chart" class="pointer"><Icon :icon="lineChartIcon" /></li>
+    <li
+      @click="onLineChart"
+      data-test="line-chart"
+      class="pointer"
+    >
+      <Icon :icon="lineChartIcon" />
+    </li>
     <!-- <li @click="onPieChart" data-test="pie-chart"><Icon :icon="pieChartIcon" /></li> -->
-    <li @click="onWarning" data-test="warning" class="pointer"><Icon :icon="warningIcon" /></li>
-    <li @click="onDelete" data-test="delete"><Icon :icon="deleteIcon" /></li>
+    <li
+      @click="onWarning"
+      data-test="warning"
+      class="pointer"
+    >
+      <Icon :icon="warningIcon" />
+    </li>
+    <li
+      @click="onDelete"
+      data-test="delete"
+    >
+      <Icon :icon="deleteIcon" />
+    </li>
   </ul>
-  <PrimaryModal :visible="isVisible" :title="modal.title" :class="modal.cssClass">
+  <PrimaryModal
+    :visible="isVisible"
+    :title="modal.title"
+    :class="modal.cssClass"
+  >
     <template #content>
       <p>{{ modal.content }}</p>
     </template>
     <template #footer>
-      <FeatherButton 
-        data-testid="cancel-btn" 
-        secondary 
-        @click="closeModal">
-          {{ modal.cancelLabel }}
+      <FeatherButton
+        data-testid="cancel-btn"
+        secondary
+        @click="closeModal"
+      >
+        {{ modal.cancelLabel }}
       </FeatherButton>
-      <FeatherButton 
-        data-testid="save-btn" 
+      <FeatherButton
+        data-testid="save-btn"
         primary
-        @click="deleteHandler">
-          {{ modal.saveLabel }}
+        @click="deleteHandler"
+      >
+        {{ modal.saveLabel }}
       </FeatherButton>
     </template>
   </PrimaryModal>
@@ -47,7 +70,7 @@ const inventoryQueries = useInventoryQueries()
 const nodeMutations = useNodeMutations()
 
 const router = useRouter()
-const props = defineProps<{ node: NodeContent}>()
+const props = defineProps<{ node: NodeContent }>()
 
 const onBubbleChart = () => {
   console.log('bubble chart')
@@ -55,19 +78,19 @@ const onBubbleChart = () => {
 const bubbleChartIcon: IIcon = {
   image: BubbleChart,
   title: 'Bubble Chart',
-  size: '1.5rem'
+  size: 1.5
 }
 
 const onLineChart = () => {
-  router.push({ 
-    name: 'Graphs', 
-    params: { id: props.node.id } 
+  router.push({
+    name: 'Graphs',
+    params: { id: props.node.id }
   })
 }
 const lineChartIcon: IIcon = {
   image: MultilineChart,
   tooltip: 'Graphs',
-  size: '1.5rem'
+  size: 1.5
 }
 
 const onPieChart = () => {
@@ -76,19 +99,19 @@ const onPieChart = () => {
 const pieChartIcon: IIcon = {
   image: PieChart,
   title: 'Pie Chart',
-  size: '1.5rem'
+  size: 1.5
 }
 
 const onWarning = () => {
-  router.push({ 
-    name: 'Node', 
-    params: { id: props.node.id } 
+  router.push({
+    name: 'Node',
+    params: { id: props.node.id }
   })
 }
 const warningIcon: IIcon = {
   image: markRaw(Warning),
   tooltip: 'Events/Alarms',
-  size: '1.5rem'
+  size: 1.5
 }
 
 const modal = ref<ModalPrimary>({
@@ -102,7 +125,7 @@ const modal = ref<ModalPrimary>({
 })
 
 const deleteHandler = async () => {
-  const deleteNode = await nodeMutations.deleteNode({id: modal.value.id})
+  const deleteNode = await nodeMutations.deleteNode({ id: modal.value.id })
 
   if (!deleteNode.error) {
     closeModal()
@@ -131,12 +154,12 @@ const onDelete = () => {
 const deleteIcon: IIcon = {
   image: markRaw(Delete),
   tooltip: 'Delete',
-  size: '1.5rem'
+  size: 1.5
 }
 </script>
 
 <style lang="scss" scoped>
-@use "@featherds/styles/themes/variables";
+@use '@featherds/styles/themes/variables';
 
 ul.icon-action-list {
   display: flex;

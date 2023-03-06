@@ -29,7 +29,7 @@ grpc:
 horizon:
   kafka:
     alarms:
-      topic: org.opennms.horizon.notifications.alarms
+      topic: alarms
       concurrency: 1
 
   pagerduty:

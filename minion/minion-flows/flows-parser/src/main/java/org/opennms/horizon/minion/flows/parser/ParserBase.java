@@ -36,12 +36,11 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Lists;
-import com.google.protobuf.ByteString;
+import com.google.protobuf.UInt32Value;
 import com.swrve.ratelimitedlogger.RateLimitedLog;
-import org.opennms.horizon.grpc.telemetry.contract.TelemetryMessage;
+import org.opennms.dataplatform.flows.document.FlowDocument;
 import org.opennms.horizon.minion.flows.listeners.Parser;
 import org.opennms.horizon.minion.flows.parser.factory.DnsResolver;
-import org.opennms.horizon.minion.flows.parser.flowmessage.FlowMessage;
 import org.opennms.horizon.minion.flows.parser.ie.RecordProvider;
 import org.opennms.horizon.minion.flows.parser.session.SequenceNumberTracker;
 import org.opennms.horizon.minion.flows.parser.session.Session;
@@ -69,6 +68,8 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import static java.util.Objects.nonNull;
+
 public abstract class ParserBase implements Parser {
     private static final Logger LOG = LoggerFactory.getLogger(ParserBase.class);
 
@@ -89,9 +90,7 @@ public abstract class ParserBase implements Parser {
 
     private final String name;
 
-    private final String queueName;
-
-    private final AsyncDispatcher<TelemetryMessage> dispatcher;
+    private final AsyncDispatcher<FlowDocument> dispatcher;
 
     private final IpcIdentity identity;
 
@@ -135,15 +134,13 @@ public abstract class ParserBase implements Parser {
 
     public ParserBase(final Protocol protocol,
                       final String name,
-                      final String queueName,
-                      final AsyncDispatcher<TelemetryMessage> dispatcher,
+                      final AsyncDispatcher<FlowDocument> dispatcher,
                       final IpcIdentity identity,
                       final DnsResolver dnsResolver,
                       final MetricRegistry metricRegistry) {
         this.protocol = Objects.requireNonNull(protocol);
         this.name = Objects.requireNonNull(name);
         this.dispatcher = Objects.requireNonNull(dispatcher);
-        this.queueName = Objects.requireNonNull(queueName);
         this.identity = Objects.requireNonNull(identity);
         this.dnsResolver = Objects.requireNonNull(dnsResolver);
         Objects.requireNonNull(metricRegistry);
@@ -152,7 +149,7 @@ public abstract class ParserBase implements Parser {
         // This variable is used to identify the thread as one that belongs to this class
         final LogPreservingThreadFactory logPreservingThreadFactory = new LogPreservingThreadFactory("Telemetryd-" + protocol + "-" + name, Integer.MAX_VALUE);
         threadFactory = r -> logPreservingThreadFactory.newThread(() -> {
-            if (Objects.nonNull(isParserThread.get()) && isParserThread.get()) {
+            if (nonNull(isParserThread.get()) && isParserThread.get()) {
                 unload();
             }
             isParserThread.set(true);
@@ -300,15 +297,19 @@ public abstract class ParserBase implements Parser {
                     // if we can't keep up
                     final Runnable dispatch = () -> {
                         // Let's serialize
-                        final FlowMessage.Builder flowMessage;
+                        final FlowDocument.Builder flowDocument;
                         try {
-                            flowMessage = this.getMessageBuilder().buildMessage(record, enrichment);
+                            flowDocument = this.getMessageBuilder().buildMessage(record, enrichment);
                         } catch (final Exception e) {
                             throw new RuntimeException(e);
                         }
 
+                        flowDocument.setLocation(this.identity.getLocation());
+                        flowDocument.setExporterAddress(InetAddressUtils.str(remoteAddress.getAddress()));
+                        flowDocument.setExporterPort(UInt32Value.of(remoteAddress.getPort()));
+
                         // Check if the flow is valid (and maybe correct it)
-                        final List<String> corrections = this.correctFlow(flowMessage);
+                        final List<String> corrections = this.correctFlow(flowDocument);
                         if (!corrections.isEmpty()) {
                             this.invalidFlows.mark();
 
@@ -323,15 +324,8 @@ public abstract class ParserBase implements Parser {
                             }
                         }
 
-                        // Build the message to dispatch
-                        final var telemetryMessage = TelemetryMessage.newBuilder()
-                            .setSourceAddress(InetAddressUtils.str(remoteAddress.getAddress()))
-                            .setSourcePort(remoteAddress.getPort())
-                            .setBytes(ByteString.copyFrom(flowMessage.build().toByteArray()))
-                            .setQueue(this.getName()).build();
-
                         // Dispatch
-                        dispatcher.send(telemetryMessage).whenComplete((b, exx) -> {
+                        this.dispatcher.send(flowDocument.build()).whenComplete((b, exx) -> {
                             if (exx != null) {
                                 this.recordDispatchErrors.inc();
                                 future.completeExceptionally(exx);
@@ -408,7 +402,7 @@ public abstract class ParserBase implements Parser {
         }
     }
 
-    private List<String> correctFlow(final FlowMessage.Builder flow) {
+    private List<String> correctFlow(final FlowDocument.Builder flow) {
         final List<String> corrections = Lists.newArrayList();
 
         if (flow.getFirstSwitched().getValue() > flow.getLastSwitched().getValue()) {

@@ -53,11 +53,11 @@ public class GrpcEventService {
 
     @GraphQLQuery
     public Flux<Event> findAllEvents(@GraphQLEnvironment ResolutionEnvironment env) {
-        return Flux.fromIterable(client.listEvents(headerUtil.getAuthHeader(env)).stream().map(mapper::protoToEvent).collect(Collectors.toList()));
+        return Flux.fromIterable(client.listEvents(headerUtil.getAuthHeader(env)).stream().map(mapper::protoToEvent).toList());
     }
 
     @GraphQLQuery
     public Flux<Event> findEventsByNodeId(@GraphQLArgument(name = "id") Long id, @GraphQLEnvironment ResolutionEnvironment env) {
-        return Flux.fromIterable(client.getEventsByNodeId(id, headerUtil.getAuthHeader(env)).stream().map(mapper::protoToEvent).collect(Collectors.toList()));
+        return Flux.fromIterable(client.getEventsByNodeId(id, headerUtil.getAuthHeader(env)).stream().map(mapper::protoToEvent).toList());
     }
 }

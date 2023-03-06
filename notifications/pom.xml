@@ -19,6 +19,7 @@
 
     <properties>
         <application.docker.image.name>opennms/horizon-stream-notification</application.docker.image.name>
+        <sonar.projectKey>opennms_horizon-stream_notification</sonar.projectKey>
     </properties>
 
     <dependencyManagement>
@@ -262,12 +263,6 @@
             <artifactId>postgresql</artifactId>
             <scope>runtime</scope>
         </dependency>
-        <dependency>
-            <groupId>com.h2database</groupId>
-            <artifactId>h2</artifactId>
-            <version>2.1.212</version>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
 
 	<build>
@@ -312,12 +307,15 @@
             <plugin>
                 <groupId>com.google.cloud.tools</groupId>
                 <artifactId>jib-maven-plugin</artifactId>
-                <configuration>
-                    <skip>${skipJib}</skip>
-                    <from>
-                        <image>openjdk:17</image>
-                    </from>
-                </configuration>
+                <executions>
+                    <execution>
+                        <id>build-docker-image</id>
+                        <phase>install</phase>
+                        <goals>
+                            <goal>${application.jib.defaultGoal}</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

@@ -30,6 +30,8 @@ syntax = "proto3";
 import "google/protobuf/empty.proto";
 import "google/protobuf/wrappers.proto";
 import "ipInterface.proto";
+import "snmpInterface.proto";
+import "tag.proto";
 
 package opennms.inventory;
 option java_multiple_files = true;
@@ -44,15 +46,18 @@ message NodeDTO {
   repeated opennms.inventory.IpInterfaceDTO ip_interfaces = 6;
   string object_id = 7;
   string system_name = 8;
-  string system_desc = 9;
+  string system_descr = 9;
   string system_location = 10;
   string system_contact = 11;
+  repeated opennms.inventory.SnmpInterfaceDTO snmpInterfaces = 12;
+  string scan_type = 13;
 }
 
 message NodeCreateDTO {
   string label = 1;
   string location = 2;
   optional string management_ip = 3;
+  repeated opennms.inventory.TagCreateDTO tags = 4;
 }
 
 message NodeList {
@@ -75,4 +80,5 @@ service NodeService {
   rpc getNodeIdFromQuery(NodeIdQuery) returns (google.protobuf.Int64Value) {};
   rpc deleteNode(google.protobuf.Int64Value) returns(google.protobuf.BoolValue) {};
   rpc startNodeScanByIds(NodeIdList) returns(google.protobuf.BoolValue) {};
+  rpc getIpInterfaceFromQuery(NodeIdQuery) returns (IpInterfaceDTO) {};
 }

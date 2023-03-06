@@ -1,20 +1,29 @@
 <template>
   <div class="header-container">
-    <PageHeader heading="Graphs" class="header" data-test="page-header" />
-    <FeatherButton text @click="onDownload" class="btn-download">
+    <PageHeader
+      heading="Graphs"
+      class="header"
+      data-test="page-header"
+    />
+    <FeatherButton
+      text
+      @click="onDownload"
+      class="btn-download"
+    >
       Download All
     </FeatherButton>
   </div>
-  <div id="graphs-container" v-if="store.fetchIsDone">
+  <div
+    id="graphs-container"
+    v-if="store.fetchIsDone"
+  >
     <LineGraph :graph="nodeLatency" />
     <LineGraph :graph="bytesInOut" />
     <LineGraph :graph="bytesIn" />
     <LineGraph :graph="bytesOut" />
-    <LineGraph :graph="hcIn" />
-    <LineGraph :graph="hcOut" />
   </div>
 </template>
-  
+
 <script setup lang="ts">
 import { TimeRangeUnit } from '@/types/graphql'
 import { GraphProps } from '@/types/graphs'
@@ -24,7 +33,9 @@ import { useGraphsQueries } from '@/store/Queries/graphsQueries'
 
 const route = useRoute()
 const store = useGraphsQueries()
-const instance = computed(() => store.node.ipInterfaces?.[0].ipAddress as string)
+const instance = computed(
+  () => store.node.ipInterfaces?.filter(({ snmpPrimary }) => snmpPrimary === true)[0]?.ipAddress as string
+)
 
 const nodeLatency = computed<GraphProps>(() => {
   return {
@@ -41,7 +52,7 @@ const nodeLatency = computed<GraphProps>(() => {
 const bytesIn = computed<GraphProps>(() => {
   return {
     label: 'Bytes Inbound',
-    metrics: ['ifInOctets'],
+    metrics: ['network_in_total_bytes'],
     monitor: 'SNMP',
     nodeId: route.params.id as string,
     instance: instance.value,
@@ -53,7 +64,7 @@ const bytesIn = computed<GraphProps>(() => {
 const bytesOut = computed<GraphProps>(() => {
   return {
     label: 'Bytes Outbound',
-    metrics: ['ifOutOctets'],
+    metrics: ['network_out_total_bytes'],
     monitor: 'SNMP',
     nodeId: route.params.id as string,
     instance: instance.value,
@@ -65,31 +76,7 @@ const bytesOut = computed<GraphProps>(() => {
 const bytesInOut = computed<GraphProps>(() => {
   return {
     label: 'Bytes Inbound / Outbound',
-    metrics: ['ifInOctets', 'ifOutOctets'],
-    monitor: 'SNMP',
-    nodeId: route.params.id as string,
-    instance: instance.value,
-    timeRange: 10,
-    timeRangeUnit: TimeRangeUnit.Minute
-  }
-})
-
-const hcIn = computed<GraphProps>(() => {
-  return {
-    label: 'ifHCInOctets',
-    metrics: ['ifHCInOctets'],
-    monitor: 'SNMP',
-    nodeId: route.params.id as string,
-    instance: instance.value,
-    timeRange: 10,
-    timeRangeUnit: TimeRangeUnit.Minute
-  }
-})
-
-const hcOut = computed<GraphProps>(() => {
-  return {
-    label: 'ifHCOutOctets',
-    metrics: ['ifHCOutOctets'],
+    metrics: ['network_in_total_bytes', 'network_out_total_bytes'],
     monitor: 'SNMP',
     nodeId: route.params.id as string,
     instance: instance.value,
@@ -109,16 +96,16 @@ onMounted(async () => {
   await store.fetchNode()
 })
 </script>
-  
+
 <style scoped lang="scss">
-@use "@featherds/styles/themes/variables";
+@use '@featherds/styles/themes/variables';
 
 .header-container {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
   margin: var(variables.$spacing-xl) var(variables.$spacing-l);
-  
+
   :deep(.spacing) {
     margin: 0;
   }
@@ -132,4 +119,3 @@ onMounted(async () => {
   margin: var(variables.$spacing-xl) var(variables.$spacing-l);
 }
 </style>
-  

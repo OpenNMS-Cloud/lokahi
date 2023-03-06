@@ -28,15 +28,24 @@
 
 package org.opennms.horizon.alarmservice.service;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.Optional;
 import java.util.Set;
+
+import io.grpc.Context;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.common.header.internals.RecordHeader;
 import org.opennms.horizon.alarmservice.api.AlarmEntityNotifier;
 import org.opennms.horizon.alarmservice.db.entity.Alarm;
 import org.opennms.horizon.alarmservice.db.entity.Memo;
+import org.opennms.horizon.alarmservice.db.tenant.TenantLookup;
 import org.opennms.horizon.alarmservice.model.AlarmDTO;
 import org.opennms.horizon.alarmservice.model.AlarmSeverity;
+import org.opennms.horizon.shared.constants.GrpcConstants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -48,6 +57,7 @@ import org.springframework.stereotype.Component;
 @Component
 @PropertySource("classpath:application.yaml")
 public class AlarmEntityNotifierImpl implements AlarmEntityNotifier {
+    private static final Logger LOG = LoggerFactory.getLogger(AlarmEntityNotifierImpl.class);
 
     public static final String DEFAULT_ALARMS_TOPIC = "new-alarms";
 
@@ -60,10 +70,22 @@ public class AlarmEntityNotifierImpl implements AlarmEntityNotifier {
 
 //    private Set<AlarmEntityListener> listeners = Sets.newConcurrentHashSet();
 
+    @Autowired
+    TenantLookup tenantLookup;
+
     @Override
     public void didCreateAlarm(Alarm alarm) {
         AlarmDTO alarmDTO =  AlarmMapper.INSTANCE.alarmToAlarmDTO(alarm);
-        kafkaTemplate.send(new ProducerRecord<>(kafkaTopic, alarmDTO.toString().getBytes()));
+
+        Optional<String> tenantId = tenantLookup.lookupTenantId(Context.current());
+
+        if (tenantId.isPresent()) {
+            var producerRecord = new ProducerRecord<String, byte[]>(kafkaTopic, alarmDTO.toString().getBytes());
+            producerRecord.headers().add(new RecordHeader(GrpcConstants.TENANT_ID_KEY, tenantId.get().getBytes(StandardCharsets.UTF_8)));
+            kafkaTemplate.send(producerRecord);
+        } else {
+            LOG.warn("No tenant on alarm:" + alarmDTO.getAlarmId());
+        }
     }
 
     @Override

@@ -23,6 +23,7 @@ import (
 // GetDefaultValues - get the default Helm/Template values
 func GetDefaultValues(operatorConfig config.OperatorConfig) (values.TemplateValues, error) {
 	v, err := LoadValues(operatorConfig.DefaultOpenNMSValuesFile)
+	v.Keycloak.DynamicRealmConfig = false
 	return values.TemplateValues{
 		Values:  v,
 		Release: values.HelmRelease{},

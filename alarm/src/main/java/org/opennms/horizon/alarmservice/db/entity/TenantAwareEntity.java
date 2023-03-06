@@ -29,14 +29,20 @@
 package org.opennms.horizon.alarmservice.db.entity;
 
 import jakarta.persistence.Column;
-//import org.hibernate.annotations.TenantId;
+import jakarta.persistence.MappedSuperclass;
+import lombok.Getter;
+import lombok.Setter;
+import org.hibernate.annotations.TenantId;
 
 /**
  * <p>Abstract Entity class.</p>
  */
+@Getter
+@Setter
+@MappedSuperclass
 public abstract class TenantAwareEntity {
 
-//    @TenantId
+    @TenantId
     @Column
     private String tenantId;
 	

@@ -28,12 +28,9 @@
 
 package org.opennms.horizon.minion.flows.parser;
 
-import static org.awaitility.Awaitility.await;
-import static org.hamcrest.Matchers.is;
-import static org.mockito.Mockito.mock;
 import com.codahale.metrics.MetricRegistry;
 import org.junit.Ignore;
-import org.opennms.horizon.grpc.telemetry.contract.TelemetryMessage;
+import org.opennms.dataplatform.flows.document.FlowDocument;
 import org.opennms.horizon.minion.flows.listeners.UdpListener;
 import org.opennms.horizon.minion.flows.parser.factory.DnsResolver;
 import org.opennms.horizon.shared.ipc.rpc.IpcIdentity;
@@ -52,6 +49,11 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static org.awaitility.Awaitility.await;
+import static org.hamcrest.Matchers.is;
+import static org.mockito.Mockito.mock;
+
+// No flows are illegal ✊
 public class IllegalFlowTest {
     private final static Path FOLDER = Paths.get("src/test/resources/flows");
     private final AtomicInteger messagesSent = new AtomicInteger();
@@ -78,9 +80,9 @@ public class IllegalFlowTest {
 
         // setting up nf9 parser
 
-        final Netflow9UdpParser parser = new Netflow9UdpParser("FLOW", "FLOW_QUEUE", new AsyncDispatcher<>() {
+        final Netflow9UdpParser parser = new Netflow9UdpParser("FLOW", new AsyncDispatcher<>() {
             @Override
-            public CompletableFuture<AsyncDispatcher.DispatchStatus> send(TelemetryMessage message) {
+            public CompletableFuture<AsyncDispatcher.DispatchStatus> send(FlowDocument message) {
                 messagesSent.incrementAndGet();
                 return CompletableFuture.completedFuture(DispatchStatus.DISPATCHED);
             }

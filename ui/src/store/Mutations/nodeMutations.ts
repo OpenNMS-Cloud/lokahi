@@ -1,8 +1,7 @@
 import { defineStore } from 'pinia'
 import { useMutation } from 'villus'
 import useSpinner from '@/composables/useSpinner'
-
-import { AddNodeDocument, DeleteNodeDocument } from '@/types/graphql'
+import { AddNodeDocument, DeleteNodeDocument, AddTagsDocument, TagListNodeAddInput } from '@/types/graphql'
 
 const { startSpinner, stopSpinner } = useSpinner()
 
@@ -20,9 +19,10 @@ export const useNodeMutations = defineStore('nodeMutations', () => {
     // refresh inventory nodes: useInventoryQueries.fetch()
   }
 
-  const addTagsToAllNodes = () => {
-    // TODO: query for all nodes
-    // refresh inventory nodes: useInventoryQueries.fetch()
+  const addTagsToAllNodes = async (tags: TagListNodeAddInput) => {
+    const { execute } = useMutation(AddTagsDocument)
+
+    return await execute({ tags })
   }
 
   const removeTagsToAllNodes = () => {

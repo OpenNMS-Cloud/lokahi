@@ -2,7 +2,6 @@ package org.opennms.horizon.minion.plugin.api;
 
 import com.google.protobuf.Any;
 
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 public interface ServiceMonitor {
@@ -22,18 +21,11 @@ public interface ServiceMonitor {
      * default events by setting the suppress event bit in the returned integer.
      * </P>
      *
-     * <P>
-     * <STRONG>NOTE: </STRONG> This method may be invoked on a Minion, in which
-     * case certain bean and facilities will not be available. If any state related
-     * information is required such as agent related configuration, it should retrieved
-     * by the {@link #getRuntimeAttributes(MonitoredService, Map)}.
-     * </P>
-     *
+
      * @param svc
      *            Includes details about to the service being monitored.
      * @param config
-     *            Includes the service parameters defined in <EM>poller-configuration.xml</EM> and those
-     *            returned by {@link #getRuntimeAttributes(MonitoredService, Map)}.
+     *            Includes the service parameters
      * @return The availability of the interface and if a transition event
      *         should be suppressed.
      * @exception RuntimeException
@@ -46,16 +38,7 @@ public interface ServiceMonitor {
      */
     public CompletableFuture<ServiceMonitorResponse> poll(MonitoredService svc, Any config);
 
-    /**
-     *
-     * @param svc
-     *            Includes details about to the service being monitored.
-     * @param parameters
-     *            Includes the service parameters defined in <EM>poller-configuration.xml</EM> and those
-     *            returned by {@link #getRuntimeAttributes(MonitoredService, Map)}.
-     * @return Additional attributes, which should be added to the parameter map before calling {@link #poll(MonitoredService, Any)}.
-     */
-    public Map<String, Object> getRuntimeAttributes(MonitoredService svc, Map<String, Object> parameters);
+
 
     /**
      * Allows the monitor to override the location at which it should be run.

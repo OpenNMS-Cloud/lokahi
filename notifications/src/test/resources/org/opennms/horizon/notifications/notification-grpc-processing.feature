@@ -5,11 +5,18 @@ Feature: Notification Grpc Processing
     Given grpc setup
 
   Scenario: Populate config via grpc
-    Given Integration key set to "abc" via grpc
-    Then verify key is "abc"
+    Given Integration "test-tenant" key set to "abc" via grpc
+    Then verify "test-tenant" key is "abc"
+    Then verify "other-tenant" key is not set
     Then tear down grpc setup
 
   Scenario: Populate config twice via grpc
-    Given Integration key set to "abc" then "abcd" via grpc
-    Then verify key is "abcd"
+    Given Integration "test-tenant" key set to "abc" then "abcd" via grpc
+    Then verify "test-tenant" key is "abcd"
+    Then tear down grpc setup
+
+  Scenario: Populate two different configs via grpc
+    Given Integration "test-tenant" then "other-tenant" key set to "abc" then "abcd" via grpc
+    Then verify "test-tenant" key is "abc"
+    Then verify "other-tenant" key is "abcd"
     Then tear down grpc setup

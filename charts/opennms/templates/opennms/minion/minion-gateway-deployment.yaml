@@ -20,31 +20,46 @@ spec:
     spec:
       serviceAccountName: {{ .Values.OpenNMS.Minion.ServiceName }}-sa
       {{- if .Values.NodeRestrictions.Enabled }}
-      nodeSelector:                                                                                    
-        {{ .Values.NodeRestrictions.Key }}: {{ .Values.NodeRestrictions.Value }}                       
+      nodeSelector:
+        {{ .Values.NodeRestrictions.Key }}: {{ .Values.NodeRestrictions.Value }}
       tolerations:
-        - effect: "NoSchedule"                                                                         
-          key: "{{ .Values.NodeRestrictions.Key }}"                                                    
+        - effect: "NoSchedule"
+          key: "{{ .Values.NodeRestrictions.Key }}"
           operator: "Equal"
-          value: {{ .Values.NodeRestrictions.Value }} 
-      affinity: 
+          value: {{ .Values.NodeRestrictions.Value }}
+      affinity:
         nodeAffinity:
-          preferredDuringSchedulingIgnoredDuringExecution:                                             
-          - weight: 1                                                                                  
-            preference:                                                                                
-              matchExpressions:                                                                        
-              - key: "{{ .Values.NodeRestrictions.Key }}"                                              
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 1
+            preference:
+              matchExpressions:
+              - key: "{{ .Values.NodeRestrictions.Key }}"
                 operator: In
-                values:                                                                                
-                - {{ .Values.NodeRestrictions.Value }}                                                 
+                values:
+                - {{ .Values.NodeRestrictions.Value }}
       {{- end }}
+      volumes:
+        - name: minion-gateway-ignite-config-volume
+          configMap:
+            name: minion-gateway-ignite-config
       containers:
         - name: {{ .Values.OpenNMS.MinionGateway.ServiceName }}
           image: {{ .Values.OpenNMS.MinionGateway.Image }}
           imagePullPolicy: {{ .Values.OpenNMS.Minion.ImagePullPolicy }}
           env:
             - name: JAVA_TOOL_OPTIONS
-              value: "-agentlib:jdwp=transport=dt_socket,server=y,address=5005,suspend=n,quiet=y"  # FIXME: Permanent debug port, enable only for dev mode
+              value: "-agentlib:jdwp=transport=dt_socket,server=y,address=5005,suspend=n,quiet=y -XX:MaxDirectMemorySize=768m"  # FIXME: Permanent debug port, enable only for dev mode
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: postgres
+                  key: minionGatewayUsr
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres
+                  key: minionGatewayPwd
+            - name: SPRING_KAFKA_BOOTSTRAP_SERVERS
             - name: KAFKA_BOOTSTRAP_SERVERS
               value: "{{ .Values.Kafka.ServiceName }}:{{ .Values.Kafka.Port }}"
             - name: IGNITE_UPDATE_NOTIFIER # Disable Ignite version lookups
@@ -58,6 +73,9 @@ spec:
               containerPort: {{ .Values.OpenNMS.MinionGateway.InternalGrpcPort }}
             - name: ig-client
               containerPort: {{ .Values.OpenNMS.MinionGateway.IgniteClientPort }}
+          volumeMounts:
+            - name: minion-gateway-ignite-config-volume
+              mountPath: "/app/resources/ignite"
           resources:
             limits:
               cpu: "{{ .Values.OpenNMS.MinionGateway.Resources.Limits.Cpu }}"

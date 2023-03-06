@@ -34,7 +34,7 @@
           data-test="icon-action-list"
         />
       </section>
-      <InventoryNodeTaggingEditOverlay
+      <InventoryNodeTagEditOverlay
         v-if="node.isEditMode"
         @edit-tags-node="editTagsNode"
         :node="node"
@@ -45,16 +45,19 @@
     :visible="isVisible"
     :title="modal.title"
     :class="modal.cssClass"
-    data-test="primary-modal"
   >
-    <!-- <PrimaryModal
-    :visible="isVisible"
-    title="modal.title"
-    :class="modal.cssClass"
-    data-test="primary-modal"
-  > -->
     <template #content>
       <p>{{ modal.content }}</p>
+      <FeatherChipList
+        condensed
+        label="Tag list"
+      >
+        <FeatherChip
+          v-for="tag in selectedTags"
+          :key="tag.id"
+          >{{ tag.name }}</FeatherChip
+        >
+      </FeatherChipList>
     </template>
     <template #footer>
       <FeatherButton
@@ -79,11 +82,13 @@ import { PropType } from 'vue'
 import Storage from '@material-design-icons/svg/outlined/storage.svg'
 import { NodeContent } from '@/types/inventory'
 import { IIcon } from '@/types'
-import { useTaggingStore } from '@/store/Components/taggingStore'
+import { useTagStore } from '@/store/Components/tagStore'
 import { useNodeMutations } from '@/store/Mutations/nodeMutations'
+import { useInventoryQueries } from '@/store/Queries/inventoryQueries'
 import { TagNodesType } from '@/types/tags'
 import { ModalPrimary } from '@/types/modal'
 import useModal from '@/composables/useModal'
+
 // TODO: sort tabContent alpha (default)? to keep list display consistently in same order (e.g. page refresh)
 const props = defineProps({
   tabContent: {
@@ -93,8 +98,12 @@ const props = defineProps({
 })
 const nodes = ref<NodeContent[]>(props.tabContent)
 const { openModal, closeModal, isVisible } = useModal()
-const taggingStore = useTaggingStore()
+
+const taggingStore = useTagStore()
 const nodeMutations = useNodeMutations()
+const inventoryQueries = useInventoryQueries()
+
+const selectedTags = computed(() => taggingStore.selectedTags)
 const tagNodesSelected = computed(() => taggingStore.tagNodesSelected)
 watch(tagNodesSelected, (type) => {
   let isTaggingChecked = false
@@ -117,11 +126,18 @@ const cancelTagsAllNodes = () => {
   taggingStore.selectTagNodes(TagNodesType.Unselected)
   closeModal()
 }
-const saveTagsAllNodes = () => {
+
+const saveTagsAllNodes = async () => {
   taggingStore.selectTagNodes(TagNodesType.Unselected)
-  nodeMutations.addTagsToAllNodes()
-  // refetch nodes
-  // refetch tags
+
+  // Temp solution until the real enpoint avail
+  const tagsToAdd = selectedTags.value.map(({ name }) => ({ name }))
+  nodes.value.forEach(async ({ id }) => {
+    nodeMutations.addTagsToAllNodes({ nodeId: id, tags: tagsToAdd })
+  })
+
+  inventoryQueries.fetch()
+
   closeModal()
 }
 const editTagsNode = (args: { id: number; toAdd: boolean; toDelete: boolean }) => {
@@ -139,13 +155,14 @@ const modal: ModalPrimary = {
 const storageIcon: IIcon = {
   image: Storage,
   title: 'Node',
-  size: '1.5rem'
+  size: 1.5
 }
 </script>
 <style lang="scss" scoped>
 @use '@featherds/styles/themes/variables';
 @use '@/styles/vars';
 @use '@/styles/mediaQueriesMixins';
+
 ul.cards {
   display: flex;
   flex-flow: row wrap;

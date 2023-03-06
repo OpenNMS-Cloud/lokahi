@@ -30,18 +30,15 @@ package org.opennms.horizon.minion.flows.parser;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.InvalidProtocolBufferException;
-import org.opennms.horizon.minion.flows.listeners.factory.TelemetryRegistry;
+
 import org.opennms.horizon.minion.plugin.api.Listener;
-import org.opennms.horizon.minion.plugin.api.ListenerFactory;
-import org.opennms.horizon.minion.plugin.api.ServiceMonitorResponse;
 import org.opennms.sink.flows.contract.FlowsConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Objects;
-import java.util.function.Consumer;
 
-public class ConfigManager implements ListenerFactory {
+public class ConfigManager implements org.opennms.horizon.minion.plugin.api.ListenerFactory {
 
     private static final Logger LOG = LoggerFactory.getLogger(ConfigManager.class);
 
@@ -49,13 +46,14 @@ public class ConfigManager implements ListenerFactory {
 
     private FlowsConfig flowsConfig;
 
-    public ConfigManager(TelemetryRegistry telemetryRegistry) {
+    public ConfigManager(final TelemetryRegistry telemetryRegistry) {
         this.telemetryRegistry = Objects.requireNonNull(telemetryRegistry);
     }
 
     @Override
-    public Listener create(Consumer<ServiceMonitorResponse> resultProcessor, Any config) {
+    public Listener create(Any config) {
         LOG.info("FlowsConfig: {}", config.toString());
+
         if (!config.is(FlowsConfig.class)) {
             throw new IllegalArgumentException("configuration must be FlowsConfig; type-url=" + config.getTypeUrl());
         }
@@ -63,7 +61,7 @@ public class ConfigManager implements ListenerFactory {
         try {
             this.flowsConfig = config.unpack(FlowsConfig.class);
             holder.clear();
-            flowsConfig.getListenersList().forEach(telemetryRegistry::getListener);
+            flowsConfig.getListenersList().forEach(telemetryRegistry::createListener);
         } catch (InvalidProtocolBufferException e) {
             throw new IllegalArgumentException("Error while parsing config with type-url=" + config.getTypeUrl());
         }

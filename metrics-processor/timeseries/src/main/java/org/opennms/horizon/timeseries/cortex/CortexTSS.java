@@ -75,15 +75,18 @@ public class CortexTSS {
 
     private final OkHttpClient client;
 
-    private final MetricRegistry metrics = new MetricRegistry();
-    private final Meter samplesWritten = metrics.meter("samplesWritten");
-    private final Meter samplesLost = metrics.meter("samplesLost");
+    private final MetricRegistry metrics;
+    private final Meter samplesWritten;
+    private final Meter samplesLost;
 
     private final Bulkhead asyncHttpCallsBulkhead;
     private final CortexTSSConfig config;
 
-    public CortexTSS(final CortexTSSConfig config) {
+    public CortexTSS(final CortexTSSConfig config, final MetricRegistry metrics) {
         this.config = Objects.requireNonNull(config);
+        this.metrics = Objects.requireNonNull(metrics);
+        samplesWritten = metrics.meter("samplesWritten");
+        samplesLost = metrics.meter("samplesLost");
 
         ConnectionPool connectionPool = new ConnectionPool(config.getMaxConcurrentHttpConnections(), 5, TimeUnit.MINUTES);
         Dispatcher dispatcher = new Dispatcher();

@@ -43,25 +43,24 @@ import java.time.Instant;
 import java.util.Objects;
 import java.util.Optional;
 
-import org.opennms.horizon.minion.flows.parser.flowmessage.Direction;
-import org.opennms.horizon.minion.flows.parser.flowmessage.FlowMessage;
-
 import com.google.common.primitives.UnsignedLong;
 import com.google.protobuf.UInt32Value;
 
 import org.opennms.horizon.minion.flows.parser.RecordEnrichment;
-import org.opennms.horizon.minion.flows.parser.flowmessage.NetflowVersion;
-import org.opennms.horizon.minion.flows.parser.flowmessage.SamplingAlgorithm;
 import org.opennms.horizon.minion.flows.parser.ie.Value;
+import org.opennms.dataplatform.flows.document.Direction;
+import org.opennms.dataplatform.flows.document.FlowDocument;
+import org.opennms.dataplatform.flows.document.NetflowVersion;
+import org.opennms.dataplatform.flows.document.SamplingAlgorithm;
 
+import lombok.NoArgsConstructor;
+
+@NoArgsConstructor
 public class IpFixMessageBuilder implements MessageBuilder {
 
-    public IpFixMessageBuilder() {
-    }
-
     @Override
-    public FlowMessage.Builder buildMessage(final Iterable<Value<?>> values, final RecordEnrichment enrichment) {
-        final FlowMessage.Builder builder = FlowMessage.newBuilder();
+    public FlowDocument.Builder buildMessage(final Iterable<Value<?>> values, final RecordEnrichment enrichment) {
+        final var builder = FlowDocument.newBuilder();
 
         Long exportTime = null;
         Long octetDeltaCount = null;
@@ -206,7 +205,7 @@ public class IpFixMessageBuilder implements MessageBuilder {
                 case "@observationDomainId":
                     Long observationDomainId = getLongValue(value);
                     if (observationDomainId != null) {
-                        builder.setNodeIdentifier(String.valueOf(observationDomainId));
+                        builder.setExporterIdentifier(String.valueOf(observationDomainId));
                     }
                     break;
 
@@ -574,7 +573,7 @@ public class IpFixMessageBuilder implements MessageBuilder {
         return direction;
     }
 
-    static void buildDeltaSwitched(FlowMessage.Builder builder, Long flowActiveTimeout, Long flowInactiveTimeout) {
+    static void buildDeltaSwitched(FlowDocument.Builder builder, Long flowActiveTimeout, Long flowInactiveTimeout) {
         Timeout timeout = new Timeout(flowActiveTimeout, flowInactiveTimeout);
         timeout.setFirstSwitched(builder.hasFirstSwitched() ? builder.getFirstSwitched().getValue() : null);
         timeout.setLastSwitched(builder.hasLastSwitched() ? builder.getLastSwitched().getValue() : null);

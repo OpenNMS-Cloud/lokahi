@@ -28,9 +28,18 @@
 
 package org.opennms.miniongateway.grpc.twin;
 
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
+import java.io.Serializable;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.apache.ignite.binary.BinaryObjectException;
+import org.apache.ignite.binary.BinaryReader;
+import org.apache.ignite.binary.BinaryWriter;
+import org.apache.ignite.binary.Binarylizable;
 
 /**
  * This Tracks Twin Object Updates for a given SessionKey (key, location).
@@ -40,11 +49,16 @@ import java.util.concurrent.atomic.AtomicInteger;
  * TwinTracker is created and updated by publisher and only consumed by Subscriber.
  * Subscriber will ignore any stale updates based on version but resets version whenever there is new SessionId.
  */
-public class TwinTracker {
+public class TwinTracker implements Binarylizable, Serializable {
 
-    private final AtomicInteger version;
+    public static final int REVISION = 1;
+    private AtomicInteger version;
     private byte[] obj;
-    private final String sessionId;
+    private String sessionId;
+
+    public TwinTracker() {
+
+    }
 
     public TwinTracker(byte[] obj) {
         this(obj, 0, UUID.randomUUID().toString());
@@ -71,5 +85,24 @@ public class TwinTracker {
     public int update(byte[] obj) {
         this.obj = obj;
         return version.incrementAndGet();
+    }
+
+    @Override
+    public void writeBinary(BinaryWriter writer) throws BinaryObjectException {
+        writer.writeInt("revision", REVISION);
+        writer.writeInt("version", version.get());
+        writer.writeString("sessionId", sessionId);
+        writer.writeByteArray("obj", obj);
+    }
+
+    @Override
+    public void readBinary(BinaryReader reader) throws BinaryObjectException {
+        int revision = reader.readInt("revision");
+        if (revision != REVISION) {
+            throw new BinaryObjectException("Could not deserialize object, revision mismatch");
+        }
+        version = new AtomicInteger(reader.readInt("version"));
+        sessionId = reader.readString("sessionId");
+        obj = reader.readByteArray("obj");
     }
 }

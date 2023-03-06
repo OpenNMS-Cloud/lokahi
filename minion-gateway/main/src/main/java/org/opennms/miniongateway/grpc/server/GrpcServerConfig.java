@@ -20,13 +20,11 @@ import org.opennms.horizon.shared.ipc.grpc.server.manager.rpc.LocationIndependen
 import org.opennms.horizon.shared.ipc.grpc.server.manager.rpcstreaming.MinionRpcStreamConnectionManager;
 import org.opennms.horizon.shared.ipc.grpc.server.manager.rpcstreaming.impl.MinionRpcStreamConnectionManagerImpl;
 import org.opennms.miniongateway.grpc.server.heartbeat.HeartbeatKafkaForwarder;
-import org.opennms.miniongateway.grpc.server.rpcrequest.flows.FlowKafkaForwarder;
+import org.opennms.miniongateway.grpc.server.flows.FlowKafkaForwarder;
 import org.opennms.miniongateway.grpc.server.tasktresults.TaskResultsKafkaForwarder;
 import org.opennms.miniongateway.grpc.server.traps.TrapsKafkaForwarder;
 import org.opennms.miniongateway.grpc.twin.GrpcTwinPublisher;
 import org.opennms.miniongateway.grpc.twin.TaskSetTwinMessageProcessor;
-import org.opennms.taskset.service.api.TaskSetForwarder;
-import org.opennms.taskset.service.api.TaskSetPublisher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -86,11 +84,9 @@ public class GrpcServerConfig {
 
     @Bean("cloudToMinionMessageProcessor")
     public TaskSetTwinMessageProcessor stubCloudToMinionMessageProcessor(
-        @Qualifier("taskSetPublisher") TaskSetPublisher publisher,
-        @Qualifier("taskSetForwarder") TaskSetForwarder forwarder,
         GrpcTwinPublisher grpcTwinPublisher,
         TenantIDGrpcServerInterceptor tenantIDGrpcServerInterceptor) {
-        return new TaskSetTwinMessageProcessor(publisher, forwarder, grpcTwinPublisher, tenantIDGrpcServerInterceptor);
+        return new TaskSetTwinMessageProcessor(grpcTwinPublisher, tenantIDGrpcServerInterceptor);
     }
 
     @Bean

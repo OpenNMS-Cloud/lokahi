@@ -2,13 +2,16 @@ package org.opennms.horizon.testtool.miniongateway.wiremock.ipc;
 
 import com.google.protobuf.Empty;
 import io.grpc.stub.StreamObserver;
+import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.opennms.cloud.grpc.minion.CloudServiceGrpc;
 import org.opennms.cloud.grpc.minion.CloudToMinionMessage;
 import org.opennms.cloud.grpc.minion.Identity;
 import org.opennms.cloud.grpc.minion.MinionToCloudMessage;
+import org.opennms.cloud.grpc.minion.RpcRequestProto;
+import org.opennms.cloud.grpc.minion.RpcResponseProto;
+import org.opennms.cloud.grpc.minion.SinkMessage;
 import org.opennms.horizon.testtool.miniongateway.wiremock.api.MockGrpcServiceApi;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -22,15 +25,15 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Component
+@Slf4j
 public class MockCloudService extends CloudServiceGrpc.CloudServiceImplBase implements MockGrpcServiceApi {
-    private static final Logger DEFAULT_LOGGER = LoggerFactory.getLogger(MockCloudService.class);
 
-    private Logger log = DEFAULT_LOGGER;
-
-    private Map<String, List<StreamObserver<CloudToMinionMessage>>> cloudToLocationStreamMap = new ConcurrentHashMap<>();
-    private Map<String, AtomicInteger> locationSequenceMap = new ConcurrentHashMap<>();
-    private Map<String, StreamObserver<CloudToMinionMessage>> cloudToMinionStreamMap = new ConcurrentHashMap<>();
-    private Set<Identity> connectedMinions = Collections.synchronizedSet(new HashSet<>());
+    private final Map<String, List<StreamObserver<CloudToMinionMessage>>> cloudToLocationStreamMap = new ConcurrentHashMap<>();
+    private final Map<String, AtomicInteger> locationSequenceMap = new ConcurrentHashMap<>();
+    private final Map<String, StreamObserver<CloudToMinionMessage>> cloudToMinionStreamMap = new ConcurrentHashMap<>();
+    private final Set<Identity> connectedMinions = Collections.synchronizedSet(new HashSet<>());
+    @Getter
+    private final List<SinkMessage> receivedSinkMessages = new ArrayList<>();
 
 //========================================
 // INTERFACE
@@ -97,12 +100,34 @@ public class MockCloudService extends CloudServiceGrpc.CloudServiceImplBase impl
         return new StreamObserver<>() {
             @Override
             public void onNext(MinionToCloudMessage value) {
-                log.info("Have minion-to-cloud-message: twin-request.consumer-key={}", value.getTwinRequest().getConsumerKey());
+                log.info("Have minion-to-cloud-message from module {}: twin-request.consumer-key={}",
+                    value.getSinkMessage().getModuleId(),
+                    value.getTwinRequest().getConsumerKey());
+                receivedSinkMessages.add(value.getSinkMessage());
             }
 
             @Override
             public void onError(Throwable t) {
+                log.warn("Have minion-to-cloud-message Exception.", t);
+            }
 
+            @Override
+            public void onCompleted() {
+
+            }
+        };
+    }
+
+    public StreamObserver<RpcResponseProto> cloudToMinionRPC(StreamObserver<RpcRequestProto> responseObserver) {
+        return new StreamObserver<>() {
+            @Override
+            public void onNext(RpcResponseProto value) {
+                log.info("cloudToMinionRPC called.");
+            }
+
+            @Override
+            public void onError(Throwable t) {
+                log.warn("cloudToMinionRPC Exception.", t);
             }
 
             @Override

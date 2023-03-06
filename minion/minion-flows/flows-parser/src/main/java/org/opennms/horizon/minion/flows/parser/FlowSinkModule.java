@@ -29,19 +29,16 @@
 package org.opennms.horizon.minion.flows.parser;
 
 import com.google.protobuf.InvalidProtocolBufferException;
-
-import org.opennms.cloud.grpc.minion.Identity;
-import org.opennms.horizon.grpc.telemetry.contract.TelemetryMessage;
-import org.opennms.horizon.grpc.telemetry.contract.TelemetryMessageLog;
+import org.opennms.dataplatform.flows.document.FlowDocument;
+import org.opennms.dataplatform.flows.document.FlowDocumentLog;
 import org.opennms.horizon.shared.ipc.rpc.IpcIdentity;
 import org.opennms.horizon.shared.ipc.sink.api.AggregationPolicy;
 import org.opennms.horizon.shared.ipc.sink.api.AsyncPolicy;
 import org.opennms.horizon.shared.ipc.sink.api.SinkModule;
 
-
 import java.util.Objects;
 
-public class FlowSinkModule implements SinkModule<TelemetryMessage, TelemetryMessageLog> {
+public class FlowSinkModule implements SinkModule<FlowDocument, FlowDocumentLog> {
 
     private static final String ID = "Flow";
 
@@ -62,41 +59,42 @@ public class FlowSinkModule implements SinkModule<TelemetryMessage, TelemetryMes
     }
 
     @Override
-    public byte[] marshal(TelemetryMessageLog message) {
+    public byte[] marshal(FlowDocumentLog message) {
         return message.toByteArray();
     }
 
     @Override
-    public TelemetryMessageLog unmarshal(byte[] message) {
+    public FlowDocumentLog unmarshal(byte[] message) {
         try {
-            return TelemetryMessageLog.parseFrom(message);
+            return FlowDocumentLog.parseFrom(message);
         } catch (InvalidProtocolBufferException e) {
             throw new UnmarshalException(e);
         }
     }
 
     @Override
-    public byte[] marshalSingleMessage(TelemetryMessage message) {
+    public byte[] marshalSingleMessage(FlowDocument message) {
         return message.toByteArray();
     }
 
     @Override
-    public TelemetryMessage unmarshalSingleMessage(byte[] message) {
+    public FlowDocument unmarshalSingleMessage(byte[] message) {
         try {
-            return TelemetryMessage.parseFrom(message);
+            return FlowDocument.parseFrom(message);
         } catch (InvalidProtocolBufferException e) {
             throw new UnmarshalException(e);
         }
     }
 
     @Override
-    public AggregationPolicy<TelemetryMessage, TelemetryMessageLog, TelemetryMessageLog> getAggregationPolicy() {
+    public AggregationPolicy<FlowDocument, FlowDocumentLog, FlowDocumentLog> getAggregationPolicy() {
         return new AggregationPolicy<>() {
             //TODO: hardcode for now. Will fix in DC-455
             @Override
             public int getCompletionSize() {
                 return 1;
             }
+
             //TODO: hardcode for now. Will fix in DC-455
             @Override
             public int getCompletionIntervalMs() {
@@ -104,26 +102,28 @@ public class FlowSinkModule implements SinkModule<TelemetryMessage, TelemetryMes
             }
 
             @Override
-            public Object key(TelemetryMessage telemetryMessage) {
-                return telemetryMessage.getTimestamp();
+            public Object key(FlowDocument flowDocument) {
+                return flowDocument.getTimestamp();
             }
 
             @Override
-            public TelemetryMessageLog aggregate(TelemetryMessageLog accumulator, TelemetryMessage newMessage) {
+            public FlowDocumentLog aggregate(FlowDocumentLog accumulator, FlowDocument newMessage) {
                 if (accumulator == null) {
-                    accumulator = TelemetryMessageLog.newBuilder()
-                        .setSystemId(Identity.newBuilder()
-                            .setSystemId(identity.getId()).setLocation(identity.getLocation()).build().toString())
+                    accumulator = FlowDocumentLog.newBuilder()
+                        .setLocation(identity.getLocation())
+                        .setSystemId(identity.getId())
                         .addMessage(newMessage).build();
                 } else {
-                    TelemetryMessageLog.newBuilder(accumulator).addMessage(newMessage);
+                    if (newMessage != null) {
+                        FlowDocumentLog.newBuilder(accumulator).addMessage(newMessage);
+                    }
                 }
                 return accumulator;
             }
 
             @Override
-            public TelemetryMessageLog build(TelemetryMessageLog telemetryMessageLog) {
-                return telemetryMessageLog;
+            public FlowDocumentLog build(FlowDocumentLog message) {
+                return message;
             }
         };
     }

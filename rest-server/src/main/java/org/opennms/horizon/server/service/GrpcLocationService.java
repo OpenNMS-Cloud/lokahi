@@ -61,4 +61,10 @@ public class GrpcLocationService {
     public Mono<Location> findLocationById(@GraphQLArgument(name = "id") long id, @GraphQLEnvironment ResolutionEnvironment env) {
         return Mono.just(mapper.protoToLocation(client.getLocationById(id, headerUtil.getAuthHeader(env))));
     }
+
+    @GraphQLQuery
+    public Flux<Location> searchLocation(@GraphQLArgument(name="searchTerm") String searchTerm, @GraphQLEnvironment ResolutionEnvironment env) {
+        return Flux.fromIterable(client.searchLocations(searchTerm, headerUtil.getAuthHeader(env))
+            .stream().map(mapper::protoToLocation).toList());
+    }
 }

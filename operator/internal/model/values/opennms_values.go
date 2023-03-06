@@ -15,58 +15,61 @@ limitations under the License.
 package values
 
 type OpenNMSValues struct {
-    API                    ServiceValues          `yaml:"API"`
-    UI                     ServiceValues          `yaml:"UI"`
-    Minion                 MinionValues           `yaml:"Minion"`
-    MinionGateway          MinionGatewayValues    `yaml:"MinionGateway"`
-    MinionGatewayGrpcProxy MGGPValues             `yaml:"MinionGatewayGrpcProxy"`
-    Inventory              InventoryValues        `yaml:"Inventory"`
-    Alarm                  AlarmValues            `yaml:"Alarm"`
-    Notification           ServiceValues          `yaml:"Notification"`
-    MetricsProcessor       MetricsProcessorValues `yaml:"MetricsProcessor"`
-    Events                 EventsValues           `yaml:"Events"`
-    DataChoices            DataChoicesValues      `yaml:"DataChoices"`
+	API                    ServiceValues          `yaml:"API"`
+	UI                     ServiceValues          `yaml:"UI"`
+	Minion                 MinionValues           `yaml:"Minion"`
+	MinionGateway          MinionGatewayValues    `yaml:"MinionGateway"`
+	MinionGatewayGrpcProxy MGGPValues             `yaml:"MinionGatewayGrpcProxy"`
+	Inventory              InventoryValues        `yaml:"Inventory"`
+	Alarm                  AlarmValues            `yaml:"Alarm"`
+	Notification           ServiceValues          `yaml:"Notification"`
+	MetricsProcessor       MetricsProcessorValues `yaml:"MetricsProcessor"`
+	Events                 EventsValues           `yaml:"Events"`
+	DataChoices            DataChoicesValues      `yaml:"DataChoices"`
 }
 
 type MinionValues struct {
-    ServiceValues     `yaml:",inline"`
-    SshPort           int `yaml:"SshPort"`
-    TrapsListenerPort int `yaml:"TrapsListenerPort"`
+	ServiceValues        `yaml:",inline"`
+	Netflow5ListenerPort int `yaml:"Netflow5ListenerPort"`
+	Netflow9ListenerPort int `yaml:"Netflow9ListenerPort"`
+	SshPort              int `yaml:"SshPort"`
+	TrapsListenerPort    int `yaml:"TrapsListenerPort"`
 }
 
 type MinionGatewayValues struct {
-    ServiceValues      `yaml:",inline"`
-    InternalGrpcPort   int         `yaml:"InternalGrpcPort"`
-    IgniteClientPort   int         `yaml:"IgniteClientPort"`
-    IngressAnnotations interface{} `yaml:"IngressAnnotations"`
+	ServiceValues      `yaml:",inline"`
+	InternalGrpcPort   int         `yaml:"InternalGrpcPort"`
+	IgniteClientPort   int         `yaml:"IgniteClientPort"`
+	IngressAnnotations interface{} `yaml:"IngressAnnotations"`
 }
 
 type MGGPValues struct {
-    ServiceValues `yaml:",inline"`
+	ServiceValues `yaml:",inline"`
 }
 type MetricsProcessorValues struct {
-    ServiceValues `yaml:",inline"`
+	ServiceValues `yaml:",inline"`
 }
 
 type InventoryValues struct {
-    ServiceValues `yaml:",inline"`
+	ServiceValues `yaml:",inline"`
+	EncryptionKey string `yaml:"EncryptionKey"`
 }
 
 type AlarmValues struct {
-    ServiceValues `yaml:",inline"`
+	ServiceValues `yaml:",inline"`
 }
 
 type EventsValues struct {
-    ServiceValues `yaml:",inline"`
+	ServiceValues `yaml:",inline"`
 }
 
 type DataChoicesValues struct {
-    ServiceValues `yaml:",inline"`
+	ServiceValues `yaml:",inline"`
 }
 
 type TimeseriesValues struct {
-    Mode   string `yaml:"Mode"`
-    Host   string `yaml:"Host"`
-    Port   string `yaml:"Port"`
-    ApiKey string `yaml:"ApiKey"`
+	Mode   string `yaml:"Mode"`
+	Host   string `yaml:"Host"`
+	Port   string `yaml:"Port"`
+	ApiKey string `yaml:"ApiKey"`
 }

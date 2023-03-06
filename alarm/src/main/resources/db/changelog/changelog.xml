@@ -11,4 +11,10 @@
     <include file="db/changelog/hs-0.1.0/tables/memo.xml"/>
     <include file="db/changelog/hs-0.1.0/tables/service.xml"/>
 
+    <include file="db/changelog/hs-0.1.0/tables/alarm_tenant_update.xml"/>
+    <include file="db/changelog/hs-0.1.0/tables/alarm_attributes_tenant_update.xml"/>
+    <include file="db/changelog/hs-0.1.0/tables/alarm_association_tenant_update.xml"/>
+    <include file="db/changelog/hs-0.1.0/tables/memo_tenant_update.xml"/>
+    <include file="db/changelog/hs-0.1.0/tables/service_tenant_update.xml"/>
+
 </databaseChangeLog>

@@ -33,7 +33,7 @@ import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
-import org.opennms.horizon.minion.flows.listeners.factory.TelemetryRegistry;
+import org.opennms.horizon.minion.flows.parser.TelemetryRegistry;
 import org.opennms.sink.flows.contract.ListenerConfig;
 import org.opennms.sink.flows.contract.ParserConfig;
 
@@ -61,7 +61,7 @@ public class InitListener implements Action {
     public Object execute() {
         ListenerConfig config = ListenerConfig.newBuilder().setClassName(listenerClass).setName(name + "_listener")
             .addParsers(ParserConfig.newBuilder().setClassName(parserClass).setName(name + "_parser")).build();
-        registry.getListener(config);
+        registry.createListener(config);
         System.out.println("Listener started.");
         return null;
     }

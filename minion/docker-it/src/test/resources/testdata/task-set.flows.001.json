@@ -1,0 +1,90 @@
+{
+  "taskDefinition": [
+    {
+      "id": "flows-config",
+      "type": "LISTENER",
+      "pluginName": "flows.parsers.config",
+      "configuration": {
+        "@type": "type.googleapis.com/opennms.sink.flows.FlowsConfig",
+        "listeners": [
+          {
+            "name": "Netflow-5-UDP-8877",
+            "className": "org.opennms.horizon.minion.flows.listeners.UdpListener",
+            "enabled": true,
+            "parameters": [
+              {
+                "key": "port",
+                "value": "8877"
+              }
+            ],
+            "parsers": [
+              {
+                "name": "Netflow-5-Parser",
+                "className": "org.opennms.horizon.minion.flows.parser.Netflow5UdpParser"
+              }
+            ]
+          },
+          {
+            "name": "Netflow-9-UDP-4729",
+            "className": "org.opennms.horizon.minion.flows.listeners.UdpListener",
+            "enabled": true,
+            "parameters": [
+              {
+                "key": "port",
+                "value": "4729"
+              }
+            ],
+            "parsers": [
+              {
+                "name": "Netflow-9-Parser",
+                "className": "org.opennms.horizon.minion.flows.parser.Netflow9UdpParser"
+              }
+            ]
+          },
+          {
+            "name": "IPFIX-TCP-4730",
+            "className": "org.opennms.horizon.minion.flows.listeners.TcpListener",
+            "enabled": true,
+            "parameters": [
+              {
+                "key": "port",
+                "value": "4730"
+              }
+            ],
+            "parsers": [
+              {
+                "name": "IPFIX-TCP-Parser",
+                "className": "org.opennms.horizon.minion.flows.parser.IpfixTcpParser"
+              }
+            ]
+          },
+          {
+            "name": "Netflow-UDP-9999",
+            "className": "org.opennms.horizon.minion.flows.listeners.UdpListener",
+            "enabled": true,
+            "parameters": [
+              {
+                "key": "port",
+                "value": "9999"
+              }
+            ],
+            "parsers": [
+              {
+                "name": "Netflow-5-Parser",
+                "className": "org.opennms.horizon.minion.flows.parser.Netflow5UdpParser"
+              },
+              {
+                "name": "Netflow-9-Parser",
+                "className": "org.opennms.horizon.minion.flows.parser.Netflow9UdpParser"
+              },
+              {
+                "name": "IPFix-Parser",
+                "className": "org.opennms.horizon.minion.flows.parser.IpfixUdpParser"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

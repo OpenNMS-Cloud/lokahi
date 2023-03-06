@@ -8,8 +8,14 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.opennms.cloud.grpc.minion.RpcRequestProto;
 import org.opennms.cloud.grpc.minion.RpcResponseProto;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class IncomingRpcHandlerAdapter implements BiConsumer<RpcRequestProto, StreamObserver<RpcResponseProto>> {
+
+    private static final Logger DEFAULT_LOGGER = LoggerFactory.getLogger(IncomingRpcHandlerAdapter.class);
+
+    private Logger LOG = DEFAULT_LOGGER;
 
     private Map<String, ServerHandler> handlers;
 
@@ -24,6 +30,7 @@ public class IncomingRpcHandlerAdapter implements BiConsumer<RpcRequestProto, St
             ServerHandler handler = handlers.get(request.getModuleId());
             handler.handle(request).whenComplete((response, error) -> {
                 if (error != null) {
+                    LOG.error("Exception on RPC: module-id={}", request.getModuleId(), error);
                     responseStream.onError(error);
                     return;
                 }

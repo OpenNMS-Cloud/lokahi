@@ -38,6 +38,9 @@ import org.opennms.horizon.notifications.exceptions.NotificationInternalExceptio
 import org.opennms.horizon.notifications.service.NotificationService;
 import org.opennms.horizon.shared.dto.event.AlarmDTO;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 
@@ -52,7 +55,8 @@ public class AlarmKafkaConsumerUnitTest {
     @Test
     public void testConsume() {
         AlarmDTO alarmDTO = new AlarmDTO();
-        alarmKafkaConsumer.consume(alarmDTO);
+        Map<String, Object> headers = new HashMap<>();
+        alarmKafkaConsumer.consume(alarmDTO,headers);
     }
 
     @Test
@@ -61,6 +65,6 @@ public class AlarmKafkaConsumerUnitTest {
             .when(notificationService).postNotification(any());
 
         AlarmDTO alarmDTO = new AlarmDTO();
-        alarmKafkaConsumer.consume(alarmDTO);
+        alarmKafkaConsumer.consumeAlarm(alarmDTO);
     }
 }

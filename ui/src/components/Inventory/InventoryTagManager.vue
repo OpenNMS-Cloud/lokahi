@@ -3,56 +3,70 @@
     class="tag-manager-box"
     v-if="isTaggingBoxOpen"
   >
-    <section
-      class="select-tags"
-      data-test="select-tags"
-    >
+    <section class="select-tags">
       <div class="top">
         <div class="heading-total-selected">
-          <h4 data-test="heading">Select Tags:</h4>
-          <div
-            class="total-selected"
-            data-test="total-selected"
-          >
-            <div>
-              TOTAL: <span>{{ tags.length }}</span
-              ><span class="pipe">|</span>
+          <h4>Select Tags:</h4>
+          <div class="total-selected">
+            <div class="total">
+              <!-- TOTAL: <span>{{ tags.length ? tags.length : '' }}</span> -->
+              TOTAL: <span>{{ tags.length }}</span>
+              <span class="pipe">|</span>
             </div>
-            <div>
+            <div class="selected">
+              <!-- SELECTED: <span>{{ selectedTags.length ? selectedTags.length : '' }}</span> -->
               SELECTED: <span>{{ selectedTags.length }}</span>
             </div>
           </div>
         </div>
         <div class="search-add">
-          <InputButtonPopover
+          <!-- Add tag -->
+          <!-- <InputButtonPopover
+            :icon="inputIcon"
             :handler="addTag"
             label="Add Tag"
-            data-test="select-tags"
-          />
-          <FeatherInput
+          /> -->
+          <!-- Search tags input -->
+          <!-- <FeatherInput
             :modelValue="searchValue"
             @update:model-value="tagsFiltering"
             clear="clear"
             label="Search Tags"
             class="search"
-            data-test="search-tags"
+          /> -->
+          <!-- <FeatherButton text>Deselect all</FeatherButton> -->
+          <FeatherButton
+            @click="selectAllToggle"
+            secondary
+            class="select-all-btn"
+            >{{ isSelectingAll ? 'Deselect all' : 'Select all' }}</FeatherButton
+          >
+          <DiscoveryAutocomplete
+            @items-selected="tagsSelectedListener"
+            :get-items="tagQueries.getTagsSearch"
+            :items="tagQueries.tagsSearched"
+            label="Search/Add tags (optional)"
+            ref="tagsAutocompleteRef"
+            class="tags-autocomplete"
+            data-test="tags-autocomplete"
           />
         </div>
       </div>
       <FeatherChipList
+        v-if="tags.length"
+        :key="selectedTags.toString()"
         condensed
         label="Tags"
-        :key="selectedTags.toString()"
-        data-test="tags-list"
+        class="tag-chip-list"
       >
         <FeatherChip
-          v-for="tag of tags"
-          :key="tag"
+          v-for="(tag, index) in tags"
+          :key="index"
+          @click="tagStore.toggleTag(tag.name)"
+          :class="{ selected: isTagSelected(tag.name as string) }"
           class="pointer"
-          :class="{ selected: selectedTags.includes(tag) }"
-          @click="taggingStore.toggleTag(tag)"
         >
-          {{ tag }}
+          {{ tag.name }}
         </FeatherChip>
       </FeatherChipList>
     </section>
@@ -63,7 +77,8 @@
       <h4>Tag Nodes:</h4>
       <FeatherRadioGroup
         label=""
-        v-model="taggingStore.tagNodesSelected"
+        v-model="tagStore.tagNodesSelected"
+        class="select-tag-nodes"
       >
         <FeatherRadio
           :value="TagNodesType.All"
@@ -83,38 +98,79 @@
 
 <script setup lang="ts">
 import { useInventoryStore } from '@/store/Views/inventoryStore'
-import { useTaggingQueries } from '@/store/Queries/taggingQueries'
-import { useTaggingStore } from '@/store/Components/taggingStore'
-import { useTaggingMutations } from '@/store/Mutations/taggingMutations'
+import { useTagQueries } from '@/store/Queries/tagQueries'
+import { useTagStore } from '@/store/Components/tagStore'
+import { useTagMutations } from '@/store/Mutations/tagMutations'
 import { TagNodesType } from '@/types/tags'
+// import Add from '@featherds/icon/action/Add'
+
 const inventoryStore = useInventoryStore()
-const taggingQueries = useTaggingQueries()
-const taggingStore = useTaggingStore()
-const taggingMutations = useTaggingMutations()
+const tagQueries = useTagQueries()
+const tagStore = useTagStore()
+const tagMutations = useTagMutations()
+
 const searchValue = ref()
-const tags = ref()
-const selectedTags = computed(() => taggingStore.selectedTags)
+const tags = computed(() => tagStore.tags)
+const selectedTags = computed(() => tagStore.selectedTags)
+const isSelectingAll = ref(false)
+
 watchEffect(() => {
-  tags.value = taggingQueries.tags
+  // console.log('tagQueries.tags', tagQueries.tags)
+  tags.value = tagQueries.tags
 })
 const isTaggingBoxOpen = computed(() => {
-  if (!inventoryStore.isTaggingBoxOpen) {
-    taggingQueries.resetTags()
-  } else {
-    taggingQueries.fetchTags()
-  }
+  inventoryStore.isTaggingBoxOpen ? tagStore.fetchTags() : tagStore.resetTags()
+
   return inventoryStore.isTaggingBoxOpen
 })
+
+const tagsAutocompleteRef = ref()
+let tagsSelected: Record<string, string>[] = []
+const tagsSelectedListener = (tags: Record<string, string>[]) => {
+  tagsSelected = tags.map((tag) => {
+    delete tag._text
+    return tag
+  })
+}
+
+const isTagSelected = (name: string): boolean => selectedTags.value.some((t) => t.name?.includes(name))
+
+const selectAllToggle = () => {
+  // select all
+  /* if (isSelectingAll.value) {
+
+  } else {
+    // deselect all
+  } */
+  isSelectingAll.value = !isSelectingAll.value
+  tagStore.selectAllTags(isSelectingAll.value)
+}
 const addTag = (val: string) => {
-  taggingMutations.editTag(val, true)
+  tagMutations.editTag(val, true)
+  // cannot be added if already exists
+  // tag list should be updated
+  // input popover should be auto-closed once added?
+  // if adding fail, show snackabr
+  // reset: on close
+  // acts as list filter
+  // when pop
 }
 const tagsFiltering = (val: string) => {
+  console.log('val', val)
+  console.log('tagQueries.tags', tagQueries.tags)
   if (!val?.length) {
-    tags.value = taggingQueries.tags
+    tags.value = tagQueries.tags
   } else {
-    tags.value = taggingQueries.tags.filter((tag: string) => tag.includes(val))
+    tags.value = tagQueries.tags.filter((tag) => tag.name?.includes(val))
   }
+  console.log('tags.value', tags.value)
 }
+
+/* const inputIcon = {
+  image: markRaw(Add),
+  size: 2,
+  cursorHover: 'pointer'
+} */
 </script>
 
 <style scoped lang="scss">
@@ -122,6 +178,7 @@ const tagsFiltering = (val: string) => {
 @use '@featherds/styles/mixins/typography';
 @use '@/styles/vars';
 @use '@/styles/mediaQueries';
+
 .tag-manager-box {
   display: flex;
   flex-direction: row;
@@ -148,46 +205,85 @@ const tagsFiltering = (val: string) => {
     justify-content: space-between;
     margin-bottom: var(variables.$spacing-m);
     .heading-total-selected {
+      width: 35%;
       .total-selected {
         display: flex;
-        flex-direction: row;
+        flex-direction: column;
         padding-top: 8px;
-        > * {
+        margin-bottom: var(variables.$spacing-l);
+        .total {
           > span {
             font-weight: bold;
-            &.pipe {
-              color: var(variables.$secondary-text-on-surface);
-              margin: 0 var(variables.$spacing-s);
-            }
+          }
+          .pipe {
+            color: var(variables.$secondary-text-on-surface);
+            margin: 0 var(variables.$spacing-s);
+            display: none;
+          }
+        }
+        .selected {
+          > span {
+            font-weight: bold;
           }
         }
       }
-      @include mediaQueries.screen-md {
-        display: flex;
-        flex-direction: row;
-        width: 50%;
-        justify-content: space-between;
-      }
     }
+
     .search-add {
+      width: 50%;
       display: flex;
       flex-direction: row;
-      :deep(.add-btn) {
-        margin: 5px 10px 0 0;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      .select-all-btn {
+        order: 2;
       }
-      :deep(.search) {
-        width: 200px;
-        input {
-          margin-right: var(variables.$spacing-m);
-        }
+      .tags-autocomplete {
+        min-width: 265px;
+        order: 1;
       }
     }
     @include mediaQueries.screen-md {
       margin-bottom: 0;
+      .heading-total-selected {
+        .total-selected {
+          flex-direction: row;
+          .total {
+            .pipe {
+              display: inline;
+            }
+          }
+        }
+      }
+      .search-add {
+        width: 70%;
+        .select-all-btn {
+          order: 1;
+          margin-top: 2px;
+          margin-right: var(variables.$spacing-m);
+        }
+        .tags-autocomplete {
+          order: 2;
+        }
+      }
+    }
+
+    @include mediaQueries.screen-xl {
+      .heading-total-selected {
+        width: 50%;
+        display: flex;
+        flex-direction: row;
+        .total-selected {
+          .total {
+            margin-left: var(variables.$spacing-m);
+          }
+        }
+      }
     }
   }
   .tag-chip-list {
-    margin-top: 0;
+    max-height: 100px;
+    overflow-y: scroll;
   }
   @include mediaQueries.screen-lg {
     width: 75%;

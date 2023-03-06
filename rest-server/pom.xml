@@ -24,6 +24,7 @@
         <application.docker.image.name>opennms/horizon-stream-rest-server</application.docker.image.name>
 		<java.version>17</java.version>
 		<graphql.spqr.version>0.0.6</graphql.spqr.version>
+        <sonar.projectKey>opennms_horizon-stream_bff</sonar.projectKey>
 	</properties>
     <dependencyManagement>
         <dependencies>
@@ -49,11 +50,11 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-devtools</artifactId>
 		</dependency>
-        <dependency>
+        <!--<dependency>
             <groupId>org.opennms.horizon.shared</groupId>
             <artifactId>dto-model</artifactId>
             <version>${project.version}</version>
-        </dependency>
+        </dependency>-->
         <dependency>
             <groupId>org.opennms.horizon.shared</groupId>
             <artifactId>grpc-common-constants</artifactId>
@@ -133,6 +134,12 @@
                     <artifactId>byte-buddy</artifactId>
                 </exclusion>
             </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.github.tomakehurst</groupId>
+            <artifactId>wiremock</artifactId>
+            <version>${wiremock.version}</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
@@ -233,6 +240,16 @@
 			<plugin>
 				<groupId>com.google.cloud.tools</groupId>
 				<artifactId>jib-maven-plugin</artifactId>
+
+				<executions>
+					<execution>
+					<id>build-docker-image</id>
+					<phase>install</phase>
+					<goals>
+						<goal>${application.jib.defaultGoal}</goal>
+					</goals>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>

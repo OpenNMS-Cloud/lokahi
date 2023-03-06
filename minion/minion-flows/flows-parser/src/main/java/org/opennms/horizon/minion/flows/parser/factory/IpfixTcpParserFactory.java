@@ -29,12 +29,14 @@
 package org.opennms.horizon.minion.flows.parser.factory;
 
 import org.opennms.horizon.minion.flows.listeners.Parser;
-import org.opennms.horizon.minion.flows.listeners.factory.TelemetryRegistry;
 import org.opennms.horizon.minion.flows.parser.IpfixTcpParser;
+import org.opennms.horizon.minion.flows.parser.TelemetryRegistry;
 import org.opennms.horizon.shared.ipc.rpc.IpcIdentity;
 import org.opennms.sink.flows.contract.ParserConfig;
 
 import java.util.Objects;
+
+import com.codahale.metrics.MetricRegistry;
 
 public class IpfixTcpParserFactory implements ParserFactory {
 
@@ -52,13 +54,17 @@ public class IpfixTcpParserFactory implements ParserFactory {
     }
 
     @Override
-    public Class<? extends Parser> getBeanClass() {
+    public Class<? extends Parser> getParserClass() {
         return IpfixTcpParser.class;
     }
 
     @Override
-    public Parser createBean(ParserConfig parserConfig) {
+    public Parser create(ParserConfig parserConfig) {
         final var dispatcher = telemetryRegistry.getDispatcher();
-        return new IpfixTcpParser(parserConfig.getName(), parserConfig.getQueue().getName(), dispatcher, identity, dnsResolver, telemetryRegistry.getMetricRegistry());
+        return new IpfixTcpParser(parserConfig.getName(),
+            dispatcher,
+            this.identity,
+            this.dnsResolver,
+            new MetricRegistry());
     }
 }

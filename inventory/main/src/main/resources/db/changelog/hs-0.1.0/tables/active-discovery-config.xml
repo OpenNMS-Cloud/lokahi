@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+
+    <changeSet author="bjanssens" id="0.1.0-active-discovery-config">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="active_discovery_config"/>
+            </not>
+        </preConditions>
+
+        <createTable tableName="active_discovery_config">
+            <column name="id" type="BIGINT" autoIncrement="true"/>
+
+            <column name="tenant_id" type="text">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="location" type="text">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="profile_name" type="text">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="discovery_config" type="jsonb">
+                <constraints nullable="false"/>
+            </column>
+
+        </createTable>
+
+        <addPrimaryKey tableName="active_discovery_config" columnNames="id" constraintName="pk_active_discovery_config_id"/>
+
+    </changeSet>
+    
+    
+    <changeSet id="0.1.0-update-discovery-config" author="cgorantla">
+
+        <preConditions onFail="MARK_RAN">
+                <tableExists tableName="active_discovery_config"/>
+        </preConditions>
+
+        <dropColumn tableName="active_discovery_config" columnName="profile_name"/>
+        <dropColumn tableName="active_discovery_config" columnName="discovery_config"/>
+        <addColumn tableName="active_discovery_config">
+            <column name="name" type="text">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+        <addColumn tableName="active_discovery_config">
+            <column name="ip_address_entries" type="jsonb">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+        <addColumn tableName="active_discovery_config">
+            <column name="snmp_community_strings" type="jsonb">
+            </column>
+        </addColumn>
+        <addColumn tableName="active_discovery_config">
+            <column name="snmp_ports" type="jsonb">
+            </column>
+        </addColumn>
+    </changeSet>
+</databaseChangeLog>

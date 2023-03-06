@@ -16,7 +16,7 @@ export const useGraphsQueries = defineStore('graphsQueries', () => {
     fetchOnMount: false
   })
 
-  const node = computed(() => data.value?.findNodeById || {} as Node)
+  const node = computed(() => data.value?.findNodeById || ({} as Node))
 
   return {
     node,

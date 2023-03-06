@@ -26,9 +26,11 @@ type InventoryHandler struct {
 }
 
 func (h *InventoryHandler) UpdateConfig(values values.TemplateValues) error {
+    var inventoryEncryptionKey corev1.Secret
 	var inventoryDeployment appsv1.Deployment
 	var inventoryService corev1.Service
 
+    h.AddToTemplates(handlers.Filepath("opennms/inventory/inventory-encryptionkey-secret.yaml"), values, &inventoryEncryptionKey)
 	h.AddToTemplates(handlers.Filepath("opennms/inventory/inventory-deployment.yaml"), values, &inventoryDeployment)
 	h.AddToTemplates(handlers.Filepath("opennms/inventory/inventory-service.yaml"), values, &inventoryService)
 

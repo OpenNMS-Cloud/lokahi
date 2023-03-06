@@ -15,14 +15,15 @@ limitations under the License.
 package values
 
 type PostgresValues struct {
-	ServiceValues        `yaml:",inline"`
-	AdminPassword        string `yaml:"AdminPassword"`
-	OpenNMSPassword      string `yaml:"OpenNMSPassword"`
-	KeycloakPassword     string `yaml:"KeycloakPassword"`
-	InventoryPassword    string `yaml:"InventoryPassword"`
-	AlarmPassword        string `yaml:"AlarmPassword"`
-	NotificationPassword string `yaml:"NotificationPassword"`
-	GrafanaPassword      string `yaml:"GrafanaPassword"`
-	EventsPassword       string `yaml:"EventsPassword"`
-	DataChoicesPassword  string `yaml:"DataChoicesPassword"`
+	ServiceValues         `yaml:",inline"`
+	AdminPassword         string `yaml:"AdminPassword"`
+	OpenNMSPassword       string `yaml:"OpenNMSPassword"`
+	KeycloakPassword      string `yaml:"KeycloakPassword"`
+	InventoryPassword     string `yaml:"InventoryPassword"`
+	AlarmPassword         string `yaml:"AlarmPassword"`
+	NotificationPassword  string `yaml:"NotificationPassword"`
+	GrafanaPassword       string `yaml:"GrafanaPassword"`
+	EventsPassword        string `yaml:"EventsPassword"`
+	DataChoicesPassword   string `yaml:"DataChoicesPassword"`
+	MinionGatewayPassword string `yaml:"MinionGatewayPassword"`
 }

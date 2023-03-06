@@ -29,30 +29,27 @@
 package org.opennms.horizon.minion.flows.parser.transport;
 
 
-import static org.opennms.horizon.minion.flows.parser.flowmessage.SamplingAlgorithm.RANDOM_N_OUT_OF_N_SAMPLING;
-import static org.opennms.horizon.minion.flows.parser.flowmessage.SamplingAlgorithm.SYSTEMATIC_COUNT_BASED_SAMPLING;
-import static org.opennms.horizon.minion.flows.parser.flowmessage.SamplingAlgorithm.UNASSIGNED;
 import static org.opennms.horizon.minion.flows.parser.transport.MessageUtils.getLongValue;
 import static org.opennms.horizon.minion.flows.parser.transport.MessageUtils.getUInt32Value;
 import static org.opennms.horizon.minion.flows.parser.transport.MessageUtils.getUInt64Value;
 
 import java.net.InetAddress;
 
-import org.opennms.horizon.minion.flows.parser.flowmessage.Direction;
-import org.opennms.horizon.minion.flows.parser.flowmessage.FlowMessage;
 import org.opennms.horizon.minion.flows.parser.RecordEnrichment;
-import org.opennms.horizon.minion.flows.parser.flowmessage.NetflowVersion;
-import org.opennms.horizon.minion.flows.parser.flowmessage.SamplingAlgorithm;
 import org.opennms.horizon.minion.flows.parser.ie.Value;
+import org.opennms.dataplatform.flows.document.Direction;
+import org.opennms.dataplatform.flows.document.FlowDocument;
+import org.opennms.dataplatform.flows.document.NetflowVersion;
+import org.opennms.dataplatform.flows.document.SamplingAlgorithm;
 
+import lombok.NoArgsConstructor;
+
+@NoArgsConstructor
 public class Netflow5MessageBuilder implements MessageBuilder {
 
-    public Netflow5MessageBuilder() {
-    }
-
     @Override
-    public FlowMessage.Builder buildMessage(final Iterable<Value<?>> values, final RecordEnrichment enrichment) {
-        final FlowMessage.Builder builder = FlowMessage.newBuilder();
+    public FlowDocument.Builder buildMessage(final Iterable<Value<?>> values, final RecordEnrichment enrichment) {
+        final var builder = FlowDocument.newBuilder();
 
         Long unixSecs = null;
         Long unixNSecs = null;
@@ -88,14 +85,14 @@ public class Netflow5MessageBuilder implements MessageBuilder {
                     break;
                 case "@samplingAlgorithm":
                     Long saValue = getLongValue(value);
-                    SamplingAlgorithm samplingAlgorithm = UNASSIGNED;
+                    SamplingAlgorithm samplingAlgorithm = SamplingAlgorithm.UNASSIGNED;
                     if (saValue != null) {
                         switch (saValue.intValue()) {
                             case 1:
-                                samplingAlgorithm = SYSTEMATIC_COUNT_BASED_SAMPLING;
+                                samplingAlgorithm = SamplingAlgorithm.SYSTEMATIC_COUNT_BASED_SAMPLING;
                                 break;
                             case 2:
-                                samplingAlgorithm = RANDOM_N_OUT_OF_N_SAMPLING;
+                                samplingAlgorithm = SamplingAlgorithm.RANDOM_N_OUT_OF_N_SAMPLING;
                                 break;
                         }
                     }

@@ -7,6 +7,7 @@ fragment NodesTableParts on Query {
     monitoringLocationId
     ipInterfaces {
       ipAddress
+      snmpPrimary
     }
   }
 }
@@ -44,7 +45,13 @@ query ListMinionMetrics($instance: String!, $monitor: String!, $timeRange: Int!,
   ...MinionLatencyParts
 }
 
-query ListNodeMetrics($id: Long!, $monitor: String!, $instance: String!, $timeRange: Int!, $timeRangeUnit: TimeRangeUnit!) {
+query ListNodeMetrics(
+  $id: Long!
+  $monitor: String!
+  $instance: String!
+  $timeRange: Int!
+  $timeRangeUnit: TimeRangeUnit!
+) {
   ...NodeLatencyParts
   ...NodeStatusParts
 }

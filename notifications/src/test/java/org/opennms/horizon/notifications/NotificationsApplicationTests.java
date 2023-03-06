@@ -8,12 +8,14 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.core.env.Environment;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 
 @SpringBootTest(
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
     classes = NotificationsApplication.class)
 @TestPropertySource(locations = "classpath:application.yml")
+@ContextConfiguration(initializers = {SpringContextTestInitializer.class})
 class NotificationsApplicationTests {
 
     @Autowired

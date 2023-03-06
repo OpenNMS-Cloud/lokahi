@@ -23,7 +23,6 @@
         <mock-gateway.docker.image>${mock-gateway.docker.image.name}:${mock-gateway.docker.image.tag}</mock-gateway.docker.image>
         <mock-gateway.docker.image.name>opennms/horizon-stream-mock-minion-gateway</mock-gateway.docker.image.name>
         <mock-gateway.docker.image.tag>latest</mock-gateway.docker.image.tag>
-        <skipJib>false</skipJib>
     </properties>
 
     <dependencyManagement>
@@ -140,14 +139,14 @@
                 <executions>
                     <execution>
                         <id>build-docker-image</id>
-                        <phase>pre-integration-test</phase>
+                        <phase>install</phase>
                         <goals>
+                            <!-- Always dockerBuild - no need to push (at least for now) -->
                             <goal>dockerBuild</goal>
                         </goals>
                     </execution>
                 </executions>
                 <configuration>
-                    <skip>${skipJib}</skip>
                     <to>
                         <image>${mock-gateway.docker.image}</image>
                     </to>

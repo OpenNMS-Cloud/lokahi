@@ -27,6 +27,7 @@
         <feature>minion-flows</feature>
         <feature>azure-plugins</feature>
         <feature>node-scan-plugin</feature>
+        <feature>plugins-shell-commands</feature>
     </feature>
 
 

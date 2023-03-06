@@ -30,8 +30,8 @@ package org.opennms.horizon.minion.flows.parser.factory;
 
 import com.codahale.metrics.MetricRegistry;
 import org.opennms.horizon.minion.flows.listeners.Parser;
-import org.opennms.horizon.minion.flows.listeners.factory.TelemetryRegistry;
 import org.opennms.horizon.minion.flows.parser.Netflow9UdpParser;
+import org.opennms.horizon.minion.flows.parser.TelemetryRegistry;
 import org.opennms.horizon.shared.ipc.rpc.IpcIdentity;
 import org.opennms.sink.flows.contract.ParserConfig;
 
@@ -54,13 +54,20 @@ public class Netflow9UdpParserFactory implements ParserFactory {
     }
 
     @Override
-    public Class<? extends Parser> getBeanClass() {
+    public Class<? extends Parser> getParserClass() {
         return Netflow9UdpParser.class;
     }
 
     @Override
-    public Parser createBean(final ParserConfig parserConfig) {
-        final var dispatcher = telemetryRegistry.getDispatcher();
-        return new Netflow9UdpParser(parserConfig.getName(), parserConfig.getQueue().getName(), dispatcher, identity, dnsResolver, new MetricRegistry());
+    public Parser create(final ParserConfig parserConfig) {
+        final var dispatcher = this.telemetryRegistry.getDispatcher();
+
+        return new Netflow9UdpParser(
+            parserConfig.getName(),
+            dispatcher,
+            this.identity,
+            this.dnsResolver,
+            new MetricRegistry()
+        );
     }
 }

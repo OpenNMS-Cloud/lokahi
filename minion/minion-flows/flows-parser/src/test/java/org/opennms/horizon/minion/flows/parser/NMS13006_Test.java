@@ -43,7 +43,7 @@ import java.util.Optional;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.opennms.horizon.minion.flows.parser.flowmessage.FlowMessage;
+import org.opennms.dataplatform.flows.document.FlowDocument;
 import org.opennms.horizon.minion.flows.parser.ie.Value;
 import org.opennms.horizon.minion.flows.parser.ie.values.UnsignedValue;
 import org.opennms.horizon.minion.flows.parser.netflow9.proto.Header;
@@ -68,7 +68,7 @@ public class NMS13006_Test {
         record.add(new UnsignedValue("FIRST_SWITCHED", 2000));
         record.add(new UnsignedValue("LAST_SWITCHED", 3000));
         final Netflow9MessageBuilder builder = new Netflow9MessageBuilder();
-        final FlowMessage flowMessage = builder.buildMessage(record, enrichment).build();
+        final FlowDocument flowMessage = builder.buildMessage(record, enrichment).build();
 
         Assert.assertEquals(1001000L, flowMessage.getFirstSwitched().getValue());
         Assert.assertEquals(1002000L, flowMessage.getLastSwitched().getValue());
@@ -84,7 +84,7 @@ public class NMS13006_Test {
         record.add(new UnsignedValue("flowStartMilliseconds", 2001000));
         record.add(new UnsignedValue("flowEndMilliseconds", 2002000));
         final Netflow9MessageBuilder builder = new Netflow9MessageBuilder();
-        final FlowMessage flowMessage = builder.buildMessage(record, enrichment).build();
+        final FlowDocument flowMessage = builder.buildMessage(record, enrichment).build();
 
         Assert.assertEquals(2001000L, flowMessage.getFirstSwitched().getValue());
         Assert.assertEquals(2002000L, flowMessage.getLastSwitched().getValue());
@@ -114,7 +114,7 @@ public class NMS13006_Test {
 
                 packet.getRecords().forEach(r -> {
                         final Netflow9MessageBuilder builder = new Netflow9MessageBuilder();
-                        final FlowMessage flowMessage = builder.buildMessage(r, enrichment).build();
+                        final FlowDocument flowMessage = builder.buildMessage(r, enrichment).build();
 
                         assertTrue(flowMessage.hasFirstSwitched());
                         assertTrue(flowMessage.hasLastSwitched());

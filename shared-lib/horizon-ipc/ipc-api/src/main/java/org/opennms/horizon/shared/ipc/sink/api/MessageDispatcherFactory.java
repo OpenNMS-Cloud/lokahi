@@ -50,4 +50,6 @@ public interface MessageDispatcherFactory {
      * by the module's {@link AsyncPolicy}.
      */
     <S extends Message, T extends Message> AsyncDispatcher<S> createAsyncDispatcher(SinkModule<S, T> module);
+
+   // AsyncDispatcher<FlowDocumentLog> createAsyncDispatcher(org.opennms.horizon.minion.flows.parser.FlowSinkModule sink);
 }

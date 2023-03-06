@@ -155,6 +155,10 @@ spec:
             periodSeconds: 2
             successThreshold: 1
             timeoutSeconds: 1
+      {{- if .Values.Keycloak.PrivateRepoEnabled }}
+      imagePullSecrets:
+        - name: image-credentials
+      {{- end }}
       volumes:
         {{- if .Values.TLS.Enabled }}
         - name: keycloak-tls-certificates
@@ -165,4 +169,4 @@ spec:
         {{- end }}
         - name: realm-config
           configMap:
-            name: keycloak-realm-configmap
+            name: {{ .Values.Keycloak.ConfigmapName }}  

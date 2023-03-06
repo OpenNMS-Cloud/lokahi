@@ -15,37 +15,37 @@ limitations under the License.
 package template
 
 import (
-    "bytes"
-    "github.com/Masterminds/sprig/v3"
-    "github.com/OpenNMS-Cloud/opennms-operator/internal/model/values"
-    "text/template"
+	"bytes"
+	"github.com/Masterminds/sprig/v3"
+	"github.com/OpenNMS-Cloud/opennms-operator/internal/model/values"
+	"text/template"
 )
 
 var templater *template.Template
 
 func TemplateConfig(file string, values values.TemplateValues) (string, error) {
-    if templater == nil {
-        initTemplater()
-    }
-    tmpl, err := templater.Parse(file)
-    if err != nil {
-        return "", err
-    }
-    buffer := new(bytes.Buffer)
-    err = tmpl.Execute(buffer, values)
-    if err != nil {
-        return "", err
-    }
-    return buffer.String(), nil
+	if templater == nil {
+		initTemplater()
+	}
+	tmpl, err := templater.Parse(file)
+	if err != nil {
+		return "", err
+	}
+	buffer := new(bytes.Buffer)
+	err = tmpl.Execute(buffer, values)
+	if err != nil {
+		return "", err
+	}
+	return buffer.String(), nil
 }
 
 func initTemplater() {
-    templater = template.New("operator-templater")
-    funcMap := sprig.TxtFuncMap()
-    funcMap["lookup"] = emptyDict
-    templater.Funcs(funcMap)
+	templater = template.New("operator-templater")
+	funcMap := sprig.TxtFuncMap()
+	funcMap["lookup"] = emptyDict
+	templater.Funcs(funcMap)
 }
 
 func emptyDict(_ ...string) map[string]interface{} {
-    return map[string]interface{}{}
+	return map[string]interface{}{}
 }

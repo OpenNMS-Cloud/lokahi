@@ -25,7 +25,11 @@
             <artifactId>registration</artifactId>
             <version>${project.version}</version>
         </dependency>
-
+        <dependency>
+            <groupId>org.opennms.horizon.minion</groupId>
+            <artifactId>shell-commands</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <dependency>
             <groupId>org.opennms.horizon.minion</groupId>
             <artifactId>ipc-features</artifactId>

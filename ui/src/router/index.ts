@@ -1,8 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import Appliances from '@/containers/Appliances.vue'
-import { useWidgets, Widgets } from '@/composables/useWidgets' 
-
-const { setAvailableWidgets } = useWidgets()
+import NodeStatus from '@/containers/NodeStatus.vue'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -10,10 +8,12 @@ const router = createRouter({
     {
       path: '/',
       name: 'Appliances',
-      component: Appliances,
-      beforeEnter: () => {
-        setAvailableWidgets(Widgets.GEOMAP)
-      }
+      component: Appliances
+    },
+    {
+      path: '/dashboard', // Temporary route - will change to '/' once complete.
+      name: 'Dashboard',
+      component: () => import('@/containers/Dashboard.vue')
     },
     {
       path: '/graphs/:id',
@@ -24,9 +24,6 @@ const router = createRouter({
       path: '/map',
       name: 'Map',
       component: () => import('@/containers/Map.vue'),
-      beforeEnter: () => {
-        setAvailableWidgets(Widgets.DEVICES, Widgets.MINIONS)
-      },
       children: [
         {
           path: '',
@@ -61,12 +58,14 @@ const router = createRouter({
       component: () => import('@/containers/MonitoringPolicies.vue')
     },
     {
+      path: '/synthetic-transactions',
+      name: 'Synthetic Transactions',
+      component: () => import('@/containers/SyntheticTransactions.vue')
+    },
+    {
       path: '/node/:id',
       name: 'Node',
-      component: () => import('@/containers/NodeStatus.vue'),
-      beforeEnter: () => {
-        setAvailableWidgets(Widgets.TAGS)
-      }
+      component: NodeStatus
     },
     {
       path: '/:pathMatch(.*)*', // catch other paths and redirect

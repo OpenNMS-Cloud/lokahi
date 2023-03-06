@@ -71,7 +71,6 @@ import Save from '@featherds/icon/action/MarkComplete'
 import { ICondition } from '@/types/policies'
 import type { Ref } from 'vue'
 
-import { markRaw } from 'vue'
 const Icons = markRaw({
   Delete,
   EditMode,

@@ -6,7 +6,7 @@
           data-test="show-minions-btn"
           icon="Show Minions" 
           @click="appliancesStore.showMinionsTable"
-          v-if="!appliancesStore.minionsTableOpen && !widgetProps?.isWidget"
+          v-if="!appliancesStore.minionsTableOpen"
         >
           <FeatherIcon :icon="ChevronRight" />
         </FeatherButton>
@@ -14,7 +14,6 @@
       </div>
 
       <FeatherInput
-        v-if="!widgetProps?.isWidget"
         class="search" 
         v-model="searchValue" 
         label="Devices">
@@ -71,11 +70,8 @@ import ChevronRight from '@featherds/icon/navigation/ChevronRight'
 import { useAppliancesQueries } from '@/store/Queries/appliancesQueries'
 import { useAppliancesStore } from '@/store/Views/appliancesStore'
 import { ExtendedNode } from '@/types/node'
-import { WidgetProps } from '@/types'
 import { GraphProps } from '@/types/graphs'
 import { TimeRangeUnit } from '@/types/graphql'
-
-defineProps<{widgetProps?: WidgetProps}>()
 
 const appliancesStore = useAppliancesStore()
 const appliancesQueries = useAppliancesQueries()

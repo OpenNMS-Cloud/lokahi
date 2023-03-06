@@ -2,6 +2,7 @@ package org.opennms.horizon.notifications.kafka;
 
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.common.header.internals.RecordHeader;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -12,7 +13,9 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Captor;
 import org.opennms.horizon.notifications.NotificationsApplication;
+import org.opennms.horizon.notifications.SpringContextTestInitializer;
 import org.opennms.horizon.notifications.api.PagerDutyAPIImpl;
+import org.opennms.horizon.shared.constants.GrpcConstants;
 import org.opennms.horizon.shared.dto.event.AlarmDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,15 +31,18 @@ import org.springframework.kafka.test.EmbeddedKafkaBroker;
 import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.kafka.test.utils.KafkaTestUtils;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 
@@ -48,6 +54,7 @@ import static org.mockito.Mockito.verify;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
     classes = NotificationsApplication.class)
 @TestPropertySource(properties = "spring.kafka.bootstrap-servers=${spring.embedded.kafka.brokers}", locations = "classpath:application.yml")
+@ContextConfiguration(initializers = {SpringContextTestInitializer.class})
 @ActiveProfiles("test")
 class AlarmKafkaConsumerIntegrationTestNoConfig {
     private static final int KAFKA_TIMEOUT = 30000;
@@ -91,21 +98,25 @@ class AlarmKafkaConsumerIntegrationTestNoConfig {
     @Test
     void testProducingAlarmWithNoConfigSetup() {
         int id = 1234;
-        stringProducer.send(new ProducerRecord<>(alarmsTopic, String.format("{\"id\": %d, \"severity\":\"indeterminate\", \"logMessage\":\"hello\"}", id)));
+        String tenantId = "opennms-prime";
+        ProducerRecord producerRecord = new ProducerRecord<>(alarmsTopic, String.format("{\"id\": %d, \"severity\":\"indeterminate\", \"logMessage\":\"hello\"}", id));
+        producerRecord.headers().add(new RecordHeader(GrpcConstants.TENANT_ID_KEY, tenantId.getBytes(StandardCharsets.UTF_8)));
+
+        stringProducer.send(producerRecord);
         stringProducer.flush();
 
         verify(alarmKafkaConsumer, timeout(KAFKA_TIMEOUT).times(1))
-            .consume(alarmCaptor.capture());
+            .consume(alarmCaptor.capture(),any());
 
         AlarmDTO capturedAlarm = alarmCaptor.getValue();
         assertEquals(id, capturedAlarm.getId());
 
         // This is the call to the PagerDuty API, we won't get this far, as we will get an exception when we try
         // to get the token, as the config table hasn't been setup.
-        verify(restTemplate, timeout(HTTP_TIMEOUT).times(0)).exchange(ArgumentMatchers.any(URI.class),
+        verify(restTemplate, timeout(HTTP_TIMEOUT).times(0)).exchange(any(URI.class),
             ArgumentMatchers.eq(HttpMethod.POST),
-            ArgumentMatchers.any(HttpEntity.class),
-            ArgumentMatchers.any(Class.class));
+            any(HttpEntity.class),
+            any(Class.class));
     }
 
     @AfterAll

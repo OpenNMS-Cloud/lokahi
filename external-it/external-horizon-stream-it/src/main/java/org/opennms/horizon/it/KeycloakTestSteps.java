@@ -5,6 +5,7 @@ import io.cucumber.java.en.Then;
 import io.restassured.response.Response;
 import org.awaitility.Awaitility;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
+import org.jboss.resteasy.client.jaxrs.internal.ResteasyClientBuilderImpl;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.KeycloakBuilder;
 import org.keycloak.representations.AccessTokenResponse;
@@ -94,7 +95,7 @@ public class KeycloakTestSteps {
 //----------------------------------------
 
     private boolean commonLoginToKeycloak() throws NoSuchAlgorithmException, KeyManagementException {
-        ResteasyClientBuilder restClientBuilder = new ResteasyClientBuilder();
+        ResteasyClientBuilder restClientBuilder = new ResteasyClientBuilderImpl();
         restClientBuilder.disableTrustManager();
         SSLContext sslContext = SSLContext.getInstance("SSL");
         sslContext.init(null, new TestTrustManager[]{new TestTrustManager()}, new SecureRandom());

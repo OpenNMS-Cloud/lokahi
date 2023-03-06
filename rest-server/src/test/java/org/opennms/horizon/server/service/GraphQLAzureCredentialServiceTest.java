@@ -72,6 +72,7 @@ class GraphQLAzureCredentialServiceTest {
         azureCredentialDTO1 = AzureCredentialDTO.newBuilder()
             .setId(1L)
             .setLocation("Default")
+            .setName("name")
             .setTenantId("tenant-id")
             .setClientId("client-id")
             .setDirectoryId("directory-id")
@@ -96,14 +97,24 @@ class GraphQLAzureCredentialServiceTest {
             "    addAzureCredential( " +
             "        azureCredential: { " +
             "            location: \"Default\", " +
+            "            name: \"name\", " +
             "            clientId: \"client-id\", " +
             "            clientSecret: \"client-secret\", " +
             "            subscriptionId: \"subscription-id\", " +
             "            directoryId: \"directory-id\" " +
+            "            tags: [ " +
+            "                {" +
+            "                    name:\"tag-1\"" +
+            "                }," +
+            "                {" +
+            "                    name:\"tag-2\"" +
+            "                }" +
+            "            ] " +
             "        } " +
             "    ) { " +
             "        id, " +
             "        location, " +
+            "        name, " +
             "        tenantId, " +
             "        clientId, " +
             "        subscriptionId, " +
@@ -122,6 +133,7 @@ class GraphQLAzureCredentialServiceTest {
             .expectBody()
             .jsonPath("$.data.addAzureCredential.id").isEqualTo(azureCredentialDTO1.getId())
             .jsonPath("$.data.addAzureCredential.location").isEqualTo(azureCredentialDTO1.getLocation())
+            .jsonPath("$.data.addAzureCredential.name").isEqualTo(azureCredentialDTO1.getName())
             .jsonPath("$.data.addAzureCredential.tenantId").isEqualTo(azureCredentialDTO1.getTenantId())
             .jsonPath("$.data.addAzureCredential.clientId").isEqualTo(azureCredentialDTO1.getClientId())
             .jsonPath("$.data.addAzureCredential.subscriptionId").isEqualTo(azureCredentialDTO1.getSubscriptionId())

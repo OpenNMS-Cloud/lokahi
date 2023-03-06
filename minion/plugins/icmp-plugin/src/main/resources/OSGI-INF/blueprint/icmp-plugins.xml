@@ -31,4 +31,14 @@
     </service-properties>
   </service>
 
+    <bean id="pingScanManager" class="org.opennms.horizon.minion.icmp.PingScanManager">
+        <argument ref="pingerFactory"/>
+    </bean>
+
+    <service ref="pingScanManager" interface="org.opennms.horizon.minion.plugin.api.ScannerManager">
+        <service-properties>
+            <entry key="scanner.name" value="Discovery-Ping" />
+        </service-properties>
+    </service>
+
 </blueprint>

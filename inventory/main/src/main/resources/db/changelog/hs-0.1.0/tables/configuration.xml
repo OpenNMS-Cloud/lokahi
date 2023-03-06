@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+
+    <changeSet author="bjanssens" id="0.1.0-configuration">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="configuration"/>
+            </not>
+        </preConditions>
+
+        <createTable tableName="configuration">
+            <column name="id" type="BIGINT" autoIncrement="true"/>
+
+            <column name="tenant_id" type="text">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="key" type="text">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="location" type="text"/>
+
+            <column name="value" type="jsonb">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addPrimaryKey tableName="configuration" columnNames="id"
+                       constraintName="pk_configuration_id"/>
+
+        <addUniqueConstraint
+            columnNames="tenant_id, key"
+            constraintName="key_constraint"
+            tableName="configuration"
+        />
+
+    </changeSet>
+</databaseChangeLog>

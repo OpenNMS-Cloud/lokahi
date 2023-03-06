@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd
+		http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+
+    <changeSet author="jhutc" id="service_tenant_update">
+        <validCheckSum>ANY</validCheckSum>
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="service" />
+        </preConditions>
+
+        <dropColumn tableName="service" columnName="tenant_id"/>
+        <addColumn tableName="service">
+            <column name="tenant_id" type="text" defaultValue="opennms-prime">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+</databaseChangeLog>

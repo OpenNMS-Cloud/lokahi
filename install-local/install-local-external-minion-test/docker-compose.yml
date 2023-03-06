@@ -2,7 +2,12 @@ version: '3.5'
 
 services:
   minion-localnet:
-    image: docker.io/opennms/horizon-stream-minion:latest
+    image: ghcr.io/opennms-cloud/horizon-stream-minion:29c1f32202546062db3a02ee3e3a617bc79a2e7e
+    #image: docker.io/opennms/horizon-stream-minion:v0.0.27-dev
+    # If you have not downloaded latest, then use latest, but if you have it
+    # downloaded, use specific versions to trigger new download. See
+    # https://hub.docker.com/r/opennms/horizon-stream-minion/tags for recent
+    # tags.
     extra_hosts:
       minion.onmshs: 10.0.0.55
     environment:
@@ -11,36 +16,39 @@ services:
       MINION_LOCATION: 'minion-b-loc'
       USE_KUBERNETES: false
       IGNITE_SERVER_ADDRESSES: localhost
-      MINION_GATEWAY_HOST: minion.onmshs
-      MINION_GATEWAY_PORT: 8990
-      MINION_GATEWAY_TLS: false
-    volumes:
-      - ./grpc.cfg:/opt/karaf/etc/org.opennms.core.ipc.grpc.client.cfg
-      - ./id.cfg:/opt/karaf/etc/org.opennms.identity.cfg
+      MINION_GATEWAY_HOST: 2738fe58-fb1f-4598-b8c8-600b096a644e-i.btominion-prod.oaaslite.opennms.com
+      MINION_GATEWAY_PORT: 443
+      MINION_GATEWAY_TLS: 'true'
+        #MINION_GATEWAY_HOST: host.docker.internal
+        #      MINION_GATEWAY_PORT: 8990
+     # MINION_GATEWAY_TLS: false
     ports:
       - "8877:8877/udp" # netflow5
       - "4729:4729/udp" # netflow9
+      - "9999:9999/udp" # netflow
     networks:
       localnet:
         ipv4_address: 172.4.1.1
 
-  snmpd-temp-a:
-    image: polinux/snmpd
+  temp-a:
+    image: ehazlett/snmpd:latest-linux-arm64
+    volumes:
+      - "./snmpd.conf:/etc/snmp/snmpd.conf"
     networks:
       localnet:
         ipv4_address: 172.4.2.1
 
-  snmpd-temp-b:
-    image: polinux/snmpd
-    networks:
-      localnet:
-        ipv4_address: 172.4.2.2
-
-  snmpd-temp-c:
-    image: polinux/snmpd
-    networks:
-      localnet:
-        ipv4_address: 172.4.2.3
+#  temp-b:
+#    image: polinux/snmpd
+#    networks:
+#      localnet:
+#        ipv4_address: 172.4.2.2
+#
+#  temp-c:
+#    image: polinux/snmpd
+#    networks:
+#      localnet:
+#        ipv4_address: 172.4.2.3
 
 networks:
   localnet:

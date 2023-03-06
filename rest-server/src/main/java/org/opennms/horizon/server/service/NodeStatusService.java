@@ -30,6 +30,7 @@ package org.opennms.horizon.server.service;
 
 import io.leangen.graphql.execution.ResolutionEnvironment;
 import lombok.RequiredArgsConstructor;
+import org.opennms.horizon.inventory.dto.IpInterface;
 import org.opennms.horizon.inventory.dto.IpInterfaceDTO;
 import org.opennms.horizon.inventory.dto.NodeDTO;
 import org.opennms.horizon.server.model.TSResult;
@@ -37,6 +38,7 @@ import org.opennms.horizon.server.model.TimeRangeUnit;
 import org.opennms.horizon.server.model.TimeSeriesQueryResult;
 import org.opennms.horizon.server.model.status.NodeStatus;
 import org.opennms.horizon.server.service.grpc.InventoryClient;
+import org.opennms.horizon.server.service.metrics.TSDBMetricsService;
 import org.opennms.horizon.server.utils.ServerHeaderUtil;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
@@ -57,7 +59,7 @@ public class NodeStatusService {
     private static final String MONITOR_KEY = "monitor";
     private static final String INSTANCE_KEY = "instance";
     private final InventoryClient client;
-    private final PrometheusTSDBServiceImpl prometheusTSDBService;
+    private final TSDBMetricsService tsdbMetricsService;
     private final ServerHeaderUtil headerUtil;
 
     public Mono<NodeStatus> getNodeStatus(long id, String monitorType, ResolutionEnvironment env) {
@@ -65,10 +67,20 @@ public class NodeStatusService {
 
         if (node.getIpInterfacesCount() > 0) {
 
-            IpInterfaceDTO ipInterface = node.getIpInterfaces(0);
+            IpInterfaceDTO ipInterface = getPrimaryInterface(node);
             return getNodeStatusByInterface(id, monitorType, ipInterface, env);
         }
         return Mono.just(new NodeStatus(id, false));
+    }
+
+    private IpInterfaceDTO getPrimaryInterface(NodeDTO node) {
+        List<IpInterfaceDTO> ipInterfacesList = node.getIpInterfacesList();
+        for (IpInterfaceDTO ipInterface : ipInterfacesList) {
+            if (ipInterface.getSnmpPrimary()) {
+                return ipInterface;
+            }
+        }
+        return node.getIpInterfaces(0);
     }
 
     private Mono<NodeStatus> getNodeStatusByInterface(long id, String monitorType, IpInterfaceDTO ipInterface, ResolutionEnvironment env) {
@@ -112,7 +124,7 @@ public class NodeStatusService {
         labels.put(MONITOR_KEY, monitorType);
         labels.put(INSTANCE_KEY, ipAddress);
 
-        return prometheusTSDBService
+        return tsdbMetricsService
             .getMetric(env, RESPONSE_TIME_METRIC, labels, TIME_RANGE_IN_SECONDS, TimeRangeUnit.SECOND);
     }
 }

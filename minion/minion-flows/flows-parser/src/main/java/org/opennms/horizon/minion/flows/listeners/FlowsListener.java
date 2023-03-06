@@ -37,9 +37,7 @@ import java.util.Collection;
  *
  * @author jwhite
  */
-public interface FlowsListener extends org.opennms.horizon.minion.plugin.api.Listener{
+public interface FlowsListener extends org.opennms.horizon.minion.plugin.api.Listener {
     String getName();
     String getDescription();
-
-    Collection<Parser> getParsers();
 }

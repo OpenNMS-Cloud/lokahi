@@ -19,14 +19,26 @@
         <java.version>17</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <sonar.organization>opennms</sonar.organization>
-        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+
+        <skipITs>false</skipITs>
+
+        <!-- DT = Developer (Manual) Test; do not automatically execute during builds -->
+        <skipDTs>true</skipDTs>
 
         <!-- Jib properties -->
+        <application.jib.defaultGoal>dockerBuild</application.jib.defaultGoal> <!-- dockerBuild for local only; build to push also -->
+        <application.docker.skip>false</application.docker.skip>
         <application.docker.image>${application.docker.image.name}:${application.docker.image.tag}</application.docker.image>
-        <!-- application.docker.image.name MUST be set by child modules that use Jib. -->
+        <!-- application.docker.image.name MUST be set by child modules that use jib-maven-plugin. -->
         <application.docker.image.name>INVALID</application.docker.image.name>
         <application.docker.image.tag>latest</application.docker.image.tag>
+
+        <!-- Sonar properties -->
+        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+        <sonar.organization>opennms</sonar.organization>
+        <sonar.moduleKey>${project.artifactId}</sonar.moduleKey>
+        <!-- sonar.projectKey MUST be set by child modules that use sonar-maven-plugin. -->
+        <sonar.projectKey/>
 
         <!-- Dependency properties -->
         <dropwizard.metrics.version>4.2.10</dropwizard.metrics.version>
@@ -82,9 +94,10 @@
         <jsr250.version>1.0</jsr250.version>
         <jsr305.version>3.0.2</jsr305.version>
         <karaf.version>4.4.2</karaf.version>
-        <keycloak.version>18.0.0</keycloak.version>
+        <karaf.maven-plugin.version>${karaf.version}</karaf.maven-plugin.version> <!-- use separate property in case a need to separate from the base Karaf version arises -->
+        <keycloak.version>20.0.3</keycloak.version>
         <liquibaseVersion>4.17.0</liquibaseVersion>
-        <log4j2.version>2.17.1</log4j2.version>
+        <log4j2.version>2.19.0</log4j2.version>
         <mapstruct.version>1.5.3.Final</mapstruct.version>
         <maven-resources.version>3.3.0</maven-resources.version>
         <mina.version>2.1.5</mina.version>
@@ -110,13 +123,14 @@
         <spring-boot.version>3.0.1</spring-boot.version>
         <spring-security.version>6.0.1</spring-security.version>
         <spring-kafka.version>3.0.1</spring-kafka.version>
+        <sonar-maven.version>3.9.1.2184</sonar-maven.version>
         <swagger.version>2.1.1</swagger.version>
         <lombok.version>1.18.24</lombok.version>
         <lombok.binding.version>0.2.0</lombok.binding.version>
         <zjsonpatch.version>0.4.12</zjsonpatch.version>
         <mockito.version>4.8.0</mockito.version>
         <jupiter.version>5.9.0</jupiter.version>
-        <jib.version>3.2.1</jib.version>
+        <jib.version>3.3.1</jib.version>
         <surefire.version>3.0.0-M7</surefire.version>
         <failsafe.version>3.0.0-M7</failsafe.version>
         <zjsonpatch.version>0.4.12</zjsonpatch.version>
@@ -130,6 +144,11 @@
         <maven-compiler-plugin.version>3.10.1</maven-compiler-plugin.version>
         <protobuf-maven-plugin.version>0.6.1</protobuf-maven-plugin.version>
         <os-maven-plugin.version>1.6.2</os-maven-plugin.version>
+        <flows.gateway.grpc.version>LATEST</flows.gateway.grpc.version>
+        <jayway-awaitility.version>1.7.0</jayway-awaitility.version>
+        <awaitility.version>4.2.0</awaitility.version>
+        <commons-csv.version>1.9.0</commons-csv.version>
+        <jmh.version>1.33</jmh.version>
     </properties>
 
     <dependencyManagement>
@@ -193,6 +212,11 @@
                 <groupId>com.helger</groupId>
                 <artifactId>dhcp4java</artifactId>
                 <version>${dhcp4java.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.jayway.awaitility</groupId>
+                <artifactId>awaitility</artifactId>
+                <version>${jayway-awaitility.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.swrve</groupId>
@@ -697,6 +721,11 @@
             </dependency>
             <dependency>
                 <groupId>io.cucumber</groupId>
+                <artifactId>cucumber-junit-platform-engine</artifactId>
+                <version>${cucumber.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.cucumber</groupId>
                 <artifactId>cucumber-junit</artifactId>
                 <version>${cucumber.version}</version>
             </dependency>
@@ -754,6 +783,12 @@
                 <artifactId>mockito-core</artifactId>
                 <version>${mockito.version}</version>
                 <scope>test</scope> <!-- TODO: do not specify scope in dependencyManagement in case a project wants to use a different scope -->
+            </dependency>
+            <dependency>
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-junit-jupiter</artifactId>
+                <version>${mockito.version}</version>
+                <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>org.opennms</groupId>
@@ -921,12 +956,90 @@
                     <artifactId>jib-maven-plugin</artifactId>
                     <version>${jib.version}</version>
                     <configuration>
+                        <from>
+                            <!-- Make sure to use the hash of the manifest list (multi-arch) vs the hash of a particular manifest (single-arch) when updating
+                                 See https://github.com/docker/roadmap/issues/262#issuecomment-1161515179 for an example on how to do this -->
+                            <image>eclipse-temurin:17-jre@sha256:c61c6a48364d05ea89504489aecddd8af8c32dba6df2257da4131fe244284f50</image>
+                        </from>
+                        <!--suppress MavenModelInspection -->
+                        <skip>${application.docker.skip}</skip>
                         <to>
                             <image>${application.docker.image}</image>
                         </to>
                     </configuration>
                 </plugin>
+                <plugin>
+                    <groupId>org.sonarsource.scanner.maven</groupId>
+                    <artifactId>sonar-maven-plugin</artifactId>
+                    <version>${sonar-maven.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.karaf.tooling</groupId>
+                    <artifactId>karaf-maven-plugin</artifactId>
+                    <version>${karaf.maven-plugin.version}</version>
+                </plugin>
 
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-failsafe-plugin</artifactId>
+                    <version>${failsafe.version}</version>
+                    <executions>
+                        <execution>
+                            <id>horizon-integration-test</id>
+                            <goals>
+                                <goal>integration-test</goal>
+                            </goals>
+                            <phase>integration-test</phase>
+                            <configuration>
+                                <skipITs>${skipITs}</skipITs>
+                                <excludes>
+                                    <exclude>none</exclude>
+                                </excludes>
+                                <includes>
+                                    <include>**/*IT.java</include>
+                                </includes>
+                            </configuration>
+                        </execution>
+
+                        <execution>
+                            <id>horizon-developer-test</id>
+                            <goals>
+                                <goal>integration-test</goal>
+                            </goals>
+                            <phase>integration-test</phase>
+                            <configuration>
+                                <skipITs>${skipDTs}</skipITs>
+                                <excludes>
+                                    <exclude>**/*IT.java</exclude>
+                                </excludes>
+                                <includes>
+                                    <include>**/*DT.java</include>
+                                </includes>
+                                <argLine>--add-opens=jdk.management/com.sun.management.internal=ALL-UNNAMED
+                                    --add-opens=java.base/jdk.internal.misc=ALL-UNNAMED
+                                    --add-opens=java.base/sun.nio.ch=ALL-UNNAMED
+                                    --add-opens=java.management/com.sun.jmx.mbeanserver=ALL-UNNAMED
+                                    --add-opens=jdk.internal.jvmstat/sun.jvmstat.monitor=ALL-UNNAMED
+                                    --add-opens=java.base/sun.reflect.generics.reflectiveObjects=ALL-UNNAMED
+                                    --add-opens=java.base/java.io=ALL-UNNAMED
+                                    --add-opens=java.base/java.nio=ALL-UNNAMED
+                                    --add-opens=java.base/java.util=ALL-UNNAMED
+                                    --add-opens=java.base/java.lang=ALL-UNNAMED
+                                    --add-opens=java.base/java.util.concurrent=ALL-UNNAMED
+                                </argLine>
+                            </configuration>
+                        </execution>
+
+                        <!-- Fail the build on IT Failures.  Executed as a separate step so that post-integration-test -->
+                        <!--  phase executes even after an IT failure.                                                 -->
+                        <execution>
+                            <id>horizon-verify-it</id>
+                            <goals>
+                                <goal>verify</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
             </plugins>
         </pluginManagement>
     </build>
@@ -961,6 +1074,31 @@
                     </plugin>
                 </plugins>
             </build>
+        </profile>
+
+        <!-- rapid-build PROFILE to speed up local development at the cost of reduced testing/validations -->
+        <profile>
+            <id>rapid-build</id>
+            <activation>
+                <file>
+                    <exists>${user.home}/.OPENNMS-RAPID-BUILD</exists>
+                </file>
+            </activation>
+            <properties>
+                <skipITs>true</skipITs>
+                <features.verify.skip>true</features.verify.skip> <!-- built-in property of karaf-maven-plugin -->
+            </properties>
+        </profile>
+
+        <profile>
+            <id>cicd</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <properties>
+                <!-- Build AND push the built image -->
+                <application.jib.defaultGoal>build</application.jib.defaultGoal>
+            </properties>
         </profile>
     </profiles>
 

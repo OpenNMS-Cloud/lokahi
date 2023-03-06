@@ -28,14 +28,15 @@
 
 package org.opennms.horizon.server.model;
 
-import java.util.List;
-
 import lombok.Getter;
 import lombok.Setter;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
 public class TSData {
     private String resultType;
-    List<TSResult> result;
+    List<TSResult> result = new ArrayList<>();
 }

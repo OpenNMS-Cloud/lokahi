@@ -2,20 +2,16 @@
 
 package org.opennms.horizon.minion.plugin.api;
 
+import org.opennms.horizon.shared.utils.InetAddressUtils;
+
 import java.net.Inet6Address;
 import java.net.InetAddress;
-import java.util.Collections;
 import java.util.Map;
 import java.util.Properties;
 import java.util.function.Supplier;
-import org.opennms.horizon.shared.utils.InetAddressUtils;
 
 public abstract class AbstractServiceMonitor implements ServiceMonitor {
 
-    @Override
-    public Map<String, Object> getRuntimeAttributes(MonitoredService svc, Map<String, Object> parameters) {
-        return Collections.emptyMap();
-    }
 
     @Override
     public String getEffectiveLocation(String location) {

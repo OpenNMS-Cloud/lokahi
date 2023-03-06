@@ -42,9 +42,6 @@ import io.grpc.stub.MetadataUtils;
 import io.grpc.stub.StreamObserver;
 import io.restassured.config.HttpClientConfig;
 import io.restassured.config.RestAssuredConfig;
-import io.restassured.internal.util.IOUtils;
-import io.restassured.path.json.JsonPath;
-import io.restassured.response.Response;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.opennms.cloud.grpc.minion.CloudServiceGrpc;
 import org.opennms.cloud.grpc.minion.CloudToMinionMessage;
@@ -65,16 +62,15 @@ import org.opennms.taskset.contract.MonitorResponse;
 import org.opennms.taskset.contract.MonitorType;
 import org.opennms.taskset.contract.TaskDefinition;
 import org.opennms.taskset.contract.TaskResult;
-import org.opennms.taskset.contract.TaskSet;
 import org.opennms.taskset.contract.TaskSetResults;
-import org.opennms.taskset.service.contract.PublishTaskSetRequest;
-import org.opennms.taskset.service.contract.PublishTaskSetResponse;
+import org.opennms.taskset.service.contract.AddSingleTaskOp;
 import org.opennms.taskset.service.contract.TaskSetServiceGrpc;
+import org.opennms.taskset.service.contract.UpdateSingleTaskOp;
+import org.opennms.taskset.service.contract.UpdateTasksRequest;
+import org.opennms.taskset.service.contract.UpdateTasksResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
@@ -142,7 +138,7 @@ public class MinionGatewayTestSteps {
     private RpcRequestProto.Builder rpcRequestProtoBuilder;
     private RpcResponseProto rpcResponseProto;
     private Exception rpcException;
-    private PublishTaskSetResponse publishTaskSetResponse;
+    private UpdateTasksResponse updateTasksResponse;
 
     private ConsumerRecord<String, byte[]> matchedKafkaRecord;
 
@@ -593,28 +589,32 @@ public class MinionGatewayTestSteps {
                     .setId("x-task-id-x")
                     .build();
 
-            TaskSet taskSet =
-                TaskSet.newBuilder()
-                    .addTaskDefinition(taskDefinition)
+            AddSingleTaskOp addSingleTaskOp =
+                AddSingleTaskOp.newBuilder()
+                    .setTaskDefinition(taskDefinition)
                     .build();
 
-            PublishTaskSetRequest publishTaskSetRequest =
-                PublishTaskSetRequest.newBuilder()
-                    .setTaskSet(taskSet)
-                    .setLocation("x-location-001-x")
+            UpdateSingleTaskOp updateSingleTaskOp =
+                UpdateSingleTaskOp.newBuilder()
+                    .setAddTask(addSingleTaskOp)
+                    .build();
+
+            UpdateTasksRequest updateTasksRequest =
+                UpdateTasksRequest.newBuilder()
+                    .addUpdate(updateSingleTaskOp)
                     .build();
 
             rpcException = null;
             try {
-                ListenableFuture<PublishTaskSetResponse> future =
+                ListenableFuture<UpdateTasksResponse> future =
                     taskSetServiceStub
                         .withInterceptors(
                             prepareGrpcHeaderInterceptor()
                         )
-                        .publishTaskSet(publishTaskSetRequest)
+                    .updateTasks(updateTasksRequest)
                 ;
 
-                publishTaskSetResponse = future.get(timeout, TimeUnit.MILLISECONDS);
+                updateTasksResponse = future.get(timeout, TimeUnit.MILLISECONDS);
             } catch (Exception exc) {
                 rpcException = exc;
             }

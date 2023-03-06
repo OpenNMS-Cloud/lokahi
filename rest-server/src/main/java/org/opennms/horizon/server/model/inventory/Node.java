@@ -39,12 +39,14 @@ public class Node {
     private long id;
     private String tenantId;
     private String nodeLabel;
+    private String scanType;
     private long createTime;
     private long monitoringLocationId;
     private List<IpInterface> ipInterfaces;
+    private List<SnmpInterface> snmpInterfaces;
     private String objectId;
     private String systemName;
-    private String systemDesc;
+    private String systemDescr;
     private String systemLocation;
     private String systemContact;
 }

@@ -7,8 +7,7 @@ interface Anchor {
   locationLink?: string
   managementIpValue?: string
   managementIpLink?: string
-  tagValue?: number | string
-  tagLink?: string
+  tagValue?: array
 }
 
 interface NodeContent {

@@ -1,8 +1,8 @@
 package org.opennms.miniongateway.taskset;
 
-import org.apache.ignite.Ignite;
-import org.opennms.taskset.service.api.TaskSetForwarder;
-import org.opennms.taskset.service.api.TaskSetPublisher;
+import org.opennms.miniongateway.grpc.twin.GrpcTwinPublisher;
+import org.opennms.miniongateway.taskset.service.TaskSetStorage;
+import org.opennms.miniongateway.taskset.service.TaskSetStorageListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -10,33 +10,19 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class TaskSetServiceConfig {
 
-    private TaskSetPublisherImpl taskSetService = new TaskSetPublisherImpl();
+    @Autowired
+    private TaskSetStorage taskSetStorage;
 
-    @Bean("taskSetPublisher")
-    public TaskSetPublisher taskSetPublisher() {
-        return taskSetService;
-    }
+    private TaskSetStorageListener taskSetStorageListener;
 
-    @Bean("taskSetForwarder")
-    public TaskSetForwarder taskSetForwarder() {
-        return taskSetService;
-    }
+    @Bean
+    public TaskSetPublisher taskSetService(GrpcTwinPublisher publisher) {
+        TaskSetPublisher result = new TaskSetPublisherImpl(publisher);
 
-    @Bean("taskSetIgniteReceiverService")
-    public TaskSetIgniteReceiverService
-    taskSetIgniteReceiverService(
-        @Autowired Ignite ignite,
-        @Autowired TaskSetPublisher taskSetPublisher
-    ) {
-        return new TaskSetIgniteReceiverService(ignite, taskSetPublisher);
-    }
+        // Wire the publisher to listen for updates from the Task Set Storage
+        taskSetStorageListener = result::publishTaskSet;
+        taskSetStorage.addAllTwinPublisherSessionListener(taskSetStorageListener);
 
-    @Bean(initMethod = "start")
-    public TaskSetIgniteReceiverServiceLifecycleManager
-    taskSetIgniteReceiverServiceLifecycleManager(
-        @Autowired Ignite ignite,
-        @Autowired TaskSetIgniteReceiverService taskSetIgniteReceiverService
-    ) {
-        return new TaskSetIgniteReceiverServiceLifecycleManager(ignite, taskSetIgniteReceiverService);
+        return result;
     }
 }

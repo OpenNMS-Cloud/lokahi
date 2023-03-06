@@ -1,0 +1,94 @@
+/*******************************************************************************
+ * This file is part of OpenNMS(R).
+ *
+ * Copyright (C) 2022 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
+ *
+ * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *
+ * OpenNMS(R) is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published
+ * by the Free Software Foundation, either version 3 of the License,
+ * or (at your option) any later version.
+ *
+ * OpenNMS(R) is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with OpenNMS(R).  If not, see:
+ *      http://www.gnu.org/licenses/
+ *
+ * For more information contact:
+ *     OpenNMS(R) Licensing <license@opennms.org>
+ *     http://www.opennms.org/
+ *     http://www.opennms.com/
+ *******************************************************************************/
+syntax = "proto3";
+
+import "google/protobuf/empty.proto";
+import "google/protobuf/wrappers.proto";
+
+package opennms.inventory;
+option java_multiple_files = true;
+option java_package = "org.opennms.horizon.inventory.dto";
+
+message TagDTO {
+  int64 id = 1;
+  string tenant_id = 2;
+  string name = 3;
+}
+
+message TagListDTO {
+  repeated TagDTO tags = 1;
+}
+
+message TagCreateListDTO {
+  oneof id {
+    int64 node_id = 1;
+    int64 azure_credential_id = 2;
+  }
+  repeated TagCreateDTO tags = 3;
+}
+
+message TagCreateDTO {
+  string name = 1;
+}
+
+message TagRemoveListDTO {
+  oneof id {
+    int64 node_id = 1;
+    int64 azure_credential_id = 2;
+  }
+  repeated google.protobuf.Int64Value tag_ids = 3;
+}
+
+message ListTagsByEntityIdParamsDTO {
+  oneof id {
+    int64 node_id = 1;
+    int64 azure_credential_id = 2;
+  }
+  optional TagListParamsDTO params = 3;
+}
+
+message ListAllTagsParamsDTO {
+  optional TagListParamsDTO params = 1;
+}
+
+message TagListParamsDTO {
+  optional string searchTerm = 1;
+  // may require pagination fields or other common list params
+}
+
+message DeleteTagsDTO {
+  repeated google.protobuf.Int64Value tag_ids = 1;
+}
+
+service TagService {
+  rpc addTags(TagCreateListDTO) returns (TagListDTO) {};
+  rpc removeTags(TagRemoveListDTO) returns (google.protobuf.BoolValue) {};
+  rpc getTagsByEntityId(ListTagsByEntityIdParamsDTO) returns (TagListDTO) {};
+  rpc getTags(ListAllTagsParamsDTO) returns (TagListDTO) {};
+  rpc deleteTags(DeleteTagsDTO) returns (google.protobuf.BoolValue) {};
+}

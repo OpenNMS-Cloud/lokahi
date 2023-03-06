@@ -47,13 +47,31 @@
     </li>
     <!-- Tagging -->
     <li>
-      <InventoryTagManagerCtrl data-test="tag-manager-ctrl" /> 
+      <InventoryTagManagerCtrl data-test="tag-manager-ctrl" />
     </li>
     <!-- Sort/A-Z -->
-    <li @click="onSort" class="action-btn" data-test="sort-btn"><Icon :icon="sortIcon" /></li>
-    <li @click="onSortAlpha" class="action-btn" data-test="sort-alpha-btn" ><Icon :icon="sortAlphaIcon" /></li>
+    <li
+      @click="onSort"
+      class="action-btn"
+      data-test="sort-btn"
+    >
+      <Icon :icon="sortIcon" />
+    </li>
+    <li
+      @click="onSortAlpha"
+      class="action-btn"
+      data-test="sort-alpha-btn"
+    >
+      <Icon :icon="sortAlphaIcon" />
+    </li>
     <!-- Expand/Collapse -->
-    <li @click="inventoryStore.toggleFilter" :data-test="expandCollapseBtn" class="action-btn"><Icon :icon="expandCollapse" /></li>
+    <li
+      @click="inventoryStore.toggleFilter"
+      :data-test="expandCollapseBtn"
+      class="action-btn"
+    >
+      <Icon :icon="expandCollapse" />
+    </li>
   </ul>
   <InventoryTagManager />
 </template>
@@ -87,7 +105,8 @@ const search = {
           _text: x
         }))
       search.loading = false
-    }, 500)}
+    }, 500)
+  }
 }
 
 // Node Type
@@ -167,13 +186,13 @@ const onSort = () => null
 const sortIcon: IIcon = {
   image: Sort,
   title: 'Sort',
-  size: '2rem'
+  size: 2
 }
 const onSortAlpha = () => null
 const sortAlphaIcon: IIcon = {
   image: SortByAlpha,
   title: 'Sort Alpha',
-  size: '2rem'
+  size: 2
 }
 
 // Expand/Collapse
@@ -181,22 +200,23 @@ const expandCollapseBtn = ref('expand-btn')
 const expandIcon: IIcon = {
   image: KeyboardDoubleArrowDown,
   title: 'Expand',
-  size: '2rem'
+  size: 2
 }
 const collapseIcon: IIcon = {
   image: KeyboardDoubleArrowUp,
   title: 'Collapse',
-  size: '2rem'
+  size: 2
 }
-const expandCollapse = ref(computed<IIcon>(() => {
-  expandCollapseBtn.value = inventoryStore.isFilterOpen ? 'collapse-btn' : 'expand-btn'
-  return inventoryStore.isFilterOpen ? collapseIcon : expandIcon
-}))
-
+const expandCollapse = ref(
+  computed<IIcon>(() => {
+    expandCollapseBtn.value = inventoryStore.isFilterOpen ? 'collapse-btn' : 'expand-btn'
+    return inventoryStore.isFilterOpen ? collapseIcon : expandIcon
+  })
+)
 </script>
 
 <style lang="scss" scoped>
-@use "@featherds/styles/themes/variables";
+@use '@featherds/styles/themes/variables';
 
 .filter-container {
   margin: var(variables.$spacing-l) 0;

@@ -262,11 +262,6 @@ public class TcpListener implements GracefulShutdownListener, FlowsListener {
         return String.format("TCP %s:%s", this.host != null ? this.host : "*", this.port);
     }
 
-    @Override
-    public Collection<Parser> getParsers() {
-        return Collections.singleton(this.parser);
-    }
-
     public String getHost() {
         return this.host;
     }

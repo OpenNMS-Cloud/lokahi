@@ -44,7 +44,9 @@ import org.opennms.horizon.alarmservice.testcontainers.TestContainerRunnerClassR
 @RunWith(Cucumber.class)
 @CucumberOptions(
     glue = {"org.opennms.horizon.alarmservice.stepdefs"},
-    plugin = {"json:target/cucumber-report.json", "html:target/cucumber.html", "pretty"}
+    plugin = {"json:target/cucumber-report.json", "html:target/cucumber.html", "pretty"},
+    objectFactory = io.cucumber.picocontainer.PicoFactory.class,
+    features = "classpath:org/opennms/horizon/alarmservice"
 )
 public class CucumberRunnerIT {
 

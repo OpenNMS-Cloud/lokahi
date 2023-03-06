@@ -28,7 +28,9 @@
 
 package org.opennms.horizon.dockerit.testcontainers;
 
-import com.github.dockerjava.api.command.CreateContainerCmd;
+import java.time.Duration;
+import java.util.List;
+
 import org.junit.rules.ExternalResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,7 +39,9 @@ import org.testcontainers.containers.Network;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.utility.DockerImageName;
 
-import java.time.Duration;
+import com.github.dockerjava.api.command.CreateContainerCmd;
+import com.github.dockerjava.api.model.ExposedPort;
+import com.github.dockerjava.api.model.InternetProtocol;
 
 @SuppressWarnings("rawtypes")
 public class TestContainerRunnerClassRule extends ExternalResource {
@@ -50,6 +54,8 @@ public class TestContainerRunnerClassRule extends ExternalResource {
 
     private GenericContainer mockMinionGatewayContainer;
     private GenericContainer applicationContainer;
+    private static final int UDP_NETFLOW5_PORT = 8877;
+    private static final int UDP_NETFLOW9_PORT = 4729;
 
     private Network network;
 
@@ -69,7 +75,7 @@ public class TestContainerRunnerClassRule extends ExternalResource {
     protected void before() throws Throwable {
         network =
             Network.newNetwork()
-            ;
+        ;
 
         LOG.info("USING TEST DOCKER NETWORK {}", network.getId());
 
@@ -93,40 +99,52 @@ public class TestContainerRunnerClassRule extends ExternalResource {
             .withNetwork(network)
             .withNetworkAliases("minion-gateway")
             .withExposedPorts(8080)
-            .withLogConsumer(new Slf4jLogConsumer(LOG).withPrefix("MOCK-MINION-GATEWAY"))
-        ;
-
+            .withLogConsumer(new Slf4jLogConsumer(LOG).withPrefix("MOCK-MINION-GATEWAY"));
     }
 
     private void startApplicationContainer() {
         applicationContainer
-            .withCreateContainerCmdModifier(cmd -> ((CreateContainerCmd) cmd).withHostName("test-minion-001")) // Why is the cast necessary?
+            .withExposedPorts(8101, 8181, 5005)
+            .withCreateContainerCmdModifier(cmd -> {
+                ((CreateContainerCmd) cmd).withHostName("test-minion-001");
+            })
             .withNetwork(network)
             .withNetworkAliases("application", "application-host")
             .dependsOn(mockMinionGatewayContainer)
-            .withExposedPorts(8101, 8181, 5005)
             .withStartupTimeout(Duration.ofMinutes(5))
             .withEnv("JAVA_TOOL_OPTIONS", "-Djava.security.egd=file:/dev/./urandom -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005")
             .withEnv("MINION_LOCATION", "Default")
             .withEnv("USE_KUBERNETES", "false")
-            .withLogConsumer(new Slf4jLogConsumer(LOG).withPrefix("APPLICATION"))
-            ;
+            .withLogConsumer(new Slf4jLogConsumer(LOG).withPrefix("APPLICATION"));
 
         // DEBUGGING: uncomment to force local port 5005
-        // applicationContainer.getPortBindings().add("5005:5005");
+        applicationContainer.getPortBindings().add("5005:5005");
+        applicationContainer.getPortBindings().addAll(List.of(ExposedPort.udp(UDP_NETFLOW5_PORT).toString(), ExposedPort.udp(UDP_NETFLOW9_PORT).toString()));
         applicationContainer.start();
 
         var karafHttpPort = applicationContainer.getMappedPort(8181); // application-http-port
+        var netflow5ListenerPort = getUdpPortBinding(UDP_NETFLOW5_PORT);
+        var netflow9ListenerPort = getUdpPortBinding(UDP_NETFLOW9_PORT);
         var debuggerPort = applicationContainer.getMappedPort(5005);
         var mockMinionGatewayHttpPort = mockMinionGatewayContainer.getMappedPort(8080);
 
-        LOG.info("APPLICATION MAPPED PORTS: http={}; mock-minion-gateway-http-port={}; debugger={}",
+        LOG.info("APPLICATION MAPPED PORTS: http={}; mock-minion-gateway-http-port={}; netflow 5 listener port={}; " +
+                "netflow 9 listener port={}, debugger={}",
             karafHttpPort,
             mockMinionGatewayHttpPort,
+            netflow5ListenerPort,
+            netflow9ListenerPort,
             debuggerPort
-            );
+        );
 
         System.setProperty("application.base-url", "http://localhost:" + karafHttpPort);
+        System.setProperty("application.host-name", "localhost");
+        System.setProperty("netflow-5-listener-port", netflow5ListenerPort);
+        System.setProperty("netflow-9-listener-port", netflow9ListenerPort);
         System.setProperty("mock-miniongateway.base-url", "http://localhost:" + mockMinionGatewayHttpPort);
+    }
+
+    private String getUdpPortBinding(int portNumber) {
+        return applicationContainer.getContainerInfo().getNetworkSettings().getPorts().getBindings().get(new ExposedPort(portNumber, InternetProtocol.UDP))[1].getHostPortSpec();
     }
 }

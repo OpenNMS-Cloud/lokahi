@@ -21,11 +21,9 @@
     <packaging>pom</packaging>
 
     <properties>
-        <skip-docker-image-build>true</skip-docker-image-build>
         <application.docker.image.name>opennms/horizon-stream-minion-gateway</application.docker.image.name>
-        <application.docker.image.skipPush>false</application.docker.image.skipPush>
         <docker.it.network>rest-server-it-network</docker.it.network>
-        <skipITs>false</skipITs>
+        <sonar.projectKey>opennms_horizon-stream_minion-gateway</sonar.projectKey>
     </properties>
 
     <modules>
@@ -60,16 +58,6 @@
                                 <version>${lombok.binding.version}</version>
                             </path>
                         </annotationProcessorPaths>
-                    </configuration>
-                </plugin>
-                <plugin>
-                    <groupId>com.google.cloud.tools</groupId>
-                    <artifactId>jib-maven-plugin</artifactId>
-                    <configuration>
-                        <!-- jib-maven-plugin needs to be executed only on specific submodules.
-                             This disables jib by default, which allows you to run jib goals on this parent pom without
-                             specifying a submodule. Set skip=false on submodules that need jib. -->
-                        <skip>true</skip>
                     </configuration>
                 </plugin>
             </plugins>

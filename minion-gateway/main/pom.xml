@@ -27,10 +27,6 @@
         </dependencies>
     </dependencyManagement>
 
-    <properties>
-        <skipJib>false</skipJib>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>org.opennms.horizon.minion.gateway</groupId>
@@ -60,6 +56,11 @@
         <dependency>
             <groupId>org.opennms.horizon.shared</groupId>
             <artifactId>ignite-tasks</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.opennms.horizon.shared</groupId>
+            <artifactId>flows</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -99,6 +100,10 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-jdbc</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
         <dependency>
@@ -121,6 +126,18 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
         </dependency>
 
         <dependency>
@@ -160,7 +177,8 @@
                 <groupId>com.google.cloud.tools</groupId>
                 <artifactId>jib-maven-plugin</artifactId>
                 <configuration>
-                    <skip>${skipJib}</skip>
+                    <!--suppress MavenModelInspection -->
+                    <skip>${application.docker.skip}</skip>
                     <container>
                         <jvmFlags>
                             <jvmFlag>--add-opens=jdk.management/com.sun.management.internal=ALL-UNNAMED</jvmFlag>
@@ -182,10 +200,14 @@
                         <id>build-docker-image</id>
                         <phase>install</phase>
                         <goals>
-                            <goal>dockerBuild</goal>
+                            <goal>${application.jib.defaultGoal}</goal>
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
             </plugin>
         </plugins>
     </build>

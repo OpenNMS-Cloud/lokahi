@@ -33,6 +33,6 @@ import java.util.concurrent.Future;
 /**
  * It extends standard listener with extra future for monitor shutdown status. In order to prevent deadlock of shutdown process.
  */
-public interface GracefulShutdownListener extends FlowsListener {
+public interface GracefulShutdownListener extends Listener {
     Future getShutdownFuture();
 }

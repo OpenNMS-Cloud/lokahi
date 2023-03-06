@@ -37,7 +37,13 @@ message SnmpInterfaceDTO {
   int64 id = 1;
   string tenant_id = 2;
   int64 node_id = 3;
-  string ip_address = 4;
-  int32 if_index = 5;
-  string if_descr = 6;
+  int32 if_index = 4;
+  string if_descr = 5;
+  int32 ifType = 6;
+  string ifName = 7;
+  int64 ifSpeed = 8;
+  int32 ifAdminStatus = 9;
+  int32 ifOperatorStatus = 10;
+  string ifAlias = 11;
+  string physicalAddr = 12;
 }

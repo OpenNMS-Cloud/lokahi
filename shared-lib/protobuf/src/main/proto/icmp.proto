@@ -51,3 +51,17 @@ message IcmpMonitorRequest {
   int32 packet_size = 5;
   int32 retries = 6;
 }
+
+message PingSweepRequest {
+  repeated IpRange ip_range = 1;
+  int64 timeout = 2;
+  double packets_per_second = 3;
+  int32 packet_size = 4;
+  int32 retries = 5;
+}
+
+message IpRange {
+  string begin = 1;
+  string end = 2;
+}
+

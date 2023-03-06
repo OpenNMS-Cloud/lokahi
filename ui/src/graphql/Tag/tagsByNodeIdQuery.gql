@@ -1,0 +1,11 @@
+fragment TagsByNodeIdParts on Query {
+  tagsByNodeId(nodeId: $nodeId) {
+    id
+    name
+    tenantId
+  }
+}
+
+query ListTagsByNodeId($nodeId: Long!) {
+  ...TagsByNodeIdParts
+}

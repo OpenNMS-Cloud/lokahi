@@ -31,6 +31,7 @@ package org.opennms.horizon.minion.snmp;
 import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors;
 import com.google.protobuf.Message;
+import org.opennms.horizon.minion.plugin.api.AbstractServiceMonitor;
 import org.opennms.horizon.minion.plugin.api.MonitoredService;
 import org.opennms.horizon.minion.plugin.api.ServiceMonitorResponse;
 import org.opennms.horizon.minion.plugin.api.ServiceMonitorResponse.Status;
@@ -42,6 +43,7 @@ import org.opennms.horizon.shared.snmp.SnmpHelper;
 import org.opennms.horizon.shared.snmp.SnmpObjId;
 import org.opennms.horizon.shared.snmp.SnmpValue;
 import org.opennms.horizon.shared.snmp.StrategyResolver;
+import org.opennms.horizon.shared.utils.InetAddressUtils;
 import org.opennms.snmp.contract.SnmpMonitorRequest;
 import org.opennms.taskset.contract.MonitorType;
 import org.slf4j.Logger;
@@ -51,6 +53,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+
+import static org.opennms.horizon.minion.snmp.SnmpMonitorUtils.meetsCriteria;
 
 /**
  * TBD888: is there lost logic here?  For example, counting
@@ -69,7 +73,7 @@ import java.util.concurrent.TimeUnit;
  * @author <A HREF="mailto:mike@opennms.org">Mike Davidson </A>
  * @author <A HREF="http://www.opennms.org/">OpenNMS </A>
  */
-public class SnmpMonitor extends SnmpMonitorStrategy {
+public class SnmpMonitor extends AbstractServiceMonitor {
 
     public static final long NANOSECOND_PER_MILLISECOND = 1_000_000;
     
@@ -143,7 +147,7 @@ public class SnmpMonitor extends SnmpMonitorStrategy {
 
             // Retrieve this interface's SNMP peer object
             //
-            SnmpAgentConfig agentConfig = getAgentConfig(svc, effectiveSnmpMonitorRequest);
+            SnmpAgentConfig agentConfig = new SnmpAgentConfig(InetAddressUtils.getInetAddress(snmpMonitorRequest.getHost()));
             hostAddress = effectiveSnmpMonitorRequest.getHost();
 
             // Get configuration parameters
@@ -310,6 +314,7 @@ public class SnmpMonitor extends SnmpMonitorStrategy {
         builder.properties(metrics);
         return builder.build();
     }
+
 
     // NOTE: this is called at call-setup time, not after the timeout.
     private ServiceMonitorResponse createTimeoutResponse(String hostAddress) {

@@ -15,11 +15,12 @@ limitations under the License.
 package values
 
 type KeycloakValues struct {
-	ServiceValues    `yaml:",inline"`
-	HttpsPort        string `yaml:"HttpsPort"`
-	HostnamePort     string `yaml:"HostnamePort"`
-	HostnameAdminUrl string `yaml:"HostnameAdminUrl"`
-	AdminUsername    string `yaml:"AdminUsername"`
-	AdminPassword    string `yaml:"AdminPassword"`
-	RealmName        string `yaml:"RealmName"`
+	ServiceValues      `yaml:",inline"`
+	HttpsPort          string `yaml:"HttpsPort"`
+	HostnamePort       string `yaml:"HostnamePort"`
+	HostnameAdminUrl   string `yaml:"HostnameAdminUrl"`
+	AdminUsername      string `yaml:"AdminUsername"`
+	AdminPassword      string `yaml:"AdminPassword"`
+	RealmName          string `yaml:"RealmName"`
+	DynamicRealmConfig bool   `yaml:"DynamicRealmConfig"`
 }

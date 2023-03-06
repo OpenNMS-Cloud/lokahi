@@ -28,6 +28,7 @@
 
 package org.opennms.horizon.alarmservice.kafkahelper;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -42,10 +43,14 @@ import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.common.header.internals.RecordHeader;
 import org.opennms.horizon.alarmservice.kafkahelper.internals.KafkaProcessor;
+import org.opennms.horizon.shared.constants.GrpcConstants;
 
 @Slf4j
 public class KafkaTestHelper {
+
+    private static int unique = 0;
 
     @Getter
     @Setter
@@ -63,7 +68,7 @@ public class KafkaTestHelper {
 
     public boolean startConsumerAndProducer(String consumerTopic, String producerTopic) {
         try {
-            KafkaConsumer<String, byte[]> consumer = this.createKafkaConsumer("test-consumer-group", "test-consumer-for-" + consumerTopic);
+            KafkaConsumer<String, byte[]> consumer = this.createKafkaConsumer("test-consumer-group"+ ++unique, "test-consumer-for-" + consumerTopic);
             kafkaProducer = this.createKafkaProducer();
             KafkaProcessor<String, byte[]> processor = new KafkaProcessor<>(consumer, kafkaProducer, records -> processRecords(consumerTopic, records));
 
@@ -84,8 +89,10 @@ public class KafkaTestHelper {
         return true;
     }
 
-    public void sendToTopic(String topic, byte[] body) {
-        kafkaProducer.send(new ProducerRecord<>(topic, body));
+    public void sendToTopic(String topic, byte[] body, String tenantId) {
+        var producerRecord = new ProducerRecord<String, byte[]>(topic, body);
+        producerRecord.headers().add(new RecordHeader(GrpcConstants.TENANT_ID_KEY, tenantId.getBytes(StandardCharsets.UTF_8)));
+        kafkaProducer.send(producerRecord);
     }
 
     public void removeConsumer(String topic) {

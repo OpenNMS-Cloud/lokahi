@@ -23,28 +23,30 @@
     </service>
 
     <bean id="listenerHolder" class="org.opennms.horizon.minion.flows.parser.ListenerHolder"/>
+    <service ref="listenerHolder" interface="org.opennms.horizon.minion.plugin.api.Listener"/>
 
     <bean id="telemetryRegistry" class="org.opennms.horizon.minion.flows.parser.TelemetryRegistryImpl">
         <argument ref="messageDispatcherFactory"/>
         <argument ref="identity"/>
+        <argument ref="dnsResolver"/>
         <argument ref="listenerHolder"/>
     </bean>
-    <service ref="telemetryRegistry" interface="org.opennms.horizon.minion.flows.listeners.factory.TelemetryRegistry"/>
+    <service ref="telemetryRegistry" interface="org.opennms.horizon.minion.flows.parser.TelemetryRegistry"/>
 
     <!-- Netflow 5 UDP Parser Factory -->
     <bean id="netflow5UdpParserFactory"
           class="org.opennms.horizon.minion.flows.parser.factory.Netflow5UdpParserFactory">
         <argument ref="telemetryRegistry"/>
-        <argument ref="dnsResolver"/>
         <argument ref="identity"/>
+        <argument ref="dnsResolver"/>
     </bean>
     <service ref="netflow5UdpParserFactory" interface="org.opennms.horizon.minion.flows.parser.factory.ParserFactory"/>
 
     <!-- Netflow 9 UDP Parser Factory -->
     <bean id="netflow9UdpParserFactory" class="org.opennms.horizon.minion.flows.parser.factory.Netflow9UdpParserFactory">
         <argument ref="telemetryRegistry"/>
-        <argument ref="dnsResolver"/>
         <argument ref="identity"/>
+        <argument ref="dnsResolver"/>
     </bean>
     <service ref="netflow9UdpParserFactory" interface="org.opennms.horizon.minion.flows.parser.factory.ParserFactory"/>
 

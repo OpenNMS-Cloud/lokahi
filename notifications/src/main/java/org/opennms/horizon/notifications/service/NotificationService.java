@@ -37,4 +37,5 @@ public interface NotificationService {
     void postNotification(AlarmDTO alarm) throws NotificationException;
 
     void postPagerDutyConfig(PagerDutyConfigDTO config);
+    void postPagerDutyConfigNonSpringAsync(PagerDutyConfigDTO config);
 }

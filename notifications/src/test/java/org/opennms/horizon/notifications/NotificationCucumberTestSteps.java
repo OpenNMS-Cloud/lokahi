@@ -115,6 +115,13 @@ public class NotificationCucumberTestSteps extends GrpcTestBase {
         serviceStub.withInterceptors(MetadataUtils
                 .newAttachHeadersInterceptor(createAuthHeader(header)))
             .postPagerDutyConfig(config);
+
+        // Sleep thread to ensure config saved before getConfig is called.
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private String getAuthHeader(String tenantId) {
@@ -131,6 +138,13 @@ public class NotificationCucumberTestSteps extends GrpcTestBase {
     public void setIntegrationKey(String key){
         PagerDutyConfigDTO configDTO = PagerDutyConfigDTO.newBuilder().setIntegrationKey(key).build();
         notificationService.postPagerDutyConfig(configDTO);
+
+        // Sleep thread to ensure config saved before getConfig is called.
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Given("Alarm posted via service")

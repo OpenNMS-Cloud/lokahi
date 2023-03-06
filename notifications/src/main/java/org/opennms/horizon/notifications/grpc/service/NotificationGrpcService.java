@@ -26,16 +26,32 @@ public class NotificationGrpcService extends NotificationServiceGrpc.Notificatio
     public void postPagerDutyConfig(PagerDutyConfigDTO request, StreamObserver<PagerDutyConfigDTO> responseObserver) {
         Optional<String> tenantIdOptional = tenantLookup.lookupTenantId();
 
-        tenantIdOptional.ifPresentOrElse(tenantId -> {
-            notificationService.postPagerDutyConfig(request);
-            responseObserver.onNext(request);
-            responseObserver.onCompleted();
-        }, () -> {
-            Status status = Status.newBuilder()
-                .setCode(Code.INVALID_ARGUMENT_VALUE)
-                .setMessage("Tenant Id can't be empty")
-                .build();
-            responseObserver.onError(StatusProto.toStatusRuntimeException(status));
-        });
+        // Hard code boolean to make it easy to switch between using spring based threading and non-spring based.
+        boolean spring = false;
+        if (spring) {
+            tenantIdOptional.ifPresentOrElse(tenantId -> {
+                notificationService.postPagerDutyConfig(request);
+                responseObserver.onNext(request);
+                responseObserver.onCompleted();
+            }, () -> {
+                Status status = Status.newBuilder()
+                    .setCode(Code.INVALID_ARGUMENT_VALUE)
+                    .setMessage("Tenant Id can't be empty")
+                    .build();
+                responseObserver.onError(StatusProto.toStatusRuntimeException(status));
+            });
+        } else {
+            tenantIdOptional.ifPresentOrElse(tenantId -> {
+                notificationService.postPagerDutyConfigNonSpringAsync(request);
+                responseObserver.onNext(request);
+                responseObserver.onCompleted();
+            }, () -> {
+                Status status = Status.newBuilder()
+                    .setCode(Code.INVALID_ARGUMENT_VALUE)
+                    .setMessage("Tenant Id can't be empty")
+                    .build();
+                responseObserver.onError(StatusProto.toStatusRuntimeException(status));
+            });
+        }
     }
 }

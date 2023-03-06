@@ -33,6 +33,7 @@ import org.opennms.horizon.notifications.dto.PagerDutyConfigDTO;
 import org.opennms.horizon.notifications.exceptions.NotificationException;
 import org.opennms.horizon.shared.dto.event.AlarmDTO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -47,7 +48,18 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
+    @Async
     public void postPagerDutyConfig(PagerDutyConfigDTO config) {
         pagerDutyAPI.saveConfig(config);
+    }
+
+    @Override
+    public void postPagerDutyConfigNonSpringAsync(PagerDutyConfigDTO config) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                pagerDutyAPI.saveConfig(config);
+            }
+        }).start();
     }
 }

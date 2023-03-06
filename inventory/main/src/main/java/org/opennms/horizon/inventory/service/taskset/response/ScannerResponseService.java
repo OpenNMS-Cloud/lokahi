@@ -134,7 +134,7 @@ public class ScannerResponseService {
     }
 
     private void processAzureScanItem(String tenantId, String location, String ipAddress, AzureScanItem item) {
-        Optional<AzureCredential> azureCredentialOpt = azureCredentialRepository.findById(item.getCredentialId());
+        Optional<AzureCredential> azureCredentialOpt = azureCredentialRepository.findByTenantIdAndId(tenantId, item.getCredentialId());
         if (azureCredentialOpt.isEmpty()) {
             log.warn("No Azure Credential found for id: {}", item.getCredentialId());
             return;

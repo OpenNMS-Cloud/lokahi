@@ -23,16 +23,16 @@
 
 set -e
 
-mvn clean install -DskipTests=true -f parent-pom
-mvn clean install -DskipTests=true -f shared-lib
+mvn clean install -P rapid-build -DskipTests=true -f parent-pom
+mvn clean install -P rapid-build -DskipTests=true -f shared-lib
 
-mvn clean install -DskipTests=true -f alarm
-mvn clean install -DskipTests=true -f minion-gateway
-mvn clean install -DskipTests=true -f minion-gateway-grpc-proxy
-mvn clean install -DskipTests=true -f minion
-mvn clean install -DskipTests=true -f rest-server
-mvn clean install -DskipTests=true -f inventory
-mvn clean install -DskipTests=true -f notifications
-mvn clean install -DskipTests=true -f metrics-processor
-mvn clean install -DskipTests=true -f events
-mvn clean install -DskipTests=true -f datachoices
+mvn clean install -P rapid-build -DskipTests=true -f alarm
+mvn clean install -P rapid-build -DskipTests=true -f minion-gateway
+mvn clean install -P rapid-build -DskipTests=true -f minion-gateway-grpc-proxy
+mvn clean install -P rapid-build -DskipTests=true -f minion
+mvn clean install -P rapid-build -DskipTests=true -f rest-server
+mvn clean install -P rapid-build -DskipTests=true -f inventory
+mvn clean install -P rapid-build -DskipTests=true -f notifications
+mvn clean install -P rapid-build -DskipTests=true -f metrics-processor
+mvn clean install -P rapid-build -DskipTests=true -f events
+mvn clean install -P rapid-build -DskipTests=true -f datachoices

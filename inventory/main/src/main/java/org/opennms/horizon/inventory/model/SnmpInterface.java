@@ -45,10 +45,14 @@ import lombok.Setter;
 @Setter
 @RequiredArgsConstructor
 @Entity
-public class SnmpInterface extends TenantAwareEntity {
+public class SnmpInterface {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
+
+    @NotNull
+    @Column(name = "tenant_id")
+    private String tenantId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "node_id", referencedColumnName = "id")

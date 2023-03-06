@@ -45,6 +45,10 @@ import org.opennms.horizon.inventory.discovery.SNMPConfigDTO;
 import org.opennms.horizon.inventory.mapper.ActiveDiscoveryMapper;
 import org.opennms.horizon.inventory.repository.ActiveDiscoveryRepository;
 import org.opennms.horizon.shared.constants.GrpcConstants;
+import org.opennms.horizon.inventory.dto.ConfigKey;
+import org.opennms.horizon.inventory.model.Configuration;
+import org.opennms.horizon.inventory.repository.ConfigurationRepository;
+import org.opennms.horizon.shared.protobuf.util.ProtobufUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
@@ -105,45 +109,37 @@ public class ActiveDiscoveryGrpcItTest extends GrpcTestBase {
 
     @Test
     void testGetConfigById() {
-        Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, tenantId).run(()->
-        {
-            ActiveDiscoveryDTO tempConfig = ActiveDiscoveryDTO.newBuilder()
-                .setConfigName(configName)
-                .addAllIpAddresses(List.of("127.0.0.1"))
-                .setSnmpConf(SNMPConfigDTO.newBuilder().addAllReadCommunity(List.of("test-community")).build()).build();
-            var model = configMapper.dtoToModel(tempConfig);
-            model.setTenantId(tenantId);
-            var activeDiscovery = configRepo.save(model);
-            ActiveDiscoveryDTO discoveryConfig = serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader)))
-                .getDiscoveryConfigById(Int64Value.of(activeDiscovery.getId()));
+        ActiveDiscoveryDTO tempConfig = ActiveDiscoveryDTO.newBuilder()
+            .setConfigName(configName)
+            .addAllIpAddresses(List.of("127.0.0.1"))
+            .setSnmpConf(SNMPConfigDTO.newBuilder().addAllReadCommunity(List.of("test-community")).build()).build();
+        var model = configMapper.dtoToModel(tempConfig);
+        model.setTenantId(tenantId);
+        var activeDiscovery = configRepo.save(model);
+        ActiveDiscoveryDTO discoveryConfig = serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader)))
+            .getDiscoveryConfigById(Int64Value.of(activeDiscovery.getId()));
 
-            assertThat(discoveryConfig).isNotNull()
-                .extracting(ActiveDiscoveryDTO::getConfigName, c -> c.getIpAddressesList().get(0), c -> c.getSnmpConf().getReadCommunityList().get(0))
-                .containsExactly(configName, "127.0.0.1", "test-community");
-        });
-
-
+        assertThat(discoveryConfig).isNotNull()
+            .extracting(ActiveDiscoveryDTO::getConfigName, c -> c.getIpAddressesList().get(0), c -> c.getSnmpConf().getReadCommunityList().get(0))
+            .containsExactly(configName, "127.0.0.1", "test-community");
     }
 
     @Test
     void testListConfig() {
-        Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, tenantId).run(()->
-        {
-            ActiveDiscoveryDTO tempConfig = ActiveDiscoveryDTO.newBuilder()
-                .setConfigName(configName)
-                .addAllIpAddresses(List.of("127.0.0.1"))
-                .setSnmpConf(SNMPConfigDTO.newBuilder().addAllReadCommunity(List.of("test-community")).build()).build();
+        ActiveDiscoveryDTO tempConfig = ActiveDiscoveryDTO.newBuilder()
+            .setConfigName(configName)
+            .addAllIpAddresses(List.of("127.0.0.1"))
+            .setSnmpConf(SNMPConfigDTO.newBuilder().addAllReadCommunity(List.of("test-community")).build()).build();
 
-            ActiveDiscoveryDTO tempConfig2 = ActiveDiscoveryDTO.newBuilder()
-                .setConfigName("new-config")
-                .addAllIpAddresses(List.of("127.0.0.2"))
-                .setSnmpConf(SNMPConfigDTO.newBuilder().addAllReadCommunity(List.of("test-community2")).build()).build();
-            var config1 = configMapper.dtoToModel(tempConfig);
-            var config2 = configMapper.dtoToModel(tempConfig2);
-            config1.setTenantId(tenantId);
-            config2.setTenantId(tenantId);
-            configRepo.saveAll(List.of(config1, config2));
-        });
+        ActiveDiscoveryDTO tempConfig2 = ActiveDiscoveryDTO.newBuilder()
+            .setConfigName("new-config")
+            .addAllIpAddresses(List.of("127.0.0.2"))
+            .setSnmpConf(SNMPConfigDTO.newBuilder().addAllReadCommunity(List.of("test-community2")).build()).build();
+        var config1 = configMapper.dtoToModel(tempConfig);
+        var config2 = configMapper.dtoToModel(tempConfig2);
+        config1.setTenantId(tenantId);
+        config2.setTenantId(tenantId);
+        configRepo.saveAll(List.of(config1, config2));
 
         ActiveDiscoveryList result = serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader)))
             .listDiscoveryConfig(Empty.getDefaultInstance());

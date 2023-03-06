@@ -32,6 +32,10 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 import java.util.List;
 
+import com.google.protobuf.Empty;
+import com.google.protobuf.StringValue;
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -43,7 +47,6 @@ import org.opennms.horizon.inventory.dto.MonitoringLocationList;
 import org.opennms.horizon.inventory.dto.MonitoringLocationServiceGrpc;
 import org.opennms.horizon.inventory.model.MonitoringLocation;
 import org.opennms.horizon.inventory.repository.MonitoringLocationRepository;
-import org.opennms.horizon.shared.constants.GrpcConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
@@ -69,22 +72,22 @@ class LocationGrpcItTest extends GrpcTestBase {
 
     @BeforeEach
     public void prepareData() throws VerificationException {
-        Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, tenantId).run(()->
-        {
-            location1 = new MonitoringLocation();
-            location1.setLocation("test-location");
-            repo.save(location1);
+        location1 = new MonitoringLocation();
+        location1.setLocation("test-location");
+        location1.setTenantId(tenantId);
+        repo.save(location1);
 
-            location2 = new MonitoringLocation();
-            location2.setLocation("test-location2");
-            repo.save(location2);
-        });
+        location2 = new MonitoringLocation();
+        location2.setLocation("test-location2");
+        location2.setTenantId(tenantId);
+        repo.save(location2);
         prepareServer();
         serviceStub = MonitoringLocationServiceGrpc.newBlockingStub(channel);
     }
 
     @AfterEach
     public void cleanUp() throws InterruptedException {
+        repo.deleteAll();
         afterTest();
     }
 

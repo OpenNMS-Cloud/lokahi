@@ -38,6 +38,7 @@ import org.opennms.horizon.inventory.dto.AzureCredentialServiceGrpc;
 import org.opennms.horizon.inventory.dto.MonitoringLocationServiceGrpc;
 import org.opennms.horizon.inventory.dto.MonitoringSystemServiceGrpc;
 import org.opennms.horizon.inventory.dto.NodeServiceGrpc;
+import org.opennms.horizon.inventory.dto.PassiveDiscoveryServiceGrpc;
 import org.opennms.horizon.inventory.dto.TagServiceGrpc;
 import org.opennms.horizon.shared.constants.GrpcConstants;
 import org.slf4j.Logger;
@@ -61,6 +62,7 @@ public class InventoryBackgroundHelper {
     private NodeServiceGrpc.NodeServiceBlockingStub nodeServiceBlockingStub;
     private TagServiceGrpc.TagServiceBlockingStub tagServiceBlockingStub;
     private AzureCredentialServiceGrpc.AzureCredentialServiceBlockingStub azureCredentialServiceBlockingStub;
+    private PassiveDiscoveryServiceGrpc.PassiveDiscoveryServiceBlockingStub passiveDiscoveryServiceBlockingStub;
 
     private final Map<String, String> grpcHeaders = new TreeMap<>();
 
@@ -99,6 +101,8 @@ public class InventoryBackgroundHelper {
         tagServiceBlockingStub = TagServiceGrpc.newBlockingStub(managedChannel)
             .withInterceptors(prepareGrpcHeaderInterceptor()).withDeadlineAfter(DEADLINE_DURATION, TimeUnit.SECONDS);
         azureCredentialServiceBlockingStub = AzureCredentialServiceGrpc.newBlockingStub(managedChannel)
+            .withInterceptors(prepareGrpcHeaderInterceptor()).withDeadlineAfter(DEADLINE_DURATION, TimeUnit.SECONDS);
+        passiveDiscoveryServiceBlockingStub = PassiveDiscoveryServiceGrpc.newBlockingStub(managedChannel)
             .withInterceptors(prepareGrpcHeaderInterceptor()).withDeadlineAfter(DEADLINE_DURATION, TimeUnit.SECONDS);
     }
 

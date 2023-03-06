@@ -46,11 +46,15 @@ import java.net.InetAddress;
 @Setter
 @RequiredArgsConstructor
 @Entity(name = "snmp_config")
-public class SnmpConfig extends TenantAwareEntity {
+public class SnmpConfig {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
+
+    @NotNull
+    @Column(name = "tenant_id")
+    private String tenantId;
 
     @NotNull
     @Column(name = "location")

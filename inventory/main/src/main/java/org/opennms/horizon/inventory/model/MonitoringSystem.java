@@ -48,10 +48,14 @@ import java.time.LocalDateTime;
 @Entity
 @Getter
 @Setter
-public class MonitoringSystem extends TenantAwareEntity {
+public class MonitoringSystem {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
+
+    @NotNull
+    @Column(name = "tenant_id")
+    private String tenantId;
 
     @NotNull
     @Column(name = "system_id")

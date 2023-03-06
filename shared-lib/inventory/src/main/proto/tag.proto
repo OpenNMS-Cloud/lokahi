@@ -48,8 +48,9 @@ message TagCreateListDTO {
   oneof id {
     int64 node_id = 1;
     int64 azure_credential_id = 2;
+    int64 passive_discovery_id = 3;
   }
-  repeated TagCreateDTO tags = 3;
+  repeated TagCreateDTO tags = 4;
 }
 
 message TagCreateDTO {
@@ -60,16 +61,18 @@ message TagRemoveListDTO {
   oneof id {
     int64 node_id = 1;
     int64 azure_credential_id = 2;
+    int64 passive_discovery_id = 3;
   }
-  repeated google.protobuf.Int64Value tag_ids = 3;
+  repeated google.protobuf.Int64Value tag_ids = 4;
 }
 
 message ListTagsByEntityIdParamsDTO {
   oneof id {
     int64 node_id = 1;
     int64 azure_credential_id = 2;
+    int64 passive_discovery_id = 3;
   }
-  optional TagListParamsDTO params = 3;
+  optional TagListParamsDTO params = 4;
 }
 
 message ListAllTagsParamsDTO {

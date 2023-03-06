@@ -7,6 +7,8 @@ import java.net.UnknownHostException;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import jakarta.transaction.Transactional;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -78,37 +80,26 @@ class DetectorResponseServiceIntTest extends GrpcTestBase {
 
     @AfterEach
     public void cleanUp() {
-        Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, TEST_TENANT_ID).run(()->
-        {
-            monitoredServiceRepository.deleteAll();
-            monitoredServiceTypeRepository.deleteAll();
-            ipInterfaceRepository.deleteAll();
-            nodeRepository.deleteAll();
-            monitoringLocationRepository.deleteAll();
-        });
+        monitoredServiceRepository.deleteAll();
+        monitoredServiceTypeRepository.deleteAll();
+        ipInterfaceRepository.deleteAll();
+        nodeRepository.deleteAll();
+        monitoringLocationRepository.deleteAll();
+
+        testGrpcService.reset();
     }
 
     @Test
-    void testAccept() {
-        Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, TEST_TENANT_ID).run(()->
-        {
-            try {
-                populateDatabase();
-            } catch (UnknownHostException e) {
-                throw new RuntimeException(e);
-            }
+    @Transactional
+    void testAccept() throws UnknownHostException {
+        populateDatabase();
 
-            DetectorResponse response = DetectorResponse.newBuilder()
-                .setDetected(true).setIpAddress(TEST_IP_ADDRESS)
-                .setMonitorType(MonitorType.SNMP).build();
+        DetectorResponse response = DetectorResponse.newBuilder()
+            .setDetected(true).setIpAddress(TEST_IP_ADDRESS)
+            .setMonitorType(MonitorType.SNMP).build();
 
-            service.accept(TEST_TENANT_ID, TEST_LOCATION, response);
+        service.accept(TEST_TENANT_ID, TEST_LOCATION, response);
 
-            checkTestAcceptResults(response, 2);
-        });
-    }
-
-    private void checkTestAcceptResults(DetectorResponse response, int expected) {
         List<MonitoredServiceType> monitoredServiceTypes = monitoredServiceTypeRepository.findAll();
         assertEquals(1, monitoredServiceTypes.size());
 
@@ -126,152 +117,150 @@ class DetectorResponseServiceIntTest extends GrpcTestBase {
         assertEquals(TEST_TENANT_ID, monitoredService.getTenantId());
 
         MonitoredServiceType relatedType = monitoredService.getMonitoredServiceType();
-        assertEquals(monitoredServiceType.getServiceName(), relatedType.getServiceName());
+        assertEquals(monitoredServiceType, relatedType);
 
-        assertEquals(expected, testGrpcService.getRequests().size());
+        assertEquals(2, testGrpcService.getRequests().size());
     }
 
     @Test
-    void testAcceptMultipleSameIpAddress() {
-        Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, TEST_TENANT_ID).run(()->
-        {
-            try {
-                populateDatabase();
-            } catch (UnknownHostException e) {
-                throw new RuntimeException(e);
-            }
+    @Transactional
+    void testAcceptMultipleSameIpAddress() throws UnknownHostException {
+        populateDatabase();
 
-            DetectorResponse response = DetectorResponse.newBuilder()
-                .setDetected(true).setIpAddress(TEST_IP_ADDRESS)
-                .setMonitorType(MonitorType.SNMP).build();
+        DetectorResponse response = DetectorResponse.newBuilder()
+            .setDetected(true).setIpAddress(TEST_IP_ADDRESS)
+            .setMonitorType(MonitorType.SNMP).build();
 
-            int numberOfCalls = 2;
+        int numberOfCalls = 2;
 
-            for (int index = 0; index < numberOfCalls; index++) {
-                service.accept(TEST_TENANT_ID, TEST_LOCATION, response);
-            }
+        for (int index = 0; index < numberOfCalls; index++) {
+            service.accept(TEST_TENANT_ID, TEST_LOCATION, response);
+        }
 
-            checkTestAcceptResults(response, numberOfCalls * 2);
-        });
+        List<MonitoredServiceType> monitoredServiceTypes = monitoredServiceTypeRepository.findAll();
+        assertEquals(1, monitoredServiceTypes.size());
+
+        MonitoredServiceType monitoredServiceType = monitoredServiceTypes.get(0);
+        assertEquals(response.getMonitorType().name(), monitoredServiceType.getServiceName());
+        assertEquals(TEST_TENANT_ID, monitoredServiceType.getTenantId());
+
+        List<MonitoredService> monitoredServices = monitoredServiceRepository.findAll();
+        assertEquals(1, monitoredServices.size());
+
+        MonitoredService monitoredService = monitoredServices.get(0);
+        IpInterface ipInterface = monitoredService.getIpInterface();
+
+        assertEquals(TEST_IP_ADDRESS, InetAddressUtils.toIpAddrString(ipInterface.getIpAddress()));
+        assertEquals(TEST_TENANT_ID, monitoredService.getTenantId());
+
+        MonitoredServiceType relatedType = monitoredService.getMonitoredServiceType();
+        assertEquals(monitoredServiceType, relatedType);
+
+        assertEquals(numberOfCalls*2, testGrpcService.getRequests().size());
     }
 
     @Test
-    void testAcceptNotDetected() {
-        Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, TEST_TENANT_ID).run(()->
-        {
-            try {
-                populateDatabase();
-            } catch (UnknownHostException e) {
-                throw new RuntimeException(e);
-            }
+    @Transactional
+    void testAcceptNotDetected() throws UnknownHostException {
+        populateDatabase();
 
-            DetectorResponse response = DetectorResponse.newBuilder()
-                .setDetected(false).setIpAddress(TEST_IP_ADDRESS)
-                .setMonitorType(MonitorType.SNMP).build();
+        DetectorResponse response = DetectorResponse.newBuilder()
+            .setDetected(false).setIpAddress(TEST_IP_ADDRESS)
+            .setMonitorType(MonitorType.SNMP).build();
+
+        service.accept(TEST_TENANT_ID, TEST_LOCATION, response);
+
+        List<MonitoredServiceType> monitoredServiceTypes = monitoredServiceTypeRepository.findAll();
+        assertEquals(0, monitoredServiceTypes.size());
+
+        List<MonitoredService> monitoredServices = monitoredServiceRepository.findAll();
+        assertEquals(0, monitoredServices.size());
+
+        assertEquals(0, testGrpcService.getRequests().size());
+    }
+
+    @Test
+    @Transactional
+    void testAcceptMultipleSameIpAddressDifferentMonitorType() throws UnknownHostException {
+        populateDatabase();
+
+        DetectorResponse.Builder builder = DetectorResponse.newBuilder()
+            .setDetected(true).setIpAddress(TEST_IP_ADDRESS);
+
+        int numberOfCalls = 2;
+
+        MonitorType[] monitorTypes = {MonitorType.ICMP, MonitorType.SNMP};
+
+        for (int index = 0; index < numberOfCalls; index++) {
+
+            DetectorResponse response = builder
+                .setMonitorType(monitorTypes[index]).build();
 
             service.accept(TEST_TENANT_ID, TEST_LOCATION, response);
+        }
 
-            List<MonitoredServiceType> monitoredServiceTypes = monitoredServiceTypeRepository.findAll();
-            assertEquals(0, monitoredServiceTypes.size());
+        List<MonitoredServiceType> monitoredServiceTypes = monitoredServiceTypeRepository.findAll();
+        assertEquals(monitorTypes.length, monitoredServiceTypes.size());
 
-            List<MonitoredService> monitoredServices = monitoredServiceRepository.findAll();
-            assertEquals(0, monitoredServices.size());
+        List<String> monitoredServiceNames =
+            monitoredServiceTypes.stream()
+                .map(MonitoredServiceType::getServiceName)
+                .collect(Collectors.toList());
 
-            assertEquals(0, testGrpcService.getRequests().size());
-        });
-    }
+        assertEquals(monitorTypes.length, monitoredServiceNames.size());
 
-    @Test
-    void testAcceptMultipleSameIpAddressDifferentMonitorType() {
-        Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, TEST_TENANT_ID).run(()->
-        {
-            try {
-                populateDatabase();
-            } catch (UnknownHostException e) {
-                throw new RuntimeException(e);
-            }
+        for (int index = 0; index < monitorTypes.length; index++) {
+            assertEquals(monitorTypes[index].getValueDescriptor().getName(), monitoredServiceNames.get(index));
+        }
 
-            DetectorResponse.Builder builder = DetectorResponse.newBuilder()
-                .setDetected(true).setIpAddress(TEST_IP_ADDRESS);
+        List<MonitoredService> monitoredServices = monitoredServiceRepository.findAll();
+        assertEquals(monitorTypes.length, monitoredServiceNames.size());
 
-            int numberOfCalls = 2;
+        for (MonitoredService monitoredService : monitoredServices) {
+            IpInterface ipInterface = monitoredService.getIpInterface();
 
-            MonitorType[] monitorTypes = {MonitorType.ICMP, MonitorType.SNMP};
+            assertEquals(TEST_IP_ADDRESS, InetAddressUtils.toIpAddrString(ipInterface.getIpAddress()));
+            assertEquals(TEST_TENANT_ID, monitoredService.getTenantId());
+        }
 
-            for (int index = 0; index < numberOfCalls; index++) {
+        var taskDefinitions = testGrpcService.getTaskDefinitions(TEST_LOCATION);
+        var monitorTasks = taskDefinitions.stream().filter(taskDefinition ->
+                taskDefinition.getType().equals(TaskType.MONITOR))
+            .filter(taskDefinition -> taskDefinition.getPluginName().contains(MonitorType.SNMP.name()) ||
+                taskDefinition.getPluginName().contains(MonitorType.ICMP.name())).toList();
 
-                DetectorResponse response = builder
-                    .setMonitorType(monitorTypes[index]).build();
+        assertEquals(2, monitorTasks.size());
 
-                service.accept(TEST_TENANT_ID, TEST_LOCATION, response);
-            }
+        List<UpdateTasksRequest> grpcRequests = testGrpcService.getRequests();
+        // fragile test : extra 1 call for SNMP collector
+        assertEquals(monitorTypes.length + 1, grpcRequests.size());
 
-            List<MonitoredServiceType> monitoredServiceTypes = monitoredServiceTypeRepository.findAll();
-            assertEquals(monitorTypes.length, monitoredServiceTypes.size());
+        var collectorTasks = taskDefinitions.stream().filter(taskDefinition ->
+                taskDefinition.getType().equals(TaskType.COLLECTOR))
+            .filter(taskDefinition -> taskDefinition.getPluginName().contains(MonitorType.SNMP.name())).toList();
 
-            List<String> monitoredServiceNames =
-                monitoredServiceTypes.stream()
-                    .map(MonitoredServiceType::getServiceName)
-                    .toList();
-
-            assertEquals(monitorTypes.length, monitoredServiceNames.size());
-
-            for (int index = 0; index < monitorTypes.length; index++) {
-                assertEquals(monitorTypes[index].getValueDescriptor().getName(), monitoredServiceNames.get(index));
-            }
-
-            List<MonitoredService> monitoredServices = monitoredServiceRepository.findAll();
-            assertEquals(monitorTypes.length, monitoredServices.size());
-
-            for (MonitoredService monitoredService : monitoredServices) {
-                IpInterface ipInterface = monitoredService.getIpInterface();
-
-                assertEquals(TEST_IP_ADDRESS, InetAddressUtils.toIpAddrString(ipInterface.getIpAddress()));
-                assertEquals(TEST_TENANT_ID, monitoredService.getTenantId());
-            }
-
-            var taskDefinitions = testGrpcService.getTaskDefinitions(TEST_LOCATION);
-            var monitorTasks = taskDefinitions.stream().filter(taskDefinition ->
-                    taskDefinition.getType().equals(TaskType.MONITOR))
-                .filter(taskDefinition -> taskDefinition.getPluginName().contains(MonitorType.SNMP.name()) ||
-                    taskDefinition.getPluginName().contains(MonitorType.ICMP.name())).toList();
-
-            assertEquals(2, monitorTasks.size());
-
-            List<UpdateTasksRequest> grpcRequests = testGrpcService.getRequests();
-            // fragile test : extra 1 call for SNMP collector
-            assertEquals(monitorTypes.length + 1, grpcRequests.size());
-
-            var collectorTasks = taskDefinitions.stream().filter(taskDefinition ->
-                    taskDefinition.getType().equals(TaskType.COLLECTOR))
-                .filter(taskDefinition -> taskDefinition.getPluginName().contains(MonitorType.SNMP.name())).toList();
-
-            assertEquals(1, collectorTasks.size());
-        });
+        assertEquals(1, collectorTasks.size());
     }
 
     private void populateDatabase() throws UnknownHostException {
-        final InetAddress inetAddress = InetAddress.getByName(TEST_IP_ADDRESS);
-        Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, TEST_TENANT_ID).run(()->
-        {
-            MonitoringLocation monitoringLocation = new MonitoringLocation();
-            monitoringLocation.setLocation(TEST_LOCATION);
-            monitoringLocation.setTenantId(TEST_TENANT_ID);
-            monitoringLocation = monitoringLocationRepository.save(monitoringLocation);
 
-            Node node = new Node();
-            node.setNodeLabel(TEST_NODE_LABEL);
-            node.setCreateTime(LocalDateTime.now());
-            node.setTenantId(TEST_TENANT_ID);
-            node.setMonitoringLocation(monitoringLocation);
-            node = nodeRepository.save(node);
+        MonitoringLocation monitoringLocation = new MonitoringLocation();
+        monitoringLocation.setLocation(TEST_LOCATION);
+        monitoringLocation.setTenantId(TEST_TENANT_ID);
+        monitoringLocation = monitoringLocationRepository.save(monitoringLocation);
 
-            IpInterface ipInterface = new IpInterface();
-            ipInterface.setIpAddress(inetAddress);
-            ipInterface.setTenantId(TEST_TENANT_ID);
-            ipInterface.setNode(node);
+        Node node = new Node();
+        node.setNodeLabel(TEST_NODE_LABEL);
+        node.setCreateTime(LocalDateTime.now());
+        node.setTenantId(TEST_TENANT_ID);
+        node.setMonitoringLocation(monitoringLocation);
+        node = nodeRepository.save(node);
 
-            ipInterfaceRepository.save(ipInterface);
-        });
+        IpInterface ipInterface = new IpInterface();
+        ipInterface.setIpAddress(InetAddress.getByName(TEST_IP_ADDRESS));
+        ipInterface.setTenantId(TEST_TENANT_ID);
+        ipInterface.setNode(node);
+
+        ipInterfaceRepository.save(ipInterface);
     }
 }

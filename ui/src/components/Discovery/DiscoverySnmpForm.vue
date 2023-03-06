@@ -16,7 +16,7 @@
       :preLoadedlocations="[discoveryInfo?.location]"
       @location-selected="setLocation"
     />
-    <!--<DiscoveryAutocomplete
+    <!--<BasicAutocomplete
       @items-selected="tagsSelectedListener"
       :get-items="discoveryQueries.getTagsSearch"
       :items="discoveryQueries.tagsSearched"

@@ -37,4 +37,6 @@ import java.util.Optional;
 public interface AzureCredentialRepository extends JpaRepository<AzureCredential, Long> {
 
     Optional<AzureCredential> findByTenantIdAndId(String tenantId, long id);
+
+    Optional<AzureCredential> findByTenantIdAndSubscriptionIdAndDirectoryIdAndClientId(String tenantId, String subscriptionId, String directoryId, String clientId);
 }

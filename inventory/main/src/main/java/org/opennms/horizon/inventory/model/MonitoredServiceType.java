@@ -44,10 +44,14 @@ import lombok.Setter;
 @Getter
 @RequiredArgsConstructor
 @Entity
-public class MonitoredServiceType extends TenantAwareEntity {
+public class MonitoredServiceType {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
+
+    @NotNull
+    @Column(name = "tenant_id")
+    private String tenantId;
 
     @NotNull
     @Column(name = "service_name")

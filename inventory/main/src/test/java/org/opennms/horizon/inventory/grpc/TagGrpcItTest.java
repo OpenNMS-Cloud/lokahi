@@ -103,389 +103,359 @@ class TagGrpcItTest extends GrpcTestBase {
 
     @Test
     void testCreateTag() {
-        Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, tenantId).run(()->
-        {
-            long nodeId = setupDatabase();
+        long nodeId = setupDatabase();
 
-            TagCreateDTO createDTO = TagCreateDTO.newBuilder()
-                .setName(TEST_TAG_NAME_1)
-                .build();
+        TagCreateDTO createDTO = TagCreateDTO.newBuilder()
+            .setName(TEST_TAG_NAME_1)
+            .build();
 
-            TagCreateListDTO createListDTO = TagCreateListDTO.newBuilder()
-                .addAllTags(Collections.singletonList(createDTO)).setNodeId(nodeId).build();
+        TagCreateListDTO createListDTO = TagCreateListDTO.newBuilder()
+            .addAllTags(Collections.singletonList(createDTO)).setNodeId(nodeId).build();
 
-            serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).addTags(createListDTO);
+        serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).addTags(createListDTO);
 
-            List<Tag> allTags = tagRepository.findAll();
-            assertEquals(1, allTags.size());
+        List<Tag> allTags = tagRepository.findAll();
+        assertEquals(1, allTags.size());
 
-            Tag savedTag = allTags.get(0);
-            assertEquals(createDTO.getName(), savedTag.getName());
-            assertEquals(tenantId, savedTag.getTenantId());
+        Tag savedTag = allTags.get(0);
+        assertEquals(createDTO.getName(), savedTag.getName());
+        assertEquals(tenantId, savedTag.getTenantId());
 
-            List<Node> nodes = savedTag.getNodes();
-            assertEquals(1, nodes.size());
+        List<Node> nodes = savedTag.getNodes();
+        assertEquals(1, nodes.size());
 
-            Node node = nodes.get(0);
-            assertEquals(nodeId, node.getId());
-            assertEquals(tenantId, node.getTenantId());
-        });
+        Node node = nodes.get(0);
+        assertEquals(nodeId, node.getId());
+        assertEquals(tenantId, node.getTenantId());
     }
 
     @Test
     void testCreateTagAlreadyCreatedOnce() {
-        Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, tenantId).run(()->
-        {
-            long nodeId = setupDatabase();
+        long nodeId = setupDatabase();
 
-            TagCreateDTO createDTO = TagCreateDTO.newBuilder()
-                .setName(TEST_TAG_NAME_1)
-                .build();
+        TagCreateDTO createDTO = TagCreateDTO.newBuilder()
+            .setName(TEST_TAG_NAME_1)
+            .build();
 
-            TagCreateListDTO createListDTO = TagCreateListDTO.newBuilder()
-                .addAllTags(Collections.singletonList(createDTO)).setNodeId(nodeId).build();
+        TagCreateListDTO createListDTO = TagCreateListDTO.newBuilder()
+            .addAllTags(Collections.singletonList(createDTO)).setNodeId(nodeId).build();
 
-            for (int index = 0; index < 2; index++) {
-                serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).addTags(createListDTO);
-            }
+        for (int index = 0; index < 2; index++) {
+            serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).addTags(createListDTO);
+        }
 
-            List<Tag> allTags = tagRepository.findAll();
-            assertEquals(1, allTags.size());
+        List<Tag> allTags = tagRepository.findAll();
+        assertEquals(1, allTags.size());
 
-            Tag savedTag = allTags.get(0);
-            assertEquals(createDTO.getName(), savedTag.getName());
-            assertEquals(tenantId, savedTag.getTenantId());
+        Tag savedTag = allTags.get(0);
+        assertEquals(createDTO.getName(), savedTag.getName());
+        assertEquals(tenantId, savedTag.getTenantId());
 
-            List<Node> nodes = savedTag.getNodes();
-            assertEquals(1, nodes.size());
+        List<Node> nodes = savedTag.getNodes();
+        assertEquals(1, nodes.size());
 
-            Node node = nodes.get(0);
-            assertEquals(nodeId, node.getId());
-            assertEquals(tenantId, node.getTenantId());
-        });
+        Node node = nodes.get(0);
+        assertEquals(nodeId, node.getId());
+        assertEquals(tenantId, node.getTenantId());
     }
 
     @Test
     void testCreateTwoTagsOnNode() {
-        Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, tenantId).run(()->
-        {
-            long nodeId = setupDatabase();
+        long nodeId = setupDatabase();
 
-            TagCreateDTO createDTO1 = TagCreateDTO.newBuilder()
-                .setName(TEST_TAG_NAME_1)
-                .build();
+        TagCreateDTO createDTO1 = TagCreateDTO.newBuilder()
+            .setName(TEST_TAG_NAME_1)
+            .build();
 
-            TagCreateListDTO createListDTO1 = TagCreateListDTO.newBuilder()
-                .addAllTags(Collections.singletonList(createDTO1)).setNodeId(nodeId).build();
+        TagCreateListDTO createListDTO1 = TagCreateListDTO.newBuilder()
+            .addAllTags(Collections.singletonList(createDTO1)).setNodeId(nodeId).build();
 
-            serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).addTags(createListDTO1);
+        serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).addTags(createListDTO1);
 
-            TagCreateDTO createDTO2 = TagCreateDTO.newBuilder()
-                .setName(TEST_TAG_NAME_2)
-                .build();
+        TagCreateDTO createDTO2 = TagCreateDTO.newBuilder()
+            .setName(TEST_TAG_NAME_2)
+            .build();
 
-            TagCreateListDTO createListDTO2 = TagCreateListDTO.newBuilder()
-                .addAllTags(Collections.singletonList(createDTO2)).setNodeId(nodeId).build();
+        TagCreateListDTO createListDTO2 = TagCreateListDTO.newBuilder()
+            .addAllTags(Collections.singletonList(createDTO2)).setNodeId(nodeId).build();
 
-            serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).addTags(createListDTO2);
+        serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).addTags(createListDTO2);
 
-            List<Tag> allTags = tagRepository.findAll();
-            assertEquals(2, allTags.size());
+        List<Tag> allTags = tagRepository.findAll();
+        assertEquals(2, allTags.size());
 
-            //tag 1
-            Tag savedTag = allTags.get(0);
-            assertEquals(createDTO1.getName(), savedTag.getName());
-            assertEquals(tenantId, savedTag.getTenantId());
+        //tag 1
+        Tag savedTag = allTags.get(0);
+        assertEquals(createDTO1.getName(), savedTag.getName());
+        assertEquals(tenantId, savedTag.getTenantId());
 
-            List<Node> nodes = savedTag.getNodes();
-            assertEquals(1, nodes.size());
+        List<Node> nodes = savedTag.getNodes();
+        assertEquals(1, nodes.size());
 
-            Node node = nodes.get(0);
-            assertEquals(nodeId, node.getId());
-            assertEquals(tenantId, node.getTenantId());
+        Node node = nodes.get(0);
+        assertEquals(nodeId, node.getId());
+        assertEquals(tenantId, node.getTenantId());
 
-            //tag 2
-            savedTag = allTags.get(1);
-            assertEquals(createDTO2.getName(), savedTag.getName());
-            assertEquals(tenantId, savedTag.getTenantId());
+        //tag 2
+        savedTag = allTags.get(1);
+        assertEquals(createDTO2.getName(), savedTag.getName());
+        assertEquals(tenantId, savedTag.getTenantId());
 
-            nodes = savedTag.getNodes();
-            assertEquals(1, nodes.size());
+        nodes = savedTag.getNodes();
+        assertEquals(1, nodes.size());
 
-            node = nodes.get(0);
-            assertEquals(nodeId, node.getId());
-            assertEquals(tenantId, node.getTenantId());
-        });
+        node = nodes.get(0);
+        assertEquals(nodeId, node.getId());
+        assertEquals(tenantId, node.getTenantId());
     }
 
     @Test
     void testCreateTwoTagsTwoNodes() {
-        Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, tenantId).run(()->
-        {
-            MonitoringLocation location = new MonitoringLocation();
-            location.setLocation(TEST_LOCATION);
-            location.setTenantId(tenantId);
-            location = locationRepository.saveAndFlush(location);
+        MonitoringLocation location = new MonitoringLocation();
+        location.setLocation(TEST_LOCATION);
+        location.setTenantId(tenantId);
+        location = locationRepository.saveAndFlush(location);
 
-            Node node1 = new Node();
-            node1.setNodeLabel(TEST_NODE_LABEL_1);
-            node1.setCreateTime(LocalDateTime.now());
-            node1.setTenantId(tenantId);
-            node1.setMonitoringLocation(location);
-            node1.setMonitoringLocationId(location.getId());
-            node1 = nodeRepository.saveAndFlush(node1);
+        Node node1 = new Node();
+        node1.setNodeLabel(TEST_NODE_LABEL_1);
+        node1.setCreateTime(LocalDateTime.now());
+        node1.setTenantId(tenantId);
+        node1.setMonitoringLocation(location);
+        node1.setMonitoringLocationId(location.getId());
+        node1 = nodeRepository.saveAndFlush(node1);
 
-            Node node2 = new Node();
-            node2.setNodeLabel(TEST_NODE_LABEL_2);
-            node2.setCreateTime(LocalDateTime.now());
-            node2.setTenantId(tenantId);
-            node2.setMonitoringLocation(location);
-            node2.setMonitoringLocationId(location.getId());
-            node2 = nodeRepository.saveAndFlush(node2);
+        Node node2 = new Node();
+        node2.setNodeLabel(TEST_NODE_LABEL_2);
+        node2.setCreateTime(LocalDateTime.now());
+        node2.setTenantId(tenantId);
+        node2.setMonitoringLocation(location);
+        node2.setMonitoringLocationId(location.getId());
+        node2 = nodeRepository.saveAndFlush(node2);
 
-            TagCreateDTO createDTO1 = TagCreateDTO.newBuilder()
-                .setName(TEST_TAG_NAME_1)
-                .build();
+        TagCreateDTO createDTO1 = TagCreateDTO.newBuilder()
+            .setName(TEST_TAG_NAME_1)
+            .build();
 
-            TagCreateDTO createDTO2 = TagCreateDTO.newBuilder()
-                .setName(TEST_TAG_NAME_2)
-                .build();
+        TagCreateDTO createDTO2 = TagCreateDTO.newBuilder()
+            .setName(TEST_TAG_NAME_2)
+            .build();
 
-            TagCreateListDTO createListDTO1 = TagCreateListDTO.newBuilder()
-                .addAllTags(List.of(createDTO1, createDTO2)).setNodeId(node1.getId()).build();
+        TagCreateListDTO createListDTO1 = TagCreateListDTO.newBuilder()
+            .addAllTags(List.of(createDTO1, createDTO2)).setNodeId(node1.getId()).build();
 
-            serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).addTags(createListDTO1);
+        serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).addTags(createListDTO1);
 
-            TagCreateDTO createDTO3 = TagCreateDTO.newBuilder()
-                .setName(TEST_TAG_NAME_2)
-                .build();
+        TagCreateDTO createDTO3 = TagCreateDTO.newBuilder()
+            .setName(TEST_TAG_NAME_2)
+            .build();
 
-            TagCreateListDTO createListDTO3 = TagCreateListDTO.newBuilder()
-                .addAllTags(List.of(createDTO3)).setNodeId(node2.getId()).build();
+        TagCreateListDTO createListDTO3 = TagCreateListDTO.newBuilder()
+            .addAllTags(List.of(createDTO3)).setNodeId(node2.getId()).build();
 
-            serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).addTags(createListDTO3);
+        serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).addTags(createListDTO3);
 
-            List<Tag> allTags = tagRepository.findAll();
-            assertEquals(2, allTags.size());
+        List<Tag> allTags = tagRepository.findAll();
+        assertEquals(2, allTags.size());
 
-            List<Node> allNodes = nodeRepository.findAll();
-            assertEquals(2, allNodes.size());
+        List<Node> allNodes = nodeRepository.findAll();
+        assertEquals(2, allNodes.size());
 
-            Node savedNode1 = allNodes.get(0);
-            assertEquals(node1.getId(), savedNode1.getId());
-            assertEquals(2, savedNode1.getTags().size());
-            assertEquals(TEST_TAG_NAME_1, savedNode1.getTags().get(0).getName());
-            assertEquals(TEST_TAG_NAME_2, savedNode1.getTags().get(1).getName());
+        Node savedNode1 = allNodes.get(0);
+        assertEquals(node1.getId(), savedNode1.getId());
+        assertEquals(2, savedNode1.getTags().size());
+        assertEquals(TEST_TAG_NAME_1, savedNode1.getTags().get(0).getName());
+        assertEquals(TEST_TAG_NAME_2, savedNode1.getTags().get(1).getName());
 
-            Node savedNode2 = allNodes.get(1);
-            assertEquals(node2.getId(), savedNode2.getId());
-            assertEquals(1, savedNode2.getTags().size());
-            assertEquals(TEST_TAG_NAME_2, savedNode2.getTags().get(0).getName());
-        });
+        Node savedNode2 = allNodes.get(1);
+        assertEquals(node2.getId(), savedNode2.getId());
+        assertEquals(1, savedNode2.getTags().size());
+        assertEquals(TEST_TAG_NAME_2, savedNode2.getTags().get(0).getName());
     }
 
     @Test
     void testGetTagListForNode() {
-        Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, tenantId).run(()->
-        {
-            long nodeId = setupDatabase();
+        long nodeId = setupDatabase();
 
-            TagCreateDTO createDTO1 = TagCreateDTO.newBuilder()
-                .setName(TEST_TAG_NAME_1)
-                .build();
+        TagCreateDTO createDTO1 = TagCreateDTO.newBuilder()
+            .setName(TEST_TAG_NAME_1)
+            .build();
 
-            TagCreateListDTO createListDTO1 = TagCreateListDTO.newBuilder()
-                .addAllTags(Collections.singletonList(createDTO1)).setNodeId(nodeId).build();
+        TagCreateListDTO createListDTO1 = TagCreateListDTO.newBuilder()
+            .addAllTags(Collections.singletonList(createDTO1)).setNodeId(nodeId).build();
 
-            serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).addTags(createListDTO1);
+        serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).addTags(createListDTO1);
 
-            TagCreateDTO createDTO2 = TagCreateDTO.newBuilder()
-                .setName(TEST_TAG_NAME_2)
-                .build();
+        TagCreateDTO createDTO2 = TagCreateDTO.newBuilder()
+            .setName(TEST_TAG_NAME_2)
+            .build();
 
-            TagCreateListDTO createListDTO2 = TagCreateListDTO.newBuilder()
-                .addAllTags(Collections.singletonList(createDTO2)).setNodeId(nodeId).build();
+        TagCreateListDTO createListDTO2 = TagCreateListDTO.newBuilder()
+            .addAllTags(Collections.singletonList(createDTO2)).setNodeId(nodeId).build();
 
-            serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).addTags(createListDTO2);
+        serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).addTags(createListDTO2);
 
-            List<Tag> allTags = tagRepository.findAll();
-            assertEquals(2, allTags.size());
+        List<Tag> allTags = tagRepository.findAll();
+        assertEquals(2, allTags.size());
 
-            ListTagsByEntityIdParamsDTO params = ListTagsByEntityIdParamsDTO.newBuilder().setNodeId(nodeId).setParams(TagListParamsDTO.newBuilder().build()).build();
-            TagListDTO tagsByNodeId = serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).getTagsByEntityId(params);
-            List<TagDTO> tagsList = tagsByNodeId.getTagsList();
-            assertEquals(2, tagsList.size());
-        });
+        ListTagsByEntityIdParamsDTO params = ListTagsByEntityIdParamsDTO.newBuilder().setNodeId(nodeId).setParams(TagListParamsDTO.newBuilder().build()).build();
+        TagListDTO tagsByNodeId = serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).getTagsByEntityId(params);
+        List<TagDTO> tagsList = tagsByNodeId.getTagsList();
+        assertEquals(2, tagsList.size());
     }
 
     @Test
     void testGetTagListForNodeWithNameLike() {
-        Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, tenantId).run(()->
-        {
-            long nodeId = setupDatabase();
+        long nodeId = setupDatabase();
 
-            TagCreateDTO createDTO1 = TagCreateDTO.newBuilder()
-                .setName(TEST_TAG_NAME_1)
-                .build();
+        TagCreateDTO createDTO1 = TagCreateDTO.newBuilder()
+            .setName(TEST_TAG_NAME_1)
+            .build();
 
-            TagCreateListDTO createListDTO1 = TagCreateListDTO.newBuilder()
-                .addAllTags(Collections.singletonList(createDTO1)).setNodeId(nodeId).build();
+        TagCreateListDTO createListDTO1 = TagCreateListDTO.newBuilder()
+            .addAllTags(Collections.singletonList(createDTO1)).setNodeId(nodeId).build();
 
-            serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).addTags(createListDTO1);
+        serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).addTags(createListDTO1);
 
-            TagCreateDTO createDTO2 = TagCreateDTO.newBuilder()
-                .setName(TEST_TAG_NAME_2)
-                .build();
+        TagCreateDTO createDTO2 = TagCreateDTO.newBuilder()
+            .setName(TEST_TAG_NAME_2)
+            .build();
 
-            TagCreateListDTO createListDTO2 = TagCreateListDTO.newBuilder()
-                .addAllTags(Collections.singletonList(createDTO2)).setNodeId(nodeId).build();
+        TagCreateListDTO createListDTO2 = TagCreateListDTO.newBuilder()
+            .addAllTags(Collections.singletonList(createDTO2)).setNodeId(nodeId).build();
 
-            serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).addTags(createListDTO2);
+        serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).addTags(createListDTO2);
 
-            List<Tag> allTags = tagRepository.findAll();
-            assertEquals(2, allTags.size());
+        List<Tag> allTags = tagRepository.findAll();
+        assertEquals(2, allTags.size());
 
-            ListTagsByEntityIdParamsDTO params = ListTagsByEntityIdParamsDTO.newBuilder().setNodeId(nodeId).setParams(TagListParamsDTO.newBuilder().setSearchTerm("tag-name").build()).build();
-            TagListDTO tagsByNodeId = serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).getTagsByEntityId(params);
-            List<TagDTO> tagsList = tagsByNodeId.getTagsList();
-            assertEquals(2, tagsList.size());
-        });
+        ListTagsByEntityIdParamsDTO params = ListTagsByEntityIdParamsDTO.newBuilder().setNodeId(nodeId).setParams(TagListParamsDTO.newBuilder().setSearchTerm("tag-name").build()).build();
+        TagListDTO tagsByNodeId = serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).getTagsByEntityId(params);
+        List<TagDTO> tagsList = tagsByNodeId.getTagsList();
+        assertEquals(2, tagsList.size());
     }
 
     @Test
     void testGetTagListForAzureCredentialWithNameLikeNoResults() {
-        Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, tenantId).run(()->
-        {
-            long credentialId = setupAzureCredentialDatabase();
+        long credentialId = setupAzureCredentialDatabase();
 
-            TagCreateDTO createDTO1 = TagCreateDTO.newBuilder()
-                .setName(TEST_TAG_NAME_1)
-                .build();
+        TagCreateDTO createDTO1 = TagCreateDTO.newBuilder()
+            .setName(TEST_TAG_NAME_1)
+            .build();
 
-            TagCreateListDTO createListDTO1 = TagCreateListDTO.newBuilder()
-                .addAllTags(Collections.singletonList(createDTO1)).setAzureCredentialId(credentialId).build();
+        TagCreateListDTO createListDTO1 = TagCreateListDTO.newBuilder()
+            .addAllTags(Collections.singletonList(createDTO1)).setAzureCredentialId(credentialId).build();
 
-            serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).addTags(createListDTO1);
+        serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).addTags(createListDTO1);
 
-            TagCreateDTO createDTO2 = TagCreateDTO.newBuilder()
-                .setName(TEST_TAG_NAME_2)
-                .build();
+        TagCreateDTO createDTO2 = TagCreateDTO.newBuilder()
+            .setName(TEST_TAG_NAME_2)
+            .build();
 
-            TagCreateListDTO createListDTO2 = TagCreateListDTO.newBuilder()
-                .addAllTags(Collections.singletonList(createDTO2)).setAzureCredentialId(credentialId).build();
+        TagCreateListDTO createListDTO2 = TagCreateListDTO.newBuilder()
+            .addAllTags(Collections.singletonList(createDTO2)).setAzureCredentialId(credentialId).build();
 
-            serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).addTags(createListDTO2);
+        serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).addTags(createListDTO2);
 
-            List<Tag> allTags = tagRepository.findAll();
-            assertEquals(2, allTags.size());
+        List<Tag> allTags = tagRepository.findAll();
+        assertEquals(2, allTags.size());
 
-            ListTagsByEntityIdParamsDTO params = ListTagsByEntityIdParamsDTO.newBuilder().setAzureCredentialId(credentialId).setParams(TagListParamsDTO.newBuilder().setSearchTerm("tag-name-INVALID").build()).build();
-            TagListDTO tagsByNodeId = serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).getTagsByEntityId(params);
-            List<TagDTO> tagsList = tagsByNodeId.getTagsList();
-            assertEquals(0, tagsList.size());
-        });
+        ListTagsByEntityIdParamsDTO params = ListTagsByEntityIdParamsDTO.newBuilder().setAzureCredentialId(credentialId).setParams(TagListParamsDTO.newBuilder().setSearchTerm("tag-name-INVALID").build()).build();
+        TagListDTO tagsByNodeId = serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).getTagsByEntityId(params);
+        List<TagDTO> tagsList = tagsByNodeId.getTagsList();
+        assertEquals(0, tagsList.size());
     }
 
     @Test
     void testGetTagListForNodeWithNameLikeNoResults() {
-        Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, tenantId).run(()->
-        {
-            long nodeId = setupDatabase();
+        long nodeId = setupDatabase();
 
-            TagCreateDTO createDTO1 = TagCreateDTO.newBuilder()
-                .setName(TEST_TAG_NAME_1)
-                .build();
+        TagCreateDTO createDTO1 = TagCreateDTO.newBuilder()
+            .setName(TEST_TAG_NAME_1)
+            .build();
 
-            TagCreateListDTO createListDTO1 = TagCreateListDTO.newBuilder()
-                .addAllTags(Collections.singletonList(createDTO1)).setNodeId(nodeId).build();
+        TagCreateListDTO createListDTO1 = TagCreateListDTO.newBuilder()
+            .addAllTags(Collections.singletonList(createDTO1)).setNodeId(nodeId).build();
 
-            serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).addTags(createListDTO1);
+        serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).addTags(createListDTO1);
 
-            TagCreateDTO createDTO2 = TagCreateDTO.newBuilder()
-                .setName(TEST_TAG_NAME_2)
-                .build();
+        TagCreateDTO createDTO2 = TagCreateDTO.newBuilder()
+            .setName(TEST_TAG_NAME_2)
+            .build();
 
-            TagCreateListDTO createListDTO2 = TagCreateListDTO.newBuilder()
-                .addAllTags(Collections.singletonList(createDTO2)).setNodeId(nodeId).build();
+        TagCreateListDTO createListDTO2 = TagCreateListDTO.newBuilder()
+            .addAllTags(Collections.singletonList(createDTO2)).setNodeId(nodeId).build();
 
-            serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).addTags(createListDTO2);
+        serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).addTags(createListDTO2);
 
-            List<Tag> allTags = tagRepository.findAll();
-            assertEquals(2, allTags.size());
+        List<Tag> allTags = tagRepository.findAll();
+        assertEquals(2, allTags.size());
 
-            ListTagsByEntityIdParamsDTO params = ListTagsByEntityIdParamsDTO.newBuilder().setNodeId(nodeId).setParams(TagListParamsDTO.newBuilder().setSearchTerm("tag-name-INVALID").build()).build();
-            TagListDTO tagsByNodeId = serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).getTagsByEntityId(params);
-            List<TagDTO> tagsList = tagsByNodeId.getTagsList();
-            assertEquals(0, tagsList.size());
-        });
+        ListTagsByEntityIdParamsDTO params = ListTagsByEntityIdParamsDTO.newBuilder().setNodeId(nodeId).setParams(TagListParamsDTO.newBuilder().setSearchTerm("tag-name-INVALID").build()).build();
+        TagListDTO tagsByNodeId = serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).getTagsByEntityId(params);
+        List<TagDTO> tagsList = tagsByNodeId.getTagsList();
+        assertEquals(0, tagsList.size());
     }
 
     @Test
     void testGetTagListForAzureCredential() {
-        Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, tenantId).run(()->
-        {
-            long credentialId = setupAzureCredentialDatabase();
+        long credentialId = setupAzureCredentialDatabase();
 
-            TagCreateDTO createDTO1 = TagCreateDTO.newBuilder()
-                .setName(TEST_TAG_NAME_1)
-                .build();
+        TagCreateDTO createDTO1 = TagCreateDTO.newBuilder()
+            .setName(TEST_TAG_NAME_1)
+            .build();
 
-            TagCreateListDTO createListDTO1 = TagCreateListDTO.newBuilder()
-                .addAllTags(Collections.singletonList(createDTO1)).setAzureCredentialId(credentialId).build();
+        TagCreateListDTO createListDTO1 = TagCreateListDTO.newBuilder()
+            .addAllTags(Collections.singletonList(createDTO1)).setAzureCredentialId(credentialId).build();
 
-            serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).addTags(createListDTO1);
+        serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).addTags(createListDTO1);
 
-            TagCreateDTO createDTO2 = TagCreateDTO.newBuilder()
-                .setName(TEST_TAG_NAME_2)
-                .build();
+        TagCreateDTO createDTO2 = TagCreateDTO.newBuilder()
+            .setName(TEST_TAG_NAME_2)
+            .build();
 
-            TagCreateListDTO createListDTO2 = TagCreateListDTO.newBuilder()
-                .addAllTags(Collections.singletonList(createDTO2)).setAzureCredentialId(credentialId).build();
+        TagCreateListDTO createListDTO2 = TagCreateListDTO.newBuilder()
+            .addAllTags(Collections.singletonList(createDTO2)).setAzureCredentialId(credentialId).build();
 
-            serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).addTags(createListDTO2);
+        serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).addTags(createListDTO2);
 
-            List<Tag> allTags = tagRepository.findAll();
-            assertEquals(2, allTags.size());
+        List<Tag> allTags = tagRepository.findAll();
+        assertEquals(2, allTags.size());
 
-            ListTagsByEntityIdParamsDTO params = ListTagsByEntityIdParamsDTO.newBuilder().setAzureCredentialId(credentialId).setParams(TagListParamsDTO.newBuilder().build()).build();
-            TagListDTO tagsByNodeId = serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).getTagsByEntityId(params);
-            List<TagDTO> tagsList = tagsByNodeId.getTagsList();
-            assertEquals(2, tagsList.size());
-        });
+        ListTagsByEntityIdParamsDTO params = ListTagsByEntityIdParamsDTO.newBuilder().setAzureCredentialId(credentialId).setParams(TagListParamsDTO.newBuilder().build()).build();
+        TagListDTO tagsByNodeId = serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).getTagsByEntityId(params);
+        List<TagDTO> tagsList = tagsByNodeId.getTagsList();
+        assertEquals(2, tagsList.size());
     }
 
     @Test
     void testGetTagListForAzureCredentialWithNameLike() {
-        Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, tenantId).run(()->
-        {
-            long credentialId = setupAzureCredentialDatabase();
+        long credentialId = setupAzureCredentialDatabase();
 
-            TagCreateDTO createDTO1 = TagCreateDTO.newBuilder()
-                .setName(TEST_TAG_NAME_1)
-                .build();
+        TagCreateDTO createDTO1 = TagCreateDTO.newBuilder()
+            .setName(TEST_TAG_NAME_1)
+            .build();
 
-            TagCreateListDTO createListDTO1 = TagCreateListDTO.newBuilder()
-                .addAllTags(Collections.singletonList(createDTO1)).setAzureCredentialId(credentialId).build();
+        TagCreateListDTO createListDTO1 = TagCreateListDTO.newBuilder()
+            .addAllTags(Collections.singletonList(createDTO1)).setAzureCredentialId(credentialId).build();
 
-            serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).addTags(createListDTO1);
+        serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).addTags(createListDTO1);
 
-            TagCreateDTO createDTO2 = TagCreateDTO.newBuilder()
-                .setName(TEST_TAG_NAME_2)
-                .build();
+        TagCreateDTO createDTO2 = TagCreateDTO.newBuilder()
+            .setName(TEST_TAG_NAME_2)
+            .build();
 
-            TagCreateListDTO createListDTO2 = TagCreateListDTO.newBuilder()
-                .addAllTags(Collections.singletonList(createDTO2)).setAzureCredentialId(credentialId).build();
+        TagCreateListDTO createListDTO2 = TagCreateListDTO.newBuilder()
+            .addAllTags(Collections.singletonList(createDTO2)).setAzureCredentialId(credentialId).build();
 
-            serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).addTags(createListDTO2);
+        serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).addTags(createListDTO2);
 
-            List<Tag> allTags = tagRepository.findAll();
-            assertEquals(2, allTags.size());
+        List<Tag> allTags = tagRepository.findAll();
+        assertEquals(2, allTags.size());
 
-            ListTagsByEntityIdParamsDTO params = ListTagsByEntityIdParamsDTO.newBuilder().setAzureCredentialId(credentialId).setParams(TagListParamsDTO.newBuilder().setSearchTerm("tag-name").build()).build();
-            TagListDTO tagsByNodeId = serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).getTagsByEntityId(params);
-            List<TagDTO> tagsList = tagsByNodeId.getTagsList();
-            assertEquals(2, tagsList.size());
-        });
+        ListTagsByEntityIdParamsDTO params = ListTagsByEntityIdParamsDTO.newBuilder().setAzureCredentialId(credentialId).setParams(TagListParamsDTO.newBuilder().setSearchTerm("tag-name").build()).build();
+        TagListDTO tagsByNodeId = serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).getTagsByEntityId(params);
+        List<TagDTO> tagsList = tagsByNodeId.getTagsList();
+        assertEquals(2, tagsList.size());
     }
 
 
@@ -493,104 +463,95 @@ class TagGrpcItTest extends GrpcTestBase {
 
     @Test
     void testGetTagList() {
-        Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, tenantId).run(()->
-        {
-            long nodeId = setupDatabase();
+        long nodeId = setupDatabase();
 
-            TagCreateDTO createDTO1 = TagCreateDTO.newBuilder()
-                .setName(TEST_TAG_NAME_1)
-                .build();
+        TagCreateDTO createDTO1 = TagCreateDTO.newBuilder()
+            .setName(TEST_TAG_NAME_1)
+            .build();
 
-            TagCreateListDTO createListDTO1 = TagCreateListDTO.newBuilder()
-                .addAllTags(Collections.singletonList(createDTO1)).setNodeId(nodeId).build();
+        TagCreateListDTO createListDTO1 = TagCreateListDTO.newBuilder()
+            .addAllTags(Collections.singletonList(createDTO1)).setNodeId(nodeId).build();
 
-            serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).addTags(createListDTO1);
+        serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).addTags(createListDTO1);
 
-            TagCreateDTO createDTO2 = TagCreateDTO.newBuilder()
-                .setName(TEST_TAG_NAME_2)
-                .build();
+        TagCreateDTO createDTO2 = TagCreateDTO.newBuilder()
+            .setName(TEST_TAG_NAME_2)
+            .build();
 
-            TagCreateListDTO createListDTO2 = TagCreateListDTO.newBuilder()
-                .addAllTags(Collections.singletonList(createDTO2)).setNodeId(nodeId).build();
+        TagCreateListDTO createListDTO2 = TagCreateListDTO.newBuilder()
+            .addAllTags(Collections.singletonList(createDTO2)).setNodeId(nodeId).build();
 
-            serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).addTags(createListDTO2);
+        serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).addTags(createListDTO2);
 
-            List<Tag> allTags = tagRepository.findAll();
-            assertEquals(2, allTags.size());
+        List<Tag> allTags = tagRepository.findAll();
+        assertEquals(2, allTags.size());
 
-            ListAllTagsParamsDTO params = ListAllTagsParamsDTO.newBuilder().setParams(TagListParamsDTO.newBuilder().build()).build();
-            TagListDTO tagsByNodeId = serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).getTags(params);
-            List<TagDTO> tagsList = tagsByNodeId.getTagsList();
-            assertEquals(2, tagsList.size());
-        });
+        ListAllTagsParamsDTO params = ListAllTagsParamsDTO.newBuilder().setParams(TagListParamsDTO.newBuilder().build()).build();
+        TagListDTO tagsByNodeId = serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).getTags(params);
+        List<TagDTO> tagsList = tagsByNodeId.getTagsList();
+        assertEquals(2, tagsList.size());
     }
 
     @Test
     void testGetTagListWithNameLike() {
-        Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, tenantId).run(()->
-        {
-            long nodeId = setupDatabase();
+        long nodeId = setupDatabase();
 
-            TagCreateDTO createDTO1 = TagCreateDTO.newBuilder()
-                .setName(TEST_TAG_NAME_1)
-                .build();
+        TagCreateDTO createDTO1 = TagCreateDTO.newBuilder()
+            .setName(TEST_TAG_NAME_1)
+            .build();
 
-            TagCreateListDTO createListDTO1 = TagCreateListDTO.newBuilder()
-                .addAllTags(Collections.singletonList(createDTO1)).setNodeId(nodeId).build();
+        TagCreateListDTO createListDTO1 = TagCreateListDTO.newBuilder()
+            .addAllTags(Collections.singletonList(createDTO1)).setNodeId(nodeId).build();
 
-            serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).addTags(createListDTO1);
+        serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).addTags(createListDTO1);
 
-            TagCreateDTO createDTO2 = TagCreateDTO.newBuilder()
-                .setName(TEST_TAG_NAME_2)
-                .build();
+        TagCreateDTO createDTO2 = TagCreateDTO.newBuilder()
+            .setName(TEST_TAG_NAME_2)
+            .build();
 
-            TagCreateListDTO createListDTO2 = TagCreateListDTO.newBuilder()
-                .addAllTags(Collections.singletonList(createDTO2)).setNodeId(nodeId).build();
+        TagCreateListDTO createListDTO2 = TagCreateListDTO.newBuilder()
+            .addAllTags(Collections.singletonList(createDTO2)).setNodeId(nodeId).build();
 
-            serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).addTags(createListDTO2);
+        serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).addTags(createListDTO2);
 
-            List<Tag> allTags = tagRepository.findAll();
-            assertEquals(2, allTags.size());
+        List<Tag> allTags = tagRepository.findAll();
+        assertEquals(2, allTags.size());
 
-            ListAllTagsParamsDTO params = ListAllTagsParamsDTO.newBuilder().setParams(TagListParamsDTO.newBuilder().setSearchTerm("tag-name").build()).build();
-            TagListDTO tagsByNodeId = serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).getTags(params);
-            List<TagDTO> tagsList = tagsByNodeId.getTagsList();
-            assertEquals(2, tagsList.size());
-        });
+        ListAllTagsParamsDTO params = ListAllTagsParamsDTO.newBuilder().setParams(TagListParamsDTO.newBuilder().setSearchTerm("tag-name").build()).build();
+        TagListDTO tagsByNodeId = serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).getTags(params);
+        List<TagDTO> tagsList = tagsByNodeId.getTagsList();
+        assertEquals(2, tagsList.size());
     }
 
     @Test
     void testGetTagListWithNameLikeNoResults() {
-        Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, tenantId).run(()->
-        {
-            long nodeId = setupDatabase();
+        long nodeId = setupDatabase();
 
-            TagCreateDTO createDTO1 = TagCreateDTO.newBuilder()
-                .setName(TEST_TAG_NAME_1)
-                .build();
+        TagCreateDTO createDTO1 = TagCreateDTO.newBuilder()
+            .setName(TEST_TAG_NAME_1)
+            .build();
 
-            TagCreateListDTO createListDTO1 = TagCreateListDTO.newBuilder()
-                .addAllTags(Collections.singletonList(createDTO1)).setNodeId(nodeId).build();
+        TagCreateListDTO createListDTO1 = TagCreateListDTO.newBuilder()
+            .addAllTags(Collections.singletonList(createDTO1)).setNodeId(nodeId).build();
 
-            serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).addTags(createListDTO1);
+        serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).addTags(createListDTO1);
 
-            TagCreateDTO createDTO2 = TagCreateDTO.newBuilder()
-                .setName(TEST_TAG_NAME_2)
-                .build();
+        TagCreateDTO createDTO2 = TagCreateDTO.newBuilder()
+            .setName(TEST_TAG_NAME_2)
+            .build();
 
-            TagCreateListDTO createListDTO2 = TagCreateListDTO.newBuilder()
-                .addAllTags(Collections.singletonList(createDTO2)).setNodeId(nodeId).build();
+        TagCreateListDTO createListDTO2 = TagCreateListDTO.newBuilder()
+            .addAllTags(Collections.singletonList(createDTO2)).setNodeId(nodeId).build();
 
-            serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).addTags(createListDTO2);
+        serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).addTags(createListDTO2);
 
-            List<Tag> allTags = tagRepository.findAll();
-            assertEquals(2, allTags.size());
+        List<Tag> allTags = tagRepository.findAll();
+        assertEquals(2, allTags.size());
 
-            ListAllTagsParamsDTO params = ListAllTagsParamsDTO.newBuilder().setParams(TagListParamsDTO.newBuilder().setSearchTerm("tag-name-INVALID").build()).build();
-            TagListDTO tagsByNodeId = serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).getTags(params);
-            List<TagDTO> tagsList = tagsByNodeId.getTagsList();
-            assertEquals(0, tagsList.size());
-        });
+        ListAllTagsParamsDTO params = ListAllTagsParamsDTO.newBuilder().setParams(TagListParamsDTO.newBuilder().setSearchTerm("tag-name-INVALID").build()).build();
+        TagListDTO tagsByNodeId = serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader))).getTags(params);
+        List<TagDTO> tagsList = tagsByNodeId.getTagsList();
+        assertEquals(0, tagsList.size());
     }
 
     private long setupDatabase() {
@@ -623,6 +584,7 @@ class TagGrpcItTest extends GrpcTestBase {
         azureCredential.setClientSecret("test-client-secret");
         azureCredential.setClientId("test-client-id");
         azureCredential.setCreateTime(LocalDateTime.now());
+        azureCredential.setTenantId(tenantId);
         azureCredential = azureCredentialRepository.saveAndFlush(azureCredential);
         return azureCredential.getId();
     }

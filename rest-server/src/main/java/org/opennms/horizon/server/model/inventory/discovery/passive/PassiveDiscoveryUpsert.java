@@ -1,8 +1,8 @@
 /*******************************************************************************
  * This file is part of OpenNMS(R).
  *
- * Copyright (C) 2023 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
+ * Copyright (C) 2022 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
  *
@@ -26,34 +26,21 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.inventory.model;
-
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.validation.constraints.NotNull;
+package org.opennms.horizon.server.model.inventory.discovery.passive;
 
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import org.opennms.horizon.server.model.inventory.tag.TagCreate;
 
+import java.util.List;
 
 @Getter
 @Setter
-@RequiredArgsConstructor
-@Entity
-public class MonitoringLocation {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
-
-    @NotNull
-    @Column(name = "tenant_id")
-    private String tenantId;
-
-    @NotNull
-    @Column(name = "location")
+public class PassiveDiscoveryUpsert {
+    private Long id;
+    private String name;
     private String location;
+    private List<Integer> snmpPorts;
+    private List<String> snmpCommunities;
+    private List<TagCreate> tags;
 }

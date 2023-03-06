@@ -1,8 +1,8 @@
 /*******************************************************************************
  * This file is part of OpenNMS(R).
  *
- * Copyright (C) 2023 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
+ * Copyright (C) 2022 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
  *
@@ -26,34 +26,17 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.inventory.model;
+package org.opennms.horizon.inventory.repository;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.validation.constraints.NotNull;
+import org.opennms.horizon.inventory.model.PassiveDiscovery;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
+import java.util.List;
+import java.util.Optional;
 
-
-@Getter
-@Setter
-@RequiredArgsConstructor
-@Entity
-public class MonitoringLocation {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
-
-    @NotNull
-    @Column(name = "tenant_id")
-    private String tenantId;
-
-    @NotNull
-    @Column(name = "location")
-    private String location;
+@Repository
+public interface PassiveDiscoveryRepository extends JpaRepository<PassiveDiscovery, Long> {
+    List<PassiveDiscovery> findByTenantId(String tenantId);
+    Optional<PassiveDiscovery> findByTenantIdAndId(String tenantId, long id);
 }

@@ -19,5 +19,5 @@ public interface MonitoringLocationRepository extends JpaRepository<MonitoringLo
 
     List<MonitoringLocation> findByIdIn(List<Long> ids);
 
-    List<MonitoringLocation> findByLocationContainingIgnoreCase(String location);
+    List<MonitoringLocation> findByLocationContainingIgnoreCaseAndTenantId(String location, String tenantId);
 }

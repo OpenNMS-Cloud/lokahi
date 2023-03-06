@@ -28,10 +28,8 @@
 
 package org.opennms.horizon.inventory.service.taskset.response;
 
-
 import com.google.protobuf.Any;
 import com.google.protobuf.InvalidProtocolBufferException;
-import io.grpc.Context;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -54,7 +52,6 @@ import org.opennms.horizon.inventory.repository.NodeRepository;
 import org.opennms.horizon.inventory.repository.SnmpInterfaceRepository;
 import org.opennms.horizon.inventory.repository.TagRepository;
 import org.opennms.horizon.inventory.service.NodeService;
-import org.opennms.horizon.shared.constants.GrpcConstants;
 import org.opennms.horizon.shared.utils.InetAddressUtils;
 import org.opennms.node.scan.contract.IpInterfaceResult;
 import org.opennms.node.scan.contract.NodeInfoResult;
@@ -66,6 +63,7 @@ import org.opennms.taskset.contract.TaskType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -117,105 +115,85 @@ class ScannerResponseServiceIntTest extends GrpcTestBase {
     }
 
     @AfterEach
+    @Transactional
     public void cleanUp() {
-        Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, TEST_TENANT_ID).run(()->
-        {
-            tagRepository.deleteAll();
-            ipInterfaceRepository.deleteAll();
-            nodeRepository.deleteAll();
-            credentialRepository.deleteAll();
-            locationRepository.deleteAll();
-        });
-        testGrpcService.reset();
+        tagRepository.deleteAll();
+        ipInterfaceRepository.deleteAll();
+        nodeRepository.deleteAll();
+        credentialRepository.deleteAll();
+        locationRepository.deleteAll();
+    }
+    @Test
+    void testAzureAccept() throws Exception {
+        AzureCredential credential = createAzureCredential();
+
+        AzureScanItem scanItem = AzureScanItem.newBuilder()
+            .setId("/subscriptions/sub-id/resourceGroups/resource-group/providers/Microsoft.Compute/virtualMachines/vm-name")
+            .setName("vm-name")
+            .setResourceGroup("resource-group")
+            .setCredentialId(credential.getId())
+            .build();
+
+        List<AzureScanItem> azureScanItems = Collections.singletonList(scanItem);
+        AzureScanResponse azureScanResponse = AzureScanResponse.newBuilder().addAllResults(azureScanItems).build();
+        ScannerResponse response = ScannerResponse.newBuilder().setResult(Any.pack(azureScanResponse)).build();
+
+        service.accept(TEST_TENANT_ID, TEST_LOCATION, response);
+
+        // monitor and collect tasks
+        await().atMost(10, TimeUnit.SECONDS).until(() -> testGrpcService.getTaskDefinitions(TEST_LOCATION).stream()
+            .filter(taskDefinition -> taskDefinition.getPluginName().contains("AZURE") &&
+                (taskDefinition.getType().equals(TaskType.MONITOR) || taskDefinition.getType().equals(TaskType.COLLECTOR)))
+            .collect(Collectors.toSet()).size(), Matchers.is(2));
+
+        List<Node> allNodes = nodeRepository.findAll();
+        assertEquals(1, allNodes.size());
+
+        Node node = allNodes.get(0);
+        assertNotNull(node);
+        assertEquals(ScanType.AZURE_SCAN, node.getScanType());
+        assertEquals(TEST_TENANT_ID, node.getTenantId());
+        assertEquals("vm-name (resource-group)", node.getNodeLabel());
+        assertNotNull(node.getMonitoringLocation());
+
+        List<Tag> tags = node.getTags();
+        assertEquals(1, tags.size());
+
+        List<IpInterface> allIpInterfaces = ipInterfaceRepository.findAll();
+        assertEquals(1, allIpInterfaces.size());
+        IpInterface ipInterface = allIpInterfaces.get(0);
+        assertEquals(TEST_TENANT_ID, ipInterface.getTenantId());
+        assertEquals("127.0.0.1", InetAddressUtils.toIpAddrString(ipInterface.getIpAddress()));
     }
 
     @Test
-    void testAzureAccept() {
-        Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, TEST_TENANT_ID).run(()->
-        {
-            AzureCredential credential = createAzureCredential();
+    void testAcceptNodeScanResult() throws InvalidProtocolBufferException {
+        String managedIp = "127.0.0.1";
+        Node node = createNode(managedIp);
+        int ifIndex = 1;
+        SnmpInterface snmpIf = createSnmpInterface(node, ifIndex);
+        NodeScanResult result = createNodeScanResult(node.getId(), managedIp, ifIndex);
 
-            AzureScanItem scanItem = AzureScanItem.newBuilder()
-                .setId("/subscriptions/sub-id/resourceGroups/resource-group/providers/Microsoft.Compute/virtualMachines/vm-name")
-                .setName("vm-name")
-                .setResourceGroup("resource-group")
-                .setCredentialId(credential.getId())
-                .build();
-
-            List<AzureScanItem> azureScanItems = Collections.singletonList(scanItem);
-            AzureScanResponse azureScanResponse = AzureScanResponse.newBuilder().addAllResults(azureScanItems).build();
-            ScannerResponse response = ScannerResponse.newBuilder().setResult(Any.pack(azureScanResponse)).build();
-
-            try {
-                service.accept(TEST_TENANT_ID, TEST_LOCATION, response);
-            } catch (InvalidProtocolBufferException e) {
-                throw new RuntimeException(e);
-            }
-
-            // monitor and collect tasks
-            await().atMost(10, TimeUnit.SECONDS).until(() -> testGrpcService.getTaskDefinitions(TEST_LOCATION).stream()
-                    .filter(taskDefinition -> taskDefinition.getPluginName().contains("AZURE") &&
-                        (taskDefinition.getType().equals(TaskType.MONITOR) || taskDefinition.getType().equals(TaskType.COLLECTOR)))
-                .collect(Collectors.toSet()).size(), Matchers.is(2));
-
-            List<Node> allNodes = nodeRepository.findAll();
-            assertEquals(1, allNodes.size());
-
-            Node node = allNodes.get(0);
-            assertNotNull(node);
-            assertEquals(ScanType.AZURE_SCAN, node.getScanType());
-            assertEquals(TEST_TENANT_ID, node.getTenantId());
-            assertEquals("vm-name (resource-group)", node.getNodeLabel());
-            assertNotNull(node.getMonitoringLocation());
-
-            List<Tag> tags = node.getTags();
-            assertEquals(1, tags.size());
-
-            List<IpInterface> allIpInterfaces = ipInterfaceRepository.findAll();
-            assertEquals(1, allIpInterfaces.size());
-            IpInterface ipInterface = allIpInterfaces.get(0);
-            assertEquals(TEST_TENANT_ID, ipInterface.getTenantId());
-            assertEquals("127.0.0.1", InetAddressUtils.toIpAddrString(ipInterface.getIpAddress()));
-        });
-    }
-
-    @Test
-    void testAcceptNodeScanResult() {
-        Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, TEST_TENANT_ID).run(()->
-        {
-            String managedIp = "127.0.0.1";
-            Node node = createNode(managedIp);
-            int ifIndex = 1;
-            SnmpInterface snmpIf = createSnmpInterface(node, ifIndex);
-            NodeScanResult result = createNodeScanResult(node.getId(), managedIp, ifIndex);
-
-            try {
-                service.accept(TEST_TENANT_ID, TEST_LOCATION, ScannerResponse.newBuilder().setResult(Any.pack(result)).build());
-            } catch (InvalidProtocolBufferException e) {
-                throw new RuntimeException(e);
-            }
-            assertNodeSystemGroup(node, null);
-            nodeRepository.findByIdAndTenantId(node.getId(), TEST_TENANT_ID).ifPresentOrElse(dbNode ->
-                assertNodeSystemGroup(dbNode, result.getNodeInfo()), () -> fail("Node not found"));
+        service.accept(TEST_TENANT_ID, TEST_LOCATION, ScannerResponse.newBuilder().setResult(Any.pack(result)).build());
+        assertNodeSystemGroup(node, null);
+        nodeRepository.findByIdAndTenantId(node.getId(), TEST_TENANT_ID).ifPresentOrElse(dbNode ->
+            assertNodeSystemGroup(dbNode, result.getNodeInfo()), () -> fail("Node not found"));
 
         assertIpInterface(node.getIpInterfaces().get(0), null);
         List<IpInterface> ipIfList = ipInterfaceRepository.findByNodeId(node.getId());
         assertThat(ipIfList.get(0)).extracting(ipIf -> ipIf.getIpAddress().getHostAddress()).isEqualTo(managedIp);
-        assertThat(ipIfList.get(0)).extracting(IpInterface::getSnmpInterface).isNotNull();
-        assertThat(ipIfList.get(1)).extracting(IpInterface::getSnmpInterface).isNull();
         assertThat(ipIfList).asList().hasSize(result.getIpInterfacesList().size());
         IntStream.range(0, ipIfList.size())
             .forEach(i -> assertIpInterface(ipIfList.get(i), result.getIpInterfaces(i)));
 
-            List<SnmpInterface> snmpInterfaceList = snmpInterfaceRepository.findByTenantId(TEST_TENANT_ID);
-            assertThat(snmpInterfaceList).asList().hasSize(2);
-            assertThat(snmpIf.getIfIndex()).isEqualTo(ifIndex);
-            assertSnmpInterfaces(snmpIf, null);
-            IntStream.range(0, snmpInterfaceList.size())
-                .forEach(i -> assertSnmpInterfaces(snmpInterfaceList.get(i), result.getSnmpInterfaces(i)));
-        });
-    }
+        List<SnmpInterface> snmpInterfaceList = snmpInterfaceRepository.findByTenantId(TEST_TENANT_ID);
+        assertThat(snmpInterfaceList).asList().hasSize(2);
+        assertThat(snmpIf.getIfIndex()).isEqualTo(ifIndex);
+        assertSnmpInterfaces(snmpIf, null);
+        IntStream.range(0, snmpInterfaceList.size())
+            .forEach(i -> assertSnmpInterfaces(snmpInterfaceList.get(i), result.getSnmpInterfaces(i)));
 
+    }
     private Node createNode(String ipAddress) {
         NodeCreateDTO createDTO = NodeCreateDTO.newBuilder()
             .setLabel("test-node")
@@ -282,7 +260,8 @@ class ScannerResponseServiceIntTest extends GrpcTestBase {
             .build();
     }
 
-    private AzureCredential createAzureCredential() {
+    @Transactional
+    public AzureCredential createAzureCredential() {
 
         MonitoringLocation location = new MonitoringLocation();
         location.setLocation(TEST_LOCATION);
@@ -301,6 +280,7 @@ class ScannerResponseServiceIntTest extends GrpcTestBase {
         credential = credentialRepository.save(credential);
 
         Tag tag = new Tag();
+        tag.setTenantId(TEST_TENANT_ID);
         tag.setName("tag-name");
         tag.getAzureCredentials().add(credential);
         tagRepository.save(tag);

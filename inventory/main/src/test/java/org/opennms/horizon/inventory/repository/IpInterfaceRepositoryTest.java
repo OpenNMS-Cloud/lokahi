@@ -51,11 +51,14 @@ import org.opennms.horizon.shared.constants.GrpcConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ContextConfiguration;
 
 import io.grpc.Context;
 
-@SpringBootTest
+@DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @ContextConfiguration(initializers = {SpringContextTestInitializer.class})
 class IpInterfaceRepositoryTest {
@@ -90,42 +93,28 @@ class IpInterfaceRepositoryTest {
 
     @Test
     void testFindByIpInterfaceForAGivenLocationAndIpAddress() throws UnknownHostException {
-        Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, "tenant1").run(()->
-        {
-            var node = nodeRepository.findByNodeLabel("node1");
-            assertNotNull(node);
-            var locationList = monitoringLocationRepository.findByLocation("location1");
-            assertFalse(locationList.isEmpty(), "Should have valid location");
-            var list = ipInterfaceRepository.findAll();
-            assertThat(list).isNotEmpty();
-        });
+        var node = nodeRepository.findByNodeLabel("node1");
+        assertNotNull(node);
+        var locationList = monitoringLocationRepository.findByLocation("location1");
+        assertFalse(locationList.isEmpty(), "Should have valid location");
+        var list = ipInterfaceRepository.findAll();
+        assertThat(list).isNotEmpty();
 
-        for (int count = 0; count < NUM_NODES; count++) {
-            final int i = count;
-            final InetAddress inetAddress = InetAddress.getByName("192.168.1." + i);
-            final String tenant = "tenant" + i;
+        for (int i = 0; i < NUM_NODES; i++) {
+            var optional = ipInterfaceRepository.findByIpAddressAndLocationAndTenantId(
+                InetAddress.getByName("192.168.1." + i), "location" + i, "tenant" + i);
+            assertThat(optional).isNotEmpty();
+            assertThat(optional.get().getIpAddress()).isEqualTo(InetAddress.getByName("192.168.1." + i));
 
-            Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, tenant).run(()->
-            {
-                var optional = ipInterfaceRepository.findByIpAddressAndLocationAndTenantId(
-                    inetAddress, "location" + i, tenant);
-                assertThat(optional).isNotEmpty();
-                assertThat(optional.get().getIpAddress()).isEqualTo(inetAddress);
+            // Check with invalid location
+            var optionalInterface = ipInterfaceRepository.findByIpAddressAndLocationAndTenantId(
+                InetAddress.getByName("192.168.1." + i), "location" + i + 3, "tenant" + i);
+            assertThat(optionalInterface).isEmpty();
 
-                // Check with invalid location
-                var optionalInterface = ipInterfaceRepository.findByIpAddressAndLocationAndTenantId(
-                    inetAddress, "location" + i + 3, tenant);
-                assertThat(optionalInterface).isEmpty();
-            });
-
-            final String invalidTenant = "tenant2" + i + 3;
-            Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, invalidTenant).run(()->
-            {
-                // Check with invalid tenant
-                var optionalInterface = ipInterfaceRepository.findByIpAddressAndLocationAndTenantId(
-                    inetAddress, "location" + i, invalidTenant);
-                assertThat(optionalInterface).isEmpty();
-            });
+            // Check with invalid tenant
+            optionalInterface = ipInterfaceRepository.findByIpAddressAndLocationAndTenantId(
+                InetAddress.getByName("192.168.1." + i), "location" + i, "tenant2" + i + 3);
+            assertThat(optionalInterface).isEmpty();
         }
 
     }
@@ -133,90 +122,69 @@ class IpInterfaceRepositoryTest {
     @Test
     void testIpInterfaceWithSNMPIfDeleteSNMP() throws UnknownHostException {
         int ifIndex = 10;
-        Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, "tenant1").run(() ->{
-            var node = nodeRepository.findByNodeLabel("node1").get(0);
-            var snmpInterface = new SnmpInterface();
-            snmpInterface.setNode(node);
-            snmpInterface.setIfIndex(ifIndex);
-            snmpInterface.setIfName("test-snmp");
-            snmpInterface.setTenantId(node.getTenantId());
-            snmpInterfaceRepository.save(snmpInterface);
-            var ipInterface = new IpInterface();
-            ipInterface.setNode(node);
-            ipInterface.setSnmpInterface(snmpInterface);
-            ipInterface.setTenantId(node.getTenantId());
-            try {
-                ipInterface.setIpAddress(InetAddress.getByName("127.0.0.1"));
-            } catch (UnknownHostException e) {
-                throw new RuntimeException(e);
-            }
-            ipInterfaceRepository.save(ipInterface);
-            var result = ipInterfaceRepository.findById(ipInterface.getId());
-            assertThat(result).isPresent().get()
-                .extracting(i -> i.getIpAddress().getHostAddress(), i -> i.getSnmpInterface().getIfName())
-                .containsExactly("127.0.0.1", "test-snmp");
-            //test after snmp being deleted
-            snmpInterfaceRepository.deleteById(snmpInterface.getId());
-            var result2 = ipInterfaceRepository.findById(ipInterface.getId());
-            assertThat(result2).isPresent();
-        });
+        var node = nodeRepository.findByNodeLabel("node1").get(0);
+        var snmpInterface = new SnmpInterface();
+        snmpInterface.setNode(node);
+        snmpInterface.setIfIndex(ifIndex);
+        snmpInterface.setIfName("test-snmp");
+        snmpInterface.setTenantId(node.getTenantId());
+        snmpInterfaceRepository.save(snmpInterface);
+        var ipInterface = new IpInterface();
+        ipInterface.setNode(node);
+        ipInterface.setSnmpInterface(snmpInterface);
+        ipInterface.setTenantId(node.getTenantId());
+        ipInterface.setIpAddress(InetAddress.getByName("127.0.0.1"));
+        ipInterfaceRepository.save(ipInterface);
+        var result = ipInterfaceRepository.findById(ipInterface.getId());
+        assertThat(result).isPresent().get()
+            .extracting(i -> i.getIpAddress().getHostAddress(), i -> i.getSnmpInterface().getIfName())
+            .containsExactly("127.0.0.1", "test-snmp");
+        //test after snmp being deleted
+        snmpInterfaceRepository.deleteById(snmpInterface.getId());
+        var result2 = ipInterfaceRepository.findById(ipInterface.getId());
+        assertThat(result2).isPresent();
     }
 
     @Test
     void testIpInterfaceWithSNMPIfDeleteIPIf() throws UnknownHostException {
-        Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, "tenant1").run(() -> {
-            int ifIndex = 10;
-            var node = nodeRepository.findByNodeLabel("node1").get(0);
-            var snmpInterface = new SnmpInterface();
-            snmpInterface.setNode(node);
-            snmpInterface.setIfIndex(ifIndex);
-            snmpInterface.setIfName("test-snmp");
-            snmpInterface.setTenantId(node.getTenantId());
-            snmpInterfaceRepository.save(snmpInterface);
-            var ipInterface = new IpInterface();
-            ipInterface.setNode(node);
-            ipInterface.setSnmpInterface(snmpInterface);
-            ipInterface.setTenantId(node.getTenantId());
-            try {
-                ipInterface.setIpAddress(InetAddress.getByName("127.0.0.1"));
-            } catch (UnknownHostException e) {
-                throw new RuntimeException(e);
-            }
-            ipInterfaceRepository.save(ipInterface);
-            ipInterfaceRepository.deleteById(ipInterface.getId());
-            var snmpIf = snmpInterfaceRepository.findById(snmpInterface.getId());
-            assertThat(snmpIf).isPresent();
-        });
+        int ifIndex = 10;
+        var node = nodeRepository.findByNodeLabel("node1").get(0);
+        var snmpInterface = new SnmpInterface();
+        snmpInterface.setNode(node);
+        snmpInterface.setIfIndex(ifIndex);
+        snmpInterface.setIfName("test-snmp");
+        snmpInterface.setTenantId(node.getTenantId());
+        snmpInterfaceRepository.save(snmpInterface);
+        var ipInterface = new IpInterface();
+        ipInterface.setNode(node);
+        ipInterface.setSnmpInterface(snmpInterface);
+        ipInterface.setTenantId(node.getTenantId());
+        ipInterface.setIpAddress(InetAddress.getByName("127.0.0.1"));
+        ipInterfaceRepository.save(ipInterface);
+        ipInterfaceRepository.deleteById(ipInterface.getId());
+        var snmpIf = snmpInterfaceRepository.findById(snmpInterface.getId());
+        assertThat(snmpIf).isPresent();
     }
 
-    private void loadNodes() {
-        for (int count = 0; count < NUM_NODES; count++) {
-            final int i = count;
-            final String tenant = "tenant" + i;
-            Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, tenant).run(()->
-            {
-                var node = new Node();
-                node.setNodeLabel("node" + i);
-                node.setCreateTime(LocalDateTime.now());
-                node.setTenantId(tenant);
-                var location = new MonitoringLocation();
-                location.setLocation("location" + i);
-                location.setTenantId(tenant);
-                monitoringLocationRepository.save(location);
-                node.setMonitoringLocation(location);
-                var ipInterface = new IpInterface();
-                ipInterface.setTenantId(tenant);
-                ipInterface.setNode(node);
-                try {
-                    ipInterface.setIpAddress(InetAddress.getByName("192.168.1." + i));
-                } catch (UnknownHostException e) {
-                    throw new RuntimeException(e);
-                }
-                var ipInterfaces = new ArrayList<IpInterface>();
-                ipInterfaces.add(ipInterface);
-                node.setIpInterfaces(ipInterfaces);
-                nodeRepository.save(node);
-            });
+    private void loadNodes() throws UnknownHostException {
+        for (int i = 0; i < NUM_NODES; i++) {
+            var node = new Node();
+            node.setNodeLabel("node" + i);
+            node.setCreateTime(LocalDateTime.now());
+            node.setTenantId("tenant" + i);
+            var location = new MonitoringLocation();
+            location.setLocation("location" + i);
+            location.setTenantId("tenant" + i);
+            monitoringLocationRepository.save(location);
+            node.setMonitoringLocation(location);
+            var ipInterface = new IpInterface();
+            ipInterface.setTenantId("tenant" + i);
+            ipInterface.setNode(node);
+            ipInterface.setIpAddress(InetAddress.getByName("192.168.1." + i));
+            var ipInterfaces = new ArrayList<IpInterface>();
+            ipInterfaces.add(ipInterface);
+            node.setIpInterfaces(ipInterfaces);
+            nodeRepository.save(node);
         }
     }
 

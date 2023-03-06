@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+
+    <changeSet author="tbigg" id="0.1.0-passive-discovery">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="passive_discovery"/>
+                <tableExists tableName="passive_discovery_tag"/>
+            </not>
+        </preConditions>
+
+        <!--  Add passive discovery table  -->
+        <createTable tableName="passive_discovery">
+            <column name="id" type="BIGINT" autoIncrement="true"/>
+
+            <column name="tenant_id" type="text">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="name" type="text">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="location" type="text">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="toggle" type="boolean" defaultValue="1" defaultValueBoolean="1">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="snmp_ports" type="jsonb" />
+
+            <column name="snmp_communities" type="jsonb" />
+
+            <column name="create_time" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addPrimaryKey tableName="passive_discovery" columnNames="id"
+                       constraintName="pk_passive_discovery_id"/>
+
+        <!--  Add tag link table -->
+        <createTable tableName="passive_discovery_tag">
+            <column name="passive_discovery_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="tag_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint constraintName="fk_passive_discovery_tag_passive_discovery_id"
+                                 onDelete="CASCADE"
+                                 baseTableName="passive_discovery_tag"
+                                 baseColumnNames="passive_discovery_id"
+                                 referencedTableName="passive_discovery" referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint constraintName="fk_passive_discovery_tag_tag_id" onDelete="CASCADE"
+                                 baseTableName="passive_discovery_tag"
+                                 baseColumnNames="tag_id"
+                                 referencedTableName="tag"
+                                 referencedColumnNames="id"/>
+
+    </changeSet>
+</databaseChangeLog>

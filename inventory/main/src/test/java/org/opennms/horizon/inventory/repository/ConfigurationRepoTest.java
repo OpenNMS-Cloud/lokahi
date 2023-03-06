@@ -28,41 +28,31 @@
 
 package org.opennms.horizon.inventory.repository;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.opennms.horizon.inventory.SpringContextTestInitializer;
+import org.opennms.horizon.inventory.dto.ConfigKey;
+import org.opennms.horizon.inventory.model.Configuration;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.test.context.ContextConfiguration;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import io.grpc.Context;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.opennms.horizon.inventory.SpringContextTestInitializer;
-import org.opennms.horizon.inventory.dto.ConfigKey;
-import org.opennms.horizon.inventory.model.Configuration;
-import org.opennms.horizon.shared.constants.GrpcConstants;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.SpringBootTestContextBootstrapper;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.test.context.BootstrapWith;
-import org.springframework.test.context.ContextConfiguration;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-
-@SpringBootTest
+@DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @ContextConfiguration(initializers = {SpringContextTestInitializer.class})
 public class ConfigurationRepoTest {
     private final String tenantId1 = new UUID(10, 10).toString();
     private final String tenantId2 = new UUID(9, 9).toString();
-    private final String tenantId3 = new UUID(5, 6).toString();
     private Configuration configuration1, configuration2, configuration3, configuration4;
 
     @Autowired
@@ -84,7 +74,7 @@ public class ConfigurationRepoTest {
 
         configuration3 = new Configuration();
         configuration3.setLocation("test-location3");
-        configuration3.setTenantId(tenantId3);
+        configuration3.setTenantId(new UUID(5, 6).toString());
         configuration3.setKey(ConfigKey.SNMP);
         configuration3.setValue(new ObjectMapper().readTree("{\"test\": \"value3\"}"));
 
@@ -94,128 +84,69 @@ public class ConfigurationRepoTest {
         configuration4.setKey(ConfigKey.DISCOVERY);
         configuration4.setValue(new ObjectMapper().readTree("{\"test\": \"value4\"}"));
 
-        Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, tenantId1).run(()->
-        {
-            repository.save(configuration1);
-            repository.save(configuration2);
-        });
-
-        Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, tenantId3).run(()->
-        {
-            repository.save(configuration3);
-        });
-
-        Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, tenantId2).run(()->
-        {
-            repository.save(configuration4);
-        });
+        repository.save(configuration1);
+        repository.save(configuration2);
+        repository.save(configuration3);
+        repository.save(configuration4);
     }
 
     @AfterEach
     public void cleanUp() {
-        Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, tenantId1).run(()->
-        {
-            repository.deleteAll();
-        });
-        Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, tenantId2).run(()->
-        {
-            repository.deleteAll();
-        });
-        Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, tenantId3).run(()->
-        {
-            repository.deleteAll();
-        });
+        repository.deleteAll();
     }
 
     @Test
     void testFindAll() {
-        Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, tenantId1).run(()->
-        {
-            List<Configuration> result = repository.findAll();
-            assertThat(result.size()).isEqualTo(2);
-        });
-        Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, tenantId2).run(()->
-        {
-            List<Configuration> result = repository.findAll();
-            assertThat(result.size()).isEqualTo(1);
-        });
-        Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, tenantId3).run(()->
-        {
-            List<Configuration> result = repository.findAll();
-            assertThat(result.size()).isEqualTo(1);
-        });
+        List<Configuration> result = repository.findAll();
+        assertThat(result.size()).isEqualTo(4);
     }
 
     @Test
     void testFindByKey() {
-        Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, configuration1.getTenantId()).run(()->
-        {
-            Optional<Configuration> result = repository.getByTenantIdAndKey(configuration1.getTenantId(), configuration1.getKey());
-            assertThat(result.isPresent()).isTrue();
-            assertThat(result.get().getValue().toString()).isEqualTo("{\"test\":\"value1\"}");
-        });
+        Optional<Configuration> result = repository.getByTenantIdAndKey(configuration1.getTenantId(), configuration1.getKey());
+        assertThat(result.isPresent()).isTrue();
+        assertThat(result.get().getValue().toString()).isEqualTo("{\"test\":\"value1\"}");
     }
 
     @Test
     void testFindByKeyNotExist() {
-        Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, configuration1.getTenantId()).run(()->
-        {
-            Optional<Configuration> result = repository.getByTenantIdAndKey(configuration1.getTenantId(), ConfigKey.UNRECOGNIZED);
-            assertThat(result.isPresent()).isFalse();
-        });
+        Optional<Configuration> result = repository.getByTenantIdAndKey(configuration1.getTenantId(), ConfigKey.UNRECOGNIZED);
+        assertThat(result.isPresent()).isFalse();
     }
 
     @Test
     void testFindByRandomTenantIdAndKey() {
-        Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, new UUID(5,8).toString()).run(()->
-        {
-            Optional<Configuration> result = repository.getByTenantIdAndKey(new UUID(5,8).toString(), configuration1.getKey());
-            assertThat(result.isPresent()).isFalse();
-        });
+        Optional<Configuration> result = repository.getByTenantIdAndKey(new UUID(5,8).toString(), configuration1.getKey());
+        assertThat(result.isPresent()).isFalse();
     }
 
     @Test
     void testFindByTenantIdAndRandomKey() {
-        Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, configuration1.getTenantId()).run(()->
-        {
-            Optional<Configuration> result = repository.getByTenantIdAndKey(configuration1.getTenantId(), ConfigKey.UNRECOGNIZED);
-            assertThat(result.isPresent()).isFalse();
-        });
+        Optional<Configuration> result = repository.getByTenantIdAndKey(configuration1.getTenantId(), ConfigKey.UNRECOGNIZED);
+        assertThat(result.isPresent()).isFalse();
     }
 
     @Test
     void testFindByLocation() {
-        Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, configuration1.getTenantId()).run(()->
-        {
-            List<Configuration> result = repository.findByTenantIdAndLocation(configuration1.getTenantId(), configuration1.getLocation());
-            assertThat(result.size()).isEqualTo(2);
-        });
+        List<Configuration> result = repository.findByTenantIdAndLocation(configuration1.getTenantId(), configuration1.getLocation());
+        assertThat(result.size()).isEqualTo(2);
     }
 
     @Test
     void testFindByLocationNotExist() {
-        Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, configuration1.getTenantId()).run(()->
-        {
-            List<Configuration> result = repository.findByTenantIdAndLocation(configuration1.getTenantId(), "Invalid location");
-            assertThat(result.isEmpty());
-        });
+        List<Configuration> result = repository.findByTenantIdAndLocation(configuration1.getTenantId(), "Invalid location");
+        assertThat(result.size()).isZero();
     }
 
     @Test
     void testFindByRandomTenantIdAndLocation() {
-        Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, new UUID(5,8).toString()).run(()->
-        {
-            List<Configuration> result = repository.findByTenantIdAndLocation(new UUID(5,8).toString(), configuration1.getLocation());
-            assertThat(result.isEmpty());
-        });
+        List<Configuration> result = repository.findByTenantIdAndLocation(new UUID(5,8).toString(), configuration1.getLocation());
+        assertThat(result.size()).isZero();
     }
 
     @Test
     void testFindByRandomLocation() {
-        Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, configuration1.getTenantId()).run(()->
-        {
-            List<Configuration> result = repository.findByTenantIdAndLocation(tenantId1, "Random location");
-            assertThat(result.isEmpty());
-        });
+        List<Configuration> result = repository.findByTenantIdAndLocation(tenantId1, "Random location");
+        assertThat(result.size()).isZero();
     }
 }

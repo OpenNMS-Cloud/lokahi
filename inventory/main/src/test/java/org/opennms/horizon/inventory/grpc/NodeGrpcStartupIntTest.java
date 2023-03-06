@@ -33,6 +33,7 @@ import static com.jayway.awaitility.Awaitility.await;
 import java.util.concurrent.TimeUnit;
 
 import org.hamcrest.Matchers;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -45,14 +46,13 @@ import org.opennms.taskset.service.contract.TaskSetServiceGrpc;
 import org.opennms.taskset.service.contract.UpdateTasksRequest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
+import org.opennms.taskset.service.contract.TaskSetServiceGrpc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 
 import jakarta.transaction.Transactional;
-import org.testcontainers.containers.PostgreSQLContainer;
-
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Supplier;
 
 import static com.jayway.awaitility.Awaitility.await;
 

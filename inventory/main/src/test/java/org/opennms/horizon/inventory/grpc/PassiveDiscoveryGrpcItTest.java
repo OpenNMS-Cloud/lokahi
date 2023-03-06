@@ -41,6 +41,7 @@ import org.opennms.horizon.inventory.dto.PassiveDiscoveryDTO;
 import org.opennms.horizon.inventory.dto.PassiveDiscoveryListDTO;
 import org.opennms.horizon.inventory.dto.PassiveDiscoveryServiceGrpc;
 import org.opennms.horizon.inventory.dto.PassiveDiscoveryUpsertDTO;
+import org.opennms.horizon.inventory.dto.PassiveDiscoveryToggleDTO;
 import org.opennms.horizon.inventory.dto.TagCreateDTO;
 import org.opennms.horizon.inventory.dto.TagDTO;
 import org.opennms.horizon.inventory.dto.TagListDTO;
@@ -209,5 +210,30 @@ class PassiveDiscoveryGrpcItTest extends GrpcTestBase {
         assertEquals(TEST_SNMP_COMMUNITY, communitiesList.get(0));
 
         assertTrue(passiveDiscovery.getCreateTimeMsec() > 0);
+    }
+
+    @Test
+    void testTogglePassiveDiscovery() {
+
+        // create a passive discovery
+        PassiveDiscoveryUpsertDTO upsertDTO = PassiveDiscoveryUpsertDTO.newBuilder()
+            .build();
+        // insert the passive discovery, should default toggle to true
+        PassiveDiscoveryDTO passiveDiscovery = serviceStub.withInterceptors(MetadataUtils
+                .newAttachHeadersInterceptor(createAuthHeader(authHeader)))
+            .upsertDiscovery(upsertDTO);
+
+        // toggle it to false
+        PassiveDiscoveryToggleDTO toggleDTO = PassiveDiscoveryToggleDTO.newBuilder()
+            .setId(passiveDiscovery.getId())
+            .setToggle(false)
+            .build();
+        PassiveDiscoveryDTO passiveDiscovery2 = serviceStub.withInterceptors(MetadataUtils
+                .newAttachHeadersInterceptor(createAuthHeader(authHeader)))
+            .toggleDiscovery(toggleDTO);
+
+        // check id and toggle
+        assertEquals(passiveDiscovery.getId(), passiveDiscovery2.getId());
+        assertEquals(toggleDTO.getToggle(), passiveDiscovery2.getToggle());
     }
 }

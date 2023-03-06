@@ -37,6 +37,7 @@ import org.junit.jupiter.api.Test;
 import org.opennms.horizon.inventory.dto.PassiveDiscoveryDTO;
 import org.opennms.horizon.inventory.dto.PassiveDiscoveryListDTO;
 import org.opennms.horizon.inventory.dto.PassiveDiscoveryUpsertDTO;
+import org.opennms.horizon.inventory.dto.PassiveDiscoveryToggleDTO;
 import org.opennms.horizon.server.RestServerApplication;
 import org.opennms.horizon.server.service.grpc.InventoryClient;
 import org.opennms.horizon.server.utils.ServerHeaderUtil;
@@ -131,6 +132,31 @@ class GraphQLPassiveDiscoveryServiceTest {
             .jsonPath("$.data.upsertPassiveDiscovery.toggle").isEqualTo(passiveDiscoveryDTO.getToggle())
             .jsonPath("$.data.upsertPassiveDiscovery.createTimeMsec").isEqualTo(passiveDiscoveryDTO.getCreateTimeMsec());
         verify(mockClient).upsertPassiveDiscovery(any(PassiveDiscoveryUpsertDTO.class), eq(accessToken));
+        verify(mockHeaderUtil, times(1)).getAuthHeader(any(ResolutionEnvironment.class));
+    }
+    
+    @Test
+    void testTogglePassiveDiscovery() throws JSONException {
+        doReturn(passiveDiscoveryDTO).when(mockClient).createPassiveDiscoveryToggle((any(PassiveDiscoveryToggleDTO.class)), eq(accessToken));
+
+        String request = createPayload(
+            "mutation {"
+                +"  togglePassiveDiscovery(toggle: { id: 1, toggle: true }) {"
+                +"    toggle"
+                +"  }"
+                +"}");
+
+        webClient.post()
+            .uri(GRAPHQL_PATH)
+            .accept(MediaType.APPLICATION_JSON)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(request)
+            .exchange()
+            .expectStatus().isOk()
+            .expectBody()
+            .jsonPath("$.data.togglePassiveDiscovery.toggle").isEqualTo(passiveDiscoveryDTO.getToggle());
+
+        verify(mockClient).createPassiveDiscoveryToggle(any(PassiveDiscoveryToggleDTO.class), eq(accessToken));
         verify(mockHeaderUtil, times(1)).getAuthHeader(any(ResolutionEnvironment.class));
     }
 

@@ -30,6 +30,7 @@ package org.opennms.horizon.inventory.service;
 
 import lombok.RequiredArgsConstructor;
 import org.opennms.horizon.inventory.dto.PassiveDiscoveryDTO;
+import org.opennms.horizon.inventory.dto.PassiveDiscoveryToggleDTO;
 import org.opennms.horizon.inventory.dto.PassiveDiscoveryUpsertDTO;
 import org.opennms.horizon.inventory.dto.TagCreateListDTO;
 import org.opennms.horizon.inventory.exception.InventoryRuntimeException;
@@ -94,6 +95,18 @@ public class PassiveDiscoveryService {
     public List<PassiveDiscoveryDTO> getPassiveDiscoveries(String tenantId) {
         List<PassiveDiscovery> discoveries = repository.findByTenantId(tenantId);
         return discoveries.stream().map(mapper::modelToDtoCustom).toList();
+    }
+
+    @Transactional
+    public PassiveDiscoveryDTO toggleDiscovery(String tenantId, PassiveDiscoveryToggleDTO request) {
+        Optional<PassiveDiscovery> discoveryOpt = repository.findByTenantIdAndId(tenantId,request.getId());
+        if (discoveryOpt.isPresent()) {
+            PassiveDiscovery discovery = discoveryOpt.get();
+            discovery.setToggle(request.getToggle());
+            discovery = repository.save(discovery);
+            return mapper.modelToDtoCustom(discovery);
+        }
+        throw new InventoryRuntimeException("Passive discovery not found, cannot update toggle");
     }
 
     private void validateSnmpPorts(PassiveDiscoveryUpsertDTO dto) {

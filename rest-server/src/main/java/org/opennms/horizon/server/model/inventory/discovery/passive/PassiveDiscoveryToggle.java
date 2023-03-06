@@ -25,46 +25,15 @@
  *     http://www.opennms.org/
  *     http://www.opennms.com/
  *******************************************************************************/
-syntax = "proto3";
 
-import "google/protobuf/empty.proto";
-import "google/protobuf/wrappers.proto";
-import "tag.proto";
+package org.opennms.horizon.server.model.inventory.discovery.passive;
 
-package opennms.inventory;
-option java_multiple_files = true;
-option java_package = "org.opennms.horizon.inventory.dto";
+import lombok.Getter;
+import lombok.Setter;
 
-message PassiveDiscoveryDTO {
-  int64 id = 1;
-  string name = 2;
-  string location = 3;
-  bool toggle = 4;
-  repeated int32 ports = 5;
-  repeated string communities = 6;
-  int64 create_time_msec = 7;
-}
-
-message PassiveDiscoveryListDTO {
-  repeated PassiveDiscoveryDTO discoveries = 1;
-}
-
-message PassiveDiscoveryUpsertDTO {
-  optional int64 id = 1;
-  string name = 2;
-  string location = 3;
-  repeated int32 ports = 4;
-  repeated string communities = 5;
-  repeated opennms.inventory.TagCreateDTO tags = 6;
-}
-
-message PassiveDiscoveryToggleDTO {
-  int64 id = 1;
-  bool toggle = 2;
-}
-
-service PassiveDiscoveryService {
-  rpc upsertDiscovery(PassiveDiscoveryUpsertDTO) returns (PassiveDiscoveryDTO) {};
-  rpc listAllDiscoveries(google.protobuf.Empty) returns (PassiveDiscoveryListDTO) {};
-  rpc toggleDiscovery(PassiveDiscoveryToggleDTO) returns (PassiveDiscoveryDTO) {};
+@Getter
+@Setter
+public class PassiveDiscoveryToggle {
+    private long id;
+    private boolean toggle;
 }

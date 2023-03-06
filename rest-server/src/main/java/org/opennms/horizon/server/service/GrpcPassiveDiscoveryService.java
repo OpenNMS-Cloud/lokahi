@@ -35,9 +35,11 @@ import io.leangen.graphql.execution.ResolutionEnvironment;
 import io.leangen.graphql.spqr.spring.annotations.GraphQLApi;
 import lombok.RequiredArgsConstructor;
 import org.opennms.horizon.inventory.dto.PassiveDiscoveryDTO;
+import org.opennms.horizon.inventory.dto.PassiveDiscoveryToggleDTO;
 import org.opennms.horizon.inventory.dto.PassiveDiscoveryUpsertDTO;
 import org.opennms.horizon.server.mapper.PassiveDiscoveryMapper;
 import org.opennms.horizon.server.model.inventory.discovery.passive.PassiveDiscovery;
+import org.opennms.horizon.server.model.inventory.discovery.passive.PassiveDiscoveryToggle;
 import org.opennms.horizon.server.model.inventory.discovery.passive.PassiveDiscoveryUpsert;
 import org.opennms.horizon.server.service.grpc.InventoryClient;
 import org.opennms.horizon.server.utils.ServerHeaderUtil;
@@ -61,6 +63,15 @@ public class GrpcPassiveDiscoveryService {
         PassiveDiscoveryUpsertDTO upsertDto = mapper.discoveryUpsertToProtoCustom(discovery);
         PassiveDiscoveryDTO dto = client.upsertPassiveDiscovery(upsertDto, authHeader);
         return Mono.just(mapper.protoToDiscovery(dto));
+    }
+
+    @GraphQLMutation
+    public Mono<PassiveDiscoveryToggle> togglePassiveDiscovery(PassiveDiscoveryToggle toggle,
+                                                               @GraphQLEnvironment ResolutionEnvironment env) {
+        String authHeader = headerUtil.getAuthHeader(env);
+        PassiveDiscoveryToggleDTO toggleDto = mapper.discoveryToggleToProto(toggle);
+        PassiveDiscoveryDTO dto = client.createPassiveDiscoveryToggle(toggleDto, authHeader);
+        return Mono.just(mapper.protoToDiscoveryToggle(dto));
     }
 
     @GraphQLQuery

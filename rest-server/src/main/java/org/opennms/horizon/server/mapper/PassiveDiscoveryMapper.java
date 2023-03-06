@@ -33,8 +33,10 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.NullValueCheckStrategy;
 import org.opennms.horizon.inventory.dto.PassiveDiscoveryDTO;
+import org.opennms.horizon.inventory.dto.PassiveDiscoveryToggleDTO;
 import org.opennms.horizon.inventory.dto.PassiveDiscoveryUpsertDTO;
 import org.opennms.horizon.server.model.inventory.discovery.passive.PassiveDiscovery;
+import org.opennms.horizon.server.model.inventory.discovery.passive.PassiveDiscoveryToggle;
 import org.opennms.horizon.server.model.inventory.discovery.passive.PassiveDiscoveryUpsert;
 
 
@@ -49,6 +51,10 @@ public interface PassiveDiscoveryMapper {
 
     @Mapping(target = "tagsList", source = "tags", nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
     PassiveDiscoveryUpsertDTO discoveryUpsertToProto(PassiveDiscoveryUpsert request);
+
+    PassiveDiscoveryToggleDTO discoveryToggleToProto(PassiveDiscoveryToggle toggle);
+
+    PassiveDiscoveryToggle protoToDiscoveryToggle(PassiveDiscoveryDTO dto);
 
     default PassiveDiscoveryUpsertDTO discoveryUpsertToProtoCustom(PassiveDiscoveryUpsert request) {
         PassiveDiscoveryUpsertDTO.Builder builder = discoveryUpsertToProto(request).toBuilder();

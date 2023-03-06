@@ -49,11 +49,15 @@ import java.util.List;
 @Setter
 @RequiredArgsConstructor
 @Entity
-public class PassiveDiscovery extends TenantAwareEntity {
+public class PassiveDiscovery {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
+
+    @NotNull
+    @Column(name = "tenant_id")
+    private String tenantId;
 
     @NotNull
     @Column(name = "toggle")

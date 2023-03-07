@@ -1,0 +1,6 @@
+mutation TogglePassiveDiscovery($toggle: PassiveDiscoveryToggleInput!) {
+  togglePassiveDiscovery(toggle: $toggle) {
+    id
+    toggle
+  }
+}

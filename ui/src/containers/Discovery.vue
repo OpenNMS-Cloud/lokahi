@@ -93,10 +93,12 @@ import { DiscoveryInput } from '@/types/discovery'
 import { DiscoveryType } from '@/components/Discovery/discovery.constants'
 import discoveryText from '@/components/Discovery/discovery.text'
 import { useDiscoveryQueries } from '@/store/Queries/discoveryQueries'
+import { useDiscoveryMutations } from '@/store/Mutations/discoveryMutations'
 import { IAutocompleteItemType } from '@featherds/autocomplete'
 import { ActiveDiscovery, PassiveDiscovery } from '@/types/graphql'
 
 const discoveryQueries = useDiscoveryQueries()
+const discoveryMutations = useDiscoveryMutations()
 
 type TDiscoveryAutocomplete = DiscoveryInput & { _text: string }
 
@@ -146,8 +148,10 @@ const showDiscovery = (discovery: IAutocompleteItemType | IAutocompleteItemType[
   }
 }
 
-const toggleDiscovery = (item: any, isToggled: boolean) => {
-  // call mutation to turn on / off passive discovery, when available.
+const toggleDiscovery = (id: string, toggle: boolean) => {
+  discoveryMutations.togglePassiveDiscovery({ 
+    toggle: { id, toggle }
+  })
 }
 
 const handleCancel = () => {

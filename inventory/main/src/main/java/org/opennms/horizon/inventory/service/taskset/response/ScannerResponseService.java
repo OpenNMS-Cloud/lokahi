@@ -129,7 +129,7 @@ public class ScannerResponseService {
                 .setLabel(pingResponse.getIpAddress())
                 .build();
             Node node = nodeService.createNode(createDTO, ScanType.DISCOVERY_SCAN, tenantId);
-            nodeService.sendNewNodeTaskSetAsync(node, tenantId);
+            nodeService.sendNewNodeTaskSetAsync(node, discoveryScanResult.getActiveDiscoveryId());
         }
     }
 

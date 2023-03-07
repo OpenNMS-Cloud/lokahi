@@ -28,11 +28,7 @@
 
 package org.opennms.horizon.minion.nodescan;
 
-import java.net.InetAddress;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
-
+import com.google.protobuf.Any;
 import org.opennms.horizon.minion.plugin.api.ScanResultsResponse;
 import org.opennms.horizon.minion.plugin.api.ScanResultsResponseImpl;
 import org.opennms.horizon.minion.plugin.api.Scanner;
@@ -48,7 +44,10 @@ import org.opennms.node.scan.contract.SnmpInterfaceResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.protobuf.Any;
+import java.net.InetAddress;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 public class NodeScanner implements Scanner {
     private static final Logger LOGGER = LoggerFactory.getLogger(NodeScanner.class);
@@ -69,6 +68,7 @@ public class NodeScanner implements Scanner {
         return CompletableFuture.supplyAsync(() ->{
             try {
                 NodeScanRequest scanRequest = config.unpack(NodeScanRequest.class);
+
                 SnmpAgentConfig agentConfig = new SnmpAgentConfig(InetAddress.getByName(scanRequest.getPrimaryIp()), SnmpConfiguration.DEFAULTS);
                 agentConfig.setVersion(SnmpConfiguration.VERSION2C);
                 NodeInfoResult nodeInfo = scanSystem(agentConfig);

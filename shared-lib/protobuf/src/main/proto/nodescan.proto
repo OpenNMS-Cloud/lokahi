@@ -28,6 +28,7 @@
 syntax = "proto3";
 
 import "google/protobuf/any.proto";
+import "snmp-api.proto";
 
 package opennms.node.scan;
 option java_multiple_files = true;
@@ -37,6 +38,7 @@ message NodeScanRequest {
   int64 nodeId = 1;
   string primaryIp = 2;
   repeated string ipAddresses = 3; //reserved for service scan
+  repeated opennms.snmp.api.SnmpConfiguration snmp_configs = 4;
 }
 
 //Scan Results
@@ -80,6 +82,7 @@ message NodeScanResult {
   NodeInfoResult nodeInfo = 2;
   repeated IpInterfaceResult ipInterfaces = 3;
   repeated SnmpInterfaceResult snmpInterfaces = 4;
+  opennms.snmp.api.SnmpConfiguration snmp_config = 5;
 }
 
 

@@ -39,7 +39,6 @@ import org.opennms.horizon.inventory.dto.NodeDTO;
 import org.opennms.horizon.inventory.dto.TagCreateDTO;
 import org.opennms.horizon.inventory.dto.TagCreateListDTO;
 import org.opennms.horizon.inventory.mapper.NodeMapper;
-import org.opennms.horizon.inventory.mapper.NodeMapperImpl;
 import org.opennms.horizon.inventory.model.IpInterface;
 import org.opennms.horizon.inventory.model.MonitoringLocation;
 import org.opennms.horizon.inventory.model.Node;
@@ -51,7 +50,6 @@ import org.opennms.horizon.inventory.service.taskset.DetectorTaskSetService;
 import org.opennms.horizon.inventory.service.taskset.MonitorTaskSetService;
 import org.opennms.horizon.inventory.service.taskset.ScannerTaskSetService;
 import org.opennms.horizon.inventory.service.taskset.publisher.TaskSetPublisher;
-import org.opennms.horizon.inventory.repository.TagRepository;
 import org.opennms.horizon.shared.constants.GrpcConstants;
 import org.opennms.taskset.contract.ScanType;
 
@@ -101,7 +99,8 @@ public class NodeServiceTest {
             mock(ScannerTaskSetService.class),
             mock(TaskSetPublisher.class),
             tagService,
-            nodeMapper);
+            nodeMapper,
+            mock(ActiveDiscoveryService.class));
 
         Node node = new Node();
         doReturn(node).when(mockNodeRepository).save(any(node.getClass()));

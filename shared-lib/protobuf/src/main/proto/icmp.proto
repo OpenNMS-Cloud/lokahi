@@ -58,6 +58,7 @@ message PingSweepRequest {
   double packets_per_second = 3;
   int32 packet_size = 4;
   int32 retries = 5;
+  int64 active_discovery_id = 6;  
 }
 
 message IpRange {

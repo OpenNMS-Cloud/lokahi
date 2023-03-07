@@ -41,7 +41,7 @@ public interface TaskUtils {
         return configName + "@" + location;
     }
 
-    static String identityForDiscoveryTask(String location, String discoveryProfile) {
-        return DISCOVERY_PROFILE + discoveryProfile + "/"  + location;
+    static String identityForDiscoveryTask(String location, long activeDiscovceryId) {
+        return DISCOVERY_PROFILE + activeDiscovceryId + "/"  + location;
     }
 }

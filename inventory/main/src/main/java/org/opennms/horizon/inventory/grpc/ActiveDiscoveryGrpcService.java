@@ -65,7 +65,7 @@ public class ActiveDiscoveryGrpcService extends ActiveDiscoveryOperationGrpc.Act
                     responseObserver.onNext(activeDiscoveryConfig);
                     responseObserver.onCompleted();
                     scannerTaskSetService.sendDiscoveryScannerTask(request.getIpAddressesList(),
-                        request.getLocation(), tenantId, request.getConfigName());
+                        request.getLocation(), tenantId, activeDiscoveryConfig.getId());
                 } catch (Exception e) {
                     responseObserver.onError(StatusProto.toStatusRuntimeException(createStatus(Code.INVALID_ARGUMENT_VALUE, "Invalid request " + request)));
                 }

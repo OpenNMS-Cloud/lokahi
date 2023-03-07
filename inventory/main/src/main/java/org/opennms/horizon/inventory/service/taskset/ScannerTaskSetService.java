@@ -39,6 +39,7 @@ import org.opennms.horizon.inventory.model.AzureCredential;
 import org.opennms.horizon.inventory.model.Node;
 import org.opennms.horizon.inventory.service.taskset.publisher.TaskSetPublisher;
 import org.opennms.horizon.shared.utils.InetAddressUtils;
+import org.opennms.horizon.snmp.api.SnmpConfiguration;
 import org.opennms.icmp.contract.IpRange;
 import org.opennms.icmp.contract.PingSweepRequest;
 import org.opennms.node.scan.contract.NodeScanRequest;
@@ -84,28 +85,33 @@ public class ScannerTaskSetService {
 
     public void sendNodeScannerTask(List<NodeDTO> nodes, String location, String tenantId) {
 
-            List<TaskDefinition> tasks = nodes.stream().map(this::createNodeScanTask)
+            List<TaskDefinition> tasks = nodes.stream().map(node -> createNodeScanTask(node, new ArrayList<>()))
                 .flatMap(Optional::stream).toList();
             if(!tasks.isEmpty()) {
                 taskSetPublisher.publishNewTasks(tenantId, location, tasks);
             }
     }
 
+    public void sendNodeScannerTask(NodeDTO node, String location, List<SnmpConfiguration> snmpConfigs) {
+        var taskDef = createNodeScanTask(node, snmpConfigs );
+        taskDef.ifPresent(taskDefinition -> taskSetPublisher.publishNewTasks(node.getTenantId(), location, List.of(taskDefinition)));
+    }
+
     public Optional<TaskDefinition> getNodeScanTasks(Node node) {
         var nodeDto = nodeMapper.modelToDTO(node);
-        return createNodeScanTask(nodeDto);
+        return createNodeScanTask(nodeDto, new ArrayList<>());
     }
 
-    public void sendDiscoveryScannerTask(List<String> ipAddresses, String location, String tenantId, String discoveryProfile) {
-        executorService.execute(() -> createAndPublishTasks(ipAddresses, location, tenantId, discoveryProfile));
+    public void sendDiscoveryScannerTask(List<String> ipAddresses, String location, String tenantId, long activeDiscoveryId) {
+        executorService.execute(() -> createAndPublishTasks(ipAddresses, location, tenantId, activeDiscoveryId));
     }
 
-    private void createAndPublishTasks(List<String> ipAddresses, String location, String tenantId, String discoveryProfile) {
-        Optional<TaskDefinition> tasks = createDiscoveryTask(ipAddresses, location, discoveryProfile);
+    private void createAndPublishTasks(List<String> ipAddresses, String location, String tenantId, long activeDiscoveryId) {
+        Optional<TaskDefinition> tasks = createDiscoveryTask(ipAddresses, location, activeDiscoveryId);
         tasks.ifPresent(taskDefinition -> taskSetPublisher.publishNewTasks(tenantId, location, List.of(taskDefinition)));
     }
 
-    Optional<TaskDefinition> createDiscoveryTask(List<String> ipAddresses, String location, String discoveryProfile) {
+    Optional<TaskDefinition> createDiscoveryTask(List<String> ipAddresses, String location, long activeDiscoveryId) {
 
         var ipRanges = new ArrayList<IpRange>();
         ipAddresses.forEach(ipAddressDTO -> {
@@ -148,7 +154,7 @@ public class ScannerTaskSetService {
                 .setPacketSize(PingConstants.DEFAULT_PACKET_SIZE)
                 .build());
 
-        String taskId = identityForDiscoveryTask(location, discoveryProfile);
+        String taskId = identityForDiscoveryTask(location, activeDiscoveryId);
         return Optional.of(TaskDefinition.newBuilder()
             .setType(TaskType.SCANNER)
             .setPluginName(DISCOVERY_TASK_PLUGIN_NAME)
@@ -190,7 +196,7 @@ public class ScannerTaskSetService {
     }
 
 
-    private Optional<TaskDefinition> createNodeScanTask(NodeDTO node) {
+    private Optional<TaskDefinition> createNodeScanTask(NodeDTO node, List<SnmpConfiguration> snmpConfigs) {
         Optional<IpInterfaceDTO> ipInterface = node.getIpInterfacesList().stream()
             .filter(IpInterfaceDTO::getSnmpPrimary).findFirst()
             .or(() -> node.getIpInterfacesList().stream().findAny());
@@ -198,7 +204,8 @@ public class ScannerTaskSetService {
             String taskId = identityForNodeScan(node.getId());
             Any taskConfig = Any.pack(NodeScanRequest.newBuilder()
                 .setNodeId(node.getId())
-                .setPrimaryIp(ip.getIpAddress()).build());
+                .setPrimaryIp(ip.getIpAddress())
+                .addAllSnmpConfigs(snmpConfigs).build());
 
             return TaskDefinition.newBuilder()
                 .setType(TaskType.SCANNER)

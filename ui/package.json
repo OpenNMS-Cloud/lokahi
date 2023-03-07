@@ -17,7 +17,7 @@
     "generate": "graphql-codegen --config codegen.yml"
   },
   "dependencies": {
-    "@dsb-norge/vue-keycloak-js": "^2.1.5-beta",
+    "@dsb-norge/vue-keycloak-js": "^2.2.0",
     "@featherds/app-bar": "0.12.16",
     "@featherds/app-layout": "0.12.16",
     "@featherds/app-rail": "0.12.16",

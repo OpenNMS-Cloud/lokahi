@@ -1,11 +1,11 @@
 import { definePlugin, createClient, defaultPlugins } from 'villus'
-import { KeycloakInstance } from '@dsb-norge/vue-keycloak-js/dist/types'
+import Keycloak from 'keycloak-js'
 import useSnackbar from '@/composables/useSnackbar'
 
 const { showSnackbar } = useSnackbar()
 
 // creates a villus gql client instance
-const getGqlClient = (kc: KeycloakInstance) => {
+const getGqlClient = (kc: Keycloak) => {
   // auth plugin to append token headers
   const authPlugin = ({ opContext }: any) => {
     opContext.headers.Authorization = `Bearer ${kc.token}`

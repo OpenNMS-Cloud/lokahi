@@ -1,10 +1,10 @@
-import { KeycloakInstance } from '@dsb-norge/vue-keycloak-js/dist/types'
+import Keycloak from 'keycloak-js'
 
-const keycloak = ref<KeycloakInstance>()
+const keycloak = ref<Keycloak>()
 
 const useKeycloak = () => {
 
-  const setKeycloak = (kc: KeycloakInstance) => {
+  const setKeycloak = (kc: Keycloak) => {
     keycloak.value = kc
   }
 

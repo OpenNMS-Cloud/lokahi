@@ -4,7 +4,7 @@ import DevicesTable from '@/components/Appliances/AppliancesNodesTable.vue'
 import MinionsTable from '@/components/Appliances/AppliancesMinionsTable.vue'
 import AppliancesAddNodeCtrl from '@/components/Appliances/AppliancesAddNodeCtrl.vue'
 import useKeycloak from '@/composables/useKeycloak'
-import { KeycloakInstance } from '@dsb-norge/vue-keycloak-js/dist/types'
+import Keycloak from 'keycloak-js'
 import setupWrapper from 'tests/setupWrapper'
 import dateFormatDirective from '@/directives/v-date'
 
@@ -20,7 +20,7 @@ const wrapper = setupWrapper({
 
 it('should have a header', async () => {
   const { setKeycloak } = useKeycloak()
-  await setKeycloak({ authenticated: true } as KeycloakInstance)
+  await setKeycloak({ authenticated: true } as Keycloak)
 
   const headerWelcome = wrapper.get('[data-test="header-welcome"]')
   expect(headerWelcome.exists()).toBe(true)

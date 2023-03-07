@@ -1,7 +1,7 @@
 import Menubar from '@/components/Layout/Menubar.vue'
 import useKeycloak from '@/composables/useKeycloak'
 import useTheme from '@/composables/useTheme'
-import { KeycloakInstance } from '@dsb-norge/vue-keycloak-js/dist/types'
+import Keycloak from 'keycloak-js'
 import setupWrapper from 'tests/setupWrapper'
 
 test('The menubar mounts', () => {
@@ -14,7 +14,7 @@ test('The menubar mounts', () => {
 test('The toggle dark btn triggers the composible function, and the ref updates', async () => {
   // mock authenticate to show dark/light mode btn
   const { setKeycloak } = useKeycloak()
-  setKeycloak({ authenticated: true } as KeycloakInstance)
+  setKeycloak({ authenticated: true } as Keycloak)
 
   // get theme hook, mock on change theme callback
   const theme = useTheme()

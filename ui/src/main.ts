@@ -3,7 +3,7 @@ import App from './App.vue'
 import router from './router'
 import { createPinia } from 'pinia'
 import VueKeycloak from '@dsb-norge/vue-keycloak-js'
-import { KeycloakInstance } from '@dsb-norge/vue-keycloak-js/dist/types'
+import Keycloak from 'keycloak-js'
 import keycloakConfig from '../keycloak.config'
 import useKeycloak from './composables/useKeycloak'
 import '@featherds/styles'
@@ -33,7 +33,7 @@ const app = createApp(App)
       url: keycloakConfig.url,
       clientId: keycloakConfig.clientId
     },
-    onReady: (kc: KeycloakInstance) => {
+    onReady: (kc: Keycloak) => {
       setKeycloak(kc)
       const gqlClient = getGqlClient(kc)
       app.use(gqlClient)

@@ -40,6 +40,7 @@ public class Node {
     private String tenantId;
     private String nodeLabel;
     private String scanType;
+    private String monitoredState;
     private long createTime;
     private long monitoringLocationId;
     private List<IpInterface> ipInterfaces;

@@ -68,14 +68,13 @@ import static org.opennms.horizon.inventory.service.taskset.TaskUtils.identityFo
 @Component
 @RequiredArgsConstructor
 public class ScannerTaskSetService {
-
-    private static final Logger LOG = LoggerFactory.getLogger(MonitorTaskSetService.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ScannerTaskSetService.class);
     private final ThreadFactory threadFactory = new ThreadFactoryBuilder()
         .setNameFormat("send-taskset-for-scan-%d")
         .build();
     private final ExecutorService executorService = Executors.newFixedThreadPool(10, threadFactory);
 
-    public final static String DISCOVERY_TASK_PLUGIN_NAME = "Discovery-Ping";
+    public static final String DISCOVERY_TASK_PLUGIN_NAME = "Discovery-Ping";
     private final TaskSetPublisher taskSetPublisher;
     private final NodeMapper nodeMapper;
 
@@ -84,22 +83,26 @@ public class ScannerTaskSetService {
     }
 
     public void sendNodeScannerTask(List<NodeDTO> nodes, String location, String tenantId) {
+        List<TaskDefinition> tasks = nodes.stream().map(node -> createNodeScanTask(node, new ArrayList<>(), null))
+            .flatMap(Optional::stream).toList();
+        if (!tasks.isEmpty()) {
+            taskSetPublisher.publishNewTasks(tenantId, location, tasks);
+        }
+    }
 
-            List<TaskDefinition> tasks = nodes.stream().map(node -> createNodeScanTask(node, new ArrayList<>()))
-                .flatMap(Optional::stream).toList();
-            if(!tasks.isEmpty()) {
-                taskSetPublisher.publishNewTasks(tenantId, location, tasks);
-            }
+    public void sendNodeScannerTask(Node node, String location, List<SnmpConfiguration> snmpConfigs) {
+        NodeDTO nodeDTO = nodeMapper.modelToDTO(node);
+        sendNodeScannerTask(nodeDTO, location, snmpConfigs);
     }
 
     public void sendNodeScannerTask(NodeDTO node, String location, List<SnmpConfiguration> snmpConfigs) {
-        var taskDef = createNodeScanTask(node, snmpConfigs );
+        var taskDef = createNodeScanTask(node, snmpConfigs, null);
         taskDef.ifPresent(taskDefinition -> taskSetPublisher.publishNewTasks(node.getTenantId(), location, List.of(taskDefinition)));
     }
 
     public Optional<TaskDefinition> getNodeScanTasks(Node node) {
         var nodeDto = nodeMapper.modelToDTO(node);
-        return createNodeScanTask(nodeDto, new ArrayList<>());
+        return createNodeScanTask(nodeDto, new ArrayList<>(), null);
     }
 
     public void sendDiscoveryScannerTask(List<String> ipAddresses, String location, String tenantId, long activeDiscoveryId) {
@@ -196,16 +199,23 @@ public class ScannerTaskSetService {
     }
 
 
-    private Optional<TaskDefinition> createNodeScanTask(NodeDTO node, List<SnmpConfiguration> snmpConfigs) {
+    private Optional<TaskDefinition> createNodeScanTask(NodeDTO node, List<SnmpConfiguration> snmpConfigs, Long passiveDiscoveryId) {
         Optional<IpInterfaceDTO> ipInterface = node.getIpInterfacesList().stream()
             .filter(IpInterfaceDTO::getSnmpPrimary).findFirst()
             .or(() -> node.getIpInterfacesList().stream().findAny());
         return ipInterface.map(ip -> {
             String taskId = identityForNodeScan(node.getId());
-            Any taskConfig = Any.pack(NodeScanRequest.newBuilder()
+
+            NodeScanRequest.Builder scanRequestBuilder = NodeScanRequest.newBuilder()
                 .setNodeId(node.getId())
                 .setPrimaryIp(ip.getIpAddress())
-                .addAllSnmpConfigs(snmpConfigs).build());
+                .addAllSnmpConfigs(snmpConfigs);
+
+            if (passiveDiscoveryId != null) {
+                scanRequestBuilder.setPassiveDiscoveryId(passiveDiscoveryId);
+            }
+
+            Any taskConfig = Any.pack(scanRequestBuilder.build());
 
             return TaskDefinition.newBuilder()
                 .setType(TaskType.SCANNER)

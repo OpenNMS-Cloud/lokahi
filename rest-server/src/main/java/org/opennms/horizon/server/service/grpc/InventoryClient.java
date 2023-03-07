@@ -47,6 +47,8 @@ import org.opennms.horizon.inventory.dto.AzureActiveDiscoveryServiceGrpc;
 import org.opennms.horizon.inventory.dto.IdList;
 import org.opennms.horizon.inventory.dto.ListAllTagsParamsDTO;
 import org.opennms.horizon.inventory.dto.ListTagsByEntityIdParamsDTO;
+import org.opennms.horizon.inventory.dto.MonitoredState;
+import org.opennms.horizon.inventory.dto.MonitoredStateQuery;
 import org.opennms.horizon.inventory.dto.MonitoringLocationDTO;
 import org.opennms.horizon.inventory.dto.MonitoringLocationServiceGrpc;
 import org.opennms.horizon.inventory.dto.MonitoringSystemDTO;
@@ -141,6 +143,13 @@ public class InventoryClient {
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
         return nodeStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).listNodes(Empty.newBuilder().build()).getNodesList();
+    }
+
+    public List<NodeDTO> listNodesByMonitoredState(String monitoredState, String accessToken) {
+        Metadata metadata = new Metadata();
+        metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
+        MonitoredStateQuery query = MonitoredStateQuery.newBuilder().setMonitoredState(MonitoredState.valueOf(monitoredState)).build();
+        return nodeStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).listNodesByMonitoredState(query).getNodesList();
     }
 
     public NodeDTO getNodeById(long id, String accessToken) {
@@ -282,4 +291,6 @@ public class InventoryClient {
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
         return passiveDiscoveryServiceBlockingStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).toggleDiscovery(request);
     }
+
+
 }

@@ -33,9 +33,11 @@ import java.util.Optional;
 
 import org.opennms.horizon.inventory.exception.InventoryRuntimeException;
 import org.opennms.horizon.inventory.service.taskset.response.DetectorResponseService;
+import org.opennms.horizon.inventory.service.taskset.response.MonitorResponseService;
 import org.opennms.horizon.inventory.service.taskset.response.ScannerResponseService;
 import org.opennms.horizon.shared.constants.GrpcConstants;
 import org.opennms.taskset.contract.DetectorResponse;
+import org.opennms.taskset.contract.MonitorResponse;
 import org.opennms.taskset.contract.ScannerResponse;
 import org.opennms.taskset.contract.TaskResult;
 import org.opennms.taskset.contract.TaskSetResults;
@@ -60,6 +62,7 @@ public class TaskSetResultsConsumer {
 
     private final ScannerResponseService scannerResponseService;
     private final DetectorResponseService detectorResponseService;
+    private final MonitorResponseService monitorResponseService;
 
     @KafkaListener(topics = "${kafka.topics.task-set-results}", concurrency = "1")
     public void receiveMessage(@Payload byte[] data, @Headers Map<String, Object> headers) {
@@ -82,6 +85,10 @@ public class TaskSetResultsConsumer {
                     DetectorResponse response = taskResult.getDetectorResponse();
 
                     detectorResponseService.accept(tenantId, location, response);
+                } else if (taskResult.hasMonitorResponse()) {
+                    MonitorResponse response = taskResult.getMonitorResponse();
+
+                    monitorResponseService.accept(tenantId, response);
                 }
             }
         } catch (Exception e) {

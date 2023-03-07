@@ -32,6 +32,7 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.opennms.horizon.inventory.dto.MonitoredState;
 import org.opennms.horizon.inventory.dto.NodeCreateDTO;
 import org.opennms.horizon.inventory.dto.NodeDTO;
 import org.opennms.horizon.inventory.dto.TagCreateListDTO;
@@ -107,6 +108,12 @@ public class NodeService {
         return nodeRepository.findByIdAndTenantId(id, tenantId).map(mapper::modelToDTO);
     }
 
+    @Transactional(readOnly = true)
+    public List<NodeDTO> findByMonitoredState(String tenantId, MonitoredState monitoredState) {
+        return nodeRepository.findByTenantIdAndMonitoredStateEquals(tenantId, monitoredState)
+            .stream().map(mapper::modelToDTO).toList();
+    }
+
     private void saveIpInterfaces(NodeCreateDTO request, Node node, String tenantId) {
         if (request.hasManagementIp()) {
 
@@ -149,6 +156,9 @@ public class NodeService {
         node.setTenantId(tenantId);
         node.setNodeLabel(request.getLabel());
         node.setScanType(scanType);
+        if (request.hasMonitoredState()) {
+            node.setMonitoredState(request.getMonitoredState());
+        }
         node.setCreateTime(LocalDateTime.now());
         node.setMonitoringLocation(monitoringLocation);
         node.setMonitoringLocationId(monitoringLocation.getId());
@@ -168,17 +178,6 @@ public class NodeService {
             .build());
 
         return node;
-    }
-
-    @Transactional
-    public Map<String, Map<String, List<NodeDTO>>> listAllNodeForMonitoring() {
-        Map<String, Map<String, List<NodeDTO>>> nodesByTenantLocation = new HashMap<>();
-        nodeRepository.findAll().forEach(node -> {
-            Map<String, List<NodeDTO>> nodeByLocation = nodesByTenantLocation.computeIfAbsent(node.getTenantId(), (tenantId) -> new HashMap<>());
-            List<NodeDTO> nodeList = nodeByLocation.computeIfAbsent(node.getMonitoringLocation().getLocation(), location -> new ArrayList<>());
-            nodeList.add(mapper.modelToDTO(node));
-        });
-        return nodesByTenantLocation;
     }
 
     @Transactional

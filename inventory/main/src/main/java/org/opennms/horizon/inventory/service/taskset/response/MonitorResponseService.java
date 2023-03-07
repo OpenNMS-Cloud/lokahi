@@ -43,6 +43,7 @@ import org.opennms.horizon.inventory.service.MonitoredServiceTypeService;
 import org.opennms.horizon.inventory.service.taskset.TaskSetHandler;
 import org.opennms.horizon.shared.utils.InetAddressUtils;
 import org.opennms.taskset.contract.DetectorResponse;
+import org.opennms.taskset.contract.MonitorResponse;
 import org.opennms.taskset.contract.MonitorType;
 import org.springframework.stereotype.Component;
 
@@ -52,68 +53,29 @@ import java.util.Optional;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class DetectorResponseService {
+public class MonitorResponseService {
     private final NodeRepository nodeRepository;
-    private final IpInterfaceRepository ipInterfaceRepository;
-    private final MonitoredServiceTypeService monitoredServiceTypeService;
-    private final MonitoredServiceService monitoredServiceService;
-    private final TaskSetHandler taskSetHandler;
 
-    public void accept(String tenantId, String location, DetectorResponse response) {
-        log.info("Received Detector Response = {} for tenant = {} and location = {}", response, tenantId, location);
-
-        InetAddress ipAddress = InetAddressUtils.getInetAddress(response.getIpAddress());
-        Optional<IpInterface> ipInterfaceOpt = ipInterfaceRepository
-            .findByIpAddressAndLocationAndTenantId(ipAddress, location, tenantId);
-
-        if (ipInterfaceOpt.isPresent()) {
-            IpInterface ipInterface = ipInterfaceOpt.get();
-
-            if (response.getDetected()) {
-                createMonitoredService(response, ipInterface);
-
-                MonitorType monitorType = response.getMonitorType();
-                long nodeId = response.getNodeId();
-
-                setMonitoredStateUnmonitored(tenantId, nodeId);
-
-                taskSetHandler.sendMonitorTask(location, monitorType, ipInterface, nodeId);
-                taskSetHandler.sendCollectorTask(location, monitorType, ipInterface, nodeId);
-
-            } else {
-                log.info("{} not detected on ip address = {}", response.getMonitorType(), ipAddress.getAddress());
+    public void accept(String tenantId, MonitorResponse response) {
+        log.info("Received Monitor Response = {} for tenant = {}", response, tenantId);
+        switch (response.getMonitorType()) {
+            case UNRECOGNIZED, UNKNOWN, ECHO -> {
+                return;
             }
-        } else {
-            log.warn("Failed to find IP Interface during detection for ip = {}", ipAddress.getHostAddress());
         }
+        setMonitoredStateMonitored(tenantId, response.getNodeId());
     }
 
-    private void setMonitoredStateUnmonitored(String tenantId, long nodeId) {
+    private void setMonitoredStateMonitored(String tenantId, long nodeId) {
         Optional<Node> nodeOpt = nodeRepository.findByIdAndTenantId(nodeId, tenantId);
         if (nodeOpt.isPresent()) {
             Node node = nodeOpt.get();
-            if (MonitoredState.UNMONITORED != node.getMonitoredState()) {
-                node.setMonitoredState(MonitoredState.UNMONITORED);
+            if (MonitoredState.MONITORED != node.getMonitoredState()) {
+                node.setMonitoredState(MonitoredState.MONITORED);
                 nodeRepository.save(node);
             }
         } else {
             log.info("No node found with ID: {}", nodeId);
         }
-    }
-
-    private void createMonitoredService(DetectorResponse response, IpInterface ipInterface) {
-        String tenantId = ipInterface.getTenantId();
-
-        MonitoredServiceType monitoredServiceType =
-            monitoredServiceTypeService.createSingle(MonitoredServiceTypeDTO.newBuilder()
-                .setServiceName(response.getMonitorType().name())
-                .setTenantId(tenantId)
-                .build());
-
-        MonitoredServiceDTO newMonitoredService = MonitoredServiceDTO.newBuilder()
-            .setTenantId(tenantId)
-            .build();
-
-        monitoredServiceService.createSingle(newMonitoredService, monitoredServiceType, ipInterface);
     }
 }

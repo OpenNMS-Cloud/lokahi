@@ -98,6 +98,7 @@ public class NodeScanner implements Scanner {
                     .setNodeInfo(nodeInfo)
                     .addAllIpInterfaces(ipInterfaceResults)
                     .addAllSnmpInterfaces(snmpInterfaceResults)
+                    .setPassiveDiscoveryId(scanRequest.getPassiveDiscoveryId())
                     .build();
                 return ScanResultsResponseImpl.builder().results(scanResult).build();
             } catch (Exception e) {

@@ -116,7 +116,10 @@ public class DocumentEnricherImpl {
             // Check whether classification is possible
             if (classificationRequest.isClassifiable()) {
                 // Apply Application mapping
-                document.setApplication(classificationEngine.classify(classificationRequest));
+                var application = classificationEngine.classify(classificationRequest);
+                if (application != null) {
+                    document.setApplication(application);
+                }
             }
 
             // Fix skewed clock

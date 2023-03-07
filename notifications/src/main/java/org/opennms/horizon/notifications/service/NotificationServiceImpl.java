@@ -50,11 +50,24 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     @Async
     public void postPagerDutyConfig(PagerDutyConfigDTO config) {
+        System.out.println("JH saving key="+config.getIntegrationKey());
         pagerDutyAPI.saveConfig(config);
+        try {
+            System.out.println("JH About to sleep");
+            Thread.sleep(1000);
+            System.out.println("JH Slept");
+
+            String key = pagerDutyAPI.getPagerDutyIntegrationKey();
+            System.out.println("JH retrieved key=" + key);
+        } catch (Exception ex) {
+            System.out.println("JH failed exception");
+            throw new RuntimeException(ex);
+        }
     }
 
     @Override
     public void postPagerDutyConfigNonSpringAsync(PagerDutyConfigDTO config) {
+        System.out.println("JH postPagerDutyConfigNonSpringAsync saving key="+config.getIntegrationKey());
         new Thread(new Runnable() {
             @Override
             public void run() {

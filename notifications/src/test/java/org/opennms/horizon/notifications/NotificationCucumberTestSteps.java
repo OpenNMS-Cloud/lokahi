@@ -166,6 +166,8 @@ public class NotificationCucumberTestSteps extends GrpcTestBase {
 
     @Then("verify {string} key is {string}")
     public void verifyKey(String tenantId, String key) {
+        System.out.println("JH Verifying tenant="+tenantId);
+        System.out.println("JH Verifying key="+key);
         try (TenantContext tc = TenantContext.withTenantId(tenantId)){
             PagerDutyConfigDTO configDTO = pagerDutyDao.getConfig();
             assertEquals(key, configDTO.getIntegrationKey());

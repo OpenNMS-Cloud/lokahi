@@ -49,6 +49,7 @@ class TenantIdentifierResolver implements CurrentTenantIdentifierResolver, Hiber
     @Override
     public String resolveCurrentTenantIdentifier() {
         Optional<String> tenantId = tenantLookup.lookupTenantId();
+        System.out.println("tenant id="+tenantId.orElse(GrpcConstants.DEFAULT_TENANT_ID));
         return tenantId.orElse(GrpcConstants.DEFAULT_TENANT_ID);
     }
 

@@ -36,4 +36,5 @@ public interface PagerDutyAPI {
     void postNotification(AlarmDTO alarm) throws NotificationException;
 
     void saveConfig(PagerDutyConfigDTO config);
+    String getPagerDutyIntegrationKey() throws NotificationException;
 }

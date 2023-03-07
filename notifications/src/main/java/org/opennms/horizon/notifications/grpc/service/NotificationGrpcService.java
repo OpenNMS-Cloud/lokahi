@@ -27,7 +27,7 @@ public class NotificationGrpcService extends NotificationServiceGrpc.Notificatio
         Optional<String> tenantIdOptional = tenantLookup.lookupTenantId();
 
         // Hard code boolean to make it easy to switch between using spring based threading and non-spring based.
-        boolean spring = false;
+        boolean spring = true;
         if (spring) {
             tenantIdOptional.ifPresentOrElse(tenantId -> {
                 notificationService.postPagerDutyConfig(request);

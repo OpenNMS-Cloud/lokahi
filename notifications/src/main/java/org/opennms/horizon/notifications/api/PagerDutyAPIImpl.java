@@ -53,6 +53,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
@@ -107,11 +108,12 @@ public class PagerDutyAPIImpl implements PagerDutyAPI {
     }
 
     @Override
+    @Async
     public void saveConfig(PagerDutyConfigDTO config) {
         pagerDutyDao.saveConfig(config);
     }
 
-    private String getPagerDutyIntegrationKey() throws NotificationConfigUninitializedException {
+    public String getPagerDutyIntegrationKey() throws NotificationConfigUninitializedException {
         PagerDutyConfigDTO config = pagerDutyDao.getConfig();
         return config.getIntegrationKey();
     }

@@ -39,10 +39,13 @@ public class TenantAwareTaskDecorator implements TaskDecorator {
         String tenantId = TenantContext.getTenantId();
         return () -> {
             try {
+                System.out.println("JH Decorator set:"+tenantId);
                 TenantContext.setTenantId(tenantId);
                 runnable.run();
             } finally {
-                TenantContext.setTenantId(null);
+                System.out.println("JH Decorator clear");
+                TenantContext.clear();
+                System.out.println("JH Decorator after clear:"+TenantContext.getTenantId());
             }
         };
     }

@@ -137,6 +137,7 @@ public class PingScan implements Scanner {
                        var pingResponse = PingResponse.newBuilder();
                        pingResponse.setIpAddress(InetAddressUtils.toIpAddrString(result.address()));
                        pingResponse.setRtt(pingResponse.getRtt());
+                       discoveryResultBuilder.setActiveDiscoveryId(request.getActiveDiscoveryId());
                        discoveryResultBuilder.addPingResponse(pingResponse);
                    });
                    builder.results(discoveryResultBuilder.build());

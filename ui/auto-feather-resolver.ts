@@ -5,6 +5,7 @@ const mismatchedDirNames: Record<string, string> = {
   'checkbox-group': 'checkbox',
   'list-item': 'list',
   'list-header': 'list',
+  'list-switch': 'list',
   'expansion-panel': 'expansion',
   'radio-group': 'radio',
   'chip': 'chips',

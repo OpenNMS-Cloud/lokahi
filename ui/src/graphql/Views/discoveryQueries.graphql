@@ -2,15 +2,23 @@ query ListLocationsForDiscovery {
   ...LocationsParts
 }
 
-query ListDiscoveryConfig {
-  listDiscoveryConfig {
+query ListDiscoveries {
+  listActiveDiscovery {
+    id
     configName
     ipAddresses
-    retries
+    location
     snmpConfig {
       ports
       readCommunities
     }
-    timeout
+  }
+  passiveDiscoveries {
+    id
+    location
+    name
+    snmpCommunities
+    snmpPorts
+    toggle
   }
 }

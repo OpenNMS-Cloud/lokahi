@@ -130,6 +130,7 @@ message CollectorResponse {
 
 message DiscoveryScanResult {
   repeated PingResponse ping_response = 1;
+  uint64 active_discovery_id = 2;
 }
 
 message PingResponse {

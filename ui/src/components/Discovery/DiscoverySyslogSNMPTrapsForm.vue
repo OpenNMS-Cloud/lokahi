@@ -10,23 +10,24 @@
       >
         {{ DiscoverySyslogSNMPTrapsForm.headline }}
       </div>
-      <!-- <Icon
-        @click="deleteHandler"
-        :icon="deleteIcon"
-      /> -->
     </div>
     <form
       @submit.prevent="submitHandler"
       data-test="form"
     >
       <div class="form-content">
-        <LocationsAutocomplete
+        <FeatherInput
+          label="Name"
+          v-model="name"
+        />
+        <DiscoveryLocationsAutocomplete
           @location-selected="locationsSelectedListener"
           ref="locationsAutocompleteRef"
           data-test="locations-autocomplete"
+          type="single"
         />
         <DiscoveryHelpConfiguring data-test="help-configuring" />
-        <DiscoveryAutocomplete
+        <BasicAutocomplete
           @items-selected="tagsSelectedListener"
           :get-items="discoveryQueries.getTagsSearch"
           :items="discoveryQueries.tagsSearched"
@@ -38,10 +39,10 @@
           <DiscoveryContentEditable
             @is-content-invalid="isCommunityStringInvalidListerner"
             @content-formatted="communityStringEnteredListerner"
-            :contentType="communityString.type"
-            :regexDelim="communityString.regexDelim"
-            :label="communityString.label"
-            :default-content="''"
+            :contentType="ContentEditableType.CommunityString"
+            :regexDelim="COMMUNITY_STRING.regexDelim"
+            :default-content="COMMUNITY_STRING.default"
+            :label="discoveryText.ContentEditable.CommunityString.label"
             class="community-string-input"
             ref="contentEditableCommunityStringRef"
             data-test="cmmunity-string-content-editable"
@@ -49,10 +50,10 @@
           <DiscoveryContentEditable
             @is-content-invalid="isUDPPortInvalidListener"
             @content-formatted="UDPPortEnteredListener"
-            :contentType="udpPort.type"
-            :regexDelim="udpPort.regexDelim"
-            :label="udpPort.label"
-            :default-content="''"
+            :contentType="ContentEditableType.UDPPort"
+            :regexDelim="UDP_PORT.regexDelim"
+            :default-content="UDP_PORT.default"
+            :label="discoveryText.ContentEditable.UDPPort.label"
             class="udp-port-input"
             ref="contentEditableUDPPortRef"
           />
@@ -66,7 +67,7 @@
           >{{ discoveryText.Discovery.button.cancel }}</FeatherButton
         >
         <ButtonWithSpinner
-          :isFetching="discoveryMutations.savingSyslogSNMPTraps"
+          :isFetching="discoveryMutations.isFetchingPassiveDiscovery"
           :disabled="isFormInvalid"
           primary
           type="submit"
@@ -80,24 +81,21 @@
 </template>
 
 <script lang="ts" setup>
-import DeleteIcon from '@featherds/icon/action/Delete'
-import { IIcon } from '@/types'
 import discoveryText from './discovery.text'
 import { DiscoverySyslogSNMPTrapsForm, Common } from './discovery.text'
-import { ContentEditableType } from './discovery.constants'
+import { ContentEditableType, COMMUNITY_STRING, UDP_PORT } from './discovery.constants'
 import { useDiscoveryQueries } from '@/store/Queries/discoveryQueries'
 import { useDiscoveryMutations } from '@/store/Mutations/discoveryMutations'
-import useSnackbar from '@/composables/useSnackbar'
+import { Location } from '@/types/graphql'
 
 const props = defineProps<{
   successCallback: (name: string) => void
   cancel: () => void
 }>()
 
-const { showSnackbar } = useSnackbar()
-
 const discoveryQueries = useDiscoveryQueries()
 const discoveryMutations = useDiscoveryMutations()
+const name = ref()
 
 const isFormInvalid = ref(
   computed(() => {
@@ -106,9 +104,9 @@ const isFormInvalid = ref(
 )
 
 const locationsAutocompleteRef = ref()
-let locationsSelected: Record<string, string>[] = []
-const locationsSelectedListener = (locations: Record<string, string>[]) => {
-  locationsSelected = locations
+let locationsSelected = ''
+const locationsSelectedListener = (locations: Location[]) => {
+  if (locations[0].location) locationsSelected = locations[0].location
 }
 
 const tagsAutocompleteRef = ref()
@@ -121,80 +119,51 @@ const tagsSelectedListener = (tags: Record<string, string>[]) => {
 }
 
 const contentEditableCommunityStringRef = ref()
-const communityString = {
-  type: ContentEditableType.CommunityString,
-  regexDelim: '',
-  label: discoveryText.ContentEditable.CommunityString.label
-}
+const contentEditableUDPPortRef = ref()
 
 let isCommunityStringInvalid = false
-const isCommunityStringInvalidListerner = (isInvalid: boolean) => {
-  isCommunityStringInvalid = isInvalid
-}
-let communityStringEntered = ''
-const communityStringEnteredListerner = (str: string) => {
-  communityStringEntered = str
-}
+const isCommunityStringInvalidListerner = (isInvalid: boolean) => isCommunityStringInvalid = isInvalid
 
-const contentEditableUDPPortRef = ref()
-const udpPort = {
-  type: ContentEditableType.UDPPort,
-  regexDelim: '',
-  label: discoveryText.ContentEditable.UDPPort.label
-}
+let communityStringEntered: string[] = []
+const communityStringEnteredListerner = (val: string[]) => communityStringEntered = val
 
 let isUDPPortInvalid = false
-const isUDPPortInvalidListener = (isInvalid: boolean) => {
-  isUDPPortInvalid = isInvalid
-}
-let UDPPortEntered = ''
-const UDPPortEnteredListener = (str: string) => {
-  UDPPortEntered = str
-}
+const isUDPPortInvalidListener = (isInvalid: boolean) => isUDPPortInvalid = isInvalid
+
+let UDPPortEntered: number[] = []
+const UDPPortEnteredListener = (val: number[]) => UDPPortEntered = val
 
 const submitHandler = async () => {
   contentEditableCommunityStringRef.value.validateAndFormat()
   contentEditableUDPPortRef.value.validateAndFormat()
+  
+  const passiveDiscovery = {
+    location: locationsSelected,
+    name: name.value,
+    snmpCommunities: communityStringEntered,
+    snmpPorts: UDPPortEntered,
+    tags: tagsSelected
+  }
 
-  const results: any = await discoveryMutations.saveSyslogSNMPTraps({
-    locations: locationsSelected,
-    tagsSelected: tagsSelected,
-    communityString: communityStringEntered,
-    UDPPort: UDPPortEntered
-  })
+  await discoveryMutations.upsertPassiveDiscovery({ passiveDiscovery })
 
-  if (results.data) {
-    props.successCallback(results.data.saveDiscovery[0].name)
+  if (!discoveryMutations.passiveDiscoveryError) {
+    props.successCallback(name.value)
     resetForm()
-  } else {
-    showSnackbar({
-      msg: results.errors[0].message,
-      error: true
-    })
+    discoveryQueries.getDiscoveries()
   }
 }
 
 const resetForm = () => {
-  // locationsAutocompleteRef.value.reset()
   tagsAutocompleteRef.value.reset()
   contentEditableCommunityStringRef.value.reset()
   contentEditableUDPPortRef.value.reset()
+  name.value = ''
 }
 
 const cancelHandler = () => {
   resetForm()
   props.cancel()
-}
-
-const deleteHandler = () => {
-  console.log('delete')
-}
-
-const deleteIcon: IIcon = {
-  image: markRaw(DeleteIcon),
-  tooltip: 'Delete',
-  size: '1.5rem',
-  cursorHover: 'pointer'
 }
 </script>
 

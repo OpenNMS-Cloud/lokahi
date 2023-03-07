@@ -28,6 +28,8 @@
 syntax = "proto3";
 
 import "google/protobuf/any.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/wrappers.proto";
 
 package opennms.events;
 option java_multiple_files = true;
@@ -35,19 +37,22 @@ option java_package = "org.opennms.horizon.events.proto";
 
 
 message EventLog {
-  repeated Event event = 1;
+  string tenant_id = 1;
+  repeated Event event = 2;
 }
 
 message Event {
-  string uei = 1;
-  uint64 node_id = 2;
-  string location = 3;
-  string ip_address = 4;
-  uint64 produced_time = 5;
-  repeated EventParameter event_params = 6;
-  optional EventInfo event_info = 7;
-  optional EventSeverity event_severity = 8;
-  optional AlarmData alarm_data = 9;
+  string tenant_id = 1;
+  uint64 database_id = 2;
+  string uei = 3;
+  uint64 node_id = 4;
+  string location = 5;
+  string ip_address = 6;
+  uint64 produced_time = 7;
+  repeated EventParameter event_params = 8;
+  optional EventInfo event_info = 9;
+  optional EventSeverity event_severity = 10;
+  optional AlarmData alarm_data = 11;
 }
 
 message EventInfo {
@@ -98,4 +103,9 @@ message UpdateField {
 
 message ManagedObject {
   string type = 1;
+}
+
+service EventService {
+  rpc listEvents(google.protobuf.Empty) returns (EventLog) {};
+  rpc getEventsByNodeId(google.protobuf.Int64Value) returns (EventLog) {};
 }

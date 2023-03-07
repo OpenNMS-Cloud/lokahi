@@ -30,7 +30,7 @@ package org.opennms.horizon.events.persistence.service;
 
 import org.opennms.horizon.events.persistence.mapper.EventMapper;
 import org.opennms.horizon.events.persistence.repository.EventRepository;
-import org.opennms.horizon.events.proto.EventDTO;
+import org.opennms.horizon.events.proto.Event;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -46,13 +46,13 @@ public class EventService {
         this.eventMapper = eventMapper;
     }
 
-    public List<EventDTO> findEvents(String tenantId) {
+    public List<Event> findEvents(String tenantId) {
         return eventRepository.findAllByTenantId(tenantId).stream()
             .map(eventMapper::modelToDtoWithParams)
             .collect(Collectors.toList());
     }
 
-    public List<EventDTO> findEventsByNodeId(String tenantId, long nodeId) {
+    public List<Event> findEventsByNodeId(String tenantId, long nodeId) {
         return eventRepository.findAllByTenantIdAndNodeId(tenantId, nodeId).stream()
             .map(eventMapper::modelToDtoWithParams)
             .collect(Collectors.toList());

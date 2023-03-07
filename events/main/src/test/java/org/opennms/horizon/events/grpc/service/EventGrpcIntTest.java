@@ -9,13 +9,10 @@ import org.opennms.horizon.events.persistence.model.Event;
 import org.opennms.horizon.events.persistence.model.EventParameter;
 import org.opennms.horizon.events.persistence.model.EventParameters;
 import org.opennms.horizon.events.persistence.repository.EventRepository;
-import org.opennms.horizon.events.proto.EventDTO;
 import org.opennms.horizon.events.proto.EventInfo;
-import org.opennms.horizon.events.proto.EventInfoDTO;
-import org.opennms.horizon.events.proto.EventList;
+import org.opennms.horizon.events.proto.EventLog;
 import org.opennms.horizon.events.proto.EventServiceGrpc;
 import org.opennms.horizon.events.proto.SnmpInfo;
-import org.opennms.horizon.events.proto.SnmpInfoDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.DynamicPropertyRegistry;
@@ -94,13 +91,13 @@ class EventGrpcIntTest extends GrpcTestBase {
             populateDatabase(index + 1);
         }
 
-        EventList eventList = serviceStub.listEvents(Empty.getDefaultInstance());
+        EventLog eventLog = serviceStub.listEvents(Empty.getDefaultInstance());
 
-        List<EventDTO> events = eventList.getEventsList();
+        List<org.opennms.horizon.events.proto.Event> events = eventLog.getEventList();
         assertEquals(count, events.size());
 
         for (int index = 0; index < events.size(); index++) {
-            EventDTO event = events.get(index);
+            org.opennms.horizon.events.proto.Event event = events.get(index);
             assertEquals(index + 1, event.getNodeId());
             assertEvent(event);
         }
@@ -117,9 +114,9 @@ class EventGrpcIntTest extends GrpcTestBase {
             populateDatabase(index + 1);
         }
 
-        EventList eventList = serviceStub.listEvents(Empty.getDefaultInstance());
+        EventLog eventLog = serviceStub.listEvents(Empty.getDefaultInstance());
 
-        List<EventDTO> events = eventList.getEventsList();
+        List<org.opennms.horizon.events.proto.Event> events = eventLog.getEventList();
         assertEquals(0, events.size());
     }
 
@@ -135,24 +132,24 @@ class EventGrpcIntTest extends GrpcTestBase {
             populateDatabase(2);
         }
 
-        EventList eventList1 = serviceStub.getEventsByNodeId(Int64Value
+        EventLog eventLog1 = serviceStub.getEventsByNodeId(Int64Value
             .newBuilder().setValue(1).build());
 
-        List<EventDTO> eventsNode1 = eventList1.getEventsList();
+        List<org.opennms.horizon.events.proto.Event> eventsNode1 = eventLog1.getEventList();
         assertNotNull(eventsNode1);
         assertEquals(3, eventsNode1.size());
-        for (EventDTO event : eventsNode1) {
+        for (org.opennms.horizon.events.proto.Event event : eventsNode1) {
             assertEquals(1, event.getNodeId());
             assertEvent(event);
         }
 
-        EventList eventList2 = serviceStub.getEventsByNodeId(Int64Value
+        EventLog eventLog2 = serviceStub.getEventsByNodeId(Int64Value
             .newBuilder().setValue(2).build());
 
-        List<EventDTO> eventsNode2 = eventList2.getEventsList();
+        List<org.opennms.horizon.events.proto.Event> eventsNode2 = eventLog2.getEventList();
         assertNotNull(eventsNode2);
         assertEquals(5, eventsNode2.size());
-        for (EventDTO event : eventsNode2) {
+        for (org.opennms.horizon.events.proto.Event event : eventsNode2) {
             assertEquals(2, event.getNodeId());
             assertEvent(event);
         }
@@ -167,10 +164,10 @@ class EventGrpcIntTest extends GrpcTestBase {
             populateDatabase(1);
         }
 
-        EventList eventList1 = serviceStub.getEventsByNodeId(Int64Value
+        EventLog eventLog = serviceStub.getEventsByNodeId(Int64Value
             .newBuilder().setValue(1).build());
 
-        List<EventDTO> eventsNode1 = eventList1.getEventsList();
+        List<org.opennms.horizon.events.proto.Event> eventsNode1 = eventLog.getEventList();
         assertEquals(0, eventsNode1.size());
     }
 
@@ -206,7 +203,7 @@ class EventGrpcIntTest extends GrpcTestBase {
         repository.saveAndFlush(event);
     }
 
-    private void assertEvent(EventDTO event) {
+    private void assertEvent(org.opennms.horizon.events.proto.Event event) {
         assertEquals(tenantId, event.getTenantId());
         assertEquals(TEST_UEI, event.getUei());
         assertNotEquals(0, event.getProducedTime());
@@ -220,10 +217,10 @@ class EventGrpcIntTest extends GrpcTestBase {
             assertEquals(TEST_ENCODING, parameter.getEncoding());
         });
 
-        EventInfoDTO eventInfo = event.getEventInfo();
+        EventInfo eventInfo = event.getEventInfo();
         assertNotNull(eventInfo);
 
-        SnmpInfoDTO snmpInfo = eventInfo.getSnmp();
+        SnmpInfo snmpInfo = eventInfo.getSnmp();
         assertNotNull(snmpInfo);
         assertEquals(TEST_ID, snmpInfo.getId());
         assertEquals(TEST_TRAP_OID, snmpInfo.getTrapOid());

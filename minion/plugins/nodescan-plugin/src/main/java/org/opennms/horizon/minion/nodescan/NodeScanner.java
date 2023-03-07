@@ -28,11 +28,14 @@
 
 package org.opennms.horizon.minion.nodescan;
 
+
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+
+import com.google.protobuf.Any;
 
 import org.opennms.horizon.minion.plugin.api.ScanResultsResponse;
 import org.opennms.horizon.minion.plugin.api.ScanResultsResponseImpl;
@@ -49,7 +52,7 @@ import org.opennms.node.scan.contract.SnmpInterfaceResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.protobuf.Any;
+
 
 public class NodeScanner implements Scanner {
     private static final Logger LOGGER = LoggerFactory.getLogger(NodeScanner.class);
@@ -72,15 +75,17 @@ public class NodeScanner implements Scanner {
         return CompletableFuture.supplyAsync(() ->{
             try {
                 NodeScanRequest scanRequest = config.unpack(NodeScanRequest.class);
+
                 SnmpAgentConfig agentConfig = new SnmpAgentConfig(InetAddress.getByName(scanRequest.getPrimaryIp()), SnmpConfiguration.DEFAULTS);
                 agentConfig.setVersion(SnmpConfiguration.VERSION2C);
-                NodeInfoResult nodeInfo = scanSystem(agentConfig);
-                List<SnmpAgentConfig> snmpAgentConfigs = snmpConfigDiscovery.detectSNMP(Collections.singletonList(agentConfig));
+
+                List<SnmpAgentConfig> snmpAgentConfigs = snmpConfigDiscovery.getDiscoveredConfig(Collections.singletonList(agentConfig));
 
                 if(snmpAgentConfigs.size() != 1 ) {
                     throw new RuntimeException("Expected to find one SNMP agent config, but found " + snmpAgentConfigs.size());
                 }
 
+                NodeInfoResult nodeInfo = scanSystem(agentConfig);
                 List<IpInterfaceResult> ipInterfaceResults = scanIpAddrTable(snmpAgentConfigs.get(0));
                 List<SnmpInterfaceResult> snmpInterfaceResults = scanSnmpInterface(snmpAgentConfigs.get(0));
                 NodeScanResult scanResult = NodeScanResult.newBuilder()

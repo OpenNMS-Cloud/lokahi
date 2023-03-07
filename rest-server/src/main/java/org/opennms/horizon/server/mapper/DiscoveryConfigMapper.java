@@ -28,20 +28,22 @@
 
 package org.opennms.horizon.server.mapper;
 
-import java.util.List;
-
 import org.mapstruct.CollectionMappingStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
-import org.opennms.horizon.inventory.discovery.DiscoveryConfigDTO;
-import org.opennms.horizon.inventory.discovery.DiscoveryConfigRequest;
+import org.mapstruct.NullValueCheckStrategy;
+import org.opennms.horizon.inventory.discovery.ActiveDiscoveryDTO;
+import org.opennms.horizon.inventory.discovery.ActiveDiscoveryRequest;
 import org.opennms.horizon.inventory.discovery.SNMPConfigDTO;
+import org.opennms.horizon.server.model.inventory.discovery.ActiveDiscovery;
 import org.opennms.horizon.server.model.inventory.discovery.CreateDiscoveryConfigRequest;
-import org.opennms.horizon.server.model.inventory.discovery.DiscoveryConfig;
 import org.opennms.horizon.server.model.inventory.discovery.SNMPConfig;
 
-@Mapper(componentModel = "spring", collectionMappingStrategy = CollectionMappingStrategy.ADDER_PREFERRED)
+import java.util.List;
+
+@Mapper(componentModel = "spring",
+    uses = {TagMapper.class}, collectionMappingStrategy = CollectionMappingStrategy.ADDER_PREFERRED)
 public interface DiscoveryConfigMapper {
     @Mappings({
         @Mapping(source = "readCommunityList", target = "readCommunities"),
@@ -57,15 +59,16 @@ public interface DiscoveryConfigMapper {
 
     @Mappings({
         @Mapping(target = "ipAddressesList", source = "ipAddresses"),
-        @Mapping(target = "snmpConf", source = "snmpConfig")
+        @Mapping(target = "snmpConf", source = "snmpConfig", nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS),
+        @Mapping(target = "tagsList", source = "tags", nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
     })
-     DiscoveryConfigRequest mapRequest(CreateDiscoveryConfigRequest request);
+    ActiveDiscoveryRequest mapRequest(CreateDiscoveryConfigRequest request);
 
     @Mappings({
         @Mapping(source = "ipAddressesList", target = "ipAddresses"),
         @Mapping(source = "snmpConf", target = "snmpConfig")
     })
-    DiscoveryConfig configDtoToModel(DiscoveryConfigDTO configDTO);
+    ActiveDiscovery configDtoToModel(ActiveDiscoveryDTO configDTO);
 
-    List<DiscoveryConfig> configDtoListToConfig(List<DiscoveryConfigDTO> dtoList);
+    List<ActiveDiscovery> configDtoListToConfig(List<ActiveDiscoveryDTO> dtoList);
 }

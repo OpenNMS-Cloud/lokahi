@@ -8,10 +8,12 @@
       <div
         v-for="item in list"
         :key="item.id"
-        @click="$emit('selectDiscovery', item)"
         class="discovery-name"
       >
-        {{ item.configName?.toUpperCase() }}
+        <div @click="$emit('selectDiscovery', item)" class="pointer">
+          {{ item.configName?.toUpperCase() || item.name?.toUpperCase() }}
+        </div>
+        <BasicToggle v-if="passive" :toggle="item.toggle" @toggle="(isToggled) => $emit('toggleDiscovery', item, isToggled)" />
       </div>
     </div>
     <div
@@ -21,7 +23,7 @@
       <FeatherIcon
         :icon="Warning"
         class="icon"
-      />You have no active discovery
+      />You have no {{ passive? 'passive' : 'active '}} discovery
     </div>
   </div>
 </template>
@@ -32,8 +34,8 @@ import Warning from '@featherds/icon/notification/Warning'
 defineProps<{
   title: string
   list?: any
+  passive?: boolean
 }>()
-defineEmits(['selectDiscovery'])
 </script>
 
 <style scoped lang="scss">
@@ -65,9 +67,10 @@ defineEmits(['selectDiscovery'])
 }
 
 .discovery-name {
+  display: flex;
+  justify-content: space-between;
   @include typography.headline4;
   color: var(variables.$secondary-variant);
-  cursor: pointer;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;

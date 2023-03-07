@@ -28,7 +28,7 @@ runs:
       if: ${{ inputs.project-key != '' }}
       run: |
         mvn -B -Dstyle.color=always \
-            -Pcoverage install sonar:sonar \
+            -Pcicd,coverage install sonar:sonar \
             -Dsonar.projectKey=$SONAR_PROJECT_KEY
       shell: bash
       working-directory: ${{ inputs.working-directory }}
@@ -41,7 +41,7 @@ runs:
       if: ${{ inputs.project-key == '' }}
       run: |
         mvn -B -Dstyle.color=always \
-            -Pcoverage install sonar:sonar
+            -Pcicd,coverage install sonar:sonar
       shell: bash
       working-directory: ${{ inputs.working-directory }}
       env:

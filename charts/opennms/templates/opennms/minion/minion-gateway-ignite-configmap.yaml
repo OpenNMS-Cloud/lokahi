@@ -8,6 +8,9 @@ metadata:
 data:
   ignite-cache-config.xml: |
     <?xml version="1.0" encoding="utf-8" ?>
+    <!--                                                                                                  -->
+    <!-- DEVELOPER WARNING: make sure to update the version of this in the minion-gateway sources as well -->
+    <!--                                                                                                  -->
     <beans xmlns="http://www.springframework.org/schema/beans"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="
@@ -39,6 +42,19 @@ data:
                     <bean class="org.apache.ignite.configuration.CacheConfiguration">
                         <property name="name" value="twinCache"/>
                         <property name="cacheMode" value="PARTITIONED" />
+                        <property name="cacheStoreFactory">
+                            <bean class="org.apache.ignite.cache.store.jdbc.CacheJdbcBlobStoreFactory">
+                                <property name="dataSourceBean" value="dataSource"/>
+                                <property name="createTableQuery" value="create table if not exists ENTRIES (akey bytea primary key, val bytea)"/>
+                            </bean>
+                        </property>
+                        <property name="writeThrough" value="true"/>
+                        <property name="readThrough" value="true"/>
+                    </bean>
+                    <bean class="org.apache.ignite.configuration.CacheConfiguration">
+                        <property name="name" value="taskSetCache"/>
+                        <property name="cacheMode" value="PARTITIONED" />
+                        <property name="atomicityMode" value="TRANSACTIONAL" />
                         <property name="cacheStoreFactory">
                             <bean class="org.apache.ignite.cache.store.jdbc.CacheJdbcBlobStoreFactory">
                                 <property name="dataSourceBean" value="dataSource"/>

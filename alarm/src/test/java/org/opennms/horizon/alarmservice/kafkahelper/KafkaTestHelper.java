@@ -89,10 +89,8 @@ public class KafkaTestHelper {
         return true;
     }
 
-    public void sendToTopic(String topic, byte[] body, String tenantId) {
-        var producerRecord = new ProducerRecord<String, byte[]>(topic, body);
-        producerRecord.headers().add(new RecordHeader(GrpcConstants.TENANT_ID_KEY, tenantId.getBytes(StandardCharsets.UTF_8)));
-        kafkaProducer.send(producerRecord);
+    public void sendToTopic(String topic, byte[] body) {
+        kafkaProducer.send(new ProducerRecord<>(topic, body));
     }
 
     public void removeConsumer(String topic) {

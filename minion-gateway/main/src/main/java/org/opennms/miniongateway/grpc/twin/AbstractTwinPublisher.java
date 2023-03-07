@@ -40,25 +40,17 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
-import java.util.Queue;
-import java.util.UUID;
 import java.util.function.BiConsumer;
-import javax.cache.Cache;
 import javax.cache.Cache.Entry;
 import org.apache.ignite.Ignite;
 import org.apache.ignite.IgniteCache;
-import org.apache.ignite.cache.CacheAtomicityMode;
 import org.apache.ignite.cache.query.QueryCursor;
 import org.apache.ignite.cache.query.ScanQuery;
-import org.apache.ignite.configuration.CacheConfiguration;
 import org.apache.ignite.lang.IgniteBiPredicate;
 import org.opennms.cloud.grpc.minion.TwinRequestProto;
 import org.opennms.cloud.grpc.minion.TwinResponseProto;
 import org.opennms.horizon.shared.protobuf.marshalling.ProtoBufJsonSerializer;
-import org.opennms.miniongateway.grpc.server.model.TenantKey;
 import org.opennms.taskset.contract.TaskSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -86,7 +78,8 @@ public abstract class AbstractTwinPublisher implements TwinPublisher, TwinProvid
     protected abstract void handleSinkUpdate(TwinUpdate sinkUpdate);
 
     @Override
-    public <T> Session<T> register(String key, Class<T> clazz, String tenantId, String location) throws IOException {
+    public <T> Session<T>
+    register(String key, Class<T> clazz, String tenantId, String location) throws IOException {
         try (MDCCloseable mdc = MDC.putCloseable("prefix", TwinConstants.LOG_PREFIX)) {
             SessionKey sessionKey = new SessionKey(key, tenantId, location);
             LOG.info("Registered a session with key {}", sessionKey);

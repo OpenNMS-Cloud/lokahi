@@ -119,9 +119,9 @@ public class TrapsConsumer {
             final Log eventLog = toLog(trapLogDTO, tenantId);
 
             // Convert to events into protobuf format
-            EventLog eventLogProto = convertToProtoEvents(eventLog);
+            EventLog eventLogProto = convertToProtoEvents(eventLog, tenantId);
             // Send them to kafka
-            eventForwarder.sendEvents(eventLogProto, tenantId);
+            eventForwarder.sendEvents(eventLogProto);
 
             eventLogProto.getEventList().stream()
                 .filter(e-> e.getNodeId() <= 0)
@@ -137,23 +137,26 @@ public class TrapsConsumer {
 
     private void sendNewSuspectEvent(org.opennms.horizon.events.proto.Event event, String tenantId) {
         var newEvent = org.opennms.horizon.events.proto.Event.newBuilder()
+            .setTenantId(tenantId)
             .setUei(EventConstants.NEW_SUSPECT_INTERFACE_EVENT_UEI)
             .setIpAddress(event.getIpAddress())
             .setLocation(event.getLocation())
             .setEventInfo(event.getEventInfo())
             .addAllEventParams(event.getEventParamsList())
             .build();
-        eventForwarder.sendInternalEvents(newEvent, tenantId);
+        eventForwarder.sendInternalEvent(newEvent);
     }
 
-    private EventLog convertToProtoEvents(Log eventLog) {
-        EventLog.Builder builder = EventLog.newBuilder();
-        eventLog.getEvents().getEventCollection().forEach((event -> builder.addEvent(mapToEventProto(event))));
+    private EventLog convertToProtoEvents(Log eventLog, String tenantId) {
+        EventLog.Builder builder = EventLog.newBuilder()
+                .setTenantId(tenantId);
+        eventLog.getEvents().getEventCollection().forEach((event -> builder.addEvent(mapToEventProto(event, tenantId))));
         return builder.build();
     }
 
-    private org.opennms.horizon.events.proto.Event mapToEventProto(Event event) {
+    private org.opennms.horizon.events.proto.Event mapToEventProto(Event event, String tenantId) {
         org.opennms.horizon.events.proto.Event.Builder eventBuilder = org.opennms.horizon.events.proto.Event.newBuilder()
+            .setTenantId(tenantId)
             .setUei(event.getUei())
             .setProducedTime(event.getCreationTime().getTime())
             .setNodeId(event.getNodeid())

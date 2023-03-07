@@ -6,9 +6,6 @@ import org.mapstruct.Mapping;
 import org.opennms.horizon.events.persistence.model.Event;
 import org.opennms.horizon.events.persistence.model.EventParameter;
 import org.opennms.horizon.events.persistence.model.EventParameters;
-import org.opennms.horizon.events.proto.EventDTO;
-import org.opennms.horizon.events.proto.EventInfoDTO;
-import org.opennms.horizon.events.proto.EventParameterDTO;
 import org.opennms.horizon.shared.utils.InetAddressUtils;
 
 import java.net.InetAddress;
@@ -18,12 +15,12 @@ import java.util.List;
 public interface EventMapper extends DateTimeMapper {
 
     @Mapping(source = "eventUei", target = "uei")
-    EventDTO modelToDTO(Event event);
+    org.opennms.horizon.events.proto.Event modelToDTO(Event event);
 
-    default EventDTO modelToDtoWithParams(Event event) {
-        EventDTO eventDTO = modelToDTO(event);
+    default org.opennms.horizon.events.proto.Event modelToDtoWithParams(Event event) {
+        org.opennms.horizon.events.proto.Event eventDTO = modelToDTO(event);
 
-        EventDTO.Builder builder = EventDTO.newBuilder(eventDTO);
+        org.opennms.horizon.events.proto.Event.Builder builder = org.opennms.horizon.events.proto.Event.newBuilder(eventDTO);
 
         EventParameters eventParams = event.getEventParameters();
         if (eventParams != null) {
@@ -36,11 +33,11 @@ public interface EventMapper extends DateTimeMapper {
         return builder.build();
     }
 
-    EventParameterDTO modelToDTO(EventParameter param);
+    org.opennms.horizon.events.proto.EventParameter modelToDTO(EventParameter param);
 
-    default EventInfoDTO map(byte[] value) {
+    default org.opennms.horizon.events.proto.EventInfo map(byte[] value) {
         try {
-            return EventInfoDTO.parseFrom(value);
+            return org.opennms.horizon.events.proto.EventInfo.parseFrom(value);
         } catch (InvalidProtocolBufferException e) {
             throw new RuntimeException(e);
         }

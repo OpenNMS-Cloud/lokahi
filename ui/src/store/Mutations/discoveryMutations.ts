@@ -1,62 +1,34 @@
 import { defineStore } from 'pinia'
 import { useMutation } from 'villus'
-import { AddAzureCredentialDocument, CreateDiscoveryConfigDocument } from '@/types/graphql'
+import { AddAzureCredentialDocument, CreateActiveDiscoveryDocument, UpsertPassiveDiscoveryDocument } from '@/types/graphql'
 
 export const useDiscoveryMutations = defineStore('discoveryMutations', () => {
+  // Create Azure
   const { execute: addAzureCreds, error, isFetching } = useMutation(AddAzureCredentialDocument)
+
+  // Create Active Discoveries
   const {
     execute: createDiscoveryConfig,
-    error: errorSnmp,
-    isFetching: isFetchingSnmp
-  } = useMutation(CreateDiscoveryConfigDocument)
+    error: activeDiscoveryError,
+    isFetching: isFetchingActiveDiscovery
+  } = useMutation(CreateActiveDiscoveryDocument)
 
-  // mock
-  let timeout = -1
-  const saveSyslogSNMPTrapsError = ref()
-  const savingSyslogSNMPTraps = ref(false)
-  const saveSyslogSNMPTraps = async (values: any) => {
-    savingSyslogSNMPTraps.value = true
-
-    // mock
-    const errorsRes = {
-      errors: [
-        {
-          message: 'Exception while fetching data (/saveDiscovery) : UNAVAILABLE: Service unavalable'
-        }
-      ]
-    }
-    const successRes = {
-      data: {
-        saveDiscovery: [
-          {
-            id: 1,
-            name: 'MAD-001-Syslog-SNMP-Traps'
-          }
-        ]
-      }
-    }
-    return new Promise((resolve) => {
-      timeout = window.setTimeout(() => {
-        savingSyslogSNMPTraps.value = false
-        // success
-        resolve(successRes)
-        // fail
-        // resolve(errorsRes)
-        // saveSyslogSNMPTrapsError.value = errorsRes
-        clearTimeout(timeout)
-      }, 2000)
-    })
-  }
+  // Create Passive Discoveries
+  const {
+    execute: upsertPassiveDiscovery,
+    error: passiveDiscoveryError,
+    isFetching: isFetchingPassiveDiscovery
+  } = useMutation(UpsertPassiveDiscoveryDocument)
 
   return {
     addAzureCreds,
     azureError: computed(() => error),
     isFetching: computed(() => isFetching),
     createDiscoveryConfig,
-    errorSnmp: computed(() => errorSnmp),
-    isFetchingSnmp: computed(() => isFetchingSnmp),
-    saveSyslogSNMPTraps,
-    saveSyslogSNMPTrapsErrors: computed(() => saveSyslogSNMPTrapsError.value),
-    savingSyslogSNMPTraps: computed(() => savingSyslogSNMPTraps.value)
+    activeDiscoveryError: computed(() => activeDiscoveryError.value),
+    isFetchingActiveDiscovery: computed(() => isFetchingActiveDiscovery.value),
+    upsertPassiveDiscovery,
+    passiveDiscoveryError: computed(() => passiveDiscoveryError.value),
+    isFetchingPassiveDiscovery: computed(() => isFetchingPassiveDiscovery.value),
   }
 })

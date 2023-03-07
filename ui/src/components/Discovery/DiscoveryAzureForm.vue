@@ -41,12 +41,13 @@
       />
     </div>
 
-    <LocationsAutocomplete
+    <DiscoveryLocationsAutocomplete
       @locationSelected="selectLocation"
       class="locations"
+      type="single"
     />
 
-    <DiscoveryAutocomplete
+    <BasicAutocomplete
       class="tags"
       @items-selected="tagsSelectedListener"
       :get-items="discoveryQueries.getTagsSearch"

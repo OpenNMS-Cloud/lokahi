@@ -66,6 +66,7 @@ import org.opennms.horizon.alarmservice.rest.AlarmCollectionDTO;
 import org.opennms.horizon.alarmservice.rest.support.MultivaluedMapImpl;
 import org.opennms.horizon.events.proto.AlarmData;
 import org.opennms.horizon.events.proto.Event;
+import org.opennms.horizon.events.proto.EventLog;
 import org.opennms.horizon.shared.constants.GrpcConstants;
 
 @Slf4j
@@ -184,24 +185,23 @@ public class AlarmTestSteps {
     }
 
     @Then("Send Event message to Kafka at topic {string} with alarm reduction key {string} with tenant {string}")
-    public void sendMessageToKafkaAtTopic(String topic, String alarmReductionKey, String tenantId) throws Exception {
-
+    public void sendMessageToKafkaAtTopic(String topic, String alarmReductionKey, String tenantId) {
         testAlarmReductionKey = alarmReductionKey;
 
-        AlarmData alarmData =
-            AlarmData.newBuilder()
-                .setReductionKey(alarmReductionKey)
-                .build()
-            ;
-
-        Event event =
-            Event.newBuilder()
-                .setNodeId(10L)
-                .setUei("BlahUEI")
-                .setAlarmData(alarmData)
+        AlarmData alarmData = AlarmData.newBuilder()
+                .setReductionKey(testAlarmReductionKey)
                 .build();
 
-        kafkaTestHelper.sendToTopic(topic, event.toByteArray(), tenantId);
+        EventLog eventLog = EventLog.newBuilder()
+            .setTenantId(tenantId)
+            .addEvent(Event.newBuilder()
+                .setTenantId(tenantId)
+                .setNodeId(10L)
+                .setUei("BlahUEI")
+                .setAlarmData(alarmData))
+            .build();
+
+        kafkaTestHelper.sendToTopic(topic, eventLog.toByteArray());
     }
 
     @Then("send GET request to application at path {string}, with timeout {int}ms, until JSON response matches the following JSON path expressions")

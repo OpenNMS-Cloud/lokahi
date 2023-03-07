@@ -28,16 +28,18 @@
 
 package org.opennms.horizon.server.model.inventory.discovery;
 
-import java.util.List;
-
 import lombok.Getter;
 import lombok.Setter;
+import org.opennms.horizon.server.model.inventory.tag.TagCreate;
+
+import java.util.List;
 
 @Getter
 @Setter
 public class CreateDiscoveryConfigRequest {
     private String configName;
     private String location;
+    private List<TagCreate> tags;
     private List<String> ipAddresses;
     private SNMPConfig snmpConfig;
 }

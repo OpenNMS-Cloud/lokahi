@@ -4,7 +4,7 @@ import {
   ListLocationsForDiscoveryDocument,
   Tag,
   ListTagsSearchDocument,
-  ListDiscoveryConfigDocument
+  ListDiscoveriesDocument
 } from '@/types/graphql'
 
 export const useDiscoveryQueries = defineStore('discoveryQueries', () => {
@@ -15,9 +15,8 @@ export const useDiscoveryQueries = defineStore('discoveryQueries', () => {
     fetchOnMount: false
   })
 
-  const { data: listDiscoveryConfig, execute: getDiscoveries } = useQuery({
-    query: ListDiscoveryConfigDocument,
-    fetchOnMount: false
+  const { data: listedDiscoveries, execute: getDiscoveries } = useQuery({
+    query: ListDiscoveriesDocument
   })
 
   const getTagsSearch = (searchTerm: string) => {
@@ -42,7 +41,8 @@ export const useDiscoveryQueries = defineStore('discoveryQueries', () => {
     getLocations,
     tagsSearched: computed(() => tagsSearched.value || []),
     getTagsSearch,
-    discoveries: computed(() => listDiscoveryConfig.value?.listDiscoveryConfig || []),
+    activeDiscoveries: computed(() => listedDiscoveries.value?.listActiveDiscovery || []),
+    passiveDiscoveries: computed(() => listedDiscoveries.value?.passiveDiscoveries || []),
     getDiscoveries
   }
 })

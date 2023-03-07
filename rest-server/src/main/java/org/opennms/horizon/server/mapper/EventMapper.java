@@ -30,12 +30,11 @@ package org.opennms.horizon.server.mapper;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.opennms.horizon.events.proto.EventDTO;
 import org.opennms.horizon.server.model.events.Event;
 
 
 @Mapper(componentModel = "spring")
 public interface EventMapper {
     @Mapping(source = "eventParamsList", target = "eventParams")
-    Event protoToEvent(EventDTO eventDTO);
+    Event protoToEvent(org.opennms.horizon.events.proto.Event eventProto);
 }

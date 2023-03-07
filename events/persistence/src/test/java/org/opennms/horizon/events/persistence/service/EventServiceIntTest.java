@@ -35,11 +35,8 @@ import org.opennms.horizon.events.persistence.model.Event;
 import org.opennms.horizon.events.persistence.model.EventParameter;
 import org.opennms.horizon.events.persistence.model.EventParameters;
 import org.opennms.horizon.events.persistence.repository.EventRepository;
-import org.opennms.horizon.events.proto.EventDTO;
 import org.opennms.horizon.events.proto.EventInfo;
-import org.opennms.horizon.events.proto.EventInfoDTO;
 import org.opennms.horizon.events.proto.SnmpInfo;
-import org.opennms.horizon.events.proto.SnmpInfoDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.DynamicPropertyRegistry;
@@ -113,11 +110,11 @@ class EventServiceIntTest {
             populateDatabase(index + 1);
         }
 
-        List<EventDTO> events = service.findEvents(TEST_TENANT_ID);
+        List<org.opennms.horizon.events.proto.Event> events = service.findEvents(TEST_TENANT_ID);
         assertEquals(count, events.size());
 
         for (int index = 0; index < events.size(); index++) {
-            EventDTO event = events.get(index);
+            org.opennms.horizon.events.proto.Event event = events.get(index);
             assertEquals(index + 1, event.getNodeId());
             assertEvent(event);
         }
@@ -133,23 +130,22 @@ class EventServiceIntTest {
             populateDatabase(2);
         }
 
-        List<EventDTO> eventsNode1 = service.findEventsByNodeId(TEST_TENANT_ID, 1);
+        List<org.opennms.horizon.events.proto.Event> eventsNode1 = service.findEventsByNodeId(TEST_TENANT_ID, 1);
         assertEquals(3, eventsNode1.size());
-        for (EventDTO event : eventsNode1) {
+        for (org.opennms.horizon.events.proto.Event event : eventsNode1) {
             assertEquals(1, event.getNodeId());
             assertEvent(event);
         }
 
-        List<EventDTO> eventsNode2 = service.findEventsByNodeId(TEST_TENANT_ID, 2);
+        List<org.opennms.horizon.events.proto.Event> eventsNode2 = service.findEventsByNodeId(TEST_TENANT_ID, 2);
         assertEquals(5, eventsNode2.size());
-        for (EventDTO event : eventsNode2) {
+        for (org.opennms.horizon.events.proto.Event event : eventsNode2) {
             assertEquals(2, event.getNodeId());
             assertEvent(event);
         }
     }
 
     private void populateDatabase(long nodeId) throws UnknownHostException {
-
         Event event = new Event();
         event.setTenantId(TEST_TENANT_ID);
         event.setEventUei(TEST_UEI);
@@ -180,7 +176,7 @@ class EventServiceIntTest {
         repository.save(event);
     }
 
-    private static void assertEvent(EventDTO event) {
+    private static void assertEvent(org.opennms.horizon.events.proto.Event event) {
         assertEquals(TEST_TENANT_ID, event.getTenantId());
         assertEquals(TEST_UEI, event.getUei());
         assertNotEquals(0, event.getProducedTime());
@@ -194,10 +190,10 @@ class EventServiceIntTest {
             assertEquals(TEST_ENCODING, parameter.getEncoding());
         });
 
-        EventInfoDTO eventInfo = event.getEventInfo();
+        EventInfo eventInfo = event.getEventInfo();
         assertNotNull(eventInfo);
 
-        SnmpInfoDTO snmpInfo = eventInfo.getSnmp();
+        SnmpInfo snmpInfo = eventInfo.getSnmp();
         assertNotNull(snmpInfo);
         assertEquals(TEST_ID, snmpInfo.getId());
         assertEquals(TEST_TRAP_OID, snmpInfo.getTrapOid());

@@ -1,0 +1,71 @@
+/*******************************************************************************
+ * This file is part of OpenNMS(R).
+ *
+ * Copyright (C) 2022 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
+ *
+ * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *
+ * OpenNMS(R) is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published
+ * by the Free Software Foundation, either version 3 of the License,
+ * or (at your option) any later version.
+ *
+ * OpenNMS(R) is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with OpenNMS(R).  If not, see:
+ *      http://www.gnu.org/licenses/
+ *
+ * For more information contact:
+ *     OpenNMS(R) Licensing <license@opennms.org>
+ *     http://www.opennms.org/
+ *     http://www.opennms.com/
+ *******************************************************************************/
+syntax = "proto3";
+
+import "google/protobuf/empty.proto";
+import "google/protobuf/wrappers.proto";
+import "tag.proto";
+
+package opennms.inventory;
+option java_multiple_files = true;
+option java_package = "org.opennms.horizon.inventory.discovery";
+
+message ActiveDiscoveryRequest {
+  string configName = 1;
+  string location = 2;
+  //can be a single ip address, ip ranges: 127.0.0.1 or 127.0.0.1-127.0.0.10 are valid values
+  repeated string ipAddresses = 3;
+  SNMPConfigDTO snmpConf = 4;
+  repeated opennms.inventory.TagCreateDTO tags = 5;
+}
+
+message ActiveDiscoveryDTO {
+  int64 id = 1;
+  string tenantId = 2;
+  string configName = 3;
+  string location = 4;
+  //can be a single ip address, ip ranges: 127.0.0.1 or 127.0.0.1-127.0.0.10 are valid values
+  repeated string ipAddresses = 5;
+  SNMPConfigDTO snmpConf = 6;
+
+}
+
+message SNMPConfigDTO {
+  repeated string readCommunity = 1;
+  repeated int32 ports = 2;
+}
+
+message ActiveDiscoveryList {
+  repeated ActiveDiscoveryDTO discoverConfigs = 1;
+}
+
+service ActiveDiscoveryOperation {
+  rpc createConfig(ActiveDiscoveryRequest) returns (ActiveDiscoveryDTO);
+  rpc listDiscoveryConfig(google.protobuf.Empty) returns(ActiveDiscoveryList);
+  rpc getDiscoveryConfigById(google.protobuf.Int64Value) returns (ActiveDiscoveryDTO);
+}

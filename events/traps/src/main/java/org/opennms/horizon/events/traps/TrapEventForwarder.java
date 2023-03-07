@@ -61,17 +61,16 @@ public class TrapEventForwarder {
         this.internalTopic = internalEventsTopic;
     }
 
-    public void sendEvents(EventLog eventLog, String tenantId) {
-        LOG.info("Sending {} events to events topic", eventLog.getEventCount());
-        var producerRecord = new ProducerRecord<String, byte[]>(kafkaTopic, eventLog.toByteArray());
-        producerRecord.headers().add(new RecordHeader(GrpcConstants.TENANT_ID_KEY, tenantId.getBytes(StandardCharsets.UTF_8)));
-        kafkaTemplate.send(producerRecord);
+    public void sendEvents(EventLog eventLog) {
+        LOG.info("Sending {} events to events topic for tenant: {}", eventLog.getEventCount(), eventLog.getTenantId());
+        var record = new ProducerRecord<String, byte[]>(kafkaTopic, eventLog.toByteArray());
+        kafkaTemplate.send(record);
     }
 
-    public void sendInternalEvents(Event event, String tenantId) {
-        LOG.info("Sending event for new node with interface {} with location {}", event.getIpAddress(), event.getLocation());
+    public void sendInternalEvent(Event event) {
+        LOG.info("Sending event with UEI: {} for interface: {} with location: {} and tenant: {}", event.getUei(),
+            event.getIpAddress(), event.getLocation(), event.getTenantId());
         var record = new ProducerRecord<String, byte[]>(internalTopic, event.toByteArray());
-        record.headers().add(new RecordHeader(GrpcConstants.TENANT_ID_KEY, tenantId.getBytes(StandardCharsets.UTF_8)));
         kafkaTemplate.send(record);
     }
 }

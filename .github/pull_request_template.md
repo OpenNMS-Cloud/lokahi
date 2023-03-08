@@ -13,3 +13,4 @@
 * [ ] Jira issue(s) have been updated to "In Review".
 * [ ] Includes [appropriate tests.](https://github.com/OpenNMS/horizon-stream/wiki/Test-Strategy)
 * [ ] Documentation has been updated as necessary.
+* [ ] Notify devops of changes to the Charts

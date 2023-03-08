@@ -46,6 +46,15 @@ spec:
                 name: {{ .Values.Grafana.ServiceName }}
                 port:
                   number: {{ .Values.Grafana.Port }}
+          {{- if .Values.Prometheus.Enabled }}
+          - path: {{ .Values.Prometheus.Path }}
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .Values.Prometheus.Server.ServiceName }}
+                port:
+                  number: {{ .Values.Prometheus.Server.Port }}
+          {{- end }}
   {{- if .Values.TLS.Enabled }}
   tls:
     - hosts:

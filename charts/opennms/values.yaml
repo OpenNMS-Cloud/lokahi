@@ -100,6 +100,7 @@ OpenNMS:
       Requests:
         Cpu: 100m
         Memory: 250Mi
+
   Inventory:
     ServiceName: opennms-inventory
     Image: opennms/horizon-stream-inventory
@@ -301,4 +302,19 @@ CustomErrors:
   Image: quay.io/kubernetes-ingress-controller/custom-error-pages:0.4
   Debug: true
 
-
+Prometheus:
+  Enabled: true
+  Path: /prometheus
+  Server:
+    ServiceName: prometheus
+    Port: 9090
+    Image: prom/prometheus:v2.39.1
+    ImagePullPolicy: IfNotPresent
+    Replicas: 1
+    Resources:
+      Limits:
+        Cpu: "1"
+        Memory: 512Mi
+      Requests:
+        Cpu: 100m
+        Memory: 100Mi

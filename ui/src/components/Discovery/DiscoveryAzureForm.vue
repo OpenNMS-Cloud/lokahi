@@ -98,7 +98,12 @@ const selectLocation = (location: Required<Location[]>) =>
 
 const tagsAutocompleteRef = ref()
 const tagsSelectedListener = (tags: Record<string, string>[]) => {
-  const tagsSelected = tags.map((name) => ({ ...name }))
+  const tagsSelected = tags.map((tag) => {
+    delete tag._text
+    delete tag.id
+    delete tag.tenantId
+    return tag
+  })
   store.selectTags(tagsSelected)
 }
 

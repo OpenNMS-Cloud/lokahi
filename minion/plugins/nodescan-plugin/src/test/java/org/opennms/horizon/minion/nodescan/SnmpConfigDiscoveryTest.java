@@ -1,14 +1,32 @@
+/*******************************************************************************
+ * This file is part of OpenNMS(R).
+ *
+ * Copyright (C) 2023 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
+ *
+ * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *
+ * OpenNMS(R) is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published
+ * by the Free Software Foundation, either version 3 of the License,
+ * or (at your option) any later version.
+ *
+ * OpenNMS(R) is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with OpenNMS(R).  If not, see:
+ *      http://www.gnu.org/licenses/
+ *
+ * For more information contact:
+ *     OpenNMS(R) Licensing <license@opennms.org>
+ *     http://www.opennms.org/
+ *     http://www.opennms.com/
+ *******************************************************************************/
+
 package org.opennms.horizon.minion.nodescan;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,6 +40,16 @@ import org.opennms.horizon.shared.snmp.SnmpValue;
 import org.opennms.horizon.shared.snmp.snmp4j.Snmp4JValue;
 import org.opennms.horizon.shared.utils.InetAddressUtils;
 import org.snmp4j.smi.Integer32;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 class SnmpConfigDiscoveryTest {
     @Mock
@@ -44,9 +72,9 @@ class SnmpConfigDiscoveryTest {
         SnmpValue[] snmpValues1 = new SnmpValue[]{new Snmp4JValue(new Integer32(1))};
         SnmpValue[] snmpValues2 = new SnmpValue[0];
 
-        when(snmpHelper.getAsync(config1, new SnmpObjId[]{SnmpObjId.get(SnmpHelper.SYSTEM_OID)}))
+        when(snmpHelper.getAsync(config1, new SnmpObjId[]{SnmpObjId.get(SnmpHelper.SYS_OBJECTID_INSTANCE)}))
             .thenReturn(CompletableFuture.completedFuture(snmpValues1));
-        when(snmpHelper.getAsync(config2, new SnmpObjId[]{SnmpObjId.get(SnmpHelper.SYSTEM_OID)}))
+        when(snmpHelper.getAsync(config2, new SnmpObjId[]{SnmpObjId.get(SnmpHelper.SYS_OBJECTID_INSTANCE)}))
             .thenReturn(CompletableFuture.completedFuture(snmpValues2));
 
         List<SnmpAgentConfig> detectedConfigs = snmpConfigDiscovery.getDiscoveredConfig(configs);

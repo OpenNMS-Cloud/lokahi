@@ -62,9 +62,9 @@ public class SnmpConfigDiscovery {
         List<SnmpAgentConfig> detectedConfigs = new ArrayList<>();
 
         // Add the SnmpAgentConfigs where SnmpValues is not empty to the detectedConfigs list
-        for (int i = 0; i < configs.size(); i++) {
+        for (int i = 0; i < futures.size(); i++) {
             SnmpValue[] values = futures.get(i).join();
-            if (values != null && values.length > 0 && values[0] != null) {
+            if (values != null && values.length > 0 && values[0] != null && !values[0].isError()) {
                 detectedConfigs.add(configs.get(i));
             }
         }

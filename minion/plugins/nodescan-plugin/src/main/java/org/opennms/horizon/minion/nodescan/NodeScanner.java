@@ -29,6 +29,7 @@
 package org.opennms.horizon.minion.nodescan;
 
 
+import com.google.common.base.Strings;
 import com.google.protobuf.Any;
 import org.opennms.horizon.minion.plugin.api.ScanResultsResponse;
 import org.opennms.horizon.minion.plugin.api.ScanResultsResponseImpl;
@@ -48,7 +49,9 @@ import org.slf4j.LoggerFactory;
 
 import java.net.InetAddress;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
 
@@ -74,30 +77,12 @@ public class NodeScanner implements Scanner {
         return CompletableFuture.supplyAsync(() ->{
             try {
                 NodeScanRequest scanRequest = config.unpack(NodeScanRequest.class);
-                List<SnmpAgentConfig> configs = new ArrayList<>();
-                var configsFromRequest = scanRequest.getSnmpConfigsList();
-                configsFromRequest.forEach(snmpConfig -> {
-                    var readCommunity = snmpConfig.getReadCommunity();
-                    var port = snmpConfig.getPort();
-                    if (SnmpConfiguration.DEFAULT_READ_COMMUNITY.equals(readCommunity)) {
-                        SnmpAgentConfig agentConfig = new SnmpAgentConfig(InetAddressUtils.getInetAddress(scanRequest.getPrimaryIp()),
-                            SnmpConfiguration.DEFAULTS);
-                        agentConfig.setReadCommunity(readCommunity);
-                        configs.add(agentConfig);
-                    }
-                    if (SnmpConfiguration.DEFAULT_PORT == port) {
-                        SnmpAgentConfig agentConfig = new SnmpAgentConfig(InetAddressUtils.getInetAddress(scanRequest.getPrimaryIp()),
-                            SnmpConfiguration.DEFAULTS);
-                        agentConfig.setPort(port);
-                        configs.add(agentConfig);
-                    }
-                });
-                // Add default config by default
-                var defaultConfig = new SnmpAgentConfig(InetAddress.getByName(scanRequest.getPrimaryIp()), SnmpConfiguration.DEFAULTS);
-                configs.add(defaultConfig);
-
-                List<SnmpAgentConfig> snmpAgentConfigs = snmpConfigDiscovery.getDiscoveredConfig(configs);
-                SnmpAgentConfig agentConfig = defaultConfig;
+                InetAddress primaryIpAddress = InetAddressUtils.getInetAddress(scanRequest.getPrimaryIp());
+                // Assign default agent config.
+                SnmpAgentConfig agentConfig = new SnmpAgentConfig(primaryIpAddress, SnmpConfiguration.DEFAULTS);
+                // Derive configs from request
+                Set<SnmpAgentConfig> configs = deriveSnmpConfigs(scanRequest.getSnmpConfigsList(), primaryIpAddress);
+                List<SnmpAgentConfig> snmpAgentConfigs = snmpConfigDiscovery.getDiscoveredConfig(configs.stream().toList());
                 if (!snmpAgentConfigs.isEmpty()) {
                    // Get first matching config
                     agentConfig = snmpAgentConfigs.get(0);
@@ -106,8 +91,8 @@ public class NodeScanner implements Scanner {
                 }
 
                 NodeInfoResult nodeInfo = scanSystem(agentConfig);
-                List<IpInterfaceResult> ipInterfaceResults = scanIpAddrTable(snmpAgentConfigs.get(0));
-                List<SnmpInterfaceResult> snmpInterfaceResults = scanSnmpInterface(snmpAgentConfigs.get(0));
+                List<IpInterfaceResult> ipInterfaceResults = scanIpAddrTable(agentConfig);
+                List<SnmpInterfaceResult> snmpInterfaceResults = scanSnmpInterface(agentConfig);
                 NodeScanResult scanResult = NodeScanResult.newBuilder()
                     .setNodeId(scanRequest.getNodeId())
                     .setNodeInfo(nodeInfo)
@@ -120,6 +105,54 @@ public class NodeScanner implements Scanner {
                 throw new RuntimeException(e);
             }
         });
+    }
+
+    Set<SnmpAgentConfig> deriveSnmpConfigs(List<org.opennms.horizon.snmp.api.SnmpConfiguration> configsFromRequest,
+                                           InetAddress primaryIpAddress) {
+        Set<SnmpAgentConfig> configs = new HashSet<>();
+        List<SnmpAgentConfig> configsForReadCommunity = new ArrayList<>();
+        configsFromRequest.forEach(snmpConfig -> {
+            var readCommunity = snmpConfig.getReadCommunity();
+            if (!Strings.isNullOrEmpty(readCommunity) &&
+                !SnmpConfiguration.DEFAULT_READ_COMMUNITY.equals(readCommunity)) {
+                SnmpAgentConfig agentConfig = new SnmpAgentConfig(primaryIpAddress, SnmpConfiguration.DEFAULTS);
+                agentConfig.setReadCommunity(readCommunity);
+                configsForReadCommunity.add(agentConfig);
+            }
+        });
+        // Add default config
+        configsForReadCommunity.add(new SnmpAgentConfig(primaryIpAddress, SnmpConfiguration.DEFAULTS));
+
+        List<SnmpAgentConfig> configsForPort = new ArrayList<>();
+        configsFromRequest.forEach(snmpConfig -> {
+            var port = snmpConfig.getPort();
+            if (port != 0 && SnmpConfiguration.DEFAULT_PORT != port) {
+                SnmpAgentConfig agentConfig = new SnmpAgentConfig(primaryIpAddress, SnmpConfiguration.DEFAULTS);
+                agentConfig.setPort(port);
+                configsForPort.add(agentConfig);
+            }
+        });
+        configsForPort.add(new SnmpAgentConfig(primaryIpAddress, SnmpConfiguration.DEFAULTS));
+
+        configsForReadCommunity.forEach(config -> {
+            configsForPort.forEach(portConfig -> {
+                SnmpAgentConfig agentConfig = new SnmpAgentConfig(primaryIpAddress, SnmpConfiguration.DEFAULTS);
+                agentConfig.setPort(portConfig.getPort());
+                agentConfig.setReadCommunity(config.getReadCommunity());
+                configs.add(agentConfig);
+            });
+        });
+
+        configsForPort.forEach(config -> {
+            configsForReadCommunity.forEach(readCommunityConfig -> {
+                config.setReadCommunity(readCommunityConfig.getReadCommunity());
+                SnmpAgentConfig agentConfig = new SnmpAgentConfig(primaryIpAddress, SnmpConfiguration.DEFAULTS);
+                agentConfig.setReadCommunity(readCommunityConfig.getReadCommunity());
+                agentConfig.setPort(config.getPort());
+                configs.add(agentConfig);
+            });
+        });
+        return configs;
     }
 
     private List<SnmpInterfaceResult> scanSnmpInterface(SnmpAgentConfig agentConfig) throws InterruptedException {

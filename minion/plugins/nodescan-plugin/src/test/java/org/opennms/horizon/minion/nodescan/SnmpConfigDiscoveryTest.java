@@ -49,7 +49,7 @@ class SnmpConfigDiscoveryTest {
         when(snmpHelper.getAsync(config2, new SnmpObjId[]{SnmpObjId.get(SnmpHelper.SYSTEM_OID)}))
             .thenReturn(CompletableFuture.completedFuture(snmpValues2));
 
-        List<SnmpAgentConfig> detectedConfigs = snmpConfigDiscovery.detectSNMP(configs);
+        List<SnmpAgentConfig> detectedConfigs = snmpConfigDiscovery.getDiscoveredConfig(configs);
 
         assertEquals(1, detectedConfigs.size());
         assertEquals(config1, detectedConfigs.get(0));

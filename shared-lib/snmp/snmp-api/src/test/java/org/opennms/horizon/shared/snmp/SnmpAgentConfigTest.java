@@ -28,10 +28,10 @@
 
 package org.opennms.horizon.shared.snmp;
 
-import java.net.InetAddress;
-
 import org.junit.Assert;
 import org.junit.Test;
+
+import java.net.InetAddress;
 
 public class SnmpAgentConfigTest {
 
@@ -125,7 +125,7 @@ public class SnmpAgentConfigTest {
     @Test
     public void canConvertToAndFromProtocolConfigString() throws Exception {
         SnmpAgentConfig config = new SnmpAgentConfig();
-        String protocolConfigString = "{\"snmp\":{\"address\":null,\"proxyFor\":null,\"port\":\"161\",\"timeout\":\"3000\",\"retries\":\"0\",\"max-vars-per-pdu\":\"10\",\"max-repetitions\":\"2\",\"max-request-size\":\"65535\",\"version\":\"1\",\"security-level\":\"1\",\"security-name\":\"opennmsUser\",\"auth-passphrase\":\"0p3nNMSv3\",\"auth-protocol\":\"MD5\",\"priv-passphrase\":\"0p3nNMSv3\",\"priv-protocol\":\"DES\",\"context-name\":null,\"engine-id\":null,\"context-engine-id\":null,\"enterprise-id\":null,\"read-community\":\"public\",\"write-community\":\"private\"}}";
+        String protocolConfigString = "{\"snmp\":{\"address\":null,\"proxyFor\":null,\"port\":\"161\",\"timeout\":\"3000\",\"retries\":\"0\",\"max-vars-per-pdu\":\"10\",\"max-repetitions\":\"2\",\"max-request-size\":\"65535\",\"version\":\"2\",\"security-level\":\"1\",\"security-name\":\"opennmsUser\",\"auth-passphrase\":\"0p3nNMSv3\",\"auth-protocol\":\"MD5\",\"priv-passphrase\":\"0p3nNMSv3\",\"priv-protocol\":\"DES\",\"context-name\":null,\"engine-id\":null,\"context-engine-id\":null,\"enterprise-id\":null,\"read-community\":\"public\",\"write-community\":\"private\"}}";
         Assert.assertEquals(protocolConfigString, config.toProtocolConfigString());
         Assert.assertEquals(config, SnmpAgentConfig.parseProtocolConfigurationString(protocolConfigString));
     }

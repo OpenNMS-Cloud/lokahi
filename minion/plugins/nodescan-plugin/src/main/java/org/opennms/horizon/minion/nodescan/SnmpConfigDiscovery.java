@@ -28,15 +28,14 @@
 
 package org.opennms.horizon.minion.nodescan;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
-
 import org.opennms.horizon.shared.snmp.SnmpAgentConfig;
 import org.opennms.horizon.shared.snmp.SnmpHelper;
 import org.opennms.horizon.shared.snmp.SnmpObjId;
 import org.opennms.horizon.shared.snmp.SnmpValue;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 public class SnmpConfigDiscovery {
 
@@ -46,14 +45,15 @@ public class SnmpConfigDiscovery {
         this.snmpHelper = snmpHelper;
     }
 
-    public List<SnmpAgentConfig> detectSNMP(List<SnmpAgentConfig> configs) {
+    public List<SnmpAgentConfig> getDiscoveredConfig(List<SnmpAgentConfig> configs) {
         List<CompletableFuture<SnmpValue[]>> futures = new ArrayList<>();
 
         // Start a CompletableFuture for each SnmpAgentConfig to detect SNMP service
         for (SnmpAgentConfig config : configs) {
-            CompletableFuture<SnmpValue[]> future = snmpHelper.getAsync(config, new SnmpObjId[]{SnmpObjId.get(SnmpHelper.SYSTEM_OID)})
-                .completeOnTimeout(new SnmpValue[0], 5000, TimeUnit.MILLISECONDS); // timeout after 5 seconds
-            futures.add(future);
+            CompletableFuture<SnmpValue[]> future = snmpHelper.getAsync(config, new SnmpObjId[]{SnmpObjId.get(SnmpHelper.SYS_OBJECTID_INSTANCE)});
+            if (future != null) {
+                futures.add(future);
+            }
         }
 
         // Wait for all detection CompletableFutures to complete

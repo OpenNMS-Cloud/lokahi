@@ -29,14 +29,7 @@
 package org.opennms.horizon.minion.nodescan;
 
 
-import java.net.InetAddress;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
-
 import com.google.protobuf.Any;
-
 import org.opennms.horizon.minion.plugin.api.ScanResultsResponse;
 import org.opennms.horizon.minion.plugin.api.ScanResultsResponseImpl;
 import org.opennms.horizon.minion.plugin.api.Scanner;
@@ -44,6 +37,7 @@ import org.opennms.horizon.shared.snmp.SnmpAgentConfig;
 import org.opennms.horizon.shared.snmp.SnmpConfiguration;
 import org.opennms.horizon.shared.snmp.SnmpHelper;
 import org.opennms.horizon.shared.snmp.SnmpWalker;
+import org.opennms.horizon.shared.utils.InetAddressUtils;
 import org.opennms.node.scan.contract.IpInterfaceResult;
 import org.opennms.node.scan.contract.NodeInfoResult;
 import org.opennms.node.scan.contract.NodeScanRequest;
@@ -52,10 +46,15 @@ import org.opennms.node.scan.contract.SnmpInterfaceResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.InetAddress;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+
 
 
 public class NodeScanner implements Scanner {
-    private static final Logger LOGGER = LoggerFactory.getLogger(NodeScanner.class);
+    private static final Logger LOG = LoggerFactory.getLogger(NodeScanner.class);
     private final SnmpHelper snmpHelper;
     private final SnmpConfigDiscovery snmpConfigDiscovery;
 
@@ -66,7 +65,7 @@ public class NodeScanner implements Scanner {
 
     @Override
     public CompletableFuture<ScanResultsResponse> scan(Any config) {
-        LOGGER.info("Received node scan config {}", config);
+        LOG.info("Received node scan config {}", config);
 
         if(!config.is(NodeScanRequest.class)) {
             throw new IllegalArgumentException("Task config must be a NodeScanRequest, this is wrong type: " + config.getTypeUrl());
@@ -75,14 +74,35 @@ public class NodeScanner implements Scanner {
         return CompletableFuture.supplyAsync(() ->{
             try {
                 NodeScanRequest scanRequest = config.unpack(NodeScanRequest.class);
+                List<SnmpAgentConfig> configs = new ArrayList<>();
+                var configsFromRequest = scanRequest.getSnmpConfigsList();
+                configsFromRequest.forEach(snmpConfig -> {
+                    var readCommunity = snmpConfig.getReadCommunity();
+                    var port = snmpConfig.getPort();
+                    if (SnmpConfiguration.DEFAULT_READ_COMMUNITY.equals(readCommunity)) {
+                        SnmpAgentConfig agentConfig = new SnmpAgentConfig(InetAddressUtils.getInetAddress(scanRequest.getPrimaryIp()),
+                            SnmpConfiguration.DEFAULTS);
+                        agentConfig.setReadCommunity(readCommunity);
+                        configs.add(agentConfig);
+                    }
+                    if (SnmpConfiguration.DEFAULT_PORT == port) {
+                        SnmpAgentConfig agentConfig = new SnmpAgentConfig(InetAddressUtils.getInetAddress(scanRequest.getPrimaryIp()),
+                            SnmpConfiguration.DEFAULTS);
+                        agentConfig.setPort(port);
+                        configs.add(agentConfig);
+                    }
+                });
+                // Add default config by default
+                var defaultConfig = new SnmpAgentConfig(InetAddress.getByName(scanRequest.getPrimaryIp()), SnmpConfiguration.DEFAULTS);
+                configs.add(defaultConfig);
 
-                SnmpAgentConfig agentConfig = new SnmpAgentConfig(InetAddress.getByName(scanRequest.getPrimaryIp()), SnmpConfiguration.DEFAULTS);
-                agentConfig.setVersion(SnmpConfiguration.VERSION2C);
-
-                List<SnmpAgentConfig> snmpAgentConfigs = snmpConfigDiscovery.getDiscoveredConfig(Collections.singletonList(agentConfig));
-
-                if(snmpAgentConfigs.size() != 1 ) {
-                    throw new RuntimeException("Expected to find one SNMP agent config, but found " + snmpAgentConfigs.size());
+                List<SnmpAgentConfig> snmpAgentConfigs = snmpConfigDiscovery.getDiscoveredConfig(configs);
+                SnmpAgentConfig agentConfig = defaultConfig;
+                if (!snmpAgentConfigs.isEmpty()) {
+                   // Get first matching config
+                    agentConfig = snmpAgentConfigs.get(0);
+                } else {
+                    LOG.warn("No matching agentConfig found from Snmp Config discovery, default config will be used");
                 }
 
                 NodeInfoResult nodeInfo = scanSystem(agentConfig);
@@ -96,7 +116,7 @@ public class NodeScanner implements Scanner {
                     .build();
                 return ScanResultsResponseImpl.builder().results(scanResult).build();
             } catch (Exception e) {
-                LOGGER.error("Error while node scan", e);
+                LOG.error("Error while node scan", e);
                 throw new RuntimeException(e);
             }
         });

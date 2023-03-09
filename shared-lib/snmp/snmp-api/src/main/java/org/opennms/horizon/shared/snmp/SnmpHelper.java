@@ -15,6 +15,8 @@ public interface SnmpHelper {
      */
     String SYSTEM_OID = ".1.3.6.1.2.1.1";
 
+    String SYS_OBJECTID_INSTANCE = ".1.3.6.1.2.1.1.2.0";
+
     /**
      * Object identifier used to retrieve interface count. This is the MIB-II
      * interfaces.ifNumber value.

@@ -25,6 +25,63 @@
  *     http://www.opennms.org/
  *     http://www.opennms.com/
  *******************************************************************************/
- 
-package org.opennms.horizon.minion.icmp.shell;public class NodeScanCommand {
+
+package org.opennms.horizon.minion.icmp.shell;
+
+import com.google.protobuf.Any;
+import org.apache.karaf.shell.api.action.Action;
+import org.apache.karaf.shell.api.action.Argument;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.lifecycle.Reference;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
+import org.opennms.horizon.minion.plugin.api.registries.ScannerRegistry;
+import org.opennms.node.scan.contract.NodeScanRequest;
+import org.opennms.node.scan.contract.NodeScanResult;
+
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
+@Command(scope = "opennms", name = "node-scan", description = "NodeScan for a given IP Address")
+@Service
+public class NodeScanCommand implements Action {
+
+    @Reference
+    private ScannerRegistry scannerRegistry;
+
+    @Argument(index = 0, name = "ipAddress", description = "IP Address for Scan", required = true, multiValued = false)
+    String ipAddress;
+
+
+    @Override
+    public Object execute() throws Exception {
+
+        var scannerManager = scannerRegistry.getService("NodeScanner");
+        var scanner = scannerManager.create();
+
+        var scanRequest = NodeScanRequest.newBuilder()
+            .setPrimaryIp(ipAddress).build();
+        var config = Any.pack(scanRequest);
+        var future = scanner.scan(config);
+        while (true) {
+            try {
+                try {
+                    var response = future.get(1, TimeUnit.SECONDS);
+                    Any result = Any.pack(response.getResults());
+                    NodeScanResult nodeScanResult = result.unpack(NodeScanResult.class);
+
+                    System.out.printf("Node Scan result : \n  %s ", nodeScanResult.toString());
+                } catch (InterruptedException e) {
+                    System.out.println("\n\nInterrupted.");
+                } catch (ExecutionException e) {
+                    System.out.printf("\n\n Node Scan failed with: %s\n", e);
+                }
+                break;
+            } catch (TimeoutException e) {
+                // pass
+            }
+            System.out.print(".");
+        }
+        return null;
+    }
 }

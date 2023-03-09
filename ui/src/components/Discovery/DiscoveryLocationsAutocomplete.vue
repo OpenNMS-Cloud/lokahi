@@ -134,9 +134,9 @@ const removeLocation = () => {
   if (selectedLocation.value) {
     locations.value.push(selectedLocation.value)
     emit('location-selected', selectedLocation.value.location)
-    handleErrDisplay()
     selectedLocation.value = null
     searchValue.value = undefined
+    handleErrDisplay()
   }
 }
 

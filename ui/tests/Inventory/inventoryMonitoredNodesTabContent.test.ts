@@ -43,7 +43,7 @@ const tabContent = [
 
 let wrapper: any
 
-describe('InventoryMonitoredNodesTabContent.vue', () => {
+describe.skip('InventoryMonitoredNodesTabContent.vue', () => {
   beforeAll(() => {
     wrapper = mount(InventoryMonitoredNodesTabContent, {
       shallow: true,

@@ -2,6 +2,7 @@ package org.opennms.horizon.notifications.kafka;
 
 import io.grpc.Context;
 import org.opennms.horizon.notifications.exceptions.NotificationException;
+import org.opennms.horizon.notifications.grpc.config.TenantLookup;
 import org.opennms.horizon.notifications.service.NotificationService;
 import org.opennms.horizon.notifications.tenant.TenantContext;
 import org.opennms.horizon.shared.constants.GrpcConstants;
@@ -28,20 +29,10 @@ public class AlarmKafkaConsumer {
         topics = "${horizon.kafka.alarms.topic}",
         concurrency = "${horizon.kafka.alarms.concurrency}"
     )
+    @TenantAwareKafkaListener(skipOnMissing = true)
     public void consume(@Payload AlarmDTO alarm, @Headers Map<String, Object> headers) {
-
         LOG.info("Received alarm from kafka {}", alarm);
-        Optional<String> tenantOptional = getTenantId(headers);
-        if (tenantOptional.isEmpty()) {
-           LOG.warn("TenantId is empty, dropping alarm {}", alarm);
-           return;
-        }
-        String tenantId = tenantOptional.get();
-        LOG.info("Received tenantId {}", tenantId);
-
-        try (TenantContext tc = TenantContext.withTenantId(tenantId)){
-            consumeAlarm(alarm);
-        }
+        consumeAlarm(alarm);
     }
 
     public void consumeAlarm(AlarmDTO alarm){
@@ -50,13 +41,5 @@ public class AlarmKafkaConsumer {
         } catch (NotificationException e) {
             LOG.error("Exception sending alarm to PagerDuty.", e);
         }
-    }
-
-    private Optional<String> getTenantId(Map<String, Object> headers) {
-        Object tenantId = headers.get(GrpcConstants.TENANT_ID_KEY);
-        if (tenantId instanceof byte[]) {
-            return Optional.of(new String((byte[]) tenantId));
-        }
-        return Optional.empty();
     }
 }

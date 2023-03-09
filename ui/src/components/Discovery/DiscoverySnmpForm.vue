@@ -144,7 +144,8 @@ const saveHandler = async () => {
   contentEditableCommunityStringRef.value?.validateAndFormat()
   contentEditableUDPPortRef.value?.validateAndFormat()
   await createDiscoveryConfig({ CreateDiscoveryConfigRequestInput: discoveryInfo.value })
-  if (!activeDiscoveryError && discoveryInfo.value.configName) {
+
+  if (!activeDiscoveryError.value && discoveryInfo.value.configName) {
     discoveryQueries.getDiscoveries()
     resetContentEditable()
     props.successCallback(discoveryInfo.value.configName)

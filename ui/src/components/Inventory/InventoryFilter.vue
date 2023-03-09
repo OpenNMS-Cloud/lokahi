@@ -1,6 +1,5 @@
 <template>
   <ul class="filter-container">
-    <!-- Search -->
     <li class="autocomplete">
       <FeatherAutocomplete
         v-model="search.value"
@@ -12,7 +11,6 @@
         data-test="search"
       />
     </li>
-    <!-- Node type -->
     <li>
       <FeatherSelect
         v-model="nodeTypeState"
@@ -23,7 +21,6 @@
         data-test="node-type"
       />
     </li>
-    <!-- Monitoring Location -->
     <li>
       <FeatherSelect
         v-model="monitoringLocationState"
@@ -34,7 +31,6 @@
         data-test="monitoring-location"
       />
     </li>
-    <!-- Severity -->
     <li>
       <FeatherSelect
         v-model="severityState"
@@ -45,17 +41,33 @@
         data-test="severity"
       />
     </li>
-    <!-- Tagging -->
     <li>
-      <InventoryTagManagerCtrl data-test="tag-manager-ctrl" /> 
+      <InventoryTagManagerCtrl data-test="tag-manager-ctrl" />
     </li>
     <!-- Sort/A-Z -->
-    <li @click="onSort" class="action-btn" data-test="sort-btn"><Icon :icon="sort" /></li>
-    <li @click="onSortAlpha" class="action-btn" data-test="sort-alpha-btn" ><Icon :icon="sortAlpha" /></li>
-    <!-- Expand/Collapse -->
-    <li @click="inventoryStore.toggleFilter" :data-test="expandCollapseBtn" class="action-btn"><Icon :icon="expandCollapse" /></li>
+    <li
+      @click="onSort"
+      class="action-btn"
+      data-test="sort-btn"
+    >
+      <Icon :icon="sortIcon" />
+    </li>
+    <li
+      @click="onSortAlpha"
+      class="action-btn"
+      data-test="sort-alpha-btn"
+    >
+      <Icon :icon="sortAlphaIcon" />
+    </li>
+    <li
+      @click="inventoryStore.toggleFilter"
+      class="action-btn"
+      :data-test="expandCollapseBtn"
+    >
+      <Icon :icon="expandCollapseIcon" />
+    </li>
   </ul>
-  <InventoryTagManager />
+  <InventoryTagManager v-if="isTagManagerOpen" />
 </template>
 
 <script lang="ts" setup>
@@ -70,7 +82,6 @@ import { useInventoryStore } from '@/store/Views/inventoryStore'
 
 const inventoryStore = useInventoryStore()
 
-// Search
 const search = {
   timeout: -1,
   loading: false,
@@ -87,10 +98,10 @@ const search = {
           _text: x
         }))
       search.loading = false
-    }, 500)}
+    }, 500)
+  }
 }
 
-// Node Type
 const nodeTypeState = ref(undefined)
 const onNodeTypeSelect: fncArgVoid = (selectedType: any) => {
   // use store to query new list
@@ -114,7 +125,6 @@ const nodeType: ISelectDropdown = {
   optionText: 'name'
 }
 
-// Monitoring Location
 const monitoringLocationState = ref(undefined)
 const onMonitoringLocationSelect: fncArgVoid = (selectedItem: any) => {
   // use store to query new list
@@ -138,7 +148,6 @@ const monitoringLocation: ISelectDropdown = {
   optionText: 'name'
 }
 
-// Severity
 const severityState = ref(undefined)
 const onSeveritySelect: fncArgVoid = (selectedItem: any) => {
   // use store to query new list
@@ -164,35 +173,37 @@ const severity: ISelectDropdown = {
 
 // Sort/A-Z
 const onSort = () => null
-const sort: IIcon = {
+const sortIcon: IIcon = {
   image: Sort,
-  title: 'Sort'
+  title: 'Sort',
+  size: 2
 }
 const onSortAlpha = () => null
-const sortAlpha: IIcon = {
+const sortAlphaIcon: IIcon = {
   image: SortByAlpha,
-  title: 'Sort Alpha'
+  title: 'Sort Alpha',
+  size: 2
 }
 
-// Expand/Collapse
+const isTagManagerOpen = computed(() => inventoryStore.isTagManagerOpen)
+
 const expandCollapseBtn = ref('expand-btn')
-const expand: IIcon = {
+const expandIcon: IIcon = {
   image: KeyboardDoubleArrowDown,
-  title: 'Expand'
+  title: 'Expand',
+  size: 2
 }
-const collapse: IIcon = {
+const collapseIcon: IIcon = {
   image: KeyboardDoubleArrowUp,
-  title: 'Collapse'
+  title: 'Collapse',
+  size: 2
 }
-const expandCollapse = ref(computed<IIcon>(() => {
-  expandCollapseBtn.value = inventoryStore.isFilterOpen ? 'collapse-btn' : 'expand-btn'
-  return inventoryStore.isFilterOpen ? collapse : expand
-}))
-
+const expandCollapseIcon = ref(computed<IIcon>(() => (inventoryStore.isFilterOpen ? collapseIcon : expandIcon)))
 </script>
 
 <style lang="scss" scoped>
-@use "@featherds/styles/themes/variables";
+@use '@featherds/styles/themes/variables';
+@use '@/styles/btns.scss';
 
 .filter-container {
   margin: var(variables.$spacing-l) 0;

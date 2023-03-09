@@ -175,7 +175,7 @@ const checkCircleIcon: IIcon = {
 const iconHelp: IIcon = {
   image: markRaw(Help),
   tooltip: props.tooltipText,
-  size: '1.2rem'
+  size: 1.2
 }
 
 defineExpose({

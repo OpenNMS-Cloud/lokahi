@@ -204,7 +204,7 @@ docker_build(
 k8s_resource(
     'opennms-ui',
     new_name='vuejs-ui',
-    port_forwards=['17080:80'],
+    port_forwards=['17080:8080'],
     labels=['vuejs-app'],
 )
 

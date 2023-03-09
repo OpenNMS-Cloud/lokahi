@@ -1,0 +1,33 @@
+/* 
+Bootstrap breakpoints - Grid containers
+Define the maximum width for different screen sizes.
+*/
+$grid-breakpoints: (
+  xs: 0,
+  sm: 576px,
+  md: 768px,
+  lg: 992px,
+  xl: 1200px,
+  xxl: 1400px
+) !default;
+
+@use "sass:map";
+
+@mixin screen-xs {
+  @media (max-width: map.get($grid-breakpoints, 'xs')) { @content; }
+}
+@mixin screen-sm {
+  @media (min-width: map.get($grid-breakpoints, 'sm')) { @content; }
+}
+@mixin screen-md {
+  @media (min-width: map.get($grid-breakpoints, 'md')) { @content; }
+}
+@mixin screen-lg {
+  @media (min-width: map.get($grid-breakpoints, 'lg')) { @content; }
+}
+@mixin screen-xl {
+  @media (min-width: map.get($grid-breakpoints, 'xl')) { @content; }
+}
+@mixin screen-xxl {
+  @media (min-width: map.get($grid-breakpoints, 'xxl')) { @content; }
+}

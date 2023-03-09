@@ -34,7 +34,7 @@
       data-test="fds-autocomplete"
     />
     <FeatherChipList
-      v-if="props.renderType === 'single'"
+      v-if="props.renderType === 'single' && props.showList"
       label="Item chip list with icon"
       data-test="fds-chip-list"
     >
@@ -83,6 +83,10 @@ const props = defineProps({
   },
   // applicable only to 'single' renderType
   allowNew: {
+    type: Boolean,
+    default: true
+  },
+  showList: {
     type: Boolean,
     default: true
   }

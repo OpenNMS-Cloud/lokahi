@@ -1,30 +1,40 @@
 <template>
-  <PageHeader :heading="heading" class="header" data-test="page-header" />
-  <FeatherTabContainer class="tab-container" data-test="tab-container">
+  <PageHeader
+    :heading="heading"
+    class="header"
+    data-test="page-header"
+  />
+  <FeatherTabContainer
+    class="tab-container"
+    data-test="tab-container"
+  >
     <template v-slot:tabs>
-      <FeatherTab v-for="tab in tabs" :key="tab.label">{{ tab.label }}</FeatherTab>
+      <FeatherTab
+        v-for="tab in tabs"
+        :key="tab.label"
+        >{{ tab.label }}</FeatherTab
+      >
     </template>
     <FeatherTabPanel>
       <InventoryFilter v-if="tabMonitoredContent.length" />
-      <InventoryMonitoredNodesTabContent v-if="tabMonitoredContent.length" :tabContent="tabMonitoredContent" />
+      <InventoryMonitoredNodesTabContent
+        v-if="tabMonitoredContent.length"
+        :tabContent="tabMonitoredContent"
+      />
     </FeatherTabPanel>
     <!-- <FeatherTabPanel>
       <InventoryFilter v-if="tabUnmonitoredContent.length" />
       <InventoryMonitoredNodesTabContent :tabContent="tabUnmonitoredContent" />
     </FeatherTabPanel> -->
     <!-- <FeatherTabPanel>
-      <Filter v-if="tabDetectedContent.length" />
+      <InventoryFilter v-if="tabDetectedContent.length" />
       <InventoryDetectedNodesTabContent :tabContent="tabDetectedContent" />
     </FeatherTabPanel> -->
   </FeatherTabContainer>
 </template>
 
 <script lang="ts" setup>
-import {
-  FeatherTab,
-  FeatherTabContainer,
-  FeatherTabPanel
-} from '@featherds/tabs'
+import { FeatherTab, FeatherTabContainer, FeatherTabPanel } from '@featherds/tabs'
 import InventoryFilter from '@/components/Inventory/InventoryFilter.vue'
 import InventoryMonitoredNodesTabContent from '@/components/Inventory/InventoryMonitoredNodesTabContent.vue'
 // import InventoryDetectedNodesTabContent from '@/components/Inventory/InventoryDetectedNodesTabContent.vue'
@@ -218,11 +228,7 @@ import { useInventoryQueries } from '@/store/Queries/inventoryQueries'
 ] */
 
 const heading = 'Network Inventory'
-const tabs = [
-  { label: 'Monitored Nodes' },
-  { label: 'Unmonitored Nodes' },
-  { label: 'Detected Nodes' }
-]
+const tabs = [{ label: 'Monitored Nodes' }, { label: 'Unmonitored Nodes' }, { label: 'Detected Nodes' }]
 
 const inventoryQueries = useInventoryQueries()
 const tabMonitoredContent = computed((): NodeContent[] => inventoryQueries.nodes)
@@ -233,6 +239,7 @@ const tabMonitoredContent = computed((): NodeContent[] => inventoryQueries.nodes
 
 <style lang="scss" scoped>
 @use '@featherds/styles/themes/variables';
+@use '@/styles/vars';
 
 .header {
   margin-right: var(variables.$spacing-l);
@@ -244,6 +251,7 @@ const tabMonitoredContent = computed((): NodeContent[] => inventoryQueries.nodes
   :deep(> ul) {
     display: flex;
     border-bottom: 1px solid var(variables.$secondary-text-on-surface);
+    min-width: vars.$min-width-smallest-screen;
     > li {
       display: flex !important;
       flex-grow: 1;

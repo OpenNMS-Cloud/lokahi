@@ -35,9 +35,9 @@ const tabContent = [
       locationLink: 'goto',
       managementIpValue: '0.0.0.0',
       managementIpLink: 'goto',
-      tagValue: 100,
-      tagLink: 'goto'
-    }
+      tagValue: []
+    },
+    isNodeOverlayChecked: false
   }
 ]
 
@@ -56,7 +56,7 @@ describe('InventoryMonitoredNodesTabContent.vue', () => {
     wrapper.unmount()
   })
 
-  const tabComponents = ['icon', 'heading', 'metric-chip-list', 'text-anchor-list', 'icon-action-list']
+  const tabComponents = ['icon-storage', 'heading', 'metric-chip-list', 'text-anchor-list', 'icon-action-list']
   it.each(tabComponents)('should have "%s" components', (cmp) => {
     expect(wrapper.get(`[data-test="${cmp}"]`).exists()).toBe(true)
   })

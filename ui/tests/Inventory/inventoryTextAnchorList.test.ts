@@ -16,8 +16,7 @@ describe.skip('inventoryTextAnchorList', () => {
           locationLink: '#',
           managementIpValue: '0.0.0.0',
           managementIpLink: '#',
-          tagValue: 100,
-          tagLink: '#'
+          tagValue: []
         }
       }
     })

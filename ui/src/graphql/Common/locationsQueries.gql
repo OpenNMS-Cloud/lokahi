@@ -1,0 +1,10 @@
+fragment LocationsParts on Query {
+  findAllLocations {
+    id
+    location
+  }
+}
+
+query ListLocations {
+  ...LocationsParts
+}

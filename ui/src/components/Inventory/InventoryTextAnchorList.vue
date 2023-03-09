@@ -7,19 +7,32 @@
     </li> -->
     <li data-test="location">
       <label :for="label.location">{{ label.location }}: </label>
-      <a v-if="anchor.locationLink" @click="goto(anchor.locationLink)" :id="label.location">{{ anchor?.locationValue }}</a>
-      <span v-else :id="label.location">{{ anchor.locationValue }}</span>
+      <a
+        v-if="anchor.locationLink"
+        @click="goto(anchor.locationLink)"
+        :id="label.location"
+        >{{ anchor?.locationValue }}</a
+      >
+      <span
+        v-else
+        :id="label.location"
+        >{{ anchor.locationValue }}</span
+      >
     </li>
     <li data-test="management-ip">
       <label :for="label.managementIp">{{ label.managementIp }}: </label>
-      <a v-if="anchor.managementIpLink" @click="goto(anchor.managementIpLink)" :id="label.managementIp">{{ anchor.managementIpValue }}</a>
-      <span v-else :id="(label.managementIp)">{{ anchor.managementIpValue }}</span>
+      <a
+        v-if="anchor.managementIpLink"
+        @click="goto(anchor.managementIpLink)"
+        :id="label.managementIp"
+        >{{ anchor.managementIpValue }}</a
+      >
+      <span
+        v-else
+        :id="label.managementIp"
+        >{{ anchor.managementIpValue }}</span
+      >
     </li>
-    <!-- <li data-test="tag">
-      <label :for="label.tag">{{ label.tag }}: </label>
-      <a v-if="anchor.tagLink" @click="goto(anchor.tagLink)" :id="label.tag">{{ anchor.tagValue }}</a>
-      <span v-else :id="label.tag">{{ anchor.tagValue }}</span>
-    </li> -->
   </ul>
 </template>
 
@@ -32,8 +45,8 @@ defineProps<{
 }>()
 
 const goto = (path: string | undefined) => {
-  if(!path) return
-  
+  if (!path) return
+
   router.push({
     path
   })
@@ -42,15 +55,34 @@ const goto = (path: string | undefined) => {
 const label = {
   profile: 'Monitoring Profile',
   location: 'Monitoring Location',
-  managementIp: 'Management IP',
-  tag: 'Tag'
+  managementIp: 'Management IP'
 }
 </script>
 
 <style lang="scss" scoped>
-ul.text-anchor-list {
+@use '@featherds/styles/themes/variables';
+
+.text-anchor-list {
   display: flex;
   flex-direction: column;
   gap: 0.2rem;
+}
+
+.tag-list {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  > ul {
+    margin-left: var(variables.$spacing-xxs);
+    > li {
+      display: inline;
+      &:after {
+        content: ', ';
+      }
+      &:last-child:after {
+        content: '';
+      }
+    }
+  }
 }
 </style>

@@ -1,0 +1,40 @@
+@use "@featherds/styles/themes/variables";
+
+@mixin btn-looks-as-select-input {
+  min-width: 13rem;
+  min-height: 2.5rem;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  border: 1px solid var(variables.$secondary-text-on-surface);
+  background: none;
+  line-height: inherit;
+  > label {
+    font-family: var(variables.$font-family);
+    font-size: var(variables.$body-small-font-size);
+    line-height: var(variables.$body-small-line-height);
+    letter-spacing: var(variables.$body-small-letter-spacing);
+    font-weight: var(variables.$body-small-font-weight);
+    text-transform: var(variables.$body-small-text-transform);
+    font-style: var(variables.$body-small-font-style);
+    color: var(variables.$secondary-text-on-surface);
+    cursor: text;
+    text-transform: capitalize;
+    border-left: 2px solid transparent;
+    padding: 0 0.75rem;
+  }
+  &:hover {
+    > label {
+      border-left-color: var(variables.$primary-text-on-surface);
+    }
+  }
+  &.has-icon {
+    padding: 0;
+    svg {
+      margin-right: 0.75rem;
+    }
+  }
+  :deep(.btn-content) {
+    display: none;
+  }
+}

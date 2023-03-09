@@ -4,9 +4,9 @@ import {
   NodesListDocument,
   NodeLatencyMetricDocument,
   TsResult,
-  IpInterface,
   Location,
-  TimeRangeUnit
+  TimeRangeUnit,
+  ListTagsByNodeIdDocument
 } from '@/types/graphql'
 import { NodeContent } from '@/types/inventory'
 import useSpinner from '@/composables/useSpinner'
@@ -40,6 +40,14 @@ export const useInventoryQueries = defineStore('inventoryQueries', () => {
     })
 
   watch(nodesFetching, (_, fetched) => (fetched ? stopSpinner() : startSpinner()))
+
+  const fetchNodeTags = (nodeId: number) =>
+    useQuery({
+      query: ListTagsByNodeIdDocument,
+      variables: {
+        nodeId
+      }
+    })
 
   watchEffect(() => {
     nodes.value = []
@@ -77,22 +85,23 @@ export const useInventoryQueries = defineStore('inventoryQueries', () => {
               locationLink: '',
               managementIpValue: '',
               managementIpLink: '',
-              tagValue: '--',
-              tagLink: ''
-            }
+              tagValue: []
+            },
+            isNodeOverlayChecked: false
           })
           return
         }
 
-        const { data, isFetching } = await fetchNodeMetrics(id, snmpPrimaryIpAddress as string)
+        const [{ data: metricData, isFetching: metricFetching }, { data: tagData, isFetching: tagFetching }] =
+          await Promise.all([fetchNodeMetrics(id, snmpPrimaryIpAddress as string), fetchNodeTags(id)])
 
-        if (data.value && !isFetching.value) {
-          const nodeLatency = data.value.nodeLatency?.data?.result as TsResult[]
+        if (!metricFetching.value && metricData.value && !tagFetching.value && tagData.value) {
+          const nodeLatency = metricData.value.nodeLatency?.data?.result as TsResult[]
           const latenciesValues = [...nodeLatency][0]?.values as number[][]
           // get the last item of the list
           const latencyValue = latenciesValues?.length ? latenciesValues[latenciesValues.length - 1][1] : undefined
 
-          const status = data.value.nodeStatus?.status
+          const status = metricData.value.nodeStatus?.status
           const { location: nodeLocation } = location as Location
           const { ipAddress: snmpPrimaryIpAddress } = ipInterfaces?.filter((ii) => ii.snmpPrimary)[0] || {} // not getting ipAddress from snmpPrimary interface can result in missing metrics for ICMP
 
@@ -120,9 +129,9 @@ export const useInventoryQueries = defineStore('inventoryQueries', () => {
               locationLink: '',
               managementIpValue: snmpPrimaryIpAddress || '',
               managementIpLink: '',
-              tagValue: '--',
-              tagLink: ''
-            }
+              tagValue: tagData.value.tagsByNodeId || []
+            },
+            isNodeOverlayChecked: false // to control the checkmark in the overlay of a node (tagging mode)
           })
         }
       })

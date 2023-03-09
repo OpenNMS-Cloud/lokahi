@@ -46,8 +46,8 @@ describe('Locations Autocomplete component', () => {
   })
 
   it('Should remove the location by id', () => {
-    wrapper.vm.selectedLocations = locationsMock
-    wrapper.vm.removeLocation({ id: 2 })
-    expect(wrapper.vm.selectedLocations.length).toEqual(3)
+    wrapper.vm.selectedLocation = locationsMock[0]
+    wrapper.vm.removeLocation()
+    expect(wrapper.vm.selectedLocation).toEqual(null)
   })
 })

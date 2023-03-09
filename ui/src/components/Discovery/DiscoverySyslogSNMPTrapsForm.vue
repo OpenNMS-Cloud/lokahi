@@ -30,8 +30,8 @@
         <DiscoveryHelpConfiguring data-test="help-configuring" />
         <BasicAutocomplete
           @items-selected="tagsSelectedListener"
-          :get-items="discoveryQueries.getTagsSearch"
-          :items="discoveryQueries.tagsSearched"
+          :get-items="tagQueries.getTagsSearch"
+          :items="tagQueries.tagsSearched"
           :label="Common.tagsInput"
           ref="tagsAutocompleteRef"
           class="tags-autocomplete"
@@ -89,6 +89,7 @@
 import discoveryText from './discovery.text'
 import { DiscoverySyslogSNMPTrapsForm, Common } from './discovery.text'
 import { ContentEditableType, COMMUNITY_STRING, UDP_PORT } from './discovery.constants'
+import { useTagQueries } from '@/store/Queries/tagQueries'
 import { useDiscoveryQueries } from '@/store/Queries/discoveryQueries'
 import { useDiscoveryMutations } from '@/store/Mutations/discoveryMutations'
 import { PassiveDiscovery, PassiveDiscoveryUpsertInput } from '@/types/graphql'
@@ -100,6 +101,7 @@ const props = defineProps<{
   cancel: () => void
 }>()
 
+const tagQueries = useTagQueries()
 const discoveryQueries = useDiscoveryQueries()
 const discoveryMutations = useDiscoveryMutations()
 const discoveryInfo = ref<PassiveDiscoveryUpsertInput>(props.discovery || ({} as PassiveDiscoveryUpsertInput))
@@ -114,7 +116,6 @@ watch(props, () => {
 })
 
 const tagsAutocompleteRef = ref()
-//let tagsSelected: Record<string, string>[] = []
 const tagsSelectedListener = (tags: Record<string, string>[]) => {
   discoveryInfo.value.tags = tags.map((tag) => {
     delete tag._text

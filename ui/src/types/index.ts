@@ -1,4 +1,8 @@
 import { SORT } from '@featherds/table'
+import { PointerAlignment, PopoverPlacement } from '@featherds/popover'
+
+export declare type fncVoid = () => void
+export declare type fncArgVoid = (...args: unknown[]) => void
 
 export interface SnackbarProps {
   msg: string
@@ -21,15 +25,20 @@ export enum TimeUnit {
   MSecs
 }
 
-export declare type fncVoid = () => void
-export declare type fncArgVoid = (...args: unknown[]) => void
-
 export interface IIcon {
   image: any
   title?: string
   tooltip?: string
-  size?: string
+  size?: number // rem
   cursorHover?: string
+}
+
+export interface IInputButtonPopover {
+  placement?: PopoverPlacement
+  alignment?: PointerAlignment
+  icon: IIcon
+  label?: string
+  handler: fncVoid
 }
 
 export const enum Monitor {

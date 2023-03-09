@@ -1,169 +1,265 @@
 <template>
-  <div class="tag-manager-box" v-if="store.isTagsOpen">
-    <div class="left">
+  <div class="tag-manager">
+    <section class="select-tags">
       <div class="top">
-        <div class="subtitle">Selected Tags: </div>
-
-        <div class="total-selected">
-          <div class="subtitle">Total: {{ tags.length }}</div>
-          <div class="subtitle pipe">|</div>
-          <div class="subtitle">Selected: {{ selectedTags.length }}</div>
-        </div>
-
-        <div class="search-add">
-          <!-- Add tag -->
-          <div>
-            <FeatherDropdown ref="newTagDropdown">
-              <template v-slot:trigger="{ attrs, on }">
-                <FeatherButton link href="#" icon="Add Tag" v-bind="attrs" v-on="on">
-                  <FeatherIcon :icon="addIcon" />
-                </FeatherButton>
-              </template>
-              <FeatherInput v-model="newTag" label="New tag" class="new-tag-input" />
-              <FeatherButton primary class="new-tag-btn" @click="addTag">
-                Add Tag
-              </FeatherButton>
-            </FeatherDropdown>
+        <div class="heading-total-selected">
+          <h4>Select Tags:</h4>
+          <div class="total-selected">
+            <div
+              class="total"
+              data-test="total"
+            >
+              TOTAL: <span>{{ tags.length }}</span>
+              <span class="pipe">|</span>
+            </div>
+            <div
+              class="selected"
+              data-test="selected"
+            >
+              SELECTED: <span>{{ tagsSelected.length }}</span>
+            </div>
           </div>
-
-          <!-- Search tags input -->
-          <FeatherInput
-            class="search"
-            v-model="searchValue"
-            label="Search Tags">
-            <template v-slot:pre>
-              <FeatherIcon :icon="searchIcon" />
-            </template>
-          </FeatherInput>
+        </div>
+        <div class="search-add">
+          <FeatherButton
+            @click="toggleSelectAll"
+            secondary
+            class="select-all-btn"
+            data-test="select-deselect-all"
+            >{{ areAllTagsSelected ? 'Deselect all' : 'Select all' }}</FeatherButton
+          >
+          <BasicAutocomplete
+            @items-selected="tagsSelectedListener"
+            :get-items="tagQueries.getTagsSearch"
+            :items="tagQueries.tagsSearched"
+            :show-list="false"
+            label="Search/Add tags (optional)"
+            ref="tagsAutocompleteRef"
+            class="tags-autocomplete"
+            data-test="tags-autocomplete"
+          />
         </div>
       </div>
-
-      <div>
-        <FeatherChipList condensed label="Tags" :key="selectedTags.toString()">
-          <FeatherChip 
-            v-for="tag of tags" 
-            :key="tag" 
-            class="pointer"
-            :class="{ 'selected' : selectedTags.includes(tag) }"
-            @click="selectTag(tag)"
-          >
-            {{ tag }}
-          </FeatherChip>
-        </FeatherChipList>
-      </div>
-    </div>
-
-    <div class="right">
-      <div class="vl"></div>
-      <FeatherRadioGroup vertical :label="'Tag Nodes:'" v-model="tagNodes">
-        <FeatherRadio :value="1">All</FeatherRadio>
-        <FeatherRadio :value="2">Individual</FeatherRadio>
-        <FeatherRadio :value="3">Clear</FeatherRadio>
-      </FeatherRadioGroup>
-    </div>
+      <FeatherChipList
+        v-if="tags.length"
+        :key="tagsSelected.toString()"
+        condensed
+        label="Tags"
+        class="tag-chip-list"
+        data-test="tag-chip-list"
+      >
+        <FeatherChip
+          v-for="(tag, index) in tags"
+          :key="index"
+          @click="toggleTagsSelected(tag)"
+          :class="{ selected: isTagSelected(tag.name as string) }"
+          class="pointer"
+        >
+          {{ tag.name }}
+        </FeatherChip>
+      </FeatherChipList>
+    </section>
+    <section class="tag-nodes">
+      <FeatherButton
+        @click="setTagEditMode(true)"
+        :disabled="!tagsSelected.length"
+        primary
+        data-test="save-btn"
+      >
+        Add tags to node
+      </FeatherButton>
+      <FeatherButton
+        @click="resetState"
+        :disabled="!tagsSelected.length"
+        secondary
+        data-test="cancel-btn"
+      >
+        Cancel
+      </FeatherButton>
+    </section>
   </div>
 </template>
 
 <script setup lang="ts">
+import { Tag } from '@/types/graphql'
 import { useInventoryStore } from '@/store/Views/inventoryStore'
-import Search from '@featherds/icon/action/Search'
-import AddIcon from '@featherds/icon/action/AddCircleAlt'
+import { useTagQueries } from '@/store/Queries/tagQueries'
+import { useTagStore } from '@/store/Components/tagStore'
 
-const store = useInventoryStore()
+const inventoryStore = useInventoryStore()
+const tagQueries = useTagQueries()
+const tagStore = useTagStore()
 
-const searchIcon = markRaw(Search)
-const addIcon = markRaw(AddIcon)
+const tagsAutocompleteRef = ref()
+const tags = computed(() => tagStore.tags)
+const tagsSelected = computed(() => tagStore.tagsSelected)
+const areAllTagsSelected = ref(false)
 
-const newTag = ref()
-const newTagDropdown = ref()
-const tagNodes = ref()
-const searchValue = ref()
-const selectedTags = ref<string[]>([])
-
-const tags = computed(() => ['tag1', 'tag2'])
-
-const selectTag = (tag: string) => {
-  if (selectedTags.value.includes(tag)) {
-    selectedTags.value = selectedTags.value.filter(t => t !== tag)
-  } else {
-    selectedTags.value.push(tag)
-  }
+const tagsSelectedListener = (selectedTags: Record<string, string>[]) => {
+  selectedTags.forEach((newTag) => tagStore.addNewTag(newTag))
 }
 
-const addTag = () => {
-  // send newtag.value
-  newTag.value = '' // clear input
-  newTagDropdown.value.handleClose() // clost dropdown
+const setTagEditMode = (isEdit: boolean) => {
+  tagStore.setTagEditMode(isEdit)
 }
+
+const isTagSelected = (name: string): boolean =>
+  tagsSelected.value.some(({ name: selectedTagName }) => selectedTagName === name)
+
+const toggleSelectAll = () => {
+  areAllTagsSelected.value = !areAllTagsSelected.value
+  tagStore.selectAllTags(areAllTagsSelected.value)
+}
+
+const toggleTagsSelected = (tag: Tag) => {
+  tagStore.toggleTagsSelected(tag)
+
+  areAllTagsSelected.value = tagsSelected.value.length === tags.value.length
+}
+
+const resetState = () => {
+  tagQueries.fetchTags()
+  areAllTagsSelected.value = false
+  inventoryStore.isTagManagerReset = true
+  tagsAutocompleteRef.value.reset()
+}
+
+watchEffect(() => {
+  if (inventoryStore.isTagManagerOpen) tagQueries.fetchTags()
+})
 </script>
 
 <style scoped lang="scss">
-@use "@featherds/styles/themes/variables";
-@use "@featherds/styles/mixins/typography";
-.subtitle {
-  @include typography.subtitle2();
-}
-.tag-manager-box {
+@use '@featherds/styles/themes/variables';
+@use '@featherds/styles/mixins/typography';
+@use '@/styles/vars';
+@use '@/styles/mediaQueriesMixins';
+
+.tag-manager {
   display: flex;
-  height: 175px;
-  background: var(variables.$shade-4);
-  margin: 10px 20px 10px 20px;
-  border-radius: 3px;
+  flex-direction: row;
+  flex-flow: wrap;
+  justify-content: space-between;
+  border: 1px solid var(variables.$secondary-text-on-surface);
+  border-radius: vars.$border-radius-m;
   padding: var(variables.$spacing-m);
+  margin-bottom: var(variables.$spacing-xl);
+  background-color: var(variables.$disabled-text-on-color);
+  min-width: 480px;
+}
 
-  .left {
-    width: 80%;
+.select-tags {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-width: 445px;
+  .top {
     display: flex;
-    flex-direction: column;
-    padding-right: var(variables.$spacing-m);
-
-    .top {
-      display: flex;
-      justify-content: space-between;
-
-      .total-selected {
-        display: flex;
-        gap: var(variables.$spacing-m);
-
-        .pipe {
-          color: var(variables.$shade-4);
-        }
-      }
-
-      .search-add {
-        display: flex;
-        gap: 5px;
-        .search {
-          width: 200px;
-        }
-        .new-tag-input {
-          margin: 0px 10px 0px 10px;
-          width: 175px;
-        }
-        .new-tag-btn {
-          margin-left: var(variables.$spacing-s);
-        }
-      }
-    }
-  }
-  .right {
-    display: flex;
-
-    .vl {
-      border-left: 1px solid var(variables.$shade-3);
-      height: 135px;
-      margin-top: 6px;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(variables.$spacing-m);
+    h4 {
+      padding-top: 3px;
       margin-right: var(variables.$spacing-m);
     }
+    .heading-total-selected {
+      width: 35%;
+      .total-selected {
+        display: flex;
+        flex-direction: column;
+        padding-top: 8px;
+        margin-bottom: var(variables.$spacing-l);
+        .total {
+          > span {
+            font-weight: bold;
+          }
+          .pipe {
+            color: var(variables.$secondary-text-on-surface);
+            margin: 0 var(variables.$spacing-s);
+            display: none;
+          }
+        }
+        .selected {
+          > span {
+            font-weight: bold;
+          }
+        }
+      }
+
+      @include mediaQueriesMixins.screen-lg {
+        width: 50%;
+      }
+    }
+
+    .search-add {
+      width: 60%;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      .select-all-btn {
+        margin-bottom: 25px;
+        display: flex;
+        order: 2;
+      }
+      .tags-autocomplete {
+        display: flex;
+        order: 1;
+        :deep(.feather-input-wrapper) {
+          min-width: 265px;
+        }
+      }
+
+      @include mediaQueriesMixins.screen-lg {
+        flex-direction: row;
+        justify-content: flex-end;
+        .select-all-btn {
+          margin-right: var(variables.$spacing-m);
+          order: 1;
+        }
+        .tags-autocomplete {
+          order: 2;
+        }
+      }
+    }
+
+    @include mediaQueriesMixins.screen-md {
+      margin-bottom: 0;
+      .heading-total-selected {
+        .total-selected {
+          flex-direction: row;
+          .total {
+            .pipe {
+              display: inline;
+            }
+          }
+        }
+      }
+    }
+    @include mediaQueriesMixins.screen-lg {
+      .heading-total-selected {
+        display: flex;
+        flex-direction: row;
+      }
+    }
+  }
+  .tag-chip-list {
+    max-height: 100px;
+    overflow-y: scroll;
+  }
+
+  @include mediaQueriesMixins.screen-lg {
+    min-width: 0;
   }
 }
-</style>
 
-
-<style lang="scss">
-.tag-manager-box {
-  .feather-radio-group-container.vertical .layout-container {
-    margin-bottom: 0px !important;
-  }
+.tag-nodes {
+  display: flex;
+  flex-direction: row;
+  justify-content: end;
+  width: 100%;
+  min-width: 445px;
+  margin-top: var(variables.$spacing-m);
+  padding-top: var(variables.$spacing-m);
 }
 </style>

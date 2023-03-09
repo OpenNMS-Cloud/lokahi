@@ -35,9 +35,9 @@ const tabContent = [
       locationLink: 'goto',
       managementIpValue: '0.0.0.0',
       managementIpLink: 'goto',
-      tagValue: 100,
-      tagLink: 'goto'
-    }
+      tagValue: []
+    },
+    isNodeOverlayChecked: false
   }
 ]
 

@@ -1,16 +1,32 @@
 <template>
   <ul>
-    <li v-for="node in tabContent" :key="node?.id">
+    <li
+      v-for="node in tabContent"
+      :key="node?.id"
+    >
       <section class="header">
-        <Icon :icon="icon" data-test="icon" />
+        <Icon
+          :icon="storageIcon"
+          data-test="icon"
+        />
         <h4 data-test="heading">{{ node?.label }}</h4>
       </section>
       <section class="node-content">
         <div>
-          <InventoryMetricChipList :metrics="node?.metrics" data-test="metric-chip-list" />
-          <InventoryTextAnchorList :anchor="node.anchor" data-test="text-anchor-list" />
+          <InventoryMetricChipList
+            :metrics="node?.metrics"
+            data-test="metric-chip-list"
+          />
+          <InventoryTextAnchorList
+            :anchor="node.anchor"
+            data-test="text-anchor-list"
+          />
         </div>
-        <InventoryIconActionList :node="node" class="icon-action" data-test="icon-action-list" />
+        <InventoryIconActionList
+          :node="node"
+          class="icon-action"
+          data-test="icon-action-list"
+        />
       </section>
     </li>
   </ul>
@@ -21,7 +37,7 @@ import { PropType } from 'vue'
 import Storage from '@material-design-icons/svg/outlined/storage.svg'
 import { NodeContent } from '@/types/inventory'
 import { IIcon } from '@/types'
-  
+
 defineProps({
   tabContent: {
     type: Object as PropType<NodeContent[]>,
@@ -29,14 +45,15 @@ defineProps({
   }
 })
 
-const icon: IIcon = {
+const storageIcon: IIcon = {
   image: Storage,
-  title: 'Node'
+  title: 'Node',
+  size: 1.5
 }
 </script>
 
 <style lang="scss" scoped>
-@use "@featherds/styles/themes/variables";
+@use '@featherds/styles/themes/variables';
 
 ul {
   display: flex;
@@ -44,7 +61,7 @@ ul {
   gap: 1rem;
   > li {
     padding: var(variables.$spacing-l) var(variables.$spacing-l);
-    border: 1px solid var(variables.$secondary-text-on-surface); 
+    border: 1px solid var(variables.$secondary-text-on-surface);
     border-radius: 10px;
     border-left: 10px solid var(variables.$secondary-text-on-surface); // TODO set color dynamically to the node's status
 

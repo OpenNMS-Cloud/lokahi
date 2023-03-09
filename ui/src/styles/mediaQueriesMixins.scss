@@ -17,16 +17,16 @@ $grid-breakpoints: (
   @media (max-width: map.get($grid-breakpoints, 'sm')) { @content; } // < 576
 }
 @mixin screen-sm {
-  @media (min-width: map.get($grid-breakpoints, 'sm')) { @content; } // < 768
+  @media (min-width: map.get($grid-breakpoints, 'sm')) { @content; } // 576 to < 768
 }
 @mixin screen-md {
-  @media (min-width: map.get($grid-breakpoints, 'md')) { @content; } // < 992
+  @media (min-width: map.get($grid-breakpoints, 'md')) { @content; } // 768 to < 992
 }
 @mixin screen-lg {
-  @media (min-width: map.get($grid-breakpoints, 'lg')) { @content; } // < 1200
+  @media (min-width: map.get($grid-breakpoints, 'lg')) { @content; } // 992 to < 1200
 }
 @mixin screen-xl {
-  @media (min-width: map.get($grid-breakpoints, 'xl')) { @content; } // < 1400
+  @media (min-width: map.get($grid-breakpoints, 'xl')) { @content; } // 1200 to < 1400
 }
 @mixin screen-xxl {
   @media (min-width: map.get($grid-breakpoints, 'xxl')) { @content; } // > 1400

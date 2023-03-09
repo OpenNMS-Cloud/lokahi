@@ -1,0 +1,7 @@
+mutation AddTagsToNode($tags: TagListNodeAddInput!) {
+  addTags(tags: $tags) {
+    id
+    name
+    tenantId
+  }
+}

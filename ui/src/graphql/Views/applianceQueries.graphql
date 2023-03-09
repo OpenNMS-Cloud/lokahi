@@ -26,13 +26,6 @@ fragment MinionsTableParts on Query {
   }
 }
 
-fragment LocationsParts on Query {
-  findAllLocations {
-    id
-    location
-  }
-}
-
 query ListNodesForTable {
   ...NodesTableParts
 }

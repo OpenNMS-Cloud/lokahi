@@ -2,7 +2,7 @@
   <FeatherButton
     primary
     data-test="add-node-btn"
-    @click="openModal"
+    @click="addNode"
   >
     <template v-slot:icon>
       <FeatherIcon
@@ -28,7 +28,7 @@
         data-test="location-name-input"
         name="locationOptions"
         v-model="locationOption"
-        :options="applianceQueries.locations"
+        :options="locations"
         text-prop="location"
         @update:modelValue="selectLocation"
         label="Location"
@@ -89,6 +89,7 @@
 import Add from '@featherds/icon/action/Add'
 import { useNodeMutations } from '@/store/Mutations/nodeMutations'
 import { useAppliancesQueries } from '@/store/Queries/appliancesQueries'
+import { useLocationsQueries } from '@/store/Common/locationsQueries'
 import useModal from '@/composables/useModal'
 import useSnackbar from '@/composables/useSnackbar'
 import { NodeCreateInput } from '@/types/graphql'
@@ -97,6 +98,7 @@ const { showSnackbar } = useSnackbar()
 const { openModal, closeModal, isVisible } = useModal()
 const nodeMutations = useNodeMutations()
 const applianceQueries = useAppliancesQueries()
+const locationsQueries = useLocationsQueries()
 
 const defaultDevice: NodeCreateInput = {
   label: undefined,
@@ -110,6 +112,12 @@ const defaultDevice: NodeCreateInput = {
 }
 
 const node = reactive({ ...defaultDevice })
+
+const locations = computed(() => locationsQueries.locations)
+const addNode = async () => {
+  await locationsQueries.fetchLocations()
+  openModal()
+}
 
 const save = async () => {
   await nodeMutations.addNode({ node })

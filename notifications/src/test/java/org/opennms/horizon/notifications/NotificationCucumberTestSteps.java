@@ -16,6 +16,7 @@ import org.opennms.horizon.notifications.exceptions.NotificationConfigUninitiali
 import org.opennms.horizon.notifications.exceptions.NotificationException;
 import org.opennms.horizon.notifications.service.NotificationService;
 import org.opennms.horizon.notifications.tenant.TenantContext;
+import org.opennms.horizon.notifications.tenant.WithTenant;
 import org.opennms.horizon.shared.constants.GrpcConstants;
 import org.opennms.horizon.shared.dto.event.AlarmDTO;
 import org.slf4j.Logger;
@@ -165,10 +166,11 @@ public class NotificationCucumberTestSteps extends GrpcTestBase {
     }
 
     @Then("verify {string} key is {string}")
+    @WithTenant(tenantIdArg = 0)
     public void verifyKey(String tenantId, String key) {
         System.out.println("JH Verifying tenant="+tenantId);
         System.out.println("JH Verifying key="+key);
-        try (TenantContext tc = TenantContext.withTenantId(tenantId)){
+        try {
             PagerDutyConfigDTO configDTO = pagerDutyDao.getConfig();
             assertEquals(key, configDTO.getIntegrationKey());
         } catch (NotificationConfigUninitializedException e) {
@@ -177,8 +179,9 @@ public class NotificationCucumberTestSteps extends GrpcTestBase {
     }
 
     @Then("verify {string} key is not set")
+    @WithTenant(tenantIdArg = 0)
     public void verifyKeyIsNotSet(String tenantId) {
-        try (TenantContext tc = TenantContext.withTenantId(tenantId)){
+        try {
             pagerDutyDao.getConfig();
             fail("Config should not be initialised");
         } catch (NotificationConfigUninitializedException e) {

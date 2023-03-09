@@ -10,10 +10,21 @@
         :key="item.id"
         class="discovery-name"
       >
-        <div @click="$emit('selectDiscovery', item)" class="pointer">
+        <div @click="$emit('selectDiscovery', item)" class="name pointer">
           {{ item.configName?.toUpperCase() || item.name?.toUpperCase() }}
         </div>
-        <BasicToggle v-if="passive" :toggle="item.toggle" @toggle="(isToggled) => $emit('toggleDiscovery', item.id, isToggled)" />
+        <FeatherTooltip
+          :title="`Toggle ${item.name?.toUpperCase()} on/off`"
+          v-slot="{ attrs, on }"
+        >
+          <BasicToggle 
+            v-bind="attrs" 
+            v-on="on" 
+            v-if="passive" 
+            :toggle="item.toggle" 
+            @toggle="(isToggled) => $emit('toggleDiscovery', item.id, isToggled)" 
+          />
+        </FeatherTooltip>
       </div>
     </div>
     <div
@@ -74,6 +85,11 @@ defineProps<{
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+
+  .name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 }
 
 .empty {

@@ -199,8 +199,6 @@ public class PassiveDiscoveryService {
     }
 
     private void sendTaskSetsToMinion(Node node, PassiveDiscovery discovery) {
-        String location = discovery.getLocation();
-
         List<SnmpConfiguration> snmpConfigs = new ArrayList<>();
 
         discovery.getSnmpCommunities().forEach(readCommunity -> {
@@ -215,7 +213,7 @@ public class PassiveDiscoveryService {
         });
 
         detectorTaskSetService.sendDetectorTasks(node);
-        scannerTaskSetService.sendNodeScannerTask(node, location, snmpConfigs);
+        scannerTaskSetService.sendNodeScannerTask(node, discovery, snmpConfigs);
     }
 
 }

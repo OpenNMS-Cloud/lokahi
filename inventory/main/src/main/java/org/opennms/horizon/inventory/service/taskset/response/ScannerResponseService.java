@@ -34,7 +34,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.opennms.horizon.azure.api.AzureScanItem;
 import org.opennms.horizon.azure.api.AzureScanResponse;
-import org.opennms.horizon.inventory.dto.MonitoredState;
 import org.opennms.horizon.inventory.dto.NodeCreateDTO;
 import org.opennms.horizon.inventory.dto.TagCreateDTO;
 import org.opennms.horizon.inventory.dto.TagCreateListDTO;
@@ -135,7 +134,6 @@ public class ScannerResponseService {
                 .setLocation(location)
                 .setManagementIp(pingResponse.getIpAddress())
                 .setLabel(pingResponse.getIpAddress())
-                .setMonitoredState(MonitoredState.DETECTED)
                 .build();
             Node node = nodeService.createNode(createDTO, ScanType.DISCOVERY_SCAN, tenantId);
             nodeService.sendNewNodeTaskSetAsync(node, discoveryScanResult.getActiveDiscoveryId());
@@ -163,7 +161,6 @@ public class ScannerResponseService {
                 .setLocation(location)
                 .setManagementIp(ipAddress)
                 .setLabel(nodeLabel)
-                .setMonitoredState(MonitoredState.DETECTED)
                 .build();
             node = nodeService.createNode(createDTO, ScanType.AZURE_SCAN, tenantId);
 

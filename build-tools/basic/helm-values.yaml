@@ -1,5 +1,7 @@
 Namespace: tilt-instance
 Host: localhost
+Port: 8123
+Protocol: http
 TLS:
   Enabled: False
 Keycloak:
@@ -32,7 +34,31 @@ OpenNMS:
       Requests:
         Cpu: '0'
         Memory: '0'
+  MinionGateway:
+    Resources:
+      Limits:
+        Cpu: '0'
+        Memory: '0'
+      Requests:
+        Cpu: '0'
+        Memory: '0'
+  Inventory:
+    Resources:
+      Limits:
+        Cpu: '0'
+        Memory: '0'
+      Requests:
+        Cpu: '0'
+        Memory: '0'
   Notification:
+    Resources:
+      Limits:
+        Cpu: '0'
+        Memory: '0'
+      Requests:
+        Cpu: '0'
+        Memory: '0'
+  Events:
     Resources:
       Limits:
         Cpu: '0'
@@ -81,3 +107,5 @@ Prometheus:
       Requests:
         Cpu: 100m
         Memory: 100Mi
+Kafka:
+  LocalPort: 24092

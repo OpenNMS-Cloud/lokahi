@@ -2,7 +2,7 @@ import { SORT } from '@featherds/table'
 import { PointerAlignment, PopoverPlacement } from '@featherds/popover'
 
 export declare type fncVoid = () => void
-export declare type fncArgVoid = (...args: any[]) => void
+export declare type fncArgVoid = (...args: unknown[]) => void
 
 export interface SnackbarProps {
   msg: string

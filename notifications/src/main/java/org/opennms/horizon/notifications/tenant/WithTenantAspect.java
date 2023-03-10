@@ -61,10 +61,13 @@ public class WithTenantAspect {
         if (tenantId == null || tenantId.isEmpty()) {
             tenantId = tenantLookup.lookupTenantId().orElseThrow();
         }
-        TenantContext.setTenantId(tenantId);
 
-        Object proceed = joinPoint.proceed();
-        TenantContext.clear();
-        return proceed;
+        try {
+            TenantContext.setTenantId(tenantId);
+            Object proceed = joinPoint.proceed();
+            return proceed;
+        } finally {
+            TenantContext.clear();
+        }
     }
 }

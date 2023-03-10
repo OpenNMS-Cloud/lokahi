@@ -61,9 +61,12 @@ public class TenantAwareKafkaListenerAspect {
         }
 
         if (foundTenant) {
-            Object proceed = joinPoint.proceed();
-            TenantContext.clear();
-            return proceed;
+            try {
+                Object proceed = joinPoint.proceed();
+                return proceed;
+            } finally {
+                TenantContext.clear();
+            }
         } else {
             LOG.warn("Failed to find tenant id");
             if (listener.skipOnMissing()) {

@@ -45,6 +45,7 @@ import org.opennms.horizon.inventory.grpc.GrpcTestBase;
 import org.opennms.horizon.inventory.mapper.discovery.IcmpActiveDiscoveryMapper;
 import org.opennms.horizon.inventory.repository.discovery.active.IcmpActiveDiscoveryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 
@@ -55,6 +56,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @ContextConfiguration(initializers = {SpringContextTestInitializer.class})
+@AutoConfigureObservability     // Make sure to include Metrics (for some reason they are disabled by default in the integration grey-box test)
 class IcmpActiveDiscoveryGrpcItTest extends GrpcTestBase {
     @Autowired
     private IcmpActiveDiscoveryRepository repository;

@@ -64,6 +64,7 @@ import org.opennms.horizon.shared.azure.http.dto.login.AzureOAuthToken;
 import org.opennms.horizon.shared.azure.http.dto.subscription.AzureSubscription;
 import org.opennms.taskset.contract.TaskType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 
@@ -84,6 +85,7 @@ import static org.opennms.horizon.shared.azure.http.AzureHttpClient.SUBSCRIPTION
 
 @SpringBootTest
 @ContextConfiguration(initializers = {SpringContextTestInitializer.class})
+@AutoConfigureObservability     // Make sure to include Metrics (for some reason they are disabled by default in the integration grey-box test)
 class AzureActiveDiscoveryGrpcItTest extends GrpcTestBase {
     private static final String TEST_NAME = "name";
     private static final String TEST_CLIENT_ID = "client-id";

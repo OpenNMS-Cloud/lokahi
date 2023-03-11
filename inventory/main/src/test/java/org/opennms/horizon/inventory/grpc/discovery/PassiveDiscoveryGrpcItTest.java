@@ -47,6 +47,7 @@ import org.opennms.horizon.inventory.dto.TagDTO;
 import org.opennms.horizon.inventory.dto.TagListDTO;
 import org.opennms.horizon.inventory.dto.TagServiceGrpc;
 import org.opennms.horizon.inventory.grpc.GrpcTestBase;
+import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 
@@ -57,6 +58,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
 @ContextConfiguration(initializers = {SpringContextTestInitializer.class})
+@AutoConfigureObservability     // Make sure to include Metrics (for some reason they are disabled by default in the integration grey-box test)
 class PassiveDiscoveryGrpcItTest extends GrpcTestBase {
     private static final String DEFAULT_LOCATION = "Default";
     private static final String TEST_TAG_NAME_1 = "tag-name-1";

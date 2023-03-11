@@ -48,20 +48,16 @@ import org.opennms.horizon.inventory.dto.MonitoringLocationServiceGrpc;
 import org.opennms.horizon.inventory.model.MonitoringLocation;
 import org.opennms.horizon.inventory.repository.MonitoringLocationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 
-import com.google.protobuf.Empty;
-import com.google.protobuf.StringValue;
-
-import io.grpc.Context;
-import io.grpc.Status;
-import io.grpc.StatusRuntimeException;
 import io.grpc.stub.MetadataUtils;
 
 
 @SpringBootTest
 @ContextConfiguration(initializers = {SpringContextTestInitializer.class})
+@AutoConfigureObservability     // Make sure to include Metrics (for some reason they are disabled by default in the integration grey-box test)
 class LocationGrpcItTest extends GrpcTestBase {
     private MonitoringLocation location1;
     private MonitoringLocation location2;

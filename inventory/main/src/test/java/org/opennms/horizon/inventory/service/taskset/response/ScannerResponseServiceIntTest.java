@@ -60,6 +60,7 @@ import org.opennms.taskset.contract.ScanType;
 import org.opennms.taskset.contract.ScannerResponse;
 import org.opennms.taskset.contract.TaskType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.transaction.annotation.Transactional;
@@ -80,6 +81,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 @SpringBootTest
 @ContextConfiguration(initializers = {SpringContextTestInitializer.class})
+@AutoConfigureObservability     // Make sure to include Metrics (for some reason they are disabled by default in the integration grey-box test)
 class ScannerResponseServiceIntTest extends GrpcTestBase {
     private static final String TEST_LOCATION = "Default";
     private static final String TEST_TENANT_ID = "test-tenant-id";

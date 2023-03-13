@@ -13,6 +13,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collections;
 
@@ -20,7 +21,7 @@ import java.util.Collections;
 @SpringBootTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @ContextConfiguration(initializers = {SpringContextTestInitializer.class})
-public class IcmpActiveDiscoveryRepositoryTest {
+class IcmpActiveDiscoveryRepositoryTest {
 
     private static final String tenantId = "tenant-1";
 
@@ -38,6 +39,7 @@ public class IcmpActiveDiscoveryRepositoryTest {
             discovery.setSnmpPorts(Collections.singletonList(1161));
             discovery.setSnmpCommunityStrings(Collections.singletonList("OpenNMS"));
             discovery.setIpAddressEntries(Arrays.asList("127.0.0.1", "127.0.0.2"));
+            discovery.setCreateTime(LocalDateTime.now());
             var persisted = repository.save(discovery);
             Assertions.assertNotNull(persisted);
             Assertions.assertEquals("MINION", discovery.getLocation());

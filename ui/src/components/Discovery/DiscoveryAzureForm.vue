@@ -67,6 +67,7 @@
         {{ Azure.cancelBtnText }}
       </FeatherButton>
       <ButtonWithSpinner
+        v-if="!discovery"
         type="submit"
         :isFetching="discoveryMutations.isFetching.value"
         @click="saveAzureDiscovery"
@@ -81,7 +82,7 @@
 <script setup lang="ts">
 import { useDiscoveryStore } from '@/store/Views/discoveryStore'
 import { Azure, Common } from './discovery.text'
-import { Location } from '@/types/graphql'
+import { AzureActiveDiscovery, Location } from '@/types/graphql'
 import { useDiscoveryQueries } from '@/store/Queries/discoveryQueries'
 import { useTagQueries } from '@/store/Queries/tagQueries'
 import { useDiscoveryMutations } from '@/store/Mutations/discoveryMutations'
@@ -97,6 +98,7 @@ const form = useForm()
 const props = defineProps<{
   successCallback: (name: string) => void
   cancel: () => void
+  discovery: AzureActiveDiscovery | null
 }>()
 
 const selectLocation = (location: Required<Location>) =>
@@ -129,6 +131,13 @@ const clientIdV = string().required('Client ID is required.')
 const clientSecretV = string().required('Client secret is required.')
 const subIdV = string().required('Subscription ID is required.')
 const dirIdV = string().required('Directory ID is required.')
+
+watchEffect(() => {
+  if (props.discovery) {
+    store.azure = { ...store.azure, ...props.discovery}
+  }
+})
+onMounted(() => store.clearAzureForm())
 </script>
 
 <style scoped lang="scss">

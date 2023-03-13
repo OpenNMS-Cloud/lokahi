@@ -1,4 +1,3 @@
-import { DiscoveryInput } from '@/types/discovery'
 import { defineStore } from 'pinia'
 import { useDiscoveryMutations } from '../Mutations/discoveryMutations'
 import { cloneDeep } from 'lodash'
@@ -25,7 +24,6 @@ export const useDiscoveryStore = defineStore('discoveryStore', {
     tags: [] as Record<string, string>[],
     udpPorts: [] as number[],
     communiyString: [] as string[],
-    activeDiscoveries: <DiscoveryInput[]>[],
     azure: cloneDeep(defaultAzureForm),
     selectedDiscovery: {}
   }),

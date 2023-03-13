@@ -25,7 +25,7 @@
             v-bind="attrs"
             v-on="on"
             v-if="passive"
-            :toggle="item.toggle"
+            :toggle="(item as PassiveDiscovery).toggle"
             @toggle="(isToggled) => $emit('toggleDiscovery', item.id, isToggled)"
           />
         </FeatherTooltip>
@@ -45,10 +45,11 @@
 
 <script lang="ts" setup>
 import Warning from '@featherds/icon/notification/Warning'
+import { PassiveDiscovery, AzureActiveDiscovery, IcmpActiveDiscovery } from '@/types/graphql'
 
 defineProps<{
   title: string
-  list?: any
+  list: (IcmpActiveDiscovery | AzureActiveDiscovery | PassiveDiscovery)[]
   passive?: boolean
   selectedId?: number
 }>()

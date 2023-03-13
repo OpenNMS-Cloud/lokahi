@@ -79,7 +79,7 @@
               }
             "
             :cancel="handleClose"
-            :discovery="(selectedDiscovery)"
+            :discovery="(selectedDiscovery as AzureActiveDiscovery)"
           />
         </div>
         <DiscoverySyslogSNMPTrapsForm
@@ -159,19 +159,21 @@ const search = (q: string) => {
 
 const showDiscovery = (selected: IAutocompleteItemType | IAutocompleteItemType[] | undefined) => {
   const discovery = selected as IAutocompleteItemType
+  discoverySearchValue.value = undefined
+  
   if (discovery) {
     isDiscoveryEditingShown.value = true
     showNewDiscovery.value = false
+    selectedDiscovery.value = discovery
     //replace with type guard
-    if (!discovery.hasOwnProperty('toggle')) {
+    if (discovery.discoveryType === DiscoveryType.ICMP) {
       discoverySelectedType.value = DiscoveryType.ICMP
-      selectedDiscovery.value = discovery as IcmpActiveDiscovery
+    }
+    else if (discovery.discoveryType === DiscoveryType.Azure) {
+      discoverySelectedType.value = DiscoveryType.Azure
     } else {
       discoverySelectedType.value = DiscoveryType.SyslogSNMPTraps
-      selectedDiscovery.value = discovery as PassiveDiscovery
     }
-  } else {
-    discoverySearchValue.value = undefined
   }
 }
 

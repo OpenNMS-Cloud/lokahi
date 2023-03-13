@@ -25,37 +25,27 @@
  *     http://www.opennms.org/
  *     http://www.opennms.com/
  *******************************************************************************/
-syntax = "proto3";
 
-import "google/protobuf/empty.proto";
-import "google/protobuf/wrappers.proto";
-import "tag.proto";
+package org.opennms.horizon.server.mapper;
 
-package opennms.inventory;
-option java_multiple_files = true;
-option java_package = "org.opennms.horizon.inventory.dto";
+import org.mapstruct.CollectionMappingStrategy;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.NullValueCheckStrategy;
+import org.opennms.horizon.inventory.dto.AzureActiveDiscoveryCreateDTO;
+import org.opennms.horizon.inventory.dto.AzureActiveDiscoveryDTO;
+import org.opennms.horizon.server.model.inventory.discovery.active.AzureActiveDiscovery;
+import org.opennms.horizon.server.model.inventory.discovery.active.AzureActiveDiscoveryCreate;
 
-message AzureActiveDiscoveryCreateDTO {
-  string location = 1;
-  string name = 2;
-  string client_id = 3;
-  string client_secret = 4;
-  string subscription_id = 5;
-  string directory_id = 6;
-  repeated opennms.inventory.TagCreateDTO tags = 7;
-}
 
-message AzureActiveDiscoveryDTO {
-  int64 id = 1;
-  string location = 2;
-  string name = 3;
-  string tenant_id = 4;
-  string client_id = 5;
-  string subscription_id = 6;
-  string directory_id = 7;
-  int64 create_time_msec = 8;
-}
+@Mapper(componentModel = "spring", uses = {TagMapper.class},
+    // Needed for grpc proto mapping
+    collectionMappingStrategy = CollectionMappingStrategy.ADDER_PREFERRED)
+public interface AzureActiveDiscoveryMapper {
 
-service AzureActiveDiscoveryService {
-  rpc createDiscovery(AzureActiveDiscoveryCreateDTO) returns (AzureActiveDiscoveryDTO) {};
+    AzureActiveDiscovery protoToAzureCredential(AzureActiveDiscoveryDTO dto);
+
+    @Mapping(target = "location", source = "location", nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
+    @Mapping(target = "tagsList", source = "tags", nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
+    AzureActiveDiscoveryCreateDTO azureCredentialCreateToProto(AzureActiveDiscoveryCreate request);
 }

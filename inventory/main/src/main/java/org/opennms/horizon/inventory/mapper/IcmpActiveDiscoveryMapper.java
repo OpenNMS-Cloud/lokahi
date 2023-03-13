@@ -32,35 +32,32 @@ import org.mapstruct.CollectionMappingStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.NullValueCheckStrategy;
-import org.opennms.horizon.inventory.discovery.ActiveDiscoveryDTO;
-import org.opennms.horizon.inventory.discovery.ActiveDiscoveryRequest;
+import org.opennms.horizon.inventory.discovery.IcmpActiveDiscoveryCreateDTO;
+import org.opennms.horizon.inventory.discovery.IcmpActiveDiscoveryDTO;
 import org.opennms.horizon.inventory.model.discovery.active.IcmpActiveDiscovery;
 
 @Mapper(componentModel = "spring", collectionMappingStrategy = CollectionMappingStrategy.ADDER_PREFERRED)
 public interface IcmpActiveDiscoveryMapper {
 
-    @Mapping(target = "name", source = "configName")
     @Mapping(target = "ipAddressEntries", source = "ipAddressesList")
     @Mapping(target = "snmpCommunityStrings", source = "snmpConf.readCommunityList",
         nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
     @Mapping(target = "snmpPorts", source = "snmpConf.portsList",
         nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
-    IcmpActiveDiscovery dtoToModel(ActiveDiscoveryRequest discoveryConfigRequest);
+    IcmpActiveDiscovery dtoToModel(IcmpActiveDiscoveryCreateDTO dto);
 
-    @Mapping(target = "configName", source = "name")
     @Mapping(target = "ipAddressesList", source = "ipAddressEntries")
     @Mapping(target = "snmpConf.readCommunityList", source = "snmpCommunityStrings",
         nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
     @Mapping(target = "snmpConf.portsList", source = "snmpPorts",
         nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
-    ActiveDiscoveryDTO modelToDto(IcmpActiveDiscovery icmpActiveDiscovery);
+    IcmpActiveDiscoveryDTO modelToDto(IcmpActiveDiscovery discovery);
 
-    @Mapping(target = "name", source = "configName")
     @Mapping(target = "ipAddressEntries", source = "ipAddressesList")
     @Mapping(target = "snmpCommunityStrings", source = "snmpConf.readCommunityList",
         nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
     @Mapping(target = "snmpPorts", source = "snmpConf.portsList",
         nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
-    IcmpActiveDiscovery dtoToModel(ActiveDiscoveryDTO discoveryConfigDTO);
+    IcmpActiveDiscovery dtoToModel(IcmpActiveDiscoveryDTO dto);
 
 }

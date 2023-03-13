@@ -26,7 +26,7 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.inventory.grpc;
+package org.opennms.horizon.inventory.grpc.discovery;
 
 import com.google.protobuf.Empty;
 import com.google.protobuf.ProtocolStringList;
@@ -46,6 +46,7 @@ import org.opennms.horizon.inventory.dto.TagCreateDTO;
 import org.opennms.horizon.inventory.dto.TagDTO;
 import org.opennms.horizon.inventory.dto.TagListDTO;
 import org.opennms.horizon.inventory.dto.TagServiceGrpc;
+import org.opennms.horizon.inventory.grpc.GrpcTestBase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 

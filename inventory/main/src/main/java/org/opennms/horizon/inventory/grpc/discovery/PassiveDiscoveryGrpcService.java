@@ -26,7 +26,7 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.inventory.grpc;
+package org.opennms.horizon.inventory.grpc.discovery;
 
 import com.google.protobuf.Empty;
 import com.google.rpc.Code;
@@ -41,6 +41,7 @@ import org.opennms.horizon.inventory.dto.PassiveDiscoveryListDTO;
 import org.opennms.horizon.inventory.dto.PassiveDiscoveryServiceGrpc;
 import org.opennms.horizon.inventory.dto.PassiveDiscoveryToggleDTO;
 import org.opennms.horizon.inventory.dto.PassiveDiscoveryUpsertDTO;
+import org.opennms.horizon.inventory.grpc.TenantLookup;
 import org.opennms.horizon.inventory.service.discovery.PassiveDiscoveryService;
 import org.springframework.stereotype.Component;
 

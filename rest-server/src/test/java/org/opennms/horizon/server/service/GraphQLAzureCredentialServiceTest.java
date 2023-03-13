@@ -34,8 +34,8 @@ import org.json.JSONObject;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.opennms.horizon.inventory.dto.AzureCredentialCreateDTO;
-import org.opennms.horizon.inventory.dto.AzureCredentialDTO;
+import org.opennms.horizon.inventory.dto.AzureActiveDiscoveryCreateDTO;
+import org.opennms.horizon.inventory.dto.AzureActiveDiscoveryDTO;
 import org.opennms.horizon.server.RestServerApplication;
 import org.opennms.horizon.server.service.grpc.InventoryClient;
 import org.opennms.horizon.server.utils.ServerHeaderUtil;
@@ -65,11 +65,11 @@ class GraphQLAzureCredentialServiceTest {
     @MockBean
     private ServerHeaderUtil mockHeaderUtil;
     private final String accessToken = "test-token-12345";
-    private AzureCredentialDTO azureCredentialDTO1;
+    private AzureActiveDiscoveryDTO azureActiveDiscoveryDTO;
 
     @BeforeEach
     public void setUp() {
-        azureCredentialDTO1 = AzureCredentialDTO.newBuilder()
+        azureActiveDiscoveryDTO = AzureActiveDiscoveryDTO.newBuilder()
             .setId(1L)
             .setLocation("Default")
             .setName("name")
@@ -91,11 +91,11 @@ class GraphQLAzureCredentialServiceTest {
 
     @Test
     void testCreateAzureCredential() throws JSONException {
-        doReturn(azureCredentialDTO1).when(mockClient).createNewAzureCredential(any(AzureCredentialCreateDTO.class), eq(accessToken));
+        doReturn(azureActiveDiscoveryDTO).when(mockClient).createAzureActiveDiscovery(any(AzureActiveDiscoveryCreateDTO.class), eq(accessToken));
 
         String request = createPayload("mutation { " +
-            "    addAzureCredential( " +
-            "        azureCredential: { " +
+            "    createAzureActiveDiscovery( " +
+            "        discovery: { " +
             "            location: \"Default\", " +
             "            name: \"name\", " +
             "            clientId: \"client-id\", " +
@@ -131,15 +131,15 @@ class GraphQLAzureCredentialServiceTest {
             .exchange()
             .expectStatus().isOk()
             .expectBody()
-            .jsonPath("$.data.addAzureCredential.id").isEqualTo(azureCredentialDTO1.getId())
-            .jsonPath("$.data.addAzureCredential.location").isEqualTo(azureCredentialDTO1.getLocation())
-            .jsonPath("$.data.addAzureCredential.name").isEqualTo(azureCredentialDTO1.getName())
-            .jsonPath("$.data.addAzureCredential.tenantId").isEqualTo(azureCredentialDTO1.getTenantId())
-            .jsonPath("$.data.addAzureCredential.clientId").isEqualTo(azureCredentialDTO1.getClientId())
-            .jsonPath("$.data.addAzureCredential.subscriptionId").isEqualTo(azureCredentialDTO1.getSubscriptionId())
-            .jsonPath("$.data.addAzureCredential.directoryId").isEqualTo(azureCredentialDTO1.getDirectoryId())
-            .jsonPath("$.data.addAzureCredential.createTimeMsec").isEqualTo(azureCredentialDTO1.getCreateTimeMsec());
-        verify(mockClient).createNewAzureCredential(any(AzureCredentialCreateDTO.class), eq(accessToken));
+            .jsonPath("$.data.createAzureActiveDiscovery.id").isEqualTo(azureActiveDiscoveryDTO.getId())
+            .jsonPath("$.data.createAzureActiveDiscovery.location").isEqualTo(azureActiveDiscoveryDTO.getLocation())
+            .jsonPath("$.data.createAzureActiveDiscovery.name").isEqualTo(azureActiveDiscoveryDTO.getName())
+            .jsonPath("$.data.createAzureActiveDiscovery.tenantId").isEqualTo(azureActiveDiscoveryDTO.getTenantId())
+            .jsonPath("$.data.createAzureActiveDiscovery.clientId").isEqualTo(azureActiveDiscoveryDTO.getClientId())
+            .jsonPath("$.data.createAzureActiveDiscovery.subscriptionId").isEqualTo(azureActiveDiscoveryDTO.getSubscriptionId())
+            .jsonPath("$.data.createAzureActiveDiscovery.directoryId").isEqualTo(azureActiveDiscoveryDTO.getDirectoryId())
+            .jsonPath("$.data.createAzureActiveDiscovery.createTimeMsec").isEqualTo(azureActiveDiscoveryDTO.getCreateTimeMsec());
+        verify(mockClient).createAzureActiveDiscovery(any(AzureActiveDiscoveryCreateDTO.class), eq(accessToken));
         verify(mockHeaderUtil, times(1)).getAuthHeader(any(ResolutionEnvironment.class));
     }
 

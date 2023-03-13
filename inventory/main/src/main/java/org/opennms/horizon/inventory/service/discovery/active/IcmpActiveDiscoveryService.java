@@ -30,8 +30,8 @@ package org.opennms.horizon.inventory.service.discovery.active;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.opennms.horizon.inventory.discovery.ActiveDiscoveryDTO;
-import org.opennms.horizon.inventory.discovery.ActiveDiscoveryRequest;
+import org.opennms.horizon.inventory.discovery.IcmpActiveDiscoveryCreateDTO;
+import org.opennms.horizon.inventory.discovery.IcmpActiveDiscoveryDTO;
 import org.opennms.horizon.inventory.dto.TagCreateListDTO;
 import org.opennms.horizon.inventory.mapper.IcmpActiveDiscoveryMapper;
 import org.opennms.horizon.inventory.model.discovery.active.IcmpActiveDiscovery;
@@ -51,7 +51,7 @@ public class IcmpActiveDiscoveryService {
     private final IcmpActiveDiscoveryMapper mapper;
     private final TagService tagService;
 
-    public ActiveDiscoveryDTO createActiveDiscovery(ActiveDiscoveryRequest request, String tenantId) {
+    public IcmpActiveDiscoveryDTO createActiveDiscovery(IcmpActiveDiscoveryCreateDTO request, String tenantId) {
 
         IcmpActiveDiscovery discovery = mapper.dtoToModel(request);
         discovery.setTenantId(tenantId);
@@ -66,12 +66,12 @@ public class IcmpActiveDiscoveryService {
         return mapper.modelToDto(discovery);
     }
 
-    public List<ActiveDiscoveryDTO> getActiveDiscoveries(String tenantId) {
+    public List<IcmpActiveDiscoveryDTO> getActiveDiscoveries(String tenantId) {
         var entities = repository.findByTenantId(tenantId);
         return entities.stream().map(mapper::modelToDto).toList();
     }
 
-    public Optional<ActiveDiscoveryDTO> getDiscoveryById(long id, String tenantId) {
+    public Optional<IcmpActiveDiscoveryDTO> getDiscoveryById(long id, String tenantId) {
         var optional = repository.findByIdAndTenantId(id, tenantId);
         return optional.map(mapper::modelToDto);
     }

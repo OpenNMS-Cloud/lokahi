@@ -83,10 +83,10 @@ public class GrpcTagService {
     }
 
     @GraphQLQuery
-    public Mono<List<Tag>> getTagsByAzureCredentialId(@GraphQLArgument(name = "azureCredentialId") Long azureCredentialId,
+    public Mono<List<Tag>> getTagsByActiveDiscoveryId(@GraphQLArgument(name = "activeDiscoveryId") Long activeDiscoveryId,
                                                       @GraphQLArgument(name = "searchTerm") String searchTerm,
                                                       @GraphQLEnvironment ResolutionEnvironment env) {
-        List<TagDTO> tagsList = client.getTagsByAzureCredentialId(azureCredentialId, searchTerm, headerUtil.getAuthHeader(env)).getTagsList();
+        List<TagDTO> tagsList = client.getTagsByActiveDiscoveryId(activeDiscoveryId, searchTerm, headerUtil.getAuthHeader(env)).getTagsList();
         return Mono.just(tagsList.stream().map(mapper::protoToTag).toList());
     }
 

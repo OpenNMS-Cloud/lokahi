@@ -1,8 +1,8 @@
 /*******************************************************************************
  * This file is part of OpenNMS(R).
  *
- * Copyright (C) 2023 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
+ * Copyright (C) 2022 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
  *
@@ -26,19 +26,20 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.server.model.inventory.discovery;
+package org.opennms.horizon.server.model.inventory.discovery.active;
 
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.List;
-
 @Getter
 @Setter
-public class ActiveDiscovery {
-    private long  id;
-    private String configName;
-    private List<String> ipAddresses;
+public class AzureActiveDiscovery {
+    private Long id;
     private String location;
-    private SNMPConfig snmpConfig;
+    private String name;
+    private String tenantId;
+    private String clientId;
+    private String subscriptionId;
+    private String directoryId;
+    private Long createTimeMsec;
 }

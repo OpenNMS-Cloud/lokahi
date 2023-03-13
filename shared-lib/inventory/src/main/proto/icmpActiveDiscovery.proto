@@ -35,8 +35,8 @@ package opennms.inventory;
 option java_multiple_files = true;
 option java_package = "org.opennms.horizon.inventory.discovery";
 
-message ActiveDiscoveryRequest {
-  string configName = 1;
+message IcmpActiveDiscoveryCreateDTO {
+  string name = 1;
   string location = 2;
   //can be a single ip address, ip ranges: 127.0.0.1 or 127.0.0.1-127.0.0.10 are valid values
   repeated string ipAddresses = 3;
@@ -44,15 +44,14 @@ message ActiveDiscoveryRequest {
   repeated opennms.inventory.TagCreateDTO tags = 5;
 }
 
-message ActiveDiscoveryDTO {
+message IcmpActiveDiscoveryDTO {
   int64 id = 1;
-  string tenantId = 2;
-  string configName = 3;
-  string location = 4;
+  string location = 2;
+  string name = 3;
+  string tenant_id = 4;
   //can be a single ip address, ip ranges: 127.0.0.1 or 127.0.0.1-127.0.0.10 are valid values
   repeated string ipAddresses = 5;
   SNMPConfigDTO snmpConf = 6;
-
 }
 
 message SNMPConfigDTO {
@@ -60,12 +59,12 @@ message SNMPConfigDTO {
   repeated int32 ports = 2;
 }
 
-message ActiveDiscoveryList {
-  repeated ActiveDiscoveryDTO discoverConfigs = 1;
+message IcmpActiveDiscoveryList {
+  repeated IcmpActiveDiscoveryDTO discoveries = 1;
 }
 
-service ActiveDiscoveryOperation {
-  rpc createConfig(ActiveDiscoveryRequest) returns (ActiveDiscoveryDTO);
-  rpc listDiscoveryConfig(google.protobuf.Empty) returns(ActiveDiscoveryList);
-  rpc getDiscoveryConfigById(google.protobuf.Int64Value) returns (ActiveDiscoveryDTO);
+service IcmpActiveDiscoveryService {
+  rpc createDiscovery(IcmpActiveDiscoveryCreateDTO) returns (IcmpActiveDiscoveryDTO);
+  rpc listDiscoveries(google.protobuf.Empty) returns(IcmpActiveDiscoveryList);
+  rpc getDiscoveryById(google.protobuf.Int64Value) returns (IcmpActiveDiscoveryDTO);
 }

@@ -26,26 +26,22 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.server.mapper;
+package org.opennms.horizon.server.model.inventory.discovery.active;
 
-import org.mapstruct.CollectionMappingStrategy;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.NullValueCheckStrategy;
-import org.opennms.horizon.inventory.dto.AzureCredentialCreateDTO;
-import org.opennms.horizon.inventory.dto.AzureCredentialDTO;
-import org.opennms.horizon.server.model.inventory.AzureCredential;
-import org.opennms.horizon.server.model.inventory.AzureCredentialCreate;
+import lombok.Getter;
+import lombok.Setter;
+import org.opennms.horizon.server.model.inventory.tag.TagCreate;
 
+import java.util.List;
 
-@Mapper(componentModel = "spring", uses = {TagMapper.class},
-    // Needed for grpc proto mapping
-    collectionMappingStrategy = CollectionMappingStrategy.ADDER_PREFERRED)
-public interface AzureCredentialMapper {
-
-    AzureCredential protoToAzureCredential(AzureCredentialDTO azureCredentialDTO);
-
-    @Mapping(target = "location", source = "location", nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
-    @Mapping(target = "tagsList", source = "tags", nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
-    AzureCredentialCreateDTO azureCredentialCreateToProto(AzureCredentialCreate request);
+@Getter
+@Setter
+public class AzureActiveDiscoveryCreate {
+    private String location;
+    private String name;
+    private String clientId;
+    private String clientSecret;
+    private String subscriptionId;
+    private String directoryId;
+    private List<TagCreate> tags;
 }

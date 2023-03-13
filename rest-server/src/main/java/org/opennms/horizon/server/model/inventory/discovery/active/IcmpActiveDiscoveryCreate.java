@@ -1,8 +1,8 @@
 /*******************************************************************************
  * This file is part of OpenNMS(R).
  *
- * Copyright (C) 2022 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
+ * Copyright (C) 2023 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
  *
@@ -26,22 +26,21 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.server.model.inventory;
+package org.opennms.horizon.server.model.inventory.discovery.active;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.opennms.horizon.server.model.inventory.discovery.SNMPConfig;
 import org.opennms.horizon.server.model.inventory.tag.TagCreate;
 
 import java.util.List;
 
 @Getter
 @Setter
-public class AzureCredentialCreate {
-    private String location;
+public class IcmpActiveDiscoveryCreate {
     private String name;
-    private String clientId;
-    private String clientSecret;
-    private String subscriptionId;
-    private String directoryId;
+    private String location;
     private List<TagCreate> tags;
+    private List<String> ipAddresses;
+    private SNMPConfig snmpConfig;
 }

@@ -25,7 +25,7 @@
  *     http://www.opennms.org/
  *     http://www.opennms.com/
  *******************************************************************************/
-package org.opennms.horizon.inventory.grpc;
+package org.opennms.horizon.inventory.grpc.discovery;
 
 import com.google.rpc.Code;
 import com.google.rpc.Status;
@@ -37,6 +37,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.opennms.horizon.inventory.dto.AzureActiveDiscoveryCreateDTO;
 import org.opennms.horizon.inventory.dto.AzureActiveDiscoveryDTO;
 import org.opennms.horizon.inventory.dto.AzureActiveDiscoveryServiceGrpc;
+import org.opennms.horizon.inventory.grpc.TenantLookup;
 import org.opennms.horizon.inventory.service.discovery.active.AzureActiveDiscoveryService;
 import org.springframework.stereotype.Component;
 
@@ -45,7 +46,7 @@ import java.util.Optional;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class AzureCredentialGrpcService extends AzureActiveDiscoveryServiceGrpc.AzureActiveDiscoveryServiceImplBase {
+public class AzureActiveDiscoveryGrpcService extends AzureActiveDiscoveryServiceGrpc.AzureActiveDiscoveryServiceImplBase {
     private final TenantLookup tenantLookup;
     private final AzureActiveDiscoveryService service;
 

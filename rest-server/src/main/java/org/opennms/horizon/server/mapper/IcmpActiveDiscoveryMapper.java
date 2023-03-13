@@ -33,18 +33,18 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
 import org.mapstruct.NullValueCheckStrategy;
-import org.opennms.horizon.inventory.discovery.ActiveDiscoveryDTO;
-import org.opennms.horizon.inventory.discovery.ActiveDiscoveryRequest;
+import org.opennms.horizon.inventory.discovery.IcmpActiveDiscoveryCreateDTO;
+import org.opennms.horizon.inventory.discovery.IcmpActiveDiscoveryDTO;
 import org.opennms.horizon.inventory.discovery.SNMPConfigDTO;
-import org.opennms.horizon.server.model.inventory.discovery.ActiveDiscovery;
-import org.opennms.horizon.server.model.inventory.discovery.CreateDiscoveryConfigRequest;
+import org.opennms.horizon.server.model.inventory.discovery.active.IcmpActiveDiscovery;
+import org.opennms.horizon.server.model.inventory.discovery.active.IcmpActiveDiscoveryCreate;
 import org.opennms.horizon.server.model.inventory.discovery.SNMPConfig;
 
 import java.util.List;
 
 @Mapper(componentModel = "spring",
     uses = {TagMapper.class}, collectionMappingStrategy = CollectionMappingStrategy.ADDER_PREFERRED)
-public interface DiscoveryConfigMapper {
+public interface IcmpActiveDiscoveryMapper {
     @Mappings({
         @Mapping(source = "readCommunityList", target = "readCommunities"),
         @Mapping(source = "portsList", target = "ports")
@@ -62,13 +62,13 @@ public interface DiscoveryConfigMapper {
         @Mapping(target = "snmpConf", source = "snmpConfig", nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS),
         @Mapping(target = "tagsList", source = "tags", nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
     })
-    ActiveDiscoveryRequest mapRequest(CreateDiscoveryConfigRequest request);
+    IcmpActiveDiscoveryCreateDTO mapRequest(IcmpActiveDiscoveryCreate request);
 
     @Mappings({
         @Mapping(source = "ipAddressesList", target = "ipAddresses"),
         @Mapping(source = "snmpConf", target = "snmpConfig")
     })
-    ActiveDiscovery configDtoToModel(ActiveDiscoveryDTO configDTO);
+    IcmpActiveDiscovery configDtoToModel(IcmpActiveDiscoveryDTO configDTO);
 
-    List<ActiveDiscovery> configDtoListToConfig(List<ActiveDiscoveryDTO> dtoList);
+    List<IcmpActiveDiscovery> configDtoListToConfig(List<IcmpActiveDiscoveryDTO> dtoList);
 }

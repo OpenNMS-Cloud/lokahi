@@ -26,7 +26,7 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.server.service;
+package org.opennms.horizon.server.service.discovery;
 
 import io.leangen.graphql.annotations.GraphQLEnvironment;
 import io.leangen.graphql.annotations.GraphQLMutation;
@@ -34,10 +34,10 @@ import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.execution.ResolutionEnvironment;
 import io.leangen.graphql.spqr.spring.annotations.GraphQLApi;
 import lombok.RequiredArgsConstructor;
-import org.opennms.horizon.inventory.discovery.ActiveDiscoveryRequest;
-import org.opennms.horizon.server.mapper.DiscoveryConfigMapper;
-import org.opennms.horizon.server.model.inventory.discovery.ActiveDiscovery;
-import org.opennms.horizon.server.model.inventory.discovery.CreateDiscoveryConfigRequest;
+import org.opennms.horizon.inventory.discovery.IcmpActiveDiscoveryCreateDTO;
+import org.opennms.horizon.server.mapper.IcmpActiveDiscoveryMapper;
+import org.opennms.horizon.server.model.inventory.discovery.active.IcmpActiveDiscovery;
+import org.opennms.horizon.server.model.inventory.discovery.active.IcmpActiveDiscoveryCreate;
 import org.opennms.horizon.server.service.grpc.InventoryClient;
 import org.opennms.horizon.server.utils.ServerHeaderUtil;
 import org.springframework.stereotype.Service;
@@ -47,25 +47,25 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 @GraphQLApi
 @Service
-public class GrpcActiveDiscoveryService {
-    private final DiscoveryConfigMapper mapper;
+public class GrpcIcmpActiveDiscoveryService {
+    private final IcmpActiveDiscoveryMapper mapper;
     private final ServerHeaderUtil headerUtil;
     private final InventoryClient client;
 
     @GraphQLMutation
-    public Mono<ActiveDiscovery> createActiveDiscovery(CreateDiscoveryConfigRequest request, @GraphQLEnvironment ResolutionEnvironment env) {
-        ActiveDiscoveryRequest requestDto = mapper.mapRequest(request);
-        return Mono.just(mapper.configDtoToModel(client.createDiscoveryConfig(requestDto, headerUtil.getAuthHeader(env))));
+    public Mono<IcmpActiveDiscovery> createIcmpActiveDiscovery(IcmpActiveDiscoveryCreate request, @GraphQLEnvironment ResolutionEnvironment env) {
+        IcmpActiveDiscoveryCreateDTO requestDto = mapper.mapRequest(request);
+        return Mono.just(mapper.configDtoToModel(client.createIcmpActiveDiscovery(requestDto, headerUtil.getAuthHeader(env))));
     }
 
     @GraphQLQuery
-    public Flux<ActiveDiscovery> listActiveDiscovery(@GraphQLEnvironment ResolutionEnvironment env) {
-        return Flux.fromIterable(mapper.configDtoListToConfig(client.listDiscoveryConfig(headerUtil.getAuthHeader(env))));
+    public Flux<IcmpActiveDiscovery> listIcmpActiveDiscovery(@GraphQLEnvironment ResolutionEnvironment env) {
+        return Flux.fromIterable(mapper.configDtoListToConfig(client.listIcmpDiscoveries(headerUtil.getAuthHeader(env))));
     }
 
     @GraphQLQuery
-    public Mono<ActiveDiscovery> getActiveDiscoveryById(Long id, @GraphQLEnvironment ResolutionEnvironment env) {
-        return Mono.just(mapper.configDtoToModel(client.getDiscoveryConfigById(id, headerUtil.getAuthHeader(env))));
+    public Mono<IcmpActiveDiscovery> getIcmpActiveDiscoveryById(Long id, @GraphQLEnvironment ResolutionEnvironment env) {
+        return Mono.just(mapper.configDtoToModel(client.getIcmpDiscoveryById(id, headerUtil.getAuthHeader(env))));
     }
 
 }

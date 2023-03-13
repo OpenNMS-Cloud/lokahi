@@ -26,7 +26,7 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.inventory.grpc;
+package org.opennms.horizon.inventory.grpc.discovery;
 
 import com.google.protobuf.Empty;
 import com.google.protobuf.Int64Value;
@@ -37,10 +37,11 @@ import io.grpc.protobuf.StatusProto;
 import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.opennms.horizon.inventory.discovery.ActiveDiscoveryDTO;
-import org.opennms.horizon.inventory.discovery.ActiveDiscoveryList;
-import org.opennms.horizon.inventory.discovery.ActiveDiscoveryOperationGrpc;
-import org.opennms.horizon.inventory.discovery.ActiveDiscoveryRequest;
+import org.opennms.horizon.inventory.discovery.IcmpActiveDiscoveryCreateDTO;
+import org.opennms.horizon.inventory.discovery.IcmpActiveDiscoveryDTO;
+import org.opennms.horizon.inventory.discovery.IcmpActiveDiscoveryList;
+import org.opennms.horizon.inventory.discovery.IcmpActiveDiscoveryServiceGrpc;
+import org.opennms.horizon.inventory.grpc.TenantLookup;
 import org.opennms.horizon.inventory.service.discovery.active.IcmpActiveDiscoveryService;
 import org.opennms.horizon.inventory.service.taskset.ScannerTaskSetService;
 import org.springframework.stereotype.Component;
@@ -50,14 +51,13 @@ import java.util.List;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class ActiveDiscoveryGrpcService extends ActiveDiscoveryOperationGrpc.ActiveDiscoveryOperationImplBase {
-
+public class IcmpActiveDiscoveryGrpcService extends IcmpActiveDiscoveryServiceGrpc.IcmpActiveDiscoveryServiceImplBase {
     private final TenantLookup tenantLookup;
     private final IcmpActiveDiscoveryService configService;
     private final ScannerTaskSetService scannerTaskSetService;
 
     @Override
-    public void createConfig(ActiveDiscoveryRequest request, StreamObserver<ActiveDiscoveryDTO> responseObserver) {
+    public void createDiscovery(IcmpActiveDiscoveryCreateDTO request, StreamObserver<IcmpActiveDiscoveryDTO> responseObserver) {
         tenantLookup.lookupTenantId(Context.current())
             .ifPresentOrElse(tenantId -> {
                 try {
@@ -73,17 +73,17 @@ public class ActiveDiscoveryGrpcService extends ActiveDiscoveryOperationGrpc.Act
     }
 
     @Override
-    public void listDiscoveryConfig(Empty request, StreamObserver<ActiveDiscoveryList> responseObserver) {
+    public void listDiscoveries(Empty request, StreamObserver<IcmpActiveDiscoveryList> responseObserver) {
         tenantLookup.lookupTenantId(Context.current())
             .ifPresentOrElse(tenantId -> {
-                List<ActiveDiscoveryDTO> list = configService.getActiveDiscoveries(tenantId);
-                responseObserver.onNext(ActiveDiscoveryList.newBuilder().addAllDiscoverConfigs(list).build());
+                List<IcmpActiveDiscoveryDTO> list = configService.getActiveDiscoveries(tenantId);
+                responseObserver.onNext(IcmpActiveDiscoveryList.newBuilder().addAllDiscoveries(list).build());
                 responseObserver.onCompleted();
             }, () -> responseObserver.onError(StatusProto.toStatusRuntimeException(createMissingTenant())));
     }
 
     @Override
-    public void getDiscoveryConfigById(Int64Value request, StreamObserver<ActiveDiscoveryDTO> responseObserver) {
+    public void getDiscoveryById(Int64Value request, StreamObserver<IcmpActiveDiscoveryDTO> responseObserver) {
         tenantLookup.lookupTenantId(Context.current())
             .ifPresentOrElse(tenantId ->
                     configService.getDiscoveryById(request.getValue(), tenantId)
@@ -102,5 +102,4 @@ public class ActiveDiscoveryGrpcService extends ActiveDiscoveryOperationGrpc.Act
     private Status createStatus(int code, String message) {
         return Status.newBuilder().setCode(code).setMessage(message).build();
     }
-
 }

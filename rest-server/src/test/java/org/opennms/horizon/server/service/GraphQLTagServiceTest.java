@@ -33,7 +33,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.opennms.horizon.inventory.dto.TagCreateListDTO;
 import org.opennms.horizon.inventory.dto.TagDTO;
 import org.opennms.horizon.inventory.dto.TagListDTO;
@@ -196,7 +195,7 @@ class GraphQLTagServiceTest {
         TagDTO tagDTO1 = TagDTO.newBuilder().setName(TEST_TAG_NAME_1).setTenantId(TEST_TENANT_ID).setId(1L).build();
         TagDTO tagDTO2 = TagDTO.newBuilder().setName(TEST_TAG_NAME_2).setTenantId(TEST_TENANT_ID).setId(2L).build();
         TagListDTO tagListDTO = TagListDTO.newBuilder().addTags(tagDTO1).addTags(tagDTO2).build();
-        when(mockClient.getTagsByAzureCredentialId(anyLong(), any(), anyString())).thenReturn(tagListDTO);
+        when(mockClient.getTagsByActiveDiscoveryId(anyLong(), any(), anyString())).thenReturn(tagListDTO);
 
         String getRequest = "query { " +
             "    tagsByAzureCredentialId (azureCredentialId: 1) { " +
@@ -220,7 +219,7 @@ class GraphQLTagServiceTest {
             .jsonPath("$.data.tagsByAzureCredentialId[1].tenantId").isNotEmpty()
             .jsonPath("$.data.tagsByAzureCredentialId[1].name").isEqualTo(TEST_TAG_NAME_2);
 
-        verify(mockClient, times(1)).getTagsByAzureCredentialId(1L, null, accessToken);
+        verify(mockClient, times(1)).getTagsByActiveDiscoveryId(1L, null, accessToken);
         verify(mockHeaderUtil, times(1)).getAuthHeader(any(ResolutionEnvironment.class));
     }
 
@@ -230,7 +229,7 @@ class GraphQLTagServiceTest {
         TagDTO tagDTO1 = TagDTO.newBuilder().setName(TEST_TAG_NAME_1).setTenantId(TEST_TENANT_ID).setId(1L).build();
         TagDTO tagDTO2 = TagDTO.newBuilder().setName(TEST_TAG_NAME_2).setTenantId(TEST_TENANT_ID).setId(2L).build();
         TagListDTO tagListDTO = TagListDTO.newBuilder().addTags(tagDTO1).addTags(tagDTO2).build();
-        when(mockClient.getTagsByAzureCredentialId(anyLong(), anyString(), anyString())).thenReturn(tagListDTO);
+        when(mockClient.getTagsByActiveDiscoveryId(anyLong(), anyString(), anyString())).thenReturn(tagListDTO);
 
         String getRequest = "query { " +
             "    tagsByAzureCredentialId (azureCredentialId: 1, searchTerm: \"abc\") { " +
@@ -254,7 +253,7 @@ class GraphQLTagServiceTest {
             .jsonPath("$.data.tagsByAzureCredentialId[1].tenantId").isNotEmpty()
             .jsonPath("$.data.tagsByAzureCredentialId[1].name").isEqualTo(TEST_TAG_NAME_2);
 
-        verify(mockClient, times(1)).getTagsByAzureCredentialId(1L, "abc", accessToken);
+        verify(mockClient, times(1)).getTagsByActiveDiscoveryId(1L, "abc", accessToken);
         verify(mockHeaderUtil, times(1)).getAuthHeader(any(ResolutionEnvironment.class));
     }
 

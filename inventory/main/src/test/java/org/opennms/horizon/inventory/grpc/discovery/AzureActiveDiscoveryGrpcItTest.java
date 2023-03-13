@@ -26,7 +26,7 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.inventory.grpc;
+package org.opennms.horizon.inventory.grpc.discovery;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -51,6 +51,7 @@ import org.opennms.horizon.inventory.dto.AzureActiveDiscoveryCreateDTO;
 import org.opennms.horizon.inventory.dto.AzureActiveDiscoveryDTO;
 import org.opennms.horizon.inventory.dto.AzureActiveDiscoveryServiceGrpc;
 import org.opennms.horizon.inventory.dto.TagCreateDTO;
+import org.opennms.horizon.inventory.grpc.GrpcTestBase;
 import org.opennms.horizon.inventory.model.Tag;
 import org.opennms.horizon.inventory.model.discovery.active.ActiveDiscovery;
 import org.opennms.horizon.inventory.model.discovery.active.AzureActiveDiscovery;

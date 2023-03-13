@@ -36,7 +36,7 @@ option java_package = "org.opennms.azure.contract";
 // todo: create common credential fields into reusable message
 
 message AzureScanRequest {
-  int64 credential_id = 1;
+  int64 discovery_id = 1;
   string client_id = 2;
   string client_secret = 3;
   string subscription_id = 4;

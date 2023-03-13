@@ -25,19 +25,17 @@
  *     http://www.opennms.org/
  *     http://www.opennms.com/
  *******************************************************************************/
-package org.opennms.horizon.inventory.service;
+package org.opennms.horizon.inventory.service.discovery.active;
 
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.StringUtils;
-import org.opennms.horizon.inventory.dto.AzureCredentialCreateDTO;
-import org.opennms.horizon.inventory.dto.AzureCredentialDTO;
+import org.opennms.horizon.inventory.dto.AzureActiveDiscoveryCreateDTO;
+import org.opennms.horizon.inventory.dto.AzureActiveDiscoveryDTO;
 import org.opennms.horizon.inventory.dto.TagCreateListDTO;
 import org.opennms.horizon.inventory.exception.InventoryRuntimeException;
-import org.opennms.horizon.inventory.mapper.AzureCredentialMapper;
-import org.opennms.horizon.inventory.model.AzureCredential;
-import org.opennms.horizon.inventory.model.MonitoringLocation;
-import org.opennms.horizon.inventory.repository.AzureCredentialRepository;
-import org.opennms.horizon.inventory.repository.MonitoringLocationRepository;
+import org.opennms.horizon.inventory.mapper.AzureActiveDiscoveryMapper;
+import org.opennms.horizon.inventory.model.discovery.active.AzureActiveDiscovery;
+import org.opennms.horizon.inventory.repository.discovery.active.AzureActiveDiscoveryRepository;
+import org.opennms.horizon.inventory.service.TagService;
 import org.opennms.horizon.inventory.service.taskset.ScannerTaskSetService;
 import org.opennms.horizon.inventory.service.taskset.TaskUtils;
 import org.opennms.horizon.shared.azure.http.AzureHttpClient;
@@ -45,7 +43,6 @@ import org.opennms.horizon.shared.azure.http.AzureHttpException;
 import org.opennms.horizon.shared.azure.http.dto.error.AzureErrorDescription;
 import org.opennms.horizon.shared.azure.http.dto.login.AzureOAuthToken;
 import org.opennms.horizon.shared.azure.http.dto.subscription.AzureSubscription;
-import org.opennms.horizon.shared.constants.GrpcConstants;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
@@ -53,40 +50,35 @@ import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
-public class AzureCredentialService {
+public class AzureActiveDiscoveryService {
     private static final String SUB_ENABLED_STATE = "Enabled";
 
     private final AzureHttpClient client;
-    private final AzureCredentialMapper mapper;
-    private final AzureCredentialRepository repository;
-    private final MonitoringLocationRepository locationRepository;
-    private final ConfigUpdateService configUpdateService;
+    private final AzureActiveDiscoveryMapper mapper;
+    private final AzureActiveDiscoveryRepository repository;
     private final ScannerTaskSetService scannerTaskSetService;
     private final TagService tagService;
 
-    public AzureCredentialDTO createCredentials(String tenantId, AzureCredentialCreateDTO request) {
+    public AzureActiveDiscoveryDTO createActiveDiscovery(String tenantId, AzureActiveDiscoveryCreateDTO request) {
         validateCredentials(tenantId, request);
 
-        MonitoringLocation monitoringLocation = getMonitoringLocation(tenantId, request);
-
-        AzureCredential credential = mapper.dtoToModel(request);
-        credential.setTenantId(tenantId);
-        credential.setCreateTime(LocalDateTime.now());
-        credential.setMonitoringLocation(monitoringLocation);
-        credential = repository.save(credential);
+        AzureActiveDiscovery discovery = mapper.dtoToModel(request);
+        discovery.setTenantId(tenantId);
+        discovery.setCreateTime(LocalDateTime.now());
+        discovery = repository.save(discovery);
 
         tagService.addTags(tenantId, TagCreateListDTO.newBuilder()
-            .setAzureCredentialId(credential.getId())
+            .setActiveDiscoveryId(discovery.getId())
             .addAllTags(request.getTagsList())
             .build());
 
         // Asynchronously send task sets to Minion
-        scannerTaskSetService.sendAzureScannerTaskAsync(credential);
+        scannerTaskSetService.sendAzureScannerTaskAsync(discovery);
 
-        return mapper.modelToDto(credential);
+        return mapper.modelToDto(discovery);
     }
 
-    private void validateCredentials(String tenantId, AzureCredentialCreateDTO request) {
+    private void validateCredentials(String tenantId, AzureActiveDiscoveryCreateDTO request) {
         validateAlreadyExists(tenantId, request);
         AzureOAuthToken token;
         try {
@@ -122,34 +114,12 @@ public class AzureCredentialService {
         }
     }
 
-    private void validateAlreadyExists(String tenantId, AzureCredentialCreateDTO request) {
-        Optional<AzureCredential> azureCredentialOpt = repository
+    private void validateAlreadyExists(String tenantId, AzureActiveDiscoveryCreateDTO request) {
+        Optional<AzureActiveDiscovery> azureDiscoveryOpt = repository
             .findByTenantIdAndSubscriptionIdAndDirectoryIdAndClientId(tenantId,
                 request.getSubscriptionId(), request.getDirectoryId(), request.getClientId());
-        if (azureCredentialOpt.isPresent()) {
-            throw new InventoryRuntimeException("Azure discovery already exists with the provided subscription, directory and client ID");
+        if (azureDiscoveryOpt.isPresent()) {
+            throw new InventoryRuntimeException("Azure Discovery already exists with the provided subscription, directory and client ID");
         }
-    }
-
-    private MonitoringLocation getMonitoringLocation(String tenantId, AzureCredentialCreateDTO request) {
-        String location = StringUtils.isEmpty(request.getLocation())
-            ? GrpcConstants.DEFAULT_LOCATION : request.getLocation();
-
-        Optional<MonitoringLocation> locationOp = locationRepository
-            .findByLocationAndTenantId(location, tenantId);
-
-        if (locationOp.isPresent()) {
-            return locationOp.get();
-        }
-
-        MonitoringLocation monitoringLocation = new MonitoringLocation();
-        monitoringLocation.setLocation(location);
-        monitoringLocation.setTenantId(tenantId);
-        monitoringLocation = locationRepository.save(monitoringLocation);
-
-        // Send config updates asynchronously to Minion
-        configUpdateService.sendConfigUpdate(tenantId, location);
-
-        return monitoringLocation;
     }
 }

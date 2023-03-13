@@ -34,10 +34,10 @@ import io.grpc.protobuf.StatusProto;
 import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.opennms.horizon.inventory.dto.AzureCredentialCreateDTO;
-import org.opennms.horizon.inventory.dto.AzureCredentialDTO;
-import org.opennms.horizon.inventory.dto.AzureCredentialServiceGrpc;
-import org.opennms.horizon.inventory.service.AzureCredentialService;
+import org.opennms.horizon.inventory.dto.AzureActiveDiscoveryCreateDTO;
+import org.opennms.horizon.inventory.dto.AzureActiveDiscoveryDTO;
+import org.opennms.horizon.inventory.dto.AzureActiveDiscoveryServiceGrpc;
+import org.opennms.horizon.inventory.service.discovery.active.AzureActiveDiscoveryService;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
@@ -45,20 +45,20 @@ import java.util.Optional;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class AzureCredentialGrpcService extends AzureCredentialServiceGrpc.AzureCredentialServiceImplBase {
+public class AzureCredentialGrpcService extends AzureActiveDiscoveryServiceGrpc.AzureActiveDiscoveryServiceImplBase {
     private final TenantLookup tenantLookup;
-    private final AzureCredentialService service;
+    private final AzureActiveDiscoveryService service;
 
     @Override
-    public void createCredentials(AzureCredentialCreateDTO request, StreamObserver<AzureCredentialDTO> responseObserver) {
+    public void createDiscovery(AzureActiveDiscoveryCreateDTO request, StreamObserver<AzureActiveDiscoveryDTO> responseObserver) {
         Optional<String> tenantIdOptional = tenantLookup.lookupTenantId(Context.current());
 
         tenantIdOptional.ifPresentOrElse(tenantId -> {
 
             try {
-                AzureCredentialDTO credentials = service.createCredentials(tenantId, request);
+                AzureActiveDiscoveryDTO discovery = service.createActiveDiscovery(tenantId, request);
 
-                responseObserver.onNext(credentials);
+                responseObserver.onNext(discovery);
                 responseObserver.onCompleted();
 
             } catch (Exception e) {
@@ -76,6 +76,7 @@ public class AzureCredentialGrpcService extends AzureCredentialServiceGrpc.Azure
                 .setMessage("Tenant Id can't be empty")
                 .build();
             responseObserver.onError(StatusProto.toStatusRuntimeException(status));
-         });
+        });
+
     }
 }

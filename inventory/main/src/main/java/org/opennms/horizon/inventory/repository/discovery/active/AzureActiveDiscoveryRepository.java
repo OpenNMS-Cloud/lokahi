@@ -25,18 +25,17 @@
  *     http://www.opennms.org/
  *     http://www.opennms.com/
  *******************************************************************************/
-package org.opennms.horizon.inventory.repository;
+package org.opennms.horizon.inventory.repository.discovery.active;
 
-import org.opennms.horizon.inventory.model.AzureCredential;
+import org.opennms.horizon.inventory.model.discovery.active.AzureActiveDiscovery;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
 @Repository
-public interface AzureCredentialRepository extends JpaRepository<AzureCredential, Long> {
+public interface AzureActiveDiscoveryRepository extends JpaRepository<AzureActiveDiscovery, Long> {
+    Optional<AzureActiveDiscovery> findByTenantIdAndId(String tenantId, long id);
 
-    Optional<AzureCredential> findByTenantIdAndId(String tenantId, long id);
-
-    Optional<AzureCredential> findByTenantIdAndSubscriptionIdAndDirectoryIdAndClientId(String tenantId, String subscriptionId, String directoryId, String clientId);
+    Optional<AzureActiveDiscovery> findByTenantIdAndSubscriptionIdAndDirectoryIdAndClientId(String tenantId, String subscriptionId, String directoryId, String clientId);
 }

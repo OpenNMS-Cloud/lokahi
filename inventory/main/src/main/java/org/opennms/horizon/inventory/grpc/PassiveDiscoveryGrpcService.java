@@ -41,7 +41,7 @@ import org.opennms.horizon.inventory.dto.PassiveDiscoveryListDTO;
 import org.opennms.horizon.inventory.dto.PassiveDiscoveryServiceGrpc;
 import org.opennms.horizon.inventory.dto.PassiveDiscoveryToggleDTO;
 import org.opennms.horizon.inventory.dto.PassiveDiscoveryUpsertDTO;
-import org.opennms.horizon.inventory.service.PassiveDiscoveryService;
+import org.opennms.horizon.inventory.service.discovery.PassiveDiscoveryService;
 import org.springframework.stereotype.Component;
 
 import java.util.List;

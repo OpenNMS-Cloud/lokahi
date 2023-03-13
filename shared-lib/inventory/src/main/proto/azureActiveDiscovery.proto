@@ -35,7 +35,7 @@ package opennms.inventory;
 option java_multiple_files = true;
 option java_package = "org.opennms.horizon.inventory.dto";
 
-message AzureCredentialDTO {
+message AzureActiveDiscoveryDTO {
   int64 id = 1;
   string location = 2;
   string name = 3;
@@ -46,7 +46,7 @@ message AzureCredentialDTO {
   int64 create_time_msec = 9;
 }
 
-message AzureCredentialCreateDTO {
+message AzureActiveDiscoveryCreateDTO {
   string location = 1;
   string name = 2;
   string client_id = 3;
@@ -56,6 +56,6 @@ message AzureCredentialCreateDTO {
   repeated opennms.inventory.TagCreateDTO tags = 7;
 }
 
-service AzureCredentialService {
-  rpc createCredentials(AzureCredentialCreateDTO) returns (AzureCredentialDTO) {};
+service AzureActiveDiscoveryService {
+  rpc createDiscovery(AzureActiveDiscoveryCreateDTO) returns (AzureActiveDiscoveryDTO) {};
 }

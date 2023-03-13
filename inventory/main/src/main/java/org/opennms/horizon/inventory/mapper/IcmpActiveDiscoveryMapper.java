@@ -34,10 +34,10 @@ import org.mapstruct.Mapping;
 import org.mapstruct.NullValueCheckStrategy;
 import org.opennms.horizon.inventory.discovery.ActiveDiscoveryDTO;
 import org.opennms.horizon.inventory.discovery.ActiveDiscoveryRequest;
-import org.opennms.horizon.inventory.model.ActiveDiscoveryConfig;
+import org.opennms.horizon.inventory.model.discovery.active.IcmpActiveDiscovery;
 
 @Mapper(componentModel = "spring", collectionMappingStrategy = CollectionMappingStrategy.ADDER_PREFERRED)
-public interface ActiveDiscoveryMapper {
+public interface IcmpActiveDiscoveryMapper {
 
     @Mapping(target = "name", source = "configName")
     @Mapping(target = "ipAddressEntries", source = "ipAddressesList")
@@ -45,7 +45,7 @@ public interface ActiveDiscoveryMapper {
         nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
     @Mapping(target = "snmpPorts", source = "snmpConf.portsList",
         nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
-    ActiveDiscoveryConfig mapRequest(ActiveDiscoveryRequest discoveryConfigRequest);
+    IcmpActiveDiscovery dtoToModel(ActiveDiscoveryRequest discoveryConfigRequest);
 
     @Mapping(target = "configName", source = "name")
     @Mapping(target = "ipAddressesList", source = "ipAddressEntries")
@@ -53,7 +53,7 @@ public interface ActiveDiscoveryMapper {
         nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
     @Mapping(target = "snmpConf.portsList", source = "snmpPorts",
         nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
-    ActiveDiscoveryDTO modelToDto(ActiveDiscoveryConfig activeDiscoveryConfig);
+    ActiveDiscoveryDTO modelToDto(IcmpActiveDiscovery icmpActiveDiscovery);
 
     @Mapping(target = "name", source = "configName")
     @Mapping(target = "ipAddressEntries", source = "ipAddressesList")
@@ -61,6 +61,6 @@ public interface ActiveDiscoveryMapper {
         nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
     @Mapping(target = "snmpPorts", source = "snmpConf.portsList",
         nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
-    ActiveDiscoveryConfig dtoToModel(ActiveDiscoveryDTO discoveryConfigDTO);
+    IcmpActiveDiscovery dtoToModel(ActiveDiscoveryDTO discoveryConfigDTO);
 
 }

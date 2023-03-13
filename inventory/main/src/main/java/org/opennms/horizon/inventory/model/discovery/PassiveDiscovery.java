@@ -1,8 +1,8 @@
 /*******************************************************************************
  * This file is part of OpenNMS(R).
  *
- * Copyright (C) 2023 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
+ * Copyright (C) 2022 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
  *
@@ -26,27 +26,32 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.inventory.model;
+package org.opennms.horizon.inventory.model.discovery;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.ManyToMany;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
+import org.opennms.horizon.inventory.model.Tag;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
 @Setter
 @RequiredArgsConstructor
-@Entity(name = "active_discovery_config")
-public class ActiveDiscoveryConfig {
+@Entity
+public class PassiveDiscovery {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
@@ -56,26 +61,29 @@ public class ActiveDiscoveryConfig {
     private String tenantId;
 
     @NotNull
-    @Column(name = "location")
-    private String location;
+    @Column(name = "toggle")
+    private boolean toggle;
 
     @NotNull
     @Column(name = "name")
     private String name;
 
     @NotNull
-    @Column(name = "ip_address_entries", columnDefinition = "jsonb")
-    @JdbcTypeCode(SqlTypes.JSON)
-    private List<String> ipAddressEntries;
-
+    @Column(name = "location")
+    private String location;
 
     @NotNull
-    @Column(name = "snmp_community_strings", columnDefinition = "jsonb")
-    @JdbcTypeCode(SqlTypes.JSON)
-    private List<String> snmpCommunityStrings;
+    @Column(name = "create_time", columnDefinition = "TIMESTAMP")
+    private LocalDateTime createTime;
 
-    @NotNull
     @Column(name = "snmp_ports", columnDefinition = "jsonb")
     @JdbcTypeCode(SqlTypes.JSON)
     private List<Integer> snmpPorts;
+
+    @Column(name = "snmp_communities", columnDefinition = "jsonb")
+    @JdbcTypeCode(SqlTypes.JSON)
+    private List<String> snmpCommunities;
+
+    @ManyToMany(mappedBy = "passiveDiscoveries")
+    private List<Tag> tags = new ArrayList<>();
 }

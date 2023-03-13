@@ -37,40 +37,35 @@ import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import com.github.tomakehurst.wiremock.matching.EqualToPattern;
 import com.google.rpc.Code;
 import com.google.rpc.Status;
-import io.grpc.Metadata;
-import io.grpc.ServerCall;
-import io.grpc.ServerCallHandler;
 import io.grpc.StatusRuntimeException;
 import io.grpc.protobuf.StatusProto;
 import io.grpc.stub.MetadataUtils;
 import org.apache.http.HttpStatus;
 import org.hamcrest.Matchers;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.keycloak.common.VerificationException;
 import org.opennms.horizon.inventory.SpringContextTestInitializer;
-import org.opennms.horizon.inventory.dto.AzureCredentialCreateDTO;
-import org.opennms.horizon.inventory.dto.AzureCredentialDTO;
-import org.opennms.horizon.inventory.dto.AzureCredentialServiceGrpc;
-import org.opennms.horizon.inventory.grpc.taskset.TestTaskSetGrpcService;
-import org.opennms.horizon.inventory.model.AzureCredential;
-import org.opennms.horizon.inventory.repository.AzureCredentialRepository;
-import org.opennms.horizon.inventory.repository.MonitoringLocationRepository;
+import org.opennms.horizon.inventory.dto.AzureActiveDiscoveryCreateDTO;
+import org.opennms.horizon.inventory.dto.AzureActiveDiscoveryDTO;
+import org.opennms.horizon.inventory.dto.AzureActiveDiscoveryServiceGrpc;
+import org.opennms.horizon.inventory.dto.TagCreateDTO;
+import org.opennms.horizon.inventory.model.Tag;
+import org.opennms.horizon.inventory.model.discovery.active.ActiveDiscovery;
+import org.opennms.horizon.inventory.model.discovery.active.AzureActiveDiscovery;
+import org.opennms.horizon.inventory.repository.TagRepository;
+import org.opennms.horizon.inventory.repository.discovery.active.AzureActiveDiscoveryRepository;
 import org.opennms.horizon.shared.azure.http.dto.AzureHttpParams;
 import org.opennms.horizon.shared.azure.http.dto.error.AzureErrorDescription;
 import org.opennms.horizon.shared.azure.http.dto.error.AzureHttpError;
 import org.opennms.horizon.shared.azure.http.dto.login.AzureOAuthToken;
 import org.opennms.horizon.shared.azure.http.dto.subscription.AzureSubscription;
-import org.opennms.taskset.service.contract.TaskSetServiceGrpc;
+import org.opennms.taskset.contract.TaskType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -86,53 +81,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.opennms.horizon.shared.azure.http.AzureHttpClient.OAUTH2_TOKEN_ENDPOINT;
 import static org.opennms.horizon.shared.azure.http.AzureHttpClient.SUBSCRIPTION_ENDPOINT;
 
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-
-import org.apache.http.HttpStatus;
-import org.hamcrest.Matchers;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.keycloak.common.VerificationException;
-import org.opennms.horizon.inventory.SpringContextTestInitializer;
-import org.opennms.horizon.inventory.dto.AzureCredentialCreateDTO;
-import org.opennms.horizon.inventory.dto.AzureCredentialDTO;
-import org.opennms.horizon.inventory.dto.AzureCredentialServiceGrpc;
-import org.opennms.horizon.inventory.dto.TagCreateDTO;
-import org.opennms.horizon.inventory.model.AzureCredential;
-import org.opennms.horizon.inventory.model.Tag;
-import org.opennms.horizon.inventory.repository.AzureCredentialRepository;
-import org.opennms.horizon.inventory.repository.TagRepository;
-import org.opennms.horizon.shared.azure.http.dto.AzureHttpParams;
-import org.opennms.horizon.shared.azure.http.dto.error.AzureErrorDescription;
-import org.opennms.horizon.shared.azure.http.dto.error.AzureHttpError;
-import org.opennms.horizon.shared.azure.http.dto.login.AzureOAuthToken;
-import org.opennms.horizon.shared.azure.http.dto.subscription.AzureSubscription;
-import org.opennms.horizon.shared.constants.GrpcConstants;
-import org.opennms.taskset.contract.TaskType;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ContextConfiguration;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.PropertyNamingStrategies;
-import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder;
-import com.github.tomakehurst.wiremock.common.Json;
-import com.github.tomakehurst.wiremock.junit.WireMockRule;
-import com.github.tomakehurst.wiremock.matching.EqualToPattern;
-import com.google.rpc.Code;
-import com.google.rpc.Status;
-
-import io.grpc.Context;
-import io.grpc.StatusRuntimeException;
-import io.grpc.protobuf.StatusProto;
-import io.grpc.stub.MetadataUtils;
-
 @SpringBootTest
 @ContextConfiguration(initializers = {SpringContextTestInitializer.class})
-class AzureCredentialGrpcItTest extends GrpcTestBase {
+class AzureActiveDiscoveryGrpcItTest extends GrpcTestBase {
     private static final String TEST_NAME = "name";
     private static final String TEST_CLIENT_ID = "client-id";
     private static final String TEST_CLIENT_SECRET = "client-secret";
@@ -141,10 +92,10 @@ class AzureCredentialGrpcItTest extends GrpcTestBase {
     private static final String DEFAULT_LOCATION = "Default";
     private static final String TEST_TAG_NAME_1 = "tag-name-1";
 
-    private AzureCredentialServiceGrpc.AzureCredentialServiceBlockingStub serviceStub;
+    private AzureActiveDiscoveryServiceGrpc.AzureActiveDiscoveryServiceBlockingStub serviceStub;
 
     @Autowired
-    private AzureCredentialRepository azureCredentialRepository;
+    private AzureActiveDiscoveryRepository repository;
 
     @Autowired
     private AzureHttpParams params;
@@ -157,7 +108,7 @@ class AzureCredentialGrpcItTest extends GrpcTestBase {
 
     private final ObjectMapper snakeCaseMapper;
 
-    public AzureCredentialGrpcItTest() {
+    public AzureActiveDiscoveryGrpcItTest() {
         this.snakeCaseMapper = new ObjectMapper();
         this.snakeCaseMapper.setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
     }
@@ -166,7 +117,7 @@ class AzureCredentialGrpcItTest extends GrpcTestBase {
     public void prepare() throws VerificationException {
         prepareTestGrpc();
         prepareServer();
-        serviceStub = AzureCredentialServiceGrpc.newBlockingStub(channel);
+        serviceStub = AzureActiveDiscoveryServiceGrpc.newBlockingStub(channel);
         wireMock.start();
     }
 
@@ -184,7 +135,7 @@ class AzureCredentialGrpcItTest extends GrpcTestBase {
 
         TagCreateDTO tagCreateDto1 = TagCreateDTO.newBuilder().setName(TEST_TAG_NAME_1).build();
 
-        AzureCredentialCreateDTO createDTO = AzureCredentialCreateDTO.newBuilder()
+        AzureActiveDiscoveryCreateDTO createDTO = AzureActiveDiscoveryCreateDTO.newBuilder()
             .setLocation(DEFAULT_LOCATION)
             .setName(TEST_NAME)
             .setClientId(TEST_CLIENT_ID)
@@ -194,13 +145,13 @@ class AzureCredentialGrpcItTest extends GrpcTestBase {
             .addAllTags(List.of(tagCreateDto1))
             .build();
 
-        AzureCredentialDTO credentials = serviceStub.withInterceptors(MetadataUtils
+        AzureActiveDiscoveryDTO credentials = serviceStub.withInterceptors(MetadataUtils
                 .newAttachHeadersInterceptor(createAuthHeader(authHeader)))
-            .createCredentials(createDTO);
+            .createDiscovery(createDTO);
 
         assertTrue(credentials.getId() > 0);
 
-        await().atMost(10, TimeUnit.SECONDS).until( () ->  testGrpcService.getTaskDefinitions(DEFAULT_LOCATION).stream()
+        await().atMost(10, TimeUnit.SECONDS).until(() -> testGrpcService.getTaskDefinitions(DEFAULT_LOCATION).stream()
             .filter(taskDef -> taskDef.getType().equals(TaskType.SCANNER)).toList().size(), Matchers.is(1));
 
         assertEquals(createDTO.getClientId(), credentials.getClientId());
@@ -208,29 +159,29 @@ class AzureCredentialGrpcItTest extends GrpcTestBase {
         assertEquals(createDTO.getDirectoryId(), credentials.getDirectoryId());
         assertTrue(credentials.getCreateTimeMsec() > 0L);
 
-        List<AzureCredential> list = azureCredentialRepository.findAll();
+        List<AzureActiveDiscovery> list = repository.findAll();
         assertEquals(1, list.size());
 
-        AzureCredential azureCredential = list.get(0);
-        assertTrue(azureCredential.getId() > 0);
-        assertNotNull(azureCredential.getMonitoringLocation());
-        assertEquals(createDTO.getName(), azureCredential.getName());
-        assertEquals(createDTO.getLocation(), azureCredential.getMonitoringLocation().getLocation());
-        assertEquals(createDTO.getClientId(), azureCredential.getClientId());
-        assertEquals(createDTO.getClientSecret(), azureCredential.getClientSecret());
-        assertEquals(createDTO.getSubscriptionId(), azureCredential.getSubscriptionId());
-        assertEquals(createDTO.getDirectoryId(), azureCredential.getDirectoryId());
-        assertNotNull(azureCredential.getCreateTime());
+        AzureActiveDiscovery discovery = list.get(0);
+        assertTrue(discovery.getId() > 0);
+        assertNotNull(discovery.getLocation());
+        assertEquals(createDTO.getName(), discovery.getName());
+        assertEquals(createDTO.getLocation(), discovery.getLocation());
+        assertEquals(createDTO.getClientId(), discovery.getClientId());
+        assertEquals(createDTO.getClientSecret(), discovery.getClientSecret());
+        assertEquals(createDTO.getSubscriptionId(), discovery.getSubscriptionId());
+        assertEquals(createDTO.getDirectoryId(), discovery.getDirectoryId());
+        assertNotNull(discovery.getCreateTime());
 
         List<Tag> allTags = tagRepository.findAll();
         assertEquals(1, allTags.size());
 
         Tag tag = allTags.get(0);
         assertEquals(tagCreateDto1.getName(), tag.getName());
-        assertEquals(1, tag.getAzureCredentials().size());
+        assertEquals(1, tag.getActiveDiscoveries().size());
 
-        AzureCredential credential = tag.getAzureCredentials().get(0);
-        assertEquals(azureCredential.getId(), credential.getId());
+        ActiveDiscovery activeDiscovery = tag.getActiveDiscoveries().get(0);
+        assertEquals(discovery.getId(), activeDiscovery.getId());
     }
 
     @Test
@@ -238,7 +189,7 @@ class AzureCredentialGrpcItTest extends GrpcTestBase {
         mockAzureLogin();
         mockAzureGetSubscriptionFailed();
 
-        AzureCredentialCreateDTO createDTO = AzureCredentialCreateDTO.newBuilder()
+        AzureActiveDiscoveryCreateDTO createDTO = AzureActiveDiscoveryCreateDTO.newBuilder()
             .setName(TEST_NAME)
             .setLocation(DEFAULT_LOCATION)
             .setClientId(TEST_CLIENT_ID)
@@ -249,7 +200,7 @@ class AzureCredentialGrpcItTest extends GrpcTestBase {
 
         StatusRuntimeException exception = assertThrows(StatusRuntimeException.class, () -> serviceStub.withInterceptors(MetadataUtils
                 .newAttachHeadersInterceptor(createAuthHeader(authHeader)))
-            .createCredentials(createDTO));
+            .createDiscovery(createDTO));
         Status status = StatusProto.fromThrowable(exception);
         assertEquals("Code: Message", status.getMessage());
         assertThat(status.getCode()).isEqualTo(Code.INTERNAL_VALUE);
@@ -261,7 +212,7 @@ class AzureCredentialGrpcItTest extends GrpcTestBase {
         mockAzureLogin();
         mockAzureGetSubscription(false);
 
-        AzureCredentialCreateDTO createDTO = AzureCredentialCreateDTO.newBuilder()
+        AzureActiveDiscoveryCreateDTO createDTO = AzureActiveDiscoveryCreateDTO.newBuilder()
             .setName(TEST_NAME)
             .setLocation(DEFAULT_LOCATION)
             .setClientId(TEST_CLIENT_ID)
@@ -272,7 +223,7 @@ class AzureCredentialGrpcItTest extends GrpcTestBase {
 
         StatusRuntimeException exception = assertThrows(StatusRuntimeException.class, () -> serviceStub.withInterceptors(MetadataUtils
                 .newAttachHeadersInterceptor(createAuthHeader(authHeader)))
-            .createCredentials(createDTO));
+            .createDiscovery(createDTO));
         Status status = StatusProto.fromThrowable(exception);
         assertThat(status.getCode()).isEqualTo(Code.INTERNAL_VALUE);
         assertEquals(0, testGrpcService.getRequests().size());
@@ -283,7 +234,7 @@ class AzureCredentialGrpcItTest extends GrpcTestBase {
         mockAzureLogin();
         mockAzureGetSubscription(true);
 
-        AzureCredentialCreateDTO createDTO = AzureCredentialCreateDTO.newBuilder()
+        AzureActiveDiscoveryCreateDTO createDTO = AzureActiveDiscoveryCreateDTO.newBuilder()
             .setName(TEST_NAME)
             .setLocation(DEFAULT_LOCATION)
             .setClientId(TEST_CLIENT_ID)
@@ -294,20 +245,20 @@ class AzureCredentialGrpcItTest extends GrpcTestBase {
 
         serviceStub.withInterceptors(MetadataUtils
                 .newAttachHeadersInterceptor(createAuthHeader(authHeader)))
-            .createCredentials(createDTO);
+            .createDiscovery(createDTO);
 
         StatusRuntimeException exception = assertThrows(StatusRuntimeException.class, () -> serviceStub.withInterceptors(MetadataUtils
                 .newAttachHeadersInterceptor(createAuthHeader(authHeader)))
-            .createCredentials(createDTO));
+            .createDiscovery(createDTO));
         Status status = StatusProto.fromThrowable(exception);
         assertThat(status.getCode()).isEqualTo(Code.INTERNAL_VALUE);
-        assertThat(exception.getMessage()).contains("Azure discovery already exists with the provided subscription, directory and client ID");
+        assertThat(exception.getMessage()).contains("Azure Discovery already exists with the provided subscription, directory and client ID");
     }
 
     @Test
     void testCreateAzureCredentialsWithoutTenantId() {
 
-        AzureCredentialCreateDTO createDTO = AzureCredentialCreateDTO.newBuilder()
+        AzureActiveDiscoveryCreateDTO createDTO = AzureActiveDiscoveryCreateDTO.newBuilder()
             .setName(TEST_NAME)
             .setLocation(DEFAULT_LOCATION)
             .setClientId(TEST_CLIENT_ID)
@@ -318,7 +269,7 @@ class AzureCredentialGrpcItTest extends GrpcTestBase {
 
         StatusRuntimeException exception = assertThrows(StatusRuntimeException.class, () ->
             serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(headerWithoutTenant)))
-                .createCredentials(createDTO));
+                .createDiscovery(createDTO));
         assertThat(exception.getStatus().getCode()).isEqualTo(io.grpc.Status.Code.UNAUTHENTICATED);
         assertThat(exception.getMessage()).contains("Missing tenant id");
     }

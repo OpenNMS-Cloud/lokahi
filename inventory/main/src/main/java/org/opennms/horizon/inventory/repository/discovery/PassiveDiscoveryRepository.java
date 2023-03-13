@@ -1,8 +1,8 @@
 /*******************************************************************************
  * This file is part of OpenNMS(R).
  *
- * Copyright (C) 2023 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
+ * Copyright (C) 2022 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
  *
@@ -26,9 +26,9 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.inventory.repository;
+package org.opennms.horizon.inventory.repository.discovery;
 
-import org.opennms.horizon.inventory.model.ActiveDiscoveryConfig;
+import org.opennms.horizon.inventory.model.discovery.PassiveDiscovery;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -36,16 +36,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface ActiveDiscoveryRepository extends JpaRepository<ActiveDiscoveryConfig, Long> {
-
-    List<ActiveDiscoveryConfig> findByLocationAndTenantId(String location, String tenantId);
-
-    Optional<ActiveDiscoveryConfig> findByLocationAndName(String location, String name);
-
-    List<ActiveDiscoveryConfig> findByNameAndTenantId(String name, String tenantId);
-
-    List<ActiveDiscoveryConfig> findByTenantId(String tenantId);
-
-    Optional<ActiveDiscoveryConfig> findByIdAndTenantId(long id, String tenantId);
-
+public interface PassiveDiscoveryRepository extends JpaRepository<PassiveDiscovery, Long> {
+    List<PassiveDiscovery> findByTenantId(String tenantId);
+    Optional<PassiveDiscovery> findByTenantIdAndId(String tenantId, long id);
 }

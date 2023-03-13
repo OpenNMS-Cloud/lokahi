@@ -39,18 +39,17 @@ import org.opennms.horizon.azure.api.AzureScanResponse;
 import org.opennms.horizon.inventory.SpringContextTestInitializer;
 import org.opennms.horizon.inventory.dto.NodeCreateDTO;
 import org.opennms.horizon.inventory.grpc.GrpcTestBase;
-import org.opennms.horizon.inventory.model.AzureCredential;
 import org.opennms.horizon.inventory.model.IpInterface;
-import org.opennms.horizon.inventory.model.MonitoringLocation;
 import org.opennms.horizon.inventory.model.Node;
 import org.opennms.horizon.inventory.model.SnmpInterface;
 import org.opennms.horizon.inventory.model.Tag;
-import org.opennms.horizon.inventory.repository.AzureCredentialRepository;
+import org.opennms.horizon.inventory.model.discovery.active.AzureActiveDiscovery;
 import org.opennms.horizon.inventory.repository.IpInterfaceRepository;
 import org.opennms.horizon.inventory.repository.MonitoringLocationRepository;
 import org.opennms.horizon.inventory.repository.NodeRepository;
 import org.opennms.horizon.inventory.repository.SnmpInterfaceRepository;
 import org.opennms.horizon.inventory.repository.TagRepository;
+import org.opennms.horizon.inventory.repository.discovery.active.AzureActiveDiscoveryRepository;
 import org.opennms.horizon.inventory.service.NodeService;
 import org.opennms.horizon.shared.utils.InetAddressUtils;
 import org.opennms.node.scan.contract.IpInterfaceResult;
@@ -92,7 +91,7 @@ class ScannerResponseServiceIntTest extends GrpcTestBase {
     private MonitoringLocationRepository locationRepository;
 
     @Autowired
-    private AzureCredentialRepository credentialRepository;
+    private AzureActiveDiscoveryRepository azureActiveDiscoveryRepository;
 
     @Autowired
     private NodeRepository nodeRepository;
@@ -120,18 +119,19 @@ class ScannerResponseServiceIntTest extends GrpcTestBase {
         tagRepository.deleteAll();
         ipInterfaceRepository.deleteAll();
         nodeRepository.deleteAll();
-        credentialRepository.deleteAll();
+        azureActiveDiscoveryRepository.deleteAll();
         locationRepository.deleteAll();
     }
+
     @Test
     void testAzureAccept() throws Exception {
-        AzureCredential credential = createAzureCredential();
+        AzureActiveDiscovery discovery = createAzureCredential();
 
         AzureScanItem scanItem = AzureScanItem.newBuilder()
             .setId("/subscriptions/sub-id/resourceGroups/resource-group/providers/Microsoft.Compute/virtualMachines/vm-name")
             .setName("vm-name")
             .setResourceGroup("resource-group")
-            .setCredentialId(credential.getId())
+            .setDiscoveryId(discovery.getId())
             .build();
 
         List<AzureScanItem> azureScanItems = Collections.singletonList(scanItem);
@@ -194,6 +194,7 @@ class ScannerResponseServiceIntTest extends GrpcTestBase {
             .forEach(i -> assertSnmpInterfaces(snmpInterfaceList.get(i), result.getSnmpInterfaces(i)));
 
     }
+
     private Node createNode(String ipAddress) {
         NodeCreateDTO createDTO = NodeCreateDTO.newBuilder()
             .setLabel("test-node")
@@ -221,8 +222,8 @@ class ScannerResponseServiceIntTest extends GrpcTestBase {
             .setSystemContact("admin@opennms.com")
             .build();
         IpInterfaceResult ipIf1 = IpInterfaceResult.newBuilder()
-             .setIpAddress(ipAddress)
-             .setIpHostName("hostname1")
+            .setIpAddress(ipAddress)
+            .setIpHostName("hostname1")
             .setNetmask("255.255.255.0")
             .setIfIndex(ifIndex)
             .build();
@@ -242,7 +243,7 @@ class ScannerResponseServiceIntTest extends GrpcTestBase {
             .setPhysicalAddr("0sdfasdf")
             .build();
         SnmpInterfaceResult snmpIf2 = SnmpInterfaceResult.newBuilder()
-            .setIfIndex(ifIndex+2)
+            .setIfIndex(ifIndex + 2)
             .setIfDescr("SNMP Interface2")
             .setIfName("testIf2")
             .setIfSpeed(2000L)
@@ -261,35 +262,30 @@ class ScannerResponseServiceIntTest extends GrpcTestBase {
     }
 
     @Transactional
-    public AzureCredential createAzureCredential() {
+    public AzureActiveDiscovery createAzureCredential() {
 
-        MonitoringLocation location = new MonitoringLocation();
-        location.setLocation(TEST_LOCATION);
-        location.setTenantId(TEST_TENANT_ID);
-        location = locationRepository.save(location);
-
-        AzureCredential credential = new AzureCredential();
-        credential.setTenantId(TEST_TENANT_ID);
-        credential.setName("name");
-        credential.setClientId("client-id");
-        credential.setClientSecret("client-secret");
-        credential.setDirectoryId("directory-id");
-        credential.setSubscriptionId("sub-id");
-        credential.setCreateTime(LocalDateTime.now());
-        credential.setMonitoringLocation(location);
-        credential = credentialRepository.save(credential);
+        AzureActiveDiscovery discovery = new AzureActiveDiscovery();
+        discovery.setTenantId(TEST_TENANT_ID);
+        discovery.setName("name");
+        discovery.setClientId("client-id");
+        discovery.setClientSecret("client-secret");
+        discovery.setDirectoryId("directory-id");
+        discovery.setSubscriptionId("sub-id");
+        discovery.setCreateTime(LocalDateTime.now());
+        discovery.setLocation(TEST_LOCATION);
+        discovery = azureActiveDiscoveryRepository.save(discovery);
 
         Tag tag = new Tag();
         tag.setTenantId(TEST_TENANT_ID);
         tag.setName("tag-name");
-        tag.getAzureCredentials().add(credential);
+        tag.getActiveDiscoveries().add(discovery);
         tagRepository.save(tag);
 
-        return credential;
+        return discovery;
     }
 
     private void assertNodeSystemGroup(Node node, NodeInfoResult nodeInfo) {
-        if(nodeInfo != null) {
+        if (nodeInfo != null) {
             assertThat(node)
                 .extracting(Node::getObjectId,
                     Node::getSystemName,
@@ -308,12 +304,12 @@ class ScannerResponseServiceIntTest extends GrpcTestBase {
                     Node::getSystemDescr,
                     Node::getSystemLocation,
                     Node::getSystemContact)
-                .containsExactly(null,null, null, null, null);
+                .containsExactly(null, null, null, null, null);
         }
     }
 
     private void assertIpInterface(IpInterface ipInterface, IpInterfaceResult scanResult) {
-        if(scanResult != null) {
+        if (scanResult != null) {
             assertThat(ipInterface)
                 .extracting(ipIf -> ipIf.getIpAddress().getHostAddress(), IpInterface::getHostname, IpInterface::getNetmask)
                 .containsExactly(scanResult.getIpAddress(), scanResult.getIpHostName(), scanResult.getNetmask());
@@ -324,8 +320,8 @@ class ScannerResponseServiceIntTest extends GrpcTestBase {
         }
     }
 
-   private void assertSnmpInterfaces(SnmpInterface snmpIf, SnmpInterfaceResult result) {
-        if(result != null) {
+    private void assertSnmpInterfaces(SnmpInterface snmpIf, SnmpInterfaceResult result) {
+        if (result != null) {
             assertThat(snmpIf)
                 .extracting(SnmpInterface::getIfIndex,
                     SnmpInterface::getIfName,
@@ -355,7 +351,7 @@ class ScannerResponseServiceIntTest extends GrpcTestBase {
                     SnmpInterface::getIfOperatorStatus,
                     SnmpInterface::getIfAlias,
                     SnmpInterface::getPhysicalAddr)
-                .containsExactly(null,null,0,0L,0,0,null,null);
+                .containsExactly(null, null, 0, 0L, 0, 0, null, null);
         }
     }
 }

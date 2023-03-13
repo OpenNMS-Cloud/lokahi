@@ -30,7 +30,6 @@ package org.opennms.horizon.inventory.grpc;
 
 import com.google.protobuf.Empty;
 import com.google.protobuf.Int64Value;
-import io.grpc.Context;
 import io.grpc.stub.MetadataUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -42,13 +41,8 @@ import org.opennms.horizon.inventory.discovery.ActiveDiscoveryList;
 import org.opennms.horizon.inventory.discovery.ActiveDiscoveryOperationGrpc;
 import org.opennms.horizon.inventory.discovery.ActiveDiscoveryRequest;
 import org.opennms.horizon.inventory.discovery.SNMPConfigDTO;
-import org.opennms.horizon.inventory.mapper.ActiveDiscoveryMapper;
-import org.opennms.horizon.inventory.repository.ActiveDiscoveryRepository;
-import org.opennms.horizon.shared.constants.GrpcConstants;
-import org.opennms.horizon.inventory.dto.ConfigKey;
-import org.opennms.horizon.inventory.model.Configuration;
-import org.opennms.horizon.inventory.repository.ConfigurationRepository;
-import org.opennms.horizon.shared.protobuf.util.ProtobufUtil;
+import org.opennms.horizon.inventory.mapper.IcmpActiveDiscoveryMapper;
+import org.opennms.horizon.inventory.repository.discovery.active.IcmpActiveDiscoveryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
@@ -59,11 +53,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @ContextConfiguration(initializers = {SpringContextTestInitializer.class})
-public class ActiveDiscoveryGrpcItTest extends GrpcTestBase {
+public class IcmpActiveDiscoveryGrpcItTest extends GrpcTestBase {
     @Autowired
-    private ActiveDiscoveryRepository configRepo;
+    private IcmpActiveDiscoveryRepository repository;
     @Autowired
-    private ActiveDiscoveryMapper configMapper;
+    private IcmpActiveDiscoveryMapper mapper;
     private ActiveDiscoveryOperationGrpc.ActiveDiscoveryOperationBlockingStub serviceStub;
     private final String configName = "test-config";
     private final String location = "test-location";
@@ -113,9 +107,9 @@ public class ActiveDiscoveryGrpcItTest extends GrpcTestBase {
             .setConfigName(configName)
             .addAllIpAddresses(List.of("127.0.0.1"))
             .setSnmpConf(SNMPConfigDTO.newBuilder().addAllReadCommunity(List.of("test-community")).build()).build();
-        var model = configMapper.dtoToModel(tempConfig);
+        var model = mapper.dtoToModel(tempConfig);
         model.setTenantId(tenantId);
-        var activeDiscovery = configRepo.save(model);
+        var activeDiscovery = repository.save(model);
         ActiveDiscoveryDTO discoveryConfig = serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader)))
             .getDiscoveryConfigById(Int64Value.of(activeDiscovery.getId()));
 
@@ -135,11 +129,11 @@ public class ActiveDiscoveryGrpcItTest extends GrpcTestBase {
             .setConfigName("new-config")
             .addAllIpAddresses(List.of("127.0.0.2"))
             .setSnmpConf(SNMPConfigDTO.newBuilder().addAllReadCommunity(List.of("test-community2")).build()).build();
-        var config1 = configMapper.dtoToModel(tempConfig);
-        var config2 = configMapper.dtoToModel(tempConfig2);
+        var config1 = mapper.dtoToModel(tempConfig);
+        var config2 = mapper.dtoToModel(tempConfig2);
         config1.setTenantId(tenantId);
         config2.setTenantId(tenantId);
-        configRepo.saveAll(List.of(config1, config2));
+        repository.saveAll(List.of(config1, config2));
 
         ActiveDiscoveryList result = serviceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader)))
             .listDiscoveryConfig(Empty.getDefaultInstance());

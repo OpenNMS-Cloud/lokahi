@@ -41,6 +41,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
 import jakarta.validation.constraints.NotNull;
+import org.opennms.horizon.inventory.model.discovery.active.ActiveDiscovery;
+import org.opennms.horizon.inventory.model.discovery.PassiveDiscovery;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -72,10 +74,10 @@ public class Tag {
 
     @ManyToMany
     @JoinTable(
-        name = "azure_credential_tag",
+        name = "active_discovery_tag",
         joinColumns = @JoinColumn(name = "tag_id"),
-        inverseJoinColumns = @JoinColumn(name = "azure_credential_id"))
-    private List<AzureCredential> azureCredentials = new ArrayList<>();
+        inverseJoinColumns = @JoinColumn(name = "active_discovery_id"))
+    private List<ActiveDiscovery> activeDiscoveries = new ArrayList<>();
 
     @ManyToMany
     @JoinTable(

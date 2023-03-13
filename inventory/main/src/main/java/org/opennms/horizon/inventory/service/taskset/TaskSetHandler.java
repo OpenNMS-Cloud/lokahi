@@ -32,8 +32,8 @@ package org.opennms.horizon.inventory.service.taskset;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.opennms.horizon.azure.api.AzureScanItem;
-import org.opennms.horizon.inventory.model.AzureCredential;
 import org.opennms.horizon.inventory.model.IpInterface;
+import org.opennms.horizon.inventory.model.discovery.active.AzureActiveDiscovery;
 import org.opennms.horizon.inventory.service.taskset.publisher.TaskSetPublisher;
 import org.opennms.taskset.contract.MonitorType;
 import org.opennms.taskset.contract.TaskDefinition;
@@ -59,11 +59,11 @@ public class TaskSetHandler {
         }
     }
 
-    public void sendAzureMonitorTasks(AzureCredential credential, AzureScanItem item, String ipAddress, long nodeId) {
-        String tenantId = credential.getTenantId();
-        String location = credential.getMonitoringLocation().getLocation();
+    public void sendAzureMonitorTasks(AzureActiveDiscovery discovery, AzureScanItem item, String ipAddress, long nodeId) {
+        String tenantId = discovery.getTenantId();
+        String location = discovery.getLocation();
 
-        TaskDefinition task = monitorTaskSetService.addAzureMonitorTask(credential, item, ipAddress, nodeId);
+        TaskDefinition task = monitorTaskSetService.addAzureMonitorTask(discovery, item, ipAddress, nodeId);
         taskSetPublisher.publishNewTasks(tenantId, location, Arrays.asList(task));
     }
 
@@ -75,11 +75,11 @@ public class TaskSetHandler {
         }
     }
 
-    public void sendAzureCollectorTasks(AzureCredential credential, AzureScanItem item, String ipAddress, long nodeId) {
-        String tenantId = credential.getTenantId();
-        String location = credential.getMonitoringLocation().getLocation();
+    public void sendAzureCollectorTasks(AzureActiveDiscovery discovery, AzureScanItem item, String ipAddress, long nodeId) {
+        String tenantId = discovery.getTenantId();
+        String location = discovery.getLocation();
 
-        TaskDefinition task = collectorTaskSetService.addAzureCollectorTask(credential, item, ipAddress, nodeId);
+        TaskDefinition task = collectorTaskSetService.addAzureCollectorTask(discovery, item, ipAddress, nodeId);
         taskSetPublisher.publishNewTasks(tenantId, location, Arrays.asList(task));
     }
 

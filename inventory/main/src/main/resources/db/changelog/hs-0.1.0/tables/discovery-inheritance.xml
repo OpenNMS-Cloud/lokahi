@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+
+    <changeSet author="tbigg" id="0.1.0-active-discovery-inheritance">
+
+        <dropTable tableName="azure_credential_tag"/>
+        <dropTable tableName="azure_credential"/>
+        <dropTable tableName="active_discovery_config"/>
+
+        <createTable tableName="active_discovery">
+
+            <column name="id" type="BIGINT"/>
+
+            <column name="tenant_id" type="text">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="name" type="text">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="location" type="text">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="create_time" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+
+        </createTable>
+
+        <addPrimaryKey tableName="active_discovery" columnNames="id" constraintName="pk_active_discovery_id"/>
+        <createSequence sequenceName="active_discovery_seq" incrementBy="50"/>
+
+        <createTable tableName="azure_active_discovery">
+
+            <column name="id" type="BIGINT"/>
+
+            <column name="client_id" type="text">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="client_secret" type="text">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="subscription_id" type="text">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="directory_id" type="text">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint constraintName="fk_azure_active_discovery_active_discovery_id" onDelete="CASCADE"
+                                 baseTableName="azure_active_discovery" baseColumnNames="id"
+                                 referencedTableName="active_discovery" referencedColumnNames="id"/>
+
+        <createTable tableName="icmp_active_discovery">
+
+            <column name="id" type="BIGINT"/>
+
+            <column name="ip_address_entries" type="jsonb">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="snmp_community_strings" type="jsonb">
+            </column>
+
+            <column name="snmp_ports" type="jsonb">
+            </column>
+
+        </createTable>
+
+        <addForeignKeyConstraint constraintName="fk_icmp_active_discovery_active_discovery_id" onDelete="CASCADE"
+                                 baseTableName="icmp_active_discovery" baseColumnNames="id"
+                                 referencedTableName="active_discovery" referencedColumnNames="id"/>
+
+        <createTable tableName="active_discovery_tag">
+            <column name="active_discovery_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="tag_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint constraintName="fk_active_discovery_tag_active_discovery_id" onDelete="CASCADE"
+                                 baseTableName="active_discovery_tag" baseColumnNames="active_discovery_id"
+                                 referencedTableName="active_discovery" referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint constraintName="fk_active_discovery_tag_tag_id" onDelete="CASCADE"
+                                 baseTableName="active_discovery_tag" baseColumnNames="tag_id"
+                                 referencedTableName="tag" referencedColumnNames="id"/>
+
+    </changeSet>
+</databaseChangeLog>

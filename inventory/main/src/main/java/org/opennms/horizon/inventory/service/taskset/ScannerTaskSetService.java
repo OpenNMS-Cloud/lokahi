@@ -35,8 +35,8 @@ import org.opennms.azure.contract.AzureScanRequest;
 import org.opennms.horizon.inventory.dto.IpInterfaceDTO;
 import org.opennms.horizon.inventory.dto.NodeDTO;
 import org.opennms.horizon.inventory.mapper.NodeMapper;
-import org.opennms.horizon.inventory.model.AzureCredential;
 import org.opennms.horizon.inventory.model.Node;
+import org.opennms.horizon.inventory.model.discovery.active.AzureActiveDiscovery;
 import org.opennms.horizon.inventory.service.taskset.publisher.TaskSetPublisher;
 import org.opennms.horizon.shared.utils.InetAddressUtils;
 import org.opennms.horizon.snmp.api.SnmpConfiguration;
@@ -79,8 +79,8 @@ public class ScannerTaskSetService {
     private final TaskSetPublisher taskSetPublisher;
     private final NodeMapper nodeMapper;
 
-    public void sendAzureScannerTaskAsync(AzureCredential credential) {
-        executorService.execute(() -> sendAzureScannerTask(credential));
+    public void sendAzureScannerTaskAsync(AzureActiveDiscovery discovery) {
+        executorService.execute(() -> sendAzureScannerTask(discovery));
     }
 
     public void sendNodeScannerTask(List<NodeDTO> nodes, String location, String tenantId) {
@@ -164,28 +164,28 @@ public class ScannerTaskSetService {
             .build());
     }
 
-    private void sendAzureScannerTask(AzureCredential credential) {
-        String tenantId = credential.getTenantId();
-        String location = credential.getMonitoringLocation().getLocation();
+    private void sendAzureScannerTask(AzureActiveDiscovery discovery) {
+        String tenantId = discovery.getTenantId();
+        String location = discovery.getLocation();
 
-        TaskDefinition task = addAzureScannerTask(credential);
+        TaskDefinition task = addAzureScannerTask(discovery);
 
         taskSetPublisher.publishNewTasks(tenantId, location, List.of(task));
     }
 
-    private TaskDefinition addAzureScannerTask(AzureCredential credential) {
+    private TaskDefinition addAzureScannerTask(AzureActiveDiscovery discovery) {
         Any configuration =
             Any.pack(AzureScanRequest.newBuilder()
-                .setCredentialId(credential.getId())
-                .setClientId(credential.getClientId())
-                .setClientSecret(credential.getClientSecret())
-                .setSubscriptionId(credential.getSubscriptionId())
-                .setDirectoryId(credential.getDirectoryId())
+                .setDiscoveryId(discovery.getId())
+                .setClientId(discovery.getClientId())
+                .setClientSecret(discovery.getClientSecret())
+                .setSubscriptionId(discovery.getSubscriptionId())
+                .setDirectoryId(discovery.getDirectoryId())
                 .setTimeoutMs(TaskUtils.AZURE_DEFAULT_TIMEOUT_MS)
                 .setRetries(TaskUtils.AZURE_DEFAULT_RETRIES)
                 .build());
 
-        String taskId = identityForAzureTask("azure-scanner", String.valueOf(credential.getId()));
+        String taskId = identityForAzureTask("azure-scanner", String.valueOf(discovery.getId()));
         return TaskDefinition.newBuilder()
             .setType(TaskType.SCANNER)
             .setPluginName("AZUREScanner")

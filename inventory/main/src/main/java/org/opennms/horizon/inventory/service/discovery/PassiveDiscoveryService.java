@@ -26,7 +26,7 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.inventory.service;
+package org.opennms.horizon.inventory.service.discovery;
 
 import lombok.RequiredArgsConstructor;
 import org.opennms.horizon.inventory.dto.PassiveDiscoveryDTO;
@@ -35,8 +35,10 @@ import org.opennms.horizon.inventory.dto.PassiveDiscoveryUpsertDTO;
 import org.opennms.horizon.inventory.dto.TagCreateListDTO;
 import org.opennms.horizon.inventory.exception.InventoryRuntimeException;
 import org.opennms.horizon.inventory.mapper.PassiveDiscoveryMapper;
-import org.opennms.horizon.inventory.model.PassiveDiscovery;
-import org.opennms.horizon.inventory.repository.PassiveDiscoveryRepository;
+import org.opennms.horizon.inventory.model.discovery.PassiveDiscovery;
+import org.opennms.horizon.inventory.repository.discovery.PassiveDiscoveryRepository;
+import org.opennms.horizon.inventory.service.Constants;
+import org.opennms.horizon.inventory.service.TagService;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 

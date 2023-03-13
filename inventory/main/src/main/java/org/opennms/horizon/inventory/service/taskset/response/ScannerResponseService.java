@@ -37,10 +37,10 @@ import org.opennms.horizon.azure.api.AzureScanResponse;
 import org.opennms.horizon.inventory.dto.NodeCreateDTO;
 import org.opennms.horizon.inventory.dto.TagCreateDTO;
 import org.opennms.horizon.inventory.dto.TagCreateListDTO;
-import org.opennms.horizon.inventory.model.AzureCredential;
 import org.opennms.horizon.inventory.model.Node;
 import org.opennms.horizon.inventory.model.SnmpInterface;
-import org.opennms.horizon.inventory.repository.AzureCredentialRepository;
+import org.opennms.horizon.inventory.model.discovery.active.AzureActiveDiscovery;
+import org.opennms.horizon.inventory.repository.discovery.active.AzureActiveDiscoveryRepository;
 import org.opennms.horizon.inventory.repository.NodeRepository;
 import org.opennms.horizon.inventory.service.IpInterfaceService;
 import org.opennms.horizon.inventory.service.NodeService;
@@ -65,7 +65,7 @@ import java.util.Optional;
 @Component
 @RequiredArgsConstructor
 public class ScannerResponseService {
-    private final AzureCredentialRepository azureCredentialRepository;
+    private final AzureActiveDiscoveryRepository azureActiveDiscoveryRepository;
     private final NodeRepository nodeRepository;
     private final NodeService nodeService;
     private final TaskSetHandler taskSetHandler;
@@ -134,13 +134,13 @@ public class ScannerResponseService {
     }
 
     private void processAzureScanItem(String tenantId, String location, String ipAddress, AzureScanItem item) {
-        Optional<AzureCredential> azureCredentialOpt = azureCredentialRepository.findByTenantIdAndId(tenantId, item.getCredentialId());
-        if (azureCredentialOpt.isEmpty()) {
-            log.warn("No Azure Credential found for id: {}", item.getCredentialId());
+        Optional<AzureActiveDiscovery> discoveryOpt = azureActiveDiscoveryRepository.findByTenantIdAndId(tenantId, item.getDiscoveryId());
+        if (discoveryOpt.isEmpty()) {
+            log.warn("No Azure Active Discovery found for id: {}", item.getDiscoveryId());
             return;
         }
 
-        AzureCredential credential = azureCredentialOpt.get();
+        AzureActiveDiscovery discovery = discoveryOpt.get();
 
         String nodeLabel = String.format("%s (%s)", item.getName(), item.getResourceGroup());
         Optional<Node> nodeOpt = nodeRepository.findByTenantLocationAndNodeLabel(tenantId, location, nodeLabel);
@@ -157,10 +157,10 @@ public class ScannerResponseService {
                 .build();
             node = nodeService.createNode(createDTO, ScanType.AZURE_SCAN, tenantId);
 
-            taskSetHandler.sendAzureMonitorTasks(credential, item, ipAddress, node.getId());
-            taskSetHandler.sendAzureCollectorTasks(credential, item, ipAddress, node.getId());
+            taskSetHandler.sendAzureMonitorTasks(discovery, item, ipAddress, node.getId());
+            taskSetHandler.sendAzureCollectorTasks(discovery, item, ipAddress, node.getId());
         }
-        List<TagCreateDTO> tags = credential.getTags().stream()
+        List<TagCreateDTO> tags = discovery.getTags().stream()
             .map(tag -> TagCreateDTO.newBuilder().setName(tag.getName()).build())
             .toList();
         tagService.addTags(tenantId, TagCreateListDTO.newBuilder()

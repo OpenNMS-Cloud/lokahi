@@ -35,7 +35,7 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.opennms.horizon.inventory.dto.PassiveDiscoveryDTO;
 import org.opennms.horizon.inventory.dto.PassiveDiscoveryUpsertDTO;
-import org.opennms.horizon.inventory.model.PassiveDiscovery;
+import org.opennms.horizon.inventory.model.discovery.PassiveDiscovery;
 
 @Mapper(componentModel = "spring", uses = {},
     // Needed for grpc proto mapping

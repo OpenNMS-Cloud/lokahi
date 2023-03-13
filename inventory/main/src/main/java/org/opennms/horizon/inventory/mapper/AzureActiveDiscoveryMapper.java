@@ -29,15 +29,14 @@ package org.opennms.horizon.inventory.mapper;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.opennms.horizon.inventory.dto.AzureCredentialCreateDTO;
-import org.opennms.horizon.inventory.dto.AzureCredentialDTO;
-import org.opennms.horizon.inventory.model.AzureCredential;
+import org.opennms.horizon.inventory.dto.AzureActiveDiscoveryCreateDTO;
+import org.opennms.horizon.inventory.dto.AzureActiveDiscoveryDTO;
+import org.opennms.horizon.inventory.model.discovery.active.AzureActiveDiscovery;
 
 @Mapper(componentModel = "spring")
-public interface AzureCredentialMapper extends DateTimeMapper {
-    AzureCredential dtoToModel(AzureCredentialCreateDTO dto);
+public interface AzureActiveDiscoveryMapper extends DateTimeMapper {
+    AzureActiveDiscovery dtoToModel(AzureActiveDiscoveryCreateDTO dto);
 
-    @Mapping(source = "monitoringLocation.location", target = "location")
     @Mapping(source = "createTime", target = "createTimeMsec")
-    AzureCredentialDTO modelToDto(AzureCredential model);
+    AzureActiveDiscoveryDTO modelToDto(AzureActiveDiscovery model);
 }

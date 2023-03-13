@@ -41,7 +41,7 @@ import org.opennms.horizon.inventory.discovery.ActiveDiscoveryDTO;
 import org.opennms.horizon.inventory.discovery.ActiveDiscoveryList;
 import org.opennms.horizon.inventory.discovery.ActiveDiscoveryOperationGrpc;
 import org.opennms.horizon.inventory.discovery.ActiveDiscoveryRequest;
-import org.opennms.horizon.inventory.service.ActiveDiscoveryService;
+import org.opennms.horizon.inventory.service.discovery.active.IcmpActiveDiscoveryService;
 import org.opennms.horizon.inventory.service.taskset.ScannerTaskSetService;
 import org.springframework.stereotype.Component;
 
@@ -53,7 +53,7 @@ import java.util.List;
 public class ActiveDiscoveryGrpcService extends ActiveDiscoveryOperationGrpc.ActiveDiscoveryOperationImplBase {
 
     private final TenantLookup tenantLookup;
-    private final ActiveDiscoveryService configService;
+    private final IcmpActiveDiscoveryService configService;
     private final ScannerTaskSetService scannerTaskSetService;
 
     @Override
@@ -61,7 +61,7 @@ public class ActiveDiscoveryGrpcService extends ActiveDiscoveryOperationGrpc.Act
         tenantLookup.lookupTenantId(Context.current())
             .ifPresentOrElse(tenantId -> {
                 try {
-                    var activeDiscoveryConfig = configService.createConfig(request, tenantId);
+                    var activeDiscoveryConfig = configService.createActiveDiscovery(request, tenantId);
                     responseObserver.onNext(activeDiscoveryConfig);
                     responseObserver.onCompleted();
                     scannerTaskSetService.sendDiscoveryScannerTask(request.getIpAddressesList(),
@@ -76,7 +76,7 @@ public class ActiveDiscoveryGrpcService extends ActiveDiscoveryOperationGrpc.Act
     public void listDiscoveryConfig(Empty request, StreamObserver<ActiveDiscoveryList> responseObserver) {
         tenantLookup.lookupTenantId(Context.current())
             .ifPresentOrElse(tenantId -> {
-                List<ActiveDiscoveryDTO> list = configService.listDiscoveryConfigs(tenantId);
+                List<ActiveDiscoveryDTO> list = configService.getActiveDiscoveries(tenantId);
                 responseObserver.onNext(ActiveDiscoveryList.newBuilder().addAllDiscoverConfigs(list).build());
                 responseObserver.onCompleted();
             }, () -> responseObserver.onError(StatusProto.toStatusRuntimeException(createMissingTenant())));
@@ -86,7 +86,7 @@ public class ActiveDiscoveryGrpcService extends ActiveDiscoveryOperationGrpc.Act
     public void getDiscoveryConfigById(Int64Value request, StreamObserver<ActiveDiscoveryDTO> responseObserver) {
         tenantLookup.lookupTenantId(Context.current())
             .ifPresentOrElse(tenantId ->
-                    configService.getDiscoveryConfigById(request.getValue(), tenantId)
+                    configService.getDiscoveryById(request.getValue(), tenantId)
                         .ifPresentOrElse(config -> {
                             responseObserver.onNext(config);
                             responseObserver.onCompleted();

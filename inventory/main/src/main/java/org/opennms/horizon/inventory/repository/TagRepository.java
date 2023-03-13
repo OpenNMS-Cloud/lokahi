@@ -81,30 +81,30 @@ public interface TagRepository extends JpaRepository<Tag, Long> {
 
     @Query("SELECT tag " +
         "FROM Tag tag " +
-        "JOIN tag.azureCredentials azureCredentials " +
+        "JOIN tag.activeDiscoveries discovery " +
         "WHERE tag.tenantId = :tenantId " +
-        "AND azureCredentials.id = :azureCredentialId " +
+        "AND discovery.id = :discoveryId " +
         "AND tag.name = :name")
-    Optional<Tag> findByTenantIdAzureCredentialIdAndName(@Param("tenantId") String tenantId,
-                                                         @Param("azureCredentialId") Long azureCredentialId,
+    Optional<Tag> findByTenantIdActiveDiscoveryIdAndName(@Param("tenantId") String tenantId,
+                                                         @Param("discoveryId") long discoveryId,
                                                          @Param("name") String name);
 
     @Query("SELECT tag " +
         "FROM Tag tag " +
-        "JOIN tag.azureCredentials azureCredential " +
+        "JOIN tag.activeDiscoveries discovery " +
         "WHERE tag.tenantId = :tenantId " +
-        "AND azureCredential.id = :azureCredentialId ")
-    List<Tag> findByTenantIdAndAzureCredentialId(@Param("tenantId") String tenantId,
-                                                 @Param("azureCredentialId") long azureCredentialId);
+        "AND discovery.id = :discoveryId ")
+    List<Tag> findByTenantIdAndActiveDiscoveryId(@Param("tenantId") String tenantId,
+                                                 @Param("discoveryId") long discoveryId);
 
     @Query("SELECT tag " +
         "FROM Tag tag " +
-        "JOIN tag.azureCredentials azureCredential " +
+        "JOIN tag.activeDiscoveries discovery " +
         "WHERE tag.tenantId = :tenantId " +
-        "AND azureCredential.id = :azureCredentialId " +
+        "AND discovery.id = :discoveryId " +
         "AND LOWER(tag.name) LIKE LOWER(CONCAT('%', :searchTerm, '%'))")
-    List<Tag> findByTenantIdAndAzureCredentialIdAndNameLike(@Param("tenantId") String tenantId,
-                                                            @Param("azureCredentialId") long azureCredentialId,
+    List<Tag> findByTenantIdAndActiveDiscoveryIdAndNameLike(@Param("tenantId") String tenantId,
+                                                            @Param("discoveryId") long discoveryId,
                                                             @Param("searchTerm") String searchTerm);
 
     @Query("SELECT tag " +

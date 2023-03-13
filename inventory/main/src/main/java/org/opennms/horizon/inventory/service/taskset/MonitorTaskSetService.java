@@ -31,8 +31,8 @@ package org.opennms.horizon.inventory.service.taskset;
 import com.google.protobuf.Any;
 import org.opennms.azure.contract.AzureMonitorRequest;
 import org.opennms.horizon.azure.api.AzureScanItem;
-import org.opennms.horizon.inventory.model.AzureCredential;
 import org.opennms.horizon.inventory.model.IpInterface;
+import org.opennms.horizon.inventory.model.discovery.active.AzureActiveDiscovery;
 import org.opennms.horizon.shared.utils.InetAddressUtils;
 import org.opennms.icmp.contract.IcmpMonitorRequest;
 import org.opennms.snmp.contract.SnmpMonitorRequest;
@@ -96,23 +96,23 @@ public class MonitorTaskSetService {
         return taskDefinition;
     }
 
-    public TaskDefinition addAzureMonitorTask(AzureCredential credential, AzureScanItem scanItem, String ipAddress, long nodeId) {
+    public TaskDefinition addAzureMonitorTask(AzureActiveDiscovery discovery, AzureScanItem scanItem, String ipAddress, long nodeId) {
 
         Any configuration =
             Any.pack(AzureMonitorRequest.newBuilder()
                 .setResource(scanItem.getName())
                 .setResourceGroup(scanItem.getResourceGroup())
                 .setHost(ipAddress) // dummy address to allow metrics to be added
-                .setClientId(credential.getClientId())
-                .setClientSecret(credential.getClientSecret())
-                .setSubscriptionId(credential.getSubscriptionId())
-                .setDirectoryId(credential.getDirectoryId())
+                .setClientId(discovery.getClientId())
+                .setClientSecret(discovery.getClientSecret())
+                .setSubscriptionId(discovery.getSubscriptionId())
+                .setDirectoryId(discovery.getDirectoryId())
                 .setTimeoutMs(TaskUtils.AZURE_DEFAULT_TIMEOUT_MS)
                 .setRetries(TaskUtils.AZURE_DEFAULT_RETRIES)
                 .build());
 
         String name = String.join("-", "azure", "monitor", scanItem.getId());
-        String id = String.join("-", String.valueOf(credential.getId()), String.valueOf(nodeId));
+        String id = String.join("-", String.valueOf(discovery.getId()), String.valueOf(nodeId));
         String taskId = identityForAzureTask(name, id);
         return TaskDefinition.newBuilder()
             .setType(TaskType.MONITOR)

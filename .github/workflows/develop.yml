@@ -225,14 +225,9 @@ jobs:
             echo "=== K8S APPLICATION LOGS ==="
             kubectl logs -n hs-instance -l appdomain=opennms --tail=-1 --prefix --all-containers
 
-  push:
-    runs-on: ubuntu-latest
-    needs: external-it
-    #if: github.ref == 'refs/heads/develop'
-    if: github.ref == 'refs/heads/jira/HS-1207-Add-to-developyml-push'
-    steps:
-      - uses: actions/checkout@v3
-      - name: push
+      - name: move
+        #if: github.ref == 'refs/heads/develop'
+        if: github.ref == 'refs/heads/jira/HS-1207-Add-to-developyml-push'
         shell: bash
         env:
           A: ${{ secrets.A }}

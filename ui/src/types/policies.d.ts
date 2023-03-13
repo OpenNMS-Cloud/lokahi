@@ -1,3 +1,5 @@
+import { TagCreateInput } from './graphql'
+
 export interface IPolicy {
   id: string
   name: string
@@ -7,7 +9,7 @@ export interface IPolicy {
     pagerDuty: boolean
     webhooks: boolean
   }
-  tags: string[]
+  tags: TagCreateInput[]
   rules: IRule[]
 }
 

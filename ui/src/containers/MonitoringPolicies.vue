@@ -3,8 +3,7 @@
     <PageHeadline text="Monitoring Policies" />
     <MPolicyForm />
     <MPolicyRuleForm/>
-
-    <SaveButtons />
+    <MPolicySaveButtons />
   </div>
 </template>
 
@@ -21,5 +20,12 @@ const store = useMonitoringPoliciesStore()
   display: flex;
   margin: 0 2rem;
   flex-direction: column;
+  max-width: 2000px;
+}
+
+:deep(hr) {
+  width: 100%;
+  border: 1px solid var(variables.$shade-4);
+  margin: var(variables.$spacing-xl) 0px;
 }
 </style>

@@ -6,7 +6,7 @@ type TState = {
   existingPolicies: IPolicy[]
   existingRules: IRule[]
   selectedPolicy?: IPolicy
-  selectedRule: IRule
+  selectedRule?: IRule
 }
 
 const defaultPolicy: IPolicy = {
@@ -36,17 +36,17 @@ export const useMonitoringPoliciesStore = defineStore('monitoringPoliciesStore',
     existingRules: [],
     existingPolicies: [],
     selectedPolicy: undefined,
-    selectedRule: cloneDeep(defaultRule)
+    selectedRule: undefined
   }),
   actions: {
     displayPolicyForm(policy?: IPolicy) {
       this.selectedPolicy = policy || cloneDeep(defaultPolicy)
     },
-    removeTag(tag: string) {
-      this.selectedPolicy!.tags = without(this.selectedPolicy!.tags, tag)
+    displayRuleForm(rule?: IRule) {
+      this.selectedRule = rule || cloneDeep(defaultRule)
     },
     setMetricName(name: string) {
-      this.selectedRule.metricName = name
+      this.selectedRule!.metricName = name
     },
     addNewCondition() {
       const defaultCondition = {
@@ -57,14 +57,14 @@ export const useMonitoringPoliciesStore = defineStore('monitoringPoliciesStore',
         period: 15,
         severity: 'critical'
       }
-      this.selectedRule.conditions.push(defaultCondition)
+      this.selectedRule!.conditions.push(defaultCondition)
     },
     removeCondition(id: number) {
-      this.selectedRule.conditions = this.selectedRule.conditions.filter((c) => c.id !== id)
+      this.selectedRule!.conditions = this.selectedRule!.conditions.filter((c) => c.id !== id)
     },
     saveRule() {
-      this.selectedPolicy!.rules.push(this.selectedRule)
-      this.existingRules.push(this.selectedRule)
+      this.selectedPolicy!.rules.push(this.selectedRule!)
+      this.existingRules.push(this.selectedRule!)
       this.selectedRule = cloneDeep(defaultRule) // clear form
     },
     savePolicy() {

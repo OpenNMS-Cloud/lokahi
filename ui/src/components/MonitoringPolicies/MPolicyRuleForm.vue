@@ -1,39 +1,51 @@
 <template>
   <div class="rule-form-container" v-if="store.selectedPolicy">
     <div>
-      <FeatherButton primary @click="ruleFormIsDisplayed = true">
+      <FeatherButton primary @click="store.displayRuleForm()">
         <FeatherIcon :icon="addIcon" />
         Create New Rule
       </FeatherButton>
-      <ExistingItems
+      <MPolicyExistingItems
         title="Existing Rules"
         :list="[{ name: 'Test'}, { name: 'Testlongername'}]" 
       />
     </div>
-    <div class="rule-form" v-if="ruleFormIsDisplayed">
-      <div class="form-title">
-        Create New Rule
-      </div>
-      <div class="form-subtitle">
-        New Policy Name
-      </div>
-      <FeatherInput
-        v-model="store.selectedRule.name"
-        label="New Rule Name"
-      />
-      <div>
-        <div class="subtitle">Component Type</div>
-        <BasicSelect
-          :list="componentTypes"
-          :size="160"
-          @item-selected="selectedRuleType"
+    <transition name="fade">
+      <div class="rule-form" v-if="store.selectedRule">
+        <div class="form-title">
+          Create New Rule
+        </div>
+        <div class="form-subtitle">
+          New Rule Name
+        </div>
+        <FeatherInput
+          v-model="store.selectedRule.name"
+          label="New Rule Name"
         />
+        <div>
+          <div class="subtitle">Component Type</div>
+          <BasicSelect
+            :list="componentTypeOptions"
+            @item-selected="selectComponentType"
+          />
+        </div>
+        <div>
+          <div class="subtitle">Detection Method</div>
+          <BasicSelect
+            :list="detectionMethodOptions"
+            @item-selected="selectDetectionMethod"
+          />
+        </div>
+        <div>
+          <div class="subtitle">Threshold Metrics</div>
+          <BasicSelect
+            :list="thresholdMetricsOptions"
+            @item-selected="selectThresholdMetrics"
+          />
+        </div>
+        <AlertConditions />
       </div>
-
-      <DetectionMethod />
-
-      <AlertConditions />
-    </div>
+    </transition>
   </div>
 </template>
 
@@ -43,23 +55,36 @@ import Add from '@featherds/icon/action/Add'
 
 const store = useMonitoringPoliciesStore()
 const addIcon = markRaw(Add)
-const ruleFormIsDisplayed = ref(false)
 
-const componentTypes = [
+const componentTypeOptions = [
   { id: 'cpu', name: 'CPU' },
   { id: 'interface', name: 'Interface' },
-  { id: 'storage', name: 'Storage' }
+  { id: 'storage', name: 'Storage' },
+  { id: 'node', name: 'Node' },
 ]
 
-const selectedRuleType = (ruleType: string) => {
-  store.selectedRule.componentType = ruleType
-}
+const detectionMethodOptions = [
+  { id: 'threshold', name: 'Threshold' },
+  { id: 'event', name: 'Event' }
+]
+
+const thresholdMetricsOptions = [
+  { id: 'over-utilization', name: 'Over Utilization' },
+  { id: 'saturation', name: 'Saturation' },
+  { id: 'errors', name: 'Errors' },
+]
+
+const selectComponentType = (type: string) => store.selectedRule!.componentType = type
+const selectDetectionMethod = (method: string) => store.selectedRule!.detectionMethod = method
+const selectThresholdMetrics = (metric: string) => store.selectedRule!.metricName = metric
 </script>
 
 <style scoped lang="scss">
 @use "@featherds/styles/mixins/elevation";
 @use '@featherds/styles/themes/variables';
 @use '@featherds/styles/mixins/typography';
+@use '@/styles/mediaQueriesMixins';
+@use "@/styles/_transitionFade";
 
 .rule-form-container {
   display: flex;
@@ -82,6 +107,10 @@ const selectedRuleType = (ruleType: string) => {
       @include typography.subtitle1;
       margin: var(variables.$spacing-m) 0;
     }
+  }
+
+  @include mediaQueriesMixins.screen-md {
+    flex-direction: row;
   }
 }
 </style>

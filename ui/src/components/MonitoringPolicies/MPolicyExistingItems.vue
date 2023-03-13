@@ -36,7 +36,7 @@ defineProps<{
   display: flex;
   flex-direction: column;
   background: var(variables.$surface);
-  margin-top: var(variables.$spacing-l);
+  margin: var(variables.$spacing-l) 0;
   padding: var(variables.$spacing-l);
   width: 350px;
   border-radius: 5px;

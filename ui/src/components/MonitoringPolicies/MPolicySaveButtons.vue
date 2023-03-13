@@ -1,0 +1,31 @@
+<template>
+  <div class="btns" v-if="store.selectedPolicy && store.selectedRule">
+    <FeatherButton class="save-btn" primary :disabled="!enableSaveRule" @click="store.saveRule">
+      Save Rule
+    </FeatherButton>
+    <hr />
+    <FeatherButton class="save-btn" primary :disabled="!store.selectedPolicy.rules.length" @click="store.savePolicy">
+      Save Policy
+    </FeatherButton>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { useMonitoringPoliciesStore } from '@/store/Views/monitoringPoliciesStore'
+const store = useMonitoringPoliciesStore()
+const enableSaveRule = computed(() => store.selectedRule?.name && store.selectedRule?.conditions.length)
+</script>
+
+<style lang="scss" scoped>
+@use '@featherds/styles/themes/variables';
+.btns {
+  display: flex;
+  flex-direction: column;
+  margin: var(variables.$spacing-xl) 0;
+
+  .save-btn {
+    width: 150px;
+    align-self: flex-end;
+  }
+}
+</style>

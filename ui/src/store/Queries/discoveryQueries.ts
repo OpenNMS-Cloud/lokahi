@@ -41,20 +41,10 @@ export const useDiscoveryQueries = defineStore('discoveryQueries', () => {
   }
 
   const formatActiveDiscoveries = (activeDiscoveries: ActiveDiscovery[] = []) => {
-    const icmpDiscoveries: IcmpActiveDiscovery[] = []
-    const azureDiscoveries: AzureActiveDiscovery[] = []
-
-    for (const discovery of activeDiscoveries) {
-      discovery.details.discoveryType = discovery.discoveryType
-      if (discovery.discoveryType === DiscoveryType.ICMP) {
-        icmpDiscoveries.push(discovery.details)
-      }
-      if (discovery.discoveryType === DiscoveryType.Azure) {
-        azureDiscoveries.push(discovery.details)
-      }
-    }
-
-    return [...icmpDiscoveries, ...azureDiscoveries]
+    return activeDiscoveries.map((discovery) => ({ 
+      ...discovery.details, 
+      discoveryType: discovery.discoveryType
+    }))
   }
 
   return {

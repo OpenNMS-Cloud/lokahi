@@ -2,8 +2,6 @@ import { DiscoveryInput } from '@/types/discovery'
 import { defineStore } from 'pinia'
 import { useDiscoveryMutations } from '../Mutations/discoveryMutations'
 import { cloneDeep } from 'lodash'
-import { DiscoveryType } from '@/components/Discovery/discovery.constants'
-import { ActiveDiscovery, PassiveDiscovery } from '@/types/graphql'
 import { TagCreateInput } from '@/types/graphql'
 
 const defaultAzureForm = {
@@ -51,7 +49,7 @@ export const useDiscoveryStore = defineStore('discoveryStore', {
       const { addAzureCreds, azureError } = useDiscoveryMutations()
 
       await addAzureCreds({
-        azureCredential: {
+        discovery: {
           location: this.selectedLocations[0],
           tags: this.selectedTags,
           ...this.azure

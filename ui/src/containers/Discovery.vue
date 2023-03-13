@@ -67,7 +67,7 @@
               }
             "
             :cancel="handleClose"
-            :discovery="(selectedDiscovery as ActiveDiscovery)"
+            :discovery="(selectedDiscovery)"
           />
         </div>
         <div v-else-if="discoverySelectedType === DiscoveryType.Azure">
@@ -79,7 +79,7 @@
               }
             "
             :cancel="handleClose"
-            :discovery="(selectedDiscovery as ActiveDiscovery)"
+            :discovery="(selectedDiscovery)"
           />
         </div>
         <DiscoverySyslogSNMPTrapsForm
@@ -115,7 +115,8 @@ import discoveryText from '@/components/Discovery/discovery.text'
 import { useDiscoveryQueries } from '@/store/Queries/discoveryQueries'
 import { useDiscoveryMutations } from '@/store/Mutations/discoveryMutations'
 import { IAutocompleteItemType } from '@featherds/autocomplete'
-import { ActiveDiscovery, PassiveDiscovery } from '@/types/graphql'
+import { AzureActiveDiscovery, IcmpActiveDiscovery, PassiveDiscovery } from '@/types/graphql'
+import { hasOwnProperty } from '@antfu/utils'
 
 const discoveryQueries = useDiscoveryQueries()
 const discoveryMutations = useDiscoveryMutations()
@@ -129,7 +130,7 @@ const addIcon: IIcon = {
 const successModal = ref()
 const isDiscoveryEditingShown = ref(false)
 const showNewDiscovery = ref(false)
-const selectedDiscovery = ref<PassiveDiscovery | ActiveDiscovery | null>(null)
+const selectedDiscovery = ref<PassiveDiscovery | AzureActiveDiscovery | IcmpActiveDiscovery | null>(null)
 const discoverySelectedType = ref(DiscoveryType.None)
 
 const handleNewDiscovery = () => {
@@ -147,9 +148,9 @@ const search = (q: string) => {
   if (!q) return
   searchLoading.value = true
   const results = [...discoveryQueries.activeDiscoveries, ...discoveryQueries.passiveDiscoveries]
-    .filter((x: any) => x.configName?.toLowerCase().indexOf(q) > -1 || x.name?.toLowerCase().indexOf(q) > -1)
+    .filter((x: any) => x.name?.toLowerCase().indexOf(q) > -1)
     .map((x: any) => ({
-      _text: x.configName || x.name,
+      _text: x.name,
       ...x
     }))
   discoveriesResults.value = results as TDiscoveryAutocomplete[]
@@ -162,9 +163,9 @@ const showDiscovery = (selected: IAutocompleteItemType | IAutocompleteItemType[]
     isDiscoveryEditingShown.value = true
     showNewDiscovery.value = false
     //replace with type guard
-    if (discovery.configName) {
+    if (!discovery.hasOwnProperty('toggle')) {
       discoverySelectedType.value = DiscoveryType.ICMP
-      selectedDiscovery.value = discovery as ActiveDiscovery
+      selectedDiscovery.value = discovery as IcmpActiveDiscovery
     } else {
       discoverySelectedType.value = DiscoveryType.SyslogSNMPTraps
       selectedDiscovery.value = discovery as PassiveDiscovery

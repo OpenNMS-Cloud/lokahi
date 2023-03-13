@@ -41,7 +41,7 @@ export const useDiscoveryQueries = defineStore('discoveryQueries', () => {
     getLocations,
     tagsSearched: computed(() => tagsSearched.value || []),
     getTagsSearch,
-    activeDiscoveries: computed(() => listedDiscoveries.value?.listActiveDiscovery || []),
+    activeDiscoveries: computed(() => listedDiscoveries.value?.listIcmpActiveDiscovery || []),
     passiveDiscoveries: computed(() => listedDiscoveries.value?.passiveDiscoveries || []),
     getDiscoveries
   }

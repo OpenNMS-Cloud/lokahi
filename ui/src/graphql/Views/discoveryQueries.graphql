@@ -3,9 +3,9 @@ query ListLocationsForDiscovery {
 }
 
 query ListDiscoveries {
-  listActiveDiscovery {
+  listIcmpActiveDiscovery {
     id
-    configName
+    name
     ipAddresses
     location
     snmpConfig {

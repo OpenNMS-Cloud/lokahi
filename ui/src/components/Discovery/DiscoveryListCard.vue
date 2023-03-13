@@ -15,7 +15,7 @@
           @click="$emit('selectDiscovery', item)"
           class="name pointer"
         >
-          {{ item.configName?.toUpperCase() || item.name?.toUpperCase() }}
+          {{ item.name?.toUpperCase() }}
         </div>
         <FeatherTooltip
           :title="`Toggle ${item.name?.toUpperCase()} on/off`"

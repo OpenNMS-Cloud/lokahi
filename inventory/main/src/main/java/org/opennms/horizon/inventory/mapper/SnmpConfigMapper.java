@@ -26,18 +26,16 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.inventory.repository;
+package org.opennms.horizon.inventory.mapper;
 
-import org.opennms.horizon.inventory.model.SnmpConfig;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
+import org.mapstruct.Mapper;
+import org.opennms.horizon.inventory.model.SnmpAgentConfig;
+import org.opennms.horizon.snmp.api.SnmpConfiguration;
 
-import java.net.InetAddress;
-import java.util.Optional;
+@Mapper(componentModel = "spring")
+public interface SnmpConfigMapper {
 
-@Repository
-public interface SnmpConfigRepository extends JpaRepository<SnmpConfig, Long> {
+    SnmpConfiguration mapModelToProto(SnmpAgentConfig snmpAgentConfig);
 
-    Optional<SnmpConfig> findByTenantIdAndLocationAndIpAddress(String tenantId, String location, InetAddress ipAddres);
-
+    SnmpAgentConfig mapProtoToModel(SnmpConfiguration snmpConfiguration);
 }

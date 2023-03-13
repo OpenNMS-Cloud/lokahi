@@ -38,7 +38,6 @@ import org.opennms.horizon.minion.plugin.api.ServiceMonitorResponse.Status;
 import org.opennms.horizon.minion.plugin.api.ServiceMonitorResponseImpl;
 import org.opennms.horizon.minion.plugin.api.ServiceMonitorResponseImpl.ServiceMonitorResponseImplBuilder;
 import org.opennms.horizon.shared.snmp.SnmpAgentConfig;
-import org.opennms.horizon.shared.snmp.SnmpConfiguration;
 import org.opennms.horizon.shared.snmp.SnmpHelper;
 import org.opennms.horizon.shared.snmp.SnmpObjId;
 import org.opennms.horizon.shared.snmp.SnmpValue;
@@ -91,15 +90,10 @@ public class SnmpMonitor extends AbstractServiceMonitor {
     private final StrategyResolver strategyResolver;
     private final SnmpHelper snmpHelper;
 
-    private final Descriptors.FieldDescriptor communityFieldDescriptor;
     private final Descriptors.FieldDescriptor hostFieldDescriptor;
-    private final Descriptors.FieldDescriptor hexFieldDescriptor;
     private final Descriptors.FieldDescriptor oidFieldDescriptor;
     private final Descriptors.FieldDescriptor operatorFieldDescriptor;
     private final Descriptors.FieldDescriptor operandFieldDescriptor;
-    private final Descriptors.FieldDescriptor reasonTemplateFieldDescriptor;
-    private final Descriptors.FieldDescriptor retriesFieldDescriptor;
-    private final Descriptors.FieldDescriptor timeoutFieldDescriptor;
 
     public SnmpMonitor(StrategyResolver strategyResolver, SnmpHelper snmpHelper) {
         this.strategyResolver = strategyResolver;
@@ -107,15 +101,10 @@ public class SnmpMonitor extends AbstractServiceMonitor {
 
         Descriptors.Descriptor snmpMonitorRequestDescriptor = SnmpMonitorRequest.getDefaultInstance().getDescriptorForType();
 
-        communityFieldDescriptor = snmpMonitorRequestDescriptor.findFieldByNumber(SnmpMonitorRequest.COMMUNITY_FIELD_NUMBER);
-        hexFieldDescriptor = snmpMonitorRequestDescriptor.findFieldByNumber(SnmpMonitorRequest.HEX_FIELD_NUMBER);
         hostFieldDescriptor = snmpMonitorRequestDescriptor.findFieldByNumber(SnmpMonitorRequest.HOST_FIELD_NUMBER);
         oidFieldDescriptor = snmpMonitorRequestDescriptor.findFieldByNumber(SnmpMonitorRequest.OID_FIELD_NUMBER);
         operandFieldDescriptor = snmpMonitorRequestDescriptor.findFieldByNumber(SnmpMonitorRequest.OPERAND_FIELD_NUMBER);
         operatorFieldDescriptor = snmpMonitorRequestDescriptor.findFieldByNumber(SnmpMonitorRequest.OPERATOR_FIELD_NUMBER);
-        reasonTemplateFieldDescriptor = snmpMonitorRequestDescriptor.findFieldByNumber(SnmpMonitorRequest.REASON_TEMPLATE_FIELD_NUMBER);
-        retriesFieldDescriptor = snmpMonitorRequestDescriptor.findFieldByNumber(SnmpMonitorRequest.RETRIES_FIELD_NUMBER);
-        timeoutFieldDescriptor = snmpMonitorRequestDescriptor.findFieldByNumber(SnmpMonitorRequest.TIMEOUT_FIELD_NUMBER);
     }
 
     /**
@@ -143,56 +132,17 @@ public class SnmpMonitor extends AbstractServiceMonitor {
             }
 
             SnmpMonitorRequest snmpMonitorRequest = config.unpack(SnmpMonitorRequest.class);
-            SnmpMonitorRequest effectiveSnmpMonitorRequest = populateDefaultsAsNeeded(snmpMonitorRequest);
 
             // Retrieve this interface's SNMP peer object
-            //
-            SnmpAgentConfig agentConfig = new SnmpAgentConfig(InetAddressUtils.getInetAddress(snmpMonitorRequest.getHost()));
-            hostAddress = effectiveSnmpMonitorRequest.getHost();
+            SnmpAgentConfig agentConfig = mapAgentConfig(snmpMonitorRequest);
+
+            hostAddress = snmpMonitorRequest.getHost();
 
             // Get configuration parameters
             //
-            String oid = effectiveSnmpMonitorRequest.getOid();
-            String operator = protobufDefaultNullHelper(effectiveSnmpMonitorRequest, operatorFieldDescriptor);
-            String operand = protobufDefaultNullHelper(effectiveSnmpMonitorRequest, operandFieldDescriptor);
-            String reasonTemplate = effectiveSnmpMonitorRequest.getReasonTemplate();
-            boolean hex = effectiveSnmpMonitorRequest.getHex();
-
-            agentConfig.setTimeout(effectiveSnmpMonitorRequest.getTimeout());
-            agentConfig.setRetries(effectiveSnmpMonitorRequest.getRetries());
-
-            // TBD888
-            // String walkstr = ParameterMap.getKeyedString(config, "walk", "false");
-            // String matchstr = ParameterMap.getKeyedString(config, "match-all", "true");
-            // int countMin = ParameterMap.getKeyedInteger(config, "minimum", 0);
-            // int countMax = ParameterMap.getKeyedInteger(config, "maximum", 0);
-            // String reasonTemplate = ParameterMap.getKeyedString(config, "reason-template", DEFAULT_REASON_TEMPLATE);
-
-            // set timeout and retries on SNMP peer object
-            //
-            // agentConfig.setPort(ParameterMap.getKeyedInteger(config, "port", agentConfig.getPort()));
-
-            // Squirrel the configuration parameters away in a Properties for later expansion if service is down
-            // Properties svcParams = new Properties();
-            // svcParams.setProperty("oid", oid);
-            // svcParams.setProperty("operator", String.valueOf(operator));
-            // svcParams.setProperty("operand", String.valueOf(operand));
-            // svcParams.setProperty("walk", walkstr);
-            // svcParams.setProperty("matchAll", matchstr);
-            // svcParams.setProperty("minimum", String.valueOf(countMin));
-            // svcParams.setProperty("maximum", String.valueOf(countMax));
-            // svcParams.setProperty("timeout", String.valueOf(agentConfig.getTimeout()));
-            // svcParams.setProperty("retry", String.valueOf(agentConfig.getRetries()));
-            // svcParams.setProperty("retries", svcParams.getProperty("retry"));
-            // svcParams.setProperty("ipaddr", hostAddress);
-            // svcParams.setProperty("port", String.valueOf(agentConfig.getPort()));
-            // svcParams.setProperty("hex", hexstr);
-
-
-//            TODO: Removing to decouple from horizon core
-//            TimeoutTracker tracker = new TimeoutTracker(parameters, agentConfig.getRetries(), agentConfig.getTimeout());
-//            tracker.reset();
-//            tracker.startAttempt();
+            String oid = snmpMonitorRequest.hasField(oidFieldDescriptor) ? snmpMonitorRequest.getOid() : DEFAULT_OBJECT_IDENTIFIER;
+            String operator = protobufDefaultNullHelper(snmpMonitorRequest, operatorFieldDescriptor);
+            String operand = protobufDefaultNullHelper(snmpMonitorRequest, operandFieldDescriptor);
 
 
             final String finalHostAddress = hostAddress;
@@ -223,35 +173,14 @@ public class SnmpMonitor extends AbstractServiceMonitor {
 // Internal Methods
 //----------------------------------------
 
-    private SnmpMonitorRequest populateDefaultsAsNeeded(SnmpMonitorRequest snmpMonitorRequest) {
-        SnmpMonitorRequest.Builder resultBuilder = SnmpMonitorRequest.newBuilder(snmpMonitorRequest);
-
-
-        if (! snmpMonitorRequest.hasField(communityFieldDescriptor)) {
-            resultBuilder.setCommunity(SnmpConfiguration.DEFAULT_READ_COMMUNITY);
+    private SnmpAgentConfig mapAgentConfig(SnmpMonitorRequest snmpMonitorRequest) {
+        var agentConfig = new SnmpAgentConfig(InetAddressUtils.getInetAddress(snmpMonitorRequest.getHost()), SnmpAgentConfig.DEFAULTS);
+        if (snmpMonitorRequest.hasAgentConfig()) {
+            agentConfig.setReadCommunity(snmpMonitorRequest.getAgentConfig().getReadCommunity());
+            agentConfig.setPort(snmpMonitorRequest.getAgentConfig().getPort());
+            //TODO: Expand config further.
         }
-
-        if (! snmpMonitorRequest.hasField(hexFieldDescriptor)) {
-            resultBuilder.setHex(false);
-        }
-
-        if (! snmpMonitorRequest.hasField(oidFieldDescriptor)) {
-            resultBuilder.setOid(DEFAULT_OBJECT_IDENTIFIER);
-        }
-
-        if (! snmpMonitorRequest.hasField(reasonTemplateFieldDescriptor)) {
-            resultBuilder.setReasonTemplate(DEFAULT_REASON_TEMPLATE);
-        }
-
-        if (! snmpMonitorRequest.hasField(retriesFieldDescriptor)) {
-            resultBuilder.setRetries(SnmpConfiguration.DEFAULT_RETRIES);
-        }
-
-        if (! snmpMonitorRequest.hasField(timeoutFieldDescriptor)) {
-            resultBuilder.setTimeout(SnmpConfiguration.DEFAULT_TIMEOUT);
-        }
-
-        return resultBuilder.build();
+        return agentConfig;
     }
 
     private String protobufDefaultNullHelper(Message msg, Descriptors.FieldDescriptor fieldDescriptor) {

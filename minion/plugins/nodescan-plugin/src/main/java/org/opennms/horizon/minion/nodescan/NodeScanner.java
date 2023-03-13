@@ -39,6 +39,7 @@ import org.opennms.horizon.shared.snmp.SnmpConfiguration;
 import org.opennms.horizon.shared.snmp.SnmpHelper;
 import org.opennms.horizon.shared.snmp.SnmpWalker;
 import org.opennms.horizon.shared.utils.InetAddressUtils;
+import org.opennms.horizon.snmp.api.Version;
 import org.opennms.node.scan.contract.IpInterfaceResult;
 import org.opennms.node.scan.contract.NodeInfoResult;
 import org.opennms.node.scan.contract.NodeScanRequest;
@@ -98,6 +99,7 @@ public class NodeScanner implements Scanner {
                     .setNodeInfo(nodeInfo)
                     .addAllIpInterfaces(ipInterfaceResults)
                     .addAllSnmpInterfaces(snmpInterfaceResults)
+                    .setSnmpConfig(mapSnmpAgentConfig(agentConfig))
                     .build();
                 return ScanResultsResponseImpl.builder().results(scanResult).build();
             } catch (Exception e) {
@@ -105,6 +107,22 @@ public class NodeScanner implements Scanner {
                 throw new RuntimeException(e);
             }
         });
+    }
+
+    private org.opennms.horizon.snmp.api.SnmpConfiguration mapSnmpAgentConfig(SnmpAgentConfig agentConfig) {
+        return org.opennms.horizon.snmp.api.SnmpConfiguration.newBuilder()
+            .setVersion(Version.forNumber(agentConfig.getVersion()))
+            .setAddress(InetAddressUtils.str(agentConfig.getAddress()))
+            .setPort(agentConfig.getPort())
+            .setRetries(agentConfig.getRetries())
+            .setTimeout(agentConfig.getTimeout())
+            .setMaxVarsPerPdu(agentConfig.getMaxVarsPerPdu())
+            .setMaxRepetitions(agentConfig.getMaxRepetitions())
+            .setMaxRequestSize(agentConfig.getMaxRequestSize())
+            .setReadCommunity(agentConfig.getReadCommunity())
+            .setWriteCommunity(agentConfig.getWriteCommunity())
+            // Skip V3 for now
+            .build();
     }
 
     Set<SnmpAgentConfig> deriveSnmpConfigs(List<org.opennms.horizon.snmp.api.SnmpConfiguration> configsFromRequest,

@@ -44,6 +44,7 @@ import org.opennms.horizon.inventory.repository.AzureCredentialRepository;
 import org.opennms.horizon.inventory.repository.NodeRepository;
 import org.opennms.horizon.inventory.service.IpInterfaceService;
 import org.opennms.horizon.inventory.service.NodeService;
+import org.opennms.horizon.inventory.service.SnmpConfigService;
 import org.opennms.horizon.inventory.service.SnmpInterfaceService;
 import org.opennms.horizon.inventory.service.TagService;
 import org.opennms.horizon.inventory.service.taskset.TaskSetHandler;
@@ -72,6 +73,7 @@ public class ScannerResponseService {
     private final IpInterfaceService ipInterfaceService;
     private final SnmpInterfaceService snmpInterfaceService;
     private final TagService tagService;
+    private final SnmpConfigService snmpConfigService;
 
     @Transactional
     public void accept(String tenantId, String location, ScannerResponse response) throws InvalidProtocolBufferException {
@@ -97,7 +99,7 @@ public class ScannerResponseService {
             case NODE_SCAN -> {
                 NodeScanResult nodeScanResult = result.unpack(NodeScanResult.class);
                 log.debug("received node scan result: {}", nodeScanResult);
-                processNodeScanResponse(tenantId, nodeScanResult);
+                processNodeScanResponse(tenantId, nodeScanResult, location);
             }
             case DISCOVERY_SCAN -> {
                 DiscoveryScanResult discoveryScanResult = result.unpack(DiscoveryScanResult.class);
@@ -167,7 +169,10 @@ public class ScannerResponseService {
             .setNodeId(node.getId()).addAllTags(tags).build());
     }
 
-    private void processNodeScanResponse(String tenantId, NodeScanResult result ) {
+    private void processNodeScanResponse(String tenantId, NodeScanResult result, String location) {
+
+        var snmpConfiguration = result.getSnmpConfig();
+        snmpConfigService.saveOrUpdateSnmpConfig(tenantId, location, snmpConfiguration);
         nodeRepository.findByIdAndTenantId(result.getNodeId(), tenantId)
             .ifPresentOrElse(node -> {
                 Map<Integer, SnmpInterface> ifIndexSNMPMap = new HashMap<>();

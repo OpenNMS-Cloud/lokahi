@@ -34,6 +34,7 @@ import org.opennms.horizon.azure.api.AzureScanItem;
 import org.opennms.horizon.inventory.model.AzureCredential;
 import org.opennms.horizon.inventory.model.IpInterface;
 import org.opennms.horizon.shared.utils.InetAddressUtils;
+import org.opennms.horizon.snmp.api.SnmpConfiguration;
 import org.opennms.icmp.contract.IcmpMonitorRequest;
 import org.opennms.snmp.contract.SnmpMonitorRequest;
 import org.opennms.taskset.contract.MonitorType;
@@ -51,7 +52,7 @@ public class MonitorTaskSetService {
 
     private static final Logger log = LoggerFactory.getLogger(MonitorTaskSetService.class);
 
-    public TaskDefinition getMonitorTask(MonitorType monitorType, IpInterface ipInterface, long nodeId) {
+    public TaskDefinition getMonitorTask(MonitorType monitorType, IpInterface ipInterface, long nodeId, SnmpConfiguration snmpConfiguration) {
 
         String monitorTypeValue = monitorType.getValueDescriptor().getName();
         String ipAddress = InetAddressUtils.toIpAddrString(ipInterface.getIpAddress());
@@ -71,12 +72,14 @@ public class MonitorTaskSetService {
                     .setPacketSize(TaskUtils.ICMP_DEFAULT_PACKET_SIZE)
                     .setRetries(TaskUtils.ICMP_DEFAULT_RETRIES)
                     .build());
-            case SNMP -> configuration =
-                Any.pack(SnmpMonitorRequest.newBuilder()
-                    .setHost(ipAddress)
-                    .setTimeout(TaskUtils.SNMP_DEFAULT_TIMEOUT_MS)
-                    .setRetries(TaskUtils.SNMP_DEFAULT_RETRIES)
-                    .build());
+            case SNMP -> {
+                var requestBuilder = SnmpMonitorRequest.newBuilder()
+                    .setHost(ipAddress);
+                if (snmpConfiguration != null) {
+                    requestBuilder.setAgentConfig(snmpConfiguration);
+                }
+                configuration = Any.pack(requestBuilder.build());
+            }
             case UNRECOGNIZED -> log.warn("Unrecognized monitor type");
             case UNKNOWN -> log.warn("Unknown monitor type");
         }

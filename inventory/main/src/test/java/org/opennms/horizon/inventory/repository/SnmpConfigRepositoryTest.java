@@ -54,29 +54,29 @@ public class SnmpConfigRepositoryTest {
 
     @Test
     public void testSnmpConfigPersistence() {
-        Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, tenantId).run(() ->
-        {
-            var snmpAgentConfig = new SnmpAgentConfig();
-            snmpAgentConfig.setPort(1161);
-            snmpAgentConfig.setReadCommunity("OpenNMS");
-            snmpAgentConfig.setWriteCommunity("private");
-            var snmpConfig = new SnmpConfig();
-            snmpConfig.setLocation("MINION");
-            snmpConfig.setIpAddress(InetAddressUtils.getInetAddress("192.168.1.1"));
-            snmpConfig.setTenantId(tenantId);
-            snmpConfig.setSnmpAgentConfig(snmpAgentConfig);
-            var persisted = snmpConfigRepository.save(snmpConfig);
-            Assertions.assertNotNull(persisted);
-            Assertions.assertEquals("v1", snmpConfig.getSnmpAgentConfig().getVersion());
-            Assertions.assertEquals("OpenNMS", snmpConfig.getSnmpAgentConfig().getReadCommunity());
-            Assertions.assertEquals("private", snmpConfig.getSnmpAgentConfig().getWriteCommunity());
-            Assertions.assertEquals(1161, snmpConfig.getSnmpAgentConfig().getPort());
 
-            var optional = snmpConfigRepository
-                .findByIpAddressAndLocation(InetAddressUtils.getInetAddress("192.168.1.1"), "MINION");
+        var snmpAgentConfig = new SnmpAgentConfig();
+        snmpAgentConfig.setPort(1161);
+        snmpAgentConfig.setReadCommunity("OpenNMS");
+        snmpAgentConfig.setWriteCommunity("private");
+        var snmpConfig = new SnmpConfig();
+        snmpConfig.setTenantId(tenantId);
+        snmpConfig.setLocation("MINION");
+        snmpConfig.setIpAddress(InetAddressUtils.getInetAddress("192.168.1.1"));
+        snmpConfig.setTenantId(tenantId);
+        snmpConfig.setSnmpAgentConfig(snmpAgentConfig);
+        var persisted = snmpConfigRepository.save(snmpConfig);
+        Assertions.assertNotNull(persisted);
+        Assertions.assertEquals("v1", snmpConfig.getSnmpAgentConfig().getVersion());
+        Assertions.assertEquals("OpenNMS", snmpConfig.getSnmpAgentConfig().getReadCommunity());
+        Assertions.assertEquals("private", snmpConfig.getSnmpAgentConfig().getWriteCommunity());
+        Assertions.assertEquals(1161, snmpConfig.getSnmpAgentConfig().getPort());
 
-            Assertions.assertTrue(optional.isPresent());
-        });
+        var optional = snmpConfigRepository
+            .findByTenantIdAndLocationAndIpAddress(tenantId, "MINION", InetAddressUtils.getInetAddress("192.168.1.1"));
+
+        Assertions.assertTrue(optional.isPresent());
+
 
     }
 

@@ -34,9 +34,9 @@ import org.opennms.azure.contract.AzureCollectorRequest;
 import org.opennms.horizon.azure.api.AzureScanItem;
 import org.opennms.horizon.inventory.model.AzureCredential;
 import org.opennms.horizon.inventory.model.IpInterface;
+import org.opennms.horizon.inventory.service.SnmpConfigService;
 import org.opennms.horizon.shared.utils.InetAddressUtils;
 import org.opennms.horizon.snmp.api.SnmpConfiguration;
-import org.opennms.horizon.snmp.api.Version;
 import org.opennms.snmp.contract.SnmpCollectorRequest;
 import org.opennms.taskset.contract.MonitorType;
 import org.opennms.taskset.contract.TaskDefinition;
@@ -50,7 +50,10 @@ import static org.opennms.horizon.inventory.service.taskset.TaskUtils.identityFo
 @RequiredArgsConstructor
 public class CollectorTaskSetService {
 
-    public TaskDefinition getCollectorTask(MonitorType monitorType, IpInterface ipInterface, long nodeId) {
+    private final SnmpConfigService snmpConfigService;
+
+    public TaskDefinition getCollectorTask(MonitorType monitorType, IpInterface ipInterface, long nodeId,
+                                           SnmpConfiguration snmpConfiguration) {
         String monitorTypeValue = monitorType.getValueDescriptor().getName();
         String ipAddress = InetAddressUtils.toIpAddrString(ipInterface.getIpAddress());
 
@@ -59,15 +62,15 @@ public class CollectorTaskSetService {
         TaskDefinition taskDefinition = null;
 
         if (monitorType == MonitorType.SNMP) {
+
+            var requestBuilder = SnmpCollectorRequest.newBuilder()
+                .setHost(ipAddress)
+                .setNodeId(nodeId);
+            if (snmpConfiguration != null) {
+                requestBuilder.setAgentConfig(snmpConfiguration);
+            }
             Any configuration =
-                Any.pack(SnmpCollectorRequest.newBuilder()
-                    .setHost(ipAddress)
-                    .setAgentConfig(SnmpConfiguration.newBuilder()
-                        .setAddress(ipAddress)
-                        .setVersion(Version.v2)
-                        .setTimeout(30000).build())
-                    .setNodeId(nodeId)
-                    .build());
+                Any.pack(requestBuilder.build());
 
             String taskId = identityForIpTask(nodeId, ipAddress, name);
             TaskDefinition.Builder builder =

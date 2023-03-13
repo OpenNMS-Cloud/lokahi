@@ -43,18 +43,10 @@ message SnmpDetectorRequest {
 
 message SnmpMonitorRequest {
   string host = 1;
-
   string oid = 2;
-  int32 timeout = 3;
-  int32 retries = 4;
-  string community = 5;
-
-  string operator = 6;
-  string operand = 7;
-  string reason_template = 8;
-
-  // TBD888: what does this do?
-  bool hex = 9;
+  string operator = 3;
+  string operand = 4;
+  opennms.snmp.api.SnmpConfiguration agent_config = 5;
 }
 
 message SnmpCollectorRequest {

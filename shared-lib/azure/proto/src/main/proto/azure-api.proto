@@ -41,7 +41,7 @@ message AzureScanItem {
   string id = 1;
   string name = 2;
   string resourceGroup = 3;
-  int64 discovery_id = 4;
+  int64 active_discovery_id = 4;
 }
 
 message AzureResponseMetric {

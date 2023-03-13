@@ -131,7 +131,7 @@ class ScannerResponseServiceIntTest extends GrpcTestBase {
             .setId("/subscriptions/sub-id/resourceGroups/resource-group/providers/Microsoft.Compute/virtualMachines/vm-name")
             .setName("vm-name")
             .setResourceGroup("resource-group")
-            .setDiscoveryId(discovery.getId())
+            .setActiveDiscoveryId(discovery.getId())
             .build();
 
         List<AzureScanItem> azureScanItems = Collections.singletonList(scanItem);

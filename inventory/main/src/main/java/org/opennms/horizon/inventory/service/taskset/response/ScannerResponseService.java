@@ -134,9 +134,9 @@ public class ScannerResponseService {
     }
 
     private void processAzureScanItem(String tenantId, String location, String ipAddress, AzureScanItem item) {
-        Optional<AzureActiveDiscovery> discoveryOpt = azureActiveDiscoveryRepository.findByTenantIdAndId(tenantId, item.getDiscoveryId());
+        Optional<AzureActiveDiscovery> discoveryOpt = azureActiveDiscoveryRepository.findByTenantIdAndId(tenantId, item.getActiveDiscoveryId());
         if (discoveryOpt.isEmpty()) {
-            log.warn("No Azure Active Discovery found for id: {}", item.getDiscoveryId());
+            log.warn("No Azure Active Discovery found for id: {}", item.getActiveDiscoveryId());
             return;
         }
 

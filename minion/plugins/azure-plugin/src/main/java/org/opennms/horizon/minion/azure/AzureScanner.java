@@ -89,7 +89,7 @@ public class AzureScanner implements Scanner {
                         .setId(azureValue.getId())
                         .setName(azureValue.getName())
                         .setResourceGroup(resourceGroup)
-                        .setDiscoveryId(request.getDiscoveryId())
+                        .setActiveDiscoveryId(request.getActiveDiscoveryId())
                         .build())
                     .toList());
             }

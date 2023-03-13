@@ -176,7 +176,7 @@ public class ScannerTaskSetService {
     private TaskDefinition addAzureScannerTask(AzureActiveDiscovery discovery) {
         Any configuration =
             Any.pack(AzureScanRequest.newBuilder()
-                .setDiscoveryId(discovery.getId())
+                .setActiveDiscoveryId(discovery.getId())
                 .setClientId(discovery.getClientId())
                 .setClientSecret(discovery.getClientSecret())
                 .setSubscriptionId(discovery.getSubscriptionId())

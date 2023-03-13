@@ -55,6 +55,6 @@ public class GrpcAzureActiveDiscoveryService {
     public Mono<AzureActiveDiscovery> createAzureActiveDiscovery(AzureActiveDiscoveryCreate discovery, @GraphQLEnvironment ResolutionEnvironment env) {
         AzureActiveDiscoveryCreateDTO createDto = mapper.azureCredentialCreateToProto(discovery);
         AzureActiveDiscoveryDTO credentialDto = client.createAzureActiveDiscovery(createDto, headerUtil.getAuthHeader(env));
-        return Mono.just(mapper.protoToAzureCredential(credentialDto));
+        return Mono.just(mapper.dtoToAzureActiveDiscovery(credentialDto));
     }
 }

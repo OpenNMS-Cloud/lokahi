@@ -39,6 +39,8 @@ import lombok.RequiredArgsConstructor;
 import org.opennms.horizon.inventory.discovery.IcmpActiveDiscoveryCreateDTO;
 import org.opennms.horizon.inventory.discovery.IcmpActiveDiscoveryDTO;
 import org.opennms.horizon.inventory.discovery.IcmpActiveDiscoveryServiceGrpc;
+import org.opennms.horizon.inventory.dto.ActiveDiscoveryDTO;
+import org.opennms.horizon.inventory.dto.ActiveDiscoveryServiceGrpc;
 import org.opennms.horizon.inventory.dto.AzureActiveDiscoveryCreateDTO;
 import org.opennms.horizon.inventory.dto.AzureActiveDiscoveryDTO;
 import org.opennms.horizon.inventory.dto.AzureActiveDiscoveryServiceGrpc;
@@ -77,18 +79,21 @@ public class InventoryClient {
     private MonitoringLocationServiceGrpc.MonitoringLocationServiceBlockingStub locationStub;
     private NodeServiceGrpc.NodeServiceBlockingStub nodeStub;
     private MonitoringSystemServiceGrpc.MonitoringSystemServiceBlockingStub systemStub;
-    private AzureActiveDiscoveryServiceGrpc.AzureActiveDiscoveryServiceBlockingStub azureActiveDiscoveryServiceBlockingStub;
     private TagServiceGrpc.TagServiceBlockingStub tagStub;
+    private ActiveDiscoveryServiceGrpc.ActiveDiscoveryServiceBlockingStub activeDiscoveryServiceBlockingStub;
     private IcmpActiveDiscoveryServiceGrpc.IcmpActiveDiscoveryServiceBlockingStub icmpActiveDiscoveryServiceBlockingStub;
+    private AzureActiveDiscoveryServiceGrpc.AzureActiveDiscoveryServiceBlockingStub azureActiveDiscoveryServiceBlockingStub;
     private PassiveDiscoveryServiceGrpc.PassiveDiscoveryServiceBlockingStub passiveDiscoveryServiceBlockingStub;
 
     protected void initialStubs() {
         locationStub = MonitoringLocationServiceGrpc.newBlockingStub(channel);
         nodeStub = NodeServiceGrpc.newBlockingStub(channel);
         systemStub = MonitoringSystemServiceGrpc.newBlockingStub(channel);
-        azureActiveDiscoveryServiceBlockingStub = AzureActiveDiscoveryServiceGrpc.newBlockingStub(channel);
+
         tagStub = TagServiceGrpc.newBlockingStub(channel);
+        activeDiscoveryServiceBlockingStub = ActiveDiscoveryServiceGrpc.newBlockingStub(channel);
         icmpActiveDiscoveryServiceBlockingStub = IcmpActiveDiscoveryServiceGrpc.newBlockingStub(channel);
+        azureActiveDiscoveryServiceBlockingStub = AzureActiveDiscoveryServiceGrpc.newBlockingStub(channel);
         passiveDiscoveryServiceBlockingStub = PassiveDiscoveryServiceGrpc.newBlockingStub(channel);
     }
 
@@ -96,6 +101,13 @@ public class InventoryClient {
         if (channel != null && !channel.isShutdown()) {
             channel.shutdown();
         }
+    }
+
+    public List<ActiveDiscoveryDTO> listActiveDiscoveries(String accessToken) {
+        Metadata metadata = new Metadata();
+        metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
+        return activeDiscoveryServiceBlockingStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
+            .listDiscoveries(Empty.getDefaultInstance()).getActiveDiscoveriesList();
     }
 
     public IcmpActiveDiscoveryDTO createIcmpActiveDiscovery(IcmpActiveDiscoveryCreateDTO request, String accessToken) {

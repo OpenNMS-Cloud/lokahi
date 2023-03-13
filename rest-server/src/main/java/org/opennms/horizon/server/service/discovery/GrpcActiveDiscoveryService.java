@@ -1,8 +1,8 @@
 /*******************************************************************************
  * This file is part of OpenNMS(R).
  *
- * Copyright (C) 2023 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
+ * Copyright (C) 2022 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
  *
@@ -28,44 +28,50 @@
 
 package org.opennms.horizon.server.service.discovery;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.leangen.graphql.annotations.GraphQLEnvironment;
-import io.leangen.graphql.annotations.GraphQLMutation;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.execution.ResolutionEnvironment;
 import io.leangen.graphql.spqr.spring.annotations.GraphQLApi;
 import lombok.RequiredArgsConstructor;
-import org.opennms.horizon.inventory.discovery.IcmpActiveDiscoveryCreateDTO;
+import org.opennms.horizon.inventory.dto.ActiveDiscoveryDTO;
+import org.opennms.horizon.server.mapper.AzureActiveDiscoveryMapper;
 import org.opennms.horizon.server.mapper.IcmpActiveDiscoveryMapper;
-import org.opennms.horizon.server.model.inventory.discovery.active.IcmpActiveDiscovery;
-import org.opennms.horizon.server.model.inventory.discovery.active.IcmpActiveDiscoveryCreate;
+import org.opennms.horizon.server.model.inventory.discovery.active.ActiveDiscovery;
 import org.opennms.horizon.server.service.grpc.InventoryClient;
 import org.opennms.horizon.server.utils.ServerHeaderUtil;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
+
+import java.util.List;
 
 @RequiredArgsConstructor
 @GraphQLApi
 @Service
-public class GrpcIcmpActiveDiscoveryService {
-    private final IcmpActiveDiscoveryMapper mapper;
-    private final ServerHeaderUtil headerUtil;
+public class GrpcActiveDiscoveryService {
     private final InventoryClient client;
-
-    @GraphQLMutation
-    public Mono<IcmpActiveDiscovery> createIcmpActiveDiscovery(IcmpActiveDiscoveryCreate request, @GraphQLEnvironment ResolutionEnvironment env) {
-        IcmpActiveDiscoveryCreateDTO requestDto = mapper.mapRequest(request);
-        return Mono.just(mapper.dtoToIcmpActiveDiscovery(client.createIcmpActiveDiscovery(requestDto, headerUtil.getAuthHeader(env))));
-    }
+    private final IcmpActiveDiscoveryMapper icmpMapper;
+    private final AzureActiveDiscoveryMapper azureMapper;
+    private final ServerHeaderUtil headerUtil;
 
     @GraphQLQuery
-    public Flux<IcmpActiveDiscovery> listIcmpActiveDiscovery(@GraphQLEnvironment ResolutionEnvironment env) {
-        return Flux.fromIterable(mapper.dtoListToIcmpActiveDiscoveryList(client.listIcmpDiscoveries(headerUtil.getAuthHeader(env))));
+    public Flux<ActiveDiscovery> listActiveDiscovery(@GraphQLEnvironment ResolutionEnvironment env) {
+        List<ActiveDiscoveryDTO> discoveriesDto = client.listActiveDiscoveries(headerUtil.getAuthHeader(env));
+        return Flux.fromIterable(discoveriesDto.stream().map(this::getActiveDiscovery).toList());
     }
 
-    @GraphQLQuery
-    public Mono<IcmpActiveDiscovery> getIcmpActiveDiscoveryById(Long id, @GraphQLEnvironment ResolutionEnvironment env) {
-        return Mono.just(mapper.dtoToIcmpActiveDiscovery(client.getIcmpDiscoveryById(id, headerUtil.getAuthHeader(env))));
+    private ActiveDiscovery getActiveDiscovery(ActiveDiscoveryDTO activeDiscoveryDTO) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        ActiveDiscovery discovery = new ActiveDiscovery();
+        if (activeDiscoveryDTO.hasAzure()) {
+            discovery.setDetails(objectMapper.valueToTree(azureMapper.dtoToAzureActiveDiscovery(activeDiscoveryDTO.getAzure())));
+            discovery.setDiscoveryType("AZURE");
+        } else if (activeDiscoveryDTO.hasIcmp()) {
+            discovery.setDetails(objectMapper.valueToTree(icmpMapper.dtoToIcmpActiveDiscovery(activeDiscoveryDTO.getIcmp())));
+            discovery.setDiscoveryType("ICMP");
+        } else {
+            throw new RuntimeException("Invalid Active Discovery type returned");
+        }
+        return discovery;
     }
-
 }

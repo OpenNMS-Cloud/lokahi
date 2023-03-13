@@ -68,7 +68,7 @@ public interface IcmpActiveDiscoveryMapper {
         @Mapping(source = "ipAddressesList", target = "ipAddresses"),
         @Mapping(source = "snmpConf", target = "snmpConfig")
     })
-    IcmpActiveDiscovery configDtoToModel(IcmpActiveDiscoveryDTO configDTO);
+    IcmpActiveDiscovery dtoToIcmpActiveDiscovery(IcmpActiveDiscoveryDTO configDTO);
 
-    List<IcmpActiveDiscovery> configDtoListToConfig(List<IcmpActiveDiscoveryDTO> dtoList);
+    List<IcmpActiveDiscovery> dtoListToIcmpActiveDiscoveryList(List<IcmpActiveDiscoveryDTO> dtoList);
 }

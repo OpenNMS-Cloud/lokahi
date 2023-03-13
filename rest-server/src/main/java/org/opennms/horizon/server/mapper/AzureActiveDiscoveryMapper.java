@@ -43,7 +43,7 @@ import org.opennms.horizon.server.model.inventory.discovery.active.AzureActiveDi
     collectionMappingStrategy = CollectionMappingStrategy.ADDER_PREFERRED)
 public interface AzureActiveDiscoveryMapper {
 
-    AzureActiveDiscovery protoToAzureCredential(AzureActiveDiscoveryDTO dto);
+    AzureActiveDiscovery dtoToAzureActiveDiscovery(AzureActiveDiscoveryDTO dto);
 
     @Mapping(target = "location", source = "location", nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
     @Mapping(target = "tagsList", source = "tags", nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)

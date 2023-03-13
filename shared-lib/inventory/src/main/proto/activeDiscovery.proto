@@ -25,20 +25,29 @@
  *     http://www.opennms.org/
  *     http://www.opennms.com/
  *******************************************************************************/
-package org.opennms.horizon.inventory.repository.discovery.active;
+syntax = "proto3";
 
-import org.opennms.horizon.inventory.model.discovery.active.AzureActiveDiscovery;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
+import "google/protobuf/empty.proto";
+import "google/protobuf/wrappers.proto";
+import "azureActiveDiscovery.proto";
+import "icmpActiveDiscovery.proto";
 
-import java.util.Optional;
+package opennms.inventory;
+option java_multiple_files = true;
+option java_package = "org.opennms.horizon.inventory.dto";
 
-@Repository
-public interface AzureActiveDiscoveryRepository extends JpaRepository<AzureActiveDiscovery, Long> {
-    Optional<AzureActiveDiscovery> findByTenantIdAndId(String tenantId, long id);
 
-    Optional<AzureActiveDiscovery> findByTenantIdAndSubscriptionIdAndDirectoryIdAndClientId(String tenantId,
-                                                                                            String subscriptionId,
-                                                                                            String directoryId,
-                                                                                            String clientId);
+message ActiveDiscoveryDTO {
+  oneof activeDiscovery {
+    opennms.inventory.AzureActiveDiscoveryDTO azure = 1;
+    opennms.inventory.IcmpActiveDiscoveryDTO icmp = 2;
+  }
+}
+
+message ActiveDiscoveryList {
+  repeated ActiveDiscoveryDTO activeDiscoveries = 1;
+}
+
+service ActiveDiscoveryService {
+  rpc listDiscoveries(google.protobuf.Empty) returns(ActiveDiscoveryList);
 }

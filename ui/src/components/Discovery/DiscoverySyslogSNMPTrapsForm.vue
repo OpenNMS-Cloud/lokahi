@@ -119,10 +119,7 @@ watch(props, () => {
 
 const tagsAutocompleteRef = ref()
 const tagsSelectedListener = (tags: Record<string, string>[]) => {
-  discoveryInfo.value.tags = tags.map((tag) => {
-    delete tag._text
-    return tag
-  })
+  discoveryInfo.value.tags = tags.map((tag) => ({ name: tag.name }))
 }
 
 const contentEditableCommunityStringRef = ref()

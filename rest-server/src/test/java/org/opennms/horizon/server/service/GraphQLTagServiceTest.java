@@ -198,7 +198,7 @@ class GraphQLTagServiceTest {
         when(mockClient.getTagsByActiveDiscoveryId(anyLong(), any(), anyString())).thenReturn(tagListDTO);
 
         String getRequest = "query { " +
-            "    tagsByAzureCredentialId (azureCredentialId: 1) { " +
+            "    tagsByActiveDiscoveryId (activeDiscoveryId: 1) { " +
             "        id, " +
             "        tenantId, " +
             "        name " +
@@ -212,12 +212,12 @@ class GraphQLTagServiceTest {
             .exchange()
             .expectStatus().isOk()
             .expectBody()
-            .jsonPath("$.data.tagsByAzureCredentialId[0].id").isEqualTo(1)
-            .jsonPath("$.data.tagsByAzureCredentialId[0].tenantId").isNotEmpty()
-            .jsonPath("$.data.tagsByAzureCredentialId[0].name").isEqualTo(TEST_TAG_NAME_1)
-            .jsonPath("$.data.tagsByAzureCredentialId[1].id").isEqualTo(2)
-            .jsonPath("$.data.tagsByAzureCredentialId[1].tenantId").isNotEmpty()
-            .jsonPath("$.data.tagsByAzureCredentialId[1].name").isEqualTo(TEST_TAG_NAME_2);
+            .jsonPath("$.data.tagsByActiveDiscoveryId[0].id").isEqualTo(1)
+            .jsonPath("$.data.tagsByActiveDiscoveryId[0].tenantId").isNotEmpty()
+            .jsonPath("$.data.tagsByActiveDiscoveryId[0].name").isEqualTo(TEST_TAG_NAME_1)
+            .jsonPath("$.data.tagsByActiveDiscoveryId[1].id").isEqualTo(2)
+            .jsonPath("$.data.tagsByActiveDiscoveryId[1].tenantId").isNotEmpty()
+            .jsonPath("$.data.tagsByActiveDiscoveryId[1].name").isEqualTo(TEST_TAG_NAME_2);
 
         verify(mockClient, times(1)).getTagsByActiveDiscoveryId(1L, null, accessToken);
         verify(mockHeaderUtil, times(1)).getAuthHeader(any(ResolutionEnvironment.class));
@@ -232,7 +232,7 @@ class GraphQLTagServiceTest {
         when(mockClient.getTagsByActiveDiscoveryId(anyLong(), anyString(), anyString())).thenReturn(tagListDTO);
 
         String getRequest = "query { " +
-            "    tagsByAzureCredentialId (azureCredentialId: 1, searchTerm: \"abc\") { " +
+            "    tagsByActiveDiscoveryId (activeDiscoveryId: 1, searchTerm: \"abc\") { " +
             "        id, " +
             "        tenantId, " +
             "        name " +
@@ -246,12 +246,12 @@ class GraphQLTagServiceTest {
             .exchange()
             .expectStatus().isOk()
             .expectBody()
-            .jsonPath("$.data.tagsByAzureCredentialId[0].id").isEqualTo(1)
-            .jsonPath("$.data.tagsByAzureCredentialId[0].tenantId").isNotEmpty()
-            .jsonPath("$.data.tagsByAzureCredentialId[0].name").isEqualTo(TEST_TAG_NAME_1)
-            .jsonPath("$.data.tagsByAzureCredentialId[1].id").isEqualTo(2)
-            .jsonPath("$.data.tagsByAzureCredentialId[1].tenantId").isNotEmpty()
-            .jsonPath("$.data.tagsByAzureCredentialId[1].name").isEqualTo(TEST_TAG_NAME_2);
+            .jsonPath("$.data.tagsByActiveDiscoveryId[0].id").isEqualTo(1)
+            .jsonPath("$.data.tagsByActiveDiscoveryId[0].tenantId").isNotEmpty()
+            .jsonPath("$.data.tagsByActiveDiscoveryId[0].name").isEqualTo(TEST_TAG_NAME_1)
+            .jsonPath("$.data.tagsByActiveDiscoveryId[1].id").isEqualTo(2)
+            .jsonPath("$.data.tagsByActiveDiscoveryId[1].tenantId").isNotEmpty()
+            .jsonPath("$.data.tagsByActiveDiscoveryId[1].name").isEqualTo(TEST_TAG_NAME_2);
 
         verify(mockClient, times(1)).getTagsByActiveDiscoveryId(1L, "abc", accessToken);
         verify(mockHeaderUtil, times(1)).getAuthHeader(any(ResolutionEnvironment.class));

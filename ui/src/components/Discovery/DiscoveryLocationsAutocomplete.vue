@@ -85,7 +85,7 @@ watchOnce(computedLocations, () => {
     selectedLocation.value = first(computedLocations.value) as Location
     locations.value = []
     filteredLocations.value = []
-    emit('location-selected', selectedLocation.value)
+    emit('location-selected', selectedLocation.value.location)
   }
 })
 

@@ -8,11 +8,7 @@ const { startSpinner, stopSpinner } = useSpinner()
 
 export const useNotificationMutations = defineStore('notificationMutations', () => {
   // send pager duty integration key
-  const {
-    execute: savePagerDutyIntegrationKey,
-    isFetching,
-    error
-  } = useMutation(SavePagerDutyConfigDocument)
+  const { execute: savePagerDutyIntegrationKey, isFetching, error } = useMutation(SavePagerDutyConfigDocument)
 
   watchEffect(() => {
     if (isFetching.value) {

@@ -1,8 +1,8 @@
 import { defineStore } from 'pinia'
 import { useMutation } from 'villus'
-import { 
-  AddAzureCredentialDocument, 
-  CreateActiveDiscoveryDocument, 
+import {
+  AddAzureCredentialDocument,
+  CreateActiveDiscoveryDocument,
   UpsertPassiveDiscoveryDocument,
   TogglePassiveDiscoveryDocument
 } from '@/types/graphql'
@@ -25,10 +25,8 @@ export const useDiscoveryMutations = defineStore('discoveryMutations', () => {
     isFetching: isFetchingPassiveDiscovery
   } = useMutation(UpsertPassiveDiscoveryDocument)
 
-    // Toggle Passive Discoveries
-    const {
-      execute: togglePassiveDiscovery
-    } = useMutation(TogglePassiveDiscoveryDocument)
+  // Toggle Passive Discoveries
+  const { execute: togglePassiveDiscovery } = useMutation(TogglePassiveDiscoveryDocument)
 
   return {
     addAzureCreds,

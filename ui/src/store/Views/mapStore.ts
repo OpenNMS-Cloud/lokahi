@@ -9,19 +9,21 @@ import { AlarmModificationQueryVariable } from '@/types/map'
 
 export const useMapStore = defineStore('mapStore', () => {
   const mapQueries = useMapQueries()
-  
+
   const areDevicesFetching = computed(() => mapQueries.isFetching)
   // TODO: Uncomment when nodes have locations
   // const nodesWithCoordinates = computed(() => mapQueries.nodes.filter((node: Node) => node.location?.latitude && node.location.longitude))
 
-  const devicesInbounds = computed(() => mapQueries.nodes.filter((node: Node) => {
-    return false
-    // const location: LatLngLiteral = {
-    //   lat: node.location?.latitude || -9999999.99,
-    //   lng: node.location?.longitude || -9999999.99
-    // }
-    // return mapBounds.value?.contains(location)
-  }))
+  const devicesInbounds = computed(() =>
+    mapQueries.nodes.filter((node: Node) => {
+      return false
+      // const location: LatLngLiteral = {
+      //   lat: node.location?.latitude || -9999999.99,
+      //   lng: node.location?.longitude || -9999999.99
+      // }
+      // return mapBounds.value?.contains(location)
+    })
+  )
 
   const alarms: any[] = [],
     interestedDevicesID: string[] = [],
@@ -31,21 +33,20 @@ export const useMapStore = defineStore('mapStore', () => {
     searchedDeviceLabels: string[] = [],
     deviceSortObject: FeatherSortObject = { property: 'label', value: SORT.ASCENDING },
     alarmSortObject: FeatherSortObject = { property: 'id', value: SORT.DESCENDING }
-  
+
   const fetchAlarms = () => []
 
   const getDeviceAlarmSeverityMap = (): Record<string, string> => {
     const map: { [x: string]: string } = {}
 
     alarms.forEach((alarm: any) => {
-      if(alarm.nodeLabel) {
+      if (alarm.nodeLabel) {
         if (numericSeverityLevel(alarm.severity) > numericSeverityLevel(map[alarm.nodeLabel])) {
           map[alarm.nodeLabel] = alarm.severity?.toUpperCase() || ''
         }
       }
-      
     })
-    
+
     return map
   }
 

@@ -12,4 +12,7 @@ const mockData: Minion = {
   locationId: 1 // TODO: this should be removed once Minion type updated
 }
 
-export const minionFixture = (mockMinion = mockData, props: Partial<Minion> = {}): Minion => ({ ...mockMinion, ...props })
+export const minionFixture = (mockMinion = mockData, props: Partial<Minion> = {}): Minion => ({
+  ...mockMinion,
+  ...props
+})

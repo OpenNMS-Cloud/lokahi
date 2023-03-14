@@ -5,14 +5,10 @@ const mockData: Event = {
   uei: 'uei',
   nodeId: 1,
   ipAddress: '127.0.0.1',
-  producedTime: '2022-09-20T09:25:44Z',
+  producedTime: '2022-09-20T09:25:44Z'
 }
 const eventsFixture = (props: Partial<Event> = {}) => ({
-  events: [
-    { ...mockData, ...props }
-  ]
+  events: [{ ...mockData, ...props }]
 })
 
-export {
-  eventsFixture
-}
+export { eventsFixture }

@@ -19,18 +19,18 @@ export const useGraphs = () => {
     for (const metricStr of metrics) {
       variables.value = { name: metricStr, monitor, timeRange, timeRangeUnit, instance, nodeId }
       await getMetric()
-      
+
       const result = data.value?.metric?.data?.result?.[0]
-  
-      if(result) {
+
+      if (result) {
         const { metric, values } = result
-    
-        if(values?.length) {
+
+        if (values?.length) {
           dataSetsObject[metric.__name__] = {
             metric,
-            values: values.filter(val => {
+            values: values.filter((val) => {
               const [timestamp, value] = val
-              if(timestamp && value) return val
+              if (timestamp && value) return val
             })
           }
         }

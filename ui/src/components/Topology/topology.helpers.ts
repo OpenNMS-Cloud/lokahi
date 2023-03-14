@@ -1,4 +1,3 @@
-
 import { orderBy } from 'lodash'
 import { TopologyGraphList, TopologyGraph } from '@/types/topology'
 import { DisplayType } from './topology.constants'
@@ -9,9 +8,9 @@ import { DisplayType } from './topology.constants'
  * @returns list of TopologyGraphList
  */
 export const formatTopologyGraphs = (graphList: TopologyGraphList[]): TopologyGraphList[] => {
-  if(!graphList.length) return []
-  
-  const topologyGraphs = graphList.map(({graphs = [], id = '', label, description}) => {
+  if (!graphList.length) return []
+
+  const topologyGraphs = graphList.map(({ graphs = [], id = '', label, description }) => {
     const graphsWithIndex = graphs.map((g, index) => ({
       ...g,
       index
@@ -32,13 +31,13 @@ export const formatTopologyGraphs = (graphList: TopologyGraphList[]): TopologyGr
 /**
  * Order the graphs list by the display graph id
  * Note: this is probably no longer relevant since API response seems already being ordered
- * 
- * @param graphs 
- * @param id 
+ *
+ * @param graphs
+ * @param id
  * @returns an ordered list
  */
 export const orderPowergridGraph = (graphs: TopologyGraph[], id = ''): object => {
-  let orderedGraphs = [ ...graphs ]
+  let orderedGraphs = [...graphs]
   const orderedLayers = id?.split('.')
 
   for (const graph of orderedGraphs) {

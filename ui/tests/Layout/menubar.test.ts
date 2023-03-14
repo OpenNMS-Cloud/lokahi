@@ -21,7 +21,7 @@ test('The toggle dark btn triggers the composible function, and the ref updates'
   const unchangedThemeValue = theme.isDark.value
   const mockFn = vi.fn(() => 'this is a mock callback')
   theme.onThemeChange(mockFn)
-  
+
   // get and trigger dark/light mode btn
   const wrapper = setupWrapper({
     component: Menubar
@@ -33,4 +33,3 @@ test('The toggle dark btn triggers the composible function, and the ref updates'
   expect(mockFn).toHaveBeenCalledOnce()
   expect(theme.isDark.value).toBe(!unchangedThemeValue)
 })
-

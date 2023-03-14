@@ -2,10 +2,15 @@ import { createTestingPinia } from '@pinia/testing'
 import { useAppliancesQueries } from '@/store/Queries/appliancesQueries'
 import { minionFixture } from '../../fixture/minions'
 import { nodeFixture } from '../../fixture/nodes'
-import { minionLatencyFixture, minionUptimeFixture, deviceLatencyFixture, deviceUptimeFixture } from '../../fixture/metrics'
+import {
+  minionLatencyFixture,
+  minionUptimeFixture,
+  deviceLatencyFixture,
+  deviceUptimeFixture
+} from '../../fixture/metrics'
 import { locationsFixture, expectedLocations } from '../../fixture/locations'
 
-describe('Appliances queries', () =>{
+describe('Appliances queries', () => {
   beforeEach(() => {
     createTestingPinia()
   })
@@ -20,10 +25,10 @@ describe('Appliances queries', () =>{
       useQuery: vi.fn().mockImplementation(() => ({
         data: {
           value: {
-            findAllMinions: [ minionFixture() ],
+            findAllMinions: [minionFixture()],
             minionLatency: minionLatencyFixture(),
             minionUptime: minionUptimeFixture(),
-            findAllNodes:  [ nodeFixture() ],
+            findAllNodes: [nodeFixture()],
             deviceLatency: deviceLatencyFixture(),
             deviceUptime: deviceUptimeFixture(),
             findAllLocations: locationsFixture()
@@ -31,10 +36,10 @@ describe('Appliances queries', () =>{
         },
         isFetching: {
           value: false
-        } 
+        }
       }))
     }))
-    
+
     const expectedAppliancesMinions = [
       {
         id: 'minion-01',

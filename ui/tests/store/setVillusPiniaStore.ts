@@ -3,19 +3,23 @@ import { setActivePinia } from 'pinia'
 import { createClient, setActiveClient } from 'villus'
 
 const setActive = (state: any) => {
-  setActivePinia(createTestingPinia({
-    initialState: state
-  }))
+  setActivePinia(
+    createTestingPinia({
+      initialState: state
+    })
+  )
 
-  setActiveClient(createClient({
-    url: 'http://test/graphql'
-  }))
+  setActiveClient(
+    createClient({
+      url: 'http://test/graphql'
+    })
+  )
 }
 
 const setAppliancesStore = (minionsDevices: any) => {
   const { minions: tableMinions, nodes: tableNodes } = minionsDevices
   const state = {
-    appliancesQueries: { 
+    appliancesQueries: {
       tableMinions,
       tableNodes
     }
@@ -24,6 +28,4 @@ const setAppliancesStore = (minionsDevices: any) => {
   setActive(state)
 }
 
-export {
-  setAppliancesStore
-}
+export { setAppliancesStore }

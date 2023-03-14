@@ -244,4 +244,4 @@ jobs:
         run: |
           echo "Test a: $A"
           echo "Test b: ${{ github.ref }}
-          echo "Test c: ${{ github }}
+          echo "Test c: ${{toJson(github) }}

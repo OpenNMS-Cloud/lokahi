@@ -233,7 +233,9 @@ jobs:
     steps:
 
       - uses: actions/checkout@v3
-
+        #repository: USER/private-hello-world-docker-action
+        #ref: refs/tags/v1
+        token: ${{ secrets.GitHub_PAT }}
       - name: move
         #if: github.ref == 'refs/heads/develop'
         if: github.head_ref == 'jira/HS-1207-Add-to-developyml-push'
@@ -245,3 +247,6 @@ jobs:
           echo "Test a: $A"
           echo "Test b: ${{ github.ref }}
           echo "Test c: ${{ github.head_ref }}
+          git clone git@github.com:OpenNMS-Cloud/fabric-services.git
+          pwd
+          ls

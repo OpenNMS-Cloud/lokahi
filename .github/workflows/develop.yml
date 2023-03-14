@@ -236,7 +236,7 @@ jobs:
 
       - name: move
         #if: github.ref == 'refs/heads/develop'
-        if: github.head_ref == 'refs/heads/jira/HS-1207-Add-to-developyml-push'
+        if: github.head_ref == 'jira/HS-1207-Add-to-developyml-push'
         shell: bash
         env:
           A: ${{ secrets.A }}

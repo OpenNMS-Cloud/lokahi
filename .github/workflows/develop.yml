@@ -248,11 +248,9 @@ jobs:
           echo "Test b: ${{ github.ref }}
           echo "Test c: ${{ github.head_ref }}
           pwd
-          ls
+          ls .github/workflows 
           git remote -v
           
           git clone https://github.com/OpenNMS-Cloud/horizon-stream.git
 
-          ls
-        
-          echo 
+          cat .gitignore

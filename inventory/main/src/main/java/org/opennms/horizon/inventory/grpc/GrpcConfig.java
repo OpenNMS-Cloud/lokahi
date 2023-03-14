@@ -33,6 +33,10 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.keycloak.adapters.KeycloakDeployment;
 import org.keycloak.adapters.rotation.JWKPublicKeyLocator;
 import org.keycloak.representations.adapters.config.AdapterConfig;
+import org.opennms.horizon.inventory.grpc.discovery.ActiveDiscoveryGrpcService;
+import org.opennms.horizon.inventory.grpc.discovery.IcmpActiveDiscoveryGrpcService;
+import org.opennms.horizon.inventory.grpc.discovery.AzureActiveDiscoveryGrpcService;
+import org.opennms.horizon.inventory.grpc.discovery.PassiveDiscoveryGrpcService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -78,12 +82,13 @@ public class GrpcConfig {
 
     @Bean(destroyMethod = "stopServer")
     public GrpcServerManager startServer(MonitoringLocationGrpcService locationGrpc, MonitoringSystemGrpcService systemGrpc,
-                                         NodeGrpcService nodeGrpcService, AzureCredentialGrpcService azureCredentialGrpcService, TagGrpcService tagGrpcService,
+                                         NodeGrpcService nodeGrpcService, AzureActiveDiscoveryGrpcService azureActiveDiscoveryGrpcService, TagGrpcService tagGrpcService,
                                          InventoryServerInterceptor interceptor,
                                          ActiveDiscoveryGrpcService activeDiscoveryGrpcService,
+                                         IcmpActiveDiscoveryGrpcService icmpActiveDiscoveryGrpcService,
                                          PassiveDiscoveryGrpcService passiveDiscoveryGrpcService) {
         GrpcServerManager manager = new GrpcServerManager(port, interceptor);
-        manager.startServer(locationGrpc, systemGrpc, nodeGrpcService, azureCredentialGrpcService, tagGrpcService, activeDiscoveryGrpcService, passiveDiscoveryGrpcService);
+        manager.startServer(locationGrpc, systemGrpc, nodeGrpcService, azureActiveDiscoveryGrpcService, tagGrpcService, activeDiscoveryGrpcService, icmpActiveDiscoveryGrpcService, passiveDiscoveryGrpcService);
         return manager;
     }
 }

@@ -10,7 +10,7 @@ const toggleDark = useToggle(isDark)
 const useTheme = () => {
   let onThemeChangeCallback: () => void
 
-  const onThemeChange = (callback: () => void) => onThemeChangeCallback = callback
+  const onThemeChange = (callback: () => void) => (onThemeChangeCallback = callback)
 
   watch(isDark, () => {
     if (onThemeChangeCallback) {

@@ -3,16 +3,6 @@ query ListLocationsForDiscovery {
 }
 
 query ListDiscoveries {
-  listActiveDiscovery {
-    id
-    configName
-    ipAddresses
-    location
-    snmpConfig {
-      ports
-      readCommunities
-    }
-  }
   passiveDiscoveries {
     id
     location
@@ -20,5 +10,9 @@ query ListDiscoveries {
     snmpCommunities
     snmpPorts
     toggle
+  },
+  listActiveDiscovery {
+    details
+    discoveryType
   }
 }

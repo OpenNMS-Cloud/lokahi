@@ -15,7 +15,7 @@ describe.skip('AppliancesNodesTable.vue', () => {
           status: 'UP'
         }
       ]
-      setAppliancesStore({nodes: computed(() => deviceItems)})
+      setAppliancesStore({ nodes: computed(() => deviceItems) })
     })
 
     const requiredColumns = [
@@ -27,22 +27,22 @@ describe.skip('AppliancesNodesTable.vue', () => {
 
     it.each(requiredColumns)('should have "%s" column', (_, dataTest) => {
       const wrapper = mount(AppliancesNodesTable)
-       
+
       const elem = wrapper.find(`[data-test="${dataTest}"]`)
       expect(elem.exists()).toBe(true)
     })
   })
 
   describe('Device list', () => {
-    it('should have an empty table when there\'s no node', () =>{
-      setAppliancesStore({nodes: computed(() => [])})
+    it("should have an empty table when there's no node", () => {
+      setAppliancesStore({ nodes: computed(() => []) })
       const wrapper = mount(AppliancesNodesTable)
-         
+
       const deviceItem = wrapper.find('[data-test="node-item"]')
       expect(deviceItem.exists()).toBe(false)
     })
-    
-    it('should display a list when there\'s node', () => {
+
+    it("should display a list when there's node", () => {
       const deviceItems = [
         {
           id: '1',
@@ -52,7 +52,7 @@ describe.skip('AppliancesNodesTable.vue', () => {
           status: 'DOWN'
         }
       ]
-      setAppliancesStore({nodes: computed(() => deviceItems)}) 
+      setAppliancesStore({ nodes: computed(() => deviceItems) })
       const wrapper = mount(AppliancesNodesTable)
 
       const deviceItem = wrapper.find('[data-test="node-item"]')
@@ -92,20 +92,23 @@ describe.skip('AppliancesNodesTable.vue', () => {
             snmp_uptime: 10,
             status: 'UP'
           }
-        ] 
-        setAppliancesStore({nodes: computed(() => deviceItems)}) 
+        ]
+        setAppliancesStore({ nodes: computed(() => deviceItems) })
       })
-  
+
       /**
        * Construct an array containing arrays of metric value and background
        * @param elems Elements of the selector
        * @returns Array of arrays [[undefined, 'unknown'], ['-10', 'failed'],...]
        */
-      const formatValueBackground = (elems: any[]) => elems.map((elem: any) => {
-        const css = elem.classes().filter((cl: string | string[]) => ['unknown', 'ok', 'failed'].find(status => status === cl))[0]
+      const formatValueBackground = (elems: any[]) =>
+        elems.map((elem: any) => {
+          const css = elem
+            .classes()
+            .filter((cl: string | string[]) => ['unknown', 'ok', 'failed'].find((status) => status === cl))[0]
 
-        return [elem.attributes('data-metric'), css]
-      })
+          return [elem.attributes('data-metric'), css]
+        })
 
       test('Latency OK/FAILED/UNKNOWN should have the corresponding background color', () => {
         const wrapper = mount(AppliancesNodesTable)
@@ -119,7 +122,7 @@ describe.skip('AppliancesNodesTable.vue', () => {
         ]
         expect(latencies).toStrictEqual(expectedValueBackground)
       })
-        
+
       test('Uptime OK/FAILED/UNKNOWN should have the corresponding background color', () => {
         const wrapper = mount(AppliancesNodesTable)
 
@@ -128,12 +131,12 @@ describe.skip('AppliancesNodesTable.vue', () => {
           [undefined, 'unknown'],
           ['-10', 'failed'],
           ['0', 'ok'],
-          ['10', 'ok'] 
+          ['10', 'ok']
         ]
         expect(uptimes).toStrictEqual(expectedValueBackground)
       })
     })
-    
+
     describe('Status', () => {
       beforeAll(() => {
         const deviceItems = [
@@ -151,8 +154,8 @@ describe.skip('AppliancesNodesTable.vue', () => {
             snmp_uptime: 0,
             status: 'DOWN'
           }
-        ] 
-        setAppliancesStore({nodes: computed(() => deviceItems)}) 
+        ]
+        setAppliancesStore({ nodes: computed(() => deviceItems) })
       })
 
       /**
@@ -160,12 +163,15 @@ describe.skip('AppliancesNodesTable.vue', () => {
        * @param elems Elements of the selector
        * @returns Array of arrays [['UP', 'ok'],[...]]
        */
-      const formatValueBackground = (elems: any[]) => elems.map((elem: { classes: () => any; text: () => any }) => {
-        const val = ['UP','DOWN'].filter((val: string) => elem.text().indexOf(val) >= 0)[0]
-        const css = elem.classes().filter((cl: string | string[]) => ['ok', 'failed'].find(status => status === cl))[0]
-        
-        return [ val, css ]
-      })
+      const formatValueBackground = (elems: any[]) =>
+        elems.map((elem: { classes: () => any; text: () => any }) => {
+          const val = ['UP', 'DOWN'].filter((val: string) => elem.text().indexOf(val) >= 0)[0]
+          const css = elem
+            .classes()
+            .filter((cl: string | string[]) => ['ok', 'failed'].find((status) => status === cl))[0]
+
+          return [val, css]
+        })
 
       test('Status UP/DOWN should have the corresponding background color', () => {
         const wrapper = mount(AppliancesNodesTable)

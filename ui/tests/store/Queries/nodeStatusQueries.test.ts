@@ -15,14 +15,15 @@ describe('Events queries', () => {
   it('fetched events, nodes and metrics', () => {
     vi.mock('villus', () => ({
       useQuery: vi.fn().mockImplementation(() => ({
-        data: { 
-          value: { 
+        data: {
+          value: {
             events: eventsFixture(),
             node: nodeFixture()
-          }}
+          }
+        }
       }))
     }))
-    
+
     const nodeStatusQueries = useNodeStatusQueries()
     nodeStatusQueries.setNodeId(2)
 

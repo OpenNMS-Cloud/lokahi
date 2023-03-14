@@ -41,13 +41,13 @@ import org.opennms.horizon.inventory.dto.TagListParamsDTO;
 import org.opennms.horizon.inventory.dto.TagRemoveListDTO;
 import org.opennms.horizon.inventory.exception.InventoryRuntimeException;
 import org.opennms.horizon.inventory.mapper.TagMapper;
-import org.opennms.horizon.inventory.model.AzureCredential;
 import org.opennms.horizon.inventory.model.Node;
+import org.opennms.horizon.inventory.model.discovery.PassiveDiscovery;
 import org.opennms.horizon.inventory.model.Tag;
-import org.opennms.horizon.inventory.model.PassiveDiscovery;
-import org.opennms.horizon.inventory.repository.AzureCredentialRepository;
+import org.opennms.horizon.inventory.model.discovery.active.ActiveDiscovery;
+import org.opennms.horizon.inventory.repository.discovery.active.ActiveDiscoveryRepository;
 import org.opennms.horizon.inventory.repository.NodeRepository;
-import org.opennms.horizon.inventory.repository.PassiveDiscoveryRepository;
+import org.opennms.horizon.inventory.repository.discovery.PassiveDiscoveryRepository;
 import org.opennms.horizon.inventory.repository.TagRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -55,14 +55,13 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Consumer;
 
 @Service
 @RequiredArgsConstructor
 public class TagService {
     private final TagRepository repository;
     private final NodeRepository nodeRepository;
-    private final AzureCredentialRepository azureCredentialRepository;
+    private final ActiveDiscoveryRepository activeDiscoveryRepository;
     private final PassiveDiscoveryRepository passiveDiscoveryRepository;
     private final TagMapper mapper;
 
@@ -76,10 +75,10 @@ public class TagService {
             return request.getTagsList().stream()
                 .map(tagCreateDTO -> addTagToNode(tenantId, node, tagCreateDTO))
                 .toList();
-        } else if (request.hasAzureCredentialId()) {
-            AzureCredential credential = getAzureCredential(tenantId, request.getAzureCredentialId());
+        } else if (request.hasActiveDiscoveryId()) {
+            ActiveDiscovery discovery = getActiveDiscovery(tenantId, request.getActiveDiscoveryId());
             return request.getTagsList().stream()
-                .map(tagCreateDTO -> addTagToAzureCredential(tenantId, credential, tagCreateDTO))
+                .map(tagCreateDTO -> addTagToActiveDiscovery(tenantId, discovery, tagCreateDTO))
                 .toList();
         } else if (request.hasPassiveDiscoveryId()) {
             PassiveDiscovery discovery = getPassiveDiscovery(tenantId, request.getPassiveDiscoveryId());
@@ -101,9 +100,9 @@ public class TagService {
         if (request.hasNodeId()) {
             Node node = getNode(tenantId, request.getNodeId());
             tags.forEach(tag -> tag.getNodes().remove(node));
-        } else if (request.hasAzureCredentialId()) {
-            AzureCredential azureCredential = getAzureCredential(tenantId, request.getAzureCredentialId());
-            tags.forEach(tag -> tag.getAzureCredentials().remove(azureCredential));
+        } else if (request.hasActiveDiscoveryId()) {
+            ActiveDiscovery activeDiscovery = getActiveDiscovery(tenantId, request.getActiveDiscoveryId());
+            tags.forEach(tag -> tag.getActiveDiscoveries().remove(activeDiscovery));
         } else if (request.hasPassiveDiscoveryId()) {
             PassiveDiscovery discovery = getPassiveDiscovery(tenantId, request.getPassiveDiscoveryId());
             tags.forEach(tag -> tag.getPassiveDiscoveries().remove(discovery));
@@ -113,8 +112,8 @@ public class TagService {
     public List<TagDTO> getTagsByEntityId(String tenantId, ListTagsByEntityIdParamsDTO listParams) {
         if (listParams.hasNodeId()) {
             return getTagsByNodeId(tenantId, listParams);
-        } else if (listParams.hasAzureCredentialId()) {
-            return getTagsByAzureCredentialId(tenantId, listParams);
+        } else if (listParams.hasActiveDiscoveryId()) {
+            return getTagsByActiveDiscoveryId(tenantId, listParams);
         } else if (listParams.hasPassiveDiscoveryId()) {
             return getTagsByPassiveDiscoveryId(tenantId, listParams);
         } else {
@@ -146,7 +145,7 @@ public class TagService {
             if (tagOpt.isPresent()) {
                 Tag tag = tagOpt.get();
                 tag.getNodes().clear();
-                tag.getAzureCredentials().clear();
+                tag.getActiveDiscoveries().clear();
                 tag.getPassiveDiscoveries().clear();
 
                 repository.delete(tag);
@@ -159,9 +158,9 @@ public class TagService {
         if (request.hasNodeId()) {
             Node node = getNode(tenantId, request.getNodeId());
             node.getTags().forEach(tag -> tag.getNodes().remove(node));
-        } else if (request.hasAzureCredentialId()) {
-            AzureCredential azureCredential = getAzureCredential(tenantId, request.getAzureCredentialId());
-            azureCredential.getTags().forEach(tag -> tag.getAzureCredentials().remove(azureCredential));
+        } else if (request.hasActiveDiscoveryId()) {
+            ActiveDiscovery activeDiscovery = getActiveDiscovery(tenantId, request.getActiveDiscoveryId());
+            activeDiscovery.getTags().forEach(tag -> tag.getActiveDiscoveries().remove(activeDiscovery));
         } else if (request.hasPassiveDiscoveryId()) {
             PassiveDiscovery discovery = getPassiveDiscovery(tenantId, request.getPassiveDiscoveryId());
             discovery.getTags().forEach(tag -> tag.getPassiveDiscoveries().remove(discovery));
@@ -188,11 +187,11 @@ public class TagService {
         return mapper.modelToDTO(tag);
     }
 
-    private TagDTO addTagToAzureCredential(String tenantId, AzureCredential credential, TagCreateDTO tagCreateDTO) {
+    private TagDTO addTagToActiveDiscovery(String tenantId, ActiveDiscovery discovery, TagCreateDTO tagCreateDTO) {
         String tagName = tagCreateDTO.getName();
 
         Optional<Tag> tagOpt = repository
-            .findByTenantIdAzureCredentialIdAndName(tenantId, credential.getId(), tagName);
+            .findByTenantIdActiveDiscoveryIdAndName(tenantId, discovery.getId(), tagName);
 
         if (tagOpt.isPresent()) {
             return mapper.modelToDTO(tagOpt.get());
@@ -201,7 +200,7 @@ public class TagService {
         tagOpt = repository.findByTenantIdAndName(tenantId, tagName);
         Tag tag = tagOpt.orElseGet(() -> mapCreateTag(tenantId, tagCreateDTO));
 
-        tag.getAzureCredentials().add(credential);
+        tag.getActiveDiscoveries().add(discovery);
         tag = repository.save(tag);
 
         return mapper.modelToDTO(tag);
@@ -248,12 +247,12 @@ public class TagService {
         return tagOpt.get();
     }
 
-    private AzureCredential getAzureCredential(String tenantId, long credentialId) {
-        Optional<AzureCredential> azureCredentialOpt = azureCredentialRepository.findByTenantIdAndId(tenantId, credentialId);
-        if (azureCredentialOpt.isEmpty()) {
-            throw new InventoryRuntimeException("Azure Credential not found for id: " + credentialId);
+    private ActiveDiscovery getActiveDiscovery(String tenantId, long credentialId) {
+        Optional<ActiveDiscovery> discoveryOpt = activeDiscoveryRepository.findByTenantIdAndId(tenantId, credentialId);
+        if (discoveryOpt.isEmpty()) {
+            throw new InventoryRuntimeException("Active Discovery not found for id: " + credentialId);
         }
-        return azureCredentialOpt.get();
+        return discoveryOpt.get();
     }
 
     private PassiveDiscovery getPassiveDiscovery(String tenantId, long trapdPassiveDiscoveryId) {
@@ -279,18 +278,18 @@ public class TagService {
             .stream().map(mapper::modelToDTO).toList();
     }
 
-    private List<TagDTO> getTagsByAzureCredentialId(String tenantId, ListTagsByEntityIdParamsDTO listParams) {
-        long azureCredentialId = listParams.getAzureCredentialId();
+    private List<TagDTO> getTagsByActiveDiscoveryId(String tenantId, ListTagsByEntityIdParamsDTO listParams) {
+        long activeDiscoveryId = listParams.getActiveDiscoveryId();
         if (listParams.hasParams()) {
             TagListParamsDTO params = listParams.getParams();
             String searchTerm = params.getSearchTerm();
 
             if (StringUtils.isNotEmpty(searchTerm)) {
-                return repository.findByTenantIdAndAzureCredentialIdAndNameLike(tenantId, azureCredentialId, searchTerm)
+                return repository.findByTenantIdAndActiveDiscoveryIdAndNameLike(tenantId, activeDiscoveryId, searchTerm)
                     .stream().map(mapper::modelToDTO).toList();
             }
         }
-        return repository.findByTenantIdAndAzureCredentialId(tenantId, azureCredentialId)
+        return repository.findByTenantIdAndActiveDiscoveryId(tenantId, activeDiscoveryId)
             .stream().map(mapper::modelToDTO).toList();
     }
 

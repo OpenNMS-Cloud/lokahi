@@ -2,10 +2,10 @@ import { fromUnixTime, format } from 'date-fns'
 import jsPDF from 'jspdf'
 
 /**
- * 
+ *
  * @param timestamp in milliseconds
- * @param formatStr 
- * @returns 
+ * @param formatStr
+ * @returns
  */
 export const formatTimestamp = (timestamp: number, formatStr: string) => {
   const date = fromUnixTime(timestamp)
@@ -34,7 +34,7 @@ export const formatTimestamp = (timestamp: number, formatStr: string) => {
  * @param canvas HTMLCanvasElement
  * @param filename string
  * @returns void
- * 
+ *
  * Takes a canvas element and downloads as PDF
  */
 export const downloadCanvas = (canvas: HTMLCanvasElement, filename: string) => {
@@ -50,7 +50,7 @@ export const downloadCanvas = (canvas: HTMLCanvasElement, filename: string) => {
  * @param page HTMLElement
  * @param canvases HTMLCollectionOf<HTMLCanvasElement>
  * @returns void
- * 
+ *
  * Takes an element and a list of canvases within.
  * Loops and downloads to PDF.
  */
@@ -62,7 +62,7 @@ export const downloadMultipleCanvases = (page: HTMLElement, canvases: HTMLCollec
   const pageCanvas = document.createElement('canvas')
   pageCanvas.id = 'pagecanvas'
   pageCanvas.width = pageWidth
-  pageCanvas.height = pageHeight 
+  pageCanvas.height = pageHeight
 
   // keep track canvas position
   const pdfctx = pageCanvas.getContext('2d') as CanvasRenderingContext2D
@@ -77,14 +77,14 @@ export const downloadMultipleCanvases = (page: HTMLElement, canvases: HTMLCollec
     // draw the canvas into the new canvas
     pdfctx.drawImage(canvases[i], pdfctxX, pdfctxY, canvasWidth, canvasHeight)
     pdfctxX += canvasWidth + widthBuffer
-    
+
     // linebreak every three graphs
     if ((i + 1) % 3 === 0) {
-      pdfctxX = 0;
+      pdfctxX = 0
       pdfctxY += canvasHeight
     }
   }
-  
+
   // create new landscape pdf and add our new canvas
   const pdf = new jsPDF('l', 'pt', [pageWidth, pageHeight])
   pdf.addImage(pageCanvas, 'PNG', 0, 0, pageWidth, pageHeight)

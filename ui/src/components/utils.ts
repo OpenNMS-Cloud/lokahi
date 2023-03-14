@@ -5,7 +5,7 @@ import { TimeUnit } from '@/types'
  * Translate value to human-readeable duration
  * @param value in seconds/milliseconds
  * @param unit of value - ms by default
- * @returns A shorted version (e.g. 28d4h22m16s) 
+ * @returns A shorted version (e.g. 28d4h22m16s)
  */
 export const getHumanReadableDuration = (value: number | undefined, unit = TimeUnit.MSecs) => {
   if (value === undefined) return '--'
@@ -40,7 +40,6 @@ export const getHumanReadableDuration = (value: number | undefined, unit = TimeU
  */
 export const setViewBox = (icon: any) => {
   const iconProps = icon.render().props
-  
+
   return iconProps.viewBox || `0 0 ${iconProps.width} ${iconProps.height}`
 }
-      

@@ -43,6 +43,7 @@ import org.opennms.horizon.inventory.model.Tag;
 import org.opennms.horizon.inventory.repository.IpInterfaceRepository;
 import org.opennms.horizon.inventory.repository.MonitoringLocationRepository;
 import org.opennms.horizon.inventory.repository.NodeRepository;
+import org.opennms.horizon.inventory.service.discovery.active.IcmpActiveDiscoveryService;
 import org.opennms.horizon.inventory.service.taskset.CollectorTaskSetService;
 import org.opennms.horizon.inventory.service.taskset.DetectorTaskSetService;
 import org.opennms.horizon.inventory.service.taskset.MonitorTaskSetService;
@@ -90,7 +91,7 @@ public class NodeService {
     private final TaskSetPublisher taskSetPublisher;
     private final TagService tagService;
     private final NodeMapper mapper;
-    private final ActiveDiscoveryService activeDiscoveryService;
+    private final IcmpActiveDiscoveryService icmpActiveDiscoveryService;
 
     @Transactional(readOnly = true)
     public List<NodeDTO> findByTenantId(String tenantId) {
@@ -245,7 +246,7 @@ public class NodeService {
         List<SnmpConfiguration> snmpConfigs = new ArrayList<>();
 
         try {
-            var optional = activeDiscoveryService.getDiscoveryConfigById(activeDiscoveryId, node.getTenantId());
+            var optional = icmpActiveDiscoveryService.getDiscoveryById(activeDiscoveryId, node.getTenantId());
             if (optional.isPresent()) {
                 var activeDiscoveryDTO = optional.get();
                 var snmpConf = activeDiscoveryDTO.getSnmpConf();

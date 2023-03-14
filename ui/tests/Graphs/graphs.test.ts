@@ -6,11 +6,11 @@ import { RouterLinkStub } from '@vue/test-utils'
 
 // mock the route param
 const mockRouter = createRouter({ history: createWebHistory(), routes: [] })
-mockRouter.currentRoute.value.params = { id: '1'}
+mockRouter.currentRoute.value.params = { id: '1' }
 
 const mockCanvas = {
-  offsetWidth: 100, 
-  offsetHeight: 100, 
+  offsetWidth: 100,
+  offsetHeight: 100,
   toDataURL: () => '',
   getContext: (...p: any) => {
     return {

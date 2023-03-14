@@ -1,5 +1,5 @@
-import { getHumanReadableDuration } from "@/components/utils"
-import { TimeUnit } from "@/types"
+import { getHumanReadableDuration } from '@/components/utils'
+import { TimeUnit } from '@/types'
 
 test('The getHumanReadableDuration function', () => {
   expect(getHumanReadableDuration(undefined)).toBe('--')

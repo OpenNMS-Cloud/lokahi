@@ -4,8 +4,12 @@ import {
   ListLocationsForDiscoveryDocument,
   Tag,
   ListTagsSearchDocument,
-  ListDiscoveriesDocument
+  ListDiscoveriesDocument,
+  ActiveDiscovery,
+  IcmpActiveDiscovery,
+  AzureActiveDiscovery
 } from '@/types/graphql'
+import { DiscoveryType } from '@/components/Discovery/discovery.constants'
 
 export const useDiscoveryQueries = defineStore('discoveryQueries', () => {
   const tagsSearched = ref([] as Tag[])
@@ -36,12 +40,19 @@ export const useDiscoveryQueries = defineStore('discoveryQueries', () => {
     })
   }
 
+  const formatActiveDiscoveries = (activeDiscoveries: ActiveDiscovery[] = []) => {
+    return activeDiscoveries.map((discovery) => ({ 
+      ...discovery.details, 
+      discoveryType: discovery.discoveryType
+    }))
+  }
+
   return {
     locations: computed(() => locations.value?.findAllLocations || []),
     getLocations,
     tagsSearched: computed(() => tagsSearched.value || []),
     getTagsSearch,
-    activeDiscoveries: computed(() => listedDiscoveries.value?.listActiveDiscovery || []),
+    activeDiscoveries: computed(() => formatActiveDiscoveries(listedDiscoveries.value?.listActiveDiscovery) || []),
     passiveDiscoveries: computed(() => listedDiscoveries.value?.passiveDiscoveries || []),
     getDiscoveries
   }

@@ -1,22 +1,22 @@
 import { defineStore } from 'pinia'
 import { useMutation } from 'villus'
 import { 
-  AddAzureCredentialDocument, 
-  CreateActiveDiscoveryDocument, 
+  CreateAzureActiveDiscoveryDocument, 
+  CreateIcmpActiveDiscoveryDocument, 
   UpsertPassiveDiscoveryDocument,
   TogglePassiveDiscoveryDocument
 } from '@/types/graphql'
 
 export const useDiscoveryMutations = defineStore('discoveryMutations', () => {
   // Create Azure
-  const { execute: addAzureCreds, error, isFetching } = useMutation(AddAzureCredentialDocument)
+  const { execute: addAzureCreds, error, isFetching } = useMutation(CreateAzureActiveDiscoveryDocument)
 
-  // Create Active Discoveries
+  // Create ICMP Discoveries
   const {
     execute: createDiscoveryConfig,
     error: activeDiscoveryError,
     isFetching: isFetchingActiveDiscovery
-  } = useMutation(CreateActiveDiscoveryDocument)
+  } = useMutation(CreateIcmpActiveDiscoveryDocument)
 
   // Create Passive Discoveries
   const {
@@ -25,10 +25,8 @@ export const useDiscoveryMutations = defineStore('discoveryMutations', () => {
     isFetching: isFetchingPassiveDiscovery
   } = useMutation(UpsertPassiveDiscoveryDocument)
 
-    // Toggle Passive Discoveries
-    const {
-      execute: togglePassiveDiscovery
-    } = useMutation(TogglePassiveDiscoveryDocument)
+  // Toggle Passive Discoveries
+  const { execute: togglePassiveDiscovery } = useMutation(TogglePassiveDiscoveryDocument)
 
   return {
     addAzureCreds,

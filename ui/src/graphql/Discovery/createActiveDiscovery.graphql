@@ -1,6 +1,6 @@
-mutation CreateActiveDiscovery($CreateDiscoveryConfigRequestInput: CreateDiscoveryConfigRequestInput!) {
-  createActiveDiscovery(request: $CreateDiscoveryConfigRequestInput) {
-    configName
+mutation CreateIcmpActiveDiscovery($request: IcmpActiveDiscoveryCreateInput!) {
+  createIcmpActiveDiscovery(request: $request) {
+    name
     ipAddresses
     location
     snmpConfig {

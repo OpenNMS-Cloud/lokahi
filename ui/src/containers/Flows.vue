@@ -5,7 +5,32 @@
     data-test="flows-page-header"
     />
     <!-- Filter Area -->
-    <div class="filters"></div>
+    <div class="filters">
+      <BasicChipSelect
+          :list="timeOptions"
+          :size="160"
+          :show-chip="true"
+        />
+      <!-- Exporters Not In Scope Yet -->
+
+         <!-- <div class="filters-divider"></div>
+        <BasicAutocomplete
+        class="filter-autocomplete"
+        :get-items="getExporters"
+        :items="exportersAutoComplete"
+        label="Filter Exporters"
+        ref="exportersAutocompleteRef"
+        /> -->
+
+      <div class="filters-divider"></div>
+      <BasicAutocomplete
+        class="filter-autocomplete"
+        :get-items="getAppliications"
+        :items="applicationsAutoComplete"
+        label="Filter Applications"
+        ref="appsAutocompleteRef"
+      />
+    </div>
     <!-- Chart Area -->
     <div class="flows"></div>
   </div>
@@ -13,6 +38,19 @@
 </template>
 
 <script setup lang="ts">
+// DUMMY DATA
+const timeOptions = [
+  { id: 'today', name: 'Today' },
+  { id: '24h', name: 'Last 24 hours' },
+  { id: 'week', name: 'Last 7 days' }
+]
+const applicationsAutoComplete = ref([
+  { id: 'app1', name: 'Application 1' },
+  { id: 'app2', name: 'Application 2' },
+  { id: 'app3', name: 'Application 3' }
+])
+const getAppliications = () => { return {} }
+
 </script>
 
 <style scoped lang="scss">
@@ -41,7 +79,21 @@
     margin-bottom: var(variables.$spacing-m);
     display: flex;
     justify-content: flex-start;
-    align-items: center;
+    align-items: flex-start;
+    align-content: stretch;
     gap: var(variables.$spacing-xl);
-  }
+    .filter-autocomplete{
+      width: 100%;
+      max-width: 360px;
+    }
+    &-divider {
+      border: 1px solid #74757D;
+      display: flex;
+      width: 0px;
+      align-self: stretch;
+    }
+    :deep(.feather-input-wrapper-container) {
+      background-color: var(variables.$surface);
+    }
+}
 </style>

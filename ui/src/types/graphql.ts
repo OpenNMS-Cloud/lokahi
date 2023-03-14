@@ -11,6 +11,7 @@ export type Scalars = {
   Boolean: boolean;
   Int: number;
   Float: number;
+  Json: any;
   Long: any;
   Map_String_StringScalar: any;
   UNREPRESENTABLE: any;
@@ -18,15 +19,12 @@ export type Scalars = {
 
 export type ActiveDiscovery = {
   __typename?: 'ActiveDiscovery';
-  configName?: Maybe<Scalars['String']>;
-  id: Scalars['Long'];
-  ipAddresses?: Maybe<Array<Maybe<Scalars['String']>>>;
-  location?: Maybe<Scalars['String']>;
-  snmpConfig?: Maybe<SnmpConfig>;
+  details?: Maybe<Scalars['Json']>;
+  discoveryType?: Maybe<Scalars['String']>;
 };
 
-export type AzureCredential = {
-  __typename?: 'AzureCredential';
+export type AzureActiveDiscovery = {
+  __typename?: 'AzureActiveDiscovery';
   clientId?: Maybe<Scalars['String']>;
   createTimeMsec?: Maybe<Scalars['Long']>;
   directoryId?: Maybe<Scalars['String']>;
@@ -37,21 +35,13 @@ export type AzureCredential = {
   tenantId?: Maybe<Scalars['String']>;
 };
 
-export type AzureCredentialCreateInput = {
+export type AzureActiveDiscoveryCreateInput = {
   clientId?: InputMaybe<Scalars['String']>;
   clientSecret?: InputMaybe<Scalars['String']>;
   directoryId?: InputMaybe<Scalars['String']>;
   location?: InputMaybe<Scalars['String']>;
   name?: InputMaybe<Scalars['String']>;
   subscriptionId?: InputMaybe<Scalars['String']>;
-  tags?: InputMaybe<Array<InputMaybe<TagCreateInput>>>;
-};
-
-export type CreateDiscoveryConfigRequestInput = {
-  configName?: InputMaybe<Scalars['String']>;
-  ipAddresses?: InputMaybe<Array<InputMaybe<Scalars['String']>>>;
-  location?: InputMaybe<Scalars['String']>;
-  snmpConfig?: InputMaybe<SnmpConfigInput>;
   tags?: InputMaybe<Array<InputMaybe<TagCreateInput>>>;
 };
 
@@ -78,6 +68,23 @@ export type EventParameter = {
   name?: Maybe<Scalars['String']>;
   type?: Maybe<Scalars['String']>;
   value?: Maybe<Scalars['String']>;
+};
+
+export type IcmpActiveDiscovery = {
+  __typename?: 'IcmpActiveDiscovery';
+  id: Scalars['Long'];
+  ipAddresses?: Maybe<Array<Maybe<Scalars['String']>>>;
+  location?: Maybe<Scalars['String']>;
+  name?: Maybe<Scalars['String']>;
+  snmpConfig?: Maybe<SnmpConfig>;
+};
+
+export type IcmpActiveDiscoveryCreateInput = {
+  ipAddresses?: InputMaybe<Array<InputMaybe<Scalars['String']>>>;
+  location?: InputMaybe<Scalars['String']>;
+  name?: InputMaybe<Scalars['String']>;
+  snmpConfig?: InputMaybe<SnmpConfigInput>;
+  tags?: InputMaybe<Array<InputMaybe<TagCreateInput>>>;
 };
 
 export type IpInterface = {
@@ -113,10 +120,10 @@ export type Minion = {
 /** Mutation root */
 export type Mutation = {
   __typename?: 'Mutation';
-  addAzureCredential?: Maybe<AzureCredential>;
   addNode?: Maybe<Node>;
   addTags?: Maybe<Array<Maybe<Tag>>>;
-  createActiveDiscovery?: Maybe<ActiveDiscovery>;
+  createAzureActiveDiscovery?: Maybe<AzureActiveDiscovery>;
+  createIcmpActiveDiscovery?: Maybe<IcmpActiveDiscovery>;
   deleteMinion?: Maybe<Scalars['Boolean']>;
   deleteNode?: Maybe<Scalars['Boolean']>;
   discoveryByNodeIds?: Maybe<Scalars['Boolean']>;
@@ -124,12 +131,6 @@ export type Mutation = {
   savePagerDutyConfig?: Maybe<Scalars['Boolean']>;
   togglePassiveDiscovery?: Maybe<PassiveDiscoveryToggle>;
   upsertPassiveDiscovery?: Maybe<PassiveDiscovery>;
-};
-
-
-/** Mutation root */
-export type MutationAddAzureCredentialArgs = {
-  azureCredential?: InputMaybe<AzureCredentialCreateInput>;
 };
 
 
@@ -146,8 +147,14 @@ export type MutationAddTagsArgs = {
 
 
 /** Mutation root */
-export type MutationCreateActiveDiscoveryArgs = {
-  request?: InputMaybe<CreateDiscoveryConfigRequestInput>;
+export type MutationCreateAzureActiveDiscoveryArgs = {
+  discovery?: InputMaybe<AzureActiveDiscoveryCreateInput>;
+};
+
+
+/** Mutation root */
+export type MutationCreateIcmpActiveDiscoveryArgs = {
+  request?: InputMaybe<IcmpActiveDiscoveryCreateInput>;
 };
 
 
@@ -261,7 +268,6 @@ export type PassiveDiscoveryUpsertInput = {
 /** Query root */
 export type Query = {
   __typename?: 'Query';
-  activeDiscoveryById?: Maybe<ActiveDiscovery>;
   findAllEvents?: Maybe<Array<Maybe<Event>>>;
   findAllLocations?: Maybe<Array<Maybe<Location>>>;
   findAllMinions?: Maybe<Array<Maybe<Minion>>>;
@@ -270,20 +276,16 @@ export type Query = {
   findLocationById?: Maybe<Location>;
   findMinionById?: Maybe<Minion>;
   findNodeById?: Maybe<Node>;
+  icmpActiveDiscoveryById?: Maybe<IcmpActiveDiscovery>;
   listActiveDiscovery?: Maybe<Array<Maybe<ActiveDiscovery>>>;
+  listIcmpActiveDiscovery?: Maybe<Array<Maybe<IcmpActiveDiscovery>>>;
   metric?: Maybe<TimeSeriesQueryResult>;
   nodeStatus?: Maybe<NodeStatus>;
   passiveDiscoveries?: Maybe<Array<Maybe<PassiveDiscovery>>>;
   searchLocation?: Maybe<Array<Maybe<Location>>>;
   tags?: Maybe<Array<Maybe<Tag>>>;
-  tagsByAzureCredentialId?: Maybe<Array<Maybe<Tag>>>;
+  tagsByActiveDiscoveryId?: Maybe<Array<Maybe<Tag>>>;
   tagsByNodeId?: Maybe<Array<Maybe<Tag>>>;
-};
-
-
-/** Query root */
-export type QueryActiveDiscoveryByIdArgs = {
-  id?: InputMaybe<Scalars['Long']>;
 };
 
 
@@ -307,6 +309,12 @@ export type QueryFindMinionByIdArgs = {
 
 /** Query root */
 export type QueryFindNodeByIdArgs = {
+  id?: InputMaybe<Scalars['Long']>;
+};
+
+
+/** Query root */
+export type QueryIcmpActiveDiscoveryByIdArgs = {
   id?: InputMaybe<Scalars['Long']>;
 };
 
@@ -339,8 +347,8 @@ export type QueryTagsArgs = {
 
 
 /** Query root */
-export type QueryTagsByAzureCredentialIdArgs = {
-  azureCredentialId?: InputMaybe<Scalars['Long']>;
+export type QueryTagsByActiveDiscoveryIdArgs = {
+  activeDiscoveryId?: InputMaybe<Scalars['Long']>;
   searchTerm?: InputMaybe<Scalars['String']>;
 };
 
@@ -444,19 +452,19 @@ export type ListLocationsQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type ListLocationsQuery = { __typename?: 'Query', findAllLocations?: Array<{ __typename?: 'Location', id: any, location?: string }> };
 
-export type AddAzureCredentialMutationVariables = Exact<{
-  azureCredential: AzureCredentialCreateInput;
+export type CreateAzureActiveDiscoveryMutationVariables = Exact<{
+  discovery: AzureActiveDiscoveryCreateInput;
 }>;
 
 
-export type AddAzureCredentialMutation = { __typename?: 'Mutation', addAzureCredential?: { __typename?: 'AzureCredential', createTimeMsec?: any, location?: string, subscriptionId?: string, clientId?: string } };
+export type CreateAzureActiveDiscoveryMutation = { __typename?: 'Mutation', createAzureActiveDiscovery?: { __typename?: 'AzureActiveDiscovery', createTimeMsec?: any, location?: string, subscriptionId?: string, clientId?: string } };
 
-export type CreateActiveDiscoveryMutationVariables = Exact<{
-  CreateDiscoveryConfigRequestInput: CreateDiscoveryConfigRequestInput;
+export type CreateIcmpActiveDiscoveryMutationVariables = Exact<{
+  request: IcmpActiveDiscoveryCreateInput;
 }>;
 
 
-export type CreateActiveDiscoveryMutation = { __typename?: 'Mutation', createActiveDiscovery?: { __typename?: 'ActiveDiscovery', configName?: string, ipAddresses?: Array<string>, location?: string, snmpConfig?: { __typename?: 'SNMPConfig', ports?: Array<number>, readCommunities?: Array<string> } } };
+export type CreateIcmpActiveDiscoveryMutation = { __typename?: 'Mutation', createIcmpActiveDiscovery?: { __typename?: 'IcmpActiveDiscovery', name?: string, ipAddresses?: Array<string>, location?: string, snmpConfig?: { __typename?: 'SNMPConfig', ports?: Array<number>, readCommunities?: Array<string> } } };
 
 export type TogglePassiveDiscoveryMutationVariables = Exact<{
   toggle: PassiveDiscoveryToggleInput;
@@ -600,7 +608,7 @@ export type ListLocationsForDiscoveryQuery = { __typename?: 'Query', findAllLoca
 export type ListDiscoveriesQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type ListDiscoveriesQuery = { __typename?: 'Query', listActiveDiscovery?: Array<{ __typename?: 'ActiveDiscovery', id: any, configName?: string, ipAddresses?: Array<string>, location?: string, snmpConfig?: { __typename?: 'SNMPConfig', ports?: Array<number>, readCommunities?: Array<string> } }>, passiveDiscoveries?: Array<{ __typename?: 'PassiveDiscovery', id?: any, location?: string, name?: string, snmpCommunities?: Array<string>, snmpPorts?: Array<number>, toggle: boolean }> };
+export type ListDiscoveriesQuery = { __typename?: 'Query', passiveDiscoveries?: Array<{ __typename?: 'PassiveDiscovery', id?: any, location?: string, name?: string, snmpCommunities?: Array<string>, snmpPorts?: Array<number>, toggle: boolean }>, listActiveDiscovery?: Array<{ __typename?: 'ActiveDiscovery', details?: any, discoveryType?: string }> };
 
 export type GetMetricQueryVariables = Exact<{
   metric: Scalars['String'];
@@ -679,8 +687,8 @@ export const MinionsTablePartsFragmentDoc = {"kind":"Document","definitions":[{"
 export const EventsByNodeIdPartsFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"EventsByNodeIdParts"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Query"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","alias":{"kind":"Name","value":"events"},"name":{"kind":"Name","value":"findEventsByNodeId"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"uei"}},{"kind":"Field","name":{"kind":"Name","value":"nodeId"}},{"kind":"Field","name":{"kind":"Name","value":"ipAddress"}},{"kind":"Field","name":{"kind":"Name","value":"producedTime"}}]}}]}}]} as unknown as DocumentNode<EventsByNodeIdPartsFragment, unknown>;
 export const NodeByIdPartsFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"NodeByIdParts"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Query"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","alias":{"kind":"Name","value":"node"},"name":{"kind":"Name","value":"findNodeById"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"nodeLabel"}},{"kind":"Field","name":{"kind":"Name","value":"objectId"}},{"kind":"Field","name":{"kind":"Name","value":"systemContact"}},{"kind":"Field","name":{"kind":"Name","value":"systemDescr"}},{"kind":"Field","name":{"kind":"Name","value":"systemLocation"}},{"kind":"Field","name":{"kind":"Name","value":"systemName"}},{"kind":"Field","name":{"kind":"Name","value":"location"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"location"}}]}},{"kind":"Field","name":{"kind":"Name","value":"ipInterfaces"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"hostname"}},{"kind":"Field","name":{"kind":"Name","value":"ipAddress"}},{"kind":"Field","name":{"kind":"Name","value":"netmask"}},{"kind":"Field","name":{"kind":"Name","value":"nodeId"}},{"kind":"Field","name":{"kind":"Name","value":"snmpPrimary"}}]}},{"kind":"Field","name":{"kind":"Name","value":"snmpInterfaces"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"ifAdminStatus"}},{"kind":"Field","name":{"kind":"Name","value":"ifAlias"}},{"kind":"Field","name":{"kind":"Name","value":"ifDescr"}},{"kind":"Field","name":{"kind":"Name","value":"ifIndex"}},{"kind":"Field","name":{"kind":"Name","value":"ifName"}},{"kind":"Field","name":{"kind":"Name","value":"ifOperatorStatus"}},{"kind":"Field","name":{"kind":"Name","value":"ifSpeed"}},{"kind":"Field","name":{"kind":"Name","value":"ifType"}},{"kind":"Field","name":{"kind":"Name","value":"ipAddress"}},{"kind":"Field","name":{"kind":"Name","value":"nodeId"}},{"kind":"Field","name":{"kind":"Name","value":"physicalAddr"}}]}}]}}]}}]} as unknown as DocumentNode<NodeByIdPartsFragment, unknown>;
 export const ListLocationsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"ListLocations"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"LocationsParts"}}]}},...LocationsPartsFragmentDoc.definitions]} as unknown as DocumentNode<ListLocationsQuery, ListLocationsQueryVariables>;
-export const AddAzureCredentialDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"AddAzureCredential"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"azureCredential"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"AzureCredentialCreateInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"addAzureCredential"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"azureCredential"},"value":{"kind":"Variable","name":{"kind":"Name","value":"azureCredential"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createTimeMsec"}},{"kind":"Field","name":{"kind":"Name","value":"location"}},{"kind":"Field","name":{"kind":"Name","value":"subscriptionId"}},{"kind":"Field","name":{"kind":"Name","value":"clientId"}}]}}]}}]} as unknown as DocumentNode<AddAzureCredentialMutation, AddAzureCredentialMutationVariables>;
-export const CreateActiveDiscoveryDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateActiveDiscovery"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"CreateDiscoveryConfigRequestInput"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"CreateDiscoveryConfigRequestInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createActiveDiscovery"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"request"},"value":{"kind":"Variable","name":{"kind":"Name","value":"CreateDiscoveryConfigRequestInput"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"configName"}},{"kind":"Field","name":{"kind":"Name","value":"ipAddresses"}},{"kind":"Field","name":{"kind":"Name","value":"location"}},{"kind":"Field","name":{"kind":"Name","value":"snmpConfig"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"ports"}},{"kind":"Field","name":{"kind":"Name","value":"readCommunities"}}]}}]}}]}}]} as unknown as DocumentNode<CreateActiveDiscoveryMutation, CreateActiveDiscoveryMutationVariables>;
+export const CreateAzureActiveDiscoveryDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateAzureActiveDiscovery"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"discovery"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"AzureActiveDiscoveryCreateInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createAzureActiveDiscovery"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"discovery"},"value":{"kind":"Variable","name":{"kind":"Name","value":"discovery"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createTimeMsec"}},{"kind":"Field","name":{"kind":"Name","value":"location"}},{"kind":"Field","name":{"kind":"Name","value":"subscriptionId"}},{"kind":"Field","name":{"kind":"Name","value":"clientId"}}]}}]}}]} as unknown as DocumentNode<CreateAzureActiveDiscoveryMutation, CreateAzureActiveDiscoveryMutationVariables>;
+export const CreateIcmpActiveDiscoveryDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateIcmpActiveDiscovery"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"request"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"IcmpActiveDiscoveryCreateInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createIcmpActiveDiscovery"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"request"},"value":{"kind":"Variable","name":{"kind":"Name","value":"request"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"ipAddresses"}},{"kind":"Field","name":{"kind":"Name","value":"location"}},{"kind":"Field","name":{"kind":"Name","value":"snmpConfig"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"ports"}},{"kind":"Field","name":{"kind":"Name","value":"readCommunities"}}]}}]}}]}}]} as unknown as DocumentNode<CreateIcmpActiveDiscoveryMutation, CreateIcmpActiveDiscoveryMutationVariables>;
 export const TogglePassiveDiscoveryDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"TogglePassiveDiscovery"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"toggle"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"PassiveDiscoveryToggleInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"togglePassiveDiscovery"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"toggle"},"value":{"kind":"Variable","name":{"kind":"Name","value":"toggle"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"toggle"}}]}}]}}]} as unknown as DocumentNode<TogglePassiveDiscoveryMutation, TogglePassiveDiscoveryMutationVariables>;
 export const UpsertPassiveDiscoveryDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"UpsertPassiveDiscovery"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"passiveDiscovery"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"PassiveDiscoveryUpsertInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"upsertPassiveDiscovery"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"discovery"},"value":{"kind":"Variable","name":{"kind":"Name","value":"passiveDiscovery"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"location"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"snmpCommunities"}},{"kind":"Field","name":{"kind":"Name","value":"snmpPorts"}},{"kind":"Field","name":{"kind":"Name","value":"toggle"}}]}}]}}]} as unknown as DocumentNode<UpsertPassiveDiscoveryMutation, UpsertPassiveDiscoveryMutationVariables>;
 export const DeleteMinionDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"DeleteMinion"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"deleteMinion"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}]}]}}]} as unknown as DocumentNode<DeleteMinionMutation, DeleteMinionMutationVariables>;
@@ -697,7 +705,7 @@ export const ListMinionMetricsDocument = {"kind":"Document","definitions":[{"kin
 export const ListNodeMetricsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"ListNodeMetrics"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Long"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"monitor"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"instance"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"timeRange"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"timeRangeUnit"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"TimeRangeUnit"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"NodeLatencyParts"}},{"kind":"FragmentSpread","name":{"kind":"Name","value":"NodeStatusParts"}}]}},...NodeLatencyPartsFragmentDoc.definitions,...MetricPartsFragmentDoc.definitions,...NodeStatusPartsFragmentDoc.definitions]} as unknown as DocumentNode<ListNodeMetricsQuery, ListNodeMetricsQueryVariables>;
 export const ListMinionsAndDevicesForTablesDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"ListMinionsAndDevicesForTables"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"NodesTableParts"}},{"kind":"FragmentSpread","name":{"kind":"Name","value":"MinionsTableParts"}},{"kind":"FragmentSpread","name":{"kind":"Name","value":"LocationsParts"}}]}},...NodesTablePartsFragmentDoc.definitions,...MinionsTablePartsFragmentDoc.definitions,...LocationsPartsFragmentDoc.definitions]} as unknown as DocumentNode<ListMinionsAndDevicesForTablesQuery, ListMinionsAndDevicesForTablesQueryVariables>;
 export const ListLocationsForDiscoveryDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"ListLocationsForDiscovery"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"LocationsParts"}}]}},...LocationsPartsFragmentDoc.definitions]} as unknown as DocumentNode<ListLocationsForDiscoveryQuery, ListLocationsForDiscoveryQueryVariables>;
-export const ListDiscoveriesDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"ListDiscoveries"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"listActiveDiscovery"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"configName"}},{"kind":"Field","name":{"kind":"Name","value":"ipAddresses"}},{"kind":"Field","name":{"kind":"Name","value":"location"}},{"kind":"Field","name":{"kind":"Name","value":"snmpConfig"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"ports"}},{"kind":"Field","name":{"kind":"Name","value":"readCommunities"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"passiveDiscoveries"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"location"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"snmpCommunities"}},{"kind":"Field","name":{"kind":"Name","value":"snmpPorts"}},{"kind":"Field","name":{"kind":"Name","value":"toggle"}}]}}]}}]} as unknown as DocumentNode<ListDiscoveriesQuery, ListDiscoveriesQueryVariables>;
+export const ListDiscoveriesDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"ListDiscoveries"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"passiveDiscoveries"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"location"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"snmpCommunities"}},{"kind":"Field","name":{"kind":"Name","value":"snmpPorts"}},{"kind":"Field","name":{"kind":"Name","value":"toggle"}}]}},{"kind":"Field","name":{"kind":"Name","value":"listActiveDiscovery"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"details"}},{"kind":"Field","name":{"kind":"Name","value":"discoveryType"}}]}}]}}]} as unknown as DocumentNode<ListDiscoveriesQuery, ListDiscoveriesQueryVariables>;
 export const GetMetricDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetMetric"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"metric"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"TimeSeriesMetric"}}]}},...TimeSeriesMetricFragmentDoc.definitions,...MetricPartsFragmentDoc.definitions]} as unknown as DocumentNode<GetMetricQuery, GetMetricQueryVariables>;
 export const GetTimeSeriesMetricDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetTimeSeriesMetric"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"name"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"monitor"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"nodeId"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"timeRange"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"timeRangeUnit"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"TimeRangeUnit"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"instance"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"ChartTimeSeriesMetric"}}]}},...ChartTimeSeriesMetricFragmentDoc.definitions,...MetricPartsFragmentDoc.definitions]} as unknown as DocumentNode<GetTimeSeriesMetricQuery, GetTimeSeriesMetricQueryVariables>;
 export const GetNodeForGraphsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetNodeForGraphs"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Long"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"findNodeById"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"ipInterfaces"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"ipAddress"}},{"kind":"Field","name":{"kind":"Name","value":"snmpPrimary"}}]}}]}}]}}]} as unknown as DocumentNode<GetNodeForGraphsQuery, GetNodeForGraphsQueryVariables>;

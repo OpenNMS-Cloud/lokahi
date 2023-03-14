@@ -8,7 +8,7 @@ const resolvers = {
     listMinions: () => listMinions
   },
   Mutation: {
-    saveRoutingKey: (_: any, { key }) => key,
+    saveRoutingKey: (_: any, { key }) => key
   }
 }
 

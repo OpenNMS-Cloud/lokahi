@@ -243,7 +243,6 @@ jobs:
         shell: bash
         env:
           A: ${{ secrets.A }}
-        working-directory: external-it
         run: |
           echo "Test a: $A"
           echo "Test b: ${{ github.ref }}

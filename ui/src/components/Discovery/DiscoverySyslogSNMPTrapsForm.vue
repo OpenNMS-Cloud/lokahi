@@ -20,6 +20,7 @@
         <FeatherInput
           label="Name"
           v-model="discoveryInfo.name"
+          :schema="nameV"
         />
         <DiscoveryLocationsAutocomplete
           @location-selected="(val) => setDiscoveryValues('location', val)"
@@ -40,7 +41,6 @@
         />
         <div class="content-editable-container">
           <DiscoveryContentEditable
-            @is-content-invalid="isCommunityStringInvalidListerner"
             @content-formatted="(val) => setDiscoveryValues('snmpCommunities', val)"
             :contentType="ContentEditableType.CommunityString"
             :regexDelim="COMMUNITY_STRING.regexDelim"
@@ -52,7 +52,6 @@
             :content="props.discovery?.snmpCommunities?.join(', ')"
           />
           <DiscoveryContentEditable
-            @is-content-invalid="isUDPPortInvalidListener"
             @content-formatted="(val) => setDiscoveryValues('snmpPorts', val)"
             :contentType="ContentEditableType.UDPPort"
             :regexDelim="UDP_PORT.regexDelim"
@@ -75,7 +74,6 @@
         <ButtonWithSpinner
           v-if="!props.discovery"
           :isFetching="discoveryMutations.isFetchingPassiveDiscovery"
-          :disabled="isFormInvalid"
           primary
           type="submit"
           data-test="btn-submit"
@@ -96,6 +94,10 @@ import { useDiscoveryQueries } from '@/store/Queries/discoveryQueries'
 import { useDiscoveryMutations } from '@/store/Mutations/discoveryMutations'
 import { PassiveDiscovery, PassiveDiscoveryUpsertInput } from '@/types/graphql'
 import { set } from 'lodash'
+import { useForm } from '@featherds/input-helper'
+import { string } from 'yup'
+const form = useForm()
+const nameV = string().required('Name is required.')
 
 const props = defineProps<{
   discovery?: PassiveDiscovery | null
@@ -107,11 +109,6 @@ const tagQueries = useTagQueries()
 const discoveryQueries = useDiscoveryQueries()
 const discoveryMutations = useDiscoveryMutations()
 const discoveryInfo = ref<PassiveDiscoveryUpsertInput>(props.discovery || ({} as PassiveDiscoveryUpsertInput))
-const isFormInvalid = ref(
-  computed(() => {
-    return isCommunityStringInvalid || isUDPPortInvalid
-  })
-)
 
 watch(props, () => {
   discoveryInfo.value = props.discovery || ({} as PassiveDiscoveryUpsertInput)
@@ -125,15 +122,6 @@ const tagsSelectedListener = (tags: Record<string, string>[]) => {
 const contentEditableCommunityStringRef = ref()
 const contentEditableUDPPortRef = ref()
 
-let isCommunityStringInvalid = false
-const isCommunityStringInvalidListerner = (isInvalid: boolean) => (isCommunityStringInvalid = isInvalid)
-
-let communityStringEntered: string[] = []
-const communityStringEnteredListerner = (val: string[]) => (communityStringEntered = val)
-
-let isUDPPortInvalid = false
-const isUDPPortInvalidListener = (isInvalid: boolean) => (isUDPPortInvalid = isInvalid)
-
 const setDiscoveryValues = (property: string, val: (string | number)[] | null) => {
   set(discoveryInfo.value, property, val)
 }
@@ -141,6 +129,8 @@ const setDiscoveryValues = (property: string, val: (string | number)[] | null) =
 const submitHandler = async () => {
   contentEditableCommunityStringRef.value.validateAndFormat()
   contentEditableUDPPortRef.value.validateAndFormat()
+  const isPortInvalid = contentEditableUDPPortRef.value?.validateContent()
+  if (form.validate().length || isPortInvalid) return
   await discoveryMutations.upsertPassiveDiscovery({ passiveDiscovery: discoveryInfo.value })
 
   if (!discoveryMutations.passiveDiscoveryError && discoveryInfo.value.name) {
@@ -182,7 +172,7 @@ const cancelHandler = () => {
 
 .form-content {
   > * {
-    margin-bottom: var(variables.$spacing-l);
+    margin-bottom: var(variables.$spacing-s);
     &:last-child {
       margin-bottom: 0;
     }
@@ -218,9 +208,5 @@ const cancelHandler = () => {
   display: flex;
   justify-content: flex-end;
   padding-top: var(variables.$spacing-s);
-}
-
-:deep(.feather-input-sub-text) {
-  display: none;
 }
 </style>

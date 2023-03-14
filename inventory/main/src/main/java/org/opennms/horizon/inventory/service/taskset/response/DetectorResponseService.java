@@ -32,12 +32,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.opennms.horizon.inventory.dto.MonitoredServiceDTO;
 import org.opennms.horizon.inventory.dto.MonitoredServiceTypeDTO;
-import org.opennms.horizon.inventory.dto.MonitoredState;
 import org.opennms.horizon.inventory.model.IpInterface;
 import org.opennms.horizon.inventory.model.MonitoredServiceType;
-import org.opennms.horizon.inventory.model.Node;
 import org.opennms.horizon.inventory.repository.IpInterfaceRepository;
-import org.opennms.horizon.inventory.repository.NodeRepository;
 import org.opennms.horizon.inventory.service.MonitoredServiceService;
 import org.opennms.horizon.inventory.service.MonitoredServiceTypeService;
 import org.opennms.horizon.inventory.service.taskset.TaskSetHandler;
@@ -53,7 +50,6 @@ import java.util.Optional;
 @Component
 @RequiredArgsConstructor
 public class DetectorResponseService {
-    private final NodeRepository nodeRepository;
     private final IpInterfaceRepository ipInterfaceRepository;
     private final MonitoredServiceTypeService monitoredServiceTypeService;
     private final MonitoredServiceService monitoredServiceService;
@@ -75,8 +71,6 @@ public class DetectorResponseService {
                 MonitorType monitorType = response.getMonitorType();
                 long nodeId = response.getNodeId();
 
-                setMonitoredStateUnmonitored(tenantId, nodeId);
-
                 taskSetHandler.sendMonitorTask(location, monitorType, ipInterface, nodeId);
                 taskSetHandler.sendCollectorTask(location, monitorType, ipInterface, nodeId);
 
@@ -85,19 +79,6 @@ public class DetectorResponseService {
             }
         } else {
             log.warn("Failed to find IP Interface during detection for ip = {}", ipAddress.getHostAddress());
-        }
-    }
-
-    private void setMonitoredStateUnmonitored(String tenantId, long nodeId) {
-        Optional<Node> nodeOpt = nodeRepository.findByIdAndTenantId(nodeId, tenantId);
-        if (nodeOpt.isPresent()) {
-            Node node = nodeOpt.get();
-            if (MonitoredState.UNMONITORED != node.getMonitoredState()) {
-                node.setMonitoredState(MonitoredState.UNMONITORED);
-                nodeRepository.save(node);
-            }
-        } else {
-            log.info("No node found with ID: {}", nodeId);
         }
     }
 

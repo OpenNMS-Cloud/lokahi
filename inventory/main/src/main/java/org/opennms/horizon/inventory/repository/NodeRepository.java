@@ -30,9 +30,9 @@ public interface NodeRepository extends JpaRepository<Node, Long> {
     @Query("SELECT n " +
         "FROM Node n " +
         "WHERE n.tenantId = :tenantId " +
-        "AND n.monitoringLocation.location IN :locations " +
+        "AND n.monitoringLocation.location = :location " +
         "AND n.monitoredState = :monitoredState ")
     List<Node> findByTenantIdLocationsAndMonitoredStateEquals(@Param("tenantId") String tenantId,
-                                                              @Param("locations") List<String> locations,
+                                                              @Param("location") String location,
                                                               @Param("monitoredState") MonitoredState monitoredState);
 }

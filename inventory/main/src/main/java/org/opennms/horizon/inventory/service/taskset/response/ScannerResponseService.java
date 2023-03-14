@@ -196,11 +196,11 @@ public class ScannerResponseService {
                 if (passiveDiscoveryOpt.isPresent()) {
 
                     PassiveDiscovery discovery = passiveDiscoveryOpt.get();
-                    //todo use snmp agent config for detection, monitor and collection
+                    //todo: use snmp agent config for detection, monitor and collection
                 }
             }
 
-            detectorTaskSetService.sendDetectorTasks(node);
+            //todo: start detection, monitor and collection here
 
         } else {
             log.error("Error while process node scan results, node with id {} doesn't exist", result.getNodeId());

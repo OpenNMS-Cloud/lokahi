@@ -164,7 +164,7 @@ public class PassiveDiscoveryService {
             String location = discovery.getLocation();
 
             List<Node> detectedNodes = nodeRepository
-                .findByTenantIdLocationsAndMonitoredStateEquals(tenantId, List.of(location), MonitoredState.DETECTED);
+                .findByTenantIdLocationsAndMonitoredStateEquals(tenantId, location, MonitoredState.DETECTED);
 
             if (!CollectionUtils.isEmpty(detectedNodes)) {
                 for (Node node : detectedNodes) {

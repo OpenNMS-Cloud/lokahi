@@ -27,10 +27,10 @@ interface IObjectKeys {
 }
 
 export interface ICondition extends IObjectKeys {
-  id: number
+  id: string
   level: string
   percentage: number
-  duration: number
-  period: number
+  duration: string
+  period: string
   severity: string
 }

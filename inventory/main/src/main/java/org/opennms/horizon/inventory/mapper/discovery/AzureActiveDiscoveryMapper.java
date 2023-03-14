@@ -1,8 +1,8 @@
 /*******************************************************************************
  * This file is part of OpenNMS(R).
  *
- * Copyright (C) 2023 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
+ * Copyright (C) 2022 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
  *
@@ -25,21 +25,19 @@
  *     http://www.opennms.org/
  *     http://www.opennms.com/
  *******************************************************************************/
+package org.opennms.horizon.inventory.mapper.discovery;
 
-package org.opennms.horizon.inventory.model;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.opennms.horizon.inventory.dto.AzureActiveDiscoveryCreateDTO;
+import org.opennms.horizon.inventory.dto.AzureActiveDiscoveryDTO;
+import org.opennms.horizon.inventory.mapper.DateTimeMapper;
+import org.opennms.horizon.inventory.model.discovery.active.AzureActiveDiscovery;
 
-import java.util.List;
+@Mapper(componentModel = "spring")
+public interface AzureActiveDiscoveryMapper extends DateTimeMapper {
+    AzureActiveDiscovery dtoToModel(AzureActiveDiscoveryCreateDTO dto);
 
-import lombok.Getter;
-import lombok.Setter;
-
-@Getter
-@Setter
-public class DiscoveryConfig {
-
-    private List<String> ipAddresses;
-
-    private List<String> communityString;
-
-    private List<Integer> snmpPorts;
+    @Mapping(source = "createTime", target = "createTimeMsec")
+    AzureActiveDiscoveryDTO modelToDto(AzureActiveDiscovery model);
 }

@@ -26,7 +26,7 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.inventory.mapper;
+package org.opennms.horizon.inventory.mapper.discovery;
 
 
 import org.mapstruct.CollectionMappingStrategy;
@@ -35,6 +35,7 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.opennms.horizon.inventory.dto.PassiveDiscoveryDTO;
 import org.opennms.horizon.inventory.dto.PassiveDiscoveryUpsertDTO;
+import org.opennms.horizon.inventory.mapper.DateTimeMapper;
 import org.opennms.horizon.inventory.model.discovery.PassiveDiscovery;
 
 @Mapper(componentModel = "spring", uses = {},

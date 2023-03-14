@@ -25,18 +25,35 @@
  *     http://www.opennms.org/
  *     http://www.opennms.com/
  *******************************************************************************/
-package org.opennms.horizon.inventory.mapper;
 
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.opennms.horizon.inventory.dto.AzureActiveDiscoveryCreateDTO;
-import org.opennms.horizon.inventory.dto.AzureActiveDiscoveryDTO;
+package org.opennms.horizon.inventory.mapper.discovery;
+
+import lombok.RequiredArgsConstructor;
+import org.opennms.horizon.inventory.dto.ActiveDiscoveryDTO;
+import org.opennms.horizon.inventory.model.discovery.active.ActiveDiscovery;
 import org.opennms.horizon.inventory.model.discovery.active.AzureActiveDiscovery;
+import org.opennms.horizon.inventory.model.discovery.active.IcmpActiveDiscovery;
+import org.springframework.stereotype.Component;
 
-@Mapper(componentModel = "spring")
-public interface AzureActiveDiscoveryMapper extends DateTimeMapper {
-    AzureActiveDiscovery dtoToModel(AzureActiveDiscoveryCreateDTO dto);
+import java.util.List;
 
-    @Mapping(source = "createTime", target = "createTimeMsec")
-    AzureActiveDiscoveryDTO modelToDto(AzureActiveDiscovery model);
+@Component
+@RequiredArgsConstructor
+public class ActiveDiscoveryMapper {
+    private final IcmpActiveDiscoveryMapper icmpActiveDiscoveryMapper;
+    private final AzureActiveDiscoveryMapper azureActiveDiscoveryMapper;
+
+    public List<ActiveDiscoveryDTO> modelToDto(List<ActiveDiscovery> list) {
+        return list.stream().map(this::modelToDto).toList();
+    }
+
+    public ActiveDiscoveryDTO modelToDto(ActiveDiscovery discovery) {
+        ActiveDiscoveryDTO.Builder builder = ActiveDiscoveryDTO.newBuilder();
+        if (discovery instanceof IcmpActiveDiscovery icmp) {
+            builder.setIcmp(icmpActiveDiscoveryMapper.modelToDto(icmp));
+        } else if (discovery instanceof AzureActiveDiscovery azure) {
+            builder.setAzure(azureActiveDiscoveryMapper.modelToDto(azure));
+        }
+        return builder.build();
+    }
 }

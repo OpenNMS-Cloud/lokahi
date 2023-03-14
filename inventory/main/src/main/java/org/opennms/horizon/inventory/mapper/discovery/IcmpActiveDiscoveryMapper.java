@@ -26,7 +26,7 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.inventory.mapper;
+package org.opennms.horizon.inventory.mapper.discovery;
 
 import org.mapstruct.CollectionMappingStrategy;
 import org.mapstruct.Mapper;

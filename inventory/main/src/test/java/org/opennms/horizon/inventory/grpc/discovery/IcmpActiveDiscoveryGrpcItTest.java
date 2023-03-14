@@ -42,7 +42,7 @@ import org.opennms.horizon.inventory.discovery.IcmpActiveDiscoveryList;
 import org.opennms.horizon.inventory.discovery.IcmpActiveDiscoveryServiceGrpc;
 import org.opennms.horizon.inventory.discovery.SNMPConfigDTO;
 import org.opennms.horizon.inventory.grpc.GrpcTestBase;
-import org.opennms.horizon.inventory.mapper.IcmpActiveDiscoveryMapper;
+import org.opennms.horizon.inventory.mapper.discovery.IcmpActiveDiscoveryMapper;
 import org.opennms.horizon.inventory.repository.discovery.active.IcmpActiveDiscoveryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

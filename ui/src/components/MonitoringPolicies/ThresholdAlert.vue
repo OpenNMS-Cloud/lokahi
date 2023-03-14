@@ -27,7 +27,7 @@ const selectedAlert = ref('interfaceUtil')
 
 const setThresholdAlert = (type: string) => {
   selectedAlert.value = type
-  store.setMetricName(type)
+  store.selectedRule!.metricName = type
 }
 </script>
 

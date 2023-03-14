@@ -1,18 +1,35 @@
 <template>
-  <div class="btns" v-if="store.selectedPolicy && store.selectedRule">
-    <FeatherButton class="save-btn" primary :disabled="!enableSaveRule" @click="store.saveRule">
+  <div
+    class="btns"
+    v-if="store.selectedPolicy && store.selectedRule"
+  >
+    <FeatherButton
+      class="save-btn"
+      primary
+      :disabled="!enableSaveRule"
+      @click="store.saveRule"
+    >
       Save Rule
     </FeatherButton>
     <hr />
-    <FeatherButton class="save-btn" primary :disabled="!store.selectedPolicy.rules.length" @click="store.savePolicy">
+    <ButtonWithSpinner
+      :isFetching="mutations.isFetching.value"
+      class="save-btn"
+      primary
+      :disabled="!store.selectedPolicy.rules.length"
+      @click="store.savePolicy"
+    >
       Save Policy
-    </FeatherButton>
+    </ButtonWithSpinner>
   </div>
 </template>
 
 <script setup lang="ts">
 import { useMonitoringPoliciesStore } from '@/store/Views/monitoringPoliciesStore'
+import { useMonitoringPoliciesMutations } from '@/store/Mutations/monitoringPolicies'
+
 const store = useMonitoringPoliciesStore()
+const mutations = useMonitoringPoliciesMutations()
 const enableSaveRule = computed(() => store.selectedRule?.name && store.selectedRule?.conditions.length)
 </script>
 

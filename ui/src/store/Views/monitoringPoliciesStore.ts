@@ -1,10 +1,10 @@
 import { defineStore } from 'pinia'
-import { cloneDeep } from 'lodash'
+import { cloneDeep, findIndex } from 'lodash'
 import { IPolicy, IRule } from '@/types/policies'
+import { useMonitoringPoliciesMutations } from '../Mutations/monitoringPolicies'
+import { useMonitoringPoliciesQueries } from '../Queries/monitoringPoliciesQueries'
 
 type TState = {
-  existingPolicies: IPolicy[]
-  existingRules: IRule[]
   selectedPolicy?: IPolicy
   selectedRule?: IRule
 }
@@ -22,19 +22,17 @@ const defaultPolicy: IPolicy = {
   rules: []
 }
 
-const defaultRule: IRule = {
-  id: '',
+const getDefaultRule = () => ({
+  id: new Date().getTime().toString(),
   name: '',
   componentType: 'cpu',
   detectionMethod: 'thresholdAlert',
   metricName: 'interfaceUtil',
   conditions: []
-}
+})
 
 export const useMonitoringPoliciesStore = defineStore('monitoringPoliciesStore', {
   state: (): TState => ({
-    existingRules: [],
-    existingPolicies: [],
     selectedPolicy: undefined,
     selectedRule: undefined
   }),
@@ -44,33 +42,47 @@ export const useMonitoringPoliciesStore = defineStore('monitoringPoliciesStore',
       if (!policy) this.selectedRule = undefined
     },
     displayRuleForm(rule?: IRule) {
-      this.selectedRule = rule || cloneDeep(defaultRule)
-    },
-    setMetricName(name: string) {
-      this.selectedRule!.metricName = name
+      this.selectedRule = cloneDeep(rule) || getDefaultRule()
     },
     addNewCondition() {
       const defaultCondition = {
-        id: new Date().getTime(),
+        id: new Date().getTime().toString(),
         level: 'above',
         percentage: 50,
-        duration: 5,
-        period: 15,
+        duration: '5s',
+        period: '15s',
         severity: 'critical'
       }
       this.selectedRule!.conditions.push(defaultCondition)
     },
-    removeCondition(id: number) {
+    removeCondition(id: string) {
       this.selectedRule!.conditions = this.selectedRule!.conditions.filter((c) => c.id !== id)
     },
     saveRule() {
-      this.selectedPolicy!.rules.push(this.selectedRule!)
-      this.existingRules.push(this.selectedRule!)
-      this.selectedRule = cloneDeep(defaultRule) // clear form
+      const existingItemIndex = findIndex(this.selectedPolicy!.rules, { id: this.selectedRule?.id })
+
+      if (existingItemIndex !== -1) { 
+        // replace existing rule
+        this.selectedPolicy!.rules.splice(existingItemIndex, 1, this.selectedRule!)
+      } else { 
+        // add new rule
+        this.selectedPolicy!.rules.push(this.selectedRule!)
+      }
+
+      this.selectedRule = getDefaultRule()
     },
-    savePolicy() {
-      this.existingPolicies.push(this.selectedPolicy!)
-      this.selectedPolicy = cloneDeep(defaultPolicy) // clear form
+    async savePolicy() {
+      const { addMonitoringPolicy, error } = useMonitoringPoliciesMutations()
+      const { listMonitoringPolicies } = useMonitoringPoliciesQueries()
+
+      await addMonitoringPolicy({ policy: this.selectedPolicy! })
+
+      if (!error.value) {
+        this.selectedPolicy = cloneDeep(defaultPolicy)
+        listMonitoringPolicies()
+      }
+
+      return !error.value
     }
   }
 })

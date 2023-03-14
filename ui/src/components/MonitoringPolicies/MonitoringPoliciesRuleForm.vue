@@ -85,7 +85,7 @@ const thresholdMetricsOptions = [
 const selectComponentType = (type: string) => (store.selectedRule!.componentType = type)
 const selectDetectionMethod = (method: string) => (store.selectedRule!.detectionMethod = method)
 const selectThresholdMetrics = (metric: string) => (store.selectedRule!.metricName = metric)
-const populateForm = (item: IRule) => (store.selectedRule = item)
+const populateForm = (rule: IRule) => (store.displayRuleForm(rule))
 </script>
 
 <style scoped lang="scss">

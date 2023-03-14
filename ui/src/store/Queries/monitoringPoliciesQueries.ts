@@ -53,11 +53,13 @@ export const useMonitoringPoliciesQueries = defineStore('monitoringPoliciesQueri
     }
   ]
 
-  // const { data: monitoringPolicies } = useQuery({ query: ListMonitoringPoliciesDocument })
+  // const { data: monitoringPolicies, execute: listMonitoringPolicies } = useQuery({ query: ListMonitoringPoliciesDocument })
 
   return {
     // monitoringPolicies: computed(() => monitoringPolicies.value?.listMonitoringPolicies || [])
-    monitoringPolicies: mockData
+    // listMonitoringPolicies
+    monitoringPolicies: mockData,
+    listMonitoringPolicies: () => mockData
   }
 })
 

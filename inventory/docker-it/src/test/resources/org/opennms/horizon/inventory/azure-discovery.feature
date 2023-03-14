@@ -1,4 +1,4 @@
-Feature: Azure Discovery
+Feature: Azure Active Discovery
 
   Background: Common Test Setup
     Given [Azure] External GRPC Port in system property "application-external-grpc-port"
@@ -6,8 +6,8 @@ Feature: Azure Discovery
     Given [Azure] Grpc TenantId "tenant-stream"
     Given [Azure] Create Grpc Connection for Inventory
 
-  Scenario: Create new azure credentials
-    Given Azure Test Credentials
-    When A GRPC request to create azure credentials
-    And A GRPC request to get tags for azure credentials
+  Scenario: Create new azure active discovery
+    Given Azure Test Active Discovery
+    When A GRPC request to create azure active discovery
+    And A GRPC request to get tags for azure active discovery
     Then The response should assert for relevant fields

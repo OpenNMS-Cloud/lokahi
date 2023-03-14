@@ -88,8 +88,8 @@ public class AzureDiscoveryStepDefinitions {
      * SCENARIO GIVEN
      * *********************************************************************************
      */
-    @Given("Azure Test Credentials")
-    public void generatedTestCredentials() {
+    @Given("Azure Test Active Discovery")
+    public void generatedTestActiveDiscovery() {
         tagCreateDto1 = TagCreateDTO.newBuilder()
             .setName("test-tag-name-1").build();
         createDiscoveryDto = AzureActiveDiscoveryCreateDTO.newBuilder()
@@ -107,14 +107,14 @@ public class AzureDiscoveryStepDefinitions {
      * SCENARIO WHEN
      * *********************************************************************************
      */
-    @When("A GRPC request to create azure credentials")
-    public void aGRPCRequestToCreateAzureCredentials() {
-        var azureCredentialServiceBlockingStub = backgroundHelper.getAzureActiveDiscoveryServiceBlockingStub();
-        discoveryDto = azureCredentialServiceBlockingStub.createDiscovery(createDiscoveryDto);
+    @When("A GRPC request to create azure active discovery")
+    public void aGRPCRequestToCreateAzureActiveDiscovery() {
+        var azureActiveDiscoveryServiceBlockingStub = backgroundHelper.getAzureActiveDiscoveryServiceBlockingStub();
+        discoveryDto = azureActiveDiscoveryServiceBlockingStub.createDiscovery(createDiscoveryDto);
     }
 
-    @And("A GRPC request to get tags for azure credentials")
-    public void aGRPCRequestToGetTagsForAzureCredentials() {
+    @And("A GRPC request to get tags for azure active discovery")
+    public void aGRPCRequestToGetTagsForAzureActiveDiscovery() {
         var tagServiceBlockingStub = backgroundHelper.getTagServiceBlockingStub();
         ListTagsByEntityIdParamsDTO params = ListTagsByEntityIdParamsDTO.newBuilder()
             .setActiveDiscoveryId(discoveryDto.getId()).build();

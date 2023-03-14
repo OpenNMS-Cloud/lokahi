@@ -130,7 +130,7 @@ class AzureActiveDiscoveryGrpcItTest extends GrpcTestBase {
 
 
     @Test
-    void testCreateAzureCredentials() throws Exception {
+    void testCreateAzureActiveDiscovery() throws Exception {
         mockAzureLogin();
         mockAzureGetSubscription(true);
 
@@ -146,19 +146,19 @@ class AzureActiveDiscoveryGrpcItTest extends GrpcTestBase {
             .addAllTags(List.of(tagCreateDto1))
             .build();
 
-        AzureActiveDiscoveryDTO credentials = serviceStub.withInterceptors(MetadataUtils
+        AzureActiveDiscoveryDTO dicsovery = serviceStub.withInterceptors(MetadataUtils
                 .newAttachHeadersInterceptor(createAuthHeader(authHeader)))
             .createDiscovery(createDTO);
 
-        assertTrue(credentials.getId() > 0);
+        assertTrue(dicsovery.getId() > 0);
 
         await().atMost(10, TimeUnit.SECONDS).until(() -> testGrpcService.getTaskDefinitions(DEFAULT_LOCATION).stream()
             .filter(taskDef -> taskDef.getType().equals(TaskType.SCANNER)).toList().size(), Matchers.is(1));
 
-        assertEquals(createDTO.getClientId(), credentials.getClientId());
-        assertEquals(createDTO.getSubscriptionId(), credentials.getSubscriptionId());
-        assertEquals(createDTO.getDirectoryId(), credentials.getDirectoryId());
-        assertTrue(credentials.getCreateTimeMsec() > 0L);
+        assertEquals(createDTO.getClientId(), dicsovery.getClientId());
+        assertEquals(createDTO.getSubscriptionId(), dicsovery.getSubscriptionId());
+        assertEquals(createDTO.getDirectoryId(), dicsovery.getDirectoryId());
+        assertTrue(dicsovery.getCreateTimeMsec() > 0L);
 
         List<AzureActiveDiscovery> list = repository.findAll();
         assertEquals(1, list.size());
@@ -186,7 +186,7 @@ class AzureActiveDiscoveryGrpcItTest extends GrpcTestBase {
     }
 
     @Test
-    void testCreateAzureCredentialsFailedSubscription() throws Exception {
+    void testCreateAzureActiveDiscoveryFailedSubscription() throws Exception {
         mockAzureLogin();
         mockAzureGetSubscriptionFailed();
 
@@ -209,7 +209,7 @@ class AzureActiveDiscoveryGrpcItTest extends GrpcTestBase {
     }
 
     @Test
-    void testCreateAzureCredentialsDisabledSubscription() throws Exception {
+    void testCreateAzureActiveDiscoveryDisabledSubscription() throws Exception {
         mockAzureLogin();
         mockAzureGetSubscription(false);
 
@@ -231,7 +231,7 @@ class AzureActiveDiscoveryGrpcItTest extends GrpcTestBase {
     }
 
     @Test
-    void testCreateAzureCredentialsAlreadyExists() throws Exception {
+    void testCreateAzureActiveDiscoveryAlreadyExists() throws Exception {
         mockAzureLogin();
         mockAzureGetSubscription(true);
 
@@ -257,7 +257,7 @@ class AzureActiveDiscoveryGrpcItTest extends GrpcTestBase {
     }
 
     @Test
-    void testCreateAzureCredentialsWithoutTenantId() {
+    void testCreateAzureActiveDicscoveryWithoutTenantId() {
 
         AzureActiveDiscoveryCreateDTO createDTO = AzureActiveDiscoveryCreateDTO.newBuilder()
             .setName(TEST_NAME)

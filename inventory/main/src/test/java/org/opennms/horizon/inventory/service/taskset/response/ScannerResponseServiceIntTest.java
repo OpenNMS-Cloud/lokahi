@@ -125,7 +125,7 @@ class ScannerResponseServiceIntTest extends GrpcTestBase {
 
     @Test
     void testAzureAccept() throws Exception {
-        AzureActiveDiscovery discovery = createAzureCredential();
+        AzureActiveDiscovery discovery = createAzureActiveDiscovery();
 
         AzureScanItem scanItem = AzureScanItem.newBuilder()
             .setId("/subscriptions/sub-id/resourceGroups/resource-group/providers/Microsoft.Compute/virtualMachines/vm-name")
@@ -262,7 +262,7 @@ class ScannerResponseServiceIntTest extends GrpcTestBase {
     }
 
     @Transactional
-    public AzureActiveDiscovery createAzureCredential() {
+    public AzureActiveDiscovery createAzureActiveDiscovery() {
 
         AzureActiveDiscovery discovery = new AzureActiveDiscovery();
         discovery.setTenantId(TEST_TENANT_ID);

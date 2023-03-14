@@ -47,5 +47,5 @@ public interface AzureActiveDiscoveryMapper {
 
     @Mapping(target = "location", source = "location", nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
     @Mapping(target = "tagsList", source = "tags", nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
-    AzureActiveDiscoveryCreateDTO azureCredentialCreateToProto(AzureActiveDiscoveryCreate request);
+    AzureActiveDiscoveryCreateDTO azureDiscoveryCreateToProto(AzureActiveDiscoveryCreate request);
 }

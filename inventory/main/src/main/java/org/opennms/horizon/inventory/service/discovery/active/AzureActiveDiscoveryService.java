@@ -60,7 +60,7 @@ public class AzureActiveDiscoveryService {
     private final TagService tagService;
 
     public AzureActiveDiscoveryDTO createActiveDiscovery(String tenantId, AzureActiveDiscoveryCreateDTO request) {
-        validateCredentials(tenantId, request);
+        validateDiscovery(tenantId, request);
 
         AzureActiveDiscovery discovery = mapper.dtoToModel(request);
         discovery.setTenantId(tenantId);
@@ -78,7 +78,7 @@ public class AzureActiveDiscoveryService {
         return mapper.modelToDto(discovery);
     }
 
-    private void validateCredentials(String tenantId, AzureActiveDiscoveryCreateDTO request) {
+    private void validateDiscovery(String tenantId, AzureActiveDiscoveryCreateDTO request) {
         validateAlreadyExists(tenantId, request);
         AzureOAuthToken token;
         try {

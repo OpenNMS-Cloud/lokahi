@@ -56,7 +56,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 @SpringBootTest(webEnvironment = RANDOM_PORT, classes = RestServerApplication.class)
-class GraphQLAzureCredentialServiceTest {
+class GraphQLAzureActiveDiscoveryServiceTest {
     private static final String GRAPHQL_PATH = "/graphql";
     @MockBean
     private InventoryClient mockClient;
@@ -90,7 +90,7 @@ class GraphQLAzureCredentialServiceTest {
     }
 
     @Test
-    void testCreateAzureCredential() throws JSONException {
+    void testCreateAzureActiveDiscovery() throws JSONException {
         doReturn(azureActiveDiscoveryDTO).when(mockClient).createAzureActiveDiscovery(any(AzureActiveDiscoveryCreateDTO.class), eq(accessToken));
 
         String request = createPayload("mutation { " +

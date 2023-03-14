@@ -1,9 +1,9 @@
 <template>
   <div class="container">
     <PageHeadline text="Monitoring Policies" />
-    <MPolicyForm />
-    <MPolicyRuleForm/>
-    <MPolicySaveButtons />
+    <MonitoringPoliciesPolicyForm />
+    <MonitoringPoliciesRuleForm/>
+    <MonitoringPoliciesSaveButtons />
   </div>
 </template>
 

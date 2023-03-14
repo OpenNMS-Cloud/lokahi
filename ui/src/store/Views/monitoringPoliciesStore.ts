@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { cloneDeep, without } from 'lodash'
+import { cloneDeep } from 'lodash'
 import { IPolicy, IRule } from '@/types/policies'
 
 type TState = {
@@ -41,6 +41,7 @@ export const useMonitoringPoliciesStore = defineStore('monitoringPoliciesStore',
   actions: {
     displayPolicyForm(policy?: IPolicy) {
       this.selectedPolicy = policy || cloneDeep(defaultPolicy)
+      if (!policy) this.selectedRule = undefined
     },
     displayRuleForm(rule?: IRule) {
       this.selectedRule = rule || cloneDeep(defaultRule)

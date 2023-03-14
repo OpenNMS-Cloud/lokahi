@@ -1,23 +1,27 @@
 <template>
   <div class="policy-form-container">
     <div>
-      <FeatherButton primary @click="store.displayPolicyForm()">
+      <FeatherButton
+        primary
+        @click="store.displayPolicyForm()"
+      >
         <FeatherIcon :icon="addIcon" />
         Create New Policy
       </FeatherButton>
-      <MPolicyExistingItems
+      <MonitoringPoliciesExistingItems
         title="Existing Policies"
-        :list="[{ name: 'Test'}, { name: 'Testlongername'}]" 
+        :list="monitoringPoliciesQueries.monitoringPolicies"
+        :selectedItemId="store.selectedPolicy?.id"
+        @selectExistingItem="populateForm"
       />
     </div>
     <transition name="fade">
-      <div class="policy-form" v-if="store.selectedPolicy">
-        <div class="form-title">
-          Create New Policy
-        </div>
-        <div class="form-subtitle">
-          New Policy Name
-        </div>
+      <div
+        class="policy-form"
+        v-if="store.selectedPolicy"
+      >
+        <div class="form-title">Create New Policy</div>
+        <div class="form-subtitle">New Policy Name</div>
         <FeatherInput
           v-model="store.selectedPolicy.name"
           label="Policy Name"
@@ -25,20 +29,20 @@
         <FeatherTextarea
           v-model="store.selectedPolicy.memo"
           label="Memo"
-          :maxlength="100"/>
+          :maxlength="100"
+        />
         <FeatherCheckboxGroup
           label="Notifications (Optional)"
-          vertical>
+          vertical
+        >
           <FeatherCheckbox v-model="store.selectedPolicy.notifications.email">Email</FeatherCheckbox>
           <FeatherCheckbox v-model="store.selectedPolicy.notifications.pagerDuty">Pager Duty</FeatherCheckbox>
           <FeatherCheckbox v-model="store.selectedPolicy.notifications.webhooks">Webhooks</FeatherCheckbox>
         </FeatherCheckboxGroup>
-        <div class="form-subtitle">
-          Tags
-        </div>
+        <div class="form-subtitle">Tags</div>
         <BasicAutocomplete
-          @items-selected="selectTags"
-          :get-items="tagQueries.getTagsSearch"
+          @itemsSelected="selectTags"
+          :getItems="tagQueries.getTagsSearch"
           :items="tagQueries.tagsSearched"
           :label="'Tag name'"
         />
@@ -50,23 +54,27 @@
 
 <script setup lang="ts">
 import { useMonitoringPoliciesStore } from '@/store/Views/monitoringPoliciesStore'
+import { useMonitoringPoliciesQueries } from '@/store/Queries/monitoringPoliciesQueries'
 import { useTagQueries } from '@/store/Queries/tagQueries'
 import Add from '@featherds/icon/action/Add'
 import { TagSelectItem } from '@/types'
+import { IPolicy } from '@/types/policies'
 
 const store = useMonitoringPoliciesStore()
+const monitoringPoliciesQueries = useMonitoringPoliciesQueries()
 const tagQueries = useTagQueries()
 const addIcon = markRaw(Add)
 
-const selectTags = (tags: TagSelectItem[]) => store.selectedPolicy!.tags = tags.map((tag) => ({ name: tag.name }))
+const selectTags = (tags: TagSelectItem[]) => (store.selectedPolicy!.tags = tags.map((tag) => ({ name: tag.name })))
+const populateForm = (item: IPolicy) => (store.selectedPolicy = item)
 </script>
 
 <style scoped lang="scss">
-@use "@featherds/styles/mixins/elevation";
+@use '@featherds/styles/mixins/elevation';
 @use '@featherds/styles/themes/variables';
 @use '@featherds/styles/mixins/typography';
 @use '@/styles/mediaQueriesMixins';
-@use "@/styles/_transitionFade";
+@use '@/styles/_transitionFade';
 
 .policy-form-container {
   display: flex;

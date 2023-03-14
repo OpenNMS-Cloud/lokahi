@@ -6,8 +6,15 @@
         <FeatherIcon :icon="infoIcon" />
       </FeatherButton>
     </div>
-    <div class="list" v-for="item in list">
-      <div class="card">
+    <div
+      class="list"
+      v-for="item in list"
+    >
+      <div
+        class="card"
+        @click="$emit('select-existing-item', item)"
+        :class="{ selected: item.id === selectedItemId }"
+      >
         {{ item.name }}
       </div>
     </div>
@@ -21,15 +28,16 @@ import { IPolicy, IRule } from '@/types/policies'
 const infoIcon = markRaw(Info)
 
 defineProps<{
-  title: String,
+  title: String
   list: Partial<IPolicy>[] | Partial<IRule>[]
+  selectedItemId?: string
 }>()
 </script>
 
 <style lang="scss" scoped>
 @use '@featherds/styles/themes/variables';
 @use '@featherds/styles/mixins/typography';
-@use "@featherds/styles/mixins/elevation";
+@use '@featherds/styles/mixins/elevation';
 
 .existing-items-container {
   @include elevation.elevation(2);
@@ -55,9 +63,14 @@ defineProps<{
     .card {
       @include typography.headline4;
       width: 100%;
-      border: 1px solid var(variables.$shade-3);
+      border: 1px solid var(variables.$shade-2);
       border-radius: 10px;
       padding: var(variables.$spacing-xs) var(variables.$spacing-m);
+      cursor: pointer;
+    }
+
+    .selected {
+      background: var(variables.$shade-4);
     }
   }
 }

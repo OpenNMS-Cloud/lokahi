@@ -1,23 +1,30 @@
 <template>
-  <div class="rule-form-container" v-if="store.selectedPolicy">
+  <div
+    class="rule-form-container"
+    v-if="store.selectedPolicy"
+  >
     <div>
-      <FeatherButton primary @click="store.displayRuleForm()">
+      <FeatherButton
+        primary
+        @click="store.displayRuleForm()"
+      >
         <FeatherIcon :icon="addIcon" />
         Create New Rule
       </FeatherButton>
-      <MPolicyExistingItems
+      <MonitoringPoliciesExistingItems
         title="Existing Rules"
-        :list="[{ name: 'Test'}, { name: 'Testlongername'}]" 
+        :list="store.selectedPolicy.rules"
+        :selectedItemId="store.selectedRule?.id"
+        @selectExistingItem="populateForm"
       />
     </div>
     <transition name="fade">
-      <div class="rule-form" v-if="store.selectedRule">
-        <div class="form-title">
-          Create New Rule
-        </div>
-        <div class="form-subtitle">
-          New Rule Name
-        </div>
+      <div
+        class="rule-form"
+        v-if="store.selectedRule"
+      >
+        <div class="form-title">Create New Rule</div>
+        <div class="form-subtitle">New Rule Name</div>
         <FeatherInput
           v-model="store.selectedRule.name"
           label="New Rule Name"
@@ -51,6 +58,7 @@
 
 <script setup lang="ts">
 import { useMonitoringPoliciesStore } from '@/store/Views/monitoringPoliciesStore'
+import { IRule } from '@/types/policies'
 import Add from '@featherds/icon/action/Add'
 
 const store = useMonitoringPoliciesStore()
@@ -60,7 +68,7 @@ const componentTypeOptions = [
   { id: 'cpu', name: 'CPU' },
   { id: 'interface', name: 'Interface' },
   { id: 'storage', name: 'Storage' },
-  { id: 'node', name: 'Node' },
+  { id: 'node', name: 'Node' }
 ]
 
 const detectionMethodOptions = [
@@ -71,20 +79,21 @@ const detectionMethodOptions = [
 const thresholdMetricsOptions = [
   { id: 'over-utilization', name: 'Over Utilization' },
   { id: 'saturation', name: 'Saturation' },
-  { id: 'errors', name: 'Errors' },
+  { id: 'errors', name: 'Errors' }
 ]
 
-const selectComponentType = (type: string) => store.selectedRule!.componentType = type
-const selectDetectionMethod = (method: string) => store.selectedRule!.detectionMethod = method
-const selectThresholdMetrics = (metric: string) => store.selectedRule!.metricName = metric
+const selectComponentType = (type: string) => (store.selectedRule!.componentType = type)
+const selectDetectionMethod = (method: string) => (store.selectedRule!.detectionMethod = method)
+const selectThresholdMetrics = (metric: string) => (store.selectedRule!.metricName = metric)
+const populateForm = (item: IRule) => (store.selectedRule = item)
 </script>
 
 <style scoped lang="scss">
-@use "@featherds/styles/mixins/elevation";
+@use '@featherds/styles/mixins/elevation';
 @use '@featherds/styles/themes/variables';
 @use '@featherds/styles/mixins/typography';
 @use '@/styles/mediaQueriesMixins';
-@use "@/styles/_transitionFade";
+@use '@/styles/_transitionFade';
 
 .rule-form-container {
   display: flex;

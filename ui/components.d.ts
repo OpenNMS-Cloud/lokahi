@@ -15,6 +15,7 @@ declare module '@vue/runtime-core' {
     AppliancesNodesTable: typeof import('./src/components/Appliances/AppliancesNodesTable.vue')['default']
     AppliancesNotificationsCtrl: typeof import('./src/components/Appliances/AppliancesNotificationsCtrl.vue')['default']
     BasicAutocomplete: typeof import('./src/components/Common/BasicAutocomplete.vue')['default']
+    BasicChipSelect: typeof import('./src/components/Common/BasicChipSelect.vue')['default']
     BasicSelect: typeof import('./src/components/Common/BasicSelect.vue')['default']
     BasicToggle: typeof import('./src/components/Common/BasicToggle.vue')['default']
     ButtonWithSpinner: typeof import('./src/components/Common/ButtonWithSpinner.vue')['default']

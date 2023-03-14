@@ -2,7 +2,7 @@ import BasicToggle from '@/components/Common/BasicToggle.vue'
 import { mount } from '@vue/test-utils'
 
 const toggle = ref(false)
-const onToggle = () => toggle.value = true
+const onToggle = () => (toggle.value = true)
 
 const wrapper = mount(BasicToggle, {
   props: {

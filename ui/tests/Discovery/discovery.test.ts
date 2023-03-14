@@ -1,7 +1,7 @@
 import Discovery from '@/containers/Discovery.vue'
 import mount from 'tests/mountWithPiniaVillus'
 
-const wrapper = mount({ 
+const wrapper = mount({
   component: Discovery,
   attachTo: document.body,
   shallow: true

@@ -21,4 +21,3 @@ interface GraphProps {
   timeRange: number
   timeRangeUnit: TimeRangeUnit
 }
- 

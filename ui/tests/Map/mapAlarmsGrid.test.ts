@@ -16,13 +16,13 @@ beforeEach(() => {
 })
 
 const columns = [
-  [ 'ID', 'col-id' ],
-  [ 'SEVERITY', 'col-severity' ],
-  [ 'NODE LABEL', 'col-node-label' ],
-  [ 'UEI', 'col-uei' ],
-  [ 'COUNT', 'col-count' ],
-  [ 'LAST EVENT', 'col-last-event' ],
-  [ 'LOG MESSAGE', 'col-log-msg' ]
+  ['ID', 'col-id'],
+  ['SEVERITY', 'col-severity'],
+  ['NODE LABEL', 'col-node-label'],
+  ['UEI', 'col-uei'],
+  ['COUNT', 'col-count'],
+  ['LAST EVENT', 'col-last-event'],
+  ['LOG MESSAGE', 'col-log-msg']
 ]
 it.each(columns)('should have %s column', (_, col) => {
   const elem = wrapper.get(`[data-test="${col}"]`)

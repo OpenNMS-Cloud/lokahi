@@ -24,7 +24,4 @@ casual.define('listMinions', function () {
 const minion = casual.minion
 const listMinions = casual.listMinions
 
-export {
-  minion,
-  listMinions
-}
+export { minion, listMinions }

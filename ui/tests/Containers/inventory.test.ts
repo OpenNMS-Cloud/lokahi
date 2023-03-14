@@ -13,10 +13,10 @@ describe('Inventory page', () => {
       component: Inventory,
       shallow: true
     })
-    
+
     const pageHeader = wrapper.getComponent('[data-test="page-header"]')
     expect(pageHeader.exists()).toBe(true)
-    
+
     const featherTabContainer = wrapper.getComponent('[data-test="tab-container"]')
     expect(featherTabContainer.exists()).toBe(true)
   })

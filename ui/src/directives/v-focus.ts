@@ -1,5 +1,5 @@
 /**
- * Add `v-focus` to any  
+ * Add `v-focus` to any
  * FeatherInput to autofocus on mount
  */
 const featherInputFocusDirective = {
@@ -8,5 +8,5 @@ const featherInputFocusDirective = {
     baseInput.focus()
   }
 }
- 
+
 export default featherInputFocusDirective

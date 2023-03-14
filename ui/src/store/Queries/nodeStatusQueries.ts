@@ -16,8 +16,8 @@ export const useNodeStatusQueries = defineStore('nodeStatusQueries', () => {
   })
 
   const fetchedData = computed(() => ({
-    events: data.value?.events || [] as Event[],
-    node: data.value?.node || {} as Node
+    events: data.value?.events || ([] as Event[]),
+    node: data.value?.node || ({} as Node)
   }))
 
   return {

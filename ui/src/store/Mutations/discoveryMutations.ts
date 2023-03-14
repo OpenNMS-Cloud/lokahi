@@ -25,10 +25,8 @@ export const useDiscoveryMutations = defineStore('discoveryMutations', () => {
     isFetching: isFetchingPassiveDiscovery
   } = useMutation(UpsertPassiveDiscoveryDocument)
 
-    // Toggle Passive Discoveries
-    const {
-      execute: togglePassiveDiscovery
-    } = useMutation(TogglePassiveDiscoveryDocument)
+  // Toggle Passive Discoveries
+  const { execute: togglePassiveDiscovery } = useMutation(TogglePassiveDiscoveryDocument)
 
   return {
     addAzureCreds,

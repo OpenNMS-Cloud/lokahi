@@ -115,7 +115,7 @@ export const useTopologyStore = defineStore('topologyStore', {
 
     async getVerticesAndEdges() {
       // TODO: add GQL call to get the data
-      const resp = { edges: [], vertices: [] }  as VerticesAndEdges
+      const resp = { edges: [], vertices: [] } as VerticesAndEdges
 
       if (resp) {
         this.parseVerticesAndEdges(resp)

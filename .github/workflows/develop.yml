@@ -252,4 +252,8 @@ jobs:
           ls
           git remote -v
           
-          git clone git@github.com:OpenNMS-Cloud/horizon-stream.git
+          git clone https://github.com/OpenNMS-Cloud/horizon-stream.git
+
+          ls
+        
+          echo 

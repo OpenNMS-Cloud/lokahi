@@ -12,10 +12,10 @@
       />
       Add
     </FeatherButton>
-    <div v-if="store.selectedRule.conditions.length">
+    <div v-if="store.selectedRule!.conditions.length">
       <div
         class="condition-card"
-        v-for="cond in store.selectedRule.conditions"
+        v-for="cond in store.selectedRule!.conditions"
         :key="cond.id"
       >
         <Condition :condition="cond" />

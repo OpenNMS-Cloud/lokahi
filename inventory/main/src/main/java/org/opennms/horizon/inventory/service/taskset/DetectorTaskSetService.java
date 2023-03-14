@@ -29,17 +29,16 @@
 package org.opennms.horizon.inventory.service.taskset;
 
 import com.google.protobuf.Any;
-import io.grpc.Context;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.opennms.horizon.inventory.dto.NodeDTO;
 import org.opennms.horizon.inventory.model.IpInterface;
 import org.opennms.horizon.inventory.model.MonitoringLocation;
 import org.opennms.horizon.inventory.model.Node;
 import org.opennms.horizon.inventory.repository.IpInterfaceRepository;
+import org.opennms.horizon.inventory.service.SnmpConfigService;
 import org.opennms.horizon.inventory.service.taskset.publisher.TaskSetPublisher;
-import org.opennms.horizon.shared.constants.GrpcConstants;
 import org.opennms.horizon.shared.utils.InetAddressUtils;
+import org.opennms.horizon.snmp.api.SnmpConfiguration;
 import org.opennms.icmp.contract.IcmpDetectorRequest;
 import org.opennms.snmp.contract.SnmpDetectorRequest;
 import org.opennms.taskset.contract.MonitorType;
@@ -51,7 +50,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import static org.opennms.horizon.inventory.service.taskset.TaskUtils.identityForIpTask;
 
@@ -61,7 +59,9 @@ public class DetectorTaskSetService {
 
     private static final Logger log = LoggerFactory.getLogger(DetectorTaskSetService.class);
 
-    private final TaskSetPublisher taskSetPublisher;private final IpInterfaceRepository ipInterfaceRepository;
+    private final TaskSetPublisher taskSetPublisher;
+    private final IpInterfaceRepository ipInterfaceRepository;
+    private final SnmpConfigService snmpConfigService;
 
     private static final MonitorType[] DETECTOR_MONITOR_TYPES = {MonitorType.ICMP, MonitorType.SNMP};
 
@@ -77,36 +77,28 @@ public class DetectorTaskSetService {
     public List<TaskDefinition> getDetectorTasks(Node node) {
         List<IpInterface> ipInterfaces =
             ipInterfaceRepository.findByNodeId(node.getId());
+        if (ipInterfaces.isEmpty()) {
+            return new ArrayList<>();
+        }
+        var optional = ipInterfaces.stream().filter(IpInterface::getSnmpPrimary).findFirst();
+        var primaryInterface = optional.orElse(ipInterfaces.get(0));
+        var ipAddress = primaryInterface.getIpAddress();
+        var snmpConfiguration = snmpConfigService.getSnmpConfig(node.getTenantId(),
+            node.getMonitoringLocation().getLocation(), ipAddress);
         List<TaskDefinition> tasks = new ArrayList<>();
         for (MonitorType monitorType : DETECTOR_MONITOR_TYPES) {
-            var list = addDetectorTasks(node, ipInterfaces, monitorType);
+            var list = addDetectorTasks(node, ipInterfaces, monitorType, snmpConfiguration.orElse(null));
             tasks.addAll(list);
         }
         return tasks;
     }
 
-    public void sendDetectorTaskForNodes(Map<String, Map<String, List<NodeDTO>>> nodeListMap) {
-        var tasks = new ArrayList<TaskDefinition>();
-        for (MonitorType monitorType : DETECTOR_MONITOR_TYPES) {
-            nodeListMap.forEach((tenantId, locationNodes) -> locationNodes.forEach((location, nodes) ->
-                nodes.forEach(node -> node.getIpInterfacesList().forEach(ip ->
-                    {
-                        var task = addDetectorTask(node.getId(), tenantId, ip.getIpAddress(), location, monitorType);
-                        if(task != null) {
-                            tasks.add(task);
-                        }
-                    }
-                ))));
-        }
-        nodeListMap.forEach((tenantId, locationMap) -> locationMap.forEach((location, node) ->
-            taskSetPublisher.publishNewTasks(tenantId, location, tasks)));
-    }
 
-    private List<TaskDefinition> addDetectorTasks(Node node, List<IpInterface> ipInterfaces, MonitorType monitorType) {
+    private List<TaskDefinition> addDetectorTasks(Node node, List<IpInterface> ipInterfaces, MonitorType monitorType,
+                                                  SnmpConfiguration snmpConfiguration) {
         List<TaskDefinition> tasks = new ArrayList<>();
         for (IpInterface ipInterface : ipInterfaces) {
-            var task = addDetectorTask(node.getId(), node.getTenantId(), InetAddressUtils.toIpAddrString(ipInterface.getIpAddress()),
-                node.getMonitoringLocation().getLocation(), monitorType);
+            var task = addDetectorTask(node.getId(), InetAddressUtils.toIpAddrString(ipInterface.getIpAddress()), monitorType, snmpConfiguration);
             if (task != null) {
                 tasks.add(task);
             }
@@ -114,7 +106,7 @@ public class DetectorTaskSetService {
         return tasks;
     }
 
-    private TaskDefinition addDetectorTask(long nodeId, String tenantId, String ipAddress, String location, MonitorType monitorType) {
+    private TaskDefinition addDetectorTask(long nodeId, String ipAddress, MonitorType monitorType, SnmpConfiguration snmpConfiguration) {
         String monitorTypeValue = monitorType.getValueDescriptor().getName();
         String name = String.format("%s-detector", monitorTypeValue.toLowerCase());
         String pluginName = String.format("%sDetector", monitorTypeValue);
@@ -131,12 +123,15 @@ public class DetectorTaskSetService {
                     .setPacketSize(TaskUtils.ICMP_DEFAULT_PACKET_SIZE)
                     .setRetries(TaskUtils.ICMP_DEFAULT_RETRIES)
                     .build());
-            case SNMP -> configuration =
-                Any.pack(SnmpDetectorRequest.newBuilder()
-                    .setHost(ipAddress)
-                    .setTimeout(TaskUtils.SNMP_DEFAULT_TIMEOUT_MS)
-                    .setRetries(TaskUtils.SNMP_DEFAULT_RETRIES)
-                    .build());
+            case SNMP -> {
+                var requestBuilder = SnmpDetectorRequest.newBuilder()
+                    .setHost(ipAddress);
+                if(snmpConfiguration != null) {
+                    requestBuilder.setAgentConfig(snmpConfiguration);
+                }
+                configuration =
+                    Any.pack(requestBuilder.build());
+            }
             case UNRECOGNIZED -> log.warn("Unrecognized monitor type");
             case UNKNOWN -> log.warn("Unknown monitor type");
         }

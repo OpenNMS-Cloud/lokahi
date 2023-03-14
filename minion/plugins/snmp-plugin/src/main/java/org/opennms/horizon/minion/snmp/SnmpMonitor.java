@@ -134,7 +134,7 @@ public class SnmpMonitor extends AbstractServiceMonitor {
             SnmpMonitorRequest snmpMonitorRequest = config.unpack(SnmpMonitorRequest.class);
 
             // Retrieve this interface's SNMP peer object
-            SnmpAgentConfig agentConfig = mapAgentConfig(snmpMonitorRequest);
+            SnmpAgentConfig agentConfig = SnmpConfigUtils.mapAgentConfig(snmpMonitorRequest.getHost(), snmpMonitorRequest.getAgentConfig());
 
             hostAddress = snmpMonitorRequest.getHost();
 

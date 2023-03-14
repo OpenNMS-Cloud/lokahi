@@ -1,8 +1,8 @@
 /*******************************************************************************
  * This file is part of OpenNMS(R).
  *
- * Copyright (C) 2022 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
+ * Copyright (C) 2023 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
  *
@@ -17,7 +17,7 @@
  * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:ufl
+ * along with OpenNMS(R).  If not, see:
  *      http://www.gnu.org/licenses/
  *
  * For more information contact:
@@ -25,30 +25,22 @@
  *     http://www.opennms.org/
  *     http://www.opennms.com/
  *******************************************************************************/
-syntax = "proto3";
 
-import "google/protobuf/any.proto";
-import "snmp-api.proto";
+package org.opennms.horizon.minion.snmp;
 
-package opennms.snmp;
-option java_multiple_files = true;
-option java_package = "org.opennms.snmp.contract";
+import org.opennms.horizon.shared.snmp.SnmpAgentConfig;
+import org.opennms.horizon.shared.utils.InetAddressUtils;
+import org.opennms.horizon.snmp.api.SnmpConfiguration;
 
-message SnmpDetectorRequest {
-  string host = 1;
-  opennms.snmp.api.SnmpConfiguration agent_config = 4;
-}
+public class SnmpConfigUtils {
 
-message SnmpMonitorRequest {
-  string host = 1;
-  string oid = 2;
-  string operator = 3;
-  string operand = 4;
-  opennms.snmp.api.SnmpConfiguration agent_config = 5;
-}
-
-message SnmpCollectorRequest {
-  string  host = 1;
-  opennms.snmp.api.SnmpConfiguration agent_config = 2;
-  uint64  node_id = 3;
+    static SnmpAgentConfig mapAgentConfig(String host, SnmpConfiguration snmpConfiguration) {
+        var agentConfig = new SnmpAgentConfig(InetAddressUtils.getInetAddress(host), SnmpAgentConfig.DEFAULTS);
+        if(snmpConfiguration != null) {
+            agentConfig.setReadCommunity(snmpConfiguration.getReadCommunity());
+            agentConfig.setPort(snmpConfiguration.getPort());
+            //TODO: Expand config further.
+        }
+        return agentConfig;
+    }
 }

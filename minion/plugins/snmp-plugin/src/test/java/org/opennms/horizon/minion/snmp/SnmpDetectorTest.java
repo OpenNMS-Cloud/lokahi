@@ -38,7 +38,6 @@ public class SnmpDetectorTest {
         testRequest =
             SnmpDetectorRequest.newBuilder()
                 .setHost("127.0.0.1")
-                .setTimeout(5000)
                 .build();
 
         testConfig = Any.pack(testRequest);

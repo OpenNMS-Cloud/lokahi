@@ -227,8 +227,8 @@ jobs:
 
             echo ${{ github.ref  }}
 
-  update:
-    name: Update
+  update2:
+    name: Update2
     #needs: external-it
     runs-on: ubuntu-latest
     steps:
@@ -243,10 +243,6 @@ jobs:
         #if: github.ref == 'refs/heads/develop'
         if: github.head_ref == 'jira/HS-1207-Add-to-developyml-push'
         shell: bash
-        env:
-          GH_USER: ${{ secrets.GH_USER }}
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
-          GH_REPOSITORY: ${{ secrets.GH_REPOSITORY }}
         run: |
           echo "Test b: ${{ github.ref }}
           echo "Test c: ${{ github.head_ref }}

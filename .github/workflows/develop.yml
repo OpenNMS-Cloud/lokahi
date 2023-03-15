@@ -251,7 +251,6 @@ jobs:
 
           git remote add hs https://github.com/OpenNMS-Cloud/horizon-stream.git
 
-          git fetch
           git checkout from-develop
 
           git fetch hs develop

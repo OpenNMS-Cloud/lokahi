@@ -247,6 +247,7 @@ jobs:
 
           git config --global user.email jaberry@opennms.com
           git config --global user.name jaberry
+
           git remote add hs https://github.com/OpenNMS-Cloud/horizon-stream.git
           git fetch
           git checkout -b from-develop remotes/origin/from-develop

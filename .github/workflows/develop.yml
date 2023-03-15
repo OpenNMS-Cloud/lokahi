@@ -261,12 +261,17 @@ jobs:
           git clone https://github.com/OpenNMS-Cloud/horizon-stream.git /tmp/horizon-stream
           cd /tmp/horizon-stream
           pwd
+          echo "a"
           git remote add private git@github.com:OpenNMS-Cloud/fabric-services.git
+          echo "b"
           git fetch --all
+          echo "c"
           git checkout develop
+          echo "d"
           #git push private HEAD:from-develop
 
           cd $WRKSPC
+          echo "e"
           pwd
           #git pull from-develop
           #git checkout trunk

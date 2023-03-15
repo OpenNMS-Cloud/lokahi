@@ -252,7 +252,7 @@ jobs:
           git branch -a
           git fetch
           git checkout -b from-develop remotes/origin/from-develop
-          git pull hs HEAD:from-develop
+          git pull hs develop:from-develop
           git push origin from-develop
 
           #git checkout trunk 

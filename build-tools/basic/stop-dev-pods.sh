@@ -12,7 +12,6 @@
 
 kubectl delete deployment opennms-notifications
 kubectl delete deployment opennms-rest-server
-kubectl delete deployment opennms-core
 kubectl delete deployment opennms-minion
 kubectl delete deployment opennms-ui
 kubectl delete deployment opennms-minion-gateway
@@ -20,4 +19,4 @@ kubectl delete deployment opennms-minion-gateway-grpc-proxy
 kubectl delete deployment opennms-metrics-processor
 kubectl delete deployment opennms-events
 kubectl delete deployment opennms-datachoices
-
+kubectl delete deployment opennms-alert

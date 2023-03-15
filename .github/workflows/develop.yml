@@ -254,10 +254,8 @@ jobs:
           ls .github/workflows 
           git remote -v
           echo "a"
-          echo "gg" $GH_USER
-          echo "gg" $GH_TOKEN
-          echo "gg" $GH_REPOSITORY
-          git remote add private https://${{ secrets.GH_USER }}:${{ secrets.GH_TOKEN }}@github.com/${{ secrets.GH_REPOSITORY }}
+          git remote add private https://${{ secrets.GH_TOKEN }}@github.com/${{ secrets.GH_REPOSITORY }}
+          git remote -v
           echo "b"
           git fetch --all
           echo "c"

@@ -251,4 +251,6 @@ jobs:
           git pull hs HEAD:from-develop
           git checkout trunk 
           git merge from-develop --allow-unrelated-histories
+          git config --global user.email jaberry@opennms.com
+          git config --global user.name jaberry
           git push origin trunk

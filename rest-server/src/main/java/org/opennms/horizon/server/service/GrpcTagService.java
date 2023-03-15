@@ -91,6 +91,14 @@ public class GrpcTagService {
     }
 
     @GraphQLQuery
+    public Mono<List<Tag>> getTagsByPassiveDiscoveryId(@GraphQLArgument(name = "passiveDiscoveryId") Long activeDiscoveryId,
+                                                      @GraphQLArgument(name = "searchTerm") String searchTerm,
+                                                      @GraphQLEnvironment ResolutionEnvironment env) {
+        List<TagDTO> tagsList = client.getTagsByPassiveDiscoveryId(activeDiscoveryId, searchTerm, headerUtil.getAuthHeader(env)).getTagsList();
+        return Mono.just(tagsList.stream().map(mapper::protoToTag).toList());
+    }
+
+    @GraphQLQuery
     public Mono<List<Tag>> getTags(@GraphQLArgument(name = "searchTerm") String searchTerm,
                                    @GraphQLEnvironment ResolutionEnvironment env) {
         List<TagDTO> tagsList = client.getTags(searchTerm, headerUtil.getAuthHeader(env)).getTagsList();

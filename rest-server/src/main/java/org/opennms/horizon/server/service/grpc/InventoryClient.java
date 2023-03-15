@@ -259,6 +259,17 @@ public class InventoryClient {
             .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).getTagsByEntityId(params);
     }
 
+    public TagListDTO getTagsByPassiveDiscoveryId(long passiveDiscoveryId, String searchTerm, String accessToken) {
+        Metadata metadata = new Metadata();
+        metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
+        ListTagsByEntityIdParamsDTO params = ListTagsByEntityIdParamsDTO.newBuilder()
+            .setPassiveDiscoveryId(passiveDiscoveryId)
+            .setParams(buildTagListParams(searchTerm))
+            .build();
+        return tagStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
+            .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).getTagsByEntityId(params);
+    }
+
     public TagListDTO getTags(String searchTerm, String accessToken) {
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);

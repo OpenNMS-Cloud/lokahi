@@ -255,7 +255,6 @@ jobs:
           git remote -v
 
           echo "a"
-          #git remote add private https://${{ secrets.GH_USER }}:${{ secrets.GH_TOKEN }}@github.com/${{ secrets.GH_REPOSITORY }}
           git remote add private https://${{ secrets.GH_USER }}:${{ secrets.GH_TOKEN }}@github.com/OpenNMS-Cloud/fabric-services.git
           git remote -v
           echo "b"

@@ -238,9 +238,9 @@ jobs:
           repository: OpenNMS-Cloud/fabric-services
           token: ${{ secrets.GH_TOKEN }}
           fetch-depth: 0
-	  # How can we add the functionality from 'git clone --filter=tree:0
-	  # <url>' in this checkout? This would save us from pulling more than
-	  # what we need.
+          # How can we add the functionality from 'git clone --filter=tree:0
+          # <url>' in this checkout? This would save us from pulling more than
+          # what we need.
       - name: update
         # Need this to trigger only when PR is merged or there is a push to
         # develop (default) branch. All testing is already complete.

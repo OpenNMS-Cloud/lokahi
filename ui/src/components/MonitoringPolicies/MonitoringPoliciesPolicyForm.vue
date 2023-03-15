@@ -47,6 +47,16 @@
           :label="'Tag name'"
         />
       </div>
+
+      <div
+        v-else
+        class="mp-card-container"
+      >
+        <MonitoringPoliciesCard
+          v-for="policy in monitoringPoliciesQueries.monitoringPolicies"
+          :policy="policy"
+        />
+      </div>
     </transition>
   </div>
   <hr v-if="store.selectedPolicy" />
@@ -98,6 +108,13 @@ const populateForm = (item: IPolicy) => (store.selectedPolicy = item)
       @include typography.subtitle1;
       margin-bottom: var(variables.$spacing-m);
     }
+  }
+
+  .mp-card-container {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: var(variables.$spacing-s);
   }
 
   @include mediaQueriesMixins.screen-md {

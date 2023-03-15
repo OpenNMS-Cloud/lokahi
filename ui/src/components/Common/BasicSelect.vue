@@ -8,8 +8,7 @@
     hideLabel
     :disabled="isDisabled"
     @update:modelValue="setSelectedItem"
-  >
-  </FeatherSelect>
+  />
 </template>
 
 <script lang="ts" setup>
@@ -21,12 +20,24 @@ const props = defineProps<{
   list: ISelectItemType[] // accept the structure [{id, name}]
   size?: number
   isDisabled?: boolean
+  selectedId?: string
 }>()
 
 const selectedItem = ref(props.list[0])
 const setSelectedItem = (selected: ISelectItemType | undefined) => {
   emit('item-selected', selected?.id)
 }
+
+// set selected by passing in an id
+watchEffect(() => {
+  if (props.selectedId) {
+    for (const item of props.list) {
+      if (item.id === props.selectedId) {
+        selectedItem.value = item
+      }
+    }
+  }
+})
 </script>
 
 <style scoped lang="scss">

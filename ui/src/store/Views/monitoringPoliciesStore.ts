@@ -26,8 +26,8 @@ const getDefaultRule = () => ({
   id: new Date().getTime().toString(),
   name: '',
   componentType: 'cpu',
-  detectionMethod: 'thresholdAlert',
-  metricName: 'interfaceUtil',
+  detectionMethod: 'threshold',
+  metricName: 'over-utilization',
   conditions: []
 })
 

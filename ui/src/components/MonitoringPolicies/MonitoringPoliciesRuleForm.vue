@@ -24,31 +24,42 @@
         v-if="store.selectedRule"
       >
         <div class="form-title">Create New Rule</div>
-        <div class="form-subtitle">New Rule Name</div>
-        <FeatherInput
-          v-model="store.selectedRule.name"
-          label="New Rule Name"
-        />
-        <div>
-          <div class="subtitle">Component Type</div>
-          <BasicSelect
-            :list="componentTypeOptions"
-            @item-selected="selectComponentType"
-          />
+
+        <div class="row">
+          <div class="col">
+            <div class="subtitle">New Rule Name</div>
+            <FeatherInput
+              v-model="store.selectedRule.name"
+              label="New Rule Name"
+            />
+          </div>
+          <div class="col">
+            <div class="subtitle">Component Type</div>
+            <BasicSelect
+              :list="componentTypeOptions"
+              @item-selected="selectComponentType"
+              :selectedId="store.selectedRule.componentType"
+            />
+          </div>
         </div>
-        <div>
-          <div class="subtitle">Detection Method</div>
-          <BasicSelect
+
+        <div class="row">
+          <div class="col">
+            <div class="subtitle">Detection Method</div>
+            <BasicSelect
             :list="detectionMethodOptions"
-            @item-selected="selectDetectionMethod"
-          />
-        </div>
-        <div>
-          <div class="subtitle">Threshold Metrics</div>
-          <BasicSelect
+              @item-selected="selectDetectionMethod"
+              :selectedId="store.selectedRule.detectionMethod"
+            />
+          </div>
+          <div class="col">
+            <div class="subtitle">Threshold Metrics</div>
+            <BasicSelect
             :list="thresholdMetricsOptions"
             @item-selected="selectThresholdMetrics"
-          />
+            :selectedId="store.selectedRule.metricName"
+            />
+          </div>
         </div>
         <AlertConditions />
       </div>
@@ -111,15 +122,26 @@ const populateForm = (rule: IRule) => (store.displayRuleForm(rule))
 
     .form-title {
       @include typography.headline3;
+      margin-bottom: var(variables.$spacing-m)
     }
-    .form-subtitle {
+    .subtitle {
       @include typography.subtitle1;
-      margin: var(variables.$spacing-m) 0;
     }
   }
 
   @include mediaQueriesMixins.screen-md {
     flex-direction: row;
   }
+
+  .row {
+    @include mediaQueriesMixins.screen-lg {
+      display: flex;
+      gap: var(variables.$spacing-xl);
+      .col {
+        flex: 1;
+      }
+    }
+  }
+
 }
 </style>

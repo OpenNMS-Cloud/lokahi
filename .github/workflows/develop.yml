@@ -257,7 +257,7 @@ jobs:
           echo "gg" $GH_USER
           echo "gg" $GH_TOKEN
           echo "gg" $GH_REPOSITORY
-          git remote add private https://${{ GH_USER }}:${{GH_TOKEN }}@github.com/${{ GH_REPOSITORY }}
+          git remote add private https://${{ secrets.GH_USER }}:${{ secrets.GH_TOKEN }}@github.com/${{ secrets.GH_REPOSITORY }}
           echo "b"
           git fetch --all
           echo "c"

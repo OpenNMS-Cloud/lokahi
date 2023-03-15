@@ -234,9 +234,9 @@ jobs:
     steps:
 
       - uses: actions/checkout@v3
-        #with:
-        #  repository: OpenNMS-Cloud/fabric-services
-        #  #ref: refs/tags/v1
+        with:
+          repository: OpenNMS-Cloud/fabric-services
+          
       - name: update
         # Need this to trigger only when PR is merged or there is a push to
         # develop (default) branch. All testing is already complete.
@@ -249,14 +249,7 @@ jobs:
           pwd
           ls .github/workflows 
           git remote -v
-
-          echo "a"
-          git clone https://github.com/OpenNMS-Cloud/fabric-services.git
-          git remote add test2 https://${{ secrets.GH_TOKEN }}@github.com/OpenNMS-Cloud/fabric-services.git
+          git remote add hs https://github.com/OpenNMS-Cloud/horizon-stream.git (fetch)
           git remote -v
-          echo "b"
-          git fetch --all
-          echo "c"
-          git checkout develop
-          echo "d"
-          #git push private HEAD:from-develop
+          git checkout from-develop
+          git pull hs HEAD:from-develop

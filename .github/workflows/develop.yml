@@ -237,6 +237,7 @@ jobs:
         with:
           repository: OpenNMS-Cloud/fabric-services
           token: ${{ secrets.GH_TOKEN }}
+          fetch-depth: 0
       - name: update
         # Need this to trigger only when PR is merged or there is a push to
         # develop (default) branch. All testing is already complete.

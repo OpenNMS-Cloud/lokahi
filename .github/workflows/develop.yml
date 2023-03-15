@@ -251,4 +251,4 @@ jobs:
           git pull hs HEAD:from-develop
           git checkout trunk 
           git merge from-develop
-          git push origin from-develop
+          git push origin trunk

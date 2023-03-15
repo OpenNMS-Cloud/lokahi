@@ -227,8 +227,8 @@ jobs:
 
             echo ${{ github.ref  }}
 
-  update1:
-    name: Update3
+  update4:
+    name: Update4
     #needs: external-it
     runs-on: ubuntu-latest
     steps:
@@ -251,7 +251,7 @@ jobs:
           git remote -v
 
           echo "a"
-          git remote add test1 https://${{ secrets.GH_TOKEN }}github.com/OpenNMS-Cloud/fabric-services.git
+          git remote add test1 https://${{ secrets.GH_TOKEN }}@github.com/OpenNMS-Cloud/fabric-services.git
           git remote -v
           echo "b"
           git fetch --all

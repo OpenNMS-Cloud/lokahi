@@ -78,11 +78,11 @@ public class PassiveDiscovery {
 
     @Column(name = "snmp_ports", columnDefinition = "jsonb")
     @JdbcTypeCode(SqlTypes.JSON)
-    private List<Integer> snmpPorts;
+    private List<Integer> snmpPorts = new ArrayList<>();
 
     @Column(name = "snmp_communities", columnDefinition = "jsonb")
     @JdbcTypeCode(SqlTypes.JSON)
-    private List<String> snmpCommunities;
+    private List<String> snmpCommunities = new ArrayList<>();
 
     @ManyToMany(mappedBy = "passiveDiscoveries")
     private List<Tag> tags = new ArrayList<>();

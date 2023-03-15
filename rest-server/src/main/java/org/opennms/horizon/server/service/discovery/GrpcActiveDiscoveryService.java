@@ -35,8 +35,9 @@ import io.leangen.graphql.execution.ResolutionEnvironment;
 import io.leangen.graphql.spqr.spring.annotations.GraphQLApi;
 import lombok.RequiredArgsConstructor;
 import org.opennms.horizon.inventory.dto.ActiveDiscoveryDTO;
-import org.opennms.horizon.server.mapper.AzureActiveDiscoveryMapper;
-import org.opennms.horizon.server.mapper.IcmpActiveDiscoveryMapper;
+import org.opennms.horizon.server.mapper.discovery.ActiveDiscoveryMapper;
+import org.opennms.horizon.server.mapper.discovery.AzureActiveDiscoveryMapper;
+import org.opennms.horizon.server.mapper.discovery.IcmpActiveDiscoveryMapper;
 import org.opennms.horizon.server.model.inventory.discovery.active.ActiveDiscovery;
 import org.opennms.horizon.server.service.grpc.InventoryClient;
 import org.opennms.horizon.server.utils.ServerHeaderUtil;
@@ -44,34 +45,19 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
 import java.util.List;
+import java.util.function.Function;
 
 @RequiredArgsConstructor
 @GraphQLApi
 @Service
 public class GrpcActiveDiscoveryService {
     private final InventoryClient client;
-    private final IcmpActiveDiscoveryMapper icmpMapper;
-    private final AzureActiveDiscoveryMapper azureMapper;
+    private final ActiveDiscoveryMapper mapper;
     private final ServerHeaderUtil headerUtil;
 
     @GraphQLQuery
     public Flux<ActiveDiscovery> listActiveDiscovery(@GraphQLEnvironment ResolutionEnvironment env) {
         List<ActiveDiscoveryDTO> discoveriesDto = client.listActiveDiscoveries(headerUtil.getAuthHeader(env));
-        return Flux.fromIterable(discoveriesDto.stream().map(this::getActiveDiscovery).toList());
-    }
-
-    private ActiveDiscovery getActiveDiscovery(ActiveDiscoveryDTO activeDiscoveryDTO) {
-        ObjectMapper objectMapper = new ObjectMapper();
-        ActiveDiscovery discovery = new ActiveDiscovery();
-        if (activeDiscoveryDTO.hasAzure()) {
-            discovery.setDetails(objectMapper.valueToTree(azureMapper.dtoToAzureActiveDiscovery(activeDiscoveryDTO.getAzure())));
-            discovery.setDiscoveryType("AZURE");
-        } else if (activeDiscoveryDTO.hasIcmp()) {
-            discovery.setDetails(objectMapper.valueToTree(icmpMapper.dtoToIcmpActiveDiscovery(activeDiscoveryDTO.getIcmp())));
-            discovery.setDiscoveryType("ICMP");
-        } else {
-            throw new RuntimeException("Invalid Active Discovery type returned");
-        }
-        return discovery;
+        return Flux.fromIterable(discoveriesDto.stream().map(mapper::dtoToActiveDiscovery).toList());
     }
 }

@@ -53,10 +53,7 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 @RequiredArgsConstructor
 public class TaskSetResultsConsumer {
-
-    private static final Logger DEFAULT_LOGGER = LoggerFactory.getLogger(TaskSetResultsConsumer.class);
-
-    private Logger LOG = DEFAULT_LOGGER;
+    private static final Logger LOG = LoggerFactory.getLogger(TaskSetResultsConsumer.class);
 
     private final ScannerResponseService scannerResponseService;
     private final DetectorResponseService detectorResponseService;

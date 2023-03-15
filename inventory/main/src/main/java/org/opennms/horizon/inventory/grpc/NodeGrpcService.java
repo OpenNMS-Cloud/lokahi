@@ -28,6 +28,7 @@
 
 package org.opennms.horizon.inventory.grpc;
 
+import com.google.common.base.Function;
 import com.google.common.base.Strings;
 import com.google.common.net.InetAddresses;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
@@ -38,11 +39,11 @@ import com.google.rpc.Code;
 import com.google.rpc.Status;
 import io.grpc.Context;
 import io.grpc.protobuf.StatusProto;
-import io.grpc.stub.ServerCalls;
 import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.opennms.horizon.inventory.dto.IpInterfaceDTO;
+import org.opennms.horizon.inventory.dto.MonitoredStateQuery;
 import org.opennms.horizon.inventory.dto.NodeCreateDTO;
 import org.opennms.horizon.inventory.dto.NodeDTO;
 import org.opennms.horizon.inventory.dto.NodeIdList;
@@ -119,6 +120,19 @@ public class NodeGrpcService extends NodeServiceGrpc.NodeServiceImplBase {
             .map(nodeService::findByTenantId).orElseThrow();
         responseObserver.onNext(NodeList.newBuilder().addAllNodes(list).build());
         responseObserver.onCompleted();
+    }
+
+    @Override
+    public void listNodesByMonitoredState(MonitoredStateQuery request, StreamObserver<NodeList> responseObserver) {
+        try {
+            List<NodeDTO> list = tenantLookup.lookupTenantId(Context.current())
+                .map((Function<String, List<NodeDTO>>) tenantId ->
+                    nodeService.findByMonitoredState(tenantId, request.getMonitoredState())).orElseThrow();
+            responseObserver.onNext(NodeList.newBuilder().addAllNodes(list).build());
+            responseObserver.onCompleted();
+        } catch (Exception e) {
+            responseObserver.onError(e);
+        }
     }
 
     @Override

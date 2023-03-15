@@ -38,6 +38,7 @@ import java.util.concurrent.CompletableFuture;
 import org.opennms.horizon.azure.api.AzureResponseMetric;
 import org.opennms.horizon.azure.api.AzureResultMetric;
 import org.opennms.horizon.azure.api.AzureValueType;
+import org.opennms.horizon.inventory.dto.MonitoredState;
 import org.opennms.horizon.timeseries.cortex.CortexTSS;
 import org.opennms.horizon.shared.constants.GrpcConstants;
 import org.opennms.horizon.snmp.api.SnmpResponseMetric;

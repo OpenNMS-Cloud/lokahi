@@ -51,6 +51,7 @@ message NodeDTO {
   string system_contact = 11;
   repeated opennms.inventory.SnmpInterfaceDTO snmpInterfaces = 12;
   string scan_type = 13;
+  optional MonitoredState monitored_state = 14;
 }
 
 message NodeCreateDTO {
@@ -58,6 +59,11 @@ message NodeCreateDTO {
   string location = 2;
   optional string management_ip = 3;
   repeated opennms.inventory.TagCreateDTO tags = 4;
+  optional MonitoredState monitored_state = 5; // optional for now - may change
+}
+
+enum MonitoredState {
+  DETECTED = 0;
 }
 
 message NodeList {
@@ -69,6 +75,10 @@ message NodeIdQuery {
   string ip_address = 2;
 }
 
+message MonitoredStateQuery {
+  MonitoredState monitored_state = 1;
+}
+
 message NodeIdList {
   repeated int64 ids = 1;
 }
@@ -76,6 +86,7 @@ message NodeIdList {
 service NodeService {
   rpc createNode(NodeCreateDTO) returns (NodeDTO) {};
   rpc listNodes(google.protobuf.Empty) returns (NodeList) {};
+  rpc listNodesByMonitoredState(MonitoredStateQuery) returns (NodeList) {};
   rpc getNodeById(google.protobuf.Int64Value) returns (NodeDTO) {};
   rpc getNodeIdFromQuery(NodeIdQuery) returns (google.protobuf.Int64Value) {};
   rpc deleteNode(google.protobuf.Int64Value) returns(google.protobuf.BoolValue) {};

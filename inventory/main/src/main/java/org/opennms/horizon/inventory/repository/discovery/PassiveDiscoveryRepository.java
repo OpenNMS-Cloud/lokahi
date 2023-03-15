@@ -38,5 +38,6 @@ import java.util.Optional;
 @Repository
 public interface PassiveDiscoveryRepository extends JpaRepository<PassiveDiscovery, Long> {
     List<PassiveDiscovery> findByTenantId(String tenantId);
+    Optional<PassiveDiscovery> findByTenantIdAndLocation(String tenantId, String location);
     Optional<PassiveDiscovery> findByTenantIdAndId(String tenantId, long id);
 }

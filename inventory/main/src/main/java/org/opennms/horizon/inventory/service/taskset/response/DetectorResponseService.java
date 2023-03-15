@@ -70,6 +70,7 @@ public class DetectorResponseService {
 
                 MonitorType monitorType = response.getMonitorType();
                 long nodeId = response.getNodeId();
+
                 taskSetHandler.sendMonitorTask(location, monitorType, ipInterface, nodeId);
                 taskSetHandler.sendCollectorTask(location, monitorType, ipInterface, nodeId);
 

@@ -93,12 +93,12 @@ public class DetectorTaskSetService {
         return tasks;
     }
 
-
     private List<TaskDefinition> addDetectorTasks(Node node, List<IpInterface> ipInterfaces, MonitorType monitorType,
                                                   SnmpConfiguration snmpConfiguration) {
         List<TaskDefinition> tasks = new ArrayList<>();
         for (IpInterface ipInterface : ipInterfaces) {
             var task = addDetectorTask(node.getId(), InetAddressUtils.toIpAddrString(ipInterface.getIpAddress()), monitorType, snmpConfiguration);
+
             if (task != null) {
                 tasks.add(task);
             }

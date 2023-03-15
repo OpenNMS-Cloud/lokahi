@@ -1,30 +1,19 @@
 const typeDefs = `
-  input LocationDTOInput {
-    geolocation: String
-    latitude: Float
-    locationName: String
-    longitude: Float
-    monitoringArea: String
-    priority: Int
-    tags: [String]
-  }
-  type Minion {
+  type Location {
     id: String!
-    label: String!
-    status: String!
     location: String!
-    lastUpdated: String!
   }
-  type ListMinions {
-    minions: [Minion!]!
+  type AzureDiscovery {
+    id: String!
+    name: String!
+    clientId: String!
+    subscriptionId: String!
+    directoryId: String!
+    location: Location!
+    tags: [String]!
   }
   type Query {
-    minion: Minion!
-    listMinions: ListMinions!
-  },
-  type Mutation {
-    saveRoutingKey(key: String!): String
+    listAzureDiscoveries: [AzureDiscovery!]!
   }
 `
-
 export default typeDefs

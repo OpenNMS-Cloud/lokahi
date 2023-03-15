@@ -1,0 +1,14 @@
+query ListAzureDiscoveries {
+  listAzureDiscoveries {
+    id
+    name
+    clientId
+    directoryId
+    subscriptionId
+    tags
+    location {
+      id
+      location
+    }
+  }
+}

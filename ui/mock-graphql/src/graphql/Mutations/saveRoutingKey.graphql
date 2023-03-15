@@ -1,3 +1,0 @@
-mutation SaveRoutingKey ($key: String!) {
-  saveRoutingKey (key: $key)
-}

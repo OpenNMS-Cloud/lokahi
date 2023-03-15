@@ -35,6 +35,7 @@ import com.google.protobuf.util.JsonFormat;
 import org.opennms.horizon.alerts.proto.Alert;
 import org.opennms.horizon.alerts.proto.AlertType;
 import org.opennms.horizon.model.common.proto.Severity;
+import org.apache.commons.lang3.StringUtils;
 import org.opennms.horizon.notifications.api.dto.PagerDutyEventAction;
 import org.opennms.horizon.notifications.api.dto.PagerDutyEventDTO;
 import org.opennms.horizon.notifications.api.dto.PagerDutyPayloadDTO;
@@ -123,7 +124,9 @@ public class PagerDutyAPIImpl implements PagerDutyAPI {
         PagerDutyEventDTO event = new PagerDutyEventDTO();
         PagerDutyPayloadDTO payload = new PagerDutyPayloadDTO();
 
-        payload.setSummary(alert.getLogMessage().trim());
+        if (StringUtils.isNotEmpty(alert.getLogMessage())) {
+            payload.setSummary(alert.getLogMessage().trim());
+        }
         payload.setTimestamp(now.toString());
         payload.setSeverity(PagerDutySeverity.fromAlertSeverity(alert.getSeverity()));
 

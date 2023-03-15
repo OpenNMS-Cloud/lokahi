@@ -250,5 +250,6 @@ jobs:
           ls .github/workflows 
           git remote add hs https://github.com/OpenNMS-Cloud/horizon-stream.git
           git remote -v
+          git fetch
           git checkout -b from-develop remotes/origin/from-develop
           git pull hs HEAD:from-develop

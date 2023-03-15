@@ -42,6 +42,8 @@ import org.mockito.ArgumentMatcher;
 import org.mockito.InOrder;
 import org.mockito.Mockito;
 import org.opennms.horizon.inventory.dto.IpInterfaceDTO;
+import org.opennms.horizon.inventory.dto.MonitoredState;
+import org.opennms.horizon.inventory.dto.MonitoredStateQuery;
 import org.opennms.horizon.inventory.dto.NodeCreateDTO;
 import org.opennms.horizon.inventory.dto.NodeDTO;
 import org.opennms.horizon.inventory.dto.NodeIdList;
@@ -366,6 +368,39 @@ public class NodeGrpcServiceTest {
         InOrder inOrder = Mockito.inOrder(mockInt64ValueStreamObserver);
         inOrder.verify(mockInt64ValueStreamObserver).onNext(Mockito.argThat(matcher));
         inOrder.verify(mockInt64ValueStreamObserver).onCompleted();
+    }
+
+    @Test
+    void testListNodesByMonitoredState() {
+        //
+        // Setup test data and interactions
+        //
+
+        MonitoredStateQuery request = MonitoredStateQuery.newBuilder()
+            .setMonitoredState(MonitoredState.DETECTED).build();
+
+        Mockito.when(
+            mockNodeService.findByMonitoredState("x-tenant-id-x", MonitoredState.DETECTED)
+        ).thenReturn(testNodeDTOList);
+
+        //
+        // Execute
+        //
+        target.listNodesByMonitoredState(request, mockNodeListStreamObserver);
+
+        //
+        // Validate
+        //
+        InOrder inOrder = Mockito.inOrder(mockNodeListStreamObserver);
+        inOrder.verify(mockNodeListStreamObserver).onNext(Mockito.argThat(argument -> {
+            if (argument != null) {
+                if (argument.getNodesCount() == testNodeDTOList.size()) {
+                    return ( argument.getNodesList().equals(testNodeDTOList) );
+                }
+            }
+            return false;
+        }));
+        inOrder.verify(mockNodeListStreamObserver).onCompleted();
     }
 
     @Test

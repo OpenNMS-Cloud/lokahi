@@ -35,7 +35,7 @@ import io.leangen.graphql.spqr.spring.annotations.GraphQLApi;
 import lombok.RequiredArgsConstructor;
 import org.opennms.horizon.inventory.dto.AzureActiveDiscoveryCreateDTO;
 import org.opennms.horizon.inventory.dto.AzureActiveDiscoveryDTO;
-import org.opennms.horizon.server.mapper.AzureActiveDiscoveryMapper;
+import org.opennms.horizon.server.mapper.discovery.AzureActiveDiscoveryMapper;
 import org.opennms.horizon.server.model.inventory.discovery.active.AzureActiveDiscovery;
 import org.opennms.horizon.server.model.inventory.discovery.active.AzureActiveDiscoveryCreate;
 import org.opennms.horizon.server.service.grpc.InventoryClient;

@@ -26,7 +26,7 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.server.mapper;
+package org.opennms.horizon.server.mapper.discovery;
 
 import org.mapstruct.CollectionMappingStrategy;
 import org.mapstruct.Mapper;
@@ -35,6 +35,7 @@ import org.mapstruct.NullValueCheckStrategy;
 import org.opennms.horizon.inventory.dto.PassiveDiscoveryDTO;
 import org.opennms.horizon.inventory.dto.PassiveDiscoveryToggleDTO;
 import org.opennms.horizon.inventory.dto.PassiveDiscoveryUpsertDTO;
+import org.opennms.horizon.server.mapper.TagMapper;
 import org.opennms.horizon.server.model.inventory.discovery.passive.PassiveDiscovery;
 import org.opennms.horizon.server.model.inventory.discovery.passive.PassiveDiscoveryToggle;
 import org.opennms.horizon.server.model.inventory.discovery.passive.PassiveDiscoveryUpsert;

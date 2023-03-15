@@ -26,7 +26,7 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.server.mapper;
+package org.opennms.horizon.server.mapper.discovery;
 
 import org.mapstruct.CollectionMappingStrategy;
 import org.mapstruct.Mapper;
@@ -34,6 +34,7 @@ import org.mapstruct.Mapping;
 import org.mapstruct.NullValueCheckStrategy;
 import org.opennms.horizon.inventory.dto.AzureActiveDiscoveryCreateDTO;
 import org.opennms.horizon.inventory.dto.AzureActiveDiscoveryDTO;
+import org.opennms.horizon.server.mapper.TagMapper;
 import org.opennms.horizon.server.model.inventory.discovery.active.AzureActiveDiscovery;
 import org.opennms.horizon.server.model.inventory.discovery.active.AzureActiveDiscoveryCreate;
 

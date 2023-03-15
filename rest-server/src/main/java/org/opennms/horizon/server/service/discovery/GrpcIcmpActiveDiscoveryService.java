@@ -35,7 +35,7 @@ import io.leangen.graphql.execution.ResolutionEnvironment;
 import io.leangen.graphql.spqr.spring.annotations.GraphQLApi;
 import lombok.RequiredArgsConstructor;
 import org.opennms.horizon.inventory.discovery.IcmpActiveDiscoveryCreateDTO;
-import org.opennms.horizon.server.mapper.IcmpActiveDiscoveryMapper;
+import org.opennms.horizon.server.mapper.discovery.IcmpActiveDiscoveryMapper;
 import org.opennms.horizon.server.model.inventory.discovery.active.IcmpActiveDiscovery;
 import org.opennms.horizon.server.model.inventory.discovery.active.IcmpActiveDiscoveryCreate;
 import org.opennms.horizon.server.service.grpc.InventoryClient;

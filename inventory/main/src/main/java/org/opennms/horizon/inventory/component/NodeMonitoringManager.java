@@ -38,7 +38,7 @@ import org.opennms.horizon.inventory.dto.NodeCreateDTO;
 import org.opennms.horizon.inventory.exception.InventoryRuntimeException;
 import org.opennms.horizon.inventory.model.Node;
 import org.opennms.horizon.inventory.service.NodeService;
-import org.opennms.horizon.inventory.service.PassiveDiscoveryService;
+import org.opennms.horizon.inventory.service.discovery.PassiveDiscoveryService;
 import org.opennms.horizon.shared.events.EventConstants;
 import org.opennms.taskset.contract.ScanType;
 import org.springframework.context.annotation.PropertySource;

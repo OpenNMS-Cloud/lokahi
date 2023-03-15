@@ -37,7 +37,7 @@ import lombok.RequiredArgsConstructor;
 import org.opennms.horizon.inventory.dto.PassiveDiscoveryDTO;
 import org.opennms.horizon.inventory.dto.PassiveDiscoveryToggleDTO;
 import org.opennms.horizon.inventory.dto.PassiveDiscoveryUpsertDTO;
-import org.opennms.horizon.server.mapper.PassiveDiscoveryMapper;
+import org.opennms.horizon.server.mapper.discovery.PassiveDiscoveryMapper;
 import org.opennms.horizon.server.model.inventory.discovery.passive.PassiveDiscovery;
 import org.opennms.horizon.server.model.inventory.discovery.passive.PassiveDiscoveryToggle;
 import org.opennms.horizon.server.model.inventory.discovery.passive.PassiveDiscoveryUpsert;

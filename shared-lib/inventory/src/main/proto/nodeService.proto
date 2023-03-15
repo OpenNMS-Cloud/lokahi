@@ -59,7 +59,7 @@ message NodeCreateDTO {
   string location = 2;
   optional string management_ip = 3;
   repeated opennms.inventory.TagCreateDTO tags = 4;
-  optional MonitoredState monitored_state = 5; // optional for now, may be set to detected straight away ?
+  optional MonitoredState monitored_state = 5; // optional for now - may change
 }
 
 enum MonitoredState {

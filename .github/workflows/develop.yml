@@ -235,7 +235,7 @@ jobs:
 
       - uses: actions/checkout@v3
         with:
-          repository: ${{ secrets.GH_REPOSITORY }}
+          repository: OpenNMS-Cloud/fabric-services
           token: ${{ secrets.GH_TOKEN }}
       - name: update
         # Need this to trigger only when PR is merged or there is a push to
@@ -244,12 +244,11 @@ jobs:
         if: github.head_ref == 'jira/HS-1207-Add-to-developyml-push'
         shell: bash
         run: |
-          echo "Test b: ${{ github.ref }}
-          echo "Test c: ${{ github.head_ref }}
-          pwd
-          ls .github/workflows 
           git remote add hs https://github.com/OpenNMS-Cloud/horizon-stream.git
           git remote -v
           git fetch
           git checkout -b from-develop remotes/origin/from-develop
           git pull hs HEAD:from-develop
+          git checkout trunk 
+          git merge from-develop
+          git push origin from-develop

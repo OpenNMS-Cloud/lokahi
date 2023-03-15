@@ -236,7 +236,7 @@ jobs:
       - uses: actions/checkout@v3
         with:
           repository: OpenNMS-Cloud/fabric-services
-          
+          token: ${{ GH_TOKEN }}
       - name: update
         # Need this to trigger only when PR is merged or there is a push to
         # develop (default) branch. All testing is already complete.

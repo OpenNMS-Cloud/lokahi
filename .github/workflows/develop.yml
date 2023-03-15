@@ -249,6 +249,7 @@ jobs:
           git config --global user.name jaberry
           git remote add hs https://github.com/OpenNMS-Cloud/horizon-stream.git
           git remote -v
+          git branch -a
           git fetch
           git checkout -b from-develop remotes/origin/from-develop
           git pull hs HEAD:from-develop

@@ -35,16 +35,14 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.opennms.horizon.notifications.api.PagerDutyAPI;
-import org.opennms.horizon.notifications.api.PagerDutyAPIImpl;
 
 @RunWith(MockitoJUnitRunner.class)
 public class NotificationsServiceImplTest {
 
     @InjectMocks
-    NotificationServiceImpl notificationService;
+    NotificationService notificationService;
 
     @Mock
     PagerDutyAPI pagerDutyAPI;

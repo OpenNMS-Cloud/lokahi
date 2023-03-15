@@ -1,11 +1,8 @@
 package org.opennms.horizon.notifications.kafka;
 
-import io.grpc.Context;
 import org.opennms.horizon.notifications.exceptions.NotificationException;
-import org.opennms.horizon.notifications.grpc.config.TenantLookup;
 import org.opennms.horizon.notifications.service.NotificationService;
-import org.opennms.horizon.notifications.tenant.TenantContext;
-import org.opennms.horizon.shared.constants.GrpcConstants;
+import org.opennms.horizon.notifications.tenant.TenantAwareKafkaListener;
 import org.opennms.horizon.shared.dto.event.AlarmDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,7 +13,6 @@ import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
-import java.util.Optional;
 
 @Service
 public class AlarmKafkaConsumer {

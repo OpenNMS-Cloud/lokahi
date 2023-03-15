@@ -28,14 +28,24 @@
 
 package org.opennms.horizon.notifications.service;
 
+import org.opennms.horizon.notifications.api.PagerDutyAPI;
 import org.opennms.horizon.notifications.dto.PagerDutyConfigDTO;
 import org.opennms.horizon.notifications.exceptions.NotificationException;
 import org.opennms.horizon.shared.dto.event.AlarmDTO;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
-public interface NotificationService {
+@Service
+public class NotificationService {
 
-    void postNotification(AlarmDTO alarm) throws NotificationException;
+    @Autowired
+    private PagerDutyAPI pagerDutyAPI;
 
-    void postPagerDutyConfig(PagerDutyConfigDTO config);
-    void postPagerDutyConfigNonSpringAsync(PagerDutyConfigDTO config);
+    public void postNotification(AlarmDTO alarm) throws NotificationException {
+        pagerDutyAPI.postNotification(alarm);
+    }
+
+    public void postPagerDutyConfig(PagerDutyConfigDTO config) {
+        pagerDutyAPI.saveConfig(config);
+    }
 }

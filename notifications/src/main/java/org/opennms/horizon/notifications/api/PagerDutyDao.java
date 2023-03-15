@@ -30,8 +30,46 @@ package org.opennms.horizon.notifications.api;
 
 import org.opennms.horizon.notifications.dto.PagerDutyConfigDTO;
 import org.opennms.horizon.notifications.exceptions.NotificationConfigUninitializedException;
+import org.opennms.horizon.notifications.mapper.PagerDutyConfigMapper;
+import org.opennms.horizon.notifications.model.PagerDutyConfig;
+import org.opennms.horizon.notifications.repository.PagerDutyConfigRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
-public interface PagerDutyDao {
-    PagerDutyConfigDTO getConfig() throws NotificationConfigUninitializedException;
-    void saveConfig(PagerDutyConfigDTO config);
+import java.util.List;
+
+@Component
+public class PagerDutyDao {
+    private static final Logger LOG = LoggerFactory.getLogger(PagerDutyDao.class);
+
+    @Autowired
+    private PagerDutyConfigRepository pagerDutyConfigRepository;
+
+    @Autowired
+    private PagerDutyConfigMapper pagerDutyConfigMapper;
+
+    public PagerDutyConfigDTO getConfig() throws NotificationConfigUninitializedException {
+        List<PagerDutyConfig> configList = pagerDutyConfigRepository.findAll();
+
+        if (configList.size() != 1) {
+            throw new NotificationConfigUninitializedException("PagerDuty config not initialized. Row count=" + configList.size());
+        }
+
+        return pagerDutyConfigMapper.modelToDTO(configList.get(0));
+    }
+
+    public void saveConfig(PagerDutyConfigDTO configDTO) {
+        List<PagerDutyConfig> configList = pagerDutyConfigRepository.findAll();
+
+        if (configList.isEmpty()) {
+            PagerDutyConfig config = pagerDutyConfigMapper.dtoToModel(configDTO);
+            pagerDutyConfigRepository.save(config);
+        } else {
+            PagerDutyConfig config = configList.get(0);
+            config.setIntegrationKey(configDTO.getIntegrationKey());
+            pagerDutyConfigRepository.save(config);
+        }
+    }
 }

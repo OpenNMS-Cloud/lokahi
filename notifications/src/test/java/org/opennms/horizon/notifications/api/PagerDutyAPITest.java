@@ -35,7 +35,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.opennms.horizon.notifications.dto.PagerDutyConfigDTO;
-import org.opennms.horizon.notifications.repository.PagerDutyConfigRepository;
 import org.opennms.horizon.shared.dto.event.AlarmDTO;
 import org.opennms.horizon.shared.dto.event.EventDTO;
 import org.opennms.horizon.shared.dto.event.EventParameterDTO;
@@ -44,9 +43,9 @@ import org.springframework.web.client.RestTemplate;
 import java.util.Arrays;
 
 @RunWith(MockitoJUnitRunner.class)
-public class PagerDutyAPIImplTest {
+public class PagerDutyAPITest {
     @InjectMocks
-    PagerDutyAPIImpl pagerDutyAPI;
+    PagerDutyAPI pagerDutyAPI;
 
     @Mock
     RestTemplate restTemplate;

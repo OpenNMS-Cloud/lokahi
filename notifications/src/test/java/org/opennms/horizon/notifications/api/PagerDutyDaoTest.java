@@ -39,9 +39,6 @@ import org.opennms.horizon.notifications.exceptions.NotificationConfigUninitiali
 import org.opennms.horizon.notifications.mapper.PagerDutyConfigMapper;
 import org.opennms.horizon.notifications.model.PagerDutyConfig;
 import org.opennms.horizon.notifications.repository.PagerDutyConfigRepository;
-import org.springframework.jdbc.BadSqlGrammarException;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -50,14 +47,13 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 
 @RunWith(MockitoJUnitRunner.class)
-public class PagerDutyDaoImplTest {
+public class PagerDutyDaoTest {
     @InjectMocks
-    PagerDutyDaoImpl pagerDutyDao;
+    PagerDutyDao pagerDutyDao;
 
     @Mock
     PagerDutyConfigRepository pagerDutyConfigRepository;

@@ -35,6 +35,8 @@ import org.opennms.horizon.shared.constants.GrpcConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernatePropertiesCustomizer;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
@@ -45,12 +47,18 @@ import java.util.Optional;
 class TenantIdentifierResolver implements CurrentTenantIdentifierResolver, HibernatePropertiesCustomizer {
     private static final Logger LOG = LoggerFactory.getLogger(TenantIdentifierResolver.class);
     private final TenantLookup tenantLookup;
+    private String defaultTenantId = GrpcConstants.DEFAULT_TENANT_ID;
 
     @Override
     public String resolveCurrentTenantIdentifier() {
         Optional<String> tenantId = tenantLookup.lookupTenantId();
-        System.out.println("tenant id="+tenantId.orElse(GrpcConstants.DEFAULT_TENANT_ID));
-        return tenantId.orElse(GrpcConstants.DEFAULT_TENANT_ID);
+        return tenantId.orElse(defaultTenantId);
+    }
+
+    @EventListener(ApplicationReadyEvent.class)
+    public void onReady() {
+        // If we return null for tenant id during startup, we get an error, so only return null after the application is ready.
+        defaultTenantId = null;
     }
 
     @Override

@@ -14,7 +14,7 @@ import org.mockito.ArgumentMatchers;
 import org.mockito.Captor;
 import org.opennms.horizon.notifications.NotificationsApplication;
 import org.opennms.horizon.notifications.SpringContextTestInitializer;
-import org.opennms.horizon.notifications.api.PagerDutyAPIImpl;
+import org.opennms.horizon.notifications.api.PagerDutyAPI;
 import org.opennms.horizon.shared.constants.GrpcConstants;
 import org.opennms.horizon.shared.dto.event.AlarmDTO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -81,7 +81,7 @@ class AlarmKafkaConsumerIntegrationTestNoConfig {
     private RestTemplate restTemplate;
 
     @SpyBean
-    private PagerDutyAPIImpl pagerDutyAPI;
+    private PagerDutyAPI pagerDutyAPI;
 
     @LocalServerPort
     private Integer port;

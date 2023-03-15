@@ -3,7 +3,6 @@ package org.opennms.horizon.notifications;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.spring.CucumberContextConfiguration;
-import io.grpc.Context;
 import io.grpc.Metadata;
 import io.grpc.ServerCall;
 import io.grpc.ServerCallHandler;
@@ -15,9 +14,7 @@ import org.opennms.horizon.notifications.dto.PagerDutyConfigDTO;
 import org.opennms.horizon.notifications.exceptions.NotificationConfigUninitializedException;
 import org.opennms.horizon.notifications.exceptions.NotificationException;
 import org.opennms.horizon.notifications.service.NotificationService;
-import org.opennms.horizon.notifications.tenant.TenantContext;
 import org.opennms.horizon.notifications.tenant.WithTenant;
-import org.opennms.horizon.shared.constants.GrpcConstants;
 import org.opennms.horizon.shared.dto.event.AlarmDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -116,13 +113,6 @@ public class NotificationCucumberTestSteps extends GrpcTestBase {
         serviceStub.withInterceptors(MetadataUtils
                 .newAttachHeadersInterceptor(createAuthHeader(header)))
             .postPagerDutyConfig(config);
-
-        // Sleep thread to ensure config saved before getConfig is called.
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     private String getAuthHeader(String tenantId) {
@@ -135,21 +125,20 @@ public class NotificationCucumberTestSteps extends GrpcTestBase {
         }
     }
 
-    @Given("Integration key set to {string}")
+    @Given("Integration key set to {string} without tenantId")
     public void setIntegrationKey(String key){
-        PagerDutyConfigDTO configDTO = PagerDutyConfigDTO.newBuilder().setIntegrationKey(key).build();
-        notificationService.postPagerDutyConfig(configDTO);
-
-        // Sleep thread to ensure config saved before getConfig is called.
+        caught = null;
         try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+            PagerDutyConfigDTO configDTO = PagerDutyConfigDTO.newBuilder().setIntegrationKey(key).build();
+            notificationService.postPagerDutyConfig(configDTO);
+        } catch (Exception e) {
+            caught = e;
         }
     }
 
-    @Given("Alarm posted via service")
-    public void postAlarmViaService() throws Exception{
+    @Given("Alarm posted via service with tenant {string}")
+    @WithTenant(tenantIdArg = 0)
+    public void postAlarmViaService(String tenantId) throws Exception{
         postAlarm();
     }
 
@@ -159,17 +148,9 @@ public class NotificationCucumberTestSteps extends GrpcTestBase {
         notificationService.postNotification(alarm);
     }
 
-    @Then("verify key is {string}")
-    public void verifyKey(String key) throws Exception {
-        PagerDutyConfigDTO configDTO = pagerDutyDao.getConfig();
-        assertEquals(key, configDTO.getIntegrationKey());
-    }
-
     @Then("verify {string} key is {string}")
     @WithTenant(tenantIdArg = 0)
     public void verifyKey(String tenantId, String key) {
-        System.out.println("JH Verifying tenant="+tenantId);
-        System.out.println("JH Verifying key="+key);
         try {
             PagerDutyConfigDTO configDTO = pagerDutyDao.getConfig();
             assertEquals(key, configDTO.getIntegrationKey());
@@ -194,8 +175,10 @@ public class NotificationCucumberTestSteps extends GrpcTestBase {
         verify(restTemplate).exchange(any(URI.class), eq(HttpMethod.POST), any(HttpEntity.class), eq(String.class));
     }
 
-    @Given("Alarm posted via service with no config")
-    public void postNotificationWithNoConfig() {
+    @Given("Alarm posted via service with no config with tenant {string}")
+    @WithTenant(tenantIdArg = 0)
+    public void postNotificationWithNoConfig(String tenantId) {
+        caught = null;
         try {
             postAlarm();
         } catch (Exception ex) {

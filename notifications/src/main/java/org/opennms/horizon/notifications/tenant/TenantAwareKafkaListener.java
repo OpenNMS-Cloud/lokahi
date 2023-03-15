@@ -28,29 +28,13 @@
 
 package org.opennms.horizon.notifications.tenant;
 
-import org.springframework.context.annotation.Configuration;
-import org.springframework.scheduling.annotation.AsyncConfigurerSupport;
-import org.springframework.scheduling.annotation.EnableAsync;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-import java.util.concurrent.Executor;
-
-@Configuration
-@EnableAsync
-public class AsyncConfig extends AsyncConfigurerSupport {
-
-    @Override
-    public Executor getAsyncExecutor() {
-        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-
-        executor.setCorePoolSize(7);
-        executor.setMaxPoolSize(42);
-        executor.setQueueCapacity(11);
-        executor.setThreadNamePrefix("TenantAwareTaskExecutor-");
-        // Commenting the following line out, breaks spring based threading, but not non-spring based
-        executor.setTaskDecorator(new TenantAwareTaskDecorator());
-        executor.initialize();
-
-        return executor;
-    }
+@Target(ElementType.METHOD)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface TenantAwareKafkaListener {
+    boolean skipOnMissing() default false;
 }

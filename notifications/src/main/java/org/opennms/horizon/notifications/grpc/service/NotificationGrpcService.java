@@ -2,7 +2,6 @@ package org.opennms.horizon.notifications.grpc.service;
 
 import com.google.rpc.Code;
 import com.google.rpc.Status;
-import io.grpc.Context;
 import io.grpc.protobuf.StatusProto;
 import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
@@ -26,32 +25,16 @@ public class NotificationGrpcService extends NotificationServiceGrpc.Notificatio
     public void postPagerDutyConfig(PagerDutyConfigDTO request, StreamObserver<PagerDutyConfigDTO> responseObserver) {
         Optional<String> tenantIdOptional = tenantLookup.lookupTenantId();
 
-        // Hard code boolean to make it easy to switch between using spring based threading and non-spring based.
-        boolean spring = true;
-        if (spring) {
-            tenantIdOptional.ifPresentOrElse(tenantId -> {
-                notificationService.postPagerDutyConfig(request);
-                responseObserver.onNext(request);
-                responseObserver.onCompleted();
-            }, () -> {
-                Status status = Status.newBuilder()
-                    .setCode(Code.INVALID_ARGUMENT_VALUE)
-                    .setMessage("Tenant Id can't be empty")
-                    .build();
-                responseObserver.onError(StatusProto.toStatusRuntimeException(status));
-            });
-        } else {
-            tenantIdOptional.ifPresentOrElse(tenantId -> {
-                notificationService.postPagerDutyConfigNonSpringAsync(request);
-                responseObserver.onNext(request);
-                responseObserver.onCompleted();
-            }, () -> {
-                Status status = Status.newBuilder()
-                    .setCode(Code.INVALID_ARGUMENT_VALUE)
-                    .setMessage("Tenant Id can't be empty")
-                    .build();
-                responseObserver.onError(StatusProto.toStatusRuntimeException(status));
-            });
-        }
+        tenantIdOptional.ifPresentOrElse(tenantId -> {
+            notificationService.postPagerDutyConfig(request);
+            responseObserver.onNext(request);
+            responseObserver.onCompleted();
+        }, () -> {
+            Status status = Status.newBuilder()
+                .setCode(Code.INVALID_ARGUMENT_VALUE)
+                .setMessage("Tenant Id can't be empty")
+                .build();
+            responseObserver.onError(StatusProto.toStatusRuntimeException(status));
+        });
     }
 }

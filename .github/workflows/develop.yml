@@ -248,8 +248,7 @@ jobs:
           echo "Test c: ${{ github.head_ref }}
           pwd
           ls .github/workflows 
-          git remote -v
           git remote add hs https://github.com/OpenNMS-Cloud/horizon-stream.git
           git remote -v
-          git checkout from-develop
+          git checkout -b from-develop remotes/origin/from-develop
           git pull hs HEAD:from-develop

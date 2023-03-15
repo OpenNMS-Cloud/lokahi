@@ -262,4 +262,3 @@ jobs:
           git checkout trunk
           git merge from-develop
           git push
-

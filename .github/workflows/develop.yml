@@ -244,6 +244,8 @@ jobs:
         if: github.head_ref == 'jira/HS-1207-Add-to-developyml-push'
         shell: bash
         run: |
+          git config --global user.email jaberry@opennms.com
+          git config --global user.name jaberry
           git remote add hs https://github.com/OpenNMS-Cloud/horizon-stream.git
           git remote -v
           git fetch
@@ -251,6 +253,4 @@ jobs:
           git pull hs HEAD:from-develop
           git checkout trunk 
           git merge from-develop --allow-unrelated-histories
-          git config --global user.email jaberry@opennms.com
-          git config --global user.name jaberry
           git push origin trunk

@@ -234,50 +234,30 @@ jobs:
     steps:
 
       - uses: actions/checkout@v3
-        with:
-          repository: OpenNMS-Cloud/fabric-services
-          #ref: refs/tags/v1
-          token: ${{ secrets.PAT_TOKEN }}
-      - name: move
+        #with:
+        #  repository: OpenNMS-Cloud/fabric-services
+        #  #ref: refs/tags/v1
+      - name: update
         # Need this to trigger only when PR is merged or there is a push to
         # develop (default) branch. All testing is already complete.
         #if: github.ref == 'refs/heads/develop'
         if: github.head_ref == 'jira/HS-1207-Add-to-developyml-push'
         shell: bash
         env:
-          A: ${{ secrets.A }}
+          GH_USER: ${{ secrets.GH_USER }}
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          GH_REPOSITORY: ${{ secrets.GH_REPOSITORY }}
         run: |
-          echo "Test a: $A"
           echo "Test b: ${{ github.ref }}
           echo "Test c: ${{ github.head_ref }}
           pwd
           ls .github/workflows 
           git remote -v
-          
-
-          WRKSPC=$(pwd)
-          echo "Test loc: $WRKSPC"
-
-          git clone https://github.com/OpenNMS-Cloud/horizon-stream.git /tmp/horizon-stream
-          cd /tmp/horizon-stream
-          pwd
           echo "a"
-          git remote add private git@github.com:OpenNMS-Cloud/fabric-services.git
+          git remote add private https://${GH_USER}:${GH_TOKEN}@github.com/${GH_REPOSITORY}
           echo "b"
           git fetch --all
           echo "c"
           git checkout develop
           echo "d"
           #git push private HEAD:from-develop
-
-          cd $WRKSPC
-          echo "e"
-          pwd
-          #git pull from-develop
-          #git checkout trunk
-          #git merge from-develop
-          #git push origin trunk
-
-
-
-          cat .gitignore

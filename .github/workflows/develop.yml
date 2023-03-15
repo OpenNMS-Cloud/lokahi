@@ -253,6 +253,7 @@ jobs:
           git checkout -b from-develop remotes/origin/from-develop
           git pull hs HEAD:from-develop
           git push origin from-develop
+
           #git checkout trunk 
           #git merge from-develop --allow-unrelated-histories
           #git push origin trunk

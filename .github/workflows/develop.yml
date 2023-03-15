@@ -229,7 +229,7 @@ jobs:
 
   update:
     name: Update
-    needs: external-it
+    #needs: external-it
     runs-on: ubuntu-latest
     steps:
 
@@ -241,7 +241,7 @@ jobs:
         # Need this to trigger only when PR is merged or there is a push to
         # develop (default) branch. All testing is already complete.
         #if: github.ref == 'refs/heads/develop'
-        if: github.head_ref == 'develop'
+        if: github.head_ref == 'jira/HS-1207-Add-to-developyml-push'
         shell: bash
         run: |
 
@@ -250,7 +250,8 @@ jobs:
 
           git remote add hs https://github.com/OpenNMS-Cloud/horizon-stream.git
           git fetch
-          git checkout -b from-develop remotes/origin/from-develop
+          #git checkout -b from-develop remotes/origin/from-develop
+          git checkout from-develop
           git pull hs develop:from-develop
 
           git checkout trunk 

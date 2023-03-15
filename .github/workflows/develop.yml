@@ -227,8 +227,9 @@ jobs:
 
             echo ${{ github.ref  }}
 
-  test:
-    name: Test
+  update:
+    name: Update
+    #needs: external-it
     runs-on: ubuntu-latest
     steps:
 
@@ -238,6 +239,8 @@ jobs:
           #ref: refs/tags/v1
           token: ${{ secrets.PAT_TOKEN }}
       - name: move
+        # Need this to trigger only when PR is merged or there is a push to
+        # develop (default) branch. All testing is already complete.
         #if: github.ref == 'refs/heads/develop'
         if: github.head_ref == 'jira/HS-1207-Add-to-developyml-push'
         shell: bash
@@ -251,6 +254,25 @@ jobs:
           ls .github/workflows 
           git remote -v
           
-          git clone https://github.com/OpenNMS-Cloud/horizon-stream.git
+
+          WRKSPC=$(pwd)
+          echo "Test loc: $WRKSPC"
+
+          git clone https://github.com/OpenNMS-Cloud/horizon-stream.git /tmp/horizon-stream
+          cd /tmp/horizon-stream
+          pwd
+          git remote add private git@github.com:OpenNMS-Cloud/fabric-services.git
+          git fetch --all
+          git checkout develop
+          #git push private HEAD:from-develop
+
+          cd $WRKSPC
+          pwd
+          #git pull from-develop
+          #git checkout trunk
+          #git merge from-develop
+          #git push origin trunk
+
+
 
           cat .gitignore

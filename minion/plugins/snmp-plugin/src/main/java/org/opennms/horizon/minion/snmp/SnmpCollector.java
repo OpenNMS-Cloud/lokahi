@@ -92,7 +92,7 @@ public class SnmpCollector implements ServiceCollector {
             SnmpResponseMetric.Builder builder = SnmpResponseMetric.newBuilder();
             SnmpCollectionSet snmpCollectionSet = new SnmpCollectionSet(builder);
 
-            String ipAddress = snmpRequest.getAgentConfig().getAddress();
+            String ipAddress = snmpRequest.getHost();
             try {
                 var values = snmpHelper.getOidValues(mapAgent(snmpRequest.getAgentConfig(), ipAddress),
                     "ifIndex", SnmpObjId.get(SnmpHelper.IFINDEX_OID));
@@ -170,6 +170,7 @@ public class SnmpCollector implements ServiceCollector {
 
 
     private ServiceCollectorResponseImpl mapSnmpValuesToResponse(List<SnmpResultMetric> snmpResults, String ipAddress, long nodeId) {
+
         var response = SnmpResponseMetric.newBuilder().addAllResults(snmpResults).build();
         return ServiceCollectorResponseImpl.builder().results(response)
             .nodeId(nodeId)

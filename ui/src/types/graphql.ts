@@ -121,13 +121,13 @@ export type Minion = {
 export type Mutation = {
   __typename?: 'Mutation';
   addNode?: Maybe<Node>;
-  addTags?: Maybe<Array<Maybe<Tag>>>;
+  addTagsToNodes?: Maybe<Array<Maybe<Tag>>>;
   createAzureActiveDiscovery?: Maybe<AzureActiveDiscovery>;
   createIcmpActiveDiscovery?: Maybe<IcmpActiveDiscovery>;
   deleteMinion?: Maybe<Scalars['Boolean']>;
   deleteNode?: Maybe<Scalars['Boolean']>;
   discoveryByNodeIds?: Maybe<Scalars['Boolean']>;
-  removeTags?: Maybe<Scalars['Boolean']>;
+  removeTagsFromNodes?: Maybe<Scalars['Boolean']>;
   savePagerDutyConfig?: Maybe<Scalars['Boolean']>;
   togglePassiveDiscovery?: Maybe<PassiveDiscoveryToggle>;
   upsertPassiveDiscovery?: Maybe<PassiveDiscovery>;
@@ -141,8 +141,8 @@ export type MutationAddNodeArgs = {
 
 
 /** Mutation root */
-export type MutationAddTagsArgs = {
-  tags?: InputMaybe<TagListNodeAddInput>;
+export type MutationAddTagsToNodesArgs = {
+  tags?: InputMaybe<TagListNodesAddInput>;
 };
 
 
@@ -177,8 +177,8 @@ export type MutationDiscoveryByNodeIdsArgs = {
 
 
 /** Mutation root */
-export type MutationRemoveTagsArgs = {
-  tags?: InputMaybe<TagListNodeRemoveInput>;
+export type MutationRemoveTagsFromNodesArgs = {
+  tags?: InputMaybe<TagListNodesRemoveInput>;
 };
 
 
@@ -205,6 +205,7 @@ export type Node = {
   id: Scalars['Long'];
   ipInterfaces?: Maybe<Array<Maybe<IpInterface>>>;
   location?: Maybe<Location>;
+  monitoredState?: Maybe<Scalars['String']>;
   monitoringLocationId: Scalars['Long'];
   nodeLabel?: Maybe<Scalars['String']>;
   objectId?: Maybe<Scalars['String']>;
@@ -272,6 +273,7 @@ export type Query = {
   findAllLocations?: Maybe<Array<Maybe<Location>>>;
   findAllMinions?: Maybe<Array<Maybe<Minion>>>;
   findAllNodes?: Maybe<Array<Maybe<Node>>>;
+  findAllNodesByMonitoredState?: Maybe<Array<Maybe<Node>>>;
   findEventsByNodeId?: Maybe<Array<Maybe<Event>>>;
   findLocationById?: Maybe<Location>;
   findMinionById?: Maybe<Minion>;
@@ -286,6 +288,13 @@ export type Query = {
   tags?: Maybe<Array<Maybe<Tag>>>;
   tagsByActiveDiscoveryId?: Maybe<Array<Maybe<Tag>>>;
   tagsByNodeId?: Maybe<Array<Maybe<Tag>>>;
+  tagsByPassiveDiscoveryId?: Maybe<Array<Maybe<Tag>>>;
+};
+
+
+/** Query root */
+export type QueryFindAllNodesByMonitoredStateArgs = {
+  monitoredState?: InputMaybe<Scalars['String']>;
 };
 
 
@@ -359,6 +368,13 @@ export type QueryTagsByNodeIdArgs = {
   searchTerm?: InputMaybe<Scalars['String']>;
 };
 
+
+/** Query root */
+export type QueryTagsByPassiveDiscoveryIdArgs = {
+  passiveDiscoveryId?: InputMaybe<Scalars['Long']>;
+  searchTerm?: InputMaybe<Scalars['String']>;
+};
+
 export type SnmpConfig = {
   __typename?: 'SNMPConfig';
   ports?: Maybe<Array<Maybe<Scalars['Int']>>>;
@@ -421,13 +437,13 @@ export type TagCreateInput = {
   name?: InputMaybe<Scalars['String']>;
 };
 
-export type TagListNodeAddInput = {
-  nodeId: Scalars['Long'];
+export type TagListNodesAddInput = {
+  nodeIds?: InputMaybe<Array<InputMaybe<Scalars['Long']>>>;
   tags?: InputMaybe<Array<InputMaybe<TagCreateInput>>>;
 };
 
-export type TagListNodeRemoveInput = {
-  nodeId: Scalars['Long'];
+export type TagListNodesRemoveInput = {
+  nodeIds?: InputMaybe<Array<InputMaybe<Scalars['Long']>>>;
   tagIds?: InputMaybe<Array<InputMaybe<Scalars['Long']>>>;
 };
 
@@ -528,12 +544,12 @@ export type SavePagerDutyConfigMutationVariables = Exact<{
 
 export type SavePagerDutyConfigMutation = { __typename?: 'Mutation', savePagerDutyConfig?: boolean };
 
-export type AddTagsToNodeMutationVariables = Exact<{
-  tags: TagListNodeAddInput;
+export type AddTagsToNodesMutationVariables = Exact<{
+  tags: TagListNodesAddInput;
 }>;
 
 
-export type AddTagsToNodeMutation = { __typename?: 'Mutation', addTags?: Array<{ __typename?: 'Tag', id: any, name?: string, tenantId?: string }> };
+export type AddTagsToNodesMutation = { __typename?: 'Mutation', addTagsToNodes?: Array<{ __typename?: 'Tag', id: any, name?: string, tenantId?: string }> };
 
 export type TagsByNodeIdPartsFragment = { __typename?: 'Query', tagsByNodeId?: Array<{ __typename?: 'Tag', id: any, name?: string, tenantId?: string }> };
 
@@ -695,7 +711,7 @@ export const DeleteMinionDocument = {"kind":"Document","definitions":[{"kind":"O
 export const AddNodeDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"AddNode"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"node"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"NodeCreateInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"addNode"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"node"},"value":{"kind":"Variable","name":{"kind":"Name","value":"node"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createTime"}},{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"monitoringLocationId"}},{"kind":"Field","name":{"kind":"Name","value":"nodeLabel"}},{"kind":"Field","name":{"kind":"Name","value":"tenantId"}}]}}]}}]} as unknown as DocumentNode<AddNodeMutation, AddNodeMutationVariables>;
 export const DeleteNodeDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"DeleteNode"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Long"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"deleteNode"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}]}]}}]} as unknown as DocumentNode<DeleteNodeMutation, DeleteNodeMutationVariables>;
 export const SavePagerDutyConfigDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"SavePagerDutyConfig"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"config"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"PagerDutyConfigInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"savePagerDutyConfig"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"config"},"value":{"kind":"Variable","name":{"kind":"Name","value":"config"}}}]}]}}]} as unknown as DocumentNode<SavePagerDutyConfigMutation, SavePagerDutyConfigMutationVariables>;
-export const AddTagsToNodeDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"AddTagsToNode"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"tags"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"TagListNodeAddInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"addTags"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"tags"},"value":{"kind":"Variable","name":{"kind":"Name","value":"tags"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"tenantId"}}]}}]}}]} as unknown as DocumentNode<AddTagsToNodeMutation, AddTagsToNodeMutationVariables>;
+export const AddTagsToNodesDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"AddTagsToNodes"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"tags"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"TagListNodesAddInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"addTagsToNodes"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"tags"},"value":{"kind":"Variable","name":{"kind":"Name","value":"tags"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"tenantId"}}]}}]}}]} as unknown as DocumentNode<AddTagsToNodesMutation, AddTagsToNodesMutationVariables>;
 export const ListTagsByNodeIdDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"ListTagsByNodeId"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"nodeId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Long"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"TagsByNodeIdParts"}}]}},...TagsByNodeIdPartsFragmentDoc.definitions]} as unknown as DocumentNode<ListTagsByNodeIdQuery, ListTagsByNodeIdQueryVariables>;
 export const ListTagsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"ListTags"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"TagsParts"}}]}},...TagsPartsFragmentDoc.definitions]} as unknown as DocumentNode<ListTagsQuery, ListTagsQueryVariables>;
 export const ListTagsSearchDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"ListTagsSearch"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"searchTerm"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"TagsSearchParts"}}]}},...TagsSearchPartsFragmentDoc.definitions]} as unknown as DocumentNode<ListTagsSearchQuery, ListTagsSearchQueryVariables>;

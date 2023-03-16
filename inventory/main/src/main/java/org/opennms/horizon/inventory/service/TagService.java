@@ -54,7 +54,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -76,7 +78,7 @@ public class TagService {
         if (request.getEntityIdsList().isEmpty()) {
             return Collections.emptyList();
         }
-        Set<TagDTO> tags = new HashSet<>();
+        Set<TagDTO> tags = new LinkedHashSet<>();
         for (TagEntityIdDTO entityId : request.getEntityIdsList()) {
             tags.addAll(addTags(tenantId, entityId, request.getTagsList()));
         }

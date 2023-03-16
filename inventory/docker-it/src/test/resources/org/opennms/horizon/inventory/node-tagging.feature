@@ -11,6 +11,12 @@ Feature: Node Tagging
     When A GRPC request to create tags "tag1,tag2" for node
     Then The response should contain only tags "tag1,tag2"
 
+  Scenario: Create multiple tags on multiple nodes
+    Given 2 new nodes
+    When A GRPC request to create tags "tag1,tag2" for both nodes
+    Then The response should contain only tags "tag1,tag2"
+    And Both nodes have the same tags of "tag1,tag2"
+
   Scenario: Get a list of tags for node
     Given A new node with tags "tag1,tag2"
     When A GRPC request to fetch tags for node

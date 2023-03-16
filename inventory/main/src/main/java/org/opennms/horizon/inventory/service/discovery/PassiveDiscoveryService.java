@@ -34,6 +34,7 @@ import org.opennms.horizon.inventory.dto.PassiveDiscoveryDTO;
 import org.opennms.horizon.inventory.dto.PassiveDiscoveryToggleDTO;
 import org.opennms.horizon.inventory.dto.PassiveDiscoveryUpsertDTO;
 import org.opennms.horizon.inventory.dto.TagCreateListDTO;
+import org.opennms.horizon.inventory.dto.TagEntityIdDTO;
 import org.opennms.horizon.inventory.exception.InventoryRuntimeException;
 import org.opennms.horizon.inventory.mapper.discovery.PassiveDiscoveryMapper;
 import org.opennms.horizon.inventory.model.discovery.PassiveDiscovery;
@@ -80,7 +81,8 @@ public class PassiveDiscoveryService {
         discovery = repository.save(discovery);
 
         tagService.addTags(tenantId, TagCreateListDTO.newBuilder()
-            .setPassiveDiscoveryId(discovery.getId())
+            .addEntityIds(TagEntityIdDTO.newBuilder()
+                .setPassiveDiscoveryId(discovery.getId()))
             .addAllTags(request.getTagsList())
             .build());
 
@@ -105,7 +107,8 @@ public class PassiveDiscoveryService {
         discovery = repository.save(discovery);
 
         tagService.updateTags(tenantId, TagCreateListDTO.newBuilder()
-            .setPassiveDiscoveryId(discovery.getId())
+            .addEntityIds(TagEntityIdDTO.newBuilder()
+                .setPassiveDiscoveryId(discovery.getId()))
             .addAllTags(request.getTagsList())
             .build());
 

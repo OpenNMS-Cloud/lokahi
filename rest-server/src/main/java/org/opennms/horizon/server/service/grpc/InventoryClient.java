@@ -63,6 +63,7 @@ import org.opennms.horizon.inventory.dto.PassiveDiscoveryServiceGrpc;
 import org.opennms.horizon.inventory.dto.PassiveDiscoveryToggleDTO;
 import org.opennms.horizon.inventory.dto.PassiveDiscoveryUpsertDTO;
 import org.opennms.horizon.inventory.dto.TagCreateListDTO;
+import org.opennms.horizon.inventory.dto.TagEntityIdDTO;
 import org.opennms.horizon.inventory.dto.TagListDTO;
 import org.opennms.horizon.inventory.dto.TagListParamsDTO;
 import org.opennms.horizon.inventory.dto.TagRemoveListDTO;
@@ -250,7 +251,7 @@ public class InventoryClient {
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
         ListTagsByEntityIdParamsDTO params = ListTagsByEntityIdParamsDTO.newBuilder()
-            .setNodeId(nodeId)
+            .setEntityId(TagEntityIdDTO.newBuilder().setNodeId(nodeId))
             .setParams(buildTagListParams(searchTerm))
             .build();
         return tagStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
@@ -261,7 +262,7 @@ public class InventoryClient {
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
         ListTagsByEntityIdParamsDTO params = ListTagsByEntityIdParamsDTO.newBuilder()
-            .setActiveDiscoveryId(activeDiscoveryId)
+            .setEntityId(TagEntityIdDTO.newBuilder().setActiveDiscoveryId(activeDiscoveryId))
             .setParams(buildTagListParams(searchTerm))
             .build();
         return tagStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
@@ -272,7 +273,7 @@ public class InventoryClient {
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
         ListTagsByEntityIdParamsDTO params = ListTagsByEntityIdParamsDTO.newBuilder()
-            .setPassiveDiscoveryId(passiveDiscoveryId)
+            .setEntityId(TagEntityIdDTO.newBuilder().setPassiveDiscoveryId(passiveDiscoveryId))
             .setParams(buildTagListParams(searchTerm))
             .build();
         return tagStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))

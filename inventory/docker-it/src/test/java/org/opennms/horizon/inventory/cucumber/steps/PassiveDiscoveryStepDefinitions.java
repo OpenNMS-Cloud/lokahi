@@ -41,6 +41,7 @@ import org.opennms.horizon.inventory.dto.PassiveDiscoveryListDTO;
 import org.opennms.horizon.inventory.dto.PassiveDiscoveryServiceGrpc;
 import org.opennms.horizon.inventory.dto.PassiveDiscoveryUpsertDTO;
 import org.opennms.horizon.inventory.dto.TagCreateDTO;
+import org.opennms.horizon.inventory.dto.TagEntityIdDTO;
 import org.opennms.horizon.inventory.dto.TagListDTO;
 import org.opennms.horizon.inventory.dto.TagServiceGrpc;
 
@@ -119,7 +120,8 @@ public class PassiveDiscoveryStepDefinitions {
     public void aGRPCRequestToGetTagsForPassiveDiscovery() {
         TagServiceGrpc.TagServiceBlockingStub stub = backgroundHelper.getTagServiceBlockingStub();
         tagList = stub.getTagsByEntityId(ListTagsByEntityIdParamsDTO.newBuilder()
-            .setPassiveDiscoveryId(createdDiscovery.getId()).build());
+            .setEntityId(TagEntityIdDTO.newBuilder()
+                .setPassiveDiscoveryId(createdDiscovery.getId())).build());
     }
 
     /*

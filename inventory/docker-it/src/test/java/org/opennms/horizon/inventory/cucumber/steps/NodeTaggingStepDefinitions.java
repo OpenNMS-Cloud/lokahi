@@ -43,15 +43,14 @@ import org.opennms.horizon.inventory.dto.NodeDTO;
 import org.opennms.horizon.inventory.dto.TagCreateDTO;
 import org.opennms.horizon.inventory.dto.TagCreateListDTO;
 import org.opennms.horizon.inventory.dto.TagDTO;
+import org.opennms.horizon.inventory.dto.TagEntityIdDTO;
 import org.opennms.horizon.inventory.dto.TagListDTO;
 import org.opennms.horizon.inventory.dto.TagListParamsDTO;
 import org.opennms.horizon.inventory.dto.TagRemoveListDTO;
-import org.opennms.horizon.inventory.dto.TagServiceGrpc;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.Function;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -123,7 +122,9 @@ public class NodeTaggingStepDefinitions {
             tagCreateList.add(TagCreateDTO.newBuilder().setName(name).build());
         }
         addedTagList = tagServiceBlockingStub.addTags(TagCreateListDTO.newBuilder()
-            .addAllTags(tagCreateList).setNodeId(node.getId()).build());
+            .addAllTags(tagCreateList)
+            .addEntityIds(TagEntityIdDTO.newBuilder()
+                .setNodeId(node.getId())).build());
     }
 
 
@@ -149,7 +150,9 @@ public class NodeTaggingStepDefinitions {
             tagCreateList.add(TagCreateDTO.newBuilder().setName(name).build());
         }
         tagServiceBlockingStub.addTags(TagCreateListDTO.newBuilder()
-            .addAllTags(tagCreateList).setNodeId(node.getId()).build());
+            .addAllTags(tagCreateList)
+            .addEntityIds(TagEntityIdDTO.newBuilder()
+                .setNodeId(node.getId())).build());
     }
 
     /*
@@ -165,14 +168,18 @@ public class NodeTaggingStepDefinitions {
             tagCreateList.add(TagCreateDTO.newBuilder().setName(name).build());
         }
         fetchedTagList = tagServiceBlockingStub.addTags(TagCreateListDTO.newBuilder()
-            .addAllTags(tagCreateList).setNodeId(node.getId()).build());
+            .addAllTags(tagCreateList)
+            .addEntityIds(TagEntityIdDTO.newBuilder()
+                .setNodeId(node.getId())).build());
     }
 
     @When("A GRPC request to fetch tags for node")
     public void aGrpcRequestToFetchTagsForNode() {
         var tagServiceBlockingStub = backgroundHelper.getTagServiceBlockingStub();
         ListTagsByEntityIdParamsDTO params = ListTagsByEntityIdParamsDTO.newBuilder()
-            .setNodeId(node.getId()).setParams(TagListParamsDTO.newBuilder().build()).build();
+            .setEntityId(TagEntityIdDTO.newBuilder()
+                .setNodeId(node.getId()))
+            .setParams(TagListParamsDTO.newBuilder().build()).build();
         fetchedTagList = tagServiceBlockingStub.getTagsByEntityId(params);
     }
 
@@ -183,12 +190,16 @@ public class NodeTaggingStepDefinitions {
             if (tagDTO.getName().equals(tag)) {
                 tagServiceBlockingStub.removeTags(TagRemoveListDTO.newBuilder()
                     .addAllTagIds(Collections.singletonList(Int64Value.newBuilder()
-                        .setValue(tagDTO.getId()).build())).setNodeId(node.getId()).build());
+                        .setValue(tagDTO.getId()).build()))
+                    .setEntityId(TagEntityIdDTO.newBuilder()
+                        .setNodeId(node.getId())).build());
                 break;
             }
         }
         ListTagsByEntityIdParamsDTO params = ListTagsByEntityIdParamsDTO.newBuilder()
-            .setNodeId(node.getId()).setParams(TagListParamsDTO.newBuilder().build()).build();
+            .setEntityId(TagEntityIdDTO.newBuilder()
+                .setNodeId(node.getId()))
+            .setParams(TagListParamsDTO.newBuilder().build()).build();
         fetchedTagList = tagServiceBlockingStub.getTagsByEntityId(params);
     }
 
@@ -204,7 +215,8 @@ public class NodeTaggingStepDefinitions {
     public void aGRPCRequestToFetchAllTagsForNodeWithNameLike(String searchTerm) {
         var tagServiceBlockingStub = backgroundHelper.getTagServiceBlockingStub();
         ListTagsByEntityIdParamsDTO params = ListTagsByEntityIdParamsDTO.newBuilder()
-            .setNodeId(node.getId())
+            .setEntityId(TagEntityIdDTO.newBuilder()
+                .setNodeId(node.getId()))
             .setParams(TagListParamsDTO.newBuilder().setSearchTerm(searchTerm).build()).build();
         fetchedTagList = tagServiceBlockingStub.getTagsByEntityId(params);
     }

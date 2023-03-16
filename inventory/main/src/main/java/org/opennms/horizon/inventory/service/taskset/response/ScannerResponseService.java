@@ -37,6 +37,7 @@ import org.opennms.horizon.azure.api.AzureScanResponse;
 import org.opennms.horizon.inventory.dto.NodeCreateDTO;
 import org.opennms.horizon.inventory.dto.TagCreateDTO;
 import org.opennms.horizon.inventory.dto.TagCreateListDTO;
+import org.opennms.horizon.inventory.dto.TagEntityIdDTO;
 import org.opennms.horizon.inventory.model.Node;
 import org.opennms.horizon.inventory.model.SnmpInterface;
 import org.opennms.horizon.inventory.model.discovery.PassiveDiscovery;
@@ -171,7 +172,9 @@ public class ScannerResponseService {
             .map(tag -> TagCreateDTO.newBuilder().setName(tag.getName()).build())
             .toList();
         tagService.addTags(tenantId, TagCreateListDTO.newBuilder()
-            .setNodeId(node.getId()).addAllTags(tags).build());
+            .addEntityIds(TagEntityIdDTO.newBuilder()
+                .setNodeId(node.getId()))
+            .addAllTags(tags).build());
     }
 
     private void processNodeScanResponse(String tenantId, NodeScanResult result ) {

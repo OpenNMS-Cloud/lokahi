@@ -82,17 +82,24 @@ public class SnmpConfigDiscovery {
     }
 
     private CompletableFuture<Optional<SnmpAgentConfig>> detectConfig(SnmpAgentConfig agentConfig) {
+        CompletableFuture<Optional<SnmpAgentConfig>> future = new CompletableFuture<>();
         try {
-            // TODO: Use snmpHelper.getAsync
-            var snmpValue = snmpHelper.get(agentConfig, SnmpObjId.get(SnmpHelper.SYS_OBJECTID_INSTANCE));
-            if (snmpValue != null && !snmpValue.isError()) {
-                return CompletableFuture.completedFuture(Optional.of(agentConfig));
-            } else {
-                return CompletableFuture.completedFuture(Optional.empty());
-            }
+            LOG.debug("Validating AgentConfig {}", agentConfig);
+            var snmpFuture = snmpHelper.getAsync(agentConfig, new SnmpObjId[]{SnmpObjId.get(SnmpHelper.SYS_OBJECTID_INSTANCE)});
+            snmpFuture.whenComplete(((snmpValues, throwable) -> {
+                if (snmpValues != null) {
+                    var snmpValue = snmpValues.length > 0 ? snmpValues[0] : null;
+                    if (snmpValue != null && !snmpValue.isError()) {
+                        future.complete(Optional.of(agentConfig));
+                        return;
+                    }
+                }
+                future.complete(Optional.empty());
+            }));
         } catch (Exception e) {
             LOG.error("Exception while doing snmp get with agentConfig {}", agentConfig);
-            return CompletableFuture.completedFuture(Optional.empty());
+            future.complete(Optional.empty());
         }
+        return future;
     }
 }

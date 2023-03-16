@@ -43,6 +43,7 @@ import org.snmp4j.smi.Integer32;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.any;
@@ -68,20 +69,20 @@ class SnmpConfigDiscoveryTest {
         SnmpAgentConfig config2 = new SnmpAgentConfig(InetAddressUtils.getInetAddress("192.168.1.1"), SnmpConfiguration.DEFAULTS);
         List<SnmpAgentConfig> configs = Arrays.asList(config1, config2);
 
-        SnmpValue snmpValues1 = new Snmp4JValue(new Integer32(1));
-        SnmpValue snmpValues2 = null;
+        SnmpValue[] snmpValues1 = new SnmpValue[]{new Snmp4JValue(new Integer32(1))};
+        SnmpValue[] snmpValues2 = new SnmpValue[0];
 
-        when(snmpHelper.get(config1, SnmpObjId.get(SnmpHelper.SYS_OBJECTID_INSTANCE)))
-            .thenReturn(snmpValues1);
-        when(snmpHelper.get(config2, SnmpObjId.get(SnmpHelper.SYS_OBJECTID_INSTANCE)))
-            .thenReturn(snmpValues2);
+        when(snmpHelper.getAsync(config1, new SnmpObjId[]{SnmpObjId.get(SnmpHelper.SYS_OBJECTID_INSTANCE)}))
+            .thenReturn(CompletableFuture.completedFuture(snmpValues1));
+        when(snmpHelper.getAsync(config2, new SnmpObjId[]{SnmpObjId.get(SnmpHelper.SYS_OBJECTID_INSTANCE)}))
+            .thenReturn(CompletableFuture.completedFuture(snmpValues2));
 
         List<SnmpAgentConfig> detectedConfigs = snmpConfigDiscovery.getDiscoveredConfig(configs);
 
         assertEquals(1, detectedConfigs.size());
         assertEquals(config1, detectedConfigs.get(0));
 
-        verify(snmpHelper, times(2)).get(any(), (SnmpObjId) any());
+        verify(snmpHelper, times(2)).getAsync(any(), any());
     }
 }
 

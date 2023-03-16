@@ -191,7 +191,7 @@ public class NodeTaggingStepDefinitions {
                 tagServiceBlockingStub.removeTags(TagRemoveListDTO.newBuilder()
                     .addAllTagIds(Collections.singletonList(Int64Value.newBuilder()
                         .setValue(tagDTO.getId()).build()))
-                    .setEntityId(TagEntityIdDTO.newBuilder()
+                    .addEntityIds(TagEntityIdDTO.newBuilder()
                         .setNodeId(node.getId())).build());
                 break;
             }

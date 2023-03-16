@@ -40,6 +40,7 @@ import org.opennms.horizon.shared.snmp.SnmpHelper;
 import org.opennms.horizon.shared.snmp.SnmpObjId;
 import org.opennms.horizon.shared.snmp.SnmpWalkCallback;
 import org.opennms.horizon.shared.snmp.SnmpWalker;
+import org.opennms.horizon.shared.utils.InetAddressUtils;
 import org.opennms.horizon.snmp.api.SnmpConfiguration;
 import org.opennms.horizon.snmp.api.SnmpResponseMetric;
 import org.opennms.horizon.snmp.api.SnmpResultMetric;
@@ -93,7 +94,7 @@ public class SnmpCollector implements ServiceCollector {
 
             String ipAddress = snmpRequest.getAgentConfig().getAddress();
             try {
-                var values = snmpHelper.getOidValues(mapAgent(snmpRequest.getAgentConfig()),
+                var values = snmpHelper.getOidValues(mapAgent(snmpRequest.getAgentConfig(), ipAddress),
                     "ifIndex", SnmpObjId.get(SnmpHelper.IFINDEX_OID));
                 values.forEach((instId, value) -> {
                     String ipAddressFromSnmp = instId.toString();
@@ -113,7 +114,8 @@ public class SnmpCollector implements ServiceCollector {
             AggregateTracker aggregate = new AggregateTracker(snmpCollectionSet.getTrackers());
 
             long nodeId = request.getNodeId();
-            try (final SnmpWalker walker = snmpHelper.createWalker(mapAgent(snmpRequest.getAgentConfig()), "Snmp-Collector", aggregate)) {
+            try (final SnmpWalker walker = snmpHelper.createWalker(mapAgent(snmpRequest.getAgentConfig(), ipAddress),
+                "Snmp-Collector", aggregate)) {
                 walker.setCallback(new SnmpWalkCallback() {
                     @Override
                     public void complete(SnmpWalker tracker, Throwable t) {
@@ -177,8 +179,8 @@ public class SnmpCollector implements ServiceCollector {
     }
 
 
-    static SnmpAgentConfig mapAgent(SnmpConfiguration agent) throws Exception {
-        SnmpAgentConfig agentConfig = new SnmpAgentConfig();
+    static SnmpAgentConfig mapAgent(SnmpConfiguration agent, String ipAddress) throws Exception {
+        SnmpAgentConfig agentConfig = new SnmpAgentConfig(InetAddressUtils.getInetAddress(ipAddress), SnmpAgentConfig.DEFAULTS);
         agentConfig.setVersion(agent.getVersion().getNumber());
         if (agent.hasConfig()) {
             SnmpV3Configuration v3config = agent.getConfig();
@@ -193,7 +195,6 @@ public class SnmpCollector implements ServiceCollector {
             agentOption(v3config.hasContextEngineId(), agentConfig::setContextEngineId, v3config::getContextEngineId);
             agentOption(v3config.hasEngineId(), agentConfig::setEngineId, v3config::getEngineId);
         }
-        agentConfig.setAddress(InetAddress.getByName(agent.getAddress()));
         agentOption(agent.hasProxyForAddress(), agentConfig::setProxyFor, () -> InetAddress.getByName(agent.getProxyForAddress()));
         agentOption(agent.hasPort(), agentConfig::setPort, agent::getPort);
         agentOption(agent.hasTimeout(), agentConfig::setTimeout, agent::getTimeout);

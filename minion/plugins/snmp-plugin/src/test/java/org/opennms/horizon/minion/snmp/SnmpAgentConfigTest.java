@@ -32,6 +32,8 @@ import org.junit.Test;
 import org.opennms.horizon.shared.snmp.SnmpAgentConfig;
 import org.opennms.horizon.snmp.api.SnmpConfiguration;
 
+import java.net.InetAddress;
+
 import static org.junit.Assert.assertEquals;
 
 public class SnmpAgentConfigTest {
@@ -42,7 +44,7 @@ public class SnmpAgentConfigTest {
     public void testAgentConfigDefaults() throws Exception {
 
         SnmpConfiguration snmpConfiguration = SnmpConfiguration.newBuilder().build();
-        SnmpAgentConfig agentConfig = SnmpCollector.mapAgent(snmpConfiguration);
+        SnmpAgentConfig agentConfig = SnmpCollector.mapAgent(snmpConfiguration, InetAddress.getLocalHost().getHostAddress());
         assertEquals("public", agentConfig.getReadCommunity());
         assertEquals("private", agentConfig.getWriteCommunity());
         assertEquals(3000, agentConfig.getTimeout());

@@ -37,8 +37,12 @@ public class SnmpConfigUtils {
     static SnmpAgentConfig mapAgentConfig(String host, SnmpConfiguration snmpConfiguration) {
         var agentConfig = new SnmpAgentConfig(InetAddressUtils.getInetAddress(host), SnmpAgentConfig.DEFAULTS);
         if(snmpConfiguration != null) {
-            agentConfig.setReadCommunity(snmpConfiguration.getReadCommunity());
-            agentConfig.setPort(snmpConfiguration.getPort());
+            if (snmpConfiguration.hasReadCommunity()) {
+                agentConfig.setReadCommunity(snmpConfiguration.getReadCommunity());
+            }
+            if (snmpConfiguration.hasPort()) {
+                agentConfig.setPort(snmpConfiguration.getPort());
+            }
             //TODO: Expand config further.
         }
         return agentConfig;

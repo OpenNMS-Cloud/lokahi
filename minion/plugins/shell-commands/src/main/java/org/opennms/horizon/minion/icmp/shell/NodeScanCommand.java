@@ -28,6 +28,7 @@
 
 package org.opennms.horizon.minion.icmp.shell;
 
+import com.google.common.base.Strings;
 import com.google.protobuf.Any;
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Argument;
@@ -35,6 +36,7 @@ import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.opennms.horizon.minion.plugin.api.registries.ScannerRegistry;
+import org.opennms.horizon.snmp.api.SnmpConfiguration;
 import org.opennms.node.scan.contract.NodeScanRequest;
 import org.opennms.node.scan.contract.NodeScanResult;
 
@@ -52,6 +54,9 @@ public class NodeScanCommand implements Action {
     @Argument(index = 0, name = "ipAddress", description = "IP Address for Scan", required = true, multiValued = false)
     String ipAddress;
 
+    @Argument(index = 1, name = "Snmp community String", description = "Snmp Communitry String to be used", required = false, multiValued = false)
+    String communityString;
+
 
     @Override
     public Object execute() throws Exception {
@@ -59,9 +64,12 @@ public class NodeScanCommand implements Action {
         var scannerManager = scannerRegistry.getService("NodeScanner");
         var scanner = scannerManager.create();
 
-        var scanRequest = NodeScanRequest.newBuilder()
-            .setPrimaryIp(ipAddress).build();
-        var config = Any.pack(scanRequest);
+        var scanRequestBuilder = NodeScanRequest.newBuilder()
+            .setPrimaryIp(ipAddress);
+        if (!Strings.isNullOrEmpty(communityString)) {
+            scanRequestBuilder.addSnmpConfigs(SnmpConfiguration.newBuilder().setReadCommunity(communityString).build());
+        }
+        var config = Any.pack(scanRequestBuilder.build());
         var future = scanner.scan(config);
         while (true) {
             try {

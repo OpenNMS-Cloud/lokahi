@@ -87,8 +87,13 @@ public class DetectorTaskSetService {
             node.getMonitoringLocation().getLocation(), ipAddress);
         List<TaskDefinition> tasks = new ArrayList<>();
         for (MonitorType monitorType : DETECTOR_MONITOR_TYPES) {
-            var list = addDetectorTasks(node, ipInterfaces, monitorType, snmpConfiguration.orElse(null));
-            tasks.addAll(list);
+            if (monitorType.equals(MonitorType.SNMP)) {
+                var list = addDetectorTasks(node, ipInterfaces, monitorType, snmpConfiguration.orElse(null));
+                tasks.addAll(list);
+            } else {
+                var list = addDetectorTasks(node, ipInterfaces, monitorType);
+                tasks.addAll(list);
+            }
         }
         return tasks;
     }
@@ -105,6 +110,11 @@ public class DetectorTaskSetService {
         }
         return tasks;
     }
+
+    private List<TaskDefinition> addDetectorTasks(Node node, List<IpInterface> ipInterfaces, MonitorType monitorType) {
+        return addDetectorTasks(node, ipInterfaces, monitorType, null);
+    }
+
 
     private TaskDefinition addDetectorTask(long nodeId, String ipAddress, MonitorType monitorType, SnmpConfiguration snmpConfiguration) {
         String monitorTypeValue = monitorType.getValueDescriptor().getName();

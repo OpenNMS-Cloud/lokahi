@@ -51,6 +51,7 @@ import org.opennms.horizon.inventory.service.SnmpInterfaceService;
 import org.opennms.horizon.inventory.service.TagService;
 import org.opennms.horizon.inventory.service.taskset.DetectorTaskSetService;
 import org.opennms.horizon.inventory.service.taskset.TaskSetHandler;
+import org.opennms.horizon.shared.utils.InetAddressUtils;
 import org.opennms.node.scan.contract.IpInterfaceResult;
 import org.opennms.node.scan.contract.NodeScanResult;
 import org.opennms.node.scan.contract.SnmpInterfaceResult;
@@ -133,13 +134,16 @@ public class ScannerResponseService {
 
     private void processDiscoveryScanResponse(String tenantId, String location, DiscoveryScanResult discoveryScanResult) {
         for (PingResponse pingResponse : discoveryScanResult.getPingResponseList()) {
-            NodeCreateDTO createDTO = NodeCreateDTO.newBuilder()
-                .setLocation(location)
-                .setManagementIp(pingResponse.getIpAddress())
-                .setLabel(pingResponse.getIpAddress())
-                .build();
-            Node node = nodeService.createNode(createDTO, ScanType.DISCOVERY_SCAN, tenantId);
-            nodeService.sendNewNodeTaskSetAsync(node, discoveryScanResult.getActiveDiscoveryId());
+            var optional = nodeService.getNode(tenantId, location, InetAddressUtils.getInetAddress(pingResponse.getIpAddress()));
+            if (optional.isEmpty()) {
+                NodeCreateDTO createDTO = NodeCreateDTO.newBuilder()
+                    .setLocation(location)
+                    .setManagementIp(pingResponse.getIpAddress())
+                    .setLabel(pingResponse.getIpAddress())
+                    .build();
+                Node node = nodeService.createNode(createDTO, ScanType.DISCOVERY_SCAN, tenantId);
+                nodeService.sendNewNodeTaskSetAsync(node, discoveryScanResult.getActiveDiscoveryId());
+            }
         }
     }
 
@@ -206,7 +210,7 @@ public class ScannerResponseService {
                     //todo: use snmp agent config for detection, monitor and collection
                 }
             }
-
+            detectorTaskSetService.sendDetectorTasks(node);
             //todo: start detection, monitor and collection here
 
         } else {

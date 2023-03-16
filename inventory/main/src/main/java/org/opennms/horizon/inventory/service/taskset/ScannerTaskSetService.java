@@ -157,6 +157,7 @@ public class ScannerTaskSetService {
                 .setTimeout(PingConstants.DEFAULT_TIMEOUT)
                 .setPacketsPerSecond(PingConstants.DEFAULT_PACKETS_PER_SECOND)
                 .setPacketSize(PingConstants.DEFAULT_PACKET_SIZE)
+                .setActiveDiscoveryId(activeDiscoveryId)
                 .build());
 
         String taskId = identityForDiscoveryTask(location, activeDiscoveryId);

@@ -60,6 +60,7 @@ import org.opennms.taskset.contract.TaskDefinition;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.net.InetAddress;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -112,6 +113,23 @@ public class NodeService {
     public List<NodeDTO> findByMonitoredState(String tenantId, MonitoredState monitoredState) {
         return nodeRepository.findByTenantIdAndMonitoredStateEquals(tenantId, monitoredState)
             .stream().map(mapper::modelToDTO).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<Node> getNode(String tenantId, String location, InetAddress primaryIpAddress) {
+
+        var list = nodeRepository.findByTenantId(tenantId);
+        if (list.isEmpty()) {
+            return Optional.empty();
+        }
+        var listOfNodesOnLocation = list.stream().filter(node -> node.getMonitoringLocation().getLocation().equals(location)).toList();
+        if (listOfNodesOnLocation.isEmpty()) {
+            return Optional.empty();
+        }
+        return listOfNodesOnLocation.stream().filter(node ->
+            node.getIpInterfaces().stream().anyMatch(ipInterface -> ipInterface.getSnmpPrimary() &&
+                ipInterface.getIpAddress().equals(primaryIpAddress))).findFirst();
+
     }
 
     private void saveIpInterfaces(NodeCreateDTO request, Node node, String tenantId) {
@@ -260,7 +278,6 @@ public class NodeService {
                     snmpConfigs.add(builder.build());
                 });
             }
-            detectorTaskSetService.sendDetectorTasks(node);
             scannerTaskSetService.sendNodeScannerTask(mapper.modelToDTO(node),
                 node.getMonitoringLocation().getLocation(), snmpConfigs);
         } catch (Exception e) {

@@ -62,7 +62,7 @@ message TagCreateDTO {
 }
 
 message TagRemoveListDTO {
-  TagEntityIdDTO entity_id = 1;
+  repeated TagEntityIdDTO entity_ids = 1;
   repeated google.protobuf.Int64Value tag_ids = 2;
 }
 

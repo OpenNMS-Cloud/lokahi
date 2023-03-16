@@ -111,8 +111,12 @@ public class TagService {
             .map(tagId -> getTag(tenantId, tagId))
             .toList();
 
-        TagEntityIdDTO entityId = request.getEntityId();
+        for (TagEntityIdDTO entityId : request.getEntityIdsList()) {
+            removeTags(tenantId, entityId, tags);
+        }
+    }
 
+    private void removeTags(String tenantId, TagEntityIdDTO entityId, List<Tag> tags) {
         if (entityId.hasNodeId()) {
             Node node = getNode(tenantId, entityId.getNodeId());
             tags.forEach(tag -> tag.getNodes().remove(node));
@@ -127,7 +131,6 @@ public class TagService {
 
     public List<TagDTO> getTagsByEntityId(String tenantId, ListTagsByEntityIdParamsDTO listParams) {
         TagEntityIdDTO entityId = listParams.getEntityId();
-
         if (entityId.hasNodeId()) {
             return getTagsByNodeId(tenantId, listParams);
         } else if (entityId.hasActiveDiscoveryId()) {

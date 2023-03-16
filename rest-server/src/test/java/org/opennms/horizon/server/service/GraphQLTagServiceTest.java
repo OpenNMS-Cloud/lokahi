@@ -76,7 +76,7 @@ class GraphQLTagServiceTest {
     }
 
     @Test
-    void testAddTagsToNode() throws JSONException {
+    void testAddTagsToNodes() throws JSONException {
 
         TagDTO tagDTO1 = TagDTO.newBuilder().setName(TEST_TAG_NAME_1).setTenantId(TEST_TENANT_ID).setId(1L).build();
         TagDTO tagDTO2 = TagDTO.newBuilder().setName(TEST_TAG_NAME_2).setTenantId(TEST_TENANT_ID).setId(2L).build();
@@ -84,9 +84,9 @@ class GraphQLTagServiceTest {
         when(mockClient.addTags(any(TagCreateListDTO.class), anyString())).thenReturn(tagListDTO);
 
         String request = "mutation { " +
-            "    addTags( " +
+            "    addTagsToNodes( " +
             "        tags: { " +
-            "            nodeId: 1, " +
+            "            nodeIds: [ 1 ], " +
             "            tags: [ " +
             "                { " +
             "                    name: \"" + TEST_TAG_NAME_1 + "\" " +
@@ -110,12 +110,12 @@ class GraphQLTagServiceTest {
             .exchange()
             .expectStatus().isOk()
             .expectBody()
-            .jsonPath("$.data.addTags[0].id").isEqualTo(1)
-            .jsonPath("$.data.addTags[0].tenantId").isNotEmpty()
-            .jsonPath("$.data.addTags[0].name").isEqualTo(TEST_TAG_NAME_1)
-            .jsonPath("$.data.addTags[1].id").isEqualTo(2)
-            .jsonPath("$.data.addTags[1].tenantId").isNotEmpty()
-            .jsonPath("$.data.addTags[1].name").isEqualTo(TEST_TAG_NAME_2);
+            .jsonPath("$.data.addTagsToNodes[0].id").isEqualTo(1)
+            .jsonPath("$.data.addTagsToNodes[0].tenantId").isNotEmpty()
+            .jsonPath("$.data.addTagsToNodes[0].name").isEqualTo(TEST_TAG_NAME_1)
+            .jsonPath("$.data.addTagsToNodes[1].id").isEqualTo(2)
+            .jsonPath("$.data.addTagsToNodes[1].tenantId").isNotEmpty()
+            .jsonPath("$.data.addTagsToNodes[1].name").isEqualTo(TEST_TAG_NAME_2);
 
         verify(mockClient).addTags(any(TagCreateListDTO.class), eq(accessToken));
         verify(mockHeaderUtil, times(1)).getAuthHeader(any(ResolutionEnvironment.class));
@@ -396,9 +396,9 @@ class GraphQLTagServiceTest {
     @Test
     void testRemoveTagsFromNode() throws JSONException {
         String request = "mutation { " +
-            "    removeTags( " +
+            "    removeTagsFromNodes( " +
             "        tags: { " +
-            "            nodeId: 1, " +
+            "            nodeIds: [ 1 ], " +
             "            tagIds: [ 1 ] " +
             "        } " +
             "    ) " +

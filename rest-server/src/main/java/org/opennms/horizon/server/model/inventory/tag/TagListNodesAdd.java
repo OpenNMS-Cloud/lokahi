@@ -35,9 +35,7 @@ import java.util.List;
 
 @Getter
 @Setter
-public class TagListNodeAdd {
-
-    private long nodeId;
-
+public class TagListNodesAdd {
+    private List<Long> nodeIds;
     private List<TagCreate> tags;
 }

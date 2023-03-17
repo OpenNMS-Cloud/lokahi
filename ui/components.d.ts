@@ -7,7 +7,6 @@ export {}
 
 declare module '@vue/runtime-core' {
   export interface GlobalComponents {
-    AlertConditions: typeof import('./src/components/MonitoringPolicies/AlertConditions.vue')['default']
     AppliancesAddNodeCtrl: typeof import('./src/components/Appliances/AppliancesAddNodeCtrl.vue')['default']
     AppliancesMinionsTable: typeof import('./src/components/Appliances/AppliancesMinionsTable.vue')['default']
     AppliancesNodesTable: typeof import('./src/components/Appliances/AppliancesNodesTable.vue')['default']
@@ -16,7 +15,6 @@ declare module '@vue/runtime-core' {
     BasicSelect: typeof import('./src/components/Common/BasicSelect.vue')['default']
     BasicToggle: typeof import('./src/components/Common/BasicToggle.vue')['default']
     ButtonWithSpinner: typeof import('./src/components/Common/ButtonWithSpinner.vue')['default']
-    Condition: typeof import('./src/components/MonitoringPolicies/Condition.vue')['default']
     ContextMenu: typeof import('./src/components/Topology/ContextMenu.vue')['default']
     CtrlHighlightFocusedNodes: typeof import('./src/components/Topology/CtrlHighlightFocusedNodes.vue')['default']
     CtrlLayers: typeof import('./src/components/Topology/CtrlLayers.vue')['default']
@@ -81,10 +79,13 @@ declare module '@vue/runtime-core' {
     MarkerCluster: typeof import('./src/components/Map/MarkerCluster.vue')['default']
     Menubar: typeof import('./src/components/Layout/Menubar.vue')['default']
     MetricChip: typeof import('./src/components/Common/MetricChip.vue')['default']
+    MonitoringPoliciesCard: typeof import('./src/components/MonitoringPolicies/MonitoringPoliciesCard.vue')['default']
+    MonitoringPoliciesCardAlertRow: typeof import('./src/components/MonitoringPolicies/MonitoringPoliciesCardAlertRow.vue')['default']
     MonitoringPoliciesExistingItems: typeof import('./src/components/MonitoringPolicies/MonitoringPoliciesExistingItems.vue')['default']
     MonitoringPoliciesPolicyForm: typeof import('./src/components/MonitoringPolicies/MonitoringPoliciesPolicyForm.vue')['default']
     MonitoringPoliciesRuleForm: typeof import('./src/components/MonitoringPolicies/MonitoringPoliciesRuleForm.vue')['default']
     MonitoringPoliciesSaveButtons: typeof import('./src/components/MonitoringPolicies/MonitoringPoliciesSaveButtons.vue')['default']
+    MonitoringPoliciesThresholdCondition: typeof import('./src/components/MonitoringPolicies/MonitoringPoliciesThresholdCondition.vue')['default']
     NavigationRail: typeof import('./src/components/Layout/NavigationRail.vue')['default']
     NetworkGraph: typeof import('./src/components/Topology/NetworkGraph.vue')['default']
     NodeInfoTable: typeof import('./src/components/NodeStatus/NodeInfoTable.vue')['default']
@@ -100,7 +101,6 @@ declare module '@vue/runtime-core' {
     SNMPInterfacesTable: typeof import('./src/components/NodeStatus/SNMPInterfacesTable.vue')['default']
     Spinner: typeof import('./src/components/Common/Spinner.vue')['default']
     TableCard: typeof import('./src/components/Common/TableCard.vue')['default']
-    ThresholdAlert: typeof import('./src/components/MonitoringPolicies/ThresholdAlert.vue')['default']
     TopologyLeftDrawer: typeof import('./src/components/Topology/TopologyLeftDrawer.vue')['default']
     TopologyModal: typeof import('./src/components/Topology/TopologyModal.vue')['default']
     TopologyRightDrawer: typeof import('./src/components/Topology/TopologyRightDrawer.vue')['default']

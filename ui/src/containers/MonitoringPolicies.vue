@@ -8,8 +8,6 @@
 </template>
 
 <script setup lang="ts">
-import { useMonitoringPoliciesStore } from '@/store/Views/monitoringPoliciesStore'
-const store = useMonitoringPoliciesStore()
 </script>
 
 <style scoped lang="scss">

@@ -19,6 +19,7 @@ export interface IRule {
   componentType: string
   detectionMethod: string
   metricName: string
+  eventTrigger?: string
   conditions: ICondition[]
 }
 
@@ -30,7 +31,9 @@ export interface ICondition extends IObjectKeys {
   id: string
   level: string
   percentage: number
-  duration: string
-  period: string
+  forAny: number
+  durationUnit: string
+  duringLast: number
+  periodUnit: string
   severity: string
 }

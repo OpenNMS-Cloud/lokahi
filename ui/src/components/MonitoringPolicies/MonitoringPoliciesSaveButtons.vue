@@ -16,7 +16,7 @@
       :isFetching="mutations.isFetching.value"
       class="save-btn"
       primary
-      :disabled="!store.selectedPolicy.rules.length"
+      :disabled="!store.selectedPolicy.rules.length || !store.selectedPolicy.name"
       @click="store.savePolicy"
     >
       Save Policy
@@ -26,7 +26,7 @@
 
 <script setup lang="ts">
 import { useMonitoringPoliciesStore } from '@/store/Views/monitoringPoliciesStore'
-import { useMonitoringPoliciesMutations } from '@/store/Mutations/monitoringPolicies'
+import { useMonitoringPoliciesMutations } from '@/store/Mutations/monitoringPoliciesMutations'
 
 const store = useMonitoringPoliciesStore()
 const mutations = useMonitoringPoliciesMutations()

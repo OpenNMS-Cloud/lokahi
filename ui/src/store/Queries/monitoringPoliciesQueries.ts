@@ -28,10 +28,12 @@ export const useMonitoringPoliciesQueries = defineStore('monitoringPoliciesQueri
           conditions: [{
             id: '1',
             level: 'above',
-            percentage: 90,
-            duration: '3 minutes',
-            period: '10 minutes',
-            severity: 'critical'
+            percentage: 50,
+            forAny: 10,
+            durationUnit: 'seconds',
+            duringLast: 15,
+            periodUnit: 'minutes',
+            severity: 'major'
           }]
         },
         {
@@ -44,8 +46,10 @@ export const useMonitoringPoliciesQueries = defineStore('monitoringPoliciesQueri
             id: '1',
             level: 'above',
             percentage: 90,
-            duration: '3 minutes',
-            period: '10 minutes',
+            forAny: 10,
+            durationUnit: 'seconds',
+            duringLast: 15,
+            periodUnit: 'minutes',
             severity: 'critical'
           }]
         },

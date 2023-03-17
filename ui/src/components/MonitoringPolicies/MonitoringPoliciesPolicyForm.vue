@@ -10,7 +10,7 @@
       </FeatherButton>
       <MonitoringPoliciesExistingItems
         title="Existing Policies"
-        :list="monitoringPoliciesQueries.monitoringPolicies"
+        :list="store.monitoringPolicies"
         :selectedItemId="store.selectedPolicy?.id"
         @selectExistingItem="populateForm"
       />
@@ -53,9 +53,9 @@
         class="mp-card-container"
       >
         <MonitoringPoliciesCard
-          v-for="policy in monitoringPoliciesQueries.monitoringPolicies"
+          v-for="policy in store.monitoringPolicies"
           :policy="policy"
-          @selectPolicy="(policy) => store.displayPolicyForm(policy)"
+          @selectPolicy="(policy: IPolicy) => store.displayPolicyForm(policy)"
         />
       </div>
     </transition>
@@ -65,14 +65,12 @@
 
 <script setup lang="ts">
 import { useMonitoringPoliciesStore } from '@/store/Views/monitoringPoliciesStore'
-import { useMonitoringPoliciesQueries } from '@/store/Queries/monitoringPoliciesQueries'
 import { useTagQueries } from '@/store/Queries/tagQueries'
 import Add from '@featherds/icon/action/Add'
 import { TagSelectItem } from '@/types'
 import { IPolicy } from '@/types/policies'
 
 const store = useMonitoringPoliciesStore()
-const monitoringPoliciesQueries = useMonitoringPoliciesQueries()
 const tagQueries = useTagQueries()
 const addIcon = markRaw(Add)
 

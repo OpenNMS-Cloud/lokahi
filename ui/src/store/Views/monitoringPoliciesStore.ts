@@ -1,8 +1,11 @@
 import { defineStore } from 'pinia'
 import { cloneDeep, findIndex } from 'lodash'
-import { IPolicy, IRule } from '@/types/policies'
-import { useMonitoringPoliciesMutations } from '../Mutations/monitoringPolicies'
+import { ICondition, IPolicy, IRule } from '@/types/policies'
+import { useMonitoringPoliciesMutations } from '../Mutations/monitoringPoliciesMutations'
 import { useMonitoringPoliciesQueries } from '../Queries/monitoringPoliciesQueries'
+import useSnackbar from '@/composables/useSnackbar'
+
+const { showSnackbar } = useSnackbar()
 
 type TState = {
   selectedPolicy?: IPolicy
@@ -22,13 +25,25 @@ const defaultPolicy: IPolicy = {
   rules: []
 }
 
+const getDefaultCondition = () => ({
+  id: new Date().getTime().toString(),
+  level: 'above',
+  percentage: 50,
+  forAny: 5,
+  durationUnit: 'seconds',
+  duringLast: 60,
+  periodUnit: 'seconds',
+  severity: 'critical'
+})
+
 const getDefaultRule = () => ({
   id: new Date().getTime().toString(),
   name: '',
   componentType: 'cpu',
   detectionMethod: 'threshold',
   metricName: 'over-utilization',
-  conditions: []
+  eventTrigger: undefined,
+  conditions: [getDefaultCondition()]
 })
 
 export const useMonitoringPoliciesStore = defineStore('monitoringPoliciesStore', {
@@ -36,6 +51,12 @@ export const useMonitoringPoliciesStore = defineStore('monitoringPoliciesStore',
     selectedPolicy: undefined,
     selectedRule: undefined
   }),
+  getters: {
+    monitoringPolicies() {
+      const { monitoringPolicies } = useMonitoringPoliciesQueries()
+      return monitoringPolicies
+    }
+  },
   actions: {
     displayPolicyForm(policy?: IPolicy) {
       this.selectedPolicy = policy || cloneDeep(defaultPolicy)
@@ -45,15 +66,16 @@ export const useMonitoringPoliciesStore = defineStore('monitoringPoliciesStore',
       this.selectedRule = cloneDeep(rule) || getDefaultRule()
     },
     addNewCondition() {
-      const defaultCondition = {
-        id: new Date().getTime().toString(),
-        level: 'above',
-        percentage: 50,
-        duration: '5s',
-        period: '15s',
-        severity: 'critical'
-      }
-      this.selectedRule!.conditions.push(defaultCondition)
+      this.selectedRule!.conditions.push(getDefaultCondition())
+    },
+    updateCondition(id: string, condition: ICondition) {
+      this.selectedRule!.conditions.map((currentCondition) => {
+        if (currentCondition.id === id) {
+          console.log({...currentCondition, ...condition})
+          return {...currentCondition, ...condition}
+        }
+        return
+      })
     },
     removeCondition(id: string) {
       this.selectedRule!.conditions = this.selectedRule!.conditions.filter((c) => c.id !== id)
@@ -70,6 +92,7 @@ export const useMonitoringPoliciesStore = defineStore('monitoringPoliciesStore',
       }
 
       this.selectedRule = getDefaultRule()
+      showSnackbar({ msg: 'Rule successfully applied to the policy.' })
     },
     async savePolicy() {
       const { addMonitoringPolicy, error } = useMonitoringPoliciesMutations()
@@ -81,6 +104,7 @@ export const useMonitoringPoliciesStore = defineStore('monitoringPoliciesStore',
         this.selectedPolicy = undefined
         this.selectedRule = undefined
         listMonitoringPolicies()
+        showSnackbar({ msg: 'Policy successfully applied.' })
       }
 
       return !error.value

@@ -47,7 +47,7 @@
           <div class="col">
             <div class="subtitle">Detection Method</div>
             <BasicSelect
-            :list="detectionMethodOptions"
+              :list="detectionMethodOptions"
               @item-selected="selectDetectionMethod"
               :selectedId="store.selectedRule.detectionMethod"
             />
@@ -55,13 +55,36 @@
           <div class="col">
             <div class="subtitle">Threshold Metrics</div>
             <BasicSelect
-            :list="thresholdMetricsOptions"
-            @item-selected="selectThresholdMetrics"
-            :selectedId="store.selectedRule.metricName"
+              :list="metricOptions"
+              @item-selected="selectMetric"
+              :selectedId="store.selectedRule.metricName"
+            />
+          </div>
+          <div
+            class="col"
+            v-if="store.selectedRule.detectionMethod === events.Event"
+          >
+            <div class="subtitle">Trigger Event</div>
+            <BasicSelect
+              :list="eventTriggerOptions"
+              @item-selected="selectEventTrigger"
+              :selectedId="store.selectedRule.eventTrigger"
             />
           </div>
         </div>
-        <AlertConditions />
+        <div
+          class="row"
+          v-if="store.selectedRule!.conditions.length"
+        >
+          <div class="col">
+            <div class="subtitle">Set Alert Conditions</div>
+            <MonitoringPoliciesThresholdCondition
+              v-for="cond in store.selectedRule!.conditions"
+              :condition="cond"
+              @updateCondition="(condition) => store.updateCondition(cond.id, condition)"
+            />
+          </div>
+        </div>
       </div>
     </transition>
   </div>
@@ -72,8 +95,17 @@ import { useMonitoringPoliciesStore } from '@/store/Views/monitoringPoliciesStor
 import { IRule } from '@/types/policies'
 import Add from '@featherds/icon/action/Add'
 
+enum events {
+  Threshold = 'threshold',
+  Event = 'event'
+}
+
 const store = useMonitoringPoliciesStore()
 const addIcon = markRaw(Add)
+
+const metricOptions = computed(() => {
+  return store.selectedRule?.detectionMethod === events.Threshold ? thresholdMetricsOptions : eventMetricsOptions
+})
 
 const componentTypeOptions = [
   { id: 'cpu', name: 'CPU' },
@@ -93,10 +125,22 @@ const thresholdMetricsOptions = [
   { id: 'errors', name: 'Errors' }
 ]
 
+const eventMetricsOptions = [
+  { id: 'snmp-trap', name: 'SNMP Trap' },
+  { id: 'internal', name: 'Internal' }
+]
+
+const eventTriggerOptions = [
+  { id: 'device-cold-reboot', name: 'Device Cold Reboot' },
+  { id: 'snmp-auth-fail', name: 'SNMP Authentication Failure' },
+  { id: 'port-down', name: 'Port Down' }
+]
+
 const selectComponentType = (type: string) => (store.selectedRule!.componentType = type)
 const selectDetectionMethod = (method: string) => (store.selectedRule!.detectionMethod = method)
-const selectThresholdMetrics = (metric: string) => (store.selectedRule!.metricName = metric)
-const populateForm = (rule: IRule) => (store.displayRuleForm(rule))
+const selectMetric = (metric: string) => (store.selectedRule!.metricName = metric)
+const selectEventTrigger = (trigger: string) => (store.selectedRule!.eventTrigger = trigger)
+const populateForm = (rule: IRule) => store.displayRuleForm(rule)
 </script>
 
 <style scoped lang="scss">
@@ -119,10 +163,11 @@ const populateForm = (rule: IRule) => (store.displayRuleForm(rule))
     background: var(variables.$surface);
     padding: var(variables.$spacing-l);
     border-radius: 5px;
+    overflow: hidden;
 
     .form-title {
       @include typography.headline3;
-      margin-bottom: var(variables.$spacing-m)
+      margin-bottom: var(variables.$spacing-m);
     }
     .subtitle {
       @include typography.subtitle1;
@@ -142,6 +187,5 @@ const populateForm = (rule: IRule) => (store.displayRuleForm(rule))
       }
     }
   }
-
 }
 </style>

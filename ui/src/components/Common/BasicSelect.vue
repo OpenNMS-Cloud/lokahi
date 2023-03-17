@@ -1,6 +1,5 @@
 <template>
   <FeatherSelect
-    :style="{ width: size + 'px' }"
     label=""
     :options="list"
     text-prop="name"
@@ -18,7 +17,6 @@ const emit = defineEmits(['item-selected'])
 
 const props = defineProps<{
   list: ISelectItemType[] // accept the structure [{id, name}]
-  size?: number
   isDisabled?: boolean
   selectedId?: string
 }>()
@@ -30,6 +28,7 @@ const setSelectedItem = (selected: ISelectItemType | undefined) => {
 
 // set selected by passing in an id
 watchEffect(() => {
+  selectedItem.value = props.list[0]
   if (props.selectedId) {
     for (const item of props.list) {
       if (item.id === props.selectedId) {
@@ -43,5 +42,14 @@ watchEffect(() => {
 <style scoped lang="scss">
 :deep(.label-border) {
   width: 0 !important;
+}
+
+// allows for smaller select
+:deep(.feather-select-input) {
+  width: 100%;
+  min-width: 60px;
+}
+:deep(.feather-input-wrapper) {
+  flex-flow: nowrap;
 }
 </style>

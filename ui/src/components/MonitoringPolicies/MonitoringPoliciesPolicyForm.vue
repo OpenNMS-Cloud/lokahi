@@ -15,7 +15,7 @@
         @selectExistingItem="populateForm"
       />
     </div>
-    <transition name="fade">
+    <transition name="fade-instant">
       <div
         class="policy-form"
         v-if="store.selectedPolicy"
@@ -55,6 +55,7 @@
         <MonitoringPoliciesCard
           v-for="policy in monitoringPoliciesQueries.monitoringPolicies"
           :policy="policy"
+          @selectPolicy="(policy) => store.displayPolicyForm(policy)"
         />
       </div>
     </transition>

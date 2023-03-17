@@ -8,3 +8,15 @@
 .fade-leave-to {
   opacity: 0;
 }
+
+// fades out instantly
+.fade-instant-enter-active {
+  transition: all 0.3s;
+}
+.fade-instant-leave-active {
+  transition: all 0s;
+}
+.fade-instant-enter-from,
+.fade-instant-leave-to {
+  opacity: 0;
+}

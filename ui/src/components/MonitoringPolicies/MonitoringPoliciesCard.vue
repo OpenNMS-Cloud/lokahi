@@ -31,17 +31,13 @@
         </div>
       </div>
 
-      <div
-        class="row"
-        v-if="ruleStates[rule.id]"
-      >
-        <!-- Alert Conditions -->
-        <div v-for="(condition, index) in rule.conditions">
-          <MonitoringPoliciesCardAlertRow
-            :condition="condition"
-            :index="index"
-          />
-        </div>
+      <div v-if="ruleStates[rule.id]">
+        <div class="alert-title">Alert Conditions</div>
+        <MonitoringPoliciesCardAlertRow
+          v-for="(condition, index) in rule.conditions"
+          :condition="condition"
+          :index="index"
+        />
       </div>
     </div>
   </div>
@@ -74,7 +70,7 @@ const triggerRuleState = (ruleId: string) => (ruleStates[ruleId] = !ruleStates[r
   @include elevation.elevation(3);
   border-radius: 5px;
   display: flex;
-  gap: var(variables.$spacing-xxs);
+  gap: var(variables.$spacing-s);
   flex-direction: column;
   padding: var(variables.$spacing-l);
 
@@ -85,7 +81,7 @@ const triggerRuleState = (ruleId: string) => (ruleStates[ruleId] = !ruleStates[r
 
   .row {
     display: flex;
-    gap: var(variables.$spacing-xxs);
+    gap: var(variables.$spacing-m);
 
     .policy-title {
       @include typography.headline4;
@@ -131,7 +127,13 @@ const triggerRuleState = (ruleId: string) => (ruleStates[ruleId] = !ruleStates[r
       padding: var(variables.$spacing-xs);
       color: var(variables.$primary-text-on-color);
       width: 145px;
+      cursor: pointer;
     }
+  }
+
+  .alert-title {
+    @include typography.subtitle1;
+    margin-top: var(variables.$spacing-xl);
   }
 
   @include mediaQueriesMixins.screen-md {

@@ -18,7 +18,7 @@
         @selectExistingItem="populateForm"
       />
     </div>
-    <transition name="fade">
+    <transition name="fade-instant">
       <div
         class="rule-form"
         v-if="store.selectedRule"

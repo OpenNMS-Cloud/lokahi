@@ -78,7 +78,8 @@ export const useMonitoringPoliciesStore = defineStore('monitoringPoliciesStore',
       await addMonitoringPolicy({ policy: this.selectedPolicy! })
 
       if (!error.value) {
-        this.selectedPolicy = cloneDeep(defaultPolicy)
+        this.selectedPolicy = undefined
+        this.selectedRule = undefined
         listMonitoringPolicies()
       }
 

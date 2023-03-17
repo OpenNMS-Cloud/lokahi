@@ -71,7 +71,6 @@ export const useMonitoringPoliciesStore = defineStore('monitoringPoliciesStore',
     updateCondition(id: string, condition: ICondition) {
       this.selectedRule!.conditions.map((currentCondition) => {
         if (currentCondition.id === id) {
-          console.log({...currentCondition, ...condition})
           return {...currentCondition, ...condition}
         }
         return

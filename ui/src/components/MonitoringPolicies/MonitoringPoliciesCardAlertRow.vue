@@ -1,15 +1,17 @@
 <template>
   <div class="mp-card-alert-row">
     <div class="alert-letter">{{ conditionLetters[index] }}</div>
-    <div class="col trigger">Trigger when the metric is:</div>
+    <div class="col tripple">Trigger when the metric is:</div>
     <div class="col box">{{ condition.level }}</div>
-    <div class="col box">{{ condition.percentage }}</div>
+    <div class="col box half">{{ condition.percentage }}</div>
     <div class="col">for any</div>
-    <div class="col box">{{ condition.duration }}</div>
-    <div class="col period">during the last</div>
-    <div class="col box">{{ condition.period }}</div>
-    <div class="col">as</div>
-    <div class="col box">{{ condition.severity }}</div>
+    <div class="col box half">{{ condition.forAny }}</div>
+    <div class="col box double">{{ condition.durationUnit }}</div>
+    <div class="col double">during the last</div>
+    <div class="col box half">{{ condition.duringLast }}</div>
+    <div class="col box double">{{ condition.periodUnit }}</div>
+    <div class="col half">as</div>
+    <div class="col box double">{{ condition.severity }}</div>
   </div>
 </template>
 
@@ -32,7 +34,7 @@ defineProps<{
   display: flex;
   width: 100%;
   gap: var(variables.$spacing-xxs);
-  @include typography.body-large;
+  @include typography.caption;
   margin: var(variables.$spacing-m) 0;
   align-items: center;
 
@@ -43,11 +45,15 @@ defineProps<{
     text-overflow: ellipsis;
     flex: 1;
     text-align: center;
-    &.trigger {
-      flex: 3;
+
+    &.half {
+      flex: 0.5;
     }
-    &.period {
+    &.double {
       flex: 2;
+    }
+    &.tripple {
+      flex: 3;
     }
   }
 

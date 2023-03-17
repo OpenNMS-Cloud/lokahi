@@ -34,6 +34,15 @@ export const useMonitoringPoliciesQueries = defineStore('monitoringPoliciesQueri
             duringLast: 15,
             periodUnit: 'minutes',
             severity: 'major'
+          },{
+            id: '2',
+            level: 'above',
+            percentage: 50,
+            forAny: 10,
+            durationUnit: 'minutes',
+            duringLast: 15,
+            periodUnit: 'minutes',
+            severity: 'critical'
           }]
         },
         {

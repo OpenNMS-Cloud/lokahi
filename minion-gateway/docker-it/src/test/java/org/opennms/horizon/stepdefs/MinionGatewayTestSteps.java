@@ -63,6 +63,7 @@ import org.opennms.taskset.contract.MonitorType;
 import org.opennms.taskset.contract.TaskDefinition;
 import org.opennms.taskset.contract.TaskResult;
 import org.opennms.taskset.contract.TaskSetResults;
+import org.opennms.taskset.contract.TenantedTaskSetResults;
 import org.opennms.taskset.service.contract.AddSingleTaskOp;
 import org.opennms.taskset.service.contract.TaskSetServiceGrpc;
 import org.opennms.taskset.service.contract.UpdateSingleTaskOp;
@@ -479,8 +480,8 @@ public class MinionGatewayTestSteps {
         assertNotNull("message was received by the test cloud-to-minion-message server (i.e. test stub for minion)", message);
     }
 
-    @Then("verify task set result was published to Kafka with timeout {int}ms")
-    public void verifyTaskSetResultWasPublishedToKafkaWithTimeoutMs(int timeout) throws Exception {
+    @Then("verify task set result was published to Kafka with tenant id = {string} and timeout {int}ms")
+    public void verifyTaskSetResultWasPublishedToKafkaWithTenantIdAndTimeoutMs(String expectedTenantId, int timeout) throws Exception {
         kafkaTestHelper.startConsumer("task-set.results");
 
         try {
@@ -496,9 +497,10 @@ public class MinionGatewayTestSteps {
             assertTrue("verify at least 1 record was returned", ! records.isEmpty());
 
             matchedKafkaRecord = records.get(0);
-            TaskSetResults results = TaskSetResults.parseFrom(matchedKafkaRecord.value());
+            TenantedTaskSetResults results = TenantedTaskSetResults.parseFrom(matchedKafkaRecord.value());
             assertNotNull(results);
             assertEquals(1, results.getResultsCount());
+            assertEquals(expectedTenantId, results.getTenantId());
 
             TaskResult taskResult = results.getResults(0);
 
@@ -510,12 +512,6 @@ public class MinionGatewayTestSteps {
         } finally {
             kafkaTestHelper.removeConsumer("task-set.results");
         }
-    }
-
-    @Then("verify the {string} header on Kafka = {string}")
-    public void verifyTheHeaderOnKafka(String headerName, String execpted) {
-        String actual = new String(matchedKafkaRecord.headers().lastHeader(headerName).value(), StandardCharsets.UTF_8);
-        assertEquals(execpted, actual);
     }
 
     @Then("verify twin update response was received from the Minion Gateway")

@@ -46,8 +46,7 @@ Feature: Minion Gateway RPC Request Processing
     Given GRPC header "tenant-id" = "x-tenant-x"
     Then create Minion-to-Cloud Message connection
     Then send task set monitor result to the Minion Gateway until successful with timeout 5000ms
-    Then verify task set result was published to Kafka with timeout 3000ms
-    Then verify the "tenant-id" header on Kafka = "x-tenant-x"
+    Then verify task set result was published to Kafka with tenant id = "x-tenant-x" and timeout 3000ms
 
   Scenario: Register for Twin updates to the Gateway via the external GRPC API (MinionToCloudRPC)
     Given GRPC header "tenant-id" = "x-tenant-x"

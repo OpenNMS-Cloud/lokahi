@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { cloneDeep, findIndex } from 'lodash'
-import { ICondition, IPolicy, IRule } from '@/types/policies'
+import { IPolicy, IRule, Condition } from '@/types/policies'
 import { useMonitoringPoliciesMutations } from '../Mutations/monitoringPoliciesMutations'
 import { useMonitoringPoliciesQueries } from '../Queries/monitoringPoliciesQueries'
 import useSnackbar from '@/composables/useSnackbar'
@@ -25,7 +25,7 @@ const defaultPolicy: IPolicy = {
   rules: []
 }
 
-const getDefaultCondition = () => ({
+const getDefaultThresholdCondition = () => ({
   id: new Date().getTime().toString(),
   level: 'above',
   percentage: 50,
@@ -43,7 +43,7 @@ const getDefaultRule = () => ({
   detectionMethod: 'threshold',
   metricName: 'over-utilization',
   eventTrigger: undefined,
-  conditions: [getDefaultCondition()]
+  conditions: [getDefaultThresholdCondition()]
 })
 
 export const useMonitoringPoliciesStore = defineStore('monitoringPoliciesStore', {
@@ -65,10 +65,10 @@ export const useMonitoringPoliciesStore = defineStore('monitoringPoliciesStore',
     displayRuleForm(rule?: IRule) {
       this.selectedRule = cloneDeep(rule) || getDefaultRule()
     },
-    addNewCondition() {
-      this.selectedRule!.conditions.push(getDefaultCondition())
+    addNewThresholdCondition() {
+      this.selectedRule!.conditions.push(getDefaultThresholdCondition())
     },
-    updateCondition(id: string, condition: ICondition) {
+    updateCondition(id: string, condition: Condition) {
       this.selectedRule!.conditions.map((currentCondition) => {
         if (currentCondition.id === id) {
           return {...currentCondition, ...condition}

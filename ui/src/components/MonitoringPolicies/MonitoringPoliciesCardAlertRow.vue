@@ -1,5 +1,20 @@
 <template>
-  <div class="mp-card-alert-row">
+  <div class="mp-card-alert-row" v-if="isThresholdCondition(condition)">
+    <div class="alert-letter">{{ conditionLetters[index] }}</div>
+    <div class="col tripple">Trigger when the metric is:</div>
+    <div class="col box">{{ condition.level }}</div>
+    <div class="col box half">{{ condition.percentage }}</div>
+    <div class="col">for any</div>
+    <div class="col box half">{{ condition.forAny }}</div>
+    <div class="col box double">{{ condition.durationUnit }}</div>
+    <div class="col double">during the last</div>
+    <div class="col box half">{{ condition.duringLast }}</div>
+    <div class="col box double">{{ condition.periodUnit }}</div>
+    <div class="col half">as</div>
+    <div class="col box double">{{ condition.severity }}</div>
+  </div>
+
+  <div class="mp-card-alert-row" v-else>
     <div class="alert-letter">{{ conditionLetters[index] }}</div>
     <div class="col tripple">Trigger when the metric is:</div>
     <div class="col box">{{ condition.level }}</div>
@@ -16,12 +31,14 @@
 </template>
 
 <script setup lang="ts">
-import { ICondition } from '@/types/policies'
+import { Condition } from '@/types/policies'
+import { isThresholdCondition, isEventColdRebootCondition } from './monitoringPolicies.utils'
+
 
 const conditionLetters = ['a.', 'b.', 'c.', 'd.']
 
 defineProps<{
-  condition: ICondition
+  condition: Condition
   index: number
 }>()
 </script>

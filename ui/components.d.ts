@@ -83,6 +83,7 @@ declare module '@vue/runtime-core' {
     MetricChip: typeof import('./src/components/Common/MetricChip.vue')['default']
     MonitoringPoliciesCard: typeof import('./src/components/MonitoringPolicies/MonitoringPoliciesCard.vue')['default']
     MonitoringPoliciesCardAlertRow: typeof import('./src/components/MonitoringPolicies/MonitoringPoliciesCardAlertRow.vue')['default']
+    MonitoringPoliciesEventCondition: typeof import('./src/components/MonitoringPolicies/MonitoringPoliciesEventCondition.vue')['default']
     MonitoringPoliciesExistingItems: typeof import('./src/components/MonitoringPolicies/MonitoringPoliciesExistingItems.vue')['default']
     MonitoringPoliciesPolicyForm: typeof import('./src/components/MonitoringPolicies/MonitoringPoliciesPolicyForm.vue')['default']
     MonitoringPoliciesRuleForm: typeof import('./src/components/MonitoringPolicies/MonitoringPoliciesRuleForm.vue')['default']

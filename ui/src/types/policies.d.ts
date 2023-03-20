@@ -20,14 +20,14 @@ export interface IRule {
   detectionMethod: string
   metricName: string
   eventTrigger?: string
-  conditions: ICondition[]
+  conditions: Condition[]
 }
 
 interface IObjectKeys {
   [key: string]: string | number
 }
 
-export interface ICondition extends IObjectKeys {
+export interface ThresholdCondition extends IObjectKeys {
   id: string
   level: string
   percentage: number
@@ -37,3 +37,22 @@ export interface ICondition extends IObjectKeys {
   periodUnit: string
   severity: string
 }
+
+interface EventConditionBase extends IObjectKeys {
+  id: string
+  count: number
+  time?: number
+  unit?: string
+  severity: string
+}
+
+export interface EventSNMPAuthFailureCondition extends EventConditionBase {}
+
+export interface EventColdRebootCondition extends EventConditionBase {}
+
+export interface EventPortDownCondition extends EventConditionBase {
+  clearEvent?: string
+}
+
+export type EventCondition = EventSNMPAuthFailureCondition | EventColdRebootCondition | EventPortDownCondition
+export type Condition = ThresholdCondition | EventCondition

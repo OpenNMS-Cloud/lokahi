@@ -72,14 +72,14 @@
 
 <script lang="ts" setup>
 import Slider from '@vueform/slider'
-import { ICondition } from '@/types/policies'
+import { ThresholdCondition } from '@/types/policies'
 
 const props = defineProps<{
-  condition: ICondition
+  condition: ThresholdCondition
 }>()
 
 const emit = defineEmits(['updateCondition'])
-const condition = ref<ICondition>()
+const condition = ref<ThresholdCondition>()
 
 const levelOptions = [
   { id: 'above', name: 'above' },

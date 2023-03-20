@@ -3,6 +3,7 @@ package org.opennms.horizon.minion.plugin.api;
 import com.google.protobuf.Any;
 
 import java.util.concurrent.CompletableFuture;
+import org.opennms.taskset.contract.Resilience;
 
 public interface ServiceMonitor {
 
@@ -26,6 +27,8 @@ public interface ServiceMonitor {
      *            Includes details about to the service being monitored.
      * @param config
      *            Includes the service parameters
+     * @param resilience
+     *            Monitor resilience settings
      * @return The availability of the interface and if a transition event
      *         should be suppressed.
      * @exception RuntimeException
@@ -36,7 +39,7 @@ public interface ServiceMonitor {
      * @see PollStatus#SERVICE_AVAILABLE
      * @see PollStatus#SERVICE_UNAVAILABLE
      */
-    public CompletableFuture<ServiceMonitorResponse> poll(MonitoredService svc, Any config);
+    public CompletableFuture<ServiceMonitorResponse> poll(MonitoredService svc, Any config, Resilience resilience);
 
 
 

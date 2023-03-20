@@ -70,8 +70,14 @@ message TaskDefinition {
   TaskType type = 3;
   string plugin_name = 4;
   string schedule = 5;
-  uint64 node_id = 6;
+  TaskContext context = 6;
   google.protobuf.Any configuration = 7;
+  Resilience resilience = 8;
+}
+
+message Resilience {
+  int64 timeout = 1;
+  int32 retries = 2;
 }
 
 message TaskSet {
@@ -82,17 +88,31 @@ message TaskResult {
   string id = 1;
   string location = 2;
   string systemId = 3;
+  TaskContext context = 4;
 
   oneof result {
-    ScannerResponse scanner_response = 4;
-    MonitorResponse monitor_response = 5;
-    DetectorResponse detector_response = 6;
-    CollectorResponse collector_response = 7;
+    ScannerResponse scanner_response = 5;
+    MonitorResponse monitor_response = 6;
+    DetectorResponse detector_response = 7;
+    CollectorResponse collector_response = 8;
   }
 }
 
 message TaskSetResults {
   repeated TaskResult results = 1;
+}
+
+// a metadata elements which may be attached to task
+message TaskContext {
+  oneof context {
+    int64 node_id = 1;
+    SyntheticTransactionMetadata synthetic_transaction = 2;
+  }
+}
+
+message SyntheticTransactionMetadata {
+  int64 synthetic_transaction_id = 1;
+  int64 synthetic_test_id = 2;
 }
 
 message ScannerResponse {
@@ -108,7 +128,6 @@ message MonitorResponse {
   double response_time_ms = 4;
   MonitorType monitor_type = 5;
   map<string, double> metrics = 6;
-  uint64 node_id = 7;
 }
 
 message DetectorResponse {
@@ -116,13 +135,11 @@ message DetectorResponse {
   string ip_address = 2;
   string reason = 3;
   MonitorType monitor_type = 4;
-  uint64 node_id = 5;
 }
 
 message CollectorResponse {
   string ip_address = 1;
   bool status = 2;
-  uint64 node_id = 3;
   // results varies for each collector.
   google.protobuf.Any result = 4;
   MonitorType monitor_type = 5;

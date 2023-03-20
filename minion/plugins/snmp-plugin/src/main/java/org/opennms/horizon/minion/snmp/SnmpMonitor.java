@@ -46,6 +46,7 @@ import org.opennms.horizon.shared.snmp.StrategyResolver;
 import org.opennms.horizon.shared.utils.InetAddressUtils;
 import org.opennms.snmp.contract.SnmpMonitorRequest;
 import org.opennms.taskset.contract.MonitorType;
+import org.opennms.taskset.contract.Resilience;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -98,8 +99,6 @@ public class SnmpMonitor extends AbstractServiceMonitor {
     private final Descriptors.FieldDescriptor operatorFieldDescriptor;
     private final Descriptors.FieldDescriptor operandFieldDescriptor;
     private final Descriptors.FieldDescriptor reasonTemplateFieldDescriptor;
-    private final Descriptors.FieldDescriptor retriesFieldDescriptor;
-    private final Descriptors.FieldDescriptor timeoutFieldDescriptor;
 
     public SnmpMonitor(StrategyResolver strategyResolver, SnmpHelper snmpHelper) {
         this.strategyResolver = strategyResolver;
@@ -114,8 +113,6 @@ public class SnmpMonitor extends AbstractServiceMonitor {
         operandFieldDescriptor = snmpMonitorRequestDescriptor.findFieldByNumber(SnmpMonitorRequest.OPERAND_FIELD_NUMBER);
         operatorFieldDescriptor = snmpMonitorRequestDescriptor.findFieldByNumber(SnmpMonitorRequest.OPERATOR_FIELD_NUMBER);
         reasonTemplateFieldDescriptor = snmpMonitorRequestDescriptor.findFieldByNumber(SnmpMonitorRequest.REASON_TEMPLATE_FIELD_NUMBER);
-        retriesFieldDescriptor = snmpMonitorRequestDescriptor.findFieldByNumber(SnmpMonitorRequest.RETRIES_FIELD_NUMBER);
-        timeoutFieldDescriptor = snmpMonitorRequestDescriptor.findFieldByNumber(SnmpMonitorRequest.TIMEOUT_FIELD_NUMBER);
     }
 
     /**
@@ -130,7 +127,7 @@ public class SnmpMonitor extends AbstractServiceMonitor {
      */
 
     @Override
-    public CompletableFuture<ServiceMonitorResponse> poll(MonitoredService svc, Any config) {
+    public CompletableFuture<ServiceMonitorResponse> poll(MonitoredService svc, Any config, Resilience resilience) {
 
         CompletableFuture<ServiceMonitorResponse> future = null;
         String hostAddress = null;
@@ -194,7 +191,10 @@ public class SnmpMonitor extends AbstractServiceMonitor {
 //            tracker.reset();
 //            tracker.startAttempt();
 
-
+            Resilience effectiveResilience = cascadedResilience(
+                Resilience.newBuilder().setRetries(agentConfig.getRetries()).setTimeout(agentConfig.getTimeout()).build(),
+                populateResilience(resilience, SnmpConfiguration.DEFAULT_RETRIES, SnmpConfiguration.DEFAULT_TIMEOUT)
+            );
             final String finalHostAddress = hostAddress;
             SnmpObjId snmpObjectId = SnmpObjId.get(oid);
 
@@ -202,8 +202,8 @@ public class SnmpMonitor extends AbstractServiceMonitor {
 
             future =
                 snmpHelper.getAsync(agentConfig, new SnmpObjId[]{ snmpObjectId })
-                    .thenApply(result -> processSnmpResponse(result, finalHostAddress, snmpObjectId, operator, operand, startTimestamp, svc.getNodeId()))
-                    .completeOnTimeout(this.createTimeoutResponse(finalHostAddress), agentConfig.getTimeout(), TimeUnit.MILLISECONDS)
+                    .thenApply(result -> processSnmpResponse(result, finalHostAddress, snmpObjectId, operator, operand, startTimestamp))
+                    .completeOnTimeout(this.createTimeoutResponse(finalHostAddress), effectiveResilience.getTimeout(), TimeUnit.MILLISECONDS)
                     .exceptionally(thrown -> this.createExceptionResponse(thrown, finalHostAddress));
 
             return future;
@@ -243,14 +243,6 @@ public class SnmpMonitor extends AbstractServiceMonitor {
             resultBuilder.setReasonTemplate(DEFAULT_REASON_TEMPLATE);
         }
 
-        if (! snmpMonitorRequest.hasField(retriesFieldDescriptor)) {
-            resultBuilder.setRetries(SnmpConfiguration.DEFAULT_RETRIES);
-        }
-
-        if (! snmpMonitorRequest.hasField(timeoutFieldDescriptor)) {
-            resultBuilder.setTimeout(SnmpConfiguration.DEFAULT_TIMEOUT);
-        }
-
         return resultBuilder.build();
     }
 
@@ -269,8 +261,7 @@ public class SnmpMonitor extends AbstractServiceMonitor {
         SnmpObjId oid,
         String operator,
         String operand,
-        long startTimestamp,
-        long nodeId) {
+        long startTimestamp) {
         long endTimestamp = System.nanoTime();
         long elapsedTimeNs = ( endTimestamp - startTimestamp );
         double elapsedTimeMs = (double) elapsedTimeNs / NANOSECOND_PER_MILLISECOND;
@@ -279,8 +270,7 @@ public class SnmpMonitor extends AbstractServiceMonitor {
             .monitorType(MonitorType.SNMP)
             .status(Status.Unknown)
             .responseTime(elapsedTimeMs)
-            .ipAddress(hostAddress)
-            .nodeId(nodeId);
+            .ipAddress(hostAddress);
 
         Map<String, Number> metrics = new HashMap<>();
 

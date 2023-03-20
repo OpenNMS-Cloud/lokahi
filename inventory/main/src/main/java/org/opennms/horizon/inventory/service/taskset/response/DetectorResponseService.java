@@ -41,6 +41,7 @@ import org.opennms.horizon.inventory.service.taskset.TaskSetHandler;
 import org.opennms.horizon.shared.utils.InetAddressUtils;
 import org.opennms.taskset.contract.DetectorResponse;
 import org.opennms.taskset.contract.MonitorType;
+import org.opennms.taskset.contract.TaskContext;
 import org.springframework.stereotype.Component;
 
 import java.net.InetAddress;
@@ -55,21 +56,21 @@ public class DetectorResponseService {
     private final MonitoredServiceService monitoredServiceService;
     private final TaskSetHandler taskSetHandler;
 
-    public void accept(String tenantId, String location, DetectorResponse response) {
+    public void accept(String tenantId, String location, DetectorResponse response, TaskContext taskContext) {
         log.info("Received Detector Response = {} for tenant = {} and location = {}", response, tenantId, location);
 
         InetAddress ipAddress = InetAddressUtils.getInetAddress(response.getIpAddress());
         Optional<IpInterface> ipInterfaceOpt = ipInterfaceRepository
             .findByIpAddressAndLocationAndTenantId(ipAddress, location, tenantId);
 
-        if (ipInterfaceOpt.isPresent()) {
+        if (ipInterfaceOpt.isPresent() && taskContext.hasNodeId()) {
             IpInterface ipInterface = ipInterfaceOpt.get();
 
             if (response.getDetected()) {
                 createMonitoredService(response, ipInterface);
 
                 MonitorType monitorType = response.getMonitorType();
-                long nodeId = response.getNodeId();
+                long nodeId = taskContext.getNodeId();
 
                 taskSetHandler.sendMonitorTask(location, monitorType, ipInterface, nodeId);
                 taskSetHandler.sendCollectorTask(location, monitorType, ipInterface, nodeId);

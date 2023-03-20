@@ -1,0 +1,136 @@
+/*******************************************************************************
+ * This file is part of OpenNMS(R).
+ *
+ * Copyright (C) 2022 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
+ *
+ * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *
+ * OpenNMS(R) is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published
+ * by the Free Software Foundation, either version 3 of the License,
+ * or (at your option) any later version.
+ *
+ * OpenNMS(R) is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with OpenNMS(R).  If not, see:
+ *      http://www.gnu.org/licenses/
+ *
+ * For more information contact:
+ *     OpenNMS(R) Licensing <license@opennms.org>
+ *     http://www.opennms.org/
+ *     http://www.opennms.com/
+ *******************************************************************************/
+syntax = "proto3";
+
+import "google/protobuf/wrappers.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/any.proto";
+
+package opennms.inventory;
+option java_multiple_files = true;
+option java_package = "org.opennms.horizon.inventory.dto";
+
+message TenantedId {
+  int64 id = 1;
+  string tenant = 2;
+}
+
+// synthetic transaction definitions
+message SyntheticTransactionCreateDTO {
+  string label = 1;
+  string tenant_id = 2;
+}
+
+message SyntheticTransactionDTO {
+  TenantedId id = 1;
+  string label = 2;
+}
+
+message SyntheticTransactionDTOArray {
+  repeated SyntheticTransactionDTO transactions = 1;
+}
+
+// Test definition
+message SyntheticTestCreateDTO {
+  TenantedId synthetic_transaction_id = 1;
+  repeated string locations = 2;
+  string label = 3;
+  string schedule = 4;
+  SyntheticTestPluginConfigurationDTO plugin_configuration = 5;
+}
+
+message SyntheticTestDTO {
+  TenantedId id = 1;
+  int64 synthetic_transaction_id = 2;
+  repeated string locations = 3;
+  string label = 4;
+  string schedule = 5;
+  SyntheticTestPluginConfigurationDTO plugin_configuration = 6;
+}
+
+message SyntheticTestPluginConfigurationDTO {
+  string plugin_name = 1;
+  map<string, string> config = 2;
+  SyntheticTestPluginResilienceDTO resilience = 3;
+}
+
+message SyntheticTestPluginResilienceDTO {
+  int64 timeout = 1;
+  int32 retries = 2;
+}
+
+message SyntheticTransactionRequestDTO {
+  TenantedId id = 1;
+}
+
+message SyntheticTransactionTestDTOArray {
+  repeated SyntheticTestDTO tests = 1;
+}
+
+// request execution of a test in all defined locations
+message SyntheticTransactionTestRequestDTO {
+  TenantedId id = 1;
+}
+
+// request test in specific location
+message SyntheticTransactionTestLocationRequestDTO {
+  TenantedId id = 1;
+  string location = 2;
+}
+
+// request execution of plugin within location
+message SyntheticTestLocationConfigurationDTO {
+  string location = 1;
+  SyntheticTestPluginConfigurationDTO plugin_configuration = 2;
+}
+
+message SyntheticTestStatusMapDTO {
+  map<string, SyntheticTestStatusDTO> statusMap = 1;
+}
+
+// limited monitor answer - response time or error message
+message SyntheticTestStatusDTO {
+  double response_time_ms = 1;
+  string reason = 2;
+}
+
+// service interface
+service SyntheticTransactionService {
+  rpc createSyntheticTransaction(SyntheticTransactionCreateDTO) returns (SyntheticTransactionDTO) {};
+  rpc getSyntheticTransactions(google.protobuf.Empty) returns (SyntheticTransactionDTOArray) {};
+  rpc deleteSyntheticTransaction(SyntheticTransactionRequestDTO) returns (google.protobuf.Empty) {};
+
+  rpc createSyntheticTransactionTest(SyntheticTestCreateDTO) returns (SyntheticTestDTO) {};
+  rpc getSyntheticTransactionTests(SyntheticTransactionRequestDTO) returns (SyntheticTransactionTestDTOArray) {};
+  rpc deleteSyntheticTransactionTest(SyntheticTransactionTestRequestDTO) returns (google.protobuf.Empty) {};
+
+  // verification of execution status for all locations, single location, configuration in given location
+  rpc executeSyntheticTest(SyntheticTransactionTestRequestDTO) returns (SyntheticTestStatusMapDTO);
+  rpc executeSyntheticTestInLocation(SyntheticTransactionTestLocationRequestDTO) returns (SyntheticTestStatusDTO);
+  rpc verifySyntheticTestConfiguration(SyntheticTestLocationConfigurationDTO) returns (SyntheticTestStatusDTO);
+}

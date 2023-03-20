@@ -28,15 +28,12 @@
 
 package org.opennms.horizon.inventory.grpc;
 
+import io.grpc.BindableService;
 import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.keycloak.adapters.KeycloakDeployment;
 import org.keycloak.adapters.rotation.JWKPublicKeyLocator;
 import org.keycloak.representations.adapters.config.AdapterConfig;
-import org.opennms.horizon.inventory.grpc.discovery.ActiveDiscoveryGrpcService;
-import org.opennms.horizon.inventory.grpc.discovery.IcmpActiveDiscoveryGrpcService;
-import org.opennms.horizon.inventory.grpc.discovery.AzureActiveDiscoveryGrpcService;
-import org.opennms.horizon.inventory.grpc.discovery.PassiveDiscoveryGrpcService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -80,15 +77,21 @@ public class GrpcConfig {
         return keycloak;
     }
 
+    /**
+     * A catch-all configuration block to fire server with all defined grpc services.
+     *
+     * GRPC interfaces which are being generated and end being used on server side share common root interface called {@link BindableService}.
+     * Because Spring is able to enumerate all of these when we declare list/array parameter with such kind we are able
+     * to pass all grpc service implementations at once.
+     *
+     * @param interceptor Service interceptor.
+     * @param services GRPC service implementations.
+     * @return Grpc Server instance.
+     */
     @Bean(destroyMethod = "stopServer")
-    public GrpcServerManager startServer(MonitoringLocationGrpcService locationGrpc, MonitoringSystemGrpcService systemGrpc,
-                                         NodeGrpcService nodeGrpcService, AzureActiveDiscoveryGrpcService azureActiveDiscoveryGrpcService, TagGrpcService tagGrpcService,
-                                         InventoryServerInterceptor interceptor,
-                                         ActiveDiscoveryGrpcService activeDiscoveryGrpcService,
-                                         IcmpActiveDiscoveryGrpcService icmpActiveDiscoveryGrpcService,
-                                         PassiveDiscoveryGrpcService passiveDiscoveryGrpcService) {
+    public GrpcServerManager startServer(InventoryServerInterceptor interceptor, BindableService ... services) {
         GrpcServerManager manager = new GrpcServerManager(port, interceptor);
-        manager.startServer(locationGrpc, systemGrpc, nodeGrpcService, azureActiveDiscoveryGrpcService, tagGrpcService, activeDiscoveryGrpcService, icmpActiveDiscoveryGrpcService, passiveDiscoveryGrpcService);
+        manager.startServer(services);
         return manager;
     }
 }

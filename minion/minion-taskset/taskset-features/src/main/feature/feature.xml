@@ -16,6 +16,7 @@
         <feature>grpc-protobuf</feature>
     </feature>
 
+
     <feature name="taskset-scheduler-internal" version="${project.version}">
         <feature dependency="true">wrap</feature>
         <feature>aries-blueprint</feature>
@@ -48,6 +49,7 @@
         <feature>plugins-api</feature>
 
         <bundle>mvn:org.opennms.horizon.minion/taskset-ipc/${project.version}</bundle>
+        <bundle>mvn:org.opennms.horizon.minion/taskset-rpc/${project.version}</bundle>
         <bundle>mvn:org.opennms.horizon.minion/taskset-worker/${project.version}</bundle>
     </feature>
 

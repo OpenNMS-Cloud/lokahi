@@ -16,7 +16,6 @@ public class ServiceMonitorResponseImpl implements ServiceMonitorResponse {
     private DeviceConfig deviceConfig;
     private Map<String, Number> properties;
     private MonitorType monitorType;
-    private long nodeId;
 
     public static ServiceMonitorResponse unknown() { return builder().status(Status.Unknown).build();}
     public static ServiceMonitorResponse down() { return builder().status(Status.Down).build();}

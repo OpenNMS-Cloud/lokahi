@@ -49,7 +49,7 @@ public class TaskConnectorRetryable implements RetryableExecutor {
 
         serviceConnector =
                 serviceConnectorFactory.create(
-                        result -> resultProcessor.queueSendResult(taskDefinition.getId(), result),
+                        result -> resultProcessor.queueSendResult(taskDefinition.getId(), taskDefinition.getContext(), result),
                         config,
                         onDisconnect
                 );

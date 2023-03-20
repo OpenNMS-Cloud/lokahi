@@ -9,6 +9,7 @@ import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.random.RandomGenerator;
 import javax.annotation.Nullable;
 import org.apache.ignite.Ignite;
 import org.apache.ignite.IgniteException;
@@ -82,8 +83,15 @@ public class RpcRequestRouterIgniteTask implements ComputeTask<RouterTaskData, b
         }
 
         // generate index which is within range from [0, size).
-        int index = random.nextInt(queue.size());
+        int index = random().nextInt(queue.size());
         return queue.get(index);
+    }
+
+    private RandomGenerator random() {
+        if (random == null) {
+            random = new Random();
+        }
+        return random;
     }
 
     private ClusterNode findNode(UUID node, List<ClusterNode> subgrid) {

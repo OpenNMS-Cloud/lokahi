@@ -29,6 +29,7 @@
 package org.opennms.horizon.minion.plugin.api;
 
 import java.net.InetAddress;
+import java.util.Map;
 
 /**
  * <p>MonitoredService interface.</p>

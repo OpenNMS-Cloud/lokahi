@@ -27,6 +27,7 @@ import org.opennms.horizon.inventory.repository.NodeRepository;
 import org.opennms.horizon.shared.utils.InetAddressUtils;
 import org.opennms.taskset.contract.DetectorResponse;
 import org.opennms.taskset.contract.MonitorType;
+import org.opennms.taskset.contract.TaskContext;
 import org.opennms.taskset.contract.TaskType;
 import org.opennms.taskset.service.contract.UpdateTasksRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +36,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 
 import java.util.stream.Collectors;
+import org.testcontainers.shaded.com.google.common.collect.ImmutableMap;
 
 
 @SpringBootTest
@@ -82,14 +84,14 @@ class DetectorResponseServiceIntTest extends GrpcTestBase {
 
     @Test
     @Transactional
-    void testAccept() throws UnknownHostException {
-        populateDatabase();
+    void testAccept() throws Exception {
+        long nodeId = populateDatabase();
 
         DetectorResponse response = DetectorResponse.newBuilder()
             .setDetected(true).setIpAddress(TEST_IP_ADDRESS)
             .setMonitorType(MonitorType.SNMP).build();
 
-        service.accept(TEST_TENANT_ID, TEST_LOCATION, response);
+        service.accept(TEST_TENANT_ID, TEST_LOCATION, response, TaskContext.newBuilder().setNodeId(nodeId).build());
 
         List<MonitoredServiceType> monitoredServiceTypes = monitoredServiceTypeRepository.findAll();
         assertEquals(1, monitoredServiceTypes.size());
@@ -115,8 +117,8 @@ class DetectorResponseServiceIntTest extends GrpcTestBase {
 
     @Test
     @Transactional
-    void testAcceptMultipleSameIpAddress() throws UnknownHostException {
-        populateDatabase();
+    void testAcceptMultipleSameIpAddress() throws Exception {
+        long nodeId = populateDatabase();
 
         DetectorResponse response = DetectorResponse.newBuilder()
             .setDetected(true).setIpAddress(TEST_IP_ADDRESS)
@@ -125,7 +127,7 @@ class DetectorResponseServiceIntTest extends GrpcTestBase {
         int numberOfCalls = 2;
 
         for (int index = 0; index < numberOfCalls; index++) {
-            service.accept(TEST_TENANT_ID, TEST_LOCATION, response);
+            service.accept(TEST_TENANT_ID, TEST_LOCATION, response, TaskContext.newBuilder().setNodeId(nodeId).build());
         }
 
         List<MonitoredServiceType> monitoredServiceTypes = monitoredServiceTypeRepository.findAll();
@@ -152,14 +154,14 @@ class DetectorResponseServiceIntTest extends GrpcTestBase {
 
     @Test
     @Transactional
-    void testAcceptNotDetected() throws UnknownHostException {
-        populateDatabase();
+    void testAcceptNotDetected() throws Exception {
+        long nodeId = populateDatabase();
 
         DetectorResponse response = DetectorResponse.newBuilder()
             .setDetected(false).setIpAddress(TEST_IP_ADDRESS)
             .setMonitorType(MonitorType.SNMP).build();
 
-        service.accept(TEST_TENANT_ID, TEST_LOCATION, response);
+        service.accept(TEST_TENANT_ID, TEST_LOCATION, response, TaskContext.newBuilder().setNodeId(nodeId).build());
 
         List<MonitoredServiceType> monitoredServiceTypes = monitoredServiceTypeRepository.findAll();
         assertEquals(0, monitoredServiceTypes.size());
@@ -172,8 +174,8 @@ class DetectorResponseServiceIntTest extends GrpcTestBase {
 
     @Test
     @Transactional
-    void testAcceptMultipleSameIpAddressDifferentMonitorType() throws UnknownHostException {
-        populateDatabase();
+    void testAcceptMultipleSameIpAddressDifferentMonitorType() throws Exception {
+        long nodeId = populateDatabase();
 
         DetectorResponse.Builder builder = DetectorResponse.newBuilder()
             .setDetected(true).setIpAddress(TEST_IP_ADDRESS);
@@ -187,7 +189,7 @@ class DetectorResponseServiceIntTest extends GrpcTestBase {
             DetectorResponse response = builder
                 .setMonitorType(monitorTypes[index]).build();
 
-            service.accept(TEST_TENANT_ID, TEST_LOCATION, response);
+            service.accept(TEST_TENANT_ID, TEST_LOCATION, response, TaskContext.newBuilder().setNodeId(nodeId).build());
         }
 
         List<MonitoredServiceType> monitoredServiceTypes = monitoredServiceTypeRepository.findAll();
@@ -233,7 +235,7 @@ class DetectorResponseServiceIntTest extends GrpcTestBase {
         assertEquals(1, collectorTasks.size());
     }
 
-    private void populateDatabase() throws UnknownHostException {
+    private long populateDatabase() throws Exception {
 
         MonitoringLocation monitoringLocation = new MonitoringLocation();
         monitoringLocation.setLocation(TEST_LOCATION);
@@ -253,5 +255,6 @@ class DetectorResponseServiceIntTest extends GrpcTestBase {
         ipInterface.setNode(node);
 
         ipInterfaceRepository.save(ipInterface);
+        return node.getId();
     }
 }

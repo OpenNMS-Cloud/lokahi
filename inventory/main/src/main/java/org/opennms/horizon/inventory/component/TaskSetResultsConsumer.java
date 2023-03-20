@@ -73,12 +73,12 @@ public class TaskSetResultsConsumer {
 
                     ScannerResponse response = taskResult.getScannerResponse();
 
-                    scannerResponseService.accept(tenantId, location, response);
+                    scannerResponseService.accept(tenantId, location, response, taskResult.getContext());
                 } else if (taskResult.hasDetectorResponse()) {
 
                     DetectorResponse response = taskResult.getDetectorResponse();
 
-                    detectorResponseService.accept(tenantId, location, response);
+                    detectorResponseService.accept(tenantId, location, response, taskResult.getContext());
                 }
             }
         } catch (Exception e) {

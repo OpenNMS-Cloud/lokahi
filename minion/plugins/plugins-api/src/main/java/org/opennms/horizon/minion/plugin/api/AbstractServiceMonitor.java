@@ -2,6 +2,8 @@
 
 package org.opennms.horizon.minion.plugin.api;
 
+import com.google.protobuf.Descriptors;
+import com.google.protobuf.Descriptors.Descriptor;
 import org.opennms.horizon.shared.utils.InetAddressUtils;
 
 import java.net.Inet6Address;
@@ -9,9 +11,20 @@ import java.net.InetAddress;
 import java.util.Map;
 import java.util.Properties;
 import java.util.function.Supplier;
+import org.opennms.taskset.contract.Resilience;
+import org.opennms.taskset.contract.Resilience.Builder;
 
 public abstract class AbstractServiceMonitor implements ServiceMonitor {
 
+    private final Descriptors.FieldDescriptor retriesFieldDescriptor;
+    private final Descriptors.FieldDescriptor timeoutFieldDescriptor;
+
+    public AbstractServiceMonitor() {
+        Descriptor resilienceDescriptor = Resilience.getDescriptor();
+
+        retriesFieldDescriptor = resilienceDescriptor.findFieldByNumber(Resilience.RETRIES_FIELD_NUMBER);
+        timeoutFieldDescriptor = resilienceDescriptor.findFieldByNumber(Resilience.TIMEOUT_FIELD_NUMBER);
+    }
 
     @Override
     public String getEffectiveLocation(String location) {
@@ -25,6 +38,32 @@ public abstract class AbstractServiceMonitor implements ServiceMonitor {
         if (value == null) return defaultValue;
 
         return value;
+    }
+
+    protected Resilience populateResilience(Resilience declared, int retries, long timeout) {
+        Builder resilienceBuilder = Resilience.newBuilder(declared);
+
+        if (!declared.hasField(retriesFieldDescriptor)) {
+            resilienceBuilder.setRetries(retries);
+        }
+        if (!declared.hasField(timeoutFieldDescriptor)) {
+            resilienceBuilder.setTimeout(timeout);
+        }
+
+        return resilienceBuilder.build();
+    }
+
+    protected Resilience cascadedResilience(Resilience lowerPriority, Resilience higherPriority) {
+        Builder resilienceBuilder = Resilience.newBuilder(lowerPriority);
+
+        if (higherPriority.hasField(retriesFieldDescriptor)) {
+            resilienceBuilder.setRetries(higherPriority.getRetries());
+        }
+        if (higherPriority.hasField(timeoutFieldDescriptor)) {
+            resilienceBuilder.setTimeout(higherPriority.getTimeout());
+        }
+
+        return resilienceBuilder.build();
     }
 
     @SuppressWarnings("unchecked")

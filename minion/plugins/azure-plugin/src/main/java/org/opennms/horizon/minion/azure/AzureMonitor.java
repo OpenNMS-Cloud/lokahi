@@ -38,6 +38,7 @@ import org.opennms.horizon.shared.azure.http.AzureHttpClient;
 import org.opennms.horizon.shared.azure.http.dto.instanceview.AzureInstanceView;
 import org.opennms.horizon.shared.azure.http.dto.login.AzureOAuthToken;
 import org.opennms.taskset.contract.MonitorType;
+import org.opennms.taskset.contract.Resilience;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,7 +54,7 @@ public class AzureMonitor extends AbstractServiceMonitor {
     }
 
     @Override
-    public CompletableFuture<ServiceMonitorResponse> poll(MonitoredService svc, Any config) {
+    public CompletableFuture<ServiceMonitorResponse> poll(MonitoredService svc, Any config, Resilience resilience) {
 
         CompletableFuture<ServiceMonitorResponse> future = new CompletableFuture<>();
 
@@ -79,7 +80,6 @@ public class AzureMonitor extends AbstractServiceMonitor {
                         .monitorType(MonitorType.AZURE)
                         .status(ServiceMonitorResponse.Status.Up)
                         .responseTime(System.currentTimeMillis() - startMs)
-                        .nodeId(svc.getNodeId())
                         .ipAddress(request.getHost())
                         .build()
                 );
@@ -88,7 +88,6 @@ public class AzureMonitor extends AbstractServiceMonitor {
                     ServiceMonitorResponseImpl.builder()
                         .monitorType(MonitorType.AZURE)
                         .status(ServiceMonitorResponse.Status.Down)
-                        .nodeId(svc.getNodeId())
                         .ipAddress(request.getHost())
                         .build()
                 );
@@ -101,7 +100,6 @@ public class AzureMonitor extends AbstractServiceMonitor {
                     .reason("Failed to monitor for azure resource: " + e.getMessage())
                     .monitorType(MonitorType.AZURE)
                     .status(ServiceMonitorResponse.Status.Down)
-                    .nodeId(svc.getNodeId())
                     .build()
             );
         }

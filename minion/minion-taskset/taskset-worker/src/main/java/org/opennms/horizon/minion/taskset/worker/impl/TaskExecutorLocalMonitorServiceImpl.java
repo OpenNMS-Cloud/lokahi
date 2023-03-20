@@ -82,7 +82,7 @@ public class TaskExecutorLocalMonitorServiceImpl implements TaskExecutorLocalSer
     private void executeSerializedIteration() {
         // Verify it's not already active
         if (active.compareAndSet(false, true)) {
-            log.trace("Executing iteration of task: workflow-uuid={}", taskDefinition.getId());
+            log.trace("Executing iteration of task: task-id={}", taskDefinition.getId());
             executeIteration();
         } else {
             log.debug("Skipping iteration of task as prior iteration is still active: workflow-uuid={}", taskDefinition.getId());
@@ -101,30 +101,30 @@ public class TaskExecutorLocalMonitorServiceImpl implements TaskExecutorLocalSer
                 // TBD888: populate host, or stop?
                 MonitoredService monitoredService = configureMonitoredService(taskDefinition);
 
-                CompletableFuture<ServiceMonitorResponse> future = monitor.poll(monitoredService, taskDefinition.getConfiguration());
+                CompletableFuture<ServiceMonitorResponse> future = monitor.poll(monitoredService, taskDefinition.getConfiguration(), taskDefinition.getResilience());
                 future.whenComplete(this::handleExecutionComplete);
             } else {
                 log.info("Skipping service monitor execution; monitor not found: monitor=" + taskDefinition.getPluginName());
             }
         } catch (Exception exc) {
             // TODO: throttle - we can get very large numbers of these in a short time
-            log.warn("error executing workflow " + taskDefinition.getId(), exc);
+            log.warn("error executing task " + taskDefinition.getId(), exc);
         }
     }
 
     private void handleExecutionComplete(ServiceMonitorResponse serviceMonitorResponse, Throwable exc) {
-        log.trace("Completed execution: workflow-uuid={}", taskDefinition.getId());
+        log.trace("Completed execution: task-id={}", taskDefinition.getId());
         active.set(false);
 
         if (exc == null) {
-            resultProcessor.queueSendResult(taskDefinition.getId(), serviceMonitorResponse);
+            resultProcessor.queueSendResult(taskDefinition.getId(), taskDefinition.getContext(), serviceMonitorResponse);
         } else {
-            log.warn("error executing workflow; workflow-uuid=" + taskDefinition.getId(), exc);
+            log.warn("error executing task; task-id=" + taskDefinition.getId(), exc);
         }
     }
 
     private MonitoredService configureMonitoredService(TaskDefinition taskDefinition)  {
-        return new GeneralMonitoredService("TBD", "TBD", taskDefinition.getNodeId(), "TBD", "TBD", null);
+        return new GeneralMonitoredService("TBD", "TBD", taskDefinition.getContext(), "TBD", "TBD", null);
     }
 
 

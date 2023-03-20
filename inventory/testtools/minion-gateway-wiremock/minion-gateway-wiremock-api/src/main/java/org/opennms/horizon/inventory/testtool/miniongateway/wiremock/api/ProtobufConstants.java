@@ -14,6 +14,8 @@ import org.opennms.snmp.contract.SnmpDetectorRequest;
 import org.opennms.snmp.contract.SnmpMonitorRequest;
 
 import java.util.List;
+import org.opennms.taskset.contract.Resilience;
+import org.opennms.taskset.contract.TaskContext;
 
 public interface ProtobufConstants {
 
@@ -33,7 +35,10 @@ public interface ProtobufConstants {
 
             AzureScanRequest.getDescriptor(),
             AzureMonitorRequest.getDescriptor(),
-            AzureCollectorRequest.getDescriptor()
+            AzureCollectorRequest.getDescriptor(),
+
+            TaskContext.getDescriptor(),
+            Resilience.getDescriptor()
         );
 
 }

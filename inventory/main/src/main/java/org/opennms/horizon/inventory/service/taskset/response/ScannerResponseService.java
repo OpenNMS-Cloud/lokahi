@@ -57,6 +57,7 @@ import org.opennms.taskset.contract.DiscoveryScanResult;
 import org.opennms.taskset.contract.PingResponse;
 import org.opennms.taskset.contract.ScanType;
 import org.opennms.taskset.contract.ScannerResponse;
+import org.opennms.taskset.contract.TaskContext;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -80,8 +81,7 @@ public class ScannerResponseService {
     private final PassiveDiscoveryRepository passiveDiscoveryRepository;
     private final DetectorTaskSetService detectorTaskSetService;
 
-    @Transactional
-    public void accept(String tenantId, String location, ScannerResponse response) throws InvalidProtocolBufferException {
+    public void accept(String tenantId, String location, ScannerResponse response, TaskContext taskContext) throws InvalidProtocolBufferException {
         Any result = response.getResult();
 
         switch (getType(response)) {

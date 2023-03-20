@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.locks.Lock;
 
@@ -50,7 +51,7 @@ public class MinionLookupServiceImplTest {
     @Mock
     Lock lock;
 
-    private Map<TenantKey, Queue<UUID>> locationMap = new HashMap<>();
+    private Map<TenantKey, Set<UUID>> locationMap = new HashMap<>();
 
     private Map<TenantKey, UUID> idMap = new HashMap<>();
 
@@ -74,9 +75,9 @@ public class MinionLookupServiceImplTest {
         doAnswer((Answer<UUID>) invocationOnMock -> idMap.put(invocationOnMock.getArgument(0), invocationOnMock.getArgument(1))).
             when(igniteIdCache).put(any(), any());
 
-        when(igniteLocationCache.get(any())).thenAnswer((Answer<Queue<UUID>>) invocationOnMock -> locationMap.get(invocationOnMock.getArgument(0)));
+        when(igniteLocationCache.get(any())).thenAnswer((Answer<Set<UUID>>) invocationOnMock -> locationMap.get(invocationOnMock.getArgument(0)));
         when(igniteLocationCache.remove(any())).thenAnswer((Answer<Boolean>) invocationOnMock -> ( locationMap.remove(invocationOnMock.getArgument(0)) != null));
-        doAnswer((Answer<Queue<UUID>>) invocationOnMock -> locationMap.put(invocationOnMock.getArgument(0), invocationOnMock.getArgument(1))).
+        doAnswer((Answer<Set<UUID>>) invocationOnMock -> locationMap.put(invocationOnMock.getArgument(0), invocationOnMock.getArgument(1))).
             when(igniteLocationCache).put(any(), any());
 
         doReturn(igniteIdCache).when(ignite).getOrCreateCache(argThat((CacheConfiguration config) -> config.getName().equals(MinionLookupServiceImpl.MINIONS_BY_ID)));
@@ -113,7 +114,7 @@ public class MinionLookupServiceImplTest {
 
         List<UUID> uuids = minionLookupService.findGatewayNodeWithLocation("tenant", "location");
         assertNotNull(uuids);
-        assertEquals(3, uuids.size());
+        assertEquals(1, uuids.size());
 
         assertEquals(localNodeUUID, uuids.stream().findFirst().get());
 

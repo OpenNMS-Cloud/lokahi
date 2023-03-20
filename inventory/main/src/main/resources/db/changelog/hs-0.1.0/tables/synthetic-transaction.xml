@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+
+    <changeSet author="ldywicki" id="0.1.0-synthetic-transaction">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="synthetic_transaction"/>
+            </not>
+        </preConditions>
+
+        <createTable tableName="synthetic_transaction">
+            <column name="id" type="BIGINT" autoIncrement="true"/>
+
+            <column name="tenant_id" type="text">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="label" type="text">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addPrimaryKey tableName="synthetic_transaction" columnNames="id" constraintName="pk_synthetic_transaction_id"/>
+
+        <createTable tableName="synthetic_test">
+            <column name="id" type="BIGINT" autoIncrement="true"/>
+
+            <column name="tenant_id" type="text">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="synthetic_transaction_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="label" type="text">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="plugin_name" type="text">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="schedule" type="text">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="timeout" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="retries" type="int">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addPrimaryKey tableName="synthetic_test" columnNames="id" constraintName="pk_synthetic_test_id"/>
+        <addForeignKeyConstraint constraintName="fk_synthetic_test_synthetic_transaction_id" onDelete="CASCADE"
+            baseTableName="synthetic_test" baseColumnNames="synthetic_transaction_id"
+            referencedTableName="synthetic_transaction" referencedColumnNames="id"/>
+
+        <createTable tableName="synthetic_test_location">
+            <column name="synthetic_test_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="monitoring_location_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addPrimaryKey tableName="synthetic_test_location" columnNames="synthetic_test_id,monitoring_location_id" />
+        <addForeignKeyConstraint constraintName="fk_synthetic_test_location_synthetic_test_id" onDelete="CASCADE"
+            baseTableName="synthetic_test_location" baseColumnNames="synthetic_test_id"
+            referencedTableName="synthetic_test" referencedColumnNames="id"/>
+        <addForeignKeyConstraint constraintName="fk_synthetic_test_location_monitoring_location_id" onDelete="CASCADE"
+            baseTableName="synthetic_test_location" baseColumnNames="monitoring_location_id"
+            referencedTableName="monitoring_location" referencedColumnNames="id"/>
+
+
+        <createTable tableName="synthetic_test_config">
+            <column name="id" type="BIGINT" autoIncrement="true"/>
+
+            <column name="synthetic_test_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="tenant_id" type="text">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="parameter" type="text">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="value" type="text">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addPrimaryKey tableName="synthetic_test_config" columnNames="id" constraintName="pk_synthetic_test_config_id"/>
+        <addForeignKeyConstraint constraintName="fk_synthetic_test_config_synthetic_test_id" onDelete="CASCADE"
+            baseTableName="synthetic_test_config" baseColumnNames="synthetic_test_id"
+            referencedTableName="synthetic_test" referencedColumnNames="id"/>
+        <addUniqueConstraint tableName="synthetic_test_config" columnNames="synthetic_test_id,parameter" constraintName="synthetic_test_config_uniq" />
+    </changeSet>
+</databaseChangeLog>

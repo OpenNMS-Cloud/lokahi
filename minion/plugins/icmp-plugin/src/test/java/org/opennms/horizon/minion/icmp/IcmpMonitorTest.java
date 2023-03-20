@@ -19,6 +19,7 @@ import org.opennms.horizon.shared.utils.InetAddressUtils;
 import org.opennms.horizon.minion.plugin.api.MonitoredService;
 import org.opennms.horizon.minion.plugin.api.ServiceMonitorResponse;
 import org.opennms.horizon.minion.plugin.api.ServiceMonitorResponse.Status;
+import org.opennms.taskset.contract.Resilience;
 
 public class IcmpMonitorTest {
     private static final String TEST_LOCALHOST_IP_VALUE = "127.0.0.1";
@@ -27,6 +28,7 @@ public class IcmpMonitorTest {
 
     IcmpMonitorRequest testEchoRequest;
     Any testConfig;
+    Resilience testResilience;
     IcmpMonitor icmpMonitor;
 
     @Before
@@ -48,11 +50,12 @@ public class IcmpMonitorTest {
                 .build();
 
         testConfig = Any.pack(testEchoRequest);
+        testResilience = Resilience.getDefaultInstance();
     }
 
     @Test
     public void poll() throws Exception {
-        CompletableFuture<ServiceMonitorResponse> response = icmpMonitor.poll(monitoredService, testConfig);
+        CompletableFuture<ServiceMonitorResponse> response = icmpMonitor.poll(monitoredService, testConfig, testResilience);
 
         ServiceMonitorResponse serviceMonitorResponse = response.get();
 

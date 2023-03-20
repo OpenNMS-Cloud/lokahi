@@ -88,7 +88,7 @@ public class TaskExecutorLocalScannerServiceImpl implements TaskExecutorLocalSer
         log.trace("Completed execution: workflow-uuid = {}", taskDefinition.getId());
 
         if (exc == null) {
-            resultProcessor.queueSendResult(taskDefinition.getId(), response);
+            resultProcessor.queueSendResult(taskDefinition.getId(), taskDefinition.getContext(), response);
         } else {
             log.warn("error executing workflow; workflow-uuid = " + taskDefinition.getId(), exc);
         }

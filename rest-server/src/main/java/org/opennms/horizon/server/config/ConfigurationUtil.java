@@ -34,6 +34,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.opennms.horizon.server.service.grpc.EventsClient;
 import org.opennms.horizon.server.service.grpc.InventoryClient;
 import org.opennms.horizon.server.service.grpc.NotificationClient;
+import org.opennms.horizon.server.service.grpc.SyntheticTransactionClient;
 import org.opennms.horizon.server.utils.JWTValidator;
 import org.opennms.horizon.server.utils.ServerHeaderUtil;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -95,5 +96,10 @@ public class ConfigurationUtil {
     @Bean(destroyMethod = "shutdown", initMethod = "initialStubs")
     public NotificationClient createNotificationClient(@Qualifier("notification") ManagedChannel channel) {
         return new NotificationClient(channel);
+    }
+
+    @Bean
+    public SyntheticTransactionClient createSyntheticTransactionsClient(@Qualifier("inventory") ManagedChannel channel) {
+        return new SyntheticTransactionClient(channel, deadline);
     }
 }

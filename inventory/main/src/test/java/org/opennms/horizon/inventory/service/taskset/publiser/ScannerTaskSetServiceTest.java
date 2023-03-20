@@ -47,7 +47,7 @@ import org.opennms.taskset.contract.TaskDefinition;
 
 import java.util.List;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -85,8 +85,8 @@ public class ScannerTaskSetServiceTest {
         service.sendNodeScannerTask(List.of(node), location, tenantId);
         verify(mockPublisher).publishNewTasks(eq(tenantId), eq(location), taskListCaptor.capture());
         List<TaskDefinition> tasks = taskListCaptor.getValue();
-        assertThat(tasks).asList().hasSize(1)
-            .extracting("nodeId_").containsExactly(node.getId());
+        assertThat(tasks).hasSize(1)
+            .extracting(f -> f.getContext().getNodeId()).containsExactly(node.getId());
         NodeScanRequest request = tasks.get(0).getConfiguration().unpack(NodeScanRequest.class);
         assertThat(request).extracting(NodeScanRequest::getNodeId, NodeScanRequest::getPrimaryIp)
             .containsExactly(node.getId(), ipInterface1.getIpAddress());
@@ -98,8 +98,8 @@ public class ScannerTaskSetServiceTest {
         service.sendNodeScannerTask(List.of(node), location, tenantId);
         verify(mockPublisher).publishNewTasks(eq(tenantId), eq(location), taskListCaptor.capture());
         List<TaskDefinition> tasks = taskListCaptor.getValue();
-        assertThat(tasks).asList().hasSize(1)
-            .extracting("nodeId_").containsExactly(node.getId());
+        assertThat(tasks).hasSize(1)
+            .extracting(f -> f.getContext().getNodeId()).containsExactly(node.getId());
         NodeScanRequest request = tasks.get(0).getConfiguration().unpack(NodeScanRequest.class);
         assertThat(request).extracting(NodeScanRequest::getNodeId, NodeScanRequest::getPrimaryIp)
             .containsExactly(node.getId(), ipInterface2.getIpAddress());

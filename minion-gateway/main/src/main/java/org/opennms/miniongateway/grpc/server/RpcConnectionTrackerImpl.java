@@ -89,7 +89,7 @@ public class RpcConnectionTrackerImpl implements RpcConnectionTracker {
     @Override
     public StreamObserver<RpcRequestProto> lookupByLocationRoundRobin(String tenantId, String locationId) {
         synchronized (lock) {
-            Iterator<StreamObserver<RpcRequestProto>> iterator = rpcHandlerIteratorMap.get(locationId);
+            Iterator<StreamObserver<RpcRequestProto>> iterator = rpcHandlerIteratorMap.get(new TenantKey(tenantId, locationId));
 
             if (iterator == null) {
                 return null;

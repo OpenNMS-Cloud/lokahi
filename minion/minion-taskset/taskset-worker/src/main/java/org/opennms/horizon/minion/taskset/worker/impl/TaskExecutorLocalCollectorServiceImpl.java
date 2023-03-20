@@ -121,7 +121,7 @@ public class TaskExecutorLocalCollectorServiceImpl implements TaskExecutorLocalS
     }
 
     private CollectionRequest configureCollectionRequest(TaskDefinition taskDefinition) {
-        return CollectorRequestImpl.builder().nodeId(taskDefinition.getNodeId()).build();
+        return CollectorRequestImpl.builder().nodeId(taskDefinition.getContext().getNodeId()).build();
     }
 
 
@@ -130,7 +130,7 @@ public class TaskExecutorLocalCollectorServiceImpl implements TaskExecutorLocalS
         active.set(false);
 
         if (exc == null) {
-            resultProcessor.queueSendResult(taskDefinition.getId(), collectionSet);
+            resultProcessor.queueSendResult(taskDefinition.getId(), taskDefinition.getContext(), collectionSet);
         } else {
             LOG.warn("error executing workflow; workflow-uuid=" + taskDefinition.getId(), exc);
         }

@@ -38,7 +38,7 @@ public class TaskExecutorLocalDetectorServiceImpl implements TaskExecutorLocalSe
         try {
             ServiceDetector detector = lookupDetector(taskDefinition);
 
-            future = detector.detect(taskDefinition.getConfiguration(), taskDefinition.getNodeId());
+            future = detector.detect(taskDefinition.getConfiguration(), taskDefinition.getContext().getNodeId());
             future.whenComplete(this::handleExecutionComplete);
 
         } catch (Exception exc) {
@@ -60,7 +60,7 @@ public class TaskExecutorLocalDetectorServiceImpl implements TaskExecutorLocalSe
         log.trace("Completed execution: workflow-uuid = {}", taskDefinition.getId());
 
         if (exc == null) {
-            resultProcessor.queueSendResult(taskDefinition.getId(), serviceDetectorResponse);
+            resultProcessor.queueSendResult(taskDefinition.getId(), taskDefinition.getContext(), serviceDetectorResponse);
         } else {
             log.warn("error executing workflow; workflow-uuid = " + taskDefinition.getId(), exc);
         }

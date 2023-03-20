@@ -41,6 +41,7 @@ import org.opennms.icmp.contract.IcmpDetectorRequest;
 import org.opennms.snmp.contract.SnmpDetectorRequest;
 import org.opennms.taskset.contract.MonitorType;
 import org.opennms.taskset.contract.TaskDefinition;
+import org.opennms.taskset.contract.TaskContext;
 import org.opennms.taskset.contract.TaskType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -126,7 +127,7 @@ public class DetectorTaskSetService {
                 TaskDefinition.newBuilder()
                     .setType(TaskType.DETECTOR)
                     .setPluginName(pluginName)
-                    .setNodeId(nodeId)
+                    .setContext(TaskContext.newBuilder().setNodeId(nodeId).build())
                     .setId(taskId)
                     .setConfiguration(configuration);
             taskDefinition = builder.build();

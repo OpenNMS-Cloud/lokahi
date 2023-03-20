@@ -39,6 +39,7 @@ import org.opennms.horizon.inventory.service.taskset.response.ScannerResponseSer
 import org.opennms.horizon.shared.constants.GrpcConstants;
 import org.opennms.taskset.contract.DetectorResponse;
 import org.opennms.taskset.contract.ScannerResponse;
+import org.opennms.taskset.contract.TaskContext;
 import org.opennms.taskset.contract.TaskResult;
 import org.opennms.taskset.contract.TaskSetResults;
 
@@ -51,6 +52,8 @@ import static org.mockito.Mockito.times;
 public class TaskSetResultsConsumerTest {
     private static final String TEST_LOCATION = "Default";
     private static final String TEST_TENANT_ID = "opennms-prime";
+
+    private static final long TEST_NODE_ID = 10L;
 
     @InjectMocks
     private TaskSetResultsConsumer consumer;
@@ -80,7 +83,7 @@ public class TaskSetResultsConsumerTest {
         consumer.receiveMessage(results.toByteArray(), headers);
 
         Mockito.verify(scannerService, times(1))
-            .accept(TEST_TENANT_ID, TEST_LOCATION, response);
+            .accept(TEST_TENANT_ID, TEST_LOCATION, response, taskResult.getContext());
     }
 
     @Test
@@ -91,6 +94,10 @@ public class TaskSetResultsConsumerTest {
         TaskResult taskResult = TaskResult.newBuilder()
             .setLocation(TEST_LOCATION)
             .setDetectorResponse(response)
+            .setContext(TaskContext.newBuilder()
+                .setNodeId(TEST_NODE_ID)
+                .build()
+            )
             .build();
 
         TaskSetResults results = TaskSetResults.newBuilder()
@@ -102,6 +109,6 @@ public class TaskSetResultsConsumerTest {
         consumer.receiveMessage(results.toByteArray(), headers);
 
         Mockito.verify(detectorService, times(1))
-            .accept(TEST_TENANT_ID, TEST_LOCATION, response);
+            .accept(TEST_TENANT_ID, TEST_LOCATION, response, taskResult.getContext());
     }
 }

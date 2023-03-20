@@ -26,7 +26,7 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.inventory.cucumber.steps;
+package org.opennms.horizon.inventory.cucumber.steps.tags;
 
 import com.google.protobuf.Empty;
 import com.google.protobuf.Int64Value;
@@ -35,13 +35,15 @@ import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
-import org.jetbrains.annotations.NotNull;
+import org.apache.commons.lang3.NotImplementedException;
 import org.opennms.horizon.inventory.cucumber.InventoryBackgroundHelper;
+import org.opennms.horizon.inventory.discovery.IcmpActiveDiscoveryCreateDTO;
+import org.opennms.horizon.inventory.discovery.IcmpActiveDiscoveryDTO;
+import org.opennms.horizon.inventory.discovery.SNMPConfigDTO;
+import org.opennms.horizon.inventory.dto.ActiveDiscoveryDTO;
 import org.opennms.horizon.inventory.dto.DeleteTagsDTO;
 import org.opennms.horizon.inventory.dto.ListAllTagsParamsDTO;
 import org.opennms.horizon.inventory.dto.ListTagsByEntityIdParamsDTO;
-import org.opennms.horizon.inventory.dto.NodeCreateDTO;
-import org.opennms.horizon.inventory.dto.NodeDTO;
 import org.opennms.horizon.inventory.dto.TagCreateDTO;
 import org.opennms.horizon.inventory.dto.TagCreateListDTO;
 import org.opennms.horizon.inventory.dto.TagDTO;
@@ -49,24 +51,23 @@ import org.opennms.horizon.inventory.dto.TagEntityIdDTO;
 import org.opennms.horizon.inventory.dto.TagListDTO;
 import org.opennms.horizon.inventory.dto.TagListParamsDTO;
 import org.opennms.horizon.inventory.dto.TagRemoveListDTO;
-import org.opennms.horizon.inventory.dto.TagServiceGrpc;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.function.Function;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 
-public class NodeTaggingStepDefinitions {
+// using icmp active discovery here but can be any subclass of ActiveDiscovery
+public class ActiveDiscoveryTaggingStepDefinitions {
     private static InventoryBackgroundHelper backgroundHelper;
 
-    private NodeDTO node1;
-    private NodeDTO node2;
+    private IcmpActiveDiscoveryDTO activeDiscovery1;
+    private IcmpActiveDiscoveryDTO activeDiscovery2;
     private TagListDTO addedTagList;
     private TagListDTO fetchedTagList;
 
@@ -79,22 +80,22 @@ public class NodeTaggingStepDefinitions {
      * BACKGROUND GIVEN
      * *********************************************************************************
      */
-    @Given("[Tags] External GRPC Port in system property {string}")
+    @Given("[ActiveDiscovery] External GRPC Port in system property {string}")
     public void externalGRPCPortInSystemProperty(String propertyName) {
         backgroundHelper.externalGRPCPortInSystemProperty(propertyName);
     }
 
-    @Given("[Tags] Kafka Bootstrap URL in system property {string}")
+    @Given("[ActiveDiscovery] Kafka Bootstrap URL in system property {string}")
     public void kafkaBootstrapURLInSystemProperty(String systemPropertyName) {
         backgroundHelper.kafkaBootstrapURLInSystemProperty(systemPropertyName);
     }
 
-    @Given("[Tags] Grpc TenantId {string}")
+    @Given("[ActiveDiscovery] Grpc TenantId {string}")
     public void grpcTenantId(String tenantId) {
         backgroundHelper.grpcTenantId(tenantId);
     }
 
-    @Given("[Tags] Create Grpc Connection for Inventory")
+    @Given("[ActiveDiscovery] Create Grpc Connection for Inventory")
     public void createGrpcConnectionForInventory() {
         backgroundHelper.createGrpcConnectionForInventory();
     }
@@ -103,112 +104,95 @@ public class NodeTaggingStepDefinitions {
      * SCENARIO GIVEN
      * *********************************************************************************
      */
-    @Given("A new node")
-    public void aNewNode() {
+    @Given("A new active discovery")
+    public void aNewActiveDiscovery() {
         deleteAllTags();
-        deleteAllNodes();
+        deleteAllActiveDiscovery();
 
-        var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
-        node1 = nodeServiceBlockingStub.createNode(NodeCreateDTO.newBuilder().setLabel("node")
-            .setLocation("location").setManagementIp("127.0.0.1").build());
+        var activeDiscoveryServiceBlockingStub = backgroundHelper.getIcmpActiveDiscoveryServiceBlockingStub();
+        activeDiscovery1 = activeDiscoveryServiceBlockingStub.createDiscovery(IcmpActiveDiscoveryCreateDTO.newBuilder()
+            .setName("discovery-name").setLocation("location").
+            addIpAddresses("127.0.0.1").setSnmpConf(SNMPConfigDTO.newBuilder().addPorts(161)
+                .addReadCommunity("public").build()).build());
     }
 
-    @Given("2 new nodes")
-    public void twoNewNodes() {
+    @Given("2 new active discovery")
+    public void twoNewActiveDiscovery() {
         deleteAllTags();
-        deleteAllNodes();
+        deleteAllActiveDiscovery();
 
-        var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
-        node1 = nodeServiceBlockingStub.createNode(NodeCreateDTO.newBuilder().setLabel("node1")
-            .setLocation("location").setManagementIp("127.0.0.1").build());
-        node2 = nodeServiceBlockingStub.createNode(NodeCreateDTO.newBuilder().setLabel("node2")
-            .setLocation("location").setManagementIp("127.0.0.2").build());
+        var activeDiscoveryServiceBlockingStub = backgroundHelper.getIcmpActiveDiscoveryServiceBlockingStub();
+        activeDiscovery1 = activeDiscoveryServiceBlockingStub.createDiscovery(IcmpActiveDiscoveryCreateDTO.newBuilder()
+            .setName("discovery-name-1").setLocation("location").
+            addIpAddresses("127.0.0.1").setSnmpConf(SNMPConfigDTO.newBuilder().addPorts(161)
+                .addReadCommunity("public").build()).build());
+        activeDiscovery2 = activeDiscoveryServiceBlockingStub.createDiscovery(IcmpActiveDiscoveryCreateDTO.newBuilder()
+            .setName("discovery-name-2").setLocation("location").
+            addIpAddresses("127.0.0.2").setSnmpConf(SNMPConfigDTO.newBuilder().addPorts(161)
+                .addReadCommunity("public").build()).build());
     }
 
-    @Given("A new node with tags {string}")
-    public void aNewNodeWithTags(String tags) {
+    @Given("A new active discovery with tags {string}")
+    public void aNewActiveDiscoveryWithTags(String tags) {
         deleteAllTags();
-        deleteAllNodes();
+        deleteAllActiveDiscovery();
 
-        var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
-        node1 = nodeServiceBlockingStub.createNode(NodeCreateDTO.newBuilder().setLabel("node")
-            .setLocation("location").setManagementIp("127.0.0.1").build());
+        var activeDiscoveryServiceBlockingStub = backgroundHelper.getIcmpActiveDiscoveryServiceBlockingStub();
+        activeDiscovery1 = activeDiscoveryServiceBlockingStub.createDiscovery(IcmpActiveDiscoveryCreateDTO.newBuilder()
+            .setName("discovery-name-1").setLocation("location").
+            addIpAddresses("127.0.0.1").setSnmpConf(SNMPConfigDTO.newBuilder().addPorts(161)
+                .addReadCommunity("public").build()).build());
         String[] tagArray = tags.split(",");
         var tagServiceBlockingStub = backgroundHelper.getTagServiceBlockingStub();
         List<TagCreateDTO> tagCreateList = getTagCreateList(tagArray);
         addedTagList = tagServiceBlockingStub.addTags(TagCreateListDTO.newBuilder()
             .addAllTags(tagCreateList)
             .addEntityIds(TagEntityIdDTO.newBuilder()
-                .setNodeId(node1.getId())).build());
-    }
-
-
-    @Given("A new node with no tags")
-    public void aNewNodeWithNoTags() {
-        deleteAllTags();
-        deleteAllNodes();
-
-        var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
-        node1 = nodeServiceBlockingStub.createNode(NodeCreateDTO.newBuilder().setLabel("node")
-            .setLocation("location").setManagementIp("127.0.0.1").build());
-    }
-
-    @Given("Another node with tags {string}")
-    public void anotherNodeWithTags(String tags) {
-        var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
-        NodeDTO node = nodeServiceBlockingStub.createNode(NodeCreateDTO.newBuilder().setLabel("Another Node")
-            .setLocation("location").setManagementIp("127.0.0.2").build());
-        String[] tagArray = tags.split(",");
-        var tagServiceBlockingStub = backgroundHelper.getTagServiceBlockingStub();
-        List<TagCreateDTO> tagCreateList = getTagCreateList(tagArray);
-        tagServiceBlockingStub.addTags(TagCreateListDTO.newBuilder()
-            .addAllTags(tagCreateList)
-            .addEntityIds(TagEntityIdDTO.newBuilder()
-                .setNodeId(node.getId())).build());
+                .setActiveDiscoveryId(activeDiscovery1.getId())).build());
     }
 
     /*
      * SCENARIO WHEN
      * *********************************************************************************
      */
-    @When("A GRPC request to create tags {string} for node")
-    public void aGRPCRequestToCreateTagsForNode(String tags) {
+    @When("A GRPC request to create tags {string} for active discovery")
+    public void aGRPCRequestToCreateTagsForActiveDiscovery(String tags) {
         String[] tagArray = tags.split(",");
         var tagServiceBlockingStub = backgroundHelper.getTagServiceBlockingStub();
         List<TagCreateDTO> tagCreateList = getTagCreateList(tagArray);
         fetchedTagList = tagServiceBlockingStub.addTags(TagCreateListDTO.newBuilder()
             .addAllTags(tagCreateList)
             .addEntityIds(TagEntityIdDTO.newBuilder()
-                .setNodeId(node1.getId())).build());
+                .setActiveDiscoveryId(activeDiscovery1.getId())).build());
     }
 
-    @When("A GRPC request to create tags {string} for both nodes")
-    public void aGRPCRequestToCreateTagsForBothNodes(String tags) {
+    @When("A GRPC request to create tags {string} for both active discovery")
+    public void aGRPCRequestToCreateTagsForBothActiveDiscovery(String tags) {
         String[] tagArray = tags.split(",");
         var tagServiceBlockingStub = backgroundHelper.getTagServiceBlockingStub();
         List<TagCreateDTO> tagCreateList = getTagCreateList(tagArray);
 
         List<TagEntityIdDTO> tagEntityList = new ArrayList<>();
-        tagEntityList.add(TagEntityIdDTO.newBuilder().setNodeId(node1.getId()).build());
-        tagEntityList.add(TagEntityIdDTO.newBuilder().setNodeId(node2.getId()).build());
+        tagEntityList.add(TagEntityIdDTO.newBuilder().setActiveDiscoveryId(activeDiscovery1.getId()).build());
+        tagEntityList.add(TagEntityIdDTO.newBuilder().setActiveDiscoveryId(activeDiscovery2.getId()).build());
 
         fetchedTagList = tagServiceBlockingStub.addTags(TagCreateListDTO.newBuilder()
             .addAllTags(tagCreateList)
             .addAllEntityIds(tagEntityList).build());
     }
 
-    @When("A GRPC request to fetch tags for node")
-    public void aGrpcRequestToFetchTagsForNode() {
+    @When("A GRPC request to fetch tags for active discovery")
+    public void aGRPCRequestToFetchTagsForActiveDiscovery() {
         var tagServiceBlockingStub = backgroundHelper.getTagServiceBlockingStub();
         ListTagsByEntityIdParamsDTO params = ListTagsByEntityIdParamsDTO.newBuilder()
             .setEntityId(TagEntityIdDTO.newBuilder()
-                .setNodeId(node1.getId()))
+                .setActiveDiscoveryId(activeDiscovery1.getId()))
             .setParams(TagListParamsDTO.newBuilder().build()).build();
         fetchedTagList = tagServiceBlockingStub.getTagsByEntityId(params);
     }
 
-    @When("A GRPC request to remove tag {string} for node")
-    public void aGRPCRequestToRemoveTagForNode(String tag) {
+    @When("A GRPC request to remove tag {string} for active discovery")
+    public void aGRPCRequestToRemoveTagForActiveDiscovery(String tag) {
         var tagServiceBlockingStub = backgroundHelper.getTagServiceBlockingStub();
         for (TagDTO tagDTO : addedTagList.getTagsList()) {
             if (tagDTO.getName().equals(tag)) {
@@ -216,49 +200,34 @@ public class NodeTaggingStepDefinitions {
                     .addAllTagIds(Collections.singletonList(Int64Value.newBuilder()
                         .setValue(tagDTO.getId()).build()))
                     .addEntityIds(TagEntityIdDTO.newBuilder()
-                        .setNodeId(node1.getId())).build());
+                        .setActiveDiscoveryId(activeDiscovery1.getId())).build());
                 break;
             }
         }
         ListTagsByEntityIdParamsDTO params = ListTagsByEntityIdParamsDTO.newBuilder()
             .setEntityId(TagEntityIdDTO.newBuilder()
-                .setNodeId(node1.getId()))
+                .setActiveDiscoveryId(activeDiscovery1.getId()))
             .setParams(TagListParamsDTO.newBuilder().build()).build();
         fetchedTagList = tagServiceBlockingStub.getTagsByEntityId(params);
     }
 
-    @When("A GRPC request to fetch all tags")
-    public void aGRPCRequestToFetchAllTags() {
-        var tagServiceBlockingStub = backgroundHelper.getTagServiceBlockingStub();
-        ListAllTagsParamsDTO params = ListAllTagsParamsDTO.newBuilder()
-            .setParams(TagListParamsDTO.newBuilder().build()).build();
-        fetchedTagList = tagServiceBlockingStub.getTags(params);
-    }
-
-    @When("A GRPC request to fetch all tags for node with name like {string}")
-    public void aGRPCRequestToFetchAllTagsForNodeWithNameLike(String searchTerm) {
+    @When("A GRPC request to fetch all tags for active discovery with name like {string}")
+    public void aGRPCRequestToFetchAllTagsForActiveDiscoveryWithNameLike(String searchTerm) {
         var tagServiceBlockingStub = backgroundHelper.getTagServiceBlockingStub();
         ListTagsByEntityIdParamsDTO params = ListTagsByEntityIdParamsDTO.newBuilder()
             .setEntityId(TagEntityIdDTO.newBuilder()
-                .setNodeId(node1.getId()))
+                .setActiveDiscoveryId(activeDiscovery1.getId()))
             .setParams(TagListParamsDTO.newBuilder().setSearchTerm(searchTerm).build()).build();
         fetchedTagList = tagServiceBlockingStub.getTagsByEntityId(params);
-    }
-
-    @When("A GRPC request to fetch all tags with name like {string}")
-    public void aGRPCRequestToFetchAllTagsWithNameLike(String searchTerm) {
-        var tagServiceBlockingStub = backgroundHelper.getTagServiceBlockingStub();
-        ListAllTagsParamsDTO params = ListAllTagsParamsDTO.newBuilder()
-            .setParams(TagListParamsDTO.newBuilder().setSearchTerm(searchTerm).build()).build();
-        fetchedTagList = tagServiceBlockingStub.getTags(params);
     }
 
     /*
      * SCENARIO THEN
      * *********************************************************************************
      */
-    @Then("The response should contain only tags {string}")
-    public void theResponseShouldContainOnlyTags(String tags) {
+
+    @Then("The active discovery tag response should contain only tags {string}")
+    public void theActiveDiscoveryTagResponseShouldContainOnlyTags(String tags) {
         String[] tagArray = tags.split(",");
 
         assertNotNull(fetchedTagList);
@@ -273,35 +242,35 @@ public class NodeTaggingStepDefinitions {
         }
     }
 
-    @Then("The response should contain an empty list of tags")
-    public void theResponseShouldContainAnEmptyListOfTags() {
+    @Then("The active discovery tag response should contain an empty list of tags")
+    public void theActiveDiscoveryTagResponseShouldContainAnEmptyListOfTags() {
         assertNotNull(fetchedTagList);
         assertEquals(0, fetchedTagList.getTagsCount());
     }
 
-    @And("Both nodes have the same tags of {string}")
-    public void bothNodesHaveTheSameTagsOf(String tags) {
+    @And("Both active discovery have the same tags of {string}")
+    public void bothActiveDiscoveryHaveTheSameTagsOf(String tags) {
         String[] tagArray = tags.split(",");
 
         var tagServiceBlockingStub = backgroundHelper.getTagServiceBlockingStub();
-        TagListDTO node1TagList = tagServiceBlockingStub.getTagsByEntityId(ListTagsByEntityIdParamsDTO.newBuilder()
-            .setEntityId(TagEntityIdDTO.newBuilder().setNodeId(node1.getId())).build());
-        TagListDTO node2TagList = tagServiceBlockingStub.getTagsByEntityId(ListTagsByEntityIdParamsDTO.newBuilder()
-            .setEntityId(TagEntityIdDTO.newBuilder().setNodeId(node2.getId())).build());
+        TagListDTO discovery1TagList = tagServiceBlockingStub.getTagsByEntityId(ListTagsByEntityIdParamsDTO.newBuilder()
+            .setEntityId(TagEntityIdDTO.newBuilder().setActiveDiscoveryId(activeDiscovery1.getId())).build());
+        TagListDTO discovery2TagList = tagServiceBlockingStub.getTagsByEntityId(ListTagsByEntityIdParamsDTO.newBuilder()
+            .setEntityId(TagEntityIdDTO.newBuilder().setActiveDiscoveryId(activeDiscovery2.getId())).build());
 
-        assertEquals(tagArray.length, node1TagList.getTagsCount());
-        assertEquals(node1TagList.getTagsCount(), node2TagList.getTagsCount());
+        assertEquals(tagArray.length, discovery1TagList.getTagsCount());
+        assertEquals(discovery1TagList.getTagsCount(), discovery2TagList.getTagsCount());
 
         List<String> tagArraySorted = Arrays.stream(tagArray).sorted().toList();
-        List<TagDTO> node1TagListSorted = node1TagList.getTagsList().stream()
+        List<TagDTO> discovery1TagListSorted = discovery1TagList.getTagsList().stream()
             .sorted(Comparator.comparing(TagDTO::getName)).toList();
-        List<TagDTO> node2TagListSorted = node2TagList.getTagsList().stream()
+        List<TagDTO> discovery2TagListSorted = discovery2TagList.getTagsList().stream()
             .sorted(Comparator.comparing(TagDTO::getName)).toList();
 
-        assertEquals(node1TagListSorted, node2TagListSorted);
+        assertEquals(discovery1TagListSorted, discovery2TagListSorted);
 
         for (int index = 0; index < tagArraySorted.size(); index++) {
-            assertEquals(tagArraySorted.get(index), node1TagListSorted.get(index).getName());
+            assertEquals(tagArraySorted.get(index), discovery1TagListSorted.get(index).getName());
         }
     }
 
@@ -316,10 +285,16 @@ public class NodeTaggingStepDefinitions {
         tagServiceBlockingStub.deleteTags(DeleteTagsDTO.newBuilder().addAllTagIds(tagIds).build());
     }
 
-    private void deleteAllNodes() {
-        var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
-        for (NodeDTO nodeDTO : nodeServiceBlockingStub.listNodes(Empty.newBuilder().build()).getNodesList()) {
-            nodeServiceBlockingStub.deleteNode(Int64Value.newBuilder().setValue(nodeDTO.getId()).build());
+    private void deleteAllActiveDiscovery() {
+        var activeDiscoveryServiceBlockingStub = backgroundHelper.getActiveDiscoveryServiceBlockingStub();
+        for (ActiveDiscoveryDTO discoveryDTO : activeDiscoveryServiceBlockingStub.listDiscoveries(Empty.newBuilder().build()).getActiveDiscoveriesList()) {
+            Long activeDiscoveryId = switch (discoveryDTO.getActiveDiscoveryCase()) {
+                case AZURE -> discoveryDTO.getAzure().getId();
+                case ICMP -> discoveryDTO.getIcmp().getId();
+                case ACTIVEDISCOVERY_NOT_SET ->
+                    throw new NotImplementedException("Other types not implemented here yet");
+            };
+            activeDiscoveryServiceBlockingStub.deleteDiscovery(Int64Value.of(activeDiscoveryId));
         }
     }
 

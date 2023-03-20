@@ -1,6 +1,6 @@
 # This file is part of OpenNMS(R).
 #
-# Copyright (C) $today.year The OpenNMS Group, Inc.
+# Copyright (C) 2023 The OpenNMS Group, Inc.
 # OpenNMS(R) is Copyright (C) 1999-$today.year The OpenNMS Group, Inc.
 #
 # OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.

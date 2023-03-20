@@ -1,7 +1,7 @@
 serviceName: opennms-operator
 image: opennms/operator:latest
 imagePullPolicy: IfNotPresent
-imageUpdateFreq: 60
+openshift: false
 resources:
   limits:
     cpu: 100m

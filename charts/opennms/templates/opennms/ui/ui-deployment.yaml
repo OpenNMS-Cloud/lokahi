@@ -43,6 +43,9 @@ spec:
       imagePullSecrets:
         - name: image-credentials
       {{- end }}
+      volumes:
+        - name: nginx-cache-volume
+          emptyDir: {}
       containers:
         - name: {{ .Values.OpenNMS.UI.ServiceName }}
           image: {{ .Values.OpenNMS.UI.Image }}
@@ -59,3 +62,6 @@ spec:
           {{/*  TODO    livenessProbe:*/}}
           {{/*          readinessProbe:*/}}
           {{/*          startupProbe:*/}}
+          volumeMounts:
+            - name: nginx-cache-volume
+              mountPath: /var/cache/nginx

@@ -1,7 +1,7 @@
+import mountWithPiniaVillus from 'tests/mountWithPiniaVillus'
 import Dashboard from '@/containers/Dashboard.vue'
-import setupWrapper from 'tests/setupWrapper'
 
-const wrapper = setupWrapper({
+const wrapper = mountWithPiniaVillus({
   component: Dashboard,
   shallow: true
 })

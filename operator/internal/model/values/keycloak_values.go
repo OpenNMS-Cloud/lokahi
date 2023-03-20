@@ -16,13 +16,13 @@ package values
 
 type KeycloakValues struct {
 	ServiceValues      `yaml:",inline"`
-	HttpsPort          string `yaml:"HttpsPort"`
-	HostnamePort       string `yaml:"HostnamePort"`
-	HostnameAdminUrl   string `yaml:"HostnameAdminUrl"`
-	AdminUsername      string `yaml:"AdminUsername"`
-	AdminPassword      string `yaml:"AdminPassword"`
-	RealmName          string `yaml:"RealmName"`
-	DynamicRealmConfig bool   `yaml:"DynamicRealmConfig"`
-    IngressAnnotations interface{} `yaml:"IngressAnnotations"`
-    ConfigmapName      string `yaml:"ConfigmapName"`
+	HttpsPort          string      `yaml:"HttpsPort"`
+	HostnamePort       string      `yaml:"HostnamePort"`
+	HostnameAdminUrl   string      `yaml:"HostnameAdminUrl"`
+	AdminUsername      string      `yaml:"AdminUsername"`
+	AdminPassword      string      `yaml:"AdminPassword"`
+	RealmName          string      `yaml:"RealmName"`
+	DynamicRealmConfig bool        `yaml:"DynamicRealmConfig"`
+	IngressAnnotations interface{} `yaml:"IngressAnnotations"`
+	ConfigmapName      string      `yaml:"ConfigmapName"`
 }

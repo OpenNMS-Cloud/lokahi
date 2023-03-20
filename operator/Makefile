@@ -1,7 +1,8 @@
 IMAGE ?= opennms/operator:local-build
+OSIMAGE ?= opennms/operator:local-openshift
 
 .PHONY: dependencies build alpine-build unit-test integration-test
-.PHONY: local-docker kind-load copy-charts kubebuilder
+.PHONY: local-docker openshift-docker kind-load copy-charts kubebuilder
 
 all: build
 
@@ -32,6 +33,9 @@ kind-load: local-docker
 
 build:
 	go build -a -o operator cmd/opennms-operator/main.go
+
+openshift-build:
+	CGO_ENABLED=0 GOOS=linux GOARCH=arm64 GO111MODULE=on go build -a -o operator cmd/opennms-operator/main.go
 
 alpine-build:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 GO111MODULE=on go build -a -o operator cmd/opennms-operator/main.go

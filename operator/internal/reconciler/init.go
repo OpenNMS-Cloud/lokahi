@@ -18,9 +18,10 @@ import (
 	opennmsv1alpha1 "github.com/OpenNMS-Cloud/opennms-operator/api/v1alpha1"
 	"github.com/OpenNMS-Cloud/opennms-operator/internal/handlers"
 	"github.com/OpenNMS-Cloud/opennms-operator/internal/handlers/base"
-	"github.com/OpenNMS-Cloud/opennms-operator/internal/handlers/ingress"
 	"github.com/OpenNMS-Cloud/opennms-operator/internal/handlers/opennms"
 	"github.com/OpenNMS-Cloud/opennms-operator/internal/handlers/thirdparty"
+	"github.com/OpenNMS-Cloud/opennms-operator/internal/handlers/ingress"
+
 	appsv1 "k8s.io/api/apps/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
 )

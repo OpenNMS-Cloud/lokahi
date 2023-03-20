@@ -15,6 +15,7 @@ limitations under the License.
 package main
 
 import (
+	"fmt"
 	"github.com/OpenNMS-Cloud/opennms-operator/config"
 	"github.com/OpenNMS-Cloud/opennms-operator/internal/handlers"
 	"github.com/OpenNMS-Cloud/opennms-operator/internal/reconciler"
@@ -57,6 +58,11 @@ func main() {
 	if err != nil {
 		setupLog.Error(err, "unable to define OpenNMS operator")
 		os.Exit(1)
+	}
+
+	setupLog.Info(fmt.Sprintf("THIS IS THE OPENSHIFT MODE: %t", operatorConfig.OpenshiftMode))
+	if operatorConfig.OpenshiftMode {
+		setupLog.Info("setting up the operator in OpenShift mode")
 	}
 
 	defaultValues, err := values.GetDefaultValues(operatorConfig)

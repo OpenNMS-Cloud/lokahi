@@ -102,6 +102,9 @@
                         <feature>aries-blueprint</feature>
                         <feature>shell-compat</feature>
                     </installedFeatures>
+                    <installedBundles>
+                        <bundle>mvn:org.apache.cxf.karaf/cxf-karaf-commands/${cxf.version}</bundle>
+                    </installedBundles>
                     <startupFeatures>
                         <feature>eventadmin</feature>
                     </startupFeatures>

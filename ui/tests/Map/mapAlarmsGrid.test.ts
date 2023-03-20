@@ -1,11 +1,11 @@
+import mountWithPiniaVillus from 'tests/mountWithPiniaVillus'
 import MapAlarmsGrid from '@/components/Map/MapAlarmsGrid.vue'
-import setupWrapper from 'tests/setupWrapper'
 import dateFormatDirective from '@/directives/v-date'
 
 let wrapper: any
 
 beforeEach(() => {
-  wrapper = setupWrapper({
+  wrapper = mountWithPiniaVillus({
     component: MapAlarmsGrid,
     global: {
       directives: {

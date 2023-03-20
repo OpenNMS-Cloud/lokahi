@@ -1,8 +1,9 @@
+import mountWithPiniaVillus from 'tests/mountWithPiniaVillus'
 import Flows from '@/containers/Flows.vue'
-import setupWrapper from 'tests/setupWrapper'
 
-const wrapper = setupWrapper({
-  component: Flows
+const wrapper = mountWithPiniaVillus({
+  component: Flows,
+  shallow: false
 })
 
 test('The Flows page container mounts correctly', () => {

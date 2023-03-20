@@ -31,6 +31,7 @@ import lombok.RequiredArgsConstructor;
 import org.opennms.horizon.inventory.dto.AzureActiveDiscoveryCreateDTO;
 import org.opennms.horizon.inventory.dto.AzureActiveDiscoveryDTO;
 import org.opennms.horizon.inventory.dto.TagCreateListDTO;
+import org.opennms.horizon.inventory.dto.TagEntityIdDTO;
 import org.opennms.horizon.inventory.exception.InventoryRuntimeException;
 import org.opennms.horizon.inventory.mapper.discovery.AzureActiveDiscoveryMapper;
 import org.opennms.horizon.inventory.model.discovery.active.AzureActiveDiscovery;
@@ -68,7 +69,8 @@ public class AzureActiveDiscoveryService {
         discovery = repository.save(discovery);
 
         tagService.addTags(tenantId, TagCreateListDTO.newBuilder()
-            .setActiveDiscoveryId(discovery.getId())
+            .addEntityIds(TagEntityIdDTO.newBuilder()
+                .setActiveDiscoveryId(discovery.getId()))
             .addAllTags(request.getTagsList())
             .build());
 

@@ -15,14 +15,14 @@ limitations under the License.
 package values
 
 type OpenNMSValues struct {
-	API                    ServiceValues          `yaml:"API"`
-	UI                     ServiceValues          `yaml:"UI"`
+	API                    APIValues              `yaml:"API"`
+	UI                     UIValues               `yaml:"UI"`
 	Minion                 MinionValues           `yaml:"Minion"`
 	MinionGateway          MinionGatewayValues    `yaml:"MinionGateway"`
 	MinionGatewayGrpcProxy MGGPValues             `yaml:"MinionGatewayGrpcProxy"`
 	Inventory              InventoryValues        `yaml:"Inventory"`
 	Alert                  AlertValues            `yaml:"Alert"`
-	Notification           ServiceValues          `yaml:"Notification"`
+	Notification           NotificationValues     `yaml:"Notification"`
 	MetricsProcessor       MetricsProcessorValues `yaml:"MetricsProcessor"`
 	Events                 EventsValues           `yaml:"Events"`
 	DataChoices            DataChoicesValues      `yaml:"DataChoices"`
@@ -43,10 +43,22 @@ type MinionGatewayValues struct {
 	IngressAnnotations interface{} `yaml:"IngressAnnotations"`
 }
 
+type APIValues struct {
+	ServiceValues `yaml:",inline"`
+}
+
+type UIValues struct {
+	ServiceValues `yaml:",inline"`
+}
+
 type MGGPValues struct {
 	ServiceValues `yaml:",inline"`
 }
 type MetricsProcessorValues struct {
+	ServiceValues `yaml:",inline"`
+}
+
+type NotificationValues struct {
 	ServiceValues `yaml:",inline"`
 }
 

@@ -3,7 +3,6 @@
 ##
 ## opennms/grafana
 ## opennms/horizon-stream-api
-## opennms/horizon-stream-core
 ## opennms/horizon-stream-keycloak
 ## opennms/horizon-stream-minion
 ## opennms/horizon-stream-minion-gateway
@@ -45,11 +44,11 @@ time {
 	echo "==="
 	mvn -f inventory install -Djib.container.creationTime=USE_CURRENT_TIMESTAMP -Dapplication.docker.image=opennms/horizon-stream-inventory:local-basic
 
-		echo ""
-  	echo "==="
-  	echo "=== ALARM SERVICE IMAGE"
-  	echo "==="
-  	mvn -f alarm install -Djib.container.creationTime=USE_CURRENT_TIMESTAMP -Dapplication.docker.image=opennms/horizon-stream-alarm:local-basic
+	echo ""
+	echo "==="
+	echo "=== ALERT SERVICE IMAGE"
+	echo "==="
+	mvn -f alert install -Djib.container.creationTime=USE_CURRENT_TIMESTAMP -Dapplication.docker.image=opennms/horizon-stream-alert:local-basic
 
 	echo ""
 	echo "==="

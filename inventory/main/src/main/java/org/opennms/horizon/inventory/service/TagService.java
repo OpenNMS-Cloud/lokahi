@@ -37,6 +37,7 @@ import org.opennms.horizon.inventory.dto.ListTagsByEntityIdParamsDTO;
 import org.opennms.horizon.inventory.dto.TagCreateDTO;
 import org.opennms.horizon.inventory.dto.TagCreateListDTO;
 import org.opennms.horizon.inventory.dto.TagDTO;
+import org.opennms.horizon.inventory.dto.TagEntityIdDTO;
 import org.opennms.horizon.inventory.dto.TagListParamsDTO;
 import org.opennms.horizon.inventory.dto.TagRemoveListDTO;
 import org.opennms.horizon.inventory.exception.InventoryRuntimeException;
@@ -53,8 +54,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -70,19 +75,30 @@ public class TagService {
         if (request.getTagsList().isEmpty()) {
             return Collections.emptyList();
         }
-        if (request.hasNodeId()) {
-            Node node = getNode(tenantId, request.getNodeId());
-            return request.getTagsList().stream()
+        if (request.getEntityIdsList().isEmpty()) {
+            return Collections.emptyList();
+        }
+        Set<TagDTO> tags = new LinkedHashSet<>();
+        for (TagEntityIdDTO entityId : request.getEntityIdsList()) {
+            tags.addAll(addTags(tenantId, entityId, request.getTagsList()));
+        }
+        return tags.stream().toList();
+    }
+
+    private List<TagDTO> addTags(String tenantId, TagEntityIdDTO entityId, List<TagCreateDTO> tagCreateList) {
+        if (entityId.hasNodeId()) {
+            Node node = getNode(tenantId, entityId.getNodeId());
+            return tagCreateList.stream()
                 .map(tagCreateDTO -> addTagToNode(tenantId, node, tagCreateDTO))
                 .toList();
-        } else if (request.hasActiveDiscoveryId()) {
-            ActiveDiscovery discovery = getActiveDiscovery(tenantId, request.getActiveDiscoveryId());
-            return request.getTagsList().stream()
+        } else if (entityId.hasActiveDiscoveryId()) {
+            ActiveDiscovery discovery = getActiveDiscovery(tenantId, entityId.getActiveDiscoveryId());
+            return tagCreateList.stream()
                 .map(tagCreateDTO -> addTagToActiveDiscovery(tenantId, discovery, tagCreateDTO))
                 .toList();
-        } else if (request.hasPassiveDiscoveryId()) {
-            PassiveDiscovery discovery = getPassiveDiscovery(tenantId, request.getPassiveDiscoveryId());
-            return request.getTagsList().stream()
+        } else if (entityId.hasPassiveDiscoveryId()) {
+            PassiveDiscovery discovery = getPassiveDiscovery(tenantId, entityId.getPassiveDiscoveryId());
+            return tagCreateList.stream()
                 .map(tagCreateDTO -> addTagToPassiveDiscovery(tenantId, discovery, tagCreateDTO))
                 .toList();
         } else {
@@ -97,24 +113,31 @@ public class TagService {
             .map(tagId -> getTag(tenantId, tagId))
             .toList();
 
-        if (request.hasNodeId()) {
-            Node node = getNode(tenantId, request.getNodeId());
+        for (TagEntityIdDTO entityId : request.getEntityIdsList()) {
+            removeTags(tenantId, entityId, tags);
+        }
+    }
+
+    private void removeTags(String tenantId, TagEntityIdDTO entityId, List<Tag> tags) {
+        if (entityId.hasNodeId()) {
+            Node node = getNode(tenantId, entityId.getNodeId());
             tags.forEach(tag -> tag.getNodes().remove(node));
-        } else if (request.hasActiveDiscoveryId()) {
-            ActiveDiscovery activeDiscovery = getActiveDiscovery(tenantId, request.getActiveDiscoveryId());
+        } else if (entityId.hasActiveDiscoveryId()) {
+            ActiveDiscovery activeDiscovery = getActiveDiscovery(tenantId, entityId.getActiveDiscoveryId());
             tags.forEach(tag -> tag.getActiveDiscoveries().remove(activeDiscovery));
-        } else if (request.hasPassiveDiscoveryId()) {
-            PassiveDiscovery discovery = getPassiveDiscovery(tenantId, request.getPassiveDiscoveryId());
+        } else if (entityId.hasPassiveDiscoveryId()) {
+            PassiveDiscovery discovery = getPassiveDiscovery(tenantId, entityId.getPassiveDiscoveryId());
             tags.forEach(tag -> tag.getPassiveDiscoveries().remove(discovery));
         }
     }
 
     public List<TagDTO> getTagsByEntityId(String tenantId, ListTagsByEntityIdParamsDTO listParams) {
-        if (listParams.hasNodeId()) {
+        TagEntityIdDTO entityId = listParams.getEntityId();
+        if (entityId.hasNodeId()) {
             return getTagsByNodeId(tenantId, listParams);
-        } else if (listParams.hasActiveDiscoveryId()) {
+        } else if (entityId.hasActiveDiscoveryId()) {
             return getTagsByActiveDiscoveryId(tenantId, listParams);
-        } else if (listParams.hasPassiveDiscoveryId()) {
+        } else if (entityId.hasPassiveDiscoveryId()) {
             return getTagsByPassiveDiscoveryId(tenantId, listParams);
         } else {
             throw new InventoryRuntimeException("Invalid ID provided");
@@ -155,17 +178,29 @@ public class TagService {
 
     @Transactional
     public void updateTags(String tenantId, TagCreateListDTO request) {
-        if (request.hasNodeId()) {
-            Node node = getNode(tenantId, request.getNodeId());
-            node.getTags().forEach(tag -> tag.getNodes().remove(node));
-        } else if (request.hasActiveDiscoveryId()) {
-            ActiveDiscovery activeDiscovery = getActiveDiscovery(tenantId, request.getActiveDiscoveryId());
-            activeDiscovery.getTags().forEach(tag -> tag.getActiveDiscoveries().remove(activeDiscovery));
-        } else if (request.hasPassiveDiscoveryId()) {
-            PassiveDiscovery discovery = getPassiveDiscovery(tenantId, request.getPassiveDiscoveryId());
-            discovery.getTags().forEach(tag -> tag.getPassiveDiscoveries().remove(discovery));
+        if (request.getTagsList().isEmpty()) {
+            return;
+        }
+        if (request.getEntityIdsList().isEmpty()) {
+            return;
+        }
+        for (TagEntityIdDTO entityId : request.getEntityIdsList()) {
+            removeEntityTagAssociations(tenantId, entityId);
         }
         addTags(tenantId, request);
+    }
+
+    private void removeEntityTagAssociations(String tenantId, TagEntityIdDTO entityId) {
+        if (entityId.hasNodeId()) {
+            Node node = getNode(tenantId, entityId.getNodeId());
+            node.getTags().forEach(tag -> tag.getNodes().remove(node));
+        } else if (entityId.hasActiveDiscoveryId()) {
+            ActiveDiscovery activeDiscovery = getActiveDiscovery(tenantId, entityId.getActiveDiscoveryId());
+            activeDiscovery.getTags().forEach(tag -> tag.getActiveDiscoveries().remove(activeDiscovery));
+        } else if (entityId.hasPassiveDiscoveryId()) {
+            PassiveDiscovery discovery = getPassiveDiscovery(tenantId, entityId.getPassiveDiscoveryId());
+            discovery.getTags().forEach(tag -> tag.getPassiveDiscoveries().remove(discovery));
+        }
     }
 
     private TagDTO addTagToNode(String tenantId, Node node, TagCreateDTO tagCreateDTO) {
@@ -264,7 +299,9 @@ public class TagService {
     }
 
     private List<TagDTO> getTagsByNodeId(String tenantId, ListTagsByEntityIdParamsDTO listParams) {
-        long nodeId = listParams.getNodeId();
+        TagEntityIdDTO entityId = listParams.getEntityId();
+
+        long nodeId = entityId.getNodeId();
         if (listParams.hasParams()) {
             TagListParamsDTO params = listParams.getParams();
             String searchTerm = params.getSearchTerm();
@@ -279,7 +316,9 @@ public class TagService {
     }
 
     private List<TagDTO> getTagsByActiveDiscoveryId(String tenantId, ListTagsByEntityIdParamsDTO listParams) {
-        long activeDiscoveryId = listParams.getActiveDiscoveryId();
+        TagEntityIdDTO entityId = listParams.getEntityId();
+
+        long activeDiscoveryId = entityId.getActiveDiscoveryId();
         if (listParams.hasParams()) {
             TagListParamsDTO params = listParams.getParams();
             String searchTerm = params.getSearchTerm();
@@ -294,7 +333,9 @@ public class TagService {
     }
 
     private List<TagDTO> getTagsByPassiveDiscoveryId(String tenantId, ListTagsByEntityIdParamsDTO listParams) {
-        long passiveDiscoveryId = listParams.getPassiveDiscoveryId();
+        TagEntityIdDTO entityId = listParams.getEntityId();
+
+        long passiveDiscoveryId = entityId.getPassiveDiscoveryId();
         if (listParams.hasParams()) {
             TagListParamsDTO params = listParams.getParams();
             String searchTerm = params.getSearchTerm();

@@ -36,11 +36,12 @@ import org.mapstruct.NullValueCheckStrategy;
 import org.opennms.horizon.inventory.dto.TagCreateDTO;
 import org.opennms.horizon.inventory.dto.TagCreateListDTO;
 import org.opennms.horizon.inventory.dto.TagDTO;
+import org.opennms.horizon.inventory.dto.TagEntityIdDTO;
 import org.opennms.horizon.inventory.dto.TagRemoveListDTO;
 import org.opennms.horizon.server.model.inventory.tag.Tag;
 import org.opennms.horizon.server.model.inventory.tag.TagCreate;
-import org.opennms.horizon.server.model.inventory.tag.TagListNodeAdd;
-import org.opennms.horizon.server.model.inventory.tag.TagListNodeRemove;
+import org.opennms.horizon.server.model.inventory.tag.TagListNodesAdd;
+import org.opennms.horizon.server.model.inventory.tag.TagListNodesRemove;
 
 
 @Mapper(componentModel = "spring", uses = {},
@@ -49,13 +50,31 @@ import org.opennms.horizon.server.model.inventory.tag.TagListNodeRemove;
 public interface TagMapper {
     Tag protoToTag(TagDTO tagDTO);
 
-    @Mapping(target = "tagsList", source = "tags", nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
-    TagCreateListDTO tagListAddToProto(TagListNodeAdd tags);
+    default TagCreateListDTO tagListAddToProtoCustom(TagListNodesAdd tags) {
+        TagCreateListDTO.Builder builder = tagListAddToProto(tags).toBuilder();
+        builder.addAllEntityIds(tags.getNodeIds().stream()
+            .map(value -> TagEntityIdDTO.newBuilder()
+                .setNodeId(value).build())
+            .toList());
+        return builder.build();
+    }
 
-    TagCreateDTO tagCreateToProto(TagCreate tagCreate);
+    default TagRemoveListDTO tagListRemoveToProtoCustom(TagListNodesRemove tags) {
+        TagRemoveListDTO.Builder builder = tagListRemoveToProto(tags).toBuilder();
+        builder.addAllEntityIds(tags.getNodeIds().stream()
+            .map(value -> TagEntityIdDTO.newBuilder()
+                .setNodeId(value).build())
+            .toList());
+        return builder.build();
+    }
+
+    @Mapping(target = "tagsList", source = "tags", nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
+    TagCreateListDTO tagListAddToProto(TagListNodesAdd tags);
 
     @Mapping(target = "tagIdsList", source = "tagIds", nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
-    TagRemoveListDTO tagListRemoveToProto(TagListNodeRemove tags);
+    TagRemoveListDTO tagListRemoveToProto(TagListNodesRemove tags);
+
+    TagCreateDTO tagCreateToProto(TagCreate tagCreate);
 
     default Int64Value longToInt64Value(Long value) {
         return Int64Value.of(value);

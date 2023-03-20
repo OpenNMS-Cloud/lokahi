@@ -10,16 +10,3 @@ subjects:
   - kind: ServiceAccount
     namespace: {{ .Release.Namespace }}
     name: {{ .Values.serviceName }}
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
-metadata:
-  name: {{ .Values.serviceName }}-dependencies
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: {{ .Values.serviceName }}-dependencies
-subjects:
-  - kind: ServiceAccount
-    namespace: {{ .Release.Namespace }}
-    name: {{ .Values.serviceName }}

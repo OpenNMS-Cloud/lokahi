@@ -29,6 +29,7 @@
 package org.opennms.horizon.inventory.cucumber.steps;
 
 import com.google.protobuf.Empty;
+import com.google.protobuf.Int64Value;
 import io.cucumber.java.BeforeAll;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
@@ -41,6 +42,7 @@ import org.opennms.horizon.inventory.dto.PassiveDiscoveryListDTO;
 import org.opennms.horizon.inventory.dto.PassiveDiscoveryServiceGrpc;
 import org.opennms.horizon.inventory.dto.PassiveDiscoveryUpsertDTO;
 import org.opennms.horizon.inventory.dto.TagCreateDTO;
+import org.opennms.horizon.inventory.dto.TagEntityIdDTO;
 import org.opennms.horizon.inventory.dto.TagListDTO;
 import org.opennms.horizon.inventory.dto.TagServiceGrpc;
 
@@ -89,6 +91,8 @@ public class PassiveDiscoveryStepDefinitions {
      */
     @Given("Passive Discovery fields to persist")
     public void passiveDiscoveryFieldsToPersist() {
+        deleteAllPassiveDiscovery();
+
         passiveDiscoveryUpsertDTO = PassiveDiscoveryUpsertDTO.newBuilder()
             .setLocation("Default")
             .addCommunities("public")
@@ -119,7 +123,8 @@ public class PassiveDiscoveryStepDefinitions {
     public void aGRPCRequestToGetTagsForPassiveDiscovery() {
         TagServiceGrpc.TagServiceBlockingStub stub = backgroundHelper.getTagServiceBlockingStub();
         tagList = stub.getTagsByEntityId(ListTagsByEntityIdParamsDTO.newBuilder()
-            .setPassiveDiscoveryId(createdDiscovery.getId()).build());
+            .setEntityId(TagEntityIdDTO.newBuilder()
+                .setPassiveDiscoveryId(createdDiscovery.getId())).build());
     }
 
     /*
@@ -149,5 +154,16 @@ public class PassiveDiscoveryStepDefinitions {
     public void theTagsForPassiveDiscoveryMatchWhatItWasCreatedWith() {
         assertEquals(passiveDiscoveryUpsertDTO.getTagsCount(), tagList.getTagsCount());
         assertEquals(passiveDiscoveryUpsertDTO.getTags(0).getName(), tagList.getTags(0).getName());
+    }
+
+    /*
+     * INTERNAL
+     * *********************************************************************************
+     */
+    private void deleteAllPassiveDiscovery() {
+        var passiveDiscoveryServiceBlockingStub = backgroundHelper.getPassiveDiscoveryServiceBlockingStub();
+        for (PassiveDiscoveryDTO discoveryDTO : passiveDiscoveryServiceBlockingStub.listAllDiscoveries(Empty.newBuilder().build()).getDiscoveriesList()) {
+            passiveDiscoveryServiceBlockingStub.deleteDiscovery(Int64Value.of(discoveryDTO.getId()));
+        }
     }
 }

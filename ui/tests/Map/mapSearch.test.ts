@@ -1,10 +1,10 @@
+import mountWithPiniaVillus from 'tests/mountWithPiniaVillus'
 import MapSearch from '@/components/Map/MapSearch.vue'
-import setupWrapper from 'tests/setupWrapper'
 
 let wrapper: any
 
 beforeEach(() => {
-  wrapper = setupWrapper({
+  wrapper = mountWithPiniaVillus({
     component: MapSearch
   })
 })

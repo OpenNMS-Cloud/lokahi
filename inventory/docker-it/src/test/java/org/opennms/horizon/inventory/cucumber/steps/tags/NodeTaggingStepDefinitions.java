@@ -26,14 +26,16 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.inventory.cucumber.steps;
+package org.opennms.horizon.inventory.cucumber.steps.tags;
 
 import com.google.protobuf.Empty;
 import com.google.protobuf.Int64Value;
 import io.cucumber.java.BeforeAll;
+import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import org.jetbrains.annotations.NotNull;
 import org.opennms.horizon.inventory.cucumber.InventoryBackgroundHelper;
 import org.opennms.horizon.inventory.dto.DeleteTagsDTO;
 import org.opennms.horizon.inventory.dto.ListAllTagsParamsDTO;
@@ -43,15 +45,17 @@ import org.opennms.horizon.inventory.dto.NodeDTO;
 import org.opennms.horizon.inventory.dto.TagCreateDTO;
 import org.opennms.horizon.inventory.dto.TagCreateListDTO;
 import org.opennms.horizon.inventory.dto.TagDTO;
+import org.opennms.horizon.inventory.dto.TagEntityIdDTO;
 import org.opennms.horizon.inventory.dto.TagListDTO;
 import org.opennms.horizon.inventory.dto.TagListParamsDTO;
 import org.opennms.horizon.inventory.dto.TagRemoveListDTO;
 import org.opennms.horizon.inventory.dto.TagServiceGrpc;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
-import java.util.function.Function;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -60,7 +64,8 @@ import static org.junit.Assert.assertNotNull;
 public class NodeTaggingStepDefinitions {
     private static InventoryBackgroundHelper backgroundHelper;
 
-    private NodeDTO node;
+    private NodeDTO node1;
+    private NodeDTO node2;
     private TagListDTO addedTagList;
     private TagListDTO fetchedTagList;
 
@@ -103,10 +108,21 @@ public class NodeTaggingStepDefinitions {
         deleteAllNodes();
 
         var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
-        node = nodeServiceBlockingStub.createNode(NodeCreateDTO.newBuilder().setLabel("node")
+        node1 = nodeServiceBlockingStub.createNode(NodeCreateDTO.newBuilder().setLabel("node")
             .setLocation("location").setManagementIp("127.0.0.1").build());
     }
 
+    @Given("2 new nodes")
+    public void twoNewNodes() {
+        deleteAllTags();
+        deleteAllNodes();
+
+        var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
+        node1 = nodeServiceBlockingStub.createNode(NodeCreateDTO.newBuilder().setLabel("node1")
+            .setLocation("location").setManagementIp("127.0.0.1").build());
+        node2 = nodeServiceBlockingStub.createNode(NodeCreateDTO.newBuilder().setLabel("node2")
+            .setLocation("location").setManagementIp("127.0.0.2").build());
+    }
 
     @Given("A new node with tags {string}")
     public void aNewNodeWithTags(String tags) {
@@ -114,27 +130,15 @@ public class NodeTaggingStepDefinitions {
         deleteAllNodes();
 
         var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
-        node = nodeServiceBlockingStub.createNode(NodeCreateDTO.newBuilder().setLabel("node")
+        node1 = nodeServiceBlockingStub.createNode(NodeCreateDTO.newBuilder().setLabel("node")
             .setLocation("location").setManagementIp("127.0.0.1").build());
         String[] tagArray = tags.split(",");
         var tagServiceBlockingStub = backgroundHelper.getTagServiceBlockingStub();
-        List<TagCreateDTO> tagCreateList = new ArrayList<>();
-        for (String name : tagArray) {
-            tagCreateList.add(TagCreateDTO.newBuilder().setName(name).build());
-        }
+        List<TagCreateDTO> tagCreateList = getTagCreateList(tagArray);
         addedTagList = tagServiceBlockingStub.addTags(TagCreateListDTO.newBuilder()
-            .addAllTags(tagCreateList).setNodeId(node.getId()).build());
-    }
-
-
-    @Given("A new node with no tags")
-    public void aNewNodeWithNoTags() {
-        deleteAllTags();
-        deleteAllNodes();
-
-        var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
-        node = nodeServiceBlockingStub.createNode(NodeCreateDTO.newBuilder().setLabel("node")
-            .setLocation("location").setManagementIp("127.0.0.1").build());
+            .addAllTags(tagCreateList)
+            .addEntityIds(TagEntityIdDTO.newBuilder()
+                .setNodeId(node1.getId())).build());
     }
 
     @Given("Another node with tags {string}")
@@ -144,12 +148,11 @@ public class NodeTaggingStepDefinitions {
             .setLocation("location").setManagementIp("127.0.0.2").build());
         String[] tagArray = tags.split(",");
         var tagServiceBlockingStub = backgroundHelper.getTagServiceBlockingStub();
-        List<TagCreateDTO> tagCreateList = new ArrayList<>();
-        for (String name : tagArray) {
-            tagCreateList.add(TagCreateDTO.newBuilder().setName(name).build());
-        }
+        List<TagCreateDTO> tagCreateList = getTagCreateList(tagArray);
         tagServiceBlockingStub.addTags(TagCreateListDTO.newBuilder()
-            .addAllTags(tagCreateList).setNodeId(node.getId()).build());
+            .addAllTags(tagCreateList)
+            .addEntityIds(TagEntityIdDTO.newBuilder()
+                .setNodeId(node.getId())).build());
     }
 
     /*
@@ -160,19 +163,35 @@ public class NodeTaggingStepDefinitions {
     public void aGRPCRequestToCreateTagsForNode(String tags) {
         String[] tagArray = tags.split(",");
         var tagServiceBlockingStub = backgroundHelper.getTagServiceBlockingStub();
-        List<TagCreateDTO> tagCreateList = new ArrayList<>();
-        for (String name : tagArray) {
-            tagCreateList.add(TagCreateDTO.newBuilder().setName(name).build());
-        }
+        List<TagCreateDTO> tagCreateList = getTagCreateList(tagArray);
         fetchedTagList = tagServiceBlockingStub.addTags(TagCreateListDTO.newBuilder()
-            .addAllTags(tagCreateList).setNodeId(node.getId()).build());
+            .addAllTags(tagCreateList)
+            .addEntityIds(TagEntityIdDTO.newBuilder()
+                .setNodeId(node1.getId())).build());
+    }
+
+    @When("A GRPC request to create tags {string} for both nodes")
+    public void aGRPCRequestToCreateTagsForBothNodes(String tags) {
+        String[] tagArray = tags.split(",");
+        var tagServiceBlockingStub = backgroundHelper.getTagServiceBlockingStub();
+        List<TagCreateDTO> tagCreateList = getTagCreateList(tagArray);
+
+        List<TagEntityIdDTO> tagEntityList = new ArrayList<>();
+        tagEntityList.add(TagEntityIdDTO.newBuilder().setNodeId(node1.getId()).build());
+        tagEntityList.add(TagEntityIdDTO.newBuilder().setNodeId(node2.getId()).build());
+
+        fetchedTagList = tagServiceBlockingStub.addTags(TagCreateListDTO.newBuilder()
+            .addAllTags(tagCreateList)
+            .addAllEntityIds(tagEntityList).build());
     }
 
     @When("A GRPC request to fetch tags for node")
     public void aGrpcRequestToFetchTagsForNode() {
         var tagServiceBlockingStub = backgroundHelper.getTagServiceBlockingStub();
         ListTagsByEntityIdParamsDTO params = ListTagsByEntityIdParamsDTO.newBuilder()
-            .setNodeId(node.getId()).setParams(TagListParamsDTO.newBuilder().build()).build();
+            .setEntityId(TagEntityIdDTO.newBuilder()
+                .setNodeId(node1.getId()))
+            .setParams(TagListParamsDTO.newBuilder().build()).build();
         fetchedTagList = tagServiceBlockingStub.getTagsByEntityId(params);
     }
 
@@ -183,12 +202,16 @@ public class NodeTaggingStepDefinitions {
             if (tagDTO.getName().equals(tag)) {
                 tagServiceBlockingStub.removeTags(TagRemoveListDTO.newBuilder()
                     .addAllTagIds(Collections.singletonList(Int64Value.newBuilder()
-                        .setValue(tagDTO.getId()).build())).setNodeId(node.getId()).build());
+                        .setValue(tagDTO.getId()).build()))
+                    .addEntityIds(TagEntityIdDTO.newBuilder()
+                        .setNodeId(node1.getId())).build());
                 break;
             }
         }
         ListTagsByEntityIdParamsDTO params = ListTagsByEntityIdParamsDTO.newBuilder()
-            .setNodeId(node.getId()).setParams(TagListParamsDTO.newBuilder().build()).build();
+            .setEntityId(TagEntityIdDTO.newBuilder()
+                .setNodeId(node1.getId()))
+            .setParams(TagListParamsDTO.newBuilder().build()).build();
         fetchedTagList = tagServiceBlockingStub.getTagsByEntityId(params);
     }
 
@@ -204,7 +227,8 @@ public class NodeTaggingStepDefinitions {
     public void aGRPCRequestToFetchAllTagsForNodeWithNameLike(String searchTerm) {
         var tagServiceBlockingStub = backgroundHelper.getTagServiceBlockingStub();
         ListTagsByEntityIdParamsDTO params = ListTagsByEntityIdParamsDTO.newBuilder()
-            .setNodeId(node.getId())
+            .setEntityId(TagEntityIdDTO.newBuilder()
+                .setNodeId(node1.getId()))
             .setParams(TagListParamsDTO.newBuilder().setSearchTerm(searchTerm).build()).build();
         fetchedTagList = tagServiceBlockingStub.getTagsByEntityId(params);
     }
@@ -221,15 +245,19 @@ public class NodeTaggingStepDefinitions {
      * SCENARIO THEN
      * *********************************************************************************
      */
-    @Then("The response should contain only tags {string}")
+    @Then("The node tag response should contain only tags {string}")
     public void theResponseShouldContainOnlyTags(String tags) {
         String[] tagArray = tags.split(",");
 
         assertNotNull(fetchedTagList);
         assertEquals(tagArray.length, fetchedTagList.getTagsCount());
 
-        for (int index = 0; index < tagArray.length; index++) {
-            assertEquals(tagArray[index], fetchedTagList.getTags(index).getName());
+        List<String> tagArraySorted = Arrays.stream(tagArray).sorted().toList();
+        List<TagDTO> fetchedTagListSorted = fetchedTagList.getTagsList().stream()
+            .sorted(Comparator.comparing(TagDTO::getName)).toList();
+
+        for (int index = 0; index < tagArraySorted.size(); index++) {
+            assertEquals(tagArraySorted.get(index), fetchedTagListSorted.get(index).getName());
         }
     }
 
@@ -239,6 +267,32 @@ public class NodeTaggingStepDefinitions {
         assertEquals(0, fetchedTagList.getTagsCount());
     }
 
+    @And("Both nodes have the same tags of {string}")
+    public void bothNodesHaveTheSameTagsOf(String tags) {
+        String[] tagArray = tags.split(",");
+
+        var tagServiceBlockingStub = backgroundHelper.getTagServiceBlockingStub();
+        TagListDTO node1TagList = tagServiceBlockingStub.getTagsByEntityId(ListTagsByEntityIdParamsDTO.newBuilder()
+            .setEntityId(TagEntityIdDTO.newBuilder().setNodeId(node1.getId())).build());
+        TagListDTO node2TagList = tagServiceBlockingStub.getTagsByEntityId(ListTagsByEntityIdParamsDTO.newBuilder()
+            .setEntityId(TagEntityIdDTO.newBuilder().setNodeId(node2.getId())).build());
+
+        assertEquals(tagArray.length, node1TagList.getTagsCount());
+        assertEquals(tagArray.length, node1TagList.getTagsCount());
+        assertEquals(node1TagList.getTagsCount(), node2TagList.getTagsCount());
+
+        List<String> tagArraySorted = Arrays.stream(tagArray).sorted().toList();
+        List<TagDTO> node1TagListSorted = node1TagList.getTagsList().stream()
+            .sorted(Comparator.comparing(TagDTO::getName)).toList();
+        List<TagDTO> node2TagListSorted = node2TagList.getTagsList().stream()
+            .sorted(Comparator.comparing(TagDTO::getName)).toList();
+
+        assertEquals(node1TagListSorted, node2TagListSorted);
+
+        for (int index = 0; index < tagArraySorted.size(); index++) {
+            assertEquals(tagArraySorted.get(index), node1TagListSorted.get(index).getName());
+        }
+    }
 
     /*
      * INTERNAL
@@ -256,5 +310,13 @@ public class NodeTaggingStepDefinitions {
         for (NodeDTO nodeDTO : nodeServiceBlockingStub.listNodes(Empty.newBuilder().build()).getNodesList()) {
             nodeServiceBlockingStub.deleteNode(Int64Value.newBuilder().setValue(nodeDTO.getId()).build());
         }
+    }
+
+    private static List<TagCreateDTO> getTagCreateList(String[] tagArray) {
+        List<TagCreateDTO> tagCreateList = new ArrayList<>();
+        for (String name : tagArray) {
+            tagCreateList.add(TagCreateDTO.newBuilder().setName(name).build());
+        }
+        return tagCreateList;
     }
 }

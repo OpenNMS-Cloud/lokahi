@@ -32,12 +32,27 @@
       />
     </div>
     <!-- Chart Area -->
-    <div class="flows"></div>
+    <div class="flows">
+      <TableChart
+      :id="'tableChart'"
+      :selected-filter-range="flowsStore.dateFilter"
+      :chart-data="flowsStore.tableChartData"
+      :table-data="flowsStore.datasets">
+      </TableChart>
+    </div>
   </div>
   
 </template>
 
 <script setup lang="ts">
+import { useFlowsStore } from '@/store/Views/flowsStore'
+
+const flowsStore = useFlowsStore()
+
+onBeforeMount(async () => {
+  flowsStore.generateTableChart()
+})
+
 // DUMMY DATA
 const timeOptions = [
   { id: 'today', name: 'Today' },

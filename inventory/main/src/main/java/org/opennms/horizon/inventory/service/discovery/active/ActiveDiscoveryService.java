@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.function.Function;
+import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
@@ -21,5 +21,14 @@ public class ActiveDiscoveryService {
     public List<ActiveDiscoveryDTO> getActiveDiscoveries(String tenantId) {
         List<ActiveDiscovery> discoveries = repository.findByTenantIdOrderById(tenantId);
         return mapper.modelToDto(discoveries);
+    }
+
+    @Transactional
+    public void deleteActiveDiscovery(String tenantId, long id) {
+        Optional<ActiveDiscovery> activeDiscoveryOptional = repository.findByTenantIdAndId(tenantId, id);
+        if (activeDiscoveryOptional.isPresent()) {
+            ActiveDiscovery activeDiscovery = activeDiscoveryOptional.get();
+            repository.delete(activeDiscovery);
+        }
     }
 }

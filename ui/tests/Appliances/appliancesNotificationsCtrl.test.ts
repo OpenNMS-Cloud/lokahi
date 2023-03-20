@@ -1,9 +1,10 @@
+import mountWithPiniaVillus from 'tests/mountWithPiniaVillus'
 import AppliancesNotificationsCtrl from '@/components/Appliances/AppliancesNotificationsCtrl.vue'
 import { useNotificationMutations } from '@/store/Mutations/notificationMutations'
-import setupWrapper from 'tests/setupWrapper'
 
-const wrapper = setupWrapper({
+const wrapper = mountWithPiniaVillus({
   component: AppliancesNotificationsCtrl,
+  shallow: false,
   global: {
     stubs: {
       teleport: true

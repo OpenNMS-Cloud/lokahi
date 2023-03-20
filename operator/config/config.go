@@ -10,6 +10,7 @@ type OperatorConfig struct {
 	DefaultOpenNMSValuesFile  string `mapstructure:"DEFAULT_OPENNMS_VALUES_FILE"`
 	DefaultOpenNMSTemplateLoc string `mapstructure:"DEFAULT_OPENNMS_TEMPLATE_LOC"`
 	DevMode                   bool   `mapstructure:"DEV_MODE"`
+	OpenshiftMode             bool   `mapstructure:"OPENSHIFT_MODE"`
 }
 
 func LoadConfig() OperatorConfig {

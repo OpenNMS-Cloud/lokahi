@@ -1,0 +1,13 @@
+{{ if .Values.OpenShift }}
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: opennms-grafana-route
+  namespace: {{ .Release.Namespace }}
+spec:
+  subdomain: {{ .Values.Host }}
+  path: {{ .Values.Grafana.Path }}  
+  to:
+    kind: Service
+    name: {{ .Values.Grafana.ServiceName }}
+{{ end }}

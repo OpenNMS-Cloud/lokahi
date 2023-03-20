@@ -1,0 +1,13 @@
+{{ if .Values.OpenShift }}
+piVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: opennms-keycloak-route
+  namespace: {{ .Release.Namespace }}
+spec:
+  subdomain: {{ .Values.Host }}
+  path: {{ .Values.Keycloak.Path }}  
+  to:
+    kind: Service
+    name: {{ .Values.Keycloak.ServiceName }}
+{{ end }}

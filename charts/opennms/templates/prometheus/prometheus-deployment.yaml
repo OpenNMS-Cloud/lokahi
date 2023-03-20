@@ -2,19 +2,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Values.Prometheus.Server.ServiceName }}
+  name: {{ .Values.Prometheus.ServiceName }}
   labels:
-    app: {{ .Values.Prometheus.Server.ServiceName }}
+    app: {{ .Values.Prometheus.ServiceName }}
   namespace: {{ .Release.Namespace }}
 spec:
-  replicas: {{ .Values.Prometheus.Server.Replicas }}
+  replicas: {{ .Values.Prometheus.Replicas }}
   selector:
     matchLabels:
-      app: {{ .Values.Prometheus.Server.ServiceName }}
+      app: {{ .Values.Prometheus.ServiceName }}
   template:
     metadata:
       labels:
-        app: {{ .Values.Prometheus.Server.ServiceName }}
+        app: {{ .Values.Prometheus.ServiceName }}
     spec:
       serviceAccountName: prometheus-sa
       {{- if .Values.NodeRestrictions.Enabled }}
@@ -41,17 +41,17 @@ spec:
           configMap:
             name: prometheus-config-map
       containers:
-        - name: {{ .Values.Prometheus.Server.ServiceName }}
-          image: {{ .Values.Prometheus.Server.Image }}
+        - name: {{ .Values.Prometheus.ServiceName }}
+          image: {{ .Values.Prometheus.Image }}
           ports:
-            - containerPort: {{ .Values.Prometheus.Server.Port }}
+            - containerPort: {{ .Values.Prometheus.Port }}
           resources:
             limits:
-              cpu: {{ .Values.Prometheus.Server.Resources.Limits.Cpu }}
-              memory: {{ .Values.Prometheus.Server.Resources.Limits.Memory }}
+              cpu: {{ .Values.Prometheus.Resources.Limits.Cpu }}
+              memory: {{ .Values.Prometheus.Resources.Limits.Memory }}
             requests:
-              cpu: {{ .Values.Prometheus.Server.Resources.Requests.Cpu }}
-              memory: {{ .Values.Prometheus.Server.Resources.Requests.Memory }}
+              cpu: {{ .Values.Prometheus.Resources.Requests.Cpu }}
+              memory: {{ .Values.Prometheus.Resources.Requests.Memory }}
           volumeMounts:
             - name: prometheus-config-volume
               mountPath: "/etc/prometheus/prometheus.yml"

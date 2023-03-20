@@ -1,12 +1,12 @@
+import mountWithPiniaVillus from 'tests/mountWithPiniaVillus'
 import InventoryTagManager from '@/components/Inventory/InventoryTagManager.vue'
 import InventoryTagManagerCtrl from '@/components/Inventory/InventoryTagManagerCtrl.vue'
-import setupWrapper from 'tests/setupWrapper'
 
-const tagManagerWrapper = setupWrapper({
+const tagManagerWrapper = mountWithPiniaVillus({
   component: InventoryTagManager
 })
 
-const tagManagerCtrlWrapper = setupWrapper({
+const tagManagerCtrlWrapper = mountWithPiniaVillus({
   component: InventoryTagManagerCtrl
 })
 

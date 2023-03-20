@@ -101,6 +101,10 @@ spec:
             - name: KC_HTTPS_CERTIFICATE_KEY_FILE
               value: "/mnt/certificates/tls.key"
             {{- end }}
+            {{- if .Values.OpenShift }}
+            - name: KC_HOSTNAME_STRICT_HTTPS
+              value: "false"
+            {{- end }}
           ports:
             - name: http
               containerPort: {{ .Values.Keycloak.Port }}

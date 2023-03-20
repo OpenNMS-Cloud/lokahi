@@ -44,13 +44,17 @@ message TagListDTO {
   repeated TagDTO tags = 1;
 }
 
-message TagCreateListDTO {
+message TagEntityIdDTO {
   oneof id {
     int64 node_id = 1;
     int64 active_discovery_id = 2;
     int64 passive_discovery_id = 3;
   }
-  repeated TagCreateDTO tags = 4;
+}
+
+message TagCreateListDTO {
+  repeated TagEntityIdDTO entity_ids = 1;
+  repeated TagCreateDTO tags = 2;
 }
 
 message TagCreateDTO {
@@ -58,21 +62,13 @@ message TagCreateDTO {
 }
 
 message TagRemoveListDTO {
-  oneof id {
-    int64 node_id = 1;
-    int64 active_discovery_id = 2;
-    int64 passive_discovery_id = 3;
-  }
-  repeated google.protobuf.Int64Value tag_ids = 4;
+  repeated TagEntityIdDTO entity_ids = 1;
+  repeated google.protobuf.Int64Value tag_ids = 2;
 }
 
 message ListTagsByEntityIdParamsDTO {
-  oneof id {
-    int64 node_id = 1;
-    int64 active_discovery_id = 2;
-    int64 passive_discovery_id = 3;
-  }
-  optional TagListParamsDTO params = 4;
+  TagEntityIdDTO entity_id = 1;
+  optional TagListParamsDTO params = 2;
 }
 
 message ListAllTagsParamsDTO {

@@ -41,16 +41,20 @@ spec:
       volumes:
         - name: minion-config-volume
           configMap:
-            name: minion-config 
+            name: minion-config
+        - name: maven-volume
+          emptyDir: {}
+      {{ if not .Values.OpenShift }}
       initContainers:
       - name: init-sysctl
         image: busybox
         command:
-        - sysctl
-        - -w
-        - net.ipv4.ping_group_range=0 429496729
+          - sysctl
+          - -w
+          - net.ipv4.ping_group_range=0 429496729
         securityContext:
           privileged: true
+      {{ end }}
       containers:
         - name: {{ .Values.OpenNMS.Minion.ServiceName }}
           image: {{ .Values.OpenNMS.Minion.Image }}
@@ -93,6 +97,8 @@ spec:
               mountPath: "/opt/horizon-stream/etc/users.properties"
               subPath: "karafUsers"
               readOnly: true
+            - name: maven-volume
+              mountPath: /.m2
           resources:
             limits:
               cpu: "{{ .Values.OpenNMS.Minion.Resources.Limits.Cpu }}"

@@ -30,4 +30,12 @@ func TestIngressUpdateConfig(t *testing.T) {
 	err := handler.UpdateConfig(testutil.DefaultTestValues())
 	assert.Nil(t, err)
 	assert.NotNil(t, handler.GetConfig(), "config should no longer be nil")
+
+	handler = IngressHandler{}
+	values := testutil.DefaultTestValues()
+	values.Values.OpenShift = true
+	assert.Nil(t, handler.GetConfig(), "config should start as nil")
+	err = handler.UpdateConfig(values)
+	assert.Nil(t, err)
+	assert.NotNil(t, handler.GetConfig(), "config should no longer be nil")
 }

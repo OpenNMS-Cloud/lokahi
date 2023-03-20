@@ -1,6 +1,7 @@
 Host: onmshs
 Port: 443 #set depending on TLS.Enabled and the Ingress ports, do not change
 Protocol: https #set depending on TLS.Enabled, do not change
+OpenShift: false
 OpenNMS:
   API:
     Path: /api
@@ -298,6 +299,7 @@ Ingress:
   ControllerImage: registry.k8s.io/ingress-nginx/controller:v1.3.0@sha256:d1707ca76d3b044ab8a28277a2466a02100ee9f58a86af1535a3edf9323ea1b5
   SecretJobImage: registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.1.1@sha256:64d8c73dca984af206adf9d6d7e46aa550362b1d7a01f3a0a91b20cc67868660
   WebhookPatchJobImage: registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.1.1@sha256:64d8c73dca984af206adf9d6d7e46aa550362b1d7a01f3a0a91b20cc67868660
+
 CustomErrors:
   Image: quay.io/kubernetes-ingress-controller/custom-error-pages:0.4
   Debug: true
@@ -305,16 +307,15 @@ CustomErrors:
 Prometheus:
   Enabled: true
   Path: /prometheus
-  Server:
-    ServiceName: prometheus
-    Port: 9090
-    Image: prom/prometheus:v2.39.1
-    ImagePullPolicy: IfNotPresent
-    Replicas: 1
-    Resources:
-      Limits:
-        Cpu: "1"
-        Memory: 512Mi
-      Requests:
-        Cpu: 100m
-        Memory: 100Mi
+  ServiceName: prometheus
+  Port: 9090
+  Image: prom/prometheus:v2.39.1
+  ImagePullPolicy: IfNotPresent
+  Replicas: 1
+  Resources:
+    Limits:
+      Cpu: "1"
+      Memory: 512Mi
+    Requests:
+      Cpu: 100m
+      Memory: 100Mi

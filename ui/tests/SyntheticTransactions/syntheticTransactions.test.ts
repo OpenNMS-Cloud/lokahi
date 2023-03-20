@@ -1,7 +1,7 @@
+import mountWithPiniaVillus from 'tests/mountWithPiniaVillus'
 import SyntheticTransactions from '@/containers/SyntheticTransactions.vue'
-import setupWrapper from 'tests/setupWrapper'
 
-const wrapper = setupWrapper({
+const wrapper = mountWithPiniaVillus({
   component: SyntheticTransactions
 })
 

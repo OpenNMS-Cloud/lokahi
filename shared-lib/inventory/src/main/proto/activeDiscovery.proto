@@ -50,4 +50,5 @@ message ActiveDiscoveryList {
 
 service ActiveDiscoveryService {
   rpc listDiscoveries(google.protobuf.Empty) returns(ActiveDiscoveryList);
+  rpc deleteDiscovery(google.protobuf.Int64Value) returns(google.protobuf.BoolValue) {};
 }

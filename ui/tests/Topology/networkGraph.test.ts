@@ -1,7 +1,7 @@
+import mountWithPiniaVillus from 'tests/mountWithPiniaVillus'
 import NetworkGraph from '@/components//Topology/NetworkGraph.vue'
-import setupWrapper from 'tests/setupWrapper'
 
-const wrapper = setupWrapper({
+const wrapper = mountWithPiniaVillus({
   component: NetworkGraph,
   props: {
     refresh: () => ''

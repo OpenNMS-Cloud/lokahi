@@ -1,13 +1,14 @@
+import mountWithPiniaVillus from 'tests/mountWithPiniaVillus'
 import SeverityFilter from '@/components/Map/SeverityFilter.vue'
 import { useMapStore } from '@/store/Views/mapStore'
 import { findByText } from 'tests/utils'
-import setupWrapper from 'tests/setupWrapper'
 
 let wrapper: any
 
 beforeEach(() => {
-  wrapper = setupWrapper({
-    component: SeverityFilter
+  wrapper = mountWithPiniaVillus({
+    component: SeverityFilter,
+    shallow: false
   })
 })
 

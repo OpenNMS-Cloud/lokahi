@@ -36,6 +36,7 @@ import org.opennms.horizon.inventory.dto.MonitoredState;
 import org.opennms.horizon.inventory.dto.NodeCreateDTO;
 import org.opennms.horizon.inventory.dto.NodeDTO;
 import org.opennms.horizon.inventory.dto.TagCreateListDTO;
+import org.opennms.horizon.inventory.dto.TagEntityIdDTO;
 import org.opennms.horizon.inventory.mapper.NodeMapper;
 import org.opennms.horizon.inventory.model.IpInterface;
 import org.opennms.horizon.inventory.model.MonitoringLocation;
@@ -191,7 +192,8 @@ public class NodeService {
         saveIpInterfaces(request, node, tenantId);
 
         tagService.addTags(tenantId, TagCreateListDTO.newBuilder()
-            .setNodeId(node.getId())
+            .addEntityIds(TagEntityIdDTO.newBuilder()
+                .setNodeId(node.getId()))
             .addAllTags(request.getTagsList())
             .build());
 

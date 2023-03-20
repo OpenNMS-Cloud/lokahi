@@ -24,3 +24,55 @@ Run the local installation script
 ```
 bash deploy-horizon-stream.yaml
 ```
+
+### OpenShift Install
+
+Create an OpenShift account, login, and download the [Local installer from here](https://console.redhat.com/openshift/create/local).
+
+Run the following:
+
+```
+crc setup
+crc start
+```
+
+Wait for `start` to finish, then run the following to login into your cluster:
+
+```
+eval $(crc oc-env)
+crc console --credentials
+```
+
+Something like this will be printed:
+
+```
+% crc console --credentials
+To login as a regular user, run 'oc login -u developer -p developer https://api.crc.testing:6443'.
+To login as an admin, run 'oc login -u kubeadmin -p W7uLo-iWt5L-CtfnA-fjJCa https://api.crc.testing:6443'
+```
+
+Copy the `admin` line and run it:
+
+```
+% oc login -u kubeadmin -p W7uLo-iWt5L-CtfnA-fjJCa https://api.crc.testing:6443
+Login successful.
+
+You have access to 67 projects, the list has been suppressed. You can list all projects with 'oc projects'
+
+Using project "default".
+```
+
+You can now interact with the OpenShift cluster using `kubectl`.
+
+
+
+#### Macbook M1
+
+If you have an M1 Macbook, follow these steps in addition to the above.
+
+?????????????????????? 
+
+
+
+
+

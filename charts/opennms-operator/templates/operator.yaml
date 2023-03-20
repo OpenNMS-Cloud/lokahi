@@ -20,8 +20,8 @@ spec:
           env:
             - name: DEV_MODE
               value: "{{ .Values.devMode }}"
-            - name: IMAGE_UPDATE_FREQUENCY
-              value: "{{ .Values.imageUpdateFreq }}"
+            - name: OPENSHIFT_MODE
+              value: "{{ .Values.openshift }}"
           resources:
             limits:
               cpu: {{ .Values.resources.limits.cpu }}

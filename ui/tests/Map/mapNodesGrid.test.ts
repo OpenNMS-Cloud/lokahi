@@ -1,10 +1,10 @@
+import mountWithPiniaVillus from 'tests/mountWithPiniaVillus'
 import MapNodesGrid from '@/components/Map/MapNodesGrid.vue'
-import setupWrapper from 'tests/setupWrapper'
 
 let wrapper: any
 
 beforeEach(() => {
-  wrapper = setupWrapper({
+  wrapper = mountWithPiniaVillus({
     component: MapNodesGrid
   })
 })

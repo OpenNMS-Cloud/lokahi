@@ -39,6 +39,7 @@ import org.opennms.horizon.inventory.dto.AzureActiveDiscoveryDTO;
 import org.opennms.horizon.inventory.dto.ListTagsByEntityIdParamsDTO;
 import org.opennms.horizon.inventory.dto.TagCreateDTO;
 import org.opennms.horizon.inventory.dto.TagDTO;
+import org.opennms.horizon.inventory.dto.TagEntityIdDTO;
 import org.opennms.horizon.inventory.dto.TagListDTO;
 
 import java.util.List;
@@ -117,7 +118,8 @@ public class AzureDiscoveryStepDefinitions {
     public void aGRPCRequestToGetTagsForAzureActiveDiscovery() {
         var tagServiceBlockingStub = backgroundHelper.getTagServiceBlockingStub();
         ListTagsByEntityIdParamsDTO params = ListTagsByEntityIdParamsDTO.newBuilder()
-            .setActiveDiscoveryId(discoveryDto.getId()).build();
+            .setEntityId(TagEntityIdDTO.newBuilder()
+                .setActiveDiscoveryId(discoveryDto.getId())).build();
         tagList = tagServiceBlockingStub.getTagsByEntityId(params);
     }
 

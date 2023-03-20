@@ -24,6 +24,7 @@ import (
 func GetDefaultValues(operatorConfig config.OperatorConfig) (values.TemplateValues, error) {
 	v, err := LoadValues(operatorConfig.DefaultOpenNMSValuesFile)
 	v.Keycloak.DynamicRealmConfig = false
+	v.OpenShift = operatorConfig.OpenshiftMode
 	return values.TemplateValues{
 		Values:  v,
 		Release: values.HelmRelease{},

@@ -8,9 +8,15 @@ on:
 # This workflow is triggered instead of individual workflows that filter based on paths.
 # If we want to fully separate individual workflows out of this one, we need fully reproducible builds.
 # Just use this one for now. The downside is it will run redundant workflows for code that didn't change.
-#    types: [labeled]
     branches:
       - 'develop'
+    paths-ignore:
+      - '.github/**'
+      - 'CHANGELOG/**'
+      - 'build-tools/**'
+      - 'doc/**'
+      - 'tooling/**'
+      - 'tools/**'
   workflow_call:
     inputs:
       image-tag:
@@ -224,3 +230,40 @@ jobs:
             echo ""
             echo "=== K8S APPLICATION LOGS ==="
             kubectl logs -n hs-instance -l appdomain=opennms --tail=-1 --prefix --all-containers
+
+            echo ${{ github.ref  }}
+
+  update:
+    name: Update
+
+    # Need this to trigger only when PR is merged or there is a push to
+    # develop (default) branch. All testing is already complete.
+    if: github.ref == 'refs/heads/develop'
+    runs-on: ubuntu-latest
+    steps:
+
+      - uses: actions/checkout@v3
+        with:
+          repository: OpenNMS-Cloud/fabric-services
+          token: ${{ secrets.GH_TOKEN }}
+          fetch-depth: 0
+          # How can we add the functionality from 'git clone --filter=tree:0
+          # <url>' in this checkout? This would save us from pulling more than
+          # what we need.
+      - name: update
+        shell: bash
+        run: |
+
+          git config --global user.email jaberry@opennms.com
+          git config --global user.name jaberry
+
+          git remote add hs https://github.com/OpenNMS-Cloud/horizon-stream.git
+
+          git checkout from-develop
+
+          git fetch hs develop
+          git reset --hard FETCH_HEAD
+          git push
+          git checkout trunk
+          git merge from-develop
+          git push

@@ -51,9 +51,9 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: {{ .Values.Prometheus.Server.ServiceName }}
+                name: {{ .Values.Prometheus.ServiceName }}
                 port:
-                  number: {{ .Values.Prometheus.Server.Port }}
+                  number: {{ .Values.Prometheus.Port }}
           {{- end }}
   {{- if .Values.TLS.Enabled }}
   tls:

@@ -37,6 +37,8 @@ spec:
       {{- end }}
       volumes:
         - name: postgres-volume
+          persistentVolumeClaim:
+            claimName: postgres-pvc
         - name: postgres-initial-script
           secret:
             secretName: postgres-initial-sql
@@ -45,6 +47,8 @@ spec:
           image: {{ .Values.Postgres.Image }}
           imagePullPolicy: {{ .Values.Postgres.ImagePullPolicy }}
           env:
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
             - name: POSTGRES_USER
               valueFrom:
                 secretKeyRef:
@@ -54,7 +58,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: postgres
-                  key: adminPwd
+                  key: adminPwd         
           ports:
             - containerPort: 5432
           livenessProbe:

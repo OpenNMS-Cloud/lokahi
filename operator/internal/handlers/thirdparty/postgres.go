@@ -29,11 +29,13 @@ func (h *PostgresHandler) UpdateConfig(values values.TemplateValues) error {
 	var initSecret corev1.Secret
 	var credSecret corev1.Secret
 	var service corev1.Service
+	var pvc corev1.PersistentVolumeClaim
 	var deployment appsv1.Deployment
 
 	h.AddToTemplates(handlers.Filepath("postgres/postgres-init-secret.yaml"), values, &initSecret)
 	h.AddToTemplates(handlers.Filepath("postgres/postgres-cred-secret.yaml"), values, &credSecret)
 	h.AddToTemplates(handlers.Filepath("postgres/postgres-service.yaml"), values, &service)
+	h.AddToTemplates(handlers.Filepath("postgres/postgres-pvc.yaml"), values, &pvc)
 	h.AddToTemplates(handlers.Filepath("postgres/postgres-deployment.yaml"), values, &deployment)
 
 	return h.LoadTemplates()

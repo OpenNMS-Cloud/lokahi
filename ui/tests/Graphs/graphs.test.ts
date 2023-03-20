@@ -1,5 +1,5 @@
+import mountWithPiniaVillus from 'tests/mountWithPiniaVillus'
 import Graphs from '@/containers/Graphs.vue'
-import setupWrapper from 'tests/setupWrapper'
 import { downloadCanvas, downloadMultipleCanvases } from '@/components/Graphs/utils'
 import { createRouter, createWebHistory } from 'vue-router'
 import { RouterLinkStub } from '@vue/test-utils'
@@ -36,7 +36,7 @@ vi.mock('jspdf', () => {
   }
 })
 
-const wrapper = setupWrapper({
+const wrapper = mountWithPiniaVillus({
   component: Graphs,
   global: {
     plugins: [mockRouter],

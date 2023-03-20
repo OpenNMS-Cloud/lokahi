@@ -33,6 +33,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.opennms.horizon.inventory.discovery.IcmpActiveDiscoveryCreateDTO;
 import org.opennms.horizon.inventory.discovery.IcmpActiveDiscoveryDTO;
 import org.opennms.horizon.inventory.dto.TagCreateListDTO;
+import org.opennms.horizon.inventory.dto.TagEntityIdDTO;
 import org.opennms.horizon.inventory.mapper.discovery.IcmpActiveDiscoveryMapper;
 import org.opennms.horizon.inventory.model.discovery.active.IcmpActiveDiscovery;
 import org.opennms.horizon.inventory.repository.discovery.active.IcmpActiveDiscoveryRepository;
@@ -59,7 +60,8 @@ public class IcmpActiveDiscoveryService {
         discovery = repository.save(discovery);
 
         tagService.addTags(tenantId, TagCreateListDTO.newBuilder()
-            .setActiveDiscoveryId(discovery.getId())
+            .addEntityIds(TagEntityIdDTO.newBuilder()
+                .setActiveDiscoveryId(discovery.getId()))
             .addAllTags(request.getTagsList())
             .build());
 

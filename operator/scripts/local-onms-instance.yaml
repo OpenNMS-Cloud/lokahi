@@ -1,13 +1,13 @@
 apiVersion: k8s.opennms.com/v1alpha1
 kind: OpenNMS
 metadata:
-  name: local-instance
+  name: opennms-instance
 spec:
   allowedUsers: []
   host: onmshs
   httpPort: 80
   httpsPort: 443
-  namespace: local-instance
+  namespace: opennms-instance
   tlsEnabled: false
   deployOnly: true
   core:

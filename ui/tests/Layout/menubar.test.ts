@@ -1,12 +1,13 @@
+import mountWithPiniaVillus from 'tests/mountWithPiniaVillus'
 import Menubar from '@/components/Layout/Menubar.vue'
 import useKeycloak from '@/composables/useKeycloak'
 import useTheme from '@/composables/useTheme'
 import Keycloak from 'keycloak-js'
-import setupWrapper from 'tests/setupWrapper'
 
 test('The menubar mounts', () => {
-  const wrapper = setupWrapper({
-    component: Menubar
+  const wrapper = mountWithPiniaVillus({
+    component: Menubar,
+    shallow: false
   })
   expect(wrapper).toBeTruthy()
 })
@@ -23,8 +24,9 @@ test('The toggle dark btn triggers the composible function, and the ref updates'
   theme.onThemeChange(mockFn)
 
   // get and trigger dark/light mode btn
-  const wrapper = setupWrapper({
-    component: Menubar
+  const wrapper = mountWithPiniaVillus({
+    component: Menubar,
+    shallow: false
   })
   const toggleDarkBtn = wrapper.get('[data-test="toggle-dark"]')
   await toggleDarkBtn.trigger('click')

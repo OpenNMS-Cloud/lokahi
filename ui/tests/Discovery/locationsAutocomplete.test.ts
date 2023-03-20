@@ -25,6 +25,7 @@ describe('Locations Autocomplete component', () => {
   beforeAll(() => {
     wrapper = mount({
       component: DiscoveryLocationsAutocomplete,
+      shallow: false,
       props: {
         type: 'multiple'
       }

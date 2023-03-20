@@ -1,12 +1,13 @@
+import mountWithPiniaVillus from 'tests/mountWithPiniaVillus'
 import GridTabs from '@/components/Map/GridTabs.vue'
 import router from '@/router'
-import setupWrapper from 'tests/setupWrapper'
 
 let wrapper: any
 
 beforeEach(() => {
-  wrapper = setupWrapper({
+  wrapper = mountWithPiniaVillus({
     component: GridTabs,
+    shallow: false,
     global: {
       plugins: [router]
     }

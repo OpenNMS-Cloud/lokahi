@@ -28,7 +28,10 @@
 
 package org.opennms.miniongateway.grpc.twin;
 
+import io.grpc.StatusRuntimeException;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -49,8 +52,6 @@ import org.opennms.miniongateway.grpc.server.model.TenantKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Strings;
-
 import io.grpc.stub.StreamObserver;
 import org.slf4j.MDC;
 import org.slf4j.MDC.MDCCloseable;
@@ -58,8 +59,8 @@ import org.slf4j.MDC.MDCCloseable;
 public class GrpcTwinPublisher extends AbstractTwinPublisher {
 
     private static final Logger LOG = LoggerFactory.getLogger(GrpcTwinPublisher.class);
-    private Multimap<TenantKey, StreamObserver<TwinResponseProto>> sinkStreamsByLocation = LinkedListMultimap.create();
-    private Map<TenantKey, StreamObserver<TwinResponseProto>> sinkStreamsBySystemId = new HashMap<>();
+    private Multimap<TenantKey, AdapterObserver> sinkStreamsByLocation = LinkedListMultimap.create();
+    private Map<TenantKey, AdapterObserver> sinkStreamsBySystemId = new HashMap<>();
     private final ThreadFactory twinRpcThreadFactory = new ThreadFactoryBuilder()
             .setNameFormat("twin-rpc-handler-%d")
             .build();
@@ -79,18 +80,34 @@ public class GrpcTwinPublisher extends AbstractTwinPublisher {
             return false;
         }
         try {
-            if (Strings.isNullOrEmpty(twinResponseProto.getLocation())) {
-                LOG.debug("Sending sink update for key {} at all locations", twinResponseProto.getConsumerKey());
-                sinkStreamsByLocation.entries().stream().filter(entry -> tenantId.equals(entry.getKey().getTenantId())).map(
-                    Entry::getValue).forEach(stream -> {
-                    stream.onNext(twinResponseProto);
-                });
+            Object[] diagnosticCtx = {tenantId, twinResponseProto.getConsumerKey(), twinResponseProto.getLocation(), twinResponseProto.getSystemId()};
+            if (twinResponseProto.getLocation().isBlank()) {
+                // theoretical broadcast scenario - no location given, so we send update to all locations
+                LOG.debug("Sending sink update for tenant {} with key {} in all locations", tenantId, twinResponseProto.getConsumerKey());
+                for (Entry<TenantKey, AdapterObserver> entry : new ArrayList<>(sinkStreamsByLocation.entries())) {
+                    if (tenantId.equals(entry.getKey().getTenantId())) {
+                        AdapterObserver stream = entry.getValue();
+                        try {
+                            LOG.debug("Sending sink update for tenant {}, key {}, location {}, system id {}", diagnosticCtx);
+                            stream.onNext(twinResponseProto);
+                        } catch (StatusRuntimeException e) {
+                            LOG.debug("Failed to send sink update for tenant {}, key {}, location {}, system id {}", diagnosticCtx);
+                            stream.complete();
+                        }
+                    }
+                }
             } else {
                 String location = twinResponseProto.getLocation();
-                sinkStreamsByLocation.get(new TenantKey(tenantId, location)).forEach(stream -> {
-                    stream.onNext(twinResponseProto);
-                    LOG.debug("Sending sink update for key {} at location {}", twinResponseProto.getConsumerKey(), twinResponseProto.getLocation());
-                });
+                Collection<AdapterObserver> observers = sinkStreamsByLocation.get(new TenantKey(tenantId, location));
+                for (AdapterObserver stream : new ArrayList<>(observers)) {
+                    try {
+                        LOG.debug("Sending sink update for tenant {}, key {} at location {}", diagnosticCtx);
+                        stream.onNext(twinResponseProto);
+                    } catch (StatusRuntimeException e) {
+                        LOG.debug("Failed to send sink update for tenant {}, key {} at location {}", diagnosticCtx);
+                        stream.complete();
+                    }
+                }
             }
         } catch (Exception e) {
             LOG.error("Error while sending Twin response for Sink stream", e);
@@ -133,6 +150,10 @@ public class GrpcTwinPublisher extends AbstractTwinPublisher {
         @Override
         public void onError(Throwable t) {
             logger.warn("Error while processing a stream data", t);
+        }
+
+        public void complete() {
+            completionCallback.run();
         }
 
         @Override
@@ -182,6 +203,8 @@ public class GrpcTwinPublisher extends AbstractTwinPublisher {
                 delegate.setCompletionCallback(() -> {
                     sinkStreamsByLocation.remove(locationKey, delegate);
                     sinkStreamsBySystemId.remove(systemIdKey);
+                    // mark stream as done
+                    responseObserver.onCompleted();
                 });
                 sinkStreamsByLocation.put(locationKey, delegate);
                 sinkStreamsBySystemId.put(systemIdKey, delegate);

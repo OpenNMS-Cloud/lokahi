@@ -33,32 +33,21 @@ import static com.jayway.awaitility.Awaitility.await;
 import java.util.concurrent.TimeUnit;
 
 import org.hamcrest.Matchers;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.opennms.horizon.inventory.SpringContextTestInitializer;
 import org.opennms.horizon.inventory.grpc.taskset.TestTaskSetGrpcService;
-import org.opennms.taskset.contract.TaskSet;
-import org.opennms.taskset.service.contract.PublishTaskSetRequest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.opennms.taskset.service.contract.TaskSetServiceGrpc;
 import org.opennms.taskset.service.contract.UpdateTasksRequest;
+import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
-import org.opennms.taskset.service.contract.TaskSetServiceGrpc;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 
-import jakarta.transaction.Transactional;
-import java.io.IOException;
-import java.util.concurrent.TimeUnit;
-
-import static com.jayway.awaitility.Awaitility.await;
-
-// TBD888: move tests into Cucumber
 @SpringBootTest(properties = {"spring.liquibase.change-log=db/changelog/changelog-test.xml"})
 @ContextConfiguration(initializers = {SpringContextTestInitializer.class})
+@AutoConfigureObservability     // Make sure to include Metrics (for some reason they are disabled by default in the integration grey-box test)
 class NodeGrpcStartupIntTest extends GrpcTestBase {
     @Autowired
     private ApplicationContext context;

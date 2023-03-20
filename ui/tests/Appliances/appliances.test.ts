@@ -1,3 +1,4 @@
+import mountWithPiniaVillus from 'tests/mountWithPiniaVillus'
 import Appliances from '@/containers/Appliances.vue'
 import AppliancesNotificationsCtrl from '@/components/Appliances/AppliancesNotificationsCtrl.vue'
 import DevicesTable from '@/components/Appliances/AppliancesNodesTable.vue'
@@ -5,10 +6,9 @@ import MinionsTable from '@/components/Appliances/AppliancesMinionsTable.vue'
 import AppliancesAddNodeCtrl from '@/components/Appliances/AppliancesAddNodeCtrl.vue'
 import useKeycloak from '@/composables/useKeycloak'
 import Keycloak from 'keycloak-js'
-import setupWrapper from 'tests/setupWrapper'
 import dateFormatDirective from '@/directives/v-date'
 
-const wrapper = setupWrapper({
+const wrapper = mountWithPiniaVillus({
   type: 'shallow',
   component: Appliances,
   global: {

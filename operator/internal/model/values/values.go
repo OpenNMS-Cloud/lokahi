@@ -24,6 +24,7 @@ type Values struct {
 	Host             string                 `yaml:"Host"`
 	Port             int                    `yaml:"Port"`
 	Protocol         string                 `yaml:"Protocol"`
+	OpenShift        bool                   `yaml:"OpenShift"`
 	Cortex           CortexValues           `yaml:"Cortex"`
 	OpenNMS          OpenNMSValues          `yaml:"OpenNMS"`
 	TLS              TLSValues              `yaml:"TLS"`
@@ -33,6 +34,7 @@ type Values struct {
 	Keycloak         KeycloakValues         `yaml:"Keycloak"`
 	Kafka            KafkaValues            `yaml:"Kafka"`
 	MailServer       MailServerValues       `yaml:"MailServer"`
+	Prometheus       PrometheusValues       `yaml:"Prometheus`
 	NodeRestrictions NodeRestrictionsValues `yaml:"NodeRestrictions"`
 	Operator         OperatorValues         `yaml:"Operator"`
 	CustomErrors     CustomErrorsValues     `yaml:"CustomErrors"`

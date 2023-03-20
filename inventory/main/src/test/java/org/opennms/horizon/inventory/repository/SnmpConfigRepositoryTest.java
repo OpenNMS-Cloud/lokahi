@@ -38,6 +38,7 @@ import org.opennms.horizon.inventory.model.SnmpConfig;
 import org.opennms.horizon.shared.constants.GrpcConstants;
 import org.opennms.horizon.shared.utils.InetAddressUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
@@ -45,6 +46,8 @@ import org.springframework.test.context.ContextConfiguration;
 @SpringBootTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @ContextConfiguration(initializers = {SpringContextTestInitializer.class})
+@AutoConfigureObservability
+// Make sure to include Metrics (for some reason they are disabled by default in the integration grey-box test)
 public class SnmpConfigRepositoryTest {
 
     private static final String tenantId = "tenant-1";

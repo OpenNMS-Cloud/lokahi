@@ -67,4 +67,5 @@ service PassiveDiscoveryService {
   rpc upsertDiscovery(PassiveDiscoveryUpsertDTO) returns (PassiveDiscoveryDTO) {};
   rpc listAllDiscoveries(google.protobuf.Empty) returns (PassiveDiscoveryListDTO) {};
   rpc toggleDiscovery(PassiveDiscoveryToggleDTO) returns (PassiveDiscoveryDTO) {};
+  rpc deleteDiscovery(google.protobuf.Int64Value) returns(google.protobuf.BoolValue) {};
 }

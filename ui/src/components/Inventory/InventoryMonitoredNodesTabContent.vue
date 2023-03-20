@@ -188,12 +188,10 @@ const openModalSaveTags = () => {
   openModal()
 }
 
-const saveTagsToSelectedNodes = () => {
-  const tagsPayload = tagStore.tagsSelected.map(({ name }) => ({ name }))
-  // TODO: BE will provide a different endpoint for all nodes saving, instead of looping to save single node at a time.
-  inventoryStore.nodesSelected.forEach(({ id }) => {
-    nodeMutations.addTagsToNode({ nodeId: id, tags: tagsPayload })
-  })
+const saveTagsToSelectedNodes = async () => {
+  const tags = tagStore.tagsSelected.map(({ name }) => ({ name }))
+  const nodeIds = inventoryStore.nodesSelected.map((node) => node.id)
+  await nodeMutations.addTagsToNodes({ nodeIds, tags })
 
   inventoryQueries.fetch()
   resetState()

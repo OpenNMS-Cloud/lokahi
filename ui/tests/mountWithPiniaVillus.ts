@@ -7,7 +7,7 @@ import { VILLUS_CLIENT, createClient } from 'villus'
  * Usage:
  *  wrapper = mountWithPiniaVillus({
  *    component: SomeComponent,
- *    shallow: true,
+ *    shallow: true, // by default
  *    props,
  *    ...
  *  })
@@ -19,12 +19,13 @@ import { VILLUS_CLIENT, createClient } from 'villus'
  *              stubs
  *              plugins
  *              provide
+ *                directives
  *            attachTo
  * @returns mounted component
  */
 const wrapper = (mountingOption: Record<string, any>): any => {
-  const { component, shallow = false, props = {}, global = {}, attachTo } = mountingOption
-  const { stubs = {}, plugins = [], provide = {} } = global
+  const { component, shallow = true, props = {}, global = {}, attachTo } = mountingOption
+  const { stubs = {}, plugins = [], provide = {}, directives = {} } = global
 
   const globalOptions: Record<string, any> = {
     shallow,
@@ -36,7 +37,8 @@ const wrapper = (mountingOption: Record<string, any>): any => {
         [VILLUS_CLIENT as unknown as string]: createClient({
           url: 'https://test/graphql'
         }),
-        ...provide
+        ...provide,
+        directives: { ...directives }
       }
     },
     attachTo

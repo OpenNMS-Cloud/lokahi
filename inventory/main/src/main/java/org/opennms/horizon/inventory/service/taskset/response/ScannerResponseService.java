@@ -37,13 +37,14 @@ import org.opennms.horizon.azure.api.AzureScanResponse;
 import org.opennms.horizon.inventory.dto.NodeCreateDTO;
 import org.opennms.horizon.inventory.dto.TagCreateDTO;
 import org.opennms.horizon.inventory.dto.TagCreateListDTO;
+import org.opennms.horizon.inventory.dto.TagEntityIdDTO;
 import org.opennms.horizon.inventory.model.Node;
 import org.opennms.horizon.inventory.model.SnmpInterface;
 import org.opennms.horizon.inventory.model.discovery.PassiveDiscovery;
 import org.opennms.horizon.inventory.model.discovery.active.AzureActiveDiscovery;
+import org.opennms.horizon.inventory.repository.NodeRepository;
 import org.opennms.horizon.inventory.repository.discovery.PassiveDiscoveryRepository;
 import org.opennms.horizon.inventory.repository.discovery.active.AzureActiveDiscoveryRepository;
-import org.opennms.horizon.inventory.repository.NodeRepository;
 import org.opennms.horizon.inventory.service.IpInterfaceService;
 import org.opennms.horizon.inventory.service.NodeService;
 import org.opennms.horizon.inventory.service.SnmpConfigService;
@@ -79,10 +80,9 @@ public class ScannerResponseService {
     private final IpInterfaceService ipInterfaceService;
     private final SnmpInterfaceService snmpInterfaceService;
     private final TagService tagService;
-    private final SnmpConfigService snmpConfigService;
     private final PassiveDiscoveryRepository passiveDiscoveryRepository;
     private final DetectorTaskSetService detectorTaskSetService;
-
+    private final SnmpConfigService snmpConfigService;
 
     @Transactional
     public void accept(String tenantId, String location, ScannerResponse response) throws InvalidProtocolBufferException {
@@ -178,13 +178,14 @@ public class ScannerResponseService {
             .map(tag -> TagCreateDTO.newBuilder().setName(tag.getName()).build())
             .toList();
         tagService.addTags(tenantId, TagCreateListDTO.newBuilder()
-            .setNodeId(node.getId()).addAllTags(tags).build());
+            .addEntityIds(TagEntityIdDTO.newBuilder()
+                .setNodeId(node.getId()))
+            .addAllTags(tags).build());
     }
 
-
     private void processNodeScanResponse(String tenantId, NodeScanResult result, String location ) {
-            var snmpConfiguration = result.getSnmpConfig();
-            snmpConfigService.saveOrUpdateSnmpConfig(tenantId, location, snmpConfiguration);
+        var snmpConfiguration = result.getSnmpConfig();
+        snmpConfigService.saveOrUpdateSnmpConfig(tenantId, location, snmpConfiguration);
 
         Optional<Node> nodeOpt = nodeRepository.findByIdAndTenantId(result.getNodeId(), tenantId);
         if (nodeOpt.isPresent()) {
@@ -211,11 +212,8 @@ public class ScannerResponseService {
                 }
             }
             detectorTaskSetService.sendDetectorTasks(node);
-            //todo: start detection, monitor and collection here
-
         } else {
             log.error("Error while process node scan results, node with id {} doesn't exist", result.getNodeId());
         }
-
     }
 }

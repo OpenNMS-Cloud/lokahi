@@ -9,6 +9,7 @@ import org.opennms.horizon.inventory.model.discovery.active.IcmpActiveDiscovery;
 import org.opennms.horizon.inventory.repository.discovery.active.IcmpActiveDiscoveryRepository;
 import org.opennms.horizon.shared.constants.GrpcConstants;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
@@ -17,10 +18,10 @@ import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collections;
 
-
 @SpringBootTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @ContextConfiguration(initializers = {SpringContextTestInitializer.class})
+@AutoConfigureObservability  // Make sure to include Metrics (for some reason they are disabled by default in the integration grey-box test)
 class IcmpActiveDiscoveryRepositoryTest {
 
     private static final String tenantId = "tenant-1";

@@ -134,7 +134,6 @@ public class CucumberRunnerIT {
             .withNetwork(network)
             .withNetworkAliases("application", "application-host")
             .dependsOn(kafkaContainer, azureWireMockContainer, postgreSQLContainer)
-            .withExposedPorts(6565, 5005)
             .dependsOn(kafkaContainer, postgreSQLContainer, mockMinionGatewayContainer)
             .withStartupTimeout(Duration.ofMinutes(5))
             .withEnv("JAVA_TOOL_OPTIONS", "-Djava.security.egd=file:/dev/./urandom -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005")
@@ -151,9 +150,9 @@ public class CucumberRunnerIT {
             .withLogConsumer(new Slf4jLogConsumer(LOG).withPrefix("APPLICATION"));
 
         if (! enableDebuggingPort5005) {
-            applicationContainer.withExposedPorts(6565, 5005);
+            applicationContainer.withExposedPorts(6565, 8080, 5005);
         } else {
-            applicationContainer.withExposedPorts(6565);
+            applicationContainer.withExposedPorts(6565, 8080);
 
             // DEBUGGING: uncomment to force local port 5005 (also comment-out the 5005 in withExposedPorts() above
             applicationContainer.getPortBindings().add("5005:5005");
@@ -162,9 +161,12 @@ public class CucumberRunnerIT {
         applicationContainer.start();
 
         var externalGrpcPort = applicationContainer.getMappedPort(6565); // application-external-grpc-port
+        var externalHttpPort = applicationContainer.getMappedPort(8080);
         var debuggerPort = applicationContainer.getMappedPort(5005);
-        LOG.info("APPLICATION MAPPED PORTS:  external-grpc={};  debugger={}", externalGrpcPort, debuggerPort);
+        LOG.info("APPLICATION MAPPED PORTS:  external-grpc={};  external-http={}; debugger={}", externalGrpcPort, externalHttpPort, debuggerPort);
         System.setProperty("application-external-grpc-port", String.valueOf(externalGrpcPort));
+        System.setProperty("application-external-http-port", String.valueOf(externalHttpPort));
+        System.setProperty("application-external-http-base-url", "http://localhost:" + externalHttpPort);
     }
 
     @SuppressWarnings({"unchecked"})

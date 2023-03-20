@@ -1,10 +1,10 @@
 #!/bin/sh
 
 helm upgrade -i opennms ./charts/opennms -f build-tools/basic/helm-values.yaml \
-  --set Grafana.Image=opennms/horizon-stream-grafana-dev:local-basic \
-  --set Keycloak.Image=opennms/horizon-stream-keycloak-dev:local-basic \
+  --set Grafana.Image=opennms/horizon-stream-grafana:local-basic \
+  --set Keycloak.Image=opennms/horizon-stream-keycloak:local-basic \
   --set OpenNMS.API.Image=opennms/horizon-stream-rest-server:local-basic \
-  --set OpenNMS.Alarm.Image=opennms/horizon-stream-alarm:local-basic \
+  --set OpenNMS.Alert.Image=opennms/horizon-stream-alert:local-basic \
   --set OpenNMS.DataChoices.Image=opennms/horizon-stream-datachoices:local-basic \
   --set OpenNMS.Events.Image=opennms/horizon-stream-events:local-basic \
   --set OpenNMS.Inventory.Image=opennms/horizon-stream-inventory:local-basic \

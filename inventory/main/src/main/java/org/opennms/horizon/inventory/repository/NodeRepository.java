@@ -2,6 +2,7 @@ package org.opennms.horizon.inventory.repository;
 
 import org.opennms.horizon.inventory.dto.MonitoredState;
 import org.opennms.horizon.inventory.model.Node;
+import org.opennms.horizon.inventory.model.TenantCount;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -27,6 +28,7 @@ public interface NodeRepository extends JpaRepository<Node, Long> {
                                                     @Param("nodeLabel") String nodeLabel);
     List<Node> findByIdInAndTenantId(List<Long> ids, String tenantId);
 
+
     @Query("SELECT n " +
         "FROM Node n " +
         "WHERE n.tenantId = :tenantId " +
@@ -35,4 +37,10 @@ public interface NodeRepository extends JpaRepository<Node, Long> {
     List<Node> findByTenantIdLocationsAndMonitoredStateEquals(@Param("tenantId") String tenantId,
                                                               @Param("location") String location,
                                                               @Param("monitoredState") MonitoredState monitoredState);
+
+    @Query("SELECT new org.opennms.horizon.inventory.model.TenantCount(n.tenantId, count(*)) " +
+        "FROM Node n " +
+        "GROUP BY n.tenantId"
+    )
+    List<TenantCount> countNodesByTenant();
 }

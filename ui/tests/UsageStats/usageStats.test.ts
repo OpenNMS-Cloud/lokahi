@@ -1,8 +1,8 @@
+import mountWithPiniaVillus from 'tests/mountWithPiniaVillus'
 import OptInOutCtrl from '@/components/UsageStats/OptInOutCtrl.vue'
-import setupWrapper from 'tests/setupWrapper'
 // import { useUsageStatsMutations } from '@/store/Mutations/usageStatsMutations'
 
-const wrapper = setupWrapper({
+const wrapper = mountWithPiniaVillus({
   component: OptInOutCtrl,
   global: {
     stubs: {

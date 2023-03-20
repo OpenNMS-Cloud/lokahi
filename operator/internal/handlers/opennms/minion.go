@@ -34,6 +34,7 @@ func (h *MinionHandler) UpdateConfig(values values.TemplateValues) error {
 	var minionSVC corev1.Service
 	var minionGatewaySVC corev1.Service
 	var minionGatewayIgniteSVC corev1.Service
+	var minionGatewayIgniteConfigMap corev1.ConfigMap
 	var minionDeploy appsv1.Deployment
 	var minionGatewayDeploy appsv1.Deployment
 	var minionGatewayIngress netv1.Ingress
@@ -47,6 +48,7 @@ func (h *MinionHandler) UpdateConfig(values values.TemplateValues) error {
 	h.AddToTemplates(handlers.Filepath("opennms/minion/minion-service.yaml"), values, &minionSVC)
 	h.AddToTemplates(handlers.Filepath("opennms/minion/minion-gateway-service.yaml"), values, &minionGatewaySVC)
 	h.AddToTemplates(handlers.Filepath("opennms/minion/minion-gateway-ignite-service.yaml"), values, &minionGatewayIgniteSVC)
+	h.AddToTemplates(handlers.Filepath("opennms/minion/minion-gateway-ignite-configmap.yaml"), values, &minionGatewayIgniteConfigMap)
 	h.AddToTemplates(handlers.Filepath("opennms/minion/minion-deployment.yaml"), values, &minionDeploy)
 	h.AddToTemplates(handlers.Filepath("opennms/minion/minion-gateway-deployment.yaml"), values, &minionGatewayDeploy)
 	h.AddToTemplates(handlers.Filepath("opennms/minion/minion-gateway-ingress.yaml"), values, &minionGatewayIngress)

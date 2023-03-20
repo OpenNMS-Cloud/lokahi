@@ -114,6 +114,7 @@ const updateConditionProp = (property: string, value: number | string) => {
 @use '@featherds/styles/themes/variables';
 @use '@featherds/styles/mixins/typography';
 @use '@/styles/mediaQueriesMixins';
+@use '@/styles/vars.scss';
 
 .condition {
   display: flex;
@@ -124,7 +125,7 @@ const updateConditionProp = (property: string, value: number | string) => {
   padding: var(variables.$spacing-xl) var(variables.$spacing-s);
   margin-top: var(variables.$spacing-s);
   border: 1px solid var(variables.$shade-4);
-  border-radius: 5px;
+  border-radius: vars.$border-radius-s;
 
   .inner-col {
     flex: 1;

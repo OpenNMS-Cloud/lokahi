@@ -66,9 +66,11 @@ const triggerRuleState = (ruleId: string) => (ruleStates[ruleId] = !ruleStates[r
 @use '@featherds/styles/mixins/typography';
 @use '@featherds/styles/mixins/elevation';
 @use '@/styles/mediaQueriesMixins.scss';
+@use '@/styles/vars.scss';
+
 .mp-card {
   @include elevation.elevation(3);
-  border-radius: 5px;
+  border-radius: vars.$border-radius-s;
   display: flex;
   gap: var(variables.$spacing-s);
   flex-direction: column;
@@ -98,7 +100,7 @@ const triggerRuleState = (ruleId: string) => (ruleStates[ruleId] = !ruleStates[r
       white-space: nowrap;
       background: var(variables.$shade-4);
       padding: var(variables.$spacing-xs);
-      border-radius: 3px;
+      border-radius: vars.$border-radius-xs;
       overflow: hidden;
       text-overflow: ellipsis;
       span {
@@ -119,7 +121,7 @@ const triggerRuleState = (ruleId: string) => (ruleStates[ruleId] = !ruleStates[r
 
     .alert-conditions-btn {
       @include typography.subtitle2;
-      border-radius: 3px;
+      border-radius: vars.$border-radius-xs;
       white-space: nowrap;
       display: flex;
       justify-content: space-between;

@@ -30,6 +30,8 @@ defineProps<{
 @use '@featherds/styles/themes/variables';
 @use '@featherds/styles/mixins/typography';
 @use '@featherds/styles/mixins/elevation';
+@use '@/styles/vars.scss';
+
 .mp-card-alert-row {
   display: flex;
   width: 100%;
@@ -66,7 +68,7 @@ defineProps<{
     background: var(variables.$primary);
     padding: var(variables.$spacing-xs);
     color: var(variables.$primary-text-on-color);
-    border-radius: 50%;
+    border-radius: vars.$border-radius-round;
   }
   .box {
     @include typography.subtitle1;

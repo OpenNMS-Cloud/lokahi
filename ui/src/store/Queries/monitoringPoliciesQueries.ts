@@ -49,7 +49,7 @@ export const useMonitoringPoliciesQueries = defineStore('monitoringPoliciesQueri
           id: '2',
           name: 'errors',
           componentType: 'interface',
-          detectionMethod: 'events',
+          detectionMethod: 'event',
           metricName: 'errors',
           conditions: [{
             id: '1',

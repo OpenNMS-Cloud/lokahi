@@ -47,6 +47,7 @@ import org.testcontainers.utility.DockerImageName;
 
 import java.time.Duration;
 
+import static io.cucumber.core.options.Constants.FILTER_TAGS_PROPERTY_NAME;
 import static io.cucumber.core.options.Constants.GLUE_PROPERTY_NAME;
 import static io.cucumber.core.options.Constants.PLUGIN_PROPERTY_NAME;
 
@@ -55,6 +56,7 @@ import static io.cucumber.core.options.Constants.PLUGIN_PROPERTY_NAME;
 @SelectClasspathResource("org/opennms/horizon/inventory")
 @ConfigurationParameter(key = PLUGIN_PROPERTY_NAME, value = "json:target/cucumber-report.json, html:target/cucumber.html, pretty")
 @ConfigurationParameter(key = GLUE_PROPERTY_NAME, value = "org.opennms.horizon.inventory,org.opennms.horizon.testtool.miniongateway.wiremock.client")
+@ConfigurationParameter(key = FILTER_TAGS_PROPERTY_NAME, value = "not @ignore")
 public class CucumberRunnerIT {
 
     public static final String MOCK_MINION_GATEWAY_DOCKER_IMAGE = "opennms-inventory/mock-minion-gateway:local";

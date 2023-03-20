@@ -139,4 +139,6 @@ public class AzureDiscoveryStepDefinitions {
         TagDTO tagDTO = tagList.getTags(0);
         assertEquals(tagCreateDto1.getName(), tagDTO.getName());
     }
+
+
 }

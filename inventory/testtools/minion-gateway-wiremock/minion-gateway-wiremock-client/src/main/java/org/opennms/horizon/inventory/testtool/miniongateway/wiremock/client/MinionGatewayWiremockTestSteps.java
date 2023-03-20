@@ -85,6 +85,11 @@ public class MinionGatewayWiremockTestSteps {
         this.taskIpAddress = ipAddress;
     }
 
+    @Given("The taskset at location {string}")
+    public void theTasksetAtLocation(String taskLocation) {
+        this.taskLocation = taskLocation;
+    }
+
     @Given("Monitor Type {string}")
     public void monitorType(String monitorType) {
         switch (monitorType) {
@@ -129,6 +134,12 @@ public class MinionGatewayWiremockTestSteps {
     public void verifyTheTaskSetUpdateIsPublishedWithRemovalOfTaskWithSuffixWithinMs(String taskSuffix, int timeout) {
         String taskIdPattern = "nodeId:\\d+/ip=" + taskIpAddress + "/" + taskSuffix;
         commonVerifyTaskSetUpdate((record) -> isMatchingRemoveTask(record, taskLocation, taskIdPattern), timeout);
+    }
+
+    @Then("verify the task set update is published for icmp discovery within {int}ms")
+    public void verifyTheTaskSetUpdateIsPublishedForIcmpDiscoveryWithinMs(int timeout) {
+        String taskIdPattern = "discovery:\\d+/" + taskLocation;
+        commonVerifyTaskSetUpdate((record) -> isMatchingAddTask(record, taskLocation, taskIdPattern), timeout);
     }
 
 
@@ -282,5 +293,6 @@ public class MinionGatewayWiremockTestSteps {
 
         JsonFormat.parser().usingTypeRegistry(typeRegistry).merge(jsonText, builder);
     }
+
 
 }

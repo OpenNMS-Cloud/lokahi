@@ -216,4 +216,12 @@ public class PassiveDiscoveryService {
         scannerTaskSetService.sendNodeScannerTask(node, discovery, snmpConfigs);
     }
 
+    @Transactional
+    public void deleteDiscovery(String tenantId, long id) {
+        Optional<PassiveDiscovery> passiveDiscoveryOpt = repository.findByTenantIdAndId(tenantId, id);
+        if (passiveDiscoveryOpt.isPresent()) {
+            PassiveDiscovery discovery = passiveDiscoveryOpt.get();
+            repository.delete(discovery);
+        }
+    }
 }

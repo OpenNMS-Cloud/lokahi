@@ -29,6 +29,7 @@
 package org.opennms.horizon.inventory.cucumber.steps;
 
 import com.google.protobuf.Empty;
+import com.google.protobuf.Int64Value;
 import io.cucumber.java.BeforeAll;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
@@ -90,6 +91,8 @@ public class PassiveDiscoveryStepDefinitions {
      */
     @Given("Passive Discovery fields to persist")
     public void passiveDiscoveryFieldsToPersist() {
+        deleteAllPassiveDiscovery();
+
         passiveDiscoveryUpsertDTO = PassiveDiscoveryUpsertDTO.newBuilder()
             .setLocation("Default")
             .addCommunities("public")
@@ -151,5 +154,16 @@ public class PassiveDiscoveryStepDefinitions {
     public void theTagsForPassiveDiscoveryMatchWhatItWasCreatedWith() {
         assertEquals(passiveDiscoveryUpsertDTO.getTagsCount(), tagList.getTagsCount());
         assertEquals(passiveDiscoveryUpsertDTO.getTags(0).getName(), tagList.getTags(0).getName());
+    }
+
+    /*
+     * INTERNAL
+     * *********************************************************************************
+     */
+    private void deleteAllPassiveDiscovery() {
+        var passiveDiscoveryServiceBlockingStub = backgroundHelper.getPassiveDiscoveryServiceBlockingStub();
+        for (PassiveDiscoveryDTO discoveryDTO : passiveDiscoveryServiceBlockingStub.listAllDiscoveries(Empty.newBuilder().build()).getDiscoveriesList()) {
+            passiveDiscoveryServiceBlockingStub.deleteDiscovery(Int64Value.of(discoveryDTO.getId()));
+        }
     }
 }

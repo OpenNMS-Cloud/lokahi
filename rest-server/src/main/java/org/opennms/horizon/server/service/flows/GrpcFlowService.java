@@ -55,6 +55,7 @@ import java.util.stream.Collectors;
 public class GrpcFlowService {
     private final ServerHeaderUtil headerUtil;
     private final FlowClient flowClient;
+
     private final InventoryClient inventoryClient;
 
     private final NodeMapper nodeMapper;

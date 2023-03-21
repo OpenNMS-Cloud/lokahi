@@ -50,6 +50,9 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+/**
+ * Fake client, the real implementation will be in HS-907
+ */
 @RequiredArgsConstructor
 public class FlowClient {
     private final ManagedChannel channel;

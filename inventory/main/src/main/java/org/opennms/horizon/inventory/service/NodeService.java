@@ -32,6 +32,7 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.opennms.horizon.inventory.discovery.IcmpActiveDiscoveryDTO;
 import org.opennms.horizon.inventory.dto.MonitoredState;
 import org.opennms.horizon.inventory.dto.NodeCreateDTO;
 import org.opennms.horizon.inventory.dto.NodeDTO;
@@ -45,7 +46,6 @@ import org.opennms.horizon.inventory.model.Tag;
 import org.opennms.horizon.inventory.repository.IpInterfaceRepository;
 import org.opennms.horizon.inventory.repository.MonitoringLocationRepository;
 import org.opennms.horizon.inventory.repository.NodeRepository;
-import org.opennms.horizon.inventory.service.discovery.active.IcmpActiveDiscoveryService;
 import org.opennms.horizon.inventory.service.taskset.CollectorTaskSetService;
 import org.opennms.horizon.inventory.service.taskset.DetectorTaskSetService;
 import org.opennms.horizon.inventory.service.taskset.MonitorTaskSetService;
@@ -94,7 +94,6 @@ public class NodeService {
     private final TaskSetPublisher taskSetPublisher;
     private final TagService tagService;
     private final NodeMapper mapper;
-    private final IcmpActiveDiscoveryService icmpActiveDiscoveryService;
 
     @Transactional(readOnly = true)
     public List<NodeDTO> findByTenantId(String tenantId) {
@@ -256,35 +255,31 @@ public class NodeService {
         }
     }
 
-    public void sendNewNodeTaskSetAsync(Node node, long activeDiscoveryId) {
-        executorService.execute(() -> sendTaskSetsToMinion(node, activeDiscoveryId));
+    public void sendNewNodeTaskSetAsync(Node node, String location, IcmpActiveDiscoveryDTO icmpDiscoveryDTO) {
+        executorService.execute(() -> sendTaskSetsToMinion(node, location, icmpDiscoveryDTO));
     }
 
-    private void sendTaskSetsToMinion(Node node, long activeDiscoveryId) {
+    private void sendTaskSetsToMinion(Node node, String location, IcmpActiveDiscoveryDTO icmpDiscoveryDTO) {
 
         List<SnmpConfiguration> snmpConfigs = new ArrayList<>();
-
         try {
-            var optional = icmpActiveDiscoveryService.getDiscoveryById(activeDiscoveryId, node.getTenantId());
-            if (optional.isPresent()) {
-                var activeDiscoveryDTO = optional.get();
-                var snmpConf = activeDiscoveryDTO.getSnmpConf();
-                snmpConf.getReadCommunityList().forEach(readCommunity -> {
-                    var builder = SnmpConfiguration.newBuilder()
-                        .setReadCommunity(readCommunity);
-                    snmpConfigs.add(builder.build());
-                });
-                snmpConf.getPortsList().forEach(port -> {
-                    var builder = SnmpConfiguration.newBuilder()
-                        .setPort(port);
-                    snmpConfigs.add(builder.build());
-                });
-            }
+            var snmpConf = icmpDiscoveryDTO.getSnmpConf();
+            snmpConf.getReadCommunityList().forEach(readCommunity -> {
+                var builder = SnmpConfiguration.newBuilder()
+                    .setReadCommunity(readCommunity);
+                snmpConfigs.add(builder.build());
+            });
+            snmpConf.getPortsList().forEach(port -> {
+                var builder = SnmpConfiguration.newBuilder()
+                    .setPort(port);
+                snmpConfigs.add(builder.build());
+            });
             scannerTaskSetService.sendNodeScannerTask(mapper.modelToDTO(node),
-                node.getMonitoringLocation().getLocation(), snmpConfigs);
+                location, snmpConfigs);
         } catch (Exception e) {
-            log.error("Error while sending detector/nodescan task for node with label {}", node.getNodeLabel());
+            log.error("Error while sending nodescan task for node with label {}", node.getNodeLabel());
         }
     }
+
 
 }

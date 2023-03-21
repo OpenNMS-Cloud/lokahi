@@ -51,6 +51,8 @@ public interface IcmpActiveDiscoveryMapper {
         nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
     @Mapping(target = "snmpConf.portsList", source = "snmpPorts",
         nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
+    @Mapping(target = "tagsList", source = "tags",
+        nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
     IcmpActiveDiscoveryDTO modelToDto(IcmpActiveDiscovery discovery);
 
     @Mapping(target = "ipAddressEntries", source = "ipAddressesList")

@@ -50,6 +50,7 @@ import org.opennms.horizon.inventory.service.NodeService;
 import org.opennms.horizon.inventory.service.SnmpConfigService;
 import org.opennms.horizon.inventory.service.SnmpInterfaceService;
 import org.opennms.horizon.inventory.service.TagService;
+import org.opennms.horizon.inventory.service.discovery.active.IcmpActiveDiscoveryService;
 import org.opennms.horizon.inventory.service.taskset.DetectorTaskSetService;
 import org.opennms.horizon.inventory.service.taskset.TaskSetHandler;
 import org.opennms.horizon.shared.utils.InetAddressUtils;
@@ -83,6 +84,7 @@ public class ScannerResponseService {
     private final PassiveDiscoveryRepository passiveDiscoveryRepository;
     private final DetectorTaskSetService detectorTaskSetService;
     private final SnmpConfigService snmpConfigService;
+    private final IcmpActiveDiscoveryService icmpActiveDiscoveryService;
 
     @Transactional
     public void accept(String tenantId, String location, ScannerResponse response) throws InvalidProtocolBufferException {
@@ -136,13 +138,22 @@ public class ScannerResponseService {
         for (PingResponse pingResponse : discoveryScanResult.getPingResponseList()) {
             var optional = nodeService.getNode(tenantId, location, InetAddressUtils.getInetAddress(pingResponse.getIpAddress()));
             if (optional.isEmpty()) {
-                NodeCreateDTO createDTO = NodeCreateDTO.newBuilder()
-                    .setLocation(location)
-                    .setManagementIp(pingResponse.getIpAddress())
-                    .setLabel(pingResponse.getIpAddress())
-                    .build();
-                Node node = nodeService.createNode(createDTO, ScanType.DISCOVERY_SCAN, tenantId);
-                nodeService.sendNewNodeTaskSetAsync(node, discoveryScanResult.getActiveDiscoveryId());
+                var discoveryOptional =
+                    icmpActiveDiscoveryService.getDiscoveryById(discoveryScanResult.getActiveDiscoveryId(), tenantId);
+                if (discoveryOptional.isPresent()) {
+                    var icmpDiscovery = discoveryOptional.get();
+                    List<TagCreateDTO> tags = icmpDiscovery.getTagsList().stream()
+                        .map(tag -> TagCreateDTO.newBuilder().setName(tag.getName()).build())
+                        .toList();
+                    NodeCreateDTO createDTO = NodeCreateDTO.newBuilder()
+                        .setLocation(location)
+                        .setManagementIp(pingResponse.getIpAddress())
+                        .setLabel(pingResponse.getIpAddress())
+                        .addAllTags(tags)
+                        .build();
+                    Node node = nodeService.createNode(createDTO, ScanType.DISCOVERY_SCAN, tenantId);
+                    nodeService.sendNewNodeTaskSetAsync(node, location, icmpDiscovery);
+                }
             }
         }
     }

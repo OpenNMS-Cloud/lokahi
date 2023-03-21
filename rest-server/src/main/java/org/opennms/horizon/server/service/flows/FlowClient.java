@@ -31,21 +31,25 @@ package org.opennms.horizon.server.service.flows;
 import com.google.protobuf.Timestamp;
 import io.grpc.ManagedChannel;
 import lombok.RequiredArgsConstructor;
+import org.opennms.dataplatform.flows.querier.v1.ApplicationFilter;
+import org.opennms.dataplatform.flows.querier.v1.ApplicationSeriesRequest;
+import org.opennms.dataplatform.flows.querier.v1.ApplicationSummariesRequest;
 import org.opennms.dataplatform.flows.querier.v1.ApplicationsServiceGrpc;
-import org.opennms.dataplatform.flows.querier.v1.Direction;
+import org.opennms.dataplatform.flows.querier.v1.ExporterFilter;
 import org.opennms.dataplatform.flows.querier.v1.ExporterServiceGrpc;
-import org.opennms.dataplatform.flows.querier.v1.FlowingPoint;
+import org.opennms.dataplatform.flows.querier.v1.Filter;
+import org.opennms.dataplatform.flows.querier.v1.ListRequest;
 import org.opennms.dataplatform.flows.querier.v1.Series;
 import org.opennms.dataplatform.flows.querier.v1.Summaries;
-import org.opennms.dataplatform.flows.querier.v1.TrafficSummary;
+import org.opennms.dataplatform.flows.querier.v1.TimeRangeFilter;
+import org.opennms.horizon.server.model.flows.Exporter;
 import org.opennms.horizon.server.model.flows.RequestCriteria;
+import org.opennms.horizon.server.model.flows.TimeRange;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
-/**
- * Fake client, the real implementation will be in HS-907
- */
 @RequiredArgsConstructor
 public class FlowClient {
     private final ManagedChannel channel;
@@ -53,7 +57,6 @@ public class FlowClient {
 
     private ApplicationsServiceGrpc.ApplicationsServiceBlockingStub applicationsServiceBlockingStub;
     private ExporterServiceGrpc.ExporterServiceBlockingStub exporterServiceStub;
-
 
     protected void initialStubs() {
         applicationsServiceBlockingStub = ApplicationsServiceGrpc.newBlockingStub(channel);
@@ -66,58 +69,115 @@ public class FlowClient {
         }
     }
 
-    /**
-     * It returns a list of exporter interfaceIds
-     *
-     * @param requestCriteria
-     * @param tenantId
-     * @return
-     */
     public List<Long> findExporters(RequestCriteria requestCriteria, String tenantId) {
-        List<Long> exporters = new ArrayList<>();
-        // fake interfaceId (long)
-        exporters.add(1L);
-        exporters.add(2L);
-        return exporters;
+        var listRequest = ListRequest.newBuilder()
+            .setTenantId(tenantId);
+        if (requestCriteria.getTimeRange() != null) {
+            listRequest.addFilters(convertTimeRage(requestCriteria.getTimeRange()));
+        }
+        if (requestCriteria.getExporter() != null) {
+            requestCriteria.getExporter().stream().forEach(e ->
+                listRequest.addFilters(convertExporter(e))
+            );
+        }
+        return exporterServiceStub.withDeadlineAfter(deadlineMs, TimeUnit.MILLISECONDS)
+            .getExporterInterfaces(listRequest.build())
+            .getElementsList().stream().map(Long::parseLong).collect(Collectors.toList());
     }
 
     public List<String> findApplications(RequestCriteria requestCriteria, String tenantId) {
-        List<String> applications = new ArrayList<>();
-        // fake applications
-        applications.add("https");
-        applications.add("ssh");
-        return applications;
+        var listRequest = ListRequest.newBuilder()
+            .setTenantId(tenantId);
+        if (requestCriteria.getTimeRange() != null) {
+            listRequest.addFilters(convertTimeRage(requestCriteria.getTimeRange()));
+        }
+        if (requestCriteria.getApplications() != null) {
+            requestCriteria.getApplications().stream().forEach(a ->
+                listRequest.addFilters(convertApplication(a))
+            );
+        }
+
+        return applicationsServiceBlockingStub.withDeadlineAfter(deadlineMs, TimeUnit.MILLISECONDS)
+            .getApplications(listRequest.build())
+            .getElementsList();
     }
 
     public Summaries getApplicationSummaries(RequestCriteria requestCriteria, String tenantId) {
-        var summaries = Summaries.newBuilder();
-        for (int i = 0; i < 10; i++) {
-            summaries.addSummaries(TrafficSummary.newBuilder().setApplication("app_" + i)
-                // fake in/out to make it looks like real
-                .setBytesIn((getRandomBytes()))
-                .setBytesOut((getRandomBytes())));
+        var request = ApplicationSummariesRequest.newBuilder()
+            .setTenantId(tenantId);
+
+        if (requestCriteria.getApplications() != null) {
+            requestCriteria.getApplications().stream().forEach(a ->
+                request.addFilters(convertApplication(a))
+            );
         }
-        return summaries.build();
+
+        if (requestCriteria.getExporter() != null) {
+            requestCriteria.getExporter().stream().forEach(e ->
+                request.addFilters(convertExporter(e))
+            );
+        }
+
+        if (requestCriteria.getTimeRange() != null) {
+            request.addFilters(convertTimeRage(requestCriteria.getTimeRange()));
+        }
+
+        return applicationsServiceBlockingStub
+            .withDeadlineAfter(deadlineMs, TimeUnit.MILLISECONDS)
+            .getApplicationSummaries(request.build());
     }
 
     public Series getApplicationSeries(RequestCriteria requestCriteria, String tenantId) {
-        Series.Builder series = Series.newBuilder();
-        int seriesSize = 100;
-        // generate 10 apps data with seriesSize of points, each step is 500ms
-        for (int i = 0; i < 10; i++) {
-            for (int j = 0; j < seriesSize; j++) {
-                series.addPoint(
-                    FlowingPoint.newBuilder()
-                        .setApplication("app_" + i)
-                        .setTimestamp(Timestamp.newBuilder().setSeconds(System.currentTimeMillis() - ((seriesSize - j) * 500)))
-                        .setValue(getRandomBytes())
-                        .setDirection(Direction.EGRESS));
-            }
+        var request = ApplicationSeriesRequest.newBuilder()
+            .setTenantId(tenantId);
+
+        if (requestCriteria.getApplications() != null) {
+            requestCriteria.getApplications().stream().forEach(a ->
+                request.addFilters(convertApplication(a))
+            );
         }
-        return series.build();
+
+        if (requestCriteria.getExporter() != null) {
+            requestCriteria.getExporter().stream().forEach(e ->
+                request.addFilters(convertExporter(e))
+            );
+        }
+
+        if (requestCriteria.getTimeRange() != null) {
+            request.addFilters(convertTimeRage(requestCriteria.getTimeRange()));
+        }
+
+        return applicationsServiceBlockingStub
+            .withDeadlineAfter(deadlineMs, TimeUnit.MILLISECONDS)
+            .getApplicationSeries(request.build());
     }
 
-    private long getRandomBytes() {
-        return (long) (Math.random() * 100_000L);
+    private Filter.Builder convertExporter(Exporter exporter) {
+        var exporterRequest = org.opennms.dataplatform.flows.querier.v1.Exporter.newBuilder();
+        if (exporter.getNode() != null) {
+            exporterRequest.setNodeId(exporter.getNode().getId());
+        }
+        if (exporter.getIpInterface() != null) {
+            exporterRequest.setInterfaceId(exporter.getIpInterface().getId());
+        }
+
+        return Filter.newBuilder().setExporter(
+            ExporterFilter.newBuilder().setExporter(exporterRequest));
+    }
+
+    private Filter.Builder convertApplication(String application) {
+        return Filter.newBuilder().setApplication(
+            ApplicationFilter.newBuilder().setApplication(application));
+    }
+
+    private Filter.Builder convertTimeRage(TimeRange timeRange) {
+        return Filter.newBuilder().setTimeRange(
+            TimeRangeFilter.newBuilder()
+                .setStartTime(Timestamp.newBuilder()
+                    .setSeconds(timeRange.getStartTime().getEpochSecond())
+                    .setNanos(timeRange.getStartTime().getNano()))
+                .setEndTime(Timestamp.newBuilder()
+                    .setSeconds(timeRange.getEndTime().getEpochSecond())
+                    .setNanos(timeRange.getEndTime().getNano())));
     }
 }

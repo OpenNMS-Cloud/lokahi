@@ -7,6 +7,10 @@ import org.opennms.horizon.shared.ipc.sink.api.AsyncPolicy;
 import org.opennms.horizon.shared.ipc.sink.api.SinkModule;
 import org.opennms.taskset.contract.TaskSetResults;
 
+/**
+ * Sink Module for TaskSetResults that is used for handling results sent by Minions.  Since the results are received
+ * from Minions, there is no explicit Tenant ID in the structures.
+ */
 public class TaskResultsModule implements SinkModule<TaskSetResults, TaskSetResults> {
 
     public static final String MODULE_ID = "task-set-result";

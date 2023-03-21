@@ -1,7 +1,6 @@
 package org.opennms.horizon.minion.taskset.worker.impl;
 
 import com.google.protobuf.Any;
-import com.google.protobuf.Message;
 import org.opennms.horizon.minion.plugin.api.CollectionSet;
 import org.opennms.horizon.minion.plugin.api.ScanResultsResponse;
 import org.opennms.horizon.minion.plugin.api.ServiceDetectorResponse;

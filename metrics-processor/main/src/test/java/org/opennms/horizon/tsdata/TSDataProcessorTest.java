@@ -32,14 +32,12 @@ import com.google.protobuf.Any;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.opennms.horizon.azure.api.AzureResponseMetric;
 import org.opennms.horizon.azure.api.AzureResultMetric;
 import org.opennms.horizon.azure.api.AzureValueMetric;
 import org.opennms.horizon.azure.api.AzureValueType;
-import org.opennms.horizon.shared.constants.GrpcConstants;
 import org.opennms.horizon.tenantmetrics.TenantMetricsTracker;
 import org.opennms.horizon.timeseries.cortex.CortexTSS;
 import org.opennms.horizon.tsdata.collector.TaskSetCollectorAzureResponseProcessor;
@@ -50,13 +48,14 @@ import org.opennms.horizon.tsdata.monitor.TaskSetMonitorResultProcessor;
 import org.opennms.taskset.contract.CollectorResponse;
 import org.opennms.taskset.contract.MonitorType;
 import org.opennms.taskset.contract.TaskResult;
-import org.opennms.taskset.contract.TaskSetResults;
+import org.opennms.taskset.contract.TenantedTaskSetResults;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.timeout;
@@ -113,16 +112,39 @@ class TSDataProcessorTest {
             .setCollectorResponse(collectorResponse)
             .build());
 
-        TaskSetResults taskSetResults = TaskSetResults.newBuilder()
+        TenantedTaskSetResults taskSetResults = TenantedTaskSetResults.newBuilder()
+            .setTenantId("opennms-prime")
             .addAllResults(taskResultList)
             .build();
 
-        Map<String, Object> headers = new HashMap<>();
-        headers.put(GrpcConstants.TENANT_ID_KEY, TENANT_ID);
-
-        processor.consume(taskSetResults.toByteArray(), headers);
+        processor.consume(taskSetResults.toByteArray(), Collections.EMPTY_MAP);
 
         verify(cortexTSS, timeout(5000).only()).store(anyString(), any(prometheus.PrometheusTypes.TimeSeries.Builder.class));
         verify(metricsTracker, times(1)).addTenantMetricSampleCount(TENANT_ID, 1);
+    }
+
+    @Test
+    void testMissingTenantId() {
+        //
+        // Setup Test Data and Interactions
+        //
+        TenantedTaskSetResults taskSetResults = TenantedTaskSetResults.newBuilder()
+            .build();
+
+        //
+        // Execute
+        //
+        Exception caught = null;
+        try {
+            processor.consume(taskSetResults.toByteArray(), Collections.EMPTY_MAP);
+            fail("Missing expected exception");
+        } catch (Exception exc) {
+            caught = exc;
+        }
+
+        //
+        // Verify the Results
+        //
+        assertEquals("Missing tenant id", caught.getMessage());
     }
 }

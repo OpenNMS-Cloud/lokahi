@@ -33,8 +33,8 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 import org.opennms.horizon.shared.constants.GrpcConstants;
-import org.opennms.taskset.contract.TaskSetResults;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.apache.logging.log4j.util.Strings;
+import org.opennms.taskset.contract.TenantedTaskSetResults;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.messaging.handler.annotation.Headers;
@@ -59,10 +59,13 @@ public class TSDataProcessor {
     //headers for future use.
     @KafkaListener(topics = "${kafka.topics}", concurrency = "1")
     public void consume(@Payload byte[] data, @Headers Map<String, Object> headers) {
-        String tenantId = getTenantId(headers);
-
         try {
-            TaskSetResults results = TaskSetResults.parseFrom(data);
+            TenantedTaskSetResults results = TenantedTaskSetResults.parseFrom(data);
+            String tenantId = results.getTenantId();
+            if (Strings.isBlank(tenantId)) {
+                throw new RuntimeException("Missing tenant id");
+            }
+
             results.getResultsList().forEach(result -> CompletableFuture.supplyAsync(() -> {
                 taskSetResultProcessor.processTaskResult(tenantId, result);
                 return null;

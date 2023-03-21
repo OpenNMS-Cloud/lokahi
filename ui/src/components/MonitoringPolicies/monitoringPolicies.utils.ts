@@ -12,7 +12,7 @@ export const isThresholdCondition = (
   return (condition as ThresholdCondition).level !== undefined
 }
 
-export const isEventColdRebootCondition = (
+export const isEventPortDownCondition = (
   condition: ThresholdCondition | EventSNMPAuthFailureCondition | EventPortDownCondition | EventColdRebootCondition
 ): condition is EventPortDownCondition => {
   return !isThresholdCondition(condition) && (condition as EventPortDownCondition).clearEvent !== undefined

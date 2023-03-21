@@ -79,8 +79,15 @@
           <div class="col">
             <div class="subtitle">Set Alert Conditions</div>
             <MonitoringPoliciesThresholdCondition
+              v-if="store.selectedRule!.detectionMethod === events.Threshold"
               v-for="cond in store.selectedRule!.conditions"
-              :condition="cond"
+              :condition="(cond as ThresholdCondition)"
+              @updateCondition="(condition) => store.updateCondition(cond.id, condition)"
+            />
+            <MonitoringPoliciesEventCondition
+              v-else
+              v-for="cond in store.selectedRule!.conditions"
+              :condition="(cond as EventCondition)"
               @updateCondition="(condition) => store.updateCondition(cond.id, condition)"
             />
           </div>
@@ -92,7 +99,7 @@
 
 <script setup lang="ts">
 import { useMonitoringPoliciesStore } from '@/store/Views/monitoringPoliciesStore'
-import { IRule } from '@/types/policies'
+import { EventCondition, IRule, ThresholdCondition } from '@/types/policies'
 import Add from '@featherds/icon/action/Add'
 
 enum events {

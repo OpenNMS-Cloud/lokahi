@@ -37,11 +37,21 @@
         :selectedId="condition.severity"
       />
     </div>
+
+    <div class="inner-col" v-if="isEventPortDownCondition(condition)">
+      <div class="text">Clear Event (optional)</div>
+      <BasicSelect
+        :list="clearEventOptions"
+        @item-selected="(val:string) => updateConditionProp('clearEvent', val)"
+        :selectedId="condition.clearEvent"
+      />
+    </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { EventCondition  } from '@/types/policies'
+import { EventCondition } from '@/types/policies'
+import { isEventPortDownCondition } from './monitoringPolicies.utils'
 
 const props = defineProps<{
   condition: EventCondition
@@ -62,6 +72,11 @@ const severityList = [
   { id: 'major', name: 'Major' },
   { id: 'minor', name: 'Minor' },
   { id: 'warning', name: 'Warning' }
+]
+
+const clearEventOptions = [
+  { id: undefined, name: '' },
+  { id: 'port-down', name: 'Port Down' },
 ]
 
 watchEffect(() => condition.value = props.condition)

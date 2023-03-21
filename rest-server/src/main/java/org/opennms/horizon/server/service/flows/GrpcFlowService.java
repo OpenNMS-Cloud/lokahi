@@ -53,10 +53,9 @@ import java.util.stream.Collectors;
 public class GrpcFlowService {
     private final ServerHeaderUtil headerUtil;
     private final FlowClient flowClient;
-    //private final InventoryClient inventoryClient;
 
     @GraphQLQuery(name = "findExporters")
-    public Flux<String> findExporters(RequestCriteria requestCriteria,
+    public Flux<Exporter> findExporters(RequestCriteria requestCriteria,
                                       @GraphQLEnvironment ResolutionEnvironment env) {
         String tenantId = headerUtil.extractTenant(env);
         return Flux.fromIterable(flowClient.findExporters(requestCriteria, tenantId));

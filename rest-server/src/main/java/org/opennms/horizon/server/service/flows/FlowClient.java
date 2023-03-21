@@ -28,27 +28,23 @@
 
 package org.opennms.horizon.server.service.flows;
 
-import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.grpc.ManagedChannel;
-import io.grpc.Metadata;
-import io.grpc.stub.MetadataUtils;
 import lombok.RequiredArgsConstructor;
 import org.opennms.dataplatform.flows.querier.ApplicationsServiceGrpc;
 import org.opennms.dataplatform.flows.querier.ExporterServiceGrpc;
 import org.opennms.dataplatform.flows.querier.Querier;
 import org.opennms.horizon.server.model.flows.Exporter;
 import org.opennms.horizon.server.model.flows.RequestCriteria;
-import org.opennms.horizon.server.model.flows.TimeRange;
 import org.opennms.horizon.server.model.inventory.IpInterface;
 import org.opennms.horizon.server.model.inventory.Node;
 
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
+/**
+ * Fake client, the real implementation will be in HS-907
+ */
 @RequiredArgsConstructor
 public class FlowClient {
     private final ManagedChannel channel;

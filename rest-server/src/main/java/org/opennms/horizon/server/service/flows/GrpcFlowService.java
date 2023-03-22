@@ -40,18 +40,12 @@ import org.opennms.horizon.server.model.flows.Exporter;
 import org.opennms.horizon.server.model.flows.FlowingPoint;
 import org.opennms.horizon.server.model.flows.RequestCriteria;
 import org.opennms.horizon.server.model.flows.TrafficSummary;
-<<<<<<< HEAD
 import org.opennms.horizon.server.service.grpc.InventoryClient;
-=======
-import org.opennms.horizon.server.model.inventory.IpInterface;
->>>>>>> 8605506af (HS-907: inital commit for BFF > querier)
 import org.opennms.horizon.server.utils.ServerHeaderUtil;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
 import java.util.Objects;
-import java.awt.geom.IllegalPathStateException;
-import java.util.List;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -86,7 +80,7 @@ public class GrpcFlowService {
         String tenantId = headerUtil.extractTenant(env);
         return Flux.fromIterable(flowClient.findApplications(requestCriteria, tenantId));
     }
-    
+
     @GraphQLQuery(name = "findApplicationSummaries")
     public Flux<TrafficSummary> findApplicationSummaries(RequestCriteria requestCriteria,
                                                          @GraphQLEnvironment ResolutionEnvironment env) {

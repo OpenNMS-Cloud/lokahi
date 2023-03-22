@@ -55,6 +55,14 @@ public interface NodeRepository extends JpaRepository<Node, Long> {
     Optional<Node> findByTenantLocationAndNodeLabel(@Param("tenantId") String tenantId,
                                                     @Param("location") String location,
                                                     @Param("nodeLabel") String nodeLabel);
+
+    @Query("SELECT n " +
+        "FROM Node n " +
+        "WHERE n.tenantId = :tenantId " +
+        "AND LOWER(n.nodeLabel) LIKE LOWER(CONCAT('%', :nodeLabelSearchTerm, '%'))")
+    List<Node> findByTenantIdAndNodeLabelLike(@Param("tenantId") String tenantId,
+                                              @Param("nodeLabelSearchTerm") String nodeLabelSearchTerm);
+
     List<Node> findByIdInAndTenantId(List<Long> ids, String tenantId);
 
 

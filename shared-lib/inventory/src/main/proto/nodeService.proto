@@ -79,6 +79,10 @@ message MonitoredStateQuery {
   MonitoredState monitored_state = 1;
 }
 
+message NodeLabelSearchQuery {
+  string searchTerm = 1;
+}
+
 message NodeIdList {
   repeated int64 ids = 1;
 }
@@ -86,6 +90,7 @@ message NodeIdList {
 service NodeService {
   rpc createNode(NodeCreateDTO) returns (NodeDTO) {};
   rpc listNodes(google.protobuf.Empty) returns (NodeList) {};
+  rpc listNodesByNodeLabel(NodeLabelSearchQuery) returns (NodeList) {};
   rpc listNodesByMonitoredState(MonitoredStateQuery) returns (NodeList) {};
   rpc getNodeById(google.protobuf.Int64Value) returns (NodeDTO) {};
   rpc getNodeIdFromQuery(NodeIdQuery) returns (google.protobuf.Int64Value) {};

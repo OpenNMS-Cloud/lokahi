@@ -5,7 +5,7 @@ metadata:
   name: opennms-minion-grpc-route
   namespace: {{ .Release.Namespace }}
 spec:
-  subdomain: "minion.{{ .Values.Host }}"
+  host: "minion.{{ .Values.Host }}.apps-crc.testing"
   port:
     targetPort: {{ .Values.OpenNMS.MinionGateway.GrpcPort }}
   tls:

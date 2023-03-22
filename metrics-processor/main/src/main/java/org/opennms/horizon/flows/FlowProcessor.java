@@ -33,6 +33,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.opennms.dataplatform.flows.document.FlowDocumentLog;
 import org.opennms.horizon.flows.processing.Pipeline;
 import org.opennms.horizon.shared.constants.GrpcConstants;
+import org.opennms.horizon.tenantmetrics.TenantMetricsTracker;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.messaging.handler.annotation.Headers;
@@ -48,10 +49,12 @@ import java.util.concurrent.CompletableFuture;
 @Service
 @PropertySource("classpath:application.yml")
 public class FlowProcessor {
-    private Pipeline pipeline;
+    private final Pipeline pipeline;
+    private final TenantMetricsTracker metricsTracker;
 
-    public FlowProcessor(final Pipeline pipeline){
+    public FlowProcessor(final Pipeline pipeline, final TenantMetricsTracker metricsTracker){
         this.pipeline = Objects.requireNonNull(pipeline);
+        this.metricsTracker = metricsTracker;
     }
 
     @KafkaListener(topics = "${kafka.flow-topics}", concurrency = "1")
@@ -63,6 +66,7 @@ public class FlowProcessor {
                 try {
                     log.trace("Processing flow {}", flowDocumentLog);
                     pipeline.process(flowDocumentLog.getMessageList(), tenantId);
+                    metricsTracker.addTenantFlowSampleCount(tenantId, flowDocumentLog.getMessageCount());
                 } catch (Exception exc) {
                     log.warn("Error processing flow: {} error: {}", flowDocumentLog, exc);
                 }

@@ -146,6 +146,8 @@ public class AlertEventProcessor {
         if (event.getNodeId() > 0) {
             alert.setManagedObjectType(ManagedObjectType.NODE);
             alert.setManagedObjectInstance(Long.toString(event.getNodeId()));
+        } else {
+            alert.setManagedObjectType(ManagedObjectType.UNDEFINED);
         }
         // FIXME: We should be using the source time of the event and not the time at which it was produced
         alert.setLastEventTime(new Date(event.getProducedTimeMs()));

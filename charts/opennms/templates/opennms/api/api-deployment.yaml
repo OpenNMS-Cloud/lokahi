@@ -74,3 +74,7 @@ spec:
             requests:
               cpu: "{{ .Values.OpenNMS.API.Resources.Requests.Cpu }}"
               memory: "{{ .Values.OpenNMS.API.Resources.Requests.Memory }}"
+      {{- if .Values.OpenNMS.API.PrivateRepoEnabled }}
+      imagePullSecrets:
+        - name: image-credentials
+      {{- end }}

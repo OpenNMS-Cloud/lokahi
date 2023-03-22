@@ -17,7 +17,7 @@ spec:
         app: {{ .Values.OpenNMS.Inventory.ServiceName }}
       annotations:
         prometheus.io/scrape: "true"
-        prometheus.io/port: "8080"
+        prometheus.io/port: "{{ .Values.OpenNMS.Inventory.Port }}"
         prometheus.io/path: "/actuator/prometheus"
     spec:
       {{- if .Values.NodeRestrictions.Enabled }}
@@ -74,3 +74,7 @@ spec:
               containerPort: {{ .Values.OpenNMS.Inventory.Port }}
             - name: grpc
               containerPort: {{ .Values.OpenNMS.Inventory.GrpcPort }}
+      {{- if .Values.OpenNMS.Inventory.PrivateRepoEnabled }}
+      imagePullSecrets:
+        - name: image-credentials
+      {{- end }}

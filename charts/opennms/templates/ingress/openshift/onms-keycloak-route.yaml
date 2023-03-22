@@ -5,7 +5,7 @@ metadata:
   name: opennms-keycloak-route
   namespace: {{ .Release.Namespace }}
 spec:
-  subdomain: {{ .Values.Host }}
+  host: {{ .Values.Host }}.apps-crc.testing
   path: {{ .Values.Keycloak.Path }}  
   to:
     kind: Service

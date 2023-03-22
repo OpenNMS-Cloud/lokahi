@@ -92,8 +92,8 @@ public class GraphQLAlertsServiceTest {
 
     @Test
     public void testFindAllAlerts() throws JSONException {
-        doReturn(Arrays.asList(alerts1, alerts2)).when(mockClient).listAlerts(accessToken);
-        String request = "query {findAllAlerts {tenantId reductionKey severity}}";
+        doReturn(Arrays.asList(alerts1, alerts2)).when(mockClient).listAlerts(5, "0", accessToken);
+        String request = "query {findAllAlerts(pageSize:5, page: \"0\") {tenantId reductionKey severity}}";
         webClient.post()
             .uri(GRAPHQL_PATH)
             .accept(MediaType.APPLICATION_JSON)
@@ -106,7 +106,7 @@ public class GraphQLAlertsServiceTest {
             .jsonPath("$.data.findAllAlerts[0].tenantId").isEqualTo(alerts1.getTenantId())
             .jsonPath("$.data.findAllAlerts[0].severity").isEqualTo(alerts1.getSeverity().name())
             .jsonPath("$.data.findAllAlerts[0].reductionKey").isEqualTo(alerts1.getReductionKey());
-        verify(mockClient).listAlerts(accessToken);
+        verify(mockClient).listAlerts(5, "0", accessToken);
         verify(mockHeaderUtil, times(1)).getAuthHeader(any(ResolutionEnvironment.class));
     }
 

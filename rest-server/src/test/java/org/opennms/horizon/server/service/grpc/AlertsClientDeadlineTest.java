@@ -112,7 +112,7 @@ public class AlertsClientDeadlineTest {
         ArgumentCaptor<ListAlertsRequest> captor = ArgumentCaptor.forClass(ListAlertsRequest.class);
         StatusRuntimeException thrown = assertThrows(
             StatusRuntimeException.class,
-            () -> client.listAlerts(accessToken + methodName),
+            () -> client.listAlerts(5, "0", accessToken + methodName),
             "Expected listLocations() to throw, but it didn't"
         );
         assertThat(thrown.getStatus().getCode()).isEqualTo(Status.Code.DEADLINE_EXCEEDED);

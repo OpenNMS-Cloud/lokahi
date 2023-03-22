@@ -87,3 +87,7 @@ spec:
             requests:
               cpu: "{{ .Values.OpenNMS.MinionGateway.Resources.Requests.Cpu }}"
               memory: "{{ .Values.OpenNMS.MinionGateway.Resources.Requests.Memory }}"
+      {{- if .Values.OpenNMS.MinionGateway.PrivateRepoEnabled }}
+      imagePullSecrets:
+        - name: image-credentials
+      {{- end }}

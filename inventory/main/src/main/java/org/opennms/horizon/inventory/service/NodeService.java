@@ -280,6 +280,11 @@ public class NodeService {
             log.error("Error while sending nodescan task for node with label {}", node.getNodeLabel());
         }
     }
-
+    
+    @Transactional(readOnly = true)
+    public List<NodeDTO> listNodesByNodeLabelSearch(String tenantId, String nodeLabelSearchTerm) {
+        return nodeRepository.findByTenantIdAndNodeLabelLike(tenantId, nodeLabelSearchTerm).stream()
+            .map(mapper::modelToDTO).toList();
+    }
 
 }

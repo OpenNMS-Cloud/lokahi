@@ -32,3 +32,9 @@ kafka:
 keycloak:
   realm: opennms
   base-url: http://onms-keycloak:8080/auth
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"

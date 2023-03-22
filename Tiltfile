@@ -30,7 +30,7 @@
 ## 29 = horizon-stream-inventory
 ## 30 = events
 ## 31 = cortex
-##
+## 32 = prometheus
 
 # Tilt config #
 secret_settings(disable_scrub=True)  ## TODO: update secret values so we can reenable scrub
@@ -224,7 +224,7 @@ jib_project_multi_module(
     'opennms/horizon-stream-inventory',
     'inventory',
     'opennms-inventory',
-    port_forwards=['29080:9090', '29050:5005', '29065:6565'],
+    port_forwards=['29080:8080', '29050:5005', '29065:6565'],
 )
 
 ### Alert ###
@@ -242,7 +242,7 @@ jib_project_multi_module(
     'opennms/horizon-stream-metrics-processor',
     'metrics-processor',
     'opennms-metrics-processor',
-    port_forwards=['28080:9090', '28050:5005'],
+    port_forwards=['28080:8080', '28050:5005'],
 )
 
 ### Events ###
@@ -251,7 +251,7 @@ jib_project_multi_module(
     'opennms/horizon-stream-events',
     'events',
     'opennms-events',
-    port_forwards=['30050:5005', '30065:6565'],
+    port_forwards=['30050:5005', '30080:8080', '30065:6565'],
 )
 
 ### Minion Gateway ###
@@ -340,6 +340,12 @@ k8s_resource(
     'onms-kafka',
     new_name='kafka',
     port_forwards=['24092:59092'],
+)
+
+### Prometheus ###
+k8s_resource(
+    'prometheus',
+    port_forwards=['32090:9090'],
 )
 
 ### Others ###

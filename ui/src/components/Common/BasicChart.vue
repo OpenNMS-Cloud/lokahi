@@ -65,7 +65,7 @@ const render = async (update?: boolean) => {
   }
 }
 
-watch(props.chartData, () => {
+watch(props, () => {
   render(true)
 })
 

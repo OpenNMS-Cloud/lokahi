@@ -5,12 +5,14 @@ export const useFlowsStore = defineStore('flowsStore', {
   state: () => ({
     datasets: [{} as any],
     tableChartOptions: {},
+    totalFlows: '1,957',
     filters: {
       dateFilter: '2023-1-14 to 2023-1-15',
       traffic: {
-        total: true,
-        inbound: false,
-        outbound: false
+        selectedItem: 'total'
+      },
+      dataStyle: {
+        selectedItem: 'table'
       }
     },
     applications: {
@@ -49,14 +51,14 @@ export const useFlowsStore = defineStore('flowsStore', {
             data: this.datasets.map((row) => row.inbound),
             barThickness: 13,
             backgroundColor: '#0043A4',
-            hidden: this.filters.traffic.outbound
+            hidden: this.filters.traffic.selectedItem === 'outbound'
           },
           {
             label: 'Outbound',
             data: this.datasets.map((row) => row.outbound),
             barThickness: 13,
             backgroundColor: '#EE7D00',
-            hidden: this.filters.traffic.inbound
+            hidden: this.filters.traffic.selectedItem === 'inbound'
           }
         ]
       }
@@ -68,14 +70,14 @@ export const useFlowsStore = defineStore('flowsStore', {
             data: this.datasets.map((row) => row.inbound),
             barThickness: 13,
             backgroundColor: '#0043A4',
-            hidden: this.filters.traffic.outbound
+            hidden: this.filters.traffic.selectedItem === 'outbound'
           },
           {
             label: 'Outbound',
             data: this.datasets.map((row) => row.outbound),
             barThickness: 13,
             backgroundColor: '#EE7D00',
-            hidden: this.filters.traffic.inbound
+            hidden: this.filters.traffic.selectedItem === 'inbound'
           }
         ]
       }
@@ -105,6 +107,10 @@ export const useFlowsStore = defineStore('flowsStore', {
         return object[key as keyof typeof object]
       })
       return filtered
+    },
+    trafficRadioOnChange(selectedItem: string) {
+      this.filters.traffic.selectedItem = selectedItem
+      this.generateTableChart()
     }
   }
 })

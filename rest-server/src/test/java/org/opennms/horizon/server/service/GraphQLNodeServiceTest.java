@@ -140,6 +140,31 @@ public class GraphQLNodeServiceTest {
     }
 
     @Test
+    public void testFindAllNodesByNodeLabelSearch() throws JSONException {
+        doReturn(Arrays.asList(nodeDTO1, nodeDTO2, nodeDTO3)).when(mockClient)
+            .listNodesByNodeLabelSearch("test-search-term", accessToken);
+        String request = "query {\n" +
+            "    findAllNodesByNodeLabelSearch(labelSearchTerm: \"test-search-term\") {\n" +
+            "       id, " +
+            "       tenantId, " +
+            "       nodeLabel, " +
+            "       createTime " +
+            "    } " +
+            "}";
+        webClient.post()
+            .uri(GRAPHQL_PATH)
+            .accept(MediaType.APPLICATION_JSON)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(createPayload(request))
+            .exchange()
+            .expectStatus().isOk()
+            .expectBody()
+            .jsonPath("$.data.findAllNodesByNodeLabelSearch.size()").isEqualTo(3);
+        verify(mockClient).listNodesByNodeLabelSearch("test-search-term", accessToken);
+        verify(mockHeaderUtil).getAuthHeader(any(ResolutionEnvironment.class));
+    }
+
+    @Test
     public void testListNodesSkipLocation() throws JSONException {
         doReturn(Arrays.asList(nodeDTO1, nodeDTO2, nodeDTO3)).when(mockClient).listNodes(accessToken);
         String request = "query {findAllNodes {id}}";

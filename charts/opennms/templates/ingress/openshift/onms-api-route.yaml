@@ -5,7 +5,7 @@ metadata:
   name: opennms-api-route
   namespace: {{ .Release.Namespace }}
 spec:
-  subdomain: {{ .Values.Host }}
+  host: {{ .Values.Host }}.apps-crc.testing
   path: {{ .Values.OpenNMS.API.Path }}  
   to:
     kind: Service

@@ -15,6 +15,10 @@ spec:
       labels:
         appdomain: opennms
         run: {{ .Values.OpenNMS.MetricsProcessor.ServiceName }}
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+        prometheus.io/path: "/actuator/prometheus"
     spec:
       {{- if .Values.NodeRestrictions.Enabled }}
       nodeSelector:                                                                                    
@@ -46,7 +50,10 @@ spec:
               value: "{{ .Values.Kafka.ServiceName }}:{{ .Values.Kafka.Port }}"
             - name: CORTEX_WRITE_URL
               value: http://{{ .Values.Cortex.ServiceName }}:{{ .Values.Cortex.Port }}/api/v1/push
-
-
-
-
+          ports:
+            - name: http
+              containerPort: 8080
+      {{- if .Values.OpenNMS.MetricsProcessor.PrivateRepoEnabled }}
+      imagePullSecrets:
+        - name: image-credentials
+      {{- end }}

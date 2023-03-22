@@ -43,6 +43,7 @@ import io.restassured.config.RestAssuredConfig;
 import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
+
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
@@ -139,15 +140,15 @@ public class AlertTestSteps {
         log.info("Using Kafka base URL: {}", this.kafkaBootstrapUrl);
     }
 
-    @Then("Send event with UEI {string} with tenant {string}")
-    public void sendMessageToKafkaAtTopic(String eventUei, String tenantId) {
+    @Then("Send event with UEI {string} with tenant {string} with node {int}")
+    public void sendMessageToKafkaAtTopic(String eventUei, String tenantId, int nodeId) {
         EventLog eventLog = EventLog.newBuilder()
             .setTenantId(tenantId)
             .addEvents(Event.newBuilder()
                 .setTenantId(tenantId)
                 .setSeverity(Severity.MINOR)
                 .setProducedTimeMs(System.currentTimeMillis())
-                .setNodeId(10L)
+                .setNodeId(nodeId)
                 .setUei(eventUei))
             .build();
 
@@ -206,27 +207,15 @@ public class AlertTestSteps {
     }
 
     @Then("Verify alert topic has {int} messages with tenant {string}")
-    public void verifyTopicContainsTenant(int expectedMessages, String tenant) {
-        int foundMessages = 0;
+    public void verifyTopicContainsTenant(int expectedMessages, String tenant) throws InterruptedException {
+         boolean success = retryUtils.retry(
+            () -> this.checkNumberOfMessageForOneTenant(tenant, expectedMessages),
+            result -> result,
+            100,
+            10000,
+            false);
 
-        List<ConsumerRecord<String, byte[]>> records = kafkaTestHelper.getConsumedMessages(alertTopic);
-        for (ConsumerRecord<String, byte[]> record: records) {
-            if (record.value() == null) {
-                continue;
-            }
-            Alert alert;
-            try {
-                alert = Alert.parseFrom(record.value());
-            } catch (InvalidProtocolBufferException e) {
-                throw new RuntimeException(e);
-            }
-
-            if (tenant.equals(alert.getTenantId())) {
-                foundMessages++;
-            }
-        }
-
-        assertEquals(expectedMessages, foundMessages);
+        assertTrue("Verify alert topic has the right number of message(s)", success);
     }
 
     @Then("Remember the first alert from the last response")
@@ -236,6 +225,24 @@ public class AlertTestSteps {
         } else {
             firstAlertFromLastResponse = null;
         }
+    }
+
+    @Then("List alerts for tenant {string} with page size {int}, with timeout {int}ms, until JSON response matches the following JSON path expressions")
+    public void listAlertsForTenantWithPageSize(String tenantId, int pageSize, int timeout, List<String> jsonPathExpressions) throws InterruptedException {
+        Supplier<MessageOrBuilder> call = () -> {
+            clientUtils.setTenantId(tenantId);
+            ListAlertsResponse listAlertsResponse = clientUtils.getAlertServiceStub()
+                .listAlerts(ListAlertsRequest.newBuilder().setPageSize(pageSize).build());
+            alertsFromLastResponse = listAlertsResponse.getAlertsList();
+            return listAlertsResponse;
+        };
+        boolean success = retryUtils.retry(
+            () -> this.doRequestThenCheckJsonPathMatch(call, jsonPathExpressions),
+            result -> result,
+            100,
+            timeout,
+            false);
+        assertTrue("GET request expected to return JSON response matching JSON path expression(s)", success);
     }
 
 //========================================
@@ -330,5 +337,26 @@ public class AlertTestSteps {
         } catch (Throwable thrown) { // Assertions extend Error
             throw new RuntimeException(thrown);
         }
+    }
+
+    private boolean checkNumberOfMessageForOneTenant(String tenant, int expectedMessages) {
+        int foundMessages = 0;
+        List<ConsumerRecord<String, byte[]>> records = kafkaTestHelper.getConsumedMessages(alertTopic);
+        for (ConsumerRecord<String, byte[]> record: records) {
+            if (record.value() == null) {
+                continue;
+            }
+            Alert alert;
+            try {
+                alert = Alert.parseFrom(record.value());
+            } catch (InvalidProtocolBufferException e) {
+                throw new RuntimeException(e);
+            }
+
+            if (tenant.equals(alert.getTenantId())) {
+                foundMessages++;
+            }
+        }
+        return foundMessages == expectedMessages;
     }
 }

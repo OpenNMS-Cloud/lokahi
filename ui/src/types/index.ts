@@ -21,6 +21,11 @@ export interface FeatherSortObject {
   value: SORT | any
 }
 
+export interface FeatherRadioObject {
+  name: string
+  value: any
+}
+
 export enum TimeUnit {
   Secs,
   MSecs

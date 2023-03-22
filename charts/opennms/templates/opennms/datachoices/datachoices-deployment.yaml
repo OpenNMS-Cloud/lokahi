@@ -65,3 +65,7 @@ spec:
               containerPort: {{ .Values.OpenNMS.DataChoices.Port }}
             - name: grpc
               containerPort: {{ .Values.OpenNMS.DataChoices.GrpcPort }}
+      {{- if .Values.OpenNMS.DataChoices.PrivateRepoEnabled }}
+      imagePullSecrets:
+        - name: image-credentials
+      {{- end }}

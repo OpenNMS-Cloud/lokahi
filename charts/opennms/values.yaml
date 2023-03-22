@@ -224,6 +224,11 @@ Keycloak:
       add_header X-Content-Type-Options "nosniff";
       add_header X-Frame-Options "sameorigin";
       add_header server_tokens "off";
+    nginx.ingress.kubernetes.io/client-body-buffer-size: 4k
+    nginx.ingress.kubernetes.io/client-header-buffer-size: 4k
+    nginx.ingress.kubernetes.io/large-client-header-buffers: 4 16k
+    nginx.ingress.kubernetes.io/proxy-body-size: 4m
+    nginx.ingress.kubernetes.io/proxy-buffer-size: 6k
 Grafana:
   Enabled: true
   Path: /grafana

@@ -22,9 +22,10 @@ Feature: Inventory Processing
     Then verify the new node return fields match
     Then retrieve the list of nodes from Inventory
     Then verify that the new node is in the list returned from inventory
+    Then verify the task set update is published for device with nodeScan within 30000ms
     Then verify the task set update is published for device with task suffix "icmp-detector" within 30000ms
     Then verify the task set update is published for device with task suffix "snmp-detector" within 30000ms
-    Then verify the task set update is published for device with nodeScan within 30000ms
+
 
   Scenario: Add a device with new location and verify that Device and location gets created
     Given add a new device with label "test-label-2" and ip address "192.168.1.2" and location "MINION-2"
@@ -45,7 +46,7 @@ Feature: Inventory Processing
     Then add a new device with label "test-label" and ip address "192.168.1.1" and location "MINION"
     Then lookup node with location "MINION" and ip address "192.168.1.1"
     Then send Device Detection to Kafka topic "task-set.results"
-    Then verify the task set update is published for device with task suffix "snmp-detector" within 30000ms
+    Then verify the task set update is published for device with task suffix "icmp-detector" within 30000ms
     Then verify the task set update is published for device with task suffix "snmp-detector" within 30000ms
 
   Scenario: Deletion of a device causes Task Definitions Removals to be Requested

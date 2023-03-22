@@ -34,6 +34,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.opennms.horizon.azure.api.AzureScanItem;
 import org.opennms.horizon.azure.api.AzureScanResponse;
+import org.opennms.horizon.inventory.dto.ListTagsByEntityIdParamsDTO;
 import org.opennms.horizon.inventory.dto.NodeCreateDTO;
 import org.opennms.horizon.inventory.dto.TagCreateDTO;
 import org.opennms.horizon.inventory.dto.TagCreateListDTO;
@@ -142,7 +143,10 @@ public class ScannerResponseService {
                     icmpActiveDiscoveryService.getDiscoveryById(discoveryScanResult.getActiveDiscoveryId(), tenantId);
                 if (discoveryOptional.isPresent()) {
                     var icmpDiscovery = discoveryOptional.get();
-                    List<TagCreateDTO> tags = icmpDiscovery.getTagsList().stream()
+                    var tagsList = tagService.getTagsByEntityId(tenantId,
+                        ListTagsByEntityIdParamsDTO.newBuilder().setEntityId(TagEntityIdDTO.newBuilder()
+                        .setActiveDiscoveryId(icmpDiscovery.getId()).build()).build());
+                    List<TagCreateDTO> tags = tagsList.stream()
                         .map(tag -> TagCreateDTO.newBuilder().setName(tag.getName()).build())
                         .toList();
                     NodeCreateDTO createDTO = NodeCreateDTO.newBuilder()

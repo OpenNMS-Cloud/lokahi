@@ -124,8 +124,10 @@ public class IcmpDiscoveryStepDefinitions {
         Assertions.assertEquals(icmpDiscovery.getLocation(), icmpDiscoveryDto.getLocation());
         Assertions.assertEquals(icmpDiscovery.getIpAddresses(0), icmpDiscoveryDto.getIpAddresses(0));
         Assertions.assertEquals(icmpDiscovery.getSnmpConf().getReadCommunity(0), icmpDiscoveryDto.getSnmpConf().getReadCommunity(0));
-        var tagList = backgroundHelper.getTagServiceBlockingStub().getTagsByEntityId(ListTagsByEntityIdParamsDTO.newBuilder()
-            .setEntityId(TagEntityIdDTO.newBuilder().setActiveDiscoveryId(icmpDiscoveryDto.getId()).build()).build());
+        var tagListQuery = ListTagsByEntityIdParamsDTO.newBuilder()
+            .setEntityId(TagEntityIdDTO.newBuilder().setActiveDiscoveryId(icmpDiscoveryDto.getId()).build())
+            .build();
+        var tagList = backgroundHelper.getTagServiceBlockingStub().getTagsByEntityId(tagListQuery);
         Assertions.assertEquals(icmpDiscovery.getTagsCount(), tagList.getTagsCount());
         var tagsCreated = icmpDiscovery.getTagsList().stream().map(TagCreateDTO::getName).toList();
         // Take one tag and validate if it exists on the discovery.
@@ -159,10 +161,10 @@ public class IcmpDiscoveryStepDefinitions {
         }
     }
 
-    @Then("verify that node is created for {string} and location {string} with same tags")
-    public void verifyThatNodeIsCreatedForAndLocationWithTheTagsInPreviousScenario(String ipAddress, String location) {
+    @Then("verify that node is created for {string} and location {string} with same tags within {int}ms")
+    public void verifyThatNodeIsCreatedForAndLocationWithTheTagsInPreviousScenario(String ipAddress, String location, int timeout) {
 
-        Awaitility.await().pollInterval(2, TimeUnit.SECONDS).atMost(30, TimeUnit.SECONDS).until(() -> {
+        Awaitility.await().pollInterval(2000, TimeUnit.MILLISECONDS).atMost(timeout, TimeUnit.MILLISECONDS).until(() -> {
             try {
                 var nodeId = backgroundHelper.getNodeServiceBlockingStub().
                     getNodeIdFromQuery(NodeIdQuery.newBuilder().setLocation(location).setIpAddress(ipAddress).build());
@@ -175,9 +177,10 @@ public class IcmpDiscoveryStepDefinitions {
             getNodeIdFromQuery(NodeIdQuery.newBuilder().setLocation(location).setIpAddress(ipAddress).build());
         var nodeDto = backgroundHelper.getNodeServiceBlockingStub().getNodeById(nodeId);
         Assertions.assertTrue(nodeDto.getIpInterfacesList().stream().anyMatch(ipInterfaceDTO -> ipInterfaceDTO.getIpAddress().equals(ipAddress)));
-        var tagList = backgroundHelper.getTagServiceBlockingStub()
-            .getTagsByEntityId(ListTagsByEntityIdParamsDTO.newBuilder().setEntityId(TagEntityIdDTO.newBuilder()
-                .setNodeId(nodeDto.getId()).build()).build());
+        var tagListQuery = ListTagsByEntityIdParamsDTO.newBuilder()
+            .setEntityId(TagEntityIdDTO.newBuilder().setNodeId(nodeDto.getId()).build())
+            .build();
+        var tagList = backgroundHelper.getTagServiceBlockingStub().getTagsByEntityId(tagListQuery);
         Assertions.assertEquals(icmpDiscovery.getTagsCount(), tagList.getTagsCount());
         var tagsCreated = icmpDiscovery.getTagsList().stream().map(TagCreateDTO::getName).toList();
         // Take one tag and validate if it exists on the node.
@@ -185,5 +188,6 @@ public class IcmpDiscoveryStepDefinitions {
         Assertions.assertTrue(tagList.getTagsList().stream().map(TagDTO::getName).toList().contains(tag));
 
     }
+
 
 }

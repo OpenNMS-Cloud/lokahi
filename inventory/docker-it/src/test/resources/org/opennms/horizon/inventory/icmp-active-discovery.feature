@@ -14,4 +14,4 @@ Feature: Active Discovery
     Given The taskset at location "MINION"
     Then verify the task set update is published for icmp discovery within 30000ms
     Then send discovery ping results for "192.168.1.17" to Kafka topic "task-set.results"
-    Then verify that node is created for "192.168.1.17" and location "MINION" with same tags
+    Then verify that node is created for "192.168.1.17" and location "MINION" with same tags within 30000ms

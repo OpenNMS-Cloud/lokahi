@@ -57,7 +57,7 @@ public class GrpcIpcServerConfig {
     }
 
     @Bean(name = "internalGrpcIpcServer", destroyMethod = "stopServer")
-    public GrpcIpcServer prepareInternalGrpcIpcServerTenantIdInterceptor(@Autowired TenantIDGrpcServerInterceptor tenantIDGrpcServerInterceptor) {
+    public GrpcIpcServer prepareInternalGrpcIpcServerTenantIdInterceptor() {
         Properties properties = new Properties();
         properties.setProperty(GrpcIpcUtils.GRPC_MAX_INBOUND_SIZE, Long.toString(maxMessageSize));
 

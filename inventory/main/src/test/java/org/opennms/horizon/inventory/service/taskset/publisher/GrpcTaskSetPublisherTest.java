@@ -30,12 +30,10 @@ package org.opennms.horizon.inventory.service.taskset.publisher;
 
 import io.grpc.ClientInterceptor;
 import io.grpc.ManagedChannel;
-import io.grpc.Metadata;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatcher;
 import org.mockito.Mockito;
-import org.opennms.horizon.shared.constants.GrpcConstants;
 import org.opennms.taskset.contract.TaskDefinition;
 import org.opennms.taskset.service.contract.TaskSetServiceGrpc;
 import org.opennms.taskset.service.contract.UpdateTasksRequest;
@@ -48,8 +46,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 
 /**
@@ -74,14 +70,12 @@ public class GrpcTaskSetPublisherTest {
     //
     private ManagedChannel mockManagedChannel;
     private TaskSetServiceGrpc.TaskSetServiceBlockingStub mockTaskSetServiceBlockingStub;
-    private ClientInterceptor mockClientInterceptor;
 
     //
     // Test Data
     //
     private List<TaskDefinition> testTaskDefinitionList1;
     private UpdateTasksResponse testUpdateTasksResponse;
-    private Metadata attachHeadersMetadata;
 
     /**
      * Prepare common test data and interactions.
@@ -90,8 +84,6 @@ public class GrpcTaskSetPublisherTest {
     void setUp() {
         mockManagedChannel = Mockito.mock(ManagedChannel.class);
         mockTaskSetServiceBlockingStub = Mockito.mock(TaskSetServiceGrpc.TaskSetServiceBlockingStub.class);
-
-        mockClientInterceptor = Mockito.mock(ClientInterceptor.class);
 
         TaskDefinition testTaskDefinition1 = TaskDefinition.newBuilder().setId("x-task-001-x").build();
         TaskDefinition testTaskDefinition2 = TaskDefinition.newBuilder().setId("x-task-002-x").build();
@@ -120,7 +112,6 @@ public class GrpcTaskSetPublisherTest {
         // EXECUTE
         //
         target.setTaskSetServiceBlockingStubSupplier(this::getTaskSetServiceBlockingStubForChannel);
-        target.setAttachHeadersInterceptorFunction(this::getAttachHeadersInterceptor);
         target.init();
 
         target.publishNewTasks("x-tenant-id-001-x", "x-location-x", testTaskDefinitionList1);
@@ -128,13 +119,9 @@ public class GrpcTaskSetPublisherTest {
         //
         // VALIDATE
         //
-        Mockito.verify(mockTaskSetServiceBlockingStub).withInterceptors(mockClientInterceptor);
         Mockito.verify(mockTaskSetServiceBlockingStub).withDeadlineAfter(DEADLINE, TimeUnit.MILLISECONDS);
-        var matcher = createUpdateTaskRequestMatcher(testTaskDefinitionList1, TASK_OP.ADD);
+        var matcher = createUpdateTaskRequestMatcher("x-tenant-id-001-x", testTaskDefinitionList1, TASK_OP.ADD);
         Mockito.verify(mockTaskSetServiceBlockingStub).updateTasks(Mockito.argThat(matcher));
-
-        assertNotNull(attachHeadersMetadata);
-        assertEquals("x-tenant-id-001-x", attachHeadersMetadata.get(GrpcConstants.TENANT_ID_REQUEST_KEY));
     }
 
     /**
@@ -148,7 +135,6 @@ public class GrpcTaskSetPublisherTest {
         // EXECUTE
         //
         target.setTaskSetServiceBlockingStubSupplier(this::getTaskSetServiceBlockingStubForChannel);
-        target.setAttachHeadersInterceptorFunction(this::getAttachHeadersInterceptor);
         target.init();
 
         target.publishNewTasks("x-tenant-id-002-x", "x-location-x", testTaskDefinitionList1);
@@ -156,8 +142,8 @@ public class GrpcTaskSetPublisherTest {
         //
         // VALIDATE
         //
-        assertNotNull(attachHeadersMetadata);
-        assertEquals("x-tenant-id-002-x", attachHeadersMetadata.get(GrpcConstants.TENANT_ID_REQUEST_KEY));
+        var matcher = createUpdateTaskRequestMatcher("x-tenant-id-002-x", testTaskDefinitionList1, TASK_OP.ADD);
+        Mockito.verify(mockTaskSetServiceBlockingStub).updateTasks(Mockito.argThat(matcher));
     }
 
     /**
@@ -171,7 +157,6 @@ public class GrpcTaskSetPublisherTest {
         // EXECUTE
         //
         target.setTaskSetServiceBlockingStubSupplier(this::getTaskSetServiceBlockingStubForChannel);
-        target.setAttachHeadersInterceptorFunction(this::getAttachHeadersInterceptor);
         target.init();
 
         target.publishTaskDeletion("x-tenant-id-001-x", "x-location-x", testTaskDefinitionList1);
@@ -179,13 +164,9 @@ public class GrpcTaskSetPublisherTest {
         //
         // VALIDATE
         //
-        Mockito.verify(mockTaskSetServiceBlockingStub).withInterceptors(mockClientInterceptor);
         Mockito.verify(mockTaskSetServiceBlockingStub).withDeadlineAfter(DEADLINE, TimeUnit.MILLISECONDS);
-        var matcher = createUpdateTaskRequestMatcher(testTaskDefinitionList1, TASK_OP.REMOVE);
+        var matcher = createUpdateTaskRequestMatcher("x-tenant-id-001-x", testTaskDefinitionList1, TASK_OP.REMOVE);
         Mockito.verify(mockTaskSetServiceBlockingStub).updateTasks(Mockito.argThat(matcher));
-
-        assertNotNull(attachHeadersMetadata);
-        assertEquals("x-tenant-id-001-x", attachHeadersMetadata.get(GrpcConstants.TENANT_ID_REQUEST_KEY));
     }
 
 
@@ -199,67 +180,66 @@ public class GrpcTaskSetPublisherTest {
         return mockTaskSetServiceBlockingStub;
     }
 
-    private ClientInterceptor getAttachHeadersInterceptor(Metadata metadata) {
-        attachHeadersMetadata = metadata;
-
-        return mockClientInterceptor;
-    }
-
     /**
      * Create an argument matcher for the TaskSetServiceBlockingStub's updateTasks(...) call given a list of expected
      * tasks and the type of operation being performed on those tasks (addition vs removal).
      *
+     * @param tenantId
      * @param expectedTasks list of task definitions being added to, or removed from, the task set.
-     * @param taskOp type of operation being performed on the task set.
+     * @param taskOp        type of operation being performed on the task set.
      * @return argument matcher for use in Mockito verifications.
      */
-    private ArgumentMatcher<UpdateTasksRequest> createUpdateTaskRequestMatcher(List<TaskDefinition> expectedTasks, TASK_OP taskOp) {
+    private ArgumentMatcher<UpdateTasksRequest> createUpdateTaskRequestMatcher(String tenantId, List<TaskDefinition> expectedTasks, TASK_OP taskOp) {
         return new ArgumentMatcher<UpdateTasksRequest>() {
             @Override
             public boolean matches(UpdateTasksRequest argument) {
-                if (argument.getUpdateCount() == expectedTasks.size()) {
-                    int cur = 0;
+                if (Objects.equals(argument.getTenantId(), tenantId)) {
+                    if (argument.getUpdateCount() == expectedTasks.size()) {
+                        int cur = 0;
 
-                    for (var oneUpdate : argument.getUpdateList()) {
-                        if (taskOp == TASK_OP.ADD) {
-                            // ADD
-                            if (oneUpdate.hasAddTask()) {
-                                var addTask = oneUpdate.getAddTask();
-                                var expectedAddTask = expectedTasks.get(cur);
+                        for (var oneUpdate : argument.getUpdateList()) {
+                            if (taskOp == TASK_OP.ADD) {
+                                // ADD
+                                if (oneUpdate.hasAddTask()) {
+                                    var addTask = oneUpdate.getAddTask();
+                                    var expectedAddTask = expectedTasks.get(cur);
 
-                                if (! Objects.equals(expectedAddTask, addTask.getTaskDefinition())) {
-                                    LOG.error("Add task mismatch: offset={}; expected={}; actual={}", cur, expectedAddTask, addTask.getTaskDefinition());
-                                    return false;
+                                    if (!Objects.equals(expectedAddTask, addTask.getTaskDefinition())) {
+                                        LOG.error("Add task mismatch: offset={}; expected={}; actual={}", cur, expectedAddTask, addTask.getTaskDefinition());
+                                        return false;
+                                    }
+
+                                    LOG.debug("MATCHED: cur={}; expected={}; actual={}", cur, expectedAddTask, addTask.getTaskDefinition());
+                                } else {
+                                    LOG.error("expecting Add Task in update");
                                 }
+                            } else if (taskOp == TASK_OP.REMOVE) {
+                                // REMOVE
+                                if (oneUpdate.hasRemoveTask()) {
+                                    var removeTask = oneUpdate.getRemoveTask();
+                                    var expectedRemoveTask = expectedTasks.get(cur);
 
-                                LOG.debug("MATCHED: cur={}; expected={}; actual={}", cur, expectedAddTask, addTask.getTaskDefinition());
-                            } else {
-                                LOG.error("expecting Add Task in update");
-                            }
-                        } else if (taskOp == TASK_OP.REMOVE) {
-                            // REMOVE
-                            if (oneUpdate.hasRemoveTask()) {
-                                var removeTask = oneUpdate.getRemoveTask();
-                                var expectedRemoveTask = expectedTasks.get(cur);
+                                    if (!Objects.equals(expectedRemoveTask.getId(), removeTask.getTaskId())) {
+                                        LOG.error("Remove task mismatch: offset={}; expected={}; actual={}", cur, expectedRemoveTask.getId(), removeTask.getTaskId());
+                                        return false;
+                                    }
 
-                                if (! Objects.equals(expectedRemoveTask.getId(), removeTask.getTaskId())) {
-                                    LOG.error("Remove task mismatch: offset={}; expected={}; actual={}", cur, expectedRemoveTask.getId(), removeTask.getTaskId());
-                                    return false;
+                                    LOG.debug("MATCHED: cur={}; expected={}; actual={}", cur, expectedRemoveTask.getId(), removeTask.getTaskId());
+                                } else {
+                                    LOG.error("expecting Remove Task in update");
                                 }
-
-                                LOG.debug("MATCHED: cur={}; expected={}; actual={}", cur, expectedRemoveTask.getId(), removeTask.getTaskId());
                             } else {
-                                LOG.error("expecting Remove Task in update");
+                                throw new RuntimeException("Unrecognized task operation type " + taskOp);
                             }
-                        } else {
-                            throw new RuntimeException("Unrecognized task operation type " + taskOp);
+
+                            cur++;
                         }
 
-                        cur++;
+                        // SUCCESS
+                        return true;
                     }
-
-                    // SUCCESS
-                    return true;
+                } else {
+                    LOG.debug("Tenant ID mismatch: expected={}; actual={}", tenantId, argument.getTenantId());
                 }
 
                 return false;

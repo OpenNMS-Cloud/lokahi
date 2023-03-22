@@ -72,14 +72,11 @@ import org.opennms.taskset.service.contract.UpdateTasksResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.TreeMap;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -123,7 +120,7 @@ public class MinionGatewayTestSteps {
     private String mockLocation;
     private String mockSystemId;
     private String applicationBaseUrl;
-    private Map<String, String> grpcHeaders = new TreeMap<>();
+    private String mockTenantId;
 
 
     //
@@ -246,9 +243,9 @@ public class MinionGatewayTestSteps {
         this.mockLocation = mockLocation;
     }
 
-    @Given("GRPC header {string} = {string}")
-    public void grpcHeader(String headerName, String headerValue) {
-        grpcHeaders.put(headerName, headerValue);
+    @Given("mock tenant ID {string}")
+    public void tenantID(String tenantId) {
+        this.mockTenantId = tenantId;
     }
 
     @Then("create Cloud RPC connection")
@@ -597,17 +594,13 @@ public class MinionGatewayTestSteps {
 
             UpdateTasksRequest updateTasksRequest =
                 UpdateTasksRequest.newBuilder()
+                    .setTenantId(mockTenantId)
                     .addUpdate(updateSingleTaskOp)
                     .build();
 
             rpcException = null;
             try {
-                ListenableFuture<UpdateTasksResponse> future =
-                    taskSetServiceStub
-                        .withInterceptors(
-                            prepareGrpcHeaderInterceptor()
-                        )
-                    .updateTasks(updateTasksRequest)
+                ListenableFuture<UpdateTasksResponse> future = taskSetServiceStub.updateTasks(updateTasksRequest)
                 ;
 
                 updateTasksResponse = future.get(timeout, TimeUnit.MILLISECONDS);
@@ -757,7 +750,9 @@ public class MinionGatewayTestSteps {
     private Metadata prepareGrpcHeaders() {
         Metadata result = new Metadata();
 
-        grpcHeaders.forEach((key, value) -> result.put(Metadata.Key.of(key, Metadata.ASCII_STRING_MARSHALLER), value));
+        if (mockTenantId != null) {
+            result.put(Metadata.Key.of("tenant-id", Metadata.ASCII_STRING_MARSHALLER), mockTenantId);
+        }
 
         return result;
     }

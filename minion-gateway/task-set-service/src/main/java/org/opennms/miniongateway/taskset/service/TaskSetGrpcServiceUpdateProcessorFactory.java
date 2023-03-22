@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class TaskSetGrpcServiceUpdateProcessorFactory  {
 
-    public TaskSetGrpcServiceUpdateProcessor create(String tenantId, UpdateTasksRequest updateTasksRequest) {
-        return new TaskSetGrpcServiceUpdateProcessor(tenantId, updateTasksRequest);
+    public TaskSetGrpcServiceUpdateProcessor create(UpdateTasksRequest updateTasksRequest) {
+        return new TaskSetGrpcServiceUpdateProcessor(updateTasksRequest);
     }
 }

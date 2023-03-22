@@ -29,6 +29,8 @@
 package org.opennms.horizon.shared.grpc.common;
 
 import io.grpc.BindableService;
+import io.grpc.ServerInterceptor;
+
 import java.io.IOException;
 import java.util.Properties;
 
@@ -42,6 +44,12 @@ public interface GrpcIpcServer {
      *
      * @param bindableService The service that needs to be added */
     void startServer(BindableService bindableService) throws IOException;
+
+    /**
+     * Starts server, this will not immediately start server but schedules server start after certain delay.
+     *
+     * @param bindableService The service that needs to be added */
+    void startServerWithInterceptors(BindableService bindableService, ServerInterceptor... interceptors) throws IOException;
 
     /**
      * Stops the Server.

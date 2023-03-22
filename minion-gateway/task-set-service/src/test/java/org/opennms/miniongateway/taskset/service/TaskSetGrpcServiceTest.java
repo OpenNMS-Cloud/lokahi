@@ -23,7 +23,6 @@ class TaskSetGrpcServiceTest {
     private TaskSetGrpcService target;
 
     private GrpcIpcServer mockGrpcIpcServer;
-    private TenantIDGrpcServerInterceptor mockTenantIDGrpcServerInterceptor;
     private TaskSetStorage mockTaskSetStorage;
     private StreamObserver<UpdateTasksResponse> mockUpdateTasksRepsonseStreamObserver;
     private TaskSetGrpcServiceUpdateProcessor mockTaskSetGrpcServiceUpdateProcessor;
@@ -55,13 +54,13 @@ class TaskSetGrpcServiceTest {
 
         testRequest =
             UpdateTasksRequest.newBuilder()
+                .setTenantId("x-tenant-id-x")
                 .setLocation("x-location-x")
                 .addUpdate(UpdateSingleTaskOp.newBuilder().setAddTask(testAddSingleTaskOp).build())
                 .addUpdate(UpdateSingleTaskOp.newBuilder().setRemoveTask(testRemoveSingleTaskOp).build())
                 .build();
 
         mockGrpcIpcServer = Mockito.mock(GrpcIpcServer.class);
-        mockTenantIDGrpcServerInterceptor = Mockito.mock(TenantIDGrpcServerInterceptor.class);
         mockTaskSetStorage = Mockito.mock(TaskSetStorage.class);
         mockUpdateTasksRepsonseStreamObserver = Mockito.mock(StreamObserver.class);
         mockTaskSetGrpcServiceUpdateProcessor = Mockito.mock(TaskSetGrpcServiceUpdateProcessor.class);
@@ -69,8 +68,7 @@ class TaskSetGrpcServiceTest {
 
         target = new TaskSetGrpcService();
 
-        Mockito.when(mockTenantIDGrpcServerInterceptor.readCurrentContextTenantId()).thenReturn("x-tenant-id-x");
-        Mockito.when(mockTaskSetGrpcServiceUpdateProcessorFactory.create("x-tenant-id-x", testRequest)).thenReturn(mockTaskSetGrpcServiceUpdateProcessor);
+        Mockito.when(mockTaskSetGrpcServiceUpdateProcessorFactory.create(testRequest)).thenReturn(mockTaskSetGrpcServiceUpdateProcessor);
     }
 
     @Test
@@ -101,7 +99,6 @@ class TaskSetGrpcServiceTest {
         //
         target.setGrpcIpcServer(mockGrpcIpcServer);
         target.setTaskSetStorage(mockTaskSetStorage);
-        target.setTenantIDGrpcServerInterceptor(mockTenantIDGrpcServerInterceptor);
         target.setTaskSetGrpcServiceUpdateProcessorFactory(mockTaskSetGrpcServiceUpdateProcessorFactory);
         target.updateTasks(testRequest, mockUpdateTasksRepsonseStreamObserver);
 
@@ -129,7 +126,6 @@ class TaskSetGrpcServiceTest {
         //
         target.setGrpcIpcServer(mockGrpcIpcServer);
         target.setTaskSetStorage(mockTaskSetStorage);
-        target.setTenantIDGrpcServerInterceptor(mockTenantIDGrpcServerInterceptor);
         target.setTaskSetGrpcServiceUpdateProcessorFactory(mockTaskSetGrpcServiceUpdateProcessorFactory);
 
         RuntimeException actualException = null;

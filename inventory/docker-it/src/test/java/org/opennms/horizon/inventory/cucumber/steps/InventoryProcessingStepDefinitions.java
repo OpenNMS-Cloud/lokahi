@@ -117,6 +117,7 @@ public class InventoryProcessingStepDefinitions {
     @Given("Grpc TenantId {string}")
     public void grpcTenantId(String tenantId) {
         backgroundHelper.grpcTenantId(tenantId);
+        minionGatewayWiremockTestSteps.setTaskTenantId(tenantId);
     }
 
     @Given("Minion at location {string} with system Id {string}")

@@ -18,11 +18,6 @@ public class TaskSetGrpcServiceUpdateProcessor implements TaskSetStorageUpdateFu
     private static final Logger LOG = LoggerFactory.getLogger(TaskSetGrpcServiceUpdateProcessor.class);
 
     /**
-     * ID of the tenant to which the task set belongs.
-     */
-    private final String tenantId;
-
-    /**
      * The request with updates to apply to the task set.
      */
     private final UpdateTasksRequest updateTasksRequest;
@@ -55,8 +50,7 @@ public class TaskSetGrpcServiceUpdateProcessor implements TaskSetStorageUpdateFu
 // Constructor
 //----------------------------------------
 
-    public TaskSetGrpcServiceUpdateProcessor(String tenantId, UpdateTasksRequest updateTasksRequest) {
-        this.tenantId = tenantId;
+    public TaskSetGrpcServiceUpdateProcessor(UpdateTasksRequest updateTasksRequest) {
         this.updateTasksRequest = updateTasksRequest;
     }
 
@@ -94,7 +88,7 @@ public class TaskSetGrpcServiceUpdateProcessor implements TaskSetStorageUpdateFu
         addNewTasks(updateTasksRequest, updatedTaskSetBuilder);
 
         LOG.debug("Remove tasks: tenant={}; location={}; added-count={}; replaced-count={}; removed-count={}",
-            tenantId, updateTasksRequest.getLocation(), numNew, numReplaced, numRemoved);
+            updateTasksRequest.getTenantId(), updateTasksRequest.getLocation(), numNew, numReplaced, numRemoved);
 
         // Determine the return value based on whether there was an actual change
         TaskSet result;
@@ -123,7 +117,7 @@ public class TaskSetGrpcServiceUpdateProcessor implements TaskSetStorageUpdateFu
                     requestedRemovalIds.add(update.getRemoveTask().getTaskId());
                 } else {
                     LOG.error("Ignoring unrecognized update request with no add-task and no remove-task: tenant-id={}; location={}",
-                        tenantId, request.getLocation());
+                        request.getTenantId(), request.getLocation());
                 }
             }
         );

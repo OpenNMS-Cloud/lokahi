@@ -133,19 +133,14 @@ public class GrpcTaskSetPublisher implements TaskSetPublisher {
         try {
             UpdateTasksRequest.Builder request =
                 UpdateTasksRequest.newBuilder()
+                    .setTenantId(tenantId)
                     .setLocation(location)
                     ;
 
             populateUpdateRequestOp.accept(request);
 
-            Metadata metadata = new Metadata();
-            metadata.put(GrpcConstants.TENANT_ID_REQUEST_KEY, tenantId);
-
-            ClientInterceptor attachHeadersInterceptor = attachHeadersInterceptorFunction.apply(metadata);
-
             UpdateTasksResponse response =
                 taskSetServiceStub
-                    .withInterceptors(attachHeadersInterceptor)
                     .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
                     .updateTasks(request.build())
                 ;

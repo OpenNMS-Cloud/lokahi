@@ -3,7 +3,6 @@ package org.opennms.miniongateway.taskset.service;
 import io.grpc.stub.StreamObserver;
 import lombok.Setter;
 import org.opennms.horizon.shared.grpc.common.GrpcIpcServer;
-import org.opennms.horizon.shared.grpc.common.TenantIDGrpcServerInterceptor;
 import org.opennms.taskset.service.contract.TaskSetServiceGrpc;
 import org.opennms.taskset.service.contract.UpdateTasksRequest;
 import org.opennms.taskset.service.contract.UpdateTasksResponse;
@@ -39,10 +38,6 @@ public class TaskSetGrpcService extends TaskSetServiceGrpc.TaskSetServiceImplBas
 
     @Autowired
     @Setter // Testability
-    private TenantIDGrpcServerInterceptor tenantIDGrpcServerInterceptor;
-
-    @Autowired
-    @Setter // Testability
     private TaskSetStorage taskSetStorage;
 
     @Autowired
@@ -72,13 +67,10 @@ public class TaskSetGrpcService extends TaskSetServiceGrpc.TaskSetServiceImplBas
      */
     @Override
     public void updateTasks(UpdateTasksRequest request, StreamObserver<UpdateTasksResponse> responseObserver) {
-        // Retrieve the Tenant ID from the TenantID GRPC Interceptor
-        String tenantId = tenantIDGrpcServerInterceptor.readCurrentContextTenantId();
-
-        TaskSetGrpcServiceUpdateProcessor updateProcessor = taskSetGrpcServiceUpdateProcessorFactory.create(tenantId, request);
+        TaskSetGrpcServiceUpdateProcessor updateProcessor = taskSetGrpcServiceUpdateProcessorFactory.create(request);
 
         try {
-            taskSetStorage.atomicUpdateTaskSetForLocation(tenantId, request.getLocation(), updateProcessor);
+            taskSetStorage.atomicUpdateTaskSetForLocation(request.getTenantId(), request.getLocation(), updateProcessor);
         } catch (RuntimeException rtExc) {
             // Log exceptions here that might otherwise get swallowed
             LOG.warn("error applying task set updates", rtExc);

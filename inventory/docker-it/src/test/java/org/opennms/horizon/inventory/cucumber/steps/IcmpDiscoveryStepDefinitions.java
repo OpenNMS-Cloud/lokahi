@@ -64,13 +64,12 @@ import java.util.stream.Stream;
 public class IcmpDiscoveryStepDefinitions {
 
     private static final Logger LOG = LoggerFactory.getLogger(InventoryProcessingStepDefinitions.class);
-    private static InventoryBackgroundHelper backgroundHelper;
+    private final InventoryBackgroundHelper backgroundHelper;
     private IcmpActiveDiscoveryCreateDTO icmpDiscovery;
     private long activeDiscoveryId;
 
-    @BeforeAll
-    public static void beforeAll() {
-        backgroundHelper = new InventoryBackgroundHelper();
+    public IcmpDiscoveryStepDefinitions(InventoryBackgroundHelper backgroundHelper) {
+        this.backgroundHelper = backgroundHelper;
     }
 
     @Given("[ICMP Discovery] External GRPC Port in system property {string}")

@@ -64,16 +64,15 @@ import static org.junit.Assert.assertNotNull;
 
 // using icmp active discovery here but can be any subclass of ActiveDiscovery
 public class ActiveDiscoveryTaggingStepDefinitions {
-    private static InventoryBackgroundHelper backgroundHelper;
+    private final InventoryBackgroundHelper backgroundHelper;
 
     private IcmpActiveDiscoveryDTO activeDiscovery1;
     private IcmpActiveDiscoveryDTO activeDiscovery2;
     private TagListDTO addedTagList;
     private TagListDTO fetchedTagList;
 
-    @BeforeAll
-    public static void beforeAll() {
-        backgroundHelper = new InventoryBackgroundHelper();
+    public ActiveDiscoveryTaggingStepDefinitions(InventoryBackgroundHelper backgroundHelper) {
+        this.backgroundHelper = backgroundHelper;
     }
 
     /*

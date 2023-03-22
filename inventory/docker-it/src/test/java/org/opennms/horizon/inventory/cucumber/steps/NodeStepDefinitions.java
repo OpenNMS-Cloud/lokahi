@@ -18,14 +18,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class NodeStepDefinitions {
-    private static InventoryBackgroundHelper backgroundHelper;
+    private final InventoryBackgroundHelper backgroundHelper;
     private NodeDTO node;
     private MonitoringLocationDTO monitoringLocation;
     private NodeList fetchedNodeList;
 
-    @BeforeAll
-    public static void beforeAll() {
-        backgroundHelper = new InventoryBackgroundHelper();
+    public NodeStepDefinitions(InventoryBackgroundHelper backgroundHelper) {
+        this.backgroundHelper = backgroundHelper;
     }
 
     /*

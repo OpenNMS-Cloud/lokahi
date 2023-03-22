@@ -59,16 +59,15 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 public class PassiveDiscoveryTaggingStepDefinitions {
-    private static InventoryBackgroundHelper backgroundHelper;
+    private final InventoryBackgroundHelper backgroundHelper;
 
     private PassiveDiscoveryDTO passiveDiscovery1;
     private PassiveDiscoveryDTO passiveDiscovery2;
     private TagListDTO addedTagList;
     private TagListDTO fetchedTagList;
 
-    @BeforeAll
-    public static void beforeAll() {
-        backgroundHelper = new InventoryBackgroundHelper();
+    public PassiveDiscoveryTaggingStepDefinitions(InventoryBackgroundHelper backgroundHelper) {
+        this.backgroundHelper = backgroundHelper;
     }
 
     /*

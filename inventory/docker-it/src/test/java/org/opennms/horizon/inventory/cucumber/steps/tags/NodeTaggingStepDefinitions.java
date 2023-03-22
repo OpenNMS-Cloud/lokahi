@@ -62,16 +62,15 @@ import static org.junit.Assert.assertNotNull;
 
 
 public class NodeTaggingStepDefinitions {
-    private static InventoryBackgroundHelper backgroundHelper;
+    private final InventoryBackgroundHelper backgroundHelper;
 
     private NodeDTO node1;
     private NodeDTO node2;
     private TagListDTO addedTagList;
     private TagListDTO fetchedTagList;
 
-    @BeforeAll
-    public static void beforeAll() {
-        backgroundHelper = new InventoryBackgroundHelper();
+    public NodeTaggingStepDefinitions(InventoryBackgroundHelper backgroundHelper) {
+        this.backgroundHelper = backgroundHelper;
     }
 
     /*

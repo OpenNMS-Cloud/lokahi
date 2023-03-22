@@ -142,7 +142,7 @@ public class MinionGatewayWiremockTestSteps {
     @Then("verify the task set update is published for icmp discovery within {int}ms")
     public void verifyTheTaskSetUpdateIsPublishedForIcmpDiscoveryWithinMs(int timeout) {
         String taskIdPattern = "discovery:\\d+/" + taskLocation;
-        commonVerifyTaskSetUpdate((record) -> isMatchingAddTask(record, taskLocation, taskIdPattern), timeout);
+        commonVerifyTaskSetUpdate((record) -> isMatchingAddTask(record, taskTenantId, taskLocation, taskIdPattern), timeout);
     }
 
 
@@ -156,7 +156,9 @@ public class MinionGatewayWiremockTestSteps {
                 for (var update : record.getUpdateList()) {
                     if (update.hasAddTask()) {
                         if (update.getAddTask().hasTaskDefinition()) {
-                            return update.getAddTask().getTaskDefinition().getId().matches(taskIdPattern);
+                            if (update.getAddTask().getTaskDefinition().getId().matches(taskIdPattern)) {
+                                return true;
+                            }
                         }
                     }
                 }

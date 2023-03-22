@@ -26,27 +26,41 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.alertservice.db.repository;
+package org.opennms.horizon.alertservice.db.entity;
 
-import org.opennms.horizon.alerts.proto.AlertType;
-import org.opennms.horizon.alertservice.db.entity.AlertDefinition;
-import org.opennms.horizon.events.proto.Event;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
-import org.springframework.stereotype.Service;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 
-import java.util.Arrays;
-import java.util.List;
+import java.io.Serial;
+import java.io.Serializable;
 
-@Repository
-public interface AlertDefinitionRepository extends JpaRepository<AlertDefinition, Long> {
+@Getter
+@Setter
+@RequiredArgsConstructor
+@Entity
+@Table(name="event_match")
+public class EventMatch extends TenantAwareEntity implements Serializable  {
 
-    public List<AlertDefinition> findAll();
+    @Serial
+    private static final long serialVersionUID = 5352121937366809116L;
 
-    default AlertDefinition getAlertDefinitionForEvent(Event event) {
-        return findAll().stream()
-            .filter(def -> event.getUei().equals(def.getUei()))
-            .findFirst()
-            .orElse(null);
-    }
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(nullable=false)
+    private long id;
+
+    @Column(nullable=false)
+    private String name;
+
+    @Column(nullable=false)
+    private String value;
 }

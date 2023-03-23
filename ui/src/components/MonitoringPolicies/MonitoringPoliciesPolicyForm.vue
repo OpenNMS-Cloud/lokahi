@@ -6,7 +6,7 @@
         @click="store.displayPolicyForm()"
       >
         <FeatherIcon :icon="addIcon" />
-        Create New Policy
+        New Policy
       </FeatherButton>
       <MonitoringPoliciesExistingItems
         title="Existing Policies"
@@ -20,11 +20,10 @@
         class="policy-form"
         v-if="store.selectedPolicy"
       >
-        <div class="form-title">Create New Policy</div>
-        <div class="form-subtitle">New Policy Name</div>
+        <div class="form-title">Policy Name</div>
         <FeatherInput
           v-model="store.selectedPolicy.name"
-          label="Policy Name"
+          label="New Policy Name"
         />
         <FeatherTextarea
           v-model="store.selectedPolicy.memo"
@@ -39,7 +38,7 @@
           <FeatherCheckbox v-model="store.selectedPolicy.notifications.pagerDuty">Pager Duty</FeatherCheckbox>
           <FeatherCheckbox v-model="store.selectedPolicy.notifications.webhooks">Webhooks</FeatherCheckbox>
         </FeatherCheckboxGroup>
-        <div class="form-subtitle">Tags</div>
+        <div class="subtitle">Tags</div>
         <BasicAutocomplete
           @itemsSelected="selectTags"
           :getItems="tagQueries.getTagsSearch"
@@ -53,8 +52,9 @@
         class="mp-card-container"
       >
         <MonitoringPoliciesCard
-          v-for="policy in store.monitoringPolicies"
+          v-for="(policy, index) in store.monitoringPolicies"
           :policy="policy"
+          :index="index"
           @selectPolicy="(policy: IPolicy) => store.displayPolicyForm(policy)"
         />
       </div>
@@ -103,9 +103,8 @@ const populateForm = (item: IPolicy) => (store.selectedPolicy = item)
       @include typography.headline3;
       margin-bottom: var(variables.$spacing-m);
     }
-    .form-subtitle {
+    .subtitle {
       @include typography.subtitle1;
-      margin-bottom: var(variables.$spacing-m);
     }
   }
 

@@ -1,4 +1,14 @@
 <template>
+  <div class="condition-title">
+    <div class="subtitle">Condition {{ conditionLetters[index].toUpperCase() }}</div>
+    <div
+      v-if="index !== 0"
+      class="delete"
+      @click="$emit('deleteCondition', condition.id)"
+    >
+      delete
+    </div>
+  </div>
   <div class="condition">
     <div class="inner-col">
       <div class="text">Count</div>
@@ -7,6 +17,7 @@
         hideLabel
         @update:model-value="(val) => updateConditionProp('count', val as number)"
         v-model="condition.count"
+        type="number"
       />
     </div>
 
@@ -17,6 +28,7 @@
         hideLabel
         @update:model-value="(val) => updateConditionProp('time', val as number)"
         v-model="condition.time"
+        type="number"
       />
     </div>
 
@@ -38,7 +50,10 @@
       />
     </div>
 
-    <div class="inner-col" v-if="isEventPortDownCondition(condition)">
+    <div
+      class="inner-col"
+      v-if="isEventPortDownCondition(condition)"
+    >
       <div class="text">Clear Event (optional)</div>
       <BasicSelect
         :list="clearEventOptions"
@@ -52,9 +67,11 @@
 <script lang="ts" setup>
 import { EventCondition } from '@/types/policies'
 import { isEventPortDownCondition } from './monitoringPolicies.utils'
+import { conditionLetters } from './monitoringPolicies.constants'
 
 const props = defineProps<{
   condition: EventCondition
+  index: number
 }>()
 
 const emit = defineEmits(['updateCondition'])
@@ -75,11 +92,11 @@ const severityList = [
 ]
 
 const clearEventOptions = [
-  { id: undefined, name: '' },
-  { id: 'port-down', name: 'Port Down' },
+  { id: null, name: '' },
+  { id: 'port-up', name: 'Port Up' }
 ]
 
-watchEffect(() => condition.value = props.condition)
+watchEffect(() => (condition.value = props.condition))
 
 const updateConditionProp = (property: string, value: number | string) => {
   condition.value![property] = value
@@ -99,10 +116,6 @@ const updateConditionProp = (property: string, value: number | string) => {
   width: 100%;
   flex-direction: column;
   gap: var(variables.$spacing-xs);
-  padding: var(variables.$spacing-xl) var(variables.$spacing-s);
-  margin-top: var(variables.$spacing-s);
-  border: 1px solid var(variables.$shade-4);
-  border-radius: vars.$border-radius-s;
 
   .inner-col {
     flex: 1;

@@ -9,7 +9,7 @@
         @click="store.displayRuleForm()"
       >
         <FeatherIcon :icon="addIcon" />
-        Create New Rule
+        New Rule
       </FeatherButton>
       <MonitoringPoliciesExistingItems
         title="Existing Rules"
@@ -30,7 +30,8 @@
             <div class="subtitle">New Rule Name</div>
             <FeatherInput
               v-model="store.selectedRule.name"
-              label="New Rule Name"
+              label=""
+              hideLabel
             />
           </div>
           <div class="col">
@@ -62,7 +63,7 @@
           </div>
           <div
             class="col"
-            v-if="store.selectedRule.detectionMethod === events.Event"
+            v-if="store.selectedRule.detectionMethod === DetectionMethodTypes.Event"
           >
             <div class="subtitle">Trigger Event</div>
             <BasicSelect
@@ -77,19 +78,31 @@
           v-if="store.selectedRule!.conditions.length"
         >
           <div class="col">
-            <div class="subtitle">Set Alert Conditions</div>
+            <div class="form-title">Set Alert Conditions</div>
             <MonitoringPoliciesThresholdCondition
-              v-if="store.selectedRule!.detectionMethod === events.Threshold"
-              v-for="cond in store.selectedRule!.conditions"
+              v-if="store.selectedRule!.detectionMethod === DetectionMethodTypes.Threshold"
+              v-for="(cond, index) in store.selectedRule!.conditions"
+              :index="index"
               :condition="(cond as ThresholdCondition)"
               @updateCondition="(condition) => store.updateCondition(cond.id, condition)"
+              @deleteCondition="(id: string) => store.deleteCondition(id)"
             />
             <MonitoringPoliciesEventCondition
               v-else
-              v-for="cond in store.selectedRule!.conditions"
+              v-for="(cond, index) in store.selectedRule!.conditions"
               :condition="(cond as EventCondition)"
+              :index="index"
               @updateCondition="(condition) => store.updateCondition(cond.id, condition)"
+              @deleteCondition="(id: string) => store.deleteCondition(id)"
             />
+            <FeatherButton
+              class="add-params"
+              text
+              @click="store.addNewCondition"
+              :disabled="store.selectedRule.conditions.length === 4"
+            >
+              Additional Parameters
+            </FeatherButton>
           </div>
         </div>
       </div>
@@ -101,17 +114,15 @@
 import { useMonitoringPoliciesStore } from '@/store/Views/monitoringPoliciesStore'
 import { EventCondition, IRule, ThresholdCondition } from '@/types/policies'
 import Add from '@featherds/icon/action/Add'
-
-enum events {
-  Threshold = 'threshold',
-  Event = 'event'
-}
+import { DetectionMethodTypes } from './monitoringPolicies.constants'
 
 const store = useMonitoringPoliciesStore()
 const addIcon = markRaw(Add)
 
 const metricOptions = computed(() => {
-  return store.selectedRule?.detectionMethod === events.Threshold ? thresholdMetricsOptions : eventMetricsOptions
+  return store.selectedRule?.detectionMethod === DetectionMethodTypes.Threshold
+    ? thresholdMetricsOptions
+    : eventMetricsOptions
 })
 
 const componentTypeOptions = [
@@ -138,16 +149,24 @@ const eventMetricsOptions = [
 ]
 
 const eventTriggerOptions = [
-  { id: 'device-cold-reboot', name: 'Device Cold Reboot' },
-  { id: 'snmp-auth-fail', name: 'SNMP Authentication Failure' },
-  { id: 'port-down', name: 'Port Down' }
+  { id: 'Device Cold Reboot', name: 'Device Cold Reboot' },
+  { id: 'SNMP Authentication Failure', name: 'SNMP Authentication Failure' },
+  { id: 'Port Down', name: 'Port Down' }
 ]
 
 const selectComponentType = (type: string) => (store.selectedRule!.componentType = type)
-const selectDetectionMethod = (method: string) => (store.selectedRule!.detectionMethod = method)
 const selectMetric = (metric: string) => (store.selectedRule!.metricName = metric)
-const selectEventTrigger = (trigger: string) => (store.selectedRule!.eventTrigger = trigger)
 const populateForm = (rule: IRule) => store.displayRuleForm(rule)
+
+const selectEventTrigger = (trigger: string) => {
+  store.selectedRule!.eventTrigger = trigger
+  store.resetDefaultConditions()
+}
+
+const selectDetectionMethod = (method: string) => {
+  store.selectedRule!.detectionMethod = method
+  store.resetDefaultConditions()
+}
 </script>
 
 <style scoped lang="scss">
@@ -179,6 +198,9 @@ const populateForm = (rule: IRule) => store.displayRuleForm(rule)
     .subtitle {
       @include typography.subtitle1;
     }
+    .add-params {
+      margin-top: var(variables.$spacing-xl);
+    }
   }
 
   @include mediaQueriesMixins.screen-md {
@@ -194,5 +216,25 @@ const populateForm = (rule: IRule) => store.displayRuleForm(rule)
       }
     }
   }
+
+  // for event / threshold child conditions
+  :deep(.condition-title) {
+    display: flex;
+    justify-content: space-between;
+    margin: var(variables.$spacing-xl) 0 var(variables.$spacing-xs) 0;
+    .subtitle {
+      @include typography.subtitle1;
+    }
+    .delete {
+      cursor: pointer;
+      color: var(variables.$primary);
+    }
+  }
+}
+
+// needed to fix feather issue where
+// hideLabel doesn't hide the label
+:deep(.label-border) {
+  width: 0 !important;
 }
 </style>

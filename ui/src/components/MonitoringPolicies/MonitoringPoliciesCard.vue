@@ -1,6 +1,11 @@
 <template>
   <div class="mp-card">
-    <div class="first-card-title">Existing Policies</div>
+    <div
+      class="first-card-title"
+      v-if="index === 0"
+    >
+      Existing Policies
+    </div>
 
     <div class="row">
       <div class="policy-title">
@@ -16,11 +21,9 @@
 
     <div v-for="rule in policy.rules">
       <div class="row">
-        <div class="title-box rule"><span>Rule: </span>{{ rule.name }}</div>
-        <div class="title-box method">
-          <span>Detection Method: </span>{{ rule.detectionMethod }}-{{ rule.metricName }}
-        </div>
-        <div class="title-box component"><span>Component: </span>{{ rule.componentType }}</div>
+        <div class="title-box rule">{{ rule.name }}</div>
+        <div class="title-box method">{{ rule.detectionMethod }}-{{ rule.metricName }}</div>
+        <div class="title-box component">{{ rule.componentType }}</div>
 
         <div
           class="alert-conditions-btn"
@@ -35,6 +38,7 @@
         <div class="alert-title">Alert Conditions</div>
         <MonitoringPoliciesCardAlertRow
           v-for="(condition, index) in rule.conditions"
+          :rule="rule"
           :condition="condition"
           :index="index"
         />
@@ -53,12 +57,16 @@ const icons = markRaw({
   ExpandMore
 })
 
-defineProps<{
+const props = defineProps<{
   policy: IPolicy
+  index: number
 }>()
 
 const ruleStates = reactive<{ [x: string]: boolean }>({})
 const triggerRuleState = (ruleId: string) => (ruleStates[ruleId] = !ruleStates[ruleId])
+
+// set all alert conditions open by default
+onMounted(() => props.policy.rules.map((rule) => (ruleStates[rule.id] = true)))
 </script>
 
 <style scoped lang="scss">
@@ -72,7 +80,7 @@ const triggerRuleState = (ruleId: string) => (ruleStates[ruleId] = !ruleStates[r
   @include elevation.elevation(3);
   border-radius: vars.$border-radius-s;
   display: flex;
-  gap: var(variables.$spacing-s);
+  gap: var(variables.$spacing-xl);
   flex-direction: column;
   padding: var(variables.$spacing-l);
 
@@ -83,7 +91,7 @@ const triggerRuleState = (ruleId: string) => (ruleStates[ruleId] = !ruleStates[r
 
   .row {
     display: flex;
-    gap: var(variables.$spacing-m);
+    gap: var(variables.$spacing-xxs);
 
     .policy-title {
       @include typography.headline4;
@@ -109,6 +117,7 @@ const triggerRuleState = (ruleId: string) => (ruleStates[ruleId] = !ruleStates[r
       }
 
       &.rule {
+        @include typography.subtitle2;
         flex: 1;
       }
       &.method {

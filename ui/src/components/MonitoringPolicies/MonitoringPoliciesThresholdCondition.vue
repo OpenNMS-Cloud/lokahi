@@ -1,5 +1,18 @@
 <template>
-  <div class="condition" v-if="condition">
+  <div class="condition-title">
+    <div class="subtitle">Condition {{ conditionLetters[index].toUpperCase() }}</div>
+    <div
+      v-if="index !== 0"
+      class="delete"
+      @click="$emit('deleteCondition', condition.id)"
+    >
+      delete
+    </div>
+  </div>
+  <div
+    class="condition"
+    v-if="condition"
+  >
     <div class="inner-col">
       <div class="text">Trigger when metric is:</div>
       <BasicSelect
@@ -49,7 +62,7 @@
         v-model="condition.duringLast"
       />
     </div>
-    
+
     <div class="inner-col">
       <div class="text">&nbsp;</div>
       <BasicSelect
@@ -73,9 +86,11 @@
 <script lang="ts" setup>
 import Slider from '@vueform/slider'
 import { ThresholdCondition } from '@/types/policies'
+import { conditionLetters } from './monitoringPolicies.constants'
 
 const props = defineProps<{
   condition: ThresholdCondition
+  index: number
 }>()
 
 const emit = defineEmits(['updateCondition'])
@@ -102,7 +117,7 @@ const severityList = [
   { id: 'warning', name: 'Warning' }
 ]
 
-watchEffect(() => condition.value = props.condition)
+watchEffect(() => (condition.value = props.condition))
 
 const updateConditionProp = (property: string, value: number | string) => {
   condition.value![property] = value
@@ -122,10 +137,6 @@ const updateConditionProp = (property: string, value: number | string) => {
   width: 100%;
   flex-direction: column;
   gap: var(variables.$spacing-xs);
-  padding: var(variables.$spacing-xl) var(variables.$spacing-s);
-  margin-top: var(variables.$spacing-s);
-  border: 1px solid var(variables.$shade-4);
-  border-radius: vars.$border-radius-s;
 
   .inner-col {
     flex: 1;
@@ -153,7 +164,7 @@ const updateConditionProp = (property: string, value: number | string) => {
 
 :root {
   .slider-horizontal {
-    width: 100%;;
+    width: 100%;
     --slider-tooltip-distance: 10px;
     --slider-tooltip-bg: #273180;
     --slider-connect-bg: #273180;

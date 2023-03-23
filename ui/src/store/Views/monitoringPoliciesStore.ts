@@ -4,6 +4,7 @@ import { IPolicy, IRule, Condition } from '@/types/policies'
 import { useMonitoringPoliciesMutations } from '../Mutations/monitoringPoliciesMutations'
 import { useMonitoringPoliciesQueries } from '../Queries/monitoringPoliciesQueries'
 import useSnackbar from '@/composables/useSnackbar'
+import { DetectionMethodTypes, EventTriggerTypes } from '@/components/MonitoringPolicies/monitoringPolicies.constants'
 
 const { showSnackbar } = useSnackbar()
 
@@ -36,6 +37,15 @@ const getDefaultThresholdCondition = () => ({
   severity: 'critical'
 })
 
+const getDefaultEventCondition = () => ({
+  id: new Date().getTime().toString(),
+  count: 1,
+  severity: 'critical'
+})
+
+// port down event has an extra property
+const getDefaultEventConditionPortDown = () => ({ ...getDefaultEventCondition(), ...{ clearEvent: 'port-up' } })
+
 const getDefaultRule = () => ({
   id: new Date().getTime().toString(),
   name: '',
@@ -65,27 +75,54 @@ export const useMonitoringPoliciesStore = defineStore('monitoringPoliciesStore',
     displayRuleForm(rule?: IRule) {
       this.selectedRule = cloneDeep(rule) || getDefaultRule()
     },
-    addNewThresholdCondition() {
-      this.selectedRule!.conditions.push(getDefaultThresholdCondition())
+    resetDefaultConditions() {
+      if (!this.selectedRule) return
+
+      // detection method THRESHOLD
+      if (this.selectedRule.detectionMethod === DetectionMethodTypes.Threshold) {
+        return (this.selectedRule.conditions = [getDefaultThresholdCondition()])
+      }
+
+      // detection method EVENT
+      if (this.selectedRule.detectionMethod === DetectionMethodTypes.Event) {
+        this.selectedRule.eventTrigger === EventTriggerTypes.PortDown
+          ? (this.selectedRule.conditions = [getDefaultEventConditionPortDown()])
+          : (this.selectedRule.conditions = [getDefaultEventCondition()])
+      }
+    },
+    addNewCondition() {
+      if (!this.selectedRule) return
+
+      // detection method THRESHOLD
+      if (this.selectedRule.detectionMethod === DetectionMethodTypes.Threshold) {
+        return this.selectedRule.conditions.push(getDefaultThresholdCondition())
+      }
+
+      // detection method EVENT
+      if (this.selectedRule.detectionMethod === DetectionMethodTypes.Event) {
+        this.selectedRule.eventTrigger === EventTriggerTypes.PortDown
+          ? this.selectedRule.conditions.push(getDefaultEventConditionPortDown())
+          : this.selectedRule.conditions.push(getDefaultEventCondition())
+      }
     },
     updateCondition(id: string, condition: Condition) {
       this.selectedRule!.conditions.map((currentCondition) => {
         if (currentCondition.id === id) {
-          return {...currentCondition, ...condition}
+          return { ...currentCondition, ...condition }
         }
         return
       })
     },
-    removeCondition(id: string) {
+    deleteCondition(id: string) {
       this.selectedRule!.conditions = this.selectedRule!.conditions.filter((c) => c.id !== id)
     },
     saveRule() {
       const existingItemIndex = findIndex(this.selectedPolicy!.rules, { id: this.selectedRule?.id })
 
-      if (existingItemIndex !== -1) { 
+      if (existingItemIndex !== -1) {
         // replace existing rule
         this.selectedPolicy!.rules.splice(existingItemIndex, 1, this.selectedRule!)
-      } else { 
+      } else {
         // add new rule
         this.selectedPolicy!.rules.push(this.selectedRule!)
       }

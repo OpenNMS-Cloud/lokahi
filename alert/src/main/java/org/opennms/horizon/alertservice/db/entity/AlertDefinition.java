@@ -28,10 +28,12 @@
 
 package org.opennms.horizon.alertservice.db.entity;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
@@ -45,6 +47,7 @@ import org.opennms.horizon.alerts.proto.ManagedObjectType;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -65,9 +68,11 @@ public class AlertDefinition extends TenantAwareEntity implements Serializable {
     @Column(length=256, nullable=false)
     private String uei;
 
-    @OneToMany
-    @JoinColumn(name="id")
-    private List<EventMatch> match;
+    @OneToMany(mappedBy = "alertDefinition",
+        orphanRemoval = true,
+        fetch =     FetchType.LAZY,
+        cascade = CascadeType.ALL)
+    private List<EventMatch> match = new ArrayList<>();
 
     @Column(nullable=false)
     private String reductionKey;

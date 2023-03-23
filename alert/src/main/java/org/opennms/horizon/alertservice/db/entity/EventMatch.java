@@ -30,6 +30,7 @@ package org.opennms.horizon.alertservice.db.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -63,4 +64,8 @@ public class EventMatch extends TenantAwareEntity implements Serializable  {
 
     @Column(nullable=false)
     private String value;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "alert_definition_id")
+    private AlertDefinition alertDefinition;
 }

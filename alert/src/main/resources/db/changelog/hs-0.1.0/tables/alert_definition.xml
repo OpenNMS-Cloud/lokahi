@@ -44,7 +44,7 @@
             <column name="tenant_id" type="text">
                 <constraints nullable="false"/>
             </column>
-            <column name="alert_definition_id" type="text">
+            <column name="alert_definition_id" type="bigint">
                 <constraints nullable="false"/>
             </column>
             <column name="name" type="text">

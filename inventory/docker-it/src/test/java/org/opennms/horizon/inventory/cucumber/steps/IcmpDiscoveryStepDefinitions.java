@@ -52,6 +52,7 @@ import org.opennms.taskset.contract.PingResponse;
 import org.opennms.taskset.contract.ScannerResponse;
 import org.opennms.taskset.contract.TaskResult;
 import org.opennms.taskset.contract.TaskSetResults;
+import org.opennms.taskset.contract.TenantedTaskSetResults;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -149,8 +150,9 @@ public class IcmpDiscoveryStepDefinitions {
                     .setScannerResponse(ScannerResponse.newBuilder().setResult(Any.pack(scanResult)).build())
                     .build();
 
-            TaskSetResults taskSetResults =
-                TaskSetResults.newBuilder()
+            TenantedTaskSetResults taskSetResults =
+                TenantedTaskSetResults.newBuilder()
+                    .setTenantId(backgroundHelper.getTenantId())
                     .addResults(taskResult)
                     .build();
             var producerRecord = new ProducerRecord<String, byte[]>(topic, taskSetResults.toByteArray());

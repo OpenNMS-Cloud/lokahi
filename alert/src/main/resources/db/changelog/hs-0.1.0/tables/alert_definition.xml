@@ -31,7 +31,12 @@
                 <constraints nullable="false"/>
             </column>
         </createTable>
+
         <addPrimaryKey columnNames="id" constraintName="alert_definition_pk" tableName="alert_definition"/>
+        <createIndex tableName="alert_definition" indexName="idx_alert_definition_uei">
+            <column name="uei"/>
+        </createIndex>
+
         <createTable tableName="event_match">
             <column name="id" type="bigint" autoIncrement="true">
                 <constraints nullable="false"/>
@@ -49,9 +54,8 @@
                 <constraints nullable="false"/>
             </column>
         </createTable>
-        <addPrimaryKey columnNames="id"
-                       constraintName="event_match_pk"
-                       tableName="event_match"/>
+
+        <addPrimaryKey columnNames="id" constraintName="event_match_pk" tableName="event_match"/>
         <addForeignKeyConstraint  baseTableName="event_match"
                                   baseColumnNames="id"
                                   constraintName="fk_alert_definition"

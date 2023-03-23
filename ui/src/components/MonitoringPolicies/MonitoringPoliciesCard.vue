@@ -65,8 +65,8 @@ const props = defineProps<{
 const ruleStates = reactive<{ [x: string]: boolean }>({})
 const triggerRuleState = (ruleId: string) => (ruleStates[ruleId] = !ruleStates[ruleId])
 
-// set all alert conditions open by default
-onMounted(() => props.policy.rules.map((rule) => (ruleStates[rule.id] = true)))
+// set first rule alert conditions open by default
+onMounted(() => ruleStates[props.policy.rules[0].id] = true)
 </script>
 
 <style scoped lang="scss">

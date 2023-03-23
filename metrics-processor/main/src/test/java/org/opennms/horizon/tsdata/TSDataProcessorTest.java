@@ -113,7 +113,7 @@ class TSDataProcessorTest {
             .build());
 
         TenantedTaskSetResults taskSetResults = TenantedTaskSetResults.newBuilder()
-            .setTenantId("opennms-prime")
+            .setTenantId(TENANT_ID)
             .addAllResults(taskResultList)
             .build();
 

@@ -96,5 +96,6 @@ service NodeService {
   rpc getNodeIdFromQuery(NodeIdQuery) returns (google.protobuf.Int64Value) {};
   rpc deleteNode(google.protobuf.Int64Value) returns(google.protobuf.BoolValue) {};
   rpc startNodeScanByIds(NodeIdList) returns(google.protobuf.BoolValue) {};
+  rpc getIpInterfaceById(google.protobuf.Int64Value) returns (IpInterfaceDTO) {};
   rpc getIpInterfaceFromQuery(NodeIdQuery) returns (IpInterfaceDTO) {};
 }

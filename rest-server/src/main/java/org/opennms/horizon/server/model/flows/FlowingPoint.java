@@ -28,11 +28,10 @@
 
 package org.opennms.horizon.server.model.flows;
 
-import java.time.Instant;
-
 import lombok.Getter;
 import lombok.Setter;
-import org.opennms.dataplatform.flows.querier.Querier;
+
+import java.time.Instant;
 
 @Getter
 @Setter
@@ -46,13 +45,13 @@ public class FlowingPoint {
 
     private double value;
 
-    public static FlowingPoint fromApplication(Querier.FlowingPoint flowingPoint) {
+    public static FlowingPoint fromApplication(org.opennms.dataplatform.flows.querier.v1.FlowingPoint flowingPoint) {
         var output = FlowingPoint.baseConversion(flowingPoint);
         output.label = flowingPoint.getApplication();
         return output;
     }
 
-    private static FlowingPoint baseConversion(Querier.FlowingPoint flowingPoint) {
+    private static FlowingPoint baseConversion(org.opennms.dataplatform.flows.querier.v1.FlowingPoint  flowingPoint) {
         var output = new FlowingPoint();
         output.setTimestamp(Instant.ofEpochSecond(flowingPoint.getTimestamp().getSeconds(), flowingPoint.getTimestamp().getNanos()));
         output.direction = flowingPoint.getDirection().toString();

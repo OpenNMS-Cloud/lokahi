@@ -281,6 +281,17 @@ public class NodeGrpcService extends NodeServiceGrpc.NodeServiceImplBase {
         }, () -> responseObserver.onError(StatusProto.toStatusRuntimeException(createTenantIdMissingStatus())));
     }
 
+    @Override
+    public void getIpInterfaceById(Int64Value request, StreamObserver<IpInterfaceDTO> responseObserver) {
+        var ipInterface = tenantLookup.lookupTenantId(Context.current())
+            .map(tenantId -> ipInterfaceService.getByIdAndTenantId(request.getValue(), tenantId))
+            .orElseThrow();
+        ipInterface.ifPresentOrElse(ipInterfaceDTO -> {
+            responseObserver.onNext(ipInterfaceDTO);
+            responseObserver.onCompleted();
+        }, () -> responseObserver.onError(StatusProto.toStatusRuntimeException(createStatusNotExits(request.getValue()))));
+    }
+
     private Status createTenantIdMissingStatus() {
         return Status.newBuilder().setCode(Code.INVALID_ARGUMENT_VALUE).setMessage(TENANT_ID_IS_MISSING_MSG).build();
     }

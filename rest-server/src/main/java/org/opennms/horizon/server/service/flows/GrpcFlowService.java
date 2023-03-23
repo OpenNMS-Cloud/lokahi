@@ -28,22 +28,24 @@
 
 package org.opennms.horizon.server.service.flows;
 
-
 import io.leangen.graphql.annotations.GraphQLEnvironment;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.execution.ResolutionEnvironment;
 import io.leangen.graphql.spqr.spring.annotations.GraphQLApi;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.opennms.horizon.server.mapper.IpInterfaceMapper;
+import org.opennms.horizon.server.mapper.NodeMapper;
 import org.opennms.horizon.server.model.flows.Exporter;
 import org.opennms.horizon.server.model.flows.FlowingPoint;
 import org.opennms.horizon.server.model.flows.RequestCriteria;
 import org.opennms.horizon.server.model.flows.TrafficSummary;
+import org.opennms.horizon.server.service.grpc.InventoryClient;
 import org.opennms.horizon.server.utils.ServerHeaderUtil;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
-import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -53,12 +55,18 @@ import java.util.stream.Collectors;
 public class GrpcFlowService {
     private final ServerHeaderUtil headerUtil;
     private final FlowClient flowClient;
+    private final InventoryClient inventoryClient;
+
+    private final NodeMapper nodeMapper;
+    private final IpInterfaceMapper ipInterfaceMapper;
 
     @GraphQLQuery(name = "findExporters")
     public Flux<Exporter> findExporters(RequestCriteria requestCriteria,
-                                      @GraphQLEnvironment ResolutionEnvironment env) {
+                                        @GraphQLEnvironment ResolutionEnvironment env) {
         String tenantId = headerUtil.extractTenant(env);
-        return Flux.fromIterable(flowClient.findExporters(requestCriteria, tenantId));
+        var interfaceIds = flowClient.findExporters(requestCriteria, tenantId);
+        return Flux.fromIterable(interfaceIds.stream()
+            .map(interfaceId -> getExporter(interfaceId, env)).filter(Objects::nonNull).collect(Collectors.toList()));
     }
 
     @GraphQLQuery(name = "findApplications")
@@ -68,31 +76,35 @@ public class GrpcFlowService {
         return Flux.fromIterable(flowClient.findApplications(requestCriteria, tenantId));
     }
 
-
-    @GraphQLQuery(name = "getApplicationSummaries")
-    public Flux<TrafficSummary> getApplicationSummaries(RequestCriteria requestCriteria,
-                                                        @GraphQLEnvironment ResolutionEnvironment env) {
+    @GraphQLQuery(name = "findApplicationSummaries")
+    public Flux<TrafficSummary> findApplicationSummaries(RequestCriteria requestCriteria,
+                                                         @GraphQLEnvironment ResolutionEnvironment env) {
         String tenantId = headerUtil.extractTenant(env);
 
-//
-//        List<TrafficSummary> summaries = new ArrayList<>();
-//        for (int i = 0; i < 10; i++) {
-//            var summary = new TrafficSummary();
-//            summary.setLabel("label" + i);
-//            summary.setBytesOut(i);
-//            summary.setBytesIn(i);
-//            summaries.add(summary);
-//        }
-//        Querier.ApplicationSummaries asummaries;
         var summaries = flowClient.getApplicationSummaries(requestCriteria, tenantId);
-        return Flux.fromIterable(summaries.getSummariesList().stream().map(s -> TrafficSummary.fromApplication(s)).collect(Collectors.toList()));
+        return Flux.fromIterable(summaries.getSummariesList().stream().map(TrafficSummary::fromApplication).collect(Collectors.toList()));
     }
 
     @GraphQLQuery(name = "findApplicationSeries")
     public Flux<FlowingPoint> findApplicationSeries(RequestCriteria requestCriteria,
                                                     @GraphQLEnvironment ResolutionEnvironment env) {
         String tenantId = headerUtil.extractTenant(env);
-        var series = flowClient.getApplicationSeries(requestCriteria, tenantId).getPointList().stream().map(p -> FlowingPoint.fromApplication(p)).collect(Collectors.toList());
+        var series = flowClient.getApplicationSeries(requestCriteria, tenantId).getPointList().stream()
+            .map(FlowingPoint::fromApplication).collect(Collectors.toList());
         return Flux.fromIterable(series);
+    }
+
+    private Exporter getExporter(long interfaceId, ResolutionEnvironment env) {
+        if (headerUtil.getAuthHeader(env) != null) {
+            var ipInterfaceDTO = inventoryClient.getIpInterfaceById(interfaceId, headerUtil.getAuthHeader(env));
+            if (ipInterfaceDTO != null) {
+                var nodeDTO = inventoryClient.getNodeById(ipInterfaceDTO.getNodeId(), headerUtil.getAuthHeader(env));
+                var exporter = new Exporter();
+                exporter.setIpInterface(ipInterfaceMapper.protoToIpInterface(ipInterfaceDTO));
+                exporter.setNode(nodeMapper.protoToNode(nodeDTO));
+                return exporter;
+            }
+        }
+        return null;
     }
 }

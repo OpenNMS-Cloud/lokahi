@@ -9,7 +9,7 @@ import java.util.List;
 @Setter
 public class RequestCriteria {
     private TimeRange timeRange;
-    private int count;
+    private int count = 10;
     private List<Exporter> exporter;
     private List<String> applications;
 }

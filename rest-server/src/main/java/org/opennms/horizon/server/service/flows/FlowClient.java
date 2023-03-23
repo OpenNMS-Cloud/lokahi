@@ -31,13 +31,14 @@ package org.opennms.horizon.server.service.flows;
 import com.google.protobuf.Timestamp;
 import io.grpc.ManagedChannel;
 import lombok.RequiredArgsConstructor;
-import org.opennms.dataplatform.flows.querier.ApplicationsServiceGrpc;
-import org.opennms.dataplatform.flows.querier.ExporterServiceGrpc;
-import org.opennms.dataplatform.flows.querier.Querier;
-import org.opennms.horizon.server.model.flows.Exporter;
+import org.opennms.dataplatform.flows.querier.v1.ApplicationsServiceGrpc;
+import org.opennms.dataplatform.flows.querier.v1.Direction;
+import org.opennms.dataplatform.flows.querier.v1.ExporterServiceGrpc;
+import org.opennms.dataplatform.flows.querier.v1.FlowingPoint;
+import org.opennms.dataplatform.flows.querier.v1.Series;
+import org.opennms.dataplatform.flows.querier.v1.Summaries;
+import org.opennms.dataplatform.flows.querier.v1.TrafficSummary;
 import org.opennms.horizon.server.model.flows.RequestCriteria;
-import org.opennms.horizon.server.model.inventory.IpInterface;
-import org.opennms.horizon.server.model.inventory.Node;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -65,24 +66,17 @@ public class FlowClient {
         }
     }
 
-    public List<Exporter> findExporters(RequestCriteria requestCriteria, String tenantId) {
-        List<Exporter> exporters = new ArrayList<>();
-        Exporter exporter = new Exporter();
-        exporters.add(exporter);
-        Node node = new Node();
-        IpInterface ipInterface = new IpInterface();
-        List<IpInterface> ipInterfaces = new ArrayList<>();
-        ipInterfaces.add(ipInterface);
-        node.setId(1);
-        node.setCreateTime(System.currentTimeMillis());
-        node.setNodeLabel("node");
-        node.setIpInterfaces(ipInterfaces);
-        ipInterface.setTenantId(tenantId);
-        ipInterface.setNodeId(node.getId());
-        ipInterface.setHostname("hostname");
-        ipInterface.setIpAddress("127.0.0.1");
-        exporter.setNode(node);
-        exporter.setIpInterface(ipInterface);
+    /**
+     * It returns a list of exporter interfaceIds
+     *
+     * @param requestCriteria
+     * @param tenantId
+     * @return
+     */
+    public List<Long> findExporters(RequestCriteria requestCriteria, String tenantId) {
+        List<Long> exporters = new ArrayList<>();
+        exporters.add(1L);
+        exporters.add(2L);
         return exporters;
     }
 
@@ -93,27 +87,27 @@ public class FlowClient {
         return applications;
     }
 
-    public Querier.Summaries getApplicationSummaries(RequestCriteria requestCriteria, String tenantId) {
-        var summaries = Querier.Summaries.newBuilder();
+    public Summaries getApplicationSummaries(RequestCriteria requestCriteria, String tenantId) {
+        var summaries = Summaries.newBuilder();
         for (int i = 0; i < 10; i++) {
-            summaries.addSummaries(Querier.TrafficSummary.newBuilder().setApplication("app_" + i)
+            summaries.addSummaries(TrafficSummary.newBuilder().setApplication("app_" + i)
                 .setBytesIn((long) (Math.random() * 100_000L))
                 .setBytesOut((long) (Math.random() * 100_000L)));
         }
         return summaries.build();
     }
 
-    public Querier.Series getApplicationSeries(RequestCriteria requestCriteria, String tenantId) {
-        Querier.Series.Builder series = Querier.Series.newBuilder();
+    public Series getApplicationSeries(RequestCriteria requestCriteria, String tenantId) {
+        Series.Builder series = Series.newBuilder();
         int seriesSize = 100;
         for (int i = 0; i < 10; i++) {
             for (int j = 0; j < seriesSize; j++) {
                 series.addPoint(
-                    Querier.FlowingPoint.newBuilder()
+                    FlowingPoint.newBuilder()
                         .setApplication("app_" + i)
                         .setTimestamp(Timestamp.newBuilder().setSeconds(System.currentTimeMillis() - ((seriesSize - j) * 500)))
                         .setValue(Math.random() * 100_1000L)
-                        .setDirection(Querier.Direction.EGRESS));
+                        .setDirection(Direction.EGRESS));
             }
         }
         return series.build();

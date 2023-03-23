@@ -10,6 +10,7 @@
                 <tableExists tableName="event_match"/>
             </not>
         </preConditions>
+
         <createTable tableName="alert_definition">
             <column name="id" type="bigint" autoIncrement="true"/>
             <column name="tenant_id" type="text">
@@ -21,18 +22,15 @@
             <column name="reduction_key" type="text">
                 <constraints nullable="false"/>
             </column>
-            <column name="clear_key" type="text">
-                <constraints nullable="false"/>
-            </column>
+            <column name="clear_key" type="text" />
             <column name="type" type="integer">
                 <constraints nullable="false"/>
             </column>
-            <column name="managed_object_type" type="integer">
-                <constraints nullable="false"/>
-            </column>
+            <column name="managed_object_type" type="integer" />
         </createTable>
 
         <addPrimaryKey columnNames="id" constraintName="alert_definition_pk" tableName="alert_definition"/>
+
         <createIndex tableName="alert_definition" indexName="idx_alert_definition_uei">
             <column name="uei"/>
         </createIndex>
@@ -56,11 +54,125 @@
         </createTable>
 
         <addPrimaryKey columnNames="id" constraintName="event_match_pk" tableName="event_match"/>
+
         <addForeignKeyConstraint  baseTableName="event_match"
                                   baseColumnNames="id"
                                   constraintName="fk_alert_definition"
                                   onDelete="CASCADE"
                                   referencedColumnNames="id"
                                   referencedTableName="alert_definition"/>
+
+        <insert tableName="alert_definition">
+            <column name="tenant_id" value="tenantA"/>
+            <column name="uei" value="uei.opennms.org/vendor/cisco/traps/SNMP_Link_Down"/>
+            <column name="reduction_key" value="%s:%s:%d"/>
+            <column name="type" value="1"/>
+        </insert>
+        <insert tableName="alert_definition">
+            <column name="tenant_id" value="tenantA"/>
+            <column name="uei" value="uei.opennms.org/vendor/cisco/traps/SNMP_Link_Up"/>
+            <column name="reduction_key" value="%s:%s:%d"/>
+            <column name="clear_key" value="%s:uei.opennms.org/vendor/cisco/traps/SNMP_Link_Down:%d"/>
+            <column name="type" value="2"/>
+        </insert>
+
+        <insert tableName="alert_definition">
+            <column name="tenant_id" value="tenantB"/>
+            <column name="uei" value="uei.opennms.org/vendor/cisco/traps/SNMP_Link_Down"/>
+            <column name="reduction_key" value="%s:%s:%d"/>
+            <column name="type" value="1"/>
+        </insert>
+        <insert tableName="alert_definition">
+            <column name="tenant_id" value="tenantB"/>
+            <column name="uei" value="uei.opennms.org/vendor/cisco/traps/SNMP_Link_Up"/>
+            <column name="reduction_key" value="%s:%s:%d"/>
+            <column name="clear_key" value="%s:uei.opennms.org/vendor/cisco/traps/SNMP_Link_Down:%d"/>
+            <column name="type" value="2"/>
+        </insert>
+
+        <insert tableName="alert_definition">
+            <column name="tenant_id" value="tenantC"/>
+            <column name="uei" value="uei.opennms.org/vendor/cisco/traps/SNMP_Link_Down"/>
+            <column name="reduction_key" value="%s:%s:%d"/>
+            <column name="type" value="1"/>
+        </insert>
+        <insert tableName="alert_definition">
+            <column name="tenant_id" value="tenantC"/>
+            <column name="uei" value="uei.opennms.org/vendor/cisco/traps/SNMP_Link_Up"/>
+            <column name="reduction_key" value="%s:%s:%d"/>
+            <column name="clear_key" value="%s:uei.opennms.org/vendor/cisco/traps/SNMP_Link_Down:%d"/>
+            <column name="type" value="2"/>
+        </insert>
+
+        <insert tableName="alert_definition">
+            <column name="tenant_id" value="tenantD"/>
+            <column name="uei" value="uei.opennms.org/vendor/cisco/traps/SNMP_Link_Down"/>
+            <column name="reduction_key" value="%s:%s:%d"/>
+            <column name="type" value="1"/>
+        </insert>
+        <insert tableName="alert_definition">
+            <column name="tenant_id" value="tenantD"/>
+            <column name="uei" value="uei.opennms.org/vendor/cisco/traps/SNMP_Link_Up"/>
+            <column name="reduction_key" value="%s:%s:%d"/>
+            <column name="clear_key" value="%s:uei.opennms.org/vendor/cisco/traps/SNMP_Link_Down:%d"/>
+            <column name="type" value="2"/>
+        </insert>
+
+        <insert tableName="alert_definition">
+            <column name="tenant_id" value="tenantE"/>
+            <column name="uei" value="uei.opennms.org/vendor/cisco/traps/SNMP_Link_Down"/>
+            <column name="reduction_key" value="%s:%s:%d"/>
+            <column name="type" value="1"/>
+        </insert>
+        <insert tableName="alert_definition">
+            <column name="tenant_id" value="tenantE"/>
+            <column name="uei" value="uei.opennms.org/vendor/cisco/traps/SNMP_Link_Up"/>
+            <column name="reduction_key" value="%s:%s:%d"/>
+            <column name="clear_key" value="%s:uei.opennms.org/vendor/cisco/traps/SNMP_Link_Down:%d"/>
+            <column name="type" value="2"/>
+        </insert>
+
+        <insert tableName="alert_definition">
+            <column name="tenant_id" value="tenantF"/>
+            <column name="uei" value="uei.opennms.org/vendor/cisco/traps/SNMP_Link_Down"/>
+            <column name="reduction_key" value="%s:%s:%d"/>
+            <column name="type" value="1"/>
+        </insert>
+        <insert tableName="alert_definition">
+            <column name="tenant_id" value="tenantF"/>
+            <column name="uei" value="uei.opennms.org/vendor/cisco/traps/SNMP_Link_Up"/>
+            <column name="reduction_key" value="%s:%s:%d"/>
+            <column name="clear_key" value="%s:uei.opennms.org/vendor/cisco/traps/SNMP_Link_Down:%d"/>
+            <column name="type" value="2"/>
+        </insert>
+
+        <insert tableName="alert_definition">
+            <column name="tenant_id" value="tenantG"/>
+            <column name="uei" value="uei.opennms.org/vendor/cisco/traps/SNMP_Link_Down"/>
+            <column name="reduction_key" value="%s:%s:%d"/>
+            <column name="type" value="1"/>
+        </insert>
+        <insert tableName="alert_definition">
+            <column name="tenant_id" value="tenantG"/>
+            <column name="uei" value="uei.opennms.org/vendor/cisco/traps/SNMP_Link_Up"/>
+            <column name="reduction_key" value="%s:%s:%d"/>
+            <column name="clear_key" value="%s:uei.opennms.org/vendor/cisco/traps/SNMP_Link_Down:%d"/>
+            <column name="type" value="2"/>
+        </insert>
+
+        <insert tableName="alert_definition">
+            <column name="tenant_id" value="tenant-other"/>
+            <column name="uei" value="uei.opennms.org/vendor/cisco/traps/SNMP_Link_Down"/>
+            <column name="reduction_key" value="%s:%s:%d"/>
+            <column name="type" value="1"/>
+        </insert>
+        <insert tableName="alert_definition">
+            <column name="tenant_id" value="tenant-other"/>
+            <column name="uei" value="uei.opennms.org/vendor/cisco/traps/SNMP_Link_Up"/>
+            <column name="reduction_key" value="%s:%s:%d"/>
+            <column name="clear_key" value="%s:uei.opennms.org/vendor/cisco/traps/SNMP_Link_Down:%d"/>
+            <column name="type" value="2"/>
+        </insert>
+
     </changeSet>
 </databaseChangeLog>

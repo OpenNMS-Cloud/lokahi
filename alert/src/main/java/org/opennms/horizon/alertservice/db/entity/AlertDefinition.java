@@ -77,14 +77,14 @@ public class AlertDefinition extends TenantAwareEntity implements Serializable {
     @Column(nullable=false)
     private String reductionKey;
 
-    @Column(nullable=false)
+    @Column
     private String clearKey;
 
     @Column
     @Enumerated(EnumType.ORDINAL)
     private AlertType type;
 
-    @Column(nullable=false)
+    @Column
     @Enumerated(EnumType.ORDINAL)
     private ManagedObjectType managedObjectType;
 

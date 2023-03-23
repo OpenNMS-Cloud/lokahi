@@ -28,20 +28,17 @@
 
 package org.opennms.horizon.alertservice.db.repository;
 
-import org.opennms.horizon.alerts.proto.AlertType;
 import org.opennms.horizon.alertservice.db.entity.AlertDefinition;
 import org.opennms.horizon.events.proto.Event;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
 import java.util.List;
 
 @Repository
 public interface AlertDefinitionRepository extends JpaRepository<AlertDefinition, Long> {
 
-    public List<AlertDefinition> findAll();
+    List<AlertDefinition> findAll();
 
     default AlertDefinition getAlertDefinitionForEvent(Event event) {
         return findAll().stream()

@@ -41,6 +41,7 @@ import org.opennms.horizon.notifications.api.dto.PagerDutyPayloadDTO;
 import org.opennms.horizon.notifications.api.dto.PagerDutySeverity;
 import org.opennms.horizon.notifications.dto.PagerDutyConfigDTO;
 import org.opennms.horizon.notifications.exceptions.NotificationAPIException;
+import org.opennms.horizon.notifications.exceptions.NotificationAPIRetryableException;
 import org.opennms.horizon.notifications.exceptions.NotificationBadDataException;
 import org.opennms.horizon.notifications.exceptions.NotificationConfigUninitializedException;
 import org.opennms.horizon.notifications.exceptions.NotificationException;
@@ -52,9 +53,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.ResourceAccessException;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -70,6 +76,9 @@ public class PagerDutyAPI {
 
     @Autowired
     RestTemplate restTemplate;
+
+    @Autowired
+    RetryTemplate retryTemplate;
 
     @Value("${horizon.pagerduty.client}")
     String client;
@@ -94,20 +103,44 @@ public class PagerDutyAPI {
             HttpEntity<String> requestEntity = new HttpEntity<>(eventJson, headers);
 
             LOG.info("Posting alert with id={} for tenant={} to PagerDuty", alert.getDatabaseId(), alert.getTenantId());
-            restTemplate.exchange(uri, HttpMethod.POST, requestEntity, String.class);
+            postPagerDutyNotification(uri, requestEntity);
         } catch (URISyntaxException e) {
             throw new NotificationInternalException("Bad PagerDuty url", e);
         } catch (JsonProcessingException e) {
             throw new NotificationBadDataException("JSON error processing alertDTO", e);
-        } catch (RestClientException e) {
-            throw new NotificationAPIException("PagerDuty API exception", e);
-        } catch (InvalidProtocolBufferException e) {
+         } catch (InvalidProtocolBufferException e) {
             throw new NotificationInternalException("Failed to encode/decode alert: " + alert, e);
         }
     }
 
     public void saveConfig(PagerDutyConfigDTO config) {
         pagerDutyDao.saveConfig(config);
+    }
+
+    private void postPagerDutyNotification(URI uri, HttpEntity<String> requestEntity) throws NotificationAPIException {
+        retryTemplate.execute(ctx -> {
+            try {
+                restTemplate.exchange(uri, HttpMethod.POST, requestEntity, String.class);
+                return true;
+            } catch (RestClientException e) {
+                Throwable cause = e.getMostSpecificCause();
+
+                if (cause instanceof ResourceAccessException) {
+                    // Some low level IO issue, retry in case it was transient.
+                    throw new NotificationAPIRetryableException("PagerDuty API Exception", e);
+                } else if (cause instanceof RestClientResponseException) {
+                    // Check the response status to see if we should retry.
+                    // See https://developer.pagerduty.com/api-reference/YXBpOjI3NDgyNjU-pager-duty-v2-events-api#api-response-codes--retry-logic
+                    HttpStatusCode responseStatus = ((RestClientResponseException) e).getStatusCode();
+                    if (responseStatus == HttpStatus.TOO_MANY_REQUESTS || responseStatus.is5xxServerError()) {
+                        throw new NotificationAPIRetryableException("PagerDuty API exception", e);
+                    }
+                }
+
+                // Not retryable, let's bail.
+                throw new NotificationAPIException("PagerDuty API exception", e);
+            }
+        });
     }
 
     private String getPagerDutyIntegrationKey(String tenantId) throws NotificationConfigUninitializedException {

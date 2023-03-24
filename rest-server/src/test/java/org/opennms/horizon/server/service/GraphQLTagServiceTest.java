@@ -156,6 +156,45 @@ class GraphQLTagServiceTest {
     }
 
     @Test
+    void testGetTagsFromNodes() throws JSONException {
+        TagDTO tagDTO1 = TagDTO.newBuilder().setName(TEST_TAG_NAME_1).setTenantId(TEST_TENANT_ID).setId(1L).build();
+        TagDTO tagDTO2 = TagDTO.newBuilder().setName(TEST_TAG_NAME_2).setTenantId(TEST_TENANT_ID).setId(2L).build();
+        TagListDTO tagListDTO = TagListDTO.newBuilder().addTags(tagDTO1).addTags(tagDTO2).build();
+        when(mockClient.getTagsByNodeId(anyLong(), anyString())).thenReturn(tagListDTO);
+
+        String getRequest = "query { " +
+            "    tagsByNodeIds (nodeIds: [1, 2]) { " +
+            "        nodeId, " +
+            "        tags { " +
+            "            id, " +
+            "            tenantId, " +
+            "            name " +
+            "        } " +
+            "    } " +
+            "}";
+        webClient.post()
+            .uri(GRAPHQL_PATH)
+            .accept(MediaType.APPLICATION_JSON)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(createPayload(getRequest))
+            .exchange()
+            .expectStatus().isOk()
+            .expectBody()
+            .jsonPath("$.data.tagsByNodeIds[0].nodeId").isEqualTo(1)
+            .jsonPath("$.data.tagsByNodeIds[0].tags.size()").isEqualTo(2)
+            .jsonPath("$.data.tagsByNodeIds[0].tags[0].name").isEqualTo(TEST_TAG_NAME_1)
+            .jsonPath("$.data.tagsByNodeIds[0].tags[1].name").isEqualTo(TEST_TAG_NAME_2)
+            .jsonPath("$.data.tagsByNodeIds[1].nodeId").isEqualTo(2)
+            .jsonPath("$.data.tagsByNodeIds[1].tags.size()").isEqualTo(2)
+            .jsonPath("$.data.tagsByNodeIds[1].tags[0].name").isEqualTo(TEST_TAG_NAME_1)
+            .jsonPath("$.data.tagsByNodeIds[1].tags[1].name").isEqualTo(TEST_TAG_NAME_2);
+
+        verify(mockClient, times(1)).getTagsByNodeId(1L, accessToken);
+        verify(mockClient, times(1)).getTagsByNodeId(2L, accessToken);
+        verify(mockHeaderUtil, times(2)).getAuthHeader(any(ResolutionEnvironment.class));
+    }
+
+    @Test
     void testGetTagsFromNodeWithSearchTerm() throws JSONException {
 
         TagDTO tagDTO1 = TagDTO.newBuilder().setName(TEST_TAG_NAME_1).setTenantId(TEST_TENANT_ID).setId(1L).build();

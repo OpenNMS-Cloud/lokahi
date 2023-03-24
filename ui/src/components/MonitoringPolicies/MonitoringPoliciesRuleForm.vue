@@ -149,9 +149,9 @@ const eventMetricsOptions = [
 ]
 
 const eventTriggerOptions = [
-  { id: 'Device Cold Reboot', name: 'Device Cold Reboot' },
-  { id: 'SNMP Authentication Failure', name: 'SNMP Authentication Failure' },
-  { id: 'Port Down', name: 'Port Down' }
+  { id: 'device-cold-reboot', name: 'Device Cold Reboot' },
+  { id: 'snmp-auth-fail', name: 'SNMP Authentication Failure' },
+  { id: 'port-down', name: 'Port Down' }
 ]
 
 const selectComponentType = (type: string) => (store.selectedRule!.componentType = type)

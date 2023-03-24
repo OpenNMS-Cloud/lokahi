@@ -77,8 +77,8 @@ onMounted(() => ruleStates[props.policy.rules[0].id] = true)
 @use '@/styles/vars.scss';
 
 .mp-card {
-  @include elevation.elevation(3);
-  border-radius: vars.$border-radius-s;
+  @include elevation.elevation(1);
+  border-radius: vars.$border-radius-xs;
   display: flex;
   gap: var(variables.$spacing-xl);
   flex-direction: column;
@@ -91,6 +91,7 @@ onMounted(() => ruleStates[props.policy.rules[0].id] = true)
 
   .row {
     display: flex;
+    flex-wrap: wrap;
     gap: var(variables.$spacing-xxs);
 
     .policy-title {
@@ -108,7 +109,7 @@ onMounted(() => ruleStates[props.policy.rules[0].id] = true)
       white-space: nowrap;
       background: var(variables.$shade-4);
       padding: var(variables.$spacing-xs);
-      border-radius: vars.$border-radius-xs;
+      border-radius: vars.$border-radius-s;
       overflow: hidden;
       text-overflow: ellipsis;
       span {
@@ -118,6 +119,7 @@ onMounted(() => ruleStates[props.policy.rules[0].id] = true)
 
       &.rule {
         @include typography.subtitle2;
+        line-height: 2;
         flex: 1;
       }
       &.method {
@@ -130,12 +132,12 @@ onMounted(() => ruleStates[props.policy.rules[0].id] = true)
 
     .alert-conditions-btn {
       @include typography.subtitle2;
-      border-radius: vars.$border-radius-xs;
+      border-radius: vars.$border-radius-s;
       white-space: nowrap;
       display: flex;
       justify-content: space-between;
       background: var(variables.$shade-1);
-      padding: var(variables.$spacing-xs);
+      padding: var(variables.$spacing-s);
       color: var(variables.$primary-text-on-color);
       width: 145px;
       cursor: pointer;

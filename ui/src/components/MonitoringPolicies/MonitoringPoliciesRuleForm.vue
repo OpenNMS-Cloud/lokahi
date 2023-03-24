@@ -175,6 +175,7 @@ const selectDetectionMethod = (method: string) => {
 @use '@featherds/styles/mixins/typography';
 @use '@/styles/mediaQueriesMixins';
 @use '@/styles/_transitionFade';
+@use '@/styles/vars.scss';
 
 .rule-form-container {
   display: flex;
@@ -188,7 +189,7 @@ const selectDetectionMethod = (method: string) => {
     flex-direction: column;
     background: var(variables.$surface);
     padding: var(variables.$spacing-l);
-    border-radius: 5px;
+    border-radius: vars.$border-radius-s;
     overflow: hidden;
 
     .form-title {

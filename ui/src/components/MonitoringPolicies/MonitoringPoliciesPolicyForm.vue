@@ -75,7 +75,10 @@ const tagQueries = useTagQueries()
 const addIcon = markRaw(Add)
 
 const selectTags = (tags: TagSelectItem[]) => (store.selectedPolicy!.tags = tags.map((tag) => ({ name: tag.name })))
-const populateForm = (item: IPolicy) => (store.selectedPolicy = item)
+const populateForm = (item: IPolicy) => {
+  store.selectedPolicy = item
+  store.selectedRule = undefined
+}
 </script>
 
 <style scoped lang="scss">
@@ -84,6 +87,7 @@ const populateForm = (item: IPolicy) => (store.selectedPolicy = item)
 @use '@featherds/styles/mixins/typography';
 @use '@/styles/mediaQueriesMixins';
 @use '@/styles/_transitionFade';
+@use '@/styles/vars.scss';
 
 .policy-form-container {
   display: flex;
@@ -97,7 +101,7 @@ const populateForm = (item: IPolicy) => (store.selectedPolicy = item)
     flex-direction: column;
     background: var(variables.$surface);
     padding: var(variables.$spacing-l);
-    border-radius: 5px;
+    border-radius: vars.$border-radius-s;
 
     .form-title {
       @include typography.headline3;
@@ -112,10 +116,11 @@ const populateForm = (item: IPolicy) => (store.selectedPolicy = item)
     display: flex;
     flex: 1;
     flex-direction: column;
-    gap: var(variables.$spacing-s);
+    gap: var(variables.$spacing-xxs);
+    margin-bottom: var(variables.$spacing-xl);;
   }
 
-  @include mediaQueriesMixins.screen-md {
+  @include mediaQueriesMixins.screen-lg {
     flex-direction: row;
   }
 }

@@ -55,7 +55,7 @@ export const useMonitoringPoliciesQueries = defineStore('monitoringPoliciesQueri
           componentType: 'snmp-trap',
           detectionMethod: 'event',
           metricName: 'errors',
-          eventTrigger: 'SNMP Authentication Failure',
+          eventTrigger: 'snmp-auth-fail',
           conditions: [
             {
               id: '1',
@@ -77,7 +77,7 @@ export const useMonitoringPoliciesQueries = defineStore('monitoringPoliciesQueri
           componentType: 'snmp-trap',
           detectionMethod: 'event',
           metricName: 'errors',
-          eventTrigger: 'Port Down',
+          eventTrigger: 'port-down',
           conditions: [
             {
               id: '1',

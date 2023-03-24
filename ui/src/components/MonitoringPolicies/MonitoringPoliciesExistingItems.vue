@@ -38,6 +38,7 @@ defineProps<{
 @use '@featherds/styles/themes/variables';
 @use '@featherds/styles/mixins/typography';
 @use '@featherds/styles/mixins/elevation';
+@use '@/styles/vars.scss';
 
 .existing-items-container {
   @include elevation.elevation(2);
@@ -47,7 +48,7 @@ defineProps<{
   margin: var(variables.$spacing-l) 0;
   padding: var(variables.$spacing-l);
   width: 350px;
-  border-radius: 5px;
+  border-radius: vars.$border-radius-s;
   border-left: 5px solid var(variables.$success);
 
   .title {
@@ -64,7 +65,7 @@ defineProps<{
       @include typography.headline4;
       width: 100%;
       border: 1px solid var(variables.$shade-2);
-      border-radius: 10px;
+      border-radius: vars.$border-radius-m;
       padding: var(variables.$spacing-xs) var(variables.$spacing-m);
       cursor: pointer;
     }

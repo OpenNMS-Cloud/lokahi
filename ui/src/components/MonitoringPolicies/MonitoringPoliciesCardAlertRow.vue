@@ -14,7 +14,7 @@
     <div class="col box half">{{ condition.duringLast }}</div>
     <div class="col box double">{{ condition.periodUnit }}</div>
     <div class="col half">as</div>
-    <div class="col box double">{{ condition.severity }}</div>
+    <div class="col severity double" :class="`${condition.severity}-color`">{{ condition.severity }}</div>
   </div>
 
   <div
@@ -45,7 +45,7 @@
       <div class="col half box">{{ condition.count }}</div>
       <div class="col half box">{{ condition.time || '&nbsp' }}</div>
       <div class="col box double">{{ condition.unit || '&nbsp' }}</div>
-      <div class="col box double">{{ condition.severity }}</div>
+      <div class="col severity double" :class="`${condition.severity}-color`">{{ condition.severity }}</div>
       <div
         class="col box double"
         v-if="isEventPortDownCondition(condition)"
@@ -73,6 +73,7 @@ defineProps<{
 @use '@featherds/styles/mixins/typography';
 @use '@featherds/styles/mixins/elevation';
 @use '@/styles/vars.scss';
+@use '@/styles/_severities.scss';
 
 .mp-card-alert-container {
   display: flex;
@@ -91,6 +92,7 @@ defineProps<{
 
 .mp-card-alert-row {
   display: flex;
+  flex-wrap: wrap;
   width: 100%;
   gap: var(variables.$spacing-xxs);
   @include typography.caption;
@@ -116,10 +118,13 @@ defineProps<{
   }
 }
 
-.box {
+.box, .severity {
   @include typography.subtitle1;
-  background: var(variables.$shade-4);
   padding: var(variables.$spacing-xs);
+  border-radius: vars.$border-radius-s;
+}
+.box {
+  background: var(variables.$shade-4);
 }
 
 .subtitle {

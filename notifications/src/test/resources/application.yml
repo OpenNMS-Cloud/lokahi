@@ -18,6 +18,9 @@ horizon:
     alerts:
       topic: alerts
       concurrency: 1
+    monitoring-policy:
+      topic: monitoring-policy
+      concurrency: 1
 
   pagerduty:
     client: OpenNMS

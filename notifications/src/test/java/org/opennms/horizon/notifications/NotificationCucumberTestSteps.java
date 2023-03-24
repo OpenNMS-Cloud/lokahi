@@ -1,5 +1,6 @@
 package org.opennms.horizon.notifications;
 
+import io.cucumber.datatable.DataTable;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.spring.CucumberContextConfiguration;
@@ -7,19 +8,26 @@ import io.grpc.Metadata;
 import io.grpc.ServerCall;
 import io.grpc.ServerCallHandler;
 import io.grpc.stub.MetadataUtils;
+import org.apache.kafka.clients.producer.Producer;
+import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.common.serialization.ByteArraySerializer;
+import org.apache.kafka.common.serialization.StringSerializer;
 import org.keycloak.common.VerificationException;
 import org.opennms.horizon.alerts.proto.Alert;
 import org.opennms.horizon.notifications.api.PagerDutyDao;
 import org.opennms.horizon.notifications.dto.NotificationServiceGrpc;
 import org.opennms.horizon.notifications.dto.PagerDutyConfigDTO;
-import org.opennms.horizon.notifications.exceptions.NotificationAPIRetryableException;
 import org.opennms.horizon.notifications.exceptions.NotificationConfigUninitializedException;
 import org.opennms.horizon.notifications.exceptions.NotificationException;
+import org.opennms.horizon.notifications.model.MonitoringPolicy;
+import org.opennms.horizon.notifications.repository.MonitoringPolicyRepository;
 import org.opennms.horizon.notifications.service.NotificationService;
 import org.opennms.horizon.notifications.tenant.WithTenant;
+import org.opennms.horizon.shared.alert.policy.MonitorPolicyProto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -29,13 +37,25 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.kafka.core.DefaultKafkaProducerFactory;
+import org.springframework.kafka.test.EmbeddedKafkaBroker;
+import org.springframework.kafka.test.context.EmbeddedKafka;
+import org.springframework.kafka.test.utils.KafkaTestUtils;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
+import org.testcontainers.shaded.org.awaitility.Awaitility;
 
 import java.net.URI;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -46,6 +66,8 @@ import static org.mockito.Mockito.when;
 @CucumberContextConfiguration
 @SpringBootTest
 @EnableAutoConfiguration
+@EmbeddedKafka(partitions = 1)
+@TestPropertySource(properties = "spring.kafka.bootstrap-servers=${spring.embedded.kafka.brokers}", locations = "classpath:application.yml")
 @ContextConfiguration(initializers = {SpringContextTestInitializer.class})
 public class NotificationCucumberTestSteps extends GrpcTestBase {
     private static final Logger LOG = LoggerFactory.getLogger(NotificationCucumberTestSteps.class);
@@ -66,6 +88,17 @@ public class NotificationCucumberTestSteps extends GrpcTestBase {
     @SpyBean
     public RestTemplate restTemplate;
 
+    @Autowired
+    private EmbeddedKafkaBroker embeddedKafkaBroker;
+
+    @Autowired
+    MonitoringPolicyRepository monitoringPolicyRepository;
+
+    @Value("${horizon.kafka.monitoring-policy.topic}")
+    private String monitoringPolicyTopic;
+
+    private Producer<String, byte[]> kafkaProducer;
+
     private Exception caught;
 
     @Then("tear down grpc setup")
@@ -77,6 +110,7 @@ public class NotificationCucumberTestSteps extends GrpcTestBase {
     @Given("clean setup")
     public void clean(){
         jdbcTemplate.execute("delete from pager_duty_config");
+        jdbcTemplate.execute("delete from monitoring_policy");
         caught = null;
     }
 
@@ -84,6 +118,14 @@ public class NotificationCucumberTestSteps extends GrpcTestBase {
     public void cleanGrpc() throws VerificationException {
         prepareServer();
         serviceStub = NotificationServiceGrpc.newBlockingStub(channel);
+    }
+    @Given("kafka setup")
+    public void setupKafka() {
+        Map<String, Object> producerConfig = new HashMap<>(KafkaTestUtils.producerProps(embeddedKafkaBroker));
+
+        DefaultKafkaProducerFactory<String, byte[]> kafkaProducerFactory
+            = new DefaultKafkaProducerFactory<>(producerConfig, new StringSerializer(), new ByteArraySerializer());
+        kafkaProducer = kafkaProducerFactory.createProducer();
     }
 
     @Given("Integration {string} key set to {string} via grpc")
@@ -224,5 +266,35 @@ public class NotificationCucumberTestSteps extends GrpcTestBase {
         when(restTemplate.exchange(any(), any(), any(), any(Class.class)))
             .thenThrow(new RestClientResponseException("Failed", HttpStatus.BAD_GATEWAY, "Failed", null, null, null))
             .thenReturn(ResponseEntity.ok(null));
+    }
+
+    @Given("the following monitoring policies sent via Kafka")
+    public void addMonitoringPolicies(DataTable table) {
+        table.asLists().forEach((row) -> {
+            MonitorPolicyProto proto = MonitorPolicyProto.newBuilder()
+                .setId(Long.parseLong(row.get(0)))
+                .setTenantId(row.get(1))
+                .setNotifyByPagerDuty(Boolean.parseBoolean(row.get(2)))
+                .setNotifyByEmail(Boolean.parseBoolean(row.get(3)))
+                .setNotifyByWebhooks(Boolean.parseBoolean(row.get(4)))
+                .build();
+            ProducerRecord<String, byte[]> record = new ProducerRecord<>(monitoringPolicyTopic, proto.toByteArray());
+            kafkaProducer.send(record);
+        });
+        kafkaProducer.flush();
+    }
+
+
+    @Then("verify {string} has a monitoring policy with ID {long} and the following enabled")
+    @WithTenant(tenantIdArg = 0)
+    public void verifyMonitoringPolicy(String tenant, long id, List<String> enabledNotifications) {
+        Awaitility.await().atMost(5, TimeUnit.SECONDS).untilAsserted(() -> {
+            Optional<MonitoringPolicy> monitoringPolicy = monitoringPolicyRepository.findByTenantIdAndId(tenant, id);
+            assertTrue(monitoringPolicy.isPresent());
+
+            assertEquals(enabledNotifications.contains("PagerDuty"), monitoringPolicy.get().isNotifyByPagerDuty());
+            assertEquals(enabledNotifications.contains("email"), monitoringPolicy.get().isNotifyByEmail());
+            assertEquals(enabledNotifications.contains("webhooks"), monitoringPolicy.get().isNotifyByWebhooks());
+        });
     }
 }

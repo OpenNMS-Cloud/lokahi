@@ -28,16 +28,15 @@
 
 package org.opennms.horizon.tsdata;
 
-import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
-import org.opennms.horizon.shared.constants.GrpcConstants;
+import lombok.Setter;
 import org.apache.logging.log4j.util.Strings;
 import org.opennms.taskset.contract.TenantedTaskSetResults;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.messaging.handler.annotation.Headers;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Service;
 
@@ -52,13 +51,18 @@ public class TSDataProcessor {
 
     private final TaskSetResultProcessor taskSetResultProcessor;
 
+    // NOTE: it might be better to split the asynchronous execution into a separate class to make testing here, and there,
+    //  more straight-forward (i.e. more "Real Obvious").  Then the submission here would look something like this:
+    //  `taskSetResultAsyncProcessor.submitTaskResultForProcessing(tenantId, result)`
+    @Setter // Testability
+    private Consumer<Runnable> submitForExecutionOp = this::defaultExecutionSubmissionOp;
+
     public TSDataProcessor(TaskSetResultProcessor taskSetResultProcessor) {
         this.taskSetResultProcessor = taskSetResultProcessor;
     }
 
-    //headers for future use.
     @KafkaListener(topics = "${kafka.topics}", concurrency = "1")
-    public void consume(@Payload byte[] data, @Headers Map<String, Object> headers) {
+    public void consume(@Payload byte[] data) {
         try {
             TenantedTaskSetResults results = TenantedTaskSetResults.parseFrom(data);
             String tenantId = results.getTenantId();
@@ -66,26 +70,27 @@ public class TSDataProcessor {
                 throw new RuntimeException("Missing tenant id");
             }
 
-            results.getResultsList().forEach(result -> CompletableFuture.supplyAsync(() -> {
-                taskSetResultProcessor.processTaskResult(tenantId, result);
-                return null;
-            }));
+            results.getResultsList().forEach(
+                result -> submitForExecutionOp.accept(() -> taskSetResultProcessor.processTaskResult(tenantId, result)));
         } catch (InvalidProtocolBufferException e) {
             log.error("Invalid data from kafka", e);
         }
     }
 
-    private String getTenantId(Map<String, Object> headers) {
-        return Optional.ofNullable(headers.get(GrpcConstants.TENANT_ID_KEY))
-            .map(tenantId -> {
-                if (tenantId instanceof byte[]) {
-                    return new String((byte[]) tenantId);
-                }
-                if (tenantId instanceof String) {
-                    return (String) tenantId;
-                }
-                return "" + tenantId;
-            })
-            .orElseThrow(() -> new RuntimeException("Could not determine tenant id"));
+//========================================
+// Internals
+//----------------------------------------
+
+    /**
+     * Default operation for submission of the given Supplier for execution which uses CompletableFuture's supplyAsync()
+     *  method to schedule execution.
+     *
+     * @param runnable
+     */
+    private void defaultExecutionSubmissionOp(Runnable runnable) {
+        CompletableFuture.supplyAsync(() -> {
+            runnable.run();
+            return null;    // Not doing anything with the Future, so the value is of no consequence
+        });
     }
 }

@@ -39,7 +39,6 @@ import org.opennms.horizon.tsdata.MetricNameConstants;
 import org.opennms.taskset.contract.CollectorResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import prometheus.PrometheusTypes;
 
@@ -85,12 +84,13 @@ public class TaskSetCollectorAzureResponseProcessor {
                         break;
                     default:
                         LOG.warn("Unrecognized azure value type");
+                        // TODO: in this case, should cortexTSS.store() be called?
                 }
 
                 cortexTSS.store(tenantId, builder);
                 tenantMetricsTracker.addTenantMetricSampleCount(tenantId, builder.getSamplesCount());
             } catch (Exception e) {
-                LOG.warn("Exception parsing azure metrics ", e);
+                LOG.warn("Exception parsing azure metrics", e);
             }
         }
     }

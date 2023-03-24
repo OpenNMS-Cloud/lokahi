@@ -44,7 +44,6 @@ public class TaskSetCollectorResultProcessor {
     private static final Logger LOG = LoggerFactory.getLogger(TaskSetCollectorResultProcessor.class);
 
     private final TaskSetCollectorSnmpResponseProcessor taskSetCollectorSnmpResponseProcessor;
-
     private final TaskSetCollectorAzureResponseProcessor taskSetCollectorAzureResponseProcessor;
 
     @Autowired

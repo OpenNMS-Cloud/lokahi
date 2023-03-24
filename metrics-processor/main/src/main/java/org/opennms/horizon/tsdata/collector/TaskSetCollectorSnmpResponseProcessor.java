@@ -99,7 +99,7 @@ public class TaskSetCollectorSnmpResponseProcessor {
                 cortexTSS.store(tenantId, builder);
                 tenantMetricsTracker.addTenantMetricSampleCount(tenantId, builder.getSamplesCount());
             } catch (Exception e) {
-                LOG.warn("Exception parsing metrics ", e);
+                LOG.warn("Exception parsing metrics", e);
             }
         }
     }

@@ -28,123 +28,140 @@
 
 package org.opennms.horizon.tsdata;
 
-import com.google.protobuf.Any;
+import com.google.protobuf.InvalidProtocolBufferException;
+import nl.altindag.log.LogCaptor;
+import nl.altindag.log.model.LogEvent;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.opennms.horizon.azure.api.AzureResponseMetric;
-import org.opennms.horizon.azure.api.AzureResultMetric;
-import org.opennms.horizon.azure.api.AzureValueMetric;
-import org.opennms.horizon.azure.api.AzureValueType;
-import org.opennms.horizon.tenantmetrics.TenantMetricsTracker;
-import org.opennms.horizon.timeseries.cortex.CortexTSS;
-import org.opennms.horizon.tsdata.collector.TaskSetCollectorAzureResponseProcessor;
-import org.opennms.horizon.tsdata.collector.TaskSetCollectorResultProcessor;
-import org.opennms.horizon.tsdata.collector.TaskSetCollectorSnmpResponseProcessor;
-import org.opennms.horizon.tsdata.detector.TaskSetDetectorResultProcessor;
-import org.opennms.horizon.tsdata.monitor.TaskSetMonitorResultProcessor;
-import org.opennms.taskset.contract.CollectorResponse;
-import org.opennms.taskset.contract.MonitorType;
+import org.mockito.Mockito;
 import org.opennms.taskset.contract.TaskResult;
 import org.opennms.taskset.contract.TenantedTaskSetResults;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.Objects;
+import java.util.function.Predicate;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.timeout;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
-@ExtendWith(MockitoExtension.class)
 class TSDataProcessorTest {
 
     public static final String TENANT_ID = "sometenant";
-    @Mock
-    private CortexTSS cortexTSS;
 
-    @Mock
-    private TenantMetricsTracker metricsTracker;
+    private TaskSetResultProcessor mockTaskSetMonitorResultProcessor;
 
-    private TSDataProcessor processor;
+    private TaskResult testTaskResult1;
+    private TaskResult testTaskResult2;
+    private TenantedTaskSetResults testTenantedTaskSetResults;
+    private TenantedTaskSetResults testTenantedTaskSetResultsBlankTenant;
+    
+    private TSDataProcessor target;
 
     @BeforeEach
     public void setup() {
-        processor = new TSDataProcessor(new TaskSetResultProcessor(
-            new TaskSetDetectorResultProcessor(),
-            new TaskSetMonitorResultProcessor(cortexTSS, metricsTracker),
-            new TaskSetCollectorResultProcessor(
-                new TaskSetCollectorSnmpResponseProcessor(cortexTSS, metricsTracker),
-                new TaskSetCollectorAzureResponseProcessor(cortexTSS, metricsTracker)
-            )
-        ));
+        mockTaskSetMonitorResultProcessor = Mockito.mock(TaskSetResultProcessor.class);
+
+        testTaskResult1 =
+            TaskResult.newBuilder()
+                .setId("x-task1-result-x")
+                .build();
+
+        testTaskResult2 =
+            TaskResult.newBuilder()
+                .setId("x-task2-result-x")
+                .build();
+        
+        testTenantedTaskSetResults =
+            TenantedTaskSetResults.newBuilder()
+                .setTenantId("x-tenant-id-x")
+                .addResults(testTaskResult1)
+                .addResults(testTaskResult2)
+                .build();
+
+        testTenantedTaskSetResultsBlankTenant =
+            TenantedTaskSetResults.newBuilder()
+                .setTenantId("")
+                .build();
+
+        target = new TSDataProcessor(mockTaskSetMonitorResultProcessor);
+        
     }
 
     @Test
-    void testConsumeAzure() throws Exception {
-
-        List<TaskResult> taskResultList = new ArrayList<>();
-
-        List<AzureResultMetric> azureResultMetrics = new ArrayList<>();
-        azureResultMetrics.add(AzureResultMetric.newBuilder()
-            .setResourceName("resource-name")
-            .setResourceGroup("resource-group")
-            .setAlias("netInBytes")
-            .setValue(AzureValueMetric.newBuilder()
-                .setType(AzureValueType.INT64)
-                .setUint64(1234L)
-                .build())
-            .build());
-
-        CollectorResponse collectorResponse = CollectorResponse.newBuilder()
-            .setResult(Any.pack(AzureResponseMetric.newBuilder()
-                .addAllResults(azureResultMetrics)
-                .build()))
-            .setMonitorType(MonitorType.AZURE)
-            .build();
-        taskResultList.add(TaskResult.newBuilder()
-            .setCollectorResponse(collectorResponse)
-            .build());
-
-        TenantedTaskSetResults taskSetResults = TenantedTaskSetResults.newBuilder()
-            .setTenantId(TENANT_ID)
-            .addAllResults(taskResultList)
-            .build();
-
-        processor.consume(taskSetResults.toByteArray(), Collections.EMPTY_MAP);
-
-        verify(cortexTSS, timeout(5000).only()).store(anyString(), any(prometheus.PrometheusTypes.TimeSeries.Builder.class));
-        verify(metricsTracker, times(1)).addTenantMetricSampleCount(TENANT_ID, 1);
-    }
-
-    @Test
-    void testMissingTenantId() {
-        //
-        // Setup Test Data and Interactions
-        //
-        TenantedTaskSetResults taskSetResults = TenantedTaskSetResults.newBuilder()
-            .build();
-
+    void testConsumeFromKafka() {
         //
         // Execute
         //
-        Exception caught = null;
+        target.setSubmitForExecutionOp(this::testExecutionSubmissionOp);
+        target.consume(testTenantedTaskSetResults.toByteArray());
+
+        //
+        // Verify the Results
+        //
+        Mockito.verify(mockTaskSetMonitorResultProcessor).processTaskResult("x-tenant-id-x", testTaskResult1);
+        Mockito.verify(mockTaskSetMonitorResultProcessor).processTaskResult("x-tenant-id-x", testTaskResult2);
+        Mockito.verifyNoMoreInteractions(mockTaskSetMonitorResultProcessor);
+    }
+
+    @Test
+    void testBlankTenantId() {
+        //
+        // Execute
+        //
+        Exception actualException = null;
         try {
-            processor.consume(taskSetResults.toByteArray(), Collections.EMPTY_MAP);
+            target.consume(testTenantedTaskSetResultsBlankTenant.toByteArray());
             fail("Missing expected exception");
         } catch (Exception exc) {
-            caught = exc;
+            actualException = exc;
         }
 
         //
         // Verify the Results
         //
-        assertEquals("Missing tenant id", caught.getMessage());
+        assertEquals("Missing tenant id", actualException.getMessage());
+    }
+
+    @Test
+    void testExceptionProcessingResults() {
+        //
+        // Setup Test Data and Interactions
+        //
+        try (LogCaptor logCaptor = LogCaptor.forClass(TSDataProcessor.class)) {
+            //
+            // Execute
+            //
+            target.consume("----INVALID----".getBytes());
+
+            //
+            // Verify the Results
+            //
+            Predicate<LogEvent> matcher =
+                (logEvent) ->
+                    (
+                        Objects.equals("Invalid data from kafka", logEvent.getMessage() ) &&
+                        (logEvent.getArguments().size() == 0) &&
+                        (logEvent.getThrowable().orElse(null) instanceof InvalidProtocolBufferException)
+                    );
+
+            assertTrue(logCaptor.getLogEvents().stream().anyMatch(matcher));
+
+            Mockito.verifyNoInteractions(mockTaskSetMonitorResultProcessor);
+        }
+    }
+
+//========================================
+// Internals
+//----------------------------------------
+
+    /**
+     * Test async execution submission operation that directly executes the operation immediately, to simplify the tests
+     *  and avoid multi-threaded testing complexity.
+     *
+     * @param runnable
+     */
+    private void testExecutionSubmissionOp(Runnable runnable) {
+        // Immediately pass-through the call
+        runnable.run();
     }
 }

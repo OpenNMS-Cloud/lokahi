@@ -19,7 +19,10 @@
       </div>
     </div>
 
-    <div v-for="rule in policy.rules">
+    <div
+      v-for="rule in policy.rules"
+      :key="rule.id"
+    >
       <div class="row">
         <div class="title-box rule">{{ rule.name }}</div>
         <div class="title-box method">{{ rule.detectionMethod }}-{{ rule.metricName }}</div>

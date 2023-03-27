@@ -79,22 +79,26 @@
         >
           <div class="col">
             <div class="form-title">Set Alert Conditions</div>
-            <MonitoringPoliciesThresholdCondition
-              v-if="store.selectedRule!.detectionMethod === DetectionMethodTypes.Threshold"
-              v-for="(cond, index) in store.selectedRule!.conditions"
-              :index="index"
-              :condition="(cond as ThresholdCondition)"
-              @updateCondition="(condition) => store.updateCondition(cond.id, condition)"
-              @deleteCondition="(id: string) => store.deleteCondition(id)"
-            />
-            <MonitoringPoliciesEventCondition
-              v-else
-              v-for="(cond, index) in store.selectedRule!.conditions"
-              :condition="(cond as EventCondition)"
-              :index="index"
-              @updateCondition="(condition) => store.updateCondition(cond.id, condition)"
-              @deleteCondition="(id: string) => store.deleteCondition(id)"
-            />
+            <template v-if="store.selectedRule!.detectionMethod === DetectionMethodTypes.Threshold">
+              <MonitoringPoliciesThresholdCondition
+                v-for="(cond, index) in store.selectedRule!.conditions"
+                :key="cond.id"
+                :index="index"
+                :condition="(cond as ThresholdCondition)"
+                @updateCondition="(condition) => store.updateCondition(cond.id, condition)"
+                @deleteCondition="(id: string) => store.deleteCondition(id)"
+              />
+            </template>
+            <template v-else>
+              <MonitoringPoliciesEventCondition
+                v-for="(cond, index) in store.selectedRule!.conditions"
+                :key="cond.id"
+                :condition="(cond as EventCondition)"
+                :index="index"
+                @updateCondition="(condition) => store.updateCondition(cond.id, condition)"
+                @deleteCondition="(id: string) => store.deleteCondition(id)"
+              />
+            </template>
             <FeatherButton
               class="add-params"
               text

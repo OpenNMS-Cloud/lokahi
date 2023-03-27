@@ -53,6 +53,7 @@
       >
         <MonitoringPoliciesCard
           v-for="(policy, index) in store.monitoringPolicies"
+          :key="policy.id"
           :policy="policy"
           :index="index"
           @selectPolicy="(policy: IPolicy) => store.displayPolicyForm(policy)"
@@ -117,7 +118,7 @@ const populateForm = (item: IPolicy) => {
     flex: 1;
     flex-direction: column;
     gap: var(variables.$spacing-xxs);
-    margin-bottom: var(variables.$spacing-xl);;
+    margin-bottom: var(variables.$spacing-xl);
   }
 
   @include mediaQueriesMixins.screen-lg {

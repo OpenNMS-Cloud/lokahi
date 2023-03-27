@@ -38,6 +38,7 @@
         <div class="alert-title">Alert Conditions</div>
         <MonitoringPoliciesCardAlertRow
           v-for="(condition, index) in rule.conditions"
+          :key="condition.id"
           :rule="rule"
           :condition="condition"
           :index="index"
@@ -66,7 +67,7 @@ const ruleStates = reactive<{ [x: string]: boolean }>({})
 const triggerRuleState = (ruleId: string) => (ruleStates[ruleId] = !ruleStates[ruleId])
 
 // set first rule alert conditions open by default
-onMounted(() => ruleStates[props.policy.rules[0].id] = true)
+onMounted(() => (ruleStates[props.policy.rules[0].id] = true))
 </script>
 
 <style scoped lang="scss">

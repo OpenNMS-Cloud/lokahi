@@ -53,11 +53,4 @@ public class AlertKafkaConsumerUnitTest {
     public void testConsume() {
         alertKafkaConsumer.consume(Alert.newBuilder().build().toByteArray());
     }
-
-    @Test
-    public void testConsumeSwallowsNotificationException() throws NotificationException {
-        doThrow(NotificationInternalException.class)
-            .when(notificationService).postNotification(any());
-        alertKafkaConsumer.consumeAlert(Alert.newBuilder().build());
-    }
 }

@@ -26,8 +26,8 @@
       <FeatherInput
         label=""
         hideLabel
-        @update:model-value="(val) => updateConditionProp('time', val as number)"
-        v-model="condition.time"
+        @update:model-value="(val) => updateConditionProp('overtime', val as number)"
+        v-model="condition.overtime"
         type="number"
       />
     </div>
@@ -36,8 +36,8 @@
       <div class="text">&nbsp;</div>
       <BasicSelect
         :list="durationOptions"
-        @item-selected="(val:number) => updateConditionProp('unit', val)"
-        :selectedId="condition.unit"
+        @item-selected="(val: number) => updateConditionProp('overtimeUnit', val)"
+        :selectedId="condition.overtimeUnit"
       />
     </div>
 
@@ -45,19 +45,19 @@
       <div class="text">Severity</div>
       <BasicSelect
         :list="severityList"
-        @item-selected="(val:string) => updateConditionProp('severity', val)"
+        @item-selected="(val: string) => updateConditionProp('severity', val)"
         :selectedId="condition.severity"
       />
     </div>
 
     <div
       class="inner-col"
-      v-if="isEventPortDownCondition(condition)"
+      v-if="rule.triggerEvent === SNMPEventType.PORT_DOWN || condition.triggerEvent === SNMPEventType.PORT_DOWN"
     >
       <div class="text">Clear Event (optional)</div>
       <BasicSelect
         :list="clearEventOptions"
-        @item-selected="(val:string) => updateConditionProp('clearEvent', val)"
+        @item-selected="(val: string) => updateConditionProp('clearEvent', val)"
         :selectedId="condition.clearEvent"
       />
     </div>
@@ -65,35 +65,35 @@
 </template>
 
 <script lang="ts" setup>
-import { EventCondition } from '@/types/policies'
-import { isEventPortDownCondition } from './monitoringPolicies.utils'
+import { EventCondition, Rule } from '@/types/policies'
 import { conditionLetters } from './monitoringPolicies.constants'
+import { OverTimeUnit, Severity, SNMPEventType } from './monitoringPolicies.constants'
 
 const props = defineProps<{
   condition: EventCondition
+  rule: Rule
   index: number
 }>()
 
-const emit = defineEmits(['updateCondition'])
+const emit = defineEmits(['updateCondition', 'deleteCondition'])
 const condition = ref<EventCondition>()
 
 const durationOptions = [
-  { id: 'second', name: 'Second(s)' },
-  { id: 'minute', name: 'Minute(s)' },
-  { id: 'hour', name: 'Hour(s)' },
-  { id: 'day', name: 'Day(s)' }
+  { id: OverTimeUnit.SECOND, name: 'Second(s)' },
+  { id: OverTimeUnit.MINUTE, name: 'Minute(s)' },
+  { id: OverTimeUnit.HOUR, name: 'Hour(s)' }
 ]
 
 const severityList = [
-  { id: 'critical', name: 'Critical' },
-  { id: 'major', name: 'Major' },
-  { id: 'minor', name: 'Minor' },
-  { id: 'warning', name: 'Warning' }
+  { id: Severity.CRITICAL, name: 'Critical' },
+  { id: Severity.MAJOR, name: 'Major' },
+  { id: Severity.MINOR, name: 'Minor' },
+  { id: Severity.WARNING, name: 'Warning' }
 ]
 
 const clearEventOptions = [
-  { id: null, name: '' },
-  { id: 'port-up', name: 'Port Up' }
+  { id: undefined, name: '' },
+  { id: SNMPEventType.PORT_UP, name: 'Port Up' }
 ]
 
 watchEffect(() => (condition.value = props.condition))

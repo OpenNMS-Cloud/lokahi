@@ -169,6 +169,33 @@ export type Minion = {
   tenantId?: Maybe<Scalars['String']>;
 };
 
+export type MonitorPolicy = {
+  __typename?: 'MonitorPolicy';
+  id?: Maybe<Scalars['Long']>;
+  memo?: Maybe<Scalars['String']>;
+  name?: Maybe<Scalars['String']>;
+  notifyByEmail?: Maybe<Scalars['Boolean']>;
+  notifyByPagerDuty?: Maybe<Scalars['Boolean']>;
+  notifyByWebhooks?: Maybe<Scalars['Boolean']>;
+  notifyInstruction?: Maybe<Scalars['String']>;
+  rules?: Maybe<Array<Maybe<PolicyRule>>>;
+  tags?: Maybe<Array<Maybe<Scalars['String']>>>;
+  tenantId?: Maybe<Scalars['String']>;
+};
+
+export type MonitorPolicyInput = {
+  id?: InputMaybe<Scalars['Long']>;
+  memo?: InputMaybe<Scalars['String']>;
+  name?: InputMaybe<Scalars['String']>;
+  notifyByEmail?: InputMaybe<Scalars['Boolean']>;
+  notifyByPagerDuty?: InputMaybe<Scalars['Boolean']>;
+  notifyByWebhooks?: InputMaybe<Scalars['Boolean']>;
+  notifyInstruction?: InputMaybe<Scalars['String']>;
+  rules?: InputMaybe<Array<InputMaybe<PolicyRuleInput>>>;
+  tags?: InputMaybe<Array<InputMaybe<Scalars['String']>>>;
+  tenantId?: InputMaybe<Scalars['String']>;
+};
+
 /** Mutation root */
 export type Mutation = {
   __typename?: 'Mutation';
@@ -178,6 +205,7 @@ export type Mutation = {
   clearAlert?: Maybe<Alert>;
   createAzureActiveDiscovery?: Maybe<AzureActiveDiscovery>;
   createIcmpActiveDiscovery?: Maybe<IcmpActiveDiscovery>;
+  createMonitorPolicy?: Maybe<MonitorPolicy>;
   deleteAlert?: Maybe<Scalars['Boolean']>;
   deleteMinion?: Maybe<Scalars['Boolean']>;
   deleteNode?: Maybe<Scalars['Boolean']>;
@@ -224,6 +252,12 @@ export type MutationCreateAzureActiveDiscoveryArgs = {
 /** Mutation root */
 export type MutationCreateIcmpActiveDiscoveryArgs = {
   request?: InputMaybe<IcmpActiveDiscoveryCreateInput>;
+};
+
+
+/** Mutation root */
+export type MutationCreateMonitorPolicyArgs = {
+  policy?: InputMaybe<MonitorPolicyInput>;
 };
 
 
@@ -324,6 +358,12 @@ export type NodeStatus = {
   status?: Maybe<Scalars['String']>;
 };
 
+export type NodeTags = {
+  __typename?: 'NodeTags';
+  nodeId: Scalars['Long'];
+  tags?: Maybe<Array<Maybe<Tag>>>;
+};
+
 export type PagerDutyConfigInput = {
   integrationkey?: InputMaybe<Scalars['String']>;
 };
@@ -359,6 +399,23 @@ export type PassiveDiscoveryUpsertInput = {
   tags?: InputMaybe<Array<InputMaybe<TagCreateInput>>>;
 };
 
+export type PolicyRule = {
+  __typename?: 'PolicyRule';
+  componentType?: Maybe<Scalars['String']>;
+  id?: Maybe<Scalars['Long']>;
+  name?: Maybe<Scalars['String']>;
+  tenantId?: Maybe<Scalars['String']>;
+  triggerEvents?: Maybe<Array<Maybe<TriggerEvent>>>;
+};
+
+export type PolicyRuleInput = {
+  componentType?: InputMaybe<Scalars['String']>;
+  id?: InputMaybe<Scalars['Long']>;
+  name?: InputMaybe<Scalars['String']>;
+  tenantId?: InputMaybe<Scalars['String']>;
+  triggerEvents?: InputMaybe<Array<InputMaybe<TriggerEventInput>>>;
+};
+
 /** Query root */
 export type Query = {
   __typename?: 'Query';
@@ -368,13 +425,16 @@ export type Query = {
   findAllMinions?: Maybe<Array<Maybe<Minion>>>;
   findAllNodes?: Maybe<Array<Maybe<Node>>>;
   findAllNodesByMonitoredState?: Maybe<Array<Maybe<Node>>>;
+  findAllNodesByNodeLabelSearch?: Maybe<Array<Maybe<Node>>>;
   findEventsByNodeId?: Maybe<Array<Maybe<Event>>>;
   findLocationById?: Maybe<Location>;
   findMinionById?: Maybe<Minion>;
+  findMonitorPolicyById?: Maybe<MonitorPolicy>;
   findNodeById?: Maybe<Node>;
   icmpActiveDiscoveryById?: Maybe<IcmpActiveDiscovery>;
   listActiveDiscovery?: Maybe<Array<Maybe<ActiveDiscovery>>>;
   listIcmpActiveDiscovery?: Maybe<Array<Maybe<IcmpActiveDiscovery>>>;
+  listMonitoryPolicies?: Maybe<Array<Maybe<MonitorPolicy>>>;
   metric?: Maybe<TimeSeriesQueryResult>;
   nodeStatus?: Maybe<NodeStatus>;
   passiveDiscoveries?: Maybe<Array<Maybe<PassiveDiscovery>>>;
@@ -382,13 +442,27 @@ export type Query = {
   tags?: Maybe<Array<Maybe<Tag>>>;
   tagsByActiveDiscoveryId?: Maybe<Array<Maybe<Tag>>>;
   tagsByNodeId?: Maybe<Array<Maybe<Tag>>>;
+  tagsByNodeIds?: Maybe<Array<Maybe<NodeTags>>>;
   tagsByPassiveDiscoveryId?: Maybe<Array<Maybe<Tag>>>;
+};
+
+
+/** Query root */
+export type QueryFindAllAlertsArgs = {
+  page?: InputMaybe<Scalars['String']>;
+  pageSize?: InputMaybe<Scalars['Int']>;
 };
 
 
 /** Query root */
 export type QueryFindAllNodesByMonitoredStateArgs = {
   monitoredState?: InputMaybe<Scalars['String']>;
+};
+
+
+/** Query root */
+export type QueryFindAllNodesByNodeLabelSearchArgs = {
+  labelSearchTerm?: InputMaybe<Scalars['String']>;
 };
 
 
@@ -407,6 +481,12 @@ export type QueryFindLocationByIdArgs = {
 /** Query root */
 export type QueryFindMinionByIdArgs = {
   id?: InputMaybe<Scalars['String']>;
+};
+
+
+/** Query root */
+export type QueryFindMonitorPolicyByIdArgs = {
+  id?: InputMaybe<Scalars['Long']>;
 };
 
 
@@ -460,6 +540,12 @@ export type QueryTagsByActiveDiscoveryIdArgs = {
 export type QueryTagsByNodeIdArgs = {
   nodeId?: InputMaybe<Scalars['Long']>;
   searchTerm?: InputMaybe<Scalars['String']>;
+};
+
+
+/** Query root */
+export type QueryTagsByNodeIdsArgs = {
+  nodeIds?: InputMaybe<Array<InputMaybe<Scalars['Long']>>>;
 };
 
 
@@ -579,6 +665,29 @@ export type TimeSeriesQueryResult = {
   status?: Maybe<Scalars['String']>;
 };
 
+export type TriggerEvent = {
+  __typename?: 'TriggerEvent';
+  clearEvent?: Maybe<Scalars['String']>;
+  count?: Maybe<Scalars['Int']>;
+  id?: Maybe<Scalars['Long']>;
+  overtime?: Maybe<Scalars['Int']>;
+  overtimeUnit?: Maybe<Scalars['String']>;
+  severity?: Maybe<Scalars['String']>;
+  tenantId?: Maybe<Scalars['String']>;
+  triggerEvent?: Maybe<Scalars['String']>;
+};
+
+export type TriggerEventInput = {
+  clearEvent?: InputMaybe<Scalars['String']>;
+  count?: InputMaybe<Scalars['Int']>;
+  id?: InputMaybe<Scalars['Long']>;
+  overtime?: InputMaybe<Scalars['Int']>;
+  overtimeUnit?: InputMaybe<Scalars['String']>;
+  severity?: InputMaybe<Scalars['String']>;
+  tenantId?: InputMaybe<Scalars['String']>;
+  triggerEvent?: InputMaybe<Scalars['String']>;
+};
+
 export type LocationsPartsFragment = { __typename?: 'Query', findAllLocations?: Array<{ __typename?: 'Location', id: any, location?: string }> };
 
 export type ListLocationsQueryVariables = Exact<{ [key: string]: never; }>;
@@ -636,6 +745,13 @@ export type DeleteMinionMutationVariables = Exact<{
 
 
 export type DeleteMinionMutation = { __typename?: 'Mutation', deleteMinion?: boolean };
+
+export type CreateMonitorPolicyMutationVariables = Exact<{
+  policy: MonitorPolicyInput;
+}>;
+
+
+export type CreateMonitorPolicyMutation = { __typename?: 'Mutation', createMonitorPolicy?: { __typename?: 'MonitorPolicy', id?: any } };
 
 export type AddNodeMutationVariables = Exact<{
   node: NodeCreateInput;
@@ -805,6 +921,11 @@ export type NodesForMapQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type NodesForMapQuery = { __typename?: 'Query', findAllNodes?: Array<{ __typename?: 'Node', id: any, nodeLabel?: string }> };
 
+export type ListMonitoryPoliciesQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type ListMonitoryPoliciesQuery = { __typename?: 'Query', listMonitoryPolicies?: Array<{ __typename?: 'MonitorPolicy', id?: any, memo?: string, name?: string, notifyByEmail?: boolean, notifyByPagerDuty?: boolean, notifyByWebhooks?: boolean, tags?: Array<string>, rules?: Array<{ __typename?: 'PolicyRule', id?: any, name?: string, componentType?: string, triggerEvents?: Array<{ __typename?: 'TriggerEvent', id?: any, count?: number, clearEvent?: string, overtime?: number, overtimeUnit?: string, severity?: string, triggerEvent?: string }> }> }> };
+
 export type EventsByNodeIdPartsFragment = { __typename?: 'Query', events?: Array<{ __typename?: 'Event', id: number, uei?: string, nodeId: number, ipAddress?: string, producedTime: any }> };
 
 export type NodeByIdPartsFragment = { __typename?: 'Query', node?: { __typename?: 'Node', id: any, nodeLabel?: string, objectId?: string, systemContact?: string, systemDescr?: string, systemLocation?: string, systemName?: string, location?: { __typename?: 'Location', location?: string }, ipInterfaces?: Array<{ __typename?: 'IpInterface', id: any, hostname?: string, ipAddress?: string, netmask?: string, nodeId: any, snmpPrimary?: boolean }>, snmpInterfaces?: Array<{ __typename?: 'SnmpInterface', id: any, ifAdminStatus: number, ifAlias?: string, ifDescr?: string, ifIndex: number, ifName?: string, ifOperatorStatus: number, ifSpeed: any, ifType: number, ipAddress?: string, nodeId: any, physicalAddr?: string }> } };
@@ -840,6 +961,7 @@ export const CreateIcmpActiveDiscoveryDocument = {"kind":"Document","definitions
 export const TogglePassiveDiscoveryDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"TogglePassiveDiscovery"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"toggle"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"PassiveDiscoveryToggleInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"togglePassiveDiscovery"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"toggle"},"value":{"kind":"Variable","name":{"kind":"Name","value":"toggle"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"toggle"}}]}}]}}]} as unknown as DocumentNode<TogglePassiveDiscoveryMutation, TogglePassiveDiscoveryMutationVariables>;
 export const UpsertPassiveDiscoveryDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"UpsertPassiveDiscovery"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"passiveDiscovery"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"PassiveDiscoveryUpsertInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"upsertPassiveDiscovery"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"discovery"},"value":{"kind":"Variable","name":{"kind":"Name","value":"passiveDiscovery"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"location"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"snmpCommunities"}},{"kind":"Field","name":{"kind":"Name","value":"snmpPorts"}},{"kind":"Field","name":{"kind":"Name","value":"toggle"}}]}}]}}]} as unknown as DocumentNode<UpsertPassiveDiscoveryMutation, UpsertPassiveDiscoveryMutationVariables>;
 export const DeleteMinionDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"DeleteMinion"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"deleteMinion"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}]}]}}]} as unknown as DocumentNode<DeleteMinionMutation, DeleteMinionMutationVariables>;
+export const CreateMonitorPolicyDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateMonitorPolicy"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"policy"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"MonitorPolicyInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createMonitorPolicy"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"policy"},"value":{"kind":"Variable","name":{"kind":"Name","value":"policy"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}}]}}]}}]} as unknown as DocumentNode<CreateMonitorPolicyMutation, CreateMonitorPolicyMutationVariables>;
 export const AddNodeDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"AddNode"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"node"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"NodeCreateInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"addNode"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"node"},"value":{"kind":"Variable","name":{"kind":"Name","value":"node"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createTime"}},{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"monitoringLocationId"}},{"kind":"Field","name":{"kind":"Name","value":"nodeLabel"}},{"kind":"Field","name":{"kind":"Name","value":"tenantId"}}]}}]}}]} as unknown as DocumentNode<AddNodeMutation, AddNodeMutationVariables>;
 export const DeleteNodeDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"DeleteNode"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Long"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"deleteNode"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}]}]}}]} as unknown as DocumentNode<DeleteNodeMutation, DeleteNodeMutationVariables>;
 export const SavePagerDutyConfigDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"SavePagerDutyConfig"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"config"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"PagerDutyConfigInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"savePagerDutyConfig"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"config"},"value":{"kind":"Variable","name":{"kind":"Name","value":"config"}}}]}]}}]} as unknown as DocumentNode<SavePagerDutyConfigMutation, SavePagerDutyConfigMutationVariables>;
@@ -862,4 +984,5 @@ export const GetNodeForGraphsDocument = {"kind":"Document","definitions":[{"kind
 export const NodesListDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"NodesList"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"NodesParts"}}]}},...NodesPartsFragmentDoc.definitions]} as unknown as DocumentNode<NodesListQuery, NodesListQueryVariables>;
 export const NodeLatencyMetricDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"NodeLatencyMetric"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Long"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"monitor"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"instance"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"timeRange"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"timeRangeUnit"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"TimeRangeUnit"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"NodeLatencyParts"}},{"kind":"FragmentSpread","name":{"kind":"Name","value":"NodeStatusParts"}}]}},...NodeLatencyPartsFragmentDoc.definitions,...MetricPartsFragmentDoc.definitions,...NodeStatusPartsFragmentDoc.definitions]} as unknown as DocumentNode<NodeLatencyMetricQuery, NodeLatencyMetricQueryVariables>;
 export const NodesForMapDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"NodesForMap"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"findAllNodes"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"nodeLabel"}}]}}]}}]} as unknown as DocumentNode<NodesForMapQuery, NodesForMapQueryVariables>;
+export const ListMonitoryPoliciesDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"ListMonitoryPolicies"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"listMonitoryPolicies"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"memo"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"notifyByEmail"}},{"kind":"Field","name":{"kind":"Name","value":"notifyByPagerDuty"}},{"kind":"Field","name":{"kind":"Name","value":"notifyByWebhooks"}},{"kind":"Field","name":{"kind":"Name","value":"rules"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"componentType"}},{"kind":"Field","name":{"kind":"Name","value":"triggerEvents"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"count"}},{"kind":"Field","name":{"kind":"Name","value":"clearEvent"}},{"kind":"Field","name":{"kind":"Name","value":"overtime"}},{"kind":"Field","name":{"kind":"Name","value":"overtimeUnit"}},{"kind":"Field","name":{"kind":"Name","value":"severity"}},{"kind":"Field","name":{"kind":"Name","value":"triggerEvent"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"tags"}}]}}]}}]} as unknown as DocumentNode<ListMonitoryPoliciesQuery, ListMonitoryPoliciesQueryVariables>;
 export const ListNodeStatusDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"ListNodeStatus"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Long"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"EventsByNodeIdParts"}},{"kind":"FragmentSpread","name":{"kind":"Name","value":"NodeByIdParts"}}]}},...EventsByNodeIdPartsFragmentDoc.definitions,...NodeByIdPartsFragmentDoc.definitions]} as unknown as DocumentNode<ListNodeStatusQuery, ListNodeStatusQueryVariables>;

@@ -8,6 +8,9 @@
 </template>
 
 <script setup lang="ts">
+import { useMonitoringPoliciesStore } from '@/store/Views/monitoringPoliciesStore'
+const store = useMonitoringPoliciesStore()
+onMounted(() => store.getMonitoringPolicies())
 </script>
 
 <style scoped lang="scss">

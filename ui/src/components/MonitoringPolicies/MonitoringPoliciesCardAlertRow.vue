@@ -1,7 +1,7 @@
 <template>
   <div
     class="mp-card-alert-row"
-    v-if="isThresholdCondition(condition)"
+    v-if="condition.detectionMethod === DetectionMethodTypes.THRESHOLD"
   >
     <div class="subtitle">{{ conditionLetters[index] + '.' }}</div>
     <div class="col tripple">Trigger when the metric is:</div>
@@ -14,7 +14,12 @@
     <div class="col box half">{{ condition.duringLast }}</div>
     <div class="col box double">{{ condition.periodUnit }}</div>
     <div class="col half">as</div>
-    <div class="col severity double" :class="`${condition.severity}-color`">{{ condition.severity }}</div>
+    <div
+      class="col severity double"
+      :class="`${condition.severity}-color`"
+    >
+      {{ condition.severity }}
+    </div>
   </div>
 
   <div
@@ -33,7 +38,7 @@
       <div class="col double">Severity</div>
       <div
         class="col double"
-        v-if="isEventPortDownCondition(condition)"
+        v-if="condition.triggerEvent === SNMPEventType.PORT_DOWN"
       >
         Clear Event
       </div>
@@ -41,14 +46,19 @@
 
     <div class="mp-card-alert-row">
       <div class="subtitle">{{ conditionLetters[index] + '.' }}</div>
-      <div class="col subtitle double">{{ rule.eventTrigger }}</div>
+      <div class="col subtitle double">{{ condition.triggerEvent }}</div>
       <div class="col half box">{{ condition.count }}</div>
-      <div class="col half box">{{ condition.time || '&nbsp' }}</div>
-      <div class="col box double">{{ condition.unit || '&nbsp' }}</div>
-      <div class="col severity double" :class="`${condition.severity}-color`">{{ condition.severity }}</div>
+      <div class="col half box">{{ condition.overtime || '&nbsp' }}</div>
+      <div class="col box double">{{ condition.overtimeUnit || '&nbsp' }}</div>
+      <div
+        class="col severity double"
+        :class="`${condition.severity!.toLowerCase()}-color`"
+      >
+        {{ condition.severity }}
+      </div>
       <div
         class="col box double"
-        v-if="isEventPortDownCondition(condition)"
+        v-if="condition.triggerEvent === SNMPEventType.PORT_DOWN"
       >
         {{ condition.clearEvent }}
       </div>
@@ -57,12 +67,11 @@
 </template>
 
 <script setup lang="ts">
-import { Condition, IRule } from '@/types/policies'
-import { isThresholdCondition, isEventPortDownCondition } from './monitoringPolicies.utils'
-import { conditionLetters } from './monitoringPolicies.constants'
+import { Condition, Rule } from '@/types/policies'
+import { conditionLetters, SNMPEventType, DetectionMethodTypes } from './monitoringPolicies.constants'
 
 defineProps<{
-  rule: IRule
+  rule: Rule
   condition: Condition
   index: number
 }>()
@@ -118,7 +127,8 @@ defineProps<{
   }
 }
 
-.box, .severity {
+.box,
+.severity {
   @include typography.subtitle1;
   padding: var(variables.$spacing-xs);
   border-radius: vars.$border-radius-s;

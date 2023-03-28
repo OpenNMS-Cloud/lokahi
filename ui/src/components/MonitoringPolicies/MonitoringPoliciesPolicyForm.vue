@@ -24,6 +24,7 @@
         <FeatherInput
           v-model="store.selectedPolicy.name"
           label="New Policy Name"
+          v-focus
         />
         <FeatherTextarea
           v-model="store.selectedPolicy.memo"
@@ -34,9 +35,9 @@
           label="Notifications (Optional)"
           vertical
         >
-          <FeatherCheckbox v-model="store.selectedPolicy.notifications.email">Email</FeatherCheckbox>
-          <FeatherCheckbox v-model="store.selectedPolicy.notifications.pagerDuty">Pager Duty</FeatherCheckbox>
-          <FeatherCheckbox v-model="store.selectedPolicy.notifications.webhooks">Webhooks</FeatherCheckbox>
+          <FeatherCheckbox v-model="store.selectedPolicy.notifyByEmail">Email</FeatherCheckbox>
+          <FeatherCheckbox v-model="store.selectedPolicy.notifyByPagerDuty">Pager Duty</FeatherCheckbox>
+          <FeatherCheckbox v-model="store.selectedPolicy.notifyByWebhooks">Webhooks</FeatherCheckbox>
         </FeatherCheckboxGroup>
         <div class="subtitle">Tags</div>
         <BasicAutocomplete
@@ -54,9 +55,9 @@
         <MonitoringPoliciesCard
           v-for="(policy, index) in store.monitoringPolicies"
           :key="policy.id"
-          :policy="policy"
+          :policy="(policy as Policy)"
           :index="index"
-          @selectPolicy="(policy: IPolicy) => store.displayPolicyForm(policy)"
+          @selectPolicy="(policy: Policy) => store.displayPolicyForm(policy)"
         />
       </div>
     </transition>
@@ -68,15 +69,15 @@
 import { useMonitoringPoliciesStore } from '@/store/Views/monitoringPoliciesStore'
 import { useTagQueries } from '@/store/Queries/tagQueries'
 import Add from '@featherds/icon/action/Add'
+import { Policy } from '@/types/policies'
 import { TagSelectItem } from '@/types'
-import { IPolicy } from '@/types/policies'
 
 const store = useMonitoringPoliciesStore()
 const tagQueries = useTagQueries()
 const addIcon = markRaw(Add)
 
-const selectTags = (tags: TagSelectItem[]) => (store.selectedPolicy!.tags = tags.map((tag) => ({ name: tag.name })))
-const populateForm = (item: IPolicy) => {
+const selectTags = (tags: TagSelectItem[]) => (store.selectedPolicy!.tags = tags.map((tag) => tag.name))
+const populateForm = (item: Policy) => {
   store.selectedPolicy = item
   store.selectedRule = undefined
 }

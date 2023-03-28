@@ -1,17 +1,13 @@
-import { IPolicy } from '@/types/policies'
 import { defineStore } from 'pinia'
 import { useMutation } from 'villus'
-// import { AddMonitoringPolicyDocument } from '@/types/graphql'
+import { CreateMonitorPolicyDocument } from '@/types/graphql'
 
 export const useMonitoringPoliciesMutations = defineStore('monitoringPoliciesMutations', () => {
-  // Add Monitoring Policy
-  // const { execute: addMonitoringPolicy, error, isFetching } = useMutation(AddMonitoringPolicyDocument)
+  const { execute: addMonitoringPolicy, error, isFetching } = useMutation(CreateMonitorPolicyDocument)
 
   return {
-    addMonitoringPolicy: (payload: { policy: IPolicy }) => {
-      console.log(payload)
-    },
-    error: computed(() => ref(false)),
-    isFetching: computed(() => ref(false))
+    addMonitoringPolicy,
+    error: computed(() => error),
+    isFetching: computed(() => isFetching)
   }
 })

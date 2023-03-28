@@ -30,7 +30,7 @@ import { useMonitoringPoliciesMutations } from '@/store/Mutations/monitoringPoli
 
 const store = useMonitoringPoliciesStore()
 const mutations = useMonitoringPoliciesMutations()
-const enableSaveRule = computed(() => store.selectedRule?.name && store.selectedRule?.conditions.length)
+const enableSaveRule = computed(() => store.selectedRule?.name && store.selectedRule?.triggerEvents.length)
 </script>
 
 <style lang="scss" scoped>

@@ -87,34 +87,34 @@
 import Slider from '@vueform/slider'
 import { ThresholdCondition } from '@/types/policies'
 import { conditionLetters } from './monitoringPolicies.constants'
+import { OverTimeUnit, Severity, ThresholdLevels } from './monitoringPolicies.constants';
 
 const props = defineProps<{
   condition: ThresholdCondition
   index: number
 }>()
 
-const emit = defineEmits(['updateCondition'])
+const emit = defineEmits(['updateCondition', 'deleteCondition'])
 const condition = ref<ThresholdCondition>()
 
 const levelOptions = [
-  { id: 'above', name: 'above' },
-  { id: 'equalTo', name: 'equalTo' },
-  { id: 'below', name: 'below' },
-  { id: 'isNotEqual', name: 'is not equal' }
+  { id: ThresholdLevels.ABOVE, name: 'above' },
+  { id: ThresholdLevels.EQUAL_TO, name: 'equal to' },
+  { id: ThresholdLevels.BELOW, name: 'below' },
+  { id: ThresholdLevels.NOT_EQUAL_TO, name: 'is not equal' }
 ]
 
 const durationOptions = [
-  { id: 'second', name: 'Second(s)' },
-  { id: 'minute', name: 'Minute(s)' },
-  { id: 'hour', name: 'Hour(s)' },
-  { id: 'day', name: 'Day(s)' }
+  { id: OverTimeUnit.SECOND, name: 'Second(s)' },
+  { id: OverTimeUnit.MINUTE, name: 'Minute(s)' },
+  { id: OverTimeUnit.HOUR, name: 'Hour(s)' },
 ]
 
 const severityList = [
-  { id: 'critical', name: 'Critical' },
-  { id: 'major', name: 'Major' },
-  { id: 'minor', name: 'Minor' },
-  { id: 'warning', name: 'Warning' }
+  { id: Severity.CRITICAL, name: 'Critical' },
+  { id: Severity.MAJOR, name: 'Major' },
+  { id: Severity.MINOR, name: 'Minor' },
+  { id: Severity.WARNING, name: 'Warning' }
 ]
 
 watchEffect(() => (condition.value = props.condition))

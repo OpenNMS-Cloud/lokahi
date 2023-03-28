@@ -25,7 +25,8 @@
     >
       <div class="row">
         <div class="title-box rule">{{ rule.name }}</div>
-        <div class="title-box method">{{ rule.detectionMethod }}-{{ rule.metricName }}</div>
+        <!-- BE does not have these props yet -->
+        <!-- <div class="title-box method">{{ rule.detectionMethod }}-{{ rule.metricName }}</div> -->
         <div class="title-box component">{{ rule.componentType }}</div>
 
         <div
@@ -40,7 +41,7 @@
       <div v-if="ruleStates[rule.id]">
         <div class="alert-title">Alert Conditions</div>
         <MonitoringPoliciesCardAlertRow
-          v-for="(condition, index) in rule.conditions"
+          v-for="(condition, index) in rule.triggerEvents"
           :key="condition.id"
           :rule="rule"
           :condition="condition"
@@ -52,7 +53,7 @@
 </template>
 
 <script setup lang="ts">
-import { IPolicy } from '@/types/policies'
+import { Policy } from '@/types/policies'
 import ExpandLess from '@featherds/icon/navigation/ExpandLess'
 import ExpandMore from '@featherds/icon/navigation/ExpandMore'
 
@@ -62,7 +63,7 @@ const icons = markRaw({
 })
 
 const props = defineProps<{
-  policy: IPolicy
+  policy: Policy
   index: number
 }>()
 

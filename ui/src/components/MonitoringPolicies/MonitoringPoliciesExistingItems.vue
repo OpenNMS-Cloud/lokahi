@@ -23,14 +23,14 @@
 
 <script setup lang="ts">
 import Info from '@featherds/icon/action/Info'
-import { IPolicy, IRule } from '@/types/policies'
+import { MonitorPolicy, PolicyRule } from '@/types/graphql'
 
 const infoIcon = markRaw(Info)
 
 defineProps<{
-  title: String
-  list: Partial<IPolicy>[] | Partial<IRule>[]
-  selectedItemId?: string
+  title: string
+  list: MonitorPolicy[] | PolicyRule[]
+  selectedItemId?: number
 }>()
 </script>
 

@@ -32,6 +32,7 @@
               v-model="store.selectedRule.name"
               label=""
               hideLabel
+              v-focus
             />
           </div>
           <div class="col">
@@ -54,7 +55,9 @@
             />
           </div>
           <div class="col">
-            <div class="subtitle">Threshold Metrics</div>
+            <div class="subtitle">
+              {{ store.selectedRule.detectionMethod === DetectionMethodTypes.EVENT ? 'Event' : 'Threshold' }} Metrics
+            </div>
             <BasicSelect
               :list="metricOptions"
               @item-selected="selectMetric"
@@ -63,25 +66,33 @@
           </div>
           <div
             class="col"
-            v-if="store.selectedRule.detectionMethod === DetectionMethodTypes.Event"
+            v-if="store.selectedRule.detectionMethod === DetectionMethodTypes.EVENT"
           >
             <div class="subtitle">Trigger Event</div>
+            <!--
+              BE does not yet respond with trigger event on rule, 
+              so we have to get it form the condition for now 
+            -->
             <BasicSelect
-              :list="eventTriggerOptions"
-              @item-selected="selectEventTrigger"
-              :selectedId="store.selectedRule.eventTrigger"
+              :list="triggerEventOptions"
+              @item-selected="selecttriggerEvent"
+              :selectedId="
+                store.selectedPolicy.id
+                  ? store.selectedRule.triggerEvents[0].triggerEvent as string
+                  : store.selectedRule.triggerEvent
+              "
             />
           </div>
         </div>
         <div
           class="row"
-          v-if="store.selectedRule!.conditions.length"
+          v-if="store.selectedRule!.triggerEvents.length"
         >
           <div class="col">
             <div class="form-title">Set Alert Conditions</div>
-            <template v-if="store.selectedRule!.detectionMethod === DetectionMethodTypes.Threshold">
+            <template v-if="store.selectedRule!.detectionMethod === DetectionMethodTypes.THRESHOLD">
               <MonitoringPoliciesThresholdCondition
-                v-for="(cond, index) in store.selectedRule!.conditions"
+                v-for="(cond, index) in store.selectedRule!.triggerEvents"
                 :key="cond.id"
                 :index="index"
                 :condition="(cond as ThresholdCondition)"
@@ -91,9 +102,10 @@
             </template>
             <template v-else>
               <MonitoringPoliciesEventCondition
-                v-for="(cond, index) in store.selectedRule!.conditions"
+                v-for="(cond, index) in store.selectedRule!.triggerEvents"
                 :key="cond.id"
                 :condition="(cond as EventCondition)"
+                :rule="store.selectedRule"
                 :index="index"
                 @updateCondition="(condition) => store.updateCondition(cond.id, condition)"
                 @deleteCondition="(id: string) => store.deleteCondition(id)"
@@ -103,7 +115,7 @@
               class="add-params"
               text
               @click="store.addNewCondition"
-              :disabled="store.selectedRule.conditions.length === 4"
+              :disabled="store.selectedRule.triggerEvents.length === 4"
             >
               Additional Parameters
             </FeatherButton>
@@ -116,54 +128,60 @@
 
 <script setup lang="ts">
 import { useMonitoringPoliciesStore } from '@/store/Views/monitoringPoliciesStore'
-import { EventCondition, IRule, ThresholdCondition } from '@/types/policies'
+import { EventCondition, Rule, ThresholdCondition } from '@/types/policies'
 import Add from '@featherds/icon/action/Add'
-import { DetectionMethodTypes } from './monitoringPolicies.constants'
+import {
+  DetectionMethodTypes,
+  ComponentType,
+  EventMetrics,
+  SNMPEventType,
+  ThresholdMetrics
+} from './monitoringPolicies.constants'
 
 const store = useMonitoringPoliciesStore()
 const addIcon = markRaw(Add)
 
 const metricOptions = computed(() => {
-  return store.selectedRule?.detectionMethod === DetectionMethodTypes.Threshold
+  return store.selectedRule?.detectionMethod === DetectionMethodTypes.THRESHOLD
     ? thresholdMetricsOptions
     : eventMetricsOptions
 })
 
 const componentTypeOptions = [
-  { id: 'cpu', name: 'CPU' },
-  { id: 'interface', name: 'Interface' },
-  { id: 'storage', name: 'Storage' },
-  { id: 'node', name: 'Node' }
+  { id: ComponentType.CPU, name: 'CPU' },
+  { id: ComponentType.INTERFACE, name: 'Interface' },
+  { id: ComponentType.STORAGE, name: 'Storage' },
+  { id: ComponentType.NODE, name: 'Node' }
 ]
 
 const detectionMethodOptions = [
-  { id: 'threshold', name: 'Threshold' },
-  { id: 'event', name: 'Event' }
+  // { id: DetectionMethodTypes.THRESHOLD, name: 'Threshold' }, BE not ready yet
+  { id: DetectionMethodTypes.EVENT, name: 'Event' }
 ]
 
 const thresholdMetricsOptions = [
-  { id: 'over-utilization', name: 'Over Utilization' },
-  { id: 'saturation', name: 'Saturation' },
-  { id: 'errors', name: 'Errors' }
+  { id: ThresholdMetrics.OVER_UTILIZATION, name: 'Over Utilization' },
+  { id: ThresholdMetrics.SATURATION, name: 'Saturation' },
+  { id: ThresholdMetrics.ERRORS, name: 'Errors' }
 ]
 
 const eventMetricsOptions = [
-  { id: 'snmp-trap', name: 'SNMP Trap' },
-  { id: 'internal', name: 'Internal' }
+  { id: EventMetrics.SNMP_TRAP, name: 'SNMP Trap' }
+  // { id: EventMetrics.INTERNAL, name: 'Internal' } BE Not ready yet
 ]
 
-const eventTriggerOptions = [
-  { id: 'device-cold-reboot', name: 'Device Cold Reboot' },
-  { id: 'snmp-auth-fail', name: 'SNMP Authentication Failure' },
-  { id: 'port-down', name: 'Port Down' }
+const triggerEventOptions = [
+  { id: SNMPEventType.COLD_REBOOT, name: 'Device Cold Reboot' },
+  { id: SNMPEventType.SNMP_AUTH_FAILURE, name: 'SNMP Authentication Failure' },
+  { id: SNMPEventType.PORT_DOWN, name: 'Port Down' }
 ]
 
 const selectComponentType = (type: string) => (store.selectedRule!.componentType = type)
 const selectMetric = (metric: string) => (store.selectedRule!.metricName = metric)
-const populateForm = (rule: IRule) => store.displayRuleForm(rule)
+const populateForm = (rule: Rule) => store.displayRuleForm(rule)
 
-const selectEventTrigger = (trigger: string) => {
-  store.selectedRule!.eventTrigger = trigger
+const selecttriggerEvent = (trigger: string) => {
+  store.selectedRule!.triggerEvent = trigger
   store.resetDefaultConditions()
 }
 

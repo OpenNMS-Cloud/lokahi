@@ -75,6 +75,7 @@ public class FlowClient {
      */
     public List<Long> findExporters(RequestCriteria requestCriteria, String tenantId) {
         List<Long> exporters = new ArrayList<>();
+        // fake interfaceId (long)
         exporters.add(1L);
         exporters.add(2L);
         return exporters;
@@ -82,6 +83,7 @@ public class FlowClient {
 
     public List<String> findApplications(RequestCriteria requestCriteria, String tenantId) {
         List<String> applications = new ArrayList<>();
+        // fake applications
         applications.add("https");
         applications.add("ssh");
         return applications;
@@ -91,8 +93,9 @@ public class FlowClient {
         var summaries = Summaries.newBuilder();
         for (int i = 0; i < 10; i++) {
             summaries.addSummaries(TrafficSummary.newBuilder().setApplication("app_" + i)
-                .setBytesIn((long) (Math.random() * 100_000L))
-                .setBytesOut((long) (Math.random() * 100_000L)));
+                // fake in/out to make it looks like real
+                .setBytesIn((getRandomBytes()))
+                .setBytesOut((getRandomBytes())));
         }
         return summaries.build();
     }
@@ -100,16 +103,21 @@ public class FlowClient {
     public Series getApplicationSeries(RequestCriteria requestCriteria, String tenantId) {
         Series.Builder series = Series.newBuilder();
         int seriesSize = 100;
+        // generate 10 apps data with seriesSize of points, each step is 500ms
         for (int i = 0; i < 10; i++) {
             for (int j = 0; j < seriesSize; j++) {
                 series.addPoint(
                     FlowingPoint.newBuilder()
                         .setApplication("app_" + i)
                         .setTimestamp(Timestamp.newBuilder().setSeconds(System.currentTimeMillis() - ((seriesSize - j) * 500)))
-                        .setValue(Math.random() * 100_1000L)
+                        .setValue(getRandomBytes())
                         .setDirection(Direction.EGRESS));
             }
         }
         return series.build();
+    }
+
+    private long getRandomBytes() {
+        return (long) (Math.random() * 100_000L);
     }
 }

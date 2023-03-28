@@ -35,53 +35,53 @@ option java_multiple_files = true;
 option java_package = "org.opennms.node.scan.contract";
 
 message NodeScanRequest {
-  int64 nodeId = 1;
-  string primaryIp = 2;
-  repeated string ipAddresses = 3; //reserved for service scan
+  int64 node_id = 1;
+  string primary_ip = 2;
+  repeated string ip_addresses = 3; //reserved for service scan
   repeated opennms.snmp.api.SnmpConfiguration snmp_configs = 4;
 }
 
 //Scan Results
 message NodeInfoResult {
-  string objectId = 1;
-  string systemName = 2;
-  string systemDescr = 3;
-  string systemLocation = 4;
-  string systemContact = 5;
-  int64 systemUptime = 6;
+  string object_id = 1;
+  string system_name = 2;
+  string system_descr = 3;
+  string system_location = 4;
+  string system_contact = 5;
+  int64 system_uptime = 6;
 }
 
 //for service detector
 message ServiceResult {
-  string ipAddress = 1;
-  string serviceName = 2;
+  string ip_address = 1;
+  string service_name = 2;
   string status = 3;
 }
 
 message IpInterfaceResult {
-  string ipAddress = 1;
-  string ipHostName = 2;
+  string ip_address = 1;
+  string ip_host_name = 2;
   string netmask = 3;
-  int32 ifIndex = 4;
+  int32 if_index = 4;
 }
 
 message SnmpInterfaceResult {
-  string physicalAddr = 1;
-  int32 ifIndex = 2;
-  string ifDescr = 3;
-  int32 ifType = 4;
-  string ifName = 5;
-  int64 ifSpeed = 6;
-  int32 ifAdminStatus = 7;
-  int32 ifOperatorStatus = 8;
-  string ifAlias = 9;
+  string physical_addr = 1;
+  int32 if_index = 2;
+  string if_descr = 3;
+  int32 if_type = 4;
+  string if_name = 5;
+  int64 if_speed = 6;
+  int32 if_admin_status = 7;
+  int32 if_operator_status = 8;
+  string if_alias = 9;
 }
 
 message NodeScanResult {
-  int64 nodeId = 1;
-  NodeInfoResult nodeInfo = 2;
-  repeated IpInterfaceResult ipInterfaces = 3;
-  repeated SnmpInterfaceResult snmpInterfaces = 4;
+  int64 node_id = 1;
+  NodeInfoResult node_info = 2;
+  repeated IpInterfaceResult ip_interfaces = 3;
+  repeated SnmpInterfaceResult snmp_interfaces = 4;
   opennms.snmp.api.SnmpConfiguration snmp_config = 5;
 }
 

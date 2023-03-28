@@ -31,6 +31,8 @@ package org.opennms.horizon.shared.grpc.common;
 import io.grpc.BindableService;
 import io.grpc.Server;
 import io.grpc.ServerInterceptor;
+import io.grpc.ServerInterceptors;
+import io.grpc.ServerServiceDefinition;
 import io.grpc.netty.shaded.io.grpc.netty.NettyServerBuilder;
 import io.grpc.netty.shaded.io.netty.handler.ssl.SslContextBuilder;
 import java.io.IOException;
@@ -88,6 +90,24 @@ public class GrpcIpcServerBuilder implements GrpcIpcServer {
             serverBuilder.addService(bindableService);
             services.add(bindableService);
         }
+        if (!serverStartScheduled) {
+            startServerWithDelay(delay.toMillis());
+            serverStartScheduled = true;
+        }
+    }
+
+    @Override
+    public void startServerWithInterceptors(BindableService bindableService, ServerInterceptor... interceptors) throws IOException {
+        initializeServerFromConfig();
+
+        if (!services.contains(bindableService)) {
+            serverBuilder.addService(bindableService);
+
+            ServerServiceDefinition serverServiceDefinition = ServerInterceptors.intercept(bindableService, interceptors);
+            serverBuilder.addService(serverServiceDefinition);
+            services.add(bindableService);
+        }
+
         if (!serverStartScheduled) {
             startServerWithDelay(delay.toMillis());
             serverStartScheduled = true;

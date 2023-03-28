@@ -23,6 +23,36 @@ export type ActiveDiscovery = {
   discoveryType?: Maybe<Scalars['String']>;
 };
 
+export type Alert = {
+  __typename?: 'Alert';
+  ackTimeMs: Scalars['Long'];
+  ackUser?: Maybe<Scalars['String']>;
+  acknowledged: Scalars['Boolean'];
+  clearKey?: Maybe<Scalars['String']>;
+  counter: Scalars['Long'];
+  databaseId: Scalars['Long'];
+  description?: Maybe<Scalars['String']>;
+  firstEventTimeMs: Scalars['Long'];
+  lastEventId: Scalars['Long'];
+  lastUpdateTimeMs: Scalars['Long'];
+  location?: Maybe<Scalars['String']>;
+  logMessage?: Maybe<Scalars['String']>;
+  managedObject?: Maybe<ManagedObject>;
+  reductionKey?: Maybe<Scalars['String']>;
+  severity?: Maybe<Severity>;
+  tenantId?: Maybe<Scalars['String']>;
+  type?: Maybe<AlertType>;
+  uei?: Maybe<Scalars['String']>;
+};
+
+export enum AlertType {
+  AlarmTypeUndefined = 'ALARM_TYPE_UNDEFINED',
+  Clear = 'CLEAR',
+  ProblemWithoutClear = 'PROBLEM_WITHOUT_CLEAR',
+  ProblemWithClear = 'PROBLEM_WITH_CLEAR',
+  Unrecognized = 'UNRECOGNIZED'
+}
+
 export type AzureActiveDiscovery = {
   __typename?: 'AzureActiveDiscovery';
   clientId?: Maybe<Scalars['String']>;
@@ -105,6 +135,28 @@ export type Location = {
   tenantId?: Maybe<Scalars['String']>;
 };
 
+export type ManagedObject = {
+  __typename?: 'ManagedObject';
+  instance?: Maybe<ManagedObjectInstance>;
+  type?: Maybe<ManagedObjectType>;
+};
+
+export type ManagedObjectInstance = {
+  __typename?: 'ManagedObjectInstance';
+  nodeVal?: Maybe<NodeRef>;
+  snmpInterfaceLinkVal?: Maybe<SnmpInterfaceLinkRef>;
+  snmpInterfaceVal?: Maybe<SnmpInterfaceRef>;
+};
+
+export enum ManagedObjectType {
+  Any = 'ANY',
+  Node = 'NODE',
+  SnmpInterface = 'SNMP_INTERFACE',
+  SnmpInterfaceLink = 'SNMP_INTERFACE_LINK',
+  Undefined = 'UNDEFINED',
+  Unrecognized = 'UNRECOGNIZED'
+}
+
 export type Minion = {
   __typename?: 'Minion';
   id: Scalars['Long'];
@@ -120,17 +172,28 @@ export type Minion = {
 /** Mutation root */
 export type Mutation = {
   __typename?: 'Mutation';
+  acknowledgeAlert?: Maybe<Alert>;
   addNode?: Maybe<Node>;
   addTagsToNodes?: Maybe<Array<Maybe<Tag>>>;
+  clearAlert?: Maybe<Alert>;
   createAzureActiveDiscovery?: Maybe<AzureActiveDiscovery>;
   createIcmpActiveDiscovery?: Maybe<IcmpActiveDiscovery>;
+  deleteAlert?: Maybe<Scalars['Boolean']>;
   deleteMinion?: Maybe<Scalars['Boolean']>;
   deleteNode?: Maybe<Scalars['Boolean']>;
   discoveryByNodeIds?: Maybe<Scalars['Boolean']>;
+  escalateAlert?: Maybe<Alert>;
   removeTagsFromNodes?: Maybe<Scalars['Boolean']>;
   savePagerDutyConfig?: Maybe<Scalars['Boolean']>;
   togglePassiveDiscovery?: Maybe<PassiveDiscoveryToggle>;
+  unacknowledgeAlert?: Maybe<Alert>;
   upsertPassiveDiscovery?: Maybe<PassiveDiscovery>;
+};
+
+
+/** Mutation root */
+export type MutationAcknowledgeAlertArgs = {
+  id: Scalars['Long'];
 };
 
 
@@ -147,6 +210,12 @@ export type MutationAddTagsToNodesArgs = {
 
 
 /** Mutation root */
+export type MutationClearAlertArgs = {
+  id: Scalars['Long'];
+};
+
+
+/** Mutation root */
 export type MutationCreateAzureActiveDiscoveryArgs = {
   discovery?: InputMaybe<AzureActiveDiscoveryCreateInput>;
 };
@@ -155,6 +224,12 @@ export type MutationCreateAzureActiveDiscoveryArgs = {
 /** Mutation root */
 export type MutationCreateIcmpActiveDiscoveryArgs = {
   request?: InputMaybe<IcmpActiveDiscoveryCreateInput>;
+};
+
+
+/** Mutation root */
+export type MutationDeleteAlertArgs = {
+  id: Scalars['Long'];
 };
 
 
@@ -177,6 +252,13 @@ export type MutationDiscoveryByNodeIdsArgs = {
 
 
 /** Mutation root */
+export type MutationEscalateAlertArgs = {
+  id: Scalars['Long'];
+  newNodeCriteria?: InputMaybe<Scalars['String']>;
+};
+
+
+/** Mutation root */
 export type MutationRemoveTagsFromNodesArgs = {
   tags?: InputMaybe<TagListNodesRemoveInput>;
 };
@@ -191,6 +273,12 @@ export type MutationSavePagerDutyConfigArgs = {
 /** Mutation root */
 export type MutationTogglePassiveDiscoveryArgs = {
   toggle?: InputMaybe<PassiveDiscoveryToggleInput>;
+};
+
+
+/** Mutation root */
+export type MutationUnacknowledgeAlertArgs = {
+  id: Scalars['Long'];
 };
 
 
@@ -223,6 +311,11 @@ export type NodeCreateInput = {
   location?: InputMaybe<Scalars['String']>;
   managementIp?: InputMaybe<Scalars['String']>;
   tags?: InputMaybe<Array<InputMaybe<TagCreateInput>>>;
+};
+
+export type NodeRef = {
+  __typename?: 'NodeRef';
+  nodeID: Scalars['Long'];
 };
 
 export type NodeStatus = {
@@ -269,6 +362,7 @@ export type PassiveDiscoveryUpsertInput = {
 /** Query root */
 export type Query = {
   __typename?: 'Query';
+  findAllAlerts?: Maybe<Array<Maybe<Alert>>>;
   findAllEvents?: Maybe<Array<Maybe<Event>>>;
   findAllLocations?: Maybe<Array<Maybe<Location>>>;
   findAllMinions?: Maybe<Array<Maybe<Minion>>>;
@@ -386,6 +480,18 @@ export type SnmpConfigInput = {
   readCommunities?: InputMaybe<Array<InputMaybe<Scalars['String']>>>;
 };
 
+export enum Severity {
+  Cleared = 'CLEARED',
+  Critical = 'CRITICAL',
+  Indeterminate = 'INDETERMINATE',
+  Major = 'MAJOR',
+  Minor = 'MINOR',
+  Normal = 'NORMAL',
+  SeverityUndefined = 'SEVERITY_UNDEFINED',
+  Unrecognized = 'UNRECOGNIZED',
+  Warning = 'WARNING'
+}
+
 export type SnmpInfo = {
   __typename?: 'SnmpInfo';
   community?: Maybe<Scalars['String']>;
@@ -411,6 +517,18 @@ export type SnmpInterface = {
   nodeId: Scalars['Long'];
   physicalAddr?: Maybe<Scalars['String']>;
   tenantId?: Maybe<Scalars['String']>;
+};
+
+export type SnmpInterfaceLinkRef = {
+  __typename?: 'SnmpInterfaceLinkRef';
+  ifA?: Maybe<SnmpInterfaceRef>;
+  ifB?: Maybe<SnmpInterfaceRef>;
+};
+
+export type SnmpInterfaceRef = {
+  __typename?: 'SnmpInterfaceRef';
+  ifIndex: Scalars['Long'];
+  node?: Maybe<NodeRef>;
 };
 
 export type TsData = {
@@ -626,6 +744,20 @@ export type ListDiscoveriesQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type ListDiscoveriesQuery = { __typename?: 'Query', passiveDiscoveries?: Array<{ __typename?: 'PassiveDiscovery', id?: any, location?: string, name?: string, snmpCommunities?: Array<string>, snmpPorts?: Array<number>, toggle: boolean }>, listActiveDiscovery?: Array<{ __typename?: 'ActiveDiscovery', details?: any, discoveryType?: string }> };
 
+export type TagsByActiveDiscoveryIdQueryVariables = Exact<{
+  discoveryId: Scalars['Long'];
+}>;
+
+
+export type TagsByActiveDiscoveryIdQuery = { __typename?: 'Query', tagsByActiveDiscoveryId?: Array<{ __typename?: 'Tag', id: any, name?: string, tenantId?: string }> };
+
+export type TagsByPassiveDiscoveryIdQueryVariables = Exact<{
+  discoveryId: Scalars['Long'];
+}>;
+
+
+export type TagsByPassiveDiscoveryIdQuery = { __typename?: 'Query', tagsByPassiveDiscoveryId?: Array<{ __typename?: 'Tag', id: any, name?: string, tenantId?: string }> };
+
 export type GetMetricQueryVariables = Exact<{
   metric: Scalars['String'];
 }>;
@@ -722,6 +854,8 @@ export const ListNodeMetricsDocument = {"kind":"Document","definitions":[{"kind"
 export const ListMinionsAndDevicesForTablesDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"ListMinionsAndDevicesForTables"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"NodesTableParts"}},{"kind":"FragmentSpread","name":{"kind":"Name","value":"MinionsTableParts"}},{"kind":"FragmentSpread","name":{"kind":"Name","value":"LocationsParts"}}]}},...NodesTablePartsFragmentDoc.definitions,...MinionsTablePartsFragmentDoc.definitions,...LocationsPartsFragmentDoc.definitions]} as unknown as DocumentNode<ListMinionsAndDevicesForTablesQuery, ListMinionsAndDevicesForTablesQueryVariables>;
 export const ListLocationsForDiscoveryDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"ListLocationsForDiscovery"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"LocationsParts"}}]}},...LocationsPartsFragmentDoc.definitions]} as unknown as DocumentNode<ListLocationsForDiscoveryQuery, ListLocationsForDiscoveryQueryVariables>;
 export const ListDiscoveriesDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"ListDiscoveries"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"passiveDiscoveries"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"location"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"snmpCommunities"}},{"kind":"Field","name":{"kind":"Name","value":"snmpPorts"}},{"kind":"Field","name":{"kind":"Name","value":"toggle"}}]}},{"kind":"Field","name":{"kind":"Name","value":"listActiveDiscovery"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"details"}},{"kind":"Field","name":{"kind":"Name","value":"discoveryType"}}]}}]}}]} as unknown as DocumentNode<ListDiscoveriesQuery, ListDiscoveriesQueryVariables>;
+export const TagsByActiveDiscoveryIdDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"TagsByActiveDiscoveryId"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"discoveryId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Long"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"tagsByActiveDiscoveryId"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"activeDiscoveryId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"discoveryId"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"tenantId"}}]}}]}}]} as unknown as DocumentNode<TagsByActiveDiscoveryIdQuery, TagsByActiveDiscoveryIdQueryVariables>;
+export const TagsByPassiveDiscoveryIdDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"TagsByPassiveDiscoveryId"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"discoveryId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Long"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"tagsByPassiveDiscoveryId"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"passiveDiscoveryId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"discoveryId"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"tenantId"}}]}}]}}]} as unknown as DocumentNode<TagsByPassiveDiscoveryIdQuery, TagsByPassiveDiscoveryIdQueryVariables>;
 export const GetMetricDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetMetric"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"metric"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"TimeSeriesMetric"}}]}},...TimeSeriesMetricFragmentDoc.definitions,...MetricPartsFragmentDoc.definitions]} as unknown as DocumentNode<GetMetricQuery, GetMetricQueryVariables>;
 export const GetTimeSeriesMetricDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetTimeSeriesMetric"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"name"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"monitor"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"nodeId"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"timeRange"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"timeRangeUnit"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"TimeRangeUnit"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"instance"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"ChartTimeSeriesMetric"}}]}},...ChartTimeSeriesMetricFragmentDoc.definitions,...MetricPartsFragmentDoc.definitions]} as unknown as DocumentNode<GetTimeSeriesMetricQuery, GetTimeSeriesMetricQueryVariables>;
 export const GetNodeForGraphsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetNodeForGraphs"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Long"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"findNodeById"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"ipInterfaces"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"ipAddress"}},{"kind":"Field","name":{"kind":"Name","value":"snmpPrimary"}}]}}]}}]}}]} as unknown as DocumentNode<GetNodeForGraphsQuery, GetNodeForGraphsQueryVariables>;

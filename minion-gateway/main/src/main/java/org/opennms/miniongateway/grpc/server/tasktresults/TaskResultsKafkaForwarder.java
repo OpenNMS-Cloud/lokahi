@@ -28,69 +28,69 @@
 
 package org.opennms.miniongateway.grpc.server.tasktresults;
 
-import com.google.protobuf.Message;
-import com.swrve.ratelimitedlogger.RateLimitedLog;
 import org.apache.kafka.clients.producer.ProducerRecord;
-import org.apache.kafka.common.header.internals.RecordHeader;
-import org.opennms.horizon.shared.constants.GrpcConstants;
 import org.opennms.horizon.shared.grpc.common.TenantIDGrpcServerInterceptor;
 import org.opennms.horizon.shared.ipc.sink.api.MessageConsumer;
 import org.opennms.horizon.shared.ipc.sink.api.SinkModule;
+import org.opennms.horizon.shared.protobuf.mapper.TenantedTaskSetResultsMapper;
+import org.opennms.taskset.contract.TaskSetResults;
+import org.opennms.taskset.contract.TenantedTaskSetResults;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
-import java.nio.charset.StandardCharsets;
-import java.time.Duration;
-
 /**
  * Forwarder of TaskResults - received via GRPC and forwarded to Kafka.
  */
 @Component
-public class TaskResultsKafkaForwarder implements MessageConsumer<Message, Message> {
+public class TaskResultsKafkaForwarder implements MessageConsumer<TaskSetResults, TaskSetResults> {
 
     public static final String DEFAULT_TASK_RESULTS_TOPIC = "task-set.results";
 
     private final Logger logger = LoggerFactory.getLogger(TaskResultsKafkaForwarder.class);
 
-    private final RateLimitedLog usingDefaultTenantIdLog =
-        RateLimitedLog
-            .withRateLimit(logger)
-            .maxRate(1)
-            .every(Duration.ofMinutes(1))
-            .build();
-
-    @Autowired
     @Qualifier("kafkaByteArrayProducerTemplate")
-    private KafkaTemplate<String, byte[]> kafkaTemplate;
+    private final KafkaTemplate<String, byte[]> kafkaTemplate;
+    private final TenantIDGrpcServerInterceptor tenantIDGrpcInterceptor;
+    private final TenantedTaskSetResultsMapper tenantedTaskSetResultsMapper;
 
-    @Autowired
-    private TenantIDGrpcServerInterceptor tenantIDGrpcInterceptor;
+    private final String kafkaTopic;
 
-    @Value("${task.results.kafka-topic:" + DEFAULT_TASK_RESULTS_TOPIC + "}")
-    private String kafkaTopic;
+    public TaskResultsKafkaForwarder(
+        KafkaTemplate<String, byte[]> kafkaTemplate,
+        TenantIDGrpcServerInterceptor tenantIDGrpcInterceptor,
+        TenantedTaskSetResultsMapper tenantedTaskSetResultsMapper,
+        @Value("${task.results.kafka-topic:" + DEFAULT_TASK_RESULTS_TOPIC + "}")
+        String kafkaTopic) {
+
+        this.kafkaTemplate = kafkaTemplate;
+        this.tenantIDGrpcInterceptor = tenantIDGrpcInterceptor;
+        this.tenantedTaskSetResultsMapper = tenantedTaskSetResultsMapper;
+        this.kafkaTopic = kafkaTopic;
+    }
 
     @Override
-    public SinkModule<Message, Message> getModule() {
+    public SinkModule<TaskSetResults, TaskSetResults> getModule() {
         return new TaskResultsModule();
     }
 
     @Override
-    public void handleMessage(Message messageLog) {
+    public void handleMessage(TaskSetResults messageLog) {
         // Retrieve the Tenant ID from the TenantID GRPC Interceptor
         String tenantId = tenantIDGrpcInterceptor.readCurrentContextTenantId();
         logger.debug("Received results; sending to Kafka: tenant-id: {}; kafka-topic={}; message={}", tenantId, kafkaTopic, messageLog);
-        byte[] rawContent = messageLog.toByteArray();
-        var producerRecord = new ProducerRecord<String, byte[]>(kafkaTopic, rawContent);
-        // add tenant id to kafka header
-        producerRecord.headers().add(new RecordHeader(GrpcConstants.TENANT_ID_KEY,
-            tenantId.getBytes(StandardCharsets.UTF_8)));
 
+        // Map to tenanted
+        TenantedTaskSetResults tenantedTaskSetResults = tenantedTaskSetResultsMapper.mapBareToTenanted(tenantId, messageLog);
+
+        // Convert to bytes
+        byte[] rawContent = tenantedTaskSetResults.toByteArray();
+        var producerRecord = new ProducerRecord<String, byte[]>(kafkaTopic, rawContent);
+
+        // Send to Kafka
         this.kafkaTemplate.send(producerRecord);
     }
-
 }

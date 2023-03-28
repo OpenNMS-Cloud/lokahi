@@ -2,5 +2,5 @@
 
 USER=admin
 
-kubectl exec -it deployment.apps/my-horizon-stream-minion -- \
+kubectl exec -it deployment.apps/opennms-minion -- \
 	sh -c "echo 'admin=admin,admin,group,manager,viewer,systembundles,ssh' >>etc/users.properties"

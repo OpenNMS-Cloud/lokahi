@@ -40,6 +40,7 @@
         <module>datachoices</module>
         <module>azure</module>
         <module>flows</module>
+        <module>alert</module>
     </modules>
 
     <build>

@@ -45,7 +45,6 @@ import org.opennms.horizon.inventory.model.Node;
 import org.opennms.horizon.inventory.repository.IpInterfaceRepository;
 import org.opennms.horizon.inventory.repository.MonitoringLocationRepository;
 import org.opennms.horizon.inventory.repository.NodeRepository;
-import org.opennms.horizon.inventory.service.discovery.active.IcmpActiveDiscoveryService;
 import org.opennms.horizon.inventory.service.taskset.CollectorTaskSetService;
 import org.opennms.horizon.inventory.service.taskset.DetectorTaskSetService;
 import org.opennms.horizon.inventory.service.taskset.MonitorTaskSetService;
@@ -100,8 +99,7 @@ public class NodeServiceTest {
             mock(ScannerTaskSetService.class),
             mock(TaskSetPublisher.class),
             tagService,
-            nodeMapper,
-            mock(IcmpActiveDiscoveryService.class));
+            nodeMapper);
 
         Node node = new Node();
         doReturn(node).when(mockNodeRepository).save(any(node.getClass()));

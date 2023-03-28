@@ -8,6 +8,10 @@ import org.opennms.taskset.contract.TaskSetResults;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Sink Module for processing TaskSetResults.  Note this is used in the communication between the Minion and
+ * Minion Gateway, so Tenant IDs are not explicitly handled here.
+ */
 public class TaskSetResultsSinkModule implements SinkModule<TaskSetResults, TaskSetResults> {
 
   public static final String MODULE_ID = "task-set-result";

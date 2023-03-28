@@ -209,6 +209,7 @@ public class SnmpMonitor extends AbstractServiceMonitor {
             .status(Status.Unknown)
             .responseTime(elapsedTimeMs)
             .ipAddress(hostAddress)
+            .timestamp(System.currentTimeMillis())
             .nodeId(nodeId);
 
         Map<String, Number> metrics = new HashMap<>();

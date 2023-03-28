@@ -28,19 +28,21 @@
 
 package org.opennms.horizon.minion.flows.parser;
 
-import com.codahale.metrics.MetricRegistry;
+import java.net.InetAddress;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
-import org.opennms.dataplatform.flows.document.FlowDocument;
 import org.opennms.horizon.minion.flows.parser.factory.DnsResolver;
 import org.opennms.horizon.minion.flows.parser.transport.MessageBuilder;
 import org.opennms.horizon.shared.ipc.rpc.IpcIdentity;
 import org.opennms.horizon.shared.ipc.sink.api.AsyncDispatcher;
 
-import java.net.InetAddress;
-import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
+import org.opennms.dataplatform.flows.document.FlowDocument;
+
+import com.codahale.metrics.MetricRegistry;
 
 public class ClockSkewTest {
     private int eventCount = 0;

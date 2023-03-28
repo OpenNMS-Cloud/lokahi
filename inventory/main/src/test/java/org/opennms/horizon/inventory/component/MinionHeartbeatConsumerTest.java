@@ -107,6 +107,7 @@ public class MinionHeartbeatConsumerTest {
     @Test
     void testAcceptHeartbeatsDelay() throws InterruptedException {
         messageConsumer.receiveMessage(heartbeat.toByteArray(), headers);
+        // TODO: rework to eliminate use of slee() which leads to intermittent failures
         Thread.sleep(1000);
         messageConsumer.receiveMessage(heartbeat.toByteArray(), headers);
         Thread.sleep(100);

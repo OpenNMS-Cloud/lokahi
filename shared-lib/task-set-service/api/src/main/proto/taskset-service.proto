@@ -30,8 +30,9 @@ message UpdateTasksRequestList {
 // UPDATE TASKS
 //
 message UpdateTasksRequest {
-  string location = 1;
-  repeated UpdateSingleTaskOp update = 2;
+  string tenantId = 1;
+  string location = 2;
+  repeated UpdateSingleTaskOp update = 3;
 }
 
 message UpdateTasksResponse {

@@ -29,16 +29,15 @@
 package org.opennms.horizon.inventory.component;
 
 import java.util.Map;
-import java.util.Optional;
 
+import org.apache.logging.log4j.util.Strings;
 import org.opennms.horizon.inventory.exception.InventoryRuntimeException;
 import org.opennms.horizon.inventory.service.taskset.response.DetectorResponseService;
 import org.opennms.horizon.inventory.service.taskset.response.ScannerResponseService;
-import org.opennms.horizon.shared.constants.GrpcConstants;
 import org.opennms.taskset.contract.DetectorResponse;
 import org.opennms.taskset.contract.ScannerResponse;
 import org.opennms.taskset.contract.TaskResult;
-import org.opennms.taskset.contract.TaskSetResults;
+import org.opennms.taskset.contract.TenantedTaskSetResults;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -63,8 +62,13 @@ public class TaskSetResultsConsumer {
         LOG.debug("Have message from Task Set Results kafka topic");
 
         try {
-            String tenantId = getTenantId(headers);
-            TaskSetResults message = TaskSetResults.parseFrom(data);
+            TenantedTaskSetResults message = TenantedTaskSetResults.parseFrom(data);
+
+            String tenantId = message.getTenantId();
+
+            if (Strings.isEmpty(tenantId)) {
+                throw new InventoryRuntimeException("Missing tenant id");
+            }
 
             for (TaskResult taskResult : message.getResultsList()) {
                 String location = taskResult.getLocation();
@@ -84,10 +88,5 @@ public class TaskSetResultsConsumer {
         } catch (Exception e) {
             log.error("Error while processing kafka message for TaskResults: ", e);
         }
-    }
-
-    private String getTenantId(Map<String, Object> headers) {
-        return Optional.ofNullable(headers.get(GrpcConstants.TENANT_ID_KEY))
-            .map(o -> new String((byte[]) o)).orElseThrow(()-> new InventoryRuntimeException("Missing tenant id"));
     }
 }

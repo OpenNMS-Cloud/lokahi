@@ -28,12 +28,8 @@
 
 package org.opennms.horizon.inventory.service.taskset.publisher;
 
-import io.grpc.ClientInterceptor;
 import io.grpc.ManagedChannel;
-import io.grpc.Metadata;
-import io.grpc.stub.MetadataUtils;
 import lombok.Setter;
-import org.opennms.horizon.shared.constants.GrpcConstants;
 import org.opennms.taskset.contract.TaskDefinition;
 import org.opennms.taskset.service.contract.AddSingleTaskOp;
 import org.opennms.taskset.service.contract.RemoveSingleTaskOp;
@@ -63,8 +59,6 @@ public class GrpcTaskSetPublisher implements TaskSetPublisher {
     // Test helpers to overcome static method calls which are challenging, at best, to mock
     @Setter
     private Function<ManagedChannel, io.grpc.stub.AbstractBlockingStub<TaskSetServiceBlockingStub>> taskSetServiceBlockingStubSupplier = this::supplyDefaultTaskSetServiceBlockingStub;
-    @Setter
-    private Function<Metadata, ClientInterceptor> attachHeadersInterceptorFunction = MetadataUtils::newAttachHeadersInterceptor;
 
     public GrpcTaskSetPublisher(ManagedChannel channel, long deadline) {
         this.channel = channel;
@@ -133,19 +127,14 @@ public class GrpcTaskSetPublisher implements TaskSetPublisher {
         try {
             UpdateTasksRequest.Builder request =
                 UpdateTasksRequest.newBuilder()
+                    .setTenantId(tenantId)
                     .setLocation(location)
                     ;
 
             populateUpdateRequestOp.accept(request);
 
-            Metadata metadata = new Metadata();
-            metadata.put(GrpcConstants.TENANT_ID_REQUEST_KEY, tenantId);
-
-            ClientInterceptor attachHeadersInterceptor = attachHeadersInterceptorFunction.apply(metadata);
-
             UpdateTasksResponse response =
                 taskSetServiceStub
-                    .withInterceptors(attachHeadersInterceptor)
                     .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
                     .updateTasks(request.build())
                 ;

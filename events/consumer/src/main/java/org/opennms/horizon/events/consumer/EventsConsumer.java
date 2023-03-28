@@ -30,6 +30,7 @@ package org.opennms.horizon.events.consumer;
 
 import com.google.common.base.Strings;
 import com.google.protobuf.InvalidProtocolBufferException;
+import org.opennms.horizon.events.consumer.metrics.TenantMetricsTracker;
 import org.opennms.horizon.events.persistence.model.Event;
 import org.opennms.horizon.events.persistence.model.EventParameter;
 import org.opennms.horizon.events.persistence.model.EventParameters;
@@ -57,9 +58,11 @@ public class EventsConsumer {
 
     private final EventRepository eventRepository;
 
+    private final TenantMetricsTracker metricsTracker;
     @Autowired
-    public EventsConsumer(EventRepository eventRepository) {
+    public EventsConsumer(EventRepository eventRepository, TenantMetricsTracker metricsTracker) {
         this.eventRepository = eventRepository;
+        this.metricsTracker = metricsTracker;
     }
 
     @KafkaListener(topics = "${kafka.events-topic}", concurrency = "1")
@@ -74,6 +77,7 @@ public class EventsConsumer {
             }
             List<Event> eventList = mapEventsFromLog(eventLog);
             eventRepository.saveAll(eventList);
+            metricsTracker.addTenantEventSampleCount(eventLog.getTenantId(), eventList.size());
             LOG.info("Persisted {} event(s) in database for tenant {}.", eventList.size(), eventLog.getTenantId());
         } catch (InvalidProtocolBufferException e) {
             LOG.error("Exception while parsing events from payload. Events will be dropped. Payload: {}",

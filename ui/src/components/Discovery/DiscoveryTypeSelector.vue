@@ -57,6 +57,14 @@ const emit = defineEmits(['discovery-option-selected'])
 const setDiscoveryOption = () => {
   emit('discovery-option-selected', menuOption.value)
 }
+
+const reset = () => {
+  menuOption.value = DiscoveryType.None
+}
+
+defineExpose({
+  reset
+})
 </script>
 
 <style scoped lang="scss">

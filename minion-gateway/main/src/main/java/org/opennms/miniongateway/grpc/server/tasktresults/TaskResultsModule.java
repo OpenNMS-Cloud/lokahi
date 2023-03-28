@@ -1,14 +1,17 @@
 package org.opennms.miniongateway.grpc.server.tasktresults;
 
 import com.google.protobuf.InvalidProtocolBufferException;
-import com.google.protobuf.Message;
 import org.opennms.horizon.shared.ipc.sink.aggregation.IdentityAggregationPolicy;
 import org.opennms.horizon.shared.ipc.sink.api.AggregationPolicy;
 import org.opennms.horizon.shared.ipc.sink.api.AsyncPolicy;
 import org.opennms.horizon.shared.ipc.sink.api.SinkModule;
 import org.opennms.taskset.contract.TaskSetResults;
 
-public class TaskResultsModule implements SinkModule<Message, Message> {
+/**
+ * Sink Module for TaskSetResults that is used for handling results sent by Minions.  Since the results are received
+ * from Minions, there is no explicit Tenant ID in the structures.
+ */
+public class TaskResultsModule implements SinkModule<TaskSetResults, TaskSetResults> {
 
     public static final String MODULE_ID = "task-set-result";
 
@@ -23,12 +26,12 @@ public class TaskResultsModule implements SinkModule<Message, Message> {
     }
 
     @Override
-    public byte[] marshal(Message message) {
+    public byte[] marshal(TaskSetResults message) {
         return message.toByteArray();
     }
 
     @Override
-    public Message unmarshal(byte[] content) {
+    public TaskSetResults unmarshal(byte[] content) {
         try {
             return TaskSetResults.parseFrom(content);
         } catch (InvalidProtocolBufferException e) {
@@ -37,17 +40,17 @@ public class TaskResultsModule implements SinkModule<Message, Message> {
     }
 
     @Override
-    public byte[] marshalSingleMessage(Message message) {
-        return marshal(message);
+    public byte[] marshalSingleMessage(TaskSetResults message) {
+        return marshal((TaskSetResults) message);
     }
 
     @Override
-    public Message unmarshalSingleMessage(byte[] message) {
+    public TaskSetResults unmarshalSingleMessage(byte[] message) {
         return unmarshal(message);
     }
 
     @Override
-    public AggregationPolicy<Message, Message, ?> getAggregationPolicy() {
+    public AggregationPolicy<TaskSetResults, TaskSetResults, ?> getAggregationPolicy() {
         return new IdentityAggregationPolicy<>();
     }
 

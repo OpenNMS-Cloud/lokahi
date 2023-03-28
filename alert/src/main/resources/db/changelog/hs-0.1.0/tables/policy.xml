@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+    <changeSet id="0.1.0-monitoring-policy" author="yli">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="monitoring_policy" />
+                <tableExists tableName="policy_rule" />
+                <tableExists tableName="trigger_event" />
+            </not>
+        </preConditions>
+        <createTable tableName="monitoring_policy">
+            <column name="id" type="bigint" autoIncrement="true"/>
+            <column name="tenant_id" type="text">
+                <constraints nullable="false" />
+            </column>
+            <column name="policy_name" type="text">
+                <constraints nullable="true" />
+            </column>
+            <column name="memo" type="text" />
+            <column name="tags" type="jsonb" />
+            <column name="notify_email" type="boolean" />
+            <column name="notify_pagerduty" type="boolean" />
+            <column name="notify_webhooks" type="boolean" />
+            <column name="notify_instruction" type="text" />
+        </createTable>
+        
+        <addPrimaryKey tableName="monitoring_policy" columnNames="id" constraintName="pk_monitoring_policy" />
+        <createIndex tableName="monitoring_policy" indexName="idx_monitoring_policy_name">
+            <column name="policy_name"/>
+        </createIndex>
+        
+        <createTable tableName="policy_rule">
+            <column name="id" type="bigint" autoIncrement="true" />
+            <column name="tenant_id" type="text" >
+                <constraints nullable="false" />
+            </column>
+            <column name="rule_name" type="text">
+                <constraints nullable="false" />
+            </column>
+            <column name="component_type" type="text">
+                <constraints nullable="false" />
+            </column>
+            <column name="policy_id" type="bigint">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+
+        <addPrimaryKey tableName="policy_rule" columnNames="id" />
+        <addForeignKeyConstraint baseTableName="policy_rule" baseColumnNames="policy_id" constraintName="fk_policy_rule_policy_id" referencedTableName="monitoring_policy"
+                                 referencedColumnNames="id"/>
+        
+        <createTable tableName="trigger_event">
+            <column name="id" type="bigint" autoIncrement="true" />
+            <column name="tenant_id" type="text">
+                <constraints nullable="false" />
+            </column>
+            <column name="trigger_event_type" type="text">
+                <constraints nullable="false" />
+            </column>
+            <column name="event_count" type="int" />
+            <column name="over_time" type="int" />
+            <column name="over_time_unit" type="text" defaultValue="minute">
+                <constraints nullable="false" />
+            </column>
+            <column name="severity" type="text">
+                <constraints nullable="false" />
+            </column>
+            <column name="clear_event_type" type="text" />
+            <column name="rule_id" type="bigint" />
+        </createTable>
+        <addPrimaryKey tableName="trigger_event" columnNames="id"/>
+        <addForeignKeyConstraint baseTableName="trigger_event" baseColumnNames="rule_id" constraintName="fk_trigger_event_rule_id" referencedTableName="policy_rule"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+</databaseChangeLog>

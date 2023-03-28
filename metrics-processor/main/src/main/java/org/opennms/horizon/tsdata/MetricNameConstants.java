@@ -26,36 +26,19 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.minion.flows.parser;
+package org.opennms.horizon.tsdata;
 
-import org.junit.Assert;
-import org.junit.Test;
-import org.mockito.Mockito;
-import org.opennms.horizon.minion.flows.listeners.FlowsListener;
+public interface MetricNameConstants {
+    String METRICS_NAME_PREFIX_MONITOR = "monitor_";
+    String METRICS_NAME_RESPONSE = "response_time_msec";
+    String METRIC_NAME_LABEL = "__name__";
 
-public class ListenerHolderTest {
+    String[] MONITOR_METRICS_LABEL_NAMES = {
+        "instance",
+        "location",
+        "system_id",
+        "monitor",
+        "node_id"
+    };
 
-    @Test
-    public void testAdd() {
-        FlowsListener listener = Mockito.mock(FlowsListener.class);
-        Mockito.when(listener.getName()).thenReturn("test");
-        ListenerHolder holder = new ListenerHolder();
-        holder.put(listener);
-        Assert.assertEquals(1, holder.size());
-        FlowsListener fromGet = holder.get("test");
-        Assert.assertEquals(listener, fromGet);
-        holder.remove("test");
-        Assert.assertEquals(0, holder.size());
-    }
-
-    @Test
-    public void testStartAndStop() throws Exception {
-        FlowsListener listener = Mockito.mock(FlowsListener.class);
-        ListenerHolder holder = new ListenerHolder();
-        holder.put(listener);
-        holder.stop();
-        Mockito.verify(listener, Mockito.times(1)).stop();
-        holder.start();
-        Mockito.verify(listener, Mockito.times(1)).start();
-    }
 }

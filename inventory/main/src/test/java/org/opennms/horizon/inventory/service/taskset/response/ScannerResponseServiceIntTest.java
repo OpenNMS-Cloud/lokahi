@@ -299,6 +299,7 @@ class ScannerResponseServiceIntTest extends GrpcTestBase {
                     nodeInfo.getSystemDescr(),
                     nodeInfo.getSystemLocation(),
                     nodeInfo.getSystemContact());
+            assertEquals(nodeInfo.getSystemName(), node.getNodeLabel());
         } else {
             assertThat(node)
                 .extracting(Node::getObjectId,

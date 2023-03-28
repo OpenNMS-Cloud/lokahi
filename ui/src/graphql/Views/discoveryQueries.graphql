@@ -10,9 +10,25 @@ query ListDiscoveries {
     snmpCommunities
     snmpPorts
     toggle
-  },
+  }
   listActiveDiscovery {
     details
     discoveryType
+  }
+}
+
+query TagsByActiveDiscoveryId($discoveryId: Long!) {
+  tagsByActiveDiscoveryId(activeDiscoveryId: $discoveryId) {
+    id
+    name
+    tenantId
+  }
+}
+
+query TagsByPassiveDiscoveryId($discoveryId: Long!) {
+  tagsByPassiveDiscoveryId(passiveDiscoveryId: $discoveryId) {
+    id
+    name
+    tenantId
   }
 }

@@ -28,25 +28,49 @@
 
 package org.opennms.horizon.inventory.cucumber.steps;
 
+import com.google.protobuf.Any;
 import io.cucumber.java.BeforeAll;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
+import org.apache.kafka.clients.producer.KafkaProducer;
+import org.apache.kafka.clients.producer.ProducerConfig;
+import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.common.serialization.ByteArraySerializer;
+import org.apache.kafka.common.serialization.StringSerializer;
+import org.awaitility.Awaitility;
 import org.junit.jupiter.api.Assertions;
 import org.opennms.horizon.inventory.cucumber.InventoryBackgroundHelper;
 import org.opennms.horizon.inventory.discovery.IcmpActiveDiscoveryCreateDTO;
 import org.opennms.horizon.inventory.discovery.SNMPConfigDTO;
+import org.opennms.horizon.inventory.dto.ListTagsByEntityIdParamsDTO;
+import org.opennms.horizon.inventory.dto.NodeIdQuery;
+import org.opennms.horizon.inventory.dto.TagCreateDTO;
+import org.opennms.horizon.inventory.dto.TagDTO;
+import org.opennms.horizon.inventory.dto.TagEntityIdDTO;
+import org.opennms.taskset.contract.DiscoveryScanResult;
+import org.opennms.taskset.contract.PingResponse;
+import org.opennms.taskset.contract.ScannerResponse;
+import org.opennms.taskset.contract.TaskResult;
+import org.opennms.taskset.contract.TaskSetResults;
+import org.opennms.taskset.contract.TenantedTaskSetResults;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.nio.charset.StandardCharsets;
+import java.util.Map;
+import java.util.Properties;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 
 public class IcmpDiscoveryStepDefinitions {
 
     private static final Logger LOG = LoggerFactory.getLogger(InventoryProcessingStepDefinitions.class);
-    private static InventoryBackgroundHelper backgroundHelper;
+    private final InventoryBackgroundHelper backgroundHelper;
     private IcmpActiveDiscoveryCreateDTO icmpDiscovery;
+    private long activeDiscoveryId;
 
-    @BeforeAll
-    public static void beforeAll() {
-        backgroundHelper = new InventoryBackgroundHelper();
+    public IcmpDiscoveryStepDefinitions(InventoryBackgroundHelper backgroundHelper) {
+        this.backgroundHelper = backgroundHelper;
     }
 
     @Given("[ICMP Discovery] External GRPC Port in system property {string}")
@@ -81,12 +105,89 @@ public class IcmpDiscoveryStepDefinitions {
     }
 
 
+
+    @Given("New Active Discovery with IpAddresses {string} and SNMP community as {string} at location {string} with tags {string}")
+    public void newActiveDiscoveryWithIpAddressesAndSNMPCommunityAsAtLocationWithTags(String ipAddressStrings, String snmpReadCommunity,
+                                                                                      String location, String tags) {
+        var tagsList = tags.split(",");
+        icmpDiscovery = IcmpActiveDiscoveryCreateDTO.newBuilder()
+            .addIpAddresses(ipAddressStrings).setSnmpConf(SNMPConfigDTO.newBuilder()
+                .addReadCommunity(snmpReadCommunity).build())
+            .addAllTags(Stream.of(tagsList).map(tag -> TagCreateDTO.newBuilder().setName(tag).build()).toList())
+            .setLocation(location).build();
+    }
+
     @Then("create Active Discovery and validate it's created active discovery with above details.")
     public void createActiveDiscoveryAndValidateItSCreatedActiveDiscoveryWithAboveDetails() {
         var icmpDiscoveryDto = backgroundHelper.getIcmpActiveDiscoveryServiceBlockingStub().createDiscovery(icmpDiscovery);
+        activeDiscoveryId = icmpDiscoveryDto.getId();
         Assertions.assertEquals(icmpDiscovery.getLocation(), icmpDiscoveryDto.getLocation());
         Assertions.assertEquals(icmpDiscovery.getIpAddresses(0), icmpDiscoveryDto.getIpAddresses(0));
         Assertions.assertEquals(icmpDiscovery.getSnmpConf().getReadCommunity(0), icmpDiscoveryDto.getSnmpConf().getReadCommunity(0));
+        var tagListQuery = ListTagsByEntityIdParamsDTO.newBuilder()
+            .setEntityId(TagEntityIdDTO.newBuilder().setActiveDiscoveryId(icmpDiscoveryDto.getId()).build())
+            .build();
+        var tagList = backgroundHelper.getTagServiceBlockingStub().getTagsByEntityId(tagListQuery);
+        Assertions.assertEquals(icmpDiscovery.getTagsCount(), tagList.getTagsCount());
+        var tagsCreated = icmpDiscovery.getTagsList().stream().map(TagCreateDTO::getName).toList();
+        // Take one tag and validate if it exists on the discovery.
+        var tag = tagsCreated.get(0);
+        Assertions.assertTrue(tagList.getTagsList().stream().map(TagDTO::getName).toList().contains(tag));
+    }
+
+    @Then("send discovery ping results for {string} to Kafka topic {string}")
+    public void sendDiscoveryPingResultsForToKafkaTopic(String ipAddress, String topic) {
+        Properties producerConfig = new Properties();
+        producerConfig.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, backgroundHelper.getKafkaBootstrapUrl());
+        producerConfig.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getCanonicalName());
+        producerConfig.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, ByteArraySerializer.class.getCanonicalName());
+        try (KafkaProducer<String, byte[]> kafkaProducer = new KafkaProducer<>(producerConfig)) {
+            var scanResult = DiscoveryScanResult.newBuilder().setActiveDiscoveryId(activeDiscoveryId)
+                .addPingResponse(PingResponse.newBuilder().setIpAddress(ipAddress).build()).build();
+            TaskResult taskResult =
+                TaskResult.newBuilder()
+                    .setLocation(icmpDiscovery.getLocation())
+                    .setScannerResponse(ScannerResponse.newBuilder().setResult(Any.pack(scanResult)).build())
+                    .build();
+
+            TenantedTaskSetResults taskSetResults =
+                TenantedTaskSetResults.newBuilder()
+                    .setTenantId(backgroundHelper.getTenantId())
+                    .addResults(taskResult)
+                    .build();
+            var producerRecord = new ProducerRecord<String, byte[]>(topic, taskSetResults.toByteArray());
+            Map<String, String> grpcHeaders = backgroundHelper.getGrpcHeaders();
+            grpcHeaders.forEach((key, value) -> producerRecord.headers().add(key, value.getBytes(StandardCharsets.UTF_8)));
+            kafkaProducer.send(producerRecord);
+        }
+    }
+
+    @Then("verify that node is created for {string} and location {string} with same tags within {int}ms")
+    public void verifyThatNodeIsCreatedForAndLocationWithTheTagsInPreviousScenario(String ipAddress, String location, int timeout) {
+
+        Awaitility.await().pollInterval(2000, TimeUnit.MILLISECONDS).atMost(timeout, TimeUnit.MILLISECONDS).until(() -> {
+            try {
+                var nodeId = backgroundHelper.getNodeServiceBlockingStub().
+                    getNodeIdFromQuery(NodeIdQuery.newBuilder().setLocation(location).setIpAddress(ipAddress).build());
+                return nodeId != null && nodeId.getValue() != 0;
+            } catch (Exception e) {
+                return false;
+            }
+        });
+        var nodeId = backgroundHelper.getNodeServiceBlockingStub().
+            getNodeIdFromQuery(NodeIdQuery.newBuilder().setLocation(location).setIpAddress(ipAddress).build());
+        var nodeDto = backgroundHelper.getNodeServiceBlockingStub().getNodeById(nodeId);
+        Assertions.assertTrue(nodeDto.getIpInterfacesList().stream().anyMatch(ipInterfaceDTO -> ipInterfaceDTO.getIpAddress().equals(ipAddress)));
+        var tagListQuery = ListTagsByEntityIdParamsDTO.newBuilder()
+            .setEntityId(TagEntityIdDTO.newBuilder().setNodeId(nodeDto.getId()).build())
+            .build();
+        var tagList = backgroundHelper.getTagServiceBlockingStub().getTagsByEntityId(tagListQuery);
+        Assertions.assertEquals(icmpDiscovery.getTagsCount(), tagList.getTagsCount());
+        var tagsCreated = icmpDiscovery.getTagsList().stream().map(TagCreateDTO::getName).toList();
+        // Take one tag and validate if it exists on the node.
+        var tag = tagsCreated.get(0);
+        Assertions.assertTrue(tagList.getTagsList().stream().map(TagDTO::getName).toList().contains(tag));
+
     }
 
 

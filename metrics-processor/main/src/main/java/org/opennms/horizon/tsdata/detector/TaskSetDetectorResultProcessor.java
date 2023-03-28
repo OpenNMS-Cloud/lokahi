@@ -1,7 +1,7 @@
 /*******************************************************************************
  * This file is part of OpenNMS(R).
  *
- * Copyright (C) 2022-2023 The OpenNMS Group, Inc.
+ * Copyright (C) 2023 The OpenNMS Group, Inc.
  * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
@@ -26,49 +26,21 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
+package org.opennms.horizon.tsdata.detector;
 
-package org.opennms.horizon.minion.flows.parser;
+import org.opennms.taskset.contract.DetectorResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
-import org.opennms.horizon.minion.flows.listeners.FlowsListener;
-import org.opennms.horizon.minion.plugin.api.Listener;
+import java.io.IOException;
 
-import java.util.HashMap;
-import java.util.Map;
+@Component
+public class TaskSetDetectorResultProcessor {
 
-public class ListenerHolder implements Listener {
+    private static final Logger LOG = LoggerFactory.getLogger(TaskSetDetectorResultProcessor.class);
 
-    private final Map<String, FlowsListener> listenerMap = new HashMap<>();
-
-    public void clear() {
-        stop(); // stop all before remove prevent resource leakage
-        listenerMap.clear();
-    }
-
-    public int size() {
-        return listenerMap.size();
-    }
-
-    public FlowsListener get(String name) {
-        return this.listenerMap.get(name);
-    }
-
-    public void put(FlowsListener listener) {
-        this.listenerMap.put(listener.getName(), listener);
-    }
-
-    public FlowsListener remove(String name) {
-        return this.listenerMap.remove(name);
-    }
-
-    @Override
-    public void start() throws Exception {
-        for (FlowsListener listener : listenerMap.values()) {
-            listener.start();
-        }
-    }
-
-    @Override
-    public void stop() {
-        listenerMap.values().forEach(FlowsListener::stop);
+    public void processDetectorResponse(String tenantId, String taskId, DetectorResponse detectorResponse) throws IOException {
+            LOG.info("Have detector response, tenant-id: {}; task-id={}; detected={}", tenantId, taskId, detectorResponse.getDetected());
     }
 }

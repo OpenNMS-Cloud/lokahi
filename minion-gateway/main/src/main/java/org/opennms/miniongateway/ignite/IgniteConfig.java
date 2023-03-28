@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.ImportResource;
 
 @Configuration
@@ -39,6 +40,7 @@ public class IgniteConfig {
 // Beans
 //----------------------------------------
 
+    @DependsOn("igniteJdbcConnectionStartupGate")
     @Bean
     public Ignite ignite(@Autowired(required=false) IgniteConfiguration cfg) {
         if (cfg == null) {

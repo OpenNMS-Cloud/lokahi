@@ -28,9 +28,13 @@
 
 package org.opennms.horizon.minion.flows.parser;
 
-import com.codahale.metrics.MetricRegistry;
-import com.google.common.collect.Sets;
-import io.netty.buffer.ByteBuf;
+import static org.opennms.horizon.minion.flows.listeners.utils.BufferUtils.slice;
+
+import java.net.InetSocketAddress;
+import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+
 import org.opennms.dataplatform.flows.document.FlowDocument;
 import org.opennms.horizon.minion.flows.listeners.TcpParser;
 import org.opennms.horizon.minion.flows.parser.factory.DnsResolver;
@@ -42,12 +46,10 @@ import org.opennms.horizon.minion.flows.parser.transport.IpFixMessageBuilder;
 import org.opennms.horizon.shared.ipc.rpc.IpcIdentity;
 import org.opennms.horizon.shared.ipc.sink.api.AsyncDispatcher;
 
-import java.net.InetSocketAddress;
-import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.CompletableFuture;
+import com.codahale.metrics.MetricRegistry;
+import com.google.common.collect.Sets;
 
-import static org.opennms.horizon.minion.flows.listeners.utils.BufferUtils.slice;
+import io.netty.buffer.ByteBuf;
 
 
 public class IpfixTcpParser extends ParserBase implements TcpParser {

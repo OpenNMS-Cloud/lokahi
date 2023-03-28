@@ -49,7 +49,6 @@
       class="locations"
       type="single"
     />
-
     <BasicAutocomplete
       class="tags"
       @items-selected="tagsSelectedListener"
@@ -57,6 +56,7 @@
       :items="tagQueries.tagsSearched"
       :label="Common.tagsInput"
       ref="tagsAutocompleteRef"
+      :preselectedItems="tags"
     />
 
     <div class="buttons">
@@ -101,6 +101,14 @@ const props = defineProps<{
   discovery: AzureActiveDiscovery | null
 }>()
 
+const tags = computed(() => (props.discovery?.id ? discoveryQueries.tagsByActiveDiscoveryId : []))
+
+onMounted(() => {
+  if (props.discovery?.id) {
+    discoveryQueries.getTagsByActiveDiscoveryId(props.discovery.id)
+  }
+})
+
 const selectLocation = (location: Required<Location>) =>
   location.location && store.selectLocation(location.location, true)
 
@@ -134,7 +142,8 @@ const dirIdV = string().required('Directory ID is required.')
 
 watchEffect(() => {
   if (props.discovery) {
-    store.azure = { ...store.azure, ...props.discovery}
+    form.clearErrors()
+    store.azure = { ...store.azure, ...props.discovery }
   }
 })
 onMounted(() => store.clearAzureForm())

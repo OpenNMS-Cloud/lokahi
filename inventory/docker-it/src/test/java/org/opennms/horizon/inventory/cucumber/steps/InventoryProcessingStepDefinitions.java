@@ -55,7 +55,7 @@ import org.opennms.horizon.inventory.testtool.miniongateway.wiremock.client.Mini
 import org.opennms.horizon.shared.constants.GrpcConstants;
 import org.opennms.taskset.contract.DetectorResponse;
 import org.opennms.taskset.contract.TaskResult;
-import org.opennms.taskset.contract.TaskSetResults;
+import org.opennms.taskset.contract.TenantedTaskSetResults;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -117,6 +117,7 @@ public class InventoryProcessingStepDefinitions {
     @Given("Grpc TenantId {string}")
     public void grpcTenantId(String tenantId) {
         backgroundHelper.grpcTenantId(tenantId);
+        minionGatewayWiremockTestSteps.setTaskTenantId(tenantId);
     }
 
     @Given("Minion at location {string} with system Id {string}")
@@ -342,8 +343,9 @@ public class InventoryProcessingStepDefinitions {
                     .setDetectorResponse(detectorResponse)
                     .build();
 
-            TaskSetResults taskSetResults =
-                TaskSetResults.newBuilder()
+            TenantedTaskSetResults taskSetResults =
+                TenantedTaskSetResults.newBuilder()
+                    .setTenantId(backgroundHelper.getTenantId())
                     .addResults(taskResult)
                     .build();
 

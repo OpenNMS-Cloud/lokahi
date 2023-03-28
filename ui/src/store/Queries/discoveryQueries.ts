@@ -6,14 +6,16 @@ import {
   ListTagsSearchDocument,
   ListDiscoveriesDocument,
   ActiveDiscovery,
-  IcmpActiveDiscovery,
-  AzureActiveDiscovery
+  TagsByActiveDiscoveryIdDocument,
+  TagsByPassiveDiscoveryIdDocument
 } from '@/types/graphql'
-import { DiscoveryType } from '@/components/Discovery/discovery.constants'
 
 export const useDiscoveryQueries = defineStore('discoveryQueries', () => {
   const tagsSearched = ref([] as Tag[])
-
+  const tagsByDiscovery = ref([] as Tag[] | undefined)
+  const discoveryId = ref({
+    discoveryId: 0
+  })
   const { data: locations, execute: getLocations } = useQuery({
     query: ListLocationsForDiscoveryDocument,
     fetchOnMount: false
@@ -41,10 +43,34 @@ export const useDiscoveryQueries = defineStore('discoveryQueries', () => {
   }
 
   const formatActiveDiscoveries = (activeDiscoveries: ActiveDiscovery[] = []) => {
-    return activeDiscoveries.map((discovery) => ({ 
-      ...discovery.details, 
+    return activeDiscoveries.map((discovery) => ({
+      ...discovery.details,
       discoveryType: discovery.discoveryType
     }))
+  }
+
+  // active discoveries
+  const { data: tagsByDiscoveryIdData, execute: tagsByDiscoveryIdExecute } = useQuery({
+    query: TagsByActiveDiscoveryIdDocument,
+    variables: discoveryId
+  })
+
+  const getTagsByActiveDiscoveryId = async (id: number) => {
+    discoveryId.value.discoveryId = id
+    await tagsByDiscoveryIdExecute()
+    tagsByDiscovery.value = tagsByDiscoveryIdData.value?.tagsByActiveDiscoveryId || []
+  }
+
+  // passive discoveries
+  const { data: tagsByPassiveDiscoveryIdData, execute: tagsByPassiveDiscoveryIdExecute } = useQuery({
+    query: TagsByPassiveDiscoveryIdDocument,
+    variables: discoveryId
+  })
+
+  const getTagsByPassiveDiscoveryId = async (id: number) => {
+    discoveryId.value.discoveryId = id
+    await tagsByPassiveDiscoveryIdExecute()
+    tagsByDiscovery.value = tagsByPassiveDiscoveryIdData.value?.tagsByPassiveDiscoveryId || []
   }
 
   return {
@@ -54,6 +80,10 @@ export const useDiscoveryQueries = defineStore('discoveryQueries', () => {
     getTagsSearch,
     activeDiscoveries: computed(() => formatActiveDiscoveries(listedDiscoveries.value?.listActiveDiscovery) || []),
     passiveDiscoveries: computed(() => listedDiscoveries.value?.passiveDiscoveries || []),
-    getDiscoveries
+    getDiscoveries,
+    getTagsByActiveDiscoveryId,
+    tagsByActiveDiscoveryId: computed(() => tagsByDiscovery.value),
+    getTagsByPassiveDiscoveryId,
+    tagsByPassiveDiscoveryId: computed(() => tagsByDiscovery.value)
   }
 })

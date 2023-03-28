@@ -34,8 +34,14 @@ Feature: Notification Processing
   Scenario: Post notification
     Given Integration "test-tenant" key set to "abc" via grpc
     Given Alert posted via service with tenant "test-tenant"
-    Then verify pager duty rest method is called
+    Then verify pager duty rest method is called 1 times
 
   Scenario: Try to post notification with no config
     Given Alert posted via service with no config with tenant "test-tenant"
     Then verify exception "NotificationConfigUninitializedException" thrown with message "PagerDuty config not initialized. Row count=0"
+
+  Scenario: Will retry on failure to post notification to PagerDuty
+    Given Integration "test-tenant" key set to "abc" via grpc
+    And first attempt to post to PagerDuty will fail but should retry
+    And Alert posted via service with tenant "test-tenant"
+    Then verify pager duty rest method is called 2 times

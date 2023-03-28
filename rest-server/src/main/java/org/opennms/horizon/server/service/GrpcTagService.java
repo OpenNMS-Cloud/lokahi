@@ -40,6 +40,7 @@ import org.opennms.horizon.inventory.dto.TagDTO;
 import org.opennms.horizon.inventory.dto.TagListDTO;
 import org.opennms.horizon.inventory.dto.TagRemoveListDTO;
 import org.opennms.horizon.server.mapper.TagMapper;
+import org.opennms.horizon.server.model.inventory.tag.NodeTags;
 import org.opennms.horizon.server.model.inventory.tag.Tag;
 import org.opennms.horizon.server.model.inventory.tag.TagListNodesAdd;
 import org.opennms.horizon.server.model.inventory.tag.TagListNodesRemove;
@@ -48,6 +49,7 @@ import org.opennms.horizon.server.utils.ServerHeaderUtil;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -80,6 +82,18 @@ public class GrpcTagService {
                                            @GraphQLEnvironment ResolutionEnvironment env) {
         List<TagDTO> tagsList = client.getTagsByNodeId(nodeId, searchTerm, headerUtil.getAuthHeader(env)).getTagsList();
         return Mono.just(tagsList.stream().map(mapper::protoToTag).toList());
+    }
+
+    @GraphQLQuery
+    public Mono<List<NodeTags>> getTagsByNodeIds(@GraphQLArgument(name = "nodeIds") List<Long> nodeIds,
+                                                 @GraphQLEnvironment ResolutionEnvironment env) {
+        List<NodeTags> nodeTags = new ArrayList<>();
+        for (Long nodeId : nodeIds) {
+            List<TagDTO> tagsDtoList = client.getTagsByNodeId(nodeId, headerUtil.getAuthHeader(env)).getTagsList();
+            List<Tag> tagList = tagsDtoList.stream().map(mapper::protoToTag).toList();
+            nodeTags.add(new NodeTags(nodeId, tagList));
+        }
+        return Mono.just(nodeTags);
     }
 
     @GraphQLQuery

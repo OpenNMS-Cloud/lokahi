@@ -1,7 +1,7 @@
 package org.opennms.horizon.minion.taskset.worker.impl;
 
 import com.google.protobuf.Any;
-import com.google.protobuf.Message;
+import com.google.protobuf.Timestamp;
 import org.opennms.horizon.minion.plugin.api.CollectionSet;
 import org.opennms.horizon.minion.plugin.api.ScanResultsResponse;
 import org.opennms.horizon.minion.plugin.api.ServiceDetectorResponse;
@@ -163,6 +163,7 @@ public class TaskExecutionResultProcessorImpl implements TaskExecutionResultProc
                 .setReason(Optional.of(smr).map(ServiceMonitorResponse::getReason).orElse(MonitorResponse.getDefaultInstance().getReason()))
                 .putAllMetrics(Optional.of(smr).map(ServiceMonitorResponse::getProperties).orElse(Collections.EMPTY_MAP))
                 .setNodeId(smr.getNodeId())
+                .setTimestamp(smr.getTimestamp())
                 .build();
 
         return result;

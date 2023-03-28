@@ -151,6 +151,12 @@
             <groupId>org.keycloak</groupId>
             <artifactId>keycloak-adapter-core</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.opennms.horizon.shared</groupId>
+            <artifactId>alert-dto</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <!-- test -->
 
         <dependency>
             <groupId>org.springframework.boot</groupId>

@@ -128,19 +128,17 @@ public class TestContainerRunnerClassRule extends ExternalResource {
             ;
 
         // DEBUGGING: uncomment to force local port 5005, and remove 5005 from .withExposedPorts() above
-        applicationContainer.getPortBindings().add("5005:5005");
+        // applicationContainer.getPortBindings().add("5005:5005");
         applicationContainer.start();
 
         var httpPort = applicationContainer.getMappedPort(8080); // application-http-port
         var externalGrpcPort = applicationContainer.getMappedPort(8990); // application-external-grpc-port
         var internalGrpcPort = applicationContainer.getMappedPort(8991); // application-internal-grpc-port
-        var debuggerPort = applicationContainer.getMappedPort(5005);
 
-        LOG.info("APPLICATION MAPPED PORTS: http={}; external-grpc={}; internal-grpc={}; debugger={}",
+        LOG.info("APPLICATION MAPPED PORTS: http={}; external-grpc={}; internal-grpc={};",
             httpPort,
             externalGrpcPort,
-            internalGrpcPort,
-            debuggerPort
+            internalGrpcPort
             );
 
         System.setProperty("application.base-url", "http://localhost:" + httpPort);

@@ -5,7 +5,7 @@ metadata:
   name: opennms-grafana-route
   namespace: {{ .Release.Namespace }}
 spec:
-  subdomain: {{ .Values.Host }}
+  host: {{ .Values.Host }}.apps-crc.testing
   path: {{ .Values.Grafana.Path }}  
   to:
     kind: Service

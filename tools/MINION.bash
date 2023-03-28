@@ -2,4 +2,4 @@
 
 USER=admin
 
-kubectl exec -it deployment.apps/my-horizon-stream-minion -- /bin/bash
+kubectl exec -it deployment.apps/opennms-minion -- /bin/bash

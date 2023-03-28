@@ -1,8 +1,8 @@
 /*******************************************************************************
  * This file is part of OpenNMS(R).
  *
- * Copyright (C) 2017-2017 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2017 The OpenNMS Group, Inc.
+ * Copyright (C) 2023 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
  *
@@ -26,18 +26,24 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.minion.flows.listeners;
+package org.opennms.horizon.server.model.alerts;
 
-import java.util.Collection;
+import java.util.List;
 
-/**
- * Interface used by the daemon to manage listeners.
- *
- * When messages are received, they should be forwarded to the given {@link Parser}s.
- *
- * @author jwhite
- */
-public interface FlowsListener extends org.opennms.horizon.minion.plugin.api.Listener {
-    String getName();
-    String getDescription();
+import org.opennms.horizon.server.model.BaseModel;
+
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
+public class MonitorPolicy extends BaseModel {
+    private String name;
+    private String memo;
+    private List<String> tags;
+    private Boolean notifyByEmail;
+    private Boolean notifyByPagerDuty;
+    private Boolean notifyByWebhooks;
+    private String notifyInstruction;
+    private List<PolicyRule> rules;
 }

@@ -1,8 +1,8 @@
 /*******************************************************************************
  * This file is part of OpenNMS(R).
  *
- * Copyright (C) 2022 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
+ * Copyright (C) 2022-2023 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
  *
@@ -30,9 +30,12 @@ package org.opennms.horizon.server.config;
 
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.opennms.horizon.server.service.grpc.EventsClient;
+import org.opennms.horizon.server.mapper.alert.MonitorPolicyMapper;
+import org.opennms.horizon.server.service.flows.FlowClient;
 import org.opennms.horizon.server.service.grpc.AlertsClient;
+import org.opennms.horizon.server.service.grpc.EventsClient;
 import org.opennms.horizon.server.service.grpc.InventoryClient;
 import org.opennms.horizon.server.service.grpc.NotificationClient;
 import org.opennms.horizon.server.utils.JWTValidator;
@@ -44,6 +47,7 @@ import org.springframework.context.annotation.Configuration;
 
 @Slf4j
 @Configuration
+@RequiredArgsConstructor
 public class ConfigurationUtil {
     @Value("${grpc.url.inventory}")
     private String inventoryGrpcAddress;
@@ -59,6 +63,11 @@ public class ConfigurationUtil {
 
     @Value("${grpc.url.alerts}")
     private String alertsGrpcAddress;
+
+    private final MonitorPolicyMapper policyMapper;
+
+    @Value("${grpc.url.flows}")
+    private String flowQuerierGrpcAddress;
 
     @Bean
     public ServerHeaderUtil createHeaderUtil(JWTValidator validator) {
@@ -93,6 +102,13 @@ public class ConfigurationUtil {
             .usePlaintext().build();
     }
 
+    @Bean(name = "flowQuerier")
+    public ManagedChannel createFlowQuerierChannel() {
+        return ManagedChannelBuilder.forTarget(flowQuerierGrpcAddress)
+            .keepAliveWithoutCalls(true)
+            .usePlaintext().build();
+    }
+
     @Bean(destroyMethod = "shutdown", initMethod = "initialStubs")
     public InventoryClient createInventoryClient(@Qualifier("inventory") ManagedChannel channel) {
         return new InventoryClient(channel, deadline);
@@ -110,6 +126,11 @@ public class ConfigurationUtil {
 
     @Bean(destroyMethod = "shutdown", initMethod = "initialStubs")
     public AlertsClient createAlertsClient(@Qualifier("alerts") ManagedChannel channel) {
-        return new AlertsClient(channel, deadline);
+        return new AlertsClient(channel, deadline, policyMapper);
+    }
+
+    @Bean(destroyMethod = "shutdown", initMethod = "initialStubs")
+    public FlowClient createFlowClient(@Qualifier("flowQuerier") ManagedChannel channel) {
+        return new FlowClient(channel, deadline);
     }
 }

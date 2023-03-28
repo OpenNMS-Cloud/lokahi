@@ -3,7 +3,6 @@ package org.opennms.miniongateway.taskset.internal;
 import org.apache.ignite.Ignite;
 import org.apache.ignite.IgniteCache;
 import org.opennms.miniongateway.grpc.server.model.TenantKey;
-import org.opennms.miniongateway.taskset.service.TaskSetGrpcServiceUpdateProcessor;
 import org.opennms.miniongateway.taskset.service.TaskSetStorage;
 import org.opennms.miniongateway.taskset.service.TaskSetStorageListener;
 import org.opennms.miniongateway.taskset.service.TaskSetStorageUpdateFunction;

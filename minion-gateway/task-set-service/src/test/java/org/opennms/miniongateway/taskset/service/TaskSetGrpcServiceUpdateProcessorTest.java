@@ -60,6 +60,7 @@ class TaskSetGrpcServiceUpdateProcessorTest {
 
         testRequestAdd1Remove1 =
             UpdateTasksRequest.newBuilder()
+                .setTenantId("x-tenant-id-x")
                 .setLocation("x-location-x")
                 .addUpdate(UpdateSingleTaskOp.newBuilder().setAddTask(testAddSingleTaskOp1).build())
                 .addUpdate(UpdateSingleTaskOp.newBuilder().setRemoveTask(testRemoveSingleTaskOp).build())
@@ -67,24 +68,28 @@ class TaskSetGrpcServiceUpdateProcessorTest {
 
         testRequestRemove1 =
             UpdateTasksRequest.newBuilder()
+                .setTenantId("x-tenant-id-x")
                 .setLocation("x-location-x")
                 .addUpdate(UpdateSingleTaskOp.newBuilder().setRemoveTask(testRemoveSingleTaskOp).build())
                 .build();
 
         testRequestAdd1 =
             UpdateTasksRequest.newBuilder()
+                .setTenantId("x-tenant-id-x")
                 .setLocation("x-location-x")
                 .addUpdate(UpdateSingleTaskOp.newBuilder().setAddTask(testAddSingleTaskOp1).build())
                 .build();
         
         testRequestNeitherAddNorRemove =
             UpdateTasksRequest.newBuilder()
+                .setTenantId("x-tenant-id-x")
                 .setLocation("x-location-x")
                 .addUpdate(UpdateSingleTaskOp.newBuilder().build())
                 .build();
 
         testRequestAddAnother1 =
             UpdateTasksRequest.newBuilder()
+                .setTenantId("x-tenant-id-x")
                 .setLocation("x-location-x")
                 .addUpdate(UpdateSingleTaskOp.newBuilder().setAddTask(testAddSingleTaskOp2).build())
                 .build();
@@ -96,7 +101,7 @@ class TaskSetGrpcServiceUpdateProcessorTest {
         // Setup Test Data and Interactions
         //
         TaskSet testEmptyOriginal = TaskSet.newBuilder().build();
-        var target = new TaskSetGrpcServiceUpdateProcessor("x-tenant-id-x", testRequestAdd1Remove1);
+        var target = new TaskSetGrpcServiceUpdateProcessor(testRequestAdd1Remove1);
 
         //
         // Execute
@@ -123,7 +128,7 @@ class TaskSetGrpcServiceUpdateProcessorTest {
                 .addTaskDefinition(testTaskDefinition1)
                 .addTaskDefinition(testRemovalTaskDefinition)
                 .build();
-        var target = new TaskSetGrpcServiceUpdateProcessor("x-tenant-id-x", testRequestAdd1Remove1);
+        var target = new TaskSetGrpcServiceUpdateProcessor(testRequestAdd1Remove1);
 
         //
         // Execute
@@ -146,7 +151,7 @@ class TaskSetGrpcServiceUpdateProcessorTest {
         // Setup Test Data and Interactions
         //
         TaskSet testEmptyOriginal = TaskSet.newBuilder().build();
-        var target = new TaskSetGrpcServiceUpdateProcessor("x-tenant-id-x", testRequestRemove1);
+        var target = new TaskSetGrpcServiceUpdateProcessor(testRequestRemove1);
 
         //
         // Execute
@@ -171,7 +176,7 @@ class TaskSetGrpcServiceUpdateProcessorTest {
             TaskSet.newBuilder()
                 .addTaskDefinition(testTaskDefinition1)
                 .build();
-        var target = new TaskSetGrpcServiceUpdateProcessor("x-tenant-id-x", testRequestAdd1);
+        var target = new TaskSetGrpcServiceUpdateProcessor(testRequestAdd1);
 
         //
         // Execute
@@ -193,7 +198,7 @@ class TaskSetGrpcServiceUpdateProcessorTest {
         // Setup Test Data and Interactions
         //
         TaskSet testEmptyOriginal = TaskSet.newBuilder().build();
-        var target = new TaskSetGrpcServiceUpdateProcessor("x-tenant-id-x", testRequestNeitherAddNorRemove);
+        var target = new TaskSetGrpcServiceUpdateProcessor(testRequestNeitherAddNorRemove);
 
 
         try (LogCaptor logCaptor = LogCaptor.forClass(TaskSetGrpcServiceUpdateProcessor.class)) {
@@ -232,7 +237,7 @@ class TaskSetGrpcServiceUpdateProcessorTest {
             TaskSet.newBuilder()
                 .addTaskDefinition(testTaskDefinition1)
                 .build();
-        var target = new TaskSetGrpcServiceUpdateProcessor("x-tenant-id-x", testRequestAddAnother1);
+        var target = new TaskSetGrpcServiceUpdateProcessor(testRequestAddAnother1);
 
         //
         // Execute

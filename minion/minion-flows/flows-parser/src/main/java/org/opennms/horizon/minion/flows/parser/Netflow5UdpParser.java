@@ -29,8 +29,10 @@
 package org.opennms.horizon.minion.flows.parser;
 
 
-import com.codahale.metrics.MetricRegistry;
-import io.netty.buffer.ByteBuf;
+import static org.opennms.horizon.minion.flows.listeners.utils.BufferUtils.slice;
+
+import java.net.InetSocketAddress;
+
 import org.opennms.dataplatform.flows.document.FlowDocument;
 import org.opennms.horizon.minion.flows.listeners.Dispatchable;
 import org.opennms.horizon.minion.flows.listeners.UdpParser;
@@ -45,9 +47,9 @@ import org.opennms.horizon.minion.flows.parser.transport.Netflow5MessageBuilder;
 import org.opennms.horizon.shared.ipc.rpc.IpcIdentity;
 import org.opennms.horizon.shared.ipc.sink.api.AsyncDispatcher;
 
-import java.net.InetSocketAddress;
+import com.codahale.metrics.MetricRegistry;
 
-import static org.opennms.horizon.minion.flows.listeners.utils.BufferUtils.slice;
+import io.netty.buffer.ByteBuf;
 
 public class Netflow5UdpParser extends UdpParserBase implements UdpParser, Dispatchable {
 

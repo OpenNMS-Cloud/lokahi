@@ -29,6 +29,7 @@
 package org.opennms.horizon.minion.flows.listeners;
 
 import java.util.Collection;
+import java.util.List;
 
 /**
  * Interface used by the daemon to manage listeners.
@@ -41,4 +42,8 @@ public interface Listener {
 
     void start() throws Exception;
     void stop();
+
+    String getName();
+
+    List<? extends Parser> getParsers();
 }

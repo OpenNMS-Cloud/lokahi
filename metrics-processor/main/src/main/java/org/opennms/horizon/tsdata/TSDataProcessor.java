@@ -28,250 +28,69 @@
 
 package org.opennms.horizon.tsdata;
 
-import java.io.IOException;
-import java.math.BigInteger;
-import java.time.Instant;
-import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
-import org.opennms.horizon.azure.api.AzureResponseMetric;
-import org.opennms.horizon.azure.api.AzureResultMetric;
-import org.opennms.horizon.azure.api.AzureValueType;
-import org.opennms.horizon.inventory.dto.MonitoredState;
-import org.opennms.horizon.timeseries.cortex.CortexTSS;
-import org.opennms.horizon.shared.constants.GrpcConstants;
-import org.opennms.horizon.snmp.api.SnmpResponseMetric;
-import org.opennms.horizon.snmp.api.SnmpResultMetric;
-import org.opennms.horizon.snmp.api.SnmpValueType;
-import org.opennms.taskset.contract.CollectorResponse;
-import org.opennms.taskset.contract.DetectorResponse;
-import org.opennms.taskset.contract.MonitorResponse;
-import org.opennms.taskset.contract.MonitorType;
-import org.opennms.taskset.contract.TaskResult;
-import org.opennms.taskset.contract.TaskSetResults;
+import lombok.Setter;
+import org.apache.logging.log4j.util.Strings;
+import org.opennms.taskset.contract.TenantedTaskSetResults;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.messaging.handler.annotation.Headers;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Service;
 
-import com.google.protobuf.Any;
 import com.google.protobuf.InvalidProtocolBufferException;
 
 import lombok.extern.slf4j.Slf4j;
-import prometheus.PrometheusTypes;
 
 @Slf4j
 @Service
 @PropertySource("classpath:application.yml")
 public class TSDataProcessor {
-    private static final String METRICS_NAME_PREFIX_MONITOR = "monitor_";
-    private static final String METRICS_NAME_RESPONSE = "response_time_msec";
-    public static final String METRIC_NAME_LABEL = "__name__";
 
-    private static final String[] MONITOR_METRICS_LABEL_NAMES = {
-        "instance",
-        "location",
-        "system_id",
-        "monitor",
-        "node_id"};
-    private final CortexTSS cortexTSS;
+    private final TaskSetResultProcessor taskSetResultProcessor;
 
-    public TSDataProcessor(CortexTSS cortexTSS) {
-        this.cortexTSS = cortexTSS;
+    // NOTE: it might be better to split the asynchronous execution into a separate class to make testing here, and there,
+    //  more straight-forward (i.e. more "Real Obvious").  Then the submission here would look something like this:
+    //  `taskSetResultAsyncProcessor.submitTaskResultForProcessing(tenantId, result)`
+    @Setter // Testability
+    private Consumer<Runnable> submitForExecutionOp = this::defaultExecutionSubmissionOp;
+
+    public TSDataProcessor(TaskSetResultProcessor taskSetResultProcessor) {
+        this.taskSetResultProcessor = taskSetResultProcessor;
     }
 
-    //headers for future use.
     @KafkaListener(topics = "${kafka.topics}", concurrency = "1")
-    public void consume(@Payload byte[] data, @Headers Map<String, Object> headers) {
-        String tenantId = getTenantId(headers);
+    public void consume(@Payload byte[] data) {
         try {
-            TaskSetResults results = TaskSetResults.parseFrom(data);
-            results.getResultsList().forEach(result -> CompletableFuture.supplyAsync(() -> {
-                try {
-                    if (result != null) {
-                        log.info("Processing task set result {}", result);
-                        if (result.hasMonitorResponse()) {
-                            log.info("Have monitor response, tenant-id: {}; task-id={};", tenantId, result.getId());
-                            processMonitorResponse(tenantId, result);
-                        } else if (result.hasDetectorResponse()) {
-                            DetectorResponse detectorResponse = result.getDetectorResponse();
-                            // TBD: how to process?
-                            log.info("Have detector response, tenant-id: {}; task-id={}; detected={}", tenantId, result.getId(), detectorResponse.getDetected());
-                        }
-                        else if(result.hasCollectorResponse()) {
-                            log.info("Have collector response, tenant-id: {}; task-id={};", tenantId, result.getId());
-                            processCollectorResponse(tenantId, result);
-                        }
-                    } else {
-                        log.warn("Task result appears to be missing the echo response details with results {}", results);
-                    }
-                } catch (Exception exc) {
-                    // TODO: throttle
-                    log.warn("Error processing task result", exc);
-                }
-                return null;
-            }));
+            TenantedTaskSetResults results = TenantedTaskSetResults.parseFrom(data);
+            String tenantId = results.getTenantId();
+            if (Strings.isBlank(tenantId)) {
+                throw new RuntimeException("Missing tenant id");
+            }
+
+            results.getResultsList().forEach(
+                result -> submitForExecutionOp.accept(() -> taskSetResultProcessor.processTaskResult(tenantId, result)));
         } catch (InvalidProtocolBufferException e) {
             log.error("Invalid data from kafka", e);
         }
     }
 
-    private void processMonitorResponse(String tenantId, TaskResult result) throws IOException {
-        MonitorResponse response = result.getMonitorResponse();
-        String[] labelValues = {response.getIpAddress(), result.getLocation(), result.getSystemId(), response.getMonitorType().name(), String.valueOf(response.getNodeId())};
+//========================================
+// Internals
+//----------------------------------------
 
-        prometheus.PrometheusTypes.TimeSeries.Builder builder = prometheus.PrometheusTypes.TimeSeries.newBuilder();
-
-        addLabels(response, labelValues, builder);
-        builder.addLabels(PrometheusTypes.Label.newBuilder()
-            .setName(METRIC_NAME_LABEL)
-            .setValue(CortexTSS.sanitizeMetricName(METRICS_NAME_RESPONSE)));
-        builder.addSamples(PrometheusTypes.Sample.newBuilder()
-            .setTimestamp(Instant.now().toEpochMilli())
-            .setValue(response.getResponseTimeMs()));
-        cortexTSS.store(tenantId, builder);
-
-        for (Map.Entry<String, Double> entry : response.getMetricsMap().entrySet()) {
-            processMetricMaps(entry, response, labelValues, tenantId);
-        }
-    }
-
-    private void processMetricMaps(Map.Entry<String, Double> entry, MonitorResponse response, String[] labelValues, String tenantId) throws IOException {
-        prometheus.PrometheusTypes.TimeSeries.Builder builder = prometheus.PrometheusTypes.TimeSeries.newBuilder();
-        String k = entry.getKey();
-        Double v = entry.getValue();
-        addLabels(response, labelValues, builder);
-        builder.addLabels(PrometheusTypes.Label.newBuilder()
-            .setName(METRIC_NAME_LABEL)
-            .setValue(CortexTSS.sanitizeMetricName(METRICS_NAME_PREFIX_MONITOR + k)));
-        builder.addSamples(PrometheusTypes.Sample.newBuilder()
-            .setTimestamp(Instant.now().toEpochMilli())
-            .setValue(v));
-        cortexTSS.store(tenantId, builder);
-    }
-
-    private void addLabels(MonitorResponse response, String[] labelValues, PrometheusTypes.TimeSeries.Builder builder) {
-        for (int i = 0; i < MONITOR_METRICS_LABEL_NAMES.length; i++) {
-            if (!"node_id".equals(MONITOR_METRICS_LABEL_NAMES[i]) || !"ECHO".equals(response.getMonitorType().name())) {
-                builder.addLabels(PrometheusTypes.Label.newBuilder()
-                    .setName(CortexTSS.sanitizeLabelName(MONITOR_METRICS_LABEL_NAMES[i]))
-                    .setValue(CortexTSS.sanitizeLabelValue(labelValues[i])));
-            }
-        }
-    }
-
-    private void processCollectorResponse(String tenantId, TaskResult result) throws IOException {
-        CollectorResponse response = result.getCollectorResponse();
-
-        String[] labelValues = {response.getIpAddress(), result.getLocation(), result.getSystemId(),
-            response.getMonitorType().name(), String.valueOf(response.getNodeId())};
-
-        if (response.hasResult()) {
-            MonitorType monitorType = response.getMonitorType();
-            if (monitorType.equals(MonitorType.SNMP)) {
-                processSnmpCollectorResponse(tenantId, response, labelValues);
-            } else if (monitorType.equals(MonitorType.AZURE)) {
-                processAzureCollectorResponse(tenantId, response, labelValues);
-            } else {
-                log.warn("Unrecognized monitor type");
-            }
-        } else {
-            log.warn("No result in response");
-        }
-    }
-
-    private void processSnmpCollectorResponse(String tenantId, CollectorResponse response, String[] labelValues)  throws IOException {
-        Any collectorMetric = response.getResult();
-        var snmpResponse = collectorMetric.unpack(SnmpResponseMetric.class);
-        long now = Instant.now().toEpochMilli();
-        for (SnmpResultMetric snmpResult : snmpResponse.getResultsList()) {
-            try {
-                PrometheusTypes.TimeSeries.Builder builder = prometheus.PrometheusTypes.TimeSeries.newBuilder();
-                builder.addLabels(PrometheusTypes.Label.newBuilder()
-                    .setName(METRIC_NAME_LABEL)
-                    .setValue(CortexTSS.sanitizeMetricName(snmpResult.getAlias())));
-                for (int i = 0; i < MONITOR_METRICS_LABEL_NAMES.length; i++) {
-                    builder.addLabels(prometheus.PrometheusTypes.Label.newBuilder()
-                        .setName(CortexTSS.sanitizeLabelName(MONITOR_METRICS_LABEL_NAMES[i]))
-                        .setValue(CortexTSS.sanitizeLabelValue(labelValues[i])));
-                }
-                int type = snmpResult.getValue().getTypeValue();
-                switch (type) {
-                    case SnmpValueType.INT32_VALUE:
-                        builder.addSamples(PrometheusTypes.Sample.newBuilder()
-                            .setTimestamp(now)
-                            .setValue(snmpResult.getValue().getSint64()));
-                        break;
-                    case SnmpValueType.COUNTER32_VALUE:
-                        // TODO: Can't set a counter through prometheus API, may be possible with remote write
-                    case SnmpValueType.TIMETICKS_VALUE:
-                    case SnmpValueType.GAUGE32_VALUE:
-                        builder.addSamples(PrometheusTypes.Sample.newBuilder()
-                            .setTimestamp(now)
-                            .setValue(snmpResult.getValue().getUint64()));
-                        break;
-                    case SnmpValueType.COUNTER64_VALUE:
-                        double metric = new BigInteger(snmpResult.getValue().getBytes().toByteArray()).doubleValue();
-                        builder.addSamples(PrometheusTypes.Sample.newBuilder()
-                            .setTimestamp(now)
-                            .setValue(metric));
-                        break;
-                }
-                cortexTSS.store(tenantId, builder);
-            } catch (Exception e) {
-                log.warn("Exception parsing metrics ", e);
-            }
-        }
-    }
-
-    private void processAzureCollectorResponse(String tenantId, CollectorResponse response, String[] labelValues) throws InvalidProtocolBufferException {
-        Any collectorMetric = response.getResult();
-        var azureResponse = collectorMetric.unpack(AzureResponseMetric.class);
-        long now = Instant.now().toEpochMilli();
-
-        for (AzureResultMetric azureResult : azureResponse.getResultsList()) {
-            try {
-                PrometheusTypes.TimeSeries.Builder builder = PrometheusTypes.TimeSeries.newBuilder();
-                builder.addLabels(PrometheusTypes.Label.newBuilder()
-                    .setName(METRIC_NAME_LABEL)
-                    .setValue(CortexTSS.sanitizeMetricName(azureResult.getAlias())));
-
-                for (int i = 0; i < MONITOR_METRICS_LABEL_NAMES.length; i++) {
-                    builder.addLabels(PrometheusTypes.Label.newBuilder()
-                        .setName(CortexTSS.sanitizeLabelName(MONITOR_METRICS_LABEL_NAMES[i]))
-                        .setValue(CortexTSS.sanitizeLabelValue(labelValues[i])));
-                }
-
-                int type = azureResult.getValue().getTypeValue();
-                switch (type) {
-                    case AzureValueType.INT64_VALUE:
-                        builder.addSamples(PrometheusTypes.Sample.newBuilder()
-                            .setTimestamp(now)
-                            .setValue(azureResult.getValue().getUint64()));
-                        break;
-                    default:
-                        log.warn("Unrecognized azure value type");
-                }
-                cortexTSS.store(tenantId, builder);
-            } catch (Exception e) {
-                log.warn("Exception parsing azure metrics ", e);
-            }
-        }
-    }
-
-    private String getTenantId(Map<String, Object> headers) {
-        return Optional.ofNullable(headers.get(GrpcConstants.TENANT_ID_KEY))
-            .map(tenantId -> {
-                if (tenantId instanceof byte[]) {
-                    return new String((byte[]) tenantId);
-                }
-                if (tenantId instanceof String) {
-                    return (String) tenantId;
-                }
-                return "" + tenantId;
-            })
-            .orElseThrow(() -> new RuntimeException("Could not determine tenant id"));
+    /**
+     * Default operation for submission of the given Supplier for execution which uses CompletableFuture's supplyAsync()
+     *  method to schedule execution.
+     *
+     * @param runnable
+     */
+    private void defaultExecutionSubmissionOp(Runnable runnable) {
+        CompletableFuture.supplyAsync(() -> {
+            runnable.run();
+            return null;    // Not doing anything with the Future, so the value is of no consequence
+        });
     }
 }

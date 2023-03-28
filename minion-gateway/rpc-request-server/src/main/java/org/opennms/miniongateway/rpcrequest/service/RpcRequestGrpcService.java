@@ -7,6 +7,7 @@ import org.opennms.cloud.grpc.minion.RpcRequestProto;
 import org.opennms.cloud.grpc.minion.RpcRequestServiceGrpc;
 import org.opennms.cloud.grpc.minion.RpcResponseProto;
 import org.opennms.horizon.shared.grpc.common.GrpcIpcServer;
+import org.opennms.horizon.shared.grpc.common.TenantIDGrpcServerInterceptor;
 import org.opennms.miniongateway.rpcrequest.RpcRequestRouter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,13 +35,17 @@ public class RpcRequestGrpcService extends RpcRequestServiceGrpc.RpcRequestServi
     @Setter
     private GrpcIpcServer grpcIpcServer;
 
+    @Autowired
+    private TenantIDGrpcServerInterceptor tenantIDGrpcServerInterceptor;
+
 //========================================
 // Lifecycle
 //----------------------------------------
 
     @PostConstruct
     public void start() throws IOException {
-        grpcIpcServer.startServer(this);
+        // TODO: use explicit tenant-id handling
+        grpcIpcServer.startServerWithInterceptors(this, tenantIDGrpcServerInterceptor);
         log.info("Initiated RPC-Request GRPC Service");
     }
 

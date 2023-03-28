@@ -536,6 +536,18 @@
                 <version>${junit.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.junit.jupiter</groupId>
+                <artifactId>junit-jupiter-api</artifactId>
+                <version>${jupiter.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.junit.jupiter</groupId>
+                <artifactId>junit-jupiter-engine</artifactId>
+                <version>${jupiter.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
                 <groupId>net.java.dev.jna</groupId>
                 <artifactId>jna</artifactId>
                 <version>${jna.version}</version>
@@ -941,6 +953,11 @@
     <build>
         <pluginManagement>
             <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>${surefire.version}</version>
+                </plugin>
                 <plugin>
                     <groupId>org.springframework.boot</groupId>
                     <artifactId>spring-boot-maven-plugin</artifactId>

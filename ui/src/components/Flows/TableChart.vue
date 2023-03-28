@@ -24,9 +24,9 @@
             v-for="(data, index) in tableData"
             :key="index"
           >
-            <td>{{ postFixGB(addValues(data.inbound, data.outbound)) }}</td>
-            <td>{{ postFixGB(data.inbound) }}</td>
-            <td>{{ postFixGB(data.outbound) }}</td>
+            <td>{{ formatBytes(addValues(data.bytesIn, data.bytesOut)) }}</td>
+            <td>{{ formatBytes(data.bytesIn) }}</td>
+            <td>{{ formatBytes(data.bytesOut) }}</td>
           </tr>
         </tbody>
       </table>
@@ -97,7 +97,7 @@ const chartOptions = computed<ChartOptions<any>>(() => {
             const value = context.dataset.data[context.dataIndex]
             const labelAbbrev = context.dataset.label.substring(0, 3).toLowerCase()
             const appName = context.label
-            return `${appName}(${labelAbbrev}): ${value} GB`
+            return `${appName}(${labelAbbrev}): ` + formatBytes(value)
           }
         }
       }
@@ -110,7 +110,7 @@ const chartOptions = computed<ChartOptions<any>>(() => {
         },
         ticks: {
           callback: function (value: any) {
-            return value + ' GB'
+            return formatBytes(value, 0)
           }
         }
       },
@@ -134,7 +134,18 @@ const addValues = (a: number, b: number) => {
   const total = (a + b).toString()
   return parseFloat(total).toPrecision(3)
 }
-const postFixGB = (value: any) => value + ' GB'
+
+const formatBytes = (bytes: any, decimals = 2) => {
+  if (!+bytes) return '0 Bytes'
+
+  const k = 1024
+  const dm = decimals < 0 ? 0 : decimals
+  const sizes = ['Bytes', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB']
+
+  const i = Math.floor(Math.log(bytes) / Math.log(k))
+
+  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`
+}
 </script>
 
 <style lang="scss" scoped>

@@ -30,12 +30,10 @@ package org.opennms.horizon.minion.flows.listeners;
 
 import java.net.InetSocketAddress;
 import java.time.Duration;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 
 import org.opennms.horizon.minion.flows.listeners.utils.BufferUtils;
 import org.opennms.horizon.minion.flows.listeners.utils.NettyEventListener;
@@ -63,7 +61,7 @@ import io.netty.channel.socket.nio.NioDatagramChannel;
 import io.netty.util.ReferenceCountUtil;
 import io.netty.util.internal.SocketUtils;
 
-public class UdpListener implements GracefulShutdownListener, FlowsListener {
+public class UdpListener implements Listener {
     private static final Logger LOG = LoggerFactory.getLogger(UdpListener.class);
 
     public static final RateLimitedLog RATE_LIMITED_LOG = RateLimitedLog
@@ -83,8 +81,6 @@ public class UdpListener implements GracefulShutdownListener, FlowsListener {
     private int port = 50000;
     private int maxPacketSize = 8096;
 
-    private Future<String> stopFuture;
-
     public UdpListener(final String name, final List<UdpParser> parsers, final MetricRegistry metrics) {
         this(name, 0, parsers, metrics);
     }
@@ -94,7 +90,7 @@ public class UdpListener implements GracefulShutdownListener, FlowsListener {
         if (port != 0) {
             this.port = port;
         }
-        this.parsers = Objects.requireNonNull(parsers);
+        this.parsers = Collections.unmodifiableList(Objects.requireNonNull(parsers));
         Objects.requireNonNull(metrics);
 
         if (this.parsers.isEmpty()) {
@@ -153,33 +149,14 @@ public class UdpListener implements GracefulShutdownListener, FlowsListener {
         }
 
         this.parsers.forEach(Parser::stop);
+    }
 
-        stopFuture = new Future<>() {
-            @Override
-            public boolean cancel(boolean mayInterruptIfRunning) {
-                return false;
-            }
+    public String getName() {
+        return this.name;
+    }
 
-            @Override
-            public boolean isCancelled() {
-                return false;
-            }
-
-            @Override
-            public boolean isDone() {
-                return bossListener.isDone();
-            }
-
-            @Override
-            public String get() {
-                return name + "[" + bossListener.getName() + ":" + bossListener.isDone() + "]";
-            }
-
-            @Override
-            public String get(long timeout, TimeUnit unit) {
-                return get();
-            }
-        };
+    public List<UdpParser> getParsers() {
+        return this.parsers;
     }
 
     public String getHost() {
@@ -205,22 +182,6 @@ public class UdpListener implements GracefulShutdownListener, FlowsListener {
     public void setMaxPacketSize(int maxPacketSize) {
         this.maxPacketSize = maxPacketSize;
     }
-
-    @Override
-    public String getName() {
-        return name;
-    }
-
-    @Override
-    public String getDescription() {
-        return String.format("UDP %s:%s", this.host != null ? this.host : "*", this.port);
-    }
-
-    @Override
-    public Future getShutdownFuture() {
-        return stopFuture;
-    }
-
 
     private class DefaultChannelInitializer extends ChannelInitializer<DatagramChannel> {
 

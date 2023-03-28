@@ -50,6 +50,7 @@ import org.opennms.taskset.contract.MonitorResponse;
 import org.opennms.taskset.contract.MonitorType;
 import org.opennms.taskset.contract.TaskResult;
 import org.opennms.taskset.contract.TaskSetResults;
+import org.opennms.taskset.contract.TenantedTaskSetResults;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -92,8 +93,7 @@ public class MinionHeartbeatConsumer {
             String tenantId = Optional.ofNullable(headers.get(GrpcConstants.TENANT_ID_KEY)).map(o -> new String((byte[])o))
                 .orElseThrow(()->new InventoryRuntimeException("Missing tenant id"));
             log.info("Received heartbeat message for minion with tenant id: {}; id: {}; location: {}", tenantId, message.getIdentity().getSystemId(), message.getIdentity().getLocation());
-            Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, tenantId).run(()->
-                service.addMonitoringSystemFromHeartbeat(message, tenantId));
+            service.addMonitoringSystemFromHeartbeat(message, tenantId);
             String systemId = message.getIdentity().getSystemId();
             String key = tenantId + "_" + systemId;
             Long lastRun = rpcMaps.get(key);
@@ -149,11 +149,13 @@ public class MinionHeartbeatConsumer {
     }
 
     private void publishResult(String systemId, String location, String tenantId, long responseTime) {
+        // TODO: use a separate structure from TaskSetResult - this is not the result of processing a TaskSet
         MonitorResponse monitorResponse = MonitorResponse.newBuilder()
             .setStatus("UP")
             .setResponseTimeMs(responseTime)
             .setMonitorType(MonitorType.ECHO)
             .setIpAddress(systemId) //for minion only
+            .setTimestamp(System.currentTimeMillis())
             .build();
         TaskResult result = TaskResult.newBuilder()
             .setId("monitor-"+systemId)
@@ -161,11 +163,12 @@ public class MinionHeartbeatConsumer {
             .setLocation(location)
             .setMonitorResponse(monitorResponse)
             .build();
-        TaskSetResults results = TaskSetResults.newBuilder()
+        TenantedTaskSetResults results = TenantedTaskSetResults.newBuilder()
+            .setTenantId(tenantId)
             .addResults(result)
             .build();
+
         ProducerRecord<String, byte[]> producerRecord = new ProducerRecord<>(kafkaTopic, results.toByteArray());
-        producerRecord.headers().add(new RecordHeader(GrpcConstants.TENANT_ID_KEY, tenantId.getBytes()));
         kafkaTemplate.send(producerRecord);
     }
 }

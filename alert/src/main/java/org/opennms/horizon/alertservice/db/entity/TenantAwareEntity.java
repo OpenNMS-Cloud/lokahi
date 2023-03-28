@@ -40,7 +40,7 @@ import org.hibernate.annotations.TenantId;
 public abstract class TenantAwareEntity {
 
     @TenantId
-    @Column
+    @Column (name = "tenant_id")
     private String tenantId;
 
 }

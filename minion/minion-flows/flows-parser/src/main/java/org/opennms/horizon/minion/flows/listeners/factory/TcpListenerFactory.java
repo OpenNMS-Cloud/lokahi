@@ -33,18 +33,15 @@ import static java.util.Objects.nonNull;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
-
-import org.opennms.horizon.minion.flows.listeners.FlowsListener;
-import org.opennms.horizon.minion.flows.listeners.TcpParser;
-
-import com.codahale.metrics.MetricRegistry;
 
 import org.opennms.horizon.minion.flows.listeners.Listener;
 import org.opennms.horizon.minion.flows.listeners.TcpListener;
+import org.opennms.horizon.minion.flows.listeners.TcpParser;
 import org.opennms.horizon.minion.flows.parser.TelemetryRegistry;
 import org.opennms.sink.flows.contract.ListenerConfig;
 import org.opennms.sink.flows.contract.Parameter;
+
+import com.codahale.metrics.MetricRegistry;
 
 public class TcpListenerFactory implements ListenerFactory {
 
@@ -52,7 +49,6 @@ public class TcpListenerFactory implements ListenerFactory {
 
     public TcpListenerFactory(TelemetryRegistry telemetryRegistry) {
         this.telemetryRegistry = Objects.requireNonNull(telemetryRegistry);
-        telemetryRegistry.addListenerFactory(this);
     }
 
     @Override
@@ -61,7 +57,7 @@ public class TcpListenerFactory implements ListenerFactory {
     }
 
     @Override
-    public FlowsListener create(ListenerConfig listenerConfig) {
+    public Listener create(ListenerConfig listenerConfig) {
         // TcpListener only supports one parser at a time
         if (listenerConfig.getParsersCount() != 1) {
             throw new IllegalArgumentException("The simple TCP listener supports exactly one parser");

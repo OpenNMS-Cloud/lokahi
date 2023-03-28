@@ -50,11 +50,6 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-devtools</artifactId>
 		</dependency>
-        <!--<dependency>
-            <groupId>org.opennms.horizon.shared</groupId>
-            <artifactId>dto-model</artifactId>
-            <version>${project.version}</version>
-        </dependency>-->
         <dependency>
             <groupId>org.opennms.horizon.shared</groupId>
             <artifactId>grpc-common-constants</artifactId>
@@ -103,6 +98,11 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
+            <groupId>org.opennms.horizon.shared</groupId>
+            <artifactId>alert-dto</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.mapstruct</groupId>
             <artifactId>mapstruct</artifactId>
         </dependency>
@@ -111,6 +111,12 @@
             <artifactId>oauth2-oidc-sdk</artifactId>
             <version>10.3</version>
         </dependency>
+        <dependency>
+            <groupId>org.opennms.flows</groupId>
+            <artifactId>flows-grpc</artifactId>
+            <version>${flows.gateway.grpc.version}</version>
+        </dependency>
+
 		<!-- Test -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -253,6 +259,21 @@
 			</plugin>
 		</plugins>
 	</build>
+
+    <repositories>
+        <repository>
+            <id>opennms-maven</id>
+            <url>https://packages.opennms.com/public/maven/maven/</url>
+            <releases>
+                <enabled>true</enabled>
+                <updatePolicy>always</updatePolicy>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+                <updatePolicy>always</updatePolicy>
+            </snapshots>
+        </repository>
+    </repositories>
 
     <profiles>
         <profile>

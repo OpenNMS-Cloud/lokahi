@@ -44,6 +44,7 @@ message AzureScanItem {
   int64 active_discovery_id = 4;
 }
 
+// TODO: the naming here is not Real Obvious - "what's the difference between AzureResponseMetric and AzureResultMetric?"
 message AzureResponseMetric {
   repeated AzureResultMetric results = 2;
 }

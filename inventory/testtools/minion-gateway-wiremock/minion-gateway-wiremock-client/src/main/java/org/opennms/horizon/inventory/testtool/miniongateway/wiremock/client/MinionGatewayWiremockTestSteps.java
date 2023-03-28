@@ -62,6 +62,9 @@ public class MinionGatewayWiremockTestSteps {
     private String taskIpAddress;
 
     @Setter
+    private String taskTenantId = "opennms-prime";
+
+    @Setter
     private String taskLocation = "Default";
 
     @Setter
@@ -115,7 +118,7 @@ public class MinionGatewayWiremockTestSteps {
     public void verifyTheTaskSetUpdateIsPublishedForDeviceWithNodeScanWithinMs(int timeout) {
         String taskIdPattern = "nodeScan=node_id/" + nodeId;
 
-        commonVerifyTaskSetUpdate((record) -> isMatchingAddTask(record, taskLocation, taskIdPattern), timeout);
+        commonVerifyTaskSetUpdate((record) -> isMatchingAddTask(record, taskTenantId, taskLocation, taskIdPattern), timeout);
     }
 
     @Then("verify the task set update is published with device monitor within {int}ms")
@@ -133,13 +136,13 @@ public class MinionGatewayWiremockTestSteps {
     @Then("verify the task set update is published with removal of task with suffix {string} within {int}ms")
     public void verifyTheTaskSetUpdateIsPublishedWithRemovalOfTaskWithSuffixWithinMs(String taskSuffix, int timeout) {
         String taskIdPattern = "nodeId:\\d+/ip=" + taskIpAddress + "/" + taskSuffix;
-        commonVerifyTaskSetUpdate((record) -> isMatchingRemoveTask(record, taskLocation, taskIdPattern), timeout);
+        commonVerifyTaskSetUpdate((record) -> isMatchingRemoveTask(record, taskTenantId, taskLocation, taskIdPattern), timeout);
     }
 
     @Then("verify the task set update is published for icmp discovery within {int}ms")
     public void verifyTheTaskSetUpdateIsPublishedForIcmpDiscoveryWithinMs(int timeout) {
         String taskIdPattern = "discovery:\\d+/" + taskLocation;
-        commonVerifyTaskSetUpdate((record) -> isMatchingAddTask(record, taskLocation, taskIdPattern), timeout);
+        commonVerifyTaskSetUpdate((record) -> isMatchingAddTask(record, taskTenantId, taskLocation, taskIdPattern), timeout);
     }
 
 
@@ -147,12 +150,16 @@ public class MinionGatewayWiremockTestSteps {
 // Internals
 //----------------------------------------
 
-    private boolean isMatchingAddTask(UpdateTasksRequest record, String location,  String taskIdPattern) {
-        if (Objects.equals(record.getLocation(), location)) {
-            for (var update : record.getUpdateList()) {
-                if (update.hasAddTask()) {
-                    if (update.getAddTask().hasTaskDefinition()) {
-                        return update.getAddTask().getTaskDefinition().getId().matches(taskIdPattern);
+    private boolean isMatchingAddTask(UpdateTasksRequest record, String tenantId, String location,  String taskIdPattern) {
+        if (Objects.equals(record.getTenantId(), tenantId)) {
+            if (Objects.equals(record.getLocation(), location)) {
+                for (var update : record.getUpdateList()) {
+                    if (update.hasAddTask()) {
+                        if (update.getAddTask().hasTaskDefinition()) {
+                            if (update.getAddTask().getTaskDefinition().getId().matches(taskIdPattern)) {
+                                return true;
+                            }
+                        }
                     }
                 }
             }
@@ -161,12 +168,14 @@ public class MinionGatewayWiremockTestSteps {
         return false;
     }
 
-    private boolean isMatchingRemoveTask(UpdateTasksRequest record, String location, String taskIdPattern) {
-        if (Objects.equals(record.getLocation(), location)) {
-            for (var update : record.getUpdateList()) {
-                if (update.hasRemoveTask()) {
-                    if (update.getRemoveTask().getTaskId().matches(taskIdPattern)) {
-                        return true;
+    private boolean isMatchingRemoveTask(UpdateTasksRequest record, String tenantId, String location, String taskIdPattern) {
+        if (Objects.equals(record.getTenantId(), tenantId)) {
+            if (Objects.equals(record.getLocation(), location)) {
+                for (var update : record.getUpdateList()) {
+                    if (update.hasRemoveTask()) {
+                        if (update.getRemoveTask().getTaskId().matches(taskIdPattern)) {
+                            return true;
+                        }
                     }
                 }
             }

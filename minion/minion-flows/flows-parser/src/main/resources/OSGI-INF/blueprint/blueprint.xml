@@ -22,14 +22,10 @@
         </service-properties>
     </service>
 
-    <bean id="listenerHolder" class="org.opennms.horizon.minion.flows.parser.ListenerHolder"/>
-    <service ref="listenerHolder" interface="org.opennms.horizon.minion.plugin.api.Listener"/>
-
     <bean id="telemetryRegistry" class="org.opennms.horizon.minion.flows.parser.TelemetryRegistryImpl">
         <argument ref="messageDispatcherFactory"/>
         <argument ref="identity"/>
         <argument ref="dnsResolver"/>
-        <argument ref="listenerHolder"/>
     </bean>
     <service ref="telemetryRegistry" interface="org.opennms.horizon.minion.flows.parser.TelemetryRegistry"/>
 
@@ -78,11 +74,11 @@
         <argument ref="telemetryRegistry"/>
     </bean>
 
-    <bean id="configManager" class="org.opennms.horizon.minion.flows.parser.ConfigManager">
+    <bean id="flowsListenerFactory" class="org.opennms.horizon.minion.flows.parser.FlowsListenerFactory">
         <argument ref="telemetryRegistry"/>
     </bean>
 
-    <service ref="configManager" interface="org.opennms.horizon.minion.plugin.api.ListenerFactory">
+    <service ref="flowsListenerFactory" interface="org.opennms.horizon.minion.plugin.api.ListenerFactory">
         <service-properties>
             <entry key="listener.name" value="flows.parsers.config"/>
         </service-properties>

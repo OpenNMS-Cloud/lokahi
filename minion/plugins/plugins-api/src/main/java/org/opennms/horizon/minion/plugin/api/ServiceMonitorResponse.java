@@ -47,6 +47,13 @@ public interface ServiceMonitorResponse {
      */
     DeviceConfig getDeviceConfig();
 
+    /**
+     * Returns timestamp when response time was actually generated.
+     *
+     * @return Timestamp of a response.
+     */
+    long getTimestamp();
+
     interface DeviceConfig {
 
         byte[] getContent();

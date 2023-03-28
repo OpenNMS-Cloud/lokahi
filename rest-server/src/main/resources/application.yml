@@ -16,9 +16,7 @@ graphql:
     gui:
       enabled: true
     base-packages:
-      - org.opennms.horizon.server.model.inventory
-      - org.opennms.horizon.server.model.events
-      - org.opennms.horizon.server.model.alerts
+      - org.opennms.horizon.server.model
 
 logging:
   file.path: /var/log/restServer
@@ -32,5 +30,6 @@ grpc:
     events: localhost:30065
     notification: localhost:15065
     alerts: opennms-alert:6565
+    flows: flows.onms-dp-dev.dev.nonprod.dataservice.opennms.com:443 # temp for development
   server:
     deadline: 60000

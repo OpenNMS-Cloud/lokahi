@@ -1,8 +1,8 @@
 /*******************************************************************************
  * This file is part of OpenNMS(R).
  *
- * Copyright (C) 2022 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
+ * Copyright (C) 2023 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
  *
@@ -26,13 +26,33 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.minion.flows.listeners;
+package org.opennms.horizon.events.consumer.metrics;
 
-import java.util.concurrent.Future;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Tag;
+import java.util.List;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
-/**
- * It extends standard listener with extra future for monitor shutdown status. In order to prevent deadlock of shutdown process.
- */
-public interface GracefulShutdownListener extends Listener {
-    Future getShutdownFuture();
+@Component
+public class TenantMetricsTrackerImpl implements TenantMetricsTracker {
+
+    public static final String EVENT_SAMPLE_COUNT_NAME = "event_sample_count";
+    public static final String SAMPLE_COUNT_TENANT_LABEL_NAME = "tenant";
+
+    @Autowired
+    private MeterRegistry meterRegistry;
+
+    @Override
+    public void addTenantEventSampleCount(String tenant, int count) {
+        Counter counter =
+            meterRegistry.counter(EVENT_SAMPLE_COUNT_NAME,
+                List.of(
+                    Tag.of(SAMPLE_COUNT_TENANT_LABEL_NAME, tenant)
+                ));
+
+        counter.increment(count);
+    }
+
 }

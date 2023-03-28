@@ -28,13 +28,9 @@
 
 package org.opennms.horizon.minion.flows.parser;
 
-import com.codahale.metrics.MetricRegistry;
-import org.junit.Ignore;
-import org.opennms.dataplatform.flows.document.FlowDocument;
-import org.opennms.horizon.minion.flows.listeners.UdpListener;
-import org.opennms.horizon.minion.flows.parser.factory.DnsResolver;
-import org.opennms.horizon.shared.ipc.rpc.IpcIdentity;
-import org.opennms.horizon.shared.ipc.sink.api.AsyncDispatcher;
+import static org.awaitility.Awaitility.await;
+import static org.hamcrest.Matchers.is;
+import static org.mockito.Mockito.mock;
 
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -49,9 +45,14 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.awaitility.Awaitility.await;
-import static org.hamcrest.Matchers.is;
-import static org.mockito.Mockito.mock;
+import org.junit.Ignore;
+import org.opennms.dataplatform.flows.document.FlowDocument;
+import org.opennms.horizon.minion.flows.listeners.UdpListener;
+import org.opennms.horizon.minion.flows.parser.factory.DnsResolver;
+import org.opennms.horizon.shared.ipc.rpc.IpcIdentity;
+import org.opennms.horizon.shared.ipc.sink.api.AsyncDispatcher;
+
+import com.codahale.metrics.MetricRegistry;
 
 // No flows are illegal ✊
 public class IllegalFlowTest {

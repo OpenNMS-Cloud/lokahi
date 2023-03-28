@@ -59,6 +59,7 @@ import org.opennms.horizon.inventory.dto.IpInterfaceDTO;
 import org.opennms.horizon.inventory.dto.MonitoringLocationDTO;
 import org.opennms.horizon.inventory.dto.NodeCreateDTO;
 import org.opennms.horizon.inventory.dto.NodeDTO;
+import org.opennms.horizon.inventory.dto.TagDTO;
 import org.opennms.horizon.server.RestServerApplication;
 import org.opennms.horizon.server.config.DataLoaderFactory;
 import org.opennms.horizon.server.model.TSData;
@@ -137,6 +138,57 @@ public class GraphQLNodeServiceTest {
         verify(mockClient).listLocationsByIds(keyCaptor.capture());
         List<DataLoaderFactory.Key> argus = keyCaptor.getValue();
         assertThat(argus.size()).isEqualTo(2);
+    }
+
+    @Test
+    public void testFindAllNodesByNodeLabelSearch() throws JSONException {
+        doReturn(Arrays.asList(nodeDTO1, nodeDTO2, nodeDTO3)).when(mockClient)
+            .listNodesByNodeLabelSearch("test-search-term", accessToken);
+        String request = "query {\n" +
+            "    findAllNodesByNodeLabelSearch(labelSearchTerm: \"test-search-term\") {\n" +
+            "       id, " +
+            "       tenantId, " +
+            "       nodeLabel, " +
+            "       createTime " +
+            "    } " +
+            "}";
+        webClient.post()
+            .uri(GRAPHQL_PATH)
+            .accept(MediaType.APPLICATION_JSON)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(createPayload(request))
+            .exchange()
+            .expectStatus().isOk()
+            .expectBody()
+            .jsonPath("$.data.findAllNodesByNodeLabelSearch.size()").isEqualTo(3);
+        verify(mockClient).listNodesByNodeLabelSearch("test-search-term", accessToken);
+        verify(mockHeaderUtil).getAuthHeader(any(ResolutionEnvironment.class));
+    }
+
+    @Test
+    public void testFindAllNodesByTags() throws JSONException {
+        List<String> tags = Arrays.asList("tag1");
+        doReturn(Arrays.asList(nodeDTO1, nodeDTO2, nodeDTO3)).when(mockClient)
+            .listNodesByTags(tags, accessToken);
+        String request = "query { " +
+            "    findAllNodesByTags(tags: [\"tag1\"]) { " +
+            "       id, " +
+            "       tenantId, " +
+            "       nodeLabel, " +
+            "       createTime " +
+            "    } " +
+            "}";
+        webClient.post()
+            .uri(GRAPHQL_PATH)
+            .accept(MediaType.APPLICATION_JSON)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(createPayload(request))
+            .exchange()
+            .expectStatus().isOk()
+            .expectBody()
+            .jsonPath("$.data.findAllNodesByTags.size()").isEqualTo(3);
+        verify(mockClient).listNodesByTags(tags, accessToken);
+        verify(mockHeaderUtil).getAuthHeader(any(ResolutionEnvironment.class));
     }
 
     @Test

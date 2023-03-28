@@ -36,14 +36,12 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.opennms.horizon.inventory.service.taskset.response.DetectorResponseService;
 import org.opennms.horizon.inventory.service.taskset.response.ScannerResponseService;
-import org.opennms.horizon.shared.constants.GrpcConstants;
 import org.opennms.taskset.contract.DetectorResponse;
 import org.opennms.taskset.contract.ScannerResponse;
 import org.opennms.taskset.contract.TaskResult;
-import org.opennms.taskset.contract.TaskSetResults;
+import org.opennms.taskset.contract.TenantedTaskSetResults;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Collections;
 
 import static org.mockito.Mockito.times;
 
@@ -71,13 +69,12 @@ public class TaskSetResultsConsumerTest {
             .setScannerResponse(response)
             .build();
 
-        TaskSetResults results = TaskSetResults.newBuilder()
-            .addResults(taskResult).build();
+        TenantedTaskSetResults results = TenantedTaskSetResults.newBuilder()
+            .setTenantId(TEST_TENANT_ID)
+            .addResults(taskResult)
+            .build();
 
-        Map<String, Object> headers = new HashMap<>();
-        headers.put(GrpcConstants.TENANT_ID_KEY, TEST_TENANT_ID.getBytes());
-
-        consumer.receiveMessage(results.toByteArray(), headers);
+        consumer.receiveMessage(results.toByteArray(), Collections.EMPTY_MAP);
 
         Mockito.verify(scannerService, times(1))
             .accept(TEST_TENANT_ID, TEST_LOCATION, response);
@@ -93,13 +90,11 @@ public class TaskSetResultsConsumerTest {
             .setDetectorResponse(response)
             .build();
 
-        TaskSetResults results = TaskSetResults.newBuilder()
+        TenantedTaskSetResults results = TenantedTaskSetResults.newBuilder()
+            .setTenantId(TEST_TENANT_ID)
             .addResults(taskResult).build();
 
-        Map<String, Object> headers = new HashMap<>();
-        headers.put(GrpcConstants.TENANT_ID_KEY, TEST_TENANT_ID.getBytes());
-
-        consumer.receiveMessage(results.toByteArray(), headers);
+        consumer.receiveMessage(results.toByteArray(), Collections.EMPTY_MAP);
 
         Mockito.verify(detectorService, times(1))
             .accept(TEST_TENANT_ID, TEST_LOCATION, response);

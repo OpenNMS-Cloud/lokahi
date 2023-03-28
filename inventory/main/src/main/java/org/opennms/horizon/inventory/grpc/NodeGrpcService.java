@@ -48,15 +48,16 @@ import org.opennms.horizon.inventory.dto.NodeCreateDTO;
 import org.opennms.horizon.inventory.dto.NodeDTO;
 import org.opennms.horizon.inventory.dto.NodeIdList;
 import org.opennms.horizon.inventory.dto.NodeIdQuery;
+import org.opennms.horizon.inventory.dto.NodeLabelSearchQuery;
 import org.opennms.horizon.inventory.dto.NodeList;
 import org.opennms.horizon.inventory.dto.NodeServiceGrpc;
+import org.opennms.horizon.inventory.dto.TagNameQuery;
 import org.opennms.horizon.inventory.mapper.NodeMapper;
 import org.opennms.horizon.inventory.model.Node;
 import org.opennms.horizon.inventory.service.IpInterfaceService;
 import org.opennms.horizon.inventory.service.NodeService;
 import org.opennms.horizon.inventory.service.taskset.DetectorTaskSetService;
 import org.opennms.horizon.inventory.service.taskset.ScannerTaskSetService;
-import org.opennms.horizon.shared.constants.GrpcConstants;
 import org.opennms.taskset.contract.ScanType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -192,6 +193,60 @@ public class NodeGrpcService extends NodeServiceGrpc.NodeServiceImplBase {
     }
 
     @Override
+    public void listNodesByNodeLabel(NodeLabelSearchQuery request, StreamObserver<NodeList> responseObserver) {
+        Optional<String> tenantIdOptional = tenantLookup.lookupTenantId(Context.current());
+
+        tenantIdOptional.ifPresentOrElse(tenantId -> {
+            try {
+                List<NodeDTO> nodes = nodeService.listNodesByNodeLabelSearch(tenantId, request.getSearchTerm());
+                responseObserver.onNext(NodeList.newBuilder().addAllNodes(nodes).build());
+                responseObserver.onCompleted();
+            } catch (Exception e) {
+
+                Status status = Status.newBuilder()
+                    .setCode(Code.INTERNAL_VALUE)
+                    .setMessage(e.getMessage())
+                    .build();
+                responseObserver.onError(StatusProto.toStatusRuntimeException(status));
+            }
+        }, () -> {
+
+            Status status = Status.newBuilder()
+                .setCode(Code.INVALID_ARGUMENT_VALUE)
+                .setMessage("Tenant Id can't be empty")
+                .build();
+            responseObserver.onError(StatusProto.toStatusRuntimeException(status));
+        });
+    }
+
+    @Override
+    public void listNodesByTags(TagNameQuery request, StreamObserver<NodeList> responseObserver) {
+        Optional<String> tenantIdOptional = tenantLookup.lookupTenantId(Context.current());
+
+        tenantIdOptional.ifPresentOrElse(tenantId -> {
+            try {
+                List<NodeDTO> nodes = nodeService.listNodesByTags(tenantId, request.getTagsList());
+                responseObserver.onNext(NodeList.newBuilder().addAllNodes(nodes).build());
+                responseObserver.onCompleted();
+            } catch (Exception e) {
+
+                Status status = Status.newBuilder()
+                    .setCode(Code.INTERNAL_VALUE)
+                    .setMessage(e.getMessage())
+                    .build();
+                responseObserver.onError(StatusProto.toStatusRuntimeException(status));
+            }
+        }, () -> {
+
+            Status status = Status.newBuilder()
+                .setCode(Code.INVALID_ARGUMENT_VALUE)
+                .setMessage("Tenant Id can't be empty")
+                .build();
+            responseObserver.onError(StatusProto.toStatusRuntimeException(status));
+        });
+    }
+
+    @Override
     public void deleteNode(Int64Value request, StreamObserver<BoolValue> responseObserver) {
         // TBD888: why lookup the node, then delete it by ID?  How about just calling deleteNode() and skip the getByIdAndTenantId?
         Optional<NodeDTO> node = tenantLookup.lookupTenantId(Context.current())
@@ -253,6 +308,17 @@ public class NodeGrpcService extends NodeServiceGrpc.NodeServiceImplBase {
         }, () -> responseObserver.onError(StatusProto.toStatusRuntimeException(createTenantIdMissingStatus())));
     }
 
+    @Override
+    public void getIpInterfaceById(Int64Value request, StreamObserver<IpInterfaceDTO> responseObserver) {
+        var ipInterface = tenantLookup.lookupTenantId(Context.current())
+            .map(tenantId -> ipInterfaceService.getByIdAndTenantId(request.getValue(), tenantId))
+            .orElseThrow();
+        ipInterface.ifPresentOrElse(ipInterfaceDTO -> {
+            responseObserver.onNext(ipInterfaceDTO);
+            responseObserver.onCompleted();
+        }, () -> responseObserver.onError(StatusProto.toStatusRuntimeException(createStatusNotExits(request.getValue()))));
+    }
+
     private Status createTenantIdMissingStatus() {
         return Status.newBuilder().setCode(Code.INVALID_ARGUMENT_VALUE).setMessage(TENANT_ID_IS_MISSING_MSG).build();
     }
@@ -292,24 +358,18 @@ public class NodeGrpcService extends NodeServiceGrpc.NodeServiceImplBase {
     }
 
     private void sendDetectorTasksToMinion(Node node, String tenantId) {
-        Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, tenantId).run(()->
-        {
-            try {
-                taskSetService.sendDetectorTasks(node);
-                scannerService.sendNodeScannerTask(List.of(nodeMapper.modelToDTO(node)),
-                    node.getMonitoringLocation().getLocation(), node.getTenantId());
-            } catch (Exception e) {
-                LOG.error("Error while sending detector task for node with label {}", node.getNodeLabel(), e);
-            }
-        });
+        try {
+            taskSetService.sendDetectorTasks(node);
+            scannerService.sendNodeScannerTask(List.of(nodeMapper.modelToDTO(node)),
+                node.getMonitoringLocation().getLocation(), node.getTenantId());
+        } catch (Exception e) {
+            LOG.error("Error while sending detector task for node with label {}", node.getNodeLabel(), e);
+        }
     }
 
     private void sendScannerTasksToMinion(Map<String, List<NodeDTO>> locationNodes, String tenantId) {
-        Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, tenantId).run(()->
-        {
-            for(String location: locationNodes.keySet()) {
-                scannerService.sendNodeScannerTask(locationNodes.get(location), location, tenantId);
-            }
-        });
+        for(String location: locationNodes.keySet()) {
+            scannerService.sendNodeScannerTask(locationNodes.get(location), location, tenantId);
+        }
     }
 }

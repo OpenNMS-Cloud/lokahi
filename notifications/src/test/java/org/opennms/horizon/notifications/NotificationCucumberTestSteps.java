@@ -12,6 +12,7 @@ import org.opennms.horizon.alerts.proto.Alert;
 import org.opennms.horizon.notifications.api.PagerDutyDao;
 import org.opennms.horizon.notifications.dto.NotificationServiceGrpc;
 import org.opennms.horizon.notifications.dto.PagerDutyConfigDTO;
+import org.opennms.horizon.notifications.exceptions.NotificationAPIRetryableException;
 import org.opennms.horizon.notifications.exceptions.NotificationConfigUninitializedException;
 import org.opennms.horizon.notifications.exceptions.NotificationException;
 import org.opennms.horizon.notifications.service.NotificationService;
@@ -22,10 +23,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
@@ -36,6 +41,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @CucumberContextConfiguration
 @SpringBootTest
@@ -57,6 +63,7 @@ public class NotificationCucumberTestSteps extends GrpcTestBase {
 
     @Autowired
     @MockBean
+    @SpyBean
     public RestTemplate restTemplate;
 
     private Exception caught;
@@ -187,9 +194,9 @@ public class NotificationCucumberTestSteps extends GrpcTestBase {
         }
     }
 
-    @Then("verify pager duty rest method is called")
-    public void verifyPagerDutyAPICalled() {
-        verify(restTemplate).exchange(any(URI.class), eq(HttpMethod.POST), any(HttpEntity.class), eq(String.class));
+    @Then("verify pager duty rest method is called {int} times")
+    public void verifyPagerDutyAPICalled(int count) {
+        verify(restTemplate, times(count)).exchange(any(URI.class), eq(HttpMethod.POST), any(HttpEntity.class), eq(String.class));
     }
 
     @Given("Alert posted via service with no config with tenant {string}")
@@ -210,5 +217,12 @@ public class NotificationCucumberTestSteps extends GrpcTestBase {
             assertEquals(exceptionName, caught.getClass().getSimpleName(), "Exception mismatch");
             assertEquals(message, caught.getMessage());
         }
+    }
+
+    @Given("first attempt to post to PagerDuty will fail but should retry")
+    public void mockPagerDutyFailOnce() {
+        when(restTemplate.exchange(any(), any(), any(), any(Class.class)))
+            .thenThrow(new RestClientResponseException("Failed", HttpStatus.BAD_GATEWAY, "Failed", null, null, null))
+            .thenReturn(ResponseEntity.ok(null));
     }
 }

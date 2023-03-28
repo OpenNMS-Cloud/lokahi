@@ -85,9 +85,6 @@ public class SnmpConfigRepositoryTest {
 
     @AfterEach
     public void destroy() {
-        Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, tenantId).run(() ->
-        {
-            snmpConfigRepository.deleteAll();
-        });
+        snmpConfigRepository.deleteAll();
     }
 }

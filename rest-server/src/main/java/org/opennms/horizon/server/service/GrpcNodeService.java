@@ -75,6 +75,16 @@ public class GrpcNodeService {
     }
 
     @GraphQLQuery
+    public Flux<Node> findAllNodesByNodeLabelSearch(@GraphQLArgument(name = "labelSearchTerm") String labelSearchTerm, @GraphQLEnvironment ResolutionEnvironment env) {
+        return Flux.fromIterable(client.listNodesByNodeLabelSearch(labelSearchTerm, headerUtil.getAuthHeader(env)).stream().map(mapper::protoToNode).toList());
+    }
+
+    @GraphQLQuery
+    public Flux<Node> findAllNodesByTags(@GraphQLArgument(name = "tags") List<String> tags, @GraphQLEnvironment ResolutionEnvironment env) {
+        return Flux.fromIterable(client.listNodesByTags(tags, headerUtil.getAuthHeader(env)).stream().map(mapper::protoToNode).toList());
+    }
+
+    @GraphQLQuery
     public Mono<Node> findNodeById(@GraphQLArgument(name = "id") Long id, @GraphQLEnvironment ResolutionEnvironment env) {
         return Mono.just(mapper.protoToNode(client.getNodeById(id, headerUtil.getAuthHeader(env))));
     }

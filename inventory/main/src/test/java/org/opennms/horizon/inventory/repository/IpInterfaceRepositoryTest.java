@@ -83,12 +83,9 @@ class IpInterfaceRepositoryTest {
 
     @AfterEach
     public void cleanUp() {
-        IntStream.range(0, NUM_NODES).forEach(i ->
-            Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, "tenant" + i).run(()-> {
-            nodeRepository.deleteAll();
-            ipInterfaceRepository.deleteAll();
-            monitoringLocationRepository.deleteAll();
-        }));
+        nodeRepository.deleteAll();
+        ipInterfaceRepository.deleteAll();
+        monitoringLocationRepository.deleteAll();
     }
 
     @Test

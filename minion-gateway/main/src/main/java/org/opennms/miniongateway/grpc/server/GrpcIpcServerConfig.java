@@ -57,13 +57,12 @@ public class GrpcIpcServerConfig {
     }
 
     @Bean(name = "internalGrpcIpcServer", destroyMethod = "stopServer")
-    public GrpcIpcServer prepareInternalGrpcIpcServer(@Autowired TenantIDGrpcServerInterceptor tenantIDGrpcServerInterceptor) {
+    public GrpcIpcServer prepareInternalGrpcIpcServerTenantIdInterceptor() {
         Properties properties = new Properties();
         properties.setProperty(GrpcIpcUtils.GRPC_MAX_INBOUND_SIZE, Long.toString(maxMessageSize));
 
         return new GrpcIpcServerBuilder(properties, internalGrpcPort, "PT10S", Arrays.asList(
-            new LoggingInterceptor(),
-            tenantIDGrpcServerInterceptor
+            new LoggingInterceptor()
         ));
     }
 }

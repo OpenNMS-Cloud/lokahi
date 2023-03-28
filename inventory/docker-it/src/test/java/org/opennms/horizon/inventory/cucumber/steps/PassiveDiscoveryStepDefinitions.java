@@ -50,15 +50,14 @@ import static org.junit.Assert.assertEquals;
 
 
 public class PassiveDiscoveryStepDefinitions {
-    private static InventoryBackgroundHelper backgroundHelper;
+    private final InventoryBackgroundHelper backgroundHelper;
     private PassiveDiscoveryUpsertDTO passiveDiscoveryUpsertDTO;
     private PassiveDiscoveryDTO createdDiscovery;
     private PassiveDiscoveryListDTO fetchedPassiveDiscoveryList;
     private TagListDTO tagList;
 
-    @BeforeAll
-    public static void beforeAll() {
-        backgroundHelper = new InventoryBackgroundHelper();
+    public PassiveDiscoveryStepDefinitions(InventoryBackgroundHelper backgroundHelper) {
+        this.backgroundHelper = backgroundHelper;
     }
 
     /*

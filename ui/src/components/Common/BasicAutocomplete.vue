@@ -9,6 +9,7 @@
       - multi: 
         - does not allow to add new value if not exists in the list
         - selected item is displayed in the input box
+    - preselectedItems: the list of items that was previously selected
   
   - Options
     - allow-new: to add new value, if not exists in the list (applicable only to 'single' render-type)
@@ -57,8 +58,9 @@
 import { PropType } from 'vue'
 import { IAutocompleteItemType } from '@featherds/autocomplete'
 import CancelIcon from '@featherds/icon/navigation/Cancel'
+import { isEqual } from 'lodash'
 
-type IAutocomplete = IAutocompleteItemType & { _text: string }
+type IAutocomplete = IAutocompleteItemType & { _text?: string }
 type TypeSingle = 'single'
 type TypeMulti = 'multi'
 
@@ -89,27 +91,41 @@ const props = defineProps({
   showList: {
     type: Boolean,
     default: true
+  },
+  preselectedItems: {
+    type: [Object],
+    reqired: false
   }
 })
 
 const loading = ref(false)
 const selectedItems = ref<IAutocomplete[]>([])
-
 const results = computed(() => {
   loading.value = false
-
   return props.items?.map((item: any) => ({
     ...item,
     _text: item.name
   }))
 })
 
+onMounted(() => {
+  props.getItems()
+})
+
+watch(
+  () => props.preselectedItems,
+  (newVal) => {
+    if (!isEqual(newVal, selectedItems.value)) {
+      selectedItems.value = props.preselectedItems as IAutocomplete[]
+    }
+  }
+)
+
 const modelValue = ref<IAutocomplete[] | undefined>()
 
 const updateModelValue = (selected: any) => {
   if (props.renderType === 'single') {
     const exists = selectedItems.value.some(({ name }) => name === selected.name)
-
     if (!exists) {
       selectedItems.value.push(selected)
 
@@ -124,9 +140,7 @@ const updateModelValue = (selected: any) => {
 
 const search = (q: string) => {
   if (!q) return // prevent making request on focus
-
   loading.value = true
-
   props.getItems(q)
 }
 
@@ -135,7 +149,6 @@ const addValue = (q: string) => {
 
   if (!exists) {
     selectedItems.value?.push({ name: q, _text: q })
-
     emits('items-selected', selectedItems.value)
   }
 }
@@ -177,5 +190,9 @@ defineExpose({
   > .label {
     order: 1;
   }
+}
+
+:deep(.feather-input-sub-text) {
+  display: none;
 }
 </style>

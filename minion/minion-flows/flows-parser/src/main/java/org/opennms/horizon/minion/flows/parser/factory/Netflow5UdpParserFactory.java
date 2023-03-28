@@ -28,14 +28,15 @@
 
 package org.opennms.horizon.minion.flows.parser.factory;
 
-import com.codahale.metrics.MetricRegistry;
+import java.util.Objects;
+
 import org.opennms.horizon.minion.flows.listeners.Parser;
 import org.opennms.horizon.minion.flows.parser.Netflow5UdpParser;
 import org.opennms.horizon.minion.flows.parser.TelemetryRegistry;
 import org.opennms.horizon.shared.ipc.rpc.IpcIdentity;
 import org.opennms.sink.flows.contract.ParserConfig;
 
-import java.util.Objects;
+import com.codahale.metrics.MetricRegistry;
 
 public class Netflow5UdpParserFactory implements ParserFactory {
 
@@ -47,7 +48,6 @@ public class Netflow5UdpParserFactory implements ParserFactory {
         this.telemetryRegistry = Objects.requireNonNull(telemetryRegistry);
         this.identity = Objects.requireNonNull(identity);
         this.dnsResolver = Objects.requireNonNull(dnsResolver);
-        telemetryRegistry.addParserFactory(this);
     }
 
     @Override
@@ -58,6 +58,7 @@ public class Netflow5UdpParserFactory implements ParserFactory {
     @Override
     public Parser create(final ParserConfig parserConfig) {
         final var dispatcher = telemetryRegistry.getDispatcher();
+
         return new Netflow5UdpParser(
             parserConfig.getName(),
             dispatcher,

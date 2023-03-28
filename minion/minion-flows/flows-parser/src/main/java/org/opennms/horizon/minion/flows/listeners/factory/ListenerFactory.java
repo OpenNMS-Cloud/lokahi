@@ -28,7 +28,6 @@
 
 package org.opennms.horizon.minion.flows.listeners.factory;
 
-import org.opennms.horizon.minion.flows.listeners.FlowsListener;
 import org.opennms.horizon.minion.flows.listeners.Listener;
 import org.opennms.sink.flows.contract.ListenerConfig;
 
@@ -39,5 +38,6 @@ import org.opennms.sink.flows.contract.ListenerConfig;
  */
 public interface ListenerFactory {
     Class<? extends Listener> getListenerClass();
-    FlowsListener create(ListenerConfig config);
+
+    Listener create(ListenerConfig config);
 }

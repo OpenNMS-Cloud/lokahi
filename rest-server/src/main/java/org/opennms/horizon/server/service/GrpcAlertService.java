@@ -30,6 +30,7 @@ package org.opennms.horizon.server.service;
 
 import org.opennms.horizon.server.mapper.AlertMapper;
 import org.opennms.horizon.server.model.alerts.Alert;
+import org.opennms.horizon.server.model.alerts.MonitorPolicy;
 import org.opennms.horizon.server.service.grpc.AlertsClient;
 import org.opennms.horizon.server.utils.ServerHeaderUtil;
 import org.springframework.stereotype.Service;
@@ -83,5 +84,20 @@ public class GrpcAlertService {
     @GraphQLMutation
     public Mono<Boolean> deleteAlert(@GraphQLArgument(name = "id") long id, @GraphQLEnvironment ResolutionEnvironment env) {
         return Mono.just(alertsClient.deleteAlert(id, headerUtil.getAuthHeader(env)));
+    }
+
+    @GraphQLMutation
+    public Mono<MonitorPolicy> createMonitorPolicy(MonitorPolicy policy, @GraphQLEnvironment ResolutionEnvironment env) {
+        return Mono.just(alertsClient.createMonitorPolicy(policy, headerUtil.getAuthHeader(env)));
+    }
+
+    @GraphQLQuery
+    public Flux<MonitorPolicy> listMonitoryPolicies(@GraphQLEnvironment ResolutionEnvironment env) {
+        return Flux.fromIterable(alertsClient.listMonitorPolicies(headerUtil.getAuthHeader(env)));
+    }
+
+    @GraphQLQuery
+    public Mono<MonitorPolicy> findMonitorPolicyById(Long id, @GraphQLEnvironment ResolutionEnvironment env) {
+        return Mono.just(alertsClient.getMonitorPolicyById(id, headerUtil.getAuthHeader(env)));
     }
 }

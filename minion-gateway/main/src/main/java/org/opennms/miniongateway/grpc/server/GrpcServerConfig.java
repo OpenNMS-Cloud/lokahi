@@ -19,6 +19,8 @@ import org.opennms.horizon.shared.ipc.grpc.server.manager.impl.RpcRequestTracker
 import org.opennms.horizon.shared.ipc.grpc.server.manager.rpc.LocationIndependentRpcClientFactoryImpl;
 import org.opennms.horizon.shared.ipc.grpc.server.manager.rpcstreaming.MinionRpcStreamConnectionManager;
 import org.opennms.horizon.shared.ipc.grpc.server.manager.rpcstreaming.impl.MinionRpcStreamConnectionManagerImpl;
+import org.opennms.horizon.shared.protobuf.mapper.TenantedTaskSetResultsMapper;
+import org.opennms.horizon.shared.protobuf.mapper.impl.TenantedTaskSetResultsMapperImpl;
 import org.opennms.miniongateway.grpc.server.heartbeat.HeartbeatKafkaForwarder;
 import org.opennms.miniongateway.grpc.server.flows.FlowKafkaForwarder;
 import org.opennms.miniongateway.grpc.server.tasktresults.TaskResultsKafkaForwarder;
@@ -43,6 +45,11 @@ public class GrpcServerConfig {
 
     @Autowired
     private MetricRegistry metricRegistry;
+
+    @Bean
+    public TenantedTaskSetResultsMapper tenantedTaskSetResultsMapper() {
+        return new TenantedTaskSetResultsMapperImpl();
+    }
 
     @Bean
     public RpcConnectionTracker rpcConnectionTracker() {

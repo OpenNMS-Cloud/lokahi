@@ -33,13 +33,23 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.opennms.horizon.alerts.proto.Alert;
 import org.opennms.horizon.model.common.proto.Severity;
 import org.opennms.horizon.notifications.dto.PagerDutyConfigDTO;
+import org.opennms.horizon.notifications.exceptions.NotificationAPIException;
+import org.opennms.horizon.notifications.exceptions.NotificationAPIRetryableException;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.retry.support.RetryTemplate;
+import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PagerDutyAPITest {
@@ -48,6 +58,13 @@ public class PagerDutyAPITest {
 
     @Mock
     RestTemplate restTemplate;
+
+    @Spy
+    RetryTemplate retryTemplate = RetryTemplate.builder()
+        .retryOn(NotificationAPIRetryableException.class)
+        .maxAttempts(3)
+        .fixedBackoff(10)
+        .build();
 
     @Mock
     PagerDutyDao pagerDutyDao;
@@ -62,6 +79,29 @@ public class PagerDutyAPITest {
     @Test
     public void saveConfig() {
         pagerDutyAPI.saveConfig(getConfigDTO());
+    }
+
+    @Test
+    public void postNotificationsWithRetry() throws Exception {
+        // Depending on the response, we should retry
+        Mockito.when(pagerDutyDao.getConfig(any())).thenReturn(getConfigDTO());
+        Mockito.when(restTemplate.exchange(any(), any(), any(), any(Class.class)))
+            .thenThrow(new RestClientResponseException("Failed", HttpStatus.TOO_MANY_REQUESTS, "Failed", null, null, null))
+            .thenReturn(ResponseEntity.ok(null));
+
+        pagerDutyAPI.postNotification(getAlert());
+        verify(restTemplate, times(2)).exchange(any(), any(), any(), any(Class.class));
+    }
+
+    @Test
+    public void postNotificationsWithoutRetry() throws Exception {
+        // Some exceptions should just fail and not retry.
+        Mockito.when(pagerDutyDao.getConfig(any())).thenReturn(getConfigDTO());
+        Mockito.when(restTemplate.exchange(any(), any(), any(), any(Class.class)))
+            .thenThrow(new RestClientResponseException("Failed", HttpStatus.BAD_REQUEST, "Failed", null, null, null));
+
+        assertThrows(NotificationAPIException.class, () -> pagerDutyAPI.postNotification(getAlert()));
+        verify(restTemplate, times(1)).exchange(any(), any(), any(), any(Class.class));
     }
 
     private PagerDutyConfigDTO getConfigDTO() {

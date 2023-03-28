@@ -80,7 +80,6 @@ public class PagerDutyDaoTest {
     }
 
     @Test
-    @WithTenant(tenantId = "any")
     public void getUninitialisedConfig() {
         try {
             pagerDutyDao.getConfig("any");
@@ -90,7 +89,6 @@ public class PagerDutyDaoTest {
     }
 
     @Test
-    @WithTenant(tenantId = "any")
     public void getInitialisedConfig() throws Exception {
         List<PagerDutyConfig> configs = Arrays.asList(new PagerDutyConfig());
         Mockito.when(pagerDutyConfigRepository.findByTenantId("any")).thenReturn(configs);

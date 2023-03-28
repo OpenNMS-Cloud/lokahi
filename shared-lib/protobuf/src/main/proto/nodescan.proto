@@ -39,7 +39,6 @@ message NodeScanRequest {
   string primaryIp = 2;
   repeated string ipAddresses = 3; //reserved for service scan
   repeated opennms.snmp.api.SnmpConfiguration snmp_configs = 4;
-  optional int64 passive_discovery_id = 5;
 }
 
 //Scan Results
@@ -84,7 +83,6 @@ message NodeScanResult {
   repeated IpInterfaceResult ipInterfaces = 3;
   repeated SnmpInterfaceResult snmpInterfaces = 4;
   opennms.snmp.api.SnmpConfiguration snmp_config = 5;
-  optional int64 passive_discovery_id = 6;
 }
 
 

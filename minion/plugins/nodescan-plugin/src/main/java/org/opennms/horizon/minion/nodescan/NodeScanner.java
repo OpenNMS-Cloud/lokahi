@@ -93,18 +93,15 @@ public class NodeScanner implements Scanner {
             NodeInfoResult nodeInfo = scanSystem(agentConfig);
             List<IpInterfaceResult> ipInterfaceResults = scanIpAddrTable(agentConfig);
             List<SnmpInterfaceResult> snmpInterfaceResults = scanSnmpInterface(agentConfig);
-            NodeScanResult.Builder resultBuilder = NodeScanResult.newBuilder()
+
+            return CompletableFuture.completedFuture(ScanResultsResponseImpl.builder().results(NodeScanResult.newBuilder()
                 .setNodeId(scanRequest.getNodeId())
                 .setNodeInfo(nodeInfo)
                 .addAllIpInterfaces(ipInterfaceResults)
                 .addAllSnmpInterfaces(snmpInterfaceResults)
                 .setSnmpConfig(mapSnmpAgentConfig(agentConfig))
-                .addAllSnmpInterfaces(snmpInterfaceResults);
-
-            if (scanRequest.hasPassiveDiscoveryId()) {
-                resultBuilder.setPassiveDiscoveryId(scanRequest.getPassiveDiscoveryId());
-            }
-            return CompletableFuture.completedFuture(ScanResultsResponseImpl.builder().results(resultBuilder.build()).build());
+                .addAllSnmpInterfaces(snmpInterfaceResults).build())
+                .build());
         } catch (Exception e) {
             LOG.error("Error while node scan", e);
             return CompletableFuture.failedFuture(e);

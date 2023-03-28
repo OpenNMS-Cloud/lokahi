@@ -91,10 +91,9 @@ public class ScannerTaskSetService {
         }
     }
 
-    public void sendNodeScannerTask(Node node, PassiveDiscovery discovery, List<SnmpConfiguration> snmpConfigs) {
+    public void sendNodeScannerTask(Node node, String location, List<SnmpConfiguration> snmpConfigs) {
         NodeDTO nodeDTO = nodeMapper.modelToDTO(node);
-        Optional<TaskDefinition> taskDef = createPassiveNodeScanTask(nodeDTO, snmpConfigs, discovery.getId());
-        taskDef.ifPresent(taskDefinition -> taskSetPublisher.publishNewTasks(node.getTenantId(), discovery.getLocation(), List.of(taskDefinition)));
+        sendNodeScannerTask(nodeDTO, location, snmpConfigs);
     }
 
     public void sendNodeScannerTask(NodeDTO node, String location, List<SnmpConfiguration> snmpConfigs) {
@@ -199,30 +198,6 @@ public class ScannerTaskSetService {
             .setConfiguration(configuration)
             .setSchedule(DEFAULT_SCHEDULE_FOR_SCAN)
             .build();
-    }
-
-    private Optional<TaskDefinition> createPassiveNodeScanTask(NodeDTO node, List<SnmpConfiguration> snmpConfigs, long passiveDiscoveryId) {
-        Optional<IpInterfaceDTO> ipInterface = node.getIpInterfacesList().stream()
-            .filter(IpInterfaceDTO::getSnmpPrimary).findFirst()
-            .or(() -> node.getIpInterfacesList().stream().findAny());
-        return ipInterface.map(ip -> {
-            String taskId = identityForNodeScan(node.getId());
-
-            Any taskConfig = Any.pack(NodeScanRequest.newBuilder()
-                .setNodeId(node.getId())
-                .setPrimaryIp(ip.getIpAddress())
-                .addAllSnmpConfigs(snmpConfigs)
-                .setPassiveDiscoveryId(passiveDiscoveryId).build());
-
-            return TaskDefinition.newBuilder()
-                .setType(TaskType.SCANNER)
-                .setPluginName("NodeScanner")
-                .setId(taskId)
-                .setNodeId(node.getId())
-                .setConfiguration(taskConfig)
-                .setSchedule(DEFAULT_SCHEDULE_FOR_SCAN)
-                .build();
-        }).or(Optional::empty);
     }
 
     private Optional<TaskDefinition> createNodeScanTask(NodeDTO node, List<SnmpConfiguration> snmpConfigs) {

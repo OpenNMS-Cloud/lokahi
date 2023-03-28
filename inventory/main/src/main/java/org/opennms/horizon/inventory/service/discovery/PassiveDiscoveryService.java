@@ -213,7 +213,7 @@ public class PassiveDiscoveryService {
         });
 
         detectorTaskSetService.sendDetectorTasks(node);
-        scannerTaskSetService.sendNodeScannerTask(node, discovery, snmpConfigs);
+        scannerTaskSetService.sendNodeScannerTask(node, discovery.getLocation(), snmpConfigs);
     }
 
     @Transactional

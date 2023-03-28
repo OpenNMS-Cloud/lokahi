@@ -39,6 +39,7 @@ import org.opennms.horizon.shared.icmp.PingResponseCallback;
 import org.opennms.horizon.shared.icmp.Pinger;
 import org.opennms.horizon.shared.icmp.PingerFactory;
 import org.opennms.icmp.contract.IcmpDetectorRequest;
+import org.opennms.node.scan.contract.ServiceResult;
 import org.opennms.taskset.contract.MonitorType;
 
 import java.net.InetAddress;
@@ -109,6 +110,39 @@ public class IcmpDetector implements ServiceDetector {
         return future;
     }
 
+    @Override
+    public CompletableFuture<ServiceResult> detect(String host, Any config) {
+        CompletableFuture<ServiceResult> future = new CompletableFuture<>();
+
+        try {
+
+            if (!config.is(IcmpDetectorRequest.class)) {
+                throw new IllegalArgumentException("configuration must be an IcmpDetectorRequest; type-url=" + config.getTypeUrl());
+            }
+
+            IcmpDetectorRequest icmpDetectorRequest = config.unpack(IcmpDetectorRequest.class);
+            IcmpDetectorRequest effectiveRequest = populateDefaultsAsNeeded(icmpDetectorRequest);
+
+            InetAddress hostAddress = InetAddress.getByName(host);
+            int dscp = effectiveRequest.getDscp();
+            boolean allowFragmentation = effectiveRequest.getAllowFragmentation();
+
+            Pinger pinger = pingerFactory.getInstance(dscp, allowFragmentation);
+
+            pinger.ping(
+                hostAddress,
+                effectiveRequest.getTimeout(),
+                effectiveRequest.getRetries(),
+                effectiveRequest.getPacketSize(),
+                new PingResponseHandler(future)
+            );
+        } catch (Exception e) {
+            future.complete(ServiceResult.newBuilder().setIpAddress(host).build());
+        }
+
+        return future;
+    }
+
     private IcmpDetectorRequest populateDefaultsAsNeeded(IcmpDetectorRequest request) {
         IcmpDetectorRequest.Builder resultBuilder = IcmpDetectorRequest.newBuilder(request);
 
@@ -138,11 +172,8 @@ public class IcmpDetector implements ServiceDetector {
     private static class MyPingResponseCallback implements PingResponseCallback {
         private final CompletableFuture<ServiceDetectorResponse> future;
 
-        private final long nodeId;
-
         public MyPingResponseCallback(CompletableFuture<ServiceDetectorResponse> future, long nodeId) {
             this.future = future;
-            this.nodeId = nodeId;
         }
 
         @Override
@@ -152,7 +183,6 @@ public class IcmpDetector implements ServiceDetector {
                     .monitorType(MonitorType.ICMP)
                     .serviceDetected(true)
                     .ipAddress(inetAddress.getHostAddress())
-                    .nodeId(nodeId)
                     .build()
             );
         }
@@ -179,6 +209,30 @@ public class IcmpDetector implements ServiceDetector {
                     .ipAddress(inetAddress.getHostAddress())
                     .build()
             );
+        }
+    }
+
+    private static class PingResponseHandler implements PingResponseCallback {
+
+        private final CompletableFuture<ServiceResult> future;
+
+        private PingResponseHandler(CompletableFuture<ServiceResult> future) {
+            this.future = future;
+        }
+
+        @Override
+        public void handleResponse(InetAddress address, EchoPacket response) {
+
+        }
+
+        @Override
+        public void handleTimeout(InetAddress address, EchoPacket request) {
+
+        }
+
+        @Override
+        public void handleError(InetAddress address, EchoPacket request, Throwable t) {
+
         }
     }
 }

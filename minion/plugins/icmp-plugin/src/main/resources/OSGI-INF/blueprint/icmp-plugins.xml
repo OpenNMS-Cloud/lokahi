@@ -17,7 +17,7 @@
 
   <service ref="icmpDetectorManager" interface="org.opennms.horizon.minion.plugin.api.ServiceDetectorManager">
     <service-properties>
-      <entry key="detector.name" value="ICMPDetector"/>
+      <entry key="detector.name" value="ICMP"/>
     </service-properties>
   </service>
 

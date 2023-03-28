@@ -39,6 +39,7 @@ import org.opennms.horizon.inventory.service.MonitoredServiceService;
 import org.opennms.horizon.inventory.service.MonitoredServiceTypeService;
 import org.opennms.horizon.inventory.service.taskset.TaskSetHandler;
 import org.opennms.horizon.shared.utils.InetAddressUtils;
+import org.opennms.node.scan.contract.ServiceResult;
 import org.opennms.taskset.contract.DetectorResponse;
 import org.opennms.taskset.contract.MonitorType;
 import org.springframework.stereotype.Component;
@@ -88,6 +89,51 @@ public class DetectorResponseService {
         MonitoredServiceType monitoredServiceType =
             monitoredServiceTypeService.createSingle(MonitoredServiceTypeDTO.newBuilder()
                 .setServiceName(response.getMonitorType().name())
+                .setTenantId(tenantId)
+                .build());
+
+        MonitoredServiceDTO newMonitoredService = MonitoredServiceDTO.newBuilder()
+            .setTenantId(tenantId)
+            .build();
+
+        monitoredServiceService.createSingle(newMonitoredService, monitoredServiceType, ipInterface);
+    }
+
+    public void processDetectorResults(String tenantId, String location, ServiceResult serviceResult) {
+
+        log.info("Received Detector Response = {} for tenant = {} and location = {}", serviceResult, tenantId, location);
+
+        InetAddress ipAddress = InetAddressUtils.getInetAddress(serviceResult.getIpAddress());
+        Optional<IpInterface> ipInterfaceOpt = ipInterfaceRepository
+            .findByIpAddressAndLocationAndTenantId(ipAddress, location, tenantId);
+
+        if (ipInterfaceOpt.isPresent()) {
+            IpInterface ipInterface = ipInterfaceOpt.get();
+
+            if (serviceResult.getStatus()) {
+                createMonitoredService(serviceResult, ipInterface);
+                // TODO: Combine Monitor type and Service type
+                MonitorType monitorType = MonitorType.valueOf(serviceResult.getService().name());
+                long nodeId = ipInterface.getNodeId();
+
+                taskSetHandler.sendMonitorTask(location, monitorType, ipInterface, nodeId);
+                taskSetHandler.sendCollectorTask(location, monitorType, ipInterface, nodeId);
+
+            } else {
+                log.info("{} not detected on ip address = {}", serviceResult.getService().name(), ipAddress.getAddress());
+            }
+        } else {
+            log.warn("Failed to find IP Interface during detection for ip = {}", ipAddress.getHostAddress());
+        }
+    }
+
+    private void createMonitoredService(ServiceResult serviceResult, IpInterface ipInterface) {
+        String tenantId = ipInterface.getTenantId();
+
+        MonitoredServiceType monitoredServiceType =
+            monitoredServiceTypeService.createSingle(MonitoredServiceTypeDTO.newBuilder()
+                 // TODO: Combine Monitor type and Service type
+                .setServiceName(serviceResult.getService().name())
                 .setTenantId(tenantId)
                 .build());
 

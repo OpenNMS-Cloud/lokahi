@@ -36,14 +36,15 @@ import org.opennms.horizon.inventory.dto.IpInterfaceDTO;
 import org.opennms.horizon.inventory.dto.NodeDTO;
 import org.opennms.horizon.inventory.mapper.NodeMapper;
 import org.opennms.horizon.inventory.model.Node;
-import org.opennms.horizon.inventory.model.discovery.PassiveDiscovery;
 import org.opennms.horizon.inventory.model.discovery.active.AzureActiveDiscovery;
 import org.opennms.horizon.inventory.service.taskset.publisher.TaskSetPublisher;
 import org.opennms.horizon.shared.utils.InetAddressUtils;
 import org.opennms.horizon.snmp.api.SnmpConfiguration;
 import org.opennms.icmp.contract.IpRange;
 import org.opennms.icmp.contract.PingSweepRequest;
+import org.opennms.node.scan.contract.DetectRequest;
 import org.opennms.node.scan.contract.NodeScanRequest;
+import org.opennms.node.scan.contract.ServiceType;
 import org.opennms.taskset.contract.TaskDefinition;
 import org.opennms.taskset.contract.TaskType;
 import org.slf4j.Logger;
@@ -210,6 +211,8 @@ public class ScannerTaskSetService {
             Any taskConfig = Any.pack(NodeScanRequest.newBuilder()
                 .setNodeId(node.getId())
                 .setPrimaryIp(ip.getIpAddress())
+                .addDetector(DetectRequest.newBuilder().setService(ServiceType.SNMP).build())
+                .addDetector(DetectRequest.newBuilder().setService(ServiceType.ICMP).build())
                 .addAllSnmpConfigs(snmpConfigs).build());
 
             return TaskDefinition.newBuilder()

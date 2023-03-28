@@ -43,7 +43,6 @@ import org.opennms.horizon.inventory.model.Node;
 import org.opennms.horizon.inventory.model.SnmpInterface;
 import org.opennms.horizon.inventory.model.discovery.active.AzureActiveDiscovery;
 import org.opennms.horizon.inventory.repository.NodeRepository;
-import org.opennms.horizon.inventory.repository.discovery.PassiveDiscoveryRepository;
 import org.opennms.horizon.inventory.repository.discovery.active.AzureActiveDiscoveryRepository;
 import org.opennms.horizon.inventory.service.IpInterfaceService;
 import org.opennms.horizon.inventory.service.NodeService;
@@ -81,10 +80,10 @@ public class ScannerResponseService {
     private final IpInterfaceService ipInterfaceService;
     private final SnmpInterfaceService snmpInterfaceService;
     private final TagService tagService;
-    private final PassiveDiscoveryRepository passiveDiscoveryRepository;
     private final DetectorTaskSetService detectorTaskSetService;
     private final SnmpConfigService snmpConfigService;
     private final IcmpActiveDiscoveryService icmpActiveDiscoveryService;
+    private final DetectorResponseService detectorResponseService;
 
     @Transactional
     public void accept(String tenantId, String location, ScannerResponse response) throws InvalidProtocolBufferException {
@@ -214,8 +213,10 @@ public class ScannerResponseService {
             for (IpInterfaceResult ipIfResult : result.getIpInterfacesList()) {
                 ipInterfaceService.creatUpdateFromScanResult(tenantId, node, ipIfResult, ifIndexSNMPMap);
             }
+            result.getDetectorResultList().forEach(detectorResult -> {
+                detectorResponseService.processDetectorResults(tenantId, location, detectorResult);
+            });
 
-            detectorTaskSetService.sendDetectorTasks(node);
         } else {
             log.error("Error while process node scan results, node with id {} doesn't exist", result.getNodeId());
         }

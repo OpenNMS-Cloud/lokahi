@@ -1,13 +1,14 @@
 package org.opennms.horizon.minion.snmp;
 
 import com.google.protobuf.Any;
-import com.google.protobuf.Descriptors;
 import org.opennms.horizon.minion.plugin.api.ServiceDetector;
 import org.opennms.horizon.minion.plugin.api.ServiceDetectorResponse;
 import org.opennms.horizon.minion.plugin.api.ServiceDetectorResponseImpl;
 import org.opennms.horizon.shared.snmp.SnmpAgentConfig;
 import org.opennms.horizon.shared.snmp.SnmpHelper;
 import org.opennms.horizon.shared.snmp.SnmpObjId;
+import org.opennms.node.scan.contract.ServiceResult;
+import org.opennms.node.scan.contract.ServiceType;
 import org.opennms.snmp.contract.SnmpDetectorRequest;
 import org.opennms.taskset.contract.MonitorType;
 import org.slf4j.Logger;
@@ -24,8 +25,6 @@ public class SnmpDetector implements ServiceDetector {
 
     public SnmpDetector(SnmpHelper snmpHelper) {
         this.snmpHelper = snmpHelper;
-
-        Descriptors.Descriptor snmpDetectorRequestDescriptor = SnmpDetectorRequest.getDefaultInstance().getDescriptorForType();
 
     }
 
@@ -60,6 +59,34 @@ public class SnmpDetector implements ServiceDetector {
         }
     }
 
+    @Override
+    public CompletableFuture<ServiceResult> detect(String host, Any config) {
+
+        try {
+            if (!config.is(SnmpDetectorRequest.class)) {
+                throw new IllegalArgumentException("config must be an SnmpRequest; type-url=" + config.getTypeUrl());
+            }
+
+            SnmpDetectorRequest snmpDetectorRequest = config.unpack(SnmpDetectorRequest.class);
+            // Retrieve agentConfig
+            SnmpAgentConfig agentConfig = SnmpConfigUtils.mapAgentConfig(host, snmpDetectorRequest.getAgentConfig());
+
+            SnmpObjId snmpObjectId = SnmpObjId.get(DEFAULT_OBJECT_IDENTIFIER);
+
+            return snmpHelper.getAsync(agentConfig, new SnmpObjId[]{snmpObjectId})
+                .handle((snmpValues, throwable) -> getResponse(snmpDetectorRequest.getHost(), throwable))
+                .completeOnTimeout(getErrorResult(host),
+                    agentConfig.getTimeout(), TimeUnit.MILLISECONDS);
+
+        } catch (IllegalArgumentException e) {
+            log.debug("Invalid SNMP Criteria during detection of interface {}", host, e);
+            return CompletableFuture.completedFuture(getErrorResult(host));
+        } catch (Exception e) {
+            log.debug("Unexpected exception during SNMP detection of interface {}", host, e);
+            return CompletableFuture.completedFuture(getErrorResult(host));
+        }
+    }
+
 
     private ServiceDetectorResponse getResponse(String host, long nodeId, Throwable throwable) {
         if (throwable != null) {
@@ -83,6 +110,29 @@ public class SnmpDetector implements ServiceDetector {
             .ipAddress(host)
             .serviceDetected(false)
             .reason(reason)
+            .build();
+    }
+
+    private ServiceResult getResponse(String host, Throwable throwable) {
+        if (throwable != null) {
+            return getErrorResult(host);
+        }
+        return getDetectedResult(host);
+    }
+
+    private ServiceResult getDetectedResult(String host) {
+        return ServiceResult.newBuilder()
+            .setService(ServiceType.SNMP)
+            .setIpAddress(host)
+            .setStatus(true)
+            .build();
+    }
+
+    private ServiceResult getErrorResult(String host) {
+        return ServiceResult.newBuilder()
+            .setService(ServiceType.SNMP)
+            .setIpAddress(host)
+            .setStatus(false)
             .build();
     }
 }

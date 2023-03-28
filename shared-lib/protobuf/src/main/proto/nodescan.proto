@@ -37,8 +37,18 @@ option java_package = "org.opennms.node.scan.contract";
 message NodeScanRequest {
   int64 node_id = 1;
   string primary_ip = 2;
-  repeated string ip_addresses = 3; //reserved for service scan
+  repeated DetectRequest detector = 3;
   repeated opennms.snmp.api.SnmpConfiguration snmp_configs = 4;
+}
+
+enum ServiceType {
+  ICMP = 0;
+  SNMP = 1;
+}
+
+message DetectRequest {
+  ServiceType service = 1;
+  google.protobuf.Any config = 2;
 }
 
 //Scan Results
@@ -54,8 +64,8 @@ message NodeInfoResult {
 //for service detector
 message ServiceResult {
   string ip_address = 1;
-  string service_name = 2;
-  string status = 3;
+  ServiceType service = 2;
+  bool status = 3;
 }
 
 message IpInterfaceResult {
@@ -83,6 +93,7 @@ message NodeScanResult {
   repeated IpInterfaceResult ip_interfaces = 3;
   repeated SnmpInterfaceResult snmp_interfaces = 4;
   opennms.snmp.api.SnmpConfiguration snmp_config = 5;
+  repeated ServiceResult detector_result = 6;
 }
 
 

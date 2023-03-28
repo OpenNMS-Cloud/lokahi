@@ -30,17 +30,20 @@ package org.opennms.horizon.minion.nodescan;
 
 import org.opennms.horizon.minion.plugin.api.Scanner;
 import org.opennms.horizon.minion.plugin.api.ScannerManager;
+import org.opennms.horizon.minion.plugin.api.registries.DetectorRegistry;
 import org.opennms.horizon.shared.snmp.SnmpHelper;
 
 public class NodeScannerManager implements ScannerManager {
     private final SnmpHelper snmpHelper;
+    private final DetectorRegistry detectorRegistry;
 
-    public NodeScannerManager(SnmpHelper snmpHelper) {
+    public NodeScannerManager(SnmpHelper snmpHelper, DetectorRegistry detectorRegistry) {
         this.snmpHelper = snmpHelper;
+        this.detectorRegistry = detectorRegistry;
     }
 
     @Override
     public Scanner create() {
-        return new NodeScanner(snmpHelper);
+        return new NodeScanner(snmpHelper, detectorRegistry);
     }
 }

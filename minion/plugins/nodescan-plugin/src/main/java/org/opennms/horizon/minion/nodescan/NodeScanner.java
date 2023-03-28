@@ -34,17 +34,21 @@ import com.google.protobuf.Any;
 import org.opennms.horizon.minion.plugin.api.ScanResultsResponse;
 import org.opennms.horizon.minion.plugin.api.ScanResultsResponseImpl;
 import org.opennms.horizon.minion.plugin.api.Scanner;
+import org.opennms.horizon.minion.plugin.api.registries.DetectorRegistry;
 import org.opennms.horizon.shared.snmp.SnmpAgentConfig;
 import org.opennms.horizon.shared.snmp.SnmpConfiguration;
 import org.opennms.horizon.shared.snmp.SnmpHelper;
 import org.opennms.horizon.shared.snmp.SnmpWalker;
 import org.opennms.horizon.shared.utils.InetAddressUtils;
 import org.opennms.horizon.snmp.api.Version;
+import org.opennms.icmp.contract.IcmpDetectorRequest;
 import org.opennms.node.scan.contract.IpInterfaceResult;
 import org.opennms.node.scan.contract.NodeInfoResult;
 import org.opennms.node.scan.contract.NodeScanRequest;
 import org.opennms.node.scan.contract.NodeScanResult;
+import org.opennms.node.scan.contract.ServiceResult;
 import org.opennms.node.scan.contract.SnmpInterfaceResult;
+import org.opennms.snmp.contract.SnmpDetectorRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,17 +58,19 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-
+import java.util.stream.Collectors;
 
 
 public class NodeScanner implements Scanner {
     private static final Logger LOG = LoggerFactory.getLogger(NodeScanner.class);
     private final SnmpHelper snmpHelper;
     private final SnmpConfigDiscovery snmpConfigDiscovery;
+    private final DetectorRegistry detectorRegistry;
 
-    public NodeScanner(SnmpHelper snmpHelper) {
+    public NodeScanner(SnmpHelper snmpHelper, DetectorRegistry detectorRegistry) {
         this.snmpHelper = snmpHelper;
-        snmpConfigDiscovery = new SnmpConfigDiscovery(snmpHelper);
+        this.snmpConfigDiscovery = new SnmpConfigDiscovery(snmpHelper);
+        this.detectorRegistry = detectorRegistry;
     }
 
     @Override
@@ -94,14 +100,61 @@ public class NodeScanner implements Scanner {
             List<IpInterfaceResult> ipInterfaceResults = scanIpAddrTable(agentConfig);
             List<SnmpInterfaceResult> snmpInterfaceResults = scanSnmpInterface(agentConfig);
 
-            return CompletableFuture.completedFuture(ScanResultsResponseImpl.builder().results(NodeScanResult.newBuilder()
-                .setNodeId(scanRequest.getNodeId())
-                .setNodeInfo(nodeInfo)
-                .addAllIpInterfaces(ipInterfaceResults)
-                .addAllSnmpInterfaces(snmpInterfaceResults)
-                .setSnmpConfig(mapSnmpAgentConfig(agentConfig))
-                .addAllSnmpInterfaces(snmpInterfaceResults).build())
-                .build());
+            var ipAddresses = ipInterfaceResults.stream().map(IpInterfaceResult::getIpAddress).toList();
+            var detectors = scanRequest.getDetectorList().stream();
+            List<CompletableFuture<ServiceResult>> futures = new ArrayList<>();
+            SnmpAgentConfig finalAgentConfig = agentConfig;
+            ipAddresses.forEach(ipAddress -> {
+                detectors.toList().forEach(detector -> {
+                    try {
+                        var serviceDetectorManager = detectorRegistry.getService(detector.getService().name());
+                        var serviceDetector = serviceDetectorManager.create();
+                        switch (detector.getService()) {
+                            case SNMP -> {
+                                SnmpDetectorRequest detectorRequest = SnmpDetectorRequest.newBuilder()
+                                    .setAgentConfig(mapSnmpAgentConfig(finalAgentConfig)).build();
+                                var snmpDetectorFuture =
+                                    serviceDetector.detect(ipAddress, Any.pack(detectorRequest));
+                                futures.add(snmpDetectorFuture);
+                            }
+                            case ICMP -> {
+                                IcmpDetectorRequest icmpDetectorRequest = IcmpDetectorRequest.newBuilder().build();
+                                var icmpDetectorFuture =
+                                    serviceDetector.detect(ipAddress, Any.pack(icmpDetectorRequest));
+                                futures.add(icmpDetectorFuture);
+                            }
+                        }
+                    } catch (Exception e) {
+                        LOG.error("Exception while detecting service {}", detector.getService());
+                        CompletableFuture<ServiceResult> future =
+                            CompletableFuture.completedFuture(
+                                ServiceResult.newBuilder()
+                                    .setService(detector.getService())
+                                    .setIpAddress(ipAddress).setStatus(false)
+                                    .build());
+                        futures.add(future);
+                    }
+                });
+            });
+
+            CompletableFuture<Void> allFutures = CompletableFuture.allOf(futures.toArray(new CompletableFuture[futures.size()]));
+            allFutures.join();
+
+            List<ServiceResult> detectorResponses = futures.stream()
+                .map(CompletableFuture::join)
+                .collect(Collectors.toList());
+
+            return CompletableFuture.completedFuture(ScanResultsResponseImpl.builder()
+                    .results(NodeScanResult.newBuilder()
+                        .setNodeId(scanRequest.getNodeId())
+                        .setNodeInfo(nodeInfo)
+                        .addAllIpInterfaces(ipInterfaceResults)
+                        .addAllSnmpInterfaces(snmpInterfaceResults)
+                        .setSnmpConfig(mapSnmpAgentConfig(agentConfig))
+                        .addAllSnmpInterfaces(snmpInterfaceResults)
+                        .addAllDetectorResult(detectorResponses)
+                        .build())
+                    .build());
         } catch (Exception e) {
             LOG.error("Error while node scan", e);
             return CompletableFuture.failedFuture(e);

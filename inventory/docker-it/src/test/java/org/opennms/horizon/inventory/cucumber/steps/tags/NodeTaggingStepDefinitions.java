@@ -30,26 +30,25 @@ package org.opennms.horizon.inventory.cucumber.steps.tags;
 
 import com.google.protobuf.Empty;
 import com.google.protobuf.Int64Value;
-import io.cucumber.java.BeforeAll;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
-import org.jetbrains.annotations.NotNull;
 import org.opennms.horizon.inventory.cucumber.InventoryBackgroundHelper;
 import org.opennms.horizon.inventory.dto.DeleteTagsDTO;
 import org.opennms.horizon.inventory.dto.ListAllTagsParamsDTO;
 import org.opennms.horizon.inventory.dto.ListTagsByEntityIdParamsDTO;
 import org.opennms.horizon.inventory.dto.NodeCreateDTO;
 import org.opennms.horizon.inventory.dto.NodeDTO;
+import org.opennms.horizon.inventory.dto.NodeList;
 import org.opennms.horizon.inventory.dto.TagCreateDTO;
 import org.opennms.horizon.inventory.dto.TagCreateListDTO;
 import org.opennms.horizon.inventory.dto.TagDTO;
 import org.opennms.horizon.inventory.dto.TagEntityIdDTO;
 import org.opennms.horizon.inventory.dto.TagListDTO;
 import org.opennms.horizon.inventory.dto.TagListParamsDTO;
+import org.opennms.horizon.inventory.dto.TagNameQuery;
 import org.opennms.horizon.inventory.dto.TagRemoveListDTO;
-import org.opennms.horizon.inventory.dto.TagServiceGrpc;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -59,6 +58,7 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 
 public class NodeTaggingStepDefinitions {
@@ -68,6 +68,7 @@ public class NodeTaggingStepDefinitions {
     private NodeDTO node2;
     private TagListDTO addedTagList;
     private TagListDTO fetchedTagList;
+    private NodeList fetchedNodeList;
 
     public NodeTaggingStepDefinitions(InventoryBackgroundHelper backgroundHelper) {
         this.backgroundHelper = backgroundHelper;
@@ -291,6 +292,29 @@ public class NodeTaggingStepDefinitions {
         for (int index = 0; index < tagArraySorted.size(); index++) {
             assertEquals(tagArraySorted.get(index), node1TagListSorted.get(index).getName());
         }
+    }
+
+    @Then("A GRPC request to get nodes for tags {string}")
+    public void aGRPCRequestToGetNodesForTags(String tags) {
+        String[] tagArray = tags.split(",");
+
+        var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
+        fetchedNodeList = nodeServiceBlockingStub.listNodesByTags(TagNameQuery.newBuilder()
+            .addAllTags(Arrays.stream(tagArray).toList()).build());
+    }
+
+    @Then("Both nodes should be fetched for")
+    public void bothNodesShouldBeFetchedFor() {
+        assertEquals(2, fetchedNodeList.getNodesCount());
+        List<NodeDTO> nodesList = fetchedNodeList.getNodesList();
+
+        List<Long> nodeIds = nodesList.stream().map(NodeDTO::getId).toList();
+        assertTrue(nodeIds.contains(node1.getId()));
+        assertTrue(nodeIds.contains(node2.getId()));
+
+        List<String> nodeLabels = nodesList.stream().map(NodeDTO::getNodeLabel).toList();
+        assertTrue(nodeLabels.contains(node1.getNodeLabel()));
+        assertTrue(nodeLabels.contains(node2.getNodeLabel()));
     }
 
     /*

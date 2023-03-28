@@ -41,7 +41,6 @@ import org.opennms.horizon.inventory.dto.TagCreateListDTO;
 import org.opennms.horizon.inventory.dto.TagEntityIdDTO;
 import org.opennms.horizon.inventory.model.Node;
 import org.opennms.horizon.inventory.model.SnmpInterface;
-import org.opennms.horizon.inventory.model.discovery.PassiveDiscovery;
 import org.opennms.horizon.inventory.model.discovery.active.AzureActiveDiscovery;
 import org.opennms.horizon.inventory.repository.NodeRepository;
 import org.opennms.horizon.inventory.repository.discovery.PassiveDiscoveryRepository;
@@ -216,16 +215,6 @@ public class ScannerResponseService {
                 ipInterfaceService.creatUpdateFromScanResult(tenantId, node, ipIfResult, ifIndexSNMPMap);
             }
 
-            if (result.hasPassiveDiscoveryId()) {
-                Optional<PassiveDiscovery> passiveDiscoveryOpt = passiveDiscoveryRepository
-                    .findByTenantIdAndId(tenantId, result.getPassiveDiscoveryId());
-
-                if (passiveDiscoveryOpt.isPresent()) {
-
-                    PassiveDiscovery discovery = passiveDiscoveryOpt.get();
-                    //todo: use snmp agent config for detection, monitor and collection
-                }
-            }
             detectorTaskSetService.sendDetectorTasks(node);
         } else {
             log.error("Error while process node scan results, node with id {} doesn't exist", result.getNodeId());

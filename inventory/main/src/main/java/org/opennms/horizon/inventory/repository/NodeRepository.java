@@ -80,4 +80,12 @@ public interface NodeRepository extends JpaRepository<Node, Long> {
         "GROUP BY n.tenantId"
     )
     List<TenantCount> countNodesByTenant();
+
+    @Query("SELECT DISTINCT n " +
+        "FROM Node n " +
+        "JOIN n.tags tag " +
+        "WHERE n.tenantId = :tenantId " +
+        "AND tag.name IN :tags")
+    List<Node> findByTenantIdAndTagNamesIn(@Param("tenantId") String tenantId,
+                                           @Param("tags") List<String> tags);
 }

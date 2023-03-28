@@ -22,6 +22,13 @@ Feature: Node Tagging
     When A GRPC request to fetch tags for node
     Then The node tag response should contain only tags "tag1,tag2"
 
+  Scenario: Get a list of nodes for tags
+    Given 2 new nodes
+    When A GRPC request to create tags "tag1,tag2" for both nodes
+    Then The node tag response should contain only tags "tag1,tag2"
+    Then A GRPC request to get nodes for tags "tag1,tag2"
+    Then Both nodes should be fetched for
+
   Scenario: Get an empty list of tags for node
     Given A new node
     When A GRPC request to fetch tags for node

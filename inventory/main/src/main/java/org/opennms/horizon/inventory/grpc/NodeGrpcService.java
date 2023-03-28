@@ -51,13 +51,13 @@ import org.opennms.horizon.inventory.dto.NodeIdQuery;
 import org.opennms.horizon.inventory.dto.NodeLabelSearchQuery;
 import org.opennms.horizon.inventory.dto.NodeList;
 import org.opennms.horizon.inventory.dto.NodeServiceGrpc;
+import org.opennms.horizon.inventory.dto.TagNameQuery;
 import org.opennms.horizon.inventory.mapper.NodeMapper;
 import org.opennms.horizon.inventory.model.Node;
 import org.opennms.horizon.inventory.service.IpInterfaceService;
 import org.opennms.horizon.inventory.service.NodeService;
 import org.opennms.horizon.inventory.service.taskset.DetectorTaskSetService;
 import org.opennms.horizon.inventory.service.taskset.ScannerTaskSetService;
-import org.opennms.horizon.shared.constants.GrpcConstants;
 import org.opennms.taskset.contract.ScanType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -199,6 +199,33 @@ public class NodeGrpcService extends NodeServiceGrpc.NodeServiceImplBase {
         tenantIdOptional.ifPresentOrElse(tenantId -> {
             try {
                 List<NodeDTO> nodes = nodeService.listNodesByNodeLabelSearch(tenantId, request.getSearchTerm());
+                responseObserver.onNext(NodeList.newBuilder().addAllNodes(nodes).build());
+                responseObserver.onCompleted();
+            } catch (Exception e) {
+
+                Status status = Status.newBuilder()
+                    .setCode(Code.INTERNAL_VALUE)
+                    .setMessage(e.getMessage())
+                    .build();
+                responseObserver.onError(StatusProto.toStatusRuntimeException(status));
+            }
+        }, () -> {
+
+            Status status = Status.newBuilder()
+                .setCode(Code.INVALID_ARGUMENT_VALUE)
+                .setMessage("Tenant Id can't be empty")
+                .build();
+            responseObserver.onError(StatusProto.toStatusRuntimeException(status));
+        });
+    }
+
+    @Override
+    public void listNodesByTags(TagNameQuery request, StreamObserver<NodeList> responseObserver) {
+        Optional<String> tenantIdOptional = tenantLookup.lookupTenantId(Context.current());
+
+        tenantIdOptional.ifPresentOrElse(tenantId -> {
+            try {
+                List<NodeDTO> nodes = nodeService.listNodesByTags(tenantId, request.getTagsList());
                 responseObserver.onNext(NodeList.newBuilder().addAllNodes(nodes).build());
                 responseObserver.onCompleted();
             } catch (Exception e) {

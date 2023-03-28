@@ -287,4 +287,10 @@ public class NodeService {
             .map(mapper::modelToDTO).toList();
     }
 
+    @Transactional(readOnly = true)
+    public List<NodeDTO> listNodesByTags(String tenantId, List<String> tags) {
+        return nodeRepository.findByTenantIdAndTagNamesIn(tenantId, tags).stream()
+            .map(mapper::modelToDTO).toList();
+    }
+
 }

@@ -12,6 +12,9 @@ spring:
     hibernate:
       ddl-auto: validate
 
+  liquibase:
+    change-log: db/changelog/changelog.xml
+
   kafka:
     template:
       default-topic: "alerts"

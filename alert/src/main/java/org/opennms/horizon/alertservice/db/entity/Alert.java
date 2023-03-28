@@ -73,14 +73,14 @@ public class Alert extends TenantAwareEntity implements Serializable {
     private String reductionKey;
 
     @Column
-    @Enumerated(EnumType.ORDINAL)
+    @Enumerated(EnumType.STRING)
     private AlertType type;
 
     @Column(nullable=false)
     private Long counter;
 
     @Column(nullable=false)
-    @Enumerated(EnumType.ORDINAL)
+    @Enumerated(EnumType.STRING)
     private Severity severity = Severity.INDETERMINATE;
 
     @Temporal(TemporalType.TIMESTAMP)
@@ -111,7 +111,7 @@ public class Alert extends TenantAwareEntity implements Serializable {
     private String clearKey;
 
     @Column(nullable=false)
-    @Enumerated(EnumType.ORDINAL)
+    @Enumerated(EnumType.STRING)
     private ManagedObjectType managedObjectType;
 
     @Column

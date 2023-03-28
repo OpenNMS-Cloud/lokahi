@@ -93,13 +93,13 @@ public class AlertEventProcessor {
     }
 
     protected org.opennms.horizon.alertservice.db.entity.Alert addOrReduceEventAsAlert(Event event) {
-        AlertDefinition alertDef = alertDefinitionRepository.getAlertDefinitionForEvent(event);
-        if (alertDef == null) {
+        Optional<AlertDefinition> alertDefOpt = alertDefinitionRepository.findFirstByTenantIdAndUei(event.getTenantId(), event.getUei());
+        if (alertDefOpt.isEmpty()) {
             // No alert definition matching, no alert to create
             eventsWithoutAlertDataCounter.increment();
             return null;
         }
-        AlertData alertData = getAlertData(event, alertDef);
+        AlertData alertData = getAlertData(event, alertDefOpt.get());
 
         org.opennms.horizon.alertservice.db.entity.Alert alert = null;
         if (alertData.clearKey() != null) {

@@ -34,16 +34,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface AlertDefinitionRepository extends JpaRepository<AlertDefinition, Long> {
 
-    List<AlertDefinition> findAll();
+    Optional<AlertDefinition> findFirstByTenantIdAndUei(String tenantId, String uei);
 
-    default AlertDefinition getAlertDefinitionForEvent(Event event) {
-        return findAll().stream()
-            .filter(def -> event.getUei().equals(def.getUei()))
-            .findFirst()
-            .orElse(null);
-    }
 }

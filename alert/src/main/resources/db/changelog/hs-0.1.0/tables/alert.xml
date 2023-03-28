@@ -23,13 +23,13 @@
 
             <column name="reduction_key" type="text"/>
 
-            <column name="type" type="integer"/>
+            <column name="type" type="text"/>
 
             <column name="counter" type="bigint">
                 <constraints nullable="false"/>
             </column>
 
-            <column name="severity" type="integer">
+            <column name="severity" type="text">
                 <constraints nullable="false"/>
             </column>
 
@@ -56,7 +56,7 @@
             <!-- the key that will match an event to clear the alert -->
             <column name="clear_key" type="text"/>
 
-            <column name="managed_object_type" type="integer"/>
+            <column name="managed_object_type" type="text"/>
 
             <column name="managed_object_instance" type="text"/>
         </createTable>

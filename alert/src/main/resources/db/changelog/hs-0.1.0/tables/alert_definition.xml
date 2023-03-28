@@ -23,10 +23,10 @@
                 <constraints nullable="false"/>
             </column>
             <column name="clear_key" type="text" />
-            <column name="type" type="integer">
+            <column name="type" type="text">
                 <constraints nullable="false"/>
             </column>
-            <column name="managed_object_type" type="integer" />
+            <column name="managed_object_type" type="text" />
         </createTable>
 
         <addPrimaryKey columnNames="id" constraintName="alert_definition_pk" tableName="alert_definition"/>

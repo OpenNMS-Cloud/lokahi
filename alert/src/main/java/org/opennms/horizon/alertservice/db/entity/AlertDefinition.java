@@ -69,7 +69,6 @@ public class AlertDefinition extends TenantAwareEntity implements Serializable {
 
     @OneToMany(mappedBy = "alertDefinition",
         orphanRemoval = true,
-        fetch =     FetchType.LAZY,
         cascade = CascadeType.ALL)
     private List<EventMatch> match = new ArrayList<>();
 
@@ -80,11 +79,11 @@ public class AlertDefinition extends TenantAwareEntity implements Serializable {
     private String clearKey;
 
     @Column
-    @Enumerated(EnumType.ORDINAL)
+    @Enumerated(EnumType.STRING)
     private AlertType type;
 
     @Column
-    @Enumerated(EnumType.ORDINAL)
+    @Enumerated(EnumType.STRING)
     private ManagedObjectType managedObjectType;
 
 }

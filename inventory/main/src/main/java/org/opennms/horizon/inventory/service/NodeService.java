@@ -246,6 +246,11 @@ public class NodeService {
 
     public void updateNodeInfo(Node node, NodeInfoResult nodeInfo) {
         mapper.updateFromNodeInfo(nodeInfo, node);
+
+        if (StringUtils.isNotEmpty(nodeInfo.getSystemName())) {
+            node.setNodeLabel(nodeInfo.getSystemName());
+        }
+
         nodeRepository.save(node);
     }
 

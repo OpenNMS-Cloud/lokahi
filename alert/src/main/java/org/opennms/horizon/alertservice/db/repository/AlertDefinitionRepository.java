@@ -29,11 +29,9 @@
 package org.opennms.horizon.alertservice.db.repository;
 
 import org.opennms.horizon.alertservice.db.entity.AlertDefinition;
-import org.opennms.horizon.events.proto.Event;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
 import java.util.Optional;
 
 @Repository

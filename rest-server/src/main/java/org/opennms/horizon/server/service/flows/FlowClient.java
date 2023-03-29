@@ -28,7 +28,6 @@
 
 package org.opennms.horizon.server.service.flows;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Timestamp;
 import io.grpc.ManagedChannel;
 import lombok.RequiredArgsConstructor;

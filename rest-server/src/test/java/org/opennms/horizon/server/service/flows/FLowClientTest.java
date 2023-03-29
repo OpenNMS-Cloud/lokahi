@@ -29,73 +29,150 @@
 package org.opennms.horizon.server.service.flows;
 
 import io.grpc.ManagedChannel;
+import io.grpc.Metadata;
+import io.grpc.ServerCall;
+import io.grpc.ServerCallHandler;
+import io.grpc.ServerInterceptor;
+import io.grpc.inprocess.InProcessChannelBuilder;
+import io.grpc.inprocess.InProcessServerBuilder;
+import io.grpc.stub.ServerCalls;
+import io.grpc.stub.StreamObserver;
+import io.grpc.testing.GrpcCleanupRule;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.ClassRule;
+import org.junit.Rule;
 import org.junit.Test;
-import org.mockito.ArgumentMatchers;
-import org.mockito.Mockito;
+import org.junit.jupiter.api.BeforeAll;
+import org.opennms.dataplatform.flows.querier.v1.ApplicationSeriesRequest;
+import org.opennms.dataplatform.flows.querier.v1.ApplicationSummariesRequest;
 import org.opennms.dataplatform.flows.querier.v1.ApplicationsServiceGrpc;
 import org.opennms.dataplatform.flows.querier.v1.Direction;
 import org.opennms.dataplatform.flows.querier.v1.Exporter;
 import org.opennms.dataplatform.flows.querier.v1.ExporterServiceGrpc;
 import org.opennms.dataplatform.flows.querier.v1.Filter;
 import org.opennms.dataplatform.flows.querier.v1.FlowingPoint;
+import org.opennms.dataplatform.flows.querier.v1.ListRequest;
 import org.opennms.dataplatform.flows.querier.v1.Series;
 import org.opennms.dataplatform.flows.querier.v1.Summaries;
 import org.opennms.dataplatform.flows.querier.v1.TrafficSummary;
 import org.opennms.horizon.server.model.flows.RequestCriteria;
 import org.opennms.horizon.server.model.flows.TimeRange;
 import org.opennms.horizon.server.model.inventory.IpInterface;
+import org.opennms.horizon.shared.constants.GrpcConstants;
 
+import java.io.IOException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
+
+import static org.mockito.AdditionalAnswers.delegatesTo;
+import static org.mockito.Mockito.mock;
 
 public class FLowClientTest {
-    private final ManagedChannel managedChannel = Mockito.mock(ManagedChannel.class);
+    @Rule
+    public final GrpcCleanupRule grpcCleanUp = new GrpcCleanupRule();
 
-    private FlowClient flowClient = new FlowClient(managedChannel, 600);
-    private final ApplicationsServiceGrpc.ApplicationsServiceBlockingStub applicationsServiceBlockingStub
-        = Mockito.mock(ApplicationsServiceGrpc.ApplicationsServiceBlockingStub.class);
-    private final ExporterServiceGrpc.ExporterServiceBlockingStub exporterServiceStub
-        = Mockito.mock(ExporterServiceGrpc.ExporterServiceBlockingStub.class);
+    private static FlowClient flowClient;
 
-
-    @Before
-    public void setUp() throws NoSuchFieldException, IllegalAccessException {
-        var applicationsServiceBlockingStubField = FlowClient.class.getDeclaredField("applicationsServiceBlockingStub");
-        applicationsServiceBlockingStubField.setAccessible(true);
-        applicationsServiceBlockingStubField.set(flowClient, applicationsServiceBlockingStub);
-
-        var exporterServiceStubField = FlowClient.class.getDeclaredField("exporterServiceStub");
-        exporterServiceStubField.setAccessible(true);
-        exporterServiceStubField.set(flowClient, exporterServiceStub);
-
-        Mockito.when(applicationsServiceBlockingStub.withDeadlineAfter(Mockito.anyLong(), Mockito.any())).thenReturn(applicationsServiceBlockingStub);
-        Mockito.when(exporterServiceStub.withDeadlineAfter(Mockito.anyLong(), Mockito.any())).thenReturn(exporterServiceStub);
-    }
 
     private final String tenantId = "testId";
-    private long exporterInterfaceId = 1L;
-    private String application = "http";
+    private final long exporterInterfaceId = 1L;
+    private final String application = "http";
     private final int count = 20; // make sure it is not default value
     private final int bytesIn = 10;
     private final int bytesOut = 10;
     private final Instant startTime = Instant.now();
     private final Instant endTime = startTime.minus(1, ChronoUnit.HOURS);
 
+
+    @Before
+    public void startGrpc() throws IOException {
+//        private static ApplicationsServiceGrpc.ApplicationsServiceImplBase applicationsServiceBlockingStub;
+//        private static ExporterServiceGrpc.ExporterServiceImplBase exporterServiceStub;
+        var applicationsServiceBlockingStub = mock(ApplicationsServiceGrpc.ApplicationsServiceImplBase.class, delegatesTo(
+            new ApplicationsServiceGrpc.ApplicationsServiceImplBase() {
+                @Override
+                public void getApplications(ListRequest request, StreamObserver<org.opennms.dataplatform.flows.querier.v1.List> responseObserver) {
+                    checkTimeRangeFilters(request.getFiltersList());
+                    Assert.assertEquals(tenantId, request.getTenantId());
+                    Assert.assertEquals(count, request.getLimit());
+                    checkApplication(application, request.getFiltersList());
+                    CompletableFuture.delayedExecutor(100, TimeUnit.MILLISECONDS).execute(() -> {
+                        responseObserver.onNext(org.opennms.dataplatform.flows.querier.v1.List.newBuilder().addElements(application).build());
+                        responseObserver.onCompleted();
+                    });
+                }
+
+                @Override
+                public void getApplicationSummaries(ApplicationSummariesRequest request, StreamObserver<Summaries> responseObserver) {
+                    checkTimeRangeFilters(request.getFiltersList());
+                    Assert.assertEquals(tenantId, request.getTenantId());
+                    Assert.assertEquals(count, request.getCount());
+                    checkApplication(application, request.getFiltersList());
+                    checkExporter(Exporter.newBuilder().setInterfaceId(exporterInterfaceId).build(), request.getFiltersList());
+                    CompletableFuture.delayedExecutor(100, TimeUnit.MILLISECONDS).execute(() -> {
+                        responseObserver.onNext(Summaries.newBuilder()
+                            .addSummaries(TrafficSummary.newBuilder().setApplication(application).setBytesIn(bytesIn).setBytesOut(bytesOut))
+                            .build());
+                        responseObserver.onCompleted();
+                    });
+                }
+
+                @Override
+                public void getApplicationSeries(ApplicationSeriesRequest request, StreamObserver<Series> responseObserver) {
+                    checkTimeRangeFilters(request.getFiltersList());
+                    Assert.assertEquals(tenantId, request.getTenantId());
+                    Assert.assertEquals(count, request.getCount());
+                    checkApplication(application, request.getFiltersList());
+                    checkExporter(Exporter.newBuilder().setInterfaceId(exporterInterfaceId).build(), request.getFiltersList());
+
+                    CompletableFuture.delayedExecutor(100, TimeUnit.MILLISECONDS).execute(() -> {
+                        responseObserver.onNext(Series.newBuilder()
+                            .addPoint(FlowingPoint.newBuilder().setApplication(application).setValue(bytesIn).setDirection(Direction.INGRESS))
+                            .build());
+                        responseObserver.onCompleted();
+                    });
+                }
+            }
+        ));
+
+        var exporterServiceStub = mock(ExporterServiceGrpc.ExporterServiceImplBase.class, delegatesTo(
+            new ExporterServiceGrpc.ExporterServiceImplBase() {
+                @Override
+                public void getExporterInterfaces(ListRequest request, StreamObserver<org.opennms.dataplatform.flows.querier.v1.List> responseObserver) {
+                    checkTimeRangeFilters(request.getFiltersList());
+                    Assert.assertEquals(tenantId, request.getTenantId());
+                    Assert.assertEquals(count, request.getLimit());
+                    checkExporter(Exporter.newBuilder().setInterfaceId(exporterInterfaceId).build(), request.getFiltersList());
+
+                    CompletableFuture.delayedExecutor(100, TimeUnit.MILLISECONDS).execute(() -> {
+                        responseObserver.onNext(org.opennms.dataplatform.flows.querier.v1.List.newBuilder()
+                            .addElements(String.valueOf(exporterInterfaceId)).build());
+                        responseObserver.onCompleted();
+                    });
+                }
+            }
+        ));
+
+        grpcCleanUp.register(InProcessServerBuilder.forName(FLowClientTest.class.getName())
+            .addService(applicationsServiceBlockingStub)
+            .addService(exporterServiceStub)
+            .directExecutor()
+            .build()
+            .start());
+        ManagedChannel channel = grpcCleanUp.register(InProcessChannelBuilder.forName(FLowClientTest.class.getName())
+            .directExecutor().build());
+        flowClient = new FlowClient(channel, 600);
+        flowClient.initialStubs();
+    }
+
+
     @Test
     public void testGetApplications() {
-        var result = org.opennms.dataplatform.flows.querier.v1.List.newBuilder().addElements(application).build();
-        Mockito.when(applicationsServiceBlockingStub.getApplications(ArgumentMatchers.argThat(request -> {
-            this.checkTimeRangeFilters(request.getFiltersList());
-            Assert.assertEquals(tenantId, request.getTenantId());
-            Assert.assertEquals(count, request.getLimit());
-            this.checkApplication(application, request.getFiltersList());
-            return true;
-        }))).thenReturn(result);
-
         RequestCriteria requestCriteria = this.getRequestCriteria();
 
         var list = flowClient.findApplications(requestCriteria, tenantId);
@@ -105,16 +182,6 @@ public class FLowClientTest {
 
     @Test
     public void testGetExporters() {
-        var result = org.opennms.dataplatform.flows.querier.v1.List.newBuilder()
-            .addElements(String.valueOf(exporterInterfaceId)).build();
-        Mockito.when(exporterServiceStub.getExporterInterfaces(ArgumentMatchers.argThat(request -> {
-            this.checkTimeRangeFilters(request.getFiltersList());
-            Assert.assertEquals(tenantId, request.getTenantId());
-            Assert.assertEquals(count, request.getLimit());
-            this.checkExporter(Exporter.newBuilder().setInterfaceId(exporterInterfaceId).build(), request.getFiltersList());
-            return true;
-        }))).thenReturn(result);
-
         RequestCriteria requestCriteria = this.getRequestCriteria();
 
         var list = flowClient.findExporters(requestCriteria, tenantId);
@@ -124,18 +191,6 @@ public class FLowClientTest {
 
     @Test
     public void testGetApplicationSummary() {
-        var result = Summaries.newBuilder()
-            .addSummaries(TrafficSummary.newBuilder().setApplication(application).setBytesIn(bytesIn).setBytesOut(bytesOut))
-            .build();
-        Mockito.when(applicationsServiceBlockingStub.getApplicationSummaries(ArgumentMatchers.argThat(request -> {
-            this.checkTimeRangeFilters(request.getFiltersList());
-            Assert.assertEquals(tenantId, request.getTenantId());
-            Assert.assertEquals(count, request.getCount());
-            this.checkApplication(application, request.getFiltersList());
-            this.checkExporter(Exporter.newBuilder().setInterfaceId(exporterInterfaceId).build(), request.getFiltersList());
-            return true;
-        }))).thenReturn(result);
-
         RequestCriteria requestCriteria = this.getRequestCriteria();
 
         var summaries = flowClient.getApplicationSummaries(requestCriteria, tenantId);
@@ -147,18 +202,6 @@ public class FLowClientTest {
 
     @Test
     public void testGetApplicationSeries() {
-        var result = Series.newBuilder()
-            .addPoint(FlowingPoint.newBuilder().setApplication(application).setValue(bytesIn).setDirection(Direction.INGRESS))
-            .build();
-        Mockito.when(applicationsServiceBlockingStub.getApplicationSeries(ArgumentMatchers.argThat(request -> {
-            this.checkTimeRangeFilters(request.getFiltersList());
-            Assert.assertEquals(tenantId, request.getTenantId());
-            Assert.assertEquals(count, request.getCount());
-            this.checkApplication(application, request.getFiltersList());
-            this.checkExporter(Exporter.newBuilder().setInterfaceId(exporterInterfaceId).build(), request.getFiltersList());
-            return true;
-        }))).thenReturn(result);
-
         RequestCriteria requestCriteria = this.getRequestCriteria();
 
         var series = flowClient.getApplicationSeries(requestCriteria, tenantId);

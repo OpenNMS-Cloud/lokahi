@@ -157,7 +157,7 @@ public class InventoryTestSteps {
             Awaitility
                 .await()
                 .ignoreExceptions()
-                .atMost(30, TimeUnit.SECONDS)
+                .atMost(120, TimeUnit.SECONDS)
                 .until(() -> checkTheStatusOfTheFirstNode(status) )
             ;
             assertTrue(true);

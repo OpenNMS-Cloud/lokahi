@@ -68,11 +68,17 @@
         depends-on="certificatePackageBootstrapImpl"
     >
 
+     <bean id="sendQueue" class="org.opennms.horizon.minion.grpc.queue.OffHeapSendQueueFactory">
+     </bean>
+
+    <bean id="minionClient" class="org.opennms.horizon.minion.grpc.MinionGrpcClient" init-method="start" destroy-method="shutdown">
         <argument ref="ipcIdentity"/>
 
         <argument ref="metricRegistry"/>
         <argument ref="tracer"/>
-        <argument ref="minionGrpcSslContextBuilderFactory"/>
+        <argument ref="sendQueue"/>
+	<argument ref="minionGrpcSslContextBuilderFactory"/>
+
         <property name="cloudMessageHandler" ref="cloudMessageHandler" />
         <property name="rpcRequestHandler" ref="thinRpcRequestHandler" />
 

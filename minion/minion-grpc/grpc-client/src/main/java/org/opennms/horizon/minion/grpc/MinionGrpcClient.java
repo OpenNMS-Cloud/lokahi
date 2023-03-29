@@ -32,6 +32,8 @@ import static org.opennms.horizon.shared.ipc.rpc.api.RpcModule.MINION_HEADERS_MO
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Properties;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
@@ -57,6 +59,7 @@ import org.opennms.horizon.minion.grpc.rpc.RpcRequestHandler;
 import org.opennms.horizon.minion.grpc.ssl.MinionGrpcSslContextBuilderFactory;
 import org.opennms.horizon.shared.ipc.rpc.IpcIdentity;
 import org.opennms.horizon.shared.ipc.rpc.api.minion.ClientRequestDispatcher;
+import org.opennms.horizon.shared.ipc.sink.api.SendQueueFactory;
 import org.opennms.horizon.shared.ipc.sink.api.MessageConsumerManager;
 import org.opennms.horizon.shared.ipc.sink.api.SinkModule;
 import org.opennms.horizon.shared.ipc.sink.common.AbstractMessageDispatcherFactory;
@@ -136,6 +139,8 @@ public class MinionGrpcClient extends AbstractMessageDispatcherFactory<String> i
     @Setter
     private String overrideAuthority;
 
+    private final SendQueueFactory sendQueueFactory;
+
 //========================================
 // Constructor
 //----------------------------------------
@@ -144,11 +149,13 @@ public class MinionGrpcClient extends AbstractMessageDispatcherFactory<String> i
         IpcIdentity ipcIdentity,
         MetricRegistry metricRegistry,
         Tracer tracer,
+        SendQueueFactory sendQueueFactory,
         MinionGrpcSslContextBuilderFactory minionGrpcSslContextBuilderFactory) {
 
         this.ipcIdentity = ipcIdentity;
         this.metricRegistry = metricRegistry;
         this.tracer = tracer;
+        this.sendQueueFactory = Objects.requireNonNull(sendQueueFactory);
         this.minionGrpcSslContextBuilderFactory = minionGrpcSslContextBuilderFactory;
     }
 
@@ -225,6 +232,14 @@ public class MinionGrpcClient extends AbstractMessageDispatcherFactory<String> i
         return metricRegistry;
     }
 
+    @Override
+    protected SendQueueFactory getSendQueueFactory() {
+        return this.sendQueueFactory;
+    }
+
+    ConnectivityState getChannelState() {
+        return channel.getState(true);
+    }
 
 //========================================
 // Processing
@@ -232,16 +247,14 @@ public class MinionGrpcClient extends AbstractMessageDispatcherFactory<String> i
 
     @Override
     // public <S extends org.opennms.horizon.ipc.sink.api.Message, T extends org.opennms.horizon.ipc.sink.api.Message> void dispatch(SinkModule<S, T> module, String metadata, T message) {
-    public <S extends Message, T extends Message> void dispatch(SinkModule<S, T> module, String metadata, T message) {
-
+    public <S extends Message, T extends Message> void dispatch(SinkModule<S, T> module, String metadata, byte[] message) {
         try (MDCCloseable mdc = MDC.putCloseable("prefix", MessageConsumerManager.LOG_PREFIX)) {
-            byte[] sinkMessageContent = module.marshal(message);
             String messageId = UUID.randomUUID().toString();
             SinkMessage.Builder sinkMessageBuilder = SinkMessage.newBuilder()
                     .setMessageId(messageId)
                     .setLocation(ipcIdentity.getLocation())
                     .setModuleId(module.getId())
-                    .setContent(ByteString.copyFrom(sinkMessageContent));
+                    .setContent(ByteString.copyFrom(message));
 
             // If module has asyncpolicy, keep attempting to send message.
             if (module.getAsyncPolicy() != null) {

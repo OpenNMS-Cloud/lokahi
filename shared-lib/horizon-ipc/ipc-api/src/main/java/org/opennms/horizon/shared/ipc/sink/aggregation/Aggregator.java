@@ -29,6 +29,8 @@
 package org.opennms.horizon.shared.ipc.sink.aggregation;
 
 import com.google.common.util.concurrent.Striped;
+import com.google.protobuf.Message;
+
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -39,6 +41,8 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
+import java.util.function.Consumer;
+
 import org.opennms.horizon.shared.ipc.sink.api.AggregationPolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,7 +58,7 @@ import org.slf4j.LoggerFactory;
  * @param <S> individual message
  * @param <T> aggregated message (i.e. bucket)
  */
-public class Aggregator<S, T> implements AutoCloseable, Runnable {
+public class Aggregator<S extends Message, T extends Message> implements AutoCloseable, Runnable {
 
     private static final Logger LOG = LoggerFactory.getLogger(Aggregator.class);
 
@@ -75,9 +79,9 @@ public class Aggregator<S, T> implements AutoCloseable, Runnable {
         .map(Integer::parseInt)
         .orElse(DEFAULT_NUM_STRIPE_LOCKS);
 
-    private final AggregationPolicy<S,T,Object> aggregationPolicy;
+    private final AggregationPolicy<S, T, Object> aggregationPolicy;
 
-    private final AggregatingMessageProducer<S,T> messageProducer;
+    private final Consumer<T> messageProducer;
 
     private final int completionSize;
 
@@ -89,7 +93,7 @@ public class Aggregator<S, T> implements AutoCloseable, Runnable {
 
     private final Striped<Lock> lockStripes = Striped.lock(NUM_STRIPE_LOCKS);
 
-    public Aggregator(String id, AggregationPolicy<S,T,?> policy, AggregatingMessageProducer<S,T> messageProducer) {
+    public Aggregator(String id, AggregationPolicy<S,T,?> policy, Consumer<T> messageProducer) {
         aggregationPolicy = (AggregationPolicy<S,T,Object>)Objects.requireNonNull(policy);
         this.messageProducer = Objects.requireNonNull(messageProducer);
         completionSize = aggregationPolicy.getCompletionSize();
@@ -187,7 +191,7 @@ public class Aggregator<S, T> implements AutoCloseable, Runnable {
 
         // Dispatch!
         for (T message : messagesReadyForDispatch) {
-            messageProducer.dispatch(message);
+            messageProducer.accept(message);
         }
     }
 

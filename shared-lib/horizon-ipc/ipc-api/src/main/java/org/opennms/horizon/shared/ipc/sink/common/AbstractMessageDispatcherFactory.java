@@ -31,12 +31,13 @@ package org.opennms.horizon.shared.ipc.sink.common;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Objects;
+import java.util.function.Consumer;
 
-import com.google.protobuf.Message;
-
-import org.opennms.horizon.shared.ipc.sink.aggregation.AggregatingSinkMessageProducer;
+import org.opennms.horizon.shared.ipc.sink.aggregation.AggregatingMessageDispatcher;
 import org.opennms.horizon.shared.ipc.sink.api.AsyncDispatcher;
+import org.opennms.horizon.shared.ipc.sink.api.MessageDispatcher;
 import org.opennms.horizon.shared.ipc.sink.api.MessageDispatcherFactory;
+import org.opennms.horizon.shared.ipc.sink.api.SendQueueFactory;
 import org.opennms.horizon.shared.ipc.sink.api.SinkModule;
 import org.opennms.horizon.shared.ipc.sink.api.SyncDispatcher;
 import org.osgi.framework.BundleContext;
@@ -45,6 +46,7 @@ import org.osgi.framework.ServiceRegistration;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.MetricSet;
 import com.codahale.metrics.Timer.Context;
+import com.google.protobuf.Message;
 
 import io.opentracing.Scope;
 import io.opentracing.Tracer;
@@ -52,20 +54,19 @@ import io.opentracing.Tracer;
 /**
  * This class does all the hard work of building and maintaining the state of the message
  * dispatchers so that concrete implementations only need to focus on dispatching the messages.
- *
+ * <p>
  * Different types of dispatchers are created based on whether or not the module is using aggregation.
- *
+ * <p>
  * Asynchronous dispatchers use a queue and a thread pool to delegate to a suitable synchronous dispatcher.
  *
- * @author jwhite
- *
  * @param <W> type of module specific state or meta-data, use <code>Void</code> if none is used
+ * @author jwhite
  */
 public abstract class AbstractMessageDispatcherFactory<W> implements MessageDispatcherFactory {
 
     private ServiceRegistration<MetricSet> metricsServiceRegistration = null;
 
-    public abstract <S extends Message, T extends Message> void dispatch(SinkModule<S, T> module, W metadata, T message);
+    protected abstract <S extends Message, T extends Message> void dispatch(SinkModule<S, T> module, W metadata, byte[] message);
 
     public abstract String getMetricDomain();
 
@@ -76,7 +77,7 @@ public abstract class AbstractMessageDispatcherFactory<W> implements MessageDisp
     /**
      * Invokes dispatch within a timer context.
      */
-    private <S extends Message, T extends Message> void timedDispatch(DispatcherState<W, S,T> state, T message) {
+    private <S extends Message, T extends Message> void timedDispatch(DispatcherState<W, S, T> state, byte[] message) {
         try (Context ctx = state.getDispatchTimer().time();
              Scope scope = getTracer().buildSpan(state.getModule().getId()).startActive(true)) {
             dispatch(state.getModule(), state.getMetaData(), message);
@@ -86,7 +87,7 @@ public abstract class AbstractMessageDispatcherFactory<W> implements MessageDisp
     /**
      * Optionally build meta-data or state information for the module which will
      * be passed on all the calls to {@link #dispatch}.
-     *
+     * <p>
      * This is useful for calculating things like message headers which are
      * re-used on every dispatch.
      *
@@ -100,59 +101,90 @@ public abstract class AbstractMessageDispatcherFactory<W> implements MessageDisp
     @Override
     public <S extends Message, T extends Message> SyncDispatcher<S> createSyncDispatcher(SinkModule<S, T> module) {
         Objects.requireNonNull(module, "module cannot be null");
-        final DispatcherState<W,S,T> state = new DispatcherState<>(this, module);
-        return createSyncDispatcher(state);
+
+        final var state = new DispatcherState<>(AbstractMessageDispatcherFactory.this, module);
+
+        final var dispatcher = createMessageDispatcher(state,
+            (message) -> AbstractMessageDispatcherFactory.this.timedDispatch(state, message));
+
+        return new SyncDispatcher<>() {
+
+            @Override
+            public void send(S message) {
+                dispatcher.dispatch(message);
+            }
+
+            @Override
+            public void close() throws Exception {
+                dispatcher.close();
+                state.close();
+            }
+        };
     }
 
     @Override
     public <S extends Message, T extends Message> AsyncDispatcher<S> createAsyncDispatcher(SinkModule<S, T> module) {
         Objects.requireNonNull(module, "module cannot be null");
         Objects.requireNonNull(module.getAsyncPolicy(), "module must have an AsyncPolicy");
-        final DispatcherState<W,S,T> state = new DispatcherState<>(this, module);
-        final SyncDispatcher<S> syncDispatcher = createSyncDispatcher(state);
-        return new AsyncDispatcherImpl<>(state, module.getAsyncPolicy(), syncDispatcher);
+
+        final DispatcherState<W, S, T> state = new DispatcherState<>(this, module);
+
+        return new AsyncDispatcherImpl<>(state, this.getSendQueueFactory(), message -> this.timedDispatch(state, message));
     }
 
-    protected <S extends Message, T extends Message> SyncDispatcher<S> createSyncDispatcher(DispatcherState<W,S,T> state) {
-        final SinkModule<S,T> module = state.getModule();
-        if (module.getAggregationPolicy() != null) {
-            // Aggregate the message before dispatching them
-            return new AggregatingSinkMessageProducer<S,T>(module) {
-                @Override
-                public void dispatch(T message) {
-                    AbstractMessageDispatcherFactory.this.timedDispatch(state, message);
-                }
-                @Override
-                public void close() throws Exception {
-                    super.close();
-                    state.close();
-                }
+    protected abstract SendQueueFactory getSendQueueFactory();
 
-            };
-        } else {
-            // No aggregation strategy is set, dispatch directly to reduce overhead
-            return new DirectDispatcher<>(state);
-        }
-    }
+    protected static class DirectDispatcher<S extends Message, T extends Message> extends MessageDispatcher<S, T> {
 
-    private class DirectDispatcher<S extends Message, T extends Message> implements SyncDispatcher<S> {
-        private final DispatcherState<W, S, T> state;
+        private final DispatcherState<?, S, T> state;
 
-        public DirectDispatcher(DispatcherState<W, S,T> state) {
-            this.state = state;
+        protected DirectDispatcher(final DispatcherState<?, S, T> state,
+                                   Consumer<byte[]> sender) {
+            super(state, sender);
+            this.state = Objects.requireNonNull(state);
         }
 
         @SuppressWarnings("unchecked")
         @Override
-        public void send(S message) {
-            // Cast S to T, modules that do not use an AggregationPolicty
-            // must have the same types for S and T
-            AbstractMessageDispatcherFactory.this.timedDispatch(state, (T) message);
+        public void dispatch(final S message) {
+            // We assume that S == T so we can send single messages directly
+            final var marshalled = this.state.getModule().marshalSingleMessage(message);
+            this.send(marshalled);
         }
 
         @Override
         public void close() throws Exception {
-            state.close();
+            this.state.close();
+        }
+    }
+
+    private void maybeRegisterMetricSetInServiceRegistry() {
+        final BundleContext bundleContext = getBundleContext();
+        if (bundleContext != null) {
+            final Dictionary<String, Object> props = new Hashtable<>();
+            props.put("name", getMetricDomain());
+            props.put("description", "Sink API Related Metrics for " + getMetricDomain());
+            metricsServiceRegistration = bundleContext.registerService(MetricSet.class, getMetrics(), props);
+        }
+    }
+
+    private void unregisterMetricSetInServiceRegistry() {
+        if (metricsServiceRegistration != null) {
+            metricsServiceRegistration.unregister();
+            metricsServiceRegistration = null;
+        }
+    }
+
+    public static <S extends Message, T extends Message> MessageDispatcher<S, T> createMessageDispatcher(
+        final DispatcherState<?, S, T> state,
+        final Consumer<byte[]> sender
+    ) {
+        if (state.getModule().getAggregationPolicy() != null) {
+            // Aggregate the message before dispatching them
+            return new AggregatingMessageDispatcher<>(state, sender);
+        } else {
+            // No aggregation strategy is set, dispatch directly to reduce overhead
+            return new AbstractMessageDispatcherFactory.DirectDispatcher<>(state, sender);
         }
     }
 }

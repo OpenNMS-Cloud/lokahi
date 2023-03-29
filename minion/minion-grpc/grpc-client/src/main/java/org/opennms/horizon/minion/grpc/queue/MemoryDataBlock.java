@@ -1,8 +1,8 @@
 /*******************************************************************************
  * This file is part of OpenNMS(R).
  *
- * Copyright (C) 2016-2016 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2016 The OpenNMS Group, Inc.
+ * Copyright (C) 2023 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
  *
@@ -26,39 +26,49 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.shared.ipc.sink.aggregation;
+package org.opennms.horizon.minion.grpc.queue;
 
-import org.opennms.horizon.shared.ipc.sink.api.AggregationPolicy;
-import org.opennms.horizon.shared.ipc.sink.api.MessageDispatcher;
-import org.opennms.horizon.shared.ipc.sink.api.SinkModule;
+import java.util.ArrayDeque;
+import java.util.Map;
+import java.util.Objects;
 
-/**
- * A {@link MessageDispatcher} that applies the {@link SinkModule}'s {@link AggregationPolicy}
- * using the {@link Aggregator}.
- *
- * @author jwhite
- */
-public abstract class AggregatingMessageProducer<S, T> implements MessageDispatcher<S> {
+public class MemoryDataBlock implements DataBlock {
 
-    private final Aggregator<S,T> aggregator;
+    private final byte[] key;
+    private final ArrayDeque<Map.Entry<String, byte[]>> data;
 
-    public AggregatingMessageProducer(String id, AggregationPolicy<S,T,?> policy) {
-        aggregator = new Aggregator<S,T>(id, policy, this);
+    public MemoryDataBlock(final byte[] key,
+                           ArrayDeque<Map.Entry<String, byte[]>> data) {
+        this.key = Objects.requireNonNull(key);
+        this.data = Objects.requireNonNull(data);
+    }
+
+//    @Override
+    public boolean offer(final Map.Entry<String, byte[]> element) {
+        return this.data.offer(element);
+    }
+
+//    @Override
+    public Map.Entry<String, byte[]> poll() {
+        return this.data.poll();
+    }
+
+//    @Override
+    public int size() {
+        return this.data.size();
+    }
+
+    public boolean isEmpty() {
+        return this.data.isEmpty();
     }
 
     @Override
-    public void send(S message) {
-        final T log = aggregator.aggregate(message);
-        if (log != null) {
-            // This log is ready to be dispatched
-            dispatch(log);
-        }
+    public MemoryDataBlock asMemory() {
+        return this;
     }
 
-    public abstract void dispatch(T message);
-
     @Override
-    public void close() throws Exception {
-        aggregator.close();
+    public OffHeapDataBlock asOffHeap() {
+        return null;
     }
 }

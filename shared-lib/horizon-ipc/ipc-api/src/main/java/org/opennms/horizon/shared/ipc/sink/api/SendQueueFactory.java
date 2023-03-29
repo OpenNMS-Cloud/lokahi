@@ -1,8 +1,8 @@
 /*******************************************************************************
  * This file is part of OpenNMS(R).
  *
- * Copyright (C) 2016-2016 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2016 The OpenNMS Group, Inc.
+ * Copyright (C) 2020 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2020 The OpenNMS Group, Inc.
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
  *
@@ -26,25 +26,11 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.shared.ipc.sink.aggregation;
-
-import java.util.Objects;
+package org.opennms.horizon.shared.ipc.sink.api;
 
 import com.google.protobuf.Message;
-import org.opennms.horizon.shared.ipc.sink.api.SinkModule;
 
-/**
- * This is a specific aggregator where the messsages implement
- * the {@link Message} marker interface.
- *
- * @author jwhite
- *
- * @param <S> individual message
- * @param <T> aggregated message (i.e. bucket)
- */
-public class SinkAggregator<S extends Message, T extends Message> extends Aggregator<S,T> {
+public interface SendQueueFactory {
 
-    public SinkAggregator(SinkModule<S, T> module, AggregatingSinkMessageProducer<S,T> messageProducer) {
-        super(Objects.requireNonNull(module).getId(), module.getAggregationPolicy(), messageProducer);
-    }
+    <T extends Message> SendQueue<T> createQueue(final SinkModule<?, T> module);
 }

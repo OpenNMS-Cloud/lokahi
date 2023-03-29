@@ -29,39 +29,28 @@
 package org.opennms.horizon.shared.ipc.sink.common;
 
 import java.time.Duration;
-import java.util.AbstractMap;
-import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 import org.opennms.horizon.shared.ipc.sink.api.AsyncDispatcher;
 import org.opennms.horizon.shared.ipc.sink.api.AsyncPolicy;
-import org.opennms.horizon.shared.ipc.sink.api.DispatchQueue;
-import org.opennms.horizon.shared.ipc.sink.api.DispatchQueueFactory;
-import org.opennms.horizon.shared.ipc.sink.api.SinkModule;
-import org.opennms.horizon.shared.ipc.sink.api.SyncDispatcher;
-import org.opennms.horizon.shared.ipc.sink.api.WriteFailedException;
-import org.opennms.horizon.shared.ipc.sink.offheap.DispatchQueueServiceLoader;
+import org.opennms.horizon.shared.ipc.sink.api.MessageDispatcher;
+import org.opennms.horizon.shared.ipc.sink.api.SendQueue;
+import org.opennms.horizon.shared.ipc.sink.api.SendQueueFactory;
 import org.opennms.horizon.shared.logging.LogPreservingThreadFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.protobuf.Message;
-
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.Gauge;
 import com.codahale.metrics.MetricRegistry;
+import com.google.protobuf.Message;
 import com.swrve.ratelimitedlogger.RateLimitedLog;
 
 public class AsyncDispatcherImpl<W, S extends Message, T extends Message> implements AsyncDispatcher<S> {
@@ -69,12 +58,13 @@ public class AsyncDispatcherImpl<W, S extends Message, T extends Message> implem
     public static final String WHAT_IS_DEFAULT_INSTANCE_ID = "OpenNMS";
 
     private static final Logger LOG = LoggerFactory.getLogger(AsyncDispatcherImpl.class);
-    private final SyncDispatcher<S> syncDispatcher;
+
+    private final SendQueue<T> sendQueue;
+    private final MessageDispatcher<S, T> messageDispatcher;
+    private final Consumer<byte[]> sender;
     private final AsyncPolicy asyncPolicy;
     private final Counter droppedCounter;
 
-    private final Map<String, CompletableFuture<DispatchStatus>> futureMap = new ConcurrentHashMap<>();
-    private final AtomicResultQueue<S> atomicResultQueue;
     private final AtomicLong missedFutures = new AtomicLong(0);
     private final AtomicInteger activeDispatchers = new AtomicInteger(0);
     
@@ -85,64 +75,42 @@ public class AsyncDispatcherImpl<W, S extends Message, T extends Message> implem
 
     private final ExecutorService executor;
 
-    public AsyncDispatcherImpl(DispatcherState<W, S, T> state, AsyncPolicy asyncPolicy,
-                               SyncDispatcher<S> syncDispatcher) {
-        Objects.requireNonNull(state);
-        Objects.requireNonNull(asyncPolicy);
-        Objects.requireNonNull(syncDispatcher);
-        this.syncDispatcher = syncDispatcher;
-        this.asyncPolicy = asyncPolicy;
-        SinkModule<S, T> sinkModule = state.getModule();
-        Optional<DispatchQueueFactory> factory = DispatchQueueServiceLoader.getDispatchQueueFactory();
+    public AsyncDispatcherImpl(final DispatcherState<W, S, T> state,
+                               final SendQueueFactory sendQueueFactory,
+                               final Consumer<byte[]> sender) {
+        this.sendQueue = sendQueueFactory.createQueue(state.getModule());
 
-        DispatchQueue<S> dispatchQueue;
-        if (factory.isPresent()) {
-            LOG.debug("Using queue from factory");
-            dispatchQueue = factory.get().getQueue(asyncPolicy, sinkModule.getId(),
-                    sinkModule::marshalSingleMessage, sinkModule::unmarshalSingleMessage);
-        } else {
-            int size = asyncPolicy.getQueueSize();
-            LOG.debug("Using default in memory queue of size {}", size);
-            dispatchQueue = new DefaultQueue<>(size);
-        }
-        atomicResultQueue = new AtomicResultQueue<>(dispatchQueue);
+        this.messageDispatcher = AbstractMessageDispatcherFactory.createMessageDispatcher(state, this.sendQueue::enqueue);
+
+        this.sender = Objects.requireNonNull(sender);
+
+        this.asyncPolicy = state.getModule().getAsyncPolicy();
 
         state.getMetrics().register(MetricRegistry.name(state.getModule().getId(), "queue-size"),
                 (Gauge<Integer>) activeDispatchers::get);
 
         droppedCounter = state.getMetrics().counter(MetricRegistry.name(state.getModule().getId(), "dropped"));
 
-        executor = Executors.newFixedThreadPool(asyncPolicy.getNumThreads(),
+        executor = Executors.newFixedThreadPool(state.getModule().getAsyncPolicy().getNumThreads(),
                 new LogPreservingThreadFactory(WHAT_IS_DEFAULT_INSTANCE_ID + ".Sink.AsyncDispatcher." +
                         state.getModule().getId(), Integer.MAX_VALUE));
+
         startDrainingQueue();
     }
 
     private void dispatchFromQueue() {
         while (true) {
             try {
-                LOG.trace("Asking dispatch queue for the next entry...");
-                Map.Entry<String, S> messageEntry = atomicResultQueue.dequeue();
-                LOG.trace("Received message entry from dispatch queue {}", messageEntry);
+                LOG.trace("Asking send queue for the next entry...");
+                final var message = this.sendQueue.dequeue();
+
+                LOG.trace("Received message entry from dispatch queue");
                 activeDispatchers.incrementAndGet();
-                LOG.trace("Sending message {} via sync dispatcher", messageEntry);
-                syncDispatcher.send(messageEntry.getValue());
-                LOG.trace("Successfully sent message {}", messageEntry);
 
-                if (messageEntry.getKey() != null) {
-                    LOG.trace("Attempting to complete future for message {}", messageEntry);
-                    CompletableFuture<DispatchStatus> messageFuture = futureMap.remove(messageEntry.getKey());
+                LOG.trace("Sending message {}", message);
+                this.sender.accept(message);
 
-                    if (messageFuture != null) {
-                        messageFuture.complete(DispatchStatus.DISPATCHED);
-                        LOG.trace("Completed future for message {}", messageEntry);
-                    } else {
-                        RATE_LIMITED_LOGGER.warn("No future found for message {}", messageEntry);
-                        missedFutures.incrementAndGet();
-                    }
-                } else {
-                    LOG.trace("Dequeued an entry with a null key");
-                }
+                LOG.trace("Successfully sent message {}", message);
 
                 activeDispatchers.decrementAndGet();
             } catch (InterruptedException e) {
@@ -154,135 +122,25 @@ public class AsyncDispatcherImpl<W, S extends Message, T extends Message> implem
     }
 
     private void startDrainingQueue() {
-        for (int i = 0; i < asyncPolicy.getNumThreads(); i++) {
+        for (int i = 0; i < this.asyncPolicy.getNumThreads(); i++) {
             executor.execute(this::dispatchFromQueue);
         }
     }
 
     @Override
-    public CompletableFuture<DispatchStatus> send(S message) {
-        CompletableFuture<DispatchStatus> sendFuture = new CompletableFuture<>();
-
-        if (!asyncPolicy.isBlockWhenFull() && atomicResultQueue.isFull()) {
-            droppedCounter.inc();
-            sendFuture.completeExceptionally(new RuntimeException("Dispatch queue full"));
-            return sendFuture;
+    public void send(S message) {
+        if (!this.asyncPolicy.isBlockWhenFull() && this.sendQueue.isFull()) {
+            this.droppedCounter.inc();
+            throw new RuntimeException("Dispatch queue full");
         }
 
-        try {
-            String newId = UUID.randomUUID().toString();
-            futureMap.put(newId, sendFuture);
-            atomicResultQueue.enqueue(message, newId, result -> {
-                LOG.trace("Result of enqueueing for Id {} was {}", newId, result);
-
-                if (result == DispatchQueue.EnqueueResult.DEFERRED) {
-                    futureMap.remove(newId);
-                    sendFuture.complete(DispatchStatus.QUEUED);
-                }
-            });
-        } catch (WriteFailedException e) {
-            sendFuture.completeExceptionally(e);
-        }
-
-        return sendFuture;
-    }
-
-    /**
-     * This class serves to ensure operations of enqueueing a message and acting on the result of that enqueue are done
-     * atomically from the point of view of any thread calling dequeue.
-     */
-    private final static class AtomicResultQueue<T> {
-        private final Map<String, CountDownLatch> resultRecordedMap = new ConcurrentHashMap<>();
-        private final DispatchQueue<T> dispatchQueue;
-
-        public AtomicResultQueue(DispatchQueue<T> dispatchQueue) {
-            this.dispatchQueue = Objects.requireNonNull(dispatchQueue);
-        }
-
-        void enqueue(T message, String key, Consumer<DispatchQueue.EnqueueResult> onEnqueue) throws WriteFailedException {
-            CountDownLatch resultRecorded = new CountDownLatch(1);
-            resultRecordedMap.put(key, resultRecorded);
-            DispatchQueue.EnqueueResult result = dispatchQueue.enqueue(message, key);
-
-            // When the result is DEFERRED we should not track the future so remove it from the map
-            if (result == DispatchQueue.EnqueueResult.DEFERRED) {
-                resultRecordedMap.remove(key);
-            }
-
-            onEnqueue.accept(result);
-            resultRecorded.countDown();
-        }
-
-        Map.Entry<String, T> dequeue() throws InterruptedException {
-            Map.Entry<String, T> messageEntry = dispatchQueue.dequeue();
-
-            // If the key is null, we weren't tracking it so we don't need to synchronize
-            if (messageEntry.getKey() == null) {
-                return messageEntry;
-            }
-            CountDownLatch resultRecorded = resultRecordedMap.remove(messageEntry.getKey());
-            if(resultRecorded != null) {
-                resultRecorded.await();
-            }
-
-            return messageEntry;
-        }
-
-        boolean isFull() {
-            return dispatchQueue.isFull();
-        }
-
-        int getSize() {
-            return dispatchQueue.getSize();
-        }
-    }
-    
-    @Override
-    public int getQueueSize() {
-        return atomicResultQueue.getSize();
+        this.messageDispatcher.dispatch(message);
     }
 
     @Override
     public void close() throws Exception {
-        syncDispatcher.close();
-        executor.shutdown();
+        this.messageDispatcher.close();
+        this.executor.shutdown();
+        this.sendQueue.close();
     }
-
-    /**
-     * This class is intended to be used only when a suitable implementation could not be found at runtime. This should
-     * only occur in testing.
-     */
-    private static class DefaultQueue<T> implements DispatchQueue<T> {
-        private final BlockingQueue<Map.Entry<String, T>> queue;
-
-        DefaultQueue(int size) {
-            queue = new LinkedBlockingQueue<>(size);
-        }
-
-        @Override
-        public EnqueueResult enqueue(T message, String key) throws WriteFailedException {
-            try {
-                queue.put(new AbstractMap.SimpleImmutableEntry<>(key, message));
-                return EnqueueResult.IMMEDIATE;
-            } catch (InterruptedException e) {
-                throw new WriteFailedException(e);
-            }
-        }
-
-        @Override
-        public Map.Entry<String, T> dequeue() throws InterruptedException {
-            return queue.take();
-        }
-
-        @Override
-        public boolean isFull() {
-            return queue.remainingCapacity() <= 0;
-        }
-
-        @Override
-        public int getSize() {
-            return queue.size();
-        }
-    }
-
 }

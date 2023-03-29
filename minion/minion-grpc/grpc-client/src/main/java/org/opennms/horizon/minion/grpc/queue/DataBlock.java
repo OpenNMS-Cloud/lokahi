@@ -1,8 +1,8 @@
 /*******************************************************************************
  * This file is part of OpenNMS(R).
  *
- * Copyright (C) 2018 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2018 The OpenNMS Group, Inc.
+ * Copyright (C) 2023 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
  *
@@ -26,27 +26,45 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.shared.ipc.sink.offheap;
+package org.opennms.horizon.minion.grpc.queue;
 
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.ArrayDeque;
+import java.util.Map;
+import java.util.Objects;
 
-public class Activator implements BundleActivator {
-
-    private static final Logger LOG = LoggerFactory.getLogger(Activator.class);
-
-    @Override
-    public void start(BundleContext context) throws Exception {
-        LOG.info("Set bundle context in OffHeapServiceLoader");
-         DispatchQueueServiceLoader.setBundleContext(context);
+public interface DataBlock {
+    static Container memory(final byte[] key, final ArrayDeque<Map.Entry<String, byte[]>> data) {
+        return new Container(new MemoryDataBlock(key, data));
     }
 
-    @Override
-    public void stop(BundleContext context) throws Exception {
-        LOG.info("Clear bundle context in OffHeapServiceLoader");
-        DispatchQueueServiceLoader.setBundleContext(null);
+//    boolean offer(final T element);
+//
+//    T poll();
+//
+//    int size();
+
+//    default boolean isEmpty() {
+//        return this.size() == 0;
+//    }
+
+    MemoryDataBlock asMemory();
+
+    OffHeapDataBlock asOffHeap();
+
+    public static class Container {
+        private DataBlock block;
+
+        public Container(final DataBlock block) {
+            this.block = Objects.requireNonNull(block);
+        }
+
+        void toMemory() {
+            this.block = this.block.asMemory();
+        }
+
+        void toOffHeap() {
+            this.block = this.block.asOffHeap();
+        }
     }
 
 }

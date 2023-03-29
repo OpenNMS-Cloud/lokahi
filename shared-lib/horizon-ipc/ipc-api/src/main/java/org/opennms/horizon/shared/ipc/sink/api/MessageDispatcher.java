@@ -28,15 +28,36 @@
 
 package org.opennms.horizon.shared.ipc.sink.api;
 
-/**
- * Used to synchronously dispatch messages.
- *
- * Instances of these should be created by the {@link MessageDispatcherFactory}.
- *
- * @author jwhite
- */
-public interface MessageDispatcher<S> extends AutoCloseable {
+import java.util.Objects;
+import java.util.function.Consumer;
 
-    void send(S message);
+import org.opennms.horizon.shared.ipc.sink.common.DispatcherState;
 
+import com.google.protobuf.Message;
+
+public abstract class MessageDispatcher<S extends Message, T extends Message> implements AutoCloseable {
+
+    private final DispatcherState<?, S, T> state;
+
+    private final Consumer<byte[]> sender;
+
+    protected MessageDispatcher(DispatcherState<?, S, T> state, final Consumer<byte[]> sender) {
+        this.state = Objects.requireNonNull(state);
+        this.sender = Objects.requireNonNull(sender);
+    }
+
+    public abstract void dispatch(final S message);
+
+    protected void send(final byte[] message) {
+        this.sender.accept(message);
+    }
+
+    public SinkModule<S, T> getModule() {
+        return this.state.getModule();
+    }
+
+    @Override
+    public void close() throws Exception {
+        this.state.close();
+    }
 }

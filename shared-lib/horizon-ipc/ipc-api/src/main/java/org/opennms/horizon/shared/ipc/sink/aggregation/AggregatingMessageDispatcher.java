@@ -28,11 +28,15 @@
 
 package org.opennms.horizon.shared.ipc.sink.aggregation;
 
-import com.google.protobuf.Message;
+import java.util.function.Consumer;
+
 import org.opennms.horizon.shared.ipc.sink.api.AggregationPolicy;
 import org.opennms.horizon.shared.ipc.sink.api.MessageDispatcher;
+import org.opennms.horizon.shared.ipc.sink.api.SendQueue;
 import org.opennms.horizon.shared.ipc.sink.api.SinkModule;
-import org.opennms.horizon.shared.ipc.sink.api.SyncDispatcher;
+import org.opennms.horizon.shared.ipc.sink.common.DispatcherState;
+
+import com.google.protobuf.Message;
 
 /**
  * A {@link MessageDispatcher} that applies the {@link SinkModule}'s {@link AggregationPolicy}
@@ -40,9 +44,37 @@ import org.opennms.horizon.shared.ipc.sink.api.SyncDispatcher;
  *
  * @author jwhite
  */
-public abstract class AggregatingSinkMessageProducer<S extends Message, T extends Message> extends AggregatingMessageProducer<S,T> implements SyncDispatcher<S> {
+public class AggregatingMessageDispatcher<S extends Message, T extends Message> extends MessageDispatcher<S, T> {
 
-    public AggregatingSinkMessageProducer(SinkModule<S, T> module) {
-        super(module.getId(), module.getAggregationPolicy());
+    private final Aggregator<S,T> aggregator;
+
+    public AggregatingMessageDispatcher(final DispatcherState<?, S, T> state,
+                                        final Consumer<byte[]> sender) {
+        super(state, sender);
+
+        this.aggregator = new Aggregator<>(
+            state.getModule().getId(),
+            state.getModule().getAggregationPolicy(),
+            this::send);
+    }
+
+    @Override
+    public void dispatch(final S message) {
+        final T log = aggregator.aggregate(message);
+        if (log != null) {
+            // This log is ready to be dispatched
+            this.send(log);
+        }
+    }
+
+    private void send(final T log) {
+        final var marshalled = this.getModule().marshal(log);
+        this.send(marshalled);
+    }
+
+    @Override
+    public void close() throws Exception {
+        super.close();
+        this.aggregator.close();
     }
 }

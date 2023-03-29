@@ -26,15 +26,15 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.server.model.flows;
+package org.opennms.horizon.server.mapper.flows;
 
-import lombok.Getter;
-import lombok.Setter;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.opennms.horizon.server.model.flows.TrafficSummary;
 
-@Getter
-@Setter
-public class TrafficSummary {
-    private long bytesIn;
-    private long bytesOut;
-    private String label;
+@Mapper(componentModel = "spring")
+public interface TrafficSummaryMapper {
+
+    @Mapping(source = "application", target = "label")
+    TrafficSummary map(org.opennms.dataplatform.flows.querier.v1.TrafficSummary proto);
 }

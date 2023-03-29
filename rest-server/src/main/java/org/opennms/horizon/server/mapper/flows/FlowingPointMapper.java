@@ -26,15 +26,22 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.server.model.flows;
+package org.opennms.horizon.server.mapper.flows;
 
-import lombok.Getter;
-import lombok.Setter;
+import com.google.protobuf.Timestamp;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.opennms.horizon.server.model.flows.FlowingPoint;
 
-@Getter
-@Setter
-public class TrafficSummary {
-    private long bytesIn;
-    private long bytesOut;
-    private String label;
+import java.time.Instant;
+
+@Mapper(componentModel = "spring")
+public interface FlowingPointMapper {
+
+    @Mapping(source = "application", target = "label")
+    FlowingPoint map(org.opennms.dataplatform.flows.querier.v1.FlowingPoint proto);
+
+    default Instant map(Timestamp timestamp) {
+        return Instant.ofEpochSecond(timestamp.getSeconds(), timestamp.getNanos());
+    }
 }

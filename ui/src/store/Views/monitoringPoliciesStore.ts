@@ -7,13 +7,12 @@ import useSnackbar from '@/composables/useSnackbar'
 import {
   DetectionMethodTypes,
   SNMPEventType,
-  OverTimeUnit,
-  Severity,
   ComponentType,
   EventMetrics,
   ThresholdLevels
 } from '@/components/MonitoringPolicies/monitoringPolicies.constants'
 import { MonitorPolicy } from '@/types/graphql'
+import { Severity, TimeRangeUnit } from '@/types/graphql'
 
 const { showSnackbar } = useSnackbar()
 
@@ -39,22 +38,22 @@ const getDefaultThresholdCondition = () => ({
   level: ThresholdLevels.ABOVE,
   percentage: 50,
   forAny: 5,
-  durationUnit: OverTimeUnit.SECOND,
+  durationUnit: TimeRangeUnit.Second,
   duringLast: 60,
-  periodUnit: OverTimeUnit.SECOND,
-  severity: Severity.CRITICAL
+  periodUnit: TimeRangeUnit.Second,
+  severity: Severity.Critical
 })
 
 const getDefaultEventCondition = () => ({
   id: new Date().getTime(),
   count: 1,
-  severity: Severity.WARNING
+  severity: Severity.Critical
 })
 
 // port down event has an extra properties
 const getDefaultEventConditionPortDown = () => ({
   ...getDefaultEventCondition(),
-  ...{ clearEvent: SNMPEventType.PORT_UP }
+  clearEvent: SNMPEventType.PORT_UP
 })
 
 const getDefaultRule = () => ({

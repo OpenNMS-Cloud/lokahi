@@ -67,7 +67,8 @@
 <script lang="ts" setup>
 import { EventCondition, Rule } from '@/types/policies'
 import { conditionLetters } from './monitoringPolicies.constants'
-import { OverTimeUnit, Severity, SNMPEventType } from './monitoringPolicies.constants'
+import { SNMPEventType } from './monitoringPolicies.constants'
+import { Severity, TimeRangeUnit } from '@/types/graphql'
 
 const props = defineProps<{
   condition: EventCondition
@@ -79,16 +80,16 @@ const emit = defineEmits(['updateCondition', 'deleteCondition'])
 const condition = ref<EventCondition>()
 
 const durationOptions = [
-  { id: OverTimeUnit.SECOND, name: 'Second(s)' },
-  { id: OverTimeUnit.MINUTE, name: 'Minute(s)' },
-  { id: OverTimeUnit.HOUR, name: 'Hour(s)' }
+  { id: TimeRangeUnit.Second, name: 'Second(s)' },
+  { id: TimeRangeUnit.Minute, name: 'Minute(s)' },
+  { id: TimeRangeUnit.Hour, name: 'Hour(s)' }
 ]
 
 const severityList = [
-  { id: Severity.CRITICAL, name: 'Critical' },
-  { id: Severity.MAJOR, name: 'Major' },
-  { id: Severity.MINOR, name: 'Minor' },
-  { id: Severity.WARNING, name: 'Warning' }
+  { id: Severity.Critical, name: 'Critical' },
+  { id: Severity.Major, name: 'Major' },
+  { id: Severity.Minor, name: 'Minor' },
+  { id: Severity.Warning, name: 'Warning' }
 ]
 
 const clearEventOptions = [

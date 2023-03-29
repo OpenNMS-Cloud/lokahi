@@ -3,24 +3,11 @@ export enum DetectionMethodTypes {
   EVENT = 'EVENT'
 }
 
-export enum OverTimeUnit {
-  SECOND = 'SECOND',
-  MINUTE = 'MINUTE',
-  HOUR = 'HOUR'
-}
-
 export enum SNMPEventType {
   COLD_REBOOT = 'COLD_REBOOT',
   SNMP_AUTH_FAILURE = 'SNMP_AUTH_FAILURE',
   PORT_DOWN = 'PORT_DOWN',
   PORT_UP = 'PORT_UP'
-}
-
-export enum Severity {
-  WARNING = 'WARNING',
-  MINOR = 'MINOR',
-  MAJOR = 'MAJOR',
-  CRITICAL = 'CRITICAL'
 }
 
 export enum ComponentType {

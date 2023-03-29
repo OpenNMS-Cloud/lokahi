@@ -45,6 +45,7 @@ import org.opennms.horizon.server.utils.ServerHeaderUtil;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
+import javax.naming.AuthenticationException;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -55,11 +56,6 @@ import java.util.stream.Collectors;
 public class GrpcFlowService {
     private final ServerHeaderUtil headerUtil;
     private final FlowClient flowClient;
-    private final InventoryClient inventoryClient;
-
-    private final NodeMapper nodeMapper;
-    private final IpInterfaceMapper ipInterfaceMapper;
-
     private final InventoryClient inventoryClient;
 
     private final NodeMapper nodeMapper;
@@ -87,7 +83,7 @@ public class GrpcFlowService {
         String tenantId = headerUtil.extractTenant(env);
 
         var summaries = flowClient.getApplicationSummaries(requestCriteria, tenantId);
-        return Flux.fromIterable(summaries.getSummariesList().stream().map(TrafficSummary::fromApplication).collect(Collectors.toList()));
+        return Flux.fromIterable(summaries.getSummariesList().stream().map(TrafficSummary::fromApplication).toList());
     }
 
     @GraphQLQuery(name = "findApplicationSeries")
@@ -95,7 +91,7 @@ public class GrpcFlowService {
                                                     @GraphQLEnvironment ResolutionEnvironment env) {
         String tenantId = headerUtil.extractTenant(env);
         var series = flowClient.getApplicationSeries(requestCriteria, tenantId).getPointList().stream()
-            .map(FlowingPoint::fromApplication).collect(Collectors.toList());
+            .map(FlowingPoint::fromApplication).toList();
         return Flux.fromIterable(series);
     }
 

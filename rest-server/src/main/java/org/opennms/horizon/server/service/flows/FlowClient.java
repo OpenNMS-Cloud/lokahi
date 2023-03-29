@@ -28,6 +28,7 @@
 
 package org.opennms.horizon.server.service.flows;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Timestamp;
 import io.grpc.ManagedChannel;
 import lombok.RequiredArgsConstructor;
@@ -48,7 +49,6 @@ import org.opennms.horizon.server.model.flows.TimeRange;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 public class FlowClient {
@@ -56,6 +56,7 @@ public class FlowClient {
     private final long deadlineMs;
 
     private ApplicationsServiceGrpc.ApplicationsServiceBlockingStub applicationsServiceBlockingStub;
+
     private ExporterServiceGrpc.ExporterServiceBlockingStub exporterServiceStub;
 
     protected void initialStubs() {
@@ -71,7 +72,7 @@ public class FlowClient {
 
     public List<Long> findExporters(RequestCriteria requestCriteria, String tenantId) {
         var listRequest = ListRequest.newBuilder()
-            .setTenantId(tenantId);
+            .setTenantId(tenantId).setLimit(requestCriteria.getCount());
         if (requestCriteria.getTimeRange() != null) {
             listRequest.addFilters(convertTimeRage(requestCriteria.getTimeRange()));
         }
@@ -82,12 +83,12 @@ public class FlowClient {
         }
         return exporterServiceStub.withDeadlineAfter(deadlineMs, TimeUnit.MILLISECONDS)
             .getExporterInterfaces(listRequest.build())
-            .getElementsList().stream().map(Long::parseLong).collect(Collectors.toList());
+            .getElementsList().stream().map(Long::parseLong).toList();
     }
 
     public List<String> findApplications(RequestCriteria requestCriteria, String tenantId) {
         var listRequest = ListRequest.newBuilder()
-            .setTenantId(tenantId);
+            .setTenantId(tenantId).setLimit(requestCriteria.getCount());
         if (requestCriteria.getTimeRange() != null) {
             listRequest.addFilters(convertTimeRage(requestCriteria.getTimeRange()));
         }
@@ -103,53 +104,53 @@ public class FlowClient {
     }
 
     public Summaries getApplicationSummaries(RequestCriteria requestCriteria, String tenantId) {
-        var request = ApplicationSummariesRequest.newBuilder()
-            .setTenantId(tenantId);
+        var summaryRequest = ApplicationSummariesRequest.newBuilder()
+            .setTenantId(tenantId).setCount(requestCriteria.getCount());
 
         if (requestCriteria.getApplications() != null) {
             requestCriteria.getApplications().stream().forEach(a ->
-                request.addFilters(convertApplication(a))
+                summaryRequest.addFilters(convertApplication(a))
             );
         }
 
         if (requestCriteria.getExporter() != null) {
             requestCriteria.getExporter().stream().forEach(e ->
-                request.addFilters(convertExporter(e))
+                summaryRequest.addFilters(convertExporter(e))
             );
         }
 
         if (requestCriteria.getTimeRange() != null) {
-            request.addFilters(convertTimeRage(requestCriteria.getTimeRange()));
+            summaryRequest.addFilters(convertTimeRage(requestCriteria.getTimeRange()));
         }
 
         return applicationsServiceBlockingStub
             .withDeadlineAfter(deadlineMs, TimeUnit.MILLISECONDS)
-            .getApplicationSummaries(request.build());
+            .getApplicationSummaries(summaryRequest.build());
     }
 
     public Series getApplicationSeries(RequestCriteria requestCriteria, String tenantId) {
-        var request = ApplicationSeriesRequest.newBuilder()
-            .setTenantId(tenantId);
+        var seriesRequest = ApplicationSeriesRequest.newBuilder()
+            .setTenantId(tenantId).setStep(requestCriteria.getStep()).setCount(requestCriteria.getCount());
 
         if (requestCriteria.getApplications() != null) {
             requestCriteria.getApplications().stream().forEach(a ->
-                request.addFilters(convertApplication(a))
+                seriesRequest.addFilters(convertApplication(a))
             );
         }
 
         if (requestCriteria.getExporter() != null) {
             requestCriteria.getExporter().stream().forEach(e ->
-                request.addFilters(convertExporter(e))
+                seriesRequest.addFilters(convertExporter(e))
             );
         }
 
         if (requestCriteria.getTimeRange() != null) {
-            request.addFilters(convertTimeRage(requestCriteria.getTimeRange()));
+            seriesRequest.addFilters(convertTimeRage(requestCriteria.getTimeRange()));
         }
 
         return applicationsServiceBlockingStub
             .withDeadlineAfter(deadlineMs, TimeUnit.MILLISECONDS)
-            .getApplicationSeries(request.build());
+            .getApplicationSeries(seriesRequest.build());
     }
 
     private Filter.Builder convertExporter(Exporter exporter) {

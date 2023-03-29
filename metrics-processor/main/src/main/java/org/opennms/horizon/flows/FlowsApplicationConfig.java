@@ -111,6 +111,7 @@ public class FlowsApplicationConfig {
             .sslContext(GrpcSslContexts.forClient().trustManager(InsecureTrustManagerFactory.INSTANCE).build())
             .keepAliveTime(10, TimeUnit.SECONDS)
             .keepAliveTimeout(15, TimeUnit.SECONDS)
+            //.usePlaintext().build();
             .build();
     }
 

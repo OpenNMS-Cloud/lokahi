@@ -147,7 +147,7 @@
         <maven-compiler-plugin.version>3.10.1</maven-compiler-plugin.version>
         <protobuf-maven-plugin.version>0.6.1</protobuf-maven-plugin.version>
         <os-maven-plugin.version>1.6.2</os-maven-plugin.version>
-        <flows.gateway.grpc.version>LATEST</flows.gateway.grpc.version>
+        <flows.gateway.grpc.version>1.12.8</flows.gateway.grpc.version>
         <jayway-awaitility.version>1.7.0</jayway-awaitility.version>
         <awaitility.version>4.2.0</awaitility.version>
         <commons-csv.version>1.9.0</commons-csv.version>

@@ -20,6 +20,10 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.opennms.horizon.shared</groupId>
+            <artifactId>horizon-shaded-grpc-core</artifactId>
+        </dependency>
+        <dependency>
             <groupId>io.grpc</groupId>
             <artifactId>grpc-netty-shaded</artifactId>
         </dependency>
@@ -59,6 +63,9 @@
                             <artifactSet>
                                 <excludes>
                                     <!-- <exclude>com.google.guava:guava</exclude> -->
+                                    <exclude>io.grpc:grpc-core</exclude>
+                                    <exclude>org.slf4j:*</exclude>
+                                    <exclude>org.projectlombok:lombok</exclude>
                                 </excludes>
                             </artifactSet>
                             <createDependencyReducedPom>true</createDependencyReducedPom>
@@ -76,7 +83,9 @@
                             com.google.protobuf;version="[3.19,4)",
                             javax.net.ssl,
                             javax.security.cert,
-                            javax.security.auth.x500
+                            javax.security.auth.x500,
+                            <!-- SLF4J required for horizon-shaded-grpc-core -->
+                            org.slf4j
                         </Import-Package>
                         <Export-Package>
                             io.grpc,

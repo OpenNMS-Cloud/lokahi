@@ -41,6 +41,7 @@
         <module>azure</module>
         <module>flows</module>
         <module>alert</module>
+        <module>shaded-grpc-core</module>
     </modules>
 
     <build>

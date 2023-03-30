@@ -7,8 +7,8 @@ import org.opennms.horizon.minion.plugin.api.ServiceDetectorResponseImpl;
 import org.opennms.horizon.shared.snmp.SnmpAgentConfig;
 import org.opennms.horizon.shared.snmp.SnmpHelper;
 import org.opennms.horizon.shared.snmp.SnmpObjId;
+import org.opennms.inventory.types.ServiceType;
 import org.opennms.node.scan.contract.ServiceResult;
-import org.opennms.node.scan.contract.ServiceType;
 import org.opennms.snmp.contract.SnmpDetectorRequest;
 import org.opennms.taskset.contract.MonitorType;
 import org.slf4j.Logger;
@@ -18,6 +18,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 public class SnmpDetector implements ServiceDetector {
+
     private static final String DEFAULT_OBJECT_IDENTIFIER = ".1.3.6.1.2.1.1.2.0";
     private static final Logger log = LoggerFactory.getLogger(SnmpDetector.class);
     private static final String SNMP_DETECTION_TIMED_OUT = "SNMP Detection Timed Out";
@@ -74,7 +75,7 @@ public class SnmpDetector implements ServiceDetector {
             SnmpObjId snmpObjectId = SnmpObjId.get(DEFAULT_OBJECT_IDENTIFIER);
 
             return snmpHelper.getAsync(agentConfig, new SnmpObjId[]{snmpObjectId})
-                .handle((snmpValues, throwable) -> getResponse(snmpDetectorRequest.getHost(), throwable))
+                .handle((snmpValues, throwable) -> getResponse(host, throwable))
                 .completeOnTimeout(getErrorResult(host),
                     agentConfig.getTimeout(), TimeUnit.MILLISECONDS);
 

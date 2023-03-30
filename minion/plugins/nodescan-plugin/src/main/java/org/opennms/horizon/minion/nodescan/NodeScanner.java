@@ -76,13 +76,13 @@ public class NodeScanner implements Scanner {
     @Override
     public CompletableFuture<ScanResultsResponse> scan(Any config) {
         LOG.info("Received node scan config {}", config);
-
+        NodeScanRequest scanRequest = null;
         if (!config.is(NodeScanRequest.class)) {
             throw new IllegalArgumentException("Task config must be a NodeScanRequest, this is wrong type: " + config.getTypeUrl());
         }
 
         try {
-            NodeScanRequest scanRequest = config.unpack(NodeScanRequest.class);
+            scanRequest = config.unpack(NodeScanRequest.class);
             InetAddress primaryIpAddress = InetAddressUtils.getInetAddress(scanRequest.getPrimaryIp());
             // Assign default agent config.
             SnmpAgentConfig agentConfig = new SnmpAgentConfig(primaryIpAddress, SnmpConfiguration.DEFAULTS);
@@ -100,12 +100,14 @@ public class NodeScanner implements Scanner {
             List<IpInterfaceResult> ipInterfaceResults = scanIpAddrTable(agentConfig);
             List<SnmpInterfaceResult> snmpInterfaceResults = scanSnmpInterface(agentConfig);
 
-            var ipAddresses = ipInterfaceResults.stream().map(IpInterfaceResult::getIpAddress).toList();
-            var detectors = scanRequest.getDetectorList().stream();
+            var ipAddresses = ipInterfaceResults.stream().map(IpInterfaceResult::getIpAddress)
+                .collect(Collectors.toSet());
+            ipAddresses.add(scanRequest.getPrimaryIp());
+            var detectors = scanRequest.getDetectorList();
             List<CompletableFuture<ServiceResult>> futures = new ArrayList<>();
             SnmpAgentConfig finalAgentConfig = agentConfig;
             ipAddresses.forEach(ipAddress -> {
-                detectors.toList().forEach(detector -> {
+                detectors.forEach(detector -> {
                     try {
                         var serviceDetectorManager = detectorRegistry.getService(detector.getService().name());
                         var serviceDetector = serviceDetectorManager.create();
@@ -136,7 +138,6 @@ public class NodeScanner implements Scanner {
                     }
                 });
             });
-
             CompletableFuture<Void> allFutures = CompletableFuture.allOf(futures.toArray(new CompletableFuture[futures.size()]));
             allFutures.join();
 
@@ -156,7 +157,11 @@ public class NodeScanner implements Scanner {
                         .build())
                     .build());
         } catch (Exception e) {
-            LOG.error("Error while node scan", e);
+            if (scanRequest != null) {
+                LOG.error("Error while performing node scan for nodeId = {}", scanRequest.getNodeId(), e);
+            } else {
+                LOG.error("Error while parsing request ", e);
+            }
             return CompletableFuture.failedFuture(e);
         }
 

@@ -38,14 +38,20 @@ import org.opennms.horizon.shared.icmp.PingConstants;
 import org.opennms.horizon.shared.icmp.PingResponseCallback;
 import org.opennms.horizon.shared.icmp.Pinger;
 import org.opennms.horizon.shared.icmp.PingerFactory;
+import org.opennms.horizon.shared.utils.InetAddressUtils;
 import org.opennms.icmp.contract.IcmpDetectorRequest;
+import org.opennms.inventory.types.ServiceType;
 import org.opennms.node.scan.contract.ServiceResult;
 import org.opennms.taskset.contract.MonitorType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.InetAddress;
 import java.util.concurrent.CompletableFuture;
 
 public class IcmpDetector implements ServiceDetector {
+
+    private static final Logger LOG = LoggerFactory.getLogger(IcmpDetector.class);
     private final PingerFactory pingerFactory;
 
     private final Descriptors.FieldDescriptor allowFragmentationFieldDescriptor;
@@ -77,7 +83,6 @@ public class IcmpDetector implements ServiceDetector {
             if (!config.is(IcmpDetectorRequest.class)) {
                 throw new IllegalArgumentException("configuration must be an IcmpDetectorRequest; type-url=" + config.getTypeUrl());
             }
-
             IcmpDetectorRequest icmpDetectorRequest = config.unpack(IcmpDetectorRequest.class);
             IcmpDetectorRequest effectiveRequest = populateDefaultsAsNeeded(icmpDetectorRequest);
 
@@ -222,17 +227,29 @@ public class IcmpDetector implements ServiceDetector {
 
         @Override
         public void handleResponse(InetAddress address, EchoPacket response) {
-
+            future.complete(ServiceResult.newBuilder()
+                .setIpAddress(InetAddressUtils.str(address))
+                .setService(ServiceType.ICMP)
+                .setStatus(true)
+                .build());
         }
 
         @Override
         public void handleTimeout(InetAddress address, EchoPacket request) {
-
+            future.complete(ServiceResult.newBuilder()
+                .setIpAddress(InetAddressUtils.str(address))
+                .setService(ServiceType.ICMP)
+                .setStatus(false)
+                .build());
         }
 
         @Override
         public void handleError(InetAddress address, EchoPacket request, Throwable t) {
-
+            future.complete(ServiceResult.newBuilder()
+                .setIpAddress(InetAddressUtils.str(address))
+                .setService(ServiceType.ICMP)
+                .setStatus(false)
+                .build());
         }
     }
 }

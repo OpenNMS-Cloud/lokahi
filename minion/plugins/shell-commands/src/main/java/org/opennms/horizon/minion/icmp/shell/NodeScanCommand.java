@@ -37,6 +37,8 @@ import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.opennms.horizon.minion.plugin.api.registries.ScannerRegistry;
 import org.opennms.horizon.snmp.api.SnmpConfiguration;
+import org.opennms.inventory.types.ServiceType;
+import org.opennms.node.scan.contract.DetectRequest;
 import org.opennms.node.scan.contract.NodeScanRequest;
 import org.opennms.node.scan.contract.NodeScanResult;
 
@@ -65,7 +67,10 @@ public class NodeScanCommand implements Action {
         var scanner = scannerManager.create();
 
         var scanRequestBuilder = NodeScanRequest.newBuilder()
-            .setPrimaryIp(ipAddress);
+            .setPrimaryIp(ipAddress)
+            .addDetector(DetectRequest.newBuilder().setService(ServiceType.ICMP).build())
+            .addDetector(DetectRequest.newBuilder().setService(ServiceType.SNMP).build());
+
         if (!Strings.isNullOrEmpty(communityString)) {
             scanRequestBuilder.addSnmpConfigs(SnmpConfiguration.newBuilder().setReadCommunity(communityString).build());
         }

@@ -29,6 +29,7 @@ syntax = "proto3";
 
 import "google/protobuf/any.proto";
 import "snmp-api.proto";
+import "types.proto";
 
 package opennms.node.scan;
 option java_multiple_files = true;
@@ -41,13 +42,10 @@ message NodeScanRequest {
   repeated opennms.snmp.api.SnmpConfiguration snmp_configs = 4;
 }
 
-enum ServiceType {
-  ICMP = 0;
-  SNMP = 1;
-}
+
 
 message DetectRequest {
-  ServiceType service = 1;
+  opennms.inventory.types.ServiceType service = 1;
   google.protobuf.Any config = 2;
 }
 
@@ -64,7 +62,7 @@ message NodeInfoResult {
 //for service detector
 message ServiceResult {
   string ip_address = 1;
-  ServiceType service = 2;
+  opennms.inventory.types.ServiceType service = 2;
   bool status = 3;
 }
 

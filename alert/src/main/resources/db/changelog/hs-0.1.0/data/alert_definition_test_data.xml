@@ -13,6 +13,7 @@ FIXME: Figure out how to set context in test container
         <column name="uei" value="uei.opennms.org/vendor/cisco/traps/SNMP_Link_Down"/>
         <column name="reduction_key" value="%s:%s:%d"/>
         <column name="type" value="PROBLEM_WITH_CLEAR"/>
+        <column name="trigger_event_id" value="1"/>
     </insert>
     <insert tableName="alert_definition">
         <column name="tenant_id" value="tenantA"/>
@@ -20,6 +21,7 @@ FIXME: Figure out how to set context in test container
         <column name="reduction_key" value="%s:%s:%d"/>
         <column name="clear_key" value="%s:uei.opennms.org/vendor/cisco/traps/SNMP_Link_Down:%d"/>
         <column name="type" value="CLEAR"/>
+        <column name="trigger_event_id" value="1"/>
     </insert>
 
     <insert tableName="alert_definition">
@@ -27,6 +29,7 @@ FIXME: Figure out how to set context in test container
         <column name="uei" value="uei.opennms.org/vendor/cisco/traps/SNMP_Link_Down"/>
         <column name="reduction_key" value="%s:%s:%d"/>
         <column name="type" value="PROBLEM_WITH_CLEAR"/>
+        <column name="trigger_event_id" value="1"/>
     </insert>
     <insert tableName="alert_definition">
         <column name="tenant_id" value="tenantB"/>
@@ -34,6 +37,7 @@ FIXME: Figure out how to set context in test container
         <column name="reduction_key" value="%s:%s:%d"/>
         <column name="clear_key" value="%s:uei.opennms.org/vendor/cisco/traps/SNMP_Link_Down:%d"/>
         <column name="type" value="CLEAR"/>
+        <column name="trigger_event_id" value="1"/>
     </insert>
 
     <insert tableName="alert_definition">
@@ -41,6 +45,7 @@ FIXME: Figure out how to set context in test container
         <column name="uei" value="uei.opennms.org/vendor/cisco/traps/SNMP_Link_Down"/>
         <column name="reduction_key" value="%s:%s:%d"/>
         <column name="type" value="PROBLEM_WITH_CLEAR"/>
+        <column name="trigger_event_id" value="1"/>
     </insert>
     <insert tableName="alert_definition">
         <column name="tenant_id" value="tenantC"/>
@@ -48,6 +53,7 @@ FIXME: Figure out how to set context in test container
         <column name="reduction_key" value="%s:%s:%d"/>
         <column name="clear_key" value="%s:uei.opennms.org/vendor/cisco/traps/SNMP_Link_Down:%d"/>
         <column name="type" value="CLEAR"/>
+        <column name="trigger_event_id" value="1"/>
     </insert>
 
     <insert tableName="alert_definition">
@@ -55,6 +61,7 @@ FIXME: Figure out how to set context in test container
         <column name="uei" value="uei.opennms.org/vendor/cisco/traps/SNMP_Link_Down"/>
         <column name="reduction_key" value="%s:%s:%d"/>
         <column name="type" value="PROBLEM_WITH_CLEAR"/>
+        <column name="trigger_event_id" value="1"/>
     </insert>
     <insert tableName="alert_definition">
         <column name="tenant_id" value="tenantD"/>
@@ -62,6 +69,7 @@ FIXME: Figure out how to set context in test container
         <column name="reduction_key" value="%s:%s:%d"/>
         <column name="clear_key" value="%s:uei.opennms.org/vendor/cisco/traps/SNMP_Link_Down:%d"/>
         <column name="type" value="CLEAR"/>
+        <column name="trigger_event_id" value="1"/>
     </insert>
 
     <insert tableName="alert_definition">
@@ -69,6 +77,7 @@ FIXME: Figure out how to set context in test container
         <column name="uei" value="uei.opennms.org/vendor/cisco/traps/SNMP_Link_Down"/>
         <column name="reduction_key" value="%s:%s:%d"/>
         <column name="type" value="PROBLEM_WITH_CLEAR"/>
+        <column name="trigger_event_id" value="1"/>
     </insert>
     <insert tableName="alert_definition">
         <column name="tenant_id" value="tenantE"/>
@@ -76,6 +85,7 @@ FIXME: Figure out how to set context in test container
         <column name="reduction_key" value="%s:%s:%d"/>
         <column name="clear_key" value="%s:uei.opennms.org/vendor/cisco/traps/SNMP_Link_Down:%d"/>
         <column name="type" value="CLEAR"/>
+        <column name="trigger_event_id" value="1"/>
     </insert>
 
     <insert tableName="alert_definition">
@@ -83,6 +93,7 @@ FIXME: Figure out how to set context in test container
         <column name="uei" value="uei.opennms.org/vendor/cisco/traps/SNMP_Link_Down"/>
         <column name="reduction_key" value="%s:%s:%d"/>
         <column name="type" value="PROBLEM_WITH_CLEAR"/>
+        <column name="trigger_event_id" value="1"/>
     </insert>
     <insert tableName="alert_definition">
         <column name="tenant_id" value="tenantF"/>
@@ -90,6 +101,7 @@ FIXME: Figure out how to set context in test container
         <column name="reduction_key" value="%s:%s:%d"/>
         <column name="clear_key" value="%s:uei.opennms.org/vendor/cisco/traps/SNMP_Link_Down:%d"/>
         <column name="type" value="CLEAR"/>
+        <column name="trigger_event_id" value="1"/>
     </insert>
 
     <insert tableName="alert_definition">
@@ -97,6 +109,7 @@ FIXME: Figure out how to set context in test container
         <column name="uei" value="uei.opennms.org/vendor/cisco/traps/SNMP_Link_Down"/>
         <column name="reduction_key" value="%s:%s:%d"/>
         <column name="type" value="PROBLEM_WITH_CLEAR"/>
+        <column name="trigger_event_id" value="1"/>
     </insert>
     <insert tableName="alert_definition">
         <column name="tenant_id" value="tenantG"/>
@@ -104,6 +117,7 @@ FIXME: Figure out how to set context in test container
         <column name="reduction_key" value="%s:%s:%d"/>
         <column name="clear_key" value="%s:uei.opennms.org/vendor/cisco/traps/SNMP_Link_Down:%d"/>
         <column name="type" value="CLEAR"/>
+        <column name="trigger_event_id" value="1"/>
     </insert>
 
     <insert tableName="alert_definition">
@@ -111,6 +125,7 @@ FIXME: Figure out how to set context in test container
         <column name="uei" value="uei.opennms.org/vendor/cisco/traps/SNMP_Link_Down"/>
         <column name="reduction_key" value="%s:%s:%d"/>
         <column name="type" value="PROBLEM_WITH_CLEAR"/>
+        <column name="trigger_event_id" value="1"/>
     </insert>
     <insert tableName="alert_definition">
         <column name="tenant_id" value="tenant-other"/>
@@ -118,6 +133,7 @@ FIXME: Figure out how to set context in test container
         <column name="reduction_key" value="%s:%s:%d"/>
         <column name="clear_key" value="%s:uei.opennms.org/vendor/cisco/traps/SNMP_Link_Down:%d"/>
         <column name="type" value="CLEAR"/>
+        <column name="trigger_event_id" value="1"/>
     </insert>
 </changeSet>
 </databaseChangeLog>

@@ -28,6 +28,8 @@
 
 package org.opennms.horizon.alertservice.db.entity;
 
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.OneToOne;
 import org.opennms.horizon.shared.alert.policy.OverTimeUnit;
 import org.opennms.horizon.shared.alert.policy.SNMPEventType;
 import org.opennms.horizon.shared.alert.policy.Severity;
@@ -72,4 +74,7 @@ public class TriggerEvent extends TenantAwareEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "rule_id", referencedColumnName = "id")
     private PolicyRule rule;
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "id", referencedColumnName = "trigger_event_id")
+    private AlertDefinition alertDefinition;
 }

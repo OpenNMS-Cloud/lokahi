@@ -10,6 +10,7 @@
             <column name="uei" value="uei.opennms.org/vendor/cisco/traps/SNMP_Link_Down"/>
             <column name="reduction_key" value="%s:%s:%d"/>
             <column name="type" value="PROBLEM_WITH_CLEAR"/>
+            <column name="trigger_event_id" value="1"/>
         </insert>
         <insert tableName="alert_definition">
             <column name="tenant_id" value="opennms-prime"/>
@@ -17,6 +18,7 @@
             <column name="reduction_key" value="%s:%s:%d"/>
             <column name="clear_key" value="%s:uei.opennms.org/vendor/cisco/traps/SNMP_Link_Down:%d"/>
             <column name="type" value="CLEAR"/>
+            <column name="trigger_event_id" value="1"/>
         </insert>
     </changeSet>
 </databaseChangeLog>

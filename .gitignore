@@ -38,3 +38,4 @@ java/bin/
 *.swp
 *.iml
 idea/
+*.log

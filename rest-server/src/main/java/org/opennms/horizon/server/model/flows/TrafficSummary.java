@@ -37,17 +37,4 @@ public class TrafficSummary {
     private long bytesIn;
     private long bytesOut;
     private String label;
-
-    public static TrafficSummary fromApplication(org.opennms.dataplatform.flows.querier.v1.TrafficSummary trafficSummary) {
-        TrafficSummary output = TrafficSummary.baseConversion(trafficSummary);
-        output.label = trafficSummary.getApplication();
-        return output;
-    }
-
-    public static TrafficSummary baseConversion(org.opennms.dataplatform.flows.querier.v1.TrafficSummary trafficSummary) {
-        TrafficSummary output = new TrafficSummary();
-        output.bytesIn = trafficSummary.getBytesIn();
-        output.bytesOut = trafficSummary.getBytesOut();
-        return output;
-    }
 }

@@ -37,7 +37,7 @@ public enum Severity {
     MINOR(5),
     MAJOR(6),
     CRITICAL(7),
-    UNRECOGNIZED(8);
+    UNRECOGNIZED(-1);
 
     private final int value;
 

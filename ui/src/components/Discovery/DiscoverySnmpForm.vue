@@ -33,12 +33,14 @@
         @content-formatted="(val) => setSnmpConfig('ipAddresses', val)"
         :contentType="ContentEditableType.IP"
         :regexDelim="IP_RANGE.regexDelim"
+        :regexExpression="REGEX_EXPRESSIONS.IP"
         :label="discoveryText.ContentEditable.IP.label"
         ref="contentEditableIPRef"
         class="ip-input"
         :tooltipText="Common.tooltip.IPHelpTooltp"
         :content="props.discovery?.ipAddresses?.join(', ')"
         isRequired
+        :id="1"
       />
       <DiscoveryContentEditable
         @content-formatted="(val) => setSnmpConfig('snmpConfig.readCommunities', val)"
@@ -49,17 +51,20 @@
         ref="contentEditableCommunityStringRef"
         class="community-input"
         :content="props.discovery?.snmpConfig?.readCommunities?.join(', ')"
+        :id="2"
       />
       <DiscoveryContentEditable
         @content-formatted="(val) => setSnmpConfig('snmpConfig.ports', val)"
         :contentType="ContentEditableType.UDPPort"
         :regexDelim="UDP_PORT.regexDelim"
+        :regexExpression="REGEX_EXPRESSIONS.PORT"
         :label="discoveryText.ContentEditable.UDPPort.label"
         :default-content="UDP_PORT.default"
         class="udp-port-input"
         ref="contentEditableUDPPortRef"
         :tooltipText="Common.tooltip.PortHelpTooltp"
         :content="props.discovery?.snmpConfig?.ports?.join(', ')"
+        :id="3"
       />
     </div>
 
@@ -82,7 +87,13 @@
 </template>
 
 <script lang="ts" setup>
-import { ContentEditableType, UDP_PORT, COMMUNITY_STRING, IP_RANGE } from '@/components/Discovery/discovery.constants'
+import {
+  ContentEditableType,
+  UDP_PORT,
+  COMMUNITY_STRING,
+  IP_RANGE,
+  REGEX_EXPRESSIONS
+} from '@/components/Discovery/discovery.constants'
 import discoveryText, { DiscoverySNMPForm, Common } from '@/components/Discovery/discovery.text'
 import { useDiscoveryQueries } from '@/store/Queries/discoveryQueries'
 import { useTagQueries } from '@/store/Queries/tagQueries'
@@ -144,9 +155,7 @@ const resetContentEditable = () => {
 }
 
 const saveHandler = async () => {
-  contentEditableIPRef.value?.validateAndFormat()
-  contentEditableCommunityStringRef.value?.validateAndFormat()
-  contentEditableUDPPortRef.value?.validateAndFormat()
+  contentEditableCommunityStringRef.value?.validateContent()
   const isIpInvalid = contentEditableIPRef.value?.validateContent()
   const isPortInvalid = contentEditableUDPPortRef.value?.validateContent()
   if (form.validate().length || isIpInvalid || isPortInvalid) return

@@ -35,7 +35,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.json.JSONException;
@@ -46,6 +46,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.opennms.horizon.alerts.proto.Alert;
+import org.opennms.horizon.alerts.proto.ListAlertsResponse;
 import org.opennms.horizon.model.common.proto.Severity;
 import org.opennms.horizon.server.RestServerApplication;
 import org.opennms.horizon.server.config.DataLoaderFactory;
@@ -92,8 +93,22 @@ public class GraphQLAlertsServiceTest {
 
     @Test
     public void testFindAllAlerts() throws JSONException {
-        doReturn(Arrays.asList(alerts1, alerts2)).when(mockClient).listAlerts(5, "0", accessToken);
-        String request = "query {findAllAlerts(pageSize:5, page: \"0\") {tenantId reductionKey severity}}";
+        doReturn(ListAlertsResponse.newBuilder().addAlerts(alerts1).addAlerts(alerts2).build()).when(mockClient).listAlerts(5, "0", Collections.singletonList("CRITICAL"), 0L, "tenantId", true, accessToken);
+        String request = "query {\n" +
+            "  findAllAlerts(pageSize: 5, page: \"0\", hours: \"0\", severities: [\"CRITICAL\"], sortBy: \"tenantId\", sortAscending: true) {\n" +
+            "    nextPageToken\n" +
+            "    alerts {\n" +
+            "      tenantId\n" +
+            "      databaseId\n" +
+            "      uei\n" +
+            "      counter\n" +
+            "      severity\n" +
+            "      firstEventTimeMs\n" +
+            "      lastUpdateTimeMs\n" +
+            "      reductionKey\n" +
+            "    }\n" +
+            "  }\n" +
+            "}";
         webClient.post()
             .uri(GRAPHQL_PATH)
             .accept(MediaType.APPLICATION_JSON)
@@ -102,11 +117,11 @@ public class GraphQLAlertsServiceTest {
             .exchange()
             .expectStatus().isOk()
             .expectBody()
-            .jsonPath("$.data.findAllAlerts.size()").isEqualTo(2)
-            .jsonPath("$.data.findAllAlerts[0].tenantId").isEqualTo(alerts1.getTenantId())
-            .jsonPath("$.data.findAllAlerts[0].severity").isEqualTo(alerts1.getSeverity().name())
-            .jsonPath("$.data.findAllAlerts[0].reductionKey").isEqualTo(alerts1.getReductionKey());
-        verify(mockClient).listAlerts(5, "0", accessToken);
+            .jsonPath("$.data.findAllAlerts.alerts.size()").isEqualTo(2)
+            .jsonPath("$.data.findAllAlerts.alerts[0].tenantId").isEqualTo(alerts1.getTenantId())
+            .jsonPath("$.data.findAllAlerts.alerts[0].severity").isEqualTo(alerts1.getSeverity().name())
+            .jsonPath("$.data.findAllAlerts.alerts[0].reductionKey").isEqualTo(alerts1.getReductionKey());
+        verify(mockClient).listAlerts(5, "0", Collections.singletonList("CRITICAL"), 0L, "tenantId", true, accessToken);
         verify(mockHeaderUtil, times(1)).getAuthHeader(any(ResolutionEnvironment.class));
     }
 

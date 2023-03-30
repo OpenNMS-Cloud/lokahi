@@ -51,17 +51,20 @@
             ref="contentEditableCommunityStringRef"
             data-test="cmmunity-string-content-editable"
             :content="props.discovery?.snmpCommunities?.join(', ')"
+            :id="1"
           />
           <DiscoveryContentEditable
             @content-formatted="(val) => setDiscoveryValues('snmpPorts', val)"
             :contentType="ContentEditableType.UDPPort"
             :regexDelim="UDP_PORT.regexDelim"
+            :regexExpression="REGEX_EXPRESSIONS.PORT"
             :default-content="UDP_PORT.default"
             :label="discoveryText.ContentEditable.UDPPort.label"
             class="udp-port-input"
             ref="contentEditableUDPPortRef"
             :content="props.discovery?.snmpPorts?.join(', ')"
             :tooltipText="Common.tooltip.PortHelpTooltp"
+            :id="2"
           />
         </div>
       </div>
@@ -89,7 +92,7 @@
 <script lang="ts" setup>
 import discoveryText from './discovery.text'
 import { DiscoverySyslogSNMPTrapsForm, Common } from './discovery.text'
-import { ContentEditableType, COMMUNITY_STRING, UDP_PORT } from './discovery.constants'
+import { ContentEditableType, COMMUNITY_STRING, UDP_PORT, REGEX_EXPRESSIONS } from './discovery.constants'
 import { useTagQueries } from '@/store/Queries/tagQueries'
 import { useDiscoveryQueries } from '@/store/Queries/discoveryQueries'
 import { useDiscoveryMutations } from '@/store/Mutations/discoveryMutations'
@@ -139,8 +142,7 @@ const setDiscoveryValues = (property: string, val: (string | number)[] | null) =
 }
 
 const submitHandler = async () => {
-  contentEditableCommunityStringRef.value.validateAndFormat()
-  contentEditableUDPPortRef.value.validateAndFormat()
+  contentEditableCommunityStringRef.value.validateContent()
   const isPortInvalid = contentEditableUDPPortRef.value?.validateContent()
   if (form.validate().length || isPortInvalid) return
   await discoveryMutations.upsertPassiveDiscovery({ passiveDiscovery: discoveryInfo.value })

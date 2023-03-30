@@ -49,7 +49,7 @@ public class MonitorPolicyService {
     private final MonitorPolicyRepository repository;
 
     public MonitorPolicyProto createPolicy(MonitorPolicyProto request, String tenantId) {
-        MonitorPolicy policy = policyMapper.protoToEntity(request);
+        MonitorPolicy policy = policyMapper.map(request);
         updateData(policy, tenantId);
         MonitorPolicy newPolicy = repository.save(policy);
         return policyMapper.entityToProto(newPolicy);

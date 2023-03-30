@@ -64,7 +64,6 @@ public interface MonitorPolicyMapper {
             .addAllTags(jsonToList(policy.getTags())).build();
     }
 
-
     @Mappings({
         @Mapping(target = "rulesList", source = "rules")
     })
@@ -74,6 +73,5 @@ public interface MonitorPolicyMapper {
         @Mapping(target = "tags", source = "tagsList"),
         @Mapping(target = "rules", source = "rulesList")
     })
-    MonitorPolicy protoToEntity(MonitorPolicyProto proto);
-
+    MonitorPolicy map(MonitorPolicyProto proto);
 }

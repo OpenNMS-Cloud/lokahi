@@ -21,4 +21,8 @@ public abstract class GQLQueryConstants {
     public static final String DELETE_NODE_BY_ID =
         "mutation DeleteNode($id: Long!) {  deleteNode(id: $id)}";
 
+    public static final String ADD_DISCOVERY_QUERY =
+        "mutation { createIcmpActiveDiscovery( request: { name: \"%s\", location: \"%s\", ipAddresses: [\"%s\"], snmpConfig: { readCommunities: [\"%s\"], ports: [%d]\n" +
+            " } } ) {id, name, ipAddresses, location, snmpConfig { readCommunities, ports } } }";
+
 }

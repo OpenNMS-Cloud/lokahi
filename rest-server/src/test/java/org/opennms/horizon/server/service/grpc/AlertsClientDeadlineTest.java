@@ -38,6 +38,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -116,7 +117,7 @@ public class AlertsClientDeadlineTest {
         ArgumentCaptor<ListAlertsRequest> captor = ArgumentCaptor.forClass(ListAlertsRequest.class);
         StatusRuntimeException thrown = assertThrows(
             StatusRuntimeException.class,
-            () -> client.listAlerts(5, "0", accessToken + methodName),
+            () -> client.listAlerts(5, "0", Collections.singletonList("CRITICAL"), 0L, "tenantId", true, accessToken + methodName),
             "Expected listLocations() to throw, but it didn't"
         );
         assertThat(thrown.getStatus().getCode()).isEqualTo(Status.Code.DEADLINE_EXCEEDED);

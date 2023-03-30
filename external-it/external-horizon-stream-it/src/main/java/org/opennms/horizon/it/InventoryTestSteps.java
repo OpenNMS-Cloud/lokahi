@@ -156,12 +156,13 @@ public class InventoryTestSteps {
         try {
             Awaitility
                 .await()
-                .atMost(120000, TimeUnit.MILLISECONDS)
+                .ignoreExceptions()
+                .atMost(120, TimeUnit.SECONDS)
                 .until(() -> checkTheStatusOfTheFirstNode(status) )
             ;
             assertTrue(true);
         } catch (Exception e) {
-            LOG.info("Test check the status failed with the error: ", e.getMessage());
+            LOG.info("Test check the status failed with the error: {}", e.getMessage());
             assertTrue(false);
         }
     }
@@ -300,6 +301,7 @@ public class InventoryTestSteps {
         LinkedHashMap lhm = jsonPathEvaluator.get("data");
         LinkedHashMap map = (LinkedHashMap) lhm.get("nodeStatus");
         String currentStatus = (String) map.get("status");
+        LOG.info("Status of the node: " + currentStatus);
         return currentStatus.equals(expectedStatus);
     }
 
@@ -309,6 +311,7 @@ public class InventoryTestSteps {
      * @throws MalformedURLException
      */
     public int getFirstNodeId() throws MalformedURLException {
+        LOG.info("Getting the first node from the inventory");
         URL url = formatIngressUrl("/api/graphql");
         String accessToken = userAccessTokenSupplier.get();
 

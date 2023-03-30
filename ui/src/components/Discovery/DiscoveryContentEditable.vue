@@ -36,13 +36,13 @@
         @keyup="contentChange"
         ref="contentEditableRef"
         contenteditable="true"
-        id="contentEditable"
+        :id="'contentEditable_' + id"
         class="content-editable"
-        @blur="validateAndFormat"
+        @blur="validateContent"
       />
       <span
-        v-if="props.regexDelim && isContentNotEmpty"
-        @click="validateAndFormat"
+        v-if="props.regexExpression && isContentNotEmpty"
+        @click="validateContent"
         class="validate-format"
         ><Icon :icon="checkCircleIcon"
       /></span>
@@ -57,17 +57,16 @@
 </template>
 
 <script lang="ts" setup>
-import ipRegex from 'ip-regex'
 import CheckCircleIcon from '@featherds/icon/action/CheckCircle'
 import { IIcon } from '@/types'
-import { ContentEditableType, REGEX_PORT } from '@/components/Discovery/discovery.constants'
+import { ContentEditableType } from '@/components/Discovery/discovery.constants'
 import { PropType } from 'vue'
 import { fncArgVoid } from '@/types'
 import discoveryText from '@/components/Discovery/discovery.text'
-
 import Help from '@featherds/icon/action/Help'
+import { isEmpty } from 'lodash'
 
-const emit = defineEmits(['is-content-invalid', 'content-formatted'])
+const emit = defineEmits(['content-formatted'])
 const props = defineProps({
   contentType: {
     type: Number as PropType<ContentEditableType>,
@@ -76,6 +75,9 @@ const props = defineProps({
   regexDelim: {
     type: String,
     default: ''
+  },
+  regexExpression: {
+    type: Array<RegExp>
   },
   label: {
     type: String,
@@ -95,6 +97,10 @@ const props = defineProps({
   isRequired: {
     type: Boolean,
     required: false
+  },
+  id: {
+    type: Number,
+    required: true
   }
 })
 
@@ -112,8 +118,68 @@ const contentChange = () => {
   isContentNotEmpty.value = contentEditableRef.value.textContent.length as boolean
 }
 
-const validateAndFormat: fncArgVoid = () => {
-  isContentInvalid.value = validateContent()
+const splitContent = (str: string[]): (string | number)[] | null => {
+  if (props.contentType === ContentEditableType.UDPPort) {
+    return str.map((p) => parseInt(p))
+  }
+  return str
+}
+
+const formatContent = (contentEditableStrings: string[], regexp: RegExp[]) => {
+  const parent = document.getElementById('contentEditable_' + props.id)
+  if (!parent) return
+  contentEditableStrings
+    .map((str: string) => {
+      const node = document.createElement('div')
+      node.textContent = str
+      if (!regexp.map((t: RegExp) => t.test(str)).includes(true)) {
+        isContentInvalid.value = true
+        node.setAttribute('style', 'color: #ff555e')
+      }
+      parent.appendChild(node)
+    })
+    .join(';')
+}
+
+const extractTextFromNodes = (ceNode: HTMLElement) => {
+  const rows = []
+  let textElement = ceNode.innerHTML
+  if (ceNode.innerHTML.indexOf('<') !== -1) {
+    textElement = ceNode.innerHTML.substring(0, ceNode.innerHTML.indexOf('<'))
+  }
+  rows.push(textElement)
+
+  const children = ceNode.children as HTMLCollection
+  for (let child of children) {
+    rows.push((child as HTMLElement).innerText)
+  }
+  return rows.filter((s) => !isEmpty(s)).join(',')
+}
+
+const validateContent = () => {
+  const regexDelim = new RegExp(props.regexDelim)
+  const ceNode = document.getElementById('contentEditable_' + props.id)
+
+  if (!ceNode) return
+  const textFromNodes = extractTextFromNodes(ceNode)
+  const contentEditableStrings = textFromNodes.replace(/\s/g, '').split(regexDelim)
+  const regexp = props.regexExpression?.map((r) => new RegExp(r))
+  isContentInvalid.value = false
+
+  if (regexp) {
+    ceNode.innerHTML = ''
+    formatContent(contentEditableStrings, regexp)
+  }
+
+  if (!isContentInvalid.value) {
+    emit('content-formatted', splitContent(contentEditableStrings))
+  } else {
+    showErrorMsg()
+  }
+  return isContentInvalid.value
+}
+
+const showErrorMsg = () => {
   if (isContentInvalid.value) {
     if (!isContentNotEmpty.value && props.isRequired) {
       errorMsg.value = discoveryText.ContentEditable.errorRequired
@@ -121,73 +187,6 @@ const validateAndFormat: fncArgVoid = () => {
       errorMsg.value = discoveryText.ContentEditable.errorInvalidValue
     }
   }
-  const highlightedString = highlightInvalid()
-  if (highlightedString.length) htmlString.value = highlightedString
-
-  emit('is-content-invalid', isContentInvalid.value)
-
-  if (!isContentInvalid.value) emit('content-formatted', splitContent(contentEditableRef.value.textContent))
-}
-
-const splitContent = (str: string): (string | number)[] | null => {
-  if (!str || str.length < 2) return null
-
-  const regexDelim = new RegExp(props.regexDelim)
-  let contentEditableStrings = str.split(regexDelim)
-
-  if (props.contentType === ContentEditableType.UDPPort) {
-    return contentEditableStrings.map((p) => parseInt(p))
-  }
-  return contentEditableStrings
-}
-
-const validateContent = () => {
-  const regexDelim = new RegExp(props.regexDelim)
-  const contentEditableStrings = contentEditableRef.value.textContent.split(regexDelim)
-  let isInvalid = false
-  const regexPorts = new RegExp(REGEX_PORT.listPorts)
-  switch (props.contentType) {
-    case ContentEditableType.IP:
-      //isInvalid = contentEditableStrings.some((str: string) => !ipRegex({ exact: true }).test(str))
-      break
-    case ContentEditableType.CommunityString:
-      break
-    case ContentEditableType.UDPPort:
-      isInvalid = !regexPorts.test(contentEditableRef.value.textContent)
-      break
-    default:
-  }
-  return isInvalid
-}
-
-const highlightInvalid = () => {
-  const regexDelim = new RegExp(props.regexDelim)
-  const contentEditableStrings = contentEditableRef.value.textContent.split(regexDelim)
-  let highlightInvalidString = ''
-  let errorStr = '<span style="color: #ff555e">{{}}</span>'
-  const portRegex = new RegExp(REGEX_PORT.onePort)
-  switch (props.contentType) {
-    case ContentEditableType.IP:
-      highlightInvalidString = contentEditableStrings
-        .map((str: string) => {
-          if (ipRegex({ exact: true }).test(str)) return str
-          return errorStr.replace('{{}}', str)
-        })
-        .join(';')
-      break
-    case ContentEditableType.CommunityString:
-      break
-    case ContentEditableType.UDPPort:
-      highlightInvalidString = contentEditableStrings
-        .map((str: string) => {
-          if (portRegex.test(str)) return str
-          return errorStr.replace('{{}}', str)
-        })
-        .join(';')
-      break
-    default:
-  }
-  return highlightInvalidString
 }
 
 const reset: fncArgVoid = () => {
@@ -202,7 +201,6 @@ const checkCircleIcon: IIcon = {
 }
 
 defineExpose({
-  validateAndFormat,
   validateContent,
   reset
 })
@@ -223,7 +221,6 @@ defineExpose({
     align-items: center;
     > .icon-help {
       height: 20px;
-      color: var(variables.$secondary-variant);
       width: 20px;
       min-width: 20px;
       border: none;
@@ -259,6 +256,7 @@ defineExpose({
     }
   }
 }
+
 .errorMsgBox {
   height: 24px;
   @include typography.caption;

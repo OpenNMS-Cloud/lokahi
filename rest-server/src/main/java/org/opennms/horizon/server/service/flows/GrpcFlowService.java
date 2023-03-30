@@ -36,6 +36,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.opennms.horizon.server.mapper.IpInterfaceMapper;
 import org.opennms.horizon.server.mapper.NodeMapper;
+import org.opennms.horizon.server.mapper.flows.FlowingPointMapper;
+import org.opennms.horizon.server.mapper.flows.TrafficSummaryMapper;
 import org.opennms.horizon.server.model.flows.Exporter;
 import org.opennms.horizon.server.model.flows.FlowingPoint;
 import org.opennms.horizon.server.model.flows.RequestCriteria;
@@ -59,6 +61,8 @@ public class GrpcFlowService {
 
     private final NodeMapper nodeMapper;
     private final IpInterfaceMapper ipInterfaceMapper;
+    private final TrafficSummaryMapper trafficSummaryMapper;
+    private final FlowingPointMapper flowingPointMapper;
 
     @GraphQLQuery(name = "findExporters")
     public Flux<Exporter> findExporters(RequestCriteria requestCriteria,
@@ -82,16 +86,15 @@ public class GrpcFlowService {
         String tenantId = headerUtil.extractTenant(env);
 
         var summaries = flowClient.getApplicationSummaries(requestCriteria, tenantId);
-        return Flux.fromIterable(summaries.getSummariesList().stream().map(TrafficSummary::fromApplication).collect(Collectors.toList()));
+        return Flux.fromIterable(summaries.getSummariesList().stream().map(trafficSummaryMapper::map).toList());
     }
 
     @GraphQLQuery(name = "findApplicationSeries")
     public Flux<FlowingPoint> findApplicationSeries(RequestCriteria requestCriteria,
                                                     @GraphQLEnvironment ResolutionEnvironment env) {
         String tenantId = headerUtil.extractTenant(env);
-        var series = flowClient.getApplicationSeries(requestCriteria, tenantId).getPointList().stream()
-            .map(FlowingPoint::fromApplication).collect(Collectors.toList());
-        return Flux.fromIterable(series);
+        return Flux.fromIterable(flowClient.getApplicationSeries(requestCriteria, tenantId).getPointList().stream()
+            .map(flowingPointMapper::map).toList());
     }
 
     private Exporter getExporter(long interfaceId, ResolutionEnvironment env) {

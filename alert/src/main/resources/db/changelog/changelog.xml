@@ -6,5 +6,9 @@
 
     <include file="/db/changelog/hs-0.1.0/tables/alert.xml"/>
     <include file="/db/changelog/hs-0.1.0/tables/policy.xml" />
+    <include file="/db/changelog/hs-0.1.0/tables/alert_definition.xml" />
+    <include file="/db/changelog/hs-0.1.0/data/alert_definition_default.xml" />
 
+    <!-- FIXME: Only load this data for tests -->
+    <include file="/db/changelog/hs-0.1.0/data/alert_definition_test_data.xml" />
 </databaseChangeLog>

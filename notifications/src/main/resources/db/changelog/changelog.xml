@@ -9,5 +9,6 @@
     <include file="db/changelog/hs-0.1.0/tables/pagerDutyConfig.xml" />
     <include file="db/changelog/hs-0.1.0/tables/pagerDutyConfigUpdate.xml" />
     <include file="db/changelog/hs-0.1.0/tables/pagerDutyConfigTenantUpdate.xml" />
+    <include file="db/changelog/hs-0.1.0/tables/monitoringPolicy.xml" />
 
 </databaseChangeLog>

@@ -35,6 +35,5 @@ import org.opennms.horizon.shared.alert.policy.SNMPEventProto;
 @Mapper(componentModel = "spring")
 public interface SNMPEventMapper {
     TriggerEvent protoToEntity(SNMPEventProto proto);
-
     SNMPEventProto entityToProto(TriggerEvent event);
 }

@@ -33,6 +33,7 @@
           :list="discoveryQueries.activeDiscoveries"
           @select-discovery="showDiscovery"
           :selectedId="discoverySelectedType !== DiscoveryType.SyslogSNMPTraps ? selectedDiscovery?.id : null"
+          @show-instructions="isInstructionVisible = true"
         />
         <DiscoveryListCard
           passive
@@ -41,6 +42,7 @@
           @toggle-discovery="toggleDiscovery"
           @select-discovery="showDiscovery"
           :selectedId="discoverySelectedType === DiscoveryType.SyslogSNMPTraps ? selectedDiscovery?.id : null"
+          @show-instructions="isInstructionVisible = true"
         />
       </div>
     </section>
@@ -106,6 +108,10 @@
     </section>
   </div>
   <DiscoverySuccessModal ref="successModal" />
+  <DiscoveryInstructions
+    :isOpen="isInstructionVisible"
+    @drawer-closed="() => (isInstructionVisible = false)"
+  />
 </template>
 
 <script lang="ts" setup>
@@ -138,6 +144,7 @@ const discoveryTypeSelector = ref<InstanceType<typeof DiscoveryTypeSelector>>()
 const discoveriesResults = ref<TDiscoveryAutocomplete[]>([])
 const searchLoading = ref(false)
 const discoverySearchValue = ref(undefined)
+const isInstructionVisible = ref(false)
 
 const handleNewDiscovery = () => {
   isDiscoveryEditingShown.value = true

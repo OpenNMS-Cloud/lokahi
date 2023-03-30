@@ -2,6 +2,7 @@ package org.opennms.horizon.it;
 
 import io.cucumber.java.en.Given;
 
+import org.opennms.horizon.it.helper.TestsExecutionHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,7 +13,7 @@ public class HorizonStreamTestSteps {
     private final KeycloakTestSteps keycloakTestSteps;
     private final InventoryTestSteps inventoryTestSteps;
     private final MetricsTestSteps metricsTestSteps;
-    private final DiscoveryTest discoveryTestSteps;
+    private final TestsExecutionHelper testsExecutionHelper;
 
     private String ingressBaseUrl;
 
@@ -20,17 +21,17 @@ public class HorizonStreamTestSteps {
 // Constructor
 //----------------------------------------
 
-    public HorizonStreamTestSteps(KeycloakTestSteps keycloakTestSteps, InventoryTestSteps inventoryTestSteps, MetricsTestSteps metricsTestSteps, DiscoveryTest discoveryTestSteps) {
+    public HorizonStreamTestSteps(KeycloakTestSteps keycloakTestSteps, InventoryTestSteps inventoryTestSteps, MetricsTestSteps metricsTestSteps, TestsExecutionHelper testsExecutionHelper) {
         this.keycloakTestSteps = keycloakTestSteps;
         this.inventoryTestSteps = inventoryTestSteps;
         this.metricsTestSteps = metricsTestSteps;
-        this.discoveryTestSteps = discoveryTestSteps;
+        this.testsExecutionHelper = testsExecutionHelper;
 
         this.inventoryTestSteps.setUserAccessTokenSupplier(this.keycloakTestSteps::getKeycloakAccessToken);
         this.inventoryTestSteps.setIngressUrlSupplier(this::getIngressBaseUrl);
 
-        this.discoveryTestSteps.setUserAccessTokenSupplier(this.keycloakTestSteps::getKeycloakAccessToken);
-        this.discoveryTestSteps.setIngressUrlSupplier(this::getIngressBaseUrl);
+        this.testsExecutionHelper.setUserAccessTokenSupplier(this.keycloakTestSteps::getKeycloakAccessToken);
+        this.testsExecutionHelper.setIngressUrlSupplier(this::getIngressBaseUrl);
 
         this.metricsTestSteps.setUserAccessTokenSupplier(this.keycloakTestSteps::getKeycloakAccessToken);
         this.metricsTestSteps.setIngressUrlSupplier(this::getIngressBaseUrl);

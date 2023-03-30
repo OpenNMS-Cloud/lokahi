@@ -28,8 +28,16 @@
 
 package org.opennms.horizon.alertservice.service;
 
-import io.grpc.Context;
-import lombok.RequiredArgsConstructor;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
+
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+
 import org.opennms.horizon.alerts.proto.Alert;
 import org.opennms.horizon.alertservice.api.AlertLifecyleListener;
 import org.opennms.horizon.alertservice.api.AlertService;
@@ -41,14 +49,8 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
+import io.grpc.Context;
+import lombok.RequiredArgsConstructor;
 
 /**
  * A simple engine that stores alerts in memory and periodically scans the list to performs actions (i.e. delete if older than X).
@@ -59,6 +61,7 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 public class AlertEngine implements AlertLifecyleListener {
     private static final Logger LOG = LoggerFactory.getLogger(AlertEngine.class);
+    public static final int DURATION = 14;
 
     private final AlertService alertService;
     private final AlertMapper alertMapper;
@@ -116,12 +119,12 @@ public class AlertEngine implements AlertLifecyleListener {
     }
 
     private synchronized void tick() {
-        LOG.info("Tick with: {}", alertsByReductionKeyByTenantId);
-        // Delete alerts more than 1 hour old
+        LOG.debug("Tick with: {}", alertsByReductionKeyByTenantId);
+        // Delete alerts more than 2 weeks old
         alertsByReductionKeyByTenantId.forEach((tenantId, alertsByReductionKey) -> {
             Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, tenantId).run(()-> {
                 alertsByReductionKey.values().stream()
-                    .filter(a -> a.getLastUpdateTimeMs() < (System.currentTimeMillis() - TimeUnit.HOURS.toMillis(1)))
+                    .filter(a -> a.getLastUpdateTimeMs() < (System.currentTimeMillis() - TimeUnit.DAYS.toMillis(DURATION)))
                     .forEach(this::deleteAlert);
             });
         });

@@ -31,8 +31,31 @@ package org.opennms.horizon.alertservice.stepdefs;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.time.Instant;
+import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
+
+import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.opennms.horizon.alerts.proto.Alert;
+import org.opennms.horizon.alerts.proto.Filter;
+import org.opennms.horizon.alerts.proto.ListAlertsRequest;
+import org.opennms.horizon.alerts.proto.ListAlertsResponse;
+import org.opennms.horizon.alerts.proto.TimeRangeFilter;
+import org.opennms.horizon.alertservice.AlertGrpcClientUtils;
+import org.opennms.horizon.alertservice.RetryUtils;
+import org.opennms.horizon.alertservice.kafkahelper.KafkaTestHelper;
+import org.opennms.horizon.events.proto.Event;
+import org.opennms.horizon.events.proto.EventLog;
+import org.opennms.horizon.model.common.proto.Severity;
+
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.MessageOrBuilder;
+import com.google.protobuf.Timestamp;
 import com.google.protobuf.UInt64Value;
 import com.google.protobuf.util.JsonFormat;
 
@@ -43,21 +66,7 @@ import io.restassured.config.RestAssuredConfig;
 import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.List;
-import java.util.function.Supplier;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.opennms.horizon.alerts.proto.Alert;
-import org.opennms.horizon.alerts.proto.ListAlertsRequest;
-import org.opennms.horizon.alerts.proto.ListAlertsResponse;
-import org.opennms.horizon.alertservice.AlertGrpcClientUtils;
-import org.opennms.horizon.alertservice.RetryUtils;
-import org.opennms.horizon.alertservice.kafkahelper.KafkaTestHelper;
-import org.opennms.horizon.events.proto.Event;
-import org.opennms.horizon.events.proto.EventLog;
-import org.opennms.horizon.model.common.proto.Severity;
 
 @Slf4j
 public class AlertTestSteps {
@@ -103,19 +112,79 @@ public class AlertTestSteps {
 //========================================
 // Gherkin Rules
 //========================================
-@Then("Send event with UEI {string} with tenant {string} with node {int}")
-public void sendMessageToKafkaAtTopic(String eventUei, String tenantId, int nodeId) {
+@Then("Send event with UEI {string} with tenant {string} with node {int} with severity {string}")
+public void sendMessageToKafkaAtTopicWithSeverity(String eventUei, String tenantId, int nodeId, String severity) {
         EventLog eventLog = EventLog.newBuilder()
             .setTenantId(tenantId)
             .addEvents(Event.newBuilder()
                 .setTenantId(tenantId)
-                .setSeverity(Severity.MINOR)
+                .setSeverity(Severity.valueOf(severity))
                 .setProducedTimeMs(System.currentTimeMillis())
                 .setNodeId(nodeId)
                 .setUei(eventUei))
             .build();
 
-        kafkaTestHelper.sendToTopic(background.getEventTopic(), eventLog.toByteArray());
+        kafkaTestHelper.sendToTopic(background.getEventTopic(), eventLog.toByteArray(), tenantId);
+    }
+
+    @Then("Send event with UEI {string} with tenant {string} with node {int} with severity {string} with produced time 23h ago")
+    public void sendMessageToKafkaAtTopicYesterday(String eventUei, String tenantId, int nodeId, String severity) {
+        EventLog eventLog = EventLog.newBuilder()
+            .setTenantId(tenantId)
+            .addEvents(Event.newBuilder()
+                .setTenantId(tenantId)
+                .setSeverity(Severity.valueOf(severity))
+                .setProducedTimeMs(System.currentTimeMillis() - TimeUnit.HOURS.toMillis(23))
+                .setNodeId(nodeId)
+                .setUei(eventUei))
+            .build();
+
+        kafkaTestHelper.sendToTopic(background.getEventTopic(), eventLog.toByteArray(), tenantId);
+    }
+
+    @Then("Send event with UEI {string} with tenant {string} with node {int} with severity {string} with produced time 1h ago")
+    public void sendMessageToKafkaAtTopic1hAgo(String eventUei, String tenantId, int nodeId, String severity) {
+        EventLog eventLog = EventLog.newBuilder()
+            .setTenantId(tenantId)
+            .addEvents(Event.newBuilder()
+                .setTenantId(tenantId)
+                .setSeverity(Severity.valueOf(severity))
+                .setProducedTimeMs(System.currentTimeMillis() - TimeUnit.HOURS.toMillis(1))
+                .setNodeId(nodeId)
+                .setUei(eventUei))
+            .build();
+
+        kafkaTestHelper.sendToTopic(background.getEventTopic(), eventLog.toByteArray(), tenantId);
+    }
+
+    @Then("Send event with UEI {string} with tenant {string} with node {int} with severity {string} with produced time 8 days ago")
+    public void sendMessageToKafkaAtTopicLastWeek(String eventUei, String tenantId, int nodeId, String severity) {
+        EventLog eventLog = EventLog.newBuilder()
+            .setTenantId(tenantId)
+            .addEvents(Event.newBuilder()
+                .setTenantId(tenantId)
+                .setSeverity(Severity.valueOf(severity))
+                .setProducedTimeMs(System.currentTimeMillis() - TimeUnit.DAYS.toMillis(8))
+                .setNodeId(nodeId)
+                .setUei(eventUei))
+            .build();
+
+        kafkaTestHelper.sendToTopic(background.getEventTopic(), eventLog.toByteArray(), tenantId);
+    }
+
+    @Then("Send event with UEI {string} with tenant {string} with node {int} with severity {string} with produced time last month")
+    public void sendMessageToKafkaAtTopicLastMonth(String eventUei, String tenantId, int nodeId, String severity) {
+        EventLog eventLog = EventLog.newBuilder()
+            .setTenantId(tenantId)
+            .addEvents(Event.newBuilder()
+                .setTenantId(tenantId)
+                .setSeverity(Severity.valueOf(severity))
+                .setProducedTimeMs(System.currentTimeMillis() - 30L * 24 * 60 * 60 * 1000)
+                .setNodeId(nodeId)
+                .setUei(eventUei))
+            .build();
+
+        kafkaTestHelper.sendToTopic(background.getEventTopic(), eventLog.toByteArray(), tenantId);
     }
 
     @Then("List alerts for tenant {string}, with timeout {int}ms, until JSON response matches the following JSON path expressions")
@@ -123,7 +192,7 @@ public void sendMessageToKafkaAtTopic(String eventUei, String tenantId, int node
         Supplier<MessageOrBuilder> call = () -> {
             clientUtils.setTenantId(tenantId);
             ListAlertsResponse listAlertsResponse = clientUtils.getAlertServiceStub()
-                .listAlerts(ListAlertsRequest.newBuilder().build());
+                .listAlerts(ListAlertsRequest.newBuilder().setSortBy("alertId").setSortAscending(true).build());
             alertsFromLastResponse = listAlertsResponse.getAlertsList();
             return listAlertsResponse;
         };
@@ -133,6 +202,27 @@ public void sendMessageToKafkaAtTopic(String eventUei, String tenantId, int node
                 100,
                 timeout,
                 false);
+        assertTrue("GET request expected to return JSON response matching JSON path expression(s)", success);
+    }
+
+    @Then("List alerts for tenant {string} with hours {long}, with timeout {int}ms, until JSON response matches the following JSON path expressions")
+    public void listAlertsForTenantFilteredByTime(String tenantId, long hours, int timeout, List<String> jsonPathExpressions) throws Exception {
+        final var request = ListAlertsRequest.newBuilder();
+        request.setSortBy("alertId")
+            .setSortAscending(true);
+        getTimeRangeFilter(hours, request);
+        Supplier<MessageOrBuilder> call = () -> {
+            clientUtils.setTenantId(tenantId);
+            ListAlertsResponse listAlertsResponse = clientUtils.getAlertServiceStub().listAlerts(request.build());
+            alertsFromLastResponse = listAlertsResponse.getAlertsList();
+            return listAlertsResponse;
+        };
+        boolean success = retryUtils.retry(
+            () -> this.doRequestThenCheckJsonPathMatch(call, jsonPathExpressions),
+            result -> result,
+            100,
+            timeout,
+            false);
         assertTrue("GET request expected to return JSON response matching JSON path expression(s)", success);
     }
 
@@ -206,6 +296,103 @@ public void sendMessageToKafkaAtTopic(String eventUei, String tenantId, int node
             timeout,
             false);
         assertTrue("GET request expected to return JSON response matching JSON path expression(s)", success);
+    }
+
+    @Then("List alerts for tenant {string} sorted by {string} ascending {string}, with timeout {int}ms, until JSON response matches the following JSON path expressions")
+    public void listAlertsForTenantSorted(String tenantId, String filter, String ascending, int timeout, List<String> jsonPathExpressions) throws InterruptedException {
+        Supplier<MessageOrBuilder> call = () -> {
+            clientUtils.setTenantId(tenantId);
+            ListAlertsResponse listAlertsResponse = clientUtils.getAlertServiceStub()
+                .listAlerts(ListAlertsRequest.newBuilder().setSortBy(filter).setSortAscending(Boolean.parseBoolean(ascending)).build());
+            alertsFromLastResponse = listAlertsResponse.getAlertsList();
+            return listAlertsResponse;
+        };
+        boolean success = retryUtils.retry(
+            () -> this.doRequestThenCheckJsonPathMatch(call, jsonPathExpressions),
+            result -> result,
+            100,
+            timeout,
+            false);
+        assertTrue("GET request expected to return JSON response matching JSON path expression(s)", success);
+    }
+
+    @Then("List alerts for tenant {string} filtered by severity {string}, with timeout {int}ms, until JSON response matches the following JSON path expressions")
+    public void listAlertsForTenantFilteredBySeverityWithTimeoutMsUntilJSONResponseMatchesTheFollowingJSONPathExpressions(String tenantId, String severity, int timeout, List<String> jsonPathExpressions) throws InterruptedException {
+        Supplier<MessageOrBuilder> call = () -> {
+            clientUtils.setTenantId(tenantId);
+            ListAlertsResponse listAlertsResponse = clientUtils.getAlertServiceStub()
+                .listAlerts(ListAlertsRequest.newBuilder().addFilters(Filter.newBuilder().setSeverity(Severity.valueOf(severity)).build()).build());
+            alertsFromLastResponse = listAlertsResponse.getAlertsList();
+            return listAlertsResponse;
+        };
+        boolean success = retryUtils.retry(
+            () -> this.doRequestThenCheckJsonPathMatch(call, jsonPathExpressions),
+            result -> result,
+            100,
+            timeout,
+            false);
+        assertTrue("GET request expected to return JSON response matching JSON path expression(s)", success);
+    }
+
+    @Then("List alerts for tenant {string} filtered by severity {string} and {string}, with timeout {int}ms, until JSON response matches the following JSON path expressions")
+    public void listAlertsForTenantFilteredBySeverityWithTimeoutMsUntilJSONResponseMatchesTheFollowingJSONPathExpressions(String tenantId, String severity, String severity2, int timeout, List<String> jsonPathExpressions) throws InterruptedException {
+        Supplier<MessageOrBuilder> call = () -> {
+            clientUtils.setTenantId(tenantId);
+            ListAlertsResponse listAlertsResponse = clientUtils.getAlertServiceStub()
+                .listAlerts(ListAlertsRequest.newBuilder()
+                    .addFilters(Filter.newBuilder().setSeverity(Severity.valueOf(severity)).build())
+                    .addFilters(Filter.newBuilder().setSeverity(Severity.valueOf(severity2)).build())
+                    .setSortBy("alertId").setSortAscending(true).build());
+            alertsFromLastResponse = listAlertsResponse.getAlertsList();
+            return listAlertsResponse;
+        };
+        boolean success = retryUtils.retry(
+            () -> this.doRequestThenCheckJsonPathMatch(call, jsonPathExpressions),
+            result -> result,
+            100,
+            timeout,
+            false);
+        assertTrue("GET request expected to return JSON response matching JSON path expression(s)", success);
+    }
+
+    @Then("List alerts for tenant {string} today , with timeout {int}ms, until JSON response matches the following JSON path expressions")
+    public void listAlertsForTenantTodayWithTimeoutMsUntilJSONResponseMatchesTheFollowingJSONPathExpressions(String tenantId, int timeout, List<String> jsonPathExpressions) throws InterruptedException {
+        final var request = ListAlertsRequest.newBuilder();
+        request.setSortBy("alertId")
+            .setSortAscending(true);
+        getTimeRangeFilter(LocalTime.MIDNIGHT.until(LocalTime.now(), ChronoUnit.HOURS), request);
+        Supplier<MessageOrBuilder> call = () -> {
+            clientUtils.setTenantId(tenantId);
+            ListAlertsResponse listAlertsResponse = clientUtils.getAlertServiceStub().listAlerts(request.build());
+            alertsFromLastResponse = listAlertsResponse.getAlertsList();
+            return listAlertsResponse;
+        };
+        boolean success = retryUtils.retry(
+            () -> this.doRequestThenCheckJsonPathMatch(call, jsonPathExpressions),
+            result -> result,
+            100,
+            timeout,
+            false);
+        assertTrue("GET request expected to return JSON response matching JSON path expression(s)", success);
+    }
+
+    @Then("Count alerts for tenant {string}, assert response is {int}")
+    public void countAlertsForTenantWithTimeoutMsUntilJSONResponseMatchesTheFollowingJSONPathExpressions(String tenantId, int expected) {
+        clientUtils.setTenantId(tenantId);
+        ListAlertsRequest listAlertsRequest = ListAlertsRequest.newBuilder().build();
+        UInt64Value countAlertsResponse = clientUtils.getAlertServiceStub()
+            .countAlerts(listAlertsRequest);
+        assertEquals(expected, countAlertsResponse.getValue());
+
+    }
+
+    @Then("Count alerts for tenant {string} filtered by severity {string}, assert response is {int}")
+    public void countAlertsForTenantFilteredBySeverity(String tenantId, String severity, int expected) {
+        clientUtils.setTenantId(tenantId);
+        ListAlertsRequest listAlertsRequest = ListAlertsRequest.newBuilder().addFilters(Filter.newBuilder().setSeverity(Severity.valueOf(severity)).build()).build();
+        UInt64Value countAlertsResponse = clientUtils.getAlertServiceStub()
+            .countAlerts(listAlertsRequest);
+        assertEquals(expected, countAlertsResponse.getValue());
     }
 
 //========================================
@@ -321,5 +508,22 @@ public void sendMessageToKafkaAtTopic(String eventUei, String tenantId, int node
             }
         }
         return foundMessages == expectedMessages;
+    }
+
+    private static void getTimeRangeFilter(Long hours, ListAlertsRequest.Builder request) {
+        Instant nowTime = Instant.now();
+        Timestamp nowTimestamp = Timestamp.newBuilder()
+            .setSeconds(nowTime.getEpochSecond())
+            .setNanos(nowTime.getNano()).build();
+
+        Instant thenTime = nowTime.minus(hours, ChronoUnit.HOURS);
+        Timestamp thenTimestamp = Timestamp.newBuilder()
+            .setSeconds(thenTime.getEpochSecond())
+            .setNanos(thenTime.getNano()).build();
+
+        request.addFilters(Filter.newBuilder().setTimeRange(TimeRangeFilter.newBuilder()
+                .setStartTime(thenTimestamp)
+                .setEndTime(nowTimestamp))
+            .build());
     }
 }

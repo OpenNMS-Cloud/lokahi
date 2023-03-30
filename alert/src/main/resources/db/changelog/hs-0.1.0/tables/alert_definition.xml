@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+    <changeSet author="rellis" id="hs-0.1.0-alert-definitions">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="alert_definition"/>
+                <tableExists tableName="event_match"/>
+            </not>
+        </preConditions>
+
+        <createTable tableName="alert_definition">
+            <column name="id" type="bigint" autoIncrement="true"/>
+            <column name="tenant_id" type="text">
+                <constraints nullable="false"/>
+            </column>
+            <column name="uei" type="text">
+                <constraints nullable="false"/>
+            </column>
+            <column name="reduction_key" type="text">
+                <constraints nullable="false"/>
+            </column>
+            <column name="clear_key" type="text" />
+            <column name="type" type="text">
+                <constraints nullable="false"/>
+            </column>
+            <column name="managed_object_type" type="text" />
+        </createTable>
+
+        <addPrimaryKey columnNames="id" constraintName="alert_definition_pk" tableName="alert_definition"/>
+
+        <createIndex tableName="alert_definition" indexName="idx_alert_definition_uei">
+            <column name="uei"/>
+        </createIndex>
+
+        <createTable tableName="event_match">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints nullable="false"/>
+            </column>
+            <column name="tenant_id" type="text">
+                <constraints nullable="false"/>
+            </column>
+            <column name="alert_definition_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="text">
+                <constraints nullable="false"/>
+            </column>
+            <column name="value" type="text">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addPrimaryKey columnNames="id" constraintName="event_match_pk" tableName="event_match"/>
+
+        <addForeignKeyConstraint  baseTableName="event_match"
+                                  baseColumnNames="id"
+                                  constraintName="fk_alert_definition"
+                                  onDelete="CASCADE"
+                                  referencedColumnNames="id"
+                                  referencedTableName="alert_definition"/>
+
+    </changeSet>
+</databaseChangeLog>

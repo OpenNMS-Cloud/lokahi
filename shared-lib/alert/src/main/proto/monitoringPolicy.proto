@@ -41,7 +41,6 @@ message MonitorPolicyProto {
   string memo = 4;
   repeated PolicyRuleProto rules = 5;
   repeated string tags = 6;
-  //Notification
   bool notifyByEmail = 7;
   bool notifyByPagerDuty = 8;
   bool notifyByWebhooks = 9;
@@ -49,10 +48,11 @@ message MonitorPolicyProto {
 }
 
 enum ComponentType {
-  CPU = 0;
-  INTERFACE = 1;
-  STORAGE = 2;
-  NODE = 3;
+  UNKNOWN_CONTENT = 0;
+  CPU = 1;
+  INTERFACE = 2;
+  STORAGE = 3;
+  NODE = 4;
 }
 
 message PolicyRuleProto {
@@ -80,23 +80,26 @@ message SNMPEventProto {
 }*/
 
 enum OverTimeUnit {
-  SECOND = 0;
-  MINUTE = 1;
-  HOUR = 2;
+  UNKNOWN_UNIT = 0;
+  SECOND = 1;
+  MINUTE = 2;
+  HOUR = 3;
 }
 
 enum SNMPEventType {
-  COLD_REBOOT = 0;
-  SNMP_AUTH_FAILURE = 1;
-  PORT_DOWN = 2;
-  PORT_UP = 3;
+  UNKNOWN_EVENT = 0;
+  COLD_REBOOT = 1;
+  SNMP_AUTH_FAILURE = 2;
+  PORT_DOWN = 3;
+  PORT_UP = 4;
 }
 
 enum Severity {
-  WARNING = 0;
-  MINOR = 1;
-  MAJOR = 2;
-  CRITICAL = 3;
+  UNKNOWN_SEVERITY = 0;
+  WARNING = 1;
+  MINOR = 2;
+  MAJOR = 3;
+  CRITICAL = 4;
 }
 
 message MonitorPolicyList {

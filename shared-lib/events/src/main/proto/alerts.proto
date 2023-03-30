@@ -29,6 +29,7 @@ syntax = "proto3";
 
 import "google/protobuf/any.proto";
 import "google/protobuf/wrappers.proto";
+import "google/protobuf/timestamp.proto";
 import "common.proto";
 
 package opennms.alerts;
@@ -40,6 +41,19 @@ enum AlertType {
   PROBLEM_WITH_CLEAR = 1;
   CLEAR = 2;
   PROBLEM_WITHOUT_CLEAR = 3;
+}
+
+message TimeRangeFilter {
+  google.protobuf.Timestamp start_time = 1;
+  google.protobuf.Timestamp end_time = 2;
+}
+
+message Filter {
+  oneof filter {
+    TimeRangeFilter time_range = 1;
+    opennms.model.Severity severity = 2;
+    int64 node_id = 3;
+  }
 }
 
 message Alert {
@@ -134,6 +148,9 @@ message ListAlertsRequest {
   // Optional. A pagination token returned from a previous call to `listAlerts`
   // that indicates where this listing should continue from.
   string next_page_token = 3;
+  repeated Filter filters = 4;
+  string sort_by = 5;
+  bool sort_ascending = 6;
 }
 
 message ListAlertsResponse {
@@ -143,6 +160,7 @@ message ListAlertsResponse {
   // A pagination token returned from a previous call to `ListAlerts`
   // that indicates from where listing should continue.
   string next_page_token = 2;
+  string last_page_token = 3;
 }
 
 message ListAlertDefinitionsRequest {
@@ -170,6 +188,7 @@ service AlertService {
   rpc clearAlert(google.protobuf.UInt64Value) returns (Alert) {};
   rpc escalateAlert(google.protobuf.UInt64Value) returns (Alert) {};
   rpc deleteAlert(google.protobuf.UInt64Value) returns(google.protobuf.BoolValue) {};
+  rpc countAlerts(ListAlertsRequest) returns (google.protobuf.UInt64Value) {};
 }
 
 service AlertConfigurationService {

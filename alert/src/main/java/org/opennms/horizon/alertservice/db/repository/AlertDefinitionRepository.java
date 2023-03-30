@@ -28,41 +28,15 @@
 
 package org.opennms.horizon.alertservice.db.repository;
 
-import org.opennms.horizon.alerts.proto.AlertDefinition;
-import org.opennms.horizon.alerts.proto.AlertType;
-import org.opennms.horizon.events.proto.Event;
-import org.springframework.stereotype.Service;
+import org.opennms.horizon.alertservice.db.entity.AlertDefinition;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
-import java.util.Arrays;
-import java.util.List;
+import java.util.Optional;
 
-/**
- * A temporary repository for alert definitions.
- *
- * Contains a couple fixed definitions to test basic behavior, and will evolve to store entities properly in the DB.
- */
-@Service
-public class AlertDefinitionRepository {
+@Repository
+public interface AlertDefinitionRepository extends JpaRepository<AlertDefinition, Long> {
 
-    public List<AlertDefinition> findAll() {
-        AlertDefinition ciscoLinkDownAlertDef = AlertDefinition.newBuilder()
-            .setUei("uei.opennms.org/vendor/cisco/traps/SNMP_Link_Down")
-            .setReductionKey("%s:%s:%d")
-            .setType(AlertType.PROBLEM_WITH_CLEAR)
-            .build();
-        AlertDefinition ciscoLinkUpAlertDef = AlertDefinition.newBuilder()
-            .setUei("uei.opennms.org/vendor/cisco/traps/SNMP_Link_Up")
-            .setReductionKey("%s:%s:%d")
-            .setClearKey("%s:uei.opennms.org/vendor/cisco/traps/SNMP_Link_Down:%d")
-            .setType(AlertType.CLEAR)
-            .build();
-        return Arrays.asList(ciscoLinkDownAlertDef, ciscoLinkUpAlertDef);
-    }
+    Optional<AlertDefinition> findFirstByTenantIdAndUei(String tenantId, String uei);
 
-    public AlertDefinition getAlertDefinitionForEvent(Event event) {
-        return findAll().stream()
-            .filter(def -> event.getUei().equals(def.getUei()))
-            .findFirst()
-            .orElse(null);
-    }
 }

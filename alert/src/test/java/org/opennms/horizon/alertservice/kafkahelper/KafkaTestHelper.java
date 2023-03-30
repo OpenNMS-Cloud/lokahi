@@ -34,16 +34,19 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import lombok.Getter;
-import lombok.Setter;
+
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.opennms.horizon.alertservice.kafkahelper.internals.KafkaProcessor;
+import org.opennms.horizon.shared.constants.GrpcConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import lombok.Getter;
+import lombok.Setter;
 
 public class KafkaTestHelper {
     private static final Logger LOG = LoggerFactory.getLogger(KafkaTestHelper.class);
@@ -84,8 +87,10 @@ public class KafkaTestHelper {
         }
     }
 
-    public void sendToTopic(String topic, byte[] body) {
-        kafkaProducer.send(new ProducerRecord<>(topic, body));
+    public void sendToTopic(String topic, byte[] body, String tenantId) {
+        ProducerRecord<String, byte[]> producerRecord = new ProducerRecord<>(topic, body);
+        producerRecord.headers().add(GrpcConstants.TENANT_ID_KEY, tenantId.getBytes());
+        kafkaProducer.send(producerRecord);
     }
 
     public List<ConsumerRecord<String, byte[]>> getConsumedMessages(String topic)  {

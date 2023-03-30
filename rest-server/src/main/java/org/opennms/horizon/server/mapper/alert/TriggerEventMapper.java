@@ -37,6 +37,5 @@ import org.opennms.horizon.shared.alert.policy.SNMPEventProto;
     nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
 public interface TriggerEventMapper {
     TriggerEvent map(SNMPEventProto protoEvent);
-
     SNMPEventProto map(TriggerEvent event);
 }

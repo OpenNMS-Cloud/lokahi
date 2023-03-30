@@ -28,7 +28,13 @@
 
 package org.opennms.horizon.alertservice.grpc;
 
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import org.opennms.horizon.alerts.proto.Alert;
 import org.opennms.horizon.alerts.proto.AlertServiceGrpc;
@@ -36,36 +42,54 @@ import org.opennms.horizon.alerts.proto.ListAlertsRequest;
 import org.opennms.horizon.alerts.proto.ListAlertsResponse;
 import org.opennms.horizon.alertservice.api.AlertService;
 import org.opennms.horizon.alertservice.db.repository.AlertRepository;
+import org.opennms.horizon.alertservice.db.tenant.TenantLookup;
 import org.opennms.horizon.alertservice.service.AlertMapper;
-import org.springframework.data.domain.Page;
+import org.opennms.horizon.model.common.proto.Severity;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 
 import com.google.protobuf.BoolValue;
+import com.google.protobuf.Timestamp;
 import com.google.protobuf.UInt64Value;
 
+import io.grpc.Context;
 import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
 
 @Component
 @RequiredArgsConstructor
 public class AlertGrpcService extends AlertServiceGrpc.AlertServiceImplBase {
-    public static final int PAGE_SIZE = 10;
-    public static final String PAGE = "0";
+    public static final int PAGE_SIZE_DEFAULT = 10;
+    public static final String PAGE_DEFAULT = "0";
+    public static final String SORT_BY_DEFAULT = "alertId";
+    public static final int DURATION = 24;
     private final AlertMapper alertMapper;
     private final AlertRepository alertRepository;
     private final AlertService alertService;
+    private final TenantLookup tenantLookup;
 
     @Override
     public void listAlerts(ListAlertsRequest request, StreamObserver<ListAlertsResponse> responseObserver) {
-        // Extract the page size and next page token values from the request
-        int pageSize = request.getPageSize() != 0 ? request.getPageSize() : PAGE_SIZE;
-        String nextPageToken = !request.getNextPageToken().isEmpty() ? request.getNextPageToken() : PAGE;
+        // Extract the page size, next page token and sort values from the request
+        int pageSize = request.getPageSize() != 0 ? request.getPageSize() : PAGE_SIZE_DEFAULT;
+        String nextPageToken = !request.getNextPageToken().isEmpty() ? request.getNextPageToken() : PAGE_DEFAULT;
+        String sortBy = !request.getSortBy().isEmpty() ? request.getSortBy() : SORT_BY_DEFAULT;
+        boolean sortAscending = request.getSortAscending();
 
-        // Create a PageRequest object based on the page size and next page token
-        PageRequest pageRequest = PageRequest.of(Integer.parseInt(nextPageToken), pageSize);
+        // Create a PageRequest object based on the page size, next page token, filter, and sort parameters
+        Sort.Direction sortDirection = sortAscending ? Sort.Direction.ASC : Sort.Direction.DESC;
+        PageRequest pageRequest = PageRequest.of(Integer.parseInt(nextPageToken), pageSize, Sort.by(sortDirection, sortBy));
 
-        Page<org.opennms.horizon.alertservice.db.entity.Alert> alertPage = alertRepository.findAll(pageRequest);
+        // Get Filters
+        List<Date> timeRange = new ArrayList<>();
+        List<Severity> severities = new ArrayList<>();
+        getFilter(request, timeRange, severities);
+
+        Optional<String> lookupTenantId = tenantLookup.lookupTenantId(Context.current());
+        var alertPage = lookupTenantId
+            .map(tenantId -> alertRepository.findBySeverityInAndLastEventTimeBetweenAndTenantId(severities, timeRange.get(0), timeRange.get(1), pageRequest, tenantId))
+            .orElseThrow();
 
         List<Alert> alerts = alertPage.getContent().stream()
             .map(alertMapper::toProto)
@@ -78,6 +102,9 @@ public class AlertGrpcService extends AlertServiceGrpc.AlertServiceImplBase {
         if (alertPage.hasNext()) {
             responseBuilder.setNextPageToken(String.valueOf(alertPage.nextPageable().getPageNumber()));
         }
+
+        // Set last_page_token
+        responseBuilder.setLastPageToken(String.valueOf(alertPage.getTotalPages() - 1));
 
         // Build the final ListAlertsResponse object and send it to the client using the responseObserver
         ListAlertsResponse response = responseBuilder.build();
@@ -104,4 +131,53 @@ public class AlertGrpcService extends AlertServiceGrpc.AlertServiceImplBase {
         responseObserver.onCompleted();
     }
 
+    @Override
+    public void countAlerts(ListAlertsRequest request, StreamObserver<UInt64Value> responseObserver) {
+        List<Date> timeRange = new ArrayList<>();
+        List<Severity> severities = new ArrayList<>();
+        getFilter(request, timeRange, severities);
+
+        responseObserver.onNext(UInt64Value.of(tenantLookup.lookupTenantId(Context.current())
+            .map(tenantId -> alertRepository.countAlertBySeverityInAndLastEventTimeBetweenAndTenantId(severities, timeRange.get(0), timeRange.get(1), tenantId))
+            .orElseThrow()));
+        responseObserver.onCompleted();
+    }
+
+    private static void getFilter(ListAlertsRequest request, List<Date> timeRange, List<Severity> severities) {
+        request.getFiltersList().forEach(filter -> {
+            if (filter.hasSeverity()) {
+                severities.add(Severity.valueOf(filter.getSeverity().name()));
+            }
+            if (filter.hasTimeRange()) {
+                timeRange.add(convertTimestampToDate(filter.getTimeRange().getStartTime()));
+                timeRange.add(convertTimestampToDate(filter.getTimeRange().getEndTime()));
+            }
+        });
+
+        if (timeRange.isEmpty()) {
+            getDefaultTimeRange(timeRange);
+        }
+
+        if (severities.isEmpty()) {
+            getAllSeverities(severities);
+        }
+    }
+
+    private static void getAllSeverities(List<Severity> severities) {
+        severities.addAll(Arrays.asList(Severity.values()));
+    }
+
+    private static void getDefaultTimeRange(List<Date> timeRange) {
+        Calendar calendar = Calendar.getInstance();
+        Date endTime = calendar.getTime();
+        calendar.add(Calendar.HOUR_OF_DAY, -DURATION);
+        Date startTime = calendar.getTime();
+        timeRange.add(startTime);
+        timeRange.add(endTime);
+    }
+
+    private static Date convertTimestampToDate(Timestamp timestamp) {
+        Instant instant = Instant.ofEpochSecond(timestamp.getSeconds(), timestamp.getNanos());
+        return Date.from(instant);
+    }
 }

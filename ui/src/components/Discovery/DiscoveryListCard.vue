@@ -3,6 +3,11 @@
     <div class="title">
       {{ title }}
       <div class="count">{{ list.length }}</div>
+      <FeatherIcon
+        class="iconHelp"
+        :icon="Icons.Help"
+        @click="$emit('showInstructions')"
+      />
     </div>
     <div v-if="list.length > 0">
       <div
@@ -46,7 +51,10 @@
 <script lang="ts" setup>
 import Warning from '@featherds/icon/notification/Warning'
 import { PassiveDiscovery, AzureActiveDiscovery, IcmpActiveDiscovery } from '@/types/graphql'
-
+import Help from '@featherds/icon/action/Help'
+const Icons = markRaw({
+  Help
+})
 defineProps<{
   title: string
   list: (IcmpActiveDiscovery | AzureActiveDiscovery | PassiveDiscovery)[]
@@ -79,7 +87,13 @@ defineProps<{
     padding: 0 var(variables.$spacing-xs);
     margin-left: var(variables.$spacing-m);
     border-radius: 5px;
+    height: max-content;
     @include typography.body-small;
+  }
+  > .iconHelp {
+    font-size: 22px;
+    margin-left: auto;
+    cursor: pointer;
   }
 }
 

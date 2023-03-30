@@ -7,6 +7,7 @@ Feature: Monitor policy gRPC Functionality
     Given Kafka event topic "events"
     Given Kafka alert topic "alerts"
 
+  @Dev
   Scenario: Create a monitor policy with SNMP Trap event rule
     Given Monitor policy name "test-policy" and memo "the test policy"
     Given Policy tags

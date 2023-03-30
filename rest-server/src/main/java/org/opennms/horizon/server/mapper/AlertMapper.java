@@ -29,10 +29,15 @@
 package org.opennms.horizon.server.mapper;
 
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.opennms.horizon.server.model.alerts.Alert;
+import org.opennms.horizon.server.model.alerts.AlertResponse;
 
 @Mapper(componentModel = "spring")
 public interface AlertMapper {
+
+    @Mapping(source = "alertsList", target = "alerts")
+    AlertResponse protoToAlertResponse(org.opennms.horizon.alerts.proto.ListAlertsResponse listAlertsResponse);
 
     Alert protoToAlert(org.opennms.horizon.alerts.proto.Alert alertProto);
 }

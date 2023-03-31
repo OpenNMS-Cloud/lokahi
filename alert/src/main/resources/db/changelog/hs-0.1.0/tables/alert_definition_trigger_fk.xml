@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+    <changeSet author="rellis" id="hs-0.1.0-alert-definitions-trigger-fk">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="alert_definition"/>
+            <tableExists tableName="trigger_event"/>
+        </preConditions>
+        <addForeignKeyConstraint baseTableName="alert_definition" baseColumnNames="trigger_event_id"
+                                 referencedTableName="trigger_event" referencedColumnNames="id"
+                                 constraintName="fk_alert_definition_trigger_event_id" />
+    </changeSet>
+</databaseChangeLog>

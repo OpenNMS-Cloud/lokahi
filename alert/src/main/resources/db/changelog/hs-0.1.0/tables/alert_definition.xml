@@ -27,9 +27,6 @@
                 <constraints nullable="false"/>
             </column>
             <column name="managed_object_type" type="text" />
-            <column name="trigger_event_id" type="bigint">
-                <constraints nullable="false"/>
-            </column>
         </createTable>
 
         <addPrimaryKey columnNames="id" constraintName="alert_definition_pk" tableName="alert_definition"/>
@@ -37,10 +34,6 @@
         <createIndex tableName="alert_definition" indexName="idx_alert_definition_uei">
             <column name="uei"/>
         </createIndex>
-
-        <addForeignKeyConstraint baseTableName="alert_definition" baseColumnNames="trigger_event_id"
-                                 referencedTableName="trigger_event" referencedColumnNames="id"
-                                 constraintName="fk_alert_definition_trigger_event_id" />
 
         <createTable tableName="event_match">
             <column name="id" type="bigint" autoIncrement="true">

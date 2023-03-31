@@ -8,10 +8,10 @@
     <include file="/db/changelog/hs-0.1.0/tables/policy.xml" />
     <include file="/db/changelog/hs-0.1.0/tables/alert_definition.xml" />
     <include file="/db/changelog/hs-0.1.0/tables/alert_definition_trigger.xml" />
-    <!-- FIXME: Can only add trigger once HS-1098 is merged
+    <!-- FIXME: Can only add trigger once HS-1098 is merged and default monitoring policy data exists
     <include file="/db/changelog/hs-0.1.0/tables/alert_definition_trigger_fk.xml" />
     -->
-    <include file="/db/changelog/hs-0.1.0/data/alert_definition_default.xml" />
-    <!-- FIXME: Only load this data for tests -->
+
+    <!-- FIXME: Find a way to only load this data for tests.. not simple as they run in a container -->
     <include file="/db/changelog/hs-0.1.0/data/alert_definition_test_data.xml" />
 </databaseChangeLog>

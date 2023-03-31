@@ -56,7 +56,6 @@ import org.opennms.horizon.inventory.mapper.NodeMapper;
 import org.opennms.horizon.inventory.model.Node;
 import org.opennms.horizon.inventory.service.IpInterfaceService;
 import org.opennms.horizon.inventory.service.NodeService;
-import org.opennms.horizon.inventory.service.taskset.DetectorTaskSetService;
 import org.opennms.horizon.inventory.service.taskset.ScannerTaskSetService;
 import org.opennms.taskset.contract.ScanType;
 import org.slf4j.Logger;
@@ -89,7 +88,6 @@ public class NodeGrpcService extends NodeServiceGrpc.NodeServiceImplBase {
     private final IpInterfaceService ipInterfaceService;
     private final NodeMapper nodeMapper;
     private final TenantLookup tenantLookup;
-    private final DetectorTaskSetService taskSetService;
     private final ScannerTaskSetService scannerService;
 
     private final ThreadFactory threadFactory = new ThreadFactoryBuilder()
@@ -111,7 +109,7 @@ public class NodeGrpcService extends NodeServiceGrpc.NodeServiceImplBase {
 
 
             // Asynchronously send task sets to Minion
-            executorService.execute(() -> sendDetectorTasksToMinion(node, tenantId));
+            executorService.execute(() -> sendNodeScanTaskToMinion(node, tenantId));
         }
     }
 
@@ -357,9 +355,8 @@ public class NodeGrpcService extends NodeServiceGrpc.NodeServiceImplBase {
         return valid;
     }
 
-    private void sendDetectorTasksToMinion(Node node, String tenantId) {
+    private void sendNodeScanTaskToMinion(Node node, String tenantId) {
         try {
-            taskSetService.sendDetectorTasks(node);
             scannerService.sendNodeScannerTask(List.of(nodeMapper.modelToDTO(node)),
                 node.getMonitoringLocation().getLocation(), node.getTenantId());
         } catch (Exception e) {

@@ -54,7 +54,6 @@ import org.opennms.horizon.inventory.model.MonitoringLocation;
 import org.opennms.horizon.inventory.model.Node;
 import org.opennms.horizon.inventory.service.IpInterfaceService;
 import org.opennms.horizon.inventory.service.NodeService;
-import org.opennms.horizon.inventory.service.taskset.DetectorTaskSetService;
 import org.opennms.horizon.inventory.service.taskset.ScannerTaskSetService;
 import org.opennms.taskset.contract.ScanType;
 import org.slf4j.Logger;
@@ -71,7 +70,6 @@ public class NodeGrpcServiceTest {
     private IpInterfaceService mockIpInterfaceService;
     private NodeMapper mockNodeMapper;
     private TenantLookup mockTenantLookup;
-    private DetectorTaskSetService mockDetectorTaskSetService;
     private ScannerTaskSetService mockScannerTaskSetService;
     private StreamObserver<NodeDTO> mockNodeDTOStreamObserver;
     private StreamObserver<NodeList> mockNodeListStreamObserver;
@@ -121,7 +119,6 @@ public class NodeGrpcServiceTest {
         mockIpInterfaceService = Mockito.mock(IpInterfaceService.class);
         mockNodeMapper = Mockito.mock(NodeMapper.class);
         mockTenantLookup = Mockito.mock(TenantLookup.class);
-        mockDetectorTaskSetService = Mockito.mock(DetectorTaskSetService.class);
         mockScannerTaskSetService = Mockito.mock(ScannerTaskSetService.class);
         mockNodeDTOStreamObserver = Mockito.mock(StreamObserver.class);
         mockNodeListStreamObserver = Mockito.mock(StreamObserver.class);
@@ -136,7 +133,6 @@ public class NodeGrpcServiceTest {
                 mockIpInterfaceService,
                 mockNodeMapper,
                 mockTenantLookup,
-                mockDetectorTaskSetService,
                 mockScannerTaskSetService);
 
         //
@@ -238,24 +234,6 @@ public class NodeGrpcServiceTest {
         Mockito.verify(mockNodeDTOStreamObserver).onError(Mockito.argThat(matcher));
     }
 
-    /**
-     * Verify exception on send of task updates at the end of processing on call to create a new node.
-     */
-    @Test
-    void testCreateNodeNewValidManagementIpExceptionOnSendTasks() {
-        Runnable runnable = commonTestCreateNode();
-
-        RuntimeException testException = new RuntimeException("x-test-exception-x");
-        Mockito.doThrow(testException).when(mockDetectorTaskSetService).sendDetectorTasks(testNode);
-
-        // Execute
-        target.setLOG(mockLogger);
-        runnable.run();
-
-        // Verify
-        Mockito.verify(mockLogger).error("Error while sending detector task for node with label {}", "x-node-label-x", testException);
-        Mockito.verifyNoInteractions(mockScannerTaskSetService);
-    }
 
     @Test
     void testListNodes() {
@@ -740,7 +718,7 @@ public class NodeGrpcServiceTest {
         //
         // Validate
         //
-        Mockito.verify(mockDetectorTaskSetService).sendDetectorTasks(testNode);
+       // Mockito.verify(mockDetectorTaskSetService).sendDetectorTasks(testNode);
         Mockito.verify(mockScannerTaskSetService).sendNodeScannerTask(List.of(testNodeDTO), "x-monitoring-location-x", "x-tenant-id-x");
     }
 

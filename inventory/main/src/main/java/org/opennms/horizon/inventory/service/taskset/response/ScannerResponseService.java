@@ -50,7 +50,6 @@ import org.opennms.horizon.inventory.service.SnmpConfigService;
 import org.opennms.horizon.inventory.service.SnmpInterfaceService;
 import org.opennms.horizon.inventory.service.TagService;
 import org.opennms.horizon.inventory.service.discovery.active.IcmpActiveDiscoveryService;
-import org.opennms.horizon.inventory.service.taskset.DetectorTaskSetService;
 import org.opennms.horizon.inventory.service.taskset.TaskSetHandler;
 import org.opennms.horizon.shared.utils.InetAddressUtils;
 import org.opennms.node.scan.contract.IpInterfaceResult;
@@ -80,7 +79,6 @@ public class ScannerResponseService {
     private final IpInterfaceService ipInterfaceService;
     private final SnmpInterfaceService snmpInterfaceService;
     private final TagService tagService;
-    private final DetectorTaskSetService detectorTaskSetService;
     private final SnmpConfigService snmpConfigService;
     private final IcmpActiveDiscoveryService icmpActiveDiscoveryService;
     private final DetectorResponseService detectorResponseService;

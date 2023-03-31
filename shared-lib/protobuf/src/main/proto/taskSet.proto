@@ -87,7 +87,6 @@ message TaskResult {
   oneof result {
     ScannerResponse scanner_response = 4;
     MonitorResponse monitor_response = 5;
-    DetectorResponse detector_response = 6;
     CollectorResponse collector_response = 7;
   }
 }
@@ -111,14 +110,6 @@ message MonitorResponse {
   map<string, double> metrics = 6;
   uint64 node_id = 7;
   uint64 timestamp = 8;
-}
-
-message DetectorResponse {
-  bool detected = 1;
-  string ip_address = 2;
-  string reason = 3;
-  MonitorType monitor_type = 4;
-  uint64 node_id = 5;
 }
 
 message CollectorResponse {

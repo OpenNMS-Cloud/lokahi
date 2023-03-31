@@ -29,9 +29,7 @@
 package org.opennms.horizon.tsdata;
 
 import org.opennms.horizon.tsdata.collector.TaskSetCollectorResultProcessor;
-import org.opennms.horizon.tsdata.detector.TaskSetDetectorResultProcessor;
 import org.opennms.horizon.tsdata.monitor.TaskSetMonitorResultProcessor;
-import org.opennms.taskset.contract.DetectorResponse;
 import org.opennms.taskset.contract.TaskResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,17 +41,14 @@ public class TaskSetResultProcessor {
 
     private static final Logger LOG = LoggerFactory.getLogger(TaskSetResultProcessor.class);
 
-    private final TaskSetDetectorResultProcessor taskSetDetectorResultProcessor;
 
     private final TaskSetMonitorResultProcessor taskSetMonitorResultProcessor;
 
     private final TaskSetCollectorResultProcessor taskSetCollectorResultProcessor;
 
     @Autowired
-    public TaskSetResultProcessor(TaskSetDetectorResultProcessor taskSetDetectorResultProcessor,
-        TaskSetMonitorResultProcessor taskSetMonitorResultProcessor,
+    public TaskSetResultProcessor(TaskSetMonitorResultProcessor taskSetMonitorResultProcessor,
         TaskSetCollectorResultProcessor taskSetCollectorResultProcessor) {
-        this.taskSetDetectorResultProcessor = taskSetDetectorResultProcessor;
         this.taskSetMonitorResultProcessor = taskSetMonitorResultProcessor;
         this.taskSetCollectorResultProcessor = taskSetCollectorResultProcessor;
     }
@@ -64,9 +59,6 @@ public class TaskSetResultProcessor {
             if (taskResult.hasMonitorResponse()) {
                 LOG.info("Have monitor response, tenant-id: {}; task-id={};", tenantId, taskResult.getId());
                 taskSetMonitorResultProcessor.processMonitorResponse(tenantId, taskResult, taskResult.getMonitorResponse());
-            } else if (taskResult.hasDetectorResponse()) {
-                DetectorResponse detectorResponse = taskResult.getDetectorResponse();
-                taskSetDetectorResultProcessor.processDetectorResponse(tenantId, taskResult.getId(), detectorResponse);
             } else if (taskResult.hasCollectorResponse()) {
                 taskSetCollectorResultProcessor.processCollectorResponse(tenantId, taskResult, taskResult.getCollectorResponse());
             }

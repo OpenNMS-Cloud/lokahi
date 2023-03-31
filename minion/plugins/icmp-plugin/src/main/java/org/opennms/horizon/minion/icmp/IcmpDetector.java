@@ -31,8 +31,6 @@ package org.opennms.horizon.minion.icmp;
 import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors;
 import org.opennms.horizon.minion.plugin.api.ServiceDetector;
-import org.opennms.horizon.minion.plugin.api.ServiceDetectorResponse;
-import org.opennms.horizon.minion.plugin.api.ServiceDetectorResponseImpl;
 import org.opennms.horizon.shared.icmp.EchoPacket;
 import org.opennms.horizon.shared.icmp.PingConstants;
 import org.opennms.horizon.shared.icmp.PingResponseCallback;
@@ -42,16 +40,12 @@ import org.opennms.horizon.shared.utils.InetAddressUtils;
 import org.opennms.icmp.contract.IcmpDetectorRequest;
 import org.opennms.inventory.types.ServiceType;
 import org.opennms.node.scan.contract.ServiceResult;
-import org.opennms.taskset.contract.MonitorType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.net.InetAddress;
 import java.util.concurrent.CompletableFuture;
 
 public class IcmpDetector implements ServiceDetector {
 
-    private static final Logger LOG = LoggerFactory.getLogger(IcmpDetector.class);
     private final PingerFactory pingerFactory;
 
     private final Descriptors.FieldDescriptor allowFragmentationFieldDescriptor;
@@ -72,48 +66,6 @@ public class IcmpDetector implements ServiceDetector {
         timeoutFieldDescriptor = icmpDetectorRequestDescriptor.findFieldByNumber(IcmpDetectorRequest.TIMEOUT_FIELD_NUMBER);
     }
 
-    @Override
-    public CompletableFuture<ServiceDetectorResponse> detect(Any config, long nodeId) {
-
-        CompletableFuture<ServiceDetectorResponse> future = new CompletableFuture<>();
-        String hostAddress = null;
-
-        try {
-
-            if (!config.is(IcmpDetectorRequest.class)) {
-                throw new IllegalArgumentException("configuration must be an IcmpDetectorRequest; type-url=" + config.getTypeUrl());
-            }
-            IcmpDetectorRequest icmpDetectorRequest = config.unpack(IcmpDetectorRequest.class);
-            IcmpDetectorRequest effectiveRequest = populateDefaultsAsNeeded(icmpDetectorRequest);
-
-            hostAddress = effectiveRequest.getHost();
-            InetAddress host = InetAddress.getByName(hostAddress);
-            int dscp = effectiveRequest.getDscp();
-            boolean allowFragmentation = effectiveRequest.getAllowFragmentation();
-
-            Pinger pinger = pingerFactory.getInstance(dscp, allowFragmentation);
-
-            pinger.ping(
-                host,
-                effectiveRequest.getTimeout(),
-                effectiveRequest.getRetries(),
-                effectiveRequest.getPacketSize(),
-                new MyPingResponseCallback(future, nodeId)
-            );
-        } catch (Exception e) {
-            future.complete(
-                ServiceDetectorResponseImpl.builder()
-                    .monitorType(MonitorType.ICMP)
-                    .serviceDetected(false)
-                    .reason(e.getMessage())
-                    .ipAddress(hostAddress)
-                    .nodeId(nodeId)
-                    .build()
-            );
-        }
-
-        return future;
-    }
 
     @Override
     public CompletableFuture<ServiceResult> detect(String host, Any config) {
@@ -172,49 +124,6 @@ public class IcmpDetector implements ServiceDetector {
         }
 
         return resultBuilder.build();
-    }
-
-    private static class MyPingResponseCallback implements PingResponseCallback {
-        private final CompletableFuture<ServiceDetectorResponse> future;
-
-        public MyPingResponseCallback(CompletableFuture<ServiceDetectorResponse> future, long nodeId) {
-            this.future = future;
-        }
-
-        @Override
-        public void handleResponse(InetAddress inetAddress, EchoPacket response) {
-            future.complete(
-                ServiceDetectorResponseImpl.builder()
-                    .monitorType(MonitorType.ICMP)
-                    .serviceDetected(true)
-                    .ipAddress(inetAddress.getHostAddress())
-                    .build()
-            );
-        }
-
-        @Override
-        public void handleTimeout(InetAddress inetAddress, EchoPacket echoPacket) {
-            future.complete(
-                ServiceDetectorResponseImpl.builder()
-                    .monitorType(MonitorType.ICMP)
-                    .serviceDetected(false)
-                    .reason(String.format("Timed out ICMP request for ip = %s", inetAddress.getHostAddress()))
-                    .ipAddress(inetAddress.getHostAddress())
-                    .build()
-            );
-        }
-
-        @Override
-        public void handleError(InetAddress inetAddress, EchoPacket echoPacket, Throwable throwable) {
-            future.complete(
-                ServiceDetectorResponseImpl.builder()
-                    .monitorType(MonitorType.ICMP)
-                    .serviceDetected(false)
-                    .reason(throwable.getMessage())
-                    .ipAddress(inetAddress.getHostAddress())
-                    .build()
-            );
-        }
     }
 
     private static class PingResponseHandler implements PingResponseCallback {

@@ -35,16 +35,23 @@ import lombok.extern.slf4j.Slf4j;
 import org.opennms.horizon.azure.api.AzureScanItem;
 import org.opennms.horizon.azure.api.AzureScanResponse;
 import org.opennms.horizon.inventory.dto.ListTagsByEntityIdParamsDTO;
+import org.opennms.horizon.inventory.dto.MonitoredServiceDTO;
+import org.opennms.horizon.inventory.dto.MonitoredServiceTypeDTO;
 import org.opennms.horizon.inventory.dto.NodeCreateDTO;
 import org.opennms.horizon.inventory.dto.TagCreateDTO;
 import org.opennms.horizon.inventory.dto.TagCreateListDTO;
 import org.opennms.horizon.inventory.dto.TagEntityIdDTO;
+import org.opennms.horizon.inventory.model.IpInterface;
+import org.opennms.horizon.inventory.model.MonitoredServiceType;
 import org.opennms.horizon.inventory.model.Node;
 import org.opennms.horizon.inventory.model.SnmpInterface;
 import org.opennms.horizon.inventory.model.discovery.active.AzureActiveDiscovery;
+import org.opennms.horizon.inventory.repository.IpInterfaceRepository;
 import org.opennms.horizon.inventory.repository.NodeRepository;
 import org.opennms.horizon.inventory.repository.discovery.active.AzureActiveDiscoveryRepository;
 import org.opennms.horizon.inventory.service.IpInterfaceService;
+import org.opennms.horizon.inventory.service.MonitoredServiceService;
+import org.opennms.horizon.inventory.service.MonitoredServiceTypeService;
 import org.opennms.horizon.inventory.service.NodeService;
 import org.opennms.horizon.inventory.service.SnmpConfigService;
 import org.opennms.horizon.inventory.service.SnmpInterfaceService;
@@ -54,14 +61,17 @@ import org.opennms.horizon.inventory.service.taskset.TaskSetHandler;
 import org.opennms.horizon.shared.utils.InetAddressUtils;
 import org.opennms.node.scan.contract.IpInterfaceResult;
 import org.opennms.node.scan.contract.NodeScanResult;
+import org.opennms.node.scan.contract.ServiceResult;
 import org.opennms.node.scan.contract.SnmpInterfaceResult;
 import org.opennms.taskset.contract.DiscoveryScanResult;
+import org.opennms.taskset.contract.MonitorType;
 import org.opennms.taskset.contract.PingResponse;
 import org.opennms.taskset.contract.ScanType;
 import org.opennms.taskset.contract.ScannerResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.net.InetAddress;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -81,7 +91,9 @@ public class ScannerResponseService {
     private final TagService tagService;
     private final SnmpConfigService snmpConfigService;
     private final IcmpActiveDiscoveryService icmpActiveDiscoveryService;
-    private final DetectorResponseService detectorResponseService;
+    private final IpInterfaceRepository ipInterfaceRepository;
+    private final MonitoredServiceTypeService monitoredServiceTypeService;
+    private final MonitoredServiceService monitoredServiceService;
 
     @Transactional
     public void accept(String tenantId, String location, ScannerResponse response) throws InvalidProtocolBufferException {
@@ -212,11 +224,56 @@ public class ScannerResponseService {
                 ipInterfaceService.creatUpdateFromScanResult(tenantId, node, ipIfResult, ifIndexSNMPMap);
             }
             result.getDetectorResultList().forEach(detectorResult -> {
-                detectorResponseService.processDetectorResults(tenantId, location, detectorResult);
+                processDetectorResults(tenantId, location, detectorResult);
             });
 
         } else {
             log.error("Error while process node scan results, node with id {} doesn't exist", result.getNodeId());
         }
+    }
+
+    private void processDetectorResults(String tenantId, String location, ServiceResult serviceResult) {
+
+        log.info("Received Detector Response = {} for tenant = {} and location = {}", serviceResult, tenantId, location);
+
+        InetAddress ipAddress = InetAddressUtils.getInetAddress(serviceResult.getIpAddress());
+        Optional<IpInterface> ipInterfaceOpt = ipInterfaceRepository
+            .findByIpAddressAndLocationAndTenantId(ipAddress, location, tenantId);
+
+        if (ipInterfaceOpt.isPresent()) {
+            IpInterface ipInterface = ipInterfaceOpt.get();
+
+            if (serviceResult.getStatus()) {
+                createMonitoredService(serviceResult, ipInterface);
+                // TODO: Combine Monitor type and Service type
+                MonitorType monitorType = MonitorType.valueOf(serviceResult.getService().name());
+                long nodeId = ipInterface.getNodeId();
+
+                taskSetHandler.sendMonitorTask(location, monitorType, ipInterface, nodeId);
+                taskSetHandler.sendCollectorTask(location, monitorType, ipInterface, nodeId);
+
+            } else {
+                log.info("{} not detected on ip address = {}", serviceResult.getService().name(), ipAddress.getAddress());
+            }
+        } else {
+            log.warn("Failed to find IP Interface during detection for ip = {}", ipAddress.getHostAddress());
+        }
+    }
+
+    private void createMonitoredService(ServiceResult serviceResult, IpInterface ipInterface) {
+        String tenantId = ipInterface.getTenantId();
+
+        MonitoredServiceType monitoredServiceType =
+            monitoredServiceTypeService.createSingle(MonitoredServiceTypeDTO.newBuilder()
+                // TODO: Combine Monitor type and Service type
+                .setServiceName(serviceResult.getService().name())
+                .setTenantId(tenantId)
+                .build());
+
+        MonitoredServiceDTO newMonitoredService = MonitoredServiceDTO.newBuilder()
+            .setTenantId(tenantId)
+            .build();
+
+        monitoredServiceService.createSingle(newMonitoredService, monitoredServiceType, ipInterface);
     }
 }

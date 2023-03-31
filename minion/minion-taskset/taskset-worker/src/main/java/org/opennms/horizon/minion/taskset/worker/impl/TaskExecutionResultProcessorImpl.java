@@ -1,16 +1,13 @@
 package org.opennms.horizon.minion.taskset.worker.impl;
 
 import com.google.protobuf.Any;
-import com.google.protobuf.Timestamp;
 import org.opennms.horizon.minion.plugin.api.CollectionSet;
 import org.opennms.horizon.minion.plugin.api.ScanResultsResponse;
-import org.opennms.horizon.minion.plugin.api.ServiceDetectorResponse;
 import org.opennms.horizon.minion.plugin.api.ServiceMonitorResponse;
 import org.opennms.horizon.minion.taskset.worker.TaskExecutionResultProcessor;
 import org.opennms.horizon.shared.ipc.rpc.IpcIdentity;
 import org.opennms.horizon.shared.ipc.sink.api.SyncDispatcher;
 import org.opennms.taskset.contract.CollectorResponse;
-import org.opennms.taskset.contract.DetectorResponse;
 import org.opennms.taskset.contract.MonitorResponse;
 import org.opennms.taskset.contract.ScannerResponse;
 import org.opennms.taskset.contract.TaskResult;
@@ -44,15 +41,6 @@ public class TaskExecutionResultProcessorImpl implements TaskExecutionResultProc
     public void queueSendResult(String id, ScanResultsResponse response) {
         TaskSetResults taskSetResults = formatTaskSetResults(id, response);
         log.info("Scan Status: id = {}, results = {} ", id, response.getResults());
-        taskSetSinkDispatcher.send(taskSetResults);
-    }
-
-    @Override
-    public void queueSendResult(String id, ServiceDetectorResponse response) {
-        log.info("Detect Status: id = {} , detected = {}; ", id, response.isServiceDetected());
-
-        TaskSetResults taskSetResults = formatTaskSetResults(id, response);
-
         taskSetSinkDispatcher.send(taskSetResults);
     }
 
@@ -114,24 +102,6 @@ public class TaskExecutionResultProcessorImpl implements TaskExecutionResultProc
         return taskSetResults;
     }
 
-    private TaskSetResults formatTaskSetResults(String id, ServiceDetectorResponse result) {
-        DetectorResponse detectorResponse = formatDetectorResponse(result);
-
-        TaskResult taskResult =
-            TaskResult.newBuilder()
-                .setId(id)
-                .setDetectorResponse(detectorResponse)
-                .setLocation(identity.getLocation())
-                .setSystemId(identity.getId())
-                .build();
-
-        TaskSetResults taskSetResults =
-            TaskSetResults.newBuilder()
-                .addResults(taskResult)
-                .build();
-
-        return taskSetResults;
-    }
 
     private ScannerResponse formatScanResultsResponse(ScanResultsResponse response) {
         return ScannerResponse.newBuilder()
@@ -140,18 +110,6 @@ public class TaskExecutionResultProcessorImpl implements TaskExecutionResultProc
             .build();
     }
 
-    private DetectorResponse formatDetectorResponse(ServiceDetectorResponse response) {
-        DetectorResponse result =
-            DetectorResponse.newBuilder()
-                .setDetected(Optional.of(response).map(ServiceDetectorResponse::isServiceDetected).orElse(DetectorResponse.getDefaultInstance().getDetected()))
-                .setIpAddress(Optional.of(response).map(ServiceDetectorResponse::getIpAddress).orElse(DetectorResponse.getDefaultInstance().getIpAddress()))
-                .setMonitorType(Optional.of(response).map(ServiceDetectorResponse::getMonitorType).orElse(DetectorResponse.getDefaultInstance().getMonitorType()))
-                .setReason(Optional.of(response).map(ServiceDetectorResponse::getReason).orElse(DetectorResponse.getDefaultInstance().getReason()))
-                .setNodeId(response.getNodeId())
-                .build();
-
-        return result;
-    }
 
     private MonitorResponse formatMonitorResponse(ServiceMonitorResponse smr) {
         MonitorResponse result =

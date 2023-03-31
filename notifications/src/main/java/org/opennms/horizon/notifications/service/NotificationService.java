@@ -28,23 +28,47 @@
 
 package org.opennms.horizon.notifications.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.opennms.horizon.alerts.proto.Alert;
 import org.opennms.horizon.notifications.api.PagerDutyAPI;
 import org.opennms.horizon.notifications.dto.PagerDutyConfigDTO;
 import org.opennms.horizon.notifications.exceptions.NotificationException;
+import org.opennms.horizon.notifications.model.MonitoringPolicy;
+import org.opennms.horizon.notifications.repository.MonitoringPolicyRepository;
 import org.opennms.horizon.notifications.tenant.WithTenant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
+@Slf4j
 public class NotificationService {
 
     @Autowired
     private PagerDutyAPI pagerDutyAPI;
 
+    @Autowired
+    private MonitoringPolicyRepository monitoringPolicyRepository;
+
     @WithTenant(tenantIdArg = 0, tenantIdArgInternalMethod = "getTenantId", tenantIdArgInternalClass = "org.opennms.horizon.alerts.proto.Alert")
-    public void postNotification(Alert alert) throws NotificationException {
-        pagerDutyAPI.postNotification(alert);
+    public void postNotification(Alert alert) {
+        Optional<MonitoringPolicy> dbPolicy = monitoringPolicyRepository.findByTenantIdAndId(
+            alert.getTenantId(),
+            alert.getMonitoringPolicyId()
+        );
+
+        dbPolicy.ifPresentOrElse(policy -> {
+            if (policy.isNotifyByPagerDuty()) {
+                // Wrap in a try/catch, we don't want a failure to notify via PagerDuty to prevent us from sending an
+                // email notification, etc.
+                try {
+                    pagerDutyAPI.postNotification(alert);
+                } catch (NotificationException e) {
+                    log.warn("Unable to send alert to PagerDuty: {}", alert, e);
+                }
+            }
+        }, () -> log.debug("No monitoring policy found, dropping alert: {}", alert));
     }
 
     public void postPagerDutyConfig(PagerDutyConfigDTO config) {

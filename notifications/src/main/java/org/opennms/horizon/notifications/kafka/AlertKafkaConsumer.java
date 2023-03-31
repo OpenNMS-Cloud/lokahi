@@ -32,18 +32,9 @@ public class AlertKafkaConsumer {
                 LOG.warn("TenantId is empty, dropping alert {}", alert);
                 return;
             }
-            consumeAlert(alert);
+            notificationService.postNotification(alert);
         } catch (InvalidProtocolBufferException e) {
             LOG.error("Error while parsing Alert. Payload: {}", Arrays.toString(data), e);
-        }
-    }
-
-    public void consumeAlert(Alert alert){
-        try {
-            notificationService.postNotification(alert);
-        } catch (NotificationException e) {
-            // TODO: We need better resiliency. If a notification fails, do we want to retry? do we want to try another method?
-            LOG.error("Exception sending alert to notification service: {}", alert, e);
         }
     }
 }

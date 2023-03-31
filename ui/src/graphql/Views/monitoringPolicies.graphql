@@ -1,0 +1,25 @@
+query ListMonitoryPolicies {
+  listMonitoryPolicies {
+    id
+    memo
+    name
+    notifyByEmail
+    notifyByPagerDuty
+    notifyByWebhooks
+    rules {
+      id
+      name
+      componentType
+      triggerEvents {
+        id
+        count
+        clearEvent
+        overtime
+        overtimeUnit
+        severity
+        triggerEvent
+      }
+    }
+    tags
+  }
+}

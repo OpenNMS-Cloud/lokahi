@@ -204,13 +204,13 @@ public class NotificationCucumberTestSteps extends GrpcTestBase {
         }
     }
 
-    @Given("Alert posted via service with tenant {string}")
-    public void postAlertViaService(String tenantId) throws Exception{
-        postAlert(tenantId);
+    @Given("Alert posted via service with tenant {string} with monitoring policy ID {long}")
+    public void postAlertViaService(String tenantId, long monitoringPolicyId) {
+        postAlert(tenantId, monitoringPolicyId);
     }
 
-    private void postAlert(String tenantId) throws NotificationException {
-        Alert alert = Alert.newBuilder().setLogMessage("Hello").setTenantId(tenantId).build();
+    private void postAlert(String tenantId, long monitoringPolicyId) {
+        Alert alert = Alert.newBuilder().setLogMessage("Hello").setTenantId(tenantId).setMonitoringPolicyId(monitoringPolicyId).build();
         notificationService.postNotification(alert);
     }
 
@@ -241,11 +241,11 @@ public class NotificationCucumberTestSteps extends GrpcTestBase {
         verify(restTemplate, times(count)).exchange(any(URI.class), eq(HttpMethod.POST), any(HttpEntity.class), eq(String.class));
     }
 
-    @Given("Alert posted via service with no config with tenant {string}")
-    public void postNotificationWithNoConfig(String tenantId) {
+    @Given("Alert posted via service with no config with tenant {string} with monitoring policy ID {long}")
+    public void postNotificationWithNoConfig(String tenantId, long monitoringPolicyId) {
         caught = null;
         try {
-            postAlert(tenantId);
+            postAlert(tenantId, monitoringPolicyId);
         } catch (Exception ex) {
             caught = ex;
         }
@@ -297,4 +297,11 @@ public class NotificationCucumberTestSteps extends GrpcTestBase {
             assertEquals(enabledNotifications.contains("webhooks"), monitoringPolicy.get().isNotifyByWebhooks());
         });
     }
+
+    @Given("{string} has a monitoring policy with ID {long}")
+    @WithTenant(tenantIdArg = 0)
+    public void waitForMonitoringPolicy(String tenant, long id) {
+        Awaitility.await().atMost(5, TimeUnit.SECONDS).until(() -> monitoringPolicyRepository.findByTenantIdAndId(tenant, id).isPresent());
+    }
+
 }

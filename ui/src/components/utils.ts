@@ -43,3 +43,16 @@ export const setViewBox = (icon: any) => {
 
   return iconProps.viewBox || `0 0 ${iconProps.width} ${iconProps.height}`
 }
+
+/**
+ * Useful for displaying enums in templates
+ * COLD_REBOOT -> Cold Reboot
+ */
+export const snakeToTitleCase = (snakeCase: string | undefined) => {
+  if (!snakeCase) return
+
+  return snakeCase
+    .toLowerCase()
+    .replace(/^[-_]*(.)/, (_, c) => c.toUpperCase())
+    .replace(/[-_]+(.)/g, (_, c) => ' ' + c.toUpperCase())
+}

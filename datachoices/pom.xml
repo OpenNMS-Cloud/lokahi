@@ -97,9 +97,9 @@
             <version>${lombok.binding.version}</version>
         </dependency>
         <dependency>
-            <groupId>io.grpc</groupId>
-            <artifactId>grpc-core</artifactId>
-            <version>${grpc.version}</version>
+            <groupId>org.opennms.horizon.shared</groupId>
+            <artifactId>horizon-shaded-grpc-core</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>io.grpc</groupId>

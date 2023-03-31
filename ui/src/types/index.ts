@@ -52,3 +52,10 @@ export const enum Monitor {
   SNMP = 'SNMP',
   ECHO = 'ECHO'
 }
+
+export interface TagSelectItem {
+  name: string
+  id?: string
+  _text?: string
+  tenantId?: string
+}

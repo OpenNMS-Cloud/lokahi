@@ -54,7 +54,7 @@ import java.util.List;
 @Setter
 @ToString
 @RequiredArgsConstructor
-public class AlertDefinition extends TenantAwareEntity implements Serializable {
+public class AlertDefinition implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 7825119801706458618L;
@@ -62,6 +62,9 @@ public class AlertDefinition extends TenantAwareEntity implements Serializable {
     @Id
     @Column(nullable=false)
     private Long id;
+
+    @Column (name = "tenant_id", nullable = false)
+    private String tenantId;
 
     @Column(length=256, nullable=false)
     private String uei;

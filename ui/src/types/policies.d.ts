@@ -1,28 +1,30 @@
-export interface IPolicy {
-  id: string
-  name: string
-  tags: string[]
-  rules: IRule[]
+import { MonitorPolicy, PolicyRule, TriggerEvent } from './graphql'
+
+export interface Policy extends MonitorPolicy {
+  rules: Rule[]
 }
 
-export interface IRule {
-  id: string
-  name: string
-  componentType: string
-  detectionMethod: string
-  metricName: string
-  conditions: ICondition[]
+export interface Rule extends PolicyRule {
+  detectionMethod?: string
+  metricName?: string
+  triggerEvent?: string
+  triggerEvents: Condition[]
 }
 
 interface IObjectKeys {
   [key: string]: string | number
 }
 
-export interface ICondition extends IObjectKeys {
+export interface ThresholdCondition extends IObjectKeys {
   id: number
   level: string
   percentage: number
-  duration: number
-  period: number
+  forAny: number
+  durationUnit: string
+  duringLast: number
+  periodUnit: string
   severity: string
 }
+
+export type EventCondition = TriggerEvent & IObjectKeys
+export type Condition = ThresholdCondition | EventCondition

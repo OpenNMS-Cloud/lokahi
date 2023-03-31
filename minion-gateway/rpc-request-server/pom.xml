@@ -33,6 +33,11 @@
     <dependencies>
         <dependency>
             <groupId>org.opennms.horizon.shared</groupId>
+            <artifactId>horizon-shaded-grpc-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.opennms.horizon.shared</groupId>
             <artifactId>ipc-grpc-contract</artifactId>
             <version>${project.version}</version>
         </dependency>

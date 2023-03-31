@@ -39,6 +39,10 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.opennms.horizon.shared</groupId>
+            <artifactId>horizon-shaded-grpc-core</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.opennms.horizon.minion</groupId>
             <artifactId>minion-gateway-wiremock-api</artifactId>
             <version>${project.version}</version>

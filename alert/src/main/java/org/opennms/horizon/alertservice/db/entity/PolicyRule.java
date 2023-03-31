@@ -53,10 +53,12 @@ import lombok.Setter;
 @Table(name = "policy_rule")
 @Getter
 @Setter
-public class PolicyRule extends TenantAwareEntity {
+public class PolicyRule {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @Column (name = "tenant_id", nullable = false)
+    private String tenantId;
     @Column(name = "rule_name")
     private String name;
     @Enumerated(EnumType.STRING)

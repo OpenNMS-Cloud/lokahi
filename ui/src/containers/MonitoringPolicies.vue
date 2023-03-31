@@ -1,36 +1,16 @@
 <template>
   <div class="container">
     <PageHeadline text="Monitoring Policies" />
-    <div class="title-rule">Policies</div>
-    <FeatherTabContainer class="tab-container">
-      <template v-slot:tabs>
-        <FeatherTab>Create New Policy</FeatherTab>
-        <FeatherTab>Existing Policies</FeatherTab>
-      </template>
-      <FeatherTabPanel class="panel"><AddNewPolicy /></FeatherTabPanel>
-      <FeatherTabPanel class="panel">
-        <ExistingItems :list="store.existingPolicies" />
-      </FeatherTabPanel>
-    </FeatherTabContainer>
-
-    <div class="title-rule">Rules</div>
-    <FeatherTabContainer class="tab-container">
-      <template v-slot:tabs>
-        <FeatherTab>Create New Rule</FeatherTab>
-        <FeatherTab>Existing Rules</FeatherTab>
-      </template>
-      <FeatherTabPanel class="panel"><AddNewRule /><DetectionMethod /><AlertConditions /></FeatherTabPanel>
-      <FeatherTabPanel class="panel">
-        <ExistingItems :list="store.existingRules" />
-      </FeatherTabPanel>
-    </FeatherTabContainer>
-    <SaveButtons />
+    <MonitoringPoliciesPolicyForm />
+    <MonitoringPoliciesRuleForm/>
+    <MonitoringPoliciesSaveButtons />
   </div>
 </template>
 
 <script setup lang="ts">
 import { useMonitoringPoliciesStore } from '@/store/Views/monitoringPoliciesStore'
 const store = useMonitoringPoliciesStore()
+onMounted(() => store.getMonitoringPolicies())
 </script>
 
 <style scoped lang="scss">
@@ -39,21 +19,14 @@ const store = useMonitoringPoliciesStore()
 
 .container {
   display: flex;
-  margin: 0 1rem;
+  margin: 0 2rem;
   flex-direction: column;
+  max-width: 2000px;
+}
 
-  .panel {
-    background-color: var(variables.$surface);
-    padding: var(variables.$spacing-l);
-    margin-top: var(variables.$spacing-m);
-    border: 1px var(variables.$shade-4) solid;
-  }
-  .tab-container {
-    margin-bottom: var(variables.$spacing-m);
-  }
-  .title-rule {
-    @include typography.headline3;
-    margin-bottom: var(variables.$spacing-s);
-  }
+:deep(hr) {
+  width: 100%;
+  border: 1px solid var(variables.$shade-4);
+  margin: var(variables.$spacing-xl) 0px;
 }
 </style>

@@ -112,14 +112,11 @@ onMounted(() => {
   props.getItems()
 })
 
-watch(
-  () => props.preselectedItems,
-  (newVal) => {
-    if (!isEqual(newVal, selectedItems.value)) {
-      selectedItems.value = props.preselectedItems as IAutocomplete[]
-    }
+watchEffect(() => {
+  if (props.preselectedItems) {
+    selectedItems.value = props.preselectedItems as IAutocomplete[]
   }
-)
+})
 
 const modelValue = ref<IAutocomplete[] | undefined>()
 

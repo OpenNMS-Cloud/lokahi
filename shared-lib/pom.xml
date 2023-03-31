@@ -23,7 +23,6 @@
     </properties>
 
     <modules>
-        <module>dto-model</module>
         <module>horizon-common-lang</module>
         <module>horizon-common-logging</module>
         <module>horizon-common-utils</module>
@@ -41,6 +40,7 @@
         <module>azure</module>
         <module>flows</module>
         <module>alert</module>
+        <module>shaded-grpc-core</module>
     </modules>
 
     <build>

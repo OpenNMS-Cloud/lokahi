@@ -49,7 +49,7 @@ import java.io.Serializable;
 @RequiredArgsConstructor
 @Entity
 @Table(name="event_match")
-public class EventMatch extends TenantAwareEntity implements Serializable  {
+public class EventMatch implements Serializable  {
 
     @Serial
     private static final long serialVersionUID = 5352121937366809116L;
@@ -58,6 +58,9 @@ public class EventMatch extends TenantAwareEntity implements Serializable  {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(nullable=false)
     private long id;
+
+    @Column (name = "tenant_id", nullable = false)
+    private String tenantId;
 
     @Column(nullable=false)
     private String name;

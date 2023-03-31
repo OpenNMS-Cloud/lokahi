@@ -404,11 +404,19 @@
                 <groupId>io.grpc</groupId>
                 <artifactId>grpc-core</artifactId>
                 <version>${grpc.version}</version>
+                <optional>true</optional> <!-- EXCLUDE by default; use org.opennmns.horizon.shared / horizon-shaded-grpc-core instead -->
             </dependency>
             <dependency>
                 <groupId>io.grpc</groupId>
                 <artifactId>grpc-netty-shaded</artifactId>
                 <version>${grpc.version}</version>
+                <!-- Use org.opennmns.horizon.shared / horizon-shaded-grpc-core instead-->
+                <exclusions>
+                    <exclusion>
+                        <groupId>io.grpc</groupId>
+                        <artifactId>grpc-core</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>io.grpc</groupId>

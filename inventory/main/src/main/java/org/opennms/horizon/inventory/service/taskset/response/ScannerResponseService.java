@@ -145,8 +145,10 @@ public class ScannerResponseService {
 
     private void processDiscoveryScanResponse(String tenantId, String location, DiscoveryScanResult discoveryScanResult) {
         for (PingResponse pingResponse : discoveryScanResult.getPingResponseList()) {
-            var optional = nodeService.getNode(tenantId, location, InetAddressUtils.getInetAddress(pingResponse.getIpAddress()));
-            if (optional.isEmpty()) {
+            // Don't need to create new node if this ip address is already part of inventory.
+            Optional<IpInterface> ipInterfaceOpt = ipInterfaceRepository
+                .findByIpAddressAndLocationAndTenantId(InetAddressUtils.getInetAddress(pingResponse.getIpAddress()), location, tenantId);
+            if (ipInterfaceOpt.isEmpty()) {
                 var discoveryOptional =
                     icmpActiveDiscoveryService.getDiscoveryById(discoveryScanResult.getActiveDiscoveryId(), tenantId);
                 if (discoveryOptional.isPresent()) {

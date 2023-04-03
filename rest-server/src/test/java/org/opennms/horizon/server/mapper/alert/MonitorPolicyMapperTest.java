@@ -36,12 +36,12 @@ import org.opennms.horizon.server.model.alerts.MonitorPolicy;
 import org.opennms.horizon.server.model.alerts.PolicyRule;
 import org.opennms.horizon.server.model.alerts.TriggerEvent;
 import org.opennms.horizon.shared.alert.policy.ComponentType;
+import org.opennms.horizon.shared.alert.policy.EventType;
 import org.opennms.horizon.shared.alert.policy.MonitorPolicyProto;
 import org.opennms.horizon.shared.alert.policy.OverTimeUnit;
 import org.opennms.horizon.shared.alert.policy.PolicyRuleProto;
-import org.opennms.horizon.shared.alert.policy.SNMPEventProto;
-import org.opennms.horizon.shared.alert.policy.SNMPEventType;
 import org.opennms.horizon.shared.alert.policy.Severity;
+import org.opennms.horizon.shared.alert.policy.TriggerEventProto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -53,8 +53,8 @@ public class MonitorPolicyMapperTest {
 
     @BeforeEach
     void before() {
-        SNMPEventProto triggerEvent = SNMPEventProto.newBuilder()
-            .setTriggerEvent(SNMPEventType.PORT_DOWN)
+        TriggerEventProto triggerEvent = TriggerEventProto.newBuilder()
+            .setTriggerEvent(EventType.PORT_DOWN)
             .setCount(1)
             .setSeverity(Severity.CRITICAL)
             .build();
@@ -90,7 +90,7 @@ public class MonitorPolicyMapperTest {
         assertThat(policy.getRules().get(0).getTriggerEvents().get(0))
             .extracting(TriggerEvent::getTriggerEvent, TriggerEvent::getCount, TriggerEvent::getOvertime, TriggerEvent::getOvertimeUnit,
                 TriggerEvent::getSeverity, TriggerEvent::getClearEvent)
-            .containsExactly(SNMPEventType.PORT_DOWN.name(), 1, 0, OverTimeUnit.UNKNOWN_UNIT.name(), Severity.CRITICAL.name(), SNMPEventType.UNKNOWN_EVENT.name());
+            .containsExactly(EventType.PORT_DOWN.name(), 1, 0, OverTimeUnit.UNKNOWN_UNIT.name(), Severity.CRITICAL.name(), EventType.UNKNOWN_EVENT.name());
     }
 
     @Test

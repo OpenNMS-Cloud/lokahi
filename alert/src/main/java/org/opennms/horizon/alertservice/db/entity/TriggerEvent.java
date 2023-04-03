@@ -30,8 +30,8 @@ package org.opennms.horizon.alertservice.db.entity;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.OneToOne;
+import org.opennms.horizon.shared.alert.policy.EventType;
 import org.opennms.horizon.shared.alert.policy.OverTimeUnit;
-import org.opennms.horizon.shared.alert.policy.SNMPEventType;
 import org.opennms.horizon.shared.alert.policy.Severity;
 
 import jakarta.persistence.Column;
@@ -60,7 +60,7 @@ public class TriggerEvent {
     private String tenantId;
     @Enumerated(EnumType.STRING)
     @Column(name = "trigger_event_type")
-    private SNMPEventType triggerEvent;
+    private EventType triggerEvent;
     @Column(name = "event_count")
     private Integer count;
     @Column(name = "over_time")
@@ -72,7 +72,7 @@ public class TriggerEvent {
     private Severity severity;
     @Enumerated(EnumType.STRING)
     @Column(name = "clear_event_type")
-    private SNMPEventType clearEvent;
+    private EventType clearEvent;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "rule_id", referencedColumnName = "id")
     private PolicyRule rule;

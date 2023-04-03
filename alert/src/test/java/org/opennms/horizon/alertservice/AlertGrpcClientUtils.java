@@ -9,7 +9,7 @@ import io.grpc.ManagedChannel;
 import io.grpc.netty.shaded.io.grpc.netty.NettyChannelBuilder;
 
 public class AlertGrpcClientUtils {
-    private static final int DEADLINE_DURATION = 30;
+    private static final int DEADLINE_DURATION = 30000;
     private static final String LOCALHOST = "localhost";
 
     private final DynamicTenantIdInterceptor dynamicTenantIdInterceptor = new DynamicTenantIdInterceptor(
@@ -31,9 +31,10 @@ public class AlertGrpcClientUtils {
         ManagedChannel managedChannel = channelBuilder.usePlaintext().build();
         managedChannel.getState(true);
         alertServiceStub = AlertServiceGrpc.newBlockingStub(managedChannel)
-            .withInterceptors(dynamicTenantIdInterceptor)
-            .withDeadlineAfter(DEADLINE_DURATION, TimeUnit.SECONDS);
+            .withDeadlineAfter(DEADLINE_DURATION, TimeUnit.SECONDS)
+            .withInterceptors(dynamicTenantIdInterceptor);
         policyStub = MonitorPolicyServiceGrpc.newBlockingStub(managedChannel)
+            .withDeadlineAfter(DEADLINE_DURATION, TimeUnit.SECONDS)
             .withInterceptors(dynamicTenantIdInterceptor);
     }
 

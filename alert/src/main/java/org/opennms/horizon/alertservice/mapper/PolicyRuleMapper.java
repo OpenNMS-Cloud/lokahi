@@ -34,7 +34,7 @@ import org.mapstruct.Mapping;
 import org.opennms.horizon.alertservice.db.entity.PolicyRule;
 import org.opennms.horizon.shared.alert.policy.PolicyRuleProto;
 
-@Mapper(componentModel = "spring", uses = {SNMPEventMapper.class},
+@Mapper(componentModel = "spring", uses = {TriggerEventMapper.class},
     collectionMappingStrategy = CollectionMappingStrategy.ADDER_PREFERRED)
 public interface PolicyRuleMapper {
     @Mapping(target = "snmpEventsList", source = "triggerEvents")

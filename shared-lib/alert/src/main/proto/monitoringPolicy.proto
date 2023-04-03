@@ -60,18 +60,18 @@ message PolicyRuleProto {
   string tenantId = 2;
   string name = 3;
   ComponentType componentType = 4;
-  repeated SNMPEventProto snmpEvents = 5;
+  repeated TriggerEventProto snmpEvents = 5;
 }
 
-message SNMPEventProto {
+message TriggerEventProto {
   int64 id = 1;
   string tenantId = 2;
-  SNMPEventType triggerEvent = 3;
+  EventType triggerEvent = 3;
   int32 count = 4;
   int32 overtime = 5;
   OverTimeUnit overtimeUnit = 6;
   Severity severity = 7;
-  SNMPEventType clearEvent = 8;
+  EventType clearEvent = 8;
 }
 
 //TBD
@@ -86,12 +86,14 @@ enum OverTimeUnit {
   HOUR = 3;
 }
 
-enum SNMPEventType {
+enum EventType {
   UNKNOWN_EVENT = 0;
   COLD_REBOOT = 1;
-  SNMP_AUTH_FAILURE = 2;
-  PORT_DOWN = 3;
-  PORT_UP = 4;
+  WARM_REBOOT = 2;
+  SNMP_AUTH_FAILURE = 3;
+  PORT_DOWN = 4;
+  PORT_UP = 5;
+  DEVICE_UNREACHABLE = 6;
 }
 
 enum Severity {
@@ -110,6 +112,7 @@ service MonitorPolicyService {
   rpc createPolicy(MonitorPolicyProto) returns(MonitorPolicyProto);
   rpc listPolicies(google.protobuf.Empty) returns(MonitorPolicyList);
   rpc getPolicyById(google.protobuf.Int64Value) returns(MonitorPolicyProto);
+  rpc getDefaultPolicy(google.protobuf.Empty) returns(MonitorPolicyProto);
 }
 
 

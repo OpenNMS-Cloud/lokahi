@@ -31,22 +31,23 @@ package org.opennms.horizon.alertservice.stepdefs;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 import java.util.List;
-import java.util.concurrent.TimeUnit;
+import java.util.Map;
 
 import org.assertj.core.groups.Tuple;
 import org.opennms.horizon.alertservice.AlertGrpcClientUtils;
 import org.opennms.horizon.shared.alert.policy.ComponentType;
+import org.opennms.horizon.shared.alert.policy.EventType;
 import org.opennms.horizon.shared.alert.policy.MonitorPolicyList;
 import org.opennms.horizon.shared.alert.policy.MonitorPolicyProto;
 import org.opennms.horizon.shared.alert.policy.OverTimeUnit;
 import org.opennms.horizon.shared.alert.policy.PolicyRuleProto;
-import org.opennms.horizon.shared.alert.policy.SNMPEventProto;
-import org.opennms.horizon.shared.alert.policy.SNMPEventType;
 import org.opennms.horizon.shared.alert.policy.Severity;
+import org.opennms.horizon.shared.alert.policy.TriggerEventProto;
 
 import com.google.protobuf.Empty;
 import com.google.protobuf.Int64Value;
 
+import io.cucumber.datatable.DataTable;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import lombok.RequiredArgsConstructor;
@@ -55,13 +56,18 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @RequiredArgsConstructor
 public class MonitorPolicySteps {
-    private final int DEADLINE_DURATION_SECONDS = 10;
-    private final String tenantId = "test-tenant";
     private final AlertGrpcClientUtils grpcClient;
     private MonitorPolicyProto.Builder policyBuilder = MonitorPolicyProto.newBuilder();
     private PolicyRuleProto.Builder ruleBuilder = PolicyRuleProto.newBuilder();
-    private SNMPEventProto.Builder triggerBuilder = SNMPEventProto.newBuilder();
+    private TriggerEventProto.Builder triggerBuilder = TriggerEventProto.newBuilder();
     private Long policyId;
+
+    private MonitorPolicyProto policy;
+
+    @Given("Tenant id {string}")
+    public void defaultTenantId(String tenantId) {
+        grpcClient.setTenantId(tenantId);
+    }
 
     @Given("Monitor policy name {string} and memo {string}")
     public void monitorPolicyNameAndMemo(String name, String memo) {
@@ -90,7 +96,7 @@ public class MonitorPolicySteps {
 
     @Given("Trigger event {string}, count {int} overtime {int} {string}, severity {string}")
     public void triggerEventCountOvertimeSeverity(String event, Integer count, Integer overTime, String timeUnit, String severity) {
-        triggerBuilder.setTriggerEvent(SNMPEventType.valueOf(event.toUpperCase()))
+        triggerBuilder.setTriggerEvent(EventType.valueOf(event.toUpperCase()))
             .setCount(count)
             .setOvertime(overTime)
             .setOvertimeUnit(OverTimeUnit.valueOf(timeUnit.toUpperCase()))
@@ -102,9 +108,7 @@ public class MonitorPolicySteps {
         MonitorPolicyProto policy = policyBuilder.addRules(
                 ruleBuilder.addSnmpEvents(triggerBuilder.build()).build()
         ).build();
-        grpcClient.setTenantId(tenantId);
-        MonitorPolicyProto dbPolicy = grpcClient.getPolicyStub()
-            .withDeadlineAfter(DEADLINE_DURATION_SECONDS, TimeUnit.SECONDS).createPolicy(policy);
+        MonitorPolicyProto dbPolicy = grpcClient.getPolicyStub().createPolicy(policy);
         policyId = dbPolicy.getId();
         log.info("Creating policy {}", policy);
         assertThat(dbPolicy).isNotNull();
@@ -112,8 +116,7 @@ public class MonitorPolicySteps {
 
     @Then("Verify the new policy has been created")
     public void verifyTheNewPolicyHasBeenCreated() {
-        MonitorPolicyProto policy = grpcClient.getPolicyStub()
-            .withDeadlineAfter(DEADLINE_DURATION_SECONDS, TimeUnit.SECONDS).getPolicyById(Int64Value.of(policyId));
+        MonitorPolicyProto policy = grpcClient.getPolicyStub().getPolicyById(Int64Value.of(policyId));
         assertThat(policy).isNotNull()
             .extracting("name", "memo", "tagsList")
             .containsExactly(policyBuilder.getName(), policyBuilder.getMemo(), policyBuilder.getTagsList());
@@ -123,15 +126,43 @@ public class MonitorPolicySteps {
         assertThat(policy.getRulesList().get(0).getSnmpEventsList()).asList().hasSize(1)
             .extracting("triggerEvent", "count", "overtime", "overtimeUnit", "severity", "clearEvent")
             .containsExactly(Tuple.tuple(triggerBuilder.getTriggerEvent(), triggerBuilder.getCount(), triggerBuilder.getOvertime(),
-                triggerBuilder.getOvertimeUnit(), triggerBuilder.getSeverity(), SNMPEventType.UNKNOWN_EVENT));
+                triggerBuilder.getOvertimeUnit(), triggerBuilder.getSeverity(), EventType.UNKNOWN_EVENT));
     }
 
     @Then("List policy should contain {int}")
     public void listPolicyShouldContain(int count) {
-        MonitorPolicyList list = grpcClient.getPolicyStub()
-            .withDeadlineAfter(DEADLINE_DURATION_SECONDS, TimeUnit.SECONDS)
-            .listPolicies(Empty.getDefaultInstance());
+        MonitorPolicyList list = grpcClient.getPolicyStub().listPolicies(Empty.getDefaultInstance());
         assertThat(list).isNotNull()
             .extracting(MonitorPolicyList::getPoliciesList).asList().hasSize(count);
+    }
+
+    @Then("The default monitoring policy exist with name {string} and tag {string} and all notification enabled")
+    public void theDefaultMonitoringPolicyExistWithNameAndTag(String policyName, String tag) {
+         policy = grpcClient.getPolicyStub().getDefaultPolicy(Empty.getDefaultInstance());
+        assertThat(policy).isNotNull()
+            .extracting("name", "tagsList", "notifyByEmail", "notifyByPagerDuty", "notifyByWebhooks")
+            .containsExactly(policyName, List.of(tag), true, true, true);
+    }
+
+    @Then("Verify the default monitoring policy has the following data")
+    public void verifyTheDefaultMonitoringPolicyHasTheFollowingData(DataTable dataTable) {
+        List<Map<String, String>> rows = dataTable.asMaps();
+        List<TriggerEventProto> events = policy.getRulesList().get(0).getSnmpEventsList();
+        assertThat(events).asList().hasSize(3);
+        for(int i =0; i < events.size(); i++) {
+            assertThat(events.get(i))
+                .extracting(e -> e.getTriggerEvent().name(), e -> e.getSeverity().name())
+                .containsExactly(rows.get(i).get("triggerEvent"), rows.get(i).get("severity"));
+        }
+    }
+
+    @Then("Verify the default policy rule has name {string} and component type {string}")
+    public void verifyTheDefaultPolicyRuleHasNameAndComponentType(String name, String type) {
+        assertThat(policy.getRulesList()).asList().hasSize(1);
+        PolicyRuleProto rule = policy.getRulesList().get(0);
+        assertThat(rule)
+            .extracting(r -> r.getName(), r->r.getComponentType().name())
+            .containsExactly(name, type);
+
     }
 }

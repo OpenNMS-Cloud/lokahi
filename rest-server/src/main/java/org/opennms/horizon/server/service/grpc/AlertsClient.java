@@ -182,4 +182,13 @@ public class AlertsClient {
             .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
             .getPolicyById(Int64Value.of(id)));
     }
+
+    public MonitorPolicy getDefaultPolicy(String accessToken) {
+        Metadata metadata = new Metadata();
+        metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
+        return policyMapper.map(policyStub
+            .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
+            .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
+            .getDefaultPolicy(Empty.getDefaultInstance()));
+    }
 }

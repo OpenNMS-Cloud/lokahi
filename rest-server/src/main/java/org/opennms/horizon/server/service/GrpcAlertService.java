@@ -125,4 +125,9 @@ public class GrpcAlertService {
     public Mono<MonitorPolicy> findMonitorPolicyById(Long id, @GraphQLEnvironment ResolutionEnvironment env) {
         return Mono.just(alertsClient.getMonitorPolicyById(id, headerUtil.getAuthHeader(env)));
     }
+
+    @GraphQLQuery
+    public Mono<MonitorPolicy> getDefaultPolicy(@GraphQLEnvironment ResolutionEnvironment env) {
+        return Mono.just(alertsClient.getDefaultPolicy(headerUtil.getAuthHeader(env)));
+    }
 }

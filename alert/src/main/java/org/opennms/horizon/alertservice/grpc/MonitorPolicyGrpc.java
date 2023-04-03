@@ -87,6 +87,19 @@ public class MonitorPolicyGrpc extends MonitorPolicyServiceGrpc.MonitorPolicySer
                 () -> responseObserver.onError(StatusProto.toStatusRuntimeException(badTenant())));
     }
 
+    @Override
+    public void getDefaultPolicy(Empty request, StreamObserver<MonitorPolicyProto> responseObserver) {
+        tenantLookup.lookupTenantId(Context.current())
+            .ifPresentOrElse(tenantId -> service.getDefaultPolicy()
+                    .ifPresentOrElse(policy -> {
+                        responseObserver.onNext(policy);
+                        responseObserver.onCompleted();
+                        },
+                        () -> responseObserver.onError(StatusProto.toStatusRuntimeException(createStatus(Code.NOT_FOUND_VALUE,
+                            "Default monitoring policy doesn't exist")))),
+                () -> responseObserver.onError(StatusProto.toStatusRuntimeException(badTenant())));
+    }
+
     private Status badTenant() {
         return createStatus(Code.INVALID_ARGUMENT_VALUE, "Tenant Id can't be empty");
     }

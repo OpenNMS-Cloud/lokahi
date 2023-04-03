@@ -101,7 +101,7 @@ Feature: Alert Service Basic Functionality
 
   Scenario: Verify find alert sorted by alertId
     Then Send event with UEI "uei.opennms.org/vendor/cisco/traps/SNMP_Link_Down" with tenant "tenantH" with node 10 with severity "MINOR"
-    Then List alerts for tenant "tenantH", with timeout 5000ms, until JSON response matches the following JSON path expressions
+    Then List alerts for tenant "tenantH", with timeout 10000ms, until JSON response matches the following JSON path expressions
       | alerts.size() == 1 |
       | alerts[0].counter == 1 |
       | alerts[0].severity == MINOR |

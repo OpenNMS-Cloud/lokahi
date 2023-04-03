@@ -30,10 +30,10 @@ package org.opennms.horizon.alertservice.mapper;
 
 import org.mapstruct.Mapper;
 import org.opennms.horizon.alertservice.db.entity.TriggerEvent;
-import org.opennms.horizon.shared.alert.policy.SNMPEventProto;
+import org.opennms.horizon.shared.alert.policy.TriggerEventProto;
 
 @Mapper(componentModel = "spring")
-public interface SNMPEventMapper {
-    TriggerEvent protoToEntity(SNMPEventProto proto);
-    SNMPEventProto entityToProto(TriggerEvent event);
+public interface TriggerEventMapper {
+    TriggerEvent protoToEntity(TriggerEventProto proto);
+    TriggerEventProto entityToProto(TriggerEvent event);
 }

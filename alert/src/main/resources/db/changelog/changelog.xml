@@ -14,4 +14,5 @@
 
     <!-- FIXME: Find a way to only load this data for tests.. not simple as they run in a container -->
     <include file="/db/changelog/hs-0.1.0/data/alert_definition_test_data.xml" />
+    <include file="/db/changelog/hs-0.1.0/tables/update_alert_enum_type.xml" />
 </databaseChangeLog>

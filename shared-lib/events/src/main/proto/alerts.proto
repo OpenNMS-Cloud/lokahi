@@ -84,7 +84,7 @@ message Alert {
   string ack_user = 17;
   // Acknowledged when?
   uint64 ack_time_ms = 18;
-  uint64 monitoring_policy_id = 19;
+  repeated uint64 monitoring_policy_id = 19;
 }
 
 message AlertList {

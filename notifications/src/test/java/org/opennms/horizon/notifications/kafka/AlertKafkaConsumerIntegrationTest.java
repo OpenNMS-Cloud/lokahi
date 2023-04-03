@@ -49,11 +49,13 @@ import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.timeout;
@@ -111,8 +113,8 @@ class AlertKafkaConsumerIntegrationTest {
         monitoringPolicy.setTenantId("opennms-prime");
         monitoringPolicy.setId(1);
         monitoringPolicy.setNotifyByPagerDuty(true);
-        Mockito.when(monitoringPolicyRepository.findByTenantIdAndId(anyString(), anyLong())).thenReturn(
-            Optional.of(monitoringPolicy)
+        Mockito.when(monitoringPolicyRepository.findByTenantIdAndIdIn(anyString(), anyList())).thenReturn(
+            List.of(monitoringPolicy)
         );
 
         String tenantId = "opennms-prime";
@@ -124,7 +126,7 @@ class AlertKafkaConsumerIntegrationTest {
             .setLogMessage("hello")
             .setDatabaseId(1234)
             .setTenantId("opennms-prime")
-            .setMonitoringPolicyId(1)
+            .addMonitoringPolicyId(1)
             .build();
         var producerRecord = new ProducerRecord<String,byte[]>(alertsTopic, alert.toByteArray());
         kafkaProducer.send(producerRecord);

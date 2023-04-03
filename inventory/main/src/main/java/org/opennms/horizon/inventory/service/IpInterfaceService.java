@@ -1,10 +1,6 @@
 package org.opennms.horizon.inventory.service;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
+import lombok.RequiredArgsConstructor;
 import org.opennms.horizon.inventory.dto.IpInterfaceDTO;
 import org.opennms.horizon.inventory.mapper.IpInterfaceMapper;
 import org.opennms.horizon.inventory.model.IpInterface;
@@ -15,7 +11,10 @@ import org.opennms.horizon.shared.utils.InetAddressUtils;
 import org.opennms.node.scan.contract.IpInterfaceResult;
 import org.springframework.stereotype.Service;
 
-import lombok.RequiredArgsConstructor;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -50,6 +49,7 @@ public class IpInterfaceService {
                 if(snmpInterface != null) {
                     ipInterface.setSnmpInterface(snmpInterface);
                 }
+                ipInterface.setIfIndex(result.getIfIndex());
                 modelRepo.save(ipInterface);
             }, () -> {
                 IpInterface ipInterface = mapper.fromScanResult(result);
@@ -57,6 +57,7 @@ public class IpInterfaceService {
                 ipInterface.setTenantId(tenantId);
                 ipInterface.setSnmpPrimary(false);
                 ipInterface.setHostname(result.getIpHostName());
+                ipInterface.setIfIndex(result.getIfIndex());
                 var snmpInterface = ifIndexSNMPMap.get(result.getIfIndex());
                 if(snmpInterface != null) {
                     ipInterface.setSnmpInterface(snmpInterface);

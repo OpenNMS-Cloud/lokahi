@@ -51,4 +51,5 @@ message SnmpCollectorRequest {
   string  host = 1;
   opennms.snmp.api.SnmpConfiguration agent_config = 2;
   uint64  node_id = 3;
+  uint32 if_index = 4;
 }

@@ -33,8 +33,8 @@ import lombok.RequiredArgsConstructor;
 import org.opennms.azure.contract.AzureCollectorRequest;
 import org.opennms.horizon.azure.api.AzureScanItem;
 import org.opennms.horizon.inventory.model.IpInterface;
-import org.opennms.horizon.inventory.service.SnmpConfigService;
 import org.opennms.horizon.inventory.model.discovery.active.AzureActiveDiscovery;
+import org.opennms.horizon.inventory.service.SnmpConfigService;
 import org.opennms.horizon.shared.utils.InetAddressUtils;
 import org.opennms.horizon.snmp.api.SnmpConfiguration;
 import org.opennms.snmp.contract.SnmpCollectorRequest;
@@ -59,13 +59,15 @@ public class CollectorTaskSetService {
 
         String name = String.format("%s-collector", monitorTypeValue.toLowerCase());
         String pluginName = String.format("%sCollector", monitorTypeValue);
+        var ifIndex = ipInterface.getIfIndex();
         TaskDefinition taskDefinition = null;
 
         if (monitorType == MonitorType.SNMP) {
 
             var requestBuilder = SnmpCollectorRequest.newBuilder()
                 .setHost(ipAddress)
-                .setNodeId(nodeId);
+                .setNodeId(nodeId)
+                .setIfIndex(ifIndex);
             if (snmpConfiguration != null) {
                 requestBuilder.setAgentConfig(snmpConfiguration);
             }

@@ -21,3 +21,13 @@ fragment TagsSearchParts on Query {
 query ListTagsSearch($searchTerm: String) {
   ...TagsSearchParts
 }
+
+query ListTagsByNodeIds($nodeIds: [Long]) {
+  tagsByNodeIds(nodeIds: $nodeIds) {
+    nodeId
+    tags {
+      id
+      name
+    }
+  }
+}

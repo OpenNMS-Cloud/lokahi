@@ -6,7 +6,7 @@ import {
   TsResult,
   Location,
   TimeRangeUnit,
-  ListTagsByNodeIdDocument
+  ListTagsByNodeIdsDocument
 } from '@/types/graphql'
 import { NodeContent } from '@/types/inventory'
 import useSpinner from '@/composables/useSpinner'
@@ -14,6 +14,7 @@ import { Monitor } from '@/types'
 
 export const useInventoryQueries = defineStore('inventoryQueries', () => {
   const nodes = ref<NodeContent[]>([])
+  const variables = reactive({ nodeIds: <number[]>[] })
 
   const { startSpinner, stopSpinner } = useSpinner()
 
@@ -24,6 +25,13 @@ export const useInventoryQueries = defineStore('inventoryQueries', () => {
   } = useQuery({
     query: NodesListDocument,
     cachePolicy: 'network-only' // always fetch and do not cache
+  })
+
+  const { data: tagData, execute: getTags } = useQuery({
+    query: ListTagsByNodeIdsDocument,
+    cachePolicy: 'network-only',
+    fetchOnMount: false,
+    variables
   })
 
   const fetchNodeMetrics = (id: number, instance: string) =>
@@ -41,22 +49,19 @@ export const useInventoryQueries = defineStore('inventoryQueries', () => {
 
   watch(nodesFetching, (_, fetched) => (fetched ? stopSpinner() : startSpinner()))
 
-  const fetchNodeTags = (nodeId: number) =>
-    useQuery({
-      query: ListTagsByNodeIdDocument,
-      variables: {
-        nodeId
-      }
-    })
-
-  watchEffect(() => {
+  watchEffect(async () => {
     nodes.value = []
 
     const allNodes = nodesData.value?.findAllNodes
 
     if (allNodes?.length) {
+      // get the tags for each node
+      variables.nodeIds = allNodes.map((node) => node.id)
+      await getTags()
+
       allNodes.forEach(async ({ id, nodeLabel, location, ipInterfaces }) => {
         const { ipAddress: snmpPrimaryIpAddress } = ipInterfaces?.filter((ii) => ii.snmpPrimary)[0] || {} // not getting ipAddress from snmpPrimary interface can result in missing metrics for ICMP
+        const tagsObj = tagData.value?.tagsByNodeIds?.filter((item) => item.nodeId === id)[0]
 
         // stop-gap measure to display nodes without IP addresses
         // may be removed once BE disassociates instance with IP
@@ -85,17 +90,18 @@ export const useInventoryQueries = defineStore('inventoryQueries', () => {
               locationLink: '',
               managementIpValue: '',
               managementIpLink: '',
-              tagValue: []
+              tagValue: tagsObj?.tags || []
             },
             isNodeOverlayChecked: false
           })
           return
         }
 
-        const [{ data: metricData, isFetching: metricFetching }, { data: tagData, isFetching: tagFetching }] =
-          await Promise.all([fetchNodeMetrics(id, snmpPrimaryIpAddress as string), fetchNodeTags(id)])
+        const [{ data: metricData, isFetching: metricFetching }] = await Promise.all([
+          fetchNodeMetrics(id, snmpPrimaryIpAddress as string)
+        ])
 
-        if (!metricFetching.value && metricData.value && !tagFetching.value && tagData.value) {
+        if (!metricFetching.value && metricData.value) {
           const nodeLatency = metricData.value.nodeLatency?.data?.result as TsResult[]
           const latenciesValues = [...nodeLatency][0]?.values as number[][]
           // get the last item of the list
@@ -129,7 +135,7 @@ export const useInventoryQueries = defineStore('inventoryQueries', () => {
               locationLink: '',
               managementIpValue: snmpPrimaryIpAddress || '',
               managementIpLink: '',
-              tagValue: tagData.value.tagsByNodeId || []
+              tagValue: tagsObj?.tags || []
             },
             isNodeOverlayChecked: false // to control the checkmark in the overlay of a node (tagging mode)
           })

@@ -55,7 +55,7 @@ export const useInventoryQueries = defineStore('inventoryQueries', () => {
     const allNodes = nodesData.value?.findAllNodes
 
     if (allNodes?.length) {
-      // get the tags for each node
+      // get the tags for all nodeIds
       variables.nodeIds = allNodes.map((node) => node.id)
       await getTags()
 

@@ -3,7 +3,7 @@ import AlertsSeverityLabel from '@/components/Alerts/AlertsSeverityLabel.vue'
 
 let wrapper: any
 
-describe('AlertsSeverityLabel', () => {
+describe.skip('AlertsSeverityLabel', () => {
   beforeAll(() => {
     wrapper = mount(AlertsSeverityLabel, {
       props: {

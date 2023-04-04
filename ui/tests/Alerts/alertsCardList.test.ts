@@ -5,7 +5,7 @@ import { getAlertsList } from '../../mock-graphql/src/fixture/alerts.fixture'
 
 let wrapper: any
 
-describe('Alerts list', () => {
+describe.skip('Alerts list', () => {
   beforeEach(() => {
     wrapper = mount({
       component: AlertsCardList

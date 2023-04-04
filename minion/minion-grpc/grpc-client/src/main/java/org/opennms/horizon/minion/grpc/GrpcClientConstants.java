@@ -40,5 +40,12 @@ public interface GrpcClientConstants {
     int DEFAULT_MESSAGE_SIZE = 10485760;
     String CLIENT_CERTIFICATE_FILE_PATH = "client.cert.filepath";
     String CLIENT_PRIVATE_KEY_FILE_PATH = "client.private.key.filepath";
+    String CLIENT_PRIVATE_KEY_PASSWORD = "client.private.key.password";
     String TRUST_CERTIFICATE_FILE_PATH = "trust.cert.filepath";
+
+    /**
+     * When validating the server's "authority" (i.e. hostname + port), this override, if given, is used rather than
+     *  the connection hostname + port.
+     */
+    String OVERRIDE_AUTHORITY = "override.authority";
 }

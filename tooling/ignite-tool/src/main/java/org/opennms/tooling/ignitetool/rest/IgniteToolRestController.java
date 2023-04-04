@@ -29,6 +29,7 @@
 package org.opennms.tooling.ignitetool.rest;
 
 import org.apache.ignite.Ignite;
+import org.apache.ignite.IgniteCache;
 import org.apache.ignite.cluster.ClusterNode;
 import org.apache.ignite.services.ServiceDescriptor;
 import org.opennms.taskset.contract.TaskSet;
@@ -114,6 +115,18 @@ public class IgniteToolRestController {
         result.put("summary", summarizeTopology(topology));
 
         return result;
+    }
+
+    // WARNING: this is a bit primitive; hard to distinguish different scenarios, such as "cache doesn't exist" vs
+    //  "cache entry is missing"
+    @GetMapping(path = "/cache/{cache-name}/{key}")
+    public Object getCacheEntry(@PathVariable("cache-name") String cacheName, @PathVariable("key") String key) {
+        IgniteCache cache = ignite.cache(cacheName);
+        if (cache != null) {
+            return cache.get(key);
+        }
+
+        return null;
     }
 
 //========================================

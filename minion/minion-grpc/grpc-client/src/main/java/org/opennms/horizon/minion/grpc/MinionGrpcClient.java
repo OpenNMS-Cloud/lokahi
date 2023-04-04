@@ -30,6 +30,7 @@ package org.opennms.horizon.minion.grpc;
 
 import static org.opennms.horizon.minion.grpc.GrpcClientConstants.CLIENT_CERTIFICATE_FILE_PATH;
 import static org.opennms.horizon.minion.grpc.GrpcClientConstants.CLIENT_PRIVATE_KEY_FILE_PATH;
+import static org.opennms.horizon.minion.grpc.GrpcClientConstants.CLIENT_PRIVATE_KEY_PASSWORD;
 import static org.opennms.horizon.minion.grpc.GrpcClientConstants.DEFAULT_GRPC_HOST;
 import static org.opennms.horizon.minion.grpc.GrpcClientConstants.DEFAULT_GRPC_PORT;
 import static org.opennms.horizon.minion.grpc.GrpcClientConstants.DEFAULT_MESSAGE_SIZE;
@@ -37,6 +38,7 @@ import static org.opennms.horizon.minion.grpc.GrpcClientConstants.GRPC_CLIENT_PI
 import static org.opennms.horizon.minion.grpc.GrpcClientConstants.GRPC_HOST;
 import static org.opennms.horizon.minion.grpc.GrpcClientConstants.GRPC_MAX_INBOUND_SIZE;
 import static org.opennms.horizon.minion.grpc.GrpcClientConstants.GRPC_PORT;
+import static org.opennms.horizon.minion.grpc.GrpcClientConstants.OVERRIDE_AUTHORITY;
 import static org.opennms.horizon.minion.grpc.GrpcClientConstants.TLS_ENABLED;
 import static org.opennms.horizon.minion.grpc.GrpcClientConstants.TRUST_CERTIFICATE_FILE_PATH;
 import static org.opennms.horizon.shared.ipc.rpc.api.RpcModule.MINION_HEADERS_MODULE;
@@ -155,10 +157,18 @@ public class MinionGrpcClient extends AbstractMessageDispatcherFactory<String> i
         int port = PropertiesUtils.getProperty(properties, GRPC_PORT, DEFAULT_GRPC_PORT);
         boolean tlsEnabled = PropertiesUtils.getProperty(properties, TLS_ENABLED, false);
         int maxInboundMessageSize = PropertiesUtils.getProperty(properties, GRPC_MAX_INBOUND_SIZE, DEFAULT_MESSAGE_SIZE);
+        String overrideAuthority = properties.getProperty(OVERRIDE_AUTHORITY);
 
         NettyChannelBuilder channelBuilder = NettyChannelBuilder.forAddress(host, port)
                 .keepAliveWithoutCalls(true)
                 .maxInboundMessageSize(maxInboundMessageSize);
+
+        // If an override authority was specified, configure it now.  Setting the override authority to match the CN
+        //  of the server certificate prevents hostname verification errors of the server certificate when the CN does
+        //  not match the hostname used to connect the server.
+        if (overrideAuthority != null) {
+            channelBuilder.overrideAuthority(overrideAuthority);
+        }
 
         if (tlsEnabled) {
             channel = channelBuilder
@@ -189,13 +199,14 @@ public class MinionGrpcClient extends AbstractMessageDispatcherFactory<String> i
         SslContextBuilder builder = GrpcSslContexts.forClient();
         String clientCertChainFilePath = properties.getProperty(CLIENT_CERTIFICATE_FILE_PATH);
         String clientPrivateKeyFilePath = properties.getProperty(CLIENT_PRIVATE_KEY_FILE_PATH);
+        String clientPrivateKeyPassword = properties.getProperty(CLIENT_PRIVATE_KEY_PASSWORD);
         String trustCertCollectionFilePath = properties.getProperty(TRUST_CERTIFICATE_FILE_PATH);
 
         if (trustCertCollectionFilePath != null) {
             builder.trustManager(new File(trustCertCollectionFilePath));
         }
         if (clientCertChainFilePath != null && clientPrivateKeyFilePath != null) {
-            builder.keyManager(new File(clientCertChainFilePath), new File(clientPrivateKeyFilePath));
+            builder.keyManager(new File(clientCertChainFilePath), new File(clientPrivateKeyFilePath), clientPrivateKeyPassword);
         }
         return builder;
     }

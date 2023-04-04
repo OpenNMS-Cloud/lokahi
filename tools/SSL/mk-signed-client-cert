@@ -1,0 +1,29 @@
+#!/bin/bash
+
+set -e
+
+LOCATION="LOC01"
+TENANT_ID="tenant01"
+
+echo "=== MAKING PKCS1 KEY"
+openssl genrsa -out client.key.pkcs1 2048
+
+echo "=== CONVERTING TO PKCS8"
+openssl pkcs8 -topk8 -in client.key.pkcs1 -out client.key -nocrypt
+
+echo "=== GENERATING THE UNSIGNED CERT"
+openssl req \
+	-new \
+	-key client.key \
+	-out client.unsigned.cert \
+	-subj "/C=CA/ST=TBD/L=TBD/O=OpenNMS/CN=opennms-minion-ssl-gateway/OU=L:${LOCATION}/OU=T:${TENANT_ID}"
+
+echo "=== SIGNING CERT"
+openssl x509 \
+	-req \
+	-in client.unsigned.cert \
+	-days 3650 \
+	-CA CA.cert \
+	-CAkey CA.key \
+	-CAcreateserial \
+	-out client.signed.cert

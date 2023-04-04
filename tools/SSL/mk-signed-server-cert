@@ -1,0 +1,22 @@
+#!/bin/bash
+
+set -e
+
+echo "=== MAKING UNSIGNED CERT"
+openssl req \
+	-new \
+	-newkey rsa:4096 \
+	-keyout server.key \
+	-out server.unsigned.cert \
+	-passout pass:passw0rd \
+	-subj "/C=CA/ST=TBD/L=TBD/O=OpenNMS/CN=opennms-minion-ssl-gateway"
+
+echo "=== SIGNING CERT"
+openssl x509 \
+	-req \
+	-in server.unsigned.cert \
+	-days 3650 \
+	-CA CA.cert \
+	-CAkey CA.key \
+	-CAcreateserial \
+	-out server.signed.cert

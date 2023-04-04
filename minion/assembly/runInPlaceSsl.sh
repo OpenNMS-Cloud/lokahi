@@ -71,6 +71,8 @@ cd "$SCRIPT_DIR"/target/assembly
 
 # Update the config file, if TLS is enabled
 
+GRPC_CLIENT_CONFIG_FILE="etc/org.opennms.core.ipc.grpc.client.cfg"
+
 if [ "${MINION_GATEWAY_TLS}" = "true" ]
 then
 	(

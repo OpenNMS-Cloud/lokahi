@@ -4,36 +4,36 @@ import AlertsCard from '@/components/Alerts/AlertsCard.vue'
 
 let wrapper: any
 
-describe.skip('Alert card', () => {
-  beforeAll(() => {
-    wrapper = mount(AlertsCard, {
-      props: {
-        // alert: getAlert()
-      }
-    })
-  })
-  afterAll(() => {
-    wrapper.unmount()
-  })
+// describe.skip('Alert card', () => {
+//   beforeAll(() => {
+//     wrapper = mount(AlertsCard, {
+//       props: {
+//         // alert: getAlert()
+//       }
+//     })
+//   })
+//   afterAll(() => {
+//     wrapper.unmount()
+//   })
 
-  test('Mount', () => {
-    expect(wrapper).toBeTruthy()
-  })
+//   test('Mount', () => {
+//     expect(wrapper).toBeTruthy()
+//   })
 
-  test('Should have required elements', () => {
-    const elems = ['checkbox', 'name', 'node-type', 'severity', 'cause', 'duration', 'date', 'time', 'check-icon']
-    elems.forEach((elem) => {
-      const el = wrapper.get(`[data-test="${elem}"]`)
-      expect(el.exists()).toBeTruthy()
-    })
-  })
+//   test('Should have required elements', () => {
+//     const elems = ['checkbox', 'name', 'node-type', 'severity', 'cause', 'duration', 'date', 'time', 'check-icon']
+//     elems.forEach((elem) => {
+//       const el = wrapper.get(`[data-test="${elem}"]`)
+//       expect(el.exists()).toBeTruthy()
+//     })
+//   })
 
-  test('Should have description when card expanded', async () => {
-    const ahref = wrapper.get('.feather-expansion-header-button')
-    expect(ahref.exists()).toBeTruthy()
+//   test('Should have description when card expanded', async () => {
+//     const ahref = wrapper.get('.feather-expansion-header-button')
+//     expect(ahref.exists()).toBeTruthy()
 
-    await ahref.trigger('click')
-    const elem = wrapper.get('[data-test="description"]')
-    expect(elem.exists()).toBeTruthy()
-  })
-})
+//     await ahref.trigger('click')
+//     const elem = wrapper.get('[data-test="description"]')
+//     expect(elem.exists()).toBeTruthy()
+//   })
+// })

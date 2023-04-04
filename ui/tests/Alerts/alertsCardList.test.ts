@@ -1,7 +1,7 @@
 import mount from 'tests/mountWithPiniaVillus'
 import AlertsCardList from '@/components/Alerts/AlertsCardList.vue'
 import { useAlertsStore } from '@/store/Views/alertsStore'
-import { getAlertsList } from '../../mock-graphql/src/fixture/alerts.fixture'
+// import { getAlertsList } from '../../mock-graphql/src/fixture/alerts.fixture'
 
 let wrapper: any
 
@@ -21,7 +21,7 @@ describe.skip('Alerts list', () => {
 
   test('Should have alerts list if list not empty', async () => {
     const alertsStore = useAlertsStore()
-    alertsStore.alertsList = getAlertsList()
+    // alertsStore.alertsList = getAlertsList()
     await wrapper.vm.$nextTick()
 
     const elem = wrapper.find('[data-test="alerts-list"]')

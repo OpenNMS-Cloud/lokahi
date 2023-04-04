@@ -1,6 +1,6 @@
 import { mount } from '@vue/test-utils'
 import AlertsCard from '@/components/Alerts/AlertsCard.vue'
-import { getAlert } from 'mock-graphql/src/fixture/alerts.fixture'
+// import { getAlert } from 'mock-graphql/src/fixture/alerts.fixture'
 
 let wrapper: any
 
@@ -8,7 +8,7 @@ describe.skip('Alert card', () => {
   beforeAll(() => {
     wrapper = mount(AlertsCard, {
       props: {
-        alert: getAlert()
+        // alert: getAlert()
       }
     })
   })

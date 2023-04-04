@@ -1,7 +1,7 @@
 import mount from '../mountWithPiniaVillus'
 import Alerts from '@/containers/Alerts.vue'
 import { useAlertsStore } from '@/store/Views/alertsStore'
-import { getAlertsList } from '../../mock-graphql/src/fixture/alerts.fixture'
+// import { getAlertsList } from '../../mock-graphql/src/fixture/alerts.fixture'
 
 let wrapper: any
 
@@ -75,7 +75,7 @@ describe.skip('Alerts', () => {
 
   test('Should have list count', async () => {
     const alertsStore = useAlertsStore()
-    alertsStore.alertsList = getAlertsList()
+    // alertsStore.alertsList = getAlertsList()
     await wrapper.vm.$nextTick()
 
     const elem = wrapper.find('[data-test="list-count"]')
@@ -94,7 +94,7 @@ describe.skip('Alerts', () => {
 
   test.skip('Should have pagination', async () => {
     const alertsStore = useAlertsStore()
-    alertsStore.alertsList = getAlertsList()
+    // alertsStore.alertsList = getAlertsList()
     await wrapper.vm.$nextTick()
 
     const elem = wrapper.find('[data-test="pagination"]')

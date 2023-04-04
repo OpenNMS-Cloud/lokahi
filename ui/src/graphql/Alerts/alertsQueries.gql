@@ -1,0 +1,59 @@
+fragment AlertsParts on Query {
+  findAllAlerts(
+    page: $page
+    pageSize: $pageSize
+    severities: $severities
+    sortAscending: $sortAscending
+    sortBy: $sortBy
+    timeRange: $timeRange
+  ) {
+    lastPage
+    nextPage
+    totalAlerts
+    alerts {
+      ackTimeMs
+      ackUser
+      acknowledged
+      clearKey
+      counter
+      databaseId
+      description
+      firstEventTimeMs
+      lastEventId
+      lastUpdateTimeMs
+      location
+      logMessage
+      managedObject {
+        instance {
+          nodeVal {
+            nodeID
+          }
+        }
+        type
+      }
+      reductionKey
+      severity
+      tenantId
+      type
+      uei
+    }
+  }
+}
+
+query Alerts(
+  $page: Int!
+  $pageSize: Int
+  $severities: [String]
+  $sortAscending: Boolean!
+  $sortBy: String
+  $timeRange: TimeRange!
+) {
+  ...AlertsParts
+}
+
+query CountAlerts(
+  $severityFilters: [String] # ["CRITICAL", "MAJOR"]
+  $timeRange: TimeRange!
+) {
+  countAlerts(severityFilters: $severityFilters, timeRange: $timeRange)
+}

@@ -37,7 +37,7 @@
         :label="discoveryText.ContentEditable.IP.label"
         ref="contentEditableIPRef"
         class="ip-input"
-        :tooltipText="Common.tooltip.IPHelpTooltp"
+        :tooltipText="Common.tooltipIP"
         :content="props.discovery?.ipAddresses?.join(', ')"
         isRequired
         :id="1"
@@ -62,7 +62,7 @@
         :default-content="UDP_PORT.default"
         class="udp-port-input"
         ref="contentEditableUDPPortRef"
-        :tooltipText="Common.tooltip.PortHelpTooltp"
+        :tooltipText="Common.tooltipPort"
         :content="props.discovery?.snmpConfig?.ports?.join(', ')"
         :id="3"
       />

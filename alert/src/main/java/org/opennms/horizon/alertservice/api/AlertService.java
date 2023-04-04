@@ -29,21 +29,25 @@
 package org.opennms.horizon.alertservice.api;
 
 
+import java.util.Optional;
+
 import org.opennms.horizon.alerts.proto.Alert;
 import org.opennms.horizon.events.proto.Event;
-
-import java.util.Optional;
 
 public interface AlertService {
     Optional<Alert> reduceEvent(Event e);
 
-    void deleteAlertById(long id);
+    boolean deleteByIdAndTenantId(long id, String tenantId);
 
-    void deleteAlert(Alert alert);
+    void deleteByTenantId(Alert alert, String tenantId);
 
-    Optional<Alert> acknowledgeAlertById(long id);
+    Optional<Alert> acknowledgeByIdAndTenantId(long id, String tenantId);
 
-    Optional<Alert> unacknowledgeAlertById(long id);
+    Optional<Alert> unacknowledgeByIdAndTenantId(long id, String tenantId);
+
+    Optional<Alert> escalateByIdAndTenantId(long id, String tenantId);
+
+    Optional<Alert> clearByIdAndTenantId(long id, String tenantId);
 
     void addListener(AlertLifecyleListener listener);
 

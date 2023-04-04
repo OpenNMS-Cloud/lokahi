@@ -28,6 +28,14 @@
 
 package org.opennms.horizon.alertservice.db.entity;
 
+import java.io.Serial;
+import java.io.Serializable;
+import java.util.Date;
+
+import org.opennms.horizon.alerts.proto.AlertType;
+import org.opennms.horizon.alerts.proto.ManagedObjectType;
+import org.opennms.horizon.model.common.proto.Severity;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -42,13 +50,6 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import org.opennms.horizon.alerts.proto.AlertType;
-import org.opennms.horizon.alerts.proto.ManagedObjectType;
-import org.opennms.horizon.model.common.proto.Severity;
-
-import java.io.Serial;
-import java.io.Serializable;
-import java.util.Date;
 
 @Entity
 @Table(name="alert")
@@ -64,7 +65,7 @@ public class Alert implements Serializable {
     @SequenceGenerator(name="alertSequence", sequenceName="alert_nxt_id", allocationSize = 1)
     @GeneratedValue(generator="alertSequence")
     @Column(nullable=false)
-    private Long alertId;
+    private Long id;
 
     @Column (name = "tenant_id", nullable = false)
     private String tenantId;

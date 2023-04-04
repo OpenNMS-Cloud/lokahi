@@ -19,6 +19,4 @@ casual.define('listAzureDiscoveries', function () {
 
 const listAzureDiscoveries = casual.listAzureDiscoveries
 
-export {
-  listAzureDiscoveries
-}
+export { listAzureDiscoveries }

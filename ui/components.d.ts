@@ -7,6 +7,14 @@ export {}
 
 declare module '@vue/runtime-core' {
   export interface GlobalComponents {
+    AddNewPolicy: typeof import('./src/components/MonitoringPolicies/AddNewPolicy.vue')['default']
+    AddNewRule: typeof import('./src/components/MonitoringPolicies/AddNewRule.vue')['default']
+    AlertConditions: typeof import('./src/components/MonitoringPolicies/AlertConditions.vue')['default']
+    AlertsCard: typeof import('./src/components/Alerts/AlertsCard.vue')['default']
+    AlertsCardList: typeof import('./src/components/Alerts/AlertsCardList.vue')['default']
+    AlertsSeverityCard: typeof import('./src/components/Alerts/AlertsSeverityCard.vue')['default']
+    AlertsSeverityFilters: typeof import('./src/components/Alerts/AlertsSeverityFilters.vue')['default']
+    AlertsSeverityLabel: typeof import('./src/components/Alerts/AlertsSeverityLabel.vue')['default']
     AppliancesAddNodeCtrl: typeof import('./src/components/Appliances/AppliancesAddNodeCtrl.vue')['default']
     AppliancesMinionsTable: typeof import('./src/components/Appliances/AppliancesMinionsTable.vue')['default']
     AppliancesNodesTable: typeof import('./src/components/Appliances/AppliancesNodesTable.vue')['default']
@@ -27,6 +35,7 @@ declare module '@vue/runtime-core' {
     DiscoveryContentEditable: typeof import('./src/components/Discovery/DiscoveryContentEditable.vue')['default']
     DiscoveryHelpConfiguring: typeof import('./src/components/Discovery/DiscoveryHelpConfiguring.vue')['default']
     DiscoveryInfo: typeof import('./src/components/MyDiscovery/DiscoveryInfo.vue')['default']
+    DiscoveryInstructions: typeof import('./src/components/Discovery/DiscoveryInstructions.vue')['default']
     DiscoveryListCard: typeof import('./src/components/Discovery/DiscoveryListCard.vue')['default']
     DiscoveryLocationsAutocomplete: typeof import('./src/components/Discovery/DiscoveryLocationsAutocomplete.vue')['default']
     DiscoverySnmpForm: typeof import('./src/components/Discovery/DiscoverySnmpForm.vue')['default']
@@ -51,6 +60,7 @@ declare module '@vue/runtime-core' {
     FeatherIcon: typeof import('@featherds/icon')['FeatherIcon']
     FeatherInput: typeof import('@featherds/input')['FeatherInput']
     FeatherListSwitch: typeof import('@featherds/list')['FeatherListSwitch']
+    FeatherPopover: typeof import('@featherds/popover')['FeatherPopover']
     FeatherProtectedInput: typeof import('@featherds/protected-input')['FeatherProtectedInput']
     FeatherRadio: typeof import('@featherds/radio')['FeatherRadio']
     FeatherRadioGroup: typeof import('@featherds/radio')['FeatherRadioGroup']

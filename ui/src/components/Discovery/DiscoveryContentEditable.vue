@@ -17,19 +17,27 @@
     <div class="content-editable-wrapper">
       <div class="label">
         <label for="contentEditable">{{ props.label }}</label>
-        <FeatherTooltip
+        <FeatherPopover
+          :pointer-alignment="PointerAlignment.center"
+          :placement="PopoverPlacement.top"
           v-if="props.tooltipText"
-          :title="props.tooltipText"
-          v-slot="{ attrs, on }"
         >
-          <FeatherButton
-            v-bind="attrs"
-            v-on="on"
-            icon="info"
-            class="icon-help"
-            ><FeatherIcon :icon="Help"> </FeatherIcon
-          ></FeatherButton>
-        </FeatherTooltip>
+          <template #default>
+            <div>
+              <h5>{{ props.tooltipText.title }}</h5>
+              <div v-html="props.tooltipText.description"></div>
+            </div>
+          </template>
+          <template #trigger="{ attrs, on }">
+            <FeatherIcon
+              class="icon-help"
+              :icon="Help"
+              v-bind="attrs"
+              v-on="on"
+            >
+            </FeatherIcon>
+          </template>
+        </FeatherPopover>
       </div>
       <div
         v-html="htmlString"
@@ -60,6 +68,7 @@
 import CheckCircleIcon from '@featherds/icon/action/CheckCircle'
 import { IIcon } from '@/types'
 import { ContentEditableType } from '@/components/Discovery/discovery.constants'
+import { PointerAlignment, PopoverPlacement } from '@featherds/popover'
 import { PropType } from 'vue'
 import { fncArgVoid } from '@/types'
 import discoveryText from '@/components/Discovery/discovery.text'
@@ -92,7 +101,7 @@ const props = defineProps({
     default: ''
   },
   tooltipText: {
-    type: String
+    type: Object
   },
   isRequired: {
     type: Boolean,

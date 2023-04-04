@@ -28,19 +28,12 @@
 
 package org.opennms.horizon.alertservice.grpc;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
-
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.concurrent.TimeUnit;
-
+import io.grpc.ManagedChannel;
+import io.grpc.Metadata;
+import io.grpc.ServerCall;
+import io.grpc.ServerCallHandler;
+import io.grpc.inprocess.InProcessChannelBuilder;
+import io.grpc.stub.MetadataUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -58,12 +51,13 @@ import org.opennms.horizon.alertservice.service.AlertMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
-import io.grpc.ManagedChannel;
-import io.grpc.Metadata;
-import io.grpc.ServerCall;
-import io.grpc.ServerCallHandler;
-import io.grpc.inprocess.InProcessChannelBuilder;
-import io.grpc.stub.MetadataUtils;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.concurrent.TimeUnit;
+
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 public class AlertGrpcServiceTest extends AbstractGrpcUnitTest {
     private AlertServiceGrpc.AlertServiceBlockingStub stub;
@@ -117,6 +111,6 @@ public class AlertGrpcServiceTest extends AbstractGrpcUnitTest {
 
         assertThat(pageRequestCaptor.getValue().getPageNumber()).isEqualTo(0);
         assertThat(pageRequestCaptor.getValue().getPageSize()).isEqualTo(10);
-        assertThat(pageRequestCaptor.getValue().getSort().getOrderFor("alertId").getDirection()).isEqualTo(org.springframework.data.domain.Sort.Direction.DESC);
+        assertThat(pageRequestCaptor.getValue().getSort().getOrderFor("id").getDirection()).isEqualTo(org.springframework.data.domain.Sort.Direction.DESC);
     }
 }

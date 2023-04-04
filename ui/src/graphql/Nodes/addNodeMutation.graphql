@@ -1,5 +1,5 @@
-mutation AddNode ($node: NodeCreateInput!) {
-  addNode (node: $node) {
+mutation AddNode($node: NodeCreateInput!) {
+  addNode(node: $node) {
     createTime
     id
     monitoringLocationId

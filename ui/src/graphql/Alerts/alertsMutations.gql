@@ -1,0 +1,25 @@
+mutation AcknowledgeAlerts($ids: [Long]) {
+  acknowledgeAlert(ids: $ids) {
+    alertList {
+      acknowledged
+      databaseId
+    }
+    alertErrorList {
+      databaseId
+      error
+    }
+  }
+}
+
+mutation ClearAlerts($ids: [Long]) {
+  clearAlert(ids: $ids) {
+    alertList {
+      acknowledged
+      databaseId
+    }
+    alertErrorList {
+      databaseId
+      error
+    }
+  }
+}

@@ -84,11 +84,7 @@ message Alert {
   string ack_user = 17;
   // Acknowledged when?
   uint64 ack_time_ms = 18;
-  uint64 monitoring_policy_id = 19;
-}
-
-message AlertList {
-  repeated Alert alerts = 1;
+  repeated uint64 monitoring_policy_id = 19;
 }
 
 message EventMatch {
@@ -145,10 +141,7 @@ message ManagedObjectInstance {
 message ListAlertsRequest {
   // Optional. The maximum number of alerts to return in the response.
   int32 page_size = 1;
-
-  // Optional. A pagination token returned from a previous call to `listAlerts`
-  // that indicates where this listing should continue from.
-  string next_page_token = 3;
+  int32 page = 3;
   repeated Filter filters = 4;
   string sort_by = 5;
   bool sort_ascending = 6;
@@ -160,8 +153,15 @@ message ListAlertsResponse {
 
   // A pagination token returned from a previous call to `ListAlerts`
   // that indicates from where listing should continue.
-  string next_page_token = 2;
-  string last_page_token = 3;
+  int32 next_page = 2;
+  int32 last_page = 3;
+  int64 total_alerts = 4;
+  AlertError error = 5;
+}
+
+message CountAlertResponse {
+  int32 count = 1;
+  AlertError error = 2;
 }
 
 message ListAlertDefinitionsRequest {
@@ -182,14 +182,33 @@ message ListAlertDefinitionsResponse {
   string page_token = 2;
 }
 
+message AlertRequest {
+  repeated uint64 alert_id = 1;
+}
+
+message AlertResponse {
+  repeated Alert alert = 1;
+  repeated AlertError alert_error = 2;
+}
+
+message DeleteAlertResponse {
+  repeated uint64 alert_id = 1;
+  repeated AlertError alert_error = 2;
+}
+
+message AlertError {
+  uint64 alert_id = 1;
+  string error = 2;
+}
+
 service AlertService {
   rpc listAlerts(ListAlertsRequest) returns (ListAlertsResponse) {};
-  rpc acknowledgeAlert(google.protobuf.UInt64Value) returns (Alert) {};
-  rpc unacknowledgeAlert(google.protobuf.UInt64Value) returns (Alert) {};
-  rpc clearAlert(google.protobuf.UInt64Value) returns (Alert) {};
-  rpc escalateAlert(google.protobuf.UInt64Value) returns (Alert) {};
-  rpc deleteAlert(google.protobuf.UInt64Value) returns(google.protobuf.BoolValue) {};
-  rpc countAlerts(ListAlertsRequest) returns (google.protobuf.UInt64Value) {};
+  rpc acknowledgeAlert(AlertRequest) returns (AlertResponse) {};
+  rpc unacknowledgeAlert(AlertRequest) returns (AlertResponse) {};
+  rpc clearAlert(AlertRequest) returns (AlertResponse) {};
+  rpc escalateAlert(AlertRequest) returns (AlertResponse) {};
+  rpc deleteAlert(AlertRequest) returns(DeleteAlertResponse) {};
+  rpc countAlerts(ListAlertsRequest) returns (CountAlertResponse) {};
 }
 
 service AlertConfigurationService {

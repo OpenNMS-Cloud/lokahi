@@ -1,49 +1,48 @@
 <template>
-  <PrimaryModal :visible="isVisible" hideTitle>
+  <PrimaryModal
+    :visible="isVisible"
+    hideTitle
+  >
     <template #content>
       <div class="header">
-        <FeatherIcon class="header-icon" :icon="Icons.CheckCircle" aria-hidden="true" focusable="false" />
+        <FeatherIcon
+          class="header-icon"
+          :icon="Icons.CheckCircle"
+          aria-hidden="true"
+          focusable="false"
+        />
         <span class="successName">{{ successName }}</span> {{ SuccessModalOptions.successMsg }}
       </div>
 
       <div class="column">
-        <div class="title">
-          {{ SuccessModalOptions.title }}
-        </div>
-
-        <FeatherButton text @click="closeModal">
+        <FeatherButton
+          text
+          @click="closeModal"
+        >
           <template v-slot:icon>
-            <FeatherIcon :icon="Icons.Discovery" aria-hidden="true" focusable="false" />
+            <FeatherIcon
+              :icon="Icons.Discovery"
+              aria-hidden="true"
+              focusable="false"
+            />
             {{ SuccessModalOptions.addDiscovery }}
           </template>
         </FeatherButton>
 
-        <FeatherButton text @click="router.push('Inventory')">
+        <FeatherButton
+          text
+          @click="router.push('Inventory')"
+        >
           <template v-slot:icon>
-            <FeatherIcon :icon="Icons.Nodes" aria-hidden="true" focusable="false" />
+            <FeatherIcon
+              :icon="Icons.Nodes"
+              aria-hidden="true"
+              focusable="false"
+            />
             {{ SuccessModalOptions.viewNodes }}
           </template>
         </FeatherButton>
-
-        <FeatherButton text @click="router.push('Synthetic Transactions')">
-          <template v-slot:icon>
-            <FeatherIcon :icon="Icons.Synthetic" aria-hidden="true" focusable="false" />
-            {{ SuccessModalOptions.addTransaction }}
-          </template>
-        </FeatherButton>
-
-        <FeatherButton text @click="router.push('Monitoring Policies')">
-          <template v-slot:icon>
-            <FeatherIcon :icon="Icons.Monitoring" aria-hidden="true" focusable="false" />
-            {{ SuccessModalOptions.addMonitoring }}
-          </template>
-        </FeatherButton>
       </div>
-    </template>
-    <template #footer>
-      <feather-checkbox v-model="state.preventModal">
-        {{ SuccessModalOptions.checkboxText }}
-      </feather-checkbox>
     </template>
   </PrimaryModal>
 </template>
@@ -72,21 +71,16 @@ const { openModal, closeModal, isVisible } = useModal()
 const successName = ref()
 
 const openSuccessModal = (name: string) => {
-  if (state.value.preventModal) return
   successName.value = name
   openModal()
 }
-
-const state = useStorage<{ preventModal: boolean } >('prevent-discovery-modal', {
-  preventModal: false
-})
 
 defineExpose({ openSuccessModal })
 </script>
 
 <style scoped lang="scss">
-@use "@featherds/styles/themes/variables";
-@use "@featherds/styles/mixins/typography";
+@use '@featherds/styles/themes/variables';
+@use '@featherds/styles/mixins/typography';
 
 .header {
   @include typography.body-large;
@@ -104,7 +98,7 @@ defineExpose({ openSuccessModal })
   }
   .successName {
     font-weight: bold;
-    line-height: 100px; 
+    line-height: 100px;
     vertical-align: middle;
     text-transform: uppercase;
   }
@@ -120,7 +114,7 @@ defineExpose({ openSuccessModal })
   display: flex;
   flex-direction: column;
   align-items: center;
-
+  margin-top: var(variables.$spacing-xl);
   .btn {
     width: 300px;
     svg {

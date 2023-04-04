@@ -30,14 +30,29 @@ package org.opennms.horizon.server.mapper;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.opennms.horizon.server.model.alerts.Alert;
-import org.opennms.horizon.server.model.alerts.AlertResponse;
+import org.opennms.horizon.server.model.alerts.*;
 
 @Mapper(componentModel = "spring")
 public interface AlertMapper {
 
     @Mapping(source = "alertsList", target = "alerts")
-    AlertResponse protoToAlertResponse(org.opennms.horizon.alerts.proto.ListAlertsResponse listAlertsResponse);
+    ListAlertResponse protoToAlertResponse(org.opennms.horizon.alerts.proto.ListAlertsResponse listAlertsResponse);
 
+    @Mapping(source = "isAcknowledged", target = "acknowledged")
     Alert protoToAlert(org.opennms.horizon.alerts.proto.Alert alertProto);
+
+    @Mapping(source = "alertList", target = "alertList")
+    @Mapping(source = "alertErrorList", target = "alertErrorList")
+    AlertResponse protoToAlertResponse(org.opennms.horizon.alerts.proto.AlertResponse alertResponse);
+
+    @Mapping(source = "alertIdList", target = "alertDatabaseIdList")
+    @Mapping(source = "alertErrorList", target = "alertErrorList")
+    DeleteAlertResponse protoToDeleteAlertResponse(org.opennms.horizon.alerts.proto.DeleteAlertResponse deleteAlertResponse);
+
+    @Mapping(source = "alertId", target = "databaseId")
+    AlertError protoToAlertError(org.opennms.horizon.alerts.proto.AlertError alertError);
+
+    CountAlertResponse protoToCountAlertResponse(org.opennms.horizon.alerts.proto.CountAlertResponse countAlertResponse);
+
+    String alertErrorToString(org.opennms.horizon.alerts.proto.AlertError alertError);
 }

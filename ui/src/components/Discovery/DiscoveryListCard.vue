@@ -1,15 +1,18 @@
 <template>
   <div class="card-my-discoveries">
     <div class="title">
-      {{ title }}
-      <div class="count">{{ list.length }}</div>
+      {{ title }}&nbsp;
       <FeatherIcon
         class="iconHelp"
         :icon="Icons.Help"
         @click="$emit('showInstructions')"
       />
+      <div class="count">({{ list.length }})</div>
     </div>
-    <div v-if="list.length > 0">
+    <div
+      class="list"
+      v-if="list.length > 0"
+    >
       <div
         v-for="item in list"
         :key="item.id"
@@ -20,10 +23,10 @@
           @click="$emit('selectDiscovery', item)"
           class="name pointer"
         >
-          {{ item.name?.toUpperCase() }}
+          {{ item.name }}
         </div>
         <FeatherTooltip
-          :title="`Toggle ${item.name?.toUpperCase()} on/off`"
+          :title="`Toggle ${item.name} on/off`"
           v-slot="{ attrs, on }"
         >
           <BasicToggle
@@ -43,7 +46,7 @@
       <FeatherIcon
         :icon="Warning"
         class="icon"
-      />You have no {{ passive ? 'passive' : 'active ' }} discovery
+      />{{ discoveryText.Discovery.empty }}
     </div>
   </div>
 </template>
@@ -52,6 +55,8 @@
 import Warning from '@featherds/icon/notification/Warning'
 import { PassiveDiscovery, AzureActiveDiscovery, IcmpActiveDiscovery } from '@/types/graphql'
 import Help from '@featherds/icon/action/Help'
+import discoveryText from '@/components/Discovery/discovery.text'
+
 const Icons = markRaw({
   Help
 })
@@ -65,61 +70,70 @@ defineProps<{
 
 <style scoped lang="scss">
 @use '@featherds/styles/themes/variables';
-@use '@/styles/mediaQueriesMixins.scss';
-@use '@/styles/vars.scss';
 @use '@featherds/styles/mixins/typography';
+@use '@/styles/vars.scss';
+@import '@/styles/mediaQueriesMixins.scss';
 
 .card-my-discoveries {
   background-color: var(variables.$surface);
   border: 1px solid var(variables.$border-on-surface);
   border-radius: vars.$border-radius-s;
-  padding: var(variables.$spacing-s);
   min-height: 100px;
 }
 
 .title {
-  @include typography.subtitle1;
+  @include typography.headline4;
   display: flex;
-  margin-bottom: var(variables.$spacing-xs);
-
+  padding: var(variables.$spacing-l);
+  border-bottom: 1px solid var(variables.$border-on-surface);
+  align-items: center;
   .count {
-    background-color: #00666d1f;
-    padding: 0 var(variables.$spacing-xs);
-    margin-left: var(variables.$spacing-m);
-    border-radius: 5px;
-    height: max-content;
-    @include typography.body-small;
+    margin-left: var(variables.$spacing-xs);
+    @include typography.body-large;
+    color: var(variables.$shade-1);
   }
   > .iconHelp {
     font-size: 22px;
-    margin-left: auto;
     cursor: pointer;
+    color: var(variables.$shade-2);
+  }
+}
+
+.list {
+  > div {
+    border-bottom: 1px solid var(variables.$border-on-surface);
+  }
+  > div:last-child {
+    border-bottom: none;
   }
 }
 
 .discovery-name {
   display: flex;
   justify-content: space-between;
-  @include typography.headline4;
-  color: var(variables.$secondary-variant);
+  @include typography.subtitle1;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-
+  padding: var(variables.$spacing-m) var(variables.$spacing-l);
+  align-items: center;
+  max-height: 55px;
   &.selected {
-    color: var(variables.$secondary);
+    color: var(variables.$secondary-variant);
+    border-right: 3px var(variables.$secondary-variant) solid;
   }
 
   .name {
     overflow: hidden;
     text-overflow: ellipsis;
+    text-transform: capitalize;
   }
 }
 
 .empty {
   display: flex;
   gap: 8px;
-  margin-top: var(variables.$spacing-s);
+  padding: var(variables.$spacing-m);
 
   .icon {
     width: 24px;

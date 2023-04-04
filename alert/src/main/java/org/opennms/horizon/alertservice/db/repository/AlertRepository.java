@@ -30,6 +30,7 @@ package org.opennms.horizon.alertservice.db.repository;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import org.opennms.horizon.alertservice.db.entity.Alert;
 import org.opennms.horizon.model.common.proto.Severity;
@@ -45,5 +46,9 @@ public interface AlertRepository extends JpaRepository<Alert, Long> {
 
     Page<Alert> findBySeverityInAndLastEventTimeBetweenAndTenantId(List<Severity> severityList, Date start, Date end, Pageable pageable, String tenantId);
 
-    int countAlertBySeverityInAndLastEventTimeBetweenAndTenantId(List<Severity> severityList, Date start, Date end, String tenantId);
+    int countBySeverityInAndLastEventTimeBetweenAndTenantId(List<Severity> severityList, Date start, Date end, String tenantId);
+
+    Optional<Alert> findByIdAndTenantId(long id, String tenantId);
+
+    void deleteByIdAndTenantId(long databaseId, String tenantId);
 }

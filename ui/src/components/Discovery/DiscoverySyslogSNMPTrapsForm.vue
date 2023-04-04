@@ -63,7 +63,7 @@
             class="udp-port-input"
             ref="contentEditableUDPPortRef"
             :content="props.discovery?.snmpPorts?.join(', ')"
-            :tooltipText="Common.tooltip.PortHelpTooltp"
+            :tooltipText="Common.tooltipPort"
             :id="2"
           />
         </div>

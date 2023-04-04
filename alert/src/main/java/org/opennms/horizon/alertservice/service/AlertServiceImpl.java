@@ -28,17 +28,19 @@
 
 package org.opennms.horizon.alertservice.service;
 
-import lombok.RequiredArgsConstructor;
+import java.util.Date;
+import java.util.Optional;
+
 import org.opennms.horizon.alerts.proto.Alert;
 import org.opennms.horizon.alertservice.api.AlertLifecyleListener;
 import org.opennms.horizon.alertservice.api.AlertService;
 import org.opennms.horizon.alertservice.db.repository.AlertRepository;
 import org.opennms.horizon.events.proto.Event;
+import org.opennms.horizon.model.common.proto.Severity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Date;
-import java.util.Optional;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -60,28 +62,29 @@ public class AlertServiceImpl implements AlertService {
 
     @Override
     @Transactional
-    public void deleteAlertById(long id) {
+    public boolean deleteByIdAndTenantId(long id, String tenantId) {
         Optional<org.opennms.horizon.alertservice.db.entity.Alert> dbAlert = alertRepository.findById(id);
         if (dbAlert.isEmpty()) {
-            return;
+            return false;
         }
 
-        alertRepository.deleteById(id);
+        alertRepository.deleteByIdAndTenantId(id, tenantId);
         Alert alert = alertMapper.toProto(dbAlert.get());
         alertListenerRegistry.forEachListener((l) -> l.handleDeletedAlert(alert));
+        return true;
     }
 
     @Override
     @Transactional
-    public void deleteAlert(Alert alert) {
-        alertRepository.deleteById(alert.getDatabaseId());
+    public void deleteByTenantId(Alert alert, String tenantId) {
+        alertRepository.deleteByIdAndTenantId(alert.getDatabaseId(), tenantId);
         alertListenerRegistry.forEachListener((l) -> l.handleDeletedAlert(alert));
     }
 
     @Override
     @Transactional
-    public Optional<Alert> acknowledgeAlertById(long id) {
-        Optional<org.opennms.horizon.alertservice.db.entity.Alert> dbAlert = alertRepository.findById(id);
+    public Optional<Alert> acknowledgeByIdAndTenantId(long id, String tenantId) {
+        Optional<org.opennms.horizon.alertservice.db.entity.Alert> dbAlert = alertRepository.findByIdAndTenantId(id, tenantId);
         if (dbAlert.isEmpty()) {
             return Optional.empty();
         }
@@ -95,8 +98,8 @@ public class AlertServiceImpl implements AlertService {
 
     @Override
     @Transactional
-    public Optional<Alert> unacknowledgeAlertById(long id) {
-        Optional<org.opennms.horizon.alertservice.db.entity.Alert> dbAlert = alertRepository.findById(id);
+    public Optional<Alert> unacknowledgeByIdAndTenantId(long id, String tenantId) {
+        Optional<org.opennms.horizon.alertservice.db.entity.Alert> dbAlert = alertRepository.findByIdAndTenantId(id, tenantId);
         if (dbAlert.isEmpty()) {
             return Optional.empty();
         }
@@ -104,6 +107,39 @@ public class AlertServiceImpl implements AlertService {
         org.opennms.horizon.alertservice.db.entity.Alert alert = dbAlert.get();
         alert.setAcknowledgedAt(null);
         alert.setAcknowledgedByUser(null);
+        alertRepository.save(alert);
+        return Optional.of(alertMapper.toProto(alert));
+    }
+
+    @Override
+    @Transactional
+    public Optional<Alert> escalateByIdAndTenantId(long id, String tenantId) {
+        Optional<org.opennms.horizon.alertservice.db.entity.Alert> dbAlert = alertRepository.findByIdAndTenantId(id, tenantId);
+        if (dbAlert.isEmpty()) {
+            return Optional.empty();
+        }
+
+        org.opennms.horizon.alertservice.db.entity.Alert alert = dbAlert.get();
+
+        // Check if the current severity is below CRITICAL
+        if (alert.getSeverity().ordinal() < Severity.CRITICAL.ordinal()) {
+            // Increase severity level by one
+            alert.setSeverity(Severity.values()[alert.getSeverity().ordinal() + 1]);
+        }
+        alertRepository.save(alert);
+        return Optional.of(alertMapper.toProto(alert));
+    }
+
+    @Override
+    @Transactional
+    public Optional<Alert> clearByIdAndTenantId(long id, String tenantId) {
+        Optional<org.opennms.horizon.alertservice.db.entity.Alert> dbAlert = alertRepository.findByIdAndTenantId(id, tenantId);
+        if (dbAlert.isEmpty()) {
+            return Optional.empty();
+        }
+
+        org.opennms.horizon.alertservice.db.entity.Alert alert = dbAlert.get();
+        alert.setSeverity(Severity.CLEARED);
         alertRepository.save(alert);
         return Optional.of(alertMapper.toProto(alert));
     }

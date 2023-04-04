@@ -28,6 +28,8 @@
 
 package org.opennms.horizon.alertservice.service;
 
+import java.util.Date;
+
 import org.mapstruct.CollectionMappingStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -35,8 +37,6 @@ import org.mapstruct.Mappings;
 import org.mapstruct.NullValueCheckStrategy;
 import org.mapstruct.factory.Mappers;
 import org.opennms.horizon.alertservice.db.entity.Alert;
-
-import java.util.Date;
 
 @Mapper(componentModel = "spring",
     collectionMappingStrategy = CollectionMappingStrategy.ADDER_PREFERRED,
@@ -46,7 +46,7 @@ public interface AlertMapper {
     AlertMapper INSTANCE = Mappers.getMapper( AlertMapper.class );
 
     @Mappings({
-        @Mapping(target = "databaseId", source = "alertId"),
+        @Mapping(target = "databaseId", source = "id"),
         @Mapping(target = "lastUpdateTimeMs", source = "lastEventTime"),
         @Mapping(target = "isAcknowledged", expression = "java(alert.getAcknowledgedByUser() != null ? true : false)"),
         @Mapping(target = "ackUser", source = "acknowledgedByUser"),

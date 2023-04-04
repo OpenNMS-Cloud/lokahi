@@ -1,5 +1,8 @@
 <template>
-  <FeatherAppLayout contentLayout="full" class="feather-styles layout">
+  <FeatherAppLayout
+    contentLayout="full"
+    class="feather-styles layout"
+  >
     <template v-slot:header>
       <Menubar />
     </template>
@@ -7,7 +10,7 @@
     <template v-slot:rail>
       <NavigationRail />
     </template>
-    
+
     <div id="mainContent">
       <Spinner />
       <Snackbar />
@@ -15,7 +18,7 @@
     </div>
   </FeatherAppLayout>
 </template>
-  
+
 <script setup lang="ts">
 // Remove KC redirectUri theme param
 const route = useRoute()
@@ -30,6 +33,5 @@ if (route.query.theme) router.replace(route.path)
 </style>
 
 <style lang="scss">
-@use "@/styles/_app";
+@use '@/styles/_app';
 </style>
-

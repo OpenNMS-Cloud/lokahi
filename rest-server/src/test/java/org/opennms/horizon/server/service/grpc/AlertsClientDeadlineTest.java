@@ -52,6 +52,7 @@ import org.opennms.horizon.alerts.proto.AlertServiceGrpc;
 import org.opennms.horizon.alerts.proto.ListAlertsRequest;
 import org.opennms.horizon.alerts.proto.ListAlertsResponse;
 import org.opennms.horizon.server.mapper.alert.MonitorPolicyMapper;
+import org.opennms.horizon.server.model.alerts.TimeRange;
 import org.opennms.horizon.shared.constants.GrpcConstants;
 
 import io.grpc.ManagedChannel;
@@ -117,7 +118,7 @@ public class AlertsClientDeadlineTest {
         ArgumentCaptor<ListAlertsRequest> captor = ArgumentCaptor.forClass(ListAlertsRequest.class);
         StatusRuntimeException thrown = assertThrows(
             StatusRuntimeException.class,
-            () -> client.listAlerts(5, "0", Collections.singletonList("CRITICAL"), 0L, "tenantId", true, accessToken + methodName),
+            () -> client.listAlerts(5, 0, Collections.singletonList("CRITICAL"), TimeRange.TODAY, "tenantId", true, accessToken + methodName),
             "Expected listLocations() to throw, but it didn't"
         );
         assertThat(thrown.getStatus().getCode()).isEqualTo(Status.Code.DEADLINE_EXCEEDED);

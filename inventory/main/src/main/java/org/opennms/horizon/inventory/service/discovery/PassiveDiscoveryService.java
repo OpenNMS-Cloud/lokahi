@@ -37,14 +37,13 @@ import org.opennms.horizon.inventory.dto.TagCreateListDTO;
 import org.opennms.horizon.inventory.dto.TagEntityIdDTO;
 import org.opennms.horizon.inventory.exception.InventoryRuntimeException;
 import org.opennms.horizon.inventory.mapper.discovery.PassiveDiscoveryMapper;
+import org.opennms.horizon.inventory.model.MonitoringLocation;
+import org.opennms.horizon.inventory.model.Node;
 import org.opennms.horizon.inventory.model.discovery.PassiveDiscovery;
+import org.opennms.horizon.inventory.repository.NodeRepository;
 import org.opennms.horizon.inventory.repository.discovery.PassiveDiscoveryRepository;
 import org.opennms.horizon.inventory.service.Constants;
 import org.opennms.horizon.inventory.service.TagService;
-import org.opennms.horizon.inventory.model.MonitoringLocation;
-import org.opennms.horizon.inventory.model.Node;
-import org.opennms.horizon.inventory.repository.NodeRepository;
-import org.opennms.horizon.inventory.service.taskset.DetectorTaskSetService;
 import org.opennms.horizon.inventory.service.taskset.ScannerTaskSetService;
 import org.opennms.horizon.snmp.api.SnmpConfiguration;
 import org.slf4j.Logger;
@@ -66,7 +65,6 @@ public class PassiveDiscoveryService {
     private final PassiveDiscoveryRepository repository;
     private final TagService tagService;
     private final NodeRepository nodeRepository;
-    private final DetectorTaskSetService detectorTaskSetService;
     private final ScannerTaskSetService scannerTaskSetService;
 
     @Transactional
@@ -212,7 +210,6 @@ public class PassiveDiscoveryService {
             snmpConfigs.add(builder.build());
         });
 
-        detectorTaskSetService.sendDetectorTasks(node);
         scannerTaskSetService.sendNodeScannerTask(node, discovery.getLocation(), snmpConfigs);
     }
 

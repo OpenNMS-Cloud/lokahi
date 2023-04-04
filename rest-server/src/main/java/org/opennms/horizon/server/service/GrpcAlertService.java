@@ -28,16 +28,6 @@
 
 package org.opennms.horizon.server.service;
 
-import java.util.List;
-
-import org.opennms.horizon.server.mapper.AlertMapper;
-import org.opennms.horizon.server.model.alerts.Alert;
-import org.opennms.horizon.server.model.alerts.AlertResponse;
-import org.opennms.horizon.server.model.alerts.MonitorPolicy;
-import org.opennms.horizon.server.service.grpc.AlertsClient;
-import org.opennms.horizon.server.utils.ServerHeaderUtil;
-import org.springframework.stereotype.Service;
-
 import io.leangen.graphql.annotations.GraphQLArgument;
 import io.leangen.graphql.annotations.GraphQLEnvironment;
 import io.leangen.graphql.annotations.GraphQLMutation;
@@ -45,8 +35,15 @@ import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.execution.ResolutionEnvironment;
 import io.leangen.graphql.spqr.spring.annotations.GraphQLApi;
 import lombok.RequiredArgsConstructor;
+import org.opennms.horizon.server.mapper.AlertMapper;
+import org.opennms.horizon.server.model.alerts.*;
+import org.opennms.horizon.server.service.grpc.AlertsClient;
+import org.opennms.horizon.server.utils.ServerHeaderUtil;
+import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.util.List;
 
 @RequiredArgsConstructor
 @GraphQLApi
@@ -58,57 +55,54 @@ public class GrpcAlertService {
     private final AlertMapper mapper;
 
     @GraphQLQuery
-    public Mono<AlertResponse> findAllAlerts(@GraphQLArgument(name = "pageSize") Integer pageSize,
-                                             @GraphQLArgument(name = "page") String page,
-                                             @GraphQLArgument(name = "hours") long hours,
-                                             @GraphQLArgument(name = "severities") List<String> severities,
-                                             @GraphQLArgument(name = "sortBy") String sortBy,
-                                             @GraphQLArgument(name = "sortAscending") boolean sortAscending,
-                                             @GraphQLEnvironment ResolutionEnvironment env) {
-        return Mono.just(mapper.protoToAlertResponse(alertsClient.listAlerts(pageSize, page, severities, hours, sortBy, sortAscending, headerUtil.getAuthHeader(env))));
+    public Mono<ListAlertResponse> findAllAlerts(@GraphQLArgument(name = "pageSize") Integer pageSize,
+                                                 @GraphQLArgument(name = "page") int page,
+                                                 @GraphQLArgument(name = "timeRange") TimeRange timeRange,
+                                                 @GraphQLArgument(name = "severities") List<String> severities,
+                                                 @GraphQLArgument(name = "sortBy") String sortBy,
+                                                 @GraphQLArgument(name = "sortAscending") boolean sortAscending,
+                                                 @GraphQLEnvironment ResolutionEnvironment env) {
+        return Mono.just(mapper.protoToAlertResponse(alertsClient.listAlerts(pageSize, page, severities, timeRange, sortBy, sortAscending, headerUtil.getAuthHeader(env))));
     }
 
     @GraphQLQuery(
         name = "countAlerts",
         description = "Returns the total count of alerts filtered by severity and time."
     )
-    public Mono<Long> countAlerts(@GraphQLArgument(name = "hours") long hours,
+    public Mono<CountAlertResponse> countAlerts(@GraphQLArgument(name = "timeRange") TimeRange timeRange,
                                   @GraphQLArgument(name = "severityFilters") List<String> severityFilters,
                                   @GraphQLEnvironment ResolutionEnvironment env) {
-        return Mono.just(alertsClient.countAlerts(severityFilters, hours, headerUtil.getAuthHeader(env)));
-    }
-
-    @GraphQLQuery(
-        name = "countAlerts",
-        description = "Returns the total count of alerts for the last 24h."
-    )
-    public Mono<Long> countAlerts(@GraphQLEnvironment ResolutionEnvironment env) {
-        return Mono.just(alertsClient.countAlerts(null, 0L, headerUtil.getAuthHeader(env)));
+        return Mono.just(mapper.protoToCountAlertResponse(alertsClient.countAlerts(severityFilters, timeRange, headerUtil.getAuthHeader(env))));
     }
 
     @GraphQLMutation
-    public Mono<Alert> acknowledgeAlert(@GraphQLArgument(name = "id") long id, @GraphQLEnvironment ResolutionEnvironment env) {
-        return Mono.just(mapper.protoToAlert(alertsClient.acknowledgeAlert(id, headerUtil.getAuthHeader(env))));
+    public Mono<AlertResponse> acknowledgeAlert(@GraphQLArgument(name = "ids") List<Long> ids,
+                                                @GraphQLEnvironment ResolutionEnvironment env) {
+        return Mono.just(mapper.protoToAlertResponse(alertsClient.acknowledgeAlert(ids, headerUtil.getAuthHeader(env))));
     }
 
     @GraphQLMutation
-    public Mono<Alert> unacknowledgeAlert(@GraphQLArgument(name = "id") long id, @GraphQLEnvironment ResolutionEnvironment env) {
-        return Mono.just(mapper.protoToAlert(alertsClient.unacknowledgeAlert(id, headerUtil.getAuthHeader(env))));
+    public Mono<AlertResponse> unacknowledgeAlert(@GraphQLArgument(name = "ids") List<Long> ids,
+                                                  @GraphQLEnvironment ResolutionEnvironment env) {
+        return Mono.just(mapper.protoToAlertResponse(alertsClient.unacknowledgeAlert(ids, headerUtil.getAuthHeader(env))));
     }
 
     @GraphQLMutation
-    public Mono<Alert> escalateAlert(@GraphQLArgument(name = "id") long id, @GraphQLArgument(name = "newNodeCriteria") String newNodeCriteria, @GraphQLEnvironment ResolutionEnvironment env) {
-        return Mono.just(mapper.protoToAlert(alertsClient.escalateAlert(id, headerUtil.getAuthHeader(env))));
+    public Mono<AlertResponse> escalateAlert(@GraphQLArgument(name = "ids") List<Long> ids,
+                                             @GraphQLEnvironment ResolutionEnvironment env) {
+        return Mono.just(mapper.protoToAlertResponse(alertsClient.escalateAlert(ids, headerUtil.getAuthHeader(env))));
     }
 
     @GraphQLMutation
-    public Mono<Alert> clearAlert(@GraphQLArgument(name = "id") long id, @GraphQLEnvironment ResolutionEnvironment env) {
-        return Mono.just(mapper.protoToAlert(alertsClient.clearAlert(id, headerUtil.getAuthHeader(env))));
+    public Mono<AlertResponse> clearAlert(@GraphQLArgument(name = "ids") List<Long> ids,
+                                          @GraphQLEnvironment ResolutionEnvironment env) {
+        return Mono.just(mapper.protoToAlertResponse(alertsClient.clearAlert(ids, headerUtil.getAuthHeader(env))));
     }
 
     @GraphQLMutation
-    public Mono<Boolean> deleteAlert(@GraphQLArgument(name = "id") long id, @GraphQLEnvironment ResolutionEnvironment env) {
-        return Mono.just(alertsClient.deleteAlert(id, headerUtil.getAuthHeader(env)));
+    public Mono<DeleteAlertResponse> deleteAlert(@GraphQLArgument(name = "ids") List<Long> ids,
+                                                 @GraphQLEnvironment ResolutionEnvironment env) {
+        return Mono.just(mapper.protoToDeleteAlertResponse(alertsClient.deleteAlert(ids, headerUtil.getAuthHeader(env))));
     }
 
     @GraphQLMutation

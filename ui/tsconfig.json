@@ -13,10 +13,14 @@
     "lib": ["esnext", "dom", "dom.iterable"],
     "allowJs": true, // needed for marker cluster
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": [
+        "src/*"
+      ]
     },
     "forceConsistentCasingInFileNames": true,
-    "types": ["vitest/globals"]
+    "types": [
+      "vitest/globals"
+    ]
   },
   "include": [
     "src/**/*.ts",
@@ -28,6 +32,7 @@
     "keycloak.config.ts",
     "tests"
   ],
-  "exclude": ["node_modules"]
+  "exclude": [
+    "node_modules"
+  ]
 }
-

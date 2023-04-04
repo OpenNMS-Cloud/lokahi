@@ -1,6 +1,7 @@
 $border-radius: (
   xs: 3px,
   s: 5px,
+  sm: 8px,
   m: 10px,
   round: 50%
 ) !default;
@@ -9,7 +10,10 @@ $border-radius: (
 
 $border-radius-xs: map.get($border-radius, 'xs');
 $border-radius-s: map.get($border-radius, 's');
+$border-radius-sm: map.get($border-radius, 'sm');
 $border-radius-m: map.get($border-radius, 'm');
 $border-radius-round: map.get($border-radius, 'round');
 
 $min-width-smallest-screen: 480px;
+
+$max-width-constrained: 1128px;

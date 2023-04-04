@@ -28,8 +28,27 @@
 
 package org.opennms.horizon.alertservice.stepdefs;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import com.google.protobuf.InvalidProtocolBufferException;
+import com.google.protobuf.MessageOrBuilder;
+import com.google.protobuf.Timestamp;
+import com.google.protobuf.UInt64Value;
+import com.google.protobuf.util.JsonFormat;
+import io.cucumber.java.en.Then;
+import io.restassured.RestAssured;
+import io.restassured.config.HttpClientConfig;
+import io.restassured.config.RestAssuredConfig;
+import io.restassured.path.json.JsonPath;
+import io.restassured.response.Response;
+import io.restassured.specification.RequestSpecification;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.opennms.horizon.alerts.proto.*;
+import org.opennms.horizon.alertservice.AlertGrpcClientUtils;
+import org.opennms.horizon.alertservice.RetryUtils;
+import org.opennms.horizon.alertservice.kafkahelper.KafkaTestHelper;
+import org.opennms.horizon.events.proto.Event;
+import org.opennms.horizon.events.proto.EventLog;
+import org.opennms.horizon.model.common.proto.Severity;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -40,33 +59,8 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
-import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.opennms.horizon.alerts.proto.Alert;
-import org.opennms.horizon.alerts.proto.Filter;
-import org.opennms.horizon.alerts.proto.ListAlertsRequest;
-import org.opennms.horizon.alerts.proto.ListAlertsResponse;
-import org.opennms.horizon.alerts.proto.TimeRangeFilter;
-import org.opennms.horizon.alertservice.AlertGrpcClientUtils;
-import org.opennms.horizon.alertservice.RetryUtils;
-import org.opennms.horizon.alertservice.kafkahelper.KafkaTestHelper;
-import org.opennms.horizon.events.proto.Event;
-import org.opennms.horizon.events.proto.EventLog;
-import org.opennms.horizon.model.common.proto.Severity;
-
-import com.google.protobuf.InvalidProtocolBufferException;
-import com.google.protobuf.MessageOrBuilder;
-import com.google.protobuf.Timestamp;
-import com.google.protobuf.UInt64Value;
-import com.google.protobuf.util.JsonFormat;
-
-import io.cucumber.java.en.Then;
-import io.restassured.RestAssured;
-import io.restassured.config.HttpClientConfig;
-import io.restassured.config.RestAssuredConfig;
-import io.restassured.path.json.JsonPath;
-import io.restassured.response.Response;
-import io.restassured.specification.RequestSpecification;
-import lombok.extern.slf4j.Slf4j;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 @Slf4j
 public class AlertTestSteps {
@@ -192,7 +186,7 @@ public void sendMessageToKafkaAtTopicWithSeverity(String eventUei, String tenant
         Supplier<MessageOrBuilder> call = () -> {
             clientUtils.setTenantId(tenantId);
             ListAlertsResponse listAlertsResponse = clientUtils.getAlertServiceStub()
-                .listAlerts(ListAlertsRequest.newBuilder().setSortBy("alertId").setSortAscending(true).build());
+                .listAlerts(ListAlertsRequest.newBuilder().setSortBy("id").setSortAscending(true).build());
             alertsFromLastResponse = listAlertsResponse.getAlertsList();
             return listAlertsResponse;
         };
@@ -208,7 +202,7 @@ public void sendMessageToKafkaAtTopicWithSeverity(String eventUei, String tenant
     @Then("List alerts for tenant {string} with hours {long}, with timeout {int}ms, until JSON response matches the following JSON path expressions")
     public void listAlertsForTenantFilteredByTime(String tenantId, long hours, int timeout, List<String> jsonPathExpressions) throws Exception {
         final var request = ListAlertsRequest.newBuilder();
-        request.setSortBy("alertId")
+        request.setSortBy("id")
             .setSortAscending(true);
         getTimeRangeFilter(hours, request);
         Supplier<MessageOrBuilder> call = () -> {
@@ -229,20 +223,19 @@ public void sendMessageToKafkaAtTopicWithSeverity(String eventUei, String tenant
     @Then("Delete the alert")
     public void deleteTheAlert() {
         clientUtils.getAlertServiceStub()
-            .deleteAlert(UInt64Value.of(firstAlertFromLastResponse.getDatabaseId()))
-            .getValue();
+            .deleteAlert(AlertRequest.newBuilder().addAlertId(firstAlertFromLastResponse.getDatabaseId()).build());
     }
 
     @Then("Acknowledge the alert")
     public void acknowledgeTheAlert() {
         clientUtils.getAlertServiceStub()
-            .acknowledgeAlert(UInt64Value.of(firstAlertFromLastResponse.getDatabaseId()));
+            .acknowledgeAlert(AlertRequest.newBuilder().addAlertId(firstAlertFromLastResponse.getDatabaseId()).build());
     }
 
     @Then("Unacknowledge the alert")
     public void unacknowledgeTheAlert() {
         clientUtils.getAlertServiceStub()
-            .unacknowledgeAlert(UInt64Value.of(firstAlertFromLastResponse.getDatabaseId()));
+            .unacknowledgeAlert(AlertRequest.newBuilder().addAlertId(firstAlertFromLastResponse.getDatabaseId()).build());
     }
 
     @Then("Send GET request to application at path {string}, with timeout {int}ms, until JSON response matches the following JSON path expressions")
@@ -342,7 +335,7 @@ public void sendMessageToKafkaAtTopicWithSeverity(String eventUei, String tenant
                 .listAlerts(ListAlertsRequest.newBuilder()
                     .addFilters(Filter.newBuilder().setSeverity(Severity.valueOf(severity)).build())
                     .addFilters(Filter.newBuilder().setSeverity(Severity.valueOf(severity2)).build())
-                    .setSortBy("alertId").setSortAscending(true).build());
+                    .setSortBy("id").setSortAscending(true).build());
             alertsFromLastResponse = listAlertsResponse.getAlertsList();
             return listAlertsResponse;
         };
@@ -358,7 +351,7 @@ public void sendMessageToKafkaAtTopicWithSeverity(String eventUei, String tenant
     @Then("List alerts for tenant {string} today , with timeout {int}ms, until JSON response matches the following JSON path expressions")
     public void listAlertsForTenantTodayWithTimeoutMsUntilJSONResponseMatchesTheFollowingJSONPathExpressions(String tenantId, int timeout, List<String> jsonPathExpressions) throws InterruptedException {
         final var request = ListAlertsRequest.newBuilder();
-        request.setSortBy("alertId")
+        request.setSortBy("id")
             .setSortAscending(true);
         getTimeRangeFilter(LocalTime.MIDNIGHT.until(LocalTime.now(), ChronoUnit.HOURS), request);
         Supplier<MessageOrBuilder> call = () -> {
@@ -380,9 +373,9 @@ public void sendMessageToKafkaAtTopicWithSeverity(String eventUei, String tenant
     public void countAlertsForTenantWithTimeoutMsUntilJSONResponseMatchesTheFollowingJSONPathExpressions(String tenantId, int expected) {
         clientUtils.setTenantId(tenantId);
         ListAlertsRequest listAlertsRequest = ListAlertsRequest.newBuilder().build();
-        UInt64Value countAlertsResponse = clientUtils.getAlertServiceStub()
+        var countAlertsResponse = clientUtils.getAlertServiceStub()
             .countAlerts(listAlertsRequest);
-        assertEquals(expected, countAlertsResponse.getValue());
+        assertEquals(expected, countAlertsResponse.getCount());
 
     }
 
@@ -390,9 +383,9 @@ public void sendMessageToKafkaAtTopicWithSeverity(String eventUei, String tenant
     public void countAlertsForTenantFilteredBySeverity(String tenantId, String severity, int expected) {
         clientUtils.setTenantId(tenantId);
         ListAlertsRequest listAlertsRequest = ListAlertsRequest.newBuilder().addFilters(Filter.newBuilder().setSeverity(Severity.valueOf(severity)).build()).build();
-        UInt64Value countAlertsResponse = clientUtils.getAlertServiceStub()
+        var countAlertsResponse = clientUtils.getAlertServiceStub()
             .countAlerts(listAlertsRequest);
-        assertEquals(expected, countAlertsResponse.getValue());
+        assertEquals(expected, countAlertsResponse.getCount());
     }
 
 //========================================

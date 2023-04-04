@@ -28,6 +28,7 @@
 
 package org.opennms.horizon.inventory.cucumber.steps;
 
+import com.google.protobuf.Any;
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Int64Value;
@@ -35,7 +36,6 @@ import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
-import io.grpc.Metadata;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -44,7 +44,6 @@ import org.apache.kafka.common.serialization.StringSerializer;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Assertions;
 import org.opennms.cloud.grpc.minion.Identity;
-
 import org.opennms.horizon.grpc.heartbeat.contract.HeartbeatMessage;
 import org.opennms.horizon.inventory.cucumber.InventoryBackgroundHelper;
 import org.opennms.horizon.inventory.dto.NodeCreateDTO;
@@ -53,7 +52,10 @@ import org.opennms.horizon.inventory.dto.NodeIdQuery;
 import org.opennms.horizon.inventory.dto.NodeList;
 import org.opennms.horizon.inventory.testtool.miniongateway.wiremock.client.MinionGatewayWiremockTestSteps;
 import org.opennms.horizon.shared.constants.GrpcConstants;
-import org.opennms.taskset.contract.DetectorResponse;
+import org.opennms.inventory.types.ServiceType;
+import org.opennms.node.scan.contract.NodeScanResult;
+import org.opennms.node.scan.contract.ServiceResult;
+import org.opennms.taskset.contract.ScannerResponse;
 import org.opennms.taskset.contract.TaskResult;
 import org.opennms.taskset.contract.TenantedTaskSetResults;
 import org.slf4j.Logger;
@@ -86,6 +88,7 @@ public class InventoryProcessingStepDefinitions {
 
     private NodeDTO node;
     private NodeList nodeList;
+    private Int64Value nodeIdCreated;
 
 //========================================
 // Constructor
@@ -309,7 +312,7 @@ public class InventoryProcessingStepDefinitions {
         var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
         var nodeId = nodeServiceBlockingStub.getNodeIdFromQuery(NodeIdQuery.newBuilder()
             .setIpAddress(ipAddress).setLocation(location).build());
-
+        nodeIdCreated = nodeId;
         assertNotNull(nodeId);
 
         node = nodeServiceBlockingStub.getNodeById(nodeId);
@@ -319,28 +322,33 @@ public class InventoryProcessingStepDefinitions {
     }
 
 
-    @Then("send Device Detection to Kafka topic {string}")
-    public void sendDeviceDetectionToKafkaTopic(String kafkaTopic) {
+    @Then("send Device Detection to Kafka topic {string} for an ip address {string} at location {string}")
+    public void sendDeviceDetectionToKafkaTopicForAnIpAddressAtLocation(String kafkaTopic, String ipAddress, String location) {
         Properties producerConfig = new Properties();
         producerConfig.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, backgroundHelper.getKafkaBootstrapUrl());
         producerConfig.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getCanonicalName());
         producerConfig.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, ByteArraySerializer.class.getCanonicalName());
 
         try (KafkaProducer<String, byte[]> kafkaProducer = new KafkaProducer<>(producerConfig)) {
-            DetectorResponse detectorResponse =
-                DetectorResponse.newBuilder()
-                    .setMonitorType(minionGatewayWiremockTestSteps.getMonitorType())
-                    .setDetected(deviceDetectedInd)
-                    .setIpAddress(minionGatewayWiremockTestSteps.getTaskIpAddress())
-                    .setNodeId(node.getId())
-                    .setReason(reason)
-                    .build();
+
+            NodeScanResult nodeScanResult = NodeScanResult.newBuilder()
+                .setNodeId(nodeIdCreated.getValue())
+                .addDetectorResult(ServiceResult.newBuilder()
+                    .setService(ServiceType.ICMP)
+                    .setIpAddress(ipAddress)
+                    .setStatus(true).build())
+                .addDetectorResult(ServiceResult.newBuilder()
+                    .setService(ServiceType.SNMP)
+                    .setIpAddress(ipAddress)
+                    .setStatus(true).build())
+                .build();
 
             TaskResult taskResult =
                 TaskResult.newBuilder()
                     .setLocation(location)
                     .setSystemId(systemId)
-                    .setDetectorResponse(detectorResponse)
+                    .setScannerResponse(ScannerResponse.newBuilder()
+                        .setResult(Any.pack(nodeScanResult)).build())
                     .build();
 
             TenantedTaskSetResults taskSetResults =
@@ -356,5 +364,6 @@ public class InventoryProcessingStepDefinitions {
             kafkaProducer.send(producerRecord);
         }
     }
+
 
 }

@@ -1,37 +1,84 @@
 <template>
-  <FeatherAppRail :labels="labels" :content="content">
-      <template v-slot:icon>
-        <IconTextAnimate class="nav-rail-home">
-          <template v-slot:icon>
-            <FeatherIcon
-              :icon="LogoIcon"
-              title="Home"
-              class="product-icon"
-              @click="gotoHome" />
-          </template>
-          <template v-slot:text>
-            <FeatherIcon
-              :icon="LogoText"
-              title="Home"
-              class="product-icon"
-              @click="gotoHome" />
-          </template>
-        </IconTextAnimate>
-      </template>
-      <template v-slot:nav>
-        <!-- hide dashboard link until complete -->
-        <FeatherAppRailNavItem v-if="false" href="/dashboard" :icon="Icons.Dashboard" title="Dashboard" :class="{ selected: isSelected('/dashboard') }" />
-        <FeatherAppRailNavItem href="/" :icon="Icons.Appliances" title="Appliances" :class="{ selected: isSelected('/') }" />
-        <FeatherAppRailNavItem href="/map" :icon="Icons.Location" title="Map" :class="{ selected: isSelected('/map') }" />
-        <FeatherAppRailNavItem href="/inventory" :icon="Icons.Business" title="Inventory" :class="{ selected: isSelected('/inventory') }" />
-        <FeatherAppRailNavItem href="/discovery" :icon="Icons.Discovery" title="Discovery" :class="{ selected: isSelected('/discovery') }" />
-        <FeatherAppRailNavItem href="/monitoring-policies" :icon="Icons.Monitoring" title="Monitoring Policies" :class="{ selected: isSelected('/monitoring-policies') }" />
-        <FeatherAppRailNavItem v-if="false" href="/synthetic-transactions" :icon="Icons.Cycle" title="Synthetic Transactions" :class="{ selected: isSelected('/synthetic-transactions') }" />
-      </template>
-    </FeatherAppRail>
+  <FeatherAppRail
+    :labels="labels"
+    :content="content"
+  >
+    <template v-slot:icon>
+      <IconTextAnimate class="nav-rail-home">
+        <template v-slot:icon>
+          <FeatherIcon
+            :icon="LogoIcon"
+            title="Home"
+            class="product-icon"
+            @click="gotoHome"
+          />
+        </template>
+        <template v-slot:text>
+          <FeatherIcon
+            :icon="LogoText"
+            title="Home"
+            class="product-icon"
+            @click="gotoHome"
+          />
+        </template>
+      </IconTextAnimate>
+    </template>
+    <template v-slot:nav>
+      <FeatherAppRailNavItem
+        v-if="false"
+        href="/dashboard"
+        :icon="Icons.Dashboard"
+        title="Dashboard"
+        :class="{ selected: isSelected('/dashboard') }"
+      />
+      <FeatherAppRailNavItem
+        href="/"
+        :icon="Icons.Appliances"
+        title="Appliances"
+        :class="{ selected: isSelected('/') }"
+      />
+      <FeatherAppRailNavItem
+        href="/map"
+        :icon="Icons.Location"
+        title="Map"
+        :class="{ selected: isSelected('/map') }"
+      />
+      <FeatherAppRailNavItem
+        href="/inventory"
+        :icon="Icons.Business"
+        title="Inventory"
+        :class="{ selected: isSelected('/inventory') }"
+      />
+      <FeatherAppRailNavItem
+        href="/discovery"
+        :icon="Icons.Discovery"
+        title="Discovery"
+        :class="{ selected: isSelected('/discovery') }"
+      />
+      <FeatherAppRailNavItem
+        href="/monitoring-policies"
+        :icon="Icons.Monitoring"
+        title="Monitoring Policies"
+        :class="{ selected: isSelected('/monitoring-policies') }"
+      />
+      <FeatherAppRailNavItem
+        href="/alerts"
+        :icon="Icons.Warning"
+        title="Alerts"
+        :class="{ selected: isSelected('/alerts') }"
+      />
+      <FeatherAppRailNavItem
+        v-if="false"
+        href="/synthetic-transactions"
+        :icon="Icons.Cycle"
+        title="Synthetic Transactions"
+        :class="{ selected: isSelected('/synthetic-transactions') }"
+      />
+    </template>
+  </FeatherAppRail>
 </template>
 
-<script setup lang=ts>
+<script setup lang="ts">
 import { IconTextAnimate, FeatherAppRailNavItem } from '@featherds/app-rail'
 import Appliances from '@featherds/icon/hardware/Appliances'
 import Dashboard from '@featherds/icon/action/Dashboard'
@@ -42,6 +89,7 @@ import LogoText from '@/assets/OpenNMS-logo-text.svg'
 import Discovery from '@featherds/icon/action/Search'
 import Monitoring from '@featherds/icon/hardware/MinionProfiles'
 import Cycle from '@featherds/icon/action/Cycle'
+import Warning from '@featherds/icon/notification/Warning'
 
 const Icons = markRaw({
   Appliances,
@@ -50,7 +98,8 @@ const Icons = markRaw({
   Business,
   Discovery,
   Monitoring,
-  Cycle
+  Cycle,
+  Warning
 })
 
 const labels = {
@@ -69,7 +118,7 @@ const gotoHome = () => {
 </script>
 
 <style lang="scss" scoped>
-@use "@featherds/styles/mixins/typography";
+@use '@featherds/styles/mixins/typography';
 
 .icon-text-animate {
   &:hover {

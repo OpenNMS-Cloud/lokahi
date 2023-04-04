@@ -1,5 +1,5 @@
-@use "@featherds/styles/themes/variables";
-@use "@featherds/styles/themes/open-mixins";
+@use '@featherds/styles/themes/variables';
+@use '@featherds/styles/themes/open-mixins';
 
 html {
   overflow-x: hidden;
@@ -34,4 +34,8 @@ ul {
 
 .pointer {
   cursor: pointer;
+}
+
+.border {
+  border: 1px solid var(variables.$border-on-surface);
 }

@@ -38,6 +38,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.List;
 
 import org.junit.Rule;
 import org.junit.jupiter.api.AfterEach;
@@ -45,15 +46,15 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
 import org.mockito.ArgumentCaptor;
-import org.opennms.horizon.alerts.proto.Alert;
+import org.opennms.horizon.alerts.proto.AlertRequest;
+import org.opennms.horizon.alerts.proto.AlertResponse;
 import org.opennms.horizon.alerts.proto.AlertServiceGrpc;
+import org.opennms.horizon.alerts.proto.DeleteAlertResponse;
 import org.opennms.horizon.alerts.proto.ListAlertsRequest;
 import org.opennms.horizon.alerts.proto.ListAlertsResponse;
 import org.opennms.horizon.server.mapper.alert.MonitorPolicyMapper;
+import org.opennms.horizon.server.model.alerts.TimeRange;
 import org.opennms.horizon.shared.constants.GrpcConstants;
-
-import com.google.protobuf.BoolValue;
-import com.google.protobuf.UInt64Value;
 
 import io.grpc.ManagedChannel;
 import io.grpc.Metadata;
@@ -88,32 +89,32 @@ public class AlertsClientTest {
                 }
 
                 @Override
-                public void acknowledgeAlert(UInt64Value request, StreamObserver<Alert> responseObserver) {
-                    responseObserver.onNext(Alert.newBuilder().build());
+                public void acknowledgeAlert(AlertRequest alertRequest, StreamObserver<AlertResponse> responseObserver) {
+                    responseObserver.onNext(AlertResponse.newBuilder().build());
                     responseObserver.onCompleted();
                 }
 
                 @Override
-                public void unacknowledgeAlert(UInt64Value request, StreamObserver<Alert> responseObserver) {
-                    responseObserver.onNext(Alert.newBuilder().build());
+                public void unacknowledgeAlert(AlertRequest alertRequest, StreamObserver<AlertResponse> responseObserver) {
+                    responseObserver.onNext(AlertResponse.newBuilder().build());
                     responseObserver.onCompleted();
                 }
 
                 @Override
-                public void clearAlert(UInt64Value request, StreamObserver<Alert> responseObserver) {
-                    responseObserver.onNext(Alert.newBuilder().build());
+                public void clearAlert(AlertRequest alertRequest, StreamObserver<AlertResponse> responseObserver) {
+                    responseObserver.onNext(AlertResponse.newBuilder().build());
                     responseObserver.onCompleted();
                 }
 
                 @Override
-                public void escalateAlert(UInt64Value request, StreamObserver<Alert> responseObserver) {
-                    responseObserver.onNext(Alert.newBuilder().build());
+                public void escalateAlert(AlertRequest alertRequest, StreamObserver<AlertResponse> responseObserver) {
+                    responseObserver.onNext(AlertResponse.newBuilder().build());
                     responseObserver.onCompleted();
                 }
 
                 @Override
-                public void deleteAlert(UInt64Value request, StreamObserver<BoolValue> responseObserver) {
-                    responseObserver.onNext(BoolValue.newBuilder().build());
+                public void deleteAlert(AlertRequest alertRequest, StreamObserver<DeleteAlertResponse> responseObserver) {
+                    responseObserver.onNext(DeleteAlertResponse.newBuilder().build());
                     responseObserver.onCompleted();
                 }
             }));
@@ -138,7 +139,7 @@ public class AlertsClientTest {
         String methodName = new Object() {
         }.getClass().getEnclosingMethod().getName();
         ArgumentCaptor<ListAlertsRequest> captor = ArgumentCaptor.forClass(ListAlertsRequest.class);
-        ListAlertsResponse result = client.listAlerts(5, "0", Collections.emptyList(), 0L, "tenantId", true, accessToken + methodName);
+        ListAlertsResponse result = client.listAlerts(5, 0, Collections.emptyList(), TimeRange.TODAY, "tenantId", true, accessToken + methodName);
         assertThat(result.getAlertsList().isEmpty()).isTrue();
         verify(mockAlertService).listAlerts(captor.capture(), any());
         assertThat(captor.getValue()).isNotNull();
@@ -149,8 +150,8 @@ public class AlertsClientTest {
     public void testAcknowledgeAlert() {
         String methodName = new Object() {
         }.getClass().getEnclosingMethod().getName();
-        ArgumentCaptor<UInt64Value> captor = ArgumentCaptor.forClass(UInt64Value.class);
-        Alert result = client.acknowledgeAlert(1l, accessToken + methodName);
+        ArgumentCaptor<AlertRequest> captor = ArgumentCaptor.forClass(AlertRequest.class);
+        AlertResponse result = client.acknowledgeAlert(List.of(1L), accessToken + methodName);
         assertThat(result).isNotNull();
         verify(mockAlertService).acknowledgeAlert(captor.capture(), any());
         assertThat(captor.getValue()).isNotNull();
@@ -161,8 +162,8 @@ public class AlertsClientTest {
     public void testUnacknowledgeAlert() {
         String methodName = new Object() {
         }.getClass().getEnclosingMethod().getName();
-        ArgumentCaptor<UInt64Value> captor = ArgumentCaptor.forClass(UInt64Value.class);
-        Alert result = client.unacknowledgeAlert(1l, accessToken + methodName);
+        ArgumentCaptor<AlertRequest> captor = ArgumentCaptor.forClass(AlertRequest.class);
+        AlertResponse result = client.unacknowledgeAlert(List.of(1L), accessToken + methodName);
         assertThat(result).isNotNull();
         verify(mockAlertService).unacknowledgeAlert(captor.capture(), any());
         assertThat(captor.getValue()).isNotNull();
@@ -173,8 +174,8 @@ public class AlertsClientTest {
     public void testClearAlert() {
         String methodName = new Object() {
         }.getClass().getEnclosingMethod().getName();
-        ArgumentCaptor<UInt64Value> captor = ArgumentCaptor.forClass(UInt64Value.class);
-        Alert result = client.clearAlert(1l, accessToken + methodName);
+        ArgumentCaptor<AlertRequest> captor = ArgumentCaptor.forClass(AlertRequest.class);
+        AlertResponse result = client.clearAlert(List.of(1L), accessToken + methodName);
         assertThat(result).isNotNull();
         verify(mockAlertService).clearAlert(captor.capture(), any());
         assertThat(captor.getValue()).isNotNull();
@@ -185,8 +186,8 @@ public class AlertsClientTest {
     public void testEscalateAlert() {
         String methodName = new Object() {
         }.getClass().getEnclosingMethod().getName();
-        ArgumentCaptor<UInt64Value> captor = ArgumentCaptor.forClass(UInt64Value.class);
-        Alert result = client.escalateAlert(1l, accessToken + methodName);
+        ArgumentCaptor<AlertRequest> captor = ArgumentCaptor.forClass(AlertRequest.class);
+        AlertResponse result = client.escalateAlert(List.of(1L), accessToken + methodName);
         assertThat(result).isNotNull();
         verify(mockAlertService).escalateAlert(captor.capture(), any());
         assertThat(captor.getValue()).isNotNull();

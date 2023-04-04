@@ -16,7 +16,7 @@
 
   <service ref="snmpDetectorManager" interface="org.opennms.horizon.minion.plugin.api.ServiceDetectorManager">
     <service-properties>
-      <entry key="detector.name" value="SNMPDetector"/>
+      <entry key="detector.name" value="SNMP"/>
     </service-properties>
   </service>
 

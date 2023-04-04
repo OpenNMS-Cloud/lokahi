@@ -31,6 +31,7 @@ package org.opennms.horizon.minion.nodescan;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.opennms.horizon.minion.plugin.api.registries.DetectorRegistry;
 import org.opennms.horizon.shared.snmp.SnmpHelper;
 import org.opennms.horizon.snmp.api.SnmpConfiguration;
 
@@ -43,7 +44,7 @@ public class SnmpConfigMatrixTest {
 
     @Test
     public void testConfigMatrix() {
-        NodeScanner nodeScanner = new NodeScanner(Mockito.mock(SnmpHelper.class));
+        NodeScanner nodeScanner = new NodeScanner(Mockito.mock(SnmpHelper.class), Mockito.mock(DetectorRegistry.class));
         List<SnmpConfiguration> configsFromRequest = new ArrayList<>();
         List<SnmpConfiguration> configurationsWithReadCommunity = new ArrayList<>();
         configurationsWithReadCommunity.add(SnmpConfiguration.newBuilder().setReadCommunity("snmp1").build());

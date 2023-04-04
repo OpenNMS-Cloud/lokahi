@@ -46,7 +46,6 @@ import org.opennms.horizon.inventory.repository.IpInterfaceRepository;
 import org.opennms.horizon.inventory.repository.MonitoringLocationRepository;
 import org.opennms.horizon.inventory.repository.NodeRepository;
 import org.opennms.horizon.inventory.service.taskset.CollectorTaskSetService;
-import org.opennms.horizon.inventory.service.taskset.DetectorTaskSetService;
 import org.opennms.horizon.inventory.service.taskset.MonitorTaskSetService;
 import org.opennms.horizon.inventory.service.taskset.ScannerTaskSetService;
 import org.opennms.horizon.inventory.service.taskset.publisher.TaskSetPublisher;
@@ -93,7 +92,6 @@ public class NodeServiceTest {
             mockMonitoringLocationRepository,
             mockIpInterfaceRepository,
             mockConfigUpdateService,
-            mock(DetectorTaskSetService.class),
             mock(CollectorTaskSetService.class),
             mock(MonitorTaskSetService.class),
             mock(ScannerTaskSetService.class),

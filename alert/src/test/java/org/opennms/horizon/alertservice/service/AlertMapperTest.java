@@ -28,13 +28,13 @@
 
 package org.opennms.horizon.alertservice.service;
 
-import org.junit.Test;
-import org.opennms.horizon.alertservice.db.entity.Alert;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 
 import java.util.Date;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
+import org.junit.Test;
+import org.opennms.horizon.alertservice.db.entity.Alert;
 
 public class AlertMapperTest {
 
@@ -42,7 +42,7 @@ public class AlertMapperTest {
     public void canMapAlert() {
         Alert dbAlert = new Alert();
         dbAlert.setTenantId("wow1");
-        dbAlert.setAlertId(42L);
+        dbAlert.setId(42L);
         dbAlert.setCounter(3L);
         dbAlert.setReductionKey("oops:1");
         dbAlert.setClearKey("clear:oops:1");
@@ -50,7 +50,7 @@ public class AlertMapperTest {
 
         var protoAlert = AlertMapper.INSTANCE.toProto(dbAlert);
         assertThat(protoAlert.getTenantId(), equalTo(dbAlert.getTenantId()));
-        assertThat(protoAlert.getDatabaseId(), equalTo(dbAlert.getAlertId()));
+        assertThat(protoAlert.getDatabaseId(), equalTo(dbAlert.getId()));
         assertThat(protoAlert.getCounter(), equalTo(dbAlert.getCounter()));
         assertThat(protoAlert.getReductionKey(), equalTo(dbAlert.getReductionKey()));
         assertThat(protoAlert.getClearKey(), equalTo(dbAlert.getClearKey()));

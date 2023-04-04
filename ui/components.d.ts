@@ -7,6 +7,14 @@ export {}
 
 declare module '@vue/runtime-core' {
   export interface GlobalComponents {
+    AddNewPolicy: typeof import('./src/components/MonitoringPolicies/AddNewPolicy.vue')['default']
+    AddNewRule: typeof import('./src/components/MonitoringPolicies/AddNewRule.vue')['default']
+    AlertConditions: typeof import('./src/components/MonitoringPolicies/AlertConditions.vue')['default']
+    AlertsCard: typeof import('./src/components/Alerts/AlertsCard.vue')['default']
+    AlertsCardList: typeof import('./src/components/Alerts/AlertsCardList.vue')['default']
+    AlertsSeverityCard: typeof import('./src/components/Alerts/AlertsSeverityCard.vue')['default']
+    AlertsSeverityFilters: typeof import('./src/components/Alerts/AlertsSeverityFilters.vue')['default']
+    AlertsSeverityLabel: typeof import('./src/components/Alerts/AlertsSeverityLabel.vue')['default']
     AppliancesAddNodeCtrl: typeof import('./src/components/Appliances/AppliancesAddNodeCtrl.vue')['default']
     AppliancesMinionsTable: typeof import('./src/components/Appliances/AppliancesMinionsTable.vue')['default']
     AppliancesNodesTable: typeof import('./src/components/Appliances/AppliancesNodesTable.vue')['default']
@@ -47,6 +55,7 @@ declare module '@vue/runtime-core' {
     FeatherChip: typeof import('@featherds/chips')['FeatherChip']
     FeatherChipList: typeof import('@featherds/chips')['FeatherChipList']
     FeatherDialog: typeof import('@featherds/dialog')['FeatherDialog']
+    FeatherDropdown: typeof import('@featherds/dropdown')['FeatherDropdown']
     FeatherExpansionPanel: typeof import('@featherds/expansion')['FeatherExpansionPanel']
     FeatherIcon: typeof import('@featherds/icon')['FeatherIcon']
     FeatherInput: typeof import('@featherds/input')['FeatherInput']
@@ -60,6 +69,7 @@ declare module '@vue/runtime-core' {
     FeatherSpinner: typeof import('@featherds/progress')['FeatherSpinner']
     FeatherTab: typeof import('@featherds/tabs')['FeatherTab']
     FeatherTabContainer: typeof import('@featherds/tabs')['FeatherTabContainer']
+    FeatherTabPanel: typeof import('@featherds/tabs')['FeatherTabPanel']
     FeatherTextarea: typeof import('@featherds/textarea')['FeatherTextarea']
     FeatherTooltip: typeof import('@featherds/tooltip')['FeatherTooltip']
     GridTabs: typeof import('./src/components/Map/GridTabs.vue')['default']

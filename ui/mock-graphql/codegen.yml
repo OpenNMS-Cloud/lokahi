@@ -1,6 +1,6 @@
 overwrite: true
 schema: "http://127.0.0.1:4000/graphql"
-documents: './src/graphql/**/*.graphql'
+documents: './src/graphql/**/*'
 generates:
   ../src/types/graphql-mocks.ts:
     plugins:

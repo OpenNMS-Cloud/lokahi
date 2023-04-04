@@ -46,8 +46,7 @@ import org.opennms.horizon.alertservice.testcontainers.TestContainerRunnerClassR
     glue = {"org.opennms.horizon.alertservice.stepdefs"},
     plugin = {"json:target/cucumber-report.json", "html:target/cucumber.html", "pretty"},
     objectFactory = io.cucumber.picocontainer.PicoFactory.class,
-    features = "classpath:org/opennms/horizon/alertservice",
-    tags = "@Policy" //todo: remove this when the alert tests were fixed
+    features = "classpath:org/opennms/horizon/alertservice"
 )
 public class CucumberRunnerIT {
 

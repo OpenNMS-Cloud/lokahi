@@ -1,3 +1,5 @@
+@use '@featherds/styles/themes/variables';
+
 .critical-color {
   background-color: rgba(165, 2, 31, 0.2);
   color: #a5021f !important;
@@ -32,3 +34,8 @@
   background-color: rgba(117, 117, 117, 0.2);
   color: #757575 !important;
 }
+
+.severity_undefined-color {
+  border: 1px solid var(variables.$border-on-surface);
+}
+

@@ -4,13 +4,13 @@ import com.google.protobuf.Any;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
-import org.opennms.horizon.minion.plugin.api.ServiceDetectorResponse;
 import org.opennms.horizon.shared.snmp.SnmpAgentConfig;
 import org.opennms.horizon.shared.snmp.SnmpHelper;
 import org.opennms.horizon.shared.snmp.SnmpObjId;
 import org.opennms.horizon.shared.snmp.SnmpValue;
+import org.opennms.inventory.types.ServiceType;
+import org.opennms.node.scan.contract.ServiceResult;
 import org.opennms.snmp.contract.SnmpDetectorRequest;
-import org.opennms.taskset.contract.MonitorType;
 
 import java.math.BigInteger;
 import java.net.InetAddress;
@@ -18,7 +18,6 @@ import java.util.concurrent.CompletableFuture;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 public class SnmpDetectorTest {
@@ -52,14 +51,13 @@ public class SnmpDetectorTest {
 
         Mockito.when(mockSnmpHelper.getAsync(Mockito.any(SnmpAgentConfig.class), Mockito.any(SnmpObjId[].class))).thenReturn(future);
 
-        CompletableFuture<ServiceDetectorResponse> response = target.detect(testConfig, 1);
+        CompletableFuture<ServiceResult> response = target.detect("127.0.0.1", testConfig);
 
-        ServiceDetectorResponse serviceDetectorResponse = response.get();
+        ServiceResult serviceDetectorResponse = response.get();
 
-        assertTrue(serviceDetectorResponse.isServiceDetected());
-        assertEquals(MonitorType.SNMP, serviceDetectorResponse.getMonitorType());
+        assertTrue(serviceDetectorResponse.getStatus());
+        assertEquals(ServiceType.SNMP, serviceDetectorResponse.getService());
         assertEquals(testRequest.getHost(), serviceDetectorResponse.getIpAddress());
-        assertNull(serviceDetectorResponse.getReason());
     }
 
     @Test
@@ -68,14 +66,13 @@ public class SnmpDetectorTest {
 
         Mockito.when(mockSnmpHelper.getAsync(Mockito.any(SnmpAgentConfig.class), Mockito.any(SnmpObjId[].class))).thenThrow(exception);
 
-        CompletableFuture<ServiceDetectorResponse> response = target.detect(testConfig,  1);
+        CompletableFuture<ServiceResult> response = target.detect("127.0.0.1", testConfig);
 
-        ServiceDetectorResponse serviceDetectorResponse = response.get();
+        ServiceResult serviceDetectorResponse = response.get();
 
-        assertFalse(serviceDetectorResponse.isServiceDetected());
-        assertEquals(MonitorType.SNMP, serviceDetectorResponse.getMonitorType());
+        assertFalse(serviceDetectorResponse.getStatus());
+        assertEquals(ServiceType.SNMP, serviceDetectorResponse.getService());
         assertEquals(testRequest.getHost(), serviceDetectorResponse.getIpAddress());
-        assertEquals(exception.getMessage(), serviceDetectorResponse.getReason());
     }
 
     private static class TestSnmpValue implements SnmpValue {

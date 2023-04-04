@@ -4,8 +4,11 @@
 
     <reference availability="optional" id="snmpHelper" interface="org.opennms.horizon.shared.snmp.SnmpHelper" />
 
+    <reference availability="optional" id="detectorRegistry" interface="org.opennms.horizon.minion.plugin.api.registries.DetectorRegistry"/>
+
     <bean id="nodeScannerManager" class="org.opennms.horizon.minion.nodescan.NodeScannerManager">
         <argument ref="snmpHelper"/>
+        <argument ref="detectorRegistry"/>
     </bean>
 
     <service ref="nodeScannerManager" interface="org.opennms.horizon.minion.plugin.api.ScannerManager">
@@ -13,4 +16,6 @@
             <entry key="scanner.name" value="NodeScanner" />
         </service-properties>
     </service>
+
+
 </blueprint>

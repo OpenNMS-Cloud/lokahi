@@ -60,9 +60,6 @@ public class TaskExecutorLocalServiceFactoryImpl implements TaskExecutorLocalSer
             case SCANNER:
                 return new TaskExecutorLocalScannerServiceImpl(taskDefinition, scannerRegistry, resultProcessor);
 
-            case DETECTOR:
-                return new TaskExecutorLocalDetectorServiceImpl(taskDefinition, detectorRegistry, resultProcessor);
-
             case MONITOR:
                 return new TaskExecutorLocalMonitorServiceImpl(scheduler, taskDefinition, resultProcessor, monitorRegistry);
 

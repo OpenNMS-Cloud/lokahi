@@ -1,0 +1,14 @@
+query alertsList {
+  alertsList {
+    id
+    name
+    severity
+    cause
+    duration
+    nodeType
+    date
+    time
+    isAcknowledged
+    description
+  }
+}

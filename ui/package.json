@@ -91,6 +91,7 @@
     "@vue-leaflet/vue-leaflet": "^0.7.0",
     "@vue/test-utils": "^2.2.7",
     "c8": "^7.11.3",
+    "casual": "^1.6.2",
     "eslint": "^8.32.0",
     "eslint-config-prettier": "^8.6.0",
     "eslint-plugin-vue": "^9.9.0",

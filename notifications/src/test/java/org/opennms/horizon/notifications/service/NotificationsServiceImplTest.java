@@ -41,10 +41,10 @@ import org.opennms.horizon.notifications.exceptions.NotificationException;
 import org.opennms.horizon.notifications.model.MonitoringPolicy;
 import org.opennms.horizon.notifications.repository.MonitoringPolicyRepository;
 
-import java.util.Optional;
+import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
@@ -68,10 +68,10 @@ public class NotificationsServiceImplTest {
         monitoringPolicy.setId(1);
         monitoringPolicy.setTenantId("T1");
         monitoringPolicy.setNotifyByPagerDuty(true);
-        Mockito.when(monitoringPolicyRepository.findByTenantIdAndId("T1", 1))
-            .thenReturn(Optional.of(monitoringPolicy));
+        Mockito.when(monitoringPolicyRepository.findByTenantIdAndIdIn("T1", List.of(1L)))
+            .thenReturn(List.of(monitoringPolicy));
 
-        Alert alert = Alert.newBuilder().setTenantId("T1").setMonitoringPolicyId(1).build();
+        Alert alert = Alert.newBuilder().setTenantId("T1").addMonitoringPolicyId(1).build();
 
         notificationService.postNotification(alert);
 
@@ -84,10 +84,10 @@ public class NotificationsServiceImplTest {
         MonitoringPolicy monitoringPolicy = new MonitoringPolicy();
         monitoringPolicy.setTenantId("T1");
         monitoringPolicy.setId(1);
-        Mockito.when(monitoringPolicyRepository.findByTenantIdAndId("T1", 1))
-            .thenReturn(Optional.of(monitoringPolicy));
+        Mockito.when(monitoringPolicyRepository.findByTenantIdAndIdIn("T1", List.of(1L)))
+            .thenReturn(List.of(monitoringPolicy));
 
-        Alert alert = Alert.newBuilder().setTenantId("T1").setMonitoringPolicyId(1).build();
+        Alert alert = Alert.newBuilder().setTenantId("T1").addMonitoringPolicyId(1).build();
 
         notificationService.postNotification(alert);
 
@@ -97,9 +97,9 @@ public class NotificationsServiceImplTest {
     @Test
     public void testNotificationNoPolicy() throws NotificationException {
         // Either the alert didn't specify the notification policy, or we're unable to find the specified one, no-op.
-        Mockito.when(monitoringPolicyRepository.findByTenantIdAndId(anyString(), anyLong())).thenReturn(Optional.empty());
+        Mockito.when(monitoringPolicyRepository.findByTenantIdAndIdIn(anyString(), anyList())).thenReturn(List.of());
 
-        Alert alert = Alert.newBuilder().setTenantId("T1").setMonitoringPolicyId(1).build();
+        Alert alert = Alert.newBuilder().setTenantId("T1").addMonitoringPolicyId(1).build();
 
         notificationService.postNotification(alert);
 
@@ -112,13 +112,35 @@ public class NotificationsServiceImplTest {
         monitoringPolicy.setTenantId("T1");
         monitoringPolicy.setId(1);
         monitoringPolicy.setNotifyByPagerDuty(true);
-        Mockito.when(monitoringPolicyRepository.findByTenantIdAndId("T1", 1))
-            .thenReturn(Optional.of(monitoringPolicy));
+        Mockito.when(monitoringPolicyRepository.findByTenantIdAndIdIn("T1", List.of(1L)))
+            .thenReturn(List.of(monitoringPolicy));
 
-        Alert alert = Alert.newBuilder().setTenantId("T1").setMonitoringPolicyId(1).build();
+        Alert alert = Alert.newBuilder().setTenantId("T1").addMonitoringPolicyId(1).build();
         doThrow(new NotificationAPIException("Foo")).when(pagerDutyAPI).postNotification(any());
 
         notificationService.postNotification(alert);
+    }
+
+    @Test
+    public void testNotificationMatchesMultiplePolicies() throws NotificationException {
+        MonitoringPolicy m1 = new MonitoringPolicy();
+        m1.setTenantId("T1");
+        m1.setId(1);
+        m1.setNotifyByPagerDuty(true);
+
+        MonitoringPolicy m2 = new MonitoringPolicy();
+        m2.setTenantId("T1");
+        m2.setId(2);
+        m2.setNotifyByPagerDuty(true);
+
+        Mockito.when(monitoringPolicyRepository.findByTenantIdAndIdIn("T1", List.of(1L, 2L)))
+            .thenReturn(List.of(m1, m2));
+
+        Alert alert = Alert.newBuilder().setTenantId("T1").addAllMonitoringPolicyId(List.of(1L, 2L)).build();
+
+        notificationService.postNotification(alert);
+
+        Mockito.verify(pagerDutyAPI, times(2)).postNotification(alert);
     }
 
     @Test

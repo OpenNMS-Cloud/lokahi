@@ -4,19 +4,16 @@ import com.google.protobuf.Any;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
-import org.opennms.horizon.minion.plugin.api.ServiceDetectorResponse;
 import org.opennms.horizon.shared.icmp.PingerFactory;
 import org.opennms.icmp.contract.IcmpDetectorRequest;
+import org.opennms.inventory.types.ServiceType;
 import org.opennms.minion.icmp.best.BestMatchPingerFactory;
-import org.opennms.taskset.contract.MonitorType;
+import org.opennms.node.scan.contract.ServiceResult;
 
 import java.util.concurrent.CompletableFuture;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -47,12 +44,11 @@ public class IcmpDetectorTest {
         when(pingerFactory.getInstance(Mockito.anyInt(), Mockito.anyBoolean()))
             .thenReturn(testPinger);
 
-        CompletableFuture<ServiceDetectorResponse> response = target.detect(testConfig, 1);
-        ServiceDetectorResponse serviceDetectorResponse = response.get();
+        CompletableFuture<ServiceResult> response = target.detect(TEST_LOCALHOST_IP_VALUE, testConfig);
+        ServiceResult serviceDetectorResponse = response.get();
 
-        assertTrue(serviceDetectorResponse.isServiceDetected());
-        assertEquals(MonitorType.ICMP, serviceDetectorResponse.getMonitorType());
+        assertTrue(serviceDetectorResponse.getStatus());
+        assertEquals(ServiceType.ICMP, serviceDetectorResponse.getService());
         assertEquals(testRequest.getHost(), serviceDetectorResponse.getIpAddress());
-        assertNull(serviceDetectorResponse.getReason());
     }
 }

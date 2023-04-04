@@ -36,12 +36,7 @@
       <div class="col half">Over</div>
       <div class="col double">&nbsp</div>
       <div class="col double">Severity</div>
-      <div
-        class="col double"
-        v-if="condition.triggerEvent === SNMPEventType.PORT_DOWN"
-      >
-        Clear Event
-      </div>
+      <div class="col double">Clear Event</div>
     </div>
 
     <div class="mp-card-alert-row">
@@ -62,10 +57,7 @@
       >
         {{ snakeToTitleCase(condition.severity) }}
       </div>
-      <div
-        class="col box double"
-        v-if="condition.triggerEvent === SNMPEventType.PORT_DOWN"
-      >
+      <div class="col box double">
         {{
           condition.clearEvent !== Unknowns.UNKNOWN_EVENT ? snakeToTitleCase(condition.clearEvent as string) : '&nbsp;'
         }}
@@ -76,7 +68,7 @@
 
 <script setup lang="ts">
 import { Condition, Rule } from '@/types/policies'
-import { conditionLetters, SNMPEventType, DetectionMethodTypes, Unknowns } from './monitoringPolicies.constants'
+import { conditionLetters, DetectionMethodTypes, Unknowns } from './monitoringPolicies.constants'
 import { snakeToTitleCase } from '../utils'
 
 defineProps<{

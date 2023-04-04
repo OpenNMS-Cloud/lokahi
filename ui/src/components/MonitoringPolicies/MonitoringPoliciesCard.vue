@@ -15,8 +15,16 @@
         class="edit"
         @click="$emit('selectPolicy', policy)"
         data-test="policy-edit-btn"
+        v-if="!policy.isDefault"
       >
         edit
+      </div>
+      <div
+        class="copy"
+        @click="$emit('copyPolicy', policy)"
+        data-test="policy-copy-btn"
+      >
+        copy
       </div>
     </div>
 
@@ -107,11 +115,16 @@ onMounted(() => (ruleStates[props.policy.rules[0].id] = true))
       @include typography.headline4;
       flex: 1;
     }
-    .edit {
+    .edit,
+    .copy {
       @include typography.subtitle1;
       cursor: pointer;
       color: var(variables.$primary);
       text-decoration: underline;
+    }
+
+    .copy {
+      margin-left: var(variables.$spacing-xs);
     }
 
     .title-box {

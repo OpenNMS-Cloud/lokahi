@@ -33,6 +33,7 @@
       :type="props.renderType"
       :allow-new="allowNew"
       data-test="fds-autocomplete"
+      :disabled="disabled"
     />
     <FeatherChipList
       v-if="props.renderType === 'single' && props.showList"
@@ -46,6 +47,7 @@
         <span>{{ item.name }}</span>
         <template v-slot:icon
           ><FeatherIcon
+            v-if="!disabled"
             @click="unselectItem(item.name as string)"
             :icon="CancelIcon"
         /></template>
@@ -58,7 +60,6 @@
 import { PropType } from 'vue'
 import { IAutocompleteItemType } from '@featherds/autocomplete'
 import CancelIcon from '@featherds/icon/navigation/Cancel'
-import { isEqual } from 'lodash'
 
 type IAutocomplete = IAutocompleteItemType & { _text?: string }
 type TypeSingle = 'single'
@@ -91,6 +92,9 @@ const props = defineProps({
   showList: {
     type: Boolean,
     default: true
+  },
+  disabled: {
+    type: Boolean
   },
   preselectedItems: {
     type: [Object],

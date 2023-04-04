@@ -6,8 +6,8 @@
     <FeatherButton
       class="save-btn"
       primary
-      :disabled="!enableSaveRule"
       @click="store.saveRule"
+      :disabled="disableSaveRuleBtn"
       data-test="save-rule-btn"
     >
       Save Rule
@@ -17,7 +17,7 @@
       :isFetching="mutations.isFetching.value"
       class="save-btn"
       primary
-      :disabled="!store.selectedPolicy.rules.length || !store.selectedPolicy.name"
+      :disabled="disableSavePolicyBtn"
       @click="store.savePolicy"
       data-test="save-policy-btn"
     >
@@ -32,7 +32,12 @@ import { useMonitoringPoliciesMutations } from '@/store/Mutations/monitoringPoli
 
 const store = useMonitoringPoliciesStore()
 const mutations = useMonitoringPoliciesMutations()
-const enableSaveRule = computed(() => store.selectedRule?.name && store.selectedRule?.triggerEvents.length)
+const disableSavePolicyBtn = computed(
+  () => store.selectedPolicy?.isDefault || !store.selectedPolicy?.rules.length || !store.selectedPolicy.name
+)
+const disableSaveRuleBtn = computed(
+  () => store.selectedPolicy?.isDefault || !store.selectedRule?.name || !store.selectedRule?.triggerEvents.length
+)
 </script>
 
 <style lang="scss" scoped>

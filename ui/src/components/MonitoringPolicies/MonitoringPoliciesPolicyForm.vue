@@ -27,19 +27,33 @@
           label="New Policy Name"
           v-focus
           data-test="policy-name-input"
+          :readonly="store.selectedPolicy.isDefault"
         />
         <FeatherTextarea
           v-model="store.selectedPolicy.memo"
           label="Memo"
           :maxlength="100"
+          :disabled="store.selectedPolicy.isDefault"
         />
         <FeatherCheckboxGroup
           label="Notifications (Optional)"
           vertical
         >
-          <FeatherCheckbox v-model="store.selectedPolicy.notifyByEmail">Email</FeatherCheckbox>
-          <FeatherCheckbox v-model="store.selectedPolicy.notifyByPagerDuty">Pager Duty</FeatherCheckbox>
-          <FeatherCheckbox v-model="store.selectedPolicy.notifyByWebhooks">Webhooks</FeatherCheckbox>
+          <FeatherCheckbox
+            :disabled="store.selectedPolicy.isDefault"
+            v-model="store.selectedPolicy.notifyByEmail"
+            >Email</FeatherCheckbox
+          >
+          <FeatherCheckbox
+            :disabled="store.selectedPolicy.isDefault"
+            v-model="store.selectedPolicy.notifyByPagerDuty"
+            >Pager Duty</FeatherCheckbox
+          >
+          <FeatherCheckbox
+            :disabled="store.selectedPolicy.isDefault"
+            v-model="store.selectedPolicy.notifyByWebhooks"
+            >Webhooks</FeatherCheckbox
+          >
         </FeatherCheckboxGroup>
         <div class="subtitle">Tags</div>
         <BasicAutocomplete
@@ -48,6 +62,7 @@
           :items="tagQueries.tagsSearched"
           :label="'Tag name'"
           :preselectedItems="formattedTags"
+          :disabled="store.selectedPolicy.isDefault"
         />
       </div>
 
@@ -61,6 +76,7 @@
           :policy="(policy as Policy)"
           :index="index"
           @selectPolicy="(policy: Policy) => store.displayPolicyForm(policy)"
+          @copyPolicy="(policy: Policy) => store.copyPolicy(policy)"
         />
       </div>
     </transition>

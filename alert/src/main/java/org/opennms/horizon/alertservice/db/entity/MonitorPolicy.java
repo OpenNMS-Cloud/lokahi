@@ -31,6 +31,7 @@ package org.opennms.horizon.alertservice.db.entity;
 import java.util.ArrayList;
 import java.util.List;
 
+import jakarta.persistence.EntityListeners;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
@@ -46,8 +47,10 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
+import org.opennms.horizon.alertservice.service.routing.MonitoringPolicyKafkaProducer;
 
 @Entity
+@EntityListeners(MonitoringPolicyKafkaProducer.class)
 @Table(name = "monitoring_policy")
 @Getter
 @Setter

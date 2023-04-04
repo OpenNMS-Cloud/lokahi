@@ -41,6 +41,7 @@ public class BackgroundSteps {
     private String kafkaBootstrapUrl;
     private String eventTopic;
     private String alertTopic;
+    private String monitoringPolicyTopic;
 
 
     @Given("Kafka event topic {string}")
@@ -51,6 +52,11 @@ public class BackgroundSteps {
     @Given("Kafka alert topic {string}")
     public void createKafkaTopicForAlerts(String alertTopic) {
         this.alertTopic = alertTopic;
+    }
+
+    @Given("Kafka monitoring policy topic {string}")
+    public void createKafkaTopicForMonitoringPolicy(String monitoringPolicyTopic) {
+        this.monitoringPolicyTopic = monitoringPolicyTopic;
     }
 
     @Given("Application base HTTP URL in system property {string}")

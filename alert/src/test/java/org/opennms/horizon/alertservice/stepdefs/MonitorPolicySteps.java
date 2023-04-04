@@ -29,12 +29,19 @@
 package org.opennms.horizon.alertservice.stepdefs;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
+import com.google.protobuf.InvalidProtocolBufferException;
+import io.cucumber.java.BeforeAll;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.assertj.core.groups.Tuple;
 import org.opennms.horizon.alertservice.AlertGrpcClientUtils;
+import org.opennms.horizon.alertservice.kafkahelper.KafkaTestHelper;
 import org.opennms.horizon.shared.alert.policy.ComponentType;
 import org.opennms.horizon.shared.alert.policy.EventType;
 import org.opennms.horizon.shared.alert.policy.MonitorPolicyList;
@@ -52,10 +59,13 @@ import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.testcontainers.shaded.org.awaitility.Awaitility;
 
 @Slf4j
 @RequiredArgsConstructor
 public class MonitorPolicySteps {
+    private final KafkaTestHelper kafkaTestHelper;
+    private final BackgroundSteps background;
     private final AlertGrpcClientUtils grpcClient;
     private MonitorPolicyProto.Builder policyBuilder = MonitorPolicyProto.newBuilder();
     private PolicyRuleProto.Builder ruleBuilder = PolicyRuleProto.newBuilder();
@@ -63,6 +73,13 @@ public class MonitorPolicySteps {
     private Long policyId;
 
     private MonitorPolicyProto policy;
+
+    @Given("Monitoring policy kafka consumer")
+    public void setupMonitoringPolicyTopic() {
+        kafkaTestHelper.setKafkaBootstrapUrl(background.getKafkaBootstrapUrl());
+        kafkaTestHelper.startConsumerAndProducer(background.getMonitoringPolicyTopic(), background.getMonitoringPolicyTopic());
+    }
+
 
     @Given("Tenant id {string}")
     public void defaultTenantId(String tenantId) {
@@ -164,5 +181,20 @@ public class MonitorPolicySteps {
             .extracting(r -> r.getName(), r->r.getComponentType().name())
             .containsExactly(name, type);
 
+    }
+
+    @Then("Verify monitoring policy for tenant {string} is sent to Kafka")
+    public void verifyMonitoringPolicyTopic(String tenant) {
+        Awaitility.await().atMost(5, TimeUnit.SECONDS).untilAsserted(() -> {
+            List<MonitorPolicyProto> messages = kafkaTestHelper.getConsumedMessages(background.getMonitoringPolicyTopic()).stream().map(messageBytes -> {
+                try {
+                    return MonitorPolicyProto.parseFrom(messageBytes.value());
+                } catch (InvalidProtocolBufferException e) {
+                    throw new RuntimeException(e);
+                }
+            }).filter(proto -> proto.getTenantId().equals(tenant)).toList();
+
+            assertEquals(1, messages.size());
+        });
     }
 }

@@ -1,6 +1,3 @@
 query NodesForMap {
-  findAllNodes {
-    id
-    nodeLabel
-  }
+  ...NodeParts
 }

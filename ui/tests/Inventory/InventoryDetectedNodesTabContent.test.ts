@@ -37,7 +37,8 @@ const tabContent = [
       managementIpLink: 'goto',
       tagValue: []
     },
-    isNodeOverlayChecked: false
+    isNodeOverlayChecked: false,
+    nodeType: 'DEFAULT'
   }
 ]
 

@@ -38,8 +38,8 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.opennms.horizon.inventory.dto.DefaultNodeDTO;
 import org.opennms.horizon.inventory.dto.IpInterfaceDTO;
-import org.opennms.horizon.inventory.dto.NodeDTO;
 import org.opennms.horizon.inventory.service.taskset.ScannerTaskSetService;
 import org.opennms.horizon.inventory.service.taskset.publisher.TaskSetPublisher;
 import org.opennms.node.scan.contract.NodeScanRequest;
@@ -54,7 +54,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 @ExtendWith(MockitoExtension.class)
-public class ScannerTaskSetServiceTest {
+class ScannerTaskSetServiceTest {
     @Mock
     private TaskSetPublisher mockPublisher;
     @InjectMocks
@@ -63,7 +63,7 @@ public class ScannerTaskSetServiceTest {
     ArgumentCaptor<List<TaskDefinition>> taskListCaptor;
     private final String tenantId = "testTenant";
     private final String location = "testLocation";
-    private NodeDTO.Builder nodeBuilder;
+    private DefaultNodeDTO.Builder nodeBuilder;
     private IpInterfaceDTO ipInterface1;
     private IpInterfaceDTO ipInterface2;
 
@@ -71,7 +71,7 @@ public class ScannerTaskSetServiceTest {
     void prepareTest() {
         ipInterface1 = IpInterfaceDTO.newBuilder().setIpAddress("127.0.0.1").setSnmpPrimary(true).build();
         ipInterface2 = IpInterfaceDTO.newBuilder().setIpAddress("127.0.0.1").build();
-        nodeBuilder = NodeDTO.newBuilder().setId(1L);
+        nodeBuilder = DefaultNodeDTO.newBuilder().setId(1L);
     }
 
     @AfterEach
@@ -81,7 +81,7 @@ public class ScannerTaskSetServiceTest {
 
     @Test
     void testSendNodeScanWithTwoIpInterfaces() throws InvalidProtocolBufferException {
-        NodeDTO node = nodeBuilder.addAllIpInterfaces(List.of(ipInterface1, ipInterface2)).build();
+        DefaultNodeDTO node = nodeBuilder.addAllIpInterfaces(List.of(ipInterface1, ipInterface2)).build();
         service.sendNodeScannerTask(List.of(node), location, tenantId);
         verify(mockPublisher).publishNewTasks(eq(tenantId), eq(location), taskListCaptor.capture());
         List<TaskDefinition> tasks = taskListCaptor.getValue();
@@ -94,7 +94,7 @@ public class ScannerTaskSetServiceTest {
 
     @Test
     void testSendNodeScanWithIpInterfaceNonPrimary() throws InvalidProtocolBufferException {
-        NodeDTO node = nodeBuilder.addAllIpInterfaces(List.of(ipInterface2)).build();
+        DefaultNodeDTO node = nodeBuilder.addAllIpInterfaces(List.of(ipInterface2)).build();
         service.sendNodeScannerTask(List.of(node), location, tenantId);
         verify(mockPublisher).publishNewTasks(eq(tenantId), eq(location), taskListCaptor.capture());
         List<TaskDefinition> tasks = taskListCaptor.getValue();
@@ -107,7 +107,7 @@ public class ScannerTaskSetServiceTest {
 
     @Test
     void testSendNodeScanWithoutIpInterfaces() {
-        NodeDTO node = nodeBuilder.build();
+        DefaultNodeDTO node = nodeBuilder.build();
         service.sendNodeScannerTask(List.of(node), location, tenantId);
         verifyNoInteractions(mockPublisher);
     }

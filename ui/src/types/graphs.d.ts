@@ -6,7 +6,7 @@ interface MetricArgs {
   name: string
   monitor: string
   instance: string
-  nodeId?: string
+  nodeId?: number
   timeRange: number
   timeRangeUnit: TimeRangeUnit
 }
@@ -15,7 +15,7 @@ interface GraphProps {
   label: string
   metrics: string[]
   monitor: string
-  nodeId?: string
+  nodeId?: number
   instance: string
   systemId?: string
   timeRange: number

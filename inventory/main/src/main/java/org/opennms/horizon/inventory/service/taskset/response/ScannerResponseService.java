@@ -34,29 +34,36 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.opennms.horizon.azure.api.AzureScanItem;
 import org.opennms.horizon.azure.api.AzureScanResponse;
+import org.opennms.horizon.inventory.dto.AzureNodeCreateDTO;
+import org.opennms.horizon.inventory.dto.DefaultNodeCreateDTO;
 import org.opennms.horizon.inventory.dto.ListTagsByEntityIdParamsDTO;
 import org.opennms.horizon.inventory.dto.MonitoredServiceDTO;
 import org.opennms.horizon.inventory.dto.MonitoredServiceTypeDTO;
-import org.opennms.horizon.inventory.dto.NodeCreateDTO;
+import org.opennms.horizon.inventory.dto.DefaultNodeCreateDTO;
 import org.opennms.horizon.inventory.dto.TagCreateDTO;
 import org.opennms.horizon.inventory.dto.TagCreateListDTO;
 import org.opennms.horizon.inventory.dto.TagEntityIdDTO;
 import org.opennms.horizon.inventory.model.IpInterface;
 import org.opennms.horizon.inventory.model.MonitoredServiceType;
-import org.opennms.horizon.inventory.model.Node;
+import org.opennms.horizon.inventory.model.node.Node;
 import org.opennms.horizon.inventory.model.SnmpInterface;
 import org.opennms.horizon.inventory.model.discovery.active.AzureActiveDiscovery;
 import org.opennms.horizon.inventory.repository.IpInterfaceRepository;
-import org.opennms.horizon.inventory.repository.NodeRepository;
 import org.opennms.horizon.inventory.repository.discovery.active.AzureActiveDiscoveryRepository;
 import org.opennms.horizon.inventory.service.IpInterfaceService;
 import org.opennms.horizon.inventory.service.MonitoredServiceService;
 import org.opennms.horizon.inventory.service.MonitoredServiceTypeService;
-import org.opennms.horizon.inventory.service.NodeService;
+import org.opennms.horizon.inventory.model.node.AzureNode;
+import org.opennms.horizon.inventory.model.node.DefaultNode;
+import org.opennms.horizon.inventory.repository.node.AzureNodeRepository;
+import org.opennms.horizon.inventory.repository.node.DefaultNodeRepository;
+
 import org.opennms.horizon.inventory.service.SnmpConfigService;
 import org.opennms.horizon.inventory.service.SnmpInterfaceService;
 import org.opennms.horizon.inventory.service.TagService;
 import org.opennms.horizon.inventory.service.discovery.active.IcmpActiveDiscoveryService;
+import org.opennms.horizon.inventory.service.node.AzureNodeService;
+import org.opennms.horizon.inventory.service.node.DefaultNodeService;
 import org.opennms.horizon.inventory.service.taskset.TaskSetHandler;
 import org.opennms.horizon.shared.utils.InetAddressUtils;
 import org.opennms.node.scan.contract.IpInterfaceResult;
@@ -83,8 +90,10 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class ScannerResponseService {
     private final AzureActiveDiscoveryRepository azureActiveDiscoveryRepository;
-    private final NodeRepository nodeRepository;
-    private final NodeService nodeService;
+    private final AzureNodeRepository azureNodeRepository;
+    private final DefaultNodeRepository defaultNodeRepository;
+    private final AzureNodeService azureNodeService;
+    private final DefaultNodeService defaultNodeService;
     private final TaskSetHandler taskSetHandler;
     private final IpInterfaceService ipInterfaceService;
     private final SnmpInterfaceService snmpInterfaceService;
@@ -155,18 +164,18 @@ public class ScannerResponseService {
                     var icmpDiscovery = discoveryOptional.get();
                     var tagsList = tagService.getTagsByEntityId(tenantId,
                         ListTagsByEntityIdParamsDTO.newBuilder().setEntityId(TagEntityIdDTO.newBuilder()
-                        .setActiveDiscoveryId(icmpDiscovery.getId()).build()).build());
+                            .setActiveDiscoveryId(icmpDiscovery.getId()).build()).build());
                     List<TagCreateDTO> tags = tagsList.stream()
                         .map(tag -> TagCreateDTO.newBuilder().setName(tag.getName()).build())
                         .toList();
-                    NodeCreateDTO createDTO = NodeCreateDTO.newBuilder()
+                    DefaultNodeCreateDTO createDTO = DefaultNodeCreateDTO.newBuilder()
                         .setLocation(location)
                         .setManagementIp(pingResponse.getIpAddress())
                         .setLabel(pingResponse.getIpAddress())
                         .addAllTags(tags)
                         .build();
-                    Node node = nodeService.createNode(createDTO, ScanType.DISCOVERY_SCAN, tenantId);
-                    nodeService.sendNewNodeTaskSetAsync(node, location, icmpDiscovery);
+                    DefaultNode node = defaultNodeService.createNode(createDTO, ScanType.DISCOVERY_SCAN, tenantId);
+                    defaultNodeService.sendNewNodeTaskSetAsync(node, location, icmpDiscovery);
                 }
             }
         }
@@ -182,19 +191,19 @@ public class ScannerResponseService {
         AzureActiveDiscovery discovery = discoveryOpt.get();
 
         String nodeLabel = String.format("%s (%s)", item.getName(), item.getResourceGroup());
-        Optional<Node> nodeOpt = nodeRepository.findByTenantLocationAndNodeLabel(tenantId, location, nodeLabel);
+        Optional<AzureNode> nodeOpt = azureNodeRepository.findByTenantLocationAndNodeLabel(tenantId, location, nodeLabel);
 
-        Node node;
+        AzureNode node;
         if (nodeOpt.isPresent()) {
             node = nodeOpt.get();
             log.warn("Node already exists for tenant: {}, location: {}, label: {}", tenantId, location, nodeLabel);
         } else {
-            NodeCreateDTO createDTO = NodeCreateDTO.newBuilder()
+            AzureNodeCreateDTO createDTO = AzureNodeCreateDTO.newBuilder()
                 .setLocation(location)
                 .setManagementIp(ipAddress)
                 .setLabel(nodeLabel)
                 .build();
-            node = nodeService.createNode(createDTO, ScanType.AZURE_SCAN, tenantId);
+            node = azureNodeService.createNode(tenantId, createDTO);
 
             taskSetHandler.sendAzureMonitorTasks(discovery, item, ipAddress, node.getId());
             taskSetHandler.sendAzureCollectorTasks(discovery, item, ipAddress, node.getId());
@@ -212,11 +221,11 @@ public class ScannerResponseService {
         var snmpConfiguration = result.getSnmpConfig();
         snmpConfigService.saveOrUpdateSnmpConfig(tenantId, location, snmpConfiguration);
 
-        Optional<Node> nodeOpt = nodeRepository.findByIdAndTenantId(result.getNodeId(), tenantId);
+        Optional<DefaultNode> nodeOpt = defaultNodeRepository.findByIdAndTenantId(result.getNodeId(), tenantId);
         if (nodeOpt.isPresent()) {
-            Node node = nodeOpt.get();
+            DefaultNode node = nodeOpt.get();
             Map<Integer, SnmpInterface> ifIndexSNMPMap = new HashMap<>();
-            nodeService.updateNodeInfo(node, result.getNodeInfo());
+            defaultNodeService.updateNodeInfo(node, result.getNodeInfo());
 
             for (SnmpInterfaceResult snmpIfResult : result.getSnmpInterfacesList()) {
                 SnmpInterface snmpInterface = snmpInterfaceService.createOrUpdateFromScanResult(tenantId, node, snmpIfResult);

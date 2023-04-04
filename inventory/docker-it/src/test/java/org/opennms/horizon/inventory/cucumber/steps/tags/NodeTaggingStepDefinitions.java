@@ -28,6 +28,7 @@
 
 package org.opennms.horizon.inventory.cucumber.steps.tags;
 
+import com.google.common.base.Function;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Int64Value;
 import io.cucumber.java.en.And;
@@ -35,10 +36,11 @@ import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import org.opennms.horizon.inventory.cucumber.InventoryBackgroundHelper;
+import org.opennms.horizon.inventory.dto.DefaultNodeCreateDTO;
+import org.opennms.horizon.inventory.dto.DefaultNodeDTO;
 import org.opennms.horizon.inventory.dto.DeleteTagsDTO;
 import org.opennms.horizon.inventory.dto.ListAllTagsParamsDTO;
 import org.opennms.horizon.inventory.dto.ListTagsByEntityIdParamsDTO;
-import org.opennms.horizon.inventory.dto.NodeCreateDTO;
 import org.opennms.horizon.inventory.dto.NodeDTO;
 import org.opennms.horizon.inventory.dto.NodeList;
 import org.opennms.horizon.inventory.dto.TagCreateDTO;
@@ -64,8 +66,8 @@ import static org.junit.Assert.assertTrue;
 public class NodeTaggingStepDefinitions {
     private final InventoryBackgroundHelper backgroundHelper;
 
-    private NodeDTO node1;
-    private NodeDTO node2;
+    private DefaultNodeDTO node1;
+    private DefaultNodeDTO node2;
     private TagListDTO addedTagList;
     private TagListDTO fetchedTagList;
     private NodeList fetchedNodeList;
@@ -107,8 +109,8 @@ public class NodeTaggingStepDefinitions {
         deleteAllTags();
         deleteAllNodes();
 
-        var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
-        node1 = nodeServiceBlockingStub.createNode(NodeCreateDTO.newBuilder().setLabel("node")
+        var defaultNodeServiceBlockingStub = backgroundHelper.getDefaultNodeServiceBlockingStub();
+        node1 = defaultNodeServiceBlockingStub.createNode(DefaultNodeCreateDTO.newBuilder().setLabel("node")
             .setLocation("location").setManagementIp("127.0.0.1").build());
     }
 
@@ -117,10 +119,10 @@ public class NodeTaggingStepDefinitions {
         deleteAllTags();
         deleteAllNodes();
 
-        var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
-        node1 = nodeServiceBlockingStub.createNode(NodeCreateDTO.newBuilder().setLabel("node1")
+        var defaultNodeServiceBlockingStub = backgroundHelper.getDefaultNodeServiceBlockingStub();
+        node1 = defaultNodeServiceBlockingStub.createNode(DefaultNodeCreateDTO.newBuilder().setLabel("node1")
             .setLocation("location").setManagementIp("127.0.0.1").build());
-        node2 = nodeServiceBlockingStub.createNode(NodeCreateDTO.newBuilder().setLabel("node2")
+        node2 = defaultNodeServiceBlockingStub.createNode(DefaultNodeCreateDTO.newBuilder().setLabel("node2")
             .setLocation("location").setManagementIp("127.0.0.2").build());
     }
 
@@ -129,8 +131,8 @@ public class NodeTaggingStepDefinitions {
         deleteAllTags();
         deleteAllNodes();
 
-        var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
-        node1 = nodeServiceBlockingStub.createNode(NodeCreateDTO.newBuilder().setLabel("node")
+        var defaultNodeServiceBlockingStub = backgroundHelper.getDefaultNodeServiceBlockingStub();
+        node1 = defaultNodeServiceBlockingStub.createNode(DefaultNodeCreateDTO.newBuilder().setLabel("node")
             .setLocation("location").setManagementIp("127.0.0.1").build());
         String[] tagArray = tags.split(",");
         var tagServiceBlockingStub = backgroundHelper.getTagServiceBlockingStub();
@@ -143,8 +145,8 @@ public class NodeTaggingStepDefinitions {
 
     @Given("Another node with tags {string}")
     public void anotherNodeWithTags(String tags) {
-        var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
-        NodeDTO node = nodeServiceBlockingStub.createNode(NodeCreateDTO.newBuilder().setLabel("Another Node")
+        var defaultNodeServiceBlockingStub = backgroundHelper.getDefaultNodeServiceBlockingStub();
+        DefaultNodeDTO node = defaultNodeServiceBlockingStub.createNode(DefaultNodeCreateDTO.newBuilder().setLabel("Another Node")
             .setLocation("location").setManagementIp("127.0.0.2").build());
         String[] tagArray = tags.split(",");
         var tagServiceBlockingStub = backgroundHelper.getTagServiceBlockingStub();
@@ -308,11 +310,13 @@ public class NodeTaggingStepDefinitions {
         assertEquals(2, fetchedNodeList.getNodesCount());
         List<NodeDTO> nodesList = fetchedNodeList.getNodesList();
 
-        List<Long> nodeIds = nodesList.stream().map(NodeDTO::getId).toList();
+        List<Long> nodeIds = nodesList.stream()
+            .map((Function<NodeDTO, Long>) nodeDTO -> nodeDTO.getDefault().getId()).toList();
         assertTrue(nodeIds.contains(node1.getId()));
         assertTrue(nodeIds.contains(node2.getId()));
 
-        List<String> nodeLabels = nodesList.stream().map(NodeDTO::getNodeLabel).toList();
+        List<String> nodeLabels = nodesList.stream()
+            .map((Function<NodeDTO, String>) nodeDTO -> nodeDTO.getDefault().getNodeLabel()).toList();
         assertTrue(nodeLabels.contains(node1.getNodeLabel()));
         assertTrue(nodeLabels.contains(node2.getNodeLabel()));
     }
@@ -331,7 +335,11 @@ public class NodeTaggingStepDefinitions {
     private void deleteAllNodes() {
         var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
         for (NodeDTO nodeDTO : nodeServiceBlockingStub.listNodes(Empty.newBuilder().build()).getNodesList()) {
-            nodeServiceBlockingStub.deleteNode(Int64Value.newBuilder().setValue(nodeDTO.getId()).build());
+            if (nodeDTO.hasDefault()) {
+                nodeServiceBlockingStub.deleteNode(Int64Value.newBuilder().setValue(nodeDTO.getDefault().getId()).build());
+            } else if (nodeDTO.hasAzure()) {
+                nodeServiceBlockingStub.deleteNode(Int64Value.newBuilder().setValue(nodeDTO.getAzure().getId()).build());
+            }
         }
     }
 

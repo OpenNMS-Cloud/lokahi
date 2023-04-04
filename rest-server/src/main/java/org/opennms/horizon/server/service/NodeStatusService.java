@@ -65,7 +65,7 @@ public class NodeStatusService {
     public Mono<NodeStatus> getNodeStatus(long id, String monitorType, ResolutionEnvironment env) {
         NodeDTO node = client.getNodeById(id, headerUtil.getAuthHeader(env));
 
-        if (node.getIpInterfacesCount() > 0) {
+        if (!getIpInterfaces(node).isEmpty()) {
 
             IpInterfaceDTO ipInterface = getPrimaryInterface(node);
             return getNodeStatusByInterface(id, monitorType, ipInterface, env);
@@ -74,13 +74,13 @@ public class NodeStatusService {
     }
 
     private IpInterfaceDTO getPrimaryInterface(NodeDTO node) {
-        List<IpInterfaceDTO> ipInterfacesList = node.getIpInterfacesList();
+        List<IpInterfaceDTO> ipInterfacesList = getIpInterfaces(node);
         for (IpInterfaceDTO ipInterface : ipInterfacesList) {
             if (ipInterface.getSnmpPrimary()) {
                 return ipInterface;
             }
         }
-        return node.getIpInterfaces(0);
+        return ipInterfacesList.get(0);
     }
 
     private Mono<NodeStatus> getNodeStatusByInterface(long id, String monitorType, IpInterfaceDTO ipInterface, ResolutionEnvironment env) {
@@ -126,5 +126,14 @@ public class NodeStatusService {
 
         return tsdbMetricsService
             .getMetric(env, RESPONSE_TIME_METRIC, labels, TIME_RANGE_IN_SECONDS, TimeRangeUnit.SECOND);
+    }
+
+    private List<IpInterfaceDTO> getIpInterfaces(NodeDTO nodeDTO) {
+        if (nodeDTO.hasDefault()) {
+            return nodeDTO.getDefault().getIpInterfacesList();
+        } else if (nodeDTO.hasAzure()) {
+            return nodeDTO.getAzure().getIpInterfacesList();
+        }
+        throw new RuntimeException("Failed to get IP Interfaces, invalid node type");
     }
 }

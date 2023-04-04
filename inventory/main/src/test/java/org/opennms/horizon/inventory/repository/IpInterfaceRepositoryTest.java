@@ -37,7 +37,6 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -45,18 +44,13 @@ import org.junit.jupiter.api.Test;
 import org.opennms.horizon.inventory.SpringContextTestInitializer;
 import org.opennms.horizon.inventory.model.IpInterface;
 import org.opennms.horizon.inventory.model.MonitoringLocation;
-import org.opennms.horizon.inventory.model.Node;
+import org.opennms.horizon.inventory.model.node.DefaultNode;
 import org.opennms.horizon.inventory.model.SnmpInterface;
-import org.opennms.horizon.shared.constants.GrpcConstants;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.opennms.horizon.inventory.repository.node.DefaultNodeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ContextConfiguration;
-
-import io.grpc.Context;
 
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
@@ -66,7 +60,7 @@ class IpInterfaceRepositoryTest {
     private static final int NUM_NODES = 10;
 
     @Autowired
-    private NodeRepository nodeRepository;
+    private DefaultNodeRepository defaultNodeRepository;
 
     @Autowired
     private IpInterfaceRepository ipInterfaceRepository;
@@ -83,14 +77,14 @@ class IpInterfaceRepositoryTest {
 
     @AfterEach
     public void cleanUp() {
-        nodeRepository.deleteAll();
+        defaultNodeRepository.deleteAll();
         ipInterfaceRepository.deleteAll();
         monitoringLocationRepository.deleteAll();
     }
 
     @Test
     void testFindByIpInterfaceForAGivenLocationAndIpAddress() throws UnknownHostException {
-        var node = nodeRepository.findByNodeLabel("node1");
+        var node = defaultNodeRepository.findByNodeLabel("node1");
         assertNotNull(node);
         var locationList = monitoringLocationRepository.findByLocation("location1");
         assertFalse(locationList.isEmpty(), "Should have valid location");
@@ -119,7 +113,7 @@ class IpInterfaceRepositoryTest {
     @Test
     void testIpInterfaceWithSNMPIfDeleteSNMP() throws UnknownHostException {
         int ifIndex = 10;
-        var node = nodeRepository.findByNodeLabel("node1").get(0);
+        var node = defaultNodeRepository.findByNodeLabel("node1").get(0);
         var snmpInterface = new SnmpInterface();
         snmpInterface.setNode(node);
         snmpInterface.setIfIndex(ifIndex);
@@ -145,7 +139,7 @@ class IpInterfaceRepositoryTest {
     @Test
     void testIpInterfaceWithSNMPIfDeleteIPIf() throws UnknownHostException {
         int ifIndex = 10;
-        var node = nodeRepository.findByNodeLabel("node1").get(0);
+        var node = defaultNodeRepository.findByNodeLabel("node1").get(0);
         var snmpInterface = new SnmpInterface();
         snmpInterface.setNode(node);
         snmpInterface.setIfIndex(ifIndex);
@@ -165,7 +159,7 @@ class IpInterfaceRepositoryTest {
 
     private void loadNodes() throws UnknownHostException {
         for (int i = 0; i < NUM_NODES; i++) {
-            var node = new Node();
+            var node = new DefaultNode();
             node.setNodeLabel("node" + i);
             node.setCreateTime(LocalDateTime.now());
             node.setTenantId("tenant" + i);
@@ -181,7 +175,7 @@ class IpInterfaceRepositoryTest {
             var ipInterfaces = new ArrayList<IpInterface>();
             ipInterfaces.add(ipInterface);
             node.setIpInterfaces(ipInterfaces);
-            nodeRepository.save(node);
+            defaultNodeRepository.save(node);
         }
     }
 

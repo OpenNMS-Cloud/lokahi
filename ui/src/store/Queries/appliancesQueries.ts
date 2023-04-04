@@ -8,6 +8,7 @@ import {
   ListNodeMetricsDocument,
   Minion,
   Node,
+  DefaultNode,
   TimeRangeUnit
 } from '@/types/graphql'
 import { ExtendedMinion } from '@/types/minion'
@@ -105,15 +106,17 @@ export const useAppliancesQueries = defineStore('appliancesQueries', {
     const addMetricsToNodes = (allNodes: Node[]) => {
       tableNodes.value = []
 
-      allNodes.forEach(async (node) => {
-        const { ipAddress: snmpPrimaryIpAddress } = node.ipInterfaces?.filter((ii) => ii.snmpPrimary)[0] || {} // not getting ipAddress from snmpPrimary interface can result in missing metrics for ICMP
-        const { data, isFetching } = await fetchNodeMetrics(node.id as number, snmpPrimaryIpAddress as string)
+      allNodes.forEach(async ({ details }) => {
+        const { ipInterfaces, id } = details as DefaultNode
+        const { ipAddress: snmpPrimaryIpAddress } = ipInterfaces?.filter((ii) => ii.snmpPrimary)[0] || {} // not getting ipAddress from snmpPrimary interface can result in missing metrics for ICMP
+
+        const { data, isFetching } = await fetchNodeMetrics(id, snmpPrimaryIpAddress as string)
         const latencyResult = data.value?.nodeLatency?.data?.result?.[0]?.values?.[0]
         const status = data.value?.nodeStatus?.status
 
         if (!isFetching.value) {
           let tableNode: ExtendedNode = {
-            ...node,
+            ...details,
             status
           }
 

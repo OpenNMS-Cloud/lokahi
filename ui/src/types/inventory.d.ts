@@ -8,6 +8,7 @@ interface Anchor {
   managementIpValue?: string
   managementIpLink?: string
   tagValue?: array
+  nodeType?: string
 }
 
 interface NodeContent {

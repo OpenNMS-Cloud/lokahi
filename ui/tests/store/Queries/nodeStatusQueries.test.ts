@@ -18,7 +18,7 @@ describe('Events queries', () => {
         data: {
           value: {
             events: eventsFixture(),
-            node: nodeFixture()
+            node: { details: nodeFixture() }
           }
         }
       }))

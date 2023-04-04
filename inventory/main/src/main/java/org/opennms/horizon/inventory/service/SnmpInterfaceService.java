@@ -3,7 +3,8 @@ package org.opennms.horizon.inventory.service;
 import lombok.RequiredArgsConstructor;
 import org.opennms.horizon.inventory.dto.SnmpInterfaceDTO;
 import org.opennms.horizon.inventory.mapper.SnmpInterfaceMapper;
-import org.opennms.horizon.inventory.model.Node;
+import org.opennms.horizon.inventory.model.node.DefaultNode;
+import org.opennms.horizon.inventory.model.node.Node;
 import org.opennms.horizon.inventory.model.SnmpInterface;
 import org.opennms.horizon.inventory.repository.SnmpInterfaceRepository;
 import org.opennms.node.scan.contract.SnmpInterfaceResult;
@@ -29,7 +30,7 @@ public class SnmpInterfaceService {
             .collect(Collectors.toList());
     }
 
-    public SnmpInterface createOrUpdateFromScanResult(String tenantId, Node node, SnmpInterfaceResult result) {
+    public SnmpInterface createOrUpdateFromScanResult(String tenantId, DefaultNode node, SnmpInterfaceResult result) {
         return modelRepo.findByNodeIdAndTenantIdAndIfIndex(node.getId(), tenantId, result.getIfIndex())
             .map(snmp -> {
                mapper.updateFromScanResult(result, snmp);

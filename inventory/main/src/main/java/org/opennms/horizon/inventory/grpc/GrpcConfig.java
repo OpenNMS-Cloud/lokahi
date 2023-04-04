@@ -37,6 +37,9 @@ import org.opennms.horizon.inventory.grpc.discovery.ActiveDiscoveryGrpcService;
 import org.opennms.horizon.inventory.grpc.discovery.IcmpActiveDiscoveryGrpcService;
 import org.opennms.horizon.inventory.grpc.discovery.AzureActiveDiscoveryGrpcService;
 import org.opennms.horizon.inventory.grpc.discovery.PassiveDiscoveryGrpcService;
+import org.opennms.horizon.inventory.grpc.node.AzureNodeGrpcService;
+import org.opennms.horizon.inventory.grpc.node.DefaultNodeGrpcService;
+import org.opennms.horizon.inventory.grpc.node.NodeGrpcService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -81,14 +84,16 @@ public class GrpcConfig {
     }
 
     @Bean(destroyMethod = "stopServer")
-    public GrpcServerManager startServer(MonitoringLocationGrpcService locationGrpc, MonitoringSystemGrpcService systemGrpc,
-                                         NodeGrpcService nodeGrpcService, AzureActiveDiscoveryGrpcService azureActiveDiscoveryGrpcService, TagGrpcService tagGrpcService,
+    public GrpcServerManager startServer(MonitoringLocationGrpcService locationGrpc,
+                                         MonitoringSystemGrpcService systemGrpc,
+                                         NodeGrpcService nodeGrpcService, DefaultNodeGrpcService defaultNodeGrpcService, AzureNodeGrpcService azureNodeGrpcService,
+                                         AzureActiveDiscoveryGrpcService azureActiveDiscoveryGrpcService,
+                                         TagGrpcService tagGrpcService,
                                          InventoryServerInterceptor interceptor,
-                                         ActiveDiscoveryGrpcService activeDiscoveryGrpcService,
-                                         IcmpActiveDiscoveryGrpcService icmpActiveDiscoveryGrpcService,
-                                         PassiveDiscoveryGrpcService passiveDiscoveryGrpcService) {
+                                         ActiveDiscoveryGrpcService activeDiscoveryGrpcService, IcmpActiveDiscoveryGrpcService icmpActiveDiscoveryGrpcService, PassiveDiscoveryGrpcService passiveDiscoveryGrpcService) {
         GrpcServerManager manager = new GrpcServerManager(port, interceptor);
-        manager.startServer(locationGrpc, systemGrpc, nodeGrpcService, azureActiveDiscoveryGrpcService, tagGrpcService, activeDiscoveryGrpcService, icmpActiveDiscoveryGrpcService, passiveDiscoveryGrpcService);
+        manager.startServer(locationGrpc, systemGrpc, nodeGrpcService, defaultNodeGrpcService, azureNodeGrpcService, azureActiveDiscoveryGrpcService,
+            tagGrpcService, activeDiscoveryGrpcService, icmpActiveDiscoveryGrpcService, passiveDiscoveryGrpcService);
         return manager;
     }
 }

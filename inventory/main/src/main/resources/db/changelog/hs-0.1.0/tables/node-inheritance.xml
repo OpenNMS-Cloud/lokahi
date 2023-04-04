@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+
+    <changeSet author="tbigg" id="0.1.0-node-inheritance">
+
+        <dropColumn tableName="node" columnName="system_objectid"/>
+        <dropColumn tableName="node" columnName="system_name"/>
+        <dropColumn tableName="node" columnName="system_desc"/>
+        <dropColumn tableName="node" columnName="system_location"/>
+        <dropColumn tableName="node" columnName="system_contact"/>
+
+        <createTable tableName="default_node">
+            <column name="id" type="BIGINT" />
+            <column name="system_objectid" type="text" />
+            <column name="system_name" type="text" />
+            <column name="system_desc" type="text" />
+            <column name="system_location" type="text" />
+            <column name="system_contact" type="text" />
+        </createTable>
+
+        <addForeignKeyConstraint constraintName="fk_default_node_node_id" onDelete="CASCADE"
+                                 baseTableName="default_node" baseColumnNames="id"
+                                 referencedTableName="node" referencedColumnNames="id"/>
+
+        <createTable tableName="azure_node">
+            <column name="id" type="BIGINT"/>
+        </createTable>
+
+        <addForeignKeyConstraint constraintName="fk_azure_node_node_id" onDelete="CASCADE"
+                                 baseTableName="azure_node" baseColumnNames="id"
+                                 referencedTableName="node" referencedColumnNames="id"/>
+
+        <createSequence sequenceName="node_seq" incrementBy="50"/>
+
+    </changeSet>
+</databaseChangeLog>

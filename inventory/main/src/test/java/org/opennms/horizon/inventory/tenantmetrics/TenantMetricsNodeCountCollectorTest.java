@@ -34,7 +34,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.opennms.horizon.inventory.model.TenantCount;
-import org.opennms.horizon.inventory.repository.NodeRepository;
+import org.opennms.horizon.inventory.repository.node.NodeRepository;
 
 import java.util.Collections;
 import java.util.List;

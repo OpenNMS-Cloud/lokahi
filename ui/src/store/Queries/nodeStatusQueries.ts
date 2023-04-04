@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { useQuery } from 'villus'
-import { Event, ListNodeStatusDocument, Node } from '@/types/graphql'
+import { Event, ListNodeStatusDocument, DefaultNode } from '@/types/graphql'
 
 export const useNodeStatusQueries = defineStore('nodeStatusQueries', () => {
   const variables = ref({})
@@ -17,7 +17,7 @@ export const useNodeStatusQueries = defineStore('nodeStatusQueries', () => {
 
   const fetchedData = computed(() => ({
     events: data.value?.events || ([] as Event[]),
-    node: data.value?.node || ({} as Node)
+    node: (data.value?.node?.details as DefaultNode) || ({} as DefaultNode)
   }))
 
   return {

@@ -37,6 +37,8 @@ import org.json.JSONObject;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.opennms.horizon.inventory.dto.AzureNodeDTO;
+import org.opennms.horizon.inventory.dto.DefaultNodeDTO;
 import org.opennms.horizon.inventory.dto.MonitoringLocationDTO;
 import org.opennms.horizon.inventory.dto.NodeDTO;
 import org.opennms.horizon.server.RestServerApplication;
@@ -90,8 +92,8 @@ class GraphQLTSDBMetricServiceTest {
     public void setUp() {
         wireMock.start();
         MonitoringLocationDTO locationDTO1 = MonitoringLocationDTO.newBuilder().setId(LOCATION_ID).setLocation(TEST_LOCATION).build();
-        nodeDTO1 = NodeDTO.newBuilder().setId(NODE_ID_1).setScanType(NODE_SCAN_SCAN_TYPE).setMonitoringLocationId(locationDTO1.getId()).build();
-        nodeDTO2 = NodeDTO.newBuilder().setId(NODE_ID_2).setScanType(AZURE_SCAN_SCAN_TYPE).setMonitoringLocationId(locationDTO1.getId()).build();
+        nodeDTO1 = NodeDTO.newBuilder().setDefault(DefaultNodeDTO.newBuilder().setId(NODE_ID_1).setMonitoringLocationId(locationDTO1.getId()).build()).build();
+        nodeDTO2 = NodeDTO.newBuilder().setAzure(AzureNodeDTO.newBuilder().setId(NODE_ID_2).setMonitoringLocationId(locationDTO1.getId()).build()).build();
     }
 
     @AfterEach

@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { useQuery } from 'villus'
-import { GetNodeForGraphsDocument, Node } from '@/types/graphql'
+import { GetNodeForGraphsDocument, DefaultNode } from '@/types/graphql'
 
 export const useGraphsQueries = defineStore('graphsQueries', () => {
   const variables = ref({})
@@ -16,7 +16,7 @@ export const useGraphsQueries = defineStore('graphsQueries', () => {
     fetchOnMount: false
   })
 
-  const node = computed(() => data.value?.findNodeById || ({} as Node))
+  const node = computed(() => (data.value?.node?.details as DefaultNode) || ({} as DefaultNode))
 
   return {
     node,

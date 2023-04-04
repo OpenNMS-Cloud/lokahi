@@ -38,7 +38,7 @@ import org.opennms.horizon.inventory.mapper.EncryptAttributeConverter;
 
 @Getter
 @Setter
-@Entity(name = "azure_active_discovery")
+@Entity
 public class AzureActiveDiscovery extends ActiveDiscovery {
 
     @NotNull

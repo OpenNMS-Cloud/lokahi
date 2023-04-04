@@ -47,7 +47,7 @@ import java.util.List;
 
 @Getter
 @Setter
-@Entity(name = "active_discovery")
+@Entity
 @Inheritance(strategy = InheritanceType.JOINED)
 public abstract class ActiveDiscovery {
 

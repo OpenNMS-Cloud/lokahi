@@ -94,7 +94,6 @@ class AzureActiveDiscoveryGrpcItTest extends GrpcTestBase {
     private static final String TEST_DIRECTORY_ID = "directory-id";
     private static final String DEFAULT_LOCATION = "Default";
     private static final String TEST_TAG_NAME_1 = "tag-name-1";
-    private static final String TEST_TENANT_ID = "tenant-id";
 
     private AzureActiveDiscoveryServiceGrpc.AzureActiveDiscoveryServiceBlockingStub serviceStub;
 

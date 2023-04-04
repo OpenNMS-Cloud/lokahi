@@ -32,7 +32,7 @@ package org.opennms.horizon.inventory.tenantmetrics;
 import io.prometheus.client.Collector;
 import lombok.Setter;
 import org.opennms.horizon.inventory.model.TenantCount;
-import org.opennms.horizon.inventory.repository.NodeRepository;
+import org.opennms.horizon.inventory.repository.node.NodeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

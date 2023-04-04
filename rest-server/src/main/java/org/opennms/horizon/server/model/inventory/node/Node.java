@@ -26,28 +26,15 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.server.model.inventory;
+package org.opennms.horizon.server.model.inventory.node;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.util.List;
 
 @Getter
 @Setter
 public class Node {
-    private long id;
-    private String tenantId;
-    private String nodeLabel;
-    private String scanType;
-    private String monitoredState;
-    private long createTime;
-    private long monitoringLocationId;
-    private List<IpInterface> ipInterfaces;
-    private List<SnmpInterface> snmpInterfaces;
-    private String objectId;
-    private String systemName;
-    private String systemDescr;
-    private String systemLocation;
-    private String systemContact;
+    private String nodeType;
+    private JsonNode details;
 }

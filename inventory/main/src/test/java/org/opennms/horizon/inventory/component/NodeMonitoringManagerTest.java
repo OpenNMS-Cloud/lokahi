@@ -37,10 +37,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.opennms.horizon.events.proto.Event;
-import org.opennms.horizon.inventory.dto.NodeCreateDTO;
-import org.opennms.horizon.inventory.model.Node;
-import org.opennms.horizon.inventory.service.NodeService;
+import org.opennms.horizon.inventory.dto.DefaultNodeCreateDTO;
+import org.opennms.horizon.inventory.model.node.DefaultNode;
 import org.opennms.horizon.inventory.service.discovery.PassiveDiscoveryService;
+import org.opennms.horizon.inventory.service.node.DefaultNodeService;
 import org.opennms.horizon.shared.events.EventConstants;
 import org.opennms.taskset.contract.ScanType;
 
@@ -56,7 +56,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 class NodeMonitoringManagerTest {
 
     @Mock
-    private NodeService nodeService;
+    private DefaultNodeService defaultNodeService;
     @Mock
     private PassiveDiscoveryService passiveDiscoveryService;
     @InjectMocks
@@ -64,7 +64,7 @@ class NodeMonitoringManagerTest {
 
     private final String tenantId = "test-tenant";
     private Event event;
-    private Node node;
+    private DefaultNode node;
 
     @BeforeEach
     public void prepare() {
@@ -74,23 +74,23 @@ class NodeMonitoringManagerTest {
             .setLocation("test-location")
             .setIpAddress("127.0.0.1")
             .build();
-        node = new Node();
+        node = new DefaultNode();
     }
 
     @AfterEach
     public void afterTest() {
-        verifyNoMoreInteractions(nodeService);
+        verifyNoMoreInteractions(defaultNodeService);
         verifyNoMoreInteractions(passiveDiscoveryService);
     }
 
     @Test
     void testReceiveEventAndCreateNewNode() {
-        doReturn(node).when(nodeService).createNode(any(NodeCreateDTO.class), eq(ScanType.NODE_SCAN), eq(tenantId));
-        ArgumentCaptor<NodeCreateDTO> argumentCaptor = ArgumentCaptor.forClass(NodeCreateDTO.class);
+        doReturn(node).when(defaultNodeService).createNode(any(DefaultNodeCreateDTO.class), eq(ScanType.NODE_SCAN), eq(tenantId));
+        ArgumentCaptor<DefaultNodeCreateDTO> argumentCaptor = ArgumentCaptor.forClass(DefaultNodeCreateDTO.class);
         consumer.receiveTrapEvent(event.toByteArray());
-        verify(nodeService).createNode(argumentCaptor.capture(), eq(ScanType.NODE_SCAN), eq(tenantId));
+        verify(defaultNodeService).createNode(argumentCaptor.capture(), eq(ScanType.NODE_SCAN), eq(tenantId));
         verify(passiveDiscoveryService).sendNodeScan(node);
-        NodeCreateDTO createDTO = argumentCaptor.getValue();
+        DefaultNodeCreateDTO createDTO = argumentCaptor.getValue();
         assertThat(createDTO.getLocation()).isEqualTo(event.getLocation());
         assertThat(createDTO.getManagementIp()).isEqualTo(event.getIpAddress());
         assertThat(createDTO.getLabel()).endsWith(event.getIpAddress());
@@ -102,6 +102,6 @@ class NodeMonitoringManagerTest {
             .setUei("something else").build();
         consumer.receiveTrapEvent(anotherEvent.toByteArray());
         verifyNoInteractions(passiveDiscoveryService);
-        verifyNoInteractions(nodeService);
+        verifyNoInteractions(defaultNodeService);
     }
 }

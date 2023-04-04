@@ -31,19 +31,20 @@ package org.opennms.horizon.inventory.service;
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
+import org.opennms.horizon.inventory.repository.MonitoringLocationRepository;
 import org.opennms.horizon.inventory.service.taskset.publisher.TaskSetPublisher;
 import org.opennms.sink.flows.contract.FlowsConfig;
 
 public class FlowsConfigServiceTest {
     @Mock
-    MonitoringLocationService monitoringLocationService;
+    MonitoringLocationRepository monitoringLocationRepository;
 
     @Mock
     TaskSetPublisher taskSetPublisher;
 
     @Test
     public void canReadConfig() {
-        FlowsConfigService service = new FlowsConfigService(monitoringLocationService, taskSetPublisher);
+        FlowsConfigService service = new FlowsConfigService(monitoringLocationRepository, taskSetPublisher);
         FlowsConfig config = service.readFlowsConfig();
         Assert.assertNotNull(config);
         Assert.assertEquals("Netflow-5-UDP-8877", config.getListeners(0).getName());

@@ -5,7 +5,7 @@ query GetMetric($metric: String!) {
 query GetTimeSeriesMetric(
   $name: String!
   $monitor: String!
-  $nodeId: String
+  $nodeId: Int
   $timeRange: Int!
   $timeRangeUnit: TimeRangeUnit!
   $instance: String!
@@ -14,11 +14,5 @@ query GetTimeSeriesMetric(
 }
 
 query GetNodeForGraphs($id: Long) {
-  findNodeById(id: $id) {
-    id
-    ipInterfaces {
-      ipAddress
-      snmpPrimary
-    }
-  }
+  ...NodeByIdParts
 }

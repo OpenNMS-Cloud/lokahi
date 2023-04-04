@@ -43,6 +43,7 @@ import lombok.Setter;
 import jakarta.validation.constraints.NotNull;
 import org.opennms.horizon.inventory.model.discovery.active.ActiveDiscovery;
 import org.opennms.horizon.inventory.model.discovery.PassiveDiscovery;
+import org.opennms.horizon.inventory.model.node.Node;
 
 import java.util.ArrayList;
 import java.util.List;

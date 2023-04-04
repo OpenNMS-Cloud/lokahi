@@ -29,7 +29,6 @@
 package org.opennms.horizon.inventory.cucumber.steps;
 
 import com.google.protobuf.Any;
-import io.cucumber.java.BeforeAll;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import org.apache.kafka.clients.producer.KafkaProducer;
@@ -42,8 +41,8 @@ import org.junit.jupiter.api.Assertions;
 import org.opennms.horizon.inventory.cucumber.InventoryBackgroundHelper;
 import org.opennms.horizon.inventory.discovery.IcmpActiveDiscoveryCreateDTO;
 import org.opennms.horizon.inventory.discovery.SNMPConfigDTO;
-import org.opennms.horizon.inventory.dto.ListTagsByEntityIdParamsDTO;
 import org.opennms.horizon.inventory.dto.NodeIdQuery;
+import org.opennms.horizon.inventory.dto.ListTagsByEntityIdParamsDTO;
 import org.opennms.horizon.inventory.dto.TagCreateDTO;
 import org.opennms.horizon.inventory.dto.TagDTO;
 import org.opennms.horizon.inventory.dto.TagEntityIdDTO;
@@ -51,7 +50,6 @@ import org.opennms.taskset.contract.DiscoveryScanResult;
 import org.opennms.taskset.contract.PingResponse;
 import org.opennms.taskset.contract.ScannerResponse;
 import org.opennms.taskset.contract.TaskResult;
-import org.opennms.taskset.contract.TaskSetResults;
 import org.opennms.taskset.contract.TenantedTaskSetResults;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -177,9 +175,9 @@ public class IcmpDiscoveryStepDefinitions {
         var nodeId = backgroundHelper.getNodeServiceBlockingStub().
             getNodeIdFromQuery(NodeIdQuery.newBuilder().setLocation(location).setIpAddress(ipAddress).build());
         var nodeDto = backgroundHelper.getNodeServiceBlockingStub().getNodeById(nodeId);
-        Assertions.assertTrue(nodeDto.getIpInterfacesList().stream().anyMatch(ipInterfaceDTO -> ipInterfaceDTO.getIpAddress().equals(ipAddress)));
+        Assertions.assertTrue(nodeDto.getDefault().getIpInterfacesList().stream().anyMatch(ipInterfaceDTO -> ipInterfaceDTO.getIpAddress().equals(ipAddress)));
         var tagListQuery = ListTagsByEntityIdParamsDTO.newBuilder()
-            .setEntityId(TagEntityIdDTO.newBuilder().setNodeId(nodeDto.getId()).build())
+            .setEntityId(TagEntityIdDTO.newBuilder().setNodeId(nodeDto.getDefault().getId()).build())
             .build();
         var tagList = backgroundHelper.getTagServiceBlockingStub().getTagsByEntityId(tagListQuery);
         Assertions.assertEquals(icmpDiscovery.getTagsCount(), tagList.getTagsCount());

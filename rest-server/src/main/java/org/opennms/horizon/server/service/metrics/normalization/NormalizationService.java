@@ -29,7 +29,6 @@
 package org.opennms.horizon.server.service.metrics.normalization;
 
 import lombok.RequiredArgsConstructor;
-import org.opennms.horizon.inventory.dto.NodeDTO;
 import org.opennms.horizon.server.model.TSData;
 import org.opennms.horizon.server.model.TSResult;
 import org.opennms.horizon.server.model.TimeSeriesQueryResult;
@@ -41,7 +40,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static org.opennms.horizon.server.service.metrics.normalization.Constants.NODE_SCAN_TYPE;
 import static org.opennms.horizon.server.service.metrics.normalization.Constants.SNMP_MONITOR_TYPE;
 
 @Component
@@ -50,18 +48,16 @@ public class NormalizationService {
     private final MetricLabelUtils metricLabelUtils;
     private final SnmpNormalizationService snmpNormalizationService;
 
-    public String getQueryMetricRegex(NodeDTO node, String metricName, Map<String, String> metricLabels) {
+    public String getQueryMetricRegex(String metricName, Map<String, String> metricLabels) {
 
-        if (NODE_SCAN_TYPE.equals(node.getScanType())) {
-            String monitor = metricLabelUtils.getMonitorType(metricLabels);
+        String monitor = metricLabelUtils.getMonitorType(metricLabels);
 
-            if (SNMP_MONITOR_TYPE.equals(monitor)) {
-                Optional<String> metricRegexOpt =
-                    snmpNormalizationService.getQueryMetricRegex(metricName);
+        if (SNMP_MONITOR_TYPE.equals(monitor)) {
+            Optional<String> metricRegexOpt =
+                snmpNormalizationService.getQueryMetricRegex(metricName);
 
-                if (metricRegexOpt.isPresent()) {
-                    return metricRegexOpt.get();
-                }
+            if (metricRegexOpt.isPresent()) {
+                return metricRegexOpt.get();
             }
         }
         return metricName;

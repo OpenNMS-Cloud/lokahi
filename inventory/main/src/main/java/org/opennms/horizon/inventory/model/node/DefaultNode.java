@@ -26,31 +26,41 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.server.mapper;
+package org.opennms.horizon.inventory.model.node;
 
-import org.mapstruct.CollectionMappingStrategy;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.Mappings;
-import org.mapstruct.NullValueCheckStrategy;
-import org.opennms.horizon.inventory.dto.NodeCreateDTO;
-import org.opennms.horizon.inventory.dto.NodeDTO;
-import org.opennms.horizon.server.model.inventory.Node;
-import org.opennms.horizon.server.model.inventory.NodeCreate;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import lombok.Getter;
+import lombok.Setter;
+import org.opennms.horizon.inventory.model.SnmpInterface;
 
+import java.util.ArrayList;
+import java.util.List;
 
-@Mapper(componentModel = "spring", uses = {TagMapper.class, IpInterfaceMapper.class, SnmpInterfaceMapper.class},
-    // Needed for grpc proto mapping
-    collectionMappingStrategy = CollectionMappingStrategy.ADDER_PREFERRED)
-public interface NodeMapper {
+@Getter
+@Setter
+@Entity
+@Table(name = "default_node")
+public class DefaultNode extends Node {
 
-    @Mappings({
-        @Mapping(source = "ipInterfacesList", target = "ipInterfaces"),
-        @Mapping(source = "snmpInterfacesList", target = "snmpInterfaces")
-    })
-    Node protoToNode(NodeDTO nodeDTO);
+    @Column(name = "system_objectid")
+    private String objectId;
 
-    @Mapping(target = "location", source = "location", nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
-    @Mapping(target = "tagsList", source = "tags", nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
-    NodeCreateDTO nodeCreateToProto(NodeCreate request);
+    @Column(name = "system_name")
+    private String systemName;
+
+    @Column(name = "system_desc")
+    private String systemDescr;
+
+    @Column(name = "system_location")
+    private String systemLocation;
+
+    @Column(name = "system_contact")
+    private String systemContact;
+
+    @OneToMany(mappedBy = "node", orphanRemoval = true, cascade = CascadeType.ALL)
+    private List<SnmpInterface> snmpInterfaces = new ArrayList<>();
 }

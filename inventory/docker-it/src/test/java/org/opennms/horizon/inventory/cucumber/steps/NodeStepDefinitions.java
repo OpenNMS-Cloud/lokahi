@@ -1,13 +1,14 @@
 package org.opennms.horizon.inventory.cucumber.steps;
 
+import com.google.common.base.Function;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Int64Value;
-import io.cucumber.java.BeforeAll;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import org.opennms.horizon.inventory.cucumber.InventoryBackgroundHelper;
+import org.opennms.horizon.inventory.dto.DefaultNodeCreateDTO;
+import org.opennms.horizon.inventory.dto.DefaultNodeDTO;
 import org.opennms.horizon.inventory.dto.MonitoringLocationDTO;
-import org.opennms.horizon.inventory.dto.NodeCreateDTO;
 import org.opennms.horizon.inventory.dto.NodeDTO;
 import org.opennms.horizon.inventory.dto.NodeLabelSearchQuery;
 import org.opennms.horizon.inventory.dto.NodeList;
@@ -19,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class NodeStepDefinitions {
     private final InventoryBackgroundHelper backgroundHelper;
-    private NodeDTO node;
+    private DefaultNodeDTO node;
     private MonitoringLocationDTO monitoringLocation;
     private NodeList fetchedNodeList;
 
@@ -60,8 +61,8 @@ public class NodeStepDefinitions {
     public void aNewNodeWithLabelIpAddressAndLocation(String label, String ipAddress, String location) {
         deleteAllNodes();
 
-        var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
-        node = nodeServiceBlockingStub.createNode(NodeCreateDTO.newBuilder().setLabel(label)
+        var defaultNodeServiceBlockingStub = backgroundHelper.getDefaultNodeServiceBlockingStub();
+        node = defaultNodeServiceBlockingStub.createNode(DefaultNodeCreateDTO.newBuilder().setLabel(label)
             .setManagementIp(ipAddress).setLocation(location).build());
 
         var monitoringLocationStub = backgroundHelper.getMonitoringLocationStub();
@@ -92,7 +93,7 @@ public class NodeStepDefinitions {
         assertEquals(nodeListSize, fetchedNodeList.getNodesCount());
 
         List<NodeDTO> nodesList = fetchedNodeList.getNodesList();
-        nodesList.stream().map(NodeDTO::getNodeLabel)
+        nodesList.stream().map((Function<NodeDTO, String>) nodeDTO -> nodeDTO.getDefault().getNodeLabel())
             .forEach(label -> assertTrue(label.contains(labelSearchTerm)));
     }
 
@@ -108,7 +109,11 @@ public class NodeStepDefinitions {
     private void deleteAllNodes() {
         var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
         for (NodeDTO nodeDTO : nodeServiceBlockingStub.listNodes(Empty.newBuilder().build()).getNodesList()) {
-            nodeServiceBlockingStub.deleteNode(Int64Value.newBuilder().setValue(nodeDTO.getId()).build());
+            if (nodeDTO.hasDefault()) {
+                nodeServiceBlockingStub.deleteNode(Int64Value.newBuilder().setValue(nodeDTO.getDefault().getId()).build());
+            } else if (nodeDTO.hasAzure()) {
+                nodeServiceBlockingStub.deleteNode(Int64Value.newBuilder().setValue(nodeDTO.getAzure().getId()).build());
+            }
         }
     }
 }

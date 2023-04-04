@@ -47,7 +47,7 @@
               <!-- Category: {{ node?.categories?.length ? node?.categories[0].name : 'N/A' }} -->
             </LPopup>
             <LIcon
-              :icon-url="setIcon(node as Partial<Node>)"
+              :icon-url="setIcon(node as Partial<DefaultNode>)"
               :icon-size="iconSize"
             />
           </LMarker>
@@ -88,7 +88,7 @@ import SeverityFilter from './SeverityFilter.vue'
 import { useTopologyStore } from '@/store/Views/topologyStore'
 import { useMapStore } from '@/store/Views/mapStore'
 import useSpinner from '@/composables/useSpinner'
-import { Node } from '@/types/graphql'
+import { DefaultNode } from '@/types/graphql'
 import useTheme from '@/composables/useTheme'
 // @ts-ignore
 import { Map as LeafletMap, divIcon, MarkerCluster as Cluster } from 'leaflet'
@@ -114,7 +114,7 @@ const nodes = computed(() => mapStore.nodesWithCoordinates)
 const center = computed<number[]>(() => ['latitude', 'longitude'].map(k => (mapStore.mapCenter as any)[k] ))
 const bounds = computed(() => {
   const coordinatedMap = getNodeCoordinateMap.value
-  return mapStore.nodesWithCoordinates.map((node: Node) => coordinatedMap.get(node?.id))
+  return mapStore.nodesWithCoordinates.map((node: DefaultNode) => coordinatedMap.get(node?.id))
 })
 const nodeLabelAlarmServerityMap = computed(() => mapStore.getDeviceAlarmSeverityMap())
 
@@ -173,7 +173,7 @@ const iconCreateFunction = (cluster: Cluster) => {
   return divIcon({ html: `<span class=${highestSeverity}>` + cluster.getChildCount() + '</span>' })
 }
 
-const setIcon = (node?: Partial<Node>) => setMarkerColor(node?.nodeLabel)
+const setIcon = (node?: Partial<DefaultNode>) => setMarkerColor(node?.nodeLabel)
 
 const setMarkerColor = (severity: string | undefined | null) => {
   if (severity) {

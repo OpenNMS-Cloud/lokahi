@@ -31,7 +31,8 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.io.Resources;
 import com.google.protobuf.Any;
 import lombok.RequiredArgsConstructor;
-import org.opennms.horizon.inventory.dto.MonitoringLocationDTO;
+import org.opennms.horizon.inventory.model.MonitoringLocation;
+import org.opennms.horizon.inventory.repository.MonitoringLocationRepository;
 import org.opennms.horizon.inventory.service.taskset.TaskUtils;
 import org.opennms.horizon.inventory.service.taskset.publisher.TaskSetPublisher;
 import org.opennms.horizon.shared.protobuf.util.ProtobufUtil;
@@ -54,19 +55,19 @@ import java.util.List;
 @RequiredArgsConstructor
 public class FlowsConfigService {
     private static final Logger LOG = LoggerFactory.getLogger(FlowsConfigService.class);
-    public final static String FLOWS_CONFIG  = "flows-config";
-    private final MonitoringLocationService monitoringLocationService;
+    public static final String FLOWS_CONFIG  = "flows-config";
+    private final MonitoringLocationRepository locationRepository;
     private final TaskSetPublisher taskSetPublisher;
 
     @EventListener(ApplicationReadyEvent.class)
     public void sendFlowConfigToMinionAfterStartup() {
-        List<MonitoringLocationDTO> allLocations = monitoringLocationService.findAll();
+        List<MonitoringLocation> allLocations = locationRepository.findAll();
 
-        for (MonitoringLocationDTO dto : allLocations) {
+        for (MonitoringLocation location : allLocations) {
             try {
-                sendFlowsConfigToMinion(dto.getTenantId(), dto.getLocation());
+                sendFlowsConfigToMinion(location.getTenantId(), location.getLocation());
             } catch (Exception e) {
-                LOG.error("Fail to sent flow config for tenant: {}, to location: {}", dto.getTenantId(), dto.getLocation());
+                LOG.error("Fail to sent flow config for tenant: {}, to location: {}", location.getTenantId(), location.getLocation());
             }
         }
     }

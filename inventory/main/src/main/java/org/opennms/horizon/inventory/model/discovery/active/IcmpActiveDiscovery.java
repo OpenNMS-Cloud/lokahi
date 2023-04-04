@@ -40,7 +40,7 @@ import java.util.List;
 
 @Getter
 @Setter
-@Entity(name = "icmp_active_discovery")
+@Entity
 public class IcmpActiveDiscovery extends ActiveDiscovery {
 
     @NotNull

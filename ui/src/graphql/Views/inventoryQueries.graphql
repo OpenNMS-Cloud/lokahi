@@ -1,5 +1,5 @@
 query NodesList {
-  ...NodesParts
+  ...NodeParts
 }
 
 query NodeLatencyMetric($id: Long!, $monitor: String!, $instance: String!, $timeRange: Int!, $timeRangeUnit: TimeRangeUnit!) {

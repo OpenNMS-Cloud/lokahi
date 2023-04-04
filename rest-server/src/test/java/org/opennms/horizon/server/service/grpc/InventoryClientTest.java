@@ -46,6 +46,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.opennms.horizon.inventory.dto.DefaultNodeDTO;
+import org.opennms.horizon.inventory.dto.DefaultNodeServiceGrpc;
 import org.opennms.horizon.inventory.dto.IdList;
 import org.opennms.horizon.inventory.dto.MonitoringLocationDTO;
 import org.opennms.horizon.inventory.dto.MonitoringLocationList;
@@ -53,7 +55,7 @@ import org.opennms.horizon.inventory.dto.MonitoringLocationServiceGrpc;
 import org.opennms.horizon.inventory.dto.MonitoringSystemDTO;
 import org.opennms.horizon.inventory.dto.MonitoringSystemList;
 import org.opennms.horizon.inventory.dto.MonitoringSystemServiceGrpc;
-import org.opennms.horizon.inventory.dto.NodeCreateDTO;
+import org.opennms.horizon.inventory.dto.DefaultNodeCreateDTO;
 import org.opennms.horizon.inventory.dto.NodeDTO;
 import org.opennms.horizon.inventory.dto.NodeList;
 import org.opennms.horizon.inventory.dto.NodeServiceGrpc;
@@ -82,6 +84,7 @@ public class InventoryClientTest {
     private static MockServerInterceptor mockInterceptor;
     private static MonitoringLocationServiceGrpc.MonitoringLocationServiceImplBase mockLocationService;
     private static NodeServiceGrpc.NodeServiceImplBase mockNodeService;
+    private static DefaultNodeServiceGrpc.DefaultNodeServiceImplBase mockDefaultNodeService;
     private static MonitoringSystemServiceGrpc.MonitoringSystemServiceImplBase mockSystemService;
     private final String accessToken = "test-token";
 
@@ -112,9 +115,8 @@ public class InventoryClientTest {
         mockNodeService = mock(NodeServiceGrpc.NodeServiceImplBase.class, delegatesTo(
             new NodeServiceGrpc.NodeServiceImplBase(){
                 @Override
-                public void createNode(NodeCreateDTO request, StreamObserver<NodeDTO> responseObserver) {
-                    responseObserver.onNext(NodeDTO.newBuilder()
-                        .setNodeLabel(request.getLabel()).build());
+                public void getNodeById(Int64Value request, StreamObserver<NodeDTO> responseObserver) {
+                    responseObserver.onNext(NodeDTO.newBuilder().build());
                     responseObserver.onCompleted();
                 }
 
@@ -123,12 +125,15 @@ public class InventoryClientTest {
                     responseObserver.onNext(NodeList.newBuilder().build());
                     responseObserver.onCompleted();
                 }
-
+            }));
+        mockDefaultNodeService = mock(DefaultNodeServiceGrpc.DefaultNodeServiceImplBase.class, delegatesTo(
+            new DefaultNodeServiceGrpc.DefaultNodeServiceImplBase(){
                 @Override
-                public void getNodeById(Int64Value request, StreamObserver<NodeDTO> responseObserver) {
-                    responseObserver.onNext(NodeDTO.newBuilder().build());
+                public void createNode(DefaultNodeCreateDTO request, StreamObserver<DefaultNodeDTO> responseObserver) {
+                    responseObserver.onNext(DefaultNodeDTO.newBuilder().setNodeLabel(request.getLabel()).build());
                     responseObserver.onCompleted();
                 }
+
             }));
 
         mockSystemService = mock(MonitoringSystemServiceGrpc.MonitoringSystemServiceImplBase.class, delegatesTo(
@@ -149,7 +154,9 @@ public class InventoryClientTest {
         grpcCleanUp.register(InProcessServerBuilder.forName("InventoryClientTest").intercept(mockInterceptor)
             .addService(mockLocationService)
             .addService(mockSystemService)
-            .addService(mockNodeService).directExecutor().build().start());
+            .addService(mockNodeService)
+            .addService(mockDefaultNodeService)
+            .directExecutor().build().start());
         ManagedChannel channel = grpcCleanUp.register(InProcessChannelBuilder.forName("InventoryClientTest").directExecutor().build());
         client = new InventoryClient(channel, 5000);
         client.initialStubs();
@@ -160,7 +167,8 @@ public class InventoryClientTest {
         verifyNoMoreInteractions(mockLocationService);
         verifyNoMoreInteractions(mockSystemService);
         verifyNoMoreInteractions(mockNodeService);
-        reset(mockNodeService, mockSystemService, mockLocationService);
+        verifyNoMoreInteractions(mockDefaultNodeService);
+        reset(mockNodeService, mockDefaultNodeService, mockSystemService, mockLocationService);
         mockInterceptor.reset();
     }
 
@@ -204,13 +212,13 @@ public class InventoryClientTest {
 
     @Test
     public void testCreateNewNode() {
-        NodeCreateDTO createDTO = NodeCreateDTO.newBuilder().setLabel("test-node").build();
+        DefaultNodeCreateDTO createDTO = DefaultNodeCreateDTO.newBuilder().setLabel("test-node").build();
         String methodName = new Object(){}.getClass().getEnclosingMethod().getName();
-        ArgumentCaptor<NodeCreateDTO> captor = ArgumentCaptor.forClass(NodeCreateDTO.class);
-        NodeDTO result = client.createNewNode(createDTO, accessToken + methodName);
+        ArgumentCaptor<DefaultNodeCreateDTO> captor = ArgumentCaptor.forClass(DefaultNodeCreateDTO.class);
+        DefaultNodeDTO result = client.createNewNode(createDTO, accessToken + methodName);
         assertThat(result).isNotNull();
         assertThat(result.getNodeLabel()).isEqualTo(createDTO.getLabel());
-        verify(mockNodeService).createNode(captor.capture(), any());
+        verify(mockDefaultNodeService).createNode(captor.capture(), any());
         assertThat(captor.getValue()).isEqualTo(createDTO);
         assertThat(mockInterceptor.getAuthHeader()).isEqualTo(accessToken + methodName);
     }

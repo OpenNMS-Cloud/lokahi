@@ -1,10 +1,5 @@
 <template>
   <ul class="text-anchor-list">
-    <!-- <li data-test="profile">
-      <label :for="label.profile">{{ label.profile }}: </label>
-      <a v-if="anchor.profileLink" @click="goto(anchor.profileLink)" :id="label.profile">{{ anchor?.profileValue }}</a>
-      <span v-else :id="label.profile">{{ anchor.profileValue }}</span>
-    </li> -->
     <li data-test="location">
       <label :for="label.location">{{ label.location }}: </label>
       <a
@@ -33,6 +28,14 @@
         >{{ anchor.managementIpValue }}</span
       >
     </li>
+    <li data-test="node-type">
+      <label :for="label.nodeType">{{ label.nodeType }}: </label>
+      <span
+        :id="label.nodeType"
+        class="node-type"
+        >{{ anchor.nodeType }}
+      </span>
+    </li>
   </ul>
 </template>
 
@@ -55,7 +58,8 @@ const goto = (path: string | undefined) => {
 const label = {
   profile: 'Monitoring Profile',
   location: 'Monitoring Location',
-  managementIp: 'Management IP'
+  managementIp: 'Management IP',
+  nodeType: 'Node Type'
 }
 </script>
 
@@ -68,21 +72,12 @@ const label = {
   gap: 0.2rem;
 }
 
-.tag-list {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  > ul {
-    margin-left: var(variables.$spacing-xxs);
-    > li {
-      display: inline;
-      &:after {
-        content: ', ';
-      }
-      &:last-child:after {
-        content: '';
-      }
-    }
+.node-type {
+  display: inline-block;
+  text-transform: lowercase;
+
+  &.node-type:first-letter {
+    text-transform: capitalize !important;
   }
 }
 </style>

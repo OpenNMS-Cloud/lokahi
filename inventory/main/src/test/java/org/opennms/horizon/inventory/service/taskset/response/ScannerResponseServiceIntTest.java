@@ -37,20 +37,23 @@ import org.junit.jupiter.api.Test;
 import org.opennms.horizon.azure.api.AzureScanItem;
 import org.opennms.horizon.azure.api.AzureScanResponse;
 import org.opennms.horizon.inventory.SpringContextTestInitializer;
-import org.opennms.horizon.inventory.dto.NodeCreateDTO;
+import org.opennms.horizon.inventory.dto.DefaultNodeCreateDTO;
 import org.opennms.horizon.inventory.grpc.GrpcTestBase;
 import org.opennms.horizon.inventory.model.IpInterface;
-import org.opennms.horizon.inventory.model.Node;
+import org.opennms.horizon.inventory.model.node.AzureNode;
+import org.opennms.horizon.inventory.model.node.DefaultNode;
+import org.opennms.horizon.inventory.model.node.Node;
 import org.opennms.horizon.inventory.model.SnmpInterface;
 import org.opennms.horizon.inventory.model.Tag;
 import org.opennms.horizon.inventory.model.discovery.active.AzureActiveDiscovery;
 import org.opennms.horizon.inventory.repository.IpInterfaceRepository;
 import org.opennms.horizon.inventory.repository.MonitoringLocationRepository;
-import org.opennms.horizon.inventory.repository.NodeRepository;
+import org.opennms.horizon.inventory.repository.node.AzureNodeRepository;
+import org.opennms.horizon.inventory.repository.node.DefaultNodeRepository;
 import org.opennms.horizon.inventory.repository.SnmpInterfaceRepository;
 import org.opennms.horizon.inventory.repository.TagRepository;
 import org.opennms.horizon.inventory.repository.discovery.active.AzureActiveDiscoveryRepository;
-import org.opennms.horizon.inventory.service.NodeService;
+import org.opennms.horizon.inventory.service.node.DefaultNodeService;
 import org.opennms.horizon.shared.utils.InetAddressUtils;
 import org.opennms.node.scan.contract.IpInterfaceResult;
 import org.opennms.node.scan.contract.NodeInfoResult;
@@ -96,7 +99,10 @@ class ScannerResponseServiceIntTest extends GrpcTestBase {
     private AzureActiveDiscoveryRepository azureActiveDiscoveryRepository;
 
     @Autowired
-    private NodeRepository nodeRepository;
+    private DefaultNodeRepository defaultNodeRepository;
+
+    @Autowired
+    private AzureNodeRepository azureNodeRepository;
 
     @Autowired
     private IpInterfaceRepository ipInterfaceRepository;
@@ -105,7 +111,7 @@ class ScannerResponseServiceIntTest extends GrpcTestBase {
     private SnmpInterfaceRepository snmpInterfaceRepository;
 
     @Autowired
-    private NodeService nodeService;
+    private DefaultNodeService nodeService;
 
     @Autowired
     private TagRepository tagRepository;
@@ -120,7 +126,7 @@ class ScannerResponseServiceIntTest extends GrpcTestBase {
     public void cleanUp() {
         tagRepository.deleteAll();
         ipInterfaceRepository.deleteAll();
-        nodeRepository.deleteAll();
+        defaultNodeRepository.deleteAll();
         azureActiveDiscoveryRepository.deleteAll();
         locationRepository.deleteAll();
     }
@@ -148,7 +154,7 @@ class ScannerResponseServiceIntTest extends GrpcTestBase {
                 (taskDefinition.getType().equals(TaskType.MONITOR) || taskDefinition.getType().equals(TaskType.COLLECTOR)))
             .collect(Collectors.toSet()).size(), Matchers.is(2));
 
-        List<Node> allNodes = nodeRepository.findAll();
+        List<AzureNode> allNodes = azureNodeRepository.findAll();
         assertEquals(1, allNodes.size());
 
         Node node = allNodes.get(0);
@@ -171,14 +177,14 @@ class ScannerResponseServiceIntTest extends GrpcTestBase {
     @Test
     void testAcceptNodeScanResult() throws InvalidProtocolBufferException {
         String managedIp = "127.0.0.1";
-        Node node = createNode(managedIp);
+        DefaultNode node = createDefaultNode(managedIp);
         int ifIndex = 1;
         SnmpInterface snmpIf = createSnmpInterface(node, ifIndex);
         NodeScanResult result = createNodeScanResult(node.getId(), managedIp, ifIndex);
 
         service.accept(TEST_TENANT_ID, TEST_LOCATION, ScannerResponse.newBuilder().setResult(Any.pack(result)).build());
         assertNodeSystemGroup(node, null);
-        nodeRepository.findByIdAndTenantId(node.getId(), TEST_TENANT_ID).ifPresentOrElse(dbNode ->
+        defaultNodeRepository.findByIdAndTenantId(node.getId(), TEST_TENANT_ID).ifPresentOrElse(dbNode ->
             assertNodeSystemGroup(dbNode, result.getNodeInfo()), () -> fail("Node not found"));
 
         assertIpInterface(node.getIpInterfaces().get(0), null);
@@ -197,8 +203,8 @@ class ScannerResponseServiceIntTest extends GrpcTestBase {
 
     }
 
-    private Node createNode(String ipAddress) {
-        NodeCreateDTO createDTO = NodeCreateDTO.newBuilder()
+    private DefaultNode createDefaultNode(String ipAddress) {
+        DefaultNodeCreateDTO createDTO = DefaultNodeCreateDTO.newBuilder()
             .setLabel("test-node")
             .setManagementIp(ipAddress)
             .setLocation(TEST_LOCATION)
@@ -206,7 +212,7 @@ class ScannerResponseServiceIntTest extends GrpcTestBase {
         return nodeService.createNode(createDTO, ScanType.NODE_SCAN, TEST_TENANT_ID);
     }
 
-    private SnmpInterface createSnmpInterface(Node node, int ifIndex) {
+    private SnmpInterface createSnmpInterface(DefaultNode node, int ifIndex) {
         SnmpInterface snmpIf = new SnmpInterface();
         snmpIf.setTenantId(TEST_TENANT_ID);
         snmpIf.setNode(node);
@@ -286,14 +292,14 @@ class ScannerResponseServiceIntTest extends GrpcTestBase {
         return discovery;
     }
 
-    private void assertNodeSystemGroup(Node node, NodeInfoResult nodeInfo) {
+    private void assertNodeSystemGroup(DefaultNode node, NodeInfoResult nodeInfo) {
         if (nodeInfo != null) {
             assertThat(node)
-                .extracting(Node::getObjectId,
-                    Node::getSystemName,
-                    Node::getSystemDescr,
-                    Node::getSystemLocation,
-                    Node::getSystemContact)
+                .extracting(DefaultNode::getObjectId,
+                    DefaultNode::getSystemName,
+                    DefaultNode::getSystemDescr,
+                    DefaultNode::getSystemLocation,
+                    DefaultNode::getSystemContact)
                 .containsExactly(nodeInfo.getObjectId(),
                     nodeInfo.getSystemName(),
                     nodeInfo.getSystemDescr(),
@@ -302,11 +308,11 @@ class ScannerResponseServiceIntTest extends GrpcTestBase {
             assertEquals(nodeInfo.getSystemName(), node.getNodeLabel());
         } else {
             assertThat(node)
-                .extracting(Node::getObjectId,
-                    Node::getSystemName,
-                    Node::getSystemDescr,
-                    Node::getSystemLocation,
-                    Node::getSystemContact)
+                .extracting(DefaultNode::getObjectId,
+                    DefaultNode::getSystemName,
+                    DefaultNode::getSystemDescr,
+                    DefaultNode::getSystemLocation,
+                    DefaultNode::getSystemContact)
                 .containsExactly(null, null, null, null, null);
         }
     }

@@ -36,7 +36,6 @@ public final class Constants {
     public static final String AZURE_MONITOR_TYPE = "AZURE";
     public static final String SNMP_MONITOR_TYPE = "SNMP";
 
-    public static final String NODE_SCAN_TYPE = "DISCOVERY_SCAN";
     public static final String AZURE_SCAN_TYPE = "AZURE_SCAN";
 
     // Common Metric Name

@@ -41,7 +41,7 @@ const nodeLatency = computed<GraphProps>(() => {
     label: 'ICMP Response Time',
     metrics: ['response_time_msec'],
     monitor: 'ICMP',
-    nodeId: route.params.id as string,
+    nodeId: Number(route.params.id),
     instance: instance.value,
     timeRange: 10,
     timeRangeUnit: TimeRangeUnit.Minute
@@ -53,7 +53,7 @@ const bytesIn = computed<GraphProps>(() => {
     label: 'Bytes Inbound',
     metrics: ['network_in_total_bytes'],
     monitor: 'SNMP',
-    nodeId: route.params.id as string,
+    nodeId: Number(route.params.id),
     instance: instance.value,
     timeRange: 10,
     timeRangeUnit: TimeRangeUnit.Minute
@@ -65,7 +65,7 @@ const bytesOut = computed<GraphProps>(() => {
     label: 'Bytes Outbound',
     metrics: ['network_out_total_bytes'],
     monitor: 'SNMP',
-    nodeId: route.params.id as string,
+    nodeId: Number(route.params.id),
     instance: instance.value,
     timeRange: 10,
     timeRangeUnit: TimeRangeUnit.Minute
@@ -77,7 +77,7 @@ const bytesInOut = computed<GraphProps>(() => {
     label: 'Bytes Inbound / Outbound',
     metrics: ['network_in_total_bytes', 'network_out_total_bytes'],
     monitor: 'SNMP',
-    nodeId: route.params.id as string,
+    nodeId: Number(route.params.id),
     instance: instance.value,
     timeRange: 10,
     timeRangeUnit: TimeRangeUnit.Minute

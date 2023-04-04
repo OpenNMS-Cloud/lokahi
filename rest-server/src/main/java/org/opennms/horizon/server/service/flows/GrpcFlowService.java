@@ -35,9 +35,9 @@ import io.leangen.graphql.spqr.spring.annotations.GraphQLApi;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.opennms.horizon.server.mapper.IpInterfaceMapper;
-import org.opennms.horizon.server.mapper.NodeMapper;
 import org.opennms.horizon.server.mapper.flows.FlowingPointMapper;
 import org.opennms.horizon.server.mapper.flows.TrafficSummaryMapper;
+import org.opennms.horizon.server.mapper.node.DefaultNodeMapper;
 import org.opennms.horizon.server.model.flows.Exporter;
 import org.opennms.horizon.server.model.flows.FlowingPoint;
 import org.opennms.horizon.server.model.flows.RequestCriteria;
@@ -59,7 +59,7 @@ public class GrpcFlowService {
     private final FlowClient flowClient;
     private final InventoryClient inventoryClient;
 
-    private final NodeMapper nodeMapper;
+    private final DefaultNodeMapper nodeMapper;
     private final IpInterfaceMapper ipInterfaceMapper;
     private final TrafficSummaryMapper trafficSummaryMapper;
     private final FlowingPointMapper flowingPointMapper;
@@ -104,7 +104,7 @@ public class GrpcFlowService {
                 var nodeDTO = inventoryClient.getNodeById(ipInterfaceDTO.getNodeId(), headerUtil.getAuthHeader(env));
                 var exporter = new Exporter();
                 exporter.setIpInterface(ipInterfaceMapper.protoToIpInterface(ipInterfaceDTO));
-                exporter.setNode(nodeMapper.protoToNode(nodeDTO));
+                exporter.setNode(nodeMapper.protoToNode(nodeDTO.getDefault()));
                 return exporter;
             }
         }

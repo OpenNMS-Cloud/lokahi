@@ -1,7 +1,7 @@
-import { Node } from './graphql'
+import { SnmpInterface, Location, IpInterface, DefaultNode } from './graphql'
 import { Chip } from './metric'
 
-interface ExtendedNode extends Node {
+interface ExtendedNode extends DefaultNode {
   latency?: Chip
   status?: string | undefined
 }

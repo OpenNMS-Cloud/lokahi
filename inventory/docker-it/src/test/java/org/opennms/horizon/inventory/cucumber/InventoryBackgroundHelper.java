@@ -37,6 +37,8 @@ import lombok.Getter;
 import org.opennms.horizon.inventory.discovery.IcmpActiveDiscoveryServiceGrpc;
 import org.opennms.horizon.inventory.dto.ActiveDiscoveryServiceGrpc;
 import org.opennms.horizon.inventory.dto.AzureActiveDiscoveryServiceGrpc;
+import org.opennms.horizon.inventory.dto.AzureNodeServiceGrpc;
+import org.opennms.horizon.inventory.dto.DefaultNodeServiceGrpc;
 import org.opennms.horizon.inventory.dto.MonitoringLocationServiceGrpc;
 import org.opennms.horizon.inventory.dto.MonitoringSystemServiceGrpc;
 import org.opennms.horizon.inventory.dto.NodeServiceGrpc;
@@ -62,6 +64,8 @@ public class InventoryBackgroundHelper {
     private MonitoringSystemServiceGrpc.MonitoringSystemServiceBlockingStub monitoringSystemStub;
     private MonitoringLocationServiceGrpc.MonitoringLocationServiceBlockingStub monitoringLocationStub;
     private NodeServiceGrpc.NodeServiceBlockingStub nodeServiceBlockingStub;
+    private DefaultNodeServiceGrpc.DefaultNodeServiceBlockingStub defaultNodeServiceBlockingStub;
+    private AzureNodeServiceGrpc.AzureNodeServiceBlockingStub azureNodeServiceBlockingStub;
     private TagServiceGrpc.TagServiceBlockingStub tagServiceBlockingStub;
     private ActiveDiscoveryServiceGrpc.ActiveDiscoveryServiceBlockingStub activeDiscoveryServiceBlockingStub;
     private IcmpActiveDiscoveryServiceGrpc.IcmpActiveDiscoveryServiceBlockingStub icmpActiveDiscoveryServiceBlockingStub;
@@ -101,6 +105,10 @@ public class InventoryBackgroundHelper {
         nodeServiceBlockingStub = NodeServiceGrpc.newBlockingStub(managedChannel)
             .withInterceptors(prepareGrpcHeaderInterceptor()).withDeadlineAfter(DEADLINE_DURATION, TimeUnit.SECONDS);
         nodeServiceBlockingStub = NodeServiceGrpc.newBlockingStub(managedChannel)
+            .withInterceptors(prepareGrpcHeaderInterceptor()).withDeadlineAfter(DEADLINE_DURATION, TimeUnit.SECONDS);
+        defaultNodeServiceBlockingStub = DefaultNodeServiceGrpc.newBlockingStub(managedChannel)
+            .withInterceptors(prepareGrpcHeaderInterceptor()).withDeadlineAfter(DEADLINE_DURATION, TimeUnit.SECONDS);
+        azureNodeServiceBlockingStub = AzureNodeServiceGrpc.newBlockingStub(managedChannel)
             .withInterceptors(prepareGrpcHeaderInterceptor()).withDeadlineAfter(DEADLINE_DURATION, TimeUnit.SECONDS);
         tagServiceBlockingStub = TagServiceGrpc.newBlockingStub(managedChannel)
             .withInterceptors(prepareGrpcHeaderInterceptor()).withDeadlineAfter(DEADLINE_DURATION, TimeUnit.SECONDS);

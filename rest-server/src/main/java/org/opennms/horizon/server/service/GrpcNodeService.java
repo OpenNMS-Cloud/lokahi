@@ -28,6 +28,7 @@
 
 package org.opennms.horizon.server.service;
 
+import com.google.common.base.Function;
 import io.leangen.graphql.annotations.GraphQLArgument;
 import io.leangen.graphql.annotations.GraphQLContext;
 import io.leangen.graphql.annotations.GraphQLEnvironment;
@@ -37,11 +38,14 @@ import io.leangen.graphql.execution.ResolutionEnvironment;
 import io.leangen.graphql.spqr.spring.annotations.GraphQLApi;
 import lombok.RequiredArgsConstructor;
 import org.dataloader.DataLoader;
+import org.opennms.horizon.inventory.dto.NodeDTO;
 import org.opennms.horizon.server.config.DataLoaderFactory;
-import org.opennms.horizon.server.mapper.NodeMapper;
+import org.opennms.horizon.server.mapper.node.DefaultNodeMapper;
+import org.opennms.horizon.server.mapper.node.NodeMapper;
 import org.opennms.horizon.server.model.inventory.Location;
-import org.opennms.horizon.server.model.inventory.Node;
 import org.opennms.horizon.server.model.inventory.NodeCreate;
+import org.opennms.horizon.server.model.inventory.node.DefaultNode;
+import org.opennms.horizon.server.model.inventory.node.Node;
 import org.opennms.horizon.server.model.status.NodeStatus;
 import org.opennms.horizon.server.service.grpc.InventoryClient;
 import org.opennms.horizon.server.utils.ServerHeaderUtil;
@@ -51,7 +55,6 @@ import reactor.core.publisher.Mono;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @GraphQLApi
@@ -60,42 +63,48 @@ public class GrpcNodeService {
     private static final String ICMP_MONITOR_TYPE = "ICMP";
 
     private final InventoryClient client;
-    private final NodeMapper mapper;
+    private final NodeMapper nodeMapper;
+    private final DefaultNodeMapper defaultNodeMapper;
     private final ServerHeaderUtil headerUtil;
     private final NodeStatusService nodeStatusService;
 
     @GraphQLQuery
     public Flux<Node> findAllNodes(@GraphQLEnvironment ResolutionEnvironment env) {
-        return Flux.fromIterable(client.listNodes(headerUtil.getAuthHeader(env)).stream().map(mapper::protoToNode).toList());
+        return Flux.fromIterable(client.listNodes(headerUtil.getAuthHeader(env)).stream()
+            .map((Function<NodeDTO, Node>) nodeMapper::dtoToNode).toList());
     }
 
     @GraphQLQuery
     public Flux<Node> findAllNodesByMonitoredState(@GraphQLArgument(name = "monitoredState") String monitoredState, @GraphQLEnvironment ResolutionEnvironment env) {
-        return Flux.fromIterable(client.listNodesByMonitoredState(monitoredState, headerUtil.getAuthHeader(env)).stream().map(mapper::protoToNode).toList());
+        return Flux.fromIterable(client.listNodesByMonitoredState(monitoredState, headerUtil.getAuthHeader(env)).stream()
+            .map((Function<NodeDTO, Node>) nodeMapper::dtoToNode).toList());
     }
 
     @GraphQLQuery
     public Flux<Node> findAllNodesByNodeLabelSearch(@GraphQLArgument(name = "labelSearchTerm") String labelSearchTerm, @GraphQLEnvironment ResolutionEnvironment env) {
-        return Flux.fromIterable(client.listNodesByNodeLabelSearch(labelSearchTerm, headerUtil.getAuthHeader(env)).stream().map(mapper::protoToNode).toList());
+        return Flux.fromIterable(client.listNodesByNodeLabelSearch(labelSearchTerm, headerUtil.getAuthHeader(env)).stream()
+            .map((Function<NodeDTO, Node>) nodeMapper::dtoToNode).toList());
     }
 
     @GraphQLQuery
     public Flux<Node> findAllNodesByTags(@GraphQLArgument(name = "tags") List<String> tags, @GraphQLEnvironment ResolutionEnvironment env) {
-        return Flux.fromIterable(client.listNodesByTags(tags, headerUtil.getAuthHeader(env)).stream().map(mapper::protoToNode).toList());
+        return Flux.fromIterable(client.listNodesByTags(tags, headerUtil.getAuthHeader(env)).stream()
+            .map((Function<NodeDTO, Node>) nodeMapper::dtoToNode).toList());
     }
 
     @GraphQLQuery
     public Mono<Node> findNodeById(@GraphQLArgument(name = "id") Long id, @GraphQLEnvironment ResolutionEnvironment env) {
-        return Mono.just(mapper.protoToNode(client.getNodeById(id, headerUtil.getAuthHeader(env))));
+        NodeDTO nodeById = client.getNodeById(id, headerUtil.getAuthHeader(env));
+        return Mono.just(nodeMapper.dtoToNode(nodeById));
     }
 
     @GraphQLMutation
     public Mono<Node> addNode(NodeCreate node, @GraphQLEnvironment ResolutionEnvironment env) {
-        return Mono.just(mapper.protoToNode(client.createNewNode(mapper.nodeCreateToProto(node), headerUtil.getAuthHeader(env))));
+        return Mono.just(nodeMapper.defaultDtoToNode(client.createNewNode(defaultNodeMapper.nodeCreateToProto(node), headerUtil.getAuthHeader(env))));
     }
 
     @GraphQLQuery
-    public CompletableFuture<Location> location(@GraphQLContext Node node, @GraphQLEnvironment ResolutionEnvironment env) {
+    public CompletableFuture<Location> location(@GraphQLContext DefaultNode node, @GraphQLEnvironment ResolutionEnvironment env) {
         DataLoader<DataLoaderFactory.Key, Location> locationLoader = env.dataFetchingEnvironment.getDataLoader(DataLoaderFactory.DATA_LOADER_LOCATION);
         DataLoaderFactory.Key key = new DataLoaderFactory.Key(node.getMonitoringLocationId(), headerUtil.getAuthHeader(env));
         return locationLoader.load(key);

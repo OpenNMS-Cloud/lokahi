@@ -46,9 +46,10 @@ import org.junit.jupiter.api.Assertions;
 import org.opennms.cloud.grpc.minion.Identity;
 import org.opennms.horizon.grpc.heartbeat.contract.HeartbeatMessage;
 import org.opennms.horizon.inventory.cucumber.InventoryBackgroundHelper;
-import org.opennms.horizon.inventory.dto.NodeCreateDTO;
-import org.opennms.horizon.inventory.dto.NodeDTO;
+import org.opennms.horizon.inventory.dto.DefaultNodeCreateDTO;
+import org.opennms.horizon.inventory.dto.DefaultNodeDTO;
 import org.opennms.horizon.inventory.dto.NodeIdQuery;
+import org.opennms.horizon.inventory.dto.NodeDTO;
 import org.opennms.horizon.inventory.dto.NodeList;
 import org.opennms.horizon.inventory.testtool.miniongateway.wiremock.client.MinionGatewayWiremockTestSteps;
 import org.opennms.horizon.shared.constants.GrpcConstants;
@@ -86,7 +87,7 @@ public class InventoryProcessingStepDefinitions {
     private boolean deviceDetectedInd;
     private String reason;
 
-    private NodeDTO node;
+    private DefaultNodeDTO node;
     private NodeList nodeList;
     private Int64Value nodeIdCreated;
 
@@ -189,7 +190,7 @@ public class InventoryProcessingStepDefinitions {
 
         assertNotNull(nodeDTO);
         assertTrue(
-            nodeDTO.getIpInterfacesList().stream().anyMatch((ele) -> ele.getIpAddress().equals(newDeviceIpAddress))
+            nodeDTO.getDefault().getIpInterfacesList().stream().anyMatch((ele) -> ele.getIpAddress().equals(newDeviceIpAddress))
         );
     }
 
@@ -211,8 +212,8 @@ public class InventoryProcessingStepDefinitions {
 
     @Then("add a new device")
     public void addANewDevice() {
-        var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
-        node = nodeServiceBlockingStub.createNode(NodeCreateDTO.newBuilder().setLabel(label).setManagementIp(newDeviceIpAddress).build());
+        var defaultNodeServiceBlockingStub = backgroundHelper.getDefaultNodeServiceBlockingStub();
+        node = defaultNodeServiceBlockingStub.createNode(DefaultNodeCreateDTO.newBuilder().setLabel(label).setManagementIp(newDeviceIpAddress).build());
         minionGatewayWiremockTestSteps.setNodeId(node.getId());
         assertNotNull(node);
     }
@@ -257,21 +258,21 @@ public class InventoryProcessingStepDefinitions {
         var nodeOptional = nodeList.getNodesList().stream().filter(
                 nodeDTO ->
                     (
-                        ( nodeDTO.getNodeLabel().equals(label) ) &&
-                        ( nodeDTO.getIpInterfacesList().stream().anyMatch(ipInterfaceDTO -> ipInterfaceDTO.getIpAddress().equals(newDeviceIpAddress))) )
+                        ( nodeDTO.getDefault().getNodeLabel().equals(label) ) &&
+                        ( nodeDTO.getDefault().getIpInterfacesList().stream().anyMatch(ipInterfaceDTO -> ipInterfaceDTO.getIpAddress().equals(newDeviceIpAddress))) )
                     )
             .findFirst();
 
         assertTrue(nodeOptional.isPresent());
 
         var node = nodeOptional.get();
-        assertEquals(label, node.getNodeLabel());
+        assertEquals(label, node.getDefault().getNodeLabel());
     }
 
     @Given("add a new device with label {string} and ip address {string} and location {string}")
     public void addANewDeviceWithLabelAndIpAddressAndLocation(String label, String ipAddress, String location) {
-        var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
-        var nodeDto = nodeServiceBlockingStub.createNode(NodeCreateDTO.newBuilder().setLabel(label).setLocation(location)
+        var defaultNodeServiceBlockingStub = backgroundHelper.getDefaultNodeServiceBlockingStub();
+        var nodeDto = defaultNodeServiceBlockingStub.createNode(DefaultNodeCreateDTO.newBuilder().setLabel(label).setLocation(location)
             .setManagementIp(ipAddress).build());
         assertNotNull(nodeDto);
     }
@@ -288,9 +289,9 @@ public class InventoryProcessingStepDefinitions {
 
     @Then("verify adding existing device with label {string} and ip address {string} and location {string} will fail")
     public void verifyAddingExistingDeviceWithLabelAndIpAddressAndLocationWillFail(String label, String ipAddress, String location) {
-        var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
+        var defaultNodeServiceBlockingStub = backgroundHelper.getDefaultNodeServiceBlockingStub();
         try {
-            var nodeDto = nodeServiceBlockingStub.createNode(NodeCreateDTO.newBuilder().setLabel(label).setLocation(location)
+            var nodeDto = defaultNodeServiceBlockingStub.createNode(DefaultNodeCreateDTO.newBuilder().setLabel(label).setLocation(location)
                 .setManagementIp(ipAddress).build());
             fail();
         } catch (Exception e) {
@@ -315,7 +316,7 @@ public class InventoryProcessingStepDefinitions {
         nodeIdCreated = nodeId;
         assertNotNull(nodeId);
 
-        node = nodeServiceBlockingStub.getNodeById(nodeId);
+        node = nodeServiceBlockingStub.getNodeById(nodeId).getDefault();
         minionGatewayWiremockTestSteps.setNodeId(node.getId());
 
         assertNotNull(node);

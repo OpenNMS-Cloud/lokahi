@@ -39,13 +39,11 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class MonitoredServiceService {
-    private final MonitoredServiceRepository modelRepo;
-
+    private final MonitoredServiceRepository repository;
     private final MonitoredServiceMapper mapper;
 
     public void createSingle(MonitoredServiceDTO newMonitoredService,
@@ -54,7 +52,7 @@ public class MonitoredServiceService {
 
         String tenantId = newMonitoredService.getTenantId();
 
-        Optional<MonitoredService> monitoredServiceOpt = modelRepo
+        Optional<MonitoredService> monitoredServiceOpt = repository
             .findByTenantIdTypeAndIpInterface(tenantId, monitoredServiceType, ipInterface);
 
         if (monitoredServiceOpt.isEmpty()) {
@@ -63,15 +61,15 @@ public class MonitoredServiceService {
             monitoredService.setIpInterface(ipInterface);
             monitoredService.setMonitoredServiceType(monitoredServiceType);
 
-            modelRepo.save(monitoredService);
+            repository.save(monitoredService);
         }
     }
 
     public List<MonitoredServiceDTO> findByTenantId(String tenantId) {
-        List<MonitoredService> all = modelRepo.findByTenantId(tenantId);
+        List<MonitoredService> all = repository.findByTenantId(tenantId);
         return all
             .stream()
             .map(mapper::modelToDTO)
-            .collect(Collectors.toList());
+            .toList();
     }
 }

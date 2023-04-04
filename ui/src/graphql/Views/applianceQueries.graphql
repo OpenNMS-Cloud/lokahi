@@ -1,17 +1,3 @@
-fragment NodesTableParts on Query {
-  findAllNodes {
-    id
-    nodeLabel
-    tenantId
-    createTime
-    monitoringLocationId
-    ipInterfaces {
-      ipAddress
-      snmpPrimary
-    }
-  }
-}
-
 fragment MinionsTableParts on Query {
   findAllMinions {
     id
@@ -27,7 +13,7 @@ fragment MinionsTableParts on Query {
 }
 
 query ListNodesForTable {
-  ...NodesTableParts
+  ...NodeParts
 }
 
 query ListMinionsForTable {
@@ -50,7 +36,7 @@ query ListNodeMetrics(
 }
 
 query ListMinionsAndDevicesForTables {
-  ...NodesTableParts
+  ...NodeParts
   ...MinionsTableParts
   ...LocationsParts
 }

@@ -40,6 +40,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import org.opennms.horizon.inventory.model.node.DefaultNode;
 
 @Getter
 @Setter
@@ -56,7 +57,7 @@ public class SnmpInterface {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "node_id", referencedColumnName = "id")
-    private Node node;
+    private DefaultNode node;
 
     @Column(name = "node_id", insertable = false, updatable = false)
     private long nodeId;

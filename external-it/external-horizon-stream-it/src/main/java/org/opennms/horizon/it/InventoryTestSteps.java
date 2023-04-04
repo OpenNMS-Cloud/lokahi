@@ -324,7 +324,8 @@ public class InventoryTestSteps {
         LinkedHashMap lhm = jsonPathEvaluator.get("data");
         ArrayList map = (ArrayList) lhm.get("findAllNodes");
         LinkedHashMap nodesData = (LinkedHashMap) map.get(0);
-        int id = (int) nodesData.get("id");
+        LinkedHashMap nodeDetailsData = (LinkedHashMap) nodesData.get("details");
+        int id = (int) nodeDetailsData.get("id");
 
         return id;
     }

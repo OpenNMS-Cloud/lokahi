@@ -1,49 +1,22 @@
 package org.opennms.horizon.it.gqlmodels.querywrappers;
 
 public class CreateNodeResponseData {
-    private long createTime;
-    private long id;
-    private long monitoringLocationId;
-    private String nodeLabel;
-    private String tenantId;
+    private String nodeType;
+    private CreateNodeResponseDetails details;
 
-    public long getCreateTime() {
-        return createTime;
+    public String getNodeType() {
+        return nodeType;
     }
 
-    public void setCreateTime(long createTime) {
-        this.createTime = createTime;
+    public void setNodeType(String nodeType) {
+        this.nodeType = nodeType;
     }
 
-    public long getId() {
-        return id;
+    public CreateNodeResponseDetails getDetails() {
+        return details;
     }
 
-    public void setId(long id) {
-        this.id = id;
-    }
-
-    public long getMonitoringLocationId() {
-        return monitoringLocationId;
-    }
-
-    public void setMonitoringLocationId(long monitoringLocationId) {
-        this.monitoringLocationId = monitoringLocationId;
-    }
-
-    public String getNodeLabel() {
-        return nodeLabel;
-    }
-
-    public void setNodeLabel(String nodeLabel) {
-        this.nodeLabel = nodeLabel;
-    }
-
-    public String getTenantId() {
-        return tenantId;
-    }
-
-    public void setTenantId(String tenantId) {
-        this.tenantId = tenantId;
+    public void setDetails(CreateNodeResponseDetails details) {
+        this.details = details;
     }
 }

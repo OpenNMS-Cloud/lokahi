@@ -25,7 +25,7 @@ describe.skip('inventoryTextAnchorList', () => {
     wrapper.unmount()
   })
 
-  const anchorList = ['profile', 'location', 'management-ip', 'tag']
+  const anchorList = ['profile', 'location', 'management-ip', 'tag', 'node-type']
   it.each(anchorList)('should have "%s" element', (elem) => {
     expect(wrapper.get(`[data-test="${elem}"]`).exists()).toBe(true)
   })

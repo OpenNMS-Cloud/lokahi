@@ -44,6 +44,10 @@ import org.opennms.horizon.inventory.dto.ActiveDiscoveryServiceGrpc;
 import org.opennms.horizon.inventory.dto.AzureActiveDiscoveryCreateDTO;
 import org.opennms.horizon.inventory.dto.AzureActiveDiscoveryDTO;
 import org.opennms.horizon.inventory.dto.AzureActiveDiscoveryServiceGrpc;
+import org.opennms.horizon.inventory.dto.AzureNodeServiceGrpc;
+import org.opennms.horizon.inventory.dto.DefaultNodeCreateDTO;
+import org.opennms.horizon.inventory.dto.DefaultNodeDTO;
+import org.opennms.horizon.inventory.dto.DefaultNodeServiceGrpc;
 import org.opennms.horizon.inventory.dto.IdList;
 import org.opennms.horizon.inventory.dto.IpInterfaceDTO;
 import org.opennms.horizon.inventory.dto.ListAllTagsParamsDTO;
@@ -54,7 +58,6 @@ import org.opennms.horizon.inventory.dto.MonitoringLocationDTO;
 import org.opennms.horizon.inventory.dto.MonitoringLocationServiceGrpc;
 import org.opennms.horizon.inventory.dto.MonitoringSystemDTO;
 import org.opennms.horizon.inventory.dto.MonitoringSystemServiceGrpc;
-import org.opennms.horizon.inventory.dto.NodeCreateDTO;
 import org.opennms.horizon.inventory.dto.NodeDTO;
 import org.opennms.horizon.inventory.dto.NodeIdList;
 import org.opennms.horizon.inventory.dto.NodeLabelSearchQuery;
@@ -84,6 +87,8 @@ public class InventoryClient {
     private final long deadline;
     private MonitoringLocationServiceGrpc.MonitoringLocationServiceBlockingStub locationStub;
     private NodeServiceGrpc.NodeServiceBlockingStub nodeStub;
+    private DefaultNodeServiceGrpc.DefaultNodeServiceBlockingStub defaultNodeStub;
+    private AzureNodeServiceGrpc.AzureNodeServiceBlockingStub azureNodeStub;
     private MonitoringSystemServiceGrpc.MonitoringSystemServiceBlockingStub systemStub;
     private TagServiceGrpc.TagServiceBlockingStub tagStub;
     private ActiveDiscoveryServiceGrpc.ActiveDiscoveryServiceBlockingStub activeDiscoveryServiceBlockingStub;
@@ -94,6 +99,8 @@ public class InventoryClient {
     protected void initialStubs() {
         locationStub = MonitoringLocationServiceGrpc.newBlockingStub(channel);
         nodeStub = NodeServiceGrpc.newBlockingStub(channel);
+        defaultNodeStub = DefaultNodeServiceGrpc.newBlockingStub(channel);
+        azureNodeStub = AzureNodeServiceGrpc.newBlockingStub(channel);
         systemStub = MonitoringSystemServiceGrpc.newBlockingStub(channel);
 
         tagStub = TagServiceGrpc.newBlockingStub(channel);
@@ -137,10 +144,10 @@ public class InventoryClient {
             .getDiscoveryById(Int64Value.of(id));
     }
 
-    public NodeDTO createNewNode(NodeCreateDTO node, String accessToken) {
+    public DefaultNodeDTO createNewNode(DefaultNodeCreateDTO node, String accessToken) {
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
-        return nodeStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).createNode(node);
+        return defaultNodeStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).createNode(node);
     }
 
     public List<NodeDTO> listNodes(String accessToken) {

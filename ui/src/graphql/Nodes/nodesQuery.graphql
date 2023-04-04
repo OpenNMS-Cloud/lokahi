@@ -1,21 +1,13 @@
-fragment NodesParts on Query {
+fragment NodeParts on Query {
   findAllNodes {
-    createTime
-    id
-    ipInterfaces {
-      id
-      ipAddress
-      nodeId
-      tenantId
-      snmpPrimary
-    }
-    location {
-      id
-      location
-      tenantId
-    }
-    monitoringLocationId
-    nodeLabel
-    tenantId
+    details
+    nodeType
+  }
+}
+
+fragment NodeByIdParts on Query {
+  node: findNodeById(id: $id) {
+    details
+    nodeType
   }
 }

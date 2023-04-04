@@ -43,6 +43,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import org.opennms.horizon.inventory.model.node.Node;
 
 import java.net.InetAddress;
 import java.util.ArrayList;

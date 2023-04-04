@@ -30,7 +30,8 @@ package org.opennms.horizon.inventory.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.protobuf.Any;
 import lombok.RequiredArgsConstructor;
-import org.opennms.horizon.inventory.dto.MonitoringLocationDTO;
+import org.opennms.horizon.inventory.model.MonitoringLocation;
+import org.opennms.horizon.inventory.repository.MonitoringLocationRepository;
 import org.opennms.horizon.inventory.service.taskset.TaskUtils;
 import org.opennms.horizon.inventory.service.trapconfig.TrapConfigBean;
 import org.opennms.horizon.inventory.service.taskset.publisher.TaskSetPublisher;
@@ -39,8 +40,6 @@ import org.opennms.sink.traps.contract.SnmpV3User;
 import org.opennms.sink.traps.contract.TrapConfig;
 import org.opennms.taskset.contract.TaskDefinition;
 import org.opennms.taskset.contract.TaskType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
@@ -49,23 +48,21 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class TrapConfigService {
-    private static final Logger LOG = LoggerFactory.getLogger(TrapConfigService.class);
-    public final static String TRAPS_CONFIG  = "traps-config";
+    public static final String TRAPS_CONFIG  = "traps-config";
     private final ObjectMapper objectMapper = new ObjectMapper();
-    private final MonitoringLocationService monitoringLocationService;
+    private final MonitoringLocationRepository locationRepository;
     private final TaskSetPublisher taskSetPublisher;
 
     @EventListener(ApplicationReadyEvent.class)
     public void sendTrapConfigToMinionAfterStartup() {
-        List<MonitoringLocationDTO> allLocations = monitoringLocationService.findAll();
+        List<MonitoringLocation> allLocations = locationRepository.findAll();
 
-        for(MonitoringLocationDTO dto : allLocations) {
-            sendTrapConfigToMinion(dto.getTenantId(), dto.getLocation());
+        for (MonitoringLocation location : allLocations) {
+            sendTrapConfigToMinion(location.getTenantId(), location.getLocation());
         }
     }
 
@@ -100,7 +97,7 @@ public class TrapConfigService {
                 .setPrivacyPassphrase(snmpV3User.getPrivacyPassphrase())
                 .setPrivacyProtocol(snmpV3User.getPrivacyProtocol())
                 .build();
-        }).collect(Collectors.toList());
+        }).toList();
     }
 
     private void publishTrapConfig(String tenantId, String location, TrapConfig trapConfig) {

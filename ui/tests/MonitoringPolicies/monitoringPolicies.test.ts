@@ -21,7 +21,8 @@ const testingPayload = {
           count: 1,
           severity: Severity.Critical,
           triggerEvent: SNMPEventType.COLD_REBOOT,
-          overtimeUnit: Unknowns.UNKNOWN_UNIT
+          overtimeUnit: Unknowns.UNKNOWN_UNIT,
+          clearEvent: Unknowns.UNKNOWN_EVENT
         }
       ]
     }

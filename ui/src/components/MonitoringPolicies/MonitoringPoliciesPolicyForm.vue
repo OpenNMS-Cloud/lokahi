@@ -6,7 +6,7 @@
         @click="store.displayPolicyForm()"
         data-test="new-policy-btn"
       >
-        <FeatherIcon :icon="addIcon" />
+        <FeatherIcon :icon="icons.Add" />
         New Policy
       </FeatherButton>
       <MonitoringPoliciesExistingItems
@@ -21,7 +21,16 @@
         class="policy-form"
         v-if="store.selectedPolicy"
       >
-        <div class="form-title">Policy Name</div>
+        <div class="policy-form-title-container">
+          <div class="form-title">Policy Name</div>
+          <FeatherButton
+            icon="Copy"
+            @click="store.copyPolicy(store.selectedPolicy!)"
+          >
+            <FeatherIcon :icon="ContentCopy" />
+          </FeatherButton>
+        </div>
+
         <FeatherInput
           v-model="store.selectedPolicy.name"
           label="New Policy Name"
@@ -90,10 +99,14 @@ import { useTagQueries } from '@/store/Queries/tagQueries'
 import Add from '@featherds/icon/action/Add'
 import { Policy } from '@/types/policies'
 import { TagSelectItem } from '@/types'
+import ContentCopy from '@featherds/icon/action/ContentCopy'
 
 const store = useMonitoringPoliciesStore()
 const tagQueries = useTagQueries()
-const addIcon = markRaw(Add)
+const icons = markRaw({
+  Add,
+  ContentCopy
+})
 
 const selectTags = (tags: TagSelectItem[]) => (store.selectedPolicy!.tags = tags.map((tag) => tag.name))
 const populateForm = (policy: Policy) => store.displayPolicyForm(policy)
@@ -122,10 +135,15 @@ const formattedTags = computed(() => store.selectedPolicy!.tags!.map((tag: strin
     padding: var(variables.$spacing-l);
     border-radius: vars.$border-radius-s;
 
-    .form-title {
-      @include typography.headline3;
-      margin-bottom: var(variables.$spacing-m);
+    .policy-form-title-container {
+      display: flex;
+      justify-content: space-between;
+      .form-title {
+        @include typography.headline3;
+        margin-bottom: var(variables.$spacing-m);
+      }
     }
+
     .subtitle {
       @include typography.subtitle1;
     }

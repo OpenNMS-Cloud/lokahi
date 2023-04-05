@@ -19,7 +19,7 @@ import { VILLUS_CLIENT, createClient } from 'villus'
  *              stubs
  *              plugins
  *              provide
- *                directives
+ *              directives
  *            attachTo
  * @returns mounted component
  */
@@ -43,8 +43,8 @@ const wrapper = (mountingOption: Record<string, any>): any => {
           url: 'https://test/graphql'
         }),
         ...provide,
-        directives: { ...directives }
-      }
+      },
+      directives: { ...directives }
     },
     attachTo
   }

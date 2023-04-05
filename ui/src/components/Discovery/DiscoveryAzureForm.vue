@@ -12,6 +12,7 @@
       v-model="store.azure.name"
       class="name"
       :schema="nameV"
+      data-test="azure-name-input"
     />
 
     <div class="row">
@@ -20,12 +21,14 @@
         label="ClientID"
         class="column"
         :schema="clientIdV"
+        data-test="azure-client-input"
       />
       <FeatherProtectedInput
         v-model="store.azure.clientSecret"
         label="Client Secret"
         class="column"
         :schema="clientSecretV"
+        data-test="azure-secret-input"
       />
     </div>
 
@@ -35,12 +38,14 @@
         label="SubscriptionID"
         class="column"
         :schema="subIdV"
+        data-test="azure-sub-input"
       />
       <FeatherInput
         v-model="store.azure.directoryId"
         label="DirectoryID"
         class="column"
         :schema="dirIdV"
+        data-test="azure-dir-input"
       />
     </div>
 
@@ -82,7 +87,7 @@
 <script setup lang="ts">
 import { useDiscoveryStore } from '@/store/Views/discoveryStore'
 import { Azure, Common } from './discovery.text'
-import { AzureActiveDiscovery, Location } from '@/types/graphql'
+import { AzureActiveDiscovery } from '@/types/graphql'
 import { useDiscoveryQueries } from '@/store/Queries/discoveryQueries'
 import { useTagQueries } from '@/store/Queries/tagQueries'
 import { useDiscoveryMutations } from '@/store/Mutations/discoveryMutations'
@@ -109,8 +114,7 @@ onMounted(() => {
   }
 })
 
-const selectLocation = (location: Required<Location>) =>
-  location.location && store.selectLocation(location.location, true)
+const selectLocation = (location: string) => location && store.selectLocation(location, true)
 
 const tagsAutocompleteRef = ref()
 const tagsSelectedListener = (tags: Record<string, string>[]) => {

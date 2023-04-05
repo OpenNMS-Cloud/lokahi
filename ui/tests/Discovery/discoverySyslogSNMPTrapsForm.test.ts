@@ -1,5 +1,6 @@
 import mountWithPiniaVillus from '../mountWithPiniaVillus'
 import DiscoverySyslogSNMPTrapsForm from '@/components/Discovery/DiscoverySyslogSNMPTrapsForm.vue'
+import tabIndexDirective from '@/directives/v-tabindex'
 
 let wrapper: any
 
@@ -8,7 +9,12 @@ describe('DiscoverySyslogSNMPTrapsForm', () => {
     wrapper = mountWithPiniaVillus({
       component: DiscoverySyslogSNMPTrapsForm,
       shallow: true,
-      props: { successCallback: () => ({}), cancel: () => ({}) }
+      props: { successCallback: () => ({}), cancel: () => ({}) },
+      global: {
+        directives: {
+          tabindex: tabIndexDirective
+        }
+      }
     })
   })
 

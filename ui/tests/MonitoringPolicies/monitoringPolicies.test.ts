@@ -4,6 +4,7 @@ import { useMonitoringPoliciesStore } from '@/store/Views/monitoringPoliciesStor
 import { useMonitoringPoliciesMutations } from '@/store/Mutations/monitoringPoliciesMutations'
 import { Unknowns, SNMPEventType, ComponentType } from '@/components/MonitoringPolicies/monitoringPolicies.constants'
 import { Severity } from '@/types/graphql'
+import featherInputFocusDirective from '@/directives/v-focus'
 
 const testingPayload = {
   name: 'Policy1',
@@ -31,7 +32,12 @@ const testingPayload = {
 const wrapper = mount({
   component: MonitoringPolicies,
   shallow: false,
-  stubActions: false
+  stubActions: false,
+  global: {
+    directives: {
+      focus: featherInputFocusDirective
+    }
+  }
 })
 
 test('The Monitoring Policies page container mounts correctly', () => {

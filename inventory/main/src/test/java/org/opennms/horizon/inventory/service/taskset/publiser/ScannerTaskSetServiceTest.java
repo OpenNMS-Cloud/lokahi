@@ -40,6 +40,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.opennms.horizon.inventory.dto.IpInterfaceDTO;
 import org.opennms.horizon.inventory.dto.NodeDTO;
+import org.opennms.horizon.inventory.service.SnmpConfigService;
 import org.opennms.horizon.inventory.service.taskset.ScannerTaskSetService;
 import org.opennms.horizon.inventory.service.taskset.publisher.TaskSetPublisher;
 import org.opennms.node.scan.contract.NodeScanRequest;
@@ -57,6 +58,9 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 public class ScannerTaskSetServiceTest {
     @Mock
     private TaskSetPublisher mockPublisher;
+    @Mock
+    private SnmpConfigService configService;
+
     @InjectMocks
     private ScannerTaskSetService service;
     @Captor

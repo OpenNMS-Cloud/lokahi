@@ -109,7 +109,7 @@ public class NodeGrpcService extends NodeServiceGrpc.NodeServiceImplBase {
 
 
             // Asynchronously send task sets to Minion
-            executorService.execute(() -> sendNodeScanTaskToMinion(node, request.getLocation()));
+            executorService.execute(() -> sendNodeScanTaskToMinion(node));
         }
     }
 
@@ -355,10 +355,10 @@ public class NodeGrpcService extends NodeServiceGrpc.NodeServiceImplBase {
         return valid;
     }
 
-    private void sendNodeScanTaskToMinion(Node node, String location) {
+    private void sendNodeScanTaskToMinion(Node node) {
         try {
             scannerService.sendNodeScannerTask(List.of(nodeMapper.modelToDTO(node)),
-               location, node.getTenantId());
+               node.getMonitoringLocation().getLocation(), node.getTenantId());
         } catch (Exception e) {
             LOG.error("Error while sending detector task for node with label {}", node.getNodeLabel(), e);
         }

@@ -61,7 +61,7 @@
           </div>
           <div class="col">
             <div class="subtitle">
-              {{ store.selectedRule.detectionMethod === DetectionMethodTypes.EVENT ? 'Event' : 'Threshold' }} Metrics
+              Event Metrics
             </div>
             <BasicSelect
               :list="metricOptions"

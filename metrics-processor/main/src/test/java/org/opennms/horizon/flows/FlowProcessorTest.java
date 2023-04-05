@@ -28,12 +28,6 @@
 
 package org.opennms.horizon.flows;
 
-import static org.mockito.Mockito.timeout;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-
-import java.util.HashMap;
-import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -44,6 +38,12 @@ import org.opennms.dataplatform.flows.document.FlowDocumentLog;
 import org.opennms.horizon.flows.processing.Pipeline;
 import org.opennms.horizon.shared.constants.GrpcConstants;
 import org.opennms.horizon.tenantmetrics.TenantMetricsTracker;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.mockito.Mockito.timeout;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 public class FlowProcessorTest {
@@ -79,7 +79,7 @@ public class FlowProcessorTest {
         processor.consume(flows.toByteArray(), headers);
 
         verify(pipeline, timeout(5000).only()).process(flows.getMessageList(), TENANT_ID);
-        verify(metricsTracker, times(1)).addTenantFlowSampleCount(TENANT_ID, 2);
+        verify(metricsTracker, timeout(5000).times(1)).addTenantFlowSampleCount(TENANT_ID, 2);
     }
 
 }

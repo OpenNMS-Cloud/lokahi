@@ -174,7 +174,7 @@ local_resource(
     cmd='mvn clean install -DskipTests=true',
     dir='shared-lib',
     deps=['./shared-lib'],
-    ignore=['**/target'],
+    ignore=['**/target','**/dependency-reduced-pom.xml'],
     labels=['shared'],
     resource_deps=['parent-pom'],
 )

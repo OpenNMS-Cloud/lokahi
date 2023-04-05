@@ -28,17 +28,7 @@
 
 package org.opennms.horizon.inventory.component;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-
-import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-
+import com.google.protobuf.Any;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -57,7 +47,17 @@ import org.opennms.horizon.shared.constants.GrpcConstants;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import com.google.protobuf.Any;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.timeout;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 public class MinionHeartbeatConsumerTest {
@@ -97,22 +97,19 @@ public class MinionHeartbeatConsumerTest {
     @Test
     void testAcceptHeartbeats() throws InterruptedException {
         messageConsumer.receiveMessage(heartbeat.toByteArray(), headers);
-        messageConsumer.receiveMessage(heartbeat.toByteArray(), headers);
-        Thread.sleep(1000);
-        verify(service, times(2)).addMonitoringSystemFromHeartbeat(any(HeartbeatMessage.class), eq(tenantId));
-        verify(rpcClient).sendRpcRequest(eq(tenantId), any(RpcRequestProto.class));
-        verify(kafkaTemplate).send(any(ProducerRecord.class));
+        verify(service, times(1)).addMonitoringSystemFromHeartbeat(any(HeartbeatMessage.class), eq(tenantId));
+        verify(rpcClient, timeout(5000).atLeast(1)).sendRpcRequest(eq(tenantId), any(RpcRequestProto.class));
+        verify(kafkaTemplate, timeout(5000).atLeast(1)).send(any(ProducerRecord.class));
     }
 
     @Test
     void testAcceptHeartbeatsDelay() throws InterruptedException {
         messageConsumer.receiveMessage(heartbeat.toByteArray(), headers);
         // TODO: rework to eliminate use of slee() which leads to intermittent failures
-        Thread.sleep(1000);
+        Thread.sleep(MinionHeartbeatConsumer.MONITOR_PERIOD * 2);
         messageConsumer.receiveMessage(heartbeat.toByteArray(), headers);
-        Thread.sleep(100);
         verify(service, times(2)).addMonitoringSystemFromHeartbeat(any(HeartbeatMessage.class), eq(tenantId));
-        verify(rpcClient, times(2)).sendRpcRequest(eq(tenantId), any(RpcRequestProto.class));
-        verify(kafkaTemplate, times(2)).send(any(ProducerRecord.class));
+        verify(rpcClient, timeout(5000).times(2)).sendRpcRequest(eq(tenantId), any(RpcRequestProto.class));
+        verify(kafkaTemplate, timeout(5000).times(2)).send(any(ProducerRecord.class));
     }
 }

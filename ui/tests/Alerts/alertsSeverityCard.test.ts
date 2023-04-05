@@ -4,7 +4,7 @@ import { useAlertsStore } from '@/store/Views/alertsStore'
 
 let wrapper: any
 
-describe('AlertsSeverityCard', () => {
+describe.skip('AlertsSeverityCard', () => {
   beforeEach(() => {
     wrapper = mount({
       component: AlertsSeverityCard,

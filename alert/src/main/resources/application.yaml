@@ -14,6 +14,7 @@ spring:
 
   liquibase:
     change-log: db/changelog/changelog.xml
+    contexts: prod
 
   kafka:
     template:
@@ -51,3 +52,4 @@ kafka:
   topics:
     alert-events: "events"
     new-alerts: "alerts"
+    monitoring-policy: "monitoring-policy"

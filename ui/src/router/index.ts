@@ -6,12 +6,12 @@ const router = createRouter({
   history: createWebHistory(),
   routes: [
     {
-      path: '/',
+      path: '/appliances',
       name: 'Appliances',
       component: Appliances
     },
     {
-      path: '/dashboard', // Temporary route - will change to '/' once complete.
+      path: '/',
       name: 'Dashboard',
       component: () => import('@/containers/Dashboard.vue')
     },

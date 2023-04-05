@@ -28,11 +28,6 @@
 
 package org.opennms.horizon.alertservice.testcontainers;
 
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.NoSuchAlgorithmException;
-import java.time.Duration;
-
 import org.junit.rules.ExternalResource;
 import org.keycloak.common.util.Base64;
 import org.slf4j.Logger;
@@ -44,6 +39,11 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.utility.DockerImageName;
+
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.NoSuchAlgorithmException;
+import java.time.Duration;
 
 @SuppressWarnings("rawtypes")
 public class TestContainerRunnerClassRule extends ExternalResource {
@@ -129,6 +129,7 @@ public class TestContainerRunnerClassRule extends ExternalResource {
             .withEnv("SPRING_DATASOURCE_USERNAME", postgreSQLContainer.getUsername())
             .withEnv("SPRING_DATASOURCE_PASSWORD", postgreSQLContainer.getPassword())
             .withEnv("KEYCLOAK_PUBLIC_KEY", Base64.encodeBytes(jwtKeyPair.getPublic().getEncoded()))
+            .withEnv("SPRING_LIQUIBASE_CONTEXTS", "test")
             .withLogConsumer(new Slf4jLogConsumer(LOG).withPrefix("APPLICATION"))
             .waitingFor(Wait.forLogMessage(".*Started AlertServiceMain.*", 1)
             .withStartupTimeout(Duration.ofMinutes(3))

@@ -43,7 +43,9 @@ const chartOptions = computed<ChartOptions<any>>(() => {
     cubicInterpolationMode: 'monotone',
     maintainAspectRatio: false,
     interaction: {
-      mode: 'x'
+      mode: 'nearest',
+      intersect: false,
+      axis: 'x'
     },
     plugins: {
       legend: {
@@ -58,7 +60,14 @@ const chartOptions = computed<ChartOptions<any>>(() => {
         borderWidth: 0.1,
         bodyColor: '#4F4F4F',
         footerColor: '#4F4F4F',
-        titleColor: '#4F4F4F'
+        titleColor: '#4F4F4F',
+        callbacks: {
+          title: (context: any) => context.label,
+          label: (context: any) => {
+            const appName = context.dataset.label
+            return `${appName} : ` + formatBytes(context.parsed.y)
+          }
+        }
       }
     },
     scales: {
@@ -66,13 +75,16 @@ const chartOptions = computed<ChartOptions<any>>(() => {
         stacked: true,
         grid: {
           display: true
-        },
-        ticks: {}
+        }
       },
       y: {
-        stacked: true,
         grid: {
           display: false
+        },
+        ticks: {
+          callback: function (value: any) {
+            return formatBytes(value, 2)
+          }
         },
         title: {
           display: true,
@@ -82,6 +94,18 @@ const chartOptions = computed<ChartOptions<any>>(() => {
     }
   }
 })
+
+const formatBytes = (bytes: any, decimals = 2) => {
+  if (!+bytes) return '0 Bytes'
+
+  const k = 1024
+  const dm = decimals < 0 ? 0 : decimals
+  const sizes = ['Bytes', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB']
+
+  const i = Math.floor(Math.log(bytes) / Math.log(k))
+
+  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`
+}
 </script>
 
 <style lang="scss" scoped>

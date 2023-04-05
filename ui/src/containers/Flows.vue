@@ -84,7 +84,8 @@
           </FeatherRadioGroup>
         </div>
       </div>
-      <ExpandingChartWrapper
+      <!-- EXPORTERS CHARTS -->
+      <!-- <ExpandingChartWrapper
         :title="'Top Ten Exporters (24 Hrs) - Total'"
         :model-value="flowsStore.exporters.expansionOpen"
         :on-filter-click="(e) => flowsStore.filterDialogToggle(e, false)"
@@ -103,7 +104,7 @@
           :chart-data="flowsStore.exporters.lineChartData"
           :table-data="flowsStore.tableDatasets"
         />
-      </ExpandingChartWrapper>
+      </ExpandingChartWrapper> -->
 
       <ExpandingChartWrapper
         :title="'Top Ten Applications (24 Hrs) - Total'"
@@ -111,19 +112,27 @@
         :on-filter-click="(e) => flowsStore.filterDialogToggle(e, true)"
       >
         <TableChart
-          v-if="flowsStore.filters.dataStyle.selectedItem === 'table'"
+          v-if="
+            flowsStore.filters.dataStyle.selectedItem === 'table' && hasData && !flowsStore.applications.isTableLoading
+          "
           :id="'tableChartApplications'"
           :selected-filter-range="flowsStore.filters.dateFilter"
           :chart-data="flowsStore.applications.tableChartData"
           :table-data="flowsStore.tableDatasets"
         />
         <LineChart
-          v-if="flowsStore.filters.dataStyle.selectedItem === 'line'"
+          v-if="
+            flowsStore.filters.dataStyle.selectedItem === 'line' && hasData && !flowsStore.applications.isLineLoading
+          "
           :id="'lineChartApplications'"
           :selected-filter-range="flowsStore.filters.dateFilter"
           :chart-data="flowsStore.applications.lineChartData"
           :table-data="flowsStore.tableDatasets"
         />
+        <FeatherSpinner v-if="flowsStore.applications.isLineLoading || flowsStore.applications.isLineLoading" />
+        <div v-if="!hasData && !flowsStore.applications.isLineLoading && !flowsStore.applications.isLineLoading">
+          No data
+        </div>
       </ExpandingChartWrapper>
     </div>
   </div>
@@ -181,11 +190,21 @@
 </template>
 
 <script setup lang="ts">
+import { useflowsQueries } from '@/store/Queries/flowsQueries'
 import { useFlowsStore } from '@/store/Views/flowsStore'
 import { FeatherRadioObject } from '@/types'
+import { TimeRange } from '@/types/graphql'
 import Download from '@featherds/icon/action/DownloadFile'
 import Refresh from '@featherds/icon/navigation/Refresh'
 const flowsStore = useFlowsStore()
+const flowsQueries = useflowsQueries()
+
+const hasData = computed(() => {
+  if (flowsStore.applications.tableChartData.datasets) {
+    return Object.keys(flowsStore.applications.tableChartData.datasets[0].data).length > 0
+  }
+  return false
+})
 
 const trafficRadios = ref([
   { name: 'Total', value: 'total' },
@@ -194,8 +213,8 @@ const trafficRadios = ref([
 ] as FeatherRadioObject[])
 
 const dataStyleRadios = ref([
-  { name: 'Line Chart', value: 'line' },
-  { name: 'Table Chart', value: 'table' }
+  { name: 'Table Chart', value: 'table' },
+  { name: 'Line Chart', value: 'line' }
 ] as FeatherRadioObject[])
 
 const appDialogLabels = {
@@ -205,18 +224,17 @@ const expDialogLabels = {
   title: 'Top Ten Exporters (24 Hrs) - Total'
 }
 
-onBeforeMount(async () => {
+onMounted(async () => {
   //Get Table data first as line data will take some time to get.
   //Show Table chart first for same reason
-  flowsStore.generateTableChart()
-  flowsStore.generateLineChart()
+  await flowsStore.updateCharts()
 })
 
 // DUMMY DATA
 const timeOptions = [
-  { id: 'today', name: 'Today' },
-  { id: '24h', name: 'Last 24 hours' },
-  { id: '7d', name: 'Last 7 days' }
+  { id: TimeRange.Today, name: 'Today' },
+  { id: TimeRange.Last_24Hours, name: 'Last 24 hours' },
+  { id: TimeRange.SevenDays, name: 'Last 7 days' }
 ]
 const applicationsAutoComplete = ref([
   { id: 'app1', name: 'Application 1' },

@@ -7,6 +7,8 @@ Feature: Monitor policy gRPC Functionality
     Given Kafka bootstrap URL in system property "kafka.bootstrap-servers"
     Given Kafka event topic "events"
     Given Kafka alert topic "alerts"
+    Given Kafka monitoring policy topic "monitoring-policy"
+    Given Monitoring policy kafka consumer
 
   Scenario: The default monitoring policy should exist
     Given Tenant id "different-tenant"
@@ -30,3 +32,4 @@ Feature: Monitor policy gRPC Functionality
     Then Create a new policy with give parameters
     Then Verify the new policy has been created
     Then List policy should contain 1
+    Then Verify monitoring policy for tenant "test-tenant" is sent to Kafka

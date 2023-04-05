@@ -55,5 +55,8 @@ query CountAlerts(
   $severityFilters: [String] # ["CRITICAL", "MAJOR"]
   $timeRange: TimeRange!
 ) {
-  countAlerts(severityFilters: $severityFilters, timeRange: $timeRange)
+  countAlerts(severityFilters: $severityFilters, timeRange: $timeRange) {
+    count
+    error
+  }
 }

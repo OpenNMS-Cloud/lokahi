@@ -1,0 +1,33 @@
+query findApplicationSeries($requestCriteria: RequestCriteriaInput!) {
+  findApplicationSeries(requestCriteria: $requestCriteria) {
+    timestamp
+    label
+    value
+    direction
+  }
+}
+
+query findApplicationSummaries($requestCriteria: RequestCriteriaInput!) {
+  findApplicationSummaries(requestCriteria: $requestCriteria) {
+    label
+    bytesIn
+    bytesOut
+  }
+}
+
+query findApplications($requestCriteria: RequestCriteriaInput!) {
+  findApplications(requestCriteria: $requestCriteria)
+}
+
+query findExporters($requestCriteria: RequestCriteriaInput!) {
+  findExporters(requestCriteria: $requestCriteria) {
+    node {
+      id
+      nodeLabel
+    }
+    ipInterface {
+      id
+      ipAddress
+    }
+  }
+}

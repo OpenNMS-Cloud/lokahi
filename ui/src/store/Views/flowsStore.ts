@@ -1,6 +1,12 @@
+import { flowsAppDataToChartJS } from '@/dtos/chartJS.dto'
 import { ChartData } from 'chart.js'
 import { format } from 'date-fns'
 import { defineStore } from 'pinia'
+import { useflowsQueries } from '@/store/Queries/flowsQueries'
+import { RequestCriteriaInput, TimeRange } from '@/types/graphql'
+import { FlowsApplicationData, FlowsApplicationSummaries } from '@/types'
+
+const flowsQueries = useflowsQueries()
 
 export const useFlowsStore = defineStore('flowsStore', {
   state: () => ({
@@ -9,15 +15,18 @@ export const useFlowsStore = defineStore('flowsStore', {
     tableChartOptions: {},
     totalFlows: '1,957',
     filters: {
-      dateFilter: 'today',
+      dateFilter: TimeRange.Today,
       traffic: {
         selectedItem: 'total'
       },
       dataStyle: {
         selectedItem: 'table'
-      }
+      },
+      applications: ['']
     },
     applications: {
+      isTableLoading: false,
+      isLineLoading: false,
       tableChartData: {} as ChartData,
       lineChartData: {} as ChartData,
       expansionOpen: true,
@@ -25,6 +34,7 @@ export const useFlowsStore = defineStore('flowsStore', {
       dialogFilters: { ...defaultDialogFilters }
     },
     exporters: {
+      isLoading: false,
       tableChartData: {} as ChartData,
       lineChartData: {} as ChartData,
       expansionOpen: true,
@@ -33,214 +43,107 @@ export const useFlowsStore = defineStore('flowsStore', {
     }
   }),
   actions: {
-    getDatasets() {
+    async getDatasets() {
       //Will be replaced with a BE call
-      const returnedTableDataSets = [
-        {
-          label: 'app_0',
-          bytesIn: 20809,
-          bytesOut: 59755
-        },
-        {
-          label: 'app_1',
-          bytesIn: 63491,
-          bytesOut: 62750
-        },
-        {
-          label: 'app_2',
-          bytesIn: 95187,
-          bytesOut: 19754
-        },
-        {
-          label: 'app_3',
-          bytesIn: 76824,
-          bytesOut: 95025
-        },
-        {
-          label: 'app_4',
-          bytesIn: 16870,
-          bytesOut: 97879
-        },
-        {
-          label: 'app_5',
-          bytesIn: 86697,
-          bytesOut: 90904
-        },
-        {
-          label: 'app_6',
-          bytesIn: 10761,
-          bytesOut: 71282
-        },
-        {
-          label: 'app_7',
-          bytesIn: 67521,
-          bytesOut: 86472
-        },
-        {
-          label: 'app_8',
-          bytesIn: 37723,
-          bytesOut: 61793
-        },
-        {
-          label: 'app_9',
-          bytesIn: 36712,
-          bytesOut: 63233
-        }
-      ]
-      this.tableDatasets = returnedTableDataSets
+      const requestData = {
+        count: 10,
+        step: 2000000,
+        timeRange: this.getTimeRange(this.filters.dateFilter)
+      } as RequestCriteriaInput
 
-      //Will be replaced with a BE call
-      const returnedLineDataSets = [
-        {
-          label: 'app0',
-          data: [
-            {
-              timestamp: '2023-03-23T01:01:25Z',
-              value: 138790.1750375429,
-              direction: 'EGRESS'
-            },
-            {
-              timestamp: '2023-03-23T01:09:47Z',
-              value: 216861.9119974472,
-              direction: 'EGRESS'
-            },
-            {
-              timestamp: '2023-03-23T01:18:07Z',
-              value: 202966.96568806906,
-              direction: 'EGRESS'
-            },
-            {
-              timestamp: '2023-03-23T01:26:27Z',
-              value: 264173.0346710393,
-              direction: 'EGRESS'
-            }
-          ]
-        },
-        {
-          label: 'app1',
-          data: [
-            {
-              timestamp: '2023-03-23T01:09:47Z',
-              value: 675859.8717571729,
-              direction: 'EGRESS'
-            },
-            {
-              timestamp: '2023-03-23T01:18:07Z',
-              value: 703441.1031400502,
-              direction: 'EGRESS'
-            },
-            {
-              timestamp: '2023-03-23T01:26:27Z',
-              value: 277710.0783393889,
-              direction: 'EGRESS'
-            },
-            {
-              timestamp: '2023-03-23T01:34:47Z',
-              value: -928133.4566595472,
-              direction: 'EGRESS'
-            },
-            {
-              timestamp: '2023-03-23T01:43:07Z',
-              value: 299538.99195372575,
-              direction: 'EGRESS'
-            },
-            {
-              timestamp: '2023-03-23T01:51:27Z',
-              value: 264867.46362876357,
-              direction: 'EGRESS'
-            },
-            {
-              timestamp: '2023-03-23T01:59:47Z',
-              value: 738735.9705331036,
-              direction: 'EGRESS'
-            },
-            {
-              timestamp: '2023-03-23T02:08:07Z',
-              value: 761950.6966375934,
-              direction: 'EGRESS'
-            },
-            {
-              timestamp: '2023-03-23T02:16:27Z',
-              value: 995884.662063265,
-              direction: 'EGRESS'
-            }
-          ]
-        }
+      this.applications.isTableLoading = true
+      //Get Table Data
+      const applicationTableData = await flowsQueries.getApplicationsSummaries(requestData)
+      this.tableDatasets = [
+        ...((applicationTableData.value?.findApplicationSummaries as FlowsApplicationSummaries[]) || null)
       ]
+      this.applications.isTableLoading = false
 
-      this.lineDatasets = returnedLineDataSets
+      this.applications.isLineLoading = true
+      //Get Line Graph Data
+      const applicationsLineData = await flowsQueries.getApplicationsSeries(requestData)
+      this.lineDatasets = [
+        ...(flowsAppDataToChartJS(applicationsLineData.value?.findApplicationSeries as FlowsApplicationData[]) || null)
+      ]
+      this.applications.isLineLoading = false
     },
     createTableChartData() {
-      //Dummy Data until BE is hooked up.
-      this.exporters.tableChartData = {
-        labels: this.tableDatasets.map((row) => row.label),
-        datasets: [
-          {
-            label: 'Inbound',
-            data: this.tableDatasets.map((row) => row.bytesIn),
-            barThickness: 13,
-            backgroundColor: '#0043A4',
-            hidden: this.filters.traffic.selectedItem === 'outbound'
-          },
-          {
-            label: 'Outbound',
-            data: this.tableDatasets.map((row) => row.bytesOut),
-            barThickness: 13,
-            backgroundColor: '#EE7D00',
-            hidden: this.filters.traffic.selectedItem === 'inbound'
-          }
-        ]
+      if (this.tableDatasets) {
+        this.exporters.tableChartData = {
+          labels: this.tableDatasets.map((row) => row.label),
+          datasets: [
+            {
+              label: 'Inbound',
+              data: this.tableDatasets.map((row) => row.bytesIn),
+              barThickness: 13,
+              backgroundColor: '#0043A4',
+              hidden: this.filters.traffic.selectedItem === 'outbound'
+            },
+            {
+              label: 'Outbound',
+              data: this.tableDatasets.map((row) => row.bytesOut),
+              barThickness: 13,
+              backgroundColor: '#EE7D00',
+              hidden: this.filters.traffic.selectedItem === 'inbound'
+            }
+          ]
+        }
       }
-      this.applications.tableChartData = {
-        labels: this.tableDatasets.map((row) => row.label),
-        datasets: [
-          {
-            label: 'Inbound',
-            data: this.tableDatasets.map((row) => row.bytesIn),
-            barThickness: 13,
-            backgroundColor: '#0043A4',
-            hidden: this.filters.traffic.selectedItem === 'outbound'
-          },
-          {
-            label: 'Outbound',
-            data: this.tableDatasets.map((row) => row.bytesOut),
-            barThickness: 13,
-            backgroundColor: '#EE7D00',
-            hidden: this.filters.traffic.selectedItem === 'inbound'
-          }
-        ]
+      if (this.tableDatasets) {
+        this.applications.tableChartData = {
+          labels: this.tableDatasets.map((row) => row.label),
+          datasets: [
+            {
+              label: 'Inbound',
+              data: this.tableDatasets.map((row) => row.bytesIn),
+              barThickness: 13,
+              backgroundColor: '#0043A4',
+              hidden: this.filters.traffic.selectedItem === 'outbound'
+            },
+            {
+              label: 'Outbound',
+              data: this.tableDatasets.map((row) => row.bytesOut),
+              barThickness: 13,
+              backgroundColor: '#EE7D00',
+              hidden: this.filters.traffic.selectedItem === 'inbound'
+            }
+          ]
+        }
       }
     },
     createLineChartData() {
-      const datasetArr = {
-        type: 'line',
-        datasets: this.lineDatasets.map((element, i) => {
-          return {
-            label: element.label,
-            data: element.data.map((data: any) => {
-              return {
-                x: this.convertToDate(data.timestamp),
-                y: data.value
-              }
-            }),
-            fill: true
-          }
-        })
+      if (this.lineDatasets) {
+        const datasetArr = {
+          type: 'line',
+          datasets: this.lineDatasets.map((element) => {
+            return {
+              label: element.label,
+              data: element.data.map((data: any) => {
+                return {
+                  x: this.convertToDate(data.timestamp),
+                  y: data.value
+                }
+              }),
+              fill: true
+            }
+          })
+        }
+        this.applications.lineChartData = datasetArr
+        this.exporters.lineChartData = datasetArr
       }
-      this.applications.lineChartData = datasetArr
-      this.exporters.lineChartData = datasetArr
     },
     filterDialogToggle(event: Event, isAppFilter: boolean) {
       isAppFilter
         ? (this.applications.filterDialogOpen = !this.applications.filterDialogOpen)
         : (this.exporters.filterDialogOpen = !this.exporters.filterDialogOpen)
     },
-    generateTableChart() {
-      this.getDatasets()
+    async updateCharts() {
+      await this.getDatasets()
       this.createTableChartData()
+      this.createLineChartData()
     },
-    generateLineChart() {
-      this.getDatasets()
+    createCharts() {
+      this.createTableChartData()
       this.createLineChartData()
     },
     appDialogRefreshClick(e: Event) {
@@ -260,18 +163,18 @@ export const useFlowsStore = defineStore('flowsStore', {
       })
       return filtered
     },
-    trafficRadioOnChange(selectedItem: string) {
+    async trafficRadioOnChange(selectedItem: string) {
       this.filters.traffic.selectedItem = selectedItem
-      this.generateTableChart()
+      await this.updateCharts()
     },
     convertToDate(ts: string) {
       const dateFormat = () => {
         switch (this.filters.dateFilter) {
-          case 'today':
+          case TimeRange.Today:
             return 'HH:mm'
-          case '24h':
+          case TimeRange.Last_24Hours:
             return 'HH:mm'
-          case '7d':
+          case TimeRange.SevenDays:
             return 'dd/MMM HH:mm'
           default:
             return 'dd/MMM HH:mm'
@@ -279,10 +182,27 @@ export const useFlowsStore = defineStore('flowsStore', {
       }
       return format(new Date(ts), dateFormat())
     },
-    onDateFilterUpdate(e: any) {
+    async onDateFilterUpdate(e: any) {
       this.filters.dateFilter = e
-      this.createLineChartData()
-      this.createTableChartData()
+      await this.updateCharts()
+    },
+    getTimeRange(range: string) {
+      const now = new Date()
+      let startTime
+      switch (range) {
+        case TimeRange.Today:
+          startTime = new Date(new Date().setHours(0, 0, 0, 0)).getTime()
+          return { startTime: startTime, endTime: Date.now() }
+        case TimeRange.Last_24Hours:
+          startTime = now.setDate(now.getDate() - 1)
+          return { startTime: startTime, endTime: Date.now() }
+        case TimeRange.SevenDays:
+          startTime = now.setDate(now.getDate() - 7)
+          return { startTime: startTime, endTime: Date.now() }
+        default:
+          startTime = new Date(new Date().setHours(0, 0, 0, 0)).getTime()
+          return { startTime: startTime, endTime: Date.now() }
+      }
     }
   }
 })

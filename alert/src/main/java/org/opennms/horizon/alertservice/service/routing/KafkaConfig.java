@@ -30,7 +30,7 @@ package org.opennms.horizon.alertservice.service.routing;
 
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.kafka.clients.admin.NewTopic;
+
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.ByteArrayDeserializer;
@@ -47,6 +47,7 @@ import org.springframework.kafka.config.TopicBuilder;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaProducerFactory;
+import org.springframework.kafka.core.KafkaAdmin;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
 
@@ -59,6 +60,9 @@ public class KafkaConfig {
 
     @Value("${spring.kafka.consumer.group-id:alert}")
     private String groupId;
+
+    @Value("${kafka.topics.monitoring-policy}")
+    private String monitoringPolicyTopic;
 
     @Bean
     public ConsumerFactory<String, byte[]> consumerFactory() {
@@ -88,16 +92,24 @@ public class KafkaConfig {
         return new DefaultKafkaProducerFactory<>(configProps);
     }
 
-    @Bean("kafkaAlertProducerTemplate")
+    @Bean("kafkaProducerTemplate")
     public KafkaTemplate<String, byte[]> kafkaTemplate(@Autowired ProducerFactory<String, byte[]> producerFactory) {
         return new KafkaTemplate<>(producerFactory);
     }
 
     @Bean("topicCreator")
-    public NewTopic alertTopic() {
-        return TopicBuilder.name("alerts")
-            .partitions(10)
-            .replicas(1)
-            .build();
+    public KafkaAdmin.NewTopics topicCreator() {
+        return new KafkaAdmin.NewTopics(
+            TopicBuilder.name("alerts")
+                .partitions(10)
+                .replicas(1)
+                .build(),
+            TopicBuilder.name(monitoringPolicyTopic)
+                .partitions(1) // Right now, Notifications is relying on these being delivered in order.
+                .replicas(1)
+                .build()
+        );
     }
+
+
 }

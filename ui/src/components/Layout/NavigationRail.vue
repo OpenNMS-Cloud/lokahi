@@ -25,17 +25,16 @@
     </template>
     <template v-slot:nav>
       <FeatherAppRailNavItem
-        v-if="false"
-        href="/dashboard"
-        :icon="Icons.Dashboard"
-        title="Dashboard"
-        :class="{ selected: isSelected('/dashboard') }"
+        href="/"
+        :icon="Icons.Home"
+        title="Home"
+        :class="{ selected: isSelected('/') }"
       />
       <FeatherAppRailNavItem
-        href="/"
+        href="/appliances"
         :icon="Icons.Appliances"
         title="Appliances"
-        :class="{ selected: isSelected('/') }"
+        :class="{ selected: isSelected('/appliances') }"
       />
       <FeatherAppRailNavItem
         href="/map"
@@ -81,7 +80,7 @@
 <script setup lang="ts">
 import { IconTextAnimate, FeatherAppRailNavItem } from '@featherds/app-rail'
 import Appliances from '@featherds/icon/hardware/Appliances'
-import Dashboard from '@featherds/icon/action/Dashboard'
+import Home from '@featherds/icon/action/Home'
 import Location from '@featherds/icon/action/Location'
 import Business from '@featherds/icon/action/Business'
 import LogoIcon from '@/assets/OpenNMS-logo-icon.svg'
@@ -93,7 +92,7 @@ import Warning from '@featherds/icon/notification/Warning'
 
 const Icons = markRaw({
   Appliances,
-  Dashboard,
+  Home,
   Location,
   Business,
   Discovery,

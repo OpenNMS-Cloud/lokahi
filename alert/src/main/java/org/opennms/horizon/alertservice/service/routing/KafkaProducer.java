@@ -28,7 +28,7 @@ public class KafkaProducer implements AlertLifecyleListener {
     private String kafkaTopic;
 
     @Autowired
-    public KafkaProducer(@Qualifier("kafkaAlertProducerTemplate") KafkaTemplate<String, byte[]> kafkaTemplate, AlertService alertService) {
+    public KafkaProducer(@Qualifier("kafkaProducerTemplate") KafkaTemplate<String, byte[]> kafkaTemplate, AlertService alertService) {
         this.kafkaTemplate = kafkaTemplate;
         this.alertService = Objects.requireNonNull(alertService);
     }

@@ -8,11 +8,23 @@ export const enum ChartTypes {
 
 export interface FlowsLineChartItem {
   label: string
-  data: FlowsLineChartItemData[]
+  data: FlowsApplicationChartData[]
 }
 
-export interface FlowsLineChartItemData {
+export interface FlowsApplicationData {
   timestamp: string
   value: number
   direction: string
+  label: string
+}
+export interface FlowsApplicationChartData {
+  timestamp: string
+  value: number
+  direction: string
+}
+
+export interface FlowsApplicationSummaries {
+  label: string
+  bytesIn: number
+  bytesOut: number
 }

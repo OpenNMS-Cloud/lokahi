@@ -81,7 +81,6 @@ public class TaskSetCollectorSnmpResponseProcessor {
                             .setValue(snmpResult.getValue().getSint64()));
                         break;
                     case SnmpValueType.COUNTER32_VALUE:
-                        // TODO: Can't set a counter through prometheus API, may be possible with remote write
                     case SnmpValueType.TIMETICKS_VALUE:
                     case SnmpValueType.GAUGE32_VALUE:
                         builder.addSamples(PrometheusTypes.Sample.newBuilder()

@@ -28,9 +28,11 @@
 
 package org.opennms.horizon.alertservice.mapper;
 
+import org.mapstruct.BeanMapping;
 import org.mapstruct.CollectionMappingStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.NullValueCheckStrategy;
 import org.opennms.horizon.alertservice.db.entity.PolicyRule;
 import org.opennms.horizon.shared.alert.policy.PolicyRuleProto;
 
@@ -38,6 +40,7 @@ import org.opennms.horizon.shared.alert.policy.PolicyRuleProto;
     collectionMappingStrategy = CollectionMappingStrategy.ADDER_PREFERRED)
 public interface PolicyRuleMapper {
     @Mapping(target = "snmpEventsList", source = "triggerEvents")
+    @BeanMapping(nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
     PolicyRuleProto entityToProto(PolicyRule rule);
 
     @Mapping(target = "triggerEvents", source = "snmpEventsList")

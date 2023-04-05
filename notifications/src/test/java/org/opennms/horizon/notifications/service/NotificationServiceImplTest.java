@@ -50,7 +50,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 
 @RunWith(MockitoJUnitRunner.class)
-public class NotificationsServiceImplTest {
+public class NotificationServiceImplTest {
 
     @InjectMocks
     NotificationService notificationService;
@@ -140,7 +140,7 @@ public class NotificationsServiceImplTest {
 
         notificationService.postNotification(alert);
 
-        Mockito.verify(pagerDutyAPI, times(2)).postNotification(alert);
+        Mockito.verify(pagerDutyAPI, times(1)).postNotification(alert);
     }
 
     @Test

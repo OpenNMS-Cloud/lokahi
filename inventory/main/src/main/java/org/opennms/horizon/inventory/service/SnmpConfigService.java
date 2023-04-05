@@ -51,17 +51,17 @@ public class SnmpConfigService {
     private final SnmpConfigMapper snmpConfigMapper;
 
     @Transactional
-    public void saveOrUpdateSnmpConfig(String tenantId, String location, SnmpConfiguration snmpConfiguration) {
+    public void saveOrUpdateSnmpConfig(String tenantId, String location, String ipAddress, SnmpConfiguration snmpConfiguration) {
         var snmpConfig = new SnmpConfig();
-        var ipAddress = InetAddressUtils.getInetAddress(snmpConfiguration.getAddress());
+        var inetAddress = InetAddressUtils.getInetAddress(ipAddress);
         var agentConfig = snmpConfigMapper.mapProtoToModel(snmpConfiguration);
-        var existingConfig = repository.findByTenantIdAndLocationAndIpAddress(tenantId, location, ipAddress);
+        var existingConfig = repository.findByTenantIdAndLocationAndIpAddress(tenantId, location, inetAddress);
         if (existingConfig.isPresent()) {
             snmpConfig = existingConfig.get();
         } else {
             snmpConfig.setTenantId(tenantId);
             snmpConfig.setLocation(location);
-            snmpConfig.setIpAddress(ipAddress);
+            snmpConfig.setIpAddress(inetAddress);
         }
         snmpConfig.setSnmpAgentConfig(agentConfig);
         repository.save(snmpConfig);

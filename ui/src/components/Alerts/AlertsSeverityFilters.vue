@@ -8,12 +8,16 @@
       :key="severity"
       :severity="severity"
       :class="severity.toLowerCase()"
+      :isFilter="isFilter"
     />
   </div>
 </template>
 
 <script lang="ts" setup>
 import { Severity } from '@/types/graphql'
+defineProps<{
+  isFilter?: boolean
+}>()
 
 const severitiesDisplay = ['critical', 'major', 'minor', 'warning', 'indeterminate']
 const severities = Object.values(Severity).filter((s) => severitiesDisplay.includes(s.toLowerCase()))

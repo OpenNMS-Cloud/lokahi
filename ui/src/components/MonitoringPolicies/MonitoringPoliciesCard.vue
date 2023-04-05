@@ -11,13 +11,23 @@
       <div class="policy-title">
         {{ policy.name }}
       </div>
-      <div
+      <FeatherButton
+        icon="Edit"
         class="edit"
         @click="$emit('selectPolicy', policy)"
         data-test="policy-edit-btn"
+        v-if="!policy.isDefault"
       >
-        edit
-      </div>
+        <FeatherIcon :icon="icons.Edit" />
+      </FeatherButton>
+      <FeatherButton
+        icon="Copy"
+        class="copy"
+        @click="$emit('copyPolicy', policy)"
+        data-test="policy-copy-btn"
+      >
+        <FeatherIcon :icon="icons.ContentCopy" />
+      </FeatherButton>
     </div>
 
     <div
@@ -60,10 +70,14 @@
 import { Policy } from '@/types/policies'
 import ExpandLess from '@featherds/icon/navigation/ExpandLess'
 import ExpandMore from '@featherds/icon/navigation/ExpandMore'
+import ContentCopy from '@featherds/icon/action/ContentCopy'
+import Edit from '@featherds/icon/action/Edit'
 
 const icons = markRaw({
   ExpandLess,
-  ExpandMore
+  ExpandMore,
+  ContentCopy,
+  Edit
 })
 
 const props = defineProps<{
@@ -107,11 +121,16 @@ onMounted(() => (ruleStates[props.policy.rules[0].id] = true))
       @include typography.headline4;
       flex: 1;
     }
-    .edit {
+    .edit,
+    .copy {
       @include typography.subtitle1;
       cursor: pointer;
       color: var(variables.$primary);
       text-decoration: underline;
+    }
+
+    .copy {
+      margin-left: var(variables.$spacing-xs);
     }
 
     .title-box {

@@ -49,13 +49,9 @@ const getDefaultEventCondition = () => ({
   id: new Date().getTime(),
   count: 1,
   severity: Severity.Critical,
-  overtimeUnit: Unknowns.UNKNOWN_UNIT
-})
-
-// port down event has an extra properties
-const getDefaultEventConditionPortDown = () => ({
-  ...getDefaultEventCondition(),
-  clearEvent: SNMPEventType.PORT_UP
+  overtimeUnit: Unknowns.UNKNOWN_UNIT,
+  triggerEvent: SNMPEventType.COLD_REBOOT,
+  clearEvent: Unknowns.UNKNOWN_EVENT
 })
 
 const getDefaultRule = () => ({
@@ -64,7 +60,6 @@ const getDefaultRule = () => ({
   componentType: ComponentType.CPU,
   detectionMethod: DetectionMethodTypes.EVENT,
   metricName: EventMetrics.SNMP_TRAP,
-  triggerEvent: SNMPEventType.COLD_REBOOT,
   triggerEvents: [getDefaultEventCondition()]
 })
 
@@ -82,36 +77,11 @@ export const useMonitoringPoliciesStore = defineStore('monitoringPoliciesStore',
       this.monitoringPolicies = queries.monitoringPolicies
     },
     displayPolicyForm(policy?: Policy) {
-      // BE does not have trigger event on rule yet
-      // so must get it from the condition.
-      // this.selectedPolicy = policy || cloneDeep(defaultPolicy)
-      if (policy) {
-        const rulesWithEvents = policy.rules.map((rule) => {
-          rule.triggerEvent = rule.triggerEvents[0].triggerEvent as string
-          return rule
-        })
-        policy.rules = rulesWithEvents
-        this.selectedPolicy = policy
-      } else {
-        this.selectedPolicy =  cloneDeep(defaultPolicy)
-      }
-
+      this.selectedPolicy = policy ? cloneDeep(policy) : cloneDeep(defaultPolicy)
       this.selectedRule = undefined
     },
     displayRuleForm(rule?: Rule) {
-      if (rule) {
-        const { detectionMethod, metricName } = getDefaultRule()
-        this.selectedRule = {
-          ...cloneDeep(rule),
-          detectionMethod,
-          metricName,
-          triggerEvent: rule.triggerEvents[0].triggerEvent as string
-        }
-      } else {
-        this.selectedRule = getDefaultRule()
-      }
-      // BE not ready so must add default above
-      // this.selectedRule = cloneDeep(rule) || getDefaultRule()
+      this.selectedRule = rule ? cloneDeep(rule) : getDefaultRule()
     },
     resetDefaultConditions() {
       if (!this.selectedRule) return
@@ -122,11 +92,7 @@ export const useMonitoringPoliciesStore = defineStore('monitoringPoliciesStore',
       }
 
       // detection method EVENT
-      if (this.selectedRule.detectionMethod === DetectionMethodTypes.EVENT) {
-        this.selectedRule.triggerEvent === SNMPEventType.PORT_DOWN
-          ? (this.selectedRule.triggerEvents = [getDefaultEventConditionPortDown()])
-          : (this.selectedRule.triggerEvents = [getDefaultEventCondition()])
-      }
+      return (this.selectedRule.triggerEvents = [getDefaultEventCondition()])
     },
     addNewCondition() {
       if (!this.selectedRule) return
@@ -137,11 +103,7 @@ export const useMonitoringPoliciesStore = defineStore('monitoringPoliciesStore',
       }
 
       // detection method EVENT
-      if (this.selectedRule.detectionMethod === DetectionMethodTypes.EVENT) {
-        this.selectedRule.triggerEvent === SNMPEventType.PORT_DOWN
-          ? this.selectedRule.triggerEvents.push(getDefaultEventConditionPortDown())
-          : this.selectedRule.triggerEvents.push(getDefaultEventCondition())
-      }
+      return this.selectedRule.triggerEvents.push(getDefaultEventCondition())
     },
     updateCondition(id: string, condition: Condition) {
       this.selectedRule!.triggerEvents.map((currentCondition) => {
@@ -175,11 +137,9 @@ export const useMonitoringPoliciesStore = defineStore('monitoringPoliciesStore',
       const policy = cloneDeep(this.selectedPolicy!)
       policy.rules = policy.rules.map((rule) => {
         rule.triggerEvents = rule.triggerEvents.map((condition) => {
-          condition.triggerEvent = rule.triggerEvent
           if (!policy.id) delete condition.id // don't send generated ids
           return condition
         })
-        delete rule.triggerEvent
         delete rule.detectionMethod
         delete rule.metricName
         if (!policy.id) delete rule.id // don't send generated ids
@@ -196,6 +156,13 @@ export const useMonitoringPoliciesStore = defineStore('monitoringPoliciesStore',
       }
 
       return !error.value
+    },
+    copyPolicy(policy: Policy) {
+      const copiedPolicy = cloneDeep(policy)
+      delete copiedPolicy.isDefault
+      delete copiedPolicy.id
+      delete copiedPolicy.name
+      this.displayPolicyForm(copiedPolicy)
     }
   }
 })

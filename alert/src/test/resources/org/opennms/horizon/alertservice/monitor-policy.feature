@@ -21,7 +21,7 @@ Feature: Monitor policy gRPC Functionality
       | DEVICE_UNREACHABLE | MAJOR    |
 
   Scenario: Verify alert can be created based on the default policy
-    Then Send event with UEI "uei.opennms.org/vendor/opennms/internal/DEVICE_UNREACHABLE" with tenant "new-tenant" with node 10 with severity "MAJOR"
+    Then Send event with UEI "uei.opennms.org/generic/traps/SNMP_Cold_Start" with tenant "new-tenant" with node 10 with severity "MAJOR"
     Then List alerts for tenant "new-tenant", with timeout 5000ms, until JSON response matches the following JSON path expressions
       | alerts.size() == 1 |
       | alerts[0].counter == 1 |

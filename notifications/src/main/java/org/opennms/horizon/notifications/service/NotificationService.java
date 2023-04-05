@@ -59,17 +59,23 @@ public class NotificationService {
             alert.getMonitoringPolicyIdList()
         );
 
-        dbPolicies.forEach(policy -> {
+        boolean notifyPagerDuty = false;
+
+        for (MonitoringPolicy policy : dbPolicies) {
             if (policy.isNotifyByPagerDuty()) {
-                // Wrap in a try/catch, we don't want a failure to notify via PagerDuty to prevent us from sending an
-                // email notification, etc.
-                try {
-                    pagerDutyAPI.postNotification(alert);
-                } catch (NotificationException e) {
-                    log.warn("Unable to send alert to PagerDuty: {}", alert, e);
-                }
+                notifyPagerDuty = true;
             }
-        });
+        }
+
+        if (notifyPagerDuty) {
+            // Wrap in a try/catch, we don't want a failure to notify via PagerDuty to prevent us from sending an
+            // email notification, etc.
+            try {
+                pagerDutyAPI.postNotification(alert);
+            } catch (NotificationException e) {
+                log.warn("Unable to send alert to PagerDuty: {}", alert, e);
+            }
+        }
 
         if (dbPolicies.isEmpty()) {
             log.debug("No monitoring policy found, dropping alert: {}", alert);

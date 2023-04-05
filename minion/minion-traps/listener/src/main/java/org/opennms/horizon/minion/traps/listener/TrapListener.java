@@ -94,6 +94,7 @@ public class TrapListener implements TrapNotificationListener, Listener {
 
         try {
             TrapDTO trapDTO = transformTrapInfo(trapInformation);
+            LOG.info("Received Trap {}", trapDTO);
             getMessageDispatcher().send(trapDTO)
                 .whenComplete((t,ex) -> {
                     if (ex != null) {

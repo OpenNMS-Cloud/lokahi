@@ -35,6 +35,7 @@
               hideLabel
               v-focus
               data-test="rule-name-input"
+              :readonly="store.selectedPolicy.isDefault"
             />
           </div>
           <div class="col">
@@ -43,6 +44,7 @@
               :list="componentTypeOptions"
               @item-selected="selectComponentType"
               :selectedId="store.selectedRule.componentType"
+              :disabled="store.selectedPolicy.isDefault"
             />
           </div>
         </div>
@@ -54,6 +56,7 @@
               :list="detectionMethodOptions"
               @item-selected="selectDetectionMethod"
               :selectedId="store.selectedRule.detectionMethod"
+              :disabled="store.selectedPolicy.isDefault"
             />
           </div>
           <div class="col">
@@ -64,25 +67,7 @@
               :list="metricOptions"
               @item-selected="selectMetric"
               :selectedId="store.selectedRule.metricName"
-            />
-          </div>
-          <div
-            class="col"
-            v-if="store.selectedRule.detectionMethod === DetectionMethodTypes.EVENT"
-          >
-            <div class="subtitle">Trigger Event</div>
-            <!--
-              BE does not yet respond with trigger event on rule, 
-              so we have to get it form the condition for now 
-            -->
-            <BasicSelect
-              :list="triggerEventOptions"
-              @item-selected="selecttriggerEvent"
-              :selectedId="
-                store.selectedPolicy.id
-                  ? store.selectedRule.triggerEvents[0].triggerEvent as string
-                  : store.selectedRule.triggerEvent
-              "
+              :disabled="store.selectedPolicy.isDefault"
             />
           </div>
         </div>
@@ -107,6 +92,7 @@
                 v-for="(cond, index) in store.selectedRule!.triggerEvents"
                 :key="cond.id"
                 :condition="(cond as EventCondition)"
+                :policy="store.selectedPolicy"
                 :rule="store.selectedRule"
                 :index="index"
                 @updateCondition="(condition) => store.updateCondition(cond.id, condition)"
@@ -117,7 +103,7 @@
               class="add-params"
               text
               @click="store.addNewCondition"
-              :disabled="store.selectedRule.triggerEvents.length === 4"
+              :disabled="store.selectedRule.triggerEvents.length === 4 || store.selectedPolicy.isDefault"
             >
               Additional Parameters
             </FeatherButton>
@@ -136,7 +122,6 @@ import {
   DetectionMethodTypes,
   ComponentType,
   EventMetrics,
-  SNMPEventType,
   ThresholdMetrics
 } from './monitoringPolicies.constants'
 
@@ -172,20 +157,9 @@ const eventMetricsOptions = [
   // { id: EventMetrics.INTERNAL, name: 'Internal' } BE Not ready yet
 ]
 
-const triggerEventOptions = [
-  { id: SNMPEventType.COLD_REBOOT, name: 'Device Cold Reboot' },
-  { id: SNMPEventType.SNMP_AUTH_FAILURE, name: 'SNMP Authentication Failure' },
-  { id: SNMPEventType.PORT_DOWN, name: 'Port Down' }
-]
-
 const selectComponentType = (type: string) => (store.selectedRule!.componentType = type)
 const selectMetric = (metric: string) => (store.selectedRule!.metricName = metric)
 const populateForm = (rule: Rule) => store.displayRuleForm(rule)
-
-const selecttriggerEvent = (trigger: string) => {
-  store.selectedRule!.triggerEvent = trigger
-  store.resetDefaultConditions()
-}
 
 const selectDetectionMethod = (method: string) => {
   store.selectedRule!.detectionMethod = method

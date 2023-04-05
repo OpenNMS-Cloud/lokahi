@@ -90,4 +90,7 @@ public class IpInterface {
 
     @Column(name = "netmask")
     private String netmask;
+
+    @Column(name = "if_index")
+    private int ifIndex;
 }

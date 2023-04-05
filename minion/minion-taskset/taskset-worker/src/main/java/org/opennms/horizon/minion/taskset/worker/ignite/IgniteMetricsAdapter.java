@@ -1,13 +1,7 @@
 package org.opennms.horizon.minion.taskset.worker.ignite;
 
-import static com.codahale.metrics.MetricRegistry.name;
-
 import com.codahale.metrics.Gauge;
 import com.codahale.metrics.MetricRegistry;
-import java.util.Collections;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Predicate;
 import org.apache.ignite.lang.IgniteFuture;
 import org.apache.ignite.spi.IgniteSpiContext;
 import org.apache.ignite.spi.IgniteSpiException;
@@ -25,6 +19,13 @@ import org.opennms.horizon.minion.observability.metrics.MetricsProvider;
 import org.opennms.horizon.shared.ipc.rpc.IpcIdentity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Collections;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Predicate;
+
+import static com.codahale.metrics.MetricRegistry.name;
 
 public class IgniteMetricsAdapter implements MetricExporterSpi, MetricsProvider, Runnable {
 
@@ -111,7 +112,7 @@ public class IgniteMetricsAdapter implements MetricExporterSpi, MetricsProvider,
         if (!metrics.getMetrics().containsKey(metricName)) {
           com.codahale.metrics.Metric bridge = bridge(metric);
           if (bridge != null) {
-            logger.info("Registered metric {}: {}", metric.name(), metric.description());
+            logger.debug("Registered metric {}: {}", metric.name(), metric.description());
             metrics.register(metricName, bridge);
           }
         }

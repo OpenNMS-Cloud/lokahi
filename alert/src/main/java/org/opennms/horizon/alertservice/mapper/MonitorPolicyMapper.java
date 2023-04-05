@@ -31,10 +31,12 @@ package org.opennms.horizon.alertservice.mapper;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.mapstruct.BeanMapping;
 import org.mapstruct.CollectionMappingStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
+import org.mapstruct.NullValueCheckStrategy;
 import org.opennms.horizon.alertservice.db.entity.MonitorPolicy;
 import org.opennms.horizon.shared.alert.policy.MonitorPolicyProto;
 
@@ -67,6 +69,7 @@ public interface MonitorPolicyMapper {
     @Mappings({
         @Mapping(target = "rulesList", source = "rules")
     })
+    @BeanMapping(nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
     MonitorPolicyProto map(MonitorPolicy policy);
 
     @Mappings({

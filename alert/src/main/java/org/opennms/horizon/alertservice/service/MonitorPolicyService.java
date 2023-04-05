@@ -185,7 +185,7 @@ public class MonitorPolicyService {
     }
 
     private void createAlertDefinition(TriggerEvent event) {
-        definitionRepo.findByTriggerEventId(event.getId())
+        definitionRepo.findFirstByTriggerEventId(event.getId())
             .ifPresentOrElse(definition -> {
                 if(StringUtils.isNotEmpty(event.getUei()) && !event.getUei().equals(definition.getUei())) {
                     definition.setUei(event.getUei());

@@ -13,7 +13,10 @@
           >clear all filters</FeatherButton
         >
       </div>
-      <AlertsSeverityFilters data-test="severity-filters" />
+      <AlertsSeverityFilters
+        data-test="severity-filters"
+        isFilter
+      />
       <div class="alerts-content">
         <div class="time-search-filters">
           <div

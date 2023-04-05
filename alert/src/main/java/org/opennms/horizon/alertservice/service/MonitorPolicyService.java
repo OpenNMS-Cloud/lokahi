@@ -30,7 +30,6 @@ package org.opennms.horizon.alertservice.service;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 
 import org.apache.commons.lang3.StringUtils;
 import org.opennms.horizon.alerts.proto.AlertType;
@@ -172,10 +171,10 @@ public class MonitorPolicyService {
 
 
     private void createAlertDefinition() {
-        CompletableFuture.runAsync(() -> {
-            eventRepository.findAll().forEach(this::createAlertDefinition);
-            definitionRepo.flush();
-        });
+        List<TriggerEvent> list =  eventRepository.findAll();
+        log.info("found {} events", list.size());
+        list.forEach(this::createAlertDefinition);
+        definitionRepo.flush();
     }
 
 
@@ -187,6 +186,7 @@ public class MonitorPolicyService {
     private void createAlertDefinition(TriggerEvent event) {
         definitionRepo.findFirstByTriggerEventId(event.getId())
             .ifPresentOrElse(definition -> {
+                log.info("update alert definition");
                 if(StringUtils.isNotEmpty(event.getUei()) && !event.getUei().equals(definition.getUei())) {
                     definition.setUei(event.getUei());
                     definition.setReductionKey(event.getReductionKey());
@@ -195,6 +195,7 @@ public class MonitorPolicyService {
                     definitionRepo.save(definition);
                 }
             }, ()-> {
+                log.info("creating alert definition for event {}", event.getTriggerEvent());
                 AlertDefinition definition = new AlertDefinition();
                 definition.setUei(event.getUei());
                 definition.setTenantId(event.getTenantId());

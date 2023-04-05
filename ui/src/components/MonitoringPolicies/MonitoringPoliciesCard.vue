@@ -24,6 +24,7 @@
         icon="Copy"
         class="copy"
         @click="$emit('copyPolicy', policy)"
+        data-test="policy-copy-btn"
       >
         <FeatherIcon :icon="icons.ContentCopy" />
       </FeatherButton>

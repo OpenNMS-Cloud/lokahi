@@ -225,7 +225,7 @@ public class ScannerResponseService {
                 ifIndexSNMPMap.put(snmpInterface.getIfIndex(), snmpInterface);
             }
             for (IpInterfaceResult ipIfResult : result.getIpInterfacesList()) {
-                ipInterfaceService.creatUpdateFromScanResult(tenantId, node, ipIfResult, ifIndexSNMPMap);
+                ipInterfaceService.createOrUpdateFromScanResult(tenantId, node, ipIfResult, ifIndexSNMPMap);
             }
             result.getDetectorResultList().forEach(detectorResult -> {
                 processDetectorResults(tenantId, location, detectorResult);

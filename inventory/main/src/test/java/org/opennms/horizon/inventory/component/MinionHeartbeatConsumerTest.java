@@ -30,12 +30,12 @@ package org.opennms.horizon.inventory.component;
 
 import com.google.protobuf.Any;
 import org.apache.kafka.clients.producer.ProducerRecord;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.opennms.cloud.grpc.minion.Identity;
 import org.opennms.cloud.grpc.minion.RpcRequestProto;
@@ -67,17 +67,15 @@ public class MinionHeartbeatConsumerTest {
     private KafkaTemplate<String, byte[]> kafkaTemplate;
     @Mock
     private MonitoringSystemService service;
+
     @InjectMocks
+    @Spy
     MinionHeartbeatConsumer messageConsumer;
 
     private final String tenantId = "test-tenant";
     private Map<String, Object> headers;
     private HeartbeatMessage heartbeat;
 
-    @BeforeAll
-    static void prepareTests(){
-        MinionHeartbeatConsumer.MONITOR_PERIOD = 1000;
-    }
 
     @BeforeEach
     void beforeTest() {
@@ -105,8 +103,7 @@ public class MinionHeartbeatConsumerTest {
     @Test
     void testAcceptHeartbeatsDelay() throws InterruptedException {
         messageConsumer.receiveMessage(heartbeat.toByteArray(), headers);
-        // TODO: rework to eliminate use of slee() which leads to intermittent failures
-        Thread.sleep(MinionHeartbeatConsumer.MONITOR_PERIOD * 2);
+        doReturn(System.currentTimeMillis() + 30000).when(messageConsumer).getSystemTimeInMsec();
         messageConsumer.receiveMessage(heartbeat.toByteArray(), headers);
         verify(service, times(2)).addMonitoringSystemFromHeartbeat(any(HeartbeatMessage.class), eq(tenantId));
         verify(rpcClient, timeout(5000).times(2)).sendRpcRequest(eq(tenantId), any(RpcRequestProto.class));

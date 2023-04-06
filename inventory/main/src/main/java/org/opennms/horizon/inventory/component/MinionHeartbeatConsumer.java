@@ -28,16 +28,12 @@
 
 package org.opennms.horizon.inventory.component;
 
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
-
-import javax.annotation.PreDestroy;
-
+import com.google.common.base.Strings;
+import com.google.protobuf.Any;
+import com.google.protobuf.InvalidProtocolBufferException;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.producer.ProducerRecord;
-import org.apache.kafka.common.header.internals.RecordHeader;
 import org.opennms.cloud.grpc.minion.RpcRequestProto;
 import org.opennms.cloud.grpc.minion.RpcResponseProto;
 import org.opennms.horizon.grpc.echo.contract.EchoRequest;
@@ -49,7 +45,6 @@ import org.opennms.horizon.shared.constants.GrpcConstants;
 import org.opennms.taskset.contract.MonitorResponse;
 import org.opennms.taskset.contract.MonitorType;
 import org.opennms.taskset.contract.TaskResult;
-import org.opennms.taskset.contract.TaskSetResults;
 import org.opennms.taskset.contract.TenantedTaskSetResults;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
@@ -59,13 +54,12 @@ import org.springframework.messaging.handler.annotation.Headers;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 
-import com.google.common.base.Strings;
-import com.google.protobuf.Any;
-import com.google.protobuf.InvalidProtocolBufferException;
-
-import io.grpc.Context;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import javax.annotation.PreDestroy;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 
 @RequiredArgsConstructor
 @Component
@@ -76,7 +70,8 @@ public class MinionHeartbeatConsumer {
     protected static final String DEFAULT_TASK_RESULTS_TOPIC = "task-set.results";
     private static final int DEFAULT_MESSAGE_SIZE = 1024;
     private static final long ECHO_TIMEOUT = 30_000;
-    protected static int MONITOR_PERIOD = 30_000;
+    private static final int MONITOR_PERIOD = 30_000 - 2000; // We expect heartbeats every 30 secs,
+    // we should still process heartbeats received closer to 30secs interval, so 2secs prior arrival should still be processed.
     private final MinionRpcClient rpcClient;
     private final KafkaTemplate<String, byte[]> kafkaTemplate;
 
@@ -95,11 +90,12 @@ public class MinionHeartbeatConsumer {
             log.info("Received heartbeat message for minion with tenant id: {}; id: {}; location: {}", tenantId, message.getIdentity().getSystemId(), message.getIdentity().getLocation());
             service.addMonitoringSystemFromHeartbeat(message, tenantId);
             String systemId = message.getIdentity().getSystemId();
-            String key = tenantId + "_" + systemId;
+            String location = message.getIdentity().getLocation();
+            String key = tenantId + "_" + location + "-" + systemId;
             Long lastRun = rpcMaps.get(key);
-            if (lastRun == null || (System.currentTimeMillis() > (lastRun + MONITOR_PERIOD))) { //prevent run too many rpc calls
+            if (lastRun == null || (getSystemTimeInMsec() > (lastRun + MONITOR_PERIOD))) { //prevent run too many rpc calls
                 CompletableFuture.runAsync(() -> runRpcMonitor(systemId, message.getIdentity().getLocation(), tenantId));
-                rpcMaps.put(key, System.currentTimeMillis());
+                rpcMaps.put(key, getSystemTimeInMsec());
             }
         } catch (Exception e) {
             log.error("Error while processing heartbeat message: ", e);
@@ -170,5 +166,9 @@ public class MinionHeartbeatConsumer {
 
         ProducerRecord<String, byte[]> producerRecord = new ProducerRecord<>(kafkaTopic, results.toByteArray());
         kafkaTemplate.send(producerRecord);
+    }
+
+    protected long getSystemTimeInMsec() {
+        return System.currentTimeMillis();
     }
 }

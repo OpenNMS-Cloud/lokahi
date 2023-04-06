@@ -40,7 +40,7 @@ public class IpInterfaceService {
             return optional.map(mapper::modelToDTO);
     }
 
-    public void creatUpdateFromScanResult(String tenantId, Node node, IpInterfaceResult result, Map<Integer, SnmpInterface> ifIndexSNMPMap) {
+    public void createOrUpdateFromScanResult(String tenantId, Node node, IpInterfaceResult result, Map<Integer, SnmpInterface> ifIndexSNMPMap) {
         modelRepo.findByNodeIdAndTenantIdAndIpAddress(node.getId(), tenantId, InetAddressUtils.getInetAddress(result.getIpAddress()))
             .ifPresentOrElse(ipInterface -> {
                 ipInterface.setHostname(result.getIpHostName());

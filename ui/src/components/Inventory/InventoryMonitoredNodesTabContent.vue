@@ -94,7 +94,7 @@
           v-for="(tag, index) in availableTagsToDelete"
           :key="index"
           @click="selectTagForDeletion(tag)"
-          :class="{ selected: tagsForDeletion.some((t) => t.name === tag.name) }"
+          :class="{ selected: tagsForDeletion.some((t) => t.id === tag.id) }"
           class="pointer"
         >
           {{ tag.name }}

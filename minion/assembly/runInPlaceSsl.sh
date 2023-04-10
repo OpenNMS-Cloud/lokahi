@@ -77,20 +77,20 @@ if [ "${MINION_GATEWAY_TLS}" = "true" ]
 then
 	(
 		cat "${GRPC_CLIENT_CONFIG_FILE}" |
-			grep -v '^trust\.cert\.filepath=' |
-			grep -v '^client\.cert\.filepath=' |
-			grep -v '^client\.private\.key\.filepath=' |
-			grep -v '^client\.private\.key\.password=' |
-			grep -v '^override\.authority='
+			grep -v '^grpc.trust\.cert\.filepath=' |
+			grep -v '^grpc.client\.cert\.filepath=' |
+			grep -v '^grpc.client\.private\.key\.filepath=' |
+			grep -v '^grpc.client\.private\.key\.password=' |
+			grep -v '^grpc.override\.authority='
 
-		echo "trust.cert.filepath=${CA_CERT_FILE}"
-		echo "client.cert.filepath=${CLIENT_CERT_FILE}"
-		echo "client.private.key.filepath=${CLIENT_KEY_FILE}"
+		echo "grpc.trust.cert.filepath=${CA_CERT_FILE}"
+		echo "grpc.client.cert.filepath=${CLIENT_CERT_FILE}"
+		echo "grpc.client.private.key.filepath=${CLIENT_KEY_FILE}"
 		if [ -n "${CLIENT_PRIVATE_KEY_PASSWORD}" ]
 		then
-			echo "client.private.key.password=${CLIENT_PRIVATE_KEY_PASSWORD}"
+			echo "grpc.client.private.key.password=${CLIENT_PRIVATE_KEY_PASSWORD}"
 		fi
-		echo "override.authority=${OVERRIDE_AUTHORITY}"
+		echo "grpc.override.authority=${OVERRIDE_AUTHORITY}"
 	) >>"${GRPC_CLIENT_CONFIG_FILE}.upd"
 
 	mv "${GRPC_CLIENT_CONFIG_FILE}.upd" "${GRPC_CLIENT_CONFIG_FILE}"

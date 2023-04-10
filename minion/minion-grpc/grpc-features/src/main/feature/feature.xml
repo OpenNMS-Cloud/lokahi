@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <features name="minion-grpc-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.6.0">
 
+    <repository>mvn:org.opennms.horizon.minion/minion-bootstrap-features/${project.version}/xml/features</repository>
+
     <feature name="internal-grpc-metrics">
         <bundle>mvn:io.dropwizard.metrics/metrics-core/${dropwizard.metrics.version}</bundle>
     </feature>
@@ -43,6 +45,7 @@
     <feature name="grpc-minion" version="${project.version}">
         <feature>aries-blueprint</feature>
 
+        <feature>minion-bootstrap-all</feature>
         <feature>internal-grpc-metrics</feature>
         <feature>internal-grpc-opentracing</feature>
         <feature>internal-grpc-guava</feature>

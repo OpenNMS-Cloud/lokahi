@@ -61,11 +61,6 @@ public class GrpcLocalDispatcherFactory extends AbstractMessageDispatcherFactory
     }
 
     @Override
-    public BundleContext getBundleContext() {
-        return null;
-    }
-
-    @Override
     public Tracer getTracer() {
         return null;
     }

@@ -152,6 +152,7 @@
         <awaitility.version>4.2.0</awaitility.version>
         <commons-csv.version>1.9.0</commons-csv.version>
         <jmh.version>1.33</jmh.version>
+        <zip4j.version>2.11.5</zip4j.version>
     </properties>
 
     <dependencyManagement>
@@ -564,6 +565,11 @@
                 <groupId>net.java.dev.jna</groupId>
                 <artifactId>jna-platform</artifactId>
                 <version>${jna.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>net.lingala.zip4j</groupId>
+                <artifactId>zip4j</artifactId>
+                <version>${zip4j.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.aries.jax.rs</groupId>

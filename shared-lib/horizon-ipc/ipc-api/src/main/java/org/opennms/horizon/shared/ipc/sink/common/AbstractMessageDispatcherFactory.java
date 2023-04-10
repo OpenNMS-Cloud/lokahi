@@ -69,8 +69,6 @@ public abstract class AbstractMessageDispatcherFactory<W> implements MessageDisp
 
     public abstract String getMetricDomain();
 
-    public abstract BundleContext getBundleContext();
-
     public abstract Tracer getTracer();
 
     public abstract MetricRegistry getMetrics();
@@ -155,23 +153,6 @@ public abstract class AbstractMessageDispatcherFactory<W> implements MessageDisp
         @Override
         public void close() throws Exception {
             state.close();
-        }
-    }
-
-    private void maybeRegisterMetricSetInServiceRegistry() {
-        final BundleContext bundleContext = getBundleContext();
-        if (bundleContext != null) {
-            final Dictionary<String,Object> props = new Hashtable<>();
-            props.put("name", getMetricDomain());
-            props.put("description", "Sink API Related Metrics for " + getMetricDomain());
-            metricsServiceRegistration = bundleContext.registerService(MetricSet.class, getMetrics(), props);
-        }
-    }
-
-    private void unregisterMetricSetInServiceRegistry() {
-        if (metricsServiceRegistration != null) {
-            metricsServiceRegistration.unregister();
-            metricsServiceRegistration = null;
         }
     }
 }

@@ -22,7 +22,7 @@
       Deselect all
     </FeatherButton>
     <FeatherButton
-      @click="openModalSaveTags"
+      @click="saveTagsToSelectedNodes"
       :disabled="!nodesSelected.length"
       primary
       data-test="open-modal-btn"
@@ -54,19 +54,14 @@
               :metric="metric"
             />
           </FeatherChipList>
-          <FeatherChipList
-            v-if="node.anchor.tagValue.length"
-            condensed
-            label="Tags"
-            class="tag-chip-list"
+
+          <div
+            class="tags-count-box"
+            @click="openModalForDeletingTags(node)"
           >
-            <FeatherChip
-              v-for="(tag, index) in node.anchor.tagValue"
-              :key="index"
-            >
-              {{ tag.name }}
-            </FeatherChip>
-          </FeatherChipList>
+            Tags: <span class="count">{{ node.anchor.tagValue.length }}</span>
+          </div>
+
           <InventoryTextAnchorList
             :anchor="node?.anchor"
             data-test="text-anchor-list"
@@ -91,28 +86,32 @@
   >
     <template #content>
       <FeatherChipList
+        :key="tagsForDeletion.toString()"
         condensed
-        label="Tag list"
+        label="Tags"
       >
         <FeatherChip
-          v-for="tag in tagStore.tagsSelected"
-          :key="tag.id"
-          >{{ tag.name }}</FeatherChip
+          v-for="(tag, index) in availableTagsToDelete"
+          :key="index"
+          @click="selectTagForDeletion(tag)"
+          :class="{ selected: tagsForDeletion.some((t) => t.name === tag.name) }"
+          class="pointer"
         >
+          {{ tag.name }}
+        </FeatherChip>
       </FeatherChipList>
     </template>
     <template #footer>
       <FeatherButton
-        data-testid="cancel-btn"
         secondary
         @click="closeModal"
       >
         {{ modal.cancelLabel }}
       </FeatherButton>
       <FeatherButton
-        data-testid="save-btn"
         primary
-        @click="saveTagsToSelectedNodes"
+        @click="removeTagsFromNodes"
+        :disabled="!tagsForDeletion.length"
       >
         {{ modal.saveLabel }}
       </FeatherButton>
@@ -131,6 +130,8 @@ import { useInventoryQueries } from '@/store/Queries/inventoryQueries'
 import { useInventoryStore } from '@/store/Views/inventoryStore'
 import { ModalPrimary } from '@/types/modal'
 import useModal from '@/composables/useModal'
+import { Tag, TagListNodesRemoveInput } from '@/types/graphql'
+import { TagsSearchPartsFragmentDoc } from '@/types/graphql'
 
 // TODO: sort tabContent alpha (default)? to keep list display consistently in same order (e.g. page refresh)
 const props = defineProps({
@@ -140,6 +141,9 @@ const props = defineProps({
   }
 })
 const nodes = ref<NodeContent[]>(props.tabContent)
+const availableTagsToDelete = ref(<Tag[]>[])
+const tagsForDeletion = ref([] as Tag[])
+const nodeIdForDeletingTags = ref()
 
 const { openModal, closeModal, isVisible } = useModal()
 
@@ -175,19 +179,6 @@ const selectDeselectAllNodes = (areSelected: boolean) => {
   }))
 }
 
-const openModalSaveTags = () => {
-  const selectedNodesLabels = nodesSelected.value.map(({ label }) => label).join(', ')
-  const modalContent = areAllNodesSelected.value
-    ? 'Add tags to all nodes?'
-    : `Add tags to node${inventoryStore.nodesSelected.length > 1 ? '(s)' : ''}: ${selectedNodesLabels}?`
-  modal.value = {
-    ...modal.value,
-    title: modalContent
-  }
-
-  openModal()
-}
-
 const saveTagsToSelectedNodes = async () => {
   const tags = tagStore.tagsSelected.map(({ name }) => ({ name }))
   const nodeIds = inventoryStore.nodesSelected.map((node) => node.id)
@@ -195,13 +186,36 @@ const saveTagsToSelectedNodes = async () => {
 
   inventoryQueries.fetch()
   resetState()
+}
+
+const removeTagsFromNodes = async () => {
+  const payload: TagListNodesRemoveInput = {
+    nodeIds: [nodeIdForDeletingTags.value], // designs only account for 1 node at a time
+    tagIds: tagsForDeletion.value.map((tag) => tag.id)
+  }
+
+  await nodeMutations.removeTagsFromNodes(payload)
+
+  inventoryQueries.fetch()
+  resetState()
   closeModal()
+}
+
+const selectTagForDeletion = (tag: Tag) => {
+  const isTagAlreadySelected = tagsForDeletion.value.some(({ name }) => name === tag.name)
+
+  if (isTagAlreadySelected) {
+    tagsForDeletion.value = tagsForDeletion.value.filter(({ name }) => name !== tag.name)
+  } else {
+    tagsForDeletion.value.push(tag)
+  }
 }
 
 const resetState = () => {
   tagStore.selectAllTags(false)
   tagStore.setTagEditMode(false)
   inventoryStore.resetSelectedNode()
+  tagsForDeletion.value = []
 
   nodes.value = nodes.value.map((node) => ({
     ...node,
@@ -209,6 +223,18 @@ const resetState = () => {
   }))
 
   inventoryStore.isTagManagerReset = false
+}
+
+const openModalForDeletingTags = (node: NodeContent) => {
+  if (!node.anchor.tagValue.length) return
+
+  nodeIdForDeletingTags.value = node.id
+  availableTagsToDelete.value = node.anchor.tagValue
+
+  modal.value.title = node.label!
+  modal.value.saveLabel = 'Delete'
+
+  openModal()
 }
 
 const modal = ref<ModalPrimary>({
@@ -232,6 +258,7 @@ const storageIcon: IIcon = {
 @use '@featherds/styles/themes/variables';
 @use '@/styles/vars';
 @use '@/styles/mediaQueriesMixins';
+@use '@featherds/styles/mixins/typography';
 
 .ctrls {
   display: flex;
@@ -289,6 +316,21 @@ ul.cards {
     flex-direction: row;
     justify-content: space-between;
     gap: 2rem;
+
+    .tags-count-box {
+      background: var(variables.$secondary-variant);
+      color: var(variables.$primary-text-on-color);
+      padding: var(variables.$spacing-xxs);
+      border-radius: vars.$border-radius-s;
+      width: 75px;
+      text-align: center;
+      cursor: pointer;
+
+      .count {
+        @include typography.subtitle2;
+        color: var(variables.$primary-text-on-color);
+      }
+    }
   }
 }
 

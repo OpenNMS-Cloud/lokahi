@@ -1,3 +1,4 @@
+import { Tag } from './graphql'
 import { Chip } from './metric'
 
 interface Anchor {
@@ -7,7 +8,7 @@ interface Anchor {
   locationLink?: string
   managementIpValue?: string
   managementIpLink?: string
-  tagValue?: array
+  tagValue: Tag[]
 }
 
 interface NodeContent {

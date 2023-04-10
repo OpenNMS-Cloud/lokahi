@@ -1,9 +1,0 @@
-mutation AddNode($node: NodeCreateInput!) {
-  addNode(node: $node) {
-    createTime
-    id
-    monitoringLocationId
-    nodeLabel
-    tenantId
-  }
-}

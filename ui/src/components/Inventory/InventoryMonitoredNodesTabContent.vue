@@ -131,7 +131,6 @@ import { useInventoryStore } from '@/store/Views/inventoryStore'
 import { ModalPrimary } from '@/types/modal'
 import useModal from '@/composables/useModal'
 import { Tag, TagListNodesRemoveInput } from '@/types/graphql'
-import { TagsSearchPartsFragmentDoc } from '@/types/graphql'
 
 // TODO: sort tabContent alpha (default)? to keep list display consistently in same order (e.g. page refresh)
 const props = defineProps({

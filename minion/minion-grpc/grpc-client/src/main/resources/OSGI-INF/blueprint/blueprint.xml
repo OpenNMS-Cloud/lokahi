@@ -15,6 +15,7 @@
             <cm:property name="grpc.client.cert.filepath" value="certs/client.signed.cert"/>
             <cm:property name="grpc.client.private.key.filepath" value="certs/client.key"/>
             <cm:property name="grpc.client.private.key.password" value=""/>
+            <cm:property name="grpc.client.private.key.is-pkcs12" value="false"/>
             <cm:property name="grpc.trust.cert.filepath" value="certs/CA.cert"/>
             <cm:property name="grpc.override.authority" value="opennms-minion-ssl-gateway"/>
             <cm:property name="grpc.max.message.size" value="104857600"/>
@@ -54,6 +55,7 @@
         <property name="clientCertChainFilePath" value="${grpc.client.cert.filepath}"/>
         <property name="clientPrivateKeyFilePath" value="${grpc.client.private.key.filepath}"/>
         <property name="clientPrivateKeyPassword" value="${grpc.client.private.key.password}"/>
+        <property name="clientPrivateKeyIsPkcs12" value="${grpc.client.private.key.is-pkcs12}"/>
         <property name="trustCertCollectionFilePath" value="${grpc.trust.cert.filepath}"/>
     </bean>
 

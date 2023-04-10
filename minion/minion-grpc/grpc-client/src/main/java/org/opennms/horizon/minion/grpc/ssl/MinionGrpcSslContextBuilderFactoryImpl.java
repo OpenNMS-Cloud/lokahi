@@ -31,10 +31,20 @@ package org.opennms.horizon.minion.grpc.ssl;
 
 import com.google.common.base.Strings;
 import io.grpc.netty.shaded.io.grpc.netty.GrpcSslContexts;
+import io.grpc.netty.shaded.io.netty.handler.ssl.ApplicationProtocolConfig;
 import io.grpc.netty.shaded.io.netty.handler.ssl.SslContextBuilder;
+import io.grpc.netty.shaded.io.netty.handler.ssl.SslProvider;
 import lombok.Setter;
 
+import javax.net.ssl.KeyManagerFactory;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.CertificateException;
 
 public class MinionGrpcSslContextBuilderFactoryImpl implements MinionGrpcSslContextBuilderFactory {
 
@@ -46,7 +56,8 @@ public class MinionGrpcSslContextBuilderFactoryImpl implements MinionGrpcSslCont
     private String clientPrivateKeyPassword;
     @Setter
     private String trustCertCollectionFilePath;
-
+    @Setter
+    private boolean clientPrivateKeyIsPkcs12;
 
     @Override
     public SslContextBuilder create() {
@@ -57,11 +68,15 @@ public class MinionGrpcSslContextBuilderFactoryImpl implements MinionGrpcSslCont
         }
 
         if (clientCertChainFilePath != null && clientPrivateKeyFilePath != null) {
-            builder.keyManager(
-                new File(clientCertChainFilePath),
-                new File(clientPrivateKeyFilePath),
-                sanitizePassword()
-            );
+            try {
+                if (clientPrivateKeyIsPkcs12) {
+                    configureKeyManagerPkcs12(builder);
+                } else {
+                    configureKeyManagerOther(builder);
+                }
+            } catch (Exception exc) {
+                throw new RuntimeException("Failed to initialize TLS", exc);
+            }
         }
 
         return builder;
@@ -70,6 +85,53 @@ public class MinionGrpcSslContextBuilderFactoryImpl implements MinionGrpcSslCont
 //========================================
 // Internals
 //----------------------------------------
+
+    private void configureKeyManagerOther(SslContextBuilder builder) {
+            builder.keyManager(
+                new File(clientCertChainFilePath),
+                new File(clientPrivateKeyFilePath),
+                sanitizePassword()
+            );
+    }
+
+    private void configureKeyManagerPkcs12(SslContextBuilder builder) throws KeyStoreException, IOException, CertificateException, NoSuchAlgorithmException, UnrecoverableKeyException {
+        KeyStore keyStore = loadPrivateKeyPkcs12Store();
+
+        KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+        keyManagerFactory.init(keyStore, passwordAsCharArray());
+
+        ApplicationProtocolConfig apn =
+            new ApplicationProtocolConfig(
+                ApplicationProtocolConfig.Protocol.ALPN,
+                ApplicationProtocolConfig.SelectorFailureBehavior.FATAL_ALERT,
+                ApplicationProtocolConfig.SelectedListenerFailureBehavior.FATAL_ALERT,
+                "h2"
+            );
+
+        builder
+            .keyManager(keyManagerFactory)
+            .sslProvider(SslProvider.JDK)
+            .applicationProtocolConfig(apn)
+            ;
+    }
+
+    private KeyStore loadPrivateKeyPkcs12Store() throws KeyStoreException, IOException, CertificateException, NoSuchAlgorithmException {
+        KeyStore keyStore = KeyStore.getInstance("pkcs12");
+        try (FileInputStream fis = new FileInputStream(clientPrivateKeyFilePath)) {
+            char[] passwordCharArray = passwordAsCharArray();
+            keyStore.load(fis, passwordCharArray);
+        }
+
+        return keyStore;
+    }
+
+    private char[] passwordAsCharArray() {
+        if (clientPrivateKeyPassword != null) {
+            return clientPrivateKeyPassword.toCharArray();
+        }
+
+        return null;
+    }
 
     private String sanitizePassword() {
         // Password must be null if unset; empty string can lead to the SSL context builder failing

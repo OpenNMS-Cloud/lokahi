@@ -1,0 +1,4 @@
+#!/bin/bash
+
+openssl pkcs12 -inkey client.key -in client.signed.cert -export -out client.p12 -passout pass:passw0rd -passin pass:passw0rd
+

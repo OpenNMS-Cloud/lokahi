@@ -14,17 +14,18 @@ CERT_ROOTDIR="$(cd ../../tools/SSL; pwd)"
 CA_CERT_FILE="${CERT_ROOTDIR}/CA.cert"
 CLIENT_KEY_FILE="${CERT_ROOTDIR}/client.key"
 CLIENT_CERT_FILE="${CERT_ROOTDIR}/client.signed.cert"
+CLIENT_KEY_IS_PKCS12="false"
 
 
 
 ###
-### WARNING: certificate passwords currently do not work
+### WARNING: certificate passwords currently do not work with PEM files; it only works with PKCS12 files.
+###
 ### The following error is logged when this fails:
 ###
 ###	Caused by: java.security.NoSuchAlgorithmException: PBES2 SecretKeyFactory not available
 ###
 CLIENT_PRIVATE_KEY_PASSWORD=""
-# CLIENT_PRIVATE_KEY_PASSWORD="passw0rd"
 
 # Prevent hostname verification failures by setting the expected cert "hostname"
 OVERRIDE_AUTHORITY="opennms-minion-ssl-gateway"
@@ -32,26 +33,32 @@ OVERRIDE_AUTHORITY="opennms-minion-ssl-gateway"
 USAGE()
 {
 	cat <<-!
-		Usage: bash $0 [-h <HOST>] [-i <ID>] [-l <LOC>] [-p <PORT>] [-a <ADDRESS>] [-d] [-t]
+		Usage: bash $0 [-f <FLA>] [-h <HOST>] [-i <ID>] [-k <PATH>] [-l <LOC>] [-P <PASS>] [-p <PORT>] [-a <ADDRESS>] [-d] [-t]
 
 		    -a[ADDRESS]	use ADDRESS (IGNITE_SERVER_ADDRESSES) configure the Ignite cluster addresses? (warning - this currently may not have any effect)
+		    -f[FLAG]	use client private key PKCS12 FLAG (true => PKCS12; false => other)
 		    -h[HOST]	use HOST (MINION_GATEWAY_HOST) as the hostname when connecting to the cloud
-		    -i[ID]		use ID (MINION_ID) as the system identifier for this minion instance
-		    -l[LOC]		use LOC (MINION_LOCATION) as the name of the location for this minion instance
+		    -i[ID]	use ID (MINION_ID) as the system identifier for this minion instance
+		    -k[PATH]	use PATH to the client private key file
+		    -l[LOC]	use LOC (MINION_LOCATION) as the name of the location for this minion instance
+		    -P[PASS]	use PASS (CLIENT_PRIVATE_KEY_PASSWORD) as the password for the client private key
 		    -p[PORT]	use GATEWAY (MINION_GATEWAY_HOST) as the hostname when connecting to the cloud
 		    -d		enable jvm debug
 		    -t		enable TLS
 !
 }
 
-while getopts a:h:i:l:p:Ddtx FLAG 
+while getopts a:f:h:i:k:l:P:p:Ddtx FLAG 
 do
     case "${FLAG}" in
-        a) IGNITE_SERVER_ADDRESSES=${OPTARG} ;;
-        h) MINION_GATEWAY_HOST=${OPTARG} ;;
-        i) MINION_ID=${OPTARG} ;;
-        l) MINION_LOCATION=${OPTARG} ;;
-        p) MINION_GATEWAY_PORT=${OPTARG} ;;
+        a) IGNITE_SERVER_ADDRESSES="${OPTARG}" ;;
+        f) CLIENT_KEY_IS_PKCS12="${OPTARG}" ;;
+        h) MINION_GATEWAY_HOST="${OPTARG}" ;;
+        i) MINION_ID="${OPTARG}" ;;
+        k) CLIENT_KEY_FILE="${OPTARG}" ;;
+        l) MINION_LOCATION="${OPTARG}" ;;
+        P) CLIENT_PRIVATE_KEY_PASSWORD="${OPTARG}" ;;
+        p) MINION_GATEWAY_PORT="${OPTARG}" ;;
 
         D) DEBUG=debugs ;;
         d) DEBUG=debug ;;
@@ -88,11 +95,13 @@ then
 			grep -v '^grpc.client\.cert\.filepath=' |
 			grep -v '^grpc.client\.private\.key\.filepath=' |
 			grep -v '^grpc.client\.private\.key\.password=' |
+			grep -v '^grpc.client.private.key.is-pkcs12=' |
 			grep -v '^grpc.override\.authority='
 
 		echo "grpc.trust.cert.filepath=${CA_CERT_FILE}"
 		echo "grpc.client.cert.filepath=${CLIENT_CERT_FILE}"
 		echo "grpc.client.private.key.filepath=${CLIENT_KEY_FILE}"
+		echo "grpc.client.private.key.is-pkcs12=${CLIENT_KEY_IS_PKCS12}"
 		if [ -n "${CLIENT_PRIVATE_KEY_PASSWORD}" ]
 		then
 			echo "grpc.client.private.key.password=${CLIENT_PRIVATE_KEY_PASSWORD}"

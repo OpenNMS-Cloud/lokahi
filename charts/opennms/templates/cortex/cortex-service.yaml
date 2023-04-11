@@ -1,3 +1,4 @@
+{{ if .Values.Cortex.Enabled }}
 apiVersion: v1
 kind: Service
 metadata:
@@ -13,3 +14,4 @@ spec:
       name: cortex-http
   selector:
     app: {{ .Values.Cortex.ServiceName }}
+{{ end }}

@@ -246,7 +246,12 @@ Grafana:
       Cpu: 100m
       Memory: 100Mi
 Cortex:
+  Enabled: true
   ServiceName: cortex
+  Host: cortex
+  PathRead: /prometheus/api/v1/query
+  PathWrite: /api/v1/push
+  Protocol: https
   Port: 9000
   Image: cortexproject/cortex:v1.14.0
   Resources:

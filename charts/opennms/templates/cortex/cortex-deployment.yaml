@@ -1,3 +1,4 @@
+{{ if .Values.Cortex.Enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -55,3 +56,4 @@ spec:
             - name: cortex-config-volume
               mountPath: "/etc/cortex.yml"
               subPath: "cortex.yml"
+{{ end }}

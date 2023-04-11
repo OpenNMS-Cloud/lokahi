@@ -251,7 +251,7 @@ Cortex:
   Host: cortex
   PathRead: /prometheus/api/v1/query
   PathWrite: /api/v1/push
-  Protocol: https
+  Protocol: http
   Port: 9000
   Image: cortexproject/cortex:v1.14.0
   Resources:

@@ -2,7 +2,31 @@ query NodesList {
   ...NodesParts
 }
 
-query NodeLatencyMetric($id: Long!, $monitor: String!, $instance: String!, $timeRange: Int!, $timeRangeUnit: TimeRangeUnit!) {
+query NodeLatencyMetric(
+  $id: Long!
+  $monitor: String!
+  $instance: String!
+  $timeRange: Int!
+  $timeRangeUnit: TimeRangeUnit!
+) {
   ...NodeLatencyParts
   ...NodeStatusParts
+}
+
+query FindAllNodesByNodeLabelSearch($labelSearchTerm: String!) {
+  findAllNodesByNodeLabelSearch(labelSearchTerm: $labelSearchTerm) {
+    id
+    ipInterfaces {
+      id
+      ipAddress
+      nodeId
+      snmpPrimary
+    }
+    location {
+      id
+      location
+    }
+    monitoringLocationId
+    nodeLabel
+  }
 }

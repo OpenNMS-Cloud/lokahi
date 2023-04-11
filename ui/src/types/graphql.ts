@@ -131,9 +131,9 @@ export type Exporter = {
   node?: Maybe<Node>;
 };
 
-export type ExporterInput = {
-  ipInterface?: InputMaybe<IpInterfaceInput>;
-  node?: InputMaybe<NodeInput>;
+export type ExporterFilterInput = {
+  ipInterfaceId?: InputMaybe<Scalars['Long']>;
+  nodeId?: InputMaybe<Scalars['Long']>;
 };
 
 export type FlowingPoint = {
@@ -170,16 +170,6 @@ export type IpInterface = {
   nodeId: Scalars['Long'];
   snmpPrimary?: Maybe<Scalars['Boolean']>;
   tenantId?: Maybe<Scalars['String']>;
-};
-
-export type IpInterfaceInput = {
-  hostname?: InputMaybe<Scalars['String']>;
-  id: Scalars['Long'];
-  ipAddress?: InputMaybe<Scalars['String']>;
-  netmask?: InputMaybe<Scalars['String']>;
-  nodeId: Scalars['Long'];
-  snmpPrimary?: InputMaybe<Scalars['Boolean']>;
-  tenantId?: InputMaybe<Scalars['String']>;
 };
 
 export type ListAlertResponse = {
@@ -406,23 +396,6 @@ export type NodeCreateInput = {
   location?: InputMaybe<Scalars['String']>;
   managementIp?: InputMaybe<Scalars['String']>;
   tags?: InputMaybe<Array<InputMaybe<TagCreateInput>>>;
-};
-
-export type NodeInput = {
-  createTime: Scalars['Long'];
-  id: Scalars['Long'];
-  ipInterfaces?: InputMaybe<Array<InputMaybe<IpInterfaceInput>>>;
-  monitoredState?: InputMaybe<Scalars['String']>;
-  monitoringLocationId: Scalars['Long'];
-  nodeLabel?: InputMaybe<Scalars['String']>;
-  objectId?: InputMaybe<Scalars['String']>;
-  scanType?: InputMaybe<Scalars['String']>;
-  snmpInterfaces?: InputMaybe<Array<InputMaybe<SnmpInterfaceInput>>>;
-  systemContact?: InputMaybe<Scalars['String']>;
-  systemDescr?: InputMaybe<Scalars['String']>;
-  systemLocation?: InputMaybe<Scalars['String']>;
-  systemName?: InputMaybe<Scalars['String']>;
-  tenantId?: InputMaybe<Scalars['String']>;
 };
 
 export type NodeRef = {
@@ -685,7 +658,8 @@ export type QueryTagsByPassiveDiscoveryIdArgs = {
 export type RequestCriteriaInput = {
   applications?: InputMaybe<Array<InputMaybe<Scalars['String']>>>;
   count?: InputMaybe<Scalars['Int']>;
-  exporter?: InputMaybe<Array<InputMaybe<ExporterInput>>>;
+  exporter?: InputMaybe<Array<InputMaybe<ExporterFilterInput>>>;
+  includeOther?: InputMaybe<Scalars['Boolean']>;
   step?: InputMaybe<Scalars['Int']>;
   timeRange?: InputMaybe<TimeRangeInput>;
 };
@@ -738,22 +712,6 @@ export type SnmpInterface = {
   nodeId: Scalars['Long'];
   physicalAddr?: Maybe<Scalars['String']>;
   tenantId?: Maybe<Scalars['String']>;
-};
-
-export type SnmpInterfaceInput = {
-  id: Scalars['Long'];
-  ifAdminStatus: Scalars['Int'];
-  ifAlias?: InputMaybe<Scalars['String']>;
-  ifDescr?: InputMaybe<Scalars['String']>;
-  ifIndex: Scalars['Int'];
-  ifName?: InputMaybe<Scalars['String']>;
-  ifOperatorStatus: Scalars['Int'];
-  ifSpeed: Scalars['Long'];
-  ifType: Scalars['Int'];
-  ipAddress?: InputMaybe<Scalars['String']>;
-  nodeId: Scalars['Long'];
-  physicalAddr?: InputMaybe<Scalars['String']>;
-  tenantId?: InputMaybe<Scalars['String']>;
 };
 
 export type SnmpInterfaceLinkRef = {
@@ -1155,6 +1113,13 @@ export type NodeLatencyMetricQueryVariables = Exact<{
 
 export type NodeLatencyMetricQuery = { __typename?: 'Query', nodeLatency?: { __typename?: 'TimeSeriesQueryResult', status?: string, data?: { __typename?: 'TSData', result?: Array<{ __typename?: 'TSResult', metric?: any, values?: Array<Array<number>> }> } }, nodeStatus?: { __typename?: 'NodeStatus', id: any, status?: string } };
 
+export type FindAllNodesByNodeLabelSearchQueryVariables = Exact<{
+  labelSearchTerm: Scalars['String'];
+}>;
+
+
+export type FindAllNodesByNodeLabelSearchQuery = { __typename?: 'Query', findAllNodesByNodeLabelSearch?: Array<{ __typename?: 'Node', id: any, monitoringLocationId: any, nodeLabel?: string, ipInterfaces?: Array<{ __typename?: 'IpInterface', id: any, ipAddress?: string, nodeId: any, snmpPrimary?: boolean }>, location?: { __typename?: 'Location', id: any, location?: string } }> };
+
 export type NodesForMapQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -1234,6 +1199,7 @@ export const GetTimeSeriesMetricDocument = {"kind":"Document", "definitions":[{"
 export const GetNodeForGraphsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetNodeForGraphs"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Long"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"findNodeById"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"ipInterfaces"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"ipAddress"}},{"kind":"Field","name":{"kind":"Name","value":"snmpPrimary"}}]}}]}}]}}]} as unknown as DocumentNode<GetNodeForGraphsQuery, GetNodeForGraphsQueryVariables>;
 export const NodesListDocument = {"kind":"Document", "definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"NodesList"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"NodesParts"}}]}},...NodesPartsFragmentDoc.definitions]} as unknown as DocumentNode<NodesListQuery, NodesListQueryVariables>;
 export const NodeLatencyMetricDocument = {"kind":"Document", "definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"NodeLatencyMetric"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Long"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"monitor"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"instance"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"timeRange"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"timeRangeUnit"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"TimeRangeUnit"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"NodeLatencyParts"}},{"kind":"FragmentSpread","name":{"kind":"Name","value":"NodeStatusParts"}}]}},...NodeLatencyPartsFragmentDoc.definitions,...MetricPartsFragmentDoc.definitions,...NodeStatusPartsFragmentDoc.definitions]} as unknown as DocumentNode<NodeLatencyMetricQuery, NodeLatencyMetricQueryVariables>;
+export const FindAllNodesByNodeLabelSearchDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"FindAllNodesByNodeLabelSearch"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"labelSearchTerm"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"findAllNodesByNodeLabelSearch"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"labelSearchTerm"},"value":{"kind":"Variable","name":{"kind":"Name","value":"labelSearchTerm"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"ipInterfaces"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"ipAddress"}},{"kind":"Field","name":{"kind":"Name","value":"nodeId"}},{"kind":"Field","name":{"kind":"Name","value":"snmpPrimary"}}]}},{"kind":"Field","name":{"kind":"Name","value":"location"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"location"}}]}},{"kind":"Field","name":{"kind":"Name","value":"monitoringLocationId"}},{"kind":"Field","name":{"kind":"Name","value":"nodeLabel"}}]}}]}}]} as unknown as DocumentNode<FindAllNodesByNodeLabelSearchQuery, FindAllNodesByNodeLabelSearchQueryVariables>;
 export const NodesForMapDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"NodesForMap"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"findAllNodes"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"nodeLabel"}}]}}]}}]} as unknown as DocumentNode<NodesForMapQuery, NodesForMapQueryVariables>;
 export const ListMonitoryPoliciesDocument = {"kind":"Document", "definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"ListMonitoryPolicies"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"listMonitoryPolicies"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"MonitoringPolicyParts"}}]}},{"kind":"Field","name":{"kind":"Name","value":"defaultPolicy"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"MonitoringPolicyParts"}}]}}]}},...MonitoringPolicyPartsFragmentDoc.definitions]} as unknown as DocumentNode<ListMonitoryPoliciesQuery, ListMonitoryPoliciesQueryVariables>;
 export const ListNodeStatusDocument = {"kind":"Document", "definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"ListNodeStatus"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Long"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"EventsByNodeIdParts"}},{"kind":"FragmentSpread","name":{"kind":"Name","value":"NodeByIdParts"}}]}},...EventsByNodeIdPartsFragmentDoc.definitions,...NodeByIdPartsFragmentDoc.definitions]} as unknown as DocumentNode<ListNodeStatusQuery, ListNodeStatusQueryVariables>;

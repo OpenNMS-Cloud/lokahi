@@ -5926,10 +5926,10 @@ value-or-promise@1.0.12, value-or-promise@^1.0.11, value-or-promise@^1.0.12:
   resolved "https://registry.yarnpkg.com/value-or-promise/-/value-or-promise-1.0.12.tgz#0e5abfeec70148c78460a849f6b003ea7986f15c"
   integrity sha512-Z6Uz+TYwEqE7ZN50gwn+1LCVo9ZVrpxRPOhOLnncYkY1ZzOYtrX8Fwf/rFktZ8R5mJms6EZf5TqNOMeZmnPq9Q==
 
-villus@^2.1.0:
-  version "2.2.1"
-  resolved "https://registry.yarnpkg.com/villus/-/villus-2.2.1.tgz#fd74a724862281e4673e00ee4302e3ea1eabaab1"
-  integrity sha512-vnrY62rf5Yzfew0fZbHQ7b51NpcWKbNDxxmq98NNhBRXjt8gVtbbXsOpRatnKINxsZPPzH+zLJGnTj95F0InHQ==
+villus@^3.1.0:
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/villus/-/villus-3.1.0.tgz#486a0ebe198fa1b013c2e1088a080d23862ec8b1"
+  integrity sha512-Z4fXLWB9OgVfWKCiGFf+KFX6Y0/2qEcqiCp2FVO3oUs9LkD1ksSgQU2H2rGV/YDEbYIwKgbcZRww3ysxy2HcXg==
 
 vite-node@0.26.3:
   version "0.26.3"

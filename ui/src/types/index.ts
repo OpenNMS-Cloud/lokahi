@@ -3,7 +3,7 @@ import { PointerAlignment, PopoverPlacement } from '@featherds/popover'
 
 export * from './flows.d'
 export declare type fncVoid = () => void
-export declare type fncArgVoid = (...args: unknown[]) => void
+export declare type fncArgVoid = (...args: any[]) => void
 
 export interface SnackbarProps {
   msg: string

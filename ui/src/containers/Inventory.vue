@@ -16,7 +16,7 @@
       >
     </template>
     <FeatherTabPanel>
-      <InventoryFilter v-if="tabMonitoredContent.length" />
+      <InventoryFilter />
       <InventoryMonitoredNodesTabContent
         v-if="tabMonitoredContent.length"
         :tabContent="tabMonitoredContent"

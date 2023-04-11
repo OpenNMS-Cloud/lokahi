@@ -1,15 +1,15 @@
 <template>
   <ul class="filter-container">
     <li class="autocomplete">
-      <FeatherAutocomplete
-        v-model="search.value"
-        :loading="search.loading"
-        :results="search.results"
-        @search="search.getItem"
+      <FeatherInput
+        @update:model-value="searchNodes"
         label="Search"
-        type="multi"
         data-test="search"
-      />
+      >
+        <template v-slot:post>
+          <FeatherIcon :icon="icons.Search" />
+        </template>
+      </FeatherInput>
     </li>
     <li>
       <FeatherSelect
@@ -71,7 +71,7 @@
 </template>
 
 <script lang="ts" setup>
-import { IAutocompleteItemType } from '@featherds/autocomplete'
+import Search from '@featherds/icon/action/Search'
 import Sort from '@material-design-icons/svg/outlined/sort.svg'
 import SortByAlpha from '@material-design-icons/svg/outlined/sort_by_alpha.svg'
 import KeyboardDoubleArrowDown from '@material-design-icons/svg/outlined/keyboard_double_arrow_down.svg'
@@ -79,28 +79,14 @@ import KeyboardDoubleArrowUp from '@material-design-icons/svg/outlined/keyboard_
 import { ISelectDropdown } from '@/types/select'
 import { fncArgVoid, IIcon } from '@/types'
 import { useInventoryStore } from '@/store/Views/inventoryStore'
+import { useInventoryQueries } from '@/store/Queries/inventoryQueries'
 
 const inventoryStore = useInventoryStore()
+const inventoryQueries = useInventoryQueries()
 
-const search = {
-  timeout: -1,
-  loading: false,
-  results: [] as IAutocompleteItemType[],
-  value: [] as IAutocompleteItemType[],
-  items: [''],
-  getItem: (q: string) => {
-    search.loading = true
-    clearTimeout(search.timeout)
-    search.timeout = window.setTimeout(() => {
-      search.results = search.items
-        .filter((x) => x.toLowerCase().indexOf(q) > -1)
-        .map((x) => ({
-          _text: x
-        }))
-      search.loading = false
-    }, 500)
-  }
-}
+const icons = markRaw({
+  Search
+})
 
 const nodeTypeState = ref(undefined)
 const onNodeTypeSelect: fncArgVoid = (selectedType: any) => {
@@ -199,6 +185,11 @@ const collapseIcon: IIcon = {
   size: 2
 }
 const expandCollapseIcon = ref(computed<IIcon>(() => (inventoryStore.isFilterOpen ? collapseIcon : expandIcon)))
+
+const searchNodes: fncArgVoid = useDebounceFn((val: string | undefined) => {
+  if (val === undefined) return
+  inventoryQueries.getNodesByLabel(val)
+})
 </script>
 
 <style lang="scss" scoped>

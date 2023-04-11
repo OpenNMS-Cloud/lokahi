@@ -46,6 +46,7 @@ import org.opennms.horizon.server.model.flows.RequestCriteria;
 import org.opennms.horizon.server.model.flows.TimeRange;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 @RequiredArgsConstructor
@@ -70,25 +71,19 @@ public class FlowClient {
 
     /**
      * It only handles time ranges, tenantId and exporters.
+     *
      * @param requestCriteria
      * @param tenantId
      * @return ListRequest.Builder
      */
-    private ListRequest.Builder createBaseListRequest(RequestCriteria requestCriteria, String tenantId){
+    private ListRequest.Builder createBaseListRequest(RequestCriteria requestCriteria, String tenantId) {
         var listRequest = ListRequest.newBuilder()
             .setTenantId(tenantId).setLimit(requestCriteria.getCount());
         if (requestCriteria.getTimeRange() != null) {
             listRequest.addFilters(convertTimeRage(requestCriteria.getTimeRange()));
         }
         if (requestCriteria.getExporter() != null) {
-            requestCriteria.getExporter().forEach(e ->
-                {
-                    var filter = convertExporter(e);
-                    if (filter != null) {
-                        listRequest.addFilters(filter);
-                    }
-                }
-            );
+            requestCriteria.getExporter().forEach(e -> convertExporter(e).ifPresent(listRequest::addFilters));
         }
         return listRequest;
     }
@@ -126,14 +121,7 @@ public class FlowClient {
         }
 
         if (requestCriteria.getExporter() != null) {
-            requestCriteria.getExporter().forEach(e ->
-                {
-                    var filter = convertExporter(e);
-                    if (filter != null) {
-                        summaryRequest.addFilters(filter);
-                    }
-                }
-            );
+            requestCriteria.getExporter().forEach(e -> convertExporter(e).ifPresent(summaryRequest::addFilters));
         }
 
         if (requestCriteria.getTimeRange() != null) {
@@ -156,13 +144,7 @@ public class FlowClient {
         }
 
         if (requestCriteria.getExporter() != null) {
-            requestCriteria.getExporter().forEach(e ->
-            {
-                var filter = convertExporter(e);
-                if (filter != null) {
-                    seriesRequest.addFilters(filter);
-                }
-            });
+            requestCriteria.getExporter().forEach(e -> convertExporter(e).ifPresent(seriesRequest::addFilters));
         }
 
         if (requestCriteria.getTimeRange() != null) {
@@ -174,18 +156,18 @@ public class FlowClient {
             .getApplicationSeries(seriesRequest.build());
     }
 
-    private Filter.Builder convertExporter(org.opennms.horizon.server.model.flows.ExporterFilter exporter) {
+    private Optional<Filter.Builder> convertExporter(org.opennms.horizon.server.model.flows.ExporterFilter exporter) {
         var exporterRequest = org.opennms.dataplatform.flows.querier.v1.Exporter.newBuilder();
         if (exporter.getNodeId() != null) {
             exporterRequest.setNodeId(exporter.getNodeId());
         } else if (exporter.getIpInterfaceId() != null) {
             exporterRequest.setInterfaceId(exporter.getIpInterfaceId());
         } else {
-            return null;
+            return Optional.empty();
         }
 
-        return Filter.newBuilder().setExporter(
-            ExporterFilter.newBuilder().setExporter(exporterRequest));
+        return Optional.of(Filter.newBuilder().setExporter(
+            ExporterFilter.newBuilder().setExporter(exporterRequest)));
     }
 
     private Filter.Builder convertApplication(String application) {

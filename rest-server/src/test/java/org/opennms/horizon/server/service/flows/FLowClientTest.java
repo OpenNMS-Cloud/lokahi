@@ -29,21 +29,14 @@
 package org.opennms.horizon.server.service.flows;
 
 import io.grpc.ManagedChannel;
-import io.grpc.Metadata;
-import io.grpc.ServerCall;
-import io.grpc.ServerCallHandler;
-import io.grpc.ServerInterceptor;
 import io.grpc.inprocess.InProcessChannelBuilder;
 import io.grpc.inprocess.InProcessServerBuilder;
-import io.grpc.stub.ServerCalls;
 import io.grpc.stub.StreamObserver;
 import io.grpc.testing.GrpcCleanupRule;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.jupiter.api.BeforeAll;
 import org.opennms.dataplatform.flows.querier.v1.ApplicationSeriesRequest;
 import org.opennms.dataplatform.flows.querier.v1.ApplicationSummariesRequest;
 import org.opennms.dataplatform.flows.querier.v1.ApplicationsServiceGrpc;
@@ -58,8 +51,6 @@ import org.opennms.dataplatform.flows.querier.v1.Summaries;
 import org.opennms.dataplatform.flows.querier.v1.TrafficSummary;
 import org.opennms.horizon.server.model.flows.RequestCriteria;
 import org.opennms.horizon.server.model.flows.TimeRange;
-import org.opennms.horizon.server.model.inventory.IpInterface;
-import org.opennms.horizon.shared.constants.GrpcConstants;
 
 import java.io.IOException;
 import java.time.Instant;
@@ -78,21 +69,18 @@ public class FLowClientTest {
 
     private static FlowClient flowClient;
 
-
     private final String tenantId = "testId";
     private final long exporterInterfaceId = 1L;
     private final String application = "http";
     private final int count = 20; // make sure it is not default value
     private final int bytesIn = 10;
     private final int bytesOut = 10;
+    private final boolean includeOther = true;
     private final Instant startTime = Instant.now();
     private final Instant endTime = startTime.minus(1, ChronoUnit.HOURS);
 
-
     @Before
     public void startGrpc() throws IOException {
-//        private static ApplicationsServiceGrpc.ApplicationsServiceImplBase applicationsServiceBlockingStub;
-//        private static ExporterServiceGrpc.ExporterServiceImplBase exporterServiceStub;
         var applicationsServiceBlockingStub = mock(ApplicationsServiceGrpc.ApplicationsServiceImplBase.class, delegatesTo(
             new ApplicationsServiceGrpc.ApplicationsServiceImplBase() {
                 @Override
@@ -112,6 +100,7 @@ public class FLowClientTest {
                     checkTimeRangeFilters(request.getFiltersList());
                     Assert.assertEquals(tenantId, request.getTenantId());
                     Assert.assertEquals(count, request.getCount());
+                    Assert.assertEquals(includeOther, request.getIncludeOther());
                     checkApplication(application, request.getFiltersList());
                     checkExporter(Exporter.newBuilder().setInterfaceId(exporterInterfaceId).build(), request.getFiltersList());
                     CompletableFuture.delayedExecutor(100, TimeUnit.MILLISECONDS).execute(() -> {
@@ -218,6 +207,7 @@ public class FLowClientTest {
         timeRage.setEndTime(endTime);
         requestCriteria.setTimeRange(timeRage);
         requestCriteria.setCount(count);
+        requestCriteria.setIncludeOther(includeOther);
 
         // application
         List<String> applications = new ArrayList<>();
@@ -225,19 +215,17 @@ public class FLowClientTest {
         requestCriteria.setApplications(applications);
 
         // exporter
-        org.opennms.horizon.server.model.flows.Exporter exporter = new org.opennms.horizon.server.model.flows.Exporter();
-        IpInterface ipInterface = new IpInterface();
-        ipInterface.setId(exporterInterfaceId);
-        exporter.setIpInterface(ipInterface);
-        List<org.opennms.horizon.server.model.flows.Exporter> exporters = new ArrayList<>();
-        exporters.add(exporter);
+        var exporterFilter = new org.opennms.horizon.server.model.flows.ExporterFilter();
+        exporterFilter.setIpInterfaceId(exporterInterfaceId);
+        List<org.opennms.horizon.server.model.flows.ExporterFilter> exporters = new ArrayList<>();
+        exporters.add(exporterFilter);
         requestCriteria.setExporter(exporters);
 
         return requestCriteria;
     }
 
     private void checkTimeRangeFilters(List<Filter> filters) {
-        var timeRangeFilters = filters.stream().filter(f -> f.hasTimeRange()).toList();
+        var timeRangeFilters = filters.stream().filter(Filter::hasTimeRange).toList();
         Assert.assertEquals(1, timeRangeFilters.size());
 
         var startTimestamp = timeRangeFilters.get(0).getTimeRange().getStartTime();
@@ -248,14 +236,14 @@ public class FLowClientTest {
     }
 
     private void checkApplication(String application, List<Filter> filters) {
-        var applicationFilter = filters.stream().filter(f -> f.hasApplication()).toList();
+        var applicationFilter = filters.stream().filter(Filter::hasApplication).toList();
 
         Assert.assertEquals(1, applicationFilter.size());
         Assert.assertEquals(application, applicationFilter.get(0).getApplication().getApplication());
     }
 
     private void checkExporter(Exporter exporter, List<Filter> filters) {
-        var exporterFilters = filters.stream().filter(f -> f.hasExporter()).toList();
+        var exporterFilters = filters.stream().filter(Filter::hasExporter).toList();
 
         Assert.assertEquals(1, exporterFilters.size());
         Assert.assertEquals(exporter.getInterfaceId(), exporterFilters.get(0).getExporter().getExporter().getInterfaceId());

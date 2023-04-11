@@ -42,8 +42,9 @@ import org.testcontainers.utility.DockerImageName;
 import com.github.dockerjava.api.command.CreateContainerCmd;
 import com.github.dockerjava.api.model.ExposedPort;
 import com.github.dockerjava.api.model.InternetProtocol;
+import org.testcontainers.utility.MountableFile;
 
-@SuppressWarnings("rawtypes")
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class TestContainerRunnerClassRule extends ExternalResource {
 
     public static final String DEFAULT_APPLICATION_DOCKER_IMAGE_NAME = "opennms/horizon-stream-minion:latest";
@@ -54,6 +55,7 @@ public class TestContainerRunnerClassRule extends ExternalResource {
 
     private GenericContainer mockMinionGatewayContainer;
     private GenericContainer applicationContainer;
+    private GenericContainer sslGatewayContainer;
     private static final int UDP_NETFLOW5_PORT = 8877;
     private static final int UDP_NETFLOW9_PORT = 4729;
 
@@ -69,10 +71,11 @@ public class TestContainerRunnerClassRule extends ExternalResource {
 
         mockMinionGatewayContainer = new GenericContainer(DockerImageName.parse("opennms/horizon-stream-mock-minion-gateway").withTag("latest"));
         applicationContainer = new GenericContainer(DockerImageName.parse(applicationDockerImageName).toString());
+        sslGatewayContainer = new GenericContainer(DockerImageName.parse("nginx:1.21.6-alpine").toString());
     }
 
     @Override
-    protected void before() throws Throwable {
+    protected void before() {
         network =
             Network.newNetwork()
         ;
@@ -80,12 +83,14 @@ public class TestContainerRunnerClassRule extends ExternalResource {
         LOG.info("USING TEST DOCKER NETWORK {}", network.getId());
 
         startMockMinionGatewayContainer();
+        startSslGatewayContainer();
         startApplicationContainer();
     }
 
     @Override
     protected void after() {
         applicationContainer.stop();
+        sslGatewayContainer.stop();
         mockMinionGatewayContainer.stop();
     }
 
@@ -99,7 +104,32 @@ public class TestContainerRunnerClassRule extends ExternalResource {
             .withNetwork(network)
             .withNetworkAliases("minion-gateway")
             .withExposedPorts(8080)
-            .withLogConsumer(new Slf4jLogConsumer(LOG).withPrefix("MOCK-MINION-GATEWAY"));
+            .withLogConsumer(new Slf4jLogConsumer(LOG).withPrefix("MOCK-MINION-GATEWAY"))
+            .start();
+    }
+
+    private void startSslGatewayContainer() {
+        sslGatewayContainer
+            .withNetwork(network)
+            .withNetworkAliases("ssl-gateway")
+            .withExposedPorts(443)
+            .withCopyFileToContainer(
+                MountableFile.forClasspathResource("ssl-gateway/nginx.conf"), "/etc/nginx/nginx.conf"
+            )
+            .withCopyFileToContainer(
+                MountableFile.forClasspathResource("ssl-gateway/CA.cert"), "/etc/ssl/cachain.pem"
+            )
+            .withCopyFileToContainer(
+                MountableFile.forClasspathResource("ssl-gateway/server.signed.cert"), "/etc/nginx/minion-gateway.crt"
+            )
+            .withCopyFileToContainer(
+                MountableFile.forClasspathResource("ssl-gateway/server.key"), "/etc/nginx/minion-gateway.key"
+            )
+            .withCopyFileToContainer(
+                MountableFile.forClasspathResource("ssl-gateway/certificate-passwords"), "/etc/nginx/cert-passwords"
+            )
+            .withLogConsumer(new Slf4jLogConsumer(LOG).withPrefix("SSL-GATEWAY"))
+            .start();
     }
 
     private void startApplicationContainer() {
@@ -111,10 +141,20 @@ public class TestContainerRunnerClassRule extends ExternalResource {
             .withNetwork(network)
             .withNetworkAliases("application", "application-host")
             .dependsOn(mockMinionGatewayContainer)
+            .dependsOn(sslGatewayContainer)
             .withStartupTimeout(Duration.ofMinutes(5))
             .withEnv("JAVA_TOOL_OPTIONS", "-Djava.security.egd=file:/dev/./urandom -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005")
             .withEnv("MINION_LOCATION", "Default")
             .withEnv("USE_KUBERNETES", "false")
+            .withEnv("MINION_GATEWAY_HOST", "ssl-gateway")
+            .withEnv("MINION_GATEWAY_PORT", "443")
+            .withEnv("MINION_GATEWAY_TLS", "true")
+            .withEnv("CERT_PKG_CLIENT_KEY_PATH", "/opt/karaf/certs/client.key")
+            .withEnv("CLIENT_PRIVATE_KEY_IS_PKCS12", "false")
+            .withEnv("CERT_PKG_PASSWORD", "passw0rd")
+            .withCopyFileToContainer(
+                MountableFile.forClasspathResource("minion-cert.insecure.zip"), "/opt/karaf/certs.in/minion-cert.zip"
+            )
             .withLogConsumer(new Slf4jLogConsumer(LOG).withPrefix("APPLICATION"));
 
         // DEBUGGING: uncomment to force local port 5005 (NOTE: MAKE SURE IT IS COMMENTED-OUT AT CODE COMMIT-TIME - i.e. on "git commit")

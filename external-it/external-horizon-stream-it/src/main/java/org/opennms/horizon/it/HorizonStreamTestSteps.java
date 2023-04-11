@@ -27,14 +27,9 @@ public class HorizonStreamTestSteps {
         this.metricsTestSteps = metricsTestSteps;
         this.testsExecutionHelper = testsExecutionHelper;
 
-        this.inventoryTestSteps.setUserAccessTokenSupplier(this.keycloakTestSteps::getKeycloakAccessToken);
-        this.inventoryTestSteps.setIngressUrlSupplier(this::getIngressBaseUrl);
-
         this.testsExecutionHelper.setUserAccessTokenSupplier(this.keycloakTestSteps::getKeycloakAccessToken);
         this.testsExecutionHelper.setIngressUrlSupplier(this::getIngressBaseUrl);
 
-        this.metricsTestSteps.setUserAccessTokenSupplier(this.keycloakTestSteps::getKeycloakAccessToken);
-        this.metricsTestSteps.setIngressUrlSupplier(this::getIngressBaseUrl);
         this.metricsTestSteps.setMinionsAtLocationSupplier(this.inventoryTestSteps::getMinionsAtLocation);
     }
 

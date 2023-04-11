@@ -1,7 +1,7 @@
 package org.opennms.horizon.it;
 
 public abstract class GQLQueryConstants {
-    public static final String LIST_MINIONS_QUERY = "{ \"query\": \"{ findAllMinions {id, systemId, systemId, location { location } } }\" }";
+    public static final String LIST_MINIONS_QUERY = "query { findAllMinions {id, label, systemId, status, location { location } } }";
 
     public static final String GET_LABELED_METRICS_QUERY =
         "query { metric(name:\"%s\", labels: {%s:\"%s\"}) { status, data { result { metric, value }}} }";

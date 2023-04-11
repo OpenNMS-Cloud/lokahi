@@ -2,15 +2,8 @@ package org.opennms.horizon.it;
 
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
-import io.restassured.RestAssured;
-import io.restassured.config.HttpClientConfig;
-import io.restassured.config.RestAssuredConfig;
-import io.restassured.config.SSLConfig;
 import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
-import io.restassured.specification.RequestSpecification;
-import org.apache.http.entity.ContentType;
-import org.apache.http.protocol.HTTP;
 import org.awaitility.Awaitility;
 import org.junit.Assert;
 import org.opennms.horizon.it.gqlmodels.CreateNodeData;
@@ -18,19 +11,17 @@ import org.opennms.horizon.it.gqlmodels.GQLQuery;
 import org.opennms.horizon.it.gqlmodels.querywrappers.CreateNodeResult;
 import org.opennms.horizon.it.gqlmodels.querywrappers.FindAllMinionsQueryResult;
 import org.opennms.horizon.it.gqlmodels.MinionData;
+import org.opennms.horizon.it.helper.TestsExecutionHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.ws.rs.core.HttpHeaders;
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
@@ -42,9 +33,11 @@ public class InventoryTestSteps {
 
     private static final Logger LOG = LoggerFactory.getLogger(InventoryTestSteps.class);
 
-    // Operations to access data from other TestSteps
-    private Supplier<String> userAccessTokenSupplier;
-    private Supplier<String> ingressUrlSupplier;
+    private TestsExecutionHelper helper;
+
+    public InventoryTestSteps(TestsExecutionHelper helper) {
+        this.helper = helper;
+    }
 
     // Runtime Data
     private String minionLocation;
@@ -55,22 +48,6 @@ public class InventoryTestSteps {
 //========================================
 // Getters and Setters
 //----------------------------------------
-
-    public Supplier<String> getUserAccessTokenSupplier() {
-        return userAccessTokenSupplier;
-    }
-
-    public void setUserAccessTokenSupplier(Supplier<String> userAccessTokenSupplier) {
-        this.userAccessTokenSupplier = userAccessTokenSupplier;
-    }
-
-    public Supplier<String> getIngressUrlSupplier() {
-        return ingressUrlSupplier;
-    }
-
-    public void setIngressUrlSupplier(Supplier<String> ingressUrlSupplier) {
-        this.ingressUrlSupplier = ingressUrlSupplier;
-    }
 
     public List<MinionData> getMinionsAtLocation() {
         return minionsAtLocation;
@@ -118,8 +95,6 @@ public class InventoryTestSteps {
 
     @Then("Add a device with label {string} IP address {string} and location {string}")
     public void addADeviceWithLabelIPAddressAndLocation(String label, String ipAddress, String location) throws MalformedURLException {
-        URL url = formatIngressUrl("/api/graphql");
-        String accessToken = userAccessTokenSupplier.get();
 
         String query = GQLQueryConstants.CREATE_NODE_QUERY;
 
@@ -134,7 +109,7 @@ public class InventoryTestSteps {
         gqlQuery.setQuery(query);
         gqlQuery.setVariables(queryVariables);
 
-        Response restAssuredResponse = executePost(url, accessToken, gqlQuery);
+        Response restAssuredResponse = helper.executePostQuery(gqlQuery);
 
         LOG.debug("createNode response: payload={}", restAssuredResponse.getBody().asString());
 
@@ -170,8 +145,6 @@ public class InventoryTestSteps {
     @Then("Delete the first node from inventory")
     public void deleteFirstNodeFromInventory() throws MalformedURLException {
         LOG.info("Deleting the first node from the inventory.");
-        URL url = formatIngressUrl("/api/graphql");
-        String accessToken = userAccessTokenSupplier.get();
 
         String queryList = GQLQueryConstants.DELETE_NODE_BY_ID;
 
@@ -183,57 +156,13 @@ public class InventoryTestSteps {
         gqlQuery.setQuery(queryList);
         gqlQuery.setVariables(queryVariables);
 
-        Response response = executePost(url, accessToken, gqlQuery);
+        Response response = helper.executePostQuery(gqlQuery);
 
         JsonPath jsonPathEvaluator = response.jsonPath();
         LinkedHashMap lhm = jsonPathEvaluator.get("data");
         Boolean done = (Boolean) lhm.get("deleteNode");
         System.out.println("node id is: " + nodeId);
         assertTrue(done);
-    }
-
-//========================================
-// Internals
-//----------------------------------------
-
-    private RestAssuredConfig createRestAssuredTestConfig() {
-        return RestAssuredConfig.config()
-            .sslConfig(SSLConfig.sslConfig().relaxedHTTPSValidation("SSL"))
-            .httpClient(HttpClientConfig.httpClientConfig()
-                .setParam("http.connection.timeout", DEFAULT_HTTP_SOCKET_TIMEOUT)
-                .setParam("http.socket.timeout", DEFAULT_HTTP_SOCKET_TIMEOUT)
-            );
-    }
-
-    private URL formatIngressUrl(String path) throws MalformedURLException {
-        String baseUrl = ingressUrlSupplier.get();
-
-        return new URL(new URL(baseUrl), path);
-    }
-
-    private String formatAuthorizationHeader(String token) {
-        return "Bearer " + token;
-    }
-
-    private Response executePost(URL url, String accessToken, Object body) {
-        RestAssuredConfig restAssuredConfig = createRestAssuredTestConfig();
-
-        RequestSpecification requestSpecification =
-            RestAssured
-                .given()
-                .config(restAssuredConfig)
-            ;
-
-        Response restAssuredResponse =
-            requestSpecification
-                .header(HttpHeaders.AUTHORIZATION, formatAuthorizationHeader(accessToken))
-                .header(HTTP.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType())
-                .body(body)
-                .post(url)
-                .thenReturn()
-            ;
-
-        return restAssuredResponse;
     }
 
     private boolean checkAtLeastOneMinionAtGivenLocation() throws MalformedURLException {
@@ -247,11 +176,10 @@ public class InventoryTestSteps {
 
     /** @noinspection rawtypes*/
     private FindAllMinionsQueryResult commonQueryMinions() throws MalformedURLException {
-        String accessToken = userAccessTokenSupplier.get();
+        GQLQuery gqlQuery = new GQLQuery();
+        gqlQuery.setQuery(GQLQueryConstants.LIST_MINIONS_QUERY);
 
-        URL url = formatIngressUrl("/api/graphql");
-
-        Response restAssuredResponse = executePost(url, accessToken, GQLQueryConstants.LIST_MINIONS_QUERY);
+        Response restAssuredResponse = helper.executePostQuery(gqlQuery);
 
         lastMinionQueryResultBody = restAssuredResponse.getBody().asString();
 
@@ -282,8 +210,6 @@ public class InventoryTestSteps {
      */
     public boolean checkTheStatusOfTheFirstNode(String expectedStatus) throws MalformedURLException {
         LOG.info("checkTheStatusOfTheNode");
-        URL url = formatIngressUrl("/api/graphql");
-        String accessToken = userAccessTokenSupplier.get();
 
         String queryList = GQLQueryConstants.LIST_NODE_METRICS;
 
@@ -295,7 +221,7 @@ public class InventoryTestSteps {
         gqlQuery.setQuery(queryList);
         gqlQuery.setVariables(queryVariables);
 
-        Response response = executePost(url, accessToken, gqlQuery);
+        Response response = helper.executePostQuery(gqlQuery);
 
         JsonPath jsonPathEvaluator = response.jsonPath();
         LinkedHashMap lhm = jsonPathEvaluator.get("data");
@@ -312,13 +238,11 @@ public class InventoryTestSteps {
      */
     public int getFirstNodeId() throws MalformedURLException {
         LOG.info("Getting the first node from the inventory");
-        URL url = formatIngressUrl("/api/graphql");
-        String accessToken = userAccessTokenSupplier.get();
 
         GQLQuery gqlQuery = new GQLQuery();
         gqlQuery.setQuery(GQLQueryConstants.GET_NODE_ID);
 
-        Response response = executePost(url, accessToken, gqlQuery);
+        Response response = helper.executePostQuery(gqlQuery);
 
         JsonPath jsonPathEvaluator = response.jsonPath();
         LinkedHashMap lhm = jsonPathEvaluator.get("data");

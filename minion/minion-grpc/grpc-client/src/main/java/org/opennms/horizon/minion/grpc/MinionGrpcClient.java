@@ -41,6 +41,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Function;
 
 import com.google.common.base.Strings;
 import lombok.Setter;
@@ -120,6 +121,11 @@ public class MinionGrpcClient extends AbstractMessageDispatcherFactory<String> i
     private CloudMessageHandler cloudMessageHandler;
 
     @Setter
+    private SimpleReconnectStrategyFactory simpleReconnectStrategyFactory = SimpleReconnectStrategy::new;
+    @Setter
+    private Function<ManagedChannel, CloudServiceStub> newStubOperation = CloudServiceGrpc::newStub;
+
+    @Setter
     private String grpcHost;
     @Setter
     private int grpcPort;
@@ -174,9 +180,9 @@ public class MinionGrpcClient extends AbstractMessageDispatcherFactory<String> i
         } else {
             channel = channelBuilder.usePlaintext().build();
         }
-        asyncStub = CloudServiceGrpc.newStub(channel);
+        asyncStub = newStubOperation.apply(channel);
 
-        reconnectStrategy = new SimpleReconnectStrategy(channel, () -> {
+        reconnectStrategy = simpleReconnectStrategyFactory.create(channel, () -> {
             initializeRpcStub();
             initializeSinkStub();
             initializeCloudReceiver();
@@ -416,6 +422,10 @@ public class MinionGrpcClient extends AbstractMessageDispatcherFactory<String> i
             LOG.error("Closing cloud message receiver");
             reconnectStrategy.activate();
         }
+    }
+
+    public interface SimpleReconnectStrategyFactory {
+        SimpleReconnectStrategy create(ManagedChannel channel, Runnable onConnect, Runnable onDisconnect);
     }
 
 }

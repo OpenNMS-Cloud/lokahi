@@ -235,12 +235,6 @@ public class InventoryClient {
         return systemStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).deleteMonitoringSystem(StringValue.of(systemId)).getValue();
     }
 
-    public boolean startScanByNodeIds(List<Long> ids, String accessToken) {
-        Metadata metadata = new Metadata();
-        metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
-        return nodeStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).startNodeScanByIds(NodeIdList.newBuilder().addAllIds(ids).build()).getValue();
-    }
-
     public AzureActiveDiscoveryDTO createAzureActiveDiscovery(AzureActiveDiscoveryCreateDTO request, String accessToken) {
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);

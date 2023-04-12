@@ -28,20 +28,12 @@
 
 package org.opennms.horizon.inventory.service.taskset;
 
-import com.google.common.base.Function;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.protobuf.Any;
 import lombok.RequiredArgsConstructor;
 import org.opennms.azure.contract.AzureScanRequest;
-import org.opennms.horizon.inventory.dto.AzureNodeDTO;
-import org.opennms.horizon.inventory.dto.DefaultNodeDTO;
-import org.opennms.horizon.inventory.dto.IpInterfaceDTO;
-import org.opennms.horizon.inventory.dto.NodeDTO;
-import org.opennms.horizon.inventory.exception.InventoryRuntimeException;
-import org.opennms.horizon.inventory.mapper.node.DefaultNodeMapper;
-import org.opennms.horizon.inventory.mapper.node.NodeMapper;
+import org.opennms.horizon.inventory.model.IpInterface;
 import org.opennms.horizon.inventory.model.discovery.active.AzureActiveDiscovery;
-import org.opennms.horizon.inventory.model.node.DefaultNode;
 import org.opennms.horizon.inventory.model.node.Node;
 import org.opennms.horizon.inventory.service.taskset.publisher.TaskSetPublisher;
 import org.opennms.horizon.shared.utils.InetAddressUtils;
@@ -80,20 +72,16 @@ public class ScannerTaskSetService {
         .setNameFormat("send-taskset-for-scan-%d")
         .build();
     private final ExecutorService executorService = Executors.newFixedThreadPool(10, threadFactory);
-
     public static final String DISCOVERY_TASK_PLUGIN_NAME = "Discovery-Ping";
+
     private final TaskSetPublisher taskSetPublisher;
-    private final DefaultNodeMapper defaultNodeMapper;
-    private final NodeMapper nodeMapper;
 
     public void sendAzureScannerTaskAsync(AzureActiveDiscovery discovery) {
         executorService.execute(() -> sendAzureScannerTask(discovery));
     }
 
-    public void sendNodeScannerTask(List<DefaultNodeDTO> nodes, String location, String tenantId) {
+    public void sendNodeScannerTask(List<Node> nodes, String location, String tenantId) {
         List<TaskDefinition> tasks = nodes.stream()
-            .map((Function<DefaultNodeDTO, NodeDTO>) defaultNode -> NodeDTO.newBuilder()
-                .setDefault(defaultNode).build())
             .map(node -> createNodeScanTask(node, new ArrayList<>()))
             .flatMap(Optional::stream).toList();
 
@@ -102,20 +90,13 @@ public class ScannerTaskSetService {
         }
     }
 
-    public void sendNodeScannerTask(DefaultNode node, String location, List<SnmpConfiguration> snmpConfigs) {
-        DefaultNodeDTO nodeDTO = defaultNodeMapper.modelToDto(node);
-        sendNodeScannerTask(nodeDTO, location, snmpConfigs);
-    }
-
-    public void sendNodeScannerTask(DefaultNodeDTO defaultNode, String location, List<SnmpConfiguration> snmpConfigs) {
-        NodeDTO node = NodeDTO.newBuilder().setDefault(defaultNode).build();
+    public void sendNodeScannerTask(Node node, String location, List<SnmpConfiguration> snmpConfigs) {
         var taskDef = createNodeScanTask(node, snmpConfigs);
-        taskDef.ifPresent(taskDefinition -> taskSetPublisher.publishNewTasks(defaultNode.getTenantId(), location, List.of(taskDefinition)));
+        taskDef.ifPresent(taskDefinition -> taskSetPublisher.publishNewTasks(node.getTenantId(), location, List.of(taskDefinition)));
     }
 
     public Optional<TaskDefinition> getNodeScanTasks(Node node) {
-        var nodeDto = nodeMapper.modelToDto(node);
-        return createNodeScanTask(nodeDto, new ArrayList<>());
+        return createNodeScanTask(node, new ArrayList<>());
     }
 
     public void sendDiscoveryScannerTask(List<String> ipAddresses, String location, String tenantId, long activeDiscoveryId) {
@@ -127,7 +108,7 @@ public class ScannerTaskSetService {
         tasks.ifPresent(taskDefinition -> taskSetPublisher.publishNewTasks(tenantId, location, List.of(taskDefinition)));
     }
 
-    Optional<TaskDefinition> createDiscoveryTask(List<String> ipAddresses, String location, long activeDiscoveryId) {
+    private Optional<TaskDefinition> createDiscoveryTask(List<String> ipAddresses, String location, long activeDiscoveryId) {
 
         var ipRanges = new ArrayList<IpRange>();
         ipAddresses.forEach(ipAddressDTO -> {
@@ -212,15 +193,17 @@ public class ScannerTaskSetService {
             .build();
     }
 
-    private Optional<TaskDefinition> createNodeScanTask(NodeDTO node, List<SnmpConfiguration> snmpConfigs) {
-        Optional<IpInterfaceDTO> ipInterface = getIpInterface(node);
-        long nodeId = getNodeId(node);
+    private Optional<TaskDefinition> createNodeScanTask(Node node, List<SnmpConfiguration> snmpConfigs) {
+        Optional<IpInterface> ipInterface = node.getIpInterfaces().stream()
+            .filter(IpInterface::getSnmpPrimary).findFirst()
+            .or(() -> node.getIpInterfaces().stream().findAny());
+        long nodeId = node.getId();
         return ipInterface.map(ip -> {
             String taskId = identityForNodeScan(nodeId);
 
             Any taskConfig = Any.pack(NodeScanRequest.newBuilder()
                 .setNodeId(nodeId)
-                .setPrimaryIp(ip.getIpAddress())
+                .setPrimaryIp(InetAddressUtils.toIpAddrString(ip.getIpAddress()))
                 .addDetector(DetectRequest.newBuilder().setService(ServiceType.SNMP).build())
                 .addDetector(DetectRequest.newBuilder().setService(ServiceType.ICMP).build())
                 .addAllSnmpConfigs(snmpConfigs).build());
@@ -234,30 +217,5 @@ public class ScannerTaskSetService {
                 .setSchedule(DEFAULT_SCHEDULE_FOR_SCAN)
                 .build();
         }).or(Optional::empty);
-    }
-
-    private Optional<IpInterfaceDTO> getIpInterface(NodeDTO node) {
-        List<IpInterfaceDTO> ipInterfacesList;
-        if (node.hasDefault()) {
-            DefaultNodeDTO defaultNode = node.getDefault();
-            ipInterfacesList = defaultNode.getIpInterfacesList();
-        } else if (node.hasAzure()) {
-            AzureNodeDTO azureNode = node.getAzure();
-            ipInterfacesList = azureNode.getIpInterfacesList();
-        } else {
-            throw new InventoryRuntimeException("Failed to get Ip Interface for Node");
-        }
-        return ipInterfacesList.stream()
-            .filter(IpInterfaceDTO::getSnmpPrimary).findFirst()
-            .or(() -> ipInterfacesList.stream().findAny());
-    }
-
-    private long getNodeId(NodeDTO node) {
-        if (node.hasDefault()) {
-            return node.getDefault().getId();
-        } else if (node.hasAzure()) {
-            return node.getAzure().getId();
-        }
-        throw new InventoryRuntimeException("Failed to get ID for Node");
     }
 }

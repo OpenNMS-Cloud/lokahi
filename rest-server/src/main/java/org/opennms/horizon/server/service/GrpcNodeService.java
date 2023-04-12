@@ -119,9 +119,4 @@ public class GrpcNodeService {
     public Mono<Boolean> deleteNode(@GraphQLArgument(name = "id") Long id, @GraphQLEnvironment ResolutionEnvironment env) {
         return Mono.just(client.deleteNode(id, headerUtil.getAuthHeader(env)));
     }
-
-    @GraphQLMutation
-    public Mono<Boolean> discoveryByNodeIds(List<Long> ids, @GraphQLEnvironment ResolutionEnvironment env) {
-        return Mono.just(client.startScanByNodeIds(ids, headerUtil.getAuthHeader(env)));
-    }
 }

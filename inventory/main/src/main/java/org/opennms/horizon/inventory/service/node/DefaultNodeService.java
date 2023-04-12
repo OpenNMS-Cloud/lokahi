@@ -160,7 +160,7 @@ public class DefaultNodeService {
                     .setPort(port);
                 snmpConfigs.add(builder.build());
             });
-            scannerTaskSetService.sendNodeScannerTask(mapper.modelToDto(node), location, snmpConfigs);
+            scannerTaskSetService.sendNodeScannerTask(node, location, snmpConfigs);
         } catch (Exception e) {
             LOG.error("Error while sending nodescan task for node with label {}", node.getNodeLabel());
         }

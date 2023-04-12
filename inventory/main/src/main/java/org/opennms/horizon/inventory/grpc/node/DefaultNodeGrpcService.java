@@ -124,7 +124,7 @@ public class DefaultNodeGrpcService extends DefaultNodeServiceGrpc.DefaultNodeSe
 
     private void sendNodeScanTaskToMinion(DefaultNode node) {
         try {
-            scannerService.sendNodeScannerTask(List.of(defaultNodeMapper.modelToDto(node)),
+            scannerService.sendNodeScannerTask(List.of(node),
                 node.getMonitoringLocation().getLocation(), node.getTenantId());
         } catch (Exception e) {
             LOG.error("Error while sending detector task for node with label {}", node.getNodeLabel(), e);

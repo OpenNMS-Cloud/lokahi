@@ -38,10 +38,12 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.opennms.horizon.inventory.dto.DefaultNodeDTO;
-import org.opennms.horizon.inventory.dto.IpInterfaceDTO;
+import org.opennms.horizon.inventory.model.IpInterface;
+import org.opennms.horizon.inventory.model.node.DefaultNode;
+import org.opennms.horizon.inventory.model.node.Node;
 import org.opennms.horizon.inventory.service.taskset.ScannerTaskSetService;
 import org.opennms.horizon.inventory.service.taskset.publisher.TaskSetPublisher;
+import org.opennms.horizon.shared.utils.InetAddressUtils;
 import org.opennms.node.scan.contract.NodeScanRequest;
 import org.opennms.taskset.contract.TaskDefinition;
 
@@ -63,15 +65,28 @@ class ScannerTaskSetServiceTest {
     ArgumentCaptor<List<TaskDefinition>> taskListCaptor;
     private final String tenantId = "testTenant";
     private final String location = "testLocation";
-    private DefaultNodeDTO.Builder nodeBuilder;
-    private IpInterfaceDTO ipInterface1;
-    private IpInterfaceDTO ipInterface2;
+    private IpInterface ipInterface1;
+    private IpInterface ipInterface2;
+
+    private Node node1;
+    private Node node2;
 
     @BeforeEach
     void prepareTest() {
-        ipInterface1 = IpInterfaceDTO.newBuilder().setIpAddress("127.0.0.1").setSnmpPrimary(true).build();
-        ipInterface2 = IpInterfaceDTO.newBuilder().setIpAddress("127.0.0.1").build();
-        nodeBuilder = DefaultNodeDTO.newBuilder().setId(1L);
+        ipInterface1 = new IpInterface();
+        ipInterface1.setIpAddress(InetAddressUtils.getInetAddress("127.0.0.1"));
+        ipInterface1.setSnmpPrimary(true);
+
+        ipInterface2 = new IpInterface();
+        ipInterface2.setIpAddress(InetAddressUtils.getInetAddress("127.0.0.1"));
+
+        node1 = new DefaultNode();
+        node1.setId(1L);
+        node1.setIpInterfaces(List.of(ipInterface1, ipInterface2));
+
+        node2 = new DefaultNode();
+        node2.setId(2L);
+        node1.setIpInterfaces(List.of(ipInterface2));
     }
 
     @AfterEach
@@ -81,34 +96,31 @@ class ScannerTaskSetServiceTest {
 
     @Test
     void testSendNodeScanWithTwoIpInterfaces() throws InvalidProtocolBufferException {
-        DefaultNodeDTO node = nodeBuilder.addAllIpInterfaces(List.of(ipInterface1, ipInterface2)).build();
-        service.sendNodeScannerTask(List.of(node), location, tenantId);
+        service.sendNodeScannerTask(List.of(node1), location, tenantId);
         verify(mockPublisher).publishNewTasks(eq(tenantId), eq(location), taskListCaptor.capture());
         List<TaskDefinition> tasks = taskListCaptor.getValue();
         assertThat(tasks).asList().hasSize(1)
-            .extracting("nodeId_").containsExactly(node.getId());
+            .extracting("nodeId_").containsExactly(node1.getId());
         NodeScanRequest request = tasks.get(0).getConfiguration().unpack(NodeScanRequest.class);
         assertThat(request).extracting(NodeScanRequest::getNodeId, NodeScanRequest::getPrimaryIp)
-            .containsExactly(node.getId(), ipInterface1.getIpAddress());
+            .containsExactly(node1.getId(), ipInterface1.getIpAddress());
     }
 
     @Test
     void testSendNodeScanWithIpInterfaceNonPrimary() throws InvalidProtocolBufferException {
-        DefaultNodeDTO node = nodeBuilder.addAllIpInterfaces(List.of(ipInterface2)).build();
-        service.sendNodeScannerTask(List.of(node), location, tenantId);
+        service.sendNodeScannerTask(List.of(node2), location, tenantId);
         verify(mockPublisher).publishNewTasks(eq(tenantId), eq(location), taskListCaptor.capture());
         List<TaskDefinition> tasks = taskListCaptor.getValue();
         assertThat(tasks).asList().hasSize(1)
-            .extracting("nodeId_").containsExactly(node.getId());
+            .extracting("nodeId_").containsExactly(node2.getId());
         NodeScanRequest request = tasks.get(0).getConfiguration().unpack(NodeScanRequest.class);
         assertThat(request).extracting(NodeScanRequest::getNodeId, NodeScanRequest::getPrimaryIp)
-            .containsExactly(node.getId(), ipInterface2.getIpAddress());
+            .containsExactly(node2.getId(), ipInterface2.getIpAddress());
     }
 
     @Test
     void testSendNodeScanWithoutIpInterfaces() {
-        DefaultNodeDTO node = nodeBuilder.build();
-        service.sendNodeScannerTask(List.of(node), location, tenantId);
+        service.sendNodeScannerTask(List.of(node1), location, tenantId);
         verifyNoInteractions(mockPublisher);
     }
 }

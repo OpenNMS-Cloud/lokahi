@@ -46,10 +46,13 @@ public class NodeMapper {
     private final ObjectMapper objectMapper;
 
     public Node dtoToNode(NodeDTO dto) {
-        if (dto.hasDefault()) {
-            return defaultDtoToNode(dto.getDefault());
-        } else if (dto.hasAzure()) {
-            return azureDtoToNode(dto.getAzure());
+        switch (dto.getNodeCase()) {
+            case DEFAULT -> {
+                return defaultDtoToNode(dto.getDefault());
+            }
+            case AZURE -> {
+                return azureDtoToNode(dto.getAzure());
+            }
         }
         throw new RuntimeException("Invalid Node type returned");
     }

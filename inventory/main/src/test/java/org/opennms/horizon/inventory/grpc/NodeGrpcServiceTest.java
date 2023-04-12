@@ -37,7 +37,6 @@ import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatcher;
 import org.mockito.InOrder;
 import org.mockito.Mockito;
@@ -46,7 +45,6 @@ import org.opennms.horizon.inventory.dto.IpInterfaceDTO;
 import org.opennms.horizon.inventory.dto.MonitoredState;
 import org.opennms.horizon.inventory.dto.MonitoredStateQuery;
 import org.opennms.horizon.inventory.dto.NodeDTO;
-import org.opennms.horizon.inventory.dto.NodeIdList;
 import org.opennms.horizon.inventory.dto.NodeIdQuery;
 import org.opennms.horizon.inventory.dto.NodeList;
 import org.opennms.horizon.inventory.grpc.node.NodeGrpcService;
@@ -55,11 +53,8 @@ import org.opennms.horizon.inventory.service.IpInterfaceService;
 import org.opennms.horizon.inventory.service.node.NodeService;
 import org.opennms.horizon.inventory.service.taskset.ScannerTaskSetService;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ExecutorService;
 import java.util.function.BiFunction;
 
 class NodeGrpcServiceTest {
@@ -71,13 +66,10 @@ class NodeGrpcServiceTest {
     private StreamObserver<NodeList> mockNodeListStreamObserver;
     private StreamObserver<Int64Value> mockInt64ValueStreamObserver;
     private StreamObserver<BoolValue> mockBoolValueStreamObserver;
-    private ExecutorService mockExecutorService;
 
     private NodeGrpcService target;
 
     private NodeDTO testNodeDTO1;
-    private NodeDTO testNodeDTO2A;
-    private NodeDTO testNodeDTO2B;
     private MonitoringLocation testMonitoringLocation;
     private Optional<String> testTenantIdOptional;
     private List<NodeDTO> testNodeDTOList;
@@ -89,8 +81,6 @@ class NodeGrpcServiceTest {
         testMonitoringLocation.setLocation("x-monitoring-location-x");
 
         testNodeDTO1 = NodeDTO.newBuilder().setDefault(DefaultNodeDTO.newBuilder().setId(101010L).build()).build();
-        testNodeDTO2A = NodeDTO.newBuilder().setDefault(DefaultNodeDTO.newBuilder().setId(202020L).build()).build();
-        testNodeDTO2B = NodeDTO.newBuilder().setDefault(DefaultNodeDTO.newBuilder().setId(303030L).build()).build();
 
         testTenantIdOptional = Optional.of("x-tenant-id-x");
 
@@ -105,7 +95,6 @@ class NodeGrpcServiceTest {
         mockNodeListStreamObserver = Mockito.mock(StreamObserver.class);
         mockInt64ValueStreamObserver = Mockito.mock(StreamObserver.class);
         mockBoolValueStreamObserver = Mockito.mock(StreamObserver.class);
-        mockExecutorService = Mockito.mock(ExecutorService.class);
 
         target =
             new NodeGrpcService(
@@ -450,117 +439,6 @@ class NodeGrpcServiceTest {
         StatusRuntimeExceptionMatcher matcher = new StatusRuntimeExceptionMatcher(this::statusExceptionMatchesExpectedId, 101010L);
         InOrder inOrder = Mockito.inOrder(mockBoolValueStreamObserver);
         inOrder.verify(mockBoolValueStreamObserver).onError(Mockito.argThat(matcher));
-    }
-
-    @Test
-    void testStartNodeScanByIdsSuccess() {
-        //
-        // Setup test data and interactions
-        //
-        NodeIdList request =
-            NodeIdList.newBuilder()
-                .addIds(101010L)
-                .addIds(202020L)
-                .addIds(303030L)
-                .build();
-
-        Map<String, List<NodeDTO>> testNodeByLocationMap =
-            Map.of(
-                "x-location-001-x", List.of(testNodeDTO1),
-                "x-location-002-x", List.of(testNodeDTO2A, testNodeDTO2B)
-            );
-
-        Mockito.when(mockNodeService.listNodeByIds(request.getIdsList(), "x-tenant-id-x")).thenReturn(testNodeByLocationMap);
-
-        //
-        // Execute
-        //
-        target.setExecutorService(mockExecutorService);
-        target.startNodeScanByIds(request, mockBoolValueStreamObserver);
-
-        //
-        // Validate
-        //
-        BoolValueMatcher boolValueMatcher = new BoolValueMatcher(true);
-        InOrder inOrder = Mockito.inOrder(mockBoolValueStreamObserver);
-        inOrder.verify(mockBoolValueStreamObserver).onNext(Mockito.argThat(boolValueMatcher));
-        inOrder.verify(mockBoolValueStreamObserver).onCompleted();
-
-        ArgumentCaptor<Runnable> argumentCaptor = ArgumentCaptor.forClass(Runnable.class);
-        Mockito.verify(mockExecutorService).execute(argumentCaptor.capture());
-
-        //
-        // Execute 2 - call the runnable
-        //
-        Runnable sendScannerTasksToMinionRunnable = argumentCaptor.getValue();
-        sendScannerTasksToMinionRunnable.run();
-
-        //
-        // Validate 2
-        //
-        Mockito.verify(mockScannerTaskSetService).sendNodeScannerTask(List.of(testNodeDTO2A.getDefault(), testNodeDTO2B.getDefault()), "x-location-002-x", "x-tenant-id-x");
-
-        // Make sure those 2 calls are all of them
-        Mockito.verify(mockScannerTaskSetService,
-            Mockito.times(2)).sendNodeScannerTask(Mockito.any(List.class), Mockito.anyString(), Mockito.anyString());
-    }
-
-    @Test
-    void testStartNodeScanByNoNodesFound() {
-        //
-        // Setup test data and interactions
-        //
-        NodeIdList request =
-            NodeIdList.newBuilder()
-                .addIds(101010L)
-                .addIds(202020L)
-                .addIds(303030L)
-                .build();
-
-        Map<String, List<NodeDTO>> testNodeByLocationMap = Collections.EMPTY_MAP;
-        Mockito.when(mockNodeService.listNodeByIds(request.getIdsList(), "x-tenant-id-x")).thenReturn(testNodeByLocationMap);
-
-        //
-        // Execute
-        //
-        target.setExecutorService(mockExecutorService);
-        target.startNodeScanByIds(request, mockBoolValueStreamObserver);
-
-        //
-        // Validate
-        //
-        StatusRuntimeExceptionMatcher matcher =
-            new StatusRuntimeExceptionMatcher(this::statusExceptionMatchesNotFound, "No nodes exist with ids " + request.getIdsList());
-        Mockito.verify(mockBoolValueStreamObserver).onError(Mockito.argThat(matcher));
-    }
-
-    @Test
-    void testStartNodeScanMissingTenantId() {
-        //
-        // Setup test data and interactions
-        //
-        NodeIdList request =
-            NodeIdList.newBuilder()
-                .addIds(101010L)
-                .addIds(202020L)
-                .addIds(303030L)
-                .build();
-
-        // Reset the tenant lookup - don't use the common, default interaction that was already configured
-        Mockito.reset(mockTenantLookup);
-        Mockito.when(mockTenantLookup.lookupTenantId(Mockito.any(Context.class))).thenReturn(Optional.empty());
-
-        //
-        // Execute
-        //
-        target.startNodeScanByIds(request, mockBoolValueStreamObserver);
-
-        //
-        // Validate
-        //
-        StatusRuntimeExceptionMatcher matcher =
-            new StatusRuntimeExceptionMatcher(this::statusExceptionMatchesInvalidArgument, NodeGrpcService.TENANT_ID_IS_MISSING_MSG);
-        Mockito.verify(mockBoolValueStreamObserver).onError(Mockito.argThat(matcher));
     }
 
     //========================================

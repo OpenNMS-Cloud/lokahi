@@ -85,6 +85,7 @@ class DefaultNodeGrpcServiceTest {
         testMonitoringLocation.setLocation("x-monitoring-location-x");
 
         testNode = new DefaultNode();
+        testNode.setId(101010L);
         testNode.setNodeLabel("x-node-label-x");
         testNode.setTenantId("x-tenant-id-x");
         testNode.setMonitoringLocation(testMonitoringLocation);
@@ -124,7 +125,7 @@ class DefaultNodeGrpcServiceTest {
         Runnable runnable = commonTestCreateNode();
 
         // Verify the lambda execution
-        testSendTaskSetsToMinionLambda(runnable, testNode, testNodeDTO1);
+        testSendTaskSetsToMinionLambda(runnable, testNode);
     }
 
 
@@ -239,7 +240,7 @@ class DefaultNodeGrpcServiceTest {
         return argumentCaptor.getValue();
     }
 
-    private void testSendTaskSetsToMinionLambda(Runnable runnable, DefaultNode testNode, DefaultNodeDTO testNodeDTO) {
+    private void testSendTaskSetsToMinionLambda(Runnable runnable, DefaultNode testNode) {
         //
         // Execute
         //
@@ -248,7 +249,7 @@ class DefaultNodeGrpcServiceTest {
         //
         // Validate
         //
-        Mockito.verify(mockScannerTaskSetService).sendNodeScannerTask(List.of(testNodeDTO), "x-monitoring-location-x", "x-tenant-id-x");
+        Mockito.verify(mockScannerTaskSetService).sendNodeScannerTask(List.of(testNode), "x-monitoring-location-x", "x-tenant-id-x");
     }
 
     private boolean statusExceptionMatchesInvalidArgument(Status status, Object expectedMessage) {

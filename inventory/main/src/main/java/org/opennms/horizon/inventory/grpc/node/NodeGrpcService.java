@@ -249,15 +249,6 @@ public class NodeGrpcService extends NodeServiceGrpc.NodeServiceImplBase {
     }
 
     @Override
-    public void startNodeScanByIds(NodeIdList request, StreamObserver<BoolValue> responseObserver) {
-        tenantLookup.lookupTenantId(Context.current())
-            .ifPresentOrElse(
-                tenantId -> startNodeScanByIdsForTenant(tenantId, request, responseObserver),
-                () -> responseObserver.onError(StatusProto.toStatusRuntimeException(createTenantIdMissingStatus())));
-    }
-
-
-    @Override
     public void getIpInterfaceById(Int64Value request, StreamObserver<IpInterfaceDTO> responseObserver) {
         var ipInterface = tenantLookup.lookupTenantId(Context.current())
             .map(tenantId -> ipInterfaceService.getByIdAndTenantId(request.getValue(), tenantId))
@@ -281,21 +272,6 @@ public class NodeGrpcService extends NodeServiceGrpc.NodeServiceImplBase {
         }, () -> responseObserver.onError(StatusProto.toStatusRuntimeException(createTenantIdMissingStatus())));
     }
 
-    private void startNodeScanByIdsForTenant(String tenantId, NodeIdList request, StreamObserver<BoolValue> responseObserver) {
-        Map<String, List<NodeDTO>> nodes = nodeService.listNodeByIds(request.getIdsList(), tenantId);
-
-        if (nodes != null && !nodes.isEmpty()) {
-            executorService.execute(() -> sendScannerTasksToMinion(nodes, tenantId));
-            responseObserver.onNext(BoolValue.of(true));
-            responseObserver.onCompleted();
-        } else {
-            Status status = Status.newBuilder()
-                .setCode(Code.NOT_FOUND_VALUE)
-                .setMessage("No nodes exist with ids " + request.getIdsList()).build();
-            responseObserver.onError(StatusProto.toStatusRuntimeException(status));
-        }
-    }
-
     private Status createTenantIdMissingStatus() {
         return Status.newBuilder().setCode(Code.INVALID_ARGUMENT_VALUE).setMessage(TENANT_ID_IS_MISSING_MSG).build();
     }
@@ -305,22 +281,5 @@ public class NodeGrpcService extends NodeServiceGrpc.NodeServiceImplBase {
             .setCode(Code.NOT_FOUND_VALUE)
             .setMessage(String.format("Node with id: %s doesn't exist.", id)).build();
 
-    }
-
-    private void sendScannerTasksToMinion(Map<String, List<NodeDTO>> locationNodes, String tenantId) {
-        for (String location : locationNodes.keySet()) {
-            List<NodeDTO> nodeDTOS = locationNodes.get(location);
-            List<DefaultNodeDTO> defaultNodes = getDefaultNodeDTOS(nodeDTOS);
-            scannerService.sendNodeScannerTask(defaultNodes, location, tenantId);
-        }
-    }
-
-    private static List<DefaultNodeDTO> getDefaultNodeDTOS(List<NodeDTO> nodeDTOS) {
-        return nodeDTOS.stream().map((Function<NodeDTO, DefaultNodeDTO>) nodeDTO -> {
-            if (nodeDTO.hasDefault()) {
-                return nodeDTO.getDefault();
-            }
-            return null;
-        }).filter(Objects::nonNull).toList();
     }
 }

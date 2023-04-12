@@ -45,6 +45,7 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
+import java.util.function.Supplier;
 
 public class MinionGrpcSslContextBuilderFactoryImpl implements MinionGrpcSslContextBuilderFactory {
 
@@ -59,9 +60,18 @@ public class MinionGrpcSslContextBuilderFactoryImpl implements MinionGrpcSslCont
     @Setter
     private boolean clientPrivateKeyIsPkcs12;
 
+    @Setter
+    private Supplier<SslContextBuilder> grpcSslClientContextFactory = GrpcSslContexts::forClient;
+    @Setter
+    private FunctionWithException<String, KeyStore, KeyStoreException> keyStoreFactory = KeyStore::getInstance;
+    @Setter
+    private FunctionWithException<String, FileInputStream, IOException> fileInputStreamFactory = FileInputStream::new;
+    @Setter
+    private FunctionWithException<String, KeyManagerFactory, NoSuchAlgorithmException> keyManagerFactoryFactory = KeyManagerFactory::getInstance;
+
     @Override
     public SslContextBuilder create() {
-        SslContextBuilder builder = GrpcSslContexts.forClient();
+        SslContextBuilder builder = grpcSslClientContextFactory.get();
 
         if (trustCertCollectionFilePath != null) {
             builder.trustManager(new File(trustCertCollectionFilePath));
@@ -97,7 +107,7 @@ public class MinionGrpcSslContextBuilderFactoryImpl implements MinionGrpcSslCont
     private void configureKeyManagerPkcs12(SslContextBuilder builder) throws KeyStoreException, IOException, CertificateException, NoSuchAlgorithmException, UnrecoverableKeyException {
         KeyStore keyStore = loadPrivateKeyPkcs12Store();
 
-        KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+        KeyManagerFactory keyManagerFactory = keyManagerFactoryFactory.apply(KeyManagerFactory.getDefaultAlgorithm());
         keyManagerFactory.init(keyStore, passwordAsCharArray());
 
         ApplicationProtocolConfig apn =
@@ -116,8 +126,8 @@ public class MinionGrpcSslContextBuilderFactoryImpl implements MinionGrpcSslCont
     }
 
     private KeyStore loadPrivateKeyPkcs12Store() throws KeyStoreException, IOException, CertificateException, NoSuchAlgorithmException {
-        KeyStore keyStore = KeyStore.getInstance("pkcs12");
-        try (FileInputStream fis = new FileInputStream(clientPrivateKeyFilePath)) {
+        KeyStore keyStore = keyStoreFactory.apply("pkcs12");
+        try (FileInputStream fis = fileInputStreamFactory.apply(clientPrivateKeyFilePath)) {
             char[] passwordCharArray = passwordAsCharArray();
             keyStore.load(fis, passwordCharArray);
         }
@@ -140,5 +150,15 @@ public class MinionGrpcSslContextBuilderFactoryImpl implements MinionGrpcSslCont
         }
 
         return clientPrivateKeyPassword;
+    }
+
+
+//========================================
+// Functional Interface
+//  with Exception Declaration
+//----------------------------------------
+
+    public interface FunctionWithException<T,R,E extends Exception> {
+        R apply(T arg) throws E;
     }
 }

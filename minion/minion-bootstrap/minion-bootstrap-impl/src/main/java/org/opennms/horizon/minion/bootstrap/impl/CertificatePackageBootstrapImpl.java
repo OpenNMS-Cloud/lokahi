@@ -38,6 +38,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.List;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 public class CertificatePackageBootstrapImpl implements CertificatePackageBootstrap {
 
@@ -46,6 +48,9 @@ public class CertificatePackageBootstrapImpl implements CertificatePackageBootst
     public static final String CLIENT_KEY_ZIP_FILE_ENTRYNAME = "client.key";
 
     private static final Logger LOG = LoggerFactory.getLogger(CertificatePackageBootstrapImpl.class);
+
+    private BiFunction<String, char[], ZipFile> zipFileFactory = ZipFile::new;
+    private Function<String, File> fileFactory = File::new;
 
     private boolean overwriteExisting;
     private String password;
@@ -58,6 +63,22 @@ public class CertificatePackageBootstrapImpl implements CertificatePackageBootst
 //========================================
 // Getters and Setters
 //----------------------------------------
+
+    public BiFunction<String, char[], ZipFile> getZipFileFactory() {
+        return zipFileFactory;
+    }
+
+    public void setZipFileFactory(BiFunction<String, char[], ZipFile> zipFileFactory) {
+        this.zipFileFactory = zipFileFactory;
+    }
+
+    public Function<String, File> getFileFactory() {
+        return fileFactory;
+    }
+
+    public void setFileFactory(Function<String, File> fileFactory) {
+        this.fileFactory = fileFactory;
+    }
 
     public boolean isOverwriteExisting() {
         return overwriteExisting;
@@ -112,7 +133,7 @@ public class CertificatePackageBootstrapImpl implements CertificatePackageBootst
 //----------------------------------------
 
     public void init() {
-        try ( ZipFile zipFile = new ZipFile(zipPath, password.toCharArray()) ) {
+        try ( ZipFile zipFile = zipFileFactory.apply(zipPath, safePasswordToCharArray()) ) {
             if (zipFile.isValidZipFile()) {
                 extractCertificateFiles(zipFile);
             } else {
@@ -127,6 +148,14 @@ public class CertificatePackageBootstrapImpl implements CertificatePackageBootst
 //========================================
 // Internals
 //----------------------------------------
+
+    private char[] safePasswordToCharArray() {
+        if (password == null) {
+            return null;
+        }
+
+        return password.toCharArray();
+    }
 
     private void extractCertificateFiles(ZipFile zipFile) throws ZipException {
         List<FileHeader> fileHeaders = zipFile.getFileHeaders();
@@ -158,7 +187,7 @@ public class CertificatePackageBootstrapImpl implements CertificatePackageBootst
     }
 
     private void commonProcessFileEntry(ZipFile zipFile, FileHeader fileHeader, String destinationPath) throws ZipException {
-        File destinationFile = new File(destinationPath);
+        File destinationFile = fileFactory.apply(destinationPath);
 
         if (overwriteExisting) {
             LOG.debug("Overwrite existing files enabled; not checking for existing file");

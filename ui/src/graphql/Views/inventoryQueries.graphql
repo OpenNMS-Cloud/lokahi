@@ -2,7 +2,20 @@ query NodesList {
   ...NodeParts
 }
 
-query NodeLatencyMetric($id: Long!, $monitor: String!, $instance: String!, $timeRange: Int!, $timeRangeUnit: TimeRangeUnit!) {
+query NodeLatencyMetric(
+  $id: Long!
+  $monitor: String!
+  $instance: String!
+  $timeRange: Int!
+  $timeRangeUnit: TimeRangeUnit!
+) {
   ...NodeLatencyParts
   ...NodeStatusParts
+}
+
+query FindAllNodesByNodeLabelSearch($labelSearchTerm: String!) {
+  findAllNodesByNodeLabelSearch(labelSearchTerm: $labelSearchTerm) {
+    details
+    nodeType
+  }
 }

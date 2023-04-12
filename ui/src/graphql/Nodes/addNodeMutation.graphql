@@ -1,6 +1,0 @@
-mutation AddNode($node: NodeCreateInput!) {
-    addNode(node: $node) {
-        details
-        nodeType
-    }
-}

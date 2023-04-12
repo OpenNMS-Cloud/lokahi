@@ -35,7 +35,7 @@
     </#if>
 </head>
 
-<body onload="animateGradient()">
+<body onload="addTheme()">
 <div>
     <div class="hs-card">
         <div id="hs-header">

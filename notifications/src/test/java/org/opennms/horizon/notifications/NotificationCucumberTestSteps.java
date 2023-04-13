@@ -1,19 +1,18 @@
 package org.opennms.horizon.notifications;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.net.URI;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
-
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.cucumber.datatable.DataTable;
+import io.cucumber.java.en.Given;
+import io.cucumber.java.en.Then;
+import io.cucumber.spring.CucumberContextConfiguration;
+import io.grpc.Metadata;
+import io.grpc.ServerCall;
+import io.grpc.ServerCallHandler;
+import io.grpc.stub.MetadataUtils;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.serialization.ByteArraySerializer;
@@ -22,6 +21,7 @@ import org.keycloak.common.VerificationException;
 import org.opennms.horizon.alerts.proto.Alert;
 import org.opennms.horizon.alerts.proto.MonitorPolicyProto;
 import org.opennms.horizon.notifications.api.PagerDutyDao;
+import org.opennms.horizon.notifications.api.keycloak.KeyCloakAPI;
 import org.opennms.horizon.notifications.dto.NotificationServiceGrpc;
 import org.opennms.horizon.notifications.dto.PagerDutyConfigDTO;
 import org.opennms.horizon.notifications.exceptions.NotificationConfigUninitializedException;
@@ -52,14 +52,21 @@ import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
 import org.testcontainers.shaded.org.awaitility.Awaitility;
 
-import io.cucumber.datatable.DataTable;
-import io.cucumber.java.en.Given;
-import io.cucumber.java.en.Then;
-import io.cucumber.spring.CucumberContextConfiguration;
-import io.grpc.Metadata;
-import io.grpc.ServerCall;
-import io.grpc.ServerCallHandler;
-import io.grpc.stub.MetadataUtils;
+import java.net.URI;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.StreamSupport;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @CucumberContextConfiguration
 @SpringBootTest
@@ -87,6 +94,10 @@ public class NotificationCucumberTestSteps extends GrpcTestBase {
     public RestTemplate restTemplate;
 
     @Autowired
+    @MockBean
+    private KeyCloakAPI keyCloakAPI;
+
+    @Autowired
     private EmbeddedKafkaBroker embeddedKafkaBroker;
 
     @Autowired
@@ -98,6 +109,11 @@ public class NotificationCucumberTestSteps extends GrpcTestBase {
     private Producer<String, byte[]> kafkaProducer;
 
     private Exception caught;
+
+    private Alert alert;
+
+    private String email;
+    private HttpClient httpClient = HttpClientBuilder.create().build();
 
     @Then("tear down grpc setup")
     public void cleanUp() throws InterruptedException {
@@ -208,7 +224,7 @@ public class NotificationCucumberTestSteps extends GrpcTestBase {
     }
 
     private void postAlert(String tenantId, long monitoringPolicyId) {
-        Alert alert = Alert.newBuilder().setLogMessage("Hello").setTenantId(tenantId).addMonitoringPolicyId(monitoringPolicyId).build();
+        alert = Alert.newBuilder().setLogMessage("Hello").setDescription("Alarm!").setTenantId(tenantId).addMonitoringPolicyId(monitoringPolicyId).build();
         notificationService.postNotification(alert);
     }
 
@@ -302,4 +318,29 @@ public class NotificationCucumberTestSteps extends GrpcTestBase {
         Awaitility.await().atMost(5, TimeUnit.SECONDS).until(() -> !monitoringPolicyRepository.findByTenantIdAndIdIn(tenant, List.of(id)).isEmpty());
     }
 
+    @Given("{string} has email {string}")
+    public void setTenantEmail(String tenant, String email) {
+        this.email = email;
+        when(keyCloakAPI.getTenantEmailAddresses(tenant)).thenReturn(List.of(email));
+    }
+
+    @Then("verify alert is sent by email")
+    public void verifyEmailAlert() throws Exception {
+        // Mailhog exposes an API with all emails recieved
+        Awaitility.await().atMost(5, TimeUnit.SECONDS).untilAsserted(() -> {
+            HttpGet get = new HttpGet(String.format(
+                "http://%s:%d/api/v2/messages",
+                SpringContextTestInitializer.mailhog.getHost(),
+                SpringContextTestInitializer.mailhog.getMappedPort(SpringContextTestInitializer.MAILHOG_WEB_PORT)
+            ));
+
+            JsonNode nodes = new ObjectMapper().readTree(httpClient.execute(get).getEntity().getContent());
+            assertEquals(1, nodes.get("total").asInt());
+            JsonNode content = nodes.get("items").get(0).get("Content");
+            // Check the email is addressed to the tenant, and the body and subject aren't empty.
+            assertEquals(List.of(email), StreamSupport.stream(content.get("Headers").get("To").spliterator(), false).map(JsonNode::asText).toList());
+            assertNotEquals("", content.get("Headers").get("Subject").get(0).asText());
+            assertNotEquals("", content.get("Body").asText());
+        });
+    }
 }

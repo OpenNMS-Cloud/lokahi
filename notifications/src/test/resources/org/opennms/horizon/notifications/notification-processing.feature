@@ -64,3 +64,12 @@ Feature: Notification Processing
     And "test-tenant" has a monitoring policy with ID 1
     And Alert posted via service with tenant "test-tenant" with monitoring policy ID 1
     Then verify pager duty rest method is called 0 times
+
+  Scenario: Send email notification
+    Given the following monitoring policies sent via Kafka
+      #| id | tenant        | enablePagerDuty | enableEmail | enableWebhooks |
+      | 1 | test-tenant    | false            | true        | false          |
+    And "test-tenant" has email "admin@company.com"
+    And "test-tenant" has a monitoring policy with ID 1
+    And Alert posted via service with tenant "test-tenant" with monitoring policy ID 1
+    Then verify alert is sent by email

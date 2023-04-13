@@ -2,6 +2,11 @@ spring:
   application:
     name: horizon-stream-notifications
 
+  mail:
+    from: noreply@opennms.com
+    host: mail-server
+    port: 1025
+
   datasource:
     driver-class-name: org.postgresql.Driver
 

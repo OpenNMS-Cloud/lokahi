@@ -313,6 +313,12 @@ k8s_resource(
     port_forwards=['26080:8080'],
 )
 
+### Email ###
+k8s_resource(
+    'mail-server',
+    port_forwards=['22080:8025'],
+)
+
 ### Grafana ###
 docker_build(
     'opennms/horizon-stream-grafana',

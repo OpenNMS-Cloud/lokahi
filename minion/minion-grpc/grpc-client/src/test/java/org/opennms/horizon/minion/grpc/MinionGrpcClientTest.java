@@ -104,8 +104,21 @@ public class MinionGrpcClientTest {
     private IpcIdentity testIpcIdentity;
 
     @BeforeEach
-    public void setUp() throws Exception {
-        testIpcIdentity = new MinionIpcIdentity("x-system-id-x", "x-location-x");
+    public void setUp() {
+        mockMetricRegistry = Mockito.mock(MetricRegistry.class);
+        mockTracer = Mockito.mock(Tracer.class);
+        mockSendQueueFactory = Mockito.mock(SendQueueFactory.class);
+        mockSimpleReconnectStrategyFactory = Mockito.mock(MinionGrpcClient.SimpleReconnectStrategyFactory.class);
+        mockSimpleReconnectStrategy = Mockito.mock(SimpleReconnectStrategy.class);
+        mockNewStubOperation = Mockito.mock(Function.class);
+        mockAsyncStub = Mockito.mock(CloudServiceGrpc.CloudServiceStub.class);
+        mockCloudMessageHandler = Mockito.mock(CloudMessageHandler.class);
+        mockRpcRequestHandler = Mockito.mock(RpcRequestHandler.class);
+
+        mockRpcStream = Mockito.mock(StreamObserver.class);
+        mockSinkStream = Mockito.mock(StreamObserver.class);
+
+        testIpcIdentity = new MinionIpcIdentity("x-system-id-x");
 
         target = new MinionGrpcClient(testIpcIdentity, mockMetricRegistry, mockTracer, mockSendQueueFactory, managedChannelFactory);
         target.setSimpleReconnectStrategyFactory(mockSimpleReconnectStrategyFactory);
@@ -124,6 +137,10 @@ public class MinionGrpcClientTest {
             target.setGrpcHost("x-grpc-host-x");
             target.setGrpcPort(1313);
             target.start();
+
+            //
+            // Verify the Results
+            //
         }
     }
 
@@ -149,6 +166,7 @@ public class MinionGrpcClientTest {
             //
             target.setGrpcHost("x-grpc-host-x");
             target.setGrpcPort(1313);
+
             target.shutdown();
             verifyNoInteractions(mockManagedChannel, mockSimpleReconnectStrategyFactory, mockNewStubOperation);
         }
@@ -190,6 +208,7 @@ public class MinionGrpcClientTest {
             target.setGrpcHost("x-grpc-host-x");
             target.setGrpcPort(1313);
             target.start();
+            target.shutdown();
         }
 
         //

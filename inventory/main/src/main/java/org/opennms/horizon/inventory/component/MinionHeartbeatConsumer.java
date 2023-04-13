@@ -34,18 +34,17 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.producer.ProducerRecord;
-import org.opennms.cloud.grpc.minion.RpcRequestProto;
-import org.opennms.cloud.grpc.minion.RpcResponseProto;
+import org.opennms.cloud.grpc.minion_gateway.GatewayRpcRequestProto;
+import org.opennms.cloud.grpc.minion_gateway.GatewayRpcResponseProto;
+import org.opennms.cloud.grpc.minion_gateway.MinionIdentity;
 import org.opennms.horizon.grpc.echo.contract.EchoRequest;
 import org.opennms.horizon.grpc.echo.contract.EchoResponse;
-import org.opennms.horizon.grpc.heartbeat.contract.HeartbeatMessage;
-import org.opennms.horizon.inventory.exception.InventoryRuntimeException;
+import org.opennms.horizon.grpc.heartbeat.contract.TenantLocationSpecificHeartbeatMessage;
 import org.opennms.horizon.inventory.service.MonitoringSystemService;
-import org.opennms.horizon.shared.constants.GrpcConstants;
 import org.opennms.taskset.contract.MonitorResponse;
 import org.opennms.taskset.contract.MonitorType;
 import org.opennms.taskset.contract.TaskResult;
-import org.opennms.taskset.contract.TenantedTaskSetResults;
+import org.opennms.taskset.contract.TenantLocationSpecificTaskSetResults;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -56,7 +55,6 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PreDestroy;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
@@ -84,17 +82,22 @@ public class MinionHeartbeatConsumer {
     @KafkaListener(topics = "${kafka.topics.minion-heartbeat}", concurrency = "1")
     public void receiveMessage(@Payload byte[] data, @Headers Map<String, Object> headers) {
         try {
-            HeartbeatMessage message = HeartbeatMessage.parseFrom(data);
-            String tenantId = Optional.ofNullable(headers.get(GrpcConstants.TENANT_ID_KEY)).map(o -> new String((byte[])o))
-                .orElseThrow(()->new InventoryRuntimeException("Missing tenant id"));
-            log.info("Received heartbeat message for minion with tenant id: {}; id: {}; location: {}", tenantId, message.getIdentity().getSystemId(), message.getIdentity().getLocation());
-            service.addMonitoringSystemFromHeartbeat(message, tenantId);
+            TenantLocationSpecificHeartbeatMessage message = TenantLocationSpecificHeartbeatMessage.parseFrom(data);
+
+            String tenantId = message.getTenantId();
+            String location = message.getLocation();
+
+            log.info("Received heartbeat message for minion: tenant-id={}; location={}; system-id={}",
+                tenantId, location, message.getIdentity().getSystemId());
+
+            service.addMonitoringSystemFromHeartbeat(message);
+
             String systemId = message.getIdentity().getSystemId();
-            String location = message.getIdentity().getLocation();
             String key = tenantId + "_" + location + "-" + systemId;
+
             Long lastRun = rpcMaps.get(key);
             if (lastRun == null || (getSystemTimeInMsec() > (lastRun + MONITOR_PERIOD))) { //prevent run too many rpc calls
-                CompletableFuture.runAsync(() -> runRpcMonitor(systemId, message.getIdentity().getLocation(), tenantId));
+                CompletableFuture.runAsync(() -> runRpcMonitor(tenantId, location, systemId));
                 rpcMaps.put(key, getSystemTimeInMsec());
             }
         } catch (Exception e) {
@@ -109,21 +112,29 @@ public class MinionHeartbeatConsumer {
         }
     }
 
-    private void runRpcMonitor(String systemId, String location, String tenantId) {
+    private void runRpcMonitor(String tenantId, String location, String systemId) {
         log.info("Sending RPC request for minion {} with location {}", systemId, location);
         EchoRequest echoRequest = EchoRequest.newBuilder()
             .setTime(System.nanoTime())
             .setMessage(Strings.repeat("*", DEFAULT_MESSAGE_SIZE))
             .build();
-        RpcRequestProto request = RpcRequestProto.newBuilder()
-            .setLocation(location)
-            .setSystemId(systemId)
+
+        MinionIdentity minionIdentity =
+            MinionIdentity.newBuilder()
+                .setTenant(tenantId)
+                .setLocation(location)
+                .setSystemId(systemId)
+                .build();
+
+        GatewayRpcRequestProto request = GatewayRpcRequestProto.newBuilder()
+            .setIdentity(minionIdentity)
             .setModuleId("Echo")
             .setExpirationTime(System.currentTimeMillis() + ECHO_TIMEOUT)
             .setRpcId(UUID.randomUUID().toString())
             .setPayload(Any.pack(echoRequest))
             .build();
-        rpcClient.sendRpcRequest(tenantId, request).thenApply(RpcResponseProto::getPayload)
+
+        rpcClient.sendRpcRequest(tenantId, request).thenApply(GatewayRpcResponseProto::getPayload)
             .thenApply(payload -> {
                 try {
                     return payload.unpack(EchoResponse.class);
@@ -146,6 +157,10 @@ public class MinionHeartbeatConsumer {
 
     private void publishResult(String systemId, String location, String tenantId, long responseTime) {
         // TODO: use a separate structure from TaskSetResult - this is not the result of processing a TaskSet
+        org.opennms.taskset.contract.Identity identity =
+            org.opennms.taskset.contract.Identity.newBuilder()
+                .setSystemId(systemId)
+                .build();
         MonitorResponse monitorResponse = MonitorResponse.newBuilder()
             .setStatus("UP")
             .setResponseTimeMs(responseTime)
@@ -155,12 +170,12 @@ public class MinionHeartbeatConsumer {
             .build();
         TaskResult result = TaskResult.newBuilder()
             .setId("monitor-"+systemId)
-            .setSystemId(systemId)
-            .setLocation(location)
+            .setIdentity(identity)
             .setMonitorResponse(monitorResponse)
             .build();
-        TenantedTaskSetResults results = TenantedTaskSetResults.newBuilder()
+        TenantLocationSpecificTaskSetResults results = TenantLocationSpecificTaskSetResults.newBuilder()
             .setTenantId(tenantId)
+            .setLocation(location)
             .addResults(result)
             .build();
 

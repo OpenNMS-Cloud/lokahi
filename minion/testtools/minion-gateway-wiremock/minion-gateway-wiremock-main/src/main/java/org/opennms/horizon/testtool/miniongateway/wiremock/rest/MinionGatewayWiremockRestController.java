@@ -1,7 +1,6 @@
 package org.opennms.horizon.testtool.miniongateway.wiremock.rest;
 
 import org.opennms.cloud.grpc.minion.Identity;
-import org.opennms.cloud.grpc.minion.SinkMessage;
 import org.opennms.horizon.testtool.miniongateway.wiremock.api.MockGrpcServiceApi;
 import org.opennms.horizon.testtool.miniongateway.wiremock.api.MockTwinHandler;
 import org.opennms.horizon.testtool.miniongateway.wiremock.api.SinkMessageDto;
@@ -35,13 +34,13 @@ public class MinionGatewayWiremockRestController {
     private MockGrpcServiceApi mockGrpcServiceApi;
 
     @PostMapping(
-        path = "/twin-publish/{topic}/{location}",
+        path = "/twin-publish/{topic}",
         consumes = MimeTypeUtils.APPLICATION_JSON_VALUE
     )
-    public String publishTwinUpdate(@RequestBody String bodyText, @PathVariable("topic") String topic, @PathVariable("location") String location) {
-        log.info("HAVE twin update: topic={}; location={}", topic, location);
+    public String publishTwinUpdate(@RequestBody String bodyText, @PathVariable("topic") String topic) {
+        log.info("HAVE twin update: topic={};", topic);
 
-        mockTwinHandler.publish(location, topic, bodyText.getBytes(StandardCharsets.UTF_8));
+        mockTwinHandler.publish(topic, bodyText.getBytes(StandardCharsets.UTF_8));
 
         return bodyText;
     }
@@ -76,7 +75,6 @@ public class MinionGatewayWiremockRestController {
         Map<String, String> result = new TreeMap<>();
 
         result.put("systemId", identity.getSystemId());
-        result.put("location", identity.getLocation());
 
         return result;
     }

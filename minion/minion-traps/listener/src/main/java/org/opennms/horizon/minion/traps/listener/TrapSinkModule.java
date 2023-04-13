@@ -110,7 +110,7 @@ public class TrapSinkModule implements SinkModule<TrapDTO, TrapLogDTO> {
                 if (accumulator == null) {
                     accumulator = TrapLogDTO.newBuilder()
                         .setTrapAddress(newMessage.getTrapAddress())
-                        .setIdentity(Identity.newBuilder().setSystemId(identity.getId()).setLocation(identity.getLocation()).build())
+                        .setIdentity(Identity.newBuilder().setSystemId(identity.getId()))
                         .addTrapDTO(newMessage).build();
                 } else {
                     TrapLogDTO.newBuilder(accumulator).addTrapDTO(newMessage);

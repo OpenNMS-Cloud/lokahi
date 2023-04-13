@@ -30,9 +30,8 @@ package org.opennms.horizon.flows;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 import lombok.extern.slf4j.Slf4j;
-import org.opennms.dataplatform.flows.document.FlowDocumentLog;
+import org.opennms.horizon.flows.document.TenantLocationSpecificFlowDocumentLog;
 import org.opennms.horizon.flows.processing.Pipeline;
-import org.opennms.horizon.shared.constants.GrpcConstants;
 import org.opennms.horizon.tenantmetrics.TenantMetricsTracker;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -58,13 +57,15 @@ public class FlowProcessor {
     }
 
     @KafkaListener(topics = "${kafka.flow-topics}", concurrency = "1")
-    public void consume(@Payload byte[] data, @Headers Map<String, Object> headers) {
-        String tenantId = getTenantId(headers);
+    public void consume(@Payload byte[] data) {
         try {
-            var flowDocumentLog = FlowDocumentLog.parseFrom(data);
+            var flowDocumentLog = TenantLocationSpecificFlowDocumentLog.parseFrom(data);
             CompletableFuture.supplyAsync(() -> {
                 try {
-                    log.trace("Processing flow {}", flowDocumentLog);
+                    String tenantId = flowDocumentLog.getTenantId();
+
+                    log.trace("Processing flow: tenant-id={}; flow={}", tenantId, flowDocumentLog);
+
                     pipeline.process(flowDocumentLog.getMessageList(), tenantId);
                     metricsTracker.addTenantFlowSampleCount(tenantId, flowDocumentLog.getMessageCount());
                 } catch (Exception exc) {
@@ -75,20 +76,5 @@ public class FlowProcessor {
         } catch (InvalidProtocolBufferException e) {
             log.error("Invalid data from kafka", e);
         }
-    }
-
-
-    private String getTenantId(Map<String, Object> headers) {
-        return Optional.ofNullable(headers.get(GrpcConstants.TENANT_ID_KEY))
-            .map(tenantId -> {
-                if (tenantId instanceof byte[]) {
-                    return new String((byte[]) tenantId);
-                }
-                if (tenantId instanceof String) {
-                    return (String) tenantId;
-                }
-                return "" + tenantId;
-            })
-            .orElseThrow(() -> new RuntimeException("Could not determine tenant id"));
     }
 }

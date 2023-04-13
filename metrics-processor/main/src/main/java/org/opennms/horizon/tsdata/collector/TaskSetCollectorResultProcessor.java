@@ -53,14 +53,15 @@ public class TaskSetCollectorResultProcessor {
         this.taskSetCollectorAzureResponseProcessor = taskSetCollectorAzureResponseProcessor;
     }
 
-    public void processCollectorResponse(String tenantId, TaskResult taskResult, CollectorResponse collectorResponse) throws IOException {
-        LOG.info("Have collector response, tenant-id: {}; task-id={};", tenantId, taskResult.getId());
+    public void processCollectorResponse(String tenantId, String location, TaskResult taskResult, CollectorResponse collectorResponse) throws IOException {
+        LOG.info("Have collector response: tenant-id={}; location={}; system-id={}; task-id={}",
+            tenantId, location, taskResult.getIdentity().getSystemId(), taskResult.getId());
 
         String[] labelValues =
             {
                 collectorResponse.getIpAddress(),
-                taskResult.getLocation(),
-                taskResult.getSystemId(),
+                location,
+                taskResult.getIdentity().getSystemId(),
                 collectorResponse.getMonitorType().name(),
                 String.valueOf(collectorResponse.getNodeId())
             };
@@ -68,9 +69,9 @@ public class TaskSetCollectorResultProcessor {
         if (collectorResponse.hasResult()) {
             MonitorType monitorType = collectorResponse.getMonitorType();
             if (monitorType.equals(MonitorType.SNMP)) {
-                taskSetCollectorSnmpResponseProcessor.processSnmpCollectorResponse(tenantId, taskResult);
+                taskSetCollectorSnmpResponseProcessor.processSnmpCollectorResponse(tenantId, location, taskResult);
             } else if (monitorType.equals(MonitorType.AZURE)) {
-                taskSetCollectorAzureResponseProcessor.processAzureCollectorResponse(tenantId, collectorResponse, labelValues);
+                taskSetCollectorAzureResponseProcessor.processAzureCollectorResponse(tenantId, location, collectorResponse, labelValues);
             } else {
                 LOG.warn("Unrecognized monitor type");
             }

@@ -3,6 +3,7 @@ package org.opennms.miniongateway.grpc.server;
 import org.opennms.horizon.shared.grpc.common.GrpcIpcServer;
 import org.opennms.horizon.shared.grpc.common.GrpcIpcServerBuilder;
 import org.opennms.horizon.shared.grpc.common.GrpcIpcUtils;
+import org.opennms.horizon.shared.grpc.common.LocationServerInterceptor;
 import org.opennms.horizon.shared.grpc.common.TenantIDGrpcServerInterceptor;
 import org.opennms.horizon.shared.grpc.interceptor.LoggingInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,19 +41,28 @@ public class GrpcIpcServerConfig {
         return new TenantIDGrpcServerInterceptor();
     }
 
+    @Bean
+    public LocationServerInterceptor prepareLocationInterceptor() {
+        return new LocationServerInterceptor();
+    }
+
     /**
      * External GRPC service for handling
      *
      * @return
      */
     @Bean(name = "externalGrpcIpcServer", destroyMethod = "stopServer")
-    public GrpcIpcServer prepareExternalGrpcIpcServer(@Autowired TenantIDGrpcServerInterceptor tenantIDGrpcServerInterceptor) {
+    public GrpcIpcServer prepareExternalGrpcIpcServer(
+        @Autowired TenantIDGrpcServerInterceptor tenantIDGrpcServerInterceptor,
+        @Autowired LocationServerInterceptor locationServerInterceptor
+    ) {
         Properties properties = new Properties();
         properties.setProperty(GrpcIpcUtils.GRPC_MAX_INBOUND_SIZE, Long.toString(maxMessageSize));
 
         return new GrpcIpcServerBuilder(properties, externalGrpcPort, "PT10S", Arrays.asList(
             new LoggingInterceptor(),
-            tenantIDGrpcServerInterceptor
+            tenantIDGrpcServerInterceptor,
+            locationServerInterceptor
         ));
     }
 

@@ -2,30 +2,27 @@ package org.opennms.miniongateway.grpc.server;
 
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import io.grpc.stub.StreamObserver;
-import org.opennms.cloud.grpc.minion.CloudToMinionMessage;
-import org.opennms.cloud.grpc.minion.Identity;
 import org.opennms.horizon.shared.grpc.common.GrpcIpcServer;
+import org.opennms.horizon.shared.grpc.common.LocationServerInterceptor;
 import org.opennms.horizon.shared.grpc.common.TenantIDGrpcServerInterceptor;
 import org.opennms.horizon.shared.grpc.interceptor.MeteringInterceptorFactory;
 import org.opennms.horizon.shared.ipc.grpc.server.OpennmsGrpcServer;
-import org.opennms.horizon.shared.ipc.grpc.server.manager.LocationIndependentRpcClientFactory;
 import org.opennms.horizon.shared.ipc.grpc.server.manager.MinionManager;
+import org.opennms.horizon.shared.ipc.grpc.server.manager.OutgoingMessageFactory;
+import org.opennms.horizon.shared.ipc.grpc.server.manager.OutgoingMessageHandler;
 import org.opennms.horizon.shared.ipc.grpc.server.manager.RpcConnectionTracker;
 import org.opennms.horizon.shared.ipc.grpc.server.manager.RpcRequestTimeoutManager;
 import org.opennms.horizon.shared.ipc.grpc.server.manager.RpcRequestTracker;
 import org.opennms.horizon.shared.ipc.grpc.server.manager.impl.RpcRequestTimeoutManagerImpl;
 import org.opennms.horizon.shared.ipc.grpc.server.manager.impl.RpcRequestTrackerImpl;
-import org.opennms.horizon.shared.ipc.grpc.server.manager.rpc.LocationIndependentRpcClientFactoryImpl;
 import org.opennms.horizon.shared.ipc.grpc.server.manager.rpcstreaming.MinionRpcStreamConnectionManager;
 import org.opennms.horizon.shared.ipc.grpc.server.manager.rpcstreaming.impl.MinionRpcStreamConnectionManagerImpl;
-import org.opennms.horizon.shared.protobuf.mapper.TenantedTaskSetResultsMapper;
-import org.opennms.horizon.shared.protobuf.mapper.impl.TenantedTaskSetResultsMapperImpl;
+import org.opennms.horizon.shared.protobuf.mapper.TenantLocationSpecificTaskSetResultsMapper;
+import org.opennms.horizon.shared.protobuf.mapper.impl.TenantLocationSpecificTaskSetResultsMapperImpl;
 import org.opennms.miniongateway.grpc.server.heartbeat.HeartbeatKafkaForwarder;
 import org.opennms.miniongateway.grpc.server.flows.FlowKafkaForwarder;
 import org.opennms.miniongateway.grpc.server.tasktresults.TaskResultsKafkaForwarder;
 import org.opennms.miniongateway.grpc.server.traps.TrapsKafkaForwarder;
-import org.opennms.miniongateway.grpc.twin.GrpcTwinPublisher;
 import org.opennms.miniongateway.grpc.twin.TaskSetTwinMessageProcessor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -38,7 +35,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
-import java.util.function.BiConsumer;
 
 @Configuration
 public class GrpcServerConfig {
@@ -47,8 +43,8 @@ public class GrpcServerConfig {
     private MetricRegistry metricRegistry;
 
     @Bean
-    public TenantedTaskSetResultsMapper tenantedTaskSetResultsMapper() {
-        return new TenantedTaskSetResultsMapperImpl();
+    public TenantLocationSpecificTaskSetResultsMapper tenantLocationSpecificTaskSetResultsMapper() {
+        return new TenantLocationSpecificTaskSetResultsMapperImpl();
     }
 
     @Bean
@@ -62,16 +58,12 @@ public class GrpcServerConfig {
     }
 
     @Bean
-    public LocationIndependentRpcClientFactory locationIndependentRpcClientFactory() {
-        return new LocationIndependentRpcClientFactoryImpl();
-    }
-
-    @Bean
     public MinionRpcStreamConnectionManager minionRpcStreamConnectionManager(
         @Autowired MinionManager minionManager,
         @Autowired RpcConnectionTracker rpcConnectionTracker,
         @Autowired RpcRequestTracker rpcRequestTracker,
-        @Autowired TenantIDGrpcServerInterceptor tenantIDGrpcServerInterceptor
+        @Autowired TenantIDGrpcServerInterceptor tenantIDGrpcServerInterceptor,
+        @Autowired LocationServerInterceptor locationServerInterceptor
         ) {
         ScheduledExecutorService responseHandlerExecutor = Executors.newSingleThreadScheduledExecutor();
 
@@ -80,7 +72,8 @@ public class GrpcServerConfig {
             rpcRequestTracker,
             minionManager,
             responseHandlerExecutor,
-            tenantIDGrpcServerInterceptor
+            tenantIDGrpcServerInterceptor,
+            locationServerInterceptor
         );
     }
 
@@ -91,9 +84,10 @@ public class GrpcServerConfig {
 
     @Bean("cloudToMinionMessageProcessor")
     public TaskSetTwinMessageProcessor stubCloudToMinionMessageProcessor(
-        GrpcTwinPublisher grpcTwinPublisher,
-        TenantIDGrpcServerInterceptor tenantIDGrpcServerInterceptor) {
-        return new TaskSetTwinMessageProcessor(grpcTwinPublisher, tenantIDGrpcServerInterceptor);
+        TenantIDGrpcServerInterceptor tenantIDGrpcServerInterceptor,
+        LocationServerInterceptor locationServerInterceptor,
+        List<OutgoingMessageFactory> outgoingMessageFactoryList) {
+        return new TaskSetTwinMessageProcessor(tenantIDGrpcServerInterceptor, locationServerInterceptor, outgoingMessageFactoryList);
     }
 
     @Bean
@@ -118,10 +112,9 @@ public class GrpcServerConfig {
         @Autowired MinionManager minionManager,
         @Autowired RpcConnectionTracker rpcConnectionTracker,
         @Autowired RpcRequestTracker rpcRequestTracker,
-        @Autowired LocationIndependentRpcClientFactory locationIndependentRpcClientFactory,
         @Autowired MinionRpcStreamConnectionManager minionRpcStreamConnectionManager,
         @Autowired @Qualifier("minionToCloudRPCProcessor") IncomingRpcHandlerAdapter incomingRpcHandlerAdapter,
-        @Autowired @Qualifier("cloudToMinionMessageProcessor") BiConsumer<Identity, StreamObserver<CloudToMinionMessage>> cloudToMinionMessageProcessor,
+        @Autowired @Qualifier("cloudToMinionMessageProcessor") OutgoingMessageHandler cloudToMinionMessageProcessor,
         @Autowired TaskResultsKafkaForwarder taskResultsKafkaForwarder,
         @Autowired HeartbeatKafkaForwarder heartbeatKafkaForwarder,
         @Autowired TrapsKafkaForwarder trapsKafkaForwarder,
@@ -139,7 +132,6 @@ public class GrpcServerConfig {
         server.setRpcRequestTimeoutManager(rpcRequestTimeoutManager);
         server.setTenantIDGrpcServerInterceptor(tenantIDGrpcServerInterceptor);
         server.setMinionManager(minionManager);
-        server.setLocationIndependentRpcClientFactory(locationIndependentRpcClientFactory);
         server.setMinionRpcStreamConnectionManager(minionRpcStreamConnectionManager);
         server.setIncomingRpcHandler(incomingRpcHandlerAdapter);
         server.setOutgoingMessageHandler(cloudToMinionMessageProcessor);

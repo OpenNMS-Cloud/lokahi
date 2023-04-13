@@ -1,14 +1,13 @@
 package org.opennms.miniongateway.grpc.server.heartbeat;
 
 import com.google.protobuf.InvalidProtocolBufferException;
-import com.google.protobuf.Message;
 import org.opennms.horizon.grpc.heartbeat.contract.HeartbeatMessage;
 import org.opennms.horizon.shared.ipc.sink.aggregation.IdentityAggregationPolicy;
 import org.opennms.horizon.shared.ipc.sink.api.AggregationPolicy;
 import org.opennms.horizon.shared.ipc.sink.api.AsyncPolicy;
 import org.opennms.horizon.shared.ipc.sink.api.SinkModule;
 
-public class HeartbeatModule implements SinkModule<Message, Message> {
+public class HeartbeatModule implements SinkModule<HeartbeatMessage, HeartbeatMessage> {
 
     @Override
     public String getId() {
@@ -21,12 +20,12 @@ public class HeartbeatModule implements SinkModule<Message, Message> {
     }
 
     @Override
-    public byte[] marshal(Message message) {
+    public byte[] marshal(HeartbeatMessage message) {
         return message.toByteArray();
     }
 
     @Override
-    public Message unmarshal(byte[] content) {
+    public HeartbeatMessage unmarshal(byte[] content) {
         try {
             return HeartbeatMessage.parseFrom(content);
         } catch (InvalidProtocolBufferException e) {
@@ -35,17 +34,17 @@ public class HeartbeatModule implements SinkModule<Message, Message> {
     }
 
     @Override
-    public byte[] marshalSingleMessage(Message message) {
+    public byte[] marshalSingleMessage(HeartbeatMessage message) {
         return marshal(message);
     }
 
     @Override
-    public Message unmarshalSingleMessage(byte[] message) {
+    public HeartbeatMessage unmarshalSingleMessage(byte[] message) {
         return unmarshal(message);
     }
 
     @Override
-    public AggregationPolicy<Message, Message, ?> getAggregationPolicy() {
+    public AggregationPolicy<HeartbeatMessage, HeartbeatMessage, ?> getAggregationPolicy() {
         return new IdentityAggregationPolicy<>();
     }
 

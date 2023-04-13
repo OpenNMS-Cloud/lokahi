@@ -10,6 +10,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicLong;
+import org.opennms.cloud.grpc.minion.Identity;
 import org.opennms.cloud.grpc.minion.RpcRequestProto;
 import org.opennms.cloud.grpc.minion.RpcResponseProto;
 import org.opennms.horizon.shared.ipc.rpc.IpcIdentity;
@@ -54,8 +55,7 @@ public class ThinRpcRequestHandler implements RpcRequestHandler {
             // Construct response using the same rpcId;
             RpcResponseProto responseProto = RpcResponseProto.newBuilder()
                 .setRpcId(requestProto.getRpcId())
-                .setSystemId(ipcIdentity.getId())
-                .setLocation(requestProto.getLocation())
+                .setIdentity(Identity.newBuilder().setSystemId(ipcIdentity.getId()).build())
                 .setModuleId(requestProto.getModuleId())
                 .setPayload(Any.pack(rpcResponse))
                 .build();

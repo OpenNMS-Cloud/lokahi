@@ -10,8 +10,12 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
+import org.opennms.cloud.grpc.minion.Identity;
 import org.opennms.cloud.grpc.minion.RpcRequestProto;
 import org.opennms.cloud.grpc.minion.RpcResponseProto;
+import org.opennms.cloud.grpc.minion_gateway.GatewayRpcRequestProto;
+import org.opennms.cloud.grpc.minion_gateway.GatewayRpcResponseProto;
+import org.opennms.cloud.grpc.minion_gateway.MinionIdentity;
 import org.opennms.horizon.shared.grpc.common.TenantIDGrpcServerInterceptor;
 import org.opennms.miniongateway.grpc.server.rpcrequest.RouterTaskData;
 import org.opennms.miniongateway.grpc.server.rpcrequest.RpcRequestRouterIgniteTask;
@@ -58,15 +62,15 @@ public class RpcRequestRouterImplTest {
         //
         // Setup Test Data and Interactions
         //
-        RpcRequestProto testRequest =
-            RpcRequestProto.newBuilder()
-                .setLocation("x-test-location-x")
+        GatewayRpcRequestProto testRequest =
+            GatewayRpcRequestProto.newBuilder()
+                .setIdentity(MinionIdentity.newBuilder().setLocation("x-test-location-x"))
                 .setRpcId("x-rpc-id-x")
                 .build()
             ;
-        RpcResponseProto rpcResponseProto =
-            RpcResponseProto.newBuilder()
-                .setLocation("x-test-response-location-x")
+        GatewayRpcResponseProto rpcResponseProto =
+            GatewayRpcResponseProto.newBuilder()
+                .setIdentity(MinionIdentity.newBuilder().setLocation("x-test-response-location-x"))
                 .build()
             ;
         byte[] responseBytes = rpcResponseProto.toByteArray();
@@ -80,8 +84,7 @@ public class RpcRequestRouterImplTest {
         //
         target.setIgnite(mockIgnite);
         target.setRpcRequestRouterIgniteTask(mockRpcRequestRouterIgniteTask);
-        target.setTenantIDGrpcServerInterceptor(mockTenantIDGrpcServerInterceptor);
-        CompletableFuture<RpcResponseProto> completableFuture = target.routeRequest(testRequest);
+        CompletableFuture<GatewayRpcResponseProto> completableFuture = target.routeRequest(testRequest);
 
         // Verify listen() call and execute the completion function
         ArgumentCaptor<IgniteInClosure> runnableArgumentCaptor = ArgumentCaptor.forClass(IgniteInClosure.class);
@@ -94,8 +97,8 @@ public class RpcRequestRouterImplTest {
         //
         // Verify the Results
         //
-        RpcResponseProto result = completableFuture.getNow(null);
-        assertEquals("x-test-response-location-x", result.getLocation());
+        GatewayRpcResponseProto result = completableFuture.getNow(null);
+        assertEquals("x-test-response-location-x", result.getIdentity().getLocation());
     }
 
     @Test
@@ -103,9 +106,9 @@ public class RpcRequestRouterImplTest {
         //
         // Setup Test Data and Interactions
         //
-        RpcRequestProto testRequest =
-            RpcRequestProto.newBuilder()
-                .setLocation("x-test-location-x")
+        GatewayRpcRequestProto testRequest =
+            GatewayRpcRequestProto.newBuilder()
+                .setIdentity(MinionIdentity.newBuilder().setLocation("x-test-location-x"))
                 .setRpcId("x-rpc-id-x")
                 .build()
             ;
@@ -121,8 +124,7 @@ public class RpcRequestRouterImplTest {
         //
         target.setIgnite(mockIgnite);
         target.setRpcRequestRouterIgniteTask(mockRpcRequestRouterIgniteTask);
-        target.setTenantIDGrpcServerInterceptor(mockTenantIDGrpcServerInterceptor);
-        CompletableFuture<RpcResponseProto> completableFuture = target.routeRequest(testRequest);
+        CompletableFuture<GatewayRpcResponseProto> completableFuture = target.routeRequest(testRequest);
 
         // Verify listen() call and execute the completion function
         ArgumentCaptor<IgniteInClosure> runnableArgumentCaptor = ArgumentCaptor.forClass(IgniteInClosure.class);
@@ -136,7 +138,7 @@ public class RpcRequestRouterImplTest {
         // Verify the Results
         //
         try {
-            RpcResponseProto result = completableFuture.getNow(null);
+            GatewayRpcResponseProto result = completableFuture.getNow(null);
             fail("missing expected exception");
         } catch (Exception exc) {
             assertSame(testException, exc.getCause());
@@ -148,9 +150,9 @@ public class RpcRequestRouterImplTest {
         //
         // Setup Test Data and Interactions
         //
-        RpcRequestProto testRequest =
-            RpcRequestProto.newBuilder()
-                .setLocation("x-test-location-x")
+        GatewayRpcRequestProto testRequest =
+            GatewayRpcRequestProto.newBuilder()
+                .setIdentity(MinionIdentity.newBuilder().setLocation("x-test-location-x"))
                 .setRpcId("x-rpc-id-x")
                 .build()
             ;
@@ -167,8 +169,7 @@ public class RpcRequestRouterImplTest {
         target.setLog(mockLogger);
         target.setIgnite(mockIgnite);
         target.setRpcRequestRouterIgniteTask(mockRpcRequestRouterIgniteTask);
-        target.setTenantIDGrpcServerInterceptor(mockTenantIDGrpcServerInterceptor);
-        CompletableFuture<RpcResponseProto> completableFuture = target.routeRequest(testRequest);
+        CompletableFuture<GatewayRpcResponseProto> completableFuture = target.routeRequest(testRequest);
 
         // Verify listen() call and execute the completion function
         ArgumentCaptor<IgniteInClosure> runnableArgumentCaptor = ArgumentCaptor.forClass(IgniteInClosure.class);
@@ -182,7 +183,7 @@ public class RpcRequestRouterImplTest {
         // Verify the Results
         //
         try {
-            RpcResponseProto result = completableFuture.getNow(null);
+            GatewayRpcResponseProto result = completableFuture.getNow(null);
             fail("missing expected exception");
         } catch (Exception exc) {
             Mockito.verify(mockLogger).error("failed to parse RPC response", exc.getCause());

@@ -28,10 +28,10 @@
 
 package org.opennms.miniongateway.grpc.server.flows;
 
-import com.google.protobuf.Message;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.header.Header;
 import org.apache.kafka.common.header.internals.RecordHeader;
+import org.opennms.horizon.flows.document.FlowDocumentLog;
 import org.opennms.horizon.shared.grpc.common.TenantIDGrpcServerInterceptor;
 import org.opennms.horizon.shared.ipc.sink.api.MessageConsumer;
 import org.opennms.horizon.shared.ipc.sink.api.SinkModule;
@@ -50,7 +50,7 @@ import java.util.List;
  * Forwarder of Flow messages - received via GRPC and forwarded to Kafka.
  */
 @Component
-public class FlowKafkaForwarder implements MessageConsumer<Message, Message> {
+public class FlowKafkaForwarder implements MessageConsumer<FlowDocumentLog, FlowDocumentLog> {
     public static final String TENANT_ID_HEADER_NAME = "tenant-id";
     public static final String DEFAULT_TASK_RESULTS_TOPIC = "flows";
 
@@ -66,12 +66,12 @@ public class FlowKafkaForwarder implements MessageConsumer<Message, Message> {
     private String kafkaTopic;
 
     @Override
-    public SinkModule<Message, Message> getModule() {
+    public SinkModule<FlowDocumentLog, FlowDocumentLog> getModule() {
         return new FlowSinkModule();
     }
 
     @Override
-    public void handleMessage(Message message) {
+    public void handleMessage(FlowDocumentLog message) {
         // Retrieve the Tenant ID from the TenantID GRPC Interceptor
         String tenantId = tenantIDGrpcInterceptor.readCurrentContextTenantId();
         logger.trace("Received flow; sending to Kafka: tenant-id: {}; kafka-topic={}; message={}", tenantId, kafkaTopic, message);

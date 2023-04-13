@@ -59,12 +59,12 @@ public class TaskSetCollectorSnmpResponseProcessor {
         this.tenantMetricsTracker = tenantMetricsTracker;
     }
 
-    public void processSnmpCollectorResponse(String tenantId, TaskResult taskResult) throws IOException {
+    public void processSnmpCollectorResponse(String tenantId, String location, TaskResult taskResult) throws IOException {
         var response = taskResult.getCollectorResponse();
         Any collectorMetric = response.getResult();
         Map<String, String> labels = new HashMap<>();
-        labels.put("location", taskResult.getLocation());
-        labels.put("system_id", taskResult.getSystemId());
+        labels.put("location", location);
+        labels.put("system_id", taskResult.getIdentity().getSystemId());
         labels.put("monitor", response.getMonitorType().name());
         labels.put("node_id", String.valueOf(response.getNodeId()));
         var snmpResponse = collectorMetric.unpack(SnmpResponseMetric.class);

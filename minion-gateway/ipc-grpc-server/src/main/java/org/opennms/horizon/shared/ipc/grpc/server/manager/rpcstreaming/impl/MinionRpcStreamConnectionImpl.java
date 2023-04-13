@@ -15,6 +15,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import org.opennms.cloud.grpc.minion.RpcRequestProto;
 import org.opennms.cloud.grpc.minion.RpcResponseProto;
+import org.opennms.horizon.shared.grpc.common.LocationServerInterceptor;
 import org.opennms.horizon.shared.grpc.common.TenantIDGrpcServerInterceptor;
 import org.opennms.horizon.shared.ipc.grpc.server.manager.MinionInfo;
 import org.opennms.horizon.shared.ipc.grpc.server.manager.MinionManager;
@@ -44,6 +45,7 @@ public class MinionRpcStreamConnectionImpl implements MinionRpcStreamConnection 
     private final ExecutorService responseHandlerExecutor;
     private final MinionManager minionManager;
     private final TenantIDGrpcServerInterceptor tenantIDGrpcServerInterceptor;
+    private final LocationServerInterceptor locationServerInterceptor;
 
     public MinionRpcStreamConnectionImpl(
             StreamObserver<RpcRequestProto> streamObserver,
@@ -53,7 +55,8 @@ public class MinionRpcStreamConnectionImpl implements MinionRpcStreamConnection 
             RpcRequestTracker rpcRequestTracker,
             ExecutorService responseHandlerExecutor,
             MinionManager minionManager,
-            TenantIDGrpcServerInterceptor tenantIDGrpcServerInterceptor
+            TenantIDGrpcServerInterceptor tenantIDGrpcServerInterceptor,
+            LocationServerInterceptor locationServerInterceptor
             ) {
 
         this.streamObserver = streamObserver;
@@ -64,6 +67,7 @@ public class MinionRpcStreamConnectionImpl implements MinionRpcStreamConnection 
         this.responseHandlerExecutor = responseHandlerExecutor;
         this.minionManager = minionManager;
         this.tenantIDGrpcServerInterceptor = tenantIDGrpcServerInterceptor;
+        this.locationServerInterceptor = locationServerInterceptor;
     }
 
     private boolean isMinionIdentityHeaders(RpcResponseProto rpcMessage) {
@@ -73,10 +77,10 @@ public class MinionRpcStreamConnectionImpl implements MinionRpcStreamConnection 
     @Override
     public void handleRpcStreamInboundMessage(RpcResponseProto message) {
         String tenantId = tenantIDGrpcServerInterceptor.readCurrentContextTenantId();
+        String location = locationServerInterceptor.readCurrentContextLocation();
 
         if (isMinionIdentityHeaders(message)) {
-            String location = message.getLocation();
-            String systemId = message.getSystemId();
+            String systemId = message.getIdentity().getSystemId();
 
             if (Strings.isNullOrEmpty(location) || Strings.isNullOrEmpty(systemId)) {
                 log.error("Invalid metadata received with location = {} , systemId = {}", location, systemId);
@@ -84,7 +88,7 @@ public class MinionRpcStreamConnectionImpl implements MinionRpcStreamConnection 
             }
 
             // Register the Minion
-            boolean added = rpcConnectionTracker.addConnection(tenantId, message.getLocation(), message.getSystemId(), streamObserver);
+            boolean added = rpcConnectionTracker.addConnection(tenantId, location, systemId, streamObserver);
 
             if (added) {
                 log.info("Added RPC handler for minion: minion-id={}; location={}; tenant-id={}", systemId, location, tenantId);

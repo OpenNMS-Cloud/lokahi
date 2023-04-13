@@ -62,17 +62,8 @@ service CloudService {
   rpc MinionToCloudMessages (stream MinionToCloudMessage) returns (google.protobuf.Empty) {}
 }
 
-/**
- * RpcRequestService
- *  Request/Response pattern between non-streaming services.
- */
-service RpcRequestService {
-  rpc request(minion.RpcRequestProto) returns (minion.RpcResponseProto) {}
-}
-
 message Identity {
   string system_id = 1;
-  string location = 2;
 }
 
 message MinionToCloudMessage {
@@ -93,49 +84,44 @@ message CloudToMinionMessage {
 message RpcRequestProto {
   string rpc_id = 1;
   google.protobuf.Any payload = 2;
-  string system_id = 3;
-  string location = 4;
-  string module_id = 5;
+  Identity identity = 3;
+  string module_id = 4;
   // absolute time elapsed since the epoch in msec.
-  uint64 expiration_time = 6;
-  map<string, google.protobuf.Any> metadata = 7;
+  uint64 expiration_time = 5;
+  map<string, google.protobuf.Any> metadata = 6;
 }
 
 message RpcResponseProto {
   string rpc_id = 1;
   google.protobuf.Any payload = 2;
-  string system_id = 3;
-  string location = 4;
-  string module_id = 5;
-  map<string, google.protobuf.Any> metadata = 6;
+  Identity identity = 3;
+  string module_id = 4;
+  map<string, google.protobuf.Any> metadata = 5;
 }
 
 message SinkMessage {
   string message_id = 1;
   bytes content = 2;
   // these should always be the same values for a given session
-  string system_id = 3;
-  string location = 4;
+  Identity identity = 3;
   // where are the messages coming from
-  string module_id = 5;
+  string module_id = 4;
   // tracing headers
-  map<string, google.protobuf.Any> metadata = 6;
+  map<string, google.protobuf.Any> metadata = 5;
 }
 
 message TwinRequestProto {
   string consumer_key = 1;
-  string system_id = 2;
-  string location = 3;
-  map<string, google.protobuf.Any> metadata = 4;
+  Identity identity = 2;
+  map<string, google.protobuf.Any> metadata = 3;
 }
 
 message TwinResponseProto {
   string consumer_key = 1;
   bytes twin_object = 2;
-  string system_id = 3;
-  string location = 4;
-  bool is_patch_object = 5;
-  string session_id = 6;
-  int32 version = 7;
-  map<string, google.protobuf.Any> metadata = 8;
+  Identity identity = 3;
+  bool is_patch_object = 4;
+  string session_id = 5;
+  int32 version = 6;
+  map<string, google.protobuf.Any> metadata = 7;
 }

@@ -37,10 +37,10 @@ import java.net.InetAddress;
 
 import org.opennms.horizon.minion.flows.parser.RecordEnrichment;
 import org.opennms.horizon.minion.flows.parser.ie.Value;
-import org.opennms.dataplatform.flows.document.Direction;
-import org.opennms.dataplatform.flows.document.FlowDocument;
-import org.opennms.dataplatform.flows.document.NetflowVersion;
-import org.opennms.dataplatform.flows.document.SamplingAlgorithm;
+import org.opennms.horizon.flows.document.Direction;
+import org.opennms.horizon.flows.document.FlowDocument;
+import org.opennms.horizon.flows.document.NetflowVersion;
+import org.opennms.horizon.flows.document.SamplingAlgorithm;
 
 import lombok.NoArgsConstructor;
 

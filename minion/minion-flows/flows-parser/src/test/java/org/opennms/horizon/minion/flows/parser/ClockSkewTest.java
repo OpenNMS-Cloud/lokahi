@@ -40,7 +40,7 @@ import org.opennms.horizon.minion.flows.parser.transport.MessageBuilder;
 import org.opennms.horizon.shared.ipc.rpc.IpcIdentity;
 import org.opennms.horizon.shared.ipc.sink.api.AsyncDispatcher;
 
-import org.opennms.dataplatform.flows.document.FlowDocument;
+import org.opennms.horizon.flows.document.FlowDocument;
 
 import com.codahale.metrics.MetricRegistry;
 
@@ -53,10 +53,6 @@ public class ClockSkewTest {
             return "myId";
         }
 
-        @Override
-        public String getLocation() {
-            return "myLocation";
-        }
     };
 
 

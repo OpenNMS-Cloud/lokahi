@@ -29,8 +29,8 @@
 package org.opennms.horizon.minion.flows.parser;
 
 import com.google.protobuf.InvalidProtocolBufferException;
-import org.opennms.dataplatform.flows.document.FlowDocument;
-import org.opennms.dataplatform.flows.document.FlowDocumentLog;
+import org.opennms.horizon.flows.document.FlowDocument;
+import org.opennms.horizon.flows.document.FlowDocumentLog;
 import org.opennms.horizon.shared.ipc.rpc.IpcIdentity;
 import org.opennms.horizon.shared.ipc.sink.api.AggregationPolicy;
 import org.opennms.horizon.shared.ipc.sink.api.AsyncPolicy;
@@ -110,7 +110,6 @@ public class FlowSinkModule implements SinkModule<FlowDocument, FlowDocumentLog>
             public FlowDocumentLog aggregate(FlowDocumentLog accumulator, FlowDocument newMessage) {
                 if (accumulator == null) {
                     accumulator = FlowDocumentLog.newBuilder()
-                        .setLocation(identity.getLocation())
                         .setSystemId(identity.getId())
                         .addMessage(newMessage).build();
                 } else {

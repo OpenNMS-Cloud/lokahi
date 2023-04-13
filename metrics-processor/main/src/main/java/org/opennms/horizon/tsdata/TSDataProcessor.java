@@ -30,11 +30,10 @@ package org.opennms.horizon.tsdata;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 import lombok.Setter;
 import org.apache.logging.log4j.util.Strings;
-import org.opennms.taskset.contract.TenantedTaskSetResults;
+import org.opennms.taskset.contract.TenantLocationSpecificTaskSetResults;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.messaging.handler.annotation.Payload;
@@ -64,14 +63,19 @@ public class TSDataProcessor {
     @KafkaListener(topics = "${kafka.topics}", concurrency = "1")
     public void consume(@Payload byte[] data) {
         try {
-            TenantedTaskSetResults results = TenantedTaskSetResults.parseFrom(data);
+            TenantLocationSpecificTaskSetResults results = TenantLocationSpecificTaskSetResults.parseFrom(data);
             String tenantId = results.getTenantId();
             if (Strings.isBlank(tenantId)) {
                 throw new RuntimeException("Missing tenant id");
             }
 
+            String location = results.getLocation();
+            if (Strings.isBlank(location)) {
+                throw new RuntimeException("Missing location");
+            }
+
             results.getResultsList().forEach(
-                result -> submitForExecutionOp.accept(() -> taskSetResultProcessor.processTaskResult(tenantId, result)));
+                result -> submitForExecutionOp.accept(() -> taskSetResultProcessor.processTaskResult(tenantId, location, result)));
         } catch (InvalidProtocolBufferException e) {
             log.error("Invalid data from kafka", e);
         }

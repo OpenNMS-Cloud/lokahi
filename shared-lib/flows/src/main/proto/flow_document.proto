@@ -2,8 +2,8 @@ syntax = "proto3";
 
 option go_package = "github.com/OpenNMS-Cloud/flows/api/flows/document";
 option java_multiple_files = true;
-package org.opennms.dataplatform.flows.document;
-
+option java_package = "org.opennms.horizon.flows.document";
+package org.opennms.horizon.flows.document;
 
 import "google/protobuf/wrappers.proto";
 
@@ -110,8 +110,9 @@ message FlowDocument {
     // Calculated during enrichment phase
     string application = 38;
     string host = 39;
-    // The user can specify where the node / minion is
-    string location = 40;
+
+    reserved 40;
+
     // Determined during enrichment phase from SrcAddress field
     Locality src_locality = 41;
     // Determined during enrichment phase from DstAddress field
@@ -126,7 +127,9 @@ message FlowDocument {
     uint64 clock_correction = 45;// Applied clock correction im milliseconds.
     google.protobuf.UInt32Value dscp = 46; // DSCP; upper 6 bits of TOS
     google.protobuf.UInt32Value ecn = 47; // ECN; lower 2 bits of TOS
-    string tenant_id = 48; // tenant id for multi-tenancy life
+
+    reserved 48;
+
     string exporter_address = 49; // Raw sending IP of the exporter
     google.protobuf.UInt32Value exporter_port = 50; // Raw sending port of the exporter
     string exporter_identifier = 52; // Protocol specific exporter identifier
@@ -137,7 +140,7 @@ message FlowDocument {
 }
 
 message FlowDocumentLog {
-  string location = 1;
+  reserved 1;
   string system_id = 2;
 
   repeated FlowDocument message = 5;

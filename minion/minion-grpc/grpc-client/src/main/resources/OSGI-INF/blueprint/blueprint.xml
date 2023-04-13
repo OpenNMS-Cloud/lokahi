@@ -33,13 +33,11 @@
         placeholder-prefix="$[" placeholder-suffix="]">
         <cm:default-properties>
             <cm:property name="id" value="UNKNOWN"/>
-            <cm:property name="location" value="Default"/>
         </cm:default-properties>
     </cm:property-placeholder>
 
     <bean id="ipcIdentity" class="org.opennms.horizon.minion.grpc.MinionIpcIdentity">
         <argument value="$[id]" />
-        <argument value="$[location]" />
     </bean>
 
     <reference id="configAdmin" interface="org.osgi.service.cm.ConfigurationAdmin"/>

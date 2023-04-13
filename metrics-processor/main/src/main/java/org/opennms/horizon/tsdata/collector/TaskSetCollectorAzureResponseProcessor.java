@@ -55,7 +55,7 @@ public class TaskSetCollectorAzureResponseProcessor {
         this.tenantMetricsTracker = tenantMetricsTracker;
     }
 
-    public void processAzureCollectorResponse(String tenantId, CollectorResponse response, String[] labelValues) throws InvalidProtocolBufferException {
+    public void processAzureCollectorResponse(String tenantId, String location, CollectorResponse response, String[] labelValues) throws InvalidProtocolBufferException {
         Any collectorMetric = response.getResult();
         var azureResponse = collectorMetric.unpack(AzureResponseMetric.class);
 

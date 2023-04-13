@@ -51,6 +51,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+import org.opennms.cloud.grpc.minion.Identity;
 import org.opennms.cloud.grpc.minion.TwinRequestProto;
 import org.opennms.cloud.grpc.minion.TwinResponseProto;
 import org.opennms.horizon.minion.ipc.twin.api.TwinSubscriber;
@@ -98,9 +99,10 @@ public abstract class AbstractTwinSubscriber implements TwinSubscriber {
 
     protected void accept(final TwinUpdate twinUpdate) {
         // Ignore update if not broadcast but foreign location
-        if (twinUpdate.getLocation() != null && !twinUpdate.getLocation().equals(this.identity.getLocation())) {
-            return;
-        }
+// TODO shall we keep this logic ?
+//        if (twinUpdate.getLocation() != null && !twinUpdate.getLocation().equals(this.identity.getLocation())) {
+//            return;
+//        }
 
         // Ignore empty response
         if (twinUpdate.getObject() == null || twinUpdate.getSessionId() == null) {
@@ -124,9 +126,6 @@ public abstract class AbstractTwinSubscriber implements TwinSubscriber {
         try {
             TwinResponseProto twinResponseProto = TwinResponseProto.parseFrom(responseBytes);
 
-            if (!Strings.isNullOrEmpty(twinResponseProto.getLocation())) {
-                twinUpdate.setLocation(twinResponseProto.getLocation());
-            }
             if(!Strings.isNullOrEmpty(twinResponseProto.getSessionId())) {
                 twinUpdate.setSessionId(twinResponseProto.getSessionId());
             }
@@ -145,10 +144,9 @@ public abstract class AbstractTwinSubscriber implements TwinSubscriber {
 
     protected TwinRequestProto mapTwinRequestToProto(TwinRequest twinRequest) {
         TwinRequestProto.Builder builder = TwinRequestProto.newBuilder();
-        builder.setConsumerKey(twinRequest.getKey())
-               .setLocation(getIdentity().getLocation())
-               .setSystemId(getIdentity().getId());
-        return builder.build();
+        return builder.setConsumerKey(twinRequest.getKey())
+            .setIdentity(Identity.newBuilder().setSystemId(getIdentity().getId()).build())
+            .build();
     }
 
     public void close() throws IOException {
@@ -254,7 +252,7 @@ public abstract class AbstractTwinSubscriber implements TwinSubscriber {
 
         private synchronized void request() {
             // Send a request
-            final var request = new TwinRequest(this.key, AbstractTwinSubscriber.this.identity.getLocation());
+            final var request = new TwinRequest(this.key);
             AbstractTwinSubscriber.this.sendRpcRequest(request);
             // Schedule a retry
             this.retry = AbstractTwinSubscriber.this.executorService.schedule(this::request, 5, TimeUnit.SECONDS);

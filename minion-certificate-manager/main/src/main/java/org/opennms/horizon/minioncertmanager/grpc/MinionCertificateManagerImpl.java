@@ -65,6 +65,8 @@ public class MinionCertificateManagerImpl extends MinionCertificateManagerGrpc.M
     private final File caCertFile;
     private final File caKeyFile;
 
+    private CommandExecutor commandExecutor = new CommandExecutor();
+
     @Autowired
     public MinionCertificateManagerImpl(@Value("${manager.mtls.certificate}") File certificate,
         @Value("${manager.mtls.privateKey}") File privateKey) throws IOException, InterruptedException {
@@ -82,7 +84,7 @@ public class MinionCertificateManagerImpl extends MinionCertificateManagerGrpc.M
 
             if (!caCertFile.exists() || !caKeyFile.exists()) {
                 LOG.debug("=== GENERATE CA CERT");
-                CommandExecutor.executeCommand(CA_CERT_COMMAND, caKeyFile.getAbsolutePath(), caCertFile.getAbsolutePath());
+                commandExecutor.executeCommand(CA_CERT_COMMAND, caKeyFile.getAbsolutePath(), caCertFile.getAbsolutePath());
             }
         }
 

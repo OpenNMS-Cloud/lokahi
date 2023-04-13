@@ -33,8 +33,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.opennms.dataplatform.flows.document.FlowDocument;
-import org.opennms.dataplatform.flows.document.FlowDocumentLog;
+import org.opennms.horizon.flows.document.TenantLocationSpecificFlowDocument;
+import org.opennms.horizon.flows.document.TenantLocationSpecificFlowDocumentLog;
 import org.opennms.horizon.flows.processing.Pipeline;
 import org.opennms.horizon.shared.constants.GrpcConstants;
 import org.opennms.horizon.tenantmetrics.TenantMetricsTracker;
@@ -64,19 +64,21 @@ public class FlowProcessorTest {
 
     @Test
     void testFlowsSampling() throws Exception {
-        FlowDocumentLog flows = FlowDocumentLog.newBuilder().addMessage(FlowDocument.newBuilder()
-            .setSrcAddress("127.0.0.1")
-            .setDstAddress("8.8.8.8")
-        ).addMessage(FlowDocument.newBuilder()
-            .setSrcAddress("192.168.0.1")
-            .setDstAddress("1.1.1.1")
-        ).build();
+        TenantLocationSpecificFlowDocumentLog flows =
+            TenantLocationSpecificFlowDocumentLog.newBuilder()
+                .setTenantId(TENANT_ID)
+                .addMessage(
+                    TenantLocationSpecificFlowDocument.newBuilder()
+                        .setSrcAddress("127.0.0.1")
+                        .setDstAddress("8.8.8.8")
+                ).addMessage(
+                    TenantLocationSpecificFlowDocument.newBuilder()
+                        .setSrcAddress("192.168.0.1")
+                        .setDstAddress("1.1.1.1")
+                ).build();
 
 
-        Map<String, Object> headers = new HashMap<>();
-        headers.put(GrpcConstants.TENANT_ID_KEY, TENANT_ID);
-
-        processor.consume(flows.toByteArray(), headers);
+        processor.consume(flows.toByteArray());
 
         verify(pipeline, timeout(5000).only()).process(flows.getMessageList(), TENANT_ID);
         verify(metricsTracker, timeout(5000).times(1)).addTenantFlowSampleCount(TENANT_ID, 2);

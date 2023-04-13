@@ -35,7 +35,7 @@
         </dependency>
         <dependency>
             <groupId>org.opennms.horizon.shared</groupId>
-            <artifactId>ipc-grpc-contract</artifactId>
+            <artifactId>minion-gateway</artifactId>
             <version>${project.version}</version>
         </dependency>
 

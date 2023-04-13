@@ -76,6 +76,11 @@
         </dependency>
         <dependency>
             <groupId>org.opennms.horizon.shared</groupId>
+            <artifactId>minion-gateway</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.opennms.horizon.shared</groupId>
             <artifactId>inventory</artifactId>
             <version>${project.version}</version>
         </dependency>

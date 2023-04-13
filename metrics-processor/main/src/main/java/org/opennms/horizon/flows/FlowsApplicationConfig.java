@@ -46,8 +46,10 @@ import org.opennms.horizon.flows.grpc.client.InventoryClient;
 import org.opennms.horizon.flows.integration.FlowRepository;
 import org.opennms.horizon.flows.integration.FlowRepositoryImpl;
 import org.opennms.horizon.flows.processing.DocumentEnricherImpl;
+import org.opennms.horizon.flows.processing.FlowDocumentClassificationRequestMapper;
 import org.opennms.horizon.flows.processing.Pipeline;
 import org.opennms.horizon.flows.processing.PipelineImpl;
+import org.opennms.horizon.flows.processing.impl.FlowDocumentClassificationRequestMapperImpl;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -153,11 +155,16 @@ public class FlowsApplicationConfig {
     }
 
     @Bean
-    public DocumentEnricherImpl createDocumentEnricher(final MetricRegistry metricRegistry,
-                                                       final InventoryClient inventoryClient,
-                                                       final ClassificationEngine classificationEngine) {
-        return new DocumentEnricherImpl(metricRegistry, inventoryClient, classificationEngine,
-            clockSkewCorrectionThreshold);
+    public DocumentEnricherImpl createDocumentEnricher(InventoryClient inventoryClient,
+                                                       ClassificationEngine classificationEngine,
+                                                       FlowDocumentClassificationRequestMapper flowDocumentClassificationRequestMapper
+    ) {
+        return new DocumentEnricherImpl(inventoryClient, classificationEngine, flowDocumentClassificationRequestMapper, clockSkewCorrectionThreshold);
+    }
+
+    @Bean
+    public FlowDocumentClassificationRequestMapper flowDocumentClassificationRequestMapper() {
+        return new FlowDocumentClassificationRequestMapperImpl();
     }
 
     @Bean

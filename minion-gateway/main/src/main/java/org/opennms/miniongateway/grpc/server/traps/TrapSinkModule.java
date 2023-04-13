@@ -29,14 +29,13 @@
 package org.opennms.miniongateway.grpc.server.traps;
 
 import com.google.protobuf.InvalidProtocolBufferException;
-import com.google.protobuf.Message;
 import org.opennms.horizon.grpc.traps.contract.TrapLogDTO;
 import org.opennms.horizon.shared.ipc.sink.aggregation.IdentityAggregationPolicy;
 import org.opennms.horizon.shared.ipc.sink.api.AggregationPolicy;
 import org.opennms.horizon.shared.ipc.sink.api.AsyncPolicy;
 import org.opennms.horizon.shared.ipc.sink.api.SinkModule;
 
-public class TrapSinkModule implements SinkModule<Message, Message> {
+public class TrapSinkModule implements SinkModule<TrapLogDTO, TrapLogDTO> {
     @Override
     public String getId() {
         return "Trap";
@@ -48,12 +47,12 @@ public class TrapSinkModule implements SinkModule<Message, Message> {
     }
 
     @Override
-    public byte[] marshal(Message message) {
+    public byte[] marshal(TrapLogDTO message) {
         return message.toByteArray();
     }
 
     @Override
-    public Message unmarshal(byte[] message) {
+    public TrapLogDTO unmarshal(byte[] message) {
         try {
             return TrapLogDTO.parseFrom(message);
         } catch (InvalidProtocolBufferException e) {
@@ -62,12 +61,12 @@ public class TrapSinkModule implements SinkModule<Message, Message> {
     }
 
     @Override
-    public byte[] marshalSingleMessage(Message message) {
+    public byte[] marshalSingleMessage(TrapLogDTO message) {
         return message.toByteArray();
     }
 
     @Override
-    public Message unmarshalSingleMessage(byte[] message) {
+    public TrapLogDTO unmarshalSingleMessage(byte[] message) {
         try {
             return TrapLogDTO.parseFrom(message);
         } catch (InvalidProtocolBufferException e) {
@@ -76,7 +75,7 @@ public class TrapSinkModule implements SinkModule<Message, Message> {
     }
 
     @Override
-    public AggregationPolicy<Message, Message, ?> getAggregationPolicy() {
+    public AggregationPolicy<TrapLogDTO, TrapLogDTO, ?> getAggregationPolicy() {
         // Aggregation should be performed on Minion not on gateway
         return new IdentityAggregationPolicy<>();
     }

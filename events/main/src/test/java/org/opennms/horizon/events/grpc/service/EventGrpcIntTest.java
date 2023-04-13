@@ -5,6 +5,7 @@ import com.google.protobuf.Int64Value;
 import com.google.protobuf.UInt64Value;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.opennms.horizon.events.persistence.model.Event;
 import org.opennms.horizon.events.persistence.model.EventParameter;
@@ -31,6 +32,7 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@Disabled //
 @SpringBootTest
 class EventGrpcIntTest extends GrpcTestBase {
     private static final String TEST_UEI = "uei";

@@ -119,6 +119,7 @@ public class ClassificationRequest {
         this.exporterAddress = exporterAddress;
     }
 
+    // TODO: no logic in getters and setters
     public boolean isClassifiable() {
         return this.srcPort != null && this.dstPort != null && this.protocol != null;
     }

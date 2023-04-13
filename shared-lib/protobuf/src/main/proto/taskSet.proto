@@ -81,14 +81,17 @@ message TaskSet {
 
 message TaskResult {
   string id = 1;
-  string location = 2;
-  string systemId = 3;
+  Identity identity = 2; // TODO: move up to TaskSetResults - there's no need for every result to have this value separately
 
   oneof result {
-    ScannerResponse scanner_response = 4;
-    MonitorResponse monitor_response = 5;
-    CollectorResponse collector_response = 7;
+    ScannerResponse scanner_response = 3;
+    MonitorResponse monitor_response = 4;
+    CollectorResponse collector_response = 5;
   }
+}
+
+message Identity {
+  string systemId = 1;
 }
 
 message TaskSetResults {

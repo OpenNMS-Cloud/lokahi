@@ -5,6 +5,7 @@ Feature: Active Discovery
     Given [ICMP Discovery] Kafka Bootstrap URL in system property "kafka.bootstrap-servers"
     Given MOCK Minion Gateway Base URL in system property "mock-minion-gateway.rest-url"
     Given Grpc TenantId "tenant-icmp-discovery"
+    Given Grpc location "test-location"
     Given [ICMP Discovery] Create Grpc Connection for Inventory
 
 

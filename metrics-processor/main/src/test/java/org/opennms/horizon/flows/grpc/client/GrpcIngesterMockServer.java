@@ -30,9 +30,6 @@ package org.opennms.horizon.flows.grpc.client;
 
 import static org.opennms.horizon.flows.grpc.client.IngestorClientTest.getFlowDocumentsTenantIds;
 
-import java.util.stream.Collectors;
-
-import org.opennms.dataplatform.flows.document.FlowDocument;
 import org.opennms.dataplatform.flows.ingester.v1.IngesterGrpc;
 import org.opennms.dataplatform.flows.ingester.v1.StoreFlowDocumentsRequest;
 import org.opennms.dataplatform.flows.ingester.v1.StoreFlowDocumentsResponse;

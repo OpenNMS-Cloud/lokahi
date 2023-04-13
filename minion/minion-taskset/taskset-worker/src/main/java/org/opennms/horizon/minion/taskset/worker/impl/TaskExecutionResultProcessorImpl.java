@@ -8,6 +8,7 @@ import org.opennms.horizon.minion.taskset.worker.TaskExecutionResultProcessor;
 import org.opennms.horizon.shared.ipc.rpc.IpcIdentity;
 import org.opennms.horizon.shared.ipc.sink.api.SyncDispatcher;
 import org.opennms.taskset.contract.CollectorResponse;
+import org.opennms.taskset.contract.Identity;
 import org.opennms.taskset.contract.MonitorResponse;
 import org.opennms.taskset.contract.ScannerResponse;
 import org.opennms.taskset.contract.TaskResult;
@@ -83,8 +84,7 @@ public class TaskExecutionResultProcessorImpl implements TaskExecutionResultProc
             TaskResult.newBuilder()
                 .setId(id)
                 .setScannerResponse(scannerResponse)
-                .setLocation(identity.getLocation())
-                .setSystemId(identity.getId())
+                .setIdentity(Identity.newBuilder().setSystemId(identity.getId()))
                 .build();
 
         TaskSetResults taskSetResults =
@@ -102,8 +102,7 @@ public class TaskExecutionResultProcessorImpl implements TaskExecutionResultProc
             TaskResult.newBuilder()
                 .setId(id)
                 .setMonitorResponse(monitorResponse)
-                .setLocation(identity.getLocation())
-                .setSystemId(identity.getId())
+                .setIdentity(Identity.newBuilder().setSystemId(identity.getId()))
                 .build();
 
         TaskSetResults taskSetResults =
@@ -146,8 +145,7 @@ public class TaskExecutionResultProcessorImpl implements TaskExecutionResultProc
             TaskResult.newBuilder()
                 .setId(id)
                 .setCollectorResponse(collectorResponse)
-                .setLocation(identity.getLocation())
-                .setSystemId(identity.getId())
+                .setIdentity(Identity.newBuilder().setSystemId(identity.getId()))
                 .build();
 
         return TaskSetResults.newBuilder()

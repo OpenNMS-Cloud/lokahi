@@ -29,16 +29,17 @@
 
 package org.opennms.horizon.shared.protobuf.mapper.impl;
 
-import org.opennms.horizon.shared.protobuf.mapper.TenantedTaskSetResultsMapper;
+import org.opennms.horizon.shared.protobuf.mapper.TenantLocationSpecificTaskSetResultsMapper;
 import org.opennms.taskset.contract.TaskSetResults;
-import org.opennms.taskset.contract.TenantedTaskSetResults;
+import org.opennms.taskset.contract.TenantLocationSpecificTaskSetResults;
 
-public class TenantedTaskSetResultsMapperImpl implements TenantedTaskSetResultsMapper {
+public class TenantLocationSpecificTaskSetResultsMapperImpl implements TenantLocationSpecificTaskSetResultsMapper {
     @Override
-    public TenantedTaskSetResults mapBareToTenanted(String tenantId, TaskSetResults bare) {
-        TenantedTaskSetResults result =
-            TenantedTaskSetResults.newBuilder()
+    public TenantLocationSpecificTaskSetResults mapBareToTenanted(String tenantId, String location, TaskSetResults bare) {
+        TenantLocationSpecificTaskSetResults result =
+            TenantLocationSpecificTaskSetResults.newBuilder()
                 .setTenantId(tenantId)
+                .setLocation(location)
                 .addAllResults(bare.getResultsList())
                 .build();
 
@@ -46,7 +47,7 @@ public class TenantedTaskSetResultsMapperImpl implements TenantedTaskSetResultsM
     }
 
     @Override
-    public TaskSetResults mapTenantedToBare(TenantedTaskSetResults tenanted) {
+    public TaskSetResults mapTenantedToBare(TenantLocationSpecificTaskSetResults tenanted) {
         TaskSetResults result =
             TaskSetResults.newBuilder()
                 .addAllResults(tenanted.getResultsList())

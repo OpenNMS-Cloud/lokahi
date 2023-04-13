@@ -54,8 +54,7 @@ import org.opennms.taskset.contract.DiscoveryScanResult;
 import org.opennms.taskset.contract.PingResponse;
 import org.opennms.taskset.contract.ScannerResponse;
 import org.opennms.taskset.contract.TaskResult;
-import org.opennms.taskset.contract.TaskSetResults;
-import org.opennms.taskset.contract.TenantedTaskSetResults;
+import org.opennms.taskset.contract.TenantLocationSpecificTaskSetResults;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -93,6 +92,11 @@ public class IcmpDiscoveryStepDefinitions {
     @Given("[ICMP Discovery] Grpc TenantId {string}")
     public void icmpDiscoveryGrpcTenantId(String tenantId) {
         backgroundHelper.grpcTenantId(tenantId);
+    }
+
+    @Given("[ICMP Discovery] Grpc location {string}")
+    public void grpcLocation(String location) {
+        backgroundHelper.grpcLocation(location);
     }
 
     @Given("[ICMP Discovery] Create Grpc Connection for Inventory")
@@ -164,15 +168,16 @@ public class IcmpDiscoveryStepDefinitions {
         try (KafkaProducer<String, byte[]> kafkaProducer = new KafkaProducer<>(producerConfig)) {
             var scanResult = DiscoveryScanResult.newBuilder().setActiveDiscoveryId(activeDiscoveryId)
                 .addPingResponse(PingResponse.newBuilder().setIpAddress(ipAddress).build()).build();
+
             TaskResult taskResult =
                 TaskResult.newBuilder()
-                    .setLocation(icmpDiscovery.getLocation())
                     .setScannerResponse(ScannerResponse.newBuilder().setResult(Any.pack(scanResult)).build())
                     .build();
 
-            TenantedTaskSetResults taskSetResults =
-                TenantedTaskSetResults.newBuilder()
+            TenantLocationSpecificTaskSetResults taskSetResults =
+                TenantLocationSpecificTaskSetResults.newBuilder()
                     .setTenantId(backgroundHelper.getTenantId())
+                    .setLocation(icmpDiscovery.getLocation())
                     .addResults(taskResult)
                     .build();
             var producerRecord = new ProducerRecord<String, byte[]>(topic, taskSetResults.toByteArray());

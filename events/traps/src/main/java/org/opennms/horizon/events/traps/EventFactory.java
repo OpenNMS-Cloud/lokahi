@@ -46,6 +46,8 @@ import org.opennms.horizon.shared.utils.InetAddressUtils;
 import org.opennms.horizon.snmp.api.SnmpResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.net.InetAddress;
 import java.util.ArrayList;
@@ -56,6 +58,7 @@ import java.util.Optional;
 import static org.opennms.horizon.events.EventConstants.OID_SNMP_IFINDEX_STRING;
 import static org.opennms.horizon.shared.utils.InetAddressUtils.str;
 
+@Component
 public class EventFactory {
 
     private static final Logger LOG = LoggerFactory.getLogger(EventFactory.class);
@@ -66,7 +69,11 @@ public class EventFactory {
     private final SnmpHelper snmpHelper;
     private final InventoryClient inventoryClient;
 
-    public EventFactory(EventConfDao eventConfDao, SnmpHelper snmpHelper, InventoryClient inventoryClient) {
+    public EventFactory(
+        @Autowired EventConfDao eventConfDao,
+        @Autowired SnmpHelper snmpHelper,
+        @Autowired InventoryClient inventoryClient) {
+
         this.eventConfDao = eventConfDao;
         this.snmpHelper = snmpHelper;
         this.inventoryClient = inventoryClient;

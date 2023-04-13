@@ -46,7 +46,7 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import org.opennms.dataplatform.flows.document.FlowDocument;
+import org.opennms.horizon.flows.document.FlowDocument;
 import org.opennms.horizon.minion.flows.listeners.Parser;
 import org.opennms.horizon.minion.flows.parser.factory.DnsResolver;
 import org.opennms.horizon.minion.flows.parser.ie.RecordProvider;
@@ -308,7 +308,6 @@ public abstract class ParserBase implements Parser {
                             throw new RuntimeException(e);
                         }
 
-                        flowDocument.setLocation(this.identity.getLocation());
                         flowDocument.setExporterAddress(InetAddressUtils.str(remoteAddress.getAddress()));
                         flowDocument.setExporterPort(UInt32Value.of(remoteAddress.getPort()));
 

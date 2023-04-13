@@ -35,7 +35,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
-import org.opennms.dataplatform.flows.document.FlowDocument;
+import org.opennms.horizon.flows.document.FlowDocument;
 import org.opennms.horizon.minion.flows.listeners.TcpParser;
 import org.opennms.horizon.minion.flows.parser.factory.DnsResolver;
 import org.opennms.horizon.minion.flows.parser.ipfix.proto.Header;

@@ -22,9 +22,9 @@ import org.apache.ignite.resources.IgniteInstanceResource;
 import org.apache.ignite.resources.LoggerResource;
 import org.apache.ignite.resources.SpringResource;
 import org.jetbrains.annotations.NotNull;
-import org.opennms.cloud.grpc.minion.RpcRequestProto;
-import org.opennms.cloud.grpc.minion.RpcResponseProto;
-import org.opennms.horizon.shared.grpc.common.TenantIDGrpcServerInterceptor;
+import org.opennms.cloud.grpc.minion_gateway.GatewayRpcRequestProto;
+import org.opennms.cloud.grpc.minion_gateway.GatewayRpcResponseProto;
+import org.opennms.cloud.grpc.minion_gateway.MinionIdentity;
 import org.opennms.miniongateway.detector.server.IgniteRpcRequestDispatcher;
 import org.opennms.miniongateway.router.MinionLookupService;
 import org.slf4j.Logger;
@@ -41,9 +41,6 @@ public class RpcRequestRouterIgniteTask implements ComputeTask<RouterTaskData, b
     @SpringResource(resourceName = MinionLookupService.IGNITE_SERVICE_NAME)
     private transient MinionLookupService minionLookupService;
 
-    @SpringResource(resourceClass = TenantIDGrpcServerInterceptor.class)
-    private transient TenantIDGrpcServerInterceptor tenantIDGrpcServerInterceptor;
-
     @IgniteInstanceResource
     private transient Ignite ignite;
 
@@ -56,11 +53,12 @@ public class RpcRequestRouterIgniteTask implements ComputeTask<RouterTaskData, b
         try {
             String tenantId = arg.getTenantId();
 
-            RpcRequestProto request = RpcRequestProto.parseFrom(arg.getRequestPayload());
-            if (!request.getSystemId().isBlank()) {
-                gatewayNodeId = minionLookupService.findGatewayNodeWithId(tenantId, request.getSystemId());
+            GatewayRpcRequestProto request = GatewayRpcRequestProto.parseFrom(arg.getRequestPayload());
+            MinionIdentity target = request.getIdentity();
+            if (!target.getSystemId().isBlank()) {
+                gatewayNodeId = minionLookupService.findGatewayNodeWithId(tenantId, target.getSystemId());
             } else {
-                gatewayNodeId = shuffle(minionLookupService.findGatewayNodeWithLocation(tenantId, request.getLocation()));
+                gatewayNodeId = shuffle(minionLookupService.findGatewayNodeWithLocation(tenantId, target.getLocation()));
             }
 
             ClusterNode routingNode;
@@ -68,7 +66,7 @@ public class RpcRequestRouterIgniteTask implements ComputeTask<RouterTaskData, b
                 // throw new IgniteException("Could not find active connection for location=" + request.getLocation() + " and systemId=" + request.getSystemId());
                 map.put(new FailedJob(request), ignite.cluster().localNode());
             } else {
-                map.put(new RoutingJob(tenantId, request), routingNode);
+                map.put(new RoutingJob(request), routingNode);
             }
         } catch (InvalidProtocolBufferException e) {
             throw new RuntimeException(e);
@@ -125,8 +123,7 @@ public class RpcRequestRouterIgniteTask implements ComputeTask<RouterTaskData, b
 
     public static class RoutingJob implements ComputeJob {
 
-        private String tenantId;
-        private final RpcRequestProto request;
+        private final GatewayRpcRequestProto request;
 
         @LoggerResource
         private transient IgniteLogger logger;
@@ -134,10 +131,9 @@ public class RpcRequestRouterIgniteTask implements ComputeTask<RouterTaskData, b
         @SpringResource(resourceClass = IgniteRpcRequestDispatcher.class)
         private transient IgniteRpcRequestDispatcher requestDispatcher;
 
-        private CompletableFuture<RpcResponseProto> responseFuture;
+        private CompletableFuture<GatewayRpcResponseProto> responseFuture;
 
-        public RoutingJob(String tenantId, RpcRequestProto request) {
-            this.tenantId = tenantId;
+        public RoutingJob(GatewayRpcRequestProto request) {
             this.request = request;
         }
 
@@ -156,7 +152,7 @@ public class RpcRequestRouterIgniteTask implements ComputeTask<RouterTaskData, b
                 } else if (logger.isDebugEnabled()) {
                     logger.debug("Dispatching rpc request " + request.getRpcId());
                 }
-                responseFuture = requestDispatcher.execute(tenantId, request).whenComplete((response, error) -> {
+                responseFuture = requestDispatcher.execute(request).whenComplete((response, error) -> {
                     if (error != null) {
                         logger.warning("Failure found while execution of " + request.getRpcId() + " " + error);
                         return;
@@ -180,9 +176,9 @@ public class RpcRequestRouterIgniteTask implements ComputeTask<RouterTaskData, b
 
     public static class FailedJob implements ComputeJob {
 
-        private RpcRequestProto request;
+        private GatewayRpcRequestProto request;
 
-        public FailedJob(RpcRequestProto request) {
+        public FailedJob(GatewayRpcRequestProto request) {
             this.request = request;
         }
 
@@ -193,7 +189,8 @@ public class RpcRequestRouterIgniteTask implements ComputeTask<RouterTaskData, b
 
         @Override
         public Object execute() throws IgniteException {
-            throw new IgniteException("Could not find active connection for location=" + request.getLocation() + " and systemId=" + request.getSystemId());
+            MinionIdentity identity = request.getIdentity();
+            throw new IgniteException("Could not find active connection for tenant=" + identity.getTenant() + ", location=" + identity.getLocation() + " and systemId=" + identity.getSystemId());
         }
     }
 }

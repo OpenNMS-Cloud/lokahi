@@ -43,9 +43,13 @@ import org.junit.Rule;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.opennms.cloud.grpc.minion.Identity;
 import org.opennms.cloud.grpc.minion.RpcRequestProto;
-import org.opennms.cloud.grpc.minion.RpcRequestServiceGrpc;
 import org.opennms.cloud.grpc.minion.RpcResponseProto;
+import org.opennms.cloud.grpc.minion_gateway.GatewayRpcRequestProto;
+import org.opennms.cloud.grpc.minion_gateway.GatewayRpcResponseProto;
+import org.opennms.cloud.grpc.minion_gateway.MinionIdentity;
+import org.opennms.cloud.grpc.minion_gateway.RpcRequestServiceGrpc;
 import org.opennms.horizon.grpc.echo.contract.EchoRequest;
 import org.opennms.horizon.grpc.echo.contract.EchoResponse;
 import org.opennms.horizon.shared.constants.GrpcConstants;
@@ -64,21 +68,25 @@ class MinionRpcClientTest {
     public final GrpcCleanupRule grpcCleanup = new GrpcCleanupRule();
     private MinionRpcClient client;
     private RpcRequestServiceGrpc.RpcRequestServiceImplBase testRequestService;
-    private List<Pair<RpcRequestProto, StreamObserver<RpcResponseProto>>> receivedRequests;
+    private List<Pair<GatewayRpcRequestProto, StreamObserver<GatewayRpcResponseProto>>> receivedRequests;
 
     @BeforeEach
     public void setUp() throws IOException {
         testRequestService = new RpcRequestServiceGrpc.RpcRequestServiceImplBase() {
             @Override
-            public void request(RpcRequestProto request, StreamObserver<RpcResponseProto> responseObserver) {
+            public void request(GatewayRpcRequestProto request, StreamObserver<GatewayRpcResponseProto> responseObserver) {
+            //     super.request(request, responseObserver);
+            // }
+            //
+            // @Override
+            // public void request(RpcRequestProto request, StreamObserver<RpcResponseProto> responseObserver) {
                 receivedRequests.add(Pair.of(request, responseObserver));
                 try {
                     EchoRequest echoRequest = request.getPayload().unpack(EchoRequest.class);
-                    responseObserver.onNext(RpcResponseProto.newBuilder()
-                        .setLocation(request.getLocation())
+                    responseObserver.onNext(GatewayRpcResponseProto.newBuilder()
+                        .setIdentity(request.getIdentity())
                         .setRpcId(request.getRpcId())
                         .setModuleId(request.getModuleId())
-                        .setSystemId(request.getSystemId())
                         .setPayload(Any.pack(EchoResponse.newBuilder().setTime(echoRequest.getTime()).build()))
                         .build()
                     );
@@ -108,17 +116,26 @@ class MinionRpcClientTest {
     @Test
     void testSentRpcRequest() throws Exception {
         EchoRequest echoRequest = EchoRequest.newBuilder().setTime(System.currentTimeMillis()).build();
-        RpcRequestProto request = RpcRequestProto.newBuilder()
-            .setSystemId("test-system")
-            .setLocation("test-location")
+
+        MinionIdentity minionIdentity =
+            MinionIdentity.newBuilder()
+                .setTenant(PRIMARY_TENANT_ID)
+                .setLocation("test-location")
+                .setSystemId("test-system")
+                .build();
+
+        GatewayRpcRequestProto request = GatewayRpcRequestProto.newBuilder()
+            .setIdentity(minionIdentity)
             .setModuleId("test-rpc")
             .setRpcId(UUID.randomUUID().toString())
             .setPayload(Any.pack(echoRequest))
             .build();
-        RpcResponseProto response = client.sendRpcRequest(PRIMARY_TENANT_ID, request).get();
+
+        GatewayRpcResponseProto response = client.sendRpcRequest(PRIMARY_TENANT_ID, request).get();
         assertEquals(1, receivedRequests.size());
-        assertThat(response.getSystemId()).isEqualTo(request.getSystemId());
-        assertThat(response.getLocation()).isEqualTo(request.getLocation());
+        assertThat(response.getIdentity().getTenant()).isEqualTo(request.getIdentity().getTenant());
+        assertThat(response.getIdentity().getSystemId()).isEqualTo(request.getIdentity().getSystemId());
+        assertThat(response.getIdentity().getLocation()).isEqualTo(request.getIdentity().getLocation());
         assertThat(response.getModuleId()).isEqualTo(request.getModuleId());
         assertThat(response.getRpcId()).isEqualTo(request.getRpcId());
         EchoResponse echoResponse = response.getPayload().unpack(EchoResponse.class);

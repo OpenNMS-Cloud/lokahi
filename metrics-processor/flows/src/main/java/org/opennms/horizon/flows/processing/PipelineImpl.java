@@ -33,7 +33,7 @@ import com.codahale.metrics.Histogram;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.google.common.collect.Maps;
-import org.opennms.dataplatform.flows.document.FlowDocument;
+import org.opennms.horizon.flows.document.TenantLocationSpecificFlowDocument;
 import org.opennms.horizon.flows.integration.FlowException;
 import org.opennms.horizon.flows.integration.FlowRepository;
 import org.slf4j.Logger;
@@ -80,7 +80,7 @@ public class PipelineImpl implements Pipeline {
         this.logEnrichementTimer = metricRegistry.timer("logEnrichment");
     }
 
-    public void process(final List<org.opennms.dataplatform.flows.document.FlowDocument> flows, String tenantId) throws FlowException {
+    public void process(List<TenantLocationSpecificFlowDocument> flows, String tenantId) throws FlowException {
         // Track the number of flows per call
         this.flowsPerLog.update(flows.size());
 
@@ -93,9 +93,9 @@ public class PipelineImpl implements Pipeline {
 
         // Enrich with model data
         LOG.debug("Enriching {} flow documents.", flows.size());
-        final List<FlowDocument> enrichedFlows;
-        try (final Timer.Context ctx = this.logEnrichementTimer.time()) {
-            enrichedFlows = documentEnricher.enrich(flows, tenantId);
+        List<TenantLocationSpecificFlowDocument> enrichedFlows;
+        try (Timer.Context ctx = this.logEnrichementTimer.time()) {
+            enrichedFlows = documentEnricher.enrich(flows);
         } catch (Exception e) {
             throw new FlowException("Failed to enrich one or more flows.", e);
         }
@@ -140,7 +140,7 @@ public class PipelineImpl implements Pipeline {
             this.logTimer = Objects.requireNonNull(logTimer);
         }
 
-        public void persist(final Collection<FlowDocument> flows) throws FlowException {
+        public void persist(final Collection<TenantLocationSpecificFlowDocument> flows) throws FlowException {
             try (final var ctx = this.logTimer.time()) {
                 this.repository.persist(flows);
             }

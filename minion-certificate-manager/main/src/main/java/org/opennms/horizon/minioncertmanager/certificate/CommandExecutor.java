@@ -46,19 +46,20 @@ public class CommandExecutor {
     private static final int TIMEOUT = 10000;
     public static final int STD_TIMEOUT = 30000;
 
-    private CommandExecutor() {
-        throw new IllegalStateException("Utility class");
-    }
+    // CLASS METHODS MAKE UNIT TESTING VERY HARD - not worth it
+    // private CommandExecutor() {
+    //     throw new IllegalStateException("Utility class");
+    // }
 
-    public static void executeCommand(String command, String ... params) throws IOException, InterruptedException {
+    public void executeCommand(String command, String ... params) throws IOException, InterruptedException {
         executeCommand(command, null, params);
     }
 
-    public static void executeCommand(String command, File directory, String ... params) throws IOException, InterruptedException {
+    public void executeCommand(String command, File directory, String ... params) throws IOException, InterruptedException {
         executeCommand(command, directory, Map.of(), params);
     }
 
-    public static void executeCommand(String command, File directory, Map<String, String> env, String ... params) throws IOException, InterruptedException {
+    public void executeCommand(String command, File directory, Map<String, String> env, String ... params) throws IOException, InterruptedException {
         String commandToExecute = String.format(command, params);
         ProcessBuilder processBuilder = new ProcessBuilder("bash", "-c", commandToExecute).directory(directory);
         processBuilder.environment().putAll(env);
@@ -93,7 +94,7 @@ public class CommandExecutor {
         }
     }
 
-    private static CompletableFuture<Void> logStderrFuture(Process finalProcess) {
+    private CompletableFuture<Void> logStderrFuture(Process finalProcess) {
         return CompletableFuture.runAsync(() -> {
             try (BufferedReader stderrReader = new BufferedReader(new InputStreamReader(finalProcess.getErrorStream()))) {
                 String stderrLine;
@@ -106,7 +107,7 @@ public class CommandExecutor {
         });
     }
 
-    private static CompletableFuture<Void> logStdoutFuture(Process finalProcess) {
+    private CompletableFuture<Void> logStdoutFuture(Process finalProcess) {
         return CompletableFuture.runAsync(() -> {
             try (BufferedReader stdoutReader = new BufferedReader(new InputStreamReader(finalProcess.getInputStream()))) {
                 String stdoutLine;
@@ -119,7 +120,7 @@ public class CommandExecutor {
         });
     }
 
-    private static void waitForStdsToComplete(CompletableFuture<Void> stdoutFuture, CompletableFuture<Void> stderrFuture) {
+    private void waitForStdsToComplete(CompletableFuture<Void> stdoutFuture, CompletableFuture<Void> stderrFuture) {
         // Wait for both CompletableFutures to complete with a timeout
         CompletableFuture<Void> allOfFuture = CompletableFuture.allOf(stdoutFuture, stderrFuture);
         try {

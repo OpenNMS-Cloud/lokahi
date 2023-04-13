@@ -78,6 +78,11 @@ public class AzureDiscoveryStepDefinitions {
         backgroundHelper.grpcTenantId(tenantId);
     }
 
+    @Given("[Azure] Grpc location {string}")
+    public void grpcLocation(String location) {
+        backgroundHelper.grpcLocation(location);
+    }
+
     @Given("[Azure] Create Grpc Connection for Inventory")
     public void createGrpcConnectionForInventory() {
         backgroundHelper.createGrpcConnectionForInventory();

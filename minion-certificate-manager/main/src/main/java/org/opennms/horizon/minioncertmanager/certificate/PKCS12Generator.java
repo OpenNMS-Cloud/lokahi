@@ -29,6 +29,8 @@
 package org.opennms.horizon.minioncertmanager.certificate;
 
 import java.util.Map;
+
+import lombok.Setter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,7 +45,10 @@ public class PKCS12Generator {
     public static final String PKCS_1_2048_COMMAND = "openssl genrsa -out client.key.pkcs1 2048";
     public static final String PKCS8_COMMAND = "openssl pkcs8 -topk8 -in client.key.pkcs1 -out client.key -nocrypt";
 
-    public void generate(String location, String tenantId, Path path, File archive, String archivePass, File caCertFile, File caKeyFile) throws InterruptedException, IOException {
+    @Setter  // Testability
+    private CommandExecutor commandExecutor = new CommandExecutor();
+
+    public void generate(String location, String tenantId, Path outputDirectoryPath, File archive, String archivePass, File caCertFile, File caKeyFile) throws InterruptedException, IOException {
         // Check if caCertFile exists
         if (!caCertFile.exists()) {
             throw new FileNotFoundException("CA certificate file not found: " + caCertFile.getPath());
@@ -52,26 +57,26 @@ public class PKCS12Generator {
         LOG.info("=== GENERATING CERTIFICATE FOR LOCATION: {} AND TENANT: {}", location, tenantId);
         LOG.info("=== CA CERT: {}", caCertFile.getAbsolutePath());
         LOG.info("=== CA KEY: {}", caKeyFile.getAbsolutePath());
-        LOG.info("=== PATH: {}", path.toAbsolutePath());
-        File file = path.toFile();
+        LOG.info("=== PATH: {}", outputDirectoryPath.toAbsolutePath());
+        File file = outputDirectoryPath.toFile();
         LOG.info("=== FILE: {}", file);
         LOG.info("=== FILE exists: {}", file.exists());
 
         LOG.debug("=== MAKING PKCS1 KEY");
-        CommandExecutor.executeCommand(PKCS_1_2048_COMMAND, file);
+        commandExecutor.executeCommand(PKCS_1_2048_COMMAND, file);
 
         LOG.debug("=== CONVERTING TO PKCS8");
-        CommandExecutor.executeCommand(PKCS8_COMMAND, file);
+        commandExecutor.executeCommand(PKCS8_COMMAND, file);
 
         LOG.debug("=== GENERATING THE UNSIGNED CERT");
-        CommandExecutor.executeCommand(UNSIGNED_CERT_COMMAND, file, location, tenantId);
+        commandExecutor.executeCommand(UNSIGNED_CERT_COMMAND, file, location, tenantId);
 
         LOG.info("=== SIGNING CERT");
         LOG.info("=== CA CERT: {}", caCertFile.getAbsolutePath());
         // Do not use this in Production (10 years is not a good idea)
-        CommandExecutor.executeCommand("openssl x509 -req -in client.unsigned.cert -days 3650 -CA \"%s\" -CAkey \"%s\" -out client.signed.cert", file, caCertFile.getAbsolutePath(), caKeyFile.getAbsolutePath());
+        commandExecutor.executeCommand("openssl x509 -req -in client.unsigned.cert -days 3650 -CA \"%s\" -CAkey \"%s\" -out client.signed.cert", file, caCertFile.getAbsolutePath(), caKeyFile.getAbsolutePath());
 
-        CommandExecutor.executeCommand("openssl pkcs12 -export -out \"%s\" -inkey client.key -in client.signed.cert -passout env:\"%s\"", file,
+        commandExecutor.executeCommand("openssl pkcs12 -export -out \"%s\" -inkey client.key -in client.signed.cert -passout env:\"%s\"", file,
             Map.of("PASS_VAR", archivePass), archive.getAbsolutePath(), "PASS_VAR");
 
         LOG.info("=== DONE");

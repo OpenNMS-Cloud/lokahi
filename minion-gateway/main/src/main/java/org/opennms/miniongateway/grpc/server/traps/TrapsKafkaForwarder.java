@@ -31,8 +31,12 @@ package org.opennms.miniongateway.grpc.server.traps;
 import com.google.protobuf.Message;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.header.internals.RecordHeader;
+import org.opennms.horizon.grpc.traps.contract.TenantLocationSpecificTrapLogDTO;
+import org.opennms.horizon.grpc.traps.contract.TrapLogDTO;
 import org.opennms.horizon.shared.constants.GrpcConstants;
+import org.opennms.horizon.shared.grpc.common.LocationServerInterceptor;
 import org.opennms.horizon.shared.grpc.common.TenantIDGrpcServerInterceptor;
+import org.opennms.horizon.shared.grpc.traps.contract.mapper.TenantLocationSpecificTrapLogDTOMapper;
 import org.opennms.horizon.shared.ipc.sink.api.MessageConsumer;
 import org.opennms.horizon.shared.ipc.sink.api.SinkModule;
 import org.slf4j.Logger;
@@ -49,7 +53,7 @@ import java.nio.charset.StandardCharsets;
  * Forwarder of Trap messages - received via GRPC and forwarded to Kafka.
  */
 @Component
-public class TrapsKafkaForwarder implements MessageConsumer<Message, Message> {
+public class TrapsKafkaForwarder implements MessageConsumer<TrapLogDTO, TrapLogDTO> {
 
     public static final String DEFAULT_TASK_RESULTS_TOPIC = "traps";
 
@@ -61,26 +65,44 @@ public class TrapsKafkaForwarder implements MessageConsumer<Message, Message> {
     @Autowired
     private TenantIDGrpcServerInterceptor tenantIDGrpcInterceptor;
 
+    @Autowired
+    private LocationServerInterceptor locationServerInterceptor;
+
+    @Autowired
+    private TenantLocationSpecificTrapLogDTOMapper tenantLocationSpecificTrapLogDTOMapper;
+
     @Value("${task.results.kafka-topic:" + DEFAULT_TASK_RESULTS_TOPIC + "}")
     private String kafkaTopic;
 
     @Override
-    public SinkModule<Message, Message> getModule() {
+    public SinkModule<TrapLogDTO, TrapLogDTO> getModule() {
         return new TrapSinkModule();
     }
 
     @Override
-    public void handleMessage(Message messageLog) {
+    public void handleMessage(TrapLogDTO messageLog) {
         // Retrieve the Tenant ID from the TenantID GRPC Interceptor
         String tenantId = tenantIDGrpcInterceptor.readCurrentContextTenantId();
-        logger.info("Received traps; sending to Kafka: tenant-id: {}; kafka-topic={}; message={}", tenantId, kafkaTopic, messageLog);
-        byte[] rawContent = messageLog.toByteArray();
+        // Ditto for location
+        String location = locationServerInterceptor.readCurrentContextLocation();
+
+        // String location
+        logger.info("Received traps; sending to Kafka: tenant-id={}; kafka-topic={}; message={}", tenantId, kafkaTopic, messageLog);
+
+        TenantLocationSpecificTrapLogDTO tenantLocationSpecificTrapLogDTO =
+            tenantLocationSpecificTrapLogDTOMapper.mapBareToTenanted(tenantId, location, messageLog);
+
+        sendToKafka(tenantLocationSpecificTrapLogDTO);
+    }
+
+//========================================
+// Internals
+//----------------------------------------
+
+    private void sendToKafka(TenantLocationSpecificTrapLogDTO tenantLocationSpecificTrapLogDTO) {
+        byte[] rawContent = tenantLocationSpecificTrapLogDTO.toByteArray();
         var producerRecord = new ProducerRecord<String, byte[]>(kafkaTopic, rawContent);
-        // add tenant id to kafka header
-        producerRecord.headers().add(new RecordHeader(GrpcConstants.TENANT_ID_KEY,
-            tenantId.getBytes(StandardCharsets.UTF_8)));
 
         this.kafkaTemplate.send(producerRecord);
     }
-
 }

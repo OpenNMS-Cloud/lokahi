@@ -39,6 +39,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
 import org.opennms.cloud.grpc.minion.CloudToMinionMessage;
+import org.opennms.cloud.grpc.minion.Identity;
 import org.opennms.cloud.grpc.minion.RpcRequestProto;
 import org.opennms.cloud.grpc.minion.TwinRequestProto;
 import org.opennms.cloud.grpc.minion.TwinResponseProto;
@@ -115,8 +116,7 @@ public class GrpcTwinSubscriber extends AbstractTwinSubscriber implements CloudM
     private synchronized boolean sendTwinRpcRequest(TwinRequestProto twinRequestProto) {
         String rpcId = UUID.randomUUID().toString();
         RpcRequestProto rpcRequestProto = RpcRequestProto.newBuilder()
-            .setSystemId(getIdentity().getId())
-            .setLocation(getIdentity().getLocation())
+            .setIdentity(Identity.newBuilder().setSystemId(getIdentity().getId()))
             .setPayload(Any.pack(twinRequestProto))
             .setModuleId("twin")
             .setRpcId(rpcId)

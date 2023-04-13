@@ -35,7 +35,7 @@ import org.opennms.horizon.inventory.exception.InventoryRuntimeException;
 import org.opennms.horizon.inventory.service.taskset.response.ScannerResponseService;
 import org.opennms.taskset.contract.ScannerResponse;
 import org.opennms.taskset.contract.TaskResult;
-import org.opennms.taskset.contract.TenantedTaskSetResults;
+import org.opennms.taskset.contract.TenantLocationSpecificTaskSetResults;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -58,16 +58,16 @@ public class TaskSetResultsConsumer {
         LOG.debug("Have message from Task Set Results kafka topic");
 
         try {
-            TenantedTaskSetResults message = TenantedTaskSetResults.parseFrom(data);
+            TenantLocationSpecificTaskSetResults message = TenantLocationSpecificTaskSetResults.parseFrom(data);
 
             String tenantId = message.getTenantId();
+            String location = message.getLocation();
 
             if (Strings.isEmpty(tenantId)) {
                 throw new InventoryRuntimeException("Missing tenant id");
             }
 
             for (TaskResult taskResult : message.getResultsList()) {
-                String location = taskResult.getLocation();
                 log.info("Received taskset results from minion with tenant id: {}; location: {}", tenantId, location);
                 if (taskResult.hasScannerResponse()) {
 

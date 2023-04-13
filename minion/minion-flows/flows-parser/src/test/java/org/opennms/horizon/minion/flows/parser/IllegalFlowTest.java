@@ -46,7 +46,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.Ignore;
-import org.opennms.dataplatform.flows.document.FlowDocument;
+import org.opennms.horizon.flows.document.FlowDocument;
 import org.opennms.horizon.minion.flows.listeners.UdpListener;
 import org.opennms.horizon.minion.flows.parser.factory.DnsResolver;
 import org.opennms.horizon.shared.ipc.rpc.IpcIdentity;

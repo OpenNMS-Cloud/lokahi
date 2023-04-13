@@ -27,12 +27,10 @@
  *
  */
 
-package org.opennms.horizon.shared.protobuf.mapper;
+package org.opennms.horizon.events.traps;
 
-import org.opennms.taskset.contract.TaskSetResults;
-import org.opennms.taskset.contract.TenantedTaskSetResults;
+import org.opennms.horizon.events.xml.Event;
 
-public interface TenantedTaskSetResultsMapper {
-    TenantedTaskSetResults mapBareToTenanted(String tenantId, TaskSetResults bare);
-    TaskSetResults mapTenantedToBare(TenantedTaskSetResults tenanted);
+public interface EventXmlToProtoMapper {
+    org.opennms.horizon.events.proto.Event convert(Event event, String tenantId);
 }

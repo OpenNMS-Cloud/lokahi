@@ -1,8 +1,8 @@
-/*******************************************************************************
+/*
  * This file is part of OpenNMS(R).
  *
- * Copyright (C) 2022 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
+ * Copyright (C) 2023 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
  *
@@ -24,21 +24,15 @@
  *     OpenNMS(R) Licensing <license@opennms.org>
  *     http://www.opennms.org/
  *     http://www.opennms.com/
- *******************************************************************************/
+ *
+ */
 
-package org.opennms.horizon.events.traps;
+package org.opennms.horizon.shared.protobuf.mapper;
 
-import org.opennms.horizon.shared.snmp.SnmpHelper;
-import org.opennms.horizon.shared.snmp.SnmpHelperImpl;
-import org.opennms.horizon.shared.snmp.snmp4j.Snmp4JStrategy;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import org.opennms.taskset.contract.TaskSetResults;
+import org.opennms.taskset.contract.TenantLocationSpecificTaskSetResults;
 
-@Configuration
-public class SnmpHelperBean {
-
-    @Bean
-    public SnmpHelper snmpHelper() {
-        return new SnmpHelperImpl(new Snmp4JStrategy());
-    }
+public interface TenantLocationSpecificTaskSetResultsMapper {
+    TenantLocationSpecificTaskSetResults mapBareToTenanted(String tenantId, String location, TaskSetResults bare);
+    TaskSetResults mapTenantedToBare(TenantLocationSpecificTaskSetResults tenanted);
 }

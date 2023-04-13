@@ -34,7 +34,6 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.github.fge.jsonpatch.diff.JsonDiff;
 import com.google.common.base.Strings;
 import com.google.protobuf.ByteString;
-import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
 import java.io.IOException;
 import java.io.Serializable;
@@ -73,9 +72,10 @@ public abstract class AbstractTwinPublisher implements TwinPublisher, TwinProvid
     }
 
     /**
+     * @param location
      * @param sinkUpdate Handle sink Update from @{@link AbstractTwinPublisher}.
      */
-    protected abstract void handleSinkUpdate(TwinUpdate sinkUpdate);
+    protected abstract void handleSinkUpdate(String location, TwinUpdate sinkUpdate);
 
     @Override
     public <T> Session<T>
@@ -88,19 +88,19 @@ public abstract class AbstractTwinPublisher implements TwinPublisher, TwinProvid
     }
 
     @Override
-    public TwinResponseProto getTwinResponse(String tenantId, TwinRequestProto twinRequest) {
-        return mapTwinResponse(getTwin(tenantId, twinRequest));
+    public TwinResponseProto getTwinResponse(String tenantId, String location, TwinRequestProto twinRequest) {
+        return mapTwinResponse(getTwin(tenantId, location, twinRequest));
     }
 
-    protected TwinUpdate getTwin(String tenantId, TwinRequestProto twinRequest) {
-        TwinTracker twinTracker = getTwinTracker(twinRequest.getConsumerKey(), tenantId, twinRequest.getLocation());
+    protected TwinUpdate getTwin(String tenantId, String location, TwinRequestProto twinRequest) {
+        TwinTracker twinTracker = getTwinTracker(twinRequest.getConsumerKey(), tenantId, location);
         TwinUpdate twinUpdate;
         if (twinTracker == null) {
             // No twin object exists for this key yet, return with null object.
-            twinUpdate = new TwinUpdate(twinRequest.getConsumerKey(), tenantId, twinRequest.getLocation(), null);
+            twinUpdate = new TwinUpdate(twinRequest.getConsumerKey(), tenantId, location, null);
         } else {
             // Fill TwinUpdate fields from TwinTracker.
-            twinUpdate = new TwinUpdate(twinRequest.getConsumerKey(), tenantId, twinRequest.getLocation(), twinTracker.getObj());
+            twinUpdate = new TwinUpdate(twinRequest.getConsumerKey(), tenantId, location, twinTracker.getObj());
             twinUpdate.setPatch(false);
             twinUpdate.setVersion(twinTracker.getVersion());
             twinUpdate.setSessionId(twinTracker.getSessionId());
@@ -119,9 +119,6 @@ public abstract class AbstractTwinPublisher implements TwinPublisher, TwinProvid
 
     protected TwinResponseProto mapTwinResponse(TwinUpdate twinUpdate) {
         TwinResponseProto.Builder builder = TwinResponseProto.newBuilder();
-        if (!Strings.isNullOrEmpty(twinUpdate.getLocation())) {
-            builder.setLocation(twinUpdate.getLocation());
-        }
         if(!Strings.isNullOrEmpty(twinUpdate.getSessionId())) {
             builder.setSessionId(twinUpdate.getSessionId());
         }
@@ -132,21 +129,6 @@ public abstract class AbstractTwinPublisher implements TwinPublisher, TwinProvid
         builder.setIsPatchObject(twinUpdate.isPatch());
         builder.setVersion(twinUpdate.getVersion());
         return builder.build();
-    }
-
-    protected TwinRequest mapTwinRequestProto(byte[] twinRequestBytes) {
-        TwinRequest twinRequest = new TwinRequest();
-        try {
-            TwinRequestProto twinRequestProto = TwinRequestProto.parseFrom(twinRequestBytes);
-            twinRequest.setKey(twinRequestProto.getConsumerKey());
-            if (!Strings.isNullOrEmpty(twinRequestProto.getLocation())) {
-                twinRequest.setLocation(twinRequestProto.getLocation());
-            }
-        } catch (InvalidProtocolBufferException e) {
-            LOG.warn("Failed to parse protobuf for the request", e);
-            throw new RuntimeException(e);
-        }
-        return twinRequest;
     }
 
     public static String generateTracingOperationKey(String location, String key) {
@@ -219,8 +201,9 @@ public abstract class AbstractTwinPublisher implements TwinPublisher, TwinProvid
                 LOG.info("Published an object update for the session with key {}", sessionKey.toString());
                 byte[] objInBytes = objectMapper.writeValueAsBytes(obj);
                 TwinUpdate twinUpdate = getResponseFromUpdatedObj(objInBytes, sessionKey);
+
                 if (twinUpdate != null) {
-                    handleSinkUpdate(twinUpdate);
+                    handleSinkUpdate(sessionKey.location, twinUpdate);
                 }
             }
         }

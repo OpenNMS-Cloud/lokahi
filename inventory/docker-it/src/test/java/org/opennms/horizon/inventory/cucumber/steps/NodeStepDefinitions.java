@@ -64,6 +64,11 @@ public class NodeStepDefinitions {
         backgroundHelper.grpcTenantId(tenantId);
     }
 
+    @Given("[Node] Grpc location {string}")
+    public void grpcLocation(String location) {
+        backgroundHelper.grpcLocation(location);
+    }
+
     @Given("[Node] Create Grpc Connection for Inventory")
     public void createGrpcConnectionForInventory() {
         backgroundHelper.createGrpcConnectionForInventory();

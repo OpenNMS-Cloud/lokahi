@@ -27,62 +27,76 @@
  *******************************************************************************/
 package org.opennms.horizon.minioncertmanager.certificate;
 
-import java.io.FileInputStream;
-import java.security.GeneralSecurityException;
-import java.security.KeyStore;
+import java.io.FileNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.api.io.TempDir;
-import org.mockito.InjectMocks;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.Mockito;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
-@ExtendWith(MockitoExtension.class)
+// TODO: MOVE TO SYSTEM INTEGRATION TEST
 public class PKCS12GeneratorTest {
-    @TempDir
-    private Path tempDir;
 
-    @InjectMocks
-    private PKCS12Generator pkcs8Generator;
+    private CommandExecutor mockCommandExecutor;
 
-    private File caCertFile;
-    private File caKeyFile;
+    private PKCS12Generator pkcs12Generator;
 
     @BeforeEach
-    public void setup() throws Exception {
-        File caRootDir = tempDir.toFile();
-        CaCertificateGenerator.generate(
-            caRootDir, "OU=TEST", 3600
-        );
-
-        caCertFile = new File(caRootDir, "ca.crt");
-        caKeyFile = new File(caRootDir, "ca.key");
+    public void setUp() {
+        mockCommandExecutor = Mockito.mock(CommandExecutor.class);
+        pkcs12Generator = new PKCS12Generator();
     }
-
 
     @Test
-    public void testGenerate() throws InterruptedException, GeneralSecurityException, IOException {
-        // Test input
-        String location = "testLocation";
-        String tenantId = "testTenantId";
+    void testGenerateP12() throws IOException, InterruptedException {
+        //
+        // Setup Test Data and Interactions
+        //
+        Path outputDirPath = Path.of("/test-output-dir");
+        File mockCaCertFile = Mockito.mock(File.class);
+        Mockito.when(mockCaCertFile.exists()).thenReturn(true);
 
-        File p12 = tempDir.resolve("minion.p12").toFile();
-        // Test execution
-        pkcs8Generator.generate(location, tenantId, tempDir, p12, "foo", caCertFile, caKeyFile);
+        //
+        // Execute
+        //
+        pkcs12Generator.setCommandExecutor(mockCommandExecutor);
+        pkcs12Generator.generate("x-location-x", "x-tenant-id-x", outputDirPath, new File("minion.p12"), "x-archive-pass-x", mockCaCertFile, new File("x-ca-key-file-x"));
 
-        assertTrue(p12.exists());
+        //
+        // Verify the Results
+        //
+        Mockito.verify(mockCommandExecutor).executeCommand("openssl genrsa -out client.key.pkcs1 2048", outputDirPath.toFile());
+    }
 
-        KeyStore keyStore = KeyStore.getInstance("pkcs12");
-        keyStore.load(new FileInputStream(p12), "foo".toCharArray());
-        assertNotNull(keyStore.getKey("1", "foo".toCharArray()));
+    @Test
+    void testGenerateP12CaCertFileMissing() throws IOException, InterruptedException {
+        //
+        // Setup Test Data and Interactions
+        //
+        Path outputDirPath = Path.of("/test-output-dir");
+        File mockCaCertFile = Mockito.mock(File.class);
+        Mockito.when(mockCaCertFile.exists()).thenReturn(false);
+
+        //
+        // Execute
+        //
+        Exception actual = null;
+        try {
+            pkcs12Generator.setCommandExecutor(mockCommandExecutor);
+            pkcs12Generator.generate("x-location-x", "x-tenant-id-x", outputDirPath, new File("minion.p12"), "x-archive-pass-x", mockCaCertFile, new File("x-ca-key-file-x"));
+            fail("missing expected exception");
+        } catch (Exception caught) {
+            actual = caught;
+        }
+
+        //
+        // Verify the Results
+        //
+        assertTrue(actual instanceof FileNotFoundException);
     }
 }
-

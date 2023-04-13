@@ -4,6 +4,7 @@ Feature: Azure Active Discovery
     Given [Azure] External GRPC Port in system property "application-external-grpc-port"
     Given [Azure] Kafka Bootstrap URL in system property "kafka.bootstrap-servers"
     Given [Azure] Grpc TenantId "tenant-stream"
+    Given [Azure] Grpc location "test-location"
     Given [Azure] Create Grpc Connection for Inventory
 
   Scenario: Create azure active discovery without tenant id

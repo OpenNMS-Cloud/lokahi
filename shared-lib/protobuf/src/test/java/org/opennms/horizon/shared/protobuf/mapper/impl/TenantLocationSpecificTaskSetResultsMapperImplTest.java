@@ -35,7 +35,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.opennms.taskset.contract.TaskResult;
 import org.opennms.taskset.contract.TaskSetResults;
-import org.opennms.taskset.contract.TenantedTaskSetResults;
+import org.opennms.taskset.contract.TenantLocationSpecificTaskSetResults;
 
 import java.util.List;
 import java.util.Set;
@@ -44,17 +44,17 @@ import java.util.stream.Collectors;
 import static org.junit.Assert.*;
 
 /**
- * Verify the mapper for TaskSetResults <===> TenantedTaskSetResults
+ * Verify the mapper for TaskSetResults <===> TenantLocationSpecificTaskSetResults
  */
-public class TenantedTaskSetResultsMapperImplTest {
+public class TenantLocationSpecificTaskSetResultsMapperImplTest {
 
-    private TenantedTaskSetResultsMapperImpl target;
+    private TenantLocationSpecificTaskSetResultsMapperImpl target;
 
     private TaskResult testTaskResult;
 
     @Before
     public void setUp() throws Exception {
-        target = new TenantedTaskSetResultsMapperImpl();
+        target = new TenantLocationSpecificTaskSetResultsMapperImpl();
 
         // Don't need to fully hydrate this one, it does not get mapped
         testTaskResult =
@@ -76,17 +76,17 @@ public class TenantedTaskSetResultsMapperImplTest {
         //
         // Execute
         //
-        TenantedTaskSetResults tenantedTaskSetResults =
-            target.mapBareToTenanted("x-tenant-id-x", taskSetResults);
+        TenantLocationSpecificTaskSetResults tenantLocationSpecificTaskSetResults =
+            target.mapBareToTenanted("x-tenant-id-x", "x-location-x", taskSetResults);
 
         //
         // Verify the Results
         //
         verifyAllFieldsSet(taskSetResults, true);
-        verifyAllFieldsSet(tenantedTaskSetResults, true);
+        verifyAllFieldsSet(tenantLocationSpecificTaskSetResults, true);
 
-        assertEquals(1, tenantedTaskSetResults.getResultsCount());
-        assertSame(testTaskResult, tenantedTaskSetResults.getResults(0));
+        assertEquals(1, tenantLocationSpecificTaskSetResults.getResultsCount());
+        assertSame(testTaskResult, tenantLocationSpecificTaskSetResults.getResults(0));
     }
 
     @Test
@@ -94,9 +94,10 @@ public class TenantedTaskSetResultsMapperImplTest {
         //
         // Setup Test Data and Interactions
         //
-        TenantedTaskSetResults tenantedTaskSetResults =
-            TenantedTaskSetResults.newBuilder()
+        TenantLocationSpecificTaskSetResults tenantLocationSpecificTaskSetResults =
+            TenantLocationSpecificTaskSetResults.newBuilder()
                 .setTenantId("x-tenant-id-x")
+                .setLocation("x-location-x")
                 .addResults(testTaskResult)
                 .build();
 
@@ -104,16 +105,16 @@ public class TenantedTaskSetResultsMapperImplTest {
         // Execute
         //
         TaskSetResults taskSetResults =
-            target.mapTenantedToBare(tenantedTaskSetResults);
+            target.mapTenantedToBare(tenantLocationSpecificTaskSetResults);
 
         //
         // Verify the Results
         //
         verifyAllFieldsSet(taskSetResults, true);
-        verifyAllFieldsSet(tenantedTaskSetResults, true);
+        verifyAllFieldsSet(tenantLocationSpecificTaskSetResults, true);
 
-        assertEquals(1, tenantedTaskSetResults.getResultsCount());
-        assertSame(testTaskResult, tenantedTaskSetResults.getResults(0));
+        assertEquals(1, tenantLocationSpecificTaskSetResults.getResultsCount());
+        assertSame(testTaskResult, tenantLocationSpecificTaskSetResults.getResults(0));
     }
 
     /**
@@ -121,8 +122,8 @@ public class TenantedTaskSetResultsMapperImplTest {
      */
     @Test
     public void testDefinitionsMatch() {
-        verifyAllFieldsExceptTenantIdMatch(
-            TaskSetResults.getDefaultInstance(), TenantedTaskSetResults.getDefaultInstance());
+        verifyAllFieldsExceptTenantIdAndLocationMatch(
+            TaskSetResults.getDefaultInstance(), TenantLocationSpecificTaskSetResults.getDefaultInstance());
     }
 
 //========================================
@@ -166,7 +167,7 @@ public class TenantedTaskSetResultsMapperImplTest {
      * @param messageWithoutTenant
      * @param messageWithTenant
      */
-    private void verifyAllFieldsExceptTenantIdMatch(Message messageWithoutTenant, Message messageWithTenant) {
+    private void verifyAllFieldsExceptTenantIdAndLocationMatch(Message messageWithoutTenant, Message messageWithTenant) {
         Descriptors.Descriptor withoutTenantTypeDescriptor = messageWithoutTenant.getDescriptorForType();
         Descriptors.Descriptor withTenantTypeDescriptor = messageWithTenant.getDescriptorForType();
 
@@ -176,6 +177,7 @@ public class TenantedTaskSetResultsMapperImplTest {
             withTenantTypeDescriptor.getFields().stream().map(Descriptors.FieldDescriptor::getName).collect(Collectors.toSet());
 
         withTenantTypeFields.remove("tenantId");
+        withTenantTypeFields.remove("location");
 
         assertEquals(withTenantTypeFields, withoutTenantTypeFields);
     }

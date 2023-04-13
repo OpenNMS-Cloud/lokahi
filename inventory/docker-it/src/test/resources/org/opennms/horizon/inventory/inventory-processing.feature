@@ -5,6 +5,7 @@ Feature: Inventory Processing
     Given Kafka Bootstrap URL in system property "kafka.bootstrap-servers"
     Given MOCK Minion Gateway Base URL in system property "mock-minion-gateway.rest-url"
     Given Grpc TenantId "tenant-stream"
+    Given Grpc location "MINION"
     Given Create Grpc Connection for Inventory
 
   Scenario: Send an Heartbeat Message to Inventory and verify Minion and location are added

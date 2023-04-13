@@ -33,7 +33,7 @@ import static org.opennms.horizon.minion.flows.listeners.utils.BufferUtils.slice
 
 import java.net.InetSocketAddress;
 
-import org.opennms.dataplatform.flows.document.FlowDocument;
+import org.opennms.horizon.flows.document.FlowDocument;
 import org.opennms.horizon.minion.flows.listeners.Dispatchable;
 import org.opennms.horizon.minion.flows.listeners.UdpParser;
 import org.opennms.horizon.minion.flows.listeners.utils.BufferUtils;

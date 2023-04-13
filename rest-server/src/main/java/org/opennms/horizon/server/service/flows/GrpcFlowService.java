@@ -48,7 +48,6 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 @Slf4j
 @GraphQLApi
@@ -68,24 +67,26 @@ public class GrpcFlowService {
     public Flux<Exporter> findExporters(RequestCriteria requestCriteria,
                                         @GraphQLEnvironment ResolutionEnvironment env) {
         String tenantId = headerUtil.extractTenant(env);
-        var interfaceIds = flowClient.findExporters(requestCriteria, tenantId);
+        String authHeader = headerUtil.getAuthHeader(env);
+        var interfaceIds = flowClient.findExporters(requestCriteria, tenantId, authHeader);
         return Flux.fromIterable(interfaceIds.stream()
-            .map(interfaceId -> getExporter(interfaceId, env)).filter(Objects::nonNull).collect(Collectors.toList()));
+            .map(interfaceId -> getExporter(interfaceId, env)).filter(Objects::nonNull).toList());
     }
 
     @GraphQLQuery(name = "findApplications")
     public Flux<String> findApplications(RequestCriteria requestCriteria,
                                          @GraphQLEnvironment ResolutionEnvironment env) {
         String tenantId = headerUtil.extractTenant(env);
-        return Flux.fromIterable(flowClient.findApplications(requestCriteria, tenantId));
+        String authHeader = headerUtil.getAuthHeader(env);
+        return Flux.fromIterable(flowClient.findApplications(requestCriteria, tenantId, authHeader));
     }
 
     @GraphQLQuery(name = "findApplicationSummaries")
     public Flux<TrafficSummary> findApplicationSummaries(RequestCriteria requestCriteria,
                                                          @GraphQLEnvironment ResolutionEnvironment env) {
         String tenantId = headerUtil.extractTenant(env);
-
-        var summaries = flowClient.getApplicationSummaries(requestCriteria, tenantId);
+        String authHeader = headerUtil.getAuthHeader(env);
+        var summaries = flowClient.getApplicationSummaries(requestCriteria, tenantId, authHeader);
         return Flux.fromIterable(summaries.getSummariesList().stream().map(trafficSummaryMapper::map).toList());
     }
 
@@ -93,7 +94,8 @@ public class GrpcFlowService {
     public Flux<FlowingPoint> findApplicationSeries(RequestCriteria requestCriteria,
                                                     @GraphQLEnvironment ResolutionEnvironment env) {
         String tenantId = headerUtil.extractTenant(env);
-        return Flux.fromIterable(flowClient.getApplicationSeries(requestCriteria, tenantId).getPointList().stream()
+        String authHeader = headerUtil.getAuthHeader(env);
+        return Flux.fromIterable(flowClient.getApplicationSeries(requestCriteria, tenantId, authHeader).getPointList().stream()
             .map(flowingPointMapper::map).toList());
     }
 

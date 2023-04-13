@@ -44,13 +44,16 @@ import org.opennms.dataplatform.flows.querier.v1.Summaries;
 import org.opennms.dataplatform.flows.querier.v1.TimeRangeFilter;
 import org.opennms.horizon.server.model.flows.RequestCriteria;
 import org.opennms.horizon.server.model.flows.TimeRange;
+import org.opennms.horizon.server.service.grpc.InventoryClient;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 @RequiredArgsConstructor
 public class FlowClient {
+    private final InventoryClient inventoryClient;
+
     private final ManagedChannel channel;
     private final long deadlineMs;
 
@@ -76,27 +79,27 @@ public class FlowClient {
      * @param tenantId
      * @return ListRequest.Builder
      */
-    private ListRequest.Builder createBaseListRequest(RequestCriteria requestCriteria, String tenantId) {
+    private ListRequest.Builder createBaseListRequest(RequestCriteria requestCriteria, String tenantId, String authHeader) {
         var listRequest = ListRequest.newBuilder()
             .setTenantId(tenantId).setLimit(requestCriteria.getCount());
         if (requestCriteria.getTimeRange() != null) {
             listRequest.addFilters(convertTimeRage(requestCriteria.getTimeRange()));
         }
         if (requestCriteria.getExporter() != null) {
-            requestCriteria.getExporter().forEach(e -> convertExporter(e).ifPresent(listRequest::addFilters));
+            requestCriteria.getExporter().forEach(e -> listRequest.addAllFilters(convertExporter(e, authHeader)));
         }
         return listRequest;
     }
 
-    public List<Long> findExporters(RequestCriteria requestCriteria, String tenantId) {
-        var listRequest = this.createBaseListRequest(requestCriteria, tenantId);
+    public List<Long> findExporters(RequestCriteria requestCriteria, String tenantId, String authHeader) {
+        var listRequest = this.createBaseListRequest(requestCriteria, tenantId, authHeader);
         return exporterServiceStub.withDeadlineAfter(deadlineMs, TimeUnit.MILLISECONDS)
             .getExporterInterfaces(listRequest.build())
             .getElementsList().stream().map(Long::parseLong).toList();
     }
 
-    public List<String> findApplications(RequestCriteria requestCriteria, String tenantId) {
-        var listRequest = this.createBaseListRequest(requestCriteria, tenantId);
+    public List<String> findApplications(RequestCriteria requestCriteria, String tenantId, String authHeader) {
+        var listRequest = this.createBaseListRequest(requestCriteria, tenantId, authHeader);
         if (requestCriteria.getApplications() != null) {
             requestCriteria.getApplications().forEach(a ->
                 listRequest.addFilters(convertApplication(a))
@@ -108,20 +111,19 @@ public class FlowClient {
             .getElementsList();
     }
 
-    public Summaries getApplicationSummaries(RequestCriteria requestCriteria, String tenantId) {
+    public Summaries getApplicationSummaries(RequestCriteria requestCriteria, String tenantId, String authHeader) {
         var summaryRequest = ApplicationSummariesRequest.newBuilder()
             .setTenantId(tenantId).setCount(requestCriteria.getCount());
 
         summaryRequest.setIncludeOther(requestCriteria.isIncludeOther());
 
+        // request.applications (exact match) are difference than ApplicationFilter (wildcard)
         if (requestCriteria.getApplications() != null) {
-            requestCriteria.getApplications().forEach(a ->
-                summaryRequest.addFilters(convertApplication(a))
-            );
+            requestCriteria.getApplications().forEach(summaryRequest::addApplications);
         }
 
         if (requestCriteria.getExporter() != null) {
-            requestCriteria.getExporter().forEach(e -> convertExporter(e).ifPresent(summaryRequest::addFilters));
+            requestCriteria.getExporter().forEach(e -> summaryRequest.addAllFilters(convertExporter(e, authHeader)));
         }
 
         if (requestCriteria.getTimeRange() != null) {
@@ -133,18 +135,16 @@ public class FlowClient {
             .getApplicationSummaries(summaryRequest.build());
     }
 
-    public Series getApplicationSeries(RequestCriteria requestCriteria, String tenantId) {
+    public Series getApplicationSeries(RequestCriteria requestCriteria, String tenantId, String authHeader) {
         var seriesRequest = ApplicationSeriesRequest.newBuilder()
             .setTenantId(tenantId).setStep(requestCriteria.getStep()).setCount(requestCriteria.getCount());
 
         if (requestCriteria.getApplications() != null) {
-            requestCriteria.getApplications().forEach(a ->
-                seriesRequest.addFilters(convertApplication(a))
-            );
+            requestCriteria.getApplications().forEach(seriesRequest::addApplications);
         }
 
         if (requestCriteria.getExporter() != null) {
-            requestCriteria.getExporter().forEach(e -> convertExporter(e).ifPresent(seriesRequest::addFilters));
+            requestCriteria.getExporter().forEach(e -> seriesRequest.addAllFilters(convertExporter(e, authHeader)));
         }
 
         if (requestCriteria.getTimeRange() != null) {
@@ -156,18 +156,24 @@ public class FlowClient {
             .getApplicationSeries(seriesRequest.build());
     }
 
-    private Optional<Filter.Builder> convertExporter(org.opennms.horizon.server.model.flows.ExporterFilter exporter) {
-        var exporterRequest = org.opennms.dataplatform.flows.querier.v1.Exporter.newBuilder();
-        if (exporter.getNodeId() != null) {
-            exporterRequest.setNodeId(exporter.getNodeId());
-        } else if (exporter.getIpInterfaceId() != null) {
-            exporterRequest.setInterfaceId(exporter.getIpInterfaceId());
-        } else {
-            return Optional.empty();
+    private Filter getExporterFilter(long id){
+        return Filter.newBuilder().setExporter(
+            ExporterFilter.newBuilder().setExporter(
+                org.opennms.dataplatform.flows.querier.v1.Exporter.newBuilder().setInterfaceId(id))).build();
+    }
+
+    private List<Filter> convertExporter(org.opennms.horizon.server.model.flows.ExporterFilter exporter, String authHeader) {
+        List<Filter> exporterList = new ArrayList<>();
+        if (exporter.getIpInterfaceId() != null) {
+            exporterList.add(getExporterFilter(exporter.getIpInterfaceId()));
+        } else if (exporter.getNodeId() != null) {
+            var nodeDTO = inventoryClient.getNodeById(exporter.getNodeId(), authHeader);
+            if (nodeDTO != null) {
+                nodeDTO.getIpInterfacesList().forEach(i -> exporterList.add(getExporterFilter(i.getId())));
+            }
         }
 
-        return Optional.of(Filter.newBuilder().setExporter(
-            ExporterFilter.newBuilder().setExporter(exporterRequest)));
+        return exporterList;
     }
 
     private Filter.Builder convertApplication(String application) {

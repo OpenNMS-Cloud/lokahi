@@ -130,7 +130,7 @@ public class ConfigurationUtil {
     }
 
     @Bean(destroyMethod = "shutdown", initMethod = "initialStubs")
-    public FlowClient createFlowClient(@Qualifier("flowQuerier") ManagedChannel channel) {
-        return new FlowClient(channel, deadline);
+    public FlowClient createFlowClient(@Qualifier("flowQuerier") ManagedChannel channel, InventoryClient inventoryClient) {
+        return new FlowClient(inventoryClient, channel, deadline);
     }
 }

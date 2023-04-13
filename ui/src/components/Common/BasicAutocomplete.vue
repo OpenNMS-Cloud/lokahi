@@ -8,7 +8,6 @@
     - render-type: single (default) | multi.
       - multi: 
         - does not allow to add new value if not exists in the list
-        - selected item is displayed in the input box
     - preselectedItems: the list of items that was previously selected
   
   - Options
@@ -36,7 +35,7 @@
       :disabled="disabled"
     />
     <FeatherChipList
-      v-if="props.renderType === 'single' && props.showList"
+      v-if="props.showList"
       label="Item chip list with icon"
       data-test="fds-chip-list"
     >
@@ -106,10 +105,19 @@ const loading = ref(false)
 const selectedItems = ref<IAutocomplete[]>([])
 const results = computed(() => {
   loading.value = false
-  return props.items?.map((item: any) => ({
+  let items = props.items?.map((item: Record<string, any>) => ({
     ...item,
     _text: item.name
   }))
+
+  // filter out already selected options
+  if (props.renderType === 'multi') {
+    items = items.filter((item: Record<string, any>) => {
+      return !selectedItems.value.some(({ name }) => name === item.name)
+    })
+  }
+
+  return items
 })
 
 onMounted(() => {
@@ -135,7 +143,8 @@ const updateModelValue = (selected: any) => {
       emits('items-selected', selectedItems.value)
     }
   } else if (props.renderType === 'multi') {
-    // TODO
+    selectedItems.value = [...selectedItems.value, ...selected]
+    emits('items-selected', selectedItems.value)
   }
 }
 

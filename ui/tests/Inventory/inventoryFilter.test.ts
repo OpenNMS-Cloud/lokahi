@@ -17,32 +17,13 @@ describe('InventoryFilter.vue', () => {
 
   describe('Required components', () => {
     const requiredComponents = [
-      'search',
-      'node-type',
-      'monitoring-location',
-      'severity',
+      'search-by-label',
+      'search-by-tags',
       'tag-manager-ctrl',
-      'sort-btn',
-      'sort-alpha-btn',
-      'expand-btn'
-      // 'collapse-btn'
     ]
 
     it.each(requiredComponents)('should have "%s" component', (item) => {
       expect(wrapper.get(`[data-test="${item}"]`).exists()).toBe(true)
-    })
-
-    it('should have collapse button', async () => {
-      const inventoryStore = useInventoryStore()
-      const toggleFilter = vi.spyOn(inventoryStore, 'toggleFilter')
-
-      const expandBtn = wrapper.get('[data-test="expand-btn"]')
-      await expandBtn.trigger('click')
-      expect(toggleFilter).toHaveBeenCalledOnce()
-
-      // TODO Assert collapse button after expand was clicked
-      // const collapseBtn = wrapper.get('[data-test="collapse-btn"]')
-      // expect(collapseBtn.existxs()).toBe(true)
     })
   })
 })

@@ -30,3 +30,21 @@ query FindAllNodesByNodeLabelSearch($labelSearchTerm: String!) {
     nodeLabel
   }
 }
+
+query FindAllNodesByTags($tags: [String]) {
+  findAllNodesByTags(tags: $tags) {
+    id
+    ipInterfaces {
+      id
+      ipAddress
+      nodeId
+      snmpPrimary
+    }
+    location {
+      id
+      location
+    }
+    monitoringLocationId
+    nodeLabel
+  }
+}

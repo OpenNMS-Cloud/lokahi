@@ -8,7 +8,8 @@ import {
   TimeRangeUnit,
   ListTagsByNodeIdsDocument,
   FindAllNodesByNodeLabelSearchDocument,
-  Node
+  Node,
+  FindAllNodesByTagsDocument
 } from '@/types/graphql'
 import { NodeContent } from '@/types/inventory'
 import useSpinner from '@/composables/useSpinner'
@@ -18,6 +19,7 @@ export const useInventoryQueries = defineStore('inventoryQueries', () => {
   const nodes = ref<NodeContent[]>([])
   const variables = reactive({ nodeIds: <number[]>[] })
   const labelSearchVariables = reactive({ labelSearchTerm: '' })
+  const tagsVariables = reactive({ tags: <string[]>[] })
 
   const { startSpinner, stopSpinner } = useSpinner()
 
@@ -48,6 +50,23 @@ export const useInventoryQueries = defineStore('inventoryQueries', () => {
     filterNodesByLabel()
   }
 
+  // Get nodes by tags
+  const {
+    onData: onFilteredByTagsData,
+    isFetching: filteredNodesByTagsFetching,
+    execute: filterNodesByTags
+  } = useQuery({
+    query: FindAllNodesByTagsDocument,
+    cachePolicy: 'network-only',
+    fetchOnMount: false,
+    variables: tagsVariables
+  })
+
+  const getNodesByTags = (tags: string[]) => {
+    tagsVariables.tags = tags
+    filterNodesByTags()
+  }
+
   // Get tags for nodes
   const { data: tagData, execute: getTags } = useQuery({
     query: ListTagsByNodeIdsDocument,
@@ -72,9 +91,11 @@ export const useInventoryQueries = defineStore('inventoryQueries', () => {
 
   watchEffect(() => (nodesFetching.value ? startSpinner() : stopSpinner()))
   watchEffect(() => (filteredNodesByLabelFetching.value ? startSpinner() : stopSpinner()))
+  watchEffect(() => (filteredNodesByTagsFetching.value ? startSpinner() : stopSpinner()))
 
   onData((data) => formatData(data.findAllNodes || []))
   onFilteredByLabelData((data) => formatData(data.findAllNodesByNodeLabelSearch || []))
+  onFilteredByTagsData((data) => formatData(data.findAllNodesByTags || []))
 
   const formatData = async (data: Partial<Node>[]) => {
     nodes.value = []
@@ -172,6 +193,7 @@ export const useInventoryQueries = defineStore('inventoryQueries', () => {
   return {
     nodes,
     fetch: execute,
-    getNodesByLabel
+    getNodesByLabel,
+    getNodesByTags
   }
 })

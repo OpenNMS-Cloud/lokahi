@@ -10,6 +10,7 @@ import org.opennms.horizon.server.service.GrpcMinionService;
 import org.opennms.horizon.server.service.GrpcNodeService;
 import org.opennms.horizon.server.service.NotificationService;
 import org.opennms.horizon.server.service.discovery.GrpcAzureActiveDiscoveryService;
+import org.opennms.horizon.server.service.flows.GrpcFlowService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -29,6 +30,8 @@ class RestServerApplicationTests {
     private GrpcAlertService grpcAlertService;
     @Autowired
     private GrpcAzureActiveDiscoveryService grpcAzureActiveDiscoveryService;
+    @Autowired
+    private GrpcFlowService grpcFlowService;
 
 	@Test
 	void contextLoads() {
@@ -39,6 +42,7 @@ class RestServerApplicationTests {
         assertNotNull(grpcNodeService);
         assertNotNull(grpcAlertService);
         assertNotNull(grpcAzureActiveDiscoveryService);
+        assertNotNull(grpcFlowService);
 	}
 
 }

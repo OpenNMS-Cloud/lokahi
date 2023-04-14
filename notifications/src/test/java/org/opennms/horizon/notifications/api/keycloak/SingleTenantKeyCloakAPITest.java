@@ -1,13 +1,13 @@
 package org.opennms.horizon.notifications.api.keycloak;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.mockito.InjectMocks;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.opennms.horizon.shared.constants.GrpcConstants;
 
 import java.util.Collections;
@@ -16,9 +16,8 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
-import static org.mockito.Mockito.mock;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class SingleTenantKeyCloakAPITest {
     @InjectMocks
     DefaultTenantKeyCloakAPI keyCloakAPI;
@@ -50,7 +49,6 @@ public class SingleTenantKeyCloakAPITest {
             assertEquals(Collections.emptyList(), keyCloakAPI.getTenantEmailAddresses("AnyOtherTenantHere"));
         }
     }
-
 
 
 }

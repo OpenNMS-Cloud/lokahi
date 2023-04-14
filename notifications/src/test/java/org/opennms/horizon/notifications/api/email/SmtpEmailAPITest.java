@@ -5,16 +5,15 @@ import jakarta.mail.Message;
 import jakarta.mail.Session;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.ArgumentMatcher;
-import org.junit.runner.RunWith;
-import org.keycloak.email.EmailException;
-import org.mockito.InjectMocks;
 import lombok.Builder;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentMatcher;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.opennms.horizon.alerts.proto.Alert;
 import org.opennms.horizon.notifications.exceptions.NotificationAPIException;
 import org.opennms.horizon.notifications.exceptions.NotificationException;
@@ -32,7 +31,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.times;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class SmtpEmailAPITest {
 
     private static final String FROM_ADDRESS = "noreply@test";
@@ -43,7 +42,7 @@ public class SmtpEmailAPITest {
     @Mock
     JavaMailSender sender;
 
-    @Before
+    @BeforeEach
     public void setup() {
         ReflectionTestUtils.setField(emailAPI, "fromAddress", FROM_ADDRESS);
         Mockito.when(sender.createMimeMessage()).thenReturn(new MimeMessage((Session) null));

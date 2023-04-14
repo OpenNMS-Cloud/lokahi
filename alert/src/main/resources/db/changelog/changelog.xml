@@ -12,4 +12,5 @@
     <include file="/db/changelog/hs-0.1.0/tables/trigger_event_uei_keys.xml" />
     <include file="/db/changelog/hs-0.1.0/tables/remove_uei_keys_trigger_event.xml" />
     <include file="/db/changelog/hs-0.1.0/tables/alert_definition_trigger_fk.xml" />
+    <include file="/db/changelog/hs-0.1.0/data/update_trigger_event_type.xml" />
 </databaseChangeLog>

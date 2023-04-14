@@ -28,6 +28,8 @@
 
 package org.opennms.horizon.alertservice.service;
 
+import static org.opennms.horizon.alerts.proto.EventType.DEVICE_UNREACHABLE;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -61,8 +63,6 @@ public class MonitorPolicyService {
     private static final String DEFAULT_POLICY = "default_policy";
     private static final String DEFAULT_RULE = "default_rule";
     private static final String DEFAULT_TAG = "default";
-    private static final String UEI_TRAP_COLD_START = "uei.opennms.org/generic/traps/SNMP_Cold_Start";
-    private static final String UEI_TRAP_WARM_START = "uei.opennms.org/generic/traps/SNMP_Warm_Start";
     private static final String UEI_TRAP_UNREACHABLE = "uei.opennms.org/generic/traps/%s_Unreachable"; // %s is component type
     private static final String UEI_GENERIC_TEMPLATE = "uei.opennms.org/generic/traps/%s"; //%s is the event type
     private static final String REDUCTION_KEY_TEMPLATE = "%s:%s:%d";
@@ -75,23 +75,23 @@ public class MonitorPolicyService {
     public void defaultPolicies() {
         if(repository.findAllByTenantId(SYSTEM_TENANT).isEmpty()) {
             TriggerEventProto coldReboot = TriggerEventProto.newBuilder()
-                .setTriggerEvent(EventType.COLD_REBOOT)
+                .setTriggerEvent(EventType.SNMP_Cold_Start)
                 .setCount(1)
                 .setSeverity(Severity.CRITICAL)
                 .build();
             TriggerEventProto warmReboot = TriggerEventProto.newBuilder()
-                .setTriggerEvent(EventType.WARM_REBOOT)
+                .setTriggerEvent(EventType.SNMP_Warm_Start)
                 .setCount(1)
                 .setSeverity(Severity.MAJOR)
                 .build();
             TriggerEventProto deviceUnreachable = TriggerEventProto.newBuilder()
-                .setTriggerEvent(EventType.DEVICE_UNREACHABLE)
+                .setTriggerEvent(DEVICE_UNREACHABLE)
                 .setCount(1)
                 .setSeverity(Severity.MAJOR)
                 .build();
             PolicyRuleProto defaultRule = PolicyRuleProto.newBuilder()
                 .setName(DEFAULT_RULE)
-                .setComponentType(ManagedObjectType.NODE.NODE)
+                .setComponentType(ManagedObjectType.NODE)
                 .addAllSnmpEvents(List.of(coldReboot, warmReboot, deviceUnreachable))
                 .build();
             MonitorPolicyProto defaultPolicy = MonitorPolicyProto.newBuilder()
@@ -192,17 +192,15 @@ public class MonitorPolicyService {
     }
 
     private String getUeiFromEventType(EventType type) {
-        return switch (type) {
-            case COLD_REBOOT -> UEI_TRAP_COLD_START;
-            case WARM_REBOOT -> UEI_TRAP_WARM_START;
-            case DEVICE_UNREACHABLE -> UEI_TRAP_UNREACHABLE;
-            default -> String.format(UEI_GENERIC_TEMPLATE, type.name());
-        };
+        if(DEVICE_UNREACHABLE.equals(type)) {
+            return UEI_TRAP_UNREACHABLE;
+        }
+        return String.format(UEI_GENERIC_TEMPLATE, type.name());
     }
 
     private AlertType getAlertTypeFromEventType(EventType eventType) {
         return switch (eventType) {
-            case COLD_REBOOT, WARM_REBOOT -> AlertType.PROBLEM_WITHOUT_CLEAR;
+            case SNMP_Cold_Start, SNMP_Warm_Start -> AlertType.PROBLEM_WITHOUT_CLEAR;
             case PORT_DOWN, SNMP_Link_Down -> AlertType.PROBLEM_WITH_CLEAR;
             case PORT_UP, SNMP_Link_Up -> AlertType.CLEAR;
             default -> AlertType.ALARM_TYPE_UNDEFINED;

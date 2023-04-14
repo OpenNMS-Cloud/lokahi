@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+    <changeSet id="hs-0.1.0-update-default-policy-trigger-events" author="yli">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="trigger_event"/>
+        </preConditions>
+        <update tableName="trigger_event">
+            <column name="trigger_event_type" value="SNMP_Cold_Start"/>
+            <where>trigger_event_type='COLD_REBOOT'</where>
+        </update>
+        <update tableName="trigger_event">
+            <column name="trigger_event_type" value="SNMP_Warm_Start"/>
+            <where>trigger_event_type='WARM_REBOOT'</where>
+        </update>
+        <update tableName="trigger_event">
+            <column name="trigger_event_type" value="SNMP_Authen_Failure"/>
+            <where>trigger_event_type='SNMP_AUTH_FAILURE'</where>
+        </update>
+    </changeSet>
+</databaseChangeLog>

@@ -295,14 +295,15 @@ enum OverTimeUnit {
 
 enum EventType {
   UNKNOWN_EVENT = 0;
-  COLD_REBOOT = 1;
-  WARM_REBOOT = 2;
-  SNMP_AUTH_FAILURE = 3;
+  SNMP_Cold_Start = 1;
+  SNMP_Warm_Start = 2;
+  SNMP_Authen_Failure = 3;
   PORT_DOWN = 4;
   PORT_UP = 5;
   DEVICE_UNREACHABLE = 6;
   SNMP_Link_Down = 7;
   SNMP_Link_Up = 8;
+  SNMP_EGP_Down = 9;
 }
 
 message MonitorPolicyList {

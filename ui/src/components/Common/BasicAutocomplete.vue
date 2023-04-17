@@ -177,7 +177,8 @@ const reset = () => {
 }
 
 defineExpose({
-  reset
+  reset,
+  addValue
 })
 </script>
 

@@ -128,6 +128,9 @@ const tagsAutocompleteRef = ref()
 onMounted(() => {
   if (props.discovery?.id) {
     discoveryQueries.getTagsByActiveDiscoveryId(props.discovery.id)
+  } else {
+    // add default tag to snmp form
+    tagsAutocompleteRef.value.addValue('default')
   }
 })
 

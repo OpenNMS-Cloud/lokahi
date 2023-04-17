@@ -29,9 +29,11 @@
 package org.opennms.horizon.notifications.service;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.opennms.horizon.alerts.proto.Alert;
 import org.opennms.horizon.notifications.api.email.EmailAPI;
 import org.opennms.horizon.notifications.api.PagerDutyAPI;
+import org.opennms.horizon.notifications.api.email.Velocity;
 import org.opennms.horizon.notifications.api.keycloak.KeyCloakAPI;
 import org.opennms.horizon.notifications.dto.PagerDutyConfigDTO;
 import org.opennms.horizon.notifications.exceptions.NotificationException;
@@ -52,6 +54,9 @@ public class NotificationService {
 
     @Autowired
     private EmailAPI emailAPI;
+
+    @Autowired
+    private Velocity velocity;
 
     @Autowired
     private KeyCloakAPI keyCloakAPI;
@@ -89,9 +94,12 @@ public class NotificationService {
         }
         if (notifyEmail) {
             try {
-                List<String> emailAddresses = keyCloakAPI.getTenantEmailAddresses(alert.getTenantId());
-                if (!emailAddresses.isEmpty()) {
-                    emailAPI.postNotification(emailAddresses, alert);
+                for (String emailAddress: keyCloakAPI.getTenantEmailAddresses(alert.getTenantId())) {
+                    emailAPI.sendEmail(
+                        emailAddress,
+                        String.format("%s severity alert", StringUtils.capitalize(alert.getSeverity().getValueDescriptor().getName())),
+                        velocity.populateTemplate(emailAddress, alert)
+                    );
                 }
             }catch (NotificationException e) {
                 log.warn("Unable to send alert to Email: {}", alert, e);

@@ -1,0 +1,3 @@
+To: $recipient
+Description: ${alert.getDescription()}
+Message: ${alert.getLogMessage()}

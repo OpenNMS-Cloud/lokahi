@@ -37,6 +37,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.opennms.horizon.alerts.proto.Alert;
 import org.opennms.horizon.notifications.api.PagerDutyAPI;
 import org.opennms.horizon.notifications.api.email.EmailAPI;
+import org.opennms.horizon.notifications.api.email.Velocity;
 import org.opennms.horizon.notifications.api.keycloak.KeyCloakAPI;
 import org.opennms.horizon.notifications.exceptions.NotificationAPIException;
 import org.opennms.horizon.notifications.exceptions.NotificationException;
@@ -71,6 +72,9 @@ public class NotificationServiceImplTest {
     @Mock
     MonitoringPolicyRepository monitoringPolicyRepository;
 
+    @Mock
+    Velocity velocity;
+
     @Test
     public void testNotificationPagerDutyPolicy() throws NotificationException {
         // PagerDuty is enabled in the monitoring policy, resulting in a PagerDuty notification
@@ -86,7 +90,7 @@ public class NotificationServiceImplTest {
         notificationService.postNotification(alert);
 
         Mockito.verify(pagerDutyAPI, times(1)).postNotification(alert);
-        Mockito.verify(emailAPI, times(0)).postNotification(any(), eq(alert));
+        Mockito.verify(emailAPI, times(0)).sendEmail(any(), any(), any());
     }
 
     @Test
@@ -103,7 +107,7 @@ public class NotificationServiceImplTest {
         notificationService.postNotification(alert);
 
         Mockito.verify(pagerDutyAPI, times(0)).postNotification(alert);
-        Mockito.verify(emailAPI, times(0)).postNotification(any(), eq(alert));
+        Mockito.verify(emailAPI, times(0)).sendEmail(any(), any(), any());
     }
 
     @Test
@@ -116,7 +120,7 @@ public class NotificationServiceImplTest {
         notificationService.postNotification(alert);
 
         Mockito.verify(pagerDutyAPI, times(0)).postNotification(alert);
-        Mockito.verify(emailAPI, times(0)).postNotification(any(), eq(alert));
+        Mockito.verify(emailAPI, times(0)).sendEmail(any(), any(), any());
     }
 
     @Test
@@ -133,12 +137,12 @@ public class NotificationServiceImplTest {
 
         Alert alert = Alert.newBuilder().setTenantId("T1").addMonitoringPolicyId(1).build();
         doThrow(new NotificationAPIException("Foo")).when(pagerDutyAPI).postNotification(any());
-        doThrow(new NotificationAPIException("Foo")).when(emailAPI).postNotification(any(), any());
+        doThrow(new NotificationAPIException("Foo")).when(emailAPI).sendEmail(any(), any(), any());
 
         notificationService.postNotification(alert);
 
         Mockito.verify(pagerDutyAPI, times(1)).postNotification(alert);
-        Mockito.verify(emailAPI, times(1)).postNotification(any(), eq(alert));
+        Mockito.verify(emailAPI, times(1)).sendEmail(any(), any(), any());
     }
 
     @Test
@@ -171,15 +175,16 @@ public class NotificationServiceImplTest {
         monitoringPolicy.setNotifyByEmail(true);
         Mockito.when(monitoringPolicyRepository.findByTenantIdAndIdIn("T1", List.of(1L)))
             .thenReturn(List.of(monitoringPolicy));
-        List<String> adminEmail = List.of("admin@email");
-        Mockito.when(keyCloakAPI.getTenantEmailAddresses("T1")).thenReturn(adminEmail);
+        String adminEmail = "admin@email";
+        Mockito.when(keyCloakAPI.getTenantEmailAddresses("T1")).thenReturn(List.of(adminEmail));
 
         Alert alert = Alert.newBuilder().setTenantId("T1").addMonitoringPolicyId(1).build();
+        Mockito.when(velocity.populateTemplate(adminEmail, alert)).thenReturn("Alert email");
 
         notificationService.postNotification(alert);
 
         Mockito.verify(pagerDutyAPI, times(0)).postNotification(alert);
-        Mockito.verify(emailAPI, times(1)).postNotification(adminEmail, alert);
+        Mockito.verify(emailAPI, times(1)).sendEmail(eq(adminEmail), any(), eq("Alert email"));
     }
 
     @Test
@@ -198,7 +203,7 @@ public class NotificationServiceImplTest {
         notificationService.postNotification(alert);
 
         Mockito.verify(pagerDutyAPI, times(0)).postNotification(alert);
-        Mockito.verify(emailAPI, times(0)).postNotification(any(), eq(alert));
+        Mockito.verify(emailAPI, times(0)).sendEmail(any(), any(), any());
     }
 
     @Test
@@ -210,15 +215,16 @@ public class NotificationServiceImplTest {
         monitoringPolicy.setNotifyByEmail(true);
         Mockito.when(monitoringPolicyRepository.findByTenantIdAndIdIn("T1", List.of(1L)))
             .thenReturn(List.of(monitoringPolicy));
-        List<String> adminEmail = List.of("admin@email");
-        Mockito.when(keyCloakAPI.getTenantEmailAddresses("T1")).thenReturn(adminEmail);
+        String adminEmail = "admin@email";
+        Mockito.when(keyCloakAPI.getTenantEmailAddresses("T1")).thenReturn(List.of(adminEmail));
 
         Alert alert = Alert.newBuilder().setTenantId("T1").addMonitoringPolicyId(1).build();
+        Mockito.when(velocity.populateTemplate(adminEmail, alert)).thenReturn("Alert email");
 
         notificationService.postNotification(alert);
 
         Mockito.verify(pagerDutyAPI, times(1)).postNotification(alert);
-        Mockito.verify(emailAPI, times(1)).postNotification(adminEmail, alert);
+        Mockito.verify(emailAPI, times(1)).sendEmail(eq(adminEmail), any(), eq("Alert email"));
     }
 
     @Test

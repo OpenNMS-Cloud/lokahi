@@ -34,5 +34,5 @@ import org.opennms.horizon.notifications.exceptions.NotificationException;
 import java.util.List;
 
 public interface EmailAPI {
-    public void postNotification(List<String> emailAddresses, Alert alert) throws NotificationException;
+    public void sendEmail(String emailAddress, String subject, String body) throws NotificationException;
 }

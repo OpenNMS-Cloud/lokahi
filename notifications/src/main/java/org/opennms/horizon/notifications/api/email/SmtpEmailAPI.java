@@ -51,31 +51,23 @@ public class SmtpEmailAPI implements EmailAPI {
     private final JavaMailSender sender;
 
     @Override
-    public void postNotification(List<String> emailAddresses, Alert alert) throws NotificationException {
+    public void sendEmail(String emailAddress, String subject, String body) throws NotificationException {
         try {
-            sendEmail(emailAddresses, alert.getLogMessage(), createEmailBody(alert));
+            MimeMessage mimeMessage = sender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage);
+
+            helper.setTo(emailAddress);
+            helper.setFrom(fromAddress);
+
+            helper.setSubject(subject);
+            helper.setText(body, true);
+
+            sender.send(helper.getMimeMessage());
         } catch (MessagingException e) {
             // TODO This may be a retryable exception
             throw new NotificationAPIException(e);
         } catch (MailException e) {
             throw new NotificationAPIException(e);
         }
-    }
-
-    private void sendEmail(List<String> to, String subject, String body) throws MessagingException {
-        MimeMessage mimeMessage = sender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(mimeMessage);
-
-        helper.setTo(to.toArray(new String[0]));
-        helper.setFrom(fromAddress);
-
-        helper.setSubject(subject);
-        helper.setText(body);
-
-        sender.send(helper.getMimeMessage());
-    }
-
-    private String createEmailBody(Alert alert) {
-        return alert.getDescription();
     }
 }

@@ -31,7 +31,9 @@ package org.opennms.horizon.alertservice.db.entity;
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
+import jakarta.persistence.Transient;
 import org.opennms.horizon.alerts.proto.AlertType;
 import org.opennms.horizon.alerts.proto.ManagedObjectType;
 import org.opennms.horizon.alerts.proto.Severity;
@@ -120,6 +122,9 @@ public class Alert implements Serializable {
 
     @Column
     private String managedObjectInstance;
+
+    @Transient
+    private List<Long> monitoringPolicyId;
 
     public void incrementCount() {
         counter++;

@@ -31,7 +31,6 @@ package org.opennms.horizon.notifications.api.email;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
-import org.opennms.horizon.alerts.proto.Alert;
 import org.opennms.horizon.notifications.exceptions.NotificationAPIException;
 import org.opennms.horizon.notifications.exceptions.NotificationException;
 import org.springframework.beans.factory.annotation.Value;
@@ -39,8 +38,6 @@ import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
 
 @Component
 @RequiredArgsConstructor

@@ -28,8 +28,6 @@
 
 package org.opennms.horizon.notifications.tenant;
 
-import io.grpc.Context;
-
 import java.util.Optional;
 
 public interface TenantLookup {

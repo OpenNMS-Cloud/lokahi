@@ -58,6 +58,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.PostConstruct;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -110,12 +111,20 @@ public class AlertEventProcessor {
             clearKey = String.format(alertDefinition.getClearKey(), event.getTenantId(), event.getNodeId());
         }
         TriggerEvent triggerEvent = triggerEventRepository.getReferenceById(alertDefinition.getTriggerEventId());
-        // TODO: An alert could match multiple monitoring policies, each having their own notifications.
+        // TODO HS-1485: An alert could match multiple monitoring policies, each having their own notifications.
         Optional<MonitorPolicy> policy = monitorPolicyRepository.findMonitoringPolicyByTriggerEvent(triggerEvent.getId());
-        if (policy.isPresent()) {
-            return new AlertData(reductionKey, clearKey, alertDefinition.getType(), triggerEvent.getSeverity(), triggerEvent.getCount(), triggerEvent.getOvertime(), triggerEvent.getOvertimeUnit(), List.of(policy.get().getId()));
-        }
-        return new AlertData(reductionKey, clearKey, alertDefinition.getType(), triggerEvent.getSeverity(), triggerEvent.getCount(), triggerEvent.getOvertime(), triggerEvent.getOvertimeUnit(), Collections.emptyList());
+        List<Long> policies = new ArrayList<>();
+        policy.ifPresent(monitorPolicy -> policies.add(monitorPolicy.getId()));
+        return new AlertData(
+            reductionKey,
+            clearKey,
+            alertDefinition.getType(),
+            triggerEvent.getSeverity(),
+            triggerEvent.getCount(),
+            triggerEvent.getOvertime(),
+            triggerEvent.getOvertimeUnit(),
+            policies
+        );
     }
 
     protected @Nullable org.opennms.horizon.alertservice.db.entity.Alert addOrReduceEventAsAlert(Event event) {
@@ -129,9 +138,6 @@ public class AlertEventProcessor {
             return null;
         }
         AlertData alertData = getAlertData(event, alertDefOpt.get());
-        if (alertData == null) {
-            return null;
-        }
 
         Optional<org.opennms.horizon.alertservice.db.entity.Alert> optionalAlert = Optional.empty();
         if (alertData.clearKey() != null) {

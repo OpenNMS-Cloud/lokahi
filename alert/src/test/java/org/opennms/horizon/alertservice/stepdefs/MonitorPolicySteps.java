@@ -212,7 +212,7 @@ public class MonitorPolicySteps {
         });
     }
 
-    @Then("valid monitoring policy ID is set in alert for tenant {string}")
+    @Then("Verify valid monitoring policy ID is set in alert for tenant {string}")
     public void checkMonitoringPolicyIdSet(String tenantId) {
         Awaitility.waitAtMost(5, TimeUnit.SECONDS).untilAsserted(() -> {
                 List<Alert> alerts = filterMessagesForTenant(tenantId, alert -> alert.getMonitoringPolicyIdCount() >= 1);

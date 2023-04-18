@@ -39,6 +39,8 @@ import org.opennms.horizon.server.model.TimeSeriesQueryResult;
 import org.opennms.horizon.server.service.grpc.InventoryClient;
 import org.opennms.horizon.server.service.metrics.normalization.NormalizationService;
 import org.opennms.horizon.server.utils.ServerHeaderUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -46,6 +48,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -69,6 +72,7 @@ public class TSDBMetricsService {
     private final InventoryClient inventoryClient;
     private final WebClient tsdbQueryWebClient;
     private final WebClient tsdbrangeQueryWebClient;
+    private static final Logger LOG = LoggerFactory.getLogger(TSDBMetricsService.class);
 
     public TSDBMetricsService(ServerHeaderUtil headerUtil,
                               MetricLabelUtils metricLabelUtils,
@@ -107,11 +111,10 @@ public class TSDBMetricsService {
         String metricNameRegex = name;
         String tenantId = headerUtil.extractTenant(env);
         if (TOTAL_NETWORK_BYTES_IN.equals(name) || TOTAL_NETWORK_BYTES_OUT.equals(name)) {
-            // TODO: Derive start/end/steps from API.
-            //  For now these two queries are fixed to 24h with 1h steps.
-            long currentTimeStampInSec = System.currentTimeMillis() / 1000L;
-            long timeStampBefore24h = currentTimeStampInSec - 24 * 60 * 60;
-            String rangeQuerySuffix = "&start=" + timeStampBefore24h + "&end=" + currentTimeStampInSec +
+            // TODO: Defaults to 24h with 1h steps but may need to align both step and range in the rate query
+            long end = System.currentTimeMillis() / 1000L;
+            long start = end - getDuration(timeRange, timeRangeUnit).orElse(Duration.ofHours(24)).getSeconds();
+            String rangeQuerySuffix = "&start=" + start + "&end=" + end +
                 "&step=1h";
             if (TOTAL_NETWORK_BYTES_IN.equals(name)) {
                 String rangeQuery = QUERY_FOR_TOTAL_NETWORK_BYTES_IN + rangeQuerySuffix;
@@ -137,6 +140,18 @@ public class TSDBMetricsService {
         return nodeOpt.map(nodeDTO -> resultMono.map(result ->
                 normalizationService.normalizeResults(name, result)))
             .orElse(resultMono);
+    }
+
+    public static Optional<Duration> getDuration(Integer timeRange, TimeRangeUnit timeRangeUnit) {
+        try {
+            if (TimeRangeUnit.DAY.value.equals(timeRangeUnit.value)) {
+                return Optional.of(Duration.parse("P" + timeRange + timeRangeUnit.value));
+            }
+            return Optional.of(Duration.parse("PT" + timeRange + timeRangeUnit.value));
+        } catch (Exception e) {
+            LOG.warn("Exception while parsing time range with timeRange {} in units {}", timeRange, timeRangeUnit, e);
+        }
+        return Optional.empty();
     }
 
 

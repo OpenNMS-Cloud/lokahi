@@ -1,6 +1,6 @@
 <template>
   <div class="flows-container">
-    <PageHeadline
+    <HeadlinePage
       text="Flows"
       data-test="flows-page-header"
     />
@@ -22,7 +22,7 @@
         :loading="flowsStore.filters.isExportersLoading"
         :results="flowsStore.filters.filteredExporters"
         @search="flowsStore.exportersAutoCompleteSearch"
-        @update:model-value="flowsStore.updateCharts"
+        @update:model-value="flowsStore.updateChartData"
       ></FeatherAutocomplete>
       <div class="filters-divider"></div>
       <FeatherAutocomplete
@@ -33,7 +33,7 @@
         :loading="flowsStore.filters.isApplicationsLoading"
         :results="flowsStore.filters.filteredApplications"
         @search="flowsStore.applicationsAutoCompleteSearch"
-        @update:model-value="flowsStore.updateCharts"
+        @update:model-value="flowsStore.updateChartData"
       ></FeatherAutocomplete>
     </div>
     <!-- Chart Area -->
@@ -44,14 +44,17 @@
           <div class="total-flows">{{ flowsStore.totalFlows }}</div>
         </div>
         <div class="utilitys">
-          <FeatherButton icon="Add">
+          <FeatherButton icon="Download">
             <FeatherIcon
               class="utility-icon"
               :icon="Download"
             >
             </FeatherIcon>
           </FeatherButton>
-          <FeatherButton icon="Add">
+          <FeatherButton
+            @click="flowsStore.populateData"
+            icon="Refresh"
+          >
             <FeatherIcon
               class="utility-icon"
               :icon="Refresh"
@@ -102,14 +105,14 @@
         :id="'tableChartApplications'"
         :selected-filter-range="flowsStore.filters.dateFilter"
         :chart-data="flowsStore.applications.tableChartData"
-        :table-data="flowsStore.tableDatasets"
+        :table-data="flowsStore.applications.tableData"
       />
       <LineChart
         v-if="flowsStore.filters.dataStyle.selectedItem === 'line' && hasData"
         :id="'lineChartApplications'"
         :selected-filter-range="flowsStore.filters.dateFilter"
         :chart-data="flowsStore.applications.lineChartData"
-        :table-data="flowsStore.tableDatasets"
+        :table-data="flowsStore.applications.tableData"
       />
       <div v-if="!hasData && !flowsStore.applications.isLineLoading && !flowsStore.applications.isLineLoading">
         No data
@@ -145,7 +148,7 @@ const dataStyleRadios = ref([
 ] as FeatherRadioObject[])
 
 onMounted(async () => {
-  await flowsStore.updateCharts()
+  await flowsStore.populateData()
 })
 
 const timeOptions = ref([
@@ -153,6 +156,8 @@ const timeOptions = ref([
   { value: TimeRange.Last_24Hours, name: '24H' },
   { value: TimeRange.SevenDays, name: '7D' }
 ])
+
+onUnmounted(() => flowsStore.$reset)
 </script>
 
 <style scoped lang="scss">

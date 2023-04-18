@@ -24,6 +24,9 @@
         <azure.okhttp.version>1.11.8</azure.okhttp.version>
         <azure.secrets.version>4.6.0</azure.secrets.version>
         <azure.identity.version>1.8.2</azure.identity.version>
+        <lombok.version>1.18.26</lombok.version>
+        <jna.version>5.12.1</jna.version>
+        <testcontainers.version>1.15.3</testcontainers.version>
     </properties>
 
     <build>
@@ -57,19 +60,11 @@
         </dependency>
 
         <dependency>
-            <groupId>com.codeborne</groupId>
-            <artifactId>selenide</artifactId>
-            <version>6.13.0</version>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
             <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
-
         <dependency>
             <groupId>org.junit.vintage</groupId>
             <artifactId>junit-vintage-engine</artifactId>
@@ -98,5 +93,32 @@
             <artifactId>azure-identity</artifactId>
             <version>${azure.identity.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>com.codeborne</groupId>
+            <artifactId>selenide</artifactId>
+            <version>6.13.0</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>${lombok.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>testcontainers</artifactId>
+            <version>${testcontainers.version}</version>
+        </dependency>
+        <!-- M1 chip support -->
+        <dependency>
+            <groupId>net.java.dev.jna</groupId>
+            <artifactId>jna</artifactId>
+            <version>${jna.version}</version>
+        </dependency>
+
     </dependencies>
 </project>

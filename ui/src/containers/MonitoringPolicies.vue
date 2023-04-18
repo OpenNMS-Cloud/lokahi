@@ -1,8 +1,8 @@
 <template>
   <div class="container">
-    <PageHeadline text="Monitoring Policies" />
+    <HeadlinePage text="Monitoring Policies" />
     <MonitoringPoliciesPolicyForm />
-    <MonitoringPoliciesRuleForm/>
+    <MonitoringPoliciesRuleForm />
     <MonitoringPoliciesSaveButtons />
   </div>
 </template>

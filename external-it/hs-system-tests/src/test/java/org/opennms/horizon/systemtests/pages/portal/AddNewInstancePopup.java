@@ -33,21 +33,20 @@ import com.codeborne.selenide.Condition;
 import com.codeborne.selenide.SelenideElement;
 
 import static com.codeborne.selenide.Selenide.$;
-import static com.codeborne.selenide.Selenide.$x;
 
 public class AddNewInstancePopup {
 
-    private static final SelenideElement popup = $("#add-instancemodal");
-    private static final SelenideElement instanceNameInp = $("#cloud-add-instance-modal-name");
-    private static final SelenideElement submitBtn = $("button.confirm-dialog-submit-button");
-    private static final SelenideElement meOption = $x("//div[@data-ref-id='feather-radio' and contains(.,'Me')]");
-    private static final SelenideElement anotherEmailInp = $("#cloud-add-instance-modal-email-with");
-    private static final SelenideElement anotherEmailDropDown = $("div.feather-menu-dropdown .feather-list-item-text");
-    private static final SelenideElement someoneElseOption = $x("//div[@data-ref-id='feather-radio' and contains(.,'Someone else')]");
-    private static final SelenideElement cancelBtn = $("button.confirm-dialog-cancel-button");
-    private static final SelenideElement closeBtn = $("a.closeButton");
+    private static final SelenideElement popup = $("#cloud-add-instance-dialog");
+    private static final SelenideElement instanceNameInp = $("#cloud-add-instance-dialog-name");
     private static final SelenideElement errorMessageTxt = $("[data-ref-id='feather-form-element-error']");
+    private static final SelenideElement meOption = $("#cloud-add-instance-me");
+    private static final SelenideElement someoneElseOption = $("#cloud-add-instance-someoneelse");
+    private static final SelenideElement anotherEmailInp = $("#cloud-add-instance-dialog-email-with");
+    private static final SelenideElement anotherEmailDropDown = $("div.feather-menu-dropdown .feather-list-item-text");
     private static final SelenideElement emailErrorMessageTxt = $("[data-ref-id='feather-form-element-error']");
+    private static final SelenideElement cancelBtn = $("#cloud-add-instance-cancel");
+    private static final SelenideElement submitBtn = $("#cloud-add-instance-confirm");
+    private static final SelenideElement closeBtn = $("[data-ref-id='dialog-close']");
 
 
     public static void waitPopupIsDisplayed(boolean visible) {

@@ -43,9 +43,6 @@ type OpenNMSSpec struct {
 	// Set the default credentials for the instance
 	Credentials Credentials `json:"credentials,omitempty"`
 
-	// Defines service values for Core service
-	Core BaseServiceResources `json:"core,omitempty"`
-
 	// Defines service values for API service
 	API BaseServiceResources `json:"api,omitempty"`
 
@@ -57,6 +54,9 @@ type OpenNMSSpec struct {
 
 	// Defines service values for the Minion Gateway
 	MinionGateway BaseServiceResources `json:"minionGateway,omitempty"`
+
+	// Defines service values for the Minion SSL Gateway
+	MinionSSLGateway BaseServiceResources `json:"minionSslGateway,omitempty"`
 
 	// Defines service values for Inventory service
 	Inventory BaseServiceResources `json:"inventory,omitempty"`
@@ -85,16 +85,8 @@ type OpenNMSSpec struct {
 	// Defines service values for Grafana
 	Grafana BaseServiceResources `json:"grafana,omitempty"`
 
-	// Defines the logic of ONMS image update
-	ImageUpdateConfig ImageUpdateConfig `json:"imageUpdate,omitempty"`
-}
-
-// Timeseries - defines the timeseries DB backend to use
-type Timeseries struct {
-	Mode   string `json:"mode,omitempty"`
-	Host   string `json:"host,omitempty"`
-	Port   string `json:"port,omitempty"`
-	ApiKey string `json:"apiKey,omitempty"`
+	// Defines the config for ONMS updates
+	UpdateConfig UpdateConfig `json:"updateConfig,omitempty"`
 }
 
 // BaseServiceResources - defines basic resource needs of a service
@@ -115,27 +107,29 @@ type Credentials struct {
 
 // OpenNMSStatus - defines the observed state of OpenNMS
 type OpenNMSStatus struct {
-	Image     ImageStatus     `json:"image,omitempty"`
+	Update    UpdateStatus    `json:"update,omitempty"`
 	Readiness ReadinessStatus `json:"readiness,omitempty"`
 	Nodes     []string        `json:"nodes,omitempty"`
 }
 
-// ImageUpdateConfig - defines current status of used image for OpenNMS container
-type ImageUpdateConfig struct {
-	// can have values of now/none
-	Update string `json:"update,omitempty"`
+// UpdateConfig - Defines the config for ONMS updates
+type UpdateConfig struct {
+	// update mode, either `automatic` updates or `manual`
+	Mode string `json:"mode" default:"manual"`
+	// toggle to force update, can be now/none
+	Update string `json:"update" default:"none"`
 }
 
 // +kubebuilder:object:generate=true
 
-// ImageStatus - defines current status of used image for OpenNMS container
-type ImageStatus struct {
-	// true if latest image used, false otherwise
-	IsLatest bool `json:"isLatest"`
-	// timestamp of a last image check in DockerHub
+// UpdateStatus - defines current status of available updates to ONMS
+type UpdateStatus struct {
+	// true if there's an update available for ONMS
+	UpdateAvailable bool `json:"updateAvailable"`
+	// timestamp of the last update check
 	CheckedAt string `json:"checkedAt,omitempty"`
-	// list of services that have updates available
-	ServicesToUpdate string `json:"servicesToUpdate,omitempty"`
+	// message describing the update status
+	Message string `json:"message,omitempty"`
 }
 
 // +kubebuilder:object:generate=true

@@ -1,6 +1,6 @@
 <template>
   <div class="container">
-    <PageHeadline text="My Discovery" />
+    <HeadlinePage text="My Discovery" />
     <div class="row">
       <div class="discovery-cards">
         <div class="card">

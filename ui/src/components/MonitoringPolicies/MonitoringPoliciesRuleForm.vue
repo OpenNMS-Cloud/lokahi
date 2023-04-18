@@ -115,15 +115,10 @@
 </template>
 
 <script setup lang="ts">
-import { useMonitoringPoliciesStore } from '@/store/Views/monitoringPoliciesStore'
-import { EventCondition, Rule, ThresholdCondition } from '@/types/policies'
+import {useMonitoringPoliciesStore} from '@/store/Views/monitoringPoliciesStore'
+import {EventCondition, Rule, ThresholdCondition} from '@/types/policies'
 import Add from '@featherds/icon/action/Add'
-import {
-  DetectionMethodTypes,
-  ComponentType,
-  EventMetrics,
-  ThresholdMetrics
-} from './monitoringPolicies.constants'
+import {ComponentType, DetectionMethodTypes, EventMetrics, ThresholdMetrics} from './monitoringPolicies.constants'
 
 const store = useMonitoringPoliciesStore()
 const addIcon = markRaw(Add)
@@ -135,9 +130,9 @@ const metricOptions = computed(() => {
 })
 
 const componentTypeOptions = [
-  { id: ComponentType.CPU, name: 'CPU' },
-  { id: ComponentType.INTERFACE, name: 'Interface' },
-  { id: ComponentType.STORAGE, name: 'Storage' },
+  { id: ComponentType.ANY, name: 'Any' },
+  { id: ComponentType.SNMP_INTERFACE, name: 'SNMP Interface' },
+  { id: ComponentType.SNMP_INTERFACE_LINK, name: 'SNMP Interface Link'},
   { id: ComponentType.NODE, name: 'Node' }
 ]
 

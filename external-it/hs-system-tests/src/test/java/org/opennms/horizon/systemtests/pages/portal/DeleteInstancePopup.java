@@ -38,8 +38,8 @@ public class DeleteInstancePopup {
 
     private static final SelenideElement popup = $("[data-ref-id='feather-dialog']");
     private static final SelenideElement confirmInstanceNameInp = $("#delete-instance-confirm-input");
-    private static final SelenideElement deleteBtn = $("div.dialog-footer button.btn-primary");
-    private static final SelenideElement cancelBtn = $("div.dialog-footer button.btn-secondary");
+    private static final SelenideElement deleteBtn = $("#cloud-delete-instance-confirm");
+    private static final SelenideElement cancelBtn = $("#cloud-delete-instance-cancel");
 
     public static void waitPopupIsDisplayed(boolean isVisible) {
         if (isVisible) {

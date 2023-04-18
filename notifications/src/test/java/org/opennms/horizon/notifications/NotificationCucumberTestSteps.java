@@ -20,6 +20,7 @@ import org.apache.kafka.common.serialization.StringSerializer;
 import org.keycloak.common.VerificationException;
 import org.opennms.horizon.alerts.proto.Alert;
 import org.opennms.horizon.alerts.proto.MonitorPolicyProto;
+import org.opennms.horizon.alerts.proto.Severity;
 import org.opennms.horizon.notifications.api.PagerDutyDao;
 import org.opennms.horizon.notifications.api.keycloak.KeyCloakAPI;
 import org.opennms.horizon.notifications.dto.NotificationServiceGrpc;
@@ -224,7 +225,7 @@ public class NotificationCucumberTestSteps extends GrpcTestBase {
     }
 
     private void postAlert(String tenantId, long monitoringPolicyId) {
-        alert = Alert.newBuilder().setLogMessage("Hello").setDescription("Alarm!").setTenantId(tenantId).addMonitoringPolicyId(monitoringPolicyId).build();
+        alert = Alert.newBuilder().setSeverity(Severity.MAJOR).setLogMessage("Hello").setDescription("Alarm!").setTenantId(tenantId).addMonitoringPolicyId(monitoringPolicyId).build();
         notificationService.postNotification(alert);
     }
 

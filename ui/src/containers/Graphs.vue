@@ -1,6 +1,6 @@
 <template>
   <div class="header-container">
-    <PageHeadline
+    <HeadlinePage
       text="Graphs"
       data-test="page-header"
     />

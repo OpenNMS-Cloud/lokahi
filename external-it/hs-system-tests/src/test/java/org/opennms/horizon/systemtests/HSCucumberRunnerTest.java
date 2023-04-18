@@ -28,44 +28,17 @@
 
 package org.opennms.horizon.systemtests;
 
-import com.codeborne.selenide.Selenide;
-import io.cucumber.java.After;
-import io.cucumber.java.Before;
 import io.cucumber.junit.Cucumber;
 import io.cucumber.junit.CucumberOptions;
 import org.junit.runner.RunWith;
-import org.opennms.horizon.systemtests.keyvalue.SecretsStorage;
-import org.opennms.horizon.systemtests.pages.portal.PortalCloudPage;
-import org.opennms.horizon.systemtests.pages.portal.PortalLoginPage;
 
 @RunWith(Cucumber.class)
 @CucumberOptions(
-    features = "src/test/resources/features",
+    features = {"src/test/resources/cloud-features", "src/test/resources/portal-features"},
     plugin = {"pretty",
         "json:cucumber.reports/cucumber-report.json",
         "html:cucumber.reports/cucumber-report.html"},
     tags = "@cloud"
 )
 public class HSCucumberRunnerTest {
-
-    @Before("@portal")
-    public static void loginToPortal() {
-        if (Selenide.webdriver().driver().hasWebDriverStarted()) {
-            return;
-        }
-        Selenide.open(SecretsStorage.portalHost);
-        PortalLoginPage.closeCookieHeader();
-        PortalLoginPage.setUsername(SecretsStorage.adminUserEmail);
-        PortalLoginPage.clickNext();
-        PortalLoginPage.setPassword(SecretsStorage.adminUserPassword);
-        PortalLoginPage.clickSignIn();
-
-        PortalCloudPage.verifyThatUserLoggedIn();
-    }
-
-    @After("@portal")
-    public static void returnToPortalMainPage() {
-        Selenide.open(SecretsStorage.portalHost + "/cloud");
-    }
-
 }

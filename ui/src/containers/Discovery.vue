@@ -1,5 +1,5 @@
 <template>
-  <PageHeadline
+  <HeadlinePage
     :text="discoveryText.Discovery.pageHeadline"
     class="page-headline"
   />
@@ -115,7 +115,6 @@
 </template>
 
 <script lang="ts" setup>
-import PageHeadline from '@/components/Common/PageHeadline.vue'
 import AddIcon from '@featherds/icon/action/Add'
 import { IIcon } from '@/types'
 import { DiscoveryInput } from '@/types/discovery'

@@ -2,7 +2,7 @@
   <div class="container">
     <div class="content">
       <div class="header">
-        <PageHeadline
+        <HeadlinePage
           text="Alerts"
           data-test="headline"
         />

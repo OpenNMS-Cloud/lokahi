@@ -25,19 +25,6 @@ spec:
               description: OpenNMSSpec defines the desired state of OpenNMS
               type: object
               properties:
-                core:
-                  description: Defines cpu,mem and disk size for core
-                  type: object
-                  properties:
-                    cpu:
-                      type: string
-                    disk:
-                      type: string
-                    mem:
-                      type: string
-                    image:
-                      description: Docker Image tag for the service
-                      type: string
                 api:
                   description: Defines cpu,mem and disk size for api
                   type: object
@@ -78,6 +65,19 @@ spec:
                       description: Docker Image tag for the service
                       type: string
                 minionGateway:
+                  description: Defines cpu,mem and disk size for the Minion
+                  type: object
+                  properties:
+                    cpu:
+                      type: string
+                    disk:
+                      type: string
+                    mem:
+                      type: string
+                    image:
+                      description: Docker Image tag for the service
+                      type: string
+                minionSslGateway:
                   description: Defines cpu,mem and disk size for the Minion
                   type: object
                   properties:
@@ -216,34 +216,23 @@ spec:
                 namespace:
                   description: k8s namespace to host resources
                   type: string
-                timeseries:
-                  description: Defines what plugin for timeseries to use
+                updateConfig:
+                  description: Defines the config for ONMS updates
                   type: object
                   properties:
-                    apiKey:
-                      type: string
-                    host:
-                      type: string
                     mode:
+                      description: update mode, either `automatic` updates or `manual` 
                       type: string
-                    port:
-                      type: integer
-                allowedUsers:
-                  description: Users allowed automatic login via tokens
-                  type: array
-                  items:
-                    type: string
-                imageUpdate:
-                  description: Configuration for automatic image updating
-                  type: object
-                  properties:
+                      enum: [ manual, automatic ]
+                      default: manual
                     update:
-                      description: Strategy for updating the running image
+                      description: toggle to force update, can be now/none
                       type: string
                       enum: [ now, none ]
-                testDeploy:
-                  description: Deploy the instance in a nonoperative testing mode
-                  type: boolean
+                      default: none
+                  required:
+                    - mode
+                    - update
                 deployOnly:
                   description: Only deploy the instance, do not run recurring updates on it
                   type: boolean
@@ -251,22 +240,21 @@ spec:
               description: OpenNMSStatus defines the observed state of OpenNMS
               type: object
               properties:
-                image:
-                  description: Image defines current status of used image for OpenNMS
-                    container
+                update:
+                  description: Defines current status of available updates to ONMS
                   type: object
                   properties:
-                    checkedAt:
-                      description: timestamp of a last image check in DockerHub
-                      type: string
-                    isLatest:
-                      description: true if latest image used, false otherwise
+                    updateAvailable:
+                      description: true if there's an update available for ONMS
                       type: boolean
-                    serviceToUpdate:
-                      description: list of services that have updates available
+                    checkedAt:
+                      description: timestamp of the last update check
+                      type: string
+                    message:
+                      description: message describing the update status
                       type: string
                   required:
-                    - isLatest
+                    - updateAvailable
                 nodes:
                   type: array
                   items:

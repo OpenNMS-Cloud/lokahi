@@ -36,7 +36,7 @@ import static com.codeborne.selenide.Selenide.$;
 
 public class PortalLoginPage {
 
-    private static final SelenideElement acceptBtn = $("button.MuiButton-root");
+    private static final SelenideElement acceptBtn = $("#cookie-header-accept");
     private static final SelenideElement usernameInp = $("#idp-discovery-username");
     private static final SelenideElement passwordInp = $("#okta-signin-password");
     private static final SelenideElement nextBtn = $("#idp-discovery-submit");

@@ -50,7 +50,8 @@ public interface AlertMapper {
         @Mapping(target = "lastUpdateTimeMs", source = "lastEventTime"),
         @Mapping(target = "isAcknowledged", expression = "java(alert.getAcknowledgedByUser() != null ? true : false)"),
         @Mapping(target = "ackUser", source = "acknowledgedByUser"),
-        @Mapping(target = "ackTimeMs", source = "acknowledgedAt")
+        @Mapping(target = "ackTimeMs", source = "acknowledgedAt"),
+        @Mapping(target = "monitoringPolicyIdList", source = "monitoringPolicyId")
     })
     org.opennms.horizon.alerts.proto.Alert toProto(Alert alert);
 

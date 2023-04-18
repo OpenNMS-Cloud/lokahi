@@ -16,5 +16,8 @@ package values
 
 type CortexValues struct {
 	ServiceValues `yaml:",inline"`
-	Server        ServiceValues `yaml:"Server"`
+	Protocol      string `yaml:"Protocol"`
+	Host          string `yaml:"Host"`
+	PathRead      string `yaml:"PathRead"`
+	PathWrite     string `yaml:"PathWrite"`
 }

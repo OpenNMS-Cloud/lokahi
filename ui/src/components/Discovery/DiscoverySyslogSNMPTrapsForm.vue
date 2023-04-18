@@ -118,6 +118,9 @@ const tags = computed(() => (props.discovery?.id ? discoveryQueries.tagsByPassiv
 onMounted(() => {
   if (props.discovery?.id) {
     discoveryQueries.getTagsByPassiveDiscoveryId(props.discovery.id)
+  } else {
+    // add default tag to syslog form
+    tagsAutocompleteRef.value.addValue('default')
   }
 })
 

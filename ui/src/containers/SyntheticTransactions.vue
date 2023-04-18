@@ -1,6 +1,6 @@
 <template>
   <div class="container">
-    <PageHeadline text="Synthetic Transactions" />
+    <HeadlinePage text="Synthetic Transactions" />
   </div>
 </template>
 

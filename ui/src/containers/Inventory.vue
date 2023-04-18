@@ -1,5 +1,5 @@
 <template>
-  <PageHeadline
+  <HeadlinePage
     :text="heading"
     class="header"
     data-test="page-header"

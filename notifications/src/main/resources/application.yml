@@ -3,6 +3,7 @@ spring:
     name: horizon-stream-notifications
 
   mail:
+    template: alert.html.vm
     from: noreply@opennms.com
     host: mail-server
     port: 1025

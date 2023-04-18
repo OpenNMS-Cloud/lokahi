@@ -1,7 +1,7 @@
 <template>
   <div class="container">
     <div class="header">
-      <PageHeadline text="Insights Dashboard" />
+      <HeadlinePage text="Insights Dashboard" />
       <DashboardHeaderLinks />
     </div>
     <div class="section-title">Alert Status</div>

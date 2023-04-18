@@ -29,15 +29,19 @@
 package org.opennms.horizon.alertservice.stepdefs;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Predicate;
 
 import org.assertj.core.groups.Tuple;
 import org.junit.platform.commons.util.StringUtils;
+import org.opennms.horizon.alerts.proto.Alert;
 import org.opennms.horizon.alerts.proto.EventType;
 import org.opennms.horizon.alerts.proto.ManagedObjectType;
 import org.opennms.horizon.alerts.proto.MonitorPolicyList;
@@ -175,7 +179,7 @@ public class MonitorPolicySteps {
     public void verifyTheDefaultMonitoringPolicyHasTheFollowingData(DataTable dataTable) {
         List<Map<String, String>> rows = dataTable.asMaps();
         List<TriggerEventProto> events = policy.getRulesList().get(0).getSnmpEventsList();
-        assertThat(events).asList().hasSize(3);
+        assertThat(events).asList().hasSize(rows.size());
         for(int i =0; i < events.size(); i++) {
             assertThat(events.get(i))
                 .extracting(e -> e.getTriggerEvent().name(), e -> e.getSeverity().name())
@@ -206,5 +210,26 @@ public class MonitorPolicySteps {
 
             assertEquals(1, messages.size());
         });
+    }
+
+    @Then("Verify valid monitoring policy ID is set in alert for tenant {string}")
+    public void checkMonitoringPolicyIdSet(String tenantId) {
+        Awaitility.waitAtMost(5, TimeUnit.SECONDS).untilAsserted(() -> {
+                List<Alert> alerts = filterMessagesForTenant(tenantId, alert -> alert.getMonitoringPolicyIdCount() >= 1);
+                assertEquals(1, alerts.size());
+
+                assertNotNull(grpcClient.getPolicyStub().getPolicyById(Int64Value.of(alerts.get(0).getMonitoringPolicyId(0))));
+        });
+    }
+
+    public List<Alert> filterMessagesForTenant(String tenant, Predicate<Alert> predicate) {
+        return kafkaTestHelper.getConsumedMessages(background.getAlertTopic()).stream().map(b -> {
+            try {
+                return Alert.parseFrom(b.value());
+            } catch (InvalidProtocolBufferException e) {
+                throw new RuntimeException(e);
+            }
+        }).filter(predicate).toList();
+
     }
 }

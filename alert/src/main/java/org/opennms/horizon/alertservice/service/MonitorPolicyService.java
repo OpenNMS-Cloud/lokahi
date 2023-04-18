@@ -28,8 +28,6 @@
 
 package org.opennms.horizon.alertservice.service;
 
-import static org.opennms.horizon.alerts.proto.EventType.DEVICE_UNREACHABLE;
-
 import java.util.List;
 import java.util.Optional;
 
@@ -63,7 +61,6 @@ public class MonitorPolicyService {
     private static final String DEFAULT_POLICY = "default_policy";
     private static final String DEFAULT_RULE = "default_rule";
     private static final String DEFAULT_TAG = "default";
-    private static final String UEI_TRAP_UNREACHABLE = "uei.opennms.org/generic/traps/%s_Unreachable"; // %s is component type
     private static final String UEI_GENERIC_TEMPLATE = "uei.opennms.org/generic/traps/%s"; //%s is the event type
     private static final String REDUCTION_KEY_TEMPLATE = "%s:%s:%d";
     private final MonitorPolicyMapper policyMapper;
@@ -84,15 +81,10 @@ public class MonitorPolicyService {
                 .setCount(1)
                 .setSeverity(Severity.MAJOR)
                 .build();
-            TriggerEventProto deviceUnreachable = TriggerEventProto.newBuilder()
-                .setTriggerEvent(DEVICE_UNREACHABLE)
-                .setCount(1)
-                .setSeverity(Severity.MAJOR)
-                .build();
             PolicyRuleProto defaultRule = PolicyRuleProto.newBuilder()
                 .setName(DEFAULT_RULE)
                 .setComponentType(ManagedObjectType.NODE)
-                .addAllSnmpEvents(List.of(coldReboot, warmReboot, deviceUnreachable))
+                .addAllSnmpEvents(List.of(coldReboot, warmReboot))
                 .build();
             MonitorPolicyProto defaultPolicy = MonitorPolicyProto.newBuilder()
                 .setName(DEFAULT_POLICY)
@@ -192,17 +184,14 @@ public class MonitorPolicyService {
     }
 
     private String getUeiFromEventType(EventType type) {
-        if(DEVICE_UNREACHABLE.equals(type)) {
-            return UEI_TRAP_UNREACHABLE;
-        }
         return String.format(UEI_GENERIC_TEMPLATE, type.name());
     }
 
     private AlertType getAlertTypeFromEventType(EventType eventType) {
         return switch (eventType) {
             case SNMP_Cold_Start, SNMP_Warm_Start -> AlertType.PROBLEM_WITHOUT_CLEAR;
-            case PORT_DOWN, SNMP_Link_Down -> AlertType.PROBLEM_WITH_CLEAR;
-            case PORT_UP, SNMP_Link_Up -> AlertType.CLEAR;
+            case SNMP_Link_Down -> AlertType.PROBLEM_WITH_CLEAR;
+            case SNMP_Link_Up -> AlertType.CLEAR;
             default -> AlertType.ALARM_TYPE_UNDEFINED;
         };
     }

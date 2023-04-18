@@ -54,7 +54,7 @@ public class MonitorPolicyMapperTest {
     @BeforeEach
     void before() {
         TriggerEventProto triggerEvent = TriggerEventProto.newBuilder()
-            .setTriggerEvent(EventType.PORT_DOWN)
+            .setTriggerEvent(EventType.SNMP_Warm_Start)
             .setCount(1)
             .setSeverity(Severity.CRITICAL)
             .build();
@@ -90,7 +90,7 @@ public class MonitorPolicyMapperTest {
         assertThat(policy.getRules().get(0).getTriggerEvents().get(0))
             .extracting(TriggerEvent::getTriggerEvent, TriggerEvent::getCount, TriggerEvent::getOvertime, TriggerEvent::getOvertimeUnit,
                 TriggerEvent::getSeverity, TriggerEvent::getClearEvent)
-            .containsExactly(EventType.PORT_DOWN.name(), 1, 0, OverTimeUnit.UNKNOWN_UNIT.name(), Severity.CRITICAL.name(), EventType.UNKNOWN_EVENT.name());
+            .containsExactly(EventType.SNMP_Warm_Start.name(), 1, 0, OverTimeUnit.UNKNOWN_UNIT.name(), Severity.CRITICAL.name(), EventType.UNKNOWN_EVENT.name());
     }
 
     @Test

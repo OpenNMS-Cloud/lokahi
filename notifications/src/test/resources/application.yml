@@ -3,6 +3,7 @@ spring:
     name: integration-test
 
   mail:
+    template: test.txt.vm
     from: noreply@opennms.com
 
   liquibase:

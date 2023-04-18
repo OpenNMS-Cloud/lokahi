@@ -10,8 +10,6 @@ import {
 
 export const useflowsQueries = defineStore('flowsQueries', {
   state: () => {
-    const isLoadingApplications = ref(false)
-
     const getApplicationsSeries = async (requestCriteria: RequestCriteriaInput) => {
       const { execute, data } = useQuery({
         query: FindApplicationSeriesDocument,
@@ -56,8 +54,6 @@ export const useflowsQueries = defineStore('flowsQueries', {
       await execute()
       return data
     }
-
-    const getApplicationsSearch = () => ({}) //Application autocomplete Filter
 
     return {
       getApplicationsSeries,

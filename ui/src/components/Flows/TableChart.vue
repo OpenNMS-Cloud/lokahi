@@ -36,6 +36,9 @@ import { ChartOptions } from 'chart.js'
 import { PropType } from 'vue'
 import { ChartData } from '@/types'
 import { Bar } from 'vue-chartjs'
+import { Chart as ChartJS, Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale } from 'chart.js'
+
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
 
 const props = defineProps({
   id: {
@@ -126,7 +129,6 @@ const chartOptions = computed<ChartOptions<any>>(() => {
   }
 })
 
-//Potentially handled by BE
 const addValues = (a: number, b: number) => {
   const total = (a + b).toString()
   return parseFloat(total).toPrecision(3)

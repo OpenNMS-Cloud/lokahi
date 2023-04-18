@@ -153,6 +153,7 @@
         <commons-csv.version>1.9.0</commons-csv.version>
         <jmh.version>1.33</jmh.version>
         <zip4j.version>2.11.5</zip4j.version>
+        <velocity.engine.version>2.3</velocity.engine.version>
     </properties>
 
     <dependencyManagement>

@@ -32,6 +32,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 
 import java.util.Date;
+import java.util.List;
 
 import org.junit.Test;
 import org.opennms.horizon.alertservice.db.entity.Alert;
@@ -47,6 +48,7 @@ public class AlertMapperTest {
         dbAlert.setReductionKey("oops:1");
         dbAlert.setClearKey("clear:oops:1");
         dbAlert.setLastEventTime(new Date(49L));
+        dbAlert.setMonitoringPolicyId(List.of(1L));
 
         var protoAlert = AlertMapper.INSTANCE.toProto(dbAlert);
         assertThat(protoAlert.getTenantId(), equalTo(dbAlert.getTenantId()));
@@ -55,6 +57,7 @@ public class AlertMapperTest {
         assertThat(protoAlert.getReductionKey(), equalTo(dbAlert.getReductionKey()));
         assertThat(protoAlert.getClearKey(), equalTo(dbAlert.getClearKey()));
         assertThat(protoAlert.getLastUpdateTimeMs(), equalTo(dbAlert.getLastEventTime().getTime()));
+        assertThat(protoAlert.getMonitoringPolicyIdList(), equalTo(List.of(1L)));
         assertThat(protoAlert.getIsAcknowledged(), equalTo(false));
     }
 

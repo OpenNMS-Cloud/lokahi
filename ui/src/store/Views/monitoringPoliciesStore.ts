@@ -50,14 +50,14 @@ const getDefaultEventCondition = () => ({
   count: 1,
   severity: Severity.Critical,
   overtimeUnit: Unknowns.UNKNOWN_UNIT,
-  triggerEvent: SNMPEventType.COLD_REBOOT,
+  triggerEvent: SNMPEventType.SNMP_COLD_START,
   clearEvent: Unknowns.UNKNOWN_EVENT
 })
 
 const getDefaultRule = () => ({
   id: new Date().getTime(),
   name: '',
-  componentType: ComponentType.CPU,
+  componentType: ComponentType.NODE,
   detectionMethod: DetectionMethodTypes.EVENT,
   metricName: EventMetrics.SNMP_TRAP,
   triggerEvents: [getDefaultEventCondition()]

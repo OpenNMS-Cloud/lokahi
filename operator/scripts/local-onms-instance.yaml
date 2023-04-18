@@ -3,17 +3,15 @@ kind: OpenNMS
 metadata:
   name: opennms-instance
 spec:
-  allowedUsers: []
   host: onmshs
   httpPort: 80
   httpsPort: 443
   namespace: opennms-instance
   tlsEnabled: false
   deployOnly: true
-  core:
-    image: opennms/horizon-stream-core
-    cpu: "0"
-    mem: "0"
+  updateConfig:
+    mode: manual
+    update: none
   api:
     image: opennms/horizon-stream-rest-server
     cpu: "0"
@@ -30,6 +28,10 @@ spec:
     image: opennms/horizon-stream-minion-gateway
     cpu: "0"
     mem: 500Mi
+  minionSslGateway:
+    image: opennms/horizon-stream-minion-gateway
+    cpu: "0"
+    mem: 200Mi
   inventory:
     image: opennms/horizon-stream-inventory
     cpu: "0"

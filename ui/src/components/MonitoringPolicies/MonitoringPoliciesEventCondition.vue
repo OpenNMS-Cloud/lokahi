@@ -68,7 +68,7 @@
 
     <div
       class="inner-col"
-      v-if="condition.triggerEvent === SNMPEventType.PORT_DOWN"
+      v-if="condition.triggerEvent === SNMPEventType.SNMP_LINK_UP"
     >
       <div class="text">Clear Event (optional)</div>
       <BasicSelect
@@ -81,9 +81,9 @@
 </template>
 
 <script lang="ts" setup>
-import { EventCondition, Rule, Policy } from '@/types/policies'
-import { conditionLetters, SNMPEventType, Unknowns } from './monitoringPolicies.constants'
-import { Severity, TimeRangeUnit } from '@/types/graphql'
+import {EventCondition, Policy, Rule} from '@/types/policies'
+import {conditionLetters, SNMPEventType, Unknowns} from './monitoringPolicies.constants'
+import {Severity, TimeRangeUnit} from '@/types/graphql'
 
 const props = defineProps<{
   condition: EventCondition
@@ -106,20 +106,22 @@ const severityList = [
   { id: Severity.Critical, name: 'Critical' },
   { id: Severity.Major, name: 'Major' },
   { id: Severity.Minor, name: 'Minor' },
-  { id: Severity.Warning, name: 'Warning' }
+  { id: Severity.Warning, name: 'Warning' },
+  { id: Severity.Cleared, name: 'Cleared'}
 ]
 
 const clearEventOptions = [
   { id: Unknowns.UNKNOWN_EVENT, name: '' },
-  { id: SNMPEventType.PORT_UP, name: 'Port Up' }
+  { id: SNMPEventType.SNMP_LINK_DOWN, name: 'SNMP Link Down'},
 ]
 
 const triggerEventOptions = [
-  { id: SNMPEventType.COLD_REBOOT, name: 'Cold Reboot' },
-  { id: SNMPEventType.WARM_REBOOT, name: 'Warm Reboot' },
-  { id: SNMPEventType.DEVICE_UNREACHABLE, name: 'Device Unreachable' },
-  { id: SNMPEventType.SNMP_AUTH_FAILURE, name: 'SNMP Authentication Failure' },
-  { id: SNMPEventType.PORT_DOWN, name: 'Port Down' }
+  { id: SNMPEventType.SNMP_COLD_START, name: 'SNMP Cold Start' },
+  { id: SNMPEventType.SNMP_WARM_START, name: 'SNMP Warm Start' },
+  { id: SNMPEventType.SNMP_AUTHEN_FAILURE, name: 'SNMP Authentication Failure' },
+  { id: SNMPEventType.SNMP_LINK_DOWN, name: 'SNMP Link Down'},
+  { id: SNMPEventType.SNMP_LINK_UP, name: 'SNMP Link Up'},
+  { id: SNMPEventType.SNMP_EGP_DOWN, name: 'SNMP EGP Down'}
 ]
 
 watchEffect(() => (condition.value = props.condition))

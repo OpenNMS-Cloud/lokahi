@@ -16,12 +16,12 @@ const testingPayload = {
   rules: [
     {
       name: 'Rule1',
-      componentType: ComponentType.CPU,
+      componentType: ComponentType.NODE,
       triggerEvents: [
         {
           count: 1,
           severity: Severity.Critical,
-          triggerEvent: SNMPEventType.COLD_REBOOT,
+          triggerEvent: SNMPEventType.SNMP_COLD_START,
           overtimeUnit: Unknowns.UNKNOWN_UNIT,
           clearEvent: Unknowns.UNKNOWN_EVENT
         }

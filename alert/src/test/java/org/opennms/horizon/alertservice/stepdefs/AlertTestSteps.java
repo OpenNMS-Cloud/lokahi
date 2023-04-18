@@ -514,6 +514,7 @@ public void sendMessageToKafkaAtTopicWithSeverity(String eventUei, String tenant
                 foundMessages++;
             }
         }
+        log.info("Found {} messages for tenant {}", foundMessages, tenant);
         return foundMessages == expectedMessages;
     }
 

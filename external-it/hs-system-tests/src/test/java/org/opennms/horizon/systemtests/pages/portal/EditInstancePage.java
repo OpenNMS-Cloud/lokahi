@@ -30,10 +30,11 @@
 package org.opennms.horizon.systemtests.pages.portal;
 
 import com.codeborne.selenide.CollectionCondition;
-import com.codeborne.selenide.Condition;
 import com.codeborne.selenide.ElementsCollection;
 import com.codeborne.selenide.SelenideElement;
 
+import static com.codeborne.selenide.Condition.enabled;
+import static com.codeborne.selenide.Condition.visible;
 import static com.codeborne.selenide.Selectors.byText;
 import static com.codeborne.selenide.Selenide.$;
 import static com.codeborne.selenide.Selenide.$$;
@@ -43,16 +44,25 @@ public class EditInstancePage {
     public static final ElementsCollection usersRow = $$("tbody tr");
     public static final SelenideElement usersTable = $("tbody");
     public static final SelenideElement deleteInstanceBtn = $("#delete-btn-cloud-instance");
+    public static final SelenideElement instanceUrlTxt = $("#cloud-details-instance-url");
 
     public static void verifyNumberOfUsers(int count) {
         usersRow.shouldHave(CollectionCondition.size(count));
     }
 
     public static void verifyUserEmailInTable(String email) {
-        usersTable.find(byText(email)).shouldBe(Condition.visible);
+        usersTable.find(byText(email)).shouldBe(visible);
+    }
+
+    public static String getInstanceUrl() {
+        return instanceUrlTxt.shouldBe(visible).getAttribute("href");
     }
 
     public static void clickDeleteInstance() {
-        deleteInstanceBtn.shouldBe(Condition.enabled).click();
+        deleteInstanceBtn.shouldBe(enabled).click();
+    }
+
+    public static void clickOnInstanceUrl() {
+        instanceUrlTxt.shouldBe(enabled).click();
     }
 }

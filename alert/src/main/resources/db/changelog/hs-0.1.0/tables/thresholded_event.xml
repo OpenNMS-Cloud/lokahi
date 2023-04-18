@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+
+    <changeSet author="jhutc" id="hs-0.1.0-thresholded_event">
+        <createTable tableName="thresholded_event">
+            <!-- Associated tenant -->
+            <column name="tenant_id" type="text" defaultValue="opennms-prime">
+                <constraints nullable="false"/>
+            </column>
+
+            <!-- Unique identifier -->
+            <column name="id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+
+            <!-- A reference to the eventUei that created this thresholded_event. -->
+            <column name="event_uei" type="text">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="reduction_key" type="text"/>
+
+            <!-- event creation time -->
+            <column name="create_time" type="TIMESTAMP WITH TIME ZONE"/>
+
+            <!-- time event is no longer relevant for thresholding -->
+            <column name="expiry_time" type="TIMESTAMP WITH TIME ZONE"/>
+        </createTable>
+
+        <addPrimaryKey columnNames="tenant_id, id"
+                       constraintName="thresholded_event_pk"
+                       tableName="thresholded_event"/>
+
+        <createSequence sequenceName="thresholded_event_nxt_id"/>
+    </changeSet>
+
+    <!-- Conditionally create distributed table if Citus is detected -->
+    <changeSet author="jhutc" id="hs-0.1.0-thresholded_event-distributed-table">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="t">SELECT to_regproc('create_distributed_table') IS NOT NULL;</sqlCheck>
+        </preConditions>
+        <sql>
+            SELECT create_distributed_table('thresholded_event', 'tenant_id');
+        </sql>
+    </changeSet>
+
+</databaseChangeLog>

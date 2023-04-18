@@ -4,18 +4,20 @@ export enum DetectionMethodTypes {
 }
 
 export enum SNMPEventType {
-  COLD_REBOOT = 'COLD_REBOOT',
-  WARM_REBOOT = 'WARM_REBOOT',
-  DEVICE_UNREACHABLE = 'DEVICE_UNREACHABLE',
-  SNMP_AUTH_FAILURE = 'SNMP_AUTH_FAILURE',
-  PORT_DOWN = 'PORT_DOWN',
-  PORT_UP = 'PORT_UP'
+  SNMP_COLD_START = 'SNMP_COLD_START',
+  SNMP_WARM_START = 'SNMP_Warm_Start',
+  SNMP_AUTHEN_FAILURE = 'SNMP_Authen_Failure',
+  SNMP_LINK_DOWN ='SNMP_Link_Down',
+  SNMP_LINK_UP = 'SNMP_Link_Up',
+  SNMP_EGP_DOWN = 'SNMP_EGP_Down'
 }
 
 export enum ComponentType {
-  CPU = 'CPU',
-  INTERFACE = 'INTERFACE',
-  STORAGE = 'STORAGE',
+  ANY = 'ANY',
+  //CPU = 'CPU', FIXME: is this a valid type?
+  SNMP_INTERFACE = 'SNMP_INTERFACE',
+  SNMP_INTERFACE_LINK = 'SNMP_INTERFACE_LINK',
+  //STORAGE = 'STORAGE', FIXME: is this a valid type?
   NODE = 'NODE'
 }
 

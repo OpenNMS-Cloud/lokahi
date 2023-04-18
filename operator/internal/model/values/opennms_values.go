@@ -19,6 +19,7 @@ type OpenNMSValues struct {
 	UI                     UIValues               `yaml:"UI"`
 	Minion                 MinionValues           `yaml:"Minion"`
 	MinionGateway          MinionGatewayValues    `yaml:"MinionGateway"`
+	MinionSslGateway       MinionSslGatewayValues `yaml:"MinionSslGateway"`
 	MinionGatewayGrpcProxy MGGPValues             `yaml:"MinionGatewayGrpcProxy"`
 	Inventory              InventoryValues        `yaml:"Inventory"`
 	Alert                  AlertValues            `yaml:"Alert"`
@@ -41,6 +42,10 @@ type MinionGatewayValues struct {
 	InternalGrpcPort   int         `yaml:"InternalGrpcPort"`
 	IgniteClientPort   int         `yaml:"IgniteClientPort"`
 	IngressAnnotations interface{} `yaml:"IngressAnnotations"`
+}
+
+type MinionSslGatewayValues struct {
+	ServiceValues `yaml:",inline"`
 }
 
 type APIValues struct {

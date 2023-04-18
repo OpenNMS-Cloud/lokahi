@@ -8,7 +8,7 @@ describe('DiscoverySyslogSNMPTrapsForm', () => {
   beforeAll(() => {
     wrapper = mountWithPiniaVillus({
       component: DiscoverySyslogSNMPTrapsForm,
-      shallow: true,
+      shallow: false,
       props: { successCallback: () => ({}), cancel: () => ({}) },
       global: {
         directives: {

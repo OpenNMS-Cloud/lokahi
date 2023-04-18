@@ -12,7 +12,7 @@ const azureTestPayload: AzureActiveDiscoveryCreateInput = {
   directoryId: 'dir1',
   subscriptionId: 'sub1',
   location: 'Default',
-  tags: []
+  tags: [{ name: 'default' }]
 }
 
 const wrapper = mount({

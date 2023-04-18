@@ -13,9 +13,7 @@ import featherInputFocusDirective from './directives/v-focus'
 import tabIndexDirective from './directives/v-tabindex'
 import { getGqlClient } from './services/gqlService'
 
-// dark / light mode
 const { setKeycloak } = useKeycloak()
-const isDark = useDark()
 
 const app = createApp(App)
   .use(router)
@@ -23,11 +21,7 @@ const app = createApp(App)
   .use(VueKeycloak, {
     init: {
       onLoad: 'login-required',
-      redirectUri: (() => {
-        const redirectUrl = new URL(window.location.href)
-        redirectUrl.searchParams.set('theme', isDark.value ? 'dark' : 'light')
-        return redirectUrl.href
-      })()
+      redirectUri: window.location.href
     },
     config: {
       realm: keycloakConfig.realm,

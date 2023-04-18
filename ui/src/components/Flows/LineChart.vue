@@ -15,7 +15,19 @@ import { ChartData } from '@/types'
 import { ChartOptions } from 'chart.js'
 import { PropType } from 'vue'
 import { Line } from 'vue-chartjs'
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend
+} from 'chart.js'
 const { isDark } = useTheme()
+
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend)
 
 const props = defineProps({
   id: {
@@ -115,7 +127,9 @@ const formatBytes = (bytes: any, decimals = 2) => {
   const sizes = ['Bytes', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB']
 
   const i = Math.floor(Math.log(bytes) / Math.log(k))
-
+  if (sizes[i] === undefined) {
+    return 0
+  }
   return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`
 }
 </script>

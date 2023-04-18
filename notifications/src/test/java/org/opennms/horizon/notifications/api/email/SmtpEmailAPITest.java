@@ -50,14 +50,13 @@ public class SmtpEmailAPITest {
 
     @Test
     public void canSendEmailToSingleRecipient() throws NotificationException {
-        List<String> userEmail = List.of("support@yourcompany.com");
-        Alert alert = Alert.newBuilder().setLogMessage("Some exciting message").setDescription("A description").build();
-        emailAPI.postNotification(userEmail, alert);
+        String userEmail = "support@yourcompany.com";
+        emailAPI.sendEmail(userEmail, "A new alert", "More details about the alert");
 
         MessageMatcher matcher = MessageMatcher.builder()
-            .expectedToAddresses(userEmail)
-            .expectedSubject(alert.getLogMessage())
-            .expectedBody(alert.getDescription())
+            .expectedToAddresses(List.of(userEmail))
+            .expectedSubject("A new alert")
+            .expectedBody("More details about the alert")
             .build();
         Mockito.verify(sender, times(1)).send(argThat(matcher));
     }
@@ -65,7 +64,7 @@ public class SmtpEmailAPITest {
     @Test
     public void throwsOnFailure() {
         Mockito.doThrow(new MailSendException("Connection failure")).when(sender).send(any(MimeMessage.class));
-        assertThrows(NotificationAPIException.class, () -> emailAPI.postNotification(List.of(), Alert.newBuilder().build()));
+        assertThrows(NotificationAPIException.class, () -> emailAPI.sendEmail("support@company", "subject", "body"));
     }
 
     @Builder

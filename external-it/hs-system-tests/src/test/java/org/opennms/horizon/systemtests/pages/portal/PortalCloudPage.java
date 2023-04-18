@@ -36,17 +36,16 @@ import java.time.Duration;
 
 import static com.codeborne.selenide.Selectors.byText;
 import static com.codeborne.selenide.Selenide.$;
-import static com.codeborne.selenide.Selenide.$x;
 
 public class PortalCloudPage {
 
     private static final SelenideElement profileIcon = $("button.profile-circle");
     private static final SelenideElement addInstanceBtn = $("#cloud-add-instance-button");
     private static final SelenideElement instanceTable = $("table.condensed  tbody");
-    private static final SelenideElement logInBtn = $("tr button.has-icon");
-    private static final SelenideElement detailsBtn = $x("//span[text()=' Details ']");
-    private static final SelenideElement searchInstanceInp = $("[data-ref-id='feather-input']");
-    private static final SelenideElement shadedBackground = $(".backdrop");
+    private static final SelenideElement logInBtn = $("#cloud-instances-row-login-0");
+    private static final SelenideElement detailsBtn = $("#cloud-instances-row-details-0");
+    private static final SelenideElement searchInstanceInp = $("#cloud-instances-search");
+    private static final SelenideElement shadedBackground = $("div.backdrop");
 
     public static void verifyThatUserLoggedIn() {
         profileIcon.shouldBe(Condition.visible, Duration.ofMinutes(1));
@@ -63,6 +62,7 @@ public class PortalCloudPage {
     public static void clickLogInForFirstInstance() {
         logInBtn.shouldBe(Condition.enabled).click();
     }
+
 
     public static void clickDetailsForFirstInstance() {
         detailsBtn.shouldBe(Condition.enabled).click();

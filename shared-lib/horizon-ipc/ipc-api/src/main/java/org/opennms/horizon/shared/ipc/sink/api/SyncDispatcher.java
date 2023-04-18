@@ -38,5 +38,5 @@ import com.google.protobuf.Message;
  * @author jwhite
  */
 public interface SyncDispatcher<S extends Message> extends AutoCloseable {
-    void send(S message);
+    void send(S message) throws InterruptedException;
 }

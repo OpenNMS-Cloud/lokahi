@@ -28,9 +28,7 @@
 
 package org.opennms.horizon.shared.ipc.sink.api;
 
-import com.google.protobuf.Message;
-
 public interface SendQueueFactory {
 
-    <T extends Message> SendQueue<T> createQueue(final SinkModule<?, T> module);
+    <T> SendQueue createQueue(final SinkModule<?, T> module);
 }

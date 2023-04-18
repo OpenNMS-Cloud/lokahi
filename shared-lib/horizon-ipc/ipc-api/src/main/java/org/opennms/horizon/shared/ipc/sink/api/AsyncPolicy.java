@@ -51,19 +51,4 @@ public interface AsyncPolicy {
      */
     int getNumThreads();
 
-    /**
-     * Used to control the behavior of a dispatch when the queue
-     * is full.
-     *
-     * When <code>true</code> the calling thread will be blocked
-     * until the queue can accept the message, or the thread is
-     * interrupted.
-     *
-     * When <code>false</code> the dispatch will return a future
-     * with a {@link java.util.concurrent.RejectedExecutionException}/
-     *
-     * @return whether or not the thread calling dispatch
-     * should block when the queue is full
-     */
-    boolean isBlockWhenFull();
 }

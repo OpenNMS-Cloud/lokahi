@@ -48,9 +48,9 @@ public interface MessageConsumerManager {
 
     <S extends Message, T extends Message> void dispatch(SinkModule<S, T> module, T message);
 
-    <S extends Message, T extends Message> void registerConsumer(MessageConsumer<S, T> consumer) throws Exception;
+    <S extends Message, T extends Message> void registerConsumer(MessageConsumer<S, T> consumer);
 
-    <S extends Message, T extends Message> void unregisterConsumer(MessageConsumer<S, T> consumer) throws Exception;
+    <S extends Message, T extends Message> void unregisterConsumer(MessageConsumer<S, T> consumer);
 
     static void updateMessageSize(MetricRegistry metricRegistry, String location, String moduleId, int messageSize) {
         Histogram messageSizeHistogram = metricRegistry.histogram(MetricRegistry.name(location, moduleId, METRIC_MESSAGE_SIZE));

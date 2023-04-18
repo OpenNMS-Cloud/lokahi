@@ -28,14 +28,12 @@
 
 package org.opennms.horizon.shared.ipc.sink.api;
 
-import com.google.protobuf.Message;
-
-public interface SendQueue<T extends Message> extends AutoCloseable {
+public interface SendQueue extends AutoCloseable {
 
     /**
      * Adds the message to the tail of the queue blocking if the queue is currently full.
      */
-    void enqueue(byte[] message);
+    void enqueue(byte[] message) throws InterruptedException;
 
     /**
      * Retrieves and removes the head of this queue, waiting if necessary until an element becomes available.
@@ -43,9 +41,4 @@ public interface SendQueue<T extends Message> extends AutoCloseable {
      * @throws InterruptedException if interrupted while waiting
      */
     byte[] dequeue() throws InterruptedException;
-
-    /**
-     * @return true if the queue has no more capacity, false otherwise
-     */
-    boolean isFull();
 }

@@ -65,12 +65,22 @@ public class Prefix {
      * @return that prefixed with this.
      */
     public byte[] with(final byte[]... that) {
-        final var buffer = ByteBuffer.allocate(this.bytes.length);
-        buffer.put(this.bytes);
-        for (final var e : that) {
-            buffer.put(e);
+        int length = this.bytes.length;
+        for (byte[] array : that) {
+            length += array.length;
         }
-        return buffer.array();
+
+        byte[] result = new byte[length];
+
+        System.arraycopy(this.bytes, 0, result, 0, this.bytes.length);
+        int pos = this.bytes.length;
+
+        for (byte[] array : that) {
+            System.arraycopy(array, 0, result, pos, array.length);
+            pos += array.length;
+        }
+
+        return result;
     }
 
     public byte[] getBytes() {

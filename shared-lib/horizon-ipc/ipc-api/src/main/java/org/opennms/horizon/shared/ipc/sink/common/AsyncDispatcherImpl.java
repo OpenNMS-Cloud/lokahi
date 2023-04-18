@@ -30,12 +30,10 @@ package org.opennms.horizon.shared.ipc.sink.common;
 
 import java.time.Duration;
 import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 import org.opennms.horizon.shared.ipc.sink.api.AsyncDispatcher;
@@ -59,13 +57,11 @@ public class AsyncDispatcherImpl<W, S extends Message, T extends Message> implem
 
     private static final Logger LOG = LoggerFactory.getLogger(AsyncDispatcherImpl.class);
 
-    private final SendQueue<T> sendQueue;
+    private final SendQueue sendQueue;
     private final MessageDispatcher<S, T> messageDispatcher;
     private final Consumer<byte[]> sender;
     private final AsyncPolicy asyncPolicy;
-    private final Counter droppedCounter;
 
-    private final AtomicLong missedFutures = new AtomicLong(0);
     private final AtomicInteger activeDispatchers = new AtomicInteger(0);
     
     private final RateLimitedLog RATE_LIMITED_LOGGER = RateLimitedLog
@@ -88,8 +84,6 @@ public class AsyncDispatcherImpl<W, S extends Message, T extends Message> implem
 
         state.getMetrics().register(MetricRegistry.name(state.getModule().getId(), "queue-size"),
                 (Gauge<Integer>) activeDispatchers::get);
-
-        droppedCounter = state.getMetrics().counter(MetricRegistry.name(state.getModule().getId(), "dropped"));
 
         executor = Executors.newFixedThreadPool(state.getModule().getAsyncPolicy().getNumThreads(),
                 new LogPreservingThreadFactory(WHAT_IS_DEFAULT_INSTANCE_ID + ".Sink.AsyncDispatcher." +
@@ -128,12 +122,7 @@ public class AsyncDispatcherImpl<W, S extends Message, T extends Message> implem
     }
 
     @Override
-    public void send(S message) {
-        if (!this.asyncPolicy.isBlockWhenFull() && this.sendQueue.isFull()) {
-            this.droppedCounter.inc();
-            throw new RuntimeException("Dispatch queue full");
-        }
-
+    public void send(S message) throws InterruptedException {
         this.messageDispatcher.dispatch(message);
     }
 

@@ -31,6 +31,7 @@ package org.opennms.horizon.shared.ipc.sink.api;
 import java.util.Objects;
 import java.util.function.Consumer;
 
+import org.opennms.horizon.shared.ipc.sink.common.AbstractMessageDispatcherFactory;
 import org.opennms.horizon.shared.ipc.sink.common.DispatcherState;
 
 import com.google.protobuf.Message;
@@ -39,17 +40,18 @@ public abstract class MessageDispatcher<S extends Message, T extends Message> im
 
     private final DispatcherState<?, S, T> state;
 
-    private final Consumer<byte[]> sender;
+    private final Sender sender;
 
-    protected MessageDispatcher(DispatcherState<?, S, T> state, final Consumer<byte[]> sender) {
+    protected MessageDispatcher(final DispatcherState<?, S, T> state,
+                                final Sender sender) {
         this.state = Objects.requireNonNull(state);
         this.sender = Objects.requireNonNull(sender);
     }
 
-    public abstract void dispatch(final S message);
+    public abstract void dispatch(final S message) throws InterruptedException;
 
-    protected void send(final byte[] message) {
-        this.sender.accept(message);
+    protected void send(final byte[] message) throws InterruptedException {
+        this.sender.send(message);
     }
 
     public SinkModule<S, T> getModule() {
@@ -59,5 +61,10 @@ public abstract class MessageDispatcher<S extends Message, T extends Message> im
     @Override
     public void close() throws Exception {
         this.state.close();
+    }
+
+    @FunctionalInterface
+    public interface Sender {
+        void send(final byte[] message) throws InterruptedException;
     }
 }

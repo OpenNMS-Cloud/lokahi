@@ -138,10 +138,6 @@ public class TrapSinkModule implements SinkModule<TrapDTO, TrapLogDTO> {
                 return config.getListenerConfig().getNumThreads();
             }
 
-            @Override
-            public boolean isBlockWhenFull() {
-                return true;
-            }
         };
     }
 }

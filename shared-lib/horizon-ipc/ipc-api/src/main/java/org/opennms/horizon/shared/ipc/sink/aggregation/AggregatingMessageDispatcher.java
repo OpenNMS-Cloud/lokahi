@@ -34,6 +34,7 @@ import org.opennms.horizon.shared.ipc.sink.api.AggregationPolicy;
 import org.opennms.horizon.shared.ipc.sink.api.MessageDispatcher;
 import org.opennms.horizon.shared.ipc.sink.api.SendQueue;
 import org.opennms.horizon.shared.ipc.sink.api.SinkModule;
+import org.opennms.horizon.shared.ipc.sink.common.AbstractMessageDispatcherFactory;
 import org.opennms.horizon.shared.ipc.sink.common.DispatcherState;
 
 import com.google.protobuf.Message;
@@ -46,10 +47,10 @@ import com.google.protobuf.Message;
  */
 public class AggregatingMessageDispatcher<S extends Message, T extends Message> extends MessageDispatcher<S, T> {
 
-    private final Aggregator<S,T> aggregator;
+    private final Aggregator<S,T, ?> aggregator;
 
     public AggregatingMessageDispatcher(final DispatcherState<?, S, T> state,
-                                        final Consumer<byte[]> sender) {
+                                        final Sender sender) {
         super(state, sender);
 
         this.aggregator = new Aggregator<>(
@@ -59,15 +60,11 @@ public class AggregatingMessageDispatcher<S extends Message, T extends Message> 
     }
 
     @Override
-    public void dispatch(final S message) {
-        final T log = aggregator.aggregate(message);
-        if (log != null) {
-            // This log is ready to be dispatched
-            this.send(log);
-        }
+    public void dispatch(final S message) throws InterruptedException {
+        this.aggregator.aggregate(message);
     }
 
-    private void send(final T log) {
+    private void send(final T log) throws InterruptedException {
         final var marshalled = this.getModule().marshal(log);
         this.send(marshalled);
     }

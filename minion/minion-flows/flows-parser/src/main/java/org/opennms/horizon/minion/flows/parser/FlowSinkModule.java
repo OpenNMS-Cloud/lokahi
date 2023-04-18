@@ -142,10 +142,6 @@ public class FlowSinkModule implements SinkModule<FlowDocument, FlowDocumentLog>
                 return 1;
             }
 
-            @Override
-            public boolean isBlockWhenFull() {
-                return true;
-            }
         };
     }
 }

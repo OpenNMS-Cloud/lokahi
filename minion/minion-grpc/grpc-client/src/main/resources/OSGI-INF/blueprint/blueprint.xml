@@ -22,6 +22,9 @@
 
             <cm:property name="grpc.host" value="localhost"/>
             <cm:property name="grpc.port" value="8990"/>
+
+            <cm:property name="sendQueue.memory" value="4096"/> <!-- 4K Elements -->
+            <cm:property name="sendQueue.offHeap" value="4194304"/> <!-- 4M Elements -->
         </cm:default-properties>
     </cm:property-placeholder>
 
@@ -59,6 +62,11 @@
         <property name="trustCertCollectionFilePath" value="${grpc.trust.cert.filepath}"/>
     </bean>
 
+     <bean id="sendQueue" class="org.opennms.horizon.minion.grpc.queue.OffHeapSendQueueFactory" destroy-method="close">
+         <argument value="${sendQueue.memory}"/>
+         <argument value="${sendQueue.offHeap}"/>
+     </bean>
+    
     <!-- Depends on the bootstrap process which extracts the Certificate ZIP file, if one is present -->
     <bean
         id="minionClient"
@@ -67,17 +75,12 @@
         destroy-method="shutdown"
         depends-on="certificatePackageBootstrapImpl"
     >
-
-     <bean id="sendQueue" class="org.opennms.horizon.minion.grpc.queue.OffHeapSendQueueFactory">
-     </bean>
-
-    <bean id="minionClient" class="org.opennms.horizon.minion.grpc.MinionGrpcClient" init-method="start" destroy-method="shutdown">
         <argument ref="ipcIdentity"/>
 
         <argument ref="metricRegistry"/>
         <argument ref="tracer"/>
         <argument ref="sendQueue"/>
-	<argument ref="minionGrpcSslContextBuilderFactory"/>
+        <argument ref="minionGrpcSslContextBuilderFactory"/>
 
         <property name="cloudMessageHandler" ref="cloudMessageHandler" />
         <property name="rpcRequestHandler" ref="thinRpcRequestHandler" />

@@ -28,10 +28,6 @@
 
 package org.opennms.horizon.shared.ipc.sink.api;
 
-import com.google.protobuf.Message;
-
-import java.util.Optional;
-
 /**
  * Defines how the messages will be routed and marshaled/unmarshaled over the wire.
  *
@@ -44,7 +40,7 @@ import java.util.Optional;
  * @param <S> type of message that will be sent by the producers
  * @param <T> type of message that will be received by the consumers
  */
-public interface SinkModule<S extends Message, T extends Message> {
+public interface SinkModule<S, T> {
 
     String HEARTBEAT_MODULE_ID = "heartbeat";
 

@@ -28,8 +28,6 @@
 
 package org.opennms.horizon.shared.ipc.sink.api;
 
-import java.util.concurrent.CompletableFuture;
-
 import com.google.protobuf.Message;
 
 /**
@@ -44,9 +42,9 @@ public interface AsyncDispatcher<S extends Message> extends AutoCloseable {
     /**
      * Asynchronously send the given message.
      *
-     * This blocks or throws an Exception depending on {@link AsyncPolicy#isBlockWhenFull()}.
+     * This blocks if the send queue is full.
      *
      * @param message the message to send
      */
-    void send(S message);
+    void send(S message) throws InterruptedException;
 }

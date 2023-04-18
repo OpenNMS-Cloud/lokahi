@@ -28,19 +28,16 @@
 
 package org.opennms.horizon.shared.ipc.sink.common;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
 import java.util.Objects;
-import java.util.function.Consumer;
 
 import org.opennms.horizon.shared.ipc.sink.aggregation.AggregatingMessageDispatcher;
 import org.opennms.horizon.shared.ipc.sink.api.AsyncDispatcher;
 import org.opennms.horizon.shared.ipc.sink.api.MessageDispatcher;
 import org.opennms.horizon.shared.ipc.sink.api.MessageDispatcherFactory;
+import org.opennms.horizon.shared.ipc.sink.api.SendQueue;
 import org.opennms.horizon.shared.ipc.sink.api.SendQueueFactory;
 import org.opennms.horizon.shared.ipc.sink.api.SinkModule;
 import org.opennms.horizon.shared.ipc.sink.api.SyncDispatcher;
-import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 
 import com.codahale.metrics.MetricRegistry;
@@ -67,8 +64,6 @@ public abstract class AbstractMessageDispatcherFactory<W> implements MessageDisp
     private ServiceRegistration<MetricSet> metricsServiceRegistration = null;
 
     protected abstract <S extends Message, T extends Message> void dispatch(SinkModule<S, T> module, W metadata, byte[] message);
-
-    public abstract String getMetricDomain();
 
     public abstract Tracer getTracer();
 
@@ -105,12 +100,12 @@ public abstract class AbstractMessageDispatcherFactory<W> implements MessageDisp
         final var state = new DispatcherState<>(AbstractMessageDispatcherFactory.this, module);
 
         final var dispatcher = createMessageDispatcher(state,
-            (message) -> AbstractMessageDispatcherFactory.this.timedDispatch(state, message));
+            message -> AbstractMessageDispatcherFactory.this.timedDispatch(state, message));
 
         return new SyncDispatcher<>() {
 
             @Override
-            public void send(S message) {
+            public void send(S message) throws InterruptedException {
                 dispatcher.dispatch(message);
             }
 
@@ -139,14 +134,14 @@ public abstract class AbstractMessageDispatcherFactory<W> implements MessageDisp
         private final DispatcherState<?, S, T> state;
 
         protected DirectDispatcher(final DispatcherState<?, S, T> state,
-                                   Consumer<byte[]> sender) {
+                                   final Sender sender) {
             super(state, sender);
             this.state = Objects.requireNonNull(state);
         }
 
         @SuppressWarnings("unchecked")
         @Override
-        public void dispatch(final S message) {
+        public void dispatch(final S message) throws InterruptedException {
             // We assume that S == T so we can send single messages directly
             final var marshalled = this.state.getModule().marshalSingleMessage(message);
             this.send(marshalled);
@@ -158,26 +153,9 @@ public abstract class AbstractMessageDispatcherFactory<W> implements MessageDisp
         }
     }
 
-    private void maybeRegisterMetricSetInServiceRegistry() {
-        final BundleContext bundleContext = getBundleContext();
-        if (bundleContext != null) {
-            final Dictionary<String, Object> props = new Hashtable<>();
-            props.put("name", getMetricDomain());
-            props.put("description", "Sink API Related Metrics for " + getMetricDomain());
-            metricsServiceRegistration = bundleContext.registerService(MetricSet.class, getMetrics(), props);
-        }
-    }
-
-    private void unregisterMetricSetInServiceRegistry() {
-        if (metricsServiceRegistration != null) {
-            metricsServiceRegistration.unregister();
-            metricsServiceRegistration = null;
-        }
-    }
-
     public static <S extends Message, T extends Message> MessageDispatcher<S, T> createMessageDispatcher(
         final DispatcherState<?, S, T> state,
-        final Consumer<byte[]> sender
+        final MessageDispatcher.Sender sender
     ) {
         if (state.getModule().getAggregationPolicy() != null) {
             // Aggregate the message before dispatching them

@@ -33,7 +33,6 @@ import static org.opennms.horizon.shared.ipc.rpc.api.RpcModule.MINION_HEADERS_MO
 import java.io.IOException;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Properties;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
@@ -93,8 +92,6 @@ import io.opentracing.Tracer;
  * messages are buffered and blocked till minion is able to connect to OpenNMS.
  */
 public class MinionGrpcClient extends AbstractMessageDispatcherFactory<String> implements ClientRequestDispatcher {
-
-    static final String SINK_METRIC_PRODUCER_DOMAIN = "org.opennms.core.ipc.sink.producer";
 
     private static final Logger LOG = LoggerFactory.getLogger(MinionGrpcClient.class);
     private static final long SINK_BLOCKING_TIMEOUT = 1000;
@@ -218,11 +215,6 @@ public class MinionGrpcClient extends AbstractMessageDispatcherFactory<String> i
 //----------------------------------------
 
     @Override
-    public String getMetricDomain() {
-        return SINK_METRIC_PRODUCER_DOMAIN;
-    }
-
-    @Override
     public Tracer getTracer() {
         return tracer;
     }
@@ -235,10 +227,6 @@ public class MinionGrpcClient extends AbstractMessageDispatcherFactory<String> i
     @Override
     protected SendQueueFactory getSendQueueFactory() {
         return this.sendQueueFactory;
-    }
-
-    ConnectivityState getChannelState() {
-        return channel.getState(true);
     }
 
 //========================================

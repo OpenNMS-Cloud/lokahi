@@ -22,47 +22,60 @@
       </router-link>
     </template>
     <template v-slot:nav>
-
       <NavigationRailNavItem
         title="Home"
         href="/"
-        :icon="Icons.Home"/>
+        :icon="Icons.Home"
+      />
 
       <NavigationRailNavItem
         title="Appliances"
         href="/appliances"
-        :icon="Icons.Appliances"/>
+        :icon="Icons.Appliances"
+      />
 
       <NavigationRailNavItem
         title="Map"
         href="/map"
-        :icon="Icons.Location"/>
+        :icon="Icons.Location"
+      />
 
       <NavigationRailNavItem
         title="Inventory"
         href="/inventory"
-        :icon="Icons.Business"/>
+        :icon="Icons.Business"
+      />
 
       <NavigationRailNavItem
         title="Discovery"
         href="/discovery"
-        :icon="Icons.Discovery"/>
+        :icon="Icons.Discovery"
+      />
 
       <NavigationRailNavItem
         title="Monitoring Policies"
         href="/monitoring-policies"
-        :icon="Icons.Monitoring"/>
+        :icon="Icons.Monitoring"
+      />
 
       <NavigationRailNavItem
         title="Alerts"
         href="/alerts"
-        :icon="Icons.Warning"/>
+        :icon="Icons.Warning"
+      />
+
+      <NavigationRailNavItem
+        title="Locations"
+        href="/locations"
+        :icon="Icons.Location"
+      />
 
       <NavigationRailNavItem
         v-if="false"
         title="Synthetic Transactions"
         href="/synthetic-transactions"
-        :icon="Icons.Cycle"/>
+        :icon="Icons.Cycle"
+      />
     </template>
   </FeatherAppRail>
 </template>
@@ -99,5 +112,4 @@ const labels = {
   skip: 'Skip to main content'
 }
 const content = 'mainContent'
-
 </script>

@@ -196,9 +196,8 @@ public class AlertEventProcessor {
 
     private boolean isThresholdMet(AlertData alertData, String tenantId) {
         Date current = new Date();
-        Date cutOff = calculateExpiry(current, alertData, false);
 
-        int currentCount = thresholdedEventRepository.countByReductionKeyAndTenantIdAndExpiryTimeGreaterThanEqual(alertData.reductionKey(), tenantId, cutOff);
+        int currentCount = thresholdedEventRepository.countByReductionKeyAndTenantIdAndExpiryTimeGreaterThanEqual(alertData.reductionKey(), tenantId, current);
         return alertData.count() <= currentCount;
     }
 

@@ -95,27 +95,3 @@ spec:
             - mountPath: "/docker-entrypoint-initdb.d/postgres.initial.script.sql"
               name: postgres-initial-script
               subPath: "postgres.initial.script.sql"
-            - mountPath: "/docker-entrypoint-initdb.d/postgres.keycloak.initial.script.sql"
-              name: postgres-initial-script
-              subPath: "postgres.keycloak.initial.script.sql"
-            - mountPath: "/docker-entrypoint-initdb.d/postgres.inventory.initial.script.sql"
-              name: postgres-initial-script
-              subPath: "postgres.inventory.initial.script.sql"
-            - mountPath: "/docker-entrypoint-initdb.d/postgres.alert.initial.script.sql"
-              name: postgres-initial-script
-              subPath: "postgres.alert.initial.script.sql"
-            - mountPath: "/docker-entrypoint-initdb.d/postgres.notification.initial.script.sql"
-              name: postgres-initial-script
-              subPath: "postgres.notification.initial.script.sql"
-            - mountPath: "/docker-entrypoint-initdb.d/postgres.grafana.initial.script.sql"
-              name: postgres-initial-script
-              subPath: "postgres.grafana.initial.script.sql"
-            - mountPath: "/docker-entrypoint-initdb.d/postgres.events.initial.script.sql"
-              name: postgres-initial-script
-              subPath: "postgres.events.initial.script.sql"
-            - mountPath: "/docker-entrypoint-initdb.d/postgres.datachoices.initial.script.sql"
-              name: postgres-initial-script
-              subPath: "postgres.datachoices.initial.script.sql"
-            - mountPath: "/docker-entrypoint-initdb.d/postgres.minion_gateway.initial.script.sql"
-              name: postgres-initial-script
-              subPath: "postgres.minion_gateway.initial.script.sql"

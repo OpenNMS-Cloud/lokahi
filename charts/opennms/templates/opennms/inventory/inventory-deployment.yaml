@@ -47,7 +47,8 @@ spec:
             - name: JAVA_TOOL_OPTIONS
               value: "-agentlib:jdwp=transport=dt_socket,server=y,address=5005,suspend=n,quiet=y"  # FIXME: Permanent debug port, enable only for dev mode
             - name: SPRING_DATASOURCE_URL
-              value: "jdbc:postgresql://postgres:5432/inventory"
+              #value: "jdbc:postgresql://postgres:5432/inventory"
+              value: "jdbc:postgresql://postgres:5432/horizon_stream?currentSchema=inventory"
             - name: SPRING_DATASOURCE_USERNAME
               valueFrom:
                 secretKeyRef:

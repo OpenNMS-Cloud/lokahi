@@ -63,6 +63,8 @@ spec:
             {{- end }}
             - name: KC_DB
               value: postgres
+            - name: KC_DB_URL
+              value: "jdbc:postgresql://postgres/horizon_stream?currentSchema=keycloak"
             - name: KC_DB_URL_HOST
               value: "{{ .Values.Postgres.ServiceName }}"
             - name: KC_DB_USERNAME

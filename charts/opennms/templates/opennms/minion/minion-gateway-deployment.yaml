@@ -61,6 +61,8 @@ spec:
                 secretKeyRef:
                   name: postgres
                   key: minionGatewayPwd
+            - name: SPRING_DATASOURCE_URL
+              value: jdbc:postgresql://postgres:5432/horizon_stream?currentSchema=minion_gateway"
             - name: SPRING_KAFKA_BOOTSTRAP_SERVERS
             - name: KAFKA_BOOTSTRAP_SERVERS
               value: "{{ .Values.Kafka.ServiceName }}:{{ .Values.Kafka.Port }}"

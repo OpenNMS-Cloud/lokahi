@@ -28,29 +28,24 @@
 
 package org.opennms.horizon.alertservice.service;
 
-import java.time.Duration;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-import java.time.temporal.TemporalAmount;
-import java.time.temporal.TemporalUnit;
-import java.util.Date;
-import java.util.Optional;
-
-import javax.annotation.PostConstruct;
-
+import com.google.common.base.Strings;
+import io.grpc.Context;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
+import jakarta.annotation.Nullable;
+import lombok.RequiredArgsConstructor;
 import org.opennms.horizon.alerts.proto.Alert;
 import org.opennms.horizon.alerts.proto.AlertType;
 import org.opennms.horizon.alerts.proto.ManagedObjectType;
 import org.opennms.horizon.alerts.proto.OverTimeUnit;
 import org.opennms.horizon.alerts.proto.Severity;
 import org.opennms.horizon.alertservice.db.entity.AlertDefinition;
+import org.opennms.horizon.alertservice.db.entity.MonitorPolicy;
 import org.opennms.horizon.alertservice.db.entity.ThresholdedEvent;
 import org.opennms.horizon.alertservice.db.entity.TriggerEvent;
 import org.opennms.horizon.alertservice.db.repository.AlertDefinitionRepository;
 import org.opennms.horizon.alertservice.db.repository.AlertRepository;
-import org.opennms.horizon.alertservice.db.repository.TriggerEventRepository;
-import org.opennms.horizon.alertservice.db.tenant.TenantLookup;
-import org.opennms.horizon.events.proto.Event;
+import org.opennms.horizon.alertservice.db.repository.MonitorPolicyRepository;
 import org.opennms.horizon.alertservice.db.repository.ThresholdedEventRepository;
 import org.opennms.horizon.alertservice.db.repository.TriggerEventRepository;
 import org.opennms.horizon.alertservice.db.tenant.TenantLookup;
@@ -60,12 +55,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.google.common.base.Strings;
-
-import io.grpc.Context;
-import io.micrometer.core.instrument.Counter;
-import io.micrometer.core.instrument.MeterRegistry;
-import lombok.RequiredArgsConstructor;
+import javax.annotation.PostConstruct;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * Used to process/reduce events to alerts.
@@ -82,6 +78,8 @@ public class AlertEventProcessor {
     private final AlertDefinitionRepository alertDefinitionRepository;
     private final TriggerEventRepository triggerEventRepository;
     private final ThresholdedEventRepository thresholdedEventRepository;
+
+    private final MonitorPolicyRepository monitorPolicyRepository;
 
     private final MeterRegistry registry;
 
@@ -105,19 +103,32 @@ public class AlertEventProcessor {
         return Optional.of(alertMapper.toProto(dbAlert));
     }
 
-    private AlertData getAlertData(Event event, AlertDefinition alertDefinition) {
+    private @Nullable AlertData getAlertData(Event event, AlertDefinition alertDefinition) {
         var reductionKey = String.format(alertDefinition.getReductionKey(), event.getTenantId(), event.getUei(), event.getNodeId());
         String clearKey = null;
         if (!Strings.isNullOrEmpty(alertDefinition.getClearKey())) {
             clearKey = String.format(alertDefinition.getClearKey(), event.getTenantId(), event.getNodeId());
         }
         TriggerEvent triggerEvent = triggerEventRepository.getReferenceById(alertDefinition.getTriggerEventId());
-        return new AlertData(reductionKey, clearKey, alertDefinition.getType(), triggerEvent.getSeverity(), triggerEvent.getCount(), triggerEvent.getOvertime(), triggerEvent.getOvertimeUnit());
+        // TODO HS-1485: An alert could match multiple monitoring policies, each having their own notifications.
+        Optional<MonitorPolicy> policy = monitorPolicyRepository.findMonitoringPolicyByTriggerEvent(triggerEvent.getId());
+        List<Long> policies = new ArrayList<>();
+        policy.ifPresent(monitorPolicy -> policies.add(monitorPolicy.getId()));
+        return new AlertData(
+            reductionKey,
+            clearKey,
+            alertDefinition.getType(),
+            triggerEvent.getSeverity(),
+            triggerEvent.getCount(),
+            triggerEvent.getOvertime(),
+            triggerEvent.getOvertimeUnit(),
+            policies
+        );
     }
 
-    protected org.opennms.horizon.alertservice.db.entity.Alert addOrReduceEventAsAlert(Event event) {
+    protected @Nullable org.opennms.horizon.alertservice.db.entity.Alert addOrReduceEventAsAlert(Event event) {
         Optional<AlertDefinition> alertDefOpt = alertDefinitionRepository.findFirstByTenantIdAndUei(event.getTenantId(), event.getUei());
-        if(alertDefOpt.isEmpty()) {
+        if (alertDefOpt.isEmpty()) {
             alertDefOpt = alertDefinitionRepository.findFirstByTenantIdAndUei(MonitorPolicyService.SYSTEM_TENANT, event.getUei());
         }
         if (alertDefOpt.isEmpty()) {
@@ -146,6 +157,10 @@ public class AlertEventProcessor {
         boolean thresholdMet = true;
         if (thresholding) {
             if (!AlertType.CLEAR.equals(alertData.type())) {
+                // TODO: (Quote from Jose) We will have to add an option to auto close if rate is no longer met - that will be post FMA.
+                // If we don't wish to use SQL, this can be done by passing the ThresholdedEvent to the AlertEngine,
+                // using the tick() method to check for expiredEvents.
+                // In AlertEngine, need id, tenant, expiryDate. Save in a TreeMap sorted by expiryDate.
                 saveThresholdEvent(event.getUei(), alertData, event);
                 thresholdMet = isThresholdMet(alertData, event.getTenantId());
             }
@@ -172,6 +187,7 @@ public class AlertEventProcessor {
                 alert.setSeverity(alertData.severity());
             }
         }
+        alert.setMonitoringPolicyId(alertData.monitoringPolicyId());
 
         // FIXME: If the alert is going to be delete immediately, should we even bother creating it?
         alertRepository.save(alert);
@@ -180,9 +196,8 @@ public class AlertEventProcessor {
 
     private boolean isThresholdMet(AlertData alertData, String tenantId) {
         Date current = new Date();
-        Date cutOff = calculateExpiry(current, alertData, false);
 
-        int currentCount = thresholdedEventRepository.countByReductionKeyAndTenantIdAndExpiryTimeGreaterThanEqual(alertData.reductionKey(), tenantId, cutOff);
+        int currentCount = thresholdedEventRepository.countByReductionKeyAndTenantIdAndExpiryTimeGreaterThanEqual(alertData.reductionKey(), tenantId, current);
         return alertData.count() <= currentCount;
     }
 
@@ -204,7 +219,7 @@ public class AlertEventProcessor {
         Instant curr = current.toInstant();
         Duration dur = Duration.ZERO;
         if (alertData.overTime() == 0) {
-            dur = Duration.ofDays(365*1000);
+            dur = Duration.ofDays(365 * 1000);
         } else {
             switch (alertData.overTimeUnit) {
                 case HOUR -> dur = Duration.ofHours(alertData.overTime());
@@ -242,8 +257,11 @@ public class AlertEventProcessor {
         // FIXME: We should be using the source time of the event and not the time at which it was produced
         alert.setLastEventTime(new Date(event.getProducedTimeMs()));
         alert.setSeverity(alertData.severity());
-        alert.setEventUei(event.getUei() );
+        alert.setEventUei(event.getUei());
         return alert;
     }
-    private record AlertData(String reductionKey, String clearKey, AlertType type, Severity severity, Integer count, Integer overTime, OverTimeUnit overTimeUnit) { }
+
+    private record AlertData(String reductionKey, String clearKey, AlertType type, Severity severity, Integer count,
+                             Integer overTime, OverTimeUnit overTimeUnit, List<Long> monitoringPolicyId) {
+    }
 }

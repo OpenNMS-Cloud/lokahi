@@ -33,9 +33,13 @@ import java.util.Optional;
 
 import org.opennms.horizon.alertservice.db.entity.MonitorPolicy;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
 public interface MonitorPolicyRepository extends JpaRepository<MonitorPolicy, Long> {
     List<MonitorPolicy> findAllByTenantId(String tenantId);
     Optional<MonitorPolicy> findByIdAndTenantId(Long id, String tenantId);
     Optional<MonitorPolicy> findByName(String name);
+
+    @Query("SELECT policy FROM TriggerEvent te INNER JOIN te.rule as pr INNER JOIN pr.policy as policy WHERE te.id = ?1")
+    Optional<MonitorPolicy> findMonitoringPolicyByTriggerEvent(Long triggerEventId);
 }

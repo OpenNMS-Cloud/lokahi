@@ -28,8 +28,32 @@
 
 package org.opennms.horizon.alertservice.stepdefs;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import com.google.protobuf.InvalidProtocolBufferException;
+import com.google.protobuf.MessageOrBuilder;
+import com.google.protobuf.Timestamp;
+import com.google.protobuf.util.JsonFormat;
+import io.cucumber.java.After;
+import io.cucumber.java.en.Then;
+import io.restassured.RestAssured;
+import io.restassured.config.HttpClientConfig;
+import io.restassured.config.RestAssuredConfig;
+import io.restassured.path.json.JsonPath;
+import io.restassured.response.Response;
+import io.restassured.specification.RequestSpecification;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.opennms.horizon.alerts.proto.Alert;
+import org.opennms.horizon.alerts.proto.AlertRequest;
+import org.opennms.horizon.alerts.proto.Filter;
+import org.opennms.horizon.alerts.proto.ListAlertsRequest;
+import org.opennms.horizon.alerts.proto.ListAlertsResponse;
+import org.opennms.horizon.alerts.proto.Severity;
+import org.opennms.horizon.alerts.proto.TimeRangeFilter;
+import org.opennms.horizon.alertservice.AlertGrpcClientUtils;
+import org.opennms.horizon.alertservice.RetryUtils;
+import org.opennms.horizon.alertservice.kafkahelper.KafkaTestHelper;
+import org.opennms.horizon.events.proto.Event;
+import org.opennms.horizon.events.proto.EventLog;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -40,34 +64,8 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
-import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.opennms.horizon.alerts.proto.Alert;
-import org.opennms.horizon.alerts.proto.AlertRequest;
-import org.opennms.horizon.alerts.proto.Filter;
-import org.opennms.horizon.alerts.proto.ListAlertsRequest;
-import org.opennms.horizon.alerts.proto.ListAlertsResponse;
-import org.opennms.horizon.alerts.proto.TimeRangeFilter;
-import org.opennms.horizon.alertservice.AlertGrpcClientUtils;
-import org.opennms.horizon.alertservice.RetryUtils;
-import org.opennms.horizon.alertservice.kafkahelper.KafkaTestHelper;
-import org.opennms.horizon.events.proto.Event;
-import org.opennms.horizon.events.proto.EventLog;
-import org.opennms.horizon.alerts.proto.Severity;
-
-import com.google.protobuf.InvalidProtocolBufferException;
-import com.google.protobuf.MessageOrBuilder;
-import com.google.protobuf.Timestamp;
-import com.google.protobuf.util.JsonFormat;
-
-import io.cucumber.java.After;
-import io.cucumber.java.en.Then;
-import io.restassured.RestAssured;
-import io.restassured.config.HttpClientConfig;
-import io.restassured.config.RestAssuredConfig;
-import io.restassured.path.json.JsonPath;
-import io.restassured.response.Response;
-import io.restassured.specification.RequestSpecification;
-import lombok.extern.slf4j.Slf4j;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 @Slf4j
 public class AlertTestSteps {
@@ -121,16 +119,33 @@ public class AlertTestSteps {
         }
     }
 
-//========================================
-// Gherkin Rules
-//========================================
-@Then("Send event with UEI {string} with tenant {string} with node {int}")
-public void sendMessageToKafkaAtTopicWithSeverity(String eventUei, String tenantId, int nodeId) {
+    //========================================
+    // Gherkin Rules
+    //========================================
+    @Then("Send event with UEI {string} with tenant {string} with node {int}")
+    public void sendMessageToKafkaAtTopicWithSeverity(String eventUei, String tenantId, int nodeId) {
         EventLog eventLog = EventLog.newBuilder()
             .setTenantId(tenantId)
             .addEvents(Event.newBuilder()
                 .setTenantId(tenantId)
                 .setProducedTimeMs(System.currentTimeMillis())
+                .setNodeId(nodeId)
+                .setUei(eventUei))
+            .build();
+
+        kafkaTestHelper.sendToTopic(background.getEventTopic(), eventLog.toByteArray(), tenantId);
+    }
+
+    @Then("Send event with UEI {string} with tenant {string} with node {int} at {long} minutes ago")
+    public void sendMessageToKafkaAtTopicWithMockedTime(String eventUei, String tenantId, int nodeId, long minutes) {
+        long current = System.currentTimeMillis();
+        long eventTime = current - (minutes * 60000L);
+
+        EventLog eventLog = EventLog.newBuilder()
+            .setTenantId(tenantId)
+            .addEvents(Event.newBuilder()
+                .setTenantId(tenantId)
+                .setProducedTimeMs(eventTime)
                 .setNodeId(nodeId)
                 .setUei(eventUei))
             .build();

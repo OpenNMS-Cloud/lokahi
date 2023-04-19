@@ -22,7 +22,7 @@ logging:
   file.path: /var/log/restServer
   level:
     root: debug
-tsdb.url: http://localhost:59090/api/v1/query
+tsdb.url: http://localhost:59090/api/v1
 
 grpc:
   url:

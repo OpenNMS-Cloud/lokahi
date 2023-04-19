@@ -71,6 +71,8 @@ import com.google.common.collect.Lists;
 import com.google.protobuf.UInt32Value;
 import com.swrve.ratelimitedlogger.RateLimitedLog;
 
+import lombok.Getter;
+
 public abstract class ParserBase implements Parser {
     private static final Logger LOG = LoggerFactory.getLogger(ParserBase.class);
 
@@ -127,6 +129,7 @@ public abstract class ParserBase implements Parser {
 
     private static final boolean DNS_LOOKUPS_ENABLED = true;
 
+    @Getter
     private LoadingCache<InetAddress, Optional<Instant>> clockSkewEventCache;
 
     private LoadingCache<InetAddress, Optional<Instant>> illegalFlowEventCache;
@@ -379,26 +382,13 @@ public abstract class ParserBase implements Parser {
     protected void detectClockSkew(final long packetTimestampMs, final InetAddress remoteAddress) {
         if (getMaxClockSkew() > 0) {
             long deltaMs = Math.abs(packetTimestampMs - System.currentTimeMillis());
-            if (deltaMs > getMaxClockSkew() * 1000L) {
+            long maxClockSkew = getMaxClockSkew() * 1000L;
+            if (deltaMs > maxClockSkew) {
                 final Optional<Instant> instant = clockSkewEventCache.getUnchecked(remoteAddress);
-
                 if (instant.isEmpty() || Duration.between(instant.get(), Instant.now()).getSeconds() > getClockSkewEventRate()) {
+                    LOG.warn("Clock skew {} detected for flow exporter (maxClockSkew = {})", deltaMs, maxClockSkew);
                     clockSkewEventCache.put(remoteAddress, Optional.of(Instant.now()));
-
-                   /* eventForwarder.sendNow(new EventBuilder()
-                            .setUei(CLOCK_SKEW_EVENT_UEI)
-                            .setTime(new Date())
-                            .setSource(getName())
-                            .setInterface(remoteAddress)
-                            .setDistPoller(identity.getId())
-                            .addParam("monitoringSystemId", identity.getId())
-                            .addParam("monitoringSystemLocation", identity.getLocation())
-                            .setParam("delta", (int) deltaMs)
-                            .setParam("clockSkewEventRate", (int) getClockSkewEventRate())
-                            .setParam("maxClockSkew", (int) getMaxClockSkew())
-                            .getEvent()); */
                 }
-
             }
         }
     }

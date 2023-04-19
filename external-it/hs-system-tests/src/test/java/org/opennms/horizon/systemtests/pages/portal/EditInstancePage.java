@@ -44,7 +44,7 @@ public class EditInstancePage {
     public static final ElementsCollection usersRow = $$("tbody tr");
     public static final SelenideElement usersTable = $("tbody");
     public static final SelenideElement deleteInstanceBtn = $("#delete-btn-cloud-instance");
-    public static final SelenideElement instanceUrlTxt = $("h2 a");
+    public static final SelenideElement instanceUrlTxt = $("#cloud-details-instance-url");
 
     public static void verifyNumberOfUsers(int count) {
         usersRow.shouldHave(CollectionCondition.size(count));

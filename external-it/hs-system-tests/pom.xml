@@ -19,14 +19,16 @@
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <cucumber.version>7.11.2</cucumber.version>
-        <selenium.version>4.1.1</selenium.version>
+        <selenide.version>6.13.0</selenide.version>
+        <retrofit.version>2.9.0</retrofit.version>
+        <okhttp.version>4.10.0</okhttp.version>
         <junit.version>5.9.1</junit.version>
         <azure.okhttp.version>1.11.8</azure.okhttp.version>
         <azure.secrets.version>4.6.0</azure.secrets.version>
         <azure.identity.version>1.8.2</azure.identity.version>
         <lombok.version>1.18.26</lombok.version>
         <jna.version>5.12.1</jna.version>
-        <testcontainers.version>1.15.3</testcontainers.version>
+        <testcontainers.version>1.17.6</testcontainers.version>
     </properties>
 
     <build>
@@ -97,8 +99,35 @@
         <dependency>
             <groupId>com.codeborne</groupId>
             <artifactId>selenide</artifactId>
-            <version>6.13.0</version>
+            <version>${selenide.version}</version>
             <scope>test</scope>
+        </dependency>
+
+        <!-- API -->
+        <dependency>
+            <groupId>com.squareup.retrofit2</groupId>
+            <artifactId>retrofit</artifactId>
+            <version>${retrofit.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.squareup.retrofit2</groupId>
+            <artifactId>converter-jackson</artifactId>
+            <version>${retrofit.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.squareup.retrofit2</groupId>
+            <artifactId>converter-simplexml</artifactId>
+            <version>${retrofit.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>okhttp</artifactId>
+            <version>${okhttp.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>logging-interceptor</artifactId>
+            <version>${okhttp.version}</version>
         </dependency>
 
         <dependency>

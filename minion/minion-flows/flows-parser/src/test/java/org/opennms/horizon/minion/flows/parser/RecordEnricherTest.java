@@ -1,8 +1,8 @@
 /*******************************************************************************
  * This file is part of OpenNMS(R).
  *
- * Copyright (C) 2019-2020 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2020 The OpenNMS Group, Inc.
+ * Copyright (C) 2023 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
  *
@@ -28,8 +28,8 @@
 
 package org.opennms.horizon.minion.flows.parser;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -41,7 +41,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
 
 import org.junit.Test;
 import org.opennms.horizon.minion.flows.parser.factory.DnsResolver;
@@ -83,17 +82,16 @@ public class RecordEnricherTest {
         RecordEnricher enricher = new RecordEnricher(dnsResolver, dnsLookupsEnabled);
 
         final Packet packet = getSampleNf5Packet();
-        final List<CompletableFuture<RecordEnrichment>> enrichmentFutures = packet.getRecords().map(enricher::enrich)
-                .collect(Collectors.toList());
+        final List<CompletableFuture<RecordEnrichment>> enrichmentFutures = packet.getRecords().map(enricher::enrich).toList();
 
         CompletableFuture.allOf(enrichmentFutures.toArray(new CompletableFuture[]{}));
 
         for (CompletableFuture<RecordEnrichment> future : enrichmentFutures) {
-            assertThat(future.isCompletedExceptionally(), equalTo(false));
+            assertFalse(future.isCompletedExceptionally());
 
             RecordEnrichment enrichment = future.get();
 
-            assertThat(enrichment.getHostnameFor(InetAddress.getByName("255.255.255.255")), equalTo(expectedValue));
+            assertEquals(expectedValue, enrichment.getHostnameFor(InetAddress.getByName("255.255.255.255")));
         }
     }
 

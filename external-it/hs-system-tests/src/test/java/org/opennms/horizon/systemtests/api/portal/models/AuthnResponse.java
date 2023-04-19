@@ -1,8 +1,8 @@
 /*******************************************************************************
  * This file is part of OpenNMS(R).
  *
- * Copyright (C) 2022 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
+ * Copyright (C) 2023 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
  *
@@ -26,21 +26,12 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.server.model;
 
-import lombok.Getter;
-import lombok.Setter;
+package org.opennms.horizon.systemtests.api.portal.models;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-@Getter
-@Setter
-public class TSResult {
-    private Map<String, String> metric = new HashMap<>();
-    List<Double> value = new ArrayList<>();
-    List<List<Double>> values = new ArrayList<>();
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class AuthnResponse {
+    public String sessionToken;
 }
-

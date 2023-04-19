@@ -28,16 +28,8 @@
 
 package org.opennms.horizon.alertservice.service;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
-
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-
+import io.grpc.Context;
+import lombok.RequiredArgsConstructor;
 import org.opennms.horizon.alerts.proto.Alert;
 import org.opennms.horizon.alertservice.api.AlertLifecyleListener;
 import org.opennms.horizon.alertservice.api.AlertService;
@@ -49,8 +41,14 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import io.grpc.Context;
-import lombok.RequiredArgsConstructor;
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 /**
  * A simple engine that stores alerts in memory and periodically scans the list to performs actions (i.e. delete if older than X).

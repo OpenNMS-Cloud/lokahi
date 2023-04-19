@@ -26,41 +26,39 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
+package org.opennms.horizon.systemtests.api.portal;
 
-package org.opennms.horizon.systemtests.pages.portal;
-
-import com.codeborne.selenide.Condition;
-import com.codeborne.selenide.SelenideElement;
-
-import static com.codeborne.selenide.Selenide.$;
-
-public class PortalLoginPage {
-
-    private static final SelenideElement acceptBtn = $("#cookie-header-accept");
-    private static final SelenideElement usernameInp = $("#idp-discovery-username");
-    private static final SelenideElement passwordInp = $("#okta-signin-password");
-    private static final SelenideElement nextBtn = $("#idp-discovery-submit");
-    private static final SelenideElement signInBtn = $("#okta-signin-submit");
-
-    public static void closeCookieHeader() {
-        acceptBtn.shouldBe(Condition.enabled).click();
-    }
-
-    public static void setUsername(String username) {
-        usernameInp.shouldBe(Condition.enabled).setValue(username);
-    }
-
-    public static void setPassword(String password) {
-        passwordInp.shouldBe(Condition.enabled).setValue(password);
-    }
-
-    public static void clickNext() {
-        nextBtn.shouldBe(Condition.enabled).click();
-    }
-
-    public static void clickSignIn() {
-        signInBtn.shouldBe(Condition.enabled).click();
-    }
+import okhttp3.ResponseBody;
+import org.opennms.horizon.systemtests.api.portal.models.BtoInstanceRequest;
+import org.opennms.horizon.systemtests.api.portal.models.BtoInstancesResponse;
+import retrofit2.Call;
+import retrofit2.http.Body;
+import retrofit2.http.DELETE;
+import retrofit2.http.GET;
+import retrofit2.http.Header;
+import retrofit2.http.POST;
+import retrofit2.http.Path;
 
 
+public interface PortalEndpoints {
+
+    @POST("api/v1/portal/{organization}/bto-instance")
+    Call<ResponseBody> createBtoInstance(
+        @Path("organization") String organization,
+        @Body BtoInstanceRequest body,
+        @Header("authorization") String authToken
+    );
+
+    @GET("api/v1/portal/{organization}/bto-instance?limit=100")
+    Call<BtoInstancesResponse> getBtoInstances(
+        @Path("organization") String organization,
+        @Header("authorization") String authToken
+    );
+
+    @DELETE("api/v1/portal/{organization}/bto-instance/{instanceId}")
+    Call<Void> deleteInstance(
+        @Path("organization") String organization,
+        @Path("instanceId") String instanceId,
+        @Header("authorization") String authToken
+    );
 }

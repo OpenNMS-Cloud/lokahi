@@ -1,8 +1,8 @@
 /*******************************************************************************
  * This file is part of OpenNMS(R).
  *
- * Copyright (C) 2022 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
+ * Copyright (C) 2023 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
  *
@@ -26,21 +26,17 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.server.model;
+package org.opennms.horizon.systemtests.api.portal.models;
 
-import lombok.Getter;
-import lombok.Setter;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+public class BtoInstanceRequest {
+    public String name;
+    public String admin;
+    public String adminFullName;
 
-@Getter
-@Setter
-public class TSResult {
-    private Map<String, String> metric = new HashMap<>();
-    List<Double> value = new ArrayList<>();
-    List<List<Double>> values = new ArrayList<>();
+    public BtoInstanceRequest(String instanceName, String adminEmail) {
+        this.name = instanceName;
+        this.admin = adminEmail;
+        this.adminFullName = "";
+    }
 }
-

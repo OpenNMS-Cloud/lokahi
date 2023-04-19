@@ -1,9 +1,12 @@
 package testcontainers;
 
+import com.github.dockerjava.api.model.ExposedPort;
+import com.github.dockerjava.api.model.InternetProtocol;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 
 import java.time.Duration;
+import java.util.List;
 
 import static org.testcontainers.containers.Network.SHARED;
 
@@ -12,10 +15,20 @@ public class MinionContainer extends GenericContainer<MinionContainer> {
     public String minionId;
     public String minionLocation;
 
+    /*
+    ## -- Karaf SSH            8101/TCP
+    ## -- HTTP                 8181/TCP
+    ## -- SNMP Trapd           1162/UDP
+    ## -- Syslog               1514/UDP
+    ## -- Flows                9999/UDP
+    ## -- Flows v5             8877/UDP
+    ## -- Flows v9             4729/UDP
+     */
     public MinionContainer(String gatewayHost, String minionId, String minionLocation) {
         super("opennms/horizon-stream-minion:latest");
-        withExposedPorts(8101)
-            .withNetworkAliases("flows")
+        // expose TCP ports here
+        withExposedPorts(8101, 8181)
+            .withNetworkAliases("horizon-stream")
             .withNetwork(SHARED)
             .withEnv("TZ", "America/New_York")
             .withEnv("MINION_ID", minionId)
@@ -35,9 +48,20 @@ public class MinionContainer extends GenericContainer<MinionContainer> {
             )
             .waitingFor(Wait.forListeningPort().withStartupTimeout(Duration.ofMinutes(5)));
 
+        // expose UDP ports here
+        this.getPortBindings().addAll(List.of(
+            ExposedPort.udp(4729).toString(),
+            ExposedPort.udp(8877).toString()
+        ));
+
         this.gatewayHost = gatewayHost;
         this.minionId = minionId.toUpperCase();
         this.minionLocation = minionLocation;
+    }
+
+    public String getUdpPortBinding(int portNumber) {
+        return this.getContainerInfo().getNetworkSettings().getPorts().getBindings()
+            .get(new ExposedPort(portNumber, InternetProtocol.UDP))[0].getHostPortSpec();
     }
 
 }

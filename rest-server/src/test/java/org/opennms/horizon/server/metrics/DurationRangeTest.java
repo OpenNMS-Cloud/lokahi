@@ -1,8 +1,8 @@
 /*******************************************************************************
  * This file is part of OpenNMS(R).
  *
- * Copyright (C) 2022 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
+ * Copyright (C) 2023 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
  *
@@ -26,21 +26,28 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.server.model;
+package org.opennms.horizon.server.metrics;
 
-import lombok.Getter;
-import lombok.Setter;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.opennms.horizon.server.model.TimeRangeUnit;
+import org.opennms.horizon.server.service.metrics.TSDBMetricsService;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.time.Duration;
 
-@Getter
-@Setter
-public class TSResult {
-    private Map<String, String> metric = new HashMap<>();
-    List<Double> value = new ArrayList<>();
-    List<List<Double>> values = new ArrayList<>();
+public class DurationRangeTest {
+
+
+    @Test
+    public void testDuration() {
+
+        var duration = TSDBMetricsService.getDuration(24, TimeRangeUnit.HOUR);
+        Assertions.assertEquals(Duration.ofHours(24), duration.get());
+        duration = TSDBMetricsService.getDuration(60, TimeRangeUnit.MINUTE);
+        Assertions.assertEquals(Duration.ofMinutes(60), duration.get());
+        duration = TSDBMetricsService.getDuration(30, TimeRangeUnit.SECOND);
+        Assertions.assertEquals(Duration.ofSeconds(30), duration.get());
+        duration = TSDBMetricsService.getDuration(2, TimeRangeUnit.DAY);
+        Assertions.assertEquals(Duration.ofDays(2), duration.get());
+    }
 }
-

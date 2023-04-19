@@ -48,4 +48,9 @@ public final class Constants {
     public static final String IF_OUT_OCTETS = "ifOutOctets";
     public static final String SYS_UP_TIME = "sysUpTime";
 
+    // Total Network
+    public static final String TOTAL_NETWORK_BYTES_IN = "total_network_bytes_in";
+    public static final String TOTAL_NETWORK_BYTES_OUT = "total_network_bytes_out";
+    public static final String QUERY_FOR_TOTAL_NETWORK_BYTES_IN = "query=sum(rate(ifHCInOctets[1h])*3600)";
+    public static final String QUERY_FOR_TOTAL_NETWORK_BYTES_OUT = "query=sum(rate(ifHCOutOctets[1h])*3600)";
 }

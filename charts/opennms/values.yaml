@@ -265,7 +265,7 @@ Cortex:
   Enabled: true
   ServiceName: cortex
   Host: cortex
-  PathRead: /prometheus/api/v1/query
+  PathRead: /prometheus/api/v1
   PathWrite: /api/v1/push
   Protocol: http
   Port: 9000

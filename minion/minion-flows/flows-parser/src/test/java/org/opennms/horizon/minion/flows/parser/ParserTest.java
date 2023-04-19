@@ -1,8 +1,8 @@
 /*******************************************************************************
  * This file is part of OpenNMS(R).
  *
- * Copyright (C) 2017-2017 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2017 The OpenNMS Group, Inc.
+ * Copyright (C) 2023 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
  *
@@ -28,8 +28,8 @@
 
 package org.opennms.horizon.minion.flows.parser;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.opennms.horizon.minion.flows.listeners.utils.BufferUtils.slice;
 
 import java.io.IOException;
@@ -56,9 +56,11 @@ import io.netty.buffer.Unpooled;
 
 public class ParserTest {
 
+    private static final String IP_FIX_RESOURCE = "/flows/ipfix.dat";
+
     @Test
     public void canReadValidIPFIX() {
-        execute("/flows/ipfix.dat", buffer -> {
+        execute(IP_FIX_RESOURCE, buffer -> {
             try {
 
                 final Session session = new TcpSession(InetAddress.getLoopbackAddress(), () -> new SequenceNumberTracker(32));
@@ -66,28 +68,28 @@ public class ParserTest {
                 final Header h1 = new Header(slice(buffer, Header.SIZE));
                 final Packet p1 = new Packet(session, h1, slice(buffer, h1.length - Header.SIZE));
 
-                assertThat(p1.header.versionNumber, is(0x000a));
-                assertThat(p1.header.observationDomainId, is(0L));
-                assertThat(p1.header.exportTime, is(1431516026L)); // "2015-05-13T11:20:26.000Z"
+                assertEquals(0x000a, p1.header.versionNumber);
+                assertEquals(0L, p1.header.observationDomainId);
+                assertEquals(1431516026L, p1.header.exportTime); // "2015-05-13T11:20:26.000Z"
 
                 final Header h2 = new Header(slice(buffer, Header.SIZE));
                 final Packet p2 = new Packet(session, h2, slice(buffer, h2.length - Header.SIZE));
 
-                assertThat(p2.header.versionNumber, is(0x000a));
-                assertThat(p2.header.observationDomainId, is(0L));
-                assertThat(p2.header.exportTime, is(1431516026L)); // "2015-05-13T11:20:26.000Z"
+                assertEquals(0x000a, p2.header.versionNumber);
+                assertEquals(0L, p2.header.observationDomainId);
+                assertEquals(1431516026L, p2.header.exportTime); // "2015-05-13T11:20:26.000Z"
 
                 final Header h3 = new Header(slice(buffer, Header.SIZE));
                 final Packet p3 = new Packet(session, h3, slice(buffer, h3.length - Header.SIZE));
 
-                assertThat(p3.header.versionNumber, is(0x000a));
-                assertThat(p3.header.observationDomainId, is(0L));
-                assertThat(p3.header.exportTime, is(1431516028L)); // "2015-05-13T11:20:26.000Z"
+                assertEquals(0x000a, p3.header.versionNumber);
+                assertEquals(0L, p3.header.observationDomainId);
+                assertEquals(1431516028L, p3.header.exportTime); // "2015-05-13T11:20:26.000Z"
 
-                assertThat(buffer.isReadable(), is(false));
+                assertFalse(buffer.isReadable());
 
             } catch (final Exception e) {
-                throw Throwables.propagate(e);
+                throw new RuntimeException(e);
             }
         });
     }
@@ -104,7 +106,6 @@ public class ParserTest {
                 final ByteBuffer buffer = ByteBuffer.allocate((int) channel.size());
                 channel.read(buffer);
                 buffer.flip();
-
                 consumer.accept(Unpooled.wrappedBuffer(buffer));
             }
 

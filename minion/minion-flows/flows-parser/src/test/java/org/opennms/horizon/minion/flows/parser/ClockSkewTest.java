@@ -1,8 +1,8 @@
 /*******************************************************************************
  * This file is part of OpenNMS(R).
  *
- * Copyright (C) 2019 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2019 The OpenNMS Group, Inc.
+ * Copyright (C) 2023 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
  *
@@ -34,7 +34,7 @@ import java.util.concurrent.CompletableFuture;
 
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
+import org.junit.Test;
 import org.opennms.horizon.minion.flows.parser.factory.DnsResolver;
 import org.opennms.horizon.minion.flows.parser.transport.MessageBuilder;
 import org.opennms.horizon.shared.ipc.rpc.IpcIdentity;
@@ -45,7 +45,6 @@ import org.opennms.dataplatform.flows.document.FlowDocument;
 import com.codahale.metrics.MetricRegistry;
 
 public class ClockSkewTest {
-    private int eventCount = 0;
 
 
     private final IpcIdentity identity = new IpcIdentity() {
@@ -93,47 +92,53 @@ public class ClockSkewTest {
 
     @Before
     public void reset() {
-        this.eventCount = 0;
+        emptyClockSkewCache();
     }
 
-    @Ignore
-    public void testClockSkewEventSentOnlyOnce() {
+    @Test
+    public void testClockSkewCorrectlyInsertedInCache() {
         long current = System.currentTimeMillis();
 
         parserBase.setMaxClockSkew(300);
         parserBase.setClockSkewEventRate(3600);
         parserBase.detectClockSkew(current - 299000, InetAddress.getLoopbackAddress());
-        Assert.assertEquals(0, eventCount);
+        Assert.assertEquals(0, parserBase.getClockSkewEventCache().size());
+        emptyClockSkewCache();
 
         parserBase.detectClockSkew(current - 301000, InetAddress.getLoopbackAddress());
-        Assert.assertEquals(1, eventCount);
+        Assert.assertEquals(1, parserBase.getClockSkewEventCache().size());
+        emptyClockSkewCache();
 
         parserBase.detectClockSkew(current - 301000, InetAddress.getLoopbackAddress());
-        Assert.assertEquals(1, eventCount);
+        Assert.assertEquals(1, parserBase.getClockSkewEventCache().size());
     }
 
-    @Ignore
+    @Test
     public void testClockSkewEventRate() throws Exception {
         long current = System.currentTimeMillis();
 
         parserBase.setMaxClockSkew(300);
         parserBase.setClockSkewEventRate(1);
         parserBase.detectClockSkew(current - 299000, InetAddress.getLoopbackAddress());
-        Assert.assertEquals(0, eventCount);
+        Assert.assertEquals(0, parserBase.getClockSkewEventCache().size());
 
         parserBase.detectClockSkew(current - 301000, InetAddress.getLoopbackAddress());
-        Assert.assertEquals(1, eventCount);
+        Assert.assertEquals(1, parserBase.getClockSkewEventCache().size());
 
         parserBase.detectClockSkew(current - 301000, InetAddress.getLoopbackAddress());
-        Assert.assertEquals(1, eventCount);
+        Assert.assertEquals(1, parserBase.getClockSkewEventCache().size());
 
         parserBase.detectClockSkew(current - 301000, InetAddress.getLoopbackAddress());
-        Assert.assertEquals(1, eventCount);
+        Assert.assertEquals(1, parserBase.getClockSkewEventCache().size());
 
-        Thread.sleep(1000);
+        emptyClockSkewCache();
 
         parserBase.detectClockSkew(current - 301000, InetAddress.getLoopbackAddress());
-        Assert.assertEquals(2, eventCount);
+        Assert.assertEquals(1, parserBase.getClockSkewEventCache().size());
+    }
+
+    private void emptyClockSkewCache() {
+        parserBase.getClockSkewEventCache().asMap().clear();
     }
 
     private static class ParserBaseExt extends ParserBase {

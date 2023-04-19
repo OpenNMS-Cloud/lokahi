@@ -1,23 +1,9 @@
 (function checkTheme() {
-  // check param on the redirectUri for dark mode
-  const params = new URLSearchParams(window.location.search)
-  const redirectUri = params.get('redirect_uri')
+  // get theme from localStorage
+  const localStorageTheme = window.localStorage.getItem('theme')
 
-  let isDark;
-
-  // First check redirectUri for theme
-  if (redirectUri) {
-    const appUrl = new URL(redirectUri)
-    if (appUrl.searchParams.get('theme')) {
-      isDark = appUrl.searchParams.get('theme') === 'dark'
-    }
-  }
-
-  // then check localStorage
-  if (isDark == null) {
-    const localStorageTheme = window.localStorage.getItem('theme')
-    isDark = localStorageTheme !== 'light' // default to dark if not set
-  }
+  // default to dark if not set
+  let isDark = localStorageTheme !== 'light'
   
   if (isDark) {
     // remove the light theme, dark will apply

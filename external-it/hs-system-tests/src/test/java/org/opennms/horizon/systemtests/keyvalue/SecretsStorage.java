@@ -38,10 +38,21 @@ public class SecretsStorage {
         .credential(new DefaultAzureCredentialBuilder().build())
         .buildClient();
 
+    public static String oktaHost = getSecretValueForEnv("okta-host");
+    public static String oktaCompanyId = getSecretValueForEnv("okta-companyId");
+    public static String oktaClientId = getSecretValueForEnv("okta-clientId");
+    public static String oktaCodeVerifier = getSecretValue("okta-codeVerifier");
+    public static String oktaCodeChallenge = getSecretValue("okta-codeChallenge");
+    public static String oktaCodeChallengeMethod = getSecretValue("okta-codeChallengeMethod");
+    public static String oktaNonce = getSecretValue("okta-nonce");
+    public static String oktaState = getSecretValue("okta-state");
+
     public static String portalHost = getSecretValueForEnv("portal-host");
     public static String adminUserEmail = getSecretValueForEnv("hs-portal-userEmail");
     public static String adminUserPassword = getSecretValueForEnv("hs-portal-userPassword");
     public static String oktaUserEmail = getSecretValueForEnv("hs-portal-oktaEmail");
+
+    public static String portalOrganizationId = getSecretValueForEnv("hs-portal-organization");
 
     private static String getSecretValueForEnv(String secret) {
         return secretClient.getSecret(secret + "-" + "dev").getValue();

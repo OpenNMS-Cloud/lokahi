@@ -36,6 +36,7 @@ Feature: Alert Service Basic Functionality
       | alerts[0].counter == 1      |
       | alerts[0].severity == MINOR |
     Then Verify alert topic has 1 messages with tenant "tenantA"
+    Then Verify valid monitoring policy ID is set in alert for tenant "tenantA"
 
   Scenario: Verify when an event is received from Kafka, with no matching alert configuration, no new alert is created
     Then Send event with UEI "uei.opennms.org/perspective/nodes/nodeLostService" with tenant "tenantB" with node 10

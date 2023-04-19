@@ -4,6 +4,7 @@ import com.codeborne.selenide.Selenide;
 import io.cucumber.java.After;
 import io.cucumber.java.AfterAll;
 import io.cucumber.java.Before;
+import org.opennms.horizon.systemtests.api.portal.PortalApi;
 import org.opennms.horizon.systemtests.keyvalue.SecretsStorage;
 import org.opennms.horizon.systemtests.pages.cloud.CloudLoginPage;
 import org.opennms.horizon.systemtests.pages.portal.AddNewInstancePopup;
@@ -26,7 +27,6 @@ public class CucumberHooks {
             return;
         }
 
-        System.out.println("CLOUD BEFORE STEP");
         Selenide.open(SecretsStorage.portalHost);
         PortalLoginPage.closeCookieHeader();
         PortalLoginPage.setUsername(SecretsStorage.adminUserEmail);
@@ -37,7 +37,7 @@ public class CucumberHooks {
         PortalCloudPage.verifyThatUserLoggedIn();
 
         long timeCode = Instant.now().toEpochMilli();
-        ;
+
         String instanceName = "Cloud-env" + timeCode;
         PortalCloudPage.clickAddInstance();
         AddNewInstancePopup.setInstanceName(instanceName);
@@ -94,6 +94,11 @@ public class CucumberHooks {
 
     @AfterAll
     public static void tearDown() {
-        MINIONS.get(0).stop();
+        if (!MINIONS.isEmpty()) {
+            MINIONS.get(0).stop();
+        }
+        PortalApi portalApi = new PortalApi();
+        portalApi.deleteAllBtoInstances();
+
     }
 }

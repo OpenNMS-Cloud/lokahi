@@ -2,7 +2,8 @@ const isDark = useDark({
   selector: 'body',
   attribute: 'class',
   valueDark: 'open-dark',
-  valueLight: 'open-light'
+  valueLight: 'open-light',
+  storageKey: 'theme'
 })
 
 const toggleDark = useToggle(isDark)

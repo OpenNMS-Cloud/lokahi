@@ -125,6 +125,7 @@ import { useDiscoveryMutations } from '@/store/Mutations/discoveryMutations'
 import { IAutocompleteItemType } from '@featherds/autocomplete'
 import { AzureActiveDiscovery, IcmpActiveDiscovery, PassiveDiscovery } from '@/types/graphql'
 import DiscoveryTypeSelector from '@/components/Discovery/DiscoveryTypeSelector.vue'
+import { cloneDeep } from 'lodash'
 const discoveryQueries = useDiscoveryQueries()
 const discoveryMutations = useDiscoveryMutations()
 
@@ -173,7 +174,7 @@ const showDiscovery = (selected: IAutocompleteItemType | IAutocompleteItemType[]
   if (discovery) {
     isDiscoveryEditingShown.value = true
     showNewDiscovery.value = false
-    selectedDiscovery.value = discovery
+    selectedDiscovery.value = cloneDeep(discovery)
     //replace with type guard
     if (discovery.discoveryType === DiscoveryType.ICMP) {
       discoverySelectedType.value = DiscoveryType.ICMP

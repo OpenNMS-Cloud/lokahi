@@ -29,7 +29,7 @@
           @update:model-value="showDiscovery"
         />
         <DiscoveryListCard
-          title=" My Active Discoveries"
+          title="My Active Discoveries"
           :list="discoveryQueries.activeDiscoveries"
           @select-discovery="showDiscovery"
           :selectedId="discoverySelectedType !== DiscoveryType.SyslogSNMPTraps ? selectedDiscovery?.id : null"
@@ -37,7 +37,7 @@
         />
         <DiscoveryListCard
           passive
-          title=" My Passive Discoveries"
+          title="My Passive Discoveries"
           :list="discoveryQueries.passiveDiscoveries"
           @toggle-discovery="toggleDiscovery"
           @select-discovery="showDiscovery"

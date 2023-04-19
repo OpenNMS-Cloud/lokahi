@@ -76,7 +76,6 @@
           >{{ discoveryText.Discovery.button.cancel }}</FeatherButton
         >
         <ButtonWithSpinner
-          v-if="!props.discovery"
           :isFetching="discoveryMutations.isFetchingPassiveDiscovery"
           primary
           type="submit"
@@ -97,7 +96,7 @@ import { useTagQueries } from '@/store/Queries/tagQueries'
 import { useDiscoveryQueries } from '@/store/Queries/discoveryQueries'
 import { useDiscoveryMutations } from '@/store/Mutations/discoveryMutations'
 import { PassiveDiscovery, PassiveDiscoveryUpsertInput } from '@/types/graphql'
-import { set } from 'lodash'
+import { cloneDeep, set } from 'lodash'
 import { useForm } from '@featherds/input-helper'
 import { string } from 'yup'
 const form = useForm()
@@ -124,10 +123,11 @@ onMounted(() => {
   }
 })
 
-watch(props, () => {
+watchEffect(async () => {
   if (props.discovery?.id) {
     form.clearErrors()
-    discoveryQueries.getTagsByPassiveDiscoveryId(props.discovery.id)
+    await discoveryQueries.getTagsByPassiveDiscoveryId(props.discovery.id)
+    discoveryInfo.value.tags = tags.value?.map((tag) => ({ name: tag.name }))
   }
   discoveryInfo.value = props.discovery || ({} as PassiveDiscoveryUpsertInput)
 })
@@ -148,7 +148,12 @@ const submitHandler = async () => {
   contentEditableCommunityStringRef.value.validateContent()
   const isPortInvalid = contentEditableUDPPortRef.value?.validateContent()
   if (form.validate().length || isPortInvalid) return
-  await discoveryMutations.upsertPassiveDiscovery({ passiveDiscovery: discoveryInfo.value })
+
+  // clone and remove unused props from payload
+  const payload = cloneDeep(discoveryInfo.value) as Partial<PassiveDiscovery>
+  if (payload.toggle) delete payload.toggle
+
+  await discoveryMutations.upsertPassiveDiscovery({ passiveDiscovery: payload })
 
   if (!discoveryMutations.passiveDiscoveryError && discoveryInfo.value.name) {
     props.successCallback(discoveryInfo.value.name)

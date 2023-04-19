@@ -10,7 +10,7 @@
   <PrimaryModal title="Outbound Notifications" :visible="isVisible">
     <template v-slot:content>
       <p class="title" data-test="notifications-modal">
-        Pager Duty
+        PagerDuty
       </p>
       <FeatherInput
         data-test="routing-input"

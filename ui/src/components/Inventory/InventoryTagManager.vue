@@ -193,14 +193,11 @@ watchEffect(() => {
     }
 
     .search-add {
-      width: 60%;
       display: flex;
       flex-direction: column;
-      align-items: flex-end;
       .select-all-btn {
-        margin-bottom: 25px;
-        display: flex;
         order: 2;
+        margin-top: var(variables.$spacing-xxs);
       }
       .tags-autocomplete {
         display: flex;
@@ -210,11 +207,10 @@ watchEffect(() => {
         }
       }
 
-      @include mediaQueriesMixins.screen-lg {
+      @include mediaQueriesMixins.screen-md {
         flex-direction: row;
-        justify-content: flex-end;
         .select-all-btn {
-          margin-right: var(variables.$spacing-m);
+          margin-right: var(variables.$spacing-s);
           order: 1;
         }
         .tags-autocomplete {

@@ -45,7 +45,7 @@ spec:
             - name: SPRING_KAFKA_BOOTSTRAP_SERVERS
               value: "{{ .Values.Kafka.ServiceName }}:{{ .Values.Kafka.Port }}"
             - name: SPRING_DATASOURCE_URL
-              value: "jdbc:postgresql://postgres:5432/horizon_stream?currentSchema=notification"
+              value: "jdbc:postgresql://{{ .Values.OpenNMS.Notification.DbHost }}:5432/{{ .Values.OpenNMS.Notification.DbName }}?currentSchema={{ .Values.OpenNMS.Notification.DbSchemaName }}"
             - name: SPRING_DATASOURCE_USERNAME
               valueFrom:
                 secretKeyRef:

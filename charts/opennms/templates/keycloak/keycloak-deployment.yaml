@@ -61,12 +61,12 @@ spec:
             - name: KC_HOSTNAME_ADMIN_URL
               value: "{{ .Values.Keycloak.HostnameAdminUrl }}"
             {{- end }}
-            - name: KC_DB
-              value: postgres
-            - name: KC_DB_URL
-              value: "jdbc:postgresql://postgres/horizon_stream?currentSchema=keycloak"
+            - name: KC_DB_SCHEMA
+              value: "{{ .Values.Postgres.DbSchemaName }}"
+            - name: KC_DB_URL_DATABASE
+              value: "{{ .Values.Postgres.DbName }}"
             - name: KC_DB_URL_HOST
-              value: "{{ .Values.Postgres.ServiceName }}"
+              value: "{{ .Values.Postgres.DbHost }}"
             - name: KC_DB_USERNAME
               valueFrom:
                 secretKeyRef:

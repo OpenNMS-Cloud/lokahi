@@ -37,8 +37,13 @@ spec:
       {{- end }}
       volumes:
         - name: postgres-volume
+          {{- if .Values.Postgres.Pvc }}
           persistentVolumeClaim:
             claimName: postgres-pvc
+          {{- else }}
+          emptyDir:
+            sizeLimit: 10Gi
+          {{- end }}
         - name: postgres-initial-script
           secret:
             secretName: postgres-initial-sql

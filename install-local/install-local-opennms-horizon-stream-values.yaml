@@ -100,4 +100,5 @@ Grafana:
   Image: opennms/horizon-stream-grafana:v0.0.32-dev
 Ingress:
   Enabled: true
-
+Postgres:
+  Pvc: false

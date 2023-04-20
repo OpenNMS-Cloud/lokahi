@@ -43,7 +43,7 @@ spec:
             - name: JAVA_TOOL_OPTIONS
               value: "-agentlib:jdwp=transport=dt_socket,server=y,address=5005,suspend=n,quiet=y" # Permanent debug port in `skaffold dev`
             - name: SPRING_DATASOURCE_URL
-              value: "jdbc:postgresql://postgres:5432/horizon_stream?currentSchema=alert"
+              value: "jdbc:postgresql://{{ .Values.OpenNMS.Alert.DbHost }}:5432/{{ .Values.OpenNMS.Alert.DbName }}?currentSchema={{ .Values.OpenNMS.Alert.DbSchemaName }}"
             - name: SPRING_DATASOURCE_USERNAME
               valueFrom:
                 secretKeyRef:

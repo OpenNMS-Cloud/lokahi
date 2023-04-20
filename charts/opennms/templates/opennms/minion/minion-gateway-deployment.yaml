@@ -62,7 +62,7 @@ spec:
                   name: postgres
                   key: minionGatewayPwd
             - name: SPRING_DATASOURCE_URL
-              value: jdbc:postgresql://postgres:5432/horizon_stream?currentSchema=minion_gateway"
+              value: "jdbc:postgresql://{{ .Values.OpenNMS.MinionGateway.DbHost }}:5432/{{ .Values.OpenNMS.MinionGateway.DbName }}?currentSchema={{ .Values.OpenNMS.MinionGateway.DbSchemaName }}"
             - name: SPRING_KAFKA_BOOTSTRAP_SERVERS
             - name: KAFKA_BOOTSTRAP_SERVERS
               value: "{{ .Values.Kafka.ServiceName }}:{{ .Values.Kafka.Port }}"

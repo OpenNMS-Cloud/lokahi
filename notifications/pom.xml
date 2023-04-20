@@ -20,6 +20,10 @@
     <properties>
         <application.docker.image.name>opennms/horizon-stream-notification</application.docker.image.name>
         <sonar.projectKey>opennms_horizon-stream_notification</sonar.projectKey>
+        <!-- Override the Netty version, Azure Communication Services requires a newer version than the one currently
+        specified in the parent pom (4.1.78.Final), but upgrading that version to this one causes issues that prevent
+        the Minion from starting up -->
+        <netty4.version>4.1.89.Final</netty4.version>
     </properties>
 
     <dependencyManagement>
@@ -241,7 +245,11 @@
             <artifactId>velocity-engine-core</artifactId>
             <version>${velocity.engine.version}</version>
         </dependency>
-
+        <dependency>
+            <groupId>com.azure</groupId>
+            <artifactId>azure-communication-email</artifactId>
+            <version>${azure-communication-email.version}</version>
+        </dependency>
 
         <!-- test-->
 		<dependency>

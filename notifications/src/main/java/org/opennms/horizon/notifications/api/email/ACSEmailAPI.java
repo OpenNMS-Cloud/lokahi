@@ -28,41 +28,32 @@
 
 package org.opennms.horizon.notifications.api.email;
 
-import jakarta.mail.MessagingException;
-import jakarta.mail.internet.MimeMessage;
+import com.azure.communication.email.EmailClient;
+import com.azure.communication.email.models.EmailMessage;
 import lombok.RequiredArgsConstructor;
-import org.opennms.horizon.notifications.exceptions.NotificationAPIException;
-import org.opennms.horizon.notifications.exceptions.NotificationException;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.MailException;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 
+/**
+ * Implements email using Azure Communication Services instead of SMTP
+ */
 @RequiredArgsConstructor
-public class SmtpEmailAPI implements EmailAPI {
+@ConditionalOnBean(EmailClient.class)
+public class ACSEmailAPI implements EmailAPI {
     @Value("${spring.mail.from}")
     private String fromAddress;
 
-    private final JavaMailSender sender;
+    private final EmailClient client;
 
     @Override
-    public void sendEmail(String emailAddress, String subject, String body) throws NotificationException {
-        try {
-            MimeMessage mimeMessage = sender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage);
+    public void sendEmail(String emailAddress, String subject, String body) {
+        EmailMessage message = new EmailMessage();
 
-            helper.setTo(emailAddress);
-            helper.setFrom(fromAddress);
+        message.setSenderAddress(fromAddress);
+        message.setToRecipients(emailAddress);
+        message.setSubject(subject);
+        message.setBodyHtml(body);
 
-            helper.setSubject(subject);
-            helper.setText(body, true);
-
-            sender.send(helper.getMimeMessage());
-        } catch (MessagingException e) {
-            // TODO This may be a retryable exception
-            throw new NotificationAPIException(e);
-        } catch (MailException e) {
-            throw new NotificationAPIException(e);
-        }
+        client.beginSend(message);
     }
 }

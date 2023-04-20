@@ -154,6 +154,7 @@
         <jmh.version>1.33</jmh.version>
         <zip4j.version>2.11.5</zip4j.version>
         <velocity.engine.version>2.3</velocity.engine.version>
+        <azure-communication-email.version>1.0.0</azure-communication-email.version>
     </properties>
 
     <dependencyManagement>

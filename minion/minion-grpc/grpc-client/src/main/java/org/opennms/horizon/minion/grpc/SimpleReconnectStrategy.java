@@ -27,7 +27,7 @@ public class SimpleReconnectStrategy implements Runnable, ReconnectStrategy {
     @Override
     public synchronized void activate() {
         if (reconnectTask != null) {
-            // Silently ignore additional activate requests if one is already in progress
+            LOG.trace("Ignoring activate request. One is already in progress.");
             return;
         }
         onDisconnect.run();
@@ -35,15 +35,18 @@ public class SimpleReconnectStrategy implements Runnable, ReconnectStrategy {
     }
 
     @Override
-    public synchronized void run() {
+    public void run() {
         ConnectivityState state = channel.getState(true);
         LOG.info("Channel is in currently in state: {}. Waiting for it to be READY.", state);
         if (state == ConnectivityState.READY) {
+            // The onConnect callback may block, so we leave this out of any critical section
             onConnect.run();
-            // After successfully triggering onConnect, cancel future executions
-            if (reconnectTask != null) {
-                reconnectTask.cancel(false);
-                reconnectTask = null;
+            synchronized (this) {
+                // After successfully triggering onConnect, cancel future executions
+                if (reconnectTask != null) {
+                    reconnectTask.cancel(false);
+                    reconnectTask = null;
+                }
             }
         }
     }

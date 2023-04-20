@@ -35,6 +35,7 @@ spec:
                 values:
                 - {{ .Values.NodeRestrictions.Value }}
       {{- end }}
+      priorityClassName: high-priority-nonpreempting
       volumes:
         - name: postgres-volume
           {{- if .Values.Postgres.Pvc }}

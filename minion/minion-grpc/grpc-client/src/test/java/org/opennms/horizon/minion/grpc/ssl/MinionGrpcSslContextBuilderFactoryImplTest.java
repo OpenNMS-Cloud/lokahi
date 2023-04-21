@@ -32,8 +32,10 @@ package org.opennms.horizon.minion.grpc.ssl;
 import io.grpc.netty.shaded.io.netty.handler.ssl.ApplicationProtocolConfig;
 import io.grpc.netty.shaded.io.netty.handler.ssl.SslContextBuilder;
 import io.grpc.netty.shaded.io.netty.handler.ssl.SslProvider;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.mockito.ArgumentMatcher;
 import org.mockito.Mockito;
 
@@ -104,40 +106,70 @@ public class MinionGrpcSslContextBuilderFactoryImplTest {
     }
 
     @Test
-    void testCreatePEM() {
-        commonTestCreatePEM(null);
+    void testInvalidTrustStore() throws Exception {
+        target.setTrustCertCollectionFilePath("invalid");
+        Assertions.assertThrows(RuntimeException.class, target::create);
+
+        target.setTrustCertCollectionFilePath("   ");
+        Assertions.assertDoesNotThrow(target::create);
     }
 
     @Test
-    void testCreatePKCS12() {
-        commonTestCreatePkcs12();
+    void testInvalidCertificateOrKey() throws Exception {
+        target.setClientPrivateKeyFilePath("invalid");
+        target.setClientCertChainFilePath("invalid");
+        Assertions.assertThrows(RuntimeException.class, target::create);
+
+        target.setClientPrivateKeyFilePath("   ");
+        target.setClientCertChainFilePath("   ");
+        Assertions.assertDoesNotThrow(target::create);
+
+        target.setClientPrivateKeyFilePath("invalid");
+        target.setClientCertChainFilePath("   ");
+        Assertions.assertThrows(RuntimeException.class, target::create);
+
+        target.setClientPrivateKeyFilePath("   ");
+        target.setClientCertChainFilePath("invalid");
+        Assertions.assertThrows(RuntimeException.class, target::create);
     }
 
     @Test
-    void testPasswordNotNullPkcs12() {
+    void testCreatePEM(@TempDir File root) throws Exception {
+        commonTestCreatePEM(root, null);
+    }
+
+    @Test
+    void testCreatePKCS12(@TempDir File root) throws Exception {
+        commonTestCreatePkcs12(root);
+    }
+
+    @Test
+    void testPasswordNotNullPkcs12(@TempDir File root) throws Exception {
         target.setClientPrivateKeyPassword("x-password-x");
-        commonTestCreatePkcs12();
+        commonTestCreatePkcs12(root);
     }
 
     @Test
-    void testPasswordNotNullPEM() {
+    void testPasswordNotNullPEM(@TempDir File root) throws Exception {
         target.setClientPrivateKeyPassword("x-password-x");
-        commonTestCreatePEM("x-password-x");
+        commonTestCreatePEM(root, "x-password-x");
     }
 
     @Test
-    public void testConfigureKeyManagerException() {
+    public void testConfigureKeyManagerException(@TempDir File root) {
         //
         // Setup Test Data and Interactions
         //
         var testException = new RuntimeException("x-text-exc-x");
-        Mockito.when(mockSslContextBuilder.keyManager(new File("x-client-cert-path"), new File("x-client-key-path"), null)).thenThrow(testException);
+        File clientCert = new File(root, "x-client-cert-path");
+        File clientKey = new File(root, "x-client-key-path");
+        Mockito.when(mockSslContextBuilder.keyManager(clientCert, clientKey, null)).thenThrow(testException);
 
         //
         // Execute
         //
-        target.setClientCertChainFilePath("x-client-cert-path");
-        target.setClientPrivateKeyFilePath("x-client-key-path");
+        target.setClientCertChainFilePath(clientCert.getAbsolutePath());
+        target.setClientPrivateKeyFilePath(clientKey.getAbsolutePath());
         target.setClientPrivateKeyIsPkcs12(false);
         target.setTrustCertCollectionFilePath("x-trust-cert-path");
 
@@ -153,26 +185,31 @@ public class MinionGrpcSslContextBuilderFactoryImplTest {
         //
         // Verify the Results
         //
-        assertEquals("Failed to initialize TLS", actualException.getMessage());
-        assertSame(testException, actualException.getCause());
+        assertTrue(actualException.getMessage().contains("x-trust-cert-path does not exist"));
     }
 
 //========================================
 // Internals
 //----------------------------------------
 
-    void commonTestCreatePEM(String expectedPassword) {
+    void commonTestCreatePEM(File root, String expectedPassword) throws IOException {
         //
         // Setup Test Data and Interactions
         //
+        var clientCert = new File(root, "x-client-cert-path");
+        var clientKey = new File(root, "x-client-key-path");
+        var trustCert = new File(root, "x-trust-cert-path");
+        clientCert.createNewFile();
+        clientKey.createNewFile();
+        trustCert.createNewFile();
 
         //
         // Execute
         //
-        target.setClientCertChainFilePath("x-client-cert-path");
-        target.setClientPrivateKeyFilePath("x-client-key-path");
+        target.setClientCertChainFilePath(clientCert.getAbsolutePath());
+        target.setClientPrivateKeyFilePath(clientKey.getAbsolutePath());
         target.setClientPrivateKeyIsPkcs12(false);
-        target.setTrustCertCollectionFilePath("x-trust-cert-path");
+        target.setTrustCertCollectionFilePath(trustCert.getAbsolutePath());
 
         SslContextBuilder result = target.create();
 
@@ -180,11 +217,11 @@ public class MinionGrpcSslContextBuilderFactoryImplTest {
         // Verify the Results
         //
         assertSame(result, mockSslContextBuilder);
-        Mockito.verify(mockSslContextBuilder).trustManager(new File("x-trust-cert-path"));
-        Mockito.verify(mockSslContextBuilder).keyManager(new File("x-client-cert-path"), new File("x-client-key-path"), expectedPassword);
+        Mockito.verify(mockSslContextBuilder).trustManager(trustCert);
+        Mockito.verify(mockSslContextBuilder).keyManager(clientCert, clientKey, expectedPassword);
     }
 
-    private void commonTestCreatePkcs12() {
+    private void commonTestCreatePkcs12(File root) throws IOException {
         //
         // Setup Test Data and Interactions
         //
@@ -195,10 +232,16 @@ public class MinionGrpcSslContextBuilderFactoryImplTest {
         //
         // Execute
         //
-        target.setClientCertChainFilePath("x-client-cert-path");
-        target.setClientPrivateKeyFilePath("x-client-key-path");
+        File clientCert = new File(root, "x-client-cert-path");
+        clientCert.createNewFile();
+        File clientKey = new File(root, "x-client-key-path");
+        clientKey.createNewFile();
+        File trustCert = new File(root, "x-trust-cert-path");
+        trustCert.createNewFile();
+        target.setClientCertChainFilePath(clientCert.getAbsolutePath());
+        target.setClientPrivateKeyFilePath(clientKey.getAbsolutePath());
         target.setClientPrivateKeyIsPkcs12(true);
-        target.setTrustCertCollectionFilePath("x-trust-cert-path");
+        target.setTrustCertCollectionFilePath(trustCert.getAbsolutePath());
         target.setKeyStoreFactory(mockKeyStoreFactory);
         target.setFileInputStreamFactory(mockFileInputStreamFactory);
         target.setKeyManagerFactoryFactory(mockKeyManagerFactoryFactory);
@@ -216,7 +259,7 @@ public class MinionGrpcSslContextBuilderFactoryImplTest {
                 "h2");
 
         assertSame(result, mockSslContextBuilder);
-        Mockito.verify(mockSslContextBuilder).trustManager(new File("x-trust-cert-path"));
+        Mockito.verify(mockSslContextBuilder).trustManager(trustCert);
         Mockito.verify(mockSslContextBuilder).keyManager(mockKeyManagerFactory);
         Mockito.verify(mockSslContextBuilder).applicationProtocolConfig(Mockito.argThat(matcher));
     }

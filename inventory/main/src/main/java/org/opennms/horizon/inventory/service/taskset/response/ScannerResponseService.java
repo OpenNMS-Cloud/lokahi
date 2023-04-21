@@ -41,6 +41,7 @@ import org.opennms.horizon.inventory.dto.NodeCreateDTO;
 import org.opennms.horizon.inventory.dto.TagCreateDTO;
 import org.opennms.horizon.inventory.dto.TagCreateListDTO;
 import org.opennms.horizon.inventory.dto.TagEntityIdDTO;
+import org.opennms.horizon.inventory.exception.EntityExistException;
 import org.opennms.horizon.inventory.model.IpInterface;
 import org.opennms.horizon.inventory.model.MonitoredServiceType;
 import org.opennms.horizon.inventory.model.Node;
@@ -135,9 +136,9 @@ public class ScannerResponseService {
         Any result = response.getResult();
         if (result.is(AzureScanResponse.class)) {
             return ScanType.AZURE_SCAN;
-        } else if(result.is(NodeScanResult.class)) {
+        } else if (result.is(NodeScanResult.class)) {
             return ScanType.NODE_SCAN;
-        } else if(result.is(DiscoveryScanResult.class)) {
+        } else if (result.is(DiscoveryScanResult.class)) {
             return ScanType.DISCOVERY_SCAN;
         }
         return ScanType.UNRECOGNIZED;
@@ -146,29 +147,30 @@ public class ScannerResponseService {
     private void processDiscoveryScanResponse(String tenantId, String location, DiscoveryScanResult discoveryScanResult) {
         for (PingResponse pingResponse : discoveryScanResult.getPingResponseList()) {
             // Don't need to create new node if this ip address is already part of inventory.
-            Optional<IpInterface> ipInterfaceOpt = ipInterfaceRepository
-                .findByIpAddressAndLocationAndTenantId(InetAddressUtils.getInetAddress(pingResponse.getIpAddress()), location, tenantId);
-            if (ipInterfaceOpt.isEmpty()) {
-                var discoveryOptional =
-                    icmpActiveDiscoveryService.getDiscoveryById(discoveryScanResult.getActiveDiscoveryId(), tenantId);
-                if (discoveryOptional.isPresent()) {
-                    var icmpDiscovery = discoveryOptional.get();
-                    var tagsList = tagService.getTagsByEntityId(tenantId,
-                        ListTagsByEntityIdParamsDTO.newBuilder().setEntityId(TagEntityIdDTO.newBuilder()
+            var discoveryOptional =
+                icmpActiveDiscoveryService.getDiscoveryById(discoveryScanResult.getActiveDiscoveryId(), tenantId);
+            if (discoveryOptional.isPresent()) {
+                var icmpDiscovery = discoveryOptional.get();
+                var tagsList = tagService.getTagsByEntityId(tenantId,
+                    ListTagsByEntityIdParamsDTO.newBuilder().setEntityId(TagEntityIdDTO.newBuilder()
                         .setActiveDiscoveryId(icmpDiscovery.getId()).build()).build());
-                    List<TagCreateDTO> tags = tagsList.stream()
-                        .map(tag -> TagCreateDTO.newBuilder().setName(tag.getName()).build())
-                        .toList();
-                    NodeCreateDTO createDTO = NodeCreateDTO.newBuilder()
-                        .setLocation(location)
-                        .setManagementIp(pingResponse.getIpAddress())
-                        .setLabel(pingResponse.getIpAddress())
-                        .addAllTags(tags)
-                        .build();
+                List<TagCreateDTO> tags = tagsList.stream()
+                    .map(tag -> TagCreateDTO.newBuilder().setName(tag.getName()).build())
+                    .toList();
+                NodeCreateDTO createDTO = NodeCreateDTO.newBuilder()
+                    .setLocation(location)
+                    .setManagementIp(pingResponse.getIpAddress())
+                    .setLabel(pingResponse.getIpAddress())
+                    .addAllTags(tags)
+                    .build();
+                try {
                     Node node = nodeService.createNode(createDTO, ScanType.DISCOVERY_SCAN, tenantId);
                     nodeService.sendNewNodeTaskSetAsync(node, location, icmpDiscovery);
+                } catch (EntityExistException e) {
+                    log.error("Error while adding new device for tenant {} at location {} with IP {}", tenantId, location, pingResponse.getIpAddress());
                 }
             }
+
         }
     }
 
@@ -183,32 +185,37 @@ public class ScannerResponseService {
 
         String nodeLabel = String.format("%s (%s)", item.getName(), item.getResourceGroup());
         Optional<Node> nodeOpt = nodeRepository.findByTenantLocationAndNodeLabel(tenantId, location, nodeLabel);
+        try {
+            Node node;
+            if (nodeOpt.isPresent()) {
+                node = nodeOpt.get();
+                log.warn("Node already exists for tenant: {}, location: {}, label: {}", tenantId, location, nodeLabel);
+            } else {
+                NodeCreateDTO createDTO = NodeCreateDTO.newBuilder()
+                    .setLocation(location)
+                    .setManagementIp(ipAddress)
+                    .setLabel(nodeLabel)
+                    .build();
 
-        Node node;
-        if (nodeOpt.isPresent()) {
-            node = nodeOpt.get();
-            log.warn("Node already exists for tenant: {}, location: {}, label: {}", tenantId, location, nodeLabel);
-        } else {
-            NodeCreateDTO createDTO = NodeCreateDTO.newBuilder()
-                .setLocation(location)
-                .setManagementIp(ipAddress)
-                .setLabel(nodeLabel)
-                .build();
-            node = nodeService.createNode(createDTO, ScanType.AZURE_SCAN, tenantId);
+                node = nodeService.createNode(createDTO, ScanType.AZURE_SCAN, tenantId);
 
-            taskSetHandler.sendAzureMonitorTasks(discovery, item, ipAddress, node.getId());
-            taskSetHandler.sendAzureCollectorTasks(discovery, item, ipAddress, node.getId());
+                taskSetHandler.sendAzureMonitorTasks(discovery, item, ipAddress, node.getId());
+                taskSetHandler.sendAzureCollectorTasks(discovery, item, ipAddress, node.getId());
+
+            }
+            List<TagCreateDTO> tags = discovery.getTags().stream()
+                .map(tag -> TagCreateDTO.newBuilder().setName(tag.getName()).build())
+                .toList();
+            tagService.addTags(tenantId, TagCreateListDTO.newBuilder()
+                .addEntityIds(TagEntityIdDTO.newBuilder()
+                    .setNodeId(node.getId()))
+                .addAllTags(tags).build());
+        } catch (EntityExistException e) {
+            log.error("Error while adding new Azure device for tenant {} at location {} with IP {}", tenantId, location, ipAddress);
         }
-        List<TagCreateDTO> tags = discovery.getTags().stream()
-            .map(tag -> TagCreateDTO.newBuilder().setName(tag.getName()).build())
-            .toList();
-        tagService.addTags(tenantId, TagCreateListDTO.newBuilder()
-            .addEntityIds(TagEntityIdDTO.newBuilder()
-                .setNodeId(node.getId()))
-            .addAllTags(tags).build());
     }
 
-    private void processNodeScanResponse(String tenantId, NodeScanResult result, String location ) {
+    private void processNodeScanResponse(String tenantId, NodeScanResult result, String location) {
         var snmpConfiguration = result.getSnmpConfig();
         // Save SNMP Config for all the interfaces in the node.
         result.getIpInterfacesList().forEach(ipInterfaceResult ->
@@ -227,9 +234,8 @@ public class ScannerResponseService {
             for (IpInterfaceResult ipIfResult : result.getIpInterfacesList()) {
                 ipInterfaceService.createOrUpdateFromScanResult(tenantId, node, ipIfResult, ifIndexSNMPMap);
             }
-            result.getDetectorResultList().forEach(detectorResult -> {
-                processDetectorResults(tenantId, location, node.getId(), detectorResult);
-            });
+            result.getDetectorResultList().forEach(detectorResult ->
+                processDetectorResults(tenantId, location, node.getId(), detectorResult));
 
         } else {
             log.error("Error while process node scan results, node with id {} doesn't exist", result.getNodeId());

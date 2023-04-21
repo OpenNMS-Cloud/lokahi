@@ -38,6 +38,7 @@ import org.opennms.horizon.azure.api.AzureScanItem;
 import org.opennms.horizon.azure.api.AzureScanResponse;
 import org.opennms.horizon.inventory.SpringContextTestInitializer;
 import org.opennms.horizon.inventory.dto.NodeCreateDTO;
+import org.opennms.horizon.inventory.exception.EntityExistException;
 import org.opennms.horizon.inventory.grpc.GrpcTestBase;
 import org.opennms.horizon.inventory.model.IpInterface;
 import org.opennms.horizon.inventory.model.Node;
@@ -169,7 +170,7 @@ class ScannerResponseServiceIntTest extends GrpcTestBase {
     }
 
     @Test
-    void testAcceptNodeScanResult() throws InvalidProtocolBufferException {
+    void testAcceptNodeScanResult() throws InvalidProtocolBufferException, EntityExistException {
         String managedIp = "127.0.0.1";
         Node node = createNode(managedIp);
         int ifIndex = 1;
@@ -197,7 +198,7 @@ class ScannerResponseServiceIntTest extends GrpcTestBase {
 
     }
 
-    private Node createNode(String ipAddress) {
+    private Node createNode(String ipAddress) throws EntityExistException {
         NodeCreateDTO createDTO = NodeCreateDTO.newBuilder()
             .setLabel("test-node")
             .setManagementIp(ipAddress)

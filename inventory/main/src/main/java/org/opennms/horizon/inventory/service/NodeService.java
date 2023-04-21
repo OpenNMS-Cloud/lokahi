@@ -28,9 +28,18 @@
 
 package org.opennms.horizon.inventory.service;
 
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.net.InetAddress;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
+import java.util.stream.Collectors;
+
 import org.apache.commons.lang3.StringUtils;
 import org.opennms.horizon.inventory.discovery.IcmpActiveDiscoveryDTO;
 import org.opennms.horizon.inventory.dto.MonitoredState;
@@ -38,6 +47,7 @@ import org.opennms.horizon.inventory.dto.NodeCreateDTO;
 import org.opennms.horizon.inventory.dto.NodeDTO;
 import org.opennms.horizon.inventory.dto.TagCreateListDTO;
 import org.opennms.horizon.inventory.dto.TagEntityIdDTO;
+import org.opennms.horizon.inventory.exception.EntityExistException;
 import org.opennms.horizon.inventory.mapper.NodeMapper;
 import org.opennms.horizon.inventory.model.IpInterface;
 import org.opennms.horizon.inventory.model.MonitoringLocation;
@@ -60,17 +70,10 @@ import org.opennms.taskset.contract.TaskDefinition;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.net.InetAddress;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
-import java.util.stream.Collectors;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 
 @Service
@@ -115,7 +118,6 @@ public class NodeService {
 
     @Transactional(readOnly = true)
     public Optional<Node> getNode(String tenantId, String location, InetAddress primaryIpAddress) {
-
         var list = nodeRepository.findByTenantId(tenantId);
         if (list.isEmpty()) {
             return Optional.empty();
@@ -132,7 +134,6 @@ public class NodeService {
 
     private void saveIpInterfaces(NodeCreateDTO request, Node node, String tenantId) {
         if (request.hasManagementIp()) {
-
             IpInterface ipInterface = new IpInterface();
             ipInterface.setNode(node);
             ipInterface.setTenantId(tenantId);
@@ -140,7 +141,6 @@ public class NodeService {
             ipInterface.setSnmpPrimary(true);
             ipInterfaceRepository.save(ipInterface);
             node.setIpInterfaces(List.of(ipInterface));
-
         }
     }
 
@@ -183,7 +183,16 @@ public class NodeService {
     }
 
     @Transactional
-    public Node createNode(NodeCreateDTO request, ScanType scanType, String tenantId) {
+    public Node createNode(NodeCreateDTO request, ScanType scanType, String tenantId) throws EntityExistException {
+        if(request.hasManagementIp()) { //Do we really want to create a node without managed IP?
+            Optional<IpInterface> ipInterfaceOpt = ipInterfaceRepository
+                .findByIpAddressAndLocationAndTenantId(InetAddressUtils.getInetAddress(request.getManagementIp()), request.getLocation(), tenantId);
+            if(ipInterfaceOpt.isPresent()) {
+                IpInterface ipInterface = ipInterfaceOpt.get();
+                log.error("IP address {} already exists in the system and belong to device {}", request.getManagementIp(), ipInterface.getNode().getNodeLabel());
+                throw new EntityExistException("IP address " + request.getManagementIp() + " already exists in the system and belong to device " + ipInterface.getNode().getNodeLabel());
+            }
+        }
         MonitoringLocation monitoringLocation = saveMonitoringLocation(request, tenantId);
         Node node = saveNode(request, monitoringLocation, scanType, tenantId);
         saveIpInterfaces(request, node, tenantId);
@@ -193,7 +202,6 @@ public class NodeService {
                 .setNodeId(node.getId()))
             .addAllTags(request.getTagsList())
             .build());
-
         return node;
     }
 

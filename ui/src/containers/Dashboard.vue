@@ -4,9 +4,13 @@
       <HeadlinePage text="Insights Dashboard" />
       <DashboardHeaderLinks />
     </div>
-    <div class="section-title">Alert Status</div>
+    <div class="section-title">{{ dashboardText.Alerts.title }}</div>
+    <div class="section-subtitle">{{ dashboardText.Alerts.timePeriod }}</div>
     <div class="list-alerts">
-      <AlertsSeverityFilters @click="redirect('Alerts')" />
+      <AlertsSeverityFilters
+        @click="redirect('Alerts')"
+        :timeRange="TimeRange.Last_24Hours"
+      />
     </div>
     <div class="graphs">
       <DashboardCard
@@ -32,6 +36,7 @@
 <script setup lang="ts">
 import { useFlowsStore } from '@/store/Views/flowsStore'
 import dashboardText from '@/components/Dashboard/dashboard.text'
+import { TimeRange } from '@/types/graphql'
 
 const router = useRouter()
 const flowsStore = useFlowsStore()
@@ -73,6 +78,10 @@ onMounted(async () => {
   }
   .section-title {
     @include typography.headline3();
+  }
+  .section-subtitle {
+    @include typography.body-small;
+    padding-bottom: var(variables.$spacing-xs);
   }
   .graphs {
     display: flex;

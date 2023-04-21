@@ -31,9 +31,11 @@ package org.opennms.horizon.systemtests.pages.cloud;
 import com.codeborne.selenide.SelenideElement;
 
 import static com.codeborne.selenide.Condition.enabled;
+import static com.codeborne.selenide.Condition.text;
 import static com.codeborne.selenide.Selenide.$;
 
 public class CloudLoginPage {
+    private static final SelenideElement pageTitleTxt = $("h2.okta-form-title");
     private static final SelenideElement userNameInp = $("#idp-discovery-username");
     private static final SelenideElement nextBtn = $("#idp-discovery-submit");
     private static final SelenideElement passwordInp = $("#okta-signin-password");
@@ -51,7 +53,11 @@ public class CloudLoginPage {
         passwordInp.shouldBe(enabled).setValue(password);
     }
 
-    public static void clickSubmitBtn() {
+    public static void clickSignInBtn() {
         submitBtn.shouldBe(enabled).click();
+    }
+
+    public static void checkPageTitle() {
+        pageTitleTxt.shouldHave(text("Sign In"));
     }
 }

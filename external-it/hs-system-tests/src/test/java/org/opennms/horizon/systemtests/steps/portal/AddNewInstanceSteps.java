@@ -30,13 +30,20 @@
 package org.opennms.horizon.systemtests.steps.portal;
 
 import io.cucumber.java.en.Then;
-import org.opennms.horizon.systemtests.keyvalue.SecretsStorage;
 import org.opennms.horizon.systemtests.pages.portal.AddNewInstancePopup;
+import org.opennms.horizon.systemtests.utils.TestDataStorage;
+import org.testcontainers.shaded.org.apache.commons.lang3.RandomStringUtils;
+
+import static org.opennms.horizon.systemtests.CucumberHooks.INSTANCES;
 
 public class AddNewInstanceSteps {
 
     @Then("the IT Administrator fills {string} in 'Instance name'")
     public void setInstanceName(String instanceName) {
+        if (instanceName.startsWith("random")) {
+            instanceName = "Instance_" + RandomStringUtils.randomAlphabetic(10);
+            INSTANCES.add(instanceName);
+        }
         AddNewInstancePopup.setInstanceName(instanceName);
     }
 
@@ -52,11 +59,9 @@ public class AddNewInstanceSteps {
 
     @Then("set assigned user email as {string}")
     public void setEmailAddressForAssignedUser(String email) {
-        if (email.equals("OKTA_USER")) {
-            email = SecretsStorage.oktaUserEmail;
-        }
-        AddNewInstancePopup.setAssignedUserEmail(email);
-        AddNewInstancePopup.confirmEmailInDropdown(email);
+        String userEmail = TestDataStorage.mapUserToEmail(email);
+        AddNewInstancePopup.setAssignedUserEmail(userEmail);
+        AddNewInstancePopup.confirmEmailInDropdown(userEmail);
     }
 
     @Then("the IT Administrator clicks on 'ADD INSTANCE' button")

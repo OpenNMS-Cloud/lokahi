@@ -37,4 +37,9 @@ public class CloudLeftPanelSteps {
     public void clickOnAppliancesSection() {
         CloudLeftPanelPage.clickOnApplianceSection();
     }
+
+    @Then("user sees the navigation panel for instance")
+    public void verifyLeftPanel() {
+        CloudLeftPanelPage.verifyLeftPanelIsDisplayed();
+    }
 }

@@ -64,12 +64,13 @@ const alertsQueries = useAlertsQueries()
 const props = defineProps<{
   severity: string
   isFilter?: boolean
+  timeRange?: TimeRange
 }>()
 
 const count = ref()
 onMounted(async () => {
   try {
-    const { data } = await alertsQueries.fetchCountAlerts([props.severity], TimeRange.All)
+    const { data } = await alertsQueries.fetchCountAlerts([props.severity], props.timeRange || TimeRange.All)
     count.value = data.value?.countAlerts?.count || 0
   } catch (err) {
     count.value = 0

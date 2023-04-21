@@ -27,14 +27,16 @@
  *******************************************************************************/
 package org.opennms.horizon.inventory.grpc;
 
-import com.google.protobuf.BoolValue;
-import com.google.protobuf.Empty;
-import com.google.protobuf.Int64Value;
-import com.google.rpc.Code;
-import io.grpc.Context;
-import io.grpc.Status;
-import io.grpc.StatusRuntimeException;
-import io.grpc.stub.StreamObserver;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.ExecutorService;
+import java.util.function.BiFunction;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -49,6 +51,7 @@ import org.opennms.horizon.inventory.dto.NodeDTO;
 import org.opennms.horizon.inventory.dto.NodeIdList;
 import org.opennms.horizon.inventory.dto.NodeIdQuery;
 import org.opennms.horizon.inventory.dto.NodeList;
+import org.opennms.horizon.inventory.exception.EntityExistException;
 import org.opennms.horizon.inventory.mapper.NodeMapper;
 import org.opennms.horizon.inventory.model.MonitoringLocation;
 import org.opennms.horizon.inventory.model.Node;
@@ -56,14 +59,16 @@ import org.opennms.horizon.inventory.service.IpInterfaceService;
 import org.opennms.horizon.inventory.service.NodeService;
 import org.opennms.horizon.inventory.service.taskset.ScannerTaskSetService;
 import org.opennms.taskset.contract.ScanType;
-import org.slf4j.Logger;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.ExecutorService;
-import java.util.function.BiFunction;
+import com.google.protobuf.BoolValue;
+import com.google.protobuf.Empty;
+import com.google.protobuf.Int64Value;
+import com.google.rpc.Code;
+
+import io.grpc.Context;
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
+import io.grpc.stub.StreamObserver;
 
 public class NodeGrpcServiceTest {
     private NodeService mockNodeService;
@@ -76,7 +81,6 @@ public class NodeGrpcServiceTest {
     private StreamObserver<Int64Value> mockInt64ValueStreamObserver;
     private StreamObserver<BoolValue> mockBoolValueStreamObserver;
     private ExecutorService mockExecutorService;
-    private Logger mockLogger;
 
     private NodeGrpcService target;
 
@@ -125,7 +129,6 @@ public class NodeGrpcServiceTest {
         mockInt64ValueStreamObserver = Mockito.mock(StreamObserver.class);
         mockBoolValueStreamObserver = Mockito.mock(StreamObserver.class);
         mockExecutorService = Mockito.mock(ExecutorService.class);
-        mockLogger = Mockito.mock(Logger.class);
 
         target =
             new NodeGrpcService(
@@ -145,7 +148,7 @@ public class NodeGrpcServiceTest {
      * Verify the creation of a new node, and successful send of task updates.
      */
     @Test
-    void testCreateNodeNewValidManagementIpSuccessfulSendTasks() {
+    void testCreateNodeNewValidManagementIpSuccessfulSendTasks() throws EntityExistException {
         Runnable runnable = commonTestCreateNode();
 
         // Verify the lambda execution
@@ -157,7 +160,7 @@ public class NodeGrpcServiceTest {
      * Verify the creation of a new node with no management IP address
      */
     @Test
-    void testCreateNodeNoManagementIp() {
+    void testCreateNodeNoManagementIp() throws EntityExistException {
         //
         // Setup test data and interactions
         //
@@ -201,7 +204,7 @@ public class NodeGrpcServiceTest {
      * Verify the creation of a new node, and successful send of task updates.
      */
     @Test
-    void testCreateNodeManagementInterfaceNotFound() {
+    void testCreateNodeEntityExistException() throws EntityExistException {
         //
         // Setup test data and interactions
         //
@@ -211,13 +214,7 @@ public class NodeGrpcServiceTest {
                 .setLocation("x-location-x")
                 .build();
 
-        IpInterfaceDTO testInterfaceDTO =
-            IpInterfaceDTO.newBuilder()
-                .build();
-
-        Mockito.when(mockIpInterfaceService.findByIpAddressAndLocationAndTenantId("127.0.0.1", "x-location-x", "x-tenant-id-x"))
-            .thenReturn(Optional.of(testInterfaceDTO));
-
+        doThrow(new EntityExistException("IP exists")).when(mockNodeService).createNode(testNodeCreateDTO, ScanType.NODE_SCAN, "x-tenant-id-x");
         //
         // Execute
         //
@@ -232,6 +229,7 @@ public class NodeGrpcServiceTest {
                 NodeGrpcService.IP_ADDRESS_ALREADY_EXISTS_FOR_LOCATION_MSG);
 
         Mockito.verify(mockNodeDTOStreamObserver).onError(Mockito.argThat(matcher));
+        verify(mockNodeService).createNode(testNodeCreateDTO, ScanType.NODE_SCAN, "x-tenant-id-x");
     }
 
 
@@ -683,7 +681,7 @@ public class NodeGrpcServiceTest {
 // Internals
 //----------------------------------------
 
-    private Runnable commonTestCreateNode() {
+    private Runnable commonTestCreateNode() throws EntityExistException {
         //
         // Setup test data and interactions
         //
@@ -725,9 +723,7 @@ public class NodeGrpcServiceTest {
     private boolean statusExceptionMatchesExpectedId(Status status, Object expectedIdObj) {
         if (status.getCode().value() == Code.NOT_FOUND_VALUE) {
             if (status.getDescription() != null) {
-                if (status.getDescription().equals("Node with id: " + expectedIdObj + " doesn't exist.")) {
-                    return true;
-                }
+                return status.getDescription().equals("Node with id: " + expectedIdObj + " doesn't exist.");
             }
         }
 
@@ -737,9 +733,7 @@ public class NodeGrpcServiceTest {
     private boolean statusExceptionMatchesInvalidArgument(Status status, Object expectedMessage) {
         if (status.getCode().value() == Code.INVALID_ARGUMENT_VALUE) {
             if (status.getDescription() != null) {
-                if (status.getDescription().equals(expectedMessage)) {
-                    return true;
-                }
+                return status.getDescription().equals(expectedMessage);
             }
         }
 
@@ -749,9 +743,7 @@ public class NodeGrpcServiceTest {
     private boolean statusExceptionMatchesNotFound(Status status, Object expectedMessage) {
         if (status.getCode().value() == Code.NOT_FOUND_VALUE) {
             if (status.getDescription() != null) {
-                if (status.getDescription().equals(expectedMessage)) {
-                    return true;
-                }
+                return status.getDescription().equals(expectedMessage);
             }
         }
 
@@ -761,9 +753,7 @@ public class NodeGrpcServiceTest {
     private boolean statusExceptionMatchesDeleteError(Status status, Object expectedId) {
         if (status.getCode().value() == Code.INTERNAL_VALUE) {
             if (status.getDescription() != null) {
-                if (status.getDescription().equals("Error while deleting node with ID " + expectedId)) {
-                    return true;
-                }
+                return status.getDescription().equals("Error while deleting node with ID " + expectedId);
             }
         }
 
@@ -773,9 +763,7 @@ public class NodeGrpcServiceTest {
     private boolean statusExceptionMatchesAlreadyExistsValue(Status status, Object expectedMessage) {
         if (status.getCode().value() == Code.ALREADY_EXISTS_VALUE) {
             if (status.getDescription() != null) {
-                if (status.getDescription().equals(expectedMessage)) {
-                    return true;
-                }
+                return status.getDescription().equals(expectedMessage);
             }
         }
 

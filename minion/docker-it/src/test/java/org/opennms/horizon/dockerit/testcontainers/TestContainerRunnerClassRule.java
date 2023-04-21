@@ -111,7 +111,7 @@ public class TestContainerRunnerClassRule extends ExternalResource {
     private void startSslGatewayContainer() {
         sslGatewayContainer
             .withNetwork(network)
-            .withNetworkAliases("ssl-gateway")
+            .withNetworkAliases("opennms-minion-ssl-gateway")
             .withExposedPorts(443)
             .withCopyFileToContainer(
                 MountableFile.forClasspathResource("ssl-gateway/nginx.conf"), "/etc/nginx/nginx.conf"
@@ -146,12 +146,14 @@ public class TestContainerRunnerClassRule extends ExternalResource {
             .withEnv("JAVA_TOOL_OPTIONS", "-Djava.security.egd=file:/dev/./urandom -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005")
             .withEnv("MINION_LOCATION", "Default")
             .withEnv("USE_KUBERNETES", "false")
-            .withEnv("MINION_GATEWAY_HOST", "ssl-gateway")
+            .withEnv("MINION_GATEWAY_HOST", "opennms-minion-ssl-gateway")
             .withEnv("MINION_GATEWAY_PORT", "443")
             .withEnv("MINION_GATEWAY_TLS", "true")
+            .withEnv("CERT_PKG_CLIENT_CERT_PATH", "/opt/karaf/certs/client.cert")
             .withEnv("CERT_PKG_CLIENT_KEY_PATH", "/opt/karaf/certs/client.key")
-            .withEnv("CLIENT_PRIVATE_KEY_IS_PKCS12", "false")
+            .withEnv("CERT_PKG_CA_CERT_PATH", "/opt/karaf/certs/CA.cert")
             .withEnv("CERT_PKG_PASSWORD", "passw0rd")
+            .withEnv("CLIENT_PRIVATE_KEY_IS_PKCS12", "false")
             .withCopyFileToContainer(
                 MountableFile.forClasspathResource("minion-cert.insecure.zip"), "/opt/karaf/certs.in/minion-cert.zip"
             )

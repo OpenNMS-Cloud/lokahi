@@ -26,19 +26,10 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
+package org.opennms.horizon.inventory.exception;
 
-package org.opennms.horizon.systemtests.steps.portal;
-
-import io.cucumber.java.en.Then;
-import org.opennms.horizon.systemtests.pages.portal.EditInstancePage;
-import org.opennms.horizon.systemtests.utils.TestDataStorage;
-
-public class EditInstanceSteps {
-
-    @Then("the IT Administrator sees {string} as a single user for the instance")
-    public void instanceHasASingleUser(String email) {
-        EditInstancePage.verifyNumberOfUsers(1);
-        String userEmail = TestDataStorage.mapUserToEmail(email);
-        EditInstancePage.verifyUserEmailInTable(userEmail);
+public class EntityExistException extends Exception {
+    public EntityExistException(String message) {
+        super(message);
     }
 }

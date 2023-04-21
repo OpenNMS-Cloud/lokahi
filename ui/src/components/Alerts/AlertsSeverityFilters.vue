@@ -9,14 +9,18 @@
       :severity="severity"
       :class="severity.toLowerCase()"
       :isFilter="isFilter"
+      :timeRange="timeRange"
     />
   </div>
 </template>
 
 <script lang="ts" setup>
 import { Severity } from '@/types/graphql'
+import { TimeRange } from '@/types/graphql'
+
 defineProps<{
   isFilter?: boolean
+  timeRange?: TimeRange
 }>()
 
 const severitiesDisplay = ['critical', 'major', 'minor', 'warning', 'indeterminate']

@@ -44,10 +44,11 @@ const dataApplications = computed(() => flowsStore.topApplications)
 
 const buildData = () => {
   if (dataApplications.value.length > 0) {
-    const values = map(sortBy(dataApplications.value, ['bytesIn']).reverse(), 'bytesIn')
+    const dataWithValues = dataApplications.value.filter((v) => v.bytesIn > 0)
+    const values = map(sortBy(dataWithValues, ['bytesIn']).reverse(), 'bytesIn')
     const total = sum(values)
     const percentages = map(values, (i) => (i * 100) / total)
-    const labels = map(dataApplications.value, (app, i) => ` ${i + 1}. ${app.label} (${percentages[i].toFixed(2)}%)`)
+    const labels = map(dataWithValues, (app, i) => ` ${i + 1}. ${app.label} (${percentages[i].toFixed(2)}%)`)
     const data = {
       labels: labels,
       datasets: [
@@ -69,7 +70,7 @@ watchEffect(() => {
 
 const config = {
   responsive: true,
-  aspectRatio: 1.3,
+  aspectRatio: 1.4,
   plugins: {
     legend: {
       display: isLargeScreen.value,

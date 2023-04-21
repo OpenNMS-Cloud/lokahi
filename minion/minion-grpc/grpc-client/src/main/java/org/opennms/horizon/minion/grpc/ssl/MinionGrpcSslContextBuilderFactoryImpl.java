@@ -46,7 +46,9 @@ import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.util.function.Supplier;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class MinionGrpcSslContextBuilderFactoryImpl implements MinionGrpcSslContextBuilderFactory {
 
     @Setter
@@ -73,23 +75,38 @@ public class MinionGrpcSslContextBuilderFactoryImpl implements MinionGrpcSslCont
     public SslContextBuilder create() {
         SslContextBuilder builder = grpcSslClientContextFactory.get();
 
-        if (trustCertCollectionFilePath != null) {
-            builder.trustManager(new File(trustCertCollectionFilePath));
+        if (isSet(trustCertCollectionFilePath)) {
+            File trustCertCollectionFile = new File(trustCertCollectionFilePath.trim());
+            if (trustCertCollectionFile.exists()) {
+                builder.trustManager(trustCertCollectionFile);
+            } else {
+                throw new RuntimeException("Configured trust store" + trustCertCollectionFile.getAbsolutePath() + " does not exist");
+            }
         }
 
-        if (clientCertChainFilePath != null && clientPrivateKeyFilePath != null) {
-            try {
-                if (clientPrivateKeyIsPkcs12) {
-                    configureKeyManagerPkcs12(builder);
-                } else {
-                    configureKeyManagerOther(builder);
+        if (isSet(clientCertChainFilePath) || isSet(clientPrivateKeyFilePath)) {
+            File clientCertChainFile = new File(clientCertChainFilePath.trim());
+            File clientPrivateKeyFile = new File(clientPrivateKeyFilePath.trim());
+            if (clientCertChainFile.exists() && clientPrivateKeyFile.exists()) {
+                try {
+                    if (clientPrivateKeyIsPkcs12) {
+                        configureKeyManagerPkcs12(builder);
+                    } else {
+                        configureKeyManagerOther(builder);
+                    }
+                } catch (Exception exc) {
+                    throw new RuntimeException("Failed to initialize TLS", exc);
                 }
-            } catch (Exception exc) {
-                throw new RuntimeException("Failed to initialize TLS", exc);
+            } else {
+                throw new RuntimeException("Configured client private key " + clientPrivateKeyFile.getAbsolutePath() + " and/or certificate " + clientCertChainFile.getAbsolutePath() + " do not exist.");
             }
         }
 
         return builder;
+    }
+
+    private boolean isSet(String value) {
+        return value != null && !value.isBlank();
     }
 
 //========================================

@@ -39,6 +39,7 @@ import static com.codeborne.selenide.Selenide.$;
 
 public class PortalCloudPage {
 
+    private static final SelenideElement headerTxt = $("section h1");
     private static final SelenideElement profileIcon = $("button.profile-circle");
     private static final SelenideElement addInstanceBtn = $("#cloud-add-instance-button");
     private static final SelenideElement instanceTable = $("table.condensed  tbody");
@@ -48,8 +49,8 @@ public class PortalCloudPage {
     private static final SelenideElement shadedBackground = $("div.backdrop");
     private static final SelenideElement spinner = $(".spinner");
 
-    public static void verifyThatUserLoggedIn() {
-        profileIcon.shouldBe(Condition.visible, Duration.ofMinutes(1));
+    public static void verifyMainPageHeader() {
+        headerTxt.shouldBe(Condition.visible, Duration.ofMinutes(1)).shouldHave(Condition.text("OpenNMS Cloud"));
     }
 
     public static void clickAddInstance() {

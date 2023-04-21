@@ -1,0 +1,6 @@
+query NetworkTraffic($name: String!, $timeRange: Int!, $timeRangeUnit: TimeRangeUnit!) {
+  metric(name: $name, timeRange: $timeRange, timeRangeUnit: $timeRangeUnit) {
+    status
+    ...MetricParts
+  }
+}

@@ -71,7 +71,7 @@ public class GrpcTagService {
     @GraphQLMutation
     public Mono<Void> removeTagsFromNodes(TagListNodesRemove tags, @GraphQLEnvironment ResolutionEnvironment env) {
         String authHeader = headerUtil.getAuthHeader(env);
-        TagRemoveListDTO tagRemoveListDTO = mapper.tagListRemoveToProto(tags);
+        TagRemoveListDTO tagRemoveListDTO = mapper.tagListRemoveToProtoCustom(tags);
         client.removeTags(tagRemoveListDTO, authHeader);
         return Mono.empty();
     }

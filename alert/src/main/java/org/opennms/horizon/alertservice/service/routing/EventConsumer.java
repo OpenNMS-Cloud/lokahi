@@ -49,25 +49,24 @@ import java.util.Arrays;
 @PropertySource("classpath:application.yaml")
 public class EventConsumer {
     private static final Logger LOG = LoggerFactory.getLogger(EventConsumer.class);
-
     private final AlertService alertService;
-
     @KafkaListener(topics = "${kafka.topics.alert-events}", concurrency = "1")
     public void receiveMessage(@Payload byte[] data) {
         try {
             EventLog eventLog = EventLog.parseFrom(data);
-
-
             eventLog.getEventsList().forEach(e -> {
                 if (Strings.isNullOrEmpty(e.getTenantId())) {
                     LOG.warn("TenantId is empty, dropping event: {}", e);
                     return;
                 }
 
+                if(e.getNodeId() <= 0) {
+                    LOG.warn("Received an event for unknown device, dropping event: {}", e);
+                    return;
+                }
+
                 // As this isn't a grpc call, there isn't a grpc context. Create one, and place the tenantId in it.
-                Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, e.getTenantId()).run(()-> {
-                    alertService.reduceEvent(e);
-                });
+                Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, e.getTenantId()).run(()-> alertService.reduceEvent(e));
             });
         } catch (InvalidProtocolBufferException e) {
             LOG.error("Error while parsing EventLog. Payload: {}", Arrays.toString(data), e);

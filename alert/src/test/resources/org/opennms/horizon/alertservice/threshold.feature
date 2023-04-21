@@ -21,8 +21,9 @@ Feature: Alert Service Thresholding Functionality
     And Create a new policy with give parameters
     Given Tenant id "thresholdTenantH"
     And Create a new policy with give parameters
+    Given Tenant id "thresholdTenantB"
+    And Create a new policy with give parameters
 
-    # delete ThresholdEvents more than 10 minutes old.
   Scenario: Verify when a thresholding event is received from Kafka, a new alert is only created on passing the threshold
     Then Send event with UEI "uei.opennms.org/generic/traps/SNMP_Cold_Start" with tenant "thresholdTenantA" with node 10
     Then Verify alert topic has 0 messages with tenant "thresholdTenantA"
@@ -34,6 +35,20 @@ Feature: Alert Service Thresholding Functionality
       | alerts[0].counter == 1 |
       | alerts[0].severity == MAJOR |
     Then Verify alert topic has 1 messages with tenant "thresholdTenantA"
+
+  Scenario: Verify when a thresholding event is received from Kafka, a new alert is only created on passing the threshold within the timeframe
+    Then Send event with UEI "uei.opennms.org/generic/traps/SNMP_Cold_Start" with tenant "thresholdTenantB" with node 10 at 15 minutes ago
+    Then Verify alert topic has 0 messages with tenant "thresholdTenantB"
+    Then Send event with UEI "uei.opennms.org/generic/traps/SNMP_Cold_Start" with tenant "thresholdTenantB" with node 10 at 7 minutes ago
+    Then Verify alert topic has 0 messages with tenant "thresholdTenantB"
+    Then Send event with UEI "uei.opennms.org/generic/traps/SNMP_Cold_Start" with tenant "thresholdTenantB" with node 10 at 3 minutes ago
+    Then Verify alert topic has 0 messages with tenant "thresholdTenantB"
+    Then Send event with UEI "uei.opennms.org/generic/traps/SNMP_Cold_Start" with tenant "thresholdTenantB" with node 10 at 2 minutes ago
+    Then List alerts for tenant "thresholdTenantB", with timeout 5000ms, until JSON response matches the following JSON path expressions
+      | alerts.size() == 1 |
+      | alerts[0].counter == 1 |
+      | alerts[0].severity == MAJOR |
+    Then Verify alert topic has 1 messages with tenant "thresholdTenantB"
 
   Scenario: Verify when a thresholding event with no time limit is received from Kafka, a new alert is only created on passing the threshold
     Then Send event with UEI "uei.opennms.org/generic/traps/SNMP_Link_Down" with tenant "thresholdTenantF" with node 10

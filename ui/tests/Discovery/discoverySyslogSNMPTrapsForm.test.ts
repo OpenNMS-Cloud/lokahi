@@ -16,7 +16,7 @@ const passiveDiscovery: Partial<PassiveDiscovery> = {
 }
 
 vi.mock('@featherds/input-helper', async () => {
-  const actual: Object = await vi.importActual("@featherds/input-helper")
+  const actual: Object = await vi.importActual('@featherds/input-helper')
 
   const useForm = () => ({
     validate: () => [],
@@ -24,7 +24,8 @@ vi.mock('@featherds/input-helper', async () => {
   })
 
   return {
-    ...actual, useForm 
+    ...actual,
+    useForm
   }
 })
 

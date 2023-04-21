@@ -228,7 +228,7 @@ public class ScannerResponseService {
                 ipInterfaceService.createOrUpdateFromScanResult(tenantId, node, ipIfResult, ifIndexSNMPMap);
             }
             result.getDetectorResultList().forEach(detectorResult -> {
-                processDetectorResults(tenantId, location, detectorResult);
+                processDetectorResults(tenantId, location, node.getId(), detectorResult);
             });
 
         } else {
@@ -236,7 +236,7 @@ public class ScannerResponseService {
         }
     }
 
-    private void processDetectorResults(String tenantId, String location, ServiceResult serviceResult) {
+    private void processDetectorResults(String tenantId, String location, long nodeId, ServiceResult serviceResult) {
 
         log.info("Received Detector Response = {} for tenant = {} and location = {}", serviceResult, tenantId, location);
 
@@ -251,7 +251,6 @@ public class ScannerResponseService {
                 createMonitoredService(serviceResult, ipInterface);
                 // TODO: Combine Monitor type and Service type
                 MonitorType monitorType = MonitorType.valueOf(serviceResult.getService().name());
-                long nodeId = ipInterface.getNodeId();
 
                 taskSetHandler.sendMonitorTask(location, monitorType, ipInterface, nodeId);
                 taskSetHandler.sendCollectorTask(location, monitorType, ipInterface, nodeId);

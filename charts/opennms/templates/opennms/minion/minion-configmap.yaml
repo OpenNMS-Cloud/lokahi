@@ -13,6 +13,3 @@ data:
   opennms-minion-identity: |
     id=${env:HOSTNAME:-UNKNOWN}
     location=${env:LOCATION:-Default}
-  karafUsers: |
-    admin=admin,_g_:admingroup
-    _g_\:admingroup=group,admin,manager,viewer,systembundles,ssh

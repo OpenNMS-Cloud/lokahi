@@ -46,13 +46,13 @@ public class ACSEmailAPI implements EmailAPI {
     private final EmailClient client;
 
     @Override
-    public void sendEmail(String emailAddress, String subject, String body) {
+    public void sendEmail(String emailAddress, String subject, String bodyHtml) {
         EmailMessage message = new EmailMessage();
 
         message.setSenderAddress(fromAddress);
         message.setToRecipients(emailAddress);
         message.setSubject(subject);
-        message.setBodyHtml(body);
+        message.setBodyHtml(bodyHtml);
 
         client.beginSend(message);
     }

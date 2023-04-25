@@ -46,7 +46,7 @@ public class SmtpEmailAPI implements EmailAPI {
     private final JavaMailSender sender;
 
     @Override
-    public void sendEmail(String emailAddress, String subject, String body) throws NotificationException {
+    public void sendEmail(String emailAddress, String subject, String bodyHtml) throws NotificationException {
         try {
             MimeMessage mimeMessage = sender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(mimeMessage);
@@ -55,7 +55,7 @@ public class SmtpEmailAPI implements EmailAPI {
             helper.setFrom(fromAddress);
 
             helper.setSubject(subject);
-            helper.setText(body, true);
+            helper.setText(bodyHtml, true);
 
             sender.send(helper.getMimeMessage());
         } catch (MessagingException e) {

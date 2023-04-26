@@ -120,7 +120,7 @@ public class TSDBMetricsService {
         return getMetrics(tenantId, queryString);
     }
 
-    
+
     private Optional<NodeDTO> getNode(ResolutionEnvironment env, Map<String, String> metricLabels) {
         return metricLabelUtils.getNodeId(metricLabels).map(nodeId -> {
             String accessToken = headerUtil.getAuthHeader(env);

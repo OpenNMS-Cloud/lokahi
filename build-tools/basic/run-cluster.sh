@@ -13,5 +13,6 @@ helm upgrade -i opennms ./charts/opennms -f build-tools/basic/helm-values.yaml \
   --set OpenNMS.MinionGateway.Image=opennms/horizon-stream-minion-gateway:local-basic \
   --set OpenNMS.MinionGatewayGrpcProxy.Image=opennms/horizon-stream-minion-gateway-grpc-proxy:local-basic \
   --set OpenNMS.Notification.Image=opennms/horizon-stream-notification:local-basic \
+  --set OpenNMS.MinionCertificateManager.Image=opennms/horizon-stream-minion-certificate-manager:local-basic \
+  --set OpenNMS.MinionCertificateVerifier.Image=opennms/horizon-stream-minion-certificate-verifier:local-basic \
   --set OpenNMS.UI.Image=opennms/horizon-stream-ui:local-basic \
-

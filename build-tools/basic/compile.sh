@@ -38,3 +38,4 @@ mvn clean install -P rapid-build -DskipTests=true -f notifications
 mvn clean install -P rapid-build -DskipTests=true -f metrics-processor
 mvn clean install -P rapid-build -DskipTests=true -f events
 mvn clean install -P rapid-build -DskipTests=true -f datachoices
+mvn clean install -P rapid-build -DskipTests=true -f minion-certificate-manager

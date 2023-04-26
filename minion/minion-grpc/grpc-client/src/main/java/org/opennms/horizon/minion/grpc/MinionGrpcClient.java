@@ -44,6 +44,8 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 
 import com.google.common.base.Strings;
+import io.grpc.okhttp.NegotiationType;
+import io.grpc.okhttp.OkHttpChannelBuilder;
 import lombok.Setter;
 import org.opennms.cloud.grpc.minion.CloudServiceGrpc;
 import org.opennms.cloud.grpc.minion.CloudServiceGrpc.CloudServiceStub;
@@ -70,11 +72,10 @@ import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
 
 import io.grpc.ManagedChannel;
-import io.grpc.netty.shaded.io.grpc.netty.NegotiationType;
-import io.grpc.netty.shaded.io.grpc.netty.NettyChannelBuilder;
-import io.grpc.netty.shaded.io.netty.handler.ssl.SslContextBuilder;
 import io.grpc.stub.StreamObserver;
 import io.opentracing.Tracer;
+
+import javax.net.ssl.SSLContext;
 
 /**
  * Minion GRPC client runs both RPC/Sink together.
@@ -157,7 +158,7 @@ public class MinionGrpcClient extends AbstractMessageDispatcherFactory<String> i
 //----------------------------------------
 
     public void start() throws IOException {
-        NettyChannelBuilder channelBuilder = NettyChannelBuilder.forAddress(grpcHost, grpcPort)
+        OkHttpChannelBuilder channelBuilder = OkHttpChannelBuilder.forAddress(grpcHost, grpcPort)
                 .keepAliveWithoutCalls(true)
                 .maxInboundMessageSize(maxInboundMessageSize);
 
@@ -169,11 +170,12 @@ public class MinionGrpcClient extends AbstractMessageDispatcherFactory<String> i
         }
 
         if (tlsEnabled) {
-            SslContextBuilder sslContextBuilder = minionGrpcSslContextBuilderFactory.create();
+            SSLContext sslContext = minionGrpcSslContextBuilderFactory.create();
 
             channel = channelBuilder
                     .negotiationType(NegotiationType.TLS)
-                    .sslContext(sslContextBuilder.build())
+                    .useTransportSecurity()
+                    .sslSocketFactory(sslContext.getSocketFactory())
                     .build();
 
             LOG.info("TLS enabled for gRPC");

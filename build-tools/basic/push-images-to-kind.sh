@@ -51,6 +51,7 @@ kind load docker-image "opennms/horizon-stream-datachoices:local-basic"
 # 		"opennms/horizon-stream-inventory:local-basic" \
 # 		"opennms/horizon-stream-keycloak:local-basic" \
 # 		"opennms/horizon-stream-metrics-processor:local-basic" \
+# 		"opennms/horizon-stream-minion-certificate-manager:local-basic" \
 # 		"opennms/horizon-stream-minion-gateway-grpc-proxy:local-basic" \
 # 		"opennms/horizon-stream-minion-gateway:local-basic" \
 # 		"opennms/horizon-stream-minion:local-basic" \

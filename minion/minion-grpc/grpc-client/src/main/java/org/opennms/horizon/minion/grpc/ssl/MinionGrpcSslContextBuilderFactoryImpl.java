@@ -29,24 +29,26 @@
 
 package org.opennms.horizon.minion.grpc.ssl;
 
-import com.google.common.base.Strings;
-import io.grpc.netty.shaded.io.grpc.netty.GrpcSslContexts;
-import io.grpc.netty.shaded.io.netty.handler.ssl.ApplicationProtocolConfig;
-import io.grpc.netty.shaded.io.netty.handler.ssl.SslContextBuilder;
-import io.grpc.netty.shaded.io.netty.handler.ssl.SslProvider;
 import lombok.Setter;
 
 import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.X509ExtendedKeyManager;
+import javax.net.ssl.X509ExtendedTrustManager;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
-import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
+import java.util.function.Function;
 import java.util.function.Supplier;
+
 import lombok.extern.slf4j.Slf4j;
+import nl.altindag.ssl.SSLFactory;
+import nl.altindag.ssl.util.PemUtils;
 
 @Slf4j
 public class MinionGrpcSslContextBuilderFactoryImpl implements MinionGrpcSslContextBuilderFactory {
@@ -63,7 +65,13 @@ public class MinionGrpcSslContextBuilderFactoryImpl implements MinionGrpcSslCont
     private boolean clientPrivateKeyIsPkcs12;
 
     @Setter
-    private Supplier<SslContextBuilder> grpcSslClientContextFactory = GrpcSslContexts::forClient;
+    private Function<Path, X509ExtendedTrustManager> loadTrustMaterialOp = PemUtils::loadTrustMaterial;
+    @Setter
+    private LoadIdentityMaterialOp loadIdentityMaterialOp = PemUtils::loadIdentityMaterial;
+    @Setter
+    private Supplier<SSLFactory.Builder> sslFactoryBuilderSupplier = SSLFactory::builder;
+    @Setter
+    private Function<String, File> fileFactory = File::new;
     @Setter
     private FunctionWithException<String, KeyStore, KeyStoreException> keyStoreFactory = KeyStore::getInstance;
     @Setter
@@ -72,27 +80,28 @@ public class MinionGrpcSslContextBuilderFactoryImpl implements MinionGrpcSslCont
     private FunctionWithException<String, KeyManagerFactory, NoSuchAlgorithmException> keyManagerFactoryFactory = KeyManagerFactory::getInstance;
 
     @Override
-    public SslContextBuilder create() {
-        SslContextBuilder builder = grpcSslClientContextFactory.get();
+    public SSLContext create() {
+        var sslFactoryBuilder = sslFactoryBuilderSupplier.get();
 
         if (isSet(trustCertCollectionFilePath)) {
-            File trustCertCollectionFile = new File(trustCertCollectionFilePath.trim());
+            File trustCertCollectionFile = fileFactory.apply(trustCertCollectionFilePath.trim());
             if (trustCertCollectionFile.exists()) {
-                builder.trustManager(trustCertCollectionFile);
+                X509ExtendedTrustManager trustManager = loadTrustMaterialOp.apply(trustCertCollectionFile.toPath());
+                sslFactoryBuilder.withTrustMaterial(trustManager);
             } else {
                 throw new RuntimeException("Configured trust store" + trustCertCollectionFile.getAbsolutePath() + " does not exist");
             }
         }
 
         if (isSet(clientCertChainFilePath) || isSet(clientPrivateKeyFilePath)) {
-            File clientCertChainFile = new File(clientCertChainFilePath.trim());
-            File clientPrivateKeyFile = new File(clientPrivateKeyFilePath.trim());
+            File clientCertChainFile = fileFactory.apply(clientCertChainFilePath.trim());
+            File clientPrivateKeyFile = fileFactory.apply(clientPrivateKeyFilePath.trim());
             if (clientCertChainFile.exists() && clientPrivateKeyFile.exists()) {
                 try {
                     if (clientPrivateKeyIsPkcs12) {
-                        configureKeyManagerPkcs12(builder);
+                        configureKeyManagerPkcs12(sslFactoryBuilder);
                     } else {
-                        configureKeyManagerOther(builder);
+                        configureKeyManagerOther(sslFactoryBuilder, clientCertChainFile.toPath(), clientPrivateKeyFile.toPath());
                     }
                 } catch (Exception exc) {
                     throw new RuntimeException("Failed to initialize TLS", exc);
@@ -102,7 +111,9 @@ public class MinionGrpcSslContextBuilderFactoryImpl implements MinionGrpcSslCont
             }
         }
 
-        return builder;
+        var sslFactory = sslFactoryBuilder.build();
+
+        return sslFactory.getSslContext();
     }
 
     private boolean isSet(String value) {
@@ -113,32 +124,19 @@ public class MinionGrpcSslContextBuilderFactoryImpl implements MinionGrpcSslCont
 // Internals
 //----------------------------------------
 
-    private void configureKeyManagerOther(SslContextBuilder builder) {
-            builder.keyManager(
-                new File(clientCertChainFilePath),
-                new File(clientPrivateKeyFilePath),
-                sanitizePassword()
-            );
+    private void configureKeyManagerOther(SSLFactory.Builder builder, Path certPath, Path keyPath) {
+        X509ExtendedKeyManager keyManager = loadIdentityMaterialOp.loadIdentityMaterial(certPath, keyPath, passwordAsCharArray());
+        builder.withIdentityMaterial(keyManager);
     }
 
-    private void configureKeyManagerPkcs12(SslContextBuilder builder) throws KeyStoreException, IOException, CertificateException, NoSuchAlgorithmException, UnrecoverableKeyException {
+    private void configureKeyManagerPkcs12(SSLFactory.Builder builder) throws Exception {
         KeyStore keyStore = loadPrivateKeyPkcs12Store();
 
         KeyManagerFactory keyManagerFactory = keyManagerFactoryFactory.apply(KeyManagerFactory.getDefaultAlgorithm());
         keyManagerFactory.init(keyStore, passwordAsCharArray());
 
-        ApplicationProtocolConfig apn =
-            new ApplicationProtocolConfig(
-                ApplicationProtocolConfig.Protocol.ALPN,
-                ApplicationProtocolConfig.SelectorFailureBehavior.FATAL_ALERT,
-                ApplicationProtocolConfig.SelectedListenerFailureBehavior.FATAL_ALERT,
-                "h2"
-            );
-
         builder
-            .keyManager(keyManagerFactory)
-            .sslProvider(SslProvider.JDK)
-            .applicationProtocolConfig(apn)
+            .withIdentityMaterial(keyManagerFactory)
             ;
     }
 
@@ -160,15 +158,6 @@ public class MinionGrpcSslContextBuilderFactoryImpl implements MinionGrpcSslCont
         return null;
     }
 
-    private String sanitizePassword() {
-        // Password must be null if unset; empty string can lead to the SSL context builder failing
-        if (Strings.isNullOrEmpty(clientPrivateKeyPassword)) {
-            return null;
-        }
-
-        return clientPrivateKeyPassword;
-    }
-
 
 //========================================
 // Functional Interface
@@ -177,5 +166,9 @@ public class MinionGrpcSslContextBuilderFactoryImpl implements MinionGrpcSslCont
 
     public interface FunctionWithException<T,R,E extends Exception> {
         R apply(T arg) throws E;
+    }
+
+    public interface LoadIdentityMaterialOp {
+        X509ExtendedKeyManager loadIdentityMaterial(Path certPath, Path keyPath, char[] password);
     }
 }

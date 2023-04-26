@@ -97,7 +97,9 @@ public class PassiveDiscoveryService {
             throw new InventoryRuntimeException("Passive discovery not found for id: " + id);
         }
 
-        validateDiscovery(tenantId, request);
+        if (!request.getLocation().equals(discoveryOpt.get().getLocation())) {
+            validateDiscovery(tenantId, request);
+        }
         validateSnmpPorts(request);
 
         PassiveDiscovery discovery = discoveryOpt.get();

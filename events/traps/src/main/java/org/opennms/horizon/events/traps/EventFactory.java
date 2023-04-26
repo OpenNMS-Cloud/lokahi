@@ -120,17 +120,41 @@ public class EventFactory {
         // Get event template and set uei, if unknown
         final org.opennms.horizon.events.xml.Event event = eventBuilder.getEvent();
         final Event econf = eventConfDao.findByEvent(event);
-        if (econf == null || econf.getUei() == null) {
-            event.setUei("uei.opennms.org/default/trap");
-        } else {
-            event.setUei(econf.getUei());
-        }
+        expandEventWithEventConfig(event, econf);
+
         if (shouldDiscard(econf)) {
             LOG.debug("Trap discarded due to matching event having logmsg dest == discardtraps");
             return null;
         }
         expandEventWithAlertData(event, econf);
         return event;
+    }
+
+    static void expandEventWithEventConfig(org.opennms.horizon.events.xml.Event event, Event econf) {
+        if (econf != null) {
+            String uei = econf.getUei();
+            if (uei != null) {
+                event.setUei(uei);
+            }
+
+            String description = econf.getDescr();
+            if (description != null) {
+                event.setDescr(description);
+            }
+
+            Logmsg econfLogMsg = econf.getLogmsg();
+            if (econf.getLogmsg() != null) {
+                org.opennms.horizon.events.xml.Logmsg logMsg = new org.opennms.horizon.events.xml.Logmsg();
+                logMsg.setNotify(econfLogMsg.getNotify());
+                logMsg.setDest(econfLogMsg.getDest().name());
+                logMsg.setContent(econfLogMsg.getContent());
+                event.setLogmsg(logMsg);
+            }
+        }
+
+        if (event.getUei() == null) {
+            event.setUei("uei.opennms.org/default/trap");
+        }
     }
 
     static void expandEventWithAlertData(org.opennms.horizon.events.xml.Event event, Event econf) {

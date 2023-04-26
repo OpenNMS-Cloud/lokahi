@@ -196,6 +196,8 @@ const handleClose = () => {
   isDiscoveryEditingShown.value = false
   discoverySelectedType.value = DiscoveryType.None
 }
+
+onMounted(() => discoveryQueries.getDiscoveries())
 </script>
 
 <style lang="scss" scoped>

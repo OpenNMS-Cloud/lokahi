@@ -151,7 +151,7 @@ const submitHandler = async () => {
 
   // clone and remove unused props from payload
   const payload = cloneDeep(discoveryInfo.value) as Partial<PassiveDiscovery>
-  if (payload.toggle) delete payload.toggle
+  if (Object.hasOwn(payload, 'toggle')) delete payload.toggle
 
   await discoveryMutations.upsertPassiveDiscovery({ passiveDiscovery: payload })
 

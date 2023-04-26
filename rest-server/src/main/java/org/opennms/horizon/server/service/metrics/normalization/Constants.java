@@ -77,7 +77,6 @@ public final class Constants {
     // Total Network
     public static final String TOTAL_NETWORK_BYTES_IN = "total_network_bytes_in";
     public static final String TOTAL_NETWORK_BYTES_OUT = "total_network_bytes_out";
-
-    public static final String QUERY_FOR_TOTAL_NETWORK_BYTES_IN = "query=sum(irate(ifHCInOctets[4m]))";
-    public static final String QUERY_FOR_TOTAL_NETWORK_BYTES_OUT = "query=sum(irate(ifHCOutOctets[4m]))";
+    public static final String QUERY_FOR_TOTAL_NETWORK_BYTES_IN = "sum(rate(ifHCInOctets[1h])*3600)";
+    public static final String QUERY_FOR_TOTAL_NETWORK_BYTES_OUT = "sum(rate(ifHCOutOctets[1h])*3600)";
 }

@@ -166,7 +166,7 @@ public class PassiveDiscoveryService {
             snmpCommunities += snmpCommunity.replace(",","") + " "; // As be requirement on HS-1332
         }
         if (snmpCommunities.length() > 128) {
-            throw new InventoryRuntimeException("Snmp Community string is too long");
+            throw new InventoryRuntimeException("Snmp communities string is too long");
         }
         for (byte b:snmpCommunities.getBytes()){
             char c = (char) b;

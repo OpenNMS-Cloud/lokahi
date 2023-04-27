@@ -3,6 +3,7 @@ import mount from 'tests/mountWithPiniaVillus'
 import { useFlowsStore } from '@/store/Views/flowsStore'
 import { TimeRange } from '@/types/graphql'
 import { createClient, setActiveClient } from 'villus'
+import { useFlowsApplicationStore } from '@/store/Views/flowsApplicationStore'
 
 const wrapper = mount({
   component: DashboardApplications,
@@ -31,12 +32,14 @@ test('The DashboardApplications component mounts correctly', () => {
 
 test('The DashboardApplications should call querie with paramters', () => {
   const store = useFlowsStore()
+  const appStore = useFlowsApplicationStore()
+
   store.filters.dateFilter = TimeRange.Last_24Hours
   store.filters.selectedExporterTopApplication = { value: { nodeId: 1, ipInterfaceId: 1 } }
   const spyDate = vi.spyOn(store, 'getTimeRange')
   const spy = vi.spyOn(store, 'getRequestData')
   spyDate.mockReturnValue(timeRange)
-  store.getApplicationDataset()
+  appStore.getApplicationDataset()
   expect(spy).toHaveBeenCalled()
   expect(spy).toHaveReturnedWith(filterValuesMock)
 })

@@ -1,7 +1,7 @@
 @portal
 Feature: Administrator can create a new instance
 
-  @TestCaseKey=CLOUD-T484
+  @TestCaseKey=CLOUD-T484 @CLOUD-3243
   Scenario: IT Administrator adds BTO instance with name and self as admin
     Given a IT Administrator clicks on '+ADD INSTANCE' button
     When the IT Administrator fills "CLOUD-T484" in 'Instance name'
@@ -13,7 +13,7 @@ Feature: Administrator can create a new instance
     Then the IT Administrator opens 'Details' for the instance
     And the IT Administrator sees "ADMIN" as a single user for the instance
 
-  @TestCaseKey=CLOUD-T487
+  @TestCaseKey=CLOUD-T487 @CLOUD-3243
   Scenario: IT Administrator adds BTO instance with name and assign it on another email
     Given a IT Administrator clicks on '+ADD INSTANCE' button
     When the IT Administrator fills "CLOUD-T487" in 'Instance name'

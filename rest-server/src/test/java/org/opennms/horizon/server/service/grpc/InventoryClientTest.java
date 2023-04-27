@@ -28,19 +28,19 @@
 
 package org.opennms.horizon.server.service.grpc;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.mockito.AdditionalAnswers.delegatesTo;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
-
+import com.google.protobuf.BoolValue;
+import com.google.protobuf.Empty;
+import com.google.protobuf.Int64Value;
+import com.google.protobuf.StringValue;
+import io.grpc.ManagedChannel;
+import io.grpc.Metadata;
+import io.grpc.ServerCall;
+import io.grpc.ServerCallHandler;
+import io.grpc.ServerInterceptor;
+import io.grpc.inprocess.InProcessChannelBuilder;
+import io.grpc.inprocess.InProcessServerBuilder;
+import io.grpc.stub.StreamObserver;
+import io.grpc.testing.GrpcCleanupRule;
 import org.junit.Rule;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -60,19 +60,18 @@ import org.opennms.horizon.inventory.dto.NodeServiceGrpc;
 import org.opennms.horizon.server.config.DataLoaderFactory;
 import org.opennms.horizon.shared.constants.GrpcConstants;
 
-import com.google.protobuf.Empty;
-import com.google.protobuf.Int64Value;
-import com.google.protobuf.StringValue;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
-import io.grpc.ManagedChannel;
-import io.grpc.Metadata;
-import io.grpc.ServerCall;
-import io.grpc.ServerCallHandler;
-import io.grpc.ServerInterceptor;
-import io.grpc.inprocess.InProcessChannelBuilder;
-import io.grpc.inprocess.InProcessServerBuilder;
-import io.grpc.stub.StreamObserver;
-import io.grpc.testing.GrpcCleanupRule;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.AdditionalAnswers.delegatesTo;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 public class InventoryClientTest {
     @Rule
@@ -106,6 +105,24 @@ public class InventoryClientTest {
                 @Override
                 public void listLocationsByIds(IdList request, StreamObserver<MonitoringLocationList> responseObserver) {
                     responseObserver.onNext(MonitoringLocationList.newBuilder().build());
+                    responseObserver.onCompleted();
+                }
+
+                @Override
+                public void createLocation(MonitoringLocationDTO request, StreamObserver<MonitoringLocationDTO> responseObserver) {
+                    responseObserver.onNext(MonitoringLocationDTO.newBuilder().build());
+                    responseObserver.onCompleted();
+                }
+
+                @Override
+                public void updateLocation(MonitoringLocationDTO request, StreamObserver<MonitoringLocationDTO> responseObserver) {
+                    responseObserver.onNext(MonitoringLocationDTO.newBuilder().build());
+                    responseObserver.onCompleted();
+                }
+
+                @Override
+                public void deleteLocation(Int64Value request, StreamObserver<BoolValue> responseObserver) {
+                    responseObserver.onNext(BoolValue.of(true));
                     responseObserver.onCompleted();
                 }
             }));
@@ -165,33 +182,33 @@ public class InventoryClientTest {
     }
 
     @Test
-    public void testListLocation() {
+    void testListLocation() {
         String methodName = new Object(){}.getClass().getEnclosingMethod().getName();
         ArgumentCaptor<Empty> captor = ArgumentCaptor.forClass(Empty.class);
         List<MonitoringLocationDTO> result = client.listLocations(accessToken + methodName);
-        assertThat(result.isEmpty()).isTrue();
+        assertThat(result).isEmpty();
         verify(mockLocationService).listLocations(captor.capture(), any());
         assertThat(captor.getValue()).isNotNull();
         assertThat(mockInterceptor.getAuthHeader()).isEqualTo(accessToken + methodName);
     }
 
     @Test
-    public void testListLocationsByIds() {
+    void testListLocationsByIds() {
         String methodName = new Object(){}.getClass().getEnclosingMethod().getName();
         List<Long> ids = Arrays.asList(1L, 2L);
         List<DataLoaderFactory.Key> keys = ids.stream().map(id -> new DataLoaderFactory.Key(id, accessToken + methodName)).collect(Collectors.toList());
         ArgumentCaptor<IdList> captor = ArgumentCaptor.forClass(IdList.class);
         List<MonitoringLocationDTO> result = client.listLocationsByIds(keys);
-        assertThat(result.isEmpty()).isTrue();
+        assertThat(result).isEmpty();
         verify(mockLocationService).listLocationsByIds(captor.capture(), any());
         List<Int64Value> argList = captor.getValue().getIdsList();
-        assertThat(argList.size()).isEqualTo(keys.size());
-        argList.forEach(v -> assertThat(ids.contains(v.getValue())).isTrue());
+        assertThat(argList).hasSameSizeAs(keys);
+        argList.forEach(v -> assertThat(ids).contains(v.getValue()));
         assertThat(mockInterceptor.getAuthHeader()).isEqualTo(accessToken + methodName);
     }
 
     @Test
-    public void testGetLocationById() {
+    void testGetLocationById() {
         long locationId = 100L;
         String methodName = new Object(){}.getClass().getEnclosingMethod().getName();
         ArgumentCaptor<Int64Value> captor = ArgumentCaptor.forClass(Int64Value.class);
@@ -203,7 +220,7 @@ public class InventoryClientTest {
     }
 
     @Test
-    public void testCreateNewNode() {
+    void testCreateNewNode() {
         NodeCreateDTO createDTO = NodeCreateDTO.newBuilder().setLabel("test-node").build();
         String methodName = new Object(){}.getClass().getEnclosingMethod().getName();
         ArgumentCaptor<NodeCreateDTO> captor = ArgumentCaptor.forClass(NodeCreateDTO.class);
@@ -216,18 +233,18 @@ public class InventoryClientTest {
     }
 
     @Test
-    public void testListNodes() {
+    void testListNodes() {
         String methodName = new Object(){}.getClass().getEnclosingMethod().getName();
         ArgumentCaptor<Empty> captor = ArgumentCaptor.forClass(Empty.class);
         List<NodeDTO> result = client.listNodes(accessToken + methodName);
-        assertThat(result.isEmpty()).isTrue();
+        assertThat(result).isEmpty();
         verify(mockNodeService).listNodes(captor.capture(), any());
         assertThat(captor.getValue()).isNotNull();
         assertThat(mockInterceptor.getAuthHeader()).isEqualTo(accessToken + methodName);
     }
 
     @Test
-    public void testGetNodeById() {
+    void testGetNodeById() {
         long locationId = 100L;
         String methodName = new Object(){}.getClass().getEnclosingMethod().getName();
         ArgumentCaptor<Int64Value> captor = ArgumentCaptor.forClass(Int64Value.class);
@@ -239,18 +256,18 @@ public class InventoryClientTest {
     }
 
     @Test
-    public void testListMonitoringSystem() {
+    void testListMonitoringSystem() {
         String methodName = new Object(){}.getClass().getEnclosingMethod().getName();
         ArgumentCaptor<Empty> captor = ArgumentCaptor.forClass(Empty.class);
         List<MonitoringSystemDTO> result = client.listMonitoringSystems(accessToken + methodName);
-        assertThat(result.isEmpty()).isTrue();
+        assertThat(result).isEmpty();
         verify(mockSystemService).listMonitoringSystem(captor.capture(), any());
         assertThat(captor.getValue()).isNotNull();
         assertThat(mockInterceptor.getAuthHeader()).isEqualTo(accessToken + methodName);
     }
 
     @Test
-    public void testGetMonitoringSystemBySystemId() {
+    void testGetMonitoringSystemBySystemId() {
         String systemId = "test-system-id-123";
         String methodName = new Object(){}.getClass().getEnclosingMethod().getName();
         ArgumentCaptor<StringValue> captor = ArgumentCaptor.forClass(StringValue.class);
@@ -258,6 +275,41 @@ public class InventoryClientTest {
         assertThat(result).isNotNull();
         verify(mockSystemService).getMonitoringSystemById(captor.capture(), any());
         assertThat(captor.getValue().getValue()).isEqualTo(systemId);
+        assertThat(mockInterceptor.getAuthHeader()).isEqualTo(accessToken + methodName);
+    }
+
+    @Test
+    void testCreateLocation() {
+        MonitoringLocationDTO createDTO = MonitoringLocationDTO.newBuilder().setLocation("test-location").build();
+        String methodName = new Object(){}.getClass().getEnclosingMethod().getName();
+        ArgumentCaptor<MonitoringLocationDTO> captor = ArgumentCaptor.forClass(MonitoringLocationDTO.class);
+        MonitoringLocationDTO result = client.createLocation(createDTO, accessToken + methodName);
+        assertThat(result).isNotNull();
+        verify(mockLocationService).createLocation(captor.capture(), any());
+        assertThat(captor.getValue()).isEqualTo(createDTO);
+        assertThat(mockInterceptor.getAuthHeader()).isEqualTo(accessToken + methodName);
+    }
+
+    @Test
+    void testUpdateLocation() {
+        MonitoringLocationDTO updateDTO = MonitoringLocationDTO.newBuilder().setLocation("test-location").build();
+        String methodName = new Object(){}.getClass().getEnclosingMethod().getName();
+        ArgumentCaptor<MonitoringLocationDTO> captor = ArgumentCaptor.forClass(MonitoringLocationDTO.class);
+        MonitoringLocationDTO result = client.updateLocation(updateDTO, accessToken + methodName);
+        assertThat(result).isNotNull();
+        verify(mockLocationService).updateLocation(captor.capture(), any());
+        assertThat(captor.getValue()).isEqualTo(updateDTO);
+        assertThat(mockInterceptor.getAuthHeader()).isEqualTo(accessToken + methodName);
+    }
+
+    @Test
+    void testDeleteLocation() {
+        long locationId = 1L;
+        String methodName = new Object(){}.getClass().getEnclosingMethod().getName();
+        ArgumentCaptor<Int64Value> captor = ArgumentCaptor.forClass(Int64Value.class);
+        client.deleteLocation(locationId, accessToken + methodName);
+        verify(mockLocationService).deleteLocation(captor.capture(), any());
+        assertThat(captor.getValue().getValue()).isEqualTo(locationId);
         assertThat(mockInterceptor.getAuthHeader()).isEqualTo(accessToken + methodName);
     }
 

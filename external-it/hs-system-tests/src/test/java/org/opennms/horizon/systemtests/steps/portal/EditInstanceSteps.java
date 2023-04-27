@@ -29,6 +29,7 @@
 
 package org.opennms.horizon.systemtests.steps.portal;
 
+import io.cucumber.java.en.And;
 import io.cucumber.java.en.Then;
 import org.opennms.horizon.systemtests.pages.portal.EditInstancePage;
 import org.opennms.horizon.systemtests.utils.TestDataStorage;
@@ -61,5 +62,20 @@ public class EditInstanceSteps {
     @Then("click on 'edit' for instance name")
     public void clickOnEditInstanceName() {
         EditInstancePage.clickEditNameBtn();
+    }
+
+    @Then("click on 'copy' button for URL")
+    public void clickOnCopyURLButton() {
+        EditInstancePage.clickCopyURLButton();
+    }
+
+    @And("search 'Search for user' input is empty")
+    public void searchSearchForUserIsEmpty() {
+        EditInstancePage.verifySearchFieldIsEmpty();
+    }
+
+    @Then("click to 'go back' button to return to the OpenNMS Cloud page")
+    public void clickGoBackBtn() {
+        EditInstancePage.clickGoBackButton();
     }
 }

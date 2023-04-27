@@ -12,7 +12,7 @@ Feature: Administrator can delete an instance
     And the IT Administrator sees the 'Cloud Instance Details' page for the "CLOUD-T521" instance
 
   @TestCaseKey=CLOUD-T522
-  Scenario: IT Administrator cancels deleting a BTO instance using button
+  Scenario: IT Administrator cancels deleting a BTO instance using X button
     Given BTO instance name "CLOUD-T522" created
     And the IT Administrator sees an instance "CLOUD-T522" in the list
     Then the IT Administrator opens 'Details' for the instance

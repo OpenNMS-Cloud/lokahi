@@ -8,7 +8,7 @@
     :loading="flowsStore.filters.isExportersLoading"
     :results="flowsStore.filters.filteredExporters"
     @search="flowsStore.exportersAutoCompleteSearch"
-    @update:model-value="flowsStore.getApplicationDataset"
+    @update:model-value="flowsAppStore.getApplicationDataset"
   ></FeatherAutocomplete>
   <div class="flows">
     <div
@@ -42,9 +42,11 @@ import { PolarArea } from 'vue-chartjs'
 import dashboardText from '@/components/Dashboard/dashboard.text'
 import PolarChart from '@/assets/PolarChart.svg'
 import PolarChartDark from '@/assets/PolarChart-dark.svg'
+import { useFlowsApplicationStore } from '@/store/Views/flowsApplicationStore'
 
 const { onThemeChange, isDark } = useTheme()
 const flowsStore = useFlowsStore()
+const flowsAppStore = useFlowsApplicationStore()
 const constGraph = ref()
 const dataGraph = ref()
 const hasData = ref(false)

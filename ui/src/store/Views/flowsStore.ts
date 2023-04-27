@@ -1,12 +1,10 @@
-import { flowsAppDataToChartJSDirection, flowsAppDataToChartJSTotal } from '@/dtos/chartJS.dto'
 import { format } from 'date-fns'
 import { defineStore } from 'pinia'
 import { useflowsQueries } from '@/store/Queries/flowsQueries'
 import { RequestCriteriaInput, TimeRange } from '@/types/graphql'
-import { FlowsApplicationData, FlowsApplicationSummaries, ChartData } from '@/types'
+import { FlowsApplicationSummaries } from '@/types'
 import { IAutocompleteItemType } from '@featherds/autocomplete/src/components/types'
-import { get } from 'lodash'
-import { IExporter } from '@/types/flows'
+import { useFlowsApplicationStore } from './flowsApplicationStore'
 
 export const useFlowsStore = defineStore('flowsStore', {
   state: () => ({
@@ -22,48 +20,26 @@ export const useFlowsStore = defineStore('flowsStore', {
         selectedItem: 'table'
       },
       steps: 2000000,
-
       //Application AutoComplete
       applications: [] as IAutocompleteItemType[],
       selectedApplications: [],
       isApplicationsLoading: false,
       filteredApplications: [] as IAutocompleteItemType[],
-
       //Exporter AutoComplete
       exporters: [] as IAutocompleteItemType[],
       selectedExporterTopApplication: undefined as undefined | IAutocompleteItemType,
-      // Selected Exporters can be set as [{ _text: 'Node Name', value: { nodeId: 1, ipInterfaceId: 1 } }]
-      // to autopopulate autofill with exporter
+      // Selected Exporters can be set as [{ _text: 'Node Name', value: { nodeId: 1, ipInterfaceId: 1 } }] to autopopulate autofill with exporter
       selectedExporters: [],
       isExportersLoading: false,
       filteredExporters: [] as IAutocompleteItemType[]
-    },
-    applications: {
-      isTableLoading: false,
-      isLineLoading: false,
-      tableChartData: {} as ChartData,
-      lineChartData: {} as ChartData,
-      filterDialogOpen: false,
-      //Table Data
-      tableData: [{} as any],
-      //Line Data
-      lineTotalData: [{} as any],
-      lineInboundData: [{} as any],
-      lineOutboundData: [{} as any]
-    },
-    exporters: {
-      isLoading: false,
-      tableChartData: {} as ChartData,
-      lineChartData: {} as ChartData,
-      filterDialogOpen: false
     }
   }),
   actions: {
-    async getDatasets() {
+    async getApplicationDatasets() {
+      const flowsApplicationStore = useFlowsApplicationStore()
       const requestData = this.getRequestData()
-
-      await this.getTableDataset(requestData)
-      await this.getLineDataset(requestData)
+      await flowsApplicationStore.getApplicationTableDataset(requestData)
+      await flowsApplicationStore.getApplicationLineDataset(requestData)
     },
     async getApplications() {
       const flowsQueries = useflowsQueries()
@@ -82,54 +58,12 @@ export const useFlowsStore = defineStore('flowsStore', {
 
       const exporters = (await flowsQueries.getExporters(requestData)) || []
       const exportersAutocompleteObject = exporters.value?.findExporters?.map((item: any) => ({
-        _text: item.node.nodeLabel.toUpperCase(),
+        _text: `${item.node.nodeLabel.toUpperCase()} : ${item.ipInterface.ipAddress}`,
         value: { nodeId: item.node.id as number, ipInterfaceId: item.ipInterface.id as number }
       })) as IAutocompleteItemType[]
       this.filters.exporters = exportersAutocompleteObject
     },
-    async getTableDataset(requestData: RequestCriteriaInput) {
-      const flowsQueries = useflowsQueries()
-      this.applications.isTableLoading = true
-      const applicationTableData = await flowsQueries.getApplicationsSummaries(requestData)
-      if (applicationTableData.value?.findApplicationSummaries) {
-        this.applications.tableData = [
-          ...((applicationTableData.value?.findApplicationSummaries as FlowsApplicationSummaries[]) || [])
-        ]
-      }
-
-      this.applications.isTableLoading = false
-    },
-    async getLineDataset(requestData: RequestCriteriaInput) {
-      const flowsQueries = useflowsQueries()
-      this.applications.isLineLoading = true
-      const applicationsLineData = await flowsQueries.getApplicationsSeries(requestData)
-      this.applications.isLineLoading = false
-
-      if (applicationsLineData.value?.findApplicationSeries) {
-        //Get Inbound Data
-        this.applications.lineInboundData =
-          flowsAppDataToChartJSDirection(
-            applicationsLineData.value?.findApplicationSeries as FlowsApplicationData[],
-            'INGRESS'
-          ) || []
-
-        //Get Outbound Data
-        this.applications.lineOutboundData =
-          flowsAppDataToChartJSDirection(
-            applicationsLineData.value?.findApplicationSeries as FlowsApplicationData[],
-            'EGRESS'
-          ) || []
-
-        //Get Total Data
-        this.applications.lineTotalData =
-          flowsAppDataToChartJSTotal(applicationsLineData.value?.findApplicationSeries as FlowsApplicationData[]) || []
-        this.applications.isLineLoading = false
-      }
-
-      //Get Total Flows
-      this.totalFlows = applicationsLineData.value?.findApplicationSeries?.length || 0
-    },
-    getRequestData(count = 10, step?: number, exporter?: IExporter[], applications?: string[]) {
+    getRequestData(count = 10, step?: number, exporter?: object[], applications?: string[]) {
       return {
         count: count,
         step: step || this.filters.steps,
@@ -138,69 +72,26 @@ export const useFlowsStore = defineStore('flowsStore', {
         applications: applications || this.filters.selectedApplications.map((app: any) => app.value)
       } as RequestCriteriaInput
     },
-    createTableChartData() {
-      if (this.applications.tableData) {
-        this.applications.tableChartData = {
-          labels: this.applications.tableData.map((row) => row.label),
-          datasets: [
-            {
-              label: 'Inbound',
-              data: this.applications.tableData.map((row) => row.bytesIn),
-              barThickness: 13,
-              backgroundColor: '#0043A4',
-              hidden: this.filters.traffic.selectedItem === 'outbound'
-            },
-            {
-              label: 'Outbound',
-              data: this.applications.tableData.map((row) => row.bytesOut),
-              barThickness: 13,
-              backgroundColor: '#EE7D00',
-              hidden: this.filters.traffic.selectedItem === 'inbound'
-            }
-          ]
-        }
-      }
+    createApplicationCharts() {
+      const flowsApplicationStore = useFlowsApplicationStore()
+      flowsApplicationStore.createApplicationTableChartData()
+      flowsApplicationStore.createApplicationLineChartData()
     },
-    createLineChartData() {
-      if (this.applications.lineInboundData.length > 0) {
-        const data = this.getLineChartDataForSelectedTraffic()
-        const datasetArr = {
-          type: 'line',
-          datasets: data?.map((element, index) => {
-            return {
-              label: element.label,
-              data: element.data.map((data: any) => {
-                return {
-                  x: this.convertToDate(data.timestamp),
-                  y: data.value
-                }
-              }),
-              fill: true,
-              borderColor: this.randomColours(index),
-              backgroundColor: this.randomColours(index, true)
-            }
-          })
-        }
-        this.applications.lineChartData = datasetArr
-      }
+    async updateApplicationCharts() {
+      await this.getApplicationDatasets()
+      this.createApplicationCharts()
     },
     async populateData() {
       await this.getExporters()
       await this.getApplications()
-      await this.getDatasets()
-      this.createCharts()
+      await this.updateApplicationCharts()
     },
     async updateChartData() {
-      await this.getDatasets()
-      this.createCharts()
-    },
-    createCharts() {
-      this.createTableChartData()
-      this.createLineChartData()
+      await this.updateApplicationCharts()
     },
     async trafficRadioOnChange(selectedItem: string) {
       this.filters.traffic.selectedItem = selectedItem
-      this.createCharts()
+      this.createApplicationCharts()
     },
     convertToDate(ts: string) {
       const dateFormat = () => {
@@ -216,18 +107,6 @@ export const useFlowsStore = defineStore('flowsStore', {
         }
       }
       return format(new Date(ts), dateFormat())
-    },
-    getLineChartDataForSelectedTraffic() {
-      switch (this.filters.traffic.selectedItem) {
-        case 'inbound':
-          return this.applications.lineInboundData
-        case 'outbound':
-          return this.applications.lineOutboundData
-        case 'total':
-          return this.applications.lineTotalData
-        default:
-          return this.applications.lineTotalData
-      }
     },
     async onDateFilterUpdate(e: any) {
       this.filters.dateFilter = e
@@ -322,18 +201,6 @@ export const useFlowsStore = defineStore('flowsStore', {
       } else {
         return defaultColors[index]
       }
-    },
-    async getApplicationDataset() {
-      const flowsQueries = useflowsQueries()
-      this.filters.dateFilter = TimeRange.Last_24Hours
-      const exporter = get(this.filters.selectedExporterTopApplication, 'value') as IExporter
-      const exporters: IExporter[] = exporter ? [exporter] : []
-      const requestData = this.getRequestData(10, 2000000, exporters, [])
-
-      const topApplications = await flowsQueries.getApplicationsSummaries(requestData)
-      this.topApplications = [
-        ...((topApplications.value?.findApplicationSummaries as FlowsApplicationSummaries[]) || [])
-      ]
     }
   }
 })

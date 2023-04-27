@@ -38,7 +38,7 @@ import java.util.concurrent.TimeUnit;
 
 
 public class ServiceGenerator {
-    private static final int DEFAULT_TIMEOUT = 30;
+    private static final int DEFAULT_TIMEOUT = 60;
     private static final OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
     private static final HttpLoggingInterceptor logging = new HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.NONE);
 

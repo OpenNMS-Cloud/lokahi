@@ -47,13 +47,7 @@ const radioModel = ref(props.selectedValue)
 @use '@/styles/vars';
 @use '@featherds/styles/mixins/typography';
 
-.open-dark {
-  .text-radio .feather-radio-group .layout-container .feather-radio .label {
-    color: rgba(255, 255, 255, 0.4) !important;
-  }
-}
-
-:deep.text-radio .feather-radio-group {
+.text-radio :deep(.feather-radio-group) {
   display: flex;
   flex-direction: row;
   justify-content: center;

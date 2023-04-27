@@ -25,6 +25,7 @@
  *     http://www.opennms.org/
  *     http://www.opennms.com/
  *******************************************************************************/
+
 package org.opennms.horizon.systemtests.steps.cloud;
 
 import io.cucumber.java.en.Then;

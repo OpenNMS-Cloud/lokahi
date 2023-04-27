@@ -155,3 +155,108 @@ export const LineGraphData = [
     ]
   }
 ]
+
+export const LineBackendData = [
+  {
+    direction: 'INGRESS',
+    label: 'ms-wbt-server',
+    timestamp: '2023-04-17T14:30:00Z',
+    value: 4671
+  },
+  {
+    direction: 'INGRESS',
+    label: 'ms-wbt-server',
+    timestamp: '2023-04-17T14:35:00Z',
+    value: 15109
+  },
+  {
+    direction: 'INGRESS',
+    label: 'ms-wbt-server',
+    timestamp: '2023-04-17T14:40:00Z',
+    value: 19884
+  },
+  {
+    direction: 'INGRESS',
+    label: 'ms-wbt-server',
+    timestamp: '2023-04-17T14:45:00Z',
+    value: 9150
+  },
+  {
+    direction: 'INGRESS',
+    label: 'ms-wbt-server',
+    timestamp: '2023-04-17T14:50:00Z',
+    value: 14845
+  },
+  {
+    direction: 'INGRESS',
+    label: 'ms-wbt-server',
+    timestamp: '2023-04-17T14:55:00Z',
+    value: 32315
+  },
+  {
+    direction: 'INGRESS',
+    label: 'ms-wbt-server',
+    timestamp: '2023-04-17T15:00:00Z',
+    value: 14212
+  },
+  {
+    direction: 'INGRESS',
+    label: 'ms-wbt-server',
+    timestamp: '2023-04-17T15:05:00Z',
+    value: 14967
+  },
+  {
+    direction: 'INGRESS',
+    label: 'ms-wbt-server',
+    timestamp: '2023-04-17T15:10:00Z',
+    value: 31028
+  },
+  {
+    direction: 'INGRESS',
+    label: 'ms-wbt-server',
+    timestamp: '2023-04-17T15:15:00Z',
+    value: 30467
+  },
+  {
+    direction: 'INGRESS',
+    label: 'ms-wbt-server',
+    timestamp: '2023-04-17T15:20:00Z',
+    value: 26292
+  },
+  {
+    direction: 'INGRESS',
+    label: 'ms-wbt-server',
+    timestamp: '2023-04-17T15:25:00Z',
+    value: 27779
+  },
+  {
+    direction: 'INGRESS',
+    label: 'ms-wbt-server',
+    timestamp: '2023-04-17T15:30:00Z',
+    value: 21214
+  },
+  {
+    direction: 'INGRESS',
+    label: 'ms-wbt-server',
+    timestamp: '2023-04-17T15:35:00Z',
+    value: 28407
+  },
+  {
+    direction: 'INGRESS',
+    label: 'ms-wbt-server',
+    timestamp: '2023-04-17T15:40:00Z',
+    value: 10038
+  },
+  {
+    direction: 'INGRESS',
+    label: 'ms-wbt-server',
+    timestamp: '2023-04-17T15:45:00Z',
+    value: 51386
+  },
+  {
+    direction: 'INGRESS',
+    label: 'ms-wbt-server',
+    timestamp: '2023-04-17T15:50:00Z',
+    value: 10699
+  }
+]

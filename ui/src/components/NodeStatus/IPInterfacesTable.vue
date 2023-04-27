@@ -2,7 +2,9 @@
   <TableCard>
     <div class="header">
       <div class="title-container">
-        <span class="title"> IP Interfaces </span>
+        <span class="title">
+          {{ nodeStatusStore.isAzure ? 'Network Interfaces' : 'IP Interfaces' }}
+        </span>
       </div>
     </div>
     <div class="container">
@@ -52,15 +54,12 @@ import MultilineChart from '@material-design-icons/svg/outlined/multiline_chart.
 const metricsModal = ref()
 
 const nodeStatusStore = useNodeStatusStore()
-const route = useRoute()
 
 const nodeData = computed(() => {
   return {
     node: nodeStatusStore.fetchedData?.node
   }
 })
-
-onBeforeMount(() => nodeStatusStore.setNodeId(Number(route.params.id)))
 </script>
 
 <style lang="scss" scoped>

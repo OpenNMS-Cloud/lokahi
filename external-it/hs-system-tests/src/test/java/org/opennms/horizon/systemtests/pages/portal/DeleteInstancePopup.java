@@ -45,7 +45,7 @@ public class DeleteInstancePopup {
     private final static SelenideElement confirmNameInp = $("#delete-instance-confirm-input");
     private final static SelenideElement cancelBtn = $("#cloud-delete-instance-cancel");
     private final static SelenideElement deleteBtn = $("#cloud-delete-instance-confirm");
-    private final static SelenideElement errorTxt = $("[data-ref-id='feather-form-element-error']");
+    private final static SelenideElement errorTxt = $("div#cloud-instance-delete-input-wrapper [data-ref-id='feather-form-element-error']");
 
     public static void waitPopupIsDisplayed(boolean isVisible) {
         if (isVisible) {

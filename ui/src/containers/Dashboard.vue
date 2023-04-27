@@ -37,16 +37,18 @@
 import { useFlowsStore } from '@/store/Views/flowsStore'
 import dashboardText from '@/components/Dashboard/dashboard.text'
 import { TimeRange } from '@/types/graphql'
+import { useFlowsApplicationStore } from '@/store/Views/flowsApplicationStore'
 
 const router = useRouter()
 const flowsStore = useFlowsStore()
+const flowsAppStore = useFlowsApplicationStore()
 
 const redirect = (route: string) => {
   router.push(route)
 }
 
 onMounted(async () => {
-  await flowsStore.getApplicationDataset()
+  await flowsAppStore.getApplicationDataset()
   await flowsStore.getExporters()
 })
 </script>

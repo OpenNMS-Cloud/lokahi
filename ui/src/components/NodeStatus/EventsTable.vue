@@ -6,22 +6,6 @@
           Events
         </span>
       </div>
-      <!-- <FeatherInput
-        class="search"
-        v-model="searchValue"
-        label="Event">
-        <template v-slot:pre>
-          <FeatherIcon :icon="Search" />
-        </template>
-      </FeatherInput>
-      <div class="btns">
-        <FeatherButton icon="Filter">
-          <FeatherIcon :icon="FilterAlt" />
-        </FeatherButton>
-        <FeatherButton icon="Sort">
-          <FeatherIcon :icon="Sort" />
-        </FeatherButton>
-      </div> -->
     </div>
     <div class="container">
       <table class="data-table" aria-label="Events Table" data-test="data-table">
@@ -57,15 +41,9 @@
 </template>
 
 <script lang="ts" setup>
-import FilterAlt from '@featherds/icon/action/FilterAlt'
-import Sort from '@featherds/icon/action/Sort'
-import Search from '@featherds/icon/action/Search'
 import { useNodeStatusStore } from '@/store/Views/nodeStatusStore'
 
 const nodeStatusStore = useNodeStatusStore()
-const route = useRoute()
-
-const searchValue = ref()
 
 // Pagination
 const page = ref(1)
@@ -82,8 +60,6 @@ const nodeData = computed(() => {
     events
   }
 })
-
-onBeforeMount(() => nodeStatusStore.setNodeId(Number(route.params.id)))
 </script>
 
 <style lang="scss" scoped>

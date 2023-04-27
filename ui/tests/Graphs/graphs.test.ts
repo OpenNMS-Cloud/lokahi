@@ -23,11 +23,21 @@ vi.mock('jspdf', () => {
   class MockJsPdf {
     val1: string
     val2: string
+    internal: object
     constructor(val1: string, val2: string) {
       this.val1 = val1
       this.val2 = val2
+      this.internal = {
+        pageSize: {
+          height: 200,
+          width: 200
+        }
+      }
     }
     addImage() {}
+    getImageProperties() {
+      return { width: 100, height: 100 }
+    }
     save() {}
   }
 

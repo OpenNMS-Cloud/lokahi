@@ -8,7 +8,7 @@ export default {
     redirectLink: 'Flows',
     timePeriod: '24 hours',
     emptyTitle: 'Data being collected.',
-    emptySubtitle: 'No applications data was found in last 24 hours..',
+    emptySubtitle: 'No applications data was found in last 24 hours.',
     filterLabel: 'Filter by exporter'
   },
   NetworkTraffic: {
@@ -16,7 +16,7 @@ export default {
     redirectLink: 'Inventory',
     timePeriod: '24 hours',
     emptyTitle: 'Data being collected.',
-    emptySubtitle: 'No network traffic data was found in last 24 hours..'
+    emptySubtitle: 'No network traffic data was found in last 24 hours.'
   },
   MenuLabel: 'Quick Actions',
   MenuLinks: [

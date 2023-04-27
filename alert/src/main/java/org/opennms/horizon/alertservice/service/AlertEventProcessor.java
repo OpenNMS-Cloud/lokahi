@@ -248,6 +248,8 @@ public class AlertEventProcessor {
         alert.setReductionKey(alertData.reductionKey());
         alert.setClearKey(alertData.clearKey());
         alert.setCounter(1L);
+        alert.setDescription(event.getDescription());
+        alert.setLogMessage(event.getLogMessage());
         if (event.getNodeId() > 0) {
             alert.setManagedObjectType(ManagedObjectType.NODE);
             alert.setManagedObjectInstance(Long.toString(event.getNodeId()));

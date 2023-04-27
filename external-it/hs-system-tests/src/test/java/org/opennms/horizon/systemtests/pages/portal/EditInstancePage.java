@@ -34,6 +34,8 @@ import com.codeborne.selenide.ElementsCollection;
 import com.codeborne.selenide.SelenideElement;
 
 import static com.codeborne.selenide.Condition.enabled;
+import static com.codeborne.selenide.Condition.exactText;
+import static com.codeborne.selenide.Condition.exactValue;
 import static com.codeborne.selenide.Condition.text;
 import static com.codeborne.selenide.Condition.visible;
 import static com.codeborne.selenide.Selectors.byText;
@@ -46,9 +48,16 @@ public class EditInstancePage {
     private static final SelenideElement header = $("h2");
     private static final ElementsCollection usersRow = $$("tbody tr");
     private static final SelenideElement usersTable = $("tbody");
+    private static final SelenideElement searchUserInp = $("#cloud-details-users-search");
     private static final SelenideElement deleteInstanceBtn = $("#delete-btn-cloud-instance");
     private static final SelenideElement editNameBtn = $("#edit-btn-cloud-instance");
     private static final SelenideElement instanceUrlTxt = $("#cloud-details-instance-url");
+    private static final SelenideElement copyUrlBtn = $("#copy-url-btn");
+    private static final SelenideElement goBackBtn = $("#cloud-details-back");
+
+    public static void clickGoBackButton() {
+        goBackBtn.shouldBe(enabled).click();
+    }
 
     public static void verifyPageTitle() {
         titleTxt.shouldHave(text("Cloud Instance Details"));
@@ -66,6 +75,10 @@ public class EditInstancePage {
         return instanceUrlTxt.shouldBe(visible).getAttribute("href");
     }
 
+    public static void clickCopyURLButton() {
+        copyUrlBtn.shouldBe(enabled).click();
+    }
+
     public static void clickDeleteInstance() {
         deleteInstanceBtn.shouldBe(enabled).click();
     }
@@ -80,5 +93,9 @@ public class EditInstancePage {
 
     public static void verifyInstanceName(String instanceName) {
         header.shouldHave(text("Instance Name: " + instanceName));
+    }
+
+    public static void verifySearchFieldIsEmpty() {
+        searchUserInp.shouldHave(exactText(""), exactValue(""));
     }
 }

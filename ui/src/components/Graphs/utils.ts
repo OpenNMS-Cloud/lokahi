@@ -38,11 +38,24 @@ export const formatTimestamp = (timestamp: number, formatStr: string) => {
  * Takes a canvas element and downloads as PDF
  */
 export const downloadCanvas = (canvas: HTMLCanvasElement, filename: string) => {
-  const width = canvas.offsetWidth
-  const height = canvas.offsetHeight
   const imgData = canvas.toDataURL('image/png')
-  const doc = new jsPDF('l', 'pt')
-  doc.addImage(imgData, 'PNG', 15, 15, width, height)
+  const doc = new jsPDF('l', 'pt', [canvas.width, canvas.height])
+  const imgProps = doc.getImageProperties(imgData)
+  const margin = 0.1
+
+  const docWidth = doc.internal.pageSize.width * (1 - margin)
+  const docHeight = doc.internal.pageSize.height * (1 - margin)
+
+  const x = doc.internal.pageSize.width * (margin / 2)
+  const y = doc.internal.pageSize.height * (margin / 2)
+
+  const widthRatio = docWidth / imgProps.width
+  const heightRatio = docHeight / imgProps.height
+  const ratio = Math.min(widthRatio, heightRatio)
+
+  const w = imgProps.width * ratio
+  const h = imgProps.height * ratio
+  doc.addImage(imgData, 'PNG', x, y, w, h)
   doc.save(`${filename}.pdf`)
 }
 

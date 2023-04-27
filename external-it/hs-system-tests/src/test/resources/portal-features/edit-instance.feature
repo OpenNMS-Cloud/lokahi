@@ -72,7 +72,7 @@ Feature: Administrator can edit an instance
     And the IT Administrator doesn't see a snackbar message
 
   @TestCaseKey=CLOUD-T565
-  Scenario: IT administrator cancels renaming BTO instance with CANCEL
+  Scenario: IT administrator cancels renaming BTO instance with X button
     Given BTO instance name "CLOUD-T565" created
     And the IT Administrator sees an instance "CLOUD-T565" in the list
     Then the IT Administrator opens 'Details' for the instance

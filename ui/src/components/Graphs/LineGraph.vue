@@ -1,25 +1,31 @@
 <template>
-  <div v-if="graphs.dataSets.value.length" class="container">
-      <div class="canvas-wrapper">
-        <FeatherTooltip
-          title="Download to PDF"
-          v-slot="{ attrs, on }"
+  <div
+    v-if="graphs.dataSets.value.length"
+    class="container"
+  >
+    <div class="canvas-wrapper">
+      <FeatherTooltip
+        title="Download to PDF"
+        v-slot="{ attrs, on }"
+      >
+        <FeatherButton
+          v-bind="attrs"
+          v-on="on"
+          icon="Download"
+          class="download-icon"
+          @click="onDownload"
         >
-          <FeatherButton
-            v-bind="attrs" 
-            v-on="on" 
-            icon="Download" 
-            class="download-icon" 
-            @click="onDownload" 
-          >
-            <FeatherIcon :icon="DownloadFile" />
-          </FeatherButton>
-        </FeatherTooltip>
-        <canvas class="canvas" :id="`${graph.label}`"></canvas>
-      </div>
+          <FeatherIcon :icon="DownloadFile" />
+        </FeatherButton>
+      </FeatherTooltip>
+      <canvas
+        class="canvas"
+        :id="`${graph.label}`"
+      ></canvas>
+    </div>
   </div>
 </template>
-  
+
 <script setup lang="ts">
 import { useGraphs } from '@/composables/useGraphs'
 import { ChartOptions, TitleOptions, ChartData } from 'chart.js'
@@ -30,6 +36,7 @@ import { formatTimestamp, downloadCanvas } from './utils'
 import { GraphProps } from '@/types/graphs'
 import DownloadFile from '@featherds/icon/action/DownloadFile'
 import { format } from 'd3'
+const emits = defineEmits(['has-data'])
 
 // Chart.register(zoomPlugin) disable zoom until phase 2
 
@@ -48,7 +55,7 @@ let chart: any = {}
 
 const options = computed<ChartOptions>(() => ({
   responsive: true,
-  maintainAspectRatio: false,
+  aspectRatio: 1.4,
   plugins: {
     title: {
       display: true,
@@ -74,7 +81,7 @@ const options = computed<ChartOptions>(() => ({
         text: props.graph.label
       } as TitleOptions,
       ticks: {
-        callback: (value) => yAxisFormatter(value as number),
+        callback: (value, index) => (index % 2 === 0 ? yAxisFormatter(value as number) : ''),
         maxTicksLimit: 8
       },
       stacked: false
@@ -88,8 +95,8 @@ const options = computed<ChartOptions>(() => ({
 }))
 
 const xAxisLabels = computed(() => {
-  const graphsDataSetsValues = graphs.dataSets.value[0]?.values as any || [] as any
-  
+  const graphsDataSetsValues = (graphs.dataSets.value[0]?.values as any) || ([] as any)
+
   const totalLabels = graphsDataSetsValues.map((val: any) => {
     return formatTimestamp(val[0], 'minutes')
   })
@@ -99,7 +106,8 @@ const xAxisLabels = computed(() => {
 
 const dataSets = computed(() => {
   const bgColor = ['green', 'blue'] // TODO: find solution to set bg color, in regards to FeatherDS theme switching
-  return graphs.dataSets.value.map((data: any ,i) => ({
+  emits('has-data', graphs.dataSets.value.length)
+  return graphs.dataSets.value.map((data: any, i) => ({
     label: data.metric.__name__,
     data: data.values.map((val: any) => val[1]),
     backgroundColor: bgColor[i],
@@ -122,7 +130,7 @@ const render = async (update?: boolean) => {
       chart.data = chartData.value
       chart.update()
     } else {
-      if(chartData.value.datasets.length) {
+      if (chartData.value.datasets.length) {
         const ctx: any = document.getElementById(`${props.graph.label}`)
         chart = new Chart(ctx, {
           type: 'line',
@@ -151,18 +159,18 @@ onMounted(async () => {
 
 <!-- TODO: make theme switching works in graphs -->
 <style scoped lang="scss">
-@use "@featherds/styles/themes/variables";
+@use '@featherds/styles/themes/variables';
 
 .container {
   position: relative;
   width: 30%;
-  min-width: 400px;
+  min-width: 380px;
   border: 1px solid var(variables.$secondary-text-on-surface);
   border-radius: 10px;
-  padding: var(variables.$spacing-l) var(variables.$spacing-l);
+  padding: var(variables.$spacing-m);
 }
 .canvas-wrapper {
-  height: 300px;
+  width: 100%;
 
   .download-icon {
     position: absolute;

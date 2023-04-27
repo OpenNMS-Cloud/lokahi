@@ -44,6 +44,13 @@ public final class Constants {
     public static final String NETWORK_IN_TOTAL_BYTES = "network_in_total_bytes";
     public static final String NETWORK_OUT_TOTAL_BYTES = "network_out_total_bytes";
 
+
+    public static final String NETWORK_IN_BITS = "network_in_bits";
+    public static final String NETWORK_OUT_BITS = "network_out_bits";
+
+    public static final String QUERY_FOR_TOTAL_NETWORK_IN_BITS = "irate(ifHCInOctets*8[4m])";
+    public static final String QUERY_FOR_TOTAL_NETWORK_OUT_BITS = "irate(ifHCOutOctets*8[4m])";
+
     // SNMP Specific Metric Names
     public static final String IF_IN_OCTETS = "ifInOctets";
     public static final String IF_OUT_OCTETS = "ifOutOctets";

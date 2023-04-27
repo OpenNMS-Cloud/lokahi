@@ -55,10 +55,6 @@ import java.util.Optional;
 
 import static org.opennms.horizon.server.service.metrics.normalization.Constants.AZURE_MONITOR_TYPE;
 import static org.opennms.horizon.server.service.metrics.normalization.Constants.AZURE_SCAN_TYPE;
-import static org.opennms.horizon.server.service.metrics.normalization.Constants.QUERY_FOR_TOTAL_NETWORK_BYTES_IN;
-import static org.opennms.horizon.server.service.metrics.normalization.Constants.QUERY_FOR_TOTAL_NETWORK_BYTES_OUT;
-import static org.opennms.horizon.server.service.metrics.normalization.Constants.TOTAL_NETWORK_BYTES_IN;
-import static org.opennms.horizon.server.service.metrics.normalization.Constants.TOTAL_NETWORK_BYTES_OUT;
 
 @Slf4j
 @GraphQLApi
@@ -108,38 +104,22 @@ public class TSDBMetricsService {
         Map<String, String> metricLabels = Optional.ofNullable(labels)
             .map(HashMap::new).orElseGet(HashMap::new);
 
-        String metricNameRegex = name;
         String tenantId = headerUtil.extractTenant(env);
-        if (TOTAL_NETWORK_BYTES_IN.equals(name) || TOTAL_NETWORK_BYTES_OUT.equals(name)) {
-            // TODO: Defaults to 24h with 1h steps but may need to align both step and range in the rate query
-            long end = System.currentTimeMillis() / 1000L;
-            long start = end - getDuration(timeRange, timeRangeUnit).orElse(Duration.ofHours(24)).getSeconds();
-            String rangeQuerySuffix = "&start=" + start + "&end=" + end +
-                "&step=1h";
-            if (TOTAL_NETWORK_BYTES_IN.equals(name)) {
-                String rangeQuery = QUERY_FOR_TOTAL_NETWORK_BYTES_IN + rangeQuerySuffix;
-                return getRangeMetrics(tenantId, rangeQuery);
-            }
-            String rangeQuery = QUERY_FOR_TOTAL_NETWORK_BYTES_OUT + rangeQuerySuffix;
-            return getRangeMetrics(tenantId, rangeQuery);
-        }
+
         //in the case of minion echo, there is no node information
         Optional<NodeDTO> nodeOpt = getNode(env, metricLabels);
         if (nodeOpt.isPresent()) {
             NodeDTO node = nodeOpt.get();
             setMonitorTypeByScanType(node, metricLabels);
-
-            metricNameRegex = normalizationService
-                .getQueryMetricRegex(node, name, metricLabels);
         }
 
         String queryString = queryService
-            .getQueryString(metricNameRegex, metricLabels, timeRange, timeRangeUnit);
+            .getQueryString(name, metricLabels, timeRange, timeRangeUnit);
 
-        Mono<TimeSeriesQueryResult> resultMono = getMetrics(tenantId, queryString);
-        return nodeOpt.map(nodeDTO -> resultMono.map(result ->
-                normalizationService.normalizeResults(name, result)))
-            .orElse(resultMono);
+        if (queryService.isRangeQuery(name)) {
+            return getRangeMetrics(tenantId, queryString);
+        }
+        return getMetrics(tenantId, queryString);
     }
 
     public static Optional<Duration> getDuration(Integer timeRange, TimeRangeUnit timeRangeUnit) {

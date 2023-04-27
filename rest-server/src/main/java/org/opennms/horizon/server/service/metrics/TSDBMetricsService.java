@@ -48,7 +48,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
-import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -122,19 +121,7 @@ public class TSDBMetricsService {
         return getMetrics(tenantId, queryString);
     }
 
-    public static Optional<Duration> getDuration(Integer timeRange, TimeRangeUnit timeRangeUnit) {
-        try {
-            if (TimeRangeUnit.DAY.value.equals(timeRangeUnit.value)) {
-                return Optional.of(Duration.parse("P" + timeRange + timeRangeUnit.value));
-            }
-            return Optional.of(Duration.parse("PT" + timeRange + timeRangeUnit.value));
-        } catch (Exception e) {
-            LOG.warn("Exception while parsing time range with timeRange {} in units {}", timeRange, timeRangeUnit, e);
-        }
-        return Optional.empty();
-    }
-
-
+    
     private Optional<NodeDTO> getNode(ResolutionEnvironment env, Map<String, String> metricLabels) {
         return metricLabelUtils.getNodeId(metricLabels).map(nodeId -> {
             String accessToken = headerUtil.getAuthHeader(env);

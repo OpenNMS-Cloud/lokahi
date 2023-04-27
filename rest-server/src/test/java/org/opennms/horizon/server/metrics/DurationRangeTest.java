@@ -31,7 +31,7 @@ package org.opennms.horizon.server.metrics;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.opennms.horizon.server.model.TimeRangeUnit;
-import org.opennms.horizon.server.service.metrics.TSDBMetricsService;
+import org.opennms.horizon.server.service.metrics.QueryService;
 
 import java.time.Duration;
 
@@ -41,13 +41,13 @@ public class DurationRangeTest {
     @Test
     public void testDuration() {
 
-        var duration = TSDBMetricsService.getDuration(24, TimeRangeUnit.HOUR);
+        var duration = QueryService.getDuration(24, TimeRangeUnit.HOUR);
         Assertions.assertEquals(Duration.ofHours(24), duration.get());
-        duration = TSDBMetricsService.getDuration(60, TimeRangeUnit.MINUTE);
+        duration = QueryService.getDuration(60, TimeRangeUnit.MINUTE);
         Assertions.assertEquals(Duration.ofMinutes(60), duration.get());
-        duration = TSDBMetricsService.getDuration(30, TimeRangeUnit.SECOND);
+        duration = QueryService.getDuration(30, TimeRangeUnit.SECOND);
         Assertions.assertEquals(Duration.ofSeconds(30), duration.get());
-        duration = TSDBMetricsService.getDuration(2, TimeRangeUnit.DAY);
+        duration = QueryService.getDuration(2, TimeRangeUnit.DAY);
         Assertions.assertEquals(Duration.ofDays(2), duration.get());
     }
 }

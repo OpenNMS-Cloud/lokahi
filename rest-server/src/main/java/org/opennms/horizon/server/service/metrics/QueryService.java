@@ -68,7 +68,7 @@ public class QueryService {
 
         if (isRangeQuery(metricName)) {
             long end = System.currentTimeMillis() / 1000L;
-            long start = end - TSDBMetricsService.getDuration(timeRange, timeRangeUnit).orElse(Duration.ofHours(24)).getSeconds();
+            long start = end - getDuration(timeRange, timeRangeUnit).orElse(Duration.ofHours(24)).getSeconds();
             if (TOTAL_NETWORK_BYTES_IN.equals(metricName) || TOTAL_NETWORK_BYTES_OUT.equals(metricName)) {
                 // TODO: Defaults to 24h with 1h steps but may need to align both step and range in the rate query
                 String rangeQuerySuffix = "&start=" + start + "&end=" + end +

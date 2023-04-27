@@ -34,10 +34,13 @@ import java.util.Map;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.ByteArraySerializer;
 import org.apache.kafka.common.serialization.StringSerializer;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.kafka.config.TopicBuilder;
 import org.springframework.kafka.core.DefaultKafkaProducerFactory;
+import org.springframework.kafka.core.KafkaAdmin;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
 
@@ -45,6 +48,9 @@ import org.springframework.kafka.core.ProducerFactory;
 public class KafkaConfig {
     @Value("${spring.kafka.bootstrap-servers}")
     private String bootStrapServers;
+
+    @Value("${kafka.topics.node}")
+    private String nodeTopic;
 
     @Bean("byteArrayTemplate")
     public KafkaTemplate<String, byte[]> createKafkaTemplate() {
@@ -55,5 +61,15 @@ public class KafkaConfig {
         props.put(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, false);
         ProducerFactory<String, byte[]> factory = new DefaultKafkaProducerFactory<>(props);
         return new KafkaTemplate<>(factory);
+    }
+
+    @Bean("topicCreator")
+    public KafkaAdmin.NewTopics topicCreator() {
+        return new KafkaAdmin.NewTopics(
+            TopicBuilder.name(nodeTopic)
+                .partitions(1) // Right now, Alerts is relying on these being delivered in order.
+                .replicas(1)
+                .build()
+        );
     }
 }

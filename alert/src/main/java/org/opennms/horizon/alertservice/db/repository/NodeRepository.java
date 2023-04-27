@@ -26,33 +26,16 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.alertservice.api;
+package org.opennms.horizon.alertservice.db.repository;
 
+import org.opennms.horizon.alertservice.db.entity.Alert;
+import org.opennms.horizon.alertservice.db.entity.Node;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
-import org.opennms.horizon.alerts.proto.Alert;
-import org.opennms.horizon.events.proto.Event;
-import org.opennms.horizon.inventory.dto.NodeDTO;
-
-public interface AlertService {
-    Optional<Alert> reduceEvent(Event e);
-
-    boolean deleteByIdAndTenantId(long id, String tenantId);
-
-    void deleteByTenantId(Alert alert, String tenantId);
-
-    Optional<Alert> acknowledgeByIdAndTenantId(long id, String tenantId);
-
-    Optional<Alert> unacknowledgeByIdAndTenantId(long id, String tenantId);
-
-    Optional<Alert> escalateByIdAndTenantId(long id, String tenantId);
-
-    Optional<Alert> clearByIdAndTenantId(long id, String tenantId);
-
-    void addListener(AlertLifecyleListener listener);
-
-    void removeListener(AlertLifecyleListener listener);
-
-    void saveNode(NodeDTO node);
+@Repository
+public interface NodeRepository extends JpaRepository<Node, Long> {
+    Optional<Node> findByIdAndTenantId(long id, String tenantId);
 }

@@ -26,33 +26,39 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.alertservice.api;
+package org.opennms.horizon.inventory.component;
 
-
-import java.util.Optional;
-
-import org.opennms.horizon.alerts.proto.Alert;
-import org.opennms.horizon.events.proto.Event;
+import jakarta.persistence.PostPersist;
+import jakarta.persistence.PostUpdate;
+import org.apache.kafka.clients.producer.ProducerRecord;
 import org.opennms.horizon.inventory.dto.NodeDTO;
+import org.opennms.horizon.inventory.model.Node;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.stereotype.Component;
 
-public interface AlertService {
-    Optional<Alert> reduceEvent(Event e);
+@Component
+public class NodeKafkaProducer {
+    @Value("${kafka.topics.node}")
+    private String topic;
 
-    boolean deleteByIdAndTenantId(long id, String tenantId);
+    @Autowired
+    @Qualifier("byteArrayTemplate")
+    private KafkaTemplate<String, byte[]> kafkaTemplate;
 
-    void deleteByTenantId(Alert alert, String tenantId);
+    @PostUpdate
+    @PostPersist
+    public void sendNode(Node node) {
+        // Not all fields are included in this proto, since the Alerts service doesn't care about all of them.
+        NodeDTO proto = NodeDTO.newBuilder()
+            .setId(node.getId())
+            .setTenantId(node.getTenantId())
+            .setNodeLabel(node.getNodeLabel())
+            .build();
 
-    Optional<Alert> acknowledgeByIdAndTenantId(long id, String tenantId);
-
-    Optional<Alert> unacknowledgeByIdAndTenantId(long id, String tenantId);
-
-    Optional<Alert> escalateByIdAndTenantId(long id, String tenantId);
-
-    Optional<Alert> clearByIdAndTenantId(long id, String tenantId);
-
-    void addListener(AlertLifecyleListener listener);
-
-    void removeListener(AlertLifecyleListener listener);
-
-    void saveNode(NodeDTO node);
+        var record = new ProducerRecord<String, byte[]>(topic, proto.toByteArray());
+        kafkaTemplate.send(record);
+    }
 }

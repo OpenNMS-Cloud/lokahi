@@ -26,33 +26,28 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.alertservice.api;
+package org.opennms.horizon.alertservice.db.entity;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 
-import java.util.Optional;
+@Getter
+@Setter
+@RequiredArgsConstructor
+@Entity
+public class Node {
+    @Id
+    private long id;
 
-import org.opennms.horizon.alerts.proto.Alert;
-import org.opennms.horizon.events.proto.Event;
-import org.opennms.horizon.inventory.dto.NodeDTO;
+    @Column(name = "tenant_id")
+    private String tenantId;
 
-public interface AlertService {
-    Optional<Alert> reduceEvent(Event e);
-
-    boolean deleteByIdAndTenantId(long id, String tenantId);
-
-    void deleteByTenantId(Alert alert, String tenantId);
-
-    Optional<Alert> acknowledgeByIdAndTenantId(long id, String tenantId);
-
-    Optional<Alert> unacknowledgeByIdAndTenantId(long id, String tenantId);
-
-    Optional<Alert> escalateByIdAndTenantId(long id, String tenantId);
-
-    Optional<Alert> clearByIdAndTenantId(long id, String tenantId);
-
-    void addListener(AlertLifecyleListener listener);
-
-    void removeListener(AlertLifecyleListener listener);
-
-    void saveNode(NodeDTO node);
+    @Column(name = "node_label")
+    private String nodeLabel;
 }

@@ -31,6 +31,7 @@ package org.opennms.horizon.inventory.model;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
@@ -45,6 +46,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import org.opennms.horizon.inventory.component.NodeKafkaProducer;
 import org.opennms.horizon.inventory.dto.MonitoredState;
 import org.opennms.taskset.contract.ScanType;
 
@@ -56,6 +58,7 @@ import java.util.List;
 @Setter
 @RequiredArgsConstructor
 @Entity
+@EntityListeners(NodeKafkaProducer.class)
 public class Node {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

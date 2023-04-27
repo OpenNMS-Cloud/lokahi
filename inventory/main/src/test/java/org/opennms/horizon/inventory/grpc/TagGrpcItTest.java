@@ -53,8 +53,11 @@ import org.opennms.horizon.inventory.repository.NodeRepository;
 import org.opennms.horizon.inventory.repository.TagRepository;
 import org.opennms.horizon.inventory.repository.discovery.active.AzureActiveDiscoveryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 
@@ -77,6 +80,10 @@ class TagGrpcItTest extends GrpcTestBase {
     private static final String TEST_TAG_NAME_2 = "tag-name-2";
 
     private TagServiceGrpc.TagServiceBlockingStub serviceStub;
+
+    @MockBean
+    @Qualifier("byteArrayTemplate")
+    private KafkaTemplate<String, byte[]> kafkaTemplate;
 
     @Autowired
     private TagRepository tagRepository;

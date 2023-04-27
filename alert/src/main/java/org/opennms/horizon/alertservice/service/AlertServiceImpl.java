@@ -35,8 +35,12 @@ import org.opennms.horizon.alerts.proto.Alert;
 import org.opennms.horizon.alerts.proto.Severity;
 import org.opennms.horizon.alertservice.api.AlertLifecyleListener;
 import org.opennms.horizon.alertservice.api.AlertService;
+import org.opennms.horizon.alertservice.db.entity.Node;
 import org.opennms.horizon.alertservice.db.repository.AlertRepository;
+import org.opennms.horizon.alertservice.db.repository.NodeRepository;
+import org.opennms.horizon.alertservice.mapper.NodeMapper;
 import org.opennms.horizon.events.proto.Event;
+import org.opennms.horizon.inventory.dto.NodeDTO;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -48,8 +52,10 @@ public class AlertServiceImpl implements AlertService {
 
     private final AlertEventProcessor alertEventProcessor;
     private final AlertRepository alertRepository;
+    private final NodeRepository nodeRepository;
     private final AlertListenerRegistry alertListenerRegistry;
     private final AlertMapper alertMapper;
+    private final NodeMapper nodeMapper;
 
     @Override
     public Optional<Alert> reduceEvent(Event e) {
@@ -150,5 +156,26 @@ public class AlertServiceImpl implements AlertService {
     @Override
     public void removeListener(AlertLifecyleListener listener) {
         alertListenerRegistry.addListener(listener);
+    }
+
+    @Override
+    public void saveNode(NodeDTO nodeDTO) {
+        Optional<Node> optNode = nodeRepository.findByIdAndTenantId(nodeDTO.getId(), nodeDTO.getTenantId());
+
+        optNode.ifPresentOrElse(node -> {
+            updateNode(node, nodeDTO);
+        }, () -> {
+            createNode(nodeDTO);
+        });
+    }
+
+    private void createNode(NodeDTO nodeDTO) {
+        Node node = nodeMapper.map(nodeDTO);
+        nodeRepository.save(node);
+    }
+
+    private void updateNode(Node node, NodeDTO nodeDTO) {
+        node.setNodeLabel(nodeDTO.getNodeLabel());
+        nodeRepository.save(node);
     }
 }

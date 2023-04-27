@@ -26,33 +26,13 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.alertservice.api;
+package org.opennms.horizon.alertservice.mapper;
 
-
-import java.util.Optional;
-
-import org.opennms.horizon.alerts.proto.Alert;
-import org.opennms.horizon.events.proto.Event;
+import org.mapstruct.Mapper;
+import org.opennms.horizon.alertservice.db.entity.Node;
 import org.opennms.horizon.inventory.dto.NodeDTO;
 
-public interface AlertService {
-    Optional<Alert> reduceEvent(Event e);
-
-    boolean deleteByIdAndTenantId(long id, String tenantId);
-
-    void deleteByTenantId(Alert alert, String tenantId);
-
-    Optional<Alert> acknowledgeByIdAndTenantId(long id, String tenantId);
-
-    Optional<Alert> unacknowledgeByIdAndTenantId(long id, String tenantId);
-
-    Optional<Alert> escalateByIdAndTenantId(long id, String tenantId);
-
-    Optional<Alert> clearByIdAndTenantId(long id, String tenantId);
-
-    void addListener(AlertLifecyleListener listener);
-
-    void removeListener(AlertLifecyleListener listener);
-
-    void saveNode(NodeDTO node);
+@Mapper(componentModel = "spring")
+public interface NodeMapper {
+    Node map(NodeDTO proto);
 }

@@ -49,21 +49,30 @@ import org.opennms.horizon.inventory.model.Node;
 import org.opennms.horizon.inventory.model.SnmpInterface;
 import org.opennms.horizon.shared.constants.GrpcConstants;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.test.context.ContextConfiguration;
 
 import io.grpc.Context;
 
-@DataJpaTest
+@SpringBootTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @ContextConfiguration(initializers = {SpringContextTestInitializer.class})
+@AutoConfigureObservability     // Make sure to include Metrics (for some reason they are disabled by default in the integration grey-box test)
 class IpInterfaceRepositoryTest {
 
     private static final int NUM_NODES = 10;
+
+    @MockBean
+    @Qualifier("byteArrayTemplate")
+    private KafkaTemplate<String, byte[]> kafkaTemplate;
 
     @Autowired
     private NodeRepository nodeRepository;

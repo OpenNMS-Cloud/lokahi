@@ -92,6 +92,8 @@ defineExpose({ openMetricsModal })
 <style scoped lang="scss">
 @use '@featherds/styles/themes/variables';
 @use '@featherds/styles/mixins/typography';
+@use '@/styles/mediaQueriesMixins.scss';
+
 .modal-content {
   max-width: 785px;
 }
@@ -103,13 +105,19 @@ defineExpose({ openMetricsModal })
 }
 .metrics {
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   flex-wrap: wrap;
   width: 100%;
+  @include mediaQueriesMixins.screen-md {
+    flex-direction: row;
+  }
   > div {
-    margin-right: var(variables.$spacing-l);
     margin-top: var(variables.$spacing-l);
+    margin-right: 0;
     display: flex;
+    @include mediaQueriesMixins.screen-md {
+      margin-right: var(variables.$spacing-l);
+    }
   }
   > div:nth-child(2n) {
     margin-right: 0;

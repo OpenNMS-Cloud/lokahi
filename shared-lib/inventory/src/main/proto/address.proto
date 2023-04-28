@@ -29,47 +29,48 @@ syntax = "proto3";
 
 import "google/protobuf/empty.proto";
 import "google/protobuf/wrappers.proto";
-import "address.proto";
 
 package opennms.inventory;
 option java_multiple_files = true;
 option java_package = "org.opennms.horizon.inventory.dto";
 
-message MonitoringLocationDTO {
+message AddressDTO {
   int64 id = 1;
-  string tenant_id = 2;
-  string location = 3;
-  GeoLocation geo_location = 4;
-  opennms.inventory.AddressDTO address = 5;
+  string address_line_1 = 2;
+  optional string address_line_2 = 3;
+  string city = 4;
+  string state = 5;
+  string postal_code = 6;
+  string country = 7;
 }
 
-message MonitoringLocationCreateDTO {
-  string tenant_id = 2;
-  string location = 3;
-  GeoLocation geo_location = 4;
-  opennms.inventory.AddressDTO address = 5;
+message AddressCreateDTO {
+  string address_line_1 = 1;
+  optional string address_line_2 = 2;
+  string city = 3;
+  string state = 4;
+  string postal_code = 5;
+  string country = 6;
 }
 
-message GeoLocation {
-  double longitude = 1;
-  double latitude = 2;
+message AddressUpdateDTO {
+  int64 id = 1;
+  optional string address_line_1 = 2;
+  optional string address_line_2 = 3;
+  optional string city = 4;
+  optional string state = 5;
+  optional string postal_code = 6;
+  optional string country = 7;
 }
 
-message MonitoringLocationList {
-  repeated MonitoringLocationDTO locations = 1;
+message AddressList {
+  repeated AddressDTO addresses = 1;
 }
 
-message IdList {
-  repeated google.protobuf.Int64Value ids = 1;
-}
-
-service MonitoringLocationService {
-  rpc listLocations(google.protobuf.Empty) returns (MonitoringLocationList) {};
-  rpc getLocationByName(google.protobuf.StringValue) returns (MonitoringLocationDTO) {};
-  rpc getLocationById(google.protobuf.Int64Value) returns (MonitoringLocationDTO) {};
-  rpc listLocationsByIds(IdList) returns (MonitoringLocationList) {};
-  rpc searchLocations(google.protobuf.StringValue) returns (MonitoringLocationList);
-  rpc createLocation(MonitoringLocationCreateDTO) returns (MonitoringLocationDTO) {};
-  rpc updateLocation(MonitoringLocationDTO) returns (MonitoringLocationDTO) {};
-  rpc deleteLocation(google.protobuf.Int64Value) returns (google.protobuf.BoolValue) {};
+service AddressService {
+  rpc getAddressById (google.protobuf.Int64Value) returns (AddressDTO);
+  rpc listAddresses (google.protobuf.Empty) returns (AddressList);
+  rpc createAddress (AddressCreateDTO) returns (AddressDTO);
+  rpc updateAddress (AddressUpdateDTO) returns (AddressDTO);
+  rpc deleteAddress (google.protobuf.Int64Value) returns (google.protobuf.BoolValue);
 }

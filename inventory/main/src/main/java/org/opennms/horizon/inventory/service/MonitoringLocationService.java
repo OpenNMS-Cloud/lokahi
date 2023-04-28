@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.opennms.horizon.inventory.dto.MonitoringLocationDTO;
 import org.opennms.horizon.inventory.mapper.MonitoringLocationMapper;
 import org.opennms.horizon.inventory.model.MonitoringLocation;
+import org.opennms.horizon.inventory.repository.AddressRepository;
 import org.opennms.horizon.inventory.repository.MonitoringLocationRepository;
 import org.springframework.stereotype.Service;
 
@@ -14,6 +15,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class MonitoringLocationService {
     private final MonitoringLocationRepository modelRepo;
+    private final AddressRepository addressRepo;
 
     private final MonitoringLocationMapper mapper;
 
@@ -52,7 +54,11 @@ public class MonitoringLocationService {
 
     public MonitoringLocationDTO upsert(MonitoringLocationDTO dto) {
         MonitoringLocation model = mapper.dtoToModel(dto);
-        return mapper.modelToDTO(modelRepo.save(model));
+        MonitoringLocation saved = modelRepo.save(model);
+        if(saved.getAddress() != null) {
+            addressRepo.findById(saved.getAddress().getId()).ifPresent(saved::setAddress);
+        }
+        return mapper.modelToDTO(saved);
     }
 
     public void delete(Long id, String tenantId) {

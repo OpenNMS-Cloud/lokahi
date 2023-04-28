@@ -1,12 +1,16 @@
 package org.opennms.horizon.inventory.service;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.opennms.horizon.inventory.dto.MonitoringLocationDTO;
 import org.opennms.horizon.inventory.mapper.MonitoringLocationMapper;
+import org.opennms.horizon.inventory.model.Address;
 import org.opennms.horizon.inventory.model.MonitoringLocation;
+import org.opennms.horizon.inventory.repository.AddressRepository;
 import org.opennms.horizon.inventory.repository.MonitoringLocationRepository;
 
 import java.util.ArrayList;
@@ -16,13 +20,15 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-@RunWith(org.mockito.junit.MockitoJUnitRunner.class)
-public class MonitoringLocationServiceTest {
+@ExtendWith(MockitoExtension.class)
+class MonitoringLocationServiceTest {
 
     @InjectMocks
     private MonitoringLocationService monitoringLocationService;
@@ -31,10 +37,18 @@ public class MonitoringLocationServiceTest {
     private MonitoringLocationRepository modelRepo;
 
     @Mock
+    private AddressRepository addressRepo;
+
+    @Mock
     private MonitoringLocationMapper mapper;
 
+    @AfterEach
+    void tearDown() {
+        verifyNoMoreInteractions(modelRepo, addressRepo, mapper);
+    }
+
     @Test
-    public void testFindByTenantId() {
+    void testFindByTenantId() {
         // Mock data
         String tenantId = "testTenantId";
         List<MonitoringLocation> monitoringLocationList = new ArrayList<>();
@@ -54,7 +68,7 @@ public class MonitoringLocationServiceTest {
     }
 
     @Test
-    public void testFindByLocationAndTenantId() {
+    void testFindByLocationAndTenantId() {
         // Mock data
         String location = "testLocation";
         String tenantId = "testTenantId";
@@ -73,7 +87,7 @@ public class MonitoringLocationServiceTest {
     }
 
     @Test
-    public void testGetByIdAndTenantId() {
+    void testGetByIdAndTenantId() {
         // Mock data
         long id = 1L;
         String tenantId = "testTenantId";
@@ -92,7 +106,7 @@ public class MonitoringLocationServiceTest {
     }
 
     @Test
-    public void testFindByLocationIds() {
+    void testFindByLocationIds() {
         // Mock data
         List<Long> ids = List.of(1L, 2L, 3L);
         List<MonitoringLocation> monitoringLocationList = new ArrayList<>();
@@ -113,7 +127,7 @@ public class MonitoringLocationServiceTest {
     }
 
     @Test
-    public void testFindAll() {
+    void testFindAll() {
         // Mock data
         List<MonitoringLocation> monitoringLocationList = new ArrayList<>();
         monitoringLocationList.add(new MonitoringLocation());
@@ -133,7 +147,7 @@ public class MonitoringLocationServiceTest {
     }
 
     @Test
-    public void testSearchLocationsByTenantId() {
+    void testSearchLocationsByTenantId() {
         // Mock data
         String tenantId = "testTenantId";
         String search = "testSearch";
@@ -155,7 +169,7 @@ public class MonitoringLocationServiceTest {
     }
 
     @Test
-    public void testUpsert() {
+    void testUpsertAddressIsNull() {
         // Mock data
         MonitoringLocationDTO monitoringLocationDTO = MonitoringLocationDTO.newBuilder().build();
         MonitoringLocation monitoringLocation = new MonitoringLocation();
@@ -174,7 +188,31 @@ public class MonitoringLocationServiceTest {
     }
 
     @Test
-    public void testDelete() {
+    void testUpsertAddressIsNotNull() {
+        // Mock data
+        MonitoringLocationDTO monitoringLocationDTO = MonitoringLocationDTO.newBuilder().build();
+        MonitoringLocation monitoringLocation = new MonitoringLocation();
+        Address address = new Address();
+        address.setId(1L);
+        monitoringLocation.setAddress(address);
+        when(mapper.dtoToModel(any(MonitoringLocationDTO.class))).thenReturn(monitoringLocation);
+        when(modelRepo.save(monitoringLocation)).thenReturn(monitoringLocation);
+        when(mapper.modelToDTO(any(MonitoringLocation.class))).thenReturn(monitoringLocationDTO);
+        when(addressRepo.findById(anyLong())).thenReturn(Optional.of(address));
+
+        // Test
+        MonitoringLocationDTO result = monitoringLocationService.upsert(monitoringLocationDTO);
+
+        // Assertions
+        assertNotNull(result);
+        verify(mapper, times(1)).dtoToModel(any(MonitoringLocationDTO.class));
+        verify(modelRepo, times(1)).save(monitoringLocation);
+        verify(mapper, times(1)).modelToDTO(any(MonitoringLocation.class));
+        verify(addressRepo, times(1)).findById(anyLong());
+    }
+
+    @Test
+    void testDelete() {
         // Mock data
         long id = 1L;
         String tenantId = "testTenantId";

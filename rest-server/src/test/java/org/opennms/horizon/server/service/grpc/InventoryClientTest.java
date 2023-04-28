@@ -46,7 +46,13 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.opennms.horizon.inventory.dto.AddressCreateDTO;
+import org.opennms.horizon.inventory.dto.AddressDTO;
+import org.opennms.horizon.inventory.dto.AddressList;
+import org.opennms.horizon.inventory.dto.AddressServiceGrpc;
+import org.opennms.horizon.inventory.dto.AddressUpdateDTO;
 import org.opennms.horizon.inventory.dto.IdList;
+import org.opennms.horizon.inventory.dto.MonitoringLocationCreateDTO;
 import org.opennms.horizon.inventory.dto.MonitoringLocationDTO;
 import org.opennms.horizon.inventory.dto.MonitoringLocationList;
 import org.opennms.horizon.inventory.dto.MonitoringLocationServiceGrpc;
@@ -82,6 +88,7 @@ public class InventoryClientTest {
     private static MonitoringLocationServiceGrpc.MonitoringLocationServiceImplBase mockLocationService;
     private static NodeServiceGrpc.NodeServiceImplBase mockNodeService;
     private static MonitoringSystemServiceGrpc.MonitoringSystemServiceImplBase mockSystemService;
+    private static AddressServiceGrpc.AddressServiceImplBase mockAddressService;
     private final String accessToken = "test-token";
 
     @BeforeAll
@@ -109,7 +116,7 @@ public class InventoryClientTest {
                 }
 
                 @Override
-                public void createLocation(MonitoringLocationDTO request, StreamObserver<MonitoringLocationDTO> responseObserver) {
+                public void createLocation(MonitoringLocationCreateDTO request, StreamObserver<MonitoringLocationDTO> responseObserver) {
                     responseObserver.onNext(MonitoringLocationDTO.newBuilder().build());
                     responseObserver.onCompleted();
                 }
@@ -163,10 +170,44 @@ public class InventoryClientTest {
                 }
             }));
 
+        mockAddressService = mock(AddressServiceGrpc.AddressServiceImplBase.class, delegatesTo(
+            new AddressServiceGrpc.AddressServiceImplBase() {
+                @Override
+                public void listAddresses(Empty request, StreamObserver<AddressList> responseObserver) {
+                    responseObserver.onNext(AddressList.newBuilder().build());
+                    responseObserver.onCompleted();
+                }
+
+                @Override
+                public void getAddressById(Int64Value request, StreamObserver<AddressDTO> responseObserver) {
+                    responseObserver.onNext(AddressDTO.newBuilder().build());
+                    responseObserver.onCompleted();
+                }
+
+                @Override
+                public void createAddress(AddressCreateDTO request, StreamObserver<AddressDTO> responseObserver) {
+                    responseObserver.onNext(AddressDTO.newBuilder().build());
+                    responseObserver.onCompleted();
+                }
+
+                @Override
+                public void updateAddress(AddressUpdateDTO request, StreamObserver<AddressDTO> responseObserver) {
+                    responseObserver.onNext(AddressDTO.newBuilder().build());
+                    responseObserver.onCompleted();
+                }
+
+                @Override
+                public void deleteAddress(Int64Value request, StreamObserver<BoolValue> responseObserver) {
+                    responseObserver.onNext(BoolValue.of(true));
+                    responseObserver.onCompleted();
+                }
+            }));
+
         grpcCleanUp.register(InProcessServerBuilder.forName("InventoryClientTest").intercept(mockInterceptor)
             .addService(mockLocationService)
             .addService(mockSystemService)
-            .addService(mockNodeService).directExecutor().build().start());
+            .addService(mockNodeService)
+            .addService(mockAddressService).directExecutor().build().start());
         ManagedChannel channel = grpcCleanUp.register(InProcessChannelBuilder.forName("InventoryClientTest").directExecutor().build());
         client = new InventoryClient(channel, 5000);
         client.initialStubs();
@@ -280,9 +321,9 @@ public class InventoryClientTest {
 
     @Test
     void testCreateLocation() {
-        MonitoringLocationDTO createDTO = MonitoringLocationDTO.newBuilder().setLocation("test-location").build();
+        MonitoringLocationCreateDTO createDTO = MonitoringLocationCreateDTO.newBuilder().setLocation("test-location").build();
         String methodName = new Object(){}.getClass().getEnclosingMethod().getName();
-        ArgumentCaptor<MonitoringLocationDTO> captor = ArgumentCaptor.forClass(MonitoringLocationDTO.class);
+        ArgumentCaptor<MonitoringLocationCreateDTO> captor = ArgumentCaptor.forClass(MonitoringLocationCreateDTO.class);
         MonitoringLocationDTO result = client.createLocation(createDTO, accessToken + methodName);
         assertThat(result).isNotNull();
         verify(mockLocationService).createLocation(captor.capture(), any());
@@ -310,6 +351,65 @@ public class InventoryClientTest {
         client.deleteLocation(locationId, accessToken + methodName);
         verify(mockLocationService).deleteLocation(captor.capture(), any());
         assertThat(captor.getValue().getValue()).isEqualTo(locationId);
+        assertThat(mockInterceptor.getAuthHeader()).isEqualTo(accessToken + methodName);
+    }
+
+    @Test
+    void createAddress() {
+//        AddressCreateDTO createDTO = AddressCreateDTO.newBuilder().build();
+        var createDTO = AddressCreateDTO.newBuilder().setCity("city").setState("state").setCountry("country").setAddressLine1("street").setAddressLine2("").setPostalCode("zipCode").build();
+        String methodName = new Object(){}.getClass().getEnclosingMethod().getName();
+        ArgumentCaptor<AddressCreateDTO> captor = ArgumentCaptor.forClass(AddressCreateDTO.class);
+        AddressDTO result = client.createAddress(createDTO, accessToken + methodName);
+        assertThat(result).isNotNull();
+        verify(mockAddressService).createAddress(captor.capture(), any());
+        assertThat(captor.getValue()).isEqualTo(createDTO);
+        assertThat(mockInterceptor.getAuthHeader()).isEqualTo(accessToken + methodName);
+    }
+
+    @Test
+    void updateAddress() {
+        AddressUpdateDTO updateDTO = AddressUpdateDTO.newBuilder().build();
+        String methodName = new Object(){}.getClass().getEnclosingMethod().getName();
+        ArgumentCaptor<AddressUpdateDTO> captor = ArgumentCaptor.forClass(AddressUpdateDTO.class);
+        AddressDTO result = client.updateAddress(updateDTO, accessToken + methodName);
+        assertThat(result).isNotNull();
+        verify(mockAddressService).updateAddress(captor.capture(), any());
+        assertThat(captor.getValue()).isEqualTo(updateDTO);
+        assertThat(mockInterceptor.getAuthHeader()).isEqualTo(accessToken + methodName);
+    }
+
+    @Test
+    void deleteAddress() {
+        long addressId = 1L;
+        String methodName = new Object(){}.getClass().getEnclosingMethod().getName();
+        ArgumentCaptor<Int64Value> captor = ArgumentCaptor.forClass(Int64Value.class);
+        client.deleteAddress(addressId, accessToken + methodName);
+        verify(mockAddressService).deleteAddress(captor.capture(), any());
+        assertThat(captor.getValue().getValue()).isEqualTo(addressId);
+        assertThat(mockInterceptor.getAuthHeader()).isEqualTo(accessToken + methodName);
+    }
+
+    @Test
+    void listAddresses() {
+        String methodName = new Object(){}.getClass().getEnclosingMethod().getName();
+        ArgumentCaptor<Empty> captor = ArgumentCaptor.forClass(Empty.class);
+        List<AddressDTO> result = client.listAddresses(accessToken + methodName);
+        assertThat(result).isEmpty();
+        verify(mockAddressService).listAddresses(captor.capture(), any());
+        assertThat(captor.getValue()).isNotNull();
+        assertThat(mockInterceptor.getAuthHeader()).isEqualTo(accessToken + methodName);
+    }
+
+    @Test
+void getAddressById() {
+        long addressId = 1L;
+        String methodName = new Object(){}.getClass().getEnclosingMethod().getName();
+        ArgumentCaptor<Int64Value> captor = ArgumentCaptor.forClass(Int64Value.class);
+        AddressDTO result = client.getAddressById(addressId, accessToken + methodName);
+        assertThat(result).isNotNull();
+        verify(mockAddressService).getAddressById(captor.capture(), any());
+        assertThat(captor.getValue().getValue()).isEqualTo(addressId);
         assertThat(mockInterceptor.getAuthHeader()).isEqualTo(accessToken + methodName);
     }
 

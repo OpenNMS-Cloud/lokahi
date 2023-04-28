@@ -26,15 +26,16 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.server.mapper;
+package org.opennms.horizon.server.model.inventory;
 
-import org.mapstruct.Mapper;
-import org.opennms.horizon.inventory.dto.MonitoringLocationDTO;
-import org.opennms.horizon.server.model.inventory.Location;
+import lombok.Getter;
+import lombok.Setter;
 
-@Mapper(componentModel = "spring")
-public interface LocationMapper {
-    Location protoToLocation(MonitoringLocationDTO locationDTO);
-    MonitoringLocationDTO locationToProto(Location location);
+@Getter
+@Setter
+public class MonitoringLocationCreate {
+    private String location;
+    private double longitude;
+    private double latitude;
+    private long addressId;
 }
-

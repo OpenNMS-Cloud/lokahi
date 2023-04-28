@@ -1,8 +1,8 @@
 /*******************************************************************************
  * This file is part of OpenNMS(R).
  *
- * Copyright (C) 2023 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
+ * Copyright (C) 2022 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
  *
@@ -26,51 +26,18 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.inventory.model;
+package org.opennms.horizon.server.model.inventory;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-
 
 @Getter
 @Setter
-@RequiredArgsConstructor
-@Entity
 public class MonitoringLocation {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
-
-    @NotNull
-    @Column(name = "tenant_id")
     private String tenantId;
-
-    @NotNull
-    @Column(name = "location")
     private String location;
-
-    @NotNull
-    @Column(name = "longitude")
     private double longitude;
-
-    @NotNull
-    @Column(name = "latitude")
     private double latitude;
-
-    @ManyToOne
-    @JoinColumn(name = "address_id", referencedColumnName = "id")
     private Address address;
-
-    @Column(name = "address_id", insertable = false, updatable = false)
-    private Long addressId;
-
 }

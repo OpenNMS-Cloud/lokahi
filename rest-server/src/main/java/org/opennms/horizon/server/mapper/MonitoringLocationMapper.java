@@ -26,22 +26,35 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.inventory.mapper;
+package org.opennms.horizon.server.mapper;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.opennms.horizon.inventory.dto.MonitoringLocationCreateDTO;
 import org.opennms.horizon.inventory.dto.MonitoringLocationDTO;
-import org.opennms.horizon.inventory.model.MonitoringLocation;
+import org.opennms.horizon.server.model.inventory.MonitoringLocation;
+import org.opennms.horizon.server.model.inventory.MonitoringLocationCreate;
+import org.opennms.horizon.server.model.inventory.MonitoringLocationUpdate;
 
 @Mapper(componentModel = "spring", uses = {AddressMapper.class})
 public interface MonitoringLocationMapper {
-    @Mapping(target = "latitude", source = "geoLocation.latitude")
-    @Mapping(target = "longitude", source = "geoLocation.longitude")
-    @Mapping(target = "addressId", source = "address.id")
-    MonitoringLocation dtoToModel(MonitoringLocationDTO dto);
+    @Mapping(target = "geoLocation.latitude", source = "latitude")
+    @Mapping(target = "geoLocation.longitude", source = "longitude")
+    @Mapping(target = "address.id", source = "addressId")
+    MonitoringLocationCreateDTO locationCreateToLocationCreateProto(MonitoringLocationCreate location);
 
     @Mapping(target = "geoLocation.latitude", source = "latitude")
     @Mapping(target = "geoLocation.longitude", source = "longitude")
-    @Mapping(target = "address", source = "address", defaultExpression = "java(AddressDTO.newBuilder().build())")
-    MonitoringLocationDTO modelToDTO(MonitoringLocation model);
+    @Mapping(target = "address.id", source = "addressId")
+    MonitoringLocationDTO locationUpdateToLocationProto(MonitoringLocationUpdate location);
+
+    @Mapping(target = "geoLocation.latitude", source = "latitude")
+    @Mapping(target = "geoLocation.longitude", source = "longitude")
+    MonitoringLocationDTO locationToLocationProto(MonitoringLocation location);
+
+    @Mapping(target = "latitude", source = "geoLocation.latitude")
+    @Mapping(target = "longitude", source = "geoLocation.longitude")
+    MonitoringLocation protoToLocation(MonitoringLocationDTO location);
+
 }
+

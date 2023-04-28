@@ -39,6 +39,10 @@ import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import org.hamcrest.Matchers;
 import org.opennms.horizon.inventory.cucumber.InventoryBackgroundHelper;
+import org.opennms.horizon.inventory.dto.AddressCreateDTO;
+import org.opennms.horizon.inventory.dto.AddressDTO;
+import org.opennms.horizon.inventory.dto.GeoLocation;
+import org.opennms.horizon.inventory.dto.MonitoringLocationCreateDTO;
 import org.opennms.horizon.inventory.dto.MonitoringLocationDTO;
 import org.opennms.horizon.inventory.dto.MonitoringLocationServiceGrpc;
 
@@ -47,6 +51,7 @@ import java.util.concurrent.TimeUnit;
 
 import static com.jayway.awaitility.Awaitility.await;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 public class MonitoringLocationStepDefinitions {
@@ -98,7 +103,7 @@ public class MonitoringLocationStepDefinitions {
 
     @When("[MonitoringLocation] Create Monitoring Location with name {string}")
     public void monitoringLocationCreateMonitoringLocation(String location) {
-        lastMonitoringLocation = backgroundHelper.getMonitoringLocationStub().createLocation(MonitoringLocationDTO.newBuilder().setLocation(location).setTenantId(backgroundHelper.getTenantId()).build());
+        lastMonitoringLocation = backgroundHelper.getMonitoringLocationStub().createLocation(MonitoringLocationCreateDTO.newBuilder().setLocation(location).setGeoLocation(GeoLocation.newBuilder().setLatitude(1.0).setLongitude(2.0).build()).setTenantId(backgroundHelper.getTenantId()).setAddress(AddressDTO.newBuilder().setId(1L).build()).build());
     }
 
     @Then("[MonitoringLocation] Monitoring Location is created")
@@ -166,7 +171,7 @@ public class MonitoringLocationStepDefinitions {
     @Then("[MonitoringLocation] Monitoring Location is deleted")
     public void monitoringLocationMonitoringLocationIsDeleted() {
         var monitoringLocationStub = backgroundHelper.getMonitoringLocationStub();
-        assertEquals(true, lastDelete.getValue());
+        assertTrue(lastDelete.getValue());
         await().pollInterval(5, TimeUnit.SECONDS)
             .atMost(30, TimeUnit.SECONDS).until(() ->
                     monitoringLocationStub.listLocations(Empty.newBuilder().build()).getLocationsList().size(),
@@ -216,5 +221,12 @@ public class MonitoringLocationStepDefinitions {
                     assertEquals(lastMonitoringLocation1, e.getMessage());
                 }
             });
+    }
+
+    @Given("[MonitoringLocation] Create address")
+    public void monitoringLocationCreateAddress() {
+        var address = AddressCreateDTO.newBuilder().setCity("city").setState("state").setCountry("country").setAddressLine1("street").setAddressLine2("").setPostalCode("zipCode").build();
+        var addressCreated = backgroundHelper.getAddressServiceBlockingStub().createAddress(address);
+        assertNotNull(addressCreated);
     }
 }

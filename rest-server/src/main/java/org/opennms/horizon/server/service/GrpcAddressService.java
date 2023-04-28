@@ -29,53 +29,51 @@
 package org.opennms.horizon.server.service;
 
 import io.leangen.graphql.annotations.GraphQLArgument;
-import io.leangen.graphql.annotations.GraphQLContext;
 import io.leangen.graphql.annotations.GraphQLEnvironment;
 import io.leangen.graphql.annotations.GraphQLMutation;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.execution.ResolutionEnvironment;
 import io.leangen.graphql.spqr.spring.annotations.GraphQLApi;
 import lombok.RequiredArgsConstructor;
-import org.dataloader.DataLoader;
-import org.opennms.horizon.server.config.DataLoaderFactory;
-import org.opennms.horizon.server.mapper.MinionMapper;
-import org.opennms.horizon.server.model.inventory.Minion;
-import org.opennms.horizon.server.model.inventory.MonitoringLocation;
+import org.opennms.horizon.server.mapper.AddressMapper;
+import org.opennms.horizon.server.model.inventory.Address;
+import org.opennms.horizon.server.model.inventory.AddressCreate;
+import org.opennms.horizon.server.model.inventory.AddressUpdate;
 import org.opennms.horizon.server.service.grpc.InventoryClient;
 import org.opennms.horizon.server.utils.ServerHeaderUtil;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.concurrent.CompletableFuture;
-
 @RequiredArgsConstructor
 @GraphQLApi
 @Service
-public class GrpcMinionService {
+public class GrpcAddressService {
     private final InventoryClient client;
-    private final MinionMapper mapper;
+    private final AddressMapper mapper;
     private final ServerHeaderUtil headerUtil;
 
     @GraphQLQuery
-    public Flux<Minion> findAllMinions(@GraphQLEnvironment ResolutionEnvironment env) {
-        return Flux.fromIterable(client.listMonitoringSystems(headerUtil.getAuthHeader(env)).stream().map(mapper::protoToMinion).toList());
+    public Flux<Address> findAllAddresses(@GraphQLEnvironment ResolutionEnvironment env) {
+        return Flux.fromIterable(client.listAddresses(headerUtil.getAuthHeader(env)).stream().map(mapper::protoToAddress).toList());
     }
-
     @GraphQLQuery
-    public Mono<Minion> findMinionById(@GraphQLArgument(name = "id") String id, @GraphQLEnvironment ResolutionEnvironment env) {
-        return Mono.just(mapper.protoToMinion(client.getSystemBySystemId(id, headerUtil.getAuthHeader(env))));
-    }
-
-    @GraphQLQuery
-    public CompletableFuture<MonitoringLocation> location(@GraphQLContext Minion minion, @GraphQLEnvironment ResolutionEnvironment env) {
-        DataLoader<DataLoaderFactory.Key, MonitoringLocation> locationDataLoader = env.dataFetchingEnvironment.getDataLoader(DataLoaderFactory.DATA_LOADER_LOCATION);
-        DataLoaderFactory.Key key = new DataLoaderFactory.Key(minion.getLocationId(), headerUtil.getAuthHeader(env));
-        return locationDataLoader.load(key);
+    public Mono<Address> findAddressById(@GraphQLArgument(name = "id") long id, @GraphQLEnvironment ResolutionEnvironment env) {
+        return Mono.just(mapper.protoToAddress(client.getAddressById(id, headerUtil.getAuthHeader(env))));
     }
 
     @GraphQLMutation
-    public Mono<Boolean> deleteMinion(@GraphQLArgument(name = "id") String id, @GraphQLEnvironment ResolutionEnvironment env) {
-        return Mono.just(client.deleteMonitoringSystem(id, headerUtil.getAuthHeader(env)));
+    public Mono<Address> createAddress(@GraphQLArgument(name="address") AddressCreate address, @GraphQLEnvironment ResolutionEnvironment env) {
+        return Mono.just(mapper.protoToAddress(client.createAddress(mapper.addressCreateToAddressCreateProto(address), headerUtil.getAuthHeader(env))));
+    }
+
+    @GraphQLMutation
+    public Mono<Address> updateAddress(@GraphQLArgument(name="address") AddressUpdate address, @GraphQLEnvironment ResolutionEnvironment env) {
+        return Mono.just(mapper.protoToAddress(client.updateAddress(mapper.addressUpdateToAddressUpdateProto(address), headerUtil.getAuthHeader(env))));
+    }
+
+    @GraphQLMutation
+    public Mono<Boolean> deleteAddress(@GraphQLArgument(name="id") long id, @GraphQLEnvironment ResolutionEnvironment env) {
+        return Mono.just(client.deleteAddress(id, headerUtil.getAuthHeader(env)));
     }
 }

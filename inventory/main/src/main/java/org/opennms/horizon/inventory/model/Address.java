@@ -33,44 +33,34 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-
 
 @Getter
 @Setter
 @RequiredArgsConstructor
 @Entity
-public class MonitoringLocation {
+public class Address {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
-    @NotNull
-    @Column(name = "tenant_id")
-    private String tenantId;
+    @Column(name = "address_line_1")
+    private String addressLine1;
 
-    @NotNull
-    @Column(name = "location")
-    private String location;
+    @Column(name = "address_line_2")
+    private String addressLine2;
 
-    @NotNull
-    @Column(name = "longitude")
-    private double longitude;
+    @Column(name = "city")
+    private String city;
 
-    @NotNull
-    @Column(name = "latitude")
-    private double latitude;
+    @Column(name = "state")
+    private String state;
 
-    @ManyToOne
-    @JoinColumn(name = "address_id", referencedColumnName = "id")
-    private Address address;
+    @Column(name = "postal_code")
+    private String postalCode;
 
-    @Column(name = "address_id", insertable = false, updatable = false)
-    private Long addressId;
-
+    @Column(name = "country")
+    private String country;
 }

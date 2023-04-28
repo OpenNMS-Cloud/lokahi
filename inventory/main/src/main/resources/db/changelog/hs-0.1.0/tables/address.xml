@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+    <changeSet id="0.1.0-address" author="bjanssens">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="address"/>
+            </not>
+        </preConditions>
+        <createTable tableName="address">
+            <column name="id" type="BIGINT" autoIncrement="true"/>
+            <column name="address_line_1" type="TEXT"/>
+            <column name="address_line_2" type="TEXT"/>
+            <column name="city" type="TEXT"/>
+            <column name="state" type="TEXT"/>
+            <column name="postal_code" type="TEXT"/>
+            <column name="country" type="TEXT"/>
+        </createTable>
+
+        <addPrimaryKey tableName="address" columnNames="id" constraintName="pk_address_id"/>
+
+        <addForeignKeyConstraint baseTableName="monitoring_location"
+                                 baseColumnNames="address_id"
+                                 constraintName="fk_monitoring_location_address_id"
+                                 referencedTableName="address"
+                                 referencedColumnNames="id"/>
+
+        <addUniqueConstraint tableName="address" columnNames="address_line_1, address_line_2, city, state, postal_code, country" constraintName="uk_address_line_1_address_line_2_city_state_postal_code_country"/>
+    </changeSet>
+</databaseChangeLog>

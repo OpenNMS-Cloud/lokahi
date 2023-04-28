@@ -27,4 +27,5 @@
     <include file="db/changelog/hs-0.1.0/tables/passive-discovery.xml" />
     <include file="db/changelog/hs-0.1.0/tables/discovery-inheritance.xml" />
     <include file="db/changelog/hs-0.1.0/tables/node-monitored-state.xml" />
+    <include file="db/changelog/hs-0.1.0/tables/address.xml" />
 </databaseChangeLog>

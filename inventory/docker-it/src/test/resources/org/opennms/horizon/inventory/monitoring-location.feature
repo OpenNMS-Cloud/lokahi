@@ -8,6 +8,7 @@ Feature: Monitoring Location
   Scenario: Happy Path
     Given [MonitoringLocation] Grpc TenantId "tenant-stream"
     Given [MonitoringLocation] Create Grpc Connection for Inventory
+    Given [MonitoringLocation] Create address
     When [MonitoringLocation] Clean up Monitoring Location
     Then [MonitoringLocation] Monitoring Location is cleaned up
     When [MonitoringLocation] Create Monitoring Location with name "xxx-LOC-xxx"

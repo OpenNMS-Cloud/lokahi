@@ -8,6 +8,8 @@
         <insert tableName="monitoring_location">
             <column name="location" value="Default"/>
             <column name="tenant_id" value="00000000-0000-0005-0000-000000000005"/>
+            <column name="longitude" value="0.0"/>
+            <column name="latitude" value="0.0"/>
         </insert>
     </changeSet>
 </databaseChangeLog>

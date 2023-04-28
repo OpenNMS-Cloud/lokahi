@@ -48,8 +48,14 @@ public final class Constants {
     public static final String NETWORK_IN_BITS = "network_in_bits";
     public static final String NETWORK_OUT_BITS = "network_out_bits";
 
-    public static final String QUERY_FOR_TOTAL_NETWORK_IN_BITS = "irate(ifHCInOctets*8[4m])";
-    public static final String QUERY_FOR_TOTAL_NETWORK_OUT_BITS = "irate(ifHCOutOctets*8[4m])";
+    public static final String QUERY_FOR_TOTAL_NETWORK_IN_BITS = "irate(ifHCInOctets[4m])*8";
+    public static final String QUERY_FOR_TOTAL_NETWORK_OUT_BITS = "irate(ifHCOutOctets[4m])*8";
+
+    public static final String BW_IN_PERCENTAGE = "bw_util_network_in";
+    public static final String BW_OUT_PERCENTAGE = "bw_util_network_out";
+
+    public static final String QUERY_FOR_BW_IN_UTIL_PERCENTAGE = "(irate(ifHCInOctets[4m])*8 ) / (ifHighSpeed *1000000) * 100";
+    public static final String QUERY_FOR_BW_OUT_UTIL_PERCENTAGE = "(irate(ifHCOutOctets[4m])*8 ) / (ifHighSpeed *1000000) * 100";
 
     // SNMP Specific Metric Names
     public static final String IF_IN_OCTETS = "ifInOctets";

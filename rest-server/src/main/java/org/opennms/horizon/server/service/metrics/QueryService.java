@@ -38,8 +38,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import static org.opennms.horizon.server.service.metrics.normalization.Constants.BW_IN_PERCENTAGE;
+import static org.opennms.horizon.server.service.metrics.normalization.Constants.BW_OUT_PERCENTAGE;
 import static org.opennms.horizon.server.service.metrics.normalization.Constants.NETWORK_IN_BITS;
 import static org.opennms.horizon.server.service.metrics.normalization.Constants.NETWORK_OUT_BITS;
+import static org.opennms.horizon.server.service.metrics.normalization.Constants.QUERY_FOR_BW_IN_UTIL_PERCENTAGE;
+import static org.opennms.horizon.server.service.metrics.normalization.Constants.QUERY_FOR_BW_OUT_UTIL_PERCENTAGE;
 import static org.opennms.horizon.server.service.metrics.normalization.Constants.QUERY_FOR_TOTAL_NETWORK_BYTES_IN;
 import static org.opennms.horizon.server.service.metrics.normalization.Constants.QUERY_FOR_TOTAL_NETWORK_BYTES_OUT;
 import static org.opennms.horizon.server.service.metrics.normalization.Constants.QUERY_FOR_TOTAL_NETWORK_IN_BITS;
@@ -85,6 +89,15 @@ public class QueryService {
                     return QUERY_FOR_TOTAL_NETWORK_IN_BITS + rangeQuerySuffix;
                 }
                 return QUERY_FOR_TOTAL_NETWORK_OUT_BITS + rangeQuerySuffix;
+            }
+
+            if (BW_IN_PERCENTAGE.equals(metricName) || BW_OUT_PERCENTAGE.equals(metricName)) {
+                String rangeQuerySuffix = "&start=" + start + "&end=" + end +
+                    "&step=2m";
+                if (BW_IN_PERCENTAGE.equals(metricName)) {
+                    return QUERY_FOR_BW_IN_UTIL_PERCENTAGE + rangeQuerySuffix;
+                }
+                return QUERY_FOR_BW_OUT_UTIL_PERCENTAGE + rangeQuerySuffix;
             }
         }
         String queryString = getQueryString(metricName, labels);

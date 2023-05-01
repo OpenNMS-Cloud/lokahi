@@ -215,6 +215,7 @@ OpenNMS:
         Memory: 250Mi
     PrivateRepoEnabled: false
 Postgres:
+  Enabled: true
   ServiceName: postgres
   Image: postgres:14.5-alpine
   ImagePullPolicy: IfNotPresent

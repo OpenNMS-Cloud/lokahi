@@ -155,6 +155,7 @@
         <zip4j.version>2.11.5</zip4j.version>
         <velocity.engine.version>2.3</velocity.engine.version>
         <azure-communication-email.version>1.0.0</azure-communication-email.version>
+        <io.hypersistence.verion>3.3.2</io.hypersistence.verion>
     </properties>
 
     <dependencyManagement>

@@ -31,45 +31,39 @@ package org.opennms.horizon.alertservice.db.entity;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.opennms.horizon.alertservice.service.routing.MonitoringPolicyKafkaProducer;
+import org.hibernate.annotations.Type;
 
-import jakarta.persistence.CascadeType;
+import io.hypersistence.utils.hibernate.type.array.ListArrayType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EntityListeners;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 
-@Entity
-@EntityListeners(MonitoringPolicyKafkaProducer.class)
-@Table(name = "monitoring_policy")
 @Getter
 @Setter
-public class MonitorPolicy {
+@Entity
+public class Tag {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column (name = "tenant_id", nullable = false)
+    @Column(name = "tenant_id")
     private String tenantId;
-    @Column(name = "policy_name")
+    @Column(name = "name")
     private String name;
-    private String memo;
-    @Column(name = "notify_email")
-    private Boolean notifyByEmail;
-    @Column(name = "notify_pagerduty")
-    private Boolean notifyByPagerDuty;
-    @Column(name = "notify_webhooks")
-    private Boolean notifyByWebhooks;
-    @Column(name = "notify_instruction")
-    private String notifyInstruction;
-    @OneToMany(mappedBy = "policy", orphanRemoval = true, cascade = CascadeType.ALL)
-    private List<PolicyRule> rules = new ArrayList<>();
-    @ManyToMany(mappedBy = "policies")
-    private List<Tag> tags = new ArrayList<>();
+    @Column(name = "node_ids", columnDefinition = "bigint[]")
+    @Type(ListArrayType.class)
+    private List<Long> nodeIds = new ArrayList<>();
+    @ManyToMany
+    @JoinTable(
+        name = "policy_tag",
+        joinColumns = @JoinColumn(name = "tag_id"),
+        inverseJoinColumns = @JoinColumn(name = "policy_id")
+    )
+    private List<MonitorPolicy> policies = new ArrayList<>();
 }

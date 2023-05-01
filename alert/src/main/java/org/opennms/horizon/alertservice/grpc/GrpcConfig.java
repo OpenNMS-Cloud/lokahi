@@ -97,10 +97,10 @@ public class GrpcConfig {
 
     @Bean(destroyMethod = "stopServer")
     public GrpcServerManager startServer(AlertGrpcService alertGrpc, AlertConfigurationGrpcService alertConfigurationGrpc,
-                                         MonitorPolicyGrpc policyGrpc,
+                                         MonitorPolicyGrpc policyGrpc, GrpcTagServiceImpl tagGrpc,
                                          AlertServerInterceptor interceptor) {
         GrpcServerManager manager = new GrpcServerManager(port, interceptor);
-        manager.startServer(alertGrpc, policyGrpc, alertConfigurationGrpc);
+        manager.startServer(alertGrpc, policyGrpc, alertConfigurationGrpc, tagGrpc);
         return manager;
     }
 }

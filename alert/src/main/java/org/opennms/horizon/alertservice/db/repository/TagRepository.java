@@ -26,28 +26,23 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.alertservice.mapper;
+package org.opennms.horizon.alertservice.db.repository;
 
-import org.mapstruct.BeanMapping;
-import org.mapstruct.CollectionMappingStrategy;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.Mappings;
-import org.mapstruct.NullValueCheckStrategy;
-import org.opennms.horizon.alerts.proto.MonitorPolicyProto;
-import org.opennms.horizon.alertservice.db.entity.MonitorPolicy;
+import java.util.List;
+import java.util.Optional;
 
-@Mapper(componentModel = "spring", uses ={PolicyRuleMapper.class},
-    collectionMappingStrategy = CollectionMappingStrategy.ADDER_PREFERRED)
-public interface MonitorPolicyMapper {
-    @Mappings({
-        @Mapping(target = "rulesList", source = "rules")
-    })
-    @BeanMapping(nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
-    MonitorPolicyProto map(MonitorPolicy policy);
+import org.opennms.horizon.alertservice.db.entity.Tag;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
-    @Mappings({
-        @Mapping(target = "rules", source = "rulesList")
-    })
-    MonitorPolicy map(MonitorPolicyProto proto);
+@Repository
+public interface TagRepository extends JpaRepository<Tag, Long> {
+    @Query("select tag from Tag tag join tag.policies policy where tag.tenantId =:tenantId and policy.id = :policyId")
+    List<Tag> findByTenantIdAndPolicyId(@Param("tenantId")String tenantID, @Param("policyId")Long policyId);
+
+    List<Tag> findByTenantId(String tenantId);
+
+    Optional<Tag> findByTenantIdAndName(String tenantId, String name);
 }

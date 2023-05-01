@@ -157,6 +157,16 @@
             <artifactId>alert-dto</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.opennms.horizon.shared</groupId>
+            <artifactId>horizon-common-tag</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.hypersistence</groupId>
+            <artifactId>hypersistence-utils-hibernate-60</artifactId>
+            <version>${io.hypersistence.verion}</version>
+        </dependency>
         <!-- test -->
 
         <dependency>

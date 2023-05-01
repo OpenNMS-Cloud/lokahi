@@ -73,6 +73,9 @@ OpenNMS:
     InternalGrpcPort: 8991
     IgniteClientPort: 10800
     Replicas: 1
+    DbName: "horizon_stream"
+    DbSchemaName: "minion_gateway"
+    DbHost: "postgres"
     Resources:
       Limits:
         Cpu: "1"
@@ -128,6 +131,9 @@ OpenNMS:
     Replicas: 1
     Port: 8080
     GrpcPort: 6565
+    DbName: "horizon_stream"
+    DbSchemaName: "inventory"
+    DbHost: "postgres"
     Resources:
       Limits:
         Cpu: "1"
@@ -144,6 +150,9 @@ OpenNMS:
     Replicas: 1
     Port: 8080
     GrpcPort: 6565
+    DbName: "horizon_stream"
+    DbSchemaName: "alert"
+    DbHost: "postgres"
     Resources:
       Limits:
         Cpu: "1"
@@ -158,6 +167,9 @@ OpenNMS:
     ImagePullPolicy: IfNotPresent
     Replicas: 1
     GrpcPort: 6565
+    DbName: "horizon_stream"
+    DbSchemaName: "notification"
+    DbHost: "postgres"
     Resources:
       Limits:
         Cpu: "1"
@@ -173,6 +185,9 @@ OpenNMS:
     Replicas: 1
     Port: 8080
     GrpcPort: 6565
+    DbName: "horizon_stream"
+    DbSchemaName: "events"
+    DbHost: "postgres"
     Resources:
       Limits:
         Cpu: "1"
@@ -188,6 +203,9 @@ OpenNMS:
     Replicas: 1
     Port: 8080
     GrpcPort: 6565
+    DbName: "horizon_stream"
+    DbSchemaName: "datachoices"
+    DbHost: "postgres"
     Resources:
       Limits:
         Cpu: "1"
@@ -211,10 +229,13 @@ OpenNMS:
         Memory: 250Mi
     PrivateRepoEnabled: false
 Postgres:
+  Enabled: true
   ServiceName: postgres
   Image: postgres:14.5-alpine
   ImagePullPolicy: IfNotPresent
   Replicas: 1
+  DbName: "horizon_stream"
+  DbHost: "postgres"
   AdminPassword: notset
   OpenNMSPassword: notset
   KeycloakPassword: notset
@@ -225,6 +246,7 @@ Postgres:
   MinionGatewayPassword: notset
   NotificationPassword: notset
   GrafanaPassword: notset
+  Pvc: true 
   VolumeSize: 10Gi
 Keycloak:
   Path: /auth
@@ -236,6 +258,9 @@ Keycloak:
   HostnameAdminUrl: ~
   Replicas: 1
   ServiceName: onms-keycloak
+  DbSchemaName: "keycloak"
+  DbName: "horizon_stream"
+  DbHost: "postgres"
   Resources:
     Limits:
       Cpu: "1"

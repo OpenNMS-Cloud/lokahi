@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package opennms.inventory;
+option java_multiple_files = true;
+option java_package = "org.opennms.horizon.shared.common.tag.proto";
+
+enum Operation {
+  ASSIGN_TAG = 0;
+  REMOVE_TAG = 1;
+}
+
+message TagOperationProto {
+  Operation operation = 1;
+  string tenant_id = 2;
+  string tag_name = 3;
+  repeated int64 node_id = 4;
+}
+
+message TagOperationList {
+  repeated TagOperationProto tags = 1;
+}

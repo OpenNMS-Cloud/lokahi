@@ -9,12 +9,12 @@
     "generate": "graphql-codegen --config codegen.yml"
   },
   "dependencies": {
-    "@graphql-yoga/node": "^2.12.0",
-    "casual": "^1.6.2"
+    "casual": "^1.6.2",
+    "graphql-yoga": "^3.9.1"
   },
   "devDependencies": {
-    "@graphql-codegen/cli": "^2.8.0",
-    "nodemon": "^2.0.19",
+    "@graphql-codegen/cli": "^3.3.1",
+    "nodemon": "^2.0.22",
     "ts-node": "^10.8.2"
   }
 }

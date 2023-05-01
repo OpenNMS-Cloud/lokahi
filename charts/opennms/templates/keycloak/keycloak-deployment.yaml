@@ -64,9 +64,9 @@ spec:
             - name: KC_DB_SCHEMA
               value: "{{ .Values.Keycloak.DbSchemaName }}"
             - name: KC_DB_URL_DATABASE
-              value: "{{ .Values.Postgres.DbName }}"
+              value: "{{ .Values.Keycloak.DbName }}"
             - name: KC_DB_URL_HOST
-              value: "{{ .Values.Postgres.DbHost }}"
+              value: "{{ .Values.Keycloak.DbHost }}"
             - name: KC_DB_USERNAME
               valueFrom:
                 secretKeyRef:

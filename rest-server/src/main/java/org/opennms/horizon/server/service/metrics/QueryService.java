@@ -48,6 +48,7 @@ import static org.opennms.horizon.server.service.metrics.normalization.Constants
 import static org.opennms.horizon.server.service.metrics.normalization.Constants.QUERY_FOR_TOTAL_NETWORK_BYTES_OUT;
 import static org.opennms.horizon.server.service.metrics.normalization.Constants.QUERY_FOR_TOTAL_NETWORK_IN_BITS;
 import static org.opennms.horizon.server.service.metrics.normalization.Constants.QUERY_FOR_TOTAL_NETWORK_OUT_BITS;
+import static org.opennms.horizon.server.service.metrics.normalization.Constants.QUERY_PREFIX;
 import static org.opennms.horizon.server.service.metrics.normalization.Constants.TOTAL_NETWORK_BYTES_IN;
 import static org.opennms.horizon.server.service.metrics.normalization.Constants.TOTAL_NETWORK_BYTES_OUT;
 
@@ -64,7 +65,8 @@ public class QueryService {
 
     public boolean isRangeQuery(String metricName) {
         return TOTAL_NETWORK_BYTES_IN.equals(metricName) || TOTAL_NETWORK_BYTES_OUT.equals(metricName)
-            || NETWORK_IN_BITS.equals(metricName) || NETWORK_OUT_BITS.equals(metricName);
+            || NETWORK_IN_BITS.equals(metricName) || NETWORK_OUT_BITS.equals(metricName)
+            || BW_IN_PERCENTAGE.equals(metricName) || BW_OUT_PERCENTAGE.equals(metricName);
     }
 
     public String getQueryString(String metricName, Map<String, String> labels,
@@ -78,26 +80,26 @@ public class QueryService {
                 String rangeQuerySuffix = "&start=" + start + "&end=" + end +
                     "&step=1h";
                 if (TOTAL_NETWORK_BYTES_IN.equals(metricName)) {
-                    return QUERY_FOR_TOTAL_NETWORK_BYTES_IN + rangeQuerySuffix;
+                    return QUERY_PREFIX + QUERY_FOR_TOTAL_NETWORK_BYTES_IN + rangeQuerySuffix;
                 }
-                return QUERY_FOR_TOTAL_NETWORK_BYTES_OUT + rangeQuerySuffix;
+                return QUERY_PREFIX + QUERY_FOR_TOTAL_NETWORK_BYTES_OUT + rangeQuerySuffix;
             }
             if (NETWORK_OUT_BITS.equals(metricName) || NETWORK_IN_BITS.equals(metricName)) {
                 String rangeQuerySuffix = "&start=" + start + "&end=" + end +
                     "&step=2m";
                 if (NETWORK_IN_BITS.equals(metricName)) {
-                    return QUERY_FOR_TOTAL_NETWORK_IN_BITS + rangeQuerySuffix;
+                    return QUERY_PREFIX + QUERY_FOR_TOTAL_NETWORK_IN_BITS + rangeQuerySuffix;
                 }
-                return QUERY_FOR_TOTAL_NETWORK_OUT_BITS + rangeQuerySuffix;
+                return QUERY_PREFIX + QUERY_FOR_TOTAL_NETWORK_OUT_BITS + rangeQuerySuffix;
             }
 
             if (BW_IN_PERCENTAGE.equals(metricName) || BW_OUT_PERCENTAGE.equals(metricName)) {
                 String rangeQuerySuffix = "&start=" + start + "&end=" + end +
                     "&step=2m";
                 if (BW_IN_PERCENTAGE.equals(metricName)) {
-                    return QUERY_FOR_BW_IN_UTIL_PERCENTAGE + rangeQuerySuffix;
+                    return QUERY_PREFIX + QUERY_FOR_BW_IN_UTIL_PERCENTAGE + rangeQuerySuffix;
                 }
-                return QUERY_FOR_BW_OUT_UTIL_PERCENTAGE + rangeQuerySuffix;
+                return QUERY_PREFIX + QUERY_FOR_BW_OUT_UTIL_PERCENTAGE + rangeQuerySuffix;
             }
         }
         String queryString = getQueryString(metricName, labels);

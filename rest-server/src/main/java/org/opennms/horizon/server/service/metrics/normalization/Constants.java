@@ -45,6 +45,7 @@ public final class Constants {
     public static final String NETWORK_OUT_TOTAL_BYTES = "network_out_total_bytes";
 
 
+    public static final String QUERY_PREFIX = "query=";
     public static final String NETWORK_IN_BITS = "network_in_bits";
     public static final String NETWORK_OUT_BITS = "network_out_bits";
 
@@ -54,8 +55,8 @@ public final class Constants {
     public static final String BW_IN_PERCENTAGE = "bw_util_network_in";
     public static final String BW_OUT_PERCENTAGE = "bw_util_network_out";
 
-    public static final String QUERY_FOR_BW_IN_UTIL_PERCENTAGE = "(irate(ifHCInOctets[4m])*8 ) / (ifHighSpeed *1000000) * 100";
-    public static final String QUERY_FOR_BW_OUT_UTIL_PERCENTAGE = "(irate(ifHCOutOctets[4m])*8 ) / (ifHighSpeed *1000000) * 100";
+    public static final String QUERY_FOR_BW_IN_UTIL_PERCENTAGE = "(irate(ifHCInOctets[4m])*8) / (ifHighSpeed *1000000) * 100 unless ifHighSpeed == 0";
+    public static final String QUERY_FOR_BW_OUT_UTIL_PERCENTAGE = "(irate(ifHCOutOctets[4m])*8) / (ifHighSpeed *1000000) * 100 unless ifHighSpeed == 0";
 
     // SNMP Specific Metric Names
     public static final String IF_IN_OCTETS = "ifInOctets";
@@ -65,6 +66,6 @@ public final class Constants {
     // Total Network
     public static final String TOTAL_NETWORK_BYTES_IN = "total_network_bytes_in";
     public static final String TOTAL_NETWORK_BYTES_OUT = "total_network_bytes_out";
-    public static final String QUERY_FOR_TOTAL_NETWORK_BYTES_IN = "query=sum(rate(ifHCInOctets[1h])*3600)";
-    public static final String QUERY_FOR_TOTAL_NETWORK_BYTES_OUT = "query=sum(rate(ifHCOutOctets[1h])*3600)";
+    public static final String QUERY_FOR_TOTAL_NETWORK_BYTES_IN = "sum(rate(ifHCInOctets[1h])*3600)";
+    public static final String QUERY_FOR_TOTAL_NETWORK_BYTES_OUT = "sum(rate(ifHCOutOctets[1h])*3600)";
 }

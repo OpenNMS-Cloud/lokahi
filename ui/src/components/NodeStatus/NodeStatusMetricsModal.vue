@@ -36,13 +36,13 @@
 </template>
 
 <script setup lang="ts">
-import { TimeRangeUnit } from '@/types/graphql'
+import { TimeRangeUnit, IpInterface } from '@/types/graphql'
 import useModal from '@/composables/useModal'
 import Close from '@featherds/icon/navigation/Cancel'
 import { useGraphsQueries } from '@/store/Queries/graphsQueries'
 import { GraphProps } from '@/types/graphs'
 import { useRoute } from 'vue-router'
-//v-if="hasMetricInfo"
+
 const route = useRoute()
 
 const store = useGraphsQueries()
@@ -80,7 +80,7 @@ onMounted(async () => {
   await store.fetchNode()
 })
 
-const openMetricsModal = (interfaceInfo: any) => {
+const openMetricsModal = (interfaceInfo: IpInterface) => {
   interfaceName.value = interfaceInfo.ipAddress
   instance.value = interfaceInfo.ipAddress
   openModal()

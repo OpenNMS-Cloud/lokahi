@@ -47,8 +47,8 @@ const hasMetricInfo = ref(false)
 
 const bytesInOut = computed<GraphProps>(() => {
   return {
-    label: 'Bytes Inbound / Outbound',
-    metrics: ['network_in_total_bytes', 'network_out_total_bytes'],
+    label: 'Bits Inbound / Outbound',
+    metrics: ['network_in_bits', 'network_out_bits'],
     monitor: 'SNMP',
     nodeId: route.params.id as string,
     instance: instance.value,

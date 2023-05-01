@@ -50,8 +50,8 @@ const nodeLatency = computed<GraphProps>(() => {
 
 const bytesIn = computed<GraphProps>(() => {
   return {
-    label: 'Bytes Inbound',
-    metrics: ['network_in_total_bytes'],
+    label: 'Bits Inbound',
+    metrics: ['network_in_bits'],
     monitor: 'SNMP',
     nodeId: route.params.id as string,
     instance: instance.value,
@@ -62,8 +62,8 @@ const bytesIn = computed<GraphProps>(() => {
 
 const bytesOut = computed<GraphProps>(() => {
   return {
-    label: 'Bytes Outbound',
-    metrics: ['network_out_total_bytes'],
+    label: 'Bits Outbound',
+    metrics: ['network_out_bits'],
     monitor: 'SNMP',
     nodeId: route.params.id as string,
     instance: instance.value,
@@ -74,8 +74,8 @@ const bytesOut = computed<GraphProps>(() => {
 
 const bytesInOut = computed<GraphProps>(() => {
   return {
-    label: 'Bytes Inbound / Outbound',
-    metrics: ['network_in_total_bytes', 'network_out_total_bytes'],
+    label: 'Bits Inbound / Outbound',
+    metrics: ['network_in_bits', 'network_out_bits'],
     monitor: 'SNMP',
     nodeId: route.params.id as string,
     instance: instance.value,

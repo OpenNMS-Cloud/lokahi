@@ -16,10 +16,6 @@
         </div>
         <div class="metrics">
           <LineGraph
-            :graph="nodeLatency"
-            @has-data="(hasData) => (hasMetricInfo = hasData)"
-          />
-          <LineGraph
             :graph="bytesInOut"
             @has-data="(hasData) => (hasMetricInfo = hasData)"
           />
@@ -28,7 +24,7 @@
           v-if="!hasMetricInfo"
           class="empty"
         >
-          No metric data at the moment for this interface.
+          Currently no data available.
         </div>
       </div>
     </template>
@@ -39,30 +35,15 @@
 import { TimeRangeUnit, IpInterface } from '@/types/graphql'
 import useModal from '@/composables/useModal'
 import Close from '@featherds/icon/navigation/Cancel'
-import { useGraphsQueries } from '@/store/Queries/graphsQueries'
 import { GraphProps } from '@/types/graphs'
 import { useRoute } from 'vue-router'
 
 const route = useRoute()
-
-const store = useGraphsQueries()
-
 const { openModal, closeModal, isVisible } = useModal()
 
 const interfaceName = ref()
 const instance = ref()
 const hasMetricInfo = ref(false)
-const nodeLatency = computed<GraphProps>(() => {
-  return {
-    label: 'ICMP Response Time',
-    metrics: ['response_time_msec'],
-    monitor: 'ICMP',
-    nodeId: route.params.id as string,
-    instance: instance.value,
-    timeRange: 10,
-    timeRangeUnit: TimeRangeUnit.Minute
-  }
-})
 
 const bytesInOut = computed<GraphProps>(() => {
   return {
@@ -74,10 +55,6 @@ const bytesInOut = computed<GraphProps>(() => {
     timeRange: 10,
     timeRangeUnit: TimeRangeUnit.Minute
   }
-})
-
-onMounted(async () => {
-  await store.fetchNode()
 })
 
 const openMetricsModal = (interfaceInfo: IpInterface) => {

@@ -1,3 +1,4 @@
+{{- if .Values.Postgres.Enabled }}
 kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
@@ -11,3 +12,4 @@ spec:
   resources:
     requests:
       storage: {{ .Values.Postgres.VolumeSize }}
+{{- end }}

@@ -1,9 +1,8 @@
 version: '3.5'
 
 services:
-  minion-localnet:
-    image: ghcr.io/opennms-cloud/horizon-stream-minion:29c1f32202546062db3a02ee3e3a617bc79a2e7e
-    #image: docker.io/opennms/horizon-stream-minion:v0.0.27-dev
+  minion-local:
+    image: docker.io/opennms/horizon-stream-minion:v0.0.32-dev
     # If you have not downloaded latest, then use latest, but if you have it
     # downloaded, use specific versions to trigger new download. See
     # https://hub.docker.com/r/opennms/horizon-stream-minion/tags for recent
@@ -16,7 +15,7 @@ services:
       MINION_LOCATION: 'minion-b-loc'
       USE_KUBERNETES: false
       IGNITE_SERVER_ADDRESSES: localhost
-      MINION_GATEWAY_HOST: 2738fe58-fb1f-4598-b8c8-600b096a644e-i.btominion-prod.oaaslite.opennms.com
+      MINION_GATEWAY_HOST: minion.onmshs
       MINION_GATEWAY_PORT: 443
       MINION_GATEWAY_TLS: 'true'
         #MINION_GATEWAY_HOST: host.docker.internal

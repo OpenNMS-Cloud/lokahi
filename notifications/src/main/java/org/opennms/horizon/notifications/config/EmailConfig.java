@@ -8,6 +8,7 @@ import com.azure.core.http.policy.RetryPolicy;
 import org.opennms.horizon.notifications.api.email.ACSEmailAPI;
 import org.opennms.horizon.notifications.api.email.EmailAPI;
 import org.opennms.horizon.notifications.api.email.SmtpEmailAPI;
+import org.opennms.horizon.notifications.exceptions.NotificationAPIRetryableException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -16,6 +17,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.retry.support.RetryTemplate;
 
 import java.time.Duration;
 
@@ -29,6 +31,9 @@ public class EmailConfig {
 
     @Value("${horizon.email.retry.maxDelay:60000}")
     private int maxRetryDelay;
+
+    @Value("${horizon.email.retry.multiplier:2}")
+    private int retryMultiplier;
 
     @Value("${horizon.email.retry.max:10}")
     private int maxNumberOfRetries;
@@ -59,6 +64,15 @@ public class EmailConfig {
     @Bean
     @ConditionalOnMissingBean(EmailAPI.class)
     public EmailAPI smtpEmailAPI(JavaMailSender jms) {
-        return new SmtpEmailAPI(jms);
+        return new SmtpEmailAPI(jms, emailRetryTemplate());
+    }
+
+    private RetryTemplate emailRetryTemplate() {
+        // Default exponential backoff, retries after 1s, 3s, 7s, 15s.. At most 60s delay by default.
+        return RetryTemplate.builder()
+            .retryOn(NotificationAPIRetryableException.class)
+            .maxAttempts(maxNumberOfRetries)
+            .exponentialBackoff(retryDelay, retryMultiplier, maxRetryDelay)
+            .build();
     }
 }

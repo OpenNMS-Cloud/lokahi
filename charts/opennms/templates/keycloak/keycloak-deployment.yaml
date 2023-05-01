@@ -62,7 +62,7 @@ spec:
               value: "{{ .Values.Keycloak.HostnameAdminUrl }}"
             {{- end }}
             - name: KC_DB_SCHEMA
-              value: "{{ .Values.Postgres.DbSchemaName }}"
+              value: "{{ .Values.Keycloak.DbSchemaName }}"
             - name: KC_DB_URL_DATABASE
               value: "{{ .Values.Postgres.DbName }}"
             - name: KC_DB_URL_HOST

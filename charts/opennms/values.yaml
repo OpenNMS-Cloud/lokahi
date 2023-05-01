@@ -221,7 +221,6 @@ Postgres:
   ImagePullPolicy: IfNotPresent
   Replicas: 1
   DbName: "horizon_stream"
-  DbSchemaName: "keycloak"
   DbHost: "postgres"
   AdminPassword: notset
   OpenNMSPassword: notset
@@ -245,6 +244,7 @@ Keycloak:
   HostnameAdminUrl: ~
   Replicas: 1
   ServiceName: onms-keycloak
+  DbSchemaName: "keycloak"
   Resources:
     Limits:
       Cpu: "1"

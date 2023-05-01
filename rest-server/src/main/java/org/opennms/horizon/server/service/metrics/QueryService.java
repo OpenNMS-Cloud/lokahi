@@ -46,7 +46,6 @@ import static org.opennms.horizon.server.service.metrics.normalization.Constants
 import static org.opennms.horizon.server.service.metrics.normalization.Constants.QUERY_FOR_BW_OUT_UTIL_PERCENTAGE;
 import static org.opennms.horizon.server.service.metrics.normalization.Constants.QUERY_FOR_TOTAL_NETWORK_BYTES_IN;
 import static org.opennms.horizon.server.service.metrics.normalization.Constants.QUERY_FOR_TOTAL_NETWORK_BYTES_OUT;
-import static org.opennms.horizon.server.service.metrics.normalization.Constants.QUERY_FOR_TOTAL_NETWORK_IN_BITS;
 import static org.opennms.horizon.server.service.metrics.normalization.Constants.QUERY_FOR_TOTAL_NETWORK_OUT_BITS;
 import static org.opennms.horizon.server.service.metrics.normalization.Constants.QUERY_PREFIX;
 import static org.opennms.horizon.server.service.metrics.normalization.Constants.TOTAL_NETWORK_BYTES_IN;
@@ -75,31 +74,24 @@ public class QueryService {
         if (isRangeQuery(metricName)) {
             long end = System.currentTimeMillis() / 1000L;
             long start = end - getDuration(timeRange, timeRangeUnit).orElse(Duration.ofHours(24)).getSeconds();
-            if (TOTAL_NETWORK_BYTES_IN.equals(metricName) || TOTAL_NETWORK_BYTES_OUT.equals(metricName)) {
-                // TODO: Defaults to 24h with 1h steps but may need to align both step and range in the rate query
-                String rangeQuerySuffix = "&start=" + start + "&end=" + end +
-                    "&step=1h";
-                if (TOTAL_NETWORK_BYTES_IN.equals(metricName)) {
+            String rangeQuerySuffixForTotal = "&start=" + start + "&end=" + end +
+                "&step=1h";
+            String rangeQuerySuffix = "&start=" + start + "&end=" + end +
+                "&step=2m";
+            switch (metricName) {
+                case TOTAL_NETWORK_BYTES_IN:
+                    return QUERY_PREFIX + QUERY_FOR_TOTAL_NETWORK_BYTES_IN + rangeQuerySuffixForTotal;
+                case TOTAL_NETWORK_BYTES_OUT:
+                    return QUERY_PREFIX + QUERY_FOR_TOTAL_NETWORK_BYTES_OUT + rangeQuerySuffixForTotal;
+                case NETWORK_IN_BITS:
                     return QUERY_PREFIX + QUERY_FOR_TOTAL_NETWORK_BYTES_IN + rangeQuerySuffix;
-                }
-                return QUERY_PREFIX + QUERY_FOR_TOTAL_NETWORK_BYTES_OUT + rangeQuerySuffix;
-            }
-            if (NETWORK_OUT_BITS.equals(metricName) || NETWORK_IN_BITS.equals(metricName)) {
-                String rangeQuerySuffix = "&start=" + start + "&end=" + end +
-                    "&step=2m";
-                if (NETWORK_IN_BITS.equals(metricName)) {
-                    return QUERY_PREFIX + QUERY_FOR_TOTAL_NETWORK_IN_BITS + rangeQuerySuffix;
-                }
-                return QUERY_PREFIX + QUERY_FOR_TOTAL_NETWORK_OUT_BITS + rangeQuerySuffix;
-            }
+                case NETWORK_OUT_BITS:
+                    return QUERY_PREFIX + QUERY_FOR_TOTAL_NETWORK_OUT_BITS + rangeQuerySuffix;
+                case BW_IN_PERCENTAGE:
+                    return BW_IN_PERCENTAGE + QUERY_FOR_BW_IN_UTIL_PERCENTAGE + rangeQuerySuffix;
+                case BW_OUT_PERCENTAGE:
+                    return BW_OUT_PERCENTAGE + QUERY_FOR_BW_OUT_UTIL_PERCENTAGE + rangeQuerySuffix;
 
-            if (BW_IN_PERCENTAGE.equals(metricName) || BW_OUT_PERCENTAGE.equals(metricName)) {
-                String rangeQuerySuffix = "&start=" + start + "&end=" + end +
-                    "&step=2m";
-                if (BW_IN_PERCENTAGE.equals(metricName)) {
-                    return QUERY_PREFIX + QUERY_FOR_BW_IN_UTIL_PERCENTAGE + rangeQuerySuffix;
-                }
-                return QUERY_PREFIX + QUERY_FOR_BW_OUT_UTIL_PERCENTAGE + rangeQuerySuffix;
             }
         }
         String queryString = getQueryString(metricName, labels);

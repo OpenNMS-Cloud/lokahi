@@ -36,6 +36,7 @@ import jakarta.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
 import org.opennms.horizon.alerts.proto.Alert;
 import org.opennms.horizon.alerts.proto.AlertType;
+import org.opennms.horizon.alerts.proto.EventType;
 import org.opennms.horizon.alerts.proto.ManagedObjectType;
 import org.opennms.horizon.alerts.proto.OverTimeUnit;
 import org.opennms.horizon.alerts.proto.Severity;
@@ -118,11 +119,8 @@ public class AlertEventProcessor {
             reductionKey,
             clearKey,
             alertDefinition.getType(),
-            triggerEvent.getSeverity(),
-            triggerEvent.getCount(),
-            triggerEvent.getOvertime(),
-            triggerEvent.getOvertimeUnit(),
-            policies
+            policies,
+            triggerEvent
         );
     }
 
@@ -184,7 +182,7 @@ public class AlertEventProcessor {
                 // Set the severity to CLEARED when reducing alerts
                 alert.setSeverity(Severity.CLEARED);
             } else {
-                alert.setSeverity(alertData.severity());
+                alert.setSeverity(alertData.triggerEvent().getSeverity());
             }
         }
         alert.setMonitoringPolicyId(alertData.monitoringPolicyId());
@@ -198,7 +196,7 @@ public class AlertEventProcessor {
         Date current = new Date();
 
         int currentCount = thresholdedEventRepository.countByReductionKeyAndTenantIdAndExpiryTimeGreaterThanEqual(alertData.reductionKey(), tenantId, current);
-        return alertData.count() <= currentCount;
+        return alertData.triggerEvent().getCount() <= currentCount;
     }
 
     private void saveThresholdEvent(String uei, AlertData alertData, Event event) {
@@ -218,13 +216,13 @@ public class AlertEventProcessor {
     private Date calculateExpiry(Date current, AlertData alertData, boolean future) {
         Instant curr = current.toInstant();
         Duration dur = Duration.ZERO;
-        if (alertData.overTime() == 0) {
+        if (alertData.triggerEvent().getOvertime() == 0) {
             dur = Duration.ofDays(365 * 1000);
         } else {
-            switch (alertData.overTimeUnit) {
-                case HOUR -> dur = Duration.ofHours(alertData.overTime());
-                case MINUTE -> dur = Duration.ofMinutes(alertData.overTime());
-                case SECOND -> dur = Duration.ofSeconds(alertData.overTime());
+            switch (alertData.triggerEvent().getOvertimeUnit()) {
+                case HOUR -> dur = Duration.ofHours(alertData.triggerEvent().getOvertime());
+                case MINUTE -> dur = Duration.ofMinutes(alertData.triggerEvent().getOvertime());
+                case SECOND -> dur = Duration.ofSeconds(alertData.triggerEvent().getOvertime());
             }
         }
 
@@ -238,7 +236,7 @@ public class AlertEventProcessor {
     }
 
     private boolean isThresholding(AlertData alertData) {
-        return (alertData.count() > 1 || alertData.overTime() > 0);
+        return (alertData.triggerEvent().getCount() > 1 || alertData.triggerEvent().getOvertime() > 0);
     }
 
     private org.opennms.horizon.alertservice.db.entity.Alert createNewAlert(Event event, AlertData alertData) {
@@ -248,6 +246,8 @@ public class AlertEventProcessor {
         alert.setReductionKey(alertData.reductionKey());
         alert.setClearKey(alertData.clearKey());
         alert.setCounter(1L);
+        alert.setDescription(event.getDescription());
+        alert.setLogMessage(event.getLogMessage());
         if (event.getNodeId() > 0) {
             alert.setManagedObjectType(ManagedObjectType.NODE);
             alert.setManagedObjectInstance(Long.toString(event.getNodeId()));
@@ -256,12 +256,13 @@ public class AlertEventProcessor {
         }
         // FIXME: We should be using the source time of the event and not the time at which it was produced
         alert.setLastEventTime(new Date(event.getProducedTimeMs()));
-        alert.setSeverity(alertData.severity());
+        alert.setLastEventId(event.getDatabaseId());
+        alert.setSeverity(alertData.triggerEvent().getSeverity());
         alert.setEventUei(event.getUei());
+        alert.setTriggerEvent(alertData.triggerEvent());
         return alert;
     }
 
-    private record AlertData(String reductionKey, String clearKey, AlertType type, Severity severity, Integer count,
-                             Integer overTime, OverTimeUnit overTimeUnit, List<Long> monitoringPolicyId) {
+    private record AlertData(String reductionKey, String clearKey, AlertType type, List<Long> monitoringPolicyId, TriggerEvent triggerEvent) {
     }
 }

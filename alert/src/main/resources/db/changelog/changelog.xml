@@ -15,4 +15,6 @@
     <include file="/db/changelog/hs-0.1.0/data/update_trigger_event_type.xml" />
     <include file="/db/changelog/hs-0.1.0/data/delete_unreachable_event.xml" />
     <include file="/db/changelog/hs-0.1.0/tables/thresholded_event.xml" />
+    <include file="/db/changelog/hs-0.1.0/tables/alert_tag.xml" />
+    <include file="/db/changelog/hs-0.1.0/tables/update_alert_trigger_event.xml" />
 </databaseChangeLog>

@@ -1,0 +1,9 @@
+keycloak:
+  realm: opennms
+  base-url: http://onms-keycloak:8080/auth
+  public-key: ""
+
+grpc:
+  server:
+    port: 8990
+    deadline: 60000

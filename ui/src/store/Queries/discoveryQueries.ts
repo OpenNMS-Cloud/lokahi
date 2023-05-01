@@ -22,7 +22,8 @@ export const useDiscoveryQueries = defineStore('discoveryQueries', () => {
   })
 
   const { data: listedDiscoveries, execute: getDiscoveries } = useQuery({
-    query: ListDiscoveriesDocument
+    query: ListDiscoveriesDocument,
+    fetchOnMount: false
   })
 
   const getTagsSearch = (searchTerm: string) => {

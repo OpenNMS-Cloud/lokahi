@@ -1,0 +1,42 @@
+syntax = "proto3";
+
+import "google/protobuf/empty.proto";
+import "google/protobuf/wrappers.proto";
+
+package opennms.inventory;
+option java_multiple_files = true;
+option java_package = "org.opennms.horizon.alert.tag.proto";
+
+message TagProto {
+  int64 id = 1;
+  string tenant_id = 2;
+  string name = 3;
+  repeated int64 node_ids = 4;
+}
+
+message TagListProto {
+  repeated TagProto tags = 1;
+}
+
+message PolicyTagProto {
+  int64 policy_id = 1;
+  repeated int64 tag_ids = 2;
+}
+
+message TagIdListProto {
+  repeated int64 tag_ids = 1;
+}
+
+message TagSearchProto {
+  optional int64 policy_id = 1;
+  optional string search_str = 2;
+}
+
+service TagService {
+  rpc removeTags(PolicyTagProto) returns (google.protobuf.BoolValue);
+  rpc listTags(TagListProto) returns (TagListProto);
+  rpc assignTags(PolicyTagProto) returns (google.protobuf.BoolValue);
+}
+
+
+

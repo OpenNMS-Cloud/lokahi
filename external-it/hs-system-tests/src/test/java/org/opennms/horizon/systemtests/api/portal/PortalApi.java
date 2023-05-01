@@ -87,11 +87,34 @@ public class PortalApi {
         try {
             Response<BtoInstancesResponse> instances = portalService.getBtoInstances(
                 SecretsStorage.portalOrganizationId,
+                null,
+                null,
+                100,
                 authToken
             ).execute();
 
             if (!instances.isSuccessful()) {
                 Assert.fail("[TEST] portalService.getBtoInstances failed with error " + instances.errorBody().string());
+            }
+            return instances.body();
+        } catch (IOException e) {
+            Assert.fail("[TEST] Test failed getting the bto instances: " + e.getLocalizedMessage());
+        }
+        return null;
+    }
+
+    public BtoInstancesResponse getAllBtoInstancesByName(String searchPattern) {
+        try {
+            Response<BtoInstancesResponse> instances = portalService.getBtoInstances(
+                SecretsStorage.portalOrganizationId,
+                searchPattern,
+                "name",
+                100,
+                authToken
+            ).execute();
+
+            if (!instances.isSuccessful()) {
+                Assert.fail("[TEST] portalService.getBtoInstances failed with error: " + instances.errorBody().string());
             }
             return instances.body();
         } catch (IOException e) {

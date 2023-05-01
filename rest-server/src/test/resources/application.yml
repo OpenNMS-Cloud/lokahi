@@ -12,3 +12,4 @@ grpc:
     notification: localhost:15065
     alerts: localhost:32065
     flows: flows.onms-dp-dev.dev.nonprod.dataservice.opennms.com:443 # temp for development
+    minion-certificate-manager: minion-certificate-manager:8990

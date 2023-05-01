@@ -43,4 +43,9 @@ public class PortalSnackBarSteps {
     public void checkErrorSnackBarMessage(String message) {
         PortalSnackBar.verifyErrorSnackBarMessage(message);
     }
+
+    @Then("the IT Administrator doesn't see a snackbar message")
+    public void checkNoSnackBar() {
+        PortalSnackBar.snackBarIsHidden();
+    }
 }

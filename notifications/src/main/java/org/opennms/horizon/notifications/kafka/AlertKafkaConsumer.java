@@ -3,7 +3,6 @@ package org.opennms.horizon.notifications.kafka;
 import com.google.common.base.Strings;
 import com.google.protobuf.InvalidProtocolBufferException;
 import org.opennms.horizon.alerts.proto.Alert;
-import org.opennms.horizon.notifications.exceptions.NotificationException;
 import org.opennms.horizon.notifications.service.NotificationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

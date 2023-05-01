@@ -49,7 +49,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DataJpaTest
 @AutoConfigureTestDatabase(replace= AutoConfigureTestDatabase.Replace.NONE)
 @ContextConfiguration(initializers = {SpringContextTestInitializer.class})
-public class MonitoringLocationRepoTest {
+class MonitoringLocationRepoTest {
     private final String tenantId = new UUID(10, 10).toString();
     private MonitoringLocation location1, location2, location3;
 
@@ -83,13 +83,13 @@ public class MonitoringLocationRepoTest {
     @Test
     void testFindByTenantId() {
         List<MonitoringLocation> result = repository.findByTenantId(tenantId);
-        assertThat(result.size()).isEqualTo(2);
+        assertThat(result).hasSize(2);
     }
 
     @Test
     void testFindByRandomTenantId() {
         List<MonitoringLocation> result = repository.findByTenantId( new UUID(5,7).toString());
-        assertThat(result.size()).isZero();
+        assertThat(result).isEmpty();
     }
 
     @Test
@@ -125,12 +125,31 @@ public class MonitoringLocationRepoTest {
     @Test
     void testFindByIdList(){
         List<MonitoringLocation> result = repository.findByIdIn(Arrays.asList(location1.getId(),location2.getId(),location3.getId()));
-        assertThat(result.size()).isEqualTo(3);
+        assertThat(result).hasSize(3);
     }
 
     @Test
     void testSearchLocation() {
         List<MonitoringLocation> result = repository.findByLocationContainingIgnoreCaseAndTenantId("locaT", tenantId);
         assertThat(result).hasSize(2);
+    }
+
+    @Test
+    void testCreateUpdateAndDeleteLocation() {
+        MonitoringLocation location = new MonitoringLocation();
+        location.setLocation("test-location");
+        location.setTenantId(tenantId);
+        repository.save(location);
+        assertThat(repository.findByLocationAndTenantId("test-location", tenantId)).isNotNull();
+
+        location.setLocation("test-location-updated");
+        repository.save(location);
+        assertThat(repository.findByLocationAndTenantId("test-location", tenantId)).isNotPresent();
+        assertThat(repository.findByLocationAndTenantId("test-location-updated", tenantId)).isPresent();
+        assertThat(repository.findById(location.getId())).isPresent();
+        assertThat(repository.findById(location.getId()).get().getLocation()).isEqualTo("test-location-updated");
+
+        repository.delete(location);
+        assertThat(repository.findById(location.getId())).isNotPresent();
     }
 }

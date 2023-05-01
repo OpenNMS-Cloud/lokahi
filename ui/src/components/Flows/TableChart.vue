@@ -4,6 +4,7 @@
       <Bar
         :data="chartData"
         :options="chartOptions"
+        ref="barChart"
       />
     </div>
 
@@ -32,13 +33,13 @@
 </template>
 
 <script setup lang="ts">
-import { ChartOptions } from 'chart.js'
 import { PropType } from 'vue'
 import { ChartData } from '@/types'
 import { Bar } from 'vue-chartjs'
-import { Chart as ChartJS, Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale } from 'chart.js'
+import { Chart, Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale, ChartOptions } from 'chart.js'
+import { downloadCanvas } from '../Graphs/utils'
 
-ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
+Chart.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
 
 const props = defineProps({
   id: {
@@ -58,6 +59,14 @@ const props = defineProps({
     type: String
   }
 })
+
+const barChart = ref()
+
+const downloadChart = (filename: string) => {
+  if (barChart.value) {
+    downloadCanvas(barChart.value.chart.canvas, `${filename + Date.now()}`)
+  }
+}
 
 const chartOptions = computed<ChartOptions<any>>(() => {
   return {
@@ -122,7 +131,7 @@ const chartOptions = computed<ChartOptions<any>>(() => {
         title: {
           display: true,
           align: 'center',
-          text: 'Host'
+          text: 'Applications'
         }
       }
     }
@@ -147,6 +156,10 @@ const formatBytes = (bytes: any, decimals = 2) => {
   }
   return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`
 }
+
+defineExpose({
+  downloadChart
+})
 </script>
 
 <style lang="scss" scoped>
@@ -164,8 +177,12 @@ const formatBytes = (bytes: any, decimals = 2) => {
   flex-direction: row;
   min-width: 0;
   flex-wrap: wrap;
+  gap: var(variables.$spacing-l);
+  padding-bottom: var(variables.$spacing-m);
+
   .table-container {
     flex: 1 1 0;
+    max-width: 360px;
   }
   .chart-container {
     flex: 1 1 0;

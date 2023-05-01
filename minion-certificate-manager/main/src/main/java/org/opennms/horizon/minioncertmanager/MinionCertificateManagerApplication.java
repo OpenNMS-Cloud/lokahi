@@ -25,28 +25,21 @@
  *     http://www.opennms.org/
  *     http://www.opennms.com/
  *******************************************************************************/
+package org.opennms.horizon.minioncertmanager;
 
-package org.opennms.horizon.systemtests.steps.cloud;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-import com.codeborne.selenide.Condition;
-import com.codeborne.selenide.Selenide;
-import io.cucumber.java.en.Then;
+import java.security.Security;
 
-import java.time.Duration;
+@SpringBootApplication
+public class MinionCertificateManagerApplication {
 
-import static com.codeborne.selenide.Selectors.byText;
-import static com.codeborne.selenide.Selenide.$;
-import static org.opennms.horizon.systemtests.CucumberHooks.MINIONS;
+	public static void main(String[] args) {
+		SpringApplication.run(MinionCertificateManagerApplication.class, args);
 
-public class AppliancesSteps {
+        Security.addProvider(new BouncyCastleProvider());
+	}
 
-    @Then("check minion in the list")
-    public static void justWait() {
-        $(byText(MINIONS.get(0).minionId)).shouldBe(Condition.visible, Duration.ofMinutes(10));
-    }
-
-    @Then("wait")
-    public static void waitSecond() {
-        Selenide.sleep(60_000);
-    }
 }

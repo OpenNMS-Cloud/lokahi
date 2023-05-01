@@ -35,8 +35,6 @@ import org.keycloak.adapters.KeycloakDeployment;
 import org.keycloak.adapters.rotation.JWKPublicKeyLocator;
 import org.keycloak.representations.adapters.config.AdapterConfig;
 import org.opennms.horizon.notifications.grpc.service.NotificationGrpcService;
-import org.opennms.horizon.notifications.tenant.TenantContextLookupImpl;
-import org.opennms.horizon.notifications.tenant.TenantLookup;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

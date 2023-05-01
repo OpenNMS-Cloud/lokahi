@@ -29,7 +29,7 @@
           @update:model-value="showDiscovery"
         />
         <DiscoveryListCard
-          title=" My Active Discoveries"
+          title="My Active Discoveries"
           :list="discoveryQueries.activeDiscoveries"
           @select-discovery="showDiscovery"
           :selectedId="discoverySelectedType !== DiscoveryType.SyslogSNMPTraps ? selectedDiscovery?.id : null"
@@ -37,7 +37,7 @@
         />
         <DiscoveryListCard
           passive
-          title=" My Passive Discoveries"
+          title="My Passive Discoveries"
           :list="discoveryQueries.passiveDiscoveries"
           @toggle-discovery="toggleDiscovery"
           @select-discovery="showDiscovery"
@@ -125,6 +125,7 @@ import { useDiscoveryMutations } from '@/store/Mutations/discoveryMutations'
 import { IAutocompleteItemType } from '@featherds/autocomplete'
 import { AzureActiveDiscovery, IcmpActiveDiscovery, PassiveDiscovery } from '@/types/graphql'
 import DiscoveryTypeSelector from '@/components/Discovery/DiscoveryTypeSelector.vue'
+import { cloneDeep } from 'lodash'
 const discoveryQueries = useDiscoveryQueries()
 const discoveryMutations = useDiscoveryMutations()
 
@@ -173,7 +174,7 @@ const showDiscovery = (selected: IAutocompleteItemType | IAutocompleteItemType[]
   if (discovery) {
     isDiscoveryEditingShown.value = true
     showNewDiscovery.value = false
-    selectedDiscovery.value = discovery
+    selectedDiscovery.value = cloneDeep(discovery)
     //replace with type guard
     if (discovery.discoveryType === DiscoveryType.ICMP) {
       discoverySelectedType.value = DiscoveryType.ICMP
@@ -195,6 +196,8 @@ const handleClose = () => {
   isDiscoveryEditingShown.value = false
   discoverySelectedType.value = DiscoveryType.None
 }
+
+onMounted(() => discoveryQueries.getDiscoveries())
 </script>
 
 <style lang="scss" scoped>

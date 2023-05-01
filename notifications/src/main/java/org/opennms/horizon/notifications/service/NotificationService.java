@@ -28,11 +28,12 @@
 
 package org.opennms.horizon.notifications.service;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.opennms.horizon.alerts.proto.Alert;
-import org.opennms.horizon.notifications.api.email.EmailAPI;
 import org.opennms.horizon.notifications.api.PagerDutyAPI;
+import org.opennms.horizon.notifications.api.email.EmailAPI;
 import org.opennms.horizon.notifications.api.email.Velocity;
 import org.opennms.horizon.notifications.api.keycloak.KeyCloakAPI;
 import org.opennms.horizon.notifications.dto.PagerDutyConfigDTO;
@@ -40,29 +41,24 @@ import org.opennms.horizon.notifications.exceptions.NotificationException;
 import org.opennms.horizon.notifications.model.MonitoringPolicy;
 import org.opennms.horizon.notifications.repository.MonitoringPolicyRepository;
 import org.opennms.horizon.notifications.tenant.WithTenant;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class NotificationService {
 
-    @Autowired
-    private PagerDutyAPI pagerDutyAPI;
+    private final PagerDutyAPI pagerDutyAPI;
 
-    @Autowired
-    private EmailAPI emailAPI;
+    private final EmailAPI emailAPI;
 
-    @Autowired
-    private Velocity velocity;
+    private final Velocity velocity;
 
-    @Autowired
-    private KeyCloakAPI keyCloakAPI;
+    private final KeyCloakAPI keyCloakAPI;
 
-    @Autowired
-    private MonitoringPolicyRepository monitoringPolicyRepository;
+    private final MonitoringPolicyRepository monitoringPolicyRepository;
 
     @WithTenant(tenantIdArg = 0, tenantIdArgInternalMethod = "getTenantId", tenantIdArgInternalClass = "org.opennms.horizon.alerts.proto.Alert")
     public void postNotification(Alert alert) {

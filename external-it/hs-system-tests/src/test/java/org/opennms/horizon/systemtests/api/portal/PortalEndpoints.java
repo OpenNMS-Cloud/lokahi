@@ -38,6 +38,7 @@ import retrofit2.http.GET;
 import retrofit2.http.Header;
 import retrofit2.http.POST;
 import retrofit2.http.Path;
+import retrofit2.http.Query;
 
 
 public interface PortalEndpoints {
@@ -49,9 +50,12 @@ public interface PortalEndpoints {
         @Header("authorization") String authToken
     );
 
-    @GET("api/v1/portal/{organization}/bto-instance?limit=100")
+    @GET("api/v1/portal/{organization}/bto-instance")
     Call<BtoInstancesResponse> getBtoInstances(
         @Path("organization") String organization,
+        @Query("search") String searchPattern,
+        @Query("searchColumn") String searchColumn,
+        @Query("limit") Integer limit,
         @Header("authorization") String authToken
     );
 

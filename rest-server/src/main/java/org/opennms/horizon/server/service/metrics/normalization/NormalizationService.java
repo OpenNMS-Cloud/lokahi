@@ -41,7 +41,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static org.opennms.horizon.server.service.metrics.normalization.Constants.NODE_SCAN_TYPE;
+import static org.opennms.horizon.server.service.metrics.normalization.Constants.DISCOVERY_SCAN;
+import static org.opennms.horizon.server.service.metrics.normalization.Constants.NODE_SCAN;
 import static org.opennms.horizon.server.service.metrics.normalization.Constants.SNMP_MONITOR_TYPE;
 
 @Component
@@ -52,7 +53,7 @@ public class NormalizationService {
 
     public String getQueryMetricRegex(NodeDTO node, String metricName, Map<String, String> metricLabels) {
 
-        if (NODE_SCAN_TYPE.equals(node.getScanType())) {
+        if (DISCOVERY_SCAN.equals(node.getScanType()) || NODE_SCAN.equals(node.getScanType())) {
             String monitor = metricLabelUtils.getMonitorType(metricLabels);
 
             if (SNMP_MONITOR_TYPE.equals(monitor)) {

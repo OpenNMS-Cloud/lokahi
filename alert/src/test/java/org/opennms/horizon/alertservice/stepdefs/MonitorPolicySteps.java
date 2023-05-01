@@ -29,7 +29,6 @@
 package org.opennms.horizon.alertservice.stepdefs;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
@@ -98,12 +97,6 @@ public class MonitorPolicySteps {
             .setMemo(memo);
     }
 
-    @Given("Policy tags")
-    public void policyTags(DataTable dataTable) {
-        List<String> tags = dataTable.asList();
-        policyBuilder.addAllTags(tags);
-    }
-
     @Given("Notify by email {string}")
     public void notifyByEmail(String notifyByEmail) {
         policyBuilder.setNotifyByEmail(Boolean.parseBoolean(notifyByEmail));
@@ -167,12 +160,12 @@ public class MonitorPolicySteps {
             .extracting(MonitorPolicyList::getPoliciesList).asList().hasSize(count);
     }
 
-    @Then("The default monitoring policy exist with name {string} and tag {string} and all notification enabled")
-    public void theDefaultMonitoringPolicyExistWithNameAndTag(String policyName, String tag) {
+    @Then("The default monitoring policy exist with name {string} and all notification enabled")
+    public void theDefaultMonitoringPolicyExistWithNameAndTag(String policyName) {
          policy = grpcClient.getPolicyStub().getDefaultPolicy(Empty.getDefaultInstance());
         assertThat(policy).isNotNull()
-            .extracting("name", "tagsList", "notifyByEmail", "notifyByPagerDuty", "notifyByWebhooks")
-            .containsExactly(policyName, List.of(tag), true, true, true);
+            .extracting("name", "notifyByEmail", "notifyByPagerDuty", "notifyByWebhooks")
+            .containsExactly(policyName, true, true, true);
     }
 
     @Then("Verify the default monitoring policy has the following data")

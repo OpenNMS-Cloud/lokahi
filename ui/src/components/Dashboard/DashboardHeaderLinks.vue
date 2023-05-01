@@ -9,6 +9,7 @@
           v-on="on"
           primary
           menu-trigger
+          data-test="menu-dropdown"
         >
           <div class="dropdown-title">{{ dashboardText.MenuLabel }}</div>
           <FeatherIcon
@@ -19,6 +20,7 @@
       </template>
       <FeatherDropdownItem
         :key="action.link"
+        data-test="menu-links"
         v-for="action in dashboardText.MenuLinks"
         @click="redirect(action.link)"
         >{{ action.name }}</FeatherDropdownItem

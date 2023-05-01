@@ -28,3 +28,8 @@ export interface FlowsApplicationSummaries {
   bytesIn: number
   bytesOut: number
 }
+
+export interface IExporter {
+  nodeId?: number
+  ipInterfaceId?: number
+}

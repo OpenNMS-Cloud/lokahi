@@ -26,7 +26,6 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-
 package org.opennms.horizon.systemtests.steps.portal;
 
 import io.cucumber.java.en.Then;
@@ -37,6 +36,11 @@ import org.testcontainers.shaded.org.apache.commons.lang3.RandomStringUtils;
 import static org.opennms.horizon.systemtests.CucumberHooks.INSTANCES;
 
 public class AddNewInstanceSteps {
+
+    @Then("'Add a Cloud instance' is visible")
+    public void checkPopupState() {
+        AddNewInstancePopup.waitPopupIsDisplayed(true);
+    }
 
     @Then("the IT Administrator fills {string} in 'Instance name'")
     public void setInstanceName(String instanceName) {

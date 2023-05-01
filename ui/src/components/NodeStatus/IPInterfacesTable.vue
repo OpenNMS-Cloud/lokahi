@@ -3,7 +3,7 @@
     <div class="header">
       <div class="title-container">
         <span class="title">
-          IP Interfaces
+          {{ nodeStatusStore.isAzure ? 'Network Interfaces' : 'IP Interfaces' }}
         </span>
       </div>
     </div>
@@ -33,15 +33,12 @@
 <script lang="ts" setup>
 import { useNodeStatusStore } from '@/store/Views/nodeStatusStore'
 const nodeStatusStore = useNodeStatusStore()
-const route = useRoute()
   
 const nodeData = computed(() => {
   return {
     node: nodeStatusStore.fetchedData?.node
   }
 })
-
-onBeforeMount(() => nodeStatusStore.setNodeId(Number(route.params.id)))
 </script>
 
 <style lang="scss" scoped>

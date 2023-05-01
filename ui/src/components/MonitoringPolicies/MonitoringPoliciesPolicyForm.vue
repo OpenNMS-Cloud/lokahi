@@ -56,7 +56,7 @@
           <FeatherCheckbox
             :disabled="store.selectedPolicy.isDefault"
             v-model="store.selectedPolicy.notifyByPagerDuty"
-            >Pager Duty</FeatherCheckbox
+            >PagerDuty</FeatherCheckbox
           >
           <FeatherCheckbox
             :disabled="store.selectedPolicy.isDefault"

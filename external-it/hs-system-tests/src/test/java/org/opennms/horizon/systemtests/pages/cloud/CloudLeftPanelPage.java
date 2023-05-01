@@ -44,4 +44,8 @@ public class CloudLeftPanelPage {
     public static void clickOnApplianceSection() {
         applianceLnk.shouldBe(Condition.enabled).click();
     }
+
+    public static void clickOnPanelSection(String section) {
+        $(String.format("[href='/%s']", section)).shouldBe(Condition.enabled).hover().click();
+    }
 }

@@ -38,16 +38,15 @@ public class AddNewInstancePopup {
 
     private static final SelenideElement popup = $("#cloud-add-instance-dialog");
     private static final SelenideElement instanceNameInp = $("#cloud-add-instance-dialog-name");
-    private static final SelenideElement errorMessageTxt = $("[data-ref-id='feather-form-element-error']");
+    private static final SelenideElement errorMessageTxt = $("div#cloud-add-instance-name-wrapper [data-ref-id='feather-form-element-error']");
     private static final SelenideElement meOption = $("#cloud-add-instance-me");
     private static final SelenideElement someoneElseOption = $("#cloud-add-instance-someoneelse");
     private static final SelenideElement anotherEmailInp = $("#cloud-add-instance-dialog-email-with");
     private static final SelenideElement anotherEmailDropDown = $("div.feather-menu-dropdown .feather-list-item-text");
-    private static final SelenideElement emailErrorMessageTxt = $("[data-ref-id='feather-form-element-error']");
+    private static final SelenideElement emailErrorMessageTxt = $("div#cloud-add-instance-email-wrapper [data-ref-id='feather-form-element-error']");
     private static final SelenideElement cancelBtn = $("#cloud-add-instance-cancel");
     private static final SelenideElement submitBtn = $("#cloud-add-instance-confirm");
     private static final SelenideElement closeBtn = $("[data-ref-id='dialog-close']");
-
 
     public static void waitPopupIsDisplayed(boolean visible) {
         if (visible) {

@@ -28,12 +28,10 @@
 
 package org.opennms.horizon.inventory.service.taskset.response;
 
-import java.net.InetAddress;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
+import com.google.protobuf.Any;
+import com.google.protobuf.InvalidProtocolBufferException;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.opennms.horizon.azure.api.AzureScanItem;
 import org.opennms.horizon.azure.api.AzureScanResponse;
 import org.opennms.horizon.inventory.dto.ListTagsByEntityIdParamsDTO;
@@ -74,11 +72,11 @@ import org.opennms.taskset.contract.ScannerResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.google.protobuf.Any;
-import com.google.protobuf.InvalidProtocolBufferException;
-
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.net.InetAddress;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 
 @Slf4j
@@ -236,14 +234,15 @@ public class ScannerResponseService {
             for (IpInterfaceResult ipIfResult : result.getIpInterfacesList()) {
                 ipInterfaceService.createOrUpdateFromScanResult(tenantId, node, ipIfResult, ifIndexSNMPMap);
             }
-            result.getDetectorResultList().forEach(detectorResult -> processDetectorResults(tenantId, location, detectorResult));
+            result.getDetectorResultList().forEach(detectorResult ->
+                processDetectorResults(tenantId, location, node.getId(), detectorResult));
 
         } else {
             log.error("Error while process node scan results, node with id {} doesn't exist", result.getNodeId());
         }
     }
 
-    private void processDetectorResults(String tenantId, String location, ServiceResult serviceResult) {
+    private void processDetectorResults(String tenantId, String location, long nodeId, ServiceResult serviceResult) {
 
         log.info("Received Detector Response = {} for tenant = {} and location = {}", serviceResult, tenantId, location);
 
@@ -258,7 +257,6 @@ public class ScannerResponseService {
                 createMonitoredService(serviceResult, ipInterface);
                 // TODO: Combine Monitor type and Service type
                 MonitorType monitorType = MonitorType.valueOf(serviceResult.getService().name());
-                long nodeId = ipInterface.getNodeId();
 
                 taskSetHandler.sendMonitorTask(location, monitorType, ipInterface, nodeId);
                 taskSetHandler.sendCollectorTask(location, monitorType, ipInterface, nodeId);

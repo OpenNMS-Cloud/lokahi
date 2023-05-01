@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="hs-0.1.0-update-alert-trigger_event" author="jhutc">
+        <addColumn tableName="alert">
+            <column name="trigger_event_id" type="bigint" />
+        </addColumn>
+        <addForeignKeyConstraint baseTableName="alert" baseColumnNames="trigger_event_id" constraintName="fk_alert_trigger_event_id" referencedTableName="trigger_event"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+
+</databaseChangeLog>

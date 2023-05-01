@@ -28,8 +28,8 @@
 
 package org.opennms.horizon.notifications.kafka;
 
-import java.util.Arrays;
-
+import com.google.common.base.Strings;
+import com.google.protobuf.InvalidProtocolBufferException;
 import org.opennms.horizon.alerts.proto.MonitorPolicyProto;
 import org.opennms.horizon.notifications.service.MonitoringPolicyService;
 import org.slf4j.Logger;
@@ -39,8 +39,7 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Service;
 
-import com.google.common.base.Strings;
-import com.google.protobuf.InvalidProtocolBufferException;
+import java.util.Arrays;
 
 @Service
 public class MonitoringPolicyKafkaConsumer {

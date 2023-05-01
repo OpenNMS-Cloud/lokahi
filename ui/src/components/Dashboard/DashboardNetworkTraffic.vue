@@ -51,7 +51,7 @@ const formatValues = (list: [number, number][]): [string, number][] =>
 
 const createConfigGraph = (list: number[]) => {
   const options = { ...optionsGraph }
-  //options.aspectRatio = isLargeScreen ? 1.4 : 1
+  options.aspectRatio = 1.4
   options.scales.x = {
     grid: {
       display: false
@@ -61,7 +61,7 @@ const createConfigGraph = (list: number[]) => {
         //show date at the beginning and at the end
         const lastIndex = store.totalNetworkTrafficIn.length - 1
 
-        if ((index == 0 || index == lastIndex) && list[index]) {
+        if ((index === 0 || index === lastIndex) && list[index]) {
           const date = format(fromUnixTime(list[index]), 'LLL d')
           return (this as any).getLabelForValue(date)
         }

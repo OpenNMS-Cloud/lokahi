@@ -24,7 +24,6 @@ import org.opennms.horizon.alertservice.db.entity.PolicyRule;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.google.protobuf.InvalidProtocolBufferException;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -59,7 +58,6 @@ public class MonitoringPolicyKafkaProducerTest {
         policy.setName("Testing Policy");
         policy.setMemo("Some memo");
         policy.setRules(List.of(mock(PolicyRule.class)));
-        policy.setTags(mock(JsonNode.class));
         policy.setNotifyInstruction("Instructions");
 
         producer.sendMonitoringPolicy(policy);

@@ -28,44 +28,18 @@
 
 package org.opennms.horizon.alertservice.mapper;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.mapstruct.BeanMapping;
 import org.mapstruct.CollectionMappingStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
 import org.mapstruct.NullValueCheckStrategy;
-import org.opennms.horizon.alertservice.db.entity.MonitorPolicy;
 import org.opennms.horizon.alerts.proto.MonitorPolicyProto;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
+import org.opennms.horizon.alertservice.db.entity.MonitorPolicy;
 
 @Mapper(componentModel = "spring", uses ={PolicyRuleMapper.class},
     collectionMappingStrategy = CollectionMappingStrategy.ADDER_PREFERRED)
 public interface MonitorPolicyMapper {
-    ObjectMapper objectMapper = new ObjectMapper();
-    default List<String> jsonToList(JsonNode data) {
-        List<String> list = new ArrayList<>();
-        if(data.isArray()) {
-            ArrayNode arrayNode = (ArrayNode) data;
-            arrayNode.forEach(tag -> list.add(tag.textValue()));
-        }
-        return list;
-    }
-    default JsonNode map(List<String> list) {
-        return objectMapper.valueToTree(list);
-    }
-
-    default MonitorPolicyProto entityToProto(MonitorPolicy policy) {
-        MonitorPolicyProto tmp = map(policy);
-        return MonitorPolicyProto.newBuilder(tmp)
-            .addAllTags(jsonToList(policy.getTags())).build();
-    }
-
     @Mappings({
         @Mapping(target = "rulesList", source = "rules")
     })
@@ -73,7 +47,6 @@ public interface MonitorPolicyMapper {
     MonitorPolicyProto map(MonitorPolicy policy);
 
     @Mappings({
-        @Mapping(target = "tags", source = "tagsList"),
         @Mapping(target = "rules", source = "rulesList")
     })
     MonitorPolicy map(MonitorPolicyProto proto);

@@ -34,6 +34,7 @@ import com.codeborne.selenide.SelenideElement;
 import java.time.Duration;
 
 import static com.codeborne.selenide.Condition.cssClass;
+import static com.codeborne.selenide.Condition.hidden;
 import static com.codeborne.selenide.Condition.text;
 import static com.codeborne.selenide.Condition.visible;
 import static com.codeborne.selenide.Selenide.$;
@@ -52,5 +53,9 @@ public class PortalSnackBar {
         snackBar
             .shouldBe(visible, Duration.ofSeconds(20))
             .shouldHave(cssClass("error"), text(message));
+    }
+
+    public static void snackBarIsHidden() {
+        snackBar.shouldBe(hidden);
     }
 }

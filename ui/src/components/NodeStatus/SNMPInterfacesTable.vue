@@ -45,15 +45,12 @@
 <script lang="ts" setup>
 import { useNodeStatusStore } from '@/store/Views/nodeStatusStore'
 const nodeStatusStore = useNodeStatusStore()
-const route = useRoute()
   
 const nodeData = computed(() => {
   return {
     node: nodeStatusStore.fetchedData?.node
   }
 })
-
-onBeforeMount(() => nodeStatusStore.setNodeId(Number(route.params.id)))
 </script>
 
 <style lang="scss" scoped>

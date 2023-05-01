@@ -28,11 +28,8 @@
 
 package org.opennms.horizon.notifications.api.email;
 
-import org.opennms.horizon.alerts.proto.Alert;
 import org.opennms.horizon.notifications.exceptions.NotificationException;
 
-import java.util.List;
-
 public interface EmailAPI {
-    public void sendEmail(String emailAddress, String subject, String body) throws NotificationException;
+    public void sendEmail(String emailAddress, String subject, String bodyHtml) throws NotificationException;
 }

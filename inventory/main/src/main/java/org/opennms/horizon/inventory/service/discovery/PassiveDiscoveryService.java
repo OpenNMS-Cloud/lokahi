@@ -141,7 +141,11 @@ public class PassiveDiscoveryService {
     private void validateDiscovery(String tenantId, PassiveDiscoveryUpsertDTO dto) {
         Optional<PassiveDiscovery> discoveryOpt = repository.findByTenantIdAndLocation(tenantId, dto.getLocation());
         if (discoveryOpt.isPresent()) {
-            throw new InventoryRuntimeException("Already a passive discovery with location " + dto.getLocation());
+            PassiveDiscovery discovery = discoveryOpt.get();
+            
+            if (discovery.getId() != dto.getId()) {
+                throw new InventoryRuntimeException("Already a passive discovery with location " + dto.getLocation());
+            }
         }
     }
 

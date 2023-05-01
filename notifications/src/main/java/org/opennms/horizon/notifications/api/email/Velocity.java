@@ -2,9 +2,9 @@ package org.opennms.horizon.notifications.api.email;
 
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
+import org.opennms.horizon.alerts.proto.Alert;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.opennms.horizon.alerts.proto.Alert;
 
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;

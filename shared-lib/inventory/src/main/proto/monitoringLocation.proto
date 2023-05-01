@@ -54,4 +54,7 @@ service MonitoringLocationService {
   rpc getLocationById(google.protobuf.Int64Value) returns (MonitoringLocationDTO) {};
   rpc listLocationsByIds(IdList) returns (MonitoringLocationList) {};
   rpc searchLocations(google.protobuf.StringValue) returns (MonitoringLocationList);
+  rpc createLocation(MonitoringLocationDTO) returns (MonitoringLocationDTO) {};
+  rpc updateLocation(MonitoringLocationDTO) returns (MonitoringLocationDTO) {};
+  rpc deleteLocation(google.protobuf.Int64Value) returns (google.protobuf.BoolValue) {};
 }

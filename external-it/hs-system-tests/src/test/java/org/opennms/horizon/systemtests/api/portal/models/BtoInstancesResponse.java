@@ -42,5 +42,6 @@ public class BtoInstancesResponse {
     public static class Instance {
         public String id;
         public String name;
+        public String url;
     }
 }

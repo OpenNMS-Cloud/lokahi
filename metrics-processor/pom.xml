@@ -7,6 +7,7 @@
         <groupId>org.opennms.horizon</groupId>
         <artifactId>horizon-parent</artifactId>
         <version>0.1.0-SNAPSHOT</version>
+        <relativePath>../parent-pom</relativePath>
     </parent>
 
     <name>OpenNMS Horizon Stream :: Metrics Processor</name>

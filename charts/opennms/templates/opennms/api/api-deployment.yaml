@@ -62,6 +62,8 @@ spec:
               value: "{{ .Values.OpenNMS.Notification.ServiceName }}:{{ .Values.OpenNMS.Notification.GrpcPort }}"
             - name: GRPC_URL_ALERT
               value: "{{ .Values.OpenNMS.Alert.ServiceName }}:{{ .Values.OpenNMS.Alert.GrpcPort }}"
+            - name: GRPC_URL_MINION_CERTIFICATE_MANAGER
+              value: "{{ .Values.OpenNMS.MinionCertificateManager.ServiceName }}:{{ .Values.OpenNMS.MinionCertificateManager.Port }}"
           ports:
             - containerPort: {{ .Values.OpenNMS.API.Port }}
           {{/*  TODO    livenessProbe:*/}}

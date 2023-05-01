@@ -32,14 +32,20 @@ package org.opennms.horizon.systemtests.pages.portal;
 import com.codeborne.selenide.Condition;
 import com.codeborne.selenide.SelenideElement;
 
+import static com.codeborne.selenide.Condition.disappear;
+import static com.codeborne.selenide.Condition.enabled;
+import static com.codeborne.selenide.Condition.exactText;
+import static com.codeborne.selenide.Condition.visible;
 import static com.codeborne.selenide.Selenide.$;
 
 public class DeleteInstancePopup {
 
     private static final SelenideElement popup = $("[data-ref-id='feather-dialog']");
-    private static final SelenideElement confirmInstanceNameInp = $("#delete-instance-confirm-input");
-    private static final SelenideElement deleteBtn = $("#cloud-delete-instance-confirm");
-    private static final SelenideElement cancelBtn = $("#cloud-delete-instance-cancel");
+    private final static SelenideElement closeBtn = $("[data-ref-id='dialog-close']");
+    private final static SelenideElement confirmNameInp = $("#delete-instance-confirm-input");
+    private final static SelenideElement cancelBtn = $("#cloud-delete-instance-cancel");
+    private final static SelenideElement deleteBtn = $("#cloud-delete-instance-confirm");
+    private final static SelenideElement errorTxt = $("div#cloud-instance-delete-input-wrapper [data-ref-id='feather-form-element-error']");
 
     public static void waitPopupIsDisplayed(boolean isVisible) {
         if (isVisible) {
@@ -49,15 +55,31 @@ public class DeleteInstancePopup {
         }
     }
 
-    public static void setInstanceEmail(String instanceName) {
-        confirmInstanceNameInp.shouldBe(Condition.enabled).setValue(instanceName);
+    public static void clickOnCloseBtn() {
+        closeBtn.shouldBe(enabled).click();
     }
 
-    public static void clickDelete() {
-        deleteBtn.shouldBe(Condition.enabled).click();
+    public static void clickOnCancelBtn() {
+        cancelBtn.shouldBe(enabled).click();
     }
 
-    public static void clickCancel() {
-        cancelBtn.shouldBe(Condition.enabled).click();
+    public static void clickOnDeleteBtn() {
+        deleteBtn.shouldBe(enabled).click();
+    }
+
+    public static void setInstanceNameToConfirmationInput(String instanceName) {
+        confirmNameInp.shouldBe(enabled).setValue("").sendKeys(instanceName);
+    }
+
+    public static void verifyErrorText(String errorMessage) {
+        errorTxt.shouldBe(visible).shouldHave(exactText(errorMessage));
+    }
+
+    public static void verifyNoError() {
+        errorTxt.shouldBe(disappear);
+    }
+
+    public static void closePopup() {
+        closeBtn.shouldHave(enabled).click();
     }
 }

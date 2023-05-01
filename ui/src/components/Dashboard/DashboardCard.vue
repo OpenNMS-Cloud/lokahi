@@ -4,6 +4,7 @@
       <div class="section-title">{{ texts.title }}</div>
       <div
         class="link"
+        data-test="redirect-link"
         @click="router.push(redirectLink)"
       >
         {{ texts.redirectLink }}

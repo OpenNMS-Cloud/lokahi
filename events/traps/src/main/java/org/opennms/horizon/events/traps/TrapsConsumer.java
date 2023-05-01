@@ -156,6 +156,12 @@ public class TrapsConsumer {
             .setNodeId(event.getNodeid())
             .setLocation(event.getDistPoller())
             .setIpAddress(event.getInterface());
+        if (event.getDescr() != null) {
+            eventBuilder.setDescription(event.getDescr());
+        }
+        if (event.getLogmsg() != null) {
+            eventBuilder.setLogMessage(event.getLogmsg().getContent());
+        }
         mapEventInfo(event, eventBuilder);
 
         List<EventParameter> eventParameters = mapEventParams(event);

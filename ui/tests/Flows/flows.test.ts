@@ -2,10 +2,13 @@ import Flows from '@/containers/Flows.vue'
 import mountWithPiniaVillus from 'tests/mountWithPiniaVillus'
 import { useFlowsStore } from '@/store/Views/flowsStore'
 import { TimeRange } from '@/types/graphql'
-import { LineGraphData } from './flowsData'
+import { LineGraphData, TableGraphData } from './flowsData'
+import { useFlowsApplicationStore } from '@/store/Views/flowsApplicationStore'
 
 describe('Flows', () => {
   let wrapper: any
+  let appStore: any
+  let store: any
 
   beforeAll(async () => {
     wrapper = await mountWithPiniaVillus({
@@ -14,11 +17,17 @@ describe('Flows', () => {
       stubActions: false
     })
 
-    const store = useFlowsStore()
+    vi.mock('vue-chartjs', () => ({
+      Bar: () => null,
+      Line: () => null
+    }))
+
+    appStore = useFlowsApplicationStore()
+    store = useFlowsStore()
     store.filters.traffic.selectedItem = 'total'
-    store.applications.lineInboundData = LineGraphData
-    store.applications.lineOutboundData = LineGraphData
-    store.applications.lineTotalData = LineGraphData
+    appStore.lineInboundData = LineGraphData
+    appStore.lineOutboundData = LineGraphData
+    appStore.lineTotalData = LineGraphData
   })
 
   afterAll(() => {
@@ -52,31 +61,13 @@ describe('Flows', () => {
     expect(isValueRGBA).toBeTruthy()
   })
 
-  test('The Flows store getDataset and createCharts should be run onMount', () => {
+  test('The Flows store should populate datasets on Mount', () => {
     const store = useFlowsStore()
     expect(store.populateData).toHaveBeenCalledOnce()
+    expect(store.getExporters).toHaveBeenCalledOnce()
+    expect(store.getApplications).toHaveBeenCalledOnce()
+    expect(store.updateApplicationCharts).toHaveBeenCalledOnce()
   })
-
-  // TODO - Set shallow to false, find a way to fix he no context error for chartJS and uncomment this test
-  // test('The Flows page should have date radio buttons and can be clicked', async () => {
-  //   const store = useFlowsStore()
-
-  //   const dateSelector = wrapper.get('[data-test="text-radio-group-Date"]')
-  //   const today = dateSelector.get('[data-test="text-radio-button-TODAY"]')
-  //   const twentyFour = dateSelector.get('[data-test="text-radio-button-LAST_24_HOURS"]')
-  //   const sevenDays = dateSelector.get('[data-test="text-radio-button-SEVEN_DAYS"]')
-
-  //   //Ensure all 3 options are available
-  //   expect(today.exists()).toBeTruthy()
-  //   expect(twentyFour.exists()).toBeTruthy()
-  //   expect(sevenDays.exists()).toBeTruthy()
-
-  //   //Change selected from today to 24H
-  //   expect(today.get('[aria-checked="true"]').exists()).toBeTruthy()
-  //   await twentyFour.get('span.label').trigger('click')
-  //   expect(store.onDateFilterUpdate).toHaveBeenCalledOnce()
-  //   expect(twentyFour.get('[aria-checked="true"]').exists()).toBeTruthy()
-  // })
 
   test('The Flows store get time range should return starttime and endtime object', () => {
     const store = useFlowsStore()
@@ -114,14 +105,23 @@ describe('Flows', () => {
     expect(defaultFormat).toBeTruthy()
   })
 
-  test('The Flows store createLine Chart should populate lineChartData', () => {
-    const store = useFlowsStore()
-    store.applications.lineChartData = { labels: [], datasets: [] }
-    expect(store.applications.lineChartData.datasets.length).toBe(0)
-    store.applications.lineInboundData = LineGraphData
-    store.applications.lineOutboundData = LineGraphData
-    store.applications.lineTotalData = LineGraphData
-    store.createLineChartData()
-    expect(store.applications.lineChartData.datasets.length).toBe(2)
+  test('The Flows store createLineChart should populate lineChartData', () => {
+    appStore.lineChartData = { labels: [], datasets: [] }
+    expect(appStore.lineChartData.datasets.length).toBe(0)
+    vi.spyOn(appStore, 'getApplicationLineDataset').mockImplementation(async () => {
+      appStore.lineInboundData = LineGraphData
+      appStore.lineOutboundData = LineGraphData
+      appStore.lineTotalData = LineGraphData
+    })
+    appStore.getApplicationLineDataset()
+    appStore.createApplicationLineChartData()
+    expect(appStore.lineChartData.datasets.length).toBe(2)
+  })
+  test('The Flows store createTableChart should populate TableGraphData', () => {
+    appStore.tableChartData = { labels: [], datasets: [] }
+    expect(appStore.tableChartData.datasets.length).toBe(0)
+    appStore.tableData = TableGraphData
+    appStore.createApplicationTableChartData()
+    expect(appStore.tableChartData.datasets.length).toBe(2)
   })
 })

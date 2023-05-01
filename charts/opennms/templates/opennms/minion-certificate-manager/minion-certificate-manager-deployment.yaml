@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.OpenNMS.MinionCertificateManager.ServiceName }}
+  labels:
+    app: {{ .Values.OpenNMS.MinionCertificateManager.ServiceName }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ .Values.OpenNMS.MinionCertificateManager.ServiceName }}
+  replicas: {{ .Values.OpenNMS.MinionCertificateManager.Replicas }}
+  template:
+    metadata:
+      labels:
+        appdomain: opennms
+        app: {{ .Values.OpenNMS.MinionCertificateManager.ServiceName }}
+    spec:
+      {{- if .Values.NodeRestrictions.Enabled }}
+      nodeSelector:                                                                                    
+        {{ .Values.NodeRestrictions.Key }}: {{ .Values.NodeRestrictions.Value }}                       
+      tolerations:
+        - effect: "NoSchedule"                                                                         
+          key: "{{ .Values.NodeRestrictions.Key }}"                                                    
+          operator: "Equal"
+          value: {{ .Values.NodeRestrictions.Value }} 
+      affinity: 
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:                                             
+          - weight: 1                                                                                  
+            preference:                                                                                
+              matchExpressions:                                                                        
+              - key: "{{ .Values.NodeRestrictions.Key }}"                                              
+                operator: In
+                values:                                                                                
+                - {{ .Values.NodeRestrictions.Value }}                                                 
+      {{- end }}
+      containers:
+        - name: {{ .Values.OpenNMS.MinionCertificateManager.ServiceName }}
+          image: {{ .Values.OpenNMS.MinionCertificateManager.Image }}
+          imagePullPolicy: {{ .Values.OpenNMS.MinionCertificateManager.ImagePullPolicy }}
+          env:
+            - name: JAVA_TOOL_OPTIONS
+              value: "-agentlib:jdwp=transport=dt_socket,server=y,address=5005,suspend=n,quiet=y"  # FIXME: Permanent debug port, enable only for dev mode
+            - name: KEYCLOAK_BASE_URL
+              value: "http://{{ .Values.Keycloak.ServiceName }}:8080/auth/"
+            - name: KEYCLOAK_REALM
+              value: "{{ .Values.Keycloak.RealmName }}"
+            - name: GRPC_SERVER_PORT
+              value: "{{ .Values.OpenNMS.MinionCertificateManager.Port }}"
+          ports:
+            - name: http
+              containerPort: {{ .Values.OpenNMS.MinionCertificateManager.Port }}
+      {{- if .Values.OpenNMS.MinionCertificateManager.PrivateRepoEnabled }}
+      imagePullSecrets:
+        - name: image-credentials
+      {{- end }}

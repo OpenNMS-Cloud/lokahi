@@ -15,8 +15,7 @@
 </template>
 
 <script lang="ts" setup>
-import { Severity } from '@/types/graphql'
-import { TimeRange } from '@/types/graphql'
+import { Severity, TimeRange } from '@/types/graphql'
 
 defineProps<{
   isFilter?: boolean

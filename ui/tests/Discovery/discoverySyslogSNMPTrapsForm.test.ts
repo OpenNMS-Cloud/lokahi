@@ -1,20 +1,46 @@
 import mountWithPiniaVillus from '../mountWithPiniaVillus'
 import DiscoverySyslogSNMPTrapsForm from '@/components/Discovery/DiscoverySyslogSNMPTrapsForm.vue'
 import tabIndexDirective from '@/directives/v-tabindex'
+import { PassiveDiscovery } from '@/types/graphql'
+import { useDiscoveryMutations } from '@/store/Mutations/discoveryMutations'
 
 let wrapper: any
+
+const passiveDiscovery: Partial<PassiveDiscovery> = {
+  id: 1,
+  location: 'Default',
+  name: 'Passive Discovery',
+  snmpCommunities: ['public'],
+  snmpPorts: [161],
+  toggle: true
+}
+
+vi.mock('@featherds/input-helper', async () => {
+  const actual: Object = await vi.importActual('@featherds/input-helper')
+
+  const useForm = () => ({
+    validate: () => [],
+    clearErrors: () => {}
+  })
+
+  return {
+    ...actual,
+    useForm
+  }
+})
 
 describe('DiscoverySyslogSNMPTrapsForm', () => {
   beforeAll(() => {
     wrapper = mountWithPiniaVillus({
       component: DiscoverySyslogSNMPTrapsForm,
       shallow: false,
-      props: { successCallback: () => ({}), cancel: () => ({}) },
+      props: { successCallback: () => ({}), cancel: () => ({}), discovery: passiveDiscovery },
       global: {
         directives: {
           tabindex: tabIndexDirective
         }
-      }
+      },
+      stubActions: false
     })
   })
 
@@ -66,5 +92,13 @@ describe('DiscoverySyslogSNMPTrapsForm', () => {
   test('Should have a submit button', () => {
     const elem = wrapper.get('[data-test="btn-submit"]')
     expect(elem.exists()).toBeTruthy()
+  })
+
+  test('Should call the upsert with the correct payload', async () => {
+    const store = useDiscoveryMutations()
+    wrapper.find('form').trigger('submit.prevent')
+    delete passiveDiscovery.toggle
+    expect(store.upsertPassiveDiscovery).toHaveBeenCalledTimes(1)
+    expect(store.upsertPassiveDiscovery).toHaveBeenCalledWith({ passiveDiscovery })
   })
 })

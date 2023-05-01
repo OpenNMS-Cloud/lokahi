@@ -28,20 +28,19 @@
 
 package org.opennms.horizon.server.service;
 
-import java.util.stream.Collectors;
-
+import io.leangen.graphql.annotations.GraphQLArgument;
+import io.leangen.graphql.annotations.GraphQLEnvironment;
+import io.leangen.graphql.annotations.GraphQLMutation;
+import io.leangen.graphql.annotations.GraphQLQuery;
+import io.leangen.graphql.execution.ResolutionEnvironment;
+import io.leangen.graphql.spqr.spring.annotations.GraphQLApi;
+import lombok.RequiredArgsConstructor;
+import org.opennms.horizon.inventory.dto.MonitoringLocationDTO;
 import org.opennms.horizon.server.mapper.LocationMapper;
 import org.opennms.horizon.server.model.inventory.Location;
 import org.opennms.horizon.server.service.grpc.InventoryClient;
 import org.opennms.horizon.server.utils.ServerHeaderUtil;
 import org.springframework.stereotype.Service;
-
-import io.leangen.graphql.annotations.GraphQLArgument;
-import io.leangen.graphql.annotations.GraphQLEnvironment;
-import io.leangen.graphql.annotations.GraphQLQuery;
-import io.leangen.graphql.execution.ResolutionEnvironment;
-import io.leangen.graphql.spqr.spring.annotations.GraphQLApi;
-import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -55,7 +54,7 @@ public class GrpcLocationService {
 
     @GraphQLQuery
     public Flux<Location> findAllLocations(@GraphQLEnvironment ResolutionEnvironment env) {
-        return Flux.fromIterable(client.listLocations(headerUtil.getAuthHeader(env)).stream().map(mapper::protoToLocation).collect(Collectors.toList()));
+        return Flux.fromIterable(client.listLocations(headerUtil.getAuthHeader(env)).stream().map(mapper::protoToLocation).toList());
     }
     @GraphQLQuery
     public Mono<Location> findLocationById(@GraphQLArgument(name = "id") long id, @GraphQLEnvironment ResolutionEnvironment env) {
@@ -66,5 +65,20 @@ public class GrpcLocationService {
     public Flux<Location> searchLocation(@GraphQLArgument(name="searchTerm") String searchTerm, @GraphQLEnvironment ResolutionEnvironment env) {
         return Flux.fromIterable(client.searchLocations(searchTerm, headerUtil.getAuthHeader(env))
             .stream().map(mapper::protoToLocation).toList());
+    }
+
+    @GraphQLMutation
+    public Mono<Location> createLocation(@GraphQLArgument(name="location") String location, @GraphQLEnvironment ResolutionEnvironment env) {
+        return Mono.just(mapper.protoToLocation(client.createLocation(MonitoringLocationDTO.newBuilder().setLocation(location).build(), headerUtil.getAuthHeader(env))));
+    }
+
+    @GraphQLMutation
+    public Mono<Location> updateLocation(@GraphQLArgument(name = "id") Long id, @GraphQLArgument(name="location") String location, @GraphQLEnvironment ResolutionEnvironment env) {
+        return Mono.just(mapper.protoToLocation(client.updateLocation(MonitoringLocationDTO.newBuilder().setId(id).setLocation(location).build(), headerUtil.getAuthHeader(env))));
+    }
+
+    @GraphQLMutation
+    public Mono<Boolean> deleteLocation(@GraphQLArgument(name="id") long id, @GraphQLEnvironment ResolutionEnvironment env) {
+        return Mono.just(client.deleteLocation(id, headerUtil.getAuthHeader(env)));
     }
 }

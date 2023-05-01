@@ -30,6 +30,7 @@ grpc:
     events: localhost:30065
     notification: localhost:15065
     alerts: opennms-alert:6565
-    flows: flows.onms-dp-dev.dev.nonprod.dataservice.opennms.com:443 # temp for development (require vpn)
+    flows: flows.onms-dp-dev.dev.nonprod.dataservice.opennms.com:443 # temp for development
+    minion-certificate-manager: minion-certificate-manager:8990
   server:
     deadline: 60000

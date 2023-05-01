@@ -31,18 +31,13 @@ package org.opennms.horizon.notifications.api.email;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
-import org.opennms.horizon.alerts.proto.Alert;
 import org.opennms.horizon.notifications.exceptions.NotificationAPIException;
 import org.opennms.horizon.notifications.exceptions.NotificationException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
-import org.springframework.stereotype.Component;
 
-import java.util.List;
-
-@Component
 @RequiredArgsConstructor
 public class SmtpEmailAPI implements EmailAPI {
     @Value("${spring.mail.from}")
@@ -51,7 +46,7 @@ public class SmtpEmailAPI implements EmailAPI {
     private final JavaMailSender sender;
 
     @Override
-    public void sendEmail(String emailAddress, String subject, String body) throws NotificationException {
+    public void sendEmail(String emailAddress, String subject, String bodyHtml) throws NotificationException {
         try {
             MimeMessage mimeMessage = sender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(mimeMessage);
@@ -60,7 +55,7 @@ public class SmtpEmailAPI implements EmailAPI {
             helper.setFrom(fromAddress);
 
             helper.setSubject(subject);
-            helper.setText(body, true);
+            helper.setText(bodyHtml, true);
 
             sender.send(helper.getMimeMessage());
         } catch (MessagingException e) {

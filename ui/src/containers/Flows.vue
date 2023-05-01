@@ -14,16 +14,29 @@
       >
       </TextRadioButtons>
       <div class="filters-divider"></div>
-      <FeatherAutocomplete
-        class="filter-autocomplete"
-        label="Filter Exporters"
-        type="multi"
-        v-model="flowsStore.filters.selectedExporters"
-        :loading="flowsStore.filters.isExportersLoading"
-        :results="flowsStore.filters.filteredExporters"
-        @search="flowsStore.exportersAutoCompleteSearch"
-        @update:model-value="flowsStore.updateChartData"
-      ></FeatherAutocomplete>
+      <div class="exporter-section">
+        <FeatherAutocomplete
+          class="filter-autocomplete"
+          label="Filter Exporters"
+          type="multi"
+          v-model="flowsStore.filters.selectedExporters"
+          :loading="flowsStore.filters.isExportersLoading"
+          :results="flowsStore.filters.filteredExporters"
+          @search="flowsStore.exportersAutoCompleteSearch"
+          @update:model-value="flowsStore.updateChartData"
+        ></FeatherAutocomplete>
+        <FeatherButton
+          @click="toggleDrawer"
+          icon="Help"
+        >
+          <FeatherIcon
+            class="utility-icon"
+            :icon="HelpIcon"
+          >
+          </FeatherIcon>
+        </FeatherButton>
+      </div>
+
       <div class="filters-divider"></div>
       <FeatherAutocomplete
         class="filter-autocomplete"
@@ -32,6 +45,7 @@
         v-model="flowsStore.filters.selectedApplications"
         :loading="flowsStore.filters.isApplicationsLoading"
         :results="flowsStore.filters.filteredApplications"
+        :selectionLimit="10"
         @search="flowsStore.applicationsAutoCompleteSearch"
         @update:model-value="flowsStore.updateChartData"
       ></FeatherAutocomplete>
@@ -41,10 +55,21 @@
       <div class="top-of-flows">
         <div class="total-container">
           <div class="total-title">Total Flows:</div>
-          <div class="total-flows">{{ flowsStore.totalFlows }}</div>
+          <div class="total-flows">{{ appStore.totalFlows }}</div>
         </div>
         <div class="utilitys">
-          <FeatherButton icon="Download">
+          <FeatherButton
+            icon="Download"
+            @click="
+              flowsStore.filters.dataStyle.selectedItem === 'table'
+                ? downloadTableChartApplications('TableChartApplications')
+                : downloadLineChartApplications('LineChartApplications')
+            "
+            :disabled="
+              (!appStore.hasLineData && flowsStore.filters.dataStyle.selectedItem === 'line') ||
+              (!appStore.hasTableData && flowsStore.filters.dataStyle.selectedItem === 'table')
+            "
+          >
             <FeatherIcon
               class="utility-icon"
               :icon="Download"
@@ -101,24 +126,68 @@
         <div class="optional-text">Optional Explainer Text</div>
       </div>
       <TableChart
-        v-if="flowsStore.filters.dataStyle.selectedItem === 'table' && hasData"
+        v-if="
+          flowsStore.filters.dataStyle.selectedItem === 'table' && appStore.hasTableData && !appStore.isTableLoading
+        "
         :id="'tableChartApplications'"
+        ref="tableChartApplications"
         :selected-filter-range="flowsStore.filters.dateFilter"
-        :chart-data="flowsStore.applications.tableChartData"
-        :table-data="flowsStore.applications.tableData"
+        :chart-data="appStore.tableChartData"
+        :table-data="appStore.tableData"
       />
       <LineChart
-        v-if="flowsStore.filters.dataStyle.selectedItem === 'line' && hasData"
+        v-if="flowsStore.filters.dataStyle.selectedItem === 'line' && appStore.hasLineData && !appStore.isLineLoading"
         :id="'lineChartApplications'"
+        ref="lineChartApplications"
         :selected-filter-range="flowsStore.filters.dateFilter"
-        :chart-data="flowsStore.applications.lineChartData"
-        :table-data="flowsStore.applications.tableData"
+        :chart-data="appStore.lineChartData"
+        :table-data="appStore.tableData"
       />
-      <div v-if="!hasData && !flowsStore.applications.isLineLoading && !flowsStore.applications.isLineLoading">
-        No data
+      <div
+        v-if="
+          ((!appStore.hasLineData && flowsStore.filters.dataStyle.selectedItem === 'line') ||
+            (!appStore.hasTableData && flowsStore.filters.dataStyle.selectedItem === 'table')) &&
+          !appStore.isLineLoading &&
+          !appStore.isTableLoading
+        "
+      >
+        <DashboardEmptyState :texts="ApplicationsText.Applications">
+          <template v-slot:icon>
+            <FeatherIcon
+              :icon="isDark ? PolarChartDark : PolarChart"
+              class="empty-chart-icon"
+            />
+          </template>
+        </DashboardEmptyState>
+      </div>
+      <div v-if="appStore.isLineLoading || appStore.isTableLoading">
+        <FeatherSpinner />
       </div>
     </div>
   </div>
+  <FeatherDrawer
+    :modelValue="isDrawerOpen"
+    @update:modelValue="toggleDrawer"
+    :labels="{ close: 'close', title: 'Flows' }"
+  >
+    <!-- This will be removed in the next iteration of design -->
+    <div class="exporter-drawer">
+      <h2>Flows</h2>
+      <p>Flows are summaries of network traffic sent by network devices (switches, routers, and so on).</p>
+      <br />
+      <p>
+        By default, the Flows page displays graphs showing the top ten exporters, applications, and conversations for
+        the network devices that you are monitoring. You can filter on the following attributes to customize the
+        information displayed:
+      </p>
+      <br />
+      <ul>
+        <li>Time period (current calendar day, last 24 hours, last 7 days)</li>
+        <li>Exporters (devices configured to export flow reports)</li>
+        <li>Applications (monitored protocols)</li>
+      </ul>
+    </div>
+  </FeatherDrawer>
 </template>
 
 <script setup lang="ts">
@@ -126,15 +195,27 @@ import { useFlowsStore } from '@/store/Views/flowsStore'
 import { FeatherRadioObject } from '@/types'
 import { TimeRange } from '@/types/graphql'
 import Download from '@featherds/icon/action/DownloadFile'
+import HelpIcon from '@featherds/icon/action/Help'
 import Refresh from '@featherds/icon/navigation/Refresh'
+import { FeatherDrawer } from '@featherds/drawer'
+import ApplicationsText from '@/components/Flows/flows.text'
+import { useFlowsApplicationStore } from '@/store/Views/flowsApplicationStore'
+import useTheme from '@/composables/useTheme'
+import PolarChart from '@/assets/PolarChart.svg'
+import PolarChartDark from '@/assets/PolarChart-dark.svg'
 const flowsStore = useFlowsStore()
+const appStore = useFlowsApplicationStore()
+const { isDark } = useTheme()
 
-const hasData = computed(() => {
-  if (flowsStore.applications.tableChartData.datasets) {
-    return Object.keys(flowsStore.applications.tableChartData.datasets[0].data).length > 0
-  }
-  return false
-})
+const lineChartApplications = ref()
+const downloadLineChartApplications = (fileName: string) => {
+  lineChartApplications.value.downloadChart(fileName)
+}
+
+const tableChartApplications = ref()
+const downloadTableChartApplications = (fileName: string) => {
+  tableChartApplications.value.downloadChart(fileName)
+}
 
 const trafficRadios = ref([
   { name: 'Total', value: 'total' },
@@ -156,6 +237,11 @@ const timeOptions = ref([
   { value: TimeRange.Last_24Hours, name: '24H' },
   { value: TimeRange.SevenDays, name: '7D' }
 ])
+
+const isDrawerOpen = ref(false)
+const toggleDrawer = () => {
+  isDrawerOpen.value = !isDrawerOpen.value
+}
 
 onUnmounted(() => flowsStore.$reset)
 </script>
@@ -253,6 +339,13 @@ onUnmounted(() => flowsStore.$reset)
     }
   }
 }
+.exporter-section {
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+  width: 100%;
+  max-width: 360px;
+}
 .total-container {
   display: flex;
   gap: var(variables.$spacing-s);
@@ -266,6 +359,15 @@ onUnmounted(() => flowsStore.$reset)
     color: #00666d;
     padding: 4px 8px;
     border-radius: 4px;
+  }
+}
+.exporter-drawer {
+  max-width: 531px;
+  margin: var(variables.$spacing-xl) var(variables.$spacing-l);
+
+  li {
+    list-style-type: disc;
+    margin-left: var(variables.$spacing-l);
   }
 }
 </style>

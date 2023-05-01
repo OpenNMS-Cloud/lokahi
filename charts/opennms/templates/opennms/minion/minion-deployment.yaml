@@ -93,10 +93,6 @@ spec:
             - name: minion-config-volume
               mountPath: "/opt/karaf/etc/org.opennms.identity.cfg"
               subPath: "opennms-minion-identity"
-            - name: minion-config-volume
-              mountPath: "/opt/horizon-stream/etc/users.properties"
-              subPath: "karafUsers"
-              readOnly: true
             - name: maven-volume
               mountPath: /.m2
           resources:

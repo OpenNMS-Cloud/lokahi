@@ -40,12 +40,17 @@ import java.util.Optional;
 
 import static org.opennms.horizon.server.service.metrics.normalization.Constants.BW_IN_PERCENTAGE;
 import static org.opennms.horizon.server.service.metrics.normalization.Constants.BW_OUT_PERCENTAGE;
+import static org.opennms.horizon.server.service.metrics.normalization.Constants.NETWORK_ERRORS_IN;
+import static org.opennms.horizon.server.service.metrics.normalization.Constants.NETWORK_ERRORS_OUT;
 import static org.opennms.horizon.server.service.metrics.normalization.Constants.NETWORK_IN_BITS;
 import static org.opennms.horizon.server.service.metrics.normalization.Constants.NETWORK_OUT_BITS;
 import static org.opennms.horizon.server.service.metrics.normalization.Constants.QUERY_FOR_BW_IN_UTIL_PERCENTAGE;
 import static org.opennms.horizon.server.service.metrics.normalization.Constants.QUERY_FOR_BW_OUT_UTIL_PERCENTAGE;
 import static org.opennms.horizon.server.service.metrics.normalization.Constants.QUERY_FOR_TOTAL_NETWORK_BYTES_IN;
 import static org.opennms.horizon.server.service.metrics.normalization.Constants.QUERY_FOR_TOTAL_NETWORK_BYTES_OUT;
+import static org.opennms.horizon.server.service.metrics.normalization.Constants.QUERY_FOR_NETWORK_ERRORS_IN;
+import static org.opennms.horizon.server.service.metrics.normalization.Constants.QUERY_FOR_NETWORK_ERRORS_OUT;
+import static org.opennms.horizon.server.service.metrics.normalization.Constants.QUERY_FOR_TOTAL_NETWORK_IN_BITS;
 import static org.opennms.horizon.server.service.metrics.normalization.Constants.QUERY_FOR_TOTAL_NETWORK_OUT_BITS;
 import static org.opennms.horizon.server.service.metrics.normalization.Constants.QUERY_PREFIX;
 import static org.opennms.horizon.server.service.metrics.normalization.Constants.TOTAL_NETWORK_BYTES_IN;
@@ -84,14 +89,17 @@ public class QueryService {
                 case TOTAL_NETWORK_BYTES_OUT:
                     return QUERY_PREFIX + QUERY_FOR_TOTAL_NETWORK_BYTES_OUT + rangeQuerySuffixForTotal;
                 case NETWORK_IN_BITS:
-                    return QUERY_PREFIX + QUERY_FOR_TOTAL_NETWORK_BYTES_IN + rangeQuerySuffix;
+                    return QUERY_PREFIX + QUERY_FOR_TOTAL_NETWORK_IN_BITS + rangeQuerySuffix;
                 case NETWORK_OUT_BITS:
                     return QUERY_PREFIX + QUERY_FOR_TOTAL_NETWORK_OUT_BITS + rangeQuerySuffix;
                 case BW_IN_PERCENTAGE:
-                    return BW_IN_PERCENTAGE + QUERY_FOR_BW_IN_UTIL_PERCENTAGE + rangeQuerySuffix;
+                    return QUERY_PREFIX + QUERY_FOR_BW_IN_UTIL_PERCENTAGE + rangeQuerySuffix;
                 case BW_OUT_PERCENTAGE:
-                    return BW_OUT_PERCENTAGE + QUERY_FOR_BW_OUT_UTIL_PERCENTAGE + rangeQuerySuffix;
-
+                    return QUERY_PREFIX + QUERY_FOR_BW_OUT_UTIL_PERCENTAGE + rangeQuerySuffix;
+                case NETWORK_ERRORS_IN:
+                    return QUERY_PREFIX + QUERY_FOR_NETWORK_ERRORS_IN + rangeQuerySuffix;
+                case NETWORK_ERRORS_OUT:
+                    return QUERY_PREFIX + QUERY_FOR_NETWORK_ERRORS_OUT + rangeQuerySuffix;
             }
         }
         String queryString = getQueryString(metricName, labels);

@@ -58,6 +58,12 @@ public final class Constants {
     public static final String QUERY_FOR_BW_IN_UTIL_PERCENTAGE = "(irate(ifHCInOctets[4m])*8) / (ifHighSpeed *1000000) * 100 unless ifHighSpeed == 0";
     public static final String QUERY_FOR_BW_OUT_UTIL_PERCENTAGE = "(irate(ifHCOutOctets[4m])*8) / (ifHighSpeed *1000000) * 100 unless ifHighSpeed == 0";
 
+    public static final String NETWORK_ERRORS_IN = "network_errors_in";
+    public static final String NETWORK_ERRORS_OUT = "network_errors_out";
+
+    public static final String QUERY_FOR_NETWORK_ERRORS_IN = "irate(ifInErrors[4m])";
+    public static final String QUERY_FOR_NETWORK_ERRORS_OUT = "irate(ifOutErrors[4m])";
+
     // SNMP Specific Metric Names
     public static final String IF_IN_OCTETS = "ifInOctets";
     public static final String IF_OUT_OCTETS = "ifOutOctets";

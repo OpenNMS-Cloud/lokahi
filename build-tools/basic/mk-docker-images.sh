@@ -88,12 +88,6 @@ time {
 
 	echo ""
 	echo "==="
-	echo "=== CERTIFICATE MANAGER IMAGE"
-	echo "==="
-	mvn -f minion-certificate-manager install -Djib.container.creationTime=USE_CURRENT_TIMESTAMP -Dapplication.docker.image=opennms/horizon-stream-minion-certificate-manager:local-basic
-
-	echo ""
-	echo "==="
 	echo "=== KEYCLOAK UI IMAGE"
 	echo "==="
 	DOCKER_BUILDKIT=1 docker build \

@@ -33,14 +33,11 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.Objects;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.function.Consumer;
 
 import org.opennms.horizon.shared.ipc.sink.api.SendQueue;
 import org.opennms.horizon.shared.ipc.sink.api.SendQueueFactory;
@@ -64,8 +61,10 @@ public class OffHeapSendQueueFactory implements SendQueueFactory, Closeable {
      */
     private final AtomicLong blockId = new AtomicLong(0);
 
-    private final Semaphore memoryElements;
-    private final Semaphore totalElements;
+    private final Semaphore memorySemaphore;
+    private final Semaphore totalSemaphore;
+
+    private final Hydra<Element> hydra = new Hydra<>();
 
     public OffHeapSendQueueFactory(final int memoryElements, final int offHeapElements) throws IOException, RocksDBException {
         this(Paths.get("./sink/queue").toAbsolutePath(), memoryElements, offHeapElements);
@@ -76,8 +75,8 @@ public class OffHeapSendQueueFactory implements SendQueueFactory, Closeable {
         final int memoryElements,
         final int offHeapElements
     ) throws IOException, RocksDBException {
-        this.memoryElements = new Semaphore(memoryElements);
-        this.totalElements = new Semaphore(memoryElements + offHeapElements);
+        this.memorySemaphore = new Semaphore(memoryElements);
+        this.totalSemaphore = new Semaphore(memoryElements + offHeapElements);
 
         this.rocksDBOptions = new Options()
             .setCreateIfMissing(true)
@@ -111,25 +110,19 @@ public class OffHeapSendQueueFactory implements SendQueueFactory, Closeable {
 
         private final Prefix prefix;
 
-        private final LinkedBlockingQueue<MemoryElement> memoryElements;
-        private final LinkedBlockingQueue<OffHeapElement> offHeapElements;
-
-        private final ReentrantLock lock = new ReentrantLock();
-
-        private final Condition available = this.lock.newCondition();
+        private final Hydra<Element>.SubQueue elements;
 
         public OffHeapSendQueue(final SinkModule<?, T> module) {
             this.prefix = new Prefix(module.getId());
 
-            this.memoryElements = new LinkedBlockingQueue<>();
-            this.offHeapElements = new LinkedBlockingQueue<>();
+            this.elements = OffHeapSendQueueFactory.this.hydra.queue();
 
             try (final var it = OffHeapSendQueueFactory.this.rocksDB.newIterator()) {
                 it.seek(prefix.getBytes());
 
                 while (it.isValid() && prefix.of(it.key())) {
                     try {
-                        this.offHeapElements.put(new OffHeapElement(Bytes.concat(it.key())));
+                        this.elements.put(new Element(Bytes.concat(it.key())));
                     } catch (final InterruptedException ex) {
                         Thread.currentThread().interrupt();
                         throw new RuntimeException(ex);
@@ -141,116 +134,138 @@ public class OffHeapSendQueueFactory implements SendQueueFactory, Closeable {
 
         @Override
         public void enqueue(final byte[] message) throws InterruptedException {
+            // Block until new element can be accepted
+            OffHeapSendQueueFactory.this.totalSemaphore.acquire();
+
+            // Persist elements until memory block becomes available
+            while (!OffHeapSendQueueFactory.this.memorySemaphore.tryAcquire()) {
+                // Move the oldest memory block to off-heap
+                try {
+                    final var memoryBlock = OffHeapSendQueueFactory.this.hydra.poll();
+                    if (memoryBlock == null) {
+                        Thread.yield();
+                        continue;
+                    }
+
+                    memoryBlock.persist();
+
+                    OffHeapSendQueueFactory.this.memorySemaphore.release();
+                } catch (final IOException e) {
+                    // TODO fooker: Add exception to method signature
+                    throw new RuntimeException(e);
+                }
+            }
+
+            // Now we have room in memory for a block
             final var key = this.prefix.with(
                 Longs.toByteArray(System.currentTimeMillis()),
                 Longs.toByteArray(OffHeapSendQueueFactory.this.blockId.getAndIncrement()));
 
-            final var newBlock = new MemoryElement(key, message);
+            final var newElement = new Element(key, message);
 
-            this.lock.lock();
-            try {
-                OffHeapSendQueueFactory.this.totalElements.acquire();
-
-                while (!OffHeapSendQueueFactory.this.memoryElements.tryAcquire()) {
-                    // We can't accept a new memory block - move the oldest memory block to off-heap
-                    try {
-                        final var oldBlock = this.memoryElements.take();
-                        OffHeapSendQueueFactory.this.memoryElements.release();
-
-                        final var offHeapBlock = this.persist(oldBlock);
-                        this.offHeapElements.put(offHeapBlock);
-
-                    } catch (final IOException e) {
-                        throw new RuntimeException(e);
-                    }
-                }
-
-                // Now we have room in memory for a block
-                this.memoryElements.put(newBlock);
-
-                this.available.signal();
-
-            } finally {
-                this.lock.unlock();
-            }
+            this.elements.put(newElement);
         }
 
         @Override
         public byte[] dequeue() throws InterruptedException {
-            this.lock.lock();
             try {
-                while (true) {
-                    try {
-                        final var key = this.offHeapElements.poll();
-                        if (key != null) {
-                            OffHeapSendQueueFactory.this.totalElements.release();
-                            return this.loadMessage(key);
-                        }
-                    } catch (final IOException ex) {
-                        throw new RuntimeException(ex);
-                    }
+                final var element = this.elements.take();
 
-                    {
-                        final var block = this.memoryElements.poll();
-                        if (block != null) {
-                            OffHeapSendQueueFactory.this.memoryElements.release();
-                            OffHeapSendQueueFactory.this.totalElements.release();
-                            return block.message;
-                        }
-                    }
-
-                    this.available.await();
+                OffHeapSendQueueFactory.this.totalSemaphore.release();
+                if (element.isInMemory()) {
+                    OffHeapSendQueueFactory.this.memorySemaphore.release();
                 }
 
-            } finally {
-                this.lock.unlock();
+                return element.read();
+            } catch (final IOException ex) {
+                // TODO fooker: Add exception to method signature
+                throw new RuntimeException(ex);
             }
         }
 
         @Override
         public void close() throws Exception {
-            for (MemoryElement element = this.memoryElements.poll(); element != null; element = this.memoryElements.poll()) {
-                this.persist(element);
+            for (Element element = this.elements.poll(); element != null; element = this.elements.poll()) {
+                element.persist();
             }
         }
 
-        private byte[] loadMessage(final OffHeapElement element) throws IOException {
+        @Override
+        public String toString() {
+            return this.prefix.toString();
+        }
+    }
+
+    public class Element {
+        public final byte[] key;
+
+        private final byte[] message;
+
+        /** Lock for database access. **/
+        private final Lock lock = new ReentrantLock();
+
+        public Element(final byte[] key,
+                       final byte[] message) {
+            this.key = Objects.requireNonNull(key);
+            this.message = Objects.requireNonNull(message);
+        }
+
+        public Element(final byte[] key) {
+            this.key = Objects.requireNonNull(key);
+            this.message = null;
+        }
+
+        private void persist() throws IOException {
+            this.lock.lock();
             try {
-                return OffHeapSendQueueFactory.this.rocksDB.get(element.key);
-            } catch (final RocksDBException e) {
-                throw new IOException(e);
+                if (this.message == null) {
+                    // Already persisted
+                    return;
+                }
+
+                try {
+                    OffHeapSendQueueFactory.this.rocksDB.put(key, this.message);
+                } catch (RocksDBException e) {
+                    throw new IOException(e);
+                }
+            } finally {
+                this.lock.unlock();
             }
         }
 
-        public OffHeapElement persist(final MemoryElement element) throws IOException {
-            final byte[] key = element.key;
-
+        private byte[] read() throws IOException {
+            this.lock.lock();
             try {
-                OffHeapSendQueueFactory.this.rocksDB.put(key, element.message);
-            } catch (RocksDBException e) {
-                throw new IOException(e);
-            }
+                if (this.message != null) {
+                    // Still in memory
+                    return this.message;
+                }
 
-            return new OffHeapElement(key);
-        }
-
-        private static class MemoryElement {
-            public final byte[] key;
-            public final byte[] message;
-
-            public MemoryElement(final byte[] key,
-                                 final byte[] message) {
-                this.key = Objects.requireNonNull(key);
-                this.message = Objects.requireNonNull(message);
+                try {
+                    return OffHeapSendQueueFactory.this.rocksDB.get(this.key);
+                } catch (final RocksDBException e) {
+                    throw new IOException(e);
+                }
+            } finally {
+                this.lock.unlock();
             }
         }
 
-        private static class OffHeapElement {
-            public final byte[] key;
-
-            public OffHeapElement(final byte[] key) {
-                this.key = Objects.requireNonNull(key);
+        public boolean isInMemory() {
+            this.lock.lock();
+            try {
+                return this.message != null;
+            } finally {
+                this.lock.unlock();
             }
         }
+    }
+
+    public int getMemoryPermits() {
+        return this.memorySemaphore.availablePermits();
+    }
+
+    public int getTotalPermits() {
+        return this.totalSemaphore.availablePermits();
     }
 }

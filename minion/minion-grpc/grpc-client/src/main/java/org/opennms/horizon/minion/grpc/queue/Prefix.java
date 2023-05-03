@@ -31,6 +31,7 @@ package org.opennms.horizon.minion.grpc.queue;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.primitives.Bytes;
 
 public class Prefix {
@@ -85,5 +86,12 @@ public class Prefix {
 
     public byte[] getBytes() {
         return this.bytes;
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+            .add("bytes", bytes)
+            .toString();
     }
 }

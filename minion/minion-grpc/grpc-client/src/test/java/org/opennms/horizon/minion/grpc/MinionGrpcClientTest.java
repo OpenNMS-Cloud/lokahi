@@ -55,7 +55,6 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * WARNING: this test does not provide complete coverage of the MinionGrpcClient.
  */
-@Disabled
 public class MinionGrpcClientTest {
 
     private MinionGrpcClient target;

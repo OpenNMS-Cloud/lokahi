@@ -1,8 +1,8 @@
 import { mount } from '@vue/test-utils'
 import InventoryTabContent from '@/components/Inventory/InventoryTabContent.vue'
-import { TimeUnit } from '@/types'
+import { InventoryNode, MonitoredStates, TimeUnit } from '@/types'
 
-const tabContent = [
+const tabContent: InventoryNode[] = [
   {
     id: 1,
     label: 'Monitored Node 1',
@@ -11,14 +11,14 @@ const tabContent = [
       {
         type: 'latency',
         label: 'Latency',
-        timestamp: 9,
+        value: 9,
         timeUnit: TimeUnit.MSecs,
         status: 'UP'
       },
       {
         type: 'uptime',
         label: 'Uptime',
-        timestamp: 1667930274.66,
+        value: 1667930274.66,
         timeUnit: TimeUnit.Secs,
         status: 'DOWN'
       },
@@ -37,7 +37,8 @@ const tabContent = [
       managementIpLink: 'goto',
       tagValue: []
     },
-    isNodeOverlayChecked: false
+    isNodeOverlayChecked: false,
+    type: MonitoredStates.MONITORED
   }
 ]
 

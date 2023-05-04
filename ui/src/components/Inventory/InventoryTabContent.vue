@@ -184,7 +184,7 @@ const saveTagsToSelectedNodes = async () => {
   const nodeIds = inventoryStore.nodesSelected.map((node) => node.id)
   await nodeMutations.addTagsToNodes({ nodeIds, tags })
 
-  inventoryQueries.fetch()
+  await inventoryQueries.fetch()
   resetState()
 }
 
@@ -196,7 +196,7 @@ const removeTagsFromNodes = async () => {
 
   await nodeMutations.removeTagsFromNodes(payload)
 
-  inventoryQueries.fetch()
+  await inventoryQueries.fetch()
   resetState()
   closeModal()
 }

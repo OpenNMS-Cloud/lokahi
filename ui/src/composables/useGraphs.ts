@@ -26,7 +26,7 @@ export const useGraphs = () => {
         const { metric, values } = result
 
         if (values?.length) {
-          dataSetsObject[metric.__name__] = {
+          dataSetsObject[metricStr] = {
             metric,
             values: values.filter((val) => {
               const [timestamp, value] = val

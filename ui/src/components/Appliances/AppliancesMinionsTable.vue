@@ -104,7 +104,6 @@
   >
     <template #content>
       <p>{{ modal.content }}</p>
-      <!-- <LineGraph :graph="graphProps" /> -->
     </template>
     <template #footer>
       <FeatherButton

@@ -2,7 +2,6 @@ import { TsResult, TimeSeriesQueryResult } from '@/types/graphql'
 
 const mockMinionLatency: TsResult = {
   metric: {
-    __name__: 'response_time_msec',
     instance: 'opennms-minion-8d6f5f64f-4l4wh',
     job: 'horizon-core',
     location: 'Default',
@@ -21,7 +20,6 @@ const minionLatencyFixture = (props: Partial<TsResult> = {}): TimeSeriesQueryRes
 
 const mockMinionUptime: TsResult = {
   metric: {
-    __name__: 'minion_uptime_sec',
     instance: 'minion-01',
     job: 'horizon-core',
     location: 'Default',
@@ -37,7 +35,6 @@ const minionUptimeFixture = (props: Partial<TsResult> = {}): TimeSeriesQueryResu
 
 const mockDeviceLatency: TsResult = {
   metric: {
-    __name__: 'icmp_round_trip_time_msec',
     instance: '127.0.0.1',
     job: 'horizon-core',
     location: 'Default',

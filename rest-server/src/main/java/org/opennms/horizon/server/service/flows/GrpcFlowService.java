@@ -36,6 +36,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.opennms.horizon.server.mapper.IpInterfaceMapper;
 import org.opennms.horizon.server.mapper.NodeMapper;
+import org.opennms.horizon.server.mapper.SnmpInterfaceMapper;
 import org.opennms.horizon.server.mapper.flows.FlowingPointMapper;
 import org.opennms.horizon.server.mapper.flows.TrafficSummaryMapper;
 import org.opennms.horizon.server.model.flows.Exporter;
@@ -60,6 +61,8 @@ public class GrpcFlowService {
 
     private final NodeMapper nodeMapper;
     private final IpInterfaceMapper ipInterfaceMapper;
+
+    private final SnmpInterfaceMapper snmpInterfaceMapper;
     private final TrafficSummaryMapper trafficSummaryMapper;
     private final FlowingPointMapper flowingPointMapper;
 
@@ -106,6 +109,15 @@ public class GrpcFlowService {
                 var nodeDTO = inventoryClient.getNodeById(ipInterfaceDTO.getNodeId(), headerUtil.getAuthHeader(env));
                 var exporter = new Exporter();
                 exporter.setIpInterface(ipInterfaceMapper.protoToIpInterface(ipInterfaceDTO));
+                exporter.setNode(nodeMapper.protoToNode(nodeDTO));
+                if (nodeDTO.getSnmpInterfacesCount() > 0) {
+                    var filteredSnmpInterfaces = nodeDTO.getSnmpInterfacesList().stream()
+                        .filter(s -> s.getId() == ipInterfaceDTO.getSnmpInterfaceId()).toList();
+                    if (filteredSnmpInterfaces.size() == 1) {
+                        exporter.setSnmpInterface(snmpInterfaceMapper.protobufToSnmpInterface(filteredSnmpInterfaces.get(0)));
+                    }
+                }
+                //inventoryClient
                 exporter.setNode(nodeMapper.protoToNode(nodeDTO));
                 return exporter;
             }

@@ -52,6 +52,9 @@ public final class Constants {
     public static final String QUERY_FOR_TOTAL_NETWORK_IN_BITS = "irate(ifHCInOctets[4m])*8";
     public static final String QUERY_FOR_TOTAL_NETWORK_OUT_BITS = "irate(ifHCOutOctets[4m])*8";
 
+    public static final String QUERY_FOR_AZURE_TOTAL_NETWORK_IN_BITS = "sum(sum_over_time(network_in_total_bytes[4m]))*8";
+    public static final String QUERY_FOR_AZURE_TOTAL_NETWORK_OUT_BITS = "sum(sum_over_time(network_out_total_bytes[4m]))*8";
+
     public static final String BW_IN_PERCENTAGE = "bw_util_network_in";
     public static final String BW_OUT_PERCENTAGE = "bw_util_network_out";
 

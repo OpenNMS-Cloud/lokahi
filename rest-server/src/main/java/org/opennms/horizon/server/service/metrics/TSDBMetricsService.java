@@ -113,7 +113,7 @@ public class TSDBMetricsService {
         }
 
         String queryString = queryService
-            .getQueryString(name, metricLabels, timeRange, timeRangeUnit);
+            .getQueryString(nodeOpt, name, metricLabels, timeRange, timeRangeUnit);
 
         if (queryService.isRangeQuery(name)) {
             return getRangeMetrics(tenantId, queryString);

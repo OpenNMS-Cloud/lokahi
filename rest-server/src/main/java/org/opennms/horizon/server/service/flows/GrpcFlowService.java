@@ -28,6 +28,8 @@
 
 package org.opennms.horizon.server.service.flows;
 
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
 import io.leangen.graphql.annotations.GraphQLEnvironment;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.execution.ResolutionEnvironment;
@@ -45,6 +47,8 @@ import org.opennms.horizon.server.model.flows.RequestCriteria;
 import org.opennms.horizon.server.model.flows.TrafficSummary;
 import org.opennms.horizon.server.service.grpc.InventoryClient;
 import org.opennms.horizon.server.utils.ServerHeaderUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
@@ -55,6 +59,7 @@ import java.util.Objects;
 @Service
 @RequiredArgsConstructor
 public class GrpcFlowService {
+    private static final Logger LOG = LoggerFactory.getLogger(GrpcFlowService.class);
     private final ServerHeaderUtil headerUtil;
     private final FlowClient flowClient;
     private final InventoryClient inventoryClient;
@@ -103,7 +108,10 @@ public class GrpcFlowService {
     }
 
     private Exporter getExporter(long interfaceId, ResolutionEnvironment env) {
-        if (headerUtil.getAuthHeader(env) != null) {
+        if (headerUtil.getAuthHeader(env) == null) {
+            return null;
+        }
+        try {
             var ipInterfaceDTO = inventoryClient.getIpInterfaceById(interfaceId, headerUtil.getAuthHeader(env));
             if (ipInterfaceDTO != null) {
                 var nodeDTO = inventoryClient.getNodeById(ipInterfaceDTO.getNodeId(), headerUtil.getAuthHeader(env));
@@ -120,6 +128,13 @@ public class GrpcFlowService {
                 //inventoryClient
                 exporter.setNode(nodeMapper.protoToNode(nodeDTO));
                 return exporter;
+            }
+        } catch (StatusRuntimeException ex) {
+            if (Status.Code.NOT_FOUND.equals(ex.getStatus().getCode())) {
+                LOG.debug("Fail to getExporter by interfaceId: {} Message: {}", interfaceId, ex.getMessage());
+                return null;
+            } else {
+                throw ex;
             }
         }
         return null;

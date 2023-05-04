@@ -51,10 +51,6 @@ spec:
           image: {{ .Values.OpenNMS.MinionGatewayGrpcProxy.Image }}
           imagePullPolicy: {{ .Values.OpenNMS.MinionGatewayGrpcProxy.ImagePullPolicy }}
           env:
-            - name: OTEL_SERVICE_NAME
-              value: "{{ .Values.OpenNMS.MinionGatewayGrpcProxy.ServiceName }}"
-            - name: OTEL_RESOURCE_ATTRIBUTES
-              value: "service.version={{ .Values.OpenNMS.MinionGatewayGrpcProxy.Image }}"
             - name: JAVA_TOOL_OPTIONS
               value: "-javaagent:agent/opentelemetry-javaagent.jar -agentlib:jdwp=transport=dt_socket,server=y,address=5005,suspend=n,quiet=y"  # FIXME: Permanent debug port, enable only for dev mode
             - name: KAFKA_BOOTSTRAP_SERVERS
@@ -63,6 +59,7 @@ spec:
               value: "{{ .Values.OpenNMS.MinionGateway.ServiceName }}"
             - name: GRPC_DOWNSTREAM_PORT
               value: "{{ .Values.OpenNMS.MinionGateway.GrpcPort }}"
+            {{- include "deployment.env" .Values.OpenNMS.MinionGatewayGrpcProxy | nindent 12 }}
           envFrom:
           - configMapRef:
               name: spring-boot-env

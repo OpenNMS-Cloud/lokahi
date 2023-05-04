@@ -98,7 +98,9 @@ public class PassiveDiscoveryService {
         }
 
         validateDiscovery(tenantId, request);
+
         validateSnmpPorts(request);
+        validateCommunityStrings(request);
 
         PassiveDiscovery discovery = discoveryOpt.get();
         mapper.updateFromDto(request, discovery);
@@ -142,14 +144,14 @@ public class PassiveDiscoveryService {
         Optional<PassiveDiscovery> discoveryOpt = repository.findByTenantIdAndLocation(tenantId, dto.getLocation());
         if (discoveryOpt.isPresent()) {
             PassiveDiscovery discovery = discoveryOpt.get();
-            
+
             if (discovery.getId() != dto.getId()) {
                 throw new InventoryRuntimeException("Already a passive discovery with location " + dto.getLocation());
             }
         }
     }
 
-    private void validateSnmpPorts(PassiveDiscoveryUpsertDTO dto) {
+    public void validateSnmpPorts(PassiveDiscoveryUpsertDTO dto) {
         List<Integer> snmpPorts = dto.getPortsList();
         for (Integer port : snmpPorts) {
             if (port < Constants.SNMP_PORT_MIN || port > Constants.SNMP_PORT_MAX) {
@@ -157,6 +159,25 @@ public class PassiveDiscoveryService {
                     Constants.SNMP_PORT_MIN, Constants.SNMP_PORT_MAX, port);
                 throw new InventoryRuntimeException(message);
             }
+        }
+    }
+
+    public void validateCommunityStrings(PassiveDiscoveryUpsertDTO passiveDiscovery) throws InventoryRuntimeException {
+        String snmpCommunities = "";
+        for (String snmpCommunity: passiveDiscovery.getCommunitiesList()){
+            snmpCommunities += snmpCommunity.replace(",","") + " ";
+        }
+        if (snmpCommunities.length() > 128) {
+            throw new InventoryRuntimeException("Snmp communities string is too long");
+        }
+        for (byte b: snmpCommunities.getBytes()){
+            char c = (char) b;
+            if (c > 127){
+                throw new InventoryRuntimeException("All characters must be 7bit ascii");
+            }
+        }
+        if (snmpCommunities.length() > 128) {
+            throw new InventoryRuntimeException("Snmp communities string is too long");
         }
     }
 

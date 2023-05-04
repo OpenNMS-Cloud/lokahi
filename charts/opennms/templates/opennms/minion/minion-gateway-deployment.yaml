@@ -55,12 +55,6 @@ spec:
           image: {{ .Values.OpenNMS.MinionGateway.Image }}
           imagePullPolicy: {{ .Values.OpenNMS.Minion.ImagePullPolicy }}
           env:
-            - name: OTEL_JAVAAGENT_ENABLED
-              value: "false"
-            - name: OTEL_SERVICE_NAME
-              value: "{{ .Values.OpenNMS.MinionGateway.ServiceName }}"
-            - name: OTEL_RESOURCE_ATTRIBUTES
-              value: "service.version={{ .Values.OpenNMS.MinionGateway.Image }}"
             - name: JAVA_TOOL_OPTIONS
               value: "-javaagent:agent/opentelemetry-javaagent.jar -agentlib:jdwp=transport=dt_socket,server=y,address=5005,suspend=n,quiet=y -XX:MaxDirectMemorySize=768m"  # FIXME: Permanent debug port, enable only for dev mode
             - name: SPRING_DATASOURCE_USERNAME
@@ -80,6 +74,7 @@ spec:
               value: "{{ .Values.Kafka.ServiceName }}:{{ .Values.Kafka.Port }}"
             - name: IGNITE_UPDATE_NOTIFIER # Disable Ignite version lookups
               value: "false"
+            {{- include "deployment.env" .Values.OpenNMS.MinionGateway | nindent 12 }}
           envFrom:
           - configMapRef:
               name: spring-boot-env

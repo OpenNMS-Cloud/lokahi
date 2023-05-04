@@ -51,10 +51,6 @@ spec:
           image: {{ .Values.OpenNMS.API.Image }}
           imagePullPolicy: {{ .Values.OpenNMS.API.ImagePullPolicy }}
           env:
-            - name: OTEL_SERVICE_NAME
-              value: "{{ .Values.OpenNMS.API.ServiceName }}"
-            - name: OTEL_RESOURCE_ATTRIBUTES
-              value: "service.version={{ .Values.OpenNMS.API.Image }}"
             - name: JAVA_TOOL_OPTIONS
               value: "-javaagent:agent/opentelemetry-javaagent.jar -agentlib:jdwp=transport=dt_socket,server=y,address=5005,suspend=n,quiet=y"  # FIXME: Permanent debug port, enable only for dev mode
             - name: SPRING_CACHE_CAFFEINE_SPEC
@@ -75,6 +71,7 @@ spec:
               value: "{{ .Values.OpenNMS.Alert.ServiceName }}:{{ .Values.OpenNMS.Alert.GrpcPort }}"
             - name: GRPC_URL_MINION_CERTIFICATE_MANAGER
               value: "{{ .Values.OpenNMS.MinionCertificateManager.ServiceName }}:{{ .Values.OpenNMS.MinionCertificateManager.Port }}"
+            {{- include "deployment.env" .Values.OpenNMS.API | nindent 12 }}
           envFrom:
           - configMapRef:
               name: spring-boot-env

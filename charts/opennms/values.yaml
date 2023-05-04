@@ -7,6 +7,8 @@ OpenNMS:
     enableJsonLogging: false
     openTelemetry:
       otlpTracesEndpoint: null
+      env:
+        OTEL_PROPAGATORS: tracecontext,baggage,jaeger,b3multi
   API:
     Path: /api
     ServiceName: opennms-rest-server
@@ -102,6 +104,8 @@ OpenNMS:
       Requests:
         Cpu: 100m
         Memory: 250Mi
+    env:
+      OTEL_JAVAAGENT_ENABLED: "false"
     IngressAnnotations:
       cert-manager.io/cluster-issuer: opennms-ca
       nginx.ingress.kubernetes.io/auth-tls-secret: default/client-root-ca-certificate

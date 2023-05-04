@@ -329,15 +329,15 @@ public abstract class ParserBase implements Parser {
                         }
 
                         // Dispatch
-                        this.dispatcher.send(flowDocument.build()).whenComplete((b, exx) -> {
-                            if (exx != null) {
-                                this.recordDispatchErrors.inc();
-                                future.completeExceptionally(exx);
-                            } else {
-                                this.recordsCompleted.mark();
-                                future.complete(null);
-                            }
-                        });
+                        try {
+                            this.dispatcher.send(flowDocument.build());
+
+                            this.recordsCompleted.mark();
+                            future.complete(null);
+                        } catch (final Exception exx) {
+                            this.recordDispatchErrors.inc();
+                            future.completeExceptionally(exx);
+                        }
 
                         recordsDispatched.mark();
                     };

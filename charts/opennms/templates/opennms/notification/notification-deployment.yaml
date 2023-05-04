@@ -47,10 +47,6 @@ spec:
           image: {{ .Values.OpenNMS.Notification.Image }}
           imagePullPolicy: {{ .Values.OpenNMS.Notification.ImagePullPolicy }}
           env:
-            - name: OTEL_SERVICE_NAME
-              value: "{{ .Values.OpenNMS.Notification.ServiceName }}"
-            - name: OTEL_RESOURCE_ATTRIBUTES
-              value: "service.version={{ .Values.OpenNMS.Notification.Image }}"
             - name: JAVA_TOOL_OPTIONS
               value: "-javaagent:agent/opentelemetry-javaagent.jar -agentlib:jdwp=transport=dt_socket,server=y,address=5005,suspend=n,quiet=y"  # FIXME: Permanent debug port, enable only for dev mode
             - name: SPRING_KAFKA_BOOTSTRAP_SERVERS
@@ -79,6 +75,7 @@ spec:
                 secretKeyRef:
                   name: {{ .Values.Keycloak.ServiceName }}-initial-admin
                   key: password
+            {{- include "deployment.env" .Values.OpenNMS.Notification | nindent 12 }}
           envFrom:
           - configMapRef:
               name: spring-boot-env

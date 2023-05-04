@@ -69,9 +69,6 @@ public class PluginConfigSinkModule implements SinkModule<PluginConfigMessage, P
         return 10;
       }
 
-      public boolean isBlockWhenFull() {
-        return true;
-      }
     };
   }
 

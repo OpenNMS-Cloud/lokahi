@@ -1,8 +1,8 @@
 /*******************************************************************************
  * This file is part of OpenNMS(R).
  *
- * Copyright (C) 2018 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2018 The OpenNMS Group, Inc.
+ * Copyright (C) 2023 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
  *
@@ -26,27 +26,34 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.shared.ipc.sink.offheap;
+package org.opennms.horizon.flows.grpc.client;
 
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.opennms.horizon.inventory.dto.IpInterfaceDTO;
+import org.opennms.horizon.inventory.dto.NodeIdQuery;
+import org.opennms.horizon.inventory.dto.NodeServiceGrpc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Activator implements BundleActivator {
+import lombok.Getter;
 
-    private static final Logger LOG = LoggerFactory.getLogger(Activator.class);
+
+public class GrpcInventoryMockServer extends NodeServiceGrpc.NodeServiceImplBase {
+
+    private static final Logger LOG = LoggerFactory.getLogger(GrpcInventoryMockServer.class);
+
+    @Getter
+    private final Map<String, NodeIdQuery> incomingNodeIdQueries = new HashMap<>();
 
     @Override
-    public void start(BundleContext context) throws Exception {
-        LOG.info("Set bundle context in OffHeapServiceLoader");
-         DispatchQueueServiceLoader.setBundleContext(context);
-    }
-
-    @Override
-    public void stop(BundleContext context) throws Exception {
-        LOG.info("Clear bundle context in OffHeapServiceLoader");
-        DispatchQueueServiceLoader.setBundleContext(null);
+    public void getIpInterfaceFromQuery(org.opennms.horizon.inventory.dto.NodeIdQuery request,
+                                        io.grpc.stub.StreamObserver<org.opennms.horizon.inventory.dto.IpInterfaceDTO> responseObserver) {
+        LOG.info("Getting Ip interface from Query.. ");
+        incomingNodeIdQueries.put(request.getLocation(), request);
+        responseObserver.onNext(IpInterfaceDTO.newBuilder().build());
+        responseObserver.onCompleted();
     }
 
 }

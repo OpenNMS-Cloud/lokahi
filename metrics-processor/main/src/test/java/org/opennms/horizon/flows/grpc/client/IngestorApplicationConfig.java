@@ -43,18 +43,12 @@ import io.grpc.inprocess.InProcessServerBuilder;
 
 @TestConfiguration
 @ImportAutoConfiguration
-public class IngestorApplicationConfigTest {
+public class IngestorApplicationConfig {
 
     public static final String SERVER_NAME = InProcessServerBuilder.generateName();
 
     @Value("${grpc.server.deadline:60000}")
     private long deadline;
-
-    @Value("${grpc.flow-ingestor.retry.maxAttempts}")
-    private int maxNumberOfAttempts;
-
-    @Value("${grpc.flow-ingestor.retry.maxDelay}")
-    private int backOffPeriod;
 
     @Bean
     public GrpcIngesterMockServer grpcIngesterMockServer() {
@@ -73,14 +67,7 @@ public class IngestorApplicationConfigTest {
 
     @Bean
     public RetryTemplate retryTemplate() {
-        RetryTemplate retryTemplate = new RetryTemplate();
-        FixedBackOffPolicy fixedBackOffPolicy = new FixedBackOffPolicy();
-        fixedBackOffPolicy.setBackOffPeriod(backOffPeriod);
-        retryTemplate.setBackOffPolicy(fixedBackOffPolicy);
-        SimpleRetryPolicy retryPolicy = new SimpleRetryPolicy();
-        retryPolicy.setMaxAttempts(maxNumberOfAttempts);
-        retryTemplate.setRetryPolicy(retryPolicy);
-        return retryTemplate;
+        return new RetryTemplate();
     }
 
 }

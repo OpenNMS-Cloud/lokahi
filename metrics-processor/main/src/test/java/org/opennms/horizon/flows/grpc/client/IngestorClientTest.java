@@ -9,9 +9,11 @@ import java.io.IOException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.junit.Rule;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -39,7 +41,7 @@ import io.grpc.inprocess.InProcessServerBuilder;
 import io.grpc.testing.GrpcCleanupRule;
 
 @ExtendWith(SpringExtension.class)
-@SpringBootTest(classes = IngestorApplicationConfigTest.class)
+@SpringBootTest(classes = IngestorApplicationConfig.class)
 @ContextConfiguration(classes = MetricRegistry.class)
 @TestPropertySource(locations = "classpath:application.yml")
 @DirtiesContext
@@ -57,13 +59,25 @@ class IngestorClientTest {
     @Autowired
     public ManagedChannel ingestorChannel;
 
+    private Server server;
+
     @BeforeEach
     public void setUp() throws IOException {
-        Server server = InProcessServerBuilder.forName(IngestorApplicationConfigTest.SERVER_NAME)
+        server = InProcessServerBuilder.forName(IngestorApplicationConfig.SERVER_NAME)
             .directExecutor()
             .addService(grpcIngesterMockServer)
             .build().start();
         grpcCleanupRule.register(server);
+    }
+
+    @AfterEach
+    public void tearDown() throws InterruptedException {
+        // assume channel and server are not null
+        server.shutdownNow();
+        ingestorChannel.shutdown();
+        // fail the test if cleanup is not successful
+        assert server.awaitTermination(5, TimeUnit.SECONDS) : "server failed to shutdown";
+        assert ingestorChannel.awaitTermination(5, TimeUnit.SECONDS) : "ingestorChannel failed to shutdown";
     }
 
     @Test

@@ -50,10 +50,6 @@ spec:
           image: {{ .Values.OpenNMS.Events.Image }}
           imagePullPolicy: {{ .Values.OpenNMS.Events.ImagePullPolicy }}
           env:
-            - name: OTEL_SERVICE_NAME
-              value: "{{ .Values.OpenNMS.Events.ServiceName }}"
-            - name: OTEL_RESOURCE_ATTRIBUTES
-              value: "service.version={{ .Values.OpenNMS.Events.Image }}"
             - name: JAVA_TOOL_OPTIONS
               value: "-javaagent:agent/opentelemetry-javaagent.jar -agentlib:jdwp=transport=dt_socket,server=y,address=5005,suspend=n,quiet=y"  # FIXME: Permanent debug port, enable only for dev mode
             - name: SPRING_DATASOURCE_URL
@@ -72,6 +68,7 @@ spec:
               value: "{{ .Values.Kafka.ServiceName }}:{{ .Values.Kafka.Port }}"
             - name: GRPC_URL_INVENTORY
               value: "{{ .Values.OpenNMS.Inventory.ServiceName }}:{{ .Values.OpenNMS.Inventory.GrpcPort }}"
+            {{- include "deployment.env" .Values.OpenNMS.Events | nindent 12 }}
           envFrom:
           - configMapRef:
               name: spring-boot-env

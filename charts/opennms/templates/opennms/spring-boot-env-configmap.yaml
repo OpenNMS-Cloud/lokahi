@@ -13,3 +13,8 @@ data:
   OTEL_TRACES_EXPORTER: "none"
 {{- end }}
   OTEL_METRICS_EXPORTER: "none"
+{{- if .Values.OpenNMS.global.openTelemetry.env }}
+  {{- range $key, $val := .Values.OpenNMS.global.openTelemetry.env }}
+  {{ $key }}: {{ $val | quote }}
+  {{- end }}
+{{- end }}

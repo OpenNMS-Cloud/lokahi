@@ -44,6 +44,7 @@ import org.opennms.cloud.grpc.minion.CloudServiceGrpc;
 import org.opennms.cloud.grpc.minion.Identity;
 import org.opennms.horizon.minion.grpc.ssl.MinionGrpcSslContextBuilderFactory;
 import org.opennms.horizon.shared.ipc.rpc.IpcIdentity;
+import org.opennms.horizon.shared.ipc.sink.api.SendQueueFactory;
 
 import java.util.Objects;
 import java.util.function.Function;
@@ -60,6 +61,8 @@ public class MinionGrpcClientTest {
 
     private MetricRegistry mockMetricRegistry;
     private Tracer mockTracer;
+
+    private SendQueueFactory mockSendQueueFactory;
     private MinionGrpcSslContextBuilderFactory mockMinionGrpcSslContextBuilderFactory;
     private SslContextBuilder mockSslContextBuilder;
     private MinionGrpcClient.SimpleReconnectStrategyFactory mockSimpleReconnectStrategyFactory;
@@ -73,6 +76,7 @@ public class MinionGrpcClientTest {
     public void setUp() {
         mockMetricRegistry = Mockito.mock(MetricRegistry.class);
         mockTracer = Mockito.mock(Tracer.class);
+        mockSendQueueFactory = Mockito.mock(SendQueueFactory.class);
         mockMinionGrpcSslContextBuilderFactory = Mockito.mock(MinionGrpcSslContextBuilderFactory.class);
         mockSslContextBuilder = Mockito.mock(SslContextBuilder.class);
         mockSimpleReconnectStrategyFactory = Mockito.mock(MinionGrpcClient.SimpleReconnectStrategyFactory.class);
@@ -86,7 +90,7 @@ public class MinionGrpcClientTest {
         Mockito.when(mockSimpleReconnectStrategyFactory.create(Mockito.any(ManagedChannel.class), Mockito.any(Runnable.class), Mockito.any(Runnable.class))).thenReturn(mockSimpleReconnectStrategy);
         Mockito.when(mockNewStubOperation.apply(Mockito.any(ManagedChannel.class))).thenReturn(mockAsyncStub);
 
-        target = new MinionGrpcClient(testIpcIdentity, mockMetricRegistry, mockTracer, mockMinionGrpcSslContextBuilderFactory);
+        target = new MinionGrpcClient(testIpcIdentity, mockMetricRegistry, mockTracer, mockSendQueueFactory, mockMinionGrpcSslContextBuilderFactory);
     }
 
     @Test

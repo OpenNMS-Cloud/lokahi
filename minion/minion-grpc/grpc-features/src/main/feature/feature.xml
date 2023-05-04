@@ -56,6 +56,8 @@
         <bundle>mvn:org.opennms.horizon.shared/horizon-common-logging/${project.version}</bundle>
         <bundle>mvn:org.opennms.horizon.shared/ipc-api/${project.version}</bundle>
         <bundle>mvn:org.opennms.horizon.minion/grpc-client/${project.version}</bundle>
+
+        <bundle dependency="true">wrap:mvn:org.rocksdb/rocksdbjni/${rocksdb.version}</bundle>
     </feature>
 
 </features>

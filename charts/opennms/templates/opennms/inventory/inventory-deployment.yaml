@@ -50,10 +50,6 @@ spec:
           image: {{ .Values.OpenNMS.Inventory.Image }}
           imagePullPolicy: {{ .Values.OpenNMS.Inventory.ImagePullPolicy }}
           env:
-            - name: OTEL_SERVICE_NAME
-              value: "{{ .Values.OpenNMS.Inventory.ServiceName }}"
-            - name: OTEL_RESOURCE_ATTRIBUTES
-              value: "service.version={{ .Values.OpenNMS.Inventory.Image }}"
             - name: JAVA_TOOL_OPTIONS
               value: "-javaagent:agent/opentelemetry-javaagent.jar -agentlib:jdwp=transport=dt_socket,server=y,address=5005,suspend=n,quiet=y"  # FIXME: Permanent debug port, enable only for dev mode
             - name: SPRING_DATASOURCE_URL
@@ -79,6 +75,7 @@ spec:
                 secretKeyRef:
                   key: encryptionKey
                   name: {{ .Values.OpenNMS.Inventory.ServiceName }}-encryption-key
+            {{- include "deployment.env" .Values.OpenNMS.Inventory | nindent 12 }}
           envFrom:
           - configMapRef:
               name: spring-boot-env

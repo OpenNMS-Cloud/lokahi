@@ -94,15 +94,15 @@ public class TrapListener implements TrapNotificationListener, Listener {
 
         try {
             TrapDTO trapDTO = transformTrapInfo(trapInformation);
-            LOG.info("Received Trap {}", trapDTO);
-            getMessageDispatcher().send(trapDTO)
-                .whenComplete((t,ex) -> {
-                    if (ex != null) {
-                        LOG.error("An error occured while forwarding trap {} for further processing. The trap will be dropped.", trapInformation, ex);
-                        // This trap will never reach the sink consumer
-                        trapdInstrumentation.incErrorCount();
-                    }
-                });
+	    LOG.info("Received Trap {}", trapDTO);
+            
+            try {
+                getMessageDispatcher().send(trapDTO);
+            } catch (final Exception ex) {
+                LOG.error("An error occured while forwarding trap {} for further processing. The trap will be dropped.", trapInformation, ex);
+                // This trap will never reach the sink consumer
+                trapdInstrumentation.incErrorCount();
+            }
         } catch (Exception ex) {
             LOG.error("Received trap {} is not valid and cannot be processed. The trap will be dropped.", trapInformation, ex);
             // This trap will never reach the sink consumer

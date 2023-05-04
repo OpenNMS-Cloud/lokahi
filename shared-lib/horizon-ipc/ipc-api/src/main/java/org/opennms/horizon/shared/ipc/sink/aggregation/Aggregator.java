@@ -29,6 +29,8 @@
 package org.opennms.horizon.shared.ipc.sink.aggregation;
 
 import com.google.common.util.concurrent.Striped;
+import com.google.protobuf.Message;
+
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -39,6 +41,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
+
 import org.opennms.horizon.shared.ipc.sink.api.AggregationPolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,7 +57,7 @@ import org.slf4j.LoggerFactory;
  * @param <S> individual message
  * @param <T> aggregated message (i.e. bucket)
  */
-public class Aggregator<S, T> implements AutoCloseable, Runnable {
+public class Aggregator<S extends Message, T extends Message, U> implements AutoCloseable {
 
     private static final Logger LOG = LoggerFactory.getLogger(Aggregator.class);
 
@@ -75,9 +78,9 @@ public class Aggregator<S, T> implements AutoCloseable, Runnable {
         .map(Integer::parseInt)
         .orElse(DEFAULT_NUM_STRIPE_LOCKS);
 
-    private final AggregationPolicy<S,T,Object> aggregationPolicy;
+    private final AggregationPolicy<S, T, U> aggregationPolicy;
 
-    private final AggregatingMessageProducer<S,T> messageProducer;
+    private final MessageSender<T> sender;
 
     private final int completionSize;
 
@@ -89,9 +92,11 @@ public class Aggregator<S, T> implements AutoCloseable, Runnable {
 
     private final Striped<Lock> lockStripes = Striped.lock(NUM_STRIPE_LOCKS);
 
-    public Aggregator(String id, AggregationPolicy<S,T,?> policy, AggregatingMessageProducer<S,T> messageProducer) {
-        aggregationPolicy = (AggregationPolicy<S,T,Object>)Objects.requireNonNull(policy);
-        this.messageProducer = Objects.requireNonNull(messageProducer);
+    public Aggregator(final String id,
+                      final AggregationPolicy<S, T, U> policy,
+                      final MessageSender<T> sender) {
+        this.aggregationPolicy = Objects.requireNonNull(policy);
+        this.sender = Objects.requireNonNull(sender);
         completionSize = aggregationPolicy.getCompletionSize();
         completionIntervalMs = aggregationPolicy.getCompletionIntervalMs();
 
@@ -102,7 +107,9 @@ public class Aggregator<S, T> implements AutoCloseable, Runnable {
                 @Override
                 public void run() {
                     try {
-                        Aggregator.this.run();
+                        Aggregator.this.flush();
+                    } catch (final InterruptedException ex) {
+                        Thread.currentThread().interrupt();
                     } catch (Throwable t) {
                         // The timer may abort if we throw, so we catch here to make
                         // sure that the timer keeps running
@@ -123,7 +130,7 @@ public class Aggregator<S, T> implements AutoCloseable, Runnable {
      * @return the bucket if it is ready to be dispatched, or <code>null</code>
      * if nothing is ready to be dispatched
      */
-    public T aggregate(S message) {
+    public void aggregate(S message) throws InterruptedException {
         // Compute the key
         final Object key = aggregationPolicy.key(message);
         // Lock the bucket
@@ -142,18 +149,14 @@ public class Aggregator<S, T> implements AutoCloseable, Runnable {
             if (accumulator != null) {
                 // The bucket is ready to be dispatched
                 buckets.remove(key);
-                return accumulator;
-            } else {
-                // The bucket is NOT ready to be dispatched
-                return null;
+                this.sender.send(accumulator);
             }
         } finally {
             lock.unlock();
         }
     }
 
-    @Override
-    public void run() {
+    private void flush() throws InterruptedException {
         final List<T> messagesReadyForDispatch = new LinkedList<>();
         // Grab a copy of all the current bucket keys
         final Set<Object> keys = new HashSet<>(buckets.keySet());
@@ -186,8 +189,8 @@ public class Aggregator<S, T> implements AutoCloseable, Runnable {
         }
 
         // Dispatch!
-        for (T message : messagesReadyForDispatch) {
-            messageProducer.dispatch(message);
+        for (final T message : messagesReadyForDispatch) {
+            sender.send(message);
         }
     }
 
@@ -199,7 +202,7 @@ public class Aggregator<S, T> implements AutoCloseable, Runnable {
     }
 
     protected class Bucket {
-        private Object accumulator;
+        private U accumulator;
         private int count = 0;
         private Long firstTimeMillis;
 
@@ -229,6 +232,11 @@ public class Aggregator<S, T> implements AutoCloseable, Runnable {
         public Long getFirstTimeMillis() {
             return firstTimeMillis;
         }
+    }
+
+    @FunctionalInterface
+    public interface MessageSender<T> {
+        void send(final T t) throws InterruptedException;
     }
     
 }

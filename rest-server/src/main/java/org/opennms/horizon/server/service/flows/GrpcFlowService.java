@@ -108,14 +108,13 @@ public class GrpcFlowService {
     }
 
     private Exporter getExporter(long interfaceId, ResolutionEnvironment env) {
-        if (headerUtil.getAuthHeader(env) == null) {
-            return null;
-        }
+        String authHeader = Objects.requireNonNull(headerUtil.getAuthHeader(env));
+        Exporter exporter = null;
         try {
-            var ipInterfaceDTO = inventoryClient.getIpInterfaceById(interfaceId, headerUtil.getAuthHeader(env));
+            var ipInterfaceDTO = inventoryClient.getIpInterfaceById(interfaceId, authHeader);
             if (ipInterfaceDTO != null) {
-                var nodeDTO = inventoryClient.getNodeById(ipInterfaceDTO.getNodeId(), headerUtil.getAuthHeader(env));
-                var exporter = new Exporter();
+                var nodeDTO = inventoryClient.getNodeById(ipInterfaceDTO.getNodeId(), authHeader);
+                exporter = new Exporter();
                 exporter.setIpInterface(ipInterfaceMapper.protoToIpInterface(ipInterfaceDTO));
                 exporter.setNode(nodeMapper.protoToNode(nodeDTO));
                 if (nodeDTO.getSnmpInterfacesCount() > 0) {
@@ -125,9 +124,7 @@ public class GrpcFlowService {
                         exporter.setSnmpInterface(snmpInterfaceMapper.protobufToSnmpInterface(filteredSnmpInterfaces.get(0)));
                     }
                 }
-                //inventoryClient
                 exporter.setNode(nodeMapper.protoToNode(nodeDTO));
-                return exporter;
             }
         } catch (StatusRuntimeException ex) {
             if (Status.Code.NOT_FOUND.equals(ex.getStatus().getCode())) {
@@ -137,6 +134,6 @@ public class GrpcFlowService {
                 throw ex;
             }
         }
-        return null;
+        return exporter;
     }
 }

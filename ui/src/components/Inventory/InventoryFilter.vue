@@ -1,6 +1,9 @@
 <template>
   <ul class="filter-container">
-    <li class="autocomplete">
+    <li
+      v-if="!onlyTags"
+      class="autocomplete"
+    >
       <FeatherInput
         @update:model-value="searchNodesByLabel"
         label="Search labels"
@@ -12,10 +15,13 @@
         </template>
       </FeatherInput>
     </li>
-    <li>
-      <div class="or">OR</div> 
+    <li v-if="!onlyTags">
+      <div class="or">OR</div>
     </li>
-    <li class="autocomplete">
+    <li
+      v-if="!onlyTags"
+      class="autocomplete"
+    >
       <BasicAutocomplete
         @items-selected="searchNodesByTags"
         :get-items="tagQueries.getTagsSearch"
@@ -45,6 +51,13 @@ import { Tag } from '@/types/graphql'
 const inventoryStore = useInventoryStore()
 const inventoryQueries = useInventoryQueries()
 const tagQueries = useTagQueries()
+
+defineProps({
+  onlyTags: {
+    type: Boolean,
+    default: false
+  }
+})
 
 const searchNodesByLabelRef = ref()
 const searchNodesByTagsRef = ref()

@@ -10,8 +10,7 @@
   >
     <template v-slot:tabs>
       <FeatherTab>Monitored Nodes</FeatherTab>
-      <!-- TODO: Add @click="inventoryQueries.getUnmonitoredNodes" one BE call available. -->
-      <FeatherTab>Unmonitored Nodes</FeatherTab>
+      <FeatherTab @click="inventoryQueries.getUnmonitoredNodes">Unmonitored Nodes</FeatherTab>
       <FeatherTab @click="inventoryQueries.getDetectedNodes">Detected Nodes</FeatherTab>
     </template>
 
@@ -26,7 +25,7 @@
 
     <!-- Unmonitored Nodes -->
     <FeatherTabPanel>
-      <InventoryFilter />
+      <InventoryFilter onlyTags/>
       <InventoryTabContent
         v-if="tabUnmonitoredContent.length"
         :tabContent="tabUnmonitoredContent"
@@ -35,7 +34,7 @@
 
     <!-- Detected Nodes -->
     <FeatherTabPanel>
-      <InventoryFilter />
+      <InventoryFilter onlyTags />
       <InventoryTabContent
         v-if="tabDetectedContent.length"
         :tabContent="tabDetectedContent"

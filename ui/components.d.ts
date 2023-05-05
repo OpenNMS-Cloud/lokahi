@@ -121,6 +121,7 @@ declare module '@vue/runtime-core' {
     NavigationRailNavItem: typeof import('./src/components/Layout/NavigationRailNavItem.vue')['default']
     NetworkGraph: typeof import('./src/components/Topology/NetworkGraph.vue')['default']
     NodeInfoTable: typeof import('./src/components/NodeStatus/NodeInfoTable.vue')['default']
+    NodeStatusMetricsModal: typeof import('./src/components/NodeStatus/NodeStatusMetricsModal.vue')['default']
     NoFocusMsg: typeof import('./src/components/Topology/NoFocusMsg.vue')['default']
     OptInOutCtrl: typeof import('./src/components/UsageStats/OptInOutCtrl.vue')['default']
     PillColor: typeof import('./src/components/Common/PillColor.vue')['default']

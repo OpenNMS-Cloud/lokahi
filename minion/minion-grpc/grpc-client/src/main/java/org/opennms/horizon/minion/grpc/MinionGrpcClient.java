@@ -173,6 +173,7 @@ public class MinionGrpcClient extends AbstractMessageDispatcherFactory<String> i
         //  not match the hostname used to connect the server.
         if (! Strings.isNullOrEmpty(overrideAuthority)) {
             channelBuilder.overrideAuthority(overrideAuthority);
+            LOG.info("Configuring GRPC override authority {}", overrideAuthority);
         }
 
         if (tlsEnabled) {
@@ -202,7 +203,9 @@ public class MinionGrpcClient extends AbstractMessageDispatcherFactory<String> i
         if (rpcStream != null) {
             rpcStream.onCompleted();
         }
-        channel.shutdown();
+        if (channel != null) {
+            channel.shutdown();
+        }
         LOG.info("Minion at location {} with systemId {} stopped", ipcIdentity.getLocation(), ipcIdentity.getId());
     }
 
@@ -340,6 +343,7 @@ public class MinionGrpcClient extends AbstractMessageDispatcherFactory<String> i
                 asyncStub.cloudToMinionMessages(identity, new CloudMessageObserver(cloudMessageHandler));
                 LOG.info("Initialized cloud receiver stream");
             });
+
     }
 
     private void sendBlockingSinkMessage(SinkMessage sinkMessage) {

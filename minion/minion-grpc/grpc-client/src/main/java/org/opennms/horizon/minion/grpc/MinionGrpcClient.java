@@ -179,10 +179,13 @@ public class MinionGrpcClient extends AbstractMessageDispatcherFactory<String> i
         if (tlsEnabled) {
             SSLContext sslContext = minionGrpcSslContextBuilderFactory.create();
 
+            if (sslContext != null) {
+                channelBuilder.sslSocketFactory(sslContext.getSocketFactory());
+            }
+
             channel = channelBuilder
                     .negotiationType(NegotiationType.TLS)
                     .useTransportSecurity()
-                    .sslSocketFactory(sslContext.getSocketFactory())
                     .build();
 
             LOG.info("TLS enabled for gRPC");

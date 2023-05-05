@@ -81,6 +81,8 @@ public class MinionGrpcSslContextBuilderFactoryImpl implements MinionGrpcSslCont
 
     @Override
     public SSLContext create() {
+        boolean haveTrustOrIdentity = false;
+
         var sslFactoryBuilder = sslFactoryBuilderSupplier.get();
 
         if (isSet(trustCertCollectionFilePath)) {
@@ -88,6 +90,8 @@ public class MinionGrpcSslContextBuilderFactoryImpl implements MinionGrpcSslCont
             if (trustCertCollectionFile.exists()) {
                 X509ExtendedTrustManager trustManager = loadTrustMaterialOp.apply(trustCertCollectionFile.toPath());
                 sslFactoryBuilder.withTrustMaterial(trustManager);
+
+                haveTrustOrIdentity = true;
             } else {
                 throw new RuntimeException("Configured trust store" + trustCertCollectionFile.getAbsolutePath() + " does not exist");
             }
@@ -103,6 +107,8 @@ public class MinionGrpcSslContextBuilderFactoryImpl implements MinionGrpcSslCont
                     } else {
                         configureKeyManagerOther(sslFactoryBuilder, clientCertChainFile.toPath(), clientPrivateKeyFile.toPath());
                     }
+
+                    haveTrustOrIdentity = true;
                 } catch (Exception exc) {
                     throw new RuntimeException("Failed to initialize TLS", exc);
                 }
@@ -111,9 +117,13 @@ public class MinionGrpcSslContextBuilderFactoryImpl implements MinionGrpcSslCont
             }
         }
 
-        var sslFactory = sslFactoryBuilder.build();
+        SSLContext result = null;
+        if (haveTrustOrIdentity) {
+            var sslFactory = sslFactoryBuilder.build();
+            result = sslFactory.getSslContext();
+        }
 
-        return sslFactory.getSslContext();
+        return result;
     }
 
     private boolean isSet(String value) {

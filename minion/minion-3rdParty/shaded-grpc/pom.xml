@@ -29,6 +29,10 @@
         </dependency>
         <dependency>
             <groupId>io.grpc</groupId>
+            <artifactId>grpc-okhttp</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.grpc</groupId>
             <artifactId>grpc-api</artifactId>
         </dependency>
         <dependency>
@@ -81,6 +85,7 @@
                     <instructions>
                         <Import-Package>
                             com.google.protobuf;version="[3.19,4)",
+                            javax.net,
                             javax.net.ssl,
                             javax.security.cert,
                             javax.security.auth.x500,
@@ -92,6 +97,7 @@
                             io.grpc.stub,
                             io.grpc.protobuf,
                             io.grpc.internal,
+                            io.grpc.okhttp,
                             io.grpc.netty.shaded.io.netty.util.collection,
                             io.grpc.netty.shaded.io.grpc.netty,
                             io.grpc.netty.shaded.io.netty.handler.ssl,

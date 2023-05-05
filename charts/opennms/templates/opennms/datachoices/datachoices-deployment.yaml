@@ -15,6 +15,9 @@ spec:
       labels:
         appdomain: opennms
         app: {{ .Values.OpenNMS.DataChoices.ServiceName }}
+      annotations:
+        # roll the deployment when the Spring boot environment variable configmap changes
+        checksum/spring-boot-env-configmap: {{ include (print $.Template.BasePath "/opennms/spring-boot-env-configmap.yaml") . | sha256sum }}
     spec:
       {{- if .Values.NodeRestrictions.Enabled }}
       nodeSelector:                                                                                    
@@ -35,15 +38,19 @@ spec:
                 values:                                                                                
                 - {{ .Values.NodeRestrictions.Value }}                                                 
       {{- end }}
+      volumes:
+        - name: spring-boot-app-config-volume
+          configMap:
+            name: spring-boot-app-config
       containers:
         - name: {{ .Values.OpenNMS.DataChoices.ServiceName }}
           image: {{ .Values.OpenNMS.DataChoices.Image }}
           imagePullPolicy: {{ .Values.OpenNMS.DataChoices.ImagePullPolicy }}
           env:
             - name: JAVA_TOOL_OPTIONS
-              value: "-agentlib:jdwp=transport=dt_socket,server=y,address=5005,suspend=n,quiet=y"  # FIXME: Permanent debug port, enable only for dev mode
+              value: "-javaagent:agent/opentelemetry-javaagent.jar -agentlib:jdwp=transport=dt_socket,server=y,address=5005,suspend=n,quiet=y"  # FIXME: Permanent debug port, enable only for dev mode
             - name: SPRING_DATASOURCE_URL
-              value: "jdbc:postgresql://postgres:5432/datachoices"
+              value: "jdbc:postgresql://{{ .Values.OpenNMS.DataChoices.DbHost }}:5432/{{ .Values.OpenNMS.DataChoices.DbName }}?currentSchema={{ .Values.OpenNMS.DataChoices.DbSchemaName }}"
             - name: SPRING_DATASOURCE_USERNAME
               valueFrom:
                 secretKeyRef:
@@ -60,11 +67,18 @@ spec:
               value: "http://{{ .Values.Keycloak.ServiceName }}:8080/auth/"
             - name: KEYCLOAK_REALM
               value: "{{ .Values.Keycloak.RealmName }}"
+            {{- include "deployment.env" .Values.OpenNMS.DataChoices | nindent 12 }}
+          envFrom:
+          - configMapRef:
+              name: spring-boot-env
           ports:
             - name: http
               containerPort: {{ .Values.OpenNMS.DataChoices.Port }}
             - name: grpc
               containerPort: {{ .Values.OpenNMS.DataChoices.GrpcPort }}
+          volumeMounts:
+            - name: spring-boot-app-config-volume
+              mountPath: "/app/config"
       {{- if .Values.OpenNMS.DataChoices.PrivateRepoEnabled }}
       imagePullSecrets:
         - name: image-credentials

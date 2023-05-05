@@ -94,9 +94,6 @@ public class HeartbeatModule implements SinkModule<HeartbeatMessage, HeartbeatMe
                 return 10;
             }
 
-            public boolean isBlockWhenFull() {
-                return true;
-            }
         };
     }
 }

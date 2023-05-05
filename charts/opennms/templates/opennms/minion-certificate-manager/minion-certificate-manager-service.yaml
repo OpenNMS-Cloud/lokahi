@@ -1,3 +1,4 @@
+{{- if .Values.OpenNMS.MinionCertificateManager.Enabled }}
 apiVersion: v1
 kind: Service
 metadata:
@@ -10,6 +11,7 @@ spec:
   ports:
     - port: {{ .Values.OpenNMS.MinionCertificateManager.Port }}
       protocol: TCP
-      name: http
+      name: grpc
   selector:
     app: {{ .Values.OpenNMS.MinionCertificateManager.ServiceName }}
+{{- end }}

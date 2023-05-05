@@ -62,10 +62,6 @@ public class HeartbeatModule implements SinkModule<Message, Message> {
                 return 1;
             }
 
-            @Override
-            public boolean isBlockWhenFull() {
-                return true;
-            }
         };
     }
 }

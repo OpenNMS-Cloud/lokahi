@@ -15,6 +15,9 @@ spec:
       labels:
         appdomain: opennms
         app: {{ .Values.OpenNMS.Alert.ServiceName }}
+      annotations:
+        # roll the deployment when the Spring boot environment variable configmap changes
+        checksum/spring-boot-env-configmap: {{ include (print $.Template.BasePath "/opennms/spring-boot-env-configmap.yaml") . | sha256sum }}
     spec:
       {{- if .Values.NodeRestrictions.Enabled }}
       nodeSelector:                                                                                    
@@ -35,15 +38,19 @@ spec:
                 values:                                                                                
                 - {{ .Values.NodeRestrictions.Value }}                                                 
       {{- end }}
+      volumes:
+        - name: spring-boot-app-config-volume
+          configMap:
+            name: spring-boot-app-config
       containers:
         - name: {{ .Values.OpenNMS.Alert.ServiceName }}
           image: {{ .Values.OpenNMS.Alert.Image }}
           imagePullPolicy: {{ .Values.OpenNMS.Alert.ImagePullPolicy }}
           env:
             - name: JAVA_TOOL_OPTIONS
-              value: "-agentlib:jdwp=transport=dt_socket,server=y,address=5005,suspend=n,quiet=y" # Permanent debug port in `skaffold dev`
+              value: "-javaagent:agent/opentelemetry-javaagent.jar -agentlib:jdwp=transport=dt_socket,server=y,address=5005,suspend=n,quiet=y" # Permanent debug port in `skaffold dev`
             - name: SPRING_DATASOURCE_URL
-              value: "jdbc:postgresql://postgres:5432/alert"
+              value: "jdbc:postgresql://{{ .Values.OpenNMS.Alert.DbHost }}:5432/{{ .Values.OpenNMS.Alert.DbName }}?currentSchema={{ .Values.OpenNMS.Alert.DbSchemaName }}"
             - name: SPRING_DATASOURCE_USERNAME
               valueFrom:
                 secretKeyRef:
@@ -56,11 +63,18 @@ spec:
                   key: alertPwd
             - name: SPRING_KAFKA_BOOTSTRAP_SERVERS
               value: "{{ .Values.Kafka.ServiceName }}:{{ .Values.Kafka.Port }}"
+            {{- include "deployment.env" .Values.OpenNMS.Alert | nindent 12 }}
+          envFrom:
+          - configMapRef:
+              name: spring-boot-env
           ports:
             - name: http
               containerPort: {{ .Values.OpenNMS.Alert.Port }}
             - name: grpc
               containerPort: {{ .Values.OpenNMS.Alert.GrpcPort }}
+          volumeMounts:
+            - name: spring-boot-app-config-volume
+              mountPath: "/app/config"
       {{- if .Values.OpenNMS.Alert.PrivateRepoEnabled }}
       imagePullSecrets:
         - name: image-credentials

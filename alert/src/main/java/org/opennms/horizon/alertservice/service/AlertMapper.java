@@ -47,11 +47,13 @@ public interface AlertMapper {
 
     @Mappings({
         @Mapping(target = "databaseId", source = "id"),
+        @Mapping(target = "uei", source = "eventUei"),
         @Mapping(target = "lastUpdateTimeMs", source = "lastEventTime"),
         @Mapping(target = "isAcknowledged", expression = "java(alert.getAcknowledgedByUser() != null ? true : false)"),
         @Mapping(target = "ackUser", source = "acknowledgedByUser"),
         @Mapping(target = "ackTimeMs", source = "acknowledgedAt"),
-        @Mapping(target = "monitoringPolicyIdList", source = "monitoringPolicyId")
+        @Mapping(target = "monitoringPolicyIdList", source = "monitoringPolicyId"),
+        @Mapping(target = "label", source = "triggerEvent.triggerEvent")
     })
     org.opennms.horizon.alerts.proto.Alert toProto(Alert alert);
 

@@ -49,12 +49,13 @@ public class CommandExecutor {
         throw new IllegalStateException("Utility class");
     }
 
-    public static void executeCommand(String command) throws IOException, InterruptedException {
-        executeCommand(command, null);
+    public static void executeCommand(String command, String ... params) throws IOException, InterruptedException {
+        executeCommand(command, null, params);
     }
 
-    public static void executeCommand(String command, File directory) throws IOException, InterruptedException {
-        ProcessBuilder processBuilder = new ProcessBuilder("bash", "-c", command).directory(directory);
+    public static void executeCommand(String command, File directory, String ... params) throws IOException, InterruptedException {
+        String commandToExecute = String.format(command, params);
+        ProcessBuilder processBuilder = new ProcessBuilder("bash", "-c", commandToExecute).directory(directory);
         Process process = null;
         try {
             process = processBuilder.start();
@@ -67,7 +68,7 @@ public class CommandExecutor {
             // Wait for the process to complete with a timeout
             boolean completed = process.waitFor(TIMEOUT, TimeUnit.MILLISECONDS);
             if (!completed) {
-                LOG.error("Command timed out: {}. Timeout: {} milliseconds", command, TIMEOUT);
+                LOG.error("Command timed out: {}. Timeout: {} milliseconds", commandToExecute, TIMEOUT);
                 // Cancel both CompletableFutures
                 CompletableFuture.allOf(stdoutFuture, stderrFuture).cancel(true);
             } else {
@@ -77,7 +78,7 @@ public class CommandExecutor {
             // Check the exit value of the process
             int exitValue = process.exitValue();
             if (exitValue != 0) {
-                LOG.error("Command exited with error code: {}. Command: {}", exitValue, command);
+                LOG.error("Command exited with error code: {}. Command: {}", exitValue, commandToExecute);
             }
         } finally {
             if (process != null) {

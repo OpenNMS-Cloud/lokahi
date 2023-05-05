@@ -28,7 +28,9 @@
 package org.opennms.horizon.minioncertmanager.grpc;
 
 import com.google.protobuf.ByteString;
+import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
+import java.util.regex.Pattern;
 import org.opennms.horizon.minioncertmanager.certificate.CertFileUtils;
 import org.opennms.horizon.minioncertmanager.certificate.CommandExecutor;
 import org.opennms.horizon.minioncertmanager.certificate.PKCS8Generator;
@@ -37,6 +39,8 @@ import org.opennms.horizon.minioncertmanager.proto.GetMinionCertificateResponse;
 import org.opennms.horizon.minioncertmanager.proto.MinionCertificateManagerGrpc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
@@ -51,25 +55,44 @@ import java.util.stream.Stream;
 @Component
 public class MinionCertificateManagerImpl extends MinionCertificateManagerGrpc.MinionCertificateManagerImplBase {
 
+    // permitted characters/values for tenant/location parameters
+    private static final Pattern INPUT_PATTERN = Pattern.compile("[^a-zA-Z0-9_\\- ]");
+
     private static final Logger LOG = LoggerFactory.getLogger(MinionCertificateManagerImpl.class);
     private static final String FAILED_TO_GENERATE_ONE_OR_MORE_FILES = "Failed to generate one or more files.";
-    public static final String CA_CERT_COMMAND = "openssl req -new -newkey rsa:4096 -days 3650 -nodes -x509 -subj \"/C=CA/ST=TBD/L=TBD/O=OpenNMS/CN=insecure-opennms-hs-ca\" -keyout CA.key -out CA.cert";
+    public static final String CA_CERT_COMMAND = "openssl req -new -newkey rsa:4096 -days 3650 -nodes -x509 -subj \"/C=CA/ST=TBD/L=TBD/O=OpenNMS/CN=insecure-opennms-hs-ca\" -keyout \"%s\" -out \"%s\"";
 
     private final PKCS8Generator pkcs8Generator;
     private final CertFileUtils certFileUtils;
     private final File caCertFile;
     private final File caKeyFile;
+    private final File serverCertFile;
 
-    public MinionCertificateManagerImpl() throws IOException, InterruptedException {
-        pkcs8Generator = new PKCS8Generator();
-        certFileUtils = new CertFileUtils();
+    @Autowired
+    public MinionCertificateManagerImpl(@Value("${manager.mtls.certificate}") File certificate,
+        @Value("${manager.mtls.privateKey}") File privateKey,
+        @Value("${manager.server.certificate}") File serverCa) throws IOException, InterruptedException {
+        this(certificate, privateKey, serverCa, new PKCS8Generator(), new CertFileUtils());
+    }
 
+    MinionCertificateManagerImpl(File certificate, File key, File serverCa, PKCS8Generator pkcs8Generator, CertFileUtils certFileUtils) throws IOException, InterruptedException {
+        this.pkcs8Generator = pkcs8Generator;
+        this.certFileUtils = certFileUtils;
         LOG.debug("=== TRYING TO RETRIEVE CA CERT");
-        caCertFile = new File("CA.cert");
-        caKeyFile = new File("CA.key");
+        caCertFile = certificate;
+        caKeyFile = key;
+
         if (!caCertFile.exists() || !caKeyFile.exists()) {
-            LOG.debug("=== GENERATE CA CERT");
-            CommandExecutor.executeCommand(CA_CERT_COMMAND);
+            LOG.warn("Generating new certificate and key");
+
+            if (!caCertFile.exists() || !caKeyFile.exists()) {
+                LOG.debug("=== GENERATE CA CERT");
+                CommandExecutor.executeCommand(CA_CERT_COMMAND, caKeyFile.getAbsolutePath(), caCertFile.getAbsolutePath());
+            }
+        }
+        serverCertFile = serverCa;
+        if (serverCertFile != null && serverCertFile.exists()) {
+            LOG.warn("Server uses custom CA certificate, including {} in result archive", serverCertFile);
         }
 
         LOG.info("CA EXISTS: {}, CA PATH {}, CA CAN READ {}", caCertFile.exists(), caCertFile.getAbsolutePath(), caCertFile.canRead());
@@ -80,8 +103,19 @@ public class MinionCertificateManagerImpl extends MinionCertificateManagerGrpc.M
         Path tempDirectory = null;
 
         try {
-            String location = request.getLocation();
-            String tenantId = request.getTenantId();
+            String location = INPUT_PATTERN.matcher(request.getLocation()).replaceAll("");
+            String tenantId = INPUT_PATTERN.matcher(request.getTenantId()).replaceAll("");
+
+            if (location.isBlank() || tenantId.isBlank()) {
+                responseObserver.onError(Status.INVALID_ARGUMENT.withDescription("Missing location and/or tenant information.").asException());
+                return;
+            }
+            if (!location.equals(request.getLocation()) || !tenantId.equals(request.getTenantId())) {
+                // filtered values do not match input values, meaning we received invalid payload
+                LOG.error("Received invalid input for certificate generation, location {}, tenant {}", request.getLocation(), request.getTenantId());
+                responseObserver.onError(Status.INVALID_ARGUMENT.withDescription("Missing location and/or tenant information.").asException());
+            }
+
             String password = UUID.randomUUID().toString();
             tempDirectory = Files.createTempDirectory(Files.createTempDirectory(Files.createTempDirectory("minioncert"), tenantId), location);
 
@@ -100,7 +134,7 @@ public class MinionCertificateManagerImpl extends MinionCertificateManagerGrpc.M
 
             // Create ZIP file
             File file = new File(tempDirectory.toFile(), "minioncert.zip");
-            certFileUtils.createZipFile(file, password, tempDirectory.toFile(), caCertFile);
+            certFileUtils.createZipFile(file, password, tempDirectory.toFile(), serverCertFile);
 
             byte[] zipBytes = certFileUtils.readZipFileToByteArray(file);
             responseObserver.onNext(createResponse(zipBytes, password));
@@ -114,7 +148,6 @@ public class MinionCertificateManagerImpl extends MinionCertificateManagerGrpc.M
     }
 
     private boolean validatePKCS8Files(File directory) {
-        File caCertFile = new File("CA.cert");
         File clientKeyFile = new File(directory, "client.key");
         File clientSignedCertFile = new File(directory, "client.signed.cert");
         LOG.info("CA EXISTS: {}, CA PATH: {}, CA CAN READ: {}, " +

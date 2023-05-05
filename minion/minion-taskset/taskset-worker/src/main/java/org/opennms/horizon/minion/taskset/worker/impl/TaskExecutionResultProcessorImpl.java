@@ -41,7 +41,11 @@ public class TaskExecutionResultProcessorImpl implements TaskExecutionResultProc
     public void queueSendResult(String id, ScanResultsResponse response) {
         TaskSetResults taskSetResults = formatTaskSetResults(id, response);
         log.info("Scan Status: id = {}, results = {} ", id, response.getResults());
-        taskSetSinkDispatcher.send(taskSetResults);
+        try {
+            taskSetSinkDispatcher.send(taskSetResults);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
@@ -50,14 +54,22 @@ public class TaskExecutionResultProcessorImpl implements TaskExecutionResultProc
 
         TaskSetResults taskSetResults = formatTaskSetResults(id, response);
 
-        taskSetSinkDispatcher.send(taskSetResults);
+        try {
+            taskSetSinkDispatcher.send(taskSetResults);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
     public void queueSendResult(String id, CollectionSet collectionSet) {
         TaskSetResults taskSetResults = formatTaskSetResults(id, collectionSet);
         log.info("Collect Status: id = {}, status = {} ", id, collectionSet.getStatus());
-        taskSetSinkDispatcher.send(taskSetResults);
+        try {
+            taskSetSinkDispatcher.send(taskSetResults);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 //========================================

@@ -1,10 +1,11 @@
+{{- if .Values.Ingress.DefaultEndpointsEnabled }}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: opennms-ingress
   namespace: {{ .Release.Namespace }}
   annotations:
-    {{- range $Annotation, $Value := .Values.Keycloak.IngressAnnotations }}
+    {{- range $Annotation, $Value := .Values.OpenNMS.UI.IngressAnnotations }}
     {{ $Annotation | quote }}: {{ $Value | quote }}
     {{- end }}
 spec:
@@ -61,3 +62,4 @@ spec:
         -  {{.Values.Host }}
       secretName: {{ .Values.TLS.Cert.Name }}
   {{- end }}
+{{- end }}

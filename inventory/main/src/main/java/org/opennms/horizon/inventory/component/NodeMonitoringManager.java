@@ -28,6 +28,8 @@
 
 package org.opennms.horizon.inventory.component;
 
+
+import com.google.common.base.Function;
 import com.google.common.base.Strings;
 import com.google.protobuf.InvalidProtocolBufferException;
 import lombok.RequiredArgsConstructor;
@@ -35,10 +37,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.opennms.horizon.events.proto.Event;
 import org.opennms.horizon.inventory.dto.MonitoredState;
 import org.opennms.horizon.inventory.dto.NodeCreateDTO;
+import org.opennms.horizon.inventory.dto.TagCreateDTO;
 import org.opennms.horizon.inventory.exception.EntityExistException;
 import org.opennms.horizon.inventory.exception.InventoryRuntimeException;
 import org.opennms.horizon.inventory.exception.LocationNotFoundException;
 import org.opennms.horizon.inventory.model.Node;
+import org.opennms.horizon.inventory.model.Tag;
+import org.opennms.horizon.inventory.model.discovery.PassiveDiscovery;
+import org.opennms.horizon.inventory.repository.discovery.PassiveDiscoveryRepository;
 import org.opennms.horizon.inventory.service.NodeService;
 import org.opennms.horizon.inventory.service.discovery.PassiveDiscoveryService;
 import org.opennms.horizon.shared.events.EventConstants;
@@ -47,8 +53,11 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -57,8 +66,10 @@ import java.util.Arrays;
 public class NodeMonitoringManager {
     private final NodeService nodeService;
     private final PassiveDiscoveryService passiveDiscoveryService;
+    private final PassiveDiscoveryRepository passiveDiscoveryRepository;
 
     @KafkaListener(topics = "${kafka.topics.internal-events}", concurrency = "1")
+    @Transactional
     public void receiveTrapEvent(@Payload byte[] data) {
         try {
             var event = Event.parseFrom(data);
@@ -67,15 +78,27 @@ public class NodeMonitoringManager {
                     throw new InventoryRuntimeException("Missing tenant id on event: " + event);
                 }
                 var tenantId = event.getTenantId();
-                log.debug("Create new node from event with interface: {}, location: {} and tenant: {}", event.getIpAddress(), event.getLocation(), tenantId);
+                var location = event.getLocation();
+                log.debug("Create new node from event with interface: {}, location: {} and tenant: {}", event.getIpAddress(), location, tenantId);
 
-                NodeCreateDTO createDTO = NodeCreateDTO.newBuilder()
-                    .setLocation(event.getLocation())
+                NodeCreateDTO.Builder nodeCreateBuilder = NodeCreateDTO.newBuilder()
+                    .setLocation(location)
                     .setManagementIp(event.getIpAddress())
                     .setLabel("trap-" + event.getIpAddress())
-                    .setMonitoredState(MonitoredState.DETECTED)
-                    .build();
-                Node node = nodeService.createNode(createDTO, ScanType.NODE_SCAN, tenantId);
+                    .setMonitoredState(MonitoredState.DETECTED);
+
+                Optional<PassiveDiscovery> discoveryOpt = passiveDiscoveryRepository.findByTenantIdAndLocation(tenantId, location);
+
+                if (discoveryOpt.isPresent()){
+                    PassiveDiscovery discovery = discoveryOpt.get();
+
+                    List<TagCreateDTO> tagCreateDtoList = discovery.getTags().stream().map((Function<Tag, TagCreateDTO>) tag ->
+                            TagCreateDTO.newBuilder().setName(tag.getName()).build()).toList();
+
+                    nodeCreateBuilder.addAllTags(tagCreateDtoList);
+                }
+
+                Node node = nodeService.createNode(nodeCreateBuilder.build(), ScanType.NODE_SCAN, tenantId);
                 passiveDiscoveryService.sendNodeScan(node);
             }
         } catch (InvalidProtocolBufferException e) {

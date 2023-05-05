@@ -29,8 +29,8 @@
 
 package org.opennms.horizon.minion.grpc.ssl;
 
-import io.grpc.netty.shaded.io.netty.handler.ssl.SslContextBuilder;
+import javax.net.ssl.SSLContext;
 
 public interface MinionGrpcSslContextBuilderFactory {
-    SslContextBuilder create();
+    SSLContext create();
 }

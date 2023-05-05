@@ -47,6 +47,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+
 import org.opennms.cloud.grpc.minion.CloudToMinionMessage;
 import org.opennms.cloud.grpc.minion.Identity;
 import org.opennms.cloud.grpc.minion.MinionToCloudMessage;
@@ -112,8 +114,8 @@ public class OpennmsGrpcServer extends AbstractMessageConsumerManager implements
     private MinionManager minionManager;
     private TenantIDGrpcServerInterceptor tenantIDGrpcServerInterceptor;
 
-    // Maintains the map of sink modules by it's id.
-    private final Map<String, SinkModule<?, Message>> sinkModulesById = new ConcurrentHashMap<>();
+    private final Map<String, Consumer<SinkMessage>> sinkDispatcherById = new ConcurrentHashMap<>();
+
     // Maintains the map of sink consumer executor and by module Id.
     private final Map<String, ExecutorService> sinkConsumersByModuleId = new ConcurrentHashMap<>();
     private BiConsumer<RpcRequestProto, StreamObserver<RpcResponseProto>> incomingRpcHandler;
@@ -162,7 +164,7 @@ public class OpennmsGrpcServer extends AbstractMessageConsumerManager implements
         rpcConnectionTracker.clear();
 
         rpcRequestTracker.clear();
-        sinkModulesById.clear();
+        sinkDispatcherById.clear();
         grpcIpcServer.stopServer();
         LOG.info("OpenNMS gRPC server stopped");
     }
@@ -244,25 +246,27 @@ public class OpennmsGrpcServer extends AbstractMessageConsumerManager implements
 //----------------------------------------
 
     @Override
-    protected void startConsumingForModule(SinkModule<?, Message> module) throws Exception {
+    protected <S extends Message, T extends Message> void startConsumingForModule(SinkModule<S, T> module) {
         if (sinkConsumersByModuleId.get(module.getId()) == null) {
             int numOfThreads = getNumConsumerThreads(module);
             ExecutorService executor = Executors.newFixedThreadPool(numOfThreads, sinkConsumerThreadFactory);
             sinkConsumersByModuleId.put(module.getId(), executor);
             LOG.info("Adding {} consumers for module: {}", numOfThreads, module.getId());
         }
-        sinkModulesById.putIfAbsent(module.getId(), module);
+        sinkDispatcherById.computeIfAbsent(module.getId(), id -> sinkMessage -> {
+            final T message = module.unmarshal(sinkMessage.getContent().toByteArray());
+            dispatch(module, message);
+        });
     }
 
     @Override
-    protected void stopConsumingForModule(SinkModule<?, Message> module) throws Exception {
-
+    protected void stopConsumingForModule(SinkModule<? extends Message, ? extends Message> module) {
         ExecutorService executor = sinkConsumersByModuleId.get(module.getId());
         if (executor != null) {
             executor.shutdownNow();
         }
         LOG.info("Stopped consumers for module: {}", module.getId());
-        sinkModulesById.remove(module.getId());
+        sinkDispatcherById.remove(module.getId());
     }
 
 //========================================
@@ -315,11 +319,12 @@ public class OpennmsGrpcServer extends AbstractMessageConsumerManager implements
     }
 
     private void dispatchSinkMessage(SinkMessage sinkMessage) {
-        SinkModule<?, Message> sinkModule = sinkModulesById.get(sinkMessage.getModuleId());
-        if (sinkModule != null && sinkMessage.getContent() != null) {
-            Message message = sinkModule.unmarshal(sinkMessage.getContent().toByteArray());
-            dispatch(sinkModule, message);
+        final var dispatcher = this.sinkDispatcherById.get(sinkMessage.getModuleId());
+        if (dispatcher == null) {
+            return;
         }
+
+        dispatcher.accept(sinkMessage);
     }
 
     public void setIncomingRpcHandler(BiConsumer<RpcRequestProto, StreamObserver<RpcResponseProto>> handler) {

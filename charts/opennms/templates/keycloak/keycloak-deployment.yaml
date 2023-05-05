@@ -47,6 +47,8 @@ spec:
               memory: "{{ .Values.Keycloak.Resources.Requests.Memory }}"
           args: ['--import-realm']
           env:
+            - name: JAVA_TOOL_OPTIONS
+              value: "-javaagent:/opt/keycloak/agent/opentelemetry-javaagent.jar"
             - name: KC_CACHE_STACK
               value: kubernetes
             - name: KC_CACHE
@@ -61,10 +63,12 @@ spec:
             - name: KC_HOSTNAME_ADMIN_URL
               value: "{{ .Values.Keycloak.HostnameAdminUrl }}"
             {{- end }}
-            - name: KC_DB
-              value: postgres
+            - name: KC_DB_SCHEMA
+              value: "{{ .Values.Keycloak.DbSchemaName }}"
+            - name: KC_DB_URL_DATABASE
+              value: "{{ .Values.Keycloak.DbName }}"
             - name: KC_DB_URL_HOST
-              value: "{{ .Values.Postgres.ServiceName }}"
+              value: "{{ .Values.Keycloak.DbHost }}"
             - name: KC_DB_USERNAME
               valueFrom:
                 secretKeyRef:
@@ -105,6 +109,26 @@ spec:
             - name: KC_HOSTNAME_STRICT_HTTPS
               value: "false"
             {{- end }}
+            {{- range $Variable, $Value := .Values.Keycloak.Environment }}
+            - name: {{ $Variable | quote }}
+              value: {{ $Value | quote }}
+            {{- end }}
+            {{- if .Values.OpenNMS.global.openTelemetry.otlpTracesEndpoint }}
+            - name: OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
+              value: {{ .Values.OpenNMS.global.openTelemetry.otlpTracesEndpoint | toYaml }}
+            {{- else }}
+            - name: OTEL_TRACES_EXPORTER
+              value: "none"
+            {{- end }}
+            - name: OTEL_METRICS_EXPORTER
+              value: "none"
+            {{- if .Values.OpenNMS.global.openTelemetry.env }}
+              {{- range $key, $val := .Values.OpenNMS.global.openTelemetry.env }}
+            - name: {{ $key }}
+              value: {{ $val | quote }}
+              {{- end }}
+            {{- end }}
+            {{- include "deployment.env" .Values.Keycloak | nindent 12 }}
           ports:
             - name: http
               containerPort: {{ .Values.Keycloak.Port }}

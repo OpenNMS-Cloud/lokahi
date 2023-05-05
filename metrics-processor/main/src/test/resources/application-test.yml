@@ -1,0 +1,38 @@
+spring:
+  kafka:
+    consumer:
+      group-id: "ts-consumer"
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.ByteArrayDeserializer
+    bootstrap-servers: localhost:59092
+
+kafka:
+  topics: "task-set.results"
+  flow-topics: "flows-test"
+
+grpc:
+  server:
+    deadline: 60000
+  inventory:
+    url: opennms-inventory:6565
+  flow-ingestor:
+    # Temporary URL
+    url: flows.onms-dp-dev.dev.nonprod.dataservice.opennms.com:443
+    retry:
+      maxAttempts: 3
+      maxDelay: 5000
+
+
+cortex.write.url: http://cortex:9000/api/v1/push
+cortex.maxconcurrenthttpconnections: 100
+cortex.cortexwritetimeoutinms: 1000
+cortex.readtimeoutinms: 1000
+cortex.bulkheadmaxwaitdurationinms: 9223372036854775807
+cortex.organizationid:
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"

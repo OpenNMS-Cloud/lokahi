@@ -31,12 +31,12 @@ package org.opennms.horizon.minion.grpc;
 
 import com.codahale.metrics.MetricRegistry;
 import io.grpc.ManagedChannel;
-import io.grpc.netty.shaded.io.netty.handler.ssl.SslContextBuilder;
 import io.grpc.stub.StreamObserver;
 import io.opentracing.Tracer;
 import nl.altindag.log.LogCaptor;
 import nl.altindag.log.model.LogEvent;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
@@ -44,7 +44,9 @@ import org.opennms.cloud.grpc.minion.CloudServiceGrpc;
 import org.opennms.cloud.grpc.minion.Identity;
 import org.opennms.horizon.minion.grpc.ssl.MinionGrpcSslContextBuilderFactory;
 import org.opennms.horizon.shared.ipc.rpc.IpcIdentity;
+import org.opennms.horizon.shared.ipc.sink.api.SendQueueFactory;
 
+import javax.net.ssl.SSLContext;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -60,12 +62,14 @@ public class MinionGrpcClientTest {
 
     private MetricRegistry mockMetricRegistry;
     private Tracer mockTracer;
+
+    private SendQueueFactory mockSendQueueFactory;
     private MinionGrpcSslContextBuilderFactory mockMinionGrpcSslContextBuilderFactory;
-    private SslContextBuilder mockSslContextBuilder;
     private MinionGrpcClient.SimpleReconnectStrategyFactory mockSimpleReconnectStrategyFactory;
     private SimpleReconnectStrategy mockSimpleReconnectStrategy;
     private Function<ManagedChannel, CloudServiceGrpc.CloudServiceStub> mockNewStubOperation;
     private CloudServiceGrpc.CloudServiceStub mockAsyncStub;
+    private SSLContext mockSslContext;
 
     private IpcIdentity testIpcIdentity;
 
@@ -73,20 +77,21 @@ public class MinionGrpcClientTest {
     public void setUp() {
         mockMetricRegistry = Mockito.mock(MetricRegistry.class);
         mockTracer = Mockito.mock(Tracer.class);
+        mockSendQueueFactory = Mockito.mock(SendQueueFactory.class);
         mockMinionGrpcSslContextBuilderFactory = Mockito.mock(MinionGrpcSslContextBuilderFactory.class);
-        mockSslContextBuilder = Mockito.mock(SslContextBuilder.class);
         mockSimpleReconnectStrategyFactory = Mockito.mock(MinionGrpcClient.SimpleReconnectStrategyFactory.class);
         mockSimpleReconnectStrategy = Mockito.mock(SimpleReconnectStrategy.class);
         mockNewStubOperation = Mockito.mock(Function.class);
         mockAsyncStub = Mockito.mock(CloudServiceGrpc.CloudServiceStub.class);
+        mockSslContext = Mockito.mock(SSLContext.class);
 
         testIpcIdentity = new MinionIpcIdentity("x-system-id-x", "x-location-x");
 
-        Mockito.when(mockMinionGrpcSslContextBuilderFactory.create()).thenReturn(mockSslContextBuilder);
+        Mockito.when(mockMinionGrpcSslContextBuilderFactory.create()).thenReturn(mockSslContext);
         Mockito.when(mockSimpleReconnectStrategyFactory.create(Mockito.any(ManagedChannel.class), Mockito.any(Runnable.class), Mockito.any(Runnable.class))).thenReturn(mockSimpleReconnectStrategy);
         Mockito.when(mockNewStubOperation.apply(Mockito.any(ManagedChannel.class))).thenReturn(mockAsyncStub);
 
-        target = new MinionGrpcClient(testIpcIdentity, mockMetricRegistry, mockTracer, mockMinionGrpcSslContextBuilderFactory);
+        target = new MinionGrpcClient(testIpcIdentity, mockMetricRegistry, mockTracer, mockSendQueueFactory, mockMinionGrpcSslContextBuilderFactory);
     }
 
     @Test
@@ -94,7 +99,6 @@ public class MinionGrpcClientTest {
         //
         // Setup Test Data and Interactions
         //
-
         try (var logCaptor = LogCaptor.forClass(MinionGrpcClient.class)) {
             //
             // Execute

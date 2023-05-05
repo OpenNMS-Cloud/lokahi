@@ -30,7 +30,7 @@ package org.opennms.miniongateway.grpc.server.flows;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
-import org.opennms.dataplatform.flows.document.FlowDocument;
+
 import org.opennms.dataplatform.flows.document.FlowDocumentLog;
 import org.opennms.horizon.shared.ipc.sink.aggregation.IdentityAggregationPolicy;
 import org.opennms.horizon.shared.ipc.sink.api.AggregationPolicy;
@@ -94,10 +94,6 @@ public class FlowSinkModule implements SinkModule<Message, Message> {
                 return 1;
             }
 
-            @Override
-            public boolean isBlockWhenFull() {
-                return true;
-            }
         };
     }
 }

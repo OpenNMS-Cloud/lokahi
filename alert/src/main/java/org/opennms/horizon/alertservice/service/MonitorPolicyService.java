@@ -107,25 +107,25 @@ public class MonitorPolicyService {
         updateData(policy, tenantId);
         MonitorPolicy newPolicy = repository.save(policy);
         createAlertDefinitionFromPolicy(newPolicy);
-        return policyMapper.entityToProto(newPolicy);
+        return policyMapper.map(newPolicy);
     }
 
     @Transactional(readOnly = true)
     public List<MonitorPolicyProto> listAll(String tenantId) {
         return repository.findAllByTenantId(tenantId)
-            .stream().map(policyMapper::entityToProto).toList();
+            .stream().map(policyMapper::map).toList();
     }
 
     @Transactional(readOnly = true)
     public Optional<MonitorPolicyProto> findById(Long id, String tenantId) {
         return repository.findByIdAndTenantId(id, tenantId)
-            .map(policyMapper::entityToProto);
+            .map(policyMapper::map);
     }
 
     @Transactional(readOnly = true)
     public Optional<MonitorPolicyProto> getDefaultPolicy() {
         return repository.findByName(DEFAULT_POLICY)
-            .map(policyMapper::entityToProto);
+            .map(policyMapper::map);
     }
     private void updateData(MonitorPolicy policy, String tenantId) {
         policy.setTenantId(tenantId);

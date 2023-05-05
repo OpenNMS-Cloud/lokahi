@@ -28,8 +28,11 @@
 
 package org.opennms.horizon.minioncertmanager.testcontainers;
 
+import java.io.File;
 import org.junit.rules.ExternalResource;
+import org.junit.rules.TemporaryFolder;
 import org.keycloak.common.util.Base64;
+import org.opennms.horizon.minioncertmanager.certificate.CaCertificateGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.GenericContainer;
@@ -58,12 +61,14 @@ public class TestContainerRunnerClassRule extends ExternalResource {
 
     private KeyPair jwtKeyPair;
 
+    private TemporaryFolder tempDir = new TemporaryFolder();
+
     public TestContainerRunnerClassRule() {
         applicationContainer = new GenericContainer(DockerImageName.parse(dockerImage));
     }
 
     @Override
-    protected void before() {
+    protected void before() throws Exception {
         network = Network.newNetwork();
         LOG.info("USING TEST DOCKER NETWORK {}", network.getId());
 
@@ -85,13 +90,20 @@ public class TestContainerRunnerClassRule extends ExternalResource {
 // Container Startups
 //----------------------------------------
 
-    private void startApplicationContainer() {
+    private void startApplicationContainer() throws Exception {
+        // create temporary certificates
+        tempDir.create();
+        File temporarySecrets = tempDir.newFolder("mtls");
+        CaCertificateGenerator.generate(temporarySecrets, "OU=openNMS Test,C=CA", 3600);
+        LOG.info("Using temporary CA certificate located in {}", temporarySecrets);
+
         applicationContainer.withNetwork(network)
             .withNetworkAliases("application", "application-host")
             .withExposedPorts(8080, 8990, 5005)
             .withEnv("JAVA_TOOL_OPTIONS", "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005")
             .withEnv("KEYCLOAK_PUBLIC_KEY", Base64.encodeBytes(jwtKeyPair.getPublic().getEncoded()))
-            .withEnv("SPRING_LIQUIBASE_CONTEXTS", "test")
+            .withFileSystemBind(new File(temporarySecrets, "ca.crt").getAbsolutePath(), "/run/secrets/mtls/tls.crt")
+            .withFileSystemBind(new File(temporarySecrets, "ca.key").getAbsolutePath(), "/run/secrets/mtls/tls.key")
             .withLogConsumer(new Slf4jLogConsumer(LOG).withPrefix("APPLICATION"))
             .waitingFor(Wait.forLogMessage(".*Started MinionCertificateManagerApplication.*", 1)
                 .withStartupTimeout(Duration.ofMinutes(1))

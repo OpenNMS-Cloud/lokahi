@@ -32,10 +32,12 @@ import lombok.Getter;
 import lombok.Setter;
 import org.opennms.horizon.server.model.inventory.IpInterface;
 import org.opennms.horizon.server.model.inventory.Node;
+import org.opennms.horizon.server.model.inventory.SnmpInterface;
 
 @Getter
 @Setter
 public class Exporter {
     private Node node;
     private IpInterface ipInterface;
+    private SnmpInterface snmpInterface;
 }

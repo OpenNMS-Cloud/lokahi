@@ -25,9 +25,9 @@
     <tr>
         <td align="left" valign="top">
             <h2 style="margin:0;font-family:'Inter', Helvetica, Arial, sans-serif;">
-                ${alert.getDescription()}
+                ${alert.getLogMessage()}
             </h2>
-            <p style="font-family: 'Open Sans', Georgia, sans-serif;">${alert.getLogMessage()}</p>
+            <p style="font-family: 'Open Sans', Georgia, sans-serif;">${alert.getDescription()}</p>
         </td>
     </tr>
 </table>

@@ -18,6 +18,9 @@ spec:
         appdomain: opennms
         app: {{ .Values.OpenNMS.MinionGatewayGrpcProxy.ServiceName }}
         ignite-cluster: core
+      annotations:
+        # roll the deployment when the Spring boot environment variable configmap changes
+        checksum/spring-boot-env-configmap: {{ include (print $.Template.BasePath "/opennms/spring-boot-env-configmap.yaml") . | sha256sum }}
     spec:
       serviceAccountName: {{ .Values.OpenNMS.MinionGatewayGrpcProxy.ServiceName }}-sa
       {{- if .Values.NodeRestrictions.Enabled }}
@@ -39,19 +42,27 @@ spec:
                 values:                                                                                
                 - {{ .Values.NodeRestrictions.Value }}                                                 
       {{- end }}
+      volumes:
+        - name: spring-boot-app-config-volume
+          configMap:
+            name: spring-boot-app-config
       containers:
         - name: {{ .Values.OpenNMS.MinionGatewayGrpcProxy.ServiceName }}
           image: {{ .Values.OpenNMS.MinionGatewayGrpcProxy.Image }}
           imagePullPolicy: {{ .Values.OpenNMS.MinionGatewayGrpcProxy.ImagePullPolicy }}
           env:
             - name: JAVA_TOOL_OPTIONS
-              value: "-agentlib:jdwp=transport=dt_socket,server=y,address=5005,suspend=n,quiet=y"  # FIXME: Permanent debug port, enable only for dev mode
+              value: "-javaagent:agent/opentelemetry-javaagent.jar -agentlib:jdwp=transport=dt_socket,server=y,address=5005,suspend=n,quiet=y"  # FIXME: Permanent debug port, enable only for dev mode
             - name: KAFKA_BOOTSTRAP_SERVERS
               value: "{{ .Values.Kafka.ServiceName }}:{{ .Values.Kafka.Port }}"
             - name: GRPC_DOWNSTREAM_HOST
               value: "{{ .Values.OpenNMS.MinionGateway.ServiceName }}"
             - name: GRPC_DOWNSTREAM_PORT
               value: "{{ .Values.OpenNMS.MinionGateway.GrpcPort }}"
+            {{- include "deployment.env" .Values.OpenNMS.MinionGatewayGrpcProxy | nindent 12 }}
+          envFrom:
+          - configMapRef:
+              name: spring-boot-env
           ports:
             - name: http
               containerPort: {{ .Values.OpenNMS.MinionGatewayGrpcProxy.Port }}
@@ -62,4 +73,7 @@ spec:
             requests:
               cpu: "{{ .Values.OpenNMS.MinionGatewayGrpcProxy.Resources.Requests.Cpu }}"
               memory: "{{ .Values.OpenNMS.MinionGatewayGrpcProxy.Resources.Requests.Memory }}"
+          volumeMounts:
+            - name: spring-boot-app-config-volume
+              mountPath: "/app/config"
 {{- end }}

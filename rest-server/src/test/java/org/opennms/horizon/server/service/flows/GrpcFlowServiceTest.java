@@ -30,6 +30,8 @@ package org.opennms.horizon.server.service.flows;
 
 import com.google.protobuf.Timestamp;
 import io.grpc.ManagedChannel;
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
 import io.leangen.graphql.execution.ResolutionEnvironment;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -43,6 +45,7 @@ import org.opennms.dataplatform.flows.querier.v1.Summaries;
 import org.opennms.dataplatform.flows.querier.v1.TrafficSummary;
 import org.opennms.horizon.inventory.dto.IpInterfaceDTO;
 import org.opennms.horizon.inventory.dto.NodeDTO;
+import org.opennms.horizon.inventory.dto.SnmpInterfaceDTO;
 import org.opennms.horizon.server.RestServerApplication;
 import org.opennms.horizon.server.model.flows.RequestCriteria;
 import org.opennms.horizon.server.service.grpc.InventoryClient;
@@ -60,6 +63,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.when;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 @SpringBootTest(webEnvironment = RANDOM_PORT, classes = RestServerApplication.class)
@@ -80,15 +84,24 @@ class GrpcFlowServiceTest {
     @MockBean
     private ServerHeaderUtil mockHeaderUtil;
     private IpInterfaceDTO ipInterfaceDTO = IpInterfaceDTO.newBuilder()
-        .setId(1L).setNodeId(1L).setIpAddress("127.0.0.1").setHostname("localhost").setSnmpPrimary(true).build();
-    private NodeDTO nodeDTO = NodeDTO.newBuilder().setId(1L).setNodeLabel("label").build();
+        .setId(1L).setNodeId(1L).setIpAddress("127.0.0.1").setHostname("localhost").setSnmpPrimary(true)
+        .setSnmpInterfaceId(2).build();
+    private NodeDTO nodeDTO = NodeDTO.newBuilder().setId(1L).setNodeLabel("label")
+        .addSnmpInterfaces(SnmpInterfaceDTO.newBuilder().setId(1).setIfIndex(1).setIfName("eth0"))
+        .addSnmpInterfaces(SnmpInterfaceDTO.newBuilder().setId(2).setIfIndex(2).setIfName("eth1")).build();
 
     @BeforeEach
     public void setUp() {
         doReturn(accessToken).when(mockHeaderUtil).getAuthHeader(any());
         doReturn(tenantId).when(mockHeaderUtil).extractTenant(any());
         doReturn(accessToken).when(mockHeaderUtil).getAuthHeader(any(ResolutionEnvironment.class));
-        doReturn(ipInterfaceDTO).when(mockInventoryClient).getIpInterfaceById(anyLong(), anyString());
+        when(mockInventoryClient.getIpInterfaceById(anyLong(), anyString())).thenAnswer(i -> {
+            if (i.getArgument(0).equals(ipInterfaceDTO.getId())) {
+                return ipInterfaceDTO;
+            } else {
+                throw new StatusRuntimeException(Status.NOT_FOUND);
+            }
+        });
         doReturn(nodeDTO).when(mockInventoryClient).getNodeById(anyLong(), anyString());
     }
 
@@ -96,7 +109,8 @@ class GrpcFlowServiceTest {
     void testFindExporters() throws JSONException {
         ArgumentCaptor<String> tenantIdArg = ArgumentCaptor.forClass(String.class);
         ArgumentCaptor<String> accessTokenArg = ArgumentCaptor.forClass(String.class);
-        doReturn(List.of(1L)).when(mockFlowClient)
+        // id = 2 is invalid
+        doReturn(List.of(1L, 2L)).when(mockFlowClient)
             .findExporters(any(RequestCriteria.class), tenantIdArg.capture(), accessTokenArg.capture());
 
         String request = """
@@ -116,15 +130,23 @@ class GrpcFlowServiceTest {
                   hostname
                   snmpPrimary
                 }
+                snmpInterface {
+                  ifName
+                  ifIndex
+                }
               }
             }
             """;
 
+        var matchedSnmpInterface = nodeDTO.getSnmpInterfacesList().stream().filter(s -> s.getId() == ipInterfaceDTO.getSnmpInterfaceId()).findFirst();
         webClient.post().uri(GRAPHQL_PATH).accept(MediaType.APPLICATION_JSON).contentType(MediaType.APPLICATION_JSON)
             .bodyValue(createPayload(request)).exchange().expectStatus().isOk().expectBody()
+            // id = 2 is expected to skip silently
             .jsonPath("$.data.findExporters.size()").isEqualTo(1)
             .jsonPath("$.data.findExporters[0].node.nodeLabel").isEqualTo(nodeDTO.getNodeLabel())
-            .jsonPath("$.data.findExporters[0].ipInterface.ipAddress").isEqualTo(ipInterfaceDTO.getIpAddress());
+            .jsonPath("$.data.findExporters[0].ipInterface.ipAddress").isEqualTo(ipInterfaceDTO.getIpAddress())
+            .jsonPath("$.data.findExporters[0].snmpInterface.ifName").isEqualTo(matchedSnmpInterface.get().getIfName())
+            .jsonPath("$.data.findExporters[0].snmpInterface.ifIndex").isEqualTo(matchedSnmpInterface.get().getIfIndex());
         assertEquals(tenantId, tenantIdArg.getValue());
         assertEquals(accessToken, accessTokenArg.getValue());
     }

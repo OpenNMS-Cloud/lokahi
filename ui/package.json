@@ -14,7 +14,7 @@
     "lint": "eslint --ignore-path ./.gitignore --ext .ts,.vue .",
     "lint:fix": "eslint --ignore-path ./.gitignore --ext .ts,.vue . --fix",
     "format": "prettier --ignore-path ./.gitignore --write \"**/*.+(ts)\"",
-    "generate": "graphql-codegen --config codegen.yml"
+    "generate": "cross-env NODE_TLS_REJECT_UNAUTHORIZED=0 graphql-codegen --config codegen.yml"
   },
   "dependencies": {
     "@dsb-norge/vue-keycloak-js": "^2.2.0",
@@ -93,6 +93,7 @@
     "@vue/test-utils": "^2.2.7",
     "c8": "^7.11.3",
     "casual": "^1.6.2",
+    "cross-env": "^7.0.3",
     "eslint": "^8.32.0",
     "eslint-config-prettier": "^8.6.0",
     "eslint-plugin-vue": "^9.9.0",

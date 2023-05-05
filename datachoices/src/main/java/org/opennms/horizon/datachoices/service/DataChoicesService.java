@@ -80,7 +80,7 @@ public class DataChoicesService {
         List<String> tenantIds = repository.findAll().stream()
             .map(DataChoices::getTenantId).distinct().collect(Collectors.toList());
 
-        System.out.println("tenantIds.size() = " + tenantIds.size());
+        log.info("tenantIds.size() = " + tenantIds.size());
 
 //        todo: perform queries and send HTTP request to usage-stats-handler
     }

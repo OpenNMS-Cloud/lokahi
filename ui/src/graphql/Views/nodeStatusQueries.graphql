@@ -17,6 +17,7 @@ fragment NodeByIdParts on Query {
     systemDescr
     systemLocation
     systemName
+    scanType
     location {
       location
     }

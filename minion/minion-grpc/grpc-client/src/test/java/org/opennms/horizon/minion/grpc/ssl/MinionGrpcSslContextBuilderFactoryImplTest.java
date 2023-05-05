@@ -29,26 +29,26 @@
 
 package org.opennms.horizon.minion.grpc.ssl;
 
-import io.grpc.netty.shaded.io.netty.handler.ssl.ApplicationProtocolConfig;
-import io.grpc.netty.shaded.io.netty.handler.ssl.SslContextBuilder;
-import io.grpc.netty.shaded.io.netty.handler.ssl.SslProvider;
+import nl.altindag.ssl.SSLFactory;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
-import org.mockito.ArgumentMatcher;
 import org.mockito.Mockito;
 
 import org.opennms.horizon.minion.grpc.ssl.MinionGrpcSslContextBuilderFactoryImpl.FunctionWithException;
 
 import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.X509ExtendedKeyManager;
+import javax.net.ssl.X509ExtendedTrustManager;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
-import java.util.Objects;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 
@@ -56,10 +56,23 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class MinionGrpcSslContextBuilderFactoryImplTest {
 
+    public static final String CLIENT_CERT_PATH = "x-client-cert-path";
+    public static final String CLIENT_KEY_PATH = "x-client-key-path";
+    public static final String TRUST_CERT_PATH = "x-trust-cert-path";
+
     private MinionGrpcSslContextBuilderFactoryImpl target;
 
-    private Supplier<SslContextBuilder> mockGrpcSslClientContextFactory;
-    private SslContextBuilder mockSslContextBuilder;
+    private Function<Path, X509ExtendedTrustManager> mockLoadTrustMaterialOp;
+    private X509ExtendedTrustManager mockX509ExtendedTrustManager;
+    private Supplier<SSLFactory.Builder> mockSslFactoryBuilderSupplier;
+    private SSLFactory.Builder mockSslFactoryBuilder;
+    private SSLFactory mockSslFactory;
+    private SSLContext mockSslContext;
+
+    private Function<String, File> mockFileFactory;
+    private File mockClientCertFile;
+    private File mockClientKeyFile;
+    private File mockTrustCertFile;
 
     private FunctionWithException<String, KeyStore, KeyStoreException> mockKeyStoreFactory;
     private KeyStore mockKeyStore;
@@ -70,25 +83,53 @@ public class MinionGrpcSslContextBuilderFactoryImplTest {
     private FunctionWithException<String, KeyManagerFactory, NoSuchAlgorithmException> mockKeyManagerFactoryFactory;
     private KeyManagerFactory mockKeyManagerFactory;
 
+    private MinionGrpcSslContextBuilderFactoryImpl.LoadIdentityMaterialOp mockLoadIdentityMaterialOp;
+    private X509ExtendedKeyManager mockX509ExtendedKeyManager;
+
     @BeforeEach
     public void setUp() throws Exception {
-        mockGrpcSslClientContextFactory = Mockito.mock(Supplier.class);
-        mockSslContextBuilder = Mockito.mock(SslContextBuilder.class);
+        mockLoadTrustMaterialOp = Mockito.mock(Function.class);
+        mockX509ExtendedTrustManager = Mockito.mock(X509ExtendedTrustManager.class);
+        mockSslFactoryBuilderSupplier = Mockito.mock(Supplier.class);
+        mockSslFactoryBuilder = Mockito.mock(SSLFactory.Builder.class);
+        mockSslFactory = Mockito.mock(SSLFactory.class);
+        mockSslContext = Mockito.mock(SSLContext.class);
+        mockClientCertFile = Mockito.mock(File.class);
+        mockClientKeyFile = Mockito.mock(File.class);
+        mockTrustCertFile = Mockito.mock(File.class);
+        mockFileFactory = Mockito.mock(Function.class);
+
         mockKeyStoreFactory = Mockito.mock(FunctionWithException.class);
         mockKeyStore = Mockito.mock(KeyStore.class);
         mockFileInputStreamFactory = Mockito.mock(FunctionWithException.class);
         mockPkcs12FileInputStream = Mockito.mock(FileInputStream.class);
         mockKeyManagerFactoryFactory = Mockito.mock(FunctionWithException.class);
         mockKeyManagerFactory = Mockito.mock(KeyManagerFactory.class);
+        mockLoadIdentityMaterialOp = Mockito.mock(MinionGrpcSslContextBuilderFactoryImpl.LoadIdentityMaterialOp.class);
 
-        Mockito.when(mockGrpcSslClientContextFactory.get()).thenReturn(mockSslContextBuilder);
+        Mockito.when(mockSslFactoryBuilderSupplier.get()).thenReturn(mockSslFactoryBuilder);
+        Mockito.when(mockSslFactoryBuilder.build()).thenReturn(mockSslFactory);
+        Mockito.when(mockSslFactory.getSslContext()).thenReturn(mockSslContext);
         Mockito.when(mockKeyStoreFactory.apply("pkcs12")).thenReturn(mockKeyStore);
-        Mockito.when(mockFileInputStreamFactory.apply("x-client-key-path")).thenReturn(mockPkcs12FileInputStream);
+        Mockito.when(mockFileInputStreamFactory.apply(CLIENT_KEY_PATH)).thenReturn(mockPkcs12FileInputStream);
         Mockito.when(mockKeyManagerFactoryFactory.apply(KeyManagerFactory.getDefaultAlgorithm())).thenReturn(mockKeyManagerFactory);
+        Mockito.when(mockFileFactory.apply(TRUST_CERT_PATH)).thenReturn(mockTrustCertFile);
+        Mockito.when(mockFileFactory.apply(CLIENT_CERT_PATH)).thenReturn(mockClientCertFile);
+        Mockito.when(mockFileFactory.apply(CLIENT_KEY_PATH)).thenReturn(mockClientKeyFile);
+
+        Mockito.when(mockTrustCertFile.getAbsolutePath()).thenReturn("/absolute/path/to/" + TRUST_CERT_PATH);
+        Mockito.when(mockClientCertFile.getAbsolutePath()).thenReturn("/absolute/path/to/" + CLIENT_CERT_PATH);
+        Mockito.when(mockClientKeyFile.getAbsolutePath()).thenReturn("/absolute/path/to/" + CLIENT_KEY_PATH);
+        Mockito.when(mockTrustCertFile.toPath()).thenReturn(Path.of(TRUST_CERT_PATH));
+        Mockito.when(mockClientCertFile.toPath()).thenReturn(Path.of(CLIENT_CERT_PATH));
+        Mockito.when(mockClientKeyFile.toPath()).thenReturn(Path.of(CLIENT_KEY_PATH));
 
         target = new MinionGrpcSslContextBuilderFactoryImpl();
 
-        target.setGrpcSslClientContextFactory(mockGrpcSslClientContextFactory);
+        target.setLoadTrustMaterialOp(mockLoadTrustMaterialOp);
+        target.setLoadIdentityMaterialOp(mockLoadIdentityMaterialOp);
+        target.setSslFactoryBuilderSupplier(mockSslFactoryBuilderSupplier);
+        target.setFileFactory(mockFileFactory);
     }
 
     @Test
@@ -96,13 +137,12 @@ public class MinionGrpcSslContextBuilderFactoryImplTest {
         //
         // Execute
         //
-        SslContextBuilder result = target.create();
+        SSLContext result = target.create();
 
         //
         // Verify the Results
         //
-        assertSame(result, mockSslContextBuilder);
-        Mockito.verifyNoInteractions(mockSslContextBuilder);
+        assertSame(result, mockSslContext);
     }
 
     @Test
@@ -134,49 +174,87 @@ public class MinionGrpcSslContextBuilderFactoryImplTest {
     }
 
     @Test
-    void testCreatePEM(@TempDir File root) throws Exception {
-        commonTestCreatePEM(root, null);
+    void testCreatePEM() throws Exception {
+        Mockito.when(mockClientCertFile.exists()).thenReturn(true);
+        Mockito.when(mockClientKeyFile.exists()).thenReturn(true);
+        Mockito.when(mockTrustCertFile.exists()).thenReturn(true);
+
+        commonTestCreateWithPEM(null);
     }
 
     @Test
-    void testCreatePKCS12(@TempDir File root) throws Exception {
-        commonTestCreatePkcs12(root);
-    }
-
-    @Test
-    void testPasswordNotNullPkcs12(@TempDir File root) throws Exception {
-        target.setClientPrivateKeyPassword("x-password-x");
-        commonTestCreatePkcs12(root);
-    }
-
-    @Test
-    void testPasswordNotNullPEM(@TempDir File root) throws Exception {
-        target.setClientPrivateKeyPassword("x-password-x");
-        commonTestCreatePEM(root, "x-password-x");
-    }
-
-    @Test
-    public void testConfigureKeyManagerException(@TempDir File root) {
+    void testCreatePEMFailInitializeTls() throws Exception {
         //
         // Setup Test Data and Interactions
         //
-        var testException = new RuntimeException("x-text-exc-x");
-        File clientCert = new File(root, "x-client-cert-path");
-        File clientKey = new File(root, "x-client-key-path");
-        Mockito.when(mockSslContextBuilder.keyManager(clientCert, clientKey, null)).thenThrow(testException);
+        Mockito.when(mockClientCertFile.exists()).thenReturn(true);
+        Mockito.when(mockClientKeyFile.exists()).thenReturn(true);
+        Mockito.when(mockTrustCertFile.exists()).thenReturn(true);
+
+        target.setClientCertChainFilePath(CLIENT_CERT_PATH);
+        target.setClientPrivateKeyFilePath(CLIENT_KEY_PATH);
+        target.setClientPrivateKeyIsPkcs12(false);
+        target.setTrustCertCollectionFilePath(TRUST_CERT_PATH);
+        RuntimeException testException = new RuntimeException("x-test-exception-x");
+        Mockito.when(mockLoadIdentityMaterialOp.loadIdentityMaterial(Path.of(CLIENT_CERT_PATH), Path.of(CLIENT_KEY_PATH), null)).thenThrow(testException);
 
         //
         // Execute
         //
-        target.setClientCertChainFilePath(clientCert.getAbsolutePath());
-        target.setClientPrivateKeyFilePath(clientKey.getAbsolutePath());
+        Exception caughtException = null;
+        try {
+            SSLContext result = target.create();
+            fail("Missing expected exception");
+        } catch (Exception actualException) {
+            caughtException = actualException;
+        }
+
+        //
+        // Verify the Results
+        //
+        assertTrue(caughtException.getMessage().contains("Failed to initialize TLS"));
+        assertSame(testException, caughtException.getCause());
+    }
+
+    @Test
+    void testCreatePKCS12() throws Exception {
+        commonTestCreateWithPkcs12();
+    }
+
+    @Test
+    void testPasswordNotNullPkcs12() throws Exception {
+        target.setClientPrivateKeyPassword("x-password-x");
+        commonTestCreateWithPkcs12();
+    }
+
+    @Test
+    void testPasswordNotNullPEM() throws Exception {
+        Mockito.when(mockClientCertFile.exists()).thenReturn(true);
+        Mockito.when(mockClientKeyFile.exists()).thenReturn(true);
+        Mockito.when(mockTrustCertFile.exists()).thenReturn(true);
+
+        target.setClientPrivateKeyPassword("x-password-x");
+        commonTestCreateWithPEM("x-password-x");
+    }
+
+    @Test
+    public void testConfigureKeyManagerException() {
+        //
+        // Setup Test Data and Interactions
+        //
+
+        //
+        // Execute
+        //
+        target.setClientCertChainFilePath(CLIENT_CERT_PATH);
+        target.setClientPrivateKeyFilePath(CLIENT_KEY_PATH);
         target.setClientPrivateKeyIsPkcs12(false);
-        target.setTrustCertCollectionFilePath("x-trust-cert-path");
+        target.setTrustCertCollectionFilePath(TRUST_CERT_PATH);
 
         Exception actualException = null;
 
         try {
-            SslContextBuilder result = target.create();
+            SSLContext result = target.create();
             fail("missing expected exception");
         } catch (Exception exc) {
             actualException = exc;
@@ -188,108 +266,130 @@ public class MinionGrpcSslContextBuilderFactoryImplTest {
         assertTrue(actualException.getMessage().contains("x-trust-cert-path does not exist"));
     }
 
+    @Test
+    public void testConfigureClientKeyDoesNotExist() {
+        //
+        // Setup Test Data and Interactions
+        //
+
+        //
+        // Execute
+        //
+        Mockito.when(mockTrustCertFile.exists()).thenReturn(true);
+        Mockito.when(mockClientCertFile.exists()).thenReturn(true);
+        Mockito.when(mockClientKeyFile.exists()).thenReturn(false);
+
+        target.setClientCertChainFilePath(CLIENT_CERT_PATH);
+        target.setClientPrivateKeyFilePath(CLIENT_KEY_PATH);
+        target.setClientPrivateKeyIsPkcs12(false);
+        target.setTrustCertCollectionFilePath(TRUST_CERT_PATH);
+
+        Exception actualException = null;
+
+        try {
+            SSLContext result = target.create();
+            fail("missing expected exception");
+        } catch (Exception exc) {
+            actualException = exc;
+        }
+
+        //
+        // Verify the Results
+        //
+        assertTrue(actualException.getMessage().contains("Configured client private key /absolute/path/to/x-client-key-path and/or certificate /absolute/path/to/x-client-cert-path do not exist"));
+    }
+
+    @Test
+    public void testConfigureClientCertificateDoesNotExist() {
+        //
+        // Setup Test Data and Interactions
+        //
+
+        //
+        // Execute
+        //
+        Mockito.when(mockTrustCertFile.exists()).thenReturn(true);
+        Mockito.when(mockClientCertFile.exists()).thenReturn(false);
+        Mockito.when(mockClientKeyFile.exists()).thenReturn(true);
+
+        target.setClientCertChainFilePath(CLIENT_CERT_PATH);
+        target.setClientPrivateKeyFilePath(CLIENT_KEY_PATH);
+        target.setClientPrivateKeyIsPkcs12(false);
+        target.setTrustCertCollectionFilePath(TRUST_CERT_PATH);
+
+        Exception actualException = null;
+
+        try {
+            target.create();
+            fail("missing expected exception");
+        } catch (Exception exc) {
+            actualException = exc;
+        }
+
+        //
+        // Verify the Results
+        //
+        assertTrue(actualException.getMessage().contains("Configured client private key /absolute/path/to/x-client-key-path and/or certificate /absolute/path/to/x-client-cert-path do not exist"));
+    }
+
 //========================================
 // Internals
 //----------------------------------------
 
-    void commonTestCreatePEM(File root, String expectedPassword) throws IOException {
+    void commonTestCreateWithPEM(String expectedPassword) throws IOException {
         //
         // Setup Test Data and Interactions
         //
-        var clientCert = new File(root, "x-client-cert-path");
-        var clientKey = new File(root, "x-client-key-path");
-        var trustCert = new File(root, "x-trust-cert-path");
-        clientCert.createNewFile();
-        clientKey.createNewFile();
-        trustCert.createNewFile();
+        char[] expectedPassArr = null;
+        if (expectedPassword != null) {
+            expectedPassArr = expectedPassword.toCharArray();
+        }
+
+        Mockito.when(mockLoadIdentityMaterialOp.loadIdentityMaterial(Path.of(CLIENT_CERT_PATH), Path.of(CLIENT_KEY_PATH), expectedPassArr)).thenReturn(mockX509ExtendedKeyManager);
+
 
         //
         // Execute
         //
-        target.setClientCertChainFilePath(clientCert.getAbsolutePath());
-        target.setClientPrivateKeyFilePath(clientKey.getAbsolutePath());
+        target.setClientCertChainFilePath(CLIENT_CERT_PATH);
+        target.setClientPrivateKeyFilePath(CLIENT_KEY_PATH);
         target.setClientPrivateKeyIsPkcs12(false);
-        target.setTrustCertCollectionFilePath(trustCert.getAbsolutePath());
+        target.setTrustCertCollectionFilePath(TRUST_CERT_PATH);
 
-        SslContextBuilder result = target.create();
+        SSLContext result = target.create();
 
         //
         // Verify the Results
         //
-        assertSame(result, mockSslContextBuilder);
-        Mockito.verify(mockSslContextBuilder).trustManager(trustCert);
-        Mockito.verify(mockSslContextBuilder).keyManager(clientCert, clientKey, expectedPassword);
+        assertSame(result, mockSslContext);
     }
 
-    private void commonTestCreatePkcs12(File root) throws IOException {
+    private void commonTestCreateWithPkcs12() throws IOException {
         //
         // Setup Test Data and Interactions
         //
-        Mockito.when(mockSslContextBuilder.keyManager(Mockito.any(KeyManagerFactory.class))).thenReturn(mockSslContextBuilder);
-        Mockito.when(mockSslContextBuilder.sslProvider(SslProvider.JDK)).thenReturn(mockSslContextBuilder);
-        Mockito.when(mockSslContextBuilder.applicationProtocolConfig(Mockito.any(ApplicationProtocolConfig.class))).thenReturn(mockSslContextBuilder);
+        Mockito.when(mockClientCertFile.exists()).thenReturn(true);
+        Mockito.when(mockClientKeyFile.exists()).thenReturn(true);
+        Mockito.when(mockTrustCertFile.exists()).thenReturn(true);
 
         //
         // Execute
         //
-        File clientCert = new File(root, "x-client-cert-path");
-        clientCert.createNewFile();
-        File clientKey = new File(root, "x-client-key-path");
-        clientKey.createNewFile();
-        File trustCert = new File(root, "x-trust-cert-path");
-        trustCert.createNewFile();
-        target.setClientCertChainFilePath(clientCert.getAbsolutePath());
-        target.setClientPrivateKeyFilePath(clientKey.getAbsolutePath());
+        target.setClientCertChainFilePath(CLIENT_CERT_PATH);
+        target.setClientPrivateKeyFilePath(CLIENT_KEY_PATH);
         target.setClientPrivateKeyIsPkcs12(true);
-        target.setTrustCertCollectionFilePath(trustCert.getAbsolutePath());
+        target.setTrustCertCollectionFilePath(TRUST_CERT_PATH);
         target.setKeyStoreFactory(mockKeyStoreFactory);
         target.setFileInputStreamFactory(mockFileInputStreamFactory);
         target.setKeyManagerFactoryFactory(mockKeyManagerFactoryFactory);
+        target.setLoadIdentityMaterialOp(mockLoadIdentityMaterialOp);
 
-        SslContextBuilder result = target.create();
+        SSLContext result = target.create();
 
         //
         // Verify the Results
         //
-        var matcher =
-            makeApplicationProtocolConfigMatcher(
-                ApplicationProtocolConfig.Protocol.ALPN,
-                ApplicationProtocolConfig.SelectorFailureBehavior.FATAL_ALERT,
-                ApplicationProtocolConfig.SelectedListenerFailureBehavior.FATAL_ALERT,
-                "h2");
-
-        assertSame(result, mockSslContextBuilder);
-        Mockito.verify(mockSslContextBuilder).trustManager(trustCert);
-        Mockito.verify(mockSslContextBuilder).keyManager(mockKeyManagerFactory);
-        Mockito.verify(mockSslContextBuilder).applicationProtocolConfig(Mockito.argThat(matcher));
+        assertSame(result, mockSslContext);
     }
 
-    private ArgumentMatcher<ApplicationProtocolConfig>
-    makeApplicationProtocolConfigMatcher(
-        ApplicationProtocolConfig.Protocol protocol,
-        ApplicationProtocolConfig.SelectorFailureBehavior selectorBehavior,
-        ApplicationProtocolConfig.SelectedListenerFailureBehavior selectedBehavior,
-        String... supportedProtocols) {
-
-        return argument -> {
-            if (
-                (argument.protocol() == protocol) &&
-                (argument.selectorFailureBehavior() == selectorBehavior) &&
-                (argument.selectedListenerFailureBehavior() == selectedBehavior) &&
-                (argument.supportedProtocols().size() == supportedProtocols.length)) {
-
-                int cur = 0;
-                while (cur < supportedProtocols.length) {
-                    if (!Objects.equals(supportedProtocols[cur], argument.supportedProtocols().get(cur))) {
-                        return false;
-                    }
-                    cur++;
-                }
-
-                return true;
-            }
-
-            return false;
-        };
-    }
 }

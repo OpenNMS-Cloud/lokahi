@@ -1,0 +1,19 @@
+{{- if .Values.TLS.CertificateGeneration }}
+apiVersion: v1
+kind: Secret
+metadata:
+  name: client-root-ca-certificate
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    "helm.sh/resource-policy": keep
+type: kubernetes.io/tls
+{{$ca := genCA "client-ca" 14 }}
+data:
+  ca.crt: >-
+    {{ b64enc $ca.Cert }}
+  tls.crt: >-
+    {{b64enc $ca.Cert }}
+  tls.key: >-
+    {{b64enc $ca.Key }}
+{{- end }}
+

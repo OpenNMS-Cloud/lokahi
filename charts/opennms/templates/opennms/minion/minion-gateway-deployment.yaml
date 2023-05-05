@@ -17,6 +17,9 @@ spec:
         appdomain: opennms
         app: {{ .Values.OpenNMS.MinionGateway.ServiceName }}
         ignite-cluster: core
+      annotations:
+        # roll the deployment when the Spring boot environment variable configmap changes
+        checksum/spring-boot-env-configmap: {{ include (print $.Template.BasePath "/opennms/spring-boot-env-configmap.yaml") . | sha256sum }}
     spec:
       serviceAccountName: {{ .Values.OpenNMS.Minion.ServiceName }}-sa
       {{- if .Values.NodeRestrictions.Enabled }}
@@ -44,13 +47,16 @@ spec:
             name: minion-gateway-ignite-config
         - name: ignite-volume
           emptyDir: {}
+        - name: spring-boot-app-config-volume
+          configMap:
+            name: spring-boot-app-config
       containers:
         - name: {{ .Values.OpenNMS.MinionGateway.ServiceName }}
           image: {{ .Values.OpenNMS.MinionGateway.Image }}
           imagePullPolicy: {{ .Values.OpenNMS.Minion.ImagePullPolicy }}
           env:
             - name: JAVA_TOOL_OPTIONS
-              value: "-agentlib:jdwp=transport=dt_socket,server=y,address=5005,suspend=n,quiet=y -XX:MaxDirectMemorySize=768m"  # FIXME: Permanent debug port, enable only for dev mode
+              value: "-javaagent:agent/opentelemetry-javaagent.jar -agentlib:jdwp=transport=dt_socket,server=y,address=5005,suspend=n,quiet=y -XX:MaxDirectMemorySize=768m"  # FIXME: Permanent debug port, enable only for dev mode
             - name: SPRING_DATASOURCE_USERNAME
               valueFrom:
                 secretKeyRef:
@@ -61,11 +67,17 @@ spec:
                 secretKeyRef:
                   name: postgres
                   key: minionGatewayPwd
+            - name: SPRING_DATASOURCE_URL
+              value: "jdbc:postgresql://{{ .Values.OpenNMS.MinionGateway.DbHost }}:5432/{{ .Values.OpenNMS.MinionGateway.DbName }}?currentSchema={{ .Values.OpenNMS.MinionGateway.DbSchemaName }}"
             - name: SPRING_KAFKA_BOOTSTRAP_SERVERS
             - name: KAFKA_BOOTSTRAP_SERVERS
               value: "{{ .Values.Kafka.ServiceName }}:{{ .Values.Kafka.Port }}"
             - name: IGNITE_UPDATE_NOTIFIER # Disable Ignite version lookups
               value: "false"
+            {{- include "deployment.env" .Values.OpenNMS.MinionGateway | nindent 12 }}
+          envFrom:
+          - configMapRef:
+              name: spring-boot-env
           ports:
             - name: http
               containerPort: {{ .Values.OpenNMS.MinionGateway.Port }}
@@ -80,6 +92,8 @@ spec:
               mountPath: "/app/resources/ignite"
             - name: ignite-volume
               mountPath: /ignite
+            - name: spring-boot-app-config-volume
+              mountPath: "/app/config"
           resources:
             limits:
               cpu: "{{ .Values.OpenNMS.MinionGateway.Resources.Limits.Cpu }}"

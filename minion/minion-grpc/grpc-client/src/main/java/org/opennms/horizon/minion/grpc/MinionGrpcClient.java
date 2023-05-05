@@ -32,6 +32,7 @@ import static org.opennms.horizon.shared.ipc.rpc.api.RpcModule.MINION_HEADERS_MO
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
@@ -44,6 +45,8 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 
 import com.google.common.base.Strings;
+import io.grpc.okhttp.NegotiationType;
+import io.grpc.okhttp.OkHttpChannelBuilder;
 import lombok.Setter;
 import org.opennms.cloud.grpc.minion.CloudServiceGrpc;
 import org.opennms.cloud.grpc.minion.CloudServiceGrpc.CloudServiceStub;
@@ -57,6 +60,7 @@ import org.opennms.horizon.minion.grpc.rpc.RpcRequestHandler;
 import org.opennms.horizon.minion.grpc.ssl.MinionGrpcSslContextBuilderFactory;
 import org.opennms.horizon.shared.ipc.rpc.IpcIdentity;
 import org.opennms.horizon.shared.ipc.rpc.api.minion.ClientRequestDispatcher;
+import org.opennms.horizon.shared.ipc.sink.api.SendQueueFactory;
 import org.opennms.horizon.shared.ipc.sink.api.MessageConsumerManager;
 import org.opennms.horizon.shared.ipc.sink.api.SinkModule;
 import org.opennms.horizon.shared.ipc.sink.common.AbstractMessageDispatcherFactory;
@@ -70,11 +74,10 @@ import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
 
 import io.grpc.ManagedChannel;
-import io.grpc.netty.shaded.io.grpc.netty.NegotiationType;
-import io.grpc.netty.shaded.io.grpc.netty.NettyChannelBuilder;
-import io.grpc.netty.shaded.io.netty.handler.ssl.SslContextBuilder;
 import io.grpc.stub.StreamObserver;
 import io.opentracing.Tracer;
+
+import javax.net.ssl.SSLContext;
 
 /**
  * Minion GRPC client runs both RPC/Sink together.
@@ -90,8 +93,6 @@ import io.opentracing.Tracer;
  * messages are buffered and blocked till minion is able to connect to OpenNMS.
  */
 public class MinionGrpcClient extends AbstractMessageDispatcherFactory<String> implements ClientRequestDispatcher {
-
-    static final String SINK_METRIC_PRODUCER_DOMAIN = "org.opennms.core.ipc.sink.producer";
 
     private static final Logger LOG = LoggerFactory.getLogger(MinionGrpcClient.class);
     private static final long SINK_BLOCKING_TIMEOUT = 1000;
@@ -136,6 +137,8 @@ public class MinionGrpcClient extends AbstractMessageDispatcherFactory<String> i
     @Setter
     private String overrideAuthority;
 
+    private final SendQueueFactory sendQueueFactory;
+
 //========================================
 // Constructor
 //----------------------------------------
@@ -144,11 +147,13 @@ public class MinionGrpcClient extends AbstractMessageDispatcherFactory<String> i
         IpcIdentity ipcIdentity,
         MetricRegistry metricRegistry,
         Tracer tracer,
+        SendQueueFactory sendQueueFactory,
         MinionGrpcSslContextBuilderFactory minionGrpcSslContextBuilderFactory) {
 
         this.ipcIdentity = ipcIdentity;
         this.metricRegistry = metricRegistry;
         this.tracer = tracer;
+        this.sendQueueFactory = Objects.requireNonNull(sendQueueFactory);
         this.minionGrpcSslContextBuilderFactory = minionGrpcSslContextBuilderFactory;
     }
 
@@ -157,7 +162,7 @@ public class MinionGrpcClient extends AbstractMessageDispatcherFactory<String> i
 //----------------------------------------
 
     public void start() throws IOException {
-        NettyChannelBuilder channelBuilder = NettyChannelBuilder.forAddress(grpcHost, grpcPort)
+        OkHttpChannelBuilder channelBuilder = OkHttpChannelBuilder.forAddress(grpcHost, grpcPort)
                 .keepAliveWithoutCalls(true)
                 .maxInboundMessageSize(maxInboundMessageSize);
 
@@ -169,11 +174,12 @@ public class MinionGrpcClient extends AbstractMessageDispatcherFactory<String> i
         }
 
         if (tlsEnabled) {
-            SslContextBuilder sslContextBuilder = minionGrpcSslContextBuilderFactory.create();
+            SSLContext sslContext = minionGrpcSslContextBuilderFactory.create();
 
             channel = channelBuilder
                     .negotiationType(NegotiationType.TLS)
-                    .sslContext(sslContextBuilder.build())
+                    .useTransportSecurity()
+                    .sslSocketFactory(sslContext.getSocketFactory())
                     .build();
 
             LOG.info("TLS enabled for gRPC");
@@ -211,11 +217,6 @@ public class MinionGrpcClient extends AbstractMessageDispatcherFactory<String> i
 //----------------------------------------
 
     @Override
-    public String getMetricDomain() {
-        return SINK_METRIC_PRODUCER_DOMAIN;
-    }
-
-    @Override
     public Tracer getTracer() {
         return tracer;
     }
@@ -225,6 +226,10 @@ public class MinionGrpcClient extends AbstractMessageDispatcherFactory<String> i
         return metricRegistry;
     }
 
+    @Override
+    protected SendQueueFactory getSendQueueFactory() {
+        return this.sendQueueFactory;
+    }
 
 //========================================
 // Processing
@@ -232,16 +237,14 @@ public class MinionGrpcClient extends AbstractMessageDispatcherFactory<String> i
 
     @Override
     // public <S extends org.opennms.horizon.ipc.sink.api.Message, T extends org.opennms.horizon.ipc.sink.api.Message> void dispatch(SinkModule<S, T> module, String metadata, T message) {
-    public <S extends Message, T extends Message> void dispatch(SinkModule<S, T> module, String metadata, T message) {
-
+    public <S extends Message, T extends Message> void dispatch(SinkModule<S, T> module, String metadata, byte[] message) {
         try (MDCCloseable mdc = MDC.putCloseable("prefix", MessageConsumerManager.LOG_PREFIX)) {
-            byte[] sinkMessageContent = module.marshal(message);
             String messageId = UUID.randomUUID().toString();
             SinkMessage.Builder sinkMessageBuilder = SinkMessage.newBuilder()
                     .setMessageId(messageId)
                     .setLocation(ipcIdentity.getLocation())
                     .setModuleId(module.getId())
-                    .setContent(ByteString.copyFrom(sinkMessageContent));
+                    .setContent(ByteString.copyFrom(message));
 
             // If module has asyncpolicy, keep attempting to send message.
             if (module.getAsyncPolicy() != null) {

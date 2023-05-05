@@ -17,7 +17,9 @@ ENV KC_CACHE_STACK=kubernetes
 WORKDIR /opt/keycloak
 
 # Install custom providers
-RUN curl -sL https://github.com/aerogear/keycloak-metrics-spi/releases/download/2.5.3/keycloak-metrics-spi-2.5.3.jar -o /opt/keycloak/providers/keycloak-metrics-spi-2.5.3.jar
+RUN curl -sSfL https://github.com/aerogear/keycloak-metrics-spi/releases/download/2.5.3/keycloak-metrics-spi-2.5.3.jar -o /opt/keycloak/providers/keycloak-metrics-spi-2.5.3.jar
+RUN mkdir -p /opt/keycloak/agent
+RUN curl -sSfL https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v1.25.0/opentelemetry-javaagent.jar -o /opt/keycloak/agent/opentelemetry-javaagent.jar
 
 COPY --link --chown=1000 themes themes
 

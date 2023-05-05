@@ -28,8 +28,6 @@
 
 package org.opennms.horizon.shared.ipc.sink.api;
 
-import java.util.concurrent.CompletableFuture;
-
 import com.google.protobuf.Message;
 
 /**
@@ -44,29 +42,9 @@ public interface AsyncDispatcher<S extends Message> extends AutoCloseable {
     /**
      * Asynchronously send the given message.
      *
-     * @param message the message to send
-     * @return a future that is resolved once the message was dispatched or queued
-     */
-    CompletableFuture<DispatchStatus> send(S message);
-
-    /**
-     * Returns the number of messages that are currently queued
-     * awaiting for dispatch.
+     * This blocks if the send queue is full.
      *
-     * @return current queue size
+     * @param message the message to send
      */
-    int getQueueSize();
-    
-    enum DispatchStatus {
-        /**
-         * The message was actually dispatched.
-         */
-        DISPATCHED,
-
-        /**
-         * The message has been queued to be dispatched later.
-         */
-        QUEUED
-    }
-
+    void send(S message) throws InterruptedException;
 }

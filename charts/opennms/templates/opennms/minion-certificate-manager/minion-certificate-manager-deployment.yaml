@@ -1,3 +1,4 @@
+{{- if .Values.OpenNMS.MinionCertificateManager.Enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -35,6 +36,13 @@ spec:
                 values:                                                                                
                 - {{ .Values.NodeRestrictions.Value }}                                                 
       {{- end }}
+      volumes:
+        - name: certificate-secrets
+          secret:
+            secretName: {{ .Values.OpenNMS.MinionCertificateManager.CaSecretName }}
+        - name: minion-certificate-manager-secrets
+          secret:
+            secretName: {{ .Values.OpenNMS.MinionCertificateManager.MtlsSecretName }}
       containers:
         - name: {{ .Values.OpenNMS.MinionCertificateManager.ServiceName }}
           image: {{ .Values.OpenNMS.MinionCertificateManager.Image }}
@@ -49,9 +57,18 @@ spec:
             - name: GRPC_SERVER_PORT
               value: "{{ .Values.OpenNMS.MinionCertificateManager.Port }}"
           ports:
-            - name: http
+            - name: grpc
               containerPort: {{ .Values.OpenNMS.MinionCertificateManager.Port }}
+          volumeMounts:
+            - name: certificate-secrets
+              mountPath: "/run/secrets/certificates"
+              readOnly: true
+            - name: minion-certificate-manager-secrets
+              mountPath: "/run/secrets/mtls"
+              readOnly: true
       {{- if .Values.OpenNMS.MinionCertificateManager.PrivateRepoEnabled }}
       imagePullSecrets:
         - name: image-credentials
       {{- end }}
+
+{{- end }}

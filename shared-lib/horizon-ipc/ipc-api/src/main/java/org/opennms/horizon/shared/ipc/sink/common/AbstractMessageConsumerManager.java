@@ -31,21 +31,18 @@ package org.opennms.horizon.shared.ipc.sink.common;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.stream.Collectors;
+
 import org.opennms.horizon.shared.ipc.sink.api.MessageConsumer;
 import org.opennms.horizon.shared.ipc.sink.api.MessageConsumerManager;
 import org.opennms.horizon.shared.ipc.sink.api.SinkModule;
@@ -67,11 +64,11 @@ public abstract class AbstractMessageConsumerManager implements MessageConsumerM
 
     protected final ExecutorService startupExecutor = Executors.newCachedThreadPool(threadFactory);
 
-    private final Map<SinkModule<?, Message>, Set<MessageConsumer<?, Message>>> consumersByModule = new ConcurrentHashMap<>();
+    private final Map<SinkModule<? extends Message, ? extends Message>, Set<MessageConsumer<? extends Message, ? extends Message>>> consumersByModule = new ConcurrentHashMap<>();
 
-    protected abstract void startConsumingForModule(SinkModule<?, Message> module) throws Exception;
+    protected abstract <S extends Message, T extends Message> void startConsumingForModule(SinkModule<S, T> module);
 
-    protected abstract void stopConsumingForModule(SinkModule<?, Message> module) throws Exception;
+    protected abstract void stopConsumingForModule(SinkModule<? extends Message, ? extends Message> module);
 
     public final CompletableFuture<Void> waitForStartup;
 
@@ -102,27 +99,26 @@ public abstract class AbstractMessageConsumerManager implements MessageConsumerM
 
     @SuppressWarnings("unchecked")
     @Override
-    public <S extends Message, T extends Message> void dispatch(SinkModule<S,T> module, T message) {
-        consumersByModule.get((SinkModule<?,Message>)module)
-            .forEach(c -> c.handleMessage(message));
+    public <S extends Message, T extends Message> void dispatch(SinkModule<S, T> module, T message) {
+        consumersByModule.get(module)
+            .forEach(c -> ((MessageConsumer<S, T>) c).handleMessage(message));
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public synchronized <S extends Message, T extends Message> void registerConsumer(MessageConsumer<S, T> consumer)
-            throws Exception {
+    public synchronized <S extends Message, T extends Message> void registerConsumer(MessageConsumer<S, T> consumer) {
         if (consumer == null) {
             return;
         }
 
         try (Logging.MDCCloseable mdc = Logging.withPrefixCloseable(MessageConsumerManager.LOG_PREFIX)) {
             LOG.info("Registering consumer: {}", consumer);
-            final SinkModule<?, Message> module = (SinkModule<?, Message>) consumer.getModule();
+            final var module = consumer.getModule();
             final int numConsumersBefore = consumersByModule.computeIfAbsent(module, (key) -> Collections.synchronizedSet(new HashSet<>())).size();
             if (!consumersByModule.containsKey(module)) {
                 consumersByModule.put(module, new CopyOnWriteArraySet<>());
             }
-            consumersByModule.get(module).add((MessageConsumer<?, Message>) consumer);
+            consumersByModule.get(module).add(consumer);
             if (numConsumersBefore < 1) {
                 waitForStartup.thenRunAsync(new Runnable() {
                     @Override
@@ -141,38 +137,41 @@ public abstract class AbstractMessageConsumerManager implements MessageConsumerM
 
     @SuppressWarnings("unchecked")
     @Override
-    public synchronized <S extends Message, T extends Message> void unregisterConsumer(MessageConsumer<S, T> consumer)
-            throws Exception {
+    public synchronized <S extends Message, T extends Message> void unregisterConsumer(MessageConsumer<S, T> consumer) {
         if (consumer == null) {
             return;
         }
 
         try (Logging.MDCCloseable mdc = Logging.withPrefixCloseable(MessageConsumerManager.LOG_PREFIX)) {
             LOG.info("Unregistering consumer: {}", consumer);
-            final SinkModule<?, Message> module = (SinkModule<?, Message>)consumer.getModule();
-            consumersByModule.remove(module, (MessageConsumer<?, Message>)consumer);
-            if (consumersByModule.get(module).size() < 1) {
-                waitForStartup.thenRunAsync(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            LOG.info("Stopping consumption of messages for module: {}", module.getId());
-                            stopConsumingForModule(module);
-                        } catch (Exception e) {
-                            LOG.error("Unexpected exception while trying to stop consumer for module: {}", module.getId(), e);
+            final SinkModule<? extends Message, ? extends Message> module = consumer.getModule();
+
+            final var consumers = this.consumersByModule.get(module);
+            if (consumers != null) {
+                consumers.remove(consumer);
+                if (consumers.isEmpty()) {
+                    waitForStartup.thenRunAsync(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                LOG.info("Stopping consumption of messages for module: {}", module.getId());
+                                stopConsumingForModule(module);
+                            } catch (Exception e) {
+                                LOG.error("Unexpected exception while trying to stop consumer for module: {}", module.getId(), e);
+                            }
                         }
-                    }
-                });
+                    });
+                }
             }
         }
     }
 
-    public synchronized void unregisterAllConsumers() throws Exception {
+    public synchronized void unregisterAllConsumers() {
         // Copy the list of consumers before we iterate to avoid concurrent modification exceptions
-        final List<MessageConsumer<?, Message>> consumers = consumersByModule.values().stream()
+        final var consumers = consumersByModule.values().stream()
             .flatMap(Collection::stream)
-            .collect(Collectors.toList());
-        for (MessageConsumer<?, Message> consumer : consumers) {
+            .toList();
+        for (final var consumer : consumers) {
             unregisterConsumer(consumer);
         }
     }
@@ -186,9 +185,5 @@ public abstract class AbstractMessageConsumerManager implements MessageConsumerM
             return defaultValue;
         }
         return configured;
-    }
-
-    public ExecutorService getStartupExecutor() {
-        return startupExecutor;
     }
 }

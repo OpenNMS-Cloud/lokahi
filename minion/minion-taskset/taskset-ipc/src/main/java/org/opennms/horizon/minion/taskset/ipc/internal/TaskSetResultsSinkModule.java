@@ -73,9 +73,6 @@ public class TaskSetResultsSinkModule implements SinkModule<TaskSetResults, Task
         return 10;
       }
 
-      public boolean isBlockWhenFull() {
-        return true;
-      }
     };
   }
 

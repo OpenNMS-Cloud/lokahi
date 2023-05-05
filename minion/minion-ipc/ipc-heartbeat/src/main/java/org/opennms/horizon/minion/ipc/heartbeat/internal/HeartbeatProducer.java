@@ -71,7 +71,7 @@ public class HeartbeatProducer {
                         build();
                     dispatcher.send(heartbeatMessage);
                 } catch (Throwable t) {
-                    log.error("An error occured while sending the heartbeat. Will try again in {} ms", PERIOD_MS, t);
+                    log.error("An error occurred while sending the heartbeat. Will try again in {} ms", PERIOD_MS, t);
                 }
             }
         }, 0, PERIOD_MS);

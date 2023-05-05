@@ -15,6 +15,9 @@ spec:
     metadata:
       labels:
         app: {{ .Values.Cortex.ServiceName }}
+      annotations:
+        # roll the deployment when the cortex configmap changes
+        checksum/cortex-configmap: {{ include (print $.Template.BasePath "/cortex/cortex-configmap.yaml") . | sha256sum }}
     spec:
       {{- if .Values.NodeRestrictions.Enabled }}
       nodeSelector:
@@ -39,6 +42,8 @@ spec:
         - name: cortex-config-volume
           configMap:
             name: cortex-config-map
+        - name: cortex-rules-volume
+          emptyDir: {}
       containers:
         - name: {{ .Values.Cortex.ServiceName }}
           image: {{ .Values.Cortex.Image }}
@@ -56,4 +61,6 @@ spec:
             - name: cortex-config-volume
               mountPath: "/etc/cortex.yml"
               subPath: "cortex.yml"
+            - name: cortex-rules-volume
+              mountPath: /tmp/cortex/rules
 {{ end }}

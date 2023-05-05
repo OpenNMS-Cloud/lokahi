@@ -28,14 +28,43 @@
 
 package org.opennms.horizon.server.service.metrics;
 
+import org.opennms.horizon.inventory.dto.NodeDTO;
 import org.opennms.horizon.server.model.TimeRangeUnit;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
+
+import static org.opennms.horizon.server.service.metrics.normalization.Constants.AZURE_SCAN_TYPE;
+import static org.opennms.horizon.server.service.metrics.normalization.Constants.BW_IN_PERCENTAGE;
+import static org.opennms.horizon.server.service.metrics.normalization.Constants.BW_OUT_PERCENTAGE;
+import static org.opennms.horizon.server.service.metrics.normalization.Constants.NETWORK_ERRORS_IN;
+import static org.opennms.horizon.server.service.metrics.normalization.Constants.NETWORK_ERRORS_OUT;
+import static org.opennms.horizon.server.service.metrics.normalization.Constants.NETWORK_IN_BITS;
+import static org.opennms.horizon.server.service.metrics.normalization.Constants.NETWORK_OUT_BITS;
+import static org.opennms.horizon.server.service.metrics.normalization.Constants.QUERY_FOR_AZURE_TOTAL_NETWORK_IN_BITS;
+import static org.opennms.horizon.server.service.metrics.normalization.Constants.QUERY_FOR_AZURE_TOTAL_NETWORK_OUT_BITS;
+import static org.opennms.horizon.server.service.metrics.normalization.Constants.QUERY_FOR_BW_IN_UTIL_PERCENTAGE;
+import static org.opennms.horizon.server.service.metrics.normalization.Constants.QUERY_FOR_BW_OUT_UTIL_PERCENTAGE;
+import static org.opennms.horizon.server.service.metrics.normalization.Constants.QUERY_FOR_TOTAL_NETWORK_BYTES_IN;
+import static org.opennms.horizon.server.service.metrics.normalization.Constants.QUERY_FOR_TOTAL_NETWORK_BYTES_OUT;
+import static org.opennms.horizon.server.service.metrics.normalization.Constants.QUERY_FOR_NETWORK_ERRORS_IN;
+import static org.opennms.horizon.server.service.metrics.normalization.Constants.QUERY_FOR_NETWORK_ERRORS_OUT;
+import static org.opennms.horizon.server.service.metrics.normalization.Constants.QUERY_FOR_TOTAL_NETWORK_IN_BITS;
+import static org.opennms.horizon.server.service.metrics.normalization.Constants.QUERY_FOR_TOTAL_NETWORK_OUT_BITS;
+import static org.opennms.horizon.server.service.metrics.normalization.Constants.QUERY_PREFIX;
+import static org.opennms.horizon.server.service.metrics.normalization.Constants.TOTAL_NETWORK_BYTES_IN;
+import static org.opennms.horizon.server.service.metrics.normalization.Constants.TOTAL_NETWORK_BYTES_OUT;
 
 @Component
 public class QueryService {
+
+    private static final Logger LOG = LoggerFactory.getLogger(QueryService.class);
+    private static final String OPERATION_NOT_SUPPORTED_FOR_AZURE_NODE = "Operation not supported for Azure node: ";
 
     public String getQueryString(String metricName, Map<String, String> labels) {
         Map<String, String> queryParams = new HashMap<>(labels);
@@ -43,8 +72,61 @@ public class QueryService {
         return getQueryString(queryParams);
     }
 
-    public String getQueryString(String metricName, Map<String, String> labels,
+    public boolean isRangeQuery(String metricName) {
+        return TOTAL_NETWORK_BYTES_IN.equals(metricName) || TOTAL_NETWORK_BYTES_OUT.equals(metricName)
+            || NETWORK_IN_BITS.equals(metricName) || NETWORK_OUT_BITS.equals(metricName)
+            || BW_IN_PERCENTAGE.equals(metricName) || BW_OUT_PERCENTAGE.equals(metricName);
+    }
+
+    public String getQueryString(Optional<NodeDTO> node, String metricName, Map<String, String> labels,
                                  Integer timeRange, TimeRangeUnit timeRangeUnit) {
+
+        if (isRangeQuery(metricName)) {
+            long end = System.currentTimeMillis() / 1000L;
+            long start = end - getDuration(timeRange, timeRangeUnit).orElse(Duration.ofHours(24)).getSeconds();
+            String rangeQuerySuffixForTotal = "&start=" + start + "&end=" + end +
+                "&step=1h";
+            String rangeQuerySuffix = "&start=" + start + "&end=" + end +
+                "&step=2m";
+            switch (metricName) {
+                case TOTAL_NETWORK_BYTES_IN:
+                    return QUERY_PREFIX + QUERY_FOR_TOTAL_NETWORK_BYTES_IN + rangeQuerySuffixForTotal;
+                case TOTAL_NETWORK_BYTES_OUT:
+                    return QUERY_PREFIX + QUERY_FOR_TOTAL_NETWORK_BYTES_OUT + rangeQuerySuffixForTotal;
+                case NETWORK_IN_BITS:
+                    if (isAzureNode(node)) {
+                        return QUERY_PREFIX + QUERY_FOR_AZURE_TOTAL_NETWORK_IN_BITS + rangeQuerySuffix;
+                    } else {
+                        return QUERY_PREFIX + QUERY_FOR_TOTAL_NETWORK_IN_BITS + rangeQuerySuffix;
+                    }
+                case NETWORK_OUT_BITS:
+                    if (isAzureNode(node)) {
+                        return QUERY_PREFIX + QUERY_FOR_AZURE_TOTAL_NETWORK_OUT_BITS + rangeQuerySuffix;
+                    } else {
+                        return QUERY_PREFIX + QUERY_FOR_TOTAL_NETWORK_OUT_BITS + rangeQuerySuffix;
+                    }
+                case BW_IN_PERCENTAGE:
+                    if (isAzureNode(node)) {
+                        throw new RuntimeException(OPERATION_NOT_SUPPORTED_FOR_AZURE_NODE + BW_IN_PERCENTAGE);
+                    }
+                    return QUERY_PREFIX + QUERY_FOR_BW_IN_UTIL_PERCENTAGE + rangeQuerySuffix;
+                case BW_OUT_PERCENTAGE:
+                    if (isAzureNode(node)) {
+                        throw new RuntimeException(OPERATION_NOT_SUPPORTED_FOR_AZURE_NODE + BW_OUT_PERCENTAGE);
+                    }
+                    return QUERY_PREFIX + QUERY_FOR_BW_OUT_UTIL_PERCENTAGE + rangeQuerySuffix;
+                case NETWORK_ERRORS_IN:
+                    if (isAzureNode(node)) {
+                        throw new RuntimeException(OPERATION_NOT_SUPPORTED_FOR_AZURE_NODE + NETWORK_ERRORS_IN);
+                    }
+                    return QUERY_PREFIX + QUERY_FOR_NETWORK_ERRORS_IN + rangeQuerySuffix;
+                case NETWORK_ERRORS_OUT:
+                    if (isAzureNode(node)) {
+                        throw new RuntimeException(OPERATION_NOT_SUPPORTED_FOR_AZURE_NODE + NETWORK_ERRORS_OUT);
+                    }
+                    return QUERY_PREFIX + QUERY_FOR_NETWORK_ERRORS_OUT + rangeQuerySuffix;
+            }
+        }
         String queryString = getQueryString(metricName, labels);
         return addTimeRange(timeRange, timeRangeUnit, queryString);
     }
@@ -71,5 +153,25 @@ public class QueryService {
             return queryString + "[" + timeRange + timeRangeUnit.value + "]";
         }
         return queryString;
+    }
+
+    public static Optional<Duration> getDuration(Integer timeRange, TimeRangeUnit timeRangeUnit) {
+        try {
+            if (TimeRangeUnit.DAY.value.equals(timeRangeUnit.value)) {
+                return Optional.of(Duration.parse("P" + timeRange + timeRangeUnit.value));
+            }
+            return Optional.of(Duration.parse("PT" + timeRange + timeRangeUnit.value));
+        } catch (Exception e) {
+            LOG.warn("Exception while parsing time range with timeRange {} in units {}", timeRange, timeRangeUnit, e);
+        }
+        return Optional.empty();
+    }
+
+    private boolean isAzureNode(Optional<NodeDTO> node){
+        return isNodeScanType(node, AZURE_SCAN_TYPE);
+    }
+
+    private boolean isNodeScanType(Optional<NodeDTO> node, String scanType) {
+        return node.map(NodeDTO::getScanType).orElse("").equals(scanType);
     }
 }

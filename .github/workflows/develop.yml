@@ -99,6 +99,20 @@ jobs:
     with:
       image-tag: ${{ inputs.image-tag || github.sha }}
       image-registry: ${{ inputs.image-registry || 'ghcr.io' }}
+  minion-certificate-manager:
+    name: Minion Certificate Manager
+    uses: ./.github/workflows/feature-minion-certificate-manager.yml
+    secrets: inherit
+    with:
+      image-tag: ${{ inputs.image-tag || github.sha }}
+      image-registry: ${{ inputs.image-registry || 'ghcr.io' }}
+  minion-certificate-verifier:
+    name: Minion Certificate Verifier
+    uses: ./.github/workflows/feature-minion-certificate-verifier.yml
+    secrets: inherit
+    with:
+      image-tag: ${{ inputs.image-tag || github.sha }}
+      image-registry: ${{ inputs.image-registry || 'ghcr.io' }}
   notifications:
     name: Notification Service
     uses: ./.github/workflows/feature-notifications.yml
@@ -141,6 +155,8 @@ jobs:
       minion,
       minion-gateway,
       minion-gateway-grpc-proxy,
+      minion-certificate-manager,
+      minion-certificate-verifier,
       notifications,
       rest-server,
       ui

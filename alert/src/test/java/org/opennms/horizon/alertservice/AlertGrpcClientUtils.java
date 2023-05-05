@@ -2,6 +2,7 @@ package org.opennms.horizon.alertservice;
 
 import java.util.concurrent.TimeUnit;
 
+import org.opennms.horizon.alert.tag.proto.TagServiceGrpc;
 import org.opennms.horizon.alerts.proto.AlertServiceGrpc;
 import org.opennms.horizon.alerts.proto.MonitorPolicyServiceGrpc;
 
@@ -17,6 +18,7 @@ public class AlertGrpcClientUtils {
         CucumberRunnerIT.testContainerRunnerClassRule.getJwtKeyPair());
     private AlertServiceGrpc.AlertServiceBlockingStub alertServiceStub;
     private MonitorPolicyServiceGrpc.MonitorPolicyServiceBlockingStub policyStub;
+    private TagServiceGrpc.TagServiceBlockingStub tagStub;
 
     public AlertGrpcClientUtils() {
         initStubs();
@@ -36,6 +38,9 @@ public class AlertGrpcClientUtils {
         policyStub = MonitorPolicyServiceGrpc.newBlockingStub(managedChannel)
             .withDeadlineAfter(DEADLINE_DURATION, TimeUnit.SECONDS)
             .withInterceptors(dynamicTenantIdInterceptor);
+        tagStub = TagServiceGrpc.newBlockingStub(managedChannel)
+            .withDeadlineAfter(DEADLINE_DURATION, TimeUnit.SECONDS)
+            .withInterceptors(dynamicTenantIdInterceptor);
     }
 
     public void setTenantId(String tenantId) {
@@ -48,5 +53,9 @@ public class AlertGrpcClientUtils {
 
     public MonitorPolicyServiceGrpc.MonitorPolicyServiceBlockingStub getPolicyStub() {
         return policyStub;
+    }
+
+    public TagServiceGrpc.TagServiceBlockingStub getTagStub() {
+        return tagStub;
     }
 }

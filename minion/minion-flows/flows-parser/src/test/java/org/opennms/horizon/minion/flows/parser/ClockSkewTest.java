@@ -75,19 +75,10 @@ public class ClockSkewTest {
 
     private final ParserBase parserBase = new ParserBaseExt(Protocol.NETFLOW5, "name", new AsyncDispatcher<>() {
         @Override
-        public CompletableFuture<DispatchStatus> send(FlowDocument message) {
-            return null;
-        }
+        public void send(FlowDocument message) { }
 
         @Override
-        public int getQueueSize() {
-            return 0;
-        }
-
-        @Override
-        public void close() {
-
-        }
+        public void close() { }
     }, identity, dnsResolver, new MetricRegistry());
 
     @Before

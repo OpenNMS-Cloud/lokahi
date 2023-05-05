@@ -52,3 +52,4 @@ kafka:
     alert-events: "events"
     new-alerts: "alerts"
     monitoring-policy: "monitoring-policy"
+    tag-operation: "tag-operation"

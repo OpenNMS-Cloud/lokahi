@@ -37,7 +37,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 
 public class PKCS8Generator {
-    public static final String UNSIGNED_CERT_COMMAND = "openssl req -new -key client.key -out client.unsigned.cert -subj \"/C=CA/ST=DoNotUseInProduction/L=DoNotUseInProduction/O=OpenNMS/CN=opennms-minion-ssl-gateway/OU=L:";
+    public static final String UNSIGNED_CERT_COMMAND = "openssl req -new -key client.key -out client.unsigned.cert -subj \"/C=CA/ST=DoNotUseInProduction/L=DoNotUseInProduction/O=OpenNMS/CN=opennms-minion-ssl-gateway/OU=L:%s/OU=T:%s\"";
     private static final Logger LOG = LoggerFactory.getLogger(PKCS8Generator.class);
     public static final String PKCS_1_2048_COMMAND = "openssl genrsa -out client.key.pkcs1 2048";
     public static final String PKCS8_COMMAND = "openssl pkcs8 -topk8 -in client.key.pkcs1 -out client.key -nocrypt";
@@ -63,12 +63,12 @@ public class PKCS8Generator {
         CommandExecutor.executeCommand(PKCS8_COMMAND, file);
 
         LOG.debug("=== GENERATING THE UNSIGNED CERT");
-        CommandExecutor.executeCommand(UNSIGNED_CERT_COMMAND + location + "/OU=T:" + tenantId + "\"", file);
+        CommandExecutor.executeCommand(UNSIGNED_CERT_COMMAND, file, location, tenantId);
 
         LOG.info("=== SIGNING CERT");
         LOG.info("=== CA CERT: {}", caCertFile.getAbsolutePath());
         // Do not use this in Production (10 years is not a good idea)
-        CommandExecutor.executeCommand("openssl x509 -req -in client.unsigned.cert -days 3650 -CA " + caCertFile.getAbsolutePath() + " -CAkey " + caKeyFile.getAbsolutePath() + " -CAcreateserial -out client.signed.cert", file);
+        CommandExecutor.executeCommand("openssl x509 -req -in client.unsigned.cert -days 3650 -CA \"%s\" -CAkey \"%s\" -out client.signed.cert", file, caCertFile.getAbsolutePath(), caKeyFile.getAbsolutePath());
 
         LOG.info("=== DONE");
     }

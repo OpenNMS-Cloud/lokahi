@@ -53,8 +53,12 @@ public class CertFileUtils {
 
         try (ZipFile zipFile = new ZipFile(file, password.toCharArray())) {
             zipFile.addFile(new File(directory, "client.key"), zipParameters);
-            zipFile.addFile(caCertFile, zipParameters);
             zipFile.addFile(new File(directory, "client.signed.cert"), zipParameters);
+            if (caCertFile.exists()) {
+                ZipParameters caParams = new ZipParameters(zipParameters);
+                caParams.setFileNameInZip("CA.cert");
+                zipFile.addFile(caCertFile, caParams);
+            }
         } catch (Exception e) {
             LOG.error("Error while creating zip file", e);
             throw new RuntimeException("Failed to generate zip file", e);

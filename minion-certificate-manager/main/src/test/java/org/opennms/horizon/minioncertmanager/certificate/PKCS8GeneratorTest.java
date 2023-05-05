@@ -27,6 +27,7 @@
  *******************************************************************************/
 package org.opennms.horizon.minioncertmanager.certificate;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
@@ -48,13 +49,26 @@ public class PKCS8GeneratorTest {
     @InjectMocks
     private PKCS8Generator pkcs8Generator;
 
+    private File caCertFile;
+    private File caKeyFile;
+
+    @BeforeEach
+    public void setup() throws Exception {
+        File caRootDir = tempDir.toFile();
+        CaCertificateGenerator.generate(
+            caRootDir, "OU=TEST", 3600
+        );
+
+        caCertFile = new File(caRootDir, "ca.crt");
+        caKeyFile = new File(caRootDir, "ca.key");
+    }
+
+
     @Test
     public void testGenerate() throws InterruptedException, IOException {
         // Test input
         String location = "testLocation";
         String tenantId = "testTenantId";
-        File caCertFile = new File("src/test/resources/ca.cert");
-        File caKeyFile = new File("src/test/resources/ca.key");
 
         // Test execution
         pkcs8Generator.generate(location, tenantId, tempDir, caCertFile, caKeyFile);

@@ -19,6 +19,8 @@ spec:
         prometheus.io/scrape: "true"
         prometheus.io/port: "{{ .Values.OpenNMS.Inventory.Port }}"
         prometheus.io/path: "/actuator/prometheus"
+        # roll the deployment when the Spring boot environment variable configmap changes
+        checksum/spring-boot-env-configmap: {{ include (print $.Template.BasePath "/opennms/spring-boot-env-configmap.yaml") . | sha256sum }}
     spec:
       {{- if .Values.NodeRestrictions.Enabled }}
       nodeSelector:                                                                                    
@@ -39,15 +41,19 @@ spec:
                 values:                                                                                
                 - {{ .Values.NodeRestrictions.Value }}                                                 
       {{- end }}
+      volumes:
+        - name: spring-boot-app-config-volume
+          configMap:
+            name: spring-boot-app-config
       containers:
         - name: {{ .Values.OpenNMS.Inventory.ServiceName }}
           image: {{ .Values.OpenNMS.Inventory.Image }}
           imagePullPolicy: {{ .Values.OpenNMS.Inventory.ImagePullPolicy }}
           env:
             - name: JAVA_TOOL_OPTIONS
-              value: "-agentlib:jdwp=transport=dt_socket,server=y,address=5005,suspend=n,quiet=y"  # FIXME: Permanent debug port, enable only for dev mode
+              value: "-javaagent:agent/opentelemetry-javaagent.jar -agentlib:jdwp=transport=dt_socket,server=y,address=5005,suspend=n,quiet=y"  # FIXME: Permanent debug port, enable only for dev mode
             - name: SPRING_DATASOURCE_URL
-              value: "jdbc:postgresql://postgres:5432/inventory"
+              value: "jdbc:postgresql://{{ .Values.OpenNMS.Inventory.DbHost }}:5432/{{ .Values.OpenNMS.Inventory.DbName }}?currentSchema={{ .Values.OpenNMS.Inventory.DbSchemaName }}"
             - name: SPRING_DATASOURCE_USERNAME
               valueFrom:
                 secretKeyRef:
@@ -69,11 +75,18 @@ spec:
                 secretKeyRef:
                   key: encryptionKey
                   name: {{ .Values.OpenNMS.Inventory.ServiceName }}-encryption-key
+            {{- include "deployment.env" .Values.OpenNMS.Inventory | nindent 12 }}
+          envFrom:
+          - configMapRef:
+              name: spring-boot-env
           ports:
             - name: http
               containerPort: {{ .Values.OpenNMS.Inventory.Port }}
             - name: grpc
               containerPort: {{ .Values.OpenNMS.Inventory.GrpcPort }}
+          volumeMounts:
+            - name: spring-boot-app-config-volume
+              mountPath: "/app/config"
       {{- if .Values.OpenNMS.Inventory.PrivateRepoEnabled }}
       imagePullSecrets:
         - name: image-credentials

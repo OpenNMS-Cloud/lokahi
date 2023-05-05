@@ -126,6 +126,8 @@ message Alert {
   // Acknowledged when?
   uint64 ack_time_ms = 18;
   repeated uint64 monitoring_policy_id = 19;
+  string node_name = 20;
+  string label = 21;
 }
 
 message EventMatch {

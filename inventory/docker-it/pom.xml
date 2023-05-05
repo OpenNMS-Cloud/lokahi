@@ -17,10 +17,6 @@
         Test Containers are used to spin up containers and exercise the public endpoints.
     </description>
 
-    <properties>
-        <application.docker.image.name>opennms/horizon-stream-inventory</application.docker.image.name>
-    </properties>
-
     <dependencies>
         <!-- Dependency to ensure the docker image is built before running the tests -->
         <dependency>

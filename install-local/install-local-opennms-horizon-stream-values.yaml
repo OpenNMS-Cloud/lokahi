@@ -1,7 +1,7 @@
 Host: onmshs
 OpenNMS:
   API:
-    Image: opennms/horizon-stream-rest-server:latest
+    Image: opennms/horizon-stream-rest-server:v0.0.32-dev
     Resources:
       Limits:
         Cpu: "0"
@@ -10,7 +10,7 @@ OpenNMS:
         Cpu: "0"
         Memory: "0"
   MetricsProcessor:
-    Image: opennms/horizon-stream-metrics-processor:latest
+    Image: opennms/horizon-stream-metrics-processor:v0.0.32-dev
     Resources:
       Limits:
         Cpu: "0"
@@ -19,7 +19,7 @@ OpenNMS:
         Cpu: "0"
         Memory: "0"
   UI:
-    Image: opennms/horizon-stream-ui:latest
+    Image: opennms/horizon-stream-ui:v0.0.32-dev
     Resources:
       Limits:
         Cpu: "0"
@@ -28,7 +28,7 @@ OpenNMS:
         Cpu: "0"
         Memory: "0"
   Minion:
-    Image: opennms/horizon-stream-minion:latest
+    Image: opennms/horizon-stream-minion:v0.0.32-dev
     Resources:
       Limits:
         Cpu: "0"
@@ -37,7 +37,7 @@ OpenNMS:
         Cpu: "0"
         Memory: "0"
   MinionGateway:
-    Image: opennms/horizon-stream-minion-gateway:latest
+    Image: opennms/horizon-stream-minion-gateway:v0.0.32-dev
     Resources:
       Limits:
         Cpu: "0"
@@ -47,7 +47,7 @@ OpenNMS:
         Memory: "0"
   MinionGatewayGrpcProxy:
     Enabled: true
-    Image: opennms/horizon-stream-minion-gateway-grpc-proxy:latest
+    Image: opennms/horizon-stream-minion-gateway-grpc-proxy:v0.0.32-dev
     Resources:
       Limits:
         Cpu: "0"
@@ -56,7 +56,7 @@ OpenNMS:
         Cpu: "0"
         Memory: "0"
   Inventory:
-    Image: opennms/horizon-stream-inventory:latest
+    Image: opennms/horizon-stream-inventory:v0.0.32-dev
     Resources:
       Limits:
         Cpu: "0"
@@ -65,7 +65,7 @@ OpenNMS:
         Cpu: "0"
         Memory: "0"
   Alarm:
-    Image: opennms/horizon-stream-alarm:latest
+    Image: opennms/horizon-stream-alarm:v0.0.32-dev
     Resources:
       Limits:
         Cpu: "0"
@@ -74,7 +74,7 @@ OpenNMS:
         Cpu: "0"
         Memory: "0"
   Notification: 
-    Image: opennms/horizon-stream-notification:latest
+    Image: opennms/horizon-stream-notification:v0.0.32-dev
     Resources:
       Limits:
         Cpu: "0"
@@ -83,7 +83,7 @@ OpenNMS:
         Cpu: "0"
         Memory: "0"
   Events:
-    Image: opennms/horizon-stream-events:latest
+    Image: opennms/horizon-stream-events:v0.0.32-dev
     Resources:
       Limits:
         Cpu: "0"
@@ -92,12 +92,13 @@ OpenNMS:
         Cpu: "0"
         Memory: "0"
 Keycloak:
-  Image: opennms/horizon-stream-keycloak:latest
+  Image: opennms/horizon-stream-keycloak:v0.0.32-dev
   AdminUsername: admin
   AdminPassword: admin
 Grafana:
   Enabled: true
-  Image: opennms/horizon-stream-grafana:latest
+  Image: opennms/horizon-stream-grafana:v0.0.32-dev
 Ingress:
   Enabled: true
-
+Postgres:
+  Pvc: false

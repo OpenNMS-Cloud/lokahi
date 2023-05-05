@@ -3,6 +3,14 @@ keycloak:
   base-url: http://onms-keycloak:8080/auth
   public-key: ""
 
+manager:
+  mtls:
+    certificate: /run/secrets/mtls/tls.crt
+    privateKey: /run/secrets/mtls/tls.key
+  # Server CA, certificate which might be added to archive to provide a trust root for minions
+  server:
+    certificate:
+
 grpc:
   server:
     port: 8990

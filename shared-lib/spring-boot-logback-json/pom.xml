@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.opennms.horizon.shared</groupId>
+        <artifactId>shared-lib</artifactId>
+        <version>0.1.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>spring-boot-logback-json</artifactId>
+    <name>OpenNMS Horizon Stream :: Spring Boot Support :: Logback JSON</name>
+
+    <dependencies>
+        <!-- Since we need to support a few different versions of Spring Boot,
+             we don't include spring-boot-starter-logging since we can't specify
+             its version here. It is the default logger, anyway, so we should
+             be fine. -->
+        <!-- The same goes for logback-classic and logback-core. We don't add
+             these directly here so we don't conflict with what is in
+             spring-boot-starter-logging. Also avoiding this in rest-server tests:
+
+		java.lang.NoClassDefFoundError: org/slf4j/impl/StaticLoggerBinder
+			at org.springframework.boot.logging.logback.LogbackLoggingSystem.getLoggerContext(LogbackLoggingSystem.java:293)
+             -->
+        <dependency>
+            <groupId>ch.qos.logback.contrib</groupId>
+            <artifactId>logback-json-classic</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback.contrib</groupId>
+            <artifactId>logback-jackson</artifactId>
+        </dependency>
+    </dependencies>
+</project>

@@ -85,6 +85,8 @@ load_images_to_kind_using_slow_kind () {
     kind load docker-image --name "$KIND_CLUSTER_NAME" "${IMAGE_PREFIX}/horizon-stream-minion:${IMAGE_TAG}" &
     kind load docker-image --name "$KIND_CLUSTER_NAME" "${IMAGE_PREFIX}/horizon-stream-minion-gateway:${IMAGE_TAG}" &
     kind load docker-image --name "$KIND_CLUSTER_NAME" "${IMAGE_PREFIX}/horizon-stream-minion-gateway-grpc-proxy:${IMAGE_TAG}" &
+    kind load docker-image --name "$KIND_CLUSTER_NAME" "${IMAGE_PREFIX}/horizon-stream-minion-certificate-manager:${IMAGE_TAG}" &
+    kind load docker-image --name "$KIND_CLUSTER_NAME" "${IMAGE_PREFIX}/horizon-stream-minion-certificate-verifier:${IMAGE_TAG}" &
     kind load docker-image --name "$KIND_CLUSTER_NAME" "${IMAGE_PREFIX}/horizon-stream-notification:${IMAGE_TAG}" &
     kind load docker-image --name "$KIND_CLUSTER_NAME" "${IMAGE_PREFIX}/horizon-stream-rest-server:${IMAGE_TAG}" &
     kind load docker-image --name "$KIND_CLUSTER_NAME" "${IMAGE_PREFIX}/horizon-stream-ui:${IMAGE_TAG}" &
@@ -100,7 +102,9 @@ pull_docker_images () {
 		"${IMAGE_PREFIX}/horizon-stream-keycloak:${IMAGE_TAG}" \
 		"${IMAGE_PREFIX}/horizon-stream-metrics-processor:${IMAGE_TAG}" \
 		"${IMAGE_PREFIX}/horizon-stream-minion-gateway-grpc-proxy:${IMAGE_TAG}" \
-		"${IMAGE_PREFIX}/horizon-stream-minion-gateway:${IMAGE_TAG}" \
+		"${IMAGE_PREFIX}/horizon-stream-minion-certificate-manager:${IMAGE_TAG}" \
+		"${IMAGE_PREFIX}/horizon-stream-minion-certificate-verifier:${IMAGE_TAG}" \
+		"${IMAGE_PREFIX}/horizon-stream-minion:${IMAGE_TAG}" \
 		"${IMAGE_PREFIX}/horizon-stream-minion:${IMAGE_TAG}" \
 		"${IMAGE_PREFIX}/horizon-stream-notification:${IMAGE_TAG}" \
 		"${IMAGE_PREFIX}/horizon-stream-rest-server:${IMAGE_TAG}" \
@@ -126,6 +130,8 @@ save_part_of_normal_docker_image_load () {
 		"${IMAGE_PREFIX}/horizon-stream-metrics-processor:${IMAGE_TAG}" \
 		"${IMAGE_PREFIX}/horizon-stream-minion-gateway-grpc-proxy:${IMAGE_TAG}" \
 		"${IMAGE_PREFIX}/horizon-stream-minion-gateway:${IMAGE_TAG}" \
+		"${IMAGE_PREFIX}/horizon-stream-minion-certificate-manager:${IMAGE_TAG}" \
+		"${IMAGE_PREFIX}/horizon-stream-minion-certificate-verifier:${IMAGE_TAG}" \
 		"${IMAGE_PREFIX}/horizon-stream-minion:${IMAGE_TAG}" \
 		"${IMAGE_PREFIX}/horizon-stream-notification:${IMAGE_TAG}" \
 		"${IMAGE_PREFIX}/horizon-stream-rest-server:${IMAGE_TAG}" \

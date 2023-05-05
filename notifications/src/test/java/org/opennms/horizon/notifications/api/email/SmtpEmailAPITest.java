@@ -13,13 +13,16 @@ import org.mockito.ArgumentMatcher;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.opennms.horizon.alerts.proto.Alert;
 import org.opennms.horizon.notifications.exceptions.NotificationAPIException;
+import org.opennms.horizon.notifications.exceptions.NotificationAPIRetryableException;
 import org.opennms.horizon.notifications.exceptions.NotificationException;
 import org.springframework.http.MediaType;
+import org.springframework.mail.MailAuthenticationException;
 import org.springframework.mail.MailSendException;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.retry.support.RetryTemplate;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.Arrays;
@@ -30,6 +33,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 public class SmtpEmailAPITest {
@@ -38,6 +42,13 @@ public class SmtpEmailAPITest {
 
     @InjectMocks
     private SmtpEmailAPI emailAPI;
+
+    @Spy
+    RetryTemplate emailRetryTemplate = RetryTemplate.builder()
+        .retryOn(NotificationAPIRetryableException.class)
+        .maxAttempts(3)
+        .fixedBackoff(10)
+        .build();
 
     @Mock
     JavaMailSender sender;
@@ -49,7 +60,7 @@ public class SmtpEmailAPITest {
     }
 
     @Test
-    public void canSendEmailToSingleRecipient() throws NotificationException {
+    void canSendEmailToSingleRecipient() throws NotificationException {
         String userEmail = "support@yourcompany.com";
         emailAPI.sendEmail(userEmail, "A new alert", "More details about the alert");
 
@@ -62,9 +73,19 @@ public class SmtpEmailAPITest {
     }
 
     @Test
-    public void throwsOnFailure() {
-        Mockito.doThrow(new MailSendException("Connection failure")).when(sender).send(any(MimeMessage.class));
+    void canRetryOnSendFailure() throws NotificationException {
+        Mockito.doThrow(new MailSendException("Connection failure")).doNothing().when(sender).send(any(MimeMessage.class));
+        emailAPI.sendEmail("support@company", "subject", "body");
+
+        verify(sender, times(2)).send(any(MimeMessage.class));
+    }
+
+    @Test
+    void throwsOnFailure() {
+        Mockito.doThrow(new MailAuthenticationException("Bad creds")).when(sender).send(any(MimeMessage.class));
         assertThrows(NotificationAPIException.class, () -> emailAPI.sendEmail("support@company", "subject", "body"));
+
+        verify(sender, times(1)).send(any(MimeMessage.class));
     }
 
     @Builder

@@ -1,3 +1,4 @@
+{{- if .Values.Ingress.DefaultEndpointsEnabled }}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -10,7 +11,12 @@ metadata:
     {{ $Annotation | quote }}: {{ $Value | quote }}
     {{- end }}
 spec:
-  ingressClassName: nginx
+  {{- if .Values.TLS.Enabled }}
+  tls:
+    - hosts:
+      - "minion.{{ .Values.Host }}"
+      secretName: {{ .Values.OpenNMS.MinionGateway.SecretName }}
+  {{- end }}
   rules:
     - host: "minion.{{ .Values.Host }}"
       http:
@@ -22,3 +28,4 @@ spec:
                 name: {{ .Values.OpenNMS.MinionGateway.ServiceName }}
                 port:
                   number: {{ .Values.OpenNMS.MinionGateway.GrpcPort }}
+{{- end }}

@@ -32,11 +32,14 @@ import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import org.opennms.horizon.notifications.exceptions.NotificationAPIException;
+import org.opennms.horizon.notifications.exceptions.NotificationAPIRetryableException;
 import org.opennms.horizon.notifications.exceptions.NotificationException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.MailException;
+import org.springframework.mail.MailSendException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.retry.support.RetryTemplate;
 
 @RequiredArgsConstructor
 public class SmtpEmailAPI implements EmailAPI {
@@ -45,24 +48,31 @@ public class SmtpEmailAPI implements EmailAPI {
 
     private final JavaMailSender sender;
 
+    private final RetryTemplate emailRetryTemplate;
+
     @Override
     public void sendEmail(String emailAddress, String subject, String bodyHtml) throws NotificationException {
-        try {
-            MimeMessage mimeMessage = sender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage);
+        emailRetryTemplate.execute(ctx -> {
+            try {
+                MimeMessage mimeMessage = sender.createMimeMessage();
+                MimeMessageHelper helper = new MimeMessageHelper(mimeMessage);
 
-            helper.setTo(emailAddress);
-            helper.setFrom(fromAddress);
+                helper.setTo(emailAddress);
+                helper.setFrom(fromAddress);
 
-            helper.setSubject(subject);
-            helper.setText(bodyHtml, true);
+                helper.setSubject(subject);
+                helper.setText(bodyHtml, true);
 
-            sender.send(helper.getMimeMessage());
-        } catch (MessagingException e) {
-            // TODO This may be a retryable exception
-            throw new NotificationAPIException(e);
-        } catch (MailException e) {
-            throw new NotificationAPIException(e);
-        }
+                sender.send(helper.getMimeMessage());
+                return true;
+            } catch (MailSendException e) {
+                // Issues like failure to connect, or the SMTP session being disconnected are all covered under
+                // this exception.
+                throw new NotificationAPIRetryableException("Mail API exception", e);
+            } catch (MessagingException|MailException e) {
+                throw new NotificationAPIException(e);
+            }
+        });
+
     }
 }

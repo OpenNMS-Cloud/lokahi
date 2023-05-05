@@ -29,6 +29,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.opennms.horizon.shared</groupId>
+            <artifactId>spring-boot-logback-json</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.opennms.horizon.minion.gateway</groupId>
             <artifactId>minion-gateway-ignite-detector-api</artifactId>
             <version>${project.version}</version>
@@ -174,6 +179,31 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>io.opentelemetry.javaagent</groupId>
+                                    <artifactId>opentelemetry-javaagent</artifactId>
+                                    <version>${opentelemetry.version}</version>
+                                    <type>jar</type>
+                                </artifactItem>
+                            </artifactItems>
+                            <stripVersion>true</stripVersion>
+                            <outputDirectory>${application.jib.extra.root}/agent</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <groupId>com.google.cloud.tools</groupId>
                 <artifactId>jib-maven-plugin</artifactId>
                 <configuration>
@@ -193,7 +223,13 @@
                             <jvmFlag>--add-opens=java.base/java.lang=ALL-UNNAMED</jvmFlag>
                             <jvmFlag>--add-opens=java.base/java.util.concurrent=ALL-UNNAMED</jvmFlag>
                         </jvmFlags>
+                        <extraClasspath>
+                            <entry>${application.jib.app.config}</entry>
+                        </extraClasspath>
                     </container>
+                    <extraDirectories>
+                        <paths>${application.jib.extra.root}</paths>
+                    </extraDirectories>
                 </configuration>
                 <executions>
                     <execution>

@@ -31,23 +31,20 @@ package org.opennms.horizon.alertservice.db.entity;
 import java.util.ArrayList;
 import java.util.List;
 
-import jakarta.persistence.EntityListeners;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
-
-import com.fasterxml.jackson.databind.JsonNode;
+import org.opennms.horizon.alertservice.service.routing.MonitoringPolicyKafkaProducer;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
-import org.opennms.horizon.alertservice.service.routing.MonitoringPolicyKafkaProducer;
 
 @Entity
 @EntityListeners(MonitoringPolicyKafkaProducer.class)
@@ -63,9 +60,6 @@ public class MonitorPolicy {
     @Column(name = "policy_name")
     private String name;
     private String memo;
-    @Column(name = "tags", columnDefinition = "jsonb")
-    @JdbcTypeCode(SqlTypes.JSON)
-    private JsonNode tags;
     @Column(name = "notify_email")
     private Boolean notifyByEmail;
     @Column(name = "notify_pagerduty")
@@ -76,4 +70,6 @@ public class MonitorPolicy {
     private String notifyInstruction;
     @OneToMany(mappedBy = "policy", orphanRemoval = true, cascade = CascadeType.ALL)
     private List<PolicyRule> rules = new ArrayList<>();
+    @ManyToMany(mappedBy = "policies")
+    private List<Tag> tags = new ArrayList<>();
 }

@@ -3,11 +3,10 @@
     <HeadlineSection
       text="locations"
       data-test="headline"
-      @click="locationsStore.setDisplayType(DisplayType.LIST)"
     >
       <template #left>
         <CountColor
-          :count="items?.length"
+          :count="locationsList?.length"
           data-test="count"
         />
       </template>
@@ -35,7 +34,7 @@
       </div>
       <ul>
         <li
-          v-for="(item, index) in items"
+          v-for="(item, index) in locationsList"
           :key="index"
           data-test="card"
         >
@@ -50,18 +49,12 @@
 import HeadlineSection from '@/components/Common/HeadlineSection.vue'
 import Help from '@featherds/icon/action/Help'
 import { LocationTemp } from '@/types/locations.d'
-import { PropType } from 'vue'
-import { useLocationsStore } from '@/store/Views/locationsStore'
-import { DisplayType } from '@/types/locations.d'
 
-defineProps({
-  items: {
-    type: Array as PropType<LocationTemp[]>,
-    required: true
-  }
-})
+const props = defineProps<{
+  items: LocationTemp[]
+}>()
 
-const locationsStore = useLocationsStore()
+const locationsList = computed(() => props.items)
 
 const icons = markRaw({
   Help

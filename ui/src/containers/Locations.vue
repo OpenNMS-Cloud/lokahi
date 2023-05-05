@@ -33,15 +33,15 @@
       </div>
       <div class="content-right">
         <LocationsMinionsList
-          v-if="locationsStore.displayType === DisplayType.LIST"
+          v-if="locationStore.displayType === DisplayType.LIST"
           :minions="minionsList"
         />
         <LocationsAddForm
-          v-if="locationsStore.displayType === DisplayType.ADD"
+          v-if="locationStore.displayType === DisplayType.ADD"
           data-test="location-add-form"
         />
         <LocationsEditForm
-          v-if="locationsStore.displayType === DisplayType.EDIT"
+          v-if="locationStore.displayType === DisplayType.EDIT"
           :id="selectedLocationId"
         />
       </div>
@@ -53,28 +53,28 @@
 import Add from '@featherds/icon/action/Add'
 import Search from '@featherds/icon/action/Search'
 import Help from '@featherds/icon/action/Help'
-import { useLocationsStore } from '@/store/Views/locationsStore'
+import { useLocationStore } from '@/store/Views/locationStore'
 import LocationsList from '@/components/Locations/LocationsList.vue'
 import { DisplayType } from '@/types/locations.d'
 
-const locationsStore = useLocationsStore()
+const locationStore = useLocationStore()
 
-const locationsList = computed(() => locationsStore.locationsList)
-const minionsList = computed(() => locationsStore.minionsList)
+const locationsList = computed(() => locationStore.locationsList)
+const minionsList = computed(() => locationStore.minionsList)
 
 onMounted(async () => {
-  await locationsStore.fetchLocations()
-  await locationsStore.fetchMinions()
+  await locationStore.fetchLocations()
+  await locationStore.fetchMinions()
 })
 
 const addLocation = () => {
-  locationsStore.setDisplayType(DisplayType.ADD)
+  locationStore.setDisplayType(DisplayType.ADD)
 }
 
-const selectedLocationId = computed(() => locationsStore.selectedLocationId)
+const selectedLocationId = computed(() => locationStore.selectedLocationId)
 
 const searchLocationListener = (val: string | number | undefined) => {
-  locationsStore.searchLocations(val as string)
+  locationStore.searchLocations(val as string)
 }
 
 const icons = markRaw({

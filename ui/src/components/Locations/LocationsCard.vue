@@ -4,8 +4,9 @@
     :class="{ selected: selectedCard }"
   >
     <div class="name">
-      <ButtonText
-        :button="buttonProps"
+      <ButtonTextIcon
+        @click="locationStore.selectLocation(location.id)"
+        :item="nameBtn"
         data-test="name"
       />
     </div>
@@ -32,27 +33,25 @@
 
 <script lang="ts" setup>
 import Expiry from '@/assets/placeholder.svg'
-import { IIcon } from '@/types'
+import { IIcon, IButtonTextIcon } from '@/types'
 import { Severity } from '@/types/graphql'
 import { LocationTemp } from '@/types/locations.d'
 import { setViewBox } from '@/components/utils'
-import { useLocationsStore } from '@/store/Views/locationsStore'
+import { useLocationStore } from '@/store/Views/locationStore'
 
 const props = defineProps<{
   item: LocationTemp
 }>()
 
-const locationsStore = useLocationsStore()
+const locationStore = useLocationStore()
 
-const selectedCard = computed(() => locationsStore.selectedLocationId === props.item.id)
+const location = computed(() => props.item)
 
-const buttonProps = {
-  label: props.item.location,
-  callback: locationsStore.selectLocation,
-  callbackArgs: {
-    id: props.item.id
-  }
-}
+const selectedCard = computed(() => locationStore.selectedLocationId === props.item.id)
+
+const nameBtn = computed<IButtonTextIcon>(() => ({
+  label: props.item.location
+}))
 
 const statusPill = {
   label: props.item.status,

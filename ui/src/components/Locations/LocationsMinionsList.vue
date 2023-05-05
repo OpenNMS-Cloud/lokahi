@@ -36,7 +36,7 @@
       class="minions-list"
     >
       <li
-        v-for="minion in minions"
+        v-for="minion in minionsList"
         :key="minion.id"
       >
         <LocationsMinionsCard :item="minion" />
@@ -54,19 +54,21 @@
 import HeadlineSection from '@/components/Common/HeadlineSection.vue'
 import Help from '@featherds/icon/action/Help'
 import Search from '@featherds/icon/action/Search'
-import { useLocationsStore } from '@/store/Views/locationsStore'
+import { useLocationStore } from '@/store/Views/locationStore'
 
-defineProps({
+const props = defineProps({
   minions: {
     type: Array,
     required: true
   }
 })
 
-const locationsStore = useLocationsStore()
+const minionsList = computed(() => props.minions)
+
+const locationStore = useLocationStore()
 
 const searchMinionsListener = (val: string | number | undefined) => {
-  locationsStore.searchMinions(val as string)
+  locationStore.searchMinions(val as string)
 }
 
 const emptyListContent = {

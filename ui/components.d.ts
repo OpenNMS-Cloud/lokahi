@@ -21,7 +21,7 @@ declare module '@vue/runtime-core' {
     BasicContextMenu: typeof import('./src/components/Common/BasicContextMenu.vue')['default']
     BasicSelect: typeof import('./src/components/Common/BasicSelect.vue')['default']
     BasicToggle: typeof import('./src/components/Common/BasicToggle.vue')['default']
-    ButtonText: typeof import('./src/components/Common/ButtonText.vue')['default']
+    ButtonTextIcon: typeof import('./src/components/Common/ButtonTextIcon.vue')['default']
     ButtonWithSpinner: typeof import('./src/components/Common/ButtonWithSpinner.vue')['default']
     ContextMenu: typeof import('./src/components/Topology/ContextMenu.vue')['default']
     CountColor: typeof import('./src/components/Common/CountColor.vue')['default']

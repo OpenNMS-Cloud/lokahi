@@ -1,6 +1,5 @@
 <template>
   <button
-    @click="button.callback(button.callbackArgs?.id)"
     :type="button.type as ButtonHTMLAttributes['type'] || 'button'"
     class="button-text"
     data-test="button-text"
@@ -13,11 +12,13 @@
 
 <script lang="ts" setup>
 import { ButtonHTMLAttributes } from 'vue'
-import { ButtonText } from '@/types'
+import { IButtonTextIcon } from '@/types'
 
-defineProps<{
-  button: ButtonText
+const props = defineProps<{
+  item: IButtonTextIcon
 }>()
+
+const button = computed(() => props.item)
 </script>
 
 <style lang="scss" scoped>

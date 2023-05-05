@@ -6,7 +6,7 @@
           class="name"
           data-test="header-name"
         >
-          {{ item.name }}
+          {{ minion.location.location }}
         </div>
         <div
           class="latency"
@@ -38,7 +38,7 @@
           class="version"
           data-test="content-version"
         >
-          {{ item.version }}
+          {{ minion?.version || '1.0.0' }}
         </div>
         <div
           class="latency"
@@ -56,7 +56,7 @@
           class="utilization"
           data-test="content-utilization"
         >
-          {{ item.utillization }}
+          {{ minion?.utillization || '00%' }}
         </div>
         <div
           class="ip"
@@ -67,7 +67,7 @@
       </div>
     </div>
     <HoverMenu
-      :items="item.contextMenu"
+      :items="contextMenu"
       data-test="context-menu"
     />
   </div>
@@ -83,11 +83,6 @@ const props = defineProps({
   }
 })
 
-const statusPill = {
-  label: props.item.status,
-  style: props.item.status === 'UP' ? Severity.Normal : Severity.Critical
-}
-
 const latencyThreshold = (latency: number) => {
   let type = Severity.Warning
 
@@ -96,14 +91,34 @@ const latencyThreshold = (latency: number) => {
 
   return type
 }
-const latencyPill = {
-  label: props.item.latency,
-  style: latencyThreshold(props.item.latency.match(/\d+/g))
-}
-const ipPill = {
-  label: props.item.ip,
-  style: Severity.Cleared
-}
+
+let statusPill = reactive({})
+let latencyPill = reactive({})
+let ipPill = reactive({})
+
+const minion = computed(() => {
+  statusPill = {
+    label: props.item.status,
+    style: props.item.status === 'UP' ? Severity.Normal : Severity.Critical
+  }
+
+  latencyPill = {
+    label: `${props.item.latency.value}ms`,
+    style: latencyThreshold(props.item.latency.value) //.match(/\d+/g))
+  }
+
+  ipPill = {
+    label: props.item.ip || '1.1.1.1',
+    style: Severity.Cleared
+  }
+
+  return props.item
+})
+
+const contextMenu = [
+  { label: 'edit', handler: () => ({}) },
+  { label: 'delete', handler: () => ({}) }
+]
 </script>
 
 <style lang="scss" scoped>

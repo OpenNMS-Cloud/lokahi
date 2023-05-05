@@ -2,39 +2,12 @@
   <div class="footer-section-wrapper">
     <hr />
     <div class="actions">
-      <FeatherButton
-        v-if="cancel"
-        @click="cancel ? cancel.callback(cancel.callbackArgs?.type) : () => ({})"
-        secondary
-        data-test="cancel-button"
-        >{{ cancel.label || 'cancel' }}</FeatherButton
-      >
-      <ButtonWithSpinner
-        v-if="save"
-        @click="save ? save.callback(save.callbackArgs) : () => ({})"
-        :type="save.type || 'submit'"
-        :isFetching="saveIsFetching"
-        :disabled="saveIsDisabled"
-        primary
-        data-test="save-button"
-      >
-        {{ save.label || 'save' }}
-      </ButtonWithSpinner>
+      <slot name="buttons" />
     </div>
   </div>
 </template>
 
-<script setup lang="ts">
-import { ButtonText } from '@/types'
-
-const props = defineProps<{
-  save?: ButtonText
-  cancel?: ButtonText
-}>()
-
-const saveIsFetching = false //computed(() => props.save?.isFetching?.value)
-const saveIsDisabled = false //computed(() => props.save?.isDisabled?.value)
-</script>
+<script setup lang="ts"></script>
 
 <style lang="scss" scoped>
 @use '@featherds/styles/themes/variables';

@@ -89,7 +89,7 @@
 import Add from '@featherds/icon/action/Add'
 import { useNodeMutations } from '@/store/Mutations/nodeMutations'
 import { useAppliancesQueries } from '@/store/Queries/appliancesQueries'
-import { useLocationsQueries } from '@/store/Queries/locationsQueries'
+import { useLocationQueries } from '@/store/Queries/locationQueries'
 import useModal from '@/composables/useModal'
 import useSnackbar from '@/composables/useSnackbar'
 import { NodeCreateInput } from '@/types/graphql'
@@ -98,7 +98,7 @@ const { showSnackbar } = useSnackbar()
 const { openModal, closeModal, isVisible } = useModal()
 const nodeMutations = useNodeMutations()
 const applianceQueries = useAppliancesQueries()
-const locationsQueries = useLocationsQueries()
+const locationQueries = useLocationQueries()
 
 const defaultDevice: NodeCreateInput = {
   label: undefined,
@@ -115,7 +115,7 @@ const node = reactive({ ...defaultDevice })
 
 const locationsList = ref()
 const addNode = async () => {
-  const locations = await locationsQueries.fetchLocations()
+  const locations = await locationQueries.fetchLocations()
 
   locationsList.value = locations?.data?.value?.findAllLocations || []
 

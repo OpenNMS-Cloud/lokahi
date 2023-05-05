@@ -42,8 +42,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import prometheus.PrometheusTypes;
 
-import java.time.Instant;
-
 @Component
 public class TaskSetCollectorAzureResponseProcessor {
 
@@ -60,7 +58,6 @@ public class TaskSetCollectorAzureResponseProcessor {
     public void processAzureCollectorResponse(String tenantId, CollectorResponse response, String[] labelValues) throws InvalidProtocolBufferException {
         Any collectorMetric = response.getResult();
         var azureResponse = collectorMetric.unpack(AzureResponseMetric.class);
-        long now = Instant.now().toEpochMilli();
 
         for (AzureResultMetric azureResult : azureResponse.getResultsList()) {
             try {
@@ -79,7 +76,7 @@ public class TaskSetCollectorAzureResponseProcessor {
                 switch (type) {
                     case AzureValueType.INT64_VALUE:
                         builder.addSamples(PrometheusTypes.Sample.newBuilder()
-                            .setTimestamp(now)
+                            .setTimestamp(response.getTimestamp())
                             .setValue(azureResult.getValue().getUint64()));
                         break;
                     default:

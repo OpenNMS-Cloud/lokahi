@@ -43,7 +43,6 @@ import prometheus.PrometheusTypes;
 
 import java.io.IOException;
 import java.math.BigInteger;
-import java.time.Instant;
 
 @Component
 public class TaskSetCollectorSnmpResponseProcessor {
@@ -61,7 +60,6 @@ public class TaskSetCollectorSnmpResponseProcessor {
     public void processSnmpCollectorResponse(String tenantId, CollectorResponse response, String[] labelValues) throws IOException {
         Any collectorMetric = response.getResult();
         var snmpResponse = collectorMetric.unpack(SnmpResponseMetric.class);
-        long now = Instant.now().toEpochMilli();
         for (SnmpResultMetric snmpResult : snmpResponse.getResultsList()) {
             try {
                 PrometheusTypes.TimeSeries.Builder builder = prometheus.PrometheusTypes.TimeSeries.newBuilder();
@@ -77,20 +75,20 @@ public class TaskSetCollectorSnmpResponseProcessor {
                 switch (type) {
                     case SnmpValueType.INT32_VALUE:
                         builder.addSamples(PrometheusTypes.Sample.newBuilder()
-                            .setTimestamp(now)
+                            .setTimestamp(response.getTimestamp())
                             .setValue(snmpResult.getValue().getSint64()));
                         break;
                     case SnmpValueType.COUNTER32_VALUE:
                     case SnmpValueType.TIMETICKS_VALUE:
                     case SnmpValueType.GAUGE32_VALUE:
                         builder.addSamples(PrometheusTypes.Sample.newBuilder()
-                            .setTimestamp(now)
+                            .setTimestamp(response.getTimestamp())
                             .setValue(snmpResult.getValue().getUint64()));
                         break;
                     case SnmpValueType.COUNTER64_VALUE:
                         double metric = new BigInteger(snmpResult.getValue().getBytes().toByteArray()).doubleValue();
                         builder.addSamples(PrometheusTypes.Sample.newBuilder()
-                            .setTimestamp(now)
+                            .setTimestamp(response.getTimestamp())
                             .setValue(metric));
                         break;
                 }

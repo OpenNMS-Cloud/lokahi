@@ -163,6 +163,7 @@ public class SnmpCollector implements ServiceCollector {
             .nodeId(nodeId)
             .monitorType(MonitorType.SNMP)
             .status(true)
+            .timeStamp(System.currentTimeMillis())
             .ipAddress(ipAddress).build();
     }
 

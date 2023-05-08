@@ -50,12 +50,13 @@ import prometheus.PrometheusTypes;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Predicate;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class TaskSetCollectorSnmpResponseProcessorTest {
 
@@ -141,6 +142,26 @@ public class TaskSetCollectorSnmpResponseProcessorTest {
 
             assertTrue(logCaptor.getLogEvents().stream().anyMatch(matcher));
         }
+    }
+
+    @Test
+    void testCollectorTimestamps() throws IOException {
+        var snmpResult = SnmpResultMetric.newBuilder()
+            .setAlias("x_int32_alias_x")
+            .setValue(SnmpValueMetric.newBuilder().setType(SnmpValueType.INT32).setSint64(3200320032L)
+                    .build()).build();
+        SnmpResponseMetric snmpResponse =
+            SnmpResponseMetric.newBuilder()
+                .addResults(snmpResult)
+                .build();
+        Instant timestamp = Instant.parse("2023-01-01T00:00:00Z");
+        CollectorResponse collectorResponse = CollectorResponse.newBuilder()
+            .setResult(Any.pack(snmpResponse))
+            .setTimestamp(timestamp.toEpochMilli())
+                .setMonitorType(MonitorType.SNMP).build();
+        target.processSnmpCollectorResponse("x-tenant-id-x", collectorResponse, testLabelValues);
+        var timeSeriesTimeStampMatcher = new PrometheusTimeSeriesTimeStampMatcher(timestamp.toEpochMilli());
+        Mockito.verify(mockCortexTSS).store(Mockito.eq("x-tenant-id-x"), Mockito.argThat(timeSeriesTimeStampMatcher));
     }
 
 //========================================
@@ -282,6 +303,19 @@ public class TaskSetCollectorSnmpResponseProcessorTest {
             }
 
             return false;
+        }
+    }
+
+    private class PrometheusTimeSeriesTimeStampMatcher implements ArgumentMatcher<PrometheusTypes.TimeSeries.Builder> {
+
+        private long timeStamp;
+        public PrometheusTimeSeriesTimeStampMatcher(long timeStamp) {
+            this.timeStamp = timeStamp;
+        }
+
+        @Override
+        public boolean matches(PrometheusTypes.TimeSeries.Builder argument) {
+            return argument.getSamples(0).getTimestamp() == timeStamp;
         }
     }
 }

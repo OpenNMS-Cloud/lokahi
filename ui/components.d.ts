@@ -35,7 +35,6 @@ declare module '@vue/runtime-core' {
     DiscoveryAzureForm: typeof import('./src/components/Discovery/DiscoveryAzureForm.vue')['default']
     DiscoveryContentEditable: typeof import('./src/components/Discovery/DiscoveryContentEditable.vue')['default']
     DiscoveryHelpConfiguring: typeof import('./src/components/Discovery/DiscoveryHelpConfiguring.vue')['default']
-    DiscoveryInfo: typeof import('./src/components/MyDiscovery/DiscoveryInfo.vue')['default']
     DiscoveryInstructions: typeof import('./src/components/Discovery/DiscoveryInstructions.vue')['default']
     DiscoveryListCard: typeof import('./src/components/Discovery/DiscoveryListCard.vue')['default']
     DiscoveryLocationsAutocomplete: typeof import('./src/components/Discovery/DiscoveryLocationsAutocomplete.vue')['default']

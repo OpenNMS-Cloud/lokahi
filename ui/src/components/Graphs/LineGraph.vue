@@ -108,7 +108,7 @@ const dataSets = computed(() => {
   const bgColor = ['green', 'blue'] // TODO: find solution to set bg color, in regards to FeatherDS theme switching
   emits('has-data', graphs.dataSets.value.length)
   return graphs.dataSets.value.map((data: any, i) => ({
-    label: data.metric.__name__,
+    label: props.graph.metrics[i],
     data: data.values.map((val: any) => val[1]),
     backgroundColor: bgColor[i],
     borderColor: bgColor[i],

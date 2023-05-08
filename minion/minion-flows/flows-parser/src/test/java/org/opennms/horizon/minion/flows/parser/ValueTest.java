@@ -28,30 +28,175 @@
 
 package org.opennms.horizon.minion.flows.parser;
 
+import static org.opennms.horizon.minion.flows.listeners.utils.BufferUtils.bytes;
+
+import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.mockito.Mockito;
+import org.opennms.horizon.minion.flows.parser.ie.Value;
 import org.opennms.horizon.minion.flows.parser.ie.values.BooleanValue;
 import org.opennms.horizon.minion.flows.parser.ie.values.DateTimeValue;
 import org.opennms.horizon.minion.flows.parser.ie.values.FloatValue;
 import org.opennms.horizon.minion.flows.parser.ie.values.IPv4AddressValue;
 import org.opennms.horizon.minion.flows.parser.ie.values.IPv6AddressValue;
+import org.opennms.horizon.minion.flows.parser.ie.values.ListValue;
 import org.opennms.horizon.minion.flows.parser.ie.values.MacAddressValue;
 import org.opennms.horizon.minion.flows.parser.ie.values.OctetArrayValue;
 import org.opennms.horizon.minion.flows.parser.ie.values.SignedValue;
 import org.opennms.horizon.minion.flows.parser.ie.values.StringValue;
 import org.opennms.horizon.minion.flows.parser.ie.values.UnsignedValue;
+import org.opennms.horizon.minion.flows.parser.session.Field;
+import org.opennms.horizon.minion.flows.parser.session.Session;
+import org.opennms.horizon.minion.flows.parser.session.Template;
 
+import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 
 public class ValueTest {
 
-    // TODO: Test BasicList, SubTemplateList, SubTemplateMultiList
+    @Test
+    public void testBasicList() throws MissingTemplateException, InvalidPacketException {
+        // Given
+        ByteBuf byteBuf = Unpooled.buffer()
+            .writeByte(0xFF) // Semantic: Undefined
+            .writeShort(11) // FieldID: destinationTransportPort (unsigned16)
+            .writeShort(2) // Field Length: unsigned16
+            .writeBytes(new byte[]{23, 42})
+            .writeBytes(new byte[]{13, 37})
+            .writeBytes(new byte[]{89, 80});
+
+        // When
+        final List<List<Value<?>>> listValue = (List<List<Value<?>>>) ListValue.parserWithBasicList("name1", Optional.empty()).parse(null, byteBuf).getValue();
+
+        // Then
+        Assert.assertNotNull(listValue);
+        Assert.assertEquals(3, listValue.size());
+        Assert.assertEquals(23 * 0x100 + 42, Long.parseUnsignedLong(((UnsignedValue) listValue.get(0).get(0)).getValue().toString()));
+        Assert.assertEquals(13 * 0x100 + 37, Long.parseUnsignedLong(((UnsignedValue) listValue.get(1).get(0)).getValue().toString()));
+        Assert.assertEquals(89 * 0x100 + 80, Long.parseUnsignedLong(((UnsignedValue) listValue.get(2).get(0)).getValue().toString()));
+    }
+
+    @Test
+    public void testSubTemplateList() throws MissingTemplateException, InvalidPacketException {
+        // Given
+        String field1Value = "firstFieldValue";
+        String field2Value = "secondFieldValue";
+
+        byte[] field1 = field1Value.getBytes();
+        byte[] field2 = field2Value.getBytes();
+        List<String> allFieldValues = Arrays.asList(field1Value, field2Value);
+        List<String> allFieldNames = Arrays.asList("firstField", "secondField");
+        final List<Field> fields = List.of(field("firstField", field1.length), field("secondField", field2.length));
+        Session.Resolver resolver = Mockito.mock(Session.Resolver.class);
+        Mockito.when(resolver.lookupTemplate(100)).thenReturn(Template.builder(100, Template.Type.TEMPLATE)
+            .withFields(fields).build());
+
+        ByteBuf byteBuf = Unpooled.buffer()
+            .writeByte(0xFF) // Semantic: Undefined
+            .writeShort(100)  // Template ID
+            .writeBytes(field1)  // Field 1 list 1
+            .writeBytes(field2)  // Field 2 list 1
+            .writeBytes(field1)  // Field 1 list 2
+            .writeBytes(field2);  // Field 2 list 2
+
+        // When
+        final List<List<Value<?>>> listValue = (List<List<Value<?>>>) ListValue.parserWithSubTemplateList("name1", Optional.empty()).parse(resolver, byteBuf).getValue();
+        Assert.assertEquals(2, listValue.get(0).size());
+        Assert.assertEquals(2, listValue.get(1).size());
+
+        // Then
+        checkListValues(allFieldValues, allFieldNames, listValue);
+    }
+
+    private static Field field(String name, final int length) {
+        return new Field() {
+            @Override
+            public int length() {
+                return length;
+            }
+
+            @Override
+            public Value<?> parse(Session.Resolver resolver, ByteBuf buffer) {
+                return new OctetArrayValue(name, bytes(buffer, length));
+            }
+        };
+    }
+
+    @Test
+    public void testSubTemplateMultiList() throws MissingTemplateException, InvalidPacketException {
+        // Given
+        String field1Value = "firstValue";
+        String field2Value = "secondValue";
+        String field3Value = "thirdValue";
+        String field4Value = "fourthValue";
+        String field5Value = "fifthValue";
+
+        //  This is the total length of the Data Records encoding for the
+        //  Template ID previously specified, including the two bytes for the
+        //  Template ID and the two bytes for the Data Records Length field
+        //  itself.
+        int dataRecordsLength = 4;
+        byte[] field1 = field1Value.getBytes();
+        byte[] field2 = field2Value.getBytes();
+        byte[] field3 = field3Value.getBytes();
+        byte[] field4 = field4Value.getBytes();
+        byte[] field5 = field5Value.getBytes();
+        final List<Field> fields = List.of(field("firstField", field1.length), field("secondField", field2.length));
+        final List<Field> fields2 = List.of(field("thirdField", field3.length), field("fourthField", field4.length), field("fifthField", field5.length));
+
+        List<String> allFieldValues = Arrays.asList(field4Value, field2Value, field3Value, field4Value, field5Value);
+        List<String> allFieldNames = Arrays.asList("firstField", "secondField", "thirdField", "fourthField", "fifthField");
+        Session.Resolver resolver = Mockito.mock(Session.Resolver.class);
+        Mockito.when(resolver.lookupTemplate(357)).thenReturn(Template.builder(357, Template.Type.TEMPLATE)
+            .withFields(fields).build());
+
+        Mockito.when(resolver.lookupTemplate(358)).thenReturn(Template.builder(358, Template.Type.TEMPLATE)
+            .withFields(fields2).build());
+
+        ByteBuf byteBuf = Unpooled.buffer()
+            .writeByte(0xFF) // Semantic: Undefined
+            .writeShort(357) // Header ID
+            .writeShort(dataRecordsLength + field1.length + field2.length)  // Header length
+            .writeBytes(field1)  // Field 1 template 1
+            .writeBytes(field2)  // Field 2 template 1
+            .writeShort(358)
+            .writeShort(dataRecordsLength + field3.length + field4.length + field5.length)  // Header length
+            .writeBytes(field3)  // Field 3 template 2
+            .writeBytes(field4) // Field 4 template 2
+            .writeBytes(field5); // Field 5 template 2
+
+        // When
+        final List<List<Value<?>>> listValue = (List<List<Value<?>>>) ListValue.parserWithSubTemplateMultiList("name1", Optional.empty()).parse(resolver, byteBuf).getValue();
+        Assert.assertEquals(2, listValue.get(0).size());
+        Assert.assertEquals(3, listValue.get(1).size());
+
+        // Then
+        checkListValues(allFieldValues, allFieldNames, listValue);
+    }
+
+    private void checkListValues(List<String> allFieldValues, List<String> allFieldNames, List<List<Value<?>>> listValue) {
+        List<String> foundFieldNames = new ArrayList<>();
+        List<String> foundFieldValues = new ArrayList<>();
+        Assert.assertNotNull(listValue);
+
+        listValue.forEach(val -> val.forEach(el -> {
+            foundFieldNames.add(el.getName());
+            foundFieldValues.add(new String((byte[]) el.getValue(), StandardCharsets.UTF_8));
+        }));
+        Assert.assertTrue(foundFieldNames.containsAll(allFieldNames));
+        Assert.assertTrue(foundFieldValues.containsAll(allFieldValues));
+    }
 
     @Test
     public void testBooleanValue() throws Exception {
@@ -75,16 +220,16 @@ public class ValueTest {
         Assert.assertEquals(Instant.from(ZonedDateTime.of(1900, 1, 1, 0, 0, 0, 0, ZoneOffset.UTC)), dateTimeMicrosecondsValue1.getValue());
         Assert.assertEquals("dateTimeMicrosecondsName1", dateTimeMicrosecondsValue1.getName());
 
-        final DateTimeValue dateTimeMicrosecondsName2 = (DateTimeValue) DateTimeValue.parserWithMicroseconds("dateTimeMicrosecondsName2", Optional.empty()).parse(null, Unpooled.buffer(8).writeInt((int)(1509533996L + DateTimeValue.SECONDS_TO_EPOCH)).writeInt(0));
+        final DateTimeValue dateTimeMicrosecondsName2 = (DateTimeValue) DateTimeValue.parserWithMicroseconds("dateTimeMicrosecondsName2", Optional.empty()).parse(null, Unpooled.buffer(8).writeInt((int) (1509533996L + DateTimeValue.SECONDS_TO_EPOCH)).writeInt(0));
         Assert.assertEquals(Instant.from(ZonedDateTime.of(2017, 11, 1, 10, 59, 56, 0, ZoneOffset.UTC)), dateTimeMicrosecondsName2.getValue());
         Assert.assertEquals("dateTimeMicrosecondsName2", dateTimeMicrosecondsName2.getName());
 
 
-        final DateTimeValue dateTimeMicrosecondsName3 = (DateTimeValue) DateTimeValue.parserWithMicroseconds("dateTimeMicrosecondsName3", Optional.empty()).parse(null, Unpooled.buffer(8).writeInt((int)(1509533996L + DateTimeValue.SECONDS_TO_EPOCH)).writeInt(16775168));
+        final DateTimeValue dateTimeMicrosecondsName3 = (DateTimeValue) DateTimeValue.parserWithMicroseconds("dateTimeMicrosecondsName3", Optional.empty()).parse(null, Unpooled.buffer(8).writeInt((int) (1509533996L + DateTimeValue.SECONDS_TO_EPOCH)).writeInt(16775168));
         Assert.assertEquals(Instant.from(ZonedDateTime.of(2017, 11, 1, 10, 59, 56, 3905773, ZoneOffset.UTC)), dateTimeMicrosecondsName3.getValue());
         Assert.assertEquals("dateTimeMicrosecondsName3", dateTimeMicrosecondsName3.getName());
 
-        final DateTimeValue dateTimeMicrosecondsName4 = (DateTimeValue) DateTimeValue.parserWithMicroseconds("dateTimeMicrosecondsName4", Optional.empty()).parse(null, Unpooled.buffer(8).writeInt((int)(1509533996L + DateTimeValue.SECONDS_TO_EPOCH)).writeInt(16775169));
+        final DateTimeValue dateTimeMicrosecondsName4 = (DateTimeValue) DateTimeValue.parserWithMicroseconds("dateTimeMicrosecondsName4", Optional.empty()).parse(null, Unpooled.buffer(8).writeInt((int) (1509533996L + DateTimeValue.SECONDS_TO_EPOCH)).writeInt(16775169));
         Assert.assertEquals(Instant.from(ZonedDateTime.of(2017, 11, 1, 10, 59, 56, 3905773, ZoneOffset.UTC)), dateTimeMicrosecondsName4.getValue());
         Assert.assertEquals("dateTimeMicrosecondsName4", dateTimeMicrosecondsName4.getName());
     }
@@ -106,11 +251,11 @@ public class ValueTest {
         Assert.assertEquals(Instant.from(ZonedDateTime.of(1900, 1, 1, 0, 0, 0, 0, ZoneOffset.UTC)), dateTimeNanosecondsValue1.getValue());
         Assert.assertEquals("dateTimeNanosecondsName1", dateTimeNanosecondsValue1.getName());
 
-        final DateTimeValue dateTimeNanosecondsValue2 = (DateTimeValue) DateTimeValue.parserWithNanoseconds("dateTimeNanosecondsName2", Optional.empty()).parse(null, Unpooled.buffer(8).writeInt((int)(1509533996L + DateTimeValue.SECONDS_TO_EPOCH)).writeInt(0));
+        final DateTimeValue dateTimeNanosecondsValue2 = (DateTimeValue) DateTimeValue.parserWithNanoseconds("dateTimeNanosecondsName2", Optional.empty()).parse(null, Unpooled.buffer(8).writeInt((int) (1509533996L + DateTimeValue.SECONDS_TO_EPOCH)).writeInt(0));
         Assert.assertEquals(Instant.from(ZonedDateTime.of(2017, 11, 1, 10, 59, 56, 0, ZoneOffset.UTC)), dateTimeNanosecondsValue2.getValue());
         Assert.assertEquals("dateTimeNanosecondsName2", dateTimeNanosecondsValue2.getName());
 
-        final DateTimeValue dateTimeNanosecondsValue3 = (DateTimeValue) DateTimeValue.parserWithNanoseconds("dateTimeNanosecondsName3", Optional.empty()).parse(null, Unpooled.buffer(8).writeInt((int)(1509533996L + DateTimeValue.SECONDS_TO_EPOCH)).writeInt(34509786));
+        final DateTimeValue dateTimeNanosecondsValue3 = (DateTimeValue) DateTimeValue.parserWithNanoseconds("dateTimeNanosecondsName3", Optional.empty()).parse(null, Unpooled.buffer(8).writeInt((int) (1509533996L + DateTimeValue.SECONDS_TO_EPOCH)).writeInt(34509786));
         Assert.assertEquals(Instant.from(ZonedDateTime.of(2017, 11, 1, 10, 59, 56, 8034935, ZoneOffset.UTC)), dateTimeNanosecondsValue3.getValue());
         Assert.assertEquals("dateTimeNanosecondsName3", dateTimeNanosecondsValue3.getName());
     }

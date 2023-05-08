@@ -45,6 +45,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 
 import com.google.common.base.Strings;
+import io.grpc.Context;
 import io.grpc.okhttp.NegotiationType;
 import io.grpc.okhttp.OkHttpChannelBuilder;
 import lombok.Setter;
@@ -103,6 +104,7 @@ public class MinionGrpcClient extends AbstractMessageDispatcherFactory<String> i
     private MetricRegistry metricRegistry;
     private StreamObserver<RpcResponseProto> rpcStream;
     private StreamObserver<MinionToCloudMessage> sinkStream;
+    private Context.CancellableContext cloudToMinionStreamCancellableContext;
 
     private final AtomicLong counter = new AtomicLong();
     private final ThreadFactory blockingSinkMessageThreadFactory = (runnable) -> new Thread(runnable, "blocking-sink-message-" + counter.incrementAndGet());
@@ -171,6 +173,7 @@ public class MinionGrpcClient extends AbstractMessageDispatcherFactory<String> i
         //  not match the hostname used to connect the server.
         if (! Strings.isNullOrEmpty(overrideAuthority)) {
             channelBuilder.overrideAuthority(overrideAuthority);
+            LOG.info("Configuring GRPC override authority {}", overrideAuthority);
         }
 
         if (tlsEnabled) {
@@ -188,14 +191,7 @@ public class MinionGrpcClient extends AbstractMessageDispatcherFactory<String> i
         }
         asyncStub = newStubOperation.apply(channel);
 
-        reconnectStrategy = simpleReconnectStrategyFactory.create(channel, () -> {
-            initializeRpcStub();
-            initializeSinkStub();
-            initializeCloudReceiver();
-        }, () -> {
-            rpcStream = null;
-            sinkStream = null;
-        });
+        reconnectStrategy = simpleReconnectStrategyFactory.create(channel, this::handleReconnect, this::handleDisconnect);
         reconnectStrategy.activate();
 
         LOG.info("Minion at location {} with systemId {} started", ipcIdentity.getLocation(), ipcIdentity.getId());
@@ -207,7 +203,9 @@ public class MinionGrpcClient extends AbstractMessageDispatcherFactory<String> i
         if (rpcStream != null) {
             rpcStream.onCompleted();
         }
-        channel.shutdown();
+        if (channel != null) {
+            channel.shutdown();
+        }
         LOG.info("Minion at location {} with systemId {} stopped", ipcIdentity.getLocation(), ipcIdentity.getId());
     }
 
@@ -283,6 +281,44 @@ public class MinionGrpcClient extends AbstractMessageDispatcherFactory<String> i
 // Internals
 //----------------------------------------
 
+    private void handleReconnect() {
+        initializeRpcStub();
+        initializeSinkStub();
+        initializeCloudReceiver();
+    }
+
+    private void handleDisconnect() {
+        if (rpcStream != null) {
+            try {
+                rpcStream.onCompleted();
+            } catch (Exception exc) {
+                LOG.info("Error on cleanup of existing rpc stream", exc);
+            }
+
+            rpcStream = null;
+        }
+
+        if (sinkStream != null) {
+            try {
+                sinkStream.onCompleted();
+            } catch (Exception exc) {
+                LOG.info("Error on cleanup of existing sink stream", exc);
+            }
+
+            sinkStream = null;
+        }
+
+        if (cloudToMinionStreamCancellableContext != null) {
+            try {
+                cloudToMinionStreamCancellableContext.cancel(new Exception("cleanup on handleDisconnect"));
+            } catch (Exception exc) {
+                LOG.info("Error on cleanup of existing cloud-to-minion stream", exc);
+            }
+
+            cloudToMinionStreamCancellableContext = null;
+        }
+    }
+
     private void initializeRpcStub() {
         rpcStream = asyncStub.cloudToMinionRPC(new RpcMessageHandler());
         // Need to send minion headers to gRPC server in order to register.
@@ -300,8 +336,14 @@ public class MinionGrpcClient extends AbstractMessageDispatcherFactory<String> i
             .setLocation(ipcIdentity.getLocation())
             .setSystemId(ipcIdentity.getId())
             .build();
-        asyncStub.cloudToMinionMessages(identity, new CloudMessageObserver(cloudMessageHandler));
-        LOG.info("Initialized cloud receiver stream");
+
+        cloudToMinionStreamCancellableContext = Context.current().withCancellation();
+        cloudToMinionStreamCancellableContext.run(
+            () -> {
+                asyncStub.cloudToMinionMessages(identity, new CloudMessageObserver(cloudMessageHandler));
+                LOG.info("Initialized cloud receiver stream");
+            });
+
     }
 
     private void sendBlockingSinkMessage(SinkMessage sinkMessage) {

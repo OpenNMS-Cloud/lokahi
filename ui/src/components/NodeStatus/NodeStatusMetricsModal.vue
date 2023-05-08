@@ -16,12 +16,24 @@
         </div>
         <div class="metrics">
           <LineGraph
+            :graph="bandwidthInOut"
+            @has-data="displayEmptyMsgIfNoData"
+          />
+          <LineGraph
             :graph="bytesInOut"
-            @has-data="(hasData) => (hasMetricInfo = hasData)"
+            @has-data="displayEmptyMsgIfNoData"
+          />
+          <LineGraph
+            :graph="nodeLatency"
+            @has-data="displayEmptyMsgIfNoData"
+          />
+          <LineGraph
+            :graph="errorsInOut"
+            @has-data="displayEmptyMsgIfNoData"
           />
         </div>
         <div
-          v-if="!hasMetricInfo"
+          v-if="!hasMetricData"
           class="empty"
         >
           Currently no data available.
@@ -43,7 +55,19 @@ const { openModal, closeModal, isVisible } = useModal()
 
 const interfaceName = ref()
 const instance = ref()
-const hasMetricInfo = ref(false)
+const hasMetricData = ref(false)
+
+const bandwidthInOut = computed<GraphProps>(() => {
+  return {
+    label: 'Bandwidth Utility Inbound / Outbound (%)',
+    metrics: ['bw_util_network_in', 'bw_util_network_out'],
+    monitor: 'SNMP',
+    nodeId: route.params.id as string,
+    instance: instance.value,
+    timeRange: 10,
+    timeRangeUnit: TimeRangeUnit.Minute
+  }
+})
 
 const bytesInOut = computed<GraphProps>(() => {
   return {
@@ -57,10 +81,39 @@ const bytesInOut = computed<GraphProps>(() => {
   }
 })
 
+const nodeLatency = computed<GraphProps>(() => {
+  return {
+    label: 'ICMP Response Time',
+    metrics: ['response_time_msec'],
+    monitor: 'ICMP',
+    nodeId: route.params.id as string,
+    instance: instance.value,
+    timeRange: 10,
+    timeRangeUnit: TimeRangeUnit.Minute
+  }
+})
+
+const errorsInOut = computed<GraphProps>(() => {
+  return {
+    label: 'Errors Inbound / Outbound',
+    metrics: ['network_errors_in', 'network_errors_out'],
+    monitor: 'SNMP',
+    nodeId: route.params.id as string,
+    instance: instance.value,
+    timeRange: 10,
+    timeRangeUnit: TimeRangeUnit.Minute
+  }
+})
+
 const openMetricsModal = (interfaceInfo: IpInterface) => {
   interfaceName.value = interfaceInfo.ipAddress
   instance.value = interfaceInfo.ipAddress
   openModal()
+}
+
+const displayEmptyMsgIfNoData = (hasData: boolean) => {
+  if (hasMetricData.value) return
+  hasMetricData.value = hasData
 }
 
 defineExpose({ openMetricsModal })

@@ -38,7 +38,7 @@ defineProps<{
   background-color: var(variables.$surface);
   padding: var(variables.$spacing-l);
   border: 1px solid var(variables.$border-on-surface);
-  @include mediaQueriesMixins.screen-md {
+  @include mediaQueriesMixins.screen-lg {
     width: 49.5%;
   }
   .header {

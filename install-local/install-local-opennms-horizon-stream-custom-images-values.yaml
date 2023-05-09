@@ -37,14 +37,62 @@ OpenNMS:
         Cpu: "0"
         Memory: "0"
   Minion:
-    Image: opennms/horizon-stream-minion:local
     Resources:
       Limits:
-        Cpu: "0"
-        Memory: "0"
+        Cpu: '0'
+        Memory: '0'
       Requests:
-        Cpu: "0"
-        Memory: "0"
+        Cpu: '0'
+        Memory: '0'
+    # see tilt-helm-values for explanation why this thing exists
+    ExtraVolumes:
+      - name: certificate-secrets
+        secret:
+          secretName: root-ca-certificate
+      - name: minion-certificate-manager-secrets
+        secret:
+          secretName: client-root-ca-certificate
+      - name: certificate
+        emptyDir: {}
+    ExtraMounts:
+      - name: certificate-secrets
+        mountPath: "/run/secrets/certificates"
+        readOnly: true
+      - name: minion-certificate-manager-secrets
+        mountPath: "/run/secrets/mtls"
+        readOnly: true
+      - name: certificate
+        mountPath: "/opt/karaf/certs/"
+    ExtraInitContainers:
+      - image: finalgene/openssh@sha256:5b8073b8720ddb204c48a79e68e2a9f8c470404d475640280eb5df2d6a843eca
+        imagePullPolicy: "IfNotPresent"
+        name: cert-generator
+        command:
+          - /bin/bash
+          - -c
+          - |
+            openssl genrsa -out /cert/client.key.pkcs1 2048
+            openssl pkcs8 -topk8 -in /cert/client.key.pkcs1 -out /cert/client.key -nocrypt
+            openssl req -new -key /cert/client.key -out /cert/client.unsigned.cert -subj "/C=CA/ST=TBD/L=TBD/O=OpenNMS/CN=local-minion/OU=L:TestLocation/OU=T:opennms-prime"
+            openssl x509 -req -in /cert/client.unsigned.cert -days 14 -CA /run/secrets/mtls/tls.crt -CAkey /run/secrets/mtls/tls.key -out /cert/client.signed.cert
+        securityContext:
+          privileged: false
+          runAsUser: 10001
+          runAsGroup: 10001
+          fsGroup: 10001
+        volumeMounts:
+          - name: certificate
+            mountPath: "/cert"
+          - name: minion-certificate-manager-secrets
+            mountPath: "/run/secrets/mtls"
+    GrpcConfig:
+      grpc.host: ingress-nginx-controller
+      grpc.port: 443
+      grpc.tls.enabled: true
+      grpc.trust.cert.filepath: /run/secrets/certificates/tls.crt
+      grpc.client.cert.filepath: /opt/karaf/certs/client.signed.cert
+      grpc.client.private.key.filepath: /opt/karaf/certs/client.key
+      grpc.override.authority: minion.onmshs
   MinionGateway:
     Image: opennms/horizon-stream-minion-gateway:local
     Resources:
@@ -54,8 +102,11 @@ OpenNMS:
       Requests:
         Cpu: "0"
         Memory: "0"
-  MinionGatewayGrpcProxy:
-    Image: opennms/horizon-stream-minion-gateway-grpc-proxy:local
+    IngressAnnotations:
+      nginx.ingress.kubernetes.io/auth-tls-secret: $NAMESPACE/client-root-ca-certificate
+      nginx.ingress.kubernetes.io/auth-url: "http://opennms-minion-certificate-verifier.$NAMESPACE.svc.cluster.local:8080/certificate/debug"
+  MinionCertificateVerifier:
+    Image: opennms/horizon-stream-minion-certificate-verifier:local
     Resources:
       Limits:
         Cpu: "0"
@@ -72,8 +123,8 @@ OpenNMS:
       Requests:
         Cpu: "0"
         Memory: "0"
-  Alarm:
-    Image: opennms/horizon-stream-alarm:local
+  Alert:
+    Image: opennms/horizon-stream-alert:local
     Resources:
       Limits:
         Cpu: "0"

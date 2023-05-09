@@ -35,6 +35,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
@@ -59,10 +60,18 @@ public class EncryptAttributeConverter implements AttributeConverter<String, Str
     private static final String TRANSFORMATION = "AES/GCM/NoPadding";
     private static final int GCM_IV_LENGTH = 12;
     private static final int AUTH_TAG_LENGTH = 128;
+    private static final int ENCRYPTION_KEY_LENGTH = 32;
     private static final SecureRandom RANDOM = new SecureRandom();
 
     @Value("${inventory.encryption.key:}")
     private String encryptionKey;
+
+    @PostConstruct
+    public void init() {
+        if (StringUtils.isBlank(encryptionKey) || encryptionKey.length() != ENCRYPTION_KEY_LENGTH) {
+            throw new InventoryRuntimeException("Inventory Encryption Key should be exactly 32 characters in length");
+        }
+    }
 
     @Override
     public String convertToDatabaseColumn(String plainText) {

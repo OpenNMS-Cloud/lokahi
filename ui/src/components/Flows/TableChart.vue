@@ -38,6 +38,8 @@ import { ChartData } from '@/types'
 import { Bar } from 'vue-chartjs'
 import { Chart, Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale, ChartOptions } from 'chart.js'
 import { downloadCanvas } from '../Graphs/utils'
+import useTheme from '@/composables/useTheme'
+const { onThemeChange, isDark } = useTheme()
 
 Chart.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
 
@@ -115,7 +117,8 @@ const chartOptions = computed<ChartOptions<any>>(() => {
       x: {
         stacked: true,
         grid: {
-          display: true
+          display: true,
+          color: isDark.value ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'
         },
         ticks: {
           callback: function (value: any) {
@@ -136,6 +139,10 @@ const chartOptions = computed<ChartOptions<any>>(() => {
       }
     }
   }
+})
+
+onThemeChange(() => {
+  chartOptions.value.scales.x.grid.color = isDark.value ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'
 })
 
 const addValues = (a: number, b: number) => {

@@ -44,16 +44,22 @@ spec:
             name: minion-config
         - name: maven-volume
           emptyDir: {}
+        {{- if .Values.OpenNMS.Minion.ExtraVolumes }}
+          {{ toYaml .Values.OpenNMS.Minion.ExtraVolumes | nindent 8 }}
+        {{- end }}
       {{ if not .Values.OpenShift }}
       initContainers:
-      - name: init-sysctl
-        image: busybox
-        command:
-          - sysctl
-          - -w
-          - net.ipv4.ping_group_range=0 429496729
-        securityContext:
-          privileged: true
+        - name: init-sysctl
+          image: busybox
+          command:
+            - sysctl
+            - -w
+            - net.ipv4.ping_group_range=0 429496729
+          securityContext:
+            privileged: true
+        {{- if .Values.OpenNMS.Minion.ExtraInitContainers }}
+          {{ toYaml .Values.OpenNMS.Minion.ExtraInitContainers | nindent 8 }}
+        {{- end }}
       {{ end }}
       containers:
         - name: {{ .Values.OpenNMS.Minion.ServiceName }}
@@ -95,6 +101,9 @@ spec:
               subPath: "opennms-minion-identity"
             - name: maven-volume
               mountPath: /.m2
+            {{- if .Values.OpenNMS.Minion.ExtraMounts }}
+              {{ toYaml .Values.OpenNMS.Minion.ExtraMounts | nindent 12 }}
+            {{- end }}
           resources:
             limits:
               cpu: "{{ .Values.OpenNMS.Minion.Resources.Limits.Cpu }}"

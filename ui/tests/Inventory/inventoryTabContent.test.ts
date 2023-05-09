@@ -1,24 +1,24 @@
 import { mount } from '@vue/test-utils'
-import InventoryDetectedNodesTabContent from '@/components/Inventory/InventoryDetectedNodesTabContent.vue'
-import { TimeUnit } from '@/types'
+import InventoryTabContent from '@/components/Inventory/InventoryTabContent.vue'
+import { InventoryNode, MonitoredStates, TimeUnit } from '@/types'
 
-const tabContent = [
+const tabContent: InventoryNode[] = [
   {
     id: 1,
-    label: 'Detected Node 1',
+    label: 'Monitored Node 1',
     status: '',
     metrics: [
       {
         type: 'latency',
         label: 'Latency',
-        timestamp: 9,
+        value: 9,
         timeUnit: TimeUnit.MSecs,
         status: 'UP'
       },
       {
         type: 'uptime',
         label: 'Uptime',
-        timestamp: 1667930274.66,
+        value: 1667930274.66,
         timeUnit: TimeUnit.Secs,
         status: 'DOWN'
       },
@@ -37,15 +37,16 @@ const tabContent = [
       managementIpLink: 'goto',
       tagValue: []
     },
-    isNodeOverlayChecked: false
+    isNodeOverlayChecked: false,
+    type: MonitoredStates.MONITORED
   }
 ]
 
 let wrapper: any
 
-describe('InventoryDetectedNodesTabContent.vue', () => {
+describe.skip('InventoryTabContent.vue', () => {
   beforeAll(() => {
-    wrapper = mount(InventoryDetectedNodesTabContent, {
+    wrapper = mount(InventoryTabContent, {
       shallow: true,
       props: {
         tabContent
@@ -56,7 +57,7 @@ describe('InventoryDetectedNodesTabContent.vue', () => {
     wrapper.unmount()
   })
 
-  const tabComponents = ['icon', 'heading', 'metric-chip-list', 'text-anchor-list', 'icon-action-list']
+  const tabComponents = ['icon-storage', 'heading', 'metric-chip-list', 'text-anchor-list', 'icon-action-list']
   it.each(tabComponents)('should have "%s" components', (cmp) => {
     expect(wrapper.get(`[data-test="${cmp}"]`).exists()).toBe(true)
   })

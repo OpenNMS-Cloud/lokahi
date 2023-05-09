@@ -436,6 +436,9 @@ public class AlertTestSteps {
             }
 
             String expectedTrimmed = parts[1].trim();
+            if ("BLANK".equals(expectedTrimmed)) {
+                expectedTrimmed = "";
+            }
 
             assertEquals("matching to JSON path " + parts[0], expectedTrimmed, actualTrimmed);
         } else {

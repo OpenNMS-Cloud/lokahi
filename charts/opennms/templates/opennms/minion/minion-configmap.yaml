@@ -7,9 +7,11 @@ metadata:
   namespace: {{ .Release.Namespace }}
 data:
   grpc-config: |
-    grpc.host={{ .Values.OpenNMS.MinionGatewayGrpcProxy.ServiceName }}
-    grpc.port={{ .Values.OpenNMS.MinionGatewayGrpcProxy.Port }}
     grpc.max.message.size=104857600
+    # Properties below override these defined earlier in file!
+    {{- range $Key, $Value := .Values.OpenNMS.Minion.GrpcConfig }}
+    {{ $Key }}={{ $Value }}
+    {{- end }}
   opennms-minion-identity: |
     id=${env:HOSTNAME:-UNKNOWN}
     location=${env:LOCATION:-Default}

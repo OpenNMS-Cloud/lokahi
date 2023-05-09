@@ -45,6 +45,7 @@ import org.opennms.horizon.alerts.proto.ListAlertsResponse;
 import org.opennms.horizon.alertservice.api.AlertService;
 import org.opennms.horizon.alertservice.db.entity.Alert;
 import org.opennms.horizon.alertservice.db.repository.AlertRepository;
+import org.opennms.horizon.alertservice.db.repository.NodeRepository;
 import org.opennms.horizon.alertservice.db.tenant.GrpcTenantLookupImpl;
 import org.opennms.horizon.alertservice.db.tenant.TenantLookup;
 import org.opennms.horizon.alertservice.service.AlertMapper;
@@ -67,14 +68,16 @@ public class AlertGrpcServiceTest extends AbstractGrpcUnitTest {
     private ManagedChannel channel;
     private AlertMapper mockAlertMapper;
     private AlertRepository mockAlertRepository;
+    private NodeRepository mockNodeRepository;
     protected TenantLookup tenantLookup = new GrpcTenantLookupImpl();
 
     @BeforeEach
     public void prepareTest() throws VerificationException, IOException {
         mockAlertService = mock(AlertService.class);
         mockAlertRepository = mock(AlertRepository.class);
+        mockNodeRepository = mock(NodeRepository.class);
         mockAlertMapper = mock(AlertMapper.class);
-        AlertGrpcService grpcService = new AlertGrpcService(mockAlertMapper, mockAlertRepository, mockAlertService, tenantLookup);
+        AlertGrpcService grpcService = new AlertGrpcService(mockAlertMapper, mockAlertRepository, mockNodeRepository, mockAlertService, tenantLookup);
         startServer(grpcService);
         channel = InProcessChannelBuilder.forName(serverName).directExecutor().build();
         stub = AlertServiceGrpc.newBlockingStub(channel);

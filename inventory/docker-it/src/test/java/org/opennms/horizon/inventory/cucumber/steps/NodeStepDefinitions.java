@@ -2,10 +2,15 @@ package org.opennms.horizon.inventory.cucumber.steps;
 
 import com.google.protobuf.Empty;
 import com.google.protobuf.Int64Value;
-import io.cucumber.java.BeforeAll;
+import com.google.protobuf.InvalidProtocolBufferException;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.junit.Assert;
 import org.opennms.horizon.inventory.cucumber.InventoryBackgroundHelper;
+import org.opennms.horizon.inventory.cucumber.RetryUtils;
+import org.opennms.horizon.inventory.cucumber.kafkahelper.KafkaTestHelper;
 import org.opennms.horizon.inventory.dto.MonitoringLocationDTO;
 import org.opennms.horizon.inventory.dto.NodeCreateDTO;
 import org.opennms.horizon.inventory.dto.NodeDTO;
@@ -17,14 +22,26 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@Slf4j
 public class NodeStepDefinitions {
     private final InventoryBackgroundHelper backgroundHelper;
+    private RetryUtils retryUtils;
+    private KafkaTestHelper kafkaTestHelper;
     private NodeDTO node;
     private MonitoringLocationDTO monitoringLocation;
     private NodeList fetchedNodeList;
+    private String nodeTopic;
 
-    public NodeStepDefinitions(InventoryBackgroundHelper backgroundHelper) {
+    public NodeStepDefinitions(RetryUtils retryUtils, KafkaTestHelper kafkaTestHelper, InventoryBackgroundHelper backgroundHelper) {
+        this.retryUtils = retryUtils;
+        this.kafkaTestHelper = kafkaTestHelper;
         this.backgroundHelper = backgroundHelper;
+        nodeTopic = "node";
+    }
+
+    private void initKafka() {
+        kafkaTestHelper.setKafkaBootstrapUrl(backgroundHelper.getKafkaBootstrapUrl());
+        kafkaTestHelper.startConsumerAndProducer(nodeTopic, nodeTopic);
     }
 
     /*
@@ -39,6 +56,7 @@ public class NodeStepDefinitions {
     @Given("[Node] Kafka Bootstrap URL in system property {string}")
     public void kafkaBootstrapURLInSystemProperty(String systemPropertyName) {
         backgroundHelper.kafkaBootstrapURLInSystemProperty(systemPropertyName);
+        initKafka();
     }
 
     @Given("[Node] Grpc TenantId {string}")
@@ -101,6 +119,18 @@ public class NodeStepDefinitions {
         assertEquals(0, fetchedNodeList.getNodesCount());
     }
 
+    @Then("verify node topic has {int} messages with tenant {string}")
+    public void verifyNodeTopicContainsTenant(int expectedMessages, String tenant) throws InterruptedException {
+        boolean success = retryUtils.retry(
+            () -> this.checkNumberOfMessageForOneTenant(tenant, expectedMessages, nodeTopic),
+            result -> result,
+            100,
+            10000,
+            false);
+
+        Assert.assertTrue("Verify node topic has the right number of message(s)", success);
+    }
+
     /*
      * INTERNAL
      * *********************************************************************************
@@ -110,5 +140,27 @@ public class NodeStepDefinitions {
         for (NodeDTO nodeDTO : nodeServiceBlockingStub.listNodes(Empty.newBuilder().build()).getNodesList()) {
             nodeServiceBlockingStub.deleteNode(Int64Value.newBuilder().setValue(nodeDTO.getId()).build());
         }
+    }
+
+    private boolean checkNumberOfMessageForOneTenant(String tenant, int expectedMessages, String topic) {
+        int foundMessages = 0;
+        List<ConsumerRecord<String, byte[]>> records = kafkaTestHelper.getConsumedMessages(topic);
+        for (ConsumerRecord<String, byte[]> record: records) {
+            if (record.value() == null) {
+                continue;
+            }
+            NodeDTO nodeDTO;
+            try {
+                nodeDTO = NodeDTO.parseFrom(record.value());
+            } catch (InvalidProtocolBufferException e) {
+                throw new RuntimeException(e);
+            }
+
+            if (tenant.equals(nodeDTO.getTenantId())) {
+                foundMessages++;
+            }
+        }
+        log.info("Found {} messages for tenant {}", foundMessages, tenant);
+        return foundMessages == expectedMessages;
     }
 }

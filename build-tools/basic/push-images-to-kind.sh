@@ -32,7 +32,6 @@ kind load docker-image "opennms/horizon-stream-alert:local-basic"
 kind load docker-image "opennms/horizon-stream-notification:local-basic"
 kind load docker-image "opennms/horizon-stream-rest-server:local-basic"
 kind load docker-image "opennms/horizon-stream-minion-gateway:local-basic"
-kind load docker-image "opennms/horizon-stream-minion-gateway-grpc-proxy:local-basic"
 kind load docker-image "opennms/horizon-stream-minion-certificate-manager:local-basic"
 kind load docker-image "opennms/horizon-stream-minion-certificate-verifier:local-basic"
 kind load docker-image "opennms/horizon-stream-metrics-processor:local-basic"
@@ -52,7 +51,7 @@ kind load docker-image "opennms/horizon-stream-datachoices:local-basic"
 # 		"opennms/horizon-stream-keycloak:local-basic" \
 # 		"opennms/horizon-stream-metrics-processor:local-basic" \
 # 		"opennms/horizon-stream-minion-certificate-manager:local-basic" \
-# 		"opennms/horizon-stream-minion-gateway-grpc-proxy:local-basic" \
+# 		"opennms/horizon-stream-minion-certificate-verifier:local-basic" \
 # 		"opennms/horizon-stream-minion-gateway:local-basic" \
 # 		"opennms/horizon-stream-minion:local-basic" \
 # 		"opennms/horizon-stream-notification:local-basic" \

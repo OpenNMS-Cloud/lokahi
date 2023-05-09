@@ -163,6 +163,7 @@ public class TaskExecutionResultProcessorImpl implements TaskExecutionResultProc
             .setNodeId(collectionSet.getNodeId())
             .setIpAddress(collectionSet.getIpAddress())
             .setMonitorType(collectionSet.getMonitorType())
+            .setTimestamp(collectionSet.getTimeStamp())
             .setResult(Any.pack(collectionSet.getResults())).build();
     }
 

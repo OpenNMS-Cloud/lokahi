@@ -37,6 +37,7 @@ kafka:
     minion-heartbeat: "heartbeat"
     task-set-results: "task-set.results"
     internal-events: "internal-event"
+    node: "node"
 
 
 keycloak:

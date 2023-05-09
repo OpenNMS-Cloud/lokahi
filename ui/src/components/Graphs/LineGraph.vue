@@ -37,23 +37,19 @@ import { GraphProps } from '@/types/graphs'
 import DownloadFile from '@featherds/icon/action/DownloadFile'
 import { format } from 'd3'
 const emits = defineEmits(['has-data'])
-
 // Chart.register(zoomPlugin) disable zoom until phase 2
-
 const graphs = useGraphs()
-
 const props = defineProps({
   graph: {
     required: true,
     type: Object as PropType<GraphProps>
   }
 })
-
+import useTheme from '@/composables/useTheme'
+const { onThemeChange, isDark } = useTheme()
 const yAxisFormatter = format('.3s')
-
 let chart: any = {}
-
-const options = computed<ChartOptions>(() => ({
+const options = computed<ChartOptions<any>>(() => ({
   responsive: true,
   aspectRatio: 1.4,
   plugins: {
@@ -81,7 +77,7 @@ const options = computed<ChartOptions>(() => ({
         text: props.graph.label
       } as TitleOptions,
       ticks: {
-        callback: (value, index) => (index % 2 === 0 ? yAxisFormatter(value as number) : ''),
+        callback: (value: any, index: any) => (index % 2 === 0 ? yAxisFormatter(value as number) : ''),
         maxTicksLimit: 8
       },
       stacked: false
@@ -89,26 +85,26 @@ const options = computed<ChartOptions>(() => ({
     x: {
       ticks: {
         maxTicksLimit: 12
+      },
+      grid: {
+        display: true,
+        color: isDark.value ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'
       }
     }
   }
 }))
-
 const xAxisLabels = computed(() => {
   const graphsDataSetsValues = (graphs.dataSets.value[0]?.values as any) || ([] as any)
-
   const totalLabels = graphsDataSetsValues.map((val: any) => {
     return formatTimestamp(val[0], 'minutes')
   })
-
   return totalLabels
 })
-
 const dataSets = computed(() => {
   const bgColor = ['green', 'blue'] // TODO: find solution to set bg color, in regards to FeatherDS theme switching
   emits('has-data', graphs.dataSets.value.length)
   return graphs.dataSets.value.map((data: any, i) => ({
-    label: data.metric.__name__,
+    label: props.graph.metrics[i],
     data: data.values.map((val: any) => val[1]),
     backgroundColor: bgColor[i],
     borderColor: bgColor[i],
@@ -116,14 +112,12 @@ const dataSets = computed(() => {
     hoverRadius: 6
   }))
 })
-
 const chartData = computed<ChartData<any>>(() => {
   return {
     labels: xAxisLabels.value,
     datasets: dataSets.value
   }
 })
-
 const render = async (update?: boolean) => {
   try {
     if (update) {
@@ -145,22 +139,22 @@ const render = async (update?: boolean) => {
     console.log('Could not render graph for ', props.graph.label)
   }
 }
-
 const onDownload = () => {
   const canvas = document.getElementById(props.graph.label) as HTMLCanvasElement
   downloadCanvas(canvas, props.graph.label)
 }
-
 onMounted(async () => {
   await graphs.getMetrics(props.graph)
   render()
+})
+onThemeChange(() => {
+  options.value.scales.x.grid.color = isDark.value ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'
 })
 </script>
 
 <!-- TODO: make theme switching works in graphs -->
 <style scoped lang="scss">
 @use '@featherds/styles/themes/variables';
-
 .container {
   position: relative;
   width: 30%;
@@ -171,12 +165,10 @@ onMounted(async () => {
 }
 .canvas-wrapper {
   width: 100%;
-
   .download-icon {
     position: absolute;
     right: 15px;
     top: 19px;
-
     svg {
       font-size: 15px;
     }

@@ -2,9 +2,6 @@
   <div class="existing-items-container">
     <div class="title">
       <div>{{ title }}</div>
-      <FeatherButton icon="info">
-        <FeatherIcon :icon="infoIcon" />
-      </FeatherButton>
     </div>
     <div
       class="list"
@@ -22,10 +19,7 @@
 </template>
 
 <script setup lang="ts">
-import Info from '@featherds/icon/action/Info'
 import { MonitorPolicy, PolicyRule } from '@/types/graphql'
-
-const infoIcon = markRaw(Info)
 
 defineProps<{
   title: string

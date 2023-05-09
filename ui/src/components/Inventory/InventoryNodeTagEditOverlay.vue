@@ -40,7 +40,7 @@
 <script lang="ts" setup>
 import { PropType } from 'vue'
 import Storage from '@material-design-icons/svg/outlined/storage.svg'
-import { NodeContent } from '@/types/inventory'
+import { InventoryNode } from '@/types/inventory'
 import { IIcon } from '@/types'
 import { useInventoryStore } from '@/store/Views/inventoryStore'
 
@@ -48,7 +48,7 @@ const inventoryStore = useInventoryStore()
 
 const props = defineProps({
   node: {
-    type: Object as PropType<NodeContent>,
+    type: Object as PropType<InventoryNode>,
     required: true
   },
   isSelected: {
@@ -62,7 +62,7 @@ watchEffect(() => {
   isChecked.value = props.node.isNodeOverlayChecked
 })
 
-const nodeSelect = (node: NodeContent) => {
+const nodeSelect = (node: InventoryNode) => {
   inventoryStore.addRemoveNodesSelected(node, isChecked.value)
 }
 

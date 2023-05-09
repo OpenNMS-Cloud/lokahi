@@ -1,7 +1,7 @@
 import { Tag } from './graphql'
 import { Chip } from './metric'
 
-interface Anchor {
+export interface Anchor {
   profileValue?: number | string
   profileLink?: string
   locationValue?: string
@@ -11,11 +11,36 @@ interface Anchor {
   tagValue: Tag[]
 }
 
-interface NodeContent {
+interface MonitoredNode {
   id: number
   label: string | undefined
   status: string
   metrics: Chip[]
   anchor: Anchor
   isNodeOverlayChecked: boolean
+  type: MonitoredStates.MONITORED
 }
+
+interface UnmonitoredNode {
+  id: number
+  label: string
+  anchor: Anchor
+  isNodeOverlayChecked: boolean
+  type: MonitoredStates.UNMONITORED
+}
+
+interface DetectedNode {
+  id: number
+  label: string
+  anchor: Anchor
+  isNodeOverlayChecked: boolean
+  type: MonitoredStates.DETECTED
+}
+
+export const enum MonitoredStates {
+  MONITORED = 'MONITORED',
+  UNMONITORED = 'UNMONITORED',
+  DETECTED = 'DETECTED'
+}
+
+type InventoryNode = MonitoredNode | UnmonitoredNode | DetectedNode

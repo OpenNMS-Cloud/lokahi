@@ -33,6 +33,7 @@ import java.util.Optional;
 
 import org.opennms.horizon.alerts.proto.Alert;
 import org.opennms.horizon.events.proto.Event;
+import org.opennms.horizon.inventory.dto.NodeDTO;
 
 public interface AlertService {
     Optional<Alert> reduceEvent(Event e);
@@ -52,4 +53,6 @@ public interface AlertService {
     void addListener(AlertLifecyleListener listener);
 
     void removeListener(AlertLifecyleListener listener);
+
+    void saveNode(NodeDTO node);
 }

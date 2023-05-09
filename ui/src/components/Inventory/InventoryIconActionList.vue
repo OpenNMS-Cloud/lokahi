@@ -1,14 +1,13 @@
 <template>
   <ul class="icon-action-list">
-    <!-- <li @click="onBubbleChart" data-test="bubble-chart"><Icon :icon="bubbleChartIcon" /></li> -->
     <li
+      v-if="isMonitored(node)"
       @click="onLineChart"
       data-test="line-chart"
       class="pointer"
     >
       <Icon :icon="lineChartIcon" />
     </li>
-    <!-- <li @click="onPieChart" data-test="pie-chart"><Icon :icon="pieChartIcon" /></li> -->
     <li
       @click="onWarning"
       data-test="warning"
@@ -51,18 +50,16 @@
 </template>
 
 <script lang="ts" setup>
-import BubbleChart from '@material-design-icons/svg/outlined/bubble_chart.svg'
 import MultilineChart from '@material-design-icons/svg/outlined/multiline_chart.svg'
-import PieChart from '@material-design-icons/svg/outlined/pie_chart.svg'
 import Warning from '@featherds/icon/notification/Warning'
 import Delete from '@featherds/icon/action/Delete'
-import { IIcon } from '@/types'
+import { IIcon, MonitoredNode, UnmonitoredNode, DetectedNode } from '@/types'
 import { ModalPrimary } from '@/types/modal'
-import { NodeContent } from '@/types/inventory'
 import useSnackbar from '@/composables/useSnackbar'
 import useModal from '@/composables/useModal'
 import { useInventoryQueries } from '@/store/Queries/inventoryQueries'
 import { useNodeMutations } from '@/store/Mutations/nodeMutations'
+import { isMonitored } from './inventory.utils'
 
 const { showSnackbar } = useSnackbar()
 const { openModal, closeModal, isVisible } = useModal()
@@ -70,16 +67,7 @@ const inventoryQueries = useInventoryQueries()
 const nodeMutations = useNodeMutations()
 
 const router = useRouter()
-const props = defineProps<{ node: NodeContent }>()
-
-const onBubbleChart = () => {
-  console.log('bubble chart')
-}
-const bubbleChartIcon: IIcon = {
-  image: BubbleChart,
-  title: 'Bubble Chart',
-  size: 1.5
-}
+const props = defineProps<{ node: MonitoredNode | UnmonitoredNode | DetectedNode }>()
 
 const onLineChart = () => {
   router.push({
@@ -90,15 +78,6 @@ const onLineChart = () => {
 const lineChartIcon: IIcon = {
   image: MultilineChart,
   tooltip: 'Graphs',
-  size: 1.5
-}
-
-const onPieChart = () => {
-  console.log('pie chart')
-}
-const pieChartIcon: IIcon = {
-  image: PieChart,
-  title: 'Pie Chart',
   size: 1.5
 }
 

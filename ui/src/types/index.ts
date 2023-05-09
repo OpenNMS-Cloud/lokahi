@@ -3,6 +3,7 @@ import { PointerAlignment, PopoverPlacement } from '@featherds/popover'
 // import { ComputedRef } from 'vue'
 
 export * from './flows.d'
+export * from './inventory.d'
 export declare type fncVoid = () => void
 export declare type fncArgVoid = (...args: any[]) => void
 

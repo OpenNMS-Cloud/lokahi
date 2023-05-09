@@ -4,12 +4,6 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Multimap;
 import io.grpc.stub.StreamObserver;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.IdentityHashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.concurrent.Semaphore;
 import org.opennms.cloud.grpc.minion.RpcRequestProto;
 import org.opennms.horizon.shared.ipc.grpc.server.manager.MinionInfo;
 import org.opennms.horizon.shared.ipc.grpc.server.manager.MinionManager;
@@ -18,6 +12,13 @@ import org.opennms.miniongateway.grpc.server.model.TenantKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.IdentityHashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.concurrent.Semaphore;
 
 public class RpcConnectionTrackerImpl implements RpcConnectionTracker {
 
@@ -112,6 +113,7 @@ public class RpcConnectionTrackerImpl implements RpcConnectionTracker {
 
                 connectionByMinionId.remove(tenantMinionId);
                 removedMinionInfo.setId(tenantMinionId.getKey());
+                removedMinionInfo.setTenantId(tenantMinionId.getTenantId());
             }
 
             if (tenantLocation != null) {

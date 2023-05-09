@@ -90,7 +90,7 @@ onMounted(async () => {
     display: flex;
     gap: 1.3%;
     flex-direction: column;
-    @include mediaQueriesMixins.screen-md {
+    @include mediaQueriesMixins.screen-lg {
       flex-direction: row;
     }
   }

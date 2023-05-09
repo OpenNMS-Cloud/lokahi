@@ -17,4 +17,5 @@
     <include file="/db/changelog/hs-0.1.0/tables/thresholded_event.xml" />
     <include file="/db/changelog/hs-0.1.0/tables/alert_tag.xml" />
     <include file="/db/changelog/hs-0.1.0/tables/update_alert_trigger_event.xml" />
+    <include file="/db/changelog/hs-0.1.0/tables/node.xml" />
 </databaseChangeLog>

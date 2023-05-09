@@ -146,7 +146,6 @@ jobs:
           'horizon-stream-keycloak',
           'horizon-stream-metrics-processor',
           'horizon-stream-minion-gateway',
-          'horizon-stream-minion-gateway-grpc-proxy',
           'horizon-stream-minion-certificate-manager',
           'horizon-stream-minion-certificate-verifier',
           'horizon-stream-notification',

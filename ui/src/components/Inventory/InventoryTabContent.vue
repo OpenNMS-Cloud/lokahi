@@ -47,6 +47,7 @@
           <FeatherChipList
             label="List of metric chips"
             data-test="metric-chip-list"
+            v-if="isMonitored(node)"
           >
             <MetricChip
               v-for="metric in node?.metrics"
@@ -122,8 +123,7 @@
 <script lang="ts" setup>
 import { PropType } from 'vue'
 import Storage from '@material-design-icons/svg/outlined/storage.svg'
-import { NodeContent } from '@/types/inventory'
-import { IIcon } from '@/types'
+import { IIcon, InventoryNode } from '@/types'
 import { useTagStore } from '@/store/Components/tagStore'
 import { useNodeMutations } from '@/store/Mutations/nodeMutations'
 import { useInventoryQueries } from '@/store/Queries/inventoryQueries'
@@ -131,15 +131,16 @@ import { useInventoryStore } from '@/store/Views/inventoryStore'
 import { ModalPrimary } from '@/types/modal'
 import useModal from '@/composables/useModal'
 import { Tag, TagListNodesRemoveInput } from '@/types/graphql'
+import { isMonitored } from './inventory.utils'
 
 // TODO: sort tabContent alpha (default)? to keep list display consistently in same order (e.g. page refresh)
 const props = defineProps({
   tabContent: {
-    type: Object as PropType<NodeContent[]>,
+    type: Object as PropType<InventoryNode[]>,
     required: true
   }
 })
-const nodes = ref<NodeContent[]>(props.tabContent)
+const nodes = ref<InventoryNode[]>(props.tabContent)
 const availableTagsToDelete = ref(<Tag[]>[])
 const tagsForDeletion = ref([] as Tag[])
 const nodeIdForDeletingTags = ref()
@@ -183,7 +184,7 @@ const saveTagsToSelectedNodes = async () => {
   const nodeIds = inventoryStore.nodesSelected.map((node) => node.id)
   await nodeMutations.addTagsToNodes({ nodeIds, tags })
 
-  inventoryQueries.fetch()
+  await inventoryQueries.fetch()
   resetState()
 }
 
@@ -195,7 +196,7 @@ const removeTagsFromNodes = async () => {
 
   await nodeMutations.removeTagsFromNodes(payload)
 
-  inventoryQueries.fetch()
+  await inventoryQueries.fetch()
   resetState()
   closeModal()
 }
@@ -224,7 +225,7 @@ const resetState = () => {
   inventoryStore.isTagManagerReset = false
 }
 
-const openModalForDeletingTags = (node: NodeContent) => {
+const openModalForDeletingTags = (node: InventoryNode) => {
   if (!node.anchor.tagValue.length) return
 
   nodeIdForDeletingTags.value = node.id

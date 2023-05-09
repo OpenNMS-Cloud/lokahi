@@ -12,6 +12,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class EncryptAttributeConverterTest {
     private static final int VALID_KEY_LENGTH = 32;
@@ -23,6 +24,31 @@ class EncryptAttributeConverterTest {
     @BeforeEach
     public void before() {
         converter = new EncryptAttributeConverter();
+    }
+
+    @Test
+    void testEncryptionKeyValidationBlankString() {
+        ReflectionTestUtils.setField(converter, ENCRYPTION_KEY_FIELD, "  ");
+        InventoryRuntimeException e = assertThrows(InventoryRuntimeException.class, () -> {
+            converter.init();
+        });
+        assertEquals("Inventory Encryption Key should be exactly 32 characters in length", e.getMessage());
+    }
+
+    @Test
+    void testEncryptionKeyValidationValidKeyLength() {
+        ReflectionTestUtils.setField(converter, ENCRYPTION_KEY_FIELD, RandomStringUtils.randomAlphabetic(VALID_KEY_LENGTH));
+        converter.init();
+        assertTrue(true);
+    }
+
+    @Test
+    void testEncryptionKeyValidationInvalidKeyLength() {
+        ReflectionTestUtils.setField(converter, ENCRYPTION_KEY_FIELD, RandomStringUtils.randomAlphabetic(INVALID_KEY_LENGTH));
+        InventoryRuntimeException e = assertThrows(InventoryRuntimeException.class, () -> {
+            converter.init();
+        });
+        assertEquals("Inventory Encryption Key should be exactly 32 characters in length", e.getMessage());
     }
 
     @Test

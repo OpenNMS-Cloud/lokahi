@@ -142,7 +142,7 @@ public class MinionGrpcSslContextBuilderFactoryImplTest {
         //
         // Verify the Results
         //
-        assertSame(result, mockSslContext);
+        assertNull(result);
     }
 
     @Test

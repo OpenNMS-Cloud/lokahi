@@ -28,12 +28,6 @@ time {
 
 	echo ""
 	echo "==="
-	echo "=== MINION-GATEWAY-GRPC-PROXY IMAGE"
-	echo "==="
-	mvn -f minion-gateway-grpc-proxy/main install -Djib.container.creationTime=USE_CURRENT_TIMESTAMP -Dapplication.docker.image=opennms/horizon-stream-minion-gateway-grpc-proxy:local-basic
-
-	echo ""
-	echo "==="
 	echo "=== MINION-CERTIFICATE-MANAGER IMAGE"
 	echo "==="
 	mvn -f minion-certificate-manager/main install -Djib.container.creationTime=USE_CURRENT_TIMESTAMP -Dapplication.docker.image=opennms/horizon-stream-minion-certificate-manager:local-basic

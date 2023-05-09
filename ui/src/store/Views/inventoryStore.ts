@@ -1,12 +1,12 @@
 import { defineStore } from 'pinia'
-import { NodeContent } from '@/types/inventory'
+import { InventoryNode } from '@/types/inventory'
 
 export const useInventoryStore = defineStore('inventoryStore', {
   state: () => ({
     isTagManagerOpen: false,
     isTagManagerReset: false,
     isFilterOpen: false,
-    nodesSelected: [] as NodeContent[],
+    nodesSelected: [] as InventoryNode[],
     isEditMode: false
   }),
   actions: {
@@ -22,7 +22,7 @@ export const useInventoryStore = defineStore('inventoryStore', {
     resetNodeEditMode() {
       this.isEditMode = false
     },
-    addRemoveNodesSelected(node: NodeContent, isSelected: boolean) {
+    addRemoveNodesSelected(node: InventoryNode, isSelected: boolean) {
       if (isSelected) {
         const isNodeAlreadySelected = this.nodesSelected.some(({ id }) => id === node.id)
         if (!isNodeAlreadySelected) this.nodesSelected.push(node)

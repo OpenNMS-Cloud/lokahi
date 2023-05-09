@@ -61,8 +61,11 @@ import org.opennms.taskset.contract.ScanType;
 import org.opennms.taskset.contract.ScannerResponse;
 import org.opennms.taskset.contract.TaskType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -104,6 +107,10 @@ class ScannerResponseServiceIntTest extends GrpcTestBase {
 
     @Autowired
     private SnmpInterfaceRepository snmpInterfaceRepository;
+
+    @MockBean
+    @Qualifier("byteArrayTemplate")
+    private KafkaTemplate<String, byte[]> kafkaTemplate;
 
     @Autowired
     private NodeService nodeService;

@@ -28,6 +28,11 @@ NAMESPACE=hs-instance
 #### FUNCTION DEF
 ################################
 
+function die() {
+  echo "Error: $1"
+  exit 1
+}
+
 create_cluster() {
   echo
   echo ______________Creating Kind Cluster________________
@@ -60,48 +65,61 @@ cluster_install_kubelet_config() {
 
 create_ssl_cert_secret () {
 
-  # Create SSL Certificate
+  # Create server CA certificate
   openssl genrsa -out tmp/ca.key
-  openssl req -new -x509 -days 365 -key tmp/ca.key -subj "/CN=$DOMAIN/O=Test Keycloak./C=US" -out tmp/ca.crt
-  openssl req -newkey rsa:2048 -nodes -keyout tmp/server.key -subj "/CN=$DOMAIN/O=Test Keycloak./C=US" -out tmp/server.csr
-  openssl x509 -req -extfile <(printf "subjectAltName=DNS:$DOMAIN") -days 365 -in tmp/server.csr -CA tmp/ca.crt -CAkey tmp/ca.key -CAcreateserial -out tmp/server.crt
-  if [ $? -ne 0 ]; then exit; fi
-  kubectl -n $NAMESPACE delete secrets/tls-cert-wildcard
-  kubectl -n $NAMESPACE create secret tls tls-cert-wildcard --cert tmp/server.crt --key tmp/server.key
-  if [ $? -ne 0 ]; then exit; fi
+  openssl req -new -x509 -days 365 -key tmp/ca.key -subj "/CN=$DOMAIN/O=Test/C=US" -out tmp/ca.crt
+  # Load into kubernetes
+  kubectl -n $NAMESPACE delete secrets/root-ca-certificate || true
+  kubectl -n $NAMESPACE create secret tls root-ca-certificate --cert tmp/ca.crt --key tmp/ca.key || die "Could not upload root-ca-certificate"
 
+  # Generate client CA certificate
+  openssl genrsa -out tmp/client-ca.key
+  openssl req -new -x509 -days 365 -key tmp/client-ca.key -subj "/CN=ClientCA/O=Test/C=CA" -out tmp/client-ca.crt
+  # Load into kubernetes
+  kubectl -n $NAMESPACE delete secrets/client-root-ca-certificate || true
+  kubectl -n $NAMESPACE create secret generic client-root-ca-certificate --from-file=tls.crt=tmp/client-ca.crt --from-file=tls.key=tmp/client-ca.key --from-file=ca.crt=tmp/client-ca.crt || die "Could not upload client-root-ca-certificate"
+
+  # UI / Keycloak ingress certificate
+  openssl req -newkey rsa:2048 -nodes -keyout tmp/server.key -subj "/CN=$DOMAIN/O=Test/C=US" -out tmp/server.csr
+  openssl x509 -req -extfile <(printf "subjectAltName=DNS:$DOMAIN") -days 365 -in tmp/server.csr -CA tmp/ca.crt -CAkey tmp/ca.key -CAcreateserial -out tmp/server.crt || die "ui certificate signing failed"
+  kubectl -n $NAMESPACE delete secrets/tls-cert-wildcard || true
+  kubectl -n $NAMESPACE create secret tls tls-cert-wildcard --cert tmp/server.crt --key tmp/server.key
+
+  # Minion Gateway ingress certificate
+  openssl req -newkey rsa:2048 -nodes -keyout tmp/mgw.key -subj "/CN=minion.$DOMAIN/O=Test/C=US" -out tmp/mgw.csr
+  openssl x509 -req -extfile <(printf "subjectAltName=DNS:minion.$DOMAIN") -days 365 -in tmp/mgw.csr -CA tmp/ca.crt -CAkey tmp/ca.key -CAcreateserial -out tmp/mgw.crt || die "minion-gateway certificate signing failed"
+  kubectl -n $NAMESPACE delete secrets/opennms-minion-gateway-certificate || true
+  kubectl -n $NAMESPACE create secret tls opennms-minion-gateway-certificate --cert tmp/mgw.crt --key tmp/mgw.key
 }
 
 # WHEN kind fixes the bug, https://github.com/kubernetes-sigs/kind/issues/3063,
 # THEN changing this to load multiple images in a single command can save a huge amount of data transfer and time
 load_images_to_kind_using_slow_kind () {
-    kind load docker-image --name "$KIND_CLUSTER_NAME" "${IMAGE_PREFIX}/horizon-stream-alarm:${IMAGE_TAG}" &
-    kind load docker-image --name "$KIND_CLUSTER_NAME" "${IMAGE_PREFIX}/horizon-stream-datachoices:${IMAGE_TAG}" &
-    kind load docker-image --name "$KIND_CLUSTER_NAME" "${IMAGE_PREFIX}/horizon-stream-events:${IMAGE_TAG}" &
-    kind load docker-image --name "$KIND_CLUSTER_NAME" "${IMAGE_PREFIX}/horizon-stream-grafana:${IMAGE_TAG}" &
-    kind load docker-image --name "$KIND_CLUSTER_NAME" "${IMAGE_PREFIX}/horizon-stream-inventory:${IMAGE_TAG}" &
-    kind load docker-image --name "$KIND_CLUSTER_NAME" "${IMAGE_PREFIX}/horizon-stream-keycloak:${IMAGE_TAG}" &
-    kind load docker-image --name "$KIND_CLUSTER_NAME" "${IMAGE_PREFIX}/horizon-stream-metrics-processor:${IMAGE_TAG}" &
-    kind load docker-image --name "$KIND_CLUSTER_NAME" "${IMAGE_PREFIX}/horizon-stream-minion:${IMAGE_TAG}" &
-    kind load docker-image --name "$KIND_CLUSTER_NAME" "${IMAGE_PREFIX}/horizon-stream-minion-gateway:${IMAGE_TAG}" &
-    kind load docker-image --name "$KIND_CLUSTER_NAME" "${IMAGE_PREFIX}/horizon-stream-minion-gateway-grpc-proxy:${IMAGE_TAG}" &
-    kind load docker-image --name "$KIND_CLUSTER_NAME" "${IMAGE_PREFIX}/horizon-stream-minion-certificate-manager:${IMAGE_TAG}" &
-    kind load docker-image --name "$KIND_CLUSTER_NAME" "${IMAGE_PREFIX}/horizon-stream-minion-certificate-verifier:${IMAGE_TAG}" &
-    kind load docker-image --name "$KIND_CLUSTER_NAME" "${IMAGE_PREFIX}/horizon-stream-notification:${IMAGE_TAG}" &
-    kind load docker-image --name "$KIND_CLUSTER_NAME" "${IMAGE_PREFIX}/horizon-stream-rest-server:${IMAGE_TAG}" &
-    kind load docker-image --name "$KIND_CLUSTER_NAME" "${IMAGE_PREFIX}/horizon-stream-ui:${IMAGE_TAG}" &
+    kind load docker-image --name "$KIND_CLUSTER_NAME" "${IMAGE_PREFIX}/horizon-stream-alert:${IMAGE_TAG}" \
+      "${IMAGE_PREFIX}/horizon-stream-datachoices:${IMAGE_TAG}" \
+      "${IMAGE_PREFIX}/horizon-stream-events:${IMAGE_TAG}" \
+      "${IMAGE_PREFIX}/horizon-stream-grafana:${IMAGE_TAG}" \
+      "${IMAGE_PREFIX}/horizon-stream-inventory:${IMAGE_TAG}" \
+      "${IMAGE_PREFIX}/horizon-stream-keycloak:${IMAGE_TAG}" \
+      "${IMAGE_PREFIX}/horizon-stream-metrics-processor:${IMAGE_TAG}" \
+      "${IMAGE_PREFIX}/horizon-stream-minion:${IMAGE_TAG}" \
+      "${IMAGE_PREFIX}/horizon-stream-minion-gateway:${IMAGE_TAG}" \
+      "${IMAGE_PREFIX}/horizon-stream-minion-certificate-manager:${IMAGE_TAG}" \
+      "${IMAGE_PREFIX}/horizon-stream-minion-certificate-verifier:${IMAGE_TAG}" \
+      "${IMAGE_PREFIX}/horizon-stream-notification:${IMAGE_TAG}" \
+      "${IMAGE_PREFIX}/horizon-stream-rest-server:${IMAGE_TAG}" \
+      "${IMAGE_PREFIX}/horizon-stream-ui:${IMAGE_TAG}"
 }
 
 pull_docker_images () {
 	for image in \
-		"${IMAGE_PREFIX}/horizon-stream-alarm:${IMAGE_TAG}" \
+		"${IMAGE_PREFIX}/horizon-stream-alert:${IMAGE_TAG}" \
 		"${IMAGE_PREFIX}/horizon-stream-datachoices:${IMAGE_TAG}" \
 		"${IMAGE_PREFIX}/horizon-stream-events:${IMAGE_TAG}" \
 		"${IMAGE_PREFIX}/horizon-stream-grafana:${IMAGE_TAG}" \
 		"${IMAGE_PREFIX}/horizon-stream-inventory:${IMAGE_TAG}" \
 		"${IMAGE_PREFIX}/horizon-stream-keycloak:${IMAGE_TAG}" \
 		"${IMAGE_PREFIX}/horizon-stream-metrics-processor:${IMAGE_TAG}" \
-		"${IMAGE_PREFIX}/horizon-stream-minion-gateway-grpc-proxy:${IMAGE_TAG}" \
 		"${IMAGE_PREFIX}/horizon-stream-minion-certificate-manager:${IMAGE_TAG}" \
 		"${IMAGE_PREFIX}/horizon-stream-minion-certificate-verifier:${IMAGE_TAG}" \
 		"${IMAGE_PREFIX}/horizon-stream-minion:${IMAGE_TAG}" \
@@ -121,14 +139,13 @@ pull_docker_images () {
 
 save_part_of_normal_docker_image_load () {
 	docker save \
-		"${IMAGE_PREFIX}/horizon-stream-alarm:${IMAGE_TAG}" \
+		"${IMAGE_PREFIX}/horizon-stream-alert:${IMAGE_TAG}" \
 		"${IMAGE_PREFIX}/horizon-stream-datachoices:${IMAGE_TAG}" \
 		"${IMAGE_PREFIX}/horizon-stream-events:${IMAGE_TAG}" \
 		"${IMAGE_PREFIX}/horizon-stream-grafana:${IMAGE_TAG}" \
 		"${IMAGE_PREFIX}/horizon-stream-inventory:${IMAGE_TAG}" \
 		"${IMAGE_PREFIX}/horizon-stream-keycloak:${IMAGE_TAG}" \
 		"${IMAGE_PREFIX}/horizon-stream-metrics-processor:${IMAGE_TAG}" \
-		"${IMAGE_PREFIX}/horizon-stream-minion-gateway-grpc-proxy:${IMAGE_TAG}" \
 		"${IMAGE_PREFIX}/horizon-stream-minion-gateway:${IMAGE_TAG}" \
 		"${IMAGE_PREFIX}/horizon-stream-minion-certificate-manager:${IMAGE_TAG}" \
 		"${IMAGE_PREFIX}/horizon-stream-minion-certificate-verifier:${IMAGE_TAG}" \
@@ -162,7 +179,7 @@ install_helm_chart_custom_images () {
   helm upgrade -i horizon-stream ./../charts/opennms \
   -f ./tmp/install-local-opennms-horizon-stream-custom-images-values.yaml \
   --namespace $NAMESPACE --create-namespace \
-  --set OpenNMS.Alarm.Image=${IMAGE_PREFIX}/horizon-stream-alarm:${IMAGE_TAG} \
+  --set OpenNMS.Alert.Image=${IMAGE_PREFIX}/horizon-stream-alert:${IMAGE_TAG} \
   --set OpenNMS.DataChoices.Image=${IMAGE_PREFIX}/horizon-stream-datachoices:${IMAGE_TAG} \
   --set OpenNMS.Events.Image=${IMAGE_PREFIX}/horizon-stream-events:${IMAGE_TAG} \
   --set Grafana.Image=${IMAGE_PREFIX}/horizon-stream-grafana:${IMAGE_TAG} \
@@ -171,7 +188,8 @@ install_helm_chart_custom_images () {
   --set OpenNMS.MetricsProcessor.Image=${IMAGE_PREFIX}/horizon-stream-metrics-processor:${IMAGE_TAG} \
   --set OpenNMS.Minion.Image=${IMAGE_PREFIX}/horizon-stream-minion:${IMAGE_TAG} \
   --set OpenNMS.MinionGateway.Image=${IMAGE_PREFIX}/horizon-stream-minion-gateway:${IMAGE_TAG} \
-  --set OpenNMS.MinionGatewayGrpcProxy.Image=${IMAGE_PREFIX}/horizon-stream-minion-gateway-grpc-proxy:${IMAGE_TAG} \
+  --set OpenNMS.MinionCertificateManager.Image=${IMAGE_PREFIX}/horizon-stream-minion-certificate-manager:${IMAGE_TAG} \
+  --set OpenNMS.MinionCertificateVerifier.Image=${IMAGE_PREFIX}/horizon-stream-minion-certificate-verifier:${IMAGE_TAG} \
   --set OpenNMS.Notification.Image=${IMAGE_PREFIX}/horizon-stream-notification:${IMAGE_TAG} \
   --set OpenNMS.API.Image=${IMAGE_PREFIX}/horizon-stream-rest-server:${IMAGE_TAG} \
   --set OpenNMS.UI.Image=${IMAGE_PREFIX}/horizon-stream-ui:${IMAGE_TAG}
@@ -192,11 +210,16 @@ echo "NAMESPACE=${NAMESPACE}"
 
 # Swap Domain in YAML files
 mkdir -p tmp
-cat install-local-onms-instance.yaml | sed "s/onmshs/$DOMAIN/g" > tmp/install-local-onms-instance.yaml
-cat install-local-onms-instance-custom-images.yaml | sed "s/onmshs/$DOMAIN/g" > tmp/install-local-onms-instance-custom-images.yaml
-cat ./../charts/opennms/values.yaml | sed "s/onmshs/$DOMAIN/g" > tmp/values.yaml
-cat install-local-opennms-horizon-stream-values.yaml | sed "s/onmshs/$DOMAIN/g" > tmp/install-local-opennms-horizon-stream-values.yaml
-cat install-local-opennms-horizon-stream-custom-images-values.yaml | sed "s/onmshs/$DOMAIN/g" > tmp/install-local-opennms-horizon-stream-custom-images-values.yaml
+cat install-local-onms-instance.yaml | \
+  sed "s/onmshs/$DOMAIN/g" | sed "s/\$NAMESPACE/$NAMESPACE/g" > tmp/install-local-onms-instance.yaml
+cat install-local-onms-instance-custom-images.yaml | \
+  sed "s/onmshs/$DOMAIN/g" | sed "s/\$NAMESPACE/$NAMESPACE/g" > tmp/install-local-onms-instance-custom-images.yaml
+cat ./../charts/opennms/values.yaml | \
+  sed "s/onmshs/$DOMAIN/g" | sed "s/\$NAMESPACE/$NAMESPACE/g" > tmp/values.yaml
+cat install-local-opennms-horizon-stream-values.yaml | \
+  sed "s/onmshs/$DOMAIN/g" | sed "s/\$NAMESPACE/$NAMESPACE/g" > tmp/install-local-opennms-horizon-stream-values.yaml
+cat install-local-opennms-horizon-stream-custom-images-values.yaml | \
+  sed "s/onmshs/$DOMAIN/g" | sed "s/\$NAMESPACE/$NAMESPACE/g" > tmp/install-local-opennms-horizon-stream-custom-images-values.yaml
 
 # Select Context, Create Cluster, and Deploy
 if [ $CONTEXT == "local" ]; then

@@ -40,6 +40,59 @@ OpenNMS:
       Requests:
         Cpu: '0'
         Memory: '0'
+    ExtraVolumes:
+      - name: certificate-secrets
+        secret:
+          secretName: root-ca-certificate
+      - name: minion-certificate-manager-secrets
+        secret:
+          secretName: client-root-ca-certificate
+      - name: certificate
+        emptyDir: {}
+    ExtraMounts:
+      - name: certificate-secrets
+        mountPath: "/run/secrets/certificates"
+        readOnly: true
+      - name: minion-certificate-manager-secrets
+        mountPath: "/run/secrets/mtls"
+        readOnly: true
+      - name: certificate
+        mountPath: "/opt/karaf/certs/"
+    ExtraInitContainers:
+      # This container is a development time helper which generates client certificate, key and signs it with
+      # `Client CA` certificate which is running in cluster. It's a bit hacky, since it pulls CA private key
+      # into minion. Please do not use this in production.
+      # Remarks - working directory for this container is /cert which is emptyDir. This empty dir is later mounted
+      # into minion container itself under /opt/karaf/certs/.
+      - image: finalgene/openssh@sha256:5b8073b8720ddb204c48a79e68e2a9f8c470404d475640280eb5df2d6a843eca
+        imagePullPolicy: "IfNotPresent"
+        name: cert-generator
+        command:
+          - /bin/bash
+          - -c
+          - |
+            openssl genrsa -out /cert/client.key.pkcs1 2048
+            openssl pkcs8 -topk8 -in /cert/client.key.pkcs1 -out /cert/client.key -nocrypt
+            openssl req -new -key /cert/client.key -out /cert/client.unsigned.cert -subj "/C=CA/ST=TBD/L=TBD/O=OpenNMS/CN=local-minion/OU=L:TestLocation/OU=T:opennms-prime"
+            openssl x509 -req -in /cert/client.unsigned.cert -days 14 -CA /run/secrets/mtls/tls.crt -CAkey /run/secrets/mtls/tls.key -out /cert/client.signed.cert
+        securityContext:
+          privileged: false
+          runAsUser: 10001
+          runAsGroup: 10001
+          fsGroup: 10001
+        volumeMounts:
+          - name: certificate
+            mountPath: "/cert"
+          - name: minion-certificate-manager-secrets
+            mountPath: "/run/secrets/mtls"
+    GrpcConfig:
+      grpc.host: ingress-nginx-controller
+      grpc.port: 443
+      grpc.tls.enabled: true
+      grpc.trust.cert.filepath: /run/secrets/certificates/tls.crt
+      grpc.client.cert.filepath: /opt/karaf/certs/client.signed.cert
+      grpc.client.private.key.filepath: /opt/karaf/certs/client.key
+      grpc.override.authority: minion.onmshs.local
   MinionGateway:
     SecretName: opennms-minion-gateway-certificate
     Resources:

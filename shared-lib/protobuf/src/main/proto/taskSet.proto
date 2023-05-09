@@ -119,6 +119,7 @@ message CollectorResponse {
   // results varies for each collector.
   google.protobuf.Any result = 4;
   MonitorType monitor_type = 5;
+  uint64 timestamp = 6;
 }
 
 message DiscoveryScanResult {

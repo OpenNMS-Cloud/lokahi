@@ -130,6 +130,9 @@ public class Alert implements Serializable {
     @Transient
     private List<Long> monitoringPolicyId;
 
+    @Transient
+    private String nodeLabel;
+
     @OneToOne
     @JoinColumn(name = "trigger_event_id", referencedColumnName = "id")
     private TriggerEvent triggerEvent;

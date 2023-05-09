@@ -45,16 +45,6 @@ OpenNMS:
       Requests:
         Cpu: "0"
         Memory: "0"
-  MinionGatewayGrpcProxy:
-    Enabled: true
-    Image: opennms/horizon-stream-minion-gateway-grpc-proxy:v0.0.32-dev
-    Resources:
-      Limits:
-        Cpu: "0"
-        Memory: "0"
-      Requests:
-        Cpu: "0"
-        Memory: "0"
   Inventory:
     Image: opennms/horizon-stream-inventory:v0.0.32-dev
     Resources:

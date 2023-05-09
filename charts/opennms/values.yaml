@@ -82,7 +82,7 @@ OpenNMS:
         Memory: 250Mi
     ExtraVolumes: []
     ExtraMounts: []
-    ExtraContainers: []
+    ExtraInitContainers: []
     GrpcConfig: {}
   MinionGateway:
     ServiceName: opennms-minion-gateway
@@ -119,20 +119,6 @@ OpenNMS:
         client_body_timeout "1200s";
     PrivateRepoEnabled: false
 
-  MinionGatewayGrpcProxy:
-    Enabled: true
-    ServiceName: opennms-minion-gateway-grpc-proxy
-    Image: opennms/horizon-stream-minion-gateway-grpc-proxy
-    ImagePullPolicy: IfNotPresent
-    Port: 8990
-    Replicas: 1
-    Resources:
-      Limits:
-        Cpu: "1"
-        Memory: 500Mi
-      Requests:
-        Cpu: 100m
-        Memory: 250Mi
 
   Inventory:
     ServiceName: opennms-inventory

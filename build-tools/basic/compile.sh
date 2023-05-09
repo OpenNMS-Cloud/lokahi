@@ -28,7 +28,6 @@ mvn clean install -P rapid-build -DskipTests=true -f shared-lib
 
 mvn clean install -P rapid-build -DskipTests=true -f alert
 mvn clean install -P rapid-build -DskipTests=true -f minion-gateway
-mvn clean install -P rapid-build -DskipTests=true -f minion-gateway-grpc-proxy
 mvn clean install -P rapid-build -DskipTests=true -f minion-certificate-manager
 mvn clean install -P rapid-build -DskipTests=true -f minion-certificate-verifier
 mvn clean install -P rapid-build -DskipTests=true -f minion

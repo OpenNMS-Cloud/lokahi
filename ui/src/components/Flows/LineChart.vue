@@ -27,7 +27,7 @@ import {
   Legend,
   ChartOptions
 } from 'chart.js'
-const { isDark } = useTheme()
+const { onThemeChange, isDark } = useTheme()
 
 Chart.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend)
 
@@ -56,6 +56,7 @@ const downloadChart = (filename: string) => {
     downloadCanvas(lineChart.value.chart.canvas, `${filename + Date.now()}`)
   }
 }
+
 const chartOptions = computed<ChartOptions<any>>(() => {
   return {
     indexAxis: 'x',
@@ -80,12 +81,16 @@ const chartOptions = computed<ChartOptions<any>>(() => {
           useBorderRadius: true,
           padding: 16,
           borderRadius: 1,
-          color: isDark ? '#e1d0d0' : '#000000',
+          color: isDark ? 'rgba(10, 12, 27, .9)' : '#000000',
           font: {
-            weight: 700
+            weight: 400
           }
+        },
+        onHover: (event: any, activeElements: any) => {
+          ;(event?.native?.target as HTMLElement).style.cursor = activeElements?.length > 0 ? 'pointer' : 'auto'
         }
       },
+
       tooltip: {
         xAlign: 'left',
         yAlign: 'bottom',
@@ -109,7 +114,8 @@ const chartOptions = computed<ChartOptions<any>>(() => {
       x: {
         stacked: true,
         grid: {
-          display: true
+          display: true,
+          color: isDark.value ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'
         }
       },
       y: {
@@ -128,6 +134,11 @@ const chartOptions = computed<ChartOptions<any>>(() => {
       }
     }
   }
+})
+
+onThemeChange(() => {
+  chartOptions.value.scales.x.grid.color = isDark.value ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'
+  chartOptions.value.plugins.legend.labels.color = isDark.value ? 'rgba(10, 12, 27, .9)' : '#000000'
 })
 
 const formatBytes = (bytes: any, decimals = 2) => {

@@ -78,6 +78,16 @@ const buildData = () => {
 const config = {
   responsive: true,
   aspectRatio: 1.5,
+  scales: {
+    x: {
+      grid: {
+        display: false
+      },
+      ticks: {
+        display: false
+      }
+    }
+  },
   plugins: {
     legend: {
       display: true,
@@ -88,10 +98,10 @@ const config = {
         boxHeight: 22,
         borderRadius: 20,
         useBorderRadius: true,
-        padding: 20,
+        padding: 10,
         color: isDark.value ? '#d1d0d0' : '#00000',
         font: {
-          size: 15
+          size: 12
         },
         usePointStyle: true
       }

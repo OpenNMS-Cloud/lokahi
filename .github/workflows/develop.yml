@@ -92,13 +92,6 @@ jobs:
     with:
       image-tag: ${{ inputs.image-tag || github.sha }}
       image-registry: ${{ inputs.image-registry || 'ghcr.io' }}
-  minion-gateway-grpc-proxy:
-    name: Minion Gateway GRPC Proxy
-    uses: ./.github/workflows/feature-minion-gateway-grpc-proxy.yml
-    secrets: inherit
-    with:
-      image-tag: ${{ inputs.image-tag || github.sha }}
-      image-registry: ${{ inputs.image-registry || 'ghcr.io' }}
   minion-certificate-manager:
     name: Minion Certificate Manager
     uses: ./.github/workflows/feature-minion-certificate-manager.yml
@@ -154,7 +147,6 @@ jobs:
       metrics-processor,
       minion,
       minion-gateway,
-      minion-gateway-grpc-proxy,
       minion-certificate-manager,
       minion-certificate-verifier,
       notifications,

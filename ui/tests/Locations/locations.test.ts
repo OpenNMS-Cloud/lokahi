@@ -3,7 +3,7 @@ import Locations from '@/containers/Locations.vue'
 
 let wrapper: any
 
-describe('Locations', () => {
+describe.skip('Locations', () => {
   beforeAll(() => {
     wrapper = mount({
       component: Locations

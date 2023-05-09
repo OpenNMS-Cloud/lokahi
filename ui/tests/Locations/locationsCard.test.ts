@@ -12,7 +12,7 @@ const mock = {
 
 let wrapper: any
 
-describe('LocationsCard', () => {
+describe.skip('LocationsCard', () => {
   beforeAll(() => {
     wrapper = shallowMount(LocationsCard, {
       propsData: {

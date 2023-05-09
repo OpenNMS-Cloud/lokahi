@@ -18,7 +18,6 @@ declare module '@vue/runtime-core' {
     BasicAutocomplete: typeof import('./src/components/Common/BasicAutocomplete.vue')['default']
     BasicChart: typeof import('./src/components/Common/BasicChart.vue')['default']
     BasicChipSelect: typeof import('./src/components/Common/BasicChipSelect.vue')['default']
-    BasicContextMenu: typeof import('./src/components/Common/BasicContextMenu.vue')['default']
     BasicSelect: typeof import('./src/components/Common/BasicSelect.vue')['default']
     BasicToggle: typeof import('./src/components/Common/BasicToggle.vue')['default']
     ButtonTextIcon: typeof import('./src/components/Common/ButtonTextIcon.vue')['default']

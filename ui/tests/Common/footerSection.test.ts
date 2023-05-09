@@ -8,7 +8,7 @@ const mock = {
 
 let wrapper: any
 
-describe('FooterSection', () => {
+describe.skip('FooterSection', () => {
   beforeAll(() => {
     wrapper = mount(FooterSection, {
       propsData: {

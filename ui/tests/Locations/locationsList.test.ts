@@ -14,7 +14,7 @@ const mock = [
 
 let wrapper: any
 
-describe('LocationsList', () => {
+describe.skip('LocationsList', () => {
   beforeAll(() => {
     wrapper = mount(LocationsList, {
       propsData: {

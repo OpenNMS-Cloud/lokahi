@@ -86,7 +86,7 @@ const props = defineProps<{
   alert: IAlert
 }>()
 
-const pillColor = { style: props.alert.severity as string }
+const pillColor = { style: props.alert.severity }
 
 const alertSelectedHandler = (databaseId: number) => {
   emits('alert-selected', databaseId)

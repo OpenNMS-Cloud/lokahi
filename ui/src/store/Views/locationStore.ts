@@ -21,7 +21,7 @@ export const useLocationStore = defineStore('locationStore', () => {
     try {
       const locations = await locationQueries.fetchLocations()
 
-      locationsList.value = locations?.data?.value?.findAllLocations || []
+      locationsList.value = locations?.data?.value?.findAllLocations ?? []
     } catch (err) {
       locationsList.value = []
     }
@@ -31,7 +31,7 @@ export const useLocationStore = defineStore('locationStore', () => {
     try {
       const locations = await locationQueries.searchLocation(searchTerm)
 
-      locationsList.value = locations?.data?.value?.searchLocation || []
+      locationsList.value = locations?.data?.value?.searchLocation ?? []
     } catch (err) {
       locationsList.value = []
     }
@@ -68,7 +68,7 @@ export const useLocationStore = defineStore('locationStore', () => {
     saveIsFetching.value = false
 
     if (!error.value) {
-      fetchLocations()
+      await fetchLocations()
     }
 
     return !error.value
@@ -82,7 +82,7 @@ export const useLocationStore = defineStore('locationStore', () => {
     updateIsFetching.value = false
 
     if (!error.value) {
-      fetchLocations()
+      await fetchLocations()
     }
 
     return !error.value
@@ -92,7 +92,7 @@ export const useLocationStore = defineStore('locationStore', () => {
     const error = await locationMutations.deleteLocation({ id: payload })
 
     if (!error.value) {
-      fetchLocations()
+      await fetchLocations()
     }
 
     return !error.value

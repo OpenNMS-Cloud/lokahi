@@ -76,8 +76,8 @@ const addLocation = () => {
 
 const selectedLocationId = computed(() => locationStore.selectedLocationId)
 
-const searchLocationListener = (val: string | number | undefined) => {
-  locationStore.searchLocations(val as string)
+const searchLocationListener = async (val: string | number | undefined) => {
+  await locationStore.searchLocations(val as string)
 }
 
 const icons = markRaw({

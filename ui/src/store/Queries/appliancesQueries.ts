@@ -59,7 +59,7 @@ export const useAppliancesQueries = defineStore('appliancesQueries', {
         const result = data.value?.minionLatency?.data?.result?.[0]?.values?.[0]
 
         if (result) {
-          const [, val] = result as number[]
+          const [, val] = result
 
           tableMinions.value.push({
             ...minion,
@@ -158,7 +158,7 @@ export const useAppliancesQueries = defineStore('appliancesQueries', {
       }
     })
 
-    const locationsList = computed(() => minionsAndNodes.value?.findAllLocations || [])
+    const locationsList = computed(() => minionsAndNodes.value?.findAllLocations ?? [])
 
     return {
       tableMinions,

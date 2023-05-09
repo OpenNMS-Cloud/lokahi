@@ -117,7 +117,7 @@ const locationsList = ref()
 const addNode = async () => {
   const locations = await locationQueries.fetchLocations()
 
-  locationsList.value = locations?.data?.value?.findAllLocations || []
+  locationsList.value = locations?.data?.value?.findAllLocations ?? []
 
   openModal()
 }

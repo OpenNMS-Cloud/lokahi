@@ -67,8 +67,8 @@ const minionsList = computed(() => props.minions)
 
 const locationStore = useLocationStore()
 
-const searchMinionsListener = (val: string | number | undefined) => {
-  locationStore.searchMinions(val as string)
+const searchMinionsListener = async (val: string | number | undefined) => {
+  await locationStore.searchMinions(val as string)
 }
 
 const emptyListContent = {

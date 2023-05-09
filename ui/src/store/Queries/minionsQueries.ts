@@ -47,7 +47,7 @@ export const useMinionsQueries = defineStore('minionsQueries', () => {
       const result = data.value?.minionLatency?.data?.result?.[0]?.values?.[0]
 
       if (result) {
-        const [, val] = result as number[]
+        const [, val] = result
 
         minionsList.value.push({
           ...minion,

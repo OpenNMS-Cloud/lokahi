@@ -92,9 +92,9 @@ const latencyThreshold = (latency: number) => {
   return type
 }
 
-let statusPill = reactive({})
-let latencyPill = reactive({})
-let ipPill = reactive({})
+let statusPill = reactive({} as Pill)
+let latencyPill = reactive({} as Pill)
+let ipPill = reactive({} as Pill)
 
 const minion = computed(() => {
   statusPill = {
@@ -103,8 +103,8 @@ const minion = computed(() => {
   }
 
   latencyPill = {
-    label: `${props.item.latency.value}ms`,
-    style: latencyThreshold(props.item.latency.value) //.match(/\d+/g))
+    label: `${props.item.latency?.value || 0}ms`, //Latency is not on this Object
+    style: latencyThreshold(props.item.latency?.value || 0) //.match(/\d+/g))
   }
 
   ipPill = {
@@ -119,6 +119,11 @@ const contextMenu = [
   { label: 'edit', handler: () => ({}) },
   { label: 'delete', handler: () => ({}) }
 ]
+
+type Pill = {
+  style: string
+  label?: string
+}
 </script>
 
 <style lang="scss" scoped>

@@ -6,7 +6,7 @@
     >
       <template #left>
         <CountColor
-          :count="locationsList?.length"
+          :count="locationsList?.length || 0"
           data-test="count"
         />
       </template>

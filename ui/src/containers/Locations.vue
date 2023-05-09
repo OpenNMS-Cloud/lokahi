@@ -5,7 +5,7 @@
         text="Locations"
         data-test="locations-headline"
       />
-      <div><AppliancesNotificationsCtrl data-test="locations-notification-ctrl" /></div>
+      <div data-test="locations-notification-ctrl"><AppliancesNotificationsCtrl /></div>
     </div>
     <div class="content">
       <div class="content-left">
@@ -29,11 +29,14 @@
             <FeatherIcon :icon="icons.Search" />
           </template>
         </FeatherInput>
-        <LocationsList :items="locationsList" />
+        <LocationsList
+          v-if="locationsList"
+          :items="locationsList"
+        />
       </div>
       <div class="content-right">
         <LocationsMinionsList
-          v-if="locationStore.displayType === DisplayType.LIST"
+          v-if="locationStore.displayType === DisplayType.LIST && minionsList"
           :minions="minionsList"
         />
         <LocationsAddForm

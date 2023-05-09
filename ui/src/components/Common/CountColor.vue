@@ -8,9 +8,12 @@
 </template>
 
 <script lang="ts" setup>
-defineProps<{
-  count: number
-}>()
+defineProps({
+  count: {
+    type: Number,
+    default: 0
+  }
+})
 </script>
 
 <style lang="scss" scoped>

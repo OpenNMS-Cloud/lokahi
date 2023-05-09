@@ -36,6 +36,7 @@ import { formatTimestamp, downloadCanvas } from './utils'
 import { GraphProps } from '@/types/graphs'
 import DownloadFile from '@featherds/icon/action/DownloadFile'
 import { format } from 'd3'
+import useTheme from '@/composables/useTheme'
 const emits = defineEmits(['has-data'])
 // Chart.register(zoomPlugin) disable zoom until phase 2
 const graphs = useGraphs()
@@ -45,7 +46,6 @@ const props = defineProps({
     type: Object as PropType<GraphProps>
   }
 })
-import useTheme from '@/composables/useTheme'
 const { onThemeChange, isDark } = useTheme()
 const yAxisFormatter = format('.3s')
 let chart: any = {}

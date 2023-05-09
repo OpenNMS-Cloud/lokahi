@@ -29,7 +29,7 @@ export const useFlowsStore = defineStore('flowsStore', {
       exporters: [] as IAutocompleteItemType[],
       selectedExporterTopApplication: undefined as undefined | IAutocompleteItemType,
       // Selected Exporters can be set as [{ _text: 'Node Name', value: { nodeId: 1, ipInterfaceId: 1 } }] to autopopulate autofill with exporter
-      selectedExporters: [],
+      selectedExporters: [] as IAutocompleteItemType[],
       isExportersLoading: false,
       filteredExporters: [] as IAutocompleteItemType[]
     }

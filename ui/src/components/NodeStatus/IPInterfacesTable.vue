@@ -9,7 +9,7 @@
     </div>
     <div class="container">
       <table
-        class="data-table"
+        class="data-table tc2"
         aria-label="IP Interfaces Table"
       >
         <thead>
@@ -31,11 +31,16 @@
           >
             <td>{{ ipInterface.ipAddress }}</td>
             <td>
-              <FeatherIcon
-                :icon="MultilineChart"
-                class="icon-metrics"
+              <FeatherButton
+                text
+                @click="routeToFlows(ipInterface.id)"
+                >Flows</FeatherButton
+              >
+              <FeatherButton
+                text
                 @click="metricsModal.openMetricsModal(ipInterface)"
-              />
+                >Traffic</FeatherButton
+              >
             </td>
             <td>{{ ipInterface.hostname }}</td>
             <td>{{ ipInterface.netmask }}</td>
@@ -50,16 +55,32 @@
 
 <script lang="ts" setup>
 import { useNodeStatusStore } from '@/store/Views/nodeStatusStore'
-import MultilineChart from '@material-design-icons/svg/outlined/multiline_chart.svg'
-const metricsModal = ref()
+import { useFlowsStore } from '@/store/Views/flowsStore'
 
+const router = useRouter()
+const flowsStore = useFlowsStore()
 const nodeStatusStore = useNodeStatusStore()
+
+const metricsModal = ref()
 
 const nodeData = computed(() => {
   return {
     node: nodeStatusStore.fetchedData?.node
   }
 })
+
+const routeToFlows = (ipInterfaceId: number) => {
+  const { id: nodeId, nodeLabel: _text } = nodeData.value.node
+  flowsStore.filters.selectedExporters = [
+    { _text, 
+      value: { 
+        nodeId, 
+        ipInterfaceId
+      } 
+    }
+  ]
+  router.push('/flows')
+}
 </script>
 
 <style lang="scss" scoped>
@@ -97,10 +118,6 @@ const nodeData = computed(() => {
         border-radius: 5px;
         padding: 0px 5px 0px 5px;
       }
-    }
-    .icon-metrics {
-      cursor: pointer;
-      color: var(variables.$primary);
     }
   }
 }

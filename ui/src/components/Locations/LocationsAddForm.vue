@@ -100,7 +100,7 @@ const onSubmit = async () => {
 
   if (isFormInvalid) return
 
-  const isFormSaved = await locationStore.createLocation(formInputs.value)
+  const isFormSaved = await locationStore.createLocation(formInputs.value as any)
 
   if (isFormSaved) {
     formInputs.value = { ...formDefault }

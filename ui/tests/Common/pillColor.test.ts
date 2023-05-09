@@ -1,11 +1,12 @@
-import { shallowMount } from '@vue/test-utils'
+import mount from '../mountWithPiniaVillus'
 import PillColor from '@/components/Common/PillColor.vue'
 
 let wrapper: any
 
 describe('PillColor', () => {
   beforeAll(() => {
-    wrapper = shallowMount(PillColor, {
+    wrapper = mount({
+      component: PillColor,
       props: {
         item: { type: 'CRITICAL' }
       }

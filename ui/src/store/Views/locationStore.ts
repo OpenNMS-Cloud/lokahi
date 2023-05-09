@@ -3,6 +3,7 @@ import { useLocationQueries } from '../Queries/locationQueries'
 import { useMinionsQueries } from '../Queries/minionsQueries'
 import { DisplayType } from '@/types/locations.d'
 import { useLocationMutations } from '../Mutations/locationMutations'
+import { Location } from '@/types/graphql'
 
 export const useLocationStore = defineStore('locationStore', () => {
   const locationsList = ref()
@@ -60,7 +61,7 @@ export const useLocationStore = defineStore('locationStore', () => {
     displayType.value = type
   }
 
-  const createLocation = async (payload) => {
+  const createLocation = async (payload: Location) => {
     saveIsFetching.value = true
 
     const error = await locationMutations.createLocation(payload)
@@ -74,7 +75,7 @@ export const useLocationStore = defineStore('locationStore', () => {
     return !error.value
   }
 
-  const updateLocation = async (payload) => {
+  const updateLocation = async (payload: { id: string; location: string }) => {
     updateIsFetching.value = true
 
     const error = await locationMutations.updateLocation(payload)
@@ -88,8 +89,8 @@ export const useLocationStore = defineStore('locationStore', () => {
     return !error.value
   }
 
-  const deleteLocation = async (payload) => {
-    const error = await locationMutations.deleteLocation({ id: payload })
+  const deleteLocation = async (id: number) => {
+    const error = await locationMutations.deleteLocation({ id })
 
     if (!error.value) {
       await fetchLocations()

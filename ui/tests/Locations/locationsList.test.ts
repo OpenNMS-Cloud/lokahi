@@ -1,4 +1,4 @@
-import { mount } from '@vue/test-utils'
+import mount  from '../mountWithPiniaVillus'
 import LocationsList from '@/components/Locations/LocationsList.vue'
 
 const mock = [
@@ -16,8 +16,9 @@ let wrapper: any
 
 describe.skip('LocationsList', () => {
   beforeAll(() => {
-    wrapper = mount(LocationsList, {
-      propsData: {
+    wrapper = mount({
+      component: LocationsList,
+      props: {
         items: mock
       }
     })

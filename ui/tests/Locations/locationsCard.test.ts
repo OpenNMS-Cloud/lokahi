@@ -1,4 +1,4 @@
-import { shallowMount } from '@vue/test-utils'
+import mount from '../mountWithPiniaVillus'
 import LocationsCard from '@/components/Locations/LocationsCard.vue'
 
 const mock = {
@@ -14,7 +14,8 @@ let wrapper: any
 
 describe.skip('LocationsCard', () => {
   beforeAll(() => {
-    wrapper = shallowMount(LocationsCard, {
+    wrapper = mount({
+      component: LocationsCard,
       propsData: {
         item: mock
       }

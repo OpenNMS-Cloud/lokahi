@@ -55,10 +55,12 @@ import HeadlineSection from '@/components/Common/HeadlineSection.vue'
 import Help from '@featherds/icon/action/Help'
 import Search from '@featherds/icon/action/Search'
 import { useLocationStore } from '@/store/Views/locationStore'
+import { PropType } from 'vue'
+import { Minion } from '@/types/graphql'
 
 const props = defineProps({
   minions: {
-    type: Array,
+    type: Array as PropType<Minion[]>,
     required: true
   }
 })

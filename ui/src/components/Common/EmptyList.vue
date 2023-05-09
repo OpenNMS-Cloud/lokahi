@@ -16,9 +16,9 @@
     <FeatherButton
       v-if="content.btn"
       secondary
-      @click="content.btn.action"
+      @click="content.btn?.action"
       data-test="btn"
-      >{{ content.btn.label }}</FeatherButton
+      >{{ content.btn?.label }}</FeatherButton
     >
   </div>
 </template>

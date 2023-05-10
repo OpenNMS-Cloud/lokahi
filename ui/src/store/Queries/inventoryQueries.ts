@@ -13,7 +13,7 @@ import {
   FindAllNodesByMonitoredStateDocument
 } from '@/types/graphql'
 import useSpinner from '@/composables/useSpinner'
-import { DetectedNode, Monitor, MonitoredStates, MonitoredNode, UnmonitoredNode } from '@/types'
+import { DetectedNode, Monitor, MonitoredStates, MonitoredNode, UnmonitoredNode, AZURE_SCAN } from '@/types'
 
 export const useInventoryQueries = defineStore('inventoryQueries', () => {
   const nodes = ref<MonitoredNode[]>([])
@@ -139,47 +139,14 @@ export const useInventoryQueries = defineStore('inventoryQueries', () => {
 
     await getTagsForData(data)
 
-    data.forEach(async ({ id, nodeLabel, location, ipInterfaces }) => {
+    data.forEach(async ({ id, nodeLabel, location, ipInterfaces, scanType }) => {
       const { ipAddress: snmpPrimaryIpAddress } = ipInterfaces?.filter((ii) => ii.snmpPrimary)[0] ?? {} // not getting ipAddress from snmpPrimary interface can result in missing metrics for ICMP
       const tagsObj = tagData.value?.tagsByNodeIds?.filter((item) => item.nodeId === id)[0]
 
-      // stop-gap measure to display nodes without IP addresses
-      // may be removed once BE disassociates instance with IP
-      // if (!snmpPrimaryIpAddress) {
-      //   nodes.value.push({
-      //     id: id,
-      //     label: nodeLabel,
-      //     status: '',
-      //     metrics: [
-      //       {
-      //         type: 'latency',
-      //         label: 'Latency',
-      //         value: 0,
-      //         status: ''
-      //       },
-      //       {
-      //         type: 'status',
-      //         label: 'Status',
-      //         status: 'NO IP'
-      //       }
-      //     ],
-      //     anchor: {
-      //       profileValue: '--',
-      //       profileLink: '',
-      //       locationValue: location?.location ?? '--',
-      //       locationLink: '',
-      //       managementIpValue: '',
-      //       managementIpLink: '',
-      //       tagValue: tagsObj?.tags ?? []
-      //     },
-      //     isNodeOverlayChecked: false,
-      //     type: MonitoredStates.MONITORED
-      //   })
-      //   return
-      // }
+      const instance = scanType === AZURE_SCAN ? `azure-node-${id}` : snmpPrimaryIpAddress!
 
       const [{ data: metricData, isFetching: metricFetching }] = await Promise.all([
-        fetchNodeMetrics(id, snmpPrimaryIpAddress as string)
+        fetchNodeMetrics(id, instance)
       ])
 
       if (!metricFetching.value && metricData.value) {

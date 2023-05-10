@@ -16,6 +16,7 @@ fragment NodesParts on Query {
     }
     monitoringLocationId
     nodeLabel
-    tenantId
+    tenantId,
+    scanType
   }
 }

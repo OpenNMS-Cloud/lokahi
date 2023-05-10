@@ -9,6 +9,7 @@ fragment NodesTableParts on Query {
       ipAddress
       snmpPrimary
     }
+    scanType
   }
 }
 

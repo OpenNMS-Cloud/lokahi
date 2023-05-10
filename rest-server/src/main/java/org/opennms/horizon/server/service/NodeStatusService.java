@@ -123,11 +123,11 @@ public class NodeStatusService {
         return new NodeStatus(id, status);
     }
 
-    private Mono<TimeSeriesQueryResult> getStatusMetric(long id, String ipAddress, String monitorType, ResolutionEnvironment env) {
+    private Mono<TimeSeriesQueryResult> getStatusMetric(long id, String instance, String monitorType, ResolutionEnvironment env) {
         Map<String, String> labels = new HashMap<>();
         labels.put(NODE_ID_KEY, String.valueOf(id));
         labels.put(MONITOR_KEY, monitorType);
-        labels.put(INSTANCE_KEY, ipAddress);
+        labels.put(INSTANCE_KEY, instance);
 
         return tsdbMetricsService
             .getMetric(env, RESPONSE_TIME_METRIC, labels, TIME_RANGE_IN_SECONDS, TimeRangeUnit.SECOND);

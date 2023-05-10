@@ -136,6 +136,7 @@ export type Exporter = {
   __typename?: 'Exporter';
   ipInterface?: Maybe<IpInterface>;
   node?: Maybe<Node>;
+  snmpInterface?: Maybe<SnmpInterface>;
 };
 
 export type ExporterFilterInput = {

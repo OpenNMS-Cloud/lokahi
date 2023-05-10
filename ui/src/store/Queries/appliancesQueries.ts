@@ -108,7 +108,6 @@ export const useAppliancesQueries = defineStore('appliancesQueries', {
         const { data, isFetching } = await fetchNodeMetrics(node.id as number, snmpPrimaryIpAddress as string)
         const latencyResult = data.value?.nodeLatency?.data?.result?.[0]?.values?.[0]
         const status = data.value?.nodeStatus?.status
-        console.log('appliancesQueries', isFetching.value)
 
         if (!isFetching.value) {
           let tableNode: ExtendedNode = {

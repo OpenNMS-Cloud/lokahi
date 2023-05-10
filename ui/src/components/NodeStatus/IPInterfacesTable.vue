@@ -33,7 +33,7 @@
             <td>
               <FeatherButton
                 text
-                @click="routeToFlows(ipInterface.id)"
+                @click="routeToFlows(ipInterface)"
                 >Flows</FeatherButton
               >
               <FeatherButton
@@ -56,6 +56,7 @@
 <script lang="ts" setup>
 import { useNodeStatusStore } from '@/store/Views/nodeStatusStore'
 import { useFlowsStore } from '@/store/Views/flowsStore'
+import { IpInterface } from '@/types/graphql'
 
 const router = useRouter()
 const flowsStore = useFlowsStore()
@@ -69,17 +70,19 @@ const nodeData = computed(() => {
   }
 })
 
-const routeToFlows = (ipInterfaceId: number) => {
-  const { id: nodeId, nodeLabel: _text } = nodeData.value.node
+const routeToFlows = (ipInterface: IpInterface) => {
+  const { id: nodeId, nodeLabel } = nodeData.value.node
+  const { id: ipInterfaceId, ipAddress } = ipInterface
+
   flowsStore.filters.selectedExporters = [
-    { _text, 
+    { _text: `${nodeLabel?.toUpperCase()} : ${ipAddress}}`, 
       value: { 
         nodeId, 
         ipInterfaceId
       } 
     }
   ]
-  router.push('/flows')
+  router.push('/flows').catch(() => 'Route to /flows unsuccessful.')
 }
 </script>
 

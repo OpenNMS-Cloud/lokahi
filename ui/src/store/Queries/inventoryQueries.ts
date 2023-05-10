@@ -10,9 +10,8 @@ import {
   Node,
   FindAllNodesByTagsDocument,
   FindAllNodesByMonitoredStateDocument,
-  TimeSeriesQueryResult,
-  NodeStatus,
-  NodeTags
+  NodeTags,
+  NodeLatencyMetricQuery
 } from '@/types/graphql'
 import useSpinner from '@/composables/useSpinner'
 import { DetectedNode, Monitor, MonitoredStates, MonitoredNode, UnmonitoredNode, AZURE_SCAN } from '@/types'
@@ -134,7 +133,7 @@ export const useInventoryQueries = defineStore('inventoryQueries', () => {
   onFilteredByTagsData((data) => formatMonitoredNodes(data.findAllNodesByTags ?? []))
   onGetUnmonitoredNodes((data) => formatUnmonitoredNodes(data.findAllNodesByMonitoredState ?? []))
   onGetDetectedNodes((data) => formatDetectedNodes(data.findAllNodesByMonitoredState ?? []))
-  onMetricsData((data) => addMetricsToMonitoredNodes(data.nodeLatency, data.nodeStatus))
+  onMetricsData((data) => addMetricsToMonitoredNodes(data))
   onTagsData((data) => addTagsToMonitoredNodes(data.tagsByNodeIds ?? []))
 
   // sets the initial monitored node object and then calls for tags and metrics
@@ -183,7 +182,7 @@ export const useInventoryQueries = defineStore('inventoryQueries', () => {
     for (const node of data) {
       const { ipAddress: snmpPrimaryIpAddress } = node.ipInterfaces?.filter((x) => x.snmpPrimary)[0] ?? {}
       const instance = node.scanType === AZURE_SCAN ? `azure-node-${node.id}` : snmpPrimaryIpAddress!
-      
+
       metricsVariables.id = node.id
       metricsVariables.instance = instance
       await getMetrics()
@@ -192,36 +191,52 @@ export const useInventoryQueries = defineStore('inventoryQueries', () => {
 
   // callback after getTags call complete
   const addTagsToMonitoredNodes = (tags: NodeTags[]) => {
-    nodes.value.map((node) => {
-      for (const tag of tags) {
+    nodes.value = nodes.value.map((node) => {
+      tags.forEach((tag) => {
         if (node.id === tag.nodeId) {
           node.anchor.tagValue = tag.tags ?? []
         }
-      }
+      })
+      
+      return node
     })
   }
 
   // callback after getMetrics call complete
-  const addMetricsToMonitoredNodes = (latency?: TimeSeriesQueryResult, status?: NodeStatus) => {
+  const addMetricsToMonitoredNodes = (data: NodeLatencyMetricQuery) => {
+    const latency = data.nodeLatency
+    const status = data.nodeStatus
+
+    const nodeId = latency?.data?.result?.[0]?.metric?.node_id || status?.id
+
+    if (!nodeId) {
+      console.warn('Cannot obtain metrics: No node id')
+      return
+    }
+
     const nodeLatency = latency?.data?.result as TsResult[]
     const latenciesValues = [...nodeLatency][0]?.values as number[][]
     const latencyValue = latenciesValues?.length ? latenciesValues[latenciesValues.length - 1][1] : undefined
 
-    for (const monitoredNode of nodes.value) {
-      monitoredNode.metrics = [
-        {
-          type: 'latency',
-          label: 'Latency',
-          value: latencyValue,
-          status: ''
-        },
-        {
-          type: 'status',
-          label: 'Status',
-          status: status?.status ?? ''
-        }
-      ]
-    }
+    nodes.value = nodes.value.map((node) => {
+      if (node.id === Number(nodeId)) {
+        node.metrics = [
+          {
+            type: 'latency',
+            label: 'Latency',
+            value: latencyValue,
+            status: ''
+          },
+          {
+            type: 'status',
+            label: 'Status',
+            status: status?.status ?? ''
+          }
+        ]
+      }
+
+      return node
+    })
   }
 
   const formatUnmonitoredNodes = async (data: Partial<Node>[]) => {

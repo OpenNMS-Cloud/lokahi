@@ -76,3 +76,4 @@ export interface IButtonTextIcon {
   label: string | undefined
   type?: string
 }
+export const AZURE_SCAN = 'AZURE_SCAN'

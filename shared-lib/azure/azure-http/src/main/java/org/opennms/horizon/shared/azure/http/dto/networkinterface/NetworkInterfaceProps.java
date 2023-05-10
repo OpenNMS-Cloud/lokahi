@@ -2,9 +2,14 @@ package org.opennms.horizon.shared.azure.http.dto.networkinterface;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+import lombok.Getter;
+import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.List;
 
+@Getter
+@Setter
 public class NetworkInterfaceProps {
     @SerializedName("provisioningState")
     @Expose
@@ -41,134 +46,14 @@ public class NetworkInterfaceProps {
     private VirtualMachine virtualMachine;
     @SerializedName("hostedWorkloads")
     @Expose
-    private List<Object> hostedWorkloads;
+    private List<Object> hostedWorkloads  = new ArrayList<>();
     @SerializedName("tapConfigurations")
     @Expose
-    private List<Object> tapConfigurations;
+    private List<Object> tapConfigurations = new ArrayList<>();
     @SerializedName("nicType")
     @Expose
     private String nicType;
     @SerializedName("allowPort25Out")
     @Expose
     private Boolean allowPort25Out;
-
-    public String getProvisioningState() {
-        return provisioningState;
-    }
-
-    public void setProvisioningState(String provisioningState) {
-        this.provisioningState = provisioningState;
-    }
-
-    public String getResourceGuid() {
-        return resourceGuid;
-    }
-
-    public void setResourceGuid(String resourceGuid) {
-        this.resourceGuid = resourceGuid;
-    }
-
-    public List<IpConfiguration> getIpConfigurations() {
-        return ipConfigurations;
-    }
-
-    public void setIpConfigurations(List<IpConfiguration> ipConfigurations) {
-        this.ipConfigurations = ipConfigurations;
-    }
-
-    public DnsSettings getDnsSettings() {
-        return dnsSettings;
-    }
-
-    public void setDnsSettings(DnsSettings dnsSettings) {
-        this.dnsSettings = dnsSettings;
-    }
-
-    public String getMacAddress() {
-        return macAddress;
-    }
-
-    public void setMacAddress(String macAddress) {
-        this.macAddress = macAddress;
-    }
-
-    public Boolean getEnableAcceleratedNetworking() {
-        return enableAcceleratedNetworking;
-    }
-
-    public void setEnableAcceleratedNetworking(Boolean enableAcceleratedNetworking) {
-        this.enableAcceleratedNetworking = enableAcceleratedNetworking;
-    }
-
-    public Boolean getVnetEncryptionSupported() {
-        return vnetEncryptionSupported;
-    }
-
-    public void setVnetEncryptionSupported(Boolean vnetEncryptionSupported) {
-        this.vnetEncryptionSupported = vnetEncryptionSupported;
-    }
-
-    public Boolean getEnableIPForwarding() {
-        return enableIPForwarding;
-    }
-
-    public void setEnableIPForwarding(Boolean enableIPForwarding) {
-        this.enableIPForwarding = enableIPForwarding;
-    }
-
-    public NetworkSecurityGroup getNetworkSecurityGroup() {
-        return networkSecurityGroup;
-    }
-
-    public void setNetworkSecurityGroup(NetworkSecurityGroup networkSecurityGroup) {
-        this.networkSecurityGroup = networkSecurityGroup;
-    }
-
-    public Boolean getPrimary() {
-        return primary;
-    }
-
-    public void setPrimary(Boolean primary) {
-        this.primary = primary;
-    }
-
-    public VirtualMachine getVirtualMachine() {
-        return virtualMachine;
-    }
-
-    public void setVirtualMachine(VirtualMachine virtualMachine) {
-        this.virtualMachine = virtualMachine;
-    }
-
-    public List<Object> getHostedWorkloads() {
-        return hostedWorkloads;
-    }
-
-    public void setHostedWorkloads(List<Object> hostedWorkloads) {
-        this.hostedWorkloads = hostedWorkloads;
-    }
-
-    public List<Object> getTapConfigurations() {
-        return tapConfigurations;
-    }
-
-    public void setTapConfigurations(List<Object> tapConfigurations) {
-        this.tapConfigurations = tapConfigurations;
-    }
-
-    public String getNicType() {
-        return nicType;
-    }
-
-    public void setNicType(String nicType) {
-        this.nicType = nicType;
-    }
-
-    public Boolean getAllowPort25Out() {
-        return allowPort25Out;
-    }
-
-    public void setAllowPort25Out(Boolean allowPort25Out) {
-        this.allowPort25Out = allowPort25Out;
-    }
 }

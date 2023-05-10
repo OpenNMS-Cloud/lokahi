@@ -2,41 +2,22 @@ package org.opennms.horizon.shared.azure.http.dto.networkinterface;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+import lombok.Getter;
+import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.List;
 
+@Getter
+@Setter
 public class DnsSettings {
     @SerializedName("dnsServers")
     @Expose
-    private List<Object> dnsServers;
+    private List<Object> dnsServers = new ArrayList<>();
     @SerializedName("appliedDnsServers")
     @Expose
-    private List<Object> appliedDnsServers;
+    private List<Object> appliedDnsServers = new ArrayList<>();
     @SerializedName("internalDomainNameSuffix")
     @Expose
     private String internalDomainNameSuffix;
-
-    public List<Object> getDnsServers() {
-        return dnsServers;
-    }
-
-    public void setDnsServers(List<Object> dnsServers) {
-        this.dnsServers = dnsServers;
-    }
-
-    public List<Object> getAppliedDnsServers() {
-        return appliedDnsServers;
-    }
-
-    public void setAppliedDnsServers(List<Object> appliedDnsServers) {
-        this.appliedDnsServers = appliedDnsServers;
-    }
-
-    public String getInternalDomainNameSuffix() {
-        return internalDomainNameSuffix;
-    }
-
-    public void setInternalDomainNameSuffix(String internalDomainNameSuffix) {
-        this.internalDomainNameSuffix = internalDomainNameSuffix;
-    }
 }

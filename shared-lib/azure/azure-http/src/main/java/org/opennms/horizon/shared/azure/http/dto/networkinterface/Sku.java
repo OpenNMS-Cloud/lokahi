@@ -2,7 +2,11 @@ package org.opennms.horizon.shared.azure.http.dto.networkinterface;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+import lombok.Getter;
+import lombok.Setter;
 
+@Getter
+@Setter
 public class Sku {
     @SerializedName("name")
     @Expose
@@ -10,21 +14,4 @@ public class Sku {
     @SerializedName("tier")
     @Expose
     private String tier;
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getTier() {
-        return tier;
-    }
-
-    public void setTier(String tier) {
-        this.tier = tier;
-    }
-
 }

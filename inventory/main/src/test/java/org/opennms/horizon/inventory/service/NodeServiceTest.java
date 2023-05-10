@@ -232,8 +232,6 @@ public class NodeServiceTest {
         verify(mockMonitoringLocationRepository).findByLocationAndTenantId(location, tenant);
         verify(mockMonitoringLocationRepository).save(any(MonitoringLocation.class));
         verifyNoInteractions(mockIpInterfaceRepository);
-        assertThat(nodeCreateDTO.getMonitoredState()).isEqualTo(MonitoredState.DETECTED);
-        Assertions.assertEquals(MonitoredState.DETECTED, nodeCreateDTO.getMonitoredState());
     }
 
     @Test

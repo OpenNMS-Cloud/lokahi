@@ -145,38 +145,38 @@ export const useInventoryQueries = defineStore('inventoryQueries', () => {
 
       // stop-gap measure to display nodes without IP addresses
       // may be removed once BE disassociates instance with IP
-      if (!snmpPrimaryIpAddress) {
-        nodes.value.push({
-          id: id,
-          label: nodeLabel,
-          status: '',
-          metrics: [
-            {
-              type: 'latency',
-              label: 'Latency',
-              value: 0,
-              status: ''
-            },
-            {
-              type: 'status',
-              label: 'Status',
-              status: 'NO IP'
-            }
-          ],
-          anchor: {
-            profileValue: '--',
-            profileLink: '',
-            locationValue: location?.location ?? '--',
-            locationLink: '',
-            managementIpValue: '',
-            managementIpLink: '',
-            tagValue: tagsObj?.tags ?? []
-          },
-          isNodeOverlayChecked: false,
-          type: MonitoredStates.MONITORED
-        })
-        return
-      }
+      // if (!snmpPrimaryIpAddress) {
+      //   nodes.value.push({
+      //     id: id,
+      //     label: nodeLabel,
+      //     status: '',
+      //     metrics: [
+      //       {
+      //         type: 'latency',
+      //         label: 'Latency',
+      //         value: 0,
+      //         status: ''
+      //       },
+      //       {
+      //         type: 'status',
+      //         label: 'Status',
+      //         status: 'NO IP'
+      //       }
+      //     ],
+      //     anchor: {
+      //       profileValue: '--',
+      //       profileLink: '',
+      //       locationValue: location?.location ?? '--',
+      //       locationLink: '',
+      //       managementIpValue: '',
+      //       managementIpLink: '',
+      //       tagValue: tagsObj?.tags ?? []
+      //     },
+      //     isNodeOverlayChecked: false,
+      //     type: MonitoredStates.MONITORED
+      //   })
+      //   return
+      // }
 
       const [{ data: metricData, isFetching: metricFetching }] = await Promise.all([
         fetchNodeMetrics(id, snmpPrimaryIpAddress as string)

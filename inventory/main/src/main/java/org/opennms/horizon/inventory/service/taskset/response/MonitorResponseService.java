@@ -25,42 +25,38 @@
  *     http://www.opennms.org/
  *     http://www.opennms.com/
  *******************************************************************************/
-syntax = "proto3";
 
-import "google/protobuf/any.proto";
+package org.opennms.horizon.inventory.service.taskset.response;
 
-package opennms.azure;
-option java_multiple_files = true;
-option java_package = "org.opennms.azure.contract";
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.opennms.horizon.inventory.dto.MonitoredState;
+import org.opennms.horizon.inventory.model.Node;
+import org.opennms.horizon.inventory.repository.NodeRepository;
+import org.opennms.taskset.contract.MonitorResponse;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
-message AzureScanRequest {
-  int64 active_discovery_id = 1;
-  string client_id = 2;
-  string client_secret = 3;
-  string subscription_id = 4;
-  string directory_id = 5;
-  int64 timeout_ms = 6;
-  int32 retries = 7;
-}
+import java.util.Optional;
 
-message AzureMonitorRequest {
-  string resource = 1;
-  string resource_group = 2;
-  string client_id = 3;
-  string client_secret = 4;
-  string subscription_id = 5;
-  string directory_id = 6;
-  int32 retries = 7;
-  int64 timeout_ms = 8;
-}
 
-message AzureCollectorRequest {
-  string resource = 1;
-  string resource_group = 2;
-  string client_id = 3;
-  string client_secret = 4;
-  string subscription_id = 5;
-  string directory_id = 6;
-  int32 retries = 7;
-  int64 timeout_ms = 8;
+@Slf4j
+@Component
+@RequiredArgsConstructor
+public class MonitorResponseService {
+    private final NodeRepository nodeRepository;
+
+    @Transactional
+    public void accept(String tenantId, MonitorResponse response) {
+        setMonitoredState(tenantId, response);
+    }
+
+    private void setMonitoredState(String tenantId, MonitorResponse response) {
+        Optional<Node> nodeOpt = nodeRepository.findByIdAndTenantId(response.getNodeId(), tenantId);
+        if (nodeOpt.isPresent()) {
+            Node node = nodeOpt.get();
+            node.setMonitoredState(MonitoredState.MONITORED);
+            nodeRepository.save(node);
+        }
+    }
 }

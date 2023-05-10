@@ -110,7 +110,6 @@ public class AzureCollector implements ServiceCollector {
                     .nodeId(collectionRequest.getNodeId())
                     .monitorType(MonitorType.AZURE)
                     .status(true)
-                    .ipAddress(request.getHost())
                     .timeStamp(System.currentTimeMillis())
                     .build());
 
@@ -119,7 +118,6 @@ public class AzureCollector implements ServiceCollector {
                     .nodeId(collectionRequest.getNodeId())
                     .monitorType(MonitorType.AZURE)
                     .status(false)
-                    .ipAddress(request.getHost())
                     .build());
             }
         } catch (Exception e) {

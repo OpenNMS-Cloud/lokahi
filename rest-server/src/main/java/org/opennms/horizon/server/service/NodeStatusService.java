@@ -65,10 +65,15 @@ public class NodeStatusService {
     public Mono<NodeStatus> getNodeStatus(long id, String monitorType, ResolutionEnvironment env) {
         NodeDTO node = client.getNodeById(id, headerUtil.getAuthHeader(env));
 
-        if (node.getIpInterfacesCount() > 0) {
+        if (node.getScanType().equals("AZURE_SCAN")) {
+            return getStatusMetric(id, "azure-node-" + id, monitorType, env)
+                .map(result -> getNodeStatus(id, result));
+        } else {
+            if (node.getIpInterfacesCount() > 0) {
 
-            IpInterfaceDTO ipInterface = getPrimaryInterface(node);
-            return getNodeStatusByInterface(id, monitorType, ipInterface, env);
+                IpInterfaceDTO ipInterface = getPrimaryInterface(node);
+                return getNodeStatusByInterface(id, monitorType, ipInterface, env);
+            }
         }
         return Mono.just(new NodeStatus(id, false));
     }

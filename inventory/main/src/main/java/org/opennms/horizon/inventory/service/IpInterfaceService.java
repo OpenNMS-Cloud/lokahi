@@ -1,6 +1,7 @@
 package org.opennms.horizon.inventory.service;
 
 import lombok.RequiredArgsConstructor;
+import org.opennms.horizon.azure.api.AzureScanNetworkInterfaceItem;
 import org.opennms.horizon.inventory.dto.IpInterfaceDTO;
 import org.opennms.horizon.inventory.mapper.IpInterfaceMapper;
 import org.opennms.horizon.inventory.model.IpInterface;
@@ -38,6 +39,15 @@ public class IpInterfaceService {
     public Optional<IpInterfaceDTO> findByIpAddressAndLocationAndTenantId(String ipAddress, String location, String tenantId) {
             Optional<IpInterface> optional = modelRepo.findByIpAddressAndLocationAndTenantId(InetAddressUtils.getInetAddress(ipAddress), location, tenantId);
             return optional.map(mapper::modelToDTO);
+    }
+
+    public void createFromAzureScanResult(String tenantId, Node node, AzureScanNetworkInterfaceItem networkInterfaceItem) {
+        IpInterface ipInterface = new IpInterface();
+        ipInterface.setNode(node);
+        ipInterface.setTenantId(tenantId);
+        ipInterface.setSnmpPrimary(false);
+        ipInterface.setIpAddress(InetAddressUtils.getInetAddress(networkInterfaceItem.getIpAddress()));
+        modelRepo.save(ipInterface);
     }
 
     public void createOrUpdateFromScanResult(String tenantId, Node node, IpInterfaceResult result, Map<Integer, SnmpInterface> ifIndexSNMPMap) {

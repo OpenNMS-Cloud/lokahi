@@ -46,6 +46,7 @@ import org.opennms.horizon.timeseries.cortex.CortexTSS;
 import org.opennms.horizon.tsdata.MetricNameConstants;
 import org.opennms.taskset.contract.CollectorResponse;
 import org.opennms.taskset.contract.MonitorType;
+import org.opennms.taskset.contract.TaskResult;
 import prometheus.PrometheusTypes;
 
 import java.io.IOException;
@@ -68,6 +69,7 @@ public class TaskSetCollectorSnmpResponseProcessorTest {
     private CollectorResponse testCollectorResponseAllResultTypes;
     private CollectorResponse testCollectorResponse1ResultType;
     private String[] testLabelValues;
+    private TaskResult testTaskResult;
 
     @BeforeEach
     public void setUp() {
@@ -92,7 +94,7 @@ public class TaskSetCollectorSnmpResponseProcessorTest {
         //
         // Execute
         //
-        target.processSnmpCollectorResponse("x-tenant-id-x", testCollectorResponseAllResultTypes, testLabelValues);
+        target.processSnmpCollectorResponse("x-tenant-id-x",  testTaskResult);
 
         //
         // Verify the Results
@@ -127,7 +129,7 @@ public class TaskSetCollectorSnmpResponseProcessorTest {
             //
             // Execute
             //
-            target.processSnmpCollectorResponse("x-tenant-id-x", testCollectorResponse1ResultType, testLabelValues);
+            target.processSnmpCollectorResponse("x-tenant-id-x", testTaskResult);
 
             //
             // Verify the Results
@@ -159,7 +161,8 @@ public class TaskSetCollectorSnmpResponseProcessorTest {
             .setResult(Any.pack(snmpResponse))
             .setTimestamp(timestamp.toEpochMilli())
                 .setMonitorType(MonitorType.SNMP).build();
-        target.processSnmpCollectorResponse("x-tenant-id-x", collectorResponse, testLabelValues);
+        TaskResult taskResult = TaskResult.newBuilder().setCollectorResponse(collectorResponse).build();
+        target.processSnmpCollectorResponse("x-tenant-id-x", taskResult);
         var timeSeriesTimeStampMatcher = new PrometheusTimeSeriesTimeStampMatcher(timestamp.toEpochMilli());
         Mockito.verify(mockCortexTSS).store(Mockito.eq("x-tenant-id-x"), Mockito.argThat(timeSeriesTimeStampMatcher));
     }
@@ -233,10 +236,17 @@ public class TaskSetCollectorSnmpResponseProcessorTest {
 
         testCollectorResponseAllResultTypes =
             CollectorResponse.newBuilder()
-                .setIpAddress("x-ip-address-x")
-                .setNodeId(131313L)
+                .setIpAddress("x-instance-x")
+                .setNodeId(131313)
+                .setMonitorType(MonitorType.SNMP)
                 .setResult(Any.pack(snmpResponseMetricAllTypes))
                 .build();
+
+        testTaskResult = TaskResult.newBuilder()
+            .setLocation("x-location-x")
+            .setSystemId("x-system-id-x")
+            .setCollectorResponse(testCollectorResponseAllResultTypes)
+            .build();
 
         SnmpResponseMetric snmpResponseMetric1Type =
             SnmpResponseMetric.newBuilder()
@@ -246,7 +256,7 @@ public class TaskSetCollectorSnmpResponseProcessorTest {
         testCollectorResponse1ResultType =
             CollectorResponse.newBuilder()
                 .setIpAddress("x-ip-address-x")
-                .setNodeId(131313L)
+                .setNodeId(131313)
                 .setResult(Any.pack(snmpResponseMetric1Type))
                 .build();
     }

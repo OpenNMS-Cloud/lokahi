@@ -39,12 +39,16 @@ public class InterfaceMetricsTracker extends Mib2InterfacesTracker {
 
     private final Logger LOG = LoggerFactory.getLogger(InterfaceMetricsTracker.class);
     private final Integer ifIndex;
+    private final String ifName;
     private final SnmpResponseMetric.Builder builder;
+    private final String ipAddress;
 
-    public InterfaceMetricsTracker(Integer ifIndex, SnmpResponseMetric.Builder builder) {
+    public InterfaceMetricsTracker(Integer ifIndex, String ifName, String ipAddress, SnmpResponseMetric.Builder builder) {
         super();
         this.ifIndex = ifIndex;
+        this.ifName = ifName;
         this.builder = builder;
+        this.ipAddress = ipAddress;
     }
 
     @Override
@@ -52,7 +56,7 @@ public class InterfaceMetricsTracker extends Mib2InterfacesTracker {
         var aliasOptional = getAlias(res);
         try {
             if (res.getInstance() != null && ifIndex == res.getInstance().toInt()) {
-                aliasOptional.ifPresent((alias) -> addResult(res, builder, alias));
+                aliasOptional.ifPresent((alias) -> addResult(res, builder, alias, ifName, ipAddress));
             }
         } catch (Exception e) {
             LOG.warn("Exception while converting result from SnmpValue to proto", e);

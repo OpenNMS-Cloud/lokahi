@@ -28,27 +28,22 @@
 
 package org.opennms.horizon.inventory.service;
 
-import java.net.InetAddress;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
-import java.util.stream.Collectors;
-
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.opennms.horizon.inventory.discovery.IcmpActiveDiscoveryDTO;
+import org.opennms.horizon.inventory.dto.IpInterfaceDTO;
 import org.opennms.horizon.inventory.dto.MonitoredState;
 import org.opennms.horizon.inventory.dto.NodeCreateDTO;
 import org.opennms.horizon.inventory.dto.NodeDTO;
+import org.opennms.horizon.inventory.dto.SnmpInterfaceDTO;
 import org.opennms.horizon.inventory.dto.TagCreateListDTO;
 import org.opennms.horizon.inventory.dto.TagEntityIdDTO;
 import org.opennms.horizon.inventory.exception.EntityExistException;
+import org.opennms.horizon.inventory.mapper.IpInterfaceMapper;
 import org.opennms.horizon.inventory.mapper.NodeMapper;
+import org.opennms.horizon.inventory.mapper.SnmpInterfaceMapper;
 import org.opennms.horizon.inventory.model.IpInterface;
 import org.opennms.horizon.inventory.model.MonitoringLocation;
 import org.opennms.horizon.inventory.model.Node;
@@ -70,10 +65,17 @@ import org.opennms.taskset.contract.TaskDefinition;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
-
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.net.InetAddress;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -95,6 +97,8 @@ public class NodeService {
     private final TaskSetPublisher taskSetPublisher;
     private final TagService tagService;
     private final NodeMapper mapper;
+    private final SnmpInterfaceMapper snmpInterfaceMapper;
+    private final IpInterfaceMapper ipInterfaceMapper;
 
     @Transactional(readOnly = true)
     public List<NodeDTO> findByTenantId(String tenantId) {
@@ -300,6 +304,26 @@ public class NodeService {
     public List<NodeDTO> listNodesByTags(String tenantId, List<String> tags) {
         return nodeRepository.findByTenantIdAndTagNamesIn(tenantId, tags).stream()
             .map(mapper::modelToDTO).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<SnmpInterfaceDTO> getSnmpInterfacesForNodeId(long nodeId) {
+        var optional = nodeRepository.findById(nodeId);
+        if(optional.isEmpty()) {
+            return new ArrayList<>();
+        } else {
+            return optional.get().getSnmpInterfaces().stream().map(snmpInterfaceMapper::modelToDTO).toList();
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public List<IpInterfaceDTO> getIpInterfacesForNodeId(long nodeId) {
+        var optional = nodeRepository.findById(nodeId);
+        if(optional.isEmpty()) {
+            return new ArrayList<>();
+        } else {
+            return optional.get().getIpInterfaces().stream().map(ipInterfaceMapper::modelToDTO).toList();
+        }
     }
 
 }

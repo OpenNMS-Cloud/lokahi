@@ -72,10 +72,13 @@ public class TaskSetHandler {
 
     public void sendCollectorTask(String location, MonitorType monitorType, IpInterface ipInterface, long nodeId) {
         String tenantId = ipInterface.getTenantId();
-        var snmpConfig = snmpConfigService.getSnmpConfig(tenantId, location, ipInterface.getIpAddress());
-        var task = collectorTaskSetService.getCollectorTask(monitorType, ipInterface, nodeId, snmpConfig.orElse(null));
-        if (task != null) {
-            taskSetPublisher.publishNewTasks(tenantId, location, Arrays.asList(task));
+        // Collectors should only be invoked for primary interface
+        if (monitorType.equals(MonitorType.SNMP) && ipInterface.getSnmpPrimary()) {
+            var snmpConfig = snmpConfigService.getSnmpConfig(tenantId, location, ipInterface.getIpAddress());
+            var task = collectorTaskSetService.addSnmpCollectorTask(ipInterface, nodeId, snmpConfig.orElse(null));
+            if (task != null) {
+                taskSetPublisher.publishNewTasks(tenantId, location, Arrays.asList(task));
+            }
         }
     }
 

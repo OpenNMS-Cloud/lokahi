@@ -42,4 +42,5 @@ message IpInterfaceDTO {
   string hostname = 6;
   string netmask = 7;
   int64 snmpInterfaceId = 8;
+  int64 if_index = 9;
 }

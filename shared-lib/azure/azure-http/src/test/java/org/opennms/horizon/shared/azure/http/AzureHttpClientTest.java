@@ -45,6 +45,15 @@ import org.opennms.horizon.shared.azure.http.dto.metrics.AzureDatum;
 import org.opennms.horizon.shared.azure.http.dto.metrics.AzureMetrics;
 import org.opennms.horizon.shared.azure.http.dto.metrics.AzureName;
 import org.opennms.horizon.shared.azure.http.dto.metrics.AzureTimeseries;
+import org.opennms.horizon.shared.azure.http.dto.networkinterface.AzureNetworkInterface;
+import org.opennms.horizon.shared.azure.http.dto.networkinterface.AzureNetworkInterfaces;
+import org.opennms.horizon.shared.azure.http.dto.networkinterface.IpConfiguration;
+import org.opennms.horizon.shared.azure.http.dto.networkinterface.IpConfigurationProps;
+import org.opennms.horizon.shared.azure.http.dto.networkinterface.NetworkInterfaceProps;
+import org.opennms.horizon.shared.azure.http.dto.networkinterface.PublicIPAddress;
+import org.opennms.horizon.shared.azure.http.dto.networkinterface.VirtualMachine;
+import org.opennms.horizon.shared.azure.http.dto.publicipaddresses.AzurePublicIPAddress;
+import org.opennms.horizon.shared.azure.http.dto.publicipaddresses.AzurePublicIpAddresses;
 import org.opennms.horizon.shared.azure.http.dto.resourcegroup.AzureResourceGroups;
 import org.opennms.horizon.shared.azure.http.dto.resourcegroup.AzureValue;
 import org.opennms.horizon.shared.azure.http.dto.resources.AzureResources;
@@ -69,7 +78,9 @@ import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.opennms.horizon.shared.azure.http.AzureHttpClient.INSTANCE_VIEW_ENDPOINT;
 import static org.opennms.horizon.shared.azure.http.AzureHttpClient.METRICS_ENDPOINT;
+import static org.opennms.horizon.shared.azure.http.AzureHttpClient.NETWORK_INTERFACES_ENDPOINT;
 import static org.opennms.horizon.shared.azure.http.AzureHttpClient.OAUTH2_TOKEN_ENDPOINT;
+import static org.opennms.horizon.shared.azure.http.AzureHttpClient.PUBLIC_IP_ADDRESSES_ENDPOINT;
 import static org.opennms.horizon.shared.azure.http.AzureHttpClient.RESOURCES_ENDPOINT;
 import static org.opennms.horizon.shared.azure.http.AzureHttpClient.RESOURCE_GROUPS_ENDPOINT;
 import static org.opennms.horizon.shared.azure.http.AzureHttpClient.SUBSCRIPTION_ENDPOINT;
@@ -236,6 +247,50 @@ public class AzureHttpClientTest {
     }
 
     @Test
+    public void testGetNetworkInterfaces() throws Exception {
+        AzureOAuthToken token = getAzureOAuthToken();
+
+        String url = String.format(NETWORK_INTERFACES_ENDPOINT, TEST_SUBSCRIPTION, TEST_RESOURCE_GROUP)
+            + "?api-version=" + this.params.getApiVersion();
+
+        AzureNetworkInterfaces azureNetworkInterfaces = getAzureNetworkInterfaces();
+
+        wireMock.stubFor(get(url)
+            .withHeader("Authorization", new EqualToPattern("Bearer " + token.getAccessToken()))
+            .willReturn(ResponseDefinitionBuilder.okForJson(azureNetworkInterfaces)));
+
+        AzureNetworkInterfaces networkInterfaces =
+            this.client.getNetworkInterfaces(token, TEST_SUBSCRIPTION, TEST_RESOURCE_GROUP, TEST_TIMEOUT, TEST_RETRIES);
+
+        verify(exactly(1), getRequestedFor(urlEqualTo(url)));
+
+        assertEquals(1, networkInterfaces.getValue().size());
+    }
+
+    @Test
+    public void testGetPublicIpAddresses() throws Exception {
+        AzureOAuthToken token = getAzureOAuthToken();
+
+        String url = String.format(PUBLIC_IP_ADDRESSES_ENDPOINT, TEST_SUBSCRIPTION, TEST_RESOURCE_GROUP)
+            + "?api-version=" + this.params.getApiVersion();
+
+        AzurePublicIpAddresses azurePublicIpAddresses = new AzurePublicIpAddresses();
+        AzurePublicIPAddress azurePublicIPAddress = new AzurePublicIPAddress();
+        azurePublicIpAddresses.setValue(Collections.singletonList(azurePublicIPAddress));
+
+        wireMock.stubFor(get(url)
+            .withHeader("Authorization", new EqualToPattern("Bearer " + token.getAccessToken()))
+            .willReturn(ResponseDefinitionBuilder.okForJson(azurePublicIpAddresses)));
+
+        AzurePublicIpAddresses networkInterfaces =
+            this.client.getPublicIpAddresses(token, TEST_SUBSCRIPTION, TEST_RESOURCE_GROUP, TEST_TIMEOUT, TEST_RETRIES);
+
+        verify(exactly(1), getRequestedFor(urlEqualTo(url)));
+
+        assertEquals(1, networkInterfaces.getValue().size());
+    }
+
+    @Test
     public void testGetInstanceView() throws Exception {
         AzureOAuthToken token = getAzureOAuthToken();
 
@@ -326,6 +381,27 @@ public class AzureHttpClientTest {
         assertNotNull(result.getBaseManagementUrl());
         assertNotNull(result.getApiVersion());
         assertNotNull(result.getMetricsApiVersion());
+    }
+
+    private static AzureNetworkInterfaces getAzureNetworkInterfaces() {
+        AzureNetworkInterfaces azureNetworkInterfaces = new AzureNetworkInterfaces();
+        AzureNetworkInterface azureNetworkInterface = new AzureNetworkInterface();
+        NetworkInterfaceProps props = new NetworkInterfaceProps();
+        IpConfiguration ipConfiguration = new IpConfiguration();
+        ipConfiguration.setId("ip-conf-id");
+        IpConfigurationProps ipConfProps = new IpConfigurationProps();
+        ipConfProps.setPrivateIPAddress("127.0.1.1");
+        PublicIPAddress publicIPAddress = new PublicIPAddress();
+        publicIPAddress.setId("pub-ip-id");
+        ipConfProps.setPublicIPAddress(publicIPAddress);
+        ipConfiguration.setProperties(ipConfProps);
+        props.setIpConfigurations(Collections.singletonList(ipConfiguration));
+        VirtualMachine virtualMachine = new VirtualMachine();
+        virtualMachine.setId("vm-id");
+        props.setVirtualMachine(virtualMachine);
+        azureNetworkInterface.setProperties(props);
+        azureNetworkInterfaces.setValue(Collections.singletonList(azureNetworkInterface));
+        return azureNetworkInterfaces;
     }
 
     private AzureOAuthToken getAzureOAuthToken() {

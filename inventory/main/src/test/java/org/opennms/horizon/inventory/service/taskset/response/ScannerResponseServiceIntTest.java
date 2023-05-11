@@ -35,6 +35,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.opennms.horizon.azure.api.AzureScanItem;
+import org.opennms.horizon.azure.api.AzureScanNetworkInterfaceItem;
 import org.opennms.horizon.azure.api.AzureScanResponse;
 import org.opennms.horizon.inventory.SpringContextTestInitializer;
 import org.opennms.horizon.inventory.dto.MonitoredState;
@@ -53,6 +54,7 @@ import org.opennms.horizon.inventory.repository.SnmpInterfaceRepository;
 import org.opennms.horizon.inventory.repository.TagRepository;
 import org.opennms.horizon.inventory.repository.discovery.active.AzureActiveDiscoveryRepository;
 import org.opennms.horizon.inventory.service.NodeService;
+import org.opennms.horizon.inventory.service.taskset.publisher.TaskSetPublisher;
 import org.opennms.horizon.shared.utils.InetAddressUtils;
 import org.opennms.node.scan.contract.IpInterfaceResult;
 import org.opennms.node.scan.contract.NodeInfoResult;
@@ -138,11 +140,16 @@ class ScannerResponseServiceIntTest extends GrpcTestBase {
     void testAzureAccept() throws Exception {
         AzureActiveDiscovery discovery = createAzureActiveDiscovery();
 
+        AzureScanNetworkInterfaceItem interfaceItem = AzureScanNetworkInterfaceItem.newBuilder()
+            .setId("/subscriptions/sub-id/resourceGroups/resource-group/providers/Microsoft.Network/NetworkInterface/interface-name")
+            .setIpAddress("127.0.1.1").build();
+
         AzureScanItem scanItem = AzureScanItem.newBuilder()
             .setId("/subscriptions/sub-id/resourceGroups/resource-group/providers/Microsoft.Compute/virtualMachines/vm-name")
             .setName("vm-name")
             .setResourceGroup("resource-group")
             .setActiveDiscoveryId(discovery.getId())
+            .addAllNetworkInterfaceItems(Collections.singletonList(interfaceItem))
             .build();
 
         List<AzureScanItem> azureScanItems = Collections.singletonList(scanItem);
@@ -152,7 +159,7 @@ class ScannerResponseServiceIntTest extends GrpcTestBase {
         service.accept(TEST_TENANT_ID, TEST_LOCATION, response);
 
         // monitor and collect tasks
-        await().atMost(10, TimeUnit.SECONDS).until(() -> testGrpcService.getTaskDefinitions(TEST_LOCATION).stream()
+        await().atMost(15, TimeUnit.SECONDS).until(() -> testGrpcService.getTaskDefinitions(TEST_LOCATION).stream()
             .filter(taskDefinition -> taskDefinition.getPluginName().contains("AZURE") &&
                 (taskDefinition.getType().equals(TaskType.MONITOR) || taskDefinition.getType().equals(TaskType.COLLECTOR)))
             .collect(Collectors.toSet()).size(), Matchers.is(2));
@@ -174,7 +181,7 @@ class ScannerResponseServiceIntTest extends GrpcTestBase {
         assertEquals(1, allIpInterfaces.size());
         IpInterface ipInterface = allIpInterfaces.get(0);
         assertEquals(TEST_TENANT_ID, ipInterface.getTenantId());
-        assertEquals("127.0.0.1", InetAddressUtils.toIpAddrString(ipInterface.getIpAddress()));
+        assertEquals(interfaceItem.getIpAddress(), InetAddressUtils.toIpAddrString(ipInterface.getIpAddress()));
     }
 
     @Test

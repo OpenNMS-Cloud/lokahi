@@ -53,14 +53,7 @@ public class TaskSetCollectorSnmpResponseProcessor {
 
     private final CortexTSS cortexTSS;
     private final TenantMetricsTracker tenantMetricsTracker;
-    String[] SNMP_COLLECTOR_METRICS_LABEL_NAMES = {
-        "instance",
-        "location",
-        "system_id",
-        "monitor",
-        "node_id"
-    };
-
+    
     public TaskSetCollectorSnmpResponseProcessor(CortexTSS cortexTSS, TenantMetricsTracker tenantMetricsTracker) {
         this.cortexTSS = cortexTSS;
         this.tenantMetricsTracker = tenantMetricsTracker;
@@ -69,14 +62,6 @@ public class TaskSetCollectorSnmpResponseProcessor {
     public void processSnmpCollectorResponse(String tenantId, TaskResult taskResult) throws IOException {
         var response = taskResult.getCollectorResponse();
         Any collectorMetric = response.getResult();
-        String[] labelValues =
-            {
-                response.getIpAddress(),
-                taskResult.getLocation(),
-                taskResult.getSystemId(),
-                response.getMonitorType().name(),
-                String.valueOf(response.getNodeId())
-            };
         Map<String, String> labels = new HashMap<>();
         labels.put("location", taskResult.getLocation());
         labels.put("system_id", taskResult.getSystemId());

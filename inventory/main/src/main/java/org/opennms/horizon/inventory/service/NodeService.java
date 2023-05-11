@@ -34,11 +34,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.opennms.horizon.inventory.component.TagPublisher;
 import org.opennms.horizon.inventory.discovery.IcmpActiveDiscoveryDTO;
-import org.opennms.horizon.inventory.dto.IpInterfaceDTO;
 import org.opennms.horizon.inventory.dto.MonitoredState;
 import org.opennms.horizon.inventory.dto.NodeCreateDTO;
 import org.opennms.horizon.inventory.dto.NodeDTO;
-import org.opennms.horizon.inventory.dto.SnmpInterfaceDTO;
 import org.opennms.horizon.inventory.dto.TagCreateListDTO;
 import org.opennms.horizon.inventory.dto.TagEntityIdDTO;
 import org.opennms.horizon.inventory.exception.EntityExistException;
@@ -316,26 +314,6 @@ public class NodeService {
     public List<NodeDTO> listNodesByTags(String tenantId, List<String> tags) {
         return nodeRepository.findByTenantIdAndTagNamesIn(tenantId, tags).stream()
             .map(mapper::modelToDTO).toList();
-    }
-
-    @Transactional(readOnly = true)
-    public List<SnmpInterfaceDTO> getSnmpInterfacesForNodeId(long nodeId) {
-        var optional = nodeRepository.findById(nodeId);
-        if(optional.isEmpty()) {
-            return new ArrayList<>();
-        } else {
-            return optional.get().getSnmpInterfaces().stream().map(snmpInterfaceMapper::modelToDTO).toList();
-        }
-    }
-
-    @Transactional(readOnly = true)
-    public List<IpInterfaceDTO> getIpInterfacesForNodeId(long nodeId) {
-        var optional = nodeRepository.findById(nodeId);
-        if(optional.isEmpty()) {
-            return new ArrayList<>();
-        } else {
-            return optional.get().getIpInterfaces().stream().map(ipInterfaceMapper::modelToDTO).toList();
-        }
     }
 
 }

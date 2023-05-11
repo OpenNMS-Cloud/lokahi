@@ -32,9 +32,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
 import org.opennms.horizon.inventory.exception.InventoryRuntimeException;
-import org.opennms.horizon.inventory.service.taskset.response.MonitorResponseService;
 import org.opennms.horizon.inventory.service.taskset.response.ScannerResponseService;
-import org.opennms.taskset.contract.MonitorResponse;
 import org.opennms.taskset.contract.ScannerResponse;
 import org.opennms.taskset.contract.TaskResult;
 import org.opennms.taskset.contract.TenantedTaskSetResults;
@@ -54,7 +52,6 @@ public class TaskSetResultsConsumer {
     private static final Logger LOG = LoggerFactory.getLogger(TaskSetResultsConsumer.class);
 
     private final ScannerResponseService scannerResponseService;
-    private final MonitorResponseService monitorResponseService;
 
     @KafkaListener(topics = "${kafka.topics.task-set-results}", concurrency = "1")
     public void receiveMessage(@Payload byte[] data, @Headers Map<String, Object> headers) {
@@ -77,11 +74,6 @@ public class TaskSetResultsConsumer {
                     ScannerResponse response = taskResult.getScannerResponse();
 
                     scannerResponseService.accept(tenantId, location, response);
-                } else if (taskResult.hasMonitorResponse()) {
-
-                    MonitorResponse response = taskResult.getMonitorResponse();
-
-                    monitorResponseService.accept(tenantId, response);
                 }
             }
         } catch (Exception e) {

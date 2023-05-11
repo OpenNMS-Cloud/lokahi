@@ -2,21 +2,22 @@
   <router-link
     custom
     :to="href"
-    v-slot="{ isActive, href: routerHref, navigate }">
+    v-slot="{ isActive, href: routerHref, navigate }"
+  >
     <FeatherAppRailNavItem
       :icon="icon"
       :title="title"
       @click="navigate"
       :href="routerHref"
-      :class="{ selected: isActive }"/>
+      :class="{ selected: isActive }"
+    />
   </router-link>
 </template>
 
 <script setup lang="ts">
-
 import { FeatherAppRailNavItem } from '@featherds/app-rail'
 
-const props = defineProps({
+defineProps({
   icon: {
     type: Object,
     required: true
@@ -30,5 +31,4 @@ const props = defineProps({
     required: true
   }
 })
-
 </script>

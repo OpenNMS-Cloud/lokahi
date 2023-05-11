@@ -63,6 +63,11 @@ const router = createRouter({
       component: () => import('@/containers/Alerts.vue')
     },
     {
+      path: '/locations',
+      name: 'Locations',
+      component: () => import('@/containers/Locations.vue')
+    },
+    {
       path: '/node/:id',
       name: 'Node',
       component: NodeStatus
@@ -76,6 +81,19 @@ const router = createRouter({
       path: '/:pathMatch(.*)*', // catch other paths and redirect
       redirect: '/'
     }
+    /* Hidden routes below are for development purposes only 
+        TODO: need to make these avail only in dev local
+    */
+    /* {
+      path: '/templates',
+      name: 'Templates',
+      component: () => import('../../templates/index.vue')
+    },
+    {
+      path: '/templates/layout/headlineTwoColumns',
+      name: 'HeadlineTwoColumns',
+      component: () => import('../../templates/layout/headlineTwoColumns.vue')
+    } */
   ]
 })
 

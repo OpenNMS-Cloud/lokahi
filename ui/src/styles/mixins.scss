@@ -1,6 +1,15 @@
+@use '@featherds/styles/themes/variables';
+@use '@/styles/vars.scss';
+
 @mixin truncate-text($width: 100%) {
   width: $width;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+@mixin wrapper-on-background(){
+  padding: var(variables.$spacing-m) var(variables.$spacing-s);
+  background: var(variables.$surface);
+  border-radius: vars.$border-radius-s;
 }

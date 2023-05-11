@@ -119,102 +119,9 @@ const icon = markRaw({
 @use '@featherds/styles/themes/variables';
 @use '@/styles/mediaQueriesMixins.scss';
 
-.btn-open-toggle {
-  color: var(variables.$primary);
-  border: none;
-  background-color: transparent;
-  padding: 0;
-  margin-bottom: var(variables.$spacing-l);
-  &:hover {
-    cursor: pointer;
-  }
-  .feather-icon {
-    width: var(variables.$spacing-l);
-    height: var(variables.$spacing-l);
-    vertical-align: middle;
-  }
-}
-
-.steps {
-  padding-bottom: var(variables.$spacing-m);
-  margin-bottom: var(variables.$spacing-xl);
-  .stepper {
-    display: flex;
-    margin-bottom: var(variables.$spacing-m);
-    .arrow {
-      width: 5%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      &:hover {
-        cursor: pointer;
-      }
-    }
-    .step-line {
-      width: 90%;
-      position: relative;
-      .line {
-        border: 1px solid var(variables.$border-on-surface);
-        background-color: var(variables.$background);
-        width: 100%;
-        position: absolute;
-        top: var(variables.$spacing-m);
-        left: 0;
-        z-index: 1000;
-      }
-      > ul {
-        display: flex;
-        justify-content: space-between;
-        position: relative;
-        z-index: 1001;
-        > li {
-          border: 1px solid var(variables.$border-on-surface);
-          border-radius: 50%;
-          width: 2rem;
-          height: 2rem;
-          text-align: center;
-          padding-top: 2px;
-          color: var(variables.$secondary-text-on-surface);
-          background-color: var(variables.$background);
-          &:hover {
-            cursor: pointer;
-          }
-        }
-      }
-      .selected {
-        background-color: var(variables.$surface);
-      }
-    }
-    .disabled {
-      color: var(variables.$disabled-text-on-surface);
-      &:hover {
-        cursor: default;
-      }
-    }
-    .feather-icon {
-      width: var(variables.$spacing-l);
-      height: var(variables.$spacing-l);
-      vertical-align: bottom;
-    }
-  }
-  .step-content {
-    display: none;
-    margin-right: var(variables.$spacing-xxl);
-    margin-left: var(variables.$spacing-xxl);
-    &.active {
-      display: block;
-    }
-    > ul {
-      margin-left: var(variables.$spacing-m);
-    }
-  }
-}
-
-// TODO: convert steppers to carousel alike
 .instructions-stepper {
-  border-left: 1px solid var(variables.$border-on-surface);
-  padding-left: var(variables.$spacing-m);
-  margin-left: var(variables.$spacing-xl);
+  width: 100% !important;
+  margin-bottom: var(variables.$spacing-m);
 
   .subtitle {
     @include typography.subtitle2();
@@ -225,6 +132,95 @@ const icon = markRaw({
     margin-left: var(variables.$spacing-xl);
     > li {
       list-style-type: square;
+    }
+  }
+
+  .btn-open-toggle {
+    color: var(variables.$primary);
+    border: none;
+    background-color: transparent;
+    padding: 0;
+    margin-bottom: var(variables.$spacing-m);
+    &:hover {
+      cursor: pointer;
+    }
+    .feather-icon {
+      width: var(variables.$spacing-l);
+      height: var(variables.$spacing-l);
+      vertical-align: middle;
+    }
+  }
+
+  .steps {
+    .stepper {
+      display: flex;
+      margin-bottom: var(variables.$spacing-m);
+      .arrow {
+        width: 5%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        &:hover {
+          cursor: pointer;
+        }
+      }
+      .step-line {
+        width: 90%;
+        position: relative;
+        .line {
+          border: 1px solid var(variables.$border-on-surface);
+          background-color: var(variables.$background);
+          width: 100%;
+          position: absolute;
+          top: var(variables.$spacing-m);
+          left: 0;
+          z-index: 1000;
+        }
+        > ul {
+          display: flex;
+          justify-content: space-between;
+          position: relative;
+          z-index: 1001;
+          > li {
+            border: 1px solid var(variables.$border-on-surface);
+            border-radius: 50%;
+            width: 2rem;
+            height: 2rem;
+            text-align: center;
+            padding-top: 2px;
+            color: var(variables.$secondary-text-on-surface);
+            background-color: var(variables.$background);
+            &:hover {
+              cursor: pointer;
+            }
+          }
+        }
+        .selected {
+          background-color: var(variables.$surface);
+        }
+      }
+      .disabled {
+        color: var(variables.$disabled-text-on-surface);
+        &:hover {
+          cursor: default;
+        }
+      }
+      .feather-icon {
+        width: var(variables.$spacing-l);
+        height: var(variables.$spacing-l);
+        vertical-align: bottom;
+      }
+    }
+    .step-content {
+      display: none;
+      margin-right: var(variables.$spacing-xxl);
+      margin-left: var(variables.$spacing-xxl);
+      &.active {
+        display: block;
+      }
+      > ul {
+        margin-left: var(variables.$spacing-m);
+      }
     }
   }
 }

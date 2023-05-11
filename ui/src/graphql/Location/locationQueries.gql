@@ -1,0 +1,20 @@
+fragment LocationsParts on Query {
+  findAllLocations {
+    id
+    location
+    # may required
+    # status
+    # expired
+  }
+}
+
+query LocationsList {
+  ...LocationsParts
+}
+
+query SearchLocation($searchTerm: String) {
+  searchLocation(searchTerm: $searchTerm) {
+    id
+    location
+  }
+}

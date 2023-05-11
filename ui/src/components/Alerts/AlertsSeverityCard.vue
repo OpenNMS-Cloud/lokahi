@@ -8,7 +8,7 @@
   >
     <div class="label-add-icon">
       <PillColor
-        :type="severity"
+        :item="pillColor"
         data-test="severity-label"
       />
       <Transition name="icon-anim">
@@ -38,7 +38,7 @@
   >
     <div class="label-add-icon">
       <PillColor
-        :type="severity"
+        :item="pillColor"
         data-test="severity-label"
       />
     </div>
@@ -66,6 +66,8 @@ const props = defineProps<{
   isFilter?: boolean
   timeRange?: TimeRange
 }>()
+
+const pillColor = { style: props.severity as string }
 
 const count = ref()
 onMounted(async () => {

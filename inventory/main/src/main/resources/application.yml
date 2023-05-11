@@ -38,6 +38,7 @@ kafka:
     task-set-results: "task-set.results"
     internal-events: "internal-event"
     node: "node"
+    tag-operation: "tag-operation"
 
 
 keycloak:

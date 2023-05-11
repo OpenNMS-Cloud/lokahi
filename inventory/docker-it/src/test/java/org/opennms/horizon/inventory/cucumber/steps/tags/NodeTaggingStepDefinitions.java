@@ -28,12 +28,21 @@
 
 package org.opennms.horizon.inventory.cucumber.steps.tags;
 
-import com.google.protobuf.Empty;
-import com.google.protobuf.Int64Value;
-import io.cucumber.java.en.And;
-import io.cucumber.java.en.Given;
-import io.cucumber.java.en.Then;
-import io.cucumber.java.en.When;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.opennms.horizon.inventory.cucumber.InventoryBackgroundHelper;
 import org.opennms.horizon.inventory.dto.DeleteTagsDTO;
 import org.opennms.horizon.inventory.dto.ListAllTagsParamsDTO;
@@ -49,18 +58,21 @@ import org.opennms.horizon.inventory.dto.TagListDTO;
 import org.opennms.horizon.inventory.dto.TagListParamsDTO;
 import org.opennms.horizon.inventory.dto.TagNameQuery;
 import org.opennms.horizon.inventory.dto.TagRemoveListDTO;
+import org.opennms.horizon.shared.common.tag.proto.TagOperationList;
+import org.opennms.horizon.shared.common.tag.proto.TagOperationProto;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import com.google.protobuf.Empty;
+import com.google.protobuf.Int64Value;
+import com.google.protobuf.InvalidProtocolBufferException;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import io.cucumber.datatable.DataTable;
+import io.cucumber.java.en.And;
+import io.cucumber.java.en.Given;
+import io.cucumber.java.en.Then;
+import io.cucumber.java.en.When;
+import lombok.extern.slf4j.Slf4j;
 
-
+@Slf4j
 public class NodeTaggingStepDefinitions {
     private final InventoryBackgroundHelper backgroundHelper;
 
@@ -69,6 +81,7 @@ public class NodeTaggingStepDefinitions {
     private TagListDTO addedTagList;
     private TagListDTO fetchedTagList;
     private NodeList fetchedNodeList;
+    private long tagMessageFilterTime;
 
     public NodeTaggingStepDefinitions(InventoryBackgroundHelper backgroundHelper) {
         this.backgroundHelper = backgroundHelper;
@@ -161,6 +174,7 @@ public class NodeTaggingStepDefinitions {
      */
     @When("A GRPC request to create tags {string} for node")
     public void aGRPCRequestToCreateTagsForNode(String tags) {
+        tagMessageFilterTime = System.currentTimeMillis();
         String[] tagArray = tags.split(",");
         var tagServiceBlockingStub = backgroundHelper.getTagServiceBlockingStub();
         List<TagCreateDTO> tagCreateList = getTagCreateList(tagArray);
@@ -172,6 +186,7 @@ public class NodeTaggingStepDefinitions {
 
     @When("A GRPC request to create tags {string} for both nodes")
     public void aGRPCRequestToCreateTagsForBothNodes(String tags) {
+        tagMessageFilterTime = System.currentTimeMillis();
         String[] tagArray = tags.split(",");
         var tagServiceBlockingStub = backgroundHelper.getTagServiceBlockingStub();
         List<TagCreateDTO> tagCreateList = getTagCreateList(tagArray);
@@ -197,6 +212,7 @@ public class NodeTaggingStepDefinitions {
 
     @When("A GRPC request to remove tag {string} for node")
     public void aGRPCRequestToRemoveTagForNode(String tag) {
+        tagMessageFilterTime = System.currentTimeMillis();
         var tagServiceBlockingStub = backgroundHelper.getTagServiceBlockingStub();
         for (TagDTO tagDTO : addedTagList.getTagsList()) {
             if (tagDTO.getName().equals(tag)) {
@@ -341,5 +357,64 @@ public class NodeTaggingStepDefinitions {
             tagCreateList.add(TagCreateDTO.newBuilder().setName(name).build());
         }
         return tagCreateList;
+    }
+
+    @Then("Verify Kafka message with {int} node(s)")
+    public void verifyKafkaMessageWithData(int nodeCount, DataTable table) throws InvalidProtocolBufferException, InterruptedException {
+        List<Map<String, String>> dataList = table.asMaps();
+        long endTime = System.currentTimeMillis() + 60000; //1 minute
+        List<Long> nodeIdList = switch (nodeCount) {
+            case 1 -> List.of(node1.getId());
+            case 2 -> List.of(node1.getId(), node2.getId());
+            default -> new ArrayList<>();
+        };
+        while (System.currentTimeMillis() < endTime) {
+            ConsumerRecords<String, byte[]> records = InventoryBackgroundHelper.getKafkaConsumer().poll(Duration.ofMillis(300));
+            if(!records.isEmpty()) {
+                List<TagOperationList> tagOpList = new ArrayList<>();
+                for(ConsumerRecord<String, byte[]> r : records) {
+                    if (r.timestamp() > tagMessageFilterTime) {
+                        tagOpList.add(TagOperationList.parseFrom(r.value()));
+                    }
+                }
+
+                List<TagOperationList> list = tagOpList.stream().filter(t -> t.getTagsList().size() == dataList.size()).toList();
+                list.forEach(l -> {
+                    List<TagOperationProto> opList = l.getTagsList();
+                    assertEquals(dataList.size(), opList.size());
+                    verifyKafkaMessage(dataList, opList, nodeIdList);
+                });
+
+                return;
+            }
+            Thread.sleep(300);
+        }
+        fail("Failed receiving Kafka message in 1 minute");
+    }
+
+    @Given("Kafka topic {string}")
+    public void kafkaTopic(String topic) {
+        backgroundHelper.subscribeKafkaTopics(List.of(topic));
+    }
+
+    @Then("Delete the node")
+    public void deleteTheNode() {
+        tagMessageFilterTime = System.currentTimeMillis();
+        backgroundHelper.getNodeServiceBlockingStub().deleteNode(Int64Value.of(node1.getId()));
+    }
+
+    private void verifyKafkaMessage(List<Map<String, String>> data, List<TagOperationProto> result, List<Long> nodeIds) {
+        data.forEach(map -> {
+            List<TagOperationProto> topPlist = result.stream().filter(r -> r.getTenantId().equals(map.get("tenant_id"))
+                && r.getTagName().equals(map.get("tag_name"))).toList();
+            if(topPlist.isEmpty()) {
+                fail("Failed receiving TagOperation massages");
+            }
+            topPlist.forEach(top -> {
+                assertEquals(map.get("action"), top.getOperation().name());
+                assertTrue(nodeIds.containsAll(top.getNodeIdList()));
+                assertEquals(1, top.getNodeIdList().size());
+            });
+        });
     }
 }

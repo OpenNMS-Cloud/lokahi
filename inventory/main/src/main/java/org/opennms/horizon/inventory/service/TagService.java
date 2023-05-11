@@ -31,6 +31,7 @@ package org.opennms.horizon.inventory.service;
 import com.google.protobuf.Int64Value;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
+import org.opennms.horizon.inventory.component.TagPublisher;
 import org.opennms.horizon.inventory.dto.DeleteTagsDTO;
 import org.opennms.horizon.inventory.dto.ListAllTagsParamsDTO;
 import org.opennms.horizon.inventory.dto.ListTagsByEntityIdParamsDTO;
@@ -50,6 +51,8 @@ import org.opennms.horizon.inventory.repository.discovery.active.ActiveDiscovery
 import org.opennms.horizon.inventory.repository.NodeRepository;
 import org.opennms.horizon.inventory.repository.discovery.PassiveDiscoveryRepository;
 import org.opennms.horizon.inventory.repository.TagRepository;
+import org.opennms.horizon.shared.common.tag.proto.Operation;
+import org.opennms.horizon.shared.common.tag.proto.TagOperationProto;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -60,6 +63,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -69,6 +73,7 @@ public class TagService {
     private final ActiveDiscoveryRepository activeDiscoveryRepository;
     private final PassiveDiscoveryRepository passiveDiscoveryRepository;
     private final TagMapper mapper;
+    private final TagPublisher tagPublisher;
 
     @Transactional
     public List<TagDTO> addTags(String tenantId, TagCreateListDTO request) {
@@ -88,6 +93,13 @@ public class TagService {
     private List<TagDTO> addTags(String tenantId, TagEntityIdDTO entityId, List<TagCreateDTO> tagCreateList) {
         if (entityId.hasNodeId()) {
             Node node = getNode(tenantId, entityId.getNodeId());
+            List<TagOperationProto> tagOpList = tagCreateList.stream().map(t -> TagOperationProto.newBuilder()
+                .setOperation(Operation.ASSIGN_TAG)
+                .setTagName(t.getName())
+                .setTenantId(tenantId)
+                .addNodeId(node.getId())
+                .build()).collect(Collectors.toList());
+            tagPublisher.publishTagUpdate(tagOpList);
             return tagCreateList.stream()
                 .map(tagCreateDTO -> addTagToNode(tenantId, node, tagCreateDTO))
                 .toList();
@@ -122,6 +134,13 @@ public class TagService {
         if (entityId.hasNodeId()) {
             Node node = getNode(tenantId, entityId.getNodeId());
             tags.forEach(tag -> tag.getNodes().remove(node));
+            List<TagOperationProto> tagOpList = tags.stream().map(t  -> TagOperationProto.newBuilder()
+                .setTenantId(tenantId)
+                .setOperation(Operation.REMOVE_TAG)
+                .setTagName(t.getName())
+                .addNodeId(node.getId())
+                .build()).collect(Collectors.toList());
+            tagPublisher.publishTagUpdate(tagOpList);
         } else if (entityId.hasActiveDiscoveryId()) {
             ActiveDiscovery activeDiscovery = getActiveDiscovery(tenantId, entityId.getActiveDiscoveryId());
             tags.forEach(tag -> tag.getActiveDiscoveries().remove(activeDiscovery));

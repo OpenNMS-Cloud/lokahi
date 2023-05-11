@@ -25,13 +25,13 @@
         v-model="node.label"
       />
       <FeatherSelect
-        data-test="location-name-input"
-        name="locationOptions"
         v-model="locationOption"
-        :options="locations"
-        text-prop="location"
+        :options="locationsList"
         @update:modelValue="selectLocation"
+        name="locationOptions"
         label="Location"
+        text-prop="location"
+        data-test="location-name-input"
       />
       <FeatherInput
         data-test="ip-input"
@@ -89,7 +89,7 @@
 import Add from '@featherds/icon/action/Add'
 import { useNodeMutations } from '@/store/Mutations/nodeMutations'
 import { useAppliancesQueries } from '@/store/Queries/appliancesQueries'
-import { useLocationsQueries } from '@/store/Common/locationsQueries'
+import { useLocationQueries } from '@/store/Queries/locationQueries'
 import useModal from '@/composables/useModal'
 import useSnackbar from '@/composables/useSnackbar'
 import { NodeCreateInput } from '@/types/graphql'
@@ -98,7 +98,7 @@ const { showSnackbar } = useSnackbar()
 const { openModal, closeModal, isVisible } = useModal()
 const nodeMutations = useNodeMutations()
 const applianceQueries = useAppliancesQueries()
-const locationsQueries = useLocationsQueries()
+const locationQueries = useLocationQueries()
 
 const defaultDevice: NodeCreateInput = {
   label: undefined,
@@ -113,9 +113,12 @@ const defaultDevice: NodeCreateInput = {
 
 const node = reactive({ ...defaultDevice })
 
-const locations = computed(() => locationsQueries.locations)
+const locationsList = ref()
 const addNode = async () => {
-  await locationsQueries.fetchLocations()
+  const locations = await locationQueries.fetchLocations()
+
+  locationsList.value = locations?.data?.value?.findAllLocations ?? []
+
   openModal()
 }
 
@@ -157,7 +160,7 @@ const selectLocation = () => {
 // sets default location when locations available
 watchEffect(() => {
   if (!node.location) {
-    locationOption.value = applianceQueries.locations[0]
+    locationOption.value = applianceQueries.locationsList[0]
     selectLocation()
   }
 })

@@ -7,7 +7,7 @@ export const useAlertsQueries = defineStore('alertsQueries', () => {
   const fetchAlertsData = ref({})
 
   const fetchAlerts = async (alertsFilters: AlertsFilters, pagination: Pagination) => {
-    const { data, execute, isFetching } = useQuery({
+    const { data, execute } = useQuery({
       query: AlertsListDocument,
       variables: {
         page: pagination.page,
@@ -24,9 +24,7 @@ export const useAlertsQueries = defineStore('alertsQueries', () => {
 
     await execute()
 
-    if (!isFetching.value) {
-      fetchAlertsData.value = data.value?.findAllAlerts || []
-    }
+    fetchAlertsData.value = data.value?.findAllAlerts || []
   }
 
   const fetchCountAlerts = async (severityFilters = [] as string[], timeRange = TimeRange.All) =>

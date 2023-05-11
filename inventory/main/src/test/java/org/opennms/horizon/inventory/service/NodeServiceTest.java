@@ -34,6 +34,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
 import org.mockito.ArgumentCaptor;
+import org.opennms.horizon.inventory.component.TagPublisher;
 import org.opennms.horizon.inventory.dto.NodeCreateDTO;
 import org.opennms.horizon.inventory.dto.NodeDTO;
 import org.opennms.horizon.inventory.dto.TagCreateDTO;
@@ -45,6 +46,7 @@ import org.opennms.horizon.inventory.mapper.SnmpInterfaceMapper;
 import org.opennms.horizon.inventory.model.IpInterface;
 import org.opennms.horizon.inventory.model.MonitoringLocation;
 import org.opennms.horizon.inventory.model.Node;
+import org.opennms.horizon.inventory.model.Tag;
 import org.opennms.horizon.inventory.repository.IpInterfaceRepository;
 import org.opennms.horizon.inventory.repository.MonitoringLocationRepository;
 import org.opennms.horizon.inventory.repository.NodeRepository;
@@ -57,6 +59,8 @@ import org.opennms.taskset.contract.ScanType;
 
 import java.net.InetAddress;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -74,6 +78,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+
 public class NodeServiceTest {
     private NodeService nodeService;
     private NodeRepository mockNodeRepository;
@@ -81,6 +86,7 @@ public class NodeServiceTest {
     private IpInterfaceRepository mockIpInterfaceRepository;
     private ConfigUpdateService mockConfigUpdateService;
     private TagService tagService;
+    private TagPublisher mockTagPublisher;
     private final String tenantID = "test-tenant";
 
     @BeforeEach
@@ -91,6 +97,7 @@ public class NodeServiceTest {
         mockIpInterfaceRepository = mock(IpInterfaceRepository.class);
         mockConfigUpdateService = mock(ConfigUpdateService.class);
         tagService = mock(TagService.class);
+        mockTagPublisher = mock(TagPublisher.class);
 
 
         nodeService = new NodeService(mockNodeRepository,
@@ -104,7 +111,8 @@ public class NodeServiceTest {
             tagService,
             nodeMapper,
             mock(SnmpInterfaceMapper.class),
-            mock(IpInterfaceMapper.class));
+            mock(IpInterfaceMapper.class),
+            mockTagPublisher);
 
         Node node = new Node();
         doReturn(node).when(mockNodeRepository).save(any(node.getClass()));
@@ -115,6 +123,41 @@ public class NodeServiceTest {
         verifyNoMoreInteractions(mockNodeRepository);
         verifyNoMoreInteractions(mockMonitoringLocationRepository);
         verifyNoMoreInteractions(mockIpInterfaceRepository);
+    }
+
+    @Test
+    public void deleteNodeNotExist() {
+        assertThatThrownBy(() -> nodeService.deleteNode(1))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("Node with ID : 1doesn't exist");
+        verify(mockNodeRepository).findById(any());
+    }
+
+    @Test
+    public void deleteNode() {
+        Node node = mock(Node.class);
+        MonitoringLocation monitoringLocation = mock(MonitoringLocation.class);
+        when(node.getMonitoringLocation()).thenReturn(monitoringLocation);
+        List<Tag> tags = getTags();
+        when(node.getTags()).thenReturn(tags);
+
+        Optional<Node> optNode = Optional.of(node);
+        when(mockNodeRepository.findById(1L)).thenReturn(optNode);
+
+        nodeService.deleteNode(1);
+
+        verify(mockNodeRepository).findById(any());
+        verify(mockNodeRepository).deleteById(any());
+    }
+
+    private List<Tag> getTags() {
+        List<Tag> tags = new ArrayList<>();
+        Tag t2 = mock(Tag.class);
+        when(t2.getNodes()).thenReturn(Arrays.asList(mock(Node.class)));
+        when(t2.getName()).thenReturn("FRED");
+        when(t2.getTenantId()).thenReturn("TENANT");
+        tags.add(t2);
+        return tags;
     }
 
     @Test

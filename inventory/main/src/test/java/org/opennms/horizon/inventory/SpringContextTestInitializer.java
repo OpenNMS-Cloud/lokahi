@@ -28,10 +28,13 @@
 
 package org.opennms.horizon.inventory;
 
+import static org.mockito.Mockito.mock;
+
 import java.io.IOException;
 import java.util.function.Supplier;
 
 import org.jetbrains.annotations.NotNull;
+import org.opennms.horizon.inventory.component.TagPublisher;
 import org.opennms.horizon.inventory.config.MinionGatewayGrpcClientConfig;
 import org.opennms.horizon.inventory.grpc.taskset.TestTaskSetGrpcService;
 import org.springframework.beans.factory.config.BeanDefinitionCustomizer;
@@ -89,7 +92,8 @@ public class SpringContextTestInitializer implements ApplicationContextInitializ
             () -> InProcessChannelBuilder.forName(serverName).directExecutor().build()
         );
         registerBean(context, GRPC_SERVICE_BEAN, TestTaskSetGrpcService.class, () -> grpcService);
-
+        TagPublisher tagPublisher = mock(TagPublisher.class);
+        registerBean(context, "tagPublisher", TagPublisher.class, () -> tagPublisher);
     }
 
     private <T> void registerBean(GenericApplicationContext context, String name, Class<T> clazz, Supplier<T> supplier) {

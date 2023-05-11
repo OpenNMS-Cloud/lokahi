@@ -1,0 +1,22 @@
+#create
+mutation CreateLocation($location: String) {
+  createLocation(location: $location) {
+    id
+    location
+    tenantId
+  }
+}
+
+#update
+mutation UpdateLocation($id: Long!, $location: String!) {
+  updateLocation(id: $id, location: $location) {
+    id
+    location
+    tenantId
+  }
+}
+
+#delete
+mutation DeleteLocation($id: Long!) {
+  deleteLocation(id: $id)
+}

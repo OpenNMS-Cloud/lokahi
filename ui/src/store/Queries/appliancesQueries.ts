@@ -55,21 +55,19 @@ export const useAppliancesQueries = defineStore('appliancesQueries', {
 
     const addMetricsToMinions = (allMinions: Minion[]) => {
       allMinions.forEach(async (minion) => {
-        const { data, isFetching } = await fetchMinionMetrics(minion.systemId as string)
+        const { data } = await fetchMinionMetrics(minion.systemId as string)
         const result = data.value?.minionLatency?.data?.result?.[0]?.values?.[0]
 
-        if (!isFetching.value) {
-          if (result) {
-            const [, val] = result as number[]
+        if (result) {
+          const [, val] = result
 
-            tableMinions.value.push({
-              ...minion,
-              latency: {
-                value: val
-              }
-            })
-          } else tableMinions.value.push(minion)
-        }
+          tableMinions.value.push({
+            ...minion,
+            latency: {
+              value: val
+            }
+          })
+        } else tableMinions.value.push(minion)
       })
     }
 
@@ -159,14 +157,14 @@ export const useAppliancesQueries = defineStore('appliancesQueries', {
       }
     })
 
-    const locations = computed(() => minionsAndNodes.value?.findAllLocations || [])
+    const locationsList = computed(() => minionsAndNodes.value?.findAllLocations ?? [])
 
     return {
       tableMinions,
       fetchMinionsForTable,
       tableNodes,
       fetchNodesForTable,
-      locations,
+      locationsList,
       fetch: execute
     }
   }

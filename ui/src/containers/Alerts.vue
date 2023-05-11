@@ -55,56 +55,58 @@
             />
           </div>
         </div>
-        <div class="card-list-top">
-          <div class="select-all-checkbox-btns">
-            <FeatherCheckbox
-              v-model="isAllAlertsSelected"
-              @update:model-value="allAlertsCheckboxHandler"
-              :disabled="isAlertsListEmpty"
-              data-test="select-all-checkbox"
-              >Select All</FeatherCheckbox
-            >
-            <FeatherButton
-              :disabled="!atLeastOneAlertSelected"
-              text
-              @click="clearAlertsHandler"
-              data-test="clear-btn"
-              >clear</FeatherButton
-            >
-            <FeatherButton
-              :disabled="!atLeastOneAlertSelected"
-              text
-              @click="acknowledgeAlertsHandler"
-              data-test="acknowledge-btn"
-              >acknowledge</FeatherButton
-            >
+        <div class="alerts-list">
+          <div class="card-list-top">
+            <div class="select-all-checkbox-btns">
+              <FeatherCheckbox
+                v-model="isAllAlertsSelected"
+                @update:model-value="allAlertsCheckboxHandler"
+                :disabled="isAlertsListEmpty"
+                data-test="select-all-checkbox"
+                >Select All</FeatherCheckbox
+              >
+              <FeatherButton
+                :disabled="!atLeastOneAlertSelected"
+                text
+                @click="clearAlertsHandler"
+                data-test="clear-btn"
+                >clear</FeatherButton
+              >
+              <FeatherButton
+                :disabled="!atLeastOneAlertSelected"
+                text
+                @click="acknowledgeAlertsHandler"
+                data-test="acknowledge-btn"
+                >acknowledge</FeatherButton
+              >
+            </div>
+            <FeatherPagination
+              v-if="!isAlertsListEmpty"
+              v-model="page"
+              :pageSize="pageSize"
+              :total="total"
+              data-test="list-count"
+            />
           </div>
-          <FeatherPagination
+          <AlertsCardList
+            :alerts="alerts"
+            @alert-selected="alertSelectedListener"
+            data-test="alerts-list"
+          />
+          <div
+            class="card-list-bottom"
             v-if="!isAlertsListEmpty"
-            v-model="page"
-            :pageSize="pageSize"
-            :total="total"
-            data-test="list-count"
-          />
-        </div>
-        <AlertsCardList
-          :alerts="alerts"
-          @alert-selected="alertSelectedListener"
-          data-test="alerts-list"
-        />
-        <div
-          class="card-list-bottom"
-          v-if="!isAlertsListEmpty"
-        >
-          <FeatherPagination
-            v-model="page"
-            :pageSize="pageSize"
-            :total="total"
-            @update:model-value="alertsStore.setPage"
-            @update:pageSize="alertsStore.setPageSize"
-            data-test="pagination"
-            ref="refPagination"
-          />
+          >
+            <FeatherPagination
+              v-model="page"
+              :pageSize="pageSize"
+              :total="total"
+              @update:model-value="alertsStore.setPage"
+              @update:pageSize="alertsStore.setPageSize"
+              data-test="pagination"
+              ref="refPagination"
+            />
+          </div>
         </div>
       </div>
     </div>
@@ -259,6 +261,11 @@ const searchAlertsListener = (v: any) => {
   padding: var(variables.$spacing-l);
 }
 
+.alerts-list {
+  border: 1px solid var(variables.$border-on-surface);
+  border-radius: vars.$border-radius-s;
+}
+
 .card-list-top {
   display: flex;
   flex-direction: row;
@@ -266,8 +273,7 @@ const searchAlertsListener = (v: any) => {
   align-items: center;
   padding: var(variables.$spacing-s) var(variables.$spacing-xl);
   background-color: var(variables.$background);
-  border: 1px solid var(variables.$border-on-surface);
-  border-radius: vars.$border-radius-s vars.$border-radius-s 0 0;
+  border-bottom: 1px solid var(variables.$border-on-surface);
   :deep(.layout-container) {
     margin-bottom: 0;
   }
@@ -301,10 +307,6 @@ const searchAlertsListener = (v: any) => {
   justify-content: flex-end;
   align-items: center;
   padding: var(variables.$spacing-s) 0 var(variables.$spacing-s) var(variables.$spacing-xl);
-  border-width: 0 1px 1px;
-  border-style: solid;
-  border-color: var(variables.$border-on-surface);
-  border-radius: 0 0 vars.$border-radius-s vars.$border-radius-s;
   > * {
     margin-left: var(variables.$spacing-xl);
   }

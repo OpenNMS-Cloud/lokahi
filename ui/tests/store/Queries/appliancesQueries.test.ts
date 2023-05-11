@@ -66,6 +66,6 @@ describe('Appliances queries', () => {
     const appliancesQueries = useAppliancesQueries()
     expect(appliancesQueries.tableMinions).toStrictEqual(expectedAppliancesMinions)
     expect(appliancesQueries.tableNodes).toStrictEqual(expectedAppliancesDevices)
-    expect(appliancesQueries.locations).toStrictEqual(expectedLocations)
+    expect(appliancesQueries.locationsList).toStrictEqual(expectedLocations)
   })
 })

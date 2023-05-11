@@ -1,4 +1,4 @@
-import { mount } from '@vue/test-utils'
+import { shallowMount } from '@vue/test-utils'
 import HeadlineSection from '@/components/Common/HeadlineSection.vue'
 
 const defaultHeading = 'Section Headline'
@@ -12,36 +12,40 @@ describe('HeadLineSection', () => {
   })
 
   it(`should have ${defaultHeading} as heading`, () => {
-    wrapper = mount(HeadlineSection)
+    wrapper = shallowMount(HeadlineSection)
 
-    const componentHeading = wrapper.get('[data-test="section-headline"]').text()
+    const componentHeading = wrapper.get('[data-test="headline"]').text()
     expect(componentHeading).toBe(defaultHeading)
   })
 
   it(`should have ${text} as heading`, () => {
-    wrapper = mount(HeadlineSection, {
+    wrapper = shallowMount(HeadlineSection, {
       propsData: {
         text
       }
     })
 
-    const componentHeading = wrapper.get('[data-test="section-headline"]').text()
+    const componentHeading = wrapper.get('[data-test="headline"]').text()
     expect(componentHeading).toBe(text)
   })
 
   it('should have rendered the slots', () => {
-    wrapper = mount(HeadlineSection, {
+    wrapper = shallowMount(HeadlineSection, {
       slots: {
-        infos: '<div>some infos</div>',
-        actions: '<div>some actions</div>'
+        left: '<div>left content</div>',
+        middle: '<div>middle content</div>',
+        right: '<div>right content</div>'
       },
       attachTo: document.body
     })
 
-    let slot = wrapper.get('[data-test="infos-slot"]')
-    expect(slot.html()).toContain('some infos')
+    let slot = wrapper.get('[data-test="left"]')
+    expect(slot.html()).toContain('left content')
 
-    slot = wrapper.get('[data-test="actions-slot"]')
-    expect(slot.html()).toContain('some actions')
+    slot = wrapper.get('[data-test="middle"]')
+    expect(slot.html()).toContain('middle content')
+
+    slot = wrapper.get('[data-test="right"]')
+    expect(slot.html()).toContain('right content')
   })
 })

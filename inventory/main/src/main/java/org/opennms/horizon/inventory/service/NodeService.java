@@ -32,6 +32,7 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.opennms.horizon.inventory.component.TagPublisher;
 import org.opennms.horizon.inventory.discovery.IcmpActiveDiscoveryDTO;
 import org.opennms.horizon.inventory.dto.IpInterfaceDTO;
 import org.opennms.horizon.inventory.dto.MonitoredState;
@@ -55,6 +56,8 @@ import org.opennms.horizon.inventory.service.taskset.CollectorTaskSetService;
 import org.opennms.horizon.inventory.service.taskset.MonitorTaskSetService;
 import org.opennms.horizon.inventory.service.taskset.ScannerTaskSetService;
 import org.opennms.horizon.inventory.service.taskset.publisher.TaskSetPublisher;
+import org.opennms.horizon.shared.common.tag.proto.Operation;
+import org.opennms.horizon.shared.common.tag.proto.TagOperationProto;
 import org.opennms.horizon.shared.constants.GrpcConstants;
 import org.opennms.horizon.shared.utils.InetAddressUtils;
 import org.opennms.horizon.snmp.api.SnmpConfiguration;
@@ -99,6 +102,7 @@ public class NodeService {
     private final NodeMapper mapper;
     private final SnmpInterfaceMapper snmpInterfaceMapper;
     private final IpInterfaceMapper ipInterfaceMapper;
+    private final TagPublisher tagPublisher;
 
     @Transactional(readOnly = true)
     public List<NodeDTO> findByTenantId(String tenantId) {
@@ -263,9 +267,17 @@ public class NodeService {
     }
 
     private void removeAssociatedTags(Node node) {
+        List<TagOperationProto> tagOpList = new ArrayList<>();
         for (Tag tag : node.getTags()) {
             tag.getNodes().remove(node);
+            tagOpList.add(TagOperationProto.newBuilder()
+                .setTagName(tag.getName())
+                .setTenantId(tag.getTenantId())
+                .setOperation(Operation.REMOVE_TAG)
+                .addNodeId(node.getId())
+                .build());
         }
+        tagPublisher.publishTagUpdate(tagOpList);
     }
 
     public void sendNewNodeTaskSetAsync(Node node, String location, IcmpActiveDiscoveryDTO icmpDiscoveryDTO) {

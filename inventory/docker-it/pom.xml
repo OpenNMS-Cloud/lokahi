@@ -139,6 +139,15 @@
             <artifactId>protobuf-java-util</artifactId>
         </dependency>
 
+        <!-- https://mvnrepository.com/artifact/org.apache.kafka/kafka-clients -->
+        <dependency>
+            <groupId>org.apache.kafka</groupId>
+            <artifactId>kafka-clients</artifactId>
+            <version>3.4.0</version>
+        </dependency>
+
+
+
     </dependencies>
 
     <build>

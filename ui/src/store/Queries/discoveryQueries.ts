@@ -75,7 +75,7 @@ export const useDiscoveryQueries = defineStore('discoveryQueries', () => {
   }
 
   return {
-    locations: computed(() => locations.value?.findAllLocations || []),
+    locations: computed(() => locations.value?.findAllLocations ?? []),
     getLocations,
     tagsSearched: computed(() => tagsSearched.value || []),
     getTagsSearch,

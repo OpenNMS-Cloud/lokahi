@@ -28,12 +28,18 @@
 
 package org.opennms.horizon.inventory.cucumber;
 
-import io.grpc.ClientInterceptor;
-import io.grpc.ManagedChannel;
-import io.grpc.Metadata;
-import io.grpc.netty.shaded.io.grpc.netty.NettyChannelBuilder;
-import io.grpc.stub.MetadataUtils;
-import lombok.Getter;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Properties;
+import java.util.TreeMap;
+import java.util.concurrent.TimeUnit;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.common.serialization.ByteArrayDeserializer;
+import org.apache.kafka.common.serialization.StringDeserializer;
 import org.opennms.horizon.inventory.discovery.IcmpActiveDiscoveryServiceGrpc;
 import org.opennms.horizon.inventory.dto.ActiveDiscoveryServiceGrpc;
 import org.opennms.horizon.inventory.dto.AzureActiveDiscoveryServiceGrpc;
@@ -46,10 +52,12 @@ import org.opennms.horizon.shared.constants.GrpcConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Map;
-import java.util.Objects;
-import java.util.TreeMap;
-import java.util.concurrent.TimeUnit;
+import io.grpc.ClientInterceptor;
+import io.grpc.ManagedChannel;
+import io.grpc.Metadata;
+import io.grpc.netty.shaded.io.grpc.netty.NettyChannelBuilder;
+import io.grpc.stub.MetadataUtils;
+import lombok.Getter;
 
 @Getter
 public class InventoryBackgroundHelper {
@@ -68,7 +76,11 @@ public class InventoryBackgroundHelper {
     private AzureActiveDiscoveryServiceGrpc.AzureActiveDiscoveryServiceBlockingStub azureActiveDiscoveryServiceBlockingStub;
     private PassiveDiscoveryServiceGrpc.PassiveDiscoveryServiceBlockingStub passiveDiscoveryServiceBlockingStub;
 
+    private static KafkaConsumer<String, byte[]> kafkaConsumer;
+
     private final Map<String, String> grpcHeaders = new TreeMap<>();
+    private static boolean isConsumerInitialized = false;
+
 
     public void externalGRPCPortInSystemProperty(String propertyName) {
         String value = System.getProperty(propertyName);
@@ -79,6 +91,23 @@ public class InventoryBackgroundHelper {
     public void kafkaBootstrapURLInSystemProperty(String systemPropertyName) {
         kafkaBootstrapUrl = System.getProperty(systemPropertyName);
         LOG.info("Using Kafka Bootstrap URL {}", kafkaBootstrapUrl);
+        if(kafkaConsumer == null && StringUtils.isNotEmpty(kafkaBootstrapUrl)) {
+            Properties consumerConfig = new Properties();
+            consumerConfig.setProperty(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaBootstrapUrl);
+            consumerConfig.setProperty(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
+            consumerConfig.setProperty(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ByteArrayDeserializer.class.getName());
+            consumerConfig.setProperty(ConsumerConfig.GROUP_ID_CONFIG, "inventory-test");
+            consumerConfig.setProperty(ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG, "100");
+            consumerConfig.setProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+            kafkaConsumer = new KafkaConsumer<>(consumerConfig);
+        }
+    }
+
+    public void subscribeKafkaTopics(List<String> topics) {
+        if(!isConsumerInitialized) {
+            kafkaConsumer.subscribe(topics);
+            isConsumerInitialized = true;
+        }
     }
 
     public void grpcTenantId(String tenantId) {
@@ -123,5 +152,9 @@ public class InventoryBackgroundHelper {
         result.put(GrpcConstants.AUTHORIZATION_BYPASS_KEY, String.valueOf(true));
         result.put(GrpcConstants.TENANT_ID_BYPASS_KEY, tenantId);
         return result;
+    }
+
+    public static KafkaConsumer<String, byte[]> getKafkaConsumer() {
+        return kafkaConsumer;
     }
 }

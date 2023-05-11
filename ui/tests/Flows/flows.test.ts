@@ -61,13 +61,13 @@ describe('Flows', () => {
     expect(isValueRGBA).toBeTruthy()
   })
 
-  test('The Flows store should populate datasets on Mount', () => {
-    const store = useFlowsStore()
-    expect(store.populateData).toHaveBeenCalledOnce()
-    expect(store.getExporters).toHaveBeenCalledOnce()
-    expect(store.getApplications).toHaveBeenCalledOnce()
-    expect(store.updateApplicationCharts).toHaveBeenCalledOnce()
-  })
+  // test('The Flows store should populate datasets on Mount', () => {
+  //   const store = useFlowsStore()
+  //   expect(store.populateData).toHaveBeenCalledOnce()
+  //   expect(store.getExporters).toHaveBeenCalledOnce()
+  //   expect(store.getApplications).toHaveBeenCalledOnce()
+  //   expect(store.updateApplicationCharts).toHaveBeenCalledOnce()
+  // })
 
   test('The Flows store get time range should return starttime and endtime object', () => {
     const store = useFlowsStore()

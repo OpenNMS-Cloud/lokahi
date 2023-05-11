@@ -23,7 +23,7 @@
             class="severity"
             data-test="severity"
           >
-            <PillColor :type="alert.severity" />
+            <PillColor :item="pillColor" />
           </div>
           <div
             class="cause headline"
@@ -82,9 +82,11 @@ import { IAlert } from '@/types/alerts'
 
 const emits = defineEmits(['alert-selected'])
 
-defineProps<{
+const props = defineProps<{
   alert: IAlert
 }>()
+
+const pillColor = { style: props.alert.severity! }
 
 const alertSelectedHandler = (databaseId: number) => {
   emits('alert-selected', databaseId)
@@ -142,7 +144,7 @@ const checkCircleIcon = markRaw(CheckCircle)
   .name-node-type {
     width: 22%;
     .name {
-      @include mixins.truncate-text();
+      @include mixins.truncate-text;
     }
   }
 
@@ -154,7 +156,7 @@ const checkCircleIcon = markRaw(CheckCircle)
   .cause {
     width: 20%;
     > div {
-      @include mixins.truncate-text();
+      @include mixins.truncate-text;
     }
   }
 

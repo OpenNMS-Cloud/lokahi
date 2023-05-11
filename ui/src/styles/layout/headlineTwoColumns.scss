@@ -1,0 +1,66 @@
+@use '@featherds/styles/themes/variables';
+@use '@/styles/mediaQueriesMixins.scss';
+@use '@/styles/vars.scss';
+
+.wrapper {
+  min-width: vars.$min-width-smallest-screen;
+  margin-left: var(variables.$spacing-l);
+  margin-right: var(variables.$spacing-l);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: var(variables.$spacing-l);
+  @include mediaQueriesMixins.screen-md {
+    flex-direction: row;
+  }
+}
+
+.content-left {
+  width: 100%;
+}
+
+.content-right {
+  width: 100%;
+}
+
+@include mediaQueriesMixins.screen-md {
+  .content-left{
+    width:33%;
+  }
+  .content-right {
+    width: 66%;
+  }
+}
+
+.footer {
+  margin-top: var(variables.$spacing-xl);
+}
+
+hr {
+  margin-top: var(variables.$spacing-l);
+  margin-bottom: var(variables.$spacing-l);
+}
+
+/* only for development purposes */
+// .wrapper {
+//   .header {
+//     background-color: green;
+//   }
+//   .content-left{
+//     background-color: red;
+//   }
+//   .content-right{
+//     background-color: blue;
+//   }
+//   .footer{
+//     background-color: yellow;
+//   }
+// }

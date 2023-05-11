@@ -87,7 +87,7 @@ import static org.opennms.horizon.shared.azure.http.AzureHttpClient.SUBSCRIPTION
 @SpringBootTest
 @ContextConfiguration(initializers = {SpringContextTestInitializer.class})
 @AutoConfigureObservability     // Make sure to include Metrics (for some reason they are disabled by default in the integration grey-box test)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 class AzureActiveDiscoveryGrpcItTest extends GrpcTestBase {
     private static final String TEST_NAME = "name";
     private static final String TEST_CLIENT_ID = "client-id";

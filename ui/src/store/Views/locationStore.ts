@@ -6,6 +6,7 @@ import { useLocationMutations } from '../Mutations/locationMutations'
 import { Location } from '@/types/graphql'
 
 export const useLocationStore = defineStore('locationStore', () => {
+  const downloadCertificatePassword = ref('')
   const locationsList = ref()
   const minionsList = ref()
   const selectedLocationId = ref()
@@ -114,6 +115,7 @@ export const useLocationStore = defineStore('locationStore', () => {
     saveIsFetching,
     updateLocation,
     updateIsFetching,
-    deleteLocation
+    deleteLocation,
+    downloadCertificatePassword
   }
 })

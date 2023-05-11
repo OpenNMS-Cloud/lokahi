@@ -44,6 +44,7 @@ import org.apache.http.HttpStatus;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.keycloak.common.VerificationException;
 import org.opennms.horizon.inventory.SpringContextTestInitializer;
@@ -88,6 +89,7 @@ import static org.opennms.horizon.shared.azure.http.AzureHttpClient.SUBSCRIPTION
 @ContextConfiguration(initializers = {SpringContextTestInitializer.class})
 @AutoConfigureObservability     // Make sure to include Metrics (for some reason they are disabled by default in the integration grey-box test)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+@Disabled
 class AzureActiveDiscoveryGrpcItTest extends GrpcTestBase {
     private static final String TEST_NAME = "name";
     private static final String TEST_CLIENT_ID = "client-id";

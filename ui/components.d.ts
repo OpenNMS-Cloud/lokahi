@@ -96,6 +96,7 @@ declare module '@vue/runtime-core' {
     LineGraph: typeof import('./src/components/Graphs/LineGraph.vue')['default']
     LocationsAddForm: typeof import('./src/components/Locations/LocationsAddForm.vue')['default']
     LocationsCard: typeof import('./src/components/Locations/LocationsCard.vue')['default']
+    LocationsCertificateDownload: typeof import('./src/components/Locations/LocationsCertificateDownload.vue')['default']
     LocationsEditForm: typeof import('./src/components/Locations/LocationsEditForm.vue')['default']
     LocationsList: typeof import('./src/components/Locations/LocationsList.vue')['default']
     LocationsMinionsCard: typeof import('./src/components/Locations/LocationsMinionsCard.vue')['default']

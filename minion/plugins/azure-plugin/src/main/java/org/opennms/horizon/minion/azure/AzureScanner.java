@@ -155,7 +155,7 @@ public class AzureScanner implements Scanner {
                 scannedNetworkInterfaces.add(AzureScanNetworkInterfaceItem.newBuilder()
                     .setId(ipConfiguration.getId())
                     .setIpAddress(ipConfigurationProps.getPrivateIPAddress())
-                    .setIsPublic(false).build());
+                    .build());
 
                 PublicIPAddress publicIPAddress = ipConfigurationProps.getPublicIPAddress();
                 if (publicIPAddress != null) {
@@ -168,7 +168,7 @@ public class AzureScanner implements Scanner {
                         scannedNetworkInterfaces.add(AzureScanNetworkInterfaceItem.newBuilder()
                             .setId(publicIpId)
                             .setIpAddress(properties.getIpAddress())
-                            .setIsPublic(true).build());
+                            .build());
                     }
                 }
             }

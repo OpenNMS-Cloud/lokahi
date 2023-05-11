@@ -48,6 +48,7 @@ import java.util.List;
 import java.util.Map;
 
 import static java.util.Objects.isNull;
+import static org.opennms.horizon.server.service.metrics.normalization.Constants.AZURE_SCAN_TYPE;
 import static org.springframework.util.CollectionUtils.isEmpty;
 
 @Service
@@ -65,7 +66,7 @@ public class NodeStatusService {
     public Mono<NodeStatus> getNodeStatus(long id, String monitorType, ResolutionEnvironment env) {
         NodeDTO node = client.getNodeById(id, headerUtil.getAuthHeader(env));
 
-        if (node.getScanType().equals("AZURE_SCAN")) {
+        if (AZURE_SCAN_TYPE.equals(node.getScanType())) {
             return getStatusMetric(id, "azure-node-" + id, monitorType, env)
                 .map(result -> getNodeStatus(id, result));
         } else {

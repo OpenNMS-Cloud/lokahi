@@ -58,7 +58,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest
 @ContextConfiguration(initializers = {SpringContextTestInitializer.class})
 @AutoConfigureObservability     // Make sure to include Metrics (for some reason they are disabled by default in the integration grey-box test)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 class IcmpActiveDiscoveryGrpcItTest extends GrpcTestBase {
     @Autowired
     private IcmpActiveDiscoveryRepository repository;

@@ -58,7 +58,7 @@ import io.grpc.protobuf.StatusProto;
 import io.grpc.stub.MetadataUtils;
 import org.springframework.test.annotation.DirtiesContext;
 
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 public class MonitorSystemGrpcTest extends AbstractGrpcUnitTest {
     private MonitoringSystemService mockService;
     private MonitoringSystemServiceGrpc.MonitoringSystemServiceBlockingStub stub;

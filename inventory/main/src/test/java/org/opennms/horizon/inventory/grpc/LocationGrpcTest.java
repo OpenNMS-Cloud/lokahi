@@ -64,7 +64,7 @@ import io.grpc.stub.MetadataUtils;
 import org.springframework.test.annotation.DirtiesContext;
 
 //This is an example of gRPC integration tests underline mock services.
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 public class LocationGrpcTest extends AbstractGrpcUnitTest {
     private MonitoringLocationServiceGrpc.MonitoringLocationServiceBlockingStub stub;
     private MonitoringLocationService mockLocationService;

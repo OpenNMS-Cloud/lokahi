@@ -35,6 +35,7 @@ import org.keycloak.common.VerificationException;
 import org.opennms.horizon.inventory.grpc.taskset.TestTaskSetGrpcService;
 import org.opennms.horizon.shared.constants.GrpcConstants;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -63,7 +64,7 @@ public abstract class GrpcTestBase {
     @Autowired
     private ApplicationContext context;
     @SpyBean
-    private  InventoryServerInterceptor spyInterceptor;
+    private InventoryServerInterceptor spyInterceptor;
 
     @Autowired
     private JdbcTemplate jdbcTemplate;

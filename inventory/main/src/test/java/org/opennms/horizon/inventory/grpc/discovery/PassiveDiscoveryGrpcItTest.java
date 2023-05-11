@@ -61,7 +61,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @SpringBootTest
 @ContextConfiguration(initializers = {SpringContextTestInitializer.class})
 @AutoConfigureObservability     // Make sure to include Metrics (for some reason they are disabled by default in the integration grey-box test)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 class PassiveDiscoveryGrpcItTest extends GrpcTestBase {
     private static final String DEFAULT_LOCATION = "Default";
     private static final String TEST_TAG_NAME_1 = "tag-name-1";

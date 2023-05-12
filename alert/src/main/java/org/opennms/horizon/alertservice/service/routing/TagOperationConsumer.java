@@ -26,23 +26,36 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.alertservice.service;
+package org.opennms.horizon.alertservice.service.routing;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.SpringBootConfiguration;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.domain.EntityScan;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import java.util.Arrays;
 
-@SpringBootConfiguration
-@SpringBootApplication
-@ComponentScan(basePackages = "org.opennms.horizon.alertservice")
-@EnableJpaRepositories(basePackages = "org.opennms.horizon.alertservice.db.repository")
-@EntityScan(basePackages = "org.opennms.horizon.alertservice.db.entity")
-public class AlertServiceMain {
+import org.opennms.horizon.alertservice.service.TagService;
+import org.opennms.horizon.shared.common.tag.proto.TagOperationList;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.stereotype.Component;
 
-    public static void main(String[] args) {
-        SpringApplication.run(AlertServiceMain.class, args);
+import com.google.protobuf.InvalidProtocolBufferException;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@RequiredArgsConstructor
+@Component
+@PropertySource("classpath:application.yaml")
+public class TagOperationConsumer {
+    private final TagService tagService;
+
+    @KafkaListener(topics = "${kafka.topics.tag-operation}", concurrency = "1")
+    public void tagMessageConsumer(@Payload byte[] data) {
+        try {
+            TagOperationList operationList = TagOperationList.parseFrom(data);
+            tagService.insertOrUpdateTags(operationList);
+        } catch (InvalidProtocolBufferException e) {
+            log.error("Error while parsing TagOperationList, payload data {}", Arrays.toString(data), e);
+        }
     }
 }

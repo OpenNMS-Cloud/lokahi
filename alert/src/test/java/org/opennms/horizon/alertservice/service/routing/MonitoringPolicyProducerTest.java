@@ -27,10 +27,10 @@ import org.springframework.test.util.ReflectionTestUtils;
 import com.google.protobuf.InvalidProtocolBufferException;
 
 @RunWith(MockitoJUnitRunner.class)
-public class MonitoringPolicyKafkaProducerTest {
+public class MonitoringPolicyProducerTest {
 
     @InjectMocks
-    MonitoringPolicyKafkaProducer producer;
+    MonitoringPolicyProducer producer;
 
     @Mock
     KafkaTemplate<String, byte[]> kafkaProducerTemplate;

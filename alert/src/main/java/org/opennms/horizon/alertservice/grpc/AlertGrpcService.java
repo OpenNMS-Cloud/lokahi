@@ -98,13 +98,21 @@ public class AlertGrpcService extends AlertServiceGrpc.AlertServiceImplBase {
         // Get Filters
         List<Date> timeRange = new ArrayList<>();
         List<Severity> severities = new ArrayList<>();
-        getFilter(request, timeRange, severities);
+        List<String> filterNodeIds = new ArrayList<>();
+        getFilter(request, timeRange, severities, filterNodeIds);
 
         Optional<String> lookupTenantId = tenantLookup.lookupTenantId(Context.current());
         try {
-            Page<org.opennms.horizon.alertservice.db.entity.Alert> alertPage = lookupTenantId
-                .map(tenantId -> alertRepository.findBySeverityInAndLastEventTimeBetweenAndTenantId(severities, timeRange.get(0), timeRange.get(1), pageRequest, tenantId))
-                .orElseThrow();
+            Page<org.opennms.horizon.alertservice.db.entity.Alert> alertPage;
+            if (filterNodeIds.isEmpty()) {
+                alertPage = lookupTenantId
+                    .map(tenantId -> alertRepository.findBySeverityInAndLastEventTimeBetweenAndTenantId(severities, timeRange.get(0), timeRange.get(1), pageRequest, tenantId))
+                    .orElseThrow();
+            } else {
+                alertPage = lookupTenantId
+                    .map(tenantId -> alertRepository.findBySeverityInAndLastEventTimeBetweenAndManagedObjectTypeAndManagedObjectInstanceInAndTenantId(severities, timeRange.get(0), timeRange.get(1), ManagedObjectType.NODE, filterNodeIds, pageRequest, tenantId))
+                    .orElseThrow();
+            }
 
             Set<String> nodeIds = getNodeIds(alertPage);
             Map<Long, String> nodeLabels = getNodeLabels(nodeIds, lookupTenantId.get());
@@ -279,12 +287,20 @@ public class AlertGrpcService extends AlertServiceGrpc.AlertServiceImplBase {
     public void countAlerts(ListAlertsRequest request, StreamObserver<CountAlertResponse> responseObserver) {
         List<Date> timeRange = new ArrayList<>();
         List<Severity> severities = new ArrayList<>();
-        getFilter(request, timeRange, severities);
+        List<String> nodeIds = new ArrayList<>();
+        getFilter(request, timeRange, severities, nodeIds);
 
         try {
-            int count = tenantLookup.lookupTenantId(Context.current())
-                .map(tenantId -> alertRepository.countBySeverityInAndLastEventTimeBetweenAndTenantId(severities, timeRange.get(0), timeRange.get(1), tenantId))
-                .orElseThrow();
+            int count;
+            if (nodeIds.isEmpty()) {
+                count = tenantLookup.lookupTenantId(Context.current())
+                    .map(tenantId -> alertRepository.countBySeverityInAndLastEventTimeBetweenAndTenantId(severities, timeRange.get(0), timeRange.get(1), tenantId))
+                    .orElseThrow();
+            } else {
+                count = tenantLookup.lookupTenantId(Context.current())
+                    .map(tenantId -> alertRepository.countBySeverityInAndLastEventTimeBetweenAndManagedObjectTypeAndManagedObjectInstanceInAndTenantId(severities, timeRange.get(0), timeRange.get(1), ManagedObjectType.NODE, nodeIds, tenantId))
+                    .orElseThrow();
+            }
             responseObserver.onNext(CountAlertResponse.newBuilder().setCount(count).build());
             responseObserver.onCompleted();
         } catch (NoSuchElementException e) {
@@ -293,7 +309,8 @@ public class AlertGrpcService extends AlertServiceGrpc.AlertServiceImplBase {
         }
     }
 
-    private static void getFilter(ListAlertsRequest request, List<Date> timeRange, List<Severity> severities) {
+    private void getFilter(ListAlertsRequest request, List<Date> timeRange, List<Severity> severities, List<String> nodeIds) {
+        Optional<String> lookupTenantId = tenantLookup.lookupTenantId(Context.current());
         request.getFiltersList().forEach(filter -> {
             if (filter.hasSeverity()) {
                 severities.add(Severity.valueOf(filter.getSeverity().name()));
@@ -301,6 +318,15 @@ public class AlertGrpcService extends AlertServiceGrpc.AlertServiceImplBase {
             if (filter.hasTimeRange()) {
                 timeRange.add(convertTimestampToDate(filter.getTimeRange().getStartTime()));
                 timeRange.add(convertTimestampToDate(filter.getTimeRange().getEndTime()));
+            }
+            if (filter.hasNodeLabel()) {
+                List<Node> nodes = lookupTenantId
+                    .map(tenantId -> nodeRepository.findAllByNodeLabelAndTenantId(filter.getNodeLabel(), tenantId))
+                    .orElseThrow();
+
+                for (Node node : nodes) {
+                    nodeIds.add(String.valueOf(node.getId()));
+                }
             }
         });
 

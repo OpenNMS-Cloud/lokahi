@@ -26,37 +26,47 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.inventory.component;
+package org.opennms.horizon.alertservice.config;
 
-import jakarta.persistence.PostPersist;
-import jakarta.persistence.PostUpdate;
-import org.apache.kafka.clients.producer.ProducerRecord;
-import org.opennms.horizon.inventory.dto.NodeDTO;
-import org.opennms.horizon.inventory.model.Node;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.stereotype.Component;
+import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 
-@Component
-public class NodeKafkaProducer {
-    @Value("${kafka.topics.node}")
-    private String topic;
 
-    @Autowired
-    private KafkaTemplate<String, byte[]> kafkaTemplate;
+@Getter
+@ConfigurationProperties(prefix = "kafka.topics")
+public class KafkaTopicProperties {
 
-    @PostUpdate
-    @PostPersist
-    public void sendNode(Node node) {
-        // Not all fields are included in this proto, since the Alerts service doesn't care about all of them.
-        NodeDTO proto = NodeDTO.newBuilder()
-            .setId(node.getId())
-            .setTenantId(node.getTenantId())
-            .setNodeLabel(node.getNodeLabel())
-            .build();
+    @Setter
+    private String event;
 
-        var producerRecord = new ProducerRecord<String, byte[]>(topic, proto.toByteArray());
-        kafkaTemplate.send(producerRecord);
+    @Setter
+    private String tagOperation;
+
+    @Setter
+    private String alert;
+
+    @Setter
+    private String nodeChanged;
+
+    @Setter
+    private String monitoringPolicy;
+
+    private final CreateTopics createTopics = new CreateTopics();
+
+    @Getter
+    public static class CreateTopics {
+        private final TopicConfig alert = new TopicConfig();
+        private final TopicConfig monitoringPolicy = new TopicConfig();
+        private final TopicConfig nodeChanged = new TopicConfig();
+    }
+
+    @Data
+    public static class TopicConfig {
+        private String name;
+        private Integer partitions = 10;
+        private Short replicas = 1;
+        private Boolean compact = false;
     }
 }

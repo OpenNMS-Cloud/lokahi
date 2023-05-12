@@ -33,7 +33,7 @@ import java.util.Optional;
 
 import org.opennms.horizon.alerts.proto.Alert;
 import org.opennms.horizon.alerts.proto.Severity;
-import org.opennms.horizon.alertservice.api.AlertLifecyleListener;
+import org.opennms.horizon.alertservice.api.AlertLifecycleListener;
 import org.opennms.horizon.alertservice.api.AlertService;
 import org.opennms.horizon.alertservice.db.entity.Node;
 import org.opennms.horizon.alertservice.db.repository.AlertRepository;
@@ -149,12 +149,12 @@ public class AlertServiceImpl implements AlertService {
     }
 
     @Override
-    public void addListener(AlertLifecyleListener listener) {
+    public void addListener(AlertLifecycleListener listener) {
         alertListenerRegistry.addListener(listener);
     }
 
     @Override
-    public void removeListener(AlertLifecyleListener listener) {
+    public void removeListener(AlertLifecycleListener listener) {
         alertListenerRegistry.addListener(listener);
     }
 

@@ -37,6 +37,7 @@ import org.junit.jupiter.api.Test;
 import org.opennms.horizon.azure.api.AzureScanItem;
 import org.opennms.horizon.azure.api.AzureScanResponse;
 import org.opennms.horizon.inventory.SpringContextTestInitializer;
+import org.opennms.horizon.inventory.dto.MonitoredState;
 import org.opennms.horizon.inventory.dto.NodeCreateDTO;
 import org.opennms.horizon.inventory.exception.EntityExistException;
 import org.opennms.horizon.inventory.grpc.GrpcTestBase;
@@ -72,6 +73,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -109,7 +111,6 @@ class ScannerResponseServiceIntTest extends GrpcTestBase {
     private SnmpInterfaceRepository snmpInterfaceRepository;
 
     @MockBean
-    @Qualifier("byteArrayTemplate")
     private KafkaTemplate<String, byte[]> kafkaTemplate;
 
     @Autowired
@@ -202,6 +203,9 @@ class ScannerResponseServiceIntTest extends GrpcTestBase {
         assertSnmpInterfaces(snmpIf, null);
         IntStream.range(0, snmpInterfaceList.size())
             .forEach(i -> assertSnmpInterfaces(snmpInterfaceList.get(i), result.getSnmpInterfaces(i)));
+
+        Optional<Node> nodeOpt = nodeRepository.findByIdAndTenantId(node.getId(), TEST_TENANT_ID);
+        assertEquals(MonitoredState.UNMONITORED,nodeOpt.get().getMonitoredState());
 
     }
 

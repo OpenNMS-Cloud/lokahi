@@ -37,6 +37,7 @@ import org.opennms.horizon.events.proto.EventLog;
 import org.opennms.horizon.shared.constants.GrpcConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.messaging.handler.annotation.Payload;
@@ -46,11 +47,10 @@ import java.util.Arrays;
 
 @RequiredArgsConstructor
 @Component
-@PropertySource("classpath:application.yaml")
 public class EventConsumer {
     private static final Logger LOG = LoggerFactory.getLogger(EventConsumer.class);
     private final AlertService alertService;
-    @KafkaListener(topics = "${kafka.topics.alert-events}", concurrency = "1")
+    @KafkaListener(topics = "${kafka.topics.event}", concurrency = "1")
     public void receiveMessage(@Payload byte[] data) {
         try {
             EventLog eventLog = EventLog.parseFrom(data);

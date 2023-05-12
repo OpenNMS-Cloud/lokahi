@@ -56,7 +56,6 @@ public class TrapsKafkaForwarder implements MessageConsumer<Message, Message> {
     private final Logger logger = LoggerFactory.getLogger(TrapsKafkaForwarder.class);
 
     @Autowired
-    @Qualifier("kafkaByteArrayProducerTemplate")
     private KafkaTemplate<String, byte[]> kafkaTemplate;
 
     @Autowired

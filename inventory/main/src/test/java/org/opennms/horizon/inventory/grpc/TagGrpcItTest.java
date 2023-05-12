@@ -82,7 +82,6 @@ class TagGrpcItTest extends GrpcTestBase {
     private TagServiceGrpc.TagServiceBlockingStub serviceStub;
 
     @MockBean
-    @Qualifier("byteArrayTemplate")
     private KafkaTemplate<String, byte[]> kafkaTemplate;
 
     @Autowired

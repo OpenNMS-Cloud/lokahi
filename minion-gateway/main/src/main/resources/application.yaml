@@ -4,3 +4,13 @@ spring:
     url: jdbc:postgresql://postgres:5432/minion_gateway
     username: ignite
     password: ignite
+
+  kafka:
+    bootstrap-servers: kafka:9092
+    consumer:
+      group-id: "minion-gateway-service"
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.ByteArrayDeserializer
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.ByteArraySerializer

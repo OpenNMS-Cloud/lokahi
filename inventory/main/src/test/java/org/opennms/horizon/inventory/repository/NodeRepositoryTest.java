@@ -55,7 +55,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 @AutoConfigureObservability     // Make sure to include Metrics (for some reason they are disabled by default in the integration grey-box test)
 class NodeRepositoryTest {
     @MockBean
-    @Qualifier("byteArrayTemplate")
     private KafkaTemplate<String, byte[]> kafkaTemplate;
     @Autowired
     private NodeRepository nodeRepo;

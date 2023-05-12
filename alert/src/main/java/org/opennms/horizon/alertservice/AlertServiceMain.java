@@ -26,30 +26,19 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.alertservice.api;
+package org.opennms.horizon.alertservice;
 
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
-import org.opennms.horizon.alerts.proto.Alert;
+@SpringBootApplication
+@EnableJpaRepositories
+@ConfigurationPropertiesScan
+public class AlertServiceMain {
 
-/**
- * Used to be notified of updates/changes made to the set of alerts.
- *
- * Implementation should register the listeners with the {@link AlertService} to receive callbacks.
- *
- * Listeners are invoked serially and the implementors should avoid blocking when possible.
- */
-public interface AlertLifecyleListener {
-    /**
-     * Called when an alert has been created or updated.
-     *
-     * @param alert a newly created or updated alert
-     */
-    void handleNewOrUpdatedAlert(Alert alert);
-
-    /**
-     * Called when an alert has been deleted.
-     *
-     * @param alert the deleted alert
-     */
-    void handleDeletedAlert(Alert alert);
+    public static void main(String[] args) {
+        SpringApplication.run(AlertServiceMain.class, args);
+    }
 }

@@ -371,7 +371,7 @@ k8s_resource(
 k8s_resource(
     'onms-kafka',
     new_name='kafka',
-    port_forwards=['24092:59092'],
+    port_forwards=['24092:24092'],
 )
 
 ### Prometheus ###

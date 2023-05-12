@@ -26,41 +26,41 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.alertservice.service;
+package org.opennms.horizon.alertservice.config;
 
-import org.opennms.horizon.alertservice.api.AlertLifecycleListener;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
+import org.apache.kafka.clients.admin.NewTopic;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.kafka.config.TopicBuilder;
 
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.function.Consumer;
+@Configuration
+public class KafkaConfig {
 
-/**
- * Helper class used to track and interact with {@link AlertLifecycleListener}s.
- */
-@Service
-public class AlertListenerRegistry {
-    private static final Logger LOG = LoggerFactory.getLogger(AlertListenerRegistry.class);
-
-    private final List<AlertLifecycleListener> listeners = new CopyOnWriteArrayList<>();
-
-    public void addListener(AlertLifecycleListener listener) {
-        listeners.add(listener);
+    @Bean
+    public NewTopic alertTopic(KafkaTopicProperties kafkaTopicProperties) {
+        return getTopicBuilder(kafkaTopicProperties.getCreateTopics().getAlert()).build();
     }
 
-    public void removeListener(AlertLifecycleListener listener) {
-        listeners.remove(listener);
+    @Bean
+    public NewTopic monitoringPolicyTopic(KafkaTopicProperties kafkaTopicProperties) {
+        return getTopicBuilder(kafkaTopicProperties.getCreateTopics().getMonitoringPolicy()).build();
     }
 
-    public void forEachListener(Consumer<AlertLifecycleListener> callback) {
-        for (AlertLifecycleListener listener : listeners) {
-            try {
-                callback.accept(listener);
-            } catch (Exception e) {
-                LOG.error("Error occurred while invoking listener: {}. Skipping.", listener, e);
-            }
+    @Bean
+    public NewTopic nodeChangedTopic(KafkaTopicProperties kafkaTopicProperties) {
+        return getTopicBuilder(kafkaTopicProperties.getCreateTopics().getNodeChanged()).build();
+    }
+
+    private TopicBuilder getTopicBuilder(KafkaTopicProperties.TopicConfig topic) {
+        TopicBuilder builder = TopicBuilder.name(topic.getName())
+            .partitions(topic.getPartitions())
+            .replicas(topic.getReplicas());
+
+        if (topic.getCompact()) {
+            builder.compact();
         }
+
+        return builder;
     }
+
 }

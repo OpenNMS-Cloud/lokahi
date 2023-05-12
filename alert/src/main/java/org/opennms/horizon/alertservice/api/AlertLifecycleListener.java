@@ -26,16 +26,30 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.alertservice.service;
+package org.opennms.horizon.alertservice.api;
 
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 
-@Configuration
-public class AlertServiceConfig {
+import org.opennms.horizon.alerts.proto.Alert;
 
-    @Bean("alertMapper")
-    public AlertMapper alertMapper() {
-        return AlertMapper.INSTANCE;
-    }
+/**
+ * Used to be notified of updates/changes made to the set of alerts.
+ *
+ * Implementation should register the listeners with the {@link AlertService} to receive callbacks.
+ *
+ * Listeners are invoked serially and the implementors should avoid blocking when possible.
+ */
+public interface AlertLifecycleListener {
+    /**
+     * Called when an alert has been created or updated.
+     *
+     * @param alert a newly created or updated alert
+     */
+    void handleNewOrUpdatedAlert(Alert alert);
+
+    /**
+     * Called when an alert has been deleted.
+     *
+     * @param alert the deleted alert
+     */
+    void handleDeletedAlert(Alert alert);
 }

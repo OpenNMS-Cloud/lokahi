@@ -2,12 +2,9 @@ package org.opennms.horizon.alertservice.service.routing;
 
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.opennms.horizon.alerts.proto.Alert;
-import org.opennms.horizon.alertservice.api.AlertLifecyleListener;
+import org.opennms.horizon.alertservice.api.AlertLifecycleListener;
 import org.opennms.horizon.alertservice.api.AlertService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.PropertySource;
+import org.opennms.horizon.alertservice.config.KafkaTopicProperties;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
@@ -16,21 +13,17 @@ import javax.annotation.PreDestroy;
 import java.util.Objects;
 
 @Component
-@PropertySource("classpath:application.yaml")
-public class KafkaProducer implements AlertLifecyleListener {
-    public static final String DEFAULT_ALARMS_TOPIC = "new-alerts";
-
+public class AlertProducer implements AlertLifecycleListener {
     private final KafkaTemplate<String, byte[]> kafkaTemplate;
 
     private final AlertService alertService;
 
-    @Value("${kafka.topics.new-alerts:" + DEFAULT_ALARMS_TOPIC + "}")
-    private String kafkaTopic;
+    private final String kafkaTopic;
 
-    @Autowired
-    public KafkaProducer(@Qualifier("kafkaProducerTemplate") KafkaTemplate<String, byte[]> kafkaTemplate, AlertService alertService) {
+    public AlertProducer(KafkaTemplate<String, byte[]> kafkaTemplate, AlertService alertService, KafkaTopicProperties kafkaTopicProperties) {
         this.kafkaTemplate = kafkaTemplate;
         this.alertService = Objects.requireNonNull(alertService);
+        this.kafkaTopic = kafkaTopicProperties.getAlert();
     }
 
     @PostConstruct

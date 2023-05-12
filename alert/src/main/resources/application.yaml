@@ -16,19 +16,14 @@ spring:
     change-log: db/changelog/changelog.xml
 
   kafka:
-    template:
-      default-topic: "alerts"
+    bootstrap-servers: localhost:9092
     consumer:
-      client-id: "alert-service"
-      group-id: "alert"
-      auto-offset-reset: earliest
+      group-id: "alert-service"
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.ByteArrayDeserializer
     producer:
-      client-id: "alert-service"
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.apache.kafka.common.serialization.ByteArraySerializer
-    bootstrap-servers: localhost:9092
 
 management:
   endpoints:
@@ -49,8 +44,16 @@ grpc:
 
 kafka:
   topics:
-    alert-events: "events"
-    new-alerts: "alerts"
-    node-changed: "node"
-    monitoring-policy: "monitoring-policy"
+    event: "events"
     tag-operation: "tag-operation"
+    alert: "alerts"
+    monitoring-policy: "monitoring-policy"
+    node-changed: "node"
+    create-topics:
+      alert:
+        name: "alerts"
+      monitoring-policy:
+        name: "monitoring-policy"
+      node-changed:
+        name: "node"
+        partitions: 1 # topic relies on there being a single partition for ordering

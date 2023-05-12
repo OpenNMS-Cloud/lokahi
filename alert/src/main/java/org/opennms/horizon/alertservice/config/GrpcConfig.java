@@ -26,7 +26,7 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.alertservice.grpc;
+package org.opennms.horizon.alertservice.config;
 
 import com.google.common.base.Strings;
 import lombok.RequiredArgsConstructor;
@@ -37,6 +37,7 @@ import org.keycloak.adapters.rotation.HardcodedPublicKeyLocator;
 import org.keycloak.adapters.rotation.JWKPublicKeyLocator;
 import org.keycloak.common.util.Base64;
 import org.keycloak.representations.adapters.config.AdapterConfig;
+import org.opennms.horizon.alertservice.grpc.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

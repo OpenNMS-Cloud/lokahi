@@ -94,6 +94,7 @@ message Filter {
     TimeRangeFilter time_range = 1;
     Severity severity = 2;
     int64 node_id = 3;
+    string node_label = 4;
   }
 }
 

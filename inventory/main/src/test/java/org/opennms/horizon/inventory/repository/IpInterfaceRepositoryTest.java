@@ -71,7 +71,6 @@ class IpInterfaceRepositoryTest {
     private static final int NUM_NODES = 10;
 
     @MockBean
-    @Qualifier("byteArrayTemplate")
     private KafkaTemplate<String, byte[]> kafkaTemplate;
 
     @Autowired

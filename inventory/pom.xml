@@ -19,6 +19,7 @@
 
     <properties>
         <sonar.projectKey>opennms_horizon-stream_inventory</sonar.projectKey>
+        <application.docker.image.name>opennms/horizon-stream-inventory</application.docker.image.name>
     </properties>
 
     <dependencyManagement>

@@ -64,9 +64,8 @@ public class CollectorTaskSetService {
                                            SnmpConfiguration snmpConfiguration) {
         if (MonitorType.SNMP.equals(monitorType)) {
             return addSnmpCollectorTask(ipInterface, nodeId, snmpConfiguration);
-        } else {
-            throw new IllegalArgumentException("No such collector exists");
         }
+        return null;
     }
 
     public TaskDefinition addSnmpCollectorTask(IpInterface ipInterface, long nodeId,

@@ -34,14 +34,6 @@
             <groupId>io.grpc</groupId>
             <artifactId>grpc-okhttp</artifactId>
         </dependency>
-        <dependency>
-            <groupId>io.github.hakky54</groupId>
-            <artifactId>sslcontext-kickstart</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.github.hakky54</groupId>
-            <artifactId>sslcontext-kickstart-for-pem</artifactId>
-        </dependency>
 
         <dependency>
             <groupId>org.opennms.horizon.shared</groupId>
@@ -81,6 +73,11 @@
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-junit-jupiter</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>

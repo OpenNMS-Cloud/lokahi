@@ -37,6 +37,13 @@
 
 # Tilt config #
 secret_settings(disable_scrub=True)  ## TODO: update secret values so we can reenable scrub
+load('ext://uibutton', 'cmd_button', 'location')
+
+cmd_button(name='reload-certificates',
+           argv=['sh', '-c', 'find target/tmp/ -type f -exec rm {} \\;'],
+           text='Remove & reissue certificates',
+           location=location.NAV,
+           icon_name='sync')
 
 # Functions #
 cluster_arch_cmd = '$(tilt get cluster default -o=jsonpath --template="{.status.arch}")'
@@ -153,12 +160,21 @@ def jib_project_multi_module(resource_name, image_name, base_path, k8s_resource_
         trigger_mode=TRIGGER_MODE_MANUAL,
     )
 
-# Deployment #
-load('ext://helm_remote', 'helm_remote')
-helm_remote('cert-manager', repo_name='jetstack', repo_url='https://charts.jetstack.io', set = [
-    'installCRDs=true'
-])
+def load_certificate_authority(secret_name, name, key_file_name, cert_file_name):
+    local('./install-local/load-or-generate-secret.sh "default" {} {} {} {}'.format(name, secret_name, key_file_name, cert_file_name))
+    watch_file(key_file_name)
+    watch_file(cert_file_name)
 
+def generate_certificate(secret_name, domain, ca_key_file_name, ca_cert_file_name):
+    local('./install-local/generate-and-sign-certificate.sh "default" {} {} {} {}'.format(domain, secret_name, ca_key_file_name, ca_cert_file_name));
+
+load_certificate_authority("root-ca-certificate", "opennms-ca", "target/tmp/server-ca.key", "target/tmp/server-ca.crt")
+generate_certificate("opennms-minion-gateway-certificate", "minion.onmshs.local", "target/tmp/server-ca.key", "target/tmp/server-ca.crt")
+generate_certificate("opennms-ui-certificate", "onmshs.local", "target/tmp/server-ca.key", "target/tmp/server-ca.crt")
+load_certificate_authority("client-root-ca-certificate", "client-ca", "target/tmp/client-ca.key", "target/tmp/client-ca.crt")
+
+
+# Deployment #
 k8s_yaml(
     helm(
         'charts/opennms',
@@ -336,13 +352,6 @@ k8s_resource(
 k8s_resource(
     'mail-server',
     port_forwards=['22080:8025'],
-)
-
-## Development time certificates
-k8s_resource(new_name='opennms-ca',
-  objects=['opennms-ca:clusterissuer'],
-  labels='cert-manager',
-  resource_deps=['cert-manager-startupapicheck']
 )
 
 ### Grafana ###

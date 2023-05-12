@@ -12,14 +12,15 @@
         <cm:default-properties>
             <cm:property name="grpc.tls.enabled" value="false"/>
 
-            <cm:property name="grpc.client.cert.filepath" value="certs/client.signed.cert"/>
-            <cm:property name="grpc.client.private.key.filepath" value="certs/client.key"/>
-            <cm:property name="grpc.client.private.key.password" value=""/>
-            <cm:property name="grpc.client.private.key.is-pkcs12" value="false"/>
-            <cm:property name="grpc.trust.cert.filepath" value="certs/CA.cert"/>
+            <cm:property name="grpc.client.keystore" value="false"/>
+            <cm:property name="grpc.client.keystore.type" value="pkcs12"/>
+            <cm:property name="grpc.client.keystore.password" value=""/>
+            <cm:property name="grpc.client.truststore" value="false"/>
+            <cm:property name="grpc.client.truststore.type" value="file"/>
+            <cm:property name="grpc.client.truststore.password" value=""/>
+
             <cm:property name="grpc.override.authority" value="opennms-minion-ssl-gateway"/>
             <cm:property name="grpc.max.message.size" value="104857600"/>
-
             <cm:property name="grpc.host" value="localhost"/>
             <cm:property name="grpc.port" value="8990"/>
 
@@ -36,9 +37,6 @@
         </cm:default-properties>
     </cm:property-placeholder>
 
-    <reference id="certificatePackageBootstrapImpl" interface="org.opennms.horizon.minion.bootstrap.CertificatePackageBootstrap" />
-
-
     <bean id="ipcIdentity" class="org.opennms.horizon.minion.grpc.MinionIpcIdentity">
         <argument value="$[id]" />
         <argument value="$[location]" />
@@ -54,41 +52,56 @@
         <argument ref="ipcIdentity" />
     </bean>
 
-    <bean id="minionGrpcSslContextBuilderFactory" class="org.opennms.horizon.minion.grpc.ssl.MinionGrpcSslContextBuilderFactoryImpl">
-        <property name="clientCertChainFilePath" value="${grpc.client.cert.filepath}"/>
-        <property name="clientPrivateKeyFilePath" value="${grpc.client.private.key.filepath}"/>
-        <property name="clientPrivateKeyPassword" value="${grpc.client.private.key.password}"/>
-        <property name="clientPrivateKeyIsPkcs12" value="${grpc.client.private.key.is-pkcs12}"/>
-        <property name="trustCertCollectionFilePath" value="${grpc.trust.cert.filepath}"/>
+    <bean id="channelBuilderFactory" class="org.opennms.horizon.minion.grpc.channel.OkHttpChannelBuilderFactory">
+        <property name="maxInboundMessageSize" value="${grpc.max.message.size}"/>
+    </bean>
+
+    <bean id="managedChannelFactory" class="org.opennms.horizon.minion.grpc.channel.SecuritySwitchedChannelFactory">
+        <argument>
+            <bean class="org.opennms.horizon.minion.grpc.channel.PlainTextChannelFactory">
+                <argument ref="channelBuilderFactory" />
+            </bean>
+        </argument>
+        <argument>
+            <bean class="org.opennms.horizon.minion.grpc.channel.SSLChannelFactory">
+                <argument ref="channelBuilderFactory" />
+                <argument>
+                    <bean class="org.opennms.horizon.minion.grpc.ssl.DefaultKeyStoreFactory" />
+                </argument>
+                <property name="keyStore" value="${grpc.client.keystore}"/>
+                <property name="keyStoreType" value="${grpc.client.keystore.type}"/>
+                <property name="keyStorePassword" value="${grpc.client.keystore.password}"/>
+                <property name="trustStore" value="${grpc.client.truststore}"/>
+                <property name="trustStoreType" value="${grpc.client.truststore.type}"/>
+                <property name="trustStorePassword" value="${grpc.client.truststore.password}"/>
+            </bean>
+        </argument>
+        <property name="tlsEnabled" value="${grpc.tls.enabled}"/>
     </bean>
 
      <bean id="sendQueue" class="org.opennms.horizon.minion.grpc.queue.OffHeapSendQueueFactory" destroy-method="close">
          <argument value="${sendQueue.memory}"/>
          <argument value="${sendQueue.offHeap}"/>
      </bean>
-    
-    <!-- Depends on the bootstrap process which extracts the Certificate ZIP file, if one is present -->
+
     <bean
         id="minionClient"
         class="org.opennms.horizon.minion.grpc.MinionGrpcClient"
         init-method="start"
         destroy-method="shutdown"
-        depends-on="certificatePackageBootstrapImpl"
     >
         <argument ref="ipcIdentity"/>
 
         <argument ref="metricRegistry"/>
         <argument ref="tracer"/>
         <argument ref="sendQueue"/>
-        <argument ref="minionGrpcSslContextBuilderFactory"/>
+        <argument ref="managedChannelFactory"/>
 
         <property name="cloudMessageHandler" ref="cloudMessageHandler" />
         <property name="rpcRequestHandler" ref="thinRpcRequestHandler" />
 
         <property name="grpcHost" value="${grpc.host}"/>
         <property name="grpcPort" value="${grpc.port}"/>
-        <property name="tlsEnabled" value="${grpc.tls.enabled}"/>
-        <property name="maxInboundMessageSize" value="${grpc.max.message.size}"/>
         <property name="overrideAuthority" value="${grpc.override.authority}"/>
     </bean>
 

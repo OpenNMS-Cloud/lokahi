@@ -133,7 +133,6 @@
         <spring-security.version>6.0.1</spring-security.version>
         <spring-kafka.version>3.0.1</spring-kafka.version>
         <sonar-maven.version>3.9.1.2184</sonar-maven.version>
-        <sslcontext-kickstart.version>7.4.11</sslcontext-kickstart.version>
         <swagger.version>2.1.1</swagger.version>
         <lombok.version>1.18.24</lombok.version>
         <lombok.binding.version>0.2.0</lombok.binding.version>
@@ -264,16 +263,6 @@
                 <groupId>io.github.hakky54</groupId>
                 <artifactId>logcaptor</artifactId>
                 <version>${logcaptor.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.github.hakky54</groupId>
-                <artifactId>sslcontext-kickstart</artifactId>
-                <version>${sslcontext-kickstart.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.github.hakky54</groupId>
-                <artifactId>sslcontext-kickstart-for-pem</artifactId>
-                <version>${sslcontext-kickstart.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.prometheus</groupId>

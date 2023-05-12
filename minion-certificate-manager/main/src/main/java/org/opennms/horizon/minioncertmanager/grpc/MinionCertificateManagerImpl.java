@@ -31,9 +31,8 @@ import com.google.protobuf.ByteString;
 import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
 import java.util.regex.Pattern;
-import org.opennms.horizon.minioncertmanager.certificate.CertFileUtils;
 import org.opennms.horizon.minioncertmanager.certificate.CommandExecutor;
-import org.opennms.horizon.minioncertmanager.certificate.PKCS8Generator;
+import org.opennms.horizon.minioncertmanager.certificate.PKCS12Generator;
 import org.opennms.horizon.minioncertmanager.proto.GetMinionCertificateRequest;
 import org.opennms.horizon.minioncertmanager.proto.GetMinionCertificateResponse;
 import org.opennms.horizon.minioncertmanager.proto.MinionCertificateManagerGrpc;
@@ -62,22 +61,18 @@ public class MinionCertificateManagerImpl extends MinionCertificateManagerGrpc.M
     private static final String FAILED_TO_GENERATE_ONE_OR_MORE_FILES = "Failed to generate one or more files.";
     public static final String CA_CERT_COMMAND = "openssl req -new -newkey rsa:4096 -days 3650 -nodes -x509 -subj \"/C=CA/ST=TBD/L=TBD/O=OpenNMS/CN=insecure-opennms-hs-ca\" -keyout \"%s\" -out \"%s\"";
 
-    private final PKCS8Generator pkcs8Generator;
-    private final CertFileUtils certFileUtils;
+    private final PKCS12Generator pkcs8Generator;
     private final File caCertFile;
     private final File caKeyFile;
-    private final File serverCertFile;
 
     @Autowired
     public MinionCertificateManagerImpl(@Value("${manager.mtls.certificate}") File certificate,
-        @Value("${manager.mtls.privateKey}") File privateKey,
-        @Value("${manager.server.certificate}") File serverCa) throws IOException, InterruptedException {
-        this(certificate, privateKey, serverCa, new PKCS8Generator(), new CertFileUtils());
+        @Value("${manager.mtls.privateKey}") File privateKey) throws IOException, InterruptedException {
+        this(certificate, privateKey, new PKCS12Generator());
     }
 
-    MinionCertificateManagerImpl(File certificate, File key, File serverCa, PKCS8Generator pkcs8Generator, CertFileUtils certFileUtils) throws IOException, InterruptedException {
+    MinionCertificateManagerImpl(File certificate, File key, PKCS12Generator pkcs8Generator) throws IOException, InterruptedException {
         this.pkcs8Generator = pkcs8Generator;
-        this.certFileUtils = certFileUtils;
         LOG.debug("=== TRYING TO RETRIEVE CA CERT");
         caCertFile = certificate;
         caKeyFile = key;
@@ -89,10 +84,6 @@ public class MinionCertificateManagerImpl extends MinionCertificateManagerGrpc.M
                 LOG.debug("=== GENERATE CA CERT");
                 CommandExecutor.executeCommand(CA_CERT_COMMAND, caKeyFile.getAbsolutePath(), caCertFile.getAbsolutePath());
             }
-        }
-        serverCertFile = serverCa;
-        if (serverCertFile != null && serverCertFile.exists()) {
-            LOG.warn("Server uses custom CA certificate, including {} in result archive", serverCertFile);
         }
 
         LOG.info("CA EXISTS: {}, CA PATH {}, CA CAN READ {}", caCertFile.exists(), caCertFile.getAbsolutePath(), caCertFile.canRead());
@@ -121,23 +112,18 @@ public class MinionCertificateManagerImpl extends MinionCertificateManagerGrpc.M
 
             LOG.info("=== TEMP DIRECTORY: {}", tempDirectory.toAbsolutePath());
             LOG.info("exists: {}, isDirectory: {}, canRead: {}", tempDirectory.toFile().exists(), tempDirectory.toFile().isDirectory(), tempDirectory.toFile().canRead());
+            File archive = new File(tempDirectory.toFile(), "minion.p12");
 
             // Generate PKCS8 files in the temporary directory
-            pkcs8Generator.generate(location, tenantId, tempDirectory, caCertFile, caKeyFile);
+            pkcs8Generator.generate(location, tenantId, tempDirectory, archive, password, caCertFile, caKeyFile);
 
-            // Validate PKCS8 files
-            if (!validatePKCS8Files(tempDirectory.toFile())) {
+            if (!archive.exists()) {
                 LOG.error(FAILED_TO_GENERATE_ONE_OR_MORE_FILES);
                 responseObserver.onError(new RuntimeException(FAILED_TO_GENERATE_ONE_OR_MORE_FILES));
                 return;
             }
 
-            // Create ZIP file
-            File file = new File(tempDirectory.toFile(), "minioncert.zip");
-            certFileUtils.createZipFile(file, password, tempDirectory.toFile(), serverCertFile);
-
-            byte[] zipBytes = certFileUtils.readZipFileToByteArray(file);
-            responseObserver.onNext(createResponse(zipBytes, password));
+            responseObserver.onNext(createResponse(Files.readAllBytes(archive.toPath()), password));
             responseObserver.onCompleted();
         } catch (IOException | InterruptedException e) {
             LOG.error("Error while fetching certificate", e);

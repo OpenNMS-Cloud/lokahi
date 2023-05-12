@@ -80,9 +80,9 @@ public class CaCertificateGenerator {
     }
 
     private static void write(File directory, String fileName, String type, byte[] encoded) throws IOException {
-        String data = "-----BEGIN " + type + "-----\n"
-            + Base64.getEncoder().encodeToString(encoded) + "\n"
-            + "-----END " + type + "-----";
+        String data = "-----BEGIN " + type + "-----\n" +
+            Base64.getMimeEncoder(64, "\n".getBytes()).encodeToString(encoded) + "\n" +
+            "-----END " + type + "-----";
         Files.write(directory.toPath().resolve(fileName), data.getBytes());
     }
 

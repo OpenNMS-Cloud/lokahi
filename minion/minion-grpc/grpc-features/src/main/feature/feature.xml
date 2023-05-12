@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <features name="minion-grpc-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.6.0">
 
-    <repository>mvn:org.opennms.horizon.minion/minion-bootstrap-features/${project.version}/xml/features</repository>
-
     <feature name="internal-grpc-metrics">
         <bundle>mvn:io.dropwizard.metrics/metrics-core/${dropwizard.metrics.version}</bundle>
     </feature>
@@ -45,33 +43,18 @@
     <feature name="grpc-minion" version="${project.version}">
         <feature>aries-blueprint</feature>
 
-        <feature>minion-bootstrap-all</feature>
         <feature>internal-grpc-metrics</feature>
         <feature>internal-grpc-opentracing</feature>
         <feature>internal-grpc-guava</feature>
         <feature>grpc-ratelimitter</feature>
         <feature>grpc-contract</feature>
         <feature>grpc-protobuf</feature>
-        <feature>grpc-sslcontext-kickstart</feature>
 
         <bundle>mvn:org.opennms.horizon.shared/horizon-common-logging/${project.version}</bundle>
         <bundle>mvn:org.opennms.horizon.shared/ipc-api/${project.version}</bundle>
         <bundle>mvn:org.opennms.horizon.minion/grpc-client/${project.version}</bundle>
 
         <bundle dependency="true">wrap:mvn:org.rocksdb/rocksdbjni/${rocksdb.version}</bundle>
-    </feature>
-
-    <feature name="grpc-sslcontext-kickstart" version="${project.version}">
-        <bundle>wrap:mvn:org.opennms.horizon.minion/shaded-sslcontext-kickstart/${project.version}$overwrite=merge&amp;Karaf-Commands=none</bundle>
-
-        <!--<bundle>wrap:mvn:io.github.hakky54/sslcontext-kickstart/${sslcontext-kickstart.version}</bundle>-->
-        <!--<bundle>wrap:mvn:io.github.hakky54/sslcontext-kickstart-for-pem/${sslcontext-kickstart.version}</bundle>-->
-        <bundle>mvn:org.bouncycastle/bcpkix-jdk15on/1.70</bundle>
-        <bundle>mvn:org.bouncycastle/bcutil-jdk15on/1.70</bundle>
-        <bundle>mvn:org.bouncycastle/bcprov-jdk15on/1.70</bundle>
-    <!--
-org.bouncycastle.util.io.pem)(version>=1.70.0)(!(version>=2.0.0))
-    -->
     </feature>
 
 </features>

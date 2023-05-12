@@ -17,7 +17,6 @@
     <modules>
         <module>shaded-grpc</module>
         <module>shaded-ignite</module>
-        <module>shaded-sslcontext-kickstart</module>
     </modules>
 
 </project>

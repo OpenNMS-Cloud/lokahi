@@ -75,6 +75,7 @@ OpenNMS:
             openssl pkcs8 -topk8 -in /cert/client.key.pkcs1 -out /cert/client.key -nocrypt
             openssl req -new -key /cert/client.key -out /cert/client.unsigned.cert -subj "/C=CA/ST=TBD/L=TBD/O=OpenNMS/CN=local-minion/OU=L:TestLocation/OU=T:opennms-prime"
             openssl x509 -req -in /cert/client.unsigned.cert -days 14 -CA /run/secrets/mtls/tls.crt -CAkey /run/secrets/mtls/tls.key -out /cert/client.signed.cert
+            openssl pkcs12 -export -out "/cert/minion.p12" -inkey /cert/client.key -in /cert/client.signed.cert -passout "pass:changeme"
         securityContext:
           privileged: false
           runAsUser: 10001
@@ -89,9 +90,9 @@ OpenNMS:
       grpc.host: ingress-nginx-controller
       grpc.port: 443
       grpc.tls.enabled: true
-      grpc.trust.cert.filepath: /run/secrets/certificates/tls.crt
-      grpc.client.cert.filepath: /opt/karaf/certs/client.signed.cert
-      grpc.client.private.key.filepath: /opt/karaf/certs/client.key
+      grpc.client.truststore: /run/secrets/certificates/tls.crt
+      grpc.client.keystore: /opt/karaf/certs/minion.p12
+      grpc.client.keystore.password: changeme
       grpc.override.authority: minion.onmshs
   MinionGateway:
     Image: opennms/horizon-stream-minion-gateway:local

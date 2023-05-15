@@ -44,7 +44,7 @@
 </template>
 
 <script setup lang="ts">
-import { TimeRangeUnit, IpInterface } from '@/types/graphql'
+import { TimeRangeUnit } from '@/types/graphql'
 import useModal from '@/composables/useModal'
 import Close from '@featherds/icon/navigation/Cancel'
 import { GraphProps } from '@/types/graphs'
@@ -105,9 +105,9 @@ const errorsInOut = computed<GraphProps>(() => {
   }
 })
 
-const openMetricsModal = (interfaceInfo: IpInterface) => {
-  interfaceName.value = interfaceInfo.ipAddress
-  instance.value = interfaceInfo.ipAddress
+const openMetricsModal = (inst: string) => {
+  interfaceName.value = inst
+  instance.value = inst
   openModal()
 }
 

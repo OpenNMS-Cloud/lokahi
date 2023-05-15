@@ -35,11 +35,13 @@ export type Alert = {
   databaseId: Scalars['Long'];
   description?: Maybe<Scalars['String']>;
   firstEventTimeMs: Scalars['Long'];
+  label?: Maybe<Scalars['String']>;
   lastEventId: Scalars['Long'];
   lastUpdateTimeMs: Scalars['Long'];
   location?: Maybe<Scalars['String']>;
   logMessage?: Maybe<Scalars['String']>;
   managedObject?: Maybe<ManagedObject>;
+  nodeName?: Maybe<Scalars['String']>;
   reductionKey?: Maybe<Scalars['String']>;
   severity?: Maybe<Severity>;
   tenantId?: Maybe<Scalars['String']>;
@@ -546,6 +548,7 @@ export type QueryCountAlertsArgs = {
 
 /** Query root */
 export type QueryFindAllAlertsArgs = {
+  nodeLabel?: InputMaybe<Scalars['String']>;
   page: Scalars['Int'];
   pageSize?: InputMaybe<Scalars['Int']>;
   severities?: InputMaybe<Array<InputMaybe<Scalars['String']>>>;

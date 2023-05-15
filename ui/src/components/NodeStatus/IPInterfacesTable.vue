@@ -37,10 +37,11 @@
                 >Flows</FeatherButton
               >
               <FeatherButton
+                v-if="nodeStatusStore.isAzure"
                 text
-                @click="metricsModal.openMetricsModal(ipInterface)"
-                >Traffic</FeatherButton
-              >
+                @click="metricsModal.openMetricsModal(ipInterface.ipAddress)"
+                >Traffic
+              </FeatherButton>
             </td>
             <td>{{ ipInterface.hostname }}</td>
             <td>{{ ipInterface.netmask }}</td>
@@ -75,11 +76,12 @@ const routeToFlows = (ipInterface: IpInterface) => {
   const { id: ipInterfaceId, ipAddress } = ipInterface
 
   flowsStore.filters.selectedExporters = [
-    { _text: `${nodeLabel?.toUpperCase()} : ${ipAddress}}`, 
-      value: { 
-        nodeId, 
+    {
+      _text: `${nodeLabel?.toUpperCase()} : ${ipAddress}}`,
+      value: {
+        nodeId,
         ipInterfaceId
-      } 
+      }
     }
   ]
   router.push('/flows').catch(() => 'Route to /flows unsuccessful.')

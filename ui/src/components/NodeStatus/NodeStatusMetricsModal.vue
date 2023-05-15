@@ -110,7 +110,7 @@ const errorsInOut = computed<GraphProps>(() => {
   }
 })
 
-const openMetricsModal = (inst: string, isSNMP: boolean = false) => {
+const openMetricsModal = (inst: string) => {
   interfaceName.value = inst
   instance.value = inst
   openModal()

@@ -8,7 +8,8 @@ query GetTimeSeriesMetric(
   $nodeId: String
   $timeRange: Int!
   $timeRangeUnit: TimeRangeUnit!
-  $instance: String!
+  $instance: String
+  $ifName: String
 ) {
   ...ChartTimeSeriesMetric
 }

@@ -9,6 +9,7 @@ interface MetricArgs {
   nodeId?: string
   timeRange: number
   timeRangeUnit: TimeRangeUnit
+  ifName?: string
 }
 
 interface GraphProps {
@@ -20,4 +21,5 @@ interface GraphProps {
   systemId?: string
   timeRange: number
   timeRangeUnit: TimeRangeUnit
+  ifName?: string
 }

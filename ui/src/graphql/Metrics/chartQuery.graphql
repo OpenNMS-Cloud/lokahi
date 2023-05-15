@@ -5,6 +5,7 @@ fragment ChartTimeSeriesMetric on Query {
       monitor: $monitor
       node_id: $nodeId
       instance: $instance
+      if_name: $ifName
     }
     timeRange: $timeRange
     timeRangeUnit: $timeRangeUnit

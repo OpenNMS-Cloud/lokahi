@@ -55,6 +55,7 @@ const { openModal, closeModal, isVisible } = useModal()
 
 const interfaceName = ref()
 const instance = ref()
+const ifName = ref()
 const hasMetricData = ref(false)
 
 const bandwidthInOut = computed<GraphProps>(() => {
@@ -65,7 +66,8 @@ const bandwidthInOut = computed<GraphProps>(() => {
     nodeId: route.params.id as string,
     instance: instance.value,
     timeRange: 10,
-    timeRangeUnit: TimeRangeUnit.Minute
+    timeRangeUnit: TimeRangeUnit.Minute,
+    ifName: ifName.value
   }
 })
 
@@ -77,7 +79,8 @@ const bytesInOut = computed<GraphProps>(() => {
     nodeId: route.params.id as string,
     instance: instance.value,
     timeRange: 10,
-    timeRangeUnit: TimeRangeUnit.Minute
+    timeRangeUnit: TimeRangeUnit.Minute,
+    ifName: ifName.value
   }
 })
 
@@ -89,7 +92,8 @@ const nodeLatency = computed<GraphProps>(() => {
     nodeId: route.params.id as string,
     instance: instance.value,
     timeRange: 10,
-    timeRangeUnit: TimeRangeUnit.Minute
+    timeRangeUnit: TimeRangeUnit.Minute,
+    ifName: ifName.value
   }
 })
 
@@ -101,13 +105,20 @@ const errorsInOut = computed<GraphProps>(() => {
     nodeId: route.params.id as string,
     instance: instance.value,
     timeRange: 10,
-    timeRangeUnit: TimeRangeUnit.Minute
+    timeRangeUnit: TimeRangeUnit.Minute,
+    ifName: ifName.value
   }
 })
 
-const openMetricsModal = (inst: string) => {
+const openMetricsModal = (inst: string, isSNMP: boolean = false) => {
   interfaceName.value = inst
   instance.value = inst
+  openModal()
+}
+
+const setIfNameAndOpenModal = (ifNameStr: string) => {
+  interfaceName.value = ifNameStr
+  ifName.value = ifNameStr
   openModal()
 }
 
@@ -116,7 +127,7 @@ const displayEmptyMsgIfNoData = (hasData: boolean) => {
   hasMetricData.value = hasData
 }
 
-defineExpose({ openMetricsModal })
+defineExpose({ openMetricsModal, setIfNameAndOpenModal })
 </script>
 
 <style scoped lang="scss">

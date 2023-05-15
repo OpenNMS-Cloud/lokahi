@@ -39,7 +39,7 @@
               <FeatherButton
                 v-if="snmpInterface.ifName"
                 text
-                @click="metricsModal.setIfNameAndOpenModal(snmpInterface.ifName, true)"
+                @click="metricsModal.setIfNameAndOpenModal(snmpInterface.ifName)"
                 >Traffic
               </FeatherButton>
             </td>

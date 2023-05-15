@@ -225,7 +225,7 @@ public class ScannerResponseService {
         if (nodeOpt.isPresent()) {
             Node node = nodeOpt.get();
             Map<Integer, SnmpInterface> ifIndexSNMPMap = new HashMap<>();
-            nodeService.updateNodeInfo(node, result.getNodeInfo());
+            nodeService.updateNodeInfo(node, result.getNodeInfo(), MonitoredState.UNMONITORED);
 
             for (SnmpInterfaceResult snmpIfResult : result.getSnmpInterfacesList()) {
                 SnmpInterface snmpInterface = snmpInterfaceService.createOrUpdateFromScanResult(tenantId, node, snmpIfResult);

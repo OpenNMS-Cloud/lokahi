@@ -7,7 +7,7 @@ import { AlertsFilters } from '@/types/alerts'
 
 const alertsFilterDefault: AlertsFilters = {
   timeRange: TimeRange.All,
-  // search: '', // not avail for EAR
+  nodeLabel: '',
   severities: [],
   sortAscending: true,
   sortBy: 'id'
@@ -41,7 +41,7 @@ export const useAlertsStore = defineStore('alertsStore', () => {
 
     alertsList.value = alertsQueries.fetchAlertsData
 
-    isAlertsListEmpty.value = alertsList.value.alerts.length <= 0
+    isAlertsListEmpty.value = Boolean(alertsList.value.alerts?.length <= 0)
 
     alertsPagination.value = {
       ...alertsPagination.value,

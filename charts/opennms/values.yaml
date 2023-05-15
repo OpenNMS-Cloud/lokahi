@@ -26,6 +26,9 @@ OpenNMS:
     PrivateRepoEnabled: false
     FlowsUrl: flows.onms-dp-dev.dev.nonprod.dataservice.opennms.com:443
     CertificateManagerUrl: dev
+      # This is the default service for certificateManager. Once it is available
+      # at 'pki-test.onms-dp-dev.dev.nonprod.dataservice.opennms.com:443', we can
+      # put that url in this field replacing 'dev'.
   MetricsProcessor:
     ServiceName: opennms-metrics-processor
     Image: opennms/horizon-stream-metrics-processor

@@ -52,7 +52,6 @@ public class TaskResultsKafkaForwarder implements MessageConsumer<TaskSetResults
 
     private final Logger logger = LoggerFactory.getLogger(TaskResultsKafkaForwarder.class);
 
-    @Qualifier("kafkaByteArrayProducerTemplate")
     private final KafkaTemplate<String, byte[]> kafkaTemplate;
     private final TenantIDGrpcServerInterceptor tenantIDGrpcInterceptor;
     private final TenantedTaskSetResultsMapper tenantedTaskSetResultsMapper;

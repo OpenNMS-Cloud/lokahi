@@ -46,23 +46,21 @@ message AzureScanRequest {
 message AzureMonitorRequest {
   string resource = 1;
   string resource_group = 2;
-  string host = 3; // dummy in order for metrics to work (management ip)
-  string client_id = 4;
-  string client_secret = 5;
-  string subscription_id = 6;
-  string directory_id = 7;
-  int32 retries = 8;
-  int64 timeout_ms = 9;
+  string client_id = 3;
+  string client_secret = 4;
+  string subscription_id = 5;
+  string directory_id = 6;
+  int32 retries = 7;
+  int64 timeout_ms = 8;
 }
 
 message AzureCollectorRequest {
   string resource = 1;
   string resource_group = 2;
-  string host = 3; // dummy in order for metrics to work (management ip)
-  string client_id = 4;
-  string client_secret = 5;
-  string subscription_id = 6;
-  string directory_id = 7;
-  int32 retries = 8;
-  int64 timeout_ms = 9;
+  string client_id = 3;
+  string client_secret = 4;
+  string subscription_id = 5;
+  string directory_id = 6;
+  int32 retries = 7;
+  int64 timeout_ms = 8;
 }

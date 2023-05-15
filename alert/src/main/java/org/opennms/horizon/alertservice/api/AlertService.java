@@ -50,9 +50,9 @@ public interface AlertService {
 
     Optional<Alert> clearByIdAndTenantId(long id, String tenantId);
 
-    void addListener(AlertLifecyleListener listener);
+    void addListener(AlertLifecycleListener listener);
 
-    void removeListener(AlertLifecyleListener listener);
+    void removeListener(AlertLifecycleListener listener);
 
     void saveNode(NodeDTO node);
 }

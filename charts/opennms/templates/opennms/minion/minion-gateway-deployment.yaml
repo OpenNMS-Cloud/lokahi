@@ -70,7 +70,6 @@ spec:
             - name: SPRING_DATASOURCE_URL
               value: "jdbc:postgresql://{{ .Values.OpenNMS.MinionGateway.DbHost }}:5432/{{ .Values.OpenNMS.MinionGateway.DbName }}?currentSchema={{ .Values.OpenNMS.MinionGateway.DbSchemaName }}"
             - name: SPRING_KAFKA_BOOTSTRAP_SERVERS
-            - name: KAFKA_BOOTSTRAP_SERVERS
               value: "{{ .Values.Kafka.ServiceName }}:{{ .Values.Kafka.Port }}"
             - name: IGNITE_UPDATE_NOTIFIER # Disable Ignite version lookups
               value: "false"

@@ -4,6 +4,7 @@
       @click="isExpand = !isExpand"
       class="btn-open-toggle"
       data-test="btn-open-toggle"
+      type="button"
     >
       <span>{{ textButton }}</span>
       <FeatherIcon

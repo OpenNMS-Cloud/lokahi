@@ -139,7 +139,7 @@ public class AlertsClientTest {
         String methodName = new Object() {
         }.getClass().getEnclosingMethod().getName();
         ArgumentCaptor<ListAlertsRequest> captor = ArgumentCaptor.forClass(ListAlertsRequest.class);
-        ListAlertsResponse result = client.listAlerts(5, 0, Collections.emptyList(), TimeRange.TODAY, "tenantId", true, accessToken + methodName);
+        ListAlertsResponse result = client.listAlerts(5, 0, Collections.emptyList(), TimeRange.TODAY, "tenantId", true, "node", accessToken + methodName);
         assertThat(result.getAlertsList().isEmpty()).isTrue();
         verify(mockAlertService).listAlerts(captor.capture(), any());
         assertThat(captor.getValue()).isNotNull();

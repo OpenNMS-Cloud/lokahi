@@ -32,6 +32,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
+import org.opennms.horizon.alerts.proto.ManagedObjectType;
 import org.opennms.horizon.alerts.proto.Severity;
 import org.opennms.horizon.alertservice.db.entity.Alert;
 import org.springframework.data.domain.Page;
@@ -43,6 +44,10 @@ import org.springframework.stereotype.Repository;
 public interface AlertRepository extends JpaRepository<Alert, Long> {
 
     Alert findByReductionKeyAndTenantId(String reductionKey, String tenantId);
+
+    Page<Alert> findBySeverityInAndLastEventTimeBetweenAndManagedObjectTypeAndManagedObjectInstanceInAndTenantId(List<Severity> severityList, Date start, Date end, ManagedObjectType managedObjectType, List<String> managedObjectInstance, Pageable pageable, String tenantId);
+
+    int countBySeverityInAndLastEventTimeBetweenAndManagedObjectTypeAndManagedObjectInstanceInAndTenantId(List<Severity> severityList, Date start, Date end, ManagedObjectType managedObjectType, List<String> managedObjectInstance, String tenantId);
 
     Page<Alert> findBySeverityInAndLastEventTimeBetweenAndTenantId(List<Severity> severityList, Date start, Date end, Pageable pageable, String tenantId);
 

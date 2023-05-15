@@ -123,7 +123,7 @@ public class TestContainerRunnerClassRule extends ExternalResource {
             // .withExposedPorts(8080, 8990, 8991, 5005)
             .withStartupTimeout(Duration.ofMinutes(5))
             .withEnv("JAVA_TOOL_OPTIONS", "-Djava.security.egd=file:/dev/./urandom -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005")
-            .withEnv("KAFKA_BOOTSTRAP_SERVERS", "kafka-host:9092")
+            .withEnv("SPRING_KAFKA_BOOTSTRAP_SERVERS", "kafka-host:9092")
             .withLogConsumer(new Slf4jLogConsumer(LOG).withPrefix("APPLICATION"))
             ;
 

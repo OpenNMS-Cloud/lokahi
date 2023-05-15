@@ -52,6 +52,7 @@ import org.opennms.horizon.inventory.repository.MonitoringLocationRepository;
 import org.opennms.horizon.inventory.repository.NodeRepository;
 import org.opennms.horizon.inventory.repository.TagRepository;
 import org.opennms.horizon.inventory.repository.discovery.active.AzureActiveDiscoveryRepository;
+import org.opennms.taskset.contract.ScanType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
@@ -82,7 +83,6 @@ class TagGrpcItTest extends GrpcTestBase {
     private TagServiceGrpc.TagServiceBlockingStub serviceStub;
 
     @MockBean
-    @Qualifier("byteArrayTemplate")
     private KafkaTemplate<String, byte[]> kafkaTemplate;
 
     @Autowired
@@ -238,6 +238,7 @@ class TagGrpcItTest extends GrpcTestBase {
         node1.setTenantId(tenantId);
         node1.setMonitoringLocation(location);
         node1.setMonitoringLocationId(location.getId());
+        node1.setScanType(ScanType.NODE_SCAN);
         node1 = nodeRepository.saveAndFlush(node1);
 
         Node node2 = new Node();
@@ -246,6 +247,7 @@ class TagGrpcItTest extends GrpcTestBase {
         node2.setTenantId(tenantId);
         node2.setMonitoringLocation(location);
         node2.setMonitoringLocationId(location.getId());
+        node2.setScanType(ScanType.NODE_SCAN);
         node2 = nodeRepository.saveAndFlush(node2);
 
         TagCreateDTO createDTO1 = TagCreateDTO.newBuilder()
@@ -639,6 +641,7 @@ class TagGrpcItTest extends GrpcTestBase {
         node.setTenantId(tenantId);
         node.setMonitoringLocation(location);
         node.setMonitoringLocationId(location.getId());
+        node.setScanType(ScanType.NODE_SCAN);
         node = nodeRepository.saveAndFlush(node);
         return node.getId();
     }

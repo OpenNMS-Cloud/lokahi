@@ -40,10 +40,12 @@ import org.junit.jupiter.api.Test;
 import org.keycloak.common.VerificationException;
 import org.mockito.ArgumentCaptor;
 import org.opennms.horizon.alerts.proto.AlertServiceGrpc;
+import org.opennms.horizon.alerts.proto.Filter;
 import org.opennms.horizon.alerts.proto.ListAlertsRequest;
 import org.opennms.horizon.alerts.proto.ListAlertsResponse;
 import org.opennms.horizon.alertservice.api.AlertService;
 import org.opennms.horizon.alertservice.db.entity.Alert;
+import org.opennms.horizon.alertservice.db.entity.Node;
 import org.opennms.horizon.alertservice.db.repository.AlertRepository;
 import org.opennms.horizon.alertservice.db.repository.NodeRepository;
 import org.opennms.horizon.alertservice.db.tenant.GrpcTenantLookupImpl;
@@ -54,6 +56,7 @@ import org.springframework.data.domain.PageRequest;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -109,6 +112,27 @@ public class AlertGrpcServiceTest extends AbstractGrpcUnitTest {
         assertThat(result.getAlertsList().size()).isEqualTo(2);
         ArgumentCaptor<PageRequest> pageRequestCaptor = ArgumentCaptor.forClass(PageRequest.class);
         verify(mockAlertRepository).findBySeverityInAndLastEventTimeBetweenAndTenantId(any(), any(), any(), pageRequestCaptor.capture(), any());
+        verify(spyInterceptor).verifyAccessToken(authHeader);
+        verify(spyInterceptor).interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));
+
+        assertThat(pageRequestCaptor.getValue().getPageNumber()).isEqualTo(0);
+        assertThat(pageRequestCaptor.getValue().getPageSize()).isEqualTo(10);
+        assertThat(pageRequestCaptor.getValue().getSort().getOrderFor("id").getDirection()).isEqualTo(org.springframework.data.domain.Sort.Direction.DESC);
+    }
+
+    @Test
+    void testListAlertsWithNodes() throws VerificationException {
+        Page<org.opennms.horizon.alertservice.db.entity.Alert> page = mock(Page.class);
+        doReturn(Arrays.asList(alert1, alert2)).when(page).getContent();
+        doReturn(page).when(mockAlertRepository).findBySeverityInAndLastEventTimeBetweenAndManagedObjectTypeAndManagedObjectInstanceInAndTenantId(any(), any(), any(), any(), any(), any(), any());
+        doReturn(Arrays.asList(mock(Node.class))).when(mockNodeRepository).findAllByNodeLabelAndTenantId(any(), any());
+        when(mockAlertMapper.toProto(any(org.opennms.horizon.alertservice.db.entity.Alert.class))).thenReturn(alertProto1, alertProto2);
+        when(mockAlertMapper.toProto(any(org.opennms.horizon.alertservice.db.entity.Alert.class))).thenReturn(alertProto1, alertProto2);
+        ListAlertsResponse result = stub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createHeaders()))
+            .listAlerts(ListAlertsRequest.newBuilder().addFilters(Filter.newBuilder().setNodeLabel("label").build()).build());
+        assertThat(result.getAlertsList().size()).isEqualTo(2);
+        ArgumentCaptor<PageRequest> pageRequestCaptor = ArgumentCaptor.forClass(PageRequest.class);
+        verify(mockAlertRepository).findBySeverityInAndLastEventTimeBetweenAndManagedObjectTypeAndManagedObjectInstanceInAndTenantId(any(), any(), any(), any(), any(), pageRequestCaptor.capture(), any());
         verify(spyInterceptor).verifyAccessToken(authHeader);
         verify(spyInterceptor).interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));
 

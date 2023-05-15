@@ -30,6 +30,7 @@ package org.opennms.horizon.inventory.service;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
@@ -55,6 +56,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
 import org.mockito.ArgumentCaptor;
+import org.opennms.horizon.inventory.dto.MonitoredState;
 import org.opennms.horizon.inventory.component.TagPublisher;
 import org.opennms.horizon.inventory.dto.NodeCreateDTO;
 import org.opennms.horizon.inventory.dto.NodeDTO;
@@ -181,6 +183,8 @@ public class NodeServiceTest {
         verify(tagService).addTags(eq(tenant), any(TagCreateListDTO.class));
         verify(mockConfigUpdateService, timeout(5000)).sendConfigUpdate(tenant, location);
         verify(mockIpInterfaceRepository).findByIpAddressAndLocationAndTenantId(any(InetAddress.class), eq(nodeCreateDTO.getLocation()), eq(tenant));
+        // Check the default state
+        assertEquals(MonitoredState.DETECTED,nodeCreateDTO.getMonitoredState());
     }
 
     @Test

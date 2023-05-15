@@ -48,6 +48,7 @@ import org.opennms.horizon.inventory.model.MonitoringLocation;
 import org.opennms.horizon.inventory.model.Node;
 import org.opennms.horizon.inventory.model.SnmpInterface;
 import org.opennms.horizon.shared.constants.GrpcConstants;
+import org.opennms.taskset.contract.ScanType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
@@ -71,7 +72,6 @@ class IpInterfaceRepositoryTest {
     private static final int NUM_NODES = 10;
 
     @MockBean
-    @Qualifier("byteArrayTemplate")
     private KafkaTemplate<String, byte[]> kafkaTemplate;
 
     @Autowired
@@ -178,6 +178,7 @@ class IpInterfaceRepositoryTest {
             node.setNodeLabel("node" + i);
             node.setCreateTime(LocalDateTime.now());
             node.setTenantId("tenant" + i);
+            node.setScanType(ScanType.NODE_SCAN);
             var location = new MonitoringLocation();
             location.setLocation("location" + i);
             location.setTenantId("tenant" + i);

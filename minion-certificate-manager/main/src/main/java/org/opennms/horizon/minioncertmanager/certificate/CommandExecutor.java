@@ -28,6 +28,7 @@
 
 package org.opennms.horizon.minioncertmanager.certificate;
 
+import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,8 +55,13 @@ public class CommandExecutor {
     }
 
     public static void executeCommand(String command, File directory, String ... params) throws IOException, InterruptedException {
+        executeCommand(command, directory, Map.of(), params);
+    }
+
+    public static void executeCommand(String command, File directory, Map<String, String> env, String ... params) throws IOException, InterruptedException {
         String commandToExecute = String.format(command, params);
         ProcessBuilder processBuilder = new ProcessBuilder("bash", "-c", commandToExecute).directory(directory);
+        processBuilder.environment().putAll(env);
         Process process = null;
         try {
             process = processBuilder.start();

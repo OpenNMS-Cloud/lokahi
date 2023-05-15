@@ -54,6 +54,7 @@ public class GrpcAlertService {
     private final ServerHeaderUtil headerUtil;
     private final AlertMapper mapper;
 
+    @SuppressWarnings("squid:S107")
     @GraphQLQuery
     public Mono<ListAlertResponse> findAllAlerts(@GraphQLArgument(name = "pageSize") Integer pageSize,
                                                  @GraphQLArgument(name = "page") int page,
@@ -61,8 +62,9 @@ public class GrpcAlertService {
                                                  @GraphQLArgument(name = "severities") List<String> severities,
                                                  @GraphQLArgument(name = "sortBy") String sortBy,
                                                  @GraphQLArgument(name = "sortAscending") boolean sortAscending,
+                                                 @GraphQLArgument(name = "nodeLabel") String nodeLabel,
                                                  @GraphQLEnvironment ResolutionEnvironment env) {
-        return Mono.just(mapper.protoToAlertResponse(alertsClient.listAlerts(pageSize, page, severities, timeRange, sortBy, sortAscending, headerUtil.getAuthHeader(env))));
+        return Mono.just(mapper.protoToAlertResponse(alertsClient.listAlerts(pageSize, page, severities, timeRange, sortBy, sortAscending, nodeLabel, headerUtil.getAuthHeader(env))));
     }
 
     @GraphQLQuery(

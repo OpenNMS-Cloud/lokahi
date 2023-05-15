@@ -63,7 +63,6 @@ public class HeartbeatKafkaForwarder implements MessageConsumer<Message, Message
             .build();
 
     @Autowired
-    @Qualifier("kafkaByteArrayProducerTemplate")
     private KafkaTemplate<String, byte[]> kafkaTemplate;
 
     @Value("${task.results.kafka-topic:" + DEFAULT_TASK_RESULTS_TOPIC + "}")

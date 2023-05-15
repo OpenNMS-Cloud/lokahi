@@ -63,7 +63,7 @@
           ></FeatherInput>
         </div>
       </div>
-      <div class="row">
+      <!-- <div class="row">
         <div class="box api-key">
           <div class="top">
             <label for="apiKey">API Key:</label>
@@ -100,6 +100,13 @@
             /></template>
           </ButtonTextIcon>
         </div>
+      </div> -->
+      <div>
+        <LocationsCertificateDownload
+          :input-model="locationStore.downloadCertificatePassword"
+          :on-primary-button-click="() => downloadCert(formInputs.location)"
+          :has-cert="true"
+        />
       </div>
       <div class="row mt-m">
         <InstructionsStepper
@@ -174,6 +181,10 @@ const onSubmit = async () => {
     locationStore.setDisplayType(DisplayType.LIST)
     form.clearErrors()
   }
+}
+
+const downloadCert = (string: string) => {
+  locationStore.downloadCertificatePassword = 'GeNeRaTeDpAsSw0rD123'
 }
 
 const generateKeyBtn: IButtonTextIcon = {

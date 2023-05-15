@@ -13,12 +13,14 @@ spring:
     change-log: db/changelog/changelog.xml
 
   kafka:
+    bootstrap-servers: localhost:59092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.ByteArraySerializer
     consumer:
-      group-id: "inventory"
-      auto-offset-reset: earliest
+      group-id: "inventory-service"
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.ByteArrayDeserializer
-    bootstrap-servers: localhost:59092
 
 grpc:
   server:

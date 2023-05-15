@@ -60,6 +60,6 @@ spec:
   tls:
     - hosts:
         -  {{.Values.Host }}
-      secretName: {{ .Values.TLS.Cert.Name }}
+      secretName: {{ .Values.OpenNMS.UI.TlsSecretName }}
   {{- end }}
 {{- end }}

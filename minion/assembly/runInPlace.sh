@@ -11,12 +11,12 @@ MINION_GATEWAY_PORT=1443
 MINION_GATEWAY_TLS="true"
 
 CERT_ROOTDIR="$(pwd)/target"
-CA_CERT_FILE="${CERT_ROOTDIR}/CA.cert"
-CLIENT_KEY_FILE="${CERT_ROOTDIR}/client.key"
-CLIENT_CERT_FILE="${CERT_ROOTDIR}/client.signed.cert"
-CLIENT_KEY_IS_PKCS12="false"
-
-
+CLIENT_KEYSTORE="${CERT_ROOTDIR}/minion.p12"
+CLIENT_KEYSTORE_TYPE="pkcs12"
+CLIENT_KEYSTORE_PASSWORD="changeme"
+CLIENT_TRUSTSTORE="${CERT_ROOTDIR}/CA.cert"
+CLIENT_TRUSTSTORE_TYPE="file"
+CLIENT_TRUSTSTORE_PASSWORD=""
 
 ###
 ### WARNING: certificate passwords currently do not work with PEM files; it only works with PKCS12 files.
@@ -80,11 +80,13 @@ if [ "${EXTRACT_TILT_CERTS}" == "true" ]; then
   kubectl get secret client-root-ca-certificate -ogo-template='{{index .data "tls.key" }}' | base64 --decode > "$CERT_ROOTDIR/client-ca.key"
 
   openssl genrsa -out "$CERT_ROOTDIR/client.key.pkcs1" 2048
-  openssl pkcs8 -topk8 -in "$CERT_ROOTDIR/client.key.pkcs1" -out "$CLIENT_KEY_FILE" -nocrypt
-  openssl req -new -key "$CLIENT_KEY_FILE" -out "$CERT_ROOTDIR/client.unsigned.cert" -subj "/C=CA/ST=TBD/L=TBD/O=OpenNMS/CN=local-minion/OU=L:${MINION_LOCATION}/OU=T:opennms-prime"
-  openssl x509 -req -in "$CERT_ROOTDIR/client.unsigned.cert" -days 14 -CA "$CERT_ROOTDIR/client-ca.crt" -CAkey "$CERT_ROOTDIR/client-ca.key" -out "$CLIENT_CERT_FILE" -CAcreateserial
+  openssl pkcs8 -topk8 -in "$CERT_ROOTDIR/client.key.pkcs1" -out "$CERT_ROOTDIR/client.key" -nocrypt
+  openssl req -new -key "$CERT_ROOTDIR/client.key" -out "$CERT_ROOTDIR/client.unsigned.cert" -subj "/C=CA/ST=TBD/L=TBD/O=OpenNMS/CN=local-minion/OU=L:${MINION_LOCATION}/OU=T:opennms-prime"
+  openssl x509 -req -in "$CERT_ROOTDIR/client.unsigned.cert" -days 14 -CA "$CERT_ROOTDIR/client-ca.crt" -CAkey "$CERT_ROOTDIR/client-ca.key" -out "$CERT_ROOTDIR/client.signed.crt" -CAcreateserial
 
-  kubectl get secret root-ca-certificate -ogo-template='{{index .data "ca.crt" }}' | base64 --decode > $CA_CERT_FILE
+  openssl pkcs12 -export -out "${CLIENT_KEYSTORE}" -inkey "$CERT_ROOTDIR/client.key" -in "$CERT_ROOTDIR/client.signed.crt" -passout "pass:${CLIENT_KEYSTORE_PASSWORD}"
+
+  kubectl get secret root-ca-certificate -ogo-template='{{index .data "ca.crt" }}' | base64 --decode > $CLIENT_TRUSTSTORE
 fi
 
 ###
@@ -108,22 +110,21 @@ if [ "${MINION_GATEWAY_TLS}" = "true" ]
 then
 	(
 		cat "${GRPC_CLIENT_CONFIG_FILE}" |
-			grep -v '^grpc.trust\.cert\.filepath=' |
-			grep -v '^grpc.client\.cert\.filepath=' |
-			grep -v '^grpc.client\.private\.key\.filepath=' |
-			grep -v '^grpc.client\.private\.key\.password=' |
-			grep -v '^grpc.client.private.key.is-pkcs12=' |
+			grep -v '^grpc\.client\.keystore=' |
+			grep -v '^grpc\.client\.keystore\.type=' |
+			grep -v '^grpc\.client\.keystore\.password=' |
+			grep -v '^grpc\.client\.truststore=' |
+			grep -v '^grpc\.client\.truststore\.type=' |
+			grep -v '^grpc\.client\.truststore\.password=' |
 			grep -v '^grpc.override\.authority='
 
-		echo "grpc.trust.cert.filepath=${CA_CERT_FILE}"
-		echo "grpc.client.cert.filepath=${CLIENT_CERT_FILE}"
-		echo "grpc.client.private.key.filepath=${CLIENT_KEY_FILE}"
-		echo "grpc.client.private.key.is-pkcs12=${CLIENT_KEY_IS_PKCS12}"
-		if [ -n "${CLIENT_PRIVATE_KEY_PASSWORD}" ]
-		then
-			echo "grpc.client.private.key.password=${CLIENT_PRIVATE_KEY_PASSWORD}"
-		fi
-		echo "grpc.override.authority=${OVERRIDE_AUTHORITY}"
+		echo "grpc\.client\.keystore=${CLIENT_KEYSTORE}"
+		echo "grpc\.client\.keystore\.type=${CLIENT_KEYSTORE_TYPE}"
+		echo "grpc\.client\.keystore\.password=${CLIENT_KEYSTORE_PASSWORD}"
+		echo "grpc\.client\.truststore=${CLIENT_TRUSTSTORE}"
+		echo "grpc\.client\.truststore\.type=${CLIENT_TRUSTSTORE_TYPE}"
+		echo "grpc\.client\.truststore\.password=${CLIENT_TRUSTSTORE_PASSWORD}"
+		echo "grpc\.override.authority=${OVERRIDE_AUTHORITY}"
 	) >>"${GRPC_CLIENT_CONFIG_FILE}.upd"
 
 	mv "${GRPC_CLIENT_CONFIG_FILE}.upd" "${GRPC_CLIENT_CONFIG_FILE}"

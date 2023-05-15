@@ -7,12 +7,48 @@ metadata:
   annotations:
     "helm.sh/resource-policy": keep
 type: kubernetes.io/tls
-{{$ca := genCA (nospace (cat .Values.Host "-ca")) 14 }}
 data:
+  # There is no existing certificate, lets generate a new one
+  {{ $ca := genCA (nospace (cat .Values.Host "-ca")) 14 }}
+  ca.crt: >-
+    {{ b64enc $ca.Cert }}
+  tls.crt: >-
+    {{ b64enc $ca.Cert }}
+  tls.key: >-
+    {{ b64enc $ca.Key }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ .Values.OpenNMS.MinionGateway.TlsSecretName }}
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    "helm.sh/resource-policy": keep
+type: kubernetes.io/tls
+data:
+  {{ $mgCert := genSignedCert (nospace (cat "minion." .Values.Host)) nil (list .Values.Host) 14 $ca }}
   ca.crt: >-
     {{b64enc $ca.Cert }}
   tls.crt: >-
-    {{b64enc $ca.Cert }}
+    {{b64enc $mgCert.Cert }}
   tls.key: >-
-    {{b64enc $ca.Key }}
+    {{b64enc $mgCert.Key }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ .Values.OpenNMS.UI.TlsSecretName }}
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    "helm.sh/resource-policy": keep
+type: kubernetes.io/tls
+data:
+  {{ $uiCert := genSignedCert .Values.Host nil (list .Values.Host) 14 $ca }}
+  ca.crt: >-
+    {{b64enc $ca.Cert }}
+  tls.crt: >-
+    {{b64enc $uiCert.Cert }}
+  tls.key: >-
+    {{b64enc $uiCert.Key }}
+
 {{- end }}

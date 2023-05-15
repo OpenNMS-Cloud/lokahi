@@ -1,7 +1,7 @@
 spring:
   kafka:
     consumer:
-      group-id: "ts-consumer"
+      group-id: "metrics-processor-service"
       auto-offset-reset: earliest
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.ByteArrayDeserializer

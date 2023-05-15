@@ -9,12 +9,11 @@ spring:
     change-log: classpath:db/changelog/changelog.xml
 
   kafka:
+    bootstrap-servers: localhost:59092
     consumer:
-      group-id: "traps-consumer"
-      auto-offset-reset: earliest
+      group-id: "event-service"
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.ByteArrayDeserializer
-    bootstrap-servers: localhost:59092
 
 grpc:
   server:

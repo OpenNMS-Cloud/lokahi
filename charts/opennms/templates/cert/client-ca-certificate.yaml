@@ -7,13 +7,23 @@ metadata:
   annotations:
     "helm.sh/resource-policy": keep
 type: kubernetes.io/tls
-{{$ca := genCA "client-ca" 14 }}
+{{- $secretObj := (lookup "v1" "Secret" .Release.Namespace "client-root-ca-certificate") | default dict }}
+{{- $secretData := (get $secretObj "data") | default dict }}
 data:
+  {{- if and (hasKey $secretData "tls.crt") (hasKey $secretData "tls.key") }}
+  ca.crt: {{ index $secretData "tls.crt" }}
+  tls.crt: {{ index $secretData "tls.crt" }}
+  tls.key: {{ index $secretData "tls.key" }}
+  {{ else }}
+  # There is no existing mtls root, lets generate a new one
+  {{$ca := genCA "client-ca" 14 }}
   ca.crt: >-
-    {{ b64enc $ca.Cert }}
+    {{b64enc $ca.Cert }}
   tls.crt: >-
     {{b64enc $ca.Cert }}
   tls.key: >-
     {{b64enc $ca.Key }}
+  {{- end }}
+
 {{- end }}
 

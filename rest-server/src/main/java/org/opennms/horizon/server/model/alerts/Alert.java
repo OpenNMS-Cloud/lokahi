@@ -53,4 +53,6 @@ public class Alert {
     private boolean isAcknowledged;
     private String ackUser;
     private long ackTimeMs;
+    private String nodeName;
+    private String label;
 }

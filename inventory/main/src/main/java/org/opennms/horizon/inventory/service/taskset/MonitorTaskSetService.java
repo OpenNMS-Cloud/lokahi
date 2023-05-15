@@ -99,13 +99,12 @@ public class MonitorTaskSetService {
         return taskDefinition;
     }
 
-    public TaskDefinition addAzureMonitorTask(AzureActiveDiscovery discovery, AzureScanItem scanItem, String ipAddress, long nodeId) {
+    public TaskDefinition addAzureMonitorTask(AzureActiveDiscovery discovery, AzureScanItem scanItem, long nodeId) {
 
         Any configuration =
             Any.pack(AzureMonitorRequest.newBuilder()
                 .setResource(scanItem.getName())
                 .setResourceGroup(scanItem.getResourceGroup())
-                .setHost(ipAddress) // dummy address to allow metrics to be added
                 .setClientId(discovery.getClientId())
                 .setClientSecret(discovery.getClientSecret())
                 .setSubscriptionId(discovery.getSubscriptionId())

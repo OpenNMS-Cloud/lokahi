@@ -79,12 +79,14 @@ public class AlertsClient {
         }
     }
 
-    public ListAlertsResponse listAlerts(int pageSize, int page, List<String> severityFilters, TimeRange timeRange, String sortBy, boolean sortAscending, String accessToken) {
+    @SuppressWarnings("squid:S107")
+    public ListAlertsResponse listAlerts(int pageSize, int page, List<String> severityFilters, TimeRange timeRange, String sortBy, boolean sortAscending, String nodeLabel, String accessToken) {
         Metadata metadata = getMetadata(accessToken);
 
         final var request = ListAlertsRequest.newBuilder();
         getTimeRangeFilter(timeRange, request);
         getSeverity(severityFilters, request);
+        request.addFilters(Filter.newBuilder().setNodeLabel(nodeLabel).build());
 
         request.setPageSize(pageSize)
             .setPage(page)

@@ -44,7 +44,6 @@ import org.opennms.taskset.contract.MonitorType;
 import org.opennms.taskset.contract.TaskDefinition;
 import org.opennms.taskset.contract.TaskType;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -141,7 +140,6 @@ public class CollectorTaskSetService {
             .build();
     }
 
-    @Transactional
     List<SnmpInterface> getSnmpInterfaces(long nodeId) {
         var optional = nodeRepository.findById(nodeId);
         if (optional.isEmpty()) {
@@ -151,7 +149,6 @@ public class CollectorTaskSetService {
         }
     }
 
-    @Transactional
     List<IpInterface> getIpInterfaces(long nodeId) {
         var optional = nodeRepository.findById(nodeId);
         if (optional.isEmpty()) {

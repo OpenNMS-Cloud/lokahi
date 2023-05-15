@@ -34,6 +34,7 @@ import org.junit.jupiter.api.Test;
 import org.opennms.horizon.inventory.SpringContextTestInitializer;
 import org.opennms.horizon.inventory.model.MonitoringLocation;
 import org.opennms.horizon.inventory.model.Node;
+import org.opennms.taskset.contract.ScanType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
@@ -81,6 +82,7 @@ class NodeRepositoryTest {
         node1.setTenantId(tenantId1);
         node1.setCreateTime(LocalDateTime.now());
         node1.setMonitoringLocation(location1);
+        node1.setScanType(ScanType.NODE_SCAN);
         nodeRepo.save(node1);
 
         node2 = new Node();
@@ -88,6 +90,7 @@ class NodeRepositoryTest {
         node2.setTenantId(tenantId1);
         node2.setCreateTime(LocalDateTime.now());
         node2.setMonitoringLocation(location1);
+        node2.setScanType(ScanType.NODE_SCAN);
         nodeRepo.save(node2);
 
         node3 = new Node();
@@ -95,6 +98,7 @@ class NodeRepositoryTest {
         node3.setTenantId(tenantId2);
         node3.setCreateTime(LocalDateTime.now());
         node3.setMonitoringLocation(location2);
+        node3.setScanType(ScanType.NODE_SCAN);
         nodeRepo.save(node3);
     }
 

@@ -29,12 +29,14 @@ import { GraphProps } from '@/types/graphs'
 import { downloadMultipleCanvases } from '@/components/Graphs/utils'
 import { useRoute } from 'vue-router'
 import { useGraphsQueries } from '@/store/Queries/graphsQueries'
+import { AZURE_SCAN } from '@/types'
 
 const route = useRoute()
 const store = useGraphsQueries()
-const instance = computed(
-  () => store.node.ipInterfaces?.filter(({ snmpPrimary }) => snmpPrimary === true)[0]?.ipAddress as string
-)
+const instance = computed(() => {
+  const snmpPrimaryIpAddress = store.node.ipInterfaces?.filter(({ snmpPrimary }) => snmpPrimary === true)[0]?.ipAddress
+  return store.node.scanType === AZURE_SCAN ? `azure-node-${store.node.id}` : snmpPrimaryIpAddress!
+})
 
 const nodeLatency = computed<GraphProps>(() => {
   return {

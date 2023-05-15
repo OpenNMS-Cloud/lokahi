@@ -110,8 +110,8 @@ public class AzureCollector implements ServiceCollector {
                     .nodeId(collectionRequest.getNodeId())
                     .monitorType(MonitorType.AZURE)
                     .status(true)
-                    .ipAddress(request.getHost())
                     .timeStamp(System.currentTimeMillis())
+                    .ipAddress("azure-node-" + collectionRequest.getNodeId())
                     .build());
 
             } else {
@@ -119,7 +119,7 @@ public class AzureCollector implements ServiceCollector {
                     .nodeId(collectionRequest.getNodeId())
                     .monitorType(MonitorType.AZURE)
                     .status(false)
-                    .ipAddress(request.getHost())
+                    .ipAddress("azure-node-" + collectionRequest.getNodeId())
                     .build());
             }
         } catch (Exception e) {
@@ -128,6 +128,7 @@ public class AzureCollector implements ServiceCollector {
                 .nodeId(collectionRequest.getNodeId())
                 .monitorType(MonitorType.AZURE)
                 .status(false)
+                .ipAddress("azure-node-" + collectionRequest.getNodeId())
                 .build());
         }
         return future;

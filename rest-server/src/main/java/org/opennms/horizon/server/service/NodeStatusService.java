@@ -48,6 +48,7 @@ import java.util.List;
 import java.util.Map;
 
 import static java.util.Objects.isNull;
+import static org.opennms.horizon.server.service.metrics.normalization.Constants.AZURE_SCAN_TYPE;
 import static org.springframework.util.CollectionUtils.isEmpty;
 
 @Service
@@ -65,10 +66,15 @@ public class NodeStatusService {
     public Mono<NodeStatus> getNodeStatus(long id, String monitorType, ResolutionEnvironment env) {
         NodeDTO node = client.getNodeById(id, headerUtil.getAuthHeader(env));
 
-        if (node.getIpInterfacesCount() > 0) {
+        if (AZURE_SCAN_TYPE.equals(node.getScanType())) {
+            return getStatusMetric(id, "azure-node-" + id, monitorType, env)
+                .map(result -> getNodeStatus(id, result));
+        } else {
+            if (node.getIpInterfacesCount() > 0) {
 
-            IpInterfaceDTO ipInterface = getPrimaryInterface(node);
-            return getNodeStatusByInterface(id, monitorType, ipInterface, env);
+                IpInterfaceDTO ipInterface = getPrimaryInterface(node);
+                return getNodeStatusByInterface(id, monitorType, ipInterface, env);
+            }
         }
         return Mono.just(new NodeStatus(id, false));
     }
@@ -118,11 +124,11 @@ public class NodeStatusService {
         return new NodeStatus(id, status);
     }
 
-    private Mono<TimeSeriesQueryResult> getStatusMetric(long id, String ipAddress, String monitorType, ResolutionEnvironment env) {
+    private Mono<TimeSeriesQueryResult> getStatusMetric(long id, String instance, String monitorType, ResolutionEnvironment env) {
         Map<String, String> labels = new HashMap<>();
         labels.put(NODE_ID_KEY, String.valueOf(id));
         labels.put(MONITOR_KEY, monitorType);
-        labels.put(INSTANCE_KEY, ipAddress);
+        labels.put(INSTANCE_KEY, instance);
 
         return tsdbMetricsService
             .getMetric(env, RESPONSE_TIME_METRIC, labels, TIME_RANGE_IN_SECONDS, TimeRangeUnit.SECOND);

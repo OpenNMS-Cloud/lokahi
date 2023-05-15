@@ -28,7 +28,6 @@
 
 package org.opennms.horizon.tsdata.monitor;
 
-import com.google.protobuf.Timestamp;
 import java.util.Optional;
 import org.opennms.horizon.tenantmetrics.TenantMetricsTracker;
 import org.opennms.horizon.timeseries.cortex.CortexTSS;

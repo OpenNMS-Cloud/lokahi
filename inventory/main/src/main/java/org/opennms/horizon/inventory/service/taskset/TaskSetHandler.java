@@ -62,11 +62,11 @@ public class TaskSetHandler {
         }
     }
 
-    public void sendAzureMonitorTasks(AzureActiveDiscovery discovery, AzureScanItem item, String ipAddress, long nodeId) {
+    public void sendAzureMonitorTasks(AzureActiveDiscovery discovery, AzureScanItem item, long nodeId) {
         String tenantId = discovery.getTenantId();
         String location = discovery.getLocation();
 
-        TaskDefinition task = monitorTaskSetService.addAzureMonitorTask(discovery, item, ipAddress, nodeId);
+        TaskDefinition task = monitorTaskSetService.addAzureMonitorTask(discovery, item, nodeId);
         taskSetPublisher.publishNewTasks(tenantId, location, Arrays.asList(task));
     }
 
@@ -82,11 +82,11 @@ public class TaskSetHandler {
         }
     }
 
-    public void sendAzureCollectorTasks(AzureActiveDiscovery discovery, AzureScanItem item, String ipAddress, long nodeId) {
+    public void sendAzureCollectorTasks(AzureActiveDiscovery discovery, AzureScanItem item, long nodeId) {
         String tenantId = discovery.getTenantId();
         String location = discovery.getLocation();
 
-        TaskDefinition task = collectorTaskSetService.addAzureCollectorTask(discovery, item, ipAddress, nodeId);
+        TaskDefinition task = collectorTaskSetService.addAzureCollectorTask(discovery, item, nodeId);
         taskSetPublisher.publishNewTasks(tenantId, location, Arrays.asList(task));
     }
 

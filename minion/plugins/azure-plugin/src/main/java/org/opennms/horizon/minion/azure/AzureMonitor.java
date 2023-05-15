@@ -80,7 +80,7 @@ public class AzureMonitor extends AbstractServiceMonitor {
                         .status(ServiceMonitorResponse.Status.Up)
                         .responseTime(System.currentTimeMillis() - startMs)
                         .nodeId(svc.getNodeId())
-                        .ipAddress(request.getHost())
+                        .ipAddress("azure-node-" + svc.getNodeId())
                         .build()
                 );
             } else {
@@ -89,7 +89,7 @@ public class AzureMonitor extends AbstractServiceMonitor {
                         .monitorType(MonitorType.AZURE)
                         .status(ServiceMonitorResponse.Status.Down)
                         .nodeId(svc.getNodeId())
-                        .ipAddress(request.getHost())
+                        .ipAddress("azure-node-" + svc.getNodeId())
                         .build()
                 );
             }

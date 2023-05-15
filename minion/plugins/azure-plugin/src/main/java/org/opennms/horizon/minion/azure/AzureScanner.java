@@ -31,20 +31,35 @@ package org.opennms.horizon.minion.azure;
 import com.google.protobuf.Any;
 import org.opennms.azure.contract.AzureScanRequest;
 import org.opennms.horizon.azure.api.AzureScanItem;
+import org.opennms.horizon.azure.api.AzureScanNetworkInterfaceItem;
 import org.opennms.horizon.azure.api.AzureScanResponse;
 import org.opennms.horizon.minion.plugin.api.ScanResultsResponse;
 import org.opennms.horizon.minion.plugin.api.ScanResultsResponseImpl;
 import org.opennms.horizon.minion.plugin.api.Scanner;
 import org.opennms.horizon.shared.azure.http.AzureHttpClient;
+import org.opennms.horizon.shared.azure.http.AzureHttpException;
 import org.opennms.horizon.shared.azure.http.dto.login.AzureOAuthToken;
+import org.opennms.horizon.shared.azure.http.dto.networkinterface.AzureNetworkInterface;
+import org.opennms.horizon.shared.azure.http.dto.networkinterface.AzureNetworkInterfaces;
+import org.opennms.horizon.shared.azure.http.dto.networkinterface.IpConfiguration;
+import org.opennms.horizon.shared.azure.http.dto.networkinterface.IpConfigurationProps;
+import org.opennms.horizon.shared.azure.http.dto.networkinterface.NetworkInterfaceProps;
+import org.opennms.horizon.shared.azure.http.dto.networkinterface.PublicIPAddress;
+import org.opennms.horizon.shared.azure.http.dto.networkinterface.VirtualMachine;
+import org.opennms.horizon.shared.azure.http.dto.publicipaddresses.AzurePublicIPAddress;
+import org.opennms.horizon.shared.azure.http.dto.publicipaddresses.AzurePublicIpAddresses;
+import org.opennms.horizon.shared.azure.http.dto.publicipaddresses.PublicIpAddressProps;
 import org.opennms.horizon.shared.azure.http.dto.resourcegroup.AzureResourceGroups;
 import org.opennms.horizon.shared.azure.http.dto.resourcegroup.AzureValue;
 import org.opennms.horizon.shared.azure.http.dto.resources.AzureResources;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 public class AzureScanner implements Scanner {
@@ -78,20 +93,7 @@ public class AzureScanner implements Scanner {
 
             for (AzureValue resourceGroupValue : resourceGroups.getValue()) {
                 String resourceGroup = resourceGroupValue.getName();
-
-                AzureResources resources = client.getResources(token, request.getSubscriptionId(),
-                    resourceGroup, request.getTimeoutMs(), request.getRetries());
-
-                scannedItems.addAll(resources.getValue().stream()
-                    .filter(azureValue -> azureValue.getType()
-                        .equalsIgnoreCase(MICROSOFT_COMPUTE_VIRTUAL_MACHINES))
-                    .map(azureValue -> AzureScanItem.newBuilder()
-                        .setId(azureValue.getId())
-                        .setName(azureValue.getName())
-                        .setResourceGroup(resourceGroup)
-                        .setActiveDiscoveryId(request.getActiveDiscoveryId())
-                        .build())
-                    .toList());
+                scannedItems.addAll(scanForResourceGroup(request, token, resourceGroup));
             }
 
             future.complete(
@@ -110,5 +112,92 @@ public class AzureScanner implements Scanner {
             );
         }
         return future;
+    }
+
+    private List<AzureScanItem> scanForResourceGroup(AzureScanRequest request, AzureOAuthToken token, String resourceGroup) throws AzureHttpException {
+        AzureResources resources = client.getResources(token, request.getSubscriptionId(),
+            resourceGroup, request.getTimeoutMs(), request.getRetries());
+
+        AzureNetworkInterfaces networkInterfaces = client.getNetworkInterfaces(token, request.getSubscriptionId(),
+            resourceGroup, request.getTimeoutMs(), request.getRetries());
+
+        AzurePublicIpAddresses publicIpAddresses = client.getPublicIpAddresses(token, request.getSubscriptionId(),
+            resourceGroup, request.getTimeoutMs(), request.getRetries());
+
+        return resources.getValue().stream()
+            .filter(azureValue -> azureValue.getType()
+                .equalsIgnoreCase(MICROSOFT_COMPUTE_VIRTUAL_MACHINES))
+            .map(resource -> AzureScanItem.newBuilder()
+                .setId(resource.getId())
+                .setName(resource.getName())
+                .setResourceGroup(resourceGroup)
+                .setActiveDiscoveryId(request.getActiveDiscoveryId())
+                .build())
+            .map(scanItem -> scanNetworkInterfaces(scanItem, networkInterfaces, publicIpAddresses))
+            .toList();
+    }
+
+    private AzureScanItem scanNetworkInterfaces(AzureScanItem scanItem,
+                                                AzureNetworkInterfaces networkInterfaces,
+                                                AzurePublicIpAddresses publicIpAddresses) {
+
+        List<AzureNetworkInterface> interfaceList = findNetworkInterfacesForVmId(networkInterfaces, scanItem.getId());
+
+        List<AzureScanNetworkInterfaceItem> scannedNetworkInterfaces = new ArrayList<>();
+
+        for (AzureNetworkInterface networkInterface : interfaceList) {
+
+            NetworkInterfaceProps networkInterfaceProps = networkInterface.getProperties();
+
+            for (IpConfiguration ipConfiguration : networkInterfaceProps.getIpConfigurations()) {
+                IpConfigurationProps ipConfigurationProps = ipConfiguration.getProperties();
+
+                scannedNetworkInterfaces.add(AzureScanNetworkInterfaceItem.newBuilder()
+                    .setId(ipConfiguration.getId())
+                    .setIpAddress(ipConfigurationProps.getPrivateIPAddress())
+                    .build());
+
+                PublicIPAddress publicIPAddress = ipConfigurationProps.getPublicIPAddress();
+                if (publicIPAddress != null) {
+                    String publicIpId = publicIPAddress.getId();
+
+                    Optional<AzurePublicIPAddress> publicAddressOpt = findPublicIpAddressForId(publicIpAddresses, publicIpId);
+                    if (publicAddressOpt.isPresent()) {
+                        PublicIpAddressProps properties = publicAddressOpt.get().getProperties();
+
+                        scannedNetworkInterfaces.add(AzureScanNetworkInterfaceItem.newBuilder()
+                            .setId(publicIpId)
+                            .setIpAddress(properties.getIpAddress())
+                            .build());
+                    }
+                }
+            }
+        }
+        if (!scannedNetworkInterfaces.isEmpty()) {
+            scanItem = scanItem.toBuilder()
+                .addAllNetworkInterfaceItems(scannedNetworkInterfaces).build();
+        }
+        return scanItem;
+    }
+
+    private List<AzureNetworkInterface> findNetworkInterfacesForVmId(AzureNetworkInterfaces networkInterfaces, String vmId) {
+        List<AzureNetworkInterface> networkInterfacesList = new ArrayList<>();
+        for (AzureNetworkInterface networkInterface : networkInterfaces.getValue()) {
+            NetworkInterfaceProps properties = networkInterface.getProperties();
+            VirtualMachine virtualMachine = properties.getVirtualMachine();
+            if (Objects.nonNull(virtualMachine) && vmId.equals(virtualMachine.getId())) {
+                networkInterfacesList.add(networkInterface);
+            }
+        }
+        return networkInterfacesList;
+    }
+
+    private Optional<AzurePublicIPAddress> findPublicIpAddressForId(AzurePublicIpAddresses azurePublicIpAddresses, String id) {
+        for (AzurePublicIPAddress publicIpAddress : azurePublicIpAddresses.getValue()) {
+            if (publicIpAddress.getId().equals(id)) {
+                return Optional.of(publicIpAddress);
+            }
+        }
+        return Optional.empty();
     }
 }

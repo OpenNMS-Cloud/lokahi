@@ -36,6 +36,8 @@ import org.opennms.horizon.shared.azure.http.dto.error.AzureHttpError;
 import org.opennms.horizon.shared.azure.http.dto.instanceview.AzureInstanceView;
 import org.opennms.horizon.shared.azure.http.dto.login.AzureOAuthToken;
 import org.opennms.horizon.shared.azure.http.dto.metrics.AzureMetrics;
+import org.opennms.horizon.shared.azure.http.dto.networkinterface.AzureNetworkInterfaces;
+import org.opennms.horizon.shared.azure.http.dto.publicipaddresses.AzurePublicIpAddresses;
 import org.opennms.horizon.shared.azure.http.dto.resourcegroup.AzureResourceGroups;
 import org.opennms.horizon.shared.azure.http.dto.resources.AzureResources;
 import org.opennms.horizon.shared.azure.http.dto.subscription.AzureSubscription;
@@ -69,6 +71,8 @@ public class AzureHttpClient {
     public static final String SUBSCRIPTION_ENDPOINT = "/subscriptions/%s";
     public static final String RESOURCE_GROUPS_ENDPOINT = "/subscriptions/%s/resourceGroups";
     public static final String RESOURCES_ENDPOINT = "/subscriptions/%s/resourceGroups/%s/resources";
+    public static final String NETWORK_INTERFACES_ENDPOINT = "/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Network/networkInterfaces";
+    public static final String PUBLIC_IP_ADDRESSES_ENDPOINT = "/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Network/publicIPAddresses";
     public static final String INSTANCE_VIEW_ENDPOINT = "/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Compute/virtualMachines/%s/InstanceView";
     public static final String METRICS_ENDPOINT = "/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Compute/virtualMachines/%s/providers/Microsoft.Insights/metrics";
 
@@ -150,6 +154,19 @@ public class AzureHttpClient {
         return get(token, url, timeoutMs, retries, AzureResources.class);
     }
 
+    public AzureNetworkInterfaces getNetworkInterfaces(AzureOAuthToken token, String subscriptionId, String resourceGroup,
+                                                       long timeoutMs, int retries) throws AzureHttpException {
+        String versionQueryParam = API_VERSION_PARAM + params.getApiVersion();
+        String url = String.format(NETWORK_INTERFACES_ENDPOINT + versionQueryParam, subscriptionId, resourceGroup);
+        return get(token, url, timeoutMs, retries, AzureNetworkInterfaces.class);
+    }
+
+    public AzurePublicIpAddresses getPublicIpAddresses(AzureOAuthToken token, String subscriptionId, String resourceGroup, long timeoutMs, int retries) throws AzureHttpException {
+        String versionQueryParam = API_VERSION_PARAM + params.getApiVersion();
+        String url = String.format(PUBLIC_IP_ADDRESSES_ENDPOINT + versionQueryParam, subscriptionId, resourceGroup);
+        return get(token, url, timeoutMs, retries, AzurePublicIpAddresses.class);
+    }
+
     public AzureInstanceView getInstanceView(AzureOAuthToken token, String subscriptionId, String resourceGroup,
                                              String resourceName, long timeoutMs, int retries) throws AzureHttpException {
         String versionQueryParam = API_VERSION_PARAM + params.getApiVersion();
@@ -224,7 +241,7 @@ public class AzureHttpClient {
 
     private HttpRequest buildGetHttpRequest(AzureOAuthToken token, String url, long timeoutMs) throws AzureHttpException {
         if (timeoutMs < MIN_TIMEOUT_MS) {
-            throw new AzureHttpException("Retry count must be a positive number > " + MIN_TIMEOUT_MS);
+            throw new AzureHttpException("Timeout must be a positive number > " + MIN_TIMEOUT_MS);
         }
         return getHttpRequestBuilder(url, timeoutMs)
             .header(AUTH_HEADER, String.format("%s %s", token.getTokenType(), token.getAccessToken()))

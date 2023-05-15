@@ -21,7 +21,7 @@ describe('Alert card', () => {
   })
 
   test('Should have required elements', () => {
-    const elems = ['checkbox', 'name', 'node-type', 'severity', 'cause', 'duration', 'date', 'time', 'check-icon']
+    const elems = ['checkbox', 'name', 'severity', 'cause', 'duration', 'date', 'time', 'check-icon']
     elems.forEach((elem) => {
       const el = wrapper.get(`[data-test="${elem}"]`)
       expect(el.exists()).toBeTruthy()

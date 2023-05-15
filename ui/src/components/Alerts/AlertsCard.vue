@@ -13,10 +13,7 @@
               class="name headline"
               data-test="name"
             >
-              {{ alert.label || 'Unknown' }}
-            </div>
-            <div data-test="node-type">
-              {{ alert.nodeType || 'Unknown' }}
+              {{ alert.nodeName || 'Unknown' }}
             </div>
           </div>
           <div
@@ -29,7 +26,7 @@
             class="cause headline"
             data-test="cause"
           >
-            <div>{{ alert.type }}</div>
+            <div>{{ alert.label }}</div>
             <div>&nbsp;</div>
           </div>
           <div

@@ -49,6 +49,7 @@ import static org.opennms.horizon.server.service.metrics.normalization.Constants
 import static org.opennms.horizon.server.service.metrics.normalization.Constants.QUERY_FOR_AZURE_TOTAL_NETWORK_IN_BITS;
 import static org.opennms.horizon.server.service.metrics.normalization.Constants.QUERY_FOR_AZURE_TOTAL_NETWORK_OUT_BITS;
 import static org.opennms.horizon.server.service.metrics.normalization.Constants.QUERY_FOR_BW_IN_UTIL_PERCENTAGE;
+import static org.opennms.horizon.server.service.metrics.normalization.Constants.QUERY_FOR_BW_OUT_UTIL_PERCENTAGE;
 import static org.opennms.horizon.server.service.metrics.normalization.Constants.QUERY_FOR_NETWORK_ERRORS_IN;
 import static org.opennms.horizon.server.service.metrics.normalization.Constants.QUERY_FOR_NETWORK_ERRORS_OUT;
 import static org.opennms.horizon.server.service.metrics.normalization.Constants.QUERY_FOR_TOTAL_NETWORK_BYTES_IN;
@@ -94,14 +95,16 @@ public class QueryService {
                     return QUERY_PREFIX + QUERY_FOR_TOTAL_NETWORK_BYTES_OUT + rangeQuerySuffixForTotal;
                 case NETWORK_IN_BITS:
                     if (isAzureNode(node)) {
-                        return QUERY_PREFIX + QUERY_FOR_AZURE_TOTAL_NETWORK_IN_BITS + rangeQuerySuffix;
+                        var query = String.format(QUERY_FOR_AZURE_TOTAL_NETWORK_IN_BITS, getLabelsQueryString(labels));
+                        return QUERY_PREFIX + query + rangeQuerySuffix;
                     } else {
                         var query = String.format(QUERY_FOR_TOTAL_NETWORK_IN_BITS, getLabelsQueryString(labels));
                         return QUERY_PREFIX + query + rangeQuerySuffix;
                     }
                 case NETWORK_OUT_BITS:
                     if (isAzureNode(node)) {
-                        return QUERY_PREFIX + QUERY_FOR_AZURE_TOTAL_NETWORK_OUT_BITS + rangeQuerySuffix;
+                        var query = String.format(QUERY_FOR_AZURE_TOTAL_NETWORK_OUT_BITS, getLabelsQueryString(labels));
+                        return QUERY_PREFIX + query + rangeQuerySuffix;
                     } else {
                         var query = String.format(QUERY_FOR_TOTAL_NETWORK_OUT_BITS, getLabelsQueryString(labels));
                         return QUERY_PREFIX + query + rangeQuerySuffix;
@@ -117,7 +120,7 @@ public class QueryService {
                     if (isAzureNode(node)) {
                         throw new RuntimeException(OPERATION_NOT_SUPPORTED_FOR_AZURE_NODE + BW_OUT_PERCENTAGE);
                     } else {
-                        var query = String.format(QUERY_FOR_BW_IN_UTIL_PERCENTAGE, getLabelsQueryString(labels));
+                        var query = String.format(QUERY_FOR_BW_OUT_UTIL_PERCENTAGE, getLabelsQueryString(labels));
                         return QUERY_PREFIX + query + rangeQuerySuffix;
                     }
                 case NETWORK_ERRORS_IN:
@@ -162,7 +165,6 @@ public class QueryService {
 
         int index = 0;
         for (Map.Entry<String, String> param : labels.entrySet()) {
-            // tilde will treat the string as a regex
             sb.append(String.format("%s=\"%s\"", param.getKey(), param.getValue()));
             if (index != labels.size() - 1) {
                 sb.append(",");

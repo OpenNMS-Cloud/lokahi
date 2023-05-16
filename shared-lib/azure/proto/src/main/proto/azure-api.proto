@@ -40,8 +40,14 @@ message AzureScanResponse {
 message AzureScanItem {
   string id = 1;
   string name = 2;
-  string resourceGroup = 3;
+  string resource_group = 3;
   int64 active_discovery_id = 4;
+  repeated AzureScanNetworkInterfaceItem network_interface_items = 5;
+}
+
+message AzureScanNetworkInterfaceItem {
+  string id = 1;
+  string ip_address = 2;
 }
 
 // TODO: the naming here is not Real Obvious - "what's the difference between AzureResponseMetric and AzureResultMetric?"
@@ -61,8 +67,8 @@ message AzureValueMetric {
 }
 
 message AzureResultMetric {
-  string resourceName = 1;
-  string resourceGroup = 2;
+  string resource_name = 1;
+  string resource_group = 2;
   AzureValueMetric value = 3;
   string alias = 4;
 }

@@ -141,6 +141,8 @@ const props = defineProps({
   }
 })
 const nodes = ref<InventoryNode[]>(props.tabContent)
+watchEffect(() => nodes.value = props.tabContent)
+
 const availableTagsToDelete = ref(<Tag[]>[])
 const tagsForDeletion = ref([] as Tag[])
 const nodeIdForDeletingTags = ref()

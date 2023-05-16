@@ -33,10 +33,12 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.opennms.horizon.azure.api.AzureScanItem;
+import org.opennms.horizon.azure.api.AzureScanNetworkInterfaceItem;
 import org.opennms.horizon.azure.api.AzureScanResponse;
 import org.opennms.horizon.inventory.dto.ListTagsByEntityIdParamsDTO;
 import org.opennms.horizon.inventory.dto.MonitoredServiceDTO;
 import org.opennms.horizon.inventory.dto.MonitoredServiceTypeDTO;
+import org.opennms.horizon.inventory.dto.MonitoredState;
 import org.opennms.horizon.inventory.dto.NodeCreateDTO;
 import org.opennms.horizon.inventory.dto.TagCreateDTO;
 import org.opennms.horizon.inventory.dto.TagCreateListDTO;
@@ -103,20 +105,9 @@ public class ScannerResponseService {
         switch (getType(response)) {
             case AZURE_SCAN -> {
                 AzureScanResponse azureResponse = result.unpack(AzureScanResponse.class);
-                List<AzureScanItem> resultsList = azureResponse.getResultsList();
-
-                for (int index = 0; index < resultsList.size(); index++) {
-                    AzureScanItem item = resultsList.get(index);
-
-                    // HACK: for now, creating a dummy ip address in order for status to display on ui
-                    // could maybe get ip interfaces from VM to save instead but private IPs may not be unique enough if no public IP attached ?
-                    // Postgres requires a valid INET field
-                    String ipAddress = String.format("127.0.0.%d", index + 1);
-
-                    processAzureScanItem(tenantId, location, ipAddress, item);
-                }
+                log.debug("received azure scan result: {}", azureResponse);
+                processAzureScanResponse(tenantId, location, azureResponse);
             }
-            //TODO process the node scan results
             case NODE_SCAN -> {
                 NodeScanResult nodeScanResult = result.unpack(NodeScanResult.class);
                 log.debug("received node scan result: {}", nodeScanResult);
@@ -128,7 +119,6 @@ public class ScannerResponseService {
                 processDiscoveryScanResponse(tenantId, location, discoveryScanResult);
             }
             case UNRECOGNIZED -> log.warn("Unrecognized scan type");
-
         }
     }
 
@@ -174,44 +164,54 @@ public class ScannerResponseService {
         }
     }
 
-    private void processAzureScanItem(String tenantId, String location, String ipAddress, AzureScanItem item) {
-        Optional<AzureActiveDiscovery> discoveryOpt = azureActiveDiscoveryRepository.findByTenantIdAndId(tenantId, item.getActiveDiscoveryId());
-        if (discoveryOpt.isEmpty()) {
-            log.warn("No Azure Active Discovery found for id: {}", item.getActiveDiscoveryId());
-            return;
-        }
+    private void processAzureScanResponse(String tenantId, String location, AzureScanResponse azureResponse) {
+        for (AzureScanItem azureScanItem : azureResponse.getResultsList()) {
 
-        AzureActiveDiscovery discovery = discoveryOpt.get();
-
-        String nodeLabel = String.format("%s (%s)", item.getName(), item.getResourceGroup());
-        Optional<Node> nodeOpt = nodeRepository.findByTenantLocationAndNodeLabel(tenantId, location, nodeLabel);
-        try {
-            Node node;
-            if (nodeOpt.isPresent()) {
-                node = nodeOpt.get();
-                log.warn("Node already exists for tenant: {}, location: {}, label: {}", tenantId, location, nodeLabel);
-            } else {
-                NodeCreateDTO createDTO = NodeCreateDTO.newBuilder()
-                    .setLocation(location)
-                    .setManagementIp(ipAddress)
-                    .setLabel(nodeLabel)
-                    .build();
-
-                node = nodeService.createNode(createDTO, ScanType.AZURE_SCAN, tenantId);
-
-                taskSetHandler.sendAzureMonitorTasks(discovery, item, ipAddress, node.getId());
-                taskSetHandler.sendAzureCollectorTasks(discovery, item, ipAddress, node.getId());
-
+            Optional<AzureActiveDiscovery> discoveryOpt = azureActiveDiscoveryRepository.findByTenantIdAndId(tenantId, azureScanItem.getActiveDiscoveryId());
+            if (discoveryOpt.isEmpty()) {
+                log.warn("No Azure Active Discovery found for id: {}", azureScanItem.getActiveDiscoveryId());
+                continue;
             }
-            List<TagCreateDTO> tags = discovery.getTags().stream()
-                .map(tag -> TagCreateDTO.newBuilder().setName(tag.getName()).build())
-                .toList();
-            tagService.addTags(tenantId, TagCreateListDTO.newBuilder()
-                .addEntityIds(TagEntityIdDTO.newBuilder()
-                    .setNodeId(node.getId()))
-                .addAllTags(tags).build());
-        } catch (EntityExistException e) {
-            log.error("Error while adding new Azure device for tenant {} at location {} with IP {}", tenantId, location, ipAddress);
+            AzureActiveDiscovery discovery = discoveryOpt.get();
+
+            String nodeLabel = String.format("%s (%s)", azureScanItem.getName(), azureScanItem.getResourceGroup());
+
+            //todo: store the ID in the database, currently this is the only way to identify the node at this point
+            Optional<Node> nodeOpt = nodeRepository.findByTenantLocationAndNodeLabel(tenantId, location, nodeLabel);
+
+            try {
+                Node node;
+                if (nodeOpt.isPresent()) {
+                    node = nodeOpt.get();
+                    //todo: perform update if AzureScanner is on a schedule or gets called again
+                    log.warn("Node already exists for tenant: {}, location: {}, label: {}", tenantId, location, nodeLabel);
+                } else {
+                    NodeCreateDTO createDTO = NodeCreateDTO.newBuilder()
+                        .setLocation(location)
+                        .setLabel(nodeLabel)
+                        .setMonitoredState(MonitoredState.UNMONITORED)
+                        .build();
+
+                    node = nodeService.createNode(createDTO, ScanType.AZURE_SCAN, tenantId);
+                    for (AzureScanNetworkInterfaceItem networkInterfaceItem : azureScanItem.getNetworkInterfaceItemsList()) {
+                        ipInterfaceService.createFromAzureScanResult(tenantId, node, networkInterfaceItem);
+                    }
+
+                    long nodeId = node.getId();
+                    taskSetHandler.sendAzureMonitorTasks(discovery, azureScanItem, nodeId);
+                    taskSetHandler.sendAzureCollectorTasks(discovery, azureScanItem, nodeId);
+                }
+                List<TagCreateDTO> tags = discovery.getTags().stream()
+                    .map(tag -> TagCreateDTO.newBuilder().setName(tag.getName()).build())
+                    .toList();
+                tagService.addTags(tenantId, TagCreateListDTO.newBuilder()
+                    .addEntityIds(TagEntityIdDTO.newBuilder()
+                        .setNodeId(node.getId()))
+                    .addAllTags(tags).build());
+            } catch (EntityExistException e) {
+                log.error("Error while adding new Azure node for tenant {} at location {}", tenantId, location);
+            }
+
         }
     }
 
@@ -225,7 +225,7 @@ public class ScannerResponseService {
         if (nodeOpt.isPresent()) {
             Node node = nodeOpt.get();
             Map<Integer, SnmpInterface> ifIndexSNMPMap = new HashMap<>();
-            nodeService.updateNodeInfo(node, result.getNodeInfo());
+            nodeService.updateNodeInfo(node, result.getNodeInfo(), MonitoredState.UNMONITORED);
 
             for (SnmpInterfaceResult snmpIfResult : result.getSnmpInterfacesList()) {
                 SnmpInterface snmpInterface = snmpInterfaceService.createOrUpdateFromScanResult(tenantId, node, snmpIfResult);

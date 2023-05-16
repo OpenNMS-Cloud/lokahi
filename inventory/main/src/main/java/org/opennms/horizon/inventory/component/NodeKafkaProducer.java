@@ -34,7 +34,6 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import org.opennms.horizon.inventory.dto.NodeDTO;
 import org.opennms.horizon.inventory.model.Node;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
@@ -45,7 +44,6 @@ public class NodeKafkaProducer {
     private String topic;
 
     @Autowired
-    @Qualifier("byteArrayTemplate")
     private KafkaTemplate<String, byte[]> kafkaTemplate;
 
     @PostUpdate
@@ -58,7 +56,7 @@ public class NodeKafkaProducer {
             .setNodeLabel(node.getNodeLabel())
             .build();
 
-        var record = new ProducerRecord<String, byte[]>(topic, proto.toByteArray());
-        kafkaTemplate.send(record);
+        var producerRecord = new ProducerRecord<String, byte[]>(topic, proto.toByteArray());
+        kafkaTemplate.send(producerRecord);
     }
 }

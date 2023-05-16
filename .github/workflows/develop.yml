@@ -225,6 +225,9 @@ jobs:
             echo "K8S CLUSTER STATUS"
             kubectl -n hs-instance get all
 
+            echo "K8S CLUSTER SECRETS"
+            kubectl -n hs-instance get secrets
+
             echo ""
 
             for pod in $(kubectl -n hs-instance get pod | awk '$1 != "NAME" { print $1; }')
@@ -237,7 +240,7 @@ jobs:
 
             echo ""
             echo "=== K8S APPLICATION LOGS ==="
-            kubectl logs -n hs-instance -l appdomain=opennms --tail=-1 --prefix --all-containers
+            kubectl logs -n hs-instance -l appdomain=opennms --tail=-1 --prefix --all-containers --ignore-errors=true
 
             echo ${{ github.ref  }}
 

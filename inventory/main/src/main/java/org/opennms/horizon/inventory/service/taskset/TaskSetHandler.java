@@ -62,28 +62,31 @@ public class TaskSetHandler {
         }
     }
 
-    public void sendAzureMonitorTasks(AzureActiveDiscovery discovery, AzureScanItem item, String ipAddress, long nodeId) {
+    public void sendAzureMonitorTasks(AzureActiveDiscovery discovery, AzureScanItem item, long nodeId) {
         String tenantId = discovery.getTenantId();
         String location = discovery.getLocation();
 
-        TaskDefinition task = monitorTaskSetService.addAzureMonitorTask(discovery, item, ipAddress, nodeId);
+        TaskDefinition task = monitorTaskSetService.addAzureMonitorTask(discovery, item, nodeId);
         taskSetPublisher.publishNewTasks(tenantId, location, Arrays.asList(task));
     }
 
     public void sendCollectorTask(String location, MonitorType monitorType, IpInterface ipInterface, long nodeId) {
         String tenantId = ipInterface.getTenantId();
-        var snmpConfig = snmpConfigService.getSnmpConfig(tenantId, location, ipInterface.getIpAddress());
-        var task = collectorTaskSetService.getCollectorTask(monitorType, ipInterface, nodeId, snmpConfig.orElse(null));
-        if (task != null) {
-            taskSetPublisher.publishNewTasks(tenantId, location, Arrays.asList(task));
+        // Collectors should only be invoked for primary interface
+        if (monitorType.equals(MonitorType.SNMP) && ipInterface.getSnmpPrimary()) {
+            var snmpConfig = snmpConfigService.getSnmpConfig(tenantId, location, ipInterface.getIpAddress());
+            var task = collectorTaskSetService.addSnmpCollectorTask(ipInterface, nodeId, snmpConfig.orElse(null));
+            if (task != null) {
+                taskSetPublisher.publishNewTasks(tenantId, location, Arrays.asList(task));
+            }
         }
     }
 
-    public void sendAzureCollectorTasks(AzureActiveDiscovery discovery, AzureScanItem item, String ipAddress, long nodeId) {
+    public void sendAzureCollectorTasks(AzureActiveDiscovery discovery, AzureScanItem item, long nodeId) {
         String tenantId = discovery.getTenantId();
         String location = discovery.getLocation();
 
-        TaskDefinition task = collectorTaskSetService.addAzureCollectorTask(discovery, item, ipAddress, nodeId);
+        TaskDefinition task = collectorTaskSetService.addAzureCollectorTask(discovery, item, nodeId);
         taskSetPublisher.publishNewTasks(tenantId, location, Arrays.asList(task));
     }
 

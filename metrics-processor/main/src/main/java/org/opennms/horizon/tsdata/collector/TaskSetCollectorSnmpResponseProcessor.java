@@ -35,7 +35,7 @@ import org.opennms.horizon.snmp.api.SnmpValueType;
 import org.opennms.horizon.tenantmetrics.TenantMetricsTracker;
 import org.opennms.horizon.timeseries.cortex.CortexTSS;
 import org.opennms.horizon.tsdata.MetricNameConstants;
-import org.opennms.taskset.contract.CollectorResponse;
+import org.opennms.taskset.contract.TaskResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -43,6 +43,8 @@ import prometheus.PrometheusTypes;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.util.HashMap;
+import java.util.Map;
 
 @Component
 public class TaskSetCollectorSnmpResponseProcessor {
@@ -51,14 +53,20 @@ public class TaskSetCollectorSnmpResponseProcessor {
 
     private final CortexTSS cortexTSS;
     private final TenantMetricsTracker tenantMetricsTracker;
-
+    
     public TaskSetCollectorSnmpResponseProcessor(CortexTSS cortexTSS, TenantMetricsTracker tenantMetricsTracker) {
         this.cortexTSS = cortexTSS;
         this.tenantMetricsTracker = tenantMetricsTracker;
     }
 
-    public void processSnmpCollectorResponse(String tenantId, CollectorResponse response, String[] labelValues) throws IOException {
+    public void processSnmpCollectorResponse(String tenantId, TaskResult taskResult) throws IOException {
+        var response = taskResult.getCollectorResponse();
         Any collectorMetric = response.getResult();
+        Map<String, String> labels = new HashMap<>();
+        labels.put("location", taskResult.getLocation());
+        labels.put("system_id", taskResult.getSystemId());
+        labels.put("monitor", response.getMonitorType().name());
+        labels.put("node_id", String.valueOf(response.getNodeId()));
         var snmpResponse = collectorMetric.unpack(SnmpResponseMetric.class);
         for (SnmpResultMetric snmpResult : snmpResponse.getResultsList()) {
             try {
@@ -66,11 +74,22 @@ public class TaskSetCollectorSnmpResponseProcessor {
                 builder.addLabels(PrometheusTypes.Label.newBuilder()
                     .setName(MetricNameConstants.METRIC_NAME_LABEL)
                     .setValue(CortexTSS.sanitizeMetricName(snmpResult.getAlias())));
-                for (int i = 0; i < MetricNameConstants.MONITOR_METRICS_LABEL_NAMES.length; i++) {
-                    builder.addLabels(prometheus.PrometheusTypes.Label.newBuilder()
-                        .setName(CortexTSS.sanitizeLabelName(MetricNameConstants.MONITOR_METRICS_LABEL_NAMES[i]))
-                        .setValue(CortexTSS.sanitizeLabelValue(labelValues[i])));
+
+                labels.forEach((name, value) -> builder.addLabels(PrometheusTypes.Label.newBuilder()
+                    .setName(CortexTSS.sanitizeLabelName(name))
+                    .setValue(CortexTSS.sanitizeLabelValue(value))));
+
+                builder.addLabels(PrometheusTypes.Label.newBuilder().setName("if_name")
+                    .setValue(snmpResult.getIfName()));
+
+                if (snmpResult.hasIpAddress()) {
+                    builder.addLabels(PrometheusTypes.Label.newBuilder().setName("ip_address")
+                        .setValue(snmpResult.getIpAddress()));
+                    // TODO: Remove instance from ip_address
+                    builder.addLabels(PrometheusTypes.Label.newBuilder().setName("instance")
+                        .setValue(snmpResult.getIpAddress()));
                 }
+
                 int type = snmpResult.getValue().getTypeValue();
                 switch (type) {
                     case SnmpValueType.INT32_VALUE:

@@ -28,7 +28,7 @@
 
 package org.opennms.horizon.alertservice.service;
 
-import org.opennms.horizon.alertservice.api.AlertLifecyleListener;
+import org.opennms.horizon.alertservice.api.AlertLifecycleListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -38,24 +38,24 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
 
 /**
- * Helper class used to track and interact with {@link AlertLifecyleListener}s.
+ * Helper class used to track and interact with {@link AlertLifecycleListener}s.
  */
 @Service
 public class AlertListenerRegistry {
     private static final Logger LOG = LoggerFactory.getLogger(AlertListenerRegistry.class);
 
-    private final List<AlertLifecyleListener> listeners = new CopyOnWriteArrayList<>();
+    private final List<AlertLifecycleListener> listeners = new CopyOnWriteArrayList<>();
 
-    public void addListener(AlertLifecyleListener listener) {
+    public void addListener(AlertLifecycleListener listener) {
         listeners.add(listener);
     }
 
-    public void removeListener(AlertLifecyleListener listener) {
+    public void removeListener(AlertLifecycleListener listener) {
         listeners.remove(listener);
     }
 
-    public void forEachListener(Consumer<AlertLifecyleListener> callback) {
-        for (AlertLifecyleListener listener : listeners) {
+    public void forEachListener(Consumer<AlertLifecycleListener> callback) {
+        for (AlertLifecycleListener listener : listeners) {
             try {
                 callback.accept(listener);
             } catch (Exception e) {

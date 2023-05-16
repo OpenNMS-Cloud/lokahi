@@ -85,7 +85,7 @@ public class Netflow5MessageBuilder implements MessageBuilder {
                     break;
                 case "@samplingAlgorithm":
                     Long saValue = getLongValue(value);
-                    SamplingAlgorithm samplingAlgorithm = SamplingAlgorithm.UNASSIGNED;
+                    SamplingAlgorithm samplingAlgorithm = SamplingAlgorithm.UNDEFINED_SAMPLING_ALGORITHM;
                     if (saValue != null) {
                         switch (saValue.intValue()) {
                             case 1:

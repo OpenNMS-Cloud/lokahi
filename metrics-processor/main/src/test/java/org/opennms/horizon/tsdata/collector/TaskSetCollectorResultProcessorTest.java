@@ -31,7 +31,6 @@ package org.opennms.horizon.tsdata.collector;
 
 import com.google.protobuf.Any;
 import nl.altindag.log.LogCaptor;
-import nl.altindag.log.model.LogEvent;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -42,9 +41,6 @@ import org.opennms.taskset.contract.TaskResult;
 
 import java.io.IOException;
 import java.util.Objects;
-import java.util.function.Predicate;
-
-import static org.junit.Assert.assertTrue;
 
 public class TaskSetCollectorResultProcessorTest {
 
@@ -150,14 +146,7 @@ public class TaskSetCollectorResultProcessorTest {
         Mockito.verify(mockTaskSetCollectorSnmpResponseProcessor)
             .processSnmpCollectorResponse(
                 Mockito.eq("x-tenant-id-x"),
-                Mockito.same(testCollectorResponseSnmp),
-                Mockito.eq(new String[]{
-                    "x-ip-address-x",
-                    "x-location-x",
-                    "x-system-id-x",
-                    MonitorType.SNMP.name(),
-                    "131313"
-                })
+                Mockito.same(testTaskResult)
             );
     }
 

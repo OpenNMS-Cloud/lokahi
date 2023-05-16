@@ -49,23 +49,25 @@ public final class Constants {
     public static final String NETWORK_IN_BITS = "network_in_bits";
     public static final String NETWORK_OUT_BITS = "network_out_bits";
 
-    public static final String QUERY_FOR_TOTAL_NETWORK_IN_BITS = "irate(ifHCInOctets[4m])*8";
-    public static final String QUERY_FOR_TOTAL_NETWORK_OUT_BITS = "irate(ifHCOutOctets[4m])*8";
+    public static final String QUERY_FOR_TOTAL_NETWORK_IN_BITS = "irate(ifHCInOctets%s[4m])*8";
+    public static final String QUERY_FOR_TOTAL_NETWORK_OUT_BITS = "irate(ifHCOutOctets%s[4m])*8";
 
-    public static final String QUERY_FOR_AZURE_TOTAL_NETWORK_IN_BITS = "sum(sum_over_time(network_in_total_bytes[4m]))*8";
-    public static final String QUERY_FOR_AZURE_TOTAL_NETWORK_OUT_BITS = "sum(sum_over_time(network_out_total_bytes[4m]))*8";
+    public static final String QUERY_FOR_AZURE_TOTAL_NETWORK_IN_BITS = "sum(sum_over_time(network_in_total_bytes%s[4m]))*8";
+    public static final String QUERY_FOR_AZURE_TOTAL_NETWORK_OUT_BITS = "sum(sum_over_time(network_out_total_bytes%s[4m]))*8";
 
     public static final String BW_IN_PERCENTAGE = "bw_util_network_in";
     public static final String BW_OUT_PERCENTAGE = "bw_util_network_out";
 
-    public static final String QUERY_FOR_BW_IN_UTIL_PERCENTAGE = "(irate(ifHCInOctets[4m])*8) / (ifHighSpeed *1000000) * 100 unless ifHighSpeed == 0";
-    public static final String QUERY_FOR_BW_OUT_UTIL_PERCENTAGE = "(irate(ifHCOutOctets[4m])*8) / (ifHighSpeed *1000000) * 100 unless ifHighSpeed == 0";
+    public static final String QUERY_FOR_BW_IN_UTIL_PERCENTAGE = "(irate(ifHCInOctets%1$s[4m])*8) " +
+        "/ (ifHighSpeed%1$s *1000000) * 100 unless ifHighSpeed%1$s == 0";
+    public static final String QUERY_FOR_BW_OUT_UTIL_PERCENTAGE = "(irate(ifHCOutOctets%1$s[4m])*8) " +
+        "/ (ifHighSpeed%1$s *1000000) * 100 unless ifHighSpeed%1$s == 0";
 
     public static final String NETWORK_ERRORS_IN = "network_errors_in";
     public static final String NETWORK_ERRORS_OUT = "network_errors_out";
 
-    public static final String QUERY_FOR_NETWORK_ERRORS_IN = "irate(ifInErrors[4m])";
-    public static final String QUERY_FOR_NETWORK_ERRORS_OUT = "irate(ifOutErrors[4m])";
+    public static final String QUERY_FOR_NETWORK_ERRORS_IN = "irate(ifInErrors%s[4m])";
+    public static final String QUERY_FOR_NETWORK_ERRORS_OUT = "irate(ifOutErrors%s[4m])";
 
     // SNMP Specific Metric Names
     public static final String IF_IN_OCTETS = "ifInOctets";

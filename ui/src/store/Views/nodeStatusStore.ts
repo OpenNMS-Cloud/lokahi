@@ -1,7 +1,6 @@
 import { defineStore } from 'pinia'
 import { useNodeStatusQueries } from '@/store/Queries/nodeStatusQueries'
-
-const AZURE_SCAN = 'AZURE_SCAN'
+import { AZURE_SCAN } from '@/types'
 
 export const useNodeStatusStore = defineStore('nodeStatusStore', () => {
   const nodeStatusQueries = useNodeStatusQueries()

@@ -38,7 +38,6 @@ import org.opennms.horizon.shared.ipc.sink.api.SinkModule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
@@ -58,7 +57,6 @@ public class FlowKafkaForwarder implements MessageConsumer<Message, Message> {
     private final Logger logger = LoggerFactory.getLogger(FlowKafkaForwarder.class);
 
     @Autowired
-    @Qualifier("kafkaByteArrayProducerTemplate")
     private KafkaTemplate<String, byte[]> kafkaTemplate;
 
     @Autowired

@@ -15,11 +15,9 @@
     <repository>mvn:org.opennms.horizon.minion/flows-features/${project.version}/xml/features</repository>
     <repository>mvn:org.opennms.horizon.minion/azure-plugin/${project.version}/xml/features</repository>
     <repository>mvn:org.opennms.horizon.minion/nodescan-plugin/${project.version}/xml/features</repository>
-    <repository>mvn:org.opennms.horizon.minion/minion-bootstrap-features/${project.version}/xml/features</repository>
 
 
     <feature name="minion-ng">
-        <feature>minion-bootstrap-all</feature>
         <feature>taskset-minion</feature>
         <feature>icmp-plugins</feature>
         <feature>icmp-rpc</feature>

@@ -112,8 +112,7 @@ public class TSDBMetricsService {
             setMonitorTypeByScanType(node, metricLabels);
         }
 
-        String queryString = queryService
-            .getQueryString(nodeOpt, name, metricLabels, timeRange, timeRangeUnit);
+        String queryString = queryService.getQueryString(nodeOpt, name, metricLabels, timeRange, timeRangeUnit);
 
         if (queryService.isRangeQuery(name)) {
             return getRangeMetrics(tenantId, queryString);

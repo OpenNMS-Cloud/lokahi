@@ -24,6 +24,7 @@ IMAGE_TAG=${3:-local}
 IMAGE_PREFIX=${4:-opennms}
 KIND_CLUSTER_NAME=kind-test
 NAMESPACE=hs-instance
+TIMEOUT=${TIMEOUT:-5m0s}
 
 #### FUNCTION DEF
 ################################
@@ -64,32 +65,13 @@ cluster_install_kubelet_config() {
 }
 
 create_ssl_cert_secret () {
-
-  # Create server CA certificate
-  openssl genrsa -out tmp/ca.key
-  openssl req -new -x509 -days 365 -key tmp/ca.key -subj "/CN=$DOMAIN/O=Test/C=US" -out tmp/ca.crt
-  # Load into kubernetes
-  kubectl -n $NAMESPACE delete secrets/root-ca-certificate || true
-  kubectl -n $NAMESPACE create secret tls root-ca-certificate --cert tmp/ca.crt --key tmp/ca.key || die "Could not upload root-ca-certificate"
+  # generate CA and ingress certs
+  ./load-or-generate-secret.sh $NAMESPACE "opennms-ca" "root-ca-certificate" "tmp/ca.key" "tmp/ca.crt"
+  ./generate-and-sign-certificate.sh $NAMESPACE "minion.$DOMAIN" "opennms-minion-gateway-certificate" "tmp/ca.key" "tmp/ca.crt"
+  ./generate-and-sign-certificate.sh $NAMESPACE "$DOMAIN" "opennms-ui-certificate" "tmp/ca.key" "tmp/ca.crt"
 
   # Generate client CA certificate
-  openssl genrsa -out tmp/client-ca.key
-  openssl req -new -x509 -days 365 -key tmp/client-ca.key -subj "/CN=ClientCA/O=Test/C=CA" -out tmp/client-ca.crt
-  # Load into kubernetes
-  kubectl -n $NAMESPACE delete secrets/client-root-ca-certificate || true
-  kubectl -n $NAMESPACE create secret generic client-root-ca-certificate --from-file=tls.crt=tmp/client-ca.crt --from-file=tls.key=tmp/client-ca.key --from-file=ca.crt=tmp/client-ca.crt || die "Could not upload client-root-ca-certificate"
-
-  # UI / Keycloak ingress certificate
-  openssl req -newkey rsa:2048 -nodes -keyout tmp/server.key -subj "/CN=$DOMAIN/O=Test/C=US" -out tmp/server.csr
-  openssl x509 -req -extfile <(printf "subjectAltName=DNS:$DOMAIN") -days 365 -in tmp/server.csr -CA tmp/ca.crt -CAkey tmp/ca.key -CAcreateserial -out tmp/server.crt || die "ui certificate signing failed"
-  kubectl -n $NAMESPACE delete secrets/tls-cert-wildcard || true
-  kubectl -n $NAMESPACE create secret tls tls-cert-wildcard --cert tmp/server.crt --key tmp/server.key
-
-  # Minion Gateway ingress certificate
-  openssl req -newkey rsa:2048 -nodes -keyout tmp/mgw.key -subj "/CN=minion.$DOMAIN/O=Test/C=US" -out tmp/mgw.csr
-  openssl x509 -req -extfile <(printf "subjectAltName=DNS:minion.$DOMAIN") -days 365 -in tmp/mgw.csr -CA tmp/ca.crt -CAkey tmp/ca.key -CAcreateserial -out tmp/mgw.crt || die "minion-gateway certificate signing failed"
-  kubectl -n $NAMESPACE delete secrets/opennms-minion-gateway-certificate || true
-  kubectl -n $NAMESPACE create secret tls opennms-minion-gateway-certificate --cert tmp/mgw.crt --key tmp/mgw.key
+  ./load-or-generate-secret.sh $NAMESPACE "client-ca" "client-root-ca-certificate" "tmp/ca.key" "tmp/ca.crt"
 }
 
 # WHEN kind fixes the bug, https://github.com/kubernetes-sigs/kind/issues/3063,
@@ -171,6 +153,10 @@ load_images_to_kind_using_normal_docker () {
 	save_part_of_normal_docker_image_load | load_part_of_normal_docker_image_load
 }
 
+create_namespace () {
+  kubectl create namespace $NAMESPACE
+}
+
 install_helm_chart_custom_images () {
   echo
   echo ________________Installing Horizon Stream________________
@@ -178,7 +164,7 @@ install_helm_chart_custom_images () {
 
   helm upgrade -i horizon-stream ./../charts/opennms \
   -f ./tmp/install-local-opennms-horizon-stream-custom-images-values.yaml \
-  --namespace $NAMESPACE --create-namespace \
+  --namespace $NAMESPACE \
   --set OpenNMS.Alert.Image=${IMAGE_PREFIX}/horizon-stream-alert:${IMAGE_TAG} \
   --set OpenNMS.DataChoices.Image=${IMAGE_PREFIX}/horizon-stream-datachoices:${IMAGE_TAG} \
   --set OpenNMS.Events.Image=${IMAGE_PREFIX}/horizon-stream-events:${IMAGE_TAG} \
@@ -192,7 +178,10 @@ install_helm_chart_custom_images () {
   --set OpenNMS.MinionCertificateVerifier.Image=${IMAGE_PREFIX}/horizon-stream-minion-certificate-verifier:${IMAGE_TAG} \
   --set OpenNMS.Notification.Image=${IMAGE_PREFIX}/horizon-stream-notification:${IMAGE_TAG} \
   --set OpenNMS.API.Image=${IMAGE_PREFIX}/horizon-stream-rest-server:${IMAGE_TAG} \
-  --set OpenNMS.UI.Image=${IMAGE_PREFIX}/horizon-stream-ui:${IMAGE_TAG}
+  --set OpenNMS.UI.Image=${IMAGE_PREFIX}/horizon-stream-ui:${IMAGE_TAG} \
+  --wait --timeout "${TIMEOUT}"
+
+  echo Helm chart installation completed
 }
 
 #### MAIN
@@ -226,20 +215,23 @@ if [ $CONTEXT == "local" ]; then
 
   create_cluster
   cluster_install_kubelet_config
+  create_namespace
+  create_ssl_cert_secret
 
   echo
   echo ________________Installing Horizon Stream________________
   echo
-  helm upgrade -i horizon-stream ./../charts/opennms -f ./tmp/install-local-opennms-horizon-stream-values.yaml --namespace $NAMESPACE --create-namespace
+  helm upgrade -i horizon-stream ./../charts/opennms -f ./tmp/install-local-opennms-horizon-stream-values.yaml --namespace $NAMESPACE --wait --timeout "${TIMEOUT}"
   if [ $? -ne 0 ]; then exit; fi
 
-  create_ssl_cert_secret
   cluster_ready_check
 
 elif [ "$CONTEXT" == "custom-images" ]; then
 
   create_cluster
   cluster_install_kubelet_config
+  create_namespace
+  create_ssl_cert_secret
 
   # Will add a kind-registry here at some point, see .github/ for sample script.
   echo "START LOADING IMAGES INTO KIND AT $(date)"
@@ -252,13 +244,14 @@ elif [ "$CONTEXT" == "custom-images" ]; then
 
   if [ $? -ne 0 ]; then exit; fi
 
-  create_ssl_cert_secret
   cluster_ready_check
 
 elif [ "$CONTEXT" == "cicd" ]; then
 
   create_cluster
   cluster_install_kubelet_config
+  create_namespace
+  create_ssl_cert_secret
 
   # assumes remote docker registry, no need to load images into cluster
   install_helm_chart_custom_images
@@ -268,7 +261,6 @@ elif [ "$CONTEXT" == "cicd" ]; then
 
   if [ $? -ne 0 ]; then exit; fi
 
-  create_ssl_cert_secret
   cluster_ready_check
 
 elif [ $CONTEXT == "existing-k8s" ]; then
@@ -276,7 +268,7 @@ elif [ $CONTEXT == "existing-k8s" ]; then
   echo
   echo ________________Installing Horizon Stream________________
   echo
-  helm upgrade -i horizon-stream ./../charts/opennms -f ./tmp/install-local-opennms-horizon-stream-values.yaml --namespace $NAMESPACE --create-namespace
+  helm upgrade -i horizon-stream ./../charts/opennms -f ./tmp/install-local-opennms-horizon-stream-values.yaml --namespace $NAMESPACE --create-namespace --wait --timeout "${TIMEOUT}"
   if [ $? -ne 0 ]; then exit; fi
 
   cluster_ready_check

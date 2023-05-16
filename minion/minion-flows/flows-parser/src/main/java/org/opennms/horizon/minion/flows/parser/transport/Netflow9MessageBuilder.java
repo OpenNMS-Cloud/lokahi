@@ -179,7 +179,7 @@ public class Netflow9MessageBuilder implements MessageBuilder {
                     break;
                 case "SAMPLING_ALGORITHM":
                     Long saValue = getLongValue(value);
-                    SamplingAlgorithm samplingAlgorithm = SamplingAlgorithm.UNASSIGNED;
+                    SamplingAlgorithm samplingAlgorithm = SamplingAlgorithm.UNDEFINED_SAMPLING_ALGORITHM;
                     if (saValue != null) {
                         if (saValue.intValue() == 1) {
                             samplingAlgorithm = SamplingAlgorithm.SYSTEMATIC_COUNT_BASED_SAMPLING;

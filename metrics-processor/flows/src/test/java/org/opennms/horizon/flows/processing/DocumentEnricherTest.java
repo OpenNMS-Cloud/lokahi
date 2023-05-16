@@ -32,11 +32,13 @@ import com.google.common.collect.Lists;
 import com.google.protobuf.UInt32Value;
 import com.google.protobuf.UInt64Value;
 import com.spotify.hamcrest.pojo.IsPojo;
+
 import org.hamcrest.Matchers;
 import org.junit.Assert;
 import org.junit.Test;
 import org.opennms.dataplatform.flows.document.Direction;
 import org.opennms.dataplatform.flows.document.FlowDocument;
+import org.opennms.dataplatform.flows.document.NetflowVersion;
 import org.opennms.horizon.flows.classification.ClassificationRequest;
 import org.opennms.horizon.flows.classification.IpAddr;
 
@@ -66,6 +68,8 @@ public class DocumentEnricherTest {
             .setDstPort(UInt32Value.of(80))
             .setProtocol(UInt32Value.of(6)) // TCP
             .setLocation("Default")
+            .setNetflowVersion(NetflowVersion.V5)
+            .setTenantId("tenantId")
             .setExporterAddress("127.0.0.1");
 
         return flow.build();
@@ -106,12 +110,12 @@ public class DocumentEnricherTest {
         final DocumentEnricherImpl enricher = factory.getEnricher();
 
         final var d1 = FlowDocument.newBuilder()
-        .setSrcAddress("1.1.1.1")
-        .setSrcPort(UInt32Value.of(1))
-        .setDstAddress("2.2.2.2")
-        .setDstPort(UInt32Value.of(2))
-        .setProtocol(UInt32Value.of(6))
-        .setDirection(Direction.INGRESS);
+            .setSrcAddress("1.1.1.1")
+            .setSrcPort(UInt32Value.of(1))
+            .setDstAddress("2.2.2.2")
+            .setDstPort(UInt32Value.of(2))
+            .setProtocol(UInt32Value.of(6))
+            .setDirection(Direction.INGRESS);
 
         final ClassificationRequest c1 = enricher.createClassificationRequest(d1);
         Assert.assertEquals(IpAddr.of("1.1.1.1"), c1.getSrcAddress());
@@ -120,12 +124,12 @@ public class DocumentEnricherTest {
         Assert.assertEquals(Integer.valueOf(2), c1.getDstPort());
 
         final var d2 = FlowDocument.newBuilder()
-        .setSrcAddress("1.1.1.1")
-        .setSrcPort(UInt32Value.of(1))
-        .setDstAddress("2.2.2.2")
-        .setDstPort(UInt32Value.of(2))
-        .setProtocol(UInt32Value.of(6))
-        .setDirection(Direction.EGRESS);
+            .setSrcAddress("1.1.1.1")
+            .setSrcPort(UInt32Value.of(1))
+            .setDstAddress("2.2.2.2")
+            .setDstPort(UInt32Value.of(2))
+            .setProtocol(UInt32Value.of(6))
+            .setDirection(Direction.EGRESS);
 
         // check that fields stay as theay are even when EGRESS is used
         final ClassificationRequest c2 = enricher.createClassificationRequest(d2);
@@ -135,11 +139,11 @@ public class DocumentEnricherTest {
         Assert.assertEquals(Integer.valueOf(2), c2.getDstPort());
 
         final var d3 = FlowDocument.newBuilder()
-        .setSrcAddress("1.1.1.1")
-        .setSrcPort(UInt32Value.of(1))
-        .setDstAddress("2.2.2.2")
-        .setDstPort(UInt32Value.of(2))
-        .setProtocol(UInt32Value.of(6));
+            .setSrcAddress("1.1.1.1")
+            .setSrcPort(UInt32Value.of(1))
+            .setDstAddress("2.2.2.2")
+            .setDstPort(UInt32Value.of(2))
+            .setProtocol(UInt32Value.of(6));
 
         final ClassificationRequest c3 = enricher.createClassificationRequest(d3);
         Assert.assertEquals(IpAddr.of("1.1.1.1"), c3.getSrcAddress());
@@ -160,10 +164,7 @@ public class DocumentEnricherTest {
         final List<FlowDocument> flows = Lists.newArrayList(flow1, flow2, flow3);
 
         final List<FlowDocument> docs = enricher.enrich(flows, "tenantId");
-        List<FlowDocument> docs1 = new ArrayList<>();
-        docs1.add(docs.get(0));
-        Assert.assertThat(docs.get(0), Matchers.is(
-            IsPojo.pojo(FlowDocument.class)
+        Assert.assertThat(docs.get(0), Matchers.is(IsPojo.pojo(FlowDocument.class)
                 .where(FlowDocument::getTimestamp, Matchers.equalTo(flow1.getTimestamp()))
                 .where(FlowDocument::getFirstSwitched, Matchers.equalTo(flow1.getFirstSwitched()))
                 .where(FlowDocument::getDeltaSwitched, Matchers.equalTo(flow1.getDeltaSwitched()))
@@ -183,5 +184,10 @@ public class DocumentEnricherTest {
                 .where(FlowDocument::getFirstSwitched, Matchers.is(UInt64Value.of(flow3.getFirstSwitched().getValue() + 3600_000L)))
                 .where(FlowDocument::getDeltaSwitched, Matchers.is(UInt64Value.of(flow3.getDeltaSwitched().getValue() + 3600_000L)))
                 .where(FlowDocument::getLastSwitched, Matchers.is(UInt64Value.of(flow3.getLastSwitched().getValue() + 3600_000L)))));
+
+        docs.forEach(doc -> {
+            Assert.assertEquals(NetflowVersion.V5, doc.getNetflowVersion());
+            Assert.assertEquals("tenantId", doc.getTenantId());
+        });
     }
 }

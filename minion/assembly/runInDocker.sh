@@ -11,10 +11,12 @@ MINION_GATEWAY_PORT=1443
 MINION_GATEWAY_TLS="true"
 
 CERT_ROOTDIR="$(pwd)/target/certs"
-CA_CERT_FILE="${CERT_ROOTDIR}/CA.cert"
-CLIENT_KEY_FILE="${CERT_ROOTDIR}/client.key"
-CLIENT_CERT_FILE="${CERT_ROOTDIR}/client.signed.cert"
-CLIENT_KEY_IS_PKCS12="false"
+CLIENT_KEYSTORE="${CERT_ROOTDIR}/minion.p12"
+CLIENT_KEYSTORE_TYPE="pkcs12"
+CLIENT_KEYSTORE_PASSWORD="changeme"
+CLIENT_TRUSTSTORE="${CERT_ROOTDIR}/CA.cert"
+CLIENT_TRUSTSTORE_TYPE="file"
+CLIENT_TRUSTSTORE_PASSWORD=""
 
 # Prevent hostname verification failures by setting the expected cert "hostname"
 OVERRIDE_AUTHORITY="minion.onmshs.local"
@@ -74,6 +76,10 @@ docker volume rm minion-certs 2>1 > /dev/null && docker volume create minion-cer
 if [ "${EXTRACT_TILT_CERTS}" == "true" ]; then
   mkdir -p $CERT_ROOTDIR || (echo "Could not create $CERT_ROOTDIR" && exit 1)
 
+  CA_CERT_FILE="${CERT_ROOTDIR}/CA.cert"
+  CLIENT_KEY_FILE="${CERT_ROOTDIR}/client.key"
+  CLIENT_CERT_FILE="${CERT_ROOTDIR}/client.signed.cert"
+
   # extract client mtls ca certificate
   kubectl get secret client-root-ca-certificate -ogo-template='{{index .data "tls.crt" }}' | base64 --decode > "$CERT_ROOTDIR/client-ca.crt"
   kubectl get secret client-root-ca-certificate -ogo-template='{{index .data "tls.key" }}' | base64 --decode > "$CERT_ROOTDIR/client-ca.key"
@@ -82,23 +88,25 @@ if [ "${EXTRACT_TILT_CERTS}" == "true" ]; then
   openssl pkcs8 -topk8 -in "$CERT_ROOTDIR/client.key.pkcs1" -out "$CLIENT_KEY_FILE" -nocrypt
   openssl req -new -key "$CLIENT_KEY_FILE" -out "$CERT_ROOTDIR/client.unsigned.cert" -subj "/C=CA/ST=TBD/L=TBD/O=OpenNMS/CN=local-minion/OU=L:${MINION_LOCATION}/OU=T:opennms-prime"
   openssl x509 -req -in "$CERT_ROOTDIR/client.unsigned.cert" -days 14 -CA "$CERT_ROOTDIR/client-ca.crt" -CAkey "$CERT_ROOTDIR/client-ca.key" -out "$CLIENT_CERT_FILE" -CAcreateserial
+  openssl pkcs12 -export -out "${CLIENT_KEYSTORE}" -inkey "$CLIENT_KEY_FILE" -in "$CLIENT_CERT_FILE" -passout "pass:${CLIENT_KEYSTORE_PASSWORD}"
 
   kubectl get secret root-ca-certificate -ogo-template='{{index .data "ca.crt" }}' | base64 --decode > $CA_CERT_FILE
 
-  DOCKER_CLIENT_CERT_FILE="/opt/karaf/certs/client.signed.cert"
-  DOCKER_CLIENT_KEY_FILE="/opt/karaf/certs/client.key"
-  DOCKER_CA_CERT_FILE="/opt/karaf/certs/CA.cert"
+  DOCKER_KEYSTORE="/opt/karaf/certs/minion.p12"
+  DOCKER_TRUSTSTORE="/opt/karaf/certs/CA.cert"
 
   # create fresh volume to store certs with owner set to user running minion
   docker volume rm minion-certs 2>1 > /dev/null && docker volume create minion-certs
   docker rm -f temp 2>1 > /dev/null #just in case if earlier invocation failed for any reason
   # copy certificates into volume
   docker run -d --rm --name temp -v minion-certs:/opt/karaf/certs alpine tail -f /dev/null
-  docker cp "${CLIENT_CERT_FILE}" "temp:${DOCKER_CLIENT_CERT_FILE}"
-  docker cp "${CLIENT_KEY_FILE}" "temp:${DOCKER_CLIENT_KEY_FILE}"
-  docker cp "${CA_CERT_FILE}" "temp:${DOCKER_CA_CERT_FILE}"
+  docker cp "${CLIENT_KEYSTORE}" "temp:${DOCKER_KEYSTORE}"
+  docker cp "${CLIENT_TRUSTSTORE}" "temp:${DOCKER_TRUSTSTORE}"
   docker exec -it temp sh -c "chown -R 10001:10001 /opt/karaf/certs"
   docker rm -f temp
+
+  CLIENT_KEYSTORE="${DOCKER_KEYSTORE}"
+  CLIENT_TRUSTSTORE="${DOCKER_TRUSTSTORE}"
 fi
 
 #
@@ -116,9 +124,13 @@ exec docker run \
                 -e MINION_LOCATION="${MINION_LOCATION}" \
                 -e MINION_GATEWAY_TLS="${MINION_GATEWAY_TLS}" \
                 -e USE_KUBERNETES="false" \
-                -e CERT_PKG_CLIENT_CERT_PATH="${DOCKER_CLIENT_CERT_FILE}" \
-                -e CERT_PKG_CLIENT_KEY_PATH="${DOCKER_CLIENT_KEY_FILE}" \
-                -e CERT_PKG_CA_CERT_PATH="${DOCKER_CA_CERT_FILE}" \
+                -e GRPC_CLIENT_KEYSTORE="${CLIENT_KEYSTORE}" \
+                -e GRPC_CLIENT_KEYSTORE_TYPE="${CLIENT_KEYSTORE_TYPE}" \
+                -e GRPC_CLIENT_KEYSTORE_PASSWORD="${CLIENT_KEYSTORE_PASSWORD}" \
+                -e GRPC_CLIENT_TRUSTSTORE="${CLIENT_TRUSTSTORE}" \
+                -e GRPC_CLIENT_TRUSTSTORE_TYPE="${CLIENT_TRUSTSTORE_TYPE}" \
+                -e GRPC_CLIENT_TRUSTSTORE_PASSWORD="${CLIENT_TRUSTSTORE_PASSWORD}" \
+                -e GRPC_CLIENT_OVERRIDE_AUTHORITY="${OVERRIDE_AUTHORITY}" \
                 -v "minion-certs:/opt/karaf/certs" \
-                opennms/horizon-stream-minion:latest \
+                opennms/horizon-stream-minion:tilt-be02473c2f7da49a \
 		console

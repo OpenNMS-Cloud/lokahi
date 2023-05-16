@@ -74,13 +74,14 @@
     </changeSet>
 
     <!-- Conditionally create distributed table if Citus is detected -->
-    <changeSet author="jwhite" id="hs-0.1.0-alert-distributed-table">
-        <preConditions onFail="MARK_RAN">
-            <sqlCheck expectedResult="t">SELECT to_regproc('create_distributed_table') IS NOT NULL;</sqlCheck>
-        </preConditions>
-        <sql>
-            SELECT create_distributed_table('alert', 'tenant_id');
-        </sql>
-    </changeSet>
+    <!-- FIXME: Disabled because of HS-1617 -->
+<!--    <changeSet author="jwhite" id="hs-0.1.0-alert-distributed-table">-->
+<!--        <preConditions onFail="MARK_RAN">-->
+<!--            <sqlCheck expectedResult="t">SELECT to_regproc('create_distributed_table') IS NOT NULL;</sqlCheck>-->
+<!--        </preConditions>-->
+<!--        <sql>-->
+<!--            SELECT create_distributed_table('alert', 'tenant_id');-->
+<!--        </sql>-->
+<!--    </changeSet>-->
 
 </databaseChangeLog>

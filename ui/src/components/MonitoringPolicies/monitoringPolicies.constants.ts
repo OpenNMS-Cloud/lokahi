@@ -4,7 +4,7 @@ export enum DetectionMethodTypes {
 }
 
 export enum SNMPEventType {
-  SNMP_COLD_START = 'SNMP_COLD_START',
+  SNMP_COLD_START = 'SNMP_Cold_Start',
   SNMP_WARM_START = 'SNMP_Warm_Start',
   SNMP_AUTHEN_FAILURE = 'SNMP_Authen_Failure',
   SNMP_LINK_DOWN ='SNMP_Link_Down',

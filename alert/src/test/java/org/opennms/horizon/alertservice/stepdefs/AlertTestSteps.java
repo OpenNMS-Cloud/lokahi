@@ -220,11 +220,31 @@ public class AlertTestSteps {
             return listAlertsResponse;
         };
         boolean success = retryUtils.retry(
-                () -> this.doRequestThenCheckJsonPathMatch(call, jsonPathExpressions),
-                result -> result,
-                100,
-                timeout,
-                false);
+            () -> this.doRequestThenCheckJsonPathMatch(call, jsonPathExpressions),
+            result -> result,
+            100,
+            timeout,
+            false);
+        assertTrue("GET request expected to return JSON response matching JSON path expression(s)", success);
+    }
+
+    @Then("List alerts for tenant {string} and label {string}, with timeout {int}ms, until JSON response matches the following JSON path expressions")
+    public void listAlertsForTenantByNode(String tenantId, String label,  int timeout, List<String> jsonPathExpressions) throws Exception {
+        log.info("List for tenant {}, label {}, timeout {}ms, data {}", tenantId, label, timeout, jsonPathExpressions);
+        Supplier<MessageOrBuilder> call = () -> {
+            clientUtils.setTenantId(tenantId);
+            Filter filter = Filter.newBuilder().setNodeLabel(label).build();
+            ListAlertsResponse listAlertsResponse = clientUtils.getAlertServiceStub()
+                .listAlerts(ListAlertsRequest.newBuilder().addFilters(filter).setSortBy("id").setSortAscending(true).build());
+            alertsFromLastResponse = listAlertsResponse.getAlertsList();
+            return listAlertsResponse;
+        };
+        boolean success = retryUtils.retry(
+            () -> this.doRequestThenCheckJsonPathMatch(call, jsonPathExpressions),
+            result -> result,
+            100,
+            timeout,
+            false);
         assertTrue("GET request expected to return JSON response matching JSON path expression(s)", success);
     }
 

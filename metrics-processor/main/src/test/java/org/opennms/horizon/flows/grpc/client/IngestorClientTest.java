@@ -118,7 +118,7 @@ class IngestorClientTest {
             .setApplication("any application")
             .setDirection(Direction.INGRESS)
             .setHost("any host")
-            .setSamplingAlgorithm(SamplingAlgorithm.UNASSIGNED)
+            .setSamplingAlgorithm(SamplingAlgorithm.UNDEFINED_SAMPLING_ALGORITHM)
             .setLocation("test-location")
             .setDstLocality(Locality.PUBLIC)
             .setNetflowVersion(NetflowVersion.V5)

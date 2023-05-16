@@ -28,9 +28,7 @@
 
 package org.opennms.horizon.inventory.component;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
+import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.opennms.horizon.inventory.model.Node;
 import org.opennms.horizon.inventory.model.Tag;
@@ -40,13 +38,13 @@ import org.opennms.horizon.shared.common.tag.proto.TagOperationList;
 import org.opennms.horizon.shared.common.tag.proto.TagOperationProto;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.context.event.EventListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
-import lombok.extern.slf4j.Slf4j;
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Component
 @Slf4j
 @PropertySource("classpath:application.yml")
@@ -57,12 +55,11 @@ public class TagPublisher {
     private final TagRepository tagRepository;
     private final KafkaTemplate<String, byte[]> kafkaTemplate;
 
-    public TagPublisher(TagRepository tagRepository, @Qualifier("byteArrayTemplate") KafkaTemplate<String, byte[]> kafkaTemplate) {
+    public TagPublisher(TagRepository tagRepository, KafkaTemplate<String, byte[]> kafkaTemplate) {
         this.tagRepository = tagRepository;
         this.kafkaTemplate = kafkaTemplate;
     }
 
-    @EventListener(ApplicationReadyEvent.class)
     public void publishAllTags() {
         List<Tag> tags = tagRepository.findAll().stream().filter(t -> t.getNodes().size() > 0).toList();
         TagOperationList list = createTagOperationFromTag(tags, Operation.ASSIGN_TAG);

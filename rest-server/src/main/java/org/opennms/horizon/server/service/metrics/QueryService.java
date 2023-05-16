@@ -50,10 +50,10 @@ import static org.opennms.horizon.server.service.metrics.normalization.Constants
 import static org.opennms.horizon.server.service.metrics.normalization.Constants.QUERY_FOR_AZURE_TOTAL_NETWORK_OUT_BITS;
 import static org.opennms.horizon.server.service.metrics.normalization.Constants.QUERY_FOR_BW_IN_UTIL_PERCENTAGE;
 import static org.opennms.horizon.server.service.metrics.normalization.Constants.QUERY_FOR_BW_OUT_UTIL_PERCENTAGE;
-import static org.opennms.horizon.server.service.metrics.normalization.Constants.QUERY_FOR_TOTAL_NETWORK_BYTES_IN;
-import static org.opennms.horizon.server.service.metrics.normalization.Constants.QUERY_FOR_TOTAL_NETWORK_BYTES_OUT;
 import static org.opennms.horizon.server.service.metrics.normalization.Constants.QUERY_FOR_NETWORK_ERRORS_IN;
 import static org.opennms.horizon.server.service.metrics.normalization.Constants.QUERY_FOR_NETWORK_ERRORS_OUT;
+import static org.opennms.horizon.server.service.metrics.normalization.Constants.QUERY_FOR_TOTAL_NETWORK_BYTES_IN;
+import static org.opennms.horizon.server.service.metrics.normalization.Constants.QUERY_FOR_TOTAL_NETWORK_BYTES_OUT;
 import static org.opennms.horizon.server.service.metrics.normalization.Constants.QUERY_FOR_TOTAL_NETWORK_IN_BITS;
 import static org.opennms.horizon.server.service.metrics.normalization.Constants.QUERY_FOR_TOTAL_NETWORK_OUT_BITS;
 import static org.opennms.horizon.server.service.metrics.normalization.Constants.QUERY_PREFIX;
@@ -75,7 +75,8 @@ public class QueryService {
     public boolean isRangeQuery(String metricName) {
         return TOTAL_NETWORK_BYTES_IN.equals(metricName) || TOTAL_NETWORK_BYTES_OUT.equals(metricName)
             || NETWORK_IN_BITS.equals(metricName) || NETWORK_OUT_BITS.equals(metricName)
-            || BW_IN_PERCENTAGE.equals(metricName) || BW_OUT_PERCENTAGE.equals(metricName);
+            || BW_IN_PERCENTAGE.equals(metricName) || BW_OUT_PERCENTAGE.equals(metricName)
+            || NETWORK_ERRORS_IN.equals(metricName) || NETWORK_ERRORS_OUT.equals(metricName);
     }
 
     public String getQueryString(Optional<NodeDTO> node, String metricName, Map<String, String> labels,
@@ -95,36 +96,48 @@ public class QueryService {
                     return QUERY_PREFIX + QUERY_FOR_TOTAL_NETWORK_BYTES_OUT + rangeQuerySuffixForTotal;
                 case NETWORK_IN_BITS:
                     if (isAzureNode(node)) {
-                        return QUERY_PREFIX + QUERY_FOR_AZURE_TOTAL_NETWORK_IN_BITS + rangeQuerySuffix;
+                        var query = String.format(QUERY_FOR_AZURE_TOTAL_NETWORK_IN_BITS, getLabelsQueryString(labels));
+                        return QUERY_PREFIX + query + rangeQuerySuffix;
                     } else {
-                        return QUERY_PREFIX + QUERY_FOR_TOTAL_NETWORK_IN_BITS + rangeQuerySuffix;
+                        var query = String.format(QUERY_FOR_TOTAL_NETWORK_IN_BITS, getLabelsQueryString(labels));
+                        return QUERY_PREFIX + query + rangeQuerySuffix;
                     }
                 case NETWORK_OUT_BITS:
                     if (isAzureNode(node)) {
-                        return QUERY_PREFIX + QUERY_FOR_AZURE_TOTAL_NETWORK_OUT_BITS + rangeQuerySuffix;
+                        var query = String.format(QUERY_FOR_AZURE_TOTAL_NETWORK_OUT_BITS, getLabelsQueryString(labels));
+                        return QUERY_PREFIX + query + rangeQuerySuffix;
                     } else {
-                        return QUERY_PREFIX + QUERY_FOR_TOTAL_NETWORK_OUT_BITS + rangeQuerySuffix;
+                        var query = String.format(QUERY_FOR_TOTAL_NETWORK_OUT_BITS, getLabelsQueryString(labels));
+                        return QUERY_PREFIX + query + rangeQuerySuffix;
                     }
                 case BW_IN_PERCENTAGE:
                     if (isAzureNode(node)) {
                         throw new RuntimeException(OPERATION_NOT_SUPPORTED_FOR_AZURE_NODE + BW_IN_PERCENTAGE);
+                    } else {
+                        var query = String.format(QUERY_FOR_BW_IN_UTIL_PERCENTAGE, getLabelsQueryString(labels));
+                        return QUERY_PREFIX + query + rangeQuerySuffix;
                     }
-                    return QUERY_PREFIX + QUERY_FOR_BW_IN_UTIL_PERCENTAGE + rangeQuerySuffix;
                 case BW_OUT_PERCENTAGE:
                     if (isAzureNode(node)) {
                         throw new RuntimeException(OPERATION_NOT_SUPPORTED_FOR_AZURE_NODE + BW_OUT_PERCENTAGE);
+                    } else {
+                        var query = String.format(QUERY_FOR_BW_OUT_UTIL_PERCENTAGE, getLabelsQueryString(labels));
+                        return QUERY_PREFIX + query + rangeQuerySuffix;
                     }
-                    return QUERY_PREFIX + QUERY_FOR_BW_OUT_UTIL_PERCENTAGE + rangeQuerySuffix;
                 case NETWORK_ERRORS_IN:
                     if (isAzureNode(node)) {
                         throw new RuntimeException(OPERATION_NOT_SUPPORTED_FOR_AZURE_NODE + NETWORK_ERRORS_IN);
+                    } else {
+                        var query = String.format(QUERY_FOR_NETWORK_ERRORS_IN, getLabelsQueryString(labels));
+                        return QUERY_PREFIX + query + rangeQuerySuffix;
                     }
-                    return QUERY_PREFIX + QUERY_FOR_NETWORK_ERRORS_IN + rangeQuerySuffix;
                 case NETWORK_ERRORS_OUT:
                     if (isAzureNode(node)) {
                         throw new RuntimeException(OPERATION_NOT_SUPPORTED_FOR_AZURE_NODE + NETWORK_ERRORS_OUT);
+                    } else {
+                        var query = String.format(QUERY_FOR_NETWORK_ERRORS_OUT, getLabelsQueryString(labels));
+                        return QUERY_PREFIX + query + rangeQuerySuffix;
                     }
-                    return QUERY_PREFIX + QUERY_FOR_NETWORK_ERRORS_OUT + rangeQuerySuffix;
             }
         }
         String queryString = getQueryString(metricName, labels);
@@ -139,6 +152,22 @@ public class QueryService {
             // tilde will treat the string as a regex
             sb.append(String.format("%s=~\"%s\"", param.getKey(), param.getValue()));
             if (index != queryParams.size() - 1) {
+                sb.append(",");
+            }
+            index++;
+        }
+
+        sb.append("}");
+        return sb.toString();
+    }
+
+    public String getLabelsQueryString(Map<String, String> labels) {
+        StringBuilder sb = new StringBuilder("{");
+
+        int index = 0;
+        for (Map.Entry<String, String> param : labels.entrySet()) {
+            sb.append(String.format("%s=\"%s\"", param.getKey(), param.getValue()));
+            if (index != labels.size() - 1) {
                 sb.append(",");
             }
             index++;

@@ -149,13 +149,14 @@ public class TestContainerRunnerClassRule extends ExternalResource {
             .withEnv("MINION_GATEWAY_HOST", "opennms-minion-ssl-gateway")
             .withEnv("MINION_GATEWAY_PORT", "443")
             .withEnv("MINION_GATEWAY_TLS", "true")
-            .withEnv("CERT_PKG_CLIENT_CERT_PATH", "/opt/karaf/certs/client.cert")
-            .withEnv("CERT_PKG_CLIENT_KEY_PATH", "/opt/karaf/certs/client.key")
-            .withEnv("CERT_PKG_CA_CERT_PATH", "/opt/karaf/certs/CA.cert")
-            .withEnv("CERT_PKG_PASSWORD", "passw0rd")
-            .withEnv("CLIENT_PRIVATE_KEY_IS_PKCS12", "false")
+            .withEnv("GRPC_CLIENT_KEYSTORE", "/opt/karaf/minion.p12")
+            .withEnv("GRPC_CLIENT_KEYSTORE_PASSWORD", "passw0rd")
+            .withEnv("GRPC_CLIENT_TRUSTSTORE", "/opt/karaf/CA.cert")
             .withCopyFileToContainer(
-                MountableFile.forClasspathResource("minion-cert.insecure.zip"), "/opt/karaf/certs.in/minion-cert.zip"
+                MountableFile.forClasspathResource("client/minion.p12"), "/opt/karaf/minion.p12"
+            )
+            .withCopyFileToContainer(
+                MountableFile.forClasspathResource("ssl-gateway/CA.cert"), "/opt/karaf/CA.cert"
             )
             .withLogConsumer(new Slf4jLogConsumer(LOG).withPrefix("APPLICATION"));
 

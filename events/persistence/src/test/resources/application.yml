@@ -13,7 +13,7 @@ spring:
 
   kafka:
     consumer:
-      group-id: "traps-consumer"
+      group-id: "event-service"
       auto-offset-reset: earliest
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.ByteArrayDeserializer

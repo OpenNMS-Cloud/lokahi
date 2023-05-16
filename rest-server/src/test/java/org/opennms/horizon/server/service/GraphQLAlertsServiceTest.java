@@ -96,10 +96,10 @@ public class GraphQLAlertsServiceTest {
 
     @Test
     public void testFindAllAlerts() throws JSONException {
-        doReturn(ListAlertsResponse.newBuilder().addAlerts(alerts1).addAlerts(alerts2).build()).when(mockClient).listAlerts(5, 0, Collections.singletonList("CRITICAL"), TimeRange.TODAY, "tenantId", true, accessToken);
+        doReturn(ListAlertsResponse.newBuilder().addAlerts(alerts1).addAlerts(alerts2).build()).when(mockClient).listAlerts(5, 0, Collections.singletonList("CRITICAL"), TimeRange.TODAY, "tenantId", true, "node", accessToken);
         String request = """
             query {
-              findAllAlerts(pageSize: 5, page: 0, timeRange: TODAY, severities: ["CRITICAL"], sortBy: "tenantId", sortAscending: true) {
+              findAllAlerts(pageSize: 5, page: 0, timeRange: TODAY, severities: ["CRITICAL"], sortBy: "tenantId", sortAscending: true, nodeLabel: "node") {
                 nextPage
                 alerts {
                   tenantId
@@ -125,7 +125,7 @@ public class GraphQLAlertsServiceTest {
             .jsonPath("$.data.findAllAlerts.alerts[0].tenantId").isEqualTo(alerts1.getTenantId())
             .jsonPath("$.data.findAllAlerts.alerts[0].severity").isEqualTo(alerts1.getSeverity().name())
             .jsonPath("$.data.findAllAlerts.alerts[0].reductionKey").isEqualTo(alerts1.getReductionKey());
-        verify(mockClient).listAlerts(5, 0, Collections.singletonList("CRITICAL"), TimeRange.TODAY, "tenantId", true, accessToken);
+        verify(mockClient).listAlerts(5, 0, Collections.singletonList("CRITICAL"), TimeRange.TODAY, "tenantId", true, "node", accessToken);
         verify(mockHeaderUtil, times(1)).getAuthHeader(any(ResolutionEnvironment.class));
     }
 

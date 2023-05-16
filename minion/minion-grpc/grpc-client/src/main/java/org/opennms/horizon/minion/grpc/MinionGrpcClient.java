@@ -30,6 +30,13 @@ package org.opennms.horizon.minion.grpc;
 
 import static org.opennms.horizon.shared.ipc.rpc.api.RpcModule.MINION_HEADERS_MODULE;
 
+import com.codahale.metrics.MetricRegistry;
+import com.google.protobuf.ByteString;
+import com.google.protobuf.Message;
+import io.grpc.Context;
+import io.grpc.ManagedChannel;
+import io.grpc.stub.StreamObserver;
+import io.opentracing.Tracer;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Objects;
@@ -44,10 +51,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 
-import com.google.common.base.Strings;
-import io.grpc.Context;
-import io.grpc.okhttp.NegotiationType;
-import io.grpc.okhttp.OkHttpChannelBuilder;
 import lombok.Setter;
 import org.opennms.cloud.grpc.minion.CloudServiceGrpc;
 import org.opennms.cloud.grpc.minion.CloudServiceGrpc.CloudServiceStub;
@@ -57,8 +60,8 @@ import org.opennms.cloud.grpc.minion.MinionToCloudMessage;
 import org.opennms.cloud.grpc.minion.RpcRequestProto;
 import org.opennms.cloud.grpc.minion.RpcResponseProto;
 import org.opennms.cloud.grpc.minion.SinkMessage;
+import org.opennms.horizon.minion.grpc.channel.ManagedChannelFactory;
 import org.opennms.horizon.minion.grpc.rpc.RpcRequestHandler;
-import org.opennms.horizon.minion.grpc.ssl.MinionGrpcSslContextBuilderFactory;
 import org.opennms.horizon.shared.ipc.rpc.IpcIdentity;
 import org.opennms.horizon.shared.ipc.rpc.api.minion.ClientRequestDispatcher;
 import org.opennms.horizon.shared.ipc.sink.api.SendQueueFactory;
@@ -69,16 +72,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.slf4j.MDC.MDCCloseable;
-
-import com.codahale.metrics.MetricRegistry;
-import com.google.protobuf.ByteString;
-import com.google.protobuf.Message;
-
-import io.grpc.ManagedChannel;
-import io.grpc.stub.StreamObserver;
-import io.opentracing.Tracer;
-
-import javax.net.ssl.SSLContext;
 
 /**
  * Minion GRPC client runs both RPC/Sink together.
@@ -115,7 +108,7 @@ public class MinionGrpcClient extends AbstractMessageDispatcherFactory<String> i
             blockingSinkMessageThreadFactory);
     private final Map<SinkMessage, ScheduledFuture<?>> pendingMessages = new ConcurrentHashMap<>(2000);
     private final Tracer tracer;
-    private final MinionGrpcSslContextBuilderFactory minionGrpcSslContextBuilderFactory;
+    private final ManagedChannelFactory managedChannelFactory;
 
     private ReconnectStrategy reconnectStrategy;
     @Setter
@@ -133,10 +126,6 @@ public class MinionGrpcClient extends AbstractMessageDispatcherFactory<String> i
     @Setter
     private int grpcPort;
     @Setter
-    private boolean tlsEnabled;
-    @Setter
-    private int maxInboundMessageSize;
-    @Setter
     private String overrideAuthority;
 
     private final SendQueueFactory sendQueueFactory;
@@ -150,13 +139,13 @@ public class MinionGrpcClient extends AbstractMessageDispatcherFactory<String> i
         MetricRegistry metricRegistry,
         Tracer tracer,
         SendQueueFactory sendQueueFactory,
-        MinionGrpcSslContextBuilderFactory minionGrpcSslContextBuilderFactory) {
+        ManagedChannelFactory managedChannelFactory) {
 
         this.ipcIdentity = ipcIdentity;
         this.metricRegistry = metricRegistry;
         this.tracer = tracer;
         this.sendQueueFactory = Objects.requireNonNull(sendQueueFactory);
-        this.minionGrpcSslContextBuilderFactory = minionGrpcSslContextBuilderFactory;
+        this.managedChannelFactory = managedChannelFactory;
     }
 
 //========================================
@@ -164,34 +153,7 @@ public class MinionGrpcClient extends AbstractMessageDispatcherFactory<String> i
 //----------------------------------------
 
     public void start() throws IOException {
-        OkHttpChannelBuilder channelBuilder = OkHttpChannelBuilder.forAddress(grpcHost, grpcPort)
-                .keepAliveWithoutCalls(true)
-                .maxInboundMessageSize(maxInboundMessageSize);
-
-        // If an override authority was specified, configure it now.  Setting the override authority to match the CN
-        //  of the server certificate prevents hostname verification errors of the server certificate when the CN does
-        //  not match the hostname used to connect the server.
-        if (! Strings.isNullOrEmpty(overrideAuthority)) {
-            channelBuilder.overrideAuthority(overrideAuthority);
-            LOG.info("Configuring GRPC override authority {}", overrideAuthority);
-        }
-
-        if (tlsEnabled) {
-            SSLContext sslContext = minionGrpcSslContextBuilderFactory.create();
-
-            if (sslContext != null) {
-                channelBuilder.sslSocketFactory(sslContext.getSocketFactory());
-            }
-
-            channel = channelBuilder
-                    .negotiationType(NegotiationType.TLS)
-                    .useTransportSecurity()
-                    .build();
-
-            LOG.info("TLS enabled for gRPC");
-        } else {
-            channel = channelBuilder.usePlaintext().build();
-        }
+        channel = managedChannelFactory.create(grpcHost, grpcPort, overrideAuthority);
         asyncStub = newStubOperation.apply(channel);
 
         reconnectStrategy = simpleReconnectStrategyFactory.create(channel, this::handleReconnect, this::handleDisconnect);
@@ -205,6 +167,9 @@ public class MinionGrpcClient extends AbstractMessageDispatcherFactory<String> i
         blockingSinkMessageScheduler.shutdown();
         if (rpcStream != null) {
             rpcStream.onCompleted();
+        }
+        if (sinkStream != null) {
+            sinkStream.onCompleted();
         }
         if (channel != null) {
             channel.shutdown();

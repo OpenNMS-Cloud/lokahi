@@ -45,6 +45,7 @@ import org.opennms.horizon.snmp.api.SnmpResponseMetric;
 import org.opennms.horizon.snmp.api.SnmpResultMetric;
 import org.opennms.horizon.snmp.api.SnmpV3Configuration;
 import org.opennms.snmp.contract.SnmpCollectorRequest;
+import org.opennms.snmp.contract.SnmpInterfaceElement;
 import org.opennms.taskset.contract.MonitorType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -92,10 +93,13 @@ public class SnmpCollector implements ServiceCollector {
             SnmpCollectionSet snmpCollectionSet = new SnmpCollectionSet(builder);
 
             String ipAddress = snmpRequest.getHost();
-
-            var interfaceMetricsTracker = new InterfaceMetricsTracker(snmpRequest.getIfIndex(), builder);
             snmpCollectionSet.addDefaultTrackers();
-            snmpCollectionSet.getTrackers().add(interfaceMetricsTracker);
+
+            for (SnmpInterfaceElement element : snmpRequest.getSnmpInterfaceList()) {
+                var interfaceMetricsTracker = new InterfaceMetricsTracker(element.getIfIndex(),
+                    element.getIfName(), element.getIpAddress(), builder);
+                snmpCollectionSet.getTrackers().add(interfaceMetricsTracker);
+            }
 
             AggregateTracker aggregate = new AggregateTracker(snmpCollectionSet.getTrackers());
 

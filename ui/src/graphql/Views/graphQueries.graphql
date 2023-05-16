@@ -8,9 +8,34 @@ query GetTimeSeriesMetric(
   $nodeId: String
   $timeRange: Int!
   $timeRangeUnit: TimeRangeUnit!
-  $instance: String!
+  $instance: String
 ) {
-  ...ChartTimeSeriesMetric
+  metric: metric(
+    name: $name
+    labels: { monitor: $monitor, node_id: $nodeId, instance: $instance }
+    timeRange: $timeRange
+    timeRangeUnit: $timeRangeUnit
+  ) {
+    ...MetricParts
+  }
+}
+
+query GetTimeSeriesMetricsWithIfName(
+  $name: String!
+  $monitor: String!
+  $nodeId: String
+  $timeRange: Int!
+  $timeRangeUnit: TimeRangeUnit!
+  $ifName: String
+) {
+  metric: metric(
+    name: $name
+    labels: { monitor: $monitor, node_id: $nodeId, if_name: $ifName }
+    timeRange: $timeRange
+    timeRangeUnit: $timeRangeUnit
+  ) {
+    ...MetricParts
+  }
 }
 
 query GetNodeForGraphs($id: Long) {
@@ -20,5 +45,6 @@ query GetNodeForGraphs($id: Long) {
       ipAddress
       snmpPrimary
     }
+    scanType
   }
 }

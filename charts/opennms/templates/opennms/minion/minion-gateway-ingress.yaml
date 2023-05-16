@@ -15,7 +15,7 @@ spec:
   tls:
     - hosts:
       - "minion.{{ .Values.Host }}"
-      secretName: {{ .Values.OpenNMS.MinionGateway.SecretName }}
+      secretName: {{ .Values.OpenNMS.MinionGateway.TlsSecretName }}
   {{- end }}
   rules:
     - host: "minion.{{ .Values.Host }}"

@@ -30,7 +30,6 @@ package org.opennms.horizon.inventory.cucumber.steps;
 
 import com.google.protobuf.Empty;
 import com.google.protobuf.Int64Value;
-import io.cucumber.java.BeforeAll;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
@@ -40,21 +39,23 @@ import org.opennms.horizon.inventory.dto.ListTagsByEntityIdParamsDTO;
 import org.opennms.horizon.inventory.dto.PassiveDiscoveryDTO;
 import org.opennms.horizon.inventory.dto.PassiveDiscoveryListDTO;
 import org.opennms.horizon.inventory.dto.PassiveDiscoveryServiceGrpc;
+import org.opennms.horizon.inventory.dto.PassiveDiscoveryToggleDTO;
 import org.opennms.horizon.inventory.dto.PassiveDiscoveryUpsertDTO;
 import org.opennms.horizon.inventory.dto.TagCreateDTO;
 import org.opennms.horizon.inventory.dto.TagEntityIdDTO;
 import org.opennms.horizon.inventory.dto.TagListDTO;
 import org.opennms.horizon.inventory.dto.TagServiceGrpc;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 
 public class PassiveDiscoveryStepDefinitions {
     private final InventoryBackgroundHelper backgroundHelper;
     private PassiveDiscoveryUpsertDTO passiveDiscoveryUpsertDTO;
-    private PassiveDiscoveryDTO createdDiscovery;
+    private PassiveDiscoveryDTO upsertedDiscovery;
     private PassiveDiscoveryListDTO fetchedPassiveDiscoveryList;
     private TagListDTO tagList;
+    private long fetchedId;
 
     public PassiveDiscoveryStepDefinitions(InventoryBackgroundHelper backgroundHelper) {
         this.backgroundHelper = backgroundHelper;
@@ -88,13 +89,27 @@ public class PassiveDiscoveryStepDefinitions {
      * SCENARIO GIVEN
      * *********************************************************************************
      */
+    @Given("Passive Discovery cleared")
+    public void passiveDiscoveryCleared() {
+        deleteAllPassiveDiscovery();
+    }
+
     @Given("Passive Discovery fields to persist")
     public void passiveDiscoveryFieldsToPersist() {
-        deleteAllPassiveDiscovery();
-
         passiveDiscoveryUpsertDTO = PassiveDiscoveryUpsertDTO.newBuilder()
             .setLocation("Default")
             .addCommunities("public")
+            .addPorts(161)
+            .addTags(TagCreateDTO.newBuilder().setName("tag-name").build())
+            .build();
+    }
+
+    @Given("Passive Discovery fields to update")
+    public void passiveDiscoveryFieldsToUpdate() {
+        passiveDiscoveryUpsertDTO = PassiveDiscoveryUpsertDTO.newBuilder()
+            .setId(fetchedId)
+            .setLocation("Updated")
+            .addCommunities("other")
             .addPorts(161)
             .addTags(TagCreateDTO.newBuilder().setName("tag-name").build())
             .build();
@@ -104,11 +119,23 @@ public class PassiveDiscoveryStepDefinitions {
      * SCENARIO WHEN
      * *********************************************************************************
      */
-    @When("A GRPC request to create a new passive discovery")
+    @When("A GRPC request to upsert a passive discovery")
     public void aGRPCRequestToCreateANewPassiveDiscovery() {
         PassiveDiscoveryServiceGrpc.PassiveDiscoveryServiceBlockingStub stub
             = backgroundHelper.getPassiveDiscoveryServiceBlockingStub();
-        createdDiscovery = stub.upsertDiscovery(passiveDiscoveryUpsertDTO);
+        upsertedDiscovery = stub.upsertDiscovery(passiveDiscoveryUpsertDTO);
+    }
+
+    @When("A GRPC request to toggle a passive discovery")
+    public void aGRPCRequestToToggleAPassiveDiscovery() {
+        PassiveDiscoveryToggleDTO toggleDTO = PassiveDiscoveryToggleDTO.newBuilder()
+            .setId(fetchedId)
+            .setToggle(false)
+            .build();
+
+        PassiveDiscoveryServiceGrpc.PassiveDiscoveryServiceBlockingStub stub
+            = backgroundHelper.getPassiveDiscoveryServiceBlockingStub();
+        upsertedDiscovery = stub.toggleDiscovery(toggleDTO);
     }
 
     @And("A GRPC request to get passive discovery list")
@@ -123,30 +150,39 @@ public class PassiveDiscoveryStepDefinitions {
         TagServiceGrpc.TagServiceBlockingStub stub = backgroundHelper.getTagServiceBlockingStub();
         tagList = stub.getTagsByEntityId(ListTagsByEntityIdParamsDTO.newBuilder()
             .setEntityId(TagEntityIdDTO.newBuilder()
-                .setPassiveDiscoveryId(createdDiscovery.getId())).build());
+                .setPassiveDiscoveryId(upsertedDiscovery.getId())).build());
     }
 
     /*
      * SCENARIO THEN
      * *********************************************************************************
      */
-    @Then("The creation and the get of passive discovery should be the same")
+    @Then("The upserted and the get of passive discovery should be the same")
     public void theCreationAndTheGetOfPassiveDiscoveryShouldBeTheSame() {
         assertEquals(1, fetchedPassiveDiscoveryList.getDiscoveriesList().size());
         PassiveDiscoveryDTO fetchedDiscovery = fetchedPassiveDiscoveryList.getDiscoveries(0);
+        fetchedId = fetchedDiscovery.getId();
 
-        assertEquals(passiveDiscoveryUpsertDTO.getLocation(), createdDiscovery.getLocation());
+        assertEquals(passiveDiscoveryUpsertDTO.getLocation(), upsertedDiscovery.getLocation());
         assertEquals(passiveDiscoveryUpsertDTO.getLocation(), fetchedDiscovery.getLocation());
 
-        assertEquals(passiveDiscoveryUpsertDTO.getPortsCount(), createdDiscovery.getPortsCount());
+        assertEquals(passiveDiscoveryUpsertDTO.getPortsCount(), upsertedDiscovery.getPortsCount());
         assertEquals(passiveDiscoveryUpsertDTO.getPortsCount(), fetchedDiscovery.getPortsCount());
-        assertEquals(passiveDiscoveryUpsertDTO.getPorts(0), createdDiscovery.getPorts(0));
+        assertEquals(passiveDiscoveryUpsertDTO.getPorts(0), upsertedDiscovery.getPorts(0));
         assertEquals(passiveDiscoveryUpsertDTO.getPorts(0), fetchedDiscovery.getPorts(0));
 
-        assertEquals(passiveDiscoveryUpsertDTO.getCommunitiesCount(), createdDiscovery.getCommunitiesCount());
+        assertEquals(passiveDiscoveryUpsertDTO.getCommunitiesCount(), upsertedDiscovery.getCommunitiesCount());
         assertEquals(passiveDiscoveryUpsertDTO.getCommunitiesCount(), fetchedDiscovery.getCommunitiesCount());
-        assertEquals(passiveDiscoveryUpsertDTO.getCommunities(0), createdDiscovery.getCommunities(0));
+        assertEquals(passiveDiscoveryUpsertDTO.getCommunities(0), upsertedDiscovery.getCommunities(0));
         assertEquals(passiveDiscoveryUpsertDTO.getCommunities(0), fetchedDiscovery.getCommunities(0));
+        assertTrue(fetchedDiscovery.getToggle());
+    }
+
+    @Then("The passive discovery toggle should be false")
+    public void theToggleShouldBeFalse() {
+        assertEquals(1, fetchedPassiveDiscoveryList.getDiscoveriesList().size());
+        PassiveDiscoveryDTO fetchedDiscovery = fetchedPassiveDiscoveryList.getDiscoveries(0);
+        assertFalse(fetchedDiscovery.getToggle());
     }
 
     @Then("the tags for passive discovery match what it was created with")

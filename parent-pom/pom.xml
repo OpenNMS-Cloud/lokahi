@@ -48,6 +48,7 @@
         <auth0.jwt.version>4.3.0</auth0.jwt.version>
         <aries.jax.rs.whiteboard.version>2.0.2</aries.jax.rs.whiteboard.version>
         <aries.jpa.api.version>2.7.3</aries.jpa.api.version>
+        <build-helper-maven-plugin.version>3.3.0</build-helper-maven-plugin.version>
         <bsf.version>2.4.0</bsf.version>
         <eclipselink.version>4.0.0</eclipselink.version>
         <camel.version>3.20.0</camel.version>
@@ -65,9 +66,7 @@
         <guava.version>31.0.1-jre</guava.version>
         <hamcrest.version>1.3</hamcrest.version>
         <hibernate.version>6.1.6.Final</hibernate.version>
-<!--        //TODO:MMF Need new hibernate for @TenantId annotation-->
-<!--        <hibernate.version>6.1.5.Final</hibernate.version>-->
-
+        <hibernate-validator.version>8.0.0.Final</hibernate-validator.version>
         <httpcore.version>4.4.4</httpcore.version>
         <httpclient.version>4.5.13</httpclient.version>
         <ignite.version>2.14.0</ignite.version>
@@ -81,7 +80,6 @@
         <jakarta.mail.version>1.6.7</jakarta.mail.version>
         <jakarta.servlet.version>6.0.0</jakarta.servlet.version>
         <javax.annotation.version>1.2</javax.annotation.version>
-        <javax.validation.version>2.0.1.Final</javax.validation.version>
         <jaxrs.version>2.1</jaxrs.version>
         <jboss-logging.version>3.4.1.Final</jboss-logging.version>
         <jcifs.version>2.1.6</jcifs.version>
@@ -133,7 +131,6 @@
         <spring-security.version>6.0.1</spring-security.version>
         <spring-kafka.version>3.0.1</spring-kafka.version>
         <sonar-maven.version>3.9.1.2184</sonar-maven.version>
-        <sslcontext-kickstart.version>7.4.11</sslcontext-kickstart.version>
         <swagger.version>2.1.1</swagger.version>
         <lombok.version>1.18.24</lombok.version>
         <lombok.binding.version>0.2.0</lombok.binding.version>
@@ -141,8 +138,8 @@
         <mockito.version>4.8.0</mockito.version>
         <jupiter.version>5.9.0</jupiter.version>
         <jib.version>3.3.1</jib.version>
-        <surefire.version>3.0.0-M7</surefire.version>
-        <failsafe.version>3.0.0-M7</failsafe.version>
+        <surefire.version>3.1.0</surefire.version>
+        <failsafe.version>3.1.0</failsafe.version>
         <zjsonpatch.version>0.4.12</zjsonpatch.version>
         <jetty.version>9.4.43.v20210629</jetty.version>
         <cron-utils.version>9.1.6</cron-utils.version>
@@ -151,7 +148,7 @@
         <resilience4j.version>1.7.0</resilience4j.version>
         <snappy-java.version>1.1.8.4</snappy-java.version>
         <wiremock.version>2.27.2</wiremock.version>
-        <maven-compiler-plugin.version>3.10.1</maven-compiler-plugin.version>
+        <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
         <protobuf-maven-plugin.version>0.6.1</protobuf-maven-plugin.version>
         <os-maven-plugin.version>1.6.2</os-maven-plugin.version>
         <flows.gateway.grpc.version>1.12.8</flows.gateway.grpc.version>
@@ -264,16 +261,6 @@
                 <groupId>io.github.hakky54</groupId>
                 <artifactId>logcaptor</artifactId>
                 <version>${logcaptor.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.github.hakky54</groupId>
-                <artifactId>sslcontext-kickstart</artifactId>
-                <version>${sslcontext-kickstart.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.github.hakky54</groupId>
-                <artifactId>sslcontext-kickstart-for-pem</artifactId>
-                <version>${sslcontext-kickstart.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.prometheus</groupId>
@@ -557,9 +544,14 @@
                 <version>${jakarta.activation.version}</version>
             </dependency>
             <dependency>
-                <groupId>javax.validation</groupId>
-                <artifactId>validation-api</artifactId>
-                <version>${javax.validation.version}</version>
+                <groupId>jakarta.validation</groupId>
+                <artifactId>jakarta.validation-api</artifactId>
+                <version>${jakarta.validation.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.hibernate.validator</groupId>
+                <artifactId>hibernate-validator</artifactId>
+                <version>${hibernate-validator.version}</version>
             </dependency>
             <dependency>
                 <groupId>joda-time</groupId>
@@ -1012,6 +1004,16 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-dependency-plugin</artifactId>
                     <version>${maven-dependency.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>build-helper-maven-plugin</artifactId>
+                    <version>${build-helper-maven-plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>${maven-compiler-plugin.version}</version>
                 </plugin>
                 <plugin>
                     <groupId>org.springframework.boot</groupId>

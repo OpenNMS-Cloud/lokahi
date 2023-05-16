@@ -9,13 +9,18 @@ import "google/protobuf/wrappers.proto";
 
 
 enum Direction {
-    INGRESS = 0;
-    EGRESS = 1;
+    /* proto3 enums must start with a zero-valued entry, which is used as the default value.
+       With proto3 there is no distinction between a field that's empty and one that's set to its default.  */
+    UNDEFINED_DIRECTION = 0;
+    INGRESS = 1;
+    EGRESS = 2;
     UNKNOWN = 255;
 }
 
 enum SamplingAlgorithm {
-    UNASSIGNED = 0;
+    /* proto3 enums must start with a zero-valued entry, which is used as the default value.
+       With proto3 there is no distinction between a field that's empty and one that's set to its default.  */
+    UNDEFINED_SAMPLING_ALGORITHM = 0;
     SYSTEMATIC_COUNT_BASED_SAMPLING = 1;
     SYSTEMATIC_TIME_BASED_SAMPLING = 2;
     RANDOM_N_OUT_OF_N_SAMPLING = 3;
@@ -26,15 +31,21 @@ enum SamplingAlgorithm {
 }
 
 enum NetflowVersion {
-    V5 = 0;
-    V9 = 1;
-    IPFIX = 2;
-    SFLOW = 3;
+   /* proto3 enums must start with a zero-valued entry, which is used as the default value.
+      With proto3 there is no distinction between a field that's empty and one that's set to its default.  */
+    UNDEFINED_NETFLOW_VERSION = 0;
+    V5 = 1;
+    V9 = 2;
+    IPFIX = 3;
+    SFLOW = 4;
 }
 
 enum Locality {
-    PUBLIC = 0;
-    PRIVATE = 1;
+    /* proto3 enums must start with a zero-valued entry, which is used as the default value.
+       With proto3 there is no distinction between a field that's empty and one that's set to its default.  */
+    UNDEFINED_LOCALITY = 0;
+    PUBLIC = 1;
+    PRIVATE = 2;
 }
 
 message NodeInfo {

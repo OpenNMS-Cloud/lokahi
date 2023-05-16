@@ -28,10 +28,17 @@
 
 package org.opennms.horizon.flows.processing;
 
-import com.codahale.metrics.MetricRegistry;
-import com.google.protobuf.UInt64Value;
-import io.grpc.Status;
-import io.grpc.StatusRuntimeException;
+import java.net.InetAddress;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import org.opennms.dataplatform.flows.document.FlowDocument;
 import org.opennms.dataplatform.flows.document.Locality;
 import org.opennms.dataplatform.flows.document.NodeInfo;
@@ -44,16 +51,11 @@ import org.opennms.horizon.shared.utils.InetAddressUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.InetAddress;
-import java.time.Duration;
-import java.time.Instant;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import com.codahale.metrics.MetricRegistry;
+import com.google.protobuf.UInt64Value;
+
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
 
 public class DocumentEnricherImpl {
     private static final Logger LOG = LoggerFactory.getLogger(DocumentEnricherImpl.class);
@@ -82,6 +84,7 @@ public class DocumentEnricherImpl {
 
         return flows.stream().flatMap(flow -> {
             final var document = FlowDocument.newBuilder(flow);
+
             if (document == null) {
                 return Stream.empty();
             }

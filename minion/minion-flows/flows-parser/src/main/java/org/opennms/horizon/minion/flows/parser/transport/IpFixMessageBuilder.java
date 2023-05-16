@@ -450,7 +450,7 @@ public class IpFixMessageBuilder implements MessageBuilder {
         first(packetDeltaCount, postPacketDeltaCount, transportPacketDeltaCount).ifPresent(packets -> 
             builder.setNumPackets(setLongValue(packets)));
 
-        SamplingAlgorithm sampling = SamplingAlgorithm.UNASSIGNED;
+        SamplingAlgorithm sampling = SamplingAlgorithm.UNDEFINED_SAMPLING_ALGORITHM;
         final Integer deprecatedSamplingAlgorithm = first(samplingAlgorithm, samplerMode)
                 .map(Long::intValue).orElse(null);
         if (deprecatedSamplingAlgorithm != null) {
@@ -465,7 +465,7 @@ public class IpFixMessageBuilder implements MessageBuilder {
         if (selectorAlgorithm != null) {
             switch (selectorAlgorithm.intValue()) {
                 case 0:
-                    sampling = SamplingAlgorithm.UNASSIGNED;
+                    sampling = SamplingAlgorithm.UNDEFINED_SAMPLING_ALGORITHM;
                     break;
                 case 1:
                     sampling = SamplingAlgorithm.SYSTEMATIC_COUNT_BASED_SAMPLING;

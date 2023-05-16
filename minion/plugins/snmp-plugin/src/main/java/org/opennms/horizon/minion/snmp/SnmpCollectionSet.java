@@ -32,6 +32,7 @@ import com.google.protobuf.ByteString;
 import org.opennms.horizon.shared.snmp.Collectable;
 import org.opennms.horizon.shared.snmp.IfNumberTracker;
 import org.opennms.horizon.shared.snmp.SnmpNodeTracker;
+import org.opennms.horizon.shared.snmp.SnmpResult;
 import org.opennms.horizon.shared.snmp.SnmpValue;
 import org.opennms.horizon.shared.snmp.SysUpTimeTracker;
 import org.opennms.horizon.snmp.api.SnmpResponseMetric;
@@ -82,7 +83,12 @@ public class SnmpCollectionSet {
         return trackers;
     }
 
-    static void addResult(org.opennms.horizon.shared.snmp.SnmpResult result, SnmpResponseMetric.Builder builder, String alias) {
+    static void addResult(SnmpResult result, SnmpResponseMetric.Builder builder,
+                          String alias, String ifName, String ipAddress) {
+        builder.addResults(mapResult(result, alias, ifName, ipAddress));
+    }
+
+    static void addResult(SnmpResult result, SnmpResponseMetric.Builder builder, String alias) {
         builder.addResults(mapResult(result, alias));
     }
 
@@ -92,6 +98,18 @@ public class SnmpCollectionSet {
             .setInstance(result.getInstance().toString())
             .setValue(mapValue(result.getValue()))
             .setAlias(alias)
+            .build();
+    }
+
+    private static SnmpResultMetric mapResult(org.opennms.horizon.shared.snmp.SnmpResult result,
+                                              String alias, String ifName, String ipAddress) {
+        return SnmpResultMetric.newBuilder()
+            .setBase(result.getBase().toString())
+            .setInstance(result.getInstance().toString())
+            .setValue(mapValue(result.getValue()))
+            .setAlias(alias)
+            .setIfName(ifName)
+            .setIpAddress(ipAddress)
             .build();
     }
 

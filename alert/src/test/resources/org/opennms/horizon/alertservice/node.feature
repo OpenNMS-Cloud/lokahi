@@ -36,6 +36,10 @@ Feature: Node operation feature
       | alerts[0].nodeName == BLANK             |
       | alerts[1].label == SNMP_Link_Down       |
       | alerts[1].nodeName == first             |
+    Then List alerts for tenant "tenant-1" and label "first", with timeout 5000ms, until JSON response matches the following JSON path expressions
+      | alerts.size() == 1                      |
+      | alerts[0].label == SNMP_Link_Down       |
+      | alerts[0].nodeName == first             |
 
   Scenario: Update node when receive new message
     Given [Node] Tenant "tenant-3"

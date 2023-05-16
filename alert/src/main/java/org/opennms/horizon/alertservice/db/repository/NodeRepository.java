@@ -33,9 +33,11 @@ import org.opennms.horizon.alertservice.db.entity.Node;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
 public interface NodeRepository extends JpaRepository<Node, Long> {
     Optional<Node> findByIdAndTenantId(long id, String tenantId);
+    List<Node> findAllByNodeLabelAndTenantId(String nodeLabel, String tenantId);
 }

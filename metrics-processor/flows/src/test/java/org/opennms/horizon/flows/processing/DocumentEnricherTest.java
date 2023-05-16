@@ -152,11 +152,14 @@ public class DocumentEnricherTest {
         assertEquals(now.minus(19_900L, ChronoUnit.MILLIS).toEpochMilli(), result.get(0).getFirstSwitched().getValue());
         assertEquals(now.minus(9_900L, ChronoUnit.MILLIS).toEpochMilli(), result.get(0).getDeltaSwitched().getValue());
         assertEquals(now.minus(4_900L, ChronoUnit.MILLIS).toEpochMilli(), result.get(0).getLastSwitched().getValue());
+        assertEquals(Locality.PUBLIC, result.get(0).getSrcLocality());
+        assertEquals(Locality.PUBLIC, result.get(0).getDstLocality());
+        assertEquals(Locality.PUBLIC, result.get(0).getFlowLocality());
 
         verifySameExcluding(
             testDocumentWithTimestamps,
             result.get(0),
-            "first_switched", "delta_switched", "last_switched", "timestamp", "clock_correction"
+            "first_switched", "delta_switched", "last_switched", "timestamp", "clock_correction", "src_locality", "dst_locality", "flow_locality"
         );
     }
 
@@ -194,10 +197,14 @@ public class DocumentEnricherTest {
         assertEquals(1, result.size());
         assertEquals("x-tenant-id-x", result.get(0).getTenantId());
         assertEquals(0, result.get(0).getClockCorrection());
+        assertEquals(Locality.PUBLIC, result.get(0).getSrcLocality());
+        assertEquals(Locality.PUBLIC, result.get(0).getDstLocality());
+        assertEquals(Locality.PUBLIC, result.get(0).getFlowLocality());
 
         verifySameExcluding(
             testDocumentWithTimestamps,
-            result.get(0)
+            result.get(0),
+            "src_locality", "dst_locality", "flow_locality"
         );
     }
 
@@ -242,8 +249,15 @@ public class DocumentEnricherTest {
         //
         assertEquals(1, result.size());
         assertFalse(result.get(0).hasSrcNode());
+        assertEquals(Locality.PUBLIC, result.get(0).getSrcLocality());
+        assertEquals(Locality.PUBLIC, result.get(0).getDstLocality());
+        assertEquals(Locality.PUBLIC, result.get(0).getFlowLocality());
 
-        verifySameExcluding(testDocument, result.get(0));
+        verifySameExcluding(
+            testDocument,
+            result.get(0),
+            "src_locality", "dst_locality", "flow_locality"
+        );
     }
 
     @Test
@@ -276,8 +290,15 @@ public class DocumentEnricherTest {
         assertEquals(123123, result.get(0).getSrcNode().getNodeId());
         assertEquals(456456, result.get(0).getSrcNode().getInterfaceId());
         assertEquals("x-hostname-x", result.get(0).getSrcNode().getForeignId());
+        assertEquals(Locality.PUBLIC, result.get(0).getSrcLocality());
+        assertEquals(Locality.PUBLIC, result.get(0).getDstLocality());
+        assertEquals(Locality.PUBLIC, result.get(0).getFlowLocality());
 
-        verifySameExcluding(testDocument, result.get(0), "src_node");
+        verifySameExcluding(
+            testDocument,
+            result.get(0),
+            "src_node", "src_locality", "dst_locality", "flow_locality"
+        );
     }
 
     @Test

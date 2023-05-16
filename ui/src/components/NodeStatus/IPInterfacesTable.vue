@@ -16,9 +16,9 @@
           <tr>
             <th scope="col">IP Address</th>
             <th scope="col">Graphs</th>
-            <th scope="col">IP Hostname</th>
-            <th scope="col">Netmask</th>
-            <th scope="col">Primary</th>
+            <th scope="col" v-if="!nodeStatusStore.isAzure">IP Hostname</th>
+            <th scope="col" v-if="!nodeStatusStore.isAzure">Netmask</th>
+            <th scope="col" v-if="!nodeStatusStore.isAzure">Primary</th>
           </tr>
         </thead>
         <TransitionGroup
@@ -44,9 +44,9 @@
                 >Traffic
               </FeatherButton>
             </td>
-            <td>{{ ipInterface.hostname }}</td>
-            <td>{{ ipInterface.netmask }}</td>
-            <td>{{ ipInterface.snmpPrimary }}</td>
+            <td v-if="!nodeStatusStore.isAzure">{{ ipInterface.hostname }}</td>
+            <td v-if="!nodeStatusStore.isAzure">{{ ipInterface.netmask }}</td>
+            <td v-if="!nodeStatusStore.isAzure">{{ ipInterface.snmpPrimary }}</td>
           </tr>
         </TransitionGroup>
       </table>

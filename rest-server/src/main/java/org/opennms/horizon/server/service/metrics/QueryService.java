@@ -75,7 +75,8 @@ public class QueryService {
     public boolean isRangeQuery(String metricName) {
         return TOTAL_NETWORK_BYTES_IN.equals(metricName) || TOTAL_NETWORK_BYTES_OUT.equals(metricName)
             || NETWORK_IN_BITS.equals(metricName) || NETWORK_OUT_BITS.equals(metricName)
-            || BW_IN_PERCENTAGE.equals(metricName) || BW_OUT_PERCENTAGE.equals(metricName);
+            || BW_IN_PERCENTAGE.equals(metricName) || BW_OUT_PERCENTAGE.equals(metricName)
+            || NETWORK_ERRORS_IN.equals(metricName) || NETWORK_ERRORS_OUT.equals(metricName);
     }
 
     public String getQueryString(Optional<NodeDTO> node, String metricName, Map<String, String> labels,

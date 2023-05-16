@@ -32,6 +32,7 @@
             <td>{{ ipInterface.ipAddress }}</td>
             <td>
               <FeatherButton
+                v-if="!nodeStatusStore.isAzure"
                 text
                 @click="routeToFlows(ipInterface)"
                 >Flows</FeatherButton
@@ -39,7 +40,7 @@
               <FeatherButton
                 v-if="nodeStatusStore.isAzure"
                 text
-                @click="metricsModal.openMetricsModal(ipInterface.ipAddress)"
+                @click="metricsModal.openAzureMetrics(ipInterface.ipAddress)"
                 >Traffic
               </FeatherButton>
             </td>

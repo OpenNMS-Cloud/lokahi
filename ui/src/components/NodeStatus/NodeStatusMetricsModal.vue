@@ -16,18 +16,21 @@
         </div>
         <div class="metrics">
           <LineGraph
+            :graph="bitsInOut"
+            @has-data="displayEmptyMsgIfNoData"
+          />
+          <LineGraph
+            v-if="!isAzure"
             :graph="bandwidthInOut"
             @has-data="displayEmptyMsgIfNoData"
           />
           <LineGraph
-            :graph="bytesInOut"
-            @has-data="displayEmptyMsgIfNoData"
-          />
-          <LineGraph
+            v-if="!isAzure"
             :graph="nodeLatency"
             @has-data="displayEmptyMsgIfNoData"
           />
           <LineGraph
+            v-if="!isAzure"
             :graph="errorsInOut"
             @has-data="displayEmptyMsgIfNoData"
           />
@@ -57,6 +60,7 @@ const interfaceName = ref()
 const instance = ref()
 const ifName = ref()
 const hasMetricData = ref(false)
+const isAzure = ref(false)
 
 const bandwidthInOut = computed<GraphProps>(() => {
   return {
@@ -71,7 +75,7 @@ const bandwidthInOut = computed<GraphProps>(() => {
   }
 })
 
-const bytesInOut = computed<GraphProps>(() => {
+const bitsInOut = computed<GraphProps>(() => {
   return {
     label: 'Bits Inbound / Outbound',
     metrics: ['network_in_bits', 'network_out_bits'],
@@ -110,13 +114,15 @@ const errorsInOut = computed<GraphProps>(() => {
   }
 })
 
-const openMetricsModal = (inst: string) => {
+const openAzureMetrics = (inst: string) => {
+  isAzure.value = true // azure nodes can only display bytes in/out
   interfaceName.value = inst
   instance.value = inst
   openModal()
 }
 
 const setIfNameAndOpenModal = (ifNameStr: string) => {
+  isAzure.value = false
   interfaceName.value = ifNameStr
   ifName.value = ifNameStr
   openModal()
@@ -127,7 +133,7 @@ const displayEmptyMsgIfNoData = (hasData: boolean) => {
   hasMetricData.value = hasData
 }
 
-defineExpose({ openMetricsModal, setIfNameAndOpenModal })
+defineExpose({ openAzureMetrics, setIfNameAndOpenModal })
 </script>
 
 <style scoped lang="scss">

@@ -5,7 +5,7 @@ type DataSets = TsResult[][]
 interface MetricArgs {
   name: string
   monitor: string
-  instance: string
+  instance?: string
   nodeId?: string
   timeRange: number
   timeRangeUnit: TimeRangeUnit

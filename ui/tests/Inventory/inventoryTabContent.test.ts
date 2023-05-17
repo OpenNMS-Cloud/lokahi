@@ -1,4 +1,4 @@
-import { mount } from '@vue/test-utils'
+import mount from '../mountWithPiniaVillus'
 import InventoryTabContent from '@/components/Inventory/InventoryTabContent.vue'
 import { InventoryNode, MonitoredStates, TimeUnit } from '@/types'
 
@@ -46,10 +46,11 @@ let wrapper: any
 
 describe.skip('InventoryTabContent.vue', () => {
   beforeAll(() => {
-    wrapper = mount(InventoryTabContent, {
-      shallow: true,
+    wrapper = mount({
+      component: InventoryTabContent,
       props: {
-        tabContent
+        tabContent,
+        state: MonitoredStates.MONITORED
       }
     })
   })

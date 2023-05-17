@@ -8,7 +8,7 @@ import { cloneDeep } from 'lodash'
 
 const alertsFilterDefault: AlertsFilters = {
   timeRange: TimeRange.All,
-  nodeLabel: null,
+  nodeLabel: '',
   severities: [],
   sortAscending: true,
   sortBy: 'id'

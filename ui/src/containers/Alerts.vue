@@ -172,7 +172,7 @@ const searchAlertsListener: fncArgVoid = (val: string | null) => {
   if (val) {
     alertsStore.alertsFilter.nodeLabel = val
   } else {
-    alertsStore.alertsFilter.nodeLabel = null
+    alertsStore.alertsFilter.nodeLabel = ''
   }
   alertsStore.resetPaginationAndFetchAlerts()
 }

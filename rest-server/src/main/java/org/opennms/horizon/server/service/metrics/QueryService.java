@@ -87,15 +87,13 @@ public class QueryService {
         if (isRangeQuery(metricName)) {
             long end = System.currentTimeMillis() / 1000L;
             long start = end - getDuration(timeRange, timeRangeUnit).orElse(Duration.ofHours(24)).getSeconds();
-            String rangeQuerySuffixForTotal = "&start=" + start + "&end=" + end +
-                "&step=1h";
             String rangeQuerySuffix = "&start=" + start + "&end=" + end +
                 "&step=2m";
             switch (metricName) {
                 case TOTAL_NETWORK_BYTES_IN:
-                    return QUERY_PREFIX + encode(QUERY_FOR_TOTAL_NETWORK_BYTES_IN) + rangeQuerySuffixForTotal;
+                    return QUERY_PREFIX + encode(QUERY_FOR_TOTAL_NETWORK_BYTES_IN) + rangeQuerySuffix;
                 case TOTAL_NETWORK_BYTES_OUT:
-                    return QUERY_PREFIX + encode(QUERY_FOR_TOTAL_NETWORK_BYTES_OUT) + rangeQuerySuffixForTotal;
+                    return QUERY_PREFIX + encode(QUERY_FOR_TOTAL_NETWORK_BYTES_OUT) + rangeQuerySuffix;
                 case NETWORK_IN_BITS:
                     if (isAzureNode(node)) {
                         var query = String.format(QUERY_FOR_AZURE_TOTAL_NETWORK_IN_BITS, getLabelsQueryString(labels));

@@ -19,5 +19,5 @@ interface AlertsFilters {
   severities?: string[]
   sortAscending: boolean
   sortBy?: string
-  nodeLabel: string
+  nodeLabel: string | null
 }

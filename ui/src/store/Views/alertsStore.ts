@@ -4,10 +4,11 @@ import { useAlertsQueries } from '../Queries/alertsQueries'
 import { useAlertsMutations } from '../Mutations/alertsMutations'
 import { Alert } from '@/types/graphql'
 import { AlertsFilters } from '@/types/alerts'
+import { cloneDeep } from 'lodash'
 
 const alertsFilterDefault: AlertsFilters = {
   timeRange: TimeRange.All,
-  nodeLabel: '',
+  nodeLabel: null,
   severities: [],
   sortAscending: true,
   sortBy: 'id'
@@ -21,12 +22,10 @@ const alertsPaginationDefault = {
 
 export const useAlertsStore = defineStore('alertsStore', () => {
   const alertsList = ref()
-  const alertsFilter = ref(alertsFilterDefault)
-  const alertsPagination = ref(alertsPaginationDefault)
+  const alertsFilter = ref(cloneDeep(alertsFilterDefault))
+  const alertsPagination = ref(cloneDeep(alertsPaginationDefault))
   const alertsSelected = ref([] as number[] | undefined)
   const isAlertsListEmpty = ref(true)
-  const gotoFirstPage = ref(false)
-  const alertsListSearched = ref([]) // TODO: not avail for EAR
 
   const alertsQueries = useAlertsQueries()
   const alertsMutations = useAlertsMutations()
@@ -49,17 +48,10 @@ export const useAlertsStore = defineStore('alertsStore', () => {
     }
   }
 
-  watch(
-    alertsFilter,
-    (newFilter, oldFilter) => {
-      if (newFilter.severities !== oldFilter.severities || newFilter.timeRange !== oldFilter.timeRange) {
-        gotoFirstPage.value = true
-      }
-
-      fetchAlerts()
-    },
-    { deep: true }
-  )
+  const resetPaginationAndFetchAlerts = async () => {
+    alertsPagination.value.page = 1
+    await fetchAlerts()
+  }
 
   const toggleSeverity = (selected: string): void => {
     const exists = alertsFilter.value.severities?.some((s) => s === selected)
@@ -82,10 +74,7 @@ export const useAlertsStore = defineStore('alertsStore', () => {
       }
     }
 
-    alertsPagination.value = {
-      ...alertsPagination.value,
-      page: 1 // always request first page on change
-    }
+    resetPaginationAndFetchAlerts()
   }
 
   const selectTime = (selected: TimeRange): void => {
@@ -93,6 +82,8 @@ export const useAlertsStore = defineStore('alertsStore', () => {
       ...alertsFilter.value,
       timeRange: selected
     }
+
+    resetPaginationAndFetchAlerts()
   }
 
   const setPage = (page: number): void => {
@@ -119,8 +110,9 @@ export const useAlertsStore = defineStore('alertsStore', () => {
   }
 
   const clearAllFilters = (): void => {
-    alertsFilter.value = alertsFilterDefault
-    alertsPagination.value = alertsPaginationDefault
+    alertsFilter.value = cloneDeep(alertsFilterDefault)
+    alertsPagination.value = cloneDeep(alertsPaginationDefault)
+    fetchAlerts()
   }
 
   // all toggle (select/deselect): true/false / individual toggle: number (alert id)
@@ -151,6 +143,7 @@ export const useAlertsStore = defineStore('alertsStore', () => {
   return {
     alertsList,
     fetchAlerts,
+    resetPaginationAndFetchAlerts,
     alertsFilter,
     toggleSeverity,
     selectTime,
@@ -161,7 +154,6 @@ export const useAlertsStore = defineStore('alertsStore', () => {
     setAlertsSelected,
     clearSelectedAlerts,
     acknowledgeSelectedAlerts,
-    isAlertsListEmpty,
-    gotoFirstPage
+    isAlertsListEmpty
   }
 })

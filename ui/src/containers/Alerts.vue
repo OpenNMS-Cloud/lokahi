@@ -46,7 +46,7 @@
           </div>
           <div class="search-filter">
             <FeatherInput
-              v-model="alertsStore.alertsFilter.nodeLabel as string"
+              v-model="alertsStore.alertsFilter.nodeLabel"
               label="Search Alerts"
               type="search"
               @update:model-value="searchAlertsListener"

@@ -93,7 +93,7 @@
         <jacksonCoreUtils.version>2.0</jacksonCoreUtils.version>
         <fgeMsgSimple.version>1.2</fgeMsgSimple.version>
         <fgeBtf.version>1.3</fgeBtf.version>
-        <json.version>20171018</json.version>
+        <json.version>20230227</json.version>
         <jsr250.version>1.0</jsr250.version>
         <jsr305.version>3.0.2</jsr305.version>
         <karaf.version>4.4.2</karaf.version>

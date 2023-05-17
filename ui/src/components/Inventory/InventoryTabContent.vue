@@ -138,6 +138,10 @@ const props = defineProps({
   tabContent: {
     type: Object as PropType<InventoryNode[]>,
     required: true
+  },
+  state: {
+    type: String,
+    required: true
   }
 })
 const nodes = ref<InventoryNode[]>(props.tabContent)
@@ -186,7 +190,7 @@ const saveTagsToSelectedNodes = async () => {
   const nodeIds = inventoryStore.nodesSelected.map((node) => node.id)
   await nodeMutations.addTagsToNodes({ nodeIds, tags })
 
-  await inventoryQueries.fetch()
+  await inventoryQueries.fetchByState(props.state)
   resetState()
 }
 
@@ -198,7 +202,7 @@ const removeTagsFromNodes = async () => {
 
   await nodeMutations.removeTagsFromNodes(payload)
 
-  await inventoryQueries.fetch()
+  await inventoryQueries.fetchByState(props.state)
   resetState()
   closeModal()
 }

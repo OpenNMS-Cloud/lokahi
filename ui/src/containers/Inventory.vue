@@ -20,6 +20,7 @@
       <InventoryTabContent
         v-if="tabMonitoredContent.length"
         :tabContent="tabMonitoredContent"
+        :state="MonitoredStates.MONITORED"
       />
     </FeatherTabPanel>
 
@@ -29,6 +30,7 @@
       <InventoryTabContent
         v-if="tabUnmonitoredContent.length"
         :tabContent="tabUnmonitoredContent"
+        :state="MonitoredStates.UNMONITORED"
       />
     </FeatherTabPanel>
 
@@ -38,6 +40,7 @@
       <InventoryTabContent
         v-if="tabDetectedContent.length"
         :tabContent="tabDetectedContent"
+        :state="MonitoredStates.DETECTED"
       />
     </FeatherTabPanel>
   </FeatherTabContainer>
@@ -47,7 +50,7 @@
 import { FeatherTab, FeatherTabContainer, FeatherTabPanel } from '@featherds/tabs'
 import InventoryFilter from '@/components/Inventory/InventoryFilter.vue'
 import InventoryTabContent from '@/components/Inventory/InventoryTabContent.vue'
-import { MonitoredNode, UnmonitoredNode, DetectedNode } from '@/types/inventory'
+import { MonitoredNode, UnmonitoredNode, DetectedNode, MonitoredStates } from '@/types'
 import { useInventoryQueries } from '@/store/Queries/inventoryQueries'
 
 const inventoryQueries = useInventoryQueries()

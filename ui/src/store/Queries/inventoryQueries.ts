@@ -281,6 +281,16 @@ export const useInventoryQueries = defineStore('inventoryQueries', () => {
     })
   }
 
+  const fetchByState = async (state: string) => {
+    if (state === MonitoredStates.MONITORED) {
+      await getMonitoredNodes()
+    } else if (state === MonitoredStates.UNMONITORED) {
+      await getUnmonitoredNodes()
+    } else if (state === MonitoredStates.DETECTED) {
+      await getDetectedNodes()
+    }
+  }
+
   return {
     nodes,
     unmonitoredNodes,
@@ -289,6 +299,7 @@ export const useInventoryQueries = defineStore('inventoryQueries', () => {
     getNodesByLabel,
     getNodesByTags,
     getUnmonitoredNodes,
-    getDetectedNodes
+    getDetectedNodes,
+    fetchByState
   }
 })

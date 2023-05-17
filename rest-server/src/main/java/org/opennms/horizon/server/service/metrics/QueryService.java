@@ -34,35 +34,37 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import static org.opennms.horizon.server.service.metrics.normalization.Constants.AZURE_SCAN_TYPE;
-import static org.opennms.horizon.server.service.metrics.normalization.Constants.BW_IN_PERCENTAGE;
-import static org.opennms.horizon.server.service.metrics.normalization.Constants.BW_OUT_PERCENTAGE;
-import static org.opennms.horizon.server.service.metrics.normalization.Constants.NETWORK_ERRORS_IN;
-import static org.opennms.horizon.server.service.metrics.normalization.Constants.NETWORK_ERRORS_OUT;
-import static org.opennms.horizon.server.service.metrics.normalization.Constants.NETWORK_IN_BITS;
-import static org.opennms.horizon.server.service.metrics.normalization.Constants.NETWORK_OUT_BITS;
-import static org.opennms.horizon.server.service.metrics.normalization.Constants.QUERY_FOR_AZURE_TOTAL_NETWORK_IN_BITS;
-import static org.opennms.horizon.server.service.metrics.normalization.Constants.QUERY_FOR_AZURE_TOTAL_NETWORK_OUT_BITS;
-import static org.opennms.horizon.server.service.metrics.normalization.Constants.QUERY_FOR_BW_IN_UTIL_PERCENTAGE;
-import static org.opennms.horizon.server.service.metrics.normalization.Constants.QUERY_FOR_BW_OUT_UTIL_PERCENTAGE;
-import static org.opennms.horizon.server.service.metrics.normalization.Constants.QUERY_FOR_NETWORK_ERRORS_IN;
-import static org.opennms.horizon.server.service.metrics.normalization.Constants.QUERY_FOR_NETWORK_ERRORS_OUT;
-import static org.opennms.horizon.server.service.metrics.normalization.Constants.QUERY_FOR_TOTAL_NETWORK_BYTES_IN;
-import static org.opennms.horizon.server.service.metrics.normalization.Constants.QUERY_FOR_TOTAL_NETWORK_BYTES_OUT;
-import static org.opennms.horizon.server.service.metrics.normalization.Constants.QUERY_FOR_TOTAL_NETWORK_IN_BITS;
-import static org.opennms.horizon.server.service.metrics.normalization.Constants.QUERY_FOR_TOTAL_NETWORK_OUT_BITS;
-import static org.opennms.horizon.server.service.metrics.normalization.Constants.QUERY_PREFIX;
-import static org.opennms.horizon.server.service.metrics.normalization.Constants.TOTAL_NETWORK_BYTES_IN;
-import static org.opennms.horizon.server.service.metrics.normalization.Constants.TOTAL_NETWORK_BYTES_OUT;
+
+import static org.opennms.horizon.server.service.metrics.Constants.AZURE_SCAN_TYPE;
+import static org.opennms.horizon.server.service.metrics.Constants.BW_IN_PERCENTAGE;
+import static org.opennms.horizon.server.service.metrics.Constants.BW_OUT_PERCENTAGE;
+import static org.opennms.horizon.server.service.metrics.Constants.NETWORK_ERRORS_IN;
+import static org.opennms.horizon.server.service.metrics.Constants.NETWORK_ERRORS_OUT;
+import static org.opennms.horizon.server.service.metrics.Constants.NETWORK_IN_BITS;
+import static org.opennms.horizon.server.service.metrics.Constants.NETWORK_OUT_BITS;
+import static org.opennms.horizon.server.service.metrics.Constants.QUERY_FOR_AZURE_TOTAL_NETWORK_IN_BITS;
+import static org.opennms.horizon.server.service.metrics.Constants.QUERY_FOR_AZURE_TOTAL_NETWORK_OUT_BITS;
+import static org.opennms.horizon.server.service.metrics.Constants.QUERY_FOR_BW_IN_UTIL_PERCENTAGE;
+import static org.opennms.horizon.server.service.metrics.Constants.QUERY_FOR_BW_OUT_UTIL_PERCENTAGE;
+import static org.opennms.horizon.server.service.metrics.Constants.QUERY_FOR_NETWORK_ERRORS_IN;
+import static org.opennms.horizon.server.service.metrics.Constants.QUERY_FOR_NETWORK_ERRORS_OUT;
+import static org.opennms.horizon.server.service.metrics.Constants.QUERY_FOR_TOTAL_NETWORK_BYTES_IN;
+import static org.opennms.horizon.server.service.metrics.Constants.QUERY_FOR_TOTAL_NETWORK_BYTES_OUT;
+import static org.opennms.horizon.server.service.metrics.Constants.QUERY_FOR_TOTAL_NETWORK_IN_BITS;
+import static org.opennms.horizon.server.service.metrics.Constants.QUERY_FOR_TOTAL_NETWORK_OUT_BITS;
+import static org.opennms.horizon.server.service.metrics.Constants.QUERY_PREFIX;
+import static org.opennms.horizon.server.service.metrics.Constants.TOTAL_NETWORK_BYTES_IN;
+import static org.opennms.horizon.server.service.metrics.Constants.TOTAL_NETWORK_BYTES_OUT;
 
 @Component
 public class QueryService {
-
     private static final Logger LOG = LoggerFactory.getLogger(QueryService.class);
     private static final String OPERATION_NOT_SUPPORTED_FOR_AZURE_NODE = "Operation not supported for Azure node: ";
 
@@ -85,15 +87,13 @@ public class QueryService {
         if (isRangeQuery(metricName)) {
             long end = System.currentTimeMillis() / 1000L;
             long start = end - getDuration(timeRange, timeRangeUnit).orElse(Duration.ofHours(24)).getSeconds();
-            String rangeQuerySuffixForTotal = "&start=" + start + "&end=" + end +
-                "&step=1h";
             String rangeQuerySuffix = "&start=" + start + "&end=" + end +
                 "&step=2m";
             switch (metricName) {
                 case TOTAL_NETWORK_BYTES_IN:
-                    return QUERY_PREFIX + QUERY_FOR_TOTAL_NETWORK_BYTES_IN + rangeQuerySuffixForTotal;
+                    return QUERY_PREFIX + encode(QUERY_FOR_TOTAL_NETWORK_BYTES_IN) + rangeQuerySuffix;
                 case TOTAL_NETWORK_BYTES_OUT:
-                    return QUERY_PREFIX + QUERY_FOR_TOTAL_NETWORK_BYTES_OUT + rangeQuerySuffixForTotal;
+                    return QUERY_PREFIX + encode(QUERY_FOR_TOTAL_NETWORK_BYTES_OUT) + rangeQuerySuffix;
                 case NETWORK_IN_BITS:
                     if (isAzureNode(node)) {
                         var query = String.format(QUERY_FOR_AZURE_TOTAL_NETWORK_IN_BITS, getLabelsQueryString(labels));
@@ -145,7 +145,7 @@ public class QueryService {
     }
 
     public String getQueryString(Map<String, String> queryParams) {
-        StringBuilder sb = new StringBuilder("query={");
+        StringBuilder sb = new StringBuilder(QUERY_PREFIX + "{");
 
         int index = 0;
         for (Map.Entry<String, String> param : queryParams.entrySet()) {
@@ -194,6 +194,10 @@ public class QueryService {
             LOG.warn("Exception while parsing time range with timeRange {} in units {}", timeRange, timeRangeUnit, e);
         }
         return Optional.empty();
+    }
+
+    private String encode(String value) {
+        return URLEncoder.encode(value, StandardCharsets.UTF_8);
     }
 
     private boolean isAzureNode(Optional<NodeDTO> node){

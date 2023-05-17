@@ -39,20 +39,6 @@ public class MetricLabelUtils {
     public static final String MONITOR_KEY = "monitor";
     private static final String NODE_ID_KEY = "node_id";
 
-    public String getMetricName(Map<String, String> metricLabels) {
-        if (metricLabels.containsKey(METRIC_NAME_KEY)) {
-            return metricLabels.get(METRIC_NAME_KEY);
-        }
-        throw new RuntimeException("No Metric Name Found in response labels - shouldn't get here");
-    }
-
-    public String getMonitorType(Map<String, String> metricLabels) {
-        if (metricLabels.containsKey(MONITOR_KEY)) {
-            return metricLabels.get(MONITOR_KEY);
-        }
-        throw new RuntimeException("No Monitor Type Found");
-    }
-
     public Optional<Long> getNodeId(Map<String, String> metricLabels) {
         if (metricLabels.containsKey(NODE_ID_KEY)) {
             String nodeIdStr = metricLabels.get(NODE_ID_KEY);

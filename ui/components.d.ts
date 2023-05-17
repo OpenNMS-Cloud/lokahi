@@ -7,6 +7,7 @@ export {}
 
 declare module '@vue/runtime-core' {
   export interface GlobalComponents {
+    AddressAutocomplete: typeof import('./src/components/Common/AddressAutocomplete.vue')['default']
     AlertsCard: typeof import('./src/components/Alerts/AlertsCard.vue')['default']
     AlertsCardList: typeof import('./src/components/Alerts/AlertsCardList.vue')['default']
     AlertsSeverityCard: typeof import('./src/components/Alerts/AlertsSeverityCard.vue')['default']

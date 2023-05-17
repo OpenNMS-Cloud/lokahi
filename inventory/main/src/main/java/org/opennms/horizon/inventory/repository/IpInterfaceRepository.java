@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.opennms.horizon.inventory.model.IpInterface;
+import org.opennms.taskset.contract.ScanType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -50,6 +51,17 @@ public interface IpInterfaceRepository extends JpaRepository<IpInterface, Long> 
     Optional<IpInterface> findByIpAddressAndLocationAndTenantId(@Param("ipAddress") InetAddress ipAddress,
                                                                 @Param("location") String location,
                                                                 @Param("tenantId") String tenantId);
+
+    @Query("SELECT ip " +
+        "FROM IpInterface ip " +
+        "WHERE ip.ipAddress = :ipAddress " +
+        "AND ip.node.monitoringLocation.location = :location " +
+        "AND ip.tenantId = :tenantId " +
+        "AND ip.node.scanType = :scanType ")
+    Optional<IpInterface> findByIpLocationTenantAndScanType(@Param("ipAddress") InetAddress ipAddress,
+                                                            @Param("location") String location,
+                                                            @Param("tenantId") String tenantId,
+                                                            @Param("scanType") ScanType scanType);
 
     Optional<IpInterface> findByIdAndTenantId(long id, String tenantId);
 

@@ -30,7 +30,6 @@ package org.opennms.horizon.server.service;
 
 import io.leangen.graphql.execution.ResolutionEnvironment;
 import lombok.RequiredArgsConstructor;
-import org.opennms.horizon.inventory.dto.IpInterface;
 import org.opennms.horizon.inventory.dto.IpInterfaceDTO;
 import org.opennms.horizon.inventory.dto.NodeDTO;
 import org.opennms.horizon.server.model.TSResult;
@@ -48,7 +47,7 @@ import java.util.List;
 import java.util.Map;
 
 import static java.util.Objects.isNull;
-import static org.opennms.horizon.server.service.metrics.normalization.Constants.AZURE_SCAN_TYPE;
+import static org.opennms.horizon.server.service.metrics.Constants.AZURE_SCAN_TYPE;
 import static org.springframework.util.CollectionUtils.isEmpty;
 
 @Service

@@ -28,6 +28,7 @@
             v-model="formInputs.location"
             :schema="nameV"
             required
+            :disabled="true"
             class="input-name"
             data-test="input-name"
           >
@@ -35,14 +36,11 @@
           ></FeatherInput>
         </div>
         <div class="row">
-          <FeatherInput
-            label="Address (optional)"
-            v-model="formInputs.address"
+          <AddressAutocomplete
+            :address-model="addressModel"
             class="input-address"
-            data-test="input-address"
-          >
-            <template #pre> <FeatherIcon :icon="icons.placeholder" /> </template
-          ></FeatherInput>
+            :on-address-model-update="onAddressChange"
+          ></AddressAutocomplete>
         </div>
         <div class="row">
           <FeatherInput
@@ -154,17 +152,22 @@ const props = defineProps<{
 
 const locationStore = useLocationStore()
 
-const formInputs = computed(() => {
-  const selectedLocation = locationStore.locationsList.filter((l: LocationType) => l.id === props.id)[0]
-
-  return {
-    id: selectedLocation.id,
-    location: selectedLocation.location,
-    address: selectedLocation.address,
-    longitude: selectedLocation.longitude,
-    latitude: selectedLocation.latitude
-  }
+const selectedLocation = locationStore.locationsList.filter((l: LocationType) => l.id === props.id)[0]
+const formInputs = ref({
+  id: selectedLocation.id,
+  location: selectedLocation.location,
+  address: selectedLocation.address,
+  longitude: selectedLocation.longitude,
+  latitude: selectedLocation.latitude
 })
+
+const addressModel = ref({ _text: formInputs.value.address, value: 'savedAddress' })
+
+const onAddressChange = (newAddress: any) => {
+  formInputs.value.address = newAddress.value.label
+  formInputs.value.longitude = newAddress.value.x
+  formInputs.value.latitude = newAddress.value.y
+}
 
 const form = useForm()
 const nameV = string().required('Location name is required.')
@@ -186,16 +189,6 @@ const onSubmit = async () => {
 const downloadCert = (string: string) => {
   locationStore.downloadCertificatePassword = 'GeNeRaTeDpAsSw0rD123'
 }
-
-const generateKeyBtn: IButtonTextIcon = {
-  label: 'GENERATE KEY'
-}
-const generateKey = () => ({})
-
-const downloadCredentialsBtn: IButtonTextIcon = {
-  label: 'READY TO DOWNLOAD'
-}
-const downloadCredentials = () => ({})
 
 const deleteLocation = async () => {
   const success = await locationStore.deleteLocation(props.id)

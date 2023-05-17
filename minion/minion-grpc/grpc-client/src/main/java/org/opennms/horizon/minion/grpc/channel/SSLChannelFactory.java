@@ -78,7 +78,7 @@ public class SSLChannelFactory implements ManagedChannelFactory {
             }
         }
 
-        if (trustStore != null) {
+        if (trustStore != null && !trustStore.isBlank()) {
             try {
                 TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
                 trustManagerFactory.init(loadKeyStore(trustStoreType, trustStore, trustStorePassword));

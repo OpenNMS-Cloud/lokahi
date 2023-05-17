@@ -26,7 +26,7 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.server.service.metrics.normalization;
+package org.opennms.horizon.server.service.metrics;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -34,15 +34,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class Constants {
     public static final String AZURE_MONITOR_TYPE = "AZURE";
-    public static final String SNMP_MONITOR_TYPE = "SNMP";
-
-    public static final String DISCOVERY_SCAN = "DISCOVERY_SCAN";
     public static final String AZURE_SCAN_TYPE = "AZURE_SCAN";
-    public static final String NODE_SCAN = "NODE_SCAN";
-
-    // Common Metric Name
-    public static final String NETWORK_IN_TOTAL_BYTES = "network_in_total_bytes";
-    public static final String NETWORK_OUT_TOTAL_BYTES = "network_out_total_bytes";
 
 
     public static final String QUERY_PREFIX = "query=";
@@ -69,14 +61,22 @@ public final class Constants {
     public static final String QUERY_FOR_NETWORK_ERRORS_IN = "irate(ifInErrors%s[4m])";
     public static final String QUERY_FOR_NETWORK_ERRORS_OUT = "irate(ifOutErrors%s[4m])";
 
-    // SNMP Specific Metric Names
-    public static final String IF_IN_OCTETS = "ifInOctets";
-    public static final String IF_OUT_OCTETS = "ifOutOctets";
-    public static final String SYS_UP_TIME = "sysUpTime";
-
     // Total Network
     public static final String TOTAL_NETWORK_BYTES_IN = "total_network_bytes_in";
     public static final String TOTAL_NETWORK_BYTES_OUT = "total_network_bytes_out";
-    public static final String QUERY_FOR_TOTAL_NETWORK_BYTES_IN = "sum(rate(ifHCInOctets[1h])*3600)";
-    public static final String QUERY_FOR_TOTAL_NETWORK_BYTES_OUT = "sum(rate(ifHCOutOctets[1h])*3600)";
+    public static final String QUERY_FOR_TOTAL_NETWORK_BYTES_IN = """
+                sum(irate(ifHCInOctets[4m])) or vector(0) +
+                sum(sum_over_time(network_in_total_bytes[4m])) or vector(0)
+                    unless
+                count(irate(ifHCInOctets[4m])) == 0 and
+                count(sum_over_time(network_in_total_bytes[4m])) == 0
+        """;
+
+    public static final String QUERY_FOR_TOTAL_NETWORK_BYTES_OUT = """
+                sum(irate(ifHCOutOctets[4m])) or vector(0) +
+                sum(sum_over_time(network_out_total_bytes[4m])) or vector(0)
+                    unless
+                count(irate(ifHCOutOctets[4m])) == 0 and
+                count(sum_over_time(network_out_total_bytes[4m])) == 0
+        """;
 }

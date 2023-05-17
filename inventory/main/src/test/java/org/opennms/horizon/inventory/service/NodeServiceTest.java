@@ -178,7 +178,7 @@ public class NodeServiceTest {
             .setManagementIp("127.0.0.1")
             .addTags(TagCreateDTO.newBuilder().setName("tag-name").build())
             .build();
-        doReturn(Optional.empty()).when(mockIpInterfaceRepository).findByIpAddressAndLocationAndTenantId(any(InetAddress.class), eq(nodeCreateDTO.getLocation()), eq(tenant));
+        doReturn(Optional.empty()).when(mockIpInterfaceRepository).findByIpLocationTenantAndScanType(any(InetAddress.class), eq(nodeCreateDTO.getLocation()), eq(tenant),eq(ScanType.NODE_SCAN));
 
         nodeService.createNode(nodeCreateDTO, ScanType.NODE_SCAN, tenant);
         verify(mockNodeRepository).save(any(Node.class));
@@ -187,7 +187,7 @@ public class NodeServiceTest {
         verify(mockMonitoringLocationRepository).findByLocationAndTenantId(location, tenant);
         verify(tagService).addTags(eq(tenant), any(TagCreateListDTO.class));
         verify(mockConfigUpdateService, timeout(5000)).sendConfigUpdate(tenant, location);
-        verify(mockIpInterfaceRepository).findByIpAddressAndLocationAndTenantId(any(InetAddress.class), eq(nodeCreateDTO.getLocation()), eq(tenant));
+        verify(mockIpInterfaceRepository).findByIpLocationTenantAndScanType(any(InetAddress.class), eq(nodeCreateDTO.getLocation()), eq(tenant), eq(ScanType.NODE_SCAN));
         // Check the default state
         assertEquals(MonitoredState.DETECTED,nodeCreateDTO.getMonitoredState());
     }
@@ -205,14 +205,14 @@ public class NodeServiceTest {
 
         doReturn(Optional.of(new MonitoringLocation())).when(mockMonitoringLocationRepository).findByLocationAndTenantId(location, tenantId);
 
-        doReturn(Optional.empty()).when(mockIpInterfaceRepository).findByIpAddressAndLocationAndTenantId(any(InetAddress.class), eq(nodeCreateDTO.getLocation()), eq(tenantId));
+        doReturn(Optional.empty()).when(mockIpInterfaceRepository).findByIpLocationTenantAndScanType(any(InetAddress.class), eq(nodeCreateDTO.getLocation()), eq(tenantId), eq(ScanType.NODE_SCAN));
 
         nodeService.createNode(nodeCreateDTO, ScanType.NODE_SCAN, tenantId);
         verify(mockNodeRepository).save(any(Node.class));
         verify(mockIpInterfaceRepository).save(any(IpInterface.class));
         verify(mockMonitoringLocationRepository).findByLocationAndTenantId(location, tenantId);
         verify(mockConfigUpdateService, timeout(5000).times(0)).sendConfigUpdate(eq(tenantId), any());
-        verify(mockIpInterfaceRepository).findByIpAddressAndLocationAndTenantId(any(InetAddress.class), eq(nodeCreateDTO.getLocation()), eq(tenantId));
+        verify(mockIpInterfaceRepository).findByIpLocationTenantAndScanType(any(InetAddress.class), eq(nodeCreateDTO.getLocation()), eq(tenantId), eq(ScanType.NODE_SCAN));
     }
 
     @Test
@@ -244,12 +244,12 @@ public class NodeServiceTest {
             .setManagementIp("127.0.0.1").build();
         MonitoringLocation location = new MonitoringLocation();
         doReturn(Optional.of(location)).when(mockMonitoringLocationRepository).findByLocationAndTenantId(GrpcConstants.DEFAULT_LOCATION, tenantID);
-        doReturn(Optional.empty()).when(mockIpInterfaceRepository).findByIpAddressAndLocationAndTenantId(any(InetAddress.class), eq(nodeCreate.getLocation()), eq(tenantID));
+        doReturn(Optional.empty()).when(mockIpInterfaceRepository).findByIpLocationTenantAndScanType(any(InetAddress.class), eq(nodeCreate.getLocation()), eq(tenantID), eq(ScanType.NODE_SCAN));
         nodeService.createNode(nodeCreate, ScanType.NODE_SCAN, tenantID);
         verify(mockMonitoringLocationRepository).findByLocationAndTenantId(GrpcConstants.DEFAULT_LOCATION, tenantID);
         verify(mockNodeRepository).save(any(Node.class));
         verify(mockIpInterfaceRepository).save(any(IpInterface.class));
-        verify(mockIpInterfaceRepository).findByIpAddressAndLocationAndTenantId(any(InetAddress.class), eq(nodeCreate.getLocation()), eq(tenantID));
+        verify(mockIpInterfaceRepository).findByIpLocationTenantAndScanType(any(InetAddress.class), eq(nodeCreate.getLocation()), eq(tenantID), eq(ScanType.NODE_SCAN));
     }
 
     @Test
@@ -259,7 +259,7 @@ public class NodeServiceTest {
             .setManagementIp("127.0.0.1").build();
         doReturn(Optional.empty()).when(mockMonitoringLocationRepository).findByLocationAndTenantId(GrpcConstants.DEFAULT_LOCATION, tenantID);
         doReturn(new MonitoringLocation()).when(mockMonitoringLocationRepository).save(any(MonitoringLocation.class));
-        doReturn(Optional.empty()).when(mockIpInterfaceRepository).findByIpAddressAndLocationAndTenantId(any(InetAddress.class), eq(nodeCreate.getLocation()), eq(tenantID));
+        doReturn(Optional.empty()).when(mockIpInterfaceRepository).findByIpLocationTenantAndScanType(any(InetAddress.class), eq(nodeCreate.getLocation()), eq(tenantID), eq(ScanType.NODE_SCAN));
         ArgumentCaptor<MonitoringLocation> captor = ArgumentCaptor.forClass(MonitoringLocation.class);
         nodeService.createNode(nodeCreate, ScanType.NODE_SCAN, tenantID);
         verify(mockMonitoringLocationRepository).findByLocationAndTenantId(GrpcConstants.DEFAULT_LOCATION, tenantID);
@@ -267,7 +267,7 @@ public class NodeServiceTest {
         assertThat(captor.getValue().getLocation()).isEqualTo(GrpcConstants.DEFAULT_LOCATION);
         verify(mockNodeRepository).save(any(Node.class));
         verify(mockIpInterfaceRepository).save(any(IpInterface.class));
-        verify(mockIpInterfaceRepository).findByIpAddressAndLocationAndTenantId(any(InetAddress.class), eq(nodeCreate.getLocation()), eq(tenantID));
+        verify(mockIpInterfaceRepository).findByIpLocationTenantAndScanType(any(InetAddress.class), eq(nodeCreate.getLocation()), eq(tenantID), eq(ScanType.NODE_SCAN));
     }
 
     @Test
@@ -320,12 +320,13 @@ public class NodeServiceTest {
         ipInterface.setNode(node);
         NodeCreateDTO nodeCreate = NodeCreateDTO.newBuilder()
             .setLabel("test-node")
-            .setManagementIp("127.0.0.1").build();
-        doReturn(Optional.of(ipInterface)).when(mockIpInterfaceRepository).findByIpAddressAndLocationAndTenantId(any(InetAddress.class), eq(nodeCreate.getLocation()), eq(tenantID));
+            .setManagementIp("127.0.0.1")
+            .build();
+        doReturn(Optional.of(ipInterface)).when(mockIpInterfaceRepository).findByIpLocationTenantAndScanType(any(InetAddress.class), eq(nodeCreate.getLocation()), eq(tenantID), eq(ScanType.NODE_SCAN));
         assertThatThrownBy(() -> nodeService.createNode(nodeCreate, ScanType.NODE_SCAN, tenantID))
             .isInstanceOf(EntityExistException.class)
             .hasMessageContaining("already exists in the system ");
-        verify(mockIpInterfaceRepository).findByIpAddressAndLocationAndTenantId(any(InetAddress.class), eq(nodeCreate.getLocation()), eq(tenantID));
+        verify(mockIpInterfaceRepository).findByIpLocationTenantAndScanType(any(InetAddress.class), eq(nodeCreate.getLocation()), eq(tenantID), eq(ScanType.NODE_SCAN));
         verifyNoInteractions(mockNodeRepository);
         verifyNoInteractions(mockMonitoringLocationRepository);
         verifyNoInteractions(tagService);

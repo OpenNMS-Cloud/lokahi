@@ -192,8 +192,8 @@ public class NodeService {
     public Node createNode(NodeCreateDTO request, ScanType scanType, String tenantId) throws EntityExistException {
         if(request.hasManagementIp()) { //Do we really want to create a node without managed IP?
             Optional<IpInterface> ipInterfaceOpt = ipInterfaceRepository
-                .findByIpAddressAndLocationAndTenantId(InetAddressUtils.getInetAddress(request.getManagementIp()), request.getLocation(), tenantId);
-            if(ipInterfaceOpt.isPresent()) {
+                .findByIpLocationTenantAndScanType(InetAddressUtils.getInetAddress(request.getManagementIp()), request.getLocation(), tenantId, scanType);
+            if (ipInterfaceOpt.isPresent()) {
                 IpInterface ipInterface = ipInterfaceOpt.get();
                 log.error("IP address {} already exists in the system and belong to device {}", request.getManagementIp(), ipInterface.getNode().getNodeLabel());
                 throw new EntityExistException("IP address " + request.getManagementIp() + " already exists in the system and belong to device " + ipInterface.getNode().getNodeLabel());

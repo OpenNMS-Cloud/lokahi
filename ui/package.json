@@ -58,6 +58,7 @@
     "graphql": "^16.6.0",
     "jspdf": "^2.5.1",
     "leaflet": "^1.9.3",
+    "leaflet-geosearch": "^3.8.0",
     "leaflet.markercluster": "^1.5.3",
     "lodash": "^4.17.21",
     "pinia": "^2.0.29",

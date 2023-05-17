@@ -1,7 +1,6 @@
 import { useQuery } from 'villus'
 import { defineStore } from 'pinia'
 import {
-  NodesListDocument,
   NodeLatencyMetricDocument,
   TsResult,
   TimeRangeUnit,
@@ -33,15 +32,16 @@ export const useInventoryQueries = defineStore('inventoryQueries', () => {
 
   const { startSpinner, stopSpinner } = useSpinner()
 
-  // Get all nodes - cannot yet specify for monitored nodes
+  // Get monitored nodes
   const {
-    onData,
-    isFetching: nodesFetching,
-    execute
+    onData: onGetMonitoredNodes,
+    isFetching: monitoredNodesFetching,
+    execute: getMonitoredNodes
   } = useQuery({
-    query: NodesListDocument,
+    query: FindAllNodesByMonitoredStateDocument,
+    fetchOnMount: false,
     cachePolicy: 'network-only',
-    fetchOnMount: false
+    variables: { monitoredState: MonitoredStates.MONITORED }
   })
 
   // Get unmonitored nodes
@@ -122,13 +122,13 @@ export const useInventoryQueries = defineStore('inventoryQueries', () => {
     variables: metricsVariables
   })
 
-  watchEffect(() => (nodesFetching.value ? startSpinner() : stopSpinner()))
+  watchEffect(() => (monitoredNodesFetching.value ? startSpinner() : stopSpinner()))
   watchEffect(() => (filteredNodesByLabelFetching.value ? startSpinner() : stopSpinner()))
   watchEffect(() => (filteredNodesByTagsFetching.value ? startSpinner() : stopSpinner()))
   watchEffect(() => (unmonitoredNodesFetching.value ? startSpinner() : stopSpinner()))
   watchEffect(() => (detectedNodesFetching.value ? startSpinner() : stopSpinner()))
 
-  onData((data) => formatMonitoredNodes(data.findAllNodes ?? []))
+  onGetMonitoredNodes((data) => formatMonitoredNodes(data.findAllNodesByMonitoredState ?? []))
   onFilteredByLabelData((data) => formatMonitoredNodes(data.findAllNodesByNodeLabelSearch ?? []))
   onFilteredByTagsData((data) => formatMonitoredNodes(data.findAllNodesByTags ?? []))
   onGetUnmonitoredNodes((data) => formatUnmonitoredNodes(data.findAllNodesByMonitoredState ?? []))
@@ -197,7 +197,7 @@ export const useInventoryQueries = defineStore('inventoryQueries', () => {
           node.anchor.tagValue = tag.tags ?? []
         }
       })
-      
+
       return node
     })
   }
@@ -285,7 +285,7 @@ export const useInventoryQueries = defineStore('inventoryQueries', () => {
     nodes,
     unmonitoredNodes,
     detectedNodes,
-    fetch: execute,
+    fetch: getMonitoredNodes,
     getNodesByLabel,
     getNodesByTags,
     getUnmonitoredNodes,

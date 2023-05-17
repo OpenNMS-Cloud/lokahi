@@ -13,6 +13,7 @@ spec:
   template:
     metadata:
       labels:
+        appdomain: opennms
         app: {{ .Values.Keycloak.ServiceName }}
     spec:
       {{- if .Values.NodeRestrictions.Enabled }}

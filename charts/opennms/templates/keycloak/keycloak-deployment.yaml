@@ -45,7 +45,11 @@ spec:
             requests:
               cpu: "{{ .Values.Keycloak.Resources.Requests.Cpu }}"
               memory: "{{ .Values.Keycloak.Resources.Requests.Memory }}"
-          args: ['--import-realm']
+          args:
+            - --import-realm
+            {{- if .Values.OpenNMS.global.enableJsonLogging }}
+            - --log-console-output=json
+            {{- end }}
           env:
             - name: JAVA_TOOL_OPTIONS
               value: "-javaagent:/opt/keycloak/agent/opentelemetry-javaagent.jar"
@@ -63,12 +67,8 @@ spec:
             - name: KC_HOSTNAME_ADMIN_URL
               value: "{{ .Values.Keycloak.HostnameAdminUrl }}"
             {{- end }}
-            - name: KC_DB_SCHEMA
-              value: "{{ .Values.Keycloak.DbSchemaName }}"
-            - name: KC_DB_URL_DATABASE
-              value: "{{ .Values.Keycloak.DbName }}"
-            - name: KC_DB_URL_HOST
-              value: "{{ .Values.Keycloak.DbHost }}"
+            - name: KC_DB_URL
+              value: "jdbc:postgresql://{{ .Values.Keycloak.DbHost }}:5432/{{ .Values.Keycloak.DbName }}?currentSchema={{ .Values.Keycloak.DbSchemaName }}"
             - name: KC_DB_USERNAME
               valueFrom:
                 secretKeyRef:

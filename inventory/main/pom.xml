@@ -388,7 +388,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>${surefire.version}</version>
                 <!-- Without these dependencies, all tests don't run with maven, either locally or in github Actions -->
                 <dependencies>
                     <dependency>
@@ -406,7 +405,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
-                <version>${failsafe.version}</version>
                 <executions>
                     <execution>
                         <id>horizon-integration-test</id>

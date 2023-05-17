@@ -2,17 +2,19 @@
   <TableCard>
     <div class="header">
       <div class="title-container">
-        <span class="title">
-          SNMP Interfaces
-        </span>
+        <span class="title"> SNMP Interfaces </span>
       </div>
     </div>
     <div class="container">
-      <table class="data-table" aria-label="SNMP Interfaces Table">
+      <table
+        class="data-table tc3"
+        aria-label="SNMP Interfaces Table"
+      >
         <thead>
           <tr>
             <th scope="col">Alias</th>
             <th scope="col">IP Addr</th>
+            <th scope="col">Graphs</th>
             <th scope="col">Physical Addr</th>
             <th scope="col">Index</th>
             <th scope="col">Desc</th>
@@ -23,10 +25,24 @@
             <th scope="col">Operator Status</th>
           </tr>
         </thead>
-        <TransitionGroup name="data-table" tag="tbody">
-          <tr v-for="snmpInterface in nodeData.node.snmpInterfaces" :key="snmpInterface.id">
+        <TransitionGroup
+          name="data-table"
+          tag="tbody"
+        >
+          <tr
+            v-for="snmpInterface in nodeData.node.snmpInterfaces"
+            :key="snmpInterface.id"
+          >
             <td>{{ snmpInterface.ifAlias }}</td>
             <td>{{ snmpInterface.ipAddress }}</td>
+            <td>
+              <FeatherButton
+                v-if="snmpInterface.ifName"
+                text
+                @click="metricsModal.setIfNameAndOpenModal(snmpInterface.ifName)"
+                >Traffic
+              </FeatherButton>
+            </td>
             <td>{{ snmpInterface.physicalAddr }}</td>
             <td>{{ snmpInterface.ifIndex }}</td>
             <td>{{ snmpInterface.ifDescr }}</td>
@@ -40,12 +56,15 @@
       </table>
     </div>
   </TableCard>
+  <NodeStatusMetricsModal ref="metricsModal" />
 </template>
 
 <script lang="ts" setup>
 import { useNodeStatusStore } from '@/store/Views/nodeStatusStore'
 const nodeStatusStore = useNodeStatusStore()
-  
+
+const metricsModal = ref()
+
 const nodeData = computed(() => {
   return {
     node: nodeStatusStore.fetchedData?.node
@@ -54,10 +73,10 @@ const nodeData = computed(() => {
 </script>
 
 <style lang="scss" scoped>
-@use "@featherds/styles/themes/variables";
-@use "@featherds/styles/mixins/typography";
-@use "@featherds/table/scss/table";
-@use "@/styles/_transitionDataTable";
+@use '@featherds/styles/themes/variables';
+@use '@featherds/styles/mixins/typography';
+@use '@featherds/table/scss/table';
+@use '@/styles/_transitionDataTable';
 
 .header {
   display: flex;

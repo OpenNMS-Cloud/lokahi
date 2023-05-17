@@ -138,8 +138,8 @@
         <mockito.version>4.8.0</mockito.version>
         <jupiter.version>5.9.0</jupiter.version>
         <jib.version>3.3.1</jib.version>
-        <surefire.version>3.0.0-M7</surefire.version>
-        <failsafe.version>3.0.0-M7</failsafe.version>
+        <surefire.version>3.1.0</surefire.version>
+        <failsafe.version>3.1.0</failsafe.version>
         <zjsonpatch.version>0.4.12</zjsonpatch.version>
         <jetty.version>9.4.43.v20210629</jetty.version>
         <cron-utils.version>9.1.6</cron-utils.version>

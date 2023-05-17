@@ -29,6 +29,8 @@
 package org.opennms.horizon.inventory.cucumber.steps;
 
 import com.google.protobuf.Any;
+import com.google.protobuf.Empty;
+import com.google.protobuf.Int64Value;
 import io.cucumber.java.BeforeAll;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
@@ -41,6 +43,7 @@ import org.awaitility.Awaitility;
 import org.junit.jupiter.api.Assertions;
 import org.opennms.horizon.inventory.cucumber.InventoryBackgroundHelper;
 import org.opennms.horizon.inventory.discovery.IcmpActiveDiscoveryCreateDTO;
+import org.opennms.horizon.inventory.discovery.IcmpActiveDiscoveryList;
 import org.opennms.horizon.inventory.discovery.SNMPConfigDTO;
 import org.opennms.horizon.inventory.dto.ListTagsByEntityIdParamsDTO;
 import org.opennms.horizon.inventory.dto.NodeIdQuery;
@@ -135,6 +138,23 @@ public class IcmpDiscoveryStepDefinitions {
         Assertions.assertTrue(tagList.getTagsList().stream().map(TagDTO::getName).toList().contains(tag));
     }
 
+    @Then("verify get active discovery with above details.")
+    public void GetActiveDiscoveryWithAboveDetails() {
+        var icmpDiscoveryDto = backgroundHelper.getIcmpActiveDiscoveryServiceBlockingStub().getDiscoveryById(Int64Value.of(activeDiscoveryId));
+        Assertions.assertEquals(icmpDiscovery.getLocation(), icmpDiscoveryDto.getLocation());
+        Assertions.assertEquals(icmpDiscovery.getIpAddresses(0), icmpDiscoveryDto.getIpAddresses(0));
+        Assertions.assertEquals(icmpDiscovery.getSnmpConf().getReadCommunity(0), icmpDiscoveryDto.getSnmpConf().getReadCommunity(0));
+        var tagListQuery = ListTagsByEntityIdParamsDTO.newBuilder()
+            .setEntityId(TagEntityIdDTO.newBuilder().setActiveDiscoveryId(icmpDiscoveryDto.getId()).build())
+            .build();
+        var tagList = backgroundHelper.getTagServiceBlockingStub().getTagsByEntityId(tagListQuery);
+        Assertions.assertEquals(icmpDiscovery.getTagsCount(), tagList.getTagsCount());
+        var tagsCreated = icmpDiscovery.getTagsList().stream().map(TagCreateDTO::getName).toList();
+        // Take one tag and validate if it exists on the discovery.
+        var tag = tagsCreated.get(0);
+        Assertions.assertTrue(tagList.getTagsList().stream().map(TagDTO::getName).toList().contains(tag));
+    }
+
     @Then("send discovery ping results for {string} to Kafka topic {string}")
     public void sendDiscoveryPingResultsForToKafkaTopic(String ipAddress, String topic) {
         Properties producerConfig = new Properties();
@@ -160,6 +180,12 @@ public class IcmpDiscoveryStepDefinitions {
             grpcHeaders.forEach((key, value) -> producerRecord.headers().add(key, value.getBytes(StandardCharsets.UTF_8)));
             kafkaProducer.send(producerRecord);
         }
+    }
+
+    @Then("verify list has {int} items")
+    public void verifyListSize(int items) {
+        IcmpActiveDiscoveryList list = backgroundHelper.getIcmpActiveDiscoveryServiceBlockingStub().listDiscoveries(Empty.getDefaultInstance());
+        Assertions.assertEquals(items, list.getDiscoveriesCount());
     }
 
     @Then("verify that node is created for {string} and location {string} with same tags within {int}ms")

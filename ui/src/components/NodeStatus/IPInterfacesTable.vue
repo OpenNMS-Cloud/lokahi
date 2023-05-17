@@ -16,9 +16,9 @@
           <tr>
             <th scope="col">IP Address</th>
             <th scope="col">Graphs</th>
-            <th scope="col">IP Hostname</th>
-            <th scope="col">Netmask</th>
-            <th scope="col">Primary</th>
+            <th scope="col" v-if="!nodeStatusStore.isAzure">IP Hostname</th>
+            <th scope="col" v-if="!nodeStatusStore.isAzure">Netmask</th>
+            <th scope="col" v-if="!nodeStatusStore.isAzure">Primary</th>
           </tr>
         </thead>
         <TransitionGroup
@@ -32,19 +32,21 @@
             <td>{{ ipInterface.ipAddress }}</td>
             <td>
               <FeatherButton
+                v-if="!nodeStatusStore.isAzure"
                 text
                 @click="routeToFlows(ipInterface)"
                 >Flows</FeatherButton
               >
               <FeatherButton
+                v-if="nodeStatusStore.isAzure"
                 text
-                @click="metricsModal.openMetricsModal(ipInterface)"
-                >Traffic</FeatherButton
-              >
+                @click="metricsModal.openAzureMetrics(ipInterface.ipAddress)"
+                >Traffic
+              </FeatherButton>
             </td>
-            <td>{{ ipInterface.hostname }}</td>
-            <td>{{ ipInterface.netmask }}</td>
-            <td>{{ ipInterface.snmpPrimary }}</td>
+            <td v-if="!nodeStatusStore.isAzure">{{ ipInterface.hostname }}</td>
+            <td v-if="!nodeStatusStore.isAzure">{{ ipInterface.netmask }}</td>
+            <td v-if="!nodeStatusStore.isAzure">{{ ipInterface.snmpPrimary }}</td>
           </tr>
         </TransitionGroup>
       </table>
@@ -75,11 +77,12 @@ const routeToFlows = (ipInterface: IpInterface) => {
   const { id: ipInterfaceId, ipAddress } = ipInterface
 
   flowsStore.filters.selectedExporters = [
-    { _text: `${nodeLabel?.toUpperCase()} : ${ipAddress}}`, 
-      value: { 
-        nodeId, 
+    {
+      _text: `${nodeLabel?.toUpperCase()} : ${ipAddress}}`,
+      value: {
+        nodeId,
         ipInterfaceId
-      } 
+      }
     }
   ]
   router.push('/flows').catch(() => 'Route to /flows unsuccessful.')

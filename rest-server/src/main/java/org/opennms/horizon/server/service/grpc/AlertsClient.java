@@ -86,7 +86,9 @@ public class AlertsClient {
         final var request = ListAlertsRequest.newBuilder();
         getTimeRangeFilter(timeRange, request);
         getSeverity(severityFilters, request);
-        request.addFilters(Filter.newBuilder().setNodeLabel(nodeLabel).build());
+        if (nodeLabel != null) {
+            request.addFilters(Filter.newBuilder().setNodeLabel(nodeLabel).build());
+        }
 
         request.setPageSize(pageSize)
             .setPage(page)

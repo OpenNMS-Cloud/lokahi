@@ -299,7 +299,7 @@ jib_project(
 ### Minion ###
 custom_build(
     'opennms/horizon-stream-minion',
-    'mvn install -f minion -Dapplication.docker.image=$EXPECTED_REF -Dtest=false -DfailIfNoTests=false -DskipITs=true -DskipTests=true -Dfeatures.verify.skip=true',
+    'mvn install -f minion -Dapplication.docker.image=$EXPECTED_REF -DskipUTs=true -DskipITs=true -DskipTests=true -Dfeatures.verify.skip=true',
     deps=['./minion'],
     ignore=['**/target', '**/dependency-reduced-pom.xml'],
 )

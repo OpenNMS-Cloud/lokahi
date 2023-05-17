@@ -16,18 +16,21 @@
         </div>
         <div class="metrics">
           <LineGraph
+            :graph="bitsInOut"
+            @has-data="displayEmptyMsgIfNoData"
+          />
+          <LineGraph
+            v-if="!isAzure"
             :graph="bandwidthInOut"
             @has-data="displayEmptyMsgIfNoData"
           />
           <LineGraph
-            :graph="bytesInOut"
-            @has-data="displayEmptyMsgIfNoData"
-          />
-          <LineGraph
+            v-if="!isAzure"
             :graph="nodeLatency"
             @has-data="displayEmptyMsgIfNoData"
           />
           <LineGraph
+            v-if="!isAzure"
             :graph="errorsInOut"
             @has-data="displayEmptyMsgIfNoData"
           />
@@ -44,7 +47,7 @@
 </template>
 
 <script setup lang="ts">
-import { TimeRangeUnit, IpInterface } from '@/types/graphql'
+import { TimeRangeUnit } from '@/types/graphql'
 import useModal from '@/composables/useModal'
 import Close from '@featherds/icon/navigation/Cancel'
 import { GraphProps } from '@/types/graphs'
@@ -55,7 +58,9 @@ const { openModal, closeModal, isVisible } = useModal()
 
 const interfaceName = ref()
 const instance = ref()
+const ifName = ref()
 const hasMetricData = ref(false)
+const isAzure = ref(false)
 
 const bandwidthInOut = computed<GraphProps>(() => {
   return {
@@ -65,11 +70,12 @@ const bandwidthInOut = computed<GraphProps>(() => {
     nodeId: route.params.id as string,
     instance: instance.value,
     timeRange: 10,
-    timeRangeUnit: TimeRangeUnit.Minute
+    timeRangeUnit: TimeRangeUnit.Minute,
+    ifName: ifName.value
   }
 })
 
-const bytesInOut = computed<GraphProps>(() => {
+const bitsInOut = computed<GraphProps>(() => {
   return {
     label: 'Bits Inbound / Outbound',
     metrics: ['network_in_bits', 'network_out_bits'],
@@ -77,7 +83,8 @@ const bytesInOut = computed<GraphProps>(() => {
     nodeId: route.params.id as string,
     instance: instance.value,
     timeRange: 10,
-    timeRangeUnit: TimeRangeUnit.Minute
+    timeRangeUnit: TimeRangeUnit.Minute,
+    ifName: ifName.value
   }
 })
 
@@ -89,7 +96,8 @@ const nodeLatency = computed<GraphProps>(() => {
     nodeId: route.params.id as string,
     instance: instance.value,
     timeRange: 10,
-    timeRangeUnit: TimeRangeUnit.Minute
+    timeRangeUnit: TimeRangeUnit.Minute,
+    ifName: ifName.value
   }
 })
 
@@ -101,13 +109,22 @@ const errorsInOut = computed<GraphProps>(() => {
     nodeId: route.params.id as string,
     instance: instance.value,
     timeRange: 10,
-    timeRangeUnit: TimeRangeUnit.Minute
+    timeRangeUnit: TimeRangeUnit.Minute,
+    ifName: ifName.value
   }
 })
 
-const openMetricsModal = (interfaceInfo: IpInterface) => {
-  interfaceName.value = interfaceInfo.ipAddress
-  instance.value = interfaceInfo.ipAddress
+const openAzureMetrics = (inst: string) => {
+  isAzure.value = true // azure nodes can only display bytes in/out
+  interfaceName.value = inst
+  instance.value = inst
+  openModal()
+}
+
+const setIfNameAndOpenModal = (ifNameStr: string) => {
+  isAzure.value = false
+  interfaceName.value = ifNameStr
+  ifName.value = ifNameStr
   openModal()
 }
 
@@ -116,7 +133,7 @@ const displayEmptyMsgIfNoData = (hasData: boolean) => {
   hasMetricData.value = hasData
 }
 
-defineExpose({ openMetricsModal })
+defineExpose({ openAzureMetrics, setIfNameAndOpenModal })
 </script>
 
 <style scoped lang="scss">

@@ -28,6 +28,7 @@
 
 package org.opennms.horizon.shared.ipc.sink.common;
 
+import java.io.IOException;
 import java.util.Objects;
 
 import org.opennms.horizon.shared.ipc.sink.aggregation.AggregatingMessageDispatcher;
@@ -118,7 +119,7 @@ public abstract class AbstractMessageDispatcherFactory<W> implements MessageDisp
     }
 
     @Override
-    public <S extends Message, T extends Message> AsyncDispatcher<S> createAsyncDispatcher(SinkModule<S, T> module) {
+    public <S extends Message, T extends Message> AsyncDispatcher<S> createAsyncDispatcher(SinkModule<S, T> module) throws IOException {
         Objects.requireNonNull(module, "module cannot be null");
         Objects.requireNonNull(module.getAsyncPolicy(), "module must have an AsyncPolicy");
 

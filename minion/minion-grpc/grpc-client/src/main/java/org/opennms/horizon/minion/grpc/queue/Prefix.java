@@ -29,6 +29,7 @@
 package org.opennms.horizon.minion.grpc.queue;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 
 import com.google.common.base.MoreObjects;
 
@@ -91,5 +92,21 @@ public class Prefix {
         return MoreObjects.toStringHelper(this)
             .add("bytes", bytes)
             .toString();
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof final Prefix that)) {
+            return false;
+        }
+        return Arrays.equals(this.bytes, that.bytes);
+    }
+
+    @Override
+    public int hashCode() {
+        return Arrays.hashCode(this.bytes);
     }
 }

@@ -28,6 +28,7 @@
 
 package org.opennms.horizon.shared.ipc.sink.common;
 
+import java.io.IOException;
 import java.time.Duration;
 import java.util.Objects;
 import java.util.concurrent.ExecutorService;
@@ -71,7 +72,7 @@ public class AsyncDispatcherImpl<W, S extends Message, T extends Message> implem
 
     public AsyncDispatcherImpl(final DispatcherState<W, S, T> state,
                                final SendQueueFactory sendQueueFactory,
-                               final Consumer<byte[]> sender) {
+                               final Consumer<byte[]> sender) throws IOException {
         this.sendQueue = sendQueueFactory.createQueue(state.getModule().getId());
 
         this.messageDispatcher = AbstractMessageDispatcherFactory.createMessageDispatcher(state, this.sendQueue::enqueue);

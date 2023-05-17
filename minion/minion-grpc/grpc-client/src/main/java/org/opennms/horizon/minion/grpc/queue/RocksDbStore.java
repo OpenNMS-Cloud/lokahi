@@ -32,74 +32,136 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Map;
+import java.util.Objects;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
+import org.rocksdb.ColumnFamilyDescriptor;
+import org.rocksdb.ColumnFamilyHandle;
+import org.rocksdb.ColumnFamilyOptions;
 import org.rocksdb.CompressionType;
+import org.rocksdb.DBOptions;
 import org.rocksdb.Options;
 import org.rocksdb.RocksDB;
 import org.rocksdb.RocksDBException;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Streams;
 
-public class RocksDbStore implements OffHeapSendQueueFactory.Store {
 
-    private final Options rocksDBOptions;
-    private final RocksDB rocksDB;
+public class RocksDbStore implements OffHeapSendQueueFactory.StoreManager {
+
+    private final static DBOptions DB_OPTIONS = new DBOptions()
+        .setCreateIfMissing(true)
+        .setMaxBackgroundJobs(Math.max(Runtime.getRuntime().availableProcessors(), 3))
+        ;
+
+    private final static ColumnFamilyOptions CF_OPTIONS = new ColumnFamilyOptions()
+        .setEnableBlobFiles(true)
+        .setEnableBlobGarbageCollection(true)
+        .setMinBlobSize(16L * 1024L)
+        .setBlobFileSize(64L * 1024L * 1024L)
+        .setTargetFileSizeBase(64L * 1024L * 1024L)
+        .setCompressionType(CompressionType.SNAPPY_COMPRESSION)
+        .setBlobCompressionType(CompressionType.SNAPPY_COMPRESSION)
+        .setEnableBlobGarbageCollection(true)
+        ;
+
+    private final RocksDB db;
+
+    private final Map<byte[], ColumnFamilyHandle> cfHandles;
 
     public RocksDbStore() throws RocksDBException, IOException {
         this(Paths.get("./sink/queue").toAbsolutePath());
     }
 
     public RocksDbStore(final Path path) throws IOException, RocksDBException {
-        this.rocksDBOptions = new Options()
-            .setCreateIfMissing(true)
-            .setCompressionType(CompressionType.SNAPPY_COMPRESSION)
-            .setEnableBlobFiles(true)
-            .setEnableBlobGarbageCollection(true)
-            .setMinBlobSize(100_000L)
-            .setBlobCompressionType(CompressionType.SNAPPY_COMPRESSION)
-            .setCreateMissingColumnFamilies(true)
-            .setTargetFileSizeBase(64L * 1024L * 1024L)
-            .setMaxBytesForLevelBase(64L * 1024L * 1024L * 10L)
-            .setMaxBackgroundJobs(Math.max(Runtime.getRuntime().availableProcessors(), 3));
-
         Files.createDirectories(path);
 
-        this.rocksDB = RocksDB.open(this.rocksDBOptions, path.toString());
+        // This wired interface works by first querying the available column family names and then pushing the list of
+        // descriptors build from these names to the open call, which will fill a list of handles co-indexed with the
+        // requested descriptors. That's some wired 90' C list management shit.
+        final var cfDescs = RocksDB.listColumnFamilies(new Options(), path.toString()).stream()
+                                   .map(columnFamilyName -> new ColumnFamilyDescriptor(columnFamilyName, CF_OPTIONS))
+                                   .collect(Collectors.toList());
+        cfDescs.add(new ColumnFamilyDescriptor(RocksDB.DEFAULT_COLUMN_FAMILY));
+
+        final var cfHandles = Lists.<ColumnFamilyHandle>newArrayListWithCapacity(cfDescs.size());
+
+        this.db = RocksDB.open(DB_OPTIONS, path.toString(),
+                               cfDescs, cfHandles);
+
+        this.cfHandles = Streams.zip(cfDescs.stream(), cfHandles.stream(), Map::entry)
+                                .collect(Collectors.toMap(e -> e.getKey().getName(), Map.Entry::getValue));
+    }
+
+    public synchronized OffHeapSendQueueFactory.Store getStore(final Prefix prefix) throws IOException {
+        final var key = prefix.getBytes();
+
+        var cfHandle = this.cfHandles.get(key);
+        if (cfHandle == null) {
+            try {
+                cfHandle = this.db.createColumnFamily(new ColumnFamilyDescriptor(key, CF_OPTIONS));
+            } catch (final RocksDBException e) {
+                throw new IOException(e);
+            }
+            this.cfHandles.put(key, cfHandle);
+        }
+
+        return new Store(cfHandle);
     }
 
     @Override
     public void close() {
-        this.rocksDB.close();
-        this.rocksDBOptions.close();
+        this.db.close();
     }
 
-    @Override
-    public byte[] get(final byte[] key) throws IOException {
-        try {
-            return this.rocksDB.get(key);
-        } catch (RocksDBException e) {
-            throw new IOException(e);
+    private class Store implements OffHeapSendQueueFactory.Store {
+
+        private final ColumnFamilyHandle cf;
+
+        private Store(final ColumnFamilyHandle cf) {
+            this.cf = Objects.requireNonNull(cf);
         }
-    }
 
-    @Override
-    public void put(final byte[] key, final byte[] message) throws IOException {
-        try {
-            this.rocksDB.put(key, message);
-        } catch (RocksDBException e) {
-            throw new IOException(e);
-        }
-    }
-
-    @Override
-    public void iterate(final Prefix prefix, final Consumer<byte[]> f) {
-        try (final var it = this.rocksDB.newIterator()) {
-            it.seek(prefix.getBytes());
-
-            while (it.isValid() && prefix.of(it.key())) {
-                f.accept(it.key());
-                it.next();
+        @Override
+        public byte[] get(final byte[] key) throws IOException {
+            try {
+                final var result = RocksDbStore.this.db.get(this.cf, key);
+                RocksDbStore.this.db.singleDelete(this.cf, key);
+                return result;
+            } catch (RocksDBException e) {
+                throw new IOException(e);
             }
         }
+
+        @Override
+        public void put(final byte[] key, final byte[] message) throws IOException {
+            try {
+                RocksDbStore.this.db.put(this.cf, key, message);
+            } catch (RocksDBException e) {
+                throw new IOException(e);
+            }
+        }
+
+        @Override
+        public void iterate(final Consumer<byte[]> f) {
+            try (final var it = RocksDbStore.this.db.newIterator(this.cf)) {
+                it.seekToFirst();
+
+                while (it.isValid()) {
+                    f.accept(it.key());
+                    it.next();
+                }
+            }
+        }
+
+        @Override
+        public void close() throws IOException {
+            this.cf.close();
+        }
     }
+
+
 }

@@ -28,6 +28,8 @@
 
 package org.opennms.horizon.shared.ipc.sink.api;
 
+import java.io.IOException;
+
 import com.google.protobuf.Message;
 
 /**
@@ -49,7 +51,5 @@ public interface MessageDispatcherFactory {
      * The behavior of the asynchronous dispatcher is defined
      * by the module's {@link AsyncPolicy}.
      */
-    <S extends Message, T extends Message> AsyncDispatcher<S> createAsyncDispatcher(SinkModule<S, T> module);
-
-   // AsyncDispatcher<FlowDocumentLog> createAsyncDispatcher(org.opennms.horizon.minion.flows.parser.FlowSinkModule sink);
+    <S extends Message, T extends Message> AsyncDispatcher<S> createAsyncDispatcher(SinkModule<S, T> module) throws IOException;
 }

@@ -28,25 +28,47 @@
 
 package org.opennms.horizon.minion.grpc.queue;
 
-/**
- * A multi-headed queue.
- *
- * A hydra consists of a global queue and multiple sub-queues. Pushing elements to a hydra is always done using a
- * sub-queue. The added elements will then be added to the sub-queue and the global queue. Taking elements from a
- * sub-queue will also remove that element from the global queue, even if they are not at the head of the global queue.
- * In addition, the global queue can be polled for elements. Elements directly taken from the global queue will still
- * remain in the sub-queue which have been used to enqueue that element.
- */
-public interface Hydra<E> {
-    E poll();
+import java.util.Queue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
-    SubQueue<E> queue();
+public class NaïveHydra<E> implements Hydra<E> {
 
-    interface SubQueue<E> {
-        public E take() throws InterruptedException;
+    private final Queue<E> global = new ConcurrentLinkedQueue<>();
 
-        public E poll();
+    public NaïveHydra() {}
 
-        public void put(final E element) throws InterruptedException;
+    @Override
+    public E poll() {
+        return this.global.poll();
+    }
+
+    @Override
+    public Hydra.SubQueue<E> queue() {
+        return new SubQueue();
+    }
+
+    public class SubQueue implements Hydra.SubQueue<E> {
+        private final BlockingQueue<E> local = new LinkedBlockingQueue<>();
+
+        private SubQueue() {}
+
+        public E take() throws InterruptedException {
+            final var element = this.local.take();
+            NaïveHydra.this.global.remove(element);
+            return element;
+        }
+
+        public E poll() {
+            final var element = this.local.poll();
+            NaïveHydra.this.global.remove(element);
+            return element;
+        }
+
+        public void put(final E element) throws InterruptedException {
+            NaïveHydra.this.global.offer(element);
+            this.local.put(element);
+        }
     }
 }

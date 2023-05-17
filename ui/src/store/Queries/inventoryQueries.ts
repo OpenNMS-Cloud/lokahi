@@ -245,14 +245,16 @@ export const useInventoryQueries = defineStore('inventoryQueries', () => {
 
     await getTagsForData(data)
 
-    data.forEach(({ id, nodeLabel, location }) => {
+    data.forEach(({ id, nodeLabel, location, ipInterfaces }) => {
+      const { ipAddress: snmpPrimaryIpAddress } = ipInterfaces?.filter((x) => x.snmpPrimary)[0] ?? {}
       const tagsObj = tagData.value?.tagsByNodeIds?.filter((item) => item.nodeId === id)[0]
       unmonitoredNodes.value.push({
         id: id,
         label: nodeLabel!,
         anchor: {
           locationValue: location?.location ?? '--',
-          tagValue: tagsObj?.tags ?? []
+          tagValue: tagsObj?.tags ?? [],
+          managementIpValue: snmpPrimaryIpAddress ?? ''
         },
         isNodeOverlayChecked: false,
         type: MonitoredStates.UNMONITORED

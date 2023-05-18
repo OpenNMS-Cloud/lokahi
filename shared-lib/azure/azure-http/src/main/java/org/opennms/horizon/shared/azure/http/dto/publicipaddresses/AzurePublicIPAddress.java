@@ -11,6 +11,9 @@ public class AzurePublicIPAddress {
     @SerializedName("id")
     @Expose
     private String id;
+    @SerializedName("name")
+    @Expose
+    private String name;
     @SerializedName("properties")
     @Expose
     private PublicIpAddressProps properties;

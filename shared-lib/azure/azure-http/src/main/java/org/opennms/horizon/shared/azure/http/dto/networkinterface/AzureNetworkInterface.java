@@ -8,6 +8,12 @@ import lombok.Setter;
 @Getter
 @Setter
 public class AzureNetworkInterface {
+    @SerializedName("id")
+    @Expose
+    private String id;
+    @SerializedName("name")
+    @Expose
+    private String name;
     @SerializedName("properties")
     @Expose
     private NetworkInterfaceProps properties;

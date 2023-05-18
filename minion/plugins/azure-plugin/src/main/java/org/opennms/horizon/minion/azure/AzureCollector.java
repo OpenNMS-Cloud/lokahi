@@ -29,6 +29,7 @@
 package org.opennms.horizon.minion.azure;
 
 import com.google.protobuf.Any;
+import org.opennms.azure.contract.AzureCollectorInterfaceRequest;
 import org.opennms.azure.contract.AzureCollectorRequest;
 import org.opennms.horizon.azure.api.AzureResponseMetric;
 import org.opennms.horizon.azure.api.AzureResultMetric;
@@ -47,6 +48,7 @@ import org.opennms.taskset.contract.MonitorType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -62,12 +64,19 @@ public class AzureCollector implements ServiceCollector {
     //   Supported intervals: PT1M,PT5M,PT15M,PT30M,PT1H,PT6H,PT12H,P1D
     private static final String METRIC_INTERVAL = "PT1M";
 
-    private static final Map<String, String> AZURE_METRIC_TO_ALIAS = new HashMap<>();
+    private static final Map<String, String> AZURE_NODE_METRIC_TO_ALIAS = new HashMap<>();
 
     static {
         // Azure Metric Key - Metrics Processor Key
-        AZURE_METRIC_TO_ALIAS.put("Network In Total", "network_in_total_bytes");
-        AZURE_METRIC_TO_ALIAS.put("Network Out Total", "network_out_total_bytes");
+        AZURE_NODE_METRIC_TO_ALIAS.put("Network In Total", "network_in_total_bytes");
+        AZURE_NODE_METRIC_TO_ALIAS.put("Network Out Total", "network_out_total_bytes");
+    }
+
+    private static final Map<String, String> AZURE_INTERFACE_METRIC_TO_ALIAS = new HashMap<>();
+
+    static {
+        AZURE_INTERFACE_METRIC_TO_ALIAS.put("BytesReceivedRate", "bytes_received_rate");
+        AZURE_INTERFACE_METRIC_TO_ALIAS.put("BytesSentRate", "bytes_sent_rate");
     }
 
     private static final String METRIC_DELIMITER = ",";
@@ -97,12 +106,31 @@ public class AzureCollector implements ServiceCollector {
 
             if (instanceView.isUp()) {
 
-                Map<String, Double> collectedData = new HashMap<>();
+                List<AzureResultMetric> metricResults = new ArrayList<>(collectNodeMetrics(request, token)
+                    .entrySet().stream().map(nodeMetric -> mapNodeResult(request, nodeMetric))
+                    .toList());
 
-                collect(request, token, collectedData);
+                for (AzureCollectorInterfaceRequest interfaceRequest : request.getInterfacesList()) {
+
+                    metricResults.addAll(collectInterfaceMetrics(request, interfaceRequest, token)
+                        .entrySet().stream().map(interfaceMetric -> mapInterfaceResult(request, interfaceRequest, interfaceMetric))
+                        .toList());
+                }
+
+                System.out.println("****************************************************");
+                System.out.println("****************************************************");
+                System.out.println("****************************************************");
+
+                System.out.println("AZURE COLLECTOR metricResults LIST");
+
+                System.out.println(metricResults);
+
+                System.out.println("****************************************************");
+                System.out.println("****************************************************");
+                System.out.println("****************************************************");
 
                 AzureResponseMetric results = AzureResponseMetric.newBuilder()
-                    .addAllResults(mapCollectedDataToResults(request, collectedData))
+                    .addAllResults(metricResults)
                     .build();
 
                 future.complete(ServiceCollectorResponseImpl.builder()
@@ -119,6 +147,7 @@ public class AzureCollector implements ServiceCollector {
                     .nodeId(collectionRequest.getNodeId())
                     .monitorType(MonitorType.AZURE)
                     .status(false)
+                    .timeStamp(System.currentTimeMillis())
                     .ipAddress("azure-node-" + collectionRequest.getNodeId())
                     .build());
             }
@@ -128,53 +157,85 @@ public class AzureCollector implements ServiceCollector {
                 .nodeId(collectionRequest.getNodeId())
                 .monitorType(MonitorType.AZURE)
                 .status(false)
+                .timeStamp(System.currentTimeMillis())
                 .ipAddress("azure-node-" + collectionRequest.getNodeId())
                 .build());
         }
         return future;
     }
 
-    private void collect(AzureCollectorRequest request,
-                         AzureOAuthToken token,
-                         Map<String, Double> collectedData) throws AzureHttpException {
-
-        String[] metricNames = AZURE_METRIC_TO_ALIAS.keySet().toArray(new String[0]);
-
-        Map<String, String> params = new HashMap<>();
-        params.put(INTERVAL_PARAM, METRIC_INTERVAL);
-        params.put(METRIC_NAMES_PARAM, String.join(METRIC_DELIMITER, metricNames));
+    private Map<String, Double> collectNodeMetrics(AzureCollectorRequest request, AzureOAuthToken token) throws AzureHttpException {
+        String[] metricNames = AZURE_NODE_METRIC_TO_ALIAS.keySet().toArray(new String[0]);
+        Map<String, String> params = getMetricsParams(metricNames);
 
         AzureMetrics metrics = client.getMetrics(token, request.getSubscriptionId(),
             request.getResourceGroup(), request.getResource(), params, request.getTimeoutMs(), request.getRetries());
 
-        metrics.collect(collectedData);
+        return metrics.collect();
     }
 
-    private List<AzureResultMetric> mapCollectedDataToResults(AzureCollectorRequest request,
-                                                              Map<String, Double> collectedData) {
-        return collectedData.entrySet().stream()
-            .map(collectedMetric -> mapMetric(request, collectedMetric))
-            .toList();
+    private Map<String, Double> collectInterfaceMetrics(AzureCollectorRequest request,
+                                                        AzureCollectorInterfaceRequest interfaceRequest, AzureOAuthToken token) throws AzureHttpException {
+
+        //todo: not supported, the API is only returning number of packets, will need to find out how to get this data
+        if (interfaceRequest.getIsPublic()) {
+            return new HashMap<>();
+        }
+
+        String[] metricNames = AZURE_INTERFACE_METRIC_TO_ALIAS.keySet().toArray(new String[0]);
+        Map<String, String> params = getMetricsParams(metricNames);
+
+        AzureMetrics metrics = client.getNetworkInterfaceMetrics(token, request.getSubscriptionId(),
+            request.getResourceGroup(), interfaceRequest.getResource(), params, request.getTimeoutMs(), request.getRetries());
+
+        return metrics.collect();
     }
 
-    private AzureResultMetric mapMetric(AzureCollectorRequest request,
-                                        Map.Entry<String, Double> collectedMetric) {
+    private Map<String, String> getMetricsParams(String[] metricNames) {
+        Map<String, String> params = new HashMap<>();
+        params.put(INTERVAL_PARAM, METRIC_INTERVAL);
+        params.put(METRIC_NAMES_PARAM, String.join(METRIC_DELIMITER, metricNames));
+        return params;
+    }
 
+    private AzureResultMetric mapNodeResult(AzureCollectorRequest request, Map.Entry<String, Double> metricData) {
         return AzureResultMetric.newBuilder()
             .setResourceGroup(request.getResourceGroup())
             .setResourceName(request.getResource())
-            .setAlias(getAlias(collectedMetric.getKey()))
+            .setAlias(getNodeMetricAlias(metricData.getKey()))
             .setValue(
                 AzureValueMetric.newBuilder()
                     .setType(AzureValueType.INT64)
-                    .setUint64(collectedMetric.getValue().longValue())
+                    .setUint64(metricData.getValue().longValue())
                     .build())
             .build();
     }
 
-    private String getAlias(String metricName) {
-        if (AZURE_METRIC_TO_ALIAS.containsKey(metricName)) {
-            return AZURE_METRIC_TO_ALIAS.get(metricName);
+    private AzureResultMetric mapInterfaceResult(AzureCollectorRequest request,
+                                                 AzureCollectorInterfaceRequest interfaceRequest,
+                                                 Map.Entry<String, Double> metricData) {
+        return AzureResultMetric.newBuilder()
+            .setResourceGroup(request.getResourceGroup())
+            .setResourceName(interfaceRequest.getResource())
+            .setAlias(getInterfaceMetricAlias(metricData.getKey()))
+            .setValue(
+                AzureValueMetric.newBuilder()
+                    .setType(AzureValueType.INT64)
+                    .setUint64(metricData.getValue().longValue())
+                    .build())
+            .build();
+    }
+
+    private String getNodeMetricAlias(String metricName) {
+        if (AZURE_NODE_METRIC_TO_ALIAS.containsKey(metricName)) {
+            return AZURE_NODE_METRIC_TO_ALIAS.get(metricName);
+        }
+        throw new IllegalArgumentException("Failed to find alias - shouldn't be reached");
+    }
+
+    private String getInterfaceMetricAlias(String metricName) {
+        if (AZURE_INTERFACE_METRIC_TO_ALIAS.containsKey(metricName)) {
+            return AZURE_INTERFACE_METRIC_TO_ALIAS.get(metricName);
         }
         throw new IllegalArgumentException("Failed to find alias - shouldn't be reached");
     }

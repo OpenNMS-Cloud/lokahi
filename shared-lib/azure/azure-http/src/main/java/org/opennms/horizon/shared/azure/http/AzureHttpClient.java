@@ -75,6 +75,7 @@ public class AzureHttpClient {
     public static final String PUBLIC_IP_ADDRESSES_ENDPOINT = "/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Network/publicIPAddresses";
     public static final String INSTANCE_VIEW_ENDPOINT = "/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Compute/virtualMachines/%s/InstanceView";
     public static final String METRICS_ENDPOINT = "/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Compute/virtualMachines/%s/providers/Microsoft.Insights/metrics";
+    public static final String NETWORK_INTERFACE_METRICS_ENDPOINT = "/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Network/networkInterfaces/%s/providers/Microsoft.Insights/metrics";
 
     /*
      * Headers
@@ -178,6 +179,14 @@ public class AzureHttpClient {
                                    String resourceName, Map<String, String> params, long timeoutMs, int retries) throws AzureHttpException {
         String versionQueryParam = API_VERSION_PARAM + this.params.getMetricsApiVersion();
         String url = String.format(METRICS_ENDPOINT + versionQueryParam, subscriptionId, resourceGroup, resourceName);
+        url = addUrlParams(url, params);
+        return get(token, url, timeoutMs, retries, AzureMetrics.class);
+    }
+
+    public AzureMetrics getNetworkInterfaceMetrics(AzureOAuthToken token, String subscriptionId, String resourceGroup,
+                                                   String resourceName, Map<String, String> params, long timeoutMs, int retries) throws AzureHttpException {
+        String versionQueryParam = API_VERSION_PARAM + this.params.getMetricsApiVersion();
+        String url = String.format(NETWORK_INTERFACE_METRICS_ENDPOINT + versionQueryParam, subscriptionId, resourceGroup, resourceName);
         url = addUrlParams(url, params);
         return get(token, url, timeoutMs, retries, AzureMetrics.class);
     }

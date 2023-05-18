@@ -149,12 +149,15 @@ public class AzureScanner implements Scanner {
 
             NetworkInterfaceProps networkInterfaceProps = networkInterface.getProperties();
 
+            //note: maybe even consider getting just primary ip configuration for now - needs tested for more than 1 ip configuration
             for (IpConfiguration ipConfiguration : networkInterfaceProps.getIpConfigurations()) {
                 IpConfigurationProps ipConfigurationProps = ipConfiguration.getProperties();
 
                 scannedNetworkInterfaces.add(AzureScanNetworkInterfaceItem.newBuilder()
-                    .setId(ipConfiguration.getId())
+                    .setId(networkInterface.getId())
+                    .setName(networkInterface.getName())
                     .setIpAddress(ipConfigurationProps.getPrivateIPAddress())
+                    .setIsPublic(false)
                     .build());
 
                 PublicIPAddress publicIPAddress = ipConfigurationProps.getPublicIPAddress();
@@ -163,11 +166,14 @@ public class AzureScanner implements Scanner {
 
                     Optional<AzurePublicIPAddress> publicAddressOpt = findPublicIpAddressForId(publicIpAddresses, publicIpId);
                     if (publicAddressOpt.isPresent()) {
-                        PublicIpAddressProps properties = publicAddressOpt.get().getProperties();
+                        AzurePublicIPAddress azurePublicIPAddress = publicAddressOpt.get();
+                        PublicIpAddressProps properties = azurePublicIPAddress.getProperties();
 
                         scannedNetworkInterfaces.add(AzureScanNetworkInterfaceItem.newBuilder()
                             .setId(publicIpId)
+                            .setName(azurePublicIPAddress.getName())
                             .setIpAddress(properties.getIpAddress())
+                            .setIsPublic(true)
                             .build());
                     }
                 }

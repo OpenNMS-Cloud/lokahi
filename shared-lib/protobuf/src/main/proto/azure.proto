@@ -54,6 +54,11 @@ message AzureMonitorRequest {
   int64 timeout_ms = 8;
 }
 
+message AzureCollectorInterfaceRequest {
+  string resource = 1;
+  bool is_public = 2;
+}
+
 message AzureCollectorRequest {
   string resource = 1;
   string resource_group = 2;
@@ -63,4 +68,5 @@ message AzureCollectorRequest {
   string directory_id = 6;
   int32 retries = 7;
   int64 timeout_ms = 8;
+  repeated AzureCollectorInterfaceRequest interfaces = 9;
 }

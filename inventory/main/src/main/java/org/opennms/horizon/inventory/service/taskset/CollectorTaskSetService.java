@@ -30,6 +30,7 @@ package org.opennms.horizon.inventory.service.taskset;
 
 import com.google.protobuf.Any;
 import lombok.RequiredArgsConstructor;
+import org.opennms.azure.contract.AzureCollectorInterfaceRequest;
 import org.opennms.azure.contract.AzureCollectorRequest;
 import org.opennms.horizon.azure.api.AzureScanItem;
 import org.opennms.horizon.inventory.model.IpInterface;
@@ -128,6 +129,12 @@ public class CollectorTaskSetService {
                 .setDirectoryId(discovery.getDirectoryId())
                 .setTimeoutMs(TaskUtils.AZURE_DEFAULT_TIMEOUT_MS)
                 .setRetries(TaskUtils.AZURE_DEFAULT_RETRIES)
+                .addAllInterfaces(scanItem.getNetworkInterfaceItemsList()
+                    .stream().map(interfaceItem -> AzureCollectorInterfaceRequest.newBuilder()
+                        .setResource(interfaceItem.getName())
+                        .setIsPublic(interfaceItem.getIsPublic())
+                        .build())
+                    .toList())
                 .build());
 
         String name = String.join("-", "azure", "collector", scanItem.getId());

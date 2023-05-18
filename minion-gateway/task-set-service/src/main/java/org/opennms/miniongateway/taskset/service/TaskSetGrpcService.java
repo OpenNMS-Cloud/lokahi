@@ -10,7 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
@@ -24,7 +23,7 @@ import java.io.IOException;
  *      2. (STORE + AGGREGATE) task set updates made against the Task Set store
  *      3. (EGRESS) updates pushed downstream to Minions via Twin
  */
-@Component
+//@Component
 public class TaskSetGrpcService extends TaskSetServiceGrpc.TaskSetServiceImplBase {
 
     private static final Logger DEFAULT_LOGGER = LoggerFactory.getLogger(TaskSetGrpcService.class);

@@ -65,6 +65,11 @@ enum MonitorType {
   AZURE = 4;
 }
 
+enum PublishType {
+  UPDATE = 0;
+  DELETE = 1;
+}
+
 message TaskDefinition {
   string id = 1;
   string description = 2;
@@ -73,6 +78,13 @@ message TaskDefinition {
   string schedule = 5;
   uint64 node_id = 6;
   google.protobuf.Any configuration = 7;
+}
+
+message TaskDefPub {
+   PublishType publish_type = 1;
+   string location = 2;
+   string tenant_id = 3;
+   repeated TaskDefinition task_def = 4;
 }
 
 message TaskSet {

@@ -23,14 +23,11 @@
           ></FeatherInput>
         </div>
         <div class="row">
-          <FeatherInput
-            label="Address (optional)"
-            v-model="formInputs.address"
+          <AddressAutocomplete
+            :address-model="addressModel"
             class="input-address"
-            data-test="input-address"
-          >
-            <template #pre> <FeatherIcon :icon="icons.placeholder" /> </template
-          ></FeatherInput>
+            :on-address-model-update="onAddressChange"
+          ></AddressAutocomplete>
         </div>
         <div class="row">
           <FeatherInput
@@ -87,9 +84,18 @@ const formDefault = {
   latitude: ''
 }
 
-const locationStore = useLocationStore()
+const addressModel = ref({ _text: '', value: '' })
+const formInputs = ref({
+  ...formDefault
+})
 
-const formInputs = ref({ ...formDefault })
+const onAddressChange = (newAddress: any) => {
+  formInputs.value.address = newAddress.value.label
+  formInputs.value.longitude = newAddress.value.x
+  formInputs.value.latitude = newAddress.value.y
+}
+
+const locationStore = useLocationStore()
 
 const form = useForm()
 const nameV = string().required('Location name is required.')

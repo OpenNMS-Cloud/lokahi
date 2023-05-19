@@ -30,6 +30,7 @@ package org.opennms.horizon.minion.grpc.queue;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.Objects;
 
 import com.google.common.base.MoreObjects;
 
@@ -37,7 +38,11 @@ public class Prefix {
     private final byte[] bytes;
 
     public Prefix(final String prefix) {
-        this.bytes = (prefix + "$").getBytes(StandardCharsets.UTF_8);
+        this.bytes = prefix.getBytes(StandardCharsets.UTF_8);
+    }
+
+    public Prefix(final byte[] prefix) {
+        this.bytes = Objects.requireNonNull(prefix);
     }
 
     /** Checks if that starts with this prefix.
@@ -65,7 +70,7 @@ public class Prefix {
      * @return that prefixed with this.
      */
     public byte[] with(final byte[]... that) {
-        int length = this.bytes.length;
+        int length = this.bytes.length + 1;
         for (byte[] array : that) {
             length += array.length;
         }
@@ -73,8 +78,10 @@ public class Prefix {
         byte[] result = new byte[length];
 
         System.arraycopy(this.bytes, 0, result, 0, this.bytes.length);
-        int pos = this.bytes.length;
 
+        result[this.bytes.length] = '$';
+
+        int pos = this.bytes.length + 1;
         for (byte[] array : that) {
             System.arraycopy(array, 0, result, pos, array.length);
             pos += array.length;

@@ -30,6 +30,7 @@ package org.opennms.horizon.minion.grpc.queue;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicLong;
@@ -167,6 +168,8 @@ public class OffHeapSendQueueFactory implements SendQueueFactory, Closeable {
             for (Element element = this.elements.poll(); element != null; element = this.elements.poll()) {
                 element.persist(this.store);
             }
+
+            this.store.close();
         }
     }
 

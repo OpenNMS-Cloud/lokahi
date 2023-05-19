@@ -70,7 +70,7 @@ public class RocksDbStore implements OffHeapSendQueueFactory.StoreManager {
 
     private final RocksDB db;
 
-    private final Map<byte[], ColumnFamilyHandle> cfHandles;
+    private final Map<Prefix, ColumnFamilyHandle> cfHandles;
 
     public RocksDbStore() throws RocksDBException, IOException {
         this(Paths.get("./sink/queue").toAbsolutePath());
@@ -93,20 +93,18 @@ public class RocksDbStore implements OffHeapSendQueueFactory.StoreManager {
                                cfDescs, cfHandles);
 
         this.cfHandles = Streams.zip(cfDescs.stream(), cfHandles.stream(), Map::entry)
-                                .collect(Collectors.toMap(e -> e.getKey().getName(), Map.Entry::getValue));
+                                .collect(Collectors.toMap(e -> new Prefix(e.getKey().getName()), Map.Entry::getValue));
     }
 
     public synchronized OffHeapSendQueueFactory.Store getStore(final Prefix prefix) throws IOException {
-        final var key = prefix.getBytes();
-
-        var cfHandle = this.cfHandles.get(key);
+        var cfHandle = this.cfHandles.get(prefix);
         if (cfHandle == null) {
             try {
-                cfHandle = this.db.createColumnFamily(new ColumnFamilyDescriptor(key, CF_OPTIONS));
+                cfHandle = this.db.createColumnFamily(new ColumnFamilyDescriptor(prefix.getBytes(), CF_OPTIONS));
             } catch (final RocksDBException e) {
                 throw new IOException(e);
             }
-            this.cfHandles.put(key, cfHandle);
+            this.cfHandles.put(prefix, cfHandle);
         }
 
         return new Store(cfHandle);
@@ -158,8 +156,7 @@ public class RocksDbStore implements OffHeapSendQueueFactory.StoreManager {
         }
 
         @Override
-        public void close() throws IOException {
-            this.cf.close();
+        public void close() {
         }
     }
 

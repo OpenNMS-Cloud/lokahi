@@ -148,15 +148,9 @@ public class OffHeapSendQueueFactoryTest {
         for (final var queue: queues.entrySet()) {
             IntStream.range(0, 50).forEach(i -> {
                 executor.submit((Callable<?>) () -> {
-                    // System.out.printf("[%s:%d] Starting consumer\n", queue.getKey(), i);
-
                     for (int cnt = 0; cnt < rounds; cnt++) {
                         final var l = Longs.fromByteArray(queue.getValue().dequeue());
                         consumedSum.addAndGet(l);
-
-                        if (cnt % 1000 == 0) {
-                            // System.out.printf("[%s:%d] Consumed: %d\n", queue.getKey(), i, cnt);
-                        }
                     }
 
                     return null;

@@ -48,9 +48,9 @@ export const useAlertsStore = defineStore('alertsStore', () => {
     }
   }
 
-  const resetPaginationAndFetchAlerts = async () => {
+  const resetPaginationAndFetchAlerts = () => {
     alertsPagination.value.page = 1
-    await fetchAlerts()
+    fetchAlerts().catch(() => 'Failed to fetch alerts')
   }
 
   const toggleSeverity = (selected: string): void => {

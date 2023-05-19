@@ -23,7 +23,7 @@
       >
         <!-- first item -->
         <div
-          @click="step = 0"
+          @click="step--"
           :class="{ disabled: step === 0 }"
           class="arrow"
         >
@@ -45,7 +45,7 @@
         </div>
         <!-- last item -->
         <div
-          @click="step = stepLists.length - 1"
+          @click="step++"
           :class="{ disabled: step === stepLists.length - 1 }"
           class="arrow"
         >
@@ -202,6 +202,7 @@ const icon = markRaw({
       }
       .disabled {
         color: var(variables.$disabled-text-on-surface);
+        pointer-events: none;
         &:hover {
           cursor: default;
         }

@@ -1,9 +1,9 @@
 package org.opennms.horizon.minion.grpc.queue;
 
-class NaïveHydraTest extends HydraTest {
+class NaiveHydraTest extends HydraTest {
 
     @Override
     protected Hydra<Integer> spawn() {
-        return new NaïveHydra<>();
+        return new NaiveHydra<>();
     }
 }

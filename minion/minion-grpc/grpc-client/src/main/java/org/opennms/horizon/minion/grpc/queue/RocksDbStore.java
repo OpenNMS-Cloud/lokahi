@@ -50,7 +50,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Streams;
 
 
-public class RocksDbStore implements OffHeapSendQueueFactory.StoreManager {
+public class RocksDbStore implements SwappingSendQueueFactory.StoreManager {
 
     private final static DBOptions DB_OPTIONS = new DBOptions()
         .setCreateIfMissing(true)
@@ -96,7 +96,7 @@ public class RocksDbStore implements OffHeapSendQueueFactory.StoreManager {
                                 .collect(Collectors.toMap(e -> new Prefix(e.getKey().getName()), Map.Entry::getValue));
     }
 
-    public synchronized OffHeapSendQueueFactory.Store getStore(final Prefix prefix) throws IOException {
+    public synchronized SwappingSendQueueFactory.Store getStore(final Prefix prefix) throws IOException {
         var cfHandle = this.cfHandles.get(prefix);
         if (cfHandle == null) {
             try {
@@ -115,7 +115,7 @@ public class RocksDbStore implements OffHeapSendQueueFactory.StoreManager {
         this.db.close();
     }
 
-    private class Store implements OffHeapSendQueueFactory.Store {
+    private class Store implements SwappingSendQueueFactory.Store {
 
         private final ColumnFamilyHandle cf;
 
@@ -159,6 +159,4 @@ public class RocksDbStore implements OffHeapSendQueueFactory.StoreManager {
         public void close() {
         }
     }
-
-
 }

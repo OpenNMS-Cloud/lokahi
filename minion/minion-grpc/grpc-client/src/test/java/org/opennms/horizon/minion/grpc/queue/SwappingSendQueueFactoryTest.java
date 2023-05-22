@@ -7,7 +7,6 @@ import static org.awaitility.Awaitility.await;
 
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
@@ -18,25 +17,22 @@ import java.util.stream.IntStream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-import org.opennms.horizon.shared.ipc.sink.api.AggregationPolicy;
-import org.opennms.horizon.shared.ipc.sink.api.AsyncPolicy;
 import org.opennms.horizon.shared.ipc.sink.api.SendQueue;
-import org.opennms.horizon.shared.ipc.sink.api.SinkModule;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.primitives.Longs;
 
-public class OffHeapSendQueueFactoryTest {
+public class SwappingSendQueueFactoryTest {
 
     public static final int MEMORY_ELEMENTS = 5;
     public static final int OFF_HEAP_ELEMENTS = 10;
-    private OffHeapSendQueueFactory factory;
+    private SwappingSendQueueFactory factory;
 
     @BeforeEach
     public void setup(@TempDir Path folder) throws Exception {
         final var store = new RocksDbStore(folder);
-        this.factory = new OffHeapSendQueueFactory(store, MEMORY_ELEMENTS, OFF_HEAP_ELEMENTS);
+        this.factory = new SwappingSendQueueFactory(store, MEMORY_ELEMENTS, OFF_HEAP_ELEMENTS);
     }
 
     @Test

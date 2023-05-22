@@ -62,7 +62,7 @@
         <property name="trustCertCollectionFilePath" value="${grpc.trust.cert.filepath}"/>
     </bean>
 
-     <bean id="sendQueue" class="org.opennms.horizon.minion.grpc.queue.OffHeapSendQueueFactory" destroy-method="close">
+     <bean id="sendQueue" class="org.opennms.horizon.minion.grpc.queue.SwappingSendQueueFactory" destroy-method="close">
          <argument>
              <bean class="org.opennms.horizon.minion.grpc.queue.RocksDbStore">
              </bean>

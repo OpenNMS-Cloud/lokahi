@@ -30,7 +30,6 @@ package org.opennms.horizon.minion.grpc.queue;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicLong;
@@ -44,7 +43,7 @@ import org.opennms.horizon.shared.ipc.sink.api.SendQueueFactory;
 import com.google.common.primitives.Bytes;
 import com.google.common.primitives.Longs;
 
-public class OffHeapSendQueueFactory implements SendQueueFactory, Closeable {
+public class SwappingSendQueueFactory implements SendQueueFactory, Closeable {
 
     private final StoreManager stores;
 
@@ -59,7 +58,7 @@ public class OffHeapSendQueueFactory implements SendQueueFactory, Closeable {
 
     private final Hydra<Element> hydra;
 
-    public OffHeapSendQueueFactory(
+    public SwappingSendQueueFactory(
         final StoreManager stores,
         final int memoryElements,
         final int offHeapElements,
@@ -73,7 +72,7 @@ public class OffHeapSendQueueFactory implements SendQueueFactory, Closeable {
         this.hydra = Objects.requireNonNull(hydra);
     }
 
-    public OffHeapSendQueueFactory(
+    public SwappingSendQueueFactory(
         final StoreManager stores,
         final int memoryElements,
         final int offHeapElements
@@ -98,9 +97,9 @@ public class OffHeapSendQueueFactory implements SendQueueFactory, Closeable {
         private final Hydra.SubQueue<Element> elements;
 
         public OffHeapSendQueue(final String id) throws IOException {
-            this.store = OffHeapSendQueueFactory.this.stores.getStore(new Prefix(id));
+            this.store = SwappingSendQueueFactory.this.stores.getStore(new Prefix(id));
 
-            this.elements = OffHeapSendQueueFactory.this.hydra.queue();
+            this.elements = SwappingSendQueueFactory.this.hydra.queue();
 
             this.store.iterate(key -> {
                 try {
@@ -116,18 +115,18 @@ public class OffHeapSendQueueFactory implements SendQueueFactory, Closeable {
         public void enqueue(final byte[] message) throws InterruptedException {
             final var key = Bytes.concat(
                 Longs.toByteArray(System.currentTimeMillis()),
-                Longs.toByteArray(OffHeapSendQueueFactory.this.blockId.getAndIncrement()));
+                Longs.toByteArray(SwappingSendQueueFactory.this.blockId.getAndIncrement()));
 
             final var newElement = new Element(key, message);
 
             // Block until new element can be accepted
-            OffHeapSendQueueFactory.this.totalSemaphore.acquire();
+            SwappingSendQueueFactory.this.totalSemaphore.acquire();
 
             // Persist elements until memory block becomes available
-            while (!OffHeapSendQueueFactory.this.memorySemaphore.tryAcquire()) {
+            while (!SwappingSendQueueFactory.this.memorySemaphore.tryAcquire()) {
                 // Move the oldest memory block to off-heap
                 try {
-                    final var memoryBlock = OffHeapSendQueueFactory.this.hydra.poll();
+                    final var memoryBlock = SwappingSendQueueFactory.this.hydra.poll();
                     if (memoryBlock == null) {
                         Thread.yield();
                         continue;
@@ -135,7 +134,7 @@ public class OffHeapSendQueueFactory implements SendQueueFactory, Closeable {
 
                     memoryBlock.persist(this.store);
 
-                    OffHeapSendQueueFactory.this.memorySemaphore.release();
+                    SwappingSendQueueFactory.this.memorySemaphore.release();
                 } catch (final IOException e) {
                     // TODO fooker: Add exception to method signature
                     throw new RuntimeException(e);
@@ -151,9 +150,9 @@ public class OffHeapSendQueueFactory implements SendQueueFactory, Closeable {
             try {
                 final var element = this.elements.take();
 
-                OffHeapSendQueueFactory.this.totalSemaphore.release();
+                SwappingSendQueueFactory.this.totalSemaphore.release();
                 if (element.isInMemory()) {
-                    OffHeapSendQueueFactory.this.memorySemaphore.release();
+                    SwappingSendQueueFactory.this.memorySemaphore.release();
                 }
 
                 return element.read(this.store);

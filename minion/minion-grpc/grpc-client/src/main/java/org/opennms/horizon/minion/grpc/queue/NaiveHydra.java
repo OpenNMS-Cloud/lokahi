@@ -33,11 +33,11 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-public class NaïveHydra<E> implements Hydra<E> {
+public class NaiveHydra<E> implements Hydra<E> {
 
     private final Queue<E> global = new ConcurrentLinkedQueue<>();
 
-    public NaïveHydra() {}
+    public NaiveHydra() {}
 
     @Override
     public E poll() {
@@ -56,18 +56,18 @@ public class NaïveHydra<E> implements Hydra<E> {
 
         public E take() throws InterruptedException {
             final var element = this.local.take();
-            NaïveHydra.this.global.remove(element);
+            NaiveHydra.this.global.remove(element);
             return element;
         }
 
         public E poll() {
             final var element = this.local.poll();
-            NaïveHydra.this.global.remove(element);
+            NaiveHydra.this.global.remove(element);
             return element;
         }
 
         public void put(final E element) throws InterruptedException {
-            NaïveHydra.this.global.offer(element);
+            NaiveHydra.this.global.offer(element);
             this.local.put(element);
         }
     }

@@ -6,7 +6,6 @@ import org.json.JSONObject;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.opennms.horizon.inventory.dto.AddressDTO;
 import org.opennms.horizon.inventory.dto.GeoLocation;
 import org.opennms.horizon.inventory.dto.MonitoringLocationCreateDTO;
 import org.opennms.horizon.inventory.dto.MonitoringLocationDTO;
@@ -43,8 +42,8 @@ class GraphQLMonitoringLocationServiceTest {
 
     @BeforeEach
     public void setUp() {
-        location1 = getLocationDTO("tenant1", "LOC1", 1L);
-        location2 = getLocationDTO("tenant2", "LOC2", 2L);
+        location1 = getLocationDTO("tenant1", "LOC1", 1L, "address1");
+        location2 = getLocationDTO("tenant2", "LOC2", 2L, "address2");
         doReturn(accessToken).when(mockHeaderUtil).getAuthHeader(any(ResolutionEnvironment.class));
     }
 
@@ -135,28 +134,22 @@ class GraphQLMonitoringLocationServiceTest {
     @Test
     void testCreateLocation() throws JSONException {
         MonitoringLocationCreateDTO locationToCreate = getLocationToCreate();
-        doReturn(location1).when(mockClient).createLocation(locationToCreate, accessToken);
+        var locationCreated = getLocationDTO("tenant1", "LOC1", 1L, "address create");
+        doReturn(locationCreated).when(mockClient).createLocation(locationToCreate, accessToken);
         String request = """
             mutation {
                 createLocation(location: {
                     location: "LOC1",
                     latitude: 1.0,
                     longitude: 2.0,
-                    addressId: 1,
+                    address: "address create",
                 }) {
                     id
                     location
                     tenantId
                     latitude
                     longitude
-                    address {
-                        addressLine1
-                        addressLine2
-                        city
-                        state
-                        country
-                        postalCode
-                    }
+                    address
                 }
             }""";
 
@@ -170,12 +163,7 @@ class GraphQLMonitoringLocationServiceTest {
             .expectBody()
             .jsonPath("$.data.createLocation.location").isEqualTo("LOC1")
             .jsonPath("$.data.createLocation.tenantId").isEqualTo("tenant1")
-            .jsonPath("$.data.createLocation.address.addressLine1").isEqualTo("addressLine1")
-            .jsonPath("$.data.createLocation.address.addressLine2").isEqualTo("addressLine2")
-            .jsonPath("$.data.createLocation.address.city").isEqualTo("city")
-            .jsonPath("$.data.createLocation.address.state").isEqualTo("state")
-            .jsonPath("$.data.createLocation.address.country").isEqualTo("country")
-            .jsonPath("$.data.createLocation.address.postalCode").isEqualTo("postalCode")
+            .jsonPath("$.data.createLocation.address").isEqualTo("address create")
             .jsonPath("$.data.createLocation.latitude").isEqualTo(1.0)
             .jsonPath("$.data.createLocation.longitude").isEqualTo(2.0);
         verify(mockClient).createLocation(locationToCreate, accessToken);
@@ -193,21 +181,14 @@ class GraphQLMonitoringLocationServiceTest {
                     location: "LOC2",
                     latitude: 1.0,
                     longitude: 2.0,
-                    addressId: 2
+                    address: "address2"
                 }) {
                     id
                     location
                     tenantId
                     latitude
                     longitude
-                    address {
-                        addressLine1
-                        addressLine2
-                        city
-                        state
-                        country
-                        postalCode
-                    }
+                    address
                 }
             }""";
         webClient.post()
@@ -221,12 +202,7 @@ class GraphQLMonitoringLocationServiceTest {
             .jsonPath("$.data.updateLocation.location").isEqualTo("LOC2")
             .jsonPath("$.data.updateLocation.id").isEqualTo(2)
             .jsonPath("$.data.updateLocation.tenantId").isEqualTo("tenant2")
-            .jsonPath("$.data.updateLocation.address.addressLine1").isEqualTo("addressLine1")
-            .jsonPath("$.data.updateLocation.address.addressLine2").isEqualTo("addressLine2")
-            .jsonPath("$.data.updateLocation.address.city").isEqualTo("city")
-            .jsonPath("$.data.updateLocation.address.state").isEqualTo("state")
-            .jsonPath("$.data.updateLocation.address.country").isEqualTo("country")
-            .jsonPath("$.data.updateLocation.address.postalCode").isEqualTo("postalCode")
+            .jsonPath("$.data.updateLocation.address").isEqualTo("address2")
             .jsonPath("$.data.updateLocation.latitude").isEqualTo(1.0)
             .jsonPath("$.data.updateLocation.longitude").isEqualTo(2.0);
         verify(mockClient).updateLocation(locationToUpdate, accessToken);
@@ -253,30 +229,18 @@ class GraphQLMonitoringLocationServiceTest {
         verify(mockHeaderUtil, times(1)).getAuthHeader(any(ResolutionEnvironment.class));
     }
 
-    private static AddressDTO getAddressToCreate() {
-        return AddressDTO.newBuilder()
-            .setId(1)
-            .setAddressLine1("addressLine1")
-            .setAddressLine2("addressLine2")
-            .setCity("city")
-            .setState("state")
-            .setPostalCode("postalCode")
-            .setCountry("country")
-            .build();
-    }
-
     private static MonitoringLocationDTO getLocationToUpdate() {
         return MonitoringLocationDTO.newBuilder()
             .setId(1)
             .setLocation("LOC2")
-            .setAddress(AddressDTO.newBuilder().setId(2).build())
+            .setAddress("address2")
             .setGeoLocation(getGeoLocationToCreate()).build();
     }
 
     private static MonitoringLocationCreateDTO getLocationToCreate() {
         return MonitoringLocationCreateDTO.newBuilder()
             .setLocation("LOC1")
-            .setAddress(AddressDTO.newBuilder().setId(1).build())
+            .setAddress("address create")
             .setGeoLocation(getGeoLocationToCreate())
             .build();
     }
@@ -288,12 +252,12 @@ class GraphQLMonitoringLocationServiceTest {
             .build();
     }
 
-    private MonitoringLocationDTO getLocationDTO(String tenantId, String location, long id) {
+    private MonitoringLocationDTO getLocationDTO(String tenantId, String location, long id, String address) {
         return MonitoringLocationDTO.newBuilder()
             .setId(id)
             .setLocation(location)
             .setTenantId(tenantId)
-            .setAddress(getAddressToCreate())
+            .setAddress(address)
             .setGeoLocation(getGeoLocationToCreate()).build();
     }
 

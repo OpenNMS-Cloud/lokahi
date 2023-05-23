@@ -46,9 +46,9 @@
         </addColumn>
     </changeSet>
 
-    <changeSet author="bjanssens" id="0.1.0-add-address-columns">
+    <changeSet author="freddy" id="0.1.0-add-address-columns">
         <addColumn tableName="monitoring_location">
-            <column name="address_id" type="BIGINT"/>
+            <column name="address" type="TEXT"/>
         </addColumn>
     </changeSet>
 

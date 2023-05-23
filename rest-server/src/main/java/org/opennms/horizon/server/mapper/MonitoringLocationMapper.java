@@ -36,16 +36,14 @@ import org.opennms.horizon.server.model.inventory.MonitoringLocation;
 import org.opennms.horizon.server.model.inventory.MonitoringLocationCreate;
 import org.opennms.horizon.server.model.inventory.MonitoringLocationUpdate;
 
-@Mapper(componentModel = "spring", uses = {AddressMapper.class})
+@Mapper(componentModel = "spring")
 public interface MonitoringLocationMapper {
     @Mapping(target = "geoLocation.latitude", source = "latitude")
     @Mapping(target = "geoLocation.longitude", source = "longitude")
-    @Mapping(target = "address.id", source = "addressId")
     MonitoringLocationCreateDTO locationCreateToLocationCreateProto(MonitoringLocationCreate location);
 
     @Mapping(target = "geoLocation.latitude", source = "latitude")
     @Mapping(target = "geoLocation.longitude", source = "longitude")
-    @Mapping(target = "address.id", source = "addressId")
     MonitoringLocationDTO locationUpdateToLocationProto(MonitoringLocationUpdate location);
 
     @Mapping(target = "geoLocation.latitude", source = "latitude")
@@ -55,6 +53,4 @@ public interface MonitoringLocationMapper {
     @Mapping(target = "latitude", source = "geoLocation.latitude")
     @Mapping(target = "longitude", source = "geoLocation.longitude")
     MonitoringLocation protoToLocation(MonitoringLocationDTO location);
-
 }
-

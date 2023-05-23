@@ -38,5 +38,5 @@ public class MonitoringLocationUpdate {
     private String location;
     private double longitude;
     private double latitude;
-    private long addressId;
+    private String address;
 }

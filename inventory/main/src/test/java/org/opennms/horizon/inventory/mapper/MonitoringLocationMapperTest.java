@@ -6,10 +6,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.opennms.horizon.inventory.dto.AddressDTO;
 import org.opennms.horizon.inventory.dto.GeoLocation;
 import org.opennms.horizon.inventory.dto.MonitoringLocationDTO;
-import org.opennms.horizon.inventory.model.Address;
 import org.opennms.horizon.inventory.model.MonitoringLocation;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -25,26 +23,19 @@ class MonitoringLocationMapperTest {
     @InjectMocks
     MonitoringLocationMapperImpl mapper;
 
-    @Mock
-    AddressMapper addressMapper;
-
-    @AfterEach
-    void tearDown() {
-        verifyNoMoreInteractions(addressMapper);
-    }
-
     @Test
     void testProtoToLocation() {
-        when(addressMapper.dtoToModel(any(AddressDTO.class))).thenReturn(new Address());
-        var proto = MonitoringLocationDTO.newBuilder().setId(1L).setTenantId("testTenantId").setLocation("testLocationName").setGeoLocation(GeoLocation.newBuilder().setLatitude(1.0).setLongitude(2.0).build()).setAddress(AddressDTO.newBuilder().setId(1L).build()).build();
+        var proto = MonitoringLocationDTO.newBuilder()
+            .setId(1L).setTenantId("testTenantId").setLocation("testLocationName")
+            .setGeoLocation(GeoLocation.newBuilder().setLatitude(1.0).setLongitude(2.0).build())
+            .setAddress("address").build();
         var result = mapper.dtoToModel(proto);
         assertEquals(1L, result.getId());
         assertEquals("testLocationName", result.getLocation());
         assertEquals(1.0, result.getLatitude());
         assertEquals(2.0, result.getLongitude());
-        assertEquals("testTenantId", result.getTenantId());
-        assertEquals(1L, result.getAddressId());
-        verify(addressMapper, times(1)).dtoToModel(any(AddressDTO.class));
+        assertEquals(proto.getTenantId(), result.getTenantId());
+        assertEquals(proto.getAddress(), result.getAddress());
     }
 
     @Test

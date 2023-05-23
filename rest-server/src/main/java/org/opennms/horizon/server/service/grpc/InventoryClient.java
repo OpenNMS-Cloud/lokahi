@@ -41,10 +41,6 @@ import org.opennms.horizon.inventory.discovery.IcmpActiveDiscoveryDTO;
 import org.opennms.horizon.inventory.discovery.IcmpActiveDiscoveryServiceGrpc;
 import org.opennms.horizon.inventory.dto.ActiveDiscoveryDTO;
 import org.opennms.horizon.inventory.dto.ActiveDiscoveryServiceGrpc;
-import org.opennms.horizon.inventory.dto.AddressCreateDTO;
-import org.opennms.horizon.inventory.dto.AddressDTO;
-import org.opennms.horizon.inventory.dto.AddressServiceGrpc;
-import org.opennms.horizon.inventory.dto.AddressUpdateDTO;
 import org.opennms.horizon.inventory.dto.AzureActiveDiscoveryCreateDTO;
 import org.opennms.horizon.inventory.dto.AzureActiveDiscoveryDTO;
 import org.opennms.horizon.inventory.dto.AzureActiveDiscoveryServiceGrpc;
@@ -95,7 +91,6 @@ public class InventoryClient {
     private IcmpActiveDiscoveryServiceGrpc.IcmpActiveDiscoveryServiceBlockingStub icmpActiveDiscoveryServiceBlockingStub;
     private AzureActiveDiscoveryServiceGrpc.AzureActiveDiscoveryServiceBlockingStub azureActiveDiscoveryServiceBlockingStub;
     private PassiveDiscoveryServiceGrpc.PassiveDiscoveryServiceBlockingStub passiveDiscoveryServiceBlockingStub;
-    private AddressServiceGrpc.AddressServiceBlockingStub addressStub;
 
     protected void initialStubs() {
         locationStub = MonitoringLocationServiceGrpc.newBlockingStub(channel);
@@ -107,7 +102,6 @@ public class InventoryClient {
         icmpActiveDiscoveryServiceBlockingStub = IcmpActiveDiscoveryServiceGrpc.newBlockingStub(channel);
         azureActiveDiscoveryServiceBlockingStub = AzureActiveDiscoveryServiceGrpc.newBlockingStub(channel);
         passiveDiscoveryServiceBlockingStub = PassiveDiscoveryServiceGrpc.newBlockingStub(channel);
-        addressStub = AddressServiceGrpc.newBlockingStub(channel);
     }
 
     public void shutdown() {
@@ -360,35 +354,5 @@ public class InventoryClient {
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
         return locationStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).deleteLocation(Int64Value.of(id)).getValue();
-    }
-
-    public List<AddressDTO> listAddresses(String accessToken) {
-        Metadata metadata = new Metadata();
-        metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
-        return addressStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).listAddresses(Empty.newBuilder().build()).getAddressesList();
-    }
-
-    public AddressDTO getAddressById(long id, String accessToken) {
-        Metadata metadata = new Metadata();
-        metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
-        return addressStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).getAddressById(Int64Value.of(id));
-    }
-
-    public AddressDTO createAddress(AddressCreateDTO address, String accessToken) {
-        Metadata metadata = new Metadata();
-        metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
-        return addressStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).createAddress(address);
-    }
-
-    public AddressDTO updateAddress(AddressUpdateDTO address, String accessToken) {
-        Metadata metadata = new Metadata();
-        metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
-        return addressStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).updateAddress(address);
-    }
-
-    public boolean deleteAddress(long id, String accessToken) {
-        Metadata metadata = new Metadata();
-        metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
-        return addressStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).deleteAddress(Int64Value.of(id)).getValue();
     }
 }

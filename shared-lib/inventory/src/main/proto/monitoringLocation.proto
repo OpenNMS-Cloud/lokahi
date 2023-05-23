@@ -29,7 +29,6 @@ syntax = "proto3";
 
 import "google/protobuf/empty.proto";
 import "google/protobuf/wrappers.proto";
-import "address.proto";
 
 package opennms.inventory;
 option java_multiple_files = true;
@@ -40,14 +39,14 @@ message MonitoringLocationDTO {
   string tenant_id = 2;
   string location = 3;
   GeoLocation geo_location = 4;
-  opennms.inventory.AddressDTO address = 5;
+  string address = 5;
 }
 
 message MonitoringLocationCreateDTO {
   string tenant_id = 2;
   string location = 3;
   GeoLocation geo_location = 4;
-  opennms.inventory.AddressDTO address = 5;
+  string address = 5;
 }
 
 message GeoLocation {

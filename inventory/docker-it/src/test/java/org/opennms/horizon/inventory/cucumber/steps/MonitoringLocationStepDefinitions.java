@@ -39,8 +39,6 @@ import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import org.hamcrest.Matchers;
 import org.opennms.horizon.inventory.cucumber.InventoryBackgroundHelper;
-import org.opennms.horizon.inventory.dto.AddressCreateDTO;
-import org.opennms.horizon.inventory.dto.AddressDTO;
 import org.opennms.horizon.inventory.dto.GeoLocation;
 import org.opennms.horizon.inventory.dto.MonitoringLocationCreateDTO;
 import org.opennms.horizon.inventory.dto.MonitoringLocationDTO;
@@ -51,7 +49,6 @@ import java.util.concurrent.TimeUnit;
 
 import static com.jayway.awaitility.Awaitility.await;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 public class MonitoringLocationStepDefinitions {
@@ -103,7 +100,7 @@ public class MonitoringLocationStepDefinitions {
 
     @When("[MonitoringLocation] Create Monitoring Location with name {string}")
     public void monitoringLocationCreateMonitoringLocation(String location) {
-        lastMonitoringLocation = backgroundHelper.getMonitoringLocationStub().createLocation(MonitoringLocationCreateDTO.newBuilder().setLocation(location).setGeoLocation(GeoLocation.newBuilder().setLatitude(1.0).setLongitude(2.0).build()).setTenantId(backgroundHelper.getTenantId()).setAddress(AddressDTO.newBuilder().setId(1L).build()).build());
+        lastMonitoringLocation = backgroundHelper.getMonitoringLocationStub().createLocation(MonitoringLocationCreateDTO.newBuilder().setLocation(location).setGeoLocation(GeoLocation.newBuilder().setLatitude(1.0).setLongitude(2.0).build()).setTenantId(backgroundHelper.getTenantId()).setAddress("address").build());
     }
 
     @Then("[MonitoringLocation] Monitoring Location is created")
@@ -221,12 +218,5 @@ public class MonitoringLocationStepDefinitions {
                     assertEquals(lastMonitoringLocation1, e.getMessage());
                 }
             });
-    }
-
-    @Given("[MonitoringLocation] Create address")
-    public void monitoringLocationCreateAddress() {
-        var address = AddressCreateDTO.newBuilder().setCity("city").setState("state").setCountry("country").setAddressLine1("street").setAddressLine2("").setPostalCode("zipCode").build();
-        var addressCreated = backgroundHelper.getAddressServiceBlockingStub().createAddress(address);
-        assertNotNull(addressCreated);
     }
 }

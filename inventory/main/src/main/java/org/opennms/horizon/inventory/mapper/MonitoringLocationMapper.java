@@ -33,15 +33,13 @@ import org.mapstruct.Mapping;
 import org.opennms.horizon.inventory.dto.MonitoringLocationDTO;
 import org.opennms.horizon.inventory.model.MonitoringLocation;
 
-@Mapper(componentModel = "spring", uses = {AddressMapper.class})
+@Mapper(componentModel = "spring")
 public interface MonitoringLocationMapper {
     @Mapping(target = "latitude", source = "geoLocation.latitude")
     @Mapping(target = "longitude", source = "geoLocation.longitude")
-    @Mapping(target = "addressId", source = "address.id")
     MonitoringLocation dtoToModel(MonitoringLocationDTO dto);
 
     @Mapping(target = "geoLocation.latitude", source = "latitude")
     @Mapping(target = "geoLocation.longitude", source = "longitude")
-    @Mapping(target = "address", source = "address", defaultExpression = "java(AddressDTO.newBuilder().build())")
     MonitoringLocationDTO modelToDTO(MonitoringLocation model);
 }

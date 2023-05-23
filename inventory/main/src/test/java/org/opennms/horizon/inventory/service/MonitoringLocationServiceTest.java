@@ -8,9 +8,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.opennms.horizon.inventory.dto.MonitoringLocationDTO;
 import org.opennms.horizon.inventory.mapper.MonitoringLocationMapper;
-import org.opennms.horizon.inventory.model.Address;
 import org.opennms.horizon.inventory.model.MonitoringLocation;
-import org.opennms.horizon.inventory.repository.AddressRepository;
 import org.opennms.horizon.inventory.repository.MonitoringLocationRepository;
 
 import java.util.ArrayList;
@@ -37,14 +35,11 @@ class MonitoringLocationServiceTest {
     private MonitoringLocationRepository modelRepo;
 
     @Mock
-    private AddressRepository addressRepo;
-
-    @Mock
     private MonitoringLocationMapper mapper;
 
     @AfterEach
     void tearDown() {
-        verifyNoMoreInteractions(modelRepo, addressRepo, mapper);
+        verifyNoMoreInteractions(modelRepo, mapper);
     }
 
     @Test
@@ -192,13 +187,10 @@ class MonitoringLocationServiceTest {
         // Mock data
         MonitoringLocationDTO monitoringLocationDTO = MonitoringLocationDTO.newBuilder().build();
         MonitoringLocation monitoringLocation = new MonitoringLocation();
-        Address address = new Address();
-        address.setId(1L);
-        monitoringLocation.setAddress(address);
+        monitoringLocation.setAddress("address");
         when(mapper.dtoToModel(any(MonitoringLocationDTO.class))).thenReturn(monitoringLocation);
         when(modelRepo.save(monitoringLocation)).thenReturn(monitoringLocation);
         when(mapper.modelToDTO(any(MonitoringLocation.class))).thenReturn(monitoringLocationDTO);
-        when(addressRepo.findById(anyLong())).thenReturn(Optional.of(address));
 
         // Test
         MonitoringLocationDTO result = monitoringLocationService.upsert(monitoringLocationDTO);
@@ -208,7 +200,6 @@ class MonitoringLocationServiceTest {
         verify(mapper, times(1)).dtoToModel(any(MonitoringLocationDTO.class));
         verify(modelRepo, times(1)).save(monitoringLocation);
         verify(mapper, times(1)).modelToDTO(any(MonitoringLocation.class));
-        verify(addressRepo, times(1)).findById(anyLong());
     }
 
     @Test

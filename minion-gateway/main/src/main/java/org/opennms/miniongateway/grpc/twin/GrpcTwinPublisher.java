@@ -28,19 +28,11 @@
 
 package org.opennms.miniongateway.grpc.twin;
 
-import io.grpc.StatusRuntimeException;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Objects;
-import java.util.concurrent.*;
-
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import io.grpc.StatusRuntimeException;
+import io.grpc.stub.StreamObserver;
 import org.apache.ignite.Ignite;
 import org.apache.logging.log4j.util.Strings;
 import org.opennms.cloud.grpc.minion.CloudToMinionMessage;
@@ -50,10 +42,19 @@ import org.opennms.horizon.shared.ipc.grpc.server.manager.OutgoingMessageFactory
 import org.opennms.miniongateway.grpc.server.model.TenantKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import io.grpc.stub.StreamObserver;
 import org.slf4j.MDC;
 import org.slf4j.MDC.MDCCloseable;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Objects;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 
 public class GrpcTwinPublisher extends AbstractTwinPublisher implements OutgoingMessageFactory {
 
@@ -79,7 +80,7 @@ public class GrpcTwinPublisher extends AbstractTwinPublisher implements Outgoing
             return false;
         }
         try {
-            Object[] diagnosticCtx = {tenantId, twinResponseProto.getConsumerKey(), location, twinResponseProto.getIdentity().getSystemId()};
+            Object[] diagnosticCtx = {tenantId, twinResponseProto.getConsumerKey(), location};
             if (Strings.isBlank(location)) {
                 // theoretical broadcast scenario - no location given, so we send update to all locations
                 LOG.debug("Sending sink update for tenant {} with key {} in all locations", tenantId, twinResponseProto.getConsumerKey());
@@ -99,11 +100,16 @@ public class GrpcTwinPublisher extends AbstractTwinPublisher implements Outgoing
                 Collection<AdapterObserver> observers = sinkStreamsByLocation.get(new TenantKey(tenantId, location));
                 for (AdapterObserver stream : new ArrayList<>(observers)) {
                     try {
-                        LOG.debug("Sending sink update for tenant {}, key {} at location {}", diagnosticCtx);
-                        stream.onNext(twinResponseProto);
-                    } catch (StatusRuntimeException e) {
+                        try {
+                            LOG.debug("Sending sink update for tenant {}, key {} at location {}", diagnosticCtx);
+                            stream.onNext(twinResponseProto);
+                        } catch (StatusRuntimeException e) {
+                            LOG.debug("Failed to send sink update for tenant {}, key {} at location {}", diagnosticCtx);
+                            stream.complete();
+                        }
+                    } catch (Exception e) {
                         LOG.debug("Failed to send sink update for tenant {}, key {} at location {}", diagnosticCtx);
-                        stream.complete();
+                        LOG.debug("Exception : ", e);
                     }
                 }
             }

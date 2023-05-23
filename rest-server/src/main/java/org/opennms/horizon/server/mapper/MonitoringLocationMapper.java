@@ -30,13 +30,14 @@ package org.opennms.horizon.server.mapper;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.NullValueCheckStrategy;
 import org.opennms.horizon.inventory.dto.MonitoringLocationCreateDTO;
 import org.opennms.horizon.inventory.dto.MonitoringLocationDTO;
 import org.opennms.horizon.server.model.inventory.MonitoringLocation;
 import org.opennms.horizon.server.model.inventory.MonitoringLocationCreate;
 import org.opennms.horizon.server.model.inventory.MonitoringLocationUpdate;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
 public interface MonitoringLocationMapper {
     @Mapping(target = "geoLocation.latitude", source = "latitude")
     @Mapping(target = "geoLocation.longitude", source = "longitude")

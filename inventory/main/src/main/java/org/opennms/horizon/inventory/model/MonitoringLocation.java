@@ -55,13 +55,11 @@ public class MonitoringLocation {
     @Column(name = "location")
     private String location;
 
-    @NotNull
     @Column(name = "longitude")
-    private double longitude;
+    private Double longitude;
 
-    @NotNull
     @Column(name = "latitude")
-    private double latitude;
+    private Double latitude;
 
     @Column(name = "address")
     private String address;

@@ -57,29 +57,30 @@ public class GrpcLocationService {
     public Flux<MonitoringLocation> findAllLocations(@GraphQLEnvironment ResolutionEnvironment env) {
         return Flux.fromIterable(client.listLocations(headerUtil.getAuthHeader(env)).stream().map(mapper::protoToLocation).toList());
     }
+
     @GraphQLQuery
     public Mono<MonitoringLocation> findLocationById(@GraphQLArgument(name = "id") long id, @GraphQLEnvironment ResolutionEnvironment env) {
         return Mono.just(mapper.protoToLocation(client.getLocationById(id, headerUtil.getAuthHeader(env))));
     }
 
     @GraphQLQuery
-    public Flux<MonitoringLocation> searchLocation(@GraphQLArgument(name="searchTerm") String searchTerm, @GraphQLEnvironment ResolutionEnvironment env) {
+    public Flux<MonitoringLocation> searchLocation(@GraphQLArgument(name = "searchTerm") String searchTerm, @GraphQLEnvironment ResolutionEnvironment env) {
         return Flux.fromIterable(client.searchLocations(searchTerm, headerUtil.getAuthHeader(env))
             .stream().map(mapper::protoToLocation).toList());
     }
 
     @GraphQLMutation
-    public Mono<MonitoringLocation> createLocation(@GraphQLArgument(name="location") MonitoringLocationCreate location, @GraphQLEnvironment ResolutionEnvironment env) {
+    public Mono<MonitoringLocation> createLocation(@GraphQLArgument(name = "location") MonitoringLocationCreate location, @GraphQLEnvironment ResolutionEnvironment env) {
         return Mono.just(mapper.protoToLocation(client.createLocation(mapper.locationCreateToLocationCreateProto(location), headerUtil.getAuthHeader(env))));
     }
 
     @GraphQLMutation
-    public Mono<MonitoringLocation> updateLocation(@GraphQLArgument(name="location") MonitoringLocationUpdate monitoringLocation, @GraphQLEnvironment ResolutionEnvironment env) {
+    public Mono<MonitoringLocation> updateLocation(@GraphQLArgument(name = "location") MonitoringLocationUpdate monitoringLocation, @GraphQLEnvironment ResolutionEnvironment env) {
         return Mono.just(mapper.protoToLocation(client.updateLocation(mapper.locationUpdateToLocationProto(monitoringLocation), headerUtil.getAuthHeader(env))));
     }
 
     @GraphQLMutation
-    public Mono<Boolean> deleteLocation(@GraphQLArgument(name="id") long id, @GraphQLEnvironment ResolutionEnvironment env) {
+    public Mono<Boolean> deleteLocation(@GraphQLArgument(name = "id") long id, @GraphQLEnvironment ResolutionEnvironment env) {
         return Mono.just(client.deleteLocation(id, headerUtil.getAuthHeader(env)));
     }
 }

@@ -28,19 +28,20 @@
 
 package org.opennms.horizon.inventory.grpc;
 
-import lombok.RequiredArgsConstructor;
 import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.keycloak.adapters.KeycloakDeployment;
 import org.keycloak.adapters.rotation.JWKPublicKeyLocator;
 import org.keycloak.representations.adapters.config.AdapterConfig;
 import org.opennms.horizon.inventory.grpc.discovery.ActiveDiscoveryGrpcService;
-import org.opennms.horizon.inventory.grpc.discovery.AzureActiveDiscoveryGrpcService;
 import org.opennms.horizon.inventory.grpc.discovery.IcmpActiveDiscoveryGrpcService;
+import org.opennms.horizon.inventory.grpc.discovery.AzureActiveDiscoveryGrpcService;
 import org.opennms.horizon.inventory.grpc.discovery.PassiveDiscoveryGrpcService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @Configuration

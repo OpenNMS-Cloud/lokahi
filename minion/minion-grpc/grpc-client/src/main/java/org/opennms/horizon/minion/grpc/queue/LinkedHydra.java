@@ -37,10 +37,10 @@ public class LinkedHydra<E> implements Hydra<E> {
     private final Lock lock = new ReentrantLock();
 
     private static class Node<E> {
-        public Node<E> global_prev;
-        public Node<E> global_next;
+        public Node<E> globalPrev;
+        public Node<E> globalNext;
 
-        public Node<E> local_next;
+        public Node<E> localNext;
 
         public E element;
     }
@@ -58,12 +58,12 @@ public class LinkedHydra<E> implements Hydra<E> {
                 return null;
             }
 
-            this.head = this.head.global_next;
+            this.head = this.head.globalNext;
             if (this.head == null) {
                 this.tail = null;
             }
 
-            curr.global_prev = null;
+            curr.globalPrev = null;
 
             return curr.element;
 
@@ -143,21 +143,21 @@ public class LinkedHydra<E> implements Hydra<E> {
 
         private void enqueue(final E element) {
             final Node<E> newNode = new Node<>();
-            newNode.global_next = null;
-            newNode.global_prev = LinkedHydra.this.tail;
-            newNode.local_next = null;
+            newNode.globalNext = null;
+            newNode.globalPrev = LinkedHydra.this.tail;
+            newNode.localNext = null;
             newNode.element = element;
 
             if (this.tail == null) {
                 this.head = newNode;
             } else {
-                this.tail.local_next = newNode;
+                this.tail.localNext = newNode;
             }
 
             if (LinkedHydra.this.tail == null) {
                 LinkedHydra.this.head = newNode;
             } else {
-                LinkedHydra.this.tail.global_next = newNode;
+                LinkedHydra.this.tail.globalNext = newNode;
             }
 
             this.tail = newNode;
@@ -167,28 +167,28 @@ public class LinkedHydra<E> implements Hydra<E> {
         private E dequeue() {
             final var curr = this.head;
 
-            this.head = this.head.local_next;
+            this.head = this.head.localNext;
             if (this.head == null) {
                 this.tail = null;
             }
 
-            if (curr.global_prev != null) {
-                curr.global_prev.global_next = curr.global_next;
+            if (curr.globalPrev != null) {
+                curr.globalPrev.globalNext = curr.globalNext;
             } else {
-                LinkedHydra.this.head = curr.global_next;
+                LinkedHydra.this.head = curr.globalNext;
             }
 
-            if (curr.global_next != null) {
-                curr.global_next.global_prev = curr.global_prev;
+            if (curr.globalNext != null) {
+                curr.globalNext.globalPrev = curr.globalPrev;
             } else {
-                LinkedHydra.this.tail = curr.global_prev;
+                LinkedHydra.this.tail = curr.globalPrev;
             }
 
             final var element = curr.element;
             curr.element = null;
-            curr.global_prev = null;
-            curr.global_next = null;
-            curr.local_next = null;
+            curr.globalPrev = null;
+            curr.globalNext = null;
+            curr.localNext = null;
 
             return element;
         }

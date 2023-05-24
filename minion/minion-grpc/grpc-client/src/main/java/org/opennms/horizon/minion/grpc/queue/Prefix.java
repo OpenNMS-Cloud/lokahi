@@ -79,6 +79,7 @@ public class Prefix {
 
         System.arraycopy(this.bytes, 0, result, 0, this.bytes.length);
 
+        // Add separator after prefix
         result[this.bytes.length] = '$';
 
         int pos = this.bytes.length + 1;

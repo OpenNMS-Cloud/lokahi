@@ -56,7 +56,7 @@ spec:
             - name: SPRING_CACHE_CAFFEINE_SPEC
               value: "maximumSize=10000,expireAfterWrite=60s"
             - name: TSDB_URL
-              value: "{{ .Values.Cortex.Protocol }}://{{ .Values.Cortex.Host }}:{{ .Values.Cortex.Port }}{{ .Values.Cortex.PathRead }}"
+              value: "{{ .Values.CortexClient.Protocol }}://{{ .Values.CortexClient.HostRead }}:{{ .Values.CortexClient.PortRead }}{{ .Values.CortexClient.PathRead }}"
             - name: SPRING_WEBFLUX_BASE_PATH
               value: /api
             - name: GRAPHQL_SPQR_GUI_TARGET_ENDPOINT

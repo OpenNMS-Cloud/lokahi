@@ -311,10 +311,6 @@ Grafana:
 Cortex:
   Enabled: true
   ServiceName: cortex
-  Host: cortex
-  PathRead: /prometheus/api/v1
-  PathWrite: /api/v1/push
-  Protocol: http
   Port: 9000
   Image: cortexproject/cortex:v1.14.0
   Resources:
@@ -324,6 +320,14 @@ Cortex:
     Requests:
       Cpu: 100m
       Memory: 100Mi
+CortexClient:
+  HostRead: cortex
+  HostWrite: cortex
+  PathRead: /prometheus/api/v1
+  PathWrite: /api/v1/push
+  Protocol: http
+  PortRead: 9000
+  PortWrite: 9000
 kafkaClient:
   bootstrapServers: onms-kafka:9092
 Kafka:

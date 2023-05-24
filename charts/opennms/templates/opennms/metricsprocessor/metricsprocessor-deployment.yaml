@@ -57,7 +57,7 @@ spec:
             - name: GRPC_FLOW_INGESTOR_URL
               value: "{{ .Values.OpenNMS.MetricsProcessor.FlowIngestorUrl }}"
             - name: CORTEX_WRITE_URL
-              value: {{ .Values.Cortex.Protocol }}://{{ .Values.Cortex.Host }}:{{ .Values.Cortex.Port }}{{ .Values.Cortex.PathWrite }}
+              value: {{ .Values.CortexClient.Protocol }}://{{ .Values.CortexClient.HostWrite }}:{{ .Values.CortexClient.PortWrite }}{{ .Values.CortexClient.PathWrite }}
             {{- include "deployment.env" .Values.OpenNMS.MetricsProcessor | nindent 12 }}
           envFrom:
           - configMapRef:

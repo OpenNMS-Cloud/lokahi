@@ -1,9 +1,13 @@
 package org.opennms.miniongateway.grpc.twin;
 
 import io.grpc.stub.StreamObserver;
+import java.util.List;
 import org.opennms.cloud.grpc.minion.CloudToMinionMessage;
 import org.opennms.cloud.grpc.minion.Identity;
+import org.opennms.horizon.shared.grpc.common.LocationServerInterceptor;
 import org.opennms.horizon.shared.grpc.common.TenantIDGrpcServerInterceptor;
+import org.opennms.horizon.shared.ipc.grpc.server.manager.OutgoingMessageFactory;
+import org.opennms.horizon.shared.ipc.grpc.server.manager.OutgoingMessageHandler;
 import org.opennms.horizon.shared.ipc.rpc.IpcIdentity;
 import org.opennms.miniongateway.grpc.server.ConnectionIdentity;
 import org.slf4j.Logger;
@@ -11,30 +15,38 @@ import org.slf4j.LoggerFactory;
 
 import java.util.function.BiConsumer;
 
-public class TaskSetTwinMessageProcessor implements BiConsumer<Identity, StreamObserver<CloudToMinionMessage>> {
+public class TaskSetTwinMessageProcessor implements OutgoingMessageHandler {
     private static final Logger DEFAULT_LOGGER = LoggerFactory.getLogger(TaskSetTwinMessageProcessor.class);
 
     private final TenantIDGrpcServerInterceptor tenantIDGrpcServerInterceptor;
+    private final LocationServerInterceptor locationServerInterceptor;
 
-    private final BiConsumer<IpcIdentity, StreamObserver<CloudToMinionMessage>> streamObserver;
+    private final List<OutgoingMessageFactory> outgoingMessageFactoryList;
 
     private Logger log = DEFAULT_LOGGER;
 
-    public TaskSetTwinMessageProcessor(GrpcTwinPublisher twinPublisher, TenantIDGrpcServerInterceptor tenantIDGrpcServerInterceptor) {
-        this.streamObserver = twinPublisher.getStreamObserver(tenantIDGrpcServerInterceptor);
+    public TaskSetTwinMessageProcessor(TenantIDGrpcServerInterceptor tenantIDGrpcServerInterceptor, LocationServerInterceptor locationServerInterceptor,
+        List<OutgoingMessageFactory> outgoingMessageFactoryList) {
+        this.outgoingMessageFactoryList = outgoingMessageFactoryList;
         this.tenantIDGrpcServerInterceptor = tenantIDGrpcServerInterceptor;
+        this.locationServerInterceptor = locationServerInterceptor;
     }
 
     @Override
-    public void accept(Identity minionHeader, StreamObserver<CloudToMinionMessage> cloudToMinionMessageStreamObserver) {
+    public void handleOutgoingStream(Identity minionHeader, StreamObserver<CloudToMinionMessage> cloudToMinionMessageStreamObserver) {
         String tenantId = tenantIDGrpcServerInterceptor.readCurrentContextTenantId();
+        String location = locationServerInterceptor.readCurrentContextLocation();
         log.info("Have Message to send to Minion: tenant-id: {}; system-id={}, location={}",
             tenantId,
             minionHeader.getSystemId(),
-            minionHeader.getLocation());
+            location
+        );
 
-        IpcIdentity identity = new ConnectionIdentity(minionHeader);
-        streamObserver.accept(identity, cloudToMinionMessageStreamObserver);
+        for (OutgoingMessageFactory outgoingMessageFactory : outgoingMessageFactoryList) {
+            // streamObserver.accept(identity, cloudToMinionMessageStreamObserver);
+            outgoingMessageFactory.create(minionHeader.getSystemId(), tenantId, location, cloudToMinionMessageStreamObserver);
+        }
+
     }
 
 }

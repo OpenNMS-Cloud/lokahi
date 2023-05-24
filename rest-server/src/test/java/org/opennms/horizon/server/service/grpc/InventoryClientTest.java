@@ -47,6 +47,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.opennms.horizon.inventory.dto.IdList;
+import org.opennms.horizon.inventory.dto.MonitoringLocationCreateDTO;
 import org.opennms.horizon.inventory.dto.MonitoringLocationDTO;
 import org.opennms.horizon.inventory.dto.MonitoringLocationList;
 import org.opennms.horizon.inventory.dto.MonitoringLocationServiceGrpc;
@@ -109,7 +110,7 @@ public class InventoryClientTest {
                 }
 
                 @Override
-                public void createLocation(MonitoringLocationDTO request, StreamObserver<MonitoringLocationDTO> responseObserver) {
+                public void createLocation(MonitoringLocationCreateDTO request, StreamObserver<MonitoringLocationDTO> responseObserver) {
                     responseObserver.onNext(MonitoringLocationDTO.newBuilder().build());
                     responseObserver.onCompleted();
                 }
@@ -166,7 +167,8 @@ public class InventoryClientTest {
         grpcCleanUp.register(InProcessServerBuilder.forName("InventoryClientTest").intercept(mockInterceptor)
             .addService(mockLocationService)
             .addService(mockSystemService)
-            .addService(mockNodeService).directExecutor().build().start());
+            .addService(mockNodeService)
+            .directExecutor().build().start());
         ManagedChannel channel = grpcCleanUp.register(InProcessChannelBuilder.forName("InventoryClientTest").directExecutor().build());
         client = new InventoryClient(channel, 5000);
         client.initialStubs();
@@ -280,9 +282,9 @@ public class InventoryClientTest {
 
     @Test
     void testCreateLocation() {
-        MonitoringLocationDTO createDTO = MonitoringLocationDTO.newBuilder().setLocation("test-location").build();
+        MonitoringLocationCreateDTO createDTO = MonitoringLocationCreateDTO.newBuilder().setLocation("test-location").build();
         String methodName = new Object(){}.getClass().getEnclosingMethod().getName();
-        ArgumentCaptor<MonitoringLocationDTO> captor = ArgumentCaptor.forClass(MonitoringLocationDTO.class);
+        ArgumentCaptor<MonitoringLocationCreateDTO> captor = ArgumentCaptor.forClass(MonitoringLocationCreateDTO.class);
         MonitoringLocationDTO result = client.createLocation(createDTO, accessToken + methodName);
         assertThat(result).isNotNull();
         verify(mockLocationService).createLocation(captor.capture(), any());

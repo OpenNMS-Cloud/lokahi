@@ -7,6 +7,8 @@ import org.apache.ignite.compute.ComputeTaskFuture;
 import org.apache.ignite.lang.IgniteFuture;
 import org.opennms.cloud.grpc.minion.RpcRequestProto;
 import org.opennms.cloud.grpc.minion.RpcResponseProto;
+import org.opennms.cloud.grpc.minion_gateway.GatewayRpcRequestProto;
+import org.opennms.cloud.grpc.minion_gateway.GatewayRpcResponseProto;
 import org.opennms.horizon.shared.grpc.common.TenantIDGrpcServerInterceptor;
 import org.opennms.miniongateway.grpc.server.rpcrequest.RouterTaskData;
 import org.opennms.miniongateway.grpc.server.rpcrequest.RpcRequestRouterIgniteTask;
@@ -34,21 +36,17 @@ public class RpcRequestRouterImpl implements RpcRequestRouter {
     @Setter
     private RpcRequestRouterIgniteTask rpcRequestRouterIgniteTask;
 
-    @Autowired
-    @Setter
-    private TenantIDGrpcServerInterceptor tenantIDGrpcServerInterceptor;
-
 
     //========================================
 // Interface: RpcRequestRouter
 //----------------------------------------
 
     @Override
-    public CompletableFuture<RpcResponseProto> routeRequest(RpcRequestProto request) {
-        CompletableFuture<RpcResponseProto> resultFuture = new CompletableFuture<>();
+    public CompletableFuture<GatewayRpcResponseProto> routeRequest(GatewayRpcRequestProto request) {
+        CompletableFuture<GatewayRpcResponseProto> resultFuture = new CompletableFuture<>();
 
-        String tenantId = tenantIDGrpcServerInterceptor.readCurrentContextTenantId();
-        RouterTaskData routerTaskData = new RouterTaskData(tenantId, request.toByteArray());
+        String tenant = request.getIdentity().getTenant();
+        RouterTaskData routerTaskData = new RouterTaskData(tenant, request.toByteArray());
 
         ComputeTaskFuture<byte[]> igniteFuture =
             ignite.compute().executeAsync(rpcRequestRouterIgniteTask, routerTaskData);
@@ -62,11 +60,11 @@ public class RpcRequestRouterImpl implements RpcRequestRouter {
 // Internals
 //----------------------------------------
 
-    private void processCompletedIgniteFuture(CompletableFuture<RpcResponseProto> completableFuture, IgniteFuture<byte[]> igniteFuture) {
+    private void processCompletedIgniteFuture(CompletableFuture<GatewayRpcResponseProto> completableFuture, IgniteFuture<byte[]> igniteFuture) {
         assert(igniteFuture.isDone());
 
         try {
-            RpcResponseProto result = RpcResponseProto.parseFrom(igniteFuture.get());
+            GatewayRpcResponseProto result = GatewayRpcResponseProto.parseFrom(igniteFuture.get());
 
             completableFuture.complete(result);
         } catch (InvalidProtocolBufferException ipbExc) {

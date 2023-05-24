@@ -59,14 +59,15 @@ public class TaskSetMonitorResultProcessor {
         this.tenantMetricsTracker = tenantMetricsTracker;
     }
 
-    public void processMonitorResponse(String tenantId, TaskResult taskResult, MonitorResponse monitorResponse) throws IOException {
-        LOG.info("Have monitor response, tenant-id: {}; task-id={};", tenantId, taskResult.getId());
+    public void processMonitorResponse(String tenantId, String location, TaskResult taskResult, MonitorResponse monitorResponse) throws IOException {
+        LOG.info("Have monitor response: tenant-id={}; location={}; system-id={}; task-id={}",
+            tenantId, location, taskResult.getIdentity().getSystemId(), taskResult.getId());
 
         String[] labelValues =
             {
                 monitorResponse.getIpAddress(),
-                taskResult.getLocation(),
-                taskResult.getSystemId(),
+                location,
+                taskResult.getIdentity().getSystemId(),
                 monitorResponse.getMonitorType().name(),
                 String.valueOf(monitorResponse.getNodeId())
             };

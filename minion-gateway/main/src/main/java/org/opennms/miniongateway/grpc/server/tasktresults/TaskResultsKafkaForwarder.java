@@ -29,12 +29,13 @@
 package org.opennms.miniongateway.grpc.server.tasktresults;
 
 import org.apache.kafka.clients.producer.ProducerRecord;
+import org.opennms.horizon.shared.grpc.common.LocationServerInterceptor;
 import org.opennms.horizon.shared.grpc.common.TenantIDGrpcServerInterceptor;
 import org.opennms.horizon.shared.ipc.sink.api.MessageConsumer;
 import org.opennms.horizon.shared.ipc.sink.api.SinkModule;
-import org.opennms.horizon.shared.protobuf.mapper.TenantedTaskSetResultsMapper;
+import org.opennms.horizon.shared.protobuf.mapper.TenantLocationSpecificTaskSetResultsMapper;
 import org.opennms.taskset.contract.TaskSetResults;
-import org.opennms.taskset.contract.TenantedTaskSetResults;
+import org.opennms.taskset.contract.TenantLocationSpecificTaskSetResults;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -54,20 +55,23 @@ public class TaskResultsKafkaForwarder implements MessageConsumer<TaskSetResults
 
     private final KafkaTemplate<String, byte[]> kafkaTemplate;
     private final TenantIDGrpcServerInterceptor tenantIDGrpcInterceptor;
-    private final TenantedTaskSetResultsMapper tenantedTaskSetResultsMapper;
+    private final TenantLocationSpecificTaskSetResultsMapper tenantLocationSpecificTaskSetResultsMapper;
+    private final LocationServerInterceptor locationServerInterceptor;
 
     private final String kafkaTopic;
 
     public TaskResultsKafkaForwarder(
         KafkaTemplate<String, byte[]> kafkaTemplate,
         TenantIDGrpcServerInterceptor tenantIDGrpcInterceptor,
-        TenantedTaskSetResultsMapper tenantedTaskSetResultsMapper,
+        LocationServerInterceptor locationServerInterceptor,
+        TenantLocationSpecificTaskSetResultsMapper tenantLocationSpecificTaskSetResultsMapper,
         @Value("${task.results.kafka-topic:" + DEFAULT_TASK_RESULTS_TOPIC + "}")
         String kafkaTopic) {
 
         this.kafkaTemplate = kafkaTemplate;
         this.tenantIDGrpcInterceptor = tenantIDGrpcInterceptor;
-        this.tenantedTaskSetResultsMapper = tenantedTaskSetResultsMapper;
+        this.locationServerInterceptor = locationServerInterceptor;
+        this.tenantLocationSpecificTaskSetResultsMapper = tenantLocationSpecificTaskSetResultsMapper;
         this.kafkaTopic = kafkaTopic;
     }
 
@@ -80,13 +84,15 @@ public class TaskResultsKafkaForwarder implements MessageConsumer<TaskSetResults
     public void handleMessage(TaskSetResults messageLog) {
         // Retrieve the Tenant ID from the TenantID GRPC Interceptor
         String tenantId = tenantIDGrpcInterceptor.readCurrentContextTenantId();
-        logger.debug("Received results; sending to Kafka: tenant-id: {}; kafka-topic={}; message={}", tenantId, kafkaTopic, messageLog);
+        String location = locationServerInterceptor.readCurrentContextLocation();
+
+        logger.debug("Received results; sending to Kafka: tenant-id={}; location={}; kafka-topic={}; message={}", tenantId, location, kafkaTopic, messageLog);
 
         // Map to tenanted
-        TenantedTaskSetResults tenantedTaskSetResults = tenantedTaskSetResultsMapper.mapBareToTenanted(tenantId, messageLog);
+        TenantLocationSpecificTaskSetResults tenantLocationSpecificTaskSetResults = tenantLocationSpecificTaskSetResultsMapper.mapBareToTenanted(tenantId, location, messageLog);
 
         // Convert to bytes
-        byte[] rawContent = tenantedTaskSetResults.toByteArray();
+        byte[] rawContent = tenantLocationSpecificTaskSetResults.toByteArray();
         var producerRecord = new ProducerRecord<String, byte[]>(kafkaTopic, rawContent);
 
         // Send to Kafka

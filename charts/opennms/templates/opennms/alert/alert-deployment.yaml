@@ -62,7 +62,7 @@ spec:
                   name: postgres
                   key: alertPwd
             - name: SPRING_KAFKA_BOOTSTRAP_SERVERS
-              value: "{{ .Values.Kafka.ServiceName }}:{{ .Values.Kafka.Port }}"
+              value: "{{ .Values.kafkaClient.bootstrapServers }}"
             {{- include "deployment.env" .Values.OpenNMS.Alert | nindent 12 }}
           envFrom:
           - configMapRef:

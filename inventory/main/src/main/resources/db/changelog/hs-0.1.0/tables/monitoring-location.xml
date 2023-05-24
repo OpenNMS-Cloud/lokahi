@@ -34,4 +34,18 @@
         />
 
     </changeSet>
+
+    <changeSet author="bjanssens" id="0.1.0-add-geo-monitoring-location-columns">
+        <addColumn tableName="monitoring_location">
+            <column name="latitude" type="DOUBLE"/>
+            <column name="longitude" type="DOUBLE"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="freddy" id="0.1.0-add-address-columns">
+        <addColumn tableName="monitoring_location">
+            <column name="address" type="TEXT"/>
+        </addColumn>
+    </changeSet>
+
 </databaseChangeLog>

@@ -33,7 +33,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
 import org.opennms.cloud.grpc.minion.Identity;
-import org.opennms.horizon.grpc.heartbeat.contract.HeartbeatMessage;
+import org.opennms.horizon.grpc.heartbeat.contract.TenantLocationSpecificHeartbeatMessage;
 import org.opennms.horizon.inventory.mapper.MonitoringSystemMapper;
 import org.opennms.horizon.inventory.model.MonitoringLocation;
 import org.opennms.horizon.inventory.model.MonitoringSystem;
@@ -59,7 +59,7 @@ public class MonitoringSystemServiceTest {
     private MonitoringSystem testMonitoringSystem;
     private MonitoringLocation testLocation;
 
-    private HeartbeatMessage heartbeatMessage;
+    private TenantLocationSpecificHeartbeatMessage heartbeatMessage;
     private final String location = "test location";
     private final String systemId = "test-monitoring-system-12345";
 
@@ -80,10 +80,14 @@ public class MonitoringSystemServiceTest {
         testMonitoringSystem.setTenantId(tenantId);
         testMonitoringSystem.setSystemId(systemId);
         testMonitoringSystem.setLabel(systemId);
-        heartbeatMessage = HeartbeatMessage.newBuilder()
-            .setIdentity(Identity.newBuilder()
+        heartbeatMessage =
+            TenantLocationSpecificHeartbeatMessage.newBuilder()
+                .setTenantId(tenantId)
                 .setLocation(location)
-                .setSystemId(systemId).build()).build();
+                .setIdentity(Identity.newBuilder()
+                    .setSystemId(systemId).build()
+                )
+                .build();
     }
 
     @AfterEach
@@ -95,7 +99,7 @@ public class MonitoringSystemServiceTest {
     @Test
     void testReceiveMsgMonitorSystemExist() {
         doReturn(Optional.of(testMonitoringSystem)).when(mockMonitoringSystemRepo).findBySystemIdAndTenantId(systemId, tenantId);
-        service.addMonitoringSystemFromHeartbeat(heartbeatMessage, tenantId);
+        service.addMonitoringSystemFromHeartbeat(heartbeatMessage);
         verify(mockMonitoringSystemRepo).findBySystemIdAndTenantId(systemId, tenantId);
         verify(mockMonitoringSystemRepo).save(testMonitoringSystem);
     }
@@ -104,7 +108,7 @@ public class MonitoringSystemServiceTest {
     void testCreateNewMonitorSystemWithLocationExist() {
         doReturn(Optional.empty()).when(mockMonitoringSystemRepo).findBySystemIdAndTenantId(systemId, tenantId);
         doReturn(Optional.of(testLocation)).when(mockLocationRepo).findByLocationAndTenantId(location, tenantId);
-        service.addMonitoringSystemFromHeartbeat(heartbeatMessage, tenantId);
+        service.addMonitoringSystemFromHeartbeat(heartbeatMessage);
         verify(mockMonitoringSystemRepo).findBySystemIdAndTenantId(systemId, tenantId);
         verify(mockMonitoringSystemRepo).save(any(MonitoringSystem.class));
         verify(mockLocationRepo).findByLocationAndTenantId(location, tenantId);
@@ -115,7 +119,7 @@ public class MonitoringSystemServiceTest {
         doReturn(Optional.empty()).when(mockMonitoringSystemRepo).findBySystemIdAndTenantId(systemId, tenantId);
         doReturn(Optional.empty()).when(mockLocationRepo).findByLocationAndTenantId(location, tenantId);
         doReturn(testLocation).when(mockLocationRepo).save(any(MonitoringLocation.class));
-        service.addMonitoringSystemFromHeartbeat(heartbeatMessage, tenantId);
+        service.addMonitoringSystemFromHeartbeat(heartbeatMessage);
         verify(mockMonitoringSystemRepo).findBySystemIdAndTenantId(systemId, tenantId);
         verify(mockMonitoringSystemRepo).save(any(MonitoringSystem.class));
         verify(mockLocationRepo).findByLocationAndTenantId(location, tenantId);

@@ -4,6 +4,7 @@ Feature: Node
     Given [Node] External GRPC Port in system property "application-external-grpc-port"
     Given [Node] Kafka Bootstrap URL in system property "kafka.bootstrap-servers"
     Given [Node] Grpc TenantId "node-tenant-stream"
+    Given [Node] Grpc location "test-location"
     Given [Node] Create Grpc Connection for Inventory
 
   Scenario: Add a node and verify list nodes by node label search returns result

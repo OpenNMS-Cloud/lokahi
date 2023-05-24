@@ -4,6 +4,7 @@ Feature: Passive Discovery Tagging
     Given [PassiveDiscovery] External GRPC Port in system property "application-external-grpc-port"
     Given [PassiveDiscovery] Kafka Bootstrap URL in system property "kafka.bootstrap-servers"
     Given [PassiveDiscovery] Grpc TenantId "tenant-stream"
+    Given [PassiveDiscovery] Grpc location "test-location"
     Given [PassiveDiscovery] Create Grpc Connection for Inventory
 
   Scenario: Create new tags on passive discovery

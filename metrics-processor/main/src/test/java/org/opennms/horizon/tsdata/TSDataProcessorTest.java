@@ -35,7 +35,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.opennms.taskset.contract.TaskResult;
-import org.opennms.taskset.contract.TenantedTaskSetResults;
+import org.opennms.taskset.contract.TenantLocationSpecificTaskSetResults;
 
 import java.util.Objects;
 import java.util.function.Predicate;
@@ -46,14 +46,12 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 class TSDataProcessorTest {
 
-    public static final String TENANT_ID = "sometenant";
-
     private TaskSetResultProcessor mockTaskSetMonitorResultProcessor;
 
     private TaskResult testTaskResult1;
     private TaskResult testTaskResult2;
-    private TenantedTaskSetResults testTenantedTaskSetResults;
-    private TenantedTaskSetResults testTenantedTaskSetResultsBlankTenant;
+    private TenantLocationSpecificTaskSetResults testTenantLocationSpecificTaskSetResults;
+    private TenantLocationSpecificTaskSetResults testTenantLocationSpecificTaskSetResultsBlankTenant;
     
     private TSDataProcessor target;
 
@@ -71,15 +69,16 @@ class TSDataProcessorTest {
                 .setId("x-task2-result-x")
                 .build();
         
-        testTenantedTaskSetResults =
-            TenantedTaskSetResults.newBuilder()
+        testTenantLocationSpecificTaskSetResults =
+            TenantLocationSpecificTaskSetResults.newBuilder()
                 .setTenantId("x-tenant-id-x")
+                .setLocation("x-location-x")
                 .addResults(testTaskResult1)
                 .addResults(testTaskResult2)
                 .build();
 
-        testTenantedTaskSetResultsBlankTenant =
-            TenantedTaskSetResults.newBuilder()
+        testTenantLocationSpecificTaskSetResultsBlankTenant =
+            TenantLocationSpecificTaskSetResults.newBuilder()
                 .setTenantId("")
                 .build();
 
@@ -93,13 +92,13 @@ class TSDataProcessorTest {
         // Execute
         //
         target.setSubmitForExecutionOp(this::testExecutionSubmissionOp);
-        target.consume(testTenantedTaskSetResults.toByteArray());
+        target.consume(testTenantLocationSpecificTaskSetResults.toByteArray());
 
         //
         // Verify the Results
         //
-        Mockito.verify(mockTaskSetMonitorResultProcessor).processTaskResult("x-tenant-id-x", testTaskResult1);
-        Mockito.verify(mockTaskSetMonitorResultProcessor).processTaskResult("x-tenant-id-x", testTaskResult2);
+        Mockito.verify(mockTaskSetMonitorResultProcessor).processTaskResult("x-tenant-id-x", "x-location-x", testTaskResult1);
+        Mockito.verify(mockTaskSetMonitorResultProcessor).processTaskResult("x-tenant-id-x", "x-location-x", testTaskResult2);
         Mockito.verifyNoMoreInteractions(mockTaskSetMonitorResultProcessor);
     }
 
@@ -110,7 +109,7 @@ class TSDataProcessorTest {
         //
         Exception actualException = null;
         try {
-            target.consume(testTenantedTaskSetResultsBlankTenant.toByteArray());
+            target.consume(testTenantLocationSpecificTaskSetResultsBlankTenant.toByteArray());
             fail("Missing expected exception");
         } catch (Exception exc) {
             actualException = exc;

@@ -4,6 +4,7 @@ Feature: Active Discovery Tagging
     Given [ActiveDiscovery] External GRPC Port in system property "application-external-grpc-port"
     Given [ActiveDiscovery] Kafka Bootstrap URL in system property "kafka.bootstrap-servers"
     Given [ActiveDiscovery] Grpc TenantId "tenant-stream"
+    Given [ActiveDiscovery] Grpc location "test-location"
     Given [ActiveDiscovery] Create Grpc Connection for Inventory
 
   Scenario: Create new tags on active discovery

@@ -38,17 +38,14 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.opennms.cloud.grpc.minion.Identity;
-import org.opennms.cloud.grpc.minion.RpcRequestProto;
-import org.opennms.cloud.grpc.minion.RpcResponseProto;
+import org.opennms.cloud.grpc.minion_gateway.GatewayRpcRequestProto;
+import org.opennms.cloud.grpc.minion_gateway.GatewayRpcResponseProto;
 import org.opennms.horizon.grpc.echo.contract.EchoResponse;
-import org.opennms.horizon.grpc.heartbeat.contract.HeartbeatMessage;
+import org.opennms.horizon.grpc.heartbeat.contract.TenantLocationSpecificHeartbeatMessage;
 import org.opennms.horizon.inventory.service.MonitoringSystemService;
-import org.opennms.horizon.shared.constants.GrpcConstants;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
@@ -72,31 +69,37 @@ public class MinionHeartbeatConsumerTest {
     @Spy
     MinionHeartbeatConsumer messageConsumer;
 
-    private final String tenantId = "test-tenant";
+    private final String TEST_TENANT_ID = "test-tenant";
+    private final String TEST_LOCATION = "test-location";
     private Map<String, Object> headers;
-    private HeartbeatMessage heartbeat;
+    private TenantLocationSpecificHeartbeatMessage heartbeat;
 
 
     @BeforeEach
     void beforeTest() {
         String systemId = "test-system123";
-        String location = "test-location";
 
-        heartbeat = HeartbeatMessage.newBuilder()
-            .setIdentity(Identity.newBuilder().setLocation(location).setSystemId(systemId).build()).build();
-        headers = new HashMap<>();
-        headers.put(GrpcConstants.TENANT_ID_KEY, tenantId.getBytes(StandardCharsets.UTF_8));
+        heartbeat = TenantLocationSpecificHeartbeatMessage.newBuilder()
+            .setTenantId(TEST_TENANT_ID)
+            .setLocation(TEST_LOCATION)
+            .setIdentity(
+                Identity.newBuilder()
+                    .setSystemId(systemId)
+                    .build()
+            )
+            .build();
+
         EchoResponse response = EchoResponse.newBuilder().setTime(System.nanoTime()).build();
-        RpcResponseProto rpcResponse = RpcResponseProto.newBuilder().setPayload(Any.pack(response)).build();
-        doReturn(CompletableFuture.completedFuture(rpcResponse)).when(rpcClient).sendRpcRequest(eq(tenantId), any(RpcRequestProto.class));
+        GatewayRpcResponseProto rpcResponse = GatewayRpcResponseProto.newBuilder().setPayload(Any.pack(response)).build();
+        doReturn(CompletableFuture.completedFuture(rpcResponse)).when(rpcClient).sendRpcRequest(eq(TEST_TENANT_ID), any(GatewayRpcRequestProto.class));
         ReflectionTestUtils.setField(messageConsumer, "kafkaTopic", "test-topic");
     }
 
     @Test
     void testAcceptHeartbeats() throws InterruptedException {
         messageConsumer.receiveMessage(heartbeat.toByteArray(), headers);
-        verify(service, times(1)).addMonitoringSystemFromHeartbeat(any(HeartbeatMessage.class), eq(tenantId));
-        verify(rpcClient, timeout(5000).atLeast(1)).sendRpcRequest(eq(tenantId), any(RpcRequestProto.class));
+        verify(service, times(1)).addMonitoringSystemFromHeartbeat(any(TenantLocationSpecificHeartbeatMessage.class));
+        verify(rpcClient, timeout(5000).atLeast(1)).sendRpcRequest(eq(TEST_TENANT_ID), any(GatewayRpcRequestProto.class));
         verify(kafkaTemplate, timeout(5000).atLeast(1)).send(any(ProducerRecord.class));
     }
 
@@ -105,8 +108,8 @@ public class MinionHeartbeatConsumerTest {
         messageConsumer.receiveMessage(heartbeat.toByteArray(), headers);
         doReturn(System.currentTimeMillis() + 30000).when(messageConsumer).getSystemTimeInMsec();
         messageConsumer.receiveMessage(heartbeat.toByteArray(), headers);
-        verify(service, times(2)).addMonitoringSystemFromHeartbeat(any(HeartbeatMessage.class), eq(tenantId));
-        verify(rpcClient, timeout(5000).times(2)).sendRpcRequest(eq(tenantId), any(RpcRequestProto.class));
+        verify(service, times(2)).addMonitoringSystemFromHeartbeat(any(TenantLocationSpecificHeartbeatMessage.class));
+        verify(rpcClient, timeout(5000).times(2)).sendRpcRequest(eq(TEST_TENANT_ID), any(GatewayRpcRequestProto.class));
         verify(kafkaTemplate, timeout(5000).times(2)).send(any(ProducerRecord.class));
     }
 }

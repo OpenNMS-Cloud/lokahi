@@ -36,6 +36,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.opennms.taskset.contract.CollectorResponse;
+import org.opennms.taskset.contract.Identity;
 import org.opennms.taskset.contract.MonitorType;
 import org.opennms.taskset.contract.TaskResult;
 
@@ -62,8 +63,11 @@ public class TaskSetCollectorResultProcessorTest {
 
         testTaskResult =
             TaskResult.newBuilder()
-                .setLocation("x-location-x")
-                .setSystemId("x-system-id-x")
+                .setIdentity(
+                    Identity.newBuilder()
+                        .setSystemId("x-system-id-x")
+                        .build()
+                )
                 .build();
 
         var templateCollectoResponse =
@@ -110,7 +114,7 @@ public class TaskSetCollectorResultProcessorTest {
         //
         // Execute
         //
-        target.processCollectorResponse("x-tenant-id-x", testTaskResult, testCollectorResponseAzure);
+        target.processCollectorResponse("x-tenant-id-x", "x-location-x", testTaskResult, testCollectorResponseAzure);
 
         //
         // Verify the Results
@@ -118,6 +122,7 @@ public class TaskSetCollectorResultProcessorTest {
         Mockito.verify(mockTaskSetCollectorAzureResponseProcessor)
             .processAzureCollectorResponse(
                 Mockito.eq("x-tenant-id-x"),
+                Mockito.eq("x-location-x"),
                 Mockito.same(testCollectorResponseAzure),
                 Mockito.eq(new String[]{
                     "x-ip-address-x",
@@ -138,7 +143,7 @@ public class TaskSetCollectorResultProcessorTest {
         //
         // Execute
         //
-        target.processCollectorResponse("x-tenant-id-x", testTaskResult, testCollectorResponseSnmp);
+        target.processCollectorResponse("x-tenant-id-x", "x-location-x", testTaskResult, testCollectorResponseSnmp);
 
         //
         // Verify the Results
@@ -146,6 +151,7 @@ public class TaskSetCollectorResultProcessorTest {
         Mockito.verify(mockTaskSetCollectorSnmpResponseProcessor)
             .processSnmpCollectorResponse(
                 Mockito.eq("x-tenant-id-x"),
+                Mockito.eq("x-location-x"),
                 Mockito.same(testTaskResult)
             );
     }
@@ -160,7 +166,7 @@ public class TaskSetCollectorResultProcessorTest {
             //
             // Execute
             //
-            target.processCollectorResponse("x-tenant-id-x", testTaskResult, testCollectorResponseMissingResult);
+            target.processCollectorResponse("x-tenant-id-x", "x-location-x", testTaskResult, testCollectorResponseMissingResult);
 
             //
             // Verify the Results
@@ -179,7 +185,7 @@ public class TaskSetCollectorResultProcessorTest {
             //
             // Execute
             //
-            target.processCollectorResponse("x-tenant-id-x", testTaskResult, testCollectorResponseUnrecognizedMonitorType);
+            target.processCollectorResponse("x-tenant-id-x", "x-location-x", testTaskResult, testCollectorResponseUnrecognizedMonitorType);
 
             //
             // Verify the Results

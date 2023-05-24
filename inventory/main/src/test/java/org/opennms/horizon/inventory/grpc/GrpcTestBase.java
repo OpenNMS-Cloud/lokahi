@@ -51,7 +51,7 @@ import static org.mockito.Mockito.reset;
 public abstract class GrpcTestBase {
     @DynamicPropertySource
     private static void registerDatasourceProperties(DynamicPropertyRegistry registry) {
-        registry.add("grpc.server.port", ()->6767);
+        registry.add("grpc.server.port", () -> 6767);
     }
 
     protected final String tenantId = "test-tenant";
@@ -63,7 +63,7 @@ public abstract class GrpcTestBase {
     @Autowired
     private ApplicationContext context;
     @SpyBean
-    private  InventoryServerInterceptor spyInterceptor;
+    private InventoryServerInterceptor spyInterceptor;
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
@@ -75,7 +75,7 @@ public abstract class GrpcTestBase {
 
     protected void prepareServer() throws VerificationException {
         channel = ManagedChannelBuilder.forAddress("localhost", 6767)
-                .usePlaintext().build();
+            .usePlaintext().build();
         doReturn(Optional.of(tenantId)).when(spyInterceptor).verifyAccessToken(authHeader);
         doReturn(Optional.of("invalid-tenant")).when(spyInterceptor).verifyAccessToken(differentTenantHeader);
         doReturn(Optional.empty()).when(spyInterceptor).verifyAccessToken(headerWithoutTenant);
@@ -83,7 +83,7 @@ public abstract class GrpcTestBase {
     }
 
     protected void afterTest() throws InterruptedException {
-        if(channel != null) {
+        if (channel != null) {
             channel.shutdownNow();
             channel.awaitTermination(10, TimeUnit.SECONDS);
         }

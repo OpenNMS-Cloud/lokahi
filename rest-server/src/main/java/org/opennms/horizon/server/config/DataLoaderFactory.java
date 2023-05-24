@@ -28,42 +28,40 @@
 
 package org.opennms.horizon.server.config;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
-
+import io.leangen.graphql.spqr.spring.autoconfigure.DataLoaderRegistryFactory;
+import lombok.RequiredArgsConstructor;
 import org.dataloader.BatchLoader;
 import org.dataloader.DataLoader;
 import org.dataloader.DataLoaderRegistry;
-import org.opennms.horizon.server.mapper.LocationMapper;
-import org.opennms.horizon.server.model.inventory.Location;
+import org.opennms.horizon.server.mapper.MonitoringLocationMapper;
+import org.opennms.horizon.server.model.inventory.MonitoringLocation;
 import org.opennms.horizon.server.service.grpc.InventoryClient;
 import org.springframework.stereotype.Component;
 
-import io.leangen.graphql.spqr.spring.autoconfigure.DataLoaderRegistryFactory;
-import lombok.RequiredArgsConstructor;
+import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 
 @RequiredArgsConstructor
 @Component
 public class DataLoaderFactory implements DataLoaderRegistryFactory {
     public static final String DATA_LOADER_LOCATION = "location";
     private final InventoryClient inventoryClient;
-    private final LocationMapper locationMapper;
-    private final BatchLoader<Key, Location> locationBatchLoader = this::locations;
+    private final MonitoringLocationMapper monitoringLocationMapper;
+    private final BatchLoader<Key, MonitoringLocation> locationBatchLoader = this::locations;
 
     @Override
     public DataLoaderRegistry createDataLoaderRegistry() {
-        DataLoader<Key, Location> locationDataLoader = new DataLoader<>(locationBatchLoader);
+        DataLoader<Key, MonitoringLocation> locationDataLoader = new DataLoader<>(locationBatchLoader);
         DataLoaderRegistry loaders = new DataLoaderRegistry();
         loaders.register(DATA_LOADER_LOCATION, locationDataLoader);
         return loaders;
     }
 
-    private CompletableFuture<List<Location>> locations(List<Key> locationKeys) {
+    private CompletableFuture<List<MonitoringLocation>> locations(List<Key> locationKeys) {
         return CompletableFuture.completedFuture(
             inventoryClient.listLocationsByIds(locationKeys)
-                .stream().map(locationMapper::protoToLocation).collect(Collectors.toList()));
+                .stream().map(monitoringLocationMapper::protoToLocation).toList());
     }
 
     public static class Key {

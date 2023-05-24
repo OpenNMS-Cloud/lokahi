@@ -34,7 +34,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.junit.Test;
-import org.opennms.dataplatform.flows.document.FlowDocument;
+import org.opennms.horizon.flows.document.FlowDocument;
 import org.opennms.horizon.minion.flows.parser.ie.Value;
 import org.opennms.horizon.minion.flows.parser.ie.values.UnsignedValue;
 import org.opennms.horizon.minion.flows.parser.transport.IpFixMessageBuilder;

@@ -28,18 +28,6 @@
 
 package org.opennms.horizon.server.service;
 
-import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
-
-import org.dataloader.DataLoader;
-import org.opennms.horizon.server.config.DataLoaderFactory;
-import org.opennms.horizon.server.mapper.MinionMapper;
-import org.opennms.horizon.server.model.inventory.Location;
-import org.opennms.horizon.server.model.inventory.Minion;
-import org.opennms.horizon.server.service.grpc.InventoryClient;
-import org.opennms.horizon.server.utils.ServerHeaderUtil;
-import org.springframework.stereotype.Service;
-
 import io.leangen.graphql.annotations.GraphQLArgument;
 import io.leangen.graphql.annotations.GraphQLContext;
 import io.leangen.graphql.annotations.GraphQLEnvironment;
@@ -48,8 +36,18 @@ import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.execution.ResolutionEnvironment;
 import io.leangen.graphql.spqr.spring.annotations.GraphQLApi;
 import lombok.RequiredArgsConstructor;
+import org.dataloader.DataLoader;
+import org.opennms.horizon.server.config.DataLoaderFactory;
+import org.opennms.horizon.server.mapper.MinionMapper;
+import org.opennms.horizon.server.model.inventory.Minion;
+import org.opennms.horizon.server.model.inventory.MonitoringLocation;
+import org.opennms.horizon.server.service.grpc.InventoryClient;
+import org.opennms.horizon.server.utils.ServerHeaderUtil;
+import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.util.concurrent.CompletableFuture;
 
 @RequiredArgsConstructor
 @GraphQLApi
@@ -61,7 +59,7 @@ public class GrpcMinionService {
 
     @GraphQLQuery
     public Flux<Minion> findAllMinions(@GraphQLEnvironment ResolutionEnvironment env) {
-        return Flux.fromIterable(client.listMonitoringSystems(headerUtil.getAuthHeader(env)).stream().map(mapper::protoToMinion).collect(Collectors.toList()));
+        return Flux.fromIterable(client.listMonitoringSystems(headerUtil.getAuthHeader(env)).stream().map(mapper::protoToMinion).toList());
     }
 
     @GraphQLQuery
@@ -70,8 +68,8 @@ public class GrpcMinionService {
     }
 
     @GraphQLQuery
-    public CompletableFuture<Location> location(@GraphQLContext Minion minion, @GraphQLEnvironment ResolutionEnvironment env) {
-        DataLoader<DataLoaderFactory.Key, Location> locationDataLoader = env.dataFetchingEnvironment.getDataLoader(DataLoaderFactory.DATA_LOADER_LOCATION);
+    public CompletableFuture<MonitoringLocation> location(@GraphQLContext Minion minion, @GraphQLEnvironment ResolutionEnvironment env) {
+        DataLoader<DataLoaderFactory.Key, MonitoringLocation> locationDataLoader = env.dataFetchingEnvironment.getDataLoader(DataLoaderFactory.DATA_LOADER_LOCATION);
         DataLoaderFactory.Key key = new DataLoaderFactory.Key(minion.getLocationId(), headerUtil.getAuthHeader(env));
         return locationDataLoader.load(key);
     }

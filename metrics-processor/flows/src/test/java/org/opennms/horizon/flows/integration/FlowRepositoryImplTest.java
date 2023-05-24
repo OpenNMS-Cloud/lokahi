@@ -8,9 +8,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
-import org.opennms.dataplatform.flows.document.FlowDocument;
 import org.opennms.dataplatform.flows.ingester.v1.IngesterGrpc;
 import org.opennms.dataplatform.flows.ingester.v1.StoreFlowDocumentsResponse;
+import org.opennms.horizon.flows.document.TenantLocationSpecificFlowDocument;
 import org.opennms.horizon.flows.grpc.client.IngestorClient;
 import org.springframework.retry.support.RetryTemplate;
 
@@ -44,8 +44,12 @@ class FlowRepositoryImplTest {
     @Test
     void testCorrectNumberOfInteractionsWithIngesterStub() {
         // Given
-        List<FlowDocument> flows = Collections.singletonList(FlowDocument.newBuilder().setTenantId("any-tenant-id")
-            .getDefaultInstanceForType());
+        List<TenantLocationSpecificFlowDocument> flows =
+            Collections.singletonList(
+                TenantLocationSpecificFlowDocument.newBuilder()
+                    .setTenantId("any-tenant-id")
+                    .getDefaultInstanceForType()    // TODO: doesn't this make the setTenantId() pointless?
+            );
 
         // When
         flowRepository.persist(flows);

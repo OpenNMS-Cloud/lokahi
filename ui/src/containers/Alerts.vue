@@ -46,7 +46,7 @@
           </div>
           <div class="search-filter">
             <FeatherInput
-              v-model="searchAlerts"
+              v-model="alertsStore.alertsFilter.nodeLabel"
               label="Search Alerts"
               type="search"
               @update:model-value="searchAlertsListener"
@@ -104,7 +104,6 @@
               @update:model-value="alertsStore.setPage"
               @update:pageSize="alertsStore.setPageSize"
               data-test="pagination"
-              ref="refPagination"
             />
           </div>
         </div>
@@ -117,14 +116,9 @@
 import { TimeRange } from '@/types/graphql'
 import { useAlertsStore } from '@/store/Views/alertsStore'
 import { IAlert } from '@/types/alerts'
-
-onMounted(async () => {
-  await alertsStore.fetchAlerts()
-})
+import { fncArgVoid } from '@/types'
 
 const alertsStore = useAlertsStore()
-
-const refPagination = ref()
 
 const alerts = ref([] as IAlert[])
 watchEffect(() => {
@@ -132,17 +126,10 @@ watchEffect(() => {
 })
 
 const isAlertsListEmpty = computed(() => alertsStore.isAlertsListEmpty)
-watchEffect(() => {
-  if (alertsStore.gotoFirstPage && refPagination.value) {
-    refPagination.value.first() // goto first page on 'severity' and/or 'time' filter change
-    alertsStore.gotoFirstPage = false
-  }
-})
 
 const page = alertsStore.alertsPagination.page
 const pageSize = computed(() => alertsStore.alertsPagination.pageSize)
 const total = computed(() => alertsStore.alertsPagination.total)
-
 const atLeastOneAlertSelected = computed(() => alerts.value.some((a: IAlert) => a.isSelected))
 
 const isAllAlertsSelected = ref(false)
@@ -181,10 +168,13 @@ const acknowledgeAlertsHandler = () => {
   isAllAlertsSelected.value = false
 }
 
-// TODO: search not avail for EAR
-const searchAlerts = ref('')
-const searchAlertsListener = (v: any) => {
-  // need to define (with BE dev), when to send request, how many chars,...
+const searchAlertsListener: fncArgVoid = (val: string | null) => {
+  if (val) {
+    alertsStore.alertsFilter.nodeLabel = val
+  } else {
+    alertsStore.alertsFilter.nodeLabel = ''
+  }
+  alertsStore.resetPaginationAndFetchAlerts()
 }
 </script>
 

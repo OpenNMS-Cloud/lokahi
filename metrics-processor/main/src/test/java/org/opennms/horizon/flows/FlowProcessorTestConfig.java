@@ -48,9 +48,9 @@ import org.opennms.horizon.flows.integration.FlowRepositoryImpl;
 import org.opennms.horizon.flows.processing.DocumentEnricherImpl;
 import org.opennms.horizon.flows.processing.Pipeline;
 import org.opennms.horizon.flows.processing.PipelineImpl;
+import org.opennms.horizon.flows.processing.impl.FlowDocumentClassificationRequestMapperImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.kafka.annotation.EnableKafka;
@@ -63,13 +63,13 @@ import org.springframework.kafka.core.ProducerFactory;
 
 import com.codahale.metrics.MetricRegistry;
 
+// TODO: remove grey box tests and this custom test-only application wiring
 @TestConfiguration
 @EnableKafka
 public class FlowProcessorTestConfig {
 
     @Bean
-    public Pipeline createPipeLine(final MetricRegistry metricRegistry, final DocumentEnricherImpl documentEnricher,
-                                   final FlowRepository flowRepository) {
+    public Pipeline createPipeLine(MetricRegistry metricRegistry, DocumentEnricherImpl documentEnricher, FlowRepository flowRepository) {
         var pipeLine = new PipelineImpl(metricRegistry, documentEnricher);
         var properties = new HashMap<>();
         properties.put(PipelineImpl.REPOSITORY_ID, "DataPlatform");
@@ -78,10 +78,16 @@ public class FlowProcessorTestConfig {
     }
 
     @Bean
-    public DocumentEnricherImpl createDocumentEnricher(final MetricRegistry metricRegistry,
-                                                       final InventoryClient inventoryClient,
-                                                       final ClassificationEngine classificationEngine) {
-        return new DocumentEnricherImpl(metricRegistry, inventoryClient, classificationEngine, 1);
+    public DocumentEnricherImpl createDocumentEnricher(InventoryClient inventoryClient,
+                                                       ClassificationEngine classificationEngine,
+                                                       FlowDocumentClassificationRequestMapperImpl flowDocumentClassificationRequestMapper) {
+
+        return new DocumentEnricherImpl(inventoryClient, classificationEngine, flowDocumentClassificationRequestMapper, 1);
+    }
+
+    @Bean
+    public FlowDocumentClassificationRequestMapperImpl flowDocumentBuilderClassificationRequestMapper() {
+        return new FlowDocumentClassificationRequestMapperImpl();
     }
 
     @Bean

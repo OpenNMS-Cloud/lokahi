@@ -6,6 +6,7 @@ fragment AlertsParts on Query {
     sortAscending: $sortAscending
     sortBy: $sortBy
     timeRange: $timeRange
+    nodeLabel: $nodeLabel
   ) {
     lastPage
     nextPage
@@ -15,6 +16,8 @@ fragment AlertsParts on Query {
       description
       lastUpdateTimeMs
       severity
+      label
+      nodeName
     }
   }
 }
@@ -26,6 +29,7 @@ query AlertsList(
   $sortAscending: Boolean!
   $sortBy: String
   $timeRange: TimeRange!
+  $nodeLabel: String
 ) {
   ...AlertsParts
 }

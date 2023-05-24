@@ -40,6 +40,7 @@ import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.opennms.horizon.inventory.dto.IdList;
+import org.opennms.horizon.inventory.dto.MonitoringLocationCreateDTO;
 import org.opennms.horizon.inventory.dto.MonitoringLocationDTO;
 import org.opennms.horizon.inventory.dto.MonitoringLocationList;
 import org.opennms.horizon.inventory.dto.MonitoringLocationServiceGrpc;
@@ -116,11 +117,11 @@ public class MonitoringLocationGrpcService extends MonitoringLocationServiceGrpc
     }
 
     @Override
-    public void createLocation(MonitoringLocationDTO request, StreamObserver<MonitoringLocationDTO> responseObserver) {
+    public void createLocation(MonitoringLocationCreateDTO request, StreamObserver<MonitoringLocationDTO> responseObserver) {
         tenantLookup.lookupTenantId(Context.current())
             .ifPresent(tenantId -> {
                 try {
-                    responseObserver.onNext(service.upsert(MonitoringLocationDTO.newBuilder(request).setTenantId(tenantId).build()));
+                    responseObserver.onNext(service.upsert(getMonitoringLocationDTO(tenantId, request)));
                     responseObserver.onCompleted();
                 } catch (Exception e) {
                     LOG.error("Error while creating location with name {}", request.getLocation(), e);
@@ -165,6 +166,14 @@ public class MonitoringLocationGrpcService extends MonitoringLocationServiceGrpc
                     responseObserver.onError(StatusProto.toStatusRuntimeException(status));
                 }
             });
+    }
+
+    private static MonitoringLocationDTO getMonitoringLocationDTO(String tenantId, MonitoringLocationCreateDTO request) {
+        return MonitoringLocationDTO.newBuilder()
+            .setLocation(request.getLocation())
+            .setAddress(request.getAddress())
+            .setGeoLocation(request.getGeoLocation())
+            .setTenantId(tenantId).build();
     }
 }
 

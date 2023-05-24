@@ -37,6 +37,7 @@ import org.mockito.Mockito;
 import org.opennms.horizon.tenantmetrics.TenantMetricsTracker;
 import org.opennms.horizon.timeseries.cortex.CortexTSS;
 import org.opennms.horizon.tsdata.MetricNameConstants;
+import org.opennms.taskset.contract.Identity;
 import org.opennms.taskset.contract.MonitorResponse;
 import org.opennms.taskset.contract.MonitorType;
 import org.opennms.taskset.contract.TaskResult;
@@ -76,8 +77,11 @@ public class TaskSetMonitorResultProcessorTest {
         testTaskResult =
             TaskResult.newBuilder()
                 .setId("x-task-id-x")
-                .setLocation("x-location-x")
-                .setSystemId("x-system-id-x")
+                .setIdentity(
+                    Identity.newBuilder()
+                        .setSystemId("x-system-id-x")
+                        .build()
+                )
                 .build();
 
         testIcmpMonitorResponse =
@@ -115,7 +119,7 @@ public class TaskSetMonitorResultProcessorTest {
         //
         // Execute
         //
-        target.processMonitorResponse("x-tenant-id-x", testTaskResult, testIcmpMonitorResponse);
+        target.processMonitorResponse("x-tenant-id-x", "x-location-x", testTaskResult, testIcmpMonitorResponse);
 
         //
         // Verify the Results
@@ -132,7 +136,7 @@ public class TaskSetMonitorResultProcessorTest {
         //
         // Execute
         //
-        target.processMonitorResponse("x-tenant-id-x", testTaskResult, testEchoMonitorResponse);
+        target.processMonitorResponse("x-tenant-id-x", "x-location-x", testTaskResult, testEchoMonitorResponse);
 
         //
         // Verify the Results
@@ -149,7 +153,7 @@ public class TaskSetMonitorResultProcessorTest {
         //
         // Execute
         //
-        target.processMonitorResponse("x-tenant-id-x", testTaskResult, testMonitorResponseWithAdditionalMetrics);
+        target.processMonitorResponse("x-tenant-id-x", "x-location-x", testTaskResult, testMonitorResponseWithAdditionalMetrics);
 
         //
         // Verify the Results
@@ -181,7 +185,7 @@ public class TaskSetMonitorResultProcessorTest {
         long testTimestamp = 100_000_000L;
         TaskResult result = createMonitorSample(testTimestamp);
 
-        target.processMonitorResponse(TENANT_ID, result, result.getMonitorResponse());
+        target.processMonitorResponse(TENANT_ID, "x-location-x", result, result.getMonitorResponse());
 
         Mockito.verify(mockCortexTSS).store(eq(TENANT_ID), argThat(new TimeMatcher(testTimestamp)));
         Mockito.verify(mockTenantMetricsTracker).addTenantMetricSampleCount(TENANT_ID, 1);
@@ -191,7 +195,7 @@ public class TaskSetMonitorResultProcessorTest {
     void testMonitoringResponseWithEmptyTimestamp() throws Exception {
         TaskResult result = createMonitorSample(0);
 
-        target.processMonitorResponse(TENANT_ID, result, result.getMonitorResponse());
+        target.processMonitorResponse(TENANT_ID, "x-location-x", result, result.getMonitorResponse());
 
         Mockito.verify(mockCortexTSS).store(eq(TENANT_ID), argThat(new TimeMatcher(ts -> ts != 0)));
         Mockito.verify(mockTenantMetricsTracker).addTenantMetricSampleCount(TENANT_ID, 1);
@@ -205,8 +209,11 @@ public class TaskSetMonitorResultProcessorTest {
             .build();
 
         return TaskResult.newBuilder()
-            .setSystemId(SYSTEM_ID)
-            .setLocation(LOCATION)
+            .setIdentity(
+                Identity.newBuilder()
+                    .setSystemId(SYSTEM_ID)
+                    .build()
+            )
             .setId("test-monitor")
             .setMonitorResponse(monitorResponse)
             .build();

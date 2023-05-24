@@ -15,6 +15,7 @@ spec:
   template:
     metadata:
       labels:
+        appdomain: opennms
         app.kubernetes.io/name: opennms-nginx-errors
     spec:
       {{- if .Values.NodeRestrictions.Enabled }}

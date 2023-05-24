@@ -61,14 +61,13 @@ public class HeartbeatProducer {
             @Override
             public void run() {
                 try {
-                    log.info("Sending heartbeat from Minion with id: {} at location: {}",
-                            identity.getId(), identity.getLocation());
+                    log.info("Sending heartbeat from Minion with id: {}", identity.getId());
 
                     long millis = System.currentTimeMillis();
-                    HeartbeatMessage heartbeatMessage = HeartbeatMessage.newBuilder().
-                        setIdentity(Identity.newBuilder().setLocation(identity.getLocation()).setSystemId(identity.getId()).build()).
-                        setTimestamp(Timestamp.newBuilder().setSeconds(millis / 1000).setNanos((int) ((millis % 1000) * 1000000)).build()).
-                        build();
+                    HeartbeatMessage heartbeatMessage = HeartbeatMessage.newBuilder()
+                        .setIdentity(Identity.newBuilder().setSystemId(identity.getId()))
+                        .setTimestamp(Timestamp.newBuilder().setSeconds(millis / 1000).setNanos((int) ((millis % 1000) * 1000000)))
+                        .build();
                     dispatcher.send(heartbeatMessage);
                 } catch (Throwable t) {
                     log.error("An error occurred while sending the heartbeat. Will try again in {} ms", PERIOD_MS, t);

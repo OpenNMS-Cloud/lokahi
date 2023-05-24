@@ -19,10 +19,9 @@ public class MockTwinHandlerImpl implements MockTwinHandler {
     private AtomicLong sessionSeq = new AtomicLong(0);
 
     @Override
-    public void publish(String location, String topic, byte[] content) {
+    public void publish(String topic, byte[] content) {
         TwinResponseProto twinResponseProto =
             TwinResponseProto.newBuilder()
-                .setLocation(location)
                 .setConsumerKey(topic)
                 .setTwinObject(ByteString.copyFrom(content))
                 .setSessionId("mock-twin-handler-session-" + sessionSeq.getAndIncrement())
@@ -35,6 +34,6 @@ public class MockTwinHandlerImpl implements MockTwinHandler {
                 .build()
             ;
 
-        grpcOperations.sendMessageToLocation(location, cloudToMinionMessage);
+        grpcOperations.sendMessageToLocation(cloudToMinionMessage);
     }
 }

@@ -324,11 +324,14 @@ Cortex:
     Requests:
       Cpu: 100m
       Memory: 100Mi
+kafkaClient:
+  bootstrapServers: onms-kafka:9092
 Kafka:
+  Enabled: true
   ServiceName: onms-kafka
   Image: bitnami/kafka:3.3.1-debian-11-r1
   ImagePullPolicy: IfNotPresent
-  Replicas: 1 
+  Replicas: 1
   Port: 9092
   ControllerPort: 9093
   LocalPort: 59092

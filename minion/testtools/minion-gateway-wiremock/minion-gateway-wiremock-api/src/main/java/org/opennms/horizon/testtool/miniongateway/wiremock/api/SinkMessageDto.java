@@ -44,15 +44,13 @@ public class SinkMessageDto {
 
     private final String messageId;
     private final String systemId;
-    private final String location;
     private final String moduleId;
 
     public static SinkMessageDto from(final SinkMessage sinkMessage) {
         Objects.requireNonNull(sinkMessage);
         return builder()
             .messageId(sinkMessage.getMessageId())
-            .systemId(sinkMessage.getSystemId())
-            .location(sinkMessage.getLocation())
+            .systemId(sinkMessage.getIdentity().getSystemId())
             .moduleId(sinkMessage.getModuleId())
             .build();
     }

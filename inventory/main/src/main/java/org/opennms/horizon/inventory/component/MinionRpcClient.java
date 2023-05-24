@@ -34,9 +34,10 @@ import java.util.concurrent.TimeUnit;
 import io.grpc.Metadata;
 import io.grpc.stub.MetadataUtils;
 import org.opennms.cloud.grpc.minion.RpcRequestProto;
-import org.opennms.cloud.grpc.minion.RpcRequestServiceGrpc;
-import org.opennms.cloud.grpc.minion.RpcRequestServiceGrpc.RpcRequestServiceStub;
 import org.opennms.cloud.grpc.minion.RpcResponseProto;
+import org.opennms.cloud.grpc.minion_gateway.GatewayRpcRequestProto;
+import org.opennms.cloud.grpc.minion_gateway.GatewayRpcResponseProto;
+import org.opennms.cloud.grpc.minion_gateway.RpcRequestServiceGrpc;
 import org.opennms.horizon.inventory.grpc.TenantLookup;
 import org.opennms.horizon.shared.constants.GrpcConstants;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -56,7 +57,7 @@ public class MinionRpcClient {
         this.deadline = deadline;
     }
 
-    private RpcRequestServiceStub rpcStub;
+    private RpcRequestServiceGrpc.RpcRequestServiceStub rpcStub;
 
     protected void init() {
         rpcStub = RpcRequestServiceGrpc.newStub(channel);
@@ -68,17 +69,18 @@ public class MinionRpcClient {
         }
     }
 
-    public CompletableFuture<RpcResponseProto> sendRpcRequest(String tenantId, RpcRequestProto request) {
-        CompletableFuture<RpcResponseProto> future = new CompletableFuture<>();
+    public CompletableFuture<GatewayRpcResponseProto> sendRpcRequest(String tenantId, GatewayRpcRequestProto request) {
+        CompletableFuture<GatewayRpcResponseProto> future = new CompletableFuture<>();
         try {
             Metadata metadata = new Metadata();
             metadata.put(GrpcConstants.TENANT_ID_REQUEST_KEY, tenantId);
 
             rpcStub
                 .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
-                .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).request(request, new StreamObserver<>() {
+                .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
+                .request(request, new StreamObserver<>() {
                     @Override
-                    public void onNext(RpcResponseProto value) {
+                    public void onNext(GatewayRpcResponseProto value) {
                         future.complete(value);
                     }
                     @Override

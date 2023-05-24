@@ -94,6 +94,11 @@ public class ActiveDiscoveryTaggingStepDefinitions {
         backgroundHelper.grpcTenantId(tenantId);
     }
 
+    @Given("[ActiveDiscovery] Grpc location {string}")
+    public void grpcLocation(String location) {
+        backgroundHelper.grpcLocation(location);
+    }
+
     @Given("[ActiveDiscovery] Create Grpc Connection for Inventory")
     public void createGrpcConnectionForInventory() {
         backgroundHelper.createGrpcConnectionForInventory();

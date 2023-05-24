@@ -7,7 +7,7 @@ import org.opennms.cloud.grpc.minion.SinkMessage;
 import java.util.List;
 
 public interface MockGrpcServiceApi {
-    void sendMessageToLocation(String location, CloudToMinionMessage message);
+    void sendMessageToLocation(CloudToMinionMessage message);
     void sendMessageToMinion(String minionId, CloudToMinionMessage message);
     List<Identity> getConnectedMinions();
     List<SinkMessage> getReceivedSinkMessages();

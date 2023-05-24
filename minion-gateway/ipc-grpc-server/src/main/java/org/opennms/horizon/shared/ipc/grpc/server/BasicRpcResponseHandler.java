@@ -5,6 +5,7 @@ import java.util.concurrent.Delayed;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import org.opennms.cloud.grpc.minion.RpcResponseProto;
+import org.opennms.cloud.grpc.minion_gateway.GatewayRpcResponseProto;
 import org.opennms.horizon.shared.ipc.rpc.api.RpcResponseHandler;
 
 public class BasicRpcResponseHandler implements RpcResponseHandler {

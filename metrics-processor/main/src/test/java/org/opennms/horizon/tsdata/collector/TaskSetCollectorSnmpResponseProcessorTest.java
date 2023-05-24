@@ -45,6 +45,7 @@ import org.opennms.horizon.tenantmetrics.TenantMetricsTracker;
 import org.opennms.horizon.timeseries.cortex.CortexTSS;
 import org.opennms.horizon.tsdata.MetricNameConstants;
 import org.opennms.taskset.contract.CollectorResponse;
+import org.opennms.taskset.contract.Identity;
 import org.opennms.taskset.contract.MonitorType;
 import org.opennms.taskset.contract.TaskResult;
 import prometheus.PrometheusTypes;
@@ -94,7 +95,7 @@ public class TaskSetCollectorSnmpResponseProcessorTest {
         //
         // Execute
         //
-        target.processSnmpCollectorResponse("x-tenant-id-x",  testTaskResult);
+        target.processSnmpCollectorResponse("x-tenant-id-x", "x-location-x", testTaskResult);
 
         //
         // Verify the Results
@@ -129,7 +130,7 @@ public class TaskSetCollectorSnmpResponseProcessorTest {
             //
             // Execute
             //
-            target.processSnmpCollectorResponse("x-tenant-id-x", testTaskResult);
+            target.processSnmpCollectorResponse("x-tenant-id-x", "x-location-x", testTaskResult);
 
             //
             // Verify the Results
@@ -162,7 +163,7 @@ public class TaskSetCollectorSnmpResponseProcessorTest {
             .setTimestamp(timestamp.toEpochMilli())
                 .setMonitorType(MonitorType.SNMP).build();
         TaskResult taskResult = TaskResult.newBuilder().setCollectorResponse(collectorResponse).build();
-        target.processSnmpCollectorResponse("x-tenant-id-x", taskResult);
+        target.processSnmpCollectorResponse("x-tenant-id-x", "x-location-x", taskResult);
         var timeSeriesTimeStampMatcher = new PrometheusTimeSeriesTimeStampMatcher(timestamp.toEpochMilli());
         Mockito.verify(mockCortexTSS).store(Mockito.eq("x-tenant-id-x"), Mockito.argThat(timeSeriesTimeStampMatcher));
     }
@@ -243,8 +244,11 @@ public class TaskSetCollectorSnmpResponseProcessorTest {
                 .build();
 
         testTaskResult = TaskResult.newBuilder()
-            .setLocation("x-location-x")
-            .setSystemId("x-system-id-x")
+            .setIdentity(
+                Identity.newBuilder()
+                    .setSystemId("x-system-id-x")
+                    .build()
+            )
             .setCollectorResponse(testCollectorResponseAllResultTypes)
             .build();
 

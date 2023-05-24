@@ -10,16 +10,17 @@ import org.opennms.cloud.grpc.minion.Identity;
 import org.opennms.cloud.grpc.minion.MinionToCloudMessage;
 import org.opennms.cloud.grpc.minion.RpcRequestProto;
 import org.opennms.cloud.grpc.minion.RpcResponseProto;
+import org.opennms.horizon.shared.ipc.grpc.server.manager.OutgoingMessageHandler;
 
 public class MinionRSTransportAdapter extends CloudServiceImplBase {
 
     private final Function<StreamObserver<RpcRequestProto>, StreamObserver<RpcResponseProto>> cloudToMinionRPC;
-    private final BiConsumer<Identity, StreamObserver<CloudToMinionMessage>> cloudToMinionMessages;
+    private final OutgoingMessageHandler cloudToMinionMessages;
     private final BiConsumer<RpcRequestProto, StreamObserver<RpcResponseProto>> minionToCloudRPC;
     private final Function<StreamObserver<Empty>, StreamObserver<MinionToCloudMessage>> minionToCloudMessages;
 
     public MinionRSTransportAdapter(Function<StreamObserver<RpcRequestProto>, StreamObserver<RpcResponseProto>> cloudToMinionRPC,
-        BiConsumer<Identity, StreamObserver<CloudToMinionMessage>> cloudToMinionMessages,
+        OutgoingMessageHandler cloudToMinionMessages,
         BiConsumer<RpcRequestProto, StreamObserver<RpcResponseProto>> minionToCloudRPC,
         Function<StreamObserver<Empty>, StreamObserver<MinionToCloudMessage>> minionToCloudMessages) {
         this.cloudToMinionRPC = cloudToMinionRPC;
@@ -35,7 +36,7 @@ public class MinionRSTransportAdapter extends CloudServiceImplBase {
 
     @Override
     public void cloudToMinionMessages(Identity request, StreamObserver<CloudToMinionMessage> responseObserver) {
-        cloudToMinionMessages.accept(request, responseObserver);
+        cloudToMinionMessages.handleOutgoingStream(request, responseObserver);
     }
 
     @Override

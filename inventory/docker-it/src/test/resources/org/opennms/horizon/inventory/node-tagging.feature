@@ -5,6 +5,7 @@ Feature: Node Tagging
     Given [Tags] External GRPC Port in system property "application-external-grpc-port"
     Given [Tags] Kafka Bootstrap URL in system property "kafka.bootstrap-servers"
     Given [Tags] Grpc TenantId "tenant-stream"
+    Given [Tags] Grpc location "test-location"
     Given [Tags] Create Grpc Connection for Inventory
     Given Kafka topic "tag-operation"
 

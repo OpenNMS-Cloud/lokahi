@@ -59,6 +59,7 @@ public class CloudServiceProxyImpl extends CloudServiceGrpc.CloudServiceImplBase
 
 
     private Metadata.Key TENANT_ID_METADATA_KEY;
+    private Metadata.Key LOCATION_METADATA_KEY;
 
     @Value("${grpc.downstream.host}")
     private String downstreamHost;
@@ -89,6 +90,7 @@ public class CloudServiceProxyImpl extends CloudServiceGrpc.CloudServiceImplBase
     @PostConstruct
     public void init() {
         TENANT_ID_METADATA_KEY = Metadata.Key.of(injectHeaderName, Metadata.ASCII_STRING_MARSHALLER);
+        LOCATION_METADATA_KEY = Metadata.Key.of("location", Metadata.ASCII_STRING_MARSHALLER);
 
         NettyChannelBuilder channelBuilder = NettyChannelBuilder.forAddress(downstreamHost, downstreamPort)
             .keepAliveWithoutCalls(true)
@@ -144,6 +146,7 @@ public class CloudServiceProxyImpl extends CloudServiceGrpc.CloudServiceImplBase
         Metadata metadata = new Metadata();
         metadata.merge(inboundHeaders);
         metadata.put(TENANT_ID_METADATA_KEY, injectHeaderValue);
+        metadata.put(LOCATION_METADATA_KEY, "MINION-LOCATION-GRPC_PROXY");
 
         CloudServiceGrpc.CloudServiceStub stubWithInterceptors =
             cloudServiceStub

@@ -48,11 +48,13 @@ import org.opennms.cloud.grpc.minion.CloudToMinionMessage;
 import org.opennms.cloud.grpc.minion.Identity;
 import org.opennms.cloud.grpc.minion.MinionToCloudMessage;
 import org.opennms.cloud.grpc.minion.RpcRequestProto;
-import org.opennms.cloud.grpc.minion.RpcRequestServiceGrpc;
 import org.opennms.cloud.grpc.minion.RpcResponseProto;
 import org.opennms.cloud.grpc.minion.SinkMessage;
 import org.opennms.cloud.grpc.minion.TwinRequestProto;
 import org.opennms.cloud.grpc.minion.TwinResponseProto;
+import org.opennms.cloud.grpc.minion_gateway.GatewayRpcRequestProto;
+import org.opennms.cloud.grpc.minion_gateway.GatewayRpcResponseProto;
+import org.opennms.cloud.grpc.minion_gateway.RpcRequestServiceGrpc;
 import org.opennms.horizon.RetryUtils;
 import org.opennms.horizon.grpc.TestCloudServiceRpcRequestHandler;
 import org.opennms.horizon.grpc.TestCloudToMinionMessageHandler;
@@ -63,7 +65,7 @@ import org.opennms.taskset.contract.MonitorType;
 import org.opennms.taskset.contract.TaskDefinition;
 import org.opennms.taskset.contract.TaskResult;
 import org.opennms.taskset.contract.TaskSetResults;
-import org.opennms.taskset.contract.TenantedTaskSetResults;
+import org.opennms.taskset.contract.TenantLocationSpecificTaskSetResults;
 import org.opennms.taskset.service.contract.AddSingleTaskOp;
 import org.opennms.taskset.service.contract.TaskSetServiceGrpc;
 import org.opennms.taskset.service.contract.UpdateSingleTaskOp;
@@ -133,8 +135,10 @@ public class MinionGatewayTestSteps {
     private CloudServiceGrpc.CloudServiceFutureStub minionToCloudRpcStub;
     private ManagedChannel cloudRpcManagedChannel;
 
+    private GatewayRpcRequestProto.Builder gatewayRpcRequestProtoBuilder;
     private RpcRequestProto.Builder rpcRequestProtoBuilder;
-    private RpcResponseProto rpcResponseProto;
+    private GatewayRpcResponseProto internalRpcResponseProto;   // Cloud-internal: between gateway and other cloud services
+    private RpcResponseProto externalRpcResponseProto;          // Cloud-external: sent to the Minion
     private Exception rpcException;
     private UpdateTasksResponse updateTasksResponse;
 
@@ -206,30 +210,42 @@ public class MinionGatewayTestSteps {
     @Given("Generated RPC Request ID")
     public void generatedRPCRequestID() {
         ensureRpcRequest();
-        rpcRequestProtoBuilder.setRpcId(UUID.randomUUID().toString());
+
+        String requestId = UUID.randomUUID().toString();
+        gatewayRpcRequestProtoBuilder.setRpcId(requestId);
+        rpcRequestProtoBuilder.setRpcId(requestId);
     }
 
     @Given("RPC Request System ID {string}")
     public void rpcRequestSystemID(String systemId) {
         ensureRpcRequest();
-        rpcRequestProtoBuilder.setSystemId(systemId);
+        gatewayRpcRequestProtoBuilder.getIdentityBuilder().setSystemId(systemId);
+        rpcRequestProtoBuilder.getIdentityBuilder().setSystemId(systemId);
+    }
+
+    @Given("RPC Request Tenant ID {string}")
+    public void rpcRequestTenantID(String tenantId) {
+        ensureRpcRequest();
+        gatewayRpcRequestProtoBuilder.getIdentityBuilder().setTenant(tenantId);
     }
 
     @Given("RPC Request Location {string}")
     public void rpcRequestLocation(String location) {
         ensureRpcRequest();
-        rpcRequestProtoBuilder.setLocation(location);
+        gatewayRpcRequestProtoBuilder.getIdentityBuilder().setLocation(location);
     }
 
     @Given("RPC Request Module ID {string}")
     public void rpcRequestModuleID(String moduleId) {
         ensureRpcRequest();
+        gatewayRpcRequestProtoBuilder.setModuleId(moduleId);
         rpcRequestProtoBuilder.setModuleId(moduleId);
     }
 
     @Given("RPC Request TTL {int}ms")
     public void rpcRequestTTLMs(int ttl) {
         ensureRpcRequest();
+        gatewayRpcRequestProtoBuilder.setExpirationTime(System.currentTimeMillis() + ttl);
         rpcRequestProtoBuilder.setExpirationTime(System.currentTimeMillis() + ttl);
     }
 
@@ -266,8 +282,11 @@ public class MinionGatewayTestSteps {
         ;
 
         RpcResponseProto rpcHeader = RpcResponseProto.newBuilder()
-            .setLocation(mockLocation)
-            .setSystemId(mockSystemId)
+            .setIdentity(
+                Identity.newBuilder()
+                    .setSystemId(mockSystemId)
+                    .build()
+            )
             .setModuleId(MINION_HEADERS_MODULE)
             .setRpcId(mockSystemId)
             .build();
@@ -285,7 +304,6 @@ public class MinionGatewayTestSteps {
 
         Identity identity =
             Identity.newBuilder()
-                .setLocation("x-location-001-x")
                 .setSystemId("x-system-001-x")
                 .build();
 
@@ -435,25 +453,25 @@ public class MinionGatewayTestSteps {
 
         assertTrue(rpcException.getMessage().contains("Could not find active connection"));
 
-        Optional.ofNullable(rpcRequestProtoBuilder.getLocation()).ifPresent(
+        Optional.ofNullable(mockLocation).ifPresent(
             location -> assertTrue("expecting exception message to contain location=" + location, rpcException.getMessage().contains("location=" + location)));
 
-        Optional.ofNullable(rpcRequestProtoBuilder.getSystemId()).ifPresent(
-            systemId -> assertTrue("expecting exception message to contain systemId=" + systemId, rpcException.getMessage().contains("systemId=" + systemId)));
+        String systemId = gatewayRpcRequestProtoBuilder.getIdentity().getSystemId();
+        assertTrue("expecting exception message to contain systemId=" + systemId, rpcException.getMessage().contains("systemId=" + systemId));
     }
 
-    @Then("verify RPC exception indicates missing tenant id")
-    public void verifyRPCExceptionIndicatesMissingTenantId() {
+    @Then("verify RPC exception indicates missing connection for minion")
+    public void verifyRPCExceptionIndicatesMissingConnectionForMinion() {
         LOG.info("RPC exception message: {}", rpcException.getMessage());
 
-        assertTrue(rpcException.getMessage().contains("Missing tenant id"));
+        assertTrue(rpcException.getMessage().contains("Could not find active connection for"));
     }
 
     @Then("verify RPC request was received by test rpc request server with timeout {int}ms")
     public void verifyRPCRequestWasReceivedByTestRpcRequestServerWithTimeout(int timeout) throws InterruptedException {
         RpcRequestProto request =
             retryUtils.retry(
-                () -> this.findReceivedRpcProto(rpcRequestProtoBuilder.getRpcId()),
+                () -> this.findReceivedRpcProto(gatewayRpcRequestProtoBuilder.getRpcId()),
                 Objects::nonNull,
                 100,
                 timeout,
@@ -494,7 +512,7 @@ public class MinionGatewayTestSteps {
             assertTrue("verify at least 1 record was returned", ! records.isEmpty());
 
             matchedKafkaRecord = records.get(0);
-            TenantedTaskSetResults results = TenantedTaskSetResults.parseFrom(matchedKafkaRecord.value());
+            TenantLocationSpecificTaskSetResults results = TenantLocationSpecificTaskSetResults.parseFrom(matchedKafkaRecord.value());
             assertNotNull(results);
             assertEquals(1, results.getResultsCount());
             assertEquals(expectedTenantId, results.getTenantId());
@@ -513,17 +531,16 @@ public class MinionGatewayTestSteps {
 
     @Then("verify twin update response was received from the Minion Gateway")
     public void verifyTwinUpdateResponseWasReceivedFromTheMinionGateway() throws InvalidProtocolBufferException {
-        assertNotNull(rpcResponseProto);
+        assertNotNull(externalRpcResponseProto);
 
-        assertEquals("twin", rpcResponseProto.getModuleId());
-        assertEquals(rpcRequestProtoBuilder.getRpcId(), rpcResponseProto.getRpcId());
+        assertEquals("twin", externalRpcResponseProto.getModuleId());
+        assertEquals(gatewayRpcRequestProtoBuilder.getRpcId(), externalRpcResponseProto.getRpcId());
 
         // Check for a TwinResponseProto payload
-        Any payload = rpcResponseProto.getPayload();
+        Any payload = externalRpcResponseProto.getPayload();
         assertTrue("Twin response payload must be a TwinResponseProto", payload.is(TwinResponseProto.class));
 
         TwinResponseProto twinResponseProto = payload.unpack(TwinResponseProto.class);
-        assertEquals(rpcRequestProtoBuilder.getLocation(), twinResponseProto.getLocation());
         assertEquals("x-consumer-key-x", twinResponseProto.getConsumerKey());
     }
 
@@ -552,16 +569,16 @@ public class MinionGatewayTestSteps {
 
         rpcException = null;
         try {
-            RpcRequestProto msg = rpcRequestProtoBuilder.build();
+            GatewayRpcRequestProto msg = gatewayRpcRequestProtoBuilder.build();
 
-            ListenableFuture<RpcResponseProto> future =
+            ListenableFuture<GatewayRpcResponseProto> future =
                 stub
                     .withInterceptors(
                         prepareGrpcHeaderInterceptor()
                     )
                     .request(msg);
 
-            rpcResponseProto = future.get(timeout, TimeUnit.MILLISECONDS);
+            internalRpcResponseProto = future.get(timeout, TimeUnit.MILLISECONDS);
         } catch (Exception exc) {
             rpcException = exc;
         }
@@ -627,18 +644,22 @@ public class MinionGatewayTestSteps {
         TwinRequestProto twinRequestProto =
             TwinRequestProto.newBuilder()
                 .setConsumerKey("x-consumer-key-x")
-                .setLocation(rpcRequestProtoBuilder.getLocation())
                 .build()
             ;
 
         RpcRequestProto twinRegistrationRequest =
             rpcRequestProtoBuilder
                 .setModuleId("twin")
+                .setIdentity(
+                    Identity.newBuilder()
+                        .setSystemId(
+                            gatewayRpcRequestProtoBuilder.getIdentityBuilder().getSystemId()
+                        )
+                )
                 .setPayload(
                     Any.pack(twinRequestProto)
                 )
-                .build()
-            ;
+                .build();
 
         rpcException = null;
         try {
@@ -650,7 +671,7 @@ public class MinionGatewayTestSteps {
                     .minionToCloudRPC(twinRegistrationRequest)
                 ;
 
-            rpcResponseProto = future.get(timeout, TimeUnit.MILLISECONDS);
+            externalRpcResponseProto = future.get(timeout, TimeUnit.MILLISECONDS);
         } catch (Exception exc) {
             rpcException = exc;
         }
@@ -676,7 +697,13 @@ public class MinionGatewayTestSteps {
         return null;
     }
 
+    // TODO - consider splitting the internal and external builders to prevent confusion and make the code more obvious?
+    //  note that this requires changes to the test steps definitions & updating the feature file
     private void ensureRpcRequest() {
+        if (gatewayRpcRequestProtoBuilder == null) {
+            gatewayRpcRequestProtoBuilder = GatewayRpcRequestProto.newBuilder();
+        }
+
         if (rpcRequestProtoBuilder == null) {
             rpcRequestProtoBuilder = RpcRequestProto.newBuilder();
         }
@@ -750,6 +777,9 @@ public class MinionGatewayTestSteps {
     private Metadata prepareGrpcHeaders() {
         Metadata result = new Metadata();
 
+        if (mockLocation != null) {
+            result.put(Metadata.Key.of("location", Metadata.ASCII_STRING_MARSHALLER), mockLocation);
+        }
         if (mockTenantId != null) {
             result.put(Metadata.Key.of("tenant-id", Metadata.ASCII_STRING_MARSHALLER), mockTenantId);
         }

@@ -41,13 +41,12 @@ import java.util.concurrent.*;
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import java.util.function.BiConsumer;
 import org.apache.ignite.Ignite;
+import org.apache.logging.log4j.util.Strings;
 import org.opennms.cloud.grpc.minion.CloudToMinionMessage;
 import org.opennms.cloud.grpc.minion.TwinResponseProto;
 import org.opennms.horizon.shared.grpc.common.GrpcIpcUtils;
-import org.opennms.horizon.shared.grpc.common.TenantIDGrpcServerInterceptor;
-import org.opennms.horizon.shared.ipc.rpc.IpcIdentity;
+import org.opennms.horizon.shared.ipc.grpc.server.manager.OutgoingMessageFactory;
 import org.opennms.miniongateway.grpc.server.model.TenantKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,7 +55,7 @@ import io.grpc.stub.StreamObserver;
 import org.slf4j.MDC;
 import org.slf4j.MDC.MDCCloseable;
 
-public class GrpcTwinPublisher extends AbstractTwinPublisher {
+public class GrpcTwinPublisher extends AbstractTwinPublisher implements OutgoingMessageFactory {
 
     private static final Logger LOG = LoggerFactory.getLogger(GrpcTwinPublisher.class);
     private Multimap<TenantKey, AdapterObserver> sinkStreamsByLocation = LinkedListMultimap.create();
@@ -71,17 +70,17 @@ public class GrpcTwinPublisher extends AbstractTwinPublisher {
     }
 
     @Override
-    protected void handleSinkUpdate(TwinUpdate sinkUpdate) {
-        sendTwinResponseForSink(sinkUpdate.getTenantId(), mapTwinResponse(sinkUpdate));
+    protected void handleSinkUpdate(String location, TwinUpdate sinkUpdate) {
+        sendTwinResponseForSink(sinkUpdate.getTenantId(), location, mapTwinResponse(sinkUpdate));
     }
 
-    private synchronized boolean sendTwinResponseForSink(String tenantId, TwinResponseProto twinResponseProto) {
+    private synchronized boolean sendTwinResponseForSink(String tenantId, String location, TwinResponseProto twinResponseProto) {
         if (sinkStreamsByLocation.isEmpty()) {
             return false;
         }
         try {
-            Object[] diagnosticCtx = {tenantId, twinResponseProto.getConsumerKey(), twinResponseProto.getLocation(), twinResponseProto.getSystemId()};
-            if (twinResponseProto.getLocation().isBlank()) {
+            Object[] diagnosticCtx = {tenantId, twinResponseProto.getConsumerKey(), location, twinResponseProto.getIdentity().getSystemId()};
+            if (Strings.isBlank(location)) {
                 // theoretical broadcast scenario - no location given, so we send update to all locations
                 LOG.debug("Sending sink update for tenant {} with key {} in all locations", tenantId, twinResponseProto.getConsumerKey());
                 for (Entry<TenantKey, AdapterObserver> entry : new ArrayList<>(sinkStreamsByLocation.entries())) {
@@ -97,7 +96,6 @@ public class GrpcTwinPublisher extends AbstractTwinPublisher {
                     }
                 }
             } else {
-                String location = twinResponseProto.getLocation();
                 Collection<AdapterObserver> observers = sinkStreamsByLocation.get(new TenantKey(tenantId, location));
                 for (AdapterObserver stream : new ArrayList<>(observers)) {
                     try {
@@ -186,41 +184,36 @@ public class GrpcTwinPublisher extends AbstractTwinPublisher {
         }
     }
 
-    // BiConsumer<MinionHeader, StreamObserver<CloudToMinionMessage>>
-    public BiConsumer<IpcIdentity, StreamObserver<CloudToMinionMessage>> getStreamObserver(TenantIDGrpcServerInterceptor tenantIDGrpcServerInterceptor) {
-        return new BiConsumer<>() {
-            @Override
-            public void accept(IpcIdentity minionHeader, StreamObserver<CloudToMinionMessage> responseObserver) {
-                String tenantId = tenantIDGrpcServerInterceptor.readCurrentContextTenantId();
-                TenantKey systemIdKey = new TenantKey(tenantId, minionHeader.getId());
-                TenantKey locationKey = new TenantKey(tenantId, minionHeader.getLocation());
-                if (sinkStreamsBySystemId.containsKey(systemIdKey)) {
-                    StreamObserver<TwinResponseProto> sinkStream = sinkStreamsBySystemId.remove(systemIdKey);
-                    sinkStreamsByLocation.remove(locationKey, sinkStream);
-                    sinkStream.onCompleted(); // force termination of session.
-                }
-                AdapterObserver delegate = new AdapterObserver(responseObserver);
-                delegate.setCompletionCallback(() -> {
-                    sinkStreamsByLocation.remove(locationKey, delegate);
-                    sinkStreamsBySystemId.remove(systemIdKey);
-                    // mark stream as done
-                    responseObserver.onCompleted();
-                });
-                sinkStreamsByLocation.put(locationKey, delegate);
-                sinkStreamsBySystemId.put(systemIdKey, delegate);
 
-                forEachSession(tenantId, ((sessionKey, twinTracker) -> {
-                    if (sessionKey.location == null || sessionKey.location.equals(locationKey.getKey())) {
-                        TwinUpdate twinUpdate = new TwinUpdate(sessionKey.key, sessionKey.tenantId, sessionKey.location, twinTracker.getObj());
-                        twinUpdate.setSessionId(twinTracker.getSessionId());
-                        twinUpdate.setVersion(twinTracker.getVersion());
-                        twinUpdate.setPatch(false);
-                        TwinResponseProto twinResponseProto = mapTwinResponse(twinUpdate);
-                        delegate.onNext(twinResponseProto);
-                    }
-                }));
+    @Override
+    public void create(String systemId, String tenantId, String location, StreamObserver<CloudToMinionMessage> streamObserver) {
+        TenantKey systemIdKey = new TenantKey(tenantId, systemId);
+        TenantKey locationKey = new TenantKey(tenantId, location);
+        if (sinkStreamsBySystemId.containsKey(systemIdKey)) {
+            StreamObserver<TwinResponseProto> sinkStream = sinkStreamsBySystemId.remove(systemIdKey);
+            sinkStreamsByLocation.remove(locationKey, sinkStream);
+            sinkStream.onCompleted(); // force termination of session.
+        }
+        AdapterObserver delegate = new AdapterObserver(streamObserver);
+        delegate.setCompletionCallback(() -> {
+            sinkStreamsByLocation.remove(locationKey, delegate);
+            sinkStreamsBySystemId.remove(systemIdKey);
+            // mark stream as done
+            streamObserver.onCompleted();
+        });
+        sinkStreamsByLocation.put(locationKey, delegate);
+        sinkStreamsBySystemId.put(systemIdKey, delegate);
+
+        forEachSession(tenantId, ((sessionKey, twinTracker) -> {
+            if (sessionKey.location == null || sessionKey.location.equals(locationKey.getKey())) {
+                TwinUpdate twinUpdate = new TwinUpdate(sessionKey.key, sessionKey.tenantId, sessionKey.location, twinTracker.getObj());
+                twinUpdate.setSessionId(twinTracker.getSessionId());
+                twinUpdate.setVersion(twinTracker.getVersion());
+                twinUpdate.setPatch(false);
+                TwinResponseProto twinResponseProto = mapTwinResponse(twinUpdate);
+                delegate.onNext(twinResponseProto);
             }
-        };
+        }));
     }
 
 }

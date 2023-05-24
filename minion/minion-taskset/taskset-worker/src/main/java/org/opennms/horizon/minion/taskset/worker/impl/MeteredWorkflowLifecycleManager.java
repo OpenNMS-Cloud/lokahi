@@ -39,7 +39,7 @@ public class MeteredWorkflowLifecycleManager implements TaskSetLifecycleManager,
 
     @Override
   public Map<String, Metric> getMetrics() {
-    return Collections.singletonMap(name("minion", identity.getLocation(), identity.getId(), "taskset"), counter);
+    return Collections.singletonMap(name("minion", identity.getId(), "taskset"), counter);
   }
 
 }

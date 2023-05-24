@@ -106,6 +106,11 @@ public class NodeTaggingStepDefinitions {
         backgroundHelper.grpcTenantId(tenantId);
     }
 
+    @Given("[Tags] Grpc location {string}")
+    public void grpcLocation(String location) {
+        backgroundHelper.grpcLocation(location);
+    }
+
     @Given("[Tags] Create Grpc Connection for Inventory")
     public void createGrpcConnectionForInventory() {
         backgroundHelper.createGrpcConnectionForInventory();

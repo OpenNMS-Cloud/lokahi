@@ -5,13 +5,15 @@ import com.google.protobuf.Empty;
 import com.google.protobuf.Int64Value;
 import com.google.protobuf.StringValue;
 import io.grpc.stub.StreamObserver;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.opennms.horizon.inventory.dto.IdList;
+import org.opennms.horizon.inventory.dto.MonitoringLocationCreateDTO;
 import org.opennms.horizon.inventory.dto.MonitoringLocationDTO;
 import org.opennms.horizon.inventory.dto.MonitoringLocationList;
 import org.opennms.horizon.inventory.service.MonitoringLocationService;
@@ -30,9 +32,8 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@RunWith(org.mockito.junit.MockitoJUnitRunner.class)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
-public class MonitoringLocationGrpcServiceTest {
+@ExtendWith(MockitoExtension.class)
+class MonitoringLocationGrpcServiceTest {
     @InjectMocks
     private MonitoringLocationGrpcService grpcService;
 
@@ -61,7 +62,7 @@ public class MonitoringLocationGrpcServiceTest {
     private ArgumentCaptor<BoolValue> deleteResponseCaptor;
 
     @Test
-    public void testListLocations() {
+    void testListLocations() {
         Empty request = Empty.getDefaultInstance();
         List<MonitoringLocationDTO> expectedLocations = new ArrayList<>();
         when(tenantLookup.lookupTenantId(any())).thenReturn(Optional.of("tenantId"));
@@ -76,7 +77,7 @@ public class MonitoringLocationGrpcServiceTest {
     }
 
     @Test
-    public void testGetLocationByName() {
+    void testGetLocationByName() {
         StringValue locationName = StringValue.newBuilder().setValue("locationName").build();
         MonitoringLocationDTO expectedLocation = MonitoringLocationDTO.newBuilder().build();
         when(tenantLookup.lookupTenantId(any())).thenReturn(Optional.of("tenantId"));
@@ -91,7 +92,7 @@ public class MonitoringLocationGrpcServiceTest {
     }
 
     @Test
-    public void testGetLocationById() {
+    void testGetLocationById() {
         Int64Value request = Int64Value.newBuilder().setValue(1L).build();
         MonitoringLocationDTO expectedLocation = MonitoringLocationDTO.newBuilder().build();
         when(tenantLookup.lookupTenantId(any())).thenReturn(Optional.of("tenantId"));
@@ -106,7 +107,7 @@ public class MonitoringLocationGrpcServiceTest {
     }
 
     @Test
-    public void testListLocationsByIds() {
+    void testListLocationsByIds() {
         IdList request = IdList.newBuilder().addIds(Int64Value.newBuilder().setValue(1L).build()).build();
         List<MonitoringLocationDTO> expectedLocations = new ArrayList<>();
         when(service.findByLocationIds(anyList())).thenReturn(expectedLocations);
@@ -120,7 +121,7 @@ public class MonitoringLocationGrpcServiceTest {
     }
 
     @Test
-    public void testSearchLocations() {
+    void testSearchLocations() {
         StringValue request = StringValue.newBuilder().setValue("searchString").build();
         List<MonitoringLocationDTO> expectedLocations = new ArrayList<>();
         when(tenantLookup.lookupTenantId(any())).thenReturn(Optional.of("tenantId"));
@@ -135,8 +136,8 @@ public class MonitoringLocationGrpcServiceTest {
     }
 
     @Test
-    public void testCreateLocation() {
-        MonitoringLocationDTO request = MonitoringLocationDTO.newBuilder().build();
+    void testCreateLocation() {
+        MonitoringLocationCreateDTO request = MonitoringLocationCreateDTO.newBuilder().build();
         MonitoringLocationDTO expectedLocation = MonitoringLocationDTO.newBuilder().build();
         when(tenantLookup.lookupTenantId(any())).thenReturn(Optional.of("tenantId"));
         when(service.upsert(any())).thenReturn(expectedLocation);
@@ -150,8 +151,8 @@ public class MonitoringLocationGrpcServiceTest {
     }
 
     @Test
-    public void testCreateLocationException() {
-        MonitoringLocationDTO request = MonitoringLocationDTO.newBuilder().build();
+    void testCreateLocationException() {
+        MonitoringLocationCreateDTO request = MonitoringLocationCreateDTO.newBuilder().build();
         when(tenantLookup.lookupTenantId(any())).thenReturn(Optional.of("tenantId"));
         when(service.upsert(any())).thenThrow(new RuntimeException("test exception"));
 
@@ -163,7 +164,7 @@ public class MonitoringLocationGrpcServiceTest {
     }
 
     @Test
-    public void testUpdateLocation() {
+    void testUpdateLocation() {
         MonitoringLocationDTO request = MonitoringLocationDTO.newBuilder().build();
         MonitoringLocationDTO expectedLocation = MonitoringLocationDTO.newBuilder().build();
         when(tenantLookup.lookupTenantId(any())).thenReturn(Optional.of("tenantId"));
@@ -178,7 +179,7 @@ public class MonitoringLocationGrpcServiceTest {
     }
 
     @Test
-    public void testUpdateLocationException() {
+    void testUpdateLocationException() {
         MonitoringLocationDTO request = MonitoringLocationDTO.newBuilder().build();
         when(tenantLookup.lookupTenantId(any())).thenReturn(Optional.of("tenantId"));
         when(service.upsert(any())).thenThrow(new RuntimeException("test exception"));
@@ -191,7 +192,7 @@ public class MonitoringLocationGrpcServiceTest {
     }
 
     @Test
-    public void testDeleteLocation() {
+    void testDeleteLocation() {
         Int64Value request = Int64Value.newBuilder().setValue(1L).build();
         when(tenantLookup.lookupTenantId(any())).thenReturn(Optional.of("tenantId"));
 
@@ -204,7 +205,7 @@ public class MonitoringLocationGrpcServiceTest {
     }
 
     @Test
-    public void testDeleteLocationException() {
+    void testDeleteLocationException() {
         Int64Value request = Int64Value.newBuilder().setValue(1L).build();
         when(tenantLookup.lookupTenantId(any())).thenReturn(Optional.of("tenantId"));
         doThrow(new RuntimeException("test exception")).when(service).delete(any(), any());

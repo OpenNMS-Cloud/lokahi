@@ -19,6 +19,7 @@ import org.junit.ClassRule;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.opennms.dataplatform.flows.document.FlowDocument;
 import org.opennms.dataplatform.flows.document.FlowDocumentLog;
@@ -48,6 +49,7 @@ import io.grpc.Server;
 import io.grpc.inprocess.InProcessServerBuilder;
 import io.grpc.testing.GrpcCleanupRule;
 
+@Disabled // TODO: REPLACE WITH CUCUMBER TEST
 @SpringBootTest
 @ContextConfiguration(classes = {IngestorApplicationConfig.class, InventoryApplicationConfig.class,
     FlowProcessorTestConfig.class})

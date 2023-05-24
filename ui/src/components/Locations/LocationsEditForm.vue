@@ -142,7 +142,6 @@ import placeholder from '@/assets/placeholder.svg'
 import { string } from 'yup'
 import { useForm } from '@featherds/input-helper'
 import { Location as LocationType } from '@/types/graphql'
-import { IButtonTextIcon } from '@/types'
 import { DisplayType } from '@/types/locations.d'
 import { useLocationStore } from '@/store/Views/locationStore'
 

@@ -38,8 +38,9 @@ package opennms.taskset;
 option java_multiple_files = true;
 option java_package = "org.opennms.taskset.contract";
 
-message TenantedTaskSetResults {
+message TenantLocationSpecificTaskSetResults {
   string tenantId = 100;
+  string location = 101;
 
   repeated TaskResult results = 1;
 }

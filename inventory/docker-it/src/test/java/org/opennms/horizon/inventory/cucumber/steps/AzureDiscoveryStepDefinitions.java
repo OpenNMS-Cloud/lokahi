@@ -44,9 +44,7 @@ import org.opennms.horizon.inventory.dto.TagListDTO;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 
 public class AzureDiscoveryStepDefinitions {
@@ -55,6 +53,7 @@ public class AzureDiscoveryStepDefinitions {
     private AzureActiveDiscoveryDTO discoveryDto;
     private TagCreateDTO tagCreateDto1;
     private TagListDTO tagList;
+    private Exception caught;
 
     public AzureDiscoveryStepDefinitions(InventoryBackgroundHelper backgroundHelper) {
         this.backgroundHelper = backgroundHelper;
@@ -77,6 +76,11 @@ public class AzureDiscoveryStepDefinitions {
     @Given("[Azure] Grpc TenantId {string}")
     public void grpcTenantId(String tenantId) {
         backgroundHelper.grpcTenantId(tenantId);
+    }
+
+    @Given("[Azure] Grpc location {string}")
+    public void grpcLocation(String location) {
+        backgroundHelper.grpcLocation(location);
     }
 
     @Given("[Azure] Create Grpc Connection for Inventory")
@@ -103,6 +107,11 @@ public class AzureDiscoveryStepDefinitions {
             .build();
     }
 
+    @Given("Clear tenant id")
+    public void clearTenantId() {
+        backgroundHelper.clearTenantId();
+    }
+
     /*
      * SCENARIO WHEN
      * *********************************************************************************
@@ -112,6 +121,19 @@ public class AzureDiscoveryStepDefinitions {
         var azureActiveDiscoveryServiceBlockingStub = backgroundHelper.getAzureActiveDiscoveryServiceBlockingStub();
         discoveryDto = azureActiveDiscoveryServiceBlockingStub.createDiscovery(createDiscoveryDto);
     }
+
+    @When("A GRPC request to create azure active discovery with exception expected")
+    public void aGRPCRequestToCreateAzureActiveDiscoveryWithException() {
+        caught = null;
+
+        try {
+            var azureActiveDiscoveryServiceBlockingStub = backgroundHelper.getAzureActiveDiscoveryServiceBlockingStub();
+            discoveryDto = azureActiveDiscoveryServiceBlockingStub.createDiscovery(createDiscoveryDto);
+        } catch (Exception ex) {
+            caught = ex;
+        }
+    }
+
 
     @And("A GRPC request to get tags for azure active discovery")
     public void aGRPCRequestToGetTagsForAzureActiveDiscovery() {
@@ -141,5 +163,15 @@ public class AzureDiscoveryStepDefinitions {
         assertEquals(tagCreateDto1.getName(), tagDTO.getName());
     }
 
+
+    @Then("verify exception {string} thrown with message {string}")
+    public void verifyException(String exceptionName, String message) {
+        if (caught == null) {
+            fail("No exception caught");
+        } else {
+            assertEquals(exceptionName, caught.getClass().getSimpleName(), "Exception mismatch");
+            assertEquals(message, caught.getMessage());
+        }
+    }
 
 }

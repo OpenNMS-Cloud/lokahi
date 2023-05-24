@@ -28,166 +28,375 @@
 
 package org.opennms.horizon.flows.processing;
 
-import com.google.common.collect.Lists;
+import com.google.protobuf.Descriptors;
 import com.google.protobuf.UInt32Value;
 import com.google.protobuf.UInt64Value;
-import com.spotify.hamcrest.pojo.IsPojo;
 
-import org.hamcrest.Matchers;
-import org.junit.Assert;
-import org.junit.Test;
-import org.opennms.dataplatform.flows.document.Direction;
-import org.opennms.dataplatform.flows.document.FlowDocument;
-import org.opennms.dataplatform.flows.document.NetflowVersion;
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+import org.opennms.horizon.flows.classification.ClassificationEngine;
+import org.opennms.horizon.flows.document.Locality;
+import org.opennms.horizon.flows.document.NetflowVersion;
 import org.opennms.horizon.flows.classification.ClassificationRequest;
-import org.opennms.horizon.flows.classification.IpAddr;
+import org.opennms.horizon.flows.document.TenantLocationSpecificFlowDocument;
+import org.opennms.horizon.flows.grpc.client.InventoryClient;
+import org.opennms.horizon.inventory.dto.IpInterfaceDTO;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class DocumentEnricherTest {
 
-    private static FlowDocument createFlowDocument(String sourceIp, String destIp) {
-        return createFlowDocument(sourceIp, destIp, 0);
-    }
+    private InventoryClient mockInventoryClient;
+    private ClassificationEngine mockClassificationEngine;
+    private FlowDocumentClassificationRequestMapper mockFlowDocumentClassificationRequestMapper;
+    private ClassificationRequest mockClassificationRequest;
 
-    private static FlowDocument createFlowDocument(String sourceIp, String destIp, final long timeOffset) {
-        final var now = Instant.now();
-        final var flow = FlowDocument.newBuilder()
-            .setReceivedAt(now.plus(timeOffset, ChronoUnit.MILLIS).toEpochMilli())
-            .setTimestamp(now.toEpochMilli())
-            .setFirstSwitched(UInt64Value.of(now.minus(20_000L, ChronoUnit.MILLIS).toEpochMilli()))
-            .setDeltaSwitched(UInt64Value.of(now.minus(10_000L, ChronoUnit.MILLIS).toEpochMilli()))
-            .setLastSwitched(UInt64Value.of(now.minus(5_000L, ChronoUnit.MILLIS).toEpochMilli()))
-            .setSrcAddress(sourceIp)
-            .setSrcPort(UInt32Value.of(510))
-            .setDstAddress(destIp)
-            .setDstPort(UInt32Value.of(80))
-            .setProtocol(UInt32Value.of(6)) // TCP
-            .setLocation("Default")
-            .setNetflowVersion(NetflowVersion.V5)
-            .setTenantId("tenantId")
-            .setExporterAddress("127.0.0.1");
+    private TenantLocationSpecificFlowDocument testDocument;
 
-        return flow.build();
-    }
+    private DocumentEnricherImpl target;
 
-    @Test
-    public void testCreateClassificationRequest() throws InterruptedException {
-        final MockDocumentEnricherFactory factory = new MockDocumentEnricherFactory(new HashMap<>());
-        final DocumentEnricherImpl enricher = factory.getEnricher();
+    @BeforeEach
+    public void setUp() {
+        mockInventoryClient = Mockito.mock(InventoryClient.class);
+        mockClassificationEngine = Mockito.mock(ClassificationEngine.class);
+        mockFlowDocumentClassificationRequestMapper = Mockito.mock(FlowDocumentClassificationRequestMapper.class);
+        mockClassificationRequest = Mockito.mock(ClassificationRequest.class);
 
-        final var flowDocument = FlowDocument.newBuilder();
+        testDocument =
+            TenantLocationSpecificFlowDocument.newBuilder()
+                .setTenantId("x-tenant-id-x")
+                .setLocation("x-location-x")
+                .setSrcAddress("1.1.1.1")
+                .setSrcPort(UInt32Value.of(510))
+                .setDstAddress("2.2.2.2")
+                .setDstPort(UInt32Value.of(80))
+                .setProtocol(UInt32Value.of(6)) // TCP
+                .setNetflowVersion(NetflowVersion.V5)
+                .setExporterAddress("127.0.0.1")
+                .build()
+                ;
 
-        // verify that null values are handled correctly, see issue HZN-1329
-        ClassificationRequest classificationRequest;
+        target = new DocumentEnricherImpl(mockInventoryClient, mockClassificationEngine, mockFlowDocumentClassificationRequestMapper, 0);
 
-        classificationRequest = enricher.createClassificationRequest(flowDocument);
-        Assert.assertEquals(false, classificationRequest.isClassifiable());
-
-        flowDocument.setDstPort(UInt32Value.of(123));
-
-        classificationRequest = enricher.createClassificationRequest(flowDocument);
-        Assert.assertEquals(false, classificationRequest.isClassifiable());
-
-        flowDocument.setSrcPort(UInt32Value.of(456));
-
-        classificationRequest = enricher.createClassificationRequest(flowDocument);
-        Assert.assertEquals(false, classificationRequest.isClassifiable());
-
-        flowDocument.setProtocol(UInt32Value.of(6));
-
-        classificationRequest = enricher.createClassificationRequest(flowDocument);
-        Assert.assertEquals(true, classificationRequest.isClassifiable());
+        Mockito.when(mockFlowDocumentClassificationRequestMapper.createClassificationRequest(Mockito.any(TenantLocationSpecificFlowDocument.class)))
+            .thenReturn(mockClassificationRequest);
     }
 
     @Test
-    public void testDirection() throws InterruptedException {
-        final MockDocumentEnricherFactory factory = new MockDocumentEnricherFactory(new HashMap<>());
-        final DocumentEnricherImpl enricher = factory.getEnricher();
+    void testEnrich() {
+        //
+        // Setup Test Data and Interactions
+        //
+        target = new DocumentEnricherImpl(mockInventoryClient, mockClassificationEngine, mockFlowDocumentClassificationRequestMapper, 100);
+        List<TenantLocationSpecificFlowDocument> testList = List.of(testDocument);
 
-        final var d1 = FlowDocument.newBuilder()
-            .setSrcAddress("1.1.1.1")
-            .setSrcPort(UInt32Value.of(1))
-            .setDstAddress("2.2.2.2")
-            .setDstPort(UInt32Value.of(2))
-            .setProtocol(UInt32Value.of(6))
-            .setDirection(Direction.INGRESS);
+        //
+        // Execute
+        //
+        List<TenantLocationSpecificFlowDocument> result = target.enrich(testList);
 
-        final ClassificationRequest c1 = enricher.createClassificationRequest(d1);
-        Assert.assertEquals(IpAddr.of("1.1.1.1"), c1.getSrcAddress());
-        Assert.assertEquals(IpAddr.of("2.2.2.2"), c1.getDstAddress());
-        Assert.assertEquals(Integer.valueOf(1), c1.getSrcPort());
-        Assert.assertEquals(Integer.valueOf(2), c1.getDstPort());
-
-        final var d2 = FlowDocument.newBuilder()
-            .setSrcAddress("1.1.1.1")
-            .setSrcPort(UInt32Value.of(1))
-            .setDstAddress("2.2.2.2")
-            .setDstPort(UInt32Value.of(2))
-            .setProtocol(UInt32Value.of(6))
-            .setDirection(Direction.EGRESS);
-
-        // check that fields stay as theay are even when EGRESS is used
-        final ClassificationRequest c2 = enricher.createClassificationRequest(d2);
-        Assert.assertEquals(IpAddr.of("1.1.1.1"), c2.getSrcAddress());
-        Assert.assertEquals(IpAddr.of("2.2.2.2"), c2.getDstAddress());
-        Assert.assertEquals(Integer.valueOf(1), c2.getSrcPort());
-        Assert.assertEquals(Integer.valueOf(2), c2.getDstPort());
-
-        final var d3 = FlowDocument.newBuilder()
-            .setSrcAddress("1.1.1.1")
-            .setSrcPort(UInt32Value.of(1))
-            .setDstAddress("2.2.2.2")
-            .setDstPort(UInt32Value.of(2))
-            .setProtocol(UInt32Value.of(6));
-
-        final ClassificationRequest c3 = enricher.createClassificationRequest(d3);
-        Assert.assertEquals(IpAddr.of("1.1.1.1"), c3.getSrcAddress());
-        Assert.assertEquals(IpAddr.of("2.2.2.2"), c3.getDstAddress());
-        Assert.assertEquals(Integer.valueOf(1), c3.getSrcPort());
-        Assert.assertEquals(Integer.valueOf(2), c3.getDstPort());
+        //
+        // Verify the Results
+        //
+        assertEquals(1, result.size());
+        assertEquals("x-tenant-id-x", result.get(0).getTenantId());
     }
 
     @Test
-    public void testClockCorrection() throws InterruptedException {
-        final MockDocumentEnricherFactory factory = new MockDocumentEnricherFactory(2400_000L, new HashMap<>());
-        final DocumentEnricherImpl enricher = factory.getEnricher();
+    void testPositiveClockSkewThreshold() {
+        //
+        // Setup Test Data and Interactions
+        //
+        target = new DocumentEnricherImpl(mockInventoryClient, mockClassificationEngine, mockFlowDocumentClassificationRequestMapper, 100);
 
-        final FlowDocument flow1 = createFlowDocument("10.0.0.1", "10.0.0.3");
-        final FlowDocument flow2 = createFlowDocument("10.0.0.1", "10.0.0.3", -3600_000L);
-        final FlowDocument flow3 = createFlowDocument("10.0.0.1", "10.0.0.3", +3600_000L);
+        var now = Instant.now();
+        int timeOffset = 100;
 
-        final List<FlowDocument> flows = Lists.newArrayList(flow1, flow2, flow3);
+        TenantLocationSpecificFlowDocument testDocumentWithTimestamps =
+            TenantLocationSpecificFlowDocument.newBuilder(testDocument)
+                .setReceivedAt(now.plus(timeOffset, ChronoUnit.MILLIS).toEpochMilli())
+                .setTimestamp(now.toEpochMilli())
+                .setFirstSwitched(UInt64Value.of(now.minus(20_000L, ChronoUnit.MILLIS).toEpochMilli()))
+                .setDeltaSwitched(UInt64Value.of(now.minus(10_000L, ChronoUnit.MILLIS).toEpochMilli()))
+                .setLastSwitched(UInt64Value.of(now.minus(5_000L, ChronoUnit.MILLIS).toEpochMilli()))
+                .build()
+                ;
 
-        final List<FlowDocument> docs = enricher.enrich(flows, "tenantId");
-        Assert.assertThat(docs.get(0), Matchers.is(IsPojo.pojo(FlowDocument.class)
-                .where(FlowDocument::getTimestamp, Matchers.equalTo(flow1.getTimestamp()))
-                .where(FlowDocument::getFirstSwitched, Matchers.equalTo(flow1.getFirstSwitched()))
-                .where(FlowDocument::getDeltaSwitched, Matchers.equalTo(flow1.getDeltaSwitched()))
-                .where(FlowDocument::getLastSwitched, Matchers.equalTo(flow1.getLastSwitched()))));
 
-        System.out.println(docs.get(1).getTimestamp() + "|" + (flow2.getTimestamp() - 3600_000L));
-        Assert.assertThat(docs.get(1), Matchers.is(
-            IsPojo.pojo(FlowDocument.class)
-                .where(FlowDocument::getTimestamp, Matchers.is(flow2.getTimestamp() - 3600_000L))
-                .where(FlowDocument::getFirstSwitched, Matchers.is(UInt64Value.of(flow2.getFirstSwitched().getValue() - 3600_000L)))
-                .where(FlowDocument::getDeltaSwitched, Matchers.is(UInt64Value.of(flow2.getDeltaSwitched().getValue() - 3600_000L)))
-                .where(FlowDocument::getLastSwitched, Matchers.is(UInt64Value.of(flow2.getLastSwitched().getValue() - 3600_000L)))));
+        List<TenantLocationSpecificFlowDocument> testList = List.of(testDocumentWithTimestamps);
 
-        Assert.assertThat(docs.get(2), Matchers.is(
-            IsPojo.pojo(FlowDocument.class)
-                .where(FlowDocument::getTimestamp, Matchers.is(flow3.getTimestamp() + 3600_000L))
-                .where(FlowDocument::getFirstSwitched, Matchers.is(UInt64Value.of(flow3.getFirstSwitched().getValue() + 3600_000L)))
-                .where(FlowDocument::getDeltaSwitched, Matchers.is(UInt64Value.of(flow3.getDeltaSwitched().getValue() + 3600_000L)))
-                .where(FlowDocument::getLastSwitched, Matchers.is(UInt64Value.of(flow3.getLastSwitched().getValue() + 3600_000L)))));
+        //
+        // Execute
+        //
+        List<TenantLocationSpecificFlowDocument> result = target.enrich(testList);
 
-        docs.forEach(doc -> {
-            Assert.assertEquals(NetflowVersion.V5, doc.getNetflowVersion());
-            Assert.assertEquals("tenantId", doc.getTenantId());
-        });
+        //
+        // Verify the Results
+        //
+        assertEquals(1, result.size());
+        assertEquals("x-tenant-id-x", result.get(0).getTenantId());
+        assertEquals(100, result.get(0).getClockCorrection());
+        assertEquals(now.plus(Duration.ofMillis(100)).toEpochMilli(), result.get(0).getTimestamp()); // plus because skew is -100
+        assertEquals(now.minus(19_900L, ChronoUnit.MILLIS).toEpochMilli(), result.get(0).getFirstSwitched().getValue());
+        assertEquals(now.minus(9_900L, ChronoUnit.MILLIS).toEpochMilli(), result.get(0).getDeltaSwitched().getValue());
+        assertEquals(now.minus(4_900L, ChronoUnit.MILLIS).toEpochMilli(), result.get(0).getLastSwitched().getValue());
+        assertEquals(Locality.PUBLIC, result.get(0).getSrcLocality());
+        assertEquals(Locality.PUBLIC, result.get(0).getDstLocality());
+        assertEquals(Locality.PUBLIC, result.get(0).getFlowLocality());
+
+        verifySameExcluding(
+            testDocumentWithTimestamps,
+            result.get(0),
+            "first_switched", "delta_switched", "last_switched", "timestamp", "clock_correction", "src_locality", "dst_locality", "flow_locality"
+        );
     }
+
+    @Test
+    void testPositiveClockSkewThresholdMissedBy1() {
+        //
+        // Setup Test Data and Interactions
+        //
+        target = new DocumentEnricherImpl(mockInventoryClient, mockClassificationEngine, mockFlowDocumentClassificationRequestMapper, 100);
+
+        var now = Instant.now();
+        int timeOffset = 99;
+
+        TenantLocationSpecificFlowDocument testDocumentWithTimestamps =
+            TenantLocationSpecificFlowDocument.newBuilder(testDocument)
+                .setReceivedAt(now.plus(timeOffset, ChronoUnit.MILLIS).toEpochMilli())
+                .setTimestamp(now.toEpochMilli())
+                .setFirstSwitched(UInt64Value.of(now.minus(20_000L, ChronoUnit.MILLIS).toEpochMilli()))
+                .setDeltaSwitched(UInt64Value.of(now.minus(10_000L, ChronoUnit.MILLIS).toEpochMilli()))
+                .setLastSwitched(UInt64Value.of(now.minus(5_000L, ChronoUnit.MILLIS).toEpochMilli()))
+                .build()
+                ;
+
+
+        List<TenantLocationSpecificFlowDocument> testList = List.of(testDocumentWithTimestamps);
+
+        //
+        // Execute
+        //
+        List<TenantLocationSpecificFlowDocument> result = target.enrich(testList);
+
+        //
+        // Verify the Results
+        //
+        assertEquals(1, result.size());
+        assertEquals("x-tenant-id-x", result.get(0).getTenantId());
+        assertEquals(0, result.get(0).getClockCorrection());
+        assertEquals(Locality.PUBLIC, result.get(0).getSrcLocality());
+        assertEquals(Locality.PUBLIC, result.get(0).getDstLocality());
+        assertEquals(Locality.PUBLIC, result.get(0).getFlowLocality());
+
+        verifySameExcluding(
+            testDocumentWithTimestamps,
+            result.get(0),
+            "src_locality", "dst_locality", "flow_locality"
+        );
+    }
+
+    @Test
+    void testEnrichNone() {
+        //
+        // Setup Test Data and Interactions
+        //
+        target = new DocumentEnricherImpl(mockInventoryClient, mockClassificationEngine, mockFlowDocumentClassificationRequestMapper, 100);
+        List<TenantLocationSpecificFlowDocument> testList = Collections.emptyList();
+
+        //
+        // Execute
+        //
+        List<TenantLocationSpecificFlowDocument> result = target.enrich(testList);
+
+        //
+        // Verify the Results
+        //
+        assertEquals(0, result.size());
+    }
+
+    @Test
+    void testEnrichNodeLookupNotFoundException() {
+        //
+        // Setup Test Data and Interactions
+        //
+        target = new DocumentEnricherImpl(mockInventoryClient, mockClassificationEngine, mockFlowDocumentClassificationRequestMapper, 100);
+        List<TenantLocationSpecificFlowDocument> testList = List.of(testDocument);
+        StatusRuntimeException testException = new StatusRuntimeException(Status.NOT_FOUND);
+
+        Mockito.when(mockInventoryClient.getIpInterfaceFromQuery("x-tenant-id-x", "1.1.1.1", "x-location-x"))
+            .thenThrow(testException);
+
+        //
+        // Execute
+        //
+        List<TenantLocationSpecificFlowDocument> result = target.enrich(testList);
+
+        //
+        // Verify the Results
+        //
+        assertEquals(1, result.size());
+        assertFalse(result.get(0).hasSrcNode());
+        assertEquals(Locality.PUBLIC, result.get(0).getSrcLocality());
+        assertEquals(Locality.PUBLIC, result.get(0).getDstLocality());
+        assertEquals(Locality.PUBLIC, result.get(0).getFlowLocality());
+
+        verifySameExcluding(
+            testDocument,
+            result.get(0),
+            "src_locality", "dst_locality", "flow_locality"
+        );
+    }
+
+    @Test
+    void testEnrichNodeLookupFound() {
+        //
+        // Setup Test Data and Interactions
+        //
+        target = new DocumentEnricherImpl(mockInventoryClient, mockClassificationEngine, mockFlowDocumentClassificationRequestMapper, 100);
+        List<TenantLocationSpecificFlowDocument> testList = List.of(testDocument);
+        IpInterfaceDTO testIpInterfaceDTO =
+            IpInterfaceDTO.newBuilder()
+                .setNodeId(123123)
+                .setId(456456)
+                .setHostname("x-hostname-x")
+                .build();
+
+        Mockito.when(mockInventoryClient.getIpInterfaceFromQuery("x-tenant-id-x", "1.1.1.1", "x-location-x"))
+            .thenReturn(testIpInterfaceDTO);
+
+        //
+        // Execute
+        //
+        List<TenantLocationSpecificFlowDocument> result = target.enrich(testList);
+
+        //
+        // Verify the Results
+        //
+        assertEquals(1, result.size());
+        assertTrue(result.get(0).hasSrcNode());
+        assertEquals(123123, result.get(0).getSrcNode().getNodeId());
+        assertEquals(456456, result.get(0).getSrcNode().getInterfaceId());
+        assertEquals("x-hostname-x", result.get(0).getSrcNode().getForeignId());
+        assertEquals(Locality.PUBLIC, result.get(0).getSrcLocality());
+        assertEquals(Locality.PUBLIC, result.get(0).getDstLocality());
+        assertEquals(Locality.PUBLIC, result.get(0).getFlowLocality());
+
+        verifySameExcluding(
+            testDocument,
+            result.get(0),
+            "src_node", "src_locality", "dst_locality", "flow_locality"
+        );
+    }
+
+    @Test
+    void testEnrichNodeLookupOtherException() {
+        //
+        // Setup Test Data and Interactions
+        //
+        target = new DocumentEnricherImpl(mockInventoryClient, mockClassificationEngine, mockFlowDocumentClassificationRequestMapper, 100);
+        List<TenantLocationSpecificFlowDocument> testList = List.of(testDocument);
+        StatusRuntimeException testException = new StatusRuntimeException(Status.INVALID_ARGUMENT);
+
+        Mockito.when(mockInventoryClient.getIpInterfaceFromQuery("x-tenant-id-x", "1.1.1.1", "x-location-x"))
+            .thenThrow(testException);
+
+        //
+        // Execute
+        //
+        Exception actual = null;
+        try {
+            List<TenantLocationSpecificFlowDocument> result = target.enrich(testList);
+            fail("Missing expected exception");
+        } catch (Exception caught) {
+            actual = caught;
+        }
+
+        //
+        // Verify the Results
+        //
+        assertSame(testException, actual);
+    }
+
+    @Test
+    void testEnrichClassifiable() {
+        //
+        // Setup Test Data and Interactions
+        //
+        List<TenantLocationSpecificFlowDocument> testList = List.of(testDocument);
+        Mockito.when(mockClassificationRequest.isClassifiable()).thenReturn(true);
+        Mockito.when(mockClassificationEngine.classify(mockClassificationRequest)).thenReturn("x-application-x");
+
+        //
+        // Execute
+        //
+        List<TenantLocationSpecificFlowDocument> result = target.enrich(testList);
+
+        //
+        // Verify the Results
+        //
+        assertEquals(1, result.size());
+        assertEquals("x-tenant-id-x", result.get(0).getTenantId());
+        assertEquals("x-application-x", result.get(0).getApplication());
+    }
+
+    @Test
+    void testEnrichPrivateLocality() {
+        //
+        // Setup Test Data and Interactions
+        //
+        TenantLocationSpecificFlowDocument testDocumentPrivateLocality =
+            TenantLocationSpecificFlowDocument.newBuilder(testDocument)
+                .setSrcAddress("127.0.0.1")
+                .setDstAddress("127.0.0.1")
+                .build()
+                ;
+
+
+        List<TenantLocationSpecificFlowDocument> testList = List.of(testDocumentPrivateLocality);
+
+        //
+        // Execute
+        //
+        List<TenantLocationSpecificFlowDocument> result = target.enrich(testList);
+
+        //
+        // Verify the Results
+        //
+        assertEquals(1, result.size());
+        assertEquals(Locality.PRIVATE, result.get(0).getFlowLocality());
+    }
+
+
+//========================================
+// Internals
+//----------------------------------------
+
+    private void verifySameExcluding(TenantLocationSpecificFlowDocument doc1, TenantLocationSpecificFlowDocument doc2, String... excludeField) {
+        List<Descriptors.FieldDescriptor> fieldDescriptors = TenantLocationSpecificFlowDocument.getDescriptor().getFields();
+        Set<String> excludedSet = new TreeSet<>(Arrays.asList(excludeField));
+
+        for (Descriptors.FieldDescriptor oneFieldDescriptor : fieldDescriptors) {
+            String fieldName = oneFieldDescriptor.getName();
+            if (! excludedSet.contains(fieldName)) {
+                Object value1 = doc1.getField(oneFieldDescriptor);
+                Object value2 = doc2.getField(oneFieldDescriptor);
+
+                assertEquals(value1, value2, "field " + fieldName + " must match");
+            }
+        }
+    }
+
 }

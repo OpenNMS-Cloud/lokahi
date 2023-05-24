@@ -8,6 +8,6 @@ import org.opennms.cloud.grpc.minion.TwinResponseProto;
  */
 public interface TwinProvider {
 
-    TwinResponseProto getTwinResponse(String tenantId, TwinRequestProto twinRequest);
+    TwinResponseProto getTwinResponse(String tenantId, String location, TwinRequestProto twinRequest);
 
 }

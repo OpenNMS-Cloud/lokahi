@@ -12,11 +12,11 @@ export const useAlertsQueries = defineStore('alertsQueries', () => {
       variables: {
         page: pagination.page,
         pageSize: pagination.pageSize,
-        // search: alertsFilters.search, // TODO: not avail for EAR
         severities: alertsFilters.severities,
         sortAscending: alertsFilters.sortAscending,
         sortBy: alertsFilters.sortBy,
-        timeRange: alertsFilters.timeRange
+        timeRange: alertsFilters.timeRange,
+        nodeLabel: alertsFilters.nodeLabel
       },
       fetchOnMount: false,
       cachePolicy: 'network-only'

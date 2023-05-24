@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import org.opennms.cloud.grpc.minion.Identity;
 import org.opennms.horizon.grpc.heartbeat.contract.HeartbeatMessage;
+import org.opennms.horizon.grpc.heartbeat.contract.TenantLocationSpecificHeartbeatMessage;
 import org.opennms.horizon.inventory.dto.MonitoringSystemDTO;
 import org.opennms.horizon.inventory.mapper.MonitoringSystemMapper;
 import org.opennms.horizon.inventory.model.MonitoringLocation;
@@ -40,29 +41,33 @@ public class MonitoringSystemService {
         return systemRepository.findBySystemIdAndTenantId(systemId, tenantId).map(mapper::modelToDTO);
     }
 
-    public void addMonitoringSystemFromHeartbeat(HeartbeatMessage message, String tenantId) {
+    public void addMonitoringSystemFromHeartbeat(TenantLocationSpecificHeartbeatMessage message) {
+        String tenantId = message.getTenantId();
+        String location = message.getLocation();
         Identity identity = message.getIdentity();
+
         Optional<MonitoringSystem> msOp = systemRepository.findBySystemIdAndTenantId(identity.getSystemId(), tenantId);
         if(msOp.isEmpty()) {
-            Optional<MonitoringLocation> locationOp = locationRepository.findByLocationAndTenantId(identity.getLocation(), tenantId);
-            MonitoringLocation location = new MonitoringLocation();
+            Optional<MonitoringLocation> locationOp = locationRepository.findByLocationAndTenantId(location, tenantId);
+            MonitoringLocation monitoringLocatgion = new MonitoringLocation();
             if(locationOp.isPresent()) {
-                location = locationOp.get();
+                monitoringLocatgion = locationOp.get();
             } else {
-                location.setLocation(identity.getLocation());
-                location.setTenantId(tenantId);
-                var newLocation = locationRepository.save(location);
+                monitoringLocatgion.setLocation(location);
+                monitoringLocatgion.setTenantId(tenantId);
+                var newLocation = locationRepository.save(monitoringLocatgion);
                 // Send config updates asynchronously to Minion
                 configUpdateService.sendConfigUpdate(newLocation.getTenantId(), newLocation.getLocation());
 
             }
+
             MonitoringSystem monitoringSystem = new MonitoringSystem();
             monitoringSystem.setSystemId(identity.getSystemId());
-            monitoringSystem.setMonitoringLocation(location);
+            monitoringSystem.setMonitoringLocation(monitoringLocatgion);
             monitoringSystem.setTenantId(tenantId);
             monitoringSystem.setLastCheckedIn(LocalDateTime.now());
             monitoringSystem.setLabel(identity.getSystemId().toUpperCase());
-            monitoringSystem.setMonitoringLocationId(location.getId());
+            monitoringSystem.setMonitoringLocationId(monitoringLocatgion.getId());
             systemRepository.save(monitoringSystem);
         } else {
             MonitoringSystem monitoringSystem = msOp.get();

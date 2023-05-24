@@ -73,7 +73,7 @@ OpenNMS:
           - |
             openssl genrsa -out /cert/client.key.pkcs1 2048
             openssl pkcs8 -topk8 -in /cert/client.key.pkcs1 -out /cert/client.key -nocrypt
-            openssl req -new -key /cert/client.key -out /cert/client.unsigned.cert -subj "/C=CA/ST=TBD/L=TBD/O=OpenNMS/CN=local-minion/OU=L:TestLocation/OU=T:opennms-prime"
+            openssl req -new -key /cert/client.key -out /cert/client.unsigned.cert -subj "/C=CA/ST=TBD/L=TBD/O=OpenNMS/CN=local-minion/OU=L:Default/OU=T:opennms-prime"
             openssl x509 -req -in /cert/client.unsigned.cert -days 14 -CA /run/secrets/mtls/tls.crt -CAkey /run/secrets/mtls/tls.key -out /cert/client.signed.cert
             openssl pkcs12 -export -out "/cert/minion.p12" -inkey /cert/client.key -in /cert/client.signed.cert -passout "pass:changeme"
         securityContext:

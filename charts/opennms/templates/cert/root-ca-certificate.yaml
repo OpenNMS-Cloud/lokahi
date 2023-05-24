@@ -26,7 +26,7 @@ metadata:
     "helm.sh/resource-policy": keep
 type: kubernetes.io/tls
 data:
-  {{ $mgCert := genSignedCert (nospace (cat "minion." .Values.Host)) nil (list .Values.Host) 14 $ca }}
+  {{ $mgCert := genSignedCert (nospace (cat "minion." .Values.Host)) nil (list (nospace (cat "minion." .Values.Host))) 14 $ca }}
   ca.crt: >-
     {{b64enc $ca.Cert }}
   tls.crt: >-

@@ -67,6 +67,7 @@ public class InventoryBackgroundHelper {
     private Integer externalGrpcPort;
     private String kafkaBootstrapUrl;
     private String tenantId;
+    private String location;
     private MonitoringSystemServiceGrpc.MonitoringSystemServiceBlockingStub monitoringSystemStub;
     private MonitoringLocationServiceGrpc.MonitoringLocationServiceBlockingStub monitoringLocationStub;
     private NodeServiceGrpc.NodeServiceBlockingStub nodeServiceBlockingStub;
@@ -115,6 +116,26 @@ public class InventoryBackgroundHelper {
         this.tenantId = tenantId;
         grpcHeaders.put(GrpcConstants.TENANT_ID_KEY, tenantId);
         LOG.info("Using Tenant Id {}", tenantId);
+    }
+
+    public void grpcLocation(String location) {
+        Objects.requireNonNull(location);
+        this.location = location;
+        grpcHeaders.put(GrpcConstants.LOCATION_KEY, location);
+        LOG.info("Using location {}", location);
+    }
+
+    public void clearTenantId() {
+        grpcHeaders.remove(GrpcConstants.TENANT_ID_KEY);
+        LOG.info("Blank Tenant Id");
+
+        NettyChannelBuilder channelBuilder =
+            NettyChannelBuilder.forAddress(LOCALHOST, externalGrpcPort);
+
+        ManagedChannel managedChannel = channelBuilder.usePlaintext().build();
+        managedChannel.getState(true);
+        azureActiveDiscoveryServiceBlockingStub = AzureActiveDiscoveryServiceGrpc.newBlockingStub(managedChannel)
+            .withDeadlineAfter(DEADLINE_DURATION, TimeUnit.SECONDS);
     }
 
     public void createGrpcConnectionForInventory() {

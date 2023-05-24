@@ -4,6 +4,7 @@ Feature: Passive Discovery
     Given [Passive] External GRPC Port in system property "application-external-grpc-port"
     Given [Passive] Kafka Bootstrap URL in system property "kafka.bootstrap-servers"
     Given [Passive] Grpc TenantId "tenant-stream"
+    Given [Passive] Grpc location "test-location"
     Given [Passive] Create Grpc Connection for Inventory
 
   Scenario: Create and fetch passive discovery list

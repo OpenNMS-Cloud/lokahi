@@ -10,6 +10,9 @@ import org.mockito.ArgumentMatcher;
 import org.mockito.Mockito;
 import org.opennms.cloud.grpc.minion.RpcRequestProto;
 import org.opennms.cloud.grpc.minion.RpcResponseProto;
+import org.opennms.cloud.grpc.minion_gateway.GatewayRpcRequestProto;
+import org.opennms.cloud.grpc.minion_gateway.GatewayRpcResponseProto;
+import org.opennms.cloud.grpc.minion_gateway.MinionIdentity;
 import org.opennms.horizon.shared.grpc.common.GrpcIpcServer;
 import org.opennms.miniongateway.rpcrequest.RpcRequestRouter;
 
@@ -28,9 +31,9 @@ public class RpcRequestGrpcServiceTest {
 
     private RpcRequestRouter mockRpcRequestRouter;
     private GrpcIpcServer mockGrpcIpcServer;
-    private CompletableFuture<RpcResponseProto> mockFuture;
+    private CompletableFuture<GatewayRpcResponseProto> mockFuture;
 
-    private StreamObserver<RpcResponseProto> mockResponseStreamObserver;
+    private StreamObserver<GatewayRpcResponseProto> mockResponseStreamObserver;
 
     @Before
     public void setUp() throws Exception {
@@ -49,14 +52,14 @@ public class RpcRequestGrpcServiceTest {
         //
         // Setup Test Data and Interactions
         //
-        RpcRequestProto requestProto =
-            RpcRequestProto.newBuilder()
-                .setLocation("x-test-location-x")
+        GatewayRpcRequestProto requestProto =
+            GatewayRpcRequestProto.newBuilder()
+                .setIdentity(MinionIdentity.newBuilder().setLocation("x-test-location-x"))
                 .build()
             ;
-        RpcResponseProto responseProto =
-            RpcResponseProto.newBuilder()
-                .setLocation("x-test-location-x")
+        GatewayRpcResponseProto responseProto =
+            GatewayRpcResponseProto.newBuilder()
+                .setIdentity(MinionIdentity.newBuilder().setLocation("x-test-location-x"))
                 .build()
             ;
 
@@ -73,10 +76,10 @@ public class RpcRequestGrpcServiceTest {
 
         // Verify whenComplete() call and execute the completion function
 
-        ArgumentCaptor<BiConsumer<RpcResponseProto, Throwable>> biConsumerArgumentCaptor = ArgumentCaptor.forClass(BiConsumer.class);
+        ArgumentCaptor<BiConsumer<GatewayRpcResponseProto, Throwable>> biConsumerArgumentCaptor = ArgumentCaptor.forClass(BiConsumer.class);
         Mockito.verify(mockFuture).whenComplete(biConsumerArgumentCaptor.capture());
 
-        BiConsumer<RpcResponseProto, Throwable> processCompletionBiConsumer = biConsumerArgumentCaptor.getValue();
+        BiConsumer<GatewayRpcResponseProto, Throwable> processCompletionBiConsumer = biConsumerArgumentCaptor.getValue();
         processCompletionBiConsumer.accept(responseProto, null);
 
         //
@@ -91,9 +94,9 @@ public class RpcRequestGrpcServiceTest {
         //
         // Setup Test Data and Interactions
         //
-        RpcRequestProto requestProto =
-            RpcRequestProto.newBuilder()
-                .setLocation("x-test-location-x")
+        GatewayRpcRequestProto requestProto =
+            GatewayRpcRequestProto.newBuilder()
+                .setIdentity(MinionIdentity.newBuilder().setLocation("x-test-location-x"))
                 .build()
             ;
         RuntimeException testException = new RuntimeException("x-test-exc-x");
@@ -111,10 +114,10 @@ public class RpcRequestGrpcServiceTest {
 
         // Verify whenComplete() call and execute the completion function
 
-        ArgumentCaptor<BiConsumer<RpcResponseProto, Throwable>> biConsumerArgumentCaptor = ArgumentCaptor.forClass(BiConsumer.class);
+        ArgumentCaptor<BiConsumer<GatewayRpcResponseProto, Throwable>> biConsumerArgumentCaptor = ArgumentCaptor.forClass(BiConsumer.class);
         Mockito.verify(mockFuture).whenComplete(biConsumerArgumentCaptor.capture());
 
-        BiConsumer<RpcResponseProto, Throwable> processCompletionBiConsumer = biConsumerArgumentCaptor.getValue();
+        BiConsumer<GatewayRpcResponseProto, Throwable> processCompletionBiConsumer = biConsumerArgumentCaptor.getValue();
         processCompletionBiConsumer.accept(null, testException);
 
         //

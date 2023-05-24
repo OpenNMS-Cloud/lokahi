@@ -65,7 +65,7 @@ spec:
                   name: postgres
                   key: eventsPwd
             - name: SPRING_KAFKA_BOOTSTRAP_SERVERS
-              value: "{{ .Values.Kafka.ServiceName }}:{{ .Values.Kafka.Port }}"
+              value: "{{ .Values.kafkaClient.bootstrapServers }}"
             - name: GRPC_URL_INVENTORY
               value: "{{ .Values.OpenNMS.Inventory.ServiceName }}:{{ .Values.OpenNMS.Inventory.GrpcPort }}"
             {{- include "deployment.env" .Values.OpenNMS.Events | nindent 12 }}

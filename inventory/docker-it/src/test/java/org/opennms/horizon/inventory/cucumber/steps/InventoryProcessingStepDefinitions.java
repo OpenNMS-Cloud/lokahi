@@ -45,6 +45,7 @@ import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Assertions;
 import org.opennms.cloud.grpc.minion.Identity;
 import org.opennms.horizon.grpc.heartbeat.contract.HeartbeatMessage;
+import org.opennms.horizon.grpc.heartbeat.contract.TenantLocationSpecificHeartbeatMessage;
 import org.opennms.horizon.inventory.cucumber.InventoryBackgroundHelper;
 import org.opennms.horizon.inventory.dto.NodeCreateDTO;
 import org.opennms.horizon.inventory.dto.NodeDTO;
@@ -57,7 +58,7 @@ import org.opennms.node.scan.contract.NodeScanResult;
 import org.opennms.node.scan.contract.ServiceResult;
 import org.opennms.taskset.contract.ScannerResponse;
 import org.opennms.taskset.contract.TaskResult;
-import org.opennms.taskset.contract.TenantedTaskSetResults;
+import org.opennms.taskset.contract.TenantLocationSpecificTaskSetResults;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -123,6 +124,11 @@ public class InventoryProcessingStepDefinitions {
         minionGatewayWiremockTestSteps.setTaskTenantId(tenantId);
     }
 
+    @Given("Grpc location {string}")
+    public void grpcLocation(String location) {
+        backgroundHelper.grpcLocation(location);
+    }
+
     @Given("Minion at location {string} with system Id {string}")
     public void minionAtLocationWithSystemId(String location, String systemId) {
         Objects.requireNonNull(location);
@@ -145,13 +151,15 @@ public class InventoryProcessingStepDefinitions {
         producerConfig.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, ByteArraySerializer.class.getCanonicalName());
         try (KafkaProducer<String, byte[]> kafkaProducer = new KafkaProducer<>(producerConfig)) {
             long millis = System.currentTimeMillis();
-            HeartbeatMessage heartbeatMessage = HeartbeatMessage.newBuilder()
-                .setIdentity(Identity.newBuilder().setLocation(location).setSystemId(systemId).build())
-                .setTimestamp(Timestamp.newBuilder().setSeconds(millis / 1000).setNanos((int) ((millis % 1000) * 1000000)).build())
-                .build();
+            TenantLocationSpecificHeartbeatMessage heartbeatMessage =
+                TenantLocationSpecificHeartbeatMessage.newBuilder()
+                    .setTenantId(backgroundHelper.getTenantId())
+                    .setLocation(backgroundHelper.getLocation())
+                    .setIdentity(Identity.newBuilder().setSystemId(systemId).build())
+                    .setTimestamp(Timestamp.newBuilder().setSeconds(millis / 1000).setNanos((int) ((millis % 1000) * 1000000)).build())
+                    .build();
             var producerRecord = new ProducerRecord<String, byte[]>(topic, heartbeatMessage.toByteArray());
-            Map<String, String> grpcHeaders = backgroundHelper.getGrpcHeaders();
-            grpcHeaders.forEach((key, value) -> producerRecord.headers().add(key, value.getBytes(StandardCharsets.UTF_8)));
+
             kafkaProducer.send(producerRecord);
         }
     }
@@ -345,22 +353,27 @@ public class InventoryProcessingStepDefinitions {
 
             TaskResult taskResult =
                 TaskResult.newBuilder()
-                    .setLocation(location)
-                    .setSystemId(systemId)
+                    .setIdentity(
+                        org.opennms.taskset.contract.Identity.newBuilder()
+                            .setSystemId(systemId)
+                            .build()
+                    )
                     .setScannerResponse(ScannerResponse.newBuilder()
                         .setResult(Any.pack(nodeScanResult)).build())
                     .build();
 
-            TenantedTaskSetResults taskSetResults =
-                TenantedTaskSetResults.newBuilder()
+            TenantLocationSpecificTaskSetResults taskSetResults =
+                TenantLocationSpecificTaskSetResults.newBuilder()
                     .setTenantId(backgroundHelper.getTenantId())
+                    .setLocation(backgroundHelper.getLocation())
                     .addResults(taskResult)
                     .build();
 
             var producerRecord = new ProducerRecord<String, byte[]>(kafkaTopic, taskSetResults.toByteArray());
 
-            Map<String, String> grpcHeaders = backgroundHelper.getGrpcHeaders();
-            grpcHeaders.forEach((key, value) -> producerRecord.headers().add(key, value.getBytes(StandardCharsets.UTF_8)));
+            // producerRecord.headers().add(GrpcConstants.TENANT_ID_KEY, backgroundHelper.getTenantId().getBytes(StandardCharsets.UTF_8));
+            // producerRecord.headers().add(GrpcConstants.LOCATION_KEY, backgroundHelper.getLocation().getBytes(StandardCharsets.UTF_8));
+
             kafkaProducer.send(producerRecord);
         }
     }

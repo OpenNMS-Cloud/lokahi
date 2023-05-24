@@ -35,11 +35,12 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
+import org.opennms.horizon.shared.grpc.common.LocationServerInterceptor;
 import org.opennms.horizon.shared.grpc.common.TenantIDGrpcServerInterceptor;
-import org.opennms.horizon.shared.protobuf.mapper.TenantedTaskSetResultsMapper;
+import org.opennms.horizon.shared.protobuf.mapper.TenantLocationSpecificTaskSetResultsMapper;
 import org.opennms.taskset.contract.TaskResult;
 import org.opennms.taskset.contract.TaskSetResults;
-import org.opennms.taskset.contract.TenantedTaskSetResults;
+import org.opennms.taskset.contract.TenantLocationSpecificTaskSetResults;
 import org.springframework.kafka.core.KafkaTemplate;
 
 import static org.junit.Assert.*;
@@ -47,28 +48,25 @@ import static org.junit.Assert.*;
 public class TaskResultsKafkaForwarderTest {
 
     public static final String TEST_AFTER_COPY_TENANT_ID = "x-tenant-after-copy-x";
+    public static final String TEST_AFTER_COPY_LOCATION = "x-location-after-copy-x";
 
     private TaskResultsKafkaForwarder taskResultsKafkaForwarder;
 
     private KafkaTemplate<String, byte[]> mockKafkaTemplate;
     private TenantIDGrpcServerInterceptor mockTenantIDGrpcInterceptor;
-    private TenantedTaskSetResultsMapper mockTenantedTaskSetResultsMapper;
+    private LocationServerInterceptor mockLocationServerInterceptor;
+    private TenantLocationSpecificTaskSetResultsMapper mockTenantLocationSpecificTaskSetResultsMapper;
 
     private TaskSetResults testTaskSetResults;
     private TaskResult testTaskResult;
-    private TenantedTaskSetResults testTenantedTaskSetResults;
+    private TenantLocationSpecificTaskSetResults testTenantLocationSpecificTaskSetResults;
 
     @Before
     public void setUp() throws Exception {
-       /*
-        KafkaTemplate<String, byte[]> kafkaTemplate,
-        TenantIDGrpcServerInterceptor tenantIDGrpcInterceptor,
-        TenantedTaskSetResultsMapper tenantedTaskSetResultsMapper) {
-        */
-
         mockKafkaTemplate = Mockito.mock(KafkaTemplate.class);
         mockTenantIDGrpcInterceptor = Mockito.mock(TenantIDGrpcServerInterceptor.class);
-        mockTenantedTaskSetResultsMapper = Mockito.mock(TenantedTaskSetResultsMapper.class);
+        mockLocationServerInterceptor = Mockito.mock(LocationServerInterceptor.class);
+        mockTenantLocationSpecificTaskSetResultsMapper = Mockito.mock(TenantLocationSpecificTaskSetResultsMapper.class);
 
         testTaskResult =
             TaskResult.newBuilder()
@@ -79,15 +77,23 @@ public class TaskResultsKafkaForwarderTest {
                 .addResults(testTaskResult)
                 .build();
 
-        testTenantedTaskSetResults =
-            TenantedTaskSetResults.newBuilder()
+        testTenantLocationSpecificTaskSetResults =
+            TenantLocationSpecificTaskSetResults.newBuilder()
                 .setTenantId(TEST_AFTER_COPY_TENANT_ID)   // Use a distinct tenant id, even though it is unrealistic, for test verification purposes
+                .setLocation(TEST_AFTER_COPY_LOCATION)    // Ditto for location
                 .build();
 
-        taskResultsKafkaForwarder = new TaskResultsKafkaForwarder(mockKafkaTemplate, mockTenantIDGrpcInterceptor, mockTenantedTaskSetResultsMapper, "x-kafka-topic-x");
+        taskResultsKafkaForwarder =
+            new TaskResultsKafkaForwarder(
+                mockKafkaTemplate,
+                mockTenantIDGrpcInterceptor,
+                mockLocationServerInterceptor,
+                mockTenantLocationSpecificTaskSetResultsMapper,
+                "x-kafka-topic-x");
 
         Mockito.when(mockTenantIDGrpcInterceptor.readCurrentContextTenantId()).thenReturn("x-tenant-x");
-        Mockito.when(mockTenantedTaskSetResultsMapper.mapBareToTenanted("x-tenant-x", testTaskSetResults)).thenReturn(testTenantedTaskSetResults);
+        Mockito.when(mockLocationServerInterceptor.readCurrentContextLocation()).thenReturn("x-location-x");
+        Mockito.when(mockTenantLocationSpecificTaskSetResultsMapper.mapBareToTenanted("x-tenant-x", "x-location-x", testTaskSetResults)).thenReturn(testTenantLocationSpecificTaskSetResults);
     }
 
     @Test
@@ -114,8 +120,9 @@ public class TaskResultsKafkaForwarderTest {
         assertEquals("x-kafka-topic-x", producerRecord.topic());
 
         byte[] raw = producerRecord.value();
-        var tenantedTaskSetResults = TenantedTaskSetResults.parseFrom(raw);
+        var tenantLocationSpecificTaskSetResults = TenantLocationSpecificTaskSetResults.parseFrom(raw);
 
-        assertEquals(TEST_AFTER_COPY_TENANT_ID, tenantedTaskSetResults.getTenantId());
+        assertEquals(TEST_AFTER_COPY_TENANT_ID, tenantLocationSpecificTaskSetResults.getTenantId());
+        assertEquals(TEST_AFTER_COPY_LOCATION, tenantLocationSpecificTaskSetResults.getLocation());
     }
 }

@@ -14,6 +14,7 @@ spec:
   template:
     metadata:
       labels:
+        appdomain: opennms
         app: {{ .Values.Cortex.ServiceName }}
       annotations:
         # roll the deployment when the cortex configmap changes

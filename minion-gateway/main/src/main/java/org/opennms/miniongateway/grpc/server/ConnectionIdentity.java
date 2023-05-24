@@ -6,20 +6,19 @@ import org.opennms.horizon.shared.ipc.rpc.IpcIdentity;
 
 public class ConnectionIdentity implements IpcIdentity {
 
-    private final Identity identity;
+    private final String systemId;
 
     public ConnectionIdentity(Identity identity) {
-        this.identity = identity;
+        this(identity.getSystemId());
+    }
+
+    public ConnectionIdentity(String systemId) {
+        this.systemId = systemId;
     }
 
     @Override
     public String getId() {
-        return identity.getSystemId();
-    }
-
-    @Override
-    public String getLocation() {
-        return identity.getLocation();
+        return systemId;
     }
 
     @Override
@@ -27,16 +26,14 @@ public class ConnectionIdentity implements IpcIdentity {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof ConnectionIdentity)) {
+        if (!(o instanceof ConnectionIdentity that)) {
             return false;
         }
-        ConnectionIdentity that = (ConnectionIdentity) o;
-        return Objects.equals(identity, that.identity);
+        return Objects.equals(systemId, that.systemId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(identity);
+        return Objects.hash(systemId);
     }
-
 }

@@ -9,6 +9,8 @@ import io.restassured.config.HttpClientConfig;
 import io.restassured.config.RestAssuredConfig;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
+import java.net.HttpURLConnection;
+import java.net.URLConnection;
 import lombok.SneakyThrows;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpHeaders;
@@ -67,16 +69,15 @@ public class MinionGatewayWiremockTestSteps {
         log.info("Using BASE URL {}", baseUrl);
     }
 
-
     @Given("MOCK twin update in resource file {string}")
     public void mockTwinUpdateInResourceFile(String resourcePath) throws Exception {
         twinUpdateContent = readResourceFile(resourcePath);
     }
 
-    @Then("MOCK send twin update for topic {string} at location {string}")
-    public void sendTwinUpdateForTopic(String topicName, String location) throws Exception {
+    @Then("MOCK send twin update for topic {string}")
+    public void sendTwinUpdateForTopic(String topicName) throws Exception {
 
-        URL requestUrl = formatTwinUpdateUrl(topicName, location);
+        URL requestUrl = formatTwinUpdateUrl(topicName);
 
         RestAssuredConfig restAssuredConfig = createRestAssuredTestConfig();
 
@@ -97,24 +98,24 @@ public class MinionGatewayWiremockTestSteps {
         log.info("MOCK twin-update status-code={}; body={}", restAssuredResponse.getStatusCode(), restAssuredResponse.getBody().asString());
     }
 
-    @Then("MOCK verify minion is connected with id {string} and location {string}")
-    public void verifyMinionIsConnected(String minionId, String location) throws Exception {
-        isMinionConnected(minionId, location, true);
+    @Then("MOCK verify minion is connected with id {string}")
+    public void verifyMinionIsConnected(String minionId) throws Exception {
+        isMinionConnected(minionId, true);
     }
 
-    @Then("MOCK wait for minion connection with id {string} and location {string} timeout {int}ms")
-    public void waitForMinionConnection(String minionId, String location, int timeout) throws Exception {
+    @Then("MOCK wait for minion connection with id {string}, timeout after {int}ms")
+    public void waitForMinionConnection(String minionId, int timeout) throws Exception {
 
         boolean found =
             retryUtils.retry(
-                () -> isMinionConnected(minionId, location, false),
+                () -> isMinionConnected(minionId, false),
                 result -> result,
                 500,
                 timeout,
                 false
                 );
 
-        assertTrue("Minion is connected: minion-id=" + minionId + "; location=" + location, found);
+        assertTrue("Minion is connected: minion-id=" + minionId, found);
     }
 
     @Then("Verify gateway has received netflow packages")
@@ -153,15 +154,15 @@ public class MinionGatewayWiremockTestSteps {
             );
     }
 
-    private URL formatTwinUpdateUrl(String topic, String location) throws MalformedURLException {
-        return formatUrl(BASE_PATH + "/twin-publish/" + topic + "/" + location);
+    private URL formatTwinUpdateUrl(String topic) throws MalformedURLException {
+        return formatUrl(BASE_PATH + "/twin-publish/" + topic);
     }
 
     private URL formatUrl(String path) throws MalformedURLException {
         return new URL(new URL(baseUrl), path);
     }
 
-    private boolean isMinionConnected(String minionId, String location, boolean useAssert) {
+    private boolean isMinionConnected(String minionId, boolean useAssert) {
         URL requestUrl;
         try {
             requestUrl = formatUrl(BASE_PATH + "/minions");
@@ -204,13 +205,11 @@ public class MinionGatewayWiremockTestSteps {
         boolean found =
             minions.stream()
                 .anyMatch(
-                    (identity) ->
-                        (location.equals(((Map) identity).get("location")) &&
-                        (minionId.equals(((Map) identity).get("systemId"))))
+                    (identity) -> (minionId.equals(((Map) identity).get("systemId")))
                 );
 
         if (useAssert) {
-            assertTrue("Minion is connected: minion-id=" + minionId + "; location=" + location, found);
+            assertTrue("Minion is connected: minion-id=" + minionId, found);
         }
 
         return found;

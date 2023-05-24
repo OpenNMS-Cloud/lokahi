@@ -108,7 +108,7 @@ public class IgniteMetricsAdapter implements MetricExporterSpi, MetricsProvider,
 
     registry.forEach(metricRegistry -> {
       metricRegistry.forEach(metric -> {
-        String metricName = name("minion", identity.getLocation(), identity.getId(), "ignite", metric.name());
+        String metricName = name("minion", identity.getId(), "ignite", metric.name());
         if (!metrics.getMetrics().containsKey(metricName)) {
           com.codahale.metrics.Metric bridge = bridge(metric);
           if (bridge != null) {
@@ -166,7 +166,7 @@ public class IgniteMetricsAdapter implements MetricExporterSpi, MetricsProvider,
 
   @NotNull
   private String connectedMetricName() {
-    return name("minion", identity.getLocation(), identity.getId(), "connected");
+    return name("minion", identity.getId(), "connected");
   }
 
   public void start() throws Exception {

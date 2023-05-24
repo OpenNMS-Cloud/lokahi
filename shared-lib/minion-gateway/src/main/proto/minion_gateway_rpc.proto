@@ -1,0 +1,94 @@
+/*******************************************************************************
+ * This file is part of OpenNMS(R).
+ *
+ * Copyright (C) 2022 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
+ *
+ * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *
+ * OpenNMS(R) is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published
+ * by the Free Software Foundation, either version 3 of the License,
+ * or (at your option) any later version.
+ *
+ * OpenNMS(R) is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with OpenNMS(R).  If not, see:
+ *      http://www.gnu.org/licenses/
+ *
+ * For more information contact:
+ *     OpenNMS(R) Licensing <license@opennms.org>
+ *     http://www.opennms.org/
+ *     http://www.opennms.com/
+ *******************************************************************************/
+syntax = "proto3";
+
+import "google/protobuf/any.proto";
+import "google/protobuf/empty.proto";
+
+package minion_gateway;
+option java_multiple_files = true;
+option java_package = "org.opennms.cloud.grpc.minion_gateway";
+
+/**
+ * RpcRequestService
+ *  Request/Response pattern between non-streaming services.
+ */
+service RpcRequestService {
+  rpc request(GatewayRpcRequestProto) returns (GatewayRpcResponseProto) {}
+}
+
+message MinionIdentity {
+  string tenant = 1;
+  string location = 2;
+  string system_id = 3;
+}
+
+message GatewayRpcRequestProto {
+  string rpc_id = 1;
+  google.protobuf.Any payload = 2;
+  MinionIdentity identity = 3;
+  string module_id = 4;
+  // absolute time elapsed since the epoch in msec.
+  uint64 expiration_time = 5;
+  map<string, google.protobuf.Any> metadata = 6;
+}
+
+message GatewayRpcResponseProto {
+  string rpc_id = 1;
+  google.protobuf.Any payload = 2;
+  MinionIdentity identity = 3;
+  string module_id = 4;
+  map<string, google.protobuf.Any> metadata = 5;
+}
+
+message SinkMessage {
+  string message_id = 1;
+  bytes content = 2;
+  // these should always be the same values for a given session
+  MinionIdentity identity = 3;
+  // where are the messages coming from
+  string module_id = 4;
+  // tracing headers
+  map<string, google.protobuf.Any> metadata = 5;
+}
+
+message GatewayTwinRequestProto {
+  string consumer_key = 1;
+  MinionIdentity identity = 2;
+  map<string, google.protobuf.Any> metadata = 3;
+}
+
+message GatewayTwinResponseProto {
+  string consumer_key = 1;
+  bytes twin_object = 2;
+  MinionIdentity identity = 3;
+  bool is_patch_object = 4;
+  string session_id = 5;
+  int32 version = 6;
+  map<string, google.protobuf.Any> metadata = 7;
+}

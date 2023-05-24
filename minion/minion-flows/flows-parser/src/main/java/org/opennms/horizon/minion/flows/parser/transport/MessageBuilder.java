@@ -30,7 +30,7 @@ package org.opennms.horizon.minion.flows.parser.transport;
 
 import org.opennms.horizon.minion.flows.parser.RecordEnrichment;
 import org.opennms.horizon.minion.flows.parser.ie.Value;
-import org.opennms.dataplatform.flows.document.FlowDocument;
+import org.opennms.horizon.flows.document.FlowDocument;
 
 public interface MessageBuilder {
     FlowDocument.Builder buildMessage(final Iterable<Value<?>> values, final RecordEnrichment enrichment);

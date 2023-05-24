@@ -23,10 +23,6 @@ public class SubscriptionTest {
             return "blahId";
         }
 
-        @Override
-        public String getLocation() {
-            return "blahLocation";
-        }
     }).new Subscription("blahKey");
 
     @Before

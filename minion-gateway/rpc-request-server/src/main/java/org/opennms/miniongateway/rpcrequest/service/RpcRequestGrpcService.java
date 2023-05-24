@@ -3,9 +3,9 @@ package org.opennms.miniongateway.rpcrequest.service;
 import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
 import lombok.Setter;
-import org.opennms.cloud.grpc.minion.RpcRequestProto;
-import org.opennms.cloud.grpc.minion.RpcRequestServiceGrpc;
-import org.opennms.cloud.grpc.minion.RpcResponseProto;
+import org.opennms.cloud.grpc.minion_gateway.GatewayRpcRequestProto;
+import org.opennms.cloud.grpc.minion_gateway.RpcRequestServiceGrpc;
+import org.opennms.cloud.grpc.minion_gateway.GatewayRpcResponseProto;
 import org.opennms.horizon.shared.grpc.common.GrpcIpcServer;
 import org.opennms.horizon.shared.grpc.common.TenantIDGrpcServerInterceptor;
 import org.opennms.miniongateway.rpcrequest.RpcRequestRouter;
@@ -35,8 +35,6 @@ public class RpcRequestGrpcService extends RpcRequestServiceGrpc.RpcRequestServi
     @Setter
     private GrpcIpcServer grpcIpcServer;
 
-    @Autowired
-    private TenantIDGrpcServerInterceptor tenantIDGrpcServerInterceptor;
 
 //========================================
 // Lifecycle
@@ -45,7 +43,7 @@ public class RpcRequestGrpcService extends RpcRequestServiceGrpc.RpcRequestServi
     @PostConstruct
     public void start() throws IOException {
         // TODO: use explicit tenant-id handling
-        grpcIpcServer.startServerWithInterceptors(this, tenantIDGrpcServerInterceptor);
+        grpcIpcServer.startServer(this);
         log.info("Initiated RPC-Request GRPC Service");
     }
 
@@ -54,8 +52,8 @@ public class RpcRequestGrpcService extends RpcRequestServiceGrpc.RpcRequestServi
 //----------------------------------------
 
     @Override
-    public void request(RpcRequestProto request, StreamObserver<RpcResponseProto> responseObserver) {
-        CompletableFuture<RpcResponseProto> future = rpcRequestRouter.routeRequest(request);
+    public void request(GatewayRpcRequestProto request, StreamObserver<GatewayRpcResponseProto> responseObserver) {
+        CompletableFuture<GatewayRpcResponseProto> future = rpcRequestRouter.routeRequest(request);
 
         future.whenComplete(
             (response, exception) -> handleCompletedRequest(response, exception, responseObserver)
@@ -66,7 +64,7 @@ public class RpcRequestGrpcService extends RpcRequestServiceGrpc.RpcRequestServi
 // Internals
 //----------------------------------------
 
-    private void handleCompletedRequest(RpcResponseProto response, Throwable exception, StreamObserver<RpcResponseProto> responseObserver) {
+    private void handleCompletedRequest(GatewayRpcResponseProto response, Throwable exception, StreamObserver<GatewayRpcResponseProto> responseObserver) {
         if (exception != null) {
             Status status = Status.UNAVAILABLE.withDescription(exception.getMessage());
             responseObserver.onError(status.asRuntimeException());

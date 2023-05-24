@@ -65,11 +65,11 @@ public class TestCloudServiceRpcRequestHandler implements StreamObserver<RpcRequ
 
     @Override
     public void onNext(RpcRequestProto value) {
-        LOG.info("Have inbound RpcRequest: rpc-id={}; system-id={}; location={}; module-id={}; payload={}",
+        LOG.info("Have inbound RpcRequest: rpc-id={}; system-id={}; module-id={}; expiration-time={}; payload={}",
             value.getRpcId(),
-            value.getSystemId(),
-            value.getLocation(),
+            value.getIdentity().getSystemId(),
             value.getModuleId(),
+            value.getExpirationTime(),
             value.getPayload()
         );
 
@@ -81,11 +81,10 @@ public class TestCloudServiceRpcRequestHandler implements StreamObserver<RpcRequ
             RpcResponseProto.Builder rpcResponseProtoBuilder =
                 RpcResponseProto.newBuilder();
 
-            Optional.ofNullable(value.getRpcId()).ifPresent(rpcResponseProtoBuilder::setRpcId);
-            Optional.ofNullable(value.getLocation()).ifPresent(rpcResponseProtoBuilder::setLocation);
-            Optional.ofNullable(value.getSystemId()).ifPresent(rpcResponseProtoBuilder::setSystemId);
-            Optional.ofNullable(value.getModuleId()).ifPresent(rpcResponseProtoBuilder::setModuleId);
-            Optional.ofNullable(value.getPayload()).ifPresent(rpcResponseProtoBuilder::setPayload);
+            rpcResponseProtoBuilder.setRpcId(value.getRpcId());
+            rpcResponseProtoBuilder.setIdentity(value.getIdentity());
+            rpcResponseProtoBuilder.setModuleId(value.getModuleId());
+            rpcResponseProtoBuilder.setPayload(value.getPayload());
 
             RpcResponseProto rpcResponseProto = rpcResponseProtoBuilder.build();
 

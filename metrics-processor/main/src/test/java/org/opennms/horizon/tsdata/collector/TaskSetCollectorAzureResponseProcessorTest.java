@@ -32,6 +32,7 @@ package org.opennms.horizon.tsdata.collector;
 import com.google.protobuf.Any;
 import nl.altindag.log.LogCaptor;
 import nl.altindag.log.model.LogEvent;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatcher;
@@ -52,8 +53,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Predicate;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 public class TaskSetCollectorAzureResponseProcessorTest {
 
@@ -91,7 +90,7 @@ public class TaskSetCollectorAzureResponseProcessorTest {
         //
         // Execute
         //
-        target.processAzureCollectorResponse("x-tenant-id-x", testCollectorResponse, testLabelValues);
+        target.processAzureCollectorResponse("x-tenant-id-x", "x-location-x", testCollectorResponse, testLabelValues);
 
         //
         // Verify the Results
@@ -112,7 +111,7 @@ public class TaskSetCollectorAzureResponseProcessorTest {
             //
             // Execute
             //
-            target.processAzureCollectorResponse("x-tenant-id-x", testCollectorResponse, testLabelValues);
+            target.processAzureCollectorResponse("x-tenant-id-x", "x-location-x", testCollectorResponse, testLabelValues);
 
             //
             // Verify the Results
@@ -125,7 +124,7 @@ public class TaskSetCollectorAzureResponseProcessorTest {
                         (logEvent.getThrowable().orElse(null) == testException)
                     );
 
-            assertTrue(logCaptor.getLogEvents().stream().anyMatch(matcher));
+            Assertions.assertTrue(logCaptor.getLogEvents().stream().anyMatch(matcher));
             Mockito.verifyNoInteractions(mockTenantMetricsTracker);
         }
     }

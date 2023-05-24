@@ -36,6 +36,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+// TODO: replace with POJO and remove use of static methods
 public final class Protocols {
 
     private static final List<Protocol> protocols = new ArrayList<>();

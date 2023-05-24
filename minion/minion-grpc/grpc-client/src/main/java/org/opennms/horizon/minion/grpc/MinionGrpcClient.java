@@ -159,9 +159,14 @@ public class MinionGrpcClient extends AbstractMessageDispatcherFactory<String> i
         reconnectStrategy = simpleReconnectStrategyFactory.create(channel, this::handleReconnect, this::handleDisconnect);
         reconnectStrategy.activate();
 
-        LOG.info("Minion at location {} with systemId {} started", ipcIdentity.getLocation(), ipcIdentity.getId());
+        LOG.info("Minion with systemId {} started", ipcIdentity.getId());
 
     }
+
+    // private boolean hasChangedToReadyState() {
+    //     ConnectivityState prevState = currentChannelState;
+    //     return !prevState.equals(ConnectivityState.READY) && getChannelState().equals(ConnectivityState.READY);
+    // }
 
     public void shutdown() {
         blockingSinkMessageScheduler.shutdown();
@@ -174,7 +179,8 @@ public class MinionGrpcClient extends AbstractMessageDispatcherFactory<String> i
         if (channel != null) {
             channel.shutdown();
         }
-        LOG.info("Minion at location {} with systemId {} stopped", ipcIdentity.getLocation(), ipcIdentity.getId());
+        LOG.info("Minion with systemId {} stopped", ipcIdentity.getId());
+
     }
 
 
@@ -208,7 +214,6 @@ public class MinionGrpcClient extends AbstractMessageDispatcherFactory<String> i
             String messageId = UUID.randomUUID().toString();
             SinkMessage.Builder sinkMessageBuilder = SinkMessage.newBuilder()
                     .setMessageId(messageId)
-                    .setLocation(ipcIdentity.getLocation())
                     .setModuleId(module.getId())
                     .setContent(ByteString.copyFrom(message));
 
@@ -301,7 +306,6 @@ public class MinionGrpcClient extends AbstractMessageDispatcherFactory<String> i
 
     private void initializeCloudReceiver() {
         Identity identity = Identity.newBuilder()
-            .setLocation(ipcIdentity.getLocation())
             .setSystemId(ipcIdentity.getId())
             .build();
 
@@ -353,8 +357,7 @@ public class MinionGrpcClient extends AbstractMessageDispatcherFactory<String> i
 
     private void sendMinionHeaders() {
         RpcResponseProto rpcHeader = RpcResponseProto.newBuilder()
-                .setLocation(ipcIdentity.getLocation())
-                .setSystemId(ipcIdentity.getId())
+                .setIdentity(Identity.newBuilder().setSystemId(ipcIdentity.getId()))
                 .setModuleId(MINION_HEADERS_MODULE)
                 .setRpcId(ipcIdentity.getId())
                 .build();

@@ -39,7 +39,7 @@ import lombok.RequiredArgsConstructor;
 import org.dataloader.DataLoader;
 import org.opennms.horizon.server.config.DataLoaderFactory;
 import org.opennms.horizon.server.mapper.NodeMapper;
-import org.opennms.horizon.server.model.inventory.Location;
+import org.opennms.horizon.server.model.inventory.MonitoringLocation;
 import org.opennms.horizon.server.model.inventory.Node;
 import org.opennms.horizon.server.model.inventory.NodeCreate;
 import org.opennms.horizon.server.model.status.NodeStatus;
@@ -51,7 +51,6 @@ import reactor.core.publisher.Mono;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @GraphQLApi
@@ -95,8 +94,8 @@ public class GrpcNodeService {
     }
 
     @GraphQLQuery
-    public CompletableFuture<Location> location(@GraphQLContext Node node, @GraphQLEnvironment ResolutionEnvironment env) {
-        DataLoader<DataLoaderFactory.Key, Location> locationLoader = env.dataFetchingEnvironment.getDataLoader(DataLoaderFactory.DATA_LOADER_LOCATION);
+    public CompletableFuture<MonitoringLocation> location(@GraphQLContext Node node, @GraphQLEnvironment ResolutionEnvironment env) {
+        DataLoader<DataLoaderFactory.Key, MonitoringLocation> locationLoader = env.dataFetchingEnvironment.getDataLoader(DataLoaderFactory.DATA_LOADER_LOCATION);
         DataLoaderFactory.Key key = new DataLoaderFactory.Key(node.getMonitoringLocationId(), headerUtil.getAuthHeader(env));
         return locationLoader.load(key);
     }

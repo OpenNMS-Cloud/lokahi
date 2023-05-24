@@ -89,6 +89,11 @@ public class PassiveDiscoveryTaggingStepDefinitions {
         backgroundHelper.grpcTenantId(tenantId);
     }
 
+    @Given("[PassiveDiscovery] Grpc location {string}")
+    public void grpcLocation(String location) {
+        backgroundHelper.grpcLocation(location);
+    }
+
     @Given("[PassiveDiscovery] Create Grpc Connection for Inventory")
     public void createGrpcConnectionForInventory() {
         backgroundHelper.createGrpcConnectionForInventory();

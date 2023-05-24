@@ -28,6 +28,7 @@
         <module>horizon-common-utils</module>
         <module>horizon-ipc</module>
         <module>inventory</module>
+        <module>minion-gateway</module>
         <module>notifications</module>
         <module>snmp</module>
         <module>icmp-api</module>

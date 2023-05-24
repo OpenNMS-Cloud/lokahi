@@ -76,4 +76,14 @@ data:
       backend: local
       local:
         directory: /tmp/cortex/rules
+
+  {{- if .Values.OpenNMS.global.openTelemetry.otlpTracesEndpoint }}
+    tracing:
+      type: otel
+      otel:
+        {{- $url := urlParse .Values.OpenNMS.global.openTelemetry.otlpTracesEndpoint }}
+        # this key is misnamed in 1.14 and is corrected in 1.15 in later to otlp_endpoint
+        oltp_endpoint: {{ $url.host }}
+        sample_ratio: 1
+  {{- end }}
 {{ end }}

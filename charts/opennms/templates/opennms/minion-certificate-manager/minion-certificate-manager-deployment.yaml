@@ -16,6 +16,9 @@ spec:
       labels:
         appdomain: opennms
         app: {{ .Values.OpenNMS.MinionCertificateManager.ServiceName }}
+      annotations:
+        # roll the deployment when the Spring boot environment variable configmap changes
+        checksum/spring-boot-env-configmap: {{ include (print $.Template.BasePath "/opennms/spring-boot-env-configmap.yaml") . | sha256sum }}
     spec:
       {{- if .Values.NodeRestrictions.Enabled }}
       nodeSelector:                                                                                    
@@ -43,19 +46,27 @@ spec:
         - name: minion-certificate-manager-secrets
           secret:
             secretName: {{ .Values.OpenNMS.MinionCertificateManager.MtlsSecretName }}
+      volumes:
+        - name: spring-boot-app-config-volume
+          configMap:
+            name: spring-boot-app-config
       containers:
         - name: {{ .Values.OpenNMS.MinionCertificateManager.ServiceName }}
           image: {{ .Values.OpenNMS.MinionCertificateManager.Image }}
           imagePullPolicy: {{ .Values.OpenNMS.MinionCertificateManager.ImagePullPolicy }}
           env:
             - name: JAVA_TOOL_OPTIONS
-              value: "-agentlib:jdwp=transport=dt_socket,server=y,address=5005,suspend=n,quiet=y"  # FIXME: Permanent debug port, enable only for dev mode
+              value: "-javaagent:agent/opentelemetry-javaagent.jar -agentlib:jdwp=transport=dt_socket,server=y,address=5005,suspend=n,quiet=y"  # FIXME: Permanent debug port, enable only for dev mode
             - name: KEYCLOAK_BASE_URL
               value: "http://{{ .Values.Keycloak.ServiceName }}:8080/auth/"
             - name: KEYCLOAK_REALM
               value: "{{ .Values.Keycloak.RealmName }}"
             - name: GRPC_SERVER_PORT
               value: "{{ .Values.OpenNMS.MinionCertificateManager.Port }}"
+            {{- include "deployment.env" .Values.OpenNMS.MinionCertificateManager | nindent 12 }}
+          envFrom:
+          - configMapRef:
+              name: spring-boot-env
           ports:
             - name: grpc
               containerPort: {{ .Values.OpenNMS.MinionCertificateManager.Port }}
@@ -66,6 +77,9 @@ spec:
             - name: minion-certificate-manager-secrets
               mountPath: "/run/secrets/mtls"
               readOnly: true
+          volumeMounts:
+            - name: spring-boot-app-config-volume
+              mountPath: "/app/config"
       {{- if .Values.OpenNMS.MinionCertificateManager.PrivateRepoEnabled }}
       imagePullSecrets:
         - name: image-credentials

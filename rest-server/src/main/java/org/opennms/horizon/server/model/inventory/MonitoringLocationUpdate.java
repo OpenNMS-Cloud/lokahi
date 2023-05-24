@@ -36,7 +36,7 @@ import lombok.Setter;
 public class MonitoringLocationUpdate {
     private long id;
     private String location;
-    private double longitude;
-    private double latitude;
+    private Double longitude;
+    private Double latitude;
     private String address;
 }

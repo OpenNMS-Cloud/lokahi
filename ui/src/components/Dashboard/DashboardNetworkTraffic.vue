@@ -27,6 +27,8 @@ import { format, fromUnixTime } from 'date-fns'
 import { useDashboardStore } from '@/store/Views/dashboardStore'
 import { optionsGraph } from './dashboardNetworkTraffic.config'
 import { ChartData } from '@/types'
+import { format as d3Format } from 'd3'
+import { ChartOptions } from 'chart.js'
 
 const { onThemeChange, isDark } = useTheme()
 
@@ -35,6 +37,7 @@ const networkTrafficIn = ref([] as [string, number][])
 const networkTrafficOut = ref([] as [string, number][])
 const dataGraph = ref({} as ChartData)
 const configGraph = ref({})
+const yAxisFormatter = d3Format('.3s')
 
 onMounted(async () => {
   await store.getNetworkTrafficInValues()
@@ -44,29 +47,36 @@ onMounted(async () => {
 //format data for the graph
 const formatValues = (list: [number, number][]): [string, number][] =>
   list.map((i) => {
-    const transformToDate = (val: number) => format(fromUnixTime(val), 'h a')
+    const transformToDate = (val: number) => format(fromUnixTime(val), 'kk:mm')
     const transformtoGb = (val: number) => val / 1e9
     return [transformToDate(i[0]), transformtoGb(i[1])]
   })
 
 const createConfigGraph = (list: number[]) => {
-  const options = { ...optionsGraph }
+  const options: Required<ChartOptions> = { ...optionsGraph }
   options.aspectRatio = 1.4
+  options.scales.y = {
+    ticks: {
+      callback: (value) => yAxisFormatter(Number(value)),
+      maxTicksLimit: 8
+    },
+    position: 'right'
+  }
   options.scales.x = {
     grid: {
       display: false
     },
     ticks: {
-      callback(val: number, index: number): string {
+      callback(val, index): string {
         //show date at the beginning and at the end
         const lastIndex = store.totalNetworkTrafficIn.length - 1
 
         if ((index === 0 || index === lastIndex) && list[index]) {
-          const date = format(fromUnixTime(list[index]), 'LLL d')
-          return (this as any).getLabelForValue(date)
+          return format(fromUnixTime(list[index]), 'LLL d')
         }
-        return index % 2 === 0 ? (this as any).getLabelForValue(val) : ''
-      }
+        return index % 2 === 0 ? this.getLabelForValue(Number(val)) : ''
+      },
+      maxTicksLimit: 12
     }
   }
   return options

@@ -15,6 +15,9 @@ spec:
       labels:
         appdomain: opennms
         app: {{ .Values.OpenNMS.MinionCertificateVerifier.ServiceName }}
+      annotations:
+        # roll the deployment when the Spring boot environment variable configmap changes
+        checksum/spring-boot-env-configmap: {{ include (print $.Template.BasePath "/opennms/spring-boot-env-configmap.yaml") . | sha256sum }}
     spec:
       {{- if .Values.NodeRestrictions.Enabled }}
       nodeSelector:                                                                                    
@@ -35,16 +38,27 @@ spec:
                 values:                                                                                
                 - {{ .Values.NodeRestrictions.Value }}                                                 
       {{- end }}
+      volumes:
+        - name: spring-boot-app-config-volume
+          configMap:
+            name: spring-boot-app-config
       containers:
         - name: {{ .Values.OpenNMS.MinionCertificateVerifier.ServiceName }}
           image: {{ .Values.OpenNMS.MinionCertificateVerifier.Image }}
           imagePullPolicy: {{ .Values.OpenNMS.MinionCertificateVerifier.ImagePullPolicy }}
           env:
             - name: JAVA_TOOL_OPTIONS
-              value: "-agentlib:jdwp=transport=dt_socket,server=y,address=5005,suspend=n,quiet=y"  # FIXME: Permanent debug port, enable only for dev mode
+              value: "-javaagent:agent/opentelemetry-javaagent.jar -agentlib:jdwp=transport=dt_socket,server=y,address=5005,suspend=n,quiet=y"  # FIXME: Permanent debug port, enable only for dev mode
+            {{- include "deployment.env" .Values.OpenNMS.MinionCertificateVerifier | nindent 12 }}
+          envFrom:
+          - configMapRef:
+              name: spring-boot-env
           ports:
             - name: http
               containerPort: {{ .Values.OpenNMS.MinionCertificateVerifier.Port }}
+          volumeMounts:
+            - name: spring-boot-app-config-volume
+              mountPath: "/app/config"
       {{- if .Values.OpenNMS.MinionCertificateVerifier.PrivateRepoEnabled }}
       imagePullSecrets:
         - name: image-credentials

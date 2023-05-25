@@ -2,6 +2,9 @@ fragment LocationsParts on Query {
   findAllLocations {
     id
     location
+    address
+    longitude
+    latitude
     # may required
     # status
     # expired
@@ -16,5 +19,8 @@ query SearchLocation($searchTerm: String) {
   searchLocation(searchTerm: $searchTerm) {
     id
     location
+    address
+    longitude
+    latitude
   }
 }

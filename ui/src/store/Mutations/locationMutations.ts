@@ -1,20 +1,26 @@
-import { defineStore } from 'pinia'
-import { useMutation } from 'villus'
-import { CreateLocationDocument, UpdateLocationDocument, DeleteLocationDocument, Location } from '@/types/graphql'
+import {defineStore} from 'pinia'
+import {useMutation} from 'villus'
+import {
+  CreateLocationDocument,
+  UpdateLocationDocument,
+  DeleteLocationDocument,
+  MonitoringLocationCreateInput,
+  MonitoringLocationUpdateInput
+} from '@/types/graphql'
 
 export const useLocationMutations = defineStore('locationMutations', () => {
-  const createLocation = async (payload: Location) => {
-    const { execute, error } = useMutation(CreateLocationDocument)
+  const createLocation = async (location: MonitoringLocationCreateInput) => {
+    const {execute: execute, error} = useMutation(CreateLocationDocument)
 
-    await execute(payload) // TODO: api needs to save address/long/lat
+    await execute({'location': location})
 
     return error
   }
 
-  const updateLocation = async (payload: {id: string, location: string}) => {
+  const updateLocation = async (location: MonitoringLocationUpdateInput) => {
     const { execute, error } = useMutation(UpdateLocationDocument)
 
-    await execute(payload) // TODO: api needs to save address/long/lat
+    await execute({'location': location})
 
     return error
   }

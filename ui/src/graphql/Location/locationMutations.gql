@@ -1,17 +1,23 @@
 #create
-mutation CreateLocation($location: String) {
-  createLocation(location: $location) {
+mutation CreateLocation($location: MonitoringLocationCreateInput!) {
+  createLocation(location: $location){
     id
     location
+    address
+    longitude
+    latitude
     tenantId
   }
 }
 
 #update
-mutation UpdateLocation($id: Long!, $location: String!) {
-  updateLocation(id: $id, location: $location) {
+mutation UpdateLocation($location: MonitoringLocationUpdateInput) {
+  updateLocation(location: $location) {
     id
     location
+    address
+    longitude
+    latitude
     tenantId
   }
 }

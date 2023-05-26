@@ -114,7 +114,7 @@ const deleteHandler = async () => {
     // Timeout because minion may not be available right away
     // TODO: Replace timeout with websocket/polling
     setTimeout(() => {
-      inventoryQueries.fetch()
+      inventoryQueries.fetchByState(props.node.type)
     }, 350)
   }
 }

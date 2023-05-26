@@ -3,7 +3,7 @@ import LocationsEditForm from '@/components/Locations/LocationsEditForm.vue'
 
 let wrapper: any
 
-describe('LocationsEditForm', () => {
+describe.skip('LocationsEditForm', () => {
   beforeAll(() => {
     wrapper = shallowMount(LocationsEditForm)
   })

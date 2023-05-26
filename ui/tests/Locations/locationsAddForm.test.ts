@@ -1,11 +1,14 @@
-import { shallowMount } from '@vue/test-utils'
+import mount from '../mountWithPiniaVillus'
 import LocationsAddForm from '@/components/Locations/LocationsAddForm.vue'
 
 let wrapper: any
 
 describe('LocationsAddForm', () => {
   beforeAll(() => {
-    wrapper = shallowMount(LocationsAddForm)
+    wrapper = mount({
+      component: LocationsAddForm,
+      shallow: false
+    })
   })
   afterAll(() => {
     wrapper.unmount()

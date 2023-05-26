@@ -32,12 +32,14 @@
         <LocationsList
           v-if="locationsList"
           :items="locationsList"
+          @showInstructions="showInstructions = true"
         />
       </div>
       <div class="content-right">
         <LocationsMinionsList
           v-if="locationStore.displayType === DisplayType.LIST && minionsList"
           :minions="minionsList"
+          @showInstructions="showInstructions = true"
         />
         <LocationsAddForm
           v-if="locationStore.displayType === DisplayType.ADD"
@@ -50,6 +52,10 @@
       </div>
     </div>
   </div>
+  <LocationsInstructions
+    :isOpen="showInstructions"
+    @drawerClosed="() => (showInstructions = false)"
+  />
 </template>
 
 <script lang="ts" setup>
@@ -61,6 +67,7 @@ import LocationsList from '@/components/Locations/LocationsList.vue'
 import { DisplayType } from '@/types/locations.d'
 
 const locationStore = useLocationStore()
+const showInstructions = ref(false)
 
 const locationsList = computed(() => locationStore.locationsList)
 const minionsList = computed(() => locationStore.minionsList)

@@ -40,6 +40,7 @@ import org.opennms.cloud.grpc.minion_gateway.MinionIdentity;
 import org.opennms.horizon.grpc.echo.contract.EchoRequest;
 import org.opennms.horizon.grpc.echo.contract.EchoResponse;
 import org.opennms.horizon.grpc.heartbeat.contract.TenantLocationSpecificHeartbeatMessage;
+import org.opennms.horizon.inventory.service.MonitoringLocationService;
 import org.opennms.horizon.inventory.service.MonitoringSystemService;
 import org.opennms.taskset.contract.MonitorResponse;
 import org.opennms.taskset.contract.MonitorType;
@@ -76,6 +77,7 @@ public class MinionHeartbeatConsumer {
     @Value("${kafka.topics.task-set-results:" + DEFAULT_TASK_RESULTS_TOPIC + "}")
     private String kafkaTopic;
     private final MonitoringSystemService service;
+    private final MonitoringLocationService locationService;
 
     private final Map<String, Long> rpcMaps = new ConcurrentHashMap<>();
 
@@ -90,6 +92,11 @@ public class MinionHeartbeatConsumer {
             log.info("Received heartbeat message for minion: tenant-id={}; location={}; system-id={}",
                 tenantId, location, message.getIdentity().getSystemId());
 
+            var optionalLocation = locationService.findByLocationAndTenantId(location, tenantId);
+            if (optionalLocation.isEmpty()) {
+                log.warn("Received heartbeat from unknown location {}", location);
+                return;
+            }
             service.addMonitoringSystemFromHeartbeat(message);
 
             String systemId = message.getIdentity().getSystemId();

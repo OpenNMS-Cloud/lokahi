@@ -1,12 +1,8 @@
 package org.opennms.horizon.inventory.service;
 
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.opennms.cloud.grpc.minion.Identity;
-import org.opennms.horizon.grpc.heartbeat.contract.HeartbeatMessage;
 import org.opennms.horizon.grpc.heartbeat.contract.TenantLocationSpecificHeartbeatMessage;
 import org.opennms.horizon.inventory.dto.MonitoringSystemDTO;
 import org.opennms.horizon.inventory.exception.LocationNotFoundException;
@@ -18,8 +14,9 @@ import org.opennms.horizon.inventory.repository.MonitoringSystemRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -64,7 +61,7 @@ public class MonitoringSystemService {
         }
 
         // Asynchronously send config updates to Minion
-        configUpdateService.sendConfigUpdate(message.getTenantId(), monitoringSystem.getMonitoringLocation().getLocation());
+        configUpdateService.sendConfigUpdate(message.getTenantId(), message.getLocation());
     }
 
     @Transactional

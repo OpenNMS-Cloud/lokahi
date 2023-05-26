@@ -26,43 +26,31 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.alertservice.config;
+package org.opennms.horizon.inventory.cucumber.steps;
 
-import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
-import org.springframework.boot.context.properties.ConfigurationProperties;
+import io.cucumber.java.en.Given;
+import io.grpc.StatusRuntimeException;
+import org.junit.jupiter.api.Assertions;
+import org.opennms.horizon.inventory.cucumber.InventoryBackgroundHelper;
+import org.opennms.horizon.inventory.dto.MonitoringLocationCreateDTO;
+import org.opennms.horizon.inventory.dto.MonitoringLocationDTO;
 
+public class CommonStepDefinitions {
 
-@Data
-@ConfigurationProperties(prefix = "kafka.topics")
-public class KafkaTopicProperties {
+    private final InventoryBackgroundHelper backgroundHelper;
 
-    private String event;
-
-    private String tagOperation;
-
-    private String alert;
-
-    private String nodeChanged;
-
-    private String monitoringPolicy;
-
-    private final CreateTopics createTopics = new CreateTopics();
-
-    @Data
-    public static class CreateTopics {
-        private Boolean enabled;
-        private final TopicConfig alert = new TopicConfig();
-        private final TopicConfig monitoringPolicy = new TopicConfig();
-        private final TopicConfig nodeChanged = new TopicConfig();
+    public CommonStepDefinitions(InventoryBackgroundHelper backgroundHelper) {
+        this.backgroundHelper = backgroundHelper;
     }
 
-    @Data
-    public static class TopicConfig {
-        private String name;
-        private Integer partitions = 10;
-        private Short replicas = 1;
-        private Boolean compact = false;
+    @Given("[Common] Create {string} Location")
+    public void createLocation(String location) {
+        var locationServiceBlockingStub = backgroundHelper.getMonitoringLocationStub();
+        try {
+            var locationDto = locationServiceBlockingStub.createLocation(MonitoringLocationCreateDTO.newBuilder().setLocation(location).build());
+            Assertions.assertNotNull(locationDto);
+        } catch (StatusRuntimeException e) {
+            // catch duplicate location
+        }
     }
 }

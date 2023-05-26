@@ -6,6 +6,7 @@ Feature: Active Discovery Tagging
     Given [ActiveDiscovery] Grpc TenantId "tenant-stream"
     Given [ActiveDiscovery] Grpc location "test-location"
     Given [ActiveDiscovery] Create Grpc Connection for Inventory
+    Given [Common] Create "location" Location
 
   Scenario: Create new tags on active discovery
     Given A new active discovery

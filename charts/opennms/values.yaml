@@ -4,6 +4,10 @@ Protocol: https #set depending on TLS.Enabled, do not change
 OpenShift: false
 OpenNMS:
   global:
+    springBoot:
+      env: {}
+    kafkaClient:
+      bootstrapServers: onms-kafka:9092
     enableJsonLogging: false
     openTelemetry:
       otlpTracesEndpoint: null
@@ -40,6 +44,7 @@ OpenNMS:
         Memory: 256Mi
     PrivateRepoEnabled: false
     FlowIngestorUrl: flows.onms-dp-dev.dev.nonprod.dataservice.opennms.com:443
+    kafkaSecretName: ~
   UI:
     Path: /
     ServiceName: opennms-ui
@@ -121,6 +126,7 @@ OpenNMS:
         grpc_send_timeout "1200s";
         client_body_timeout "1200s";
     PrivateRepoEnabled: false
+    kafkaSecretName: ~
 
 
   Inventory:
@@ -142,6 +148,7 @@ OpenNMS:
         Memory: 250Mi
     EncryptionKey: ~
     PrivateRepoEnabled: false
+    kafkaSecretName: ~
   Alert:
     ServiceName: opennms-alert
     Image: opennms/horizon-stream-alert
@@ -160,7 +167,8 @@ OpenNMS:
         Cpu: 100m
         Memory: 250Mi
     PrivateRepoEnabled: false
-  Notification: 
+    kafkaSecretName: ~
+  Notification:
     ServiceName: opennms-notifications
     Image: opennms/horizon-stream-notification
     ImagePullPolicy: IfNotPresent
@@ -177,6 +185,7 @@ OpenNMS:
         Cpu: 100m
         Memory: 250Mi
     PrivateRepoEnabled: false
+    kafkaSecretName: ~
   Events:
     ServiceName: opennms-events
     Image: opennms/horizon-stream-events
@@ -311,10 +320,6 @@ Grafana:
 Cortex:
   Enabled: true
   ServiceName: cortex
-  Host: cortex
-  PathRead: /prometheus/api/v1
-  PathWrite: /api/v1/push
-  Protocol: http
   Port: 9000
   Image: cortexproject/cortex:v1.14.0
   Resources:
@@ -324,8 +329,14 @@ Cortex:
     Requests:
       Cpu: 100m
       Memory: 100Mi
-kafkaClient:
-  bootstrapServers: onms-kafka:9092
+CortexClient:
+  HostRead: cortex
+  HostWrite: cortex
+  PathRead: /prometheus/api/v1
+  PathWrite: /api/v1/push
+  Protocol: http
+  PortRead: 9000
+  PortWrite: 9000
 Kafka:
   Enabled: true
   ServiceName: onms-kafka

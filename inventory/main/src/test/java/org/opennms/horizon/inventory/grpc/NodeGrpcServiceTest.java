@@ -52,6 +52,7 @@ import org.opennms.horizon.inventory.dto.NodeIdList;
 import org.opennms.horizon.inventory.dto.NodeIdQuery;
 import org.opennms.horizon.inventory.dto.NodeList;
 import org.opennms.horizon.inventory.exception.EntityExistException;
+import org.opennms.horizon.inventory.exception.LocationNotFoundException;
 import org.opennms.horizon.inventory.mapper.NodeMapper;
 import org.opennms.horizon.inventory.model.MonitoringLocation;
 import org.opennms.horizon.inventory.model.Node;
@@ -150,7 +151,7 @@ public class NodeGrpcServiceTest {
      * Verify the creation of a new node, and successful send of task updates.
      */
     @Test
-    void testCreateNodeNewValidManagementIpSuccessfulSendTasks() throws EntityExistException {
+    void testCreateNodeNewValidManagementIpSuccessfulSendTasks() throws EntityExistException, LocationNotFoundException {
         Runnable runnable = commonTestCreateNode();
 
         // Verify the lambda execution
@@ -162,7 +163,7 @@ public class NodeGrpcServiceTest {
      * Verify the creation of a new node with no management IP address
      */
     @Test
-    void testCreateNodeNoManagementIp() throws EntityExistException {
+    void testCreateNodeNoManagementIp() throws EntityExistException, LocationNotFoundException {
         //
         // Setup test data and interactions
         //
@@ -206,7 +207,7 @@ public class NodeGrpcServiceTest {
      * Verify the creation of a new node, and successful send of task updates.
      */
     @Test
-    void testCreateNodeEntityExistException() throws EntityExistException {
+    void testCreateNodeEntityExistException() throws EntityExistException, LocationNotFoundException {
         //
         // Setup test data and interactions
         //
@@ -229,6 +230,38 @@ public class NodeGrpcServiceTest {
             new StatusRuntimeExceptionMatcher(
                 this::statusExceptionMatchesAlreadyExistsValue,
                 NodeGrpcService.IP_ADDRESS_ALREADY_EXISTS_FOR_LOCATION_MSG);
+
+        Mockito.verify(mockNodeDTOStreamObserver).onError(Mockito.argThat(matcher));
+        verify(mockNodeService).createNode(testNodeCreateDTO, ScanType.NODE_SCAN, "x-tenant-id-x");
+    }
+
+    /**
+     * Verify new node is not created if the location doesn't exist.
+     */
+    @Test
+    void testCreateNodeLocationNotFoundException() throws EntityExistException, LocationNotFoundException {
+        //
+        // Setup test data and interactions
+        //
+        testNodeCreateDTO =
+            NodeCreateDTO.newBuilder()
+                .setManagementIp("127.0.0.1")
+                .setLocation("x-location-x")
+                .build();
+
+        doThrow(new LocationNotFoundException("Location not found")).when(mockNodeService).createNode(testNodeCreateDTO, ScanType.NODE_SCAN, "x-tenant-id-x");
+        //
+        // Execute
+        //
+        target.createNode(testNodeCreateDTO, mockNodeDTOStreamObserver);
+
+        //
+        // Validate
+        //
+        var matcher =
+            new StatusRuntimeExceptionMatcher(
+                this::statusExceptionMatchesNotFoundValue,
+                NodeGrpcService.LOCATION_NOT_FOUND);
 
         Mockito.verify(mockNodeDTOStreamObserver).onError(Mockito.argThat(matcher));
         verify(mockNodeService).createNode(testNodeCreateDTO, ScanType.NODE_SCAN, "x-tenant-id-x");
@@ -683,7 +716,7 @@ public class NodeGrpcServiceTest {
 // Internals
 //----------------------------------------
 
-    private Runnable commonTestCreateNode() throws EntityExistException {
+    private Runnable commonTestCreateNode() throws EntityExistException, LocationNotFoundException {
         //
         // Setup test data and interactions
         //
@@ -764,6 +797,16 @@ public class NodeGrpcServiceTest {
 
     private boolean statusExceptionMatchesAlreadyExistsValue(Status status, Object expectedMessage) {
         if (status.getCode().value() == Code.ALREADY_EXISTS_VALUE) {
+            if (status.getDescription() != null) {
+                return status.getDescription().equals(expectedMessage);
+            }
+        }
+
+        return false;
+    }
+
+    private boolean statusExceptionMatchesNotFoundValue(Status status, Object expectedMessage) {
+        if (status.getCode().value() == Code.NOT_FOUND_VALUE) {
             if (status.getDescription() != null) {
                 return status.getDescription().equals(expectedMessage);
             }

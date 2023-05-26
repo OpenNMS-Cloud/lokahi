@@ -9,6 +9,7 @@ import org.opennms.cloud.grpc.minion.Identity;
 import org.opennms.horizon.grpc.heartbeat.contract.HeartbeatMessage;
 import org.opennms.horizon.grpc.heartbeat.contract.TenantLocationSpecificHeartbeatMessage;
 import org.opennms.horizon.inventory.dto.MonitoringSystemDTO;
+import org.opennms.horizon.inventory.exception.LocationNotFoundException;
 import org.opennms.horizon.inventory.mapper.MonitoringSystemMapper;
 import org.opennms.horizon.inventory.model.MonitoringLocation;
 import org.opennms.horizon.inventory.model.MonitoringSystem;
@@ -34,46 +35,36 @@ public class MonitoringSystemService {
         return all
             .stream()
             .map(mapper::modelToDTO)
-            .collect(Collectors.toList());
+            .toList();
     }
 
     public Optional<MonitoringSystemDTO> findBySystemId(String systemId, String tenantId) {
         return systemRepository.findBySystemIdAndTenantId(systemId, tenantId).map(mapper::modelToDTO);
     }
 
-    public void addMonitoringSystemFromHeartbeat(TenantLocationSpecificHeartbeatMessage message) {
-        String tenantId = message.getTenantId();
-        String location = message.getLocation();
+    public void addMonitoringSystemFromHeartbeat(TenantLocationSpecificHeartbeatMessage message) throws LocationNotFoundException {
         Identity identity = message.getIdentity();
-
-        Optional<MonitoringSystem> msOp = systemRepository.findBySystemIdAndTenantId(identity.getSystemId(), tenantId);
-        if(msOp.isEmpty()) {
-            Optional<MonitoringLocation> locationOp = locationRepository.findByLocationAndTenantId(location, tenantId);
-            MonitoringLocation monitoringLocatgion = new MonitoringLocation();
-            if(locationOp.isPresent()) {
-                monitoringLocatgion = locationOp.get();
-            } else {
-                monitoringLocatgion.setLocation(location);
-                monitoringLocatgion.setTenantId(tenantId);
-                var newLocation = locationRepository.save(monitoringLocatgion);
-                // Send config updates asynchronously to Minion
-                configUpdateService.sendConfigUpdate(newLocation.getTenantId(), newLocation.getLocation());
-
-            }
-
-            MonitoringSystem monitoringSystem = new MonitoringSystem();
+        MonitoringSystem monitoringSystem;
+        Optional<MonitoringSystem> msOp = systemRepository.findBySystemIdAndTenantId(identity.getSystemId(), message.getTenantId());
+        if (msOp.isEmpty()) {
+            MonitoringLocation location = locationRepository.findByLocationAndTenantId(message.getLocation(), message.getTenantId())
+                .orElseThrow(() -> new LocationNotFoundException("Location not found " + message.getLocation()));
+            monitoringSystem = new MonitoringSystem();
             monitoringSystem.setSystemId(identity.getSystemId());
-            monitoringSystem.setMonitoringLocation(monitoringLocatgion);
-            monitoringSystem.setTenantId(tenantId);
+            monitoringSystem.setMonitoringLocation(location);
+            monitoringSystem.setTenantId(message.getTenantId());
             monitoringSystem.setLastCheckedIn(LocalDateTime.now());
             monitoringSystem.setLabel(identity.getSystemId().toUpperCase());
-            monitoringSystem.setMonitoringLocationId(monitoringLocatgion.getId());
+            monitoringSystem.setMonitoringLocationId(location.getId());
             systemRepository.save(monitoringSystem);
         } else {
-            MonitoringSystem monitoringSystem = msOp.get();
+            monitoringSystem = msOp.get();
             monitoringSystem.setLastCheckedIn(LocalDateTime.now());
             systemRepository.save(monitoringSystem);
         }
+
+        // Asynchronously send config updates to Minion
+        configUpdateService.sendConfigUpdate(message.getTenantId(), monitoringSystem.getMonitoringLocation().getLocation());
     }
 
     @Transactional
@@ -86,7 +77,7 @@ public class MonitoringSystemService {
             var tenantId = monitoringSystem.getTenantId();
             systemRepository.deleteById(id);
             var retrieved = systemRepository.findByMonitoringLocationIdAndTenantId(optionalMS.get().getMonitoringLocationId(), tenantId);
-            if (retrieved.size() == 0) {
+            if (retrieved.isEmpty()) {
                 locationRepository.delete(monitoringSystem.getMonitoringLocation());
                 configUpdateService.removeConfigsFromTaskSet(tenantId, location);
             }

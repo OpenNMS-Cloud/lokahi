@@ -1,6 +1,12 @@
 package org.opennms.horizon.it;
 
 public abstract class GQLQueryConstants {
+    public static final String CREATE_LOCATION = "mutation createLocation($location: String) { createLocation(location: {location: $location}) { id, location } }";
+
+    public static final String DELETE_LOCATION = "mutation deleteLocation($id: Long!) { deleteLocation(id: $id) }";
+
+    public static final String LIST_LOCATIONS_QUERY = "query { findAllLocations { id, location } }";
+
     public static final String LIST_MINIONS_QUERY = "query { findAllMinions {id, label, systemId, status, location { location } } }";
 
     public static final String GET_LABELED_METRICS_QUERY =

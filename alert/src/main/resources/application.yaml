@@ -50,6 +50,7 @@ kafka:
     monitoring-policy: "monitoring-policy"
     node-changed: "node"
     create-topics:
+      enabled: true
       alert:
         name: "alerts"
       monitoring-policy:

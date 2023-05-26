@@ -6,6 +6,7 @@ Feature: Azure Active Discovery
     Given [Azure] Grpc TenantId "tenant-stream"
     Given [Azure] Grpc location "test-location"
     Given [Azure] Create Grpc Connection for Inventory
+    Given [Common] Create "Default" Location
 
   Scenario: Create azure active discovery without tenant id
     Given Clear tenant id

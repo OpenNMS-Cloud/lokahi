@@ -44,6 +44,7 @@ import org.opennms.horizon.inventory.dto.TagCreateDTO;
 import org.opennms.horizon.inventory.dto.TagCreateListDTO;
 import org.opennms.horizon.inventory.dto.TagEntityIdDTO;
 import org.opennms.horizon.inventory.exception.EntityExistException;
+import org.opennms.horizon.inventory.exception.LocationNotFoundException;
 import org.opennms.horizon.inventory.model.IpInterface;
 import org.opennms.horizon.inventory.model.MonitoredServiceType;
 import org.opennms.horizon.inventory.model.Node;
@@ -158,6 +159,8 @@ public class ScannerResponseService {
                     nodeService.sendNewNodeTaskSetAsync(node, location, icmpDiscovery);
                 } catch (EntityExistException e) {
                     log.error("Error while adding new device for tenant {} at location {} with IP {}", tenantId, location, pingResponse.getIpAddress());
+                } catch (LocationNotFoundException e) {
+                    log.error("Location not found while adding new device for tenant {} at location {} with IP {}", tenantId, location, pingResponse.getIpAddress());
                 }
             }
 
@@ -210,8 +213,9 @@ public class ScannerResponseService {
                     .addAllTags(tags).build());
             } catch (EntityExistException e) {
                 log.error("Error while adding new Azure node for tenant {} at location {}", tenantId, location);
+            } catch (LocationNotFoundException e) {
+                log.error("Location not found while adding new Azure device for tenant {} at location {}", tenantId, location);
             }
-
         }
     }
 

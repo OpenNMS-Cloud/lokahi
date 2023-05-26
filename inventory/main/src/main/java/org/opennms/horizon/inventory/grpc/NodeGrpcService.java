@@ -53,6 +53,7 @@ import org.opennms.horizon.inventory.dto.NodeList;
 import org.opennms.horizon.inventory.dto.NodeServiceGrpc;
 import org.opennms.horizon.inventory.dto.TagNameQuery;
 import org.opennms.horizon.inventory.exception.EntityExistException;
+import org.opennms.horizon.inventory.exception.LocationNotFoundException;
 import org.opennms.horizon.inventory.mapper.NodeMapper;
 import org.opennms.horizon.inventory.model.Node;
 import org.opennms.horizon.inventory.service.IpInterfaceService;
@@ -78,6 +79,7 @@ public class NodeGrpcService extends NodeServiceGrpc.NodeServiceImplBase {
     public static final String INVALID_REQUEST_LOCATION_AND_IP_NOT_EMPTY_MSG = "Invalid Request Query, location/ipAddress can't be empty";
     public static final String TENANT_ID_IS_MISSING_MSG = "Tenant ID is missing";
     public static final String IP_ADDRESS_ALREADY_EXISTS_FOR_LOCATION_MSG = "Ip address already exists for location";
+    public static final String LOCATION_NOT_FOUND = "Location not found";
     public static final String EMPTY_TENANT_ID_MSG = "Tenant Id can't be empty";
 
     private static final Logger DEFAULT_LOGGER = LoggerFactory.getLogger(NodeGrpcService.class);
@@ -101,7 +103,7 @@ public class NodeGrpcService extends NodeServiceGrpc.NodeServiceImplBase {
     @Override
     public void createNode(NodeCreateDTO request, StreamObserver<NodeDTO> responseObserver) {
         String tenantId = tenantLookup.lookupTenantId(Context.current()).orElseThrow();
-        boolean valid = validateInput(request, tenantId, responseObserver);
+        boolean valid = validateInput(request, responseObserver);
         if (valid) {
             try {
                 Node node = nodeService.createNode(request, ScanType.NODE_SCAN, tenantId);
@@ -113,6 +115,12 @@ public class NodeGrpcService extends NodeServiceGrpc.NodeServiceImplBase {
                 Status status = Status.newBuilder()
                     .setCode(Code.ALREADY_EXISTS_VALUE)
                     .setMessage(IP_ADDRESS_ALREADY_EXISTS_FOR_LOCATION_MSG)
+                    .build();
+                responseObserver.onError(StatusProto.toStatusRuntimeException(status));
+            } catch (LocationNotFoundException e) {
+                Status status = Status.newBuilder()
+                    .setCode(Code.NOT_FOUND_VALUE)
+                    .setMessage(LOCATION_NOT_FOUND)
                     .build();
                 responseObserver.onError(StatusProto.toStatusRuntimeException(status));
             }
@@ -217,7 +225,7 @@ public class NodeGrpcService extends NodeServiceGrpc.NodeServiceImplBase {
 
             Status status = Status.newBuilder()
                 .setCode(Code.INVALID_ARGUMENT_VALUE)
-                .setMessage("Tenant Id can't be empty")
+                .setMessage(EMPTY_TENANT_ID_MSG)
                 .build();
             responseObserver.onError(StatusProto.toStatusRuntimeException(status));
         });
@@ -244,7 +252,7 @@ public class NodeGrpcService extends NodeServiceGrpc.NodeServiceImplBase {
 
             Status status = Status.newBuilder()
                 .setCode(Code.INVALID_ARGUMENT_VALUE)
-                .setMessage("Tenant Id can't be empty")
+                .setMessage(EMPTY_TENANT_ID_MSG)
                 .build();
             responseObserver.onError(StatusProto.toStatusRuntimeException(status));
         });
@@ -302,14 +310,12 @@ public class NodeGrpcService extends NodeServiceGrpc.NodeServiceImplBase {
 
     @Override
     public void getIpInterfaceFromQuery(NodeIdQuery request, StreamObserver<IpInterfaceDTO> responseObserver) {
-        tenantLookup.lookupTenantId(Context.current()).ifPresentOrElse(tenantId -> {
-            ipInterfaceService.findByIpAddressAndLocationAndTenantId(request.getIpAddress(), request.getLocation(), tenantId).ifPresentOrElse(ipInterface -> {
-                responseObserver.onNext(ipInterface);
-                responseObserver.onCompleted();
-            }, () -> responseObserver.onError(StatusProto.toStatusRuntimeException(Status.newBuilder()
-                .setCode(Code.NOT_FOUND_VALUE)
-                .setMessage(String.format("IpInterface with IP: %s doesn't exist.", request.getIpAddress())).build())));
-        }, () -> responseObserver.onError(StatusProto.toStatusRuntimeException(createTenantIdMissingStatus())));
+        tenantLookup.lookupTenantId(Context.current()).ifPresentOrElse(tenantId -> ipInterfaceService.findByIpAddressAndLocationAndTenantId(request.getIpAddress(), request.getLocation(), tenantId).ifPresentOrElse(ipInterface -> {
+            responseObserver.onNext(ipInterface);
+            responseObserver.onCompleted();
+        }, () -> responseObserver.onError(StatusProto.toStatusRuntimeException(Status.newBuilder()
+            .setCode(Code.NOT_FOUND_VALUE)
+            .setMessage(String.format("IpInterface with IP: %s doesn't exist.", request.getIpAddress())).build()))), () -> responseObserver.onError(StatusProto.toStatusRuntimeException(createTenantIdMissingStatus())));
     }
 
     @Override
@@ -334,18 +340,16 @@ public class NodeGrpcService extends NodeServiceGrpc.NodeServiceImplBase {
 
     }
 
-    private boolean validateInput(NodeCreateDTO request, String tenantId, StreamObserver<NodeDTO> responseObserver) {
+    private boolean validateInput(NodeCreateDTO request, StreamObserver<NodeDTO> responseObserver) {
         boolean valid = true;
 
-        if (request.hasManagementIp()) {
-            if (!InetAddresses.isInetAddress(request.getManagementIp())) {
+        if (request.hasManagementIp() && (!InetAddresses.isInetAddress(request.getManagementIp()))) {
                 valid = false;
                 Status status = Status.newBuilder()
                     .setCode(Code.INVALID_ARGUMENT_VALUE)
                     .setMessage("Bad management_ip: " + request.getManagementIp())
                     .build();
                 responseObserver.onError(StatusProto.toStatusRuntimeException(status));
-            }
         }
 
         return valid;
@@ -361,8 +365,8 @@ public class NodeGrpcService extends NodeServiceGrpc.NodeServiceImplBase {
     }
 
     private void sendScannerTasksToMinion(Map<String, List<NodeDTO>> locationNodes, String tenantId) {
-        for(String location: locationNodes.keySet()) {
-            scannerService.sendNodeScannerTask(locationNodes.get(location), location, tenantId);
+        for(Map.Entry<String, List<NodeDTO>> entry: locationNodes.entrySet()) {
+            scannerService.sendNodeScannerTask(entry.getValue(), entry.getKey(), tenantId);
         }
     }
 }

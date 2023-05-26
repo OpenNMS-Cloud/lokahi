@@ -6,6 +6,7 @@ Feature: Node
     Given [Node] Grpc TenantId "node-tenant-stream"
     Given [Node] Grpc location "test-location"
     Given [Node] Create Grpc Connection for Inventory
+    Given [Common] Create "Default" Location
 
   Scenario: Add a node and verify list nodes by node label search returns result
     Given a new node with label "node-label", ip address "127.0.0.1" and location "Default"

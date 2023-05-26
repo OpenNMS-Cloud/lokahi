@@ -36,6 +36,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verifyNoInteractions;
 
 import org.junit.jupiter.api.AfterEach;
@@ -52,6 +53,7 @@ import org.opennms.horizon.inventory.dto.NodeCreateDTO;
 import org.opennms.horizon.inventory.dto.PassiveDiscoveryUpsertDTO;
 import org.opennms.horizon.inventory.exception.EntityExistException;
 import org.opennms.horizon.inventory.exception.InventoryRuntimeException;
+import org.opennms.horizon.inventory.exception.LocationNotFoundException;
 import org.opennms.horizon.inventory.model.Node;
 import org.opennms.horizon.inventory.model.Tag;
 import org.opennms.horizon.inventory.model.discovery.PassiveDiscovery;
@@ -107,10 +109,11 @@ class NodeMonitoringManagerTest {
     @AfterEach
     public void afterTest() {
         verifyNoMoreInteractions(nodeService);
+        verifyNoMoreInteractions(passiveDiscoveryService);
     }
 
     @Test
-    void testReceiveEventAndCreateNewNode() throws EntityExistException {
+    void testReceiveEventAndCreateNewNode() throws EntityExistException, LocationNotFoundException {
         doReturn(node).when(nodeService).createNode(any(NodeCreateDTO.class), eq(ScanType.NODE_SCAN), eq(tenantId));
         doReturn(passiveDiscovery).when(passiveDiscoveryRepository).findByTenantIdAndLocation(any(String.class), any(String.class));
         ArgumentCaptor<NodeCreateDTO> argumentCaptor = ArgumentCaptor.forClass(NodeCreateDTO.class);
@@ -140,7 +143,8 @@ class NodeMonitoringManagerTest {
     }
 
     @Test
-    void testEntityExistException() throws EntityExistException {
+    void testEntityExistException() throws EntityExistException, LocationNotFoundException {
+        doThrow(new EntityExistException("bad request")).when(nodeService).createNode(any(NodeCreateDTO.class), eq(ScanType.NODE_SCAN), eq(tenantId));
         ArgumentCaptor<NodeCreateDTO> argumentCaptor = ArgumentCaptor.forClass(NodeCreateDTO.class);
         nodeMonitoringManager.receiveTrapEvent(event.toByteArray());
         verify(nodeService).createNode(argumentCaptor.capture(), eq(ScanType.NODE_SCAN), eq(tenantId));
@@ -148,5 +152,6 @@ class NodeMonitoringManagerTest {
         assertThat(createDTO.getLocation()).isEqualTo(event.getLocation());
         assertThat(createDTO.getManagementIp()).isEqualTo(event.getIpAddress());
         assertThat(createDTO.getLabel()).endsWith(event.getIpAddress());
+        verifyNoInteractions(passiveDiscoveryService);
     }
 }

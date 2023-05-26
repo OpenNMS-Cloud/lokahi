@@ -7,6 +7,8 @@ Feature: Inventory Processing
     Given Grpc TenantId "tenant-stream"
     Given Grpc location "MINION"
     Given Create Grpc Connection for Inventory
+    Given [Common] Create "MINION" Location
+    Given [Common] Create "MINION-2" Location
 
   Scenario: Send an Heartbeat Message to Inventory and verify Minion and location are added
     Given Minion at location "MINION" with system Id "MINION-TEST-1"
@@ -16,8 +18,9 @@ Feature: Inventory Processing
 
   Scenario: Add a device with existing location and verify Device and Associated Task creation
     Given Label "test-label"
-    Given New Device IP Address "192.168.1.1"
-    Given Device Task IP address = "192.168.1.1"
+    Given New Device Location "MINION"
+    Given New Device IP Address "192.168.100.1"
+    Given Device Task IP address = "192.168.100.1"
     Then add a new device
     Then verify the device has an interface with the given IP address
     Then verify the new node return fields match
@@ -49,7 +52,7 @@ Feature: Inventory Processing
     Then verify the task set update is published for device with task suffix "icmp-monitor" within 30000ms
     Then verify the task set update is published for device with task suffix "snmp-monitor" within 30000ms
 
-  
+
   Scenario: Deletion of a device causes Task Definitions Removals to be Requested
     Given Existing Device IP Address "192.168.1.1"
     Given Existing Device Location "MINION"

@@ -40,6 +40,7 @@ import org.opennms.horizon.inventory.dto.NodeDTO;
 import org.opennms.horizon.inventory.dto.TagCreateListDTO;
 import org.opennms.horizon.inventory.dto.TagEntityIdDTO;
 import org.opennms.horizon.inventory.exception.EntityExistException;
+import org.opennms.horizon.inventory.exception.LocationNotFoundException;
 import org.opennms.horizon.inventory.mapper.IpInterfaceMapper;
 import org.opennms.horizon.inventory.mapper.NodeMapper;
 import org.opennms.horizon.inventory.mapper.SnmpInterfaceMapper;
@@ -150,24 +151,10 @@ public class NodeService {
         }
     }
 
-    private MonitoringLocation saveMonitoringLocation(NodeCreateDTO request, String tenantId) {
-        String location = StringUtils.isEmpty(request.getLocation()) ? GrpcConstants.DEFAULT_LOCATION : request.getLocation();
-        Optional<MonitoringLocation> found =
-            monitoringLocationRepository.findByLocationAndTenantId(location, tenantId);
+    private MonitoringLocation findMonitoringLocation(NodeCreateDTO request, String tenantId) throws LocationNotFoundException {
+        Optional<MonitoringLocation> found = monitoringLocationRepository.findByLocationAndTenantId(request.getLocation(), tenantId);
 
-        if (found.isPresent()) {
-            return found.get();
-        } else {
-            MonitoringLocation newLocation = new MonitoringLocation();
-
-            newLocation.setTenantId(tenantId);
-            newLocation.setLocation(location);
-
-            MonitoringLocation saved = monitoringLocationRepository.save(newLocation);
-            // Asynchronously send config updates to Minion
-            configUpdateService.sendConfigUpdate(tenantId, saved.getLocation());
-            return saved;
-        }
+        return found.orElseThrow(() -> new LocationNotFoundException("Location not found " + request.getLocation()));
     }
 
     private Node saveNode(NodeCreateDTO request, MonitoringLocation monitoringLocation,
@@ -189,8 +176,8 @@ public class NodeService {
     }
 
     @Transactional
-    public Node createNode(NodeCreateDTO request, ScanType scanType, String tenantId) throws EntityExistException {
-        if(request.hasManagementIp()) { //Do we really want to create a node without managed IP?
+    public Node createNode(NodeCreateDTO request, ScanType scanType, String tenantId) throws EntityExistException, LocationNotFoundException {
+        if (request.hasManagementIp()) { //Do we really want to create a node without managed IP?
             Optional<IpInterface> ipInterfaceOpt = ipInterfaceRepository
                 .findByIpLocationTenantAndScanType(InetAddressUtils.getInetAddress(request.getManagementIp()), request.getLocation(), tenantId, scanType);
             if (ipInterfaceOpt.isPresent()) {
@@ -199,7 +186,7 @@ public class NodeService {
                 throw new EntityExistException("IP address " + request.getManagementIp() + " already exists in the system and belong to device " + ipInterface.getNode().getNodeLabel());
             }
         }
-        MonitoringLocation monitoringLocation = saveMonitoringLocation(request, tenantId);
+        MonitoringLocation monitoringLocation = findMonitoringLocation(request, tenantId);
         Node node = saveNode(request, monitoringLocation, scanType, tenantId);
         saveIpInterfaces(request, node, tenantId);
 

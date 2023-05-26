@@ -41,8 +41,10 @@ import org.opennms.horizon.inventory.SpringContextTestInitializer;
 import org.opennms.horizon.inventory.dto.MonitoredState;
 import org.opennms.horizon.inventory.dto.NodeCreateDTO;
 import org.opennms.horizon.inventory.exception.EntityExistException;
+import org.opennms.horizon.inventory.exception.LocationNotFoundException;
 import org.opennms.horizon.inventory.grpc.GrpcTestBase;
 import org.opennms.horizon.inventory.model.IpInterface;
+import org.opennms.horizon.inventory.model.MonitoringLocation;
 import org.opennms.horizon.inventory.model.Node;
 import org.opennms.horizon.inventory.model.SnmpInterface;
 import org.opennms.horizon.inventory.model.Tag;
@@ -139,6 +141,7 @@ class ScannerResponseServiceIntTest extends GrpcTestBase {
     @Test
     void testAzureAccept() throws Exception {
         AzureActiveDiscovery discovery = createAzureActiveDiscovery();
+        createLocation();
 
         AzureScanNetworkInterfaceItem interfaceItem = AzureScanNetworkInterfaceItem.newBuilder()
             .setId("/subscriptions/sub-id/resourceGroups/resource-group/providers/Microsoft.Network/NetworkInterface/interface-name")
@@ -185,7 +188,7 @@ class ScannerResponseServiceIntTest extends GrpcTestBase {
     }
 
     @Test
-    void testAcceptNodeScanResult() throws InvalidProtocolBufferException, EntityExistException {
+    void testAcceptNodeScanResult() throws InvalidProtocolBufferException, EntityExistException, LocationNotFoundException {
         String managedIp = "127.0.0.1";
         Node node = createNode(managedIp);
         int ifIndex = 1;
@@ -216,13 +219,22 @@ class ScannerResponseServiceIntTest extends GrpcTestBase {
 
     }
 
-    private Node createNode(String ipAddress) throws EntityExistException {
+    private Node createNode(String ipAddress) throws EntityExistException, LocationNotFoundException {
+        createLocation();
         NodeCreateDTO createDTO = NodeCreateDTO.newBuilder()
             .setLabel("test-node")
             .setManagementIp(ipAddress)
             .setLocation(TEST_LOCATION)
             .build();
         return nodeService.createNode(createDTO, ScanType.NODE_SCAN, TEST_TENANT_ID);
+    }
+
+    private MonitoringLocation createLocation() {
+        MonitoringLocation location = new MonitoringLocation();
+        location.setTenantId(TEST_TENANT_ID);
+        location.setLocation(TEST_LOCATION);
+        locationRepository.save(location);
+        return location;
     }
 
     private SnmpInterface createSnmpInterface(Node node, int ifIndex) {

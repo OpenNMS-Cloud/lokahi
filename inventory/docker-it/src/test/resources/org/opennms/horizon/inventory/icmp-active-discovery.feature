@@ -7,6 +7,7 @@ Feature: Active Discovery
     Given Grpc TenantId "tenant-icmp-discovery"
     Given Grpc location "test-location"
     Given [ICMP Discovery] Create Grpc Connection for Inventory
+    Given [Common] Create "MINION" Location
 
 
   Scenario: Create Active discovery and verify task set is published

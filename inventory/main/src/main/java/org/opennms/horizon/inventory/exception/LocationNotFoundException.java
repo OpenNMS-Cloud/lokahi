@@ -26,43 +26,10 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.alertservice.config;
+package org.opennms.horizon.inventory.exception;
 
-import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-
-
-@Data
-@ConfigurationProperties(prefix = "kafka.topics")
-public class KafkaTopicProperties {
-
-    private String event;
-
-    private String tagOperation;
-
-    private String alert;
-
-    private String nodeChanged;
-
-    private String monitoringPolicy;
-
-    private final CreateTopics createTopics = new CreateTopics();
-
-    @Data
-    public static class CreateTopics {
-        private Boolean enabled;
-        private final TopicConfig alert = new TopicConfig();
-        private final TopicConfig monitoringPolicy = new TopicConfig();
-        private final TopicConfig nodeChanged = new TopicConfig();
-    }
-
-    @Data
-    public static class TopicConfig {
-        private String name;
-        private Integer partitions = 10;
-        private Short replicas = 1;
-        private Boolean compact = false;
+public class LocationNotFoundException extends Exception {
+    public LocationNotFoundException(String message) {
+        super(message);
     }
 }

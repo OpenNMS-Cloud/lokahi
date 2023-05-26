@@ -989,6 +989,11 @@
                 <artifactId>logback-jackson</artifactId>
                 <version>${logback.contrib.version}</version>
             </dependency>
+            <dependency>
+                <groupId>io.opentelemetry</groupId>
+                <artifactId>opentelemetry-api</artifactId>
+                <version>${opentelemetry.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 

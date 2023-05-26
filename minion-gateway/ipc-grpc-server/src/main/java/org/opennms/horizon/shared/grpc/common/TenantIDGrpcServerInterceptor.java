@@ -38,6 +38,8 @@ import io.grpc.ServerInterceptor;
 import io.grpc.Status;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import io.opentelemetry.api.GlobalOpenTelemetry;
+import io.opentelemetry.api.trace.Span;
 
 import java.time.Duration;
 import java.util.function.Supplier;
@@ -94,6 +96,11 @@ public class TenantIDGrpcServerInterceptor implements ServerInterceptor {
 //----------------------------------------
 
     private String commonReadContextTenantId(Supplier<String> readTenantIdOp) {
-        return readTenantIdOp.get();
+        var tenantId = readTenantIdOp.get();
+        var span = Span.current();
+        if (span.isRecording()) {
+            span.setAttribute("user", tenantId);
+        }
+        return tenantId;
     }
 }

@@ -35,7 +35,12 @@ import com.google.protobuf.Message;
 import io.grpc.BindableService;
 import io.grpc.Context;
 import io.grpc.stub.StreamObserver;
+import io.opentelemetry.api.GlobalOpenTelemetry;
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.StatusCode;
+import io.opentelemetry.api.trace.Tracer;
 import java.io.IOException;
+import java.lang.reflect.UndeclaredThrowableException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -121,6 +126,8 @@ public class OpennmsGrpcServer extends AbstractMessageConsumerManager implements
     private final Map<String, ExecutorService> sinkConsumersByModuleId = new ConcurrentHashMap<>();
     private BiConsumer<RpcRequestProto, StreamObserver<RpcResponseProto>> incomingRpcHandler;
     private OutgoingMessageHandler outgoingMessageHandler;
+
+    private Tracer tracer = GlobalOpenTelemetry.get().getTracer(getClass().getName());
 
 //========================================
 // Constructor
@@ -248,7 +255,22 @@ public class OpennmsGrpcServer extends AbstractMessageConsumerManager implements
         }
         sinkDispatcherById.computeIfAbsent(module.getId(), id -> sinkMessage -> {
             final T message = module.unmarshal(sinkMessage.getContent().toByteArray());
-            dispatch(module, message);
+            final var span = tracer.spanBuilder("dispatch " + module.getClass().getSimpleName())
+                .setNoParent()
+                .addLink(Span.current().getSpanContext())
+                .startSpan();
+
+            try (var ss = span.makeCurrent()) {
+                // we might want to do this in the future in a debugging mode
+                //span.setAttribute("message", message.toString());
+                dispatch(module, message);
+            } catch (Throwable throwable) {
+                span.setStatus(StatusCode.ERROR, "Received exception during dispatch: " + throwable);
+                span.recordException(throwable);
+                throw new UndeclaredThrowableException(throwable);
+            } finally {
+                span.end();
+            }
         });
     }
 

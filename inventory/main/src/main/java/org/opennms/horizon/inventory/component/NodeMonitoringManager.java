@@ -39,6 +39,7 @@ import org.opennms.horizon.inventory.dto.NodeCreateDTO;
 import org.opennms.horizon.inventory.dto.TagCreateDTO;
 import org.opennms.horizon.inventory.exception.EntityExistException;
 import org.opennms.horizon.inventory.exception.InventoryRuntimeException;
+import org.opennms.horizon.inventory.exception.LocationNotFoundException;
 import org.opennms.horizon.inventory.model.Node;
 import org.opennms.horizon.inventory.model.Tag;
 import org.opennms.horizon.inventory.model.discovery.PassiveDiscovery;
@@ -106,6 +107,8 @@ public class NodeMonitoringManager {
             log.error("Error while parsing Event. Payload: {}", Arrays.toString(data), e);
         } catch (EntityExistException e) {
             log.error("Duplicated device error.", e);
+        } catch (LocationNotFoundException e) {
+            log.error("Location not found.", e);
         }
     }
 }

@@ -7,6 +7,7 @@ Feature: Node Tagging
     Given [Tags] Grpc TenantId "tenant-stream"
     Given [Tags] Grpc location "test-location"
     Given [Tags] Create Grpc Connection for Inventory
+    Given [Common] Create "location" Location
     Given Kafka topic "tag-operation"
 
   Scenario: Create new tags on node

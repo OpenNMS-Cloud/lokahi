@@ -82,7 +82,7 @@ public class InventoryProcessingStepDefinitions {
 
     private String label;
     private String newDeviceIpAddress;
-    private String location = GrpcConstants.DEFAULT_LOCATION;
+    private String location;
     private String systemId;
     private boolean deviceDetectedInd;
     private String reason;
@@ -220,7 +220,7 @@ public class InventoryProcessingStepDefinitions {
     @Then("add a new device")
     public void addANewDevice() {
         var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
-        node = nodeServiceBlockingStub.createNode(NodeCreateDTO.newBuilder().setLabel(label).setManagementIp(newDeviceIpAddress).build());
+        node = nodeServiceBlockingStub.createNode(NodeCreateDTO.newBuilder().setLabel(label).setLocation(location).setManagementIp(newDeviceIpAddress).build());
         minionGatewayWiremockTestSteps.setNodeId(node.getId());
         assertNotNull(node);
     }

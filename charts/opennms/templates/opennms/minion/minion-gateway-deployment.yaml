@@ -70,13 +70,14 @@ spec:
             - name: SPRING_DATASOURCE_URL
               value: "jdbc:postgresql://{{ .Values.OpenNMS.MinionGateway.DbHost }}:5432/{{ .Values.OpenNMS.MinionGateway.DbName }}?currentSchema={{ .Values.OpenNMS.MinionGateway.DbSchemaName }}"
             - name: SPRING_KAFKA_BOOTSTRAP_SERVERS
-              value: "{{ .Values.kafkaClient.bootstrapServers }}"
+              value: "{{ .Values.OpenNMS.global.kafkaClient.bootstrapServers }}"
             - name: IGNITE_UPDATE_NOTIFIER # Disable Ignite version lookups
               value: "false"
             {{- include "deployment.env" .Values.OpenNMS.MinionGateway | nindent 12 }}
           envFrom:
           - configMapRef:
               name: spring-boot-env
+          {{- include "kafkaSecretFrom" .Values.OpenNMS.MinionGateway | indent 10 }}
           ports:
             - name: http
               containerPort: {{ .Values.OpenNMS.MinionGateway.Port }}

@@ -8,7 +8,9 @@ import org.awaitility.Awaitility;
 import org.junit.Assert;
 import org.opennms.horizon.it.gqlmodels.CreateNodeData;
 import org.opennms.horizon.it.gqlmodels.GQLQuery;
+import org.opennms.horizon.it.gqlmodels.LocationData;
 import org.opennms.horizon.it.gqlmodels.querywrappers.CreateNodeResult;
+import org.opennms.horizon.it.gqlmodels.querywrappers.FindAllLocationsData;
 import org.opennms.horizon.it.gqlmodels.querywrappers.FindAllMinionsQueryResult;
 import org.opennms.horizon.it.gqlmodels.MinionData;
 import org.opennms.horizon.it.helper.TestsExecutionHelper;
@@ -26,6 +28,7 @@ import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class InventoryTestSteps {
 
@@ -57,11 +60,40 @@ public class InventoryTestSteps {
 // Test Step Definitions
 //----------------------------------------
 
+    @Given("Location {string} is created")
+    public void createLocation(String location) throws Exception {
+        String queryList = GQLQueryConstants.CREATE_LOCATION;
+
+        GQLQuery gqlQuery = new GQLQuery();
+        gqlQuery.setQuery(queryList);
+        gqlQuery.setVariables(Map.of("location", location));
+
+        Response response = helper.executePostQuery(gqlQuery);
+        assertEquals(response.getStatusCode(), 200);
+    }
+
+    @Given("Location {string} is removed")
+    public void deleteLocation(String location) throws Exception {
+        LocationData locationData = commonQueryLocations().getData().getFindAllLocations().stream()
+            .filter(loc -> loc.getLocation().equals(location))
+            .findFirst().orElse(null);
+
+        if (locationData == null) {
+            fail("Location " + location + " not found");
+        }
+
+        GQLQuery gqlQuery = new GQLQuery();
+        gqlQuery.setQuery(GQLQueryConstants.DELETE_LOCATION);
+        gqlQuery.setVariables(Map.of("id", locationData.getId()));
+
+        Response response = helper.executePostQuery(gqlQuery);
+        assertEquals(response.getStatusCode(), 200);
+    }
+
     @Given("At least one Minion is running with location {string}")
     public void atLeastOneMinionIsRunningWithLocation(String location) {
         minionLocation = location;
     }
-
 
     @Then("Wait for at least one minion for the given location reported by inventory with timeout {int}ms")
     public void waitForAtLeastOneMinionForTheGivenLocationReportedByInventoryWithTimeoutMs(int timeout) {
@@ -172,6 +204,14 @@ public class InventoryTestSteps {
         LOG.debug("MINIONS for location: count={}; location={}", filtered.size(), minionLocation);
 
         return ( ! filtered.isEmpty() );
+    }
+
+    private FindAllLocationsData commonQueryLocations() throws MalformedURLException {
+        GQLQuery gqlQuery = new GQLQuery();
+        gqlQuery.setQuery(GQLQueryConstants.LIST_LOCATIONS_QUERY);
+        Response restAssuredResponse = helper.executePostQuery(gqlQuery);
+        Assert.assertEquals(200, restAssuredResponse.getStatusCode());
+        return restAssuredResponse.getBody().as(FindAllLocationsData.class);
     }
 
     /** @noinspection rawtypes*/

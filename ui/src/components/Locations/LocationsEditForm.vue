@@ -141,9 +141,10 @@ import Delete from '@featherds/icon/action/Delete'
 import placeholder from '@/assets/placeholder.svg'
 import { string } from 'yup'
 import { useForm } from '@featherds/input-helper'
-import { Location as LocationType } from '@/types/graphql'
+import { MonitoringLocation as LocationType } from '@/types/graphql'
 import { DisplayType } from '@/types/locations.d'
 import { useLocationStore } from '@/store/Views/locationStore'
+import { IAutocompleteItemType } from '@featherds/autocomplete'
 
 const props = defineProps<{
   id: number
@@ -160,12 +161,16 @@ const formInputs = ref({
   latitude: selectedLocation.latitude
 })
 
-const addressModel = ref({ _text: formInputs.value.address, value: 'savedAddress' })
+let addressModel = ref([{_text: formInputs.value.address,
+  value: {label: formInputs.value.address, x: formInputs.value.longitude, y: formInputs.value.longitude}}] as IAutocompleteItemType[])
 
 const onAddressChange = (newAddress: any) => {
-  formInputs.value.address = newAddress.value.label
-  formInputs.value.longitude = newAddress.value.x
-  formInputs.value.latitude = newAddress.value.y
+  if (newAddress != undefined) {
+    formInputs.value.address = newAddress.value.label
+    formInputs.value.longitude = newAddress.value.x
+    formInputs.value.latitude = newAddress.value.y
+    addressModel = ref(newAddress)
+  }
 }
 
 const form = useForm()

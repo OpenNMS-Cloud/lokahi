@@ -12,6 +12,12 @@ export const useLocationMutations = defineStore('locationMutations', () => {
   const createLocation = async (location: MonitoringLocationCreateInput) => {
     const {execute: execute, error} = useMutation(CreateLocationDocument)
 
+    if (typeof location.latitude !== 'number') {
+      location.latitude = 0
+    }
+    if (typeof location.longitude !== 'number') {
+      location.longitude = 0
+    }
     await execute({'location': location})
 
     return error
@@ -20,6 +26,12 @@ export const useLocationMutations = defineStore('locationMutations', () => {
   const updateLocation = async (location: MonitoringLocationUpdateInput) => {
     const { execute, error } = useMutation(UpdateLocationDocument)
 
+    if (typeof location.latitude !== 'number') {
+      location.latitude = 0
+    }
+    if (typeof location.longitude !== 'number') {
+      location.longitude = 0
+    }
     await execute({'location': location})
 
     return error

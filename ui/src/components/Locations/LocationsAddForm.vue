@@ -84,15 +84,18 @@ const formDefault = {
   latitude: ''
 }
 
-const addressModel = ref({ _text: '', value: '' })
+let addressModel = ref({ _text: '', value: '' })
 const formInputs = ref({
   ...formDefault
 })
 
 const onAddressChange = (newAddress: any) => {
-  formInputs.value.address = newAddress.value.label
-  formInputs.value.longitude = newAddress.value.x
-  formInputs.value.latitude = newAddress.value.y
+  if (newAddress != undefined) {
+    formInputs.value.address = newAddress.value.label
+    formInputs.value.longitude = newAddress.value.x
+    formInputs.value.latitude = newAddress.value.y
+    addressModel = newAddress
+  }
 }
 
 const locationStore = useLocationStore()

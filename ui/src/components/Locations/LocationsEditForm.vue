@@ -37,10 +37,10 @@
         </div>
         <div class="row">
           <AddressAutocomplete
-            :address-model="addressModel"
+            :addressModel="formInputs"
             class="input-address"
-            :on-address-model-update="onAddressChange"
-          ></AddressAutocomplete>
+            @onAddressChange="onAddressChange"
+          />
         </div>
         <div class="row">
           <FeatherInput
@@ -141,35 +141,31 @@ import Delete from '@featherds/icon/action/Delete'
 import placeholder from '@/assets/placeholder.svg'
 import { string } from 'yup'
 import { useForm } from '@featherds/input-helper'
-import { MonitoringLocation as LocationType } from '@/types/graphql'
+import { MonitoringLocation as LocationType, MonitoringLocationUpdateInput } from '@/types/graphql'
 import { DisplayType } from '@/types/locations.d'
 import { useLocationStore } from '@/store/Views/locationStore'
-import { IAutocompleteItemType } from '@featherds/autocomplete'
 
 const props = defineProps<{
   id: number
 }>()
 
 const locationStore = useLocationStore()
+const selectedLocation = computed(() => locationStore.locationsList.filter((l: LocationType) => l.id === props.id)[0])
+const formInputs = reactive({} as Required<MonitoringLocationUpdateInput>)
 
-const selectedLocation = locationStore.locationsList.filter((l: LocationType) => l.id === props.id)[0]
-const formInputs = ref({
-  id: selectedLocation.id,
-  location: selectedLocation.location,
-  address: selectedLocation.address,
-  longitude: selectedLocation.longitude,
-  latitude: selectedLocation.latitude
+watchEffect(() => {
+  formInputs.id = selectedLocation.value.id,
+  formInputs.location = selectedLocation.value.location,
+  formInputs.address= selectedLocation.value.address,
+  formInputs.longitude= selectedLocation.value.longitude,
+  formInputs.latitude = selectedLocation.value.latitude
 })
-
-let addressModel = ref([{_text: formInputs.value.address,
-  value: {label: formInputs.value.address, x: formInputs.value.longitude, y: formInputs.value.longitude}}] as IAutocompleteItemType[])
 
 const onAddressChange = (newAddress: any) => {
   if (newAddress != undefined) {
-    formInputs.value.address = newAddress.value.label
-    formInputs.value.longitude = newAddress.value.x
-    formInputs.value.latitude = newAddress.value.y
-    addressModel = ref(newAddress)
+    formInputs.address = newAddress.value.label
+    formInputs.longitude = newAddress.value.x
+    formInputs.latitude = newAddress.value.y
   }
 }
 
@@ -182,7 +178,7 @@ const onSubmit = async () => {
 
   if (isFormInvalid) return
 
-  const isFormUpdated = await locationStore.updateLocation(formInputs.value)
+  const isFormUpdated = await locationStore.updateLocation(formInputs)
 
   if (isFormUpdated) {
     locationStore.setDisplayType(DisplayType.LIST)

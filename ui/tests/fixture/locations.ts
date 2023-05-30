@@ -1,15 +1,21 @@
-import { Location } from '@/types/graphql'
+import { MonitoringLocation } from '@/types/graphql'
 
-const mockLocation: Location = {
+const mockLocation: MonitoringLocation = {
   location: 'Default',
-  id: 1
+  id: 1,
+  address: 'address',
+  latitude: 0.0,
+  longitude: 0.0 
 }
-const locationsFixture = (props: Partial<Location> = {}): Location[] => [{ ...mockLocation, ...props }]
+const locationsFixture = (props: Partial<MonitoringLocation> = {}): MonitoringLocation[] => [{ ...mockLocation, ...props }]
 
 const expectedLocations = [
   {
     id: 1,
-    location: 'Default'
+    location: 'Default',
+    address: 'address',
+    latitude: 0.0,
+    longitude: 0.0 
   }
 ]
 

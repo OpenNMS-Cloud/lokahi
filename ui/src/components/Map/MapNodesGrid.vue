@@ -121,7 +121,7 @@
 import { useMapStore } from '@/store/Views/mapStore'
 import { FeatherSortObject } from '@/types'
 import { FeatherSortHeader, SORT } from '@featherds/table'
-import { Node, Location } from '@/types/graphql'
+import { Node, MonitoringLocation } from '@/types/graphql'
 
 const mapStore = useMapStore()
 const nodes = computed(() => mapStore.devicesInbounds)

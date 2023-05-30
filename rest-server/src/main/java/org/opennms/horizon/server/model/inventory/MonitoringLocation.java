@@ -37,7 +37,7 @@ public class MonitoringLocation {
     private long id;
     private String tenantId;
     private String location;
-    private double longitude;
-    private double latitude;
+    private Double longitude;
+    private Double latitude;
     private String address;
 }

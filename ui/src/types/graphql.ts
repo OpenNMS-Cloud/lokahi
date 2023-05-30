@@ -255,9 +255,9 @@ export type MonitoringLocation = {
   __typename?: 'MonitoringLocation';
   address?: Maybe<Scalars['String']>;
   id: Scalars['Long'];
-  latitude: Scalars['Float'];
+  latitude?: Maybe<Scalars['Float']>;
   location?: Maybe<Scalars['String']>;
-  longitude: Scalars['Float'];
+  longitude?: Maybe<Scalars['Float']>;
   tenantId?: Maybe<Scalars['String']>;
 };
 
@@ -971,14 +971,14 @@ export type CreateLocationMutationVariables = Exact<{
 }>;
 
 
-export type CreateLocationMutation = { __typename?: 'Mutation', createLocation?: { __typename?: 'MonitoringLocation', id: any, location?: string, address?: string, longitude: number, latitude: number, tenantId?: string } };
+export type CreateLocationMutation = { __typename?: 'Mutation', createLocation?: { __typename?: 'MonitoringLocation', id: any, location?: string, address?: string, longitude?: number, latitude?: number, tenantId?: string } };
 
 export type UpdateLocationMutationVariables = Exact<{
   location?: InputMaybe<MonitoringLocationUpdateInput>;
 }>;
 
 
-export type UpdateLocationMutation = { __typename?: 'Mutation', updateLocation?: { __typename?: 'MonitoringLocation', id: any, location?: string, address?: string, longitude: number, latitude: number, tenantId?: string } };
+export type UpdateLocationMutation = { __typename?: 'Mutation', updateLocation?: { __typename?: 'MonitoringLocation', id: any, location?: string, address?: string, longitude?: number, latitude?: number, tenantId?: string } };
 
 export type DeleteLocationMutationVariables = Exact<{
   id: Scalars['Long'];
@@ -987,19 +987,19 @@ export type DeleteLocationMutationVariables = Exact<{
 
 export type DeleteLocationMutation = { __typename?: 'Mutation', deleteLocation?: boolean };
 
-export type LocationsPartsFragment = { __typename?: 'Query', findAllLocations?: Array<{ __typename?: 'MonitoringLocation', id: any, location?: string, address?: string, longitude: number, latitude: number }> };
+export type LocationsPartsFragment = { __typename?: 'Query', findAllLocations?: Array<{ __typename?: 'MonitoringLocation', id: any, location?: string, address?: string, longitude?: number, latitude?: number }> };
 
 export type LocationsListQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type LocationsListQuery = { __typename?: 'Query', findAllLocations?: Array<{ __typename?: 'MonitoringLocation', id: any, location?: string, address?: string, longitude: number, latitude: number }> };
+export type LocationsListQuery = { __typename?: 'Query', findAllLocations?: Array<{ __typename?: 'MonitoringLocation', id: any, location?: string, address?: string, longitude?: number, latitude?: number }> };
 
 export type SearchLocationQueryVariables = Exact<{
   searchTerm?: InputMaybe<Scalars['String']>;
 }>;
 
 
-export type SearchLocationQuery = { __typename?: 'Query', searchLocation?: Array<{ __typename?: 'MonitoringLocation', id: any, location?: string, address?: string, longitude: number, latitude: number }> };
+export type SearchLocationQuery = { __typename?: 'Query', searchLocation?: Array<{ __typename?: 'MonitoringLocation', id: any, location?: string, address?: string, longitude?: number, latitude?: number }> };
 
 export type DeviceUptimePartsFragment = { __typename?: 'Query', deviceUptime?: { __typename?: 'TimeSeriesQueryResult', data?: { __typename?: 'TSData', result?: Array<{ __typename?: 'TSResult', metric?: any, values?: Array<Array<number>> }> } } };
 
@@ -1129,7 +1129,7 @@ export type ListNodeMetricsQuery = { __typename?: 'Query', nodeLatency?: { __typ
 export type ListMinionsAndDevicesForTablesQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type ListMinionsAndDevicesForTablesQuery = { __typename?: 'Query', findAllNodes?: Array<{ __typename?: 'Node', id: any, nodeLabel?: string, tenantId?: string, createTime: any, monitoringLocationId: any, scanType?: string, ipInterfaces?: Array<{ __typename?: 'IpInterface', ipAddress?: string, snmpPrimary?: boolean }> }>, findAllMinions?: Array<{ __typename?: 'Minion', id: any, label?: string, lastCheckedTime: any, status?: string, systemId?: string, location?: { __typename?: 'MonitoringLocation', id: any, location?: string } }>, findAllLocations?: Array<{ __typename?: 'MonitoringLocation', id: any, location?: string, address?: string, longitude: number, latitude: number }> };
+export type ListMinionsAndDevicesForTablesQuery = { __typename?: 'Query', findAllNodes?: Array<{ __typename?: 'Node', id: any, nodeLabel?: string, tenantId?: string, createTime: any, monitoringLocationId: any, scanType?: string, ipInterfaces?: Array<{ __typename?: 'IpInterface', ipAddress?: string, snmpPrimary?: boolean }> }>, findAllMinions?: Array<{ __typename?: 'Minion', id: any, label?: string, lastCheckedTime: any, status?: string, systemId?: string, location?: { __typename?: 'MonitoringLocation', id: any, location?: string } }>, findAllLocations?: Array<{ __typename?: 'MonitoringLocation', id: any, location?: string, address?: string, longitude?: number, latitude?: number }> };
 
 export type NetworkTrafficQueryVariables = Exact<{
   name: Scalars['String'];
@@ -1143,7 +1143,7 @@ export type NetworkTrafficQuery = { __typename?: 'Query', metric?: { __typename?
 export type ListLocationsForDiscoveryQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type ListLocationsForDiscoveryQuery = { __typename?: 'Query', findAllLocations?: Array<{ __typename?: 'MonitoringLocation', id: any, location?: string, address?: string, longitude: number, latitude: number }> };
+export type ListLocationsForDiscoveryQuery = { __typename?: 'Query', findAllLocations?: Array<{ __typename?: 'MonitoringLocation', id: any, location?: string, address?: string, longitude?: number, latitude?: number }> };
 
 export type ListDiscoveriesQueryVariables = Exact<{ [key: string]: never; }>;
 

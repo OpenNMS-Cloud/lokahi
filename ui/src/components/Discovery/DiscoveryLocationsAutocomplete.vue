@@ -43,7 +43,7 @@ import { useDiscoveryQueries } from '@/store/Queries/discoveryQueries'
 import Cancel from '@featherds/icon/navigation/Cancel'
 import { markRaw } from 'vue'
 import { debounce, first } from 'lodash'
-import { Location } from '@/types/graphql'
+import { MonitoringLocation } from '@/types/graphql'
 import { IAutocompleteItemType } from '@featherds/autocomplete'
 import { watchOnce } from '@vueuse/core'
 import { object } from 'yup'
@@ -52,9 +52,9 @@ const Icons = markRaw({
   Cancel
 })
 const emit = defineEmits(['location-selected'])
-type TLocationAutocomplete = Location & { _text?: string }
+type TLocationAutocomplete = MonitoringLocation & { _text?: string }
 const discoveryQueries = useDiscoveryQueries()
-const searchValue = ref<Location | undefined>()
+const searchValue = ref<MonitoringLocation | undefined>()
 const selectedLocation = ref<TLocationAutocomplete | null>(null)
 const loading = ref(false)
 const locations = ref() //locations without selected items
@@ -70,19 +70,19 @@ const props = defineProps<{
 onMounted(() => discoveryQueries.getLocations())
 
 const initLocations = () => {
-  filteredLocations.value = computedLocations.value as Location[]
-  locations.value = computedLocations.value as Location[]
+  filteredLocations.value = computedLocations.value as MonitoringLocation[]
+  locations.value = computedLocations.value as MonitoringLocation[]
   selectedLocation.value = null
   if (props.preLoadedlocation) {
-    selectedLocation.value = locations.value.filter((l: Location) => l.location == props.preLoadedlocation)[0]
-    locations.value = locations.value.filter((l: Location) => l.location !== props.preLoadedlocation)
+    selectedLocation.value = locations.value.filter((l: MonitoringLocation) => l.location == props.preLoadedlocation)[0]
+    locations.value = locations.value.filter((l: MonitoringLocation) => l.location !== props.preLoadedlocation)
     filteredLocations.value = locations.value
   }
 }
 watchOnce(computedLocations, () => {
   initLocations()
   if (computedLocations.value.length == 1) {
-    selectedLocation.value = first(computedLocations.value) as Location
+    selectedLocation.value = first(computedLocations.value) as MonitoringLocation
     locations.value = []
     filteredLocations.value = []
     emit('location-selected', selectedLocation.value.location)
@@ -116,7 +116,7 @@ const deboncedFn = debounce(
     const selected = item as IAutocompleteItemType
     if (selected && selected._text) {
       selectedLocation.value = selected as TLocationAutocomplete
-      locations.value = computedLocations.value.filter((l: Location) => l.id !== selectedLocation.value?.id)
+      locations.value = computedLocations.value.filter((l: MonitoringLocation) => l.id !== selectedLocation.value?.id)
       searchValue.value = undefined
       inputRef.value?.handleOutsideClick()
       emit('location-selected', selectedLocation.value.location)

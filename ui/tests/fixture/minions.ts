@@ -6,7 +6,10 @@ const mockData: Minion = {
   lastCheckedTime: 1670542388,
   location: {
     location: 'default',
-    id: 1
+    id: 1,
+    address: 'address',
+    latitude: 0.0,
+    longitude: 0.0
   },
   systemId: 'opennms-minion-8d6f5f64f-4l4wh',
   locationId: 1 // TODO: this should be removed once Minion type updated

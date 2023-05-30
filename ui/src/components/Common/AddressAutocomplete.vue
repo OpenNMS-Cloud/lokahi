@@ -47,7 +47,7 @@ const search = debounce(async (q: string) => {
   if (q.length == 0) {
     return
   }
-  const addresses = await provider.search({ query: q.replace(/\s+$/g, '') })
+  const addresses = await provider.search({ query: q })
   results.value = addresses
     .filter((x) => matchQuery(q, x.label))
     .map((x) => ({

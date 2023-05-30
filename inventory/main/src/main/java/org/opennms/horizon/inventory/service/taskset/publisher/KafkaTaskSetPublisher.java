@@ -34,6 +34,7 @@ import org.opennms.taskset.contract.PublishType;
 import org.opennms.taskset.contract.TaskDefPub;
 import org.opennms.taskset.contract.TaskDefinition;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
@@ -44,6 +45,7 @@ import java.util.List;
 @Component
 @Slf4j
 @PropertySource("classpath:application.yml")
+@Primary
 public class KafkaTaskSetPublisher implements TaskSetPublisher {
 
     private static final String DEFAULT_TASK_SET_PUBLISH_TOPIC = "task-set-publisher";
@@ -55,6 +57,7 @@ public class KafkaTaskSetPublisher implements TaskSetPublisher {
     @Override
     public void publishNewTasks(String tenantId, String location, List<TaskDefinition> taskList) {
 
+        log.info("Publishing task updates for location {} with tenantId {}, taskDef = {}", location, tenantId, taskList);
         var tasksetPub = TaskDefPub.newBuilder()
             .setPublishType(PublishType.UPDATE)
             .setLocation(location).setTenantId(tenantId)
@@ -65,6 +68,7 @@ public class KafkaTaskSetPublisher implements TaskSetPublisher {
     @Override
     public void publishTaskDeletion(String tenantId, String location, List<TaskDefinition> taskList) {
 
+        log.info("Publishing task removal for location {} with tenantId {}, taskDef = {}", location, tenantId, taskList);
         var tasksetPub = TaskDefPub.newBuilder()
             .setPublishType(PublishType.DELETE)
             .setLocation(location).setTenantId(tenantId)

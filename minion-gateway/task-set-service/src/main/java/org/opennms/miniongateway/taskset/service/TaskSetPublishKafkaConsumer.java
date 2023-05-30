@@ -71,6 +71,7 @@ public class TaskSetPublishKafkaConsumer {
 
         try {
             var tasksetPub = TaskDefPub.parseFrom(data);
+            LOG.info("Received taskset update {}", tasksetPub);
             var builder = UpdateTasksRequest.newBuilder().setLocation(tasksetPub.getLocation())
                 .setTenantId(tasksetPub.getTenantId());
             if (tasksetPub.getPublishType().equals(PublishType.UPDATE)) {

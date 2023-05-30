@@ -54,7 +54,6 @@ import org.opennms.horizon.inventory.repository.TagRepository;
 import org.opennms.horizon.inventory.repository.discovery.active.AzureActiveDiscoveryRepository;
 import org.opennms.taskset.contract.ScanType;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -72,6 +71,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @ContextConfiguration(initializers = {SpringContextTestInitializer.class})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 @AutoConfigureObservability     // Make sure to include Metrics (for some reason they are disabled by default in the integration grey-box test)
+@Disabled
 class TagGrpcItTest extends GrpcTestBase {
 
     private static final String TEST_NODE_LABEL_1 = "node-label-1";

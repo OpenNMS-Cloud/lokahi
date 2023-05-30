@@ -46,6 +46,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+@Deprecated
 public class GrpcTaskSetPublisher implements TaskSetPublisher {
 
     public static final String TASK_SET_PUBLISH_BEAN_NAME = "taskSetServiceBlockingStub";

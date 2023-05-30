@@ -31,6 +31,7 @@ package org.opennms.horizon.inventory.service.taskset.publisher;
 import io.grpc.ClientInterceptor;
 import io.grpc.ManagedChannel;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatcher;
 import org.mockito.Mockito;
@@ -51,6 +52,7 @@ import static org.junit.Assert.assertSame;
 /**
  * Verify operation of the GrpcTaskSetPublisher.
  */
+@Disabled
 public class GrpcTaskSetPublisherTest {
 
     public static final int DEADLINE = 5000;

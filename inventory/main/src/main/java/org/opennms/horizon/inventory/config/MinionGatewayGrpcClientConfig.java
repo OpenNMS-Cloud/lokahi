@@ -1,17 +1,14 @@
 package org.opennms.horizon.inventory.config;
 
+import io.grpc.ManagedChannel;
+import io.grpc.netty.shaded.io.grpc.netty.NettyChannelBuilder;
 import org.opennms.horizon.inventory.component.MinionRpcClient;
 import org.opennms.horizon.inventory.exception.InventoryRuntimeException;
 import org.opennms.horizon.inventory.grpc.TenantLookup;
-import org.opennms.horizon.inventory.service.taskset.publisher.GrpcTaskSetPublisher;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Lazy;
-
-import io.grpc.ManagedChannel;
-import io.grpc.netty.shaded.io.grpc.netty.NettyChannelBuilder;
 
 @Configuration
 public class MinionGatewayGrpcClientConfig {
@@ -50,10 +47,6 @@ public class MinionGatewayGrpcClientConfig {
         return channel;
     }
 
-    @Bean(initMethod = "init", name = GrpcTaskSetPublisher.TASK_SET_PUBLISH_BEAN_NAME)
-    public GrpcTaskSetPublisher taskSetPublisher(@Qualifier(MINION_GATEWAY_GRPC_CHANNEL) ManagedChannel channel) {
-        return new GrpcTaskSetPublisher(channel, deadline);
-    }
 
     @Bean(initMethod = "init", destroyMethod = "shutdown")
     public MinionRpcClient createMinionRpcClient(@Qualifier(MINION_GATEWAY_GRPC_CHANNEL) ManagedChannel channel, TenantLookup tenantLookup) {

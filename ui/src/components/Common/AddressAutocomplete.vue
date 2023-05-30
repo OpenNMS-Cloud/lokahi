@@ -43,7 +43,7 @@ watch(
 
 const search = debounce(async (q: string) => {
   loading.value = true
-  q = q.replace(/\s+$/g, '')
+  q = q.trim()
   if (q.length == 0) {
     return
   }

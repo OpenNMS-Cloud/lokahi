@@ -29,6 +29,7 @@ OpenNMS:
         Memory: 1Gi
     PrivateRepoEnabled: false
     FlowsUrl: flows.onms-dp-dev.dev.nonprod.dataservice.opennms.com:443
+    FlowsTlsEnabled: false
     CertificateManagerUrl: dev
   MetricsProcessor:
     ServiceName: opennms-metrics-processor
@@ -44,6 +45,7 @@ OpenNMS:
         Memory: 256Mi
     PrivateRepoEnabled: false
     FlowIngestorUrl: flows.onms-dp-dev.dev.nonprod.dataservice.opennms.com:443
+    FlowTlsEnabled: false
     kafkaSecretName: ~
   UI:
     Path: /

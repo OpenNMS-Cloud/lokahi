@@ -56,6 +56,8 @@ spec:
               value: "{{ .Values.OpenNMS.global.kafkaClient.bootstrapServers }}"
             - name: GRPC_FLOW_INGESTOR_URL
               value: "{{ .Values.OpenNMS.MetricsProcessor.FlowIngestorUrl }}"
+            - name: GRPC_FLOW_TLS_ENABLED
+              value: "{{ .Values.OpenNMS.MetricsProcessor.FlowTlsEnabled }}"
             - name: CORTEX_WRITE_URL
               value: {{ .Values.CortexClient.Protocol }}://{{ .Values.CortexClient.HostWrite }}:{{ .Values.CortexClient.PortWrite }}{{ .Values.CortexClient.PathWrite }}
             {{- include "deployment.env" .Values.OpenNMS.MetricsProcessor | nindent 12 }}

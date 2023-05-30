@@ -110,7 +110,7 @@ public class ConfigurationUtil {
     public ManagedChannel createFlowQuerierChannel() {
         return ManagedChannelBuilder.forTarget(flowQuerierGrpcAddress)
             .keepAliveWithoutCalls(true)
-            .build();
+            .usePlaintext().build();
     }
 
     @Bean(name = "minionCertificateManager")

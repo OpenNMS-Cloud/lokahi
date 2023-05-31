@@ -207,7 +207,7 @@ jobs:
           KEYCLOAK_USERNAME=admin
           KEYCLOAK_PASSWORD=admin
           KEYCLOAK_CLIENT_ID=lokahi
-          MINION_IMAGE_NAME=${{ inputs.image-registry || 'ghcr.io' }}/opennms-cloud/lohaki-minion:${{ inputs.image-tag || github.sha }}
+          MINION_IMAGE_NAME=${{ inputs.image-registry || 'ghcr.io' }}/opennms-cloud/lokahi-minion:${{ inputs.image-tag || github.sha }}
           MINION_INGRESS_URL=$(hostname)
           MINION_INGRESS_PORT=443
           MINION_INGRESS_TLS=true

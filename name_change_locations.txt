@@ -13,6 +13,15 @@ Dockerhub repos created:
 * lokahi-rest-server
 * lokahi-ui
 
+The following file names have been changed, run from: $ find . -name '*horizon-stream*'
+* ./external-it/external-horizon-stream-it
+* ./external-it/external-horizon-stream-it/src/main/resources/org/opennms/horizon/it/horizon-stream.feature
+  * The 'horizon' in this, have not updated, need to do a separate search for just horizon refs.
+* ./operator/scripts/deploy-horizon-stream.sh
+* ./keycloak-ui/themes/horizon-stream
+* ./install-local/install-local-opennms-horizon-stream-values.yaml
+* ./install-local/install-local-opennms-horizon-stream-custom-images-values.yaml
+
 Running the following on Mac OS: 
 * $ grep -rl 'horizon-stream' * | grep -v 'target' | grep -v 'Binary file' | grep -v 'cucumber' | grep -v '.swp' | xargs sed -i '' -e 's/horizon-stream/lokahi/g'
 * $ git checkout charts/packaged/index.yaml
@@ -37,7 +46,7 @@ alert/pom.xml:24:        <sonar.projectKey>opennms_horizon-stream_alert</sonar.p
 
 README.md:5:See [Getting Started on the Wiki](https://github.com/OpenNMS/horizon-stream/wiki/Getting-Started) for development instructions.
 
-# IMPORTANT: Create or add correct privileges to the github repos created from the pipeline.
+# IMPORTANT: Create or add correct privileges to the github repos created from the pipeline. These were added automatically, the permissions from fabric-services has been added.
 # The following is done, but check the github private repos.
 .github/pull_request_template.md:11:* [ ] Follows Horizon Stream's [development guidelines.](https://github.com/OpenNMS/horizon-stream/wiki/Development-Guidelines)
 .github/pull_request_template.md:14:* [ ] Includes [appropriate tests.](https://github.com/OpenNMS/horizon-stream/wiki/Test-Strategy)

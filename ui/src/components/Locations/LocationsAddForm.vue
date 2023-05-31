@@ -35,17 +35,13 @@
             v-model="formInputs.longitude"
             class="input-longitude"
             data-test="input-longitude"
-          >
-            <template #pre> <FeatherIcon :icon="icons.placeholder" /> </template
-          ></FeatherInput>
+          />
           <FeatherInput
             label="Latitude (optional)"
             v-model="formInputs.latitude"
             class="input-latitude"
             data-test="input-latitude"
-          >
-            <template #pre> <FeatherIcon :icon="icons.placeholder" /> </template
-          ></FeatherInput>
+          />
         </div>
       </div>
       <FooterSection>
@@ -71,7 +67,6 @@
 
 <script setup lang="ts">
 import Location from '@featherds/icon/action/Location'
-import placeholder from '@/assets/placeholder.svg'
 import { string } from 'yup'
 import { useForm } from '@featherds/input-helper'
 import { useLocationStore } from '@/store/Views/locationStore'
@@ -121,8 +116,7 @@ onMounted(() => {
 })
 
 const icons = markRaw({
-  Location,
-  placeholder
+  Location
 })
 </script>
 

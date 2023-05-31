@@ -94,6 +94,7 @@ export const useLocationStore = defineStore('locationStore', () => {
     const error = await locationMutations.deleteLocation({ id })
 
     if (!error.value) {
+      setDisplayType(DisplayType.LIST)
       await fetchLocations()
     }
 

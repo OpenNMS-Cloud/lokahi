@@ -17,14 +17,13 @@
     />
     <div class="expiry">
       <FeatherIcon
-        :icon="iconExpiry.image"
-        :viewBox="setViewBox(iconExpiry.image)"
+        :icon="icons.cert"
         data-test="icon-expiry"
       />
     </div>
     <div class="context-menu">
       <HoverMenu
-        :items="item.contextMenu"
+        :items="contextMenuItems"
         data-test="context-menu"
       />
     </div>
@@ -32,11 +31,10 @@
 </template>
 
 <script lang="ts" setup>
-import Expiry from '@/assets/placeholder.svg'
-import { IIcon, IButtonTextIcon } from '@/types'
+import Cert from '@featherds/icon/communication/Certificate'
+import { IButtonTextIcon } from '@/types'
 import { Severity } from '@/types/graphql'
 import { LocationTemp } from '@/types/locations.d'
-import { setViewBox } from '@/components/utils'
 import { useLocationStore } from '@/store/Views/locationStore'
 
 const props = defineProps<{
@@ -58,9 +56,14 @@ const statusPill = {
   style: props.item.status === 'UP' ? Severity.Normal : Severity.Critical
 }
 
-const iconExpiry: IIcon = {
-  image: Expiry
-}
+const contextMenuItems = [
+  { label: 'Edit', handler: () => locationStore.selectLocation(props.item.id) },
+  { label: 'Delete', handler: () => locationStore.deleteLocation(props.item.id) }
+]
+
+const icons = markRaw({
+  cert: Cert
+})
 </script>
 
 <style lang="scss" scoped>
@@ -82,6 +85,7 @@ const iconExpiry: IIcon = {
   justify-content: center;
 }
 .expiry {
+  font-size: 20px;
   width: 15%;
   display: flex;
   justify-content: center;

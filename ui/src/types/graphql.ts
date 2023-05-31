@@ -537,6 +537,7 @@ export type Query = {
   findExporters?: Maybe<Array<Maybe<Exporter>>>;
   findLocationById?: Maybe<MonitoringLocation>;
   findMinionById?: Maybe<Minion>;
+  findMinionsByLabel?: Maybe<Array<Maybe<Minion>>>;
   findMonitorPolicyById?: Maybe<MonitorPolicy>;
   findNodeById?: Maybe<Node>;
   getMinionCertificate?: Maybe<CertificateResponse>;
@@ -632,6 +633,12 @@ export type QueryFindLocationByIdArgs = {
 /** Query root */
 export type QueryFindMinionByIdArgs = {
   id?: InputMaybe<Scalars['String']>;
+};
+
+
+/** Query root */
+export type QueryFindMinionsByLabelArgs = {
+  label?: InputMaybe<Scalars['String']>;
 };
 
 

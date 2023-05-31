@@ -138,6 +138,15 @@ public class MonitoringSystemGrpcItTest extends GrpcTestBase {
     }
 
     @Test
+    void testListSystemByLabel() {
+        MonitoringSystemList systemList = serviceStub
+            .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader)))
+            .listMonitoringSystemByLabel(StringValue.of(system1.getLabel()));
+        assertThat(systemList).isNotNull();
+        assertThat(systemList.getSystemsList().size()).isEqualTo(1);
+    }
+
+    @Test
     void testGetBySystemId() {
         MonitoringSystemDTO systemDTO = serviceStub
             .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader)))

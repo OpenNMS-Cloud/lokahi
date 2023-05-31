@@ -10,7 +10,7 @@
         <version>0.1.0-SNAPSHOT</version>
     </parent>
 
-    <name>OpenNMS Horizon Stream :: Inventory :: Main</name>
+    <name>OpenNMS Lokahi :: Inventory :: Main</name>
     <description>
         A microservice responsible for tracking the state of the network and how to monitor devices.
     </description>

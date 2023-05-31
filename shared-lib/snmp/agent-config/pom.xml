@@ -13,7 +13,7 @@
 
 
     <artifactId>agent-config</artifactId>
-    <name>OpenNMS Horizon Stream :: Shared Library :: Snmp :: AgentConfig</name>
+    <name>OpenNMS Lokahi :: Shared Library :: Snmp :: AgentConfig</name>
     <packaging>bundle</packaging>
 
     <dependencies>

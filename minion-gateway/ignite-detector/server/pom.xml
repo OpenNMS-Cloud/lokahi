@@ -10,7 +10,7 @@
 
     <artifactId>minion-gateway-ignite-detector-server</artifactId>
 
-    <name>OpenNMS Horizon Stream :: Minion Gateway :: Ignite Detector :: Server</name>
+    <name>OpenNMS Lokahi :: Minion Gateway :: Ignite Detector :: Server</name>
     <description>
         Server implementation for running Detectors over Ignite.
     </description>

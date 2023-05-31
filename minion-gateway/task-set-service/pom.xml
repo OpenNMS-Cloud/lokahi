@@ -12,7 +12,7 @@
 
     <artifactId>task-set-service</artifactId>
 
-    <name>OpenNMS Horizon Stream :: Minion Gateway :: Task Set Service</name>
+    <name>OpenNMS Lokahi :: Minion Gateway :: Task Set Service</name>
     <description>
         Service which receives task set definitions in order to track and publish them to downstream consumers.
     </description>

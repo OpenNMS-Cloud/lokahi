@@ -12,7 +12,7 @@
     <artifactId>traps-features</artifactId>
     <packaging>feature</packaging>
 
-    <name>OpenNMS Horizon Stream :: Minion :: Traps :: Features</name>
+    <name>OpenNMS Lokahi :: Minion :: Traps :: Features</name>
 
     <dependencies>
         <dependency>

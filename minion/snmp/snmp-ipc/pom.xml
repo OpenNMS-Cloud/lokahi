@@ -10,7 +10,7 @@
   </parent>
 
   <artifactId>snmp-ipc</artifactId>
-  <name>OpenNMS Horizon Stream :: Minion :: SNMP :: IPC</name>
+  <name>OpenNMS Lokahi :: Minion :: SNMP :: IPC</name>
   <packaging>bundle</packaging>
 
   <dependencies>

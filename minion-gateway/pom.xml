@@ -10,7 +10,7 @@
         <relativePath>../parent-pom</relativePath>
     </parent>
 
-    <name>OpenNMS Horizon Stream :: Minion Gateway</name>
+    <name>OpenNMS Lokahi :: Minion Gateway</name>
     <description>
         Gateway which serves gRPC connections from Minions and routes traffic to and from Minions.
     </description>

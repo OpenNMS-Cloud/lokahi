@@ -12,7 +12,7 @@
 
     <artifactId>minion-3rdParty</artifactId>
 
-    <name>OpenNMS Horizon Stream :: Minion :: 3rd Party</name>
+    <name>OpenNMS Lokahi :: Minion :: 3rd Party</name>
 
     <modules>
         <module>shaded-grpc</module>

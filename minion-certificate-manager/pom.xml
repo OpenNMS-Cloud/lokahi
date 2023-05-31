@@ -10,7 +10,7 @@
         <relativePath>../parent-pom</relativePath>
     </parent>
 
-    <name>OpenNMS Horizon Stream :: Minion Certificate Manager</name>
+    <name>OpenNMS Lokahi :: Minion Certificate Manager</name>
     <description>
         Manage certificates for Minion on dev environment
     </description>

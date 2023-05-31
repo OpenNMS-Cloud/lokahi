@@ -11,7 +11,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>horizon-shaded-grpc-core</artifactId>
-    <name>OpenNMS Horizon Stream :: Shared Library:: Shaded GRPC-CORE</name>
+    <name>OpenNMS Lokahi :: Shared Library:: Shaded GRPC-CORE</name>
     <packaging>bundle</packaging>
 
     <description>

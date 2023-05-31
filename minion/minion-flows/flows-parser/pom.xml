@@ -7,7 +7,7 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>flows-parser</artifactId>
-  <name>OpenNms Horizon :: Minion :: Flows :: Parser</name>
+  <name>OpenNMS Lokahi :: Minion :: Flows :: Parser</name>
   <packaging>bundle</packaging>
     <build>
         <plugins>

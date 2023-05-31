@@ -11,7 +11,7 @@
         <relativePath>../parent-pom</relativePath>
     </parent>
 
-    <name>OpenNMS Horizon Stream :: Alert Service</name>
+    <name>OpenNMS Lokahi :: Alert Service</name>
     <description>
         A microservice that processes events produced by other components into alerts.
     </description>

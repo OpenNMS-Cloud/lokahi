@@ -11,7 +11,7 @@
 
     <groupId>org.opennms.horizon.shared.azure</groupId>
     <artifactId>proto</artifactId>
-    <name>OpenNMS Horizon :: Shared Library :: Azure :: Proto</name>
+    <name>OpenNMS Lokahi :: Shared Library :: Azure :: Proto</name>
     <packaging>bundle</packaging>
 
     <dependencies>

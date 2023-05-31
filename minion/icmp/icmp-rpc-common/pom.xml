@@ -10,7 +10,7 @@
     </parent>
 
   <artifactId>icmp-rpc-common</artifactId>
-  <name>OpenNMS Horizon Stream :: Minion :: ICMP :: RPC Common</name>
+  <name>OpenNMS Lokahi :: Minion :: ICMP :: RPC Common</name>
   <packaging>bundle</packaging>
 
   <dependencies>

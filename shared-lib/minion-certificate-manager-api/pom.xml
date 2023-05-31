@@ -12,7 +12,7 @@
     <artifactId>minion-certificate-manager-api</artifactId>
     <packaging>bundle</packaging>
 
-    <name>OpenNMS Horizon Stream :: Shared Library :: Minion Certificate Manager API</name>
+    <name>OpenNMS Lokahi :: Shared Library :: Minion Certificate Manager API</name>
     <description>The Minion Certificate Manager service contract.</description>
 
 

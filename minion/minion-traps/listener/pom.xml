@@ -10,7 +10,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>traps-listener</artifactId>
-    <name>OpenNMS Horizon Stream :: Minion :: Traps :: Listener</name>
+    <name>OpenNMS Lokahi :: Minion :: Traps :: Listener</name>
     <packaging>bundle</packaging>
 
     <dependencies>

@@ -13,7 +13,7 @@
     <artifactId>minion-gateway-wiremock-client</artifactId>
     <version>0.1.0-SNAPSHOT</version>
 
-    <name>OpenNMS Horizon Stream :: Inventory :: TestTools :: Minion Gateway Wiremock :: Client</name>
+    <name>OpenNMS Lokahi :: Inventory :: TestTools :: Minion Gateway Wiremock :: Client</name>
     <description>
         Client for programming the Minion Gateway Wiremock for Inventory.
     </description>

@@ -13,7 +13,7 @@
     <artifactId>grpc-client</artifactId>
     <packaging>bundle</packaging>
 
-    <name>OpenNMS Horizon Stream :: Minion :: gRPC :: Client</name>
+    <name>OpenNMS Lokahi :: Minion :: gRPC :: Client</name>
     <description>Client side of gRPC.</description>
 
     <dependencies>

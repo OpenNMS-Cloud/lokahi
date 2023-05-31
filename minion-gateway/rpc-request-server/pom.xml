@@ -13,7 +13,7 @@
     <artifactId>rpc-request-server</artifactId>
     <packaging>jar</packaging>
 
-    <name>OpenNMS Horizon Stream :: Minion Gateway :: RPC Request Server</name>
+    <name>OpenNMS Lokahi :: Minion Gateway :: RPC Request Server</name>
     <description>
         Server processing RPC Requests.
     </description>

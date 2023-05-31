@@ -10,7 +10,7 @@
 
     <artifactId>minion-certificate-manager-docker-it</artifactId>
 
-    <name>OpenNMS Horizon :: Minion Certificate Manager :: Docker IT</name>
+    <name>OpenNMS Lokahi :: Minion Certificate Manager :: Docker IT</name>
     <description>
         Docker build-time Integration Tests for the OpenNMS Minion Certificate Manager.
 

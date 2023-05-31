@@ -12,7 +12,7 @@
     <artifactId>taskset-ipc</artifactId>
     <packaging>bundle</packaging>
 
-    <name>OpenNMS Horizon Stream :: Minion :: TaskSet :: IPC</name>
+    <name>OpenNMS Lokahi :: Minion :: TaskSet :: IPC</name>
     <description>TaskSet grpc-ipc-api glue modules</description>
 
     <dependencies>

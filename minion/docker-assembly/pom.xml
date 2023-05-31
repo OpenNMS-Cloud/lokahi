@@ -11,7 +11,7 @@
 
     <artifactId>docker-assembly</artifactId>
 
-    <name>OpenNMS Horizon Stream :: Minion :: Docker</name>
+    <name>OpenNMS Lokahi :: Minion :: Docker</name>
     <description>Create docker image for the application.</description>
 
     <properties>

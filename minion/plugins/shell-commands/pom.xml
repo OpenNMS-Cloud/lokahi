@@ -11,7 +11,7 @@
 
     <artifactId>shell-commands</artifactId>
     <packaging>bundle</packaging>
-    <name>OpenNms Horizon :: Minion :: Plugins :: Shell Commands</name>
+    <name>OpenNMS Lokahi :: Minion :: Plugins :: Shell Commands</name>
     <build>
         <plugins>
             <plugin>

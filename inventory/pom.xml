@@ -12,7 +12,7 @@
         <relativePath>../parent-pom</relativePath>
     </parent>
 
-    <name>OpenNMS Horizon Stream :: Inventory Parent</name>
+    <name>OpenNMS Lokahi :: Inventory Parent</name>
 
     <artifactId>inventory-parent</artifactId>
     <packaging>pom</packaging>

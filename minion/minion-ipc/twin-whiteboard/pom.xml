@@ -12,7 +12,7 @@
     <artifactId>twin-whiteboard</artifactId>
     <packaging>bundle</packaging>
 
-    <name>OpenNMS Horizon Stream :: Minion :: Ipc :: Twin :: Whiteboard</name>
+    <name>OpenNMS Lokahi :: Minion :: Ipc :: Twin :: Whiteboard</name>
 
     <dependencies>
         <dependency>

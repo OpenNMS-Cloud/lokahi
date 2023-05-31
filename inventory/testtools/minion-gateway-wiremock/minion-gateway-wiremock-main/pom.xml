@@ -13,7 +13,7 @@
     <artifactId>minion-gateway-wiremock-main</artifactId>
     <version>0.1.0-SNAPSHOT</version>
 
-    <name>OpenNMS Horizon Stream :: Inventory :: TestTools :: Minion Gateway Wiremock :: Main</name>
+    <name>OpenNMS Lokahi :: Inventory :: TestTools :: Minion Gateway Wiremock :: Main</name>
     <description>
         Main executable for the Minion Gateway WireMock.
     </description>

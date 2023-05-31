@@ -10,7 +10,7 @@
         <relativePath>../parent-pom</relativePath>
     </parent>
 
-    <name>OpenNMS Horizon Stream :: Minion Certificate Verifier</name>
+    <name>OpenNMS Lokahi :: Minion Certificate Verifier</name>
     <description>
         Manage certificates validation/extraction.
     </description>

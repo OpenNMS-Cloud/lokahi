@@ -11,7 +11,7 @@
     </parent>
 
     <artifactId>ipc-grpc</artifactId>
-    <name>OpenNMS Horizon Stream :: Shared Library :: IPC :: gRPC</name>
+    <name>OpenNMS Lokahi :: Shared Library :: IPC :: gRPC</name>
     <packaging>pom</packaging>
 
     <modules>

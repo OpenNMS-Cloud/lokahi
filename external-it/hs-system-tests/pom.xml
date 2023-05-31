@@ -8,9 +8,9 @@
     <artifactId>hs-system-tests</artifactId>
     <version>0.1.0-SNAPSHOT</version>
 
-    <name>OpenNMS Horizon Stream :: System level tests</name>
+    <name>OpenNMS Lokahi :: System level tests</name>
     <description>
-        A System integration test suite to run against a fully deployed Horizon Stream cluster.
+        A System integration test suite to run against a fully deployed Lokahi cluster.
 
         Intended to be used in CI pipelines.
     </description>

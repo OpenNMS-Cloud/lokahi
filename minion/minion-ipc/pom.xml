@@ -12,7 +12,7 @@
     <artifactId>minion-ipc</artifactId>
     <packaging>pom</packaging>
 
-    <name>OpenNMS Horizon Stream :: Minion :: Ipc</name>
+    <name>OpenNMS Lokahi :: Minion :: Ipc</name>
 
     <modules>
         <module>ipc-echo</module>

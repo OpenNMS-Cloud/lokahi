@@ -13,7 +13,7 @@
     <artifactId>datachoices</artifactId>
     <packaging>bundle</packaging>
 
-    <name>OpenNMS Horizon :: Shared Library :: DataChoices</name>
+    <name>OpenNMS Lokahi :: Shared Library :: DataChoices</name>
     <description>The datachoices service contract.</description>
 
     <dependencies>

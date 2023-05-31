@@ -12,7 +12,7 @@
     <artifactId>minion-features</artifactId>
     <packaging>feature</packaging>
 
-    <name>OpenNMS Horizon Stream :: Minion :: Features</name>
+    <name>OpenNMS Lokahi :: Minion :: Features</name>
 
     <dependencies>
 

@@ -14,7 +14,7 @@
     <artifactId>testtools</artifactId>
     <packaging>pom</packaging>
 
-    <name>OpenNMS Horizon Stream :: Inventory :: TestTools</name>
+    <name>OpenNMS Lokahi :: Inventory :: TestTools</name>
     <description>
         Tools to support testing of the Inventory service.
     </description>

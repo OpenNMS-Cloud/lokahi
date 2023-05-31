@@ -12,7 +12,7 @@
     <artifactId>horizon-common-tag</artifactId>
     <packaging>bundle</packaging>
 
-    <name>OpenNMS Horizon Stream :: Shared Library :: Common Tag</name>
+    <name>OpenNMS Lokahi :: Shared Library :: Common Tag</name>
     <description>The shared </description>
 
 

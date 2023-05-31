@@ -13,7 +13,7 @@
     <artifactId>ipc-grpc-contract</artifactId>
     <packaging>bundle</packaging>
 
-    <name>OpenNMS Horizon Stream :: Shared Library :: IPC :: gRPC :: Contract</name>
+    <name>OpenNMS Lokahi :: Shared Library :: IPC :: gRPC :: Contract</name>
     <description>The gRPC service contract.</description>
 
     <dependencies>

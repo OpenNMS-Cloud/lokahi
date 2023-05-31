@@ -9,7 +9,7 @@
     </parent>
 
     <artifactId>certificate-verifier-docker-it</artifactId>
-    <name>OpenNMS Horizon Stream :: Minion Certificate Verifier :: Docker IT</name>
+    <name>OpenNMS Lokahi :: Minion Certificate Verifier :: Docker IT</name>
     <description>
         Docker build-time Integration Tests for the OpenNMS Minion Certificate Verifier.
         Test Containers are used to spin up containers and exercise the public endpoints.

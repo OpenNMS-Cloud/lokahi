@@ -12,7 +12,7 @@
     <artifactId>observability</artifactId>
     <packaging>pom</packaging>
 
-    <name>OpenNMS Horizon Stream :: Minion :: Observability</name>
+    <name>OpenNMS Lokahi :: Minion :: Observability</name>
 
     <modules>
         <module>observability-metrics</module>

@@ -10,7 +10,7 @@
 
     <artifactId>minion-gateway-main</artifactId>
 
-    <name>OpenNMS Horizon Stream :: Minion Gateway :: Main</name>
+    <name>OpenNMS Lokahi :: Minion Gateway :: Main</name>
     <description>
         Main executable module for the Minion Gateway.
     </description>

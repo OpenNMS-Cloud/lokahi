@@ -11,7 +11,7 @@
     <artifactId>task-set-service-api</artifactId>
     <packaging>bundle</packaging>
 
-    <name>OpenNMS Horizon Stream :: Shared :: Task Set Service :: API</name>
+    <name>OpenNMS Lokahi :: Shared :: Task Set Service :: API</name>
     <description>
         API definitions (models + interfaces) for the Task Set Service.
     </description>

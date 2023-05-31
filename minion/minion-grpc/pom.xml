@@ -12,7 +12,7 @@
     <artifactId>minion-grpc</artifactId>
     <packaging>pom</packaging>
 
-    <name>OpenNMS Horizon Stream :: Minion :: gRPC</name>
+    <name>OpenNMS Lokahi :: Minion :: gRPC</name>
 
     <modules>
         <module>grpc-client</module>

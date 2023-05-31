@@ -11,7 +11,7 @@
     <artifactId>flows-features</artifactId>
     <packaging>feature</packaging>
 
-    <name>OpenNms Horizon :: Minion :: Flows :: Features</name>
+    <name>OpenNMS Lokahi :: Minion :: Flows :: Features</name>
 
     <dependencies>
         <dependency>

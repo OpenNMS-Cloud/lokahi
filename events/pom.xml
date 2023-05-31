@@ -11,7 +11,7 @@
         <relativePath>../parent-pom</relativePath>
     </parent>
 
-    <name>OpenNMS Horizon Stream :: Events</name>
+    <name>OpenNMS Lokahi :: Events</name>
     <description>
         A microservice that enriches events produced by other components and provides an API to query them.
     </description>

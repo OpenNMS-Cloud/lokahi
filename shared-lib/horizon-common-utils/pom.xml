@@ -10,7 +10,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>horizon-common-utils</artifactId>
-    <name>OpenNMS Horizon Stream :: Shared Library:: Utils</name>
+    <name>OpenNMS Lokahi :: Shared Library:: Utils</name>
     <packaging>bundle</packaging>
 
     <dependencies>

@@ -11,7 +11,7 @@
     <artifactId>minion-gateway-ignite-detector-api</artifactId>
     <packaging>bundle</packaging>
 
-    <name>OpenNMS Horizon Stream :: Minion Gateway :: Ignite Detector :: API</name>
+    <name>OpenNMS Lokahi :: Minion Gateway :: Ignite Detector :: API</name>
     <description>
         API for the Ignite Detector in the Minion Gateway.
     </description>

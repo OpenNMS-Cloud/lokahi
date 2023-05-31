@@ -11,7 +11,7 @@
         <relativePath>../parent-pom</relativePath>
     </parent>
 
-    <name>OpenNMS Horizon Stream :: DataChoices</name>
+    <name>OpenNMS Lokahi :: DataChoices</name>
     <description>datachoices</description>
 
     <artifactId>datachoices</artifactId>

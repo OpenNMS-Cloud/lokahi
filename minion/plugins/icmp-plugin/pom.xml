@@ -12,7 +12,7 @@
     <artifactId>icmp-plugin</artifactId>
 
     <packaging>bundle</packaging>
-    <name>OpenNMS Horizon Stream :: Minion :: Plugins :: ICMP</name>
+    <name>OpenNMS Lokahi :: Minion :: Plugins :: ICMP</name>
 
     <dependencies>
         <dependency>

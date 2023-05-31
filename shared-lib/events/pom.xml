@@ -12,7 +12,7 @@
     <artifactId>events</artifactId>
     <packaging>bundle</packaging>
 
-    <name>OpenNMS Horizon Stream :: Shared Library :: Events</name>
+    <name>OpenNMS Lokahi :: Shared Library :: Events</name>
     <description>The events service contract.</description>
 
     <dependencies>

@@ -12,7 +12,7 @@
     <artifactId>azure-plugin</artifactId>
 
     <packaging>bundle</packaging>
-    <name>OpenNms Horizon :: Minion :: Plugins :: Azure</name>
+    <name>OpenNMS Lokahi :: Minion :: Plugins :: Azure</name>
 
     <dependencies>
         <dependency>

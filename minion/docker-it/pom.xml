@@ -9,9 +9,9 @@
         <version>0.1.0-SNAPSHOT</version>
     </parent>
 
-    <name>OpenNMS Horizon Stream :: Minion :: Docker IT</name>
+    <name>OpenNMS Lokahi :: Minion :: Docker IT</name>
     <description>
-        Docker build-time, Black Box, System Integration Tests for the OpenNMS Horizon project.
+        Docker build-time, Black Box, System Integration Tests for the OpenNMS Lokahi project.
 
         The docker-maven-plugin is used to spin up containers with the Minion and dependencies, then exercise
         Minion functionality.

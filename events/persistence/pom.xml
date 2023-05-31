@@ -11,7 +11,7 @@
 
     <groupId>org.opennms.horizon.events</groupId>
     <artifactId>persistence</artifactId>
-    <name>OpenNMS Horizon Stream :: Events :: Persistence</name>
+    <name>OpenNMS Lokahi :: Events :: Persistence</name>
     <version>0.1.0-SNAPSHOT</version>
 
     <properties>

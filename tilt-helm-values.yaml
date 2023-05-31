@@ -11,7 +11,7 @@ TLS:
 Keycloak:
   AdminPassword: admin
   HostnamePort: 1443
-  HostnameAdminUrl: https://localhost:1443/auth
+  HostnameAdminUrl: https://onmshs.local:1443/auth
 
 OpenNMS:
   API:

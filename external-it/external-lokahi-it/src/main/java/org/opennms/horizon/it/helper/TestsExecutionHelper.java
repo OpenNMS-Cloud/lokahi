@@ -56,6 +56,7 @@ public class TestsExecutionHelper {
     //----------------------------------------
     private Supplier<String> userAccessTokenSupplier;
     private Supplier<String> ingressUrlSupplier;
+    private Supplier<String> minionImageNameSupplier;
     private Supplier<String> minionIngressSupplier;
     private Supplier<Integer> minionIngressPortSupplier;
     private Supplier<Boolean> minionIngressTlsSupplier;
@@ -80,6 +81,14 @@ public class TestsExecutionHelper {
 
     public void setIngressUrlSupplier(Supplier<String> ingressUrlSupplier) {
         this.ingressUrlSupplier = ingressUrlSupplier;
+    }
+
+    public Supplier<String> getMinionImageNameSupplier() {
+        return minionImageNameSupplier;
+    }
+
+    public void setMinionImageNameSupplier(Supplier<String> minionImageNameSupplier) {
+        this.minionImageNameSupplier = minionImageNameSupplier;
     }
 
     public Supplier<String> getMinionIngressSupplier() {
@@ -171,7 +180,7 @@ public class TestsExecutionHelper {
      * @return RestAssured Response or null in case of failure
      */
     public Response executePostQuery(GQLQuery gqlQuery) {
-        LOG.info("checkTheStatusOfTheNode");
+        LOG.info("Executing GraphQL request {}", gqlQuery.getQuery());
 
         try {
             URL url = formatIngressUrl("/api/graphql");
@@ -184,5 +193,4 @@ public class TestsExecutionHelper {
         }
         return null;
     }
-
 }

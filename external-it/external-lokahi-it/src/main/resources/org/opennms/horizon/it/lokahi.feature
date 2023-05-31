@@ -7,6 +7,7 @@ Feature: Minion Monitoring via Echo Messages Logged in Prometheus
     Given Keycloak username in environment variable "KEYCLOAK_USERNAME"
     Given Keycloak password in environment variable "KEYCLOAK_PASSWORD"
     Given Keycloak client-id in environment variable "KEYCLOAK_CLIENT_ID"
+    Given Minion image name in environment variable "MINION_IMAGE_NAME"
     Given Minion ingress base url in environment variable "MINION_INGRESS_URL"
     Given Minion ingress port is in variable "MINION_INGRESS_PORT"
     Given Minion ingress TLS enabled flag is in variable "MINION_INGRESS_TLS"

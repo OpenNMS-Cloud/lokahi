@@ -273,7 +273,7 @@ public class InventoryTestSteps {
             if (existing != null && existing.isRunning()) {
                 existing.stop();
             }
-            GenericContainer<?> minion = new GenericContainer<>(DockerImageName.parse("opennms/lokahi-minion").withTag("latest"))
+            GenericContainer<?> minion = new GenericContainer<>(DockerImageName.parse(helper.getMinionImageNameSupplier().get()))
                 .withEnv("MINION_GATEWAY_HOST", helper.getMinionIngressSupplier().get())
                 .withEnv("MINION_GATEWAY_PORT", String.valueOf(helper.getMinionIngressPortSupplier().get()))
                 .withEnv("MINION_GATEWAY_TLS", String.valueOf(helper.getMinionIngressTlsEnabledSupplier().get()))

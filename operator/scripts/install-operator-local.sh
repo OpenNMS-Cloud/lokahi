@@ -7,13 +7,13 @@ echo
 make local-docker
 if [ $? -ne 0 ]; then exit; fi
 
-docker build -t opennms/horizon-stream-keycloak:latest -f ../keycloak-ui/Dockerfile ../keycloak-ui
+docker build -t opennms/lokahi-keycloak:latest -f ../keycloak-ui/Dockerfile ../keycloak-ui
 
 echo
 echo ______Pushing Docker Images into Kind Cluster______
 echo
 kind load docker-image opennms/operator:local-build
-kind load docker-image opennms/horizon-stream-keycloak:latest
+kind load docker-image opennms/lokahi-keycloak:latest
 
 echo
 echo ________________Installing Operator________________

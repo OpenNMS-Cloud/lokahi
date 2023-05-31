@@ -1,6 +1,6 @@
 spring:
   application:
-    name: horizon-stream-inventory
+    name: lokahi-inventory
 
   datasource:
     driver-class-name: org.postgresql.Driver

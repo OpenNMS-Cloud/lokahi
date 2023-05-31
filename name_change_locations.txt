@@ -13,9 +13,32 @@ Dockerhub repos created:
 * lokahi-rest-server
 * lokahi-ui
 
+Running the following on Mac OS: 
+* $ grep -rl 'horizon-stream' * | grep -v 'target' | grep -v 'Binary file' | grep -v 'cucumber' | grep -v '.swp' | xargs sed -i '' -e 's/horizon-stream/lokahi/g'
+* $ git checkout charts/packaged/index.yaml
+  * Keep the original, it refs old versions.
+* $ git checkout CHANGELOG/
+  * This tracks history, keep this.
+* Also, had to reset the sonar keys, these would not point to the correct location.
+
+# Sonar
+operator/sonar-project.properties:2:sonar.projectKey=opennms_horizon-stream_operator
+rest-server/pom.xml:27:        <sonar.projectKey>opennms_horizon-stream_bff</sonar.projectKey>
+shared-lib/pom.xml:22:        <sonar.projectKey>opennms_horizon-stream_shared-lib</sonar.projectKey>
+ui/sonar-project.properties:2:sonar.projectKey=opennms_horizon-stream_ui
+notifications/pom.xml:22:        <sonar.projectKey>opennms_horizon-stream_notification</sonar.projectKey>
+minion-gateway/pom.xml:26:        <sonar.projectKey>opennms_horizon-stream_minion-gateway</sonar.projectKey>
+minion/pom.xml:44:        <sonar.projectKey>opennms_horizon-stream_minion</sonar.projectKey>
+metrics-processor/pom.xml:24:        <sonar.projectKey>opennms_horizon-stream_metrics-processor</sonar.projectKey>
+inventory/pom.xml:21:        <sonar.projectKey>opennms_horizon-stream_inventory</sonar.projectKey>
+events/pom.xml:25:        <sonar.projectKey>opennms_horizon-stream_events</sonar.projectKey>
+datachoices/pom.xml:21:        <sonar.projectKey>opennms_horizon-stream_datachoices</sonar.projectKey>
+alert/pom.xml:24:        <sonar.projectKey>opennms_horizon-stream_alert</sonar.projectKey>
+
 README.md:5:See [Getting Started on the Wiki](https://github.com/OpenNMS/horizon-stream/wiki/Getting-Started) for development instructions.
 
 # IMPORTANT: Create or add correct privileges to the github repos created from the pipeline.
+# The following is done, but check the github private repos.
 .github/pull_request_template.md:11:* [ ] Follows Horizon Stream's [development guidelines.](https://github.com/OpenNMS/horizon-stream/wiki/Development-Guidelines)
 .github/pull_request_template.md:14:* [ ] Includes [appropriate tests.](https://github.com/OpenNMS/horizon-stream/wiki/Test-Strategy)
 .github/workflows/feature-minion.yml:24:  IMAGE: ${{ inputs.image || 'horizon-stream-minion' }}
@@ -159,14 +182,16 @@ charts/opennms/values.yaml:312:  Image: opennms/horizon-stream-grafana
 charts/opennms/onms-realm.json:5:  "loginTheme": "horizon-stream",
 charts/opennms/onms-realm.json:6:  "emailTheme": "horizon-stream",
 charts/opennms/onms-realm.json:11:      "clientId": "horizon-stream",
+charts/Makefile:7:	helm repo index --url https://opennms-cloud.github.io/horizon-stream/charts/packaged --merge packaged/index.yaml ./packaged
+charts/opennms-operator/Chart.yaml:5:home: https://github.com/OpenNMS/horizon-stream
+
+# Ignore these, already published.
 charts/packaged/index.yaml:9:    - https://opennms-cloud.github.io/horizon-stream/charts/packaged/opennms-0.7.4.tgz
 charts/packaged/index.yaml:16:    - https://opennms-cloud.github.io/horizon-stream/charts/packaged/opennms-0.7.3.tgz
 charts/packaged/index.yaml:23:    - https://opennms-cloud.github.io/horizon-stream/charts/packaged/opennms-0.7.2.tgz
 charts/packaged/index.yaml:30:    - https://opennms-cloud.github.io/horizon-stream/charts/packaged/opennms-0.7.1.tgz
 charts/packaged/index.yaml:37:    - https://opennms-cloud.github.io/horizon-stream/charts/packaged/opennms-0.7.0.tgz
 charts/packaged/index.yaml:44:    - https://opennms-cloud.github.io/horizon-stream/charts/packaged/opennms-0.6.0.tgz
-charts/Makefile:7:	helm repo index --url https://opennms-cloud.github.io/horizon-stream/charts/packaged --merge packaged/index.yaml ./packaged
-charts/opennms-operator/Chart.yaml:5:home: https://github.com/OpenNMS/horizon-stream
 
 external-it/pom.xml:15:        <module>external-horizon-stream-it</module>
 external-it/hs-system-tests/src/test/java/testcontainers/UpdGenContainer.java:46:            .withNetworkAliases("horizon-stream")
@@ -329,20 +354,6 @@ operator/scripts/local-onms-instance.yaml:60:    image: opennms/horizon-stream-k
 operator/scripts/local-onms-instance.yaml:62:    image: opennms/horizon-stream-grafana
 operator/scripts/install-operator-local.sh:10:docker build -t opennms/horizon-stream-keycloak:latest -f ../keycloak-ui/Dockerfile ../keycloak-ui
 operator/scripts/install-operator-local.sh:16:kind load docker-image opennms/horizon-stream-keycloak:latest
-
-# Sonar
-operator/sonar-project.properties:2:sonar.projectKey=opennms_horizon-stream_operator
-rest-server/pom.xml:27:        <sonar.projectKey>opennms_horizon-stream_bff</sonar.projectKey>
-shared-lib/pom.xml:22:        <sonar.projectKey>opennms_horizon-stream_shared-lib</sonar.projectKey>
-ui/sonar-project.properties:2:sonar.projectKey=opennms_horizon-stream_ui
-notifications/pom.xml:22:        <sonar.projectKey>opennms_horizon-stream_notification</sonar.projectKey>
-minion-gateway/pom.xml:26:        <sonar.projectKey>opennms_horizon-stream_minion-gateway</sonar.projectKey>
-minion/pom.xml:44:        <sonar.projectKey>opennms_horizon-stream_minion</sonar.projectKey>
-metrics-processor/pom.xml:24:        <sonar.projectKey>opennms_horizon-stream_metrics-processor</sonar.projectKey>
-inventory/pom.xml:21:        <sonar.projectKey>opennms_horizon-stream_inventory</sonar.projectKey>
-events/pom.xml:25:        <sonar.projectKey>opennms_horizon-stream_events</sonar.projectKey>
-datachoices/pom.xml:21:        <sonar.projectKey>opennms_horizon-stream_datachoices</sonar.projectKey>
-alert/pom.xml:24:        <sonar.projectKey>opennms_horizon-stream_alert</sonar.projectKey>
 
 tilt-custom-resource.yaml:10:    image: opennms/horizon-stream-core
 tilt-custom-resource.yaml:14:    image: opennms/horizon-stream-rest-server

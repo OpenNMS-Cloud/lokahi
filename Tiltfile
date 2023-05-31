@@ -12,13 +12,13 @@
 ##	Exceptions to the Rule
 ##		8123 = INGRESS HTTP
 ##
-## 11 = horizon-stream-core
-## 12 = horizon-stream-minion
-## 13 = horizon-stream-api
+## 11 = lokahi-core
+## 12 = lokahi-minion
+## 13 = lokahi-api
 ## 14 = api-gateway
-## 15 = horizon-stream-notification
-## 16 = horizon-stream-minion-gateway
-## 17 = horizon-stream-ui
+## 15 = lokahi-notification
+## 16 = lokahi-minion-gateway
+## 17 = lokahi-ui
 ## 18 = grafana
 ## 22 = mail-server
 ## 23 = zookeeper
@@ -27,7 +27,7 @@
 ## 26 = keycloak
 ## 27 = minion (classic)
 ## 28 = metric processor
-## 29 = horizon-stream-inventory
+## 29 = lokahi-inventory
 ## 30 = events
 ## 31 = cortex
 ## 32 = prometheus
@@ -207,7 +207,7 @@ local_resource(
 ### Notification ###
 jib_project(
     'notification',
-    'opennms/horizon-stream-notification',
+    'opennms/lokahi-notification',
     'notifications',
     'opennms-notifications',
     port_forwards=['15065:6565', '15050:5005'],
@@ -216,7 +216,7 @@ jib_project(
 ### Vue.js App ###
 #### UI ####
 docker_build(
-    'opennms/horizon-stream-ui',
+    'opennms/lokahi-ui',
     'ui',
     target='development',
     live_update=[
@@ -235,7 +235,7 @@ k8s_resource(
 #### BFF ####
 jib_project(
     'vuejs-bff',
-    'opennms/horizon-stream-rest-server',
+    'opennms/lokahi-rest-server',
     'rest-server',
     'opennms-rest-server',
     labels=['vuejs-app'],
@@ -245,7 +245,7 @@ jib_project(
 ### Inventory ###
 jib_project_multi_module(
     'inventory',
-    'opennms/horizon-stream-inventory',
+    'opennms/lokahi-inventory',
     'inventory',
     'opennms-inventory',
     port_forwards=['29080:8080', '29050:5005', '29065:6565'],
@@ -254,7 +254,7 @@ jib_project_multi_module(
 ### Alert ###
 jib_project(
     'alert',
-    'opennms/horizon-stream-alert',
+    'opennms/lokahi-alert',
     'alert',
     'opennms-alert',
     port_forwards=['32080:9090', '32050:5005', '32065:6565',  '32000:8080'],
@@ -263,7 +263,7 @@ jib_project(
 ### Metrics Processor ###
 jib_project_multi_module(
     'metrics-processor',
-    'opennms/horizon-stream-metrics-processor',
+    'opennms/lokahi-metrics-processor',
     'metrics-processor',
     'opennms-metrics-processor',
     port_forwards=['28080:8080', '28050:5005'],
@@ -272,7 +272,7 @@ jib_project_multi_module(
 ### Events ###
 jib_project_multi_module(
     'events',
-    'opennms/horizon-stream-events',
+    'opennms/lokahi-events',
     'events',
     'opennms-events',
     port_forwards=['30050:5005', '30080:8080', '30065:6565'],
@@ -281,7 +281,7 @@ jib_project_multi_module(
 ### Minion Gateway ###
 jib_project_multi_module(
     'minion-gateway',
-    'opennms/horizon-stream-minion-gateway',
+    'opennms/lokahi-minion-gateway',
     'minion-gateway',
     'opennms-minion-gateway',
     port_forwards=['16080:9090', '16050:5005'],
@@ -290,7 +290,7 @@ jib_project_multi_module(
 ### DataChoices ###
 jib_project(
     'datachoices',
-    'opennms/horizon-stream-datachoices',
+    'opennms/lokahi-datachoices',
     'datachoices',
     'opennms-datachoices',
     port_forwards=['33080:9090', '33050:5005', '33065:6565'],
@@ -298,7 +298,7 @@ jib_project(
 
 ### Minion ###
 custom_build(
-    'opennms/horizon-stream-minion',
+    'opennms/lokahi-minion',
     'mvn install -f minion -Dapplication.docker.image=$EXPECTED_REF -DskipUTs=true -DskipITs=true -DskipTests=true -Dfeatures.verify.skip=true',
     deps=['./minion'],
     ignore=['**/target', '**/dependency-reduced-pom.xml'],
@@ -315,7 +315,7 @@ k8s_resource(
 ### Minion Certificate Manager ###
 jib_project(
     'minion-certificate-manager',
-    'opennms/horizon-stream-minion-certificate-manager',
+    'opennms/lokahi-minion-certificate-manager',
     'minion-certificate-manager',
     'opennms-minion-certificate-manager',
     port_forwards=['34089:8990', '34050:5005'],
@@ -325,7 +325,7 @@ jib_project(
 # resource_name, image_name, base_path, k8s_resource_name, resource_deps=[], port_forwards=[], labels=None)
 jib_project(
     'minion-certificate-verifier',
-    'opennms/horizon-stream-minion-certificate-verifier',
+    'opennms/lokahi-minion-certificate-verifier',
     'minion-certificate-verifier',
     'opennms-minion-certificate-verifier',
     port_forwards=['35080:8080', '35050:5005'],
@@ -335,7 +335,7 @@ jib_project(
 ## 3rd Party Resources ##
 ### Keycloak ###
 docker_build(
-    'opennms/horizon-stream-keycloak',
+    'opennms/lokahi-keycloak',
     'keycloak-ui',
     target='development',
     live_update=[
@@ -356,7 +356,7 @@ k8s_resource(
 
 ### Grafana ###
 docker_build(
-    'opennms/horizon-stream-grafana',
+    'opennms/lokahi-grafana',
     'grafana',
 )
 k8s_resource(

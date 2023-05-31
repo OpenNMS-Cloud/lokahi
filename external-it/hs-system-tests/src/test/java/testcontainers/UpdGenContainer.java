@@ -43,7 +43,7 @@ public class UpdGenContainer extends GenericContainer<UpdGenContainer> {
     public UpdGenContainer(Object port, String flowType, Object numberOfPackages) {
         super("opennms/udpgen:latest");
         withNetwork(Network.SHARED)
-            .withNetworkAliases("horizon-stream")
+            .withNetworkAliases("lokahi")
             .withCommand("/udpgen",
                 "-h", InetAddress.getLocalHost().getHostAddress(),
                 "-p", port.toString(),

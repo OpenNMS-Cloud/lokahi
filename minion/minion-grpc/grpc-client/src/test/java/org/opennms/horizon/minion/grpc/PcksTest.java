@@ -34,7 +34,7 @@ public class PcksTest {
 
     public static void main(String[] args) throws Exception {
         KeyStore keyStore = KeyStore.getInstance("pkcs12");
-        keyStore.load(new FileInputStream("/home/splatch/projects/opennms/sources/horizon-stream/tools/SSL/keystore.p12"),
+        keyStore.load(new FileInputStream("/home/splatch/projects/opennms/sources/lokahi/tools/SSL/keystore.p12"),
             "passw0rd1".toCharArray());
 
         Enumeration<String> aliases = keyStore.aliases();
@@ -80,7 +80,7 @@ public class PcksTest {
 
     private static SslContextBuilder buildSslContext() throws Exception {
         KeyStore keyStore = KeyStore.getInstance("pkcs12");
-        keyStore.load(new FileInputStream("/home/splatch/projects/opennms/sources/horizon-stream/tools/SSL/keystore.p12"),
+        keyStore.load(new FileInputStream("/home/splatch/projects/opennms/sources/lokahi/tools/SSL/keystore.p12"),
             "passw0rd1".toCharArray());
 
         KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());

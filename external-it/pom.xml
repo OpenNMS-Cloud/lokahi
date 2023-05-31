@@ -12,7 +12,7 @@
     <name>OpenNMS Horizon Stream :: External IT Parent</name>
 
     <modules>
-        <module>external-horizon-stream-it</module>
+        <module>external-lokahi-it</module>
     </modules>
 
 </project>

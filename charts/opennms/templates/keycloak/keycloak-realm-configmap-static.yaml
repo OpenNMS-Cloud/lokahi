@@ -10,13 +10,13 @@ data:
       "realm": "{{ .Values.Keycloak.RealmName }}",
       "accessTokenLifespan": 6000,
       "enabled": true,
-      "loginTheme": "horizon-stream",
-      "emailTheme": "horizon-stream",
+      "loginTheme": "lokahi",
+      "emailTheme": "lokahi",
       "rememberMe": true,
       "resetPasswordAllowed": true,
       "clients": [
         {
-          "clientId": "horizon-stream",
+          "clientId": "lokahi",
           "standardFlowEnabled": true,
           "enabled": true,
           "webOrigins": [

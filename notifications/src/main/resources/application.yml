@@ -1,6 +1,6 @@
 spring:
   application:
-    name: horizon-stream-notifications
+    name: lokahi-notifications
 
   mail:
     template: alert.html.vm

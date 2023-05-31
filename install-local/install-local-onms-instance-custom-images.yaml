@@ -11,41 +11,41 @@ spec:
   tlsEnabled: true
   deployOnly: true
   core:
-    image: opennms/horizon-stream-core:local
+    image: opennms/lokahi-core:local
     cpu: "0"
     mem: "0"
   api:
-    image: opennms/horizon-stream-rest-server:local
+    image: opennms/lokahi-rest-server:local
     cpu: "0"
     mem: 500Mi
   ui:
-    image: opennms/horizon-stream-ui:local
+    image: opennms/lokahi-ui:local
     cpu: "0"
     mem: 100Mi
   minion:
-    image: opennms/horizon-stream-minion:local
+    image: opennms/lokahi-minion:local
     cpu: "0"
     mem: 1000Mi
   minionGateway:
-    image: opennms/horizon-stream-minion-gateway:local
+    image: opennms/lokahi-minion-gateway:local
     cpu: "0"
     mem: 500Mi
   notification:
-    image: opennms/horizon-stream-notification:local
+    image: opennms/lokahi-notification:local
     cpu: "0"
     mem: 100Mi
   inventory:
-    image: opennms/horizon-stream-inventory:local
+    image: opennms/lokahi-inventory:local
   metricsProcessor:
-    image: opennms/horizon-stream-metrics-processor:local
+    image: opennms/lokahi-metrics-processor:local
   events:
-    image: opennms/horizon-stream-events:local
+    image: opennms/lokahi-events:local
   datachoices:
-    image: opennms/horizon-stream-datachoices:local
+    image: opennms/lokahi-datachoices:local
   keycloak:
-    image: opennms/horizon-stream-keycloak:local
+    image: opennms/lokahi-keycloak:local
   grafana:
-    image: opennms/horizon-stream-grafana:local
+    image: opennms/lokahi-grafana:local
   postgres:
     image: postgres:14.5-alpine
   credentials:

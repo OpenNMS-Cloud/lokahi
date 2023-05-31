@@ -207,6 +207,7 @@ jobs:
           KEYCLOAK_USERNAME=admin
           KEYCLOAK_PASSWORD=admin
           KEYCLOAK_CLIENT_ID=lokahi
+          MINION_IMAGE_NAME=${{ inputs.image-registry || 'ghcr.io' }}/opennms-cloud/lohaki-minion:${{ inputs.image-tag || github.sha }}
           MINION_INGRESS_URL=$(hostname)
           MINION_INGRESS_PORT=443
           MINION_INGRESS_TLS=true
@@ -214,7 +215,7 @@ jobs:
           MINION_INGRESS_OVERRIDE_AUTHORITY=minion.onmshs
           
           export INGRESS_BASE_URL KEYCLOAK_BASE_URL KEYCLOAK_REALM KEYCLOAK_USERNAME KEYCLOAK_PASSWORD KEYCLOAK_CLIENT_ID
-          export MINION_INGRESS_URL MINION_INGRESS_PORT MINION_INGRESS_TLS MINION_INGRESS_CA MINION_INGRESS_OVERRIDE_AUTHORITY
+          export MINION_IMAGE_NAME MINION_INGRESS_URL MINION_INGRESS_PORT MINION_INGRESS_TLS MINION_INGRESS_CA MINION_INGRESS_OVERRIDE_AUTHORITY
           PROJECT_VERSION="$(mvn -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive -q org.codehaus.mojo:exec-maven-plugin:1.6.0:exec)"
           java -jar "external-lokahi-it/target/external-lokahi-it-${PROJECT_VERSION}.jar"
 

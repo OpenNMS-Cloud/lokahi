@@ -20,7 +20,7 @@ on:
         type: string
 
 env:
-  IMAGE: ${{ inputs.image || 'horizon-stream-operator' }}
+  IMAGE: ${{ inputs.image || 'lokahi-operator' }}
   IMAGE_TAG: ${{ inputs.image-tag || github.sha }}
   IMAGE_REGISTRY: ${{ inputs.image-registry || 'ghcr.io' }}
 

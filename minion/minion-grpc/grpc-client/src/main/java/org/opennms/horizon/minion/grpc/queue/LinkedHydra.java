@@ -141,6 +141,18 @@ public class LinkedHydra<E> implements Hydra<E> {
             }
         }
 
+        @Override
+        public boolean isEmpty() {
+            final var lock = LinkedHydra.this.lock;
+            lock.lock();
+
+            try {
+                return this.head == null;
+            } finally {
+                lock.unlock();
+            }
+        }
+
         private void enqueue(final E element) {
             final Node<E> newNode = new Node<>();
             newNode.globalNext = null;

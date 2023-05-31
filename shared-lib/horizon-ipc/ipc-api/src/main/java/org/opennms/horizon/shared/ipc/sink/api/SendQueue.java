@@ -41,4 +41,10 @@ public interface SendQueue extends AutoCloseable {
      * @throws InterruptedException if interrupted while waiting
      */
     byte[] dequeue() throws InterruptedException;
+
+    /**
+     * Retruns {@literal  true} if this queue contains no elements.
+     * @return {@literal  true} if this queue contains no elements
+     */
+    boolean isEmpty();
 }

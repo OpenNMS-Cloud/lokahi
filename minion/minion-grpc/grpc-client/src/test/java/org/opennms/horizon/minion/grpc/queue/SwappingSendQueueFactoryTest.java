@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import static org.awaitility.Awaitility.await;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.file.Path;
 import java.util.List;
@@ -182,5 +183,30 @@ public class SwappingSendQueueFactoryTest {
         }
 
         await().until(() -> consumedSum.get() == producedSum.get());
+    }
+
+    @Test
+    public void testStoreEviction() throws Exception {
+        try (final var queue = this.factory.createQueue("test")) {
+            queue.enqueue("0".getBytes());
+            queue.enqueue("1".getBytes());
+            queue.enqueue("2".getBytes());
+            queue.enqueue("3".getBytes());
+        }
+
+        try (final var queue = this.factory.createQueue("test")) {
+            assertArrayEquals("0".getBytes(), queue.dequeue());
+            assertArrayEquals("1".getBytes(), queue.dequeue());
+        }
+
+        try (final var queue = this.factory.createQueue("test")) {
+            assertArrayEquals("2".getBytes(), queue.dequeue());
+            assertArrayEquals("3".getBytes(), queue.dequeue());
+            assertTrue(queue.isEmpty());
+        }
+
+        try (final var queue = this.factory.createQueue("test")) {
+            assertTrue(queue.isEmpty());
+        }
     }
 }

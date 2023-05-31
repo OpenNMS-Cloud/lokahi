@@ -29,7 +29,9 @@
 package org.opennms.horizon.minion.grpc.queue;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
@@ -42,13 +44,19 @@ public abstract class HydraTest {
         final var hydra = this.spawn();
         final var queue = hydra.queue();
 
+        assertTrue(queue.isEmpty());
+
         queue.put(23);
         assertEquals(23, queue.take());
 
         queue.put(13);
         queue.put(37);
+        assertFalse(queue.isEmpty());
+
         assertEquals(13, queue.take());
         assertEquals(37, queue.take());
+
+        assertTrue(queue.isEmpty());
     }
 
     @Test
@@ -75,12 +83,34 @@ public abstract class HydraTest {
         final var queue2 = hydra.queue();
         final var queue3 = hydra.queue();
 
+        assertTrue(queue1.isEmpty());
+        assertTrue(queue2.isEmpty());
+        assertTrue(queue3.isEmpty());
+
         queue1.put(23);
+
+        assertFalse(queue1.isEmpty());
+        assertTrue(queue2.isEmpty());
+        assertTrue(queue3.isEmpty());
+
         queue2.put(13);
         queue2.put(37);
+
+        assertFalse(queue1.isEmpty());
+        assertFalse(queue2.isEmpty());
+        assertTrue(queue3.isEmpty());
+
         queue3.put(42);
 
+        assertFalse(queue1.isEmpty());
+        assertFalse(queue2.isEmpty());
+        assertFalse(queue3.isEmpty());
+
         assertEquals(23, queue1.take());
+
+        assertTrue(queue1.isEmpty());
+        assertFalse(queue2.isEmpty());
+        assertFalse(queue3.isEmpty());
 
         assertEquals(13, hydra.poll());
         assertEquals(37, hydra.poll());
@@ -88,8 +118,16 @@ public abstract class HydraTest {
         assertEquals(13, queue2.take());
         assertEquals(37, queue2.take());
 
+        assertTrue(queue1.isEmpty());
+        assertTrue(queue2.isEmpty());
+        assertFalse(queue3.isEmpty());
+
         assertEquals(42, queue3.take());
         assertNull(hydra.poll());
+
+        assertTrue(queue1.isEmpty());
+        assertTrue(queue2.isEmpty());
+        assertTrue(queue3.isEmpty());
     }
 
 }

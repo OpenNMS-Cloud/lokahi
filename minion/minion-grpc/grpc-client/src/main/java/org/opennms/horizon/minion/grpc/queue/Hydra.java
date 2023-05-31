@@ -48,5 +48,7 @@ public interface Hydra<E> {
         public E poll();
 
         public void put(final E element) throws InterruptedException;
+
+        public boolean isEmpty();
     }
 }

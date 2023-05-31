@@ -163,6 +163,11 @@ public class SwappingSendQueueFactory implements SendQueueFactory, Closeable {
         }
 
         @Override
+        public boolean isEmpty() {
+            return this.elements.isEmpty();
+        }
+
+        @Override
         public void close() throws Exception {
             for (Element element = this.elements.poll(); element != null; element = this.elements.poll()) {
                 element.persist(this.store);

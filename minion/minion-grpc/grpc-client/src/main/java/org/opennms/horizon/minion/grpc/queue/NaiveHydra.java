@@ -70,5 +70,10 @@ public class NaiveHydra<E> implements Hydra<E> {
             NaiveHydra.this.global.offer(element);
             this.local.put(element);
         }
+
+        @Override
+        public boolean isEmpty() {
+            return this.local.isEmpty();
+        }
     }
 }

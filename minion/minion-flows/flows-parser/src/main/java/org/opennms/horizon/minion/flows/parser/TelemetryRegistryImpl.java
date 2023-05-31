@@ -27,6 +27,7 @@
  *******************************************************************************/
 package org.opennms.horizon.minion.flows.parser;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -66,7 +67,7 @@ public class TelemetryRegistryImpl implements TelemetryRegistry {
 
     public TelemetryRegistryImpl(MessageDispatcherFactory messageDispatcherFactory,
                                  IpcIdentity identity,
-                                 DnsResolver dnsResolver) {
+                                 DnsResolver dnsResolver) throws IOException {
         Objects.requireNonNull(messageDispatcherFactory);
         Objects.requireNonNull(identity);
         Objects.requireNonNull(dnsResolver);

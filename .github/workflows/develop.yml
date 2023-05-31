@@ -207,7 +207,14 @@ jobs:
           KEYCLOAK_USERNAME=admin
           KEYCLOAK_PASSWORD=admin
           KEYCLOAK_CLIENT_ID=horizon-stream
+          MINION_INGRESS_URL=$(hostname)
+          MINION_INGRESS_PORT=443
+          MINION_INGRESS_TLS=true
+          MINION_INGRESS_CA=$(realpath ../install-local/tmp/ca.crt)
+          MINION_INGRESS_OVERRIDE_AUTHORITY=minion.onmshs
+          
           export INGRESS_BASE_URL KEYCLOAK_BASE_URL KEYCLOAK_REALM KEYCLOAK_USERNAME KEYCLOAK_PASSWORD KEYCLOAK_CLIENT_ID
+          export MINION_INGRESS_URL MINION_INGRESS_PORT MINION_INGRESS_TLS MINION_INGRESS_CA MINION_INGRESS_OVERRIDE_AUTHORITY
           PROJECT_VERSION="$(mvn -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive -q org.codehaus.mojo:exec-maven-plugin:1.6.0:exec)"
           java -jar "external-horizon-stream-it/target/external-horizon-stream-it-${PROJECT_VERSION}.jar"
 

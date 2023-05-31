@@ -115,6 +115,18 @@ OpenNMS:
       Requests:
         Cpu: "0"
         Memory: "0"
+  MinionCertificateManager:
+    Image: opennms/horizon-stream-minion-certificate-manager:local
+    CaSecretName: root-ca-certificate
+    MtlsSecretName: client-root-ca-certificate
+    Enabled: true
+    Resources:
+      Limits:
+        Cpu: "0"
+        Memory: "0"
+      Requests:
+        Cpu: "0"
+        Memory: "0"
   Inventory:
     Image: opennms/horizon-stream-inventory:local
     Resources:

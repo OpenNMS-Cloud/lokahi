@@ -31,4 +31,7 @@ public abstract class GQLQueryConstants {
         "mutation { createIcmpActiveDiscovery( request: { name: \"%s\", location: \"%s\", ipAddresses: [\"%s\"], snmpConfig: { readCommunities: [\"%s\"], ports: [%d]\n" +
             " } } ) {id, name, ipAddresses, location, snmpConfig { readCommunities, ports } } }";
 
+    public static final String CREATE_MINION_CERTIFICATE =
+        "query { getMinionCertificate(location: \"%s\") {  certificate, password } }";
+
 }

@@ -28,7 +28,9 @@
 
 package org.opennms.horizon.shared.ipc.sink.api;
 
+import java.io.IOException;
+
 public interface SendQueueFactory {
 
-    <T> SendQueue createQueue(final SinkModule<?, T> module);
+    SendQueue createQueue(final String id) throws IOException;
 }

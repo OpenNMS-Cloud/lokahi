@@ -68,7 +68,10 @@ public class ConfigurationUtil {
     private final MonitorPolicyMapper policyMapper;
 
     @Value("${grpc.url.flows}")
-    private String flowQuerierGrpcAddress;
+    private String flowsQuerierGrpcAddress;
+
+    @Value("${grpc.url.flows.tls.enabled:false}")
+    private boolean flowsTlsEnabled;
 
     @Value("${grpc.url.minion-certificate-manager}")
     private String minionCertificateManagerGrpcAddress;
@@ -108,9 +111,12 @@ public class ConfigurationUtil {
 
     @Bean(name = "flowQuerier")
     public ManagedChannel createFlowQuerierChannel() {
-        return ManagedChannelBuilder.forTarget(flowQuerierGrpcAddress)
-            .keepAliveWithoutCalls(true)
-            .build();
+        var builder = ManagedChannelBuilder.forTarget(flowsQuerierGrpcAddress)
+            .keepAliveWithoutCalls(true);
+        if (!flowsTlsEnabled) {
+            builder.usePlaintext();
+        }
+        return builder.build();
     }
 
     @Bean(name = "minionCertificateManager")

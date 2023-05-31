@@ -190,13 +190,6 @@ export type ListAlertResponse = {
   totalAlerts: Scalars['Long'];
 };
 
-export type Location = {
-  __typename?: 'Location';
-  id: Scalars['Long'];
-  location?: Maybe<Scalars['String']>;
-  tenantId?: Maybe<Scalars['String']>;
-};
-
 export type ManagedObject = {
   __typename?: 'ManagedObject';
   instance?: Maybe<ManagedObjectInstance>;
@@ -224,7 +217,7 @@ export type Minion = {
   id: Scalars['Long'];
   label?: Maybe<Scalars['String']>;
   lastCheckedTime: Scalars['Long'];
-  location?: Maybe<Location>;
+  location?: Maybe<MonitoringLocation>;
   locationId: Scalars['Long'];
   status?: Maybe<Scalars['String']>;
   systemId?: Maybe<Scalars['String']>;
@@ -258,6 +251,31 @@ export type MonitorPolicyInput = {
   tenantId?: InputMaybe<Scalars['String']>;
 };
 
+export type MonitoringLocation = {
+  __typename?: 'MonitoringLocation';
+  address?: Maybe<Scalars['String']>;
+  id: Scalars['Long'];
+  latitude?: Maybe<Scalars['Float']>;
+  location?: Maybe<Scalars['String']>;
+  longitude?: Maybe<Scalars['Float']>;
+  tenantId?: Maybe<Scalars['String']>;
+};
+
+export type MonitoringLocationCreateInput = {
+  address?: InputMaybe<Scalars['String']>;
+  latitude?: InputMaybe<Scalars['Float']>;
+  location?: InputMaybe<Scalars['String']>;
+  longitude?: InputMaybe<Scalars['Float']>;
+};
+
+export type MonitoringLocationUpdateInput = {
+  address?: InputMaybe<Scalars['String']>;
+  id: Scalars['Long'];
+  latitude?: InputMaybe<Scalars['Float']>;
+  location?: InputMaybe<Scalars['String']>;
+  longitude?: InputMaybe<Scalars['Float']>;
+};
+
 /** Mutation root */
 export type Mutation = {
   __typename?: 'Mutation';
@@ -267,7 +285,7 @@ export type Mutation = {
   clearAlert?: Maybe<AlertResponse>;
   createAzureActiveDiscovery?: Maybe<AzureActiveDiscovery>;
   createIcmpActiveDiscovery?: Maybe<IcmpActiveDiscovery>;
-  createLocation?: Maybe<Location>;
+  createLocation?: Maybe<MonitoringLocation>;
   createMonitorPolicy?: Maybe<MonitorPolicy>;
   deleteAlert?: Maybe<DeleteAlertResponse>;
   deleteLocation?: Maybe<Scalars['Boolean']>;
@@ -279,7 +297,7 @@ export type Mutation = {
   savePagerDutyConfig?: Maybe<Scalars['Boolean']>;
   togglePassiveDiscovery?: Maybe<PassiveDiscoveryToggle>;
   unacknowledgeAlert?: Maybe<AlertResponse>;
-  updateLocation?: Maybe<Location>;
+  updateLocation?: Maybe<MonitoringLocation>;
   upsertPassiveDiscovery?: Maybe<PassiveDiscovery>;
 };
 
@@ -322,7 +340,7 @@ export type MutationCreateIcmpActiveDiscoveryArgs = {
 
 /** Mutation root */
 export type MutationCreateLocationArgs = {
-  location?: InputMaybe<Scalars['String']>;
+  location?: InputMaybe<MonitoringLocationCreateInput>;
 };
 
 
@@ -394,8 +412,7 @@ export type MutationUnacknowledgeAlertArgs = {
 
 /** Mutation root */
 export type MutationUpdateLocationArgs = {
-  id?: InputMaybe<Scalars['Long']>;
-  location?: InputMaybe<Scalars['String']>;
+  location?: InputMaybe<MonitoringLocationUpdateInput>;
 };
 
 
@@ -409,7 +426,7 @@ export type Node = {
   createTime: Scalars['Long'];
   id: Scalars['Long'];
   ipInterfaces?: Maybe<Array<Maybe<IpInterface>>>;
-  location?: Maybe<Location>;
+  location?: Maybe<MonitoringLocation>;
   monitoredState?: Maybe<Scalars['String']>;
   monitoringLocationId: Scalars['Long'];
   nodeLabel?: Maybe<Scalars['String']>;
@@ -507,7 +524,7 @@ export type Query = {
   defaultPolicy?: Maybe<MonitorPolicy>;
   findAllAlerts?: Maybe<ListAlertResponse>;
   findAllEvents?: Maybe<Array<Maybe<Event>>>;
-  findAllLocations?: Maybe<Array<Maybe<Location>>>;
+  findAllLocations?: Maybe<Array<Maybe<MonitoringLocation>>>;
   findAllMinions?: Maybe<Array<Maybe<Minion>>>;
   findAllNodes?: Maybe<Array<Maybe<Node>>>;
   findAllNodesByMonitoredState?: Maybe<Array<Maybe<Node>>>;
@@ -518,7 +535,7 @@ export type Query = {
   findApplications?: Maybe<Array<Maybe<Scalars['String']>>>;
   findEventsByNodeId?: Maybe<Array<Maybe<Event>>>;
   findExporters?: Maybe<Array<Maybe<Exporter>>>;
-  findLocationById?: Maybe<Location>;
+  findLocationById?: Maybe<MonitoringLocation>;
   findMinionById?: Maybe<Minion>;
   findMonitorPolicyById?: Maybe<MonitorPolicy>;
   findNodeById?: Maybe<Node>;
@@ -530,7 +547,7 @@ export type Query = {
   metric?: Maybe<TimeSeriesQueryResult>;
   nodeStatus?: Maybe<NodeStatus>;
   passiveDiscoveries?: Maybe<Array<Maybe<PassiveDiscovery>>>;
-  searchLocation?: Maybe<Array<Maybe<Location>>>;
+  searchLocation?: Maybe<Array<Maybe<MonitoringLocation>>>;
   tags?: Maybe<Array<Maybe<Tag>>>;
   tagsByActiveDiscoveryId?: Maybe<Array<Maybe<Tag>>>;
   tagsByNodeId?: Maybe<Array<Maybe<Tag>>>;
@@ -950,19 +967,18 @@ export type FindExportersQueryVariables = Exact<{
 export type FindExportersQuery = { __typename?: 'Query', findExporters?: Array<{ __typename?: 'Exporter', node?: { __typename?: 'Node', id: any, nodeLabel?: string }, ipInterface?: { __typename?: 'IpInterface', id: any, ipAddress?: string } }> };
 
 export type CreateLocationMutationVariables = Exact<{
-  location?: InputMaybe<Scalars['String']>;
+  location: MonitoringLocationCreateInput;
 }>;
 
 
-export type CreateLocationMutation = { __typename?: 'Mutation', createLocation?: { __typename?: 'Location', id: any, location?: string, tenantId?: string } };
+export type CreateLocationMutation = { __typename?: 'Mutation', createLocation?: { __typename?: 'MonitoringLocation', id: any, location?: string, address?: string, longitude?: number, latitude?: number, tenantId?: string } };
 
 export type UpdateLocationMutationVariables = Exact<{
-  id: Scalars['Long'];
-  location: Scalars['String'];
+  location?: InputMaybe<MonitoringLocationUpdateInput>;
 }>;
 
 
-export type UpdateLocationMutation = { __typename?: 'Mutation', updateLocation?: { __typename?: 'Location', id: any, location?: string, tenantId?: string } };
+export type UpdateLocationMutation = { __typename?: 'Mutation', updateLocation?: { __typename?: 'MonitoringLocation', id: any, location?: string, address?: string, longitude?: number, latitude?: number, tenantId?: string } };
 
 export type DeleteLocationMutationVariables = Exact<{
   id: Scalars['Long'];
@@ -971,19 +987,19 @@ export type DeleteLocationMutationVariables = Exact<{
 
 export type DeleteLocationMutation = { __typename?: 'Mutation', deleteLocation?: boolean };
 
-export type LocationsPartsFragment = { __typename?: 'Query', findAllLocations?: Array<{ __typename?: 'Location', id: any, location?: string }> };
+export type LocationsPartsFragment = { __typename?: 'Query', findAllLocations?: Array<{ __typename?: 'MonitoringLocation', id: any, location?: string, address?: string, longitude?: number, latitude?: number }> };
 
 export type LocationsListQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type LocationsListQuery = { __typename?: 'Query', findAllLocations?: Array<{ __typename?: 'Location', id: any, location?: string }> };
+export type LocationsListQuery = { __typename?: 'Query', findAllLocations?: Array<{ __typename?: 'MonitoringLocation', id: any, location?: string, address?: string, longitude?: number, latitude?: number }> };
 
 export type SearchLocationQueryVariables = Exact<{
   searchTerm?: InputMaybe<Scalars['String']>;
 }>;
 
 
-export type SearchLocationQuery = { __typename?: 'Query', searchLocation?: Array<{ __typename?: 'Location', id: any, location?: string }> };
+export type SearchLocationQuery = { __typename?: 'Query', searchLocation?: Array<{ __typename?: 'MonitoringLocation', id: any, location?: string, address?: string, longitude?: number, latitude?: number }> };
 
 export type DeviceUptimePartsFragment = { __typename?: 'Query', deviceUptime?: { __typename?: 'TimeSeriesQueryResult', data?: { __typename?: 'TSData', result?: Array<{ __typename?: 'TSResult', metric?: any, values?: Array<Array<number>> }> } } };
 
@@ -1043,7 +1059,7 @@ export type RemoveTagsFromNodesMutation = { __typename?: 'Mutation', removeTagsF
 
 export type NodeStatusPartsFragment = { __typename?: 'Query', nodeStatus?: { __typename?: 'NodeStatus', id: any, status?: string } };
 
-export type NodesPartsFragment = { __typename?: 'Query', findAllNodes?: Array<{ __typename?: 'Node', createTime: any, id: any, monitoringLocationId: any, nodeLabel?: string, tenantId?: string, scanType?: string, ipInterfaces?: Array<{ __typename?: 'IpInterface', id: any, ipAddress?: string, nodeId: any, tenantId?: string, snmpPrimary?: boolean }>, location?: { __typename?: 'Location', id: any, location?: string, tenantId?: string } }> };
+export type NodesPartsFragment = { __typename?: 'Query', findAllNodes?: Array<{ __typename?: 'Node', createTime: any, id: any, monitoringLocationId: any, nodeLabel?: string, tenantId?: string, scanType?: string, ipInterfaces?: Array<{ __typename?: 'IpInterface', id: any, ipAddress?: string, nodeId: any, tenantId?: string, snmpPrimary?: boolean }>, location?: { __typename?: 'MonitoringLocation', id: any, location?: string, tenantId?: string } }> };
 
 export type SavePagerDutyConfigMutationVariables = Exact<{
   config: PagerDutyConfigInput;
@@ -1077,7 +1093,7 @@ export type ListTagsByNodeIdsQuery = { __typename?: 'Query', tagsByNodeIds?: Arr
 
 export type NodesTablePartsFragment = { __typename?: 'Query', findAllNodes?: Array<{ __typename?: 'Node', id: any, nodeLabel?: string, tenantId?: string, createTime: any, monitoringLocationId: any, scanType?: string, ipInterfaces?: Array<{ __typename?: 'IpInterface', ipAddress?: string, snmpPrimary?: boolean }> }> };
 
-export type MinionsTablePartsFragment = { __typename?: 'Query', findAllMinions?: Array<{ __typename?: 'Minion', id: any, label?: string, lastCheckedTime: any, status?: string, systemId?: string, location?: { __typename?: 'Location', id: any, location?: string } }> };
+export type MinionsTablePartsFragment = { __typename?: 'Query', findAllMinions?: Array<{ __typename?: 'Minion', id: any, label?: string, lastCheckedTime: any, status?: string, systemId?: string, location?: { __typename?: 'MonitoringLocation', id: any, location?: string } }> };
 
 export type ListNodesForTableQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -1087,7 +1103,7 @@ export type ListNodesForTableQuery = { __typename?: 'Query', findAllNodes?: Arra
 export type ListMinionsForTableQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type ListMinionsForTableQuery = { __typename?: 'Query', findAllMinions?: Array<{ __typename?: 'Minion', id: any, label?: string, lastCheckedTime: any, status?: string, systemId?: string, location?: { __typename?: 'Location', id: any, location?: string } }> };
+export type ListMinionsForTableQuery = { __typename?: 'Query', findAllMinions?: Array<{ __typename?: 'Minion', id: any, label?: string, lastCheckedTime: any, status?: string, systemId?: string, location?: { __typename?: 'MonitoringLocation', id: any, location?: string } }> };
 
 export type ListMinionMetricsQueryVariables = Exact<{
   instance: Scalars['String'];
@@ -1113,7 +1129,7 @@ export type ListNodeMetricsQuery = { __typename?: 'Query', nodeLatency?: { __typ
 export type ListMinionsAndDevicesForTablesQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type ListMinionsAndDevicesForTablesQuery = { __typename?: 'Query', findAllNodes?: Array<{ __typename?: 'Node', id: any, nodeLabel?: string, tenantId?: string, createTime: any, monitoringLocationId: any, scanType?: string, ipInterfaces?: Array<{ __typename?: 'IpInterface', ipAddress?: string, snmpPrimary?: boolean }> }>, findAllMinions?: Array<{ __typename?: 'Minion', id: any, label?: string, lastCheckedTime: any, status?: string, systemId?: string, location?: { __typename?: 'Location', id: any, location?: string } }>, findAllLocations?: Array<{ __typename?: 'Location', id: any, location?: string }> };
+export type ListMinionsAndDevicesForTablesQuery = { __typename?: 'Query', findAllNodes?: Array<{ __typename?: 'Node', id: any, nodeLabel?: string, tenantId?: string, createTime: any, monitoringLocationId: any, scanType?: string, ipInterfaces?: Array<{ __typename?: 'IpInterface', ipAddress?: string, snmpPrimary?: boolean }> }>, findAllMinions?: Array<{ __typename?: 'Minion', id: any, label?: string, lastCheckedTime: any, status?: string, systemId?: string, location?: { __typename?: 'MonitoringLocation', id: any, location?: string } }>, findAllLocations?: Array<{ __typename?: 'MonitoringLocation', id: any, location?: string, address?: string, longitude?: number, latitude?: number }> };
 
 export type NetworkTrafficQueryVariables = Exact<{
   name: Scalars['String'];
@@ -1127,7 +1143,7 @@ export type NetworkTrafficQuery = { __typename?: 'Query', metric?: { __typename?
 export type ListLocationsForDiscoveryQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type ListLocationsForDiscoveryQuery = { __typename?: 'Query', findAllLocations?: Array<{ __typename?: 'Location', id: any, location?: string }> };
+export type ListLocationsForDiscoveryQuery = { __typename?: 'Query', findAllLocations?: Array<{ __typename?: 'MonitoringLocation', id: any, location?: string, address?: string, longitude?: number, latitude?: number }> };
 
 export type ListDiscoveriesQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -1189,7 +1205,7 @@ export type GetNodeForGraphsQuery = { __typename?: 'Query', findNodeById?: { __t
 export type NodesListQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type NodesListQuery = { __typename?: 'Query', findAllNodes?: Array<{ __typename?: 'Node', createTime: any, id: any, monitoringLocationId: any, nodeLabel?: string, tenantId?: string, scanType?: string, ipInterfaces?: Array<{ __typename?: 'IpInterface', id: any, ipAddress?: string, nodeId: any, tenantId?: string, snmpPrimary?: boolean }>, location?: { __typename?: 'Location', id: any, location?: string, tenantId?: string } }> };
+export type NodesListQuery = { __typename?: 'Query', findAllNodes?: Array<{ __typename?: 'Node', createTime: any, id: any, monitoringLocationId: any, nodeLabel?: string, tenantId?: string, scanType?: string, ipInterfaces?: Array<{ __typename?: 'IpInterface', id: any, ipAddress?: string, nodeId: any, tenantId?: string, snmpPrimary?: boolean }>, location?: { __typename?: 'MonitoringLocation', id: any, location?: string, tenantId?: string } }> };
 
 export type NodeLatencyMetricQueryVariables = Exact<{
   id: Scalars['Long'];
@@ -1207,21 +1223,21 @@ export type FindAllNodesByNodeLabelSearchQueryVariables = Exact<{
 }>;
 
 
-export type FindAllNodesByNodeLabelSearchQuery = { __typename?: 'Query', findAllNodesByNodeLabelSearch?: Array<{ __typename?: 'Node', id: any, monitoringLocationId: any, nodeLabel?: string, ipInterfaces?: Array<{ __typename?: 'IpInterface', id: any, ipAddress?: string, nodeId: any, snmpPrimary?: boolean }>, location?: { __typename?: 'Location', id: any, location?: string } }> };
+export type FindAllNodesByNodeLabelSearchQuery = { __typename?: 'Query', findAllNodesByNodeLabelSearch?: Array<{ __typename?: 'Node', id: any, monitoringLocationId: any, nodeLabel?: string, ipInterfaces?: Array<{ __typename?: 'IpInterface', id: any, ipAddress?: string, nodeId: any, snmpPrimary?: boolean }>, location?: { __typename?: 'MonitoringLocation', id: any, location?: string } }> };
 
 export type FindAllNodesByTagsQueryVariables = Exact<{
   tags?: InputMaybe<Array<InputMaybe<Scalars['String']>> | InputMaybe<Scalars['String']>>;
 }>;
 
 
-export type FindAllNodesByTagsQuery = { __typename?: 'Query', findAllNodesByTags?: Array<{ __typename?: 'Node', id: any, monitoringLocationId: any, nodeLabel?: string, ipInterfaces?: Array<{ __typename?: 'IpInterface', id: any, ipAddress?: string, nodeId: any, snmpPrimary?: boolean }>, location?: { __typename?: 'Location', id: any, location?: string } }> };
+export type FindAllNodesByTagsQuery = { __typename?: 'Query', findAllNodesByTags?: Array<{ __typename?: 'Node', id: any, monitoringLocationId: any, nodeLabel?: string, ipInterfaces?: Array<{ __typename?: 'IpInterface', id: any, ipAddress?: string, nodeId: any, snmpPrimary?: boolean }>, location?: { __typename?: 'MonitoringLocation', id: any, location?: string } }> };
 
 export type FindAllNodesByMonitoredStateQueryVariables = Exact<{
   monitoredState: Scalars['String'];
 }>;
 
 
-export type FindAllNodesByMonitoredStateQuery = { __typename?: 'Query', findAllNodesByMonitoredState?: Array<{ __typename?: 'Node', id: any, monitoringLocationId: any, nodeLabel?: string, ipInterfaces?: Array<{ __typename?: 'IpInterface', id: any, ipAddress?: string, nodeId: any, snmpPrimary?: boolean }>, location?: { __typename?: 'Location', id: any, location?: string } }> };
+export type FindAllNodesByMonitoredStateQuery = { __typename?: 'Query', findAllNodesByMonitoredState?: Array<{ __typename?: 'Node', id: any, monitoringLocationId: any, nodeLabel?: string, ipInterfaces?: Array<{ __typename?: 'IpInterface', id: any, ipAddress?: string, nodeId: any, snmpPrimary?: boolean }>, location?: { __typename?: 'MonitoringLocation', id: any, location?: string } }> };
 
 export type NodesForMapQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -1237,17 +1253,17 @@ export type ListMonitoryPoliciesQuery = { __typename?: 'Query', listMonitoryPoli
 
 export type EventsByNodeIdPartsFragment = { __typename?: 'Query', events?: Array<{ __typename?: 'Event', id: number, uei?: string, nodeId: number, ipAddress?: string, producedTime: any }> };
 
-export type NodeByIdPartsFragment = { __typename?: 'Query', node?: { __typename?: 'Node', id: any, nodeLabel?: string, objectId?: string, systemContact?: string, systemDescr?: string, systemLocation?: string, systemName?: string, scanType?: string, location?: { __typename?: 'Location', location?: string }, ipInterfaces?: Array<{ __typename?: 'IpInterface', id: any, hostname?: string, ipAddress?: string, netmask?: string, nodeId: any, snmpPrimary?: boolean }>, snmpInterfaces?: Array<{ __typename?: 'SnmpInterface', id: any, ifAdminStatus: number, ifAlias?: string, ifDescr?: string, ifIndex: number, ifName?: string, ifOperatorStatus: number, ifSpeed: any, ifType: number, ipAddress?: string, nodeId: any, physicalAddr?: string }> } };
+export type NodeByIdPartsFragment = { __typename?: 'Query', node?: { __typename?: 'Node', id: any, nodeLabel?: string, objectId?: string, systemContact?: string, systemDescr?: string, systemLocation?: string, systemName?: string, scanType?: string, location?: { __typename?: 'MonitoringLocation', location?: string }, ipInterfaces?: Array<{ __typename?: 'IpInterface', id: any, hostname?: string, ipAddress?: string, netmask?: string, nodeId: any, snmpPrimary?: boolean }>, snmpInterfaces?: Array<{ __typename?: 'SnmpInterface', id: any, ifAdminStatus: number, ifAlias?: string, ifDescr?: string, ifIndex: number, ifName?: string, ifOperatorStatus: number, ifSpeed: any, ifType: number, ipAddress?: string, nodeId: any, physicalAddr?: string }> } };
 
 export type ListNodeStatusQueryVariables = Exact<{
   id?: InputMaybe<Scalars['Long']>;
 }>;
 
 
-export type ListNodeStatusQuery = { __typename?: 'Query', events?: Array<{ __typename?: 'Event', id: number, uei?: string, nodeId: number, ipAddress?: string, producedTime: any }>, node?: { __typename?: 'Node', id: any, nodeLabel?: string, objectId?: string, systemContact?: string, systemDescr?: string, systemLocation?: string, systemName?: string, scanType?: string, location?: { __typename?: 'Location', location?: string }, ipInterfaces?: Array<{ __typename?: 'IpInterface', id: any, hostname?: string, ipAddress?: string, netmask?: string, nodeId: any, snmpPrimary?: boolean }>, snmpInterfaces?: Array<{ __typename?: 'SnmpInterface', id: any, ifAdminStatus: number, ifAlias?: string, ifDescr?: string, ifIndex: number, ifName?: string, ifOperatorStatus: number, ifSpeed: any, ifType: number, ipAddress?: string, nodeId: any, physicalAddr?: string }> } };
+export type ListNodeStatusQuery = { __typename?: 'Query', events?: Array<{ __typename?: 'Event', id: number, uei?: string, nodeId: number, ipAddress?: string, producedTime: any }>, node?: { __typename?: 'Node', id: any, nodeLabel?: string, objectId?: string, systemContact?: string, systemDescr?: string, systemLocation?: string, systemName?: string, scanType?: string, location?: { __typename?: 'MonitoringLocation', location?: string }, ipInterfaces?: Array<{ __typename?: 'IpInterface', id: any, hostname?: string, ipAddress?: string, netmask?: string, nodeId: any, snmpPrimary?: boolean }>, snmpInterfaces?: Array<{ __typename?: 'SnmpInterface', id: any, ifAdminStatus: number, ifAlias?: string, ifDescr?: string, ifIndex: number, ifName?: string, ifOperatorStatus: number, ifSpeed: any, ifType: number, ipAddress?: string, nodeId: any, physicalAddr?: string }> } };
 
 export const AlertsPartsFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"AlertsParts"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Query"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"findAllAlerts"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"page"},"value":{"kind":"Variable","name":{"kind":"Name","value":"page"}}},{"kind":"Argument","name":{"kind":"Name","value":"pageSize"},"value":{"kind":"Variable","name":{"kind":"Name","value":"pageSize"}}},{"kind":"Argument","name":{"kind":"Name","value":"severities"},"value":{"kind":"Variable","name":{"kind":"Name","value":"severities"}}},{"kind":"Argument","name":{"kind":"Name","value":"sortAscending"},"value":{"kind":"Variable","name":{"kind":"Name","value":"sortAscending"}}},{"kind":"Argument","name":{"kind":"Name","value":"sortBy"},"value":{"kind":"Variable","name":{"kind":"Name","value":"sortBy"}}},{"kind":"Argument","name":{"kind":"Name","value":"timeRange"},"value":{"kind":"Variable","name":{"kind":"Name","value":"timeRange"}}},{"kind":"Argument","name":{"kind":"Name","value":"nodeLabel"},"value":{"kind":"Variable","name":{"kind":"Name","value":"nodeLabel"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"lastPage"}},{"kind":"Field","name":{"kind":"Name","value":"nextPage"}},{"kind":"Field","name":{"kind":"Name","value":"totalAlerts"}},{"kind":"Field","name":{"kind":"Name","value":"alerts"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"acknowledged"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"lastUpdateTimeMs"}},{"kind":"Field","name":{"kind":"Name","value":"severity"}},{"kind":"Field","name":{"kind":"Name","value":"label"}},{"kind":"Field","name":{"kind":"Name","value":"nodeName"}}]}}]}}]}}]} as unknown as DocumentNode<AlertsPartsFragment, unknown>;
-export const LocationsPartsFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"LocationsParts"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Query"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"findAllLocations"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"location"}}]}}]}}]} as unknown as DocumentNode<LocationsPartsFragment, unknown>;
+export const LocationsPartsFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"LocationsParts"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Query"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"findAllLocations"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"location"}},{"kind":"Field","name":{"kind":"Name","value":"address"}},{"kind":"Field","name":{"kind":"Name","value":"longitude"}},{"kind":"Field","name":{"kind":"Name","value":"latitude"}}]}}]}}]} as unknown as DocumentNode<LocationsPartsFragment, unknown>;
 export const MetricPartsFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"MetricParts"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"TimeSeriesQueryResult"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"data"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"result"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"metric"}},{"kind":"Field","name":{"kind":"Name","value":"values"}}]}}]}}]}}]} as unknown as DocumentNode<MetricPartsFragment, unknown>;
 export const DeviceUptimePartsFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"DeviceUptimeParts"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Query"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","alias":{"kind":"Name","value":"deviceUptime"},"name":{"kind":"Name","value":"metric"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"name"},"value":{"kind":"StringValue","value":"snmp_uptime_sec","block":false}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"MetricParts"}}]}}]}}]} as unknown as DocumentNode<DeviceUptimePartsFragment, unknown>;
 export const DeviceLatencyPartsFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"DeviceLatencyParts"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Query"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","alias":{"kind":"Name","value":"deviceLatency"},"name":{"kind":"Name","value":"metric"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"name"},"value":{"kind":"StringValue","value":"response_time_msec","block":false}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"MetricParts"}}]}}]}}]} as unknown as DocumentNode<DeviceLatencyPartsFragment, unknown>;
@@ -1276,11 +1292,11 @@ export const FindApplicationSeriesDocument = {"kind":"Document","definitions":[{
 export const FindApplicationSummariesDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"findApplicationSummaries"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"requestCriteria"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"RequestCriteriaInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"findApplicationSummaries"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"requestCriteria"},"value":{"kind":"Variable","name":{"kind":"Name","value":"requestCriteria"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"label"}},{"kind":"Field","name":{"kind":"Name","value":"bytesIn"}},{"kind":"Field","name":{"kind":"Name","value":"bytesOut"}}]}}]}}]} as unknown as DocumentNode<FindApplicationSummariesQuery, FindApplicationSummariesQueryVariables>;
 export const FindApplicationsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"findApplications"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"requestCriteria"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"RequestCriteriaInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"findApplications"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"requestCriteria"},"value":{"kind":"Variable","name":{"kind":"Name","value":"requestCriteria"}}}]}]}}]} as unknown as DocumentNode<FindApplicationsQuery, FindApplicationsQueryVariables>;
 export const FindExportersDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"findExporters"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"requestCriteria"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"RequestCriteriaInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"findExporters"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"requestCriteria"},"value":{"kind":"Variable","name":{"kind":"Name","value":"requestCriteria"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"node"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"nodeLabel"}}]}},{"kind":"Field","name":{"kind":"Name","value":"ipInterface"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"ipAddress"}}]}}]}}]}}]} as unknown as DocumentNode<FindExportersQuery, FindExportersQueryVariables>;
-export const CreateLocationDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateLocation"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"location"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createLocation"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"location"},"value":{"kind":"Variable","name":{"kind":"Name","value":"location"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"location"}},{"kind":"Field","name":{"kind":"Name","value":"tenantId"}}]}}]}}]} as unknown as DocumentNode<CreateLocationMutation, CreateLocationMutationVariables>;
-export const UpdateLocationDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"UpdateLocation"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Long"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"location"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"updateLocation"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}},{"kind":"Argument","name":{"kind":"Name","value":"location"},"value":{"kind":"Variable","name":{"kind":"Name","value":"location"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"location"}},{"kind":"Field","name":{"kind":"Name","value":"tenantId"}}]}}]}}]} as unknown as DocumentNode<UpdateLocationMutation, UpdateLocationMutationVariables>;
+export const CreateLocationDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateLocation"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"location"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"MonitoringLocationCreateInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createLocation"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"location"},"value":{"kind":"Variable","name":{"kind":"Name","value":"location"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"location"}},{"kind":"Field","name":{"kind":"Name","value":"address"}},{"kind":"Field","name":{"kind":"Name","value":"longitude"}},{"kind":"Field","name":{"kind":"Name","value":"latitude"}},{"kind":"Field","name":{"kind":"Name","value":"tenantId"}}]}}]}}]} as unknown as DocumentNode<CreateLocationMutation, CreateLocationMutationVariables>;
+export const UpdateLocationDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"UpdateLocation"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"location"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"MonitoringLocationUpdateInput"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"updateLocation"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"location"},"value":{"kind":"Variable","name":{"kind":"Name","value":"location"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"location"}},{"kind":"Field","name":{"kind":"Name","value":"address"}},{"kind":"Field","name":{"kind":"Name","value":"longitude"}},{"kind":"Field","name":{"kind":"Name","value":"latitude"}},{"kind":"Field","name":{"kind":"Name","value":"tenantId"}}]}}]}}]} as unknown as DocumentNode<UpdateLocationMutation, UpdateLocationMutationVariables>;
 export const DeleteLocationDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"DeleteLocation"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Long"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"deleteLocation"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}]}]}}]} as unknown as DocumentNode<DeleteLocationMutation, DeleteLocationMutationVariables>;
 export const LocationsListDocument = {"kind":"Document", "definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"LocationsList"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"LocationsParts"}}]}},...LocationsPartsFragmentDoc.definitions]} as unknown as DocumentNode<LocationsListQuery, LocationsListQueryVariables>;
-export const SearchLocationDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"SearchLocation"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"searchTerm"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"searchLocation"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"searchTerm"},"value":{"kind":"Variable","name":{"kind":"Name","value":"searchTerm"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"location"}}]}}]}}]} as unknown as DocumentNode<SearchLocationQuery, SearchLocationQueryVariables>;
+export const SearchLocationDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"SearchLocation"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"searchTerm"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"searchLocation"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"searchTerm"},"value":{"kind":"Variable","name":{"kind":"Name","value":"searchTerm"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"location"}},{"kind":"Field","name":{"kind":"Name","value":"address"}},{"kind":"Field","name":{"kind":"Name","value":"longitude"}},{"kind":"Field","name":{"kind":"Name","value":"latitude"}}]}}]}}]} as unknown as DocumentNode<SearchLocationQuery, SearchLocationQueryVariables>;
 export const DeleteMinionDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"DeleteMinion"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"deleteMinion"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}]}]}}]} as unknown as DocumentNode<DeleteMinionMutation, DeleteMinionMutationVariables>;
 export const CreateMonitorPolicyDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateMonitorPolicy"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"policy"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"MonitorPolicyInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createMonitorPolicy"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"policy"},"value":{"kind":"Variable","name":{"kind":"Name","value":"policy"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}}]}}]}}]} as unknown as DocumentNode<CreateMonitorPolicyMutation, CreateMonitorPolicyMutationVariables>;
 export const AddNodeDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"AddNode"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"node"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"NodeCreateInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"addNode"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"node"},"value":{"kind":"Variable","name":{"kind":"Name","value":"node"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createTime"}},{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"monitoringLocationId"}},{"kind":"Field","name":{"kind":"Name","value":"nodeLabel"}},{"kind":"Field","name":{"kind":"Name","value":"tenantId"}}]}}]}}]} as unknown as DocumentNode<AddNodeMutation, AddNodeMutationVariables>;

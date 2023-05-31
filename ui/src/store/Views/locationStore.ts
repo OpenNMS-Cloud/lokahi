@@ -3,7 +3,7 @@ import { useLocationQueries } from '../Queries/locationQueries'
 import { useMinionsQueries } from '../Queries/minionsQueries'
 import { DisplayType } from '@/types/locations.d'
 import { useLocationMutations } from '../Mutations/locationMutations'
-import { Location } from '@/types/graphql'
+import { MonitoringLocationCreateInput, MonitoringLocationUpdateInput } from '@/types/graphql'
 
 export const useLocationStore = defineStore('locationStore', () => {
   const downloadCertificatePassword = ref('')
@@ -62,10 +62,10 @@ export const useLocationStore = defineStore('locationStore', () => {
     displayType.value = type
   }
 
-  const createLocation = async (payload: Location) => {
+  const createLocation = async (location: MonitoringLocationCreateInput) => {
     saveIsFetching.value = true
 
-    const error = await locationMutations.createLocation(payload)
+    const error = await locationMutations.createLocation(location)
 
     saveIsFetching.value = false
 
@@ -76,10 +76,10 @@ export const useLocationStore = defineStore('locationStore', () => {
     return !error.value
   }
 
-  const updateLocation = async (payload: { id: string; location: string }) => {
+  const updateLocation = async (location: MonitoringLocationUpdateInput) => {
     updateIsFetching.value = true
 
-    const error = await locationMutations.updateLocation(payload)
+    const error = await locationMutations.updateLocation(location)
 
     updateIsFetching.value = false
 

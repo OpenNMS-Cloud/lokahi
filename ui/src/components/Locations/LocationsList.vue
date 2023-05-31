@@ -14,6 +14,8 @@
         <FeatherIcon
           :icon="icons.Help"
           data-test="icon-help"
+          @click="$emit('showInstructions')"
+          class="pointer"
         />
       </template>
     </HeadlineSection>

@@ -93,6 +93,9 @@ public class FlowsApplicationConfig {
     @Value("${grpc.flow-ingestor.url}")
     private String ingestorGrpcAddress;
 
+    @Value("${grpc.flow.tls.enabled:false}")
+    private boolean flowTlsEnabled;
+
     @Value("${grpc.server.deadline:60000}")
     private long deadline;
 
@@ -111,11 +114,15 @@ public class FlowsApplicationConfig {
 
     @Bean(name = "ingestorChannel")
     public ManagedChannel createIngestorChannel() throws SSLException {
-        return NettyChannelBuilder.forTarget(ingestorGrpcAddress)
-            .sslContext(GrpcSslContexts.forClient().trustManager(InsecureTrustManagerFactory.INSTANCE).build())
+        var builder = NettyChannelBuilder.forTarget(ingestorGrpcAddress)
             .keepAliveTime(10, TimeUnit.SECONDS)
-            .keepAliveTimeout(15, TimeUnit.SECONDS)
-            .build();
+            .keepAliveTimeout(15, TimeUnit.SECONDS);
+        if (flowTlsEnabled) {
+            builder.sslContext(GrpcSslContexts.forClient().trustManager(InsecureTrustManagerFactory.INSTANCE).build());
+        } else {
+            builder.usePlaintext();
+        }
+        return builder.build();
     }
 
     @Bean(destroyMethod = "shutdown", initMethod = "initialStubs")

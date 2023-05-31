@@ -24,12 +24,13 @@ import { VILLUS_CLIENT, createClient } from 'villus'
  * @returns mounted component
  */
 const wrapper = (mountingOption: Record<string, any>): any => {
-  const { component, shallow = true, props = {}, global = {}, attachTo, stubActions = true } = mountingOption
+  const { component, shallow = true, props = {}, slots = {}, global = {}, attachTo, stubActions = true } = mountingOption
   const { stubs = {}, plugins = [], provide = {}, directives = {} } = global
 
   const globalOptions: Record<string, any> = {
     shallow,
     props,
+    slots,
     global: {
       stubs: { ...stubs },
       plugins: [

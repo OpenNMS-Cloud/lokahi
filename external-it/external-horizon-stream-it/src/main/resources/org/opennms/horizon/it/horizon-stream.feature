@@ -7,7 +7,25 @@ Feature: Minion Monitoring via Echo Messages Logged in Prometheus
     Given Keycloak username in environment variable "KEYCLOAK_USERNAME"
     Given Keycloak password in environment variable "KEYCLOAK_PASSWORD"
     Given Keycloak client-id in environment variable "KEYCLOAK_CLIENT_ID"
+    Given Minion ingress base url in environment variable "MINION_INGRESS_URL"
+    Given Minion ingress port is in variable "MINION_INGRESS_PORT"
+    Given Minion ingress TLS enabled flag is in variable "MINION_INGRESS_TLS"
+    Given Minion ingress CA certificate file is in environment variable "MINION_INGRESS_CA"
+    Given Minion ingress overridden authority is in variable "MINION_INGRESS_OVERRIDE_AUTHORITY"
     Then login to Keycloak with timeout 120000ms
+
+  Scenario: Create "External" location and request Minion certificate
+    Given No Minion running with location "External"
+    #Given Location "External" does not exist
+    When Location "External" is created
+    Then Location "External" do exist
+    Then Request certificate for location "External"
+    When Minion "test-minion" is started in location "External"
+    Given At least one Minion is running with location "External"
+    Then Wait for at least one minion for the given location reported by inventory with timeout 180000ms
+    When Location "External" is removed
+    Then Location "External" does not exist
+    Then Minion "test-minion" is stopped
 
   Scenario: Wait for at least one minion to connect from location TestLocation
     Given Location "TestLocation" is created
@@ -56,6 +74,7 @@ Feature: Minion Monitoring via Echo Messages Logged in Prometheus
     Given Location "TestLocation" is created
     Given At least one Minion is running with location "TestLocation"
     Then Wait for at least one minion for the given location reported by inventory with timeout 600000ms
+    # Currently this test is using Minion open port 161 to make a discovery. In future would be preferred to use container with open ports
     Then Add a new active discovery for the name "Automation Discovery Tests" at location "TestLocation" with ip address "127.1.0.5" and port 161, readCommunities "public"
     Then Check the status of the Node with expected status "UP"
     Then Delete the first node from inventory

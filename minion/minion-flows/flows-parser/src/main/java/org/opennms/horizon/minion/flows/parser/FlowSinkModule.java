@@ -92,7 +92,7 @@ public class FlowSinkModule implements SinkModule<FlowDocument, FlowDocumentLog>
             //TODO: hardcode for now. Will fix in DC-455
             @Override
             public int getCompletionSize() {
-                return 1;
+                return 1000;
             }
 
             //TODO: hardcode for now. Will fix in DC-455

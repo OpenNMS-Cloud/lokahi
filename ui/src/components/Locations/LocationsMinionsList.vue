@@ -26,8 +26,9 @@
       <template #right>
         <FeatherIcon
           :icon="icons.Help"
-          class="icon-help"
           data-test="icon-help"
+          @click="$emit('showInstructions')"
+          class="pointer"
         />
       </template>
     </HeadlineSection>

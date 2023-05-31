@@ -2,6 +2,7 @@ package org.opennms.horizon.it;
 
 import io.cucumber.java.en.Given;
 
+import java.io.File;
 import org.opennms.horizon.it.helper.TestsExecutionHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +17,11 @@ public class HorizonStreamTestSteps {
     private final TestsExecutionHelper testsExecutionHelper;
 
     private String ingressBaseUrl;
+    private String minionIngress;
+    private boolean minionIngressTlsEnabled;
+    private int minionIngressPort;
+    private String minionIngressCaCertificate;
+    private String minionIngressOverrideAuthority;
 
 //========================================
 // Constructor
@@ -29,6 +35,11 @@ public class HorizonStreamTestSteps {
 
         this.testsExecutionHelper.setUserAccessTokenSupplier(this.keycloakTestSteps::getKeycloakAccessToken);
         this.testsExecutionHelper.setIngressUrlSupplier(this::getIngressBaseUrl);
+        this.testsExecutionHelper.setMinionIngressSupplier(() -> minionIngress);
+        this.testsExecutionHelper.setMinionIngressPortSupplier(() -> minionIngressPort);
+        this.testsExecutionHelper.setMinionIngressCaCertificateSupplier(() -> minionIngressCaCertificate != null ? new File(minionIngressCaCertificate).getAbsoluteFile() : null);
+        this.testsExecutionHelper.setMinionIngressTlsEnabledSupplier(() -> minionIngressTlsEnabled);
+        this.testsExecutionHelper.setMinionIngressOverrideAuthority(() -> minionIngressOverrideAuthority);
 
         this.metricsTestSteps.setMinionsAtLocationSupplier(this.inventoryTestSteps::getMinionsAtLocation);
     }
@@ -51,5 +62,40 @@ public class HorizonStreamTestSteps {
         ingressBaseUrl = System.getenv(variableName);
 
         log.info("INGRESS BASE URL: {}", ingressBaseUrl);
+    }
+
+    @Given("Minion ingress base url in environment variable {string}")
+    public void horizonStreamMinionIngressUrlInEnvironmentVariable(String variableName) {
+        minionIngress = System.getenv(variableName);
+
+        log.info("MINION INGRESS BASE URL: {}", minionIngress);
+    }
+
+    @Given("Minion ingress CA certificate file is in environment variable {string}")
+    public void horizonStreamMinionIngressCaCertificateEnvironmentVariable(String variableName) {
+        minionIngressCaCertificate = System.getenv(variableName);
+
+        log.info("MINION INGRESS CA Certificate file: {}", minionIngressCaCertificate);
+    }
+
+    @Given("Minion ingress TLS enabled flag is in variable {string}")
+    public void horizonStreamMinionIngressTlsEnabledEnvironmentVariable(String variableName) {
+        minionIngressTlsEnabled = Boolean.parseBoolean(System.getenv(variableName));
+
+        log.info("MINION INGRESS TLS: {}", minionIngressTlsEnabled);
+    }
+
+    @Given("Minion ingress port is in variable {string}")
+    public void horizonStreamMinionIngressPortEnvironmentVariable(String variableName) {
+        minionIngressPort = Integer.parseInt(System.getenv(variableName));
+
+        log.info("MINION INGRESS PORT: {}", minionIngressPort);
+    }
+
+    @Given("Minion ingress overridden authority is in variable {string}")
+    public void horizonStreamMinionIngressOverrideAuthorityEnvironmentVariable(String variableName) {
+        minionIngressOverrideAuthority = System.getenv(variableName);
+
+        log.info("MINION INGRESS OVERRIDDEN AUTHORITY: {}", minionIngressOverrideAuthority);
     }
 }

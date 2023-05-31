@@ -99,6 +99,7 @@ declare module '@vue/runtime-core' {
     LocationsCard: typeof import('./src/components/Locations/LocationsCard.vue')['default']
     LocationsCertificateDownload: typeof import('./src/components/Locations/LocationsCertificateDownload.vue')['default']
     LocationsEditForm: typeof import('./src/components/Locations/LocationsEditForm.vue')['default']
+    LocationsInstructions: typeof import('./src/components/Locations/LocationsInstructions.vue')['default']
     LocationsList: typeof import('./src/components/Locations/LocationsList.vue')['default']
     LocationsMinionsCard: typeof import('./src/components/Locations/LocationsMinionsCard.vue')['default']
     LocationsMinionsList: typeof import('./src/components/Locations/LocationsMinionsList.vue')['default']

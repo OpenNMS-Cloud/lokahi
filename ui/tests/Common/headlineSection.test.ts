@@ -1,4 +1,4 @@
-import { shallowMount } from '@vue/test-utils'
+import mount from '../mountWithPiniaVillus'
 import HeadlineSection from '@/components/Common/HeadlineSection.vue'
 
 const defaultHeading = 'Section Headline'
@@ -12,15 +12,16 @@ describe('HeadLineSection', () => {
   })
 
   it(`should have ${defaultHeading} as heading`, () => {
-    wrapper = shallowMount(HeadlineSection)
+    wrapper = mount({ component: HeadlineSection })
 
     const componentHeading = wrapper.get('[data-test="headline"]').text()
     expect(componentHeading).toBe(defaultHeading)
   })
 
   it(`should have ${text} as heading`, () => {
-    wrapper = shallowMount(HeadlineSection, {
-      propsData: {
+    wrapper = mount({
+      component: HeadlineSection,
+      props: {
         text
       }
     })
@@ -30,7 +31,8 @@ describe('HeadLineSection', () => {
   })
 
   it('should have rendered the slots', () => {
-    wrapper = shallowMount(HeadlineSection, {
+    wrapper = mount({
+      component: HeadlineSection,
       slots: {
         left: '<div>left content</div>',
         middle: '<div>middle content</div>',

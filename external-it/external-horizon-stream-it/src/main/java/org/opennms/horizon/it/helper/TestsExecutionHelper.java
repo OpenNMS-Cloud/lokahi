@@ -33,6 +33,7 @@ import io.restassured.config.RestAssuredConfig;
 import io.restassured.config.SSLConfig;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
+import java.io.File;
 import org.apache.http.entity.ContentType;
 import org.apache.http.protocol.HTTP;
 import org.opennms.horizon.it.gqlmodels.GQLQuery;
@@ -55,6 +56,11 @@ public class TestsExecutionHelper {
     //----------------------------------------
     private Supplier<String> userAccessTokenSupplier;
     private Supplier<String> ingressUrlSupplier;
+    private Supplier<String> minionIngressSupplier;
+    private Supplier<Integer> minionIngressPortSupplier;
+    private Supplier<Boolean> minionIngressTlsSupplier;
+    private Supplier<File> minionIngressCaCertificateSupplier;
+    private Supplier<String> minionIngressOverrideAuthority;
 
 
     //========================================
@@ -74,6 +80,46 @@ public class TestsExecutionHelper {
 
     public void setIngressUrlSupplier(Supplier<String> ingressUrlSupplier) {
         this.ingressUrlSupplier = ingressUrlSupplier;
+    }
+
+    public Supplier<String> getMinionIngressSupplier() {
+        return minionIngressSupplier;
+    }
+
+    public void setMinionIngressSupplier(Supplier<String> minionUrlSupplier) {
+        this.minionIngressSupplier = minionUrlSupplier;
+    }
+
+    public Supplier<Integer> getMinionIngressPortSupplier() {
+        return minionIngressPortSupplier;
+    }
+
+    public void setMinionIngressPortSupplier(Supplier<Integer> minionIngressPortSupplier) {
+        this.minionIngressPortSupplier = minionIngressPortSupplier;
+    }
+
+    public Supplier<Boolean> getMinionIngressTlsEnabledSupplier() {
+        return minionIngressTlsSupplier;
+    }
+
+    public void setMinionIngressTlsEnabledSupplier(Supplier<Boolean> minionIngressTlsSupplier) {
+        this.minionIngressTlsSupplier = minionIngressTlsSupplier;
+    }
+
+    public Supplier<File> getMinionIngressCaCertificateSupplier() {
+        return minionIngressCaCertificateSupplier;
+    }
+
+    public void setMinionIngressCaCertificateSupplier(Supplier<File> minionCaCertificateSupplier) {
+        this.minionIngressCaCertificateSupplier = minionCaCertificateSupplier;
+    }
+
+    public Supplier<String> getMinionIngressOverrideAuthority() {
+        return minionIngressOverrideAuthority;
+    }
+
+    public void setMinionIngressOverrideAuthority(Supplier<String> minionIngressOverrideAuthority) {
+        this.minionIngressOverrideAuthority = minionIngressOverrideAuthority;
     }
 
     //========================================

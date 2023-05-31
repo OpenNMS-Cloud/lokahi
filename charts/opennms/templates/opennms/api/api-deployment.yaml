@@ -76,6 +76,9 @@ spec:
                 }}"{{ .Values.OpenNMS.API.CertificateManagerUrl }}"{{ end }}
             - name: GRPC_URL_FLOWS
               value: "{{ .Values.OpenNMS.API.FlowsUrl }}"
+            - name: GRPC_URL_FLOWS_TLS_ENABLED
+              value: "{{ .Values.OpenNMS.API.FlowsTlsEnabled }}"
+
             {{- include "deployment.env" .Values.OpenNMS.API | nindent 12 }}
           envFrom:
           - configMapRef:

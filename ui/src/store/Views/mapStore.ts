@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { FeatherSortObject } from '@/types'
-import { Node, Location } from '@/types/graphql'
+import { Node, MonitoringLocation } from '@/types/graphql'
 // import { LatLngLiteral } from 'leaflet'
 import { SORT } from '@featherds/table'
 import { numericSeverityLevel } from '@/components/Map/utils'

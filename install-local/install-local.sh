@@ -71,7 +71,7 @@ create_ssl_cert_secret () {
   ./generate-and-sign-certificate.sh $NAMESPACE "$DOMAIN" "opennms-ui-certificate" "tmp/ca.key" "tmp/ca.crt"
 
   # Generate client CA certificate
-  ./load-or-generate-secret.sh $NAMESPACE "client-ca" "client-root-ca-certificate" "tmp/ca.key" "tmp/ca.crt"
+  ./load-or-generate-secret.sh $NAMESPACE "client-ca" "client-root-ca-certificate" "tmp/client-ca.key" "tmp/client-ca.crt"
 }
 
 # WHEN kind fixes the bug, https://github.com/kubernetes-sigs/kind/issues/3063,

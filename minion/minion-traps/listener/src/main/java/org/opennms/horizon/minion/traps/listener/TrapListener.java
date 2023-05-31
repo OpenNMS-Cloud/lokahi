@@ -196,7 +196,7 @@ public class TrapListener implements TrapNotificationListener, Listener {
     }
 
 
-    private AsyncDispatcher<TrapDTO> getMessageDispatcher() {
+    private AsyncDispatcher<TrapDTO> getMessageDispatcher() throws IOException {
         if (dispatcher == null) {
             dispatcher = messageDispatcherFactory.createAsyncDispatcher(new TrapSinkModule(trapsBaseConfig, identity));
         }

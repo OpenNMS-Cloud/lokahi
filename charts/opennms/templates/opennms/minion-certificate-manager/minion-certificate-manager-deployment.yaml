@@ -46,7 +46,6 @@ spec:
         - name: minion-certificate-manager-secrets
           secret:
             secretName: {{ .Values.OpenNMS.MinionCertificateManager.MtlsSecretName }}
-      volumes:
         - name: spring-boot-app-config-volume
           configMap:
             name: spring-boot-app-config
@@ -77,7 +76,6 @@ spec:
             - name: minion-certificate-manager-secrets
               mountPath: "/run/secrets/mtls"
               readOnly: true
-          volumeMounts:
             - name: spring-boot-app-config-volume
               mountPath: "/app/config"
       {{- if .Values.OpenNMS.MinionCertificateManager.PrivateRepoEnabled }}

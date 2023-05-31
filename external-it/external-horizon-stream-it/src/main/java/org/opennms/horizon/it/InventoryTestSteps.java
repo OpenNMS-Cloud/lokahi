@@ -2,8 +2,17 @@ package org.opennms.horizon.it;
 
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
+import io.cucumber.java.en.When;
 import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.time.Duration;
+import java.util.Base64;
+import java.util.Map.Entry;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import org.awaitility.Awaitility;
 import org.junit.Assert;
 import org.opennms.horizon.it.gqlmodels.CreateNodeData;
@@ -25,8 +34,17 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.containers.Network;
+import org.testcontainers.containers.wait.strategy.Wait;
+import org.testcontainers.images.builder.Transferable;
+import org.testcontainers.utility.DockerImageName;
+import org.testcontainers.utility.MountableFile;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -37,6 +55,7 @@ public class InventoryTestSteps {
     private static final Logger LOG = LoggerFactory.getLogger(InventoryTestSteps.class);
 
     private TestsExecutionHelper helper;
+    private Map<String, GenericContainer> minions = new ConcurrentHashMap<>();
 
     public InventoryTestSteps(TestsExecutionHelper helper) {
         this.helper = helper;
@@ -47,6 +66,9 @@ public class InventoryTestSteps {
     private FindAllMinionsQueryResult findAllMinionsQueryResult;
     private List<MinionData> minionsAtLocation;
     private String lastMinionQueryResultBody;
+
+    // certificate related runtime info location -> [keystore password=pkcs12 byte sequence]
+    private Map<String, Entry<String, byte[]>> keystores = new ConcurrentHashMap<>();
 
 //========================================
 // Getters and Setters
@@ -90,10 +112,32 @@ public class InventoryTestSteps {
         assertEquals(response.getStatusCode(), 200);
     }
 
+    @Given("Location {string} does not exist")
+    public void queryLocationDoNotExist(String location) throws MalformedURLException {
+        List<LocationData> locationData = commonQueryLocations().getData().getFindAllLocations().stream()
+            .filter(data -> data.getLocation().equals(location)).toList();
+        assertTrue(locationData.isEmpty());
+    }
+
+    @Then("Location {string} do exist")
+    public void queryLocationDoExist(String location) throws MalformedURLException {
+        Optional<LocationData> locationData = commonQueryLocations().getData().getFindAllLocations().stream()
+            .filter(data -> data.getLocation().equals(location))
+            .findFirst();
+        assertTrue(locationData.isPresent());
+    }
+
     @Given("At least one Minion is running with location {string}")
     public void atLeastOneMinionIsRunningWithLocation(String location) {
         minionLocation = location;
     }
+
+    @Given("No Minion running with location {string}")
+    public void check(String location) throws MalformedURLException {
+        atLeastOneMinionIsRunningWithLocation(location);
+        assertFalse(checkAtLeastOneMinionAtGivenLocation());
+    }
+
 
     @Then("Wait for at least one minion for the given location reported by inventory with timeout {int}ms")
     public void waitForAtLeastOneMinionForTheGivenLocationReportedByInventoryWithTimeoutMs(int timeout) {
@@ -195,6 +239,77 @@ public class InventoryTestSteps {
         Boolean done = (Boolean) lhm.get("deleteNode");
         System.out.println("node id is: " + nodeId);
         assertTrue(done);
+    }
+
+    @When("Request certificate for location {string}")
+    public void requestCertificateForLocation(String location) throws MalformedURLException {
+        LOG.info("Requesting certificate for location {}.", location);
+
+        String query = String.format(GQLQueryConstants.CREATE_MINION_CERTIFICATE, location);
+        GQLQuery gqlQuery = new GQLQuery();
+        gqlQuery.setQuery(query);
+
+        Response response = helper.executePostQuery(gqlQuery);
+
+        JsonPath jsonPathEvaluator = response.jsonPath();
+        LinkedHashMap<String, String> lhm = jsonPathEvaluator.get("data.getMinionCertificate");
+
+        byte[] pkcs12 = Base64.getDecoder().decode(lhm.get("certificate"));
+        String pkcs12password = lhm.get("password");
+        assertTrue(pkcs12.length > 0);
+        assertNotNull(pkcs12password);
+
+        keystores.put(location, Map.entry(pkcs12password, pkcs12));
+    }
+
+    @Then("Minion {string} is started in location {string}")
+    public void startMinion(String systemId, String location) throws IOException {
+        if (!keystores.containsKey(location)) {
+            fail("Could not find location " + location + " certificate");
+        }
+
+        Entry<String, byte[]> certificate = keystores.get(location);
+        minions.compute(systemId, (key, existing) -> {
+            if (existing != null && existing.isRunning()) {
+                existing.stop();
+            }
+            GenericContainer<?> minion = new GenericContainer<>(DockerImageName.parse("opennms/horizon-stream-minion").withTag("latest"))
+                .withEnv("MINION_GATEWAY_HOST", helper.getMinionIngressSupplier().get())
+                .withEnv("MINION_GATEWAY_PORT", String.valueOf(helper.getMinionIngressPortSupplier().get()))
+                .withEnv("MINION_GATEWAY_TLS", String.valueOf(helper.getMinionIngressTlsEnabledSupplier().get()))
+                .withEnv("MINION_ID", systemId)
+                .withEnv("USE_KUBERNETES", "false")
+                .withEnv("GRPC_CLIENT_KEYSTORE", "/opt/karaf/minion.p12")
+                .withEnv("GRPC_CLIENT_KEYSTORE_PASSWORD", certificate.getKey())
+                .withEnv("GRPC_CLIENT_OVERRIDE_AUTHORITY", helper.getMinionIngressOverrideAuthority().get())
+                .withEnv("IGNITE_SERVER_ADDRESSES", "localhost")
+                .withNetworkAliases("minion")
+                .withNetwork(Network.SHARED)
+                .withLabel("label", key);
+
+            File ca = helper.getMinionIngressCaCertificateSupplier().get();
+            if (ca != null) {
+                try {
+                    minion.withCopyToContainer(Transferable.of(Files.readString(ca.toPath())), "/opt/karaf/ca.crt");
+                    minion.withEnv("GRPC_CLIENT_TRUSTSTORE", "/opt/karaf/ca.crt");
+                } catch (IOException e) {
+                    throw new RuntimeException("Failed to read CA certificate", e);
+                }
+            }
+
+            minion.withCopyToContainer(Transferable.of(certificate.getValue()), "/opt/karaf/minion.p12");
+            minion.waitingFor(Wait.forLogMessage(".*Ignite node started OK.*", 1).withStartupTimeout(Duration.ofMinutes(3)));
+            minion.start();
+            return minion;
+        });
+    }
+
+    @Then("Minion {string} is stopped")
+    public void stopMinion(String systemId) throws IOException {
+        GenericContainer<?> minion = minions.get(systemId);
+        if (minion != null && minion.isRunning()) {
+            minion.stop();
+        }
     }
 
     private boolean checkAtLeastOneMinionAtGivenLocation() throws MalformedURLException {

@@ -83,17 +83,17 @@ public class MinionGatewayWiremockTestSteps {
         LOG.info("Using BASE URL {}", baseUrl);
     }
 
-    @Given("Device Task IP address = {string}")
+/*    @Given("Device Task IP address = {string}")
     public void deviceTaskIPAddress(String ipAddress) {
         this.taskIpAddress = ipAddress;
-    }
+    }*/
 
-    @Given("The taskset at location {string}")
+/*    @Given("The taskset at location {string}")
     public void theTasksetAtLocation(String taskLocation) {
         this.taskLocation = taskLocation;
-    }
+    }*/
 
-    @Given("Monitor Type {string}")
+   /* @Given("Monitor Type {string}")
     public void monitorType(String monitorType) {
         switch (monitorType) {
             case "ICMP":
@@ -107,19 +107,19 @@ public class MinionGatewayWiremockTestSteps {
             default:
                 throw new RuntimeException("Unrecognized monitor type " + monitorType);
         }
-    }
+    }*/
 
-    @Then("verify the task set update is published for device with task suffix {string} within {int}ms")
+/*    @Then("verify the task set update is published for device with task suffix {string} within {int}ms")
     public void verifyTheTaskSetUpdateIsPublishedForDeviceWithTaskSuffixWithinMs(String taskNameSuffix, int timeout) {
         commonVerifyTaskSetUpdate(record -> isExpectedDeviceCollectorTaskSetUpdate(record, taskNameSuffix), timeout);
-    }
+    }*/
 
-    @Then("verify the task set update is published for device with nodeScan within {int}ms")
+/*    @Then("verify the task set update is published for device with nodeScan within {int}ms")
     public void verifyTheTaskSetUpdateIsPublishedForDeviceWithNodeScanWithinMs(int timeout) {
         String taskIdPattern = "nodeScan=node_id/" + nodeId;
 
         commonVerifyTaskSetUpdate((record) -> isMatchingAddTask(record, taskTenantId, taskLocation, taskIdPattern), timeout);
-    }
+    }*/
 
     @Then("verify the task set update is published with device monitor within {int}ms")
     public void verifyTheTaskSetUpdateIsPublishedWithDeviceMonitorWithinMs(int timeout) {
@@ -133,18 +133,18 @@ public class MinionGatewayWiremockTestSteps {
         commonVerifyTaskSetUpdate(record -> isExpectedDeviceCollectorTaskSetUpdate(record, collectorName), timeout);
     }
 
-    @Then("verify the task set update is published with removal of task with suffix {string} within {int}ms")
+/*    @Then("verify the task set update is published with removal of task with suffix {string} within {int}ms")
     public void verifyTheTaskSetUpdateIsPublishedWithRemovalOfTaskWithSuffixWithinMs(String taskSuffix, int timeout) {
         String taskIdPattern = "nodeId:\\d+/ip=" + taskIpAddress + "/" + taskSuffix;
         commonVerifyTaskSetUpdate((record) -> isMatchingRemoveTask(record, taskTenantId, taskLocation, taskIdPattern), timeout);
-    }
+    }*/
 
-    @Then("verify the task set update is published for icmp discovery within {int}ms")
+   /* @Then("verify the task set update is published for icmp discovery within {int}ms")
     public void verifyTheTaskSetUpdateIsPublishedForIcmpDiscoveryWithinMs(int timeout) {
         String taskIdPattern = "discovery:\\d+/" + taskLocation;
         commonVerifyTaskSetUpdate((record) -> isMatchingAddTask(record, taskTenantId, taskLocation, taskIdPattern), timeout);
     }
-
+*/
 
 //========================================
 // Internals

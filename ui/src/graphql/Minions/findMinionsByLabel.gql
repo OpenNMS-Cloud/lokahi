@@ -1,0 +1,13 @@
+query FindMinionsByLabel($label: String) {
+  findMinionsByLabel(label: $label) {
+    id
+    label
+    lastCheckedTime
+    status
+    systemId
+    location {
+      id
+      location
+    }
+  }
+}

@@ -47,10 +47,7 @@ export const useLocationStore = defineStore('locationStore', () => {
     })
   }
 
-  const searchMinions = async (searchTerm = '') => {
-    // const minions = await locationQueries.searchMinion(searchTerm)
-    // minionsList.value = minions?.data?.value?.searchLocation || []
-  }
+  const findMinionsByLabel = async (label: string) => minionsQueries.findMinionsByLabel(label)
 
   const selectLocation = (id: number | undefined) => {
     if (id) displayType.value = DisplayType.EDIT
@@ -110,7 +107,7 @@ export const useLocationStore = defineStore('locationStore', () => {
     searchLocations,
     minionsList,
     fetchMinions,
-    searchMinions,
+    findMinionsByLabel,
     createLocation,
     saveIsFetching,
     updateLocation,

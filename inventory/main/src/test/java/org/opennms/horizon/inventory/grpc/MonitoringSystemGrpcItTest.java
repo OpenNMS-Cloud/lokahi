@@ -143,7 +143,7 @@ public class MonitoringSystemGrpcItTest extends GrpcTestBase {
             .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader)))
             .listMonitoringSystemByLabel(StringValue.of(system1.getLabel()));
         assertThat(systemList).isNotNull();
-        assertThat(systemList.getSystemsList().size()).isEqualTo(1);
+        assertThat(systemList.getSystemsList().size()).hasSize(1);
     }
 
     @Test

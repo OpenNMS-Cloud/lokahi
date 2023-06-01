@@ -12,7 +12,7 @@
       </template>
       <template #middle>
         <FeatherInput
-          @update:model-value="searchMinionsListener"
+          @update:model-value="findMinionsByLabel"
           label="Search Minion"
           type="search"
           class="search-minions-input"
@@ -58,6 +58,7 @@ import Search from '@featherds/icon/action/Search'
 import { useLocationStore } from '@/store/Views/locationStore'
 import { PropType } from 'vue'
 import { Minion } from '@/types/graphql'
+import { fncArgVoid } from '@/types'
 
 const props = defineProps({
   minions: {
@@ -70,8 +71,9 @@ const minionsList = computed(() => props.minions)
 
 const locationStore = useLocationStore()
 
-const searchMinionsListener = async (val: string | number | undefined) => {
-  await locationStore.searchMinions(val as string)
+const findMinionsByLabel: fncArgVoid = async (val: string | undefined) => {
+  if (val === undefined) return
+  locationStore.findMinionsByLabel(val as string)
 }
 
 const emptyListContent = {

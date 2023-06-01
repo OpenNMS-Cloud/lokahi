@@ -1,12 +1,19 @@
 import { defineStore } from 'pinia'
 import { useQuery } from 'villus'
-import { ListMinionsForTableDocument, ListMinionMetricsDocument, Minion, TimeRangeUnit } from '@/types/graphql'
+import {
+  ListMinionsForTableDocument,
+  ListMinionMetricsDocument,
+  Minion,
+  TimeRangeUnit,
+  FindMinionsByLabelDocument
+} from '@/types/graphql'
 import { ExtendedMinion } from '@/types/minion'
 import useSpinner from '@/composables/useSpinner'
 import { Monitor } from '@/types'
 
 export const useMinionsQueries = defineStore('minionsQueries', () => {
   const minionsList = ref<ExtendedMinion[]>([])
+  const minionLabel = reactive({ label: '' })
 
   const { startSpinner, stopSpinner } = useSpinner()
 
@@ -59,5 +66,29 @@ export const useMinionsQueries = defineStore('minionsQueries', () => {
     })
   }
 
-  return { minionsList: computed(() => minionsList.value), fetchMinions }
+  // find minions by label
+  const { onData: onFindMinionsByLabel, isFetching: isFetchinMinionsByLabel } = useQuery({
+    query: FindMinionsByLabelDocument,
+    cachePolicy: 'network-only',
+    fetchOnMount: false,
+    variables: minionLabel
+  })
+
+  const findMinionsByLabel = (label: string) => (minionLabel.label = label)
+  
+  watchEffect(() => (isFetchinMinionsByLabel.value ? startSpinner() : stopSpinner()))
+
+  onFindMinionsByLabel((data) => {
+    if (data.findMinionsByLabel?.length) {
+      addMetricsToMinions(data.findMinionsByLabel as Minion[])
+    } else {
+      minionsList.value = []
+    }
+  })
+
+  return {
+    minionsList: computed(() => minionsList.value),
+    fetchMinions,
+    findMinionsByLabel
+  }
 })

@@ -112,7 +112,7 @@ public class MonitoringSystemRepositoryTest {
     @Test
     void testFindByLabel() {
         List<MonitoringSystem> list = systemRepository.findByLabelAndTenantId(system1.getLabel(), tenantId);
-        assertThat(list.size()).isEqualTo(1);
+        assertThat(list.size()).hasSize(1);
     }
 
     @Test

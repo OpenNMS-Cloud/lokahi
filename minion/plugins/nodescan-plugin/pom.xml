@@ -11,7 +11,7 @@
 
     <artifactId>nodescan-plugin</artifactId>
     <packaging>bundle</packaging>
-    <name>OpenNms Horizon Stream:: Minion :: Plugins :: Node Scan</name>
+    <name>OpenNMS Lokahi:: Minion :: Plugins :: Node Scan</name>
 
 
    <properties>

@@ -14,14 +14,14 @@
     <artifactId>minion-gateway-grpc-proxy</artifactId>
     <packaging>pom</packaging>
 
-    <name>OpenNMS Horizon Stream :: Minion Gateway gRPC Proxy</name>
+    <name>OpenNMS Lokahi :: Minion Gateway gRPC Proxy</name>
     <description>
         Proxy service for gRPC communication with the Minion Gateway.
         Covers gRPC communications from Minion, and potentially other external services.
     </description>
 
     <properties>
-        <application.docker.image.name>opennms/horizon-stream-minion-gateway-grpc-proxy</application.docker.image.name>
+        <application.docker.image.name>opennms/lokahi-minion-gateway-grpc-proxy</application.docker.image.name>
         <docker.it.network>rest-server-it-network</docker.it.network>
     </properties>
 

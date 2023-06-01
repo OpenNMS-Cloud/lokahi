@@ -10,7 +10,7 @@
   </parent>
 
   <artifactId>snmp-parent</artifactId>
-  <name>OpenNMS Horizon Stream :: Shared Library :: Snmp</name>
+  <name>OpenNMS Lokahi :: Shared Library :: Snmp</name>
   <packaging>pom</packaging>
 
   <modules>

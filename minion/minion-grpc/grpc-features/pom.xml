@@ -12,7 +12,7 @@
     <artifactId>grpc-features</artifactId>
     <packaging>feature</packaging>
 
-    <name>OpenNMS Horizon Stream :: Minion :: gRPC :: Features</name>
+    <name>OpenNMS Lokahi :: Minion :: gRPC :: Features</name>
 
     <dependencies>
         <dependency>

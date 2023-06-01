@@ -12,7 +12,7 @@
     <artifactId>taskset-scheduler</artifactId>
     <packaging>bundle</packaging>
 
-    <name>OpenNMS Horizon Stream :: Minion :: Scheduler</name>
+    <name>OpenNMS Lokahi :: Minion :: Scheduler</name>
     <description>Scheduler for handling tasks by period or cron expression.</description>
 
     <dependencies>

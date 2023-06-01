@@ -12,7 +12,7 @@
     </parent>
 
     <artifactId>protobuf</artifactId>
-    <name>OpenNMS Horizon Stream :: Shared Library:: Protobuf</name>
+    <name>OpenNMS Lokahi :: Shared Library:: Protobuf</name>
     <packaging>bundle</packaging>
 
     <description>

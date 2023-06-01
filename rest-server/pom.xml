@@ -10,7 +10,7 @@
         <relativePath>../parent-pom</relativePath>
 	</parent>
 
-    <name>OpenNMS Horizon Stream :: BFF</name>
+    <name>OpenNMS Lokahi :: BFF</name>
     <description>
         A microservice that provides a GraphQL API for the Vue.js frontend.
 
@@ -21,7 +21,7 @@
     <version>0.1.0-SNAPSHOT</version>
 
 	<properties>
-        <application.docker.image.name>opennms/horizon-stream-rest-server</application.docker.image.name>
+        <application.docker.image.name>opennms/lokahi-rest-server</application.docker.image.name>
 		<java.version>17</java.version>
 		<graphql.spqr.version>0.0.6</graphql.spqr.version>
         <sonar.projectKey>opennms_horizon-stream_bff</sonar.projectKey>

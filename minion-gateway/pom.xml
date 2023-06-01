@@ -10,7 +10,7 @@
         <relativePath>../parent-pom</relativePath>
     </parent>
 
-    <name>OpenNMS Horizon Stream :: Minion Gateway</name>
+    <name>OpenNMS Lokahi :: Minion Gateway</name>
     <description>
         Gateway which serves gRPC connections from Minions and routes traffic to and from Minions.
     </description>
@@ -21,7 +21,7 @@
     <packaging>pom</packaging>
 
     <properties>
-        <application.docker.image.name>opennms/horizon-stream-minion-gateway</application.docker.image.name>
+        <application.docker.image.name>opennms/lokahi-minion-gateway</application.docker.image.name>
         <docker.it.network>rest-server-it-network</docker.it.network>
         <sonar.projectKey>opennms_horizon-stream_minion-gateway</sonar.projectKey>
     </properties>

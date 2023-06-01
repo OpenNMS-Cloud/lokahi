@@ -1,6 +1,6 @@
 spring:
   application:
-    name: horizon-stream-events
+    name: lokahi-events
 
   datasource:
     driver-class-name: org.postgresql.Driver

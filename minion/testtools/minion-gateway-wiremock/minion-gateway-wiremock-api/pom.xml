@@ -13,7 +13,7 @@
     <artifactId>minion-gateway-wiremock-api</artifactId>
     <version>0.1.0-SNAPSHOT</version>
 
-    <name>OpenNMS Horizon Stream :: Minion :: TestTools :: Minion Gateway Wiremock :: API</name>
+    <name>OpenNMS Lokahi :: Minion :: TestTools :: Minion Gateway Wiremock :: API</name>
     <description>
         API for mock programming of the Minion Gateway Wiremock.
     </description>

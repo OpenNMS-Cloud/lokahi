@@ -12,7 +12,7 @@
 
     <artifactId>minion-gateway</artifactId>
 
-    <name>OpenNMS Horizon Stream :: Shared :: Minion-gateway</name>
+    <name>OpenNMS Lokahi :: Shared :: Minion-gateway</name>
     <description>Minion Gateway contract</description>
 
     <dependencies>

@@ -10,7 +10,7 @@
     </parent>
 
   <artifactId>icmp-jni</artifactId>
-  <name>OpenNMS Horizon Stream :: Minion :: ICMP :: JNI</name>
+  <name>OpenNMS Lokahi :: Minion :: ICMP :: JNI</name>
   <packaging>bundle</packaging>
 
   <dependencies>

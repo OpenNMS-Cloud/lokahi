@@ -11,7 +11,7 @@
     <artifactId>task-set-service</artifactId>
     <packaging>pom</packaging>
 
-    <name>OpenNMS Horizon Stream :: Shared :: Task Set Service</name>
+    <name>OpenNMS Lokahi :: Shared :: Task Set Service</name>
     <description>
         Task Set Service which receives Task Set Definitions and shares them with downstream consumers.
     </description>

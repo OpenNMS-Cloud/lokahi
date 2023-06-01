@@ -11,7 +11,7 @@
         <relativePath>../parent-pom</relativePath>
     </parent>
 
-    <name>OpenNMS Horizon Stream :: Alert Service</name>
+    <name>OpenNMS Lokahi :: Alert Service</name>
     <description>
         A microservice that processes events produced by other components into alerts.
     </description>
@@ -20,7 +20,7 @@
     <artifactId>alert-service</artifactId>
 
     <properties>
-        <application.docker.image.name>opennms/horizon-stream-alert</application.docker.image.name>
+        <application.docker.image.name>opennms/lokahi-alert</application.docker.image.name>
         <sonar.projectKey>opennms_horizon-stream_alert</sonar.projectKey>
         <!-- There is no sonarcloud project for the Alert service yet, so skip scanning it -->
         <sonar.skip>true</sonar.skip>

@@ -10,7 +10,7 @@
         <relativePath>../parent-pom</relativePath>
     </parent>
 
-    <name>OpenNMS Horizon Stream :: Shared Library</name>
+    <name>OpenNMS Lokahi :: Shared Library</name>
     <description>A library of shared code across different Java-based microservices.</description>
 
     <groupId>org.opennms.horizon.shared</groupId>

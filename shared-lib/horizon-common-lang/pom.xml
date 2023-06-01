@@ -12,7 +12,7 @@
     </parent>
 
     <artifactId>horizon-common-lang</artifactId>
-    <name>OpenNMS Horizon Stream :: Shared Library:: Lang</name>
+    <name>OpenNMS Lokahi :: Shared Library:: Lang</name>
     <packaging>bundle</packaging>
 
     <description>

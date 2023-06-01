@@ -11,7 +11,7 @@
 
     <artifactId>assembly</artifactId>
 
-    <name>OpenNMS Horizon Stream :: Minion :: Assembly</name>
+    <name>OpenNMS Lokahi :: Minion :: Assembly</name>
     <packaging>karaf-assembly</packaging>
 
     <dependencies>

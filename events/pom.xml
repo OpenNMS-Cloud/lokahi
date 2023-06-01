@@ -11,7 +11,7 @@
         <relativePath>../parent-pom</relativePath>
     </parent>
 
-    <name>OpenNMS Horizon Stream :: Events</name>
+    <name>OpenNMS Lokahi :: Events</name>
     <description>
         A microservice that enriches events produced by other components and provides an API to query them.
     </description>
@@ -21,7 +21,7 @@
     <packaging>pom</packaging>
 
     <properties>
-        <application.docker.image.name>opennms/horizon-stream-events</application.docker.image.name>
+        <application.docker.image.name>opennms/lokahi-events</application.docker.image.name>
         <sonar.projectKey>opennms_horizon-stream_events</sonar.projectKey>
     </properties>
 

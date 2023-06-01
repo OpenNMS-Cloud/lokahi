@@ -10,7 +10,7 @@
         <relativePath>../../parent-pom</relativePath>
     </parent>
 
-    <name>OpenNMS Horizon Stream :: Ignite Tool</name>
+    <name>OpenNMS Lokahi :: Ignite Tool</name>
     <description>
         Tool for connecting to an Ignite cluster, reporting statistics, accessing functionality, and more.
     </description>

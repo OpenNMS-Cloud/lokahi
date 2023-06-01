@@ -12,7 +12,7 @@
     <artifactId>alert-dto</artifactId>
     <packaging>bundle</packaging>
 
-    <name>OpenNMS Horizon Stream :: Shared Library :: Alert</name>
+    <name>OpenNMS Lokahi :: Shared Library :: Alert</name>
     <description>The alert service DTO contract.</description>
 
 

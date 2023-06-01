@@ -10,7 +10,7 @@
   </parent>
 
   <artifactId>minion-snmp</artifactId>
-  <name>OpenNMS Horizon Stream :: Minion :: SNMP</name>
+  <name>OpenNMS Lokahi :: Minion :: SNMP</name>
   <packaging>pom</packaging>
 
   <modules>

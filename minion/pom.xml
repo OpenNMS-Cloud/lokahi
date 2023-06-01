@@ -10,7 +10,7 @@
         <relativePath>../parent-pom</relativePath>
     </parent>
 
-    <name>OpenNMS Horizon Stream :: Minion</name>
+    <name>OpenNMS Lokahi :: Minion</name>
     <description>
         A Karaf-based Java program that's responsible for monitoring devices on a network.
     </description>
@@ -39,7 +39,7 @@
     </modules>
 
     <properties>
-        <application.docker.image.name>opennms/horizon-stream-minion</application.docker.image.name>
+        <application.docker.image.name>opennms/lokahi-minion</application.docker.image.name>
         <skipUTs>false</skipUTs>
         <sonar.projectKey>opennms_horizon-stream_minion</sonar.projectKey>
     </properties>

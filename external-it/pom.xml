@@ -9,10 +9,10 @@
     <packaging>pom</packaging>
     <version>0.1.0-SNAPSHOT</version>
 
-    <name>OpenNMS Horizon Stream :: External IT Parent</name>
+    <name>OpenNMS Lokahi :: External IT Parent</name>
 
     <modules>
-        <module>external-horizon-stream-it</module>
+        <module>external-lokahi-it</module>
     </modules>
 
 </project>

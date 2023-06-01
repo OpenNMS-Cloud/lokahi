@@ -10,7 +10,7 @@
   </parent>
 
   <artifactId>snmp-impl</artifactId>
-  <name>OpenNMS Horizon Stream :: Minion :: Snmp :: SNMP IMPL</name>
+  <name>OpenNMS Lokahi :: Minion :: Snmp :: SNMP IMPL</name>
   <description>
     OpenNMS SNMP implementation based on snmp4j.org.
   </description>

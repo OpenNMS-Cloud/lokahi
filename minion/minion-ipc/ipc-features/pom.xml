@@ -12,7 +12,7 @@
     <artifactId>ipc-features</artifactId>
     <packaging>feature</packaging>
 
-    <name>OpenNMS Horizon Stream :: Minion :: IPC :: Features</name>
+    <name>OpenNMS Lokahi :: Minion :: IPC :: Features</name>
 
     <dependencies>
         <dependency>

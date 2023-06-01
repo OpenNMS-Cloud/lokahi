@@ -10,7 +10,7 @@
   </parent>
 
   <artifactId>testtools</artifactId>
-  <name>OpenNMS Horizon Stream :: Minion :: TestTools</name>
+  <name>OpenNMS Lokahi :: Minion :: TestTools</name>
   <packaging>pom</packaging>
 
   <modules>

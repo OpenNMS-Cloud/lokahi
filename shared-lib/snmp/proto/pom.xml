@@ -11,7 +11,7 @@
 
     <groupId>org.opennms.horizon.shared.snmp</groupId>
     <artifactId>proto</artifactId>
-    <name>OpenNMS Horizon Stream :: Shared Library :: Snmp :: Proto</name>
+    <name>OpenNMS Lokahi :: Shared Library :: Snmp :: Proto</name>
     <packaging>bundle</packaging>
 
     <dependencies>

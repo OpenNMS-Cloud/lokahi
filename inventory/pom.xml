@@ -12,14 +12,14 @@
         <relativePath>../parent-pom</relativePath>
     </parent>
 
-    <name>OpenNMS Horizon Stream :: Inventory Parent</name>
+    <name>OpenNMS Lokahi :: Inventory Parent</name>
 
     <artifactId>inventory-parent</artifactId>
     <packaging>pom</packaging>
 
     <properties>
         <sonar.projectKey>opennms_horizon-stream_inventory</sonar.projectKey>
-        <application.docker.image.name>opennms/horizon-stream-inventory</application.docker.image.name>
+        <application.docker.image.name>opennms/lokahi-inventory</application.docker.image.name>
     </properties>
 
     <dependencyManagement>

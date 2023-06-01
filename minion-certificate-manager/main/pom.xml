@@ -9,7 +9,7 @@
     </parent>
 
 	<artifactId>certificate-manager-main</artifactId>
-	<name>OpenNMS Horizon Stream :: Minion Certificate Manager :: Main</name>
+	<name>OpenNMS Lokahi :: Minion Certificate Manager :: Main</name>
 	<description>Minion Certificate Manager</description>
 
     <dependencyManagement>

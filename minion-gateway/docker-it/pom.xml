@@ -10,7 +10,7 @@
 
     <artifactId>minion-gateway-docker-it</artifactId>
 
-    <name>OpenNMS Horizon :: Minion Gateway :: Docker IT</name>
+    <name>OpenNMS Lokahi :: Minion Gateway :: Docker IT</name>
     <description>
         Docker build-time Integration Tests for the OpenNMS Minion Gateway.
 

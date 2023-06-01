@@ -10,7 +10,7 @@
 
     <artifactId>minion-gateway-main</artifactId>
 
-    <name>OpenNMS Horizon Stream :: Minion Gateway :: Main</name>
+    <name>OpenNMS Lokahi :: Minion Gateway :: Main</name>
     <description>
         Main executable module for the Minion Gateway.
     </description>
@@ -155,6 +155,10 @@
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.opentelemetry</groupId>
+            <artifactId>opentelemetry-api</artifactId>
         </dependency>
     </dependencies>
 

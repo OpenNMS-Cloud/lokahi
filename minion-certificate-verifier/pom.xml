@@ -10,7 +10,7 @@
         <relativePath>../parent-pom</relativePath>
     </parent>
 
-    <name>OpenNMS Horizon Stream :: Minion Certificate Verifier</name>
+    <name>OpenNMS Lokahi :: Minion Certificate Verifier</name>
     <description>
         Manage certificates validation/extraction.
     </description>
@@ -21,7 +21,7 @@
     <packaging>pom</packaging>
 
     <properties>
-        <application.docker.image.name>opennms/horizon-stream-minion-certificate-verifier</application.docker.image.name>
+        <application.docker.image.name>opennms/lokahi-minion-certificate-verifier</application.docker.image.name>
         <sonar.skip>true</sonar.skip>
     </properties>
 

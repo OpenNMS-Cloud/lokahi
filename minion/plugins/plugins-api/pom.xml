@@ -11,7 +11,7 @@
 
     <artifactId>plugins-api</artifactId>
 
-    <name>OpenNMS Horizon Stream :: Minion :: Plugins Api</name>
+    <name>OpenNMS Lokahi :: Minion :: Plugins Api</name>
     <packaging>bundle</packaging>
 
     <dependencies>

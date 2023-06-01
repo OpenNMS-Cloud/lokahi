@@ -12,7 +12,7 @@
     </parent>
 
     <artifactId>spring-boot-logback-json</artifactId>
-    <name>OpenNMS Horizon Stream :: Spring Boot Support :: Logback JSON</name>
+    <name>OpenNMS Lokahi :: Spring Boot Support :: Logback JSON</name>
 
     <dependencies>
         <!-- Since we need to support a few different versions of Spring Boot,

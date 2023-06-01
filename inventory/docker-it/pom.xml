@@ -10,7 +10,7 @@
 
     <artifactId>inventory-docker-it</artifactId>
 
-    <name>OpenNMS Horizon Stream :: Inventory :: Docker IT</name>
+    <name>OpenNMS Lokahi :: Inventory :: Docker IT</name>
     <description>
         Docker build-time Integration Tests for the OpenNMS Inventory.
 
@@ -18,7 +18,7 @@
     </description>
 
     <properties>
-        <application.docker.image.name>opennms/horizon-stream-inventory</application.docker.image.name>
+        <application.docker.image.name>opennms/lokahi-inventory</application.docker.image.name>
     </properties>
 
     <dependencies>

@@ -28,17 +28,6 @@
 
 package org.opennms.horizon.shared.ipc.grpc.server;
 
-import com.google.common.base.Strings;
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import com.google.protobuf.Empty;
-import com.google.protobuf.Message;
-import io.grpc.BindableService;
-import io.grpc.Context;
-import io.grpc.stub.StreamObserver;
-import io.opentelemetry.api.GlobalOpenTelemetry;
-import io.opentelemetry.api.trace.Span;
-import io.opentelemetry.api.trace.StatusCode;
-import io.opentelemetry.api.trace.Tracer;
 import java.io.IOException;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.util.Collections;
@@ -54,8 +43,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
-import org.opennms.cloud.grpc.minion.CloudToMinionMessage;
-import org.opennms.cloud.grpc.minion.Identity;
 import org.opennms.cloud.grpc.minion.MinionToCloudMessage;
 import org.opennms.cloud.grpc.minion.RpcRequestProto;
 import org.opennms.cloud.grpc.minion.RpcResponseProto;
@@ -80,6 +67,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.slf4j.MDC.MDCCloseable;
+
+import com.google.common.base.Strings;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import com.google.protobuf.Empty;
+import com.google.protobuf.Message;
+
+import io.grpc.BindableService;
+import io.grpc.Context;
+import io.grpc.stub.StreamObserver;
+import io.opentelemetry.api.GlobalOpenTelemetry;
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.StatusCode;
+import io.opentelemetry.api.trace.Tracer;
+import io.opentelemetry.semconv.trace.attributes.SemanticAttributes;
 
 /**
  * OpenNMS GRPC Server runs as OSGI bundle and it runs both RPC/Sink together.
@@ -255,9 +256,10 @@ public class OpennmsGrpcServer extends AbstractMessageConsumerManager implements
         }
         sinkDispatcherById.computeIfAbsent(module.getId(), id -> sinkMessage -> {
             final T message = module.unmarshal(sinkMessage.getContent().toByteArray());
-            final var span = tracer.spanBuilder("dispatch " + module.getClass().getSimpleName())
+            final var span = tracer.spanBuilder("dispatch " + module.getId())
                 .setNoParent()
                 .addLink(Span.current().getSpanContext())
+                .setAttribute(SemanticAttributes.CODE_NAMESPACE, module.getClass().getName())
                 .startSpan();
 
             try (var ss = span.makeCurrent()) {

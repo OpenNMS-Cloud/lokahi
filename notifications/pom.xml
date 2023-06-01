@@ -11,14 +11,14 @@
         <relativePath>../parent-pom</relativePath>
     </parent>
 
-    <name>OpenNMS Horizon Stream :: Notifications</name>
+    <name>OpenNMS Lokahi :: Notifications</name>
     <description>A microservice responsible for generating notifications from alerts.</description>
 
 	<artifactId>notifications</artifactId>
 	<version>0.1.0-SNAPSHOT</version>
 
     <properties>
-        <application.docker.image.name>opennms/horizon-stream-notification</application.docker.image.name>
+        <application.docker.image.name>opennms/lokahi-notification</application.docker.image.name>
         <sonar.projectKey>opennms_horizon-stream_notification</sonar.projectKey>
         <!-- Override the Netty version, Azure Communication Services requires a newer version than the one currently
         specified in the parent pom (4.1.78.Final), but upgrading that version to this one causes issues that prevent

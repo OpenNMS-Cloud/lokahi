@@ -13,53 +13,53 @@ spec:
     mode: manual
     update: none
   api:
-    image: opennms/horizon-stream-rest-server
+    image: opennms/lokahi-rest-server
     cpu: "0"
     mem: 500Mi
   ui:
-    image: opennms/horizon-stream-ui
+    image: opennms/lokahi-ui
     cpu: "0"
     mem: 100Mi
   minion:
-    image: opennms/horizon-stream-minion
+    image: opennms/lokahi-minion
     cpu: "0"
     mem: 1000Mi
   minionGateway:
-    image: opennms/horizon-stream-minion-gateway
+    image: opennms/lokahi-minion-gateway
     cpu: "0"
     mem: 500Mi
   minionSslGateway:
-    image: opennms/horizon-stream-minion-gateway
+    image: opennms/lokahi-minion-gateway
     cpu: "0"
     mem: 200Mi
   inventory:
-    image: opennms/horizon-stream-inventory
+    image: opennms/lokahi-inventory
     cpu: "0"
     mem: 100Mi
   alert:
-    image: opennms/horizon-stream-alert
+    image: opennms/lokahi-alert
     cpu: "0"
     mem: 100Mi
   notification:
-    image: opennms/horizon-stream-notification
+    image: opennms/lokahi-notification
     cpu: "0"
     mem: 100Mi
   metricsProcessor:
-    image: opennms/horizon-stream-metrics-processor
+    image: opennms/lokahi-metrics-processor
     cpu: "0"
     mem: 256Mi
   events:
-    image: opennms/horizon-stream-events
+    image: opennms/lokahi-events
     cpu: "0"
     mem: 100Mi
   datachoices:
-    image: opennms/horizon-stream-datachoices
+    image: opennms/lokahi-datachoices
     cpu: "0"
     mem: 100Mi
   keycloak:
-    image: opennms/horizon-stream-keycloak
+    image: opennms/lokahi-keycloak
   grafana:
-    image: opennms/horizon-stream-grafana
+    image: opennms/lokahi-grafana
   postgres:
     image: postgres:14.5-alpine
   credentials:

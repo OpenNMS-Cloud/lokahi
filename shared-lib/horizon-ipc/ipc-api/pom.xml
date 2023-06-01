@@ -13,7 +13,7 @@
     <artifactId>ipc-api</artifactId>
     <packaging>bundle</packaging>
 
-    <name>OpenNMS Horizon Stream :: Shared Library :: IPC :: API</name>
+    <name>OpenNMS Lokahi :: Shared Library :: IPC :: API</name>
     <description>Shallow copy of IPC api.</description>
 
     <dependencies>

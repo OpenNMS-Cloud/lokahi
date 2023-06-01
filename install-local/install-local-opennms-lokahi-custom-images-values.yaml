@@ -1,0 +1,171 @@
+Host: onmshs
+OpenNMS:
+  Core:
+    Image: opennms/lokahi-core:local
+    Resources:
+      Limits:
+        Cpu: "0"
+        Memory: "0"
+      Requests:
+        Cpu: "0"
+        Memory: "0"
+  API:
+    Image: opennms/lokahi-rest-server:local
+    Resources:
+      Limits:
+        Cpu: "0"
+        Memory: "0"
+      Requests:
+        Cpu: "0"
+        Memory: "0"
+  MetricsProcessor:
+    Image: opennms/lokahi-metrics-processor:local
+    Resources:
+      Limits:
+        Cpu: "0"
+        Memory: "0"
+      Requests:
+        Cpu: "0"
+        Memory: "0"
+  UI:
+    Image: opennms/lokahi-ui:local
+    Resources:
+      Limits:
+        Cpu: "0"
+        Memory: "0"
+      Requests:
+        Cpu: "0"
+        Memory: "0"
+  Minion:
+    Resources:
+      Limits:
+        Cpu: '0'
+        Memory: '0'
+      Requests:
+        Cpu: '0'
+        Memory: '0'
+    # see tilt-helm-values for explanation why this thing exists
+    ExtraVolumes:
+      - name: certificate-secrets
+        secret:
+          secretName: root-ca-certificate
+      - name: minion-certificate-manager-secrets
+        secret:
+          secretName: client-root-ca-certificate
+      - name: certificate
+        emptyDir: {}
+    ExtraMounts:
+      - name: certificate-secrets
+        mountPath: "/run/secrets/certificates"
+        readOnly: true
+      - name: minion-certificate-manager-secrets
+        mountPath: "/run/secrets/mtls"
+        readOnly: true
+      - name: certificate
+        mountPath: "/opt/karaf/certs/"
+    ExtraInitContainers:
+      - image: finalgene/openssh@sha256:5b8073b8720ddb204c48a79e68e2a9f8c470404d475640280eb5df2d6a843eca
+        imagePullPolicy: "IfNotPresent"
+        name: cert-generator
+        command:
+          - /bin/bash
+          - -c
+          - |
+            openssl genrsa -out /cert/client.key.pkcs1 2048
+            openssl pkcs8 -topk8 -in /cert/client.key.pkcs1 -out /cert/client.key -nocrypt
+            openssl req -new -key /cert/client.key -out /cert/client.unsigned.cert -subj "/C=CA/ST=TBD/L=TBD/O=OpenNMS/CN=local-minion/OU=L:TestLocation/OU=T:opennms-prime"
+            openssl x509 -req -in /cert/client.unsigned.cert -days 14 -CA /run/secrets/mtls/tls.crt -CAkey /run/secrets/mtls/tls.key -out /cert/client.signed.cert
+            openssl pkcs12 -export -out "/cert/minion.p12" -inkey /cert/client.key -in /cert/client.signed.cert -passout "pass:changeme"
+        securityContext:
+          privileged: false
+          runAsUser: 10001
+          runAsGroup: 10001
+          fsGroup: 10001
+        volumeMounts:
+          - name: certificate
+            mountPath: "/cert"
+          - name: minion-certificate-manager-secrets
+            mountPath: "/run/secrets/mtls"
+    GrpcConfig:
+      grpc.host: ingress-nginx-controller
+      grpc.port: 443
+      grpc.tls.enabled: true
+      grpc.client.truststore: /run/secrets/certificates/tls.crt
+      grpc.client.keystore: /opt/karaf/certs/minion.p12
+      grpc.client.keystore.password: changeme
+      grpc.override.authority: minion.onmshs
+  MinionGateway:
+    Image: opennms/lokahi-minion-gateway:local
+    Resources:
+      Limits:
+        Cpu: "0"
+        Memory: "0"
+      Requests:
+        Cpu: "0"
+        Memory: "0"
+    IngressAnnotations:
+      nginx.ingress.kubernetes.io/auth-tls-secret: $NAMESPACE/client-root-ca-certificate
+      nginx.ingress.kubernetes.io/auth-url: "http://opennms-minion-certificate-verifier.$NAMESPACE.svc.cluster.local:8080/certificate/debug"
+  MinionCertificateVerifier:
+    Image: opennms/lokahi-minion-certificate-verifier:local
+    Resources:
+      Limits:
+        Cpu: "0"
+        Memory: "0"
+      Requests:
+        Cpu: "0"
+        Memory: "0"
+  MinionCertificateManager:
+    Image: opennms/lokahi-minion-certificate-manager:local
+    CaSecretName: root-ca-certificate
+    MtlsSecretName: client-root-ca-certificate
+    Enabled: true
+    Resources:
+      Limits:
+        Cpu: "0"
+        Memory: "0"
+      Requests:
+        Cpu: "0"
+        Memory: "0"
+  Inventory:
+    Image: opennms/lokahi-inventory:local
+    Resources:
+      Limits:
+        Cpu: "0"
+        Memory: "0"
+      Requests:
+        Cpu: "0"
+        Memory: "0"
+  Alert:
+    Image: opennms/lokahi-alert:local
+    Resources:
+      Limits:
+        Cpu: "0"
+        Memory: "0"
+      Requests:
+        Cpu: "0"
+        Memory: "0"
+  Notification: 
+    Image: opennms/lokahi-notification:local
+    Resources:
+      Limits:
+        Cpu: "0"
+        Memory: "0"
+      Requests:
+        Cpu: "0"
+        Memory: "0"
+  Events:
+    Image: opennms/lokahi-events:local
+    Resources:
+      Limits:
+        Cpu: "0"
+        Memory: "0"
+      Requests:
+        Cpu: "0"
+        Memory: "0"
+Keycloak:
+  Image: opennms/lokahi-keycloak:local
+  AdminUsername: admin
+  AdminPassword: admin
+Grafana:
+  Image: opennms/lokahi-grafana:local

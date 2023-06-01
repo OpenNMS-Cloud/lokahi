@@ -10,7 +10,7 @@
         <relativePath>../parent-pom</relativePath>
     </parent>
 
-    <name>OpenNMS Horizon Stream :: Minion Certificate Manager</name>
+    <name>OpenNMS Lokahi :: Minion Certificate Manager</name>
     <description>
         Manage certificates for Minion on dev environment
     </description>
@@ -21,7 +21,7 @@
     <packaging>pom</packaging>
 
     <properties>
-        <application.docker.image.name>opennms/horizon-stream-minion-certificate-manager</application.docker.image.name>
+        <application.docker.image.name>opennms/lokahi-minion-certificate-manager</application.docker.image.name>
         <docker.it.network>rest-server-it-network</docker.it.network>
         <sonar.skip>true</sonar.skip>
     </properties>

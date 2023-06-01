@@ -10,7 +10,7 @@
   </parent>
 
   <artifactId>snmp-api</artifactId>
-  <name>OpenNMS Horizon Stream :: Shared Library :: Snmp :: Api</name>
+  <name>OpenNMS Lokahi :: Shared Library :: Snmp :: Api</name>
   <packaging>bundle</packaging>
 
   <dependencies>

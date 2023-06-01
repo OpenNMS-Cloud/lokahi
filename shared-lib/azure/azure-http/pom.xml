@@ -11,7 +11,7 @@
     </parent>
 
     <artifactId>azure-http</artifactId>
-    <name>OpenNMS Horizon :: Shared Library :: Azure :: Http</name>
+    <name>OpenNMS Lokahi :: Shared Library :: Azure :: Http</name>
     <packaging>bundle</packaging>
 
     <dependencies>

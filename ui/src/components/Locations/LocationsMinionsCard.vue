@@ -67,7 +67,7 @@
       </div>
     </div>
     <HoverMenu
-      :items="contextMenu"
+      :items="contextMenuItems"
       data-test="context-menu"
     />
   </div>
@@ -75,6 +75,9 @@
 
 <script setup lang="ts">
 import { Severity } from '@/types/graphql'
+import { useMinionMutations } from '@/store/Mutations/minionMutations'
+
+const minionMutations = useMinionMutations()
 
 const props = defineProps({
   item: {
@@ -115,10 +118,7 @@ const minion = computed(() => {
   return props.item
 })
 
-const contextMenu = [
-  { label: 'edit', handler: () => ({}) },
-  { label: 'delete', handler: () => ({}) }
-]
+const contextMenuItems = [{ label: 'Delete', handler: () => minionMutations.deleteMinion({ id: props.item.id }) }]
 
 type Pill = {
   style: string

@@ -123,9 +123,9 @@ jobs:
 
           # Not sure how to push this without build for multi-arch.
           docker buildx build --push \
-            --tag opennms/horizon-stream-minion:latest \
-            --tag opennms/horizon-stream-minion:${{ env.RELEASE_TAG }} \
-            docker-assembly/target/docker/opennms/horizon-stream-minion/latest/build/ \
+            --tag opennms/lokahi-minion:latest \
+            --tag opennms/lokahi-minion:${{ env.RELEASE_TAG }} \
+            docker-assembly/target/docker/opennms/lokahi-minion/latest/build/ \
             -f docker-assembly/src/main/docker/app/Dockerfile \
             --platform linux/amd64,linux/arm64,linux/arm/v7
 
@@ -138,19 +138,19 @@ jobs:
     strategy:
       matrix:
         image: [
-          'horizon-stream-alert',
-          'horizon-stream-datachoices',
-          'horizon-stream-events',
-          'horizon-stream-grafana',
-          'horizon-stream-inventory',
-          'horizon-stream-keycloak',
-          'horizon-stream-metrics-processor',
-          'horizon-stream-minion-gateway',
-          'horizon-stream-minion-certificate-manager',
-          'horizon-stream-minion-certificate-verifier',
-          'horizon-stream-notification',
-          'horizon-stream-rest-server',
-          'horizon-stream-ui',
+          'lokahi-alert',
+          'lokahi-datachoices',
+          'lokahi-events',
+          'lokahi-grafana',
+          'lokahi-inventory',
+          'lokahi-keycloak',
+          'lokahi-metrics-processor',
+          'lokahi-minion-gateway',
+          'lokahi-minion-certificate-manager',
+          'lokahi-minion-certificate-verifier',
+          'lokahi-notification',
+          'lokahi-rest-server',
+          'lokahi-ui',
         ]
     environment: docker-publish-account
     # Environment that contains the required secrets.

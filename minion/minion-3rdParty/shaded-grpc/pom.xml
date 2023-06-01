@@ -15,7 +15,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>shaded-grpc</artifactId>
-    <name>OpenNMS Horizon Stream :: Minion :: 3rd Party :: gRPC (shaded)</name>
+    <name>OpenNMS Lokahi :: Minion :: 3rd Party :: gRPC (shaded)</name>
     <packaging>bundle</packaging>
 
     <dependencies>

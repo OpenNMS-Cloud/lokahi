@@ -11,7 +11,7 @@
 
     <groupId>org.opennms.horizon.events</groupId>
     <artifactId>consumer</artifactId>
-    <name>OpenNMS Horizon Stream :: Events Consumer</name>
+    <name>OpenNMS Lokahi :: Events Consumer</name>
     <dependencyManagement>
         <dependencies>
             <dependency>

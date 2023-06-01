@@ -10,8 +10,8 @@
         data-test="headline"
       >
         <template #right>
-          <FeatherButton icon="placeholder">
-            <FeatherIcon :icon="placeholder"> </FeatherIcon>
+          <FeatherButton icon="map">
+            <FeatherIcon :icon="icons.Location"> </FeatherIcon>
           </FeatherButton>
           <FeatherButton
             @click="deleteLocation"
@@ -48,17 +48,13 @@
             v-model="formInputs.longitude"
             class="input-longitude"
             data-test="input-longitude"
-          >
-            <template #pre><FeatherIcon :icon="icons.placeholder" /></template
-          ></FeatherInput>
+          />
           <FeatherInput
             label="Latitude (optional)"
             v-model="formInputs.latitude"
             class="input-latitude"
             data-test="input-latitude"
-          >
-            <template #pre><FeatherIcon :icon="icons.placeholder" /></template
-          ></FeatherInput>
+          />
         </div>
       </div>
       <!-- <div class="row">
@@ -138,7 +134,6 @@ import Location from '@featherds/icon/action/Location'
 import ContentCopy from '@featherds/icon/action/ContentCopy'
 import DownloadFile from '@featherds/icon/action/DownloadFile'
 import Delete from '@featherds/icon/action/Delete'
-import placeholder from '@/assets/placeholder.svg'
 import { string } from 'yup'
 import { useForm } from '@featherds/input-helper'
 import { MonitoringLocation as LocationType, MonitoringLocationUpdateInput } from '@/types/graphql'
@@ -194,7 +189,6 @@ const deleteLocation = async () => {
   const success = await locationStore.deleteLocation(props.id)
 
   if (success) {
-    locationStore.setDisplayType(DisplayType.LIST)
     form.clearErrors()
   }
 }
@@ -234,8 +228,7 @@ const icons = markRaw({
   Location,
   ContentCopy,
   DownloadFile,
-  Delete,
-  placeholder
+  Delete
 })
 </script>
 

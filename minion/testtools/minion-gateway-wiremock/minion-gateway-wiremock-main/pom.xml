@@ -13,7 +13,7 @@
     <artifactId>minion-gateway-wiremock-main</artifactId>
     <version>0.1.0-SNAPSHOT</version>
 
-    <name>OpenNMS Horizon Stream :: Minion :: TestTools :: Minion Gateway Wiremock :: Main</name>
+    <name>OpenNMS Lokahi :: Minion :: TestTools :: Minion Gateway Wiremock :: Main</name>
     <description>
         Main executable for the Minion Gateway WireMock.
     </description>
@@ -21,7 +21,7 @@
     <properties>
         <java.version>17</java.version>
         <mock-gateway.docker.image>${mock-gateway.docker.image.name}:${mock-gateway.docker.image.tag}</mock-gateway.docker.image>
-        <mock-gateway.docker.image.name>opennms/horizon-stream-mock-minion-gateway</mock-gateway.docker.image.name>
+        <mock-gateway.docker.image.name>opennms/lokahi-mock-minion-gateway</mock-gateway.docker.image.name>
         <mock-gateway.docker.image.tag>latest</mock-gateway.docker.image.tag>
     </properties>
 

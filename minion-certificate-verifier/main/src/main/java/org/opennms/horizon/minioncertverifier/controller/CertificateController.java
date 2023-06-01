@@ -28,9 +28,9 @@
 
 package org.opennms.horizon.minioncertverifier.controller;
 
-import jakarta.servlet.http.HttpServletRequest;
 import java.util.Enumeration;
 import java.util.List;
+
 import org.opennms.horizon.minioncertverifier.parser.CertificateDnParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,6 +40,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.StatusCode;
+import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
 @RequestMapping("/certificate")
@@ -82,10 +86,20 @@ public class CertificateController {
                 location = value.substring(2);
             }
         }
+
+        var span = Span.current();
+        if (span.isRecording()) {
+            span.setAttribute("ssl-client-subject-dn", clientSubjectDn);
+            span.setAttribute("user", tenant);
+            span.setAttribute("location", location);
+        }
+
         if (location.isBlank() || tenant.isBlank()) {
+            span.setStatus(StatusCode.ERROR);
             return ResponseEntity.notFound().build();
         }
 
+        span.setStatus(StatusCode.OK);
         return ResponseEntity.ok()
             .header("tenant-id", tenant)
             .header("location", location)

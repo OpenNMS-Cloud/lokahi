@@ -11,7 +11,7 @@
     </parent>
 
     <artifactId>azure-parent</artifactId>
-    <name>OpenNMS Horizon :: Shared Library :: Azure</name>
+    <name>OpenNMS Lokahi :: Shared Library :: Azure</name>
     <packaging>pom</packaging>
 
     <modules>

@@ -12,7 +12,7 @@
     </parent>
 
     <artifactId>horizon-common-logging</artifactId>
-    <name>OpenNMS Horizon Stream :: Shared Library:: Logging</name>
+    <name>OpenNMS Lokahi :: Shared Library:: Logging</name>
     <packaging>bundle</packaging>
 
     <dependencies>

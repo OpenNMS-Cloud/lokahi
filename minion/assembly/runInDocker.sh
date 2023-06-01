@@ -132,5 +132,5 @@ exec docker run \
                 -e GRPC_CLIENT_TRUSTSTORE_PASSWORD="${CLIENT_TRUSTSTORE_PASSWORD}" \
                 -e GRPC_CLIENT_OVERRIDE_AUTHORITY="${OVERRIDE_AUTHORITY}" \
                 -v "minion-certs:/opt/karaf/certs" \
-                opennms/horizon-stream-minion:tilt-be02473c2f7da49a \
+                opennms/lokahi-minion:tilt-be02473c2f7da49a \
 		console

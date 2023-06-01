@@ -55,10 +55,10 @@ public class MinionContainer extends GenericContainer<MinionContainer> {
     ## -- Flows v9             4729/UDP
      */
     public MinionContainer(String gatewayHost, String minionId, String minionLocation) {
-        super("opennms/horizon-stream-minion:latest");
+        super("opennms/lokahi-minion:latest");
         // expose TCP ports here
         withExposedPorts(8101, 8181)
-            .withNetworkAliases("horizon-stream")
+            .withNetworkAliases("lokahi")
             .withNetwork(SHARED)
             .withEnv("TZ", "America/New_York")
             .withEnv("MINION_ID", minionId)

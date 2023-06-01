@@ -21,7 +21,7 @@ on:
         type: string
 
 env:
-  IMAGE: ${{ inputs.image || 'horizon-stream-grafana' }}
+  IMAGE: ${{ inputs.image || 'lokahi-grafana' }}
   IMAGE_TAG: ${{ inputs.image-tag || github.sha }}
   IMAGE_REGISTRY: ${{ inputs.image-registry || 'ghcr.io' }}
 

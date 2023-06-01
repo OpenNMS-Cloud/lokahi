@@ -11,9 +11,6 @@
 
 set -e
 
-cd contrib.opennms-horizon-stream/
-pwd
-
 CURRENT_TAG=$1
 PREVIOUS_TAG=$2
 

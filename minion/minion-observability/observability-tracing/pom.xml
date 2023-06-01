@@ -11,7 +11,7 @@
 
     <artifactId>observability-tracing</artifactId>
     <packaging>bundle</packaging>
-    <name>OpenNMS Horizon Stream :: Minion :: Observability :: Tracing</name>
+    <name>OpenNMS Lokahi :: Minion :: Observability :: Tracing</name>
 
     <description>Drop in replacement for horizon / openapi tracing</description>
 

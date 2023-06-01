@@ -13,7 +13,7 @@
 <!--    jar correctly show that it can be used.-->
 
     <artifactId>shaded-ignite</artifactId>
-    <name>OpenNMS Horizon Stream :: Minion :: 3rd Party :: ignite (shaded)</name>
+    <name>OpenNMS Lokahi :: Minion :: 3rd Party :: ignite (shaded)</name>
     <packaging>bundle</packaging>
 
     <dependencies>

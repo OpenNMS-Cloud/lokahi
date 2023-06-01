@@ -18,7 +18,7 @@
     <artifactId>notifications</artifactId>
     <packaging>bundle</packaging>
 
-    <name>OpenNMS Horizon Stream :: Shared Library :: Notifications</name>
+    <name>OpenNMS Lokahi :: Shared Library :: Notifications</name>
     <description>The notifications service contract.</description>
 
     <dependencies>

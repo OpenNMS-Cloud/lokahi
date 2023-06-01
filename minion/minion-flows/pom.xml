@@ -10,7 +10,7 @@
     </parent>
 
     <artifactId>minion-flows</artifactId>
-    <name>OpenNMS Horizon :: Minion :: Flows</name>
+    <name>OpenNMS Lokahi :: Minion :: Flows</name>
     <packaging>pom</packaging>
     <modules>
         <module>flows-parser</module>

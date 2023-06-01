@@ -11,7 +11,7 @@
 
     <groupId>org.opennms.horizon.events</groupId>
     <artifactId>grpc</artifactId>
-    <name>OpenNMS Horizon Stream :: Events :: Grpc</name>
+    <name>OpenNMS Lokahi :: Events :: Grpc</name>
     <version>0.1.0-SNAPSHOT</version>
 
     <dependencyManagement>

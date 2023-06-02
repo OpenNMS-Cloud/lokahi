@@ -202,13 +202,14 @@ const createAndDownloadBlobFile = (base64: string, filename: string) => {
   document.body.removeChild(link)
 }
 
-const downloadCert = (location: string) => {
-  locationStore.getMinionCertificate(location, certificateCallback)
-}
+const downloadCert = async (location: string) => {
+  const minionCertificate = await locationStore.getMinionCertificate(location)
 
-const certificateCallback = (newCert: CertificateResponse) => {
-  locationStore.setCertificatePassword(newCert.password as string)
-  createAndDownloadBlobFile(newCert.certificate, `${formInputs.location}-certificate.p12`)
+  if (minionCertificate) {
+    locationStore.setCertificatePassword(minionCertificate.password as string)
+    createAndDownloadBlobFile(minionCertificate.certificate, `${formInputs.location}-certificate.p12`)
+    form.clearErrors()
+  }
 }
 
 const deleteLocation = async () => {

@@ -101,9 +101,9 @@ export const useLocationStore = defineStore('locationStore', () => {
     return !error.value
   }
 
-  const getMinionCertificate = async (location: string, callback: any) => {
+  const getMinionCertificate = async (location: string) => {
     const response = await locationQueries.getMinionCertificate(location)
-    callback(response.data.value?.getMinionCertificate)
+    return response.data.value?.getMinionCertificate
   }
 
   const setCertificatePassword = (password: string) => {

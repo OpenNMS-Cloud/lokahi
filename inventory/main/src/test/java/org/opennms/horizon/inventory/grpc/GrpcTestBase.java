@@ -50,16 +50,17 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.reset;
 
 public abstract class GrpcTestBase {
+
     @DynamicPropertySource
     private static void registerDatasourceProperties(DynamicPropertyRegistry registry) {
-        registry.add("grpc.server.port", () -> getAvailablePort(6000, 9000));
+        registry.add("grpc.server.port", () -> port);
     }
 
     protected final String tenantId = "test-tenant";
     protected final String authHeader = "Bearer esgs12345";
     protected final String headerWithoutTenant = "Bearer esgs12345invalid";
     protected final String differentTenantHeader = "Bearer esgs12345different";
-    private static int port;
+    private static int port = getAvailablePort(6000, 9000);
     protected ManagedChannel channel;
     protected TestTaskSetGrpcService testGrpcService;
     @Autowired

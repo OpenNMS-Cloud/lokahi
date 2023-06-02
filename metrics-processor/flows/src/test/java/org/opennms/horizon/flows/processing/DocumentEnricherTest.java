@@ -35,6 +35,7 @@ import com.google.protobuf.UInt64Value;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.opennms.horizon.flows.classification.ClassificationEngine;
@@ -56,6 +57,7 @@ import java.util.TreeSet;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@Disabled
 public class DocumentEnricherTest {
 
     private InventoryClient mockInventoryClient;

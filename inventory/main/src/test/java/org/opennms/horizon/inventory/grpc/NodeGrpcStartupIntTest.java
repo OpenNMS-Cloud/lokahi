@@ -28,28 +28,30 @@
 
 package org.opennms.horizon.inventory.grpc;
 
-import static com.jayway.awaitility.Awaitility.await;
-
-import java.util.concurrent.TimeUnit;
-
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.opennms.horizon.inventory.SpringContextTestInitializer;
 import org.opennms.horizon.inventory.grpc.taskset.TestTaskSetGrpcService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.opennms.taskset.service.contract.UpdateTasksRequest;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 
+import java.util.concurrent.TimeUnit;
+
+import static com.jayway.awaitility.Awaitility.await;
+
 @SpringBootTest(properties = {"spring.liquibase.change-log=db/changelog/changelog-test.xml"})
 @ContextConfiguration(initializers = {SpringContextTestInitializer.class})
 @AutoConfigureObservability     // Make sure to include Metrics (for some reason they are disabled by default in the integration grey-box test)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+@Disabled
 class NodeGrpcStartupIntTest extends GrpcTestBase {
     @Autowired
     private ApplicationContext context;

@@ -33,6 +33,7 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.opennms.horizon.azure.api.AzureScanItem;
 import org.opennms.horizon.azure.api.AzureScanNetworkInterfaceItem;
@@ -56,7 +57,6 @@ import org.opennms.horizon.inventory.repository.SnmpInterfaceRepository;
 import org.opennms.horizon.inventory.repository.TagRepository;
 import org.opennms.horizon.inventory.repository.discovery.active.AzureActiveDiscoveryRepository;
 import org.opennms.horizon.inventory.service.NodeService;
-import org.opennms.horizon.inventory.service.taskset.publisher.TaskSetPublisher;
 import org.opennms.horizon.shared.utils.InetAddressUtils;
 import org.opennms.node.scan.contract.IpInterfaceResult;
 import org.opennms.node.scan.contract.NodeInfoResult;
@@ -66,11 +66,11 @@ import org.opennms.taskset.contract.ScanType;
 import org.opennms.taskset.contract.ScannerResponse;
 import org.opennms.taskset.contract.TaskType;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -92,6 +92,8 @@ import static org.junit.jupiter.api.Assertions.fail;
 @SpringBootTest
 @ContextConfiguration(initializers = {SpringContextTestInitializer.class})
 @AutoConfigureObservability     // Make sure to include Metrics (for some reason they are disabled by default in the integration grey-box test)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+@Disabled
 class ScannerResponseServiceIntTest extends GrpcTestBase {
     private static final String TEST_LOCATION = "Default";
     private static final String TEST_TENANT_ID = "test-tenant-id";

@@ -53,15 +53,15 @@
 
           <div class="input-wrapper">
             <FeatherInput
-              :label="props.inputPlaceholder"
-              :modelValue="props.inputModel"
+              :label="inputPlaceholder"
+              :modelValue="certificatePassword"
               type="text"
               class="download-input"
               :disabled="true"
               data-test="download-input"
             />
             <FeatherButton
-              :disabled="!props.inputModel"
+              :disabled="!certificatePassword"
               text
               @click="copyClick"
               class="download-copy-button"
@@ -117,7 +117,7 @@ const props = defineProps({
     default: 'Unlock File Password',
     type: String
   },
-  inputModel: {
+  certificatePassword: {
     required: true,
     type: String
   },
@@ -128,7 +128,7 @@ const props = defineProps({
 })
 
 const copyClick = () => {
-  navigator.clipboard.writeText(props.inputModel).catch(() => 'Copy to clipboard was unsuccessful.')
+  navigator.clipboard.writeText(props.certificatePassword).catch(() => 'Copy to clipboard was unsuccessful.')
   showSnackbar({
     msg: 'Copied.'
   })

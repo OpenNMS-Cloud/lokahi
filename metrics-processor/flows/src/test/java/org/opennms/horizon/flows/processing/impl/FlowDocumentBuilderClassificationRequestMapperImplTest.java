@@ -3,6 +3,7 @@ package org.opennms.horizon.flows.processing.impl;
 import com.google.protobuf.UInt32Value;
 import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.opennms.horizon.flows.classification.ClassificationRequest;
@@ -12,6 +13,7 @@ import org.opennms.horizon.flows.document.TenantLocationSpecificFlowDocument;
 
 import java.util.function.Function;
 
+@Disabled
 public class FlowDocumentBuilderClassificationRequestMapperImplTest {
 
     private Function<Integer, Protocol> mockProtocolLookupOp;

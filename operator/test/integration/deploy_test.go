@@ -32,7 +32,7 @@ package integration
 //func DeployOperatorAndCRD(t *testing.T, ctx context.Context, helmClient helmclient.Client) {
 //	chartSpec := &helmclient.ChartSpec{
 //		ReleaseName: "opennms-operator-integration-test",
-//		ChartName:   "charts/opennms-operator",
+//		ChartName:   "charts/lokahi-operator",
 //		Wait:        true,
 //		Timeout:     time.Second * 300,
 //		UpgradeCRDs: true,

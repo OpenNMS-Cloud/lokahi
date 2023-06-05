@@ -1,7 +1,7 @@
-charts/opennms/charts
-charts/opennms/tmpcharts
-charts/opennms-operator/charts
-charts/opennms-operator/tmpcharts
-charts/opennms-operator-dependencies/charts
-charts/opennms-operator-dependencies/tmpcharts
+charts/lokahi/charts
+charts/lokahi/tmpcharts
+charts/lokahi-operator/charts
+charts/lokahi-operator/tmpcharts
+charts/lokahi-operator-dependencies/charts
+charts/lokahi-operator-dependencies/tmpcharts
 *.iml

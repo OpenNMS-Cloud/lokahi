@@ -1,6 +1,6 @@
 #!/bin/sh
 
-helm upgrade -i opennms ./charts/opennms -f build-tools/basic/helm-values.yaml \
+helm upgrade -i opennms ./charts/lokahi -f build-tools/basic/helm-values.yaml \
   --set Grafana.Image=opennms/lokahi-grafana:local-basic \
   --set Keycloak.Image=opennms/lokahi-keycloak:local-basic \
   --set OpenNMS.API.Image=opennms/lokahi-rest-server:local-basic \

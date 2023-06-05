@@ -24,7 +24,7 @@ import (
 )
 
 func TestPostgresUpdateConfig(t *testing.T) {
-	handlers.ConfigFilePath = "./../../../charts/opennms/templates/"
+	handlers.ConfigFilePath = "./../../../charts/lokahi/templates/"
 	handler := PostgresHandler{}
 	assert.Nil(t, handler.GetConfig(), "config should start as nil")
 	err := handler.UpdateConfig(testutil.DefaultTestValues())

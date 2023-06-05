@@ -17,17 +17,17 @@ limitations under the License.
 package thirdparty
 
 import (
-    "github.com/OpenNMS-Cloud/opennms-operator/internal/handlers"
-    "github.com/OpenNMS-Cloud/opennms-operator/internal/handlers/testutil"
-    "github.com/stretchr/testify/assert"
-    "testing"
+	"github.com/OpenNMS-Cloud/opennms-operator/internal/handlers"
+	"github.com/OpenNMS-Cloud/opennms-operator/internal/handlers/testutil"
+	"github.com/stretchr/testify/assert"
+	"testing"
 )
 
 func TestGrafanaUpdateConfig(t *testing.T) {
-    handlers.ConfigFilePath = "./../../../charts/opennms/templates/"
-    handler := GrafanaHandler{}
-    assert.Nil(t, handler.GetConfig(), "config should start as nil")
-    err := handler.UpdateConfig(testutil.DefaultTestValues())
-    assert.Nil(t, err)
-    assert.NotNil(t, handler.GetConfig(), "config should no longer be nil")
+	handlers.ConfigFilePath = "./../../../charts/lokahi/templates/"
+	handler := GrafanaHandler{}
+	assert.Nil(t, handler.GetConfig(), "config should start as nil")
+	err := handler.UpdateConfig(testutil.DefaultTestValues())
+	assert.Nil(t, err)
+	assert.NotNil(t, handler.GetConfig(), "config should no longer be nil")
 }

@@ -96,6 +96,7 @@ export const useLocationStore = defineStore('locationStore', () => {
   }
 
   const deleteLocation = async (id: number) => {
+    displayType.value = DisplayType.LIST
     const error = await locationMutations.deleteLocation({ id })
 
     if (!error.value) {

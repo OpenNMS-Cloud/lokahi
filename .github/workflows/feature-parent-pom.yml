@@ -37,4 +37,4 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           sonar-token: ${{ secrets.SONAR_TOKEN }}
           # sonar.projectKey cannot be defined in this project's pom.xml, all child projects would inherit its value
-          project-key: ${{ secrets.SONAR_CLOUD_PROJECT_KEY }} 
+          sonar-project-key: 'opennms_lokahi_parent-pom'

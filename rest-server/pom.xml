@@ -24,7 +24,7 @@
         <application.docker.image.name>opennms/lokahi-rest-server</application.docker.image.name>
 		<java.version>17</java.version>
 		<graphql.spqr.version>0.0.6</graphql.spqr.version>
-        <sonar.projectKey>opennms_horizon-stream_bff</sonar.projectKey>
+        <sonar.projectKey>opennms_lokahi_bff</sonar.projectKey>
 	</properties>
     <dependencyManagement>
         <dependencies>

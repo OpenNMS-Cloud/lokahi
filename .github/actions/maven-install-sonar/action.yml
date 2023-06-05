@@ -11,7 +11,7 @@ inputs:
   sonar-token:
     description: 'SONAR_TOKEN secret to authenticate job with SonarCloud'
     required: true
-  project-key:
+  sonar-project-key:
     description: 'The Sonar project key'
     required: false
 
@@ -25,7 +25,7 @@ runs:
         key: ${{ runner.os }}-${{ runner.arch }}-sonar
 
     - name: Install & Sonar scan
-      if: ${{ inputs.project-key != '' }}
+      if: ${{ inputs.sonar-project-key != '' }}
       run: |
         mvn -B -Dstyle.color=always \
             -Pcicd,coverage install sonar:sonar \
@@ -35,10 +35,10 @@ runs:
       env:
         GITHUB_TOKEN: ${{ inputs.github-token }}
         SONAR_TOKEN: ${{ inputs.sonar-token }}
-        SONAR_PROJECT_KEY: ${{ inputs.project-key }}
+        SONAR_PROJECT_KEY: ${{ inputs.sonar-project-key }}
 
     - name: Install & Sonar scan
-      if: ${{ inputs.project-key == '' }}
+      if: ${{ inputs.sonar-project-key == '' }}
       run: |
         mvn -B -Dstyle.color=always \
             -Pcicd,coverage install sonar:sonar

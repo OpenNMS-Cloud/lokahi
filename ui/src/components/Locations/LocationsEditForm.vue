@@ -97,9 +97,10 @@
       </div> -->
       <div>
         <LocationsCertificateDownload
-          :input-model="locationStore.downloadCertificatePassword"
+          :certificate-password="locationStore.certificatePassword"
           :on-primary-button-click="() => downloadCert(formInputs.location)"
           :has-cert="true"
+          :disabled="true"
         />
       </div>
       <div class="row mt-m">
@@ -136,7 +137,7 @@ import DownloadFile from '@featherds/icon/action/DownloadFile'
 import Delete from '@featherds/icon/action/Delete'
 import { string } from 'yup'
 import { useForm } from '@featherds/input-helper'
-import { MonitoringLocation as LocationType, MonitoringLocationUpdateInput } from '@/types/graphql'
+import {CertificateResponse, MonitoringLocation as LocationType, MonitoringLocationUpdateInput} from '@/types/graphql'
 import { DisplayType } from '@/types/locations.d'
 import { useLocationStore } from '@/store/Views/locationStore'
 
@@ -147,6 +148,7 @@ const props = defineProps<{
 const locationStore = useLocationStore()
 const selectedLocation = computed(() => locationStore.locationsList.filter((l: LocationType) => l.id === props.id)[0])
 const formInputs = reactive({} as Required<MonitoringLocationUpdateInput>)
+const certificate = reactive({} as CertificateResponse)
 
 watchEffect(() => {
   formInputs.id = selectedLocation.value.id,
@@ -180,9 +182,34 @@ const onSubmit = async () => {
     form.clearErrors()
   }
 }
+const convertBase64ToArrayBuffer = (base64: string) => {
+  const binaryString = window.atob(base64)
+  const bytes = new Uint8Array(binaryString.length)
+  return bytes.map((byte, i) => binaryString.charCodeAt(i))
+}
 
-const downloadCert = (string: string) => {
-  locationStore.downloadCertificatePassword = 'GeNeRaTeDpAsSw0rD123'
+const createAndDownloadBlobFile = (base64: string, filename: string) => {
+  const data = convertBase64ToArrayBuffer(base64)
+  const blob = new Blob([data])
+
+  const link = document.createElement('a')
+  const url = URL.createObjectURL(blob)
+  link.setAttribute('href', url)
+  link.setAttribute('download', filename)
+  link.style.visibility = 'hidden'
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+}
+
+const downloadCert = async (location: string) => {
+  const minionCertificate = await locationStore.getMinionCertificate(location)
+
+  if (minionCertificate) {
+    locationStore.setCertificatePassword(minionCertificate.password as string)
+    createAndDownloadBlobFile(minionCertificate.certificate, `${formInputs.location}-certificate.p12`)
+    form.clearErrors()
+  }
 }
 
 const deleteLocation = async () => {

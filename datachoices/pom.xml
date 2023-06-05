@@ -18,7 +18,7 @@
 
     <properties>
         <application.docker.image.name>opennms/lokahi-datachoices</application.docker.image.name>
-        <sonar.projectKey>opennms_horizon-stream_datachoices</sonar.projectKey>
+        <sonar.projectKey>opennms_lokahi_datachoices</sonar.projectKey>
     </properties>
 
     <dependencyManagement>

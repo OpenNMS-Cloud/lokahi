@@ -41,7 +41,7 @@
     <properties>
         <application.docker.image.name>opennms/lokahi-minion</application.docker.image.name>
         <skipUTs>false</skipUTs>
-        <sonar.projectKey>opennms_horizon-stream_minion</sonar.projectKey>
+        <sonar.projectKey>opennms_lokahi_minion</sonar.projectKey>
     </properties>
 
     <dependencyManagement>

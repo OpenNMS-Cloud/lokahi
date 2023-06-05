@@ -14,7 +14,7 @@ inputs:
   sonar-token:
     description: 'SONAR_TOKEN secret to authenticate job with SonarCloud'
     required: true
-  project-key:
+  sonar-project-key:
     description: 'The Sonar project key'
     required: false
 
@@ -31,12 +31,12 @@ runs:
       uses: ./.github/actions/maven-cache-cleanup-project-artifacts
 
     - name: Build Image & Scan
-      if: ${{ inputs.project-key != '' }}
+      if: ${{ inputs.sonar-project-key != '' }}
       env:
         IMAGE: ${{ inputs.image }}
         GITHUB_TOKEN: ${{ inputs.github-token }}
         SONAR_TOKEN: ${{ inputs.sonar-token }}
-        SONAR_PROJECT_KEY: ${{ inputs.project-key }}
+        SONAR_PROJECT_KEY: ${{ inputs.sonar-project-key }}
       run: |
         BASE_IMAGE=ghcr.io/opennms-cloud/$(cat ../.github/base-image-tag-ref.json | jq .image_tag_java | sed 's/\"//g')
 
@@ -49,7 +49,7 @@ runs:
       working-directory: ${{ inputs.working-directory }}
 
     - name: Build Image & Scan
-      if: ${{ inputs.project-key == '' }}
+      if: ${{ inputs.sonar-project-key == '' }}
       env:
         IMAGE: ${{ inputs.image }}
         GITHUB_TOKEN: ${{ inputs.github-token }}

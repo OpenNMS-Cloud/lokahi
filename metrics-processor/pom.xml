@@ -21,7 +21,7 @@
     <properties>
         <application.docker.image.name>opennms/lokahi-metrics-processor</application.docker.image.name>
         <java.version>17</java.version>
-        <sonar.projectKey>opennms_horizon-stream_metrics-processor</sonar.projectKey>
+        <sonar.projectKey>opennms_lokahi_metrics-processor</sonar.projectKey>
     </properties>
 
     <packaging>pom</packaging>

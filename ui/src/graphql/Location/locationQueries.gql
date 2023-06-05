@@ -24,3 +24,10 @@ query SearchLocation($searchTerm: String) {
     latitude
   }
 }
+
+query getMinionCertificate($location: String) {
+  getMinionCertificate(location: $location){
+    password
+    certificate
+  }
+}

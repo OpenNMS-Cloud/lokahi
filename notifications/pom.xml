@@ -19,7 +19,7 @@
 
     <properties>
         <application.docker.image.name>opennms/lokahi-notification</application.docker.image.name>
-        <sonar.projectKey>opennms_horizon-stream_notification</sonar.projectKey>
+        <sonar.projectKey>opennms_lokahi_notification</sonar.projectKey>
         <!-- Override the Netty version, Azure Communication Services requires a newer version than the one currently
         specified in the parent pom (4.1.78.Final), but upgrading that version to this one causes issues that prevent
         the Minion from starting up -->

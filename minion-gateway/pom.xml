@@ -23,7 +23,7 @@
     <properties>
         <application.docker.image.name>opennms/lokahi-minion-gateway</application.docker.image.name>
         <docker.it.network>rest-server-it-network</docker.it.network>
-        <sonar.projectKey>opennms_horizon-stream_minion-gateway</sonar.projectKey>
+        <sonar.projectKey>opennms_lokahi_minion-gateway</sonar.projectKey>
     </properties>
 
     <modules>

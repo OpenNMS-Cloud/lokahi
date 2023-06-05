@@ -18,7 +18,7 @@
     <packaging>pom</packaging>
 
     <properties>
-        <sonar.projectKey>opennms_horizon-stream_inventory</sonar.projectKey>
+        <sonar.projectKey>opennms_lokahi_inventory</sonar.projectKey>
         <application.docker.image.name>opennms/lokahi-inventory</application.docker.image.name>
     </properties>
 

@@ -1,15 +1,15 @@
-import { defineStore } from 'pinia'
-import { useLocationQueries } from '../Queries/locationQueries'
-import { useMinionsQueries } from '../Queries/minionsQueries'
-import { DisplayType } from '@/types/locations.d'
-import { useLocationMutations } from '../Mutations/locationMutations'
-import { MonitoringLocationCreateInput, MonitoringLocationUpdateInput } from '@/types/graphql'
+import {defineStore} from 'pinia'
+import {useLocationQueries} from '../Queries/locationQueries'
+import {useMinionsQueries} from '../Queries/minionsQueries'
+import {DisplayType} from '@/types/locations.d'
+import {useLocationMutations} from '../Mutations/locationMutations'
+import {MonitoringLocationCreateInput, MonitoringLocationUpdateInput} from '@/types/graphql'
 
 export const useLocationStore = defineStore('locationStore', () => {
-  const downloadCertificatePassword = ref('')
   const locationsList = ref()
   const minionsList = ref()
   const selectedLocationId = ref()
+  const certificatePassword = ref()
   const displayType = ref(DisplayType.LIST)
 
   const saveIsFetching = ref()
@@ -56,6 +56,7 @@ export const useLocationStore = defineStore('locationStore', () => {
     if (id) displayType.value = DisplayType.EDIT
 
     selectedLocationId.value = id
+    certificatePassword.value = ''
   }
 
   const setDisplayType = (type: DisplayType) => {
@@ -94,11 +95,19 @@ export const useLocationStore = defineStore('locationStore', () => {
     const error = await locationMutations.deleteLocation({ id })
 
     if (!error.value) {
-      setDisplayType(DisplayType.LIST)
       await fetchLocations()
     }
 
     return !error.value
+  }
+
+  const getMinionCertificate = async (location: string) => {
+    const response = await locationQueries.getMinionCertificate(location)
+    return response.data.value?.getMinionCertificate
+  }
+
+  const setCertificatePassword = (password: string) => {
+    certificatePassword.value = password
   }
 
   return {
@@ -117,6 +126,8 @@ export const useLocationStore = defineStore('locationStore', () => {
     updateLocation,
     updateIsFetching,
     deleteLocation,
-    downloadCertificatePassword
+    getMinionCertificate,
+    certificatePassword,
+    setCertificatePassword
   }
 })

@@ -70,6 +70,7 @@ import org.springframework.boot.test.autoconfigure.actuate.observability.AutoCon
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -91,6 +92,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 @SpringBootTest
 @ContextConfiguration(initializers = {SpringContextTestInitializer.class})
 @AutoConfigureObservability     // Make sure to include Metrics (for some reason they are disabled by default in the integration grey-box test)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 @Disabled
 class ScannerResponseServiceIntTest extends GrpcTestBase {
     private static final String TEST_LOCATION = "Default";

@@ -1,6 +1,6 @@
-# Horizon Stream
+# Lokahi
 
-**Horizon Stream** is a new distribution of OpenNMS, inspired from the existing platform
+**Lokahi** is a new distribution of OpenNMS, inspired from the existing platform
 
 See [Getting Started on the Wiki](https://github.com/OpenNMS/lokahi/wiki/Getting-Started) for development instructions.
 

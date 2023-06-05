@@ -162,7 +162,7 @@ install_helm_chart_custom_images () {
   echo ________________Installing Horizon Stream________________
   echo
 
-  helm upgrade -i lokahi ./../charts/opennms \
+  helm upgrade -i lokahi ./../charts/lokahi \
   -f ./tmp/install-local-opennms-lokahi-custom-images-values.yaml \
   --namespace $NAMESPACE \
   --set OpenNMS.Alert.Image=${IMAGE_PREFIX}/lokahi-alert:${IMAGE_TAG} \
@@ -203,7 +203,7 @@ cat install-local-onms-instance.yaml | \
   sed "s/onmshs/$DOMAIN/g" | sed "s/\$NAMESPACE/$NAMESPACE/g" > tmp/install-local-onms-instance.yaml
 cat install-local-onms-instance-custom-images.yaml | \
   sed "s/onmshs/$DOMAIN/g" | sed "s/\$NAMESPACE/$NAMESPACE/g" > tmp/install-local-onms-instance-custom-images.yaml
-cat ./../charts/opennms/values.yaml | \
+cat ./../charts/lokahi/values.yaml | \
   sed "s/onmshs/$DOMAIN/g" | sed "s/\$NAMESPACE/$NAMESPACE/g" > tmp/values.yaml
 cat install-local-opennms-lokahi-values.yaml | \
   sed "s/onmshs/$DOMAIN/g" | sed "s/\$NAMESPACE/$NAMESPACE/g" > tmp/install-local-opennms-lokahi-values.yaml
@@ -221,7 +221,7 @@ if [ $CONTEXT == "local" ]; then
   echo
   echo ________________Installing Horizon Stream________________
   echo
-  helm upgrade -i lokahi ./../charts/opennms -f ./tmp/install-local-opennms-lokahi-values.yaml --namespace $NAMESPACE --wait --timeout "${TIMEOUT}"
+  helm upgrade -i lokahi ./../charts/lokahi -f ./tmp/install-local-opennms-lokahi-values.yaml --namespace $NAMESPACE --wait --timeout "${TIMEOUT}"
   if [ $? -ne 0 ]; then exit; fi
 
   cluster_ready_check
@@ -268,7 +268,7 @@ elif [ $CONTEXT == "existing-k8s" ]; then
   echo
   echo ________________Installing Horizon Stream________________
   echo
-  helm upgrade -i lokahi ./../charts/opennms -f ./tmp/install-local-opennms-lokahi-values.yaml --namespace $NAMESPACE --create-namespace --wait --timeout "${TIMEOUT}"
+  helm upgrade -i lokahi ./../charts/lokahi -f ./tmp/install-local-opennms-lokahi-values.yaml --namespace $NAMESPACE --create-namespace --wait --timeout "${TIMEOUT}"
   if [ $? -ne 0 ]; then exit; fi
 
   cluster_ready_check

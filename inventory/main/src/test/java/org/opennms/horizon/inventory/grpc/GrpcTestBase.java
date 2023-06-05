@@ -41,6 +41,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 
+import java.net.ServerSocket;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
@@ -49,15 +50,17 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.reset;
 
 public abstract class GrpcTestBase {
+
     @DynamicPropertySource
     private static void registerDatasourceProperties(DynamicPropertyRegistry registry) {
-        registry.add("grpc.server.port", () -> 6767);
+        registry.add("grpc.server.port", () -> port);
     }
 
     protected final String tenantId = "test-tenant";
     protected final String authHeader = "Bearer esgs12345";
     protected final String headerWithoutTenant = "Bearer esgs12345invalid";
     protected final String differentTenantHeader = "Bearer esgs12345different";
+    private static int port = getAvailablePort(6000, 9000);
     protected ManagedChannel channel;
     protected TestTaskSetGrpcService testGrpcService;
     @Autowired
@@ -74,12 +77,14 @@ public abstract class GrpcTestBase {
     }
 
     protected void prepareServer() throws VerificationException {
-        channel = ManagedChannelBuilder.forAddress("localhost", 6767)
+
+        channel = ManagedChannelBuilder.forAddress("localhost", port)
             .usePlaintext().build();
         doReturn(Optional.of(tenantId)).when(spyInterceptor).verifyAccessToken(authHeader);
         doReturn(Optional.of("invalid-tenant")).when(spyInterceptor).verifyAccessToken(differentTenantHeader);
         doReturn(Optional.empty()).when(spyInterceptor).verifyAccessToken(headerWithoutTenant);
         doThrow(new VerificationException()).when(spyInterceptor).verifyAccessToken(null);
+
     }
 
     protected void afterTest() throws InterruptedException {
@@ -100,5 +105,17 @@ public abstract class GrpcTestBase {
     private void cleanDataBase() {
         jdbcTemplate.execute("truncate table node, tag, configuration, monitored_service, " +
             "monitoring_system, monitoring_location, azure_active_discovery, icmp_active_discovery, active_discovery, passive_discovery CASCADE");
+    }
+
+    private static int getAvailablePort(int current, final int max) {
+        while (current < max) {
+            try (final ServerSocket socket = new ServerSocket(current)) {
+                port = socket.getLocalPort();
+                return port;
+            } catch (final Throwable e) {
+            }
+            current++;
+        }
+        throw new IllegalStateException("Can't find an available network port");
     }
 }

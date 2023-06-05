@@ -20,7 +20,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-var ConfigFilePath = "./charts/opennms/templates/"
+var ConfigFilePath = "./charts/lokahi/templates/"
 
 type ServiceHandler interface {
 	//GetConfig - get the config

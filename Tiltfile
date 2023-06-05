@@ -186,7 +186,7 @@ k8s_resource(
 
 k8s_yaml(
     helm(
-        'charts/opennms',
+        'charts/lokahi',
         values=['./tilt-helm-values.yaml'],
     )
 )

@@ -1,9 +1,7 @@
 package org.opennms.horizon.flows.integration;
 
 
-import java.util.Collections;
-import java.util.List;
-
+import io.grpc.ManagedChannel;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
@@ -14,7 +12,8 @@ import org.opennms.horizon.flows.document.TenantLocationSpecificFlowDocument;
 import org.opennms.horizon.flows.grpc.client.IngestorClient;
 import org.springframework.retry.support.RetryTemplate;
 
-import io.grpc.ManagedChannel;
+import java.util.Collections;
+import java.util.List;
 
 
 class FlowRepositoryImplTest {
@@ -55,6 +54,6 @@ class FlowRepositoryImplTest {
         flowRepository.persist(flows);
 
         // Then
-        Mockito.verify(ingesterBlockingStub, Mockito.times(3));
+        Mockito.verify(ingesterBlockingStub, Mockito.times(3)).storeFlowDocuments(Mockito.any());
     }
 }

@@ -36,7 +36,7 @@ var tvals values.TemplateValues
 func DefaultTestValues() values.TemplateValues {
 	if !valuesSet {
 		tvals, _ = values2.GetDefaultValues(config.OperatorConfig{
-			DefaultOpenNMSValuesFile: "./../../charts/opennms/values.yaml",
+			DefaultOpenNMSValuesFile: "./../../charts/lokahi/values.yaml",
 		})
 		valuesSet = true
 	}
@@ -44,7 +44,7 @@ func DefaultTestValues() values.TemplateValues {
 }
 
 func TestInstance(t *testing.T) {
-	handlers.ConfigFilePath = "./../../../charts/opennms/templates/"
+	handlers.ConfigFilePath = "./../../../charts/lokahi/templates/"
 	i := Instance{}
 	crd := v1alpha1.OpenNMS{}
 	crd.SetName("test")

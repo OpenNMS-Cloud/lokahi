@@ -1,5 +1,5 @@
-query FindMinionsByLabel($label: String) {
-  findMinionsByLabel(label: $label) {
+query FindMinionsByLocationId($locationId: Long!) {
+  findMinionsByLocationId(locationId: $locationId) {
     id
     label
     lastCheckedTime

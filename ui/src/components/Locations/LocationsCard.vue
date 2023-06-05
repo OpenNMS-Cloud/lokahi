@@ -2,10 +2,10 @@
   <div
     class="locations-card-wrapper"
     :class="{ selected: selectedCard }"
+    @click="locationStore.getMinionsForLocationId(location.id)"
   >
     <div class="name">
       <ButtonTextIcon
-        @click="locationStore.selectLocation(location.id)"
         :item="nameBtn"
         data-test="name"
       />
@@ -45,7 +45,7 @@ const locationStore = useLocationStore()
 
 const location = computed(() => props.item)
 
-const selectedCard = computed(() => locationStore.selectedLocationId === props.item.id)
+const selectedCard = computed(() => locationStore.selectedLocationIdForMinions === props.item.id)
 
 const nameBtn = computed<IButtonTextIcon>(() => ({
   label: props.item.location
@@ -74,6 +74,7 @@ const icons = markRaw({
   align-items: center;
   gap: var(variables.$spacing-s);
   padding: 0 var(variables.$spacing-s);
+  cursor: pointer;
 }
 
 .name {

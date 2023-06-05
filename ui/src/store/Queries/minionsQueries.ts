@@ -5,7 +5,7 @@ import {
   ListMinionMetricsDocument,
   Minion,
   TimeRangeUnit,
-  FindMinionsByLabelDocument
+  FindMinionsByLocationIdDocument
 } from '@/types/graphql'
 import { ExtendedMinion } from '@/types/minion'
 import useSpinner from '@/composables/useSpinner'
@@ -13,7 +13,7 @@ import { Monitor } from '@/types'
 
 export const useMinionsQueries = defineStore('minionsQueries', () => {
   const minionsList = ref<ExtendedMinion[]>([])
-  const minionLabel = reactive({ label: '' })
+  const minionLocationId = reactive({ locationId: 0 })
 
   const { startSpinner, stopSpinner } = useSpinner()
 
@@ -66,21 +66,21 @@ export const useMinionsQueries = defineStore('minionsQueries', () => {
     })
   }
 
-  // find minions by label
-  const { onData: onFindMinionsByLabel, isFetching: isFetchinMinionsByLabel } = useQuery({
-    query: FindMinionsByLabelDocument,
+  // find minions by location id
+  const { onData: onFindMinionsByLocationId, isFetching: isFetchingMinionsByLocationId } = useQuery({
+    query: FindMinionsByLocationIdDocument,
     cachePolicy: 'network-only',
     fetchOnMount: false,
-    variables: minionLabel
+    variables: minionLocationId
   })
 
-  const findMinionsByLabel = (label: string) => (minionLabel.label = label)
+  const findMinionsByLocationId = (locationId: number) => (minionLocationId.locationId = locationId)
   
-  watchEffect(() => (isFetchinMinionsByLabel.value ? startSpinner() : stopSpinner()))
+  watchEffect(() => (isFetchingMinionsByLocationId.value ? startSpinner() : stopSpinner()))
 
-  onFindMinionsByLabel((data) => {
-    if (data.findMinionsByLabel?.length) {
-      addMetricsToMinions(data.findMinionsByLabel as Minion[])
+  onFindMinionsByLocationId((data) => {
+    if (data.findMinionsByLocationId?.length) {
+      addMetricsToMinions(data.findMinionsByLocationId as Minion[])
     } else {
       minionsList.value = []
     }
@@ -89,6 +89,6 @@ export const useMinionsQueries = defineStore('minionsQueries', () => {
   return {
     minionsList: computed(() => minionsList.value),
     fetchMinions,
-    findMinionsByLabel
+    findMinionsByLocationId
   }
 })

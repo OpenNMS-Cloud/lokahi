@@ -33,7 +33,7 @@
       <li
         v-for="item in items"
         :key="item.label"
-        @click="item.handler"
+        @click.stop.prevent="item.handler"
         :data-test="item.label"
       >
         {{ item.label }}

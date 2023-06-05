@@ -63,8 +63,8 @@ public class GrpcMinionService {
     }
 
     @GraphQLQuery
-    public Flux<Minion> findMinionsByLabel(@GraphQLArgument(name = "label") String label, @GraphQLEnvironment ResolutionEnvironment env) {
-        return Flux.fromIterable(client.listMonitoringSystemsByLabel(label, headerUtil.getAuthHeader(env)).stream().map(mapper::protoToMinion).toList());
+    public Flux<Minion> findMinionsByLocationId(@GraphQLArgument(name = "locationId") long locationId, @GraphQLEnvironment ResolutionEnvironment env) {
+        return Flux.fromIterable(client.getMonitoringSystemsByLocationId(locationId, headerUtil.getAuthHeader(env)).stream().map(mapper::protoToMinion).toList());
     }
 
     @GraphQLQuery

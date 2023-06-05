@@ -110,9 +110,9 @@ public class MonitoringSystemRepositoryTest {
     }
 
     @Test
-    void testFindByLabel() {
-        List<MonitoringSystem> list = systemRepository.findByLabelAndTenantId(system1.getLabel(), tenantId);
-        assertThat(list.size()).hasSize(1);
+    void testFindByLocationId() {
+        List<MonitoringSystem> list = systemRepository.findByMonitoringLocationIdAndTenantId(system1.getMonitoringLocationId(), tenantId);
+        assertThat(list.size()).isEqualTo(3);
     }
 
     @Test

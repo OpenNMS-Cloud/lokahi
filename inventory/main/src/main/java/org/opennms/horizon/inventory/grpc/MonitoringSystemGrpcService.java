@@ -65,9 +65,9 @@ public class MonitoringSystemGrpcService extends MonitoringSystemServiceGrpc.Mon
     }
 
     @Override
-    public void listMonitoringSystemByLabel(StringValue label, StreamObserver<MonitoringSystemList> responseObserver) {
+    public void listMonitoringSystemByLocationId(long locationId, StreamObserver<MonitoringSystemList> responseObserver) {
         List<MonitoringSystemDTO> list = tenantLookup.lookupTenantId(Context.current())
-            .map(tenantId -> service.findByLabelAndTenantId(label.getValue(), tenantId))
+            .map(tenantId -> service.findByMonitoringLocationIdAndTenantId(locationId.getValue(), tenantId))
             .orElseThrow();
         responseObserver.onNext(MonitoringSystemList.newBuilder().addAllSystems(list).build());
         responseObserver.onCompleted();

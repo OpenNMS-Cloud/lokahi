@@ -13,5 +13,4 @@ public interface MonitoringSystemRepository extends JpaRepository<MonitoringSyst
     Optional<MonitoringSystem> findBySystemId(String systemId);
     Optional<MonitoringSystem> findBySystemIdAndTenantId(String systemId, String tenantId);
     List<MonitoringSystem> findByMonitoringLocationIdAndTenantId(long locationId, String tenantId);
-    List<MonitoringSystem> findByLabelAndTenantId(String label, String tenantId);
 }

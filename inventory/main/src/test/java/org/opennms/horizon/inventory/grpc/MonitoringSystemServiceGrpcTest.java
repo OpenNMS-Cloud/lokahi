@@ -37,13 +37,13 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import com.google.protobuf.Empty;
 import com.google.protobuf.Int64Value;
 import io.grpc.ManagedChannel;
-import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -90,7 +90,7 @@ class MonitoringSystemServiceGrpcTest extends AbstractGrpcUnitTest {
     void testListMonitoringSystem(){
         MonitoringSystemDTO systemDTO = MonitoringSystemDTO.newBuilder()
             .setSystemId(systemId).build();
-        doReturn(Lists.newArrayList(systemDTO)).when(mockService).findByTenantId(tenantId);
+        doReturn(Collections.singletonList(systemDTO)).when(mockService).findByTenantId(tenantId);
         assertThat(stub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createHeaders())).listMonitoringSystem(Empty.newBuilder().build())).isNotNull();
         verify(mockService).findByTenantId(tenantId);
     }
@@ -100,7 +100,7 @@ class MonitoringSystemServiceGrpcTest extends AbstractGrpcUnitTest {
         long locationId = 1L;
         MonitoringSystemDTO systemDTO = MonitoringSystemDTO.newBuilder()
             .setSystemId(systemId).setMonitoringLocationId(locationId).build();
-        doReturn(Lists.newArrayList(systemDTO)).when(mockService).findByMonitoringLocationIdAndTenantId(locationId, tenantId);
+        doReturn(Collections.singletonList(systemDTO)).when(mockService).findByMonitoringLocationIdAndTenantId(locationId, tenantId);
         assertThat(stub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createHeaders())).listMonitoringSystemByLocationId(Int64Value.of(locationId))).isNotNull();
         verify(mockService).findByMonitoringLocationIdAndTenantId(locationId, tenantId);
     }

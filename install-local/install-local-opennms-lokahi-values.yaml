@@ -1,0 +1,94 @@
+Host: onmshs
+OpenNMS:
+  API:
+    Image: opennms/lokahi-rest-server:v0.0.32-dev
+    Resources:
+      Limits:
+        Cpu: "0"
+        Memory: "0"
+      Requests:
+        Cpu: "0"
+        Memory: "0"
+  MetricsProcessor:
+    Image: opennms/lokahi-metrics-processor:v0.0.32-dev
+    Resources:
+      Limits:
+        Cpu: "0"
+        Memory: "0"
+      Requests:
+        Cpu: "0"
+        Memory: "0"
+  UI:
+    Image: opennms/lokahi-ui:v0.0.32-dev
+    Resources:
+      Limits:
+        Cpu: "0"
+        Memory: "0"
+      Requests:
+        Cpu: "0"
+        Memory: "0"
+  Minion:
+    Image: opennms/lokahi-minion:v0.0.32-dev
+    Resources:
+      Limits:
+        Cpu: "0"
+        Memory: "0"
+      Requests:
+        Cpu: "0"
+        Memory: "0"
+  MinionGateway:
+    Image: opennms/lokahi-minion-gateway:v0.0.32-dev
+    Resources:
+      Limits:
+        Cpu: "0"
+        Memory: "0"
+      Requests:
+        Cpu: "0"
+        Memory: "0"
+  Inventory:
+    Image: opennms/lokahi-inventory:v0.0.32-dev
+    Resources:
+      Limits:
+        Cpu: "0"
+        Memory: "0"
+      Requests:
+        Cpu: "0"
+        Memory: "0"
+  Alarm:
+    Image: opennms/lokahi-alarm:v0.0.32-dev
+    Resources:
+      Limits:
+        Cpu: "0"
+        Memory: "0"
+      Requests:
+        Cpu: "0"
+        Memory: "0"
+  Notification: 
+    Image: opennms/lokahi-notification:v0.0.32-dev
+    Resources:
+      Limits:
+        Cpu: "0"
+        Memory: "0"
+      Requests:
+        Cpu: "0"
+        Memory: "0"
+  Events:
+    Image: opennms/lokahi-events:v0.0.32-dev
+    Resources:
+      Limits:
+        Cpu: "0"
+        Memory: "0"
+      Requests:
+        Cpu: "0"
+        Memory: "0"
+Keycloak:
+  Image: opennms/lokahi-keycloak:v0.0.32-dev
+  AdminUsername: admin
+  AdminPassword: admin
+Grafana:
+  Enabled: true
+  Image: opennms/lokahi-grafana:v0.0.32-dev
+Ingress:
+  Enabled: true
+Postgres:
+  Pvc: false

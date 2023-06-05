@@ -28,7 +28,8 @@
 
 package org.opennms.horizon.shared.grpc.common;
 
-import com.swrve.ratelimitedlogger.RateLimitedLog;
+import org.opennms.horizon.shared.constants.GrpcConstants;
+
 import io.grpc.Context;
 import io.grpc.Contexts;
 import io.grpc.Metadata;
@@ -36,11 +37,8 @@ import io.grpc.ServerCall;
 import io.grpc.ServerCallHandler;
 import io.grpc.ServerInterceptor;
 import io.grpc.Status;
-import java.time.Duration;
-import java.util.function.Supplier;
-import lombok.Getter;
+import io.opentelemetry.api.trace.Span;
 import lombok.extern.slf4j.Slf4j;
-import org.opennms.horizon.shared.constants.GrpcConstants;
 
 /**
  * Location resolver which rely on grpc header.
@@ -72,7 +70,12 @@ public class LocationServerInterceptor implements ServerInterceptor {
     }
 
     public String readContextLocation(Context context) {
-        return GrpcConstants.LOCATION_CONTEXT_KEY.get(context);
+        var location = GrpcConstants.LOCATION_CONTEXT_KEY.get(context);
+        var span = Span.current();
+        if (span.isRecording()) {
+            span.setAttribute("location", location);
+        }
+        return location;
     }
 
 

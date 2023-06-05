@@ -1,6 +1,6 @@
 spring:
   application:
-    name: horizon-stream-alert
+    name: lokahi-alert
 
   datasource:
     driver-class-name: org.postgresql.Driver

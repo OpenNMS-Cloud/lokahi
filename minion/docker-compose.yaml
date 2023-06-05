@@ -3,9 +3,9 @@ version: '3.5'
  
 services:
   minion-tenanta:
-    image: docker.io/opennms/horizon-stream-minion:latest
+    image: docker.io/opennms/lokahi-minion:latest
     # If latest is already on your machine, use specific tags to trigger fresh download.
-    # See https://hub.docker.com/r/opennms/horizon-stream-minion/tags for updated list.
+    # See https://hub.docker.com/r/opennms/lokahi-minion/tags for updated list.
     environment:
       TZ: 'America/New_York'
       MINION_ID: 'minion-a'

@@ -24,7 +24,7 @@ Server Version: version.Info{Major:"1", Minor:"24", GitVersion:"v1.24.0", GitCom
 
 Run the local installation script.
 ```
-bash scripts/deploy-horizon-stream.sh
+bash scripts/deploy-lokahi.sh
 ```
 
 ### OpenNMS on Openshift

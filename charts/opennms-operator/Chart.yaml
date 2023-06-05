@@ -2,7 +2,7 @@ apiVersion: v2
 name: opennms-operator
 version: 0.6.0
 description: A Kubernetes operator for deploying and maintaining OpenNMS in the cloud.
-home: https://github.com/OpenNMS/horizon-stream
+home: https://github.com/OpenNMS/lokahi
 maintainers:
   - name: Jeffrey-David Kapp
     email: jkapp@opennms.com

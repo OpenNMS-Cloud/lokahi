@@ -28,17 +28,20 @@
 
 package org.opennms.horizon.datachoices.service;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 import org.opennms.horizon.datachoices.dto.ToggleDataChoicesDTO;
 import org.opennms.horizon.datachoices.model.DataChoices;
 import org.opennms.horizon.datachoices.repository.DataChoicesRepository;
 import org.springframework.stereotype.Component;
 
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.instrumentation.annotations.WithSpan;
 import jakarta.transaction.Transactional;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
@@ -76,11 +79,13 @@ public class DataChoicesService {
         }
     }
 
+    @WithSpan
     public void execute() {
         List<String> tenantIds = repository.findAll().stream()
             .map(DataChoices::getTenantId).distinct().collect(Collectors.toList());
 
         log.info("tenantIds.size() = " + tenantIds.size());
+        Span.current().setAttribute("tenant_ids_count", tenantIds.size());
 
 //        todo: perform queries and send HTTP request to usage-stats-handler
     }

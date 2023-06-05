@@ -77,38 +77,38 @@ create_ssl_cert_secret () {
 # WHEN kind fixes the bug, https://github.com/kubernetes-sigs/kind/issues/3063,
 # THEN changing this to load multiple images in a single command can save a huge amount of data transfer and time
 load_images_to_kind_using_slow_kind () {
-    kind load docker-image --name "$KIND_CLUSTER_NAME" "${IMAGE_PREFIX}/horizon-stream-alert:${IMAGE_TAG}" \
-      "${IMAGE_PREFIX}/horizon-stream-datachoices:${IMAGE_TAG}" \
-      "${IMAGE_PREFIX}/horizon-stream-events:${IMAGE_TAG}" \
-      "${IMAGE_PREFIX}/horizon-stream-grafana:${IMAGE_TAG}" \
-      "${IMAGE_PREFIX}/horizon-stream-inventory:${IMAGE_TAG}" \
-      "${IMAGE_PREFIX}/horizon-stream-keycloak:${IMAGE_TAG}" \
-      "${IMAGE_PREFIX}/horizon-stream-metrics-processor:${IMAGE_TAG}" \
-      "${IMAGE_PREFIX}/horizon-stream-minion:${IMAGE_TAG}" \
-      "${IMAGE_PREFIX}/horizon-stream-minion-gateway:${IMAGE_TAG}" \
-      "${IMAGE_PREFIX}/horizon-stream-minion-certificate-manager:${IMAGE_TAG}" \
-      "${IMAGE_PREFIX}/horizon-stream-minion-certificate-verifier:${IMAGE_TAG}" \
-      "${IMAGE_PREFIX}/horizon-stream-notification:${IMAGE_TAG}" \
-      "${IMAGE_PREFIX}/horizon-stream-rest-server:${IMAGE_TAG}" \
-      "${IMAGE_PREFIX}/horizon-stream-ui:${IMAGE_TAG}"
+    kind load docker-image --name "$KIND_CLUSTER_NAME" "${IMAGE_PREFIX}/lokahi-alert:${IMAGE_TAG}" \
+      "${IMAGE_PREFIX}/lokahi-datachoices:${IMAGE_TAG}" \
+      "${IMAGE_PREFIX}/lokahi-events:${IMAGE_TAG}" \
+      "${IMAGE_PREFIX}/lokahi-grafana:${IMAGE_TAG}" \
+      "${IMAGE_PREFIX}/lokahi-inventory:${IMAGE_TAG}" \
+      "${IMAGE_PREFIX}/lokahi-keycloak:${IMAGE_TAG}" \
+      "${IMAGE_PREFIX}/lokahi-metrics-processor:${IMAGE_TAG}" \
+      "${IMAGE_PREFIX}/lokahi-minion:${IMAGE_TAG}" \
+      "${IMAGE_PREFIX}/lokahi-minion-gateway:${IMAGE_TAG}" \
+      "${IMAGE_PREFIX}/lokahi-minion-certificate-manager:${IMAGE_TAG}" \
+      "${IMAGE_PREFIX}/lokahi-minion-certificate-verifier:${IMAGE_TAG}" \
+      "${IMAGE_PREFIX}/lokahi-notification:${IMAGE_TAG}" \
+      "${IMAGE_PREFIX}/lokahi-rest-server:${IMAGE_TAG}" \
+      "${IMAGE_PREFIX}/lokahi-ui:${IMAGE_TAG}"
 }
 
 pull_docker_images () {
 	for image in \
-		"${IMAGE_PREFIX}/horizon-stream-alert:${IMAGE_TAG}" \
-		"${IMAGE_PREFIX}/horizon-stream-datachoices:${IMAGE_TAG}" \
-		"${IMAGE_PREFIX}/horizon-stream-events:${IMAGE_TAG}" \
-		"${IMAGE_PREFIX}/horizon-stream-grafana:${IMAGE_TAG}" \
-		"${IMAGE_PREFIX}/horizon-stream-inventory:${IMAGE_TAG}" \
-		"${IMAGE_PREFIX}/horizon-stream-keycloak:${IMAGE_TAG}" \
-		"${IMAGE_PREFIX}/horizon-stream-metrics-processor:${IMAGE_TAG}" \
-		"${IMAGE_PREFIX}/horizon-stream-minion-certificate-manager:${IMAGE_TAG}" \
-		"${IMAGE_PREFIX}/horizon-stream-minion-certificate-verifier:${IMAGE_TAG}" \
-		"${IMAGE_PREFIX}/horizon-stream-minion:${IMAGE_TAG}" \
-		"${IMAGE_PREFIX}/horizon-stream-minion:${IMAGE_TAG}" \
-		"${IMAGE_PREFIX}/horizon-stream-notification:${IMAGE_TAG}" \
-		"${IMAGE_PREFIX}/horizon-stream-rest-server:${IMAGE_TAG}" \
-		"${IMAGE_PREFIX}/horizon-stream-ui:${IMAGE_TAG}"
+		"${IMAGE_PREFIX}/lokahi-alert:${IMAGE_TAG}" \
+		"${IMAGE_PREFIX}/lokahi-datachoices:${IMAGE_TAG}" \
+		"${IMAGE_PREFIX}/lokahi-events:${IMAGE_TAG}" \
+		"${IMAGE_PREFIX}/lokahi-grafana:${IMAGE_TAG}" \
+		"${IMAGE_PREFIX}/lokahi-inventory:${IMAGE_TAG}" \
+		"${IMAGE_PREFIX}/lokahi-keycloak:${IMAGE_TAG}" \
+		"${IMAGE_PREFIX}/lokahi-metrics-processor:${IMAGE_TAG}" \
+		"${IMAGE_PREFIX}/lokahi-minion-certificate-manager:${IMAGE_TAG}" \
+		"${IMAGE_PREFIX}/lokahi-minion-certificate-verifier:${IMAGE_TAG}" \
+		"${IMAGE_PREFIX}/lokahi-minion:${IMAGE_TAG}" \
+		"${IMAGE_PREFIX}/lokahi-minion:${IMAGE_TAG}" \
+		"${IMAGE_PREFIX}/lokahi-notification:${IMAGE_TAG}" \
+		"${IMAGE_PREFIX}/lokahi-rest-server:${IMAGE_TAG}" \
+		"${IMAGE_PREFIX}/lokahi-ui:${IMAGE_TAG}"
 	do
 		if docker inspect "${image}" >/dev/null
 		then
@@ -121,20 +121,20 @@ pull_docker_images () {
 
 save_part_of_normal_docker_image_load () {
 	docker save \
-		"${IMAGE_PREFIX}/horizon-stream-alert:${IMAGE_TAG}" \
-		"${IMAGE_PREFIX}/horizon-stream-datachoices:${IMAGE_TAG}" \
-		"${IMAGE_PREFIX}/horizon-stream-events:${IMAGE_TAG}" \
-		"${IMAGE_PREFIX}/horizon-stream-grafana:${IMAGE_TAG}" \
-		"${IMAGE_PREFIX}/horizon-stream-inventory:${IMAGE_TAG}" \
-		"${IMAGE_PREFIX}/horizon-stream-keycloak:${IMAGE_TAG}" \
-		"${IMAGE_PREFIX}/horizon-stream-metrics-processor:${IMAGE_TAG}" \
-		"${IMAGE_PREFIX}/horizon-stream-minion-gateway:${IMAGE_TAG}" \
-		"${IMAGE_PREFIX}/horizon-stream-minion-certificate-manager:${IMAGE_TAG}" \
-		"${IMAGE_PREFIX}/horizon-stream-minion-certificate-verifier:${IMAGE_TAG}" \
-		"${IMAGE_PREFIX}/horizon-stream-minion:${IMAGE_TAG}" \
-		"${IMAGE_PREFIX}/horizon-stream-notification:${IMAGE_TAG}" \
-		"${IMAGE_PREFIX}/horizon-stream-rest-server:${IMAGE_TAG}" \
-		"${IMAGE_PREFIX}/horizon-stream-ui:${IMAGE_TAG}"
+		"${IMAGE_PREFIX}/lokahi-alert:${IMAGE_TAG}" \
+		"${IMAGE_PREFIX}/lokahi-datachoices:${IMAGE_TAG}" \
+		"${IMAGE_PREFIX}/lokahi-events:${IMAGE_TAG}" \
+		"${IMAGE_PREFIX}/lokahi-grafana:${IMAGE_TAG}" \
+		"${IMAGE_PREFIX}/lokahi-inventory:${IMAGE_TAG}" \
+		"${IMAGE_PREFIX}/lokahi-keycloak:${IMAGE_TAG}" \
+		"${IMAGE_PREFIX}/lokahi-metrics-processor:${IMAGE_TAG}" \
+		"${IMAGE_PREFIX}/lokahi-minion-gateway:${IMAGE_TAG}" \
+		"${IMAGE_PREFIX}/lokahi-minion-certificate-manager:${IMAGE_TAG}" \
+		"${IMAGE_PREFIX}/lokahi-minion-certificate-verifier:${IMAGE_TAG}" \
+		"${IMAGE_PREFIX}/lokahi-minion:${IMAGE_TAG}" \
+		"${IMAGE_PREFIX}/lokahi-notification:${IMAGE_TAG}" \
+		"${IMAGE_PREFIX}/lokahi-rest-server:${IMAGE_TAG}" \
+		"${IMAGE_PREFIX}/lokahi-ui:${IMAGE_TAG}"
 }
 
 load_part_of_normal_docker_image_load () {
@@ -162,23 +162,23 @@ install_helm_chart_custom_images () {
   echo ________________Installing Horizon Stream________________
   echo
 
-  helm upgrade -i horizon-stream ./../charts/opennms \
-  -f ./tmp/install-local-opennms-horizon-stream-custom-images-values.yaml \
+  helm upgrade -i lokahi ./../charts/opennms \
+  -f ./tmp/install-local-opennms-lokahi-custom-images-values.yaml \
   --namespace $NAMESPACE \
-  --set OpenNMS.Alert.Image=${IMAGE_PREFIX}/horizon-stream-alert:${IMAGE_TAG} \
-  --set OpenNMS.DataChoices.Image=${IMAGE_PREFIX}/horizon-stream-datachoices:${IMAGE_TAG} \
-  --set OpenNMS.Events.Image=${IMAGE_PREFIX}/horizon-stream-events:${IMAGE_TAG} \
-  --set Grafana.Image=${IMAGE_PREFIX}/horizon-stream-grafana:${IMAGE_TAG} \
-  --set OpenNMS.Inventory.Image=${IMAGE_PREFIX}/horizon-stream-inventory:${IMAGE_TAG} \
-  --set Keycloak.Image=${IMAGE_PREFIX}/horizon-stream-keycloak:${IMAGE_TAG} \
-  --set OpenNMS.MetricsProcessor.Image=${IMAGE_PREFIX}/horizon-stream-metrics-processor:${IMAGE_TAG} \
-  --set OpenNMS.Minion.Image=${IMAGE_PREFIX}/horizon-stream-minion:${IMAGE_TAG} \
-  --set OpenNMS.MinionGateway.Image=${IMAGE_PREFIX}/horizon-stream-minion-gateway:${IMAGE_TAG} \
-  --set OpenNMS.MinionCertificateManager.Image=${IMAGE_PREFIX}/horizon-stream-minion-certificate-manager:${IMAGE_TAG} \
-  --set OpenNMS.MinionCertificateVerifier.Image=${IMAGE_PREFIX}/horizon-stream-minion-certificate-verifier:${IMAGE_TAG} \
-  --set OpenNMS.Notification.Image=${IMAGE_PREFIX}/horizon-stream-notification:${IMAGE_TAG} \
-  --set OpenNMS.API.Image=${IMAGE_PREFIX}/horizon-stream-rest-server:${IMAGE_TAG} \
-  --set OpenNMS.UI.Image=${IMAGE_PREFIX}/horizon-stream-ui:${IMAGE_TAG} \
+  --set OpenNMS.Alert.Image=${IMAGE_PREFIX}/lokahi-alert:${IMAGE_TAG} \
+  --set OpenNMS.DataChoices.Image=${IMAGE_PREFIX}/lokahi-datachoices:${IMAGE_TAG} \
+  --set OpenNMS.Events.Image=${IMAGE_PREFIX}/lokahi-events:${IMAGE_TAG} \
+  --set Grafana.Image=${IMAGE_PREFIX}/lokahi-grafana:${IMAGE_TAG} \
+  --set OpenNMS.Inventory.Image=${IMAGE_PREFIX}/lokahi-inventory:${IMAGE_TAG} \
+  --set Keycloak.Image=${IMAGE_PREFIX}/lokahi-keycloak:${IMAGE_TAG} \
+  --set OpenNMS.MetricsProcessor.Image=${IMAGE_PREFIX}/lokahi-metrics-processor:${IMAGE_TAG} \
+  --set OpenNMS.Minion.Image=${IMAGE_PREFIX}/lokahi-minion:${IMAGE_TAG} \
+  --set OpenNMS.MinionGateway.Image=${IMAGE_PREFIX}/lokahi-minion-gateway:${IMAGE_TAG} \
+  --set OpenNMS.MinionCertificateManager.Image=${IMAGE_PREFIX}/lokahi-minion-certificate-manager:${IMAGE_TAG} \
+  --set OpenNMS.MinionCertificateVerifier.Image=${IMAGE_PREFIX}/lokahi-minion-certificate-verifier:${IMAGE_TAG} \
+  --set OpenNMS.Notification.Image=${IMAGE_PREFIX}/lokahi-notification:${IMAGE_TAG} \
+  --set OpenNMS.API.Image=${IMAGE_PREFIX}/lokahi-rest-server:${IMAGE_TAG} \
+  --set OpenNMS.UI.Image=${IMAGE_PREFIX}/lokahi-ui:${IMAGE_TAG} \
   --wait --timeout "${TIMEOUT}"
 
   echo Helm chart installation completed
@@ -205,10 +205,10 @@ cat install-local-onms-instance-custom-images.yaml | \
   sed "s/onmshs/$DOMAIN/g" | sed "s/\$NAMESPACE/$NAMESPACE/g" > tmp/install-local-onms-instance-custom-images.yaml
 cat ./../charts/opennms/values.yaml | \
   sed "s/onmshs/$DOMAIN/g" | sed "s/\$NAMESPACE/$NAMESPACE/g" > tmp/values.yaml
-cat install-local-opennms-horizon-stream-values.yaml | \
-  sed "s/onmshs/$DOMAIN/g" | sed "s/\$NAMESPACE/$NAMESPACE/g" > tmp/install-local-opennms-horizon-stream-values.yaml
-cat install-local-opennms-horizon-stream-custom-images-values.yaml | \
-  sed "s/onmshs/$DOMAIN/g" | sed "s/\$NAMESPACE/$NAMESPACE/g" > tmp/install-local-opennms-horizon-stream-custom-images-values.yaml
+cat install-local-opennms-lokahi-values.yaml | \
+  sed "s/onmshs/$DOMAIN/g" | sed "s/\$NAMESPACE/$NAMESPACE/g" > tmp/install-local-opennms-lokahi-values.yaml
+cat install-local-opennms-lokahi-custom-images-values.yaml | \
+  sed "s/onmshs/$DOMAIN/g" | sed "s/\$NAMESPACE/$NAMESPACE/g" > tmp/install-local-opennms-lokahi-custom-images-values.yaml
 
 # Select Context, Create Cluster, and Deploy
 if [ $CONTEXT == "local" ]; then
@@ -221,7 +221,7 @@ if [ $CONTEXT == "local" ]; then
   echo
   echo ________________Installing Horizon Stream________________
   echo
-  helm upgrade -i horizon-stream ./../charts/opennms -f ./tmp/install-local-opennms-horizon-stream-values.yaml --namespace $NAMESPACE --wait --timeout "${TIMEOUT}"
+  helm upgrade -i lokahi ./../charts/opennms -f ./tmp/install-local-opennms-lokahi-values.yaml --namespace $NAMESPACE --wait --timeout "${TIMEOUT}"
   if [ $? -ne 0 ]; then exit; fi
 
   cluster_ready_check
@@ -257,7 +257,7 @@ elif [ "$CONTEXT" == "cicd" ]; then
   install_helm_chart_custom_images
 
   # output values from the release to help with debugging pipelines
-  helm get values horizon-stream --namespace $NAMESPACE
+  helm get values lokahi --namespace $NAMESPACE
 
   if [ $? -ne 0 ]; then exit; fi
 
@@ -268,7 +268,7 @@ elif [ $CONTEXT == "existing-k8s" ]; then
   echo
   echo ________________Installing Horizon Stream________________
   echo
-  helm upgrade -i horizon-stream ./../charts/opennms -f ./tmp/install-local-opennms-horizon-stream-values.yaml --namespace $NAMESPACE --create-namespace --wait --timeout "${TIMEOUT}"
+  helm upgrade -i lokahi ./../charts/opennms -f ./tmp/install-local-opennms-lokahi-values.yaml --namespace $NAMESPACE --create-namespace --wait --timeout "${TIMEOUT}"
   if [ $? -ne 0 ]; then exit; fi
 
   cluster_ready_check

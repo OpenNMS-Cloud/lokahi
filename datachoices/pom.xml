@@ -17,8 +17,8 @@
     <artifactId>datachoices</artifactId>
 
     <properties>
-        <application.docker.image.name>opennms/horizon-stream-datachoices</application.docker.image.name>
-        <sonar.projectKey>opennms_horizon-stream_datachoices</sonar.projectKey>
+        <application.docker.image.name>opennms/lokahi-datachoices</application.docker.image.name>
+        <sonar.projectKey>opennms_lokahi_datachoices</sonar.projectKey>
     </properties>
 
     <dependencyManagement>
@@ -225,6 +225,10 @@
             <artifactId>jna</artifactId>
             <version>5.12.1</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.opentelemetry.instrumentation</groupId>
+            <artifactId>opentelemetry-instrumentation-annotations</artifactId>
         </dependency>
     </dependencies>
     <build>

@@ -28,13 +28,12 @@
 
 package org.opennms.miniongateway.grpc.server.heartbeat;
 
-import com.swrve.ratelimitedlogger.RateLimitedLog;
+import java.time.Duration;
+
 import org.apache.kafka.clients.producer.ProducerRecord;
-import org.apache.kafka.common.header.internals.RecordHeader;
 import org.opennms.horizon.grpc.heartbeat.contract.HeartbeatMessage;
 import org.opennms.horizon.grpc.heartbeat.contract.TenantLocationSpecificHeartbeatMessage;
 import org.opennms.horizon.grpc.heartbeat.contract.mapper.TenantLocationSpecificHeartbeatMessageMapper;
-import org.opennms.horizon.shared.constants.GrpcConstants;
 import org.opennms.horizon.shared.grpc.common.LocationServerInterceptor;
 import org.opennms.horizon.shared.grpc.common.TenantIDGrpcServerInterceptor;
 import org.opennms.horizon.shared.ipc.sink.api.MessageConsumer;
@@ -42,12 +41,13 @@ import org.opennms.horizon.shared.ipc.sink.api.SinkModule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
-import java.time.Duration;
+import com.swrve.ratelimitedlogger.RateLimitedLog;
+
+import io.opentelemetry.api.trace.Span;
 
 /**
  * Forwarder of Heartbeat messages - received via GRPC and forwarded to Kafka.
@@ -92,6 +92,7 @@ public class HeartbeatKafkaForwarder implements MessageConsumer<HeartbeatMessage
         String location = locationServerInterceptor.readCurrentContextLocation();
 
         logger.info("Received heartbeat; sending to Kafka: tenant-id={}; location={}; kafka-topic={}; message={}", tenantId, location, kafkaTopic, heartbeatMessage);
+        Span.current().setAttribute("message", heartbeatMessage.toString());
 
         TenantLocationSpecificHeartbeatMessage mapped = tenantLocationSpecificHeartbeatMessageMapper.mapBareToTenanted(tenantId, location, heartbeatMessage);
 

@@ -21,8 +21,8 @@
     <packaging>pom</packaging>
 
     <properties>
-        <application.docker.image.name>opennms/horizon-stream-events</application.docker.image.name>
-        <sonar.projectKey>opennms_horizon-stream_events</sonar.projectKey>
+        <application.docker.image.name>opennms/lokahi-events</application.docker.image.name>
+        <sonar.projectKey>opennms_lokahi_events</sonar.projectKey>
     </properties>
 
     <modules>

@@ -19,7 +19,7 @@
     <packaging>pom</packaging>
 
     <properties>
-        <sonar.projectKey>opennms_horizon-stream_shared-lib</sonar.projectKey>
+        <sonar.projectKey>opennms_lokahi_shared-lib</sonar.projectKey>
     </properties>
 
     <modules>

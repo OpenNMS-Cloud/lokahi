@@ -1,0 +1,421 @@
+Dockerhub repos created:
+* lokahi-alert
+* lokahi-datachoices
+* lokahi-events
+* lokahi-grafana
+* lokahi-inventory
+* lokahi-keycloak
+* lokahi-metrics-processor
+* lokahi-minion-gateway
+* lokahi-minion-certificate-manager
+* lokahi-minion-certificate-verifier
+* lokahi-notification
+* lokahi-rest-server
+* lokahi-ui
+
+The following file names have been changed, run from: $ find . -name '*horizon-stream*'
+* ./external-it/external-horizon-stream-it
+* ./external-it/external-horizon-stream-it/src/main/resources/org/opennms/horizon/it/horizon-stream.feature
+  * The 'horizon' in this, have not updated, need to do a separate search for just horizon refs.
+* ./operator/scripts/deploy-horizon-stream.sh
+* ./keycloak-ui/themes/horizon-stream
+* ./install-local/install-local-opennms-horizon-stream-values.yaml
+* ./install-local/install-local-opennms-horizon-stream-custom-images-values.yaml
+
+Running the following on Mac OS: 
+* $ grep -rl 'horizon-stream' * | grep -v 'target' | grep -v 'Binary file' | grep -v 'cucumber' | grep -v '.swp' | xargs sed -i '' -e 's/horizon-stream/lokahi/g'
+* $ git checkout charts/packaged/index.yaml
+  * Keep the original, it refs old versions.
+* $ git checkout CHANGELOG/
+  * This tracks history, keep this.
+* Also, had to reset the sonar keys, these would not point to the correct location.
+
+# Sonar
+operator/sonar-project.properties:2:sonar.projectKey=opennms_horizon-stream_operator
+rest-server/pom.xml:27:        <sonar.projectKey>opennms_horizon-stream_bff</sonar.projectKey>
+shared-lib/pom.xml:22:        <sonar.projectKey>opennms_horizon-stream_shared-lib</sonar.projectKey>
+ui/sonar-project.properties:2:sonar.projectKey=opennms_horizon-stream_ui
+notifications/pom.xml:22:        <sonar.projectKey>opennms_horizon-stream_notification</sonar.projectKey>
+minion-gateway/pom.xml:26:        <sonar.projectKey>opennms_horizon-stream_minion-gateway</sonar.projectKey>
+minion/pom.xml:44:        <sonar.projectKey>opennms_horizon-stream_minion</sonar.projectKey>
+metrics-processor/pom.xml:24:        <sonar.projectKey>opennms_horizon-stream_metrics-processor</sonar.projectKey>
+inventory/pom.xml:21:        <sonar.projectKey>opennms_horizon-stream_inventory</sonar.projectKey>
+events/pom.xml:25:        <sonar.projectKey>opennms_horizon-stream_events</sonar.projectKey>
+datachoices/pom.xml:21:        <sonar.projectKey>opennms_horizon-stream_datachoices</sonar.projectKey>
+alert/pom.xml:24:        <sonar.projectKey>opennms_horizon-stream_alert</sonar.projectKey>
+
+README.md:5:See [Getting Started on the Wiki](https://github.com/OpenNMS/horizon-stream/wiki/Getting-Started) for development instructions.
+
+# IMPORTANT: Create or add correct privileges to the github repos created from the pipeline. These were added automatically, the permissions from fabric-services has been added.
+# The following is done, but check the github private repos.
+.github/pull_request_template.md:11:* [ ] Follows Horizon Stream's [development guidelines.](https://github.com/OpenNMS/horizon-stream/wiki/Development-Guidelines)
+.github/pull_request_template.md:14:* [ ] Includes [appropriate tests.](https://github.com/OpenNMS/horizon-stream/wiki/Test-Strategy)
+.github/workflows/feature-minion.yml:24:  IMAGE: ${{ inputs.image || 'horizon-stream-minion' }}
+.github/workflows/feature-alert.yml:24:  IMAGE: ${{ inputs.image || 'horizon-stream-alert' }}
+.github/workflows/feature-metrics-processor.yml:24:  IMAGE: ${{ inputs.image || 'horizon-stream-metrics-processor' }}
+.github/workflows/feature-minion-gateway.yml:24:  IMAGE: ${{ inputs.image || 'horizon-stream-minion-gateway' }}
+.github/workflows/release.yml:126:            --tag opennms/horizon-stream-minion:latest \
+.github/workflows/release.yml:127:            --tag opennms/horizon-stream-minion:${{ env.RELEASE_TAG }} \
+.github/workflows/release.yml:128:            docker-assembly/target/docker/opennms/horizon-stream-minion/latest/build/ \
+.github/workflows/release.yml:141:          'horizon-stream-alert',
+.github/workflows/release.yml:142:          'horizon-stream-datachoices',
+.github/workflows/release.yml:143:          'horizon-stream-events',
+.github/workflows/release.yml:144:          'horizon-stream-grafana',
+.github/workflows/release.yml:145:          'horizon-stream-inventory',
+.github/workflows/release.yml:146:          'horizon-stream-keycloak',
+.github/workflows/release.yml:147:          'horizon-stream-metrics-processor',
+.github/workflows/release.yml:148:          'horizon-stream-minion-gateway',
+.github/workflows/release.yml:149:          'horizon-stream-minion-certificate-manager',
+.github/workflows/release.yml:150:          'horizon-stream-minion-certificate-verifier',
+.github/workflows/release.yml:151:          'horizon-stream-notification',
+.github/workflows/release.yml:152:          'horizon-stream-rest-server',
+.github/workflows/release.yml:153:          'horizon-stream-ui',
+.github/workflows/feature-notifications.yml:24:  IMAGE: ${{ inputs.image || 'horizon-stream-notification' }}
+.github/workflows/feature-inventory.yml:24:  IMAGE: ${{ inputs.image || 'horizon-stream-inventory' }}
+.github/workflows/feature-events.yml:24:  IMAGE: ${{ inputs.image || 'horizon-stream-events' }}
+.github/workflows/feature-operator.yml:23:  IMAGE: ${{ inputs.image || 'horizon-stream-operator' }}
+.github/workflows/develop.yml:209:          KEYCLOAK_CLIENT_ID=horizon-stream
+.github/workflows/develop.yml:219:          java -jar "external-horizon-stream-it/target/external-horizon-stream-it-${PROJECT_VERSION}.jar"
+.github/workflows/develop.yml:222:          ##for i in $(jq '.[0].elements[].steps[].result.status' external-it/external-horizon-stream-it/cucumber.reports/cucumber-report.json);do
+.github/workflows/develop.yml:278:          git remote add hs https://github.com/OpenNMS-Cloud/horizon-stream.git
+.github/workflows/feature-minion-certificate-manager.yml:24:  IMAGE: ${{ inputs.image || 'horizon-stream-minion-certificate-manager' }}
+.github/workflows/feature-rest-server.yml:24:  IMAGE: ${{ inputs.image || 'horizon-stream-rest-server' }}
+.github/workflows/feature-ui.yml:24:  IMAGE: ${{ inputs.image || 'horizon-stream-ui' }}
+.github/workflows/feature-keycloak-ui.yml:24:  IMAGE: ${{ inputs.image-name || 'horizon-stream-keycloak' }}
+.github/workflows/feature-datachoices.yml:24:  IMAGE: ${{ inputs.image || 'horizon-stream-datachoices' }}
+.github/workflows/feature-minion-certificate-verifier.yml:24:  IMAGE: ${{ inputs.image || 'horizon-stream-minion-certificate-verifier' }}
+.github/workflows/feature-grafana.yml:24:  IMAGE: ${{ inputs.image || 'horizon-stream-grafana' }}
+
+Tiltfile:15:## 11 = horizon-stream-core
+Tiltfile:16:## 12 = horizon-stream-minion
+Tiltfile:17:## 13 = horizon-stream-api
+Tiltfile:19:## 15 = horizon-stream-notification
+Tiltfile:20:## 16 = horizon-stream-minion-gateway
+Tiltfile:21:## 17 = horizon-stream-ui
+Tiltfile:30:## 29 = horizon-stream-inventory
+Tiltfile:210:    'opennms/horizon-stream-notification',
+Tiltfile:219:    'opennms/horizon-stream-ui',
+Tiltfile:238:    'opennms/horizon-stream-rest-server',
+Tiltfile:248:    'opennms/horizon-stream-inventory',
+Tiltfile:257:    'opennms/horizon-stream-alert',
+Tiltfile:266:    'opennms/horizon-stream-metrics-processor',
+Tiltfile:275:    'opennms/horizon-stream-events',
+Tiltfile:284:    'opennms/horizon-stream-minion-gateway',
+Tiltfile:293:    'opennms/horizon-stream-datachoices',
+Tiltfile:301:    'opennms/horizon-stream-minion',
+Tiltfile:318:    'opennms/horizon-stream-minion-certificate-manager',
+Tiltfile:328:    'opennms/horizon-stream-minion-certificate-verifier',
+Tiltfile:338:    'opennms/horizon-stream-keycloak',
+Tiltfile:359:    'opennms/horizon-stream-grafana',
+
+build-tools/basic/run-cluster.sh:4:  --set Grafana.Image=opennms/horizon-stream-grafana:local-basic \
+build-tools/basic/run-cluster.sh:5:  --set Keycloak.Image=opennms/horizon-stream-keycloak:local-basic \
+build-tools/basic/run-cluster.sh:6:  --set OpenNMS.API.Image=opennms/horizon-stream-rest-server:local-basic \
+build-tools/basic/run-cluster.sh:7:  --set OpenNMS.Alert.Image=opennms/horizon-stream-alert:local-basic \
+build-tools/basic/run-cluster.sh:8:  --set OpenNMS.DataChoices.Image=opennms/horizon-stream-datachoices:local-basic \
+build-tools/basic/run-cluster.sh:9:  --set OpenNMS.Events.Image=opennms/horizon-stream-events:local-basic \
+build-tools/basic/run-cluster.sh:10:  --set OpenNMS.Inventory.Image=opennms/horizon-stream-inventory:local-basic \
+build-tools/basic/run-cluster.sh:11:  --set OpenNMS.MetricsProcessor.Image=opennms/horizon-stream-metrics-processor:local-basic \
+build-tools/basic/run-cluster.sh:12:  --set OpenNMS.Minion.Image=opennms/horizon-stream-minion:local-basic \
+build-tools/basic/run-cluster.sh:13:  --set OpenNMS.MinionGateway.Image=opennms/horizon-stream-minion-gateway:local-basic \
+build-tools/basic/run-cluster.sh:14:  --set OpenNMS.Notification.Image=opennms/horizon-stream-notification:local-basic \
+build-tools/basic/run-cluster.sh:15:  --set OpenNMS.MinionCertificateManager.Image=opennms/horizon-stream-minion-certificate-manager:local-basic \
+build-tools/basic/run-cluster.sh:16:  --set OpenNMS.MinionCertificateVerifier.Image=opennms/horizon-stream-minion-certificate-verifier:local-basic \
+build-tools/basic/run-cluster.sh:17:  --set OpenNMS.UI.Image=opennms/horizon-stream-ui:local-basic \
+build-tools/basic/push-images-to-kind.sh:26:kind load docker-image "opennms/horizon-stream-grafana:local-basic"
+build-tools/basic/push-images-to-kind.sh:27:kind load docker-image "opennms/horizon-stream-minion:local-basic"
+build-tools/basic/push-images-to-kind.sh:28:kind load docker-image "opennms/horizon-stream-ui:local-basic"
+build-tools/basic/push-images-to-kind.sh:29:kind load docker-image "opennms/horizon-stream-keycloak:local-basic"
+build-tools/basic/push-images-to-kind.sh:30:kind load docker-image "opennms/horizon-stream-inventory:local-basic"
+build-tools/basic/push-images-to-kind.sh:31:kind load docker-image "opennms/horizon-stream-alert:local-basic"
+build-tools/basic/push-images-to-kind.sh:32:kind load docker-image "opennms/horizon-stream-notification:local-basic"
+build-tools/basic/push-images-to-kind.sh:33:kind load docker-image "opennms/horizon-stream-rest-server:local-basic"
+build-tools/basic/push-images-to-kind.sh:34:kind load docker-image "opennms/horizon-stream-minion-gateway:local-basic"
+build-tools/basic/push-images-to-kind.sh:35:kind load docker-image "opennms/horizon-stream-minion-certificate-manager:local-basic"
+build-tools/basic/push-images-to-kind.sh:36:kind load docker-image "opennms/horizon-stream-minion-certificate-verifier:local-basic"
+build-tools/basic/push-images-to-kind.sh:37:kind load docker-image "opennms/horizon-stream-metrics-processor:local-basic"
+build-tools/basic/push-images-to-kind.sh:38:kind load docker-image "opennms/horizon-stream-events:local-basic"
+build-tools/basic/push-images-to-kind.sh:39:kind load docker-image "opennms/horizon-stream-datachoices:local-basic"
+build-tools/basic/push-images-to-kind.sh:46:# 		"opennms/horizon-stream-alert:local-basic" \
+build-tools/basic/push-images-to-kind.sh:47:# 		"opennms/horizon-stream-datachoices:local-basic" \
+build-tools/basic/push-images-to-kind.sh:48:# 		"opennms/horizon-stream-events:local-basic" \
+build-tools/basic/push-images-to-kind.sh:49:# 		"opennms/horizon-stream-grafana:local-basic" \
+build-tools/basic/push-images-to-kind.sh:50:# 		"opennms/horizon-stream-inventory:local-basic" \
+build-tools/basic/push-images-to-kind.sh:51:# 		"opennms/horizon-stream-keycloak:local-basic" \
+build-tools/basic/push-images-to-kind.sh:52:# 		"opennms/horizon-stream-metrics-processor:local-basic" \
+build-tools/basic/push-images-to-kind.sh:53:# 		"opennms/horizon-stream-minion-certificate-manager:local-basic" \
+build-tools/basic/push-images-to-kind.sh:54:# 		"opennms/horizon-stream-minion-certificate-verifier:local-basic" \
+build-tools/basic/push-images-to-kind.sh:55:# 		"opennms/horizon-stream-minion-gateway:local-basic" \
+build-tools/basic/push-images-to-kind.sh:56:# 		"opennms/horizon-stream-minion:local-basic" \
+build-tools/basic/push-images-to-kind.sh:57:# 		"opennms/horizon-stream-notification:local-basic" \
+build-tools/basic/push-images-to-kind.sh:58:# 		"opennms/horizon-stream-rest-server:local-basic" \
+build-tools/basic/push-images-to-kind.sh:59:# 		"opennms/horizon-stream-ui:local-basic"
+build-tools/basic/mk-docker-images.sh:5:## opennms/horizon-stream-api
+build-tools/basic/mk-docker-images.sh:6:## opennms/horizon-stream-keycloak
+build-tools/basic/mk-docker-images.sh:7:## opennms/horizon-stream-minion
+build-tools/basic/mk-docker-images.sh:8:## opennms/horizon-stream-minion-gateway
+build-tools/basic/mk-docker-images.sh:9:## opennms/horizon-stream-notification
+build-tools/basic/mk-docker-images.sh:10:## opennms/horizon-stream-ui
+build-tools/basic/mk-docker-images.sh:21:	mvn -f minion/docker-assembly install -Pbuild-docker-images-enabled -DskipTests -Dapplication.docker.image=opennms/horizon-stream-minion:local-basic -Ddocker.skipPush=true
+build-tools/basic/mk-docker-images.sh:27:	mvn -f minion-gateway/main install -Djib.container.creationTime=USE_CURRENT_TIMESTAMP -Dapplication.docker.image=opennms/horizon-stream-minion-gateway:local-basic
+build-tools/basic/mk-docker-images.sh:33:	mvn -f minion-certificate-manager/main install -Djib.container.creationTime=USE_CURRENT_TIMESTAMP -Dapplication.docker.image=opennms/horizon-stream-minion-certificate-manager:local-basic
+build-tools/basic/mk-docker-images.sh:39:	mvn -f minion-certificate-verifier/main install -Djib.container.creationTime=USE_CURRENT_TIMESTAMP -Dapplication.docker.image=opennms/horizon-stream-minion-certificate-verifier:local-basic
+build-tools/basic/mk-docker-images.sh:45:	mvn -f rest-server install -Djib.container.creationTime=USE_CURRENT_TIMESTAMP -Dapplication.docker.image=opennms/horizon-stream-rest-server:local-basic
+build-tools/basic/mk-docker-images.sh:51:	mvn -f inventory install -Djib.container.creationTime=USE_CURRENT_TIMESTAMP -Dapplication.docker.image=opennms/horizon-stream-inventory:local-basic
+build-tools/basic/mk-docker-images.sh:57:	mvn -f alert install -Djib.container.creationTime=USE_CURRENT_TIMESTAMP -Dapplication.docker.image=opennms/horizon-stream-alert:local-basic
+build-tools/basic/mk-docker-images.sh:63:	mvn -f notifications install -Djib.container.creationTime=USE_CURRENT_TIMESTAMP -Dapplication.docker.image=opennms/horizon-stream-notification:local-basic
+build-tools/basic/mk-docker-images.sh:69:	mvn -f metrics-processor install -Djib.container.creationTime=USE_CURRENT_TIMESTAMP -Dapplication.docker.image=opennms/horizon-stream-metrics-processor:local-basic
+build-tools/basic/mk-docker-images.sh:75:	mvn -f events install -Djib.container.creationTime=USE_CURRENT_TIMESTAMP -Dapplication.docker.image=opennms/horizon-stream-events:local-basic
+build-tools/basic/mk-docker-images.sh:81:	mvn -f datachoices install -Djib.container.creationTime=USE_CURRENT_TIMESTAMP -Dapplication.docker.image=opennms/horizon-stream-datachoices:local-basic
+build-tools/basic/mk-docker-images.sh:89:		-t opennms/horizon-stream-keycloak:local-basic \
+build-tools/basic/mk-docker-images.sh:96:	docker build -t opennms/horizon-stream-grafana:local-basic grafana
+build-tools/basic/mk-docker-images.sh:106:		-t opennms/horizon-stream-ui:local-basic \
+
+charts/opennms/templates/keycloak/keycloak-realm-configmap-static.yaml:13:      "loginTheme": "horizon-stream",
+charts/opennms/templates/keycloak/keycloak-realm-configmap-static.yaml:14:      "emailTheme": "horizon-stream",
+charts/opennms/templates/keycloak/keycloak-realm-configmap-static.yaml:19:          "clientId": "horizon-stream",
+charts/opennms/values.yaml:19:    Image: opennms/horizon-stream-rest-server
+charts/opennms/values.yaml:36:    Image: opennms/horizon-stream-metrics-processor
+charts/opennms/values.yaml:54:    Image: opennms/horizon-stream-ui
+charts/opennms/values.yaml:78:    Image: opennms/horizon-stream-minion
+charts/opennms/values.yaml:101:    Image: opennms/horizon-stream-minion-gateway
+charts/opennms/values.yaml:136:    Image: opennms/horizon-stream-inventory
+charts/opennms/values.yaml:156:    Image: opennms/horizon-stream-alert
+charts/opennms/values.yaml:175:    Image: opennms/horizon-stream-notification
+charts/opennms/values.yaml:193:    Image: opennms/horizon-stream-events
+charts/opennms/values.yaml:211:    Image: opennms/horizon-stream-datachoices
+charts/opennms/values.yaml:232:    Image: opennms/horizon-stream-minion-certificate-manager
+charts/opennms/values.yaml:246:    Image: opennms/horizon-stream-minion-certificate-verifier
+charts/opennms/values.yaml:280:  Image: opennms/horizon-stream-keycloak:latest
+charts/opennms/values.yaml:312:  Image: opennms/horizon-stream-grafana
+charts/opennms/onms-realm.json:5:  "loginTheme": "horizon-stream",
+charts/opennms/onms-realm.json:6:  "emailTheme": "horizon-stream",
+charts/opennms/onms-realm.json:11:      "clientId": "horizon-stream",
+charts/Makefile:7:	helm repo index --url https://opennms-cloud.github.io/horizon-stream/charts/packaged --merge packaged/index.yaml ./packaged
+charts/opennms-operator/Chart.yaml:5:home: https://github.com/OpenNMS/horizon-stream
+
+# Ignore these, already published.
+charts/packaged/index.yaml:9:    - https://opennms-cloud.github.io/horizon-stream/charts/packaged/opennms-0.7.4.tgz
+charts/packaged/index.yaml:16:    - https://opennms-cloud.github.io/horizon-stream/charts/packaged/opennms-0.7.3.tgz
+charts/packaged/index.yaml:23:    - https://opennms-cloud.github.io/horizon-stream/charts/packaged/opennms-0.7.2.tgz
+charts/packaged/index.yaml:30:    - https://opennms-cloud.github.io/horizon-stream/charts/packaged/opennms-0.7.1.tgz
+charts/packaged/index.yaml:37:    - https://opennms-cloud.github.io/horizon-stream/charts/packaged/opennms-0.7.0.tgz
+charts/packaged/index.yaml:44:    - https://opennms-cloud.github.io/horizon-stream/charts/packaged/opennms-0.6.0.tgz
+
+external-it/pom.xml:15:        <module>external-horizon-stream-it</module>
+external-it/hs-system-tests/src/test/java/testcontainers/UpdGenContainer.java:46:            .withNetworkAliases("horizon-stream")
+external-it/hs-system-tests/src/test/java/testcontainers/MinionContainer.java:58:        super("opennms/horizon-stream-minion:latest");
+external-it/hs-system-tests/src/test/java/testcontainers/MinionContainer.java:61:            .withNetworkAliases("horizon-stream")
+external-it/external-horizon-stream-it/pom.xml:22:    <artifactId>external-horizon-stream-it</artifactId>
+external-it/external-horizon-stream-it/README.md:13:    $ KEYCLOAK_CLIENT_ID=horizon-stream
+external-it/external-horizon-stream-it/src/main/java/org/opennms/horizon/it/InventoryTestSteps.java:276:            GenericContainer<?> minion = new GenericContainer<>(DockerImageName.parse("opennms/horizon-stream-minion").withTag("latest"))
+
+install-local/install-local.sh:166:  -f ./tmp/install-local-opennms-horizon-stream-custom-images-values.yaml \
+install-local/install-local.sh:208:cat install-local-opennms-horizon-stream-values.yaml | \
+install-local/install-local.sh:209:  sed "s/onmshs/$DOMAIN/g" | sed "s/\$NAMESPACE/$NAMESPACE/g" > tmp/install-local-opennms-horizon-stream-values.yaml
+install-local/install-local.sh:210:cat install-local-opennms-horizon-stream-custom-images-values.yaml | \
+install-local/install-local.sh:211:  sed "s/onmshs/$DOMAIN/g" | sed "s/\$NAMESPACE/$NAMESPACE/g" > tmp/install-local-opennms-horizon-stream-custom-images-values.yaml
+install-local/install-local.sh:224:  helm upgrade -i horizon-stream ./../charts/opennms -f ./tmp/install-local-opennms-horizon-stream-values.yaml --namespace $NAMESPACE --wait --timeout "${TIMEOUT}"
+install-local/install-local.sh:271:  helm upgrade -i horizon-stream ./../charts/opennms -f ./tmp/install-local-opennms-horizon-stream-values.yaml --namespace $NAMESPACE --create-namespace --wait --timeout "${TIMEOUT}"
+install-local/install-local-opennms-horizon-stream-values.yaml:4:    Image: opennms/horizon-stream-rest-server:v0.0.32-dev
+install-local/install-local-opennms-horizon-stream-values.yaml:13:    Image: opennms/horizon-stream-metrics-processor:v0.0.32-dev
+install-local/install-local-opennms-horizon-stream-values.yaml:22:    Image: opennms/horizon-stream-ui:v0.0.32-dev
+install-local/install-local-opennms-horizon-stream-values.yaml:31:    Image: opennms/horizon-stream-minion:v0.0.32-dev
+install-local/install-local-opennms-horizon-stream-values.yaml:40:    Image: opennms/horizon-stream-minion-gateway:v0.0.32-dev
+install-local/install-local-opennms-horizon-stream-values.yaml:49:    Image: opennms/horizon-stream-inventory:v0.0.32-dev
+install-local/install-local-opennms-horizon-stream-values.yaml:58:    Image: opennms/horizon-stream-alarm:v0.0.32-dev
+install-local/install-local-opennms-horizon-stream-values.yaml:67:    Image: opennms/horizon-stream-notification:v0.0.32-dev
+install-local/install-local-opennms-horizon-stream-values.yaml:76:    Image: opennms/horizon-stream-events:v0.0.32-dev
+install-local/install-local-opennms-horizon-stream-values.yaml:85:  Image: opennms/horizon-stream-keycloak:v0.0.32-dev
+install-local/install-local-opennms-horizon-stream-values.yaml:90:  Image: opennms/horizon-stream-grafana:v0.0.32-dev
+install-local/install-local.sh:80:    kind load docker-image --name "$KIND_CLUSTER_NAME" "${IMAGE_PREFIX}/horizon-stream-alert:${IMAGE_TAG}" \
+install-local/install-local.sh:81:      "${IMAGE_PREFIX}/horizon-stream-datachoices:${IMAGE_TAG}" \
+install-local/install-local.sh:82:      "${IMAGE_PREFIX}/horizon-stream-events:${IMAGE_TAG}" \
+install-local/install-local.sh:83:      "${IMAGE_PREFIX}/horizon-stream-grafana:${IMAGE_TAG}" \
+install-local/install-local.sh:84:      "${IMAGE_PREFIX}/horizon-stream-inventory:${IMAGE_TAG}" \
+install-local/install-local.sh:85:      "${IMAGE_PREFIX}/horizon-stream-keycloak:${IMAGE_TAG}" \
+install-local/install-local.sh:86:      "${IMAGE_PREFIX}/horizon-stream-metrics-processor:${IMAGE_TAG}" \
+install-local/install-local.sh:87:      "${IMAGE_PREFIX}/horizon-stream-minion:${IMAGE_TAG}" \
+install-local/install-local.sh:88:      "${IMAGE_PREFIX}/horizon-stream-minion-gateway:${IMAGE_TAG}" \
+install-local/install-local.sh:89:      "${IMAGE_PREFIX}/horizon-stream-minion-certificate-manager:${IMAGE_TAG}" \
+install-local/install-local.sh:90:      "${IMAGE_PREFIX}/horizon-stream-minion-certificate-verifier:${IMAGE_TAG}" \
+install-local/install-local.sh:91:      "${IMAGE_PREFIX}/horizon-stream-notification:${IMAGE_TAG}" \
+install-local/install-local.sh:92:      "${IMAGE_PREFIX}/horizon-stream-rest-server:${IMAGE_TAG}" \
+install-local/install-local.sh:93:      "${IMAGE_PREFIX}/horizon-stream-ui:${IMAGE_TAG}"
+install-local/install-local.sh:98:		"${IMAGE_PREFIX}/horizon-stream-alert:${IMAGE_TAG}" \
+install-local/install-local.sh:99:		"${IMAGE_PREFIX}/horizon-stream-datachoices:${IMAGE_TAG}" \
+install-local/install-local.sh:100:		"${IMAGE_PREFIX}/horizon-stream-events:${IMAGE_TAG}" \
+install-local/install-local.sh:101:		"${IMAGE_PREFIX}/horizon-stream-grafana:${IMAGE_TAG}" \
+install-local/install-local.sh:102:		"${IMAGE_PREFIX}/horizon-stream-inventory:${IMAGE_TAG}" \
+install-local/install-local.sh:103:		"${IMAGE_PREFIX}/horizon-stream-keycloak:${IMAGE_TAG}" \
+install-local/install-local.sh:104:		"${IMAGE_PREFIX}/horizon-stream-metrics-processor:${IMAGE_TAG}" \
+install-local/install-local.sh:105:		"${IMAGE_PREFIX}/horizon-stream-minion-certificate-manager:${IMAGE_TAG}" \
+install-local/install-local.sh:106:		"${IMAGE_PREFIX}/horizon-stream-minion-certificate-verifier:${IMAGE_TAG}" \
+install-local/install-local.sh:107:		"${IMAGE_PREFIX}/horizon-stream-minion:${IMAGE_TAG}" \
+install-local/install-local.sh:108:		"${IMAGE_PREFIX}/horizon-stream-minion:${IMAGE_TAG}" \
+install-local/install-local.sh:109:		"${IMAGE_PREFIX}/horizon-stream-notification:${IMAGE_TAG}" \
+install-local/install-local.sh:110:		"${IMAGE_PREFIX}/horizon-stream-rest-server:${IMAGE_TAG}" \
+install-local/install-local.sh:111:		"${IMAGE_PREFIX}/horizon-stream-ui:${IMAGE_TAG}"
+install-local/install-local.sh:124:		"${IMAGE_PREFIX}/horizon-stream-alert:${IMAGE_TAG}" \
+install-local/install-local.sh:125:		"${IMAGE_PREFIX}/horizon-stream-datachoices:${IMAGE_TAG}" \
+install-local/install-local.sh:126:		"${IMAGE_PREFIX}/horizon-stream-events:${IMAGE_TAG}" \
+install-local/install-local.sh:127:		"${IMAGE_PREFIX}/horizon-stream-grafana:${IMAGE_TAG}" \
+install-local/install-local.sh:128:		"${IMAGE_PREFIX}/horizon-stream-inventory:${IMAGE_TAG}" \
+install-local/install-local.sh:129:		"${IMAGE_PREFIX}/horizon-stream-keycloak:${IMAGE_TAG}" \
+install-local/install-local.sh:130:		"${IMAGE_PREFIX}/horizon-stream-metrics-processor:${IMAGE_TAG}" \
+install-local/install-local.sh:131:		"${IMAGE_PREFIX}/horizon-stream-minion-gateway:${IMAGE_TAG}" \
+install-local/install-local.sh:132:		"${IMAGE_PREFIX}/horizon-stream-minion-certificate-manager:${IMAGE_TAG}" \
+install-local/install-local.sh:133:		"${IMAGE_PREFIX}/horizon-stream-minion-certificate-verifier:${IMAGE_TAG}" \
+install-local/install-local.sh:134:		"${IMAGE_PREFIX}/horizon-stream-minion:${IMAGE_TAG}" \
+install-local/install-local.sh:135:		"${IMAGE_PREFIX}/horizon-stream-notification:${IMAGE_TAG}" \
+install-local/install-local.sh:136:		"${IMAGE_PREFIX}/horizon-stream-rest-server:${IMAGE_TAG}" \
+install-local/install-local.sh:137:		"${IMAGE_PREFIX}/horizon-stream-ui:${IMAGE_TAG}"
+install-local/install-local.sh:165:  helm upgrade -i horizon-stream ./../charts/opennms \
+install-local/install-local.sh:166:  -f ./tmp/install-local-opennms-horizon-stream-custom-images-values.yaml \
+install-local/install-local.sh:168:  --set OpenNMS.Alert.Image=${IMAGE_PREFIX}/horizon-stream-alert:${IMAGE_TAG} \
+install-local/install-local.sh:169:  --set OpenNMS.DataChoices.Image=${IMAGE_PREFIX}/horizon-stream-datachoices:${IMAGE_TAG} \
+install-local/install-local.sh:170:  --set OpenNMS.Events.Image=${IMAGE_PREFIX}/horizon-stream-events:${IMAGE_TAG} \
+install-local/install-local.sh:171:  --set Grafana.Image=${IMAGE_PREFIX}/horizon-stream-grafana:${IMAGE_TAG} \
+install-local/install-local.sh:172:  --set OpenNMS.Inventory.Image=${IMAGE_PREFIX}/horizon-stream-inventory:${IMAGE_TAG} \
+install-local/install-local.sh:173:  --set Keycloak.Image=${IMAGE_PREFIX}/horizon-stream-keycloak:${IMAGE_TAG} \
+install-local/install-local.sh:174:  --set OpenNMS.MetricsProcessor.Image=${IMAGE_PREFIX}/horizon-stream-metrics-processor:${IMAGE_TAG} \
+install-local/install-local.sh:175:  --set OpenNMS.Minion.Image=${IMAGE_PREFIX}/horizon-stream-minion:${IMAGE_TAG} \
+install-local/install-local.sh:176:  --set OpenNMS.MinionGateway.Image=${IMAGE_PREFIX}/horizon-stream-minion-gateway:${IMAGE_TAG} \
+install-local/install-local.sh:177:  --set OpenNMS.MinionCertificateManager.Image=${IMAGE_PREFIX}/horizon-stream-minion-certificate-manager:${IMAGE_TAG} \
+install-local/install-local.sh:178:  --set OpenNMS.MinionCertificateVerifier.Image=${IMAGE_PREFIX}/horizon-stream-minion-certificate-verifier:${IMAGE_TAG} \
+install-local/install-local.sh:179:  --set OpenNMS.Notification.Image=${IMAGE_PREFIX}/horizon-stream-notification:${IMAGE_TAG} \
+install-local/install-local.sh:180:  --set OpenNMS.API.Image=${IMAGE_PREFIX}/horizon-stream-rest-server:${IMAGE_TAG} \
+install-local/install-local.sh:181:  --set OpenNMS.UI.Image=${IMAGE_PREFIX}/horizon-stream-ui:${IMAGE_TAG} \
+install-local/install-local.sh:208:cat install-local-opennms-horizon-stream-values.yaml | \
+install-local/install-local.sh:209:  sed "s/onmshs/$DOMAIN/g" | sed "s/\$NAMESPACE/$NAMESPACE/g" > tmp/install-local-opennms-horizon-stream-values.yaml
+install-local/install-local.sh:210:cat install-local-opennms-horizon-stream-custom-images-values.yaml | \
+install-local/install-local.sh:211:  sed "s/onmshs/$DOMAIN/g" | sed "s/\$NAMESPACE/$NAMESPACE/g" > tmp/install-local-opennms-horizon-stream-custom-images-values.yaml
+install-local/install-local.sh:224:  helm upgrade -i horizon-stream ./../charts/opennms -f ./tmp/install-local-opennms-horizon-stream-values.yaml --namespace $NAMESPACE --wait --timeout "${TIMEOUT}"
+install-local/install-local.sh:260:  helm get values horizon-stream --namespace $NAMESPACE
+install-local/install-local.sh:271:  helm upgrade -i horizon-stream ./../charts/opennms -f ./tmp/install-local-opennms-horizon-stream-values.yaml --namespace $NAMESPACE --create-namespace --wait --timeout "${TIMEOUT}"
+install-local/install-local-opennms-horizon-stream-custom-images-values.yaml:4:    Image: opennms/horizon-stream-core:local
+install-local/install-local-opennms-horizon-stream-custom-images-values.yaml:13:    Image: opennms/horizon-stream-rest-server:local
+install-local/install-local-opennms-horizon-stream-custom-images-values.yaml:22:    Image: opennms/horizon-stream-metrics-processor:local
+install-local/install-local-opennms-horizon-stream-custom-images-values.yaml:31:    Image: opennms/horizon-stream-ui:local
+install-local/install-local-opennms-horizon-stream-custom-images-values.yaml:98:    Image: opennms/horizon-stream-minion-gateway:local
+install-local/install-local-opennms-horizon-stream-custom-images-values.yaml:110:    Image: opennms/horizon-stream-minion-certificate-verifier:local
+install-local/install-local-opennms-horizon-stream-custom-images-values.yaml:119:    Image: opennms/horizon-stream-minion-certificate-manager:local
+install-local/install-local-opennms-horizon-stream-custom-images-values.yaml:131:    Image: opennms/horizon-stream-inventory:local
+install-local/install-local-opennms-horizon-stream-custom-images-values.yaml:140:    Image: opennms/horizon-stream-alert:local
+install-local/install-local-opennms-horizon-stream-custom-images-values.yaml:149:    Image: opennms/horizon-stream-notification:local
+install-local/install-local-opennms-horizon-stream-custom-images-values.yaml:158:    Image: opennms/horizon-stream-events:local
+install-local/install-local-opennms-horizon-stream-custom-images-values.yaml:167:  Image: opennms/horizon-stream-keycloak:local
+install-local/install-local-opennms-horizon-stream-custom-images-values.yaml:171:  Image: opennms/horizon-stream-grafana:local
+install-local/install-local-onms-instance-custom-images.yaml:14:    image: opennms/horizon-stream-core:local
+install-local/install-local-onms-instance-custom-images.yaml:18:    image: opennms/horizon-stream-rest-server:local
+install-local/install-local-onms-instance-custom-images.yaml:22:    image: opennms/horizon-stream-ui:local
+install-local/install-local-onms-instance-custom-images.yaml:26:    image: opennms/horizon-stream-minion:local
+install-local/install-local-onms-instance-custom-images.yaml:30:    image: opennms/horizon-stream-minion-gateway:local
+install-local/install-local-onms-instance-custom-images.yaml:34:    image: opennms/horizon-stream-notification:local
+install-local/install-local-onms-instance-custom-images.yaml:38:    image: opennms/horizon-stream-inventory:local
+install-local/install-local-onms-instance-custom-images.yaml:40:    image: opennms/horizon-stream-metrics-processor:local
+install-local/install-local-onms-instance-custom-images.yaml:42:    image: opennms/horizon-stream-events:local
+install-local/install-local-onms-instance-custom-images.yaml:44:    image: opennms/horizon-stream-datachoices:local
+install-local/install-local-onms-instance-custom-images.yaml:46:    image: opennms/horizon-stream-keycloak:local
+install-local/install-local-onms-instance-custom-images.yaml:48:    image: opennms/horizon-stream-grafana:local
+install-local/install-local-onms-instance.yaml:14:    image: opennms/horizon-stream-core
+install-local/install-local-onms-instance.yaml:18:    image: opennms/horizon-stream-rest-server
+install-local/install-local-onms-instance.yaml:22:    image: opennms/horizon-stream-ui
+install-local/install-local-onms-instance.yaml:26:    image: opennms/horizon-stream-minion
+install-local/install-local-onms-instance.yaml:30:    image: opennms/horizon-stream-minion-gateway
+install-local/install-local-onms-instance.yaml:34:    image: opennms/horizon-stream-notification
+install-local/install-local-onms-instance.yaml:38:    image: opennms/horizon-stream-inventory
+install-local/install-local-onms-instance.yaml:40:    image: opennms/horizon-stream-metrics-processor
+install-local/install-local-onms-instance.yaml:42:    image: opennms/horizon-stream-events
+install-local/install-local-onms-instance.yaml:44:    image: opennms/horizon-stream-datachoices
+install-local/install-local-onms-instance.yaml:46:    image: opennms/horizon-stream-keycloak
+install-local/install-local-onms-instance.yaml:48:    image: opennms/horizon-stream-grafana
+install-local/install-local-external-minion-test/docker-compose.yml:5:    image: docker.io/opennms/horizon-stream-minion:v0.0.32-dev
+install-local/install-local-external-minion-test/docker-compose.yml:8:    # https://hub.docker.com/r/opennms/horizon-stream-minion/tags for recent
+
+operator/README.md:27:bash scripts/deploy-horizon-stream.sh
+operator/scripts/build-arm-images.sh:2:  --tag opennms/horizon-stream-minion-gateway:latest \
+operator/scripts/local-os-onms-instance.yaml:14:    image: opennms/horizon-stream-core
+operator/scripts/local-os-onms-instance.yaml:18:    image: opennms/horizon-stream-rest-server
+operator/scripts/local-os-onms-instance.yaml:22:    image: opennms/horizon-stream-ui
+operator/scripts/local-os-onms-instance.yaml:26:    image: opennms/horizon-stream-minion
+operator/scripts/local-os-onms-instance.yaml:30:    image: opennms/horizon-stream-minion-gateway
+operator/scripts/local-os-onms-instance.yaml:34:    image: opennms/horizon-stream-inventory
+operator/scripts/local-os-onms-instance.yaml:38:    image: opennms/horizon-stream-alert
+operator/scripts/local-os-onms-instance.yaml:42:    image: opennms/horizon-stream-notification
+operator/scripts/local-os-onms-instance.yaml:46:    image: opennms/horizon-stream-metrics-processor
+operator/scripts/local-os-onms-instance.yaml:50:    image: opennms/horizon-stream-events
+operator/scripts/local-os-onms-instance.yaml:54:    image: opennms/horizon-stream-datachoices
+operator/scripts/local-os-onms-instance.yaml:58:    image: opennms/horizon-stream-keycloak
+operator/scripts/local-os-onms-instance.yaml:60:    image: opennms/horizon-stream-grafana
+operator/scripts/local-onms-instance.yaml:16:    image: opennms/horizon-stream-rest-server
+operator/scripts/local-onms-instance.yaml:20:    image: opennms/horizon-stream-ui
+operator/scripts/local-onms-instance.yaml:24:    image: opennms/horizon-stream-minion
+operator/scripts/local-onms-instance.yaml:28:    image: opennms/horizon-stream-minion-gateway
+operator/scripts/local-onms-instance.yaml:32:    image: opennms/horizon-stream-minion-gateway
+operator/scripts/local-onms-instance.yaml:36:    image: opennms/horizon-stream-inventory
+operator/scripts/local-onms-instance.yaml:40:    image: opennms/horizon-stream-alert
+operator/scripts/local-onms-instance.yaml:44:    image: opennms/horizon-stream-notification
+operator/scripts/local-onms-instance.yaml:48:    image: opennms/horizon-stream-metrics-processor
+operator/scripts/local-onms-instance.yaml:52:    image: opennms/horizon-stream-events
+operator/scripts/local-onms-instance.yaml:56:    image: opennms/horizon-stream-datachoices
+operator/scripts/local-onms-instance.yaml:60:    image: opennms/horizon-stream-keycloak
+operator/scripts/local-onms-instance.yaml:62:    image: opennms/horizon-stream-grafana
+operator/scripts/install-operator-local.sh:10:docker build -t opennms/horizon-stream-keycloak:latest -f ../keycloak-ui/Dockerfile ../keycloak-ui
+operator/scripts/install-operator-local.sh:16:kind load docker-image opennms/horizon-stream-keycloak:latest
+
+tilt-custom-resource.yaml:10:    image: opennms/horizon-stream-core
+tilt-custom-resource.yaml:14:    image: opennms/horizon-stream-rest-server
+tilt-custom-resource.yaml:18:    image: opennms/horizon-stream-ui
+tilt-custom-resource.yaml:22:    image: opennms/horizon-stream-inventory
+tilt-custom-resource.yaml:26:    image: opennms/horizon-stream-notification
+tilt-custom-resource.yaml:30:    image: opennms/horizon-stream-events
+tilt-custom-resource.yaml:34:    image: opennms/horizon-stream-datachoices
+tilt-custom-resource.yaml:38:    image: opennms/horizon-stream-keycloak-dev
+tilt-custom-resource.yaml:40:    image: opennms/horizon-stream-grafana-dev
+
+tooling/ignite-tool/README.md:10:    $ kubectl run opennms-ignite-tool --env ignite_use_kubernetes=true --env ignite_kubernetes_service_name=horizon-stream-ignite-core --restart=Never --rm -it --image opennms-ignite-tool:local --port 8080
+
+# Services
+
+inventory/pom.xml:22:        <application.docker.image.name>opennms/horizon-stream-inventory</application.docker.image.name>
+inventory/docker-it/pom.xml:21:        <application.docker.image.name>opennms/horizon-stream-inventory</application.docker.image.name>
+inventory/main/src/main/resources/application.yml:3:    name: horizon-stream-inventory
+
+keycloak-ui/themes/horizon-stream/login/theme.properties:2:import=common/horizon-stream/
+keycloak-ui/themes/horizon-stream/email/theme.properties:2:import=common/horizon-stream/
+
+metrics-processor/pom.xml:22:        <application.docker.image.name>opennms/horizon-stream-metrics-processor</application.docker.image.name>
+
+minion/docker-compose.yaml:6:    image: docker.io/opennms/horizon-stream-minion:latest
+minion/docker-compose.yaml:8:    # See https://hub.docker.com/r/opennms/horizon-stream-minion/tags for updated list.
+minion/assembly/runInDocker.sh:135:                opennms/horizon-stream-minion:tilt-be02473c2f7da49a \
+minion/pom.xml:42:        <application.docker.image.name>opennms/horizon-stream-minion</application.docker.image.name>
+minion/minion-grpc/grpc-client/src/test/java/org/opennms/horizon/minion/grpc/PcksTest.java:37:        keyStore.load(new FileInputStream("/home/splatch/projects/opennms/sources/horizon-stream/tools/SSL/keystore.p12"),
+minion/minion-grpc/grpc-client/src/test/java/org/opennms/horizon/minion/grpc/PcksTest.java:83:        keyStore.load(new FileInputStream("/home/splatch/projects/opennms/sources/horizon-stream/tools/SSL/keystore.p12"),
+minion/docker-it/src/test/java/org/opennms/horizon/dockerit/testcontainers/TestContainerRunnerClassRule.java:50:    public static final String DEFAULT_APPLICATION_DOCKER_IMAGE_NAME = "opennms/horizon-stream-minion:latest";
+minion/docker-it/src/test/java/org/opennms/horizon/dockerit/testcontainers/TestContainerRunnerClassRule.java:72:        mockMinionGatewayContainer = new GenericContainer(DockerImageName.parse("opennms/horizon-stream-mock-minion-gateway").withTag("latest"));
+minion/testtools/minion-gateway-wiremock/minion-gateway-wiremock-main/pom.xml:24:        <mock-gateway.docker.image.name>opennms/horizon-stream-mock-minion-gateway</mock-gateway.docker.image.name>
+
+minion-certificate-manager/pom.xml:24:        <application.docker.image.name>opennms/horizon-stream-minion-certificate-manager</application.docker.image.name>
+minion-certificate-verifier/pom.xml:24:        <application.docker.image.name>opennms/horizon-stream-minion-certificate-verifier</application.docker.image.name>
+
+minion-gateway/pom.xml:24:        <application.docker.image.name>opennms/horizon-stream-minion-gateway</application.docker.image.name>
+minion-gateway-grpc-proxy/pom.xml:24:        <application.docker.image.name>opennms/horizon-stream-minion-gateway-grpc-proxy</application.docker.image.name>
+
+notifications/pom.xml:21:        <application.docker.image.name>opennms/horizon-stream-notification</application.docker.image.name>
+notifications/src/main/resources/application.yml:3:    name: horizon-stream-notifications
+
+rest-server/pom.xml:24:        <application.docker.image.name>opennms/horizon-stream-rest-server</application.docker.image.name>
+
+ui/nginx/conf.d/default.conf:3:    server_name horizon-stream-ui;
+ui/.env:4:VITE_KEYCLOAK_CLIENT_ID=horizon-stream
+
+alert/pom.xml:23:        <application.docker.image.name>opennms/horizon-stream-alert</application.docker.image.name>
+alert/src/main/resources/application.yaml:3:    name: horizon-stream-alert
+
+datachoices/pom.xml:20:        <application.docker.image.name>opennms/horizon-stream-datachoices</application.docker.image.name>
+datachoices/src/main/resources/application.yml:3:    name: horizon-stream-datachoices
+
+events/pom.xml:24:        <application.docker.image.name>opennms/horizon-stream-events</application.docker.image.name>
+events/main/src/main/resources/application.yml:3:    name: horizon-stream-events

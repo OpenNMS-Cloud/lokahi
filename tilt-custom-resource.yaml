@@ -7,36 +7,36 @@ spec:
   host: onmshs
   namespace: tilt-instance
   core:
-    image: opennms/horizon-stream-core
+    image: opennms/lokahi-core
     cpu: "0"
     mem: "0"
   api:
-    image: opennms/horizon-stream-rest-server
+    image: opennms/lokahi-rest-server
     cpu: "0"
     mem: "0"
   ui:
-    image: opennms/horizon-stream-ui
+    image: opennms/lokahi-ui
     cpu: "0"
     mem: "0"
   inventory:
-    image: opennms/horizon-stream-inventory
+    image: opennms/lokahi-inventory
     cpu: "0"
     mem: "0"
   notification:
-    image: opennms/horizon-stream-notification
+    image: opennms/lokahi-notification
     cpu: "0"
     mem: "0"
   events:
-    image: opennms/horizon-stream-events
+    image: opennms/lokahi-events
     cpu: "0"
     mem: "0"
   datachoices:
-    image: opennms/horizon-stream-datachoices
+    image: opennms/lokahi-datachoices
     cpu: "0"
     mem: "0"
   keycloak:
-    image: opennms/horizon-stream-keycloak-dev
+    image: opennms/lokahi-keycloak-dev
   grafana:
-    image: opennms/horizon-stream-grafana-dev
+    image: opennms/lokahi-grafana-dev
   postgres:
     image: postgres:13.3-alpine

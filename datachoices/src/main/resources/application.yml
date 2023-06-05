@@ -1,6 +1,6 @@
 spring:
   application:
-    name: horizon-stream-datachoices
+    name: lokahi-datachoices
 
   datasource:
     driver-class-name: org.postgresql.Driver

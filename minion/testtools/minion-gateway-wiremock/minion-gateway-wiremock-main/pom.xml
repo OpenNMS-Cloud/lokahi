@@ -21,7 +21,7 @@
     <properties>
         <java.version>17</java.version>
         <mock-gateway.docker.image>${mock-gateway.docker.image.name}:${mock-gateway.docker.image.tag}</mock-gateway.docker.image>
-        <mock-gateway.docker.image.name>opennms/horizon-stream-mock-minion-gateway</mock-gateway.docker.image.name>
+        <mock-gateway.docker.image.name>opennms/lokahi-mock-minion-gateway</mock-gateway.docker.image.name>
         <mock-gateway.docker.image.tag>latest</mock-gateway.docker.image.tag>
     </properties>
 

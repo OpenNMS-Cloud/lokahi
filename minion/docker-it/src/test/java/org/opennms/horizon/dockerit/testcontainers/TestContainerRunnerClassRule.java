@@ -47,7 +47,7 @@ import org.testcontainers.utility.MountableFile;
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class TestContainerRunnerClassRule extends ExternalResource {
 
-    public static final String DEFAULT_APPLICATION_DOCKER_IMAGE_NAME = "opennms/horizon-stream-minion:latest";
+    public static final String DEFAULT_APPLICATION_DOCKER_IMAGE_NAME = "opennms/lokahi-minion:latest";
 
     private static final Logger DEFAULT_LOGGER = LoggerFactory.getLogger(TestContainerRunnerClassRule.class);
 
@@ -69,7 +69,7 @@ public class TestContainerRunnerClassRule extends ExternalResource {
 
         LOG.info("Using application docker image: name={}", applicationDockerImageName);
 
-        mockMinionGatewayContainer = new GenericContainer(DockerImageName.parse("opennms/horizon-stream-mock-minion-gateway").withTag("latest"));
+        mockMinionGatewayContainer = new GenericContainer(DockerImageName.parse("opennms/lokahi-mock-minion-gateway").withTag("latest"));
         applicationContainer = new GenericContainer(DockerImageName.parse(applicationDockerImageName).toString());
         sslGatewayContainer = new GenericContainer(DockerImageName.parse("nginx:1.21.6-alpine").toString());
     }

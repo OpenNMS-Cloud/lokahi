@@ -20,8 +20,8 @@
     <artifactId>alert-service</artifactId>
 
     <properties>
-        <application.docker.image.name>opennms/horizon-stream-alert</application.docker.image.name>
-        <sonar.projectKey>opennms_horizon-stream_alert</sonar.projectKey>
+        <application.docker.image.name>opennms/lokahi-alert</application.docker.image.name>
+        <sonar.projectKey>opennms_lokahi_alert</sonar.projectKey>
         <!-- There is no sonarcloud project for the Alert service yet, so skip scanning it -->
         <sonar.skip>true</sonar.skip>
     </properties>

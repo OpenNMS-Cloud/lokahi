@@ -28,11 +28,13 @@
 
 package org.opennms.horizon.inventory.component;
 
-import com.google.common.base.Strings;
-import com.google.protobuf.Any;
-import com.google.protobuf.InvalidProtocolBufferException;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+
+import javax.annotation.PreDestroy;
+
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.opennms.cloud.grpc.minion_gateway.GatewayRpcRequestProto;
 import org.opennms.cloud.grpc.minion_gateway.GatewayRpcResponseProto;
@@ -40,6 +42,7 @@ import org.opennms.cloud.grpc.minion_gateway.MinionIdentity;
 import org.opennms.horizon.grpc.echo.contract.EchoRequest;
 import org.opennms.horizon.grpc.echo.contract.EchoResponse;
 import org.opennms.horizon.grpc.heartbeat.contract.TenantLocationSpecificHeartbeatMessage;
+import org.opennms.horizon.inventory.exception.LocationNotFoundException;
 import org.opennms.horizon.inventory.service.MonitoringLocationService;
 import org.opennms.horizon.inventory.service.MonitoringSystemService;
 import org.opennms.taskset.contract.MonitorResponse;
@@ -54,11 +57,14 @@ import org.springframework.messaging.handler.annotation.Headers;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PreDestroy;
-import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
+import com.google.common.base.Strings;
+import com.google.protobuf.Any;
+import com.google.protobuf.InvalidProtocolBufferException;
+
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.StatusCode;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @RequiredArgsConstructor
 @Component
@@ -91,6 +97,9 @@ public class MinionHeartbeatConsumer {
 
             log.info("Received heartbeat message for minion: tenant-id={}; location={}; system-id={}",
                 tenantId, location, message.getIdentity().getSystemId());
+            Span.current().setAttribute("user", tenantId);
+            Span.current().setAttribute("location", location);
+            Span.current().setAttribute("system-id", message.getIdentity().getSystemId());
 
             var optionalLocation = locationService.findByLocationAndTenantId(location, tenantId);
             if (optionalLocation.isEmpty()) {
@@ -107,8 +116,14 @@ public class MinionHeartbeatConsumer {
                 CompletableFuture.runAsync(() -> runRpcMonitor(tenantId, location, systemId));
                 rpcMaps.put(key, getSystemTimeInMsec());
             }
+
+            Span.current().setStatus(StatusCode.OK);
+        } catch (LocationNotFoundException e) {
+            log.error("Location not found while processing heartbeat message: {}", e.getMessage());
+            Span.current().setStatus(StatusCode.ERROR, "Location not found while processing heartbeat message: " + e.getMessage());
         } catch (Exception e) {
             log.error("Error while processing heartbeat message: ", e);
+            Span.current().recordException(e);
         }
     }
 

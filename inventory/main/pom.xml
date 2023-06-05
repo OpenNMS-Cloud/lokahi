@@ -303,6 +303,11 @@
             <version>5.12.1</version>
             <scope>test</scope>
         </dependency>
+
+        <dependency>
+            <groupId>io.opentelemetry</groupId>
+            <artifactId>opentelemetry-api</artifactId>
+        </dependency>
     </dependencies>
     <build>
         <plugins>

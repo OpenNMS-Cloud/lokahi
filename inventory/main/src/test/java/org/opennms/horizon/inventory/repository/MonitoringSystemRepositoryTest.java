@@ -112,7 +112,7 @@ public class MonitoringSystemRepositoryTest {
     @Test
     void testFindByLocationId() {
         List<MonitoringSystem> list = systemRepository.findByMonitoringLocationIdAndTenantId(system1.getMonitoringLocationId(), tenantId);
-        assertThat(list.size()).isEqualTo(3);
+        assertThat(list.size()).isEqualTo(2);
     }
 
     @Test

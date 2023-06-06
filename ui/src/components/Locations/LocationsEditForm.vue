@@ -110,10 +110,10 @@ const locationStore = useLocationStore()
 const formInputs = reactive({} as Required<MonitoringLocationUpdateInput>)
 
 watchEffect(() => {
-  formInputs.id = locationStore.selectedLocation?.id,
-  formInputs.location = locationStore.selectedLocation?.location,
-  formInputs.address= locationStore.selectedLocation?.address,
-  formInputs.longitude= locationStore.selectedLocation?.longitude,
+  formInputs.id = locationStore.selectedLocation?.id
+  formInputs.location = locationStore.selectedLocation?.location
+  formInputs.address= locationStore.selectedLocation?.address
+  formInputs.longitude= locationStore.selectedLocation?.longitude
   formInputs.latitude = locationStore.selectedLocation?.latitude
 })
 

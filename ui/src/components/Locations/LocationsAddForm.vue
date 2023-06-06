@@ -6,7 +6,7 @@
       class="locations-add-form"
     >
       <HeadlineSection
-        text="Add Location"
+        text="New Location"
         data-test="headline"
       />
       <div class="inputs">
@@ -106,7 +106,6 @@ const onSubmit = async () => {
 
   if (isFormSaved) {
     Object.assign(formInputs, formDefault)
-    locationStore.setDisplayType(DisplayType.LIST)
     form.clearErrors()
   }
 }

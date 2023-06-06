@@ -45,7 +45,7 @@ const locationStore = useLocationStore()
 
 const location = computed(() => props.item)
 
-const selectedCard = computed(() => locationStore.selectedLocationIdForMinions === props.item.id)
+const selectedCard = computed(() => locationStore.selectedLocationId === props.item.id)
 
 const nameBtn = computed<IButtonTextIcon>(() => ({
   label: props.item.location

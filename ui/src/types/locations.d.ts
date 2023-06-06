@@ -9,5 +9,6 @@ export interface LocationTemp extends MonitoringLocation {
 export const enum DisplayType {
   ADD = 'add',
   EDIT = 'edit',
-  LIST = 'list'
+  LIST = 'list',
+  READY = 'ready'
 }

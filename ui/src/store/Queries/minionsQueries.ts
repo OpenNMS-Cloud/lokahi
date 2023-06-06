@@ -49,6 +49,8 @@ export const useMinionsQueries = defineStore('minionsQueries', () => {
     })
 
   const addMetricsToMinions = (allMinions: Minion[]) => {
+    minionsList.value = []
+
     allMinions.forEach(async (minion) => {
       const { data } = await fetchMinionMetrics(minion.systemId as string)
       const result = data.value?.minionLatency?.data?.result?.[0]?.values?.[0]

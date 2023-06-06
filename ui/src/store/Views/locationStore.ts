@@ -1,9 +1,9 @@
-import {defineStore} from 'pinia'
-import {useLocationQueries} from '../Queries/locationQueries'
-import {useMinionsQueries} from '../Queries/minionsQueries'
-import {DisplayType} from '@/types/locations.d'
-import {useLocationMutations} from '../Mutations/locationMutations'
-import {MonitoringLocation, MonitoringLocationCreateInput, MonitoringLocationUpdateInput} from '@/types/graphql'
+import { defineStore } from 'pinia'
+import { useLocationQueries } from '../Queries/locationQueries'
+import { useMinionsQueries } from '../Queries/minionsQueries'
+import { DisplayType } from '@/types/locations.d'
+import { useLocationMutations } from '../Mutations/locationMutations'
+import { MonitoringLocation, MonitoringLocationCreateInput, MonitoringLocationUpdateInput } from '@/types/graphql'
 
 export const useLocationStore = defineStore('locationStore', () => {
   const locationsList = ref<MonitoringLocation[]>([])
@@ -60,7 +60,7 @@ export const useLocationStore = defineStore('locationStore', () => {
   }
 
   const getMinionsForLocationId = (id: number | undefined) => {
-    if (!id) return 
+    if (!id) return
     displayType.value = DisplayType.LIST
     selectedLocationId.value = id
     minionsQueries.findMinionsByLocationId(id)

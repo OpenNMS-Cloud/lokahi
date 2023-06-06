@@ -12,7 +12,7 @@
       </template>
       <template #middle>
         <FeatherInput
-          @update:model-value="searchMinionsListener"
+          v-model="searchMinionsInput"
           label="Search Minion"
           type="search"
           class="search-minions-input"
@@ -37,7 +37,7 @@
       class="minions-list"
     >
       <li
-        v-for="minion in minionsList"
+        v-for="minion in filteredMinionList"
         :key="minion.id"
       >
         <LocationsMinionsCard :item="minion" />
@@ -66,17 +66,28 @@ const props = defineProps({
   }
 })
 
-const minionsList = computed(() => props.minions)
-
 const locationStore = useLocationStore()
 
-const searchMinionsListener = async (val: string | number | undefined) => {
-  await locationStore.searchMinions(val as string)
-}
+const searchMinionsInput = ref()
+const minionsList = computed(() => props.minions)
 
-const emptyListContent = {
-  msg: 'No minions found.'
-}
+const filteredMinionList = computed(() => {
+  if (searchMinionsInput.value) {
+    return minionsList.value.filter((minion) => minion.label?.includes(searchMinionsInput.value))
+  }
+
+  return minionsList.value
+})
+
+const emptyListContent = reactive({
+  msg: 'Add or select a location to get started.'
+})
+
+watchEffect(() => {
+  if (locationStore.selectedLocationIdForMinions) {
+    emptyListContent.msg = 'No Minions found.'
+  }
+})
 
 const icons = markRaw({
   Help,

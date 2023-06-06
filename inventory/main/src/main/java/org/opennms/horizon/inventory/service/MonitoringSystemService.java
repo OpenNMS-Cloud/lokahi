@@ -35,6 +35,14 @@ public class MonitoringSystemService {
             .toList();
     }
 
+    public List<MonitoringSystemDTO> findByMonitoringLocationIdAndTenantId(long locationId, String tenantId) {
+        List<MonitoringSystem> all = systemRepository.findByMonitoringLocationIdAndTenantId(locationId, tenantId);
+        return all
+            .stream()
+            .map(mapper::modelToDTO)
+            .toList();
+    }
+
     public Optional<MonitoringSystemDTO> findBySystemId(String systemId, String tenantId) {
         return systemRepository.findBySystemIdAndTenantId(systemId, tenantId).map(mapper::modelToDTO);
     }

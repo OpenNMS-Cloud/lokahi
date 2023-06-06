@@ -247,7 +247,6 @@ const instructions = {
 }
 
 onUnmounted(() => {
-  locationStore.selectLocation(undefined)
   form.clearErrors()
 })
 

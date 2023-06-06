@@ -37,9 +37,12 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
+import com.google.protobuf.Empty;
+import com.google.protobuf.Int64Value;
 import io.grpc.ManagedChannel;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -59,9 +62,10 @@ import io.grpc.stub.MetadataUtils;
 import org.springframework.test.annotation.DirtiesContext;
 
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
-public class MonitorSystemGrpcTest extends AbstractGrpcUnitTest {
+class MonitoringSystemServiceGrpcTest extends AbstractGrpcUnitTest {
     private MonitoringSystemService mockService;
     private MonitoringSystemServiceGrpc.MonitoringSystemServiceBlockingStub stub;
+
     private final String systemId = "test-system";
     private ManagedChannel channel;
 
@@ -80,6 +84,25 @@ public class MonitorSystemGrpcTest extends AbstractGrpcUnitTest {
         channel.shutdownNow();
         channel.awaitTermination(10, TimeUnit.SECONDS);
         stopServer();
+    }
+
+    @Test
+    void testListMonitoringSystem(){
+        MonitoringSystemDTO systemDTO = MonitoringSystemDTO.newBuilder()
+            .setSystemId(systemId).build();
+        doReturn(Collections.singletonList(systemDTO)).when(mockService).findByTenantId(tenantId);
+        assertThat(stub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createHeaders())).listMonitoringSystem(Empty.newBuilder().build())).isNotNull();
+        verify(mockService).findByTenantId(tenantId);
+    }
+
+    @Test
+    void testListMonitoringSystemByLocationId(){
+        long locationId = 1L;
+        MonitoringSystemDTO systemDTO = MonitoringSystemDTO.newBuilder()
+            .setSystemId(systemId).setMonitoringLocationId(locationId).build();
+        doReturn(Collections.singletonList(systemDTO)).when(mockService).findByMonitoringLocationIdAndTenantId(locationId, tenantId);
+        assertThat(stub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createHeaders())).listMonitoringSystemByLocationId(Int64Value.of(locationId))).isNotNull();
+        verify(mockService).findByMonitoringLocationIdAndTenantId(locationId, tenantId);
     }
 
     @Test

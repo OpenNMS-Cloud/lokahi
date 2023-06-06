@@ -1,0 +1,13 @@
+query FindMinionsByLocationId($locationId: Long!) {
+  findMinionsByLocationId(locationId: $locationId) {
+    id
+    label
+    lastCheckedTime
+    status
+    systemId
+    location {
+      id
+      location
+    }
+  }
+}

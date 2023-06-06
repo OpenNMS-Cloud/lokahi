@@ -1,8 +1,8 @@
 /*******************************************************************************
  * This file is part of OpenNMS(R).
  *
- * Copyright (C) 2022 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
+ * Copyright (C) 2022-2023 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
  *
@@ -42,6 +42,7 @@ import org.opennms.horizon.inventory.repository.MonitoringLocationRepository;
 import org.opennms.horizon.inventory.repository.MonitoringSystemRepository;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -97,6 +98,21 @@ class MonitoringSystemServiceTest {
     public void postTest() {
         verifyNoMoreInteractions(mockLocationRepo);
         verifyNoMoreInteractions(mockMonitoringSystemRepo);
+    }
+
+    @Test
+    void testFindByTenantId() {
+        doReturn(Collections.singletonList(testMonitoringSystem)).when(mockMonitoringSystemRepo).findByTenantId(tenantId);
+        service.findByTenantId(tenantId);
+        verify(mockMonitoringSystemRepo).findByTenantId(tenantId);
+    }
+
+    @Test
+    void testFindByMonitoringLocationIdAndTenantId() {
+        long locationId = 1L;
+        doReturn(Collections.singletonList(testMonitoringSystem)).when(mockMonitoringSystemRepo).findByMonitoringLocationIdAndTenantId(locationId, tenantId);
+        service.findByMonitoringLocationIdAndTenantId(locationId, tenantId);
+        verify(mockMonitoringSystemRepo).findByMonitoringLocationIdAndTenantId(locationId, tenantId);
     }
 
     @Test

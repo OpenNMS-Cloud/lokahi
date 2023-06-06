@@ -29,6 +29,7 @@
 package org.opennms.horizon.inventory.grpc;
 
 import com.google.protobuf.Empty;
+import com.google.protobuf.Int64Value;
 import com.google.protobuf.StringValue;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
@@ -137,6 +138,15 @@ public class MonitoringSystemGrpcItTest extends GrpcTestBase {
             .listMonitoringSystem(Empty.newBuilder().build());
         assertThat(systemList).isNotNull();
         assertThat(systemList.getSystemsList().size()).isZero();
+    }
+
+    @Test
+    void testListSystemByLocationId() {
+        MonitoringSystemList systemList = serviceStub
+            .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader)))
+            .listMonitoringSystemByLocationId(Int64Value.of(system1.getMonitoringLocationId()));
+        assertThat(systemList).isNotNull();
+        assertThat(systemList.getSystemsList().size()).isEqualTo(3);
     }
 
     @Test

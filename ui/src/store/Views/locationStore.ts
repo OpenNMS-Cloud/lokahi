@@ -9,6 +9,7 @@ export const useLocationStore = defineStore('locationStore', () => {
   const locationsList = ref()
   const minionsList = ref()
   const selectedLocationId = ref()
+  const selectedLocationIdForMinions = ref()
   const certificatePassword = ref()
   const displayType = ref(DisplayType.LIST)
 
@@ -47,16 +48,19 @@ export const useLocationStore = defineStore('locationStore', () => {
     })
   }
 
-  const searchMinions = async (searchTerm = '') => {
-    // const minions = await locationQueries.searchMinion(searchTerm)
-    // minionsList.value = minions?.data?.value?.searchLocation || []
-  }
-
   const selectLocation = (id: number | undefined) => {
     if (id) displayType.value = DisplayType.EDIT
 
     selectedLocationId.value = id
+    selectedLocationIdForMinions.value = id
     certificatePassword.value = ''
+  }
+
+  const getMinionsForLocationId = (id: number | undefined) => {
+    if (!id) return 
+    displayType.value = DisplayType.LIST
+    selectedLocationIdForMinions.value = id
+    minionsQueries.findMinionsByLocationId(id)
   }
 
   const setDisplayType = (type: DisplayType) => {
@@ -92,6 +96,7 @@ export const useLocationStore = defineStore('locationStore', () => {
   }
 
   const deleteLocation = async (id: number) => {
+    displayType.value = DisplayType.LIST
     const error = await locationMutations.deleteLocation({ id })
 
     if (!error.value) {
@@ -120,7 +125,6 @@ export const useLocationStore = defineStore('locationStore', () => {
     searchLocations,
     minionsList,
     fetchMinions,
-    searchMinions,
     createLocation,
     saveIsFetching,
     updateLocation,
@@ -128,6 +132,8 @@ export const useLocationStore = defineStore('locationStore', () => {
     deleteLocation,
     getMinionCertificate,
     certificatePassword,
-    setCertificatePassword
+    setCertificatePassword,
+    getMinionsForLocationId,
+    selectedLocationIdForMinions
   }
 })

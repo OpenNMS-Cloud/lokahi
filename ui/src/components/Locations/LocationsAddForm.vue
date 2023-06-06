@@ -14,6 +14,7 @@
           <FeatherInput
             label="Location Name *"
             v-model="formInputs.location"
+            v-focus
             :schema="nameV"
             required
             class="input-name"

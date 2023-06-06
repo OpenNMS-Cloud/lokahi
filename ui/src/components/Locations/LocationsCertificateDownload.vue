@@ -36,7 +36,7 @@
               v-if="props.hasCert"
               secondary
               @click="onSecondaryButtonClick"
-              data-test="download-btn"
+              data-test="revoke-btn"
             >
               {{ props.secondaryButtonText }}
             </FeatherButton>

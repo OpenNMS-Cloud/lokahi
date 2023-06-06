@@ -121,7 +121,7 @@ export const useLocationStore = defineStore('locationStore', () => {
     certificatePassword.value = password
   }
 
-  const selectedLocation = computed(() => locationsList.value.filter((loc) => loc.id === selectedLocationId.value)[0])
+  const selectedLocation = computed(() => locationsList.value.filter((loc) => loc.id === selectedLocationId.value)[0] as Required<MonitoringLocation>)
 
   return {
     displayType,

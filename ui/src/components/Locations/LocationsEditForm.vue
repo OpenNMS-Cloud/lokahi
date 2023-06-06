@@ -97,7 +97,7 @@ import DownloadFile from '@featherds/icon/action/DownloadFile'
 import Delete from '@featherds/icon/action/Delete'
 import { string } from 'yup'
 import { useForm } from '@featherds/input-helper'
-import { MonitoringLocation as LocationType, MonitoringLocation, MonitoringLocationUpdateInput } from '@/types/graphql'
+import { MonitoringLocationUpdateInput } from '@/types/graphql'
 import { DisplayType } from '@/types/locations.d'
 import { useLocationStore } from '@/store/Views/locationStore'
 import { createAndDownloadBlobFile } from '@/components/utils'
@@ -107,15 +107,14 @@ const props = defineProps<{
 }>()
 
 const locationStore = useLocationStore()
-const selectedLocation = computed(() => locationStore.locationsList.filter((l: LocationType) => l.id === props.id)[0] as Required<MonitoringLocation>)
 const formInputs = reactive({} as Required<MonitoringLocationUpdateInput>)
 
 watchEffect(() => {
-  formInputs.id = selectedLocation.value.id,
-  formInputs.location = selectedLocation.value.location,
-  formInputs.address= selectedLocation.value.address,
-  formInputs.longitude= selectedLocation.value.longitude,
-  formInputs.latitude = selectedLocation.value.latitude
+  formInputs.id = locationStore.selectedLocation?.id,
+  formInputs.location = locationStore.selectedLocation?.location,
+  formInputs.address= locationStore.selectedLocation?.address,
+  formInputs.longitude= locationStore.selectedLocation?.longitude,
+  formInputs.latitude = locationStore.selectedLocation?.latitude
 })
 
 const onAddressChange = (newAddress: any) => {

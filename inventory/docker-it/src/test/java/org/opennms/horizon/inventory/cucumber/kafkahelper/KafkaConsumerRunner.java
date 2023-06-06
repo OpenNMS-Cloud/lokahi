@@ -35,7 +35,7 @@ import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.serialization.ByteArrayDeserializer;
 import org.apache.kafka.common.serialization.StringDeserializer;
-import org.opennms.taskset.contract.TaskDefPub;
+import org.opennms.taskset.service.contract.UpdateTasksRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -81,8 +81,8 @@ public class KafkaConsumerRunner implements Runnable {
             for (ConsumerRecord<String, byte[]> record : records) {
                 this.values.add(record.value());
                 try {
-                    var taskDefPub = TaskDefPub.parseFrom(record.value());
-                    LOG.info("Consuming record {}", taskDefPub);
+                    var tasksRequest = UpdateTasksRequest.parseFrom(record.value());
+                    LOG.info("Consuming record {}", tasksRequest);
                 } catch (InvalidProtocolBufferException e) {
                     e.printStackTrace();
                 }

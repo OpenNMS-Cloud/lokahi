@@ -30,11 +30,6 @@ package org.opennms.miniongateway.taskset.service;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 import lombok.Setter;
-import org.opennms.taskset.contract.PublishType;
-import org.opennms.taskset.contract.TaskDefPub;
-import org.opennms.taskset.service.contract.AddSingleTaskOp;
-import org.opennms.taskset.service.contract.RemoveSingleTaskOp;
-import org.opennms.taskset.service.contract.UpdateSingleTaskOp;
 import org.opennms.taskset.service.contract.UpdateTasksRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,23 +65,12 @@ public class TaskSetPublishKafkaConsumer {
     public void receiveMessage(@Payload byte[] data) {
 
         try {
-            var tasksetPub = TaskDefPub.parseFrom(data);
-            LOG.info("Received taskset update {}", tasksetPub);
-            var builder = UpdateTasksRequest.newBuilder().setLocation(tasksetPub.getLocation())
-                .setTenantId(tasksetPub.getTenantId());
-            if (tasksetPub.getPublishType().equals(PublishType.UPDATE)) {
-                tasksetPub.getTaskDefList().forEach(taskDef ->
-                    builder.addUpdate(UpdateSingleTaskOp.newBuilder().setAddTask(AddSingleTaskOp.newBuilder()
-                        .setTaskDefinition(taskDef).build()).build()).build());
-            } else {
-                tasksetPub.getTaskDefList().forEach(taskDef ->
-                    builder.addUpdate(UpdateSingleTaskOp.newBuilder().setRemoveTask(RemoveSingleTaskOp.newBuilder()
-                        .setTaskId(taskDef.getId()).build()).build()).build());
-            }
-            TaskSetGrpcServiceUpdateProcessor updateProcessor = taskSetGrpcServiceUpdateProcessorFactory.create(builder.build());
+            UpdateTasksRequest request = UpdateTasksRequest.parseFrom(data);
+            LOG.info("Received taskset update {}", request);
+            TaskSetGrpcServiceUpdateProcessor updateProcessor = taskSetGrpcServiceUpdateProcessorFactory.create(request);
 
             try {
-                taskSetStorage.atomicUpdateTaskSetForLocation(tasksetPub.getTenantId(), tasksetPub.getLocation(), updateProcessor);
+                taskSetStorage.atomicUpdateTaskSetForLocation(request.getTenantId(), request.getLocation(), updateProcessor);
             } catch (RuntimeException rtExc) {
                 // Log exceptions here that might otherwise get swallowed
                 LOG.warn("error applying task set updates", rtExc);

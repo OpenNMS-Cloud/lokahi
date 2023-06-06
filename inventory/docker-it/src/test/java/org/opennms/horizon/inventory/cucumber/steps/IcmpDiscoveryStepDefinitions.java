@@ -53,11 +53,11 @@ import org.opennms.horizon.inventory.dto.TagDTO;
 import org.opennms.horizon.inventory.dto.TagEntityIdDTO;
 import org.opennms.taskset.contract.DiscoveryScanResult;
 import org.opennms.taskset.contract.PingResponse;
-import org.opennms.taskset.contract.PublishType;
 import org.opennms.taskset.contract.ScannerResponse;
-import org.opennms.taskset.contract.TaskDefPub;
 import org.opennms.taskset.contract.TaskResult;
 import org.opennms.taskset.contract.TenantLocationSpecificTaskSetResults;
+import org.opennms.taskset.service.contract.UpdateSingleTaskOp;
+import org.opennms.taskset.service.contract.UpdateTasksRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -68,6 +68,7 @@ import java.util.Properties;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.awaitility.Awaitility.await;
@@ -242,32 +243,48 @@ public class IcmpDiscoveryStepDefinitions {
     }
 
 
-    private AtomicBoolean matchesTaskPattern(String taskIdPattern, PublishType publishType) {
+    private AtomicBoolean matchesTaskPattern(String taskIdPattern, InventoryProcessingStepDefinitions.PublishType publishType) {
         AtomicBoolean matched = new AtomicBoolean(false);
         var list = kafkaConsumerRunner.getValues();
-        var tasks = new ArrayList<TaskDefPub>();
+        var tasks = new ArrayList<UpdateTasksRequest>();
         for (byte[] taskSet : list) {
             try {
-                var taskDefPub = TaskDefPub.parseFrom(taskSet);
+                var taskDefPub = UpdateTasksRequest.parseFrom(taskSet);
                 tasks.add(taskDefPub);
             } catch (InvalidProtocolBufferException ignored) {
 
             }
         }
         LOG.info("taskIdPattern = {}, publish type = {}, Tasks :  {}", taskIdPattern, publishType, tasks);
-        for (TaskDefPub task : tasks) {
-            if (task.getPublishType().equals(publishType) &&
-                task.getTaskDefList().stream().anyMatch(taskDefinition -> taskDefinition.getId().matches(taskIdPattern))) {
-                matched.set(true);
+        for (UpdateTasksRequest task : tasks) {
+            var addTasks = task.getUpdateList().stream().filter(UpdateSingleTaskOp::hasAddTask).collect(Collectors.toList());
+            var removeTasks = task.getUpdateList().stream().filter(UpdateSingleTaskOp::hasRemoveTask).collect(Collectors.toList());
+            if (publishType.equals(InventoryProcessingStepDefinitions.PublishType.UPDATE)) {
+                boolean matchForTaskId = addTasks.stream().anyMatch(updateSingleTaskOp ->
+                    updateSingleTaskOp.getAddTask().getTaskDefinition().getId().matches(taskIdPattern));
+                if (matchForTaskId) {
+                    matched.set(true);
+                }
             }
+            if (publishType.equals(InventoryProcessingStepDefinitions.PublishType.REMOVE)) {
+                boolean matchForTaskId = removeTasks.stream().anyMatch(updateSingleTaskOp ->
+                    updateSingleTaskOp.getRemoveTask().getTaskId().matches(taskIdPattern));
+                if (matchForTaskId) {
+                    matched.set(true);
+                }
+            }
+
         }
         return matched;
     }
 
     AtomicBoolean matchesTaskPatternForUpdate(String taskIdPattern) {
-        return matchesTaskPattern(taskIdPattern, PublishType.UPDATE);
+        return matchesTaskPattern(taskIdPattern, InventoryProcessingStepDefinitions.PublishType.UPDATE);
     }
 
+    AtomicBoolean matchesTaskPatternForDelete(String taskIdPattern) {
+        return matchesTaskPattern(taskIdPattern, InventoryProcessingStepDefinitions.PublishType.REMOVE);
+    }
 
     @Given("Discovery Subscribe to kafka topic {string}")
     public void discoverySubscribeToKafkaTopic(String topic) {

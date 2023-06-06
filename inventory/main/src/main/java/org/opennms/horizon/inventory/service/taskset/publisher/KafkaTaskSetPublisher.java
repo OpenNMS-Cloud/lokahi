@@ -30,9 +30,11 @@ package org.opennms.horizon.inventory.service.taskset.publisher;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.opennms.taskset.contract.PublishType;
-import org.opennms.taskset.contract.TaskDefPub;
 import org.opennms.taskset.contract.TaskDefinition;
+import org.opennms.taskset.service.contract.AddSingleTaskOp;
+import org.opennms.taskset.service.contract.RemoveSingleTaskOp;
+import org.opennms.taskset.service.contract.UpdateSingleTaskOp;
+import org.opennms.taskset.service.contract.UpdateTasksRequest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.PropertySource;
@@ -40,6 +42,7 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 @RequiredArgsConstructor
 @Component
@@ -58,21 +61,59 @@ public class KafkaTaskSetPublisher implements TaskSetPublisher {
     public void publishNewTasks(String tenantId, String location, List<TaskDefinition> taskList) {
 
         log.info("Publishing task updates for location {} with tenantId {}, taskDef = {}", location, tenantId, taskList);
-        var tasksetPub = TaskDefPub.newBuilder()
-            .setPublishType(PublishType.UPDATE)
-            .setLocation(location).setTenantId(tenantId)
-            .addAllTaskDef(taskList).build();
-        kafkaTemplate.send(kafkaTopic, tasksetPub.toByteArray());
+        publishTaskSetUpdate(
+            (updateBuilder) -> taskList.forEach((taskDefinition) -> addAdditionOpToTaskUpdate(updateBuilder, taskDefinition)),
+            tenantId,
+            location);
     }
 
     @Override
     public void publishTaskDeletion(String tenantId, String location, List<TaskDefinition> taskList) {
 
         log.info("Publishing task removal for location {} with tenantId {}, taskDef = {}", location, tenantId, taskList);
-        var tasksetPub = TaskDefPub.newBuilder()
-            .setPublishType(PublishType.DELETE)
-            .setLocation(location).setTenantId(tenantId)
-            .addAllTaskDef(taskList).build();
-        kafkaTemplate.send(kafkaTopic, tasksetPub.toByteArray());
+        publishTaskSetUpdate(
+            (updateBuilder) -> taskList.forEach((taskDefinition) -> addRemovalOpToUpdate(updateBuilder, taskDefinition.getId())),
+            tenantId,
+            location);
+    }
+
+    private void addAdditionOpToTaskUpdate(UpdateTasksRequest.Builder updateBuilder, TaskDefinition task) {
+        AddSingleTaskOp addOp =
+            AddSingleTaskOp.newBuilder()
+                .setTaskDefinition(task)
+                .build();
+
+        UpdateSingleTaskOp updateOp =
+            UpdateSingleTaskOp.newBuilder()
+                .setAddTask(addOp)
+                .build();
+
+        updateBuilder.addUpdate(updateOp);
+    }
+
+    private void addRemovalOpToUpdate(UpdateTasksRequest.Builder updateBuilder, String taskId) {
+        RemoveSingleTaskOp removeOp =
+            RemoveSingleTaskOp.newBuilder()
+                .setTaskId(taskId)
+                .build();
+
+        UpdateSingleTaskOp updateOp =
+            UpdateSingleTaskOp.newBuilder()
+                .setRemoveTask(removeOp)
+                .build();
+
+        updateBuilder.addUpdate(updateOp);
+    }
+
+    private void publishTaskSetUpdate(Consumer<UpdateTasksRequest.Builder> populateUpdateRequestOp, String tenantId, String location) {
+        UpdateTasksRequest.Builder request =
+            UpdateTasksRequest.newBuilder()
+                .setTenantId(tenantId)
+                .setLocation(location);
+
+        populateUpdateRequestOp.accept(request);
+
+        kafkaTemplate.send(kafkaTopic, tenantId + ":" + location, request.build().toByteArray());
+
     }
 }

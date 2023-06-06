@@ -56,11 +56,11 @@ import org.opennms.inventory.types.ServiceType;
 import org.opennms.node.scan.contract.NodeScanResult;
 import org.opennms.node.scan.contract.ServiceResult;
 import org.opennms.taskset.contract.MonitorType;
-import org.opennms.taskset.contract.PublishType;
 import org.opennms.taskset.contract.ScannerResponse;
-import org.opennms.taskset.contract.TaskDefPub;
 import org.opennms.taskset.contract.TaskResult;
 import org.opennms.taskset.contract.TenantLocationSpecificTaskSetResults;
+import org.opennms.taskset.service.contract.UpdateSingleTaskOp;
+import org.opennms.taskset.service.contract.UpdateTasksRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,6 +70,7 @@ import java.util.Properties;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -95,6 +96,10 @@ public class InventoryProcessingStepDefinitions {
     private String taskIpAddress;
     private MonitorType monitorType;
     private KafkaConsumerRunner kafkaConsumerRunner;
+    public enum PublishType {
+        UPDATE,
+        REMOVE
+    }
 
 //========================================
 // Constructor
@@ -432,21 +437,34 @@ public class InventoryProcessingStepDefinitions {
     private AtomicBoolean matchesTaskPattern(String taskIdPattern, PublishType publishType) {
         AtomicBoolean matched = new AtomicBoolean(false);
         var list = kafkaConsumerRunner.getValues();
-        var tasks = new ArrayList<TaskDefPub>();
+        var tasks = new ArrayList<UpdateTasksRequest>();
         for (byte[] taskSet : list) {
             try {
-                var taskDefPub = TaskDefPub.parseFrom(taskSet);
+                var taskDefPub = UpdateTasksRequest.parseFrom(taskSet);
                 tasks.add(taskDefPub);
             } catch (InvalidProtocolBufferException ignored) {
 
             }
         }
         LOG.info("taskIdPattern = {}, publish type = {}, Tasks :  {}", taskIdPattern, publishType, tasks);
-        for (TaskDefPub task : tasks) {
-            if (task.getPublishType().equals(publishType) &&
-                task.getTaskDefList().stream().anyMatch(taskDefinition -> taskDefinition.getId().matches(taskIdPattern))) {
-                matched.set(true);
+        for (UpdateTasksRequest task : tasks) {
+            var addTasks = task.getUpdateList().stream().filter(UpdateSingleTaskOp::hasAddTask).collect(Collectors.toList());
+            var removeTasks = task.getUpdateList().stream().filter(UpdateSingleTaskOp::hasRemoveTask).collect(Collectors.toList());
+            if (publishType.equals(PublishType.UPDATE)) {
+                boolean matchForTaskId = addTasks.stream().anyMatch(updateSingleTaskOp ->
+                    updateSingleTaskOp.getAddTask().getTaskDefinition().getId().matches(taskIdPattern));
+                if (matchForTaskId) {
+                    matched.set(true);
+                }
             }
+            if (publishType.equals(PublishType.REMOVE)) {
+                boolean matchForTaskId = removeTasks.stream().anyMatch(updateSingleTaskOp ->
+                    updateSingleTaskOp.getRemoveTask().getTaskId().matches(taskIdPattern));
+                if (matchForTaskId) {
+                    matched.set(true);
+                }
+            }
+
         }
         return matched;
     }
@@ -456,7 +474,7 @@ public class InventoryProcessingStepDefinitions {
     }
 
     AtomicBoolean matchesTaskPatternForDelete(String taskIdPattern) {
-        return matchesTaskPattern(taskIdPattern, PublishType.DELETE);
+        return matchesTaskPattern(taskIdPattern, PublishType.REMOVE);
     }
 
     @Then("shutdown kafka consumer")

@@ -84,7 +84,7 @@ const emptyListContent = reactive({
 })
 
 watchEffect(() => {
-  if (locationStore.selectedLocationIdForMinions) {
+  if (locationStore.selectedLocationId) {
     emptyListContent.msg = 'No Minions found.'
   }
 })

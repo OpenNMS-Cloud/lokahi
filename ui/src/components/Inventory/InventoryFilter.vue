@@ -84,7 +84,7 @@ const searchNodesByTags: fncArgVoid = (tags: Tag[]) => {
 
   // if empty tags array, call regular fetch
   if (!tags.length) {
-    inventoryQueries.fetch()
+    inventoryQueries.getMonitoredNodes()
     return
   }
   const tagNames = tags.map((tag) => tag.name!)

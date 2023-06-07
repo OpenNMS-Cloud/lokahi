@@ -7,7 +7,7 @@ import { MonitoringLocation, MonitoringLocationCreateInput, MonitoringLocationUp
 
 export const useLocationStore = defineStore('locationStore', () => {
   const locationsList = ref<MonitoringLocation[]>([])
-  const minionsList = ref()
+  const minionsList = ref([])
   const selectedLocationId = ref()
   const certificatePassword = ref('')
   const displayType = ref(DisplayType.LIST)
@@ -37,14 +37,6 @@ export const useLocationStore = defineStore('locationStore', () => {
     } catch (err) {
       locationsList.value = []
     }
-  }
-
-  const fetchMinions = async () => {
-    minionsQueries.fetchMinions()
-
-    watchEffect(() => {
-      minionsList.value = minionsQueries.minionsList
-    })
   }
 
   const selectLocation = (id: number | undefined) => {
@@ -132,7 +124,6 @@ export const useLocationStore = defineStore('locationStore', () => {
     selectLocation,
     searchLocations,
     minionsList,
-    fetchMinions,
     createLocation,
     saveIsFetching,
     updateLocation,

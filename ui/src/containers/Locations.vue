@@ -37,7 +37,7 @@
       </div>
       <div class="content-right">
         <LocationsMinionsList
-          v-if="locationStore.displayType === DisplayType.LIST && minionsList"
+          v-if="locationStore.displayType === DisplayType.LIST"
           :minions="minionsList"
           @showInstructions="showInstructions = true"
         />
@@ -79,10 +79,7 @@ const showInstructions = ref(false)
 const locationsList = computed(() => locationStore.locationsList)
 const minionsList = computed(() => locationStore.minionsList)
 
-onMounted(async () => {
-  await locationStore.fetchLocations()
-  await locationStore.fetchMinions()
-})
+onMounted(async () => await locationStore.fetchLocations())
 
 const selectedLocationId = computed(() => locationStore.selectedLocationId)
 

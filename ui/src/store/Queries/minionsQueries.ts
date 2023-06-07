@@ -69,7 +69,11 @@ export const useMinionsQueries = defineStore('minionsQueries', () => {
   }
 
   // find minions by location id
-  const { onData: onFindMinionsByLocationId, isFetching: isFetchingMinionsByLocationId } = useQuery({
+  const {
+    onData: onFindMinionsByLocationId,
+    isFetching: isFetchingMinionsByLocationId,
+    execute: refreshMinionsById
+  } = useQuery({
     query: FindMinionsByLocationIdDocument,
     cachePolicy: 'network-only',
     fetchOnMount: false,
@@ -77,7 +81,7 @@ export const useMinionsQueries = defineStore('minionsQueries', () => {
   })
 
   const findMinionsByLocationId = (locationId: number) => (minionLocationId.locationId = locationId)
-  
+
   watchEffect(() => (isFetchingMinionsByLocationId.value ? startSpinner() : stopSpinner()))
 
   onFindMinionsByLocationId((data) => {
@@ -91,6 +95,7 @@ export const useMinionsQueries = defineStore('minionsQueries', () => {
   return {
     minionsList: computed(() => minionsList.value),
     fetchMinions,
-    findMinionsByLocationId
+    findMinionsByLocationId,
+    refreshMinionsById
   }
 })

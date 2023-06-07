@@ -13,6 +13,9 @@ Keycloak:
   HostnamePort: 1443
   HostnameAdminUrl: https://onmshs.local:1443/auth
 
+Postgres:
+  addTestLocation: True
+
 OpenNMS:
   global:
     openTelemetry:

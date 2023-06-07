@@ -1,11 +1,14 @@
-import { shallowMount } from '@vue/test-utils'
+import mount from '../mountWithPiniaVillus'
 import LocationsEditForm from '@/components/Locations/LocationsEditForm.vue'
 
 let wrapper: any
 
-describe.skip('LocationsEditForm', () => {
+describe('LocationsEditForm', () => {
   beforeAll(() => {
-    wrapper = shallowMount(LocationsEditForm)
+    wrapper = mount({
+      component: LocationsEditForm,
+      shallow: false
+    })
   })
   afterAll(() => {
     wrapper.unmount()
@@ -36,17 +39,12 @@ describe.skip('LocationsEditForm', () => {
   })
 
   test('Should have a regenrate key button', () => {
-    const elem = wrapper.get('[data-test="regenrate-key-button"]')
+    const elem = wrapper.get('[data-test="revoke-btn"]')
     expect(elem.exists()).toBeTruthy()
   })
 
   test('Should have a download button', () => {
-    const elem = wrapper.get('[data-test="download-button"]')
-    expect(elem.exists()).toBeTruthy()
-  })
-
-  test('Should have an intructions section', () => {
-    const elem = wrapper.get('[data-test="instruction-section"]')
+    const elem = wrapper.get('[data-test="download-btn"]')
     expect(elem.exists()).toBeTruthy()
   })
 

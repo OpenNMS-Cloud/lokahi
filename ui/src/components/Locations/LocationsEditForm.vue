@@ -57,50 +57,10 @@
           />
         </div>
       </div>
-      <!-- <div class="row">
-        <div class="box api-key">
-          <div class="top">
-            <label for="apiKey">API Key:</label>
-            <span id="apiKey">ABCD1234@#$%</span>
-          </div>
-          <ButtonTextIcon
-            @click="generateKey"
-            :item="generateKeyBtn"
-          >
-            <template #pre
-              ><FeatherIcon
-                :icon="ContentCopy"
-                aria-hidden="true"
-                focusable="false"
-                class="icon-pre"
-            /></template>
-          </ButtonTextIcon>
-        </div>
-        <div class="box download-credentials">
-          <div class="top">
-            <div>Location Credentials File Bundle</div>
-            <div>4/24/2023 - 00:00</div>
-          </div>
-          <ButtonTextIcon
-            @click="downloadCredentials"
-            :item="downloadCredentialsBtn"
-          >
-            <template #pre
-              ><FeatherIcon
-                :icon="DownloadFile"
-                aria-hidden="true"
-                focusable="false"
-                class="icon-pre"
-            /></template>
-          </ButtonTextIcon>
-        </div>
-      </div> -->
       <div>
         <LocationsCertificateDownload
           :certificate-password="locationStore.certificatePassword"
-          :on-primary-button-click="() => downloadCert(formInputs.location)"
-          :has-cert="true"
-          :disabled="true"
+          :on-primary-button-click="downloadCert"
         />
       </div>
       <div class="row mt-m">
@@ -137,25 +97,24 @@ import DownloadFile from '@featherds/icon/action/DownloadFile'
 import Delete from '@featherds/icon/action/Delete'
 import { string } from 'yup'
 import { useForm } from '@featherds/input-helper'
-import {CertificateResponse, MonitoringLocation as LocationType, MonitoringLocationUpdateInput} from '@/types/graphql'
+import { MonitoringLocationUpdateInput } from '@/types/graphql'
 import { DisplayType } from '@/types/locations.d'
 import { useLocationStore } from '@/store/Views/locationStore'
+import { createAndDownloadBlobFile } from '@/components/utils'
 
 const props = defineProps<{
   id: number
 }>()
 
 const locationStore = useLocationStore()
-const selectedLocation = computed(() => locationStore.locationsList.filter((l: LocationType) => l.id === props.id)[0])
 const formInputs = reactive({} as Required<MonitoringLocationUpdateInput>)
-const certificate = reactive({} as CertificateResponse)
 
 watchEffect(() => {
-  formInputs.id = selectedLocation.value.id,
-  formInputs.location = selectedLocation.value.location,
-  formInputs.address= selectedLocation.value.address,
-  formInputs.longitude= selectedLocation.value.longitude,
-  formInputs.latitude = selectedLocation.value.latitude
+  formInputs.id = locationStore.selectedLocation?.id
+  formInputs.location = locationStore.selectedLocation?.location
+  formInputs.address= locationStore.selectedLocation?.address
+  formInputs.longitude= locationStore.selectedLocation?.longitude
+  formInputs.latitude = locationStore.selectedLocation?.latitude
 })
 
 const onAddressChange = (newAddress: any) => {
@@ -182,28 +141,9 @@ const onSubmit = async () => {
     form.clearErrors()
   }
 }
-const convertBase64ToArrayBuffer = (base64: string) => {
-  const binaryString = window.atob(base64)
-  const bytes = new Uint8Array(binaryString.length)
-  return bytes.map((byte, i) => binaryString.charCodeAt(i))
-}
 
-const createAndDownloadBlobFile = (base64: string, filename: string) => {
-  const data = convertBase64ToArrayBuffer(base64)
-  const blob = new Blob([data])
-
-  const link = document.createElement('a')
-  const url = URL.createObjectURL(blob)
-  link.setAttribute('href', url)
-  link.setAttribute('download', filename)
-  link.style.visibility = 'hidden'
-  document.body.appendChild(link)
-  link.click()
-  document.body.removeChild(link)
-}
-
-const downloadCert = async (location: string) => {
-  const minionCertificate = await locationStore.getMinionCertificate(location)
+const downloadCert = async () => {
+  const minionCertificate = await locationStore.getMinionCertificate()
 
   if (minionCertificate) {
     locationStore.setCertificatePassword(minionCertificate.password as string)

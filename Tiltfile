@@ -36,6 +36,11 @@
 ## 35 = minion-certificate-verifier
 
 # Tilt config #
+config.define_string("listen-on")
+config.define_string_list("args", args=True)
+cfg = config.parse()
+config.set_enabled_resources(cfg.get('args', []))
+
 secret_settings(disable_scrub=True)  ## TODO: update secret values so we can reenable scrub
 load('ext://uibutton', 'cmd_button', 'location')
 load('ext://helm_remote', 'helm_remote') # for simple charts like jaeger
@@ -406,12 +411,13 @@ k8s_resource(
 )
 
 ### Others ###
+listen_on = cfg.get('listen-on', "")
 k8s_resource(
     'ingress-nginx-controller',
     labels=['0_useful'],
     port_forwards=[
-        port_forward(8123, 80),
-        port_forward(1443, 443),
+        port_forward(8123, 80, host=listen_on),
+        port_forward(1443, 443, host=listen_on),
     ],
     links=[
         link("https://onmshs.local:1443/", name="Web UI"),

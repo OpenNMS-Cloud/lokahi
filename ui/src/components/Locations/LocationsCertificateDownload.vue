@@ -6,10 +6,7 @@
     <div class="download-container">
       <div class="download-title">{{ props.title }}</div>
       <div class="download-functionality">
-        <div
-          class="certificate-stats"
-          v-if="props.hasCert"
-        >
+        <div class="certificate-stats">
           <div class="certificate-data">
             <FeatherIcon
               class="cert-icon"
@@ -25,14 +22,8 @@
             <div>Expire on 05-08-2024</div>
           </div>
         </div>
-        <div
-          class="divider"
-          v-if="props.hasCert"
-        ></div>
-        <div
-          :class="{ hasCert: !props.hasCert }"
-          class="download-buttons-wrapper"
-        >
+        <div class="divider"></div>
+        <div class="download-buttons-wrapper">
           <div class="download-buttons">
             <FeatherButton
               primary
@@ -45,7 +36,7 @@
               v-if="props.hasCert"
               secondary
               @click="onSecondaryButtonClick"
-              data-test="download-btn"
+              data-test="revoke-btn"
             >
               {{ props.secondaryButtonText }}
             </FeatherButton>
@@ -122,7 +113,7 @@ const props = defineProps({
     type: String
   },
   hasCert: {
-    required: true,
+    default: true,
     type: Boolean
   }
 })

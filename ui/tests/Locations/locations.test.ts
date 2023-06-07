@@ -1,9 +1,10 @@
+import { useLocationStore } from '@/store/Views/locationStore'
 import mount from '../mountWithPiniaVillus'
 import Locations from '@/containers/Locations.vue'
 
 let wrapper: any
 
-describe.skip('Locations', () => {
+describe('Locations', () => {
   beforeAll(() => {
     wrapper = mount({
       component: Locations
@@ -33,10 +34,9 @@ describe.skip('Locations', () => {
   })
 
   test('Should open the location add form', async () => {
+    const store = useLocationStore()
     await wrapper.get('[data-test="add-location-btn"]').trigger('click')
-
-    const elem = wrapper.get('[data-test="location-add-form"]')
-    expect(elem.exists()).toBeTruthy()
+    expect(store.addLocation).toHaveBeenCalledOnce()
   })
 
   test('Should have a location search input', () => {

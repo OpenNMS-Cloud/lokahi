@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+trap 's=$?; echo >&2 "$0: Error on line "$LINENO": $BASH_COMMAND"; exit $s' ERR
+
+password=$(./minion-cert.sh)
+echo "Created minion certificate in minion.p12"
+
+image=$(docker image ls | grep lokahi-minion | grep tilt-build | head -1 | awk '{ print $1 ":" $2 }')
+
+rm -f .env
+echo "IMAGE=${image}" >> .env
+echo "PASSWORD=${password}" >> .env
+
+echo "Updated .env with ${image} image and minion.p12 password"

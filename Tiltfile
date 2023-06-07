@@ -410,8 +410,8 @@ k8s_resource(
     'ingress-nginx-controller',
     labels=['0_useful'],
     port_forwards=[
-        port_forward(8123, 80, host='0.0.0.0'),
-        port_forward(1443, 443, host='0.0.0.0'),
+        port_forward(8123, 80),
+        port_forward(1443, 443),
     ],
     links=[
         link("https://onmshs.local:1443/", name="Web UI"),

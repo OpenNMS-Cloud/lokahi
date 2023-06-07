@@ -27,15 +27,11 @@ locationId=$(curl "$@" -sSf -k -H "Content-Type: application/json" \
 query="{\"query\": \"query { getMinionCertificate(location: \\\"LOC_ID\\\") { certificate, password } }\"}"
 #query=${query/LOC_ID/$locationId}
 query=${query/LOC_ID/$locationName}
-echo "${query}"
 certificateData=$(curl "$@" -sSf -k -H "Content-Type: application/json" \
   -H "Authorization: Bearer $token" \
   --data "${query}" \
   "${graphql}api/graphql")
-echo "${certificateData}"
 
 echo $certificateData|cut -d "\"" -f 8 | base64 -d > minion.p12
 password=$(echo $certificateData|cut -d "\"" -f 12)
-echo "Your location is ${locationName}"
-echo "Your certificate is in minion.p12"
-echo "Password: ${password}"
+echo "${password}"

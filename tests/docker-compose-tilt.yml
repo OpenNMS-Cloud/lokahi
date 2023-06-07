@@ -3,7 +3,7 @@ version: '3.5'
  
 services:
   minion-local:
-    image: localhost:53081/opennms_lokahi-minion:tilt-c79911137e198133
+    image: ${IMAGE}
     environment:
       TZ: 'America/New_York'
       MINION_ID: 'minion-b'
@@ -16,7 +16,7 @@ services:
       GRPC_CLIENT_OVERRIDE_AUTHORITY: minion.onmshs.local
       GRPC_CLIENT_TRUSTSTORE: /opt/karaf/ca.crt
       GRPC_CLIENT_KEYSTORE: /opt/karaf/minion.p12
-      GRPC_CLIENT_KEYSTORE_PASSWORD: 'f8d83d54-af5a-4bcc-8f01-3666b4a49782'
+      GRPC_CLIENT_KEYSTORE_PASSWORD: '${PASSWORD}'
 
       MINION_GATEWAY_PORT: 1443
       MINION_GATEWAY_TLS: 'true'

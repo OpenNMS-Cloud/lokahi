@@ -11,7 +11,7 @@
       <div class="content-left">
         <FeatherButton
           primary
-          @click="addLocation"
+          @click="locationStore.addLocation"
           data-test="add-location-btn"
         >
           <FeatherIcon :icon="icons.Add" />
@@ -49,6 +49,12 @@
           v-if="locationStore.displayType === DisplayType.EDIT"
           :id="selectedLocationId"
         />
+        <LocationsCertificateDownload
+          v-if="locationStore.displayType === DisplayType.READY"
+          :certificate-password="locationStore.certificatePassword"
+          :on-primary-button-click="downloadCert"
+          :has-cert="false"
+        />
       </div>
     </div>
   </div>
@@ -65,6 +71,7 @@ import Help from '@featherds/icon/action/Help'
 import { useLocationStore } from '@/store/Views/locationStore'
 import LocationsList from '@/components/Locations/LocationsList.vue'
 import { DisplayType } from '@/types/locations.d'
+import { createAndDownloadBlobFile } from '@/components/utils'
 
 const locationStore = useLocationStore()
 const showInstructions = ref(false)
@@ -77,10 +84,6 @@ onMounted(async () => {
   await locationStore.fetchMinions()
 })
 
-const addLocation = () => {
-  locationStore.setDisplayType(DisplayType.ADD)
-}
-
 const selectedLocationId = computed(() => locationStore.selectedLocationId)
 
 const searchLocationListener = async (val: string | number | undefined) => {
@@ -92,6 +95,15 @@ const icons = markRaw({
   Search,
   Help
 })
+
+const downloadCert = async () => {
+  const minionCertificate = await locationStore.getMinionCertificate()
+
+  if (minionCertificate) {
+    locationStore.setCertificatePassword(minionCertificate.password as string)
+    createAndDownloadBlobFile(minionCertificate.certificate, `${locationStore.selectedLocation?.location}-certificate.p12`)
+  }
+}
 </script>
 
 <style lang="scss" scoped>

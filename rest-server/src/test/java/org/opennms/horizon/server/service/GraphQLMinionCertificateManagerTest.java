@@ -2,6 +2,7 @@ package org.opennms.horizon.server.service;
 
 import com.google.protobuf.ByteString;
 import io.leangen.graphql.execution.ResolutionEnvironment;
+import java.util.Base64;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.jupiter.api.AfterEach;
@@ -22,13 +23,14 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 @SpringBootTest(webEnvironment = RANDOM_PORT, classes = RestServerApplication.class)
 class GraphQLMinionCertificateManagerTest {
     private static final String GRAPHQL_PATH = "/graphql";
     public static final String TENANT_ID = "tenantId";
-    public static final String LOCATION = "location";
+    public static final Long LOCATION_ID = 444L;
 
     @MockBean
     private MinionCertificateManagerClient mockClient;
@@ -52,10 +54,12 @@ class GraphQLMinionCertificateManagerTest {
 
     @Test
     void testGetMinionCert() throws JSONException {
-        doReturn(GetMinionCertificateResponse.newBuilder().setCertificate(ByteString.copyFromUtf8("test")).setPassword("password").build()).when(mockClient).getMinionCert(TENANT_ID, LOCATION, accessToken);
+        when(mockClient.getMinionCert(TENANT_ID, LOCATION_ID, accessToken)).thenReturn(
+            GetMinionCertificateResponse.newBuilder().setCertificate(ByteString.copyFromUtf8("pkcs12-here")).setPassword("passw0rd").build()
+        );
         String request = """
             query {
-              getMinionCertificate(location: "location"){
+              getMinionCertificate(locationId: 444){
                 certificate
                 password
               }
@@ -68,9 +72,9 @@ class GraphQLMinionCertificateManagerTest {
             .exchange()
             .expectStatus().isOk()
             .expectBody()
-            .jsonPath("$.data.getMinionCertificate.password").isEqualTo("password")
-            .jsonPath("$.data.getMinionCertificate.certificate").isNotEmpty();
-        verify(mockClient).getMinionCert(TENANT_ID, LOCATION, accessToken);
+            .jsonPath("$.data.getMinionCertificate.password").isEqualTo("passw0rd")
+            .jsonPath("$.data.getMinionCertificate.certificate").isEqualTo(Base64.getEncoder().encodeToString("pkcs12-here".getBytes()));
+        verify(mockClient).getMinionCert(TENANT_ID, LOCATION_ID, accessToken);
         verify(mockHeaderUtil, times(1)).extractTenant(any(ResolutionEnvironment.class));
         verify(mockHeaderUtil, times(1)).getAuthHeader(any(ResolutionEnvironment.class));
     }

@@ -32,6 +32,6 @@ public abstract class GQLQueryConstants {
             " } } ) {id, name, ipAddresses, location, snmpConfig { readCommunities, ports } } }";
 
     public static final String CREATE_MINION_CERTIFICATE =
-        "query { getMinionCertificate(location: \"%s\") {  certificate, password } }";
+        "query { getMinionCertificate(locationId: \"%d\") {  certificate, password } }";
 
 }

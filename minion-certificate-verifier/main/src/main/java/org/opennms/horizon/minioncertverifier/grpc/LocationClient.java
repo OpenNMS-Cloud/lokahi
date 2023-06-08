@@ -1,8 +1,8 @@
 /*******************************************************************************
  * This file is part of OpenNMS(R).
  *
- * Copyright (C) 2023 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
+ * Copyright (C) 2022 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
  *
@@ -25,23 +25,14 @@
  *     http://www.opennms.org/
  *     http://www.opennms.com/
  *******************************************************************************/
-syntax = "proto3";
 
-package opennms.minioncertmanager;
-option java_multiple_files = true;
-option java_package = "org.opennms.horizon.minioncertmanager.proto";
-option go_package = "github.com/OpenNMS-Cloud/TSaaS/pki/bti/proto";
+package org.opennms.horizon.minioncertverifier.grpc;
 
-service MinionCertificateManager {
-  rpc getMinionCert(GetMinionCertificateRequest) returns (GetMinionCertificateResponse) {};
-}
+import java.util.Optional;
+import org.opennms.horizon.inventory.dto.MonitoringLocationDTO;
 
-message GetMinionCertificateRequest {
-  string tenant_id = 1;
-  uint64 location_id = 2;
-}
+public interface LocationClient {
 
-message GetMinionCertificateResponse {
-  bytes certificate = 1;
-  string password = 2;
+    Optional<MonitoringLocationDTO> getLocation(String tenantId, long locationId);
+
 }

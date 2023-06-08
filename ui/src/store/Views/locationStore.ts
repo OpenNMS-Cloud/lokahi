@@ -105,7 +105,7 @@ export const useLocationStore = defineStore('locationStore', () => {
 
   const getMinionCertificate = async () => {
     if (!selectedLocation.value) return
-    const response = await locationQueries.getMinionCertificate(selectedLocation.value.location)
+    const response = await locationQueries.getMinionCertificate(selectedLocation.value.id)
     return response.data.value?.getMinionCertificate
   }
 

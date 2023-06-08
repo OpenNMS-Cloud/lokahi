@@ -45,7 +45,7 @@ public class MinionCertificateManagerImplTest {
 
     @Test
     public void requestCertificateWithEmptyDataFails() {
-        createCertificate("", "", (response, error) -> {
+        createCertificate("", 0L, (response, error) -> {
             assertNull(response);
             assertNotNull(error);
         });
@@ -53,7 +53,7 @@ public class MinionCertificateManagerImplTest {
 
     @Test
     public void requestCertificateWithInvalidDataFails() {
-        createCertificate("\"; /dev/null", "&", (response, error) -> {
+        createCertificate("\"; /dev/null", 50L, (response, error) -> {
             assertNull(response);
             assertNotNull(error);
         });
@@ -62,7 +62,7 @@ public class MinionCertificateManagerImplTest {
     @Test
     public void requestCertificateWithValidDataProducesData() {
         String tenantId = "foo faz";
-        String location = "bar baz";
+        Long location = 1010L;
         createCertificate(tenantId, location, (response, error) -> {
             // validation of file existence - we still fail, but mocks should be called
             assertNull(response);
@@ -82,10 +82,10 @@ public class MinionCertificateManagerImplTest {
         assertTrue(caCertFile.exists());
     }
 
-    private void createCertificate(String tenantId, String location, BiConsumer<GetMinionCertificateResponse, Throwable> callback) {
+    private void createCertificate(String tenantId, Long locationId, BiConsumer<GetMinionCertificateResponse, Throwable> callback) {
         GetMinionCertificateRequest request = GetMinionCertificateRequest.newBuilder()
             .setTenantId(tenantId)
-            .setLocation(location)
+            .setLocationId(locationId)
             .build();
 
         minionCertificateManager.getMinionCert(request, new StreamObserver<>() {

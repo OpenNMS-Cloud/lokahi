@@ -21,6 +21,13 @@
             <groupId>org.opennms.horizon.minion.certificate-verifier</groupId>
             <artifactId>certificate-verifier-main</artifactId>
             <version>${project.version}</version>
+            <exclusions>
+                <!-- exclude logback-json stuff, as it pulls legacy logback and makes slf4j2 freak out -->
+                <exclusion>
+                    <groupId>org.opennms.horizon.shared</groupId>
+                    <artifactId>spring-boot-logback-json</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
@@ -63,6 +70,12 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-core</artifactId>
+            <version>1.4.7</version>
             <scope>test</scope>
         </dependency>
 

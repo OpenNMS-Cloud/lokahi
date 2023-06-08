@@ -96,28 +96,28 @@ public class MinionCertificateManagerImpl extends MinionCertificateManagerGrpc.M
         Path tempDirectory = null;
 
         try {
-            String location = INPUT_PATTERN.matcher(request.getLocation()).replaceAll("");
+            Long locationId = request.getLocationId();
             String tenantId = INPUT_PATTERN.matcher(request.getTenantId()).replaceAll("");
 
-            if (location.isBlank() || tenantId.isBlank()) {
+            if (locationId == 0L) {
                 responseObserver.onError(Status.INVALID_ARGUMENT.withDescription("Missing location and/or tenant information.").asException());
                 return;
             }
-            if (!location.equals(request.getLocation()) || !tenantId.equals(request.getTenantId())) {
+            if (!tenantId.equals(request.getTenantId())) {
                 // filtered values do not match input values, meaning we received invalid payload
-                LOG.error("Received invalid input for certificate generation, location {}, tenant {}", request.getLocation(), request.getTenantId());
+                LOG.error("Received invalid input for certificate generation, locationId {}, tenant {}", locationId, request.getTenantId());
                 responseObserver.onError(Status.INVALID_ARGUMENT.withDescription("Missing location and/or tenant information.").asException());
             }
 
             String password = UUID.randomUUID().toString();
-            tempDirectory = Files.createTempDirectory(Files.createTempDirectory(Files.createTempDirectory("minioncert"), tenantId), location);
+            tempDirectory = Files.createTempDirectory(Files.createTempDirectory(Files.createTempDirectory("minioncert"), tenantId), String.valueOf(locationId));
 
             LOG.info("=== TEMP DIRECTORY: {}", tempDirectory.toAbsolutePath());
             LOG.info("exists: {}, isDirectory: {}, canRead: {}", tempDirectory.toFile().exists(), tempDirectory.toFile().isDirectory(), tempDirectory.toFile().canRead());
             File archive = new File(tempDirectory.toFile(), "minion.p12");
 
             // Generate PKCS8 files in the temporary directory
-            pkcs8Generator.generate(location, tenantId, tempDirectory, archive, password, caCertFile, caKeyFile);
+            pkcs8Generator.generate(locationId, tenantId, tempDirectory, archive, password, caCertFile, caKeyFile);
 
             if (!archive.exists()) {
                 LOG.error(FAILED_TO_GENERATE_ONE_OR_MORE_FILES);

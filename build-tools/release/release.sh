@@ -32,7 +32,7 @@ git log $PREVIOUS_TAG..HEAD --oneline --graph --all | grep 'Merge pull request' 
 
 git add -A
 
-git commit -m "RELEASE $CURRENT_TAG - brief description"
+git commit -m "RELEASE $CURRENT_TAG - updated"
 git push origin release
 
 # Release has the release tag history.

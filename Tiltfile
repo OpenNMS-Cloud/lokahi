@@ -411,7 +411,7 @@ k8s_resource(
 )
 
 ### Others ###
-listen_on = cfg.get('listen-on', "")
+listen_on = cfg.get('listen-on', "0.0.0.0")
 k8s_resource(
     'ingress-nginx-controller',
     labels=['0_useful'],

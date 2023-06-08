@@ -5,7 +5,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
 data:
 {{- if .Values.OpenNMS.global.enableJsonLogging }}
-  SPRING_PROFILES_INCLUDE: json-logging
+  SPRING_PROFILES_INCLUDE: default,json-logging
 {{- end }}
 {{- with .Values.OpenNMS.global.springBoot }}
   {{- range $key, $val := .env }}

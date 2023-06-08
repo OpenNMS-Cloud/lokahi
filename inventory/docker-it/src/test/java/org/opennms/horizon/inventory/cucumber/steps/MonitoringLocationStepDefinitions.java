@@ -62,6 +62,11 @@ public class MonitoringLocationStepDefinitions {
         this.backgroundHelper = backgroundHelper;
     }
 
+    @Given("[MonitoringLocation] Grpc location {string}")
+    public void grpcLocation(String location) {
+        backgroundHelper.grpcLocation(location);
+    }
+
     @Given("[MonitoringLocation] External GRPC Port in system property {string}")
     public void monitoringLocationExternalGRPCPortInSystemProperty(String systemPropertyName) {
         backgroundHelper.externalGRPCPortInSystemProperty(systemPropertyName);

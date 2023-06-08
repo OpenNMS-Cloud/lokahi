@@ -175,6 +175,14 @@ public class InventoryProcessingStepDefinitions {
         assertEquals(backgroundHelper.getTenantId(), systems.get(0).getTenantId());
     }
 
+    @Then("verify Monitoring system is removed with system id {string}")
+    public void verifyMonitoringSystemIsRemovedWithSystemId(String systemId) {
+        var monitoringSystemStub = backgroundHelper.getMonitoringSystemStub();
+        var systems = monitoringSystemStub.listMonitoringSystem(Empty.newBuilder().build()).getSystemsList()
+            .stream().filter(s -> systemId.equals(s.getSystemId())).toList();
+        assertEquals(0, systems.size());
+    }
+
     @Then("verify Monitoring location is created with location {string}")
     public void verifyMonitoringLocationIsCreatedWithLocation(String location) {
         var monitoringLocationStub = backgroundHelper.getMonitoringLocationStub();

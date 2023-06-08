@@ -62,11 +62,15 @@ public class FlowsConfigService {
     public void sendFlowConfigToMinionAfterStartup() {
         List<MonitoringLocationDTO> allLocations = monitoringLocationService.findAll();
 
-        for (MonitoringLocationDTO dto : allLocations) {
-            try {
-                sendFlowsConfigToMinion(dto.getTenantId(), dto.getId());
-            } catch (Exception e) {
-                LOG.error("Fail to sent flow config for tenantId={}; locationId={}", dto.getTenantId(), dto.getLocation());
+        FlowsConfig flowsConfig = readFlowsConfig();
+
+        if (flowsConfig != null) {
+            for (MonitoringLocationDTO dto : allLocations) {
+                try {
+                    publishFlowsConfig(dto.getTenantId(), dto.getId(), flowsConfig);
+                } catch (Exception exc) {
+                    LOG.error("Failed to send flow config: tenant={}; location={}", dto.getTenantId(), dto.getLocation(), exc);
+                }
             }
         }
     }
@@ -91,13 +95,12 @@ public class FlowsConfigService {
         taskSetPublisher.publishNewTasks(tenantId, locationId, taskList);
     }
 
-    @VisibleForTesting
-    FlowsConfig readFlowsConfig() {
+    private FlowsConfig readFlowsConfig() {
         try {
             URL url = this.getClass().getResource("/flows-config.json");
             return ProtobufUtil.fromJson(Resources.toString(url, StandardCharsets.UTF_8), FlowsConfig.class);
         } catch (IOException ex) {
-            LOG.error("Fail to read flows config: {}", ex.getMessage());
+            LOG.error("Failed to read flows config", ex);
             return null;
         }
     }

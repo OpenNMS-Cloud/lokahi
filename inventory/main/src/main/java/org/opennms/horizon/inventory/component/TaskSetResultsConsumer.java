@@ -40,11 +40,8 @@ import org.opennms.taskset.contract.TenantLocationSpecificTaskSetResults;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.messaging.handler.annotation.Headers;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
-
-import java.util.Map;
 
 @Slf4j
 @Component
@@ -55,7 +52,7 @@ public class TaskSetResultsConsumer {
     private final ScannerResponseService scannerResponseService;
 
     @KafkaListener(topics = "${kafka.topics.task-set-results}", concurrency = "1")
-    public void receiveMessage(@Payload byte[] data, @Headers Map<String, Object> headers) {
+    public void receiveMessage(@Payload byte[] data) {
         LOG.debug("Have message from Task Set Results kafka topic");
 
         try {

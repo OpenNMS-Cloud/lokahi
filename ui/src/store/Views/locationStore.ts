@@ -7,7 +7,6 @@ import { MonitoringLocation, MonitoringLocationCreateInput, MonitoringLocationUp
 
 export const useLocationStore = defineStore('locationStore', () => {
   const locationsList = ref<MonitoringLocation[]>([])
-  const minionsList = ref([])
   const selectedLocationId = ref()
   const certificatePassword = ref('')
   const displayType = ref(DisplayType.LIST)
@@ -123,7 +122,6 @@ export const useLocationStore = defineStore('locationStore', () => {
     selectedLocationId,
     selectLocation,
     searchLocations,
-    minionsList,
     createLocation,
     saveIsFetching,
     updateLocation,

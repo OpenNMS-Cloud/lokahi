@@ -69,15 +69,17 @@ import Add from '@featherds/icon/action/Add'
 import Search from '@featherds/icon/action/Search'
 import Help from '@featherds/icon/action/Help'
 import { useLocationStore } from '@/store/Views/locationStore'
+import { useMinionsQueries } from '@/store/Queries/minionsQueries'
 import LocationsList from '@/components/Locations/LocationsList.vue'
 import { DisplayType } from '@/types/locations.d'
 import { createAndDownloadBlobFile } from '@/components/utils'
 
 const locationStore = useLocationStore()
+const minionsQueries = useMinionsQueries()
 const showInstructions = ref(false)
 
 const locationsList = computed(() => locationStore.locationsList)
-const minionsList = computed(() => locationStore.minionsList)
+const minionsList = computed(() => minionsQueries.minionsList)
 
 onMounted(async () => await locationStore.fetchLocations())
 

@@ -28,6 +28,7 @@
 
 package org.opennms.miniongateway.grpc.server.flows;
 
+import lombok.RequiredArgsConstructor;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.opennms.horizon.flows.document.FlowDocumentLog;
 import org.opennms.horizon.flows.document.TenantLocationSpecificFlowDocumentLog;
@@ -52,20 +53,26 @@ public class FlowKafkaForwarder implements MessageConsumer<FlowDocumentLog, Flow
 
     private final Logger logger = LoggerFactory.getLogger(FlowKafkaForwarder.class);
 
-    @Autowired
-    private TenantIDGrpcServerInterceptor tenantIDGrpcInterceptor;
+    private final TenantIDGrpcServerInterceptor tenantIDGrpcInterceptor;
 
-    @Autowired
-    private LocationServerInterceptor locationServerInterceptor;
+    private final LocationServerInterceptor locationServerInterceptor;
 
-    @Autowired
-    private KafkaTemplate<String, byte[]> kafkaTemplate;
+    private final KafkaTemplate<String, byte[]> kafkaTemplate;
 
-    @Autowired
-    private TenantLocationSpecificFlowDocumentLogMapper tenantLocationSpecificFlowDocumentLogMapper;
+    private final TenantLocationSpecificFlowDocumentLogMapper tenantLocationSpecificFlowDocumentLogMapper;
 
     @Value("${task.results.kafka-topic:" + DEFAULT_TASK_RESULTS_TOPIC + "}")
     private String kafkaTopic;
+
+    public FlowKafkaForwarder(@Autowired TenantIDGrpcServerInterceptor tenantIDGrpcInterceptor,
+                              @Autowired LocationServerInterceptor locationServerInterceptor,
+                              @Autowired KafkaTemplate<String, byte[]> kafkaTemplate,
+                              @Autowired TenantLocationSpecificFlowDocumentLogMapper tenantLocationSpecificFlowDocumentLogMapper) {
+        this.tenantIDGrpcInterceptor = tenantIDGrpcInterceptor;
+        this.locationServerInterceptor = locationServerInterceptor;
+        this.kafkaTemplate = kafkaTemplate;
+        this.tenantLocationSpecificFlowDocumentLogMapper = tenantLocationSpecificFlowDocumentLogMapper;
+    }
 
     @Override
     public SinkModule<FlowDocumentLog, FlowDocumentLog> getModule() {

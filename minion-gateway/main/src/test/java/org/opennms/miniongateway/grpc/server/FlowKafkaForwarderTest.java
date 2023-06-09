@@ -28,18 +28,13 @@
 
 package org.opennms.miniongateway.grpc.server;
 
-import com.google.protobuf.InvalidProtocolBufferException;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatcher;
-import org.mockito.Captor;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.opennms.horizon.flows.document.FlowDocument;
 import org.opennms.horizon.flows.document.FlowDocumentLog;
@@ -55,37 +50,34 @@ import org.springframework.test.util.ReflectionTestUtils;
 import java.util.Arrays;
 
 import static org.mockito.ArgumentMatchers.argThat;
-
+import static org.mockito.Mockito.mock;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FlowKafkaForwarderTest {
-    @InjectMocks
-    private FlowKafkaForwarder flowKafkaForwarder = new FlowKafkaForwarder();
+    private final TenantIDGrpcServerInterceptor tenantIDGrpcInterceptor = mock(TenantIDGrpcServerInterceptor.class);
 
-    @Mock
-    private TenantIDGrpcServerInterceptor tenantIDGrpcInterceptor;
+    private final LocationServerInterceptor locationServerInterceptor = mock(LocationServerInterceptor.class);
 
-    @Mock
-    private LocationServerInterceptor locationServerInterceptor;
-
-    @Mock
-    private KafkaTemplate<String, byte[]> kafkaTemplate;
+    private final KafkaTemplate<String, byte[]> kafkaTemplate = mock(KafkaTemplate.class);
 
     private final FlowApplicationConfig flowApplicationConfig = new FlowApplicationConfig();
-    @Spy
-    private TenantLocationSpecificFlowDocumentLogMapper tenantLocationSpecificFlowDocumentLogMapper = flowApplicationConfig.tenantLocationSpecificFlowDocumentLogMapper();
+    private final TenantLocationSpecificFlowDocumentLogMapper tenantLocationSpecificFlowDocumentLogMapper =
+        flowApplicationConfig.tenantLocationSpecificFlowDocumentLogMapper();
 
     private final String kafkaTopic = "kafkaTopic";
+
+    @InjectMocks
+    private FlowKafkaForwarder flowKafkaForwarder = new FlowKafkaForwarder(tenantIDGrpcInterceptor,
+        locationServerInterceptor, kafkaTemplate, tenantLocationSpecificFlowDocumentLogMapper);
+
     @Before
     public void setUp() {
         ReflectionTestUtils.setField(flowKafkaForwarder, "kafkaTopic", kafkaTopic);
+        ReflectionTestUtils.setField(flowKafkaForwarder, "tenantLocationSpecificFlowDocumentLogMapper", tenantLocationSpecificFlowDocumentLogMapper);
     }
 
-    @Captor
-    ArgumentCaptor<ProducerRecord<String, byte[]>> captor;
-
     @Test
-    public void testForward() throws InvalidProtocolBufferException {
+    public void testForward() {
         Mockito.when(tenantIDGrpcInterceptor.readCurrentContextTenantId()).thenReturn("tenantId");
         Mockito.when(locationServerInterceptor.readCurrentContextLocation()).thenReturn("location");
         var flowsLog = FlowDocumentLog.newBuilder()

@@ -47,6 +47,7 @@ import org.opennms.horizon.shared.flows.mapper.TenantLocationSpecificFlowDocumen
 import org.opennms.horizon.shared.flows.mapper.impl.TenantLocationSpecificFlowDocumentLogMapperImpl;
 import org.opennms.horizon.shared.grpc.common.LocationServerInterceptor;
 import org.opennms.horizon.shared.grpc.common.TenantIDGrpcServerInterceptor;
+import org.opennms.miniongateway.grpc.server.flows.FlowApplicationConfig;
 import org.opennms.miniongateway.grpc.server.flows.FlowKafkaForwarder;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -68,8 +69,9 @@ public class FlowKafkaForwarderTest {
     @Mock
     private KafkaTemplate<String, byte[]> kafkaTemplate;
 
+    private final FlowApplicationConfig flowApplicationConfig = new FlowApplicationConfig();
     @Spy
-    private TenantLocationSpecificFlowDocumentLogMapper tenantLocationSpecificFlowDocumentLogMapper = new TenantLocationSpecificFlowDocumentLogMapperImpl();
+    private TenantLocationSpecificFlowDocumentLogMapper tenantLocationSpecificFlowDocumentLogMapper = flowApplicationConfig.tenantLocationSpecificFlowDocumentLogMapper();
 
     @Before
     public void setUp() {

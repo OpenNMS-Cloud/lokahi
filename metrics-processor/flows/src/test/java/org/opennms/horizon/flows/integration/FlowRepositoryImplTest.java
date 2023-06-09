@@ -8,7 +8,9 @@ import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.opennms.dataplatform.flows.ingester.v1.IngesterGrpc;
 import org.opennms.dataplatform.flows.ingester.v1.StoreFlowDocumentsResponse;
+import org.opennms.horizon.flows.document.FlowDocument;
 import org.opennms.horizon.flows.document.TenantLocationSpecificFlowDocument;
+import org.opennms.horizon.flows.document.TenantLocationSpecificFlowDocumentLog;
 import org.opennms.horizon.flows.grpc.client.IngestorClient;
 import org.springframework.retry.support.RetryTemplate;
 
@@ -43,15 +45,13 @@ class FlowRepositoryImplTest {
     @Test
     void testCorrectNumberOfInteractionsWithIngesterStub() {
         // Given
-        List<TenantLocationSpecificFlowDocument> flows =
-            Collections.singletonList(
-                TenantLocationSpecificFlowDocument.newBuilder()
+        var flowsLog =
+                TenantLocationSpecificFlowDocumentLog.newBuilder()
                     .setTenantId("any-tenant-id")
-                    .getDefaultInstanceForType()    // TODO: doesn't this make the setTenantId() pointless?
-            );
+                    .addMessage(FlowDocument.newBuilder());
 
         // When
-        flowRepository.persist(flows);
+        flowRepository.persist(flowsLog.build());
 
         // Then
         Mockito.verify(ingesterBlockingStub, Mockito.times(3)).storeFlowDocuments(Mockito.any());

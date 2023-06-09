@@ -33,14 +33,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.opennms.horizon.flows.document.TenantLocationSpecificFlowDocument;
+import org.opennms.horizon.flows.document.FlowDocument;
 import org.opennms.horizon.flows.document.TenantLocationSpecificFlowDocumentLog;
 import org.opennms.horizon.flows.processing.Pipeline;
-import org.opennms.horizon.shared.constants.GrpcConstants;
 import org.opennms.horizon.tenantmetrics.TenantMetricsTracker;
-
-import java.util.HashMap;
-import java.util.Map;
 
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
@@ -68,11 +64,11 @@ public class FlowProcessorTest {
             TenantLocationSpecificFlowDocumentLog.newBuilder()
                 .setTenantId(TENANT_ID)
                 .addMessage(
-                    TenantLocationSpecificFlowDocument.newBuilder()
+                    FlowDocument.newBuilder()
                         .setSrcAddress("127.0.0.1")
                         .setDstAddress("8.8.8.8")
                 ).addMessage(
-                    TenantLocationSpecificFlowDocument.newBuilder()
+                    FlowDocument.newBuilder()
                         .setSrcAddress("192.168.0.1")
                         .setDstAddress("1.1.1.1")
                 ).build();
@@ -80,7 +76,7 @@ public class FlowProcessorTest {
 
         processor.consume(flows.toByteArray());
 
-        verify(pipeline, timeout(5000).only()).process(flows.getMessageList(), TENANT_ID);
+        verify(pipeline, timeout(5000).only()).process(flows);
         verify(metricsTracker, timeout(5000).times(1)).addTenantFlowSampleCount(TENANT_ID, 2);
     }
 

@@ -32,6 +32,9 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.header.Header;
 import org.apache.kafka.common.header.internals.RecordHeader;
 import org.opennms.horizon.flows.document.FlowDocumentLog;
+import org.opennms.horizon.flows.document.TenantLocationSpecificFlowDocumentLog;
+import org.opennms.horizon.shared.flows.mapper.TenantLocationSpecificFlowDocumentLogMapper;
+import org.opennms.horizon.shared.grpc.common.LocationServerInterceptor;
 import org.opennms.horizon.shared.grpc.common.TenantIDGrpcServerInterceptor;
 import org.opennms.horizon.shared.ipc.sink.api.MessageConsumer;
 import org.opennms.horizon.shared.ipc.sink.api.SinkModule;
@@ -51,58 +54,53 @@ import java.util.List;
  */
 @Component
 public class FlowKafkaForwarder implements MessageConsumer<FlowDocumentLog, FlowDocumentLog> {
-    public static final String TENANT_ID_HEADER_NAME = "tenant-id";
     public static final String DEFAULT_TASK_RESULTS_TOPIC = "flows";
 
     private final Logger logger = LoggerFactory.getLogger(FlowKafkaForwarder.class);
 
     @Autowired
+    private TenantIDGrpcServerInterceptor tenantIDGrpcInterceptor;
+
+    @Autowired
+    private LocationServerInterceptor locationServerInterceptor;
+
+    @Autowired
     private KafkaTemplate<String, byte[]> kafkaTemplate;
 
     @Autowired
-    private TenantIDGrpcServerInterceptor tenantIDGrpcInterceptor;
+    private TenantLocationSpecificFlowDocumentLogMapper tenantLocationSpecificFlowDocumentLogMapper;
 
     @Value("${task.results.kafka-topic:" + DEFAULT_TASK_RESULTS_TOPIC + "}")
     private String kafkaTopic;
 
     @Override
     public SinkModule<FlowDocumentLog, FlowDocumentLog> getModule() {
-        return new FlowSinkModule();
+        return new org.opennms.miniongateway.grpc.server.flows.FlowSinkModule();
     }
 
     @Override
-    public void handleMessage(FlowDocumentLog message) {
+    public void handleMessage(FlowDocumentLog messageLog) {
         // Retrieve the Tenant ID from the TenantID GRPC Interceptor
         String tenantId = tenantIDGrpcInterceptor.readCurrentContextTenantId();
-        logger.trace("Received flow; sending to Kafka: tenant-id: {}; kafka-topic={}; message={}", tenantId, kafkaTopic, message);
+        // Ditto for location
+        String location = locationServerInterceptor.readCurrentContextLocation();
+        logger.trace("Received flow; sending to Kafka: tenant-id: {}; kafka-topic={}; message={}", tenantId, kafkaTopic, messageLog);
 
-        byte[] rawContent = message.toByteArray();
-        ProducerRecord<String, byte[]> producerRecord = formatProducerRecord(rawContent, tenantId);
 
-        this.kafkaTemplate.send(producerRecord);
+        var tenantLocationSpecificFlowDocumentLog =
+            tenantLocationSpecificFlowDocumentLogMapper.mapBareToTenanted(tenantId, location, messageLog);
+
+        sendToKafka(tenantLocationSpecificFlowDocumentLog);
     }
 
 //========================================
 // INTERNALS
 //----------------------------------------
 
-    /**
-     * Format the record to send to Kafka, with the needed content and the headers.
-     *
-     * @param rawContent content to include as the message payload.
-     * @param tenantId   Tenant ID to include in the message headers.
-     * @return ProducerRecord to send to Kafka.
-     */
-    private ProducerRecord<String, byte[]> formatProducerRecord(byte[] rawContent, String tenantId) {
-        List<Header> headers = new LinkedList<>();
-        headers.add(new RecordHeader(TENANT_ID_HEADER_NAME, tenantId.getBytes(StandardCharsets.UTF_8)));
+    private void sendToKafka(TenantLocationSpecificFlowDocumentLog tenantLocationSpecificFlowDocumentLog) {
+        byte[] rawContent = tenantLocationSpecificFlowDocumentLog.toByteArray();
+        var producerRecord = new ProducerRecord<String, byte[]>(kafkaTopic, rawContent);
 
-        return new ProducerRecord<String, byte[]>(
-            kafkaTopic,
-            null,
-            null,
-            rawContent,
-            headers
-        );
+        this.kafkaTemplate.send(producerRecord);
     }
 }

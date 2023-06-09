@@ -8,15 +8,18 @@ import org.mockito.Mockito;
 import org.opennms.horizon.flows.classification.ClassificationRequest;
 import org.opennms.horizon.flows.classification.IpAddr;
 import org.opennms.horizon.flows.classification.persistence.api.Protocol;
+import org.opennms.horizon.flows.document.FlowDocument;
 import org.opennms.horizon.flows.document.TenantLocationSpecificFlowDocument;
 
 import java.util.function.Function;
 
-public class FlowDocumentBuilderClassificationRequestMapperImplTest {
+class FlowDocumentBuilderClassificationRequestMapperImplTest {
 
     private Function<Integer, Protocol> mockProtocolLookupOp;
 
     private FlowDocumentClassificationRequestMapperImpl target;
+
+    private final String location = "location";
 
     @BeforeEach
     public void setUp() {
@@ -32,7 +35,7 @@ public class FlowDocumentBuilderClassificationRequestMapperImplTest {
         //
         // Setup Test Data and Interactions
         //
-        var testDocument = TenantLocationSpecificFlowDocument.newBuilder()
+        var testDocument = FlowDocument.newBuilder()
             .setSrcAddress("1.1.1.1")
             .setSrcPort(UInt32Value.of(1))
             .setDstAddress("2.2.2.2")
@@ -42,7 +45,7 @@ public class FlowDocumentBuilderClassificationRequestMapperImplTest {
         //
         // Execute
         //
-        ClassificationRequest result = target.createClassificationRequest(testDocument.build());
+        ClassificationRequest result = target.createClassificationRequest(testDocument.build(), location);
 
         //
         // Verify the Results
@@ -58,12 +61,12 @@ public class FlowDocumentBuilderClassificationRequestMapperImplTest {
         //
         // Setup Test Data and Interactions
         //
-        var testDocument = TenantLocationSpecificFlowDocument.newBuilder();
+        var testDocument = FlowDocument.newBuilder();
 
         //
         // Execute
         //
-        ClassificationRequest result = target.createClassificationRequest(testDocument.build());
+        ClassificationRequest result = target.createClassificationRequest(testDocument.build(), location);
 
         //
         // Verify the Results

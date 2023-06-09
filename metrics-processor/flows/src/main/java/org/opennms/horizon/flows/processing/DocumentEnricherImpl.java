@@ -31,11 +31,13 @@ package org.opennms.horizon.flows.processing;
 import com.google.protobuf.UInt64Value;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
+import org.opennms.horizon.flows.document.FlowDocument;
 import org.opennms.horizon.flows.document.Locality;
 import org.opennms.horizon.flows.document.NodeInfo;
 import org.opennms.horizon.flows.classification.ClassificationEngine;
 import org.opennms.horizon.flows.classification.ClassificationRequest;
 import org.opennms.horizon.flows.document.TenantLocationSpecificFlowDocument;
+import org.opennms.horizon.flows.document.TenantLocationSpecificFlowDocumentLog;
 import org.opennms.horizon.flows.grpc.client.InventoryClient;
 import org.opennms.horizon.inventory.dto.IpInterfaceDTO;
 import org.opennms.horizon.shared.utils.InetAddressUtils;
@@ -74,13 +76,14 @@ public class DocumentEnricherImpl {
         this.clockSkewCorrectionThreshold = clockSkewCorrectionThreshold;
     }
 
-    public List<TenantLocationSpecificFlowDocument> enrich(Collection<TenantLocationSpecificFlowDocument> flows) {
+    public List<FlowDocument> enrich(TenantLocationSpecificFlowDocumentLog flowsLog) {
+        var flows = flowsLog.getMessageList();
         if (flows.isEmpty()) {
             LOG.info("Nothing to enrich.");
             return Collections.emptyList();
         }
 
-        return flows.stream().map(this::enrichOne).collect(Collectors.toList());
+        return flows.stream().map(f -> this.enrichOne(f, flowsLog.getTenantId(), flowsLog.getLocation())).toList();
     }
 
     private boolean isPrivateAddress(String ipAddress) {
@@ -112,11 +115,8 @@ public class DocumentEnricherImpl {
     }
 
     // Note that protobuf semantics prevent nulls in many places here
-    private TenantLocationSpecificFlowDocument enrichOne(TenantLocationSpecificFlowDocument flow) {
-        var document = TenantLocationSpecificFlowDocument.newBuilder(flow);     // Can never return null
-
-        String tenantId = flow.getTenantId();
-        String location = flow.getLocation();
+    private FlowDocument enrichOne(FlowDocument flow, String tenantId, String location) {
+        var document = FlowDocument.newBuilder(flow);     // Can never return null
 
         // Node data
         Optional.ofNullable(getNodeInfo(location, flow.getExporterAddress(), tenantId)).ifPresent(document::setExporterNode);
@@ -134,7 +134,7 @@ public class DocumentEnricherImpl {
         }
 
         ClassificationRequest classificationRequest =
-            flowDocumentBuilderClassificationRequestMapper.createClassificationRequest(document.build());
+            flowDocumentBuilderClassificationRequestMapper.createClassificationRequest(document.build(), location);
 
         // Check whether classification is possible
         if (classificationRequest.isClassifiable()) {

@@ -39,10 +39,12 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.opennms.horizon.flows.classification.ClassificationEngine;
+import org.opennms.horizon.flows.document.FlowDocument;
 import org.opennms.horizon.flows.document.Locality;
 import org.opennms.horizon.flows.document.NetflowVersion;
 import org.opennms.horizon.flows.classification.ClassificationRequest;
 import org.opennms.horizon.flows.document.TenantLocationSpecificFlowDocument;
+import org.opennms.horizon.flows.document.TenantLocationSpecificFlowDocumentLog;
 import org.opennms.horizon.flows.grpc.client.InventoryClient;
 import org.opennms.horizon.inventory.dto.IpInterfaceDTO;
 
@@ -65,7 +67,7 @@ public class DocumentEnricherTest {
     private FlowDocumentClassificationRequestMapper mockFlowDocumentClassificationRequestMapper;
     private ClassificationRequest mockClassificationRequest;
 
-    private TenantLocationSpecificFlowDocument testDocument;
+    private TenantLocationSpecificFlowDocumentLog testDocumentLog;
 
     private DocumentEnricherImpl target;
 
@@ -76,23 +78,24 @@ public class DocumentEnricherTest {
         mockFlowDocumentClassificationRequestMapper = Mockito.mock(FlowDocumentClassificationRequestMapper.class);
         mockClassificationRequest = Mockito.mock(ClassificationRequest.class);
 
-        testDocument =
-            TenantLocationSpecificFlowDocument.newBuilder()
+        testDocumentLog =
+            TenantLocationSpecificFlowDocumentLog.newBuilder()
                 .setTenantId("x-tenant-id-x")
                 .setLocation("x-location-x")
-                .setSrcAddress("1.1.1.1")
-                .setSrcPort(UInt32Value.of(510))
-                .setDstAddress("2.2.2.2")
-                .setDstPort(UInt32Value.of(80))
-                .setProtocol(UInt32Value.of(6)) // TCP
-                .setNetflowVersion(NetflowVersion.V5)
-                .setExporterAddress("127.0.0.1")
-                .build()
-                ;
+                .addMessage(
+                    FlowDocument.newBuilder()
+                        .setSrcAddress("1.1.1.1")
+                        .setSrcPort(UInt32Value.of(510))
+                        .setDstAddress("2.2.2.2")
+                        .setDstPort(UInt32Value.of(80))
+                        .setProtocol(UInt32Value.of(6)) // TCP
+                        .setNetflowVersion(NetflowVersion.V5)
+                        .setExporterAddress("127.0.0.1"))
+                .build();
 
         target = new DocumentEnricherImpl(mockInventoryClient, mockClassificationEngine, mockFlowDocumentClassificationRequestMapper, 0);
 
-        Mockito.when(mockFlowDocumentClassificationRequestMapper.createClassificationRequest(Mockito.any(TenantLocationSpecificFlowDocument.class)))
+        Mockito.when(mockFlowDocumentClassificationRequestMapper.createClassificationRequest(Mockito.any(FlowDocument.class), Mockito.any(String.class)))
             .thenReturn(mockClassificationRequest);
     }
 
@@ -102,18 +105,16 @@ public class DocumentEnricherTest {
         // Setup Test Data and Interactions
         //
         target = new DocumentEnricherImpl(mockInventoryClient, mockClassificationEngine, mockFlowDocumentClassificationRequestMapper, 100);
-        List<TenantLocationSpecificFlowDocument> testList = List.of(testDocument);
 
         //
         // Execute
         //
-        List<TenantLocationSpecificFlowDocument> result = target.enrich(testList);
+        List<FlowDocument> result = target.enrich(testDocumentLog);
 
         //
         // Verify the Results
         //
         assertEquals(1, result.size());
-        assertEquals("x-tenant-id-x", result.get(0).getTenantId());
     }
 
     @Test
@@ -126,29 +127,25 @@ public class DocumentEnricherTest {
         var now = Instant.now();
         int timeOffset = 100;
 
-        TenantLocationSpecificFlowDocument testDocumentWithTimestamps =
-            TenantLocationSpecificFlowDocument.newBuilder(testDocument)
+        var testDocumentLogWithTimestamps = TenantLocationSpecificFlowDocumentLog.newBuilder(testDocumentLog);
+        testDocumentLogWithTimestamps.getMessageBuilder(0)
                 .setReceivedAt(now.plus(timeOffset, ChronoUnit.MILLIS).toEpochMilli())
                 .setTimestamp(now.toEpochMilli())
                 .setFirstSwitched(UInt64Value.of(now.minus(20_000L, ChronoUnit.MILLIS).toEpochMilli()))
                 .setDeltaSwitched(UInt64Value.of(now.minus(10_000L, ChronoUnit.MILLIS).toEpochMilli()))
                 .setLastSwitched(UInt64Value.of(now.minus(5_000L, ChronoUnit.MILLIS).toEpochMilli()))
-                .build()
                 ;
-
-
-        List<TenantLocationSpecificFlowDocument> testList = List.of(testDocumentWithTimestamps);
 
         //
         // Execute
         //
-        List<TenantLocationSpecificFlowDocument> result = target.enrich(testList);
+        List<FlowDocument> result = target.enrich(testDocumentLogWithTimestamps.build());
 
         //
         // Verify the Results
         //
         assertEquals(1, result.size());
-        assertEquals("x-tenant-id-x", result.get(0).getTenantId());
+        assertEquals("x-tenant-id-x", testDocumentLogWithTimestamps.getTenantId());
         assertEquals(100, result.get(0).getClockCorrection());
         assertEquals(now.plus(Duration.ofMillis(100)).toEpochMilli(), result.get(0).getTimestamp()); // plus because skew is -100
         assertEquals(now.minus(19_900L, ChronoUnit.MILLIS).toEpochMilli(), result.get(0).getFirstSwitched().getValue());
@@ -159,7 +156,7 @@ public class DocumentEnricherTest {
         assertEquals(Locality.PUBLIC, result.get(0).getFlowLocality());
 
         verifySameExcluding(
-            testDocumentWithTimestamps,
+            testDocumentLogWithTimestamps.getMessage(0),
             result.get(0),
             "first_switched", "delta_switched", "last_switched", "timestamp", "clock_correction", "src_locality", "dst_locality", "flow_locality"
         );
@@ -175,8 +172,9 @@ public class DocumentEnricherTest {
         var now = Instant.now();
         int timeOffset = 99;
 
-        TenantLocationSpecificFlowDocument testDocumentWithTimestamps =
-            TenantLocationSpecificFlowDocument.newBuilder(testDocument)
+        var testDocumentLogWithTimestamps =
+            TenantLocationSpecificFlowDocumentLog.newBuilder(testDocumentLog);
+        testDocumentLogWithTimestamps.getMessageBuilder(0)
                 .setReceivedAt(now.plus(timeOffset, ChronoUnit.MILLIS).toEpochMilli())
                 .setTimestamp(now.toEpochMilli())
                 .setFirstSwitched(UInt64Value.of(now.minus(20_000L, ChronoUnit.MILLIS).toEpochMilli()))
@@ -185,26 +183,23 @@ public class DocumentEnricherTest {
                 .build()
                 ;
 
-
-        List<TenantLocationSpecificFlowDocument> testList = List.of(testDocumentWithTimestamps);
-
         //
         // Execute
         //
-        List<TenantLocationSpecificFlowDocument> result = target.enrich(testList);
+        List<FlowDocument> result = target.enrich(testDocumentLogWithTimestamps.build());
 
         //
         // Verify the Results
         //
         assertEquals(1, result.size());
-        assertEquals("x-tenant-id-x", result.get(0).getTenantId());
+        assertEquals("x-tenant-id-x", testDocumentLogWithTimestamps.getTenantId());
         assertEquals(0, result.get(0).getClockCorrection());
         assertEquals(Locality.PUBLIC, result.get(0).getSrcLocality());
         assertEquals(Locality.PUBLIC, result.get(0).getDstLocality());
         assertEquals(Locality.PUBLIC, result.get(0).getFlowLocality());
 
         verifySameExcluding(
-            testDocumentWithTimestamps,
+            testDocumentLogWithTimestamps.getMessage(0),
             result.get(0),
             "src_locality", "dst_locality", "flow_locality"
         );
@@ -216,12 +211,12 @@ public class DocumentEnricherTest {
         // Setup Test Data and Interactions
         //
         target = new DocumentEnricherImpl(mockInventoryClient, mockClassificationEngine, mockFlowDocumentClassificationRequestMapper, 100);
-        List<TenantLocationSpecificFlowDocument> testList = Collections.emptyList();
+        var noneLog = TenantLocationSpecificFlowDocumentLog.newBuilder();
 
         //
         // Execute
         //
-        List<TenantLocationSpecificFlowDocument> result = target.enrich(testList);
+        List<FlowDocument> result = target.enrich(noneLog.build());
 
         //
         // Verify the Results
@@ -235,7 +230,6 @@ public class DocumentEnricherTest {
         // Setup Test Data and Interactions
         //
         target = new DocumentEnricherImpl(mockInventoryClient, mockClassificationEngine, mockFlowDocumentClassificationRequestMapper, 100);
-        List<TenantLocationSpecificFlowDocument> testList = List.of(testDocument);
         StatusRuntimeException testException = new StatusRuntimeException(Status.NOT_FOUND);
 
         Mockito.when(mockInventoryClient.getIpInterfaceFromQuery("x-tenant-id-x", "1.1.1.1", "x-location-x"))
@@ -244,7 +238,7 @@ public class DocumentEnricherTest {
         //
         // Execute
         //
-        List<TenantLocationSpecificFlowDocument> result = target.enrich(testList);
+        List<FlowDocument> result = target.enrich(testDocumentLog);
 
         //
         // Verify the Results
@@ -256,7 +250,7 @@ public class DocumentEnricherTest {
         assertEquals(Locality.PUBLIC, result.get(0).getFlowLocality());
 
         verifySameExcluding(
-            testDocument,
+            testDocumentLog.getMessage(0),
             result.get(0),
             "src_locality", "dst_locality", "flow_locality"
         );
@@ -268,7 +262,6 @@ public class DocumentEnricherTest {
         // Setup Test Data and Interactions
         //
         target = new DocumentEnricherImpl(mockInventoryClient, mockClassificationEngine, mockFlowDocumentClassificationRequestMapper, 100);
-        List<TenantLocationSpecificFlowDocument> testList = List.of(testDocument);
         IpInterfaceDTO testIpInterfaceDTO =
             IpInterfaceDTO.newBuilder()
                 .setNodeId(123123)
@@ -282,7 +275,7 @@ public class DocumentEnricherTest {
         //
         // Execute
         //
-        List<TenantLocationSpecificFlowDocument> result = target.enrich(testList);
+        List<FlowDocument> result = target.enrich(testDocumentLog);
 
         //
         // Verify the Results
@@ -297,7 +290,7 @@ public class DocumentEnricherTest {
         assertEquals(Locality.PUBLIC, result.get(0).getFlowLocality());
 
         verifySameExcluding(
-            testDocument,
+            testDocumentLog.getMessage(0),
             result.get(0),
             "src_node", "src_locality", "dst_locality", "flow_locality"
         );
@@ -309,7 +302,6 @@ public class DocumentEnricherTest {
         // Setup Test Data and Interactions
         //
         target = new DocumentEnricherImpl(mockInventoryClient, mockClassificationEngine, mockFlowDocumentClassificationRequestMapper, 100);
-        List<TenantLocationSpecificFlowDocument> testList = List.of(testDocument);
         StatusRuntimeException testException = new StatusRuntimeException(Status.INVALID_ARGUMENT);
 
         Mockito.when(mockInventoryClient.getIpInterfaceFromQuery("x-tenant-id-x", "1.1.1.1", "x-location-x"))
@@ -320,7 +312,7 @@ public class DocumentEnricherTest {
         //
         Exception actual = null;
         try {
-            List<TenantLocationSpecificFlowDocument> result = target.enrich(testList);
+            List<FlowDocument> result = target.enrich(testDocumentLog);
             fail("Missing expected exception");
         } catch (Exception caught) {
             actual = caught;
@@ -337,20 +329,19 @@ public class DocumentEnricherTest {
         //
         // Setup Test Data and Interactions
         //
-        List<TenantLocationSpecificFlowDocument> testList = List.of(testDocument);
         Mockito.when(mockClassificationRequest.isClassifiable()).thenReturn(true);
         Mockito.when(mockClassificationEngine.classify(mockClassificationRequest)).thenReturn("x-application-x");
 
         //
         // Execute
         //
-        List<TenantLocationSpecificFlowDocument> result = target.enrich(testList);
+        List<FlowDocument> result = target.enrich(testDocumentLog);
 
         //
         // Verify the Results
         //
         assertEquals(1, result.size());
-        assertEquals("x-tenant-id-x", result.get(0).getTenantId());
+        assertEquals("x-tenant-id-x", testDocumentLog.getTenantId());
         assertEquals("x-application-x", result.get(0).getApplication());
     }
 
@@ -359,20 +350,18 @@ public class DocumentEnricherTest {
         //
         // Setup Test Data and Interactions
         //
-        TenantLocationSpecificFlowDocument testDocumentPrivateLocality =
-            TenantLocationSpecificFlowDocument.newBuilder(testDocument)
+        var testDocumentLogPrivateLocality =
+            TenantLocationSpecificFlowDocumentLog.newBuilder(testDocumentLog);
+        testDocumentLogPrivateLocality.getMessageBuilder(0)
                 .setSrcAddress("127.0.0.1")
                 .setDstAddress("127.0.0.1")
                 .build()
                 ;
 
-
-        List<TenantLocationSpecificFlowDocument> testList = List.of(testDocumentPrivateLocality);
-
         //
         // Execute
         //
-        List<TenantLocationSpecificFlowDocument> result = target.enrich(testList);
+        List<FlowDocument> result = target.enrich(testDocumentLogPrivateLocality.build());
 
         //
         // Verify the Results
@@ -386,8 +375,8 @@ public class DocumentEnricherTest {
 // Internals
 //----------------------------------------
 
-    private void verifySameExcluding(TenantLocationSpecificFlowDocument doc1, TenantLocationSpecificFlowDocument doc2, String... excludeField) {
-        List<Descriptors.FieldDescriptor> fieldDescriptors = TenantLocationSpecificFlowDocument.getDescriptor().getFields();
+    private void verifySameExcluding(FlowDocument doc1, FlowDocument doc2, String... excludeField) {
+        List<Descriptors.FieldDescriptor> fieldDescriptors = FlowDocument.getDescriptor().getFields();
         Set<String> excludedSet = new TreeSet<>(Arrays.asList(excludeField));
 
         for (Descriptors.FieldDescriptor oneFieldDescriptor : fieldDescriptors) {

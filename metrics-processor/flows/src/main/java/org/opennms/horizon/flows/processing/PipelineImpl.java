@@ -97,7 +97,8 @@ public class PipelineImpl implements Pipeline {
             .setLocation(flowsLog.getLocation())
             .setSystemId(flowsLog.getSystemId());
         try (Timer.Context ctx = this.logEnrichementTimer.time()) {
-            enrichedFlowsLog.addAllMessage(documentEnricher.enrich(flowsLog));
+            var enrichedFlows = documentEnricher.enrich(flowsLog);
+            enrichedFlowsLog.addAllMessage(enrichedFlows);
         } catch (Exception e) {
             throw new FlowException("Failed to enrich one or more flows.", e);
         }

@@ -34,6 +34,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatcher;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -44,7 +45,6 @@ import org.opennms.horizon.flows.document.FlowDocument;
 import org.opennms.horizon.flows.document.FlowDocumentLog;
 import org.opennms.horizon.flows.document.TenantLocationSpecificFlowDocumentLog;
 import org.opennms.horizon.shared.flows.mapper.TenantLocationSpecificFlowDocumentLogMapper;
-import org.opennms.horizon.shared.flows.mapper.impl.TenantLocationSpecificFlowDocumentLogMapperImpl;
 import org.opennms.horizon.shared.grpc.common.LocationServerInterceptor;
 import org.opennms.horizon.shared.grpc.common.TenantIDGrpcServerInterceptor;
 import org.opennms.miniongateway.grpc.server.flows.FlowApplicationConfig;
@@ -52,7 +52,9 @@ import org.opennms.miniongateway.grpc.server.flows.FlowKafkaForwarder;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import static org.junit.Assert.assertEquals;
+import java.util.Arrays;
+
+import static org.mockito.ArgumentMatchers.argThat;
 
 
 @RunWith(MockitoJUnitRunner.class)
@@ -73,9 +75,10 @@ public class FlowKafkaForwarderTest {
     @Spy
     private TenantLocationSpecificFlowDocumentLogMapper tenantLocationSpecificFlowDocumentLogMapper = flowApplicationConfig.tenantLocationSpecificFlowDocumentLogMapper();
 
+    private final String kafkaTopic = "kafkaTopic";
     @Before
     public void setUp() {
-        ReflectionTestUtils.setField(flowKafkaForwarder, "kafkaTopic", "kafkaTopic");
+        ReflectionTestUtils.setField(flowKafkaForwarder, "kafkaTopic", kafkaTopic);
     }
 
     @Captor
@@ -91,14 +94,30 @@ public class FlowKafkaForwarderTest {
                 .setSrcAddress("127.0.0.1"))
             .build();
 
+        var expectedFlowDocumentLog = TenantLocationSpecificFlowDocumentLog.newBuilder()
+            .setSystemId("systemId")
+            .setLocation("location")
+            .setTenantId("tenantId")
+            .addMessage(FlowDocument.newBuilder()
+                .setSrcAddress("127.0.0.1"))
+            .build();
+        var expectedProducerRecord = new ProducerRecord<String, byte[]>(kafkaTopic, expectedFlowDocumentLog.toByteArray());
+
         flowKafkaForwarder.handleMessage(flowsLog);
 
-        Mockito.verify(kafkaTemplate).send(captor.capture());
-        var tenantLocationSpecificFlowDocumentLog = TenantLocationSpecificFlowDocumentLog.parseFrom(captor.getValue().value());
-        assertEquals("location", tenantLocationSpecificFlowDocumentLog.getLocation());
-        assertEquals("tenantId", tenantLocationSpecificFlowDocumentLog.getTenantId());
-        assertEquals("systemId", tenantLocationSpecificFlowDocumentLog.getSystemId());
-        assertEquals("127.0.0.1", tenantLocationSpecificFlowDocumentLog.getMessage(0).getSrcAddress());
-        Mockito.verify(kafkaTemplate, Mockito.times(1)).send(Mockito.any(ProducerRecord.class));
+        class ProducerRecordMatcher implements ArgumentMatcher<ProducerRecord<String, byte[]>> {
+            private final ProducerRecord<String, byte[]> left;
+
+            public ProducerRecordMatcher(ProducerRecord<String, byte[]> left) {
+                this.left = left;
+            }
+
+            @Override
+            public boolean matches(ProducerRecord<String, byte[]> right) {
+                return left.topic().equals(right.topic()) && Arrays.equals(left.value(), right.value());
+            }
+        }
+
+        Mockito.verify(kafkaTemplate, Mockito.times(1)).send(argThat(new ProducerRecordMatcher(expectedProducerRecord)));
     }
 }

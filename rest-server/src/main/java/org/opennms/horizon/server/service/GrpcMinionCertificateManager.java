@@ -21,10 +21,10 @@ public class GrpcMinionCertificateManager {
     private final CertificateMapper mapper;
 
     @GraphQLQuery(name = "getMinionCertificate")
-    public Mono<CertificateResponse> getMinionCertificate(String location, @GraphQLEnvironment ResolutionEnvironment env) {
+    public Mono<CertificateResponse> getMinionCertificate(Long locationId, @GraphQLEnvironment ResolutionEnvironment env) {
         String tenantId = headerUtil.extractTenant(env);
 
-        CertificateResponse minionCert = mapper.protoToCertificateResponse(client.getMinionCert(tenantId, location, headerUtil.getAuthHeader(env)));
+        CertificateResponse minionCert = mapper.protoToCertificateResponse(client.getMinionCert(tenantId, locationId, headerUtil.getAuthHeader(env)));
 
         return Mono.just(minionCert);
     }

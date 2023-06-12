@@ -1,0 +1,28 @@
+controller:
+  opentelemetry:
+    enabled: true
+  config:
+    enable-access-log-for-default-backend: true
+    error-log-level: info
+    log-format-upstream: $remote_addr - $remote_user [$time_local] "$request" $status $body_bytes_sent "$http_referer" "$http_user_agent" $request_length $request_time [$proxy_upstream_name] [$proxy_alternative_upstream_name] $upstream_addr $upstream_response_length $upstream_response_time $upstream_status $opentelemetry_trace_id
+    enable-opentelemetry: true
+    otlp-collector-host: jaeger-collector
+    opentelemetry-operation-name: HTTP $request_method $service_name $location_path
+    opentelemetry-trust-incoming-span: "true" # this helps in development, probably don't want it like this in production
+    http-snippet: |
+      opentelemetry_propagate b3; # For compatibility with linkerd < 2.13
+      # https://opentelemetry.io/docs/specs/otel/trace/semantic_conventions/http/#http-server-semantic-conventions
+      opentelemetry_attribute "http.route" "$service_name:$location_path";
+      # Made up this attribute name -- this is service this receives this request
+      opentelemetry_attribute "http.target_service" "$service_name";
+      # Useful for local dev, but definitely don't want on in production as it grabs a lot including the Bearer token.
+      # opentelemetry_capture_headers on;
+    location-snippet: |
+      # This appears to need to be a location snippet to work, although it should supposedly work in the http context.
+      # http://nginx.org/en/docs/http/ngx_http_headers_module.html#add_header
+      add_header Server-Timing "traceparent;desc=\"$opentelemetry_context_traceparent\"";
+
+# opentelemetry config options in this configmap:
+#   https://kubernetes.github.io/ingress-nginx/user-guide/third-party-addons/opentelemetry/
+# Opentelemetry-cpp-contrib plugin nginx directives (can be used in snippets):
+#   https://github.com/open-telemetry/opentelemetry-cpp-contrib/tree/main/instrumentation/nginx#nginx-directives

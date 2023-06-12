@@ -17,6 +17,7 @@ spec:
         app: {{ .Values.OpenNMS.Minion.ServiceName }}
       annotations:
         linkerd.io/inject: enabled
+        kubectl.kubernetes.io/default-container: "{{ .Values.OpenNMS.Minion.ServiceName }}"
     spec:
       serviceAccountName: {{ .Values.OpenNMS.Minion.ServiceName }}-sa
       {{- if .Values.NodeRestrictions.Enabled }}

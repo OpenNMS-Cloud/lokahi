@@ -10,13 +10,6 @@ on:
 # Just use this one for now. The downside is it will run redundant workflows for code that didn't change.
     branches:
       - 'develop'
-    paths-ignore:
-      - '.github/**'
-      - 'CHANGELOG/**'
-      - 'build-tools/**'
-      - 'doc/**'
-      - 'tooling/**'
-      - 'tools/**'
   workflow_call:
     inputs:
       image-tag:
@@ -27,6 +20,9 @@ on:
         description: 'Docker image registry for all images'
         required: false
         type: string
+
+env:
+  NAMESPACE: hs-instance
 
 jobs:
   alert:
@@ -193,7 +189,7 @@ jobs:
           echo "K8S CLUSTER STATUS"
           echo "=================="
           date
-          kubectl -n hs-instance get all
+          kubectl -n $NAMESPACE get all
 
       - name: Set up & run Cucumber tests
         shell: bash
@@ -231,24 +227,24 @@ jobs:
         shell: bash
         run: |
             echo "K8S CLUSTER STATUS"
-            kubectl -n hs-instance get all
+            kubectl -n $NAMESPACE get all
 
             echo "K8S CLUSTER SECRETS"
-            kubectl -n hs-instance get secrets
+            kubectl -n $NAMESPACE get secrets
 
             echo ""
 
-            for pod in $(kubectl -n hs-instance get pod | awk '$1 != "NAME" { print $1; }')
+            for pod in $(kubectl -n $NAMESPACE get pod | awk '$1 != "NAME" { print $1; }')
             do
                 echo ""
                 echo "=== DIAG POD ${pod} ==="
                 echo ""
-                kubectl -n hs-instance describe "pod/${pod#pod/}" | sed 's,^,    ,'
+                kubectl -n $NAMESPACE describe "pod/${pod#pod/}" | sed 's,^,    ,'
             done
 
             echo ""
             echo "=== K8S APPLICATION LOGS ==="
-            kubectl logs -n hs-instance -l appdomain=opennms --tail=-1 --prefix --all-containers --ignore-errors=true
+            kubectl logs -n $NAMESPACE -l appdomain=opennms --tail=-1 --prefix --all-containers --ignore-errors=true
 
             echo ${{ github.ref  }}
 

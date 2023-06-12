@@ -2,7 +2,7 @@
   <div
     class="locations-card-wrapper"
     :class="{ selected: selectedCard }"
-    @click="locationStore.getMinionsForLocationId(location.id)"
+    @click="getMinionsForLocationId(location.id)"
   >
     <div class="name">
       <ButtonTextIcon
@@ -36,16 +36,18 @@ import { IButtonTextIcon } from '@/types'
 import { Severity } from '@/types/graphql'
 import { LocationTemp } from '@/types/locations.d'
 import { useLocationStore } from '@/store/Views/locationStore'
+import { useMinionsQueries } from '@/store/Queries/minionsQueries'
 
 const props = defineProps<{
   item: LocationTemp
 }>()
 
 const locationStore = useLocationStore()
+const minionsQueries = useMinionsQueries()
 
 const location = computed(() => props.item)
 
-const selectedCard = computed(() => locationStore.selectedLocationIdForMinions === props.item.id)
+const selectedCard = computed(() => locationStore.selectedLocationId === props.item.id)
 
 const nameBtn = computed<IButtonTextIcon>(() => ({
   label: props.item.location
@@ -64,6 +66,23 @@ const contextMenuItems = [
 const icons = markRaw({
   cert: Cert
 })
+
+const getMinionsForLocationId = (locationId: number) => {
+  locationStore.getMinionsForLocationId(locationId)
+  sartMinionsPoll()
+}
+
+// Following functions are for polling new minions every 1 min.
+const refreshMinions = async () => {
+  await minionsQueries.refreshMinionsById().catch(() => console.warn('Could not refresh minions.'))
+}
+
+const { resume: sartMinionsPoll, pause: pauseMinionPoll } = useTimeoutPoll(refreshMinions, 60000)
+
+onMounted(() => {
+  if (locationStore.selectedLocationId) sartMinionsPoll()
+})
+onUnmounted(() => pauseMinionPoll())
 </script>
 
 <style lang="scss" scoped>

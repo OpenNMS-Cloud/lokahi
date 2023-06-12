@@ -245,7 +245,13 @@ public class InventoryTestSteps {
     public void requestCertificateForLocation(String location) throws MalformedURLException {
         LOG.info("Requesting certificate for location {}.", location);
 
-        String query = String.format(GQLQueryConstants.CREATE_MINION_CERTIFICATE, location);
+        Long locationId = commonQueryLocations().getData().getFindAllLocations().stream()
+            .filter(loc -> location.equals(loc.getLocation()))
+            .findFirst()
+            .map(LocationData::getId)
+            .orElseThrow(() -> new IllegalArgumentException("Unknown location " + location));
+
+        String query = String.format(GQLQueryConstants.CREATE_MINION_CERTIFICATE, locationId);
         GQLQuery gqlQuery = new GQLQuery();
         gqlQuery.setQuery(query);
 

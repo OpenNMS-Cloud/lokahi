@@ -45,6 +45,8 @@ spec:
     metadata:
       labels:
         app: snmpd
+      annotations:
+        kubectl.kubernetes.io/default-container: "snmpd"
     spec:
       volumes:
         - name: snmpd-conf-volume

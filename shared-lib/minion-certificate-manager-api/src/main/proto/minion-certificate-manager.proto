@@ -38,7 +38,7 @@ service MinionCertificateManager {
 
 message GetMinionCertificateRequest {
   string tenant_id = 1;
-  string location = 2;
+  uint64 location_id = 2;
 }
 
 message GetMinionCertificateResponse {

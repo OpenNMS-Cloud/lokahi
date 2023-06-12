@@ -29,10 +29,11 @@
 package org.opennms.horizon.flows.processing;
 
 import org.opennms.horizon.flows.document.TenantLocationSpecificFlowDocument;
+import org.opennms.horizon.flows.document.TenantLocationSpecificFlowDocumentLog;
 import org.opennms.horizon.flows.integration.FlowException;
 
 import java.util.List;
 
 public interface Pipeline {
-    void process(final List<TenantLocationSpecificFlowDocument> flows, final String tenantId) throws FlowException;
+    void process(final TenantLocationSpecificFlowDocumentLog flowLog) throws FlowException;
 }

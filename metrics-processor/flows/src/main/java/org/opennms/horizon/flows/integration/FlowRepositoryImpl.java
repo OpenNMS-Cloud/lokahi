@@ -1,21 +1,16 @@
 package org.opennms.horizon.flows.integration;
 
-import org.apache.commons.lang3.StringUtils;
+import lombok.RequiredArgsConstructor;
 import org.opennms.dataplatform.flows.document.FlowDocument;
 import org.opennms.dataplatform.flows.document.NodeInfo;
-import org.opennms.horizon.flows.document.TenantLocationSpecificFlowDocument;
 import org.opennms.dataplatform.flows.ingester.v1.StoreFlowDocumentsRequest;
-
+import org.opennms.horizon.flows.document.TenantLocationSpecificFlowDocumentLog;
 import org.opennms.horizon.flows.grpc.client.IngestorClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
 
-import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
-
-import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public class FlowRepositoryImpl implements FlowRepository {
@@ -23,8 +18,9 @@ public class FlowRepositoryImpl implements FlowRepository {
     private final IngestorClient ingestorClient;
 
     @Override
-    public void persist(Collection<TenantLocationSpecificFlowDocument> enrichedFlows) {
-        LOG.info("Persisting flow data: {}", enrichedFlows.toString());
+    public void persist(TenantLocationSpecificFlowDocumentLog enrichedFlowsLog) {
+        LOG.info("Persisting flow data: {}", enrichedFlowsLog);
+        var enrichedFlows = enrichedFlowsLog.getMessageList();
 
         if (CollectionUtils.isEmpty(enrichedFlows)) {
             LOG.trace("No EnrichedFlow present, skipping flow data persisting step. ");
@@ -32,7 +28,7 @@ public class FlowRepositoryImpl implements FlowRepository {
         }
 
         List<FlowDocument> listDataPlatformFlowDocuments =
-            enrichedFlows.stream().map(this::mapFlowDocument).collect(Collectors.toList());
+            enrichedFlows.stream().map(this::mapFlowDocument).toList();
 
         StoreFlowDocumentsRequest storeFlowDocumentsRequest = StoreFlowDocumentsRequest.newBuilder()
             .addAllDocuments(listDataPlatformFlowDocuments)
@@ -40,7 +36,7 @@ public class FlowRepositoryImpl implements FlowRepository {
 
         ingestorClient.sendData(
             storeFlowDocumentsRequest,
-            StringUtils.join(enrichedFlows.stream().map(TenantLocationSpecificFlowDocument::getTenantId), ",")
+            enrichedFlowsLog.getTenantId()
         );
     }
 
@@ -49,63 +45,63 @@ public class FlowRepositoryImpl implements FlowRepository {
 //----------------------------------------
 
     // NOTE: this will hopefully be simplified in the future
-    private FlowDocument mapFlowDocument(TenantLocationSpecificFlowDocument tenantLocationSpecificFlowDocument) {
+    private FlowDocument mapFlowDocument(org.opennms.horizon.flows.document.FlowDocument flowDocument) {
         FlowDocument result =
             FlowDocument.newBuilder()
-                .setTimestamp(tenantLocationSpecificFlowDocument.getTimestamp())
-                .setNumBytes(tenantLocationSpecificFlowDocument.getNumBytes())
-                .setDirectionValue(tenantLocationSpecificFlowDocument.getDirection().getNumber())
-                .setDstAddress(tenantLocationSpecificFlowDocument.getDstAddress())
-                .setDstHostname(tenantLocationSpecificFlowDocument.getDstHostname())
-                .setDstAs(tenantLocationSpecificFlowDocument.getDstAs())
-                .setDstMaskLen(tenantLocationSpecificFlowDocument.getDstMaskLen())
-                .setDstPort(tenantLocationSpecificFlowDocument.getDstPort())
-                .setEngineId(tenantLocationSpecificFlowDocument.getEngineId())
-                .setEngineType(tenantLocationSpecificFlowDocument.getEngineType())
-                .setDeltaSwitched(tenantLocationSpecificFlowDocument.getDeltaSwitched())
-                .setFirstSwitched(tenantLocationSpecificFlowDocument.getFirstSwitched())
-                .setLastSwitched(tenantLocationSpecificFlowDocument.getLastSwitched())
-                .setNumFlowRecords(tenantLocationSpecificFlowDocument.getNumFlowRecords())
-                .setNumPackets(tenantLocationSpecificFlowDocument.getNumPackets())
-                .setFlowSeqNum(tenantLocationSpecificFlowDocument.getFlowSeqNum())
-                .setInputSnmpIfindex(tenantLocationSpecificFlowDocument.getInputSnmpIfindex())
-                .setOutputSnmpIfindex(tenantLocationSpecificFlowDocument.getOutputSnmpIfindex())
-                .setIpProtocolVersion(tenantLocationSpecificFlowDocument.getIpProtocolVersion())
-                .setNextHopAddress(tenantLocationSpecificFlowDocument.getNextHopAddress())
-                .setNextHopHostname(tenantLocationSpecificFlowDocument.getNextHopHostname())
-                .setProtocol(tenantLocationSpecificFlowDocument.getProtocol())
-                .setSamplingAlgorithmValue(tenantLocationSpecificFlowDocument.getSamplingAlgorithm().getNumber())
-                .setSamplingInterval(tenantLocationSpecificFlowDocument.getSamplingInterval())
-                .setSrcAddress(tenantLocationSpecificFlowDocument.getSrcAddress())
-                .setSrcHostname(tenantLocationSpecificFlowDocument.getSrcHostname())
-                .setSrcAs(tenantLocationSpecificFlowDocument.getSrcAs())
-                .setSrcMaskLen(tenantLocationSpecificFlowDocument.getSrcMaskLen())
-                .setSrcPort(tenantLocationSpecificFlowDocument.getSrcPort())
-                .setTcpFlags(tenantLocationSpecificFlowDocument.getTcpFlags())
-                .setTos(tenantLocationSpecificFlowDocument.getTos())
-                .setNetflowVersionValue(tenantLocationSpecificFlowDocument.getNetflowVersion().getNumber())
-                .setVlan(tenantLocationSpecificFlowDocument.getVlan())
+                .setTimestamp(flowDocument.getTimestamp())
+                .setNumBytes(flowDocument.getNumBytes())
+                .setDirectionValue(flowDocument.getDirection().getNumber())
+                .setDstAddress(flowDocument.getDstAddress())
+                .setDstHostname(flowDocument.getDstHostname())
+                .setDstAs(flowDocument.getDstAs())
+                .setDstMaskLen(flowDocument.getDstMaskLen())
+                .setDstPort(flowDocument.getDstPort())
+                .setEngineId(flowDocument.getEngineId())
+                .setEngineType(flowDocument.getEngineType())
+                .setDeltaSwitched(flowDocument.getDeltaSwitched())
+                .setFirstSwitched(flowDocument.getFirstSwitched())
+                .setLastSwitched(flowDocument.getLastSwitched())
+                .setNumFlowRecords(flowDocument.getNumFlowRecords())
+                .setNumPackets(flowDocument.getNumPackets())
+                .setFlowSeqNum(flowDocument.getFlowSeqNum())
+                .setInputSnmpIfindex(flowDocument.getInputSnmpIfindex())
+                .setOutputSnmpIfindex(flowDocument.getOutputSnmpIfindex())
+                .setIpProtocolVersion(flowDocument.getIpProtocolVersion())
+                .setNextHopAddress(flowDocument.getNextHopAddress())
+                .setNextHopHostname(flowDocument.getNextHopHostname())
+                .setProtocol(flowDocument.getProtocol())
+                .setSamplingAlgorithmValue(flowDocument.getSamplingAlgorithm().getNumber())
+                .setSamplingInterval(flowDocument.getSamplingInterval())
+                .setSrcAddress(flowDocument.getSrcAddress())
+                .setSrcHostname(flowDocument.getSrcHostname())
+                .setSrcAs(flowDocument.getSrcAs())
+                .setSrcMaskLen(flowDocument.getSrcMaskLen())
+                .setSrcPort(flowDocument.getSrcPort())
+                .setTcpFlags(flowDocument.getTcpFlags())
+                .setTos(flowDocument.getTos())
+                .setNetflowVersionValue(flowDocument.getNetflowVersion().getNumber())
+                .setVlan(flowDocument.getVlan())
                 .setSrcNode(
-                    mapNodeInfoToDataPlatform(tenantLocationSpecificFlowDocument.getSrcNode())
+                    mapNodeInfoToDataPlatform(flowDocument.getSrcNode())
                 )
                 .setExporterNode(
-                    mapNodeInfoToDataPlatform(tenantLocationSpecificFlowDocument.getExporterNode())
+                    mapNodeInfoToDataPlatform(flowDocument.getExporterNode())
                 )
                 .setDestNode(
-                    mapNodeInfoToDataPlatform(tenantLocationSpecificFlowDocument.getDestNode())
+                    mapNodeInfoToDataPlatform(flowDocument.getDestNode())
                 )
-                .setApplication(tenantLocationSpecificFlowDocument.getApplication())
-                .setHost(tenantLocationSpecificFlowDocument.getHost())
-                .setSrcLocalityValue(tenantLocationSpecificFlowDocument.getSrcLocality().getNumber())
-                .setDstLocalityValue(tenantLocationSpecificFlowDocument.getDstLocality().getNumber())
-                .setFlowLocalityValue(tenantLocationSpecificFlowDocument.getFlowLocality().getNumber())
-                .setClockCorrection(tenantLocationSpecificFlowDocument.getClockCorrection())
-                .setDscp(tenantLocationSpecificFlowDocument.getDscp())
-                .setEcn(tenantLocationSpecificFlowDocument.getEcn())
-                .setExporterAddress(tenantLocationSpecificFlowDocument.getExporterAddress())
-                .setExporterPort(tenantLocationSpecificFlowDocument.getExporterPort())
-                .setExporterIdentifier(tenantLocationSpecificFlowDocument.getExporterIdentifier())
-                .setReceivedAt(tenantLocationSpecificFlowDocument.getReceivedAt())
+                .setApplication(flowDocument.getApplication())
+                .setHost(flowDocument.getHost())
+                .setSrcLocalityValue(flowDocument.getSrcLocality().getNumber())
+                .setDstLocalityValue(flowDocument.getDstLocality().getNumber())
+                .setFlowLocalityValue(flowDocument.getFlowLocality().getNumber())
+                .setClockCorrection(flowDocument.getClockCorrection())
+                .setDscp(flowDocument.getDscp())
+                .setEcn(flowDocument.getEcn())
+                .setExporterAddress(flowDocument.getExporterAddress())
+                .setExporterPort(flowDocument.getExporterPort())
+                .setExporterIdentifier(flowDocument.getExporterIdentifier())
+                .setReceivedAt(flowDocument.getReceivedAt())
                 .build();
 
         return result;

@@ -90,6 +90,14 @@ const icon = markRaw({
 .hover-menu-wrapper {
   position: relative;
   margin-top: 4px;
+
+  li {
+    padding: var(variables.$spacing-xxs) var(variables.$spacing-xs);
+  }
+
+  li:hover {
+    background: var(variables.$shade-4);
+  }
 }
 
 .hover-menu-icon {
@@ -106,7 +114,6 @@ const icon = markRaw({
 .hover-menu-list {
   position: absolute;
   display: none;
-  padding: var(variables.$spacing-s) var(variables.$spacing-m);
   box-shadow: var(variables.$shadow-1);
   @include elevation.elevation(2);
   text-align: left;

@@ -17,6 +17,8 @@ spec:
       labels:
         appdomain: opennms
         app.kubernetes.io/name: opennms-nginx-errors
+      annotations:
+        kubectl.kubernetes.io/default-container: "opennms-nginx-error-server"
     spec:
       {{- if .Values.NodeRestrictions.Enabled }}
       nodeSelector:                                                                                    

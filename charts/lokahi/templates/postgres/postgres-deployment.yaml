@@ -17,6 +17,8 @@ spec:
         appdomain: opennms
         app: {{ .Values.Postgres.ServiceName }}
         role: master
+      annotations:
+        kubectl.kubernetes.io/default-container: "{{ .Values.Postgres.ServiceName }}"
     spec:
       {{- if .Values.NodeRestrictions.Enabled }}
       nodeSelector:

@@ -27,7 +27,7 @@ env:
 
 jobs:
   build-and-test:
-    name: Build and test - Minion Certificate Manager
+    name: Build and test - Minion Certificate Verifier
     runs-on: ubuntu-latest
     steps:
 

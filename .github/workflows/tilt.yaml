@@ -1,0 +1,107 @@
+name: Validate tilt
+
+on:
+  push:
+    branches:
+      - 'develop'
+  pull_request:
+    branches:
+      - 'develop'
+
+env:
+  NAMESPACE: default
+
+jobs:
+  tilt-ci:
+    name: Run 'tilt ci'
+    runs-on:
+      labels: ubuntu-latest-8-cores
+    timeout-minutes: 30 # Prevents hung workflows on the larger runners from costing more than necessary
+    steps:
+      - name: Install tools
+        shell: bash
+        run: |
+          sudo apt-get install -y git uuid-runtime
+
+          # tilt -- https://raw.githubusercontent.com/tilt-dev/tilt/master/scripts/install.sh
+          case $(uname -m) in
+              aarch64) ARCH=arm64;;
+              armv7l)  ARCH=arm;;
+              *)       ARCH=$(uname -m);;
+          esac
+          VERSION=0.32.0
+          curl -fsSL https://github.com/tilt-dev/tilt/releases/download/v$VERSION/tilt.$VERSION.linux.$ARCH.tar.gz | tar -xzvC /usr/local/bin tilt
+
+          # helm
+          case $(uname -m) in
+              aarch64) ARCH=arm64;;
+              armv7l)  ARCH=arm;;
+              x86_64)  ARCH=amd64;;
+              *)       ARCH=$(uname -m);;
+          esac
+          VERSION=3.12.0
+          curl -fsSL https://get.helm.sh/helm-v$VERSION-linux-$ARCH.tar.gz | tar --strip-components=1 -xzvC /usr/local/bin linux-$ARCH/helm
+
+          # ctlptl - https://github.com/tilt-dev/ctlptl/blob/main/INSTALL.md
+          CTLPTL_VERSION="0.8.19"
+          curl -fsSL https://github.com/tilt-dev/ctlptl/releases/download/v$CTLPTL_VERSION/ctlptl.$CTLPTL_VERSION.linux.x86_64.tar.gz | sudo tar -xzv -C /usr/local/bin ctlptl
+
+          # kind - https://kind.sigs.k8s.io/docs/user/quick-start/#installing-from-release-binaries
+          # For AMD64 / x86_64
+          [ $(uname -m) = x86_64 ] && curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.19.0/kind-linux-amd64
+          # For ARM64
+          [ $(uname -m) = aarch64 ] && curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.19.0/kind-linux-arm64
+          chmod +x ./kind
+          sudo mv ./kind /usr/local/bin/kind
+
+      - uses: actions/checkout@v3
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Cache Maven dependencies
+        uses: ./.github/actions/maven-cache
+        with:
+          cache-key-hash: ${{ hashFiles('**/pom.xml') }}
+
+      - name: Setup kind cluster
+        shell: bash
+        run: |
+          # Setup localhost DNS
+          sudo sh -c 'echo "127.0.0.1 onmshs" >> /etc/hosts'
+
+          ctlptl create cluster kind --registry=ctlptl-registry
+
+      - name: Run 'tilt ci'
+        shell: bash
+        run: |
+          tilt ci
+
+      - name: Diag after failure
+        if: ${{ failure() }}
+        shell: bash
+        run: |
+            echo "K8S CLUSTER STATUS"
+            kubectl -n $NAMESPACE get all
+
+            echo "K8S CLUSTER SECRETS"
+            kubectl -n $NAMESPACE get secrets
+
+            echo ""
+
+            for pod in $(kubectl -n $NAMESPACE get pod | awk '$1 != "NAME" { print $1; }')
+            do
+                echo ""
+                echo "=== DIAG POD ${pod} ==="
+                echo ""
+                kubectl -n $NAMESPACE describe "pod/${pod#pod/}" | sed 's,^,    ,'
+            done
+
+            echo ""
+            echo "=== K8S APPLICATION LOGS ==="
+            kubectl logs -n $NAMESPACE -l appdomain=opennms --tail=-1 --prefix --all-containers --ignore-errors=true
+
+            echo ${{ github.ref  }}

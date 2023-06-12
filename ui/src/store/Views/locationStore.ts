@@ -1,16 +1,14 @@
-import {defineStore} from 'pinia'
-import {useLocationQueries} from '../Queries/locationQueries'
-import {useMinionsQueries} from '../Queries/minionsQueries'
-import {DisplayType} from '@/types/locations.d'
-import {useLocationMutations} from '../Mutations/locationMutations'
-import {MonitoringLocationCreateInput, MonitoringLocationUpdateInput} from '@/types/graphql'
+import { defineStore } from 'pinia'
+import { useLocationQueries } from '../Queries/locationQueries'
+import { useMinionsQueries } from '../Queries/minionsQueries'
+import { DisplayType } from '@/types/locations.d'
+import { useLocationMutations } from '../Mutations/locationMutations'
+import { MonitoringLocation, MonitoringLocationCreateInput, MonitoringLocationUpdateInput } from '@/types/graphql'
 
 export const useLocationStore = defineStore('locationStore', () => {
-  const locationsList = ref()
-  const minionsList = ref()
+  const locationsList = ref<MonitoringLocation[]>([])
   const selectedLocationId = ref()
-  const selectedLocationIdForMinions = ref()
-  const certificatePassword = ref()
+  const certificatePassword = ref('')
   const displayType = ref(DisplayType.LIST)
 
   const saveIsFetching = ref()
@@ -40,26 +38,22 @@ export const useLocationStore = defineStore('locationStore', () => {
     }
   }
 
-  const fetchMinions = async () => {
-    minionsQueries.fetchMinions()
-
-    watchEffect(() => {
-      minionsList.value = minionsQueries.minionsList
-    })
-  }
-
   const selectLocation = (id: number | undefined) => {
     if (id) displayType.value = DisplayType.EDIT
 
     selectedLocationId.value = id
-    selectedLocationIdForMinions.value = id
     certificatePassword.value = ''
   }
 
+  const addLocation = () => {
+    setDisplayType(DisplayType.ADD)
+    selectedLocationId.value = undefined
+  }
+
   const getMinionsForLocationId = (id: number | undefined) => {
-    if (!id) return 
+    if (!id) return
     displayType.value = DisplayType.LIST
-    selectedLocationIdForMinions.value = id
+    selectedLocationId.value = id
     minionsQueries.findMinionsByLocationId(id)
   }
 
@@ -70,15 +64,17 @@ export const useLocationStore = defineStore('locationStore', () => {
   const createLocation = async (location: MonitoringLocationCreateInput) => {
     saveIsFetching.value = true
 
-    const error = await locationMutations.createLocation(location)
+    const createdLocation = await locationMutations.createLocation(location)
 
     saveIsFetching.value = false
 
-    if (!error.value) {
+    if (!createdLocation.error) {
       await fetchLocations()
+      selectedLocationId.value = createdLocation.data?.id
+      setDisplayType(DisplayType.READY)
     }
 
-    return !error.value
+    return !createdLocation.error
   }
 
   const updateLocation = async (location: MonitoringLocationUpdateInput) => {
@@ -106,14 +102,17 @@ export const useLocationStore = defineStore('locationStore', () => {
     return !error.value
   }
 
-  const getMinionCertificate = async (location: string) => {
-    const response = await locationQueries.getMinionCertificate(location)
+  const getMinionCertificate = async () => {
+    if (!selectedLocation.value) return
+    const response = await locationQueries.getMinionCertificate(selectedLocation.value.id)
     return response.data.value?.getMinionCertificate
   }
 
   const setCertificatePassword = (password: string) => {
     certificatePassword.value = password
   }
+
+  const selectedLocation = computed(() => locationsList.value.filter((loc) => loc.id === selectedLocationId.value)[0] as Required<MonitoringLocation>)
 
   return {
     displayType,
@@ -123,8 +122,6 @@ export const useLocationStore = defineStore('locationStore', () => {
     selectedLocationId,
     selectLocation,
     searchLocations,
-    minionsList,
-    fetchMinions,
     createLocation,
     saveIsFetching,
     updateLocation,
@@ -134,6 +131,7 @@ export const useLocationStore = defineStore('locationStore', () => {
     certificatePassword,
     setCertificatePassword,
     getMinionsForLocationId,
-    selectedLocationIdForMinions
+    addLocation,
+    selectedLocation
   }
 })

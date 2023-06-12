@@ -48,13 +48,13 @@ public class PKCS12Generator {
     @Setter  // Testability
     private CommandExecutor commandExecutor = new CommandExecutor();
 
-    public void generate(String location, String tenantId, Path outputDirectoryPath, File archive, String archivePass, File caCertFile, File caKeyFile) throws InterruptedException, IOException {
+    public void generate(Long locationId, String tenantId, Path outputDirectoryPath, File archive, String archivePass, File caCertFile, File caKeyFile) throws InterruptedException, IOException {
         // Check if caCertFile exists
         if (!caCertFile.exists()) {
             throw new FileNotFoundException("CA certificate file not found: " + caCertFile.getPath());
         }
 
-        LOG.info("=== GENERATING CERTIFICATE FOR LOCATION: {} AND TENANT: {}", location, tenantId);
+        LOG.info("=== GENERATING CERTIFICATE FOR LOCATION: {} AND TENANT: {}", locationId, tenantId);
         LOG.info("=== CA CERT: {}", caCertFile.getAbsolutePath());
         LOG.info("=== CA KEY: {}", caKeyFile.getAbsolutePath());
         LOG.info("=== PATH: {}", outputDirectoryPath.toAbsolutePath());
@@ -69,7 +69,7 @@ public class PKCS12Generator {
         commandExecutor.executeCommand(PKCS8_COMMAND, file);
 
         LOG.debug("=== GENERATING THE UNSIGNED CERT");
-        commandExecutor.executeCommand(UNSIGNED_CERT_COMMAND, file, location, tenantId);
+        commandExecutor.executeCommand(UNSIGNED_CERT_COMMAND, file, String.valueOf(locationId), tenantId);
 
         LOG.info("=== SIGNING CERT");
         LOG.info("=== CA CERT: {}", caCertFile.getAbsolutePath());

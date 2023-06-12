@@ -4,30 +4,30 @@ Feature: Minion Certificate Verifier HTTP Request Processing
     Given External HTTP port in system property "application-external-http-port"
 
   Scenario: Verify minion certificate validation request
-    When Request with "OU=T:tenant01,OU=L:LOC01,CN=opennms-minion-ssl-gateway,O=OpenNMS,L=TBD,ST=TBD,C=CA" is made
+    When Request with "OU=T:tenant01,OU=L:111,CN=opennms-minion-ssl-gateway,O=OpenNMS,L=TBD,ST=TBD,C=CA" is made
     Then Within 30s result headers are:
       | header             | value       |
       | tenant-id          | tenant01    |
-      | location           | LOC01       |
+      | location           | x-loc-x     |
 
   Scenario: Verify minion certificate validation request - with only tenant and location
-    When Request with "OU=T:tenant02,OU=L:LOC02" is made
+    When Request with "OU=T:tenant02,OU=L:222" is made
     Then Within 30s result headers are:
       | header             | value       |
       | tenant-id          | tenant02    |
-      | location           | LOC02       |
+      | location           | x-loc-x     |
 
   Scenario: Verify minion certificate validation request - with only tenant
     When Request with "OU=T:tenant03" is made
     Then Within 30s result fails
 
   Scenario: Verify minion certificate validation request - with empty tenant
-    When Request with "OU=T:,OU=L:LOC0x" is made
+    When Request with "OU=T:,OU=L:L333" is made
     Then Within 30s result fails
 
 
   Scenario: Verify minion certificate validation request - with only location
-    When Request with "OU=L:ASD" is made
+    When Request with "OU=L:444" is made
     Then Within 30s result fails
 
   Scenario: Verify minion certificate validation request - with empty location

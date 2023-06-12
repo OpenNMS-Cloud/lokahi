@@ -9,7 +9,7 @@
     data-test="tab-container"
   >
     <template v-slot:tabs>
-      <FeatherTab>Monitored Nodes</FeatherTab>
+      <FeatherTab @click="inventoryQueries.getMonitoredNodes">Monitored Nodes</FeatherTab>
       <FeatherTab @click="inventoryQueries.getUnmonitoredNodes">Unmonitored Nodes</FeatherTab>
       <FeatherTab @click="inventoryQueries.getDetectedNodes">Detected Nodes</FeatherTab>
     </template>
@@ -58,8 +58,7 @@ const tabMonitoredContent = computed((): MonitoredNode[] => inventoryQueries.nod
 const tabUnmonitoredContent = computed((): UnmonitoredNode[] => inventoryQueries.unmonitoredNodes)
 const tabDetectedContent = computed((): DetectedNode[] => inventoryQueries.detectedNodes)
 
-// TODO: Change to getting just monitored nodes once BE done
-onMounted(() => inventoryQueries.fetch())
+onMounted(() => inventoryQueries.getMonitoredNodes())
 </script>
 
 <style lang="scss" scoped>

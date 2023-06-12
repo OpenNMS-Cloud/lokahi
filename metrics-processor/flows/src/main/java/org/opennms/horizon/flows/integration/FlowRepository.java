@@ -28,9 +28,7 @@
 
 package org.opennms.horizon.flows.integration;
 
-import org.opennms.horizon.flows.document.TenantLocationSpecificFlowDocument;
-
-import java.util.Collection;
+import org.opennms.horizon.flows.document.TenantLocationSpecificFlowDocumentLog;
 
 /**
  * Persistence interface for flows.
@@ -46,5 +44,5 @@ public interface FlowRepository {
      *
      * @throws FlowException on any error happening during processing.
      */
-    void persist(Collection<TenantLocationSpecificFlowDocument> enrichedFlows) throws FlowException;
+    void persist(TenantLocationSpecificFlowDocumentLog enrichedFlows) throws FlowException;
 }

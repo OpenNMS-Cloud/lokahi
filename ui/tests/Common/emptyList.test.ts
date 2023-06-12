@@ -25,7 +25,7 @@ describe('EmptyList', () => {
   })
 
   test('Should have a message', () => {
-    const elem = wrapper.get('[data-test="msg]').text()
+    const elem = wrapper.get('[data-test="msg"]').text()
     expect(elem).toEqual(mock.msg)
   })
 

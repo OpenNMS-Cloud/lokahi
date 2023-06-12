@@ -81,19 +81,6 @@ const router = createRouter({
       path: '/:pathMatch(.*)*', // catch other paths and redirect
       redirect: '/'
     }
-    /* Hidden routes below are for development purposes only 
-        TODO: need to make these avail only in dev local
-    */
-    /* {
-      path: '/templates',
-      name: 'Templates',
-      component: () => import('../../templates/index.vue')
-    },
-    {
-      path: '/templates/layout/headlineTwoColumns',
-      name: 'HeadlineTwoColumns',
-      component: () => import('../../templates/layout/headlineTwoColumns.vue')
-    } */
   ]
 })
 

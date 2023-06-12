@@ -36,15 +36,33 @@
 ## 35 = minion-certificate-verifier
 
 # Tilt config #
+config.define_string("listen-on")
+config.define_string_list("values")
+config.define_string_list("args", args=True)
+cfg = config.parse()
+config.set_enabled_resources(cfg.get('args', []))
+
 secret_settings(disable_scrub=True)  ## TODO: update secret values so we can reenable scrub
 load('ext://uibutton', 'cmd_button', 'location')
-load('ext://helm_remote', 'helm_remote') # for simple charts like jaeger
+load('ext://helm_remote', 'helm_remote') # for simple charts like jaeger and cert-manager
+load('ext://helm_resource', 'helm_resource', 'helm_repo') # for charts that we want to have resources for
 
 cmd_button(name='reload-certificates',
            argv=['sh', '-c', 'find target/tmp/ -type f -exec rm {} \\;'],
            text='Remove & reissue certificates',
            location=location.NAV,
            icon_name='sync')
+
+cmd_button(name='reload-helm',
+           argv=['touch', 'tilt-helm-values.yaml'],
+           text='Helm upgrade',
+           location=location.NAV,
+           icon_name='system_update_alt')
+
+if os.getenv("CI"):
+    # Be a little bit more reserved and give ourselves more time in CI
+    update_settings(max_parallel_updates=2,
+                    k8s_upsert_timeout_secs=60)
 
 # Functions #
 cluster_arch_cmd = '$(tilt get cluster default -o=jsonpath --template="{.status.arch}")'
@@ -184,10 +202,25 @@ k8s_resource(
     port_forwards=port_forward(16686, name="Jaeger UI"),
 )
 
+# Deployment #
+helm_remote('cert-manager', version='1.11.0', repo_url='https://charts.jetstack.io', set = [
+    'installCRDs=true'
+])
+
+# https://github.com/kubernetes/ingress-nginx/tree/main/charts/ingress-nginx
+helm_repo('ingress-nginx-repo', 'https://kubernetes.github.io/ingress-nginx')
+helm_resource('ingress-nginx', 'ingress-nginx-repo/ingress-nginx',
+	flags=[
+		'--version=4.7.0',
+		'--values=tilt-ingress-nginx-values.yaml',
+	],
+	deps=["Tiltfile", "tilt-ingress-nginx-values.yaml"],
+)
+
 k8s_yaml(
     helm(
         'charts/lokahi',
-        values=['./tilt-helm-values.yaml'],
+        values=['./tilt-helm-values.yaml'] + cfg.get('values', []),
     )
 )
 
@@ -406,29 +439,15 @@ k8s_resource(
 )
 
 ### Others ###
+listen_on = cfg.get('listen-on', "0.0.0.0")
 k8s_resource(
-    'ingress-nginx-controller',
+    'ingress-nginx',
     labels=['0_useful'],
     port_forwards=[
-        port_forward(8123, 80),
-        port_forward(1443, 443),
+        port_forward(8123, 80, host=listen_on),
+        port_forward(1443, 443, host=listen_on),
     ],
     links=[
         link("https://onmshs.local:1443/", name="Web UI"),
     ],
-)
-
-k8s_resource(
-    'opennms-nginx-errors',
-    labels=['opennms-nginx-errors'],
-)
-
-k8s_resource(
-    'ingress-nginx-admission-create',
-    labels=['z_ingress-nginx-support'],
-)
-
-k8s_resource(
-    'ingress-nginx-admission-patch',
-    labels=['z_ingress-nginx-support'],
 )

@@ -41,8 +41,8 @@ import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -54,7 +54,7 @@ public class KafkaConsumerRunner implements Runnable {
     private final KafkaConsumer<String, byte[]> consumer;
     private final AtomicBoolean closed = new AtomicBoolean(false);
     private final AtomicBoolean shutdown = new AtomicBoolean(false);
-    private final List<byte[]> values = new ArrayList<>();
+    private final List<byte[]> values = Collections.synchronizedList(new LinkedList<>());
 
     public KafkaConsumerRunner(String bootStrapUrl, String topic) {
         this.topic = topic;
@@ -94,7 +94,7 @@ public class KafkaConsumerRunner implements Runnable {
     }
 
     public List<byte[]> getValues() {
-        return this.values;
+        return new LinkedList<>(this.values);
     }
 
     public AtomicBoolean isShutdown() {

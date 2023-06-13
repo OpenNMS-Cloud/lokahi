@@ -54,7 +54,7 @@ public class CucumberHooks {
     public static String instanceUrl;
     public static String gatewayHost;
     public static PortalApi portalApi = new PortalApi();
-    private static String minionPrefix = "Default_Minion-";
+    private static final String MINION_PREFIX = "Default_Minion-";
 
     @Before("@cloud")
     public static void setUp() {
@@ -89,7 +89,7 @@ public class CucumberHooks {
 
         MinionContainer minionContainer = new MinionContainer(
             gatewayHost,
-            minionPrefix + timeCode,
+            MINION_PREFIX + timeCode,
             "location-" + timeCode
         );
 
@@ -108,13 +108,13 @@ public class CucumberHooks {
     public static void tearDownCloud() {
         Selenide.open(instanceUrl);
 
-        Stream<MinionContainer> aDefault = MINIONS.stream().dropWhile(container -> !container.minionId.startsWith(minionPrefix));
+        Stream<MinionContainer> aDefault = MINIONS.stream().dropWhile(container -> !container.minionId.startsWith(MINION_PREFIX));
         aDefault.forEach(GenericContainer::stop);
 
         if (MINIONS.isEmpty()) {
             long timeCode = Instant.now().toEpochMilli();
             MinionContainer.createNewOne(
-                minionPrefix + timeCode,
+                MINION_PREFIX + timeCode,
                 "location-" + timeCode
             );
         }
@@ -122,7 +122,7 @@ public class CucumberHooks {
 
     @Before("@portal")
     public static void loginToPortal() {
-        portalApi.deleteAllBtoInstances();
+        portalApi.deleteAllCloudInstances();
         if (Selenide.webdriver().driver().hasWebDriverStarted()) {
             return;
         }
@@ -146,7 +146,7 @@ public class CucumberHooks {
 
     @Before("@portal-member")
     public static void loginToPortalAsMember() {
-        portalApi.deleteAllBtoInstances();
+        portalApi.deleteAllCloudInstances();
         if (Selenide.webdriver().driver().hasWebDriverStarted()) {
             return;
         }
@@ -172,6 +172,6 @@ public class CucumberHooks {
         if (!MINIONS.isEmpty()) {
             MINIONS.get(0).stop();
         }
-        portalApi.deleteAllBtoInstances();
+        portalApi.deleteAllCloudInstances();
     }
 }

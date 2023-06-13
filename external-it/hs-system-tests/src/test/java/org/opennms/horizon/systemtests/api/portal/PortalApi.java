@@ -33,10 +33,10 @@ import org.junit.Assert;
 import org.opennms.horizon.systemtests.api.ServiceGenerator;
 import org.opennms.horizon.systemtests.api.portal.models.AuthnRequest;
 import org.opennms.horizon.systemtests.api.portal.models.AuthnResponse;
-import org.opennms.horizon.systemtests.api.portal.models.BtoInstanceRequest;
-import org.opennms.horizon.systemtests.api.portal.models.BtoInstancesResponse;
+import org.opennms.horizon.systemtests.api.portal.models.CloudInstanceRequest;
+import org.opennms.horizon.systemtests.api.portal.models.CloudInstancesResponse;
 import org.opennms.horizon.systemtests.api.portal.models.GetInstanceUsersResponse;
-import org.opennms.horizon.systemtests.api.portal.models.PostInstanceUserRequest;
+import org.opennms.horizon.systemtests.api.portal.models.AddInstanceUserRequest;
 import org.opennms.horizon.systemtests.api.portal.models.TokenResponse;
 import org.opennms.horizon.systemtests.keyvalue.SecretsStorage;
 import org.slf4j.Logger;
@@ -67,27 +67,27 @@ public class PortalApi {
      * @param adminEmail   - an email of assigned admin
      * @return the string with an instance uuid
      */
-    public String createBtoInstance(String instanceName, String adminEmail) {
+    public String createCloudInstance(String instanceName, String adminEmail) {
         try {
-            Response<ResponseBody> btoInstanceId = portalService.createBtoInstance(
+            Response<ResponseBody> btoInstanceId = portalService.createCloudInstance(
                 SecretsStorage.portalOrganizationId,
-                new BtoInstanceRequest(instanceName, adminEmail),
+                new CloudInstanceRequest(instanceName, adminEmail),
                 authToken
             ).execute();
 
             if (btoInstanceId.isSuccessful()) {
                 return btoInstanceId.body().string();
             }
-            Assert.fail("[TEST] Create a bto instance request failed: " + btoInstanceId.errorBody().string());
+            Assert.fail("[TEST] Creating a cloud instance failed: " + btoInstanceId.errorBody().string());
         } catch (IOException ex) {
-            Assert.fail("[TEST] Portal.createBtoInstance request failed: " + ex.getMessage());
+            Assert.fail("[TEST] Failed creating a cloud instance: " + ex.getMessage());
         }
         return null;
     }
 
-    public BtoInstancesResponse getAllBtoInstances() {
+    public CloudInstancesResponse listCloudInstances() {
         try {
-            Response<BtoInstancesResponse> instances = portalService.getBtoInstances(
+            Response<CloudInstancesResponse> instances = portalService.getCloudInstances(
                 SecretsStorage.portalOrganizationId,
                 null,
                 null,
@@ -96,18 +96,18 @@ public class PortalApi {
             ).execute();
 
             if (!instances.isSuccessful()) {
-                Assert.fail("[TEST] portalService.getBtoInstances failed with error " + instances.errorBody().string());
+                Assert.fail("[TEST] listing cloud instances failed with error " + instances.errorBody().string());
             }
             return instances.body();
         } catch (IOException e) {
-            Assert.fail("[TEST] Test failed getting the bto instances: " + e.getLocalizedMessage());
+            Assert.fail("[TEST] failed listing cloud instances: " + e.getLocalizedMessage());
         }
         return null;
     }
 
-    public BtoInstancesResponse getAllBtoInstancesByName(String searchPattern) {
+    public CloudInstancesResponse searchCloudInstancesByName(String searchPattern) {
         try {
-            Response<BtoInstancesResponse> instances = portalService.getBtoInstances(
+            Response<CloudInstancesResponse> instances = portalService.getCloudInstances(
                 SecretsStorage.portalOrganizationId,
                 searchPattern,
                 "name",
@@ -116,28 +116,28 @@ public class PortalApi {
             ).execute();
 
             if (!instances.isSuccessful()) {
-                Assert.fail("[TEST] portalService.getBtoInstances failed with error: " + instances.errorBody().string());
+                Assert.fail("[TEST] listing cloud instances by name failed with error: " + instances.errorBody().string());
             }
             return instances.body();
         } catch (IOException e) {
-            Assert.fail("[TEST] Test failed getting the bto instances: " + e.getLocalizedMessage());
+            Assert.fail("[TEST] failed listing cloud instances by name: " + e.getLocalizedMessage());
         }
         return null;
     }
 
-    public void deleteBtoInstance(String btoInstanceId) {
+    public void deleteCloudInstance(String cloudInstanceId) {
         try {
             Response<Void> deleteResponse = portalService.deleteInstance(
                 SecretsStorage.portalOrganizationId,
-                btoInstanceId,
+                cloudInstanceId,
                 authToken
             ).execute();
 
             if (!deleteResponse.isSuccessful()) {
-                Assert.fail("[TEST] portalService.deleteInstance failed with error " + deleteResponse.errorBody().string());
+                Assert.fail("[TEST] deleting cloud instance failed with error " + deleteResponse.errorBody().string());
             }
         } catch (IOException e) {
-            Assert.fail("[TEST] Test failed deleting the bto instances: " + e.getLocalizedMessage());
+            Assert.fail("[TEST] failed deleting cloud instance: " + e.getLocalizedMessage());
         }
     }
 
@@ -152,32 +152,32 @@ public class PortalApi {
             ).execute();
 
             if (!response.isSuccessful()) {
-                Assert.fail("[TEST] portalService.getInstanceUsers return error:" + response.errorBody().string());
+                Assert.fail("[TEST] listing users associated to cloud instance failed with error:" + response.errorBody().string());
             }
 
             return response.body();
         } catch (IOException e) {
-            Assert.fail("[TEST] portalService.getInstanceUsers failed");
+            Assert.fail("[TEST] failed listing users associated to cloud instance: " + e.getLocalizedMessage());
         }
         return null;
     }
 
     public void addUserToInstance(String instanceName, String userEmail) {
-        String instanceId = getAllBtoInstancesByName(instanceName).pagedRecords.get(0).id;
+        String instanceId = searchCloudInstancesByName(instanceName).pagedRecords.get(0).id;
 
         try {
-            Response<Void> response = portalService.postInstanceUser(
+            Response<Void> response = portalService.addInstanceUser(
                 SecretsStorage.portalOrganizationId,
                 instanceId,
-                new PostInstanceUserRequest(userEmail),
+                new AddInstanceUserRequest(userEmail),
                 authToken
             ).execute();
 
             if (!response.isSuccessful()) {
-                Assert.fail("[TEST] portalService.postUserToInstance return error:" + response.errorBody().string());
+                Assert.fail("[TEST] adding user to cloud instance failed with error:" + response.errorBody().string());
             }
         } catch (IOException e) {
-            Assert.fail("[TEST] portalService.postUserToInstance failed");
+            Assert.fail("[TEST] failed adding user to cloud instance: " + e.getLocalizedMessage());
         }
     }
 
@@ -191,15 +191,15 @@ public class PortalApi {
             ).execute();
 
             if (!response.isSuccessful()) {
-                Assert.fail("[TEST] portalService.deleteInstanceUser return error:" + response.errorBody().string());
+                Assert.fail("[TEST] deleting user from cloud instance failed with error:" + response.errorBody().string());
             }
         } catch (IOException e) {
-            Assert.fail("[TEST] portalService.deleteInstanceUser failed");
+            Assert.fail("[TEST] failed deleting user from cloud instance: " + e.getLocalizedMessage());
         }
     }
 
     public void revokeUserAccessFromInstance(String instanceName, String userEmail) {
-        String instanceId = getAllBtoInstancesByName(instanceName).pagedRecords.get(0).id;
+        String instanceId = searchCloudInstancesByName(instanceName).pagedRecords.get(0).id;
         GetInstanceUsersResponse.InstanceUser user = getAllInstancesUsers(instanceId)
             .pagedRecords
             .stream().filter(t -> t.email.equals(userEmail))
@@ -207,12 +207,12 @@ public class PortalApi {
         deleteUserFromInstance(instanceId, user.identity);
     }
 
-    public void deleteAllBtoInstances() {
-        List<BtoInstancesResponse.Instance> items = getAllBtoInstances().pagedRecords;
+    public void deleteAllCloudInstances() {
+        List<CloudInstancesResponse.Instance> items = listCloudInstances().pagedRecords;
 
-        for (BtoInstancesResponse.Instance item : items) {
-            deleteBtoInstance(item.id);
-            LOGGER.info("[TEST] BTO instance {} deleted", item.name);
+        for (CloudInstancesResponse.Instance item : items) {
+            deleteCloudInstance(item.id);
+            LOGGER.info("[TEST] cloud instance {} deleted", item.name);
         }
     }
 

@@ -26,17 +26,12 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
+
 package org.opennms.horizon.systemtests.api.portal.models;
 
+import lombok.AllArgsConstructor;
 
-public class BtoInstanceRequest {
-    public String name;
-    public String admin;
-    public String adminFullName;
-
-    public BtoInstanceRequest(String instanceName, String adminEmail) {
-        this.name = instanceName;
-        this.admin = adminEmail;
-        this.adminFullName = "";
-    }
+@AllArgsConstructor
+public class AddInstanceUserRequest {
+    public String email;
 }

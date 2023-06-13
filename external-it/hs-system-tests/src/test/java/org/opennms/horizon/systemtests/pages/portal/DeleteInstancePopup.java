@@ -31,6 +31,7 @@ package org.opennms.horizon.systemtests.pages.portal;
 
 import com.codeborne.selenide.Condition;
 import com.codeborne.selenide.SelenideElement;
+import org.openqa.selenium.By;
 
 import static com.codeborne.selenide.Condition.disappear;
 import static com.codeborne.selenide.Condition.enabled;
@@ -42,9 +43,9 @@ public class DeleteInstancePopup {
 
     private static final SelenideElement popup = $("[data-ref-id='feather-dialog']");
     private final static SelenideElement closeBtn = $("[data-ref-id='dialog-close']");
-    private final static SelenideElement confirmNameInp = $("#delete-instance-confirm-input");
-    private final static SelenideElement cancelBtn = $("#cloud-delete-instance-cancel");
-    private final static SelenideElement deleteBtn = $("#cloud-delete-instance-confirm");
+    private final static SelenideElement confirmNameInp = $(By.id("delete-instance-confirm-input"));
+    private final static SelenideElement cancelBtn = $(By.id("cloud-delete-instance-cancel"));
+    private final static SelenideElement deleteBtn = $(By.id("cloud-delete-instance-confirm"));
     private final static SelenideElement errorTxt = $("div#cloud-instance-delete-input-wrapper [data-ref-id='feather-form-element-error']");
 
     public static void waitPopupIsDisplayed(boolean isVisible) {

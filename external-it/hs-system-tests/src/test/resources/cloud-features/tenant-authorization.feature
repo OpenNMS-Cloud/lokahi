@@ -1,8 +1,8 @@
 @portal
 Feature: Assigned admin can authorize in the instance
 
-  Background: Scenario: IT Administrator adds BTO instance with name and self as admin
-    Given BTO instance named "random" is created
+  Background: Scenario: IT Administrator adds cloud instance with name and self as admin
+    Given cloud instance named "random" is created
     And sees an instance "random" in the list
     And click on 'Log in' button for the instance
 

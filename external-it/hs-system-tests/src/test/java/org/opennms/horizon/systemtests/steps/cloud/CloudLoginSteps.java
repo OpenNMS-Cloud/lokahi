@@ -74,7 +74,7 @@ public class CloudLoginSteps {
 
     @Then("verify the instance url for {string} instance")
     public void checkInstanceUrl(String instanceName) {
-        String expectedUrl = CucumberHooks.portalApi.getAllBtoInstancesByName(instanceName).pagedRecords.get(0).url;
+        String expectedUrl = CucumberHooks.portalApi.searchCloudInstancesByName(instanceName).pagedRecords.get(0).url;
         String actualUrl = Selenide.webdriver().driver().url();
 
         Assert.assertTrue(

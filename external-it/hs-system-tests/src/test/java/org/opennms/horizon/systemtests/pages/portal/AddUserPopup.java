@@ -31,6 +31,7 @@ package org.opennms.horizon.systemtests.pages.portal;
 
 import com.codeborne.selenide.Condition;
 import com.codeborne.selenide.SelenideElement;
+import org.openqa.selenium.By;
 
 import static com.codeborne.selenide.Condition.enabled;
 import static com.codeborne.selenide.Condition.hidden;
@@ -42,8 +43,8 @@ public class AddUserPopup {
     private static final SelenideElement emailAddressInp = $("textarea#cloud-add-user-dialog-email-with");
     private static final SelenideElement emailAddressDropdown = $("div.feather-menu-dropdown .feather-list-item-text");
     private static final SelenideElement emailAddressErrorTxt = $("#cloud-add-user-dialog-email-with .feather-input-error");
-    private static final SelenideElement addBtn = $("#cloud-add-user-dialog-confirm");
-    private static final SelenideElement cancelBtn = $("#cloud-add-user-dialog-cancel");
+    private static final SelenideElement addBtn = $(By.id("cloud-add-user-dialog-confirm"));
+    private static final SelenideElement cancelBtn = $(By.id("cloud-add-user-dialog-cancel"));
     private static final SelenideElement closeBtn = $("[data-ref-id='dialog-close']");
 
     public static void popupIsVisible(boolean state) {

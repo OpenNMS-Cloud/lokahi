@@ -2,8 +2,8 @@
 Feature: Administrator can edit an instance
 
   @TestCaseKey=CLOUD-T560
-  Scenario: IT administrator can rename BTO instance
-    Given BTO instance named "CLOUD-T560" is created
+  Scenario: IT administrator can rename cloud instance
+    Given cloud instance named "CLOUD-T560" is created
     And sees an instance "CLOUD-T560" in the list
     Then click on 'Details' for the first instance
     And click on 'edit' for instance name
@@ -14,9 +14,9 @@ Feature: Administrator can edit an instance
     And sees the 'Cloud Instance Details' page for the "CLOUD-T560-EDITED" instance
 
   @TestCaseKey=CLOUD-T561
-  Scenario: IT administrator cannot rename BTO instance to duplicate name
-    Given BTO instance named "CLOUD-T561_one" is created
-    And BTO instance named "CLOUD-T561_two" is created
+  Scenario: IT administrator cannot rename cloud instance to duplicate name
+    Given cloud instance named "CLOUD-T561_one" is created
+    And cloud instance named "CLOUD-T561_two" is created
     And sees an instance "CLOUD-T561_one" in the list
     Then click on 'Details' for the first instance
     And click on 'edit' for instance name
@@ -28,8 +28,8 @@ Feature: Administrator can edit an instance
     But gets error snackbar message "Instance with same name exists."
 
   @TestCaseKey=CLOUD-T562
-  Scenario: IT administrator cannot rename BTO instance to name outside character set
-    Given BTO instance named "CLOUD-T562" is created
+  Scenario: IT administrator cannot rename cloud instance to name outside character set
+    Given cloud instance named "CLOUD-T562" is created
     And sees an instance "CLOUD-T562" in the list
     Then click on 'Details' for the first instance
     And click on 'edit' for instance name
@@ -38,8 +38,8 @@ Feature: Administrator can edit an instance
     But 'Edit Instance' popup shows an error message "Only letters, numbers, -, _ are allowed." for Instance name
 
   @TestCaseKey=CLOUD-T562_2
-  Scenario: IT administrator cannot rename BTO instance to empty name
-    Given BTO instance named "CLOUD-T562_2" is created
+  Scenario: IT administrator cannot rename cloud instance to empty name
+    Given cloud instance named "CLOUD-T562_2" is created
     And sees an instance "CLOUD-T562_2" in the list
     Then click on 'Details' for the first instance
     And click on 'edit' for instance name
@@ -48,8 +48,8 @@ Feature: Administrator can edit an instance
     But 'Edit Instance' popup shows an error message "Name is required and can contain only letters and the \"-' .\" characters" for Instance name
 
   @TestCaseKey=CLOUD-T562_3
-  Scenario: IT administrator cannot rename BTO instance to name with only spaces
-    Given BTO instance named "CLOUD-T562_3" is created
+  Scenario: IT administrator cannot rename cloud instance to name with only spaces
+    Given cloud instance named "CLOUD-T562_3" is created
     And sees an instance "CLOUD-T562_3" in the list
     Then click on 'Details' for the first instance
     And click on 'edit' for instance name
@@ -60,8 +60,8 @@ Feature: Administrator can edit an instance
     And gets error snackbar message "Invalid name; must not be blank."
 
   @TestCaseKey=CLOUD-T563
-  Scenario: IT administrator cancels renaming BTO instance with CANCEL
-    Given BTO instance named "CLOUD-T563" is created
+  Scenario: IT administrator cancels renaming cloud instance with CANCEL
+    Given cloud instance named "CLOUD-T563" is created
     And sees an instance "CLOUD-T563" in the list
     Then click on 'Details' for the first instance
     And click on 'edit' for instance name
@@ -72,8 +72,8 @@ Feature: Administrator can edit an instance
     And doesn't see a snackbar message
 
   @TestCaseKey=CLOUD-T565
-  Scenario: IT administrator cancels renaming BTO instance with X button
-    Given BTO instance named "CLOUD-T565" is created
+  Scenario: IT administrator cancels renaming cloud instance with X button
+    Given cloud instance named "CLOUD-T565" is created
     And sees an instance "CLOUD-T565" in the list
     Then click on 'Details' for the first instance
     And click on 'edit' for instance name

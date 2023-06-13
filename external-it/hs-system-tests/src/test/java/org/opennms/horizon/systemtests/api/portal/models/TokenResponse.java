@@ -26,7 +26,6 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-
 package org.opennms.horizon.systemtests.api.portal.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;

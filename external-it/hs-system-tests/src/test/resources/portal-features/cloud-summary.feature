@@ -2,17 +2,17 @@
 Feature: Administrator can see instances in the table
 
   @TestCaseKey=CLOUD-T476
-  Scenario: IT Administrator of a BTO Organization with no BTO instances sees empty table in BTO Summary page
-    Given No BTO instances created
+  Scenario: IT Administrator of a cloud Organization with no cloud instances sees empty table in cloud Summary page
+    Given No cloud instances created
     Then sees 'No instances available.'
 
   @TestCaseKey=CLOUD-T476_1 @CLOUD-3243
-  Scenario: IT Administrator of a BTO Organization can create a new instance from 'No instances available.' notification
-    Given No BTO instances created
+  Scenario: IT Administrator of a cloud Organization can create a new instance from 'No instances available.' notification
+    Given No cloud instances created
     Then sees 'No instances available.'
     When click on 'ADD INSTANCE' button
     Then fills "CLOUD-T476_1" in 'Instance name'
-    And  and selects 'Me' as option for 'Assign this instance to:'
+    And and selects 'Me' as option for 'Assign this instance to:'
     And clicks on 'ADD INSTANCE' button
     Then is brought back to the OpenNMS Cloud page
     And gets success snackbar message "Cloud instance created."
@@ -22,8 +22,8 @@ Feature: Administrator can see instances in the table
     And sees "ADMIN" as a single user for the instance
 
   @TestCaseKey=CLOUD-T477
-  Scenario: IT Administrator of a BTO Organization with BTO instances sees tables with all instances in BTO Summary page
-    Given A list of BTO instances are created
+  Scenario: IT Administrator of a cloud Organization with cloud instances sees tables with all instances in cloud Summary page
+    Given A list of cloud instances are created
       | A-Instance |
       | Z-Instance |
       | P-Instance |
@@ -36,7 +36,7 @@ Feature: Administrator can see instances in the table
       | K-Instance |
     Then set "Instance" in the 'Search Instance Name' field
     And see "none" sorting icon for 'Instance name'
-    And  sees a list of instances in the list
+    And sees a list of instances in the list
       | Z-Instance |
       | X-Instance |
       | P-Instance |
@@ -49,7 +49,7 @@ Feature: Administrator can see instances in the table
       | A-Instance |
     Then click on 'Instance Name' title to change sorting
     And see "ascending" sorting icon for 'Instance name'
-    And  sees a list of instances in the list
+    And sees a list of instances in the list
       | A-Instance |
       | D-Instance |
       | E-Instance |
@@ -62,7 +62,7 @@ Feature: Administrator can see instances in the table
       | Z-Instance |
     Then click on 'Instance Name' title to change sorting
     And see "descending" sorting icon for 'Instance name'
-    And  sees a list of instances in the list
+    And sees a list of instances in the list
       | Z-Instance |
       | X-Instance |
       | P-Instance |
@@ -74,10 +74,9 @@ Feature: Administrator can see instances in the table
       | D-Instance |
       | A-Instance |
 
-
   @TestCaseKey=CLOUD-T478
-  Scenario: IT Administrator of a BTO Organization with BTO instances can search instances - no match
-    Given BTO instance named "CLOUD-T478" is created
+  Scenario: IT Administrator of a cloud Organization with cloud instances can search instances - no match
+    Given cloud instance named "CLOUD-T478" is created
     When set "FAKE" in the 'Search Instance Name' field
     Then sees 'No results found'
     Then click on 'CLEAR SEARCH' button
@@ -86,8 +85,8 @@ Feature: Administrator can see instances in the table
       | CLOUD-T478 |
 
   @TestCaseKey=CLOUD-T479
-  Scenario: IT Administrator of a BTO Organization with BTO instances can search instances - partial match
-    Given A list of BTO instances are created
+  Scenario: IT Administrator of a cloud Organization with cloud instances can search instances - partial match
+    Given A list of cloud instances are created
       | CLOUD-middle-T479 |
       | prefix-CLOUD-T479 |
       | CLOUD-T479        |
@@ -98,10 +97,9 @@ Feature: Administrator can see instances in the table
       | CLOUD-T479-suffix |
       | CLOUD-T479        |
 
-
   @TestCaseKey=CLOUD-T480
-  Scenario: IT Administrator of a BTO Organization with BTO instances can search instances - more specific match
-    Given A list of BTO instances are created
+  Scenario: IT Administrator of a cloud Organization with cloud instances can search instances - more specific match
+    Given A list of cloud instances are created
       | CLOUD-T480            |
       | CLOUD-T480-step       |
       | CLOUD-T480-step-final |
@@ -119,8 +117,8 @@ Feature: Administrator can see instances in the table
       | CLOUD-T480-step-final |
 
   @TestCaseKey=CLOUD-T481
-  Scenario: IT Administrator of a BTO Organization with BTO instances sees LOG IN button next to each instance in BTO Summary page
-    Given A list of BTO instances are created
+  Scenario: IT Administrator of a cloud Organization with cloud instances sees LOG IN button next to each instance in cloud Summary page
+    Given A list of cloud instances are created
       | CLOUD-T481-1 |
       | CLOUD-T481-2 |
     Then set "CLOUD-T481" in the 'Search Instance Name' field
@@ -136,8 +134,8 @@ Feature: Administrator can see instances in the table
     Then verify the instance url for "CLOUD-T481-2" instance
 
   @TestCaseKey=CLOUD-T482
-  Scenario: IT Administrator of a BTO Organization with BTO instances sees "DETAILS" button next to each instance in BTO Summary page
-    Given A list of BTO instances are created
+  Scenario: IT Administrator of a cloud Organization with cloud instances sees "DETAILS" button next to each instance in cloud Summary page
+    Given A list of cloud instances are created
       | CLOUD-T482-firstinstance  |
       | CLOUD-T482-secondinstance |
     Then set "CLOUD-T482" in the 'Search Instance Name' field
@@ -148,8 +146,8 @@ Feature: Administrator can see instances in the table
     And sees the 'Cloud Instance Details' page for the "CLOUD-T482-secondinstance" instance
 
   @TestCaseKey=CLOUD-T483
-  Scenario: IT Administrator of a BTO Organization with BTO instances sees "url" information
-    Given BTO instance named "CLOUD-T483" is created
+  Scenario: IT Administrator of a cloud Organization with cloud instances sees "url" information
+    Given cloud instance named "CLOUD-T483" is created
     And sees an instance "CLOUD-T483" in the list
     And click on 'Details' for the first instance
     Then sees the 'Cloud Instance Details' page for the "CLOUD-T483" instance
@@ -158,8 +156,8 @@ Feature: Administrator can see instances in the table
     And has correct URL link in the clipboard that matches with the URL field
 
   @TestCaseKey=CLOUD-T497 @CLOUD-3253
-  Scenario: IT Administrator of a BTO Organization with more than 10 BTO instances can navigate between pages
-    Given A list of BTO instances are created
+  Scenario: IT Administrator of a cloud Organization with more than 10 cloud instances can navigate between pages
+    Given A list of cloud instances are created
       | CLOUD-T497-1  |
       | CLOUD-T497-2  |
       | CLOUD-T497-3  |
@@ -172,7 +170,7 @@ Feature: Administrator can see instances in the table
       | CLOUD-T497-10 |
     And set "CLOUD-T497" in the 'Search Instance Name' field
     And user sees the pagination control panel for the "single" page
-    Then BTO instance named "CLOUD-T497-11" is created
+    Then cloud instance named "CLOUD-T497-11" is created
     And set "" in the 'Search Instance Name' field
     And user sees the pagination control panel for the "first" page
     And sees a list of instances in the list

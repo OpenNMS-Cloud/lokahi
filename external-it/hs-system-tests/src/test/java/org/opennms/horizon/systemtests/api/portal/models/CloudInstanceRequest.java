@@ -26,12 +26,16 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-
 package org.opennms.horizon.systemtests.api.portal.models;
 
-import lombok.AllArgsConstructor;
+public class CloudInstanceRequest {
+    public String name;
+    public String admin;
+    public String adminFullName;
 
-@AllArgsConstructor
-public class PostInstanceUserRequest {
-    public String email;
+    public CloudInstanceRequest(String instanceName, String adminEmail) {
+        this.name = instanceName;
+        this.admin = adminEmail;
+        this.adminFullName = "";
+    }
 }

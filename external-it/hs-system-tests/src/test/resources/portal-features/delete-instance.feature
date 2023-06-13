@@ -2,8 +2,8 @@
 Feature: Administrator can delete an instance
 
   @TestCaseKey=CLOUD-T521
-  Scenario: IT Administrator cancels deleting a BTO instance using button
-    Given BTO instance named "CLOUD-T521" is created
+  Scenario: IT Administrator cancels deleting a cloud instance using button
+    Given cloud instance named "CLOUD-T521" is created
     And sees an instance "CLOUD-T521" in the list
     Then click on 'Details' for the first instance
     And click on 'DELETE INSTANCE' button
@@ -12,8 +12,8 @@ Feature: Administrator can delete an instance
     And sees the 'Cloud Instance Details' page for the "CLOUD-T521" instance
 
   @TestCaseKey=CLOUD-T522
-  Scenario: IT Administrator cancels deleting a BTO instance using X button
-    Given BTO instance named "CLOUD-T522" is created
+  Scenario: IT Administrator cancels deleting a cloud instance using X button
+    Given cloud instance named "CLOUD-T522" is created
     And sees an instance "CLOUD-T522" in the list
     Then click on 'Details' for the first instance
     And click on 'DELETE INSTANCE' button
@@ -22,19 +22,19 @@ Feature: Administrator can delete an instance
     And sees the 'Cloud Instance Details' page for the "CLOUD-T522" instance
 
   @TestCaseKey=CLOUD-T523
-  Scenario: IT Administrator enters non matching name BTO instance in "DELETE INSTANCE" confirmation
-    Given BTO instance named "CLOUD-T523" is created
+  Scenario: IT Administrator enters non matching name cloud instance in "DELETE INSTANCE" confirmation
+    Given cloud instance named "CLOUD-T523" is created
     And sees an instance "CLOUD-T523" in the list
     Then click on 'Details' for the first instance
     And click on 'DELETE INSTANCE' button
     And 'Instance Delete Confirmation' popup appears
-    And enters "BTO2" as an 'Instance Name'
+    And enters "cloud2" as an 'Instance Name'
     Then click on 'DELETE' button to confirm deletion
     But sees error message 'Instance name does not match.' for 'Instance Name' field
 
   @TestCaseKey=CLOUD-T525
-  Scenario: IT Administrator enters BTO instance named with name subset in "DELETE INSTANCE" confirmation
-    Given BTO instance named "CLOUD-T525 DELETE" is created
+  Scenario: IT Administrator enters cloud instance named with name subset in "DELETE INSTANCE" confirmation
+    Given cloud instance named "CLOUD-T525 DELETE" is created
     And sees an instance "CLOUD-T525 DELETE" in the list
     Then click on 'Details' for the first instance
     And click on 'DELETE INSTANCE' button
@@ -44,8 +44,8 @@ Feature: Administrator can delete an instance
     But sees error message 'Instance name does not match.' for 'Instance Name' field
 
   @TestCaseKey=CLOUD-T526
-  Scenario:IT Administrator deletes BTO instance after confirmation
-    Given BTO instance named "CLOUD-T526" is created
+  Scenario:IT Administrator deletes cloud instance after confirmation
+    Given cloud instance named "CLOUD-T526" is created
     And sees an instance "CLOUD-T526" in the list
     Then click on 'Details' for the first instance
     And click on 'DELETE INSTANCE' button
@@ -56,8 +56,8 @@ Feature: Administrator can delete an instance
     And doesn't see an instance "CLOUD-T526" in the list
 
   @TestCaseKey=CLOUD-T530
-  Scenario: IT Administrator enters non matching then matching BTO instance named in "DELETE INSTANCE" confirmation
-    Given BTO instance named "CLOUD-T530" is created
+  Scenario: IT Administrator enters non matching then matching cloud instance named in "DELETE INSTANCE" confirmation
+    Given cloud instance named "CLOUD-T530" is created
     And sees an instance "CLOUD-T530" in the list
     Then click on 'Details' for the first instance
     And click on 'DELETE INSTANCE' button
@@ -72,8 +72,8 @@ Feature: Administrator can delete an instance
     And doesn't see an instance "CLOUD-T530" in the list
 
   @TestCaseKey=CLOUD-T533
-  Scenario: IT Administrator can no longer login BTO instance after deletion
-    Given BTO instance named "CLOUD-T533" is created
+  Scenario: IT Administrator can no longer login cloud instance after deletion
+    Given cloud instance named "CLOUD-T533" is created
     And sees an instance "CLOUD-T533" in the list
     Then click on 'Details' for the first instance
     And click on the instance 'URL' link
@@ -87,7 +87,7 @@ Feature: Administrator can delete an instance
 
   @TestCaseKey=CLOUD-T538
   Scenario: IT Administrator cannot delete instance if the name case does not match
-    Given BTO instance named "CLOUD-T538" is created
+    Given cloud instance named "CLOUD-T538" is created
     And sees an instance "CLOUD-T538" in the list
     Then click on 'Details' for the first instance
     And click on 'DELETE INSTANCE' button
@@ -98,7 +98,7 @@ Feature: Administrator can delete an instance
 
   @TestCaseKey=CLOUD-T629
   Scenario: IT Administrator cannot delete an instance by its previous name
-    Given BTO instance named "CLOUD-T629" is created
+    Given cloud instance named "CLOUD-T629" is created
     And sees an instance "CLOUD-T629" in the list
     Then click on 'Details' for the first instance
     And click on 'edit' for instance name

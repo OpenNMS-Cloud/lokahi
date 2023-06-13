@@ -184,6 +184,7 @@ public class MonitoringLocationStepDefinitions {
     public void monitoringLocationMonitoringLocationIsNotFound() {
         var monitoringLocationStub = backgroundHelper.getMonitoringLocationStub();
         await().pollInterval(5, TimeUnit.SECONDS)
+            .pollDelay(10L, TimeUnit.MILLISECONDS)
             .atMost(30, TimeUnit.SECONDS).until(() -> {
                     try {
                         monitoringLocationStub.getLocationById(Int64Value.of(lastMonitoringLocation.getId()));
@@ -215,6 +216,7 @@ public class MonitoringLocationStepDefinitions {
 
     private void findByNameNotFound(MonitoringLocationServiceGrpc.MonitoringLocationServiceBlockingStub monitoringLocationStub, String location, String lastMonitoringLocation1) {
         await().pollInterval(5, TimeUnit.SECONDS)
+            .pollDelay(10L, TimeUnit.MILLISECONDS)
             .atMost(30, TimeUnit.SECONDS).until(() -> {
                 try {
                     monitoringLocationStub.getLocationByName(StringValue.of(location));

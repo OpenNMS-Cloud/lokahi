@@ -177,10 +177,12 @@ public class InventoryProcessingStepDefinitions {
 
     @Then("verify Monitoring system is removed with system id {string}")
     public void verifyMonitoringSystemIsRemovedWithSystemId(String systemId) {
-        var monitoringSystemStub = backgroundHelper.getMonitoringSystemStub();
-        var systems = monitoringSystemStub.listMonitoringSystem(Empty.newBuilder().build()).getSystemsList()
-            .stream().filter(s -> systemId.equals(s.getSystemId())).toList();
-        assertEquals(0, systems.size());
+        await().atMost(30, TimeUnit.SECONDS).pollDelay(10L, TimeUnit.MILLISECONDS).until(() -> {
+            var monitoringSystemStub = backgroundHelper.getMonitoringSystemStub();
+            var systems = monitoringSystemStub.listMonitoringSystem(Empty.newBuilder().build()).getSystemsList()
+                .stream().filter(s -> systemId.equals(s.getSystemId())).toList();
+            assertEquals(0, systems.size());
+        });
     }
 
     @Then("verify Monitoring location is created with location {string}")

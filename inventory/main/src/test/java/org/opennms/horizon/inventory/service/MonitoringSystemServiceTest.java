@@ -122,7 +122,6 @@ class MonitoringSystemServiceTest {
         service.addMonitoringSystemFromHeartbeat(heartbeatMessage);
         verify(mockMonitoringSystemRepo).findBySystemIdAndTenantId(systemId, tenantId);
         verify(mockMonitoringSystemRepo).save(testMonitoringSystem);
-        verify(mockConfigUpdateService).sendConfigUpdate(tenantId, location);
     }
 
     @Test

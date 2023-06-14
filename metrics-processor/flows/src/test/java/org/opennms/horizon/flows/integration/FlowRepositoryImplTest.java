@@ -4,21 +4,21 @@ package org.opennms.horizon.flows.integration;
 import io.grpc.ManagedChannel;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentMatcher;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.opennms.dataplatform.flows.ingester.v1.IngesterGrpc;
+import org.opennms.dataplatform.flows.ingester.v1.StoreFlowDocumentsRequest;
 import org.opennms.dataplatform.flows.ingester.v1.StoreFlowDocumentsResponse;
 import org.opennms.horizon.flows.document.FlowDocument;
-import org.opennms.horizon.flows.document.TenantLocationSpecificFlowDocument;
 import org.opennms.horizon.flows.document.TenantLocationSpecificFlowDocumentLog;
 import org.opennms.horizon.flows.grpc.client.IngestorClient;
 import org.springframework.retry.support.RetryTemplate;
 
-import java.util.Collections;
-import java.util.List;
-
 
 class FlowRepositoryImplTest {
+
+    private final String tenantId = "any-tenant-id";
 
     private FlowRepositoryImpl flowRepository;
     private final IngesterGrpc.IngesterBlockingStub ingesterBlockingStub = Mockito.mock(IngesterGrpc.IngesterBlockingStub.class);
@@ -47,13 +47,21 @@ class FlowRepositoryImplTest {
         // Given
         var flowsLog =
                 TenantLocationSpecificFlowDocumentLog.newBuilder()
-                    .setTenantId("any-tenant-id")
+                    .setTenantId(tenantId)
                     .addMessage(FlowDocument.newBuilder());
 
         // When
         flowRepository.persist(flowsLog.build());
 
         // Then
-        Mockito.verify(ingesterBlockingStub, Mockito.times(3)).storeFlowDocuments(Mockito.any());
+        class FlowDocumentArgumentMatcher implements ArgumentMatcher<StoreFlowDocumentsRequest>{
+            @Override
+            public boolean matches(StoreFlowDocumentsRequest right) {
+                return right.getDocumentsList().stream().allMatch(d -> tenantId.equals(d.getTenantId()));
+            }
+        }
+
+        Mockito.verify(ingesterBlockingStub, Mockito.times(3))
+            .storeFlowDocuments(Mockito.argThat(new FlowDocumentArgumentMatcher()));
     }
 }

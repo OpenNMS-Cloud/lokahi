@@ -28,13 +28,12 @@
 
 package org.opennms.horizon.systemtests.api.portal.models;
 
-
-public class BtoInstanceRequest {
+public class CloudInstanceRequest {
     public String name;
     public String admin;
     public String adminFullName;
 
-    public BtoInstanceRequest(String instanceName, String adminEmail) {
+    public CloudInstanceRequest(String instanceName, String adminEmail) {
         this.name = instanceName;
         this.admin = adminEmail;
         this.adminFullName = "";

@@ -26,15 +26,12 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
+
 package org.opennms.horizon.systemtests.api.portal.models;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AllArgsConstructor;
 
-@JsonIgnoreProperties(ignoreUnknown = true)
-public class TokenResponse {
-    @JsonProperty("access_token")
-    public String accessToken;
-    @JsonProperty("id_token")
-    public String idToken;
+@AllArgsConstructor
+public class AddInstanceUserRequest {
+    public String email;
 }

@@ -26,7 +26,6 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-
 package org.opennms.horizon.systemtests.api.portal.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -34,7 +33,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class BtoInstancesResponse {
+public class CloudInstancesResponse {
     public Integer totalRecords;
     public List<Instance> pagedRecords;
 

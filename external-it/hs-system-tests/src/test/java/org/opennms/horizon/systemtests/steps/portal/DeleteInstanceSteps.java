@@ -40,7 +40,7 @@ public class DeleteInstanceSteps {
         DeleteInstancePopup.waitPopupIsDisplayed(true);
     }
 
-    @Then("the IT Administrator enters {string} as an 'Instance Name'")
+    @Then("enters {string} as an 'Instance Name'")
     public void setInstnanceName(String instanceName) {
         DeleteInstancePopup.setInstanceNameToConfirmationInput(instanceName);
     }

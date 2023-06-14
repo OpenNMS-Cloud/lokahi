@@ -34,13 +34,24 @@ import io.cucumber.java.en.Then;
 import org.opennms.horizon.systemtests.pages.portal.EditInstancePage;
 import org.opennms.horizon.systemtests.utils.TestDataStorage;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 public class EditInstanceSteps {
 
-    @Then("the IT Administrator sees {string} as a single user for the instance")
+    @Then("sees {string} as a single user for the instance")
     public void instanceHasASingleUser(String email) {
+        EditInstancePage.setUserSearchPattern("");  // TODO: BUG CLOUD-3243
         EditInstancePage.verifyNumberOfUsers(1);
         String userEmail = TestDataStorage.mapUserToEmail(email);
         EditInstancePage.verifyUserEmailInTable(userEmail);
+    }
+
+    @Then("sees following users as members of the instance")
+    public void instanceHasASingleUser(List<String> users) {
+        EditInstancePage.verifyNumberOfUsers(2);
+        List<String> emails = users.stream().map(TestDataStorage::mapUserToEmail).collect(Collectors.toList());
+        EditInstancePage.verifyListOfEmailsInTheTable(emails);
     }
 
     @Then("click on 'DELETE INSTANCE' button")
@@ -48,7 +59,12 @@ public class EditInstanceSteps {
         EditInstancePage.clickDeleteInstance();
     }
 
-    @Then("the IT Administrator sees the 'Cloud Instance Details' page for the {string} instance")
+    @Then("does not see the 'DELETE INSTANCE' button")
+    public void checkDeleteInstanceButtonIsHidden() {
+        EditInstancePage.setDeleteInstanceBtnIsHidden();
+    }
+
+    @Then("sees the 'Cloud Instance Details' page for the {string} instance")
     public void checkWeAreOnDetailsPage(String instanceName) {
         EditInstancePage.verifyPageTitle();
         EditInstancePage.verifyInstanceName(instanceName);
@@ -64,6 +80,11 @@ public class EditInstanceSteps {
         EditInstancePage.clickEditNameBtn();
     }
 
+    @Then("does not see the 'edit' button for the instance name")
+    public void checkEditButtonIsHidden() {
+        EditInstancePage.editNameBtnIsHidden();
+    }
+
     @Then("click on 'copy' button for URL")
     public void clickOnCopyURLButton() {
         EditInstancePage.clickCopyURLButton();
@@ -77,5 +98,10 @@ public class EditInstanceSteps {
     @Then("click to 'go back' button to return to the OpenNMS Cloud page")
     public void clickGoBackBtn() {
         EditInstancePage.clickGoBackButton();
+    }
+
+    @Then("click on 'ADD USER' button")
+    public void clickOnAddUser() {
+        EditInstancePage.clickOnAddUserBtn();
     }
 }

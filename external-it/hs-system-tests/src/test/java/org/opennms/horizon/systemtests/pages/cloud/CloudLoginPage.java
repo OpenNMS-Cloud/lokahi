@@ -29,6 +29,7 @@
 package org.opennms.horizon.systemtests.pages.cloud;
 
 import com.codeborne.selenide.SelenideElement;
+import org.openqa.selenium.By;
 
 import static com.codeborne.selenide.Condition.enabled;
 import static com.codeborne.selenide.Condition.text;
@@ -36,10 +37,10 @@ import static com.codeborne.selenide.Selenide.$;
 
 public class CloudLoginPage {
     private static final SelenideElement pageTitleTxt = $("h2.okta-form-title");
-    private static final SelenideElement userNameInp = $("#idp-discovery-username");
-    private static final SelenideElement nextBtn = $("#idp-discovery-submit");
-    private static final SelenideElement passwordInp = $("#okta-signin-password");
-    private static final SelenideElement submitBtn = $("#okta-signin-submit");
+    private static final SelenideElement userNameInp = $(By.id("idp-discovery-username"));
+    private static final SelenideElement nextBtn = $(By.id("idp-discovery-submit"));
+    private static final SelenideElement passwordInp = $(By.id("okta-signin-password"));
+    private static final SelenideElement submitBtn = $(By.id("okta-signin-submit"));
 
     public static void setUsername(String username) {
         userNameInp.shouldBe(enabled).setValue(username);

@@ -42,7 +42,7 @@ public class AddNewInstanceSteps {
         AddNewInstancePopup.waitPopupIsDisplayed(true);
     }
 
-    @Then("the IT Administrator fills {string} in 'Instance name'")
+    @Then("fills {string} in 'Instance name'")
     public void setInstanceName(String instanceName) {
         if (instanceName.startsWith("random")) {
             instanceName = "Instance_" + RandomStringUtils.randomAlphabetic(10);
@@ -68,12 +68,12 @@ public class AddNewInstanceSteps {
         AddNewInstancePopup.confirmEmailInDropdown(userEmail);
     }
 
-    @Then("the IT Administrator clicks on 'ADD INSTANCE' button")
+    @Then("clicks on 'ADD INSTANCE' button")
     public void clickOnAddInstanceBtn() {
         AddNewInstancePopup.clickSubmitBtn();
     }
 
-    @Then("the IT Administrator clicks on 'X' button to close popup")
+    @Then("clicks on 'X' button to close popup")
     public void clickOnCancelBtn() {
         AddNewInstancePopup.clickCloseBtn();
     }

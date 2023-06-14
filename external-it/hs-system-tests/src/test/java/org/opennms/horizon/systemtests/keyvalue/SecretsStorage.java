@@ -48,9 +48,10 @@ public class SecretsStorage {
     public static String oktaState = getSecretValue("okta-state");
 
     public static String portalHost = getSecretValueForEnv("portal-host");
-    public static String adminUserEmail = getSecretValueForEnv("hs-portal-userEmail");
-    public static String adminUserPassword = getSecretValueForEnv("hs-portal-userPassword");
+    public static String adminUserEmail = getSecretValueForEnv("hs-portal-admin-email");
+    public static String memberUserEmail = getSecretValueForEnv("hs-portal-member-email");
     public static String oktaUserEmail = getSecretValueForEnv("hs-portal-oktaEmail");
+    public static String userPassword = getSecretValueForEnv("hs-portal-userPassword");
 
     public static String portalOrganizationId = getSecretValueForEnv("hs-portal-organization");
 

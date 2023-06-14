@@ -30,6 +30,7 @@
 package org.opennms.horizon.systemtests.pages.portal;
 
 import com.codeborne.selenide.CollectionCondition;
+import com.codeborne.selenide.Condition;
 import com.codeborne.selenide.ElementsCollection;
 import com.codeborne.selenide.Selenide;
 import com.codeborne.selenide.SelenideElement;
@@ -44,6 +45,7 @@ import static com.codeborne.selenide.Condition.disappear;
 import static com.codeborne.selenide.Condition.enabled;
 import static com.codeborne.selenide.Condition.exactText;
 import static com.codeborne.selenide.Condition.exactValue;
+import static com.codeborne.selenide.Condition.exist;
 import static com.codeborne.selenide.Condition.hidden;
 import static com.codeborne.selenide.Condition.not;
 import static com.codeborne.selenide.Condition.text;
@@ -55,17 +57,18 @@ import static com.codeborne.selenide.Selenide.$$x;
 public class PortalCloudPage {
 
     private static final SelenideElement headerTxt = $("#header");
-    private static final SelenideElement addInstanceBtn = $("#cloud-add-instance-button");
+    private static final SelenideElement subscriptionInfoTxt = $("[data-ref-id='feather-chip-list']");
+    private static final SelenideElement addInstanceBtn = $(By.id("cloud-add-instance-button"));
     private static final SelenideElement instanceTable = $("table.condensed  tbody");
     private static final ElementsCollection names = $$x("//tbody/tr/td[position()=1]");
     private static final SelenideElement instanceNameTitle = $("th[data-ref-id='feather-sort-header']");
-    private static final SelenideElement logInBtn = $("#cloud-instances-row-login-0");
-    private static final SelenideElement detailsBtn = $("#cloud-instances-row-details-0");
-    private static final SelenideElement clearSearchBtn = $("#cloud-instances-nodata-clear-search");
-    private static final SelenideElement addInstanceNoDataBtn = $("#cloud-instances-nodata-add-instance");
-    private static final SelenideElement searchInstanceInp = $("#cloud-instances-search");
+    private static final SelenideElement logInBtn = $(By.id("cloud-instances-row-login-0"));
+    private static final SelenideElement detailsBtn = $(By.id("cloud-instances-row-details-0"));
+    private static final SelenideElement clearSearchBtn = $(By.id("cloud-instances-nodata-clear-search"));
+    private static final SelenideElement addInstanceNoDataBtn = $(By.id("cloud-instances-nodata-add-instance"));
+    private static final SelenideElement searchInstanceInp = $(By.id("cloud-instances-search"));
     private static final SelenideElement shadedBackground = $("div.backdrop");
-    private static final SelenideElement spinner = $(".spinner");
+    private static final SelenideElement spinner = $("div.cloud-instances div.spinner-container");
     private static final SelenideElement noDataTxt = $("h3.empty-view");
     private static final SelenideElement noDataSubTxt = $("p.empty-view-sub");
     private static final SelenideElement rowToHide = $("tr.data-table-leave-to");
@@ -77,10 +80,20 @@ public class PortalCloudPage {
 
     public static void verifyMainPageHeader() {
         headerTxt.shouldBe(visible, Duration.ofMinutes(1)).shouldHave(text("OpenNMS Cloud"));
+        // TODO: waiting for the spinner leads to intermittent failures.
+//        waitSpinnerDisappear();
     }
 
     public static void clickAddInstance() {
         addInstanceBtn.shouldBe(enabled, Duration.ofSeconds(20)).click();
+    }
+
+    public static void addInstanceBtnIsHidden() {
+        addInstanceBtn.shouldNot(exist);
+    }
+
+    public static void addInstanceNoDataBtnHasState(Condition state) {
+        addInstanceNoDataBtn.shouldBe(state);
     }
 
     public static void clickAddInstanceWhenNoData() {
@@ -100,6 +113,10 @@ public class PortalCloudPage {
 
     public static void clickOnClearSearchBtn() {
         clearSearchBtn.shouldBe(enabled).click();
+    }
+
+    public static void clearSearchBtnIsHidden() {
+        clearSearchBtn.shouldBe(hidden);
     }
 
     public static void clickLogInForFirstInstance() {
@@ -149,11 +166,13 @@ public class PortalCloudPage {
         searchInstanceInp.shouldHave(exactText(""), exactValue(""));
     }
 
-    public static void verifyNoInstances() {
+    public static void verifyNoInstancesTxt() {
         noDataTxt.shouldBe(visible, text("No instances available."));
         noDataSubTxt.shouldHave(text("Get started by selecting Add Instance."));
-        addInstanceNoDataBtn.shouldBe(enabled);
-        clearSearchBtn.shouldBe(hidden);
+    }
+
+    public static void verifyNoInstancesTxtMember() {
+        noDataTxt.shouldBe(visible, text("No instances available."));
     }
 
     public static void clickInstanceNameTitle() {
@@ -183,5 +202,13 @@ public class PortalCloudPage {
         previousPageBtn.click();
         spinner.shouldBe(appear).shouldBe(disappear, Duration.ofMinutes(1));
         Selenide.sleep(1_000);
+    }
+
+    public static void waitSpinnerDisappear() {
+        spinner.shouldBe(appear, Duration.ofSeconds(30)).shouldBe(disappear, Duration.ofSeconds(30));
+    }
+
+    public static void subscriptionInfoIsHidden() {
+        subscriptionInfoTxt.shouldBe(hidden);
     }
 }

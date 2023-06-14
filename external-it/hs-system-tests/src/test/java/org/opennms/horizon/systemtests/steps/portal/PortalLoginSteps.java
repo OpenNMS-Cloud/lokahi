@@ -47,7 +47,7 @@ public class PortalLoginSteps {
         PortalLoginPage.closeCookieHeader();
         PortalLoginPage.setUsername(SecretsStorage.adminUserEmail);
         PortalLoginPage.clickNext();
-        PortalLoginPage.setPassword(SecretsStorage.adminUserPassword);
+        PortalLoginPage.setPassword(SecretsStorage.userPassword);
         PortalLoginPage.clickSignIn();
     }
 }

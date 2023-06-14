@@ -37,22 +37,40 @@ import org.opennms.horizon.systemtests.pages.portal.PortalCloudPage;
 
 import java.util.List;
 
+import static com.codeborne.selenide.Condition.enabled;
+import static com.codeborne.selenide.Condition.hidden;
 import static org.opennms.horizon.systemtests.CucumberHooks.INSTANCES;
 
 public class PortalCloudSteps {
+
+    @Then("refresh the page")
+    public void refreshThePage() {
+        Selenide.refresh();
+        PortalCloudPage.verifyMainPageHeader();
+    }
 
     @Then("Verify that user logged in to Portal successfully")
     public void verifyThatUserLoggedInToPortal() {
         PortalCloudPage.verifyMainPageHeader();
     }
 
-    @Then("a IT Administrator clicks on '+ADD INSTANCE' button")
+    @Then("does not see subscription information")
+    public void verifySubscriptionIsHidden() {
+        PortalCloudPage.subscriptionInfoIsHidden();
+    }
+
+    @Then("clicks on '+ADD INSTANCE' button")
     public void clickOnAddInstanceButton() {
         PortalCloudPage.clickAddInstance();
         AddNewInstancePopup.waitPopupIsDisplayed(true);
     }
 
-    @Then("the IT Administrator sees an instance {string} in the list")
+    @Then("does not see the '+ADD INSTANCE' button")
+    public void theAddInstanceBtnNotDisplayed() {
+        PortalCloudPage.addInstanceBtnIsHidden();
+    }
+
+    @Then("sees an instance {string} in the list")
     public void findInstanceNameInTheTable(String instanceName) {
         if (instanceName.startsWith("random")) {
             instanceName = INSTANCES.get(0);
@@ -61,7 +79,7 @@ public class PortalCloudSteps {
         PortalCloudPage.instantShouldBePresentedInTable(instanceName);
     }
 
-    @Then("the IT Administrator sees a list of instances in the list")
+    @Then("sees a list of instances in the list")
     public void checkVisibilityOfInstances(List<String> instanceName) {
         PortalCloudPage.compareInstanceNamesInTheTable(instanceName);
     }
@@ -76,7 +94,7 @@ public class PortalCloudSteps {
         PortalCloudPage.addTextToFilter(pattern);
     }
 
-    @Then("the IT Administrator doesn't see an instance {string} in the list")
+    @Then("doesn't see an instance {string} in the list")
     public void checkThatInstanceIsAbsent(String instanceName) {
         if (instanceName.startsWith("random")) {
             instanceName = INSTANCES.get(0);
@@ -92,7 +110,16 @@ public class PortalCloudSteps {
 
     @Then("sees 'No instances available.'")
     public void verifyNoInstances() {
-        PortalCloudPage.verifyNoInstances();
+        PortalCloudPage.verifyNoInstancesTxt();
+        PortalCloudPage.addInstanceNoDataBtnHasState(enabled);
+        PortalCloudPage.clearSearchBtnIsHidden();
+    }
+
+    @Then("sees 'No instances available.' section without 'ADD INSTANCE' button")
+    public void verifyNoInstancesWithNoAddButton() {
+        PortalCloudPage.verifyNoInstancesTxtMember();
+        PortalCloudPage.addInstanceNoDataBtnHasState(hidden);
+        PortalCloudPage.clearSearchBtnIsHidden();
     }
 
     @Then("click on 'CLEAR SEARCH' button")
@@ -110,12 +137,12 @@ public class PortalCloudSteps {
         PortalCloudPage.verifySearchField();
     }
 
-    @Then("the IT Administrator opens 'Details' for the instance")
+    @Then("click on 'Details' for the first instance")
     public void openDetailsForTheInstance() {
         PortalCloudPage.clickDetailsForFirstInstance();
     }
 
-    @Then("the IT Administrator is brought back to the OpenNMS Cloud page")
+    @Then("is brought back to the OpenNMS Cloud page")
     public void thePageIsNotCoveredByAnyPopup() {
         PortalCloudPage.mainPageIsNotCoveredByPopups();
         PortalCloudPage.verifyMainPageHeader();

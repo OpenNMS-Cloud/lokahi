@@ -105,7 +105,7 @@ pull_docker_images () {
 		"${IMAGE_PREFIX}/lokahi-minion-certificate-manager:${IMAGE_TAG}" \
 		"${IMAGE_PREFIX}/lokahi-minion-certificate-verifier:${IMAGE_TAG}" \
 		"${IMAGE_PREFIX}/lokahi-minion:${IMAGE_TAG}" \
-		"${IMAGE_PREFIX}/lokahi-minion:${IMAGE_TAG}" \
+		"${IMAGE_PREFIX}/lokahi-minion-gateway:${IMAGE_TAG}" \
 		"${IMAGE_PREFIX}/lokahi-notification:${IMAGE_TAG}" \
 		"${IMAGE_PREFIX}/lokahi-rest-server:${IMAGE_TAG}" \
 		"${IMAGE_PREFIX}/lokahi-ui:${IMAGE_TAG}"

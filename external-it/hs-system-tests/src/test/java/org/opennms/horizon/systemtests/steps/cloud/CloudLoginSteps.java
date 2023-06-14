@@ -56,7 +56,7 @@ public class CloudLoginSteps {
 
     @Then("set password")
     public void setPassword() {
-        CloudLoginPage.setPassword(SecretsStorage.adminUserPassword);
+        CloudLoginPage.setPassword(SecretsStorage.userPassword);
     }
 
     @Then("click on 'Sign in' button")
@@ -64,9 +64,17 @@ public class CloudLoginSteps {
         CloudLoginPage.clickSignInBtn();
     }
 
+    @Then("login to Cloud instance as {string} user")
+    public void loginAsUser(String user) {
+        setEmail(user);
+        clickNextBtn();
+        setPassword();
+        clickSignIn();
+    }
+
     @Then("verify the instance url for {string} instance")
     public void checkInstanceUrl(String instanceName) {
-        String expectedUrl = CucumberHooks.portalApi.getAllBtoInstancesByName(instanceName).pagedRecords.get(0).url;
+        String expectedUrl = CucumberHooks.portalApi.searchCloudInstancesByName(instanceName).pagedRecords.get(0).url;
         String actualUrl = Selenide.webdriver().driver().url();
 
         Assert.assertTrue(

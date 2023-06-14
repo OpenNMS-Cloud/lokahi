@@ -29,9 +29,9 @@
 package org.opennms.horizon.systemtests.steps.portal;
 
 import io.cucumber.java.en.Given;
-import org.opennms.horizon.systemtests.CucumberHooks;
-import org.opennms.horizon.systemtests.api.portal.models.BtoInstancesResponse;
+import org.opennms.horizon.systemtests.api.portal.models.CloudInstancesResponse;
 import org.opennms.horizon.systemtests.keyvalue.SecretsStorage;
+import org.opennms.horizon.systemtests.utils.TestDataStorage;
 import org.testcontainers.shaded.org.apache.commons.lang3.RandomStringUtils;
 
 import java.util.List;
@@ -41,30 +41,48 @@ import static org.opennms.horizon.systemtests.CucumberHooks.portalApi;
 
 public class PrepareDataSteps {
 
-    @Given("No BTO instances created")
+    @Given("No cloud instances created")
     public void emptyState() {
-        portalApi.deleteAllBtoInstances();
+        portalApi.deleteAllCloudInstances();
     }
 
-    @Given("BTO instance name {string} created")
+    @Given("cloud instance named {string} is created")
     public void prepareAnInstance(String instanceName) {
         if (instanceName.startsWith("random")) {
             instanceName = "Instance_" + RandomStringUtils.randomAlphabetic(10);
             INSTANCES.add(instanceName);
         }
-        CucumberHooks.portalApi.createBtoInstance(instanceName, SecretsStorage.adminUserEmail);
+        portalApi.createCloudInstance(instanceName, SecretsStorage.adminUserEmail);
     }
 
-    @Given("A list of BTO instances are created")
+    @Given("cloud instance named {string} is assigned to {string} user")
+    public void prepareAnInstanceForMember(String instanceName, String user) {
+        String userEmail = TestDataStorage.mapUserToEmail(user);
+        portalApi.createCloudInstance(instanceName, userEmail);
+    }
+
+    @Given("A list of cloud instances are created")
     public void prepareAnInstance(List<String> instanceNames) {
         instanceNames.forEach(name ->
-            CucumberHooks.portalApi.createBtoInstance(name, SecretsStorage.adminUserEmail)
+            portalApi.createCloudInstance(name, SecretsStorage.adminUserEmail)
         );
     }
 
     @Given("someone deletes the {string} instance")
     public void deleteInstanceByName(String instanceName) {
-        BtoInstancesResponse allBtoInstancesByName = CucumberHooks.portalApi.getAllBtoInstancesByName(instanceName);
-        portalApi.deleteBtoInstance(allBtoInstancesByName.pagedRecords.get(0).id);
+        CloudInstancesResponse instancesByName = portalApi.searchCloudInstancesByName(instanceName);
+        portalApi.deleteCloudInstance(instancesByName.pagedRecords.get(0).id);
+    }
+
+    @Given("{string} user was assigned to {string} instance")
+    public void assignUserToInstance(String user, String instanceName) {
+        String email = TestDataStorage.mapUserToEmail(user);
+        portalApi.addUserToInstance(instanceName, email);
+    }
+
+    @Given("{string} user was revoked from {string} instance")
+    public void revokeUserToInstance(String user, String instanceName) {
+        String email = TestDataStorage.mapUserToEmail(user);
+        portalApi.revokeUserAccessFromInstance(instanceName, email);
     }
 }

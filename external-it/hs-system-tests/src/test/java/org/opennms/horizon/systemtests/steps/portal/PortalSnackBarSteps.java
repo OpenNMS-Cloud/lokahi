@@ -34,17 +34,17 @@ import org.opennms.horizon.systemtests.pages.portal.PortalSnackBar;
 
 public class PortalSnackBarSteps {
 
-    @Then("the IT Administrator gets success snackbar message {string}")
+    @Then("gets success snackbar message {string}")
     public void checkSnackBarMessage(String message) {
         PortalSnackBar.verifySuccessSnackBarMessage(message);
     }
 
-    @Then("the IT Administrator gets error snackbar message {string}")
+    @Then("gets error snackbar message {string}")
     public void checkErrorSnackBarMessage(String message) {
         PortalSnackBar.verifyErrorSnackBarMessage(message);
     }
 
-    @Then("the IT Administrator doesn't see a snackbar message")
+    @Then("doesn't see a snackbar message")
     public void checkNoSnackBar() {
         PortalSnackBar.snackBarIsHidden();
     }

@@ -36,6 +36,7 @@ public class TestDataStorage {
     public static String mapUserToEmail(String email) {
         return switch (email) {
             case "ADMIN" -> SecretsStorage.adminUserEmail;
+            case "MEMBER" -> SecretsStorage.memberUserEmail;
             case "OKTA_USER" -> SecretsStorage.oktaUserEmail;
             default -> email;
         };

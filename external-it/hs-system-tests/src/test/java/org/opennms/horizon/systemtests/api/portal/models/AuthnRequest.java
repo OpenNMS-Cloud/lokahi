@@ -26,14 +26,13 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-
 package org.opennms.horizon.systemtests.api.portal.models;
 
 import org.opennms.horizon.systemtests.keyvalue.SecretsStorage;
 
 public class AuthnRequest {
     public final String username = SecretsStorage.adminUserEmail;
-    public final String password = SecretsStorage.adminUserPassword;
+    public final String password = SecretsStorage.userPassword;
     public final Options options = new Options();
 
     public static class Options {

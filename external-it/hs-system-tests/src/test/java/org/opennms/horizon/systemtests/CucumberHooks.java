@@ -28,6 +28,7 @@
 
 package org.opennms.horizon.systemtests;
 
+import com.codeborne.selenide.Configuration;
 import com.codeborne.selenide.Selenide;
 import io.cucumber.java.After;
 import io.cucumber.java.AfterAll;
@@ -52,8 +53,8 @@ public class CucumberHooks {
     public static final List<String> INSTANCES = new ArrayList<>();
     public static String instanceUrl;
     public static String gatewayHost;
-    private static String minionPrefix = "Default_Minion-";
     public static PortalApi portalApi = new PortalApi();
+    private static final String MINION_PREFIX = "Default_Minion-";
 
     @Before("@cloud")
     public static void setUp() {
@@ -65,7 +66,7 @@ public class CucumberHooks {
         PortalLoginPage.closeCookieHeader();
         PortalLoginPage.setUsername(SecretsStorage.adminUserEmail);
         PortalLoginPage.clickNext();
-        PortalLoginPage.setPassword(SecretsStorage.adminUserPassword);
+        PortalLoginPage.setPassword(SecretsStorage.userPassword);
         PortalLoginPage.clickSignIn();
 
         PortalCloudPage.verifyMainPageHeader();
@@ -88,7 +89,7 @@ public class CucumberHooks {
 
         MinionContainer minionContainer = new MinionContainer(
             gatewayHost,
-            minionPrefix + timeCode,
+            MINION_PREFIX + timeCode,
             "location-" + timeCode
         );
 
@@ -99,7 +100,7 @@ public class CucumberHooks {
 
         CloudLoginPage.setUsername(SecretsStorage.adminUserEmail);
         CloudLoginPage.clickNextBtn();
-        CloudLoginPage.setPassword(SecretsStorage.adminUserPassword);
+        CloudLoginPage.setPassword(SecretsStorage.userPassword);
         CloudLoginPage.clickSignInBtn();
     }
 
@@ -107,13 +108,13 @@ public class CucumberHooks {
     public static void tearDownCloud() {
         Selenide.open(instanceUrl);
 
-        Stream<MinionContainer> aDefault = MINIONS.stream().dropWhile(container -> !container.minionId.startsWith(minionPrefix));
+        Stream<MinionContainer> aDefault = MINIONS.stream().dropWhile(container -> !container.minionId.startsWith(MINION_PREFIX));
         aDefault.forEach(GenericContainer::stop);
 
         if (MINIONS.isEmpty()) {
             long timeCode = Instant.now().toEpochMilli();
             MinionContainer.createNewOne(
-                minionPrefix + timeCode,
+                MINION_PREFIX + timeCode,
                 "location-" + timeCode
             );
         }
@@ -121,15 +122,16 @@ public class CucumberHooks {
 
     @Before("@portal")
     public static void loginToPortal() {
-        portalApi.deleteAllBtoInstances();
+        portalApi.deleteAllCloudInstances();
         if (Selenide.webdriver().driver().hasWebDriverStarted()) {
             return;
         }
+        Configuration.baseUrl = SecretsStorage.portalHost;
         Selenide.open(SecretsStorage.portalHost);
         PortalLoginPage.closeCookieHeader();
         PortalLoginPage.setUsername(SecretsStorage.adminUserEmail);
         PortalLoginPage.clickNext();
-        PortalLoginPage.setPassword(SecretsStorage.adminUserPassword);
+        PortalLoginPage.setPassword(SecretsStorage.userPassword);
         PortalLoginPage.clickSignIn();
 
         PortalCloudPage.verifyMainPageHeader();
@@ -142,11 +144,34 @@ public class CucumberHooks {
         INSTANCES.clear();
     }
 
+    @Before("@portal-member")
+    public static void loginToPortalAsMember() {
+        portalApi.deleteAllCloudInstances();
+        if (Selenide.webdriver().driver().hasWebDriverStarted()) {
+            return;
+        }
+        Configuration.baseUrl = SecretsStorage.portalHost;
+        Selenide.open(SecretsStorage.portalHost);
+        PortalLoginPage.closeCookieHeader();
+        PortalLoginPage.setUsername(SecretsStorage.memberUserEmail);
+        PortalLoginPage.clickNext();
+        PortalLoginPage.setPassword(SecretsStorage.userPassword);
+        PortalLoginPage.clickSignIn();
+
+        PortalCloudPage.verifyMainPageHeader();
+    }
+
+    @After("@portal-member")
+    public static void returnToThePortalMainPage() {
+        Selenide.open(SecretsStorage.portalHost + "/cloud");
+        PortalCloudPage.verifyMainPageHeader();
+    }
+
     @AfterAll
     public static void tearDown() {
         if (!MINIONS.isEmpty()) {
             MINIONS.get(0).stop();
         }
-        portalApi.deleteAllBtoInstances();
+        portalApi.deleteAllCloudInstances();
     }
 }

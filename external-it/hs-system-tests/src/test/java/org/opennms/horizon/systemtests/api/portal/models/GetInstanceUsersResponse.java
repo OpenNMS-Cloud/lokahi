@@ -28,13 +28,16 @@
 
 package org.opennms.horizon.systemtests.api.portal.models;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.List;
 
-@JsonIgnoreProperties(ignoreUnknown = true)
-public class TokenResponse {
-    @JsonProperty("access_token")
-    public String accessToken;
-    @JsonProperty("id_token")
-    public String idToken;
+public class GetInstanceUsersResponse {
+
+    public List<InstanceUser> pagedRecords;
+    public Integer totalRecords;
+
+    public static class InstanceUser {
+        public String email;
+        public String identity;
+        public String name;
+    }
 }

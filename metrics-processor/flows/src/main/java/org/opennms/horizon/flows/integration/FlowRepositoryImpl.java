@@ -28,7 +28,7 @@ public class FlowRepositoryImpl implements FlowRepository {
         }
 
         List<FlowDocument> listDataPlatformFlowDocuments =
-            enrichedFlows.stream().map(this::mapFlowDocument).toList();
+            enrichedFlows.stream().map(doc -> this.mapFlowDocument(doc, enrichedFlowsLog)).toList();
 
         StoreFlowDocumentsRequest storeFlowDocumentsRequest = StoreFlowDocumentsRequest.newBuilder()
             .addAllDocuments(listDataPlatformFlowDocuments)
@@ -45,7 +45,8 @@ public class FlowRepositoryImpl implements FlowRepository {
 //----------------------------------------
 
     // NOTE: this will hopefully be simplified in the future
-    private FlowDocument mapFlowDocument(org.opennms.horizon.flows.document.FlowDocument flowDocument) {
+    private FlowDocument mapFlowDocument(org.opennms.horizon.flows.document.FlowDocument flowDocument,
+                                         TenantLocationSpecificFlowDocumentLog flowsLog) {
         FlowDocument result =
             FlowDocument.newBuilder()
                 .setTimestamp(flowDocument.getTimestamp())
@@ -102,6 +103,7 @@ public class FlowRepositoryImpl implements FlowRepository {
                 .setExporterPort(flowDocument.getExporterPort())
                 .setExporterIdentifier(flowDocument.getExporterIdentifier())
                 .setReceivedAt(flowDocument.getReceivedAt())
+                .setTenantId(flowsLog.getTenantId())
                 .build();
 
         return result;

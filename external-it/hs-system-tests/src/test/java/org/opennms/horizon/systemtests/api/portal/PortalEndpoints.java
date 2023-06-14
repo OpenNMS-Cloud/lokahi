@@ -29,8 +29,10 @@
 package org.opennms.horizon.systemtests.api.portal;
 
 import okhttp3.ResponseBody;
-import org.opennms.horizon.systemtests.api.portal.models.BtoInstanceRequest;
-import org.opennms.horizon.systemtests.api.portal.models.BtoInstancesResponse;
+import org.opennms.horizon.systemtests.api.portal.models.CloudInstanceRequest;
+import org.opennms.horizon.systemtests.api.portal.models.CloudInstancesResponse;
+import org.opennms.horizon.systemtests.api.portal.models.GetInstanceUsersResponse;
+import org.opennms.horizon.systemtests.api.portal.models.AddInstanceUserRequest;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.DELETE;
@@ -40,22 +42,46 @@ import retrofit2.http.POST;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
 
-
 public interface PortalEndpoints {
 
     @POST("api/v1/portal/{organization}/bto-instance")
-    Call<ResponseBody> createBtoInstance(
+    Call<ResponseBody> createCloudInstance(
         @Path("organization") String organization,
-        @Body BtoInstanceRequest body,
+        @Body CloudInstanceRequest body,
         @Header("authorization") String authToken
     );
 
     @GET("api/v1/portal/{organization}/bto-instance")
-    Call<BtoInstancesResponse> getBtoInstances(
+    Call<CloudInstancesResponse> getCloudInstances(
         @Path("organization") String organization,
         @Query("search") String searchPattern,
         @Query("searchColumn") String searchColumn,
         @Query("limit") Integer limit,
+        @Header("authorization") String authToken
+    );
+
+    @GET("api/v1/portal/{organization}/bto-instance/{instanceId}/users")
+    Call<GetInstanceUsersResponse> getInstanceUsers(
+        @Path("organization") String organization,
+        @Path("instanceId") String instanceId,
+        @Query("limit") Integer limit,
+        @Query("offset") Integer offset,
+        @Header("authorization") String authToken
+    );
+
+    @POST("api/v1/portal/{organization}/bto-instance/{instanceId}/users")
+    Call<Void> addInstanceUser(
+        @Path("organization") String organization,
+        @Path("instanceId") String instanceId,
+        @Body AddInstanceUserRequest body,
+        @Header("authorization") String authToken
+    );
+
+    @DELETE("api/v1/portal/{organization}/bto-instance/{instanceId}/users/{userOktaId}")
+    Call<Void> deleteInstanceUser(
+        @Path("organization") String organization,
+        @Path("instanceId") String instanceId,
+        @Path("userOktaId") String userOktaId,
         @Header("authorization") String authToken
     );
 

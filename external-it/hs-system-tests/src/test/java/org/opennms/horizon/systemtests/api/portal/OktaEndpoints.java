@@ -41,7 +41,6 @@ import retrofit2.http.POST;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
 
-
 public interface OktaEndpoints {
     @POST("api/v1/authn")
     Call<AuthnResponse> authn(@Body AuthnRequest body);

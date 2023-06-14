@@ -75,7 +75,6 @@ message TaskDefinition {
   google.protobuf.Any configuration = 7;
 }
 
-
 message TaskSet {
   repeated TaskDefinition taskDefinition = 1;
 }

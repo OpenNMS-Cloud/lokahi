@@ -37,6 +37,7 @@
     <modules>
         <module>main</module>
 
+        <module>testtools</module>
         <module>docker-it</module>
     </modules>
 

@@ -6,8 +6,8 @@ const router = createRouter({
   history: createWebHistory(),
   routes: [
     {
-      path: '/appliances',
-      name: 'Appliances',
+      path: '/minions',
+      name: 'Minions',
       component: Appliances
     },
     {
@@ -20,23 +20,24 @@ const router = createRouter({
       name: 'Graphs',
       component: () => import('@/containers/Graphs.vue')
     },
-    {
-      path: '/map',
-      name: 'Map',
-      component: () => import('@/containers/Map.vue'),
-      children: [
-        {
-          path: '',
-          name: 'MapAlarms',
-          component: () => import('@/components/Map/MapAlarmsGrid.vue')
-        },
-        {
-          path: 'nodes',
-          name: 'MapNodes',
-          component: () => import('@/components/Map/MapNodesGrid.vue')
-        }
-      ]
-    },
+    // hidden until after EAR
+    // {
+    //   path: '/map',
+    //   name: 'Map',
+    //   component: () => import('@/containers/Map.vue'),
+    //   children: [
+    //     {
+    //       path: '',
+    //       name: 'MapAlarms',
+    //       component: () => import('@/components/Map/MapAlarmsGrid.vue')
+    //     },
+    //     {
+    //       path: 'nodes',
+    //       name: 'MapNodes',
+    //       component: () => import('@/components/Map/MapNodesGrid.vue')
+    //     }
+    //   ]
+    // },
     {
       path: '/inventory',
       name: 'Inventory',

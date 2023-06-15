@@ -13,5 +13,5 @@
     $ KEYCLOAK_CLIENT_ID=lokahi
     $ export INGRESS_BASE_URL HORIZON_STREAM_BASE_URL KEYCLOAK_BASE_URL KEYCLOAK_REALM KEYCLOAK_USERNAME KEYCLOAK_PASSWORD KEYCLOAK_CLIENT_ID
     $ PROJECT_VERSION="$(mvn -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive -q org.codehaus.mojo:exec-maven-plugin:1.6.0:exec)"
-    $ java -jar "external-lokahi-it/target/external-lokahi-it-${PROJECT_VERSION}.jar"
+    $ java -jar "integration-tests/target/integration-tests-${PROJECT_VERSION}.jar"
 

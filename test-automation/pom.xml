@@ -5,14 +5,15 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.opennms.horizon.exttest</groupId>
-    <artifactId>external-it</artifactId>
+    <artifactId>test-automation</artifactId>
     <packaging>pom</packaging>
     <version>0.1.0-SNAPSHOT</version>
 
-    <name>OpenNMS Lokahi :: External IT Parent</name>
+    <name>OpenNMS Lokahi :: Test Automation Parent</name>
 
     <modules>
-        <module>external-lokahi-it</module>
+        <module>integration-tests</module>
+<!--        <module>ui-tests</module>-->
     </modules>
 
 </project>

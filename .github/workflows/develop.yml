@@ -131,7 +131,7 @@ jobs:
     with:
       image-tag: ${{ inputs.image-tag || github.sha }}
       image-registry: ${{ inputs.image-registry || 'ghcr.io' }}
-  external-it:
+  test-automation:
     name: End-to-end Tests
     needs: [
       alert,
@@ -172,7 +172,7 @@ jobs:
       - name: Cache Maven dependencies
         uses: ./.github/actions/maven-cache
         with:
-          cache-key-hash: ${{ hashFiles('external-it/**/pom.xml') }}
+          cache-key-hash: ${{ hashFiles('test-automation/**/pom.xml') }}
 
       - name: Create & set up cluster
         shell: bash
@@ -193,7 +193,7 @@ jobs:
 
       - name: Set up & run Cucumber tests
         shell: bash
-        working-directory: external-it
+        working-directory: test-automation
         run: |
           # Cucumber test
           mvn install
@@ -213,10 +213,10 @@ jobs:
           export INGRESS_BASE_URL KEYCLOAK_BASE_URL KEYCLOAK_REALM KEYCLOAK_USERNAME KEYCLOAK_PASSWORD KEYCLOAK_CLIENT_ID
           export MINION_IMAGE_NAME MINION_INGRESS_URL MINION_INGRESS_PORT MINION_INGRESS_TLS MINION_INGRESS_CA MINION_INGRESS_OVERRIDE_AUTHORITY
           PROJECT_VERSION="$(mvn -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive -q org.codehaus.mojo:exec-maven-plugin:1.6.0:exec)"
-          java -jar "external-lokahi-it/target/external-lokahi-it-${PROJECT_VERSION}.jar"
+          java -jar "integration-tests/target/integration-tests-${PROJECT_VERSION}.jar"
 
           ## If fail, exit which kills the ci-cd workflow.
-          ##for i in $(jq '.[0].elements[].steps[].result.status' external-it/external-lokahi-it/cucumber.reports/cucumber-report.json);do
+          ##for i in $(jq '.[0].elements[].steps[].result.status' test-automation/integration-tests/cucumber.reports/cucumber-report.json);do
           ##  if [[ $i != '"passed"' ]];then
           ##    exit;
           ##  fi

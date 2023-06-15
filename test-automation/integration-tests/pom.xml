@@ -11,7 +11,7 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
-    <name>OpenNMS Lokahi :: External IT</name>
+    <name>OpenNMS Lokahi :: Test Automation :: Integration Tests</name>
     <description>
         A Spring Boot based application that runs E2E tests against a fully deployed Lokahi cluster.
 
@@ -19,7 +19,7 @@
     </description>
 
     <groupId>org.opennms.horizon.exttest</groupId>
-    <artifactId>external-lokahi-it</artifactId>
+    <artifactId>integration-tests</artifactId>
     <version>0.1.0-SNAPSHOT</version>
 
     <properties>

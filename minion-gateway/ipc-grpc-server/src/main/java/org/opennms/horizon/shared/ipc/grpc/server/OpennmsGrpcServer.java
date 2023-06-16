@@ -75,6 +75,8 @@ import com.google.protobuf.Message;
 
 import io.grpc.BindableService;
 import io.grpc.Context;
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
 import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.trace.Span;
@@ -323,7 +325,12 @@ public class OpennmsGrpcServer extends AbstractMessageConsumerManager implements
 
             @Override
             public void onError(Throwable throwable) {
-                LOG.error("Error in sink streaming", throwable);
+                if (throwable instanceof StatusRuntimeException statusRuntimeException
+                    && statusRuntimeException.getStatus().getCode() == Status.Code.CANCELLED) {
+                    LOG.warn("Got status code CANCELLED in sink streaming");
+                } else {
+                    LOG.error("Error in sink streaming", throwable);
+                }
             }
 
             @Override

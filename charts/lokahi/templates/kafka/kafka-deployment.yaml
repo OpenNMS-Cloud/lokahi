@@ -16,6 +16,8 @@ spec:
       labels:
         appdomain: opennms
         app: {{ .Values.Kafka.ServiceName }}
+      annotations:
+        kubectl.kubernetes.io/default-container: "{{ .Values.Kafka.ServiceName }}"
     spec:
       {{- if .Values.NodeRestrictions.Enabled }}
       nodeSelector:                                                                                    

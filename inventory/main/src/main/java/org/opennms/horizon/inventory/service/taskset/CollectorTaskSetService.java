@@ -40,6 +40,7 @@ import org.opennms.horizon.shared.utils.InetAddressUtils;
 import org.opennms.horizon.snmp.api.SnmpConfiguration;
 import org.opennms.snmp.contract.SnmpCollectorRequest;
 import org.opennms.snmp.contract.SnmpInterfaceElement;
+import org.opennms.snmp.contract.SnmpInterfaceElement.Builder;
 import org.opennms.taskset.contract.MonitorType;
 import org.opennms.taskset.contract.TaskDefinition;
 import org.opennms.taskset.contract.TaskType;
@@ -72,45 +73,48 @@ public class CollectorTaskSetService {
         String monitorTypeValue = MonitorType.SNMP.name();
         String ipAddress = InetAddressUtils.toIpAddrString(ipInterface.getIpAddress());
 
-        var snmpInterfaces = getSnmpInterfaces(nodeId);
-        var ipInterfaces = getIpInterfaces(nodeId);
+        List<SnmpInterface> snmpInterfaces = getSnmpInterfaces(nodeId);
+        List<IpInterface> ipInterfaces = getIpInterfaces(nodeId);
 
         Map<Integer, IpInterface> ifIndexMap = new HashMap<>();
-        ipInterfaces.forEach(ipInterfaceDTO -> ifIndexMap.put(ipInterface.getIfIndex(), ipInterfaceDTO));
-        var snmpInterfaceElements = new ArrayList<SnmpInterfaceElement>();
-        snmpInterfaces.forEach(snmpInterface -> {
-            var ipInterfaceDTO = ifIndexMap.get(snmpInterface.getIfIndex());
-            var elementBuilder = SnmpInterfaceElement.newBuilder().setIfIndex(snmpInterface.getIfIndex())
-                .setIfName(snmpInterface.getIfName());
-            if (ipInterfaceDTO != null) {
-                elementBuilder.setIpAddress(InetAddressUtils.toIpAddrString(ipInterfaceDTO.getIpAddress()));
+        for (IpInterface anInterface : ipInterfaces) {
+            ifIndexMap.put(ipInterface.getIfIndex(), anInterface);
+        }
+        List<SnmpInterfaceElement> snmpInterfaceElements = new ArrayList<>();
+        for (SnmpInterface snmpInterface : snmpInterfaces) {
+            IpInterface ipInterfaceDTO = ifIndexMap.get(snmpInterface.getIfIndex());
+            String ifName = snmpInterface.getIfName();
+            if (ifName != null) {
+                Builder elementBuilder = SnmpInterfaceElement.newBuilder().setIfIndex(snmpInterface.getIfIndex()).setIfName(ifName);
+                if (ipInterfaceDTO != null) {
+                    elementBuilder.setIpAddress(InetAddressUtils.toIpAddrString(ipInterfaceDTO.getIpAddress()));
+                }
+                snmpInterfaceElements.add(elementBuilder.build());
             }
-            snmpInterfaceElements.add(elementBuilder.build());
-        });
+        }
+
         String name = String.format("%s-collector", monitorTypeValue.toLowerCase());
         String pluginName = String.format("%sCollector", monitorTypeValue);
-        TaskDefinition taskDefinition = null;
-            var requestBuilder = SnmpCollectorRequest.newBuilder()
-                .setHost(ipAddress)
-                .setNodeId(nodeId)
-                .addAllSnmpInterface(snmpInterfaceElements);
-            if (snmpConfiguration != null) {
-                requestBuilder.setAgentConfig(snmpConfiguration);
-            }
-            Any configuration =
-                Any.pack(requestBuilder.build());
 
-            String taskId = identityForIpTask(nodeId, ipAddress, name);
-            TaskDefinition.Builder builder =
-                TaskDefinition.newBuilder()
-                    .setType(TaskType.COLLECTOR)
-                    .setPluginName(pluginName)
-                    .setNodeId(nodeId)
-                    .setId(taskId)
-                    .setConfiguration(configuration)
-                    .setSchedule(TaskUtils.DEFAULT_SCHEDULE);
-            taskDefinition = builder.build();
-        return taskDefinition;
+        SnmpCollectorRequest.Builder requestBuilder = SnmpCollectorRequest.newBuilder()
+            .setHost(ipAddress)
+            .setNodeId(nodeId)
+            .addAllSnmpInterface(snmpInterfaceElements);
+        if (snmpConfiguration != null) {
+            requestBuilder.setAgentConfig(snmpConfiguration);
+        }
+        Any configuration = Any.pack(requestBuilder.build());
+
+        String taskId = identityForIpTask(nodeId, ipAddress, name);
+        TaskDefinition.Builder builder =
+            TaskDefinition.newBuilder()
+                .setType(TaskType.COLLECTOR)
+                .setPluginName(pluginName)
+                .setNodeId(nodeId)
+                .setId(taskId)
+                .setConfiguration(configuration)
+                .setSchedule(TaskUtils.DEFAULT_SCHEDULE);
+        return builder.build();
     }
 
     public TaskDefinition addAzureCollectorTask(AzureActiveDiscovery discovery, AzureScanItem scanItem, long nodeId) {

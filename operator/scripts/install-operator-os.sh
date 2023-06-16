@@ -20,6 +20,6 @@ docker push $REGISTRY/opennms-operator:local
 echo
 echo ________________Installing Operator________________
 echo
-helm upgrade -i operator-local ../charts/opennms-operator -f scripts/openshift-operator-values.yaml --namespace opennms --create-namespace
+helm upgrade -i operator-local ../charts/lokahi-operator -f scripts/openshift-operator-values.yaml --namespace opennms --create-namespace
 oc adm policy add-role-to-user system:image-pullers system:serviceaccount:opennms-operator -n opennms
 if [ $? -ne 0 ]; then exit; fi

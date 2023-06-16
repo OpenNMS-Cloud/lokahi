@@ -39,6 +39,7 @@ import org.testcontainers.utility.DockerImageName;
 
 import java.security.KeyPair;
 import java.time.Duration;
+import org.testcontainers.utility.MountableFile;
 
 @SuppressWarnings("rawtypes")
 public class TestContainerRunnerClassRule extends ExternalResource {
@@ -49,14 +50,14 @@ public class TestContainerRunnerClassRule extends ExternalResource {
 
     private Logger LOG = DEFAULT_LOGGER;
 
-    private GenericContainer applicationContainer;
+    private final GenericContainer<?> applicationContainer;
 
     private Network network;
 
     private KeyPair jwtKeyPair;
 
     public TestContainerRunnerClassRule() {
-        applicationContainer = new GenericContainer(DockerImageName.parse(dockerImage));
+        applicationContainer = new GenericContainer<>(DockerImageName.parse(dockerImage));
     }
 
     @Override
@@ -81,6 +82,11 @@ public class TestContainerRunnerClassRule extends ExternalResource {
             .withNetworkAliases("application", "application-host")
             .withExposedPorts(8080, 5005)
             .withEnv("JAVA_TOOL_OPTIONS", "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005")
+            // this section is used as a temporary way to test location lookup until we switch backend to rely on location-id
+            .withEnv("SPRING_PROFILES_ACTIVE", "static")
+            .withEnv("INVENTORY_FILE", "file:/tmp/tenant_locations.properties")
+            .withCopyFileToContainer(MountableFile.forClasspathResource("tenant_locations.properties"), "/tmp/tenant_locations.properties")
+            // end of temporary hack
             .withLogConsumer(new Slf4jLogConsumer(LOG).withPrefix("APPLICATION"))
             .waitingFor(Wait.forLogMessage(".*Started MinionCertificateVerifier.*", 1)
                 .withStartupTimeout(Duration.ofMinutes(1))

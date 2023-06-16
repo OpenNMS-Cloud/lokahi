@@ -6,7 +6,7 @@
       class="locations-add-form"
     >
       <HeadlineSection
-        text="Add Location"
+        text="New Location"
         data-test="headline"
       />
       <div class="inputs">
@@ -14,6 +14,7 @@
           <FeatherInput
             label="Location Name *"
             v-model="formInputs.location"
+            v-focus
             :schema="nameV"
             required
             class="input-name"
@@ -106,7 +107,6 @@ const onSubmit = async () => {
 
   if (isFormSaved) {
     Object.assign(formInputs, formDefault)
-    locationStore.setDisplayType(DisplayType.LIST)
     form.clearErrors()
   }
 }

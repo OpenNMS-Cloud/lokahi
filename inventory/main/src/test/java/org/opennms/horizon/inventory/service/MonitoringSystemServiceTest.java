@@ -1,8 +1,8 @@
 /*******************************************************************************
  * This file is part of OpenNMS(R).
  *
- * Copyright (C) 2022 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
+ * Copyright (C) 2022-2023 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
  *
@@ -42,6 +42,7 @@ import org.opennms.horizon.inventory.repository.MonitoringLocationRepository;
 import org.opennms.horizon.inventory.repository.MonitoringSystemRepository;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -100,13 +101,27 @@ class MonitoringSystemServiceTest {
     }
 
     @Test
+    void testFindByTenantId() {
+        doReturn(Collections.singletonList(testMonitoringSystem)).when(mockMonitoringSystemRepo).findByTenantId(tenantId);
+        service.findByTenantId(tenantId);
+        verify(mockMonitoringSystemRepo).findByTenantId(tenantId);
+    }
+
+    @Test
+    void testFindByMonitoringLocationIdAndTenantId() {
+        long locationId = 1L;
+        doReturn(Collections.singletonList(testMonitoringSystem)).when(mockMonitoringSystemRepo).findByMonitoringLocationIdAndTenantId(locationId, tenantId);
+        service.findByMonitoringLocationIdAndTenantId(locationId, tenantId);
+        verify(mockMonitoringSystemRepo).findByMonitoringLocationIdAndTenantId(locationId, tenantId);
+    }
+
+    @Test
     void testReceiveMsgMonitorSystemExist() throws LocationNotFoundException {
         doReturn(Optional.of(testMonitoringSystem)).when(mockMonitoringSystemRepo).findBySystemIdAndTenantId(systemId, tenantId);
         doReturn(Optional.of(testLocation)).when(mockLocationRepo).findByLocationAndTenantId(location, tenantId);
         service.addMonitoringSystemFromHeartbeat(heartbeatMessage);
         verify(mockMonitoringSystemRepo).findBySystemIdAndTenantId(systemId, tenantId);
         verify(mockMonitoringSystemRepo).save(testMonitoringSystem);
-        verify(mockConfigUpdateService).sendConfigUpdate(tenantId, location);
     }
 
     @Test

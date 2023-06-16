@@ -39,6 +39,7 @@ import org.springframework.stereotype.Component;
 
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.Empty;
+import com.google.protobuf.Int64Value;
 import com.google.protobuf.StringValue;
 import com.google.rpc.Code;
 import com.google.rpc.Status;
@@ -59,6 +60,15 @@ public class MonitoringSystemGrpcService extends MonitoringSystemServiceGrpc.Mon
     public void listMonitoringSystem(Empty request, StreamObserver<MonitoringSystemList> responseObserver) {
         List<MonitoringSystemDTO> list = tenantLookup.lookupTenantId(Context.current())
             .map(service::findByTenantId)
+            .orElseThrow();
+        responseObserver.onNext(MonitoringSystemList.newBuilder().addAllSystems(list).build());
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void listMonitoringSystemByLocationId(Int64Value locationId, StreamObserver<MonitoringSystemList> responseObserver) {
+        List<MonitoringSystemDTO> list = tenantLookup.lookupTenantId(Context.current())
+            .map(tenantId -> service.findByMonitoringLocationIdAndTenantId(locationId.getValue(), tenantId))
             .orElseThrow();
         responseObserver.onNext(MonitoringSystemList.newBuilder().addAllSystems(list).build());
         responseObserver.onCompleted();

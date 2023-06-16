@@ -110,6 +110,12 @@ public class MonitoringSystemRepositoryTest {
     }
 
     @Test
+    void testFindByLocationId() {
+        List<MonitoringSystem> list = systemRepository.findByMonitoringLocationIdAndTenantId(system1.getMonitoringLocationId(), tenantId);
+        assertThat(list.size()).isEqualTo(2);
+    }
+
+    @Test
     void testFindByRandomTenantId(){
         List<MonitoringSystem> list = systemRepository.findByTenantId(new UUID(5,7).toString());
         assertThat(list.size()).isZero();

@@ -24,7 +24,7 @@ import (
 )
 
 func TestKafkaUpdateConfig(t *testing.T) {
-	handlers.ConfigFilePath = "./../../../charts/opennms/templates/"
+	handlers.ConfigFilePath = "./../../../charts/lokahi/templates/"
 	handler := KafkaHandler{}
 	assert.Nil(t, handler.GetConfig(), "config should start as nil")
 	err := handler.UpdateConfig(testutil.DefaultTestValues())

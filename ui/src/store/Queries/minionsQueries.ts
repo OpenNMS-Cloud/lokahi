@@ -1,12 +1,19 @@
 import { defineStore } from 'pinia'
 import { useQuery } from 'villus'
-import { ListMinionsForTableDocument, ListMinionMetricsDocument, Minion, TimeRangeUnit } from '@/types/graphql'
+import {
+  ListMinionsForTableDocument,
+  ListMinionMetricsDocument,
+  Minion,
+  TimeRangeUnit,
+  FindMinionsByLocationIdDocument
+} from '@/types/graphql'
 import { ExtendedMinion } from '@/types/minion'
 import useSpinner from '@/composables/useSpinner'
 import { Monitor } from '@/types'
 
 export const useMinionsQueries = defineStore('minionsQueries', () => {
   const minionsList = ref<ExtendedMinion[]>([])
+  const minionLocationId = reactive({ locationId: 0 })
 
   const { startSpinner, stopSpinner } = useSpinner()
 
@@ -42,6 +49,8 @@ export const useMinionsQueries = defineStore('minionsQueries', () => {
     })
 
   const addMetricsToMinions = (allMinions: Minion[]) => {
+    minionsList.value = []
+
     allMinions.forEach(async (minion) => {
       const { data } = await fetchMinionMetrics(minion.systemId as string)
       const result = data.value?.minionLatency?.data?.result?.[0]?.values?.[0]
@@ -59,5 +68,34 @@ export const useMinionsQueries = defineStore('minionsQueries', () => {
     })
   }
 
-  return { minionsList: computed(() => minionsList.value), fetchMinions }
+  // find minions by location id
+  const {
+    onData: onFindMinionsByLocationId,
+    isFetching: isFetchingMinionsByLocationId,
+    execute: refreshMinionsById
+  } = useQuery({
+    query: FindMinionsByLocationIdDocument,
+    cachePolicy: 'network-only',
+    fetchOnMount: false,
+    variables: minionLocationId
+  })
+
+  const findMinionsByLocationId = (locationId: number) => (minionLocationId.locationId = locationId)
+
+  watchEffect(() => (isFetchingMinionsByLocationId.value ? startSpinner() : stopSpinner()))
+
+  onFindMinionsByLocationId((data) => {
+    if (data.findMinionsByLocationId?.length) {
+      addMetricsToMinions(data.findMinionsByLocationId as Minion[])
+    } else {
+      minionsList.value = []
+    }
+  })
+
+  return {
+    minionsList: computed(() => minionsList.value),
+    fetchMinions,
+    findMinionsByLocationId,
+    refreshMinionsById
+  }
 })

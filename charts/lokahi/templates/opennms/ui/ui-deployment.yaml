@@ -18,6 +18,8 @@ spec:
       labels:
         appdomain: opennms
         app: {{ .Values.OpenNMS.UI.ServiceName }}
+      annotations:
+        kubectl.kubernetes.io/default-container: "{{ .Values.OpenNMS.UI.ServiceName }}"
     spec:
       {{- if .Values.NodeRestrictions.Enabled }}
       nodeSelector:                                                                                    

@@ -33,14 +33,12 @@ import com.codahale.metrics.Histogram;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.google.common.collect.Maps;
-import org.opennms.horizon.flows.document.TenantLocationSpecificFlowDocument;
+import org.opennms.horizon.flows.document.TenantLocationSpecificFlowDocumentLog;
 import org.opennms.horizon.flows.integration.FlowException;
 import org.opennms.horizon.flows.integration.FlowRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -80,22 +78,27 @@ public class PipelineImpl implements Pipeline {
         this.logEnrichementTimer = metricRegistry.timer("logEnrichment");
     }
 
-    public void process(List<TenantLocationSpecificFlowDocument> flows, String tenantId) throws FlowException {
+    public void process(TenantLocationSpecificFlowDocumentLog flowsLog) throws FlowException {
+        var flows = flowsLog.getMessageList();
         // Track the number of flows per call
         this.flowsPerLog.update(flows.size());
 
         // Filter empty logs
         if (flows.isEmpty()) {
             this.emptyFlows.inc();
-            LOG.info("Received empty flows for {}. Nothing to do.", tenantId);
+            LOG.info("Received empty flows for {}. Nothing to do.", flowsLog.getTenantId());
             return;
         }
 
         // Enrich with model data
         LOG.debug("Enriching {} flow documents.", flows.size());
-        List<TenantLocationSpecificFlowDocument> enrichedFlows;
+        var enrichedFlowsLog = TenantLocationSpecificFlowDocumentLog.newBuilder()
+            .setTenantId(flowsLog.getTenantId())
+            .setLocation(flowsLog.getLocation())
+            .setSystemId(flowsLog.getSystemId());
         try (Timer.Context ctx = this.logEnrichementTimer.time()) {
-            enrichedFlows = documentEnricher.enrich(flows);
+            var enrichedFlows = documentEnricher.enrich(flowsLog);
+            enrichedFlowsLog.addAllMessage(enrichedFlows);
         } catch (Exception e) {
             throw new FlowException("Failed to enrich one or more flows.", e);
         }
@@ -104,7 +107,7 @@ public class PipelineImpl implements Pipeline {
 
         // Push flows to persistence
         for (final var persister : this.persisters.entrySet()) {
-            persister.getValue().persist(enrichedFlows);
+            persister.getValue().persist(enrichedFlowsLog.build());
         }
     }
 
@@ -140,9 +143,9 @@ public class PipelineImpl implements Pipeline {
             this.logTimer = Objects.requireNonNull(logTimer);
         }
 
-        public void persist(final Collection<TenantLocationSpecificFlowDocument> flows) throws FlowException {
+        public void persist(final TenantLocationSpecificFlowDocumentLog flowsLog) throws FlowException {
             try (final var ctx = this.logTimer.time()) {
-                this.repository.persist(flows);
+                this.repository.persist(flowsLog);
             }
         }
     }

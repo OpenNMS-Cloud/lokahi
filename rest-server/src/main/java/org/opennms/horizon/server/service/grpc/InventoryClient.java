@@ -195,6 +195,12 @@ public class InventoryClient {
         return systemStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).listMonitoringSystem(Empty.newBuilder().build()).getSystemsList();
     }
 
+    public List<MonitoringSystemDTO> getMonitoringSystemsByLocationId(long locationId, String accessToken) {
+        Metadata metadata = new Metadata();
+        metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
+        return systemStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).listMonitoringSystemByLocationId(Int64Value.of(locationId)).getSystemsList();
+    }
+
     public MonitoringSystemDTO getSystemBySystemId(String systemId, String accessToken) {
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);

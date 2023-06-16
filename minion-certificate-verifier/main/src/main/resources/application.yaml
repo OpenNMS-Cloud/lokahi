@@ -1,0 +1,14 @@
+spring:
+  application:
+    name: lokahi-minion-certificate-verifier
+
+management:
+  endpoints:
+    web:
+      base-path: "/"
+      exposure:
+        include: "*"
+
+grpc:
+  url:
+    inventory: opennms-inventory:6565

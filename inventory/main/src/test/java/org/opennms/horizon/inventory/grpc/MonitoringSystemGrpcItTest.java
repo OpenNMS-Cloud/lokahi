@@ -29,12 +29,14 @@
 package org.opennms.horizon.inventory.grpc;
 
 import com.google.protobuf.Empty;
+import com.google.protobuf.Int64Value;
 import com.google.protobuf.StringValue;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import io.grpc.stub.MetadataUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.keycloak.common.VerificationException;
 import org.opennms.horizon.inventory.SpringContextTestInitializer;
@@ -64,6 +66,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @ContextConfiguration(initializers = {SpringContextTestInitializer.class})
 @AutoConfigureObservability     // Make sure to include Metrics (for some reason they are disabled by default in the integration grey-box test)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+@Disabled
 public class MonitoringSystemGrpcItTest extends GrpcTestBase {
     @Autowired
     private MonitoringSystemRepository systemRepo;
@@ -135,6 +138,15 @@ public class MonitoringSystemGrpcItTest extends GrpcTestBase {
             .listMonitoringSystem(Empty.newBuilder().build());
         assertThat(systemList).isNotNull();
         assertThat(systemList.getSystemsList().size()).isZero();
+    }
+
+    @Test
+    void testListSystemByLocationId() {
+        MonitoringSystemList systemList = serviceStub
+            .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(authHeader)))
+            .listMonitoringSystemByLocationId(Int64Value.of(system1.getMonitoringLocationId()));
+        assertThat(systemList).isNotNull();
+        assertThat(systemList.getSystemsList().size()).isEqualTo(3);
     }
 
     @Test

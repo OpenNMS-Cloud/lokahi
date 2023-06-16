@@ -20,8 +20,13 @@ Feature: Monitoring Location
     Then [MonitoringLocation] Monitoring Location is updated
     When [MonitoringLocation] Get Monitoring Location by name "yyy-LOC-yyy"
     Then [MonitoringLocation] Monitoring Location is returned
+    Given [MonitoringLocation] Grpc location "yyy-LOC-yyy"
+    Given Minion at location "yyy-LOC-yyy" with system Id "MINION-TEST"
+    Then send heartbeat message to Kafka topic "heartbeat"
+    Then verify Monitoring system is created with system id "MINION-TEST"
     When [MonitoringLocation] Delete Monitoring Location
     Then [MonitoringLocation] Monitoring Location is deleted
+    Then verify Monitoring system is removed with system id "MINION-TEST"
     Then [MonitoringLocation] Monitoring Location is not found
 
   Scenario: List Location With Wrong Tenant

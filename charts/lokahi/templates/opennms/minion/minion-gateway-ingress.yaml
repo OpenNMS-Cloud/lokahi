@@ -11,6 +11,7 @@ metadata:
     {{ $Annotation | quote }}: {{ $Value | quote }}
     {{- end }}
 spec:
+  ingressClassName: nginx
   {{- if .Values.TLS.Enabled }}
   tls:
     - hosts:

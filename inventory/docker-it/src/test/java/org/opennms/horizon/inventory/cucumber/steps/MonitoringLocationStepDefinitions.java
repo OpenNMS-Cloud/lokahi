@@ -62,6 +62,11 @@ public class MonitoringLocationStepDefinitions {
         this.backgroundHelper = backgroundHelper;
     }
 
+    @Given("[MonitoringLocation] Grpc location {string}")
+    public void grpcLocation(String location) {
+        backgroundHelper.grpcLocation(location);
+    }
+
     @Given("[MonitoringLocation] External GRPC Port in system property {string}")
     public void monitoringLocationExternalGRPCPortInSystemProperty(String systemPropertyName) {
         backgroundHelper.externalGRPCPortInSystemProperty(systemPropertyName);
@@ -179,6 +184,7 @@ public class MonitoringLocationStepDefinitions {
     public void monitoringLocationMonitoringLocationIsNotFound() {
         var monitoringLocationStub = backgroundHelper.getMonitoringLocationStub();
         await().pollInterval(5, TimeUnit.SECONDS)
+            .pollDelay(10L, TimeUnit.MILLISECONDS)
             .atMost(30, TimeUnit.SECONDS).until(() -> {
                     try {
                         monitoringLocationStub.getLocationById(Int64Value.of(lastMonitoringLocation.getId()));
@@ -210,6 +216,7 @@ public class MonitoringLocationStepDefinitions {
 
     private void findByNameNotFound(MonitoringLocationServiceGrpc.MonitoringLocationServiceBlockingStub monitoringLocationStub, String location, String lastMonitoringLocation1) {
         await().pollInterval(5, TimeUnit.SECONDS)
+            .pollDelay(10L, TimeUnit.MILLISECONDS)
             .atMost(30, TimeUnit.SECONDS).until(() -> {
                 try {
                     monitoringLocationStub.getLocationByName(StringValue.of(location));

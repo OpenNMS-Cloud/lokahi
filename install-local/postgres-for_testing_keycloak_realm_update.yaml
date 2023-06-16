@@ -16,6 +16,8 @@ spec:
       labels:
         app: postgres-keycloak-v3
         role: master
+      annotations:
+        kubectl.kubernetes.io/default-container: "postgres"
     spec:
       volumes:
         - name: postgres-volume

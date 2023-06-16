@@ -32,6 +32,7 @@ import com.google.protobuf.Any;
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Int64Value;
+import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import io.cucumber.java.en.Given;
@@ -44,29 +45,32 @@ import org.apache.kafka.common.serialization.StringSerializer;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Assertions;
 import org.opennms.cloud.grpc.minion.Identity;
-import org.opennms.horizon.grpc.heartbeat.contract.HeartbeatMessage;
 import org.opennms.horizon.grpc.heartbeat.contract.TenantLocationSpecificHeartbeatMessage;
 import org.opennms.horizon.inventory.cucumber.InventoryBackgroundHelper;
+import org.opennms.horizon.inventory.cucumber.kafkahelper.KafkaConsumerRunner;
 import org.opennms.horizon.inventory.dto.NodeCreateDTO;
 import org.opennms.horizon.inventory.dto.NodeDTO;
 import org.opennms.horizon.inventory.dto.NodeIdQuery;
 import org.opennms.horizon.inventory.dto.NodeList;
-import org.opennms.horizon.inventory.testtool.miniongateway.wiremock.client.MinionGatewayWiremockTestSteps;
-import org.opennms.horizon.shared.constants.GrpcConstants;
 import org.opennms.inventory.types.ServiceType;
 import org.opennms.node.scan.contract.NodeScanResult;
 import org.opennms.node.scan.contract.ServiceResult;
+import org.opennms.taskset.contract.MonitorType;
 import org.opennms.taskset.contract.ScannerResponse;
 import org.opennms.taskset.contract.TaskResult;
 import org.opennms.taskset.contract.TenantLocationSpecificTaskSetResults;
+import org.opennms.taskset.service.contract.UpdateSingleTaskOp;
+import org.opennms.taskset.service.contract.UpdateTasksRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.nio.charset.StandardCharsets;
-import java.util.Map;
+import java.util.ArrayList;
 import java.util.Objects;
 import java.util.Properties;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 
 import static com.jayway.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -78,7 +82,6 @@ public class InventoryProcessingStepDefinitions {
     private static final Logger LOG = LoggerFactory.getLogger(InventoryProcessingStepDefinitions.class);
 
     private InventoryBackgroundHelper backgroundHelper;
-    private MinionGatewayWiremockTestSteps minionGatewayWiremockTestSteps;
 
     private String label;
     private String newDeviceIpAddress;
@@ -90,16 +93,19 @@ public class InventoryProcessingStepDefinitions {
     private NodeDTO node;
     private NodeList nodeList;
     private Int64Value nodeIdCreated;
+    private String taskIpAddress;
+    private MonitorType monitorType;
+    private KafkaConsumerRunner kafkaConsumerRunner;
+    public enum PublishType {
+        UPDATE,
+        REMOVE
+    }
 
 //========================================
 // Constructor
 //----------------------------------------
 
-    public InventoryProcessingStepDefinitions(
-        MinionGatewayWiremockTestSteps minionGatewayWiremockTestSteps,
-        InventoryBackgroundHelper inventoryBackgroundHelper) {
-
-        this.minionGatewayWiremockTestSteps = minionGatewayWiremockTestSteps;
+    public InventoryProcessingStepDefinitions(InventoryBackgroundHelper inventoryBackgroundHelper) {
         this.backgroundHelper = inventoryBackgroundHelper;
     }
 
@@ -121,7 +127,6 @@ public class InventoryProcessingStepDefinitions {
     @Given("Grpc TenantId {string}")
     public void grpcTenantId(String tenantId) {
         backgroundHelper.grpcTenantId(tenantId);
-        minionGatewayWiremockTestSteps.setTaskTenantId(tenantId);
     }
 
     @Given("Grpc location {string}")
@@ -142,6 +147,7 @@ public class InventoryProcessingStepDefinitions {
     public void createGrpcConnectionForInventory() {
         backgroundHelper.createGrpcConnectionForInventory();
     }
+
 
     @Given("send heartbeat message to Kafka topic {string}")
     public void sendHeartbeatMessageToKafkaTopic(String topic) {
@@ -175,6 +181,16 @@ public class InventoryProcessingStepDefinitions {
         assertEquals(backgroundHelper.getTenantId(), systems.get(0).getTenantId());
     }
 
+    @Then("verify Monitoring system is removed with system id {string}")
+    public void verifyMonitoringSystemIsRemovedWithSystemId(String systemId) {
+        await().atMost(30, TimeUnit.SECONDS).pollDelay(10L, TimeUnit.MILLISECONDS).until(() -> {
+            var monitoringSystemStub = backgroundHelper.getMonitoringSystemStub();
+            var systems = monitoringSystemStub.listMonitoringSystem(Empty.newBuilder().build()).getSystemsList()
+                .stream().filter(s -> systemId.equals(s.getSystemId())).toList();
+            assertEquals(0, systems.size());
+        });
+    }
+
     @Then("verify Monitoring location is created with location {string}")
     public void verifyMonitoringLocationIsCreatedWithLocation(String location) {
         var monitoringLocationStub = backgroundHelper.getMonitoringLocationStub();
@@ -192,8 +208,7 @@ public class InventoryProcessingStepDefinitions {
         NodeDTO nodeDTO =
             backgroundHelper.getNodeServiceBlockingStub()
                 .withInterceptors()
-                .getNodeById(Int64Value.of(node.getId()))
-                ;
+                .getNodeById(Int64Value.of(node.getId()));
 
         assertNotNull(nodeDTO);
         assertTrue(
@@ -214,14 +229,12 @@ public class InventoryProcessingStepDefinitions {
     @Given("New/Existing Device Location {string}")
     public void newDeviceLocation(String location) {
         this.location = location;
-        minionGatewayWiremockTestSteps.setTaskLocation(location);
     }
 
     @Then("add a new device")
     public void addANewDevice() {
         var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
         node = nodeServiceBlockingStub.createNode(NodeCreateDTO.newBuilder().setLabel(label).setLocation(location).setManagementIp(newDeviceIpAddress).build());
-        minionGatewayWiremockTestSteps.setNodeId(node.getId());
         assertNotNull(node);
     }
 
@@ -265,9 +278,9 @@ public class InventoryProcessingStepDefinitions {
         var nodeOptional = nodeList.getNodesList().stream().filter(
                 nodeDTO ->
                     (
-                        ( nodeDTO.getNodeLabel().equals(label) ) &&
-                        ( nodeDTO.getIpInterfacesList().stream().anyMatch(ipInterfaceDTO -> ipInterfaceDTO.getIpAddress().equals(newDeviceIpAddress))) )
-                    )
+                        (nodeDTO.getNodeLabel().equals(label)) &&
+                            (nodeDTO.getIpInterfacesList().stream().anyMatch(ipInterfaceDTO -> ipInterfaceDTO.getIpAddress().equals(newDeviceIpAddress))))
+            )
             .findFirst();
 
         assertTrue(nodeOptional.isPresent());
@@ -305,6 +318,7 @@ public class InventoryProcessingStepDefinitions {
             // left intentionally empty
         }
     }
+
     @Given("Device detected indicator = {string}")
     public void deviceDetectedIndicator(String deviceDetectedInd) {
         this.deviceDetectedInd = Boolean.parseBoolean(deviceDetectedInd);
@@ -324,7 +338,6 @@ public class InventoryProcessingStepDefinitions {
         assertNotNull(nodeId);
 
         node = nodeServiceBlockingStub.getNodeById(nodeId);
-        minionGatewayWiremockTestSteps.setNodeId(node.getId());
 
         assertNotNull(node);
     }
@@ -379,4 +392,104 @@ public class InventoryProcessingStepDefinitions {
     }
 
 
+    @Given("Subscribe to kafka topic {string}")
+    public void subscribeToKafkaTopic(String topic) {
+        kafkaConsumerRunner = new KafkaConsumerRunner(backgroundHelper.getKafkaBootstrapUrl(), topic);
+        Executors.newSingleThreadExecutor().execute(kafkaConsumerRunner);
+    }
+
+    @Then("verify the task set update is published for device with nodeScan within {int}ms")
+    public void verifyTheTaskSetUpdateIsPublishedForDeviceWithNodeScanWithinMs(int timeout) {
+        long nodeId = node.getId();
+        String taskIdPattern = "nodeScan=node_id/" + nodeId;
+        await().atMost(timeout, TimeUnit.MILLISECONDS)
+            .until(() -> matchesTaskPatternForUpdate(taskIdPattern).get(), Matchers.is(true));
+    }
+
+    @Given("Device Task IP address = {string}")
+    public void deviceTaskIPAddress(String ipAddress) {
+        this.taskIpAddress = ipAddress;
+    }
+
+    @Given("Monitor Type {string}")
+    public void monitorType(String monitorType) {
+        switch (monitorType) {
+            case "ICMP":
+                this.monitorType = MonitorType.ICMP;
+                break;
+
+            case "SNMP":
+                this.monitorType = MonitorType.SNMP;
+                break;
+
+            default:
+                throw new RuntimeException("Unrecognized monitor type " + monitorType);
+        }
+    }
+
+    @Then("verify the task set update is published for device with task suffix {string} within {int}ms")
+    public void verifyTheTaskSetUpdateIsPublishedForDeviceWithTaskSuffixWithinMs(String taskNameSuffix, int timeout) {
+        String taskIdPattern = "nodeId:\\d+/ip=" + taskIpAddress + "/" + taskNameSuffix;
+        await().atMost(timeout, TimeUnit.MILLISECONDS).pollDelay(2000, TimeUnit.MILLISECONDS)
+            .pollInterval(2000, TimeUnit.MILLISECONDS)
+            .until(() -> matchesTaskPatternForUpdate(taskIdPattern).get(), Matchers.is(true));
+    }
+
+    @Then("verify the task set update is published with removal of task with suffix {string} within {int}ms")
+    public void verifyTheTaskSetUpdateIsPublishedWithRemovalOfTaskWithSuffixWithinMs(String taskSuffix, int timeout) {
+        String taskIdPattern = "nodeId:\\d+/ip=" + taskIpAddress + "/" + taskSuffix;
+        await().atMost(timeout, TimeUnit.MILLISECONDS).pollDelay(2000, TimeUnit.MILLISECONDS)
+            .pollInterval(2000, TimeUnit.MILLISECONDS)
+            .until(() -> matchesTaskPatternForDelete(taskIdPattern).get(), Matchers.is(true));
+    }
+
+
+    private AtomicBoolean matchesTaskPattern(String taskIdPattern, PublishType publishType) {
+        AtomicBoolean matched = new AtomicBoolean(false);
+        var list = kafkaConsumerRunner.getValues();
+        var tasks = new ArrayList<UpdateTasksRequest>();
+        for (byte[] taskSet : list) {
+            try {
+                var taskDefPub = UpdateTasksRequest.parseFrom(taskSet);
+                tasks.add(taskDefPub);
+            } catch (InvalidProtocolBufferException ignored) {
+
+            }
+        }
+        LOG.info("taskIdPattern = {}, publish type = {}, Tasks :  {}", taskIdPattern, publishType, tasks);
+        for (UpdateTasksRequest task : tasks) {
+            var addTasks = task.getUpdateList().stream().filter(UpdateSingleTaskOp::hasAddTask).collect(Collectors.toList());
+            var removeTasks = task.getUpdateList().stream().filter(UpdateSingleTaskOp::hasRemoveTask).collect(Collectors.toList());
+            if (publishType.equals(PublishType.UPDATE)) {
+                boolean matchForTaskId = addTasks.stream().anyMatch(updateSingleTaskOp ->
+                    updateSingleTaskOp.getAddTask().getTaskDefinition().getId().matches(taskIdPattern));
+                if (matchForTaskId) {
+                    matched.set(true);
+                }
+            }
+            if (publishType.equals(PublishType.REMOVE)) {
+                boolean matchForTaskId = removeTasks.stream().anyMatch(updateSingleTaskOp ->
+                    updateSingleTaskOp.getRemoveTask().getTaskId().matches(taskIdPattern));
+                if (matchForTaskId) {
+                    matched.set(true);
+                }
+            }
+
+        }
+        return matched;
+    }
+
+    AtomicBoolean matchesTaskPatternForUpdate(String taskIdPattern) {
+        return matchesTaskPattern(taskIdPattern, PublishType.UPDATE);
+    }
+
+    AtomicBoolean matchesTaskPatternForDelete(String taskIdPattern) {
+        return matchesTaskPattern(taskIdPattern, PublishType.REMOVE);
+    }
+
+    @Then("shutdown kafka consumer")
+    public void shutdownKafkaConsumer() {
+        kafkaConsumerRunner.shutdown();
+        await().atMost(3, TimeUnit.SECONDS).until(() -> kafkaConsumerRunner.isShutdown().get(), Matchers.is(true));
+    }
 }

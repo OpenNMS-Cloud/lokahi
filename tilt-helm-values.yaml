@@ -13,6 +13,9 @@ Keycloak:
   HostnamePort: 1443
   HostnameAdminUrl: https://onmshs.local:1443/auth
 
+Ingress:
+  Enabled: false
+
 OpenNMS:
   global:
     openTelemetry:
@@ -67,18 +70,73 @@ OpenNMS:
       # into minion. Please do not use this in production.
       # Remarks - working directory for this container is /cert which is emptyDir. This empty dir is later mounted
       # into minion container itself under /opt/karaf/certs/.
-      - image: finalgene/openssh@sha256:5b8073b8720ddb204c48a79e68e2a9f8c470404d475640280eb5df2d6a843eca
+      - image: opennms/deploy-base:ubuntu-3.0.1.b223-jre-11
         imagePullPolicy: "IfNotPresent"
         name: cert-generator
         command:
           - /bin/bash
           - -c
           - |
+            set -euo pipefail
+            trap 's=$?; echo >&2 "$0: Error on line "$LINENO": $BASH_COMMAND"; if [ -f /tmp/curl-headers.txt ]; then grep server-timing: /tmp/curl-headers.txt; fi; exit $s' ERR
+
+            url="https://onmshs.local:1443"
+            set -- --connect-to onmshs.local:1443:ingress-nginx-controller.default.svc.cluster.local:443
+
+            keycloak="${url}/auth/"
+            graphql="${url}/"
+
+            token=$(curl "$@" -sSf -k -X POST -H "Content-Type\\: application/x-www-form-urlencoded" \
+              --dump-header /tmp/curl-headers.txt \
+              -d 'username=admin' \
+              -d 'password=admin' \
+              -d 'grant_type=password' \
+              -d 'scope=openid' \
+              -d 'client_id=lokahi' \
+              "${keycloak}realms/opennms/protocol/openid-connect/token" | cut -d "\"" -f 4)
+
+            locationName="TestLocation"
+            query="{\"query\": \"query { searchLocation(searchTerm: \\\"LOC_NAME\\\") { id, location } }\"}"
+            query=${query/LOC_NAME/$locationName}
+            result=$(curl "$@" -sSf -k -H "Content-Type: application/json" \
+              --dump-header /tmp/curl-headers.txt \
+              -H "Authorization: Bearer $token" \
+              --data "${query}" \
+              "${graphql}api/graphql")
+
+            if grep -q '^{"errors":' <<< "$result"; then
+              echo "error getting location: $result" >&2
+              exit 1
+            fi
+
+            locationId=$(echo "$result" | cut -d ":" -f 4|cut -d , -f 1)
+
+            if [ -n "${locationId}" ]; then
+              echo "Found existing location ID ${locationId} for '${locationName}'"
+            else # if it doesn't exist, create it
+              query="{\"query\": \"mutation { createLocation(location: {location: \\\"LOC_NAME\\\"}) { id, location } }\"}"
+              query=${query/LOC_NAME/$locationName}
+              result=$(curl "$@" -sSf -k -H "Content-Type: application/json" \
+                --dump-header /tmp/curl-headers.txt \
+                -H "Authorization: Bearer $token" \
+                --data "${query}" \
+                "${graphql}api/graphql")
+
+              if grep -q '^{"errors":' <<< "$result"; then
+                echo "error getting location: $result" >&2
+                exit 1
+              fi
+
+              locationId=$(echo "$result" | cut -d ":" -f 4|cut -d , -f 1)
+              echo "Created new location ID ${locationId} for '${locationName}'"
+            fi
+
             openssl genrsa -out /cert/client.key.pkcs1 2048
             openssl pkcs8 -topk8 -in /cert/client.key.pkcs1 -out /cert/client.key -nocrypt
-            openssl req -new -key /cert/client.key -out /cert/client.unsigned.cert -subj "/C=CA/ST=TBD/L=TBD/O=OpenNMS/CN=local-minion/OU=L:TestLocation/OU=T:opennms-prime"
+            openssl req -new -key /cert/client.key -out /cert/client.unsigned.cert -subj "/C=CA/ST=TBD/L=TBD/O=OpenNMS/CN=local-minion/OU=L:${locationId}/OU=T:opennms-prime"
             openssl x509 -req -in /cert/client.unsigned.cert -days 14 -CA /run/secrets/mtls/tls.crt -CAkey /run/secrets/mtls/tls.key -out /cert/client.signed.cert
             openssl pkcs12 -export -out "/cert/minion.p12" -inkey /cert/client.key -in /cert/client.signed.cert -passout "pass:changeme"
+
         securityContext:
           privileged: false
           runAsUser: 10001
@@ -108,16 +166,21 @@ OpenNMS:
     env:
       OTEL_JAVAAGENT_ENABLED: "true" # Enable for local development since it adds useful data
     IngressAnnotations:
-      nginx.ingress.kubernetes.io/auth-tls-secret: default/client-root-ca-certificate
-      nginx.ingress.kubernetes.io/auth-tls-verify-client: "on"
-      nginx.ingress.kubernetes.io/auth-tls-verify-depth: "1"
-      nginx.ingress.kubernetes.io/auth-url: "http://opennms-minion-certificate-verifier.default.svc.cluster.local:8080/certificate/debug"
-      nginx.ingress.kubernetes.io/auth-response-headers: "tenant-id, location"
-      nginx.ingress.kubernetes.io/auth-tls-pass-certificate-to-upstream: "false"
-      nginx.ingress.kubernetes.io/server-snippet: |
-        grpc_read_timeout "1200s";
-        grpc_send_timeout "1200s";
-        client_body_timeout "1200s";
+      nginx.ingress.kubernetes.io/configuration-snippet: |
+        # This adds the tenant-id and location to the response headers sent to the client so we can use them in
+        # logging. This is bit circuitous, and it is unnecessary to send these to the client, but this was a way I
+        # could figure out how to get the tenant and minion information in the logs using $sent_http_x_tenant_id
+        # and $sent_http_x_location once these response headers are added. They also seem to need to be in the
+        # location block to work.
+        # Note: The response headers are prefixed with "x-", although the headers from the auth service are not.
+        # Note: I am being a little naughty and depending an internal implementation detail of ingress-nginx by
+        # using the authHeader* variables. These are created by ingress-nginx from the auth-response-headers
+        # annotation. The naming of the authHeader* variables is sensitive to the order of the headers in the
+        # nginx.ingress.kubernetes.io/auth-response-headers annotation.
+        add_header x-tenant-id "$authHeader0" always;
+        add_header x-location "$authHeader1" always;
+        set $dummy_val "$opentelemetry_context_traceparent"; # workaround for https://github.com/kubernetes/ingress-nginx/issues/9811
+        grpc_set_header 'traceparent' $opentelemetry_context_traceparent; # This doesn't get sent downstream normally. :(
   MinionCertificateManager:
     Enabled: true
     CaSecretName: root-ca-certificate

@@ -18,5 +18,5 @@ kind load docker-image opennms/lokahi-keycloak:latest
 echo
 echo ________________Installing Operator________________
 echo
-helm upgrade -i operator-local ../charts/opennms-operator -f scripts/local-operator-values.yaml --namespace opennms --create-namespace
+helm upgrade -i operator-local ../charts/lokahi-operator -f scripts/local-operator-values.yaml --namespace opennms --create-namespace
 if [ $? -ne 0 ]; then exit; fi

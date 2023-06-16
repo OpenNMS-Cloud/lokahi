@@ -31,6 +31,9 @@ package org.opennms.horizon.minioncertverifier.controller;
 import java.util.Enumeration;
 import java.util.List;
 
+import java.util.Optional;
+import org.opennms.horizon.inventory.dto.MonitoringLocationDTO;
+import org.opennms.horizon.minioncertverifier.grpc.LocationClient;
 import org.opennms.horizon.minioncertverifier.parser.CertificateDnParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,10 +54,12 @@ public class CertificateController {
 
     private final Logger logger = LoggerFactory.getLogger(CertificateController.class);
     private final String headerName;
+    private final LocationClient locationClient;
     private final CertificateDnParser certificateDnParser;
 
-    public CertificateController(@Value("${certificate.header.name:ssl-client-subject-dn}") String headerName, CertificateDnParser certificateDnParser) {
+    public CertificateController(@Value("${certificate.header.name:ssl-client-subject-dn}") String headerName, LocationClient locationClient, CertificateDnParser certificateDnParser) {
         this.headerName = headerName;
+        this.locationClient = locationClient;
         this.certificateDnParser = certificateDnParser;
     }
 
@@ -76,25 +81,30 @@ public class CertificateController {
     public ResponseEntity<Void> validate(@RequestHeader("ssl-client-subject-dn") String clientSubjectDn) throws Exception {
         List<String> values = certificateDnParser.get(clientSubjectDn, "OU");
         String tenant = "";
-        String location = "";
+        Long locationId = 0L;
 
         for (String value : values) {
             if (value.startsWith("T:")) {
                 tenant = value.substring(2);
             }
             if (value.startsWith("L:")) {
-                location = value.substring(2);
+                locationId = Long.parseLong(value.substring(2));
             }
         }
+
+        String location = locationClient.getLocation(tenant, locationId)
+            .map(MonitoringLocationDTO::getLocation)
+            .orElse("");
 
         var span = Span.current();
         if (span.isRecording()) {
             span.setAttribute("ssl-client-subject-dn", clientSubjectDn);
             span.setAttribute("user", tenant);
+            span.setAttribute("location-id", locationId);
             span.setAttribute("location", location);
         }
 
-        if (location.isBlank() || tenant.isBlank()) {
+        if (location.isBlank()) {
             span.setStatus(StatusCode.ERROR);
             return ResponseEntity.notFound().build();
         }

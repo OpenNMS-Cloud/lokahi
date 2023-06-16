@@ -29,6 +29,8 @@ spec:
         app.kubernetes.io/component: controller-{{ .Release.Namespace }}
         app.kubernetes.io/name: ingress-nginx-{{ .Release.Namespace }}
         app.kubernetes.io/instance: ingress-nginx-{{ .Release.Namespace }}
+      annotations:
+        kubectl.kubernetes.io/default-container: "controller"
     spec:
       {{- if .Values.NodeRestrictions.Enabled }}
       nodeSelector:

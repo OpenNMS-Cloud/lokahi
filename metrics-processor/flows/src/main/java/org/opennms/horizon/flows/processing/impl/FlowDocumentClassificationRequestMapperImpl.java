@@ -4,6 +4,7 @@ import lombok.Setter;
 import org.opennms.horizon.flows.classification.ClassificationRequest;
 import org.opennms.horizon.flows.classification.persistence.api.Protocol;
 import org.opennms.horizon.flows.classification.persistence.api.Protocols;
+import org.opennms.horizon.flows.document.FlowDocument;
 import org.opennms.horizon.flows.document.TenantLocationSpecificFlowDocument;
 import org.opennms.horizon.flows.processing.FlowDocumentClassificationRequestMapper;
 
@@ -16,12 +17,12 @@ public class FlowDocumentClassificationRequestMapperImpl implements FlowDocument
     private Function<Integer, Protocol> protocolLookupOp = Protocols::getProtocol;
 
     @Override
-    public ClassificationRequest createClassificationRequest(TenantLocationSpecificFlowDocument document) {
+    public ClassificationRequest createClassificationRequest(FlowDocument document, String location) {
         ClassificationRequest request = new ClassificationRequest();
         if (document.hasProtocol()) {
             request.setProtocol(protocolLookupOp.apply(document.getProtocol().getValue()));
         }
-        request.setLocation(document.getLocation());
+        request.setLocation(location);
         request.setExporterAddress(document.getHost());
         request.setDstAddress(document.getDstAddress());
         if (document.hasDstPort()) {

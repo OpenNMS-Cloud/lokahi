@@ -11,7 +11,7 @@
       <div class="content-left">
         <FeatherButton
           primary
-          @click="addLocation"
+          @click="locationStore.addLocation"
           data-test="add-location-btn"
         >
           <FeatherIcon :icon="icons.Add" />
@@ -37,7 +37,7 @@
       </div>
       <div class="content-right">
         <LocationsMinionsList
-          v-if="locationStore.displayType === DisplayType.LIST && minionsList"
+          v-if="locationStore.displayType === DisplayType.LIST"
           :minions="minionsList"
           @showInstructions="showInstructions = true"
         />
@@ -48,6 +48,12 @@
         <LocationsEditForm
           v-if="locationStore.displayType === DisplayType.EDIT"
           :id="selectedLocationId"
+        />
+        <LocationsCertificateDownload
+          v-if="locationStore.displayType === DisplayType.READY"
+          :certificate-password="locationStore.certificatePassword"
+          :on-primary-button-click="downloadCert"
+          :has-cert="false"
         />
       </div>
     </div>
@@ -63,23 +69,19 @@ import Add from '@featherds/icon/action/Add'
 import Search from '@featherds/icon/action/Search'
 import Help from '@featherds/icon/action/Help'
 import { useLocationStore } from '@/store/Views/locationStore'
+import { useMinionsQueries } from '@/store/Queries/minionsQueries'
 import LocationsList from '@/components/Locations/LocationsList.vue'
 import { DisplayType } from '@/types/locations.d'
+import { createAndDownloadBlobFile } from '@/components/utils'
 
 const locationStore = useLocationStore()
+const minionsQueries = useMinionsQueries()
 const showInstructions = ref(false)
 
 const locationsList = computed(() => locationStore.locationsList)
-const minionsList = computed(() => locationStore.minionsList)
+const minionsList = computed(() => minionsQueries.minionsList)
 
-onMounted(async () => {
-  await locationStore.fetchLocations()
-  await locationStore.fetchMinions()
-})
-
-const addLocation = () => {
-  locationStore.setDisplayType(DisplayType.ADD)
-}
+onMounted(async () => await locationStore.fetchLocations())
 
 const selectedLocationId = computed(() => locationStore.selectedLocationId)
 
@@ -92,6 +94,15 @@ const icons = markRaw({
   Search,
   Help
 })
+
+const downloadCert = async () => {
+  const minionCertificate = await locationStore.getMinionCertificate()
+
+  if (minionCertificate) {
+    locationStore.setCertificatePassword(minionCertificate.password as string)
+    createAndDownloadBlobFile(minionCertificate.certificate, `${locationStore.selectedLocation?.location}-certificate.p12`)
+  }
+}
 </script>
 
 <style lang="scss" scoped>

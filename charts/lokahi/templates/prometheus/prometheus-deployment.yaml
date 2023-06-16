@@ -16,6 +16,8 @@ spec:
       labels:
         appdomain: opennms
         app: {{ .Values.Prometheus.ServiceName }}
+      annotations:
+        kubectl.kubernetes.io/default-container: "{{ .Values.Prometheus.ServiceName }}"
     spec:
       serviceAccountName: prometheus-sa
       {{- if .Values.NodeRestrictions.Enabled }}

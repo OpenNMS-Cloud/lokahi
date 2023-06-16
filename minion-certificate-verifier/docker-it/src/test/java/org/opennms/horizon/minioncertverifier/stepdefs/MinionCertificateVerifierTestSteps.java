@@ -104,7 +104,7 @@ public class MinionCertificateVerifierTestSteps {
             request.orTimeout(timeoutSec, TimeUnit.SECONDS).get();
             fail("Request should fail");
         } catch (ExecutionException e) {
-            e.printStackTrace();
+            LOG.debug("Expected exception caught", e);
         }
     }
 }

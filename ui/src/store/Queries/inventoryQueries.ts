@@ -297,7 +297,7 @@ export const useInventoryQueries = defineStore('inventoryQueries', () => {
     nodes,
     unmonitoredNodes,
     detectedNodes,
-    fetch: getMonitoredNodes,
+    getMonitoredNodes,
     getNodesByLabel,
     getNodesByTags,
     getUnmonitoredNodes,

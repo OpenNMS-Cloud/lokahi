@@ -25,7 +25,7 @@ import (
 )
 
 func TestCortexUpdateConfig(t *testing.T) {
-	handlers.ConfigFilePath = "./../../../charts/opennms/templates/"
+	handlers.ConfigFilePath = "./../../../charts/lokahi/templates/"
 	handler := CortexHandler{}
 	assert.Nil(t, handler.GetConfig(), "config should start as nil")
 	values := testutil.DefaultTestValues()

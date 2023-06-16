@@ -94,7 +94,7 @@ They extract the OS cluster's internal image registry URL, and pushes the built 
 Then install the Operator to the cluster using Helm:
 
 ```
-helm upgrade -i operator-local ../charts/opennms-operator -f scripts/openshift-operator-values.yaml --namespace opennms --create-namespace
+helm upgrade -i operator-local ../charts/lokahi-operator -f scripts/openshift-operator-values.yaml --namespace opennms --create-namespace
 ```
 
 And give it the following OpenShift permission, which allows its K8s Pod to pull from the above internal image registry:

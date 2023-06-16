@@ -31,10 +31,15 @@ package org.opennms.horizon.minion.flows.listeners;
 import java.net.InetSocketAddress;
 import java.util.concurrent.CompletableFuture;
 
+import org.opennms.horizon.minion.flows.parser.session.UdpSessionManager;
+
 import io.netty.buffer.ByteBuf;
 
 public interface UdpParser extends Parser {
     CompletableFuture<?> parse(final ByteBuf buffer,
                                final InetSocketAddress remoteAddress,
                                final InetSocketAddress localAddress) throws Exception;
+
+    UdpSessionManager getSessionManager();
+
 }

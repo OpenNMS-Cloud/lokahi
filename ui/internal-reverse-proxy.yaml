@@ -28,6 +28,8 @@ spec:
     metadata:
       labels:
         app: nginx
+      annotations:
+        kubectl.kubernetes.io/default-container: "nginx"
     spec:
       containers:
         - name: nginx

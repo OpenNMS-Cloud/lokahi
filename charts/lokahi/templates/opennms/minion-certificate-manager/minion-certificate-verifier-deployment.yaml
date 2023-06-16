@@ -18,6 +18,7 @@ spec:
       annotations:
         # roll the deployment when the Spring boot environment variable configmap changes
         checksum/spring-boot-env-configmap: {{ include (print $.Template.BasePath "/opennms/spring-boot-env-configmap.yaml") . | sha256sum }}
+        kubectl.kubernetes.io/default-container: "{{ .Values.OpenNMS.MinionCertificateVerifier.ServiceName }}"
     spec:
       {{- if .Values.NodeRestrictions.Enabled }}
       nodeSelector:                                                                                    

@@ -50,6 +50,7 @@ import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 
 import io.netty.buffer.ByteBuf;
+import lombok.Getter;
 
 public abstract class UdpParserBase extends ParserBase implements UdpParser {
     public final static long HOUSEKEEPING_INTERVAL = 60000;
@@ -57,6 +58,7 @@ public abstract class UdpParserBase extends ParserBase implements UdpParser {
     private final Meter packetsReceived;
     private final Counter parserErrors;
 
+    @Getter
     private UdpSessionManager sessionManager;
 
     private ScheduledFuture<?> housekeepingFuture;

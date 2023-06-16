@@ -152,6 +152,7 @@ public class ScannerResponseService {
                     .setLocation(location)
                     .setManagementIp(pingResponse.getIpAddress())
                     .setLabel(pingResponse.getIpAddress())
+                    .setMonitoredState(MonitoredState.UNMONITORED)
                     .addAllTags(tags)
                     .build();
                 try {
@@ -229,7 +230,7 @@ public class ScannerResponseService {
         if (nodeOpt.isPresent()) {
             Node node = nodeOpt.get();
             Map<Integer, SnmpInterface> ifIndexSNMPMap = new HashMap<>();
-            nodeService.updateNodeInfo(node, result.getNodeInfo(), MonitoredState.UNMONITORED);
+            nodeService.updateNodeInfo(node, result.getNodeInfo(), MonitoredState.MONITORED);
 
             for (SnmpInterfaceResult snmpIfResult : result.getSnmpInterfacesList()) {
                 SnmpInterface snmpInterface = snmpInterfaceService.createOrUpdateFromScanResult(tenantId, node, snmpIfResult);

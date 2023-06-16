@@ -29,16 +29,17 @@
       />
 
       <NavigationRailNavItem
-        title="Appliances"
-        href="/appliances"
+        title="Minions"
+        href="/minions"
         :icon="Icons.Appliances"
       />
 
-      <NavigationRailNavItem
+      <!-- Hidden until after EAR -->
+      <!-- <NavigationRailNavItem
         title="Map"
         href="/map"
         :icon="Icons.Location"
-      />
+      /> -->
 
       <NavigationRailNavItem
         title="Inventory"

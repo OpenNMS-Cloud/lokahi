@@ -1,0 +1,25 @@
+Changes: 
+*   28288dbd4 Merge pull request #1194 from OpenNMS-Cloud/fix/lokahi/references
+*   13fa9c76e Merge pull request #1186 from OpenNMS-Cloud/BTO-509
+*   6b8e2a86a Merge pull request #1184 from OpenNMS-Cloud/feature/BTO-514
+*   a092400b3 Merge pull request #1183 from OpenNMS-Cloud/feature/BTO-500
+* c83112f02 Merge pull request #1167 from OpenNMS-Cloud/deejgregor/tilt-jaeger-with-tracing-examples
+*   299ef0b5b Merge pull request #1067 from OpenNMS-Cloud/HS-1407-endpoints-tests
+*   0321fd96d Merge pull request #1053 from OpenNMS-Cloud/HS-1523-location-edit-form
+*   083aefbd2 Merge pull request #1039 from OpenNMS-Cloud/HS-1405-location-add-edit-form
+*   212513425 Merge pull request #1051 from OpenNMS-Cloud/HS-1522-location-add-form
+*   c395f9b40 Merge pull request #1032 from OpenNMS-Cloud/HS-1469-add-locations-list
+*   b793b7e8b Merge pull request #1000 from OpenNMS-Cloud/HS-1405-locations-card
+*   a002143a3 Merge pull request #1002 from OpenNMS-Cloud/HS-1404-context-menu
+*   74e5bf4c4 Merge pull request #338 from OpenNMS/mmf/shared-cleanup
+*   673071a60 Merge pull request #330 from OpenNMS/mmf/cleanup-package-names
+*   2353a8c17 Merge pull request #333 from OpenNMS/mmf/protobuf-cleanup
+*   675c695f8 Merge pull request #327 from OpenNMS/mmf/pre-merge-cleanup-1
+*   447978a77 Merge pull request #306 from OpenNMS/mmf/add-minion-heartbeat
+*   b0c67bcde Merge pull request #290 from OpenNMS/asn/provision-ignite-detector-client
+*   b5cfd3bc9 Merge pull request #251 from OpenNMS/features/final-core-dep-cleanup
+*   34eeb6315 Merge pull request #250 from OpenNMS/feature/switch-minion-to-shared-ipc
+*   96de146d4 Merge pull request #245 from OpenNMS/features/decouple-minion-from-core
+*   f72ec79bb Merge pull request #236 from OpenNMS/features/minion-unit-tests
+*   7bb2bea31 Merge pull request #232 from OpenNMS/features/use-shared-lib-in-minion
+*   954a0b670 Merge pull request #208 from OpenNMS/feature/minion-ng

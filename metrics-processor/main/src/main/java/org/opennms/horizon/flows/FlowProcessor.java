@@ -66,7 +66,7 @@ public class FlowProcessor {
 
                     log.trace("Processing flow: tenant-id={}; flow={}", tenantId, flowDocumentLog);
 
-                    pipeline.process(flowDocumentLog.getMessageList(), tenantId);
+                    pipeline.process(flowDocumentLog);
                     metricsTracker.addTenantFlowSampleCount(tenantId, flowDocumentLog.getMessageCount());
                 } catch (Exception exc) {
                     log.warn("Error processing flow: {} error: {}", flowDocumentLog, exc);

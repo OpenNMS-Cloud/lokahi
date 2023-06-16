@@ -12,7 +12,7 @@
  -->
 <template>
   <div class="empty-list">
-    <div data-test="msg">{{ content.msg }}</div>
+    <div data-test="msg">{{ msg }}</div>
     <FeatherButton
       v-if="content.btn"
       secondary
@@ -34,9 +34,11 @@ type Content = {
   }
 }
 
-defineProps<{
+const props = defineProps<{
   content: Content
 }>()
+
+const msg = computed(() => props.content.msg || '')
 </script>
 
 <style lang="scss" scoped>

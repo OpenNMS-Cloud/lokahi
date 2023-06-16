@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
@@ -85,7 +86,10 @@ public class RocksDbStore implements SwappingSendQueueFactory.StoreManager {
         final var cfDescs = RocksDB.listColumnFamilies(new Options(), path.toString()).stream()
                                    .map(columnFamilyName -> new ColumnFamilyDescriptor(columnFamilyName, CF_OPTIONS))
                                    .collect(Collectors.toList());
-        cfDescs.add(new ColumnFamilyDescriptor(RocksDB.DEFAULT_COLUMN_FAMILY));
+
+        if (cfDescs.stream().noneMatch(desc -> Arrays.equals(desc.getName(), RocksDB.DEFAULT_COLUMN_FAMILY))) {
+            cfDescs.add(new ColumnFamilyDescriptor(RocksDB.DEFAULT_COLUMN_FAMILY));
+        }
 
         final var cfHandles = Lists.<ColumnFamilyHandle>newArrayListWithCapacity(cfDescs.size());
 

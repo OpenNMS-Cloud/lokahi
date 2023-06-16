@@ -65,7 +65,7 @@ public class PKCS12GeneratorTest {
         // Execute
         //
         pkcs12Generator.setCommandExecutor(mockCommandExecutor);
-        pkcs12Generator.generate("x-location-x", "x-tenant-id-x", outputDirPath, new File("minion.p12"), "x-archive-pass-x", mockCaCertFile, new File("x-ca-key-file-x"));
+        pkcs12Generator.generate(1010L, "x-tenant-id-x", outputDirPath, new File("minion.p12"), "x-archive-pass-x", mockCaCertFile, new File("x-ca-key-file-x"));
 
         //
         // Verify the Results
@@ -88,7 +88,7 @@ public class PKCS12GeneratorTest {
         Exception actual = null;
         try {
             pkcs12Generator.setCommandExecutor(mockCommandExecutor);
-            pkcs12Generator.generate("x-location-x", "x-tenant-id-x", outputDirPath, new File("minion.p12"), "x-archive-pass-x", mockCaCertFile, new File("x-ca-key-file-x"));
+            pkcs12Generator.generate(2020L, "x-tenant-id-x", outputDirPath, new File("minion.p12"), "x-archive-pass-x", mockCaCertFile, new File("x-ca-key-file-x"));
             fail("missing expected exception");
         } catch (Exception caught) {
             actual = caught;

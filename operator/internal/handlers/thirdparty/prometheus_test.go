@@ -24,7 +24,7 @@ import (
 )
 
 func TestPrometheusUpdateConfig(t *testing.T) {
-	handlers.ConfigFilePath = "./../../../charts/opennms/templates/"
+	handlers.ConfigFilePath = "./../../../charts/lokahi/templates/"
 	handler := PrometheusHandler{}
 	vals := testutil.DefaultTestValues()
 	vals.Values.Prometheus.Enabled = true

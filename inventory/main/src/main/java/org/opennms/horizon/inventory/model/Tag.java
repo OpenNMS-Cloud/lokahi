@@ -85,4 +85,11 @@ public class Tag {
         joinColumns = @JoinColumn(name = "tag_id"),
         inverseJoinColumns = @JoinColumn(name = "passive_discovery_id"))
     private List<PassiveDiscovery> passiveDiscoveries = new ArrayList<>();
+
+/*    @ManyToMany
+    @JoinTable(
+        name = "monitoring_policy_tag",
+        joinColumns = @JoinColumn(name = "tag_id"),
+        inverseJoinColumns = @JoinColumn(name = "monitoring_policy_id"))
+    private List<MonitoringPolicyTag> monitoringPolicyTags = new ArrayList<>();*/
 }

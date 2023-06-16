@@ -43,22 +43,22 @@ import org.opennms.horizon.inventory.dto.TagListParamsDTO;
 import org.opennms.horizon.inventory.dto.TagRemoveListDTO;
 import org.opennms.horizon.inventory.exception.InventoryRuntimeException;
 import org.opennms.horizon.inventory.mapper.TagMapper;
+import org.opennms.horizon.inventory.model.MonitoringPolicyTag;
 import org.opennms.horizon.inventory.model.Node;
-import org.opennms.horizon.inventory.model.discovery.PassiveDiscovery;
 import org.opennms.horizon.inventory.model.Tag;
+import org.opennms.horizon.inventory.model.discovery.PassiveDiscovery;
 import org.opennms.horizon.inventory.model.discovery.active.ActiveDiscovery;
-import org.opennms.horizon.inventory.repository.discovery.active.ActiveDiscoveryRepository;
+import org.opennms.horizon.inventory.repository.MonitoringPolicyTagRepository;
 import org.opennms.horizon.inventory.repository.NodeRepository;
-import org.opennms.horizon.inventory.repository.discovery.PassiveDiscoveryRepository;
 import org.opennms.horizon.inventory.repository.TagRepository;
+import org.opennms.horizon.inventory.repository.discovery.PassiveDiscoveryRepository;
+import org.opennms.horizon.inventory.repository.discovery.active.ActiveDiscoveryRepository;
 import org.opennms.horizon.shared.common.tag.proto.Operation;
 import org.opennms.horizon.shared.common.tag.proto.TagOperationProto;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
@@ -72,6 +72,7 @@ public class TagService {
     private final NodeRepository nodeRepository;
     private final ActiveDiscoveryRepository activeDiscoveryRepository;
     private final PassiveDiscoveryRepository passiveDiscoveryRepository;
+    private final MonitoringPolicyTagRepository monitoringPolicyTagRepository;
     private final TagMapper mapper;
     private final TagPublisher tagPublisher;
 
@@ -113,6 +114,18 @@ public class TagService {
             return tagCreateList.stream()
                 .map(tagCreateDTO -> addTagToPassiveDiscovery(tenantId, discovery, tagCreateDTO))
                 .toList();
+        } else if (entityId.hasMonitoringPolicyId()) {
+
+            List<TagOperationProto> tagOpList = tagCreateList.stream().map(t -> TagOperationProto.newBuilder()
+                .setOperation(Operation.ASSIGN_TAG)
+                .setTagName(t.getName())
+                .setTenantId(tenantId)
+                .addMonitoringPolicyId(entityId.getMonitoringPolicyId())
+                .build()).collect(Collectors.toList());
+            tagPublisher.publishTagUpdate(tagOpList);
+            return tagCreateList.stream().map(tagCreateDTO ->
+                    addTagsToMonitoringPolicy(tenantId, entityId.getMonitoringPolicyId(), tagCreateDTO))
+                .collect(Collectors.toList());
         } else {
             throw new InventoryRuntimeException("Invalid ID provided");
         }
@@ -278,6 +291,25 @@ public class TagService {
 
         return mapper.modelToDTO(tag);
     }
+
+    private TagDTO addTagsToMonitoringPolicy(String tenantId, long monitoringPolicyId, TagCreateDTO tagCreateDTO) {
+        String tagName = tagCreateDTO.getName();
+        var optional = repository.findByTenantIdMonitoringPolicyIdAndName(tenantId, monitoringPolicyId, tagCreateDTO.getName());
+        if (optional.isPresent()) {
+            return mapper.modelToDTO(optional.get());
+        }
+
+        optional = repository.findByTenantIdAndName(tenantId, tagName);
+        Tag tag = optional.orElseGet(() -> mapCreateTag(tenantId, tagCreateDTO));
+        tag = repository.save(tag);
+        var policyTag = new MonitoringPolicyTag();
+        policyTag.setTagId(tag.getId());
+        policyTag.setMonitoringPolicyId(monitoringPolicyId);
+        //tag.getMonitoringPolicyTags().add(policyTag);
+        monitoringPolicyTagRepository.save(policyTag);
+        return mapper.modelToDTO(tag);
+    }
+
 
     private Tag mapCreateTag(String tenantId, TagCreateDTO request) {
         Tag tag = mapper.createDtoToModel(request);

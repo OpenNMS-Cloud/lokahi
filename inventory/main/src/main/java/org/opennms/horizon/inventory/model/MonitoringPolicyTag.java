@@ -26,35 +26,32 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.alertservice.service.routing;
+package org.opennms.horizon.inventory.model;
 
-import com.google.protobuf.InvalidProtocolBufferException;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.IdClass;
+import jakarta.validation.constraints.NotNull;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.opennms.horizon.alertservice.service.TagService;
-import org.opennms.horizon.shared.common.tag.proto.TagOperationList;
-import org.springframework.context.annotation.PropertySource;
-import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.messaging.handler.annotation.Payload;
-import org.springframework.stereotype.Component;
+import lombok.Setter;
 
-import java.util.Arrays;
-
-@Slf4j
+@Getter
+@Setter
 @RequiredArgsConstructor
-@Component
-@PropertySource("classpath:application.yaml")
-public class TagOperationConsumer {
-    private final TagService tagService;
+@Entity
+@IdClass(MonitoringPolicyTag.class)
+public class MonitoringPolicyTag {
 
-    @KafkaListener(topics = "${kafka.topics.tag-operation}", concurrency = "1")
-    public void tagMessageConsumer(@Payload byte[] data) {
-        try {
-            TagOperationList operationList = TagOperationList.parseFrom(data);
-            tagService.insertOrUpdateTags(operationList);
-            log.info("Received tag operation {}", operationList);
-        } catch (InvalidProtocolBufferException e) {
-            log.error("Error while parsing TagOperationList, payload data {}", Arrays.toString(data), e);
-        }
-    }
+    @NotNull
+    @Column(name = "tag_id")
+    @Id
+    private long tagId;
+
+    @NotNull
+    @Column(name = "monitoring_policy_id")
+    @Id
+    private long monitoringPolicyId;
+
 }

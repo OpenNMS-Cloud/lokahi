@@ -36,13 +36,23 @@ import io.leangen.graphql.execution.ResolutionEnvironment;
 import io.leangen.graphql.spqr.spring.annotations.GraphQLApi;
 import lombok.RequiredArgsConstructor;
 import org.opennms.horizon.server.mapper.AlertMapper;
-import org.opennms.horizon.server.model.alerts.*;
+import org.opennms.horizon.server.mapper.TagMapper;
+import org.opennms.horizon.server.model.alerts.AlertResponse;
+import org.opennms.horizon.server.model.alerts.CountAlertResponse;
+import org.opennms.horizon.server.model.alerts.DeleteAlertResponse;
+import org.opennms.horizon.server.model.alerts.ListAlertResponse;
+import org.opennms.horizon.server.model.alerts.MonitorPolicy;
+import org.opennms.horizon.server.model.alerts.TimeRange;
+import org.opennms.horizon.server.model.inventory.tag.TagCreate;
+import org.opennms.horizon.server.model.inventory.tag.TagListMonitorPolicyAdd;
 import org.opennms.horizon.server.service.grpc.AlertsClient;
+import org.opennms.horizon.server.service.grpc.InventoryClient;
 import org.opennms.horizon.server.utils.ServerHeaderUtil;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -53,6 +63,8 @@ public class GrpcAlertService {
     private final AlertsClient alertsClient;
     private final ServerHeaderUtil headerUtil;
     private final AlertMapper mapper;
+    private final TagMapper tagMapper;
+    private final InventoryClient client;
 
     @SuppressWarnings("squid:S107")
     @GraphQLQuery
@@ -109,7 +121,10 @@ public class GrpcAlertService {
 
     @GraphQLMutation
     public Mono<MonitorPolicy> createMonitorPolicy(MonitorPolicy policy, @GraphQLEnvironment ResolutionEnvironment env) {
-        return Mono.just(alertsClient.createMonitorPolicy(policy, headerUtil.getAuthHeader(env)));
+        String authHeader = headerUtil.getAuthHeader(env);
+        var monitorPolicy = alertsClient.createMonitorPolicy(policy, headerUtil.getAuthHeader(env));
+        createTagsInInventory(monitorPolicy, authHeader);
+        return Mono.just(monitorPolicy);
     }
 
     @GraphQLQuery
@@ -125,5 +140,13 @@ public class GrpcAlertService {
     @GraphQLQuery
     public Mono<MonitorPolicy> getDefaultPolicy(@GraphQLEnvironment ResolutionEnvironment env) {
         return Mono.just(alertsClient.getDefaultPolicy(headerUtil.getAuthHeader(env)));
+    }
+
+    private void createTagsInInventory(MonitorPolicy monitorPolicy, String authHeader) {
+        List<TagCreate> tags = new ArrayList<>();
+        monitorPolicy.getTags().forEach(tag -> tags.add(new TagCreate(tag)));
+        var monitoringPolicyAdd = new TagListMonitorPolicyAdd(monitorPolicy.getId(), tags);
+        var newTags = tagMapper.tagListAddToProtoCustom(monitoringPolicyAdd);
+        client.addTags(newTags, authHeader);
     }
 }

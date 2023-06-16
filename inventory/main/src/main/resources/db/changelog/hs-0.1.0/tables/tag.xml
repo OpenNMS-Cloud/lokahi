@@ -44,4 +44,16 @@
                                  referencedTableName="tag" referencedColumnNames="id"/>
 
     </changeSet>
+
+    <changeSet id="0.1.0-monitoring-policy-tag" author="cgorantla">
+        <createTable tableName="monitoring_policy_tag">
+            <column name="monitoring_policy_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="tag_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+    </changeSet>
 </databaseChangeLog>

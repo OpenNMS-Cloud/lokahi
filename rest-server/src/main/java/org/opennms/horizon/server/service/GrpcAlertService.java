@@ -123,7 +123,7 @@ public class GrpcAlertService {
     public Mono<MonitorPolicy> createMonitorPolicy(MonitorPolicy policy, @GraphQLEnvironment ResolutionEnvironment env) {
         String authHeader = headerUtil.getAuthHeader(env);
         var monitorPolicy = alertsClient.createMonitorPolicy(policy, headerUtil.getAuthHeader(env));
-        createTagsInInventory(monitorPolicy, authHeader);
+        createTagsInInventory(authHeader, monitorPolicy.getId(), policy.getTags());
         return Mono.just(monitorPolicy);
     }
 
@@ -142,10 +142,10 @@ public class GrpcAlertService {
         return Mono.just(alertsClient.getDefaultPolicy(headerUtil.getAuthHeader(env)));
     }
 
-    private void createTagsInInventory(MonitorPolicy monitorPolicy, String authHeader) {
+    private void createTagsInInventory(String authHeader, long monitoringPolicyId, List<String> policyTags) {
         List<TagCreate> tags = new ArrayList<>();
-        monitorPolicy.getTags().forEach(tag -> tags.add(new TagCreate(tag)));
-        var monitoringPolicyAdd = new TagListMonitorPolicyAdd(monitorPolicy.getId(), tags);
+        policyTags.forEach(tag -> tags.add(new TagCreate(tag)));
+        var monitoringPolicyAdd = new TagListMonitorPolicyAdd(monitoringPolicyId, tags);
         var newTags = tagMapper.tagListAddToProtoCustom(monitoringPolicyAdd);
         client.addTags(newTags, authHeader);
     }

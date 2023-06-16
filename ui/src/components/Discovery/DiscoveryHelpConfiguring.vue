@@ -4,7 +4,8 @@
     <ul class="type-square">
       <li>{{ DiscoverySyslogSNMPTrapsForm.help.top.list.text1 }}</li>
       <li>{{ DiscoverySyslogSNMPTrapsForm.help.top.list.text2 }}</li>
-      <li
+      <!-- Hidden until after EAR -->
+      <!-- <li
         @click="isHelpOpen = !isHelpOpen"
         class="step-opener"
       >
@@ -12,7 +13,7 @@
           {{ DiscoverySyslogSNMPTrapsForm.help.top.list.text3 }}
           <FeatherIcon :icon="isHelpOpen ? icon.ExpandLess : icon.ExpandMore" />
         </span>
-      </li>
+      </li> -->
     </ul>
     <div
       v-if="isHelpOpen"

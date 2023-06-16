@@ -58,11 +58,12 @@
             v-model="store.selectedPolicy.notifyByPagerDuty"
             >PagerDuty</FeatherCheckbox
           >
-          <FeatherCheckbox
+          <!-- Hidden until ready -->
+          <!-- <FeatherCheckbox
             :disabled="store.selectedPolicy.isDefault"
             v-model="store.selectedPolicy.notifyByWebhooks"
             >Webhooks</FeatherCheckbox
-          >
+          > -->
         </FeatherCheckboxGroup>
         <div class="subtitle">Tags</div>
         <BasicAutocomplete

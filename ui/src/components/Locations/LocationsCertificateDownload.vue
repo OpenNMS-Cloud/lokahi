@@ -71,6 +71,9 @@
       </div>
     </div>
   </div>
+  <div class="row mt-m">
+    <LocationsMinionCmd />
+  </div>
 </template>
 
 <script lang="ts" setup>
@@ -121,7 +124,7 @@ const props = defineProps({
 const copyClick = () => {
   navigator.clipboard.writeText(props.certificatePassword).catch(() => 'Copy to clipboard was unsuccessful.')
   showSnackbar({
-    msg: 'Copied.'
+    msg: 'Certificate password copied.'
   })
 }
 </script>
@@ -182,6 +185,7 @@ const copyClick = () => {
 }
 .download-copy-button {
   min-width: 87px;
+  margin-top: -25px;
 }
 .download-input {
   width: 285px;

@@ -38,7 +38,7 @@
         <div class="row">
           <AddressAutocomplete
             :addressModel="formInputs"
-            class="input-address"
+            class="full-width"
             @onAddressChange="onAddressChange"
           />
         </div>
@@ -61,12 +61,6 @@
         <LocationsCertificateDownload
           :certificate-password="locationStore.certificatePassword"
           :on-primary-button-click="downloadCert"
-        />
-      </div>
-      <div class="row mt-m">
-        <InstructionsStepper
-          :text-button="instructions.textButton"
-          :step-lists="instructions.stepLists"
         />
       </div>
       <FooterSection>
@@ -112,8 +106,8 @@ const formInputs = reactive({} as Required<MonitoringLocationUpdateInput>)
 watchEffect(() => {
   formInputs.id = locationStore.selectedLocation?.id
   formInputs.location = locationStore.selectedLocation?.location
-  formInputs.address= locationStore.selectedLocation?.address
-  formInputs.longitude= locationStore.selectedLocation?.longitude
+  formInputs.address = locationStore.selectedLocation?.address
+  formInputs.longitude = locationStore.selectedLocation?.longitude
   formInputs.latitude = locationStore.selectedLocation?.latitude
 })
 
@@ -160,32 +154,6 @@ const deleteLocation = async () => {
   }
 }
 
-const instructions = {
-  textButton: 'Need instructions for minion deployment at this location?',
-  stepLists: [
-    {
-      title: 'Step 1 heading',
-      items: [
-        'Enter configuration commands, one per line. End with CNTL/Z',
-        'Router-Dallas(config)#logging 192.168.0.30',
-        'Router-Dallas(config)#service timestamps debug datetime localtime show-timezone'
-      ]
-    },
-    {
-      title: 'Step 2 heading',
-      items: ['Instruction 2...', 'Instruction 2a...', 'Instruction 2b...']
-    },
-    {
-      title: 'Step 3 heading',
-      items: ['Instruction 3...', 'Instruction 3a...', 'Instruction 3b...']
-    },
-    {
-      title: 'Step 4 heading',
-      items: ['Instruction 4...', 'Instruction 4a...', 'Instruction 4b...']
-    }
-  ]
-}
-
 onUnmounted(() => {
   form.clearErrors()
 })
@@ -222,7 +190,7 @@ const icons = markRaw({
     }
 
     @include mediaQueriesMixins.screen-sm {
-      > *:not(.input-address) {
+      > *:not(.full-width) {
         width: 49%;
       }
     }
@@ -232,7 +200,7 @@ const icons = markRaw({
       }
     }
     @include mediaQueriesMixins.screen-lg {
-      > *:not(.input-address) {
+      > *:not(.full-width) {
         width: 49%;
       }
     }

@@ -35,6 +35,10 @@ const copyClick = () => {
     showSnackbar({
       msg: 'Minion run command copied.'
     })
+  }).catch(() => {
+    showSnackbar({
+      msg: 'Failed to copy command.'
+    })
   })
 }
 </script>

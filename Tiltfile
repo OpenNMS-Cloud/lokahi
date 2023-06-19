@@ -59,10 +59,11 @@ cmd_button(name='reload-helm',
            location=location.NAV,
            icon_name='system_update_alt')
 
+# Give ourselves more time
+update_settings(k8s_upsert_timeout_secs=60)
 if os.getenv("CI"):
-    # Be a little bit more reserved and give ourselves more time in CI
-    update_settings(max_parallel_updates=2,
-                    k8s_upsert_timeout_secs=60)
+    # Be a little bit more aggressive in CI
+    update_settings(max_parallel_updates=4)
 
 # Functions #
 cluster_arch_cmd = '$(tilt get cluster default -o=jsonpath --template="{.status.arch}")'
@@ -203,18 +204,34 @@ k8s_resource(
 )
 
 # Deployment #
-helm_remote('cert-manager', version='1.11.0', repo_url='https://charts.jetstack.io', set = [
-    'installCRDs=true'
-])
+helm_repo('jetstack', 'https://charts.jetstack.io', labels=['z_dependencies'])
+helm_resource('cert-manager', 'jetstack/cert-manager',
+	flags=[
+		'--version=1.11.0',
+		'--set', 'installCRDs=true',
+		'--set', 'cainjector.extraArgs={--leader-elect=false}',
+	],
+	resource_deps=[
+		'jetstack',
+	],
+)
+k8s_resource(
+    'cert-manager',
+    labels=['z_dependencies'],
+)
 
 # https://github.com/kubernetes/ingress-nginx/tree/main/charts/ingress-nginx
-helm_repo('ingress-nginx-repo', 'https://kubernetes.github.io/ingress-nginx')
+helm_repo('ingress-nginx-repo', 'https://kubernetes.github.io/ingress-nginx' , labels=['z_dependencies'])
 helm_resource('ingress-nginx', 'ingress-nginx-repo/ingress-nginx',
 	flags=[
 		'--version=4.7.0',
 		'--values=tilt-ingress-nginx-values.yaml',
 	],
 	deps=["Tiltfile", "tilt-ingress-nginx-values.yaml"],
+	resource_deps=[
+		'cert-manager',
+		'ingress-nginx-repo',
+	],
 )
 
 k8s_yaml(
@@ -407,6 +424,7 @@ k8s_resource(
     'grafana',
     labels='z_dependencies',
     port_forwards=['18080:3000'],
+    resource_deps=['postgres'],
 )
 
 ### Cortex ###

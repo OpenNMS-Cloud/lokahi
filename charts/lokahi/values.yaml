@@ -95,6 +95,7 @@ OpenNMS:
     ExtraMounts: []
     ExtraInitContainers: []
     GrpcConfig: {}
+    addTestLocation: false
   MinionGateway:
     ServiceName: opennms-minion-gateway
     TlsSecretName: opennms-minion-gateway-certificate
@@ -342,7 +343,7 @@ CortexClient:
 Kafka:
   Enabled: true
   ServiceName: onms-kafka
-  Image: bitnami/kafka:3.3.1-debian-11-r1
+  Image: bitnami/kafka:3.3.2-debian-11-r28 # latest 3.3.2 version not affected by https://github.com/bitnami/containers/issues/33271
   ImagePullPolicy: IfNotPresent
   Replicas: 1
   Port: 9092

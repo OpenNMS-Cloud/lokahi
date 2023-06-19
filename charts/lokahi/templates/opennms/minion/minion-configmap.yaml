@@ -9,6 +9,15 @@ data:
   grpc-config: |
     grpc.max.message.size=104857600
     # Properties below override these defined earlier in file!
+    {{- if .Values.OpenNMS.Minion.addTestLocation }}
+    grpc.host: ingress-nginx-controller
+    grpc.port: {{ .Values.Port }}
+    grpc.tls.enabled: true
+    grpc.client.truststore: /run/secrets/certificates/tls.crt
+    grpc.client.keystore: /opt/karaf/certs/minion.p12
+    grpc.client.keystore.password: changeme
+    grpc.override.authority: minion.{{ .Values.Host }}
+    {{- end }}
     {{- range $Key, $Value := .Values.OpenNMS.Minion.GrpcConfig }}
     {{ $Key }}={{ $Value }}
     {{- end }}

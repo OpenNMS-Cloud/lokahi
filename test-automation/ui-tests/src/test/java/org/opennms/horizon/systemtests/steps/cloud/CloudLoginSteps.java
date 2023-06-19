@@ -28,13 +28,8 @@
 
 package org.opennms.horizon.systemtests.steps.cloud;
 
-import com.codeborne.selenide.Selenide;
 import io.cucumber.java.en.Then;
-import org.junit.Assert;
-import org.opennms.horizon.systemtests.CucumberHooks;
-import org.opennms.horizon.systemtests.keyvalue.SecretsStorage;
 import org.opennms.horizon.systemtests.pages.cloud.CloudLoginPage;
-import org.opennms.horizon.systemtests.utils.TestDataStorage;
 
 public class CloudLoginSteps {
 
@@ -45,18 +40,12 @@ public class CloudLoginSteps {
 
     @Then("set email address as {string}")
     public void setEmail(String email) {
-        String userEmail = TestDataStorage.mapUserToEmail(email);
-        CloudLoginPage.setUsername(userEmail);
-    }
-
-    @Then("click on 'Next' button")
-    public void clickNextBtn() {
-        CloudLoginPage.clickNextBtn();
+        CloudLoginPage.setUsername(email);
     }
 
     @Then("set password")
     public void setPassword() {
-        CloudLoginPage.setPassword(SecretsStorage.userPassword);
+        CloudLoginPage.setPassword("admin"); // TODO
     }
 
     @Then("click on 'Sign in' button")
@@ -67,19 +56,7 @@ public class CloudLoginSteps {
     @Then("login to Cloud instance as {string} user")
     public void loginAsUser(String user) {
         setEmail(user);
-        clickNextBtn();
         setPassword();
         clickSignIn();
     }
-
-    @Then("verify the instance url for {string} instance")
-    public void checkInstanceUrl(String instanceName) {
-        String expectedUrl = CucumberHooks.portalApi.searchCloudInstancesByName(instanceName).pagedRecords.get(0).url;
-        String actualUrl = Selenide.webdriver().driver().url();
-
-        Assert.assertTrue(
-            String.format("Expected url:\n%s\nactual url\n%s", expectedUrl, actualUrl),
-            actualUrl.replace("https://", "").startsWith(expectedUrl));
-    }
 }
-

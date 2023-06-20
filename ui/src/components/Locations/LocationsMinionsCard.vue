@@ -6,7 +6,7 @@
           class="name"
           data-test="header-name"
         >
-          {{ minion.location.location }}
+          {{ minion.label }}
         </div>
         <div
           class="latency"

@@ -1,7 +1,7 @@
 const isDark = useDark({
   selector: 'body',
   attribute: 'class',
-  valueDark: 'open-dark',
+  valueDark: 'open-light', // forces light for EAR, may remove after FMA+
   valueLight: 'open-light',
   storageKey: 'theme'
 })

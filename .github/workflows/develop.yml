@@ -257,14 +257,6 @@ jobs:
     environment: docker-publish-account
     # Environment that contains the required secrets.
     steps:
-      - name: init
-        id: tag-creation
-        run: |
-
-          TAG=bleeding
-          echo "Tag: $TAG."
-          echo "RELEASE_TAG=$TAG" >> $GITHUB_ENV
-
       - name: Check out repository code
         uses: actions/checkout@v3
         # Is required to call actions.
@@ -313,6 +305,8 @@ jobs:
 
 
       - name: Build & Push Images
+        working-directory: minion
+        shell: bash
         run: |
 
           ls -1
@@ -325,13 +319,10 @@ jobs:
 
           # Not sure how to push this without build for multi-arch.
           docker buildx build --push \
-            --tag opennms/lokahi-minion:${{ env.RELEASE_TAG }} \
+            --tag opennms/lokahi-minion:bleeding \
             docker-assembly/target/docker/opennms/lokahi-minion/latest/build/ \
             -f docker-assembly/src/main/docker/app/Dockerfile \
             --platform linux/amd64,linux/arm64,linux/arm/v7
-
-        working-directory: minion
-        shell: bash
       
   update:
     name: Update

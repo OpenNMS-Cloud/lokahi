@@ -35,6 +35,7 @@ import org.mockito.Mockito;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.security.cert.CertificateException;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -53,7 +54,7 @@ public class PKCS12GeneratorTest {
     }
 
     @Test
-    void testGenerateP12() throws IOException, InterruptedException {
+    void testGenerateP12() throws IOException, InterruptedException, CertificateException {
         //
         // Setup Test Data and Interactions
         //

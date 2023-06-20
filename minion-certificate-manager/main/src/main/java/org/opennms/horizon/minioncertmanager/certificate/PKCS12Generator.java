@@ -28,16 +28,21 @@
 
 package org.opennms.horizon.minioncertmanager.certificate;
 
-import java.util.Map;
-
+import com.google.common.annotations.VisibleForTesting;
 import lombok.Setter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.FileSystems;
 import java.nio.file.Path;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
+import java.util.Map;
 
 public class PKCS12Generator {
     public static final String UNSIGNED_CERT_COMMAND = "openssl req -new -key client.key -out client.unsigned.cert -subj \"/C=CA/ST=DoNotUseInProduction/L=DoNotUseInProduction/O=OpenNMS/CN=opennms-minion-ssl-gateway/OU=L:%s/OU=T:%s\"";
@@ -48,7 +53,11 @@ public class PKCS12Generator {
     @Setter  // Testability
     private CommandExecutor commandExecutor = new CommandExecutor();
 
-    public void generate(Long locationId, String tenantId, Path outputDirectoryPath, File archive, String archivePass, File caCertFile, File caKeyFile) throws InterruptedException, IOException {
+    /**
+     * generate self-signed certificate and return certificate serial number
+     */
+
+    public X509Certificate generate(Long locationId, String tenantId, Path outputDirectoryPath, File archive, String archivePass, File caCertFile, File caKeyFile) throws InterruptedException, IOException, CertificateException {
         // Check if caCertFile exists
         if (!caCertFile.exists()) {
             throw new FileNotFoundException("CA certificate file not found: " + caCertFile.getPath());
@@ -80,5 +89,12 @@ public class PKCS12Generator {
             Map.of("PASS_VAR", archivePass), archive.getAbsolutePath(), "PASS_VAR");
 
         LOG.info("=== DONE");
+        return getX509Certificate(file.getAbsolutePath() + FileSystems.getDefault().getSeparator() + "client.signed.cert");
+    }
+
+    private X509Certificate getX509Certificate(String certificatePath) throws CertificateException, FileNotFoundException {
+        CertificateFactory fac = CertificateFactory.getInstance("X509");
+        FileInputStream is = new FileInputStream(certificatePath);
+        return (X509Certificate) fac.generateCertificate(is);
     }
 }

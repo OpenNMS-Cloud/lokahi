@@ -33,8 +33,8 @@ import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import org.opennms.horizon.minioncertmanager.MinionCertificateManagerGrpcClientUtils;
 import org.opennms.horizon.minioncertmanager.RetryUtils;
-import org.opennms.horizon.minioncertmanager.proto.GetMinionCertificateRequest;
 import org.opennms.horizon.minioncertmanager.proto.GetMinionCertificateResponse;
+import org.opennms.horizon.minioncertmanager.proto.MinionCertificateRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,7 +54,7 @@ public class MinionCertificateManagerTestSteps {
     private final RetryUtils retryUtils;
     private final MinionCertificateManagerGrpcClientUtils clientUtils;
 
-    private GetMinionCertificateRequest getMinionCertificateRequest;
+    private MinionCertificateRequest minionCertificateRequest;
     private GetMinionCertificateResponse getMinionCertificateResponse;
 
     //========================================
@@ -85,7 +85,7 @@ public class MinionCertificateManagerTestSteps {
 
     @Given("New Get Minion Certificate with tenantId {string} for location id {long}")
     public void newActiveDiscoveryWithIpAddressesAndSNMPCommunityAsAtLocation(String tenantId, long locationId) {
-        getMinionCertificateRequest = GetMinionCertificateRequest.newBuilder()
+        minionCertificateRequest = MinionCertificateRequest.newBuilder()
             .setTenantId(tenantId)
             .setLocationId(locationId)
             .build();
@@ -95,7 +95,7 @@ public class MinionCertificateManagerTestSteps {
     public void sendRequest(long timeout) throws InterruptedException {
         Supplier<MessageOrBuilder> call = () -> {
             getMinionCertificateResponse = clientUtils.getMinionCertificateManagerStub()
-                .getMinionCert(getMinionCertificateRequest);
+                .getMinionCert(minionCertificateRequest);
             return getMinionCertificateResponse;
         };
         boolean success = retryUtils.retry(

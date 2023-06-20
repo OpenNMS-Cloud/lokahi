@@ -252,7 +252,7 @@ jobs:
     # This requires a separate step in order to publish multi-arch images. We
     # tried to get this working through Maven, but was not able to get it
     # working.
-    needs: [build-all]
+    needs: [test-automation]
     runs-on: ubuntu-latest
     environment: docker-publish-account
     # Environment that contains the required secrets.

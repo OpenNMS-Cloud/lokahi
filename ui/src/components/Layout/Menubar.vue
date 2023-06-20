@@ -2,8 +2,9 @@
   <FeatherAppBar :labels="{ skip: 'main' }" content="app" v-if="keycloak?.authenticated">
     <template v-slot:right>
       <div class="right-container">
+        <!-- All these are hidden for EAR -->
         <!-- <OptInOutCtrl /> -->
-        <FeatherIcon
+        <!-- <FeatherIcon
           :icon="LightDarkMode"
           class="pointer menu-icon"
           @click="toggleDark()"
@@ -13,7 +14,7 @@
           :icon="LogOut"
           class="pointer menu-icon"
           @click="logout()"
-        />
+        /> -->
       </div>
     </template>
   </FeatherAppBar>

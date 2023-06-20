@@ -28,18 +28,11 @@
 
 package org.opennms.horizon.systemtests;
 
-import com.codeborne.selenide.Configuration;
 import com.codeborne.selenide.Selenide;
 import io.cucumber.java.After;
 import io.cucumber.java.AfterAll;
 import io.cucumber.java.Before;
-import org.opennms.horizon.systemtests.api.portal.PortalApi;
-import org.opennms.horizon.systemtests.keyvalue.SecretsStorage;
 import org.opennms.horizon.systemtests.pages.cloud.CloudLoginPage;
-import org.opennms.horizon.systemtests.pages.portal.AddNewInstancePopup;
-import org.opennms.horizon.systemtests.pages.portal.EditInstancePage;
-import org.opennms.horizon.systemtests.pages.portal.PortalCloudPage;
-import org.opennms.horizon.systemtests.pages.portal.PortalLoginPage;
 import org.testcontainers.containers.GenericContainer;
 import testcontainers.MinionContainer;
 
@@ -50,11 +43,13 @@ import java.util.stream.Stream;
 
 public class CucumberHooks {
     public static final List<MinionContainer> MINIONS = new ArrayList<>();
-    public static final List<String> INSTANCES = new ArrayList<>();
     public static String instanceUrl;
     public static String gatewayHost;
-    public static PortalApi portalApi = new PortalApi();
     private static final String MINION_PREFIX = "Default_Minion-";
+    private static final String LOCAL_INSTANCE_URL_DEFAULT = "https://onmshs.local:1443";
+    private static final String LOCAL_MINION_GATEWAY_HOST_DEFAULT = "minion.onmshs.local";
+    private static final String ADMIN_DEFAULT_USERNAME = "admin";
+    private static final String ADMIN_DEFAULT_PASSWORD = "admin";
 
     @Before("@cloud")
     public static void setUp() {
@@ -62,30 +57,10 @@ public class CucumberHooks {
             return;
         }
 
-        Selenide.open(SecretsStorage.portalHost);
-        PortalLoginPage.closeCookieHeader();
-        PortalLoginPage.setUsername(SecretsStorage.adminUserEmail);
-        PortalLoginPage.clickNext();
-        PortalLoginPage.setPassword(SecretsStorage.userPassword);
-        PortalLoginPage.clickSignIn();
-
-        PortalCloudPage.verifyMainPageHeader();
-
         long timeCode = Instant.now().toEpochMilli();
 
-        String instanceName = "Cloud-env" + timeCode;
-        PortalCloudPage.clickAddInstance();
-        AddNewInstancePopup.setInstanceName(instanceName);
-        AddNewInstancePopup.clickSubmitBtn();
-
-        PortalCloudPage.mainPageIsNotCoveredByPopups();
-        PortalCloudPage.setFilter(instanceName);
-        PortalCloudPage.clickDetailsForFirstInstance();
-        String instanceUrl = EditInstancePage.getInstanceUrl();
-        CucumberHooks.instanceUrl = instanceUrl;
-        CucumberHooks.gatewayHost = instanceUrl
-            .replace("https://", "")
-            .replace("tnnt", "minion");
+        instanceUrl = LOCAL_INSTANCE_URL_DEFAULT;
+        gatewayHost = LOCAL_MINION_GATEWAY_HOST_DEFAULT;
 
         MinionContainer minionContainer = new MinionContainer(
             gatewayHost,
@@ -96,11 +71,10 @@ public class CucumberHooks {
         minionContainer.start();
         MINIONS.add(minionContainer);
 
-        EditInstancePage.clickOnInstanceUrl();
-
-        CloudLoginPage.setUsername(SecretsStorage.adminUserEmail);
-        CloudLoginPage.clickNextBtn();
-        CloudLoginPage.setPassword(SecretsStorage.userPassword);
+        Selenide.open(instanceUrl);
+        CloudLoginPage.checkPageTitle();
+        CloudLoginPage.setUsername(ADMIN_DEFAULT_USERNAME);
+        CloudLoginPage.setPassword(ADMIN_DEFAULT_PASSWORD);
         CloudLoginPage.clickSignInBtn();
     }
 
@@ -120,58 +94,10 @@ public class CucumberHooks {
         }
     }
 
-    @Before("@portal")
-    public static void loginToPortal() {
-        portalApi.deleteAllCloudInstances();
-        if (Selenide.webdriver().driver().hasWebDriverStarted()) {
-            return;
-        }
-        Configuration.baseUrl = SecretsStorage.portalHost;
-        Selenide.open(SecretsStorage.portalHost);
-        PortalLoginPage.closeCookieHeader();
-        PortalLoginPage.setUsername(SecretsStorage.adminUserEmail);
-        PortalLoginPage.clickNext();
-        PortalLoginPage.setPassword(SecretsStorage.userPassword);
-        PortalLoginPage.clickSignIn();
-
-        PortalCloudPage.verifyMainPageHeader();
-    }
-
-    @After("@portal")
-    public static void returnToPortalMainPage() {
-        Selenide.open(SecretsStorage.portalHost + "/cloud");
-        PortalCloudPage.verifyMainPageHeader();
-        INSTANCES.clear();
-    }
-
-    @Before("@portal-member")
-    public static void loginToPortalAsMember() {
-        portalApi.deleteAllCloudInstances();
-        if (Selenide.webdriver().driver().hasWebDriverStarted()) {
-            return;
-        }
-        Configuration.baseUrl = SecretsStorage.portalHost;
-        Selenide.open(SecretsStorage.portalHost);
-        PortalLoginPage.closeCookieHeader();
-        PortalLoginPage.setUsername(SecretsStorage.memberUserEmail);
-        PortalLoginPage.clickNext();
-        PortalLoginPage.setPassword(SecretsStorage.userPassword);
-        PortalLoginPage.clickSignIn();
-
-        PortalCloudPage.verifyMainPageHeader();
-    }
-
-    @After("@portal-member")
-    public static void returnToThePortalMainPage() {
-        Selenide.open(SecretsStorage.portalHost + "/cloud");
-        PortalCloudPage.verifyMainPageHeader();
-    }
-
     @AfterAll
     public static void tearDown() {
         if (!MINIONS.isEmpty()) {
             MINIONS.get(0).stop();
         }
-        portalApi.deleteAllCloudInstances();
     }
 }

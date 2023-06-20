@@ -255,6 +255,7 @@ jobs:
     needs: [test-automation]
     runs-on: ubuntu-latest
     environment: docker-publish-account
+    if: github.ref == 'refs/heads/develop'
     # Environment that contains the required secrets.
     steps:
       - name: Check out repository code

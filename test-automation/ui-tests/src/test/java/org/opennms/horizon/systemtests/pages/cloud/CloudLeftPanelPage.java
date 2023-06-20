@@ -34,15 +34,10 @@ import com.codeborne.selenide.SelenideElement;
 import static com.codeborne.selenide.Selenide.$;
 
 public class CloudLeftPanelPage {
-    private static final SelenideElement applianceLnk = $("[href='/appliances']");
     private static final SelenideElement leftPanel = $(".app-aside");
 
     public static void verifyLeftPanelIsDisplayed() {
         leftPanel.shouldBe(Condition.visible);
-    }
-
-    public static void clickOnApplianceSection() {
-        applianceLnk.shouldBe(Condition.enabled).click();
     }
 
     public static void clickOnPanelSection(String section) {

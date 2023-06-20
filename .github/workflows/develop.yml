@@ -248,7 +248,7 @@ jobs:
 
             echo ${{ github.ref  }}
 
-  minion:
+  minion-bleeding-deploy:
     # This requires a separate step in order to publish multi-arch images. We
     # tried to get this working through Maven, but was not able to get it
     # working.

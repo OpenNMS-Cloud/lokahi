@@ -4,7 +4,7 @@ import io.grpc.ManagedChannel;
 import io.grpc.Metadata;
 import io.grpc.stub.MetadataUtils;
 import lombok.RequiredArgsConstructor;
-import org.opennms.horizon.minioncertmanager.proto.GetMinionCertificateRequest;
+import org.opennms.horizon.minioncertmanager.proto.MinionCertificateRequest;
 import org.opennms.horizon.minioncertmanager.proto.GetMinionCertificateResponse;
 import org.opennms.horizon.minioncertmanager.proto.MinionCertificateManagerGrpc;
 import org.opennms.horizon.shared.constants.GrpcConstants;
@@ -34,7 +34,7 @@ public class MinionCertificateManagerClient {
     }
 
     public GetMinionCertificateResponse getMinionCert(String tenantId, Long locationId, String accessToken) {
-        GetMinionCertificateRequest request = GetMinionCertificateRequest.newBuilder()
+        MinionCertificateRequest request = MinionCertificateRequest.newBuilder()
             .setTenantId(tenantId)
             .setLocationId(locationId)
             .build();

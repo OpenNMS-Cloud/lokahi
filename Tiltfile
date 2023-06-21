@@ -270,6 +270,7 @@ jib_project(
     'notifications',
     'opennms-notifications',
     port_forwards=['15065:6565', '15050:5005'],
+    resource_deps=['shared-lib'],
 )
 
 ### Vue.js App ###
@@ -299,6 +300,7 @@ jib_project(
     'opennms-rest-server',
     labels=['vuejs-app'],
     port_forwards=['13080:9090', '13050:5005'],
+    resource_deps=['shared-lib'],
 )
 
 ### Inventory ###
@@ -308,6 +310,7 @@ jib_project_multi_module(
     'inventory',
     'opennms-inventory',
     port_forwards=['29080:8080', '29050:5005', '29065:6565'],
+    resource_deps=['shared-lib'],
 )
 
 ### Alert ###
@@ -317,6 +320,7 @@ jib_project(
     'alert',
     'opennms-alert',
     port_forwards=['32080:9090', '32050:5005', '32065:6565',  '32000:8080'],
+    resource_deps=['shared-lib'],
 )
 
 ### Metrics Processor ###
@@ -326,6 +330,7 @@ jib_project_multi_module(
     'metrics-processor',
     'opennms-metrics-processor',
     port_forwards=['28080:8080', '28050:5005'],
+    resource_deps=['shared-lib'],
 )
 
 ### Events ###
@@ -335,6 +340,7 @@ jib_project_multi_module(
     'events',
     'opennms-events',
     port_forwards=['30050:5005', '30080:8080', '30065:6565'],
+    resource_deps=['shared-lib'],
 )
 
 ### Minion Gateway ###
@@ -344,6 +350,7 @@ jib_project_multi_module(
     'minion-gateway',
     'opennms-minion-gateway',
     port_forwards=['16080:9090', '16050:5005'],
+    resource_deps=['shared-lib'],
 )
 
 ### DataChoices ###
@@ -353,6 +360,7 @@ jib_project(
     'datachoices',
     'opennms-datachoices',
     port_forwards=['33080:9090', '33050:5005', '33065:6565'],
+    resource_deps=['shared-lib'],
 )
 
 ### Minion ###
@@ -369,6 +377,7 @@ k8s_resource(
     port_forwards=['12022:8101', '12080:8181', '12050:5005'],
     labels=['minion'],
     trigger_mode=TRIGGER_MODE_MANUAL,
+    resource_deps=['shared-lib'],
 )
 
 ### Minion Certificate Manager ###

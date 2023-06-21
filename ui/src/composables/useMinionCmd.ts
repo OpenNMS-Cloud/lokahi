@@ -18,8 +18,7 @@ const useMinionCmd = () => {
   const minionDockerCmd = computed<string>(() =>
     [
       `docker run --rm`,
-      `-p 162:162/udp`,
-      `-p 1162:1162/udp`,
+      `-p 162:1162/udp`,
       `-p 9999:9999/udp`,
       `-e TZ='America/New_York'`,
       `-e USE_KUBERNETES="false"`,

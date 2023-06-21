@@ -26,41 +26,19 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
+package org.opennms.horizon.systemtests;
 
-package org.opennms.horizon.systemtests.pages.portal;
+import io.cucumber.junit.Cucumber;
+import io.cucumber.junit.CucumberOptions;
+import org.junit.runner.RunWith;
 
-import com.codeborne.selenide.Condition;
-import com.codeborne.selenide.SelenideElement;
-
-import static com.codeborne.selenide.Selenide.$;
-
-public class PortalLoginPage {
-
-    private static final SelenideElement acceptBtn = $("#cookie-header-accept");
-    private static final SelenideElement usernameInp = $("#idp-discovery-username");
-    private static final SelenideElement passwordInp = $("#okta-signin-password");
-    private static final SelenideElement nextBtn = $("#idp-discovery-submit");
-    private static final SelenideElement signInBtn = $("#okta-signin-submit");
-
-    public static void closeCookieHeader() {
-        acceptBtn.shouldBe(Condition.enabled).click();
-    }
-
-    public static void setUsername(String username) {
-        usernameInp.shouldBe(Condition.enabled).setValue(username);
-    }
-
-    public static void setPassword(String password) {
-        passwordInp.shouldBe(Condition.enabled).setValue(password);
-    }
-
-    public static void clickNext() {
-        nextBtn.shouldBe(Condition.enabled).click();
-    }
-
-    public static void clickSignIn() {
-        signInBtn.shouldBe(Condition.enabled).click();
-    }
-
-
+@RunWith(Cucumber.class)
+@CucumberOptions(
+    features = {"src/test/resources/cloud-features"},
+    plugin = {"pretty",
+        "json:cucumber.reports/cucumber-report.json",
+        "html:cucumber.reports/cucumber-report.html"},
+    tags = "@cloud and not @ignore"
+)
+public class UiCucumberRunnerTest {
 }

@@ -34,11 +34,6 @@ import org.opennms.horizon.systemtests.pages.cloud.CloudLeftPanelPage;
 
 public class CloudLeftPanelSteps {
 
-    @Then("Navigate to the 'Appliances' through the left panel")
-    public void clickOnAppliancesSection() {
-        CloudLeftPanelPage.clickOnApplianceSection();
-    }
-
     @Then("Navigate to the {string} through the left panel")
     public void clickOnLeftPanelSection(String section) {
         CloudLeftPanelPage.clickOnPanelSection(section);

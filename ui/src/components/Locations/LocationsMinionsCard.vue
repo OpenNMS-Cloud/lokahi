@@ -6,7 +6,7 @@
           class="name"
           data-test="header-name"
         >
-          {{ minion.location.location }}
+          {{ minion.label }}
         </div>
         <div
           class="latency"
@@ -66,7 +66,7 @@
         </div>
       </div>
     </div>
-    <HoverMenu
+    <MoreOptionsMenu
       :items="contextMenuItems"
       data-test="context-menu"
     />
@@ -76,8 +76,12 @@
 <script setup lang="ts">
 import { Severity } from '@/types/graphql'
 import { useMinionMutations } from '@/store/Mutations/minionMutations'
+import { useLocationStore } from '@/store/Views/locationStore'
+import { useMinionsQueries } from '@/store/Queries/minionsQueries'
 
 const minionMutations = useMinionMutations()
+const locationStore = useLocationStore()
+const minionsQueries = useMinionsQueries()
 
 const props = defineProps({
   item: {
@@ -118,7 +122,16 @@ const minion = computed(() => {
   return props.item
 })
 
-const contextMenuItems = [{ label: 'Delete', handler: () => minionMutations.deleteMinion({ id: props.item.id }) }]
+const contextMenuItems = [
+  {
+    label: 'Delete',
+    handler: async () => {
+      await minionMutations.deleteMinion({ id: props.item.systemId })
+      await minionsQueries.refreshMinionsById()
+      locationStore.fetchLocations() // location may be gone if last minion deleted
+    }
+  }
+]
 
 type Pill = {
   style: string

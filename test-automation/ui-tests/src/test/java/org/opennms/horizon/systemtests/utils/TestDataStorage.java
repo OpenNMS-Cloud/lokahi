@@ -28,19 +28,9 @@
 
 package org.opennms.horizon.systemtests.utils;
 
-import org.opennms.horizon.systemtests.keyvalue.SecretsStorage;
-
 import static org.opennms.horizon.systemtests.CucumberHooks.MINIONS;
 
 public class TestDataStorage {
-    public static String mapUserToEmail(String email) {
-        return switch (email) {
-            case "ADMIN" -> SecretsStorage.adminUserEmail;
-            case "MEMBER" -> SecretsStorage.memberUserEmail;
-            case "OKTA_USER" -> SecretsStorage.oktaUserEmail;
-            default -> email;
-        };
-    }
 
     /**
      * Gets the name of the minion as it appears in Minion table as label

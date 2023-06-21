@@ -3,13 +3,13 @@
 ##
 ## RELEASE IMAGE
 ##
-#FROM opennms/deploy-base:jre-1.3.0.b138
-FROM eclipse-temurin:17
+
+ARG BASE_IMAGE="eclipse-temurin:17"
+#ARG BASE_IMAGE="opennms/deploy-base:jre-1.3.0.b138"
+
+FROM ${BASE_IMAGE} as tarball
 
 RUN mkdir -p /opt
-
-RUN groupadd --gid 10001 minion-poc && \
-    useradd --system --uid 10001 --gid minion-poc minion-poc --home-dir /opt/karaf
 
 ADD --chown=10001:0 work/karaf/ /opt/karaf/
 
@@ -27,7 +27,17 @@ RUN sed -i 's/^karaf.clean.cache *=.*/karaf.clean.cache = true/' /opt/karaf/etc/
 #    echo "_g_\\:admingroup = group,admin,manager,viewer,systembundles,ssh" >> /opt/karaf/etc/keys.properties
 
 # Allow users in the root group to access them with the same authorization as the directory and file owner
+# This will double the size of the our code layer because we have two copies of the karaf files -- before and after the chmod.
+# To avoid this, we create a 'tarball' image, do the chmod in there, and then use that to create the final image.
 RUN chmod -R g=u /opt/karaf/
+
+FROM ${BASE_IMAGE}
+
+RUN groupadd --gid 10001 minion && \
+    useradd --system --uid 10001 --gid minion minion --home-dir /opt/karaf
+
+RUN mkdir -p /opt
+COPY --chown=10001:0 --from=tarball /opt/karaf /opt/karaf
 
 # Arguments for labels should not invalidate caches
 ARG BUILD_DATE="1970-01-01T00:00:00+0000"

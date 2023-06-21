@@ -1,28 +1,32 @@
 <template>
   <div
-    class="locations-card-wrapper"
+    class="locations-card"
     :class="{ selected: selectedCard }"
-    @click="getMinionsForLocationId(location.id)"
   >
-    <div class="name">
-      <ButtonTextIcon
-        :item="nameBtn"
-        data-test="name"
+    <div
+      class="locations-card-items"
+      @click="getMinionsForLocationId(location.id)"
+    >
+      <div class="name">
+        <ButtonTextIcon
+          :item="nameBtn"
+          data-test="name"
+        />
+      </div>
+      <PillColor
+        :item="statusPill"
+        class="status"
+        data-test="status"
       />
-    </div>
-    <PillColor
-      :item="statusPill"
-      class="status"
-      data-test="status"
-    />
-    <div class="expiry">
-      <FeatherIcon
-        :icon="icons.cert"
-        data-test="icon-expiry"
-      />
+      <div class="expiry">
+        <FeatherIcon
+          :icon="icons.cert"
+          data-test="icon-expiry"
+        />
+      </div>
     </div>
     <div class="context-menu">
-      <HoverMenu
+      <MoreOptionsMenu
         :items="contextMenuItems"
         data-test="context-menu"
       />
@@ -88,7 +92,12 @@ onUnmounted(() => pauseMinionPoll())
 <style lang="scss" scoped>
 @use '@featherds/styles/themes/variables';
 
-.locations-card-wrapper {
+.locations-card {
+  display: flex;
+}
+
+.locations-card-items {
+  width: 100%;
   display: flex;
   align-items: center;
   gap: var(variables.$spacing-s);

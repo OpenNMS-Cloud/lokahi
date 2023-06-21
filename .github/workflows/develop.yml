@@ -248,6 +248,83 @@ jobs:
 
             echo ${{ github.ref  }}
 
+  minion-bleeding-deploy:
+    if: github.ref == 'refs/heads/develop'
+    # This requires a separate step in order to publish multi-arch images. We
+    # tried to get this working through Maven, but was not able to get it
+    # working.
+    needs: [test-automation]
+    runs-on: ubuntu-latest
+    environment: docker-publish-account
+    # Environment that contains the required secrets.
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3
+        # Is required to call actions.
+
+      - name: Log in to the Container registry
+        # Need to pull images from github container registry first.
+        # Need to pull base images eventually.
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Log in to Dockerhub
+        # Need to log into Dockerhub to push images.
+        uses: docker/login-action@v2
+        with:
+          registry: docker.io
+          username: ${{ secrets.DOCKERHUB_LOGIN }}
+          password: ${{ secrets.DOCKERHUB_PASS }}
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Cache SonarCloud packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-${{ runner.arch }}-sonar
+
+      - name: Set up Maven
+        uses: stCarolas/setup-maven@v4.5
+        with:
+          maven-version: 3.8.2
+
+      - name: Cache Maven dependencies
+        uses: ./.github/actions/maven-cache
+        with:
+          cache-key-hash: ${{ hashFiles('minion/**/pom.xml', 'parent-pom/pom.xml', 'shared-lib/**/pom.xml') }}
+
+      - name: Build and install prerequisites
+        uses: ./.github/actions/java-install-prereqs
+
+
+      - name: Build & Push Images
+        working-directory: minion
+        shell: bash
+        run: |
+
+          ls -1
+
+          mvn clean install
+
+          ls -1R docker-assembly/
+
+          docker buildx create --use --driver docker-container --name maven
+
+          # Not sure how to push this without build for multi-arch.
+          docker buildx build --push \
+            --tag opennms/lokahi-minion:bleeding \
+            docker-assembly/target/docker/opennms/lokahi-minion/latest/build/ \
+            -f docker-assembly/src/main/docker/app/Dockerfile \
+            --platform linux/amd64,linux/arm64,linux/arm/v7
+      
   update:
     name: Update
 

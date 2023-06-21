@@ -45,11 +45,24 @@ spec:
             name: minion-config
         - name: maven-volume
           emptyDir: {}
+        {{- if .Values.OpenNMS.Minion.addTestLocation }}
+        - name: scripts
+          configMap:
+            name: minion-scripts
+        - name: certificate-secrets
+          secret:
+            secretName: root-ca-certificate
+        - name: minion-certificate-manager-secrets
+          secret:
+            secretName: client-root-ca-certificate
+        - name: certificate
+          emptyDir: {}
+        {{- end }}
         {{- if .Values.OpenNMS.Minion.ExtraVolumes }}
           {{ toYaml .Values.OpenNMS.Minion.ExtraVolumes | nindent 8 }}
         {{- end }}
-      {{ if not .Values.OpenShift }}
       initContainers:
+        {{ if not .Values.OpenShift }}
         - name: init-sysctl
           image: busybox
           command:
@@ -58,10 +71,38 @@ spec:
             - net.ipv4.ping_group_range=0 429496729
           securityContext:
             privileged: true
+        {{ end }}
+        {{- if .Values.OpenNMS.Minion.addTestLocation }}
+        # This container is a development time helper which generates client certificate, key and signs it with
+        # `Client CA` certificate which is running in cluster. It's a bit hacky, since it pulls CA private key
+        # into minion. Please do not use this in production.
+        # Remarks - working directory for this container is /cert which is emptyDir. This empty dir is later mounted
+        # into minion container itself under /opt/karaf/certs/.
+        - image: opennms/deploy-base:ubuntu-3.0.1.b223-jre-11
+          imagePullPolicy: "IfNotPresent"
+          name: cert-generator
+          command:
+            - bash
+            - /scripts/init-create-test-location.sh
+          env:
+            - name: INGRESS_HOST_PORT
+              value: "{{ .Values.Host }}:{{ .Values.Port }}"
+          securityContext:
+            privileged: false
+            runAsUser: 10001
+            runAsGroup: 10001
+            fsGroup: 10001
+          volumeMounts:
+            - name: certificate
+              mountPath: "/cert"
+            - name: minion-certificate-manager-secrets
+              mountPath: "/run/secrets/mtls"
+            - name: scripts
+              mountPath: /scripts
+        {{- end }}
         {{- if .Values.OpenNMS.Minion.ExtraInitContainers }}
           {{ toYaml .Values.OpenNMS.Minion.ExtraInitContainers | nindent 8 }}
         {{- end }}
-      {{ end }}
       containers:
         - name: {{ .Values.OpenNMS.Minion.ServiceName }}
           image: {{ .Values.OpenNMS.Minion.Image }}
@@ -102,6 +143,16 @@ spec:
               subPath: "opennms-minion-identity"
             - name: maven-volume
               mountPath: /.m2
+            {{- if .Values.OpenNMS.Minion.addTestLocation }}
+            - name: certificate-secrets
+              mountPath: "/run/secrets/certificates"
+              readOnly: true
+            - name: minion-certificate-manager-secrets
+              mountPath: "/run/secrets/mtls"
+              readOnly: true
+            - name: certificate
+              mountPath: "/opt/karaf/certs/"
+            {{- end }}
             {{- if .Values.OpenNMS.Minion.ExtraMounts }}
               {{ toYaml .Values.OpenNMS.Minion.ExtraMounts | nindent 12 }}
             {{- end }}

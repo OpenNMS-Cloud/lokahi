@@ -59,10 +59,11 @@ cmd_button(name='reload-helm',
            location=location.NAV,
            icon_name='system_update_alt')
 
+# Give ourselves more time
+update_settings(k8s_upsert_timeout_secs=60)
 if os.getenv("CI"):
-    # Be a little bit more reserved and give ourselves more time in CI
-    update_settings(max_parallel_updates=2,
-                    k8s_upsert_timeout_secs=60)
+    # Be a little bit more aggressive in CI
+    update_settings(max_parallel_updates=4)
 
 # Functions #
 cluster_arch_cmd = '$(tilt get cluster default -o=jsonpath --template="{.status.arch}")'
@@ -203,18 +204,34 @@ k8s_resource(
 )
 
 # Deployment #
-helm_remote('cert-manager', version='1.11.0', repo_url='https://charts.jetstack.io', set = [
-    'installCRDs=true'
-])
+helm_repo('jetstack', 'https://charts.jetstack.io', labels=['z_dependencies'])
+helm_resource('cert-manager', 'jetstack/cert-manager',
+	flags=[
+		'--version=1.11.0',
+		'--set', 'installCRDs=true',
+		'--set', 'cainjector.extraArgs={--leader-elect=false}',
+	],
+	resource_deps=[
+		'jetstack',
+	],
+)
+k8s_resource(
+    'cert-manager',
+    labels=['z_dependencies'],
+)
 
 # https://github.com/kubernetes/ingress-nginx/tree/main/charts/ingress-nginx
-helm_repo('ingress-nginx-repo', 'https://kubernetes.github.io/ingress-nginx')
+helm_repo('ingress-nginx-repo', 'https://kubernetes.github.io/ingress-nginx' , labels=['z_dependencies'])
 helm_resource('ingress-nginx', 'ingress-nginx-repo/ingress-nginx',
 	flags=[
 		'--version=4.7.0',
 		'--values=tilt-ingress-nginx-values.yaml',
 	],
 	deps=["Tiltfile", "tilt-ingress-nginx-values.yaml"],
+	resource_deps=[
+		'cert-manager',
+		'ingress-nginx-repo',
+	],
 )
 
 k8s_yaml(
@@ -253,6 +270,7 @@ jib_project(
     'notifications',
     'opennms-notifications',
     port_forwards=['15065:6565', '15050:5005'],
+    resource_deps=['shared-lib'],
 )
 
 ### Vue.js App ###
@@ -282,6 +300,7 @@ jib_project(
     'opennms-rest-server',
     labels=['vuejs-app'],
     port_forwards=['13080:9090', '13050:5005'],
+    resource_deps=['shared-lib'],
 )
 
 ### Inventory ###
@@ -291,6 +310,7 @@ jib_project_multi_module(
     'inventory',
     'opennms-inventory',
     port_forwards=['29080:8080', '29050:5005', '29065:6565'],
+    resource_deps=['shared-lib'],
 )
 
 ### Alert ###
@@ -300,6 +320,7 @@ jib_project(
     'alert',
     'opennms-alert',
     port_forwards=['32080:9090', '32050:5005', '32065:6565',  '32000:8080'],
+    resource_deps=['shared-lib'],
 )
 
 ### Metrics Processor ###
@@ -309,6 +330,7 @@ jib_project_multi_module(
     'metrics-processor',
     'opennms-metrics-processor',
     port_forwards=['28080:8080', '28050:5005'],
+    resource_deps=['shared-lib'],
 )
 
 ### Events ###
@@ -318,6 +340,7 @@ jib_project_multi_module(
     'events',
     'opennms-events',
     port_forwards=['30050:5005', '30080:8080', '30065:6565'],
+    resource_deps=['shared-lib'],
 )
 
 ### Minion Gateway ###
@@ -327,6 +350,7 @@ jib_project_multi_module(
     'minion-gateway',
     'opennms-minion-gateway',
     port_forwards=['16080:9090', '16050:5005'],
+    resource_deps=['shared-lib'],
 )
 
 ### DataChoices ###
@@ -336,6 +360,7 @@ jib_project(
     'datachoices',
     'opennms-datachoices',
     port_forwards=['33080:9090', '33050:5005', '33065:6565'],
+    resource_deps=['shared-lib'],
 )
 
 ### Minion ###
@@ -352,6 +377,7 @@ k8s_resource(
     port_forwards=['12022:8101', '12080:8181', '12050:5005'],
     labels=['minion'],
     trigger_mode=TRIGGER_MODE_MANUAL,
+    resource_deps=['shared-lib'],
 )
 
 ### Minion Certificate Manager ###
@@ -407,6 +433,7 @@ k8s_resource(
     'grafana',
     labels='z_dependencies',
     port_forwards=['18080:3000'],
+    resource_deps=['postgres'],
 )
 
 ### Cortex ###

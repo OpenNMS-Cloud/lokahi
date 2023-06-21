@@ -1,6 +1,9 @@
 (function checkTheme() {
   // get theme from localStorage
-  const localStorageTheme = window.localStorage.getItem('theme')
+  // const localStorageTheme = window.localStorage.getItem('theme')
+
+  // only light mode for EAR. May remove for FMA+
+  const localStorageTheme = 'light' 
 
   // default to dark if not set
   let isDark = localStorageTheme !== 'light'

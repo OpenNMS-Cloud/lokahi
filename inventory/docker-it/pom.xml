@@ -28,16 +28,12 @@
             <artifactId>inventory</artifactId>
             <version>${project.version}</version>
         </dependency>
-
+        
         <dependency>
-            <groupId>org.opennms.horizon.inventory</groupId>
-            <artifactId>minion-gateway-wiremock-api</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.opennms.horizon.inventory</groupId>
-            <artifactId>minion-gateway-wiremock-client</artifactId>
-            <version>${project.version}</version>
+            <groupId>org.awaitility</groupId>
+            <artifactId>awaitility</artifactId>
+            <version>4.2.0</version>
+            <scope>test</scope>
         </dependency>
 
         <dependency>

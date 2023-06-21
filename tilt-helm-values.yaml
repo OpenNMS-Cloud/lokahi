@@ -39,6 +39,7 @@ OpenNMS:
         Memory: '0'
     IngressAnnotations: {}
   Minion:
+    addTestLocation: true
     Resources:
       Limits:
         Cpu: '0'
@@ -46,115 +47,6 @@ OpenNMS:
       Requests:
         Cpu: '0'
         Memory: '0'
-    ExtraVolumes:
-      - name: certificate-secrets
-        secret:
-          secretName: root-ca-certificate
-      - name: minion-certificate-manager-secrets
-        secret:
-          secretName: client-root-ca-certificate
-      - name: certificate
-        emptyDir: {}
-    ExtraMounts:
-      - name: certificate-secrets
-        mountPath: "/run/secrets/certificates"
-        readOnly: true
-      - name: minion-certificate-manager-secrets
-        mountPath: "/run/secrets/mtls"
-        readOnly: true
-      - name: certificate
-        mountPath: "/opt/karaf/certs/"
-    ExtraInitContainers:
-      # This container is a development time helper which generates client certificate, key and signs it with
-      # `Client CA` certificate which is running in cluster. It's a bit hacky, since it pulls CA private key
-      # into minion. Please do not use this in production.
-      # Remarks - working directory for this container is /cert which is emptyDir. This empty dir is later mounted
-      # into minion container itself under /opt/karaf/certs/.
-      - image: opennms/deploy-base:ubuntu-3.0.1.b223-jre-11
-        imagePullPolicy: "IfNotPresent"
-        name: cert-generator
-        command:
-          - /bin/bash
-          - -c
-          - |
-            set -euo pipefail
-            trap 's=$?; echo >&2 "$0: Error on line "$LINENO": $BASH_COMMAND"; if [ -f /tmp/curl-headers.txt ]; then grep server-timing: /tmp/curl-headers.txt; fi; exit $s' ERR
-
-            url="https://onmshs.local:1443"
-            set -- --connect-to onmshs.local:1443:ingress-nginx-controller.default.svc.cluster.local:443
-
-            keycloak="${url}/auth/"
-            graphql="${url}/"
-
-            token=$(curl "$@" -sSf -k -X POST -H "Content-Type\\: application/x-www-form-urlencoded" \
-              --dump-header /tmp/curl-headers.txt \
-              -d 'username=admin' \
-              -d 'password=admin' \
-              -d 'grant_type=password' \
-              -d 'scope=openid' \
-              -d 'client_id=lokahi' \
-              "${keycloak}realms/opennms/protocol/openid-connect/token" | cut -d "\"" -f 4)
-
-            locationName="TestLocation"
-            query="{\"query\": \"query { searchLocation(searchTerm: \\\"LOC_NAME\\\") { id, location } }\"}"
-            query=${query/LOC_NAME/$locationName}
-            result=$(curl "$@" -sSf -k -H "Content-Type: application/json" \
-              --dump-header /tmp/curl-headers.txt \
-              -H "Authorization: Bearer $token" \
-              --data "${query}" \
-              "${graphql}api/graphql")
-
-            if grep -q '^{"errors":' <<< "$result"; then
-              echo "error getting location: $result" >&2
-              exit 1
-            fi
-
-            locationId=$(echo "$result" | cut -d ":" -f 4|cut -d , -f 1)
-
-            if [ -n "${locationId}" ]; then
-              echo "Found existing location ID ${locationId} for '${locationName}'"
-            else # if it doesn't exist, create it
-              query="{\"query\": \"mutation { createLocation(location: {location: \\\"LOC_NAME\\\"}) { id, location } }\"}"
-              query=${query/LOC_NAME/$locationName}
-              result=$(curl "$@" -sSf -k -H "Content-Type: application/json" \
-                --dump-header /tmp/curl-headers.txt \
-                -H "Authorization: Bearer $token" \
-                --data "${query}" \
-                "${graphql}api/graphql")
-
-              if grep -q '^{"errors":' <<< "$result"; then
-                echo "error getting location: $result" >&2
-                exit 1
-              fi
-
-              locationId=$(echo "$result" | cut -d ":" -f 4|cut -d , -f 1)
-              echo "Created new location ID ${locationId} for '${locationName}'"
-            fi
-
-            openssl genrsa -out /cert/client.key.pkcs1 2048
-            openssl pkcs8 -topk8 -in /cert/client.key.pkcs1 -out /cert/client.key -nocrypt
-            openssl req -new -key /cert/client.key -out /cert/client.unsigned.cert -subj "/C=CA/ST=TBD/L=TBD/O=OpenNMS/CN=local-minion/OU=L:${locationId}/OU=T:opennms-prime"
-            openssl x509 -req -in /cert/client.unsigned.cert -days 14 -CA /run/secrets/mtls/tls.crt -CAkey /run/secrets/mtls/tls.key -out /cert/client.signed.cert
-            openssl pkcs12 -export -out "/cert/minion.p12" -inkey /cert/client.key -in /cert/client.signed.cert -passout "pass:changeme"
-
-        securityContext:
-          privileged: false
-          runAsUser: 10001
-          runAsGroup: 10001
-          fsGroup: 10001
-        volumeMounts:
-          - name: certificate
-            mountPath: "/cert"
-          - name: minion-certificate-manager-secrets
-            mountPath: "/run/secrets/mtls"
-    GrpcConfig:
-      grpc.host: ingress-nginx-controller
-      grpc.port: 443
-      grpc.tls.enabled: true
-      grpc.client.truststore: /run/secrets/certificates/tls.crt
-      grpc.client.keystore: /opt/karaf/certs/minion.p12
-      grpc.client.keystore.password: changeme
-      grpc.override.authority: minion.onmshs.local
   MinionGateway:
     Resources:
       Limits:

@@ -41,6 +41,7 @@ kafka:
     internal-events: "internal-event"
     node: "node"
     tag-operation: "tag-operation"
+    task-set-publisher: "task-set-publisher"
 
 
 keycloak:

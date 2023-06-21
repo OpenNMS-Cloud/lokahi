@@ -1,0 +1,10 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: minion-scripts
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ .Values.OpenNMS.Minion.ServiceName }}
+data:
+  {{- (.Files.Glob "scripts/opennms/minion/**").AsConfig | nindent 2 }}

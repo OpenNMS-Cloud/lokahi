@@ -26,22 +26,19 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.systemtests.steps.cloud;
+package org.opennms.horizon.systemtests;
 
-import com.codeborne.selenide.Selenide;
-import io.cucumber.java.en.Then;
-import org.opennms.horizon.systemtests.pages.cloud.CloudLeftPanelPage;
+import io.cucumber.junit.Cucumber;
+import io.cucumber.junit.CucumberOptions;
+import org.junit.runner.RunWith;
 
-public class CloudLeftPanelSteps {
-
-    @Then("Navigate to the {string} through the left panel")
-    public void clickOnLeftPanelSection(String section) {
-        CloudLeftPanelPage.clickOnPanelSection(section);
-        Selenide.refresh();
-    }
-
-    @Then("user sees the navigation panel for instance")
-    public void verifyLeftPanel() {
-        CloudLeftPanelPage.verifyLeftPanelIsDisplayed();
-    }
+@RunWith(Cucumber.class)
+@CucumberOptions(
+    features = {"src/test/resources/cloud-features"},
+    plugin = {"pretty",
+        "json:cucumber.reports/cucumber-report.json",
+        "html:cucumber.reports/cucumber-report.html"},
+    tags = "@cloud and not @ignore"
+)
+public class UiCucumberRunnerTest {
 }

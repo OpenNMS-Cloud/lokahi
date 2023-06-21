@@ -1,18 +1,18 @@
-# Integration Tests
+# UI Tests
+
+## Prerequisites
+
+Need to have a Lokahi system running locally, with the following:
+- User: `admin`
+- Password: `admin`
+- URL: `https://onmshs.local:1443`
 
 ## Running
 
-### Locally
-Tests can be run locally via IntelliJ, but require access to Azure - specifically: permissions to read secrets from key vault 
-`automation-test-vault`. 
+For now, this test suite can be run locally via `mvn test`.
 
-### CI/CD
+## TODO
 
-Retrieve the Service Principal (SP) from Bitwarden (`opennms-automation-testing`). This SP has permissions to read from 
-key vault `automation-test-vault`.
-
-Set the environment variables as follows:
-
-- AZURE_CLIENT_ID
-- AZURE_TENANT_ID
-- AZURE_CLIENT_SECRET
+- Minion: the existing tests need to be adjusted to support running a minion.
+- Integration with CI: this suite should be setup to run on events of interest (e.g. PRs, environment update).
+- Add more tests! :)

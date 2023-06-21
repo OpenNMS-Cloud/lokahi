@@ -36,18 +36,13 @@ import static com.codeborne.selenide.Condition.text;
 import static com.codeborne.selenide.Selenide.$;
 
 public class CloudLoginPage {
-    private static final SelenideElement pageTitleTxt = $("h2.okta-form-title");
-    private static final SelenideElement userNameInp = $(By.id("idp-discovery-username"));
-    private static final SelenideElement nextBtn = $(By.id("idp-discovery-submit"));
-    private static final SelenideElement passwordInp = $(By.id("okta-signin-password"));
-    private static final SelenideElement submitBtn = $(By.id("okta-signin-submit"));
+    private static final SelenideElement pageTitleTxt = $(By.id("hs-page-title"));
+    private static final SelenideElement userNameInp = $(By.id("username"));
+    private static final SelenideElement passwordInp = $(By.id("password"));
+    private static final SelenideElement submitBtn = $(By.id("hs-login"));
 
     public static void setUsername(String username) {
         userNameInp.shouldBe(enabled).setValue(username);
-    }
-
-    public static void clickNextBtn() {
-        nextBtn.shouldBe(enabled).click();
     }
 
     public static void setPassword(String password) {

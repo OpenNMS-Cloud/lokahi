@@ -62,14 +62,14 @@ public class MonitoringSystemService {
             monitoringSystem.setLabel(identity.getSystemId().toUpperCase());
             monitoringSystem.setMonitoringLocationId(location.getId());
             systemRepository.save(monitoringSystem);
+            // Asynchronously send config updates to Minion
+            configUpdateService.sendConfigUpdate(message.getTenantId(), message.getLocation());
         } else {
             monitoringSystem = msOp.get();
             monitoringSystem.setLastCheckedIn(LocalDateTime.now());
             systemRepository.save(monitoringSystem);
         }
 
-        // Asynchronously send config updates to Minion
-        configUpdateService.sendConfigUpdate(message.getTenantId(), message.getLocation());
     }
 
     @Transactional

@@ -28,13 +28,12 @@
 
 package org.opennms.horizon.server.model.inventory.tag;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
-@AllArgsConstructor
+//@AllArgsConstructor
 public class TagCreate {
     private String name;
 }

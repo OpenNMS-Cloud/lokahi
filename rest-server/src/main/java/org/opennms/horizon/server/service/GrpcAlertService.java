@@ -144,7 +144,11 @@ public class GrpcAlertService {
 
     private void createTagsInInventory(String authHeader, long monitoringPolicyId, List<String> policyTags) {
         List<TagCreate> tags = new ArrayList<>();
-        policyTags.forEach(tag -> tags.add(new TagCreate(tag)));
+        policyTags.forEach(tag -> {
+            var tagCreate = new TagCreate();
+            tagCreate.setName(tag);
+            tags.add(tagCreate);
+        });
         var monitoringPolicyAdd = new TagListMonitorPolicyAdd(monitoringPolicyId, tags);
         var newTags = tagMapper.tagListAddToProtoCustom(monitoringPolicyAdd);
         client.addTags(newTags, authHeader);

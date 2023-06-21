@@ -31,6 +31,7 @@ package org.opennms.horizon.minioncertmanager.certificate;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.rocksdb.CompressionType;
 import org.rocksdb.Options;
 import org.rocksdb.RocksDB;
@@ -69,7 +70,7 @@ public class SerialNumberRepository {
     }
 
 
-    public void cleanup() {
+    public void close() {
         LOG.info("Begin to close rocketDb");
         if (db != null) {
             db.close();
@@ -77,17 +78,21 @@ public class SerialNumberRepository {
         LOG.info("Successfully closed rocketDb");
     }
 
-    public void addCertificate(String locationId, X509Certificate value) throws RocksDBException, IOException {
-        var meta = new CertificateMeta(value, locationId);
+    public void addCertificate(String tenantId, String locationId, X509Certificate certificate) throws RocksDBException, IOException {
+        var meta = new CertificateMeta(tenantId, locationId, certificate);
         db.put(meta.getSerial().getBytes(), mapper.writeValueAsBytes(meta));
     }
 
-    public void revoke(String locationId) throws RocksDBException, IOException {
+    public void revoke(String tenantId, String locationId) throws RocksDBException, IOException {
+        Objects.requireNonNull(tenantId);
+        Objects.requireNonNull(locationId);
+
         try (var ite = db.newIterator()) {
+            ite.seekToFirst();
             while (ite.isValid()) {
                 var meta = mapper.readValue(ite.value(), new TypeReference<CertificateMeta>() {
                 });
-                if (locationId.equals(meta.getLocationId())) {
+                if (locationId.equals(meta.getLocationId()) && tenantId.equals(meta.getTenantId())) {
                     db.delete(ite.key());
                 }
                 ite.next();
@@ -101,12 +106,15 @@ public class SerialNumberRepository {
         });
     }
 
-    public CertificateMeta getByLocationId(String locationId) throws IOException {
+    public CertificateMeta getByLocationId(String tenantId, String locationId) throws IOException {
+        Objects.requireNonNull(locationId);
+        Objects.requireNonNull(tenantId);
         try (var ite = db.newIterator()) {
+            ite.seekToFirst();
             while (ite.isValid()) {
                 var meta = mapper.readValue(ite.value(), new TypeReference<CertificateMeta>() {
                 });
-                if (locationId.equals(meta.getLocationId())) {
+                if (locationId.equals(meta.getLocationId()) && tenantId.equals(meta.getTenantId())) {
                     return meta;
                 }
                 ite.next();
@@ -115,23 +123,23 @@ public class SerialNumberRepository {
         return null;
     }
 
+    @NoArgsConstructor
     public static class CertificateMeta {
         @Getter
-
-        private final String serial;
+        private String serial;
         @Getter
-
-        private final String locationId;
+        private String locationId;
         @Getter
-
-        private final Date notBefore;
+        private String tenantId;
         @Getter
+        private Date notBefore;
+        @Getter
+        private Date notAfter;
 
-        private final Date notAfter;
-
-        CertificateMeta(X509Certificate certificate, String locationId) {
+        public CertificateMeta(String tenantId, String locationId, X509Certificate certificate) {
             this.serial = certificate.getSerialNumber().toString(16).toUpperCase();
             this.locationId = locationId;
+            this.tenantId = tenantId;
             this.notBefore = certificate.getNotBefore();
             this.notAfter = certificate.getNotAfter();
         }

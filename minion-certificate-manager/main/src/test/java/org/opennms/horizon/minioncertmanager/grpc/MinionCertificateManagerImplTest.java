@@ -38,10 +38,15 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.opennms.horizon.minioncertmanager.certificate.CaCertificateGenerator;
 import org.opennms.horizon.minioncertmanager.certificate.PKCS12Generator;
 import org.opennms.horizon.minioncertmanager.certificate.SerialNumberRepository;
+import org.opennms.horizon.minioncertmanager.proto.EmptyResponse;
 import org.opennms.horizon.minioncertmanager.proto.GetMinionCertificateResponse;
+import org.opennms.horizon.minioncertmanager.proto.IsCertificateValidRequest;
+import org.opennms.horizon.minioncertmanager.proto.IsCertificateValidResponse;
 import org.opennms.horizon.minioncertmanager.proto.MinionCertificateRequest;
+import org.rocksdb.RocksDBException;
 
 import java.io.File;
+import java.io.IOException;
 import java.math.BigInteger;
 import java.security.cert.X509Certificate;
 import java.util.function.BiConsumer;
@@ -52,6 +57,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 
@@ -63,6 +70,9 @@ public class MinionCertificateManagerImplTest {
     @Mock
     private X509Certificate certificate;
 
+    @Mock
+    private SerialNumberRepository serialNumberRepository;
+
     @TempDir()
     private File tempDir;
     private MinionCertificateManagerImpl minionCertificateManager;
@@ -73,7 +83,7 @@ public class MinionCertificateManagerImplTest {
 
         minionCertificateManager = new MinionCertificateManagerImpl(
             new File(tempDir, "ca.key"), new File(tempDir, "ca.crt"),
-            pkcs12Generator, new SerialNumberRepository(tempDir.getAbsolutePath())
+            pkcs12Generator, serialNumberRepository
         );
 
         lenient().when(certificate.getSerialNumber()).thenReturn(BigInteger.ONE);
@@ -106,6 +116,8 @@ public class MinionCertificateManagerImplTest {
             assertNotNull(error);
             try {
                 verify(pkcs12Generator).generate(eq(location), eq(tenantId), any(), any(), any(), any(), any());
+                verify(serialNumberRepository, times(1))
+                    .addCertificate(eq(tenantId), eq(String.valueOf(location)), any(X509Certificate.class));
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -117,6 +129,27 @@ public class MinionCertificateManagerImplTest {
         // Verify that the CA cert file is created
         File caCertFile = minionCertificateManager.getCaCertFile();
         assertTrue(caCertFile.exists());
+    }
+
+    @Test
+    void testRevokeCertificate() throws RocksDBException, IOException {
+        String tenantId = "foo faz";
+        long location = 1010L;
+        StreamObserver<EmptyResponse> observer = mock(StreamObserver.class);
+        minionCertificateManager.revokeMinionCert(MinionCertificateRequest.newBuilder().setLocationId(location).setTenantId(tenantId).build(), observer);
+        verify(serialNumberRepository, times(1))
+            .revoke(tenantId, String.valueOf(location));
+        verify(observer, times(1)).onCompleted();
+    }
+
+    @Test
+    void testSerialNumber() throws RocksDBException, IOException {
+        String serial = "123456";
+
+        StreamObserver<IsCertificateValidResponse> observer = mock(StreamObserver.class);
+        minionCertificateManager.isCertValid( IsCertificateValidRequest.newBuilder().setSerialNumber(serial).build(), observer);
+        verify(serialNumberRepository, times(1)).getBySerial(serial);
+        verify(observer, times(1)).onCompleted();
     }
 
     private void createCertificate(String tenantId, Long locationId, BiConsumer<GetMinionCertificateResponse, Throwable> callback) {

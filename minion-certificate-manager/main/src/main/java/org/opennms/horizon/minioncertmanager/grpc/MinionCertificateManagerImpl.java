@@ -130,8 +130,8 @@ public class MinionCertificateManagerImpl extends MinionCertificateManagerGrpc.M
             File archive = new File(tempDirectory.toFile(), "minion.p12");
 
             // Generate PKCS8 files in the temporary directory
-            var serial = pkcs8Generator.generate(locationId, tenantId, tempDirectory, archive, password, caCertFile, caKeyFile);
-            serialNumberRepository.addCertificate(String.valueOf(locationId), serial);
+            var certificate = pkcs8Generator.generate(locationId, tenantId, tempDirectory, archive, password, caCertFile, caKeyFile);
+            serialNumberRepository.addCertificate(tenantId, String.valueOf(locationId), certificate);
 
             if (!archive.exists()) {
                 LOG.error(FAILED_TO_GENERATE_ONE_OR_MORE_FILES);
@@ -152,7 +152,7 @@ public class MinionCertificateManagerImpl extends MinionCertificateManagerGrpc.M
     @Override
     public void getMinionCertMetadata(MinionCertificateRequest request, StreamObserver<GetMinionCertificateMetadataResponse> responseObserver) {
         try {
-            var meta = serialNumberRepository.getByLocationId(String.valueOf(request.getLocationId()));
+            var meta = serialNumberRepository.getByLocationId(request.getTenantId(), String.valueOf(request.getLocationId()));
             var response = GetMinionCertificateMetadataResponse.newBuilder()
                 .setCreateDate(Timestamp.newBuilder().setSeconds(meta.getNotBefore().getTime()))
                 .setExpireDate(Timestamp.newBuilder().setSeconds(meta.getNotAfter().getTime()))
@@ -167,7 +167,7 @@ public class MinionCertificateManagerImpl extends MinionCertificateManagerGrpc.M
     @Override
     public void revokeMinionCert(MinionCertificateRequest request, StreamObserver<EmptyResponse> responseObserver) {
         try {
-            serialNumberRepository.revoke(String.valueOf(request.getLocationId()));
+            serialNumberRepository.revoke(request.getTenantId(), String.valueOf(request.getLocationId()));
             responseObserver.onCompleted();
         } catch (RocksDBException | IOException e) {
             LOG.error("Fail to revoke minion cert for {}. Error: {}", request, e.getMessage());

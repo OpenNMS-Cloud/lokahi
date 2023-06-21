@@ -30,7 +30,6 @@ package org.opennms.horizon.minioncertmanager.grpc;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Timestamp;
 import io.grpc.Status;
-import io.grpc.stub.ServerCalls;
 import io.grpc.stub.StreamObserver;
 
 import java.security.cert.CertificateException;

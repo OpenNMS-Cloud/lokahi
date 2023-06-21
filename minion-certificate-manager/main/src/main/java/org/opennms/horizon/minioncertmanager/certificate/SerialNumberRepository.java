@@ -55,9 +55,9 @@ public class SerialNumberRepository {
     private static final Logger LOG = LoggerFactory.getLogger(SerialNumberRepository.class);
 
     private final RocksDB db;
-    public SerialNumberRepository(@Value("${grpc.server.db:/app/db}") String rootDir) throws RocksDBException{
+    public SerialNumberRepository(@Value("${grpc.server.db.url:/app/rocks-db}") String rootDir) throws RocksDBException{
         Objects.requireNonNull(rootDir);
-        LOG.info("Begin to init rocksDB of {}", rootDir);
+        LOG.info("Beginning init of rocksDB: db-path={}", rootDir);
         try (Options dbOptions = new Options()) {
             dbOptions.setCreateMissingColumnFamilies(true)
                 .setCreateIfMissing(true)

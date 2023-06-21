@@ -90,9 +90,9 @@ public class GrpcLocationService {  // TODO: rename to GraphQL...Service; there 
     public Mono<Boolean> deleteLocation(@GraphQLArgument(name = "id") long id, @GraphQLEnvironment ResolutionEnvironment env) {
         var accessToken = headerUtil.getAuthHeader(env);
         var status = client.deleteLocation(id, accessToken);
-        if (status) {
-            certificateManagerClient.revokeCertificate(headerUtil.extractTenant(env), id, accessToken);
-        }
+        // we may want to revoke even delete location is fail. E.g. location is already deleted before or it is partially deleted.
+        // It will not be able to use anyway.
+        certificateManagerClient.revokeCertificate(headerUtil.extractTenant(env), id, accessToken);
         return Mono.just(status);
     }
 }

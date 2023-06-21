@@ -33,6 +33,8 @@
             </column>
         </createTable>
 
+
+
         <addPrimaryKey tableName="tag" columnNames="id" constraintName="pk_tag_id"/>
 
         <addForeignKeyConstraint constraintName="fk_node_tag_node_id" onDelete="CASCADE"
@@ -45,15 +47,10 @@
 
     </changeSet>
 
-    <changeSet id="0.1.0-monitoring-policy-tag" author="cgorantla">
-        <createTable tableName="monitoring_policy_tag">
-            <column name="monitoring_policy_id" type="BIGINT">
-                <constraints nullable="false"/>
-            </column>
-            <column name="tag_id" type="BIGINT">
-                <constraints nullable="false"/>
-            </column>
-        </createTable>
-
+    <changeSet id="0.1.0-table-add-policy-ids" author="cgorantla">
+        <addColumn tableName="tag">
+            <column name="policy_ids" type="jsonb" />
+        </addColumn>
     </changeSet>
+
 </databaseChangeLog>

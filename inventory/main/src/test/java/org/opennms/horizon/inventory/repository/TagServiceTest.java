@@ -36,7 +36,6 @@ import org.opennms.horizon.inventory.dto.TagCreateDTO;
 import org.opennms.horizon.inventory.dto.TagCreateListDTO;
 import org.opennms.horizon.inventory.dto.TagEntityIdDTO;
 import org.opennms.horizon.inventory.dto.TagListParamsDTO;
-import org.opennms.horizon.inventory.model.MonitoringPolicyTag;
 import org.opennms.horizon.inventory.service.TagService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
@@ -55,7 +54,7 @@ public class TagServiceTest {
     private TagService tagService;
 
     @Autowired
-    private MonitoringPolicyTagRepository monitoringPolicyTagRepository;
+    private TagRepository repository;
 
 
     @Test
@@ -71,11 +70,12 @@ public class TagServiceTest {
             .setParams(TagListParamsDTO.newBuilder().setSearchTerm("tag1").build()).build());
         Assertions.assertEquals(1, list.size());
         var tagDTO = list.get(0);
-        var policyTag = new MonitoringPolicyTag();
-        policyTag.setTagId(tagDTO.getId());
-        policyTag.setMonitoringPolicyId(1L);
-        var policyTagReturned = monitoringPolicyTagRepository.findById(policyTag);
-        Assertions.assertTrue(policyTagReturned.isPresent());
+        var tagOptional = repository.findById(tagDTO.getId());
+        Assertions.assertTrue(tagOptional.isPresent());
+        var tag = tagOptional.get();
+        var policyIds = tag.getPolicyIds();
+        Assertions.assertEquals(1, policyIds.size());
+        Assertions.assertEquals(1L, policyIds.get(0).longValue());
 
     }
 }

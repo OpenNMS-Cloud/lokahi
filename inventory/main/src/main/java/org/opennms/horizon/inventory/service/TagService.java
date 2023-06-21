@@ -43,12 +43,10 @@ import org.opennms.horizon.inventory.dto.TagListParamsDTO;
 import org.opennms.horizon.inventory.dto.TagRemoveListDTO;
 import org.opennms.horizon.inventory.exception.InventoryRuntimeException;
 import org.opennms.horizon.inventory.mapper.TagMapper;
-import org.opennms.horizon.inventory.model.MonitoringPolicyTag;
 import org.opennms.horizon.inventory.model.Node;
 import org.opennms.horizon.inventory.model.Tag;
 import org.opennms.horizon.inventory.model.discovery.PassiveDiscovery;
 import org.opennms.horizon.inventory.model.discovery.active.ActiveDiscovery;
-import org.opennms.horizon.inventory.repository.MonitoringPolicyTagRepository;
 import org.opennms.horizon.inventory.repository.NodeRepository;
 import org.opennms.horizon.inventory.repository.TagRepository;
 import org.opennms.horizon.inventory.repository.discovery.PassiveDiscoveryRepository;
@@ -72,7 +70,6 @@ public class TagService {
     private final NodeRepository nodeRepository;
     private final ActiveDiscoveryRepository activeDiscoveryRepository;
     private final PassiveDiscoveryRepository passiveDiscoveryRepository;
-    private final MonitoringPolicyTagRepository monitoringPolicyTagRepository;
     private final TagMapper mapper;
     private final TagPublisher tagPublisher;
 
@@ -294,19 +291,10 @@ public class TagService {
 
     private TagDTO addTagsToMonitoringPolicy(String tenantId, long monitoringPolicyId, TagCreateDTO tagCreateDTO) {
         String tagName = tagCreateDTO.getName();
-        var optional = repository.findByTenantIdMonitoringPolicyIdAndName(tenantId, monitoringPolicyId, tagCreateDTO.getName());
-        if (optional.isPresent()) {
-            return mapper.modelToDTO(optional.get());
-        }
-
-        optional = repository.findByTenantIdAndName(tenantId, tagName);
+        var optional = repository.findByTenantIdAndName(tenantId, tagName);
         Tag tag = optional.orElseGet(() -> mapCreateTag(tenantId, tagCreateDTO));
+        tag.getPolicyIds().add(monitoringPolicyId);
         tag = repository.save(tag);
-        var policyTag = new MonitoringPolicyTag();
-        policyTag.setTagId(tag.getId());
-        policyTag.setMonitoringPolicyId(monitoringPolicyId);
-        //tag.getMonitoringPolicyTags().add(policyTag);
-        monitoringPolicyTagRepository.save(policyTag);
         return mapper.modelToDTO(tag);
     }
 

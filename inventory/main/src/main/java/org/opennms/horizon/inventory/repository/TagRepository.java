@@ -134,13 +134,4 @@ public interface TagRepository extends JpaRepository<Tag, Long> {
     Optional<Tag> findByTenantIdPassiveDiscoveryIdAndName(@Param("tenantId") String tenantId,
                                                           @Param("passiveDiscoveryId") long passiveDiscoveryId,
                                                           @Param("name") String name);
-    @Query("SELECT tag " +
-        "FROM Tag tag " +
-        "JOIN  MonitoringPolicyTag policyTag " +
-        "WHERE tag.tenantId = :tenantId " +
-        "AND policyTag.monitoringPolicyId = :monitoringPolicyId " +
-        "AND tag.name = :name")
-    Optional<Tag> findByTenantIdMonitoringPolicyIdAndName(@Param("tenantId") String tenantId,
-                                                          @Param("monitoringPolicyId") long monitoringPolicyId,
-                                                          @Param("name") String name);
 }

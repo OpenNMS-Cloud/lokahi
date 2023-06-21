@@ -12,6 +12,7 @@ message TagProto {
   string tenant_id = 2;
   string name = 3;
   repeated int64 node_ids = 4;
+  repeated int64 policy_ids = 5;
 }
 
 message TagListProto {

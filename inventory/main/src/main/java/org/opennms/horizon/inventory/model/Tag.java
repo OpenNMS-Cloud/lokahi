@@ -85,5 +85,5 @@ public class Tag {
         joinColumns = @JoinColumn(name = "tag_id"),
         inverseJoinColumns = @JoinColumn(name = "passive_discovery_id"))
     private List<PassiveDiscovery> passiveDiscoveries = new ArrayList<>();
-    
+
 }

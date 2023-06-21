@@ -28,17 +28,18 @@
 
 package org.opennms.horizon.alertservice.service;
 
-import java.util.List;
-
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.opennms.horizon.alert.tag.proto.TagProto;
 import org.opennms.horizon.alertservice.db.entity.Tag;
+import org.opennms.horizon.alertservice.db.repository.MonitorPolicyRepository;
 import org.opennms.horizon.alertservice.db.repository.TagRepository;
 import org.opennms.horizon.alertservice.mapper.TagMapper;
 import org.opennms.horizon.shared.common.tag.proto.TagOperationList;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.util.List;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -46,7 +47,9 @@ import lombok.extern.slf4j.Slf4j;
 public class TagService {
     private final TagRepository tagRepository;
     private final TagMapper tagMapper;
+    private final MonitorPolicyRepository monitorPolicyRepository;
 
+    @Transactional
     public void insertOrUpdateTags(TagOperationList list) {
         list.getTagsList().forEach( tagOp -> {
             switch (tagOp.getOperation()) {
@@ -58,6 +61,10 @@ public class TagService {
                                 tag.getNodeIds().add(id);
                             }
                         });
+                        tagOp.getMonitoringPolicyIdList().forEach(id -> {
+                           var policy =  monitorPolicyRepository.findByIdAndTenantId(id, tagOp.getTenantId());
+                           policy.ifPresent(tag.getPolicies()::add);
+                        });
                         tagRepository.save(tag);
                         log.info("added nodeIds with data {} node id size from {} to {}", tagOp, oldSize, tag.getNodeIds().size());
                     }, () -> {
@@ -65,6 +72,10 @@ public class TagService {
                         tag.setName(tagOp.getTagName());
                         tag.setTenantId(tagOp.getTenantId());
                         tag.setNodeIds(tagOp.getNodeIdList());
+                        tagOp.getMonitoringPolicyIdList().forEach(id -> {
+                            var policy =  monitorPolicyRepository.findByIdAndTenantId(id, tagOp.getTenantId());
+                            policy.ifPresent(tag.getPolicies()::add);
+                        });
                         tagRepository.save(tag);
                         log.info("inserted new tag with data {}", tagOp);
                     });
@@ -72,7 +83,11 @@ public class TagService {
                     .ifPresent(tag -> {
                         int oldSize = tag.getNodeIds().size();
                         tagOp.getNodeIdList().forEach(id -> tag.getNodeIds().remove(id));
-                        if(tag.getNodeIds().isEmpty()) {
+                        tagOp.getMonitoringPolicyIdList().forEach(id -> {
+                            var policy =  monitorPolicyRepository.findByIdAndTenantId(id, tagOp.getTenantId());
+                            policy.ifPresent(tag.getPolicies()::remove);
+                        });
+                        if(tag.getNodeIds().isEmpty() && tag.getPolicies().isEmpty()) {
                             tagRepository.deleteById(tag.getId());
                             log.info("deleted tag {}", tagOp);
                         } else {
@@ -86,6 +101,6 @@ public class TagService {
 
     public List<TagProto> listAllTags(String tenantId) {
         return tagRepository.findByTenantId(tenantId)
-            .stream().map(tag -> tagMapper.map(tag)).toList();
+            .stream().map(tagMapper::map).toList();
     }
 }

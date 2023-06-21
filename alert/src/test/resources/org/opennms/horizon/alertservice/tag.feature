@@ -12,11 +12,13 @@ Feature: Tag operation feature
   Scenario: Insert tag when receive new message
     Given Tenant "tenant-1"
     Given Tag operation data
-      | action     | name     | node_ids |
-      | ASSIGN_TAG | test-tag | 100,200  |
+      | action     | name     | node_ids | policy_ids |
+      | ASSIGN_TAG | test-tag | 100,200  | 101,201   |
     And Sent tag operation message to Kafka topic
     Then Verify list tag with size 1 and node ids
       | 100 | 200 |
+    Then Verify list tag with size 1 and policy ids
+      | 101 | 201 |
     Given Tag operation data
       | action     | name     | node_ids |
       | ASSIGN_TAG | test-tag | 100,300  |
@@ -24,8 +26,8 @@ Feature: Tag operation feature
     Then Verify list tag with size 1 and node ids
       | 100 | 200 | 300 |
     Given Tag operation data
-      | action     | name     | node_ids |
-      | REMOVE_TAG | test-tag | 100,200  |
+      | action     | name     | node_ids | policy_ids |
+      | REMOVE_TAG | test-tag | 100,200  | 101,201   |
     And Sent tag operation message to Kafka topic
     Then Verify list tag with size 1 and node ids
       | 300 |

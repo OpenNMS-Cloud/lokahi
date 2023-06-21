@@ -4,6 +4,7 @@ import io.grpc.ManagedChannel;
 import io.grpc.Metadata;
 import io.grpc.stub.MetadataUtils;
 import lombok.RequiredArgsConstructor;
+import org.opennms.horizon.minioncertmanager.proto.EmptyResponse;
 import org.opennms.horizon.minioncertmanager.proto.MinionCertificateRequest;
 import org.opennms.horizon.minioncertmanager.proto.GetMinionCertificateResponse;
 import org.opennms.horizon.minioncertmanager.proto.MinionCertificateManagerGrpc;
@@ -42,5 +43,16 @@ public class MinionCertificateManagerClient {
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
         return minionCertStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
             .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).getMinionCert(request);
+    }
+
+    public void revokeCertificate(String tenantId, Long locationId, String accessToken) {
+        MinionCertificateRequest request = MinionCertificateRequest.newBuilder()
+            .setTenantId(tenantId)
+            .setLocationId(locationId)
+            .build();
+        Metadata metadata = new Metadata();
+        metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
+        minionCertStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
+            .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).revokeMinionCert(request);
     }
 }

@@ -44,6 +44,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.opennms.horizon.minioncertmanager.proto.EmptyResponse;
 import org.opennms.horizon.minioncertmanager.proto.MinionCertificateRequest;
 import org.opennms.horizon.minioncertmanager.proto.GetMinionCertificateResponse;
 import org.opennms.horizon.minioncertmanager.proto.MinionCertificateManagerGrpc;
@@ -82,6 +83,13 @@ public class MinionCertificateManagerClientTest {
                         .build());
                     responseObserver.onCompleted();
                 }
+
+                @Override
+                public void revokeMinionCert(MinionCertificateRequest request, StreamObserver<EmptyResponse> responseObserver) {
+                    responseObserver.onNext(EmptyResponse.newBuilder()
+                        .build());
+                    responseObserver.onCompleted();
+                }
             }));
 
         grpcCleanUp.register(InProcessServerBuilder.forName("MinionCertificateManagerClientTest").intercept(mockInterceptor)
@@ -111,6 +119,18 @@ public class MinionCertificateManagerClientTest {
         client.shutdown();
     }
 
+    @Test
+    void testRevoke() {
+        String methodName = new Object() {
+        }.getClass().getEnclosingMethod().getName();
+        ArgumentCaptor<MinionCertificateRequest> captor = ArgumentCaptor.forClass(MinionCertificateRequest.class);
+        client.revokeCertificate("tenantId", 333L, accessToken + methodName);
+        verify(mockAlertService).revokeMinionCert(captor.capture(), any());
+        assertThat(captor.getValue()).isNotNull();
+        assertThat(mockInterceptor.getAuthHeader()).isEqualTo(accessToken + methodName);
+        client.shutdown();
+    }
+
     private static class MockServerInterceptor implements ServerInterceptor {
         private String authHeader;
 
@@ -128,5 +148,4 @@ public class MinionCertificateManagerClientTest {
             authHeader = null;
         }
     }
-
 }

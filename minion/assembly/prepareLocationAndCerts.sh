@@ -1,0 +1,407 @@
+#!/bin/bash
+######################################################################################################################
+##
+## DESCRIPTION:
+##	Prepare for running a minion by logging into the cluster, looking up the ID of the location name requested,
+##	and creating the location if is does not yet exist, then downloading the PKCS12 Minion certficiate.
+##
+## PROCESS:
+##	1. Extract the CA certificate from the cluster and save as the trust-store for the Minion (and curl commands)
+##	2. Login to the cluster
+##	3. Lookup the location
+##	4. If the location does not yet exist, create the location
+##	5. Download the location certificate and password
+##
+## EXAMPLE USAGE:
+##	./prepareLocationAndCerts.sh -l LOC001 -u admin -p admin
+##
+######################################################################################################################
+
+
+TEMPLATE_LOOKUP_LOCATION_GQL='
+	query { locationByName(locationName: "%s") { id } }
+	'
+
+TEMPLATE_CREATE_LOCATION_GQL='
+	mutation createLocation { createLocation(location: { location: "%s" }) { id } }
+	'
+
+TEMPLATE_GET_CERTIFICATE_GQL='
+	query { getMinionCertificate(locationId: %d) { certificate, password } }
+'
+
+
+###
+### SCRIPT INPUTS
+###
+
+CERT_ROOTDIR="$(pwd)/target"
+CLIENT_KEYSTORE="${CERT_ROOTDIR}/minion.p12"
+CLIENT_TRUSTSTORE="${CERT_ROOTDIR}/CA.cert"
+API_BASE_URL=https://onmshs.local
+AUTH_BASE_URL=https://onmshs.local/auth
+# LOCATION_NAME="minion-standalone-loc"
+USERNAME=""
+PASSWORD=""
+VERBOSE="false"
+AUTH_REALM="opennms"
+CLIENT_ID="lokahi"
+
+
+
+###
+### RUNTIME DATA
+###
+
+ACCESS_TOKEN=""
+LOCATION_ID=-1
+
+
+
+###
+###
+###
+
+is_verbose ()
+{
+	if [ "$VERBOSE" = "true" ]
+	then
+		return 0
+	else
+		return 1
+	fi
+}
+
+format_lookup_location_gql_query ()
+{
+	typeset location_name
+
+	location_name="$1"
+
+	printf "${TEMPLATE_LOOKUP_LOCATION_GQL}" "${location_name}"
+}
+
+format_create_location_gql_query ()
+{
+	typeset location_name
+
+	location_name="$1"
+
+	printf "${TEMPLATE_CREATE_LOCATION_GQL}" "${location_name}"
+}
+
+format_get_ceritificate_gql_query ()
+{
+	typeset location_id
+
+	location_id="$1"
+
+	printf "${TEMPLATE_GET_CERTIFICATE_GQL}" "${location_id}"
+}
+
+format_graphql_url ()
+{
+	echo "${API_BASE_URL}/api/graphql"
+}
+
+format_auth_url ()
+{
+	typeset realm
+
+	realm="$1"
+
+	echo "${AUTH_BASE_URL}/realms/${realm}/protocol/openid-connect/token"
+}
+
+gql_result_check_no_errors ()
+{
+	typeset gql_response
+	typeset report_errors_flag
+
+	typeset err_msg
+
+	gql_response="$1"
+	report_errors_flag="${2:-false}"
+
+	# Check for an error message
+	err_msg="$(echo "${gql_response}" | jq 'select(.errors) | .errors')"
+
+	if [ -z "$err_msg" ]
+	then
+		# Also check for .error
+		err_msg="$(echo "${gql_response}" | jq -r 'select(.error) | .error')"
+	fi
+
+	if [ -n "$err_msg" ]
+	then
+		# Have errors
+
+		if [ "${report_errors_flag}" != "false" ] || is_verbose
+		then
+			echo "ERROR: GRAPHQL QUERY FAILED" >&2
+			echo "${gql_response}" | jq . >&2
+		fi
+
+		return 1
+	fi
+
+	return 0
+}
+
+execute_gql_query ()
+{
+	typeset gql_query
+	typeset gql_response
+	typeset gql_url
+	typeset gql_formatted_query_envelope
+	typeset report_errors_flag
+
+	gql_query="$1"
+	report_errors_flag="$2"
+
+	gql_url="$(format_graphql_url)"
+
+	if is_verbose
+	then
+		echo "=== DEBUG: Sending GQL Query: url=${gql_url}; query=${gql_query}" >&2
+	fi
+
+	gql_formatted_query_envelope="$(echo "$gql_query" | jq -R 'select(length > 0) | { query: . }')"
+
+	gql_response="$(
+		curl \
+			--cacert "${CLIENT_TRUSTSTORE}" \
+			-S \
+			-s \
+			-X POST \
+			-H 'Content-Type: application/json' \
+			-H "Authorization: Bearer ${ACCESS_TOKEN}" \
+			--data-ascii "${gql_formatted_query_envelope}" \
+			"${gql_url}"
+		)"
+
+	if is_verbose
+	then
+		echo "=== DEBUG: GQL Response: response=${gql_response}" >&2
+	fi
+
+	if gql_result_check_no_errors "${gql_response}" "${report_errors_flag}"
+	then
+		echo "$gql_response"
+	else
+		return 1
+	fi
+}
+
+login ()
+{
+	typeset auth_url
+	typeset response
+	typeset error
+
+	auth_url="$(format_auth_url "${AUTH_REALM}")"
+
+	echo ">>> LOGIN USER ${USERNAME}"
+
+	response="$(
+		curl \
+			--cacert "${CLIENT_TRUSTSTORE}" \
+			-S \
+			-s \
+			-X POST \
+			-H 'Content-Type: application/x-www-form-urlencoded' \
+			-d "username=${USERNAME}" \
+			-d "password=${PASSWORD}" \
+			-d 'grant_type=password' \
+			-d "client_id=${CLIENT_ID}" \
+			-d 'scope=openid' \
+			"${auth_url}"
+	)"
+
+	error="$(echo "$response" | jq -r 'select(.error) | .error')"
+	if [ -n "$error" ]
+	then
+		echo "!!! Login failed"
+		echo "$response"
+		exit 1
+	fi
+
+	ACCESS_TOKEN="$(echo "$response" | jq -r '.access_token')"
+
+	if [ -z "${ACCESS_TOKEN}" ]
+	then
+		echo "!!! Login error - failed to extract access token from the response"
+		echo "$response"
+		exit 1
+	fi
+
+	if is_verbose
+	then
+		echo "ACCESS TOKEN = ${ACCESS_TOKEN}" >&2
+	fi
+}
+
+lookup_location ()
+{
+	typeset location_name
+	typeset gql_query
+	typeset gql_response
+	typeset gql_url
+
+	location_name="$1"
+
+	echo ">>> LOOKUP LOCATION ${location_name}"
+
+	gql_query="$(format_lookup_location_gql_query "${location_name}")"
+
+	if gql_response="$(execute_gql_query "${gql_query}")"
+	then
+		LOCATION_ID="$(echo "${gql_response}" | jq -r '.data.locationByName.id')"
+		echo "Have location ${location_name}, ID=${LOCATION_ID}"
+
+		return 0
+	else
+		return 1
+	fi
+}
+
+create_location ()
+{
+	typeset location_name
+	typeset gql_query
+	typeset gql_response
+
+	location_name="$1"
+
+	echo ">>> CREATING LOCATION ${location_name}"
+
+	gql_query="$(format_create_location_gql_query "${location_name}")"
+
+	if gql_response="$(execute_gql_query "${gql_query}")"
+	then
+		LOCATION_ID="$(echo "${gql_response}" | jq -r '.data.locationByName.id')"
+		echo "Have location ${location_name}, ID=${LOCATION_ID}"
+
+		return 0
+	else
+		echo "Failed to create location ${location_name}; aborting" >&2
+		exit 1
+	fi
+}
+
+retrieve_certificate ()
+{
+	typeset location_id
+
+	typeset gql_query
+	typeset gql_response
+
+	location_id="$1"
+
+	echo ">>> RETRIEVING CERTIFICATE FOR LOCATION ID ${location_id}"
+
+	gql_query="$(format_get_ceritificate_gql_query "${location_id}")"
+
+	if gql_response="$(execute_gql_query "${gql_query}")"
+	then
+		CERTIFICATE_DATA="$(echo "${gql_response}" | jq -r '.data.getMinionCertificate.certificate')"
+		CERTIFICATE_PASSWORD="$(echo "${gql_response}" | jq -r '.data.getMinionCertificate.password')"
+
+		return 0
+	else
+		echo "Failed to retrieve certificate for location id ${location_id}; aborting" >&2
+		exit 1
+	fi
+}
+
+print_p12_subject ()
+{
+	typeset p12_path
+	typeset p12_password
+
+	p12_path="$1"
+	p12_password="$2"
+
+	openssl pkcs12 -in "${p12_path}" -nodes -passin pass:"${p12_password}"  | openssl x509 -noout -subject
+}
+
+store_certificate ()
+{
+	if [ -f "${CLIENT_KEYSTORE}" ]
+	then
+		mv -f "${CLIENT_KEYSTORE}" "${CLIENT_KEYSTORE}.bak"
+	fi
+
+	echo "${CERTIFICATE_DATA}" | base64 --decode >"${CLIENT_KEYSTORE}"
+}
+
+get_ca_cert_from_k8s ()
+{
+	echo ">>> EXTRACTING client truststore contents from K8S"
+
+	if [ -f "${CLIENT_TRUSTSTORE}" ]
+	then
+		mv -f "${CLIENT_TRUSTSTORE}" "${CLIENT_TRUSTSTORE}.bak"
+	fi
+
+	kubectl get secret root-ca-certificate -ogo-template='{{index .data "ca.crt" }}' | base64 --decode > "${CLIENT_TRUSTSTORE}"
+
+	openssl x509 -in target/CA.cert -subject -noout
+}
+
+show_command_line_help ()
+{
+	echo "Usage: $0 [-h] [-l location] [-p password] [-u username]"
+	echo
+	echo "	-h	Display this help"
+	echo "	-l loc	Name of the location to use/create"
+	echo "	-p pass	Password for logging into the cluster"
+	echo "	-u user	Username for logging into the cluster"
+}
+
+parse_command_line ()
+{
+	while getopts hvl:p:u: FLAG
+	do
+		case "$FLAG" in
+			h)	show_command_line_help; exit 0 ;;
+			l)	LOCATION_NAME="${OPTARG}" ;;
+			p)	PASSWORD="${OPTARG}" ;;
+			u)	USERNAME="${OPTARG}" ;;
+			v)	VERBOSE="true" ;;
+			?)	show_command_line_help >&2; exit 1 ;;
+		esac
+	done
+}
+
+
+
+######################################################################################################################
+##
+## MAIN BODY STARTS HERE
+##
+######################################################################################################################
+
+# STOP on errors
+set -e
+
+parse_command_line "$@"
+
+get_ca_cert_from_k8s
+
+login
+
+if lookup_location "${LOCATION_NAME}"
+then
+	:
+else
+	create_location "${LOCATION_NAME}"
+fi
+
+retrieve_certificate "${LOCATION_ID}"
+
+store_certificate "${CLIENT_KEYSTORE}"
+
+print_p12_subject "${CLIENT_KEYSTORE}" "${CERTIFICATE_PASSWORD}"
+
+echo "Certificate Password = ${CERTIFICATE_PASSWORD}"

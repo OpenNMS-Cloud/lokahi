@@ -48,7 +48,7 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 @GraphQLApi
 @Service
-public class GrpcLocationService {
+public class GrpcLocationService {  // TODO: rename to GraphQL...Service; there is no GRPC in this code
     private final InventoryClient client;
     private final MonitoringLocationMapper mapper;
     private final ServerHeaderUtil headerUtil;
@@ -61,6 +61,11 @@ public class GrpcLocationService {
     @GraphQLQuery
     public Mono<MonitoringLocation> findLocationById(@GraphQLArgument(name = "id") long id, @GraphQLEnvironment ResolutionEnvironment env) {
         return Mono.just(mapper.protoToLocation(client.getLocationById(id, headerUtil.getAuthHeader(env))));
+    }
+
+    @GraphQLQuery
+    public Mono<MonitoringLocation> getLocationByName(@GraphQLArgument(name = "locationName") String locationName, @GraphQLEnvironment ResolutionEnvironment env) {
+        return Mono.just(mapper.protoToLocation(client.getLocationByName(locationName, headerUtil.getAuthHeader(env))));
     }
 
     @GraphQLQuery

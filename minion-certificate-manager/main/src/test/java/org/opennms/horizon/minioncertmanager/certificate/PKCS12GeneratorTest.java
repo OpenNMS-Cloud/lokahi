@@ -58,7 +58,7 @@ public class PKCS12GeneratorTest {
         //
         // Setup Test Data and Interactions
         //
-        Path outputDirPath = Path.of("/test-output-dir");
+        Path outputDirPath = Path.of("src/test/resources/test-output-dir");
         File mockCaCertFile = Mockito.mock(File.class);
         Mockito.when(mockCaCertFile.exists()).thenReturn(true);
 

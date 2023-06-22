@@ -87,7 +87,7 @@ public class Tag {
         inverseJoinColumns = @JoinColumn(name = "passive_discovery_id"))
     private List<PassiveDiscovery> passiveDiscoveries = new ArrayList<>();
 
-    @Column(name = "policy_ids", columnDefinition = "jsonb")
+    @Column(name = "monitor_policy_ids", columnDefinition = "jsonb")
     @JdbcTypeCode( SqlTypes.JSON )
-    private List<Long> policyIds = new ArrayList<>();
+    private List<Long> monitorPolicyIds = new ArrayList<>();
 }

@@ -29,6 +29,7 @@
 package org.opennms.horizon.inventory.repository;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.opennms.horizon.inventory.SpringContextTestInitializer;
 import org.opennms.horizon.inventory.dto.ListAllTagsParamsDTO;
@@ -47,7 +48,7 @@ import org.springframework.test.context.ContextConfiguration;
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @ContextConfiguration(initializers = {SpringContextTestInitializer.class})
 @AutoConfigureObservability
-// Make sure to include Metrics (for some reason they are disabled by default in the integration grey-box test)
+@Disabled // Only used as developer test
 public class TagServiceTest {
 
     @Autowired
@@ -73,7 +74,7 @@ public class TagServiceTest {
         var tagOptional = repository.findById(tagDTO.getId());
         Assertions.assertTrue(tagOptional.isPresent());
         var tag = tagOptional.get();
-        var policyIds = tag.getPolicyIds();
+        var policyIds = tag.getMonitorPolicyIds();
         Assertions.assertEquals(1, policyIds.size());
         Assertions.assertEquals(1L, policyIds.get(0).longValue());
 

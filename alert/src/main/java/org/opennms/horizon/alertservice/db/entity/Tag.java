@@ -28,11 +28,6 @@
 
 package org.opennms.horizon.alertservice.db.entity;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.hibernate.annotations.Type;
-
 import io.hypersistence.utils.hibernate.type.array.ListArrayType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -44,6 +39,11 @@ import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.Type;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.StringJoiner;
 
 @Getter
 @Setter
@@ -66,4 +66,15 @@ public class Tag {
         inverseJoinColumns = @JoinColumn(name = "policy_id")
     )
     private List<MonitorPolicy> policies = new ArrayList<>();
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", Tag.class.getSimpleName() + "[", "]")
+            .add("id=" + id)
+            .add("tenantId='" + tenantId + "'")
+            .add("name='" + name + "'")
+            .add("nodeIds=" + nodeIds)
+            .add("policies=" + policies)
+            .toString();
+    }
 }

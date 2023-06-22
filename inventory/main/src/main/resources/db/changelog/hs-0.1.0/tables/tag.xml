@@ -49,7 +49,7 @@
 
     <changeSet id="0.1.0-table-add-policy-ids" author="cgorantla">
         <addColumn tableName="tag">
-            <column name="policy_ids" type="jsonb" />
+            <column name="monitor_policy_ids" type="jsonb" />
         </addColumn>
     </changeSet>
 

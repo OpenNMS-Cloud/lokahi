@@ -28,10 +28,10 @@
 
 package org.opennms.horizon.alertservice.service;
 
-import java.util.List;
-import java.util.Optional;
-
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.opennms.horizon.alerts.proto.AlertType;
+import org.opennms.horizon.alerts.proto.EventType;
 import org.opennms.horizon.alerts.proto.ManagedObjectType;
 import org.opennms.horizon.alerts.proto.MonitorPolicyProto;
 import org.opennms.horizon.alerts.proto.PolicyRuleProto;
@@ -44,14 +44,13 @@ import org.opennms.horizon.alertservice.db.repository.AlertDefinitionRepository;
 import org.opennms.horizon.alertservice.db.repository.MonitorPolicyRepository;
 import org.opennms.horizon.alertservice.db.repository.TriggerEventRepository;
 import org.opennms.horizon.alertservice.mapper.MonitorPolicyMapper;
-import org.opennms.horizon.alerts.proto.EventType;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -89,7 +88,6 @@ public class MonitorPolicyService {
             MonitorPolicyProto defaultPolicy = MonitorPolicyProto.newBuilder()
                 .setName(DEFAULT_POLICY)
                 .setMemo("Default SNMP event monitoring policy")
-                .addTags(DEFAULT_TAG)
                 .setNotifyByEmail(true)
                 .setNotifyByPagerDuty(true)
                 .setNotifyByWebhooks(true)
@@ -102,6 +100,7 @@ public class MonitorPolicyService {
         }
     }
 
+    @Transactional
     public MonitorPolicyProto createPolicy(MonitorPolicyProto request, String tenantId) {
         MonitorPolicy policy = policyMapper.map(request);
         updateData(policy, tenantId);

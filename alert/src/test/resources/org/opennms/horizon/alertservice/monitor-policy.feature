@@ -7,6 +7,7 @@ Feature: Monitor policy gRPC Functionality
     Given Kafka bootstrap URL in system property "kafka.bootstrap-servers"
     Given Kafka event topic "events"
     Given Kafka alert topic "alerts"
+    Given Kafka topic for tags "tag-operation"
     Given Kafka monitoring policy topic "monitoring-policy"
     Given Monitoring policy kafka consumer
 
@@ -37,3 +38,12 @@ Feature: Monitor policy gRPC Functionality
     Then Verify the new policy has been created
     Then List policy should contain 1
     Then Verify monitoring policy for tenant "test-tenant" is sent to Kafka
+
+
+  Scenario: Add tags to given Monitoring policy from kafka topic update
+    Given Tenant id "test-tenant"
+    Given existing policy, get policy id
+    Given Send tag operation data for existing monitoring policy
+      | action     | name     | tenant-id |
+      | ASSIGN_TAG | test-tag | test-tenant |
+    Then Verify policy has tag "test-tag"

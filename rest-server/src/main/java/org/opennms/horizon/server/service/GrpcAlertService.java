@@ -123,6 +123,7 @@ public class GrpcAlertService {
     public Mono<MonitorPolicy> createMonitorPolicy(MonitorPolicy policy, @GraphQLEnvironment ResolutionEnvironment env) {
         String authHeader = headerUtil.getAuthHeader(env);
         var monitorPolicy = alertsClient.createMonitorPolicy(policy, headerUtil.getAuthHeader(env));
+        // TODO: Handle scenarios where one of the service is down
         createTagsInInventory(authHeader, monitorPolicy.getId(), policy.getTags());
         return Mono.just(monitorPolicy);
     }

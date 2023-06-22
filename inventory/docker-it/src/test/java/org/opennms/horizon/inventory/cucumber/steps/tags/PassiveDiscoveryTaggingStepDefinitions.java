@@ -97,6 +97,12 @@ public class PassiveDiscoveryTaggingStepDefinitions {
      * SCENARIO GIVEN
      * *********************************************************************************
      */
+    @Given("[PassiveDiscovery] A clean system")
+    public void aCleanSystem() {
+        deleteAllTags();
+        deleteAllPassiveDiscovery();
+    }
+    
     @Given("Passive discovery communities {string}")
     public void passiveDiscoveryCommunities(String communities) {
         initializePassiveDiscoveryDto().addAllCommunities(Arrays.stream(communities.split(","))

@@ -40,6 +40,8 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
+
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 import org.opennms.horizon.inventory.model.discovery.PassiveDiscovery;
@@ -52,6 +54,7 @@ import java.util.List;
 @Setter
 @RequiredArgsConstructor
 @Entity
+@ToString
 public class Tag {
 
     @Id

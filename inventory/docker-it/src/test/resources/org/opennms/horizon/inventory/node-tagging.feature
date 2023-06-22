@@ -9,6 +9,7 @@ Feature: Node Tagging
     Given [Common] Create "Belfast" Location
     Given [Tags] Nodes are associated with location named "Belfast"
     Given Kafka topic "tag-operation"
+    Given [Tags] A clean system
 
   Scenario: Create new tags on node
     Given A new node

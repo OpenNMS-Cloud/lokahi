@@ -152,7 +152,6 @@ public class ScannerResponseService {
                     .setLocationId(String.valueOf(locationId))
                     .setManagementIp(pingResponse.getIpAddress())
                     .setLabel(pingResponse.getIpAddress())
-                    .setMonitoredState(MonitoredState.UNMONITORED)
                     .addAllTags(tags)
                     .build();
                 try {
@@ -193,7 +192,6 @@ public class ScannerResponseService {
                     NodeCreateDTO createDTO = NodeCreateDTO.newBuilder()
                         .setLocationId(String.valueOf(locationId))
                         .setLabel(nodeLabel)
-                        .setMonitoredState(MonitoredState.UNMONITORED)
                         .build();
 
                     node = nodeService.createNode(createDTO, ScanType.AZURE_SCAN, tenantId);
@@ -230,7 +228,7 @@ public class ScannerResponseService {
         if (nodeOpt.isPresent()) {
             Node node = nodeOpt.get();
             Map<Integer, SnmpInterface> ifIndexSNMPMap = new HashMap<>();
-            nodeService.updateNodeInfo(node, result.getNodeInfo(), MonitoredState.MONITORED);
+            nodeService.updateNodeInfo(node, result.getNodeInfo());
 
             for (SnmpInterfaceResult snmpIfResult : result.getSnmpInterfacesList()) {
                 SnmpInterface snmpInterface = snmpInterfaceService.createOrUpdateFromScanResult(tenantId, node, snmpIfResult);

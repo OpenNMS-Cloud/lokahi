@@ -47,6 +47,7 @@ import org.opennms.horizon.inventory.cucumber.InventoryBackgroundHelper;
 import org.opennms.horizon.inventory.dto.DeleteTagsDTO;
 import org.opennms.horizon.inventory.dto.ListAllTagsParamsDTO;
 import org.opennms.horizon.inventory.dto.ListTagsByEntityIdParamsDTO;
+import org.opennms.horizon.inventory.dto.MonitoredState;
 import org.opennms.horizon.inventory.dto.NodeCreateDTO;
 import org.opennms.horizon.inventory.dto.NodeDTO;
 import org.opennms.horizon.inventory.dto.NodeList;
@@ -121,11 +122,14 @@ public class NodeTaggingStepDefinitions {
      * SCENARIO GIVEN
      * *********************************************************************************
      */
-    @Given("A new node")
-    public void aNewNode() {
+    @Given("[Tags] A clean system")
+    public void aCleanSystem() {
         deleteAllTags();
         deleteAllNodes();
+    }
 
+    @Given("A new node")
+    public void aNewNode() {
         var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
         node1 = nodeServiceBlockingStub.createNode(NodeCreateDTO.newBuilder().setLabel("node")
             .setLocationId(locationId).setManagementIp("127.0.0.1").build());
@@ -133,9 +137,6 @@ public class NodeTaggingStepDefinitions {
 
     @Given("2 new nodes")
     public void twoNewNodes() {
-        deleteAllTags();
-        deleteAllNodes();
-
         var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
         node1 = nodeServiceBlockingStub.createNode(NodeCreateDTO.newBuilder().setLabel("node1")
             .setLocationId(locationId).setManagementIp("127.0.0.1").build());
@@ -145,9 +146,6 @@ public class NodeTaggingStepDefinitions {
 
     @Given("A new node with tags {string}")
     public void aNewNodeWithTags(String tags) {
-        deleteAllTags();
-        deleteAllNodes();
-
         var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
         node1 = nodeServiceBlockingStub.createNode(NodeCreateDTO.newBuilder().setLabel("node")
             .setLocationId(locationId).setManagementIp("127.0.0.1").build());
@@ -337,6 +335,14 @@ public class NodeTaggingStepDefinitions {
         List<String> nodeLabels = nodesList.stream().map(NodeDTO::getNodeLabel).toList();
         assertTrue(nodeLabels.contains(node1.getNodeLabel()));
         assertTrue(nodeLabels.contains(node2.getNodeLabel()));
+    }
+
+    @Then("The monitored state will be {string}")
+    public void monitoredStateWillBe(String state) {
+        final var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
+        final var node = nodeServiceBlockingStub.getNodeById(Int64Value.of(this.node1.getId()));
+
+        assertEquals(MonitoredState.valueOf(state), node.getMonitoredState());
     }
 
     /*

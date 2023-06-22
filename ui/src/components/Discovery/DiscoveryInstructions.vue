@@ -10,7 +10,7 @@
         {{ Instructions.subtitle }}
       </div>
       <br />
-      <div class="section">
+      <div class="section" v-if="instructionsType === InstructionsType.Active">
         <div class="title">{{ Instructions.activeDiscoveryTitle }}</div>
         {{ Instructions.activeDiscoverySubtitle }}
         <ul class="list">
@@ -33,7 +33,7 @@
           </li>
         </ul>
       </div>
-      <div class="section">
+      <div class="section" v-if="instructionsType === InstructionsType.Passive">
         <div class="title">{{ Instructions.passiveDiscoveryTitle }}</div>
 
         {{ Instructions.passiveDiscoverySubtitle }}
@@ -66,8 +66,10 @@
 <script setup lang="ts">
 import { FeatherDrawer } from '@featherds/drawer'
 import { Instructions } from './discovery.text'
+import { InstructionsType } from './discovery.constants';
 const props = defineProps<{
   isOpen: boolean
+  instructionsType: string
 }>()
 
 const isOpen = computed<boolean>(() => props.isOpen)

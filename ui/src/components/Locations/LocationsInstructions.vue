@@ -5,11 +5,11 @@
     @update:modelValue="$emit('drawer-closed')"
   >
     <div class="drawerContent">
-      <div class="section">
+      <div class="section" v-if="instructionsType === InstructionsType.Location">
         <div class="title">{{ Instructions.locTitle }}</div>
         {{ Instructions.locInfo }}
       </div>
-      <div class="section">
+      <div class="section" v-if="instructionsType === InstructionsType.Minion">
         <div class="title">{{ Instructions.minTitle }}</div>
         {{ Instructions.minInfo }}
       </div>
@@ -20,8 +20,10 @@
 <script setup lang="ts">
 import { FeatherDrawer } from '@featherds/drawer'
 import { Instructions } from './locations.text'
+import { InstructionsType } from './locations.constants'
 const props = defineProps<{
   isOpen: boolean
+  instructionsType: string
 }>()
 
 const isOpen = computed<boolean>(() => props.isOpen)

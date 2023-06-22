@@ -6,7 +6,7 @@
       class="delete"
       @click="$emit('deleteCondition', condition.id)"
     >
-      delete
+      Delete condition {{ conditionLetters[index].toUpperCase() }}
     </div>
   </div>
   <div

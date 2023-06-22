@@ -32,14 +32,14 @@
         <LocationsList
           v-if="locationsList"
           :items="locationsList"
-          @showInstructions="showInstructions = true"
+          @showInstructions="openInstructions(InstructionsType.Location)"
         />
       </div>
       <div class="content-right">
         <LocationsMinionsList
           v-if="locationStore.displayType === DisplayType.LIST"
           :minions="minionsList"
-          @showInstructions="showInstructions = true"
+          @showInstructions="openInstructions(InstructionsType.Minion)"
         />
         <LocationsAddForm
           v-if="locationStore.displayType === DisplayType.ADD"
@@ -59,6 +59,7 @@
     </div>
   </div>
   <LocationsInstructions
+    :instructionsType='instructionsType'
     :isOpen="showInstructions"
     @drawerClosed="() => (showInstructions = false)"
   />
@@ -73,10 +74,12 @@ import { useMinionsQueries } from '@/store/Queries/minionsQueries'
 import LocationsList from '@/components/Locations/LocationsList.vue'
 import { DisplayType } from '@/types/locations.d'
 import { createAndDownloadBlobFile } from '@/components/utils'
+import { InstructionsType } from '@/components/Locations/locations.constants'
 
 const locationStore = useLocationStore()
 const minionsQueries = useMinionsQueries()
 const showInstructions = ref(false)
+const instructionsType = ref(InstructionsType.Location)
 
 const locationsList = computed(() => locationStore.locationsList)
 const minionsList = computed(() => minionsQueries.minionsList)
@@ -102,6 +105,11 @@ const downloadCert = async () => {
     locationStore.setCertificatePassword(minionCertificate.password as string)
     createAndDownloadBlobFile(minionCertificate.certificate, `${locationStore.selectedLocation?.location}-certificate.p12`)
   }
+}
+
+const openInstructions = (type: InstructionsType) => {
+  showInstructions.value = true
+  instructionsType.value = type
 }
 </script>
 

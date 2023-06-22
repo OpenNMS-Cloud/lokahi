@@ -18,6 +18,7 @@ fragment AlertsParts on Query {
       severity
       label
       nodeName
+      databaseId
     }
   }
 }

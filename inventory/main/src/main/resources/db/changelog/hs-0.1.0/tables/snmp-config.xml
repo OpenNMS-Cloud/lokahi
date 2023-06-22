@@ -52,8 +52,12 @@
             <changeSetExecuted id="0.1.1-snmp-config" author="ldywicki" changeLogFile="db/changelog/hs-0.1.0/tables/snmp-config.xml"/>
         </preConditions>
         <sql>
-            UPDATE snmp_config SET location_id=locations.id FROM (SELECT id, location FROM monitoring_location) AS locations
-            WHERE snmp_config.location=locations.location
+            UPDATE snmp_config SET location_id=locations.id FROM (SELECT id, tenant_id, location FROM monitoring_location) AS locations
+            WHERE snmp_config.location=locations.location AND snmp_config.tenant_id=locations.tenant_id
+        </sql>
+        <!-- Remove orphans -->
+        <sql>
+            DELETE FROM snmp_config WHERE location_id IS NULL
         </sql>
         <addNotNullConstraint tableName="snmp_config" columnName="location_id" />
         <dropColumn tableName="snmp_config" columnName="location" />

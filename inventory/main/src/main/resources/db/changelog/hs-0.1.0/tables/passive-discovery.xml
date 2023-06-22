@@ -83,8 +83,12 @@
             <changeSetExecuted id="0.1.1-passive-discovery" author="ldywicki" changeLogFile="db/changelog/hs-0.1.0/tables/passive-discovery.xml"/>
         </preConditions>
         <sql>
-            UPDATE passive_discovery SET location_id=locations.id FROM (SELECT id, location FROM monitoring_location) AS locations
-            WHERE passive_discovery.location=locations.location
+            UPDATE passive_discovery SET location_id=locations.id FROM (SELECT id, tenant_id, location FROM monitoring_location) AS locations
+            WHERE passive_discovery.location=locations.location AND passive_discovery.tenant_id=locations.tenant_id
+        </sql>
+        <!-- Remove orphans -->
+        <sql>
+            DELETE FROM passive_discovery WHERE location_id IS NULL
         </sql>
         <addNotNullConstraint tableName="passive_discovery" columnName="location_id" />
         <dropColumn tableName="passive_discovery" columnName="location" />

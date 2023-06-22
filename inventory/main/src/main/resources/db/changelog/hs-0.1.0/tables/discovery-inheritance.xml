@@ -114,8 +114,12 @@
             <changeSetExecuted id="0.1.1-active-discovery-inheritance" author="ldywicki" changeLogFile="db/changelog/hs-0.1.0/tables/discovery-inheritance.xml"/>
         </preConditions>
         <sql>
-            UPDATE active_discovery SET location_id=locations.id FROM (SELECT id, location FROM monitoring_location) AS locations
-            WHERE active_discovery.location=locations.location
+            UPDATE active_discovery SET location_id=locations.id FROM (SELECT id, tenant_id, location FROM monitoring_location) AS locations
+            WHERE active_discovery.location=locations.location AND active_discovery.tenant_id=locations.tenant_id
+        </sql>
+        <!-- Remove orphans -->
+        <sql>
+            DELETE FROM active_discovery WHERE location_id IS NULL
         </sql>
         <addNotNullConstraint tableName="active_discovery" columnName="location_id" />
         <dropColumn tableName="active_discovery" columnName="location" />

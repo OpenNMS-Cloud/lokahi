@@ -37,7 +37,9 @@ import java.io.IOException;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -62,20 +64,26 @@ public class PKCS12GeneratorTest {
         Path outputDirPath = Path.of("/test-output-dir");
         File mockCaCertFile = Mockito.mock(File.class);
         Mockito.when(mockCaCertFile.exists()).thenReturn(true);
+
         CertificateReader mockCertificateReader = Mockito.mock(CertificateReader.class);
+        X509Certificate mockCertificate = Mockito.mock(X509Certificate.class);
+        Mockito.when(mockCertificateReader.getX509Certificate(
+            outputDirPath.toFile().getAbsolutePath() + FileSystems.getDefault().getSeparator() + "client.signed.cert"))
+            .thenReturn(mockCertificate);
+
         pkcs12Generator.setCertificateReader(mockCertificateReader);
+
         //
         // Execute
         //
         pkcs12Generator.setCommandExecutor(mockCommandExecutor);
-        pkcs12Generator.generate(1010L, "x-tenant-id-x", outputDirPath, new File("minion.p12"), "x-archive-pass-x", mockCaCertFile, new File("x-ca-key-file-x"));
+        var outputCert = pkcs12Generator.generate(1010L, "x-tenant-id-x", outputDirPath, new File("minion.p12"), "x-archive-pass-x", mockCaCertFile, new File("x-ca-key-file-x"));
 
         //
         // Verify the Results
         //
         Mockito.verify(mockCommandExecutor).executeCommand("openssl genrsa -out client.key.pkcs1 2048", outputDirPath.toFile());
-        Mockito.verify(mockCertificateReader).getX509Certificate(
-            outputDirPath.toFile().getAbsolutePath() + FileSystems.getDefault().getSeparator() + "client.signed.cert");
+        assertEquals(mockCertificate, outputCert);
     }
 
     @Test

@@ -121,17 +121,11 @@ public class MinionCertificateManagerTestSteps {
     }
 
     @Then("send isValid with last serial number and timeout {int}ms")
-    public String checkLastIsValid(long timeout) throws InterruptedException {
+    public String checkLastIsValid(long timeout) {
         LOG.info("Checking certificate serial number: {}", serialNumber);
-        Supplier<IsCertificateValidResponse> call = () -> clientUtils.getMinionCertificateManagerStub()
-            .isCertValid(IsCertificateValidRequest.newBuilder().setSerialNumber(serialNumber).build());
-        Supplier<IsCertificateValidResponse> isValid = retryUtils.retry(
-            () -> call,
-            result -> result.get().getIsValid(),
-            100,
-            timeout,
-            null);
-        assertTrue("Serial number is invalid", isValid.get().getIsValid());
+        IsCertificateValidResponse response = clientUtils.getMinionCertificateManagerStub().isCertValid(
+            IsCertificateValidRequest.newBuilder().setSerialNumber(serialNumber).build());
+        assertTrue("Serial number is invalid", response.getIsValid());
         return serialNumber;
     }
 

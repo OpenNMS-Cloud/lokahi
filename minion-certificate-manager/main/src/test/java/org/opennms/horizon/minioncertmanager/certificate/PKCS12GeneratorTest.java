@@ -34,6 +34,7 @@ import org.mockito.Mockito;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.security.cert.CertificateException;
 
@@ -58,10 +59,11 @@ public class PKCS12GeneratorTest {
         //
         // Setup Test Data and Interactions
         //
-        Path outputDirPath = Path.of("src/test/resources/test-output-dir");
+        Path outputDirPath = Path.of("/test-output-dir");
         File mockCaCertFile = Mockito.mock(File.class);
         Mockito.when(mockCaCertFile.exists()).thenReturn(true);
-
+        CertificateReader mockCertificateReader = Mockito.mock(CertificateReader.class);
+        pkcs12Generator.setCertificateReader(mockCertificateReader);
         //
         // Execute
         //
@@ -72,6 +74,8 @@ public class PKCS12GeneratorTest {
         // Verify the Results
         //
         Mockito.verify(mockCommandExecutor).executeCommand("openssl genrsa -out client.key.pkcs1 2048", outputDirPath.toFile());
+        Mockito.verify(mockCertificateReader).getX509Certificate(
+            outputDirPath.toFile().getAbsolutePath() + FileSystems.getDefault().getSeparator() + "client.signed.cert");
     }
 
     @Test

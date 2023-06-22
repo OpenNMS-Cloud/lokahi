@@ -74,7 +74,7 @@ public class MinionCertificateManagerImpl extends MinionCertificateManagerGrpc.M
     private final File caCertFile;
     private final File caKeyFile;
 
-    private SerialNumberRepository serialNumberRepository;
+    private final SerialNumberRepository serialNumberRepository;
 
     private CommandExecutor commandExecutor = new CommandExecutor();
 

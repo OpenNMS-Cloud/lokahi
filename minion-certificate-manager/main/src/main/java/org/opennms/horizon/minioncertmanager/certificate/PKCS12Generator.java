@@ -33,13 +33,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.Map;
 
@@ -51,6 +49,9 @@ public class PKCS12Generator {
 
     @Setter  // Testability
     private CommandExecutor commandExecutor = new CommandExecutor();
+
+    @Setter  // Testability
+    private CertificateReader certificateReader = new CertificateReader();
 
     /**
      * generate self-signed certificate and return certificate serial number
@@ -88,12 +89,6 @@ public class PKCS12Generator {
             Map.of("PASS_VAR", archivePass), archive.getAbsolutePath(), "PASS_VAR");
 
         LOG.info("=== DONE");
-        return getX509Certificate(file.getAbsolutePath() + FileSystems.getDefault().getSeparator() + "client.signed.cert");
-    }
-
-    private X509Certificate getX509Certificate(String certificatePath) throws CertificateException, FileNotFoundException {
-        CertificateFactory fac = CertificateFactory.getInstance("X509");
-        FileInputStream is = new FileInputStream(certificatePath);
-        return (X509Certificate) fac.generateCertificate(is);
+        return certificateReader.getX509Certificate(file.getAbsolutePath() + FileSystems.getDefault().getSeparator() + "client.signed.cert");
     }
 }

@@ -20,6 +20,6 @@ Feature: Minion Certificate Manager RPC Request Processing
     Given New Get Minion Certificate with tenantId "x-tenant-x" for location id 3030
     Then send Get Minion Certificate Request with timeout 10000ms and verify success
     Then send isValid with last serial number and timeout 10000ms
-    Given New Get Minion Certificate with tenantId "y-tenant-y" for location 3030
+    Given New Get Minion Certificate with tenantId "y-tenant-y" for location id 3031
     Then send Get Minion Certificate Request with timeout 10000ms and verify success
     Then send isValid with last serial number and timeout 10000ms

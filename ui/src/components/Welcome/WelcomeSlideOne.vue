@@ -21,12 +21,6 @@
                     <h4>Minimum System Requirements:</h4>
                 </div>
                 <table aria-describedby="Minimum System Requirements" role="presentation">
-                    <thead>
-                        <tr>
-                            <th>Requirement Type</th>
-                            <th>Requirement Specification</th>
-                        </tr>
-                    </thead>
                     <tbody>
                         <tr>
                             <td>CPU</td>

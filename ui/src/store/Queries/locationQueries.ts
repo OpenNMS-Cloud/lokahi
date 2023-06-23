@@ -1,6 +1,6 @@
 import { useQuery } from 'villus'
 import { defineStore } from 'pinia'
-import { LocationsListDocument, ListMinionsForTableDocument, SearchLocationDocument, GetMinionCertificateDocument, FindLocationsForWelcomeDocument } from '@/types/graphql'
+import { LocationsListDocument, ListMinionsForTableDocument, SearchLocationDocument, GetMinionCertificateDocument } from '@/types/graphql'
 
 export const useLocationQueries = defineStore('locationQueries', () => {
   const fetchLocations = () =>
@@ -9,17 +9,6 @@ export const useLocationQueries = defineStore('locationQueries', () => {
       fetchOnMount: false,
       cachePolicy: 'network-only'
     })
-
-  const fetchLocationsForWelcome = async () => {
-
-    const { execute } = useQuery({
-      query: FindLocationsForWelcomeDocument,
-      cachePolicy: 'network-only',
-      fetchOnMount: false,
-    })
-    const response = await execute();
-    return toRaw(response?.data?.findAllLocations)?.map((d) => ({ id: d.id, location: d.location || '' })) || [];
-  }
 
   const fetchMinions = () =>
     useQuery({
@@ -48,10 +37,8 @@ export const useLocationQueries = defineStore('locationQueries', () => {
       cachePolicy: 'network-only'
     })
 
-
   return {
     fetchLocations,
-    fetchLocationsForWelcome,
     fetchMinions,
     searchLocation,
     getMinionCertificate

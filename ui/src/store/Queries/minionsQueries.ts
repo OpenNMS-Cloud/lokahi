@@ -68,29 +68,6 @@ export const useMinionsQueries = defineStore('minionsQueries', () => {
     })
   }
 
-  const getMinionsByLocationId = async (locationId: number) => {
-    const { execute } = useQuery({
-      query: FindMinionsByLocationIdDocument,
-      cachePolicy: 'network-only',
-      fetchOnMount: false,
-      variables: { locationId }
-    })
-    const queryResults = await execute();
-    return queryResults.data?.findMinionsByLocationId;
-  }
-
-  const getAllMinions = async (): Promise<[]> => {
-
-    const { execute } = useQuery({
-      query: ListMinionsForTableDocument,
-      cachePolicy: 'network-only'
-    });
-
-    const allMinions = await execute();
-    const rawResult = toRaw(allMinions.data)?.findAllMinions || []
-    return allMinions.error ? [] : rawResult
-  }
-
   // find minions by location id
   const {
     onData: onFindMinionsByLocationId,
@@ -116,8 +93,6 @@ export const useMinionsQueries = defineStore('minionsQueries', () => {
   })
 
   return {
-    getAllMinions,
-    getMinionsByLocationId,
     minionsList: computed(() => minionsList.value),
     fetchMinions,
     findMinionsByLocationId,

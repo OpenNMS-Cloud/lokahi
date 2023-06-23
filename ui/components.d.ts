@@ -3,7 +3,7 @@
 // Read more: https://github.com/vuejs/core/pull/3399
 import '@vue/runtime-core'
 
-export { }
+export {}
 
 declare module '@vue/runtime-core' {
   export interface GlobalComponents {
@@ -24,6 +24,7 @@ declare module '@vue/runtime-core' {
     ButtonTextIcon: typeof import('./src/components/Common/ButtonTextIcon.vue')['default']
     ButtonWithSpinner: typeof import('./src/components/Common/ButtonWithSpinner.vue')['default']
     CollapsingCard: typeof import('./src/components/Common/CollapsingCard.vue')['default']
+    CollapsingWrapper: typeof import('./src/components/Common/CollapsingWrapper.vue')['default']
     ContextMenu: typeof import('./src/components/Topology/ContextMenu.vue')['default']
     CountColor: typeof import('./src/components/Common/CountColor.vue')['default']
     CtrlHighlightFocusedNodes: typeof import('./src/components/Topology/CtrlHighlightFocusedNodes.vue')['default']

@@ -16,14 +16,14 @@ import { validationErrorsToStringRecord } from '@/services/validationService'
 import useMinionCmd from '@/composables/useMinionCmd'
 import { ComputedRef } from 'vue'
 import { useLocationQueries } from '../Queries/locationQueries'
-import { useNodeQueries } from '../Queries/nodeQueries'
 import { useMinionsQueries } from '../Queries/minionsQueries'
-import { useCertificateQueries } from '../Queries/certificateQueries'
+import { useWelcomeQueries } from '../Queries/welcomeQueries'
 
 interface WelcomeStoreState {
   copied: boolean
   copyButtonCopy: string
   defaultLocationName: string
+  delayCounter: number
   detectedDevice: Partial<Node> | undefined
   devicePreview: ItemPreviewProps
   discoverySubmitted: boolean
@@ -62,6 +62,7 @@ export const useWelcomeStore = defineStore('welcomeStore', {
   ({
     copied: false,
     copyButtonCopy: 'Copy',
+    delayCounter: 0,
     discoverySubmitted: false,
     defaultLocationName: 'default',
     detectedDevice: {},
@@ -69,10 +70,8 @@ export const useWelcomeStore = defineStore('welcomeStore', {
       title: 'Node Discovery',
       loading: false,
       itemTitle: '',
-      itemSubtitle: 'Added --/--/--',
+      itemSubtitle: '',
       itemStatuses: [
-        { title: 'ICMP Latency', status: 'Normal', statusColor: '#cee3ce', statusText: '#0b720c' },
-        { title: 'SNMP Uptime', status: 'Normal', statusColor: '#cee3ce', statusText: '#0b720c' }
       ]
     },
     doneGradient: false,
@@ -107,7 +106,7 @@ export const useWelcomeStore = defineStore('welcomeStore', {
   actions: {
     async init() {
       let onboardingState = true
-      const { getAllMinions } = useMinionsQueries()
+      const { getAllMinions } = useWelcomeQueries()
       const minions = await getAllMinions();
       await this.createDefaultLocation();
       if (minions?.length > 0) {
@@ -137,8 +136,8 @@ export const useWelcomeStore = defineStore('welcomeStore', {
       }
     },
     async createDefaultLocation() {
-      const { fetchLocationsForWelcome } = useLocationQueries();
-      const locations = await fetchLocationsForWelcome();
+      const { getLocationsForWelcome } = useWelcomeQueries();
+      const locations = await getLocationsForWelcome();
       const existingDefault = locations?.find((def: { location: string }) => def.location === 'default');
       if (!existingDefault) {
         const locationMutations = useLocationMutations();
@@ -160,13 +159,13 @@ export const useWelcomeStore = defineStore('welcomeStore', {
     },
     dockerCmd() {
       let dcmd = this.minionCmd.minionDockerCmd
-      if (location.origin === 'https://onmshs.local:1443') {
+      if (location.origin === 'https://onmshs.local:1443' || location.origin.startsWith('http://localhost:')) {
         dcmd = `docker run --rm -p 8181:8181 -p 8101:8101 -p 1162:1162/udp -p 8877:8877/udp -p 4729:4729/udp -p 9999:9999/udp -p 162:162/udp -e TZ='America/New_York' -e USE_KUBERNETES="false" -e MINION_GATEWAY_HOST="host.docker.internal" -e MINION_GATEWAY_PORT=1443 -e MINION_GATEWAY_TLS="true" -e GRPC_CLIENT_TRUSTSTORE=/opt/karaf/gateway.crt --mount type=bind,source="${import.meta.env.VITE_MINION_PATH}/target/tmp/server-ca.crt",target="/opt/karaf/gateway.crt",readonly -e GRPC_CLIENT_KEYSTORE='/opt/karaf/minion.p12' -e GRPC_CLIENT_KEYSTORE_PASSWORD='${this.minionCert.password}' -e MINION_ID='default' --mount type=bind,source="${import.meta.env.VITE_MINION_PATH}/target/tmp/${this.defaultLocationName}-certificate.p12",target="/opt/karaf/minion.p12",readonly  -e GRPC_CLIENT_OVERRIDE_AUTHORITY="minion.onmshs.local" -e IGNITE_SERVER_ADDRESSES="localhost" opennms/lokahi-minion:latest`
       }
       return dcmd;
     },
     async downloadClick() {
-      const { getMinionCertificate } = useCertificateQueries();
+      const { getMinionCertificate } = useWelcomeQueries();
       this.downloadCopy = 'Downloading'
       this.downloading = true;
       this.minionCert = await getMinionCertificate(this.firstLocation.id)
@@ -189,28 +188,34 @@ export const useWelcomeStore = defineStore('welcomeStore', {
       }, 5000)
     },
     async getFirstNode() {
+      const defaultLatency = 0;
+      const timeoutDelay = 10000;
+      const maxDelayLoops = 9; // 10 seconds * 9 loops === 1.5 minutes of waiting before showing a DOWN discovery. 
       const { getDiscoveries } = useDiscoveryQueries();
-      const { getNodeDetails } = useNodeQueries();
+      const { getNodeDetails } = useWelcomeQueries();
       await getDiscoveries();
       const details = await getNodeDetails(this.firstDiscovery.name);
       const metric = details?.metrics?.nodeLatency?.data?.result?.[0]?.values?.[0]?.[1]
-      if (details.detail && metric) {
-        this.setDevicePreview(details.detail, details.metrics, metric);
+      if ((details.detail && metric) || details.detail && this.delayCounter > maxDelayLoops) {
+        this.setDevicePreview(details.detail, details.metrics, metric || defaultLatency);
         this.devicePreview.loading = false;
       } else {
-        setTimeout(this.getFirstNode, 10000)
+        if (details.detail) {
+          this.delayCounter += 1;
+        }
+        setTimeout(this.getFirstNode, timeoutDelay)
       }
     },
     getFailureStatus() {
       return {
-        statusColor: 'rgba(165,2,31,0.3)',
-        statusText: 'rgba(165,2,31,1)'
+        statusColor: 'var(--feather-error)',
+        statusText: 'var(--feather-primary-text-on-color)'
       }
     },
     getSuccessStatus() {
       return {
-        statusColor: '#cee3ce',
-        statusText: '#0b720c'
+        statusColor: 'var(--feather-success)',
+        statusText: 'var(--feather-primary-text-on-color)'
       }
     },
     loadDevicePreview() {
@@ -225,7 +230,7 @@ export const useWelcomeStore = defineStore('welcomeStore', {
     },
     async refreshMinions() {
       if (this.refreshing && this.firstLocation.location) {
-        const { getAllMinions } = useMinionsQueries();
+        const { getAllMinions } = useWelcomeQueries();
         const localMinions = await getAllMinions()
         if (localMinions?.length > 0) {
           this.refreshing = false

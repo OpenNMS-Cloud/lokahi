@@ -42,8 +42,9 @@ import lombok.Setter;
 import org.hibernate.annotations.Type;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
-import java.util.StringJoiner;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -65,16 +66,6 @@ public class Tag {
         joinColumns = @JoinColumn(name = "tag_id"),
         inverseJoinColumns = @JoinColumn(name = "policy_id")
     )
-    private List<MonitorPolicy> policies = new ArrayList<>();
+    private Set<MonitorPolicy> policies = new HashSet<>();
 
-    @Override
-    public String toString() {
-        return new StringJoiner(", ", Tag.class.getSimpleName() + "[", "]")
-            .add("id=" + id)
-            .add("tenantId='" + tenantId + "'")
-            .add("name='" + name + "'")
-            .add("nodeIds=" + nodeIds)
-            .add("policies=" + policies)
-            .toString();
-    }
 }

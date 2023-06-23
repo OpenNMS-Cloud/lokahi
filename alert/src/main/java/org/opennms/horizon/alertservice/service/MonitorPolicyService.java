@@ -39,9 +39,11 @@ import org.opennms.horizon.alerts.proto.Severity;
 import org.opennms.horizon.alerts.proto.TriggerEventProto;
 import org.opennms.horizon.alertservice.db.entity.AlertDefinition;
 import org.opennms.horizon.alertservice.db.entity.MonitorPolicy;
+import org.opennms.horizon.alertservice.db.entity.Tag;
 import org.opennms.horizon.alertservice.db.entity.TriggerEvent;
 import org.opennms.horizon.alertservice.db.repository.AlertDefinitionRepository;
 import org.opennms.horizon.alertservice.db.repository.MonitorPolicyRepository;
+import org.opennms.horizon.alertservice.db.repository.TagRepository;
 import org.opennms.horizon.alertservice.db.repository.TriggerEventRepository;
 import org.opennms.horizon.alertservice.mapper.MonitorPolicyMapper;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
@@ -49,8 +51,10 @@ import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -66,6 +70,7 @@ public class MonitorPolicyService {
     private final MonitorPolicyRepository repository;
     private final AlertDefinitionRepository definitionRepo;
     private final TriggerEventRepository eventRepository;
+    private final TagRepository tagRepository;
 
     @EventListener(ApplicationReadyEvent.class)
     public void defaultPolicies() {
@@ -92,6 +97,7 @@ public class MonitorPolicyService {
                 .setNotifyByPagerDuty(true)
                 .setNotifyByWebhooks(true)
                 .addRules(defaultRule)
+                .addTags(DEFAULT_TAG)
                 .setNotifyInstruction("This is default policy notification") //todo: changed to something from environment
                 .build();
             createPolicy(defaultPolicy, SYSTEM_TENANT);
@@ -106,7 +112,25 @@ public class MonitorPolicyService {
         updateData(policy, tenantId);
         MonitorPolicy newPolicy = repository.save(policy);
         createAlertDefinitionFromPolicy(newPolicy);
+        var tags = updateTags(newPolicy, policy.getTags());
+        newPolicy.setTags(tags);
         return policyMapper.map(newPolicy);
+    }
+
+    private Set<Tag> updateTags(MonitorPolicy newPolicy, Set<Tag> tags) {
+        Set<Tag> persistedTags = new HashSet<>();
+        tags.forEach(tag -> persistedTags.add(updateTag(newPolicy, tag)));
+        return persistedTags;
+    }
+
+    private Tag updateTag(MonitorPolicy newPolicy, Tag tag) {
+
+        var optional = tagRepository.findByTenantIdAndName(newPolicy.getTenantId(), tag.getName());
+        if(optional.isPresent()) {
+            tag = optional.get();
+        }
+        tag.getPolicies().add(newPolicy);
+        return tagRepository.save(tag);
     }
 
     @Transactional(readOnly = true)
@@ -135,6 +159,9 @@ public class MonitorPolicyService {
                 e.setTenantId(tenantId);
                 e.setRule(r);
             });
+        });
+        policy.getTags().forEach( tag -> {
+            tag.setTenantId(tenantId);
         });
     }
 

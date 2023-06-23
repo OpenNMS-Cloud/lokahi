@@ -5,7 +5,7 @@
         <feature>ipc-minion</feature>
         <feature>snmp-snmp4j</feature>
         <feature>plugins-api</feature>
-        <bundle>mvn:org.opennms.horizon.minion/traps-listener/${project.version}</bundle>
+        <bundle>mvn:org.opennms.lokahi.minion/traps-listener/${project.version}</bundle>
     </feature>
 
 </features>

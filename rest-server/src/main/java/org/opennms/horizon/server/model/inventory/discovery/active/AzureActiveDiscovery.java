@@ -35,7 +35,7 @@ import lombok.Setter;
 @Setter
 public class AzureActiveDiscovery {
     private Long id;
-    private String location;
+    private String locationId;
     private String name;
     private String tenantId;
     private String clientId;

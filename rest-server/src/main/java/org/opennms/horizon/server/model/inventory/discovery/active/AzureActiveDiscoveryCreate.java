@@ -37,7 +37,7 @@ import java.util.List;
 @Getter
 @Setter
 public class AzureActiveDiscoveryCreate {
-    private String location;
+    private String locationId;
     private String name;
     private String clientId;
     private String clientSecret;

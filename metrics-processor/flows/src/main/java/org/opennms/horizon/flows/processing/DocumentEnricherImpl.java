@@ -80,7 +80,7 @@ public class DocumentEnricherImpl {
             return Collections.emptyList();
         }
 
-        return flows.stream().map(f -> this.enrichOne(f, flowsLog.getTenantId(), flowsLog.getLocation())).toList();
+        return flows.stream().map(f -> this.enrichOne(f, flowsLog.getTenantId(), flowsLog.getLocationId())).toList();
     }
 
     private boolean isPrivateAddress(String ipAddress) {

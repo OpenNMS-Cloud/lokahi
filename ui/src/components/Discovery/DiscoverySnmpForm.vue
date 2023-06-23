@@ -15,8 +15,8 @@
     <DiscoveryLocationsAutocomplete
       class="locations-select"
       type="single"
-      :preLoadedlocation="props.discovery?.location"
-      @location-selected="(val) => setSnmpConfig('location', val)"
+      :preLoadedlocation="props.discovery?.locationId"
+      @location-selected="(loc: MonitoringLocation) => setSnmpConfig('locationId', loc.id)"
     />
     <BasicAutocomplete
       @items-selected="tagsSelectedListener"
@@ -97,7 +97,7 @@ import {
 import discoveryText, { DiscoverySNMPForm, Common } from '@/components/Discovery/discovery.text'
 import { useDiscoveryQueries } from '@/store/Queries/discoveryQueries'
 import { useTagQueries } from '@/store/Queries/tagQueries'
-import { IcmpActiveDiscovery, IcmpActiveDiscoveryCreateInput } from '@/types/graphql'
+import { IcmpActiveDiscovery, IcmpActiveDiscoveryCreateInput, MonitoringLocation } from '@/types/graphql'
 import { set } from 'lodash'
 import { useDiscoveryMutations } from '@/store/Mutations/discoveryMutations'
 import DiscoveryContentEditable from '@/components/Discovery/DiscoveryContentEditable.vue'

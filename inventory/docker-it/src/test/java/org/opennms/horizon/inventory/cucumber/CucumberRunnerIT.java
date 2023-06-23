@@ -53,13 +53,12 @@ import static io.cucumber.core.options.Constants.PLUGIN_PROPERTY_NAME;
 
 @Suite
 @IncludeEngines("cucumber")
-@SelectClasspathResource("org/opennms/horizon/inventory")
+@SelectClasspathResource("org/opennms/horizon/inventory/")
 @ConfigurationParameter(key = PLUGIN_PROPERTY_NAME, value = "json:target/cucumber-report.json, html:target/cucumber.html, pretty")
 @ConfigurationParameter(key = GLUE_PROPERTY_NAME, value = "org.opennms.horizon.inventory,org.opennms.horizon.testtool.miniongateway.wiremock.client")
 @ConfigurationParameter(key = FILTER_TAGS_PROPERTY_NAME, value = "not @ignore")
 public class CucumberRunnerIT {
 
-    public static final String MOCK_MINION_GATEWAY_DOCKER_IMAGE = "opennms-inventory/mock-minion-gateway:local";
     public static final String KAFKA_BOOTSTRAP_SERVER_PROPERTYNAME = "kafka.bootstrap-servers";
 
     private static final Logger LOG = LoggerFactory.getLogger(CucumberRunnerIT.class);
@@ -119,7 +118,6 @@ public class CucumberRunnerIT {
         kafkaContainer.stop();
         azureWireMockContainer.stop();
         postgreSQLContainer.stop();
-        //mockMinionGatewayContainer.stop();
     }
 
     @SuppressWarnings({"unchecked"})

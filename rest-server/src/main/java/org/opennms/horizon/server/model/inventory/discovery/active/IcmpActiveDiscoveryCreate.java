@@ -39,7 +39,7 @@ import java.util.List;
 @Setter
 public class IcmpActiveDiscoveryCreate {
     private String name;
-    private String location;
+    private String locationId;
     private List<TagCreate> tags;
     private List<String> ipAddresses;
     private SNMPConfig snmpConfig;

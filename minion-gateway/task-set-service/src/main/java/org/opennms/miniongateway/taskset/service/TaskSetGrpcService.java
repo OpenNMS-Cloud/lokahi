@@ -70,7 +70,7 @@ public class TaskSetGrpcService extends TaskSetServiceGrpc.TaskSetServiceImplBas
         TaskSetGrpcServiceUpdateProcessor updateProcessor = taskSetGrpcServiceUpdateProcessorFactory.create(request);
 
         try {
-            taskSetStorage.atomicUpdateTaskSetForLocation(request.getTenantId(), request.getLocation(), updateProcessor);
+            taskSetStorage.atomicUpdateTaskSetForLocation(request.getTenantId(), request.getLocationId(), updateProcessor);
         } catch (RuntimeException rtExc) {
             // Log exceptions here that might otherwise get swallowed
             LOG.warn("error applying task set updates", rtExc);

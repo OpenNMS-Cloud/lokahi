@@ -4,8 +4,8 @@
     <modelVersion>4.0.0</modelVersion>
 
 	<parent>
-        <groupId>org.opennms.horizon</groupId>
-        <artifactId>horizon-parent</artifactId>
+        <groupId>org.opennms.lokahi</groupId>
+        <artifactId>lokahi-parent</artifactId>
         <version>0.1.0-SNAPSHOT</version>
         <relativePath>../parent-pom</relativePath>
 	</parent>
@@ -39,13 +39,13 @@
     </dependencyManagement>
 	<dependencies>
         <dependency>
-            <groupId>org.opennms.horizon.shared</groupId>
+            <groupId>org.opennms.lokahi.shared</groupId>
             <artifactId>spring-boot-logback-json</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.opennms.horizon.shared</groupId>
-            <artifactId>horizon-shaded-grpc-core</artifactId>
+            <groupId>org.opennms.lokahi.shared</groupId>
+            <artifactId>lokahi-shaded-grpc-core</artifactId>
             <version>${project.version}</version>
         </dependency>
 		<dependency>
@@ -61,7 +61,7 @@
 			<artifactId>spring-boot-devtools</artifactId>
 		</dependency>
         <dependency>
-            <groupId>org.opennms.horizon.shared</groupId>
+            <groupId>org.opennms.lokahi.shared</groupId>
             <artifactId>grpc-common-constants</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -93,28 +93,28 @@
             <artifactId>grpc-netty-shaded</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.opennms.horizon.shared</groupId>
+            <groupId>org.opennms.lokahi.shared</groupId>
             <artifactId>inventory</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.opennms.horizon.shared</groupId>
+            <groupId>org.opennms.lokahi.shared</groupId>
             <artifactId>events</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.opennms.horizon.shared</groupId>
+            <groupId>org.opennms.lokahi.shared</groupId>
             <artifactId>notifications</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.opennms.horizon.shared</groupId>
+            <groupId>org.opennms.lokahi.shared</groupId>
             <artifactId>minion-certificate-manager-api</artifactId>
             <version>0.1.0-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
-            <groupId>org.opennms.horizon.shared</groupId>
+            <groupId>org.opennms.lokahi.shared</groupId>
             <artifactId>alert-dto</artifactId>
             <version>${project.version}</version>
         </dependency>

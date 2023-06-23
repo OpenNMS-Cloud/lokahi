@@ -3,18 +3,18 @@
     <repository>mvn:org.apache.cxf.karaf/apache-cxf/${cxf.version}/xml/features</repository>
     <repository>mvn:org.apache.camel.karaf/apache-camel/${camel.version}/xml/features</repository>
 
-    <repository>mvn:org.opennms.horizon.minion/grpc-features/${project.version}/xml/features</repository>
-    <repository>mvn:org.opennms.horizon.minion/ipc-features/${project.version}/xml/features</repository>
-    <repository>mvn:org.opennms.horizon.minion/taskset-features/${project.version}/xml/features</repository>
-    <repository>mvn:org.opennms.horizon.minion/observability-features/${project.version}/xml/features</repository>
-    <repository>mvn:org.opennms.horizon.minion/plugin-features/${project.version}/xml/features</repository>
-    <repository>mvn:org.opennms.horizon.minion/icmp-plugin/${project.version}/xml/features</repository>
-    <repository>mvn:org.opennms.horizon.shared/snmp-api/${project.version}/xml/features</repository>
-    <repository>mvn:org.opennms.horizon.minion/snmp-plugin/${project.version}/xml/features</repository>
-    <repository>mvn:org.opennms.horizon.minion/traps-features/${project.version}/xml/features</repository>
-    <repository>mvn:org.opennms.horizon.minion/flows-features/${project.version}/xml/features</repository>
-    <repository>mvn:org.opennms.horizon.minion/azure-plugin/${project.version}/xml/features</repository>
-    <repository>mvn:org.opennms.horizon.minion/nodescan-plugin/${project.version}/xml/features</repository>
+    <repository>mvn:org.opennms.lokahi.minion/grpc-features/${project.version}/xml/features</repository>
+    <repository>mvn:org.opennms.lokahi.minion/ipc-features/${project.version}/xml/features</repository>
+    <repository>mvn:org.opennms.lokahi.minion/taskset-features/${project.version}/xml/features</repository>
+    <repository>mvn:org.opennms.lokahi.minion/observability-features/${project.version}/xml/features</repository>
+    <repository>mvn:org.opennms.lokahi.minion/plugin-features/${project.version}/xml/features</repository>
+    <repository>mvn:org.opennms.lokahi.minion/icmp-plugin/${project.version}/xml/features</repository>
+    <repository>mvn:org.opennms.lokahi.shared/snmp-api/${project.version}/xml/features</repository>
+    <repository>mvn:org.opennms.lokahi.minion/snmp-plugin/${project.version}/xml/features</repository>
+    <repository>mvn:org.opennms.lokahi.minion/traps-features/${project.version}/xml/features</repository>
+    <repository>mvn:org.opennms.lokahi.minion/flows-features/${project.version}/xml/features</repository>
+    <repository>mvn:org.opennms.lokahi.minion/azure-plugin/${project.version}/xml/features</repository>
+    <repository>mvn:org.opennms.lokahi.minion/nodescan-plugin/${project.version}/xml/features</repository>
 
 
     <feature name="minion-ng">

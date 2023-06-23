@@ -117,9 +117,7 @@ public class MetricsTestSteps {
     }
 
     private MetricQueryResult commonQueryDeviceMetrics(String metricName, String labelName, String labelValue) throws MalformedURLException {
-
-        String query =
-            String.format(GQLQueryConstants.GET_LABELED_METRICS_QUERY, metricName, labelName, labelValue);
+        String query = String.format(GQLQueryConstants.GET_LABELED_METRICS_QUERY, metricName, labelName, labelValue);
 
         GQLQuery gqlQuery = new GQLQuery();
         gqlQuery.setQuery(query);

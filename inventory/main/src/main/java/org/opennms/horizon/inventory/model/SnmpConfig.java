@@ -57,8 +57,8 @@ public class SnmpConfig {
     private String tenantId;
 
     @NotNull
-    @Column(name = "location")
-    private String location;
+    @Column(name = "location_id")
+    private Long locationId;
 
     @NotNull
     @Column(name = "ip_address", columnDefinition = "inet")

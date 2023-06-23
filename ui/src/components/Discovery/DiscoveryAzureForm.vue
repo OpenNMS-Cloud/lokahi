@@ -87,7 +87,7 @@
 <script setup lang="ts">
 import { useDiscoveryStore } from '@/store/Views/discoveryStore'
 import { Azure, Common } from './discovery.text'
-import { AzureActiveDiscovery } from '@/types/graphql'
+import { AzureActiveDiscovery, MonitoringLocation } from '@/types/graphql'
 import { useDiscoveryQueries } from '@/store/Queries/discoveryQueries'
 import { useTagQueries } from '@/store/Queries/tagQueries'
 import { useDiscoveryMutations } from '@/store/Mutations/discoveryMutations'
@@ -117,7 +117,7 @@ onMounted(() => {
   }
 })
 
-const selectLocation = (location: string) => location && store.selectLocation(location, true)
+const selectLocation = (location: MonitoringLocation) => location && store.selectLocation(location, true)
 
 const tagsAutocompleteRef = ref()
 const tagsSelectedListener = (tags: Record<string, string>[]) => {

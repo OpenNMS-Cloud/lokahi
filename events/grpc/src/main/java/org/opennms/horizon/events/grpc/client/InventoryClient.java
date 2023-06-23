@@ -55,13 +55,13 @@ public class InventoryClient {
         }
     }
 
-    public long getNodeIdFromQuery(String tenantId, String ipAddress, String location) {
+    public long getNodeIdFromQuery(String tenantId, String ipAddress, String locationId) {
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_BYPASS_KEY, String.valueOf(true));
         metadata.put(GrpcConstants.TENANT_ID_BYPASS_KEY, tenantId);
 
         NodeIdQuery query = NodeIdQuery.newBuilder()
-            .setIpAddress(ipAddress).setLocation(location).build();
+            .setIpAddress(ipAddress).setLocationId(locationId).build();
         return nodeStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
             .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
             .getNodeIdFromQuery(query).getValue();

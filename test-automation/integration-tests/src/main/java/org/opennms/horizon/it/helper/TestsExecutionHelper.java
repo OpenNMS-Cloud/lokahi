@@ -36,7 +36,10 @@ import io.restassured.specification.RequestSpecification;
 import java.io.File;
 import org.apache.http.entity.ContentType;
 import org.apache.http.protocol.HTTP;
+import org.junit.Assert;
+import org.opennms.horizon.it.GQLQueryConstants;
 import org.opennms.horizon.it.gqlmodels.GQLQuery;
+import org.opennms.horizon.it.gqlmodels.querywrappers.FindAllLocationsData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -180,17 +183,28 @@ public class TestsExecutionHelper {
      * @return RestAssured Response or null in case of failure
      */
     public Response executePostQuery(GQLQuery gqlQuery) {
-        LOG.info("Executing GraphQL request {}", gqlQuery.getQuery());
+        LOG.info("Executing GraphQL request {} with variables {}", gqlQuery.getQuery(), gqlQuery.getVariables());
 
         try {
             URL url = formatIngressUrl("/api/graphql");
             String accessToken = getUserAccessTokenSupplier().get();
 
-            return executePost(url, accessToken, gqlQuery);
+            Response response = executePost(url, accessToken, gqlQuery);
+            LOG.info("Response from server: {}", response.asPrettyString());
+            return response;
 
         } catch (MalformedURLException e) {
             LOG.error("checkTheStatusOfTheNode failed: " + e.getMessage());
         }
         return null;
     }
+
+    public FindAllLocationsData commonQueryLocations() throws MalformedURLException {
+        GQLQuery gqlQuery = new GQLQuery();
+        gqlQuery.setQuery(GQLQueryConstants.LIST_LOCATIONS_QUERY);
+        Response restAssuredResponse = executePostQuery(gqlQuery);
+        Assert.assertEquals(200, restAssuredResponse.getStatusCode());
+        return restAssuredResponse.getBody().as(FindAllLocationsData.class);
+    }
+
 }

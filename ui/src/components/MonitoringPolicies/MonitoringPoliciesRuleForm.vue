@@ -105,7 +105,7 @@
               @click="store.addNewCondition"
               :disabled="store.selectedRule.triggerEvents.length === 4 || store.selectedPolicy.isDefault"
             >
-              Additional Parameters
+              Additional Conditions
             </FeatherButton>
           </div>
         </div>

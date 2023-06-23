@@ -1,5 +1,9 @@
 package org.opennms.horizon.it;
 
+import com.github.dockerjava.api.DockerClient;
+import com.github.dockerjava.api.command.StopContainerCmd;
+import com.github.dockerjava.api.command.WaitContainerCmd;
+import com.github.dockerjava.api.model.Container;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -34,17 +38,19 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import org.testcontainers.DockerClientFactory;
+import org.testcontainers.Testcontainers;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
 import org.testcontainers.containers.wait.strategy.Wait;
+import org.testcontainers.containers.wait.strategy.WaitAllStrategy;
 import org.testcontainers.images.builder.Transferable;
 import org.testcontainers.utility.DockerImageName;
-import org.testcontainers.utility.MountableFile;
+import org.testcontainers.utility.ResourceReaper;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -82,7 +88,7 @@ public class InventoryTestSteps {
 // Test Step Definitions
 //----------------------------------------
 
-    @Given("Location {string} is created")
+    @Given("Create location {string}")
     public void createLocation(String location) throws Exception {
         String queryList = GQLQueryConstants.CREATE_LOCATION;
 
@@ -96,7 +102,7 @@ public class InventoryTestSteps {
 
     @Given("Location {string} is removed")
     public void deleteLocation(String location) throws Exception {
-        LocationData locationData = commonQueryLocations().getData().getFindAllLocations().stream()
+        LocationData locationData = helper.commonQueryLocations().getData().getFindAllLocations().stream()
             .filter(loc -> loc.getLocation().equals(location))
             .findFirst().orElse(null);
 
@@ -114,14 +120,14 @@ public class InventoryTestSteps {
 
     @Given("Location {string} does not exist")
     public void queryLocationDoNotExist(String location) throws MalformedURLException {
-        List<LocationData> locationData = commonQueryLocations().getData().getFindAllLocations().stream()
+        List<LocationData> locationData = helper.commonQueryLocations().getData().getFindAllLocations().stream()
             .filter(data -> data.getLocation().equals(location)).toList();
         assertTrue(locationData.isEmpty());
     }
 
     @Then("Location {string} do exist")
     public void queryLocationDoExist(String location) throws MalformedURLException {
-        Optional<LocationData> locationData = commonQueryLocations().getData().getFindAllLocations().stream()
+        Optional<LocationData> locationData = helper.commonQueryLocations().getData().getFindAllLocations().stream()
             .filter(data -> data.getLocation().equals(location))
             .findFirst();
         assertTrue(locationData.isPresent());
@@ -171,12 +177,19 @@ public class InventoryTestSteps {
 
     @Then("Add a device with label {string} IP address {string} and location {string}")
     public void addADeviceWithLabelIPAddressAndLocation(String label, String ipAddress, String location) throws MalformedURLException {
+        LocationData locationData = helper.commonQueryLocations().getData().getFindAllLocations().stream()
+            .filter(loc -> location.equals(loc.getLocation()))
+            .findFirst().orElse(null);
+
+        if (locationData == null) {
+            fail("Location " + location + " not found");
+        }
 
         String query = GQLQueryConstants.CREATE_NODE_QUERY;
 
         CreateNodeData nodeVariable = new CreateNodeData();
         nodeVariable.setLabel(label);
-        nodeVariable.setLocation(location);
+        nodeVariable.setLocationId(String.valueOf(locationData.getId()));
         nodeVariable.setManagementIp(ipAddress);
 
         Map<String, Object> queryVariables = Map.of("node", nodeVariable);
@@ -245,8 +258,8 @@ public class InventoryTestSteps {
     public void requestCertificateForLocation(String location) throws MalformedURLException {
         LOG.info("Requesting certificate for location {}.", location);
 
-        Long locationId = commonQueryLocations().getData().getFindAllLocations().stream()
-            .filter(loc -> location.equals(loc.getLocation()))
+        Long locationId = helper.commonQueryLocations().getData().getFindAllLocations().stream()
+            .filter(loc -> loc.getLocation().equals(location))
             .findFirst()
             .map(LocationData::getId)
             .orElseThrow(() -> new IllegalArgumentException("Unknown location " + location));
@@ -275,46 +288,56 @@ public class InventoryTestSteps {
         }
 
         Entry<String, byte[]> certificate = keystores.get(location);
-        minions.compute(systemId, (key, existing) -> {
-            if (existing != null && existing.isRunning()) {
-                existing.stop();
-            }
-            GenericContainer<?> minion = new GenericContainer<>(DockerImageName.parse(helper.getMinionImageNameSupplier().get()))
-                .withEnv("MINION_GATEWAY_HOST", helper.getMinionIngressSupplier().get())
-                .withEnv("MINION_GATEWAY_PORT", String.valueOf(helper.getMinionIngressPortSupplier().get()))
-                .withEnv("MINION_GATEWAY_TLS", String.valueOf(helper.getMinionIngressTlsEnabledSupplier().get()))
-                .withEnv("MINION_ID", systemId)
-                .withEnv("USE_KUBERNETES", "false")
-                .withEnv("GRPC_CLIENT_KEYSTORE", "/opt/karaf/minion.p12")
-                .withEnv("GRPC_CLIENT_KEYSTORE_PASSWORD", certificate.getKey())
-                .withEnv("GRPC_CLIENT_OVERRIDE_AUTHORITY", helper.getMinionIngressOverrideAuthority().get())
-                .withEnv("IGNITE_SERVER_ADDRESSES", "localhost")
-                .withNetworkAliases("minion")
-                .withNetwork(Network.SHARED)
-                .withLabel("label", key);
+        stopMinion(systemId);
 
-            File ca = helper.getMinionIngressCaCertificateSupplier().get();
-            if (ca != null) {
-                try {
-                    minion.withCopyToContainer(Transferable.of(Files.readString(ca.toPath())), "/opt/karaf/ca.crt");
-                    minion.withEnv("GRPC_CLIENT_TRUSTSTORE", "/opt/karaf/ca.crt");
-                } catch (IOException e) {
-                    throw new RuntimeException("Failed to read CA certificate", e);
-                }
-            }
+        GenericContainer<?> minion = new GenericContainer<>(DockerImageName.parse(helper.getMinionImageNameSupplier().get()))
+            .withEnv("MINION_GATEWAY_HOST", helper.getMinionIngressSupplier().get())
+            .withEnv("MINION_GATEWAY_PORT", String.valueOf(helper.getMinionIngressPortSupplier().get()))
+            .withEnv("MINION_GATEWAY_TLS", String.valueOf(helper.getMinionIngressTlsEnabledSupplier().get()))
+            .withEnv("MINION_ID", systemId)
+            .withEnv("USE_KUBERNETES", "false")
+            .withEnv("IGNITE_SERVER_ADDRESSES", "127.0.0.1")
+            .withEnv("GRPC_CLIENT_KEYSTORE", "/opt/karaf/minion.p12")
+            .withEnv("GRPC_CLIENT_KEYSTORE_PASSWORD", certificate.getKey())
+            .withEnv("GRPC_CLIENT_OVERRIDE_AUTHORITY", helper.getMinionIngressOverrideAuthority().get())
+            .withNetworkAliases("minion-" + systemId.toLowerCase())
+            .withNetwork(Network.SHARED)
+            .withLabel("label", systemId);
+        minions.put(systemId, minion);
 
-            minion.withCopyToContainer(Transferable.of(certificate.getValue()), "/opt/karaf/minion.p12");
-            minion.waitingFor(Wait.forLogMessage(".*Ignite node started OK.*", 1).withStartupTimeout(Duration.ofMinutes(3)));
-            minion.start();
-            return minion;
-        });
+        File ca = helper.getMinionIngressCaCertificateSupplier().get();
+        if (ca != null) {
+            try {
+                minion.withCopyToContainer(Transferable.of(Files.readString(ca.toPath())), "/opt/karaf/ca.crt");
+                minion.withEnv("GRPC_CLIENT_TRUSTSTORE", "/opt/karaf/ca.crt");
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to read CA certificate", e);
+            }
+        }
+
+        WaitAllStrategy waitStrategy = new WaitAllStrategy().withStartupTimeout(Duration.ofMinutes(3));
+        waitStrategy.withStrategy(Wait.forLogMessage(".*Ignite node started OK.*", 1));
+        // make sure grpc connection gets activated and reaches server
+        waitStrategy.withStrategy(Wait.forLogMessage(".*Initialized RPC stream.*", 1));
+        waitStrategy.withStrategy(Wait.forLogMessage(".*Initialized Sink stream.*", 1));
+        waitStrategy.withStrategy(Wait.forLogMessage(".*Initialized cloud receiver stream.*", 1));
+        minion.withCopyToContainer(Transferable.of(certificate.getValue()), "/opt/karaf/minion.p12");
+        minion.waitingFor(waitStrategy);
+        minion.start();
     }
 
     @Then("Minion {string} is stopped")
-    public void stopMinion(String systemId) throws IOException {
-        GenericContainer<?> minion = minions.get(systemId);
-        if (minion != null && minion.isRunning()) {
-            minion.stop();
+    public void stopMinion(String systemId) {
+        DockerClient dockerClient = DockerClientFactory.lazyClient();
+        List<Container> containers = dockerClient.listContainersCmd().exec();
+        for (Container container : containers) {
+            if (systemId.equals(container.getLabels().get("label"))) {
+                try (WaitContainerCmd wait = dockerClient.waitContainerCmd(container.getId()); StopContainerCmd stop = dockerClient.stopContainerCmd(container.getId())) {
+                    stop.exec();
+                    Integer status = wait.start().awaitStatusCode(45, TimeUnit.SECONDS);
+                    LOG.info("Stopped minion {}, exit status {}", systemId, status);
+                }
+            }
         }
     }
 
@@ -325,14 +348,6 @@ public class InventoryTestSteps {
         LOG.debug("MINIONS for location: count={}; location={}", filtered.size(), minionLocation);
 
         return ( ! filtered.isEmpty() );
-    }
-
-    private FindAllLocationsData commonQueryLocations() throws MalformedURLException {
-        GQLQuery gqlQuery = new GQLQuery();
-        gqlQuery.setQuery(GQLQueryConstants.LIST_LOCATIONS_QUERY);
-        Response restAssuredResponse = helper.executePostQuery(gqlQuery);
-        Assert.assertEquals(200, restAssuredResponse.getStatusCode());
-        return restAssuredResponse.getBody().as(FindAllLocationsData.class);
     }
 
     /** @noinspection rawtypes*/

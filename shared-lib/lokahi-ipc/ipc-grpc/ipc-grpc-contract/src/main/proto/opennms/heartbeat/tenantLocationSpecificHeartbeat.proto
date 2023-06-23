@@ -1,0 +1,16 @@
+syntax = "proto3";
+package opennms.sink.heartbeat;
+
+option java_multiple_files = true;
+option java_package = "org.opennms.horizon.grpc.heartbeat.contract";
+
+import "google/protobuf/timestamp.proto";
+import "opennms_minion_ipc.proto";
+
+message TenantLocationSpecificHeartbeatMessage {
+  string tenant_id = 100;
+  string location_id = 101;
+
+  minion.Identity identity = 1;
+  google.protobuf.Timestamp timestamp = 2;
+}

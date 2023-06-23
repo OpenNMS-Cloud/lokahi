@@ -4,6 +4,7 @@ import { useMinionsQueries } from '../Queries/minionsQueries'
 import { DisplayType } from '@/types/locations.d'
 import { useLocationMutations } from '../Mutations/locationMutations'
 import { MonitoringLocation, MonitoringLocationCreateInput, MonitoringLocationUpdateInput } from '@/types/graphql'
+import useMinionCmd from '@/composables/useMinionCmd'
 
 export const useLocationStore = defineStore('locationStore', () => {
   const locationsList = ref<MonitoringLocation[]>([])
@@ -17,6 +18,7 @@ export const useLocationStore = defineStore('locationStore', () => {
   const locationQueries = useLocationQueries()
   const minionsQueries = useMinionsQueries()
   const locationMutations = useLocationMutations()
+  const { minionDockerCmd, setPassword, setMinionId, clearMinionCmdVals } = useMinionCmd()
 
   const fetchLocations = async () => {
     try {
@@ -43,6 +45,7 @@ export const useLocationStore = defineStore('locationStore', () => {
 
     selectedLocationId.value = id
     certificatePassword.value = ''
+    clearMinionCmdVals()
   }
 
   const addLocation = () => {
@@ -59,6 +62,8 @@ export const useLocationStore = defineStore('locationStore', () => {
 
   const setDisplayType = (type: DisplayType) => {
     displayType.value = type
+    certificatePassword.value = ''
+    clearMinionCmdVals()
   }
 
   const createLocation = async (location: MonitoringLocationCreateInput) => {
@@ -110,9 +115,13 @@ export const useLocationStore = defineStore('locationStore', () => {
 
   const setCertificatePassword = (password: string) => {
     certificatePassword.value = password
+    setPassword(certificatePassword.value)
+    setMinionId(selectedLocation.value.location)
   }
 
-  const selectedLocation = computed(() => locationsList.value.filter((loc) => loc.id === selectedLocationId.value)[0] as Required<MonitoringLocation>)
+  const selectedLocation = computed(
+    () => locationsList.value.filter((loc) => loc.id === selectedLocationId.value)[0] as Required<MonitoringLocation>
+  )
 
   return {
     displayType,
@@ -132,6 +141,7 @@ export const useLocationStore = defineStore('locationStore', () => {
     setCertificatePassword,
     getMinionsForLocationId,
     addLocation,
-    selectedLocation
+    selectedLocation,
+    minionDockerCmd
   }
 })

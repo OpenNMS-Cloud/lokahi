@@ -72,7 +72,7 @@ class TSDataProcessorTest {
         testTenantLocationSpecificTaskSetResults =
             TenantLocationSpecificTaskSetResults.newBuilder()
                 .setTenantId("x-tenant-id-x")
-                .setLocation("x-location-x")
+                .setLocationId("x-location-x")
                 .addResults(testTaskResult1)
                 .addResults(testTaskResult2)
                 .build();

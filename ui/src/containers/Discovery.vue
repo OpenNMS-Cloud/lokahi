@@ -33,7 +33,7 @@
           :list="discoveryQueries.activeDiscoveries"
           @select-discovery="showDiscovery"
           :selectedId="discoverySelectedType !== DiscoveryType.SyslogSNMPTraps ? selectedDiscovery?.id : null"
-          @show-instructions="isInstructionVisible = true"
+          @show-instructions="openInstructions(InstructionsType.Active)"
         />
         <DiscoveryListCard
           passive
@@ -42,7 +42,7 @@
           @toggle-discovery="toggleDiscovery"
           @select-discovery="showDiscovery"
           :selectedId="discoverySelectedType === DiscoveryType.SyslogSNMPTraps ? selectedDiscovery?.id : null"
-          @show-instructions="isInstructionVisible = true"
+          @show-instructions="openInstructions(InstructionsType.Passive)"
         />
       </div>
     </section>
@@ -109,6 +109,7 @@
   </div>
   <DiscoverySuccessModal ref="successModal" />
   <DiscoveryInstructions
+    :instructionsType="instructionsType"
     :isOpen="isInstructionVisible"
     @drawer-closed="() => (isInstructionVisible = false)"
   />
@@ -118,7 +119,7 @@
 import AddIcon from '@featherds/icon/action/Add'
 import { IIcon } from '@/types'
 import { DiscoveryInput } from '@/types/discovery'
-import { DiscoveryType } from '@/components/Discovery/discovery.constants'
+import { DiscoveryType, InstructionsType } from '@/components/Discovery/discovery.constants'
 import discoveryText from '@/components/Discovery/discovery.text'
 import { useDiscoveryQueries } from '@/store/Queries/discoveryQueries'
 import { useDiscoveryMutations } from '@/store/Mutations/discoveryMutations'
@@ -145,6 +146,7 @@ const discoveriesResults = ref<TDiscoveryAutocomplete[]>([])
 const searchLoading = ref(false)
 const discoverySearchValue = ref(undefined)
 const isInstructionVisible = ref(false)
+const instructionsType = ref(InstructionsType.Active)
 
 const handleNewDiscovery = () => {
   isDiscoveryEditingShown.value = true
@@ -195,6 +197,11 @@ const toggleDiscovery = (id: string, toggle: boolean) => {
 const handleClose = () => {
   isDiscoveryEditingShown.value = false
   discoverySelectedType.value = DiscoveryType.None
+}
+
+const openInstructions = (type: InstructionsType) => {
+  isInstructionVisible.value = true
+  instructionsType.value = type
 }
 
 onMounted(() => discoveryQueries.getDiscoveries())

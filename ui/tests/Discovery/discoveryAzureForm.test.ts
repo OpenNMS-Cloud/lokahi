@@ -11,7 +11,7 @@ const azureTestPayload: AzureActiveDiscoveryCreateInput = {
   clientSecret: 'secret1',
   directoryId: 'dir1',
   subscriptionId: 'sub1',
-  location: 'Default',
+  locationId: '1',
   tags: [{ name: 'default' }]
 }
 
@@ -30,7 +30,7 @@ test('The azure form payload when saving.', async () => {
   const store = useDiscoveryStore()
   const mutations = useDiscoveryMutations()
 
-  await wrapper.vm.selectLocation('Default')
+  await wrapper.vm.selectLocation({ id: '1' })
   await wrapper.get('[data-test="azure-name-input"] .feather-input').setValue('azure1')
   await wrapper.get('[data-test="azure-client-input"] .feather-input').setValue('client1')
   await wrapper.get('[data-test="azure-secret-input"] .feather-input').setValue('secret1')

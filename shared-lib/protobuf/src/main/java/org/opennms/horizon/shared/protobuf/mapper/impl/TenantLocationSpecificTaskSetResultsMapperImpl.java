@@ -35,11 +35,11 @@ import org.opennms.taskset.contract.TenantLocationSpecificTaskSetResults;
 
 public class TenantLocationSpecificTaskSetResultsMapperImpl implements TenantLocationSpecificTaskSetResultsMapper {
     @Override
-    public TenantLocationSpecificTaskSetResults mapBareToTenanted(String tenantId, String location, TaskSetResults bare) {
+    public TenantLocationSpecificTaskSetResults mapBareToTenanted(String tenantId, String locationId, TaskSetResults bare) {
         TenantLocationSpecificTaskSetResults result =
             TenantLocationSpecificTaskSetResults.newBuilder()
                 .setTenantId(tenantId)
-                .setLocation(location)
+                .setLocationId(locationId)
                 .addAllResults(bare.getResultsList())
                 .build();
 

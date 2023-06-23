@@ -32,16 +32,16 @@
         </div>
         <div class="row">
           <FeatherInput
-            label="Longitude (optional)"
-            v-model="formInputs.longitude"
-            class="input-longitude"
-            data-test="input-longitude"
-          />
-          <FeatherInput
             label="Latitude (optional)"
             v-model="formInputs.latitude"
             class="input-latitude"
             data-test="input-latitude"
+          />
+          <FeatherInput
+            label="Longitude (optional)"
+            v-model="formInputs.longitude"
+            class="input-longitude"
+            data-test="input-longitude"
           />
         </div>
       </div>

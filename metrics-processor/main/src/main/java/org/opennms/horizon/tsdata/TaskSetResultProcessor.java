@@ -53,14 +53,14 @@ public class TaskSetResultProcessor {
         this.taskSetCollectorResultProcessor = taskSetCollectorResultProcessor;
     }
 
-    public void processTaskResult(String tenantId, String location, TaskResult taskResult) {
+    public void processTaskResult(String tenantId, String locationId, TaskResult taskResult) {
         try {
             LOG.info("Processing task set result {}", taskResult);
             if (taskResult.hasMonitorResponse()) {
                 LOG.info("Have monitor response, tenant-id: {}; task-id={};", tenantId, taskResult.getId());
-                taskSetMonitorResultProcessor.processMonitorResponse(tenantId, location, taskResult, taskResult.getMonitorResponse());
+                taskSetMonitorResultProcessor.processMonitorResponse(tenantId, locationId, taskResult, taskResult.getMonitorResponse());
             } else if (taskResult.hasCollectorResponse()) {
-                taskSetCollectorResultProcessor.processCollectorResponse(tenantId, location, taskResult, taskResult.getCollectorResponse());
+                taskSetCollectorResultProcessor.processCollectorResponse(tenantId, locationId, taskResult, taskResult.getCollectorResponse());
             }
         } catch (Exception exc) {
             // TODO: throttle

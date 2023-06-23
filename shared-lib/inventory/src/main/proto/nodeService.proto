@@ -49,14 +49,14 @@ message NodeDTO {
   string system_descr = 9;
   string system_location = 10;
   string system_contact = 11;
-  repeated opennms.inventory.SnmpInterfaceDTO snmpInterfaces = 12;
+  repeated opennms.inventory.SnmpInterfaceDTO snmp_interfaces = 12;
   string scan_type = 13;
   optional MonitoredState monitored_state = 14;
 }
 
 message NodeCreateDTO {
   string label = 1;
-  string location = 2;
+  string location_id = 2;
   optional string management_ip = 3;
   repeated opennms.inventory.TagCreateDTO tags = 4;
   optional MonitoredState monitored_state = 5; // optional for now - may change
@@ -73,7 +73,7 @@ message NodeList {
 }
 
 message NodeIdQuery {
-  string location = 1;
+  string location_id = 1;
   string ip_address = 2;
 }
 
@@ -86,7 +86,7 @@ message TagNameQuery {
 }
 
 message NodeLabelSearchQuery {
-  string searchTerm = 1;
+  string search_term = 1;
 }
 
 message NodeIdList {

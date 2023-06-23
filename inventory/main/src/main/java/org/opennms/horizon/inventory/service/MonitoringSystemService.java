@@ -52,8 +52,8 @@ public class MonitoringSystemService {
         MonitoringSystem monitoringSystem;
         Optional<MonitoringSystem> msOp = systemRepository.findBySystemIdAndTenantId(identity.getSystemId(), message.getTenantId());
         if (msOp.isEmpty()) {
-            MonitoringLocation location = locationRepository.findByLocationAndTenantId(message.getLocation(), message.getTenantId())
-                .orElseThrow(() -> new LocationNotFoundException("Location not found " + message.getLocation()));
+            MonitoringLocation location = locationRepository.findByIdAndTenantId(Long.parseLong(message.getLocationId()), message.getTenantId())
+                .orElseThrow(() -> new LocationNotFoundException("Location not found " + message.getLocationId()));
             monitoringSystem = new MonitoringSystem();
             monitoringSystem.setSystemId(identity.getSystemId());
             monitoringSystem.setMonitoringLocation(location);
@@ -63,7 +63,7 @@ public class MonitoringSystemService {
             monitoringSystem.setMonitoringLocationId(location.getId());
             systemRepository.save(monitoringSystem);
             // Asynchronously send config updates to Minion
-            configUpdateService.sendConfigUpdate(message.getTenantId(), message.getLocation());
+            configUpdateService.sendConfigUpdate(message.getTenantId(), monitoringSystem.getMonitoringLocationId());
         } else {
             monitoringSystem = msOp.get();
             monitoringSystem.setLastCheckedIn(LocalDateTime.now());
@@ -78,13 +78,13 @@ public class MonitoringSystemService {
         var optionalMS = systemRepository.findById(id);
         if (optionalMS.isPresent()) {
             var monitoringSystem = optionalMS.get();
-            var location = monitoringSystem.getMonitoringLocation().getLocation();
+            var locationId = monitoringSystem.getMonitoringLocationId();
             var tenantId = monitoringSystem.getTenantId();
             systemRepository.deleteById(id);
             var retrieved = systemRepository.findByMonitoringLocationIdAndTenantId(optionalMS.get().getMonitoringLocationId(), tenantId);
             if (retrieved.isEmpty()) {
                 locationRepository.delete(monitoringSystem.getMonitoringLocation());
-                configUpdateService.removeConfigsFromTaskSet(tenantId, location);
+                configUpdateService.removeConfigsFromTaskSet(tenantId, locationId);
             }
         }
     }

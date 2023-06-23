@@ -3,12 +3,8 @@ package org.opennms.horizon.shared.ipc.grpc.server.manager.rpcstreaming.impl;
 import static org.opennms.horizon.shared.ipc.rpc.api.RpcModule.MINION_HEADERS_MODULE;
 
 import com.google.common.base.Strings;
-import com.swrve.ratelimitedlogger.RateLimitedLog;
-import io.grpc.Context;
-import io.grpc.Metadata;
 import io.grpc.stub.StreamObserver;
 
-import java.time.Duration;
 import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.function.BiConsumer;
@@ -77,13 +73,13 @@ public class MinionRpcStreamConnectionImpl implements MinionRpcStreamConnection 
     @Override
     public void handleRpcStreamInboundMessage(RpcResponseProto message) {
         String tenantId = tenantIDGrpcServerInterceptor.readCurrentContextTenantId();
-        String location = locationServerInterceptor.readCurrentContextLocation();
+        String location = locationServerInterceptor.readCurrentContextLocationId();
 
         if (isMinionIdentityHeaders(message)) {
             String systemId = message.getIdentity().getSystemId();
 
             if (Strings.isNullOrEmpty(location) || Strings.isNullOrEmpty(systemId)) {
-                log.error("Invalid metadata received with location = {} , systemId = {}", location, systemId);
+                log.error("Invalid metadata received with locationId={}; systemId={}", location, systemId);
                 return;
             }
 
@@ -91,7 +87,7 @@ public class MinionRpcStreamConnectionImpl implements MinionRpcStreamConnection 
             boolean added = rpcConnectionTracker.addConnection(tenantId, location, systemId, streamObserver);
 
             if (added) {
-                log.info("Added RPC handler for minion: minion-id={}; location={}; tenant-id={}", systemId, location, tenantId);
+                log.info("Added RPC handler for minion: tenantId={}; locationId={}; systemId={};", tenantId, location, systemId);
 
                 // Notify the MinionManager of the addition
                 MinionInfo minionInfo = new MinionInfo();

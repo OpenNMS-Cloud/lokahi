@@ -38,7 +38,7 @@ option java_package = "org.opennms.horizon.inventory.dto";
 message PassiveDiscoveryDTO {
   int64 id = 1;
   string name = 2;
-  string location = 3;
+  string location_id = 3;
   bool toggle = 4;
   repeated int32 ports = 5;
   repeated string communities = 6;
@@ -52,7 +52,7 @@ message PassiveDiscoveryListDTO {
 message PassiveDiscoveryUpsertDTO {
   optional int64 id = 1;
   string name = 2;
-  string location = 3;
+  string location_id = 3;
   repeated int32 ports = 4;
   repeated string communities = 5;
   repeated opennms.inventory.TagCreateDTO tags = 6;

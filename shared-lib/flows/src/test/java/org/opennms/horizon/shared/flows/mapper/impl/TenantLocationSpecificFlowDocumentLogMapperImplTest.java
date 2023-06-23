@@ -75,7 +75,7 @@ public class TenantLocationSpecificFlowDocumentLogMapperImplTest {
         verifyAllFieldsSet(mappedResult, true);
 
         assertEquals("x-tenant-id-x", mappedResult.getTenantId());
-        assertEquals("x-location-x", mappedResult.getLocation());
+        assertEquals("x-location-x", mappedResult.getLocationId());
         assertEquals("systemId", mappedResult.getSystemId());
         assertEquals(1, mappedResult.getMessageCount());
     }
@@ -88,7 +88,7 @@ public class TenantLocationSpecificFlowDocumentLogMapperImplTest {
         TenantLocationSpecificFlowDocumentLog testTenantLocationSpecificFlowDocumentLog =
             TenantLocationSpecificFlowDocumentLog.newBuilder()
                 .setTenantId("x-tenant-id-x")
-                .setLocation("x-location-x")
+                .setLocationId("x-location-x")
                 .setSystemId("systemId")
                 .addMessage(FlowDocument.newBuilder())
                 .build();
@@ -171,7 +171,7 @@ public class TenantLocationSpecificFlowDocumentLogMapperImplTest {
             withTenantTypeDescriptor.getFields().stream().map(Descriptors.FieldDescriptor::getName).collect(Collectors.toSet());
 
         withTenantTypeFields.remove("tenant_id");
-        withTenantTypeFields.remove("location");
+        withTenantTypeFields.remove("location_id");
 
         assertEquals(withTenantTypeFields, withoutTenantTypeFields);
     }

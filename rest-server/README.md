@@ -1,4 +1,4 @@
-# Horizon Stream REST Sever
+# Lokahi REST Sever
 ## REST API docs
 http://localhost:9090/swagger-ui.html
 

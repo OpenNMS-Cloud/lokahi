@@ -55,7 +55,7 @@ class TaskSetGrpcServiceTest {
         testRequest =
             UpdateTasksRequest.newBuilder()
                 .setTenantId("x-tenant-id-x")
-                .setLocation("x-location-x")
+                .setLocationId("505050")
                 .addUpdate(UpdateSingleTaskOp.newBuilder().setAddTask(testAddSingleTaskOp).build())
                 .addUpdate(UpdateSingleTaskOp.newBuilder().setRemoveTask(testRemoveSingleTaskOp).build())
                 .build();
@@ -119,7 +119,7 @@ class TaskSetGrpcServiceTest {
         // Setup Test Data and Interactions
         //
         RuntimeException testException = new RuntimeException("x-test-exception-x");
-        Mockito.doThrow(testException).when(mockTaskSetStorage).atomicUpdateTaskSetForLocation("x-tenant-id-x", "x-location-x", mockTaskSetGrpcServiceUpdateProcessor);
+        Mockito.doThrow(testException).when(mockTaskSetStorage).atomicUpdateTaskSetForLocation("x-tenant-id-x", "505050", mockTaskSetGrpcServiceUpdateProcessor);
 
         //
         // Execute

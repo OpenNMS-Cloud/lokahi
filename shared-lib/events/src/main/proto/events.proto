@@ -45,7 +45,7 @@ message Event {
   uint64 database_id = 2;
   string uei = 3;
   uint64 node_id = 4;
-  string location = 5;
+  string location_id = 5;
   string ip_address = 6;
   uint64 produced_time_ms = 7;
   repeated EventParameter parameters = 8;

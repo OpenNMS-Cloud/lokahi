@@ -5,12 +5,12 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.opennms.horizon.minion</groupId>
+        <groupId>org.opennms.lokahi.minion</groupId>
         <artifactId>testtools</artifactId>
         <version>0.1.0-SNAPSHOT</version>
     </parent>
 
-    <groupId>org.opennms.horizon.minion</groupId>
+    <groupId>org.opennms.lokahi.minion</groupId>
     <artifactId>minion-gateway-wiremock</artifactId>
     <version>0.1.0-SNAPSHOT</version>
     <packaging>pom</packaging>

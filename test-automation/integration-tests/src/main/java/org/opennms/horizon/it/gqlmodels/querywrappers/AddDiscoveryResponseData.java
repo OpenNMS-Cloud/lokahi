@@ -1,6 +1,5 @@
 package org.opennms.horizon.it.gqlmodels.querywrappers;
 
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class AddDiscoveryResponseData {
@@ -9,7 +8,7 @@ public class AddDiscoveryResponseData {
     private String name;
     private String[] ipAddresses;
     private String[] readCommunities;
-    private String location;
+    private String locationId;
     private int[] ports;
     private Map<String, Object> snmpConfig;
 
@@ -45,12 +44,12 @@ public class AddDiscoveryResponseData {
         this.readCommunities = readCommunities;
     }
 
-    public String getLocation() {
-        return location;
+    public String getLocationId() {
+        return locationId;
     }
 
-    public void setLocation(String location) {
-        this.location = location;
+    public void setLocationId(String locationId) {
+        this.locationId = locationId;
     }
 
     public int[] getPorts() {

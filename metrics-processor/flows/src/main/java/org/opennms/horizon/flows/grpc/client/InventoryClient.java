@@ -72,21 +72,21 @@ public class InventoryClient {
             .getNodeById(Int64Value.of(nodeId));
     }
 
-    public long getNodeIdFromQuery(String tenantId, String ipAddress, String location) {
+    public long getNodeIdFromQuery(String tenantId, String ipAddress, String locationId) {
         Metadata metadata = getMetadata(true, tenantId);
 
         NodeIdQuery query = NodeIdQuery.newBuilder()
-            .setIpAddress(ipAddress).setLocation(location).build();
+            .setIpAddress(ipAddress).setLocationId(locationId).build();
         return nodeStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
             .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
             .getNodeIdFromQuery(query).getValue();
     }
 
-    public IpInterfaceDTO getIpInterfaceFromQuery(String tenantId, String ipAddress, String location) {
+    public IpInterfaceDTO getIpInterfaceFromQuery(String tenantId, String ipAddress, String locationId) {
         Metadata metadata = getMetadata(true, tenantId);
 
         NodeIdQuery query = NodeIdQuery.newBuilder()
-            .setIpAddress(ipAddress).setLocation(location).build();
+            .setIpAddress(ipAddress).setLocationId(locationId).build();
         return nodeStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
             .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
             .getIpInterfaceFromQuery(query);

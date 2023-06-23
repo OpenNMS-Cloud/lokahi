@@ -38,7 +38,7 @@ import java.util.List;
 @Setter
 public class NodeCreate {
     private String label;
-    private String location;
+    private String locationId;
     private String managementIp;
     private List<TagCreate> tags;
 }

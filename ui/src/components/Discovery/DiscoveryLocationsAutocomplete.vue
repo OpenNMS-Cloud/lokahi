@@ -74,8 +74,8 @@ const initLocations = () => {
   locations.value = computedLocations.value as MonitoringLocation[]
   selectedLocation.value = null
   if (props.preLoadedlocation) {
-    selectedLocation.value = locations.value.filter((l: MonitoringLocation) => l.location == props.preLoadedlocation)[0]
-    locations.value = locations.value.filter((l: MonitoringLocation) => l.location !== props.preLoadedlocation)
+    selectedLocation.value = locations.value.filter((l: MonitoringLocation) => l.id == props.preLoadedlocation)[0]
+    locations.value = locations.value.filter((l: MonitoringLocation) => l.id !== props.preLoadedlocation)
     filteredLocations.value = locations.value
   }
 }
@@ -85,7 +85,7 @@ watchOnce(computedLocations, () => {
     selectedLocation.value = first(computedLocations.value) as MonitoringLocation
     locations.value = []
     filteredLocations.value = []
-    emit('location-selected', selectedLocation.value.location)
+    emit('location-selected', selectedLocation.value)
   }
 })
 
@@ -119,7 +119,7 @@ const deboncedFn = debounce(
       locations.value = computedLocations.value.filter((l: MonitoringLocation) => l.id !== selectedLocation.value?.id)
       searchValue.value = undefined
       inputRef.value?.handleOutsideClick()
-      emit('location-selected', selectedLocation.value.location)
+      emit('location-selected', selectedLocation.value)
       handleErrDisplay()
     }
   },
@@ -133,7 +133,6 @@ const deboncedFn = debounce(
 const removeLocation = () => {
   if (selectedLocation.value) {
     locations.value.push(selectedLocation.value)
-    emit('location-selected', selectedLocation.value.location)
     selectedLocation.value = null
     searchValue.value = undefined
     handleErrDisplay()

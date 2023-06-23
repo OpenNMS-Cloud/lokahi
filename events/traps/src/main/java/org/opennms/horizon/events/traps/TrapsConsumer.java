@@ -97,7 +97,7 @@ public class TrapsConsumer {
             .setTenantId(tenantId)
             .setUei(EventConstants.NEW_SUSPECT_INTERFACE_EVENT_UEI)
             .setIpAddress(event.getIpAddress())
-            .setLocation(event.getLocation())
+            .setLocationId(event.getLocationId())
             .setInfo(event.getInfo())
             .addAllParameters(event.getParametersList())
             .build();

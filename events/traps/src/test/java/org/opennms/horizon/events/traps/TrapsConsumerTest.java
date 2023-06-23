@@ -74,7 +74,7 @@ public class TrapsConsumerTest {
         baseTestTrapLogDTO =
             TenantLocationSpecificTrapLogDTO.newBuilder()
                 .setTenantId("x-tenant-id-x")
-                .setLocation("x-location-x")
+                .setLocationId("x-location-x")
                 .setTrapAddress("x-trap-address-x")
                 .build();
 
@@ -147,7 +147,7 @@ public class TrapsConsumerTest {
         TenantLocationSpecificTrapLogDTO testTrapLogDTO =
             baseTestTrapLogDTO.toBuilder()
                 .setTenantId("x-tenant-id-x")
-                .setLocation("x-location-x")
+                .setLocationId("x-location-x")
                 .setIdentity(
                     Identity.newBuilder()
                         .setSystemId("x-system-id-x")

@@ -53,10 +53,10 @@ public class RpcConnectionTrackerImpl implements RpcConnectionTracker {
             TenantKey tenantLocation = new TenantKey(tenantId, location);
 
             // Prevent duplicate registration
-            if (! connectionListByLocation.containsEntry(tenantLocation, connection)) {
+            if (!connectionListByLocation.containsEntry(tenantLocation, connection)) {
                 log.debug("Registering connection: location={}; minionId={}", location, minionId);
 
-                removePossibleExistingMinionConnectionLocked(minionId);
+                removePossibleExistingMinionConnectionLocked(tenantMinionId);
 
                 connectionByMinionId.put(tenantMinionId, connection);
                 connectionListByLocation.put(tenantLocation, connection);
@@ -68,7 +68,7 @@ public class RpcConnectionTrackerImpl implements RpcConnectionTracker {
 
                 updateIteratorLocked(tenantLocation);
 
-                minionManager.addMinion(new MinionInfo(tenantId, minionId, location));
+                //minionManager.addMinion(new MinionInfo(tenantId, minionId, location));
 
                 added = true;
             } else {
@@ -156,12 +156,13 @@ public class RpcConnectionTrackerImpl implements RpcConnectionTracker {
 // Internals
 //----------------------------------------
 
-    private void removePossibleExistingMinionConnectionLocked(String minionId) {
-        StreamObserver<RpcRequestProto> obsoleteObserver = connectionByMinionId.get(minionId);
+    private void removePossibleExistingMinionConnectionLocked(TenantKey minionId) {
+        StreamObserver<RpcRequestProto> obsoleteObserver = connectionByMinionId.remove(minionId);
 
         if (obsoleteObserver != null) {
             log.info("replacing existing connection for minion: minion-id={}", minionId);
             connectionListByLocation.values().remove(obsoleteObserver);
+            obsoleteObserver.onCompleted();
         }
     }
 

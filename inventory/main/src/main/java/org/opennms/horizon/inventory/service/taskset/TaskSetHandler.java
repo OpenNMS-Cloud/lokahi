@@ -52,42 +52,42 @@ public class TaskSetHandler {
     private final CollectorTaskSetService collectorTaskSetService;
     private final SnmpConfigService snmpConfigService;
 
-    public void sendMonitorTask(String location, MonitorType monitorType, IpInterface ipInterface, long nodeId) {
+    public void sendMonitorTask(Long locationId, MonitorType monitorType, IpInterface ipInterface, long nodeId) {
         String tenantId = ipInterface.getTenantId();
-        var snmpConfig = snmpConfigService.getSnmpConfig(tenantId, location, ipInterface.getIpAddress());
+        var snmpConfig = snmpConfigService.getSnmpConfig(tenantId, locationId, ipInterface.getIpAddress());
 
         var task = monitorTaskSetService.getMonitorTask(monitorType, ipInterface, nodeId, snmpConfig.orElse(null));
         if (task != null) {
-            taskSetPublisher.publishNewTasks(tenantId, location, Arrays.asList(task));
+            taskSetPublisher.publishNewTasks(tenantId, locationId, Arrays.asList(task));
         }
     }
 
     public void sendAzureMonitorTasks(AzureActiveDiscovery discovery, AzureScanItem item, long nodeId) {
         String tenantId = discovery.getTenantId();
-        String location = discovery.getLocation();
+        Long locationId = discovery.getLocationId();
 
         TaskDefinition task = monitorTaskSetService.addAzureMonitorTask(discovery, item, nodeId);
-        taskSetPublisher.publishNewTasks(tenantId, location, Arrays.asList(task));
+        taskSetPublisher.publishNewTasks(tenantId, locationId, Arrays.asList(task));
     }
 
-    public void sendCollectorTask(String location, MonitorType monitorType, IpInterface ipInterface, long nodeId) {
+    public void sendCollectorTask(Long locationId, MonitorType monitorType, IpInterface ipInterface, long nodeId) {
         String tenantId = ipInterface.getTenantId();
         // Collectors should only be invoked for primary interface
         if (monitorType.equals(MonitorType.SNMP) && ipInterface.getSnmpPrimary()) {
-            var snmpConfig = snmpConfigService.getSnmpConfig(tenantId, location, ipInterface.getIpAddress());
+            var snmpConfig = snmpConfigService.getSnmpConfig(tenantId, locationId, ipInterface.getIpAddress());
             var task = collectorTaskSetService.addSnmpCollectorTask(ipInterface, nodeId, snmpConfig.orElse(null));
             if (task != null) {
-                taskSetPublisher.publishNewTasks(tenantId, location, Arrays.asList(task));
+                taskSetPublisher.publishNewTasks(tenantId, locationId, Arrays.asList(task));
             }
         }
     }
 
     public void sendAzureCollectorTasks(AzureActiveDiscovery discovery, AzureScanItem item, long nodeId) {
         String tenantId = discovery.getTenantId();
-        String location = discovery.getLocation();
+        Long locationId = discovery.getLocationId();
 
         TaskDefinition task = collectorTaskSetService.addAzureCollectorTask(discovery, item, nodeId);
-        taskSetPublisher.publishNewTasks(tenantId, location, Arrays.asList(task));
+        taskSetPublisher.publishNewTasks(tenantId, locationId, Arrays.asList(task));
     }
 
 }

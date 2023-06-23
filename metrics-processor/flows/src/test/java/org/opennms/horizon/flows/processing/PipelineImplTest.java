@@ -59,7 +59,7 @@ public class PipelineImplTest {
     @Test
     public void testPipeline() throws FlowException {
         var flowsLog = TenantLocationSpecificFlowDocumentLog.newBuilder()
-            .setLocation("location")
+            .setLocationId("location")
             .setTenantId("tenantId")
             .setSystemId("systemId").addMessage(FlowDocument.newBuilder().setSrcAddress("127.0.0.1"))
             .build();

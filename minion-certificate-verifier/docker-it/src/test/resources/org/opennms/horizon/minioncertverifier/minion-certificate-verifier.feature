@@ -8,26 +8,26 @@ Feature: Minion Certificate Verifier HTTP Request Processing
     Then Within 30s result headers are:
       | header             | value       |
       | tenant-id          | tenant01    |
-      | location           | x-loc-x     |
+      | location-id        | 111         |
 
   Scenario: Verify minion certificate validation request - with only tenant and location
     When Request with "OU=T:tenant02,OU=L:222" is made
     Then Within 30s result headers are:
       | header             | value       |
       | tenant-id          | tenant02    |
-      | location           | x-loc-x     |
+      | location-id        | 222         |
 
   Scenario: Verify minion certificate validation request - with only tenant
     When Request with "OU=T:tenant03" is made
     Then Within 30s result fails
 
   Scenario: Verify minion certificate validation request - with empty tenant
-    When Request with "OU=T:,OU=L:L333" is made
+    When Request with "OU=T:,OU=L:333" is made
     Then Within 30s result fails
 
 
   Scenario: Verify minion certificate validation request - with only location
-    When Request with "OU=L:444" is made
+    When Request with "OU=L:ASD" is made
     Then Within 30s result fails
 
   Scenario: Verify minion certificate validation request - with empty location

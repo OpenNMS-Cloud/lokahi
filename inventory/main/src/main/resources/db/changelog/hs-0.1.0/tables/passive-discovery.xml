@@ -67,4 +67,34 @@
                                  referencedColumnNames="id"/>
 
     </changeSet>
+
+    <changeSet id="0.1.1-passive-discovery" author="ldywicki">
+        <preConditions onFail="HALT">
+            <changeSetExecuted id="0.1.0-passive-discovery" author="tbigg" changeLogFile="db/changelog/hs-0.1.0/tables/passive-discovery.xml"/>
+        </preConditions>
+        <addColumn tableName="passive_discovery">
+            <column name="location_id" type="BIGINT">
+                <constraints nullable="true" />
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="ldywicki" id="0.1.2-passive-discovery">
+        <preConditions onFail="HALT">
+            <changeSetExecuted id="0.1.1-passive-discovery" author="ldywicki" changeLogFile="db/changelog/hs-0.1.0/tables/passive-discovery.xml"/>
+        </preConditions>
+        <sql>
+            UPDATE passive_discovery SET location_id=locations.id FROM (SELECT id, tenant_id, location FROM monitoring_location) AS locations
+            WHERE passive_discovery.location=locations.location AND passive_discovery.tenant_id=locations.tenant_id
+        </sql>
+        <!-- Remove orphans -->
+        <sql>
+            DELETE FROM passive_discovery WHERE location_id IS NULL
+        </sql>
+        <addNotNullConstraint tableName="passive_discovery" columnName="location_id" />
+        <dropColumn tableName="passive_discovery" columnName="location" />
+        <addForeignKeyConstraint constraintName="fk_passive_discovery_location_id" onDelete="CASCADE"
+            baseTableName="passive_discovery" baseColumnNames="location_id"
+            referencedTableName="monitoring_location" referencedColumnNames="id"/>
+    </changeSet>
+
 </databaseChangeLog>

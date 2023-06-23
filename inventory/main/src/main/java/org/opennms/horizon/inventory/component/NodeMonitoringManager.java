@@ -48,7 +48,6 @@ import org.opennms.horizon.inventory.service.NodeService;
 import org.opennms.horizon.inventory.service.discovery.PassiveDiscoveryService;
 import org.opennms.horizon.shared.events.EventConstants;
 import org.opennms.taskset.contract.ScanType;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.messaging.handler.annotation.Payload;
@@ -80,16 +79,16 @@ public class NodeMonitoringManager {
                     throw new InventoryRuntimeException("Missing tenant id on event: " + event);
                 }
                 var tenantId = event.getTenantId();
-                var location = event.getLocation();
-                log.debug("Create new node from event with interface: {}, location: {} and tenant: {}", event.getIpAddress(), location, tenantId);
+                var locationId = event.getLocationId();
+                log.debug("Create new node from event with tenantId={}; locationId={}; interface={}", event.getIpAddress(), locationId, tenantId);
 
                 NodeCreateDTO.Builder nodeCreateBuilder = NodeCreateDTO.newBuilder()
-                    .setLocation(location)
+                    .setLocationId(locationId)
                     .setManagementIp(event.getIpAddress())
                     .setLabel("trap-" + event.getIpAddress())
                     .setMonitoredState(MonitoredState.DETECTED);
 
-                Optional<PassiveDiscovery> discoveryOpt = passiveDiscoveryRepository.findByTenantIdAndLocation(tenantId, location);
+                Optional<PassiveDiscovery> discoveryOpt = passiveDiscoveryRepository.findByTenantIdAndLocationId(tenantId, Long.valueOf(locationId));
 
                 if (discoveryOpt.isPresent()){
                     PassiveDiscovery discovery = discoveryOpt.get();

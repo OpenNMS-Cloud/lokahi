@@ -32,6 +32,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
 import org.opennms.horizon.inventory.exception.InventoryRuntimeException;
+import org.opennms.horizon.inventory.service.MonitoringLocationService;
 import org.opennms.horizon.inventory.service.taskset.response.ScannerResponseService;
 import org.opennms.taskset.contract.ScannerResponse;
 import org.opennms.taskset.contract.TaskResult;
@@ -39,11 +40,8 @@ import org.opennms.taskset.contract.TenantLocationSpecificTaskSetResults;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.messaging.handler.annotation.Headers;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
-
-import java.util.Map;
 
 @Slf4j
 @Component
@@ -54,26 +52,26 @@ public class TaskSetResultsConsumer {
     private final ScannerResponseService scannerResponseService;
 
     @KafkaListener(topics = "${kafka.topics.task-set-results}", concurrency = "1")
-    public void receiveMessage(@Payload byte[] data, @Headers Map<String, Object> headers) {
+    public void receiveMessage(@Payload byte[] data) {
         LOG.debug("Have message from Task Set Results kafka topic");
 
         try {
             TenantLocationSpecificTaskSetResults message = TenantLocationSpecificTaskSetResults.parseFrom(data);
 
             String tenantId = message.getTenantId();
-            String location = message.getLocation();
+            String locationId = message.getLocationId();
 
             if (Strings.isEmpty(tenantId)) {
                 throw new InventoryRuntimeException("Missing tenant id");
             }
 
             for (TaskResult taskResult : message.getResultsList()) {
-                log.info("Received taskset results from minion with tenant id: {}; location: {}", tenantId, location);
+                log.info("Received taskset results from minion with tenantId={}; locationId={}", tenantId, locationId);
                 if (taskResult.hasScannerResponse()) {
 
                     ScannerResponse response = taskResult.getScannerResponse();
 
-                    scannerResponseService.accept(tenantId, location, response);
+                    scannerResponseService.accept(tenantId, Long.valueOf(locationId), response);
                 }
             }
         } catch (Exception e) {

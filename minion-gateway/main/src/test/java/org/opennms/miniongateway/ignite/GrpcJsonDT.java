@@ -30,7 +30,7 @@ public class GrpcJsonDT {
 
         UpdateTasksRequest updateTasksRequest =
             UpdateTasksRequest.newBuilder()
-                .setLocation("x-location-x")
+                .setLocationId("x-location-x")
                 .addUpdate(addOpWrapper)
                 .addUpdate(removeOpWrapper)
                 .build();
@@ -58,7 +58,7 @@ public class GrpcJsonDT {
 
         PublishTaskSetRequest publishTaskSetRequest =
             PublishTaskSetRequest.newBuilder()
-                .setLocation("x-location-x")
+                .setLocationId("x-location-x")
                 .setTaskSet(taskSet)
                 .build();
 

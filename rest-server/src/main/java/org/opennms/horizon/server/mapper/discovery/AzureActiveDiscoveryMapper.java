@@ -46,7 +46,7 @@ public interface AzureActiveDiscoveryMapper {
 
     AzureActiveDiscovery dtoToAzureActiveDiscovery(AzureActiveDiscoveryDTO dto);
 
-    @Mapping(target = "location", source = "location", nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
+    @Mapping(target = "locationId", source = "locationId", nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
     @Mapping(target = "tagsList", source = "tags", nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
     AzureActiveDiscoveryCreateDTO azureDiscoveryCreateToProto(AzureActiveDiscoveryCreate request);
 }

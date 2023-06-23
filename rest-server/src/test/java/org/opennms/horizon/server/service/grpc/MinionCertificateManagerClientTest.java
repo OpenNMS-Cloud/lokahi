@@ -44,7 +44,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import org.opennms.horizon.minioncertmanager.proto.GetMinionCertificateRequest;
+import org.opennms.horizon.minioncertmanager.proto.EmptyResponse;
+import org.opennms.horizon.minioncertmanager.proto.MinionCertificateRequest;
 import org.opennms.horizon.minioncertmanager.proto.GetMinionCertificateResponse;
 import org.opennms.horizon.minioncertmanager.proto.MinionCertificateManagerGrpc;
 import org.opennms.horizon.shared.constants.GrpcConstants;
@@ -75,10 +76,17 @@ public class MinionCertificateManagerClientTest {
         mockAlertService = mock(MinionCertificateManagerGrpc.MinionCertificateManagerImplBase.class, delegatesTo(
             new MinionCertificateManagerGrpc.MinionCertificateManagerImplBase() {
                 @Override
-                public void getMinionCert(GetMinionCertificateRequest request, StreamObserver<GetMinionCertificateResponse> responseObserver) {
+                public void getMinionCert(MinionCertificateRequest request, StreamObserver<GetMinionCertificateResponse> responseObserver) {
                     responseObserver.onNext(GetMinionCertificateResponse.newBuilder()
                         .setCertificate(ByteString.copyFromUtf8("test"))
                         .setPassword("password")
+                        .build());
+                    responseObserver.onCompleted();
+                }
+
+                @Override
+                public void revokeMinionCert(MinionCertificateRequest request, StreamObserver<EmptyResponse> responseObserver) {
+                    responseObserver.onNext(EmptyResponse.newBuilder()
                         .build());
                     responseObserver.onCompleted();
                 }
@@ -102,13 +110,23 @@ public class MinionCertificateManagerClientTest {
     void testGetMinionCert() {
         String methodName = new Object() {
         }.getClass().getEnclosingMethod().getName();
-        ArgumentCaptor<GetMinionCertificateRequest> captor = ArgumentCaptor.forClass(GetMinionCertificateRequest.class);
+        ArgumentCaptor<MinionCertificateRequest> captor = ArgumentCaptor.forClass(MinionCertificateRequest.class);
         GetMinionCertificateResponse result = client.getMinionCert("tenantId", 333L, accessToken + methodName);
         Assertions.assertFalse(result.getPassword().isEmpty());
         verify(mockAlertService).getMinionCert(captor.capture(), any());
         assertThat(captor.getValue()).isNotNull();
         assertThat(mockInterceptor.getAuthHeader()).isEqualTo(accessToken + methodName);
-        client.shutdown();
+    }
+
+    @Test
+    void testRevoke() {
+        String methodName = new Object() {
+        }.getClass().getEnclosingMethod().getName();
+        ArgumentCaptor<MinionCertificateRequest> captor = ArgumentCaptor.forClass(MinionCertificateRequest.class);
+        client.revokeCertificate("tenantId", 333L, accessToken + methodName);
+        verify(mockAlertService).revokeMinionCert(captor.capture(), any());
+        assertThat(captor.getValue()).isNotNull();
+        assertThat(mockInterceptor.getAuthHeader()).isEqualTo(accessToken + methodName);
     }
 
     private static class MockServerInterceptor implements ServerInterceptor {
@@ -128,5 +146,4 @@ public class MinionCertificateManagerClientTest {
             authHeader = null;
         }
     }
-
 }

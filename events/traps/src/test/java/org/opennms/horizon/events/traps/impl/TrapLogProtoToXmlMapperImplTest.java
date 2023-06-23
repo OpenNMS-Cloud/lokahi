@@ -52,7 +52,7 @@ public class TrapLogProtoToXmlMapperImplTest {
         testTenantLocationSpecificTrapLogDTO =
             TenantLocationSpecificTrapLogDTO.newBuilder()
                 .setTenantId("x-tenant-id-x")
-                .setLocation("x-location-x")
+                .setLocationId("x-location-x")
                 .setIdentity(testIdentity)
                 .setTrapAddress("1.2.3.4")
                 .addTrapDTO(testTrapDTO)

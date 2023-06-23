@@ -358,21 +358,21 @@ public class OpennmsGrpcServer extends AbstractMessageConsumerManager implements
     }
 
     @Override
-    public CompletableFuture<GatewayRpcResponseProto> dispatch(String tenantId, String location, RpcRequestProto request) {
-        StreamObserver<RpcRequestProto> rpcHandler = rpcConnectionTracker.lookupByLocationRoundRobin(tenantId, location);
+    public CompletableFuture<GatewayRpcResponseProto> dispatch(String tenantId, String locationId, RpcRequestProto request) {
+        StreamObserver<RpcRequestProto> rpcHandler = rpcConnectionTracker.lookupByLocationRoundRobin(tenantId, locationId);
         if (rpcHandler == null) {
-            return CompletableFuture.failedFuture(new IllegalArgumentException("Unknown location " + location));
+            return CompletableFuture.failedFuture(new IllegalArgumentException("Unknown location " + locationId));
         }
-        return dispatch(rpcHandler, location, request);
+        return dispatch(rpcHandler, locationId, request);
     }
 
     @Override
-    public CompletableFuture<GatewayRpcResponseProto> dispatch(String tenantId, String location, String systemId, RpcRequestProto request) {
+    public CompletableFuture<GatewayRpcResponseProto> dispatch(String tenantId, String locationId, String systemId, RpcRequestProto request) {
         StreamObserver<RpcRequestProto> rpcHandler = rpcConnectionTracker.lookupByMinionId(tenantId, systemId);
         if (rpcHandler == null) {
             return CompletableFuture.failedFuture(new IllegalArgumentException("Unknown system id " + systemId));
         }
-        return dispatch(rpcHandler, location, request);
+        return dispatch(rpcHandler, locationId, request);
     }
 
     private CompletableFuture<GatewayRpcResponseProto> dispatch(StreamObserver<RpcRequestProto> rpcHandler, String location, RpcRequestProto request) {
@@ -389,7 +389,7 @@ public class OpennmsGrpcServer extends AbstractMessageConsumerManager implements
                 .setRpcId(response.getRpcId())
                 .setIdentity(MinionIdentity.newBuilder()
                     .setSystemId(response.getIdentity().getSystemId())
-                    .setLocation(location)
+                    .setLocationId(location)
                 )
                 .setModuleId(response.getModuleId())
                 .setPayload(response.getPayload())

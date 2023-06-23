@@ -27,7 +27,6 @@ public class NodeStepDefinitions {
     private final InventoryBackgroundHelper backgroundHelper;
     private RetryUtils retryUtils;
     private KafkaTestHelper kafkaTestHelper;
-    private NodeDTO node;
     private MonitoringLocationDTO monitoringLocation;
     private NodeList fetchedNodeList;
     private String nodeTopic;
@@ -64,11 +63,6 @@ public class NodeStepDefinitions {
         backgroundHelper.grpcTenantId(tenantId);
     }
 
-    @Given("[Node] Grpc location {string}")
-    public void grpcLocation(String location) {
-        backgroundHelper.grpcLocation(location);
-    }
-
     @Given("[Node] Create Grpc Connection for Inventory")
     public void createGrpcConnectionForInventory() {
         backgroundHelper.createGrpcConnectionForInventory();
@@ -79,16 +73,13 @@ public class NodeStepDefinitions {
      * *********************************************************************************
      */
 
-    @Given("a new node with label {string}, ip address {string} and location {string}")
+    @Given("a new node with label {string}, ip address {string} in location named {string}")
     public void aNewNodeWithLabelIpAddressAndLocation(String label, String ipAddress, String location) {
         deleteAllNodes();
 
         var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
-        node = nodeServiceBlockingStub.createNode(NodeCreateDTO.newBuilder().setLabel(label)
-            .setManagementIp(ipAddress).setLocation(location).build());
-
-        var monitoringLocationStub = backgroundHelper.getMonitoringLocationStub();
-        monitoringLocation = monitoringLocationStub.getLocationById(Int64Value.of(node.getMonitoringLocationId()));
+        nodeServiceBlockingStub.createNode(NodeCreateDTO.newBuilder().setLabel(label)
+            .setManagementIp(ipAddress).setLocationId(backgroundHelper.findLocationId(location)).build());
     }
 
     /*
@@ -98,9 +89,17 @@ public class NodeStepDefinitions {
 
     @Then("verify that a new node is created with label {string}, ip address {string} and location {string}")
     public void verifyThatANewNodeIsCreatedWithLabelIpAddressAndLocation(String label, String ipAddress, String location) {
+        var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
+        NodeDTO node = nodeServiceBlockingStub.listNodes(Empty.getDefaultInstance()).getNodesList().stream()
+            .filter(fetched -> label.equals(fetched.getNodeLabel()))
+            .findFirst()
+            .orElseThrow(() -> new IllegalArgumentException("Node " + label + " not found"));
+
+        String locationId = backgroundHelper.findLocationId(location);
+
         assertEquals(label, node.getNodeLabel());
         assertEquals(ipAddress, node.getIpInterfaces(0).getIpAddress());
-        assertEquals(location, monitoringLocation.getLocation());
+        assertEquals(locationId, String.valueOf(node.getMonitoringLocationId()));
     }
 
     @Then("fetch a list of nodes by node label with search term {string}")

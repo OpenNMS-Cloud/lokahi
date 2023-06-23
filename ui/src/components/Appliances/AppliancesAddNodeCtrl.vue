@@ -102,7 +102,7 @@ const locationQueries = useLocationQueries()
 
 const defaultDevice: NodeCreateInput = {
   label: undefined,
-  location: undefined,
+  locationId: undefined,
   // latitude: undefined,
   // longitude: undefined,
   // monitoringArea: undefined,
@@ -153,13 +153,13 @@ const cancel = () => {
 const locationOption = ref()
 // sets location val in the payload
 const selectLocation = () => {
-  if (locationOption.value?.location) {
-    node.location = locationOption.value.location
+  if (locationOption.value?.id) {
+    node.locationId = locationOption.value.id
   }
 }
 // sets default location when locations available
 watchEffect(() => {
-  if (!node.location) {
+  if (!node.locationId) {
     locationOption.value = applianceQueries.locationsList[0]
     selectLocation()
   }

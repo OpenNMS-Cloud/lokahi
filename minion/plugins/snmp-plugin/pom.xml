@@ -4,7 +4,7 @@
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>plugins</artifactId>
-        <groupId>org.opennms.horizon.minion</groupId>
+        <groupId>org.opennms.lokahi.minion</groupId>
         <version>0.1.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -26,24 +26,24 @@
             <version>1.0.0</version>
         </dependency>
         <dependency>
-            <groupId>org.opennms.horizon.minion</groupId>
+            <groupId>org.opennms.lokahi.minion</groupId>
             <artifactId>plugins-api</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.opennms.horizon.minion</groupId>
+            <groupId>org.opennms.lokahi.minion</groupId>
             <artifactId>snmp-ipc</artifactId>
             <version>${project.version}</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>
-            <groupId>org.opennms.horizon.shared</groupId>
+            <groupId>org.opennms.lokahi.shared</groupId>
             <artifactId>protobuf</artifactId>
             <version>${project.version}</version>
         </dependency>
 
         <dependency>
-            <groupId>org.opennms.horizon.shared</groupId>
+            <groupId>org.opennms.lokahi.shared</groupId>
             <artifactId>snmp-api</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -118,11 +118,11 @@
                             <descriptors>
                                 <descriptor>mvn:org.apache.karaf.features/framework/${karaf.version}/xml/features</descriptor>
                                 <descriptor>mvn:org.apache.karaf.features/standard/${karaf.version}/xml/features</descriptor>
-                                <descriptor>mvn:org.opennms.horizon.minion/grpc-features/${project.version}/xml/features</descriptor>
-                                <descriptor>mvn:org.opennms.horizon.minion/ipc-features/${project.version}/xml/features</descriptor>
-                                <descriptor>mvn:org.opennms.horizon.minion/observability-features/${project.version}/xml/features</descriptor>
-                                <descriptor>mvn:org.opennms.horizon.shared/snmp-api/${project.version}/xml/features</descriptor>
-                                <descriptor>mvn:org.opennms.horizon.minion/plugin-features/${project.version}/xml/features</descriptor>
+                                <descriptor>mvn:org.opennms.lokahi.minion/grpc-features/${project.version}/xml/features</descriptor>
+                                <descriptor>mvn:org.opennms.lokahi.minion/ipc-features/${project.version}/xml/features</descriptor>
+                                <descriptor>mvn:org.opennms.lokahi.minion/observability-features/${project.version}/xml/features</descriptor>
+                                <descriptor>mvn:org.opennms.lokahi.shared/snmp-api/${project.version}/xml/features</descriptor>
+                                <descriptor>mvn:org.opennms.lokahi.minion/plugin-features/${project.version}/xml/features</descriptor>
                                 <descriptor>file:${project.build.directory}/feature/feature.xml</descriptor>
                             </descriptors>
                             <features>

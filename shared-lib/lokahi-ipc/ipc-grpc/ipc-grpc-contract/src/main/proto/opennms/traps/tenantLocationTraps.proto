@@ -1,0 +1,17 @@
+syntax = "proto3";
+package opennms.sink.traps;
+
+option java_multiple_files = true;
+option java_package = "org.opennms.horizon.grpc.traps.contract";
+
+import "opennms/traps/traps.proto";
+import "opennms_minion_ipc.proto";
+
+message TenantLocationSpecificTrapLogDTO {
+  string tenant_id = 100;
+  string location_id = 101;
+
+  minion.Identity identity = 1;
+  string trapAddress = 2;
+  repeated TrapDTO trapDTO = 3;
+}

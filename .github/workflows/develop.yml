@@ -181,7 +181,7 @@ jobs:
           # Setup localhost DNS
           sudo echo "127.0.0.1 onmshs" | sudo tee -a /etc/hosts
           
-          # Build cluster with Horizon Stream installed.
+          # Build cluster with Lokahi installed.
           ./install-local.sh cicd onmshs "${{ inputs.image-tag || github.sha }}" "${{ inputs.image-registry || 'ghcr.io' }}/opennms-cloud"
 
           echo ""

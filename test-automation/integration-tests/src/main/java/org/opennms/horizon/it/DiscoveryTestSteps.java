@@ -30,6 +30,7 @@ package org.opennms.horizon.it;
 import io.cucumber.java.en.Then;
 import io.restassured.response.Response;
 import org.opennms.horizon.it.gqlmodels.GQLQuery;
+import org.opennms.horizon.it.gqlmodels.LocationData;
 import org.opennms.horizon.it.gqlmodels.querywrappers.AddDiscoveryResult;
 import org.opennms.horizon.it.gqlmodels.querywrappers.CreateNodeResult;
 import org.opennms.horizon.it.helper.TestsExecutionHelper;
@@ -65,10 +66,15 @@ public class DiscoveryTestSteps {
      * @throws MalformedURLException
      */
     @Then("Add a new active discovery for the name {string} at location {string} with ip address {string} and port {int}, readCommunities {string}")
-    public void addANewActiveDiscovery(String name, String location, String ipaddress, int port, String communities) {
+    public void addANewActiveDiscovery(String name, String location, String ipaddress, int port, String communities) throws MalformedURLException {
         LOG.info("Add a new discovery query execution steps");
 
-        String query = String.format(GQLQueryConstants.ADD_DISCOVERY_QUERY, name, location, ipaddress, communities, port);
+        Long locationId = helper.commonQueryLocations().getData().getFindAllLocations().stream()
+            .filter(loc -> location.equals(loc.getLocation()))
+            .findFirst()
+            .map(LocationData::getId)
+            .orElseThrow(() -> new IllegalArgumentException("Unknown location " + location));
+        String query = String.format(GQLQueryConstants.ADD_DISCOVERY_QUERY, name, locationId, ipaddress, communities, port);
 
         GQLQuery gqlQuery = new GQLQuery();
         gqlQuery.setQuery(query);

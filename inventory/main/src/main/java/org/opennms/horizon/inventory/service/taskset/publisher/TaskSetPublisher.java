@@ -34,7 +34,7 @@ import java.util.List;
 
 public interface TaskSetPublisher {
 
-    void publishNewTasks(String tenantId, String location, List<TaskDefinition> taskList);
+    void publishNewTasks(String tenantId, Long locationId, List<TaskDefinition> taskList);
 
-    void publishTaskDeletion(String tenantId, String location, List<TaskDefinition> taskList);
+    void publishTaskDeletion(String tenantId, Long locationId, List<TaskDefinition> taskList);
 }

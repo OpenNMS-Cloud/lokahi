@@ -38,6 +38,6 @@ import java.util.Optional;
 @Repository
 public interface SnmpConfigRepository extends JpaRepository<SnmpConfig, Long> {
 
-    Optional<SnmpConfig> findByTenantIdAndLocationAndIpAddress(String tenantId, String location, InetAddress ipAddres);
+    Optional<SnmpConfig> findByTenantIdAndLocationIdAndIpAddress(String tenantId, Long locationId, InetAddress ipAddres);
 
 }

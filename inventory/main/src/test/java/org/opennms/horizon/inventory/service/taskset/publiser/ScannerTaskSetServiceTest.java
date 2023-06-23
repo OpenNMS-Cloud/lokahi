@@ -66,7 +66,7 @@ public class ScannerTaskSetServiceTest {
     @Captor
     ArgumentCaptor<List<TaskDefinition>> taskListCaptor;
     private final String tenantId = "testTenant";
-    private final String location = "testLocation";
+    private final Long locationId = 1020304050L;
     private NodeDTO.Builder nodeBuilder;
     private IpInterfaceDTO ipInterface1;
     private IpInterfaceDTO ipInterface2;
@@ -86,8 +86,8 @@ public class ScannerTaskSetServiceTest {
     @Test
     void testSendNodeScanWithTwoIpInterfaces() throws InvalidProtocolBufferException {
         NodeDTO node = nodeBuilder.addAllIpInterfaces(List.of(ipInterface1, ipInterface2)).build();
-        service.sendNodeScannerTask(List.of(node), location, tenantId);
-        verify(mockPublisher).publishNewTasks(eq(tenantId), eq(location), taskListCaptor.capture());
+        service.sendNodeScannerTask(List.of(node), locationId, tenantId);
+        verify(mockPublisher).publishNewTasks(eq(tenantId), eq(locationId), taskListCaptor.capture());
         List<TaskDefinition> tasks = taskListCaptor.getValue();
         assertThat(tasks).asList().hasSize(1)
             .extracting("nodeId_").containsExactly(node.getId());
@@ -99,8 +99,8 @@ public class ScannerTaskSetServiceTest {
     @Test
     void testSendNodeScanWithIpInterfaceNonPrimary() throws InvalidProtocolBufferException {
         NodeDTO node = nodeBuilder.addAllIpInterfaces(List.of(ipInterface2)).build();
-        service.sendNodeScannerTask(List.of(node), location, tenantId);
-        verify(mockPublisher).publishNewTasks(eq(tenantId), eq(location), taskListCaptor.capture());
+        service.sendNodeScannerTask(List.of(node), locationId, tenantId);
+        verify(mockPublisher).publishNewTasks(eq(tenantId), eq(locationId), taskListCaptor.capture());
         List<TaskDefinition> tasks = taskListCaptor.getValue();
         assertThat(tasks).asList().hasSize(1)
             .extracting("nodeId_").containsExactly(node.getId());
@@ -112,7 +112,7 @@ public class ScannerTaskSetServiceTest {
     @Test
     void testSendNodeScanWithoutIpInterfaces() {
         NodeDTO node = nodeBuilder.build();
-        service.sendNodeScannerTask(List.of(node), location, tenantId);
+        service.sendNodeScannerTask(List.of(node), locationId, tenantId);
         verifyNoInteractions(mockPublisher);
     }
 }

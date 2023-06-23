@@ -24,7 +24,7 @@
         <bundle>mvn:io.netty/netty-transport-native-unix-common/${netty4.version}</bundle>
         <bundle>mvn:io.netty/netty-handler/${netty4.version}</bundle>
         <bundle>mvn:org.apache.commons/commons-csv/1.9.0</bundle>
-        <bundle>mvn:org.opennms.horizon.shared/flows/${project.version}</bundle>
-        <bundle>mvn:org.opennms.horizon.minion/flows-parser/${project.version}</bundle>
+        <bundle>mvn:org.opennms.lokahi.shared/flows/${project.version}</bundle>
+        <bundle>mvn:org.opennms.lokahi.minion/flows-parser/${project.version}</bundle>
     </feature>
 </features>

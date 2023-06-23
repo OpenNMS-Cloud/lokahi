@@ -18,7 +18,7 @@
         Intended to be used in CI pipelines.
     </description>
 
-    <groupId>org.opennms.horizon.exttest</groupId>
+    <groupId>org.opennms.lokahi.exttest</groupId>
     <artifactId>integration-tests</artifactId>
     <version>0.1.0-SNAPSHOT</version>
 

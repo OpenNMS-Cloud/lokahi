@@ -119,8 +119,8 @@ class MinionRpcClientTest {
 
         MinionIdentity minionIdentity =
             MinionIdentity.newBuilder()
-                .setTenant(PRIMARY_TENANT_ID)
-                .setLocation("test-location")
+                .setTenantId(PRIMARY_TENANT_ID)
+                .setLocationId("test-location")
                 .setSystemId("test-system")
                 .build();
 
@@ -133,9 +133,9 @@ class MinionRpcClientTest {
 
         GatewayRpcResponseProto response = client.sendRpcRequest(PRIMARY_TENANT_ID, request).get();
         assertEquals(1, receivedRequests.size());
-        assertThat(response.getIdentity().getTenant()).isEqualTo(request.getIdentity().getTenant());
+        assertThat(response.getIdentity().getTenantId()).isEqualTo(request.getIdentity().getTenantId());
         assertThat(response.getIdentity().getSystemId()).isEqualTo(request.getIdentity().getSystemId());
-        assertThat(response.getIdentity().getLocation()).isEqualTo(request.getIdentity().getLocation());
+        assertThat(response.getIdentity().getLocationId()).isEqualTo(request.getIdentity().getLocationId());
         assertThat(response.getModuleId()).isEqualTo(request.getModuleId());
         assertThat(response.getRpcId()).isEqualTo(request.getRpcId());
         EchoResponse echoResponse = response.getPayload().unpack(EchoResponse.class);

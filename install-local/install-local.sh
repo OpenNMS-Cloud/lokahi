@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 #use this script to install a basic version of OpenNMS Horizon Stream locally
 
-set -e
+set -euo pipefail
+trap 's=$?; echo >&2 "$0: Error on line "$LINENO": $BASH_COMMAND"; exit $s' ERR
 
 LOCAL_DOCKER_CONFIG_JSON="${HOME}/.docker/config.json"
 
@@ -171,7 +172,7 @@ create_namespace () {
 
 install_helm_chart_custom_images () {
   echo
-  echo ________________Installing Horizon Stream________________
+  echo ________________Installing Lokahi________________
   echo
 
   if ! helm upgrade -i lokahi ./../charts/lokahi \
@@ -245,7 +246,7 @@ if [ $CONTEXT == "local" ]; then
   create_ssl_cert_secret
 
   echo
-  echo ________________Installing Horizon Stream________________
+  echo ________________Installing Lokahi________________
   echo
   helm upgrade -i lokahi ./../charts/lokahi -f ./tmp/install-local-opennms-lokahi-values.yaml --namespace $NAMESPACE --wait --timeout "${TIMEOUT}"
   if [ $? -ne 0 ]; then exit; fi
@@ -296,7 +297,7 @@ elif [ "$CONTEXT" == "cicd" ]; then
 elif [ $CONTEXT == "existing-k8s" ]; then
 
   echo
-  echo ________________Installing Horizon Stream________________
+  echo ________________Installing Lokahi________________
   echo
   helm upgrade -i lokahi ./../charts/lokahi -f ./tmp/install-local-opennms-lokahi-values.yaml --namespace $NAMESPACE --create-namespace --wait --timeout "${TIMEOUT}"
   if [ $? -ne 0 ]; then exit; fi

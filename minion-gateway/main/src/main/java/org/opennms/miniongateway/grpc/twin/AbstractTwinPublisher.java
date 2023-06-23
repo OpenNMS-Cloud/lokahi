@@ -39,6 +39,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.Objects;
 import java.util.function.BiConsumer;
 import javax.cache.Cache.Entry;
@@ -72,35 +73,34 @@ public abstract class AbstractTwinPublisher implements TwinPublisher, TwinProvid
     }
 
     /**
-     * @param location
+     * @param locationId
      * @param sinkUpdate Handle sink Update from @{@link AbstractTwinPublisher}.
      */
-    protected abstract void handleSinkUpdate(String location, TwinUpdate sinkUpdate);
+    protected abstract void handleSinkUpdate(String locationId, TwinUpdate sinkUpdate);
 
     @Override
-    public <T> Session<T>
-    register(String key, Class<T> clazz, String tenantId, String location) throws IOException {
+    public <T> Session<T> register(String key, Class<T> clazz, String tenantId, String locationId) throws IOException {
         try (MDCCloseable mdc = MDC.putCloseable("prefix", TwinConstants.LOG_PREFIX)) {
-            SessionKey sessionKey = new SessionKey(key, tenantId, location);
+            SessionKey sessionKey = new SessionKey(key, tenantId, locationId);
             LOG.info("Registered a session with key {}", sessionKey);
             return new SessionImpl<>(sessionKey);
         }
     }
 
     @Override
-    public TwinResponseProto getTwinResponse(String tenantId, String location, TwinRequestProto twinRequest) {
-        return mapTwinResponse(getTwin(tenantId, location, twinRequest));
+    public TwinResponseProto getTwinResponse(String tenantId, String locationId, TwinRequestProto twinRequest) {
+        return mapTwinResponse(getTwin(tenantId, locationId, twinRequest));
     }
 
-    protected TwinUpdate getTwin(String tenantId, String location, TwinRequestProto twinRequest) {
-        TwinTracker twinTracker = getTwinTracker(twinRequest.getConsumerKey(), tenantId, location);
+    protected TwinUpdate getTwin(String tenantId, String locationId, TwinRequestProto twinRequest) {
+        TwinTracker twinTracker = getTwinTracker(twinRequest.getConsumerKey(), tenantId, locationId);
         TwinUpdate twinUpdate;
         if (twinTracker == null) {
             // No twin object exists for this key yet, return with null object.
-            twinUpdate = new TwinUpdate(twinRequest.getConsumerKey(), tenantId, location, null);
+            twinUpdate = new TwinUpdate(twinRequest.getConsumerKey(), tenantId, locationId, null);
         } else {
             // Fill TwinUpdate fields from TwinTracker.
-            twinUpdate = new TwinUpdate(twinRequest.getConsumerKey(), tenantId, location, twinTracker.getObj());
+            twinUpdate = new TwinUpdate(twinRequest.getConsumerKey(), tenantId, locationId, twinTracker.getObj());
             twinUpdate.setPatch(false);
             twinUpdate.setVersion(twinTracker.getVersion());
             twinUpdate.setSessionId(twinTracker.getSessionId());
@@ -108,9 +108,9 @@ public abstract class AbstractTwinPublisher implements TwinPublisher, TwinProvid
         return twinUpdate;
     }
 
-    private synchronized TwinTracker getTwinTracker(String key, String tenantId, String location) {
+    private synchronized TwinTracker getTwinTracker(String key, String tenantId, String locationId) {
         // Check if we have a session key specific to location else check session key without location.
-        TwinTracker twinTracker = twinTrackerMap.get(new SessionKey(key, tenantId, location));
+        TwinTracker twinTracker = twinTrackerMap.get(new SessionKey(key, tenantId, locationId));
         if (twinTracker == null) {
             twinTracker = twinTrackerMap.get(new SessionKey(key, tenantId, null));
         }
@@ -136,9 +136,9 @@ public abstract class AbstractTwinPublisher implements TwinPublisher, TwinProvid
     }
 
     private synchronized TwinUpdate getResponseFromUpdatedObj(byte[] updatedObj, SessionKey sessionKey) {
-        TwinTracker twinTracker = getTwinTracker(sessionKey.key, sessionKey.tenantId, sessionKey.location);
+        TwinTracker twinTracker = getTwinTracker(sessionKey.key, sessionKey.tenantId, sessionKey.locationId);
         if (twinTracker == null || !Arrays.equals(twinTracker.getObj(), updatedObj)) {
-            TwinUpdate twinUpdate = new TwinUpdate(sessionKey.key, sessionKey.tenantId, sessionKey.location, updatedObj);
+            TwinUpdate twinUpdate = new TwinUpdate(sessionKey.key, sessionKey.tenantId, sessionKey.locationId, updatedObj);
             if (twinTracker == null) {
                 twinTracker = new TwinTracker(updatedObj);
             } else {
@@ -177,17 +177,17 @@ public abstract class AbstractTwinPublisher implements TwinPublisher, TwinProvid
 
     public synchronized void forEachSession(String tenantId, BiConsumer<SessionKey, TwinTracker> consumer) {
         ScanQuery<SessionKey, TwinTracker> query = new ScanQuery<>();
-        query.setFilter(new IgniteBiPredicate<SessionKey, TwinTracker>() {
-            @Override
-            public boolean apply(SessionKey sessionKey, TwinTracker twinTracker) {
-                return tenantId.equals(sessionKey.tenantId);
-            }
-        });
+        query.setFilter(new TenantSessionKeyPredicate(tenantId));
         QueryCursor<Entry<SessionKey, TwinTracker>> cursor = twinTrackerMap.query(query);
-        cursor.forEach(entry -> consumer.accept(entry.getKey(), entry.getValue()));
+        Iterator<Entry<SessionKey, TwinTracker>> iterator = cursor.iterator();
+        while (iterator.hasNext()) {
+            Entry<SessionKey, TwinTracker> entry = iterator.next();
+            consumer.accept(entry.getKey(), entry.getValue());
+        }
+        cursor.close();
     }
 
-    private class SessionImpl<T> implements Session<T> {
+    private class SessionImpl<T> implements Session<T>, Serializable {
 
         private final SessionKey sessionKey;
 
@@ -203,7 +203,7 @@ public abstract class AbstractTwinPublisher implements TwinPublisher, TwinProvid
                 TwinUpdate twinUpdate = getResponseFromUpdatedObj(objInBytes, sessionKey);
 
                 if (twinUpdate != null) {
-                    handleSinkUpdate(sessionKey.location, twinUpdate);
+                    handleSinkUpdate(sessionKey.locationId, twinUpdate);
                 }
             }
         }
@@ -219,12 +219,12 @@ public abstract class AbstractTwinPublisher implements TwinPublisher, TwinProvid
 
         public final String key;
         public final String tenantId;
-        public final String location;
+        public final String locationId;
 
-        private SessionKey(String key, String tenantId, String location) {
+        private SessionKey(String key, String tenantId, String locationId) {
             this.key = key;
             this.tenantId = tenantId;
-            this.location = location;
+            this.locationId = locationId;
         }
 
         @Override
@@ -233,12 +233,12 @@ public abstract class AbstractTwinPublisher implements TwinPublisher, TwinProvid
             if (o == null || getClass() != o.getClass()) return false;
             SessionKey that = (SessionKey) o;
             return Objects.equals(key, that.key) && Objects.equals(tenantId, that.tenantId) &&
-                Objects.equals(location, that.location);
+                Objects.equals(locationId, that.locationId);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(key, tenantId, location);
+            return Objects.hash(key, tenantId, locationId);
         }
 
         @Override
@@ -246,7 +246,7 @@ public abstract class AbstractTwinPublisher implements TwinPublisher, TwinProvid
             return "SessionKey{" +
                     "key='" + key + '\'' +
                     ", tenant-id='" + tenantId + '\'' +
-                    ", location='" + location + '\'' +
+                    ", location='" + locationId + '\'' +
                     '}';
         }
     }
@@ -263,5 +263,19 @@ public abstract class AbstractTwinPublisher implements TwinPublisher, TwinProvid
 //        simpleModule.addSerializer(new ProtoBufJsonSerializer<>(TaskSet.class));
 
         objectMapper.registerModule(simpleModule);
+    }
+
+    static class TenantSessionKeyPredicate implements IgniteBiPredicate<SessionKey, TwinTracker> {
+
+        private final String tenantId;
+
+        TenantSessionKeyPredicate(String tenantId) {
+            this.tenantId = tenantId;
+        }
+
+        @Override
+        public boolean apply(SessionKey sessionKey, TwinTracker twinTracker) {
+            return tenantId.equals(sessionKey.tenantId);
+        }
     }
 }

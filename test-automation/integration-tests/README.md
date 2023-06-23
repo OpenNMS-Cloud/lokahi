@@ -1,6 +1,6 @@
 # To Use
 
-    * With Horizon Stream running on localhost at port 8080
+    * With Lokahi running on localhost at port 8080
     * Keycloak on port 9000
     * Keycloak user "user001", password "passw0rd", in realm "opennms"
 

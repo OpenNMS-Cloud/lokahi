@@ -94,7 +94,7 @@ public class PipelineImpl implements Pipeline {
         LOG.debug("Enriching {} flow documents.", flows.size());
         var enrichedFlowsLog = TenantLocationSpecificFlowDocumentLog.newBuilder()
             .setTenantId(flowsLog.getTenantId())
-            .setLocation(flowsLog.getLocation())
+            .setLocationId(flowsLog.getLocationId())
             .setSystemId(flowsLog.getSystemId());
         try (Timer.Context ctx = this.logEnrichementTimer.time()) {
             var enrichedFlows = documentEnricher.enrich(flowsLog);

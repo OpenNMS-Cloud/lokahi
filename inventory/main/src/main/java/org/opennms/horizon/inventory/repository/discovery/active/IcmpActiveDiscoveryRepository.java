@@ -37,9 +37,9 @@ import java.util.Optional;
 
 @Repository
 public interface IcmpActiveDiscoveryRepository extends JpaRepository<IcmpActiveDiscovery, Long> {
-    List<IcmpActiveDiscovery> findByLocationAndTenantId(String location, String tenantId);
+    List<IcmpActiveDiscovery> findByLocationIdAndTenantId(Long locationId, String tenantId);
 
-    Optional<IcmpActiveDiscovery> findByLocationAndName(String location, String name);
+    Optional<IcmpActiveDiscovery> findByLocationIdAndName(Long locationId, String name);
 
     List<IcmpActiveDiscovery> findByNameAndTenantId(String name, String tenantId);
 

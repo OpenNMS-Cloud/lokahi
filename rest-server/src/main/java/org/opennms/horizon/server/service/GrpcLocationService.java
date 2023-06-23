@@ -40,6 +40,7 @@ import org.opennms.horizon.server.model.inventory.MonitoringLocation;
 import org.opennms.horizon.server.model.inventory.MonitoringLocationCreate;
 import org.opennms.horizon.server.model.inventory.MonitoringLocationUpdate;
 import org.opennms.horizon.server.service.grpc.InventoryClient;
+import org.opennms.horizon.server.service.grpc.MinionCertificateManagerClient;
 import org.opennms.horizon.server.utils.ServerHeaderUtil;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -50,6 +51,7 @@ import reactor.core.publisher.Mono;
 @Service
 public class GrpcLocationService {  // TODO: rename to GraphQL...Service; there is no GRPC in this code
     private final InventoryClient client;
+    private final MinionCertificateManagerClient certificateManagerClient;
     private final MonitoringLocationMapper mapper;
     private final ServerHeaderUtil headerUtil;
 
@@ -86,6 +88,11 @@ public class GrpcLocationService {  // TODO: rename to GraphQL...Service; there 
 
     @GraphQLMutation
     public Mono<Boolean> deleteLocation(@GraphQLArgument(name = "id") long id, @GraphQLEnvironment ResolutionEnvironment env) {
-        return Mono.just(client.deleteLocation(id, headerUtil.getAuthHeader(env)));
+        var accessToken = headerUtil.getAuthHeader(env);
+        var status = client.deleteLocation(id, accessToken);
+        // we may want to revoke even delete location is fail. E.g. location is already deleted before or it is partially deleted.
+        // It will not be able to use anyway.
+        certificateManagerClient.revokeCertificate(headerUtil.extractTenant(env), id, accessToken);
+        return Mono.just(status);
     }
 }

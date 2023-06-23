@@ -15,8 +15,8 @@ service TaskSetService {
 // PUBLISH TASK SET (TODO - remove)
 //
 message PublishTaskSetRequest {
-  string location = 1;
-  opennms.taskset.TaskSet taskSet = 2;
+  string location_id = 1;
+  opennms.taskset.TaskSet task_set = 2;
 }
 
 message PublishTaskSetResponse {
@@ -30,28 +30,28 @@ message UpdateTasksRequestList {
 // UPDATE TASKS
 //
 message UpdateTasksRequest {
-  string tenantId = 1;
-  string location = 2;
+  string tenant_id = 1;
+  string location_id = 2;
   repeated UpdateSingleTaskOp update = 3;
 }
 
 message UpdateTasksResponse {
-  int32 numNew = 1;
-  int32 numRemoved = 2;
-  int32 numReplaced = 3;
+  int32 num_new = 1;
+  int32 num_removed = 2;
+  int32 num_replaced = 3;
 }
 
 message UpdateSingleTaskOp {
   oneof op {
-      AddSingleTaskOp addTask = 1;
-      RemoveSingleTaskOp removeTask = 2;
+      AddSingleTaskOp add_task = 1;
+      RemoveSingleTaskOp remove_task = 2;
   }
 }
 
 message AddSingleTaskOp {
-  TaskDefinition taskDefinition = 1;
+  TaskDefinition task_definition = 1;
 }
 
 message RemoveSingleTaskOp {
-  string taskId = 1;
+  string task_id = 1;
 }

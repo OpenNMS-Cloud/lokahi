@@ -97,7 +97,7 @@ public class TenantLocationSpecificTaskSetResultsMapperImplTest {
         TenantLocationSpecificTaskSetResults tenantLocationSpecificTaskSetResults =
             TenantLocationSpecificTaskSetResults.newBuilder()
                 .setTenantId("x-tenant-id-x")
-                .setLocation("x-location-x")
+                .setLocationId("x-location-x")
                 .addResults(testTaskResult)
                 .build();
 
@@ -176,8 +176,8 @@ public class TenantLocationSpecificTaskSetResultsMapperImplTest {
         Set<String> withTenantTypeFields =
             withTenantTypeDescriptor.getFields().stream().map(Descriptors.FieldDescriptor::getName).collect(Collectors.toSet());
 
-        withTenantTypeFields.remove("tenantId");
-        withTenantTypeFields.remove("location");
+        withTenantTypeFields.remove("tenant_id");
+        withTenantTypeFields.remove("location_id");
 
         assertEquals(withTenantTypeFields, withoutTenantTypeFields);
     }

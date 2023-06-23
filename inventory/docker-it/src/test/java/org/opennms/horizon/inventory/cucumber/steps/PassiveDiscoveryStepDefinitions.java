@@ -80,11 +80,6 @@ public class PassiveDiscoveryStepDefinitions {
         backgroundHelper.grpcTenantId(tenantId);
     }
 
-    @Given("[Passive] Grpc location {string}")
-    public void grpcLocation(String location) {
-        backgroundHelper.grpcLocation(location);
-    }
-
     @Given("[Passive] Create Grpc Connection for Inventory")
     public void createGrpcConnectionForInventory() {
         backgroundHelper.createGrpcConnectionForInventory();
@@ -99,21 +94,21 @@ public class PassiveDiscoveryStepDefinitions {
         deleteAllPassiveDiscovery();
     }
 
-    @Given("Passive Discovery fields to persist")
-    public void passiveDiscoveryFieldsToPersist() {
+    @Given("Passive Discovery fields to persist for location named {string}")
+    public void passiveDiscoveryFieldsToPersist(String location) {
         passiveDiscoveryUpsertDTO = PassiveDiscoveryUpsertDTO.newBuilder()
-            .setLocation("Default")
+            .setLocationId(backgroundHelper.findLocationId(location))
             .addCommunities("public")
             .addPorts(161)
             .addTags(TagCreateDTO.newBuilder().setName("tag-name").build())
             .build();
     }
 
-    @Given("Passive Discovery fields to update")
-    public void passiveDiscoveryFieldsToUpdate() {
+    @Given("Passive Discovery fields to update for location named {string}")
+    public void passiveDiscoveryFieldsToUpdate(String location) {
         passiveDiscoveryUpsertDTO = PassiveDiscoveryUpsertDTO.newBuilder()
             .setId(fetchedId)
-            .setLocation("Updated")
+            .setLocationId(backgroundHelper.findLocationId(location))
             .addCommunities("other")
             .addPorts(161)
             .addTags(TagCreateDTO.newBuilder().setName("tag-name").build())
@@ -168,8 +163,8 @@ public class PassiveDiscoveryStepDefinitions {
         PassiveDiscoveryDTO fetchedDiscovery = fetchedPassiveDiscoveryList.getDiscoveries(0);
         fetchedId = fetchedDiscovery.getId();
 
-        assertEquals(passiveDiscoveryUpsertDTO.getLocation(), upsertedDiscovery.getLocation());
-        assertEquals(passiveDiscoveryUpsertDTO.getLocation(), fetchedDiscovery.getLocation());
+        assertEquals(passiveDiscoveryUpsertDTO.getLocationId(), upsertedDiscovery.getLocationId());
+        assertEquals(passiveDiscoveryUpsertDTO.getLocationId(), fetchedDiscovery.getLocationId());
 
         assertEquals(passiveDiscoveryUpsertDTO.getPortsCount(), upsertedDiscovery.getPortsCount());
         assertEquals(passiveDiscoveryUpsertDTO.getPortsCount(), fetchedDiscovery.getPortsCount());

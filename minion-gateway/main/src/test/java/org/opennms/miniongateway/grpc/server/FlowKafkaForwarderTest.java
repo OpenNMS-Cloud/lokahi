@@ -79,7 +79,7 @@ public class FlowKafkaForwarderTest {
     @Test
     public void testForward() {
         Mockito.when(tenantIDGrpcInterceptor.readCurrentContextTenantId()).thenReturn("tenantId");
-        Mockito.when(locationServerInterceptor.readCurrentContextLocation()).thenReturn("location");
+        Mockito.when(locationServerInterceptor.readCurrentContextLocationId()).thenReturn("location");
         var flowsLog = FlowDocumentLog.newBuilder()
             .setSystemId("systemId")
             .addMessage(FlowDocument.newBuilder()
@@ -88,7 +88,7 @@ public class FlowKafkaForwarderTest {
 
         var expectedFlowDocumentLog = TenantLocationSpecificFlowDocumentLog.newBuilder()
             .setSystemId("systemId")
-            .setLocation("location")
+            .setLocationId("location")
             .setTenantId("tenantId")
             .addMessage(FlowDocument.newBuilder()
                 .setSrcAddress("127.0.0.1"))

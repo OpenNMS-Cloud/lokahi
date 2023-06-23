@@ -2,7 +2,7 @@ package org.opennms.horizon.it.gqlmodels;
 
 public class CreateNodeData {
     private String label;
-    private String location;
+    private String locationId;
     private String managementIp;
 
     public String getLabel() {
@@ -13,12 +13,12 @@ public class CreateNodeData {
         this.label = label;
     }
 
-    public String getLocation() {
-        return location;
+    public String getLocationId() {
+        return locationId;
     }
 
-    public void setLocation(String location) {
-        this.location = location;
+    public void setLocationId(String locationId) {
+        this.locationId = locationId;
     }
 
     public String getManagementIp() {

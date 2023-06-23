@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { useDiscoveryMutations } from '../Mutations/discoveryMutations'
 import { cloneDeep } from 'lodash'
-import { TagCreateInput } from '@/types/graphql'
+import { MonitoringLocation, TagCreateInput } from '@/types/graphql'
 
 const defaultAzureForm = {
   name: '',
@@ -28,16 +28,16 @@ export const useDiscoveryStore = defineStore('discoveryStore', {
     selectedDiscovery: {}
   }),
   actions: {
-    selectLocation(location: string, single?: boolean) {
+    selectLocation(location: MonitoringLocation, single?: boolean) {
       if (single) {
-        this.selectedLocations = location ? [location] : []
+        this.selectedLocations = location ? [location.id] : []
         return
       }
 
-      if (this.selectedLocations.includes(location)) {
-        this.selectedLocations = this.selectedLocations.filter((x) => x !== location)
+      if (this.selectedLocations.includes(location.id)) {
+        this.selectedLocations = this.selectedLocations.filter((x) => x !== location.id)
       } else {
-        this.selectedLocations.push(location)
+        this.selectedLocations.push(location.id)
       }
     },
     selectTags(tags: TagCreateInput[]) {
@@ -48,7 +48,7 @@ export const useDiscoveryStore = defineStore('discoveryStore', {
 
       await addAzureCreds({
         discovery: {
-          location: this.selectedLocations[0],
+          locationId: this.selectedLocations[0],
           tags: this.selectedTags,
           ...this.azure
         }

@@ -103,14 +103,9 @@ public class IcmpDiscoveryStepDefinitions {
         backgroundHelper.grpcTenantId(tenantId);
     }
 
-    @Given("[ICMP Discovery] Grpc location {string}")
-    public void grpcLocation(String location) {
-        backgroundHelper.grpcLocation(location);
-    }
-
-    @Given("The taskset at location {string}")
+    @Given("The taskset for location named {string}")
     public void theTasksetAtLocation(String taskLocation) {
-        this.taskLocation = taskLocation;
+        this.taskLocation = backgroundHelper.findLocationId(taskLocation);
     }
 
     @Given("[ICMP Discovery] Create Grpc Connection for Inventory")
@@ -121,30 +116,30 @@ public class IcmpDiscoveryStepDefinitions {
     @Given("New Active Discovery with IpAddresses {string} and SNMP community as {string} at location {string}")
     public void newActiveDiscoveryWithIpAddressesAndSNMPCommunityAsAtLocation(String ipAddressStrings, String snmpReadCommunity, String location) {
         icmpDiscovery = IcmpActiveDiscoveryCreateDTO.newBuilder()
-            .addIpAddresses(ipAddressStrings).setSnmpConf(SNMPConfigDTO.newBuilder().addReadCommunity(snmpReadCommunity).build())
-            .setLocation(location).build();
+            .addIpAddresses(ipAddressStrings).setSnmpConfig(SNMPConfigDTO.newBuilder().addReadCommunity(snmpReadCommunity).build())
+            .setLocationId(backgroundHelper.findLocationId(location)).build();
     }
 
 
 
-    @Given("New Active Discovery with IpAddresses {string} and SNMP community as {string} at location {string} with tags {string}")
+    @Given("New Active Discovery with IpAddresses {string} and SNMP community as {string} at location named {string} with tags {string}")
     public void newActiveDiscoveryWithIpAddressesAndSNMPCommunityAsAtLocationWithTags(String ipAddressStrings, String snmpReadCommunity,
                                                                                       String location, String tags) {
         var tagsList = tags.split(",");
         icmpDiscovery = IcmpActiveDiscoveryCreateDTO.newBuilder()
-            .addIpAddresses(ipAddressStrings).setSnmpConf(SNMPConfigDTO.newBuilder()
+            .addIpAddresses(ipAddressStrings).setSnmpConfig(SNMPConfigDTO.newBuilder()
                 .addReadCommunity(snmpReadCommunity).build())
             .addAllTags(Stream.of(tagsList).map(tag -> TagCreateDTO.newBuilder().setName(tag).build()).toList())
-            .setLocation(location).build();
+            .setLocationId(backgroundHelper.findLocationId(location)).build();
     }
 
     @Then("create Active Discovery and validate it's created active discovery with above details.")
     public void createActiveDiscoveryAndValidateItSCreatedActiveDiscoveryWithAboveDetails() {
         var icmpDiscoveryDto = backgroundHelper.getIcmpActiveDiscoveryServiceBlockingStub().createDiscovery(icmpDiscovery);
         activeDiscoveryId = icmpDiscoveryDto.getId();
-        Assertions.assertEquals(icmpDiscovery.getLocation(), icmpDiscoveryDto.getLocation());
+        Assertions.assertEquals(icmpDiscovery.getLocationId(), icmpDiscoveryDto.getLocationId());
         Assertions.assertEquals(icmpDiscovery.getIpAddresses(0), icmpDiscoveryDto.getIpAddresses(0));
-        Assertions.assertEquals(icmpDiscovery.getSnmpConf().getReadCommunity(0), icmpDiscoveryDto.getSnmpConf().getReadCommunity(0));
+        Assertions.assertEquals(icmpDiscovery.getSnmpConfig().getReadCommunity(0), icmpDiscoveryDto.getSnmpConfig().getReadCommunity(0));
         var tagListQuery = ListTagsByEntityIdParamsDTO.newBuilder()
             .setEntityId(TagEntityIdDTO.newBuilder().setActiveDiscoveryId(icmpDiscoveryDto.getId()).build())
             .build();
@@ -159,9 +154,9 @@ public class IcmpDiscoveryStepDefinitions {
     @Then("verify get active discovery with above details.")
     public void GetActiveDiscoveryWithAboveDetails() {
         var icmpDiscoveryDto = backgroundHelper.getIcmpActiveDiscoveryServiceBlockingStub().getDiscoveryById(Int64Value.of(activeDiscoveryId));
-        Assertions.assertEquals(icmpDiscovery.getLocation(), icmpDiscoveryDto.getLocation());
+        Assertions.assertEquals(icmpDiscovery.getLocationId(), icmpDiscoveryDto.getLocationId());
         Assertions.assertEquals(icmpDiscovery.getIpAddresses(0), icmpDiscoveryDto.getIpAddresses(0));
-        Assertions.assertEquals(icmpDiscovery.getSnmpConf().getReadCommunity(0), icmpDiscoveryDto.getSnmpConf().getReadCommunity(0));
+        Assertions.assertEquals(icmpDiscovery.getSnmpConfig().getReadCommunity(0), icmpDiscoveryDto.getSnmpConfig().getReadCommunity(0));
         var tagListQuery = ListTagsByEntityIdParamsDTO.newBuilder()
             .setEntityId(TagEntityIdDTO.newBuilder().setActiveDiscoveryId(icmpDiscoveryDto.getId()).build())
             .build();
@@ -198,7 +193,7 @@ public class IcmpDiscoveryStepDefinitions {
             TenantLocationSpecificTaskSetResults taskSetResults =
                 TenantLocationSpecificTaskSetResults.newBuilder()
                     .setTenantId(backgroundHelper.getTenantId())
-                    .setLocation(icmpDiscovery.getLocation())
+                    .setLocationId(icmpDiscovery.getLocationId())
                     .addResults(taskResult)
                     .build();
             var producerRecord = new ProducerRecord<String, byte[]>(topic, taskSetResults.toByteArray());
@@ -214,20 +209,20 @@ public class IcmpDiscoveryStepDefinitions {
         Assertions.assertEquals(items, list.getDiscoveriesCount());
     }
 
-    @Then("verify that node is created for {string} and location {string} with same tags within {int}ms")
+    @Then("verify that node is created for {string} and location named {string} with same tags within {int}ms")
     public void verifyThatNodeIsCreatedForAndLocationWithTheTagsInPreviousScenario(String ipAddress, String location, int timeout) {
-
+        String locationId = backgroundHelper.findLocationId(location);
         await().pollInterval(2000, TimeUnit.MILLISECONDS).atMost(timeout, TimeUnit.MILLISECONDS).until(() -> {
             try {
                 var nodeId = backgroundHelper.getNodeServiceBlockingStub().
-                    getNodeIdFromQuery(NodeIdQuery.newBuilder().setLocation(location).setIpAddress(ipAddress).build());
+                    getNodeIdFromQuery(NodeIdQuery.newBuilder().setLocationId(locationId).setIpAddress(ipAddress).build());
                 return nodeId != null && nodeId.getValue() != 0;
             } catch (Exception e) {
                 return false;
             }
         });
         var nodeId = backgroundHelper.getNodeServiceBlockingStub().
-            getNodeIdFromQuery(NodeIdQuery.newBuilder().setLocation(location).setIpAddress(ipAddress).build());
+            getNodeIdFromQuery(NodeIdQuery.newBuilder().setLocationId(locationId).setIpAddress(ipAddress).build());
         var nodeDto = backgroundHelper.getNodeServiceBlockingStub().getNodeById(nodeId);
         Assertions.assertTrue(nodeDto.getIpInterfacesList().stream().anyMatch(ipInterfaceDTO -> ipInterfaceDTO.getIpAddress().equals(ipAddress)));
         var tagListQuery = ListTagsByEntityIdParamsDTO.newBuilder()

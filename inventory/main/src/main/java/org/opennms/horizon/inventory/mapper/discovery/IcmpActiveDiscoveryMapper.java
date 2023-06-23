@@ -40,23 +40,23 @@ import org.opennms.horizon.inventory.model.discovery.active.IcmpActiveDiscovery;
 public interface IcmpActiveDiscoveryMapper {
 
     @Mapping(target = "ipAddressEntries", source = "ipAddressesList")
-    @Mapping(target = "snmpCommunityStrings", source = "snmpConf.readCommunityList",
+    @Mapping(target = "snmpCommunityStrings", source = "snmpConfig.readCommunityList",
         nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
-    @Mapping(target = "snmpPorts", source = "snmpConf.portsList",
+    @Mapping(target = "snmpPorts", source = "snmpConfig.portsList",
         nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
     IcmpActiveDiscovery dtoToModel(IcmpActiveDiscoveryCreateDTO dto);
 
     @Mapping(target = "ipAddressesList", source = "ipAddressEntries")
-    @Mapping(target = "snmpConf.readCommunityList", source = "snmpCommunityStrings",
+    @Mapping(target = "snmpConfig.readCommunityList", source = "snmpCommunityStrings",
         nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
-    @Mapping(target = "snmpConf.portsList", source = "snmpPorts",
+    @Mapping(target = "snmpConfig.portsList", source = "snmpPorts",
         nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
     IcmpActiveDiscoveryDTO modelToDto(IcmpActiveDiscovery discovery);
 
     @Mapping(target = "ipAddressEntries", source = "ipAddressesList")
-    @Mapping(target = "snmpCommunityStrings", source = "snmpConf.readCommunityList",
+    @Mapping(target = "snmpCommunityStrings", source = "snmpConfig.readCommunityList",
         nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
-    @Mapping(target = "snmpPorts", source = "snmpConf.portsList",
+    @Mapping(target = "snmpPorts", source = "snmpConfig.portsList",
         nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
     IcmpActiveDiscovery dtoToModel(IcmpActiveDiscoveryDTO dto);
 

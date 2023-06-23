@@ -28,6 +28,7 @@
 
 package org.opennms.horizon.inventory.service;
 
+import java.util.Random;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -63,7 +64,7 @@ class MonitoringSystemServiceTest {
     private MonitoringLocation testLocation;
 
     private TenantLocationSpecificHeartbeatMessage heartbeatMessage;
-    private final String location = "test location";
+    private final Long locationId = new Random().nextLong(1, Long.MAX_VALUE);
     private final String systemId = "test-monitoring-system-12345";
 
     private final String tenantId = "test-tenant";
@@ -76,7 +77,8 @@ class MonitoringSystemServiceTest {
         MonitoringSystemMapper mapper = Mappers.getMapper(MonitoringSystemMapper.class);
         service = new MonitoringSystemService(mockMonitoringSystemRepo, mockLocationRepo, mapper, mockConfigUpdateService);
         testLocation = new MonitoringLocation();
-        testLocation.setLocation(location);
+        testLocation.setId(locationId);
+        testLocation.setLocation("Location " + locationId);
         testLocation.setTenantId(tenantId);
         testMonitoringSystem = new MonitoringSystem();
         testMonitoringSystem.setLastCheckedIn(LocalDateTime.now());
@@ -84,10 +86,11 @@ class MonitoringSystemServiceTest {
         testMonitoringSystem.setSystemId(systemId);
         testMonitoringSystem.setLabel(systemId);
         testMonitoringSystem.setMonitoringLocation(testLocation);
+        testMonitoringSystem.setMonitoringLocationId(locationId);
         heartbeatMessage =
             TenantLocationSpecificHeartbeatMessage.newBuilder()
                 .setTenantId(tenantId)
-                .setLocation(location)
+                .setLocationId(String.valueOf(locationId))
                 .setIdentity(Identity.newBuilder()
                     .setSystemId(systemId)
                 )
@@ -118,31 +121,32 @@ class MonitoringSystemServiceTest {
     @Test
     void testReceiveMsgMonitorSystemExist() throws LocationNotFoundException {
         doReturn(Optional.of(testMonitoringSystem)).when(mockMonitoringSystemRepo).findBySystemIdAndTenantId(systemId, tenantId);
-        doReturn(Optional.of(testLocation)).when(mockLocationRepo).findByLocationAndTenantId(location, tenantId);
+        doReturn(Optional.of(testLocation)).when(mockLocationRepo).findByIdAndTenantId(locationId, tenantId);
         service.addMonitoringSystemFromHeartbeat(heartbeatMessage);
         verify(mockMonitoringSystemRepo).findBySystemIdAndTenantId(systemId, tenantId);
         verify(mockMonitoringSystemRepo).save(testMonitoringSystem);
+        verifyNoMoreInteractions(mockConfigUpdateService);
     }
 
     @Test
     void testCreateNewMonitorSystemWithLocationExist() throws LocationNotFoundException {
         doReturn(Optional.empty()).when(mockMonitoringSystemRepo).findBySystemIdAndTenantId(systemId, tenantId);
-        doReturn(Optional.of(testLocation)).when(mockLocationRepo).findByLocationAndTenantId(location, tenantId);
+        doReturn(Optional.of(testLocation)).when(mockLocationRepo).findByIdAndTenantId(locationId, tenantId);
         service.addMonitoringSystemFromHeartbeat(heartbeatMessage);
         verify(mockMonitoringSystemRepo).findBySystemIdAndTenantId(systemId, tenantId);
         verify(mockMonitoringSystemRepo).save(any(MonitoringSystem.class));
-        verify(mockLocationRepo).findByLocationAndTenantId(location, tenantId);
-        verify(mockConfigUpdateService).sendConfigUpdate(tenantId, location);
+        verify(mockLocationRepo).findByIdAndTenantId(locationId, tenantId);
+        verify(mockConfigUpdateService).sendConfigUpdate(tenantId, locationId);
     }
 
     @Test
     void testCreateNewMonitorSystemAndNewLocation() {
         doReturn(Optional.empty()).when(mockMonitoringSystemRepo).findBySystemIdAndTenantId(systemId, tenantId);
-        doReturn(Optional.empty()).when(mockLocationRepo).findByLocationAndTenantId(location, tenantId);
+        doReturn(Optional.empty()).when(mockLocationRepo).findByIdAndTenantId(locationId, tenantId);
         doReturn(testLocation).when(mockLocationRepo).save(any(MonitoringLocation.class));
         assertThrows(LocationNotFoundException.class, () -> service.addMonitoringSystemFromHeartbeat(heartbeatMessage));
         verify(mockMonitoringSystemRepo).findBySystemIdAndTenantId(systemId, tenantId);
-        verify(mockLocationRepo).findByLocationAndTenantId(location, tenantId);
+        verify(mockLocationRepo).findByIdAndTenantId(locationId, tenantId);
     }
 
     @Test

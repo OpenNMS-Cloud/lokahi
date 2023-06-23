@@ -43,8 +43,8 @@ service RpcRequestService {
 }
 
 message MinionIdentity {
-  string tenant = 1;
-  string location = 2;
+  string tenant_id = 1;
+  string location_id = 2;
   string system_id = 3;
 }
 

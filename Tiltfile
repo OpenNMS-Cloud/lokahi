@@ -226,6 +226,7 @@ helm_resource('ingress-nginx', 'ingress-nginx-repo/ingress-nginx',
 	flags=[
 		'--version=4.7.0',
 		'--values=tilt-ingress-nginx-values.yaml',
+		'--timeout=60s'
 	],
 	deps=["Tiltfile", "tilt-ingress-nginx-values.yaml"],
 	resource_deps=[

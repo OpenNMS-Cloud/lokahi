@@ -36,4 +36,34 @@
 
 
     </changeSet>
+
+    <changeSet id="0.1.1-snmp-config" author="ldywicki">
+        <preConditions onFail="HALT">
+            <changeSetExecuted id="0.1.0-snmp-config" author="cgorantla" changeLogFile="db/changelog/hs-0.1.0/tables/snmp-config.xml"/>
+        </preConditions>
+        <addColumn tableName="snmp_config">
+            <column name="location_id" type="BIGINT">
+                <constraints nullable="true" />
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet id="0.1.2-snmp-config" author="ldywicki">
+        <preConditions onFail="HALT">
+            <changeSetExecuted id="0.1.1-snmp-config" author="ldywicki" changeLogFile="db/changelog/hs-0.1.0/tables/snmp-config.xml"/>
+        </preConditions>
+        <sql>
+            UPDATE snmp_config SET location_id=locations.id FROM (SELECT id, tenant_id, location FROM monitoring_location) AS locations
+            WHERE snmp_config.location=locations.location AND snmp_config.tenant_id=locations.tenant_id
+        </sql>
+        <!-- Remove orphans -->
+        <sql>
+            DELETE FROM snmp_config WHERE location_id IS NULL
+        </sql>
+        <addNotNullConstraint tableName="snmp_config" columnName="location_id" />
+        <dropColumn tableName="snmp_config" columnName="location" />
+        <addForeignKeyConstraint constraintName="fk_snmp_config_location_id" onDelete="CASCADE"
+            baseTableName="snmp_config" baseColumnNames="location_id"
+            referencedTableName="monitoring_location" referencedColumnNames="id"/>
+    </changeSet>
+
 </databaseChangeLog>

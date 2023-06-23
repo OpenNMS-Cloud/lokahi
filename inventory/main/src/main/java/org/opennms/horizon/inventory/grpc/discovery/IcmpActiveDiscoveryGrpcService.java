@@ -64,9 +64,9 @@ public class IcmpActiveDiscoveryGrpcService extends IcmpActiveDiscoveryServiceGr
                     var activeDiscoveryConfig = configService.createActiveDiscovery(request, tenantId);
                     responseObserver.onNext(activeDiscoveryConfig);
                     responseObserver.onCompleted();
-                    scannerTaskSetService.sendDiscoveryScannerTask(request.getIpAddressesList(),
-                        request.getLocation(), tenantId, activeDiscoveryConfig.getId());
+                    scannerTaskSetService.sendDiscoveryScannerTask(request.getIpAddressesList(), Long.valueOf(request.getLocationId()), tenantId, activeDiscoveryConfig.getId());
                 } catch (Exception e) {
+                    log.error("failed to create ICMP active discovery", e);
                     responseObserver.onError(StatusProto.toStatusRuntimeException(createStatus(Code.INVALID_ARGUMENT_VALUE, "Invalid request " + request)));
                 }
             }, () -> responseObserver.onError(StatusProto.toStatusRuntimeException(createMissingTenant())));

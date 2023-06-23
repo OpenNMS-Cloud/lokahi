@@ -75,7 +75,7 @@ class GraphQLPassiveDiscoveryServiceTest {
         passiveDiscoveryDTO = PassiveDiscoveryDTO.newBuilder()
             .setId(1L)
             .setName("passive-discovery-name")
-            .setLocation("Default")
+            .setLocationId("Default")
             .setToggle(true)
             .addAllPorts(List.of(161))
             .addAllCommunities(List.of("public"))

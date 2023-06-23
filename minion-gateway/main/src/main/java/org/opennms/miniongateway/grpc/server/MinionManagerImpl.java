@@ -39,12 +39,12 @@ public class MinionManagerImpl implements MinionManager {
 
     @Override
     public void addMinion(MinionInfo minionInfo) {
-        log.info("Minion Manager: adding minion: tenant={}, id={}; location={}", minionInfo.getTenantId(), minionInfo.getId(), minionInfo.getLocation());
+        log.info("Minion Manager: adding minion: tenantId={}; locationId={}; systemId={}", minionInfo.getTenantId(), minionInfo.getLocation(), minionInfo.getId());
 
         TenantKey minionKey = new TenantKey(minionInfo.getTenantId(), minionInfo.getId());
         if (minionByIdMap.containsKey(minionKey)) {
-            log.warn("Attempt to register minion with duplicate id; ignoring: tenant={}; id={}; location={}",
-                minionInfo.getTenantId(), minionInfo.getId(), minionInfo.getLocation());
+            log.warn("Attempt to register minion with duplicate id; ignoring: tenantId={}; locationId={}; systemId={}",
+                minionInfo.getTenantId(), minionInfo.getLocation(), minionInfo.getId());
             return;
         }
 
@@ -55,20 +55,16 @@ public class MinionManagerImpl implements MinionManager {
 
     @Override
     public void removeMinion(MinionInfo minionInfo) {
-        log.info("Minion Manager: removing minion: tenant={}, id={}; location={}",  minionInfo.getTenantId(), minionInfo.getId(), minionInfo.getLocation());
-
-        MinionInfo removedMinionInfo;
+        log.info("Minion Manager: removing minion: tenantId={}; locationId={}; systemId={}",  minionInfo.getTenantId(), minionInfo.getLocation(), minionInfo.getId());
 
         TenantKey minionKey = new TenantKey(minionInfo.getTenantId(), minionInfo.getId());
-        removedMinionInfo = minionByIdMap.remove(minionKey);
+        MinionInfo removedMinionInfo = minionByIdMap.remove(minionKey);
 
         if (removedMinionInfo == null) {
-            log.warn("Attempt to remove minion with unknown id; ignoring: tenant={}, id={}; location={}",
-                minionInfo.getTenantId(), minionInfo.getId(), minionInfo.getLocation());
+            log.warn("Attempt to remove minion with unknown id; ignoring: tenantId={}; locationId={}; systemId={}; ",
+                minionInfo.getTenantId(), minionInfo.getLocation(), minionInfo.getId());
             return;
         }
-
-        minionByIdMap.remove(minionKey);
 
         listeners.forEach(listener -> listener.onMinionRemoved(sequence++, removedMinionInfo));
     }

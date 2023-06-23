@@ -82,6 +82,7 @@ public class NodeTaggingStepDefinitions {
     private TagListDTO fetchedTagList;
     private NodeList fetchedNodeList;
     private long tagMessageFilterTime;
+    private String locationId;
 
     public NodeTaggingStepDefinitions(InventoryBackgroundHelper backgroundHelper) {
         this.backgroundHelper = backgroundHelper;
@@ -106,9 +107,9 @@ public class NodeTaggingStepDefinitions {
         backgroundHelper.grpcTenantId(tenantId);
     }
 
-    @Given("[Tags] Grpc location {string}")
+    @Given("[Tags] Nodes are associated with location named {string}")
     public void grpcLocation(String location) {
-        backgroundHelper.grpcLocation(location);
+        locationId = backgroundHelper.findLocationId(location);
     }
 
     @Given("[Tags] Create Grpc Connection for Inventory")
@@ -127,7 +128,7 @@ public class NodeTaggingStepDefinitions {
 
         var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
         node1 = nodeServiceBlockingStub.createNode(NodeCreateDTO.newBuilder().setLabel("node")
-            .setLocation("location").setManagementIp("127.0.0.1").build());
+            .setLocationId(locationId).setManagementIp("127.0.0.1").build());
     }
 
     @Given("2 new nodes")
@@ -137,9 +138,9 @@ public class NodeTaggingStepDefinitions {
 
         var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
         node1 = nodeServiceBlockingStub.createNode(NodeCreateDTO.newBuilder().setLabel("node1")
-            .setLocation("location").setManagementIp("127.0.0.1").build());
+            .setLocationId(locationId).setManagementIp("127.0.0.1").build());
         node2 = nodeServiceBlockingStub.createNode(NodeCreateDTO.newBuilder().setLabel("node2")
-            .setLocation("location").setManagementIp("127.0.0.2").build());
+            .setLocationId(locationId).setManagementIp("127.0.0.2").build());
     }
 
     @Given("A new node with tags {string}")
@@ -149,7 +150,7 @@ public class NodeTaggingStepDefinitions {
 
         var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
         node1 = nodeServiceBlockingStub.createNode(NodeCreateDTO.newBuilder().setLabel("node")
-            .setLocation("location").setManagementIp("127.0.0.1").build());
+            .setLocationId(locationId).setManagementIp("127.0.0.1").build());
         String[] tagArray = tags.split(",");
         var tagServiceBlockingStub = backgroundHelper.getTagServiceBlockingStub();
         List<TagCreateDTO> tagCreateList = getTagCreateList(tagArray);
@@ -163,7 +164,7 @@ public class NodeTaggingStepDefinitions {
     public void anotherNodeWithTags(String tags) {
         var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
         NodeDTO node = nodeServiceBlockingStub.createNode(NodeCreateDTO.newBuilder().setLabel("Another Node")
-            .setLocation("location").setManagementIp("127.0.0.2").build());
+            .setLocationId(locationId).setManagementIp("127.0.0.2").build());
         String[] tagArray = tags.split(",");
         var tagServiceBlockingStub = backgroundHelper.getTagServiceBlockingStub();
         List<TagCreateDTO> tagCreateList = getTagCreateList(tagArray);

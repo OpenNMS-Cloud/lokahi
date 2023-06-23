@@ -50,7 +50,7 @@ public interface NodeMapper {
     })
     Node protoToNode(NodeDTO nodeDTO);
 
-    @Mapping(target = "location", source = "location", nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
+    @Mapping(target = "locationId", source = "locationId", nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
     @Mapping(target = "tagsList", source = "tags", nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
     NodeCreateDTO nodeCreateToProto(NodeCreate request);
 }

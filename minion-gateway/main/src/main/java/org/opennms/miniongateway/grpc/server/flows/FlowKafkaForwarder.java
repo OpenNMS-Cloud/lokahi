@@ -84,12 +84,12 @@ public class FlowKafkaForwarder implements MessageConsumer<FlowDocumentLog, Flow
         // Retrieve the Tenant ID from the TenantID GRPC Interceptor
         String tenantId = tenantIDGrpcInterceptor.readCurrentContextTenantId();
         // Ditto for location
-        String location = locationServerInterceptor.readCurrentContextLocation();
-        logger.trace("Received flow; sending to Kafka: tenant-id: {}; kafka-topic={}; message={}", tenantId, kafkaTopic, messageLog);
+        String locationId = locationServerInterceptor.readCurrentContextLocationId();
+        logger.trace("Received flow; sending to Kafka: tenantId: {}; locationId={}; kafka-topic={}; message={}", tenantId, locationId, kafkaTopic, messageLog);
 
 
         var tenantLocationSpecificFlowDocumentLog =
-            tenantLocationSpecificFlowDocumentLogMapper.mapBareToTenanted(tenantId, location, messageLog);
+            tenantLocationSpecificFlowDocumentLogMapper.mapBareToTenanted(tenantId, locationId, messageLog);
 
         sendToKafka(tenantLocationSpecificFlowDocumentLog);
     }

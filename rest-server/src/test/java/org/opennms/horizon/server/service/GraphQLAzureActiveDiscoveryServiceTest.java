@@ -71,7 +71,7 @@ class GraphQLAzureActiveDiscoveryServiceTest {
     public void setUp() {
         azureActiveDiscoveryDTO = AzureActiveDiscoveryDTO.newBuilder()
             .setId(1L)
-            .setLocation("Default")
+            .setLocationId("Default")
             .setName("name")
             .setTenantId("tenant-id")
             .setClientId("client-id")
@@ -96,7 +96,7 @@ class GraphQLAzureActiveDiscoveryServiceTest {
         String request = createPayload("mutation { " +
             "    createAzureActiveDiscovery( " +
             "        discovery: { " +
-            "            location: \"Default\", " +
+            "            locationId: \"Default\", " +
             "            name: \"name\", " +
             "            clientId: \"client-id\", " +
             "            clientSecret: \"client-secret\", " +
@@ -113,7 +113,7 @@ class GraphQLAzureActiveDiscoveryServiceTest {
             "        } " +
             "    ) { " +
             "        id, " +
-            "        location, " +
+            "        locationId, " +
             "        name, " +
             "        tenantId, " +
             "        clientId, " +
@@ -132,7 +132,7 @@ class GraphQLAzureActiveDiscoveryServiceTest {
             .expectStatus().isOk()
             .expectBody()
             .jsonPath("$.data.createAzureActiveDiscovery.id").isEqualTo(azureActiveDiscoveryDTO.getId())
-            .jsonPath("$.data.createAzureActiveDiscovery.location").isEqualTo(azureActiveDiscoveryDTO.getLocation())
+            .jsonPath("$.data.createAzureActiveDiscovery.locationId").isEqualTo(azureActiveDiscoveryDTO.getLocationId())
             .jsonPath("$.data.createAzureActiveDiscovery.name").isEqualTo(azureActiveDiscoveryDTO.getName())
             .jsonPath("$.data.createAzureActiveDiscovery.tenantId").isEqualTo(azureActiveDiscoveryDTO.getTenantId())
             .jsonPath("$.data.createAzureActiveDiscovery.clientId").isEqualTo(azureActiveDiscoveryDTO.getClientId())

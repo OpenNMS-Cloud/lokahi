@@ -65,14 +65,14 @@ public class TrapConfigService {
         List<MonitoringLocationDTO> allLocations = monitoringLocationService.findAll();
 
         for(MonitoringLocationDTO dto : allLocations) {
-            sendTrapConfigToMinion(dto.getTenantId(), dto.getLocation());
+            sendTrapConfigToMinion(dto.getTenantId(), dto.getId());
         }
     }
 
-    public void sendTrapConfigToMinion(String tenantId, String location) {
+    public void sendTrapConfigToMinion(String tenantId, Long locationId) {
         TrapConfigBean trapConfigBean = readTrapConfig();
         TrapConfig trapConfig = mapBeanToProto(trapConfigBean);
-        publishTrapConfig(tenantId, location, trapConfig);
+        publishTrapConfig(tenantId, locationId, trapConfig);
     }
 
     private TrapConfig mapBeanToProto(TrapConfigBean config) {
@@ -103,9 +103,9 @@ public class TrapConfigService {
         }).collect(Collectors.toList());
     }
 
-    private void publishTrapConfig(String tenantId, String location, TrapConfig trapConfig) {
+    private void publishTrapConfig(String tenantId, Long locationId, TrapConfig trapConfig) {
         TaskDefinition taskDefinition = TaskDefinition.newBuilder()
-            .setId(TaskUtils.identityForConfig(TRAPS_CONFIG, location))
+            .setId(TaskUtils.identityForConfig(TRAPS_CONFIG, locationId))
             .setPluginName("trapd.listener.config")
             .setType(TaskType.LISTENER)
             .setConfiguration(Any.pack(trapConfig))
@@ -113,7 +113,7 @@ public class TrapConfigService {
         var taskList = new ArrayList<TaskDefinition>();
         taskList.add(taskDefinition);
 
-        taskSetPublisher.publishNewTasks(tenantId, location, taskList);
+        taskSetPublisher.publishNewTasks(tenantId, locationId, taskList);
     }
 
     private TrapConfigBean readTrapConfig() {

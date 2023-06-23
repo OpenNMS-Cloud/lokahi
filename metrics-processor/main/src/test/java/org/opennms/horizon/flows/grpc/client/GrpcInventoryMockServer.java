@@ -51,7 +51,7 @@ public class GrpcInventoryMockServer extends NodeServiceGrpc.NodeServiceImplBase
     public void getIpInterfaceFromQuery(org.opennms.horizon.inventory.dto.NodeIdQuery request,
                                         io.grpc.stub.StreamObserver<org.opennms.horizon.inventory.dto.IpInterfaceDTO> responseObserver) {
         LOG.info("Getting Ip interface from Query.. ");
-        incomingNodeIdQueries.put(request.getLocation(), request);
+        incomingNodeIdQueries.put(request.getLocationId(), request);
         responseObserver.onNext(IpInterfaceDTO.newBuilder().build());
         responseObserver.onCompleted();
     }

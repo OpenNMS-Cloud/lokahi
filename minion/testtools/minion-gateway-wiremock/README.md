@@ -5,7 +5,7 @@
 **Maven**
 
     <dependency>
-        <groupId>org.opennms.horizon.minion-gateway-wiremock</groupId>
+        <groupId>org.opennms.lokahi.minion-gateway-wiremock</groupId>
         <artifactId>client</artifactId>
         <version>${project.version}</version>
         <scope>test</scope>

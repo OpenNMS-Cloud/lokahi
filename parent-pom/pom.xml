@@ -7,8 +7,8 @@
         Top-level Parent POM with standard dependency versions for use across multiple top-level projects.
     </description>
 
-    <groupId>org.opennms.horizon</groupId>
-    <artifactId>horizon-parent</artifactId>
+    <groupId>org.opennms.lokahi</groupId>
+    <artifactId>lokahi-parent</artifactId>
     <version>0.1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
@@ -413,13 +413,13 @@
                 <groupId>io.grpc</groupId>
                 <artifactId>grpc-core</artifactId>
                 <version>${grpc.version}</version>
-                <optional>true</optional> <!-- EXCLUDE by default; use org.opennmns.horizon.shared / horizon-shaded-grpc-core instead -->
+                <optional>true</optional> <!-- EXCLUDE by default; use org.opennms.lokahi.shared / lokahi-shaded-grpc-core instead -->
             </dependency>
             <dependency>
                 <groupId>io.grpc</groupId>
                 <artifactId>grpc-netty-shaded</artifactId>
                 <version>${grpc.version}</version>
-                <!-- Use org.opennmns.horizon.shared / horizon-shaded-grpc-core instead-->
+                <!-- Use org.opennms.lokahi.shared / lokahi-shaded-grpc-core instead-->
                 <exclusions>
                     <exclusion>
                         <groupId>io.grpc</groupId>
@@ -1103,7 +1103,7 @@
                     <version>${failsafe.version}</version>
                     <executions>
                         <execution>
-                            <id>horizon-integration-test</id>
+                            <id>lokahi-integration-test</id>
                             <goals>
                                 <goal>integration-test</goal>
                             </goals>
@@ -1120,7 +1120,7 @@
                         </execution>
 
                         <execution>
-                            <id>horizon-developer-test</id>
+                            <id>lokahi-developer-test</id>
                             <goals>
                                 <goal>integration-test</goal>
                             </goals>
@@ -1151,7 +1151,7 @@
                         <!-- Fail the build on IT Failures.  Executed as a separate step so that post-integration-test -->
                         <!--  phase executes even after an IT failure.                                                 -->
                         <execution>
-                            <id>horizon-verify-it</id>
+                            <id>lokahi-verify-it</id>
                             <goals>
                                 <goal>verify</goal>
                             </goals>

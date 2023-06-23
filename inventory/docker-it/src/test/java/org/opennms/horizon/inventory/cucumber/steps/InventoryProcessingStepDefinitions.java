@@ -48,6 +48,7 @@ import org.opennms.cloud.grpc.minion.Identity;
 import org.opennms.horizon.grpc.heartbeat.contract.TenantLocationSpecificHeartbeatMessage;
 import org.opennms.horizon.inventory.cucumber.InventoryBackgroundHelper;
 import org.opennms.horizon.inventory.cucumber.kafkahelper.KafkaConsumerRunner;
+import org.opennms.horizon.inventory.dto.MonitoringLocationDTO;
 import org.opennms.horizon.inventory.dto.NodeCreateDTO;
 import org.opennms.horizon.inventory.dto.NodeDTO;
 import org.opennms.horizon.inventory.dto.NodeIdQuery;
@@ -85,7 +86,7 @@ public class InventoryProcessingStepDefinitions {
 
     private String label;
     private String newDeviceIpAddress;
-    private String location;
+    private String locationId;
     private String systemId;
     private boolean deviceDetectedInd;
     private String reason;
@@ -129,16 +130,15 @@ public class InventoryProcessingStepDefinitions {
         backgroundHelper.grpcTenantId(tenantId);
     }
 
-    @Given("Grpc location {string}")
+    @Given("Grpc location named {string}")
     public void grpcLocation(String location) {
-        backgroundHelper.grpcLocation(location);
     }
 
-    @Given("Minion at location {string} with system Id {string}")
+    @Given("Minion at location named {string} with system ID {string}")
     public void minionAtLocationWithSystemId(String location, String systemId) {
         Objects.requireNonNull(location);
         Objects.requireNonNull(systemId);
-        this.location = location;
+        this.locationId = backgroundHelper.findLocationId(location);
         this.systemId = systemId;
         LOG.info("Using Location {} and systemId {}", location, systemId);
     }
@@ -160,7 +160,7 @@ public class InventoryProcessingStepDefinitions {
             TenantLocationSpecificHeartbeatMessage heartbeatMessage =
                 TenantLocationSpecificHeartbeatMessage.newBuilder()
                     .setTenantId(backgroundHelper.getTenantId())
-                    .setLocation(backgroundHelper.getLocation())
+                    .setLocationId(locationId)
                     .setIdentity(Identity.newBuilder().setSystemId(systemId).build())
                     .setTimestamp(Timestamp.newBuilder().setSeconds(millis / 1000).setNanos((int) ((millis % 1000) * 1000000)).build())
                     .build();
@@ -221,20 +221,16 @@ public class InventoryProcessingStepDefinitions {
         this.label = label;
     }
 
-    @Given("New/Existing Device IP Address {string}")
-    public void newDeviceIPAddress(String ipAddress) {
+    @Given("Device IP Address {string} in location named {string}")
+    public void newDeviceIPAddress(String ipAddress, String location) {
         this.newDeviceIpAddress = ipAddress;
-    }
-
-    @Given("New/Existing Device Location {string}")
-    public void newDeviceLocation(String location) {
-        this.location = location;
+        this.locationId = backgroundHelper.findLocationId(location);
     }
 
     @Then("add a new device")
     public void addANewDevice() {
         var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
-        node = nodeServiceBlockingStub.createNode(NodeCreateDTO.newBuilder().setLabel(label).setLocation(location).setManagementIp(newDeviceIpAddress).build());
+        node = nodeServiceBlockingStub.createNode(NodeCreateDTO.newBuilder().setLabel(label).setLocationId(locationId).setManagementIp(newDeviceIpAddress).build());
         assertNotNull(node);
     }
 
@@ -243,7 +239,7 @@ public class InventoryProcessingStepDefinitions {
         var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
 
         var nodeId = nodeServiceBlockingStub.getNodeIdFromQuery(NodeIdQuery.newBuilder()
-            .setIpAddress(newDeviceIpAddress).setLocation(location).build());
+            .setIpAddress(newDeviceIpAddress).setLocationId(locationId).build());
 
         assertNotNull(nodeId);
 
@@ -289,19 +285,19 @@ public class InventoryProcessingStepDefinitions {
         assertEquals(label, node.getNodeLabel());
     }
 
-    @Given("add a new device with label {string} and ip address {string} and location {string}")
+    @Given("add a new device with label {string} and ip address {string} and location named {string}")
     public void addANewDeviceWithLabelAndIpAddressAndLocation(String label, String ipAddress, String location) {
         var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
-        var nodeDto = nodeServiceBlockingStub.createNode(NodeCreateDTO.newBuilder().setLabel(label).setLocation(location)
+        var nodeDto = nodeServiceBlockingStub.createNode(NodeCreateDTO.newBuilder().setLabel(label).setLocationId(backgroundHelper.findLocationId(location))
             .setManagementIp(ipAddress).build());
         assertNotNull(nodeDto);
     }
 
-    @Then("verify that a new node is created with location {string} and ip address {string}")
+    @Then("verify that a new node is created with location named {string} and ip address {string}")
     public void verifyThatANewNodeIsCreatedWithLocationAndIpAddress(String location, String ipAddress) {
         var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
         var nodeId = nodeServiceBlockingStub.getNodeIdFromQuery(NodeIdQuery.newBuilder()
-            .setIpAddress(ipAddress).setLocation(location).build());
+            .setIpAddress(ipAddress).setLocationId(backgroundHelper.findLocationId(location)).build());
         assertNotNull(nodeId);
         var node = nodeServiceBlockingStub.getNodeById(nodeId);
         assertNotNull(node);
@@ -311,7 +307,7 @@ public class InventoryProcessingStepDefinitions {
     public void verifyAddingExistingDeviceWithLabelAndIpAddressAndLocationWillFail(String label, String ipAddress, String location) {
         var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
         try {
-            var nodeDto = nodeServiceBlockingStub.createNode(NodeCreateDTO.newBuilder().setLabel(label).setLocation(location)
+            var nodeDto = nodeServiceBlockingStub.createNode(NodeCreateDTO.newBuilder().setLabel(label).setLocationId(location)
                 .setManagementIp(ipAddress).build());
             fail();
         } catch (Exception e) {
@@ -333,7 +329,7 @@ public class InventoryProcessingStepDefinitions {
     public void lookupNodeWithLocationAndIpAddress(String location, String ipAddress) {
         var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
         var nodeId = nodeServiceBlockingStub.getNodeIdFromQuery(NodeIdQuery.newBuilder()
-            .setIpAddress(ipAddress).setLocation(location).build());
+            .setIpAddress(ipAddress).setLocationId(backgroundHelper.findLocationId(location)).build());
         nodeIdCreated = nodeId;
         assertNotNull(nodeId);
 
@@ -378,7 +374,7 @@ public class InventoryProcessingStepDefinitions {
             TenantLocationSpecificTaskSetResults taskSetResults =
                 TenantLocationSpecificTaskSetResults.newBuilder()
                     .setTenantId(backgroundHelper.getTenantId())
-                    .setLocation(backgroundHelper.getLocation())
+                    .setLocationId(backgroundHelper.findLocationId(location))
                     .addResults(taskResult)
                     .build();
 

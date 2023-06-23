@@ -4,7 +4,7 @@
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>minion</artifactId>
-        <groupId>org.opennms.horizon.minion</groupId>
+        <groupId>org.opennms.lokahi.minion</groupId>
         <version>0.1.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -17,70 +17,70 @@
     <dependencies>
 
         <dependency>
-            <groupId>org.opennms.horizon.minion</groupId>
+            <groupId>org.opennms.lokahi.minion</groupId>
             <artifactId>grpc-features</artifactId>
             <version>${project.version}</version>
             <classifier>features</classifier>
             <type>xml</type>
         </dependency>
         <dependency>
-            <groupId>org.opennms.horizon.minion</groupId>
+            <groupId>org.opennms.lokahi.minion</groupId>
             <artifactId>ipc-features</artifactId>
             <version>${project.version}</version>
             <classifier>features</classifier>
             <type>xml</type>
         </dependency>
         <dependency>
-            <groupId>org.opennms.horizon.minion</groupId>
+            <groupId>org.opennms.lokahi.minion</groupId>
             <artifactId>plugin-features</artifactId>
             <version>${project.version}</version>
             <classifier>features</classifier>
             <type>xml</type>
         </dependency>
         <dependency>
-            <groupId>org.opennms.horizon.minion</groupId>
+            <groupId>org.opennms.lokahi.minion</groupId>
             <artifactId>taskset-features</artifactId>
             <version>${project.version}</version>
             <classifier>features</classifier>
             <type>xml</type>
         </dependency>
         <dependency>
-            <groupId>org.opennms.horizon.minion</groupId>
+            <groupId>org.opennms.lokahi.minion</groupId>
             <artifactId>observability-features</artifactId>
             <version>${project.version}</version>
             <classifier>features</classifier>
             <type>xml</type>
         </dependency>
         <dependency>
-            <groupId>org.opennms.horizon.minion</groupId>
+            <groupId>org.opennms.lokahi.minion</groupId>
             <artifactId>icmp-plugin</artifactId>
             <version>${project.version}</version>
             <classifier>features</classifier>
             <type>xml</type>
         </dependency>
         <dependency>
-            <groupId>org.opennms.horizon.minion</groupId>
+            <groupId>org.opennms.lokahi.minion</groupId>
             <artifactId>traps-features</artifactId>
             <version>${project.version}</version>
             <classifier>features</classifier>
             <type>xml</type>
         </dependency>
         <dependency>
-            <groupId>org.opennms.horizon.minion</groupId>
+            <groupId>org.opennms.lokahi.minion</groupId>
             <artifactId>flows-features</artifactId>
             <version>${project.version}</version>
             <classifier>features</classifier>
             <type>xml</type>
         </dependency>
         <dependency>
-            <groupId>org.opennms.horizon.minion</groupId>
+            <groupId>org.opennms.lokahi.minion</groupId>
             <artifactId>azure-plugin</artifactId>
             <version>${project.version}</version>
             <classifier>features</classifier>
             <type>xml</type>
         </dependency>
         <dependency>
-            <groupId>org.opennms.horizon.minion</groupId>
+            <groupId>org.opennms.lokahi.minion</groupId>
             <artifactId>nodescan-plugin</artifactId>
             <version>${project.version}</version>
             <classifier>features</classifier>

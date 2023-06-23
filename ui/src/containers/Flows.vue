@@ -123,7 +123,7 @@
     <div class="flows applications-charts">
       <div class="flows-titles">
         <div class="title">Top Ten Applications</div>
-        <div class="optional-text">Optional Explainer Text</div>
+        <div class="optional-text">Displays top 10 most used applications in your monitored network over the selected time period.</div>
       </div>
       <TableChart
         v-if="

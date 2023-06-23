@@ -68,8 +68,8 @@ public class TrapEventForwarder {
     }
 
     public void sendInternalEvent(Event event) {
-        LOG.info("Sending event with UEI: {} for interface: {} with location: {} and tenant: {}", event.getUei(),
-            event.getIpAddress(), event.getLocation(), event.getTenantId());
+        LOG.info("Sending event with UEI: {} for interface: {} for tenantId={}; locationId={}", event.getUei(),
+            event.getIpAddress(), event.getTenantId(), event.getLocationId());
         var record = new ProducerRecord<String, byte[]>(internalTopic, event.toByteArray());
         kafkaTemplate.send(record);
     }

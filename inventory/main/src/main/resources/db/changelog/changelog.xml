@@ -22,7 +22,7 @@
     <include file="db/changelog/hs-0.1.0/tables/azure-credential-tags.xml" />
     <include file="db/changelog/hs-0.1.0/tables/ip-snmp-interfaces.xml" />
     <include file="db/changelog/hs-0.1.0/tables/node-scan-type.xml" />
-    <include file="/db/changelog/hs-0.1.0/tables/active-discovery-config.xml" />
+    <include file="db/changelog/hs-0.1.0/tables/active-discovery-config.xml" />
     <include file="db/changelog/hs-0.1.0/tables/snmp-config.xml" />
     <include file="db/changelog/hs-0.1.0/tables/passive-discovery.xml" />
     <include file="db/changelog/hs-0.1.0/tables/discovery-inheritance.xml" />

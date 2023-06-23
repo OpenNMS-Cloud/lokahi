@@ -81,7 +81,7 @@ public class EventFactory {
 
     public org.opennms.horizon.events.xml.Event createEventFrom(final TrapDTO trapDTO,
                                                                 final String systemId,
-                                                                final String location,
+                                                                final String locationId,
                                                                 final InetAddress trapAddress,
                                                                 String tenantId) {
         LOG.info("{} trap - trapInterface: {}", trapDTO.getVersion(), trapDTO.getAgentAddress());
@@ -116,12 +116,12 @@ public class EventFactory {
         }
 
         // Resolve Node id and set, if known by OpenNMS
-        resolveNodeId(location, trapAddress, tenantId)
+        resolveNodeId(tenantId, locationId, trapAddress)
             .ifPresent(eventBuilder::setNodeid);
 
         // Note: Filling in Location instead of SystemId. Do we really need to know about system id ?
         if (systemId != null) {
-            eventBuilder.setDistPoller(location);
+            eventBuilder.setDistPoller(locationId);
         }
 
         // Get event template and set uei, if unknown
@@ -201,13 +201,12 @@ public class EventFactory {
         return false;
     }
 
-    private Optional<Long> resolveNodeId(String location, InetAddress trapAddress, String tenantId) {
+    private Optional<Long> resolveNodeId(String tenantId, String locationId, InetAddress trapAddress) {
         String trapIpAddress = InetAddressUtils.str(trapAddress);
         try {
-            return Optional.of(inventoryClient
-                .getNodeIdFromQuery(tenantId, trapIpAddress, location));
+            return Optional.of(inventoryClient.getNodeIdFromQuery(tenantId, trapIpAddress, locationId));
         } catch (Exception e) {
-            LOG.warn("Failed to find node id for location = {}, trap address = {}, reason = {}", location, trapIpAddress, e.getMessage());
+            LOG.warn("Failed to find node id for tenantId={}; locationId={}, trap address = {}, reason = {}", tenantId, locationId, trapIpAddress, e.getMessage());
             return Optional.empty();
         }
     }

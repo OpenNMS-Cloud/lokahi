@@ -101,7 +101,7 @@ public class NodeGrpcServiceTest {
     void setUp() {
         testNodeCreateDTO =
             NodeCreateDTO.newBuilder()
-                .setLocation("x-location-x")
+                .setLocationId("x-location-x")
                 .setManagementIp("12.0.0.1")
                 .build();
 
@@ -169,7 +169,7 @@ public class NodeGrpcServiceTest {
         //
         testNodeCreateDTO =
             NodeCreateDTO.newBuilder()
-                .setLocation("x-location-x")
+                .setLocationId("x-location-x")
                 .build();
 
         //
@@ -214,7 +214,7 @@ public class NodeGrpcServiceTest {
         testNodeCreateDTO =
             NodeCreateDTO.newBuilder()
                 .setManagementIp("127.0.0.1")
-                .setLocation("x-location-x")
+                .setLocationId("x-location-x")
                 .build();
 
         doThrow(new EntityExistException("IP exists")).when(mockNodeService).createNode(testNodeCreateDTO, ScanType.NODE_SCAN, "x-tenant-id-x");
@@ -246,7 +246,7 @@ public class NodeGrpcServiceTest {
         testNodeCreateDTO =
             NodeCreateDTO.newBuilder()
                 .setManagementIp("127.0.0.1")
-                .setLocation("x-location-x")
+                .setLocationId("x-location-x")
                 .build();
 
         doThrow(new LocationNotFoundException("Location not found")).when(mockNodeService).createNode(testNodeCreateDTO, ScanType.NODE_SCAN, "x-tenant-id-x");
@@ -351,7 +351,7 @@ public class NodeGrpcServiceTest {
         //
         NodeIdQuery request =
             NodeIdQuery.newBuilder()
-                .setLocation("x-location-x")
+                .setLocationId("x-location-x")
                 .setIpAddress("127.0.0.1")
                 .build();
 
@@ -426,7 +426,7 @@ public class NodeGrpcServiceTest {
 
         NodeIdQuery request =
             NodeIdQuery.newBuilder()
-                .setLocation("x-location-x")
+                .setLocationId("x-location-x")
                 .setIpAddress("127.0.0.1")
                 .build();
 
@@ -473,7 +473,7 @@ public class NodeGrpcServiceTest {
         //
         NodeIdQuery request =
             NodeIdQuery.newBuilder()
-                .setLocation("x-location-x")
+                .setLocationId("x-location-x")
                 .build();
 
         //
@@ -496,7 +496,7 @@ public class NodeGrpcServiceTest {
         //
         NodeIdQuery request =
             NodeIdQuery.newBuilder()
-                .setLocation("x-location-x")
+                .setLocationId("x-location-x")
                 .setIpAddress("127.0.0.1")
                 .build();
 
@@ -612,10 +612,10 @@ public class NodeGrpcServiceTest {
                 .addIds(303030L)
                 .build();
 
-        Map<String, List<NodeDTO>> testNodeByLocationMap =
+        Map<Long, List<NodeDTO>> testNodeByLocationMap =
             Map.of(
-                "x-location-001-x", List.of(testNodeDTO1),
-                "x-location-002-x", List.of(testNodeDTO2A, testNodeDTO2B)
+                1001L, List.of(testNodeDTO1),
+                1002L, List.of(testNodeDTO2A, testNodeDTO2B)
             );
 
         Mockito.when(mockNodeService.listNodeByIds(request.getIdsList(), "x-tenant-id-x")).thenReturn(testNodeByLocationMap);
@@ -646,12 +646,12 @@ public class NodeGrpcServiceTest {
         //
         // Validate 2
         //
-        Mockito.verify(mockScannerTaskSetService).sendNodeScannerTask(List.of(testNodeDTO1), "x-location-001-x", "x-tenant-id-x");
-        Mockito.verify(mockScannerTaskSetService).sendNodeScannerTask(List.of(testNodeDTO2A, testNodeDTO2B), "x-location-002-x", "x-tenant-id-x");
+        Mockito.verify(mockScannerTaskSetService).sendNodeScannerTask(List.of(testNodeDTO1), 1001L, "x-tenant-id-x");
+        Mockito.verify(mockScannerTaskSetService).sendNodeScannerTask(List.of(testNodeDTO2A, testNodeDTO2B), 1002L, "x-tenant-id-x");
 
         // Make sure those 2 calls are all of them
         Mockito.verify(mockScannerTaskSetService,
-            Mockito.times(2)).sendNodeScannerTask(Mockito.any(List.class), Mockito.anyString(), Mockito.anyString());
+            Mockito.times(2)).sendNodeScannerTask(Mockito.any(List.class), Mockito.anyLong(), Mockito.anyString());
     }
 
     @Test
@@ -666,7 +666,7 @@ public class NodeGrpcServiceTest {
                 .addIds(303030L)
                 .build();
 
-        Map<String, List<NodeDTO>> testNodeByLocationMap = Collections.EMPTY_MAP;
+        Map<Long, List<NodeDTO>> testNodeByLocationMap = Collections.EMPTY_MAP;
         Mockito.when(mockNodeService.listNodeByIds(request.getIdsList(), "x-tenant-id-x")).thenReturn(testNodeByLocationMap);
 
         //
@@ -752,7 +752,7 @@ public class NodeGrpcServiceTest {
         // Validate
         //
        // Mockito.verify(mockDetectorTaskSetService).sendDetectorTasks(testNode);
-        Mockito.verify(mockScannerTaskSetService).sendNodeScannerTask(List.of(testNodeDTO), "x-monitoring-location-x", "x-tenant-id-x");
+        Mockito.verify(mockScannerTaskSetService).sendNodeScannerTask(List.of(testNodeDTO), testNode.getMonitoringLocationId(), "x-tenant-id-x");
     }
 
     private boolean statusExceptionMatchesExpectedId(Status status, Object expectedIdObj) {

@@ -64,7 +64,7 @@ public class MonitoringLocationStepDefinitions {
 
     @Given("[MonitoringLocation] Grpc location {string}")
     public void grpcLocation(String location) {
-        backgroundHelper.grpcLocation(location);
+        //backgroundHelper.grpcLocationId(location);
     }
 
     @Given("[MonitoringLocation] External GRPC Port in system property {string}")
@@ -105,7 +105,15 @@ public class MonitoringLocationStepDefinitions {
 
     @When("[MonitoringLocation] Create Monitoring Location with name {string}")
     public void monitoringLocationCreateMonitoringLocation(String location) {
-        lastMonitoringLocation = backgroundHelper.getMonitoringLocationStub().createLocation(MonitoringLocationCreateDTO.newBuilder().setLocation(location).setGeoLocation(GeoLocation.newBuilder().setLatitude(1.0).setLongitude(2.0).build()).setTenantId(backgroundHelper.getTenantId()).setAddress("address").build());
+        lastMonitoringLocation = backgroundHelper.getMonitoringLocationStub().createLocation(MonitoringLocationCreateDTO.newBuilder()
+            .setLocation(location)
+            .setGeoLocation(GeoLocation.newBuilder()
+                .setLatitude(1.0)
+                .setLongitude(2.0)
+            ).setTenantId(backgroundHelper.getTenantId())
+            .setAddress("address")
+            .build()
+        );
     }
 
     @Then("[MonitoringLocation] Monitoring Location is created")

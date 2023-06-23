@@ -86,39 +86,39 @@ public class ScannerTaskSetService {
         executorService.execute(() -> sendAzureScannerTask(discovery));
     }
 
-    public void sendNodeScannerTask(List<NodeDTO> nodes, String location, String tenantId) {
-        List<TaskDefinition> tasks = nodes.stream().map(node -> createNodeScanTask(node, location, new ArrayList<>()))
+    public void sendNodeScannerTask(List<NodeDTO> nodes, Long locationId, String tenantId) {
+        List<TaskDefinition> tasks = nodes.stream().map(node -> createNodeScanTask(node, locationId, new ArrayList<>()))
             .flatMap(Optional::stream).toList();
         if (!tasks.isEmpty()) {
-            taskSetPublisher.publishNewTasks(tenantId, location, tasks);
+            taskSetPublisher.publishNewTasks(tenantId, locationId, tasks);
         }
     }
 
-    public void sendNodeScannerTask(Node node, String location, List<SnmpConfiguration> snmpConfigs) {
+    public void sendNodeScannerTask(Node node, Long locationId, List<SnmpConfiguration> snmpConfigs) {
         NodeDTO nodeDTO = nodeMapper.modelToDTO(node);
-        sendNodeScannerTask(nodeDTO, location, snmpConfigs);
+        sendNodeScannerTask(nodeDTO, locationId, snmpConfigs);
     }
 
-    public void sendNodeScannerTask(NodeDTO node, String location, List<SnmpConfiguration> snmpConfigs) {
-        var taskDef = createNodeScanTask(node, location, snmpConfigs);
-        taskDef.ifPresent(taskDefinition -> taskSetPublisher.publishNewTasks(node.getTenantId(), location, List.of(taskDefinition)));
+    public void sendNodeScannerTask(NodeDTO node, Long locationId, List<SnmpConfiguration> snmpConfigs) {
+        var taskDef = createNodeScanTask(node, locationId, snmpConfigs);
+        taskDef.ifPresent(taskDefinition -> taskSetPublisher.publishNewTasks(node.getTenantId(), locationId, List.of(taskDefinition)));
     }
 
     public Optional<TaskDefinition> getNodeScanTasks(Node node) {
         var nodeDto = nodeMapper.modelToDTO(node);
-        return createNodeScanTask(nodeDto, node.getMonitoringLocation().getLocation(), new ArrayList<>());
+        return createNodeScanTask(nodeDto, node.getMonitoringLocation().getId(), new ArrayList<>());
     }
 
-    public void sendDiscoveryScannerTask(List<String> ipAddresses, String location, String tenantId, long activeDiscoveryId) {
-        executorService.execute(() -> createAndPublishTasks(ipAddresses, location, tenantId, activeDiscoveryId));
+    public void sendDiscoveryScannerTask(List<String> ipAddresses, Long locationId, String tenantId, long activeDiscoveryId) {
+        executorService.execute(() -> createAndPublishTasks(ipAddresses, locationId, tenantId, activeDiscoveryId));
     }
 
-    private void createAndPublishTasks(List<String> ipAddresses, String location, String tenantId, long activeDiscoveryId) {
-        Optional<TaskDefinition> tasks = createDiscoveryTask(ipAddresses, location, activeDiscoveryId);
-        tasks.ifPresent(taskDefinition -> taskSetPublisher.publishNewTasks(tenantId, location, List.of(taskDefinition)));
+    private void createAndPublishTasks(List<String> ipAddresses, Long locationId, String tenantId, long activeDiscoveryId) {
+        Optional<TaskDefinition> tasks = createDiscoveryTask(ipAddresses, locationId, activeDiscoveryId);
+        tasks.ifPresent(taskDefinition -> taskSetPublisher.publishNewTasks(tenantId, locationId, List.of(taskDefinition)));
     }
 
-    Optional<TaskDefinition> createDiscoveryTask(List<String> ipAddresses, String location, long activeDiscoveryId) {
+    Optional<TaskDefinition> createDiscoveryTask(List<String> ipAddresses, Long locationId, long activeDiscoveryId) {
 
         var ipRanges = new ArrayList<IpRange>();
         ipAddresses.forEach(ipAddressDTO -> {
@@ -162,7 +162,7 @@ public class ScannerTaskSetService {
                 .setActiveDiscoveryId(activeDiscoveryId)
                 .build());
 
-        String taskId = identityForDiscoveryTask(location, activeDiscoveryId);
+        String taskId = identityForDiscoveryTask(locationId, activeDiscoveryId);
         return Optional.of(TaskDefinition.newBuilder()
             .setType(TaskType.SCANNER)
             .setPluginName(DISCOVERY_TASK_PLUGIN_NAME)
@@ -174,11 +174,11 @@ public class ScannerTaskSetService {
 
     private void sendAzureScannerTask(AzureActiveDiscovery discovery) {
         String tenantId = discovery.getTenantId();
-        String location = discovery.getLocation();
+        Long locationId = discovery.getLocationId();
 
         TaskDefinition task = addAzureScannerTask(discovery);
 
-        taskSetPublisher.publishNewTasks(tenantId, location, List.of(task));
+        taskSetPublisher.publishNewTasks(tenantId, locationId, List.of(task));
     }
 
     private TaskDefinition addAzureScannerTask(AzureActiveDiscovery discovery) {
@@ -203,13 +203,13 @@ public class ScannerTaskSetService {
             .build();
     }
 
-    private Optional<TaskDefinition> createNodeScanTask(NodeDTO node, String location, List<SnmpConfiguration> snmpConfigs) {
+    private Optional<TaskDefinition> createNodeScanTask(NodeDTO node, Long locationId, List<SnmpConfiguration> snmpConfigs) {
         Optional<IpInterfaceDTO> ipInterface = node.getIpInterfacesList().stream()
             .filter(IpInterfaceDTO::getSnmpPrimary).findFirst()
             .or(() -> node.getIpInterfacesList().stream().findAny());
         if (ipInterface.isPresent()) {
             var snmpConfig = snmpConfigService.getSnmpConfig(node.getTenantId(),
-                location, InetAddressUtils.getInetAddress(ipInterface.get().getIpAddress()));
+                locationId, InetAddressUtils.getInetAddress(ipInterface.get().getIpAddress()));
             snmpConfig.ifPresent(snmpConfigs::add);
         }
         return ipInterface.map(ip -> {

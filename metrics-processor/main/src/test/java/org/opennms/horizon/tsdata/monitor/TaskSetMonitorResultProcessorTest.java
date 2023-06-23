@@ -288,7 +288,7 @@ public class TaskSetMonitorResultProcessorTest {
                 return (
                     (Objects.equals(metricName, labelMap.get(MetricNameConstants.METRIC_NAME_LABEL))) &&
                     (Objects.equals("x-ip-address-x", labelMap.get("instance"))) &&
-                    (Objects.equals("x-location-x", labelMap.get("location"))) &&
+                    (Objects.equals("x-location-x", labelMap.get("location_id"))) &&
                     (Objects.equals("x-system-id-x", labelMap.get("system_id"))) &&
                     (Objects.equals(monitorType.name(), labelMap.get("monitor"))) &&
                     ((isEchoMatcher) || Objects.equals("151515", labelMap.get("node_id")))

@@ -123,7 +123,7 @@ OpenNMS:
       nginx.ingress.kubernetes.io/auth-tls-verify-client: "on"
       nginx.ingress.kubernetes.io/auth-tls-verify-depth: "1"
       nginx.ingress.kubernetes.io/auth-url: "http://opennms-minion-certificate-verifier.default.svc.cluster.local:8080/certificate/debug"
-      nginx.ingress.kubernetes.io/auth-response-headers: "tenant-id, location"
+      nginx.ingress.kubernetes.io/auth-response-headers: "tenant-id, location-id"
       nginx.ingress.kubernetes.io/server-snippet: |
         grpc_read_timeout "1200s";
         grpc_send_timeout "1200s";

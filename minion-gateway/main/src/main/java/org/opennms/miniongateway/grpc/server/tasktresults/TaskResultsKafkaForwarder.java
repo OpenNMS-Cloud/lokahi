@@ -38,7 +38,6 @@ import org.opennms.taskset.contract.TaskSetResults;
 import org.opennms.taskset.contract.TenantLocationSpecificTaskSetResults;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
@@ -84,12 +83,12 @@ public class TaskResultsKafkaForwarder implements MessageConsumer<TaskSetResults
     public void handleMessage(TaskSetResults messageLog) {
         // Retrieve the Tenant ID from the TenantID GRPC Interceptor
         String tenantId = tenantIDGrpcInterceptor.readCurrentContextTenantId();
-        String location = locationServerInterceptor.readCurrentContextLocation();
+        String locationId = locationServerInterceptor.readCurrentContextLocationId();
 
-        logger.debug("Received results; sending to Kafka: tenant-id={}; location={}; kafka-topic={}; message={}", tenantId, location, kafkaTopic, messageLog);
+        logger.debug("Received results; sending to Kafka: tenant-id={}; location-id={}; kafka-topic={}; message={}", tenantId, locationId, kafkaTopic, messageLog);
 
         // Map to tenanted
-        TenantLocationSpecificTaskSetResults tenantLocationSpecificTaskSetResults = tenantLocationSpecificTaskSetResultsMapper.mapBareToTenanted(tenantId, location, messageLog);
+        TenantLocationSpecificTaskSetResults tenantLocationSpecificTaskSetResults = tenantLocationSpecificTaskSetResultsMapper.mapBareToTenanted(tenantId, locationId, messageLog);
 
         // Convert to bytes
         byte[] rawContent = tenantLocationSpecificTaskSetResults.toByteArray();

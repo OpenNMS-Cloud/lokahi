@@ -57,7 +57,6 @@ import org.opennms.horizon.inventory.service.taskset.ScannerTaskSetService;
 import org.opennms.horizon.inventory.service.taskset.publisher.TaskSetPublisher;
 import org.opennms.horizon.shared.common.tag.proto.Operation;
 import org.opennms.horizon.shared.common.tag.proto.TagOperationProto;
-import org.opennms.horizon.shared.constants.GrpcConstants;
 import org.opennms.horizon.shared.utils.InetAddressUtils;
 import org.opennms.horizon.snmp.api.SnmpConfiguration;
 import org.opennms.node.scan.contract.NodeInfoResult;
@@ -152,9 +151,9 @@ public class NodeService {
     }
 
     private MonitoringLocation findMonitoringLocation(NodeCreateDTO request, String tenantId) throws LocationNotFoundException {
-        Optional<MonitoringLocation> found = monitoringLocationRepository.findByLocationAndTenantId(request.getLocation(), tenantId);
+        Optional<MonitoringLocation> found = monitoringLocationRepository.findByIdAndTenantId(Long.parseLong(request.getLocationId()), tenantId);
 
-        return found.orElseThrow(() -> new LocationNotFoundException("Location not found " + request.getLocation()));
+        return found.orElseThrow(() -> new LocationNotFoundException("Location not found " + request.getLocationId()));
     }
 
     private Node saveNode(NodeCreateDTO request, MonitoringLocation monitoringLocation,
@@ -179,7 +178,7 @@ public class NodeService {
     public Node createNode(NodeCreateDTO request, ScanType scanType, String tenantId) throws EntityExistException, LocationNotFoundException {
         if (request.hasManagementIp()) { //Do we really want to create a node without managed IP?
             Optional<IpInterface> ipInterfaceOpt = ipInterfaceRepository
-                .findByIpLocationTenantAndScanType(InetAddressUtils.getInetAddress(request.getManagementIp()), request.getLocation(), tenantId, scanType);
+                .findByIpLocationIdTenantAndScanType(InetAddressUtils.getInetAddress(request.getManagementIp()), Long.parseLong(request.getLocationId()), tenantId, scanType);
             if (ipInterfaceOpt.isPresent()) {
                 IpInterface ipInterface = ipInterfaceOpt.get();
                 log.error("IP address {} already exists in the system and belong to device {}", request.getManagementIp(), ipInterface.getNode().getNodeLabel());
@@ -199,12 +198,12 @@ public class NodeService {
     }
 
     @Transactional
-    public Map<String, List<NodeDTO>> listNodeByIds(List<Long> ids, String tenantId) {
+    public Map<Long, List<NodeDTO>> listNodeByIds(List<Long> ids, String tenantId) {
         List<Node> nodeList = nodeRepository.findByIdInAndTenantId(ids, tenantId);
         if (nodeList.isEmpty()) {
             return new HashMap<>();
         }
-        return nodeList.stream().collect(Collectors.groupingBy(node -> node.getMonitoringLocation().getLocation(),
+        return nodeList.stream().collect(Collectors.groupingBy(node -> node.getMonitoringLocation().getId(),
             Collectors.mapping(mapper::modelToDTO, Collectors.toList())));
     }
 
@@ -217,7 +216,7 @@ public class NodeService {
         } else {
             var node = optionalNode.get();
             var tenantId = node.getTenantId();
-            var location = node.getMonitoringLocation().getLocation();
+            var location = node.getMonitoringLocationId();
             var tasks = getTasksForNode(node);
             removeAssociatedTags(node);
             nodeRepository.deleteById(id);
@@ -267,15 +266,15 @@ public class NodeService {
         tagPublisher.publishTagUpdate(tagOpList);
     }
 
-    public void sendNewNodeTaskSetAsync(Node node, String location, IcmpActiveDiscoveryDTO icmpDiscoveryDTO) {
-        executorService.execute(() -> sendTaskSetsToMinion(node, location, icmpDiscoveryDTO));
+    public void sendNewNodeTaskSetAsync(Node node, Long locationId, IcmpActiveDiscoveryDTO icmpDiscoveryDTO) {
+        executorService.execute(() -> sendTaskSetsToMinion(node, locationId, icmpDiscoveryDTO));
     }
 
-    private void sendTaskSetsToMinion(Node node, String location, IcmpActiveDiscoveryDTO icmpDiscoveryDTO) {
+    private void sendTaskSetsToMinion(Node node, Long locationId, IcmpActiveDiscoveryDTO icmpDiscoveryDTO) {
 
         List<SnmpConfiguration> snmpConfigs = new ArrayList<>();
         try {
-            var snmpConf = icmpDiscoveryDTO.getSnmpConf();
+            var snmpConf = icmpDiscoveryDTO.getSnmpConfig();
             snmpConf.getReadCommunityList().forEach(readCommunity -> {
                 var builder = SnmpConfiguration.newBuilder()
                     .setReadCommunity(readCommunity);
@@ -286,8 +285,7 @@ public class NodeService {
                     .setPort(port);
                 snmpConfigs.add(builder.build());
             });
-            scannerTaskSetService.sendNodeScannerTask(mapper.modelToDTO(node),
-                location, snmpConfigs);
+            scannerTaskSetService.sendNodeScannerTask(mapper.modelToDTO(node), locationId, snmpConfigs);
         } catch (Exception e) {
             log.error("Error while sending nodescan task for node with label {}", node.getNodeLabel());
         }

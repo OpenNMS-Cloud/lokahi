@@ -2,7 +2,7 @@ mutation CreateIcmpActiveDiscovery($request: IcmpActiveDiscoveryCreateInput!) {
   createIcmpActiveDiscovery(request: $request) {
     name
     ipAddresses
-    location
+    locationId
     snmpConfig {
       ports
       readCommunities

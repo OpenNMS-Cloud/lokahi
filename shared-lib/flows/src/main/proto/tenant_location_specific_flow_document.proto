@@ -10,7 +10,7 @@ import "flow_document.proto";
 
 message TenantLocationSpecificFlowDocumentLog {
   string tenant_id = 1;
-  string location = 2;
+  string location_id = 2;
   string system_id = 3;
 
   repeated FlowDocument message = 4;

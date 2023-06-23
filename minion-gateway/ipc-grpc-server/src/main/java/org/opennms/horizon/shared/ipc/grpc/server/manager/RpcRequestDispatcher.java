@@ -2,7 +2,6 @@ package org.opennms.horizon.shared.ipc.grpc.server.manager;
 
 import java.util.concurrent.CompletableFuture;
 import org.opennms.cloud.grpc.minion.RpcRequestProto;
-import org.opennms.cloud.grpc.minion.RpcResponseProto;
 import org.opennms.cloud.grpc.minion_gateway.GatewayRpcResponseProto;
 
 /**
@@ -13,7 +12,7 @@ import org.opennms.cloud.grpc.minion_gateway.GatewayRpcResponseProto;
  */
 public interface RpcRequestDispatcher {
 
-    CompletableFuture<GatewayRpcResponseProto> dispatch(String tenant, String location, RpcRequestProto request);
-    CompletableFuture<GatewayRpcResponseProto> dispatch(String tenant, String location, String systemId, RpcRequestProto request);
+    CompletableFuture<GatewayRpcResponseProto> dispatch(String tenantId, String locationId, RpcRequestProto request);
+    CompletableFuture<GatewayRpcResponseProto> dispatch(String tenantId, String locationId, String systemId, RpcRequestProto request);
 
 }

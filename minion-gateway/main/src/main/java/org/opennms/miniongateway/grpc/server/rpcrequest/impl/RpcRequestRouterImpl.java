@@ -45,7 +45,7 @@ public class RpcRequestRouterImpl implements RpcRequestRouter {
     public CompletableFuture<GatewayRpcResponseProto> routeRequest(GatewayRpcRequestProto request) {
         CompletableFuture<GatewayRpcResponseProto> resultFuture = new CompletableFuture<>();
 
-        String tenant = request.getIdentity().getTenant();
+        String tenant = request.getIdentity().getTenantId();
         RouterTaskData routerTaskData = new RouterTaskData(tenant, request.toByteArray());
 
         ComputeTaskFuture<byte[]> igniteFuture =

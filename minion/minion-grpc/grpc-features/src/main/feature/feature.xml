@@ -25,7 +25,7 @@
         <feature>internal-grpc-guava</feature>
         <feature>grpc-protobuf</feature>
 
-        <bundle>wrap:mvn:org.opennms.horizon.minion/shaded-grpc/${project.version}$overwrite=merge&amp;Karaf-Commands=none</bundle>
+        <bundle>wrap:mvn:org.opennms.lokahi.minion/shaded-grpc/${project.version}$overwrite=merge&amp;Karaf-Commands=none</bundle>
     </feature>
 
     <feature name="grpc-ratelimitter" version="2.0.2">
@@ -36,8 +36,8 @@
     <feature name="grpc-contract" version="2.0.2">
         <feature>grpc-protobuf</feature>
         <feature>grpc</feature>
-        <bundle>mvn:org.opennms.horizon.shared/ipc-grpc-contract/${project.version}</bundle>
-        <bundle>mvn:org.opennms.horizon.shared.snmp/proto/${project.version}</bundle>
+        <bundle>mvn:org.opennms.lokahi.shared/ipc-grpc-contract/${project.version}</bundle>
+        <bundle>mvn:org.opennms.lokahi.shared.snmp/proto/${project.version}</bundle>
     </feature>
 
     <feature name="grpc-minion" version="${project.version}">
@@ -50,9 +50,9 @@
         <feature>grpc-contract</feature>
         <feature>grpc-protobuf</feature>
 
-        <bundle>mvn:org.opennms.horizon.shared/horizon-common-logging/${project.version}</bundle>
-        <bundle>mvn:org.opennms.horizon.shared/ipc-api/${project.version}</bundle>
-        <bundle>mvn:org.opennms.horizon.minion/grpc-client/${project.version}</bundle>
+        <bundle>mvn:org.opennms.lokahi.shared/lokahi-common-logging/${project.version}</bundle>
+        <bundle>mvn:org.opennms.lokahi.shared/ipc-api/${project.version}</bundle>
+        <bundle>mvn:org.opennms.lokahi.minion/grpc-client/${project.version}</bundle>
 
         <bundle dependency="true">wrap:mvn:org.rocksdb/rocksdbjni/${rocksdb.version}</bundle>
     </feature>

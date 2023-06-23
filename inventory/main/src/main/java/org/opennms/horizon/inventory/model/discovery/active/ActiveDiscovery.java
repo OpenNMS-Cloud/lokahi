@@ -65,8 +65,8 @@ public abstract class ActiveDiscovery {
     private String name;
 
     @NotNull
-    @Column(name = "location")
-    private String location;
+    @Column(name = "location_id")
+    private Long locationId;
 
     @NotNull
     @Column(name = "create_time", columnDefinition = "TIMESTAMP")

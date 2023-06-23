@@ -30,11 +30,11 @@ public class LocalIgniteRpcRequestDispatcher implements IgniteRpcRequestDispatch
             .setPayload(request.getPayload());
 
         if (identity.getSystemId().isBlank()) {
-            return rpcRequestDispatcher.dispatch(identity.getTenant(), identity.getLocation(), rpcRequest.build());
+            return rpcRequestDispatcher.dispatch(identity.getTenantId(), identity.getLocationId(), rpcRequest.build());
         }
 
-        rpcRequest.setIdentity(Identity.newBuilder().setSystemId(identity.getSystemId()));
-        return rpcRequestDispatcher.dispatch(identity.getTenant(), identity.getLocation(), identity.getSystemId(), rpcRequest.build());
+        rpcRequest.setIdentity(Identity.newBuilder().setSystemId(identity.getSystemId()));  // Why replace the existing identity with a new one?
+        return rpcRequestDispatcher.dispatch(identity.getTenantId(), identity.getLocationId(), identity.getSystemId(), rpcRequest.build());
     }
 
 }

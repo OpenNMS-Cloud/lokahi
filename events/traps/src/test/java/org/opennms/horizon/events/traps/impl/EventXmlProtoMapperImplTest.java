@@ -69,7 +69,7 @@ public class EventXmlProtoMapperImplTest {
         // Verify the Results
         //
         assertEquals("x-uei-x", result.getUei());
-        assertEquals("x-dist-poller-x", result.getLocation());
+        assertEquals("x-dist-poller-x", result.getLocationId());
         assertEquals("1.2.3.4", result.getIpAddress());
 
         assertNotNull(result.getInfo());

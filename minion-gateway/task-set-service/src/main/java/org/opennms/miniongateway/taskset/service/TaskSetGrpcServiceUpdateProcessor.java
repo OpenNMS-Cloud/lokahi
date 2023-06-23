@@ -87,8 +87,8 @@ public class TaskSetGrpcServiceUpdateProcessor implements TaskSetStorageUpdateFu
         // Finally, add any new tasks
         addNewTasks(updateTasksRequest, updatedTaskSetBuilder);
 
-        LOG.debug("Remove tasks: tenant={}; location={}; added-count={}; replaced-count={}; removed-count={}",
-            updateTasksRequest.getTenantId(), updateTasksRequest.getLocation(), numNew, numReplaced, numRemoved);
+        LOG.debug("Remove tasks: tenantId={}; locationId={}; added-count={}; replaced-count={}; removed-count={}",
+            updateTasksRequest.getTenantId(), updateTasksRequest.getLocationId(), numNew, numReplaced, numRemoved);
 
         // Determine the return value based on whether there was an actual change
         TaskSet result;
@@ -116,8 +116,8 @@ public class TaskSetGrpcServiceUpdateProcessor implements TaskSetStorageUpdateFu
                 } else if (update.hasRemoveTask()) {
                     requestedRemovalIds.add(update.getRemoveTask().getTaskId());
                 } else {
-                    LOG.error("Ignoring unrecognized update request with no add-task and no remove-task: tenant-id={}; location={}",
-                        request.getTenantId(), request.getLocation());
+                    LOG.error("Ignoring unrecognized update request with no add-task and no remove-task: tenantId={}; locationId={}",
+                        request.getTenantId(), request.getLocationId());
                 }
             }
         );

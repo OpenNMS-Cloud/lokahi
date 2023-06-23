@@ -30,6 +30,7 @@ package org.opennms.horizon.inventory.component;
 
 import jakarta.persistence.PostPersist;
 import jakarta.persistence.PostUpdate;
+import lombok.Setter;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.opennms.horizon.inventory.dto.NodeDTO;
 import org.opennms.horizon.inventory.model.Node;
@@ -41,9 +42,11 @@ import org.springframework.stereotype.Component;
 @Component
 public class NodeKafkaProducer {
     @Value("${kafka.topics.node}")
+    @Setter // Testability
     private String topic;
 
     @Autowired
+    @Setter // Testability
     private KafkaTemplate<String, byte[]> kafkaTemplate;
 
     @PostUpdate

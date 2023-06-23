@@ -58,23 +58,22 @@ public class KafkaTaskSetPublisher implements TaskSetPublisher {
     private String kafkaTopic;
 
     @Override
-    public void publishNewTasks(String tenantId, String location, List<TaskDefinition> taskList) {
-
-        log.info("Publishing task updates for location {} with tenantId {}, taskDef = {}", location, tenantId, taskList);
+    public void publishNewTasks(String tenantId, Long locationId, List<TaskDefinition> taskList) {
+        log.info("Publishing task updates for tenantId={}; locationId={}; taskDef={}", tenantId, locationId, taskList);
         publishTaskSetUpdate(
             (updateBuilder) -> taskList.forEach((taskDefinition) -> addAdditionOpToTaskUpdate(updateBuilder, taskDefinition)),
             tenantId,
-            location);
+            locationId
+        );
     }
 
     @Override
-    public void publishTaskDeletion(String tenantId, String location, List<TaskDefinition> taskList) {
-
-        log.info("Publishing task removal for location {} with tenantId {}, taskDef = {}", location, tenantId, taskList);
+    public void publishTaskDeletion(String tenantId, Long locationId, List<TaskDefinition> taskList) {
+        log.info("Publishing task removal for location for tenantId={}; locationId={}; taskDef={}", tenantId, locationId, taskList);
         publishTaskSetUpdate(
             (updateBuilder) -> taskList.forEach((taskDefinition) -> addRemovalOpToUpdate(updateBuilder, taskDefinition.getId())),
             tenantId,
-            location);
+            locationId);
     }
 
     private void addAdditionOpToTaskUpdate(UpdateTasksRequest.Builder updateBuilder, TaskDefinition task) {
@@ -105,15 +104,15 @@ public class KafkaTaskSetPublisher implements TaskSetPublisher {
         updateBuilder.addUpdate(updateOp);
     }
 
-    private void publishTaskSetUpdate(Consumer<UpdateTasksRequest.Builder> populateUpdateRequestOp, String tenantId, String location) {
+    private void publishTaskSetUpdate(Consumer<UpdateTasksRequest.Builder> populateUpdateRequestOp, String tenantId, Long locationId) {
         UpdateTasksRequest.Builder request =
             UpdateTasksRequest.newBuilder()
                 .setTenantId(tenantId)
-                .setLocation(location);
+                .setLocationId(String.valueOf(locationId));
 
         populateUpdateRequestOp.accept(request);
 
-        kafkaTemplate.send(kafkaTopic, tenantId + ":" + location, request.build().toByteArray());
+        kafkaTemplate.send(kafkaTopic, tenantId + ":" + locationId, request.build().toByteArray());
 
     }
 }

@@ -57,7 +57,7 @@ public class EventXmlToProtoMapperImpl implements EventXmlToProtoMapper {
             .setUei(event.getUei())
             .setProducedTimeMs(event.getCreationTime().getTime())
             .setNodeId(event.getNodeid())
-            .setLocation(event.getDistPoller())
+            .setLocationId(event.getDistPoller())
             .setIpAddress(event.getInterface());
 
         if (event.getDescr() != null) {

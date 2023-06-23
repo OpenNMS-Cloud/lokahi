@@ -175,9 +175,9 @@ public class NodeGrpcService extends NodeServiceGrpc.NodeServiceImplBase {
         }
 
         String tenantId = tenantIdOptional.get();
-        String location = request.getLocation();
+        String locationId = request.getLocationId();
         String ipAddress = request.getIpAddress();
-        if (Strings.isNullOrEmpty(location) || Strings.isNullOrEmpty(ipAddress)) {
+        if (Strings.isNullOrEmpty(locationId) || Strings.isNullOrEmpty(ipAddress)) {
             Status status = Status.newBuilder()
                 .setCode(Code.INVALID_ARGUMENT_VALUE)
                 .setMessage(INVALID_REQUEST_LOCATION_AND_IP_NOT_EMPTY_MSG)
@@ -186,7 +186,7 @@ public class NodeGrpcService extends NodeServiceGrpc.NodeServiceImplBase {
             return;
         }
 
-        Optional<IpInterfaceDTO> optional = ipInterfaceService.findByIpAddressAndLocationAndTenantId(ipAddress, location, tenantId);
+        Optional<IpInterfaceDTO> optional = ipInterfaceService.findByIpAddressAndLocationAndTenantId(ipAddress, locationId, tenantId);
 
         if (optional.isEmpty()) {
             Status status = Status.newBuilder()
@@ -294,7 +294,7 @@ public class NodeGrpcService extends NodeServiceGrpc.NodeServiceImplBase {
     }
 
     private void startNodeScanByIdsForTenant(String tenantId, NodeIdList request, StreamObserver<BoolValue> responseObserver) {
-        Map<String, List<NodeDTO>> nodes = nodeService.listNodeByIds(request.getIdsList(), tenantId);
+        Map<Long, List<NodeDTO>> nodes = nodeService.listNodeByIds(request.getIdsList(), tenantId);
 
         if(nodes != null && !nodes.isEmpty()) {
             executorService.execute(() -> sendScannerTasksToMinion(nodes, tenantId));
@@ -310,7 +310,7 @@ public class NodeGrpcService extends NodeServiceGrpc.NodeServiceImplBase {
 
     @Override
     public void getIpInterfaceFromQuery(NodeIdQuery request, StreamObserver<IpInterfaceDTO> responseObserver) {
-        tenantLookup.lookupTenantId(Context.current()).ifPresentOrElse(tenantId -> ipInterfaceService.findByIpAddressAndLocationAndTenantId(request.getIpAddress(), request.getLocation(), tenantId).ifPresentOrElse(ipInterface -> {
+        tenantLookup.lookupTenantId(Context.current()).ifPresentOrElse(tenantId -> ipInterfaceService.findByIpAddressAndLocationAndTenantId(request.getIpAddress(), request.getLocationId(), tenantId).ifPresentOrElse(ipInterface -> {
             responseObserver.onNext(ipInterface);
             responseObserver.onCompleted();
         }, () -> responseObserver.onError(StatusProto.toStatusRuntimeException(Status.newBuilder()
@@ -357,15 +357,14 @@ public class NodeGrpcService extends NodeServiceGrpc.NodeServiceImplBase {
 
     private void sendNodeScanTaskToMinion(Node node) {
         try {
-            scannerService.sendNodeScannerTask(List.of(nodeMapper.modelToDTO(node)),
-               node.getMonitoringLocation().getLocation(), node.getTenantId());
+            scannerService.sendNodeScannerTask(List.of(nodeMapper.modelToDTO(node)), node.getMonitoringLocationId(), node.getTenantId());
         } catch (Exception e) {
             LOG.error("Error while sending detector task for node with label {}", node.getNodeLabel(), e);
         }
     }
 
-    private void sendScannerTasksToMinion(Map<String, List<NodeDTO>> locationNodes, String tenantId) {
-        for(Map.Entry<String, List<NodeDTO>> entry: locationNodes.entrySet()) {
+    private void sendScannerTasksToMinion(Map<Long, List<NodeDTO>> locationNodes, String tenantId) {
+        for(Map.Entry<Long, List<NodeDTO>> entry: locationNodes.entrySet()) {
             scannerService.sendNodeScannerTask(entry.getValue(), entry.getKey(), tenantId);
         }
     }

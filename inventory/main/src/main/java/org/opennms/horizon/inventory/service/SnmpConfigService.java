@@ -51,25 +51,25 @@ public class SnmpConfigService {
     private final SnmpConfigMapper snmpConfigMapper;
 
     @Transactional
-    public void saveOrUpdateSnmpConfig(String tenantId, String location, String ipAddress, SnmpConfiguration snmpConfiguration) {
+    public void saveOrUpdateSnmpConfig(String tenantId, Long locationId, String ipAddress, SnmpConfiguration snmpConfiguration) {
         var snmpConfig = new SnmpConfig();
         var inetAddress = InetAddressUtils.getInetAddress(ipAddress);
         var agentConfig = snmpConfigMapper.mapProtoToModel(snmpConfiguration);
-        var existingConfig = repository.findByTenantIdAndLocationAndIpAddress(tenantId, location, inetAddress);
+        var existingConfig = repository.findByTenantIdAndLocationIdAndIpAddress(tenantId, locationId, inetAddress);
         if (existingConfig.isPresent()) {
             snmpConfig = existingConfig.get();
         } else {
             snmpConfig.setTenantId(tenantId);
-            snmpConfig.setLocation(location);
+            snmpConfig.setLocationId(locationId);
             snmpConfig.setIpAddress(inetAddress);
         }
         snmpConfig.setSnmpAgentConfig(agentConfig);
         repository.save(snmpConfig);
     }
 
-    public Optional<SnmpConfiguration> getSnmpConfig(String tenantId, String location, InetAddress ipAddress) {
+    public Optional<SnmpConfiguration> getSnmpConfig(String tenantId, Long locationId, InetAddress ipAddress) {
 
-        Optional<SnmpConfig> snmpConfig = repository.findByTenantIdAndLocationAndIpAddress(tenantId, location, ipAddress);
+        Optional<SnmpConfig> snmpConfig = repository.findByTenantIdAndLocationIdAndIpAddress(tenantId, locationId, ipAddress);
         if (snmpConfig.isPresent()) {
             var snmpConfiguration = snmpConfigMapper.mapModelToProto(snmpConfig.get().getSnmpAgentConfig());
             return Optional.of(snmpConfiguration);

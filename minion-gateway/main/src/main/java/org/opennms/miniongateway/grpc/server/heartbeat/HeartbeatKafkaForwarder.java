@@ -28,8 +28,6 @@
 
 package org.opennms.miniongateway.grpc.server.heartbeat;
 
-import java.time.Duration;
-
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.opennms.horizon.grpc.heartbeat.contract.HeartbeatMessage;
 import org.opennms.horizon.grpc.heartbeat.contract.TenantLocationSpecificHeartbeatMessage;
@@ -45,8 +43,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
-import com.swrve.ratelimitedlogger.RateLimitedLog;
-
 import io.opentelemetry.api.trace.Span;
 
 /**
@@ -57,12 +53,6 @@ public class HeartbeatKafkaForwarder implements MessageConsumer<HeartbeatMessage
     public static final String DEFAULT_TASK_RESULTS_TOPIC = "heartbeat";
 
     private final Logger logger = LoggerFactory.getLogger(HeartbeatKafkaForwarder.class);
-    private final RateLimitedLog usingDefaultTenantIdLog =
-        RateLimitedLog
-            .withRateLimit(logger)
-            .maxRate(1)
-            .every(Duration.ofMinutes(1))
-            .build();
 
     @Autowired
     private KafkaTemplate<String, byte[]> kafkaTemplate;
@@ -88,13 +78,13 @@ public class HeartbeatKafkaForwarder implements MessageConsumer<HeartbeatMessage
     public void handleMessage(HeartbeatMessage heartbeatMessage) {
         // Retrieve the Tenant ID from the TenantID GRPC Interceptor
         String tenantId = tenantIDGrpcInterceptor.readCurrentContextTenantId();
-        // And the location from its Interceptor
-        String location = locationServerInterceptor.readCurrentContextLocation();
+        // And the locationId from its Interceptor
+        String locationId = locationServerInterceptor.readCurrentContextLocationId();
 
-        logger.info("Received heartbeat; sending to Kafka: tenant-id={}; location={}; kafka-topic={}; message={}", tenantId, location, kafkaTopic, heartbeatMessage);
+        logger.info("Received heartbeat; sending to Kafka: tenantId={}; locationId={}; kafka-topic={}; message={}", tenantId, locationId, kafkaTopic, heartbeatMessage);
         Span.current().setAttribute("message", heartbeatMessage.toString());
 
-        TenantLocationSpecificHeartbeatMessage mapped = tenantLocationSpecificHeartbeatMessageMapper.mapBareToTenanted(tenantId, location, heartbeatMessage);
+        TenantLocationSpecificHeartbeatMessage mapped = tenantLocationSpecificHeartbeatMessageMapper.mapBareToTenanted(tenantId, locationId, heartbeatMessage);
 
         byte[] rawContent = mapped.toByteArray();
         var producerRecord = new ProducerRecord<String, byte[]>(kafkaTopic, rawContent);

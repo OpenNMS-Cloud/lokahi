@@ -37,25 +37,25 @@ option java_package = "org.opennms.horizon.inventory.discovery";
 
 message IcmpActiveDiscoveryCreateDTO {
   string name = 1;
-  string location = 2;
+  string location_id = 2;
   //can be a single ip address, ip ranges: 127.0.0.1 or 127.0.0.1-127.0.0.10 are valid values
-  repeated string ipAddresses = 3;
-  SNMPConfigDTO snmpConf = 4;
+  repeated string ip_addresses = 3;
+  SNMPConfigDTO snmp_config = 4;
   repeated opennms.inventory.TagCreateDTO tags = 5;
 }
 
 message IcmpActiveDiscoveryDTO {
   int64 id = 1;
-  string location = 2;
+  string location_id = 2;
   string name = 3;
   string tenant_id = 4;
   //can be a single ip address, ip ranges: 127.0.0.1 or 127.0.0.1-127.0.0.10 are valid values
-  repeated string ipAddresses = 5;
-  SNMPConfigDTO snmpConf = 6;
+  repeated string ip_addresses = 5;
+  SNMPConfigDTO snmp_config = 6;
 }
 
 message SNMPConfigDTO {
-  repeated string readCommunity = 1;
+  repeated string read_community = 1;
   repeated int32 ports = 2;
 }
 

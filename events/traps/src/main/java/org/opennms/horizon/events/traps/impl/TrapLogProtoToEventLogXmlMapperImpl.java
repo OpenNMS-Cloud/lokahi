@@ -35,7 +35,7 @@ public class TrapLogProtoToEventLogXmlMapperImpl implements TrapLogProtoToEventL
         log.setEvents(events);
 
         String tenantId = messageLog.getTenantId();
-        String location = messageLog.getLocation();
+        String locationId = messageLog.getLocationId();
 
         // TODO: Add metrics for Traps received/error/dropped.
         for (TrapDTO eachMessage : messageLog.getTrapDTOList()) {
@@ -44,7 +44,7 @@ public class TrapLogProtoToEventLogXmlMapperImpl implements TrapLogProtoToEventL
                     eventFactory.createEventFrom(
                         eachMessage,
                         messageLog.getIdentity().getSystemId(),
-                        location,
+                        locationId,
                         inetAddressLookupFunction.apply(messageLog.getTrapAddress()),
                         tenantId);
 

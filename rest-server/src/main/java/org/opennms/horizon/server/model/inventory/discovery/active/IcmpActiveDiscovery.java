@@ -40,6 +40,6 @@ public class IcmpActiveDiscovery {
     private long  id;
     private String name;
     private List<String> ipAddresses;
-    private String location;
+    private String locationId;
     private SNMPConfig snmpConfig;
 }

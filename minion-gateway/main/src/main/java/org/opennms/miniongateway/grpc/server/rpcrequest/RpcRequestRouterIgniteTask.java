@@ -58,7 +58,7 @@ public class RpcRequestRouterIgniteTask implements ComputeTask<RouterTaskData, b
             if (!target.getSystemId().isBlank()) {
                 gatewayNodeId = minionLookupService.findGatewayNodeWithId(tenantId, target.getSystemId());
             } else {
-                gatewayNodeId = shuffle(minionLookupService.findGatewayNodeWithLocation(tenantId, target.getLocation()));
+                gatewayNodeId = shuffle(minionLookupService.findGatewayNodeWithLocation(tenantId, target.getLocationId()));
             }
 
             ClusterNode routingNode;
@@ -190,7 +190,7 @@ public class RpcRequestRouterIgniteTask implements ComputeTask<RouterTaskData, b
         @Override
         public Object execute() throws IgniteException {
             MinionIdentity identity = request.getIdentity();
-            throw new IgniteException("Could not find active connection for tenant=" + identity.getTenant() + ", location=" + identity.getLocation() + " and systemId=" + identity.getSystemId());
+            throw new IgniteException("Could not find active connection for tenantId=" + identity.getTenantId() + ", locationId=" + identity.getLocationId() + " and systemId=" + identity.getSystemId());
         }
     }
 }

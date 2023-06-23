@@ -141,12 +141,12 @@ public class PassiveDiscoveryService {
     }
 
     private void validateDiscovery(String tenantId, PassiveDiscoveryUpsertDTO dto) {
-        Optional<PassiveDiscovery> discoveryOpt = repository.findByTenantIdAndLocation(tenantId, dto.getLocation());
+        Optional<PassiveDiscovery> discoveryOpt = repository.findByTenantIdAndLocationId(tenantId, Long.valueOf(dto.getLocationId()));
         if (discoveryOpt.isPresent()) {
             PassiveDiscovery discovery = discoveryOpt.get();
 
             if (discovery.getId() != dto.getId()) {
-                throw new InventoryRuntimeException("Already a passive discovery with location " + dto.getLocation());
+                throw new InventoryRuntimeException("Already a passive discovery with location " + dto.getLocationId());
             }
         }
     }
@@ -184,10 +184,10 @@ public class PassiveDiscoveryService {
     private void sendNodeScan(PassiveDiscovery discovery) {
         if (discovery.isToggle()) {
             String tenantId = discovery.getTenantId();
-            String location = discovery.getLocation();
+            Long locationId = discovery.getLocationId();
 
             List<Node> detectedNodes = nodeRepository
-                .findByTenantIdLocationsAndMonitoredStateEquals(tenantId, location, MonitoredState.DETECTED);
+                .findByTenantIdLocationsAndMonitoredStateEquals(tenantId, locationId, MonitoredState.DETECTED);
 
             if (!CollectionUtils.isEmpty(detectedNodes)) {
                 for (Node node : detectedNodes) {
@@ -208,7 +208,7 @@ public class PassiveDiscoveryService {
         MonitoringLocation monitoringLocation = node.getMonitoringLocation();
         String location = monitoringLocation.getLocation();
 
-        Optional<PassiveDiscovery> discoveryOpt = repository.findByTenantIdAndLocation(tenantId, location);
+        Optional<PassiveDiscovery> discoveryOpt = repository.findByTenantIdAndLocationId(tenantId, Long.valueOf(location));
         if (discoveryOpt.isPresent()) {
             PassiveDiscovery discovery = discoveryOpt.get();
             if (discovery.isToggle()) {
@@ -235,7 +235,7 @@ public class PassiveDiscoveryService {
             snmpConfigs.add(builder.build());
         });
 
-        scannerTaskSetService.sendNodeScannerTask(node, discovery.getLocation(), snmpConfigs);
+        scannerTaskSetService.sendNodeScannerTask(node, discovery.getLocationId(), snmpConfigs);
     }
 
     @Transactional

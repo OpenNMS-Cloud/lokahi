@@ -46,20 +46,20 @@ public interface IpInterfaceRepository extends JpaRepository<IpInterface, Long> 
     @Query("SELECT ip " +
         "FROM IpInterface ip " +
         "WHERE ip.ipAddress = :ipAddress " +
-        "AND ip.node.monitoringLocation.location = :location " +
+        "AND ip.node.monitoringLocationId = :locationId " +
         "AND ip.tenantId = :tenantId ")
-    Optional<IpInterface> findByIpAddressAndLocationAndTenantId(@Param("ipAddress") InetAddress ipAddress,
-                                                                @Param("location") String location,
+    Optional<IpInterface> findByIpAddressAndLocationIdAndTenantId(@Param("ipAddress") InetAddress ipAddress,
+                                                                @Param("locationId") Long locationId,
                                                                 @Param("tenantId") String tenantId);
 
     @Query("SELECT ip " +
         "FROM IpInterface ip " +
         "WHERE ip.ipAddress = :ipAddress " +
-        "AND ip.node.monitoringLocation.location = :location " +
+        "AND ip.node.monitoringLocationId = :locationId " +
         "AND ip.tenantId = :tenantId " +
         "AND ip.node.scanType = :scanType ")
-    Optional<IpInterface> findByIpLocationTenantAndScanType(@Param("ipAddress") InetAddress ipAddress,
-                                                            @Param("location") String location,
+    Optional<IpInterface> findByIpLocationIdTenantAndScanType(@Param("ipAddress") InetAddress ipAddress,
+                                                            @Param("locationId") Long locationId,
                                                             @Param("tenantId") String tenantId,
                                                             @Param("scanType") ScanType scanType);
 

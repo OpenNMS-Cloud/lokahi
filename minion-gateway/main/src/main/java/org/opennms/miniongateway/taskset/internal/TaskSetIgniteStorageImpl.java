@@ -41,22 +41,22 @@ public class TaskSetIgniteStorageImpl implements TaskSetStorage {
     }
 
     @Override
-    public TaskSet getTaskSetForLocation(String tenantId, String location) {
-        TenantKey tenantKey = new TenantKey(tenantId, location);
+    public TaskSet getTaskSetForLocation(String tenantId, String locationId) {
+        TenantKey tenantKey = new TenantKey(tenantId, locationId);
 
         return taskSetIgniteCache.get(tenantKey);
     }
 
     @Override
-    public void putTaskSetForLocation(String tenantId, String location, TaskSet taskSet) {
-        TenantKey tenantKey = new TenantKey(tenantId, location);
+    public void putTaskSetForLocation(String tenantId, String locationId, TaskSet taskSet) {
+        TenantKey tenantKey = new TenantKey(tenantId, locationId);
 
         taskSetIgniteCache.put(tenantKey, taskSet);
     }
 
     @Override
-    public boolean deleteTaskSetForLocation(String tenantId, String location) {
-        TenantKey tenantKey = new TenantKey(tenantId, location);
+    public boolean deleteTaskSetForLocation(String tenantId, String locationId) {
+        TenantKey tenantKey = new TenantKey(tenantId, locationId);
 
         return taskSetIgniteCache.remove(tenantKey);
     }
@@ -65,8 +65,8 @@ public class TaskSetIgniteStorageImpl implements TaskSetStorage {
      * {@inheritDoc}
      */
     @Override
-    public void atomicUpdateTaskSetForLocation(String tenantId, String location, TaskSetStorageUpdateFunction updateFunction) {
-        TenantKey tenantKey = new TenantKey(tenantId, location);
+    public void atomicUpdateTaskSetForLocation(String tenantId, String locationId, TaskSetStorageUpdateFunction updateFunction) {
+        TenantKey tenantKey = new TenantKey(tenantId, locationId);
 
         Lock lock = taskSetIgniteCache.lock(tenantKey);
         lock.lock();
@@ -80,16 +80,14 @@ public class TaskSetIgniteStorageImpl implements TaskSetStorage {
             // NOTE the rare instance equality check.  This is intentional.
             if (updatedTaskSet != currentTaskSet) {
                 if (updatedTaskSet != null) {
-                    LOG.debug("Updating task set after operation complete: tenant-id={}; location={}", tenantId, location);
+                    LOG.debug("Updating task set after operation complete: tenantId={}; locationId={}", tenantId, locationId);
                     taskSetIgniteCache.put(tenantKey, updatedTaskSet);
                 } else {
-                    LOG.debug("Removing task set on update operation return null: tenant-id={}; location={}",
-                        tenantId, location);
+                    LOG.debug("Removing task set on update operation return null: tenantId={}; locationId={}", tenantId, locationId);
                     taskSetIgniteCache.remove(tenantKey);
                 }
             } else {
-                LOG.debug("Skipping task set update - returned task set is the original: tenant-id={}; location={}",
-                    tenantId, location);
+                LOG.debug("Skipping task set update - returned task set is the original: tenantId={}; locationId={}", tenantId, locationId);
             }
         } finally {
             lock.unlock();

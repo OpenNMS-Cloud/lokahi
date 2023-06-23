@@ -100,24 +100,24 @@ public class ScannerResponseService {
     private final MonitoredServiceService monitoredServiceService;
 
     @Transactional
-    public void accept(String tenantId, String location, ScannerResponse response) throws InvalidProtocolBufferException {
+    public void accept(String tenantId, Long locationId, ScannerResponse response) throws InvalidProtocolBufferException {
         Any result = response.getResult();
 
         switch (getType(response)) {
             case AZURE_SCAN -> {
                 AzureScanResponse azureResponse = result.unpack(AzureScanResponse.class);
                 log.debug("received azure scan result: {}", azureResponse);
-                processAzureScanResponse(tenantId, location, azureResponse);
+                processAzureScanResponse(tenantId, locationId, azureResponse);
             }
             case NODE_SCAN -> {
                 NodeScanResult nodeScanResult = result.unpack(NodeScanResult.class);
                 log.debug("received node scan result: {}", nodeScanResult);
-                processNodeScanResponse(tenantId, nodeScanResult, location);
+                processNodeScanResponse(tenantId, nodeScanResult, locationId);
             }
             case DISCOVERY_SCAN -> {
                 DiscoveryScanResult discoveryScanResult = result.unpack(DiscoveryScanResult.class);
                 log.debug("received discovery result: {}", discoveryScanResult);
-                processDiscoveryScanResponse(tenantId, location, discoveryScanResult);
+                processDiscoveryScanResponse(tenantId, locationId, discoveryScanResult);
             }
             case UNRECOGNIZED -> log.warn("Unrecognized scan type");
         }
@@ -135,7 +135,7 @@ public class ScannerResponseService {
         return ScanType.UNRECOGNIZED;
     }
 
-    private void processDiscoveryScanResponse(String tenantId, String location, DiscoveryScanResult discoveryScanResult) {
+    private void processDiscoveryScanResponse(String tenantId, Long locationId, DiscoveryScanResult discoveryScanResult) {
         for (PingResponse pingResponse : discoveryScanResult.getPingResponseList()) {
             // Don't need to create new node if this ip address is already part of inventory.
             var discoveryOptional =
@@ -149,7 +149,7 @@ public class ScannerResponseService {
                     .map(tag -> TagCreateDTO.newBuilder().setName(tag.getName()).build())
                     .toList();
                 NodeCreateDTO createDTO = NodeCreateDTO.newBuilder()
-                    .setLocation(location)
+                    .setLocationId(String.valueOf(locationId))
                     .setManagementIp(pingResponse.getIpAddress())
                     .setLabel(pingResponse.getIpAddress())
                     .setMonitoredState(MonitoredState.UNMONITORED)
@@ -157,18 +157,18 @@ public class ScannerResponseService {
                     .build();
                 try {
                     Node node = nodeService.createNode(createDTO, ScanType.DISCOVERY_SCAN, tenantId);
-                    nodeService.sendNewNodeTaskSetAsync(node, location, icmpDiscovery);
+                    nodeService.sendNewNodeTaskSetAsync(node, locationId, icmpDiscovery);
                 } catch (EntityExistException e) {
-                    log.error("Error while adding new device for tenant {} at location {} with IP {}", tenantId, location, pingResponse.getIpAddress());
+                    log.error("Error while adding new device for tenantId={}; locationId={} with IP {}", tenantId, locationId, pingResponse.getIpAddress());
                 } catch (LocationNotFoundException e) {
-                    log.error("Location not found while adding new device for tenant {} at location {} with IP {}", tenantId, location, pingResponse.getIpAddress());
+                    log.error("Location not found while adding new device for tenantId={}; locationId={} with IP {}", tenantId, locationId, pingResponse.getIpAddress());
                 }
             }
 
         }
     }
 
-    private void processAzureScanResponse(String tenantId, String location, AzureScanResponse azureResponse) {
+    private void processAzureScanResponse(String tenantId, Long locationId, AzureScanResponse azureResponse) {
         for (AzureScanItem azureScanItem : azureResponse.getResultsList()) {
 
             Optional<AzureActiveDiscovery> discoveryOpt = azureActiveDiscoveryRepository.findByTenantIdAndId(tenantId, azureScanItem.getActiveDiscoveryId());
@@ -181,17 +181,17 @@ public class ScannerResponseService {
             String nodeLabel = String.format("%s (%s)", azureScanItem.getName(), azureScanItem.getResourceGroup());
 
             //todo: store the ID in the database, currently this is the only way to identify the node at this point
-            Optional<Node> nodeOpt = nodeRepository.findByTenantLocationAndNodeLabel(tenantId, location, nodeLabel);
+            Optional<Node> nodeOpt = nodeRepository.findByTenantLocationIdAndNodeLabel(tenantId, locationId, nodeLabel);
 
             try {
                 Node node;
                 if (nodeOpt.isPresent()) {
                     node = nodeOpt.get();
                     //todo: perform update if AzureScanner is on a schedule or gets called again
-                    log.warn("Node already exists for tenant: {}, location: {}, label: {}", tenantId, location, nodeLabel);
+                    log.warn("Node already exists for tenantId={}; locationId={}; label={}", tenantId, locationId, nodeLabel);
                 } else {
                     NodeCreateDTO createDTO = NodeCreateDTO.newBuilder()
-                        .setLocation(location)
+                        .setLocationId(String.valueOf(locationId))
                         .setLabel(nodeLabel)
                         .setMonitoredState(MonitoredState.UNMONITORED)
                         .build();
@@ -213,18 +213,18 @@ public class ScannerResponseService {
                         .setNodeId(node.getId()))
                     .addAllTags(tags).build());
             } catch (EntityExistException e) {
-                log.error("Error while adding new Azure node for tenant {} at location {}", tenantId, location);
+                log.error("Error while adding new Azure node for tenantId={}; locationId={}", tenantId, locationId);
             } catch (LocationNotFoundException e) {
-                log.error("Location not found while adding new Azure device for tenant {} at location {}", tenantId, location);
+                log.error("Location not found while adding new Azure device for tenantId={}; locationId={}", tenantId, locationId);
             }
         }
     }
 
-    private void processNodeScanResponse(String tenantId, NodeScanResult result, String location) {
+    private void processNodeScanResponse(String tenantId, NodeScanResult result, Long locationId) {
         var snmpConfiguration = result.getSnmpConfig();
         // Save SNMP Config for all the interfaces in the node.
         result.getIpInterfacesList().forEach(ipInterfaceResult ->
-            snmpConfigService.saveOrUpdateSnmpConfig(tenantId, location, ipInterfaceResult.getIpAddress(), snmpConfiguration));
+            snmpConfigService.saveOrUpdateSnmpConfig(tenantId, locationId, ipInterfaceResult.getIpAddress(), snmpConfiguration));
 
         Optional<Node> nodeOpt = nodeRepository.findByIdAndTenantId(result.getNodeId(), tenantId);
         if (nodeOpt.isPresent()) {
@@ -240,20 +240,20 @@ public class ScannerResponseService {
                 ipInterfaceService.createOrUpdateFromScanResult(tenantId, node, ipIfResult, ifIndexSNMPMap);
             }
             result.getDetectorResultList().forEach(detectorResult ->
-                processDetectorResults(tenantId, location, node.getId(), detectorResult));
+                processDetectorResults(tenantId, locationId, node.getId(), detectorResult));
 
         } else {
-            log.error("Error while process node scan results, node with id {} doesn't exist", result.getNodeId());
+            log.error("Error while process node scan results, tenantId={}; locationId={}; node with id {} doesn't exist", tenantId, locationId, result.getNodeId());
         }
     }
 
-    private void processDetectorResults(String tenantId, String location, long nodeId, ServiceResult serviceResult) {
+    private void processDetectorResults(String tenantId, Long locationId, long nodeId, ServiceResult serviceResult) {
 
-        log.info("Received Detector Response = {} for tenant = {} and location = {}", serviceResult, tenantId, location);
+        log.info("Received Detector tenantId={}; locationId={}; response={}", serviceResult, tenantId, locationId);
 
         InetAddress ipAddress = InetAddressUtils.getInetAddress(serviceResult.getIpAddress());
         Optional<IpInterface> ipInterfaceOpt = ipInterfaceRepository
-            .findByIpAddressAndLocationAndTenantId(ipAddress, location, tenantId);
+            .findByIpAddressAndLocationIdAndTenantId(ipAddress, locationId, tenantId);
 
         if (ipInterfaceOpt.isPresent()) {
             IpInterface ipInterface = ipInterfaceOpt.get();
@@ -263,14 +263,14 @@ public class ScannerResponseService {
                 // TODO: Combine Monitor type and Service type
                 MonitorType monitorType = MonitorType.valueOf(serviceResult.getService().name());
 
-                taskSetHandler.sendMonitorTask(location, monitorType, ipInterface, nodeId);
-                taskSetHandler.sendCollectorTask(location, monitorType, ipInterface, nodeId);
+                taskSetHandler.sendMonitorTask(locationId, monitorType, ipInterface, nodeId);
+                taskSetHandler.sendCollectorTask(locationId, monitorType, ipInterface, nodeId);
 
             } else {
-                log.info("{} not detected on ip address = {}", serviceResult.getService().name(), ipAddress.getAddress());
+                log.info("{} not detected on tenantId={}; locationId={}; ip={}", serviceResult.getService().name(), tenantId, locationId, ipAddress.getAddress());
             }
         } else {
-            log.warn("Failed to find IP Interface during detection for ip = {}", ipAddress.getHostAddress());
+            log.warn("Failed to find IP Interface during detection for tenantId={}; locationId={}; ip={}", tenantId, locationId, ipAddress.getHostAddress());
         }
     }
 

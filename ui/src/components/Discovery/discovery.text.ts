@@ -99,7 +99,7 @@ export const Common = {
   },
   tooltipPort: {
     title: 'Port list',
-    description: 'It accepts list of ports, separated by space, [, ; :]'
+    description: 'Separated by a space or one of these characters: [, ; :]'
   }
 }
 

@@ -98,4 +98,33 @@
                                  referencedTableName="tag" referencedColumnNames="id"/>
 
     </changeSet>
+
+    <changeSet id="0.1.1-active-discovery-inheritance" author="ldywicki">
+        <preConditions onFail="HALT">
+            <changeSetExecuted id="0.1.0-active-discovery-inheritance" author="tbigg" changeLogFile="db/changelog/hs-0.1.0/tables/discovery-inheritance.xml"/>
+        </preConditions>
+        <addColumn tableName="active_discovery">
+            <column name="location_id" type="BIGINT">
+                <constraints nullable="true" />
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet id="0.1.2-active-discovery-inheritance" author="ldywicki">
+        <preConditions onFail="HALT">
+            <changeSetExecuted id="0.1.1-active-discovery-inheritance" author="ldywicki" changeLogFile="db/changelog/hs-0.1.0/tables/discovery-inheritance.xml"/>
+        </preConditions>
+        <sql>
+            UPDATE active_discovery SET location_id=locations.id FROM (SELECT id, tenant_id, location FROM monitoring_location) AS locations
+            WHERE active_discovery.location=locations.location AND active_discovery.tenant_id=locations.tenant_id
+        </sql>
+        <!-- Remove orphans -->
+        <sql>
+            DELETE FROM active_discovery WHERE location_id IS NULL
+        </sql>
+        <addNotNullConstraint tableName="active_discovery" columnName="location_id" />
+        <dropColumn tableName="active_discovery" columnName="location" />
+        <addForeignKeyConstraint constraintName="fk_active_discovery_location_id" onDelete="CASCADE"
+            baseTableName="active_discovery" baseColumnNames="location_id"
+            referencedTableName="monitoring_location" referencedColumnNames="id"/>
+    </changeSet>
 </databaseChangeLog>

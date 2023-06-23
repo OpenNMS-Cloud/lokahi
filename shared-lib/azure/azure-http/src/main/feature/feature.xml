@@ -2,9 +2,9 @@
 <features name="minion-plugin-api-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.6.0">
 
     <feature name="azure-http" description="OpenNMS Azure HTTP" version="${project.version}">
-        <bundle>mvn:org.opennms.horizon.shared/horizon-common-utils/${project.version}</bundle>
+        <bundle>mvn:org.opennms.lokahi.shared/lokahi-common-utils/${project.version}</bundle>
         <bundle>mvn:com.google.code.gson/gson/${gson.version}</bundle>
-        <bundle>mvn:org.opennms.horizon.shared/azure-http/${project.version}</bundle>
+        <bundle>mvn:org.opennms.lokahi.shared/azure-http/${project.version}</bundle>
     </feature>
 
 </features>

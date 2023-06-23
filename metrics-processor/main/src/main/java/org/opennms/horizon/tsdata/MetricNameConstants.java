@@ -35,7 +35,7 @@ public interface MetricNameConstants {
 
     String[] MONITOR_METRICS_LABEL_NAMES = {
         "instance",
-        "location",
+        "location_id",
         "system_id",
         "monitor",
         "node_id"

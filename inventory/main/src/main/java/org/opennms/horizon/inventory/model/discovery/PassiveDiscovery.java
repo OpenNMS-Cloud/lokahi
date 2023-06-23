@@ -69,8 +69,8 @@ public class PassiveDiscovery {
     private String name;
 
     @NotNull
-    @Column(name = "location")
-    private String location;
+    @Column(name = "location_id", nullable = false)
+    private Long locationId;
 
     @NotNull
     @Column(name = "create_time", columnDefinition = "TIMESTAMP")

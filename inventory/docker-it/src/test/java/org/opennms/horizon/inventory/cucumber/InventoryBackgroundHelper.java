@@ -28,9 +28,11 @@
 
 package org.opennms.horizon.inventory.cucumber;
 
+import com.google.protobuf.Empty;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
@@ -43,6 +45,7 @@ import org.apache.kafka.common.serialization.StringDeserializer;
 import org.opennms.horizon.inventory.discovery.IcmpActiveDiscoveryServiceGrpc;
 import org.opennms.horizon.inventory.dto.ActiveDiscoveryServiceGrpc;
 import org.opennms.horizon.inventory.dto.AzureActiveDiscoveryServiceGrpc;
+import org.opennms.horizon.inventory.dto.MonitoringLocationDTO;
 import org.opennms.horizon.inventory.dto.MonitoringLocationServiceGrpc;
 import org.opennms.horizon.inventory.dto.MonitoringSystemServiceGrpc;
 import org.opennms.horizon.inventory.dto.NodeServiceGrpc;
@@ -67,7 +70,6 @@ public class InventoryBackgroundHelper {
     private Integer externalGrpcPort;
     private String kafkaBootstrapUrl;
     private String tenantId;
-    private String location;
     private MonitoringSystemServiceGrpc.MonitoringSystemServiceBlockingStub monitoringSystemStub;
     private MonitoringLocationServiceGrpc.MonitoringLocationServiceBlockingStub monitoringLocationStub;
     private NodeServiceGrpc.NodeServiceBlockingStub nodeServiceBlockingStub;
@@ -115,14 +117,16 @@ public class InventoryBackgroundHelper {
         Objects.requireNonNull(tenantId);
         this.tenantId = tenantId;
         grpcHeaders.put(GrpcConstants.TENANT_ID_KEY, tenantId);
-        LOG.info("Using Tenant Id {}", tenantId);
+        LOG.info("Using tenantId={}", tenantId);
     }
 
-    public void grpcLocation(String location) {
-        Objects.requireNonNull(location);
-        this.location = location;
-        grpcHeaders.put(GrpcConstants.LOCATION_KEY, location);
-        LOG.info("Using location {}", location);
+    public String findLocationId(String locationName) {
+        return monitoringLocationStub.listLocations(Empty.newBuilder().build()).getLocationsList().stream()
+            .filter(loc -> locationName.equals(loc.getLocation()))
+            .findFirst()
+            .map(MonitoringLocationDTO::getId)
+            .map(String::valueOf)
+            .orElseThrow(() -> new IllegalArgumentException("Location " + locationName + " not found"));
     }
 
     public void clearTenantId() {
@@ -178,4 +182,5 @@ public class InventoryBackgroundHelper {
     public static KafkaConsumer<String, byte[]> getKafkaConsumer() {
         return kafkaConsumer;
     }
+
 }

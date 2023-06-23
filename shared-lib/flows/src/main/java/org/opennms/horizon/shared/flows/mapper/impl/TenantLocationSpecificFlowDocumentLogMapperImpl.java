@@ -36,7 +36,7 @@ public class TenantLocationSpecificFlowDocumentLogMapperImpl implements TenantLo
     public TenantLocationSpecificFlowDocumentLog mapBareToTenanted(String tenantId, String location, FlowDocumentLog flowDocumentLog) {
         return TenantLocationSpecificFlowDocumentLog.newBuilder()
             .setTenantId(tenantId)
-            .setLocation(location)
+            .setLocationId(location)
             .setSystemId(flowDocumentLog.getSystemId())
             .addAllMessage(flowDocumentLog.getMessageList())
             .build();

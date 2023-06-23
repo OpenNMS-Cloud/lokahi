@@ -81,7 +81,7 @@ public class DocumentEnricherTest {
         testDocumentLog =
             TenantLocationSpecificFlowDocumentLog.newBuilder()
                 .setTenantId("x-tenant-id-x")
-                .setLocation("x-location-x")
+                .setLocationId("x-location-x")
                 .addMessage(
                     FlowDocument.newBuilder()
                         .setSrcAddress("1.1.1.1")

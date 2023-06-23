@@ -49,8 +49,8 @@ public class LocationServerInterceptor implements ServerInterceptor {
     @Override
     public <ReqT, RespT> ServerCall.Listener<ReqT> interceptCall(ServerCall<ReqT, RespT> serverCall, Metadata headers, ServerCallHandler<ReqT, RespT> callHandler) {
         log.debug("Received metadata: {}", headers);
-        String location = headers.get(GrpcConstants.LOCATION_REQUEST_KEY);
-         if (location == null) {
+        String locationId = headers.get(GrpcConstants.LOCATION_ID_REQUEST_KEY);
+         if (locationId == null) {
              //
              // FAILED
              //
@@ -61,21 +61,21 @@ public class LocationServerInterceptor implements ServerInterceptor {
          }
 
         // Write the tenant ID to the current GRPC context
-        Context context = Context.current().withValue(GrpcConstants.LOCATION_CONTEXT_KEY, location);
+        Context context = Context.current().withValue(GrpcConstants.LOCATION_ID_CONTEXT_KEY, locationId);
         return Contexts.interceptCall(context, serverCall, headers, callHandler);
     }
 
-    public String readCurrentContextLocation() {
-        return GrpcConstants.LOCATION_CONTEXT_KEY.get();
+    public String readCurrentContextLocationId() {
+        return GrpcConstants.LOCATION_ID_CONTEXT_KEY.get();
     }
 
     public String readContextLocation(Context context) {
-        var location = GrpcConstants.LOCATION_CONTEXT_KEY.get(context);
+        var locationId = GrpcConstants.LOCATION_ID_CONTEXT_KEY.get(context);
         var span = Span.current();
         if (span.isRecording()) {
-            span.setAttribute("location", location);
+            span.setAttribute("location-id", locationId);
         }
-        return location;
+        return locationId;
     }
 
 

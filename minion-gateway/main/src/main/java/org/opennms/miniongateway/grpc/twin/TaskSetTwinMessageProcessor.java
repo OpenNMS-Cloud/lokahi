@@ -8,12 +8,8 @@ import org.opennms.horizon.shared.grpc.common.LocationServerInterceptor;
 import org.opennms.horizon.shared.grpc.common.TenantIDGrpcServerInterceptor;
 import org.opennms.horizon.shared.ipc.grpc.server.manager.OutgoingMessageFactory;
 import org.opennms.horizon.shared.ipc.grpc.server.manager.OutgoingMessageHandler;
-import org.opennms.horizon.shared.ipc.rpc.IpcIdentity;
-import org.opennms.miniongateway.grpc.server.ConnectionIdentity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.function.BiConsumer;
 
 public class TaskSetTwinMessageProcessor implements OutgoingMessageHandler {
     private static final Logger DEFAULT_LOGGER = LoggerFactory.getLogger(TaskSetTwinMessageProcessor.class);
@@ -35,7 +31,7 @@ public class TaskSetTwinMessageProcessor implements OutgoingMessageHandler {
     @Override
     public void handleOutgoingStream(Identity minionHeader, StreamObserver<CloudToMinionMessage> cloudToMinionMessageStreamObserver) {
         String tenantId = tenantIDGrpcServerInterceptor.readCurrentContextTenantId();
-        String location = locationServerInterceptor.readCurrentContextLocation();
+        String location = locationServerInterceptor.readCurrentContextLocationId();
         log.info("Have Message to send to Minion: tenant-id: {}; system-id={}, location={}",
             tenantId,
             minionHeader.getSystemId(),

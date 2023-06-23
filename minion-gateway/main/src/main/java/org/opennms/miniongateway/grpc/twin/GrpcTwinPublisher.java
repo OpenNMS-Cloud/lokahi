@@ -71,8 +71,8 @@ public class GrpcTwinPublisher extends AbstractTwinPublisher implements Outgoing
     }
 
     @Override
-    protected void handleSinkUpdate(String location, TwinUpdate sinkUpdate) {
-        sendTwinResponseForSink(sinkUpdate.getTenantId(), location, mapTwinResponse(sinkUpdate));
+    protected void handleSinkUpdate(String locationId, TwinUpdate sinkUpdate) {
+        sendTwinResponseForSink(sinkUpdate.getTenantId(), locationId, mapTwinResponse(sinkUpdate));
     }
 
     private synchronized boolean sendTwinResponseForSink(String tenantId, String location, TwinResponseProto twinResponseProto) {
@@ -211,8 +211,8 @@ public class GrpcTwinPublisher extends AbstractTwinPublisher implements Outgoing
         sinkStreamsBySystemId.put(systemIdKey, delegate);
 
         forEachSession(tenantId, ((sessionKey, twinTracker) -> {
-            if (sessionKey.location == null || sessionKey.location.equals(locationKey.getKey())) {
-                TwinUpdate twinUpdate = new TwinUpdate(sessionKey.key, sessionKey.tenantId, sessionKey.location, twinTracker.getObj());
+            if (sessionKey.locationId == null || sessionKey.locationId.equals(locationKey.getKey())) {
+                TwinUpdate twinUpdate = new TwinUpdate(sessionKey.key, sessionKey.tenantId, sessionKey.locationId, twinTracker.getObj());
                 twinUpdate.setSessionId(twinTracker.getSessionId());
                 twinUpdate.setVersion(twinTracker.getVersion());
                 twinUpdate.setPatch(false);

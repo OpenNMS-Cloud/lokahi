@@ -23,10 +23,10 @@
           :schema="nameV"
         />
         <DiscoveryLocationsAutocomplete
-          @location-selected="(val) => setDiscoveryValues('location', val)"
+          @location-selected="(loc: MonitoringLocation) => setDiscoveryValues('locationId', loc.id)"
           ref="locationsAutocompleteRef"
           data-test="locations-autocomplete"
-          :preLoadedlocation="props.discovery?.location"
+          :preLoadedlocation="props.discovery?.id"
           type="single"
         />
         <DiscoveryHelpConfiguring data-test="help-configuring" />
@@ -95,7 +95,7 @@ import { ContentEditableType, COMMUNITY_STRING, UDP_PORT, REGEX_EXPRESSIONS } fr
 import { useTagQueries } from '@/store/Queries/tagQueries'
 import { useDiscoveryQueries } from '@/store/Queries/discoveryQueries'
 import { useDiscoveryMutations } from '@/store/Mutations/discoveryMutations'
-import { PassiveDiscovery, PassiveDiscoveryUpsertInput } from '@/types/graphql'
+import { MonitoringLocation, PassiveDiscovery, PassiveDiscoveryUpsertInput } from '@/types/graphql'
 import { cloneDeep, set } from 'lodash'
 import { useForm } from '@featherds/input-helper'
 import { string } from 'yup'

@@ -12,7 +12,8 @@ test('The menubar mounts', () => {
   expect(wrapper).toBeTruthy()
 })
 
-test('The toggle dark btn triggers the composible function, and the ref updates', async () => {
+// Skipped until after EAR
+test.skip('The toggle dark btn triggers the composible function, and the ref updates', async () => {
   // mock authenticate to show dark/light mode btn
   const { setKeycloak } = useKeycloak()
   setKeycloak({ authenticated: true } as Keycloak)

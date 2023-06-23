@@ -69,13 +69,13 @@ public class TSDataProcessor {
                 throw new RuntimeException("Missing tenant id");
             }
 
-            String location = results.getLocation();
-            if (Strings.isBlank(location)) {
+            String locationId = results.getLocationId();
+            if (Strings.isBlank(locationId)) {
                 throw new RuntimeException("Missing location");
             }
 
             results.getResultsList().forEach(
-                result -> submitForExecutionOp.accept(() -> taskSetResultProcessor.processTaskResult(tenantId, location, result)));
+                result -> submitForExecutionOp.accept(() -> taskSetResultProcessor.processTaskResult(tenantId, locationId, result)));
         } catch (InvalidProtocolBufferException e) {
             log.error("Invalid data from kafka", e);
         }

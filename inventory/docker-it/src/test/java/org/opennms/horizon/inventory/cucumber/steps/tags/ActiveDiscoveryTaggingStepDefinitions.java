@@ -30,7 +30,6 @@ package org.opennms.horizon.inventory.cucumber.steps.tags;
 
 import com.google.protobuf.Empty;
 import com.google.protobuf.Int64Value;
-import io.cucumber.java.BeforeAll;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
@@ -94,11 +93,6 @@ public class ActiveDiscoveryTaggingStepDefinitions {
         backgroundHelper.grpcTenantId(tenantId);
     }
 
-    @Given("[ActiveDiscovery] Grpc location {string}")
-    public void grpcLocation(String location) {
-        backgroundHelper.grpcLocation(location);
-    }
-
     @Given("[ActiveDiscovery] Create Grpc Connection for Inventory")
     public void createGrpcConnectionForInventory() {
         backgroundHelper.createGrpcConnectionForInventory();
@@ -108,43 +102,43 @@ public class ActiveDiscoveryTaggingStepDefinitions {
      * SCENARIO GIVEN
      * *********************************************************************************
      */
-    @Given("A new active discovery")
-    public void aNewActiveDiscovery() {
+    @Given("A new active discovery for location named {string}")
+    public void aNewActiveDiscovery(String location) {
         deleteAllTags();
         deleteAllActiveDiscovery();
 
         var activeDiscoveryServiceBlockingStub = backgroundHelper.getIcmpActiveDiscoveryServiceBlockingStub();
         activeDiscovery1 = activeDiscoveryServiceBlockingStub.createDiscovery(IcmpActiveDiscoveryCreateDTO.newBuilder()
-            .setName("discovery-name").setLocation("location").
-            addIpAddresses("127.0.0.1").setSnmpConf(SNMPConfigDTO.newBuilder().addPorts(161)
+            .setName("discovery-name").setLocationId(backgroundHelper.findLocationId(location))
+                .addIpAddresses("127.0.0.1").setSnmpConfig(SNMPConfigDTO.newBuilder().addPorts(161)
                 .addReadCommunity("public").build()).build());
     }
 
-    @Given("2 new active discovery")
-    public void twoNewActiveDiscovery() {
+    @Given("2 new active discovery in {string}")
+    public void twoNewActiveDiscovery(String location) {
         deleteAllTags();
         deleteAllActiveDiscovery();
 
         var activeDiscoveryServiceBlockingStub = backgroundHelper.getIcmpActiveDiscoveryServiceBlockingStub();
         activeDiscovery1 = activeDiscoveryServiceBlockingStub.createDiscovery(IcmpActiveDiscoveryCreateDTO.newBuilder()
-            .setName("discovery-name-1").setLocation("location").
-            addIpAddresses("127.0.0.1").setSnmpConf(SNMPConfigDTO.newBuilder().addPorts(161)
+            .setName("discovery-name-1").setLocationId(backgroundHelper.findLocationId(location))
+                .addIpAddresses("127.0.0.1").setSnmpConfig(SNMPConfigDTO.newBuilder().addPorts(161)
                 .addReadCommunity("public").build()).build());
         activeDiscovery2 = activeDiscoveryServiceBlockingStub.createDiscovery(IcmpActiveDiscoveryCreateDTO.newBuilder()
-            .setName("discovery-name-2").setLocation("location").
-            addIpAddresses("127.0.0.2").setSnmpConf(SNMPConfigDTO.newBuilder().addPorts(161)
+            .setName("discovery-name-2").setLocationId(backgroundHelper.findLocationId(location))
+                .addIpAddresses("127.0.0.2").setSnmpConfig(SNMPConfigDTO.newBuilder().addPorts(161)
                 .addReadCommunity("public").build()).build());
     }
 
-    @Given("A new active discovery with tags {string}")
-    public void aNewActiveDiscoveryWithTags(String tags) {
+    @Given("A new active discovery with tags {string} in {string}")
+    public void aNewActiveDiscoveryWithTags(String tags, String location) {
         deleteAllTags();
         deleteAllActiveDiscovery();
 
         var activeDiscoveryServiceBlockingStub = backgroundHelper.getIcmpActiveDiscoveryServiceBlockingStub();
         activeDiscovery1 = activeDiscoveryServiceBlockingStub.createDiscovery(IcmpActiveDiscoveryCreateDTO.newBuilder()
-            .setName("discovery-name-1").setLocation("location").
-            addIpAddresses("127.0.0.1").setSnmpConf(SNMPConfigDTO.newBuilder().addPorts(161)
+            .setName("discovery-name-1").setLocationId(backgroundHelper.findLocationId(location))
+            .addIpAddresses("127.0.0.1").setSnmpConfig(SNMPConfigDTO.newBuilder().addPorts(161)
                 .addReadCommunity("public").build()).build());
         String[] tagArray = tags.split(",");
         var tagServiceBlockingStub = backgroundHelper.getTagServiceBlockingStub();

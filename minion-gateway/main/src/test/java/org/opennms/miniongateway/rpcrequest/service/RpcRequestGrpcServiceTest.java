@@ -54,12 +54,12 @@ public class RpcRequestGrpcServiceTest {
         //
         GatewayRpcRequestProto requestProto =
             GatewayRpcRequestProto.newBuilder()
-                .setIdentity(MinionIdentity.newBuilder().setLocation("x-test-location-x"))
+                .setIdentity(MinionIdentity.newBuilder().setLocationId("x-test-location-x"))
                 .build()
             ;
         GatewayRpcResponseProto responseProto =
             GatewayRpcResponseProto.newBuilder()
-                .setIdentity(MinionIdentity.newBuilder().setLocation("x-test-location-x"))
+                .setIdentity(MinionIdentity.newBuilder().setLocationId("x-test-location-x"))
                 .build()
             ;
 
@@ -96,7 +96,7 @@ public class RpcRequestGrpcServiceTest {
         //
         GatewayRpcRequestProto requestProto =
             GatewayRpcRequestProto.newBuilder()
-                .setIdentity(MinionIdentity.newBuilder().setLocation("x-test-location-x"))
+                .setIdentity(MinionIdentity.newBuilder().setLocationId("x-test-location-x"))
                 .build()
             ;
         RuntimeException testException = new RuntimeException("x-test-exc-x");

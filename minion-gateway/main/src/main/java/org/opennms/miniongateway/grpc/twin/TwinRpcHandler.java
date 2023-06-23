@@ -40,13 +40,13 @@ public class TwinRpcHandler implements ServerHandler {
     @Override
     public CompletableFuture<RpcResponseProto> handle(RpcRequestProto request) {
         String tenantId = tenantIDGrpcServerInterceptor.readCurrentContextTenantId();
-        String location = locationServerInterceptor.readCurrentContextLocation();
+        String locationId = locationServerInterceptor.readCurrentContextLocationId();
 
         return CompletableFuture.supplyAsync(() -> {
             try {
                 TwinRequestProto twinRequest = request.getPayload().unpack(TwinRequestProto.class);
-                TwinResponseProto twinResponseProto = twinProvider.getTwinResponse(tenantId, location, twinRequest);
-                logger.debug("Sent Twin response for key {} at location {}", twinRequest.getConsumerKey(), location);
+                TwinResponseProto twinResponseProto = twinProvider.getTwinResponse(tenantId, locationId, twinRequest);
+                logger.debug("Sent Twin response for key {} at location {}", twinRequest.getConsumerKey(), locationId);
 
                 RpcResponseProto response = RpcResponseProto.newBuilder()
                     .setModuleId("twin")

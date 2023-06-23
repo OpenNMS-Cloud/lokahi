@@ -37,11 +37,11 @@ public interface TaskUtils {
         return NODE_SCAN + nodeId;
     }
 
-    static String identityForConfig(String configName, String location) {
-        return configName + "@" + location;
+    static String identityForConfig(String configName, Long locationId) {
+        return configName + "@" + locationId;
     }
 
-    static String identityForDiscoveryTask(String location, long activeDiscovceryId) {
-        return DISCOVERY_PROFILE + activeDiscovceryId + "/"  + location;
+    static String identityForDiscoveryTask(Long locationId, long activeDiscovceryId) {
+        return DISCOVERY_PROFILE + activeDiscovceryId + "/"  + locationId;
     }
 }

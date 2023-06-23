@@ -119,7 +119,7 @@ public class MinionGatewayTestSteps {
     private int internalGrpcPort;
     private int externalGrpcPort;
     private String kafkaBootstrapUrl;
-    private String mockLocation;
+    private String mockLocationId;
     private String mockSystemId;
     private String applicationBaseUrl;
     private String mockTenantId;
@@ -226,13 +226,13 @@ public class MinionGatewayTestSteps {
     @Given("RPC Request Tenant ID {string}")
     public void rpcRequestTenantID(String tenantId) {
         ensureRpcRequest();
-        gatewayRpcRequestProtoBuilder.getIdentityBuilder().setTenant(tenantId);
+        gatewayRpcRequestProtoBuilder.getIdentityBuilder().setTenantId(tenantId);
     }
 
-    @Given("RPC Request Location {string}")
+    @Given("RPC Request Location ID {string}")
     public void rpcRequestLocation(String location) {
         ensureRpcRequest();
-        gatewayRpcRequestProtoBuilder.getIdentityBuilder().setLocation(location);
+        gatewayRpcRequestProtoBuilder.getIdentityBuilder().setLocationId(location);
     }
 
     @Given("RPC Request Module ID {string}")
@@ -254,9 +254,9 @@ public class MinionGatewayTestSteps {
         this.mockSystemId = mockSystemId;
     }
 
-    @Given("mock location {string}")
+    @Given("mock location ID {string}")
     public void mockLocation(String mockLocation) {
-        this.mockLocation = mockLocation;
+        this.mockLocationId = mockLocation;
     }
 
     @Given("mock tenant ID {string}")
@@ -453,11 +453,11 @@ public class MinionGatewayTestSteps {
 
         assertTrue(rpcException.getMessage().contains("Could not find active connection"));
 
-        Optional.ofNullable(mockLocation).ifPresent(
-            location -> assertTrue("expecting exception message to contain location=" + location, rpcException.getMessage().contains("location=" + location)));
+        Optional.ofNullable(mockLocationId).ifPresent(
+            location -> assertTrue("expecting exception message to contain " + location, rpcException.getMessage().contains(location)));
 
         String systemId = gatewayRpcRequestProtoBuilder.getIdentity().getSystemId();
-        assertTrue("expecting exception message to contain systemId=" + systemId, rpcException.getMessage().contains("systemId=" + systemId));
+        assertTrue("expecting exception message to contain " + systemId, rpcException.getMessage().contains(systemId));
     }
 
     @Then("verify RPC exception indicates missing connection for minion")
@@ -777,8 +777,8 @@ public class MinionGatewayTestSteps {
     private Metadata prepareGrpcHeaders() {
         Metadata result = new Metadata();
 
-        if (mockLocation != null) {
-            result.put(Metadata.Key.of("location", Metadata.ASCII_STRING_MARSHALLER), mockLocation);
+        if (mockLocationId != null) {
+            result.put(Metadata.Key.of("location-id", Metadata.ASCII_STRING_MARSHALLER), mockLocationId);
         }
         if (mockTenantId != null) {
             result.put(Metadata.Key.of("tenant-id", Metadata.ASCII_STRING_MARSHALLER), mockTenantId);

@@ -4,8 +4,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.opennms.horizon</groupId>
-        <artifactId>horizon-parent</artifactId>
+        <groupId>org.opennms.lokahi</groupId>
+        <artifactId>lokahi-parent</artifactId>
         <version>0.1.0-SNAPSHOT</version>
         <relativePath>../parent-pom</relativePath>
     </parent>
@@ -15,7 +15,7 @@
         A Karaf-based Java program that's responsible for monitoring devices on a network.
     </description>
 
-    <groupId>org.opennms.horizon.minion</groupId>
+    <groupId>org.opennms.lokahi.minion</groupId>
     <artifactId>minion</artifactId>
     <packaging>pom</packaging>
     <inceptionYear>2022</inceptionYear>
@@ -111,8 +111,8 @@
                 <version>${grpc.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.opennms.horizon.shared</groupId>
-                <artifactId>horizon-shaded-grpc-core</artifactId>
+                <groupId>org.opennms.lokahi.shared</groupId>
+                <artifactId>lokahi-shaded-grpc-core</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -231,7 +231,7 @@
                 </configuration>
                 <executions>
                     <execution>
-                        <id>horizon-integration-test</id>
+                        <id>lokahi-integration-test</id>
                         <goals>
                             <goal>integration-test</goal>
                         </goals>
@@ -249,7 +249,7 @@
                     <!-- Fail the build on IT Failures.  Executed as a separate step so that post-integration-test -->
                     <!--  phase executes even after an IT failure.                                                 -->
                     <execution>
-                        <id>horizon-verify-it</id>
+                        <id>lokahi-verify-it</id>
                         <goals>
                             <goal>verify</goal>
                         </goals>

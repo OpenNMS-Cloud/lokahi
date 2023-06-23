@@ -50,10 +50,10 @@ public interface NodeRepository extends JpaRepository<Node, Long> {
     @Query("SELECT n " +
         "FROM Node n " +
         "WHERE n.tenantId = :tenantId " +
-        "AND n.monitoringLocation.location = :location " +
+        "AND n.monitoringLocation.id = :location_id " +
         "AND n.nodeLabel = :nodeLabel ")
-    Optional<Node> findByTenantLocationAndNodeLabel(@Param("tenantId") String tenantId,
-                                                    @Param("location") String location,
+    Optional<Node> findByTenantLocationIdAndNodeLabel(@Param("tenantId") String tenantId,
+                                                    @Param("location_id") Long location,
                                                     @Param("nodeLabel") String nodeLabel);
 
     @Query("SELECT n " +
@@ -69,10 +69,10 @@ public interface NodeRepository extends JpaRepository<Node, Long> {
     @Query("SELECT n " +
         "FROM Node n " +
         "WHERE n.tenantId = :tenantId " +
-        "AND n.monitoringLocation.location = :location " +
+        "AND n.monitoringLocation.id = :location_id " +
         "AND n.monitoredState = :monitoredState ")
     List<Node> findByTenantIdLocationsAndMonitoredStateEquals(@Param("tenantId") String tenantId,
-                                                              @Param("location") String location,
+                                                              @Param("location_id") Long locationId,
                                                               @Param("monitoredState") MonitoredState monitoredState);
 
     @Query("SELECT new org.opennms.horizon.inventory.model.TenantCount(n.tenantId, count(*)) " +

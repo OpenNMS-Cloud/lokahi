@@ -33,6 +33,6 @@ import org.opennms.taskset.contract.TaskSetResults;
 import org.opennms.taskset.contract.TenantLocationSpecificTaskSetResults;
 
 public interface TenantLocationSpecificTaskSetResultsMapper {
-    TenantLocationSpecificTaskSetResults mapBareToTenanted(String tenantId, String location, TaskSetResults bare);
+    TenantLocationSpecificTaskSetResults mapBareToTenanted(String tenantId, String locationId, TaskSetResults bare);
     TaskSetResults mapTenantedToBare(TenantLocationSpecificTaskSetResults tenanted);
 }

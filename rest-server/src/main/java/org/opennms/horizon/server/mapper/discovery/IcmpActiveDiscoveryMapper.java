@@ -60,14 +60,14 @@ public interface IcmpActiveDiscoveryMapper {
 
     @Mappings({
         @Mapping(target = "ipAddressesList", source = "ipAddresses"),
-        @Mapping(target = "snmpConf", source = "snmpConfig", nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS),
+        @Mapping(target = "snmpConfig", source = "snmpConfig", nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS),
         @Mapping(target = "tagsList", source = "tags", nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
     })
     IcmpActiveDiscoveryCreateDTO mapRequest(IcmpActiveDiscoveryCreate request);
 
     @Mappings({
         @Mapping(source = "ipAddressesList", target = "ipAddresses"),
-        @Mapping(source = "snmpConf", target = "snmpConfig")
+        @Mapping(target = "snmpConfig", source = "snmpConfig", nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS),
     })
     IcmpActiveDiscovery dtoToIcmpActiveDiscovery(IcmpActiveDiscoveryDTO configDTO);
 

@@ -28,7 +28,6 @@
 
 package org.opennms.horizon.inventory.cucumber.steps;
 
-import io.cucumber.java.BeforeAll;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
@@ -78,11 +77,6 @@ public class AzureDiscoveryStepDefinitions {
         backgroundHelper.grpcTenantId(tenantId);
     }
 
-    @Given("[Azure] Grpc location {string}")
-    public void grpcLocation(String location) {
-        backgroundHelper.grpcLocation(location);
-    }
-
     @Given("[Azure] Create Grpc Connection for Inventory")
     public void createGrpcConnectionForInventory() {
         backgroundHelper.createGrpcConnectionForInventory();
@@ -92,12 +86,12 @@ public class AzureDiscoveryStepDefinitions {
      * SCENARIO GIVEN
      * *********************************************************************************
      */
-    @Given("Azure Test Active Discovery")
-    public void generatedTestActiveDiscovery() {
+    @Given("Azure Test Active Discovery for location named {string}")
+    public void generatedTestActiveDiscovery(String location) {
         tagCreateDto1 = TagCreateDTO.newBuilder()
             .setName("test-tag-name-1").build();
         createDiscoveryDto = AzureActiveDiscoveryCreateDTO.newBuilder()
-            .setLocation("Default")
+            .setLocationId(backgroundHelper.findLocationId(location))
             .setName("test-azure-discovery-name")
             .setClientId("test-client-id")
             .setClientSecret("test-client-secret")
@@ -155,7 +149,7 @@ public class AzureDiscoveryStepDefinitions {
         assertEquals(createDiscoveryDto.getClientId(), discoveryDto.getClientId());
         assertEquals(createDiscoveryDto.getSubscriptionId(), discoveryDto.getSubscriptionId());
         assertEquals(createDiscoveryDto.getDirectoryId(), discoveryDto.getDirectoryId());
-        assertNotNull(discoveryDto.getLocation());
+        assertNotNull(discoveryDto.getLocationId());
         assertTrue(discoveryDto.getCreateTimeMsec() > 0);
 
         assertEquals(1, tagList.getTagsCount());

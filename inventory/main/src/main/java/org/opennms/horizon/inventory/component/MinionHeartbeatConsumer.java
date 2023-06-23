@@ -29,12 +29,15 @@
 package org.opennms.horizon.inventory.component;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 
 import javax.annotation.PreDestroy;
 
+import lombok.Setter;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.opennms.cloud.grpc.minion_gateway.GatewayRpcRequestProto;
 import org.opennms.cloud.grpc.minion_gateway.GatewayRpcResponseProto;
@@ -42,9 +45,11 @@ import org.opennms.cloud.grpc.minion_gateway.MinionIdentity;
 import org.opennms.horizon.grpc.echo.contract.EchoRequest;
 import org.opennms.horizon.grpc.echo.contract.EchoResponse;
 import org.opennms.horizon.grpc.heartbeat.contract.TenantLocationSpecificHeartbeatMessage;
+import org.opennms.horizon.inventory.dto.MonitoringLocationDTO;
 import org.opennms.horizon.inventory.exception.LocationNotFoundException;
 import org.opennms.horizon.inventory.service.MonitoringLocationService;
 import org.opennms.horizon.inventory.service.MonitoringSystemService;
+import org.opennms.horizon.inventory.util.Clock;
 import org.opennms.taskset.contract.MonitorResponse;
 import org.opennms.taskset.contract.MonitorType;
 import org.opennms.taskset.contract.TaskResult;
@@ -53,7 +58,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.messaging.handler.annotation.Headers;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 
@@ -82,49 +86,57 @@ public class MinionHeartbeatConsumer {
 
     @Value("${kafka.topics.task-set-results:" + DEFAULT_TASK_RESULTS_TOPIC + "}")
     private String kafkaTopic;
-    private final MonitoringSystemService service;
-    private final MonitoringLocationService locationService;
 
+     // Testability
+    @Setter
+    private Consumer<Runnable> rpcMonitorRunner = CompletableFuture::runAsync;
+
+    private final MonitoringSystemService monitoringSystemService;
+    private final MonitoringLocationService locationService;
+    private final Clock clock;
     private final Map<String, Long> rpcMaps = new ConcurrentHashMap<>();
 
     @KafkaListener(topics = "${kafka.topics.minion-heartbeat}", concurrency = "1")
-    public void receiveMessage(@Payload byte[] data, @Headers Map<String, Object> headers) {
+    public void receiveMessage(@Payload byte[] data) {
         try {
             TenantLocationSpecificHeartbeatMessage message = TenantLocationSpecificHeartbeatMessage.parseFrom(data);
 
             String tenantId = message.getTenantId();
-            String location = message.getLocation();
+            String locationId = message.getLocationId();
 
-            log.info("Received heartbeat message for minion: tenant-id={}; location={}; system-id={}",
-                tenantId, location, message.getIdentity().getSystemId());
             Span.current().setAttribute("user", tenantId);
-            Span.current().setAttribute("location", location);
+            Span.current().setAttribute("location-id", locationId);
             Span.current().setAttribute("system-id", message.getIdentity().getSystemId());
 
-            var optionalLocation = locationService.findByLocationAndTenantId(location, tenantId);
-            if (optionalLocation.isEmpty()) {
-                log.warn("Received heartbeat from unknown location {}", location);
+            Optional<MonitoringLocationDTO> location = locationService.getByIdAndTenantId(Long.parseLong(locationId), tenantId);
+            if (location.isEmpty()) {
+                log.info("Received heartbeat message for orphaned minion: tenantId={}; locationId={}; systemId={}",
+                    tenantId, locationId, message.getIdentity().getSystemId());
                 return;
             }
-            service.addMonitoringSystemFromHeartbeat(message);
+            log.info("Received heartbeat message for minion: tenantId={}; locationId={}; systemId={}",
+                tenantId, locationId, message.getIdentity().getSystemId());
+            monitoringSystemService.addMonitoringSystemFromHeartbeat(message);
 
             String systemId = message.getIdentity().getSystemId();
-            String key = tenantId + "_" + location + "-" + systemId;
+            String key = tenantId + "_" + locationId + "-" + systemId;
 
             Long lastRun = rpcMaps.get(key);
-            if (lastRun == null || (getSystemTimeInMsec() > (lastRun + MONITOR_PERIOD))) { //prevent run too many rpc calls
-                CompletableFuture.runAsync(() -> runRpcMonitor(tenantId, location, systemId));
-                rpcMaps.put(key, getSystemTimeInMsec());
+
+            // WARNING: this uses wall-clock.  If a system's time is changed, this logic will be impacted.
+            // TODO: consider changing to System.nanoTime() which is not affected by wall-clock changes
+            long currentTimeMs = clock.getCurrentTimeMs();
+            if (lastRun == null || (currentTimeMs > (lastRun + MONITOR_PERIOD))) { //prevent run too many rpc calls
+                rpcMonitorRunner.accept(() -> runRpcMonitor(tenantId, locationId, systemId));
+                rpcMaps.put(key, currentTimeMs);
             }
 
             Span.current().setStatus(StatusCode.OK);
-        } catch (LocationNotFoundException e) {
-            log.error("Location not found while processing heartbeat message: {}", e.getMessage());
-            Span.current().setStatus(StatusCode.ERROR, "Location not found while processing heartbeat message: " + e.getMessage());
         } catch (Exception e) {
             log.error("Error while processing heartbeat message: ", e);
             Span.current().recordException(e);
         }
+
     }
 
     @PreDestroy
@@ -134,8 +146,8 @@ public class MinionHeartbeatConsumer {
         }
     }
 
-    private void runRpcMonitor(String tenantId, String location, String systemId) {
-        log.info("Sending RPC request for minion {} with location {}", systemId, location);
+    private void runRpcMonitor(String tenantId, String locationId, String systemId) {
+        log.info("Sending RPC request for tenantId={}; locationId={}; systemId={}", tenantId, locationId, systemId);
         EchoRequest echoRequest = EchoRequest.newBuilder()
             .setTime(System.nanoTime())
             .setMessage(Strings.repeat("*", DEFAULT_MESSAGE_SIZE))
@@ -143,8 +155,8 @@ public class MinionHeartbeatConsumer {
 
         MinionIdentity minionIdentity =
             MinionIdentity.newBuilder()
-                .setTenant(tenantId)
-                .setLocation(location)
+                .setTenantId(tenantId)
+                .setLocationId(locationId)
                 .setSystemId(systemId)
                 .build();
 
@@ -166,18 +178,18 @@ public class MinionHeartbeatConsumer {
             })
             .whenComplete((echoResponse, error) -> {
                     if (error != null) {
-                        log.error("Unable to complete echo request for monitoring system {} with tenant {}, location {}",
-                            systemId, tenantId, location, error);
+                        log.error("Unable to complete echo request for monitoring with tenantId={}; locationId={}; systemId={}",
+                            tenantId, locationId, systemId, error);
                         return;
                     }
                     long responseTime = (System.nanoTime() - echoResponse.getTime()) / 1000000;
-                    publishResult(systemId, location, tenantId, responseTime);
+                    publishResult(systemId, locationId, tenantId, responseTime);
                     log.info("Response time for minion {} is {} msecs", systemId, responseTime);
                 }
             );
     }
 
-    private void publishResult(String systemId, String location, String tenantId, long responseTime) {
+    private void publishResult(String systemId, String locationId, String tenantId, long responseTime) {
         // TODO: use a separate structure from TaskSetResult - this is not the result of processing a TaskSet
         org.opennms.taskset.contract.Identity identity =
             org.opennms.taskset.contract.Identity.newBuilder()
@@ -197,15 +209,11 @@ public class MinionHeartbeatConsumer {
             .build();
         TenantLocationSpecificTaskSetResults results = TenantLocationSpecificTaskSetResults.newBuilder()
             .setTenantId(tenantId)
-            .setLocation(location)
+            .setLocationId(locationId)
             .addResults(result)
             .build();
 
         ProducerRecord<String, byte[]> producerRecord = new ProducerRecord<>(kafkaTopic, results.toByteArray());
         kafkaTemplate.send(producerRecord);
-    }
-
-    protected long getSystemTimeInMsec() {
-        return System.currentTimeMillis();
     }
 }

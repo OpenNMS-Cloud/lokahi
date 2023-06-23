@@ -64,13 +64,13 @@ public class RpcRequestRouterImplTest {
         //
         GatewayRpcRequestProto testRequest =
             GatewayRpcRequestProto.newBuilder()
-                .setIdentity(MinionIdentity.newBuilder().setLocation("x-test-location-x"))
+                .setIdentity(MinionIdentity.newBuilder().setLocationId("x-test-location-x"))
                 .setRpcId("x-rpc-id-x")
                 .build()
             ;
         GatewayRpcResponseProto rpcResponseProto =
             GatewayRpcResponseProto.newBuilder()
-                .setIdentity(MinionIdentity.newBuilder().setLocation("x-test-response-location-x"))
+                .setIdentity(MinionIdentity.newBuilder().setLocationId("x-test-response-location-x"))
                 .build()
             ;
         byte[] responseBytes = rpcResponseProto.toByteArray();
@@ -98,7 +98,7 @@ public class RpcRequestRouterImplTest {
         // Verify the Results
         //
         GatewayRpcResponseProto result = completableFuture.getNow(null);
-        assertEquals("x-test-response-location-x", result.getIdentity().getLocation());
+        assertEquals("x-test-response-location-x", result.getIdentity().getLocationId());
     }
 
     @Test
@@ -108,7 +108,7 @@ public class RpcRequestRouterImplTest {
         //
         GatewayRpcRequestProto testRequest =
             GatewayRpcRequestProto.newBuilder()
-                .setIdentity(MinionIdentity.newBuilder().setLocation("x-test-location-x"))
+                .setIdentity(MinionIdentity.newBuilder().setLocationId("x-test-location-x"))
                 .setRpcId("x-rpc-id-x")
                 .build()
             ;
@@ -152,7 +152,7 @@ public class RpcRequestRouterImplTest {
         //
         GatewayRpcRequestProto testRequest =
             GatewayRpcRequestProto.newBuilder()
-                .setIdentity(MinionIdentity.newBuilder().setLocation("x-test-location-x"))
+                .setIdentity(MinionIdentity.newBuilder().setLocationId("x-test-location-x"))
                 .setRpcId("x-rpc-id-x")
                 .build()
             ;

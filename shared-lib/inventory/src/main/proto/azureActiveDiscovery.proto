@@ -36,7 +36,7 @@ option java_multiple_files = true;
 option java_package = "org.opennms.horizon.inventory.dto";
 
 message AzureActiveDiscoveryCreateDTO {
-  string location = 1;
+  string location_id = 1;
   string name = 2;
   string client_id = 3;
   string client_secret = 4;
@@ -47,7 +47,7 @@ message AzureActiveDiscoveryCreateDTO {
 
 message AzureActiveDiscoveryDTO {
   int64 id = 1;
-  string location = 2;
+  string location_id = 2;
   string name = 3;
   string tenant_id = 4;
   string client_id = 5;

@@ -28,12 +28,9 @@
 
 package org.opennms.miniongateway.grpc.server.traps;
 
-import com.google.protobuf.Message;
 import org.apache.kafka.clients.producer.ProducerRecord;
-import org.apache.kafka.common.header.internals.RecordHeader;
 import org.opennms.horizon.grpc.traps.contract.TenantLocationSpecificTrapLogDTO;
 import org.opennms.horizon.grpc.traps.contract.TrapLogDTO;
-import org.opennms.horizon.shared.constants.GrpcConstants;
 import org.opennms.horizon.shared.grpc.common.LocationServerInterceptor;
 import org.opennms.horizon.shared.grpc.common.TenantIDGrpcServerInterceptor;
 import org.opennms.horizon.shared.grpc.traps.contract.mapper.TenantLocationSpecificTrapLogDTOMapper;
@@ -42,12 +39,9 @@ import org.opennms.horizon.shared.ipc.sink.api.SinkModule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
-
-import java.nio.charset.StandardCharsets;
 
 /**
  * Forwarder of Trap messages - received via GRPC and forwarded to Kafka.
@@ -83,14 +77,14 @@ public class TrapsKafkaForwarder implements MessageConsumer<TrapLogDTO, TrapLogD
     public void handleMessage(TrapLogDTO messageLog) {
         // Retrieve the Tenant ID from the TenantID GRPC Interceptor
         String tenantId = tenantIDGrpcInterceptor.readCurrentContextTenantId();
-        // Ditto for location
-        String location = locationServerInterceptor.readCurrentContextLocation();
+        // Ditto for locationId
+        String locationId = locationServerInterceptor.readCurrentContextLocationId();
 
-        // String location
-        logger.info("Received traps; sending to Kafka: tenant-id={}; kafka-topic={}; message={}", tenantId, kafkaTopic, messageLog);
+        // String locationId
+        logger.info("Received traps; sending to Kafka: tenant-id={}; location-id={}, kafka-topic={}; message={}", tenantId, locationId, kafkaTopic, messageLog);
 
         TenantLocationSpecificTrapLogDTO tenantLocationSpecificTrapLogDTO =
-            tenantLocationSpecificTrapLogDTOMapper.mapBareToTenanted(tenantId, location, messageLog);
+            tenantLocationSpecificTrapLogDTOMapper.mapBareToTenanted(tenantId, locationId, messageLog);
 
         sendToKafka(tenantLocationSpecificTrapLogDTO);
     }

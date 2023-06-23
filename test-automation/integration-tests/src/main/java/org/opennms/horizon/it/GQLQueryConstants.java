@@ -28,8 +28,8 @@ public abstract class GQLQueryConstants {
         "mutation DeleteNode($id: Long!) {  deleteNode(id: $id)}";
 
     public static final String ADD_DISCOVERY_QUERY =
-        "mutation { createIcmpActiveDiscovery( request: { name: \"%s\", location: \"%s\", ipAddresses: [\"%s\"], snmpConfig: { readCommunities: [\"%s\"], ports: [%d]\n" +
-            " } } ) {id, name, ipAddresses, location, snmpConfig { readCommunities, ports } } }";
+        "mutation { createIcmpActiveDiscovery( request: { name: \"%s\", locationId: \"%s\", ipAddresses: [\"%s\"], snmpConfig: { readCommunities: [\"%s\"], ports: [%d]\n" +
+            " } } ) {id, name, ipAddresses, locationId, snmpConfig { readCommunities, ports } } }";
 
     public static final String CREATE_MINION_CERTIFICATE =
         "query { getMinionCertificate(locationId: \"%d\") {  certificate, password } }";

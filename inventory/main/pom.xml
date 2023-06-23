@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.opennms.horizon</groupId>
+        <groupId>org.opennms.lokahi</groupId>
         <artifactId>inventory-parent</artifactId>
         <version>0.1.0-SNAPSHOT</version>
     </parent>
@@ -19,7 +19,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.opennms.horizon.shared</groupId>
+            <groupId>org.opennms.lokahi.shared</groupId>
             <artifactId>spring-boot-logback-json</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -65,32 +65,32 @@
             <optional>true</optional>
         </dependency>
         <dependency>
-            <groupId>org.opennms.horizon.shared</groupId>
+            <groupId>org.opennms.lokahi.shared</groupId>
             <artifactId>grpc-common-constants</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.opennms.horizon.shared</groupId>
+            <groupId>org.opennms.lokahi.shared</groupId>
             <artifactId>events</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.opennms.horizon.shared</groupId>
+            <groupId>org.opennms.lokahi.shared</groupId>
             <artifactId>minion-gateway</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.opennms.horizon.shared</groupId>
+            <groupId>org.opennms.lokahi.shared</groupId>
             <artifactId>inventory</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.opennms.horizon.shared</groupId>
+            <groupId>org.opennms.lokahi.shared</groupId>
             <artifactId>azure-http</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.opennms.horizon.shared</groupId>
+            <groupId>org.opennms.lokahi.shared</groupId>
             <artifactId>protobuf</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -100,8 +100,8 @@
             <version>${postgresql.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.opennms.horizon.shared</groupId>
-            <artifactId>horizon-common-utils</artifactId>
+            <groupId>org.opennms.lokahi.shared</groupId>
+            <artifactId>lokahi-common-utils</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -128,8 +128,8 @@
             <version>${lombok.binding.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.opennms.horizon.shared</groupId>
-            <artifactId>horizon-shaded-grpc-core</artifactId>
+            <groupId>org.opennms.lokahi.shared</groupId>
+            <artifactId>lokahi-shaded-grpc-core</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -146,18 +146,18 @@
             <version>${grpc.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.opennms.horizon.shared</groupId>
+            <groupId>org.opennms.lokahi.shared</groupId>
             <artifactId>ipc-grpc-contract</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.opennms.horizon.shared</groupId>
+            <groupId>org.opennms.lokahi.shared</groupId>
             <artifactId>task-set-service-api</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.opennms.horizon.shared</groupId>
-            <artifactId>horizon-common-tag</artifactId>
+            <groupId>org.opennms.lokahi.shared</groupId>
+            <artifactId>lokahi-common-tag</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -417,7 +417,7 @@
                 <artifactId>maven-failsafe-plugin</artifactId>
                 <executions>
                     <execution>
-                        <id>horizon-integration-test</id>
+                        <id>lokahi-integration-test</id>
                         <goals>
                             <goal>integration-test</goal>
                         </goals>
@@ -435,7 +435,7 @@
                     <!-- Fail the build on IT Failures.  Executed as a separate step so that post-integration-test -->
                     <!--  phase executes even after an IT failure.                                                 -->
                     <execution>
-                        <id>horizon-verify-it</id>
+                        <id>lokahi-verify-it</id>
                         <goals>
                             <goal>verify</goal>
                         </goals>

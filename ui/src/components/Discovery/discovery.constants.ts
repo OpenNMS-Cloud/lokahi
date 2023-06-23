@@ -5,6 +5,11 @@ export enum DiscoveryType {
   SyslogSNMPTraps = 'SyslogSNMPTraps'
 }
 
+export enum InstructionsType {
+  Active = 'active',
+  Passive = 'passive'
+}
+
 export enum ContentEditableType {
   IP,
   CommunityString,

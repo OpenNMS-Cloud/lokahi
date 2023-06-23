@@ -7,16 +7,16 @@ runs:
       run: |
         set -e
 
-        if [ -d ~/.m2/repository/org/opennms/horizon ]
+        if [ -d ~/.m2/repository/org/opennms/lokahi ]
         then
-          echo "Cleanup org.opennms.horizon maven content cached"
+          echo "Cleanup org.opennms.lokahi maven content cached"
 
-          cd ~/.m2/repository/org/opennms/horizon
+          cd ~/.m2/repository/org/opennms/lokahi
 
           for subdir in *
           do
             case "$subdir" in
-              shared | horizon-parent)
+              shared | lokahi-parent)
                 # Keep
                 ;;
   
@@ -27,6 +27,6 @@ runs:
             esac
           done
         else
-          echo "NO org.opennms.horizon maven content cached"
+          echo "NO org.opennms.lokahi maven content cached"
         fi
       shell: bash

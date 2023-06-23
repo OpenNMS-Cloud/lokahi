@@ -17,6 +17,12 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+/**
+ * TODO: perhaps rename this to ScanResultIpProcessor, or the like.  The name IpInterfaceService can easily lead to
+ * tight coupling problems because "ip interface" is a lower-level logical concept than "Azure Scan" and "SNMP".
+ * Alternatively, move the azure-specific and snmp-specific handling up a layer and make the operations here work
+ * on ip-interface (and lower) concepts only.
+ */
 @Service
 @RequiredArgsConstructor
 public class IpInterfaceService {
@@ -50,6 +56,7 @@ public class IpInterfaceService {
         modelRepo.save(ipInterface);
     }
 
+    // TODO: is this executed inside a transaction?  If not, there is a race condition in this code (find-then-save).
     public void createOrUpdateFromScanResult(String tenantId, Node node, IpInterfaceResult result, Map<Integer, SnmpInterface> ifIndexSNMPMap) {
         modelRepo.findByNodeIdAndTenantIdAndIpAddress(node.getId(), tenantId, InetAddressUtils.getInetAddress(result.getIpAddress()))
             .ifPresentOrElse(ipInterface -> {

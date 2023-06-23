@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <features name="minion-plugin-api-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.6.0">
 
-    <repository>mvn:org.opennms.horizon.minion/ipc-features/${project.version}/xml/features</repository>
+    <repository>mvn:org.opennms.lokahi.minion/ipc-features/${project.version}/xml/features</repository>
 
-    <feature name="plugins-horizon-utils-internal" version="${project.version}">
-        <bundle>mvn:org.opennms.horizon.shared/horizon-common-utils/${project.version}</bundle>
+    <feature name="plugins-lokahi-utils-internal" version="${project.version}">
+        <bundle>mvn:org.opennms.lokahi.shared/lokahi-common-utils/${project.version}</bundle>
     </feature>
 
     <feature name="plugins-guava-internal">
@@ -25,8 +25,8 @@
     <feature name="plugins-model" version="${project.version}">
         <feature>protobuf</feature>
         <bundle>mvn:com.google.protobuf/protobuf-java/${protobuf.version}</bundle>
-        <bundle>mvn:org.opennms.horizon.shared/protobuf/${project.version}</bundle>
-        <bundle>mvn:org.opennms.horizon.shared.snmp/proto/${project.version}</bundle>
+        <bundle>mvn:org.opennms.lokahi.shared/protobuf/${project.version}</bundle>
+        <bundle>mvn:org.opennms.lokahi.shared.snmp/proto/${project.version}</bundle>
     </feature>
 
     <feature name="plugins-registration-internal" description="Plugin registration plugin-registration" version="${project.version}">
@@ -35,7 +35,7 @@
         <feature>camel-blueprint</feature>
         <feature>plugins-model</feature>
         <feature>plugins-api</feature>
-        <bundle>mvn:org.opennms.horizon.minion/registration/${project.version}</bundle>
+        <bundle>mvn:org.opennms.lokahi.minion/registration/${project.version}</bundle>
     </feature>
 
     <feature name="plugins-api" version="${project.version}">
@@ -43,11 +43,11 @@
         <feature>plugins-model</feature>
         <feature>plugins-eos-internal</feature>
         <feature>plugins-gson-internal</feature>
-<!--        <feature>plugins-horizon-core-lib-internal</feature>-->
-        <feature>plugins-horizon-utils-internal</feature>
+<!--        <feature>plugins-lokahi-core-lib-internal</feature>-->
+        <feature>plugins-lokahi-utils-internal</feature>
 
         <bundle>mvn:com.google.protobuf/protobuf-java/${protobuf.version}</bundle>
-        <bundle>mvn:org.opennms.horizon.minion/plugins-api/${project.version}</bundle>
+        <bundle>mvn:org.opennms.lokahi.minion/plugins-api/${project.version}</bundle>
     </feature>
 
     <feature name="plugins-minion" version="${project.version}">
@@ -60,7 +60,7 @@
     <feature name="plugins-shell-commands" version="${project.version}">
         <feature>plugins-api</feature>
         <feature dependency="true">shell</feature>
-        <bundle>mvn:org.opennms.horizon.minion/shell-commands/${project.version}</bundle>
+        <bundle>mvn:org.opennms.lokahi.minion/shell-commands/${project.version}</bundle>
       </feature>
 
 </features>

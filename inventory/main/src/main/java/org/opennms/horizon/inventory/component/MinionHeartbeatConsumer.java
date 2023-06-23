@@ -33,9 +33,11 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 
 import javax.annotation.PreDestroy;
 
+import lombok.Setter;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.opennms.cloud.grpc.minion_gateway.GatewayRpcRequestProto;
 import org.opennms.cloud.grpc.minion_gateway.GatewayRpcResponseProto;
@@ -47,6 +49,7 @@ import org.opennms.horizon.inventory.dto.MonitoringLocationDTO;
 import org.opennms.horizon.inventory.exception.LocationNotFoundException;
 import org.opennms.horizon.inventory.service.MonitoringLocationService;
 import org.opennms.horizon.inventory.service.MonitoringSystemService;
+import org.opennms.horizon.inventory.util.Clock;
 import org.opennms.taskset.contract.MonitorResponse;
 import org.opennms.taskset.contract.MonitorType;
 import org.opennms.taskset.contract.TaskResult;
@@ -55,7 +58,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.messaging.handler.annotation.Headers;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 
@@ -84,13 +86,18 @@ public class MinionHeartbeatConsumer {
 
     @Value("${kafka.topics.task-set-results:" + DEFAULT_TASK_RESULTS_TOPIC + "}")
     private String kafkaTopic;
-    private final MonitoringSystemService service;
-    private final MonitoringLocationService locationService;
 
+     // Testability
+    @Setter
+    private Consumer<Runnable> rpcMonitorRunner = CompletableFuture::runAsync;
+
+    private final MonitoringSystemService monitoringSystemService;
+    private final MonitoringLocationService locationService;
+    private final Clock clock;
     private final Map<String, Long> rpcMaps = new ConcurrentHashMap<>();
 
     @KafkaListener(topics = "${kafka.topics.minion-heartbeat}", concurrency = "1")
-    public void receiveMessage(@Payload byte[] data, @Headers Map<String, Object> headers) {
+    public void receiveMessage(@Payload byte[] data) {
         try {
             TenantLocationSpecificHeartbeatMessage message = TenantLocationSpecificHeartbeatMessage.parseFrom(data);
 
@@ -109,20 +116,27 @@ public class MinionHeartbeatConsumer {
             }
             log.info("Received heartbeat message for minion: tenantId={}; locationId={}; systemId={}",
                 tenantId, locationId, message.getIdentity().getSystemId());
-            service.addMonitoringSystemFromHeartbeat(message);
+            monitoringSystemService.addMonitoringSystemFromHeartbeat(message);
 
             String systemId = message.getIdentity().getSystemId();
             String key = tenantId + "_" + locationId + "-" + systemId;
 
             Long lastRun = rpcMaps.get(key);
-            if (lastRun == null || (getSystemTimeInMsec() > (lastRun + MONITOR_PERIOD))) { //prevent run too many rpc calls
-                CompletableFuture.runAsync(() -> runRpcMonitor(tenantId, locationId, systemId));
-                rpcMaps.put(key, getSystemTimeInMsec());
+
+            // WARNING: this uses wall-clock.  If a system's time is changed, this logic will be impacted.
+            // TODO: consider changing to System.nanoTime() which is not affected by wall-clock changes
+            long currentTimeMs = clock.getCurrentTimeMs();
+            if (lastRun == null || (currentTimeMs > (lastRun + MONITOR_PERIOD))) { //prevent run too many rpc calls
+                rpcMonitorRunner.accept(() -> runRpcMonitor(tenantId, locationId, systemId));
+                rpcMaps.put(key, currentTimeMs);
             }
+
+            Span.current().setStatus(StatusCode.OK);
         } catch (Exception e) {
             log.error("Error while processing heartbeat message: ", e);
             Span.current().recordException(e);
         }
+
     }
 
     @PreDestroy
@@ -201,9 +215,5 @@ public class MinionHeartbeatConsumer {
 
         ProducerRecord<String, byte[]> producerRecord = new ProducerRecord<>(kafkaTopic, results.toByteArray());
         kafkaTemplate.send(producerRecord);
-    }
-
-    protected long getSystemTimeInMsec() {
-        return System.currentTimeMillis();
     }
 }

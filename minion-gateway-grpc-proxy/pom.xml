@@ -4,13 +4,13 @@
     <modelVersion>4.0.0</modelVersion>
     <version>0.1.0-SNAPSHOT</version>
     <parent>
-        <groupId>org.opennms.horizon</groupId>
-        <artifactId>horizon-parent</artifactId>
+        <groupId>org.opennms.lokahi</groupId>
+        <artifactId>lokahi-parent</artifactId>
         <version>0.1.0-SNAPSHOT</version>
         <relativePath>../parent-pom</relativePath>
     </parent>
 
-    <groupId>org.opennms.horizon.minion.gateway.grpc-proxy</groupId>
+    <groupId>org.opennms.lokahi.minion.gateway.grpc-proxy</groupId>
     <artifactId>minion-gateway-grpc-proxy</artifactId>
     <packaging>pom</packaging>
 

@@ -30,13 +30,19 @@ syntax = "proto3";
 package opennms.minioncertmanager;
 option java_multiple_files = true;
 option java_package = "org.opennms.horizon.minioncertmanager.proto";
-option go_package = "github.com/OpenNMS-Cloud/TSaaS/pki/bti/proto";
+option go_package = "github.com/OpenNMS-Cloud/TSaaS/pki/bto/proto";
+
+import "google/protobuf/timestamp.proto";
 
 service MinionCertificateManager {
-  rpc getMinionCert(GetMinionCertificateRequest) returns (GetMinionCertificateResponse) {};
+  rpc getMinionCert(MinionCertificateRequest) returns (GetMinionCertificateResponse) {};
+  rpc getMinionCertMetadata(MinionCertificateRequest) returns (GetMinionCertificateMetadataResponse) {};
+  rpc revokeMinionCert(MinionCertificateRequest) returns (EmptyResponse) {};
+  rpc deleteMinionCert(MinionCertificateRequest) returns (EmptyResponse) {};
+  rpc isCertValid(IsCertificateValidRequest) returns (IsCertificateValidResponse) {};
 }
 
-message GetMinionCertificateRequest {
+message MinionCertificateRequest {
   string tenant_id = 1;
   uint64 location_id = 2;
 }
@@ -44,4 +50,22 @@ message GetMinionCertificateRequest {
 message GetMinionCertificateResponse {
   bytes certificate = 1;
   string password = 2;
+}
+
+message EmptyResponse {
+}
+
+message GetMinionCertificateMetadataResponse {
+  string serial_number = 1; // certificate serial number
+  string subject = 2; // should contain the Tenant ID and the Location ID
+  google.protobuf.Timestamp create_date = 3; // ~ not_before in Keyfactor to track creation date
+  google.protobuf.Timestamp expire_date = 4; // ~ not_after in Keyfactor to track expiration date
+}
+
+message IsCertificateValidRequest {
+  string serial_number = 1; // certificate serial number
+}
+
+message IsCertificateValidResponse {
+  bool is_valid = 1; // true when valid; false otherwise
 }

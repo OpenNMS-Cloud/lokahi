@@ -11,6 +11,7 @@ import org.opennms.horizon.inventory.dto.MonitoringLocationCreateDTO;
 import org.opennms.horizon.inventory.dto.MonitoringLocationDTO;
 import org.opennms.horizon.server.RestServerApplication;
 import org.opennms.horizon.server.service.grpc.InventoryClient;
+import org.opennms.horizon.server.service.grpc.MinionCertificateManagerClient;
 import org.opennms.horizon.server.utils.ServerHeaderUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -21,6 +22,7 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import java.util.Arrays;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -32,6 +34,8 @@ class GraphQLMonitoringLocationServiceTest {
     private static final String GRAPHQL_PATH = "/graphql";
     @MockBean
     private InventoryClient mockClient;
+    @MockBean
+    private MinionCertificateManagerClient mockCertificateClient;
     @Autowired
     private WebTestClient webClient;
     @MockBean
@@ -227,6 +231,8 @@ class GraphQLMonitoringLocationServiceTest {
             .jsonPath("$.data.deleteLocation").isEqualTo(true);
         verify(mockClient).deleteLocation(1, accessToken);
         verify(mockHeaderUtil, times(1)).getAuthHeader(any(ResolutionEnvironment.class));
+        verify(mockHeaderUtil, times(1)).extractTenant(any(ResolutionEnvironment.class));
+        verify(mockCertificateClient).revokeCertificate(any(), eq(1L), eq(accessToken));
     }
 
     private static MonitoringLocationDTO getLocationToUpdate() {

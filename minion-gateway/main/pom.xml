@@ -3,7 +3,7 @@
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>org.opennms.horizon.minion.gateway</groupId>
+        <groupId>org.opennms.lokahi.minion.gateway</groupId>
         <artifactId>minion-gateway</artifactId>
         <version>0.1.0-SNAPSHOT</version>
     </parent>
@@ -29,52 +29,52 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.opennms.horizon.shared</groupId>
+            <groupId>org.opennms.lokahi.shared</groupId>
             <artifactId>spring-boot-logback-json</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.opennms.horizon.minion.gateway</groupId>
+            <groupId>org.opennms.lokahi.minion.gateway</groupId>
             <artifactId>minion-gateway-ignite-detector-api</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.opennms.horizon.minion.gateway</groupId>
+            <groupId>org.opennms.lokahi.minion.gateway</groupId>
             <artifactId>minion-gateway-ignite-detector-server</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.opennms.horizon.minion.gateway</groupId>
+            <groupId>org.opennms.lokahi.minion.gateway</groupId>
             <artifactId>ipc-grpc-server</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.opennms.horizon.shared</groupId>
+            <groupId>org.opennms.lokahi.shared</groupId>
             <artifactId>task-set-service-api</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.opennms.horizon.minion.gateway</groupId>
+            <groupId>org.opennms.lokahi.minion.gateway</groupId>
             <artifactId>minion-gateway-ignite-detector-client</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.opennms.horizon.shared</groupId>
+            <groupId>org.opennms.lokahi.shared</groupId>
             <artifactId>ignite-tasks</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.opennms.horizon.shared</groupId>
+            <groupId>org.opennms.lokahi.shared</groupId>
             <artifactId>flows</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.opennms.horizon.minion.gateway</groupId>
+            <groupId>org.opennms.lokahi.minion.gateway</groupId>
             <artifactId>task-set-service</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.opennms.horizon.minion.gateway</groupId>
+            <groupId>org.opennms.lokahi.minion.gateway</groupId>
             <artifactId>rpc-request-server</artifactId>
             <version>${project.version}</version>
         </dependency>

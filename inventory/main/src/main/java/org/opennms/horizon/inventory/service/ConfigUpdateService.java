@@ -30,6 +30,7 @@ package org.opennms.horizon.inventory.service;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.opennms.horizon.inventory.service.taskset.TaskUtils;
 import org.opennms.horizon.inventory.service.taskset.publisher.TaskSetPublisher;
@@ -52,7 +53,10 @@ public class ConfigUpdateService {
     private final ThreadFactory threadFactory = new ThreadFactoryBuilder()
         .setNameFormat("new-location-run-config-update-%d")
         .build();
-    private final ExecutorService executorService = Executors.newFixedThreadPool(10, threadFactory);
+
+    @Setter // Testability
+    private ExecutorService executorService = Executors.newFixedThreadPool(10, threadFactory);
+
     private final TrapConfigService trapConfigService;
     private final FlowsConfigService flowsConfigService;
     private final TaskSetPublisher taskSetPublisher;

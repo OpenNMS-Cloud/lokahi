@@ -15,9 +15,9 @@
         <feature>aries-blueprint</feature>
         <feature>icmp-guava-internal</feature>
         <feature>grpc-contract</feature>
-        <bundle dependency="true">mvn:org.opennms.horizon.shared/icmp-api/${project.version}</bundle>
-        <bundle dependency="true">mvn:org.opennms.horizon.shared/horizon-common-logging/${project.version}</bundle>
-        <bundle dependency="true">mvn:org.opennms.horizon.shared/horizon-common-utils/${project.version}</bundle>
+        <bundle dependency="true">mvn:org.opennms.lokahi.shared/icmp-api/${project.version}</bundle>
+        <bundle dependency="true">mvn:org.opennms.lokahi.shared/lokahi-common-logging/${project.version}</bundle>
+        <bundle dependency="true">mvn:org.opennms.lokahi.shared/lokahi-common-utils/${project.version}</bundle>
         <bundle dependency="true">mvn:org.opennms.lib/org.opennms.lib.tracker/0.7</bundle>
     </feature>
 
@@ -25,33 +25,33 @@
         <feature>icmp-shared-libs</feature>
         <feature>icmp-jna-internal</feature>
         <feature>icmp-guava-internal</feature>
-        <bundle>mvn:org.opennms.horizon.minion/icmp-jna/${project.version}</bundle>
+        <bundle>mvn:org.opennms.lokahi.minion/icmp-jna/${project.version}</bundle>
     </feature>
 
     <feature name="icmp-jni" version="${project.version}">
         <feature>icmp-shared-libs</feature>
         <bundle dependency="true">mvn:org.opennms/jicmp-api/${jicmp.version}</bundle>
         <bundle dependency="true">mvn:org.opennms/jicmp6-api/${jicmp6.version}</bundle>
-        <bundle>mvn:org.opennms.horizon.minion/icmp-jni6/${project.version}</bundle>
-        <bundle>mvn:org.opennms.horizon.minion/icmp-jni/${project.version}</bundle>
+        <bundle>mvn:org.opennms.lokahi.minion/icmp-jni6/${project.version}</bundle>
+        <bundle>mvn:org.opennms.lokahi.minion/icmp-jni/${project.version}</bundle>
     </feature>
 
     <feature name="icmp-best" version="${project.version}">
         <feature>icmp-jna</feature>
         <feature>icmp-jni</feature>
-        <bundle>mvn:org.opennms.horizon.minion/icmp-best/${project.version}</bundle>
+        <bundle>mvn:org.opennms.lokahi.minion/icmp-best/${project.version}</bundle>
     </feature>
 
     <feature name="icmp-rpc" version="${project.version}">
         <feature>icmp-jna</feature>
         <feature>ipc-api</feature>
-        <bundle>mvn:org.opennms.horizon.minion/icmp-ipc/${project.version}</bundle>
+        <bundle>mvn:org.opennms.lokahi.minion/icmp-ipc/${project.version}</bundle>
     </feature>
 
     <feature name="icmp-plugins" version="${project.version}">
         <feature>icmp-jna</feature>
         <feature>plugins-api</feature>
-        <bundle>mvn:org.opennms.horizon.minion/icmp-plugin/${project.version}</bundle>
+        <bundle>mvn:org.opennms.lokahi.minion/icmp-plugin/${project.version}</bundle>
     </feature>
 
 </features>

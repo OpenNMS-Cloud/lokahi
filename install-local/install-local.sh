@@ -172,7 +172,7 @@ create_namespace () {
 
 install_helm_chart_custom_images () {
   echo
-  echo ________________Installing Horizon Stream________________
+  echo ________________Installing Lokahi________________
   echo
 
   if ! helm upgrade -i lokahi ./../charts/lokahi \
@@ -246,7 +246,7 @@ if [ $CONTEXT == "local" ]; then
   create_ssl_cert_secret
 
   echo
-  echo ________________Installing Horizon Stream________________
+  echo ________________Installing Lokahi________________
   echo
   helm upgrade -i lokahi ./../charts/lokahi -f ./tmp/install-local-opennms-lokahi-values.yaml --namespace $NAMESPACE --wait --timeout "${TIMEOUT}"
   if [ $? -ne 0 ]; then exit; fi
@@ -297,7 +297,7 @@ elif [ "$CONTEXT" == "cicd" ]; then
 elif [ $CONTEXT == "existing-k8s" ]; then
 
   echo
-  echo ________________Installing Horizon Stream________________
+  echo ________________Installing Lokahi________________
   echo
   helm upgrade -i lokahi ./../charts/lokahi -f ./tmp/install-local-opennms-lokahi-values.yaml --namespace $NAMESPACE --create-namespace --wait --timeout "${TIMEOUT}"
   if [ $? -ne 0 ]; then exit; fi

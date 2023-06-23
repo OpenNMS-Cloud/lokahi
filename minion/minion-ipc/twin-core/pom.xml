@@ -4,7 +4,7 @@
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>minion-ipc</artifactId>
-        <groupId>org.opennms.horizon.minion</groupId>
+        <groupId>org.opennms.lokahi.minion</groupId>
         <version>0.1.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -16,21 +16,21 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.opennms.horizon.shared</groupId>
-            <artifactId>horizon-shaded-grpc-core</artifactId>
+            <groupId>org.opennms.lokahi.shared</groupId>
+            <artifactId>lokahi-shaded-grpc-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.opennms.horizon.shared</groupId>
+            <groupId>org.opennms.lokahi.shared</groupId>
             <artifactId>ipc-api</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.opennms.horizon.minion</groupId>
+            <groupId>org.opennms.lokahi.minion</groupId>
             <artifactId>grpc-client</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.opennms.horizon.minion</groupId>
+            <groupId>org.opennms.lokahi.minion</groupId>
             <artifactId>twin-common</artifactId>
             <version>${project.version}</version>
         </dependency>

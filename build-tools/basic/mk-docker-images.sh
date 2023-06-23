@@ -97,7 +97,7 @@ time {
 
 	echo ""
 	echo "==="
-	echo "=== HORIZON UI IMAGE"
+	echo "=== LOKAHI UI IMAGE"
 	echo "==="
 	DOCKER_BUILDKIT=1 docker build \
 		--build-arg VITE_BASE_URL=http://localhost:14080 \

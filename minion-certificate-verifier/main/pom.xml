@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.opennms.horizon.minion.certificate-verifier</groupId>
+        <groupId>org.opennms.lokahi.minion.certificate-verifier</groupId>
         <artifactId>minion-certificate-verifier</artifactId>
         <version>0.1.0-SNAPSHOT</version>
     </parent>
@@ -28,7 +28,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.opennms.horizon.shared</groupId>
+            <groupId>org.opennms.lokahi.shared</groupId>
             <artifactId>spring-boot-logback-json</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -55,7 +55,7 @@
             <artifactId>opentelemetry-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.opennms.horizon.shared</groupId>
+            <groupId>org.opennms.lokahi.shared</groupId>
             <artifactId>grpc-common-constants</artifactId>
             <version>${project.version}</version>
         </dependency>

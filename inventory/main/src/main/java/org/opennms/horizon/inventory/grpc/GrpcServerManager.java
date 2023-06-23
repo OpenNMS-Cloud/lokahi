@@ -34,11 +34,13 @@ import io.grpc.ServerInterceptor;
 import io.grpc.netty.shaded.io.grpc.netty.NettyServerBuilder;
 import io.grpc.protobuf.services.ProtoReflectionService;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.Arrays;
+import java.util.function.Function;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -48,10 +50,16 @@ public class GrpcServerManager {
     private final int port;
     private final ServerInterceptor interceptor;
 
+    @Setter // Testability
+    private BindableService protoReflectionService = ProtoReflectionService.newInstance();
+
+    @Setter
+    private Function<InetSocketAddress, NettyServerBuilder> nettyServerBuilderFactory = NettyServerBuilder::forAddress;
+
     public synchronized void startServer(BindableService ... services) {
-        NettyServerBuilder serverBuilder = NettyServerBuilder.forAddress(new InetSocketAddress(port))
+        NettyServerBuilder serverBuilder = nettyServerBuilderFactory.apply(new InetSocketAddress(port))
             .intercept(interceptor)
-            .addService(ProtoReflectionService.newInstance());
+            .addService(protoReflectionService);
         Arrays.stream(services).forEach(serverBuilder::addService);
         grpcServer = serverBuilder.build();
         try {

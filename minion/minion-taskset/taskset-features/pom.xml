@@ -4,7 +4,7 @@
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>taskset</artifactId>
-        <groupId>org.opennms.horizon.minion</groupId>
+        <groupId>org.opennms.lokahi.minion</groupId>
         <version>0.1.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -16,37 +16,37 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.opennms.horizon.minion</groupId>
+            <groupId>org.opennms.lokahi.minion</groupId>
             <artifactId>taskset-ipc</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.opennms.horizon.minion</groupId>
+            <groupId>org.opennms.lokahi.minion</groupId>
             <artifactId>taskset-worker</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.opennms.horizon.minion</groupId>
+            <groupId>org.opennms.lokahi.minion</groupId>
             <artifactId>shaded-ignite</artifactId>
             <version>${project.version}</version>
         </dependency>
 
         <dependency>
-            <groupId>org.opennms.horizon.minion</groupId>
+            <groupId>org.opennms.lokahi.minion</groupId>
             <artifactId>ipc-features</artifactId>
             <version>${project.version}</version>
             <classifier>features</classifier>
             <type>xml</type>
         </dependency>
         <dependency>
-            <groupId>org.opennms.horizon.minion</groupId>
+            <groupId>org.opennms.lokahi.minion</groupId>
             <artifactId>observability-features</artifactId>
             <version>${project.version}</version>
             <classifier>features</classifier>
             <type>xml</type>
         </dependency>
         <dependency>
-            <groupId>org.opennms.horizon.minion</groupId>
+            <groupId>org.opennms.lokahi.minion</groupId>
             <artifactId>plugin-features</artifactId>
             <version>${project.version}</version>
             <classifier>features</classifier>
@@ -72,10 +72,10 @@
                                 <descriptor>mvn:org.apache.karaf.features/framework/${karaf.version}/xml/features</descriptor>
                                 <descriptor>mvn:org.apache.karaf.features/standard/${karaf.version}/xml/features</descriptor>
                                 <descriptor>mvn:org.apache.karaf.features/spring/${karaf.version}/xml/features</descriptor>
-                                <descriptor>mvn:org.opennms.horizon.minion/grpc-features/${project.version}/xml/features</descriptor>
-                                <descriptor>mvn:org.opennms.horizon.minion/ipc-features/${project.version}/xml/features</descriptor>
-                                <descriptor>mvn:org.opennms.horizon.minion/observability-features/${project.version}/xml/features</descriptor>
-                                <descriptor>mvn:org.opennms.horizon.minion/plugin-features/${project.version}/xml/features</descriptor>
+                                <descriptor>mvn:org.opennms.lokahi.minion/grpc-features/${project.version}/xml/features</descriptor>
+                                <descriptor>mvn:org.opennms.lokahi.minion/ipc-features/${project.version}/xml/features</descriptor>
+                                <descriptor>mvn:org.opennms.lokahi.minion/observability-features/${project.version}/xml/features</descriptor>
+                                <descriptor>mvn:org.opennms.lokahi.minion/plugin-features/${project.version}/xml/features</descriptor>
                                 <descriptor>mvn:org.apache.aries.jax.rs/org.apache.aries.jax.rs.features/${aries.jax.rs.whiteboard.version}/xml</descriptor>
                                 <descriptor>mvn:org.apache.cxf.karaf/apache-cxf/${cxf.version}/xml/features</descriptor>
                                 <descriptor>mvn:org.apache.camel.karaf/apache-camel/${camel.version}/xml/features</descriptor>

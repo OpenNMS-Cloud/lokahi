@@ -22,8 +22,10 @@
                 </div>
                 <table aria-describedby="Minimum System Requirements" role="presentation">
                     <thead>
-                        <th>Requirement Type</th>
-                        <th>Requirement Specification</th>
+                        <tr>
+                            <th>Requirement Type</th>
+                            <th>Requirement Specification</th>
+                        </tr>
                     </thead>
                     <tbody>
                         <tr>

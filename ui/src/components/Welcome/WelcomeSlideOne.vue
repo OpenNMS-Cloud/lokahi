@@ -20,9 +20,12 @@
                 <div>
                     <h4>Minimum System Requirements:</h4>
                 </div>
-                <table>
+                <table aria-describedby="Minimum System Requirements" role="presentation">
+                    <thead>
+                        <th>Requirement Type</th>
+                        <th>Requirement Specification</th>
+                    </thead>
                     <tbody>
-
                         <tr>
                             <td>CPU</td>
                             <td>3GHz quad core x86_64 and above</td>
@@ -101,6 +104,10 @@ table {
     border-radius: 3px;
     border-bottom: 0;
     margin-bottom: 24px;
+
+    thead {
+        display: none;
+    }
 }
 
 ul {

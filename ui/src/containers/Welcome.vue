@@ -46,7 +46,6 @@ const { isDark } = useTheme();
 
 .welcome-contain {
   opacity: 0;
-  transition: opacity 1s ease-in-out;
   transform: translateY(4px);
   transition: opacity 0.9s ease-in-out, transform 0.5s ease-in-out 0s;
 }

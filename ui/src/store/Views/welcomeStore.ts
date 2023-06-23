@@ -203,7 +203,7 @@ export const useWelcomeStore = defineStore('welcomeStore', {
         if (details.detail) {
           this.delayCounter += 1;
         }
-        setTimeout(this.getFirstNode, timeoutDelay)
+        setTimeout(() => this.getFirstNode(), timeoutDelay)
       }
     },
     getFailureStatus() {
@@ -238,7 +238,7 @@ export const useWelcomeStore = defineStore('welcomeStore', {
           this.minionStatusLoading = false
           this.updateMinionStatusCopy();
         } else {
-          setTimeout(this.refreshMinions, 10000)
+          setTimeout(() => this.refreshMinions(), 10000)
         }
       }
     },

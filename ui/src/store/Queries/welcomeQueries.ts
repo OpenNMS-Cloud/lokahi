@@ -7,14 +7,13 @@ import { useQuery } from "villus";
 export const useWelcomeQueries = defineStore('welcomeQueries', () => {
 
     const getAllMinions = async (): Promise<unknown[]> => {
-
         const { execute } = useQuery({
             query: ListMinionsForTableDocument,
             cachePolicy: 'network-only'
         });
 
         const allMinions = await execute();
-        const rawResult = toRaw(allMinions.data)?.findAllMinions ?? []
+        const rawResult = toRaw(allMinions.data)?.findAllMinions || []
         return allMinions.error ? [] : rawResult
     }
 
@@ -39,17 +38,6 @@ export const useWelcomeQueries = defineStore('welcomeQueries', () => {
         })
         const cert = await execute();
         return { password: cert.data?.getMinionCertificate?.password, certificate: cert.data?.getMinionCertificate?.certificate };
-    }
-
-    const getMinionsByLocationId = async (locationId: number) => {
-        const { execute } = useQuery({
-            query: FindMinionsByLocationIdDocument,
-            cachePolicy: 'network-only',
-            fetchOnMount: false,
-            variables: { locationId }
-        })
-        const queryResults = await execute();
-        return queryResults.data?.findMinionsByLocationId;
     }
 
     const getNodeDetails = async (name: string) => {
@@ -82,7 +70,6 @@ export const useWelcomeQueries = defineStore('welcomeQueries', () => {
         getAllMinions,
         getLocationsForWelcome,
         getMinionCertificate,
-        getMinionsByLocationId,
         getNodeDetails
     };
 

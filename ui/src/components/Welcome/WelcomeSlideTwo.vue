@@ -18,7 +18,9 @@
                 </div>
                 <div class="welcome-slide-two-location-callout-right">
                     <span>We have created a default location for your first Minion.</span>
-                    <a href="#">Learn More About Locations</a>
+                    <a href="https://docs.opennms.com/cloud/locations.html" target="_blank" rel="noopener noreferrer">Learn
+                        More About
+                        Locations</a>
                 </div>
             </div>
             <div class="welcome-slide-step">

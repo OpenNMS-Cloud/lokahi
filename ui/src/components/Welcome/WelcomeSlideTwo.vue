@@ -8,12 +8,12 @@
     ]">
         <div class="welcome-slide-two-inner">
             <div class="welcome-slide-two-title">
-                <h1>Minion Installation</h1>
+                <h1 data-test="welcome-slide-two-title">Minion Installation</h1>
                 <p>An OpenNMS Minion is a virtual or hardware device for distributed network monitoring. Your network must
                     include at least one Minion to use Cloud.</p>
             </div>
             <div class="welcome-slide-two-location-callout">
-                <div class="welcome-slide-two-location-callout-left">
+                <div class="welcome-slide-two-location-callout-left" data-test="welcome-slide-two-callout">
                     <InformationIcon />
                 </div>
                 <div class="welcome-slide-two-location-callout-right">
@@ -27,7 +27,8 @@
                     <div class="welcome-slide-table-header">
                         <div>Minion Installation Bundle</div>
                         <div>
-                            <FeatherButton text @click="welcomeStore.downloadClick" v-if="!welcomeStore.downloading">
+                            <FeatherButton text @click="welcomeStore.downloadClick" v-if="!welcomeStore.downloading"
+                                data-test="welcome-slide-two-download-button">
                                 <template #icon>
                                     <FeatherIcon :icon="welcomeStore.downloaded ? CheckIcon : DownloadIcon" />
                                 </template>
@@ -48,7 +49,7 @@
                 </div>
             </div>
             <CollapsingWrapper :open="!!welcomeStore.minionCert.password">
-                <div class="welcome-slide-step">
+                <div class="welcome-slide-step" data-test="welcome-page-two-internal">
                     <h2>Step 2: Copy and Run Docker Install Command</h2>
                     <pre>Replace pathToFile with the path to the certificate. (e.g., /tmp/)</pre>
                     <div class="welcome-slide-table">
@@ -78,7 +79,7 @@
 
                     <div
                         :class="['welcome-slide-minion-status', welcomeStore.minionStatusSuccess ? 'welcome-slide-minion-success' : '']">
-                        <div class="icon-spin">
+                        <div class="icon-spin" data-test="welcome-slide-two-icon-spin">
                             <FeatherSpinner v-if="welcomeStore.minionStatusLoading && welcomeStore.minionStatusStarted" />
                             <FeatherIcon :icon="CheckIcon"
                                 v-if="!welcomeStore.minionStatusLoading && welcomeStore.minionStatusSuccess" />
@@ -91,8 +92,10 @@
             </CollapsingWrapper>
 
             <div class="welcome-slide-footer">
-                <FeatherButton text @click="welcomeStore.prevSlide">Back</FeatherButton>
-                <FeatherButton primary :disabled="!welcomeStore.minionStatusSuccess" @click="welcomeStore.nextSlide">
+                <FeatherButton text @click="welcomeStore.prevSlide" data-id="welcome-slide-two-back-button">Back
+                </FeatherButton>
+                <FeatherButton primary :disabled="!welcomeStore.minionStatusSuccess"
+                    data-id="welcome-slide-two-continue-button" @click="welcomeStore.nextSlide">
                     Continue
                 </FeatherButton>
             </div>

@@ -1,5 +1,5 @@
 <template>
-  <div class="item-preview-wrapper">
+  <div class="item-preview-wrapper" data-test="item-preview">
     <div class="item-preview-header" v-if="!loading">
       {{ title }}
     </div>

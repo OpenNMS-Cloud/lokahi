@@ -1,11 +1,11 @@
 <template>
   <div class="welcome-wrapper">
-    <div :class="['gradiant', welcomeStore.doneGradient ? 'loaded' : '']">
+    <div :class="['gradiant', welcomeStore.doneGradient ? 'loaded' : '']" data-test="gradiant-bg">
       <GradiantBG />
     </div>
     <div :class="['welcome-contain', welcomeStore.doneLoading ? 'loaded' : '']">
       <div class="welcome-inner">
-        <div class="welcome-logo">
+        <div class="welcome-logo" data-test="welcome-logo">
           <LogoIcon v-if="!isDark" />
           <LogoDarkIcon v-if="isDark" />
         </div>

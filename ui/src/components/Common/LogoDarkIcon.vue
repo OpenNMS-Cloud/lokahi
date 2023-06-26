@@ -1,6 +1,7 @@
 
 <template>
-    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 600 110.8">
+    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 600 110.8"
+        data-test="logo-dark-icon">
         <defs>
             <linearGradient id="linear-gradient" x1="61.57" y1="108.09" x2="-5.08" y2="40.81"
                 gradientUnits="userSpaceOnUse">

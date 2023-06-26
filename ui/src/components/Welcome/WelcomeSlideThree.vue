@@ -3,20 +3,22 @@
     ]">
         <div class="welcome-slide-three-inner">
             <div class="welcome-slide-three-title">
-                <h2>Start Your First Discovery</h2>
+                <h2 data-test="welcome-slide-three-title">Start Your First Discovery</h2>
                 <p>We've populated the fields from your Minion deployment.</p>
             </div>
             <div class="welcome-slide-three-form">
-                <FeatherInput label="Name" :modelValue="welcomeStore.firstDiscovery.name"
-                    :error="welcomeStore.firstDiscoveryErrors.name"
+                <FeatherInput label="Name" data-test="welcome-slide-three-name-input"
+                    :modelValue="welcomeStore.firstDiscovery.name" :error="welcomeStore.firstDiscoveryErrors.name"
                     @update:modelValue="(e) => welcomeStore.updateFirstDiscovery('name', e)" />
-                <FeatherInput label="Management IPV4/IPV6" :modelValue="welcomeStore.firstDiscovery.ip"
-                    :error="welcomeStore.firstDiscoveryErrors.ip"
+                <FeatherInput label="Management IPV4/IPV6" data-test="welcome-slide-three-ip-input"
+                    :modelValue="welcomeStore.firstDiscovery.ip" :error="welcomeStore.firstDiscoveryErrors.ip"
                     @update:modelValue="(e) => welcomeStore.updateFirstDiscovery('ip', e)" />
-                <FeatherInput label="Community String (optional)" :modelValue="welcomeStore.firstDiscovery.communityString"
+                <FeatherInput label="Community String (optional)" data-test="welcome-slide-three-community-string-input"
+                    :modelValue="welcomeStore.firstDiscovery.communityString"
                     :error="welcomeStore.firstDiscoveryErrors.communityString"
                     @update:modelValue="(e) => welcomeStore.updateFirstDiscovery('communityString', e)" />
-                <FeatherInput label="Port (optional)" :modelValue="welcomeStore.firstDiscovery.port"
+                <FeatherInput label="Port (optional)" data-test="welcome-slide-three-port-input"
+                    :modelValue="welcomeStore.firstDiscovery.port"
                     :error="welcomeStore.firstDiscoveryErrors.communityString"
                     @update:modelValue="(e) => welcomeStore.updateFirstDiscovery('port', e)" />
             </div>
@@ -26,13 +28,16 @@
                 :itemSubtitle="welcomeStore.devicePreview.itemSubtitle"
                 :itemStatuses="welcomeStore.devicePreview.itemStatuses" />
             <div class="welcome-slide-footer">
-                <FeatherButton text @click="welcomeStore.skipSlideThree">Skip
+                <FeatherButton data-test="welcome-store-slide-three-skip-button" text @click="welcomeStore.skipSlideThree">
+                    Skip
                 </FeatherButton>
-                <FeatherButton v-if="welcomeStore.discoverySubmitted" primary :disabled="!welcomeStore.slideThreeDisabled"
-                    @click="welcomeStore.skipSlideThree">
+                <FeatherButton data-test="welcome-store-slide-three-continue-button" v-if="welcomeStore.discoverySubmitted"
+                    primary :disabled="!welcomeStore.slideThreeDisabled" @click="welcomeStore.skipSlideThree">
                     Continue
                 </FeatherButton>
-                <FeatherButton v-if="!welcomeStore.discoverySubmitted" primary @click="welcomeStore.startDiscovery">
+                <FeatherButton v-if="!welcomeStore.discoverySubmitted"
+                    data-test="welcome-store-page-three-start-discovery-button" primary
+                    @click="welcomeStore.startDiscovery">
                     Start Discovery
                 </FeatherButton>
             </div>

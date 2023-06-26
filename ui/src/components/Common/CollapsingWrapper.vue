@@ -1,5 +1,6 @@
 <template>
-    <div :class="['collapse-box', open ? 'collapse-box-open' : 'collapse-box-closed']">
+    <div :class="['collapse-box', open ? 'collapse-box-open' : 'collapse-box-closed']"
+        data-test="collapsing-wrapper-wrapper">
         <div class="collapse-box-contents">
             <slot></slot>
         </div>

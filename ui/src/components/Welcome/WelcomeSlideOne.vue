@@ -2,15 +2,15 @@
     <div :class="['welcome-slide-one-wrapper', visible ? 'visible' : 'hidden',
     ]">
         <div class="welcome-text">
-            <h1>Welcome to <br />OpenNMS&nbsp;Cloud!</h1>
+            <h1 data-test="welcome-slide-one-title">Welcome to <br />OpenNMS&nbsp;Cloud!</h1>
             <p class="margin-bottom">Our mission is to make monitoring just&nbsp;happen.</p>
             <p class="margin-bottom">To start monitoring, your network must include at least one OpenNMS Minion: a
                 virtual or hardware device
                 for distributed network monitoring. We'll walk you through that setup, which takes only a
                 few&nbsp;minutes.</p>
         </div>
-        <CollapsingCard title="Requirements: Before You Begin" :open="welcomeStore.slideOneCollapseVisible"
-            :headerClicked="welcomeStore.toggleSlideOneCollapse">
+        <CollapsingCard title="Requirements: Before You Begin" data-test="welcome-slide-one-toggler"
+            :open="welcomeStore.slideOneCollapseVisible" :headerClicked="welcomeStore.toggleSlideOneCollapse">
             <template #icon>
                 <div>
                     <FeatherIcon :icon="Lightbulb" title="Lightbulb" :class="isDark ? 'icon-dark' : 'icon-light'" />
@@ -20,7 +20,8 @@
                 <div>
                     <h4>Minimum System Requirements:</h4>
                 </div>
-                <table aria-describedby="Minimum System Requirements" role="presentation">
+                <table aria-describedby="Minimum System Requirements" role="presentation"
+                    data-test="welcome-system-requirements-table">
                     <tbody>
                         <tr>
                             <td>CPU</td>
@@ -54,7 +55,8 @@
                 </a>
             </template>
         </CollapsingCard>
-        <FeatherButton primary @click="welcomeStore.nextSlide">Start Setup</FeatherButton>
+        <FeatherButton primary @click="welcomeStore.nextSlide" data-test="welcome-slide-one-setup-button">Start Setup
+        </FeatherButton>
     </div>
 </template>
 <script lang="ts" setup>

@@ -1,5 +1,6 @@
 <template>
-  <svg :width="width" :height="height" :viewBox="`0 0 ${width} ${height}`" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <svg :width="width" :height="height" :viewBox="`0 0 ${width} ${height}`" fill="none" xmlns="http://www.w3.org/2000/svg"
+    data-test="gradiant-bg">
     <g clip-path="url(#clip0_2548_16987)">
       <g opacity="0.7" filter="url(#filter0_f_2548_16987)">
         <path d="M507.711 1026.44L-14 1259H1511V634H876.921C716.395 634 563.895 895.628 507.711 1026.44Z"

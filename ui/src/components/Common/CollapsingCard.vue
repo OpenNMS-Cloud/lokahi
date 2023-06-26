@@ -1,7 +1,7 @@
  
 <template>
-    <div :class="['collapse-box', open ? 'collapse-box-open' : 'collapse-box-closed']">
-        <div class="collapse-box-header" @click="headerClicked">
+    <div :class="['collapse-box', open ? 'collapse-box-open' : 'collapse-box-closed']" data-test="collapsing-card-wrapper">
+        <div class="collapse-box-header" @click="headerClicked" v-bind="$attrs">
             <span class="collapse-box-header-icon-wrapper">
                 <span class="collapse-box-header-icon">
                     <slot name="icon"></slot>
@@ -20,7 +20,7 @@
 <script lang='ts' setup>
 import ExpandMore from '@featherds/icon/navigation/ExpandMore'
 import { PropType } from 'vue'
-
+defineOptions({ inheritAttrs: false })
 defineProps({
     title: { type: String, default: '' },
     open: { type: Boolean, default: false },

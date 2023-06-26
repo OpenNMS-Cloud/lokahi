@@ -5,7 +5,7 @@ let wrapper: any
 
 describe('CollapsingCard', () => {
     beforeAll(() => {
-        wrapper = mount(CollapsingCard, { shallow: true })
+        wrapper = mount(CollapsingCard as any, { shallow: true, props: { title: '', open: false, headerClicked: () => ({}) } })
     })
 
     test('Mount component', () => {

@@ -5,7 +5,7 @@ let wrapper: any
 
 describe('CollapsingWrapper', () => {
     beforeAll(() => {
-        wrapper = mount(CollapsingWrapper, { shallow: true })
+        wrapper = mount(CollapsingWrapper as any, { shallow: false, props: { open: false }, slots: { default: '<div></div>' } })
     })
 
     test('Mount component', () => {

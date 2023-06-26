@@ -167,6 +167,7 @@ public class MinionCertificateManagerImpl extends MinionCertificateManagerGrpc.M
     public void revokeMinionCert(MinionCertificateRequest request, StreamObserver<EmptyResponse> responseObserver) {
         try {
             serialNumberRepository.revoke(request.getTenantId(), String.valueOf(request.getLocationId()));
+            responseObserver.onNext(EmptyResponse.newBuilder().build());
             responseObserver.onCompleted();
         } catch (RocksDBException | IOException e) {
             LOG.error("Fail to revoke minion cert for {}. Error: {}", request, e.getMessage());

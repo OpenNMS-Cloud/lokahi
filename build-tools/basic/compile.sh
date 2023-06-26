@@ -19,21 +19,24 @@
 ##	- Incremental builds of the full mono-repo are NOT a GOAL.
 ##	- Detecting missing pre-requisites and setup is NOT a GOAL.
 ##
+## Please keep unit tests enabled here; feel free to copy this script and keep local changes as you see fit - just
+##  be careful not to commit them.
+##
 ########################################################################################################################
 
 set -e
 
-mvn clean install -P rapid-build -DskipTests=true -f parent-pom
-mvn clean install -P rapid-build -DskipTests=true -f shared-lib
+mvn clean install -P rapid-build -f parent-pom
+mvn clean install -P rapid-build -f shared-lib
 
-mvn clean install -P rapid-build -DskipTests=true -f alert
-mvn clean install -P rapid-build -DskipTests=true -f minion-gateway
-mvn clean install -P rapid-build -DskipTests=true -f minion-certificate-manager
-mvn clean install -P rapid-build -DskipTests=true -f minion-certificate-verifier
-mvn clean install -P rapid-build -DskipTests=true -f minion
-mvn clean install -P rapid-build -DskipTests=true -f rest-server
-mvn clean install -P rapid-build -DskipTests=true -f inventory
-mvn clean install -P rapid-build -DskipTests=true -f notifications
-mvn clean install -P rapid-build -DskipTests=true -f metrics-processor
-mvn clean install -P rapid-build -DskipTests=true -f events
-mvn clean install -P rapid-build -DskipTests=true -f datachoices
+mvn clean install -P rapid-build -f alert
+mvn clean install -P rapid-build -f minion-gateway
+mvn clean install -P rapid-build -f minion-certificate-manager
+mvn clean install -P rapid-build -f minion-certificate-verifier
+mvn clean install -P rapid-build -f minion
+mvn clean install -P rapid-build -f rest-server
+mvn clean install -P rapid-build -f inventory
+mvn clean install -P rapid-build -f notifications
+mvn clean install -P rapid-build -f metrics-processor
+mvn clean install -P rapid-build -f events
+mvn clean install -P rapid-build -f datachoices

@@ -1,3 +1,3 @@
 #!/bin/sh
 
-helm delete opennms
+helm delete lokahi

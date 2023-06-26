@@ -3,7 +3,7 @@
     ]">
         <div class="welcome-slide-three-inner">
             <div class="welcome-slide-three-title">
-                <h2>Start your first discovery</h2>
+                <h2>Start Your First Discovery</h2>
                 <p>We've populated the fields from your Minion deployment.</p>
             </div>
             <div class="welcome-slide-three-form">

@@ -50,7 +50,7 @@
             <CollapsingWrapper :open="!!welcomeStore.minionCert.password">
                 <div class="welcome-slide-step">
                     <h2>Step 2: Copy and Run Docker Install Command</h2>
-                    <pre>Replace pathToFile with the path to the certificate. (e.g. /tmp/)</pre>
+                    <pre>Replace pathToFile with the path to the certificate. (e.g., /tmp/)</pre>
                     <div class="welcome-slide-table">
                         <div class="welcome-slide-table-header">
                             <span>Command</span>

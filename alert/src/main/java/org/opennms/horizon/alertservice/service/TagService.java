@@ -61,10 +61,6 @@ public class TagService {
                                 tag.getNodeIds().add(id);
                             }
                         });
-                        tagOp.getMonitoringPolicyIdList().forEach(id -> {
-                           var policy =  monitorPolicyRepository.findByIdAndTenantId(id, tagOp.getTenantId());
-                           policy.ifPresent(tag.getPolicies()::add);
-                        });
                         tagRepository.save(tag);
                         log.info("added nodeIds with data {} node id size from {} to {}", tagOp, oldSize, tag.getNodeIds().size());
                     }, () -> {
@@ -72,10 +68,6 @@ public class TagService {
                         tag.setName(tagOp.getTagName());
                         tag.setTenantId(tagOp.getTenantId());
                         tag.setNodeIds(tagOp.getNodeIdList());
-                        tagOp.getMonitoringPolicyIdList().forEach(id -> {
-                            var policy =  monitorPolicyRepository.findByIdAndTenantId(id, tagOp.getTenantId());
-                            policy.ifPresent(tag.getPolicies()::add);
-                        });
                         tagRepository.save(tag);
                         log.info("inserted new tag with data {}", tagOp);
                     });
@@ -83,10 +75,6 @@ public class TagService {
                     .ifPresent(tag -> {
                         int oldSize = tag.getNodeIds().size();
                         tagOp.getNodeIdList().forEach(id -> tag.getNodeIds().remove(id));
-                        tagOp.getMonitoringPolicyIdList().forEach(id -> {
-                            var policy =  monitorPolicyRepository.findByIdAndTenantId(id, tagOp.getTenantId());
-                            policy.ifPresent(tag.getPolicies()::remove);
-                        });
                         if(tag.getNodeIds().isEmpty() && tag.getPolicies().isEmpty()) {
                             tagRepository.deleteById(tag.getId());
                             log.info("deleted tag {}", tagOp);

@@ -112,14 +112,6 @@ public class TagService {
                 .map(tagCreateDTO -> addTagToPassiveDiscovery(tenantId, discovery, tagCreateDTO))
                 .toList();
         } else if (entityId.hasMonitoringPolicyId()) {
-
-            List<TagOperationProto> tagOpList = tagCreateList.stream().map(t -> TagOperationProto.newBuilder()
-                .setOperation(Operation.ASSIGN_TAG)
-                .setTagName(t.getName())
-                .setTenantId(tenantId)
-                .addMonitoringPolicyId(entityId.getMonitoringPolicyId())
-                .build()).collect(Collectors.toList());
-            tagPublisher.publishTagUpdate(tagOpList);
             return tagCreateList.stream().map(tagCreateDTO ->
                     addTagsToMonitoringPolicy(tenantId, entityId.getMonitoringPolicyId(), tagCreateDTO))
                 .collect(Collectors.toList());

@@ -6,7 +6,7 @@
             <p class="margin-bottom">Our mission is to make monitoring just&nbsp;happen.</p>
             <p class="margin-bottom">To start monitoring, your network must include at least one OpenNMS Minion: a
                 virtual or hardware device
-                for distributed network monitoring. We'll walk you through that setup, which only takes a
+                for distributed network monitoring. We'll walk you through that setup, which takes only a
                 few&nbsp;minutes.</p>
         </div>
         <CollapsingCard title="Requirements: Before You Begin" :open="welcomeStore.slideOneCollapseVisible"

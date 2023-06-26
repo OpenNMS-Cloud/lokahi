@@ -13,4 +13,5 @@
 * [ ] Jira issue(s) have been updated to "In Review".
 * [ ] Includes [appropriate tests.](https://github.com/OpenNMS-Cloud/lokahi/wiki/Test-Strategy)
 * [ ] Documentation has been updated as necessary.
-* [ ] Notify devops of changes to the Charts
+* [ ] Notify devops of changes to the Charts.
+* [ ] Notify documentation team of any changes to names of screens or features (affects URLs).

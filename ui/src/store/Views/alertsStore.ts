@@ -31,9 +31,16 @@ export const useAlertsStore = defineStore('alertsStore', () => {
   const alertsMutations = useAlertsMutations()
 
   const fetchAlerts = async () => {
+    // Api has base 0 and FE pagination has base 1
+    // If above 0, always subtract 1 before sending request.
+    let page = 0
+    if (alertsPagination.value.page > 0) {
+      page = alertsPagination.value.page - 1
+    }
+
     alertsPagination.value = {
       ...alertsPagination.value,
-      page: alertsPagination.value.page - 1 // AlertsList api has base 0 and FE pagination component has base 1; hence we always subtract 1 before sending request.
+      page
     }
 
     await alertsQueries.fetchAlerts(alertsFilter.value, alertsPagination.value)

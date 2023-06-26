@@ -51,12 +51,19 @@
             </div>
           </div>
           <div class="check-circle">
-            <FeatherIcon
-              :icon="checkCircleIcon"
-              :class="{ acknowledged: alert.acknowledged }"
-              class="acknowledged-icon"
-              data-test="check-icon"
-            />
+            <FeatherTooltip
+              :title="alert.acknowledged ? 'Acknowledged' : 'Unacknowledged'"
+              v-slot="{ attrs, on }"
+            >
+              <FeatherIcon
+                v-bind="attrs"
+                v-on="on"
+                :icon="checkCircleIcon"
+                :class="{ acknowledged: alert.acknowledged }"
+                class="acknowledged-icon"
+                data-test="check-icon"
+              />
+            </FeatherTooltip>
           </div>
         </div>
       </template>

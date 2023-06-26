@@ -40,7 +40,7 @@ CLIENT_KEYSTORE="${CERT_ROOTDIR}/minion.p12"
 CLIENT_TRUSTSTORE="${CERT_ROOTDIR}/CA.cert"
 API_BASE_URL=https://onmshs.local
 AUTH_BASE_URL=https://onmshs.local/auth
-# LOCATION_NAME="minion-standalone-loc"
+LOCATION_NAME="minion-standalone-loc"
 USERNAME=""
 PASSWORD=""
 VERBOSE="false"
@@ -279,7 +279,7 @@ create_location ()
 
 	if gql_response="$(execute_gql_query "${gql_query}")"
 	then
-		LOCATION_ID="$(echo "${gql_response}" | jq -r '.data.locationByName.id')"
+		LOCATION_ID="$(echo "${gql_response}" | jq -r '.data.createLocation.id')"
 		echo "Have location ${location_name}, ID=${LOCATION_ID}"
 
 		return 0

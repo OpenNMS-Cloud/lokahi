@@ -25,7 +25,6 @@ CLIENT_TRUSTSTORE_PASSWORD=""
 ###
 ###	Caused by: java.security.NoSuchAlgorithmException: PBES2 SecretKeyFactory not available
 ###
-CLIENT_PRIVATE_KEY_PASSWORD=""
 
 # Prevent hostname verification failures by setting the expected cert "hostname"
 OVERRIDE_AUTHORITY="minion.onmshs.local"
@@ -42,7 +41,7 @@ USAGE()
 		    -i[ID]	use ID (MINION_ID) as the system identifier for this minion instance
 		    -k[PATH]	use PATH to the client private key file
 		    -l[LOC]	use LOC (MINION_LOCATION) as the name of the location for this minion instance
-		    -P[PASS]	use PASS (CLIENT_PRIVATE_KEY_PASSWORD) as the password for the client private key
+		    -P[PASS]	use PASS (CLIENT_KEYSTORE_PASSWORD) as the password for the client private key
 		    -p[PORT]	use GATEWAY (MINION_GATEWAY_HOST) as the hostname when connecting to the cloud
 		    -d		enable jvm debug
 		    -t		enable TLS
@@ -60,7 +59,7 @@ do
         i) MINION_ID="${OPTARG}" ;;
         k) CLIENT_KEY_FILE="${OPTARG}" ;;
         l) MINION_LOCATION="${OPTARG}" ;;
-        P) CLIENT_PRIVATE_KEY_PASSWORD="${OPTARG}" ;;
+        P) CLIENT_KEYSTORE_PASSWORD="${OPTARG}" ;;
         p) MINION_GATEWAY_PORT="${OPTARG}" ;;
 
         D) DEBUG=debugs ;;

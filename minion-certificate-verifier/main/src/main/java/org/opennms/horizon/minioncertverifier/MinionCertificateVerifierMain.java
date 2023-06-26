@@ -29,9 +29,15 @@
 package org.opennms.horizon.minioncertverifier;
 
 
+import io.grpc.ManagedChannel;
+import io.grpc.ManagedChannelBuilder;
+import org.opennms.horizon.minioncertverifier.controller.MinionCertificateManagerClient;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
 
 /**
  * Certificate Verifier entry point.
@@ -40,7 +46,25 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class MinionCertificateVerifierMain {
 
+    @Value("${grpc.server.deadline:60000}")
+    private long deadline;
+
+    @Value("${grpc.url.minion-certificate-manager}")
+    private String minionCertificateManagerUrl;
+
     public static void main(String[] args) {
         SpringApplication.run(MinionCertificateVerifierMain.class, args);
+    }
+
+    @Bean(name = "minionCertificateManager")
+    public ManagedChannel minionCertificateManagerChannel() {
+        return ManagedChannelBuilder.forTarget(minionCertificateManagerUrl)
+            .keepAliveWithoutCalls(true)
+            .usePlaintext().build();
+    }
+
+    @Bean(destroyMethod = "shutdown", initMethod = "initialStubs")
+    public MinionCertificateManagerClient createMinionCertificateManagerClient(@Qualifier("minionCertificateManager") ManagedChannel channel) {
+        return new MinionCertificateManagerClient(channel, deadline);
     }
 }

@@ -28,13 +28,21 @@
 
 package org.opennms.horizon.minioncertverifier.controller;
 
+import java.io.ByteArrayInputStream;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
 import java.util.Enumeration;
 import java.util.List;
 
+import org.opennms.horizon.minioncertmanager.proto.IsCertificateValidResponse;
 import org.opennms.horizon.minioncertverifier.parser.CertificateDnParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -50,12 +58,14 @@ import jakarta.servlet.http.HttpServletRequest;
 public class CertificateController {
 
     private final Logger logger = LoggerFactory.getLogger(CertificateController.class);
-    private final String headerName;
     private final CertificateDnParser certificateDnParser;
 
-    public CertificateController(@Value("${certificate.header.name:ssl-client-subject-dn}") String headerName, CertificateDnParser certificateDnParser) {
-        this.headerName = headerName;
+    private final MinionCertificateManagerClient minionCertificateManagerClient;
+
+    public CertificateController(CertificateDnParser certificateDnParser,
+                                 MinionCertificateManagerClient minionCertificateManagerClient) {
         this.certificateDnParser = certificateDnParser;
+        this.minionCertificateManagerClient = minionCertificateManagerClient;
     }
 
     @GetMapping("/debug")
@@ -68,12 +78,23 @@ public class CertificateController {
             logger.info("\t{}: {}", header, request.getHeader(header));
         }
 
-        String subjectDn = request.getHeader(headerName);
-        return validate(subjectDn);
+        String cert = request.getHeader("ssl-client-cert");
+        return validate( cert);
     }
 
     @GetMapping
-    public ResponseEntity<Void> validate(@RequestHeader("ssl-client-subject-dn") String clientSubjectDn) throws Exception {
+    public ResponseEntity<Void> validate(@RequestHeader("ssl-client-cert") String certificate) throws Exception {
+
+        ByteArrayInputStream certStream  =  new ByteArrayInputStream(URLDecoder.decode(certificate, StandardCharsets.UTF_8).getBytes());
+        CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
+        X509Certificate cert = (X509Certificate) certFactory.generateCertificate(certStream);
+        var clientSubjectDn = cert.getSubjectX500Principal().getName();
+        var serialNumber = cert.getSerialNumber().toString(16).toUpperCase();
+
+        IsCertificateValidResponse response = minionCertificateManagerClient.isCertValid(serialNumber, "");
+        if(!response.getIsValid()){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
         List<String> values = certificateDnParser.get(clientSubjectDn, "OU");
         String tenant = "";
         String location = "";

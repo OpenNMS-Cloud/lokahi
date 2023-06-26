@@ -77,8 +77,13 @@ public class MinionCertServerInterceptor implements ServerInterceptor {
         LOG.debug("Received metadata: {}", headers);
         String authHeader = headers.get(GrpcConstants.AUTHORIZATION_METADATA_KEY);
         try {
-            Optional<String> tenantId = verifyAccessToken(authHeader);
-            Context context = tenantId.map(tnId -> Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, tnId)).orElseThrow();
+            Context context;
+            if("isCertValid".equals(serverCall.getMethodDescriptor().getBareMethodName())){
+                context = Context.current();
+            } else {
+                Optional<String> tenantId = verifyAccessToken(authHeader);
+                context = tenantId.map(tnId -> Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, tnId)).orElseThrow();
+            }
             return Contexts.interceptCall(context, serverCall, headers, callHandler);
         } catch (VerificationException e) {
             LOG.error("Failed to verify access token", e);

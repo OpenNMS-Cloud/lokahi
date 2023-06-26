@@ -10,5 +10,8 @@ management:
         include: "*"
 
 grpc:
+  server:
+    deadline: 6000
   url:
     inventory: opennms-inventory:6565
+    minion-certificate-manager: opennms-minion-certificate-manager:8990

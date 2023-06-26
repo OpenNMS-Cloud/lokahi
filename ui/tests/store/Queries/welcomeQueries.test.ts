@@ -54,7 +54,6 @@ describe('Welcome Queries', () => {
     })
 
     it('get welcome minion certificate', async () => {
-        const dateN = Date.now()
         global.fetch = buildFetchList({
             getMinionCertificate: { getMinionCertificate: { password: 'tempPassword', certificate: '234234098098' } },
         })

@@ -35,14 +35,14 @@ describe.skip('WelcomeSlideTwo', () => {
         await elem.trigger('click');
         const hiddenElem = wrapper.get('[data-test="welcome-slide-two-internal"]')
         expect(hiddenElem).toBeDefined();
-        expect(welcomeStore.minionStatusLoading === true)
+        expect(welcomeStore.minionStatusLoading).toBeTruthy()
     })
     test('Welcome Slide Two Minion Detector is working', async () => {
 
         const welcomeStore = useWelcomeStore();
         const elem = wrapper.get('[data-test="welcome-slide-two-download-button"]')
         await elem.trigger('click');
-        expect(welcomeStore.minionStatusLoading === true)
+        expect(welcomeStore.minionStatusLoading).toBeTruthy()
     })
 
     test('Should have a back button', () => {

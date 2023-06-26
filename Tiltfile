@@ -60,7 +60,7 @@ cmd_button(name='reload-helm',
            icon_name='system_update_alt')
 
 # Give ourselves more time
-update_settings(k8s_upsert_timeout_secs=60)
+update_settings(k8s_upsert_timeout_secs=300)
 if os.getenv("CI"):
     # Be a little bit more aggressive in CI
     update_settings(max_parallel_updates=4)
@@ -210,6 +210,7 @@ helm_resource('cert-manager', 'jetstack/cert-manager',
 		'--version=1.11.0',
 		'--set', 'installCRDs=true',
 		'--set', 'cainjector.extraArgs={--leader-elect=false}',
+		'--timeout=300s'
 	],
 	resource_deps=[
 		'jetstack',
@@ -226,7 +227,7 @@ helm_resource('ingress-nginx', 'ingress-nginx-repo/ingress-nginx',
 	flags=[
 		'--version=4.7.0',
 		'--values=tilt-ingress-nginx-values.yaml',
-		'--timeout=60s'
+		'--timeout=300s'
 	],
 	deps=["Tiltfile", "tilt-ingress-nginx-values.yaml"],
 	resource_deps=[

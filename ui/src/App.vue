@@ -1,5 +1,5 @@
 <template>
-  <FeatherAppLayout contentLayout="full" class="feather-styles layout" v-if="welcomeStore.ready">
+  <FeatherAppLayout contentLayout="full" class="feather-styles layout" v-if="welcomeStore.ready" data-test="main-content">
     <template v-slot:header>
       <Menubar />
     </template>

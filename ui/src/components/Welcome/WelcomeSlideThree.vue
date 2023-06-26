@@ -4,7 +4,7 @@
         <div class="welcome-slide-three-inner">
             <div class="welcome-slide-three-title">
                 <h2>Start your first discovery</h2>
-                <p>We've populated the fields from your Minion deployement.</p>
+                <p>We've populated the fields from your Minion deployment.</p>
             </div>
             <div class="welcome-slide-three-form">
                 <FeatherInput label="Name" :modelValue="welcomeStore.firstDiscovery.name"

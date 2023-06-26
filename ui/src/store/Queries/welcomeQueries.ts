@@ -1,5 +1,5 @@
 import { Monitor } from "@/types";
-import { DownloadMinionCertificateForWelcomeDocument, FindLocationsForWelcomeDocument, FindMinionsByLocationIdDocument, ListMinionsForTableDocument, ListNodeMetricsDocument, ListNodesForTableDocument, TimeRangeUnit } from "@/types/graphql";
+import { DownloadMinionCertificateForWelcomeDocument, FindLocationsForWelcomeDocument, ListMinionsForTableDocument, ListNodeMetricsDocument, ListNodesForTableDocument, TimeRangeUnit } from "@/types/graphql";
 import { defineStore } from "pinia";
 import { useQuery } from "villus";
 
@@ -13,7 +13,7 @@ export const useWelcomeQueries = defineStore('welcomeQueries', () => {
         });
 
         const allMinions = await execute();
-        const rawResult = toRaw(allMinions.data)?.findAllMinions || []
+        const rawResult = toRaw(allMinions.data)?.findAllMinions ?? []
         return allMinions.error ? [] : rawResult
     }
 

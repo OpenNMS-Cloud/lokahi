@@ -15,8 +15,6 @@ import { REGEX_EXPRESSIONS } from '@/components/Discovery/discovery.constants'
 import { validationErrorsToStringRecord } from '@/services/validationService'
 import useMinionCmd from '@/composables/useMinionCmd'
 import { ComputedRef } from 'vue'
-import { useLocationQueries } from '../Queries/locationQueries'
-import { useMinionsQueries } from '../Queries/minionsQueries'
 import { useWelcomeQueries } from '../Queries/welcomeQueries'
 
 interface WelcomeStoreState {
@@ -172,7 +170,7 @@ export const useWelcomeStore = defineStore('welcomeStore', {
       this.downloading = false;
       this.downloaded = true
       this.downloadCopy = 'Downloaded'
-      this.minionCmd.setPassword(this.minionCert.password || '');
+      this.minionCmd.setPassword(this.minionCert.password ?? '');
       this.minionCmd.setMinionId(this.defaultLocationName);
       createAndDownloadBlobFile(this.minionCert.certificate, `${this.defaultLocationName}-certificate.p12`)
 
@@ -197,7 +195,7 @@ export const useWelcomeStore = defineStore('welcomeStore', {
       const details = await getNodeDetails(this.firstDiscovery.name);
       const metric = details?.metrics?.nodeLatency?.data?.result?.[0]?.values?.[0]?.[1]
       if ((details.detail && metric) || details.detail && this.delayCounter > maxDelayLoops) {
-        this.setDevicePreview(details.detail, details.metrics, metric || defaultLatency);
+        this.setDevicePreview(details.detail, details.metrics, metric ?? defaultLatency);
         this.devicePreview.loading = false;
       } else {
         if (details.detail) {
@@ -252,11 +250,11 @@ export const useWelcomeStore = defineStore('welcomeStore', {
         welcomeWrapper?.scrollTo({ top: 0, behavior: 'smooth' })
       }
     },
-    setDevicePreview(detail: { nodeLabel?: string | undefined, createTime: number }, metrics: ListNodeMetricsQuery | null | undefined, metric: number) {
-      this.devicePreview.itemTitle = detail.nodeLabel || ''
+    setDevicePreview(detail: { nodeLabel?: string, createTime: number }, metrics: ListNodeMetricsQuery | null | undefined, metric: number) {
+      this.devicePreview.itemTitle = detail.nodeLabel ?? ''
       this.devicePreview.itemSubtitle = 'Added ' + new Intl.DateTimeFormat('en-US').format(new Date(detail.createTime))
       this.devicePreview.itemStatuses[0] = this.buildItemStatus({
-        title: 'Status', status: metrics?.nodeStatus?.status || '', condition:
+        title: 'Status', status: metrics?.nodeStatus?.status ?? '', condition:
           metrics?.nodeStatus?.status === 'UP'
       });
       this.devicePreview.itemStatuses[1] = this.buildItemStatus({

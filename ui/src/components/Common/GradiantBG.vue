@@ -55,4 +55,3 @@ onBeforeUnmount(() => {
   window.removeEventListener('resize', updateSize)
 })
 </script>
-<style lang="scss" scoped></style>

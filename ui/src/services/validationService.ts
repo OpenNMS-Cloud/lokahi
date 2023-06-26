@@ -8,7 +8,7 @@ import { ValidationError } from "yup"
 */
 export const validationErrorsToStringRecord = <T>(err: ValidationError): T => {
     const messages: Record<string, string | undefined> = {}
-    const validationErrors = (err as ValidationError).inner || [{ message: err.message, path: err.path }] || []
+    const validationErrors = err.inner || [{ message: err.message, path: err.path }] || []
     for (const e of validationErrors) {
         if (e.path) {
             messages[e.path] = e.message

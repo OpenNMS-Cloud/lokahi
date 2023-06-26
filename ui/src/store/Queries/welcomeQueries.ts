@@ -14,7 +14,7 @@ export const useWelcomeQueries = defineStore('welcomeQueries', () => {
         });
 
         const allMinions = await execute();
-        const rawResult = toRaw(allMinions.data)?.findAllMinions || []
+        const rawResult = toRaw(allMinions.data)?.findAllMinions ?? []
         return allMinions.error ? [] : rawResult
     }
 
@@ -26,7 +26,7 @@ export const useWelcomeQueries = defineStore('welcomeQueries', () => {
             fetchOnMount: false,
         })
         const response = await execute();
-        return toRaw(response?.data?.findAllLocations)?.map((d) => ({ id: d.id, location: d.location || '' })) || [];
+        return toRaw(response?.data?.findAllLocations)?.map((d) => ({ id: d.id, location: d.location ?? '' })) ?? [];
     }
 
     const getMinionCertificate = async (locationId: number) => {
@@ -69,7 +69,7 @@ export const useWelcomeQueries = defineStore('welcomeQueries', () => {
                 fetchOnMount: false,
                 variables: {
                     id: firstDetail.id,
-                    instance: firstDetail.ipInterfaces?.[0].ipAddress || '',
+                    instance: firstDetail.ipInterfaces?.[0].ipAddress ?? '',
                     monitor: Monitor.ICMP, timeRange: 1, timeRangeUnit: TimeRangeUnit.Minute
                 }
             })

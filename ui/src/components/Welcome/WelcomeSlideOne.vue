@@ -20,8 +20,13 @@
                 <div>
                     <h4>Minimum System Requirements:</h4>
                 </div>
-                <table aria-describedby="Minimum System Requirements" role="presentation"
-                    data-test="welcome-system-requirements-table">
+                <table aria-describedby="Minimum System Requirements" data-test="welcome-system-requirements-table">
+                    <thead>
+                        <tr>
+                            <th>Requiment Type</th>
+                            <th>Requiment Specifications</th>
+                        </tr>
+                    </thead>
                     <tbody>
                         <tr>
                             <td>CPU</td>

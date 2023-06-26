@@ -294,7 +294,7 @@ export const useWelcomeStore = defineStore('welcomeStore', {
         this.minionStatusCopy = 'Waiting for the Docker Install Command to be complete.'
       }
       if (this.minionStatusStarted && this.minionStatusLoading) {
-        this.minionStatusCopy = 'Please wait while we detect your minion'
+        this.minionStatusCopy = 'Please wait while we detect your Minion.'
       }
       if (this.minionStatusStarted && !this.minionStatusLoading && this.minionStatusSuccess) {
         this.minionStatusCopy = 'Minion detected.'

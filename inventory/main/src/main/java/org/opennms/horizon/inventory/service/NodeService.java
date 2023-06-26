@@ -244,7 +244,12 @@ public class NodeService {
         mapper.updateFromNodeInfo(nodeInfo, node);
 
         if (StringUtils.isNotEmpty(nodeInfo.getSystemName())) {
-            node.setNodeLabel(nodeInfo.getSystemName());
+            // HS-1364: update the node label if the incoming System Name is set, and the existing node value is not
+            if (StringUtils.isEmpty(node.getNodeLabel())) {
+                node.setNodeLabel(nodeInfo.getSystemName());
+            } else {
+                log.debug("Node already has a nodeLabel - keeping the existing value: node-label={}; system-name={}", node.getNodeLabel(), nodeInfo.getSystemName());
+            }
         }
 
         node.setMonitoredState(monitoredState);

@@ -32,6 +32,8 @@ package org.opennms.horizon.inventory.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
@@ -49,13 +51,18 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Predicate;
 
+import nl.altindag.log.LogCaptor;
+import nl.altindag.log.model.LogEvent;
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
+import org.mockito.Mockito;
 import org.opennms.horizon.inventory.dto.MonitoredState;
 import org.opennms.horizon.inventory.component.TagPublisher;
 import org.opennms.horizon.inventory.dto.NodeCreateDTO;
@@ -78,6 +85,7 @@ import org.opennms.horizon.inventory.service.taskset.CollectorTaskSetService;
 import org.opennms.horizon.inventory.service.taskset.MonitorTaskSetService;
 import org.opennms.horizon.inventory.service.taskset.ScannerTaskSetService;
 import org.opennms.horizon.inventory.service.taskset.publisher.TaskSetPublisher;
+import org.opennms.node.scan.contract.NodeInfoResult;
 import org.opennms.taskset.contract.ScanType;
 
 public class NodeServiceTest {
@@ -335,5 +343,120 @@ public class NodeServiceTest {
         verifyNoInteractions(mockMonitoringLocationRepository);
         verifyNoInteractions(tagService);
         verifyNoInteractions(mockConfigUpdateService);
+    }
+
+    @Test
+    void testUpdateNodeInfo() {
+        //
+        // Setup Test Data and Interactions
+        //
+        Node testNode = new Node();
+        NodeInfoResult testNodeInfoResult =
+            NodeInfoResult.newBuilder()
+                .setSystemName("x-system-name-x")
+                .build();
+        MonitoredState testMonitoredState = MonitoredState.MONITORED;
+        NodeMapper nodeMapper = mock(NodeMapper.class);
+        nodeService = new NodeService(mockNodeRepository,
+            mockMonitoringLocationRepository,
+            mockIpInterfaceRepository,
+            mockConfigUpdateService,
+            mock(CollectorTaskSetService.class),
+            mock(MonitorTaskSetService.class),
+            mock(ScannerTaskSetService.class),
+            mock(TaskSetPublisher.class),
+            tagService,
+            nodeMapper,
+            mock(SnmpInterfaceMapper.class),
+            mock(IpInterfaceMapper.class),
+            mockTagPublisher);
+
+        //
+        // Execute
+        //
+        nodeService.updateNodeInfo(testNode, testNodeInfoResult, testMonitoredState);
+
+        //
+        // Verify the Results
+        //
+        Mockito.verify(mockNodeRepository).save(testNode);
+        assertEquals("x-system-name-x", testNode.getNodeLabel());
+    }
+
+    @Test
+    void testUpdateNodeInfoEmptySystemName() {
+        //
+        // Setup Test Data and Interactions
+        //
+        Node testNode = new Node();
+        NodeInfoResult testNodeInfoResult =
+            NodeInfoResult.newBuilder()
+                .setSystemName("")
+                .build();
+        MonitoredState testMonitoredState = MonitoredState.MONITORED;
+        NodeMapper nodeMapper = mock(NodeMapper.class);
+        nodeService = new NodeService(mockNodeRepository,
+            mockMonitoringLocationRepository,
+            mockIpInterfaceRepository,
+            mockConfigUpdateService,
+            mock(CollectorTaskSetService.class),
+            mock(MonitorTaskSetService.class),
+            mock(ScannerTaskSetService.class),
+            mock(TaskSetPublisher.class),
+            tagService,
+            nodeMapper,
+            mock(SnmpInterfaceMapper.class),
+            mock(IpInterfaceMapper.class),
+            mockTagPublisher);
+
+        //
+        // Execute
+        //
+        nodeService.updateNodeInfo(testNode, testNodeInfoResult, testMonitoredState);
+
+        //
+        // Verify the Results
+        //
+        Mockito.verify(mockNodeRepository).save(testNode);
+        assertNull(testNode.getNodeLabel());
+    }
+
+    @Test
+    void testUpdateNodeInfoNonEmptySystemNameNotReplacingExisting() {
+        //
+        // Setup Test Data and Interactions
+        //
+        Node testNode = new Node();
+        testNode.setNodeLabel("x-existing-label-x");
+        NodeInfoResult testNodeInfoResult =
+            NodeInfoResult.newBuilder()
+                .setSystemName("x-system-name-x")
+                .build();
+        MonitoredState testMonitoredState = MonitoredState.MONITORED;
+        NodeMapper nodeMapper = mock(NodeMapper.class);
+        nodeService = new NodeService(mockNodeRepository,
+            mockMonitoringLocationRepository,
+            mockIpInterfaceRepository,
+            mockConfigUpdateService,
+            mock(CollectorTaskSetService.class),
+            mock(MonitorTaskSetService.class),
+            mock(ScannerTaskSetService.class),
+            mock(TaskSetPublisher.class),
+            tagService,
+            nodeMapper,
+            mock(SnmpInterfaceMapper.class),
+            mock(IpInterfaceMapper.class),
+            mockTagPublisher);
+
+        //
+        // Execute
+        //
+        nodeService.updateNodeInfo(testNode, testNodeInfoResult, testMonitoredState);
+
+        //
+        // Verify the Results
+        //
+        Mockito.verify(mockNodeRepository).save(testNode);
+        assertEquals("x-existing-label-x", testNode.getNodeLabel());
     }
 }

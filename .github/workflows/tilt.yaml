@@ -19,6 +19,7 @@ jobs:
     timeout-minutes: 30 # Prevents hung workflows on the larger runners from costing more than necessary
     steps:
       - name: Install tools
+        if: false # we are using an non-ephemeral runner at the moment so this is already installed
         shell: bash
         run: |
           sudo apt-get install -y git uuid-runtime
@@ -72,6 +73,9 @@ jobs:
         run: |
           # Setup localhost DNS
           sudo sh -c 'echo "127.0.0.1 onmshs" >> /etc/hosts'
+
+          # Delete cluster if exists
+          kind delete clusters kind
 
           ctlptl create cluster kind --registry=ctlptl-registry
 

@@ -297,7 +297,7 @@ export const useWelcomeStore = defineStore('welcomeStore', {
         this.minionStatusCopy = 'Please wait while we detect your minion'
       }
       if (this.minionStatusStarted && !this.minionStatusLoading && this.minionStatusSuccess) {
-        this.minionStatusCopy = 'Minion Detected.'
+        this.minionStatusCopy = 'Minion detected.'
       }
     },
     async validateFirstDiscovery() {

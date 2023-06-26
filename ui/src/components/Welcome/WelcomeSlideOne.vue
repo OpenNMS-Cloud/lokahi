@@ -9,7 +9,7 @@
                 for distributed network monitoring. We'll walk you through that setup, which only takes a
                 few&nbsp;minutes.</p>
         </div>
-        <CollapsingCard title="Requirements: Before you Begin" :open="welcomeStore.slideOneCollapseVisible"
+        <CollapsingCard title="Requirements: Before You Begin" :open="welcomeStore.slideOneCollapseVisible"
             :headerClicked="welcomeStore.toggleSlideOneCollapse">
             <template #icon>
                 <div>

@@ -10,8 +10,8 @@ data:
     grpc.max.message.size=104857600
     # Properties below override these defined earlier in file!
     {{- if .Values.OpenNMS.Minion.addTestLocation }}
-    grpc.host: ingress-nginx-controller
-    grpc.port: {{ .Values.Port }}
+    grpc.host: ingress-nginx-controller # this is the internal name inside the cluster
+    grpc.port: 443 # this is the internal port inside the cluster
     grpc.tls.enabled: true
     grpc.client.truststore: /run/secrets/certificates/tls.crt
     grpc.client.keystore: /opt/karaf/certs/minion.p12

@@ -212,8 +212,6 @@ public class MonitorPolicySteps {
                     throw new RuntimeException(e);
                 }
             }).filter(proto -> proto.getTenantId().equals(tenant)).toList();
-
-            //assertEquals(1, messages.size());
             assertTrue(messages.size() >= 1);
         });
     }

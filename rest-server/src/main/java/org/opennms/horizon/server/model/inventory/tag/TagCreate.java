@@ -33,7 +33,6 @@ import lombok.Setter;
 
 @Getter
 @Setter
-//@AllArgsConstructor
 public class TagCreate {
     private String name;
 }

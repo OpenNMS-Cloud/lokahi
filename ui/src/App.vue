@@ -1,8 +1,5 @@
 <template>
-  <FeatherAppLayout
-    contentLayout="full"
-    class="feather-styles layout"
-  >
+  <FeatherAppLayout contentLayout="full" class="feather-styles layout" v-if="welcomeStore.ready" data-test="main-content">
     <template v-slot:header>
       <Menubar />
     </template>
@@ -18,6 +15,15 @@
     </div>
   </FeatherAppLayout>
 </template>
+
+<script setup lang="ts">
+import { useWelcomeStore } from '@/store/Views/welcomeStore'
+const welcomeStore = useWelcomeStore()
+
+onMounted(async () => {
+  await welcomeStore.init()
+})
+</script>
 
 <style lang="scss" scoped>
 :deep(.feather-app-rail) {

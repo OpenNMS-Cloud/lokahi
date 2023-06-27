@@ -9,11 +9,17 @@ const useMinionCmd = () => {
     minionId.value = 'default'
   }
 
-  const url = computed(() =>
-    location.origin.includes('dev')
-      ? 'minion.onms-fb-dev.dev.nonprod.dataservice.opennms.com'
-      : 'minion.onms-fb-prod.production.prod.dataservice.opennms.com'
-  )
+  const url = computed<string>(() => {
+    if (location.origin.includes('dev')) {
+      return 'minion.onms-fb-dev.dev.nonprod.dataservice.opennms.com'
+    }
+
+    if (location.origin.includes('staging')) {
+      return 'minion.onms-fb-stg.staging.nonprod.dataservice.opennms.com'
+    }
+
+    return 'minion.onms-fb-prod.production.prod.dataservice.opennms.com'
+  })
 
   const minionDockerCmd = computed<string>(() =>
     [

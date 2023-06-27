@@ -1,0 +1,33 @@
+query FindLocationsForWelcome {
+  findAllLocations {
+    id
+    location
+  }
+}
+
+query FindDevicesForWelcome {
+  findAllNodes {
+    id,
+    nodeLabel,
+    createTime,
+    ipInterfaces {
+      id
+      nodeId
+      ipAddress
+      snmpPrimary
+    }
+  }
+}
+
+query FindMinionsForWelcome($locationId: Long!) {
+  findMinionsByLocationId(locationId: $locationId) {
+    id
+  }
+}
+
+query DownloadMinionCertificateForWelcome($location: Long) {
+  getMinionCertificate(locationId: $location){
+    password
+    certificate
+  }
+}

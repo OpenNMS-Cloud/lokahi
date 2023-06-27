@@ -9,3 +9,4 @@ cypress/e2e/examples
 cypress/videos
 .vscode
 *.bk
+.env.development.local

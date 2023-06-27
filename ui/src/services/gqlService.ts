@@ -25,6 +25,10 @@ const errorNotificationPlugin = definePlugin(({ afterQuery }) => {
 
     const errorsMsgs = [
       {
+        err: 'INVALID_ARGUMENT:',
+        msg: error.message.split('INVALID_ARGUMENT:')[1]
+      },
+      {
         err: 'INTERNAL:',
         msg: error.message.split('INTERNAL:')[1]
       },

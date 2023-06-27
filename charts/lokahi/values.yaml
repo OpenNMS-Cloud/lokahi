@@ -236,6 +236,7 @@ OpenNMS:
     ImagePullPolicy: IfNotPresent
     Replicas: 1
     Port: 8990
+    VolumeSize: 1Gi
     Resources:
       Limits:
         Cpu: "1"

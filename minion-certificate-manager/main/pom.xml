@@ -134,6 +134,11 @@
             <artifactId>rocksdbjni</artifactId>
             <version>${rocksdb.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-inline</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
 	<build>

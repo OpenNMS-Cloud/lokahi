@@ -118,9 +118,26 @@ public class MonitorPolicyService {
     }
 
     private Set<Tag> updateTags(MonitorPolicy newPolicy, Set<Tag> tags) {
-        Set<Tag> persistedTags = new HashSet<>();
-        tags.forEach(tag -> persistedTags.add(updateTag(newPolicy, tag)));
-        return persistedTags;
+        Set<Tag> newTags = new HashSet<>();
+        tags.forEach(tag -> newTags.add(updateTag(newPolicy, tag)));
+        var existingTags = tagRepository.findByTenantIdAndPolicyId(newPolicy.getTenantId(), newPolicy.getId());
+        updateExistingTags(existingTags, newTags);
+        return newTags;
+    }
+
+    private void updateExistingTags(List<Tag> existingTags, Set<Tag> persistedTags) {
+        existingTags.forEach(tag -> {
+            if (persistedTags.stream().noneMatch(persistedTag ->
+                tag.getId().equals(persistedTag.getId()))) {
+                // Delete tag if it got removed and nodeIds are empty
+                if (tag.getNodeIds().isEmpty()) {
+                    tagRepository.deleteById(tag.getId());
+                } else {
+                    tag.setPolicies(new HashSet<>());
+                    tagRepository.save(tag);
+                }
+            }
+        });
     }
 
     private Tag updateTag(MonitorPolicy newPolicy, Tag tag) {

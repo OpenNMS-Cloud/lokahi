@@ -285,7 +285,9 @@ public class TagService {
         String tagName = tagCreateDTO.getName();
         var optional = repository.findByTenantIdAndName(tenantId, tagName);
         Tag tag = optional.orElseGet(() -> mapCreateTag(tenantId, tagCreateDTO));
-        tag.getMonitorPolicyIds().add(monitoringPolicyId);
+        if (tag.getMonitorPolicyIds().stream().noneMatch(policyId -> policyId == monitoringPolicyId)) {
+            tag.getMonitorPolicyIds().add(monitoringPolicyId);
+        }
         tag = repository.save(tag);
         return mapper.modelToDTO(tag);
     }

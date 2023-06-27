@@ -178,6 +178,10 @@ jobs:
         shell: bash
         working-directory: install-local
         run: |          
+
+          # Delete cluster if exists
+          kind delete clusters kind-test
+
           # Setup localhost DNS
           sudo echo "127.0.0.1 onmshs" | sudo tee -a /etc/hosts
           

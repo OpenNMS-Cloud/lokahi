@@ -1,27 +1,12 @@
 <template>
-  <div
-    v-if="graphs.dataSets.value.length"
-    class="container"
-  >
+  <div v-if="graphs.dataSets.value.length" class="container">
     <div class="canvas-wrapper">
-      <FeatherTooltip
-        title="Download to PDF"
-        v-slot="{ attrs, on }"
-      >
-        <FeatherButton
-          v-bind="attrs"
-          v-on="on"
-          icon="Download"
-          class="download-icon"
-          @click="onDownload"
-        >
+      <FeatherTooltip title="Download to PDF" v-slot="{ attrs, on }">
+        <FeatherButton v-bind="attrs" v-on="on" icon="Download" class="download-icon" @click="onDownload">
           <FeatherIcon :icon="DownloadFile" />
         </FeatherButton>
       </FeatherTooltip>
-      <canvas
-        class="canvas"
-        :id="`${graph.label}`"
-      ></canvas>
+      <canvas class="canvas" :id="`${graph.label}`"></canvas>
     </div>
   </div>
 </template>
@@ -37,6 +22,7 @@ import { GraphProps } from '@/types/graphs'
 import DownloadFile from '@featherds/icon/action/DownloadFile'
 import { format } from 'd3'
 import useTheme from '@/composables/useTheme'
+import { humanFileSize } from '../utils'
 const emits = defineEmits(['has-data'])
 // Chart.register(zoomPlugin) disable zoom until phase 2
 const graphs = useGraphs()
@@ -44,10 +30,11 @@ const props = defineProps({
   graph: {
     required: true,
     type: Object as PropType<GraphProps>
-  }
+  },
+  type: { type: String, default: 'bytes' }
 })
 const { onThemeChange, isDark } = useTheme()
-const yAxisFormatter = format('.3s')
+
 let chart: any = {}
 const options = computed<ChartOptions<any>>(() => ({
   responsive: true,
@@ -68,6 +55,17 @@ const options = computed<ChartOptions<any>>(() => ({
         enabled: true,
         mode: 'x'
       }
+    },
+    tooltip: {
+      usePointStyle: true,
+      callbacks: {
+        label: (context: any) => {
+          return ` ${context.label} - ${props.type === 'bytes' ? humanFileSize(context.parsed.y.toFixed(1)) : context.parsed.y.toFixed(1)}`
+        },
+        title: () => {
+          return ''
+        },
+      }
     }
   },
   scales: {
@@ -77,7 +75,7 @@ const options = computed<ChartOptions<any>>(() => ({
         text: props.graph.label
       } as TitleOptions,
       ticks: {
-        callback: (value: any, index: any) => (index % 2 === 0 ? yAxisFormatter(value as number) : ''),
+        callback: (value: any, index: any) => (props.type === 'bytes' ? humanFileSize(value as number) : value),
         maxTicksLimit: 8
       },
       stacked: false
@@ -155,6 +153,7 @@ onThemeChange(() => {
 <!-- TODO: make theme switching works in graphs -->
 <style scoped lang="scss">
 @use '@featherds/styles/themes/variables';
+
 .container {
   position: relative;
   width: 30%;
@@ -163,12 +162,15 @@ onThemeChange(() => {
   border-radius: 10px;
   padding: var(variables.$spacing-m);
 }
+
 .canvas-wrapper {
   width: 100%;
+
   .download-icon {
     position: absolute;
     right: 15px;
     top: 19px;
+
     svg {
       font-size: 15px;
     }

@@ -1,44 +1,18 @@
 <template>
-  <PrimaryModal
-    :visible="isVisible"
-    hideTitle
-    :minWidth="385"
-  >
-    <template #content
-      ><div class="modal-content">
+  <PrimaryModal :visible="isVisible" hideTitle :minWidth="385">
+    <template #content>
+      <div class="modal-content">
         <div class="header">
           <div class="title">{{ interfaceName }}</div>
-          <FeatherIcon
-            :icon="Close"
-            class="pointer"
-            @click="closeModal"
-          />
+          <FeatherIcon :icon="Close" class="pointer" @click="closeModal" />
         </div>
         <div class="metrics">
-          <LineGraph
-            :graph="bitsInOut"
-            @has-data="displayEmptyMsgIfNoData"
-          />
-          <LineGraph
-            v-if="!isAzure"
-            :graph="bandwidthInOut"
-            @has-data="displayEmptyMsgIfNoData"
-          />
-          <LineGraph
-            v-if="!isAzure"
-            :graph="nodeLatency"
-            @has-data="displayEmptyMsgIfNoData"
-          />
-          <LineGraph
-            v-if="!isAzure"
-            :graph="errorsInOut"
-            @has-data="displayEmptyMsgIfNoData"
-          />
+          <LineGraph :graph="bitsInOut" type="bytes" @has-data="displayEmptyMsgIfNoData" />
+          <LineGraph v-if="!isAzure" type="percentage" :graph="bandwidthInOut" @has-data="displayEmptyMsgIfNoData" />
+          <LineGraph v-if="!isAzure" :graph="nodeLatency" @has-data="displayEmptyMsgIfNoData" />
+          <LineGraph v-if="!isAzure" :graph="errorsInOut" @has-data="displayEmptyMsgIfNoData" />
         </div>
-        <div
-          v-if="!hasMetricData"
-          class="empty"
-        >
+        <div v-if="!hasMetricData" class="empty">
           Currently no data available.
         </div>
       </div>
@@ -144,32 +118,39 @@ defineExpose({ openAzureMetrics, setIfNameAndOpenModal })
 .modal-content {
   max-width: 785px;
 }
+
 .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   @include typography.headline3;
 }
+
 .metrics {
   display: flex;
   flex-direction: column;
   flex-wrap: wrap;
   width: 100%;
+
   @include mediaQueriesMixins.screen-md {
     flex-direction: row;
   }
-  > div {
+
+  >div {
     margin-top: var(variables.$spacing-l);
     margin-right: 0;
     display: flex;
+
     @include mediaQueriesMixins.screen-md {
       margin-right: var(variables.$spacing-l);
     }
   }
-  > div:nth-child(2n) {
+
+  >div:nth-child(2n) {
     margin-right: 0;
   }
 }
+
 .empty {
   margin-top: var(variables.$spacing-xl);
 }

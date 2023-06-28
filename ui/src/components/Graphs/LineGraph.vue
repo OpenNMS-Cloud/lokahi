@@ -31,11 +31,20 @@ const props = defineProps({
     required: true,
     type: Object as PropType<GraphProps>
   },
-  type: { type: String, default: 'bytes' }
+  type: { type: String, default: 'latency' }
 })
 const { onThemeChange, isDark } = useTheme()
 
 let chart: any = {}
+const formatAxisBasedOnType = (context: number) => {
+  let formattedAxis = context.toFixed(1);
+  if (props.type === 'bytes') {
+    formattedAxis = humanFileSize(context)
+  } else if (props.type === 'percentage') {
+    formattedAxis = (context * 100).toFixed(2) + '%'
+  }
+  return formattedAxis
+}
 const options = computed<ChartOptions<any>>(() => ({
   responsive: true,
   aspectRatio: 1.4,
@@ -60,7 +69,7 @@ const options = computed<ChartOptions<any>>(() => ({
       usePointStyle: true,
       callbacks: {
         label: (context: any) => {
-          return ` ${context.label} - ${props.type === 'bytes' ? humanFileSize(context.parsed.y.toFixed(1)) : context.parsed.y.toFixed(1)}`
+          return ` ${context.label} - ${formatAxisBasedOnType(context.parsed.y)}`
         },
         title: () => {
           return ''
@@ -75,7 +84,7 @@ const options = computed<ChartOptions<any>>(() => ({
         text: props.graph.label
       } as TitleOptions,
       ticks: {
-        callback: (value: any, index: any) => (props.type === 'bytes' ? humanFileSize(value as number) : value),
+        callback: (value: any, index: any) => (formatAxisBasedOnType(value)),
         maxTicksLimit: 8
       },
       stacked: false

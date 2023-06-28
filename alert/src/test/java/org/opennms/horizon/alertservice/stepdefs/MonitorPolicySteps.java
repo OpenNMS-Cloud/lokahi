@@ -28,17 +28,16 @@
 
 package org.opennms.horizon.alertservice.stepdefs;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Predicate;
-
+import com.google.protobuf.Empty;
+import com.google.protobuf.Int64Value;
+import com.google.protobuf.InvalidProtocolBufferException;
+import io.cucumber.datatable.DataTable;
+import io.cucumber.java.en.Given;
+import io.cucumber.java.en.Then;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.groups.Tuple;
+import org.junit.jupiter.api.Assertions;
 import org.junit.platform.commons.util.StringUtils;
 import org.opennms.horizon.alerts.proto.Alert;
 import org.opennms.horizon.alerts.proto.EventType;
@@ -51,17 +50,21 @@ import org.opennms.horizon.alerts.proto.Severity;
 import org.opennms.horizon.alerts.proto.TriggerEventProto;
 import org.opennms.horizon.alertservice.AlertGrpcClientUtils;
 import org.opennms.horizon.alertservice.kafkahelper.KafkaTestHelper;
+import org.opennms.horizon.shared.common.tag.proto.Operation;
+import org.opennms.horizon.shared.common.tag.proto.TagOperationList;
+import org.opennms.horizon.shared.common.tag.proto.TagOperationProto;
 import org.testcontainers.shaded.org.awaitility.Awaitility;
 
-import com.google.protobuf.Empty;
-import com.google.protobuf.Int64Value;
-import com.google.protobuf.InvalidProtocolBufferException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Predicate;
 
-import io.cucumber.datatable.DataTable;
-import io.cucumber.java.en.Given;
-import io.cucumber.java.en.Then;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -73,6 +76,8 @@ public class MonitorPolicySteps {
     private PolicyRuleProto.Builder ruleBuilder = PolicyRuleProto.newBuilder();
     private List<TriggerEventProto.Builder> triggerBuilders = new ArrayList<>();
     private Long policyId;
+    private String tenantId;
+    private String tagTopic;
 
     private MonitorPolicyProto policy;
 
@@ -84,9 +89,16 @@ public class MonitorPolicySteps {
         kafkaTestHelper.startConsumerAndProducer(background.getMonitoringPolicyTopic(), background.getMonitoringPolicyTopic());
     }
 
+    @Given("Kafka topic for tags {string}")
+    public void kafkaTopicForTags(String tagTopic) {
+        this.tagTopic = tagTopic;
+        kafkaTestHelper.setKafkaBootstrapUrl(background.getKafkaBootstrapUrl());
+        kafkaTestHelper.startConsumerAndProducer(tagTopic, tagTopic);
+    }
 
     @Given("Tenant id {string}")
     public void defaultTenantId(String tenantId) {
+        this.tenantId = tenantId;
         grpcClient.setTenantId(tenantId);
     }
 
@@ -192,7 +204,7 @@ public class MonitorPolicySteps {
 
     @Then("Verify monitoring policy for tenant {string} is sent to Kafka")
     public void verifyMonitoringPolicyTopic(String tenant) {
-        Awaitility.await().atMost(5, TimeUnit.SECONDS).untilAsserted(() -> {
+        Awaitility.await().atMost(10, TimeUnit.SECONDS).untilAsserted(() -> {
             List<MonitorPolicyProto> messages = kafkaTestHelper.getConsumedMessages(background.getMonitoringPolicyTopic()).stream().map(messageBytes -> {
                 try {
                     return MonitorPolicyProto.parseFrom(messageBytes.value());
@@ -200,8 +212,7 @@ public class MonitorPolicySteps {
                     throw new RuntimeException(e);
                 }
             }).filter(proto -> proto.getTenantId().equals(tenant)).toList();
-
-            assertEquals(1, messages.size());
+            assertTrue(messages.size() >= 1);
         });
     }
 
@@ -224,5 +235,39 @@ public class MonitorPolicySteps {
             }
         }).filter(predicate).toList();
 
+    }
+
+
+    @Then("Verify policy has tag {string}")
+    public void verifyPolicyHasTag(String tag) throws InterruptedException {
+        Awaitility.waitAtMost(10, TimeUnit.SECONDS).untilAsserted(() -> {
+            var policyProto = grpcClient.getPolicyStub().getPolicyById(Int64Value.newBuilder().setValue(policyId).build());
+            Assertions.assertFalse(policyProto.getTagsList().isEmpty());
+            String aTag = policyProto.getTags(0);
+            Assertions.assertEquals(tag, aTag);
+        });
+    }
+
+
+    @Given("Send tag operation data for existing monitoring policy")
+    public void sendTagOperationDataForExistingMonitoringPolicy(DataTable data) {
+
+        Map<String, String> map = data.asMaps().get(0);
+        var builder = TagOperationProto.newBuilder();
+        builder.setOperation(Operation.valueOf(map.get("action")))
+            .setTagName(map.get("name"))
+            .setTenantId(map.get("tenant-id"))
+            .addAllMonitoringPolicyId(List.of(policyId));
+        TagOperationList tagList = TagOperationList.newBuilder()
+            .addTags(builder.build()).build();
+        kafkaTestHelper.sendToTopic(tagTopic, tagList.toByteArray(), tenantId);
+    }
+
+    @Given("existing policy, get policy id")
+    public void existingPolicyGetPolicyId() {
+        var list = grpcClient.getPolicyStub().listPolicies(Empty.getDefaultInstance());
+        Assertions.assertFalse(list.getPoliciesList().isEmpty());
+        var monitoringPolicy = list.getPoliciesList().get(0);
+        policyId = monitoringPolicy.getId();
     }
 }

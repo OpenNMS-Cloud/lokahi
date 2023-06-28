@@ -26,46 +26,18 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.alertservice.db.entity;
+package org.opennms.horizon.server.model.inventory.tag;
 
-import io.hypersistence.utils.hibernate.type.array.ListArrayType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.Type;
 
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @Getter
 @Setter
-@Entity
-public class Tag {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    @Column(name = "tenant_id")
-    private String tenantId;
-    @Column(name = "name")
-    private String name;
-    @Column(name = "node_ids", columnDefinition = "bigint[]")
-    @Type(ListArrayType.class)
-    private List<Long> nodeIds = new ArrayList<>();
-    @ManyToMany
-    @JoinTable(
-        name = "policy_tag",
-        joinColumns = @JoinColumn(name = "tag_id"),
-        inverseJoinColumns = @JoinColumn(name = "policy_id")
-    )
-    private Set<MonitorPolicy> policies = new HashSet<>();
-
+@AllArgsConstructor
+public class TagListMonitorPolicyAdd {
+    private Long monitorPolicyId;
+    private List<TagCreate> tags;
 }

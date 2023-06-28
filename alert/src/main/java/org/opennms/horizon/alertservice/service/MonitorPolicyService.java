@@ -28,10 +28,10 @@
 
 package org.opennms.horizon.alertservice.service;
 
-import java.util.List;
-import java.util.Optional;
-
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.opennms.horizon.alerts.proto.AlertType;
+import org.opennms.horizon.alerts.proto.EventType;
 import org.opennms.horizon.alerts.proto.ManagedObjectType;
 import org.opennms.horizon.alerts.proto.MonitorPolicyProto;
 import org.opennms.horizon.alerts.proto.PolicyRuleProto;
@@ -39,19 +39,22 @@ import org.opennms.horizon.alerts.proto.Severity;
 import org.opennms.horizon.alerts.proto.TriggerEventProto;
 import org.opennms.horizon.alertservice.db.entity.AlertDefinition;
 import org.opennms.horizon.alertservice.db.entity.MonitorPolicy;
+import org.opennms.horizon.alertservice.db.entity.Tag;
 import org.opennms.horizon.alertservice.db.entity.TriggerEvent;
 import org.opennms.horizon.alertservice.db.repository.AlertDefinitionRepository;
 import org.opennms.horizon.alertservice.db.repository.MonitorPolicyRepository;
+import org.opennms.horizon.alertservice.db.repository.TagRepository;
 import org.opennms.horizon.alertservice.db.repository.TriggerEventRepository;
 import org.opennms.horizon.alertservice.mapper.MonitorPolicyMapper;
-import org.opennms.horizon.alerts.proto.EventType;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -67,6 +70,7 @@ public class MonitorPolicyService {
     private final MonitorPolicyRepository repository;
     private final AlertDefinitionRepository definitionRepo;
     private final TriggerEventRepository eventRepository;
+    private final TagRepository tagRepository;
 
     @EventListener(ApplicationReadyEvent.class)
     public void defaultPolicies() {
@@ -89,11 +93,11 @@ public class MonitorPolicyService {
             MonitorPolicyProto defaultPolicy = MonitorPolicyProto.newBuilder()
                 .setName(DEFAULT_POLICY)
                 .setMemo("Default SNMP event monitoring policy")
-                .addTags(DEFAULT_TAG)
                 .setNotifyByEmail(true)
                 .setNotifyByPagerDuty(true)
                 .setNotifyByWebhooks(true)
                 .addRules(defaultRule)
+                .addTags(DEFAULT_TAG)
                 .setNotifyInstruction("This is default policy notification") //todo: changed to something from environment
                 .build();
             createPolicy(defaultPolicy, SYSTEM_TENANT);
@@ -102,12 +106,48 @@ public class MonitorPolicyService {
         }
     }
 
+    @Transactional
     public MonitorPolicyProto createPolicy(MonitorPolicyProto request, String tenantId) {
         MonitorPolicy policy = policyMapper.map(request);
         updateData(policy, tenantId);
         MonitorPolicy newPolicy = repository.save(policy);
         createAlertDefinitionFromPolicy(newPolicy);
+        var tags = updateTags(newPolicy, policy.getTags());
+        newPolicy.setTags(tags);
         return policyMapper.map(newPolicy);
+    }
+
+    private Set<Tag> updateTags(MonitorPolicy newPolicy, Set<Tag> tags) {
+        Set<Tag> newTags = new HashSet<>();
+        tags.forEach(tag -> newTags.add(updateTag(newPolicy, tag)));
+        var existingTags = tagRepository.findByTenantIdAndPolicyId(newPolicy.getTenantId(), newPolicy.getId());
+        updateExistingTags(existingTags, newTags);
+        return newTags;
+    }
+
+    private void updateExistingTags(List<Tag> existingTags, Set<Tag> persistedTags) {
+        existingTags.forEach(tag -> {
+            if (persistedTags.stream().noneMatch(persistedTag ->
+                tag.getId().equals(persistedTag.getId()))) {
+                // Delete tag if it got removed and nodeIds are empty
+                if (tag.getNodeIds().isEmpty()) {
+                    tagRepository.deleteById(tag.getId());
+                } else {
+                    tag.setPolicies(new HashSet<>());
+                    tagRepository.save(tag);
+                }
+            }
+        });
+    }
+
+    private Tag updateTag(MonitorPolicy newPolicy, Tag tag) {
+
+        var optional = tagRepository.findByTenantIdAndName(newPolicy.getTenantId(), tag.getName());
+        if(optional.isPresent()) {
+            tag = optional.get();
+        }
+        tag.getPolicies().add(newPolicy);
+        return tagRepository.save(tag);
     }
 
     @Transactional(readOnly = true)
@@ -136,6 +176,9 @@ public class MonitorPolicyService {
                 e.setTenantId(tenantId);
                 e.setRule(r);
             });
+        });
+        policy.getTags().forEach( tag -> {
+            tag.setTenantId(tenantId);
         });
     }
 

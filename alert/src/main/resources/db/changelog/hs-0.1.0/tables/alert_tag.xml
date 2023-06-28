@@ -36,4 +36,9 @@
                                  referencedTableName="tag" referencedColumnNames="id"/>
         <dropColumn tableName="monitoring_policy" columnName="tags" />
     </changeSet>
+
+    <changeSet id="hs-0.1.0-tag-add-unique-constraint" author="cgorantla">
+        <addUniqueConstraint tableName="tag" columnNames="name,tenant_id"/>
+    </changeSet>
+
 </databaseChangeLog>

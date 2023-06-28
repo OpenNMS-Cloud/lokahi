@@ -78,4 +78,5 @@ public class BackgroundSteps {
         this.kafkaBootstrapUrl = System.getProperty(systemProperty);
         log.info("Using Kafka base URL: {}", this.kafkaBootstrapUrl);
     }
+
 }

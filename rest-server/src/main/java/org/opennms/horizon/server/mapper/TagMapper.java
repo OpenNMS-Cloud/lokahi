@@ -40,6 +40,7 @@ import org.opennms.horizon.inventory.dto.TagEntityIdDTO;
 import org.opennms.horizon.inventory.dto.TagRemoveListDTO;
 import org.opennms.horizon.server.model.inventory.tag.Tag;
 import org.opennms.horizon.server.model.inventory.tag.TagCreate;
+import org.opennms.horizon.server.model.inventory.tag.TagListMonitorPolicyAdd;
 import org.opennms.horizon.server.model.inventory.tag.TagListNodesAdd;
 import org.opennms.horizon.server.model.inventory.tag.TagListNodesRemove;
 
@@ -59,6 +60,12 @@ public interface TagMapper {
         return builder.build();
     }
 
+    default TagCreateListDTO tagListAddToProtoCustom(TagListMonitorPolicyAdd tags) {
+        TagCreateListDTO.Builder builder = tagListAddToProto(tags).toBuilder();
+        builder.addEntityIds(TagEntityIdDTO.newBuilder().setMonitoringPolicyId(tags.getMonitorPolicyId()).build());
+        return builder.build();
+    }
+
     default TagRemoveListDTO tagListRemoveToProtoCustom(TagListNodesRemove tags) {
         TagRemoveListDTO.Builder builder = tagListRemoveToProto(tags).toBuilder();
         builder.addAllEntityIds(tags.getNodeIds().stream()
@@ -73,6 +80,10 @@ public interface TagMapper {
 
     @Mapping(target = "tagIdsList", source = "tagIds", nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
     TagRemoveListDTO tagListRemoveToProto(TagListNodesRemove tags);
+
+    @Mapping(target = "tagsList", source = "tags", nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
+    TagCreateListDTO tagListAddToProto(TagListMonitorPolicyAdd tags);
+
 
     TagCreateDTO tagCreateToProto(TagCreate tagCreate);
 

@@ -47,6 +47,8 @@ import org.opennms.horizon.alertservice.testcontainers.TestContainerRunnerClassR
     plugin = {"json:target/cucumber-report.json", "html:target/cucumber.html", "pretty"},
     objectFactory = io.cucumber.picocontainer.PicoFactory.class,
     features = "classpath:org/opennms/horizon/alertservice"
+    // For running a set of tests, following can be used
+    //tags = "@Policy"
 )
 public class CucumberRunnerIT {
 

@@ -28,8 +28,9 @@
 
 package org.opennms.horizon.alertservice.service.routing;
 
-import java.util.Arrays;
-
+import com.google.protobuf.InvalidProtocolBufferException;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.opennms.horizon.alertservice.service.TagService;
 import org.opennms.horizon.shared.common.tag.proto.TagOperationList;
 import org.springframework.context.annotation.PropertySource;
@@ -37,10 +38,7 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 
-import com.google.protobuf.InvalidProtocolBufferException;
-
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.util.Arrays;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -54,6 +52,7 @@ public class TagOperationConsumer {
         try {
             TagOperationList operationList = TagOperationList.parseFrom(data);
             tagService.insertOrUpdateTags(operationList);
+            log.info("Received tag operation {}", operationList);
         } catch (InvalidProtocolBufferException e) {
             log.error("Error while parsing TagOperationList, payload data {}", Arrays.toString(data), e);
         }

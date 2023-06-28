@@ -19,7 +19,7 @@ const useTheme = () => {
     }
   })
 
-  return { isDark, toggleDark, onThemeChange }
+  return { isDark: ref(false), toggleDark, onThemeChange }
 }
 
 export default useTheme

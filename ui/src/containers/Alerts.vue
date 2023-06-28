@@ -66,14 +66,14 @@
                 >Select All</FeatherCheckbox
               >
               <FeatherButton
-                :disabled="!atLeastOneAlertSelected"
+                v-if="atLeastOneAlertSelected"
                 text
                 @click="clearAlertsHandler"
                 data-test="clear-btn"
                 >clear</FeatherButton
               >
               <FeatherButton
-                :disabled="!atLeastOneAlertSelected"
+                v-if="atLeastOneAlertSelected"
                 text
                 @click="acknowledgeAlertsHandler"
                 data-test="acknowledge-btn"

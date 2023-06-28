@@ -51,6 +51,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
+import com.codahale.metrics.MetricRegistry;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.opennms.horizon.flows.document.FlowDocument;
@@ -93,7 +94,7 @@ public class ClearUdpSessionCmdTest {
         AsyncDispatcher<FlowDocument> dispatcher = mock(AsyncDispatcher.class);
         MessageDispatcherFactory messageDispatcherFactory = mock(MessageDispatcherFactory.class);
         when(messageDispatcherFactory.createAsyncDispatcher(any(FlowSinkModule.class))).thenReturn(dispatcher);
-        TelemetryRegistry telemetryRegistry = new TelemetryRegistryImpl(messageDispatcherFactory, identity, dnsResolver);
+        TelemetryRegistry telemetryRegistry = new TelemetryRegistryImpl(messageDispatcherFactory, identity, dnsResolver, new MetricRegistry());
 
         FlowsListenerFactory.FlowsListener flowsListener = new FlowsListenerFactory(telemetryRegistry).create(readFlowsConfig());
 

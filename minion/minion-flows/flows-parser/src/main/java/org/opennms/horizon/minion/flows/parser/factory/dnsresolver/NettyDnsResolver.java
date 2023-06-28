@@ -111,12 +111,12 @@ public class NettyDnsResolver implements DnsResolver {
 
     public NettyDnsResolver(MetricRegistry metrics) {
         this.metrics = Objects.requireNonNull(metrics);
-        lookupTimer = metrics.timer("lookups");
-        lookupsSuccessful = metrics.meter("lookupsSuccessful");
-        lookupsFailed = metrics.meter("lookupsFailed");
-        lookupsRejectedByCircuitBreaker = metrics.meter("lookupsRejectedByCircuitBreaker");
-        metrics.register("availableConcurrentCalls", (Gauge<Integer>) () -> bulkhead.getMetrics().getAvailableConcurrentCalls());
-        metrics.register("maxAllowedConcurrentCalls", (Gauge<Integer>) () -> bulkhead.getMetrics().getMaxAllowedConcurrentCalls());
+        lookupTimer = metrics.timer("dnsLookups");
+        lookupsSuccessful = metrics.meter("dnsLookupsSuccessful");
+        lookupsFailed = metrics.meter("dnsLookupsFailed");
+        lookupsRejectedByCircuitBreaker = metrics.meter("dnsLookupsRejectedByCircuitBreaker");
+        metrics.register("dnsAvailableConcurrentCalls", (Gauge<Integer>) () -> bulkhead.getMetrics().getAvailableConcurrentCalls());
+        metrics.register("dnsMaxAllowedConcurrentCalls", (Gauge<Integer>) () -> bulkhead.getMetrics().getMaxAllowedConcurrentCalls());
     }
 
     public void init() {

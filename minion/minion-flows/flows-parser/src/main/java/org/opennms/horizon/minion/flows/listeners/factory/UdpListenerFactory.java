@@ -45,9 +45,11 @@ import com.codahale.metrics.MetricRegistry;
 public class UdpListenerFactory implements ListenerFactory {
 
     private final TelemetryRegistry telemetryRegistry;
+    private final MetricRegistry metricRegistry;
 
-    public UdpListenerFactory(TelemetryRegistry telemetryRegistry) {
+    public UdpListenerFactory(TelemetryRegistry telemetryRegistry, MetricRegistry metricRegistry) {
         this.telemetryRegistry = Objects.requireNonNull(telemetryRegistry);
+        this.metricRegistry = Objects.requireNonNull(metricRegistry);
     }
 
     @Override
@@ -79,6 +81,6 @@ public class UdpListenerFactory implements ListenerFactory {
             throw new IllegalArgumentException(String.format("Invalid port for listener: %s, error: %s", listenerConfig.getName(), e.getMessage()));
         }
 
-        return new UdpListener(listenerConfig.getName(), port, udpParsers, new MetricRegistry());
+        return new UdpListener(listenerConfig.getName(), port, udpParsers, metricRegistry);
     }
 }

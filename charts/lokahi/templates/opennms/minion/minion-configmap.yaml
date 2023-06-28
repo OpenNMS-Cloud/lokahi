@@ -11,7 +11,7 @@ data:
     # Properties below override these defined earlier in file!
     {{- if .Values.OpenNMS.Minion.addTestLocation }}
     grpc.host: ingress-nginx-controller
-    grpc.port: {{ .Values.Port }}
+    grpc.port: 443
     grpc.tls.enabled: true
     grpc.client.truststore: /run/secrets/certificates/tls.crt
     grpc.client.keystore: /opt/karaf/certs/minion.p12

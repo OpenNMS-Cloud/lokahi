@@ -49,8 +49,14 @@
 
     <changeSet id="0.1.0-table-add-policy-ids" author="cgorantla">
         <addColumn tableName="tag">
-            <column name="monitor_policy_ids" type="jsonb" />
+            <column name="monitor_policy_ids" type="jsonb"/>
         </addColumn>
     </changeSet>
 
+    <changeSet id="0.1.0-tag-monitor-policy-ids-add-default-value" author="cgorantla">
+        <addDefaultValue tableName="tag" columnName="monitor_policy_ids" defaultValue="[]"/>
+        <sql>
+            UPDATE tag SET monitor_policy_ids = '[]' WHERE monitor_policy_ids IS NULL;
+        </sql>
+    </changeSet>
 </databaseChangeLog>

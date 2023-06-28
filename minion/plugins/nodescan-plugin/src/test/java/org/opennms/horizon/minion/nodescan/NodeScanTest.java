@@ -114,7 +114,7 @@ public class NodeScanTest {
         SNMPInterfaceTableTracker tracker = new SNMPInterfaceTableTracker() {
             @Override
             public void processPhysicalInterfaceRow(PhysicalInterfaceRow row) {
-                list.add(row.createInterfaceFromRow());
+                row.createInterfaceFromRow().ifPresent(list::add);
             }
         };
         try (SnmpWalker walker = snmpHelper.createWalker(agentConfig, "snmpInterfaceTable", tracker)) {

@@ -44,7 +44,6 @@ import org.opennms.horizon.alertservice.db.entity.ThresholdedEvent;
 import org.opennms.horizon.alertservice.db.entity.TriggerEvent;
 import org.opennms.horizon.alertservice.db.repository.AlertDefinitionRepository;
 import org.opennms.horizon.alertservice.db.repository.AlertRepository;
-import org.opennms.horizon.alertservice.db.repository.MonitorPolicyRepository;
 import org.opennms.horizon.alertservice.db.repository.TagRepository;
 import org.opennms.horizon.alertservice.db.repository.ThresholdedEventRepository;
 import org.opennms.horizon.alertservice.db.repository.TriggerEventRepository;
@@ -78,8 +77,6 @@ public class AlertEventProcessor {
     private final AlertDefinitionRepository alertDefinitionRepository;
     private final TriggerEventRepository triggerEventRepository;
     private final ThresholdedEventRepository thresholdedEventRepository;
-
-    private final MonitorPolicyRepository monitorPolicyRepository;
 
     private final TagRepository tagRepository;
 
@@ -115,7 +112,6 @@ public class AlertEventProcessor {
         var tags = tagRepository.findByTenantIdAndNodeId(event.getTenantId(), event.getNodeId());
         List<MonitorPolicy> matchingPolicies = new ArrayList<>();
         tags.forEach(tag -> matchingPolicies.addAll(tag.getPolicies().stream().toList()));
-        // TODO HS-1485: An alert could match multiple monitoring policies, each having their own notifications.
         var policies = matchingPolicies.stream().map(MonitorPolicy::getId).toList();
         return new AlertData(
             reductionKey,

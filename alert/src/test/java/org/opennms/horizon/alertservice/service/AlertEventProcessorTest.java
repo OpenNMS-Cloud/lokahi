@@ -11,16 +11,19 @@ import org.opennms.horizon.alerts.proto.Severity;
 import org.opennms.horizon.alertservice.db.entity.Alert;
 import org.opennms.horizon.alertservice.db.entity.AlertDefinition;
 import org.opennms.horizon.alertservice.db.entity.MonitorPolicy;
+import org.opennms.horizon.alertservice.db.entity.Tag;
 import org.opennms.horizon.alertservice.db.entity.TriggerEvent;
 import org.opennms.horizon.alertservice.db.repository.AlertDefinitionRepository;
 import org.opennms.horizon.alertservice.db.repository.AlertRepository;
-import org.opennms.horizon.alertservice.db.repository.MonitorPolicyRepository;
+import org.opennms.horizon.alertservice.db.repository.TagRepository;
 import org.opennms.horizon.alertservice.db.repository.TriggerEventRepository;
 import org.opennms.horizon.alertservice.db.tenant.TenantLookup;
 import org.opennms.horizon.events.proto.Event;
 
-import java.util.Optional;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -40,10 +43,10 @@ public class AlertEventProcessorTest {
     TriggerEventRepository triggerEventRepository;
 
     @Mock
-    MonitorPolicyRepository monitorPolicyRepository;
+    MeterRegistry registry;
 
     @Mock
-    MeterRegistry registry;
+    TagRepository tagRepository;
 
     @Mock
     TenantLookup tenantLookup;
@@ -71,13 +74,18 @@ public class AlertEventProcessorTest {
         MonitorPolicy monitorPolicy = new MonitorPolicy();
         monitorPolicy.setId(1L);
         monitorPolicy.setTenantId("tenantA");
+        var tag = new Tag();
+        tag.setPolicies(new HashSet<>(List.of(monitorPolicy)));
+        var tags = new ArrayList<Tag>();
+        tags.add(tag);
+
 
         Mockito.when(alertDefinitionRepository.findFirstByTenantIdAndUei(event.getTenantId(), event.getUei()))
             .thenReturn(Optional.of(alertDefinition));
         Mockito.when(triggerEventRepository.getReferenceById(triggerEvent.getId()))
             .thenReturn(triggerEvent);
-        Mockito.when(monitorPolicyRepository.findMonitoringPolicyByTriggerEvent(triggerEvent.getId()))
-            .thenReturn(Optional.of(monitorPolicy));
+        Mockito.when(tagRepository.findByTenantIdAndNodeId(Mockito.anyString(), Mockito.anyLong())).thenReturn(tags);
+
 
         Alert alert = processor.addOrReduceEventAsAlert(event);
         assertEquals("tenantA", alert.getTenantId());

@@ -38,6 +38,7 @@ import org.opennms.horizon.minioncertverifier.parser.CertificateParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -51,6 +52,8 @@ import jakarta.servlet.http.HttpServletRequest;
 @RestController
 @RequestMapping("/certificate")
 public class CertificateController {
+    public static final String TENANTID_KEY = "tenant-id";
+    public static final String LOCATIONID_KEY = "location-id";
 
     private final Logger logger = LoggerFactory.getLogger(CertificateController.class);
     private final CertificateDnParser certificateDnParser;
@@ -74,20 +77,25 @@ public class CertificateController {
         }
 
         String cert = request.getHeader("ssl-client-cert");
-        return validate( cert);
+        return validate(cert);
     }
 
     @GetMapping
     public ResponseEntity<Void> validate(@RequestHeader("ssl-client-cert") String certificatePem) {
+        var span = Span.current();
         CertificateParser parser;
         try {
             parser = new CertificateParser(certificatePem);
         } catch (CertificateException ex) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            span.setAttribute("message", "Invalid certificate");
+            span.setStatus(StatusCode.ERROR);
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
         IsCertificateValidResponse response = minionCertificateManagerClient.isCertValid(parser.getSerialNumber());
         if (!response.getIsValid()) {
+            span.setAttribute("message", "Invalid certificate. serial number: " + parser.getSerialNumber());
+            span.setStatus(StatusCode.ERROR);
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
@@ -105,22 +113,25 @@ public class CertificateController {
             }
         }
 
-        var span = Span.current();
+
         if (span.isRecording()) {
             span.setAttribute("ssl-client-subject-dn", clientSubjectDn);
-            span.setAttribute("user", tenant);
-            span.setAttribute("location", location);
+            span.setAttribute(TENANTID_KEY, tenant);
+            span.setAttribute(LOCATIONID_KEY, location);
         }
 
         if (tenant.isBlank() || location.isBlank() || !location.matches("^\\d+$")) {
             span.setStatus(StatusCode.ERROR);
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .header(TENANTID_KEY, tenant)
+                .header(LOCATIONID_KEY, location)
+                .build();
         }
 
         span.setStatus(StatusCode.OK);
         return ResponseEntity.ok()
-            .header("tenant-id", tenant)
-            .header("location-id", location)
+            .header(TENANTID_KEY, tenant)
+            .header(LOCATIONID_KEY, location)
             .build();
     }
 }

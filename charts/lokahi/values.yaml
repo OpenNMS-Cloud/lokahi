@@ -259,6 +259,7 @@ OpenNMS:
         Cpu: 100m
         Memory: 250Mi
     PrivateRepoEnabled: false
+    CertificateManagerUrl: dev
 Postgres:
   Enabled: true
   ServiceName: postgres

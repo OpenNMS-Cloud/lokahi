@@ -82,7 +82,7 @@ public class CertificateController {
         CertificateParser parser;
         try {
             parser = new CertificateParser(certificatePem);
-        }catch(CertificateException ex){
+        } catch (CertificateException ex) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 

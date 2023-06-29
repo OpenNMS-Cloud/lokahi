@@ -55,6 +55,8 @@ public class CertificateController {
     public static final String TENANTID_KEY = "tenant-id";
     public static final String LOCATIONID_KEY = "location-id";
 
+    public static final String ERROR_HEADER_KEY = "error";
+
     private final Logger logger = LoggerFactory.getLogger(CertificateController.class);
     private final CertificateDnParser certificateDnParser;
 
@@ -86,16 +88,16 @@ public class CertificateController {
         CertificateParser parser;
         try {
             parser = new CertificateParser(certificatePem);
+            span.setAttribute("serial-number", parser.getSerialNumber());
         } catch (CertificateException ex) {
-            span.setAttribute("message", "Invalid certificate");
+            span.recordException(ex);
             span.setStatus(StatusCode.ERROR);
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
         IsCertificateValidResponse response = minionCertificateManagerClient.isCertValid(parser.getSerialNumber());
         if (!response.getIsValid()) {
-            span.setAttribute("message", "Invalid certificate. serial number: " + parser.getSerialNumber());
-            span.setStatus(StatusCode.ERROR);
+            span.setStatus(StatusCode.ERROR, "certificate manager reported that certificate is invalid");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
@@ -116,16 +118,24 @@ public class CertificateController {
 
         if (span.isRecording()) {
             span.setAttribute("ssl-client-subject-dn", clientSubjectDn);
-            span.setAttribute(TENANTID_KEY, tenant);
-            span.setAttribute(LOCATIONID_KEY, location);
+            span.setAttribute("user", tenant);
+            span.setAttribute("location", location);
         }
 
-        if (tenant.isBlank() || location.isBlank() || !location.matches("^\\d+$")) {
-            span.setStatus(StatusCode.ERROR);
+        if (tenant.isBlank()) {
+            span.setStatus(StatusCode.ERROR, TENANTID_KEY + " is blank");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .header(TENANTID_KEY, tenant)
-                .header(LOCATIONID_KEY, location)
-                .build();
+                .header(ERROR_HEADER_KEY, "MISSING " + TENANTID_KEY).build();
+        }
+        if (location.isBlank()) {
+            span.setStatus(StatusCode.ERROR, LOCATIONID_KEY + " is blank");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .header(ERROR_HEADER_KEY, "MISSING " + LOCATIONID_KEY).build();
+        }
+        if (!location.matches("^\\d+$")) {
+            span.setStatus(StatusCode.ERROR, LOCATIONID_KEY + " is not number");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .header(ERROR_HEADER_KEY, "INVALID " + LOCATIONID_KEY).build();
         }
 
         span.setStatus(StatusCode.OK);

@@ -89,7 +89,8 @@ public class CertificateController {
         try {
             parser = new CertificateParser(certificatePem);
             span.setAttribute("serial-number", parser.getSerialNumber());
-        } catch (CertificateException ex) {
+        } catch (Exception ex) {
+            // we want to capture all exceptions include null pointer
             span.recordException(ex);
             span.setStatus(StatusCode.ERROR);
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();

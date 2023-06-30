@@ -32,11 +32,14 @@ import { ChartOptions, TitleOptions, ChartData } from 'chart.js'
 import Chart from 'chart.js/auto'
 // import zoomPlugin from 'chartjs-plugin-zoom'
 import { PropType } from 'vue'
-import { formatTimestamp, downloadCanvas } from './utils'
+import { downloadCanvas } from './utils'
 import { GraphProps } from '@/types/graphs'
 import DownloadFile from '@featherds/icon/action/DownloadFile'
 import { format } from 'd3'
 import useTheme from '@/composables/useTheme'
+import 'chartjs-adapter-date-fns'
+import { format as formatDate, add } from 'date-fns'
+
 const emits = defineEmits(['has-data'])
 // Chart.register(zoomPlugin) disable zoom until phase 2
 const graphs = useGraphs()
@@ -83,7 +86,13 @@ const options = computed<ChartOptions<any>>(() => ({
       stacked: false
     },
     x: {
+      type: 'time',
+      time: {
+        tooltipFormat: 'kk:mm',
+        parser: (val: number) => val * 1000 // convert to miliseconds before applying format
+      },
       ticks: {
+        callback: (val: number) => formatDate(new Date(val), 'kk:mm'),
         maxTicksLimit: 12
       },
       grid: {
@@ -95,10 +104,12 @@ const options = computed<ChartOptions<any>>(() => ({
 }))
 const xAxisLabels = computed(() => {
   const graphsDataSetsValues = (graphs.dataSets.value[0]?.values as any) || ([] as any)
-  const totalLabels = graphsDataSetsValues.map((val: any) => {
-    return formatTimestamp(val[0], 'minutes')
-  })
-  return totalLabels
+
+  // used to track the gap between the previous point and now, should the collector go down
+  const date = add(new Date(), { minutes: 2 })
+  graphsDataSetsValues.push([date.getTime() / 1000, 0])
+
+  return graphsDataSetsValues.map((val: number[]) => val[0])
 })
 const dataSets = computed(() => {
   const bgColor = ['green', 'blue'] // TODO: find solution to set bg color, in regards to FeatherDS theme switching
@@ -109,7 +120,11 @@ const dataSets = computed(() => {
     backgroundColor: bgColor[i],
     borderColor: bgColor[i],
     hitRadius: 5,
-    hoverRadius: 6
+    hoverRadius: 6,
+    // this bizarre line hides the last point (always 0), which is used to track the gap 
+    // between the previous point and now, should the collector go down
+    pointRadius: Array.from(Array(xAxisLabels.value.length).keys()).map((_, index) => xAxisLabels.value.length -1 === index ? 0 : 3) ,
+    spanGaps: 1000 * 60 * 2 // no line over 2+ minute gaps
   }))
 })
 const chartData = computed<ChartData<any>>(() => {

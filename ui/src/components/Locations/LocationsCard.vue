@@ -13,7 +13,8 @@
           data-test="name"
         />
       </div>
-      <PillColor
+      <!-- Post EAR -->
+      <!-- <PillColor
         :item="statusPill"
         class="status"
         data-test="status"
@@ -23,7 +24,7 @@
           :icon="icons.cert"
           data-test="icon-expiry"
         />
-      </div>
+      </div> -->
     </div>
     <div class="context-menu">
       <MoreOptionsMenu

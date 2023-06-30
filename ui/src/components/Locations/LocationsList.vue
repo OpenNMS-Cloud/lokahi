@@ -27,12 +27,13 @@
         >
           Name
         </div>
-        <div
+        <!-- Post EAR -->
+        <!-- <div
           class="status"
           data-test="status"
         >
           Status
-        </div>
+        </div> -->
       </div>
       <ul>
         <li

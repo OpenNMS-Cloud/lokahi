@@ -29,8 +29,6 @@
 package org.opennms.horizon.alertservice.config;
 
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 
@@ -38,7 +36,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = "kafka.topics")
 public class KafkaTopicProperties {
 
-    private String event;
+    private String trapEvent;
 
     private String tagOperation;
 

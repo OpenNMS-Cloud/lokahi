@@ -28,14 +28,12 @@
 
 package org.opennms.horizon.shared.snmp;
 
-import jakarta.xml.bind.annotation.XmlRootElement;
 
 /**
  * Represents a base class for SnmpConfiguration of agents, ranges and defaults
  *
  * @author brozow
  */
-@XmlRootElement(name="snmpConfiguration")
 public class SnmpConfiguration {
 	
     public static final int DEFAULT_TIMEOUT = 3000;

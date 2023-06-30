@@ -113,6 +113,11 @@ public class IPAddrTracker extends TableTracker {
             }
 
             final InetAddress inetAddress = InetAddressUtils.addr(ipAddr);
+
+            if (inetAddress.isAnyLocalAddress() || inetAddress.isLoopbackAddress() || inetAddress.isLinkLocalAddress() || inetAddress.isMulticastAddress()) {
+                return Optional.empty();
+            }
+
             IpInterfaceResult.Builder ipInterFaceBuilder = IpInterfaceResult.newBuilder();
             ipInterFaceBuilder.setIpAddress(inetAddress.getHostAddress());
             ipInterFaceBuilder.setNetmask(netMask.getHostAddress());

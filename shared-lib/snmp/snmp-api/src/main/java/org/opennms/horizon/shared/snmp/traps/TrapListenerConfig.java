@@ -30,25 +30,16 @@ package org.opennms.horizon.shared.snmp.traps;
 
 import org.opennms.horizon.shared.snmp.SnmpV3User;
 
-import jakarta.xml.bind.annotation.XmlAccessType;
-import jakarta.xml.bind.annotation.XmlAccessorType;
-import jakarta.xml.bind.annotation.XmlElement;
-import jakarta.xml.bind.annotation.XmlElementWrapper;
-import jakarta.xml.bind.annotation.XmlRootElement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.StringJoiner;
 
 
-@XmlRootElement(name = "trap-listener-config")
-@XmlAccessorType(XmlAccessType.NONE)
 public class TrapListenerConfig {
 
     public static final String TWIN_KEY = "trapd.listener.config";
 
-    @XmlElementWrapper(name = "snmp-v3-users")
-    @XmlElement(name = "snmp-v3-user")
     private List<SnmpV3User> snmpV3Users= new ArrayList<>();
 
     public List<SnmpV3User> getSnmpV3Users() {

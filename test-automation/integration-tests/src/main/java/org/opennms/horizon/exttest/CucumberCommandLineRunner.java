@@ -6,6 +6,9 @@ import io.cucumber.core.runtime.Runtime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 @Component
 public class CucumberCommandLineRunner {
@@ -19,12 +22,16 @@ public class CucumberCommandLineRunner {
     @Autowired
     private ApplicationContext applicationContext;
 
-    public void run() {
+    public void run(String... args) {
+        System.out.println("Arguments: " + args.length);
+        List<String> arguments = new ArrayList<>();
+        arguments.addAll(Arrays.asList(DEFAULT_CUCUMBER_OPTIONS));
+        arguments.addAll(Arrays.asList(args));
         CommandlineOptionsParser commandlineOptionsParser = new CommandlineOptionsParser(System.out);
 
         RuntimeOptions runtimeOptions =
-                commandlineOptionsParser.parse(DEFAULT_CUCUMBER_OPTIONS)
-                .build();
+                commandlineOptionsParser.parse(arguments.toArray(DEFAULT_CUCUMBER_OPTIONS))
+                    .build();
 
         Runtime cucumberRuntime =
                 Runtime.builder()

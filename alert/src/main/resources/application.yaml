@@ -44,7 +44,7 @@ grpc:
 
 kafka:
   topics:
-    event: "events"
+    trap-event: "events"
     tag-operation: "tag-operation"
     alert: "alerts"
     monitoring-policy: "monitoring-policy"

@@ -69,4 +69,3 @@ The following sections might be of most interest:
 ## License
 
 The software is licensed under the GNU Affero General Public License 3.0.
-

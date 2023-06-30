@@ -70,6 +70,12 @@ spec:
                   key: minionGatewayPwd
             - name: SPRING_DATASOURCE_URL
               value: "jdbc:postgresql://{{ .Values.OpenNMS.MinionGateway.DbHost }}:5432/{{ .Values.OpenNMS.MinionGateway.DbName }}?currentSchema={{ .Values.OpenNMS.MinionGateway.DbSchemaName }}"
+            - name: IGNITE_USE_KUBERNETES
+              value: "{{ .Values.OpenNMS.MinionGateway.UseKubernetes }}"
+            - name: IGNITE_KUBERNETES_SERVICE_NAME
+              value: "{{ .Values.OpenNMS.MinionGateway.ServiceName }}"
+            - name: IGNITE_KUBERNETES_NAMESPACE
+              value: "{{ .Release.Namespace }}"
             - name: SPRING_KAFKA_BOOTSTRAP_SERVERS
               value: "{{ .Values.OpenNMS.global.kafkaClient.bootstrapServers }}"
             - name: IGNITE_UPDATE_NOTIFIER # Disable Ignite version lookups

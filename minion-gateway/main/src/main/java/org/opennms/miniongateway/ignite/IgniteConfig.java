@@ -23,10 +23,13 @@ import org.springframework.context.annotation.ImportResource;
 @Configuration
 public class IgniteConfig {
 
-    @Value("${ignite.use-kubernetes:false}")
+    @Value("${ignite.use-kubernetes:true}")
     private boolean useKubernetes;
 
-    @Value("${ignite.kubernetes-service-name:unknown}")
+    @Value("${ignite.kubernetes-namespace:default}")
+    private String kubernetesNamespace;
+
+    @Value("${ignite.kubernetes-service-name:opennms-minion-gateway-ignite}")
     private String kubernetesServiceName;
 
     @Value("${ignite.config:file*:/config/ignite.xml}")
@@ -93,6 +96,7 @@ public class IgniteConfig {
         TcpDiscoverySpi tcpDiscoverySpi = new TcpDiscoverySpi();
 
         KubernetesConnectionConfiguration connectionConfiguration = new KubernetesConnectionConfiguration();
+        connectionConfiguration.setNamespace(kubernetesNamespace);
         connectionConfiguration.setServiceName(kubernetesServiceName);
 
         TcpDiscoveryKubernetesIpFinder ipFinder = new TcpDiscoveryKubernetesIpFinder(connectionConfiguration);

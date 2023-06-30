@@ -50,6 +50,9 @@ spec:
         - name: spring-boot-app-config-volume
           configMap:
             name: spring-boot-app-config
+        - name: rocksdb
+          persistentVolumeClaim:
+            claimName: minion-certificate-manager-pvc
       containers:
         - name: {{ .Values.OpenNMS.MinionCertificateManager.ServiceName }}
           image: {{ .Values.OpenNMS.MinionCertificateManager.Image }}
@@ -79,6 +82,8 @@ spec:
               readOnly: true
             - name: spring-boot-app-config-volume
               mountPath: "/app/config"
+            - name: rocksdb
+              mountPath: "/app/rocks-db"
       {{- if .Values.OpenNMS.MinionCertificateManager.PrivateRepoEnabled }}
       imagePullSecrets:
         - name: image-credentials

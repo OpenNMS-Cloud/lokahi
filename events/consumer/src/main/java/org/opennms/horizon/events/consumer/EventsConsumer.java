@@ -65,7 +65,7 @@ public class EventsConsumer {
         this.metricsTracker = metricsTracker;
     }
 
-    @KafkaListener(topics = "${kafka.events-topic}", concurrency = "1")
+    @KafkaListener(topics = "${kafka.trap-events-topic}", concurrency = "1")
     public void consume(@Payload byte[] data) {
 
         try {

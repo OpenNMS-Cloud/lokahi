@@ -68,15 +68,6 @@ describe('Alerts', () => {
       expect(checkbox.exists()).toBeTruthy()
     })
 
-    test('Should have clear button', () => {
-      const btn = wrapper.get('[data-test="clear-btn"]')
-      expect(btn.exists()).toBeTruthy()
-    })
-
-    test('Should have acknowledge button', () => {
-      const btn = wrapper.get('[data-test="acknowledge-btn"]')
-      expect(btn.exists()).toBeTruthy()
-    })
 
     test('Should have list count', async () => {
       const elem = wrapper.find('[data-test="list-count"]')

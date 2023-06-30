@@ -36,13 +36,14 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-
-import jakarta.validation.constraints.NotNull;
-import org.opennms.horizon.inventory.model.discovery.active.ActiveDiscovery;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import org.opennms.horizon.inventory.model.discovery.PassiveDiscovery;
+import org.opennms.horizon.inventory.model.discovery.active.ActiveDiscovery;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -85,4 +86,8 @@ public class Tag {
         joinColumns = @JoinColumn(name = "tag_id"),
         inverseJoinColumns = @JoinColumn(name = "passive_discovery_id"))
     private List<PassiveDiscovery> passiveDiscoveries = new ArrayList<>();
+
+    @Column(name = "monitor_policy_ids", columnDefinition = "jsonb")
+    @JdbcTypeCode( SqlTypes.JSON )
+    private List<Long> monitorPolicyIds = new ArrayList<>();
 }

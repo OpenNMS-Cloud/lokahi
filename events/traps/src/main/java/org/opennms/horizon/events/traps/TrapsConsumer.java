@@ -52,7 +52,7 @@ public class TrapsConsumer {
 
     @Autowired
     @Setter
-    private TrapEventForwarder eventForwarder;
+    private EventForwarder eventForwarder;
 
     @Autowired
     @Setter
@@ -62,7 +62,7 @@ public class TrapsConsumer {
     @Setter
     private TrapLogProtoToEventLogXmlMapper trapLogProtoToXmlMapper;
 
-    @KafkaListener(topics = "${kafka.traps-topic}", concurrency = "1")
+    @KafkaListener(topics = "${kafka.raw-traps-topic}", concurrency = "1")
     public void consume(@Payload byte[] data) {
 
         try {
@@ -81,7 +81,7 @@ public class TrapsConsumer {
             EventLog eventLogProto = eventLogXmlToProtoMapper.convert(eventLog, tenantId);
 
             // Send them to kafka
-            eventForwarder.sendEvents(eventLogProto);
+            eventForwarder.sendTrapEvents(eventLogProto);
 
             eventLogProto.getEventsList().stream()
                 .filter(event-> ( event.getNodeId() <= 0 ))

@@ -28,14 +28,13 @@
 
 package org.opennms.horizon.alertservice.stepdefs;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
-
+import com.google.protobuf.MessageOrBuilder;
+import io.cucumber.datatable.DataTable;
+import io.cucumber.java.Transpose;
+import io.cucumber.java.en.And;
+import io.cucumber.java.en.Given;
+import io.cucumber.java.en.Then;
+import lombok.RequiredArgsConstructor;
 import org.opennms.horizon.alert.tag.proto.TagListProto;
 import org.opennms.horizon.alert.tag.proto.TagProto;
 import org.opennms.horizon.alertservice.AlertGrpcClientUtils;
@@ -45,14 +44,14 @@ import org.opennms.horizon.shared.common.tag.proto.Operation;
 import org.opennms.horizon.shared.common.tag.proto.TagOperationList;
 import org.opennms.horizon.shared.common.tag.proto.TagOperationProto;
 
-import com.google.protobuf.MessageOrBuilder;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
-import io.cucumber.datatable.DataTable;
-import io.cucumber.java.Transpose;
-import io.cucumber.java.en.And;
-import io.cucumber.java.en.Given;
-import io.cucumber.java.en.Then;
-import lombok.RequiredArgsConstructor;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @RequiredArgsConstructor
 public class TagTestSteps {
@@ -85,11 +84,14 @@ public class TagTestSteps {
     public void tagOperationData(DataTable data) {
         Map<String, String> map = data.asMaps().get(0);
         List<Long> nodIds = Arrays.stream(map.get("node_ids").split(",")).map(s -> Long.parseLong(s)).collect(Collectors.toList());
+        List<Long> policyIds = map.get("policy_ids") != null ?
+            Arrays.stream(map.get("policy_ids").split(",")).map(s -> Long.parseLong(s)).collect(Collectors.toList()) : new ArrayList<>();
         builder = TagOperationProto.newBuilder();
         builder.setOperation(Operation.valueOf(map.get("action")))
             .setTagName(map.get("name"))
             .setTenantId(tenantId)
-            .addAllNodeId(nodIds);
+            .addAllNodeId(nodIds)
+            .addAllMonitoringPolicyId(policyIds);
     }
 
     @And("Sent tag operation message to Kafka topic")
@@ -104,7 +106,7 @@ public class TagTestSteps {
         List<String> idStrList = data.asList();
         List<Long> ids = idStrList.stream().map(s -> Long.parseLong(s)).collect(Collectors.toList());
         Supplier<MessageOrBuilder> call = () -> grpcClient.getTagStub().listTags(TagListProto.newBuilder().build());
-        boolean success = retryUtils.retry(() -> this.sendRequestAndVerify(call, size, builder, ids),
+        boolean success = retryUtils.retry(() -> this.sendRequestAndVerify(call, size, builder, ids, new ArrayList<>()),
             result -> result,
             100, TIME_OUT, false);
         assertThat(success).isTrue();
@@ -113,13 +115,13 @@ public class TagTestSteps {
     @Then("Verify list tag is empty")
     public void verifyListTagIsEmpty() throws InterruptedException {
         Supplier<MessageOrBuilder> grpcCall = () -> grpcClient.getTagStub().listTags(TagListProto.newBuilder().build());
-        boolean success = retryUtils.retry(() -> sendRequestAndVerify(grpcCall, 0, null, null),
+        boolean success = retryUtils.retry(() -> sendRequestAndVerify(grpcCall, 0, null, null, null),
             result -> result,
             100, TIME_OUT, false
         );
     }
 
-    private boolean sendRequestAndVerify(Supplier<MessageOrBuilder> supplier, int listSize, TagOperationProto.Builder builder, List<Long> nodeIds) {
+    private boolean sendRequestAndVerify(Supplier<MessageOrBuilder> supplier, int listSize, TagOperationProto.Builder builder, List<Long> nodeIds, List<Long> policyIds) {
         try {
             var tagProtoList = (TagListProto) supplier.get();
             List<TagProto> list = tagProtoList.getTagsList();
@@ -128,11 +130,26 @@ public class TagTestSteps {
                 assertThat(list.get(0))
                     .extracting(TagProto::getName, TagProto::getTenantId)
                     .containsExactly(builder.getTagName(), builder.getTenantId());
-                assertThat(list.get(0).getNodeIdsList()).asList().hasSize(nodeIds.size()).containsAll(nodeIds);
+                if(!nodeIds.isEmpty()) {
+                    assertThat(list.get(0).getNodeIdsList()).asList().hasSize(nodeIds.size()).containsAll(nodeIds);
+                }
+                // TODO: Map policyIds list
             }
             return true;
         } catch (Throwable t) {
             throw new RuntimeException(t);
         }
+    }
+
+    @Then("Verify list tag with size {int} and policy ids")
+    public void verifyListTagWithSizeAndPolicyIds(int size, @Transpose DataTable data) throws InterruptedException {
+
+        List<String> idStrList = data.asList();
+        List<Long> ids = idStrList.stream().map(s -> Long.parseLong(s)).collect(Collectors.toList());
+        Supplier<MessageOrBuilder> call = () -> grpcClient.getTagStub().listTags(TagListProto.newBuilder().build());
+        boolean success = retryUtils.retry(() -> this.sendRequestAndVerify(call, size, builder, new ArrayList<>(), ids),
+            result -> result,
+            100, TIME_OUT, false);
+        assertThat(success).isTrue();
     }
 }

@@ -11,7 +11,8 @@
 
     <groupId>org.opennms.lokahi.events</groupId>
     <artifactId>conf</artifactId>
-    <name>OpenNMS Lokahi :: Events Conf</name>
+    <name>OpenNMS Lokahi :: Events :: Conf</name>
+
     <properties>
         <sonar.coverage.exclusions>
             src/main/java/org/opennms/horizon/events/**/*

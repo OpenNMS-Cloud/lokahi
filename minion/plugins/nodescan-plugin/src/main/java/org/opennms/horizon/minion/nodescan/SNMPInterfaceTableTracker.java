@@ -89,6 +89,7 @@ public class SNMPInterfaceTableTracker extends TableTracker {
     public static final SnmpObjId IF_ALIAS = SnmpObjId.get(IF_XTABLE_ENTRY, "18");
     /** Constant <code>IF_COUNTER_DISCONTINUITY_TIME</code> */
     public static final SnmpObjId IF_COUNTER_DISCONTINUITY_TIME = SnmpObjId.get(IF_XTABLE_ENTRY, "19");
+    public static final int SNMP_IFTYPE_LOOPBACK = 24;
 
     private static SnmpObjId[] s_tableColumns = new SnmpObjId[] {
         IF_INDEX,
@@ -210,7 +211,11 @@ public class SNMPInterfaceTableTracker extends TableTracker {
             }
         }
 
-        public SnmpInterfaceResult createInterfaceFromRow() {
+        public Optional<SnmpInterfaceResult> createInterfaceFromRow() {
+            if (getIfType().map(type -> type == SNMP_IFTYPE_LOOPBACK).orElse(false)) {
+                return Optional.empty();
+            }
+
             SnmpInterfaceResult.Builder builder = SnmpInterfaceResult.newBuilder();
             getIfIndex().ifPresent(builder::setIfIndex);
             getIfAdminStatus().ifPresent(builder::setIfAdminStatus);
@@ -221,7 +226,7 @@ public class SNMPInterfaceTableTracker extends TableTracker {
             getIfSpeed().ifPresent(builder::setIfSpeed);
             getIfType().ifPresent(builder::setIfType);
             getPhysAddr().ifPresent(builder::setPhysicalAddr);
-            return builder.build();
+            return Optional.of(builder.build());
         }
     }
 

@@ -9,6 +9,7 @@
     <Loggers>
         <Logger name="com.github.dockerjava" level="WARN"/>
         <Logger name="org.testcontainers" level="INFO"/>
+        <Logger name="org.apache.kafka" level="ERROR"/>
         <Root level="info">
             <AppenderRef ref="console"/>
         </Root>

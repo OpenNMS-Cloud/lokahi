@@ -11,7 +11,8 @@
 
     <groupId>org.opennms.lokahi.events</groupId>
     <artifactId>consumer</artifactId>
-    <name>OpenNMS Lokahi :: Events Consumer</name>
+    <name>OpenNMS Lokahi :: Events :: Consumer</name>
+
     <dependencyManagement>
         <dependencies>
             <dependency>

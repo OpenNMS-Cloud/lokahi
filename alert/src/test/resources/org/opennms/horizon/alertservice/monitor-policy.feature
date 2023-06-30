@@ -7,6 +7,7 @@ Feature: Monitor policy gRPC Functionality
     Given Kafka bootstrap URL in system property "kafka.bootstrap-servers"
     Given Kafka event topic "events"
     Given Kafka alert topic "alerts"
+    Given Kafka topic for tags "tag-operation"
     Given Kafka monitoring policy topic "monitoring-policy"
     Given Monitoring policy kafka consumer
 

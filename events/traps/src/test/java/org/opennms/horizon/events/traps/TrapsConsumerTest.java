@@ -54,7 +54,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class TrapsConsumerTest {
 
-    private TrapEventForwarder mockTrapEventForwarder;
+    private EventForwarder mockEventForwarder;
     private Function<String, InetAddress> mockInetAddressLookupFunction;
     private TrapLogProtoToEventLogXmlMapper mockTrapLogProtoToXmlMapper;
     private EventLogXmlToProtoMapper mockEventLogXmlToProtoMapper;
@@ -66,7 +66,7 @@ public class TrapsConsumerTest {
 
     @BeforeEach
     public void setUp() {
-        mockTrapEventForwarder = Mockito.mock(TrapEventForwarder.class);
+        mockEventForwarder = Mockito.mock(EventForwarder.class);
         mockInetAddressLookupFunction = Mockito.mock(Function.class);
         mockTrapLogProtoToXmlMapper = Mockito.mock(TrapLogProtoToEventLogXmlMapper.class);
         mockEventLogXmlToProtoMapper = Mockito.mock(EventLogXmlToProtoMapper.class);
@@ -83,7 +83,7 @@ public class TrapsConsumerTest {
         Mockito.when(mockInetAddressLookupFunction.apply("x-trap-address-x")).thenReturn(testInetAddress);
 
         target = new TrapsConsumer();
-        target.setEventForwarder(mockTrapEventForwarder);
+        target.setEventForwarder(mockEventForwarder);
         target.setTrapLogProtoToXmlMapper(mockTrapLogProtoToXmlMapper);
         target.setEventLogXmlToProtoMapper(mockEventLogXmlToProtoMapper);
     }
@@ -130,8 +130,8 @@ public class TrapsConsumerTest {
         //
         // Verify the Results
         //
-        Mockito.verify(mockTrapEventForwarder).sendEvents(Mockito.any(EventLog.class));
-        Mockito.verify(mockTrapEventForwarder, Mockito.times(0)).sendInternalEvent(Mockito.any(Event.class));
+        Mockito.verify(mockEventForwarder).sendTrapEvents(Mockito.any(EventLog.class));
+        Mockito.verify(mockEventForwarder, Mockito.times(0)).sendInternalEvent(Mockito.any(Event.class));
     }
 
     @Test
@@ -192,8 +192,8 @@ public class TrapsConsumerTest {
         //
         // Verify the Results
         //
-        Mockito.verify(mockTrapEventForwarder).sendEvents(Mockito.any(EventLog.class));
-        Mockito.verify(mockTrapEventForwarder).sendInternalEvent(Mockito.any(Event.class));
+        Mockito.verify(mockEventForwarder).sendTrapEvents(Mockito.any(EventLog.class));
+        Mockito.verify(mockEventForwarder).sendInternalEvent(Mockito.any(Event.class));
     }
 
     @Test

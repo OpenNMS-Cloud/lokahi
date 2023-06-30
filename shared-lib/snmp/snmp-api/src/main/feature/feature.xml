@@ -4,10 +4,7 @@
     <feature name="snmp-api" description="OpenNMS Minion SNMP Api" version="${project.version}">
         <feature>aries-blueprint</feature>
         <feature version="${project.version}">guava</feature>
-        <bundle>wrap:mvn:org.json/json/20171018$Export-Package=org.json</bundle>
         <bundle>mvn:org.opennms.lokahi.shared/lokahi-common-utils/${project.version}</bundle>
-        <bundle>mvn:jakarta.xml.bind/jakarta.xml.bind-api/${jakarta.xml.version}</bundle>
-        <bundle>mvn:jakarta.activation/jakarta.activation-api/${jakarta.activation.version}</bundle>
         <bundle>mvn:org.opennms.lokahi.shared/snmp-api/${project.version}</bundle>
     </feature>
 

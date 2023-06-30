@@ -106,6 +106,7 @@ OpenNMS:
     InternalGrpcPort: 8991
     IgniteClientPort: 10800
     Replicas: 1
+    UseKubernetes: "true"
     DbName: "horizon_stream"
     DbSchemaName: "minion_gateway"
     DbHost: "postgres"

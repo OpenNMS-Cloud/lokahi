@@ -28,11 +28,6 @@
 
 package org.opennms.horizon.alertservice.db.entity;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.opennms.horizon.alertservice.service.routing.MonitoringPolicyProducer;
-
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -45,6 +40,12 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
+import org.opennms.horizon.alertservice.service.routing.MonitoringPolicyProducer;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @Entity
 @EntityListeners(MonitoringPolicyProducer.class)
@@ -71,5 +72,6 @@ public class MonitorPolicy {
     @OneToMany(mappedBy = "policy", orphanRemoval = true, cascade = CascadeType.ALL)
     private List<PolicyRule> rules = new ArrayList<>();
     @ManyToMany(mappedBy = "policies")
-    private List<Tag> tags = new ArrayList<>();
+    private Set<Tag> tags = new HashSet<>();
+
 }

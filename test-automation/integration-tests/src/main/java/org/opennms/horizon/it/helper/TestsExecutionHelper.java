@@ -46,6 +46,7 @@ import org.slf4j.LoggerFactory;
 import javax.ws.rs.core.HttpHeaders;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.List;
 import java.util.function.Supplier;
 
 import static org.opennms.horizon.it.InventoryTestSteps.DEFAULT_HTTP_SOCKET_TIMEOUT;
@@ -175,6 +176,16 @@ public class TestsExecutionHelper {
         String baseUrl = ingressUrlSupplier.get();
 
         return new URL(new URL(baseUrl), path);
+    }
+
+    /**
+     * Checks to see if the response contains errors
+     * @param response The Response from a gqlquery
+     * @return boolean True if there are errors in the response
+     */
+    public boolean responseContainsErrors(Response response) {
+        List<Object> errorList = response.jsonPath().getList("errors");
+        return (errorList != null && errorList.size() > 0);
     }
 
     /**

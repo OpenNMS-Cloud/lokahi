@@ -28,19 +28,15 @@
 
 package org.opennms.miniongateway.grpc.server.traps;
 
-import org.apache.kafka.clients.producer.ProducerRecord;
 import org.opennms.horizon.grpc.traps.contract.TenantLocationSpecificTrapLogDTO;
 import org.opennms.horizon.grpc.traps.contract.TrapLogDTO;
-import org.opennms.horizon.shared.grpc.common.LocationServerInterceptor;
-import org.opennms.horizon.shared.grpc.common.TenantIDGrpcServerInterceptor;
 import org.opennms.horizon.shared.grpc.traps.contract.mapper.TenantLocationSpecificTrapLogDTOMapper;
 import org.opennms.horizon.shared.ipc.sink.api.MessageConsumer;
 import org.opennms.horizon.shared.ipc.sink.api.SinkModule;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.opennms.miniongateway.grpc.server.kafka.SinkMessageKafkaPublisher;
+import org.opennms.miniongateway.grpc.server.kafka.SinkMessageKafkaPublisherFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
 /**
@@ -49,24 +45,18 @@ import org.springframework.stereotype.Component;
 @Component
 public class TrapsKafkaForwarder implements MessageConsumer<TrapLogDTO, TrapLogDTO> {
 
-    public static final String DEFAULT_TASK_RESULTS_TOPIC = "traps";
+    public static final String DEFAULT_TRAP_RESULTS_TOPIC = "traps";
 
-    private final Logger logger = LoggerFactory.getLogger(TrapsKafkaForwarder.class);
-
-    @Autowired
-    private KafkaTemplate<String, byte[]> kafkaTemplate;
+    private final SinkMessageKafkaPublisher<TrapLogDTO, TenantLocationSpecificTrapLogDTO> kafkaPublisher;
 
     @Autowired
-    private TenantIDGrpcServerInterceptor tenantIDGrpcInterceptor;
-
-    @Autowired
-    private LocationServerInterceptor locationServerInterceptor;
-
-    @Autowired
-    private TenantLocationSpecificTrapLogDTOMapper tenantLocationSpecificTrapLogDTOMapper;
-
-    @Value("${task.results.kafka-topic:" + DEFAULT_TASK_RESULTS_TOPIC + "}")
-    private String kafkaTopic;
+    public TrapsKafkaForwarder(SinkMessageKafkaPublisherFactory messagePublisherFactory, TenantLocationSpecificTrapLogDTOMapper mapper,
+        @Value("${traps.results.kafka-topic:" + DEFAULT_TRAP_RESULTS_TOPIC + "}") String kafkaTopic) {
+        this.kafkaPublisher = messagePublisherFactory.create(
+            mapper::mapBareToTenanted,
+            kafkaTopic
+        );
+    }
 
     @Override
     public SinkModule<TrapLogDTO, TrapLogDTO> getModule() {
@@ -74,29 +64,7 @@ public class TrapsKafkaForwarder implements MessageConsumer<TrapLogDTO, TrapLogD
     }
 
     @Override
-    public void handleMessage(TrapLogDTO messageLog) {
-        // Retrieve the Tenant ID from the TenantID GRPC Interceptor
-        String tenantId = tenantIDGrpcInterceptor.readCurrentContextTenantId();
-        // Ditto for locationId
-        String locationId = locationServerInterceptor.readCurrentContextLocationId();
-
-        // String locationId
-        logger.info("Received traps; sending to Kafka: tenant-id={}; location-id={}, kafka-topic={}; message={}", tenantId, locationId, kafkaTopic, messageLog);
-
-        TenantLocationSpecificTrapLogDTO tenantLocationSpecificTrapLogDTO =
-            tenantLocationSpecificTrapLogDTOMapper.mapBareToTenanted(tenantId, locationId, messageLog);
-
-        sendToKafka(tenantLocationSpecificTrapLogDTO);
-    }
-
-//========================================
-// Internals
-//----------------------------------------
-
-    private void sendToKafka(TenantLocationSpecificTrapLogDTO tenantLocationSpecificTrapLogDTO) {
-        byte[] rawContent = tenantLocationSpecificTrapLogDTO.toByteArray();
-        var producerRecord = new ProducerRecord<String, byte[]>(kafkaTopic, rawContent);
-
-        this.kafkaTemplate.send(producerRecord);
+    public void handleMessage(TrapLogDTO message) {
+        this.kafkaPublisher.send(message);
     }
 }

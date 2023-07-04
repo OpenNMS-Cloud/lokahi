@@ -40,6 +40,6 @@ public class TestMain implements CommandLineRunner {
     public void run(String... args) throws Exception {
         CucumberCommandLineRunner runner = new CucumberCommandLineRunner();
 
-        runner.run();
+        runner.run(args);
     }
 }

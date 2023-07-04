@@ -29,7 +29,6 @@ import org.opennms.horizon.it.gqlmodels.MinionData;
 import org.opennms.horizon.it.helper.TestsExecutionHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -46,6 +45,7 @@ import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.containers.wait.strategy.WaitAllStrategy;
 import org.testcontainers.images.builder.Transferable;
 import org.testcontainers.utility.DockerImageName;
+
 import org.testcontainers.utility.ResourceReaper;
 
 import static org.junit.Assert.assertEquals;
@@ -236,6 +236,7 @@ public class InventoryTestSteps {
         }
     }
 
+
     @Then("Delete the first node from inventory")
     public void deleteFirstNodeFromInventory() throws MalformedURLException {
         LOG.info("Deleting the first node from the inventory.");
@@ -286,27 +287,43 @@ public class InventoryTestSteps {
         keystores.put(location, Map.entry(pkcs12password, pkcs12));
     }
 
+    @Then("Minion {string} is started with shared networking in location {string}")
+    public void startMinionSharedNetwork(String systemId, String location) throws IOException {
+        startMinion(systemId, location, true);
+    }
+
     @Then("Minion {string} is started in location {string}")
-    public void startMinion(String systemId, String location) throws IOException {
+    public void startMinionSpecificNetwork(String systemId, String location) throws IOException {
+        startMinion(systemId, location, false);
+    }
+
+    public void startMinion(String systemId, String location, boolean sharedNetworking) throws IOException {
         if (!keystores.containsKey(location)) {
             fail("Could not find location " + location + " certificate");
         }
 
         Entry<String, byte[]> certificate = keystores.get(location);
+
         stopMinion(systemId);
 
+        Network network;
+        if (sharedNetworking) {
+            network = Network.SHARED;
+        } else {
+            network = helper.getCommonNetworkSupplier().get();
+        }
         GenericContainer<?> minion = new GenericContainer<>(DockerImageName.parse(helper.getMinionImageNameSupplier().get()))
             .withEnv("MINION_GATEWAY_HOST", helper.getMinionIngressSupplier().get())
             .withEnv("MINION_GATEWAY_PORT", String.valueOf(helper.getMinionIngressPortSupplier().get()))
             .withEnv("MINION_GATEWAY_TLS", String.valueOf(helper.getMinionIngressTlsEnabledSupplier().get()))
             .withEnv("MINION_ID", systemId)
             .withEnv("USE_KUBERNETES", "false")
-            .withEnv("IGNITE_SERVER_ADDRESSES", "127.0.0.1")
             .withEnv("GRPC_CLIENT_KEYSTORE", "/opt/karaf/minion.p12")
             .withEnv("GRPC_CLIENT_KEYSTORE_PASSWORD", certificate.getKey())
             .withEnv("GRPC_CLIENT_OVERRIDE_AUTHORITY", helper.getMinionIngressOverrideAuthority().get())
+            .withEnv("IGNITE_SERVER_ADDRESSES", "localhost")
             .withNetworkAliases("minion-" + systemId.toLowerCase())
-            .withNetwork(Network.SHARED)
+            .withNetwork(network)
             .withLabel("label", systemId);
         minions.put(systemId, minion);
 
@@ -345,6 +362,7 @@ public class InventoryTestSteps {
             }
         }
     }
+
 
     private boolean checkAtLeastOneMinionAtGivenLocation() throws MalformedURLException {
         FindAllMinionsQueryResult findAllMinionsQueryResult = commonQueryMinions();
@@ -412,6 +430,7 @@ public class InventoryTestSteps {
         LOG.info("Status of the node: " + currentStatus);
         return currentStatus.equals(expectedStatus);
     }
+
 
     /**
      * Method to get the ID of the first node in the inventory

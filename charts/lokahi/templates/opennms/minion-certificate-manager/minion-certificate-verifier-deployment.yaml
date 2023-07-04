@@ -51,6 +51,11 @@ spec:
             - name: JAVA_TOOL_OPTIONS
               value: "-javaagent:agent/opentelemetry-javaagent.jar -agentlib:jdwp=transport=dt_socket,server=y,address=5005,suspend=n,quiet=y"  # FIXME: Permanent debug port, enable only for dev mode
             {{- include "deployment.env" .Values.OpenNMS.MinionCertificateVerifier | nindent 12 }}
+            - name: GRPC_URL_MINION_CERTIFICATE_MANAGER
+              value: {{ if or (eq .Values.OpenNMS.MinionCertificateVerifier.CertificateManagerUrl "") (eq .Values.OpenNMS.MinionCertificateVerifier.CertificateManagerUrl "dev")
+                }}"{{ .Values.OpenNMS.MinionCertificateManager.ServiceName }}:{{ .Values.OpenNMS.MinionCertificateManager.Port }}"{{
+              else
+                }}"{{ .Values.OpenNMS.MinionCertificateVerifier.CertificateManagerUrl }}"{{ end }}
           envFrom:
           - configMapRef:
               name: spring-boot-env

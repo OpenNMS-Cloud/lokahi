@@ -10,7 +10,8 @@
         <bundle>mvn:io.netty/netty-transport/${netty4.version}</bundle>
         <bundle>mvn:io.netty/netty-resolver/${netty4.version}</bundle>
         <bundle>mvn:io.netty/netty-codec/${netty4.version}</bundle>
-
+        <bundle>mvn:io.dropwizard.metrics/metrics-core/${dropwizard.metrics.version}</bundle>
+        <bundle>mvn:io.dropwizard.metrics/metrics-jmx/${dropwizard.metrics.version}</bundle>
         <bundle>mvn:com.github.ben-manes.caffeine/caffeine/3.1.2</bundle>
         <bundle>mvn:io.github.resilience4j/resilience4j-bulkhead/${resilience4j.version}</bundle>
         <bundle>mvn:io.github.resilience4j/resilience4j-circuitbreaker/${resilience4j.version}</bundle>

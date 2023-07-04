@@ -13,7 +13,7 @@ LOCAL_DOCKER_CONFIG_JSON="${HOME}/.docker/config.json"
 # Like Skaffold and Tilt. 
 # This determines whether or not to import custom images or not.
 HELP='Need to pass "local" parameter to script'
-if [[ -z "$2" || -z "$1" ]]; then
+if [ $# -lt 2 ]; then
   echo "Need to add custom DNS for the second parameter, domain to use."
   echo "$HELP"
   exit 1
@@ -25,7 +25,10 @@ IMAGE_TAG=${3:-local}
 IMAGE_PREFIX=${4:-opennms}
 KIND_CLUSTER_NAME=kind-test
 NAMESPACE=hs-instance
-TIMEOUT=${TIMEOUT:-5m0s}
+TIMEOUT=${TIMEOUT:-10m0s}
+
+LOAD_IMAGES_USING_KIND=${LOAD_IMAGES_USING_KIND:-}
+DEBUG_IMAGES=${DEBUG_IMAGES:-}
 
 #### FUNCTION DEF
 ################################
@@ -148,6 +151,8 @@ load_part_of_normal_docker_image_load () {
 		echo "Make sure all of your images are built for the same platform that your" >&2
 		echo "cluster is running as. You can use this command to see the architecture" >&2
 		echo "for an image: docker inspect --format='{{.Architecture}}' <image>" >&2
+		echo "" >&2
+		echo "Lastly, try setting LOAD_IMAGES_USING_KIND=1 to load the images a different way." >&2
 		exit 1
 	fi
 }
@@ -175,7 +180,7 @@ install_helm_chart_custom_images () {
   echo ________________Installing Lokahi________________
   echo
 
-  if ! helm upgrade -i lokahi ./../charts/lokahi \
+  if ! time helm upgrade -i lokahi ./../charts/lokahi \
   -f ./tmp/install-local-opennms-lokahi-custom-images-values.yaml \
   --namespace $NAMESPACE \
   --set OpenNMS.Alert.Image=${IMAGE_PREFIX}/lokahi-alert:${IMAGE_TAG} \
@@ -248,7 +253,7 @@ if [ $CONTEXT == "local" ]; then
   echo
   echo ________________Installing Lokahi________________
   echo
-  helm upgrade -i lokahi ./../charts/lokahi -f ./tmp/install-local-opennms-lokahi-values.yaml --namespace $NAMESPACE --wait --timeout "${TIMEOUT}"
+  time helm upgrade -i lokahi ./../charts/lokahi -f ./tmp/install-local-opennms-lokahi-values.yaml --namespace $NAMESPACE --wait --timeout "${TIMEOUT}"
   if [ $? -ne 0 ]; then exit; fi
 
   cluster_ready_check
@@ -299,7 +304,7 @@ elif [ $CONTEXT == "existing-k8s" ]; then
   echo
   echo ________________Installing Lokahi________________
   echo
-  helm upgrade -i lokahi ./../charts/lokahi -f ./tmp/install-local-opennms-lokahi-values.yaml --namespace $NAMESPACE --create-namespace --wait --timeout "${TIMEOUT}"
+  time helm upgrade -i lokahi ./../charts/lokahi -f ./tmp/install-local-opennms-lokahi-values.yaml --namespace $NAMESPACE --create-namespace --wait --timeout "${TIMEOUT}"
   if [ $? -ne 0 ]; then exit; fi
 
   cluster_ready_check

@@ -42,6 +42,7 @@ import org.opennms.horizon.it.gqlmodels.GQLQuery;
 import org.opennms.horizon.it.gqlmodels.querywrappers.FindAllLocationsData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testcontainers.containers.Network;
 
 import javax.ws.rs.core.HttpHeaders;
 import java.net.MalformedURLException;
@@ -61,11 +62,14 @@ public class TestsExecutionHelper {
     private Supplier<String> userAccessTokenSupplier;
     private Supplier<String> ingressUrlSupplier;
     private Supplier<String> minionImageNameSupplier;
+    private Supplier<String> nodeImageNameSupplier;
     private Supplier<String> minionIngressSupplier;
     private Supplier<Integer> minionIngressPortSupplier;
     private Supplier<Boolean> minionIngressTlsSupplier;
     private Supplier<File> minionIngressCaCertificateSupplier;
     private Supplier<String> minionIngressOverrideAuthority;
+
+    private Supplier<Network> commonNetworkSupplier;
 
 
     //========================================
@@ -93,6 +97,22 @@ public class TestsExecutionHelper {
 
     public void setMinionImageNameSupplier(Supplier<String> minionImageNameSupplier) {
         this.minionImageNameSupplier = minionImageNameSupplier;
+    }
+
+    public void setCommonNetworkSupplier(Supplier<Network> networkSupplier) {
+        commonNetworkSupplier = networkSupplier;
+    }
+
+    public Supplier<Network> getCommonNetworkSupplier() {
+        return commonNetworkSupplier;
+    }
+
+    public void setNodeImageNameSupplier(Supplier<String> nodeImageNameSupplier) {
+        this.nodeImageNameSupplier = nodeImageNameSupplier;
+    }
+
+    public Supplier<String> getNodeImageNameSupplier() {
+        return nodeImageNameSupplier;
     }
 
     public Supplier<String> getMinionIngressSupplier() {

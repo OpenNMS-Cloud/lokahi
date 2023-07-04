@@ -28,6 +28,7 @@
 
 package org.opennms.horizon.minion.flows.parser;
 
+import com.codahale.metrics.MetricRegistry;
 import com.google.common.io.Resources;
 import com.google.protobuf.Any;
 import org.junit.Assert;
@@ -59,7 +60,7 @@ public class FlowsListenerTest {
         AsyncDispatcher<FlowDocument> dispatcher = mock(AsyncDispatcher.class);
         MessageDispatcherFactory messageDispatcherFactory = mock(MessageDispatcherFactory.class);
         when(messageDispatcherFactory.createAsyncDispatcher(any(FlowSinkModule.class))).thenReturn(dispatcher);
-        TelemetryRegistry registry = new TelemetryRegistryImpl(messageDispatcherFactory, identity, dnsResolver);
+        TelemetryRegistry registry = new TelemetryRegistryImpl(messageDispatcherFactory, identity, dnsResolver, new MetricRegistry());
 
         FlowsListenerFactory manger = new FlowsListenerFactory(registry);
         final var listener = manger.create(readFlowsConfig());

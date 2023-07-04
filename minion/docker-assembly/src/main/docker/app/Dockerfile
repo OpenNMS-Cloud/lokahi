@@ -33,6 +33,13 @@ RUN chmod -R g=u /opt/karaf/
 
 FROM ${BASE_IMAGE}
 
+RUN apt-get update && \
+    apt-get \
+        --no-install-recommends \
+        -yq \
+        install \
+            jq
+
 RUN groupadd --gid 10001 minion && \
     useradd --system --uid 10001 --gid minion minion --home-dir /opt/karaf
 

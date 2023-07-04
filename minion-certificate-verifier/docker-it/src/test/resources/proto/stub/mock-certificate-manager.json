@@ -1,0 +1,114 @@
+[
+  {
+    "service": "MinionCertificateManager",
+    "method": "IsCertValid",
+    "input": {
+      "equals": {
+        "serial_number": "4F0FCE70F75FE51142CF54B4C347A6FE981CC748"
+      }
+    },
+    "output": {
+      "data": {
+        "is_valid": true
+      }
+    }
+  },
+  {
+    "service": "MinionCertificateManager",
+    "method": "IsCertValid",
+    "input": {
+      "equals": {
+        "serial_number": "4A209B170241006A2A532E2135FB4C63B2B19BF2"
+      }
+    },
+    "output": {
+      "data": {
+        "is_valid": true
+      }
+    }
+  },
+  {
+    "service": "MinionCertificateManager",
+    "method": "IsCertValid",
+    "input": {
+      "equals": {
+        "serial_number": "2153852DFDB725B8AC0519AFC5AD6173A6770834"
+      }
+    },
+    "output": {
+      "data": {
+        "is_valid": true
+      }
+    }
+  },
+  {
+    "service": "MinionCertificateManager",
+    "method": "IsCertValid",
+    "input": {
+      "equals": {
+        "serial_number": "5D6FEFDCF1D1630451DB898E0B9025BCF4774CD4"
+      }
+    },
+    "output": {
+      "data": {
+        "is_valid": true
+      }
+    }
+  },
+  {
+    "service": "MinionCertificateManager",
+    "method": "IsCertValid",
+    "input": {
+      "equals": {
+        "serial_number": "52679F05AE3985E1807F1B0B0AE3534B7D7AB870"
+      }
+    },
+    "output": {
+      "data": {
+        "is_valid": true
+      }
+    }
+  },
+  {
+    "service": "MinionCertificateManager",
+    "method": "IsCertValid",
+    "input": {
+      "equals": {
+        "serial_number": "4F0FCE70F75FE51142CF54B4C347A6FE981CC748"
+      }
+    },
+    "output": {
+      "data": {
+        "is_valid": true
+      }
+    }
+  },
+  {
+    "service": "MinionCertificateManager",
+    "method": "IsCertValid",
+    "input": {
+      "equals": {
+        "serial_number": "5E790EA32B91517607ABDC11E94DFA17D5A89011"
+      }
+    },
+    "output": {
+      "data": {
+        "is_valid": true
+      }
+    }
+  },
+  {
+    "service": "MinionCertificateManager",
+    "method": "IsCertValid",
+    "input": {
+      "equals": {
+        "serial_number": "394799FE46DDD20AA70789517FC1B8DCF160E8FA"
+      }
+    },
+    "output": {
+      "data": {
+        "is_valid": false
+      }
+    }
+  }
+]

@@ -28,14 +28,14 @@
 
 package org.opennms.horizon.alertservice.db.repository;
 
-import java.util.List;
-import java.util.Optional;
-
 import org.opennms.horizon.alertservice.db.entity.Tag;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+
+import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface TagRepository extends JpaRepository<Tag, Long> {
@@ -45,4 +45,7 @@ public interface TagRepository extends JpaRepository<Tag, Long> {
     List<Tag> findByTenantId(String tenantId);
 
     Optional<Tag> findByTenantIdAndName(String tenantId, String name);
+
+    @Query(value = "SELECT * FROM tag WHERE tenant_id = :tenantId AND node_ids @> ARRAY[:nodeId]", nativeQuery = true)
+    List<Tag> findByTenantIdAndNodeId(@Param("tenantId")String tenantId, @Param("nodeId")Long nodeId);
 }

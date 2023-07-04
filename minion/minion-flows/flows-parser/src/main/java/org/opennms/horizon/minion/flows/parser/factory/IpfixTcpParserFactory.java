@@ -43,13 +43,16 @@ public class IpfixTcpParserFactory implements ParserFactory {
     private final TelemetryRegistry telemetryRegistry;
     private final DnsResolver dnsResolver;
     private final IpcIdentity identity;
+    private final MetricRegistry metricRegistry;
 
     public IpfixTcpParserFactory(final TelemetryRegistry telemetryRegistry,
                                  final IpcIdentity identity,
-                                 final DnsResolver dnsResolver) {
+                                 final DnsResolver dnsResolver,
+                                 final MetricRegistry metricRegistry) {
         this.telemetryRegistry = Objects.requireNonNull(telemetryRegistry);
         this.identity = Objects.requireNonNull(identity);
         this.dnsResolver = Objects.requireNonNull(dnsResolver);
+        this.metricRegistry = Objects.requireNonNull(metricRegistry);
     }
 
     @Override
@@ -65,6 +68,6 @@ public class IpfixTcpParserFactory implements ParserFactory {
             dispatcher,
             this.identity,
             this.dnsResolver,
-            new MetricRegistry());
+            metricRegistry);
     }
 }

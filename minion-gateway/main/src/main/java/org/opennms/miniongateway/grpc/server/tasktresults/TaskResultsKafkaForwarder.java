@@ -28,18 +28,15 @@
 
 package org.opennms.miniongateway.grpc.server.tasktresults;
 
-import org.apache.kafka.clients.producer.ProducerRecord;
-import org.opennms.horizon.shared.grpc.common.LocationServerInterceptor;
-import org.opennms.horizon.shared.grpc.common.TenantIDGrpcServerInterceptor;
 import org.opennms.horizon.shared.ipc.sink.api.MessageConsumer;
 import org.opennms.horizon.shared.ipc.sink.api.SinkModule;
 import org.opennms.horizon.shared.protobuf.mapper.TenantLocationSpecificTaskSetResultsMapper;
+import org.opennms.miniongateway.grpc.server.kafka.SinkMessageKafkaPublisher;
+import org.opennms.miniongateway.grpc.server.kafka.SinkMessageKafkaPublisherFactory;
 import org.opennms.taskset.contract.TaskSetResults;
 import org.opennms.taskset.contract.TenantLocationSpecificTaskSetResults;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
 /**
@@ -49,29 +46,15 @@ import org.springframework.stereotype.Component;
 public class TaskResultsKafkaForwarder implements MessageConsumer<TaskSetResults, TaskSetResults> {
 
     public static final String DEFAULT_TASK_RESULTS_TOPIC = "task-set.results";
+    private final SinkMessageKafkaPublisher<TaskSetResults, TenantLocationSpecificTaskSetResults> kafkaPublisher;
 
-    private final Logger logger = LoggerFactory.getLogger(TaskResultsKafkaForwarder.class);
-
-    private final KafkaTemplate<String, byte[]> kafkaTemplate;
-    private final TenantIDGrpcServerInterceptor tenantIDGrpcInterceptor;
-    private final TenantLocationSpecificTaskSetResultsMapper tenantLocationSpecificTaskSetResultsMapper;
-    private final LocationServerInterceptor locationServerInterceptor;
-
-    private final String kafkaTopic;
-
-    public TaskResultsKafkaForwarder(
-        KafkaTemplate<String, byte[]> kafkaTemplate,
-        TenantIDGrpcServerInterceptor tenantIDGrpcInterceptor,
-        LocationServerInterceptor locationServerInterceptor,
-        TenantLocationSpecificTaskSetResultsMapper tenantLocationSpecificTaskSetResultsMapper,
-        @Value("${task.results.kafka-topic:" + DEFAULT_TASK_RESULTS_TOPIC + "}")
-        String kafkaTopic) {
-
-        this.kafkaTemplate = kafkaTemplate;
-        this.tenantIDGrpcInterceptor = tenantIDGrpcInterceptor;
-        this.locationServerInterceptor = locationServerInterceptor;
-        this.tenantLocationSpecificTaskSetResultsMapper = tenantLocationSpecificTaskSetResultsMapper;
-        this.kafkaTopic = kafkaTopic;
+    @Autowired
+    public TaskResultsKafkaForwarder(SinkMessageKafkaPublisherFactory messagePublisherFactory, TenantLocationSpecificTaskSetResultsMapper mapper,
+        @Value("${task.results.kafka-topic:" + DEFAULT_TASK_RESULTS_TOPIC + "}") String kafkaTopic) {
+        this.kafkaPublisher = messagePublisherFactory.create(
+            mapper::mapBareToTenanted,
+            kafkaTopic
+        );
     }
 
     @Override
@@ -80,21 +63,7 @@ public class TaskResultsKafkaForwarder implements MessageConsumer<TaskSetResults
     }
 
     @Override
-    public void handleMessage(TaskSetResults messageLog) {
-        // Retrieve the Tenant ID from the TenantID GRPC Interceptor
-        String tenantId = tenantIDGrpcInterceptor.readCurrentContextTenantId();
-        String locationId = locationServerInterceptor.readCurrentContextLocationId();
-
-        logger.debug("Received results; sending to Kafka: tenant-id={}; location-id={}; kafka-topic={}; message={}", tenantId, locationId, kafkaTopic, messageLog);
-
-        // Map to tenanted
-        TenantLocationSpecificTaskSetResults tenantLocationSpecificTaskSetResults = tenantLocationSpecificTaskSetResultsMapper.mapBareToTenanted(tenantId, locationId, messageLog);
-
-        // Convert to bytes
-        byte[] rawContent = tenantLocationSpecificTaskSetResults.toByteArray();
-        var producerRecord = new ProducerRecord<String, byte[]>(kafkaTopic, rawContent);
-
-        // Send to Kafka
-        this.kafkaTemplate.send(producerRecord);
+    public void handleMessage(TaskSetResults message) {
+        this.kafkaPublisher.send(message);
     }
 }

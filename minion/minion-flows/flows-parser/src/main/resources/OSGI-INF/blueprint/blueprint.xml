@@ -12,20 +12,35 @@
 
     <bean id="dnsResolver" class="org.opennms.horizon.minion.flows.parser.factory.dnsresolver.NettyDnsResolver"
           init-method="init" destroy-method="destroy">
-        <argument index="0" ref="metricRegistry"/>
+        <argument index="0" ref="flowPipelineMetricRegistry"/>
     </bean>
-    <bean id="metricRegistry" class="com.codahale.metrics.MetricRegistry"/>
-    <service ref="metricRegistry" interface="com.codahale.metrics.MetricSet">
+    <bean id="flowPipelineMetricRegistry" class="com.codahale.metrics.MetricRegistry"/>
+    <service ref="flowPipelineMetricRegistry" interface="com.codahale.metrics.MetricSet">
         <service-properties>
-            <entry key="name" value="Netty DNS Resolver"/>
-            <entry key="description" value="Netty DNS resolution metrics"/>
+            <entry key="name" value="org.opennms.horizon.minion.flows"/>
+            <entry key="description" value="Flow metrics"/>
         </service-properties>
     </service>
+
+    <bean id="flowPipelineMetricRegistryJmxReporterBuilder" class="com.codahale.metrics.jmx.JmxReporter" factory-method="forRegistry">
+        <argument ref="flowPipelineMetricRegistry"/>
+    </bean>
+
+    <bean id="flowPipelineMetricRegistryDomainedJmxReporterBuilder" factory-ref="flowPipelineMetricRegistryJmxReporterBuilder" factory-method="inDomain">
+        <argument value="org.opennms.horizon.minion.flows"/>
+    </bean>
+
+    <bean id="flowPipelineMetricRegistryJmxReporter"
+          factory-ref="flowPipelineMetricRegistryDomainedJmxReporterBuilder"
+          factory-method="build"
+          init-method="start"
+          destroy-method="stop" />
 
     <bean id="telemetryRegistry" class="org.opennms.horizon.minion.flows.parser.TelemetryRegistryImpl">
         <argument ref="messageDispatcherFactory"/>
         <argument ref="identity"/>
         <argument ref="dnsResolver"/>
+        <argument ref="flowPipelineMetricRegistry"/>
     </bean>
     <service ref="telemetryRegistry" interface="org.opennms.horizon.minion.flows.parser.TelemetryRegistry"/>
 
@@ -35,6 +50,7 @@
         <argument ref="telemetryRegistry"/>
         <argument ref="identity"/>
         <argument ref="dnsResolver"/>
+        <argument ref="flowPipelineMetricRegistry"/>
     </bean>
     <service ref="netflow5UdpParserFactory" interface="org.opennms.horizon.minion.flows.parser.factory.ParserFactory"/>
 
@@ -43,6 +59,7 @@
         <argument ref="telemetryRegistry"/>
         <argument ref="identity"/>
         <argument ref="dnsResolver"/>
+        <argument ref="flowPipelineMetricRegistry"/>
     </bean>
     <service ref="netflow9UdpParserFactory" interface="org.opennms.horizon.minion.flows.parser.factory.ParserFactory"/>
 
@@ -52,6 +69,7 @@
         <argument ref="telemetryRegistry"/>
         <argument ref="dnsResolver"/>
         <argument ref="identity"/>
+        <argument ref="flowPipelineMetricRegistry"/>
     </bean>
     <service ref="ipfixTcpParserFactory" interface="org.opennms.horizon.minion.flows.parser.factory.ParserFactory"/>
 
@@ -61,17 +79,20 @@
         <argument ref="telemetryRegistry"/>
         <argument ref="dnsResolver"/>
         <argument ref="identity"/>
+        <argument ref="flowPipelineMetricRegistry"/>
     </bean>
     <service ref="ipfixUpdParserFactory" interface="org.opennms.horizon.minion.flows.parser.factory.ParserFactory"/>
 
     <!-- UDP Listener Factory -->
     <bean id="udpListenerFactory" class="org.opennms.horizon.minion.flows.listeners.factory.UdpListenerFactory">
         <argument ref="telemetryRegistry"/>
+        <argument ref="flowPipelineMetricRegistry"/>
     </bean>
 
     <!-- TCP Listener Factory -->
     <bean id="tcpListenerFactory" class="org.opennms.horizon.minion.flows.listeners.factory.TcpListenerFactory">
         <argument ref="telemetryRegistry"/>
+        <argument ref="flowPipelineMetricRegistry"/>
     </bean>
 
     <bean id="flowsListenerFactory" class="org.opennms.horizon.minion.flows.parser.FlowsListenerFactory">

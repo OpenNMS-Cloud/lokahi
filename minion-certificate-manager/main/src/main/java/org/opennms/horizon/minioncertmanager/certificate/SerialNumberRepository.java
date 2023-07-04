@@ -102,7 +102,7 @@ public class SerialNumberRepository {
 
     public CertificateMeta getBySerial(String serial) throws IOException, RocksDBException {
         byte[] data = db.get(serial.getBytes());
-        return mapper.readValue(data, new TypeReference<>() {
+        return (data == null) ? null : mapper.readValue(data, new TypeReference<>() {
         });
     }
 

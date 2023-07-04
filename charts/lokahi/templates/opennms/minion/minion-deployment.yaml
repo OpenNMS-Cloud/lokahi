@@ -78,9 +78,9 @@ spec:
         # into minion. Please do not use this in production.
         # Remarks - working directory for this container is /cert which is emptyDir. This empty dir is later mounted
         # into minion container itself under /opt/karaf/certs/.
-        - image: opennms/deploy-base:ubuntu-3.0.1.b223-jre-11
+        - image: {{ .Values.OpenNMS.Minion.Image }}
           imagePullPolicy: "IfNotPresent"
-          name: cert-generator
+          name: get-cert
           command:
             - bash
             - /scripts/init-create-test-location.sh
@@ -91,7 +91,6 @@ spec:
             privileged: false
             runAsUser: 10001
             runAsGroup: 10001
-            fsGroup: 10001
           volumeMounts:
             - name: certificate
               mountPath: "/cert"
@@ -163,3 +162,11 @@ spec:
             requests:
               cpu: "{{ .Values.OpenNMS.Minion.Resources.Requests.Cpu }}"
               memory: "{{ .Values.OpenNMS.Minion.Resources.Requests.Memory }}"
+          startupProbe:
+            exec:
+              command:
+              - sh
+              - -c
+              - unset JAVA_TOOL_OPTIONS; echo "opennms:task-set-print" | bin/client -b | grep -q taskDefinition
+            initialDelaySeconds: 25
+            periodSeconds: 5

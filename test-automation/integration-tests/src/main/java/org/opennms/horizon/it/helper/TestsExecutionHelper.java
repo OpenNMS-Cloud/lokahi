@@ -42,10 +42,12 @@ import org.opennms.horizon.it.gqlmodels.GQLQuery;
 import org.opennms.horizon.it.gqlmodels.querywrappers.FindAllLocationsData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testcontainers.containers.Network;
 
 import javax.ws.rs.core.HttpHeaders;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.List;
 import java.util.function.Supplier;
 
 import static org.opennms.horizon.it.InventoryTestSteps.DEFAULT_HTTP_SOCKET_TIMEOUT;
@@ -60,11 +62,14 @@ public class TestsExecutionHelper {
     private Supplier<String> userAccessTokenSupplier;
     private Supplier<String> ingressUrlSupplier;
     private Supplier<String> minionImageNameSupplier;
+    private Supplier<String> nodeImageNameSupplier;
     private Supplier<String> minionIngressSupplier;
     private Supplier<Integer> minionIngressPortSupplier;
     private Supplier<Boolean> minionIngressTlsSupplier;
     private Supplier<File> minionIngressCaCertificateSupplier;
     private Supplier<String> minionIngressOverrideAuthority;
+
+    private Supplier<Network> commonNetworkSupplier;
 
 
     //========================================
@@ -92,6 +97,22 @@ public class TestsExecutionHelper {
 
     public void setMinionImageNameSupplier(Supplier<String> minionImageNameSupplier) {
         this.minionImageNameSupplier = minionImageNameSupplier;
+    }
+
+    public void setCommonNetworkSupplier(Supplier<Network> networkSupplier) {
+        commonNetworkSupplier = networkSupplier;
+    }
+
+    public Supplier<Network> getCommonNetworkSupplier() {
+        return commonNetworkSupplier;
+    }
+
+    public void setNodeImageNameSupplier(Supplier<String> nodeImageNameSupplier) {
+        this.nodeImageNameSupplier = nodeImageNameSupplier;
+    }
+
+    public Supplier<String> getNodeImageNameSupplier() {
+        return nodeImageNameSupplier;
     }
 
     public Supplier<String> getMinionIngressSupplier() {
@@ -175,6 +196,16 @@ public class TestsExecutionHelper {
         String baseUrl = ingressUrlSupplier.get();
 
         return new URL(new URL(baseUrl), path);
+    }
+
+    /**
+     * Checks to see if the response contains errors
+     * @param response The Response from a gqlquery
+     * @return boolean True if there are errors in the response
+     */
+    public boolean responseContainsErrors(Response response) {
+        List<Object> errorList = response.jsonPath().getList("errors");
+        return (errorList != null && errorList.size() > 0);
     }
 
     /**

@@ -6,6 +6,7 @@ import java.io.File;
 import org.opennms.horizon.it.helper.TestsExecutionHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testcontainers.containers.Network;
 
 public class HorizonStreamTestSteps {
 
@@ -20,11 +21,14 @@ public class HorizonStreamTestSteps {
 
     private String ingressBaseUrl;
     private String minionImageName;
+    private static final String NODE_SNMPD_IMAGE_NAME = "polinux/snmpd:alpine";
     private String minionIngress;
     private boolean minionIngressTlsEnabled;
     private int minionIngressPort;
     private String minionIngressCaCertificate;
     private String minionIngressOverrideAuthority;
+
+    private Network network = Network.newNetwork();
 
 //========================================
 // Constructor
@@ -39,11 +43,13 @@ public class HorizonStreamTestSteps {
         this.testsExecutionHelper.setUserAccessTokenSupplier(this.keycloakTestSteps::getKeycloakAccessToken);
         this.testsExecutionHelper.setIngressUrlSupplier(this::getIngressBaseUrl);
         this.testsExecutionHelper.setMinionImageNameSupplier(() -> minionImageName);
+        this.testsExecutionHelper.setNodeImageNameSupplier(() -> NODE_SNMPD_IMAGE_NAME);
         this.testsExecutionHelper.setMinionIngressSupplier(() -> minionIngress);
         this.testsExecutionHelper.setMinionIngressPortSupplier(() -> minionIngressPort);
         this.testsExecutionHelper.setMinionIngressCaCertificateSupplier(() -> minionIngressCaCertificate != null ? new File(minionIngressCaCertificate).getAbsoluteFile() : null);
         this.testsExecutionHelper.setMinionIngressTlsEnabledSupplier(() -> minionIngressTlsEnabled);
         this.testsExecutionHelper.setMinionIngressOverrideAuthority(() -> minionIngressOverrideAuthority);
+        this.testsExecutionHelper.setCommonNetworkSupplier(() -> network);
 
         this.metricsTestSteps.setMinionsAtLocationSupplier(this.inventoryTestSteps::getMinionsAtLocation);
     }

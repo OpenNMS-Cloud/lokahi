@@ -78,7 +78,6 @@
             <version>1.4.7</version>
             <scope>test</scope>
         </dependency>
-
         <dependency>
             <!--
                 temporarily required for test-containers on m1 mac

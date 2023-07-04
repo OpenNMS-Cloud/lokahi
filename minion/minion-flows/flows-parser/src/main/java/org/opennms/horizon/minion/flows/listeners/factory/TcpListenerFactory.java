@@ -46,9 +46,11 @@ import com.codahale.metrics.MetricRegistry;
 public class TcpListenerFactory implements ListenerFactory {
 
     private final TelemetryRegistry telemetryRegistry;
+    private final MetricRegistry metricRegistry;
 
-    public TcpListenerFactory(TelemetryRegistry telemetryRegistry) {
+    public TcpListenerFactory(TelemetryRegistry telemetryRegistry, MetricRegistry metricRegistry) {
         this.telemetryRegistry = Objects.requireNonNull(telemetryRegistry);
+        this.metricRegistry = Objects.requireNonNull(metricRegistry);
     }
 
     @Override
@@ -82,6 +84,6 @@ public class TcpListenerFactory implements ListenerFactory {
             throw new IllegalArgumentException(String.format("Invalid port for listener: %s, error: %s", listenerConfig.getName(), e.getMessage()));
         }
 
-        return new TcpListener(listenerConfig.getName(), port, parser.iterator().next(), new MetricRegistry());
+        return new TcpListener(listenerConfig.getName(), port, parser.iterator().next(), metricRegistry);
     }
 }

@@ -46,10 +46,12 @@ import org.keycloak.util.TokenUtil;
 import org.opennms.horizon.shared.constants.GrpcConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.Set;
 
 @Component
 @RequiredArgsConstructor
@@ -58,6 +60,9 @@ public class MinionCertServerInterceptor implements ServerInterceptor {
 
     private static final String TOKEN_PREFIX = "Bearer";
     private final KeycloakDeployment keycloak;
+
+    @Value("${grpc.server.bypassTokenMethods}")
+    private final Set<String> bypassTokenMethods;
 
     @Override
     public <ReqT, RespT> ServerCall.Listener<ReqT> interceptCall(ServerCall<ReqT, RespT> serverCall, Metadata headers, ServerCallHandler<ReqT, RespT> callHandler) {
@@ -75,10 +80,15 @@ public class MinionCertServerInterceptor implements ServerInterceptor {
         }
 
         LOG.debug("Received metadata: {}", headers);
-        String authHeader = headers.get(GrpcConstants.AUTHORIZATION_METADATA_KEY);
         try {
-            Optional<String> tenantId = verifyAccessToken(authHeader);
-            Context context = tenantId.map(tnId -> Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, tnId)).orElseThrow();
+            Context context;
+            if (bypassTokenMethods.contains(serverCall.getMethodDescriptor().getBareMethodName())) {
+                context = Context.current();
+            } else {
+                String authHeader = headers.get(GrpcConstants.AUTHORIZATION_METADATA_KEY);
+                Optional<String> tenantId = verifyAccessToken(authHeader);
+                context = tenantId.map(tnId -> Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, tnId)).orElseThrow();
+            }
             return Contexts.interceptCall(context, serverCall, headers, callHandler);
         } catch (VerificationException e) {
             LOG.error("Failed to verify access token", e);

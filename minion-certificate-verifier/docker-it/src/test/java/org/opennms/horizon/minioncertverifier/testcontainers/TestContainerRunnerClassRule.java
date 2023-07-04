@@ -1,8 +1,8 @@
 /*
  * This file is part of OpenNMS(R).
  *
- * Copyright (C) 2022 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
+ * Copyright (C) 2022-2023 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
  *
@@ -31,15 +31,14 @@ package org.opennms.horizon.minioncertverifier.testcontainers;
 import org.junit.rules.ExternalResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.utility.DockerImageName;
 
-import java.security.KeyPair;
 import java.time.Duration;
-import org.testcontainers.utility.MountableFile;
 
 public class TestContainerRunnerClassRule extends ExternalResource {
 
@@ -51,43 +50,48 @@ public class TestContainerRunnerClassRule extends ExternalResource {
 
     private final GenericContainer<?> applicationContainer;
 
-    private Network network;
+    private final GenericContainer<?> mockCertificateManagerContainer;
 
-    private KeyPair jwtKeyPair;
+    private Network network;
 
     public TestContainerRunnerClassRule() {
         applicationContainer = new GenericContainer<>(DockerImageName.parse(dockerImage));
+        mockCertificateManagerContainer = new GenericContainer<>(DockerImageName.parse("tkpd/gripmock"));
     }
 
     @Override
-    protected void before() {
+    protected void before() throws Exception {
         network = Network.newNetwork();
         LOG.info("USING TEST DOCKER NETWORK {}", network.getId());
 
-        startApplicationContainer();
+        var managerUrl = startCertificateManagerContainer();
+        LOG.info("Mock server url: {}", managerUrl);
+        startApplicationContainer(managerUrl);
     }
 
     @Override
     protected void after() {
         applicationContainer.stop();
+        mockCertificateManagerContainer.stop();
     }
 
 //========================================
 // Container Startups
 //----------------------------------------
 
-    private void startApplicationContainer() {
+    private void startApplicationContainer(String managerUrl) {
         applicationContainer.withNetwork(network)
             .withNetworkAliases("application", "application-host")
             .withExposedPorts(8080, 5005)
             .withEnv("JAVA_TOOL_OPTIONS", "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005")
+            .withEnv("grpc.url.minion-certificate-manager", managerUrl)
             .withLogConsumer(new Slf4jLogConsumer(LOG).withPrefix("APPLICATION"))
             .waitingFor(Wait.forLogMessage(".*Started MinionCertificateVerifier.*", 1)
                 .withStartupTimeout(Duration.ofMinutes(1))
             );
 
         // DEBUGGING: uncomment to force local port 5005
-        //applicationContainer.getPortBindings().add("5005:5005");
+        // applicationContainer.getPortBindings().add("5005:5005");
         applicationContainer.start();
 
         var externalHttpPort = applicationContainer.getMappedPort(8080);
@@ -96,5 +100,25 @@ public class TestContainerRunnerClassRule extends ExternalResource {
         LOG.info("APPLICATION MAPPED PORTS: external-http={}; debugger={}", externalHttpPort, debuggerPort);
         System.setProperty("application-external-http-port", String.valueOf(externalHttpPort));
         System.setProperty("application-external-http-base-url", "http://localhost:" + externalHttpPort);
+    }
+
+    private String startCertificateManagerContainer() {
+        mockCertificateManagerContainer
+            .withNetwork(network)
+            .withNetworkAliases("opennms-minion-certificate-manager")
+            .withExposedPorts(4770)
+            .withClasspathResourceMapping("proto", "/proto", BindMode.READ_ONLY)
+            // refer from jar file
+            .withClasspathResourceMapping("minion-certificate-manager.proto", "/proto/minion-certificate-manager.proto", BindMode.READ_ONLY)
+            // make sure stub file don't have tail 0A return char
+            .withCommand("--stub=/proto/stub", "/proto/minion-certificate-manager.proto")
+            .withLogConsumer(new Slf4jLogConsumer(LOG).withPrefix("MOCK"))
+            .waitingFor(Wait.forListeningPort()
+                .withStartupTimeout(Duration.ofSeconds(10))
+            );
+
+        mockCertificateManagerContainer.start();
+
+        return "opennms-minion-certificate-manager:4770";
     }
 }

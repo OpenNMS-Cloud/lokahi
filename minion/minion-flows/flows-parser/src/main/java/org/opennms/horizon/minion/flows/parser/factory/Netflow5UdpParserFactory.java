@@ -43,11 +43,16 @@ public class Netflow5UdpParserFactory implements ParserFactory {
     private final TelemetryRegistry telemetryRegistry;
     private final IpcIdentity identity;
     private final DnsResolver dnsResolver;
+    private final MetricRegistry metricRegistry;
 
-    public Netflow5UdpParserFactory(final TelemetryRegistry telemetryRegistry, final IpcIdentity identity, final DnsResolver dnsResolver) {
+    public Netflow5UdpParserFactory(final TelemetryRegistry telemetryRegistry,
+                                    final IpcIdentity identity,
+                                    final DnsResolver dnsResolver,
+                                    final MetricRegistry metricRegistry) {
         this.telemetryRegistry = Objects.requireNonNull(telemetryRegistry);
         this.identity = Objects.requireNonNull(identity);
         this.dnsResolver = Objects.requireNonNull(dnsResolver);
+        this.metricRegistry = Objects.requireNonNull(metricRegistry);
     }
 
     @Override
@@ -64,7 +69,7 @@ public class Netflow5UdpParserFactory implements ParserFactory {
             dispatcher,
             this.identity,
             this.dnsResolver,
-            new MetricRegistry()
+            metricRegistry
         );
     }
 }

@@ -50,7 +50,7 @@ import java.util.Arrays;
 public class EventConsumer {
     private static final Logger LOG = LoggerFactory.getLogger(EventConsumer.class);
     private final AlertService alertService;
-    @KafkaListener(topics = "${kafka.topics.event}", concurrency = "1")
+    @KafkaListener(topics = "${kafka.topics.trap-event}", concurrency = "1")
     public void receiveMessage(@Payload byte[] data) {
         try {
             EventLog eventLog = EventLog.parseFrom(data);

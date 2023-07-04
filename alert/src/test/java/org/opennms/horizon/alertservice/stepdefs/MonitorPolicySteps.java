@@ -109,6 +109,11 @@ public class MonitorPolicySteps {
             .setMemo(memo);
     }
 
+    @Given("tags for monitor policy {string}")
+    public void tagsForMonitorPolicy(String tag) {
+        policyBuilder.addTags(tag);
+    }
+
     @Given("Notify by email {string}")
     public void notifyByEmail(String notifyByEmail) {
         policyBuilder.setNotifyByEmail(Boolean.parseBoolean(notifyByEmail));
@@ -270,4 +275,5 @@ public class MonitorPolicySteps {
         var monitoringPolicy = list.getPoliciesList().get(0);
         policyId = monitoringPolicy.getId();
     }
+
 }

@@ -31,23 +31,9 @@ package org.opennms.horizon.shared.snmp;
 import java.util.Arrays;
 import java.util.Objects;
 
-import jakarta.xml.bind.annotation.XmlAccessType;
-import jakarta.xml.bind.annotation.XmlAccessorType;
-import jakarta.xml.bind.annotation.XmlElement;
-import jakarta.xml.bind.annotation.XmlRootElement;
-import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-
-@XmlRootElement(name="snmp-result")
-@XmlAccessorType(XmlAccessType.NONE)
 public class SnmpResult implements Comparable<SnmpResult> {
-    @XmlElement(name="base")
-    @XmlJavaTypeAdapter(SnmpObjIdXmlAdapter.class)
     private SnmpObjId m_base;
-    @XmlElement(name="instance")
-    @XmlJavaTypeAdapter(SnmpInstIdXmlAdapter.class)
     private SnmpInstId m_instance;
-    @XmlElement(name="value")
-    @XmlJavaTypeAdapter(SnmpValueXmlAdapter.class)
     private SnmpValue m_value;
 
     protected SnmpResult() {

@@ -100,9 +100,10 @@ public class UdpListener implements Listener {
             throw new IllegalArgumentException("If more than 1 parser is defined, all parsers must be Dispatchable");
         }
 
-        packetsReceived = metrics.meter(MetricRegistry.name("org/opennms/horizon/minion/flows/listeners", name, "packetsReceived"));
+        packetsReceived = metrics.meter(MetricRegistry.name("listeners", name, "packetsReceived"));
     }
     // check
+    
     public void start() throws InterruptedException {
         // Netty defaults to 2 * num cores when the number of threads is set to 0
         this.bossGroup = new NioEventLoopGroup(0, new ThreadFactoryBuilder()

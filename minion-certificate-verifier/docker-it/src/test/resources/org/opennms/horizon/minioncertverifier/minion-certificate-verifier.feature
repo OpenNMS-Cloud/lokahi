@@ -37,3 +37,7 @@ Feature: Minion Certificate Verifier HTTP Request Processing
   Scenario: Verify minion certificate validation request - with empty subject
     When Request with "" is made
     Then Within 30s result fails
+
+  Scenario: Verify minion certificate validation request - with expired certificate
+    When Request with "OU=T:tenant03,OU=L:333" is made
+    Then Within 30s result fails

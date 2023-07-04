@@ -1,8 +1,8 @@
 /*******************************************************************************
  * This file is part of OpenNMS(R).
  *
- * Copyright (C) 2011-2014 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2014 The OpenNMS Group, Inc.
+ * Copyright (C) 2023 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
  *
@@ -26,13 +26,29 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-@XmlSchema(
-    namespace="http://xmlns.opennms.org/xsd/config/snmp",
-    elementFormDefault=jakarta.xml.bind.annotation.XmlNsForm.QUALIFIED,
-    xmlns={
-        @XmlNs(prefix="", namespaceURI="http://xmlns.opennms.org/xsd/config/snmp")
+package org.opennms.horizon.minioncertverifier.parser;
+
+import java.io.ByteArrayInputStream;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
+
+public class CertificateParser {
+    private final X509Certificate certificate;
+    public CertificateParser(String pemInput) throws CertificateException {
+        var certStream  =  new ByteArrayInputStream(URLDecoder.decode(pemInput, StandardCharsets.UTF_8).getBytes());
+        CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
+        certificate = (X509Certificate) certFactory.generateCertificate(certStream);
     }
-)
-package org.opennms.horizon.shared.snmp.conf.xml;
-import jakarta.xml.bind.annotation.XmlNs;
-import jakarta.xml.bind.annotation.XmlSchema;
+
+    public String getSubjectDn(){
+        return certificate.getSubjectX500Principal().getName();
+    }
+
+    public String getSerialNumber(){
+        return certificate.getSerialNumber().toString(16).toUpperCase();
+    }
+
+}

@@ -6,8 +6,10 @@ Feature: Alert Service Basic Functionality
     Given Kafka bootstrap URL in system property "kafka.bootstrap-servers"
     Given Kafka event topic "events"
     Given Kafka alert topic "alerts"
+    Given Kafka tag topic "tag-operation"
     Given Tenant id "tenantA"
     Given Monitor policy name "tenantA-policy" and memo "tenantA policy"
+    Given tags for monitor policy "tag1"
     Given Policy Rule name "tenantA-rule" and componentType "NODE"
     And Trigger events data
       | trigger_event   | count | overtime | overtime_unit | severity | clear_event    |
@@ -16,6 +18,13 @@ Feature: Alert Service Basic Functionality
       | SNMP_Cold_Start | 1     | 0        | MINUTE        | MAJOR    |                |
       | SNMP_Warm_Start | 1     | 0        | MINUTE        | CRITICAL |                |
     And Create a new policy with give parameters
+    Given Tenant "tenantA"
+    Given Tag operation data
+      | action     | name     | node_ids |
+      | ASSIGN_TAG | tag1     | 10       |
+    And Sent tag operation message to Kafka topic
+    Then Verify list tag with size 1 and node ids
+      | 10 |
     Given Tenant id "tenantF"
     And Create a new policy with give parameters
     Given Tenant id "tenantG"

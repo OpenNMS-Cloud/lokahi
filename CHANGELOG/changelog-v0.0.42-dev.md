@@ -1,4 +1,3 @@
-
 Changes: 
 *   7bab8fdf1 Merge pull request #1192 from OpenNMS-Cloud/jira/HS-1613
 *   b19666095 Merge pull request #1211 from OpenNMS-Cloud/deejgregor/fix-tilt-test-location-setup

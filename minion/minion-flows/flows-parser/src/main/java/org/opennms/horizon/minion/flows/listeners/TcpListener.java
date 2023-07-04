@@ -93,7 +93,7 @@ public class TcpListener implements Listener {
         }
         this.parser = Objects.requireNonNull(parser);
 
-        packetsReceived = metrics.meter(MetricRegistry.name("org/opennms/horizon/minion/flows/listeners", name, "packetsReceived"));
+        packetsReceived = metrics.meter(MetricRegistry.name("listeners", name, "packetsReceived"));
     }
 
     public void start() throws InterruptedException {

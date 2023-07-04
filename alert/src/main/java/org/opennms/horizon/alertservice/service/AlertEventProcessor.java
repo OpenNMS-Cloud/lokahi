@@ -36,9 +36,7 @@ import jakarta.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
 import org.opennms.horizon.alerts.proto.Alert;
 import org.opennms.horizon.alerts.proto.AlertType;
-import org.opennms.horizon.alerts.proto.EventType;
 import org.opennms.horizon.alerts.proto.ManagedObjectType;
-import org.opennms.horizon.alerts.proto.OverTimeUnit;
 import org.opennms.horizon.alerts.proto.Severity;
 import org.opennms.horizon.alertservice.db.entity.AlertDefinition;
 import org.opennms.horizon.alertservice.db.entity.MonitorPolicy;
@@ -46,7 +44,7 @@ import org.opennms.horizon.alertservice.db.entity.ThresholdedEvent;
 import org.opennms.horizon.alertservice.db.entity.TriggerEvent;
 import org.opennms.horizon.alertservice.db.repository.AlertDefinitionRepository;
 import org.opennms.horizon.alertservice.db.repository.AlertRepository;
-import org.opennms.horizon.alertservice.db.repository.MonitorPolicyRepository;
+import org.opennms.horizon.alertservice.db.repository.TagRepository;
 import org.opennms.horizon.alertservice.db.repository.ThresholdedEventRepository;
 import org.opennms.horizon.alertservice.db.repository.TriggerEventRepository;
 import org.opennms.horizon.alertservice.db.tenant.TenantLookup;
@@ -80,7 +78,7 @@ public class AlertEventProcessor {
     private final TriggerEventRepository triggerEventRepository;
     private final ThresholdedEventRepository thresholdedEventRepository;
 
-    private final MonitorPolicyRepository monitorPolicyRepository;
+    private final TagRepository tagRepository;
 
     private final MeterRegistry registry;
 
@@ -111,10 +109,10 @@ public class AlertEventProcessor {
             clearKey = String.format(alertDefinition.getClearKey(), event.getTenantId(), event.getNodeId());
         }
         TriggerEvent triggerEvent = triggerEventRepository.getReferenceById(alertDefinition.getTriggerEventId());
-        // TODO HS-1485: An alert could match multiple monitoring policies, each having their own notifications.
-        Optional<MonitorPolicy> policy = monitorPolicyRepository.findMonitoringPolicyByTriggerEvent(triggerEvent.getId());
-        List<Long> policies = new ArrayList<>();
-        policy.ifPresent(monitorPolicy -> policies.add(monitorPolicy.getId()));
+        var tags = tagRepository.findByTenantIdAndNodeId(event.getTenantId(), event.getNodeId());
+        List<MonitorPolicy> matchingPolicies = new ArrayList<>();
+        tags.forEach(tag -> matchingPolicies.addAll(tag.getPolicies().stream().toList()));
+        var policies = matchingPolicies.stream().map(MonitorPolicy::getId).toList();
         return new AlertData(
             reductionKey,
             clearKey,

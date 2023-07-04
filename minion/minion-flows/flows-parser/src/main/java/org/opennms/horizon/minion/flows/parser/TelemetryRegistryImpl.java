@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import com.codahale.metrics.MetricRegistry;
 import org.opennms.horizon.flows.document.FlowDocument;
 import org.opennms.horizon.minion.flows.listeners.Listener;
 import org.opennms.horizon.minion.flows.listeners.Parser;
@@ -66,21 +67,23 @@ public class TelemetryRegistryImpl implements TelemetryRegistry {
 
     public TelemetryRegistryImpl(MessageDispatcherFactory messageDispatcherFactory,
                                  IpcIdentity identity,
-                                 DnsResolver dnsResolver) throws IOException {
+                                 DnsResolver dnsResolver,
+                                 MetricRegistry metricRegistry) throws IOException {
         Objects.requireNonNull(messageDispatcherFactory);
         Objects.requireNonNull(identity);
         Objects.requireNonNull(dnsResolver);
+        Objects.requireNonNull(metricRegistry);
 
         var sink = new FlowSinkModule(identity);
         this.dispatcher = messageDispatcherFactory.createAsyncDispatcher(sink);
 
-        this.addListenerFactory(new UdpListenerFactory(this));
-        this.addListenerFactory(new TcpListenerFactory(this));
+        this.addListenerFactory(new UdpListenerFactory(this, metricRegistry));
+        this.addListenerFactory(new TcpListenerFactory(this, metricRegistry));
 
-        this.addParserFactory(new Netflow5UdpParserFactory(this, identity, dnsResolver));
-        this.addParserFactory(new Netflow9UdpParserFactory(this, identity, dnsResolver));
-        this.addParserFactory(new IpfixUdpParserFactory(this, identity, dnsResolver));
-        this.addParserFactory(new IpfixTcpParserFactory(this, identity, dnsResolver));
+        this.addParserFactory(new Netflow5UdpParserFactory(this, identity, dnsResolver, metricRegistry));
+        this.addParserFactory(new Netflow9UdpParserFactory(this, identity, dnsResolver, metricRegistry));
+        this.addParserFactory(new IpfixUdpParserFactory(this, identity, dnsResolver, metricRegistry));
+        this.addParserFactory(new IpfixTcpParserFactory(this, identity, dnsResolver, metricRegistry));
     }
 
     protected void addListenerFactory(ListenerFactory factory) {

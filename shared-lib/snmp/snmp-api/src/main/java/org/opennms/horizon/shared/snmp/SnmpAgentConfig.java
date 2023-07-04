@@ -30,26 +30,14 @@ package org.opennms.horizon.shared.snmp;
 
 import java.io.Serializable;
 import java.net.InetAddress;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
-
-import jakarta.xml.bind.annotation.XmlRootElement;
-import jakarta.xml.bind.annotation.XmlTransient;
-import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-
-import org.json.JSONObject;
-import org.json.JSONStringer;
-import org.json.JSONTokener;
-import org.json.JSONWriter;
 
 /**
  * @author (various previous authors not documented)
  * @author <a href="mailto:david@opennms.org">David Hustace</a>
  */
-@XmlRootElement(name = "snmpAgentConfig")
 public class SnmpAgentConfig extends SnmpConfiguration implements Serializable {
     private static final long serialVersionUID = -6646744513933866811L;
 
@@ -71,39 +59,6 @@ public class SnmpAgentConfig extends SnmpConfiguration implements Serializable {
     public SnmpAgentConfig(InetAddress agentAddress, SnmpConfiguration defaults) {
         super(defaults);
         m_address = agentAddress;
-    }
-
-    public static SnmpAgentConfig parseProtocolConfigurationString(String protocolConfigString) {
-        if (protocolConfigString == null) {
-            throw new IllegalArgumentException("Protocol configuration string for SnmpAgentConfig must not be null.");
-        }
-
-        final JSONObject protocolConfig = new JSONObject(new JSONTokener(protocolConfigString)).optJSONObject("snmp");
-        if (protocolConfig == null) {
-            throw new IllegalStateException("Invalid protocol configuration string for SnmpAgentConfig: Expected it to start with snmp object" + protocolConfigString);
-        }
-
-        Map<String, String> attributes = new HashMap<>();
-        @SuppressWarnings("unchecked")
-        Iterator<String> keysItr = protocolConfig.keys();
-        while(keysItr.hasNext()) {
-            String key = keysItr.next();
-            attributes.put(key, protocolConfig.isNull(key) ? null : protocolConfig.getString(key));
-        }
-
-        return SnmpAgentConfig.fromMap(attributes);
-    }
-
-    public String toProtocolConfigString() {
-        final JSONWriter writer = new JSONStringer()
-                .object()
-                .key("snmp")
-                .object();
-        toMap().entrySet().stream()
-                .forEach(e -> writer.key(e.getKey()).value(e.getValue()));
-        return writer.endObject()
-                .endObject()
-                .toString();
     }
 
     /**
@@ -144,7 +99,6 @@ public class SnmpAgentConfig extends SnmpConfiguration implements Serializable {
     }
 
 
-    @XmlJavaTypeAdapter(InetAddrXmlAdapter.class)
     public InetAddress getAddress() {
         return m_address;
     }
@@ -153,7 +107,6 @@ public class SnmpAgentConfig extends SnmpConfiguration implements Serializable {
         m_address = address;
     }
 
-    @XmlJavaTypeAdapter(InetAddrXmlAdapter.class)
     public InetAddress getProxyFor() {
         return m_proxyFor;
     }
@@ -162,13 +115,11 @@ public class SnmpAgentConfig extends SnmpConfiguration implements Serializable {
         m_proxyFor = address;
     }
 
-    @XmlTransient
     public InetAddress getEffectiveAddress() {
         if (m_proxyFor == null) return m_address;
         return m_proxyFor;
     }
 
-    @XmlTransient
     public boolean isDefault() {
         return isDefault;
     }
@@ -177,7 +128,6 @@ public class SnmpAgentConfig extends SnmpConfiguration implements Serializable {
         this.isDefault = isDefault;
     }
 
-    @XmlTransient
     public String getProfileLabel() {
         return profileLabel;
     }

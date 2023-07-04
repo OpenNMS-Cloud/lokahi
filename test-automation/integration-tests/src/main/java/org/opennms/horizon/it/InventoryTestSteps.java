@@ -29,7 +29,6 @@ import org.opennms.horizon.it.gqlmodels.MinionData;
 import org.opennms.horizon.it.helper.TestsExecutionHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -46,6 +45,7 @@ import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.containers.wait.strategy.WaitAllStrategy;
 import org.testcontainers.images.builder.Transferable;
 import org.testcontainers.utility.DockerImageName;
+
 import org.testcontainers.utility.ResourceReaper;
 
 import static org.junit.Assert.assertEquals;
@@ -98,6 +98,7 @@ public class InventoryTestSteps {
 
         Response response = helper.executePostQuery(gqlQuery);
         assertEquals(response.getStatusCode(), 200);
+        assertFalse(helper.responseContainsErrors(response));
     }
 
     @Given("Location {string} is removed")
@@ -116,6 +117,9 @@ public class InventoryTestSteps {
 
         Response response = helper.executePostQuery(gqlQuery);
         assertEquals(response.getStatusCode(), 200);
+//        TODO: The current API always fails on location deletion. This needs to be uncommented
+//              once it's working properly (fails from the UI also).
+//        assertFalse(helper.responseContainsErrors(response));
     }
 
     @Given("Location {string} does not exist")
@@ -204,6 +208,7 @@ public class InventoryTestSteps {
 
         assertEquals("add-device query failed: status=" + restAssuredResponse.getStatusCode() + "; body=" + restAssuredResponse.getBody().asString(),
             200, restAssuredResponse.getStatusCode());
+        assertFalse("add-device query failed", helper.responseContainsErrors(restAssuredResponse));
 
         CreateNodeResult createNodeResult = restAssuredResponse.getBody().as(CreateNodeResult.class);
 
@@ -230,6 +235,7 @@ public class InventoryTestSteps {
             assertTrue(false);
         }
     }
+
 
     @Then("Delete the first node from inventory")
     public void deleteFirstNodeFromInventory() throws MalformedURLException {
@@ -281,27 +287,43 @@ public class InventoryTestSteps {
         keystores.put(location, Map.entry(pkcs12password, pkcs12));
     }
 
+    @Then("Minion {string} is started with shared networking in location {string}")
+    public void startMinionSharedNetwork(String systemId, String location) throws IOException {
+        startMinion(systemId, location, true);
+    }
+
     @Then("Minion {string} is started in location {string}")
-    public void startMinion(String systemId, String location) throws IOException {
+    public void startMinionSpecificNetwork(String systemId, String location) throws IOException {
+        startMinion(systemId, location, false);
+    }
+
+    public void startMinion(String systemId, String location, boolean sharedNetworking) throws IOException {
         if (!keystores.containsKey(location)) {
             fail("Could not find location " + location + " certificate");
         }
 
         Entry<String, byte[]> certificate = keystores.get(location);
+
         stopMinion(systemId);
 
+        Network network;
+        if (sharedNetworking) {
+            network = Network.SHARED;
+        } else {
+            network = helper.getCommonNetworkSupplier().get();
+        }
         GenericContainer<?> minion = new GenericContainer<>(DockerImageName.parse(helper.getMinionImageNameSupplier().get()))
             .withEnv("MINION_GATEWAY_HOST", helper.getMinionIngressSupplier().get())
             .withEnv("MINION_GATEWAY_PORT", String.valueOf(helper.getMinionIngressPortSupplier().get()))
             .withEnv("MINION_GATEWAY_TLS", String.valueOf(helper.getMinionIngressTlsEnabledSupplier().get()))
             .withEnv("MINION_ID", systemId)
             .withEnv("USE_KUBERNETES", "false")
-            .withEnv("IGNITE_SERVER_ADDRESSES", "127.0.0.1")
             .withEnv("GRPC_CLIENT_KEYSTORE", "/opt/karaf/minion.p12")
             .withEnv("GRPC_CLIENT_KEYSTORE_PASSWORD", certificate.getKey())
             .withEnv("GRPC_CLIENT_OVERRIDE_AUTHORITY", helper.getMinionIngressOverrideAuthority().get())
+            .withEnv("IGNITE_SERVER_ADDRESSES", "localhost")
             .withNetworkAliases("minion-" + systemId.toLowerCase())
-            .withNetwork(Network.SHARED)
+            .withNetwork(network)
             .withLabel("label", systemId);
         minions.put(systemId, minion);
 
@@ -341,6 +363,7 @@ public class InventoryTestSteps {
         }
     }
 
+
     private boolean checkAtLeastOneMinionAtGivenLocation() throws MalformedURLException {
         FindAllMinionsQueryResult findAllMinionsQueryResult = commonQueryMinions();
         List<MinionData> filtered = commonFilterMinionsAtLocation(findAllMinionsQueryResult);
@@ -360,6 +383,7 @@ public class InventoryTestSteps {
         lastMinionQueryResultBody = restAssuredResponse.getBody().asString();
 
         Assert.assertEquals(200, restAssuredResponse.getStatusCode());
+        assertFalse(helper.responseContainsErrors(restAssuredResponse));
 
         return restAssuredResponse.getBody().as(FindAllMinionsQueryResult.class);
     }
@@ -406,6 +430,7 @@ public class InventoryTestSteps {
         LOG.info("Status of the node: " + currentStatus);
         return currentStatus.equals(expectedStatus);
     }
+
 
     /**
      * Method to get the ID of the first node in the inventory

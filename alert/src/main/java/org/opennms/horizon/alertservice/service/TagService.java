@@ -32,7 +32,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.opennms.horizon.alert.tag.proto.TagProto;
 import org.opennms.horizon.alertservice.db.entity.Tag;
-import org.opennms.horizon.alertservice.db.repository.MonitorPolicyRepository;
 import org.opennms.horizon.alertservice.db.repository.TagRepository;
 import org.opennms.horizon.alertservice.mapper.TagMapper;
 import org.opennms.horizon.shared.common.tag.proto.TagOperationList;
@@ -47,7 +46,6 @@ import java.util.List;
 public class TagService {
     private final TagRepository tagRepository;
     private final TagMapper tagMapper;
-    private final MonitorPolicyRepository monitorPolicyRepository;
 
     @Transactional
     public void insertOrUpdateTags(TagOperationList list) {

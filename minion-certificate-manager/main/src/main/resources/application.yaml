@@ -15,3 +15,4 @@ grpc:
   server:
     port: 8990
     deadline: 60000
+    bypassTokenMethods: isCertValid # comma separated list

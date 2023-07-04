@@ -142,6 +142,7 @@
         :selected-filter-range="flowsStore.filters.dateFilter"
         :chart-data="appStore.lineChartData"
         :table-data="appStore.tableData"
+        :format="flowsStore.convertToDate"
       />
       <div
         v-if="

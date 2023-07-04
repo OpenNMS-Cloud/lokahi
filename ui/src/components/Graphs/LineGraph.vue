@@ -105,7 +105,7 @@ const options = computed<ChartOptions<any>>(() => ({
 const xAxisLabels = computed(() => {
   const graphsDataSetsValues = (graphs.dataSets.value[0]?.values as any) || ([] as any)
 
-  // used to track the gap between the previous point and now, should the collector go down
+  // if collector down, this tracks the gap between the previous point and now
   const date = add(new Date(), { minutes: 2 })
   graphsDataSetsValues.push([date.getTime() / 1000, 0])
 
@@ -121,9 +121,8 @@ const dataSets = computed(() => {
     borderColor: bgColor[i],
     hitRadius: 5,
     hoverRadius: 6,
-    // this bizarre line hides the last point (always 0), which is used to track the gap 
-    // between the previous point and now, should the collector go down
-    pointRadius: Array.from(Array(xAxisLabels.value.length).keys()).map((_, index) => xAxisLabels.value.length -1 === index ? 0 : 3) ,
+    // hides the last point, which tracks the gap between the previous point and now
+    pointRadius: Array.from(Array(xAxisLabels.value.length).keys()).map((_, index) => xAxisLabels.value.length -1 === index ? 0 : 3),
     spanGaps: 1000 * 60 * 2 // no line over 2+ minute gaps
   }))
 })

@@ -109,8 +109,7 @@ const createData = (list: [number, number][]) => {
 }
 
 watchEffect(() => {
-  // add a final point 'now', which is used to track the gap 
-  // between the previous point and now, should the collector go down
+  // add a final point 'now', which is used to track the gap between the previous point and now
   const totalTrafficIn = [...store.totalNetworkTrafficIn]
   totalTrafficIn.push([Date.now() / 1000, 0])
 

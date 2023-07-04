@@ -29,10 +29,8 @@
 package org.opennms.horizon.events.traps;
 
 import org.apache.kafka.clients.producer.ProducerRecord;
-import org.apache.kafka.common.header.internals.RecordHeader;
 import org.opennms.horizon.events.proto.Event;
 import org.opennms.horizon.events.proto.EventLog;
-import org.opennms.horizon.shared.constants.GrpcConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,37 +38,34 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
-import java.nio.charset.StandardCharsets;
-
 @Component
-public class TrapEventForwarder {
+public class EventForwarder {
 
-    private static final Logger LOG = LoggerFactory.getLogger(TrapEventForwarder.class);
+    private static final Logger LOG = LoggerFactory.getLogger(EventForwarder.class);
 
     private final KafkaTemplate<String, byte[]> kafkaTemplate;
 
-    private final String kafkaTopic;
-    private final String internalTopic;
+    private final String trapEventsTopic;
+    private final String internalEventsTopic;
 
-    @Autowired
-    public TrapEventForwarder(KafkaTemplate<String, byte[]> kafkaTemplate,
-                              @Value("${kafka.events-topic}") String kafkaTopic,
-                              @Value("${kafka.internal-topic}") String internalEventsTopic) {
+    public EventForwarder(KafkaTemplate<String, byte[]> kafkaTemplate,
+                          @Value("${kafka.trap-events-topic}") String trapEventsTopic,
+                          @Value("${kafka.internal-events-topic}") String internalEventsTopic) {
         this.kafkaTemplate = kafkaTemplate;
-        this.kafkaTopic = kafkaTopic;
-        this.internalTopic = internalEventsTopic;
+        this.trapEventsTopic = trapEventsTopic;
+        this.internalEventsTopic = internalEventsTopic;
     }
 
-    public void sendEvents(EventLog eventLog) {
+    public void sendTrapEvents(EventLog eventLog) {
         LOG.info("Sending {} events to events topic for tenant: {}", eventLog.getEventsCount(), eventLog.getTenantId());
-        var record = new ProducerRecord<String, byte[]>(kafkaTopic, eventLog.toByteArray());
-        kafkaTemplate.send(record);
+        var producerRecord = new ProducerRecord<String, byte[]>(trapEventsTopic, eventLog.toByteArray());
+        kafkaTemplate.send(producerRecord);
     }
 
     public void sendInternalEvent(Event event) {
         LOG.info("Sending event with UEI: {} for interface: {} for tenantId={}; locationId={}", event.getUei(),
             event.getIpAddress(), event.getTenantId(), event.getLocationId());
-        var record = new ProducerRecord<String, byte[]>(internalTopic, event.toByteArray());
-        kafkaTemplate.send(record);
+        var producerRecord = new ProducerRecord<String, byte[]>(internalEventsTopic, event.toByteArray());
+        kafkaTemplate.send(producerRecord);
     }
 }

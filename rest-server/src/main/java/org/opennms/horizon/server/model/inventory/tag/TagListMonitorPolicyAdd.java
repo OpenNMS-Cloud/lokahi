@@ -1,8 +1,8 @@
 /*******************************************************************************
  * This file is part of OpenNMS(R).
  *
- * Copyright (C) 2011-2014 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2014 The OpenNMS Group, Inc.
+ * Copyright (C) 2023 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
  *
@@ -26,13 +26,18 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-@XmlSchema(
-    namespace="http://xmlns.opennms.org/xsd/config/snmp",
-    elementFormDefault=jakarta.xml.bind.annotation.XmlNsForm.QUALIFIED,
-    xmlns={
-        @XmlNs(prefix="", namespaceURI="http://xmlns.opennms.org/xsd/config/snmp")
-    }
-)
-package org.opennms.horizon.shared.snmp.conf.xml;
-import jakarta.xml.bind.annotation.XmlNs;
-import jakarta.xml.bind.annotation.XmlSchema;
+package org.opennms.horizon.server.model.inventory.tag;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
+
+import java.util.List;
+
+@Getter
+@Setter
+@AllArgsConstructor
+public class TagListMonitorPolicyAdd {
+    private Long monitorPolicyId;
+    private List<TagCreate> tags;
+}

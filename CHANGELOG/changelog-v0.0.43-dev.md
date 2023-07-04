@@ -1,14 +1,12 @@
 Changes: 
-*   7bab8fdf1 Merge pull request #1192 from OpenNMS-Cloud/jira/HS-1613
-*   b19666095 Merge pull request #1211 from OpenNMS-Cloud/deejgregor/fix-tilt-test-location-setup
-*   b8fed35ff Merge pull request #1061 from OpenNMS-Cloud/feature/HS-1537_member
-*   eb89f2e10 Merge pull request #1185 from OpenNMS-Cloud/jira/HS-1685
-*   7c71a87da Merge pull request #1190 from OpenNMS-Cloud/jira/BTO-509-tilt-ci-test
-*   8c639bbc0 Merge pull request #1209 from OpenNMS-Cloud/fix/remove-path-filtering
-*   6c52ef156 Merge pull request #1205 from OpenNMS-Cloud/jira/HS-1703
-*   3c81dc5a2 Merge pull request #1166 from OpenNMS-Cloud/jira/BTO-535
-*   be1107017 Merge pull request #1204 from OpenNMS-Cloud/jira/HS-1690-fixups
-*   0b0b15d9e Merge pull request #1191 from OpenNMS-Cloud/HS-1681
+*   aca5be4a4 Merge pull request #1264 from OpenNMS-Cloud/feature/HS-1759-events-refactor
+*   47c76d0fd Merge pull request #1263 from OpenNMS-Cloud/testCleanup-HS1680
+*   db1fddf93 Merge pull request #1252 from OpenNMS-Cloud/fooker/minion-port-fix
+*   58462b6bc Merge pull request #1245 from OpenNMS-Cloud/no-jira-PR-template2
+*   485005211 Merge pull request #1188 from OpenNMS-Cloud/feature/BTO-515
+*   fc067591e Merge pull request #1235 from OpenNMS-Cloud/feature/HS-1744
+*   135552294 Merge pull request #1224 from OpenNMS-Cloud/deejgregor/various-build-improvements
+*   1a85ba24d Merge pull request #1221 from OpenNMS-Cloud/cg/jira/HS-1601-new
 *   299ef0b5b Merge pull request #1067 from OpenNMS-Cloud/HS-1407-endpoints-tests
 *   0321fd96d Merge pull request #1053 from OpenNMS-Cloud/HS-1523-location-edit-form
 *   083aefbd2 Merge pull request #1039 from OpenNMS-Cloud/HS-1405-location-add-edit-form

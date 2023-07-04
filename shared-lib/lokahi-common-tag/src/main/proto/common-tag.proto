@@ -14,6 +14,7 @@ message TagOperationProto {
   string tenant_id = 2;
   string tag_name = 3;
   repeated int64 node_id = 4;
+  repeated int64 monitoring_policy_id = 5;
 }
 
 message TagOperationList {

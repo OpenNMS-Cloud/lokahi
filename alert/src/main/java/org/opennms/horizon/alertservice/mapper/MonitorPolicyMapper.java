@@ -36,18 +36,35 @@ import org.mapstruct.Mappings;
 import org.mapstruct.NullValueCheckStrategy;
 import org.opennms.horizon.alerts.proto.MonitorPolicyProto;
 import org.opennms.horizon.alertservice.db.entity.MonitorPolicy;
+import org.opennms.horizon.alertservice.db.entity.Tag;
 
 @Mapper(componentModel = "spring", uses ={PolicyRuleMapper.class},
     collectionMappingStrategy = CollectionMappingStrategy.ADDER_PREFERRED)
 public interface MonitorPolicyMapper {
     @Mappings({
-        @Mapping(target = "rulesList", source = "rules")
+        @Mapping(target = "rulesList", source = "rules"),
+        @Mapping(target = "tagsList", source = "tags")
     })
     @BeanMapping(nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
     MonitorPolicyProto map(MonitorPolicy policy);
 
     @Mappings({
-        @Mapping(target = "rules", source = "rulesList")
+        @Mapping(target = "rules", source = "rulesList"),
+        @Mapping(target = "tags", source = "tagsList")
     })
     MonitorPolicy map(MonitorPolicyProto proto);
+
+    default String map(Tag tag) {
+        if(tag != null) {
+            return tag.getName();
+        }
+        return null;
+    }
+
+    default Tag map(String tagName) {
+        var tag = new Tag();
+        tag.setName(tagName);
+        return tag;
+
+    }
 }

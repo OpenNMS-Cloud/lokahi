@@ -17,7 +17,6 @@
       <module>snmp-api</module>
       <module>snmp-impl</module>
       <module>proto</module>
-      <module>agent-config</module>
   </modules>
 
 </project>

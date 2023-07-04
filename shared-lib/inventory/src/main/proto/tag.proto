@@ -49,6 +49,7 @@ message TagEntityIdDTO {
     int64 node_id = 1;
     int64 active_discovery_id = 2;
     int64 passive_discovery_id = 3;
+    int64 monitoring_policy_id = 4;
   }
 }
 

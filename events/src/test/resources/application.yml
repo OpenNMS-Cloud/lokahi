@@ -1,8 +1,0 @@
-spring:
-  application:
-    name: integration-test
-
-  liquibase:
-    change-log: db/changelog/changelog.xml
-    enabled: true
-

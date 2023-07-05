@@ -35,7 +35,7 @@
             <FeatherButton
               v-if="props.hasCert"
               secondary
-              @click="onSecondaryButtonClick"
+              @click="locationStore.revokeMinionCertificate"
               data-test="revoke-btn"
             >
               {{ props.secondaryButtonText }}

@@ -33,6 +33,10 @@ public class CucumberCommandLineRunner {
                 commandlineOptionsParser.parse(arguments.toArray(DEFAULT_CUCUMBER_OPTIONS))
                     .build();
 
+        if (commandlineOptionsParser.exitStatus().isPresent()) {
+            System.exit(commandlineOptionsParser.exitStatus().get());
+        }
+
         Runtime cucumberRuntime =
                 Runtime.builder()
                         .withRuntimeOptions(runtimeOptions)

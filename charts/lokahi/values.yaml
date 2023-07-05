@@ -74,6 +74,7 @@ OpenNMS:
       nginx.ingress.kubernetes.io/proxy-body-size: 4m
       nginx.ingress.kubernetes.io/proxy-buffer-size: 6k
   Minion:
+    Enabled: false
     ServiceName: opennms-minion
     Image: opennms/lokahi-minion
     ImagePullPolicy: IfNotPresent
@@ -95,7 +96,7 @@ OpenNMS:
     ExtraMounts: []
     ExtraInitContainers: []
     GrpcConfig: {}
-    addTestLocation: false
+    addDefaultLocation: false
   MinionGateway:
     ServiceName: opennms-minion-gateway
     TlsSecretName: opennms-minion-gateway-certificate

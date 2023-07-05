@@ -1,3 +1,4 @@
+{{- if .Values.OpenNMS.Minion.Enabled }}
 apiVersion: v1
 kind: Service
 metadata:
@@ -16,3 +17,4 @@ spec:
       name: http
   selector:
     app: {{ .Values.OpenNMS.Minion.ServiceName }}
+{{- end }}

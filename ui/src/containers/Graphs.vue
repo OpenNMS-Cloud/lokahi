@@ -1,25 +1,15 @@
 <template>
   <div class="header-container">
-    <HeadlinePage
-      text="Graphs"
-      data-test="page-header"
-    />
-    <FeatherButton
-      text
-      @click="onDownload"
-      class="btn-download"
-    >
+    <HeadlinePage text="Graphs" data-test="page-header" />
+    <FeatherButton text @click="onDownload" class="btn-download">
       Download All
     </FeatherButton>
   </div>
-  <div
-    id="graphs-container"
-    v-if="store.fetchIsDone"
-  >
-    <LineGraph :graph="nodeLatency" />
-    <LineGraph :graph="bytesInOut" />
-    <LineGraph :graph="bytesIn" />
-    <LineGraph :graph="bytesOut" />
+  <div id="graphs-container" v-if="store.fetchIsDone">
+    <LineGraph :graph="nodeLatency" type="latency" />
+    <LineGraph :graph="bytesInOut" type="bytes" />
+    <LineGraph :graph="bytesIn" type="bytes" />
+    <LineGraph :graph="bytesOut" type="bytes" />
   </div>
 </template>
 

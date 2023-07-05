@@ -39,7 +39,8 @@ OpenNMS:
         Memory: '0'
     IngressAnnotations: {}
   Minion:
-    addTestLocation: true
+    Enabled: true
+    addDefaultLocation: true
     Resources:
       Limits:
         Cpu: '0'

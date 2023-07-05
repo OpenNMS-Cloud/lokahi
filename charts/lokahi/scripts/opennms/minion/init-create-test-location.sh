@@ -18,7 +18,7 @@ while true; do
               -U https://$INGRESS_HOST_PORT \
               -k -c "--connect-to" -c "$INGRESS_HOST_PORT:ingress-nginx-controller:443" \
               -f "/cert/minion.p12" -P changeme \
-              -l TestLocation; then
+              -l default; then
     break
   fi
 

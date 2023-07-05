@@ -19,4 +19,12 @@ public class LocationData {
     public void setLocation(String location) {
         this.location = location;
     }
+
+    @Override
+    public String toString() {
+        return "LocationData{" +
+            "id='" + id + '\'' +
+            ", location=" + location +
+            '}';
+    }
 }

@@ -1,3 +1,4 @@
+{{- if .Values.OpenNMS.Minion.Enabled }}
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
@@ -13,3 +14,4 @@ roleRef:
   kind: Role
   name: role-endpoints
   apiGroup: rbac.authorization.k8s.io
+{{- end }}

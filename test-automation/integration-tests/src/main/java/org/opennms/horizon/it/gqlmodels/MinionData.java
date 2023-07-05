@@ -46,4 +46,16 @@ public class MinionData {
     public void setLocation(LocationData location) {
         this.location = location;
     }
+
+
+    @Override
+    public String toString() {
+        return "MinionData{" +
+            "id='" + id + '\'' +
+            ", label=" + label +
+            ", status=" + status +
+            ", systemId=" + systemId +
+            ", location=" + location +
+            '}';
+    }
 }

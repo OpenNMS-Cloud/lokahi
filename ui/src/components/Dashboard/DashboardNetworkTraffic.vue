@@ -4,17 +4,10 @@
     v-if="networkTrafficIn.length <= 1 && networkTrafficOut.length <= 1"
   >
     <template v-slot:icon>
-      <FeatherIcon
-        :icon="isDark ? AreaChartDark : AreaChart"
-        class="empty-chart-icon"
-      />
+      <FeatherIcon :icon="isDark ? AreaChartDark : AreaChart" class="empty-chart-icon" />
     </template>
   </DashboardEmptyState>
-  <Line
-    v-else
-    :data="dataGraph"
-    :options="configGraph"
-  />
+  <Line v-else :data="dataGraph" :options="configGraph" />
 </template>
 
 <script setup lang="ts">
@@ -27,9 +20,9 @@ import { format, fromUnixTime } from 'date-fns'
 import { useDashboardStore } from '@/store/Views/dashboardStore'
 import { optionsGraph } from './dashboardNetworkTraffic.config'
 import { ChartData } from '@/types'
-import { format as d3Format } from 'd3'
 import { ChartOptions } from 'chart.js'
 import 'chartjs-adapter-date-fns'
+import { humanFileSize } from '../utils'
 
 const { onThemeChange, isDark } = useTheme()
 
@@ -38,7 +31,7 @@ const networkTrafficIn = ref([] as [number, number][])
 const networkTrafficOut = ref([] as [number, number][])
 const dataGraph = ref({} as ChartData)
 const configGraph = ref({})
-const yAxisFormatter = d3Format('.3s')
+
 
 onMounted(async () => {
   await store.getNetworkTrafficInValues()
@@ -49,7 +42,7 @@ onMounted(async () => {
 const formatValues = (list: [number, number][]): [number, number][] =>
   list.map((i) => {
     const transformTimeStampToMillis = (val: number) => val * 1000
-    const transformtoGb = (val: number) => val / 1e9
+    const transformtoGb = (val: number) => val
     return [transformTimeStampToMillis(i[0]), transformtoGb(i[1])]
   })
 
@@ -58,7 +51,7 @@ const createConfigGraph = (list: number[]) => {
   options.aspectRatio = 1.4
   options.scales.y = {
     ticks: {
-      callback: (value) => yAxisFormatter(Number(value)),
+      callback: (value) => humanFileSize(Number(value)),
       maxTicksLimit: 8
     },
     position: 'right'

@@ -1,3 +1,4 @@
+{{- if .Values.OpenNMS.Minion.Enabled }}
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -8,3 +9,4 @@ metadata:
     app: {{ .Values.OpenNMS.Minion.ServiceName }}
 data:
   {{- (.Files.Glob "scripts/opennms/minion/**").AsConfig | nindent 2 }}
+{{- end }}

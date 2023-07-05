@@ -1,3 +1,4 @@
+{{- if .Values.OpenNMS.Minion.Enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -45,7 +46,7 @@ spec:
             name: minion-config
         - name: maven-volume
           emptyDir: {}
-        {{- if .Values.OpenNMS.Minion.addTestLocation }}
+        {{- if .Values.OpenNMS.Minion.addDefaultLocation }}
         - name: scripts
           configMap:
             name: minion-scripts
@@ -72,7 +73,7 @@ spec:
           securityContext:
             privileged: true
         {{ end }}
-        {{- if .Values.OpenNMS.Minion.addTestLocation }}
+        {{- if .Values.OpenNMS.Minion.addDefaultLocation }}
         # This container is a development time helper which generates client certificate, key and signs it with
         # `Client CA` certificate which is running in cluster. It's a bit hacky, since it pulls CA private key
         # into minion. Please do not use this in production.
@@ -142,7 +143,7 @@ spec:
               subPath: "opennms-minion-identity"
             - name: maven-volume
               mountPath: /.m2
-            {{- if .Values.OpenNMS.Minion.addTestLocation }}
+            {{- if .Values.OpenNMS.Minion.addDefaultLocation }}
             - name: certificate-secrets
               mountPath: "/run/secrets/certificates"
               readOnly: true
@@ -170,3 +171,4 @@ spec:
               - unset JAVA_TOOL_OPTIONS; echo "opennms:task-set-print" | bin/client -b | grep -q taskDefinition
             initialDelaySeconds: 25
             periodSeconds: 5
+{{- end }}

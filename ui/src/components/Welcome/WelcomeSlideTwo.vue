@@ -86,7 +86,7 @@
                             <FeatherIcon :icon="CheckIcon"
                                 v-if="!welcomeStore.minionStatusLoading && welcomeStore.minionStatusSuccess" />
                         </div>
-                        <div class="copy">
+                        <div class="copy" data-test="welcome-minion-status-txt">
                             {{ welcomeStore.minionStatusCopy }}
                         </div>
                     </div>

@@ -1,11 +1,7 @@
 <template>
   <div class="table-chart-container">
     <div class="chart-container">
-      <Bar
-        :data="chartData"
-        :options="chartOptions"
-        ref="barChart"
-      />
+      <Bar :data="chartData" :options="chartOptions" ref="barChart" />
     </div>
 
     <div class="table-container">
@@ -18,13 +14,10 @@
           </tr>
         </thead>
         <tbody>
-          <tr
-            v-for="(data, index) in tableData"
-            :key="index"
-          >
-            <td>{{ formatBytes(addValues(data.bytesIn, data.bytesOut)) }}</td>
-            <td>{{ formatBytes(data.bytesIn) }}</td>
-            <td>{{ formatBytes(data.bytesOut) }}</td>
+          <tr v-for="(data, index) in tableData" :key="index">
+            <td>{{ humanFileSize(Number(addValues(data.bytesIn, data.bytesOut))) }}</td>
+            <td>{{ humanFileSize(data.bytesIn) }}</td>
+            <td>{{ humanFileSize(data.bytesOut) }}</td>
           </tr>
         </tbody>
       </table>
@@ -39,6 +32,7 @@ import { Bar } from 'vue-chartjs'
 import { Chart, Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale, ChartOptions } from 'chart.js'
 import { downloadCanvas } from '../Graphs/utils'
 import useTheme from '@/composables/useTheme'
+import { humanFileSize } from '../utils'
 const { onThemeChange, isDark } = useTheme()
 
 Chart.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
@@ -108,7 +102,7 @@ const chartOptions = computed<ChartOptions<any>>(() => {
             const value = context.dataset.data[context.dataIndex]
             const labelAbbrev = context.dataset.label.substring(0, 3).toLowerCase()
             const appName = context.label
-            return `${appName}(${labelAbbrev}): ` + formatBytes(value)
+            return `${appName}(${labelAbbrev}): ` + humanFileSize(value)
           }
         }
       }
@@ -122,7 +116,7 @@ const chartOptions = computed<ChartOptions<any>>(() => {
         },
         ticks: {
           callback: function (value: any) {
-            return formatBytes(value, 2)
+            return humanFileSize(value)
           }
         }
       },
@@ -150,19 +144,6 @@ const addValues = (a: number, b: number) => {
   return parseFloat(total).toPrecision(3)
 }
 
-const formatBytes = (bytes: any, decimals = 2) => {
-  if (!+bytes) return '0 Bytes'
-
-  const k = 1024
-  const dm = decimals < 0 ? 0 : decimals
-  const sizes = ['Bytes', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB']
-
-  const i = Math.floor(Math.log(bytes) / Math.log(k))
-  if (sizes[i] === undefined) {
-    return 0
-  }
-  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`
-}
 
 defineExpose({
   downloadChart
@@ -191,17 +172,21 @@ defineExpose({
     flex: 1 1 0;
     max-width: 360px;
   }
+
   .chart-container {
     flex: 1 1 0;
   }
 }
+
 table {
   @include table();
   @include row-select();
   width: 100%;
+
   &.condensed {
     @include table-condensed();
   }
+
   th,
   td {
     border-bottom: 0px;

@@ -1,4 +1,4 @@
-/*
+/*******************************************************************************
  * This file is part of OpenNMS(R).
  *
  * Copyright (C) 2023 The OpenNMS Group, Inc.
@@ -24,75 +24,67 @@
  *     OpenNMS(R) Licensing <license@opennms.org>
  *     http://www.opennms.org/
  *     http://www.opennms.com/
- *
- */
+ *******************************************************************************/
 
-package org.opennms.miniongateway.grpc.server.tasktresults;
+package org.opennms.miniongateway.grpc.server.flows;
 
-import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.opennms.horizon.flows.document.FlowDocument;
+import org.opennms.horizon.flows.document.FlowDocumentLog;
+import org.opennms.horizon.flows.document.TenantLocationSpecificFlowDocumentLog;
 import org.opennms.horizon.shared.flows.mapper.TenantLocationSpecificFlowDocumentLogMapper;
 import org.opennms.horizon.shared.grpc.common.LocationServerInterceptor;
 import org.opennms.horizon.shared.grpc.common.TenantIDGrpcServerInterceptor;
-import org.opennms.horizon.shared.protobuf.mapper.TenantLocationSpecificTaskSetResultsMapper;
+import org.opennms.miniongateway.grpc.server.flows.FlowApplicationConfig;
+import org.opennms.miniongateway.grpc.server.flows.FlowKafkaForwarder;
 import org.opennms.miniongateway.grpc.server.kafka.SinkMessageKafkaPublisher;
 import org.opennms.miniongateway.grpc.server.kafka.SinkMessageKafkaPublisherFactory;
 import org.opennms.miniongateway.grpc.server.kafka.SinkMessageMapper;
-import org.opennms.taskset.contract.TaskResult;
-import org.opennms.taskset.contract.TaskSetResults;
-import org.opennms.taskset.contract.TenantLocationSpecificTaskSetResults;
 import org.springframework.kafka.core.KafkaTemplate;
 
-import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class TaskResultsKafkaForwarderTest {
+public class FlowKafkaForwarderTest {
+
 
     private final String kafkaTopic = "kafkaTopic";
 
     @Mock
     private SinkMessageKafkaPublisherFactory publisherFactory;
     @Mock
-    private TenantLocationSpecificTaskSetResultsMapper mapper;
+    private TenantLocationSpecificFlowDocumentLogMapper mapper;
     @Mock
     private SinkMessageKafkaPublisher<Message, Message> publisher;
 
-    private TaskResultsKafkaForwarder taskResultsKafkaForwarder;
-
-    private TenantLocationSpecificTaskSetResults testTenantLocationSpecificTaskSetResults;
+    private FlowKafkaForwarder flowKafkaForwarder;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         when(publisherFactory.create(any(SinkMessageMapper.class), eq(kafkaTopic))).thenReturn(publisher);
-        taskResultsKafkaForwarder = new TaskResultsKafkaForwarder(publisherFactory, mapper, kafkaTopic);
+        flowKafkaForwarder = new FlowKafkaForwarder(publisherFactory, mapper, kafkaTopic);
     }
 
     @Test
-    public void testHandleMessage() throws InvalidProtocolBufferException {
-        //
-        // Setup Test Data and Interactions
-        //
-
-        TaskResult testTaskResult = TaskResult.newBuilder().build();
-
-        TaskSetResults testTaskSetResults = TaskSetResults.newBuilder()
-            .addResults(testTaskResult)
+    public void testForward() {
+        var message = FlowDocumentLog.newBuilder()
+            .setSystemId("systemId")
+            .addMessage(FlowDocument.newBuilder()
+                .setSrcAddress("127.0.0.1"))
             .build();
-        //
-        // Execute
-        //
-        taskResultsKafkaForwarder.handleMessage(testTaskSetResults);
-        Mockito.verify(publisher).send(testTaskSetResults);
+
+
+        flowKafkaForwarder.handleMessage(message);
+        Mockito.verify(publisher).send(message);
     }
 }

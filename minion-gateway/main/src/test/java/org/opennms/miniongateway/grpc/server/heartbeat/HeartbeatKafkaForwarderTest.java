@@ -28,41 +28,52 @@
 
 package org.opennms.miniongateway.grpc.server.heartbeat;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
+
+import com.google.protobuf.Message;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.junit.MockitoJUnitRunner;
+import org.opennms.cloud.grpc.minion.Identity;
 import org.opennms.horizon.grpc.heartbeat.contract.HeartbeatMessage;
-import org.opennms.horizon.grpc.heartbeat.contract.TenantLocationSpecificHeartbeatMessage;
 import org.opennms.horizon.grpc.heartbeat.contract.mapper.TenantLocationSpecificHeartbeatMessageMapper;
-import org.opennms.horizon.shared.ipc.sink.api.MessageConsumer;
-import org.opennms.horizon.shared.ipc.sink.api.SinkModule;
 import org.opennms.miniongateway.grpc.server.kafka.SinkMessageKafkaPublisher;
 import org.opennms.miniongateway.grpc.server.kafka.SinkMessageKafkaPublisherFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
+import org.opennms.miniongateway.grpc.server.kafka.SinkMessageMapper;
 
-/**
- * Forwarder of Heartbeat messages - received via GRPC and forwarded to Kafka.
- */
-@Component
-public class HeartbeatKafkaForwarder implements MessageConsumer<HeartbeatMessage, HeartbeatMessage> {
-    public static final String DEFAULT_HEARTBEAT_RESULTS_TOPIC = "heartbeat";
-    private final SinkMessageKafkaPublisher<HeartbeatMessage, TenantLocationSpecificHeartbeatMessage> kafkaPublisher;
+@RunWith(MockitoJUnitRunner.class)
+public class HeartbeatKafkaForwarderTest {
 
-    @Autowired
-    public HeartbeatKafkaForwarder(SinkMessageKafkaPublisherFactory messagePublisherFactory, TenantLocationSpecificHeartbeatMessageMapper mapper,
-        @Value("${heartbeat.results.kafka-topic:" + DEFAULT_HEARTBEAT_RESULTS_TOPIC + "}") String kafkaTopic) {
-        this.kafkaPublisher = messagePublisherFactory.create(
-            mapper::mapBareToTenanted,
-            kafkaTopic
-        );
+    private final String kafkaTopic = "kafkaTopic";
+
+    @Mock
+    private SinkMessageKafkaPublisherFactory publisherFactory;
+    @Mock
+    private TenantLocationSpecificHeartbeatMessageMapper mapper;
+    @Mock
+    private SinkMessageKafkaPublisher<Message, Message> publisher;
+
+    private HeartbeatKafkaForwarder heartbeatForwarder;
+
+    @Before
+    public void setUp() {
+        when(publisherFactory.create(any(SinkMessageMapper.class), eq(kafkaTopic))).thenReturn(publisher);
+        heartbeatForwarder = new HeartbeatKafkaForwarder(publisherFactory, mapper, kafkaTopic);
     }
 
-    @Override
-    public SinkModule<HeartbeatMessage, HeartbeatMessage> getModule() {
-        return new HeartbeatModule();
-    }
+    @Test
+    public void testForward() {
+        var message = HeartbeatMessage.newBuilder()
+            .setIdentity(Identity.newBuilder().setSystemId("foo").build())
+            .build();
 
-    @Override
-    public void handleMessage(HeartbeatMessage message) {
-        this.kafkaPublisher.send(message);
+
+        heartbeatForwarder.handleMessage(message);
+        Mockito.verify(publisher).send(message);
     }
 }

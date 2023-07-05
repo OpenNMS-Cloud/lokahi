@@ -86,7 +86,7 @@ class GraphQLMinionCertificateManagerTest {
             mutation {
               revokeMinionCertificate(locationId: 444)
             }""";
-        webClient.post()../rest-server/src/main/java/org/opennms/horizon/server/service/GrpcMinionCertificateManager.java
+        webClient.post()
             .uri(GRAPHQL_PATH)
             .accept(MediaType.APPLICATION_JSON)
             .contentType(MediaType.APPLICATION_JSON)

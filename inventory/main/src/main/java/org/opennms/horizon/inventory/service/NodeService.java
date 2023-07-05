@@ -29,8 +29,10 @@
 package org.opennms.horizon.inventory.service;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
 import org.apache.commons.lang3.StringUtils;
 import org.opennms.horizon.inventory.component.TagPublisher;
 import org.opennms.horizon.inventory.discovery.IcmpActiveDiscoveryDTO;
@@ -51,6 +53,7 @@ import org.opennms.horizon.inventory.model.Tag;
 import org.opennms.horizon.inventory.repository.IpInterfaceRepository;
 import org.opennms.horizon.inventory.repository.MonitoringLocationRepository;
 import org.opennms.horizon.inventory.repository.NodeRepository;
+import org.opennms.horizon.inventory.repository.TagRepository;
 import org.opennms.horizon.inventory.service.taskset.CollectorTaskSetService;
 import org.opennms.horizon.inventory.service.taskset.MonitorTaskSetService;
 import org.opennms.horizon.inventory.service.taskset.ScannerTaskSetService;
@@ -101,6 +104,7 @@ public class NodeService {
     private final SnmpInterfaceMapper snmpInterfaceMapper;
     private final IpInterfaceMapper ipInterfaceMapper;
     private final TagPublisher tagPublisher;
+    private final TagRepository tagRepository;
 
     @Transactional(readOnly = true)
     public List<NodeDTO> findByTenantId(String tenantId) {
@@ -240,7 +244,23 @@ public class NodeService {
         return tasks;
     }
 
-    public void updateNodeInfo(Node node, NodeInfoResult nodeInfo, MonitoredState monitoredState) {
+    public void updateNodeMonitoredState(Node node) {
+        final var monitored = tagRepository.findByTenantIdAndNodeId(node.getTenantId(), node.getId()).stream()
+            .anyMatch(tag -> !tag.getMonitorPolicyIds().isEmpty());
+
+        final var monitoredState = monitored
+            ? MonitoredState.MONITORED
+            : node.getMonitoredState() == MonitoredState.DETECTED
+                ? MonitoredState.DETECTED
+                : MonitoredState.UNMONITORED;
+
+        if (node.getMonitoredState() != monitoredState) {
+            node.setMonitoredState(monitoredState);
+            this.nodeRepository.save(node);
+        }
+    }
+
+    public void updateNodeInfo(Node node, NodeInfoResult nodeInfo) {
         mapper.updateFromNodeInfo(nodeInfo, node);
 
         if (StringUtils.isNotEmpty(nodeInfo.getSystemName())) {
@@ -252,7 +272,7 @@ public class NodeService {
             }
         }
 
-        node.setMonitoredState(monitoredState);
+        this.updateNodeMonitoredState(node);
 
         nodeRepository.save(node);
     }
@@ -269,6 +289,7 @@ public class NodeService {
                 .build());
         }
         tagPublisher.publishTagUpdate(tagOpList);
+        this.updateNodeMonitoredState(node);
     }
 
     public void sendNewNodeTaskSetAsync(Node node, Long locationId, IcmpActiveDiscoveryDTO icmpDiscoveryDTO) {
@@ -295,7 +316,7 @@ public class NodeService {
             log.error("Error while sending nodescan task for node with label {}", node.getNodeLabel());
         }
     }
-    
+
     @Transactional(readOnly = true)
     public List<NodeDTO> listNodesByNodeLabelSearch(String tenantId, String nodeLabelSearchTerm) {
         return nodeRepository.findByTenantIdAndNodeLabelLike(tenantId, nodeLabelSearchTerm).stream()

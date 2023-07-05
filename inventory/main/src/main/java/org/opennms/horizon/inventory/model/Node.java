@@ -79,7 +79,7 @@ public class Node {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "monitored_state")
-    private MonitoredState monitoredState;
+    private MonitoredState monitoredState = MonitoredState.DETECTED;
 
     @NotNull
     @Column(name = "create_time", columnDefinition = "TIMESTAMP")

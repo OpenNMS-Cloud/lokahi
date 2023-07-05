@@ -102,11 +102,14 @@ public class ActiveDiscoveryTaggingStepDefinitions {
      * SCENARIO GIVEN
      * *********************************************************************************
      */
-    @Given("A new active discovery for location named {string}")
-    public void aNewActiveDiscovery(String location) {
+    @Given("[ActiveDiscovery] A clean system")
+    public void aCleanSystem() {
         deleteAllTags();
         deleteAllActiveDiscovery();
+    }
 
+    @Given("A new active discovery for location named {string}")
+    public void aNewActiveDiscovery(String location) {
         var activeDiscoveryServiceBlockingStub = backgroundHelper.getIcmpActiveDiscoveryServiceBlockingStub();
         activeDiscovery1 = activeDiscoveryServiceBlockingStub.createDiscovery(IcmpActiveDiscoveryCreateDTO.newBuilder()
             .setName("discovery-name").setLocationId(backgroundHelper.findLocationId(location))
@@ -116,9 +119,6 @@ public class ActiveDiscoveryTaggingStepDefinitions {
 
     @Given("2 new active discovery in {string}")
     public void twoNewActiveDiscovery(String location) {
-        deleteAllTags();
-        deleteAllActiveDiscovery();
-
         var activeDiscoveryServiceBlockingStub = backgroundHelper.getIcmpActiveDiscoveryServiceBlockingStub();
         activeDiscovery1 = activeDiscoveryServiceBlockingStub.createDiscovery(IcmpActiveDiscoveryCreateDTO.newBuilder()
             .setName("discovery-name-1").setLocationId(backgroundHelper.findLocationId(location))
@@ -132,9 +132,6 @@ public class ActiveDiscoveryTaggingStepDefinitions {
 
     @Given("A new active discovery with tags {string} in {string}")
     public void aNewActiveDiscoveryWithTags(String tags, String location) {
-        deleteAllTags();
-        deleteAllActiveDiscovery();
-
         var activeDiscoveryServiceBlockingStub = backgroundHelper.getIcmpActiveDiscoveryServiceBlockingStub();
         activeDiscovery1 = activeDiscoveryServiceBlockingStub.createDiscovery(IcmpActiveDiscoveryCreateDTO.newBuilder()
             .setName("discovery-name-1").setLocationId(backgroundHelper.findLocationId(location))

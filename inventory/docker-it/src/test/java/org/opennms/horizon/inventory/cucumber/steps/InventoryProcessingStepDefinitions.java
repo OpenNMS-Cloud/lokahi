@@ -53,6 +53,9 @@ import org.opennms.horizon.inventory.dto.NodeCreateDTO;
 import org.opennms.horizon.inventory.dto.NodeDTO;
 import org.opennms.horizon.inventory.dto.NodeIdQuery;
 import org.opennms.horizon.inventory.dto.NodeList;
+import org.opennms.horizon.inventory.dto.TagCreateDTO;
+import org.opennms.horizon.inventory.dto.TagCreateListDTO;
+import org.opennms.horizon.inventory.dto.TagEntityIdDTO;
 import org.opennms.inventory.types.ServiceType;
 import org.opennms.node.scan.contract.NodeScanResult;
 import org.opennms.node.scan.contract.ServiceResult;
@@ -66,6 +69,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.Properties;
 import java.util.concurrent.Executors;
@@ -487,5 +491,21 @@ public class InventoryProcessingStepDefinitions {
     public void shutdownKafkaConsumer() {
         kafkaConsumerRunner.shutdown();
         await().atMost(3, TimeUnit.SECONDS).until(() -> kafkaConsumerRunner.isShutdown().get(), Matchers.is(true));
+    }
+
+    @Given("A new monitoring policy with tags {string}")
+    public void aNewMonitoringPolicyWithTags(final String tags) {
+        final var tagService = this.backgroundHelper.getTagServiceBlockingStub();
+
+        final var builder = TagCreateListDTO.newBuilder();
+        for (final var tag :  tags.split(",")) {
+            builder.addTags(TagCreateDTO.newBuilder().setName(tag).build());
+        }
+
+        builder.addEntityIds(TagEntityIdDTO.newBuilder()
+            .setMonitoringPolicyId(9999) // We can face the ID here because there is no real alarm service running
+            .build());
+
+        tagService.addTags(builder.build());
     }
 }

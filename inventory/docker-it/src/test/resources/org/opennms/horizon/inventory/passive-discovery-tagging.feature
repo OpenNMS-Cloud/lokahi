@@ -5,6 +5,7 @@ Feature: Passive Discovery Tagging
     Given [PassiveDiscovery] Kafka Bootstrap URL in system property "kafka.bootstrap-servers"
     Given [PassiveDiscovery] Grpc TenantId "tenant-stream"
     Given [PassiveDiscovery] Create Grpc Connection for Inventory
+    Given [PassiveDiscovery] A clean system
 
   Scenario: Create new tags on passive discovery
     Given [Common] Create "Cork" Location

@@ -49,12 +49,8 @@ export const useTagQueries = defineStore('tagQueries', () => {
 
     await tagsSearchExecute()
 
-    if (!tagsSearchIsFetching.value) {
-      if (!tagsSearchError.value) {
-        tagsSearched.value = tagsSearchData.value?.tags || []
-      } else {
-        // TODO: what kind of errors and how to manage them
-      }
+    if (tagsSearchData.value?.tags) {
+      tagsSearched.value = tagsSearchData?.value.tags
     }
   }
 

@@ -1,43 +1,23 @@
 <template>
   <ul class="filter-container">
-    <li
-      v-if="!onlyTags"
-      class="autocomplete"
-    >
-      <FeatherInput
-        @update:model-value="searchNodesByLabel"
-        label="Search labels"
-        data-test="search-by-label"
-        ref="searchNodesByLabelRef"
-      >
-        <template v-slot:post>
-          <FeatherIcon :icon="icons.Search" />
-        </template>
+    <li v-if="!onlyTags" class="autocomplete flex margin-bottom">
+      <FeatherSelect class="filter-type-selector" label="Search Type" textProp="name"
+        :options="[{ id: 1, name: 'Labels' }, { id: 2, name: 'Tags' }]" :modelValue="inventoryStore.searchType"
+        @update:modelValue="inventoryStore.setSearchType">
+      </FeatherSelect>
+      <FeatherAutocomplete v-if="inventoryStore.searchType.name === 'Tags'" type="multi"
+        :modelValue="inventoryStore.tagsSelected" @update:modelValue="inventoryStore.addSelectedTag"
+        :results="tagQueries.tagsSearched" @search="tagQueries.getTagsSearch" class="inventory-auto" label="Search"
+        :allow-new="false" textProp="name" render-type="multi" data-test="search-by-tags" ref="searchNodesByTagsRef" />
+      <FeatherInput v-if="inventoryStore.searchType.name === 'Labels'" @update:model-value="searchNodesByLabel"
+        label="Search" class="inventory-search" data-test="search" ref="searchNodesByLabelRef">
       </FeatherInput>
     </li>
-    <li v-if="!onlyTags">
-      <div class="or">OR</div>
-    </li>
-    <li
-      v-if="!onlyTags"
-      class="autocomplete"
-    >
-      <BasicAutocomplete
-        @items-selected="searchNodesByTags"
-        :get-items="tagQueries.getTagsSearch"
-        :items="tagQueries.tagsSearched"
-        label="Search tags"
-        :allow-new="false"
-        render-type="multi"
-        data-test="search-by-tags"
-        ref="searchNodesByTagsRef"
-      />
-    </li>
-    <li>
+    <li class="push-right">
       <InventoryTagManagerCtrl data-test="tag-manager-ctrl" />
     </li>
   </ul>
-  <InventoryTagManager v-if="isTagManagerOpen" />
+  <InventoryTagManager :visible="inventoryStore.isTagManagerOpen" />
 </template>
 
 <script lang="ts" setup>
@@ -47,7 +27,8 @@ import { useInventoryStore } from '@/store/Views/inventoryStore'
 import { useInventoryQueries } from '@/store/Queries/inventoryQueries'
 import { useTagQueries } from '@/store/Queries/tagQueries'
 import { Tag } from '@/types/graphql'
-
+import { FeatherDropdown, FeatherDropdownItem } from '@featherds/dropdown'
+import MenuIcon from "@featherds/icon/navigation/MoreHoriz";
 const inventoryStore = useInventoryStore()
 const inventoryQueries = useInventoryQueries()
 const tagQueries = useTagQueries()
@@ -65,8 +46,6 @@ const searchNodesByTagsRef = ref()
 const icons = markRaw({
   Search
 })
-
-const isTagManagerOpen = computed(() => inventoryStore.isTagManagerOpen)
 
 // Current BE setup only allows search by names OR tags.
 // so we clear the other search to avoid confusion
@@ -100,14 +79,59 @@ const searchNodesByTags: fncArgVoid = (tags: Tag[]) => {
   margin: var(variables.$spacing-l) 0;
   display: flex;
   flex-flow: row wrap;
-  > * {
+  margin-bottom: 0;
+  align-items: center;
+
+  >* {
     margin-right: var(variables.$spacing-l);
   }
-  > .autocomplete {
+
+  >.autocomplete {
     min-width: 13rem;
   }
+
   .or {
     line-height: 2.6;
   }
+
+  :deep(.feather-input-sub-text) {
+    display: none;
+  }
+}
+
+.push-right {
+  margin-left: auto;
+  margin-right: 0;
+}
+
+.flex {
+  display: flex;
+  align-items: center;
+}
+
+.inventory-search {
+  min-width: 240px;
+  margin-right: 24px;
+}
+
+.inventory-auto {
+  min-width: 400px;
+
+  :deep(.feather-autocomplete-input) {
+    min-width: 100px;
+  }
+
+  :deep(.feather-autocomplete-content) {
+    display: block;
+  }
+}
+
+.margin-bottom {
+  margin-bottom: 12px;
+}
+
+.filter-type-selector {
+  margin-right: 12px;
+  max-width: 120px;
 }
 </style>

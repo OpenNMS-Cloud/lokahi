@@ -87,6 +87,6 @@ public class AlertDefinition implements Serializable {
     @Enumerated(EnumType.STRING)
     private ManagedObjectType managedObjectType;
 
-    @Column(name = "trigger_event_id")
-    private Long triggerEventId;
+    @Column(name = "alert_condition_id")
+    private Long alertConditionId;
 }

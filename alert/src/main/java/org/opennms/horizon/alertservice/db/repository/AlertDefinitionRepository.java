@@ -37,5 +37,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface AlertDefinitionRepository extends JpaRepository<AlertDefinition, Long> {
     Optional<AlertDefinition> findFirstByTenantIdAndUei(String tenantId, String uei);
-    Optional<AlertDefinition> findFirstByTriggerEventId(Long id);
+    Optional<AlertDefinition> findFirstByAlertConditionId(Long id);
 }

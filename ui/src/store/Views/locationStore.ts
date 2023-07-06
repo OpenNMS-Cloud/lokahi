@@ -113,6 +113,16 @@ export const useLocationStore = defineStore('locationStore', () => {
     return response.data.value?.getMinionCertificate
   }
 
+  const revokeMinionCertificate = async () => {
+    if (!selectedLocation.value) return
+    const response = await locationMutations.revokeMinionCertificate(selectedLocation.value.id)
+    if(!response.value){
+      setCertificatePassword('')
+    }
+
+    return !response.value
+  }
+
   const setCertificatePassword = (password: string) => {
     certificatePassword.value = password
     setPassword(certificatePassword.value)
@@ -137,6 +147,7 @@ export const useLocationStore = defineStore('locationStore', () => {
     updateIsFetching,
     deleteLocation,
     getMinionCertificate,
+    revokeMinionCertificate,
     certificatePassword,
     setCertificatePassword,
     getMinionsForLocationId,

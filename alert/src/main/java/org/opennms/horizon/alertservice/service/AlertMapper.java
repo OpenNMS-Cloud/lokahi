@@ -53,7 +53,7 @@ public interface AlertMapper {
         @Mapping(target = "ackUser", source = "acknowledgedByUser"),
         @Mapping(target = "ackTimeMs", source = "acknowledgedAt"),
         @Mapping(target = "monitoringPolicyIdList", source = "monitoringPolicyId"),
-        @Mapping(target = "label", source = "triggerEvent.triggerEvent"),
+        @Mapping(target = "label", source = "alertCondition.triggerEventType"),
         @Mapping(target = "nodeName", source = "nodeLabel")
     })
     org.opennms.horizon.alerts.proto.Alert toProto(Alert alert);

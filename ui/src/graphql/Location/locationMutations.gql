@@ -26,3 +26,8 @@ mutation UpdateLocation($location: MonitoringLocationUpdateInput) {
 mutation DeleteLocation($id: Long!) {
   deleteLocation(id: $id)
 }
+
+#revoke
+mutation revokeMinionCertificate($locationId: Long!) {
+  revokeMinionCertificate(locationId: $locationId)
+}

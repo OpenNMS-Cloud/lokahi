@@ -10,13 +10,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.opennms.horizon.alerts.proto.Severity;
 import org.opennms.horizon.alertservice.db.entity.Alert;
 import org.opennms.horizon.alertservice.db.entity.AlertDefinition;
+import org.opennms.horizon.alertservice.db.entity.AlertCondition;
 import org.opennms.horizon.alertservice.db.entity.MonitorPolicy;
 import org.opennms.horizon.alertservice.db.entity.Tag;
-import org.opennms.horizon.alertservice.db.entity.TriggerEvent;
 import org.opennms.horizon.alertservice.db.repository.AlertDefinitionRepository;
 import org.opennms.horizon.alertservice.db.repository.AlertRepository;
+import org.opennms.horizon.alertservice.db.repository.AlertConditionRepository;
 import org.opennms.horizon.alertservice.db.repository.TagRepository;
-import org.opennms.horizon.alertservice.db.repository.TriggerEventRepository;
 import org.opennms.horizon.alertservice.db.tenant.TenantLookup;
 import org.opennms.horizon.events.proto.Event;
 
@@ -40,7 +40,7 @@ public class AlertEventProcessorTest {
     AlertDefinitionRepository alertDefinitionRepository;
 
     @Mock
-    TriggerEventRepository triggerEventRepository;
+    AlertConditionRepository alertConditionRepository;
 
     @Mock
     MeterRegistry registry;
@@ -58,18 +58,18 @@ public class AlertEventProcessorTest {
             .setUei("uei")
             .build();
 
-        TriggerEvent triggerEvent = new TriggerEvent();
-        triggerEvent.setTenantId("tenantA");
-        triggerEvent.setId(1L);
-        triggerEvent.setSeverity(Severity.MAJOR);
-        triggerEvent.setCount(1);
-        triggerEvent.setOvertime(0);
+        AlertCondition alertCondition = new AlertCondition();
+        alertCondition.setTenantId("tenantA");
+        alertCondition.setId(1L);
+        alertCondition.setSeverity(Severity.MAJOR);
+        alertCondition.setCount(1);
+        alertCondition.setOvertime(0);
 
         AlertDefinition alertDefinition = new AlertDefinition();
         alertDefinition.setTenantId("tenantA");
         alertDefinition.setUei("uei");
         alertDefinition.setReductionKey("reduction");
-        alertDefinition.setTriggerEventId(triggerEvent.getId());
+        alertDefinition.setAlertConditionId(alertCondition.getId());
 
         MonitorPolicy monitorPolicy = new MonitorPolicy();
         monitorPolicy.setId(1L);
@@ -82,14 +82,13 @@ public class AlertEventProcessorTest {
 
         Mockito.when(alertDefinitionRepository.findFirstByTenantIdAndUei(event.getTenantId(), event.getUei()))
             .thenReturn(Optional.of(alertDefinition));
-        Mockito.when(triggerEventRepository.getReferenceById(triggerEvent.getId()))
-            .thenReturn(triggerEvent);
+        Mockito.when(alertConditionRepository.getReferenceById(alertCondition.getId()))
+            .thenReturn(alertCondition);
         Mockito.when(tagRepository.findByTenantIdAndNodeId(Mockito.anyString(), Mockito.anyLong())).thenReturn(tags);
-
 
         Alert alert = processor.addOrReduceEventAsAlert(event);
         assertEquals("tenantA", alert.getTenantId());
-        assertEquals(triggerEvent.getSeverity(), alert.getSeverity());
+        assertEquals(alertCondition.getSeverity(), alert.getSeverity());
         assertEquals(List.of(monitorPolicy.getId()), alert.getMonitoringPolicyId());
     }
 }

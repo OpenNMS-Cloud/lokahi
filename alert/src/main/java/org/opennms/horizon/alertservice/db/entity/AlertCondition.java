@@ -48,33 +48,42 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@Table(name = "trigger_event")
+@Table(name = "alert_condition")
 @Getter
 @Setter
-public class TriggerEvent {
+public class AlertCondition {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column (name = "tenant_id", nullable = false)
+
+    @Column(name = "tenant_id", nullable = false)
     private String tenantId;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "trigger_event_type")
-    private EventType triggerEvent;
+    private EventType triggerEventType;
+
     @Column(name = "event_count")
     private Integer count;
+
     @Column(name = "over_time")
     private Integer overtime;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "over_time_unit")
     private OverTimeUnit overtimeUnit;
+
     @Enumerated(EnumType.STRING)
     private Severity severity;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "clear_event_type")
-    private EventType clearEvent;
+    private EventType clearEventType;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "rule_id", referencedColumnName = "id")
     private PolicyRule rule;
+
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "id", referencedColumnName = "trigger_event_id")
     private AlertDefinition alertDefinition;

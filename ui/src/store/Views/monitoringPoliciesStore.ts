@@ -50,8 +50,8 @@ const getDefaultEventCondition = () => ({
   count: 1,
   severity: Severity.Critical,
   overtimeUnit: Unknowns.UNKNOWN_UNIT,
-  triggerEvent: SNMPEventType.SNMP_COLD_START,
-  clearEvent: Unknowns.UNKNOWN_EVENT
+  triggerEventType: SNMPEventType.SNMP_COLD_START,
+  clearEventType: Unknowns.UNKNOWN_EVENT
 })
 
 const getDefaultRule = () => ({
@@ -60,7 +60,7 @@ const getDefaultRule = () => ({
   componentType: ComponentType.NODE,
   detectionMethod: DetectionMethodTypes.EVENT,
   metricName: EventMetrics.SNMP_TRAP,
-  triggerEvents: [getDefaultEventCondition()]
+  alertConditions: [getDefaultEventCondition()]
 })
 
 export const useMonitoringPoliciesStore = defineStore('monitoringPoliciesStore', {
@@ -88,25 +88,25 @@ export const useMonitoringPoliciesStore = defineStore('monitoringPoliciesStore',
 
       // detection method THRESHOLD
       if (this.selectedRule.detectionMethod === DetectionMethodTypes.THRESHOLD) {
-        return (this.selectedRule.triggerEvents = [getDefaultThresholdCondition()])
+        return (this.selectedRule.alertConditions = [getDefaultThresholdCondition()])
       }
 
       // detection method EVENT
-      return (this.selectedRule.triggerEvents = [getDefaultEventCondition()])
+      return (this.selectedRule.alertConditions = [getDefaultEventCondition()])
     },
     addNewCondition() {
       if (!this.selectedRule) return
 
       // detection method THRESHOLD
       if (this.selectedRule.detectionMethod === DetectionMethodTypes.THRESHOLD) {
-        return this.selectedRule.triggerEvents.push(getDefaultThresholdCondition())
+        return this.selectedRule.alertConditions.push(getDefaultThresholdCondition())
       }
 
       // detection method EVENT
-      return this.selectedRule.triggerEvents.push(getDefaultEventCondition())
+      return this.selectedRule.alertConditions.push(getDefaultEventCondition())
     },
     updateCondition(id: string, condition: Condition) {
-      this.selectedRule!.triggerEvents.map((currentCondition) => {
+      this.selectedRule!.alertConditions.map((currentCondition) => {
         if (currentCondition.id === id) {
           return { ...currentCondition, ...condition }
         }
@@ -114,7 +114,7 @@ export const useMonitoringPoliciesStore = defineStore('monitoringPoliciesStore',
       })
     },
     deleteCondition(id: string) {
-      this.selectedRule!.triggerEvents = this.selectedRule!.triggerEvents.filter((c) => c.id !== id)
+      this.selectedRule!.alertConditions = this.selectedRule!.alertConditions.filter((c) => c.id !== id)
     },
     saveRule() {
       const existingItemIndex = findIndex(this.selectedPolicy!.rules, { id: this.selectedRule!.id })
@@ -136,7 +136,7 @@ export const useMonitoringPoliciesStore = defineStore('monitoringPoliciesStore',
       // modify payload to comply with current BE format
       const policy = cloneDeep(this.selectedPolicy!)
       policy.rules = policy.rules.map((rule) => {
-        rule.triggerEvents = rule.triggerEvents.map((condition) => {
+        rule.alertConditions = rule.alertConditions.map((condition) => {
           if (!policy.id) delete condition.id // don't send generated ids
           return condition
         })

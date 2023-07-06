@@ -1,4 +1,4 @@
-import { MonitorPolicy, PolicyRule, TriggerEvent } from './graphql'
+import { MonitorPolicy, PolicyRule, AlertCondition } from './graphql'
 
 export interface Policy extends MonitorPolicy {
   rules: Rule[]
@@ -8,7 +8,7 @@ export interface Policy extends MonitorPolicy {
 export interface Rule extends PolicyRule {
   detectionMethod?: string
   metricName?: string
-  triggerEvents: Condition[]
+  alertConditions: Condition[]
 }
 
 interface IObjectKeys {
@@ -24,8 +24,8 @@ export interface ThresholdCondition extends IObjectKeys {
   duringLast: number
   periodUnit: string
   severity: string
-  triggerEvent: string
+  triggerEventType: string
 }
 
-export type EventCondition = TriggerEvent & IObjectKeys
+export type EventCondition = AlertCondition & IObjectKeys
 export type Condition = ThresholdCondition | EventCondition

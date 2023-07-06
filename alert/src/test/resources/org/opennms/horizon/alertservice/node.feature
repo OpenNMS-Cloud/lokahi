@@ -11,12 +11,12 @@ Feature: Node operation feature
     Given Tenant id "tenant-1"
     Given Monitor policy name "tenantA-policy" and memo "tenantA policy"
     Given Policy Rule name "tenantA-rule" and componentType "NODE"
-    And Trigger events data
-      | trigger_event   | count | overtime | overtime_unit | severity | clear_event    |
-      | SNMP_Link_Down  | 1     | 0        | MINUTE        | MINOR    |                |
-      | SNMP_Link_Up    | 1     | 0        | MINUTE        | CLEARED  | SNMP_Link_Down |
-      | SNMP_Cold_Start | 1     | 0        | MINUTE        | MAJOR    |                |
-      | SNMP_Warm_Start | 1     | 0        | MINUTE        | CRITICAL |                |
+    And Alert condition data
+      | trigger_event_type | count | overtime | overtime_unit | severity | clear_event_type |
+      | SNMP_Link_Down     | 1     | 0        | MINUTE        | MINOR    |                  |
+      | SNMP_Link_Up       | 1     | 0        | MINUTE        | CLEARED  | SNMP_Link_Down   |
+      | SNMP_Cold_Start    | 1     | 0        | MINUTE        | MAJOR    |                  |
+      | SNMP_Warm_Start    | 1     | 0        | MINUTE        | CRITICAL |                  |
     And Create a new policy with give parameters
     Given Tenant id "tenant-3"
     And Create a new policy with give parameters

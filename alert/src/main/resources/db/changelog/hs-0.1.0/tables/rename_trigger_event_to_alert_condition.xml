@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="hs-0.1.0-rename-trigger-event" author="geraldhumphries">
+        <renameTable oldTableName="trigger_event" newTableName="alert_condition" />
+        <renameColumn tableName="alert_definition" oldColumnName="trigger_event_id" newColumnName="alert_condition_id" />
+        <renameColumn tableName="alert" oldColumnName="trigger_event_id" newColumnName="alert_condition_id" />
+
+        <dropForeignKeyConstraint baseTableName="alert" constraintName="fk_alert_trigger_event_id" />
+        <addForeignKeyConstraint baseTableName="alert" baseColumnNames="alert_condition_id" constraintName="fk_alert_alert_condition_id" referencedTableName="alert_condition"
+                                 referencedColumnNames="id"/>
+
+
+        <dropForeignKeyConstraint baseTableName="alert_definition" constraintName="fk_alert_definition_trigger_event_id" />
+        <addForeignKeyConstraint baseTableName="alert_definition" baseColumnNames="alert_condition_id"
+                                 referencedTableName="alert_condition" referencedColumnNames="id"
+                                 constraintName="fk_alert_definition_alert_condition_id" />
+
+        <dropUniqueConstraint tableName="alert_definition" constraintName="uk_alert_def_trigger_id" />
+        <addUniqueConstraint tableName="alert_definition" columnNames="alert_condition_id" constraintName="uk_alert_definition_alert_condition_id"/>
+    </changeSet>
+
+</databaseChangeLog>

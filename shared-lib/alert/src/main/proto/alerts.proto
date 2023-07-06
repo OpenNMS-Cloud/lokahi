@@ -275,18 +275,18 @@ message PolicyRuleProto {
   string tenantId = 2;
   string name = 3;
   ManagedObjectType componentType = 4;
-  repeated TriggerEventProto snmpEvents = 5;
+  repeated AlertConditionProto snmpEvents = 5;
 }
 
-message TriggerEventProto {
+message AlertConditionProto {
   int64 id = 1;
   string tenantId = 2;
-  EventType triggerEvent = 3;
+  EventType triggerEventType = 3;
   int32 count = 4;
   int32 overtime = 5;
   OverTimeUnit overtimeUnit = 6;
   Severity severity = 7;
-  EventType clearEvent = 8;
+  EventType clearEventType = 8;
 }
 
 enum OverTimeUnit {

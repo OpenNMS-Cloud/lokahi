@@ -4,9 +4,8 @@
         <div class="welcome-text">
             <h1 data-test="welcome-slide-one-title">Welcome to <br />OpenNMS&nbsp;Cloud!</h1>
             <p class="margin-bottom">Our mission is to make monitoring just&nbsp;happen.</p>
-            <p class="margin-bottom">To start monitoring, your network must include at least one OpenNMS Minion: a
-                virtual or hardware device
-                for distributed network monitoring. We'll walk you through that setup, which takes only a
+            <p class="margin-bottom">To start monitoring, your network must include at least one OpenNMS Minion for
+                distributed network monitoring. We'll walk you through that setup, which takes only a
                 few&nbsp;minutes.</p>
         </div>
         <CollapsingCard title="Requirements: Before You Begin" data-test="welcome-slide-one-toggler"

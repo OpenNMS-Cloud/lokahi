@@ -22,6 +22,8 @@ export const useNodeStatusStore = defineStore('nodeStatusStore', () => {
     exporters.value = data.value?.findExporters || []
   }
 
+  // add the exporter object to the matching node snmp interface (match on ifIndex)
+  // which is used to show if the interface is observing flows data
   const node = computed(() => {
     const node = nodeStatusQueries.fetchedData.node
 
@@ -32,7 +34,7 @@ export const useNodeStatusStore = defineStore('nodeStatusStore', () => {
         }
       }
       return { ...snmpInterface, exporter: {} }
-    })
+    }) || []
 
     return { ...node, snmpInterfaces }
   })

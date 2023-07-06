@@ -15,7 +15,7 @@
         <thead>
           <tr>
             <th scope="col">IP Address</th>
-            <th scope="col">Graphs</th>
+            <th scope="col" v-if="nodeStatusStore.isAzure">Graphs</th>
             <th scope="col" v-if="!nodeStatusStore.isAzure">IP Hostname</th>
             <th scope="col" v-if="!nodeStatusStore.isAzure">Netmask</th>
             <th scope="col" v-if="!nodeStatusStore.isAzure">Primary</th>
@@ -26,19 +26,12 @@
           tag="tbody"
         >
           <tr
-            v-for="ipInterface in nodeData.node.ipInterfaces"
+            v-for="ipInterface in nodeStatusStore.node.ipInterfaces"
             :key="ipInterface.id"
           >
             <td>{{ ipInterface.ipAddress }}</td>
-            <td>
+            <td v-if="nodeStatusStore.isAzure">
               <FeatherButton
-                v-if="!nodeStatusStore.isAzure"
-                text
-                @click="routeToFlows(ipInterface)"
-                >Flows</FeatherButton
-              >
-              <FeatherButton
-                v-if="nodeStatusStore.isAzure"
                 text
                 @click="metricsModal.openAzureMetrics(ipInterface.ipAddress)"
                 >Traffic
@@ -57,36 +50,8 @@
 
 <script lang="ts" setup>
 import { useNodeStatusStore } from '@/store/Views/nodeStatusStore'
-import { useFlowsStore } from '@/store/Views/flowsStore'
-import { IpInterface } from '@/types/graphql'
-
-const router = useRouter()
-const flowsStore = useFlowsStore()
 const nodeStatusStore = useNodeStatusStore()
-
 const metricsModal = ref()
-
-const nodeData = computed(() => {
-  return {
-    node: nodeStatusStore.fetchedData?.node
-  }
-})
-
-const routeToFlows = (ipInterface: IpInterface) => {
-  const { id: nodeId, nodeLabel } = nodeData.value.node
-  const { id: ipInterfaceId, ipAddress } = ipInterface
-
-  flowsStore.filters.selectedExporters = [
-    {
-      _text: `${nodeLabel?.toUpperCase()} : ${ipAddress}}`,
-      value: {
-        nodeId,
-        ipInterfaceId
-      }
-    }
-  ]
-  router.push('/flows').catch(() => 'Route to /flows unsuccessful.')
-}
 </script>
 
 <style lang="scss" scoped>

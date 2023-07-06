@@ -27,6 +27,60 @@ import GradiantBG from '../components/Common/GradiantBG.vue'
 import useTheme from '@/composables/useTheme'
 const welcomeStore = useWelcomeStore()
 const { isDark } = useTheme();
+
+const fullSequence = ['ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowLeft', 'ArrowLeft', 'ArrowLeft', 'ArrowRight', 'ArrowRight', 'ArrowRight']
+const inputtedSequence = ref<string[]>([])
+const router = useRouter();
+
+/**
+ * Used to verify if we should be overriding the Welcome Guide
+ * How to use:
+ * 1. After loading the welcome guide, give the window/document focus.
+ * 2. Enter they keypress sequence listed above (Left,Right,Left,Left,Left,Left,Right,Right,Right)
+ * 3. You should now have a session variable set to override the welcome guide.
+ * 4. You should be redirected now to the dashboard, and the Welcome Guide Closed.
+ * 5. Page reloads will not cause the welcome guide to load.
+ * 6. To disable the flag set by this sequence, navigate back to the welcome guide (/welcome) and enter the sequence again.
+ * @param keyValue A keyboard event from 'keyup' on addEventListener
+ */
+const overrideChecker = (keyValue: KeyboardEvent) => {
+  let clear = false;
+  let totalExact = 0;
+
+  // Store the keypress key
+  inputtedSequence.value.push(keyValue.key)
+  for (let i = 0; i < inputtedSequence.value.length; i++) {
+    // If we have something that doesn't match, we clear the sequence so the user can restart.
+    if (inputtedSequence.value[i] !== fullSequence[i]) {
+      clear = true;
+    } else {
+      totalExact += 1
+    }
+  }
+  // We found an incorrect value in the sequence, reset.
+  if (clear) {
+    inputtedSequence.value = []
+  }
+  // The sequence is identical. Toggle the override value.
+  if (totalExact === fullSequence.length) {
+    if (sessionStorage.getItem('welcomeOverride') === 'true') {
+      sessionStorage.setItem('welcomeOverride', 'false')
+    } else {
+      sessionStorage.setItem('welcomeOverride', 'true')
+      router.push('/')
+    }
+  }
+}
+onMounted(() => {
+  window.addEventListener('keyup', overrideChecker)
+  if (sessionStorage.getItem('welcomeOverride') === 'true') {
+    welcomeStore.init();
+  }
+})
+onUnmounted(() => {
+  window.removeEventListener('keyup', overrideChecker)
+})
+
 </script>
 <style lang="scss" scoped>
 @import '@featherds/styles/themes/variables';

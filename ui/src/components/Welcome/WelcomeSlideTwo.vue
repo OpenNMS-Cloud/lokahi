@@ -96,18 +96,11 @@
             <div class="welcome-slide-footer">
                 <FeatherButton text @click="welcomeStore.prevSlide" data-id="welcome-slide-two-back-button">Back
                 </FeatherButton>
-                <!-- 
-                    TODO: Replace button below with the following once testing/feedback is complete.
-                    This blocks the user from continuing to slide 3 until the minion is found.
-                <FeatherButton primary 
-                :disabled="!welcomeStore.minionStatusSuccess"
+                <FeatherButton primary :disabled="!welcomeStore.minionStatusSuccess"
                     data-id="welcome-slide-two-continue-button" @click="welcomeStore.nextSlide">
                     Continue
                 </FeatherButton>
-                -->
-                <FeatherButton primary data-id="welcome-slide-two-continue-button" @click="welcomeStore.nextSlide">
-                    Continue
-                </FeatherButton>
+
             </div>
         </div>
     </div>

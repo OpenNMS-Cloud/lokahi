@@ -35,7 +35,7 @@
             <FeatherButton
               v-if="props.hasCert"
               secondary
-              @click="onSecondaryButtonClick"
+              @click="locationStore.revokeMinionCertificate"
               data-test="revoke-btn"
             >
               {{ props.secondaryButtonText }}
@@ -81,9 +81,11 @@ import { PropType } from 'vue'
 import CopyIcon from '@featherds/icon/action/ContentCopy'
 import CheckIcon from '@featherds/icon/action/CheckCircle'
 import CalendarIcon from '@featherds/icon/action/CalendarEndDate'
+import { useLocationStore } from '@/store/Views/locationStore'
 
 import useSnackbar from '@/composables/useSnackbar'
 const { showSnackbar } = useSnackbar()
+const locationStore = useLocationStore()
 
 const props = defineProps({
   title: {

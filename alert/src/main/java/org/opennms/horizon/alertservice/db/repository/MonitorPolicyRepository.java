@@ -40,6 +40,6 @@ public interface MonitorPolicyRepository extends JpaRepository<MonitorPolicy, Lo
     Optional<MonitorPolicy> findByIdAndTenantId(Long id, String tenantId);
     Optional<MonitorPolicy> findByName(String name);
 
-    @Query("SELECT policy FROM TriggerEvent te INNER JOIN te.rule as pr INNER JOIN pr.policy as policy WHERE te.id = ?1")
-    Optional<MonitorPolicy> findMonitoringPolicyByTriggerEvent(Long triggerEventId);
+    @Query("SELECT policy FROM AlertCondition ac INNER JOIN ac.rule as pr INNER JOIN pr.policy as policy WHERE ac.id = ?1")
+    Optional<MonitorPolicy> findMonitoringPolicyByAlertConditionId(Long alertConditionId);
 }

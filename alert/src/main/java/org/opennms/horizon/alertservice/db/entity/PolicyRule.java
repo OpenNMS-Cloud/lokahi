@@ -57,15 +57,19 @@ public class PolicyRule {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @Column (name = "tenant_id", nullable = false)
     private String tenantId;
+
     @Column(name = "rule_name")
     private String name;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "component_type")
     private ManagedObjectType componentType;
+
     @OneToMany(mappedBy = "rule", orphanRemoval = true, cascade = CascadeType.ALL)
-    private List<TriggerEvent> triggerEvents = new ArrayList<>();
+    private List<AlertCondition> alertConditions = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "policy_id", referencedColumnName = "id")

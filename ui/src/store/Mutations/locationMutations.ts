@@ -4,6 +4,7 @@ import {
   CreateLocationDocument,
   UpdateLocationDocument,
   DeleteLocationDocument,
+  RevokeMinionCertificateDocument,
   MonitoringLocationCreateInput,
   MonitoringLocationUpdateInput
 } from '@/types/graphql'
@@ -37,7 +38,7 @@ export const useLocationMutations = defineStore('locationMutations', () => {
     return error
   }
 
-  const deleteLocation = async (payload: { id: number}) => {
+  const deleteLocation = async (payload: { id: number }) => {
     const { execute, error } = useMutation(DeleteLocationDocument)
 
     await execute(payload)
@@ -45,5 +46,13 @@ export const useLocationMutations = defineStore('locationMutations', () => {
     return error
   }
 
-  return { createLocation, updateLocation, deleteLocation }
+  const revokeMinionCertificate = async (payload: { locationId: number }) => {
+    const { execute, error } = useMutation(RevokeMinionCertificateDocument)
+
+    await execute({ locationId: payload })
+
+    return error
+  }
+
+  return { createLocation, updateLocation, deleteLocation, revokeMinionCertificate }
 })

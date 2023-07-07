@@ -26,17 +26,20 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.alertservice.mapper;
+package org.opennms.horizon.server.model.alerts;
 
-import org.mapstruct.BeanMapping;
-import org.mapstruct.Mapper;
-import org.mapstruct.NullValueCheckStrategy;
-import org.opennms.horizon.alertservice.db.entity.TriggerEvent;
-import org.opennms.horizon.alerts.proto.TriggerEventProto;
+import org.opennms.horizon.server.model.BaseModel;
 
-@Mapper(componentModel = "spring")
-public interface TriggerEventMapper {
-    TriggerEvent protoToEntity(TriggerEventProto proto);
-    @BeanMapping(nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
-    TriggerEventProto entityToProto(TriggerEvent event);
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
+public class AlertCondition extends BaseModel {
+    private String triggerEventType;
+    private Integer count;
+    private Integer overtime;
+    private String overtimeUnit;
+    private String severity;
+    private String clearEventType;
 }

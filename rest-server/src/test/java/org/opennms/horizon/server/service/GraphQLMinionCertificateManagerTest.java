@@ -19,6 +19,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -75,6 +76,26 @@ class GraphQLMinionCertificateManagerTest {
             .jsonPath("$.data.getMinionCertificate.password").isEqualTo("passw0rd")
             .jsonPath("$.data.getMinionCertificate.certificate").isEqualTo(Base64.getEncoder().encodeToString("pkcs12-here".getBytes()));
         verify(mockClient).getMinionCert(TENANT_ID, LOCATION_ID, accessToken);
+        verify(mockHeaderUtil, times(1)).extractTenant(any(ResolutionEnvironment.class));
+        verify(mockHeaderUtil, times(1)).getAuthHeader(any(ResolutionEnvironment.class));
+    }
+
+    @Test
+    void testRevokeMinionCertificate() throws JSONException {
+        String request = """
+            mutation {
+              revokeMinionCertificate(locationId: 444)
+            }""";
+        webClient.post()
+            .uri(GRAPHQL_PATH)
+            .accept(MediaType.APPLICATION_JSON)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(createPayload(request))
+            .exchange()
+            .expectStatus().isOk()
+            .expectBody()
+            .jsonPath("$.data.revokeMinionCertificate").isBoolean();
+        verify(mockClient,  times(1)).revokeCertificate(TENANT_ID, LOCATION_ID, accessToken);
         verify(mockHeaderUtil, times(1)).extractTenant(any(ResolutionEnvironment.class));
         verify(mockHeaderUtil, times(1)).getAuthHeader(any(ResolutionEnvironment.class));
     }

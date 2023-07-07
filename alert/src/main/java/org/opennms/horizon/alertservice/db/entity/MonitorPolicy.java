@@ -56,21 +56,30 @@ public class MonitorPolicy {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @Column (name = "tenant_id", nullable = false)
     private String tenantId;
+
     @Column(name = "policy_name")
     private String name;
+
     private String memo;
+
     @Column(name = "notify_email")
     private Boolean notifyByEmail;
+
     @Column(name = "notify_pagerduty")
     private Boolean notifyByPagerDuty;
+
     @Column(name = "notify_webhooks")
     private Boolean notifyByWebhooks;
+
     @Column(name = "notify_instruction")
     private String notifyInstruction;
+
     @OneToMany(mappedBy = "policy", orphanRemoval = true, cascade = CascadeType.ALL)
     private List<PolicyRule> rules = new ArrayList<>();
+
     @ManyToMany(mappedBy = "policies")
     private Set<Tag> tags = new HashSet<>();
 

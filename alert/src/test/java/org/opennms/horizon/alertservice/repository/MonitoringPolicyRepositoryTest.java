@@ -37,7 +37,7 @@ import org.opennms.horizon.alerts.proto.ManagedObjectType;
 import org.opennms.horizon.alerts.proto.MonitorPolicyProto;
 import org.opennms.horizon.alerts.proto.PolicyRuleProto;
 import org.opennms.horizon.alerts.proto.Severity;
-import org.opennms.horizon.alerts.proto.TriggerEventProto;
+import org.opennms.horizon.alerts.proto.AlertConditionProto;
 import org.opennms.horizon.alertservice.db.entity.MonitorPolicy;
 import org.opennms.horizon.alertservice.db.repository.MonitorPolicyRepository;
 import org.opennms.horizon.alertservice.db.repository.TagRepository;
@@ -137,13 +137,13 @@ public class MonitoringPolicyRepositoryTest {
     }
 
     MonitorPolicy createNewPolicy(MonitorPolicyMapper monitorPolicyMapper) {
-        TriggerEventProto coldReboot = TriggerEventProto.newBuilder()
-            .setTriggerEvent(EventType.SNMP_Cold_Start)
+        AlertConditionProto coldReboot = AlertConditionProto.newBuilder()
+            .setTriggerEventType(EventType.SNMP_Cold_Start)
             .setCount(1)
             .setSeverity(Severity.CRITICAL)
             .build();
-        TriggerEventProto warmReboot = TriggerEventProto.newBuilder()
-            .setTriggerEvent(EventType.SNMP_Warm_Start)
+        AlertConditionProto warmReboot = AlertConditionProto.newBuilder()
+            .setTriggerEventType(EventType.SNMP_Warm_Start)
             .setCount(1)
             .setSeverity(Severity.MAJOR)
             .build();
@@ -169,7 +169,7 @@ public class MonitoringPolicyRepositoryTest {
         policy.getRules().forEach(r -> {
             r.setTenantId(tenantId);
             r.setPolicy(policy);
-            r.getTriggerEvents().forEach(e -> {
+            r.getAlertConditions().forEach(e -> {
                 e.setTenantId(tenantId);
                 e.setRule(r);
             });

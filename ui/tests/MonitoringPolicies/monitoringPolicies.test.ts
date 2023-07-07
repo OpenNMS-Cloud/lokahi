@@ -17,13 +17,13 @@ const testingPayload = {
     {
       name: 'Rule1',
       componentType: ComponentType.NODE,
-      triggerEvents: [
+      alertConditions: [
         {
           count: 1,
           severity: Severity.Critical,
-          triggerEvent: SNMPEventType.SNMP_COLD_START,
+          triggerEventType: SNMPEventType.SNMP_COLD_START,
           overtimeUnit: Unknowns.UNKNOWN_UNIT,
-          clearEvent: Unknowns.UNKNOWN_EVENT
+          clearEventType: Unknowns.UNKNOWN_EVENT
         }
       ]
     }

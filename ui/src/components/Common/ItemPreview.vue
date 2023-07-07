@@ -21,7 +21,7 @@
       <div>
         <FeatherSpinner />
       </div>
-      <div>Loading first discovery.</div>
+      <div data-test="welcome-discovery-status-txt">Loading first discovery.</div>
     </div>
   </div>
 </template>

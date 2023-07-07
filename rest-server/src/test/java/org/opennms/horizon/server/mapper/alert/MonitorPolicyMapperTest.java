@@ -32,16 +32,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.opennms.horizon.alerts.proto.EventType;
-import org.opennms.horizon.alerts.proto.ManagedObjectType;
-import org.opennms.horizon.alerts.proto.MonitorPolicyProto;
-import org.opennms.horizon.alerts.proto.OverTimeUnit;
-import org.opennms.horizon.alerts.proto.PolicyRuleProto;
-import org.opennms.horizon.alerts.proto.Severity;
+import org.opennms.horizon.alerts.proto.*;
+import org.opennms.horizon.server.model.alerts.AlertCondition;
 import org.opennms.horizon.server.model.alerts.MonitorPolicy;
 import org.opennms.horizon.server.model.alerts.PolicyRule;
-import org.opennms.horizon.server.model.alerts.TriggerEvent;
-import org.opennms.horizon.alerts.proto.TriggerEventProto;
+import org.opennms.horizon.alerts.proto.AlertConditionProto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -53,15 +48,15 @@ public class MonitorPolicyMapperTest {
 
     @BeforeEach
     void before() {
-        TriggerEventProto triggerEvent = TriggerEventProto.newBuilder()
-            .setTriggerEvent(EventType.SNMP_Warm_Start)
+        AlertConditionProto alertCondition = AlertConditionProto.newBuilder()
+            .setTriggerEventType(EventType.SNMP_Warm_Start)
             .setCount(1)
             .setSeverity(Severity.CRITICAL)
             .build();
         PolicyRuleProto rule = PolicyRuleProto.newBuilder()
             .setName("test-rule")
             .setComponentType(ManagedObjectType.NODE)
-            .addSnmpEvents(triggerEvent)
+            .addSnmpEvents(alertCondition)
             .build();
         policyProto = MonitorPolicyProto.newBuilder()
             .setName("test-policy")
@@ -85,11 +80,11 @@ public class MonitorPolicyMapperTest {
                 policyProto.getNotifyByEmail(), policyProto.getNotifyByPagerDuty(), policyProto.getNotifyByWebhooks(), policyProto.getNotifyInstruction());
         assertThat(policy.getTags()).isEqualTo(policyProto.getTagsList()); //the order doesn't matter here
         assertThat(policy.getRules().get(0))
-            .extracting(PolicyRule::getName, PolicyRule::getComponentType, r -> r.getTriggerEvents().size())
+            .extracting(PolicyRule::getName, PolicyRule::getComponentType, r -> r.getAlertConditions().size())
             .containsExactly("test-rule", ManagedObjectType.NODE.name(), 1);
-        assertThat(policy.getRules().get(0).getTriggerEvents().get(0))
-            .extracting(TriggerEvent::getTriggerEvent, TriggerEvent::getCount, TriggerEvent::getOvertime, TriggerEvent::getOvertimeUnit,
-                TriggerEvent::getSeverity, TriggerEvent::getClearEvent)
+        assertThat(policy.getRules().get(0).getAlertConditions().get(0))
+            .extracting(AlertCondition::getTriggerEventType, AlertCondition::getCount, AlertCondition::getOvertime, AlertCondition::getOvertimeUnit,
+                AlertCondition::getSeverity, AlertCondition::getClearEventType)
             .containsExactly(EventType.SNMP_Warm_Start.name(), 1, 0, OverTimeUnit.UNKNOWN_UNIT.name(), Severity.CRITICAL.name(), EventType.UNKNOWN_EVENT.name());
     }
 

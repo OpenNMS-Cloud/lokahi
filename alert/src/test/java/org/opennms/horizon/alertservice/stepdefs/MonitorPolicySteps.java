@@ -47,7 +47,7 @@ import org.opennms.horizon.alerts.proto.MonitorPolicyProto;
 import org.opennms.horizon.alerts.proto.OverTimeUnit;
 import org.opennms.horizon.alerts.proto.PolicyRuleProto;
 import org.opennms.horizon.alerts.proto.Severity;
-import org.opennms.horizon.alerts.proto.TriggerEventProto;
+import org.opennms.horizon.alerts.proto.AlertConditionProto;
 import org.opennms.horizon.alertservice.AlertGrpcClientUtils;
 import org.opennms.horizon.alertservice.kafkahelper.KafkaTestHelper;
 import org.opennms.horizon.shared.common.tag.proto.Operation;
@@ -74,7 +74,7 @@ public class MonitorPolicySteps {
     private final AlertGrpcClientUtils grpcClient;
     private MonitorPolicyProto.Builder policyBuilder = MonitorPolicyProto.newBuilder();
     private PolicyRuleProto.Builder ruleBuilder = PolicyRuleProto.newBuilder();
-    private List<TriggerEventProto.Builder> triggerBuilders = new ArrayList<>();
+    private List<AlertConditionProto.Builder> triggerBuilders = new ArrayList<>();
     private Long policyId;
     private String tenantId;
     private String tagTopic;
@@ -130,16 +130,16 @@ public class MonitorPolicySteps {
     public void alertConditionData(DataTable data) {
         List<Map<String, String>> mapList = data.asMaps();
         mapList.forEach(map -> {
-            TriggerEventProto.Builder eventBuilder = TriggerEventProto.newBuilder().setTriggerEvent(EventType.valueOf(map.get("trigger_event_type")))
+            AlertConditionProto.Builder eventBuilder = AlertConditionProto.newBuilder().setTriggerEventType(EventType.valueOf(map.get("trigger_event_type")))
                 .setCount(Integer.parseInt(map.get("count")))
                 .setOvertime(Integer.parseInt(map.get("overtime")))
                 .setOvertimeUnit(OverTimeUnit.valueOf(map.get("overtime_unit").toUpperCase()))
                 .setSeverity(Severity.valueOf(map.get("severity").toUpperCase()));
-            String clearEvent = map.get("clear_event_type");
-            if(StringUtils.isNotBlank(clearEvent)) {
-                eventBuilder.setClearEvent(EventType.valueOf(clearEvent));
+            String clearEventType = map.get("clear_event_type");
+            if(StringUtils.isNotBlank(clearEventType)) {
+                eventBuilder.setClearEventType(EventType.valueOf(clearEventType));
             }
-            eventType = eventBuilder.getTriggerEvent();
+            eventType = eventBuilder.getTriggerEventType();
             triggerBuilders.add(eventBuilder);
         });
     }
@@ -156,7 +156,7 @@ public class MonitorPolicySteps {
 
     @Then("Verify the new policy has been created")
     public void verifyTheNewPolicyHasBeenCreated() {
-        TriggerEventProto.Builder triggerBuilder = triggerBuilders.stream().filter(b -> b.getTriggerEvent().equals(eventType)).findFirst().get();
+        AlertConditionProto.Builder triggerBuilder = triggerBuilders.stream().filter(b -> b.getTriggerEventType().equals(eventType)).findFirst().get();
         MonitorPolicyProto policy = grpcClient.getPolicyStub().getPolicyById(Int64Value.of(policyId));
         assertThat(policy).isNotNull()
             .extracting("name", "memo", "tagsList")
@@ -165,8 +165,8 @@ public class MonitorPolicySteps {
             .extracting("name", "componentType")
             .containsExactly(Tuple.tuple(ruleBuilder.getName(), ruleBuilder.getComponentType()));
         assertThat(policy.getRulesList().get(0).getSnmpEventsList()).asList().hasSize(1)
-            .extracting("triggerEvent", "count", "overtime", "overtimeUnit", "severity", "clearEvent")
-            .containsExactly(Tuple.tuple(triggerBuilder.getTriggerEvent(), triggerBuilder.getCount(), triggerBuilder.getOvertime(),
+            .extracting("triggerEventType", "count", "overtime", "overtimeUnit", "severity", "clearEventType")
+            .containsExactly(Tuple.tuple(triggerBuilder.getTriggerEventType(), triggerBuilder.getCount(), triggerBuilder.getOvertime(),
                 triggerBuilder.getOvertimeUnit(), triggerBuilder.getSeverity(), EventType.UNKNOWN_EVENT));
     }
 
@@ -188,12 +188,12 @@ public class MonitorPolicySteps {
     @Then("Verify the default monitoring policy has the following data")
     public void verifyTheDefaultMonitoringPolicyHasTheFollowingData(DataTable dataTable) {
         List<Map<String, String>> rows = dataTable.asMaps();
-        List<TriggerEventProto> events = policy.getRulesList().get(0).getSnmpEventsList();
+        List<AlertConditionProto> events = policy.getRulesList().get(0).getSnmpEventsList();
         assertThat(events).asList().hasSize(rows.size());
         for(int i =0; i < events.size(); i++) {
             assertThat(events.get(i))
-                .extracting(e -> e.getTriggerEvent().name(), e -> e.getSeverity().name())
-                .containsExactly(rows.get(i).get("triggerEvent"), rows.get(i).get("severity"));
+                .extracting(e -> e.getTriggerEventType().name(), e -> e.getSeverity().name())
+                .containsExactly(rows.get(i).get("triggerEventType"), rows.get(i).get("severity"));
         }
     }
 

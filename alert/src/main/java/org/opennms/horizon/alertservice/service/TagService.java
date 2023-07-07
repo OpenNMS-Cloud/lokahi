@@ -51,36 +51,50 @@ public class TagService {
     public void insertOrUpdateTags(TagOperationList list) {
         list.getTagsList().forEach( tagOp -> {
             switch (tagOp.getOperation()) {
-                case ASSIGN_TAG -> tagRepository.findByTenantIdAndName(tagOp.getTenantId(), tagOp.getTagName())
-                    .ifPresentOrElse(tag -> {
-                        int oldSize = tag.getNodeIds().size();
-                        tagOp.getNodeIdList().forEach(id -> {
-                            if(!tag.getNodeIds().contains(id)) {
-                                tag.getNodeIds().add(id);
+
+                case ASSIGN_TAG -> {
+                    if (tagOp.getNodeIdList().isEmpty()) {
+                        // Only handle tag operation updates with nodeIds
+                        return;
+                    }
+                    tagRepository.findByTenantIdAndName(tagOp.getTenantId(), tagOp.getTagName())
+                        .ifPresentOrElse(tag -> {
+                            int oldSize = tag.getNodeIds().size();
+                            tagOp.getNodeIdList().forEach(id -> {
+                                if (!tag.getNodeIds().contains(id)) {
+                                    tag.getNodeIds().add(id);
+                                }
+                            });
+                            tagRepository.save(tag);
+                            log.info("added nodeIds with data {} node id size from {} to {}", tagOp, oldSize, tag.getNodeIds().size());
+                        }, () -> {
+                            Tag tag = new Tag();
+                            tag.setName(tagOp.getTagName());
+                            tag.setTenantId(tagOp.getTenantId());
+                            tag.setNodeIds(tagOp.getNodeIdList());
+                            tagRepository.save(tag);
+                            log.info("inserted new tag with data {}", tagOp);
+                        });
+                }
+                case REMOVE_TAG -> {
+
+                    if (tagOp.getNodeIdList().isEmpty()) {
+                        // Only handle tag operation updates with nodeIds
+                        return;
+                    }
+                    tagRepository.findByTenantIdAndName(tagOp.getTenantId(), tagOp.getTagName())
+                        .ifPresent(tag -> {
+                            int oldSize = tag.getNodeIds().size();
+                            tagOp.getNodeIdList().forEach(id -> tag.getNodeIds().remove(id));
+                            if(tag.getNodeIds().isEmpty() && tag.getPolicies().isEmpty()) {
+                                tagRepository.deleteById(tag.getId());
+                                log.info("deleted tag {}", tagOp);
+                            } else {
+                                tagRepository.save(tag);
+                                log.info("removed nodeIds for {} and node ids size changed from {} to {}", tagOp, oldSize, tag.getNodeIds().size());
                             }
                         });
-                        tagRepository.save(tag);
-                        log.info("added nodeIds with data {} node id size from {} to {}", tagOp, oldSize, tag.getNodeIds().size());
-                    }, () -> {
-                        Tag tag = new Tag();
-                        tag.setName(tagOp.getTagName());
-                        tag.setTenantId(tagOp.getTenantId());
-                        tag.setNodeIds(tagOp.getNodeIdList());
-                        tagRepository.save(tag);
-                        log.info("inserted new tag with data {}", tagOp);
-                    });
-                case REMOVE_TAG -> tagRepository.findByTenantIdAndName(tagOp.getTenantId(), tagOp.getTagName())
-                    .ifPresent(tag -> {
-                        int oldSize = tag.getNodeIds().size();
-                        tagOp.getNodeIdList().forEach(id -> tag.getNodeIds().remove(id));
-                        if(tag.getNodeIds().isEmpty() && tag.getPolicies().isEmpty()) {
-                            tagRepository.deleteById(tag.getId());
-                            log.info("deleted tag {}", tagOp);
-                        } else {
-                            tagRepository.save(tag);
-                            log.info("removed nodeIds for {} and node ids size changed from {} to {}", tagOp, oldSize, tag.getNodeIds().size());
-                        }
-                    });
+                }
             }
         });
     }
@@ -89,4 +103,5 @@ public class TagService {
         return tagRepository.findByTenantId(tenantId)
             .stream().map(tagMapper::map).toList();
     }
+
 }

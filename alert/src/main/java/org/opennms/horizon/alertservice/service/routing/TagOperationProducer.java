@@ -28,32 +28,28 @@
 
 package org.opennms.horizon.alertservice.service.routing;
 
-import com.google.protobuf.InvalidProtocolBufferException;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.opennms.horizon.alertservice.service.TagService;
+import org.opennms.horizon.alertservice.config.KafkaTopicProperties;
 import org.opennms.horizon.shared.common.tag.proto.TagOperationList;
-import org.springframework.context.annotation.PropertySource;
-import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
-import java.util.Arrays;
-
-@Slf4j
-@RequiredArgsConstructor
 @Component
-@PropertySource("classpath:application.yaml")
-public class TagOperationConsumer {
-    private final TagService tagService;
+@Slf4j
+public class TagOperationProducer {
 
-    @KafkaListener(topics = "${kafka.topics.tag-operation}", concurrency = "1")
-    public void tagMessageConsumer(@Payload byte[] data) {
-        try {
-            TagOperationList operationList = TagOperationList.parseFrom(data);
-            tagService.insertOrUpdateTags(operationList);
-        } catch (InvalidProtocolBufferException e) {
-            log.error("Error while parsing TagOperationList, payload data {}", Arrays.toString(data), e);
-        }
+    private final KafkaTemplate<String, byte[]> kafkaTemplate;
+
+    private final String kafkaTopic;
+
+    public TagOperationProducer(KafkaTemplate<String, byte[]> kafkaTemplate, KafkaTopicProperties kafkaTopicProperties) {
+        this.kafkaTopic = kafkaTopicProperties.getTagOperation();
+        this.kafkaTemplate = kafkaTemplate;
+    }
+
+
+    public void sendTagUpdate(TagOperationList tagOperationList) {
+        log.info("Sending tag updates {}", tagOperationList);
+        kafkaTemplate.send(kafkaTopic, tagOperationList.toByteArray());
     }
 }

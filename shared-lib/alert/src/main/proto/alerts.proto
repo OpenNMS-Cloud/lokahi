@@ -136,15 +136,6 @@ message EventMatch {
   string value = 2;
 }
 
-message AlertDefinition {
-  string uei = 1;
-  repeated EventMatch match = 2;
-  string reduction_key = 3;
-  string clear_key = 4;
-  AlertType type = 5;
-  ManagedObjectType managed_object_type = 6;
-}
-
 message ManagedObject {
   ManagedObjectType type = 1;
   ManagedObjectInstance instance = 2;
@@ -200,24 +191,6 @@ message CountAlertResponse {
   AlertError error = 2;
 }
 
-message ListAlertDefinitionsRequest {
-  // Optional. The maximum number of alerts to return in the response.
-  int32 page_size = 1;
-
-  // Optional. A pagination token returned from a previous call to `listAlerts`
-  // that indicates where this listing should continue from.
-  string page_token = 2;
-}
-
-message ListAlertDefinitionsResponse {
-  // A possibly paginated list of Alerts that are associated with the calling tenant.
-  repeated AlertDefinition definitions = 1;
-
-  // Optional. A pagination token returned from a previous call to `ListAlertDefinitions`
-  // that indicates where this listing should continue from.
-  string page_token = 2;
-}
-
 message AlertRequest {
   repeated uint64 alert_id = 1;
 }
@@ -245,14 +218,6 @@ service AlertService {
   rpc escalateAlert(AlertRequest) returns (AlertResponse) {};
   rpc deleteAlert(AlertRequest) returns(DeleteAlertResponse) {};
   rpc countAlerts(ListAlertsRequest) returns (CountAlertResponse) {};
-}
-
-service AlertConfigurationService {
-  rpc listAlertDefinitions(ListAlertDefinitionsRequest) returns (ListAlertDefinitionsResponse) {};
-  rpc getAlertDefinition(google.protobuf.UInt64Value) returns (AlertDefinition) {}
-  rpc insertAlertDefinition(AlertDefinition) returns (AlertDefinition) {}
-  rpc updateAlertDefinition(AlertDefinition) returns (AlertDefinition) {}
-  rpc removeAlertDefinition(google.protobuf.UInt64Value) returns (google.protobuf.BoolValue) {}
 }
 
 // Proto for Monitoring policy

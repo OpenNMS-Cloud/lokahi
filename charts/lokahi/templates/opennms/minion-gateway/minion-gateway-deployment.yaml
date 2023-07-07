@@ -22,7 +22,7 @@ spec:
         checksum/spring-boot-env-configmap: {{ include (print $.Template.BasePath "/opennms/spring-boot-env-configmap.yaml") . | sha256sum }}
         kubectl.kubernetes.io/default-container: "{{ .Values.OpenNMS.MinionGateway.ServiceName }}"
     spec:
-      serviceAccountName: {{ .Values.OpenNMS.Minion.ServiceName }}-sa
+      serviceAccountName: {{ .Values.OpenNMS.MinionGateway.ServiceName }}-sa
       {{- if .Values.NodeRestrictions.Enabled }}
       nodeSelector:
         {{ .Values.NodeRestrictions.Key }}: {{ .Values.NodeRestrictions.Value }}
@@ -54,7 +54,7 @@ spec:
       containers:
         - name: {{ .Values.OpenNMS.MinionGateway.ServiceName }}
           image: {{ .Values.OpenNMS.MinionGateway.Image }}
-          imagePullPolicy: {{ .Values.OpenNMS.Minion.ImagePullPolicy }}
+          imagePullPolicy: {{ .Values.OpenNMS.MinionGateway.ImagePullPolicy }}
           env:
             - name: JAVA_TOOL_OPTIONS
               value: "-javaagent:agent/opentelemetry-javaagent.jar -agentlib:jdwp=transport=dt_socket,server=y,address=5005,suspend=n,quiet=y -XX:MaxDirectMemorySize=768m"  # FIXME: Permanent debug port, enable only for dev mode

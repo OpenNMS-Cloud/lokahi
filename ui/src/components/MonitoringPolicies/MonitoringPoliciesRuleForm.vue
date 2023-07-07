@@ -73,13 +73,13 @@
         </div>
         <div
           class="row"
-          v-if="store.selectedRule!.triggerEvents.length"
+          v-if="store.selectedRule!.alertConditions.length"
         >
           <div class="col">
             <div class="form-title">Set Alert Conditions</div>
             <template v-if="store.selectedRule!.detectionMethod === DetectionMethodTypes.THRESHOLD">
               <MonitoringPoliciesThresholdCondition
-                v-for="(cond, index) in store.selectedRule!.triggerEvents"
+                v-for="(cond, index) in store.selectedRule!.alertConditions"
                 :key="cond.id"
                 :index="index"
                 :condition="(cond as ThresholdCondition)"
@@ -89,7 +89,7 @@
             </template>
             <template v-else>
               <MonitoringPoliciesEventCondition
-                v-for="(cond, index) in store.selectedRule!.triggerEvents"
+                v-for="(cond, index) in store.selectedRule!.alertConditions"
                 :key="cond.id"
                 :condition="(cond as EventCondition)"
                 :policy="store.selectedPolicy"
@@ -103,7 +103,7 @@
               class="add-params"
               text
               @click="store.addNewCondition"
-              :disabled="store.selectedRule.triggerEvents.length === 4 || store.selectedPolicy.isDefault"
+              :disabled="store.selectedRule.alertConditions.length === 4 || store.selectedPolicy.isDefault"
             >
               Additional Conditions
             </FeatherButton>

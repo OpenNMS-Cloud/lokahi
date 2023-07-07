@@ -40,5 +40,5 @@ import lombok.Setter;
 public class PolicyRule extends BaseModel {
     private String name;
     private String componentType;
-    private List<TriggerEvent> triggerEvents;
+    private List<AlertCondition> alertConditions;
 }

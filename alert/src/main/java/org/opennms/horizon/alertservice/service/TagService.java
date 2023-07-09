@@ -34,7 +34,12 @@ import org.opennms.horizon.alert.tag.proto.TagProto;
 import org.opennms.horizon.alertservice.db.entity.Tag;
 import org.opennms.horizon.alertservice.db.repository.TagRepository;
 import org.opennms.horizon.alertservice.mapper.TagMapper;
+import org.opennms.horizon.alertservice.service.routing.TagOperationProducer;
+import org.opennms.horizon.shared.common.tag.proto.Operation;
 import org.opennms.horizon.shared.common.tag.proto.TagOperationList;
+import org.opennms.horizon.shared.common.tag.proto.TagOperationProto;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -46,12 +51,32 @@ import java.util.List;
 public class TagService {
     private final TagRepository tagRepository;
     private final TagMapper tagMapper;
+    private final TagOperationProducer tagOperationProducer;
+
+    /**
+     * This publishes existing tags on monitoring policies to Kafka
+     */
+    @EventListener(ApplicationReadyEvent.class)
+    @Transactional
+    public void publishExistingTags() {
+
+        var tags = tagRepository.findAll();
+        var tagOperationUpdates = TagOperationList.newBuilder();
+        tags.forEach(tag -> {
+            var tagAddOp = TagOperationProto.newBuilder().setOperation(Operation.ASSIGN_TAG)
+                .setTagName(tag.getName())
+                .setTenantId(tag.getTenantId());
+            tag.getPolicies().forEach(monitorPolicy -> tagAddOp.addMonitoringPolicyId(monitorPolicy.getId()));
+            tagOperationUpdates.addTags(tagAddOp.build());
+        });
+        tagOperationProducer.sendTagUpdate(tagOperationUpdates.build());
+    }
 
     @Transactional
     public void insertOrUpdateTags(TagOperationList list) {
         list.getTagsList().forEach( tagOp -> {
-            switch (tagOp.getOperation()) {
 
+            switch (tagOp.getOperation()) {
                 case ASSIGN_TAG -> {
                     if (tagOp.getNodeIdList().isEmpty()) {
                         // Only handle tag operation updates with nodeIds

@@ -47,6 +47,7 @@ public class TagPublishConsumer {
 
     private final TagService tagService;
 
+    // auto.offset.reset = earliest needed here to consume all tags if Inventory service started much later than Alerts
     @KafkaListener(topics = "${kafka.topics.tag-operation}", properties = ConsumerConfig.AUTO_OFFSET_RESET_CONFIG + "=earliest")
     public void receiveMessage(@Payload byte[] data) {
 

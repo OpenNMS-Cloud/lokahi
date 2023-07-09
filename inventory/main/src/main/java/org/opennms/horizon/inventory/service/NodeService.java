@@ -246,6 +246,7 @@ public class NodeService {
         final var monitored = tagRepository.findByTenantIdAndNodeId(node.getTenantId(), node.getId()).stream()
             .anyMatch(tag -> !tag.getMonitorPolicyIds().isEmpty());
 
+        // System tenant will have default monitoring policies, we always need to match them.
         var tagsOnSystemTenant = tagRepository.findByTenantId("system-tenant");
         final var matchWithSystemTenant = tagsOnSystemTenant.stream()
             .anyMatch(tag -> node.getTags().stream().map(Tag::getName)

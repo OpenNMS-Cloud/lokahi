@@ -5,9 +5,10 @@
                 <FeatherIcon :icon="Search" />
             </div>
             <div class="main">
+                <label for="atomic-input">{{ inputLabel }}</label>
                 <input id="atomic-input" tabIndex="0" :value="inputValue" @keydown="keyDownCheck"
-                    @input="(event) => textChanged((event.target as HTMLInputElement)?.value)" placeholder="Activate Tag"
-                    label="Activate Tag" class="atomic-auto-input" data-ref-id="feather-autocomplete-input" />
+                    @input="(event) => textChanged((event.target as HTMLInputElement)?.value)" :placeholder="inputLabel"
+                    class="atomic-auto-input" data-ref-id="feather-autocomplete-input" />
             </div>
             <div class="post">
                 <FeatherIcon :icon="KeyboardArrowDown" class="drop-icon" />
@@ -36,6 +37,7 @@ const wrapper = ref();
 const listRef = ref();
 const props = defineProps({
     inputValue: { type: String, default: '' },
+    inputLabel: { type: String, default: '' },
     itemClicked: { type: Function as PropType<(listItem: unknown, index: number) => void>, default: () => { } },
     loading: { type: Boolean, default: false },
     outsideClicked: { type: Function as PropType<() => void>, default: () => { } },
@@ -184,5 +186,9 @@ const shortenedList = computed(() => props.results?.length > 10 ? props.results?
     :focus-within {
         outline: none;
     }
+}
+
+.main label {
+    display: none;
 }
 </style>

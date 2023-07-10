@@ -1,19 +1,20 @@
 <template>
   <CollapsingWrapper :open="visible">
     <div class="tag-manager">
-      <div>
+      <div class="instructions">
+        <h4>To add tags to a node:</h4>
         <ol>
-          <li>Using the search, find an existing tag or create a new one.</li>
+          <li>In the search box, select an existing tag or create a new one.</li>
           <li>While a tag is active, select a node below with a checkbox to make a connection.</li>
-          <li>Click Save Tags to Node</li>
+          <li>Click <strong>Save Tags to Node</strong></li>
         </ol>
       </div>
       <section class="select-tags">
         <div class="top">
           <div class="search-add">
-            <AtomicAutocomplete class="tag-manager-complete" :loading="tagQueries.tagsSearchIsFetching"
-              :outsideClicked="closeAutocomplete" :itemClicked="itemClicked" :resultsVisible="isAutoCompleteOpen"
-              :focusLost="onFocusLost" :wrapperClicked="wrapperClicked"
+            <AtomicAutocomplete class="tag-manager-complete" inputLabel="Search Tags"
+              :loading="tagQueries.tagsSearchIsFetching" :outsideClicked="closeAutocomplete" :itemClicked="itemClicked"
+              :resultsVisible="isAutoCompleteOpen" :focusLost="onFocusLost" :wrapperClicked="wrapperClicked"
               :results="tagQueries.tagsSearched.map((d) => d.name)" :inputValue="inputValue" :textChanged="textChanged">
             </AtomicAutocomplete>
             <FeatherTooltip :title="tagManagerTip" v-slot="{ attrs, on }">
@@ -193,6 +194,7 @@ const textChanged = (newVal: string) => {
 
     .search-add {
       display: flex;
+      flex-wrap: wrap;
       align-items: center;
 
       .tags-autocomplete {
@@ -204,6 +206,12 @@ const textChanged = (newVal: string) => {
 
         :deep(.feather-input-sub-text) {
           display: none;
+        }
+      }
+
+      .wrapper {
+        @media (max-width:702px) {
+          margin-bottom: var(variables.$spacing-m);
         }
       }
     }
@@ -256,5 +264,9 @@ const textChanged = (newVal: string) => {
   min-width: 445px;
   margin-top: var(variables.$spacing-m);
   padding-top: var(variables.$spacing-m);
+}
+
+.instructions {
+  margin-bottom: var(variables.$spacing-m);
 }
 </style>

@@ -15,7 +15,7 @@
         Copy
       </template>
     </FeatherButton>
-    <p>Make sure you replace <strong>PATH_TO_DOWNLOADED_FILE</strong> with the path to the certificate file.</p>
+    <p>Make sure you replace <strong>PATH_TO_DOWNLOADED_FILE</strong> with the full path to the certificate file.</p>
     <pre>
       {{ locationStore.minionDockerCmd }}
     </pre>

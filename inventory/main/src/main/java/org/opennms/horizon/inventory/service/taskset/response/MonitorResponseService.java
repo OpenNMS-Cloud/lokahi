@@ -35,6 +35,7 @@ import org.opennms.horizon.events.proto.EventLog;
 import org.opennms.horizon.events.proto.EventParameter;
 import org.opennms.horizon.inventory.component.InternalEventProducer;
 import org.opennms.horizon.inventory.model.MonitoredServiceState;
+import org.opennms.horizon.inventory.repository.MonitoredServiceRepository;
 import org.opennms.horizon.inventory.repository.MonitoredServiceStateRepository;
 import org.opennms.horizon.shared.events.EventConstants;
 import org.opennms.taskset.contract.MonitorResponse;
@@ -49,6 +50,8 @@ public class MonitorResponseService {
 
     private final MonitoredServiceStateRepository serviceStateRepository;
 
+    private final MonitoredServiceRepository monitoredServiceRepository;
+
     private final InternalEventProducer eventProducer;
 
 
@@ -60,7 +63,11 @@ public class MonitorResponseService {
             return;
         }
         long monitorServiceId = monitorResponse.getMonitorServiceId();
-
+        var optionalService = monitoredServiceRepository.findByIdAndTenantId(monitorServiceId, tenantId);
+        if (optionalService.isEmpty()) {
+            return;
+        }
+        var monitoredService = optionalService.get();
         var optionalServiceState = serviceStateRepository.findByTenantIdAndMonitoredServiceId(tenantId, monitorServiceId);
         var previousState = Boolean.TRUE;
         Boolean statusFromMonitor = "Up".equalsIgnoreCase(monitorResponse.getStatus()) ? Boolean.TRUE : Boolean.FALSE;
@@ -72,7 +79,7 @@ public class MonitorResponseService {
         } else {
             MonitoredServiceState monitoredServiceState = new MonitoredServiceState();
             monitoredServiceState.setTenantId(tenantId);
-            monitoredServiceState.setMonitoredServiceId(monitorServiceId);
+            monitoredServiceState.setMonitoredService(monitoredService);
             monitoredServiceState.setServiceState(statusFromMonitor);
             serviceStateRepository.save(monitoredServiceState);
         }
@@ -91,13 +98,14 @@ public class MonitorResponseService {
         }
         eventBuilder.setIpAddress(monitorResponse.getIpAddress());
         eventBuilder.setTenantId(tenantId);
+        eventBuilder.setNodeId(monitorResponse.getNodeId());
         var serviceNameParam = EventParameter.newBuilder().setName("serviceName")
             .setValue(monitorResponse.getMonitorType().name()).build();
         var serviceIdParam = EventParameter.newBuilder().setName("serviceId")
             .setValue(String.valueOf(monitorResponse.getMonitorServiceId())).build();
         eventBuilder.addParameters(serviceNameParam)
             .addParameters(serviceIdParam);
-        var eventLog = EventLog.newBuilder().addEvents(eventBuilder.build());
+        var eventLog = EventLog.newBuilder().setTenantId(tenantId).addEvents(eventBuilder.build());
         eventProducer.sendEvent(eventLog.build());
     }
 }

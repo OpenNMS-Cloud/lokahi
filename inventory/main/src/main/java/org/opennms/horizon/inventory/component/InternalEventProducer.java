@@ -50,6 +50,7 @@ public class InternalEventProducer {
     }
 
     public void sendEvent(EventLog eventLog) {
+        log.info("Sending internal events {}", eventLog);
         kafkaTemplate.send(eventTopic, eventLog.toByteArray());
     }
 }

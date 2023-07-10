@@ -4,8 +4,9 @@
       <div class="instructions">
         <h4>To add tags to a node:</h4>
         <ol>
-          <li>In the search box, select an existing tag or create a new one.</li>
-          <li>While a tag is active, select a node below with a checkbox to make a connection.</li>
+          <li>Using the search, find an existing tag or create a new one.</li>
+          <li>After selecting your tag(s), click the checkbox field on the node(s) to which you want to add the tag(s).
+          </li>
           <li>Click <strong>Save Tags to Node</strong></li>
         </ol>
       </div>

@@ -25,7 +25,7 @@
       <InventoryTabContent v-if="tabMonitoredContent.length" :tabContent="tabMonitoredContent"
         :state="MonitoredStates.MONITORED" />
       <EmptyList v-if="!tabMonitoredContent.length" bg
-        :content="{ msg: 'No Monitored Nodes. Add some on the Minions page.', btn: { label: 'Visit Minions Page', action: () => { $router.push('/minions') } } }" />
+        :content="{ msg: 'No monitored nodes. Add some on the Minions page.', btn: { label: 'Visit Minions Page', action: () => { $router.push('/minions') } } }" />
       <FeatherSpinner v-if="inventoryQueries.isFetching" />
     </FeatherTabPanel>
 
@@ -36,7 +36,7 @@
       <InventoryTabContent v-if="tabUnmonitoredContent.length" :tabContent="tabUnmonitoredContent"
         :state="MonitoredStates.UNMONITORED" />
       <EmptyList v-if="!tabUnmonitoredContent.length" bg
-        :content="{ msg: 'No Unmonitored Nodes. Add some on the Minions page.', btn: { label: 'Visit Minions Page', action: () => { $router.push('/minions') } } }" />
+        :content="{ msg: 'No unmonitored nodes. Add some on the Minions page.', btn: { label: 'Visit Minions Page', action: () => { $router.push('/minions') } } }" />
       <FeatherSpinner v-if="inventoryQueries.isFetching" />
     </FeatherTabPanel>
 
@@ -47,7 +47,7 @@
       <InventoryTabContent v-if="tabDetectedContent.length" :tabContent="tabDetectedContent"
         :state="MonitoredStates.DETECTED" />
       <EmptyList v-if="!tabDetectedContent.length" bg
-        :content="{ msg: 'No Detected Nodes. Add some on the Minions page.', btn: { label: 'Visit Minions Page', action: () => { $router.push('/minions') } } }" />
+        :content="{ msg: 'No detected nodes. Add some on the Minions page.', btn: { label: 'Visit Minions Page', action: () => { $router.push('/minions') } } }" />
       <FeatherSpinner v-if="inventoryQueries.isFetching" />
     </FeatherTabPanel>
   </FeatherTabContainer>

@@ -67,15 +67,15 @@ public class AzureHttpClient {
     /*
      * Endpoints
      */
-    public static final String OAUTH2_TOKEN_ENDPOINT = "/%s/oauth2/token";
-    public static final String SUBSCRIPTION_ENDPOINT = "/subscriptions/%s";
-    public static final String RESOURCE_GROUPS_ENDPOINT = "/subscriptions/%s/resourceGroups";
-    public static final String RESOURCES_ENDPOINT = "/subscriptions/%s/resourceGroups/%s/resources";
-    public static final String NETWORK_INTERFACES_ENDPOINT = "/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Network/networkInterfaces";
-    public static final String PUBLIC_IP_ADDRESSES_ENDPOINT = "/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Network/publicIPAddresses";
-    public static final String INSTANCE_VIEW_ENDPOINT = "/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Compute/virtualMachines/%s/InstanceView";
-    public static final String METRICS_ENDPOINT = "/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Compute/virtualMachines/%s/providers/Microsoft.Insights/metrics";
-    public static final String NETWORK_INTERFACE_METRICS_ENDPOINT = "/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Network/networkInterfaces/%s/providers/Microsoft.Insights/metrics";
+    public static final String OAUTH2_TOKEN_ENDPOINT = "%s/%s/oauth2/token%s";
+    public static final String SUBSCRIPTION_ENDPOINT = "/subscriptions/%s%s";
+    public static final String RESOURCE_GROUPS_ENDPOINT = "/subscriptions/%s/resourceGroups%s";
+    public static final String RESOURCES_ENDPOINT = "/subscriptions/%s/resourceGroups/%s/resources%s";
+    public static final String NETWORK_INTERFACES_ENDPOINT = "/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Network/networkInterfaces%s";
+    public static final String PUBLIC_IP_ADDRESSES_ENDPOINT = "/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Network/publicIPAddresses%s";
+    public static final String INSTANCE_VIEW_ENDPOINT = "/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Compute/virtualMachines/%s/InstanceView%s";
+    public static final String METRICS_ENDPOINT = "/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Compute/virtualMachines/%s/providers/Microsoft.Insights/metrics%s";
+    public static final String NETWORK_INTERFACE_METRICS_ENDPOINT = "/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Network/networkInterfaces/%s/providers/Microsoft.Insights/metrics%s";
 
     /*
      * Headers
@@ -127,7 +127,7 @@ public class AzureHttpClient {
 
         String baseLoginUrl = params.getBaseLoginUrl();
         String versionQueryParam = API_VERSION_PARAM + params.getApiVersion();
-        String url = String.format(baseLoginUrl + OAUTH2_TOKEN_ENDPOINT + versionQueryParam, directoryId);
+        String url = String.format(OAUTH2_TOKEN_ENDPOINT, baseLoginUrl, directoryId, versionQueryParam);
         HttpRequest request = getHttpRequestBuilder(url, timeoutMs)
             .header(CONTENT_TYPE_HEADER, APPLICATION_FORM_URLENCODED_VALUE)
             .POST(HttpRequest.BodyPublishers.ofString(String.join(PARAMETER_DELIMITER, parameters)))
@@ -138,47 +138,47 @@ public class AzureHttpClient {
 
     public AzureSubscription getSubscription(AzureOAuthToken token, String subscriptionId, long timeoutMs, int retries) throws AzureHttpException {
         String versionQueryParam = API_VERSION_PARAM + params.getApiVersion();
-        String url = String.format(SUBSCRIPTION_ENDPOINT + versionQueryParam, subscriptionId);
+        String url = String.format(SUBSCRIPTION_ENDPOINT, subscriptionId, versionQueryParam);
         return get(token, url, timeoutMs, retries, AzureSubscription.class);
     }
 
     public AzureResourceGroups getResourceGroups(AzureOAuthToken token, String subscriptionId, long timeoutMs, int retries) throws AzureHttpException {
         String versionQueryParam = API_VERSION_PARAM + params.getApiVersion();
-        String url = String.format(RESOURCE_GROUPS_ENDPOINT + versionQueryParam, subscriptionId);
+        String url = String.format(RESOURCE_GROUPS_ENDPOINT, subscriptionId, versionQueryParam);
         return get(token, url, timeoutMs, retries, AzureResourceGroups.class);
     }
 
     public AzureResources getResources(AzureOAuthToken token, String subscriptionId, String resourceGroup,
                                        long timeoutMs, int retries) throws AzureHttpException {
         String versionQueryParam = API_VERSION_PARAM + params.getApiVersion();
-        String url = String.format(RESOURCES_ENDPOINT + versionQueryParam, subscriptionId, resourceGroup);
+        String url = String.format(RESOURCES_ENDPOINT, subscriptionId, resourceGroup, versionQueryParam);
         return get(token, url, timeoutMs, retries, AzureResources.class);
     }
 
     public AzureNetworkInterfaces getNetworkInterfaces(AzureOAuthToken token, String subscriptionId, String resourceGroup,
                                                        long timeoutMs, int retries) throws AzureHttpException {
         String versionQueryParam = API_VERSION_PARAM + params.getApiVersion();
-        String url = String.format(NETWORK_INTERFACES_ENDPOINT + versionQueryParam, subscriptionId, resourceGroup);
+        String url = String.format(NETWORK_INTERFACES_ENDPOINT, subscriptionId, resourceGroup, versionQueryParam);
         return get(token, url, timeoutMs, retries, AzureNetworkInterfaces.class);
     }
 
     public AzurePublicIpAddresses getPublicIpAddresses(AzureOAuthToken token, String subscriptionId, String resourceGroup, long timeoutMs, int retries) throws AzureHttpException {
         String versionQueryParam = API_VERSION_PARAM + params.getApiVersion();
-        String url = String.format(PUBLIC_IP_ADDRESSES_ENDPOINT + versionQueryParam, subscriptionId, resourceGroup);
+        String url = String.format(PUBLIC_IP_ADDRESSES_ENDPOINT, subscriptionId, resourceGroup, versionQueryParam);
         return get(token, url, timeoutMs, retries, AzurePublicIpAddresses.class);
     }
 
     public AzureInstanceView getInstanceView(AzureOAuthToken token, String subscriptionId, String resourceGroup,
                                              String resourceName, long timeoutMs, int retries) throws AzureHttpException {
         String versionQueryParam = API_VERSION_PARAM + params.getApiVersion();
-        String url = String.format(INSTANCE_VIEW_ENDPOINT + versionQueryParam, subscriptionId, resourceGroup, resourceName);
+        String url = String.format(INSTANCE_VIEW_ENDPOINT, subscriptionId, resourceGroup, resourceName, versionQueryParam);
         return get(token, url, timeoutMs, retries, AzureInstanceView.class);
     }
 
     public AzureMetrics getMetrics(AzureOAuthToken token, String subscriptionId, String resourceGroup,
                                    String resourceName, Map<String, String> params, long timeoutMs, int retries) throws AzureHttpException {
         String versionQueryParam = API_VERSION_PARAM + this.params.getMetricsApiVersion();
-        String url = String.format(METRICS_ENDPOINT + versionQueryParam, subscriptionId, resourceGroup, resourceName);
+        String url = String.format(METRICS_ENDPOINT, subscriptionId, resourceGroup, resourceName, versionQueryParam);
         url = addUrlParams(url, params);
         return get(token, url, timeoutMs, retries, AzureMetrics.class);
     }
@@ -186,7 +186,7 @@ public class AzureHttpClient {
     public AzureMetrics getNetworkInterfaceMetrics(AzureOAuthToken token, String subscriptionId, String resourceGroup,
                                                    String resourceName, Map<String, String> params, long timeoutMs, int retries) throws AzureHttpException {
         String versionQueryParam = API_VERSION_PARAM + this.params.getMetricsApiVersion();
-        String url = String.format(NETWORK_INTERFACE_METRICS_ENDPOINT + versionQueryParam, subscriptionId, resourceGroup, resourceName);
+        String url = String.format(NETWORK_INTERFACE_METRICS_ENDPOINT, subscriptionId, resourceGroup, resourceName, versionQueryParam);
         url = addUrlParams(url, params);
         return get(token, url, timeoutMs, retries, AzureMetrics.class);
     }
@@ -223,10 +223,13 @@ public class AzureHttpClient {
                     endpoint, httpResponse.statusCode(), httpResponse.body(), retryCount, retries);
                 exception = new AzureHttpException(message, description);
 
-            } catch (IOException | InterruptedException e) {
-                String message = String.format("Failed to get for endpoint: %s, retry: %d/%d",
-                    endpoint, retryCount, retries);
+            } catch (Exception e) {
+                String message = String.format("Failed to get for endpoint: %s, retry: %d/%d error: %s",
+                    endpoint, retryCount, retries, e.getMessage());
                 exception = new AzureHttpException(message, e);
+                if (e instanceof InterruptedException) {
+                    Thread.currentThread().interrupt();
+                }
             }
             if (retryCount != retries) {
                 log.warn(exception.getMessage());

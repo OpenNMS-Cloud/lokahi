@@ -55,7 +55,7 @@
       <div v-if="ruleStates[rule.id]">
         <div class="alert-title">Alert Conditions</div>
         <MonitoringPoliciesCardAlertRow
-          v-for="(condition, index) in rule.triggerEvents"
+          v-for="(condition, index) in rule.alertConditions"
           :key="condition.id"
           :rule="rule"
           :condition="condition"

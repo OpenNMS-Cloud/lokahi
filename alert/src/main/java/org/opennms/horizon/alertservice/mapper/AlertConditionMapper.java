@@ -32,20 +32,16 @@ import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.NullValueCheckStrategy;
+import org.opennms.horizon.alerts.proto.AlertConditionProto;
 import org.opennms.horizon.alertservice.db.entity.AlertCondition;
-import org.opennms.horizon.alerts.proto.TriggerEventProto;
 
 @Mapper(componentModel = "spring")
 public interface AlertConditionMapper {
 
-    @Mapping(source = "triggerEvent", target = "triggerEventType")
-    @Mapping(source = "clearEvent", target = "clearEventType")
     @Mapping(target = "rule", ignore = true)
     @Mapping(target = "alertDefinition", ignore = true)
-    AlertCondition protoToEntity(TriggerEventProto proto);
+    AlertCondition protoToEntity(AlertConditionProto proto);
 
     @BeanMapping(nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
-    @Mapping(source = "triggerEventType", target = "triggerEvent")
-    @Mapping(source = "clearEventType", target = "clearEvent")
-    TriggerEventProto entityToProto(AlertCondition event);
+    AlertConditionProto entityToProto(AlertCondition event);
 }

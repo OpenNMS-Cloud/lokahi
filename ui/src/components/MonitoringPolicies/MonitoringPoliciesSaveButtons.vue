@@ -36,7 +36,7 @@ const disableSavePolicyBtn = computed(
   () => store.selectedPolicy?.isDefault || !store.selectedPolicy?.rules.length || !store.selectedPolicy.name
 )
 const disableSaveRuleBtn = computed(
-  () => store.selectedPolicy?.isDefault || !store.selectedRule?.name || !store.selectedRule?.triggerEvents.length
+  () => store.selectedPolicy?.isDefault || !store.selectedRule?.name || !store.selectedRule?.alertConditions.length
 )
 </script>
 

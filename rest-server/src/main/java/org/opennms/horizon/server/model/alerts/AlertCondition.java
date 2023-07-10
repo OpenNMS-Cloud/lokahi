@@ -26,16 +26,20 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.alertservice.grpc;
+package org.opennms.horizon.server.model.alerts;
 
-import org.opennms.horizon.alerts.proto.AlertConfigurationServiceGrpc;
-import org.springframework.stereotype.Component;
+import org.opennms.horizon.server.model.BaseModel;
 
-/**
- * A temporary noop implementation of the service.
- *
- * Will evolve with the data model as necessary.
- */
-@Component
-public class AlertConfigurationGrpcService extends AlertConfigurationServiceGrpc.AlertConfigurationServiceImplBase {
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
+public class AlertCondition extends BaseModel {
+    private String triggerEventType;
+    private Integer count;
+    private Integer overtime;
+    private String overtimeUnit;
+    private String severity;
+    private String clearEventType;
 }

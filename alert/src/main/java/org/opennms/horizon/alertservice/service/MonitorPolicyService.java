@@ -36,7 +36,7 @@ import org.opennms.horizon.alerts.proto.ManagedObjectType;
 import org.opennms.horizon.alerts.proto.MonitorPolicyProto;
 import org.opennms.horizon.alerts.proto.PolicyRuleProto;
 import org.opennms.horizon.alerts.proto.Severity;
-import org.opennms.horizon.alerts.proto.TriggerEventProto;
+import org.opennms.horizon.alerts.proto.AlertConditionProto;
 import org.opennms.horizon.alertservice.db.entity.AlertDefinition;
 import org.opennms.horizon.alertservice.db.entity.MonitorPolicy;
 import org.opennms.horizon.alertservice.db.entity.Tag;
@@ -75,13 +75,13 @@ public class MonitorPolicyService {
     @EventListener(ApplicationReadyEvent.class)
     public void defaultPolicies() {
         if(repository.findAllByTenantId(SYSTEM_TENANT).isEmpty()) {
-            TriggerEventProto coldReboot = TriggerEventProto.newBuilder()
-                .setTriggerEvent(EventType.SNMP_Cold_Start)
+            AlertConditionProto coldReboot = AlertConditionProto.newBuilder()
+                .setTriggerEventType(EventType.SNMP_Cold_Start)
                 .setCount(1)
                 .setSeverity(Severity.CRITICAL)
                 .build();
-            TriggerEventProto warmReboot = TriggerEventProto.newBuilder()
-                .setTriggerEvent(EventType.SNMP_Warm_Start)
+            AlertConditionProto warmReboot = AlertConditionProto.newBuilder()
+                .setTriggerEventType(EventType.SNMP_Warm_Start)
                 .setCount(1)
                 .setSeverity(Severity.MAJOR)
                 .build();

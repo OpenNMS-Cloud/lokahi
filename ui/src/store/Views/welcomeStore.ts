@@ -197,6 +197,7 @@ export const useWelcomeStore = defineStore('welcomeStore', {
       if ((details.detail && metric) || details.detail && this.delayCounter > maxDelayLoops) {
         this.setDevicePreview(details.detail, details.metrics, metric ?? defaultLatency);
         this.devicePreview.loading = false;
+        this.slideThreeDisabled = false;
       } else {
         if (details.detail) {
           this.delayCounter += 1;

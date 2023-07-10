@@ -1,0 +1,4 @@
+
+.Reference
+* xref:reference:glossary.adoc[]
+* xref:reference:severities.adoc[]

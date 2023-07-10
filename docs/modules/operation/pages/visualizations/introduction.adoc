@@ -1,0 +1,32 @@
+
+= Vizualizations
+
+The Insights Dashboard is the home page for your Horizon Stream instance.
+It displays statistics and visualizations that represent the current state of your monitored network.
+
+== Statistics and visualizations
+
+The Insights Dashboard displays the following statistics and visualizations:
+
+* *Alert Status:* Number of alerts of each status (Critical, Major, and so on) and their incidence rate compared to the average for the selected time period (for example, "-15% Past 24 Hours").
+* *Total Network Traffic:* A graph of inbound and outbound network traffic over the selected time period.
+* *Top 10 Applications:* A graph displaying the top 10 most used applications in your monitored network over the selected time period.
+* *Top 10 Talkers:* A graph displaying the top 10 most active applications in your monitored network over the selected time period.
+
+You can download PDF versions of the Total Network Traffic, Top 10 Applications, and Top 10 Talkers graphs by clicking the *Download* symbol at the top-right of each widget. <this behaviour hasn't been solidified yet; update this line as design is furthered>
+To refresh the data in a widget, click the associated *Refresh* symbol.
+
+You can modify the time period for which statistics are displayed using the selector at the top of the page.
+By default, information is shown for the last 24 hours.
+
+== Shortcuts
+
+The Insights Dashboard includes shortcuts for the following functions:
+
+* *Add New Device:* Provision a device to your monitored network. <this button will be removed; remove this line when prototype is updated>
+* *New Discovery:* Create a new xref:get-started/discovery/active.adoc[active] or xref:get-started/discovery/passive.adoc[passive discovery].
+* *Add Monitoring Policy:* Define a new xref:get-started/policies/create.adoc[monitoring policy].
+* *View Locations:* View the locations associated with your monitored network.
+* *View Flows:* View visualizations of flows data collected from your monitored network.
+
+<"Download entire page" function may be in the works>

@@ -15,7 +15,7 @@
         Copy
       </template>
     </FeatherButton>
-    <p>Please download the certificate and replace the pathToFile in the command below.</p>
+    <p>Make sure you replace <strong>PATH_TO_DOWNLOADED_FILE</strong> with the full path to the certificate file.</p>
     <pre>
       {{ locationStore.minionDockerCmd }}
     </pre>
@@ -49,7 +49,6 @@ const copyClick = () => {
   padding: 12px 24px;
   p {
     margin-bottom: 10px;
-    font-weight: bold;
   }
   pre {
     margin: 0;

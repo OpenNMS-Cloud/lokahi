@@ -1,0 +1,23 @@
+
+:imagesdir: ../assets/images
+:!sectids:
+
+= Alerts
+
+Alerts are representations of potential and actual problems in your monitored network.
+Your environment's xref:get-started/policies/introduction.adoc[monitoring policies] define the conditions under which alerts are generated.
+
+The xref:visualizations/introduction.adoc[Insights Dashboard] displays a summary of alerts over a selected period of time.
+For more detailed insights into your network's alerts, including the monitoring policies that defined them, select *Alerts List* in the left navigation menu.
+
+For information about severities, see xref:reference:severities.adoc[Alert Severities].
+
+*Benefits:* You do not have to sift through a lot of information to see which nodes require attention; you can simply review alerts of different severities.
+
+== Before you begin
+
+Before Lōkahi begins generating alerts, you must configure the following:
+
+* Your xref:get-started/discovery/introduction.adoc[network discovery] settings.
+* (Optional) At least one monitoring policy.
+** If you do not want to configure a policy immediately, you can use the xref:get-started/policies/introduction.adoc#default-monitoring-policy[default monitoring policy] instead.

@@ -19,11 +19,13 @@ defineProps({
     opacity: 0;
     transition: max-height 0.4s ease-out 0s, opacity 0.2s ease-out 0.2s, padding-top 0.4s ease-out 0s, padding-bottom 0.3s ease-out 0s;
     max-height: 0vh;
+    pointer-events: none;
 }
 
 .collapse-box-open .collapse-box-contents {
     opacity: 1;
     transition: max-height 0.7s ease-out 0s, opacity 0.4s ease-out 0.3s, padding-top 0.5s ease-out 0s, padding-bottom 0.4s ease-out 0s;
     max-height: 1000vh;
+    pointer-events: all;
 }
 </style>

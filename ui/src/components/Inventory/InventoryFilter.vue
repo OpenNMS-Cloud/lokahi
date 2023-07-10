@@ -14,22 +14,37 @@
       </FeatherInput>
     </li>
     <li class="push-right">
-      <InventoryTagManagerCtrl data-test="tag-manager-ctrl" />
+
+      <InventoryTagManagerCtrl class="tag-manager" data-test="tag-manager-ctrl" />
     </li>
+
   </ul>
-  <InventoryTagManager :visible="inventoryStore.isTagManagerOpen" />
+  <div :class="[inventoryStore.isTagManagerOpen ? 'padding' : 'no-padding']">
+    <InventoryTagManager :visible="inventoryStore.isTagManagerOpen" />
+  </div>
+  <div class="margin-bottom">
+    <FeatherButton text v-if="tagStore.isTagEditMode" @click="inventoryStore.selectAll(nodes)">Select All
+    </FeatherButton>
+    <FeatherButton text v-if="inventoryStore.nodesSelected.length > 0 && inventoryStore.isTagManagerOpen"
+      @click="inventoryStore.clearAll">Clear Selection
+    </FeatherButton>
+  </div>
 </template>
 
 <script lang="ts" setup>
 import Search from '@featherds/icon/action/Search'
-import { fncArgVoid } from '@/types'
+import { InventoryNode, fncArgVoid } from '@/types'
 import { useInventoryStore } from '@/store/Views/inventoryStore'
 import { useInventoryQueries } from '@/store/Queries/inventoryQueries'
 import { useTagQueries } from '@/store/Queries/tagQueries'
 import { Tag } from '@/types/graphql'
 import { FeatherDropdown, FeatherDropdownItem } from '@featherds/dropdown'
 import MenuIcon from "@featherds/icon/navigation/MoreHoriz";
+import { PropType } from 'vue'
+import { FeatherButton } from '@featherds/button'
+import { useTagStore } from '@/store/Components/tagStore'
 const inventoryStore = useInventoryStore()
+const tagStore = useTagStore();
 const inventoryQueries = useInventoryQueries()
 const tagQueries = useTagQueries()
 
@@ -37,11 +52,18 @@ defineProps({
   onlyTags: {
     type: Boolean,
     default: false
-  }
+  },
+  state: {
+    type: String,
+    required: true
+  },
+  nodes: {
+    type: Object as PropType<InventoryNode[]>,
+    required: true
+  },
 })
 
 const searchNodesByLabelRef = ref()
-const searchNodesByTagsRef = ref()
 
 const icons = markRaw({
   Search
@@ -50,8 +72,6 @@ const icons = markRaw({
 // Current BE setup only allows search by names OR tags.
 // so we clear the other search to avoid confusion
 const searchNodesByLabel: fncArgVoid = useDebounceFn((val: string | undefined) => {
-  // clear tags search
-  searchNodesByTagsRef.value.reset()
 
   if (val === undefined) return
   inventoryQueries.getNodesByLabel(val)
@@ -81,6 +101,7 @@ const searchNodesByTags: fncArgVoid = (tags: Tag[]) => {
   flex-flow: row wrap;
   margin-bottom: 0;
   align-items: center;
+  min-height: 55px;
 
   >* {
     margin-right: var(variables.$spacing-l);
@@ -127,7 +148,7 @@ const searchNodesByTags: fncArgVoid = (tags: Tag[]) => {
 }
 
 .margin-bottom {
-  margin-bottom: 12px;
+  margin-bottom: var(variables.$spacing-s);
 }
 
 .filter-type-selector {

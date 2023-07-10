@@ -1,0 +1,4 @@
+
+= Installation
+
+For installation instructions, see the https://github.com/OpenNMS-Cloud/lokahi/wiki/Getting-Started---Admin[administrator's getting started guide] in the project's wiki on GitHub.

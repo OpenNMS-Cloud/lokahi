@@ -1,0 +1,21 @@
+:imagesdir: ../assets/images
+:!sectids:
+
+=  Lōkahi/Cloud Documentation
+
+Lōkahi (pronounced "loh-KAH-hee") is an open source network monitoring project designed for Cloud-native deployments: the next generation of OpenNMS Horizon.
+Both the word lōkahi, which means unity, unison, and harmony, and David Hustace, one of The OpenNMS Group's founders, share Hawaiian roots.
+
+The Lōkahi project allows us to collaborate and move quickly to achieve the project's goals much more rapidly than we could by refactoring the OpenNMS Horizon project.
+This way, Horizon continues to evolve as a community project and users can still count on Meridian for continuous improvement and deployment in traditional production environments.
+
+Lōkahi aims to provide the following:
+
+* A modern, intuitive user experience to accomplish network monitoring tasks quickly
+* Multi-tenancy for any organization that wants to isolate their monitoring environments
+* A cloud-native service built using a microservices design and orchestrated using Kubernetes
+* A solution that implements industry and de facto monitoring standards with dynamically deployed plugins for collecting monitoring data and synthetically testing network services
+* A resilient distributed monitoring system that can be easily deployed to scale horizontally for any monitoring workload
+* A system that can extend its monitoring capabilities, and integrate into corporate incident management workflows, via streaming and plugin APIs
+
+Lōkahi also forms the basis of our OpenNMS Cloud product.

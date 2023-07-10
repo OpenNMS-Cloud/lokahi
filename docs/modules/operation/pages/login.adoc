@@ -1,0 +1,9 @@
+
+= Getting Started
+
+After you log in, there are several different ways to proceed.
+This getting started section provides instructions on how to xref:get-started/discovery/introduction.adoc[discover] your inventory and xref:get-started/policies/create.adoc[create monitoring policies] to ensure you are monitoring what you want to monitor.
+
+== First-Time Login (OpenNMS Cloud)
+
+Note that first-time login with OpenNMS Cloud includes basic onboarding of setting up a location and Minion.

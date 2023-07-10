@@ -50,7 +50,7 @@ public class BasicDnParser implements CertificateDnParser {
         }
 
         try {
-            LdapName name = new LdapName(dn);
+            LdapName name = new LdapName(dn.replaceAll("\\+OU", ",OU"));
             List<String> values = new ArrayList<>();
             for (Rdn rdn : name.getRdns()) {
                 if (type.equals(rdn.getType())) {

@@ -7,7 +7,7 @@
           <li>Using the search, find an existing tag or create a new one.</li>
           <li>After selecting your tag(s), click the checkbox field on the node(s) to which you want to add the tag(s).
           </li>
-          <li>Click <strong>Save Tags to Node</strong></li>
+          <li>Click <strong>Save Tags to Node</strong>.</li>
         </ol>
       </div>
       <section class="select-tags">

@@ -138,7 +138,7 @@ const storage: IIcon = {
           background-color: var(variables.$high-visibility-text-on-surface);
 
           .label {
-            color: var(variables.$primary-text-on-color);
+            color: var(variables.$high-visibility-on-surface);
           }
         }
       }

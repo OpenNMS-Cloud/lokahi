@@ -80,8 +80,8 @@ export const useWelcomeStore = defineStore('welcomeStore', {
     firstDiscovery: { name: 'MyFirstDiscovery', ip: '', communityString: 'public', port: '161' },
     firstDiscoveryErrors: { name: '', ip: '', communityString: '', port: '' },
     firstDiscoveryValidation: yup.object().shape({
-      name: yup.string().required("Please enter a name"),
-      ip: yup.string().required("Please enter an IP").matches(new RegExp(REGEX_EXPRESSIONS.IP[0]), 'Must be a valid IP'),
+      name: yup.string().required("Please enter a name."),
+      ip: yup.string().required("Please enter an IP.").matches(new RegExp(REGEX_EXPRESSIONS.IP[0]), 'Must be a valid IP.'),
       communityString: yup.string(),
       port: yup.number()
     }).required(),

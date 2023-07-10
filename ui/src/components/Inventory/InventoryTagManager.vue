@@ -4,7 +4,7 @@
       <div>
         <ol>
           <li>Using the search, find an existing tag or create a new one.</li>
-          <li>While a tag is active, select a node below with a checkbox to make a connection.</li>
+          <li>After selecting your tag(s), click the checkbox field on the node(s) to which you want to add the tag(s).</li>
           <li>Click Save Tags to Node</li>
         </ol>
       </div>

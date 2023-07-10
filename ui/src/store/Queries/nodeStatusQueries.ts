@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { useQuery } from 'villus'
-import { Event, ListNodeStatusDocument, Node } from '@/types/graphql'
+import { Event, FindExportersForNodeStatusDocument, ListNodeStatusDocument, Node, RequestCriteriaInput } from '@/types/graphql'
 
 export const useNodeStatusQueries = defineStore('nodeStatusQueries', () => {
   const variables = ref({})
@@ -20,8 +20,21 @@ export const useNodeStatusQueries = defineStore('nodeStatusQueries', () => {
     node: data.value?.node || ({} as Node)
   }))
 
+  const fetchExporters = async (requestCriteria: RequestCriteriaInput) => {
+    const { execute, data } = useQuery({
+      query: FindExportersForNodeStatusDocument,
+      variables: {
+        requestCriteria
+      },
+      cachePolicy: 'network-only'
+    })
+    await execute()
+    return data
+  }
+
   return {
     setNodeId,
-    fetchedData
+    fetchedData,
+    fetchExporters
   }
 })

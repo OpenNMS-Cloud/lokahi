@@ -30,18 +30,41 @@
           tag="tbody"
         >
           <tr
-            v-for="snmpInterface in nodeData.node.snmpInterfaces"
+            v-for="snmpInterface in nodeStatusStore.node.snmpInterfaces"
             :key="snmpInterface.id"
           >
             <td>{{ snmpInterface.ifAlias }}</td>
             <td>{{ snmpInterface.ipAddress }}</td>
             <td>
-              <FeatherButton
-                v-if="snmpInterface.ifName"
-                text
-                @click="metricsModal.setIfNameAndOpenModal(snmpInterface.ifName)"
-                >Traffic
-              </FeatherButton>
+              <FeatherTooltip
+                title="Traffic"
+                v-slot="{ attrs, on }"
+              >
+                <FeatherButton
+                  v-if="snmpInterface.ifName"
+                  v-bind="attrs"
+                  v-on="on"
+                  icon="Traffic"
+                  text
+                  @click="metricsModal.setIfNameAndOpenModal(snmpInterface.ifName)"
+                  ><FeatherIcon :icon="icons.Traffic" />
+                </FeatherButton>
+              </FeatherTooltip>
+
+              <FeatherTooltip
+                title="Flows"
+                v-slot="{ attrs, on }"
+              >
+                <FeatherButton
+                  v-if="snmpInterface.exporter.ipInterface"
+                  v-bind="attrs"
+                  v-on="on"
+                  icon="Flows"
+                  text
+                  @click="routeToFlows(snmpInterface.exporter)"
+                  ><FeatherIcon :icon="icons.Flows"
+                /></FeatherButton>
+              </FeatherTooltip>
             </td>
             <td>{{ snmpInterface.physicalAddr }}</td>
             <td>{{ snmpInterface.ifIndex }}</td>
@@ -61,15 +84,37 @@
 
 <script lang="ts" setup>
 import { useNodeStatusStore } from '@/store/Views/nodeStatusStore'
+import { useFlowsStore } from '@/store/Views/flowsStore'
+import { Exporter } from '@/types/graphql'
+import { DeepPartial } from '@/types'
+import Traffic from '@featherds/icon/action/Workflow'
+import Flows from '@featherds/icon/action/SendWorkflow'
+
+const router = useRouter()
+const flowsStore = useFlowsStore()
 const nodeStatusStore = useNodeStatusStore()
 
 const metricsModal = ref()
 
-const nodeData = computed(() => {
-  return {
-    node: nodeStatusStore.fetchedData?.node
-  }
+const icons = markRaw({
+  Traffic,
+  Flows
 })
+
+const routeToFlows = (exporter: DeepPartial<Exporter>) => {
+  const { id: nodeId, nodeLabel } = nodeStatusStore.node
+
+  flowsStore.filters.selectedExporters = [
+    {
+      _text: `${nodeLabel?.toUpperCase()} : ${exporter.snmpInterface?.ifName || exporter.ipInterface?.ipAddress}}`,
+      value: {
+        nodeId,
+        ipInterfaceId: exporter.ipInterface?.id
+      }
+    }
+  ]
+  router.push('/flows').catch(() => 'Route to /flows unsuccessful.')
+}
 </script>
 
 <style lang="scss" scoped>

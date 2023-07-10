@@ -47,7 +47,7 @@
       <InventoryTabContent v-if="tabDetectedContent.length" :tabContent="tabDetectedContent"
         :state="MonitoredStates.DETECTED" />
       <EmptyList v-if="!tabDetectedContent.length" bg
-        :content="{ msg: 'No Detected Nodes. Add some on the Minions page.', btn: { label: 'Visit Minions Page', action: () => { $router.push('/minions') } } }" />
+        :content="{ msg: 'No detected nodes. Add some on the Minions page.', btn: { label: 'Visit Minions Page', action: () => { $router.push('/minions') } } }" />
       <FeatherSpinner v-if="inventoryQueries.isFetching" />
     </FeatherTabPanel>
   </FeatherTabContainer>

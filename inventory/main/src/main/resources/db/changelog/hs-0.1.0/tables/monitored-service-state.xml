@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+<changeSet author="cgorantla" id="0.1.0-monitored-service-state">
+    <preConditions onFail="MARK_RAN">
+        <not>
+            <tableExists tableName="monitored_service_state"/>
+        </not>
+    </preConditions>
+
+    <createTable tableName="monitored_service_state">
+        <column name="id" type="BIGINT" autoIncrement="true"/>
+
+        <column name="tenant_id" type="text">
+            <constraints nullable="false"/>
+        </column>
+
+        <column name="monitored_service_id" type="BIGINT">
+            <constraints nullable="false"/>
+        </column>
+
+        <column name="service_state" type="bool">
+            <constraints nullable="false"/>
+        </column>
+
+    </createTable>
+
+    <addPrimaryKey tableName="monitored_service_state" columnNames="id" constraintName="pk_monitored_service_state_id"/>
+
+    <addForeignKeyConstraint constraintName="fk_monitored_service_state_monitored_service" onDelete="CASCADE"
+                             baseTableName="monitored_service_state" baseColumnNames="monitored_service_id"
+                             referencedTableName="monitored_service" referencedColumnNames="id"/>
+
+</changeSet>
+</databaseChangeLog>

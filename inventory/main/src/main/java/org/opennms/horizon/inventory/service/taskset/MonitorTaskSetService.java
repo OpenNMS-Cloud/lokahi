@@ -52,7 +52,7 @@ public class MonitorTaskSetService {
 
     private static final Logger log = LoggerFactory.getLogger(MonitorTaskSetService.class);
 
-    public TaskDefinition getMonitorTask(MonitorType monitorType, IpInterface ipInterface, long nodeId, SnmpConfiguration snmpConfiguration) {
+    public TaskDefinition getMonitorTask(MonitorType monitorType, IpInterface ipInterface, long nodeId, long monitoredServiceId, SnmpConfiguration snmpConfiguration) {
 
         String monitorTypeValue = monitorType.getValueDescriptor().getName();
         String ipAddress = InetAddressUtils.toIpAddrString(ipInterface.getIpAddress());
@@ -92,6 +92,7 @@ public class MonitorTaskSetService {
                     .setPluginName(pluginName)
                     .setNodeId(nodeId)
                     .setId(taskId)
+                    .setMonitorServiceId(monitoredServiceId)
                     .setConfiguration(configuration)
                     .setSchedule(TaskUtils.DEFAULT_SCHEDULE);
             taskDefinition = builder.build();

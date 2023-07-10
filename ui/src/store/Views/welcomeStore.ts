@@ -77,7 +77,7 @@ export const useWelcomeStore = defineStore('welcomeStore', {
     downloadCopy: 'Download',
     downloaded: false,
     downloading: false,
-    firstDiscovery: { name: 'MyFirstDiscovery', ip: '192.168.1.1', communityString: 'public', port: '161' },
+    firstDiscovery: { name: 'MyFirstDiscovery', ip: '', communityString: 'public', port: '161' },
     firstDiscoveryErrors: { name: '', ip: '', communityString: '', port: '' },
     firstDiscoveryValidation: yup.object().shape({
       name: yup.string().required("Please enter a name"),

@@ -36,7 +36,7 @@
       <InventoryTabContent v-if="tabUnmonitoredContent.length" :tabContent="tabUnmonitoredContent"
         :state="MonitoredStates.UNMONITORED" />
       <EmptyList v-if="!tabUnmonitoredContent.length" bg
-        :content="{ msg: 'No Unmonitored Nodes. Add some on the Minions page.', btn: { label: 'Visit Minions Page', action: () => { $router.push('/minions') } } }" />
+        :content="{ msg: 'No unmonitored nodes. Add some on the Minions page.', btn: { label: 'Visit Minions Page', action: () => { $router.push('/minions') } } }" />
       <FeatherSpinner v-if="inventoryQueries.isFetching" />
     </FeatherTabPanel>
 

@@ -139,10 +139,13 @@ export const useInventoryQueries = defineStore('inventoryQueries', () => {
 
   // sets the initial monitored node object and then calls for tags and metrics
   const formatMonitoredNodes = async (data: Partial<Node>[]) => {
-    if (!data.length) return
-    setMonitoredNodes(data)
-    await getTagsForData(data)
-    await getMetricsForData(data)
+    if (data.length) {
+      setMonitoredNodes(data)
+      await getTagsForData(data)
+      await getMetricsForData(data)
+    } else {
+      nodes.value = []
+    }
   }
 
   // sets the initial monitored node object
@@ -241,47 +244,53 @@ export const useInventoryQueries = defineStore('inventoryQueries', () => {
   }
 
   const formatUnmonitoredNodes = async (data: Partial<Node>[]) => {
-    if (!data.length) return
 
-    await getTagsForData(data)
+    if (data.length) {
 
-    unmonitoredNodes.value = []
-    data.forEach(({ id, nodeLabel, location, ipInterfaces }) => {
-      const { ipAddress: snmpPrimaryIpAddress } = ipInterfaces?.filter((x) => x.snmpPrimary)[0] ?? {}
-      const tagsObj = tagData.value?.tagsByNodeIds?.filter((item) => item.nodeId === id)[0]
-      unmonitoredNodes.value.push({
-        id: id,
-        label: nodeLabel!,
-        anchor: {
-          locationValue: location?.location ?? '--',
-          tagValue: tagsObj?.tags ?? [],
-          managementIpValue: snmpPrimaryIpAddress ?? ''
-        },
-        isNodeOverlayChecked: false,
-        type: MonitoredStates.UNMONITORED
+      await getTagsForData(data)
+
+      unmonitoredNodes.value = []
+      data.forEach(({ id, nodeLabel, location, ipInterfaces }) => {
+        const { ipAddress: snmpPrimaryIpAddress } = ipInterfaces?.filter((x) => x.snmpPrimary)[0] ?? {}
+        const tagsObj = tagData.value?.tagsByNodeIds?.filter((item) => item.nodeId === id)[0]
+        unmonitoredNodes.value.push({
+          id: id,
+          label: nodeLabel!,
+          anchor: {
+            locationValue: location?.location ?? '--',
+            tagValue: tagsObj?.tags ?? [],
+            managementIpValue: snmpPrimaryIpAddress ?? ''
+          },
+          isNodeOverlayChecked: false,
+          type: MonitoredStates.UNMONITORED
+        })
       })
-    })
+    } else {
+      unmonitoredNodes.value = []
+    }
   }
 
   const formatDetectedNodes = async (data: Partial<Node>[]) => {
-    if (!data.length) return
 
-    await getTagsForData(data)
-
-    detectedNodes.value = []
-    data.forEach(({ id, nodeLabel, location }) => {
-      const tagsObj = tagData.value?.tagsByNodeIds?.filter((item) => item.nodeId === id)[0]
-      detectedNodes.value.push({
-        id: id,
-        label: nodeLabel!,
-        anchor: {
-          locationValue: location?.location ?? '--',
-          tagValue: tagsObj?.tags ?? []
-        },
-        isNodeOverlayChecked: false,
-        type: MonitoredStates.DETECTED
+    if (data.length) {
+      await getTagsForData(data)
+      detectedNodes.value = []
+      data.forEach(({ id, nodeLabel, location }) => {
+        const tagsObj = tagData.value?.tagsByNodeIds?.filter((item) => item.nodeId === id)[0]
+        detectedNodes.value.push({
+          id: id,
+          label: nodeLabel!,
+          anchor: {
+            locationValue: location?.location ?? '--',
+            tagValue: tagsObj?.tags ?? []
+          },
+          isNodeOverlayChecked: false,
+          type: MonitoredStates.DETECTED
+        })
       })
-    })
+    } else {
+      detectedNodes.value = []
+    }
   }
 
   const fetchByState = async (stateIn: string) => {

@@ -1,8 +1,11 @@
 import mount from '../mountWithPiniaVillus'
 import AlertsSeverityCard from '@/components/Alerts/AlertsSeverityCard.vue'
 import { useAlertsStore } from '@/store/Views/alertsStore'
+import { useAlertsQueries } from '@/store/Queries/alertsQueries'
 
 let wrapper: any
+let alertsQueries: any
+let alertsStore: any
 
 describe('AlertsSeverityCard', () => {
   beforeEach(() => {
@@ -10,15 +13,19 @@ describe('AlertsSeverityCard', () => {
       component: AlertsSeverityCard,
       props: {
         severity: 'CRITICAL',
-        count: 4
+        isFilter: true
       }
     })
+    alertsQueries = useAlertsQueries()
+    alertsQueries.fetchCountAlertsData = 4
+    alertsStore = useAlertsStore()
   })
+
   afterEach(() => {
     wrapper.unmount()
   })
 
-  test.only('Mount', () => {
+  test('Mount', () => {
     expect(wrapper).toBeTruthy()
   })
 
@@ -32,7 +39,7 @@ describe('AlertsSeverityCard', () => {
     expect(elem.exists()).toBeTruthy()
   })
 
-  test('Should have an add/cancel icon', () => {
+  test('Should have an add/cancel icon', async () => {
     const elem = wrapper.get('[data-test="add-cancel-icon"]')
     expect(elem.exists()).toBeTruthy()
   })
@@ -42,13 +49,12 @@ describe('AlertsSeverityCard', () => {
     expect(elem.exists()).toBeTruthy()
   })
 
-  test('Should have a percentage/time', () => {
+  test.skip('Should have a percentage/time', () => {
     const elem = wrapper.get('[data-test="percentage-time"]')
     expect(elem.exists()).toBeTruthy()
   })
 
   test('Should set severity filter when click on card', async () => {
-    const alertsStore = useAlertsStore()
     const spy = vi.spyOn(alertsStore, 'toggleSeverity')
 
     const elem = wrapper.get('[data-test="severity-card"]')

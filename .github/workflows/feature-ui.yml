@@ -72,8 +72,6 @@ jobs:
         working-directory: 'ui'
 
       - name: Test and coverage report
-        timeout-minutes: 5 # This step can hang forever, see https://opennms.atlassian.net/browse/HS-841
-        continue-on-error: true
         run: 'yarn test:coverage:sonar'
         working-directory: 'ui'
 

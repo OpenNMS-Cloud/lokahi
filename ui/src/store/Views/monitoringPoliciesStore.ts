@@ -24,7 +24,6 @@ type TState = {
 }
 
 const defaultPolicy: Policy = {
-  id: undefined,
   name: '',
   memo: '',
   notifyByEmail: false,

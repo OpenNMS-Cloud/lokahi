@@ -5,6 +5,7 @@ import { AlertsFilters, Pagination } from '@/types/alerts'
 
 export const useAlertsQueries = defineStore('alertsQueries', () => {
   const fetchAlertsData = ref({})
+  const fetchCountAlertsData = ref(0)
 
   const fetchAlerts = async (alertsFilters: AlertsFilters, pagination: Pagination) => {
     const { data, execute } = useQuery({
@@ -24,11 +25,11 @@ export const useAlertsQueries = defineStore('alertsQueries', () => {
 
     await execute()
 
-    fetchAlertsData.value = data.value?.findAllAlerts || []
+    fetchAlertsData.value = data.value?.findAllAlerts || {}
   }
 
-  const fetchCountAlerts = async (severityFilters = [] as string[], timeRange = TimeRange.All) =>
-    useQuery({
+  const fetchCountAlerts = async (severityFilters = [] as string[], timeRange = TimeRange.All) => {
+    const { data, execute } = useQuery({
       query: CountAlertsDocument,
       variables: {
         severityFilters,
@@ -38,9 +39,15 @@ export const useAlertsQueries = defineStore('alertsQueries', () => {
       cachePolicy: 'network-only'
     })
 
+    await execute()
+
+    fetchCountAlertsData.value = data.value?.countAlerts?.count || 0
+  }
+
   return {
     fetchAlerts,
     fetchAlertsData,
-    fetchCountAlerts
+    fetchCountAlerts,
+    fetchCountAlertsData
   }
 })

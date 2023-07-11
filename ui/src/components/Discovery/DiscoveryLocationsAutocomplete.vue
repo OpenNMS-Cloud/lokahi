@@ -146,13 +146,15 @@ const locationV = object().test({
   message: locationErrMsg
 })
 const handleErrDisplay = () => {
-  inputRef.value.handleInputBlur() // runs yup validate
+  if (inputRef.value) {
+    inputRef.value.handleInputBlur() // runs yup validate
 
-  nextTick(() => {
-    // add/remove the feather input subtext display
-    errMsgDisplay.value =
-      document.getElementById(inputRef.value.subTextId)?.children[0].innerHTML === locationErrMsg ? 'flex' : 'none'
-  })
+    nextTick(() => {
+      // add/remove the feather input subtext display
+      errMsgDisplay.value =
+        document.getElementById(inputRef.value.subTextId)?.children[0].innerHTML === locationErrMsg ? 'flex' : 'none'
+    })
+  }
 }
 </script>
 

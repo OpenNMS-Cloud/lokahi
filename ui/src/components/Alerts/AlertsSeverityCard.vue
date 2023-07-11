@@ -72,8 +72,8 @@ const pillColor = { style: props.severity as string }
 const count = ref()
 onMounted(async () => {
   try {
-    const { data } = await alertsQueries.fetchCountAlerts([props.severity], props.timeRange || TimeRange.All)
-    count.value = data.value?.countAlerts?.count || 0
+    await alertsQueries.fetchCountAlerts([props.severity], props.timeRange || TimeRange.All)
+    count.value = alertsQueries.fetchCountAlertsData
   } catch (err) {
     count.value = 0
   }

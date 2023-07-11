@@ -20,6 +20,7 @@ const testingPayload = {
       alertConditions: [
         {
           count: 1,
+          overtime: undefined,
           severity: Severity.Critical,
           triggerEventType: SNMPEventType.SNMP_COLD_START,
           overtimeUnit: Unknowns.UNKNOWN_UNIT,

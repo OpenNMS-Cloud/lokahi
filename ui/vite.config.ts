@@ -37,7 +37,7 @@ export default defineConfig(({ mode }) => {
       globals: true,
       environment: 'happy-dom',
       deps: {
-        inline: true
+        inline: ['/@featherds/']
       },
       coverage: {
         reporter: ['lcov', 'html']

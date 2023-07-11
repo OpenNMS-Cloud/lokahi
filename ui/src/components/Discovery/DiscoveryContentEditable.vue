@@ -43,9 +43,10 @@
         v-html="htmlString"
         @keyup="contentChange"
         ref="contentEditableRef"
-        contenteditable="true"
+        :contenteditable="!disabled"
         :id="'contentEditable_' + id"
         class="content-editable"
+        :class="{ 'disabled-editable-content': disabled }"
         @blur="validateContent"
       />
       <span
@@ -110,6 +111,10 @@ const props = defineProps({
   id: {
     type: Number,
     required: true
+  },
+  disabled: {
+    type: Boolean,
+    required: false
   }
 })
 
@@ -249,6 +254,10 @@ defineExpose({
     > .error {
       color: red;
     }
+  }
+
+  > .disabled-editable-content {
+    background: var(variables.$shade-4);
   }
   > .validate-format {
     position: absolute;

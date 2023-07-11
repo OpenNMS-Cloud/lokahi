@@ -53,7 +53,8 @@
             <CollapsingWrapper :open="!!welcomeStore.minionCert.password">
                 <div class="welcome-slide-step" data-test="welcome-page-two-internal">
                     <h2>Step 2: Copy and Run Docker Install Command</h2>
-                    <pre>Replace <strong>PATH_TO_DOWNLOADED_FILE</strong> with the full path to the certificate file.</pre>
+                    <pre
+                        class="pre-wrap">Replace <strong>PATH_TO_DOWNLOADED_FILE</strong> with the full path to the certificate file.</pre>
                     <div class="welcome-slide-table">
                         <div class="welcome-slide-table-header">
                             <span>Command</span>
@@ -68,7 +69,7 @@
                             </div>
                         </div>
                         <div class="welcome-slide-table-body">
-                            <pre>
+                            <pre class="pre-wrap">
                             {{ dockerCmd }}
                         </pre>
                         </div>
@@ -289,5 +290,9 @@ const { isDark } = useTheme();
         max-width: 15px;
         margin-right: 12px;
     }
+}
+
+.pre-wrap {
+    white-space: pre-wrap;
 }
 </style>

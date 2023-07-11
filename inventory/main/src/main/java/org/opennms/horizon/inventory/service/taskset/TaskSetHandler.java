@@ -52,11 +52,11 @@ public class TaskSetHandler {
     private final CollectorTaskSetService collectorTaskSetService;
     private final SnmpConfigService snmpConfigService;
 
-    public void sendMonitorTask(Long locationId, MonitorType monitorType, IpInterface ipInterface, long nodeId) {
+    public void sendMonitorTask(Long locationId, MonitorType monitorType, IpInterface ipInterface, long nodeId, long monitoredServiceId) {
         String tenantId = ipInterface.getTenantId();
         var snmpConfig = snmpConfigService.getSnmpConfig(tenantId, locationId, ipInterface.getIpAddress());
 
-        var task = monitorTaskSetService.getMonitorTask(monitorType, ipInterface, nodeId, snmpConfig.orElse(null));
+        var task = monitorTaskSetService.getMonitorTask(monitorType, ipInterface, nodeId, monitoredServiceId, snmpConfig.orElse(null));
         if (task != null) {
             taskSetPublisher.publishNewTasks(tenantId, locationId, Arrays.asList(task));
         }

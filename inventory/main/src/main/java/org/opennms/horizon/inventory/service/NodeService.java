@@ -235,7 +235,8 @@ public class NodeService {
             ipInterface.getMonitoredServices().forEach((ms) -> {
                 String serviceName = ms.getMonitoredServiceType().getServiceName();
                 var monitorType = MonitorType.valueOf(serviceName);
-                var monitorTask = monitorTaskSetService.getMonitorTask(monitorType, ipInterface, node.getId(), null);
+                var monitorTask = monitorTaskSetService.getMonitorTask(monitorType, ipInterface, node.getId(),
+                    ms.getId(), null);
                 Optional.ofNullable(monitorTask).ifPresent(tasks::add);
                 var collectorTask = collectorTaskSetService.getCollectorTask(monitorType, ipInterface, node.getId(), null);
                 Optional.ofNullable(collectorTask).ifPresent(tasks::add);

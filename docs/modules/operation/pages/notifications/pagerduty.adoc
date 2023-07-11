@@ -1,0 +1,25 @@
+
+:imagesdir: ../assets/images
+
+= Set up notifications through PagerDuty
+
+Instead of using the Lōkahi UI to view notifications, you can receive them as they occur via PagerDuty.
+
+. Create a new https://www.pagerduty.com/[PagerDuty] account.
+. Go to **Services**, and create a new integration for `Events API V2`.
++
+image::notifications/pd-integration.png["PagerDuty add integration page. Events API V2 selected.", 500]
+
+. Go to the settings for the integration, and retrieve the integration key.
++
+image::notifications/pd-key.png["PagerDuty integration key page.", 300]
+
+. In Lōkahi, click *Appliances>Outbound Notification*, and add your PagerDuty integration key.
+. Select *Monitoring Policies* in the left navigation menu.
+. Make sure you have a monitoring policy with notifications configured via PagerDuty.
++
+NOTE: The default monitoring policy does not work for this, so you'll need to xref:get-started/policies/create.adoc[create a new monitoring policy].
+
+. When a notification that matches the monitoring policy occurs, a new incident in PagerDuty will also be created.
+
+image::notifications/pd-open-incidents.png["PagerDuty page displaying open incidents.", 600]

@@ -17,6 +17,7 @@ public class ServiceMonitorResponseImpl implements ServiceMonitorResponse {
     private Map<String, Number> properties;
     private MonitorType monitorType;
     private long nodeId;
+    private long monitoredServiceId;
 
     private long timestamp;
 

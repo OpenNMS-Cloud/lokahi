@@ -74,7 +74,7 @@ public class IcmpMonitor extends AbstractServiceMonitor {
                 effectiveRequest.getTimeout(),
                 effectiveRequest.getRetries(),
                 effectiveRequest.getPacketSize(),
-                new MyPingResponseCallback(future, svc.getNodeId())
+                new MyPingResponseCallback(future, svc.getNodeId(), svc.getMonitorServiceId())
             );
         } catch (Exception e) {
             future.completeExceptionally(e);
@@ -122,10 +122,14 @@ public class IcmpMonitor extends AbstractServiceMonitor {
         private final Logger logger = LoggerFactory.getLogger(MyPingResponseCallback.class);
         private final CompletableFuture<ServiceMonitorResponse> future;
         private final long nodeId;
+        private final long monitoredServiceId;
 
-        public MyPingResponseCallback(CompletableFuture<ServiceMonitorResponse> future, long nodeId) {
+        public MyPingResponseCallback(CompletableFuture<ServiceMonitorResponse> future,
+                                      long nodeId,
+                                      long monitoredServiceId) {
             this.future = future;
             this.nodeId = nodeId;
+            this.monitoredServiceId = monitoredServiceId;
         }
 
         @Override
@@ -139,6 +143,7 @@ public class IcmpMonitor extends AbstractServiceMonitor {
                     .status(Status.Up)
                     .responseTime(responseTimeMillis)
                     .nodeId(nodeId)
+                    .monitoredServiceId(monitoredServiceId)
                     .timestamp(System.currentTimeMillis())
                     .ipAddress(inetAddress.getHostAddress())
                     .build()
@@ -151,6 +156,7 @@ public class IcmpMonitor extends AbstractServiceMonitor {
                 ServiceMonitorResponseImpl.builder()
                     .monitorType(MonitorType.ICMP)
                     .status(Status.Unknown)
+                    .monitoredServiceId(monitoredServiceId)
                     .ipAddress(inetAddress.getHostAddress())
                     .build()
             );
@@ -162,6 +168,7 @@ public class IcmpMonitor extends AbstractServiceMonitor {
                 ServiceMonitorResponseImpl.builder()
                     .monitorType(MonitorType.ICMP)
                     .status(Status.Down)
+                    .monitoredServiceId(monitoredServiceId)
                     .ipAddress(inetAddress.getHostAddress())
                     .build()
             );

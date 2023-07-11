@@ -1,0 +1,18 @@
+
+= Network Inventory
+
+Inventory refers to the devices and entities in your network that OpenNMS Cloud has identified through the xref:get-started/discovery/introduction.adoc[discovery] process.
+OpenNMS displays these nodes on the *Network Inventory* page under the following categories:
+
+* *Monitored Nodes*: Discovered nodes that OpenNMS Cloud is monitoring.
+* *Unmonitored Nodes*: Discovered nodes that are not yet tagged for monitoring.
+They did not match any of the criteria in any monitoring policy, including the xref:get-started/policies/introduction.adoc#default-monitoring-policy[default one].
+* *Detected Nodes*: Nodes identified through an indirect way like via flow.
+You can choose to monitor the node through a xref:get-started/policies/introduction.adoc[monitoring policy], or ignore it.
+
+Inventory management involves the following:
+
+* Examining unmonitored and detected nodes to determine if you want to monitor them.
+* xref:inventory/nodes.adoc#tag-create[Tagging] nodes so that they are monitored.
+* https://github.com/OpenNMS-Cloud/lokahi/wiki/Manage-Monitoring-Policies#edit-a-monitoring-policy[Updating] or https://github.com/OpenNMS-Cloud/lokahi/wiki/Create-a-Monitoring-Policy[creating] monitoring policies to discover additional network nodes.
+* https://github.com/OpenNMS-Cloud/lokahi/wiki/Manage-nodes#remove-nodes-you-do-not-want-to-monitor[Removing nodes] you do not want to monitor from the monitored nodes list.

@@ -124,7 +124,8 @@ public class TaskExecutorLocalMonitorServiceImpl implements TaskExecutorLocalSer
     }
 
     private MonitoredService configureMonitoredService(TaskDefinition taskDefinition)  {
-        return new GeneralMonitoredService("TBD", "TBD", taskDefinition.getNodeId(), "TBD", "TBD", null);
+        return new GeneralMonitoredService("TBD", "TBD", taskDefinition.getNodeId(), "TBD", "TBD",
+            null, taskDefinition.getMonitorServiceId());
     }
 
 

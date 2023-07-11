@@ -13,14 +13,17 @@ public class GeneralMonitoredService implements MonitoredService {
     private final String nodeLabel;
     private final String nodeLocation;
     private final InetAddress address;
+    private final long monitorServiceId;
 
-    public GeneralMonitoredService(String svcName, String ipAddr, long nodeId, String nodeLabel, String nodeLocation, InetAddress address) {
+    public GeneralMonitoredService(String svcName, String ipAddr, long nodeId, String nodeLabel,
+                                   String nodeLocation, InetAddress address, long monitorServiceId) {
         this.svcName = svcName;
         this.ipAddr = ipAddr;
         this.nodeId = nodeId;
         this.nodeLabel = nodeLabel;
         this.nodeLocation = nodeLocation;
         this.address = address;
+        this.monitorServiceId = monitorServiceId;
     }
 
     @Override
@@ -51,5 +54,10 @@ public class GeneralMonitoredService implements MonitoredService {
     @Override
     public InetAddress getAddress() {
         return address;
+    }
+
+    @Override
+    public long getMonitorServiceId() {
+        return monitorServiceId;
     }
 }

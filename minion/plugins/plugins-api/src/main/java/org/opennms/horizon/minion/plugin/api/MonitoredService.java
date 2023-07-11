@@ -80,4 +80,7 @@ public interface MonitoredService {
      */
     InetAddress getAddress();
 
+
+    long getMonitorServiceId();
+
 }

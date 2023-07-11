@@ -32,6 +32,8 @@ public interface ServiceMonitorResponse {
 
     long getNodeId();
 
+    long getMonitoredServiceId();
+
     /**
      *  TODO: standardize the unit (ms or sec?)
      *

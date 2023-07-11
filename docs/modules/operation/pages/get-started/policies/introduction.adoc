@@ -1,0 +1,26 @@
+:imagesdir: ../assets/images
+:!sectids:
+
+= Monitoring Policies
+
+A monitoring policy defines a set of rules for monitoring nodes and automatically taking action under certain conditions (for example, sending alerts, enforcing thresholds).
+You can apply a monitoring policy to multiple devices, allowing for easy management of the devices on your network.
+
+[[default-monitoring-policy]]
+== Default monitoring policy
+
+By default, OpenNMS Cloud starts monitoring the system when it discovers nodes.
+The default monitoring policy applies to all discovered nodes, and includes the following parameters:
+
+* Accepts SNMP Traps, Syslogs, and API events.
+* MIB-II enabled.
+* Azure cloud monitoring enabled.
+* Flows, Netflow, and JFlow enabled.
+* Uses PagerDuty to send notifications to all OpenNMS Cloud users in your organization.
+
+== Before you begin
+
+Make sure you have done the following before you create a monitoring policy:
+
+* Performed at least one xref:get-started/discovery/active.adoc[discovery].
+* Created xref:get-started/policies/introduction.adoc#tag-create[tags] for the nodes you are monitoring.

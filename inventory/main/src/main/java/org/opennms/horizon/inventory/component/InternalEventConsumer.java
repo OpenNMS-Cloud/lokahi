@@ -28,11 +28,11 @@
 
 package org.opennms.horizon.inventory.component;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-
 import com.google.common.base.Function;
+import com.google.common.base.Strings;
+import com.google.protobuf.InvalidProtocolBufferException;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.opennms.horizon.events.proto.Event;
 import org.opennms.horizon.inventory.dto.MonitoredState;
 import org.opennms.horizon.inventory.dto.NodeCreateDTO;
@@ -52,26 +52,24 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
-
-import com.google.common.base.Strings;
-import com.google.protobuf.InvalidProtocolBufferException;
-
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 @Slf4j
 @Component
 @PropertySource("classpath:application.yml")
-public class NodeMonitoringManager {
+public class InternalEventConsumer {
     private final NodeService nodeService;
     private final PassiveDiscoveryService passiveDiscoveryService;
     private final PassiveDiscoveryRepository passiveDiscoveryRepository;
 
     @KafkaListener(topics = "${kafka.topics.internal-events}", concurrency = "1")
     @Transactional
-    public void receiveTrapEvent(@Payload byte[] data) {
+    public void receiveNewSuspectEvent(@Payload byte[] data) {
         try {
             var event = Event.parseFrom(data);
             if(event.getUei().equals(EventConstants.NEW_SUSPECT_INTERFACE_EVENT_UEI)) {

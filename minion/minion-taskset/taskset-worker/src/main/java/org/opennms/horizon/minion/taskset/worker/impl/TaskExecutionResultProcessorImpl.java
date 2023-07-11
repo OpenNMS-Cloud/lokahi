@@ -132,6 +132,7 @@ public class TaskExecutionResultProcessorImpl implements TaskExecutionResultProc
                 .setReason(Optional.of(smr).map(ServiceMonitorResponse::getReason).orElse(MonitorResponse.getDefaultInstance().getReason()))
                 .putAllMetrics(Optional.of(smr).map(ServiceMonitorResponse::getProperties).orElse(Collections.EMPTY_MAP))
                 .setNodeId(smr.getNodeId())
+                .setMonitorServiceId(smr.getMonitoredServiceId())
                 .setTimestamp(smr.getTimestamp())
                 .build();
 

@@ -1,0 +1,19 @@
+:imagesdir: ../assets/images
+:!sectids:
+
+= Alert Severities
+
+Lōkahi uses the following alert severities:
+
+* *Critical:* A number of devices on the monitored network are affected by an alert.
+Anyone who can should focus on fixing the alert's root cause.
+* *Major:* A device is completely down or in danger of going down.
+* *Minor:* A portion of a device (a service, an interface, a power supply, and so on) has stopped functioning.
+* *Warning:* An alert has occurred that requires attention.
+This severity can also indicate a condition that should be logged, but that does not require direct action.
+* *Normal:* An informational message; no action is required.
+* *Cleared:* An alert with a self-clearing error condition has been corrected and service is restored.
+* *Indeterminate:* No severity could be associated with the alert.
+
+
+

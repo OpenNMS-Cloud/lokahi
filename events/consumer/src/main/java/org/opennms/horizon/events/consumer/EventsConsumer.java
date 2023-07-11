@@ -85,6 +85,26 @@ public class EventsConsumer {
         }
     }
 
+    @KafkaListener(topics = "${kafka.internal-events-topic}", concurrency = "1")
+    public void consumeInternalEvents(@Payload byte[] data) {
+
+        try {
+            EventLog eventLog = EventLog.parseFrom(data);
+            LOG.info("Received internal events from kafka {}", eventLog);
+            if (Strings.isNullOrEmpty(eventLog.getTenantId())) {
+                LOG.warn("TenantId is empty. Dropping events: {}", eventLog);
+                return;
+            }
+            List<Event> eventList = mapEventsFromLog(eventLog);
+            eventRepository.saveAll(eventList);
+            metricsTracker.addTenantEventSampleCount(eventLog.getTenantId(), eventList.size());
+            LOG.info("Persisted {} event(s) in database for tenant {}.", eventList.size(), eventLog.getTenantId());
+        } catch (InvalidProtocolBufferException e) {
+            LOG.error("Exception while parsing events from payload. Events will be dropped. Payload: {}",
+                Arrays.toString(data), e);
+        }
+    }
+
     List<Event> mapEventsFromLog(EventLog eventLog) {
         return eventLog.getEventsList().stream()
             .map(this::mapEventFromProto)

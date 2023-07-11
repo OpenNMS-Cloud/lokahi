@@ -48,7 +48,7 @@ public class MonitoredServiceService {
 
     private final MonitoredServiceMapper mapper;
 
-    public void createSingle(MonitoredServiceDTO newMonitoredService,
+    public MonitoredService createSingle(MonitoredServiceDTO newMonitoredService,
                              MonitoredServiceType monitoredServiceType,
                              IpInterface ipInterface) {
 
@@ -64,7 +64,9 @@ public class MonitoredServiceService {
             monitoredService.setMonitoredServiceType(monitoredServiceType);
 
             modelRepo.save(monitoredService);
+            return monitoredService;
         }
+        return monitoredServiceOpt.get();
     }
 
     public List<MonitoredServiceDTO> findByTenantId(String tenantId) {

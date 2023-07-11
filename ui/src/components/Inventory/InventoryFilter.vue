@@ -23,10 +23,12 @@
     <InventoryTagManager :visible="inventoryStore.isTagManagerOpen" />
   </div>
   <div class="margin-bottom">
-    <FeatherButton text v-if="tagStore.isTagEditMode" @click="inventoryStore.selectAll(nodes)">Select All
+    <FeatherButton text v-if="tagStore.isTagEditMode" data-test="select-all" @click="inventoryStore.selectAll(nodes)">
+      Select All
     </FeatherButton>
-    <FeatherButton text v-if="inventoryStore.nodesSelected.length > 0 && inventoryStore.isTagManagerOpen"
-      @click="inventoryStore.clearAll">Clear Selection
+    <FeatherButton data-test="clear-selection" text
+      v-if="inventoryStore.nodesSelected.length > 0 && inventoryStore.isTagManagerOpen" @click="inventoryStore.clearAll">
+      Clear Selection
     </FeatherButton>
   </div>
 </template>

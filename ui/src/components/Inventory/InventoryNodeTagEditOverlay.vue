@@ -41,7 +41,7 @@ const props = defineProps({
   }
 })
 
-const isChecked = computed(() => inventoryStore.nodesSelected.find((d) => d.id === props.node.id));
+const isChecked = computed(() => !!inventoryStore.nodesSelected.find((d) => d.id === props.node.id) || false);
 
 
 

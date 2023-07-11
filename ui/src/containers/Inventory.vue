@@ -24,8 +24,8 @@
         :nodes="tabMonitoredContent" />
       <InventoryTabContent v-if="tabMonitoredContent.length" :tabContent="tabMonitoredContent"
         :state="MonitoredStates.MONITORED" />
-      <EmptyList v-if="!tabMonitoredContent.length" bg
-        :content="{ msg: 'No monitored nodes. Add some on the Minions page.', btn: { label: 'Visit Discovery Page', action: () => { $router.push('/discovery') } } }" />
+      <EmptyList data-test="monitored-empty" v-if="!tabMonitoredContent.length" bg
+        :content="{ msg: 'No monitored nodes. Add some on the Discovery page.', btn: { label: 'Visit Discovery Page', action: () => { $router.push('/discovery') } } }" />
       <FeatherSpinner v-if="inventoryQueries.isFetching" />
     </FeatherTabPanel>
 
@@ -35,8 +35,8 @@
         :nodes="tabUnmonitoredContent" />
       <InventoryTabContent v-if="tabUnmonitoredContent.length" :tabContent="tabUnmonitoredContent"
         :state="MonitoredStates.UNMONITORED" />
-      <EmptyList v-if="!tabUnmonitoredContent.length" bg
-        :content="{ msg: 'No unmonitored nodes. Add some on the Minions page.', btn: { label: 'Visit Discovery Page', action: () => { $router.push('/discovery') } } }" />
+      <EmptyList data-test="unmonitored-empty" v-if="!tabUnmonitoredContent.length" bg
+        :content="{ msg: 'No unmonitored nodes. Add some on the Discovery page.', btn: { label: 'Visit Discovery Page', action: () => { $router.push('/discovery') } } }" />
       <FeatherSpinner v-if="inventoryQueries.isFetching" />
     </FeatherTabPanel>
 
@@ -46,8 +46,8 @@
         :nodes="tabDetectedContent" />
       <InventoryTabContent v-if="tabDetectedContent.length" :tabContent="tabDetectedContent"
         :state="MonitoredStates.DETECTED" />
-      <EmptyList v-if="!tabDetectedContent.length" bg
-        :content="{ msg: 'No detected nodes. Add some on the Minions page.', btn: { label: 'Visit Discovery Page', action: () => { $router.push('/discovery') } } }" />
+      <EmptyList data-test="discovery-empty" v-if="!tabDetectedContent.length" bg
+        :content="{ msg: 'No detected nodes. Add some on the Discovery page.', btn: { label: 'Visit Discovery Page', action: () => { $router.push('/discovery') } } }" />
       <FeatherSpinner v-if="inventoryQueries.isFetching" />
     </FeatherTabPanel>
   </FeatherTabContainer>

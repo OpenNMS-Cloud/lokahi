@@ -13,7 +13,7 @@
       <section class="select-tags">
         <div class="top">
           <div class="search-add">
-            <AtomicAutocomplete class="tag-manager-complete" inputLabel="Search Tags"
+            <AtomicAutocomplete class="tag-manager-complete" data-test="search-by-tags-inner" inputLabel="Search Tags"
               :loading="tagQueries.tagsSearchIsFetching" :outsideClicked="closeAutocomplete" :itemClicked="itemClicked"
               :resultsVisible="isAutoCompleteOpen" :focusLost="onFocusLost" :wrapperClicked="wrapperClicked"
               :results="tagQueries.tagsSearched.map((d) => d.name)" :inputValue="inputValue" :textChanged="textChanged">
@@ -21,7 +21,7 @@
             <FeatherTooltip :title="tagManagerTip" v-slot="{ attrs, on }">
               <FeatherButton v-bind="attrs" v-on="tagManagerTip ? on : null"
                 @click="() => tagStore.saveTagsToSelectedNodes(state)" :disabled="!inventoryStore.nodesSelected.length"
-                primary data-test="open-modal-btn">
+                primary data-test="save-tags-button">
                 {{ `Save tags to node${inventoryStore.nodesSelected.length > 1 ? 's' : ''}` }}
               </FeatherButton>
             </FeatherTooltip>

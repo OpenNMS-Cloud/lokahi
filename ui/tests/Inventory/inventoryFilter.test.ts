@@ -17,8 +17,6 @@ describe('InventoryFilter.vue', () => {
 
   describe('Required components', () => {
     const requiredComponents = [
-      'search-by-label',
-      'search-by-tags',
       'tag-manager-ctrl',
     ]
 

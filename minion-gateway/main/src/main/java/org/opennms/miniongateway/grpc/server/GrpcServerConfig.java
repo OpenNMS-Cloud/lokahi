@@ -1,11 +1,9 @@
 package org.opennms.miniongateway.grpc.server;
 
-import com.codahale.metrics.MetricRegistry;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import org.opennms.horizon.shared.grpc.common.GrpcIpcServer;
 import org.opennms.horizon.shared.grpc.common.LocationServerInterceptor;
 import org.opennms.horizon.shared.grpc.common.TenantIDGrpcServerInterceptor;
-import org.opennms.horizon.shared.grpc.interceptor.MeteringInterceptorFactory;
 import org.opennms.horizon.shared.ipc.grpc.server.OpennmsGrpcServer;
 import org.opennms.horizon.shared.ipc.grpc.server.manager.MinionManager;
 import org.opennms.horizon.shared.ipc.grpc.server.manager.OutgoingMessageFactory;
@@ -36,11 +34,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
 
+import io.micrometer.core.instrument.MeterRegistry;
+
 @Configuration
 public class GrpcServerConfig {
-
-    @Autowired
-    private MetricRegistry metricRegistry;
 
     @Bean
     public TenantLocationSpecificTaskSetResultsMapper tenantLocationSpecificTaskSetResultsMapper() {
@@ -120,12 +117,11 @@ public class GrpcServerConfig {
         @Autowired TrapsKafkaForwarder trapsKafkaForwarder,
         @Autowired FlowKafkaForwarder flowKafkaForwarder,
         @Autowired RpcRequestTimeoutManager rpcRequestTimeoutManager,
-        @Autowired TenantIDGrpcServerInterceptor tenantIDGrpcServerInterceptor
-    ) throws Exception {
+        @Autowired TenantIDGrpcServerInterceptor tenantIDGrpcServerInterceptor,
+        @Autowired MeterRegistry meterRegistry
+        ) throws Exception {
 
-        OpennmsGrpcServer server = new OpennmsGrpcServer(serverBuilder, Arrays.asList(
-            new MeteringInterceptorFactory(metricRegistry)
-        ));
+        OpennmsGrpcServer server = new OpennmsGrpcServer(serverBuilder, meterRegistry);
 
         server.setRpcConnectionTracker(rpcConnectionTracker);
         server.setRpcRequestTracker(rpcRequestTracker);

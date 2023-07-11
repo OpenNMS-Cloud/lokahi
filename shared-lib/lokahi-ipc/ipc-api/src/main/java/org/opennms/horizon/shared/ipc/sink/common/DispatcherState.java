@@ -30,6 +30,7 @@ package org.opennms.horizon.shared.ipc.sink.common;
 
 import java.util.Collection;
 
+import com.codahale.metrics.Counter;
 import com.google.protobuf.Message;
 
 import org.opennms.horizon.shared.ipc.sink.api.SinkModule;
@@ -58,31 +59,15 @@ public class DispatcherState<W, S extends Message, T extends Message> implements
 
     private final Timer dispatchTimer;
 
+    private final Counter dispatchCounter;
+
     public DispatcherState(AbstractMessageDispatcherFactory<W> dispatcherFactory, SinkModule<S, T> module) {
         this.module = module;
         metadata = dispatcherFactory.getModuleMetadata(module);
         metrics = dispatcherFactory.getMetrics();
 
-        String metricName = MetricRegistry.name(module.getId(), "dispatch");
-
-        Collection<Timer> existingTimers = metrics.getTimers(new MetricFilter() {
-            @Override
-            public boolean matches(String name, Metric metric) {
-                return metricName.equals(name);
-            }
-        }).values();
-
-        switch(existingTimers.size()) {
-        case 0:
-            dispatchTimer = metrics.timer(metricName);
-            break;
-        case 1:
-            dispatchTimer = existingTimers.iterator().next();
-            break;
-        default:
-            LOG.warn("Multiple timers registered with name {} somehow", metricName);
-            dispatchTimer = existingTimers.iterator().next();
-        }
+        this.dispatchTimer = metrics.timer(MetricRegistry.name(module.getId(), "dispatch", "time"));
+        this.dispatchCounter = metrics.counter(MetricRegistry.name(module.getId(), "dispatch", "count"));
     }
 
     public SinkModule<S, T> getModule() {
@@ -99,6 +84,10 @@ public class DispatcherState<W, S extends Message, T extends Message> implements
 
     public Timer getDispatchTimer() {
         return dispatchTimer;
+    }
+
+    public Counter getDispatchCounter() {
+        return this.dispatchCounter;
     }
 
     @Override

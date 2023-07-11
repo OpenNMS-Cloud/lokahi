@@ -1,0 +1,20 @@
+
+= Create a Monitoring Policy
+
+A monitoring policy uses tags and rules to customize the type of monitoring data that you collect and the notifications you receive about that data.
+
+To create a monitoring policy, follow these steps:
+
+. Choose *Monitoring Policies* in the left navigation menu.
+. Click *+ New Policy** or *Add*.
+. Type a name for the policy.
+. In the *Memo* box, type details about the policy you might want as a reference (for example, its basic use case).
+. (Optional) Select the types of notifications that you want to receive for any alerts.
+. \<Instructions box>
+. Add xref:inventory/nodes.adoc#tag-create[tags] to categorize the policy.
+. To add a rule to the policy, click *Add* or *+New Rule*.
+. Specify the *Name*, *Component Type*, and *Detection Method*.
+. Click *Save Rule*.
+. \<Save Policy button?>
+
+TBD: multiple rules per policy? Guidelines around conflicts with rules. Does saving a rule save the policy (not clear from prototype).

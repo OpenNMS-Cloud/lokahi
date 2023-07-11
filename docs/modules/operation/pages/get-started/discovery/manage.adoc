@@ -1,0 +1,9 @@
+
+= Manage Discoveries
+
+You can edit passive discoveries.
+
+<TBD - any caveats for deleting/editing discoveries? - if they delete a name and try to recreate does it work?>
+
+. Click the passive discovery you want to edit or delete.
+. Change the information and click *Save Discovery*.

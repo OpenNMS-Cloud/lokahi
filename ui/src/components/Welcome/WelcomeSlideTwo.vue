@@ -53,7 +53,7 @@
             <CollapsingWrapper :open="!!welcomeStore.minionCert.password">
                 <div class="welcome-slide-step" data-test="welcome-page-two-internal">
                     <h2>Step 2: Copy and Run Docker Install Command</h2>
-                    <pre>Replace pathToFile with the path to the certificate. (e.g., /tmp/)</pre>
+                    <pre>Replace <strong>PATH_TO_DOWNLOADED_FILE</strong> with the full path to the certificate file.</pre>
                     <div class="welcome-slide-table">
                         <div class="welcome-slide-table-header">
                             <span>Command</span>
@@ -96,18 +96,11 @@
             <div class="welcome-slide-footer">
                 <FeatherButton text @click="welcomeStore.prevSlide" data-id="welcome-slide-two-back-button">Back
                 </FeatherButton>
-                <!-- 
-                    TODO: Replace button below with the following once testing/feedback is complete.
-                    This blocks the user from continuing to slide 3 until the minion is found.
-                <FeatherButton primary 
-                :disabled="!welcomeStore.minionStatusSuccess"
+                <FeatherButton primary :disabled="!welcomeStore.minionStatusSuccess"
                     data-id="welcome-slide-two-continue-button" @click="welcomeStore.nextSlide">
                     Continue
                 </FeatherButton>
-                -->
-                <FeatherButton primary data-id="welcome-slide-two-continue-button" @click="welcomeStore.nextSlide">
-                    Continue
-                </FeatherButton>
+
             </div>
         </div>
     </div>

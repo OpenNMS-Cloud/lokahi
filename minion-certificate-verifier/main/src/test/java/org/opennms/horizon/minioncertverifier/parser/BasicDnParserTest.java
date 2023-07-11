@@ -44,6 +44,13 @@ public class BasicDnParserTest {
         List<String> values = parser.get(dn, "OU");
         assertThat(values).isNotNull()
             .contains("T:tenant01", "L:LOC01");
+
+        // cert-manager use case
+        dn = "OU=T:tenant01+OU=OpenNMSCloud+OU=L:LOC01,CN=opennms-minion-ssl-gateway,O=OpenNMS,L=TBD,ST=TBD,C=CA";
+
+        values = parser.get(dn, "OU");
+        assertThat(values).isNotNull()
+            .contains("T:tenant01", "L:LOC01");
     }
 
     @Test

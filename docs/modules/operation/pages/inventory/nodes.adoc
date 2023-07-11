@@ -1,0 +1,70 @@
+
+= Manage Nodes
+
+Node management involves assessing the nodes that OpenNMS Cloud has identified on your network and determining whether you want to monitor them.
+See xref:inventory/introduction.adoc[inventory management] for a detailed description of node categories (monitored, unmonitored, and detected).
+
+NOTE: Remember that node discovery and management are iterative processes.
+You may identify nodes that OpenNMS is currently monitoring that you don't want to monitor or think would fit better in a different monitoring policy.
+
+== Add nodes to the monitored nodes category
+
+Unmonitored and detected nodes are nodes that OpenNMS Cloud is not monitoring.
+In the case of unmonitored nodes, OpenNMS discovered the nodes, but they did not match any of the criteria in your monitoring policies.
+Detected nodes were identified indirectly, and have not gone through a discovery process.
+
+To start monitoring these nodes, you need to xref:get-started/policies/create.adoc[create a monitoring policy] that uses tags or other criteria to identify them as nodes you want to monitor.
+You can also optionally use tags to categorize and identify these nodes.
+
+[[tag-create]]
+=== Create tags and add them to a node
+
+A tag is an optional, arbitrary label that you can associate with a node or device and its components, alerts, events, Minions, and network monitoring policies.
+It allows for easy and flexible filtering and grouping of devices.
+
+A tag can be any word or number.
+We recommend that you define a tagging scheme that works for your organization, and that will allow for the most robust or granular filtering you need.
+For example, you may want to create tags based on the following:
+
+* Device type: storage, network, security, router, server.
+* Location: building 1, building 2, London, New York.
+* Service: Email, VoIP.
+* Employee name: Bob Smith, Jane Doe.
+* Any arbitrary word.
+
+To create a tag, follow these steps:
+
+. Click *Inventory* in the left navigation menu.
+. Click on the node tab that lists the node you want to tag.
+. Click *Tag Manager*.
+. In the *Search/Add tags* field, type the name for the tag.
++
+If the tag does not exist, the word *New* appears beside it.
+. Click *New* to create the tag.
+. Click on the tags you want to add to the node, or click *Select All* and click *Add Tags to Node*.
+
+==== Delete tags from a node
+
+To remove tags from a node, follow these steps:
+
+. Click *Inventory* in the left navigation menu.
+. Click on the node tab that displays the node from which you want to remove the tag.
+. Click the *Tags* label on the node.
+. Click on the tag or tags you want to remove and click *Delete*.
+
+=== Create labels
+
+(*_What is the difference between labels and tags? Where do you create labels? You can search them on the Monitored Nodes tab, but no option to add them there. Where do they come from? Are they already associated with devices?_*)
+
+== Remove nodes you do not want to monitor
+
+Note that removing a node from monitoring removes it only until the next time a discovery runs that contains the same tags as the deleted node or if the node matches an existing monitoring policy.
+If you do not want the node to appear again, you need to ...
+(*_How do we prevent a node from getting rediscovered if we already decided we don't want to monitor it?_*)
+
+To remove a node from a monitoring list, follow these steps:
+
+. Click *Inventory* in the left navigation menu.
+. Click on the node tab that displays the node you do not want to monitor.
+. Click the *delete* symbol on the node card.
+. When prompted to confirm deletion, click *Delete*.

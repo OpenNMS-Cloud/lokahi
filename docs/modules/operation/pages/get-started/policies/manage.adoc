@@ -1,0 +1,29 @@
+
+= Manage Monitoring Policies
+
+You can edit and delete monitoring policies.
+
+\<TBD - any caveats for deleting/editing policies?>
+
+== Edit a monitoring policy
+
+Follow these steps to edit a monitoring policy:
+
+. Click *Monitoring Policies* in the left navigation menu.
+. Select a policy from the *Existing Policies* list.
+. Click *Edit*.
+. Update the policy's configuration settings as desired.
+. Update the associated rule's configuration settings as desired, if applicable.
+. Click *Save Rule*.
+
+The policy's configuration settings are updated.
+
+== Delete a monitoring policy
+
+To delete the policy, follow these steps:
+
+. Click *Monitoring Policies* in the left navigation menu.
+. Select the policy from the *Existing Policies* list.
+. \<???>
+
+The policy and any associated rules are deleted. \<are the rules deleted as well?>

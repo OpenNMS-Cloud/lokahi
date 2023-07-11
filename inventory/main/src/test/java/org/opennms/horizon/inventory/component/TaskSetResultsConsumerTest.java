@@ -7,6 +7,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.opennms.horizon.inventory.exception.InventoryRuntimeException;
+import org.opennms.horizon.inventory.service.taskset.response.MonitorResponseService;
 import org.opennms.horizon.inventory.service.taskset.response.ScannerResponseService;
 import org.opennms.taskset.contract.CollectorResponse;
 import org.opennms.taskset.contract.ScannerResponse;
@@ -27,12 +28,14 @@ public class TaskSetResultsConsumerTest {
 
     private ScannerResponseService mockScannerResponseService;
 
+    private MonitorResponseService monitorResponseService;
+
     @BeforeEach
     public void setUp() {
         mockScannerResponseService = Mockito.mock(ScannerResponseService.class);
 
 
-        target = new TaskSetResultsConsumer(mockScannerResponseService);
+        target = new TaskSetResultsConsumer(mockScannerResponseService, monitorResponseService);
     }
 
     @Test

@@ -152,9 +152,10 @@ public class SnmpMonitor extends AbstractServiceMonitor {
 
             future =
                 snmpHelper.getAsync(agentConfig, new SnmpObjId[]{ snmpObjectId })
-                    .thenApply(result -> processSnmpResponse(result, finalHostAddress, snmpObjectId, operator, operand, startTimestamp, svc.getNodeId()))
-                    .completeOnTimeout(this.createTimeoutResponse(finalHostAddress), agentConfig.getTimeout(), TimeUnit.MILLISECONDS)
-                    .exceptionally(thrown -> this.createExceptionResponse(thrown, finalHostAddress));
+                    .thenApply(result -> processSnmpResponse(result, finalHostAddress, snmpObjectId, operator, operand,
+                        startTimestamp, svc.getNodeId(), svc.getMonitorServiceId()))
+                    .completeOnTimeout(this.createTimeoutResponse(finalHostAddress, svc.getMonitorServiceId()), agentConfig.getTimeout(), TimeUnit.MILLISECONDS)
+                    .exceptionally(thrown -> this.createExceptionResponse(thrown, finalHostAddress, svc.getMonitorServiceId()));
 
             return future;
         } catch (NumberFormatException e) {
@@ -191,15 +192,15 @@ public class SnmpMonitor extends AbstractServiceMonitor {
         return (String) msg.getField(fieldDescriptor);
     }
 
-    private ServiceMonitorResponse
-    processSnmpResponse(
+    private ServiceMonitorResponse processSnmpResponse(
         SnmpValue[] result,
         String hostAddress,
         SnmpObjId oid,
         String operator,
         String operand,
         long startTimestamp,
-        long nodeId) {
+        long nodeId,
+        long monitorServiceId) {
         long endTimestamp = System.nanoTime();
         long elapsedTimeNs = ( endTimestamp - startTimestamp );
         double elapsedTimeMs = (double) elapsedTimeNs / NANOSECOND_PER_MILLISECOND;
@@ -210,7 +211,8 @@ public class SnmpMonitor extends AbstractServiceMonitor {
             .responseTime(elapsedTimeMs)
             .ipAddress(hostAddress)
             .timestamp(System.currentTimeMillis())
-            .nodeId(nodeId);
+            .nodeId(nodeId)
+            .monitoredServiceId(monitorServiceId);
 
         Map<String, Number> metrics = new HashMap<>();
 
@@ -247,7 +249,7 @@ public class SnmpMonitor extends AbstractServiceMonitor {
 
 
     // NOTE: this is called at call-setup time, not after the timeout.
-    private ServiceMonitorResponse createTimeoutResponse(String hostAddress) {
+    private ServiceMonitorResponse createTimeoutResponse(String hostAddress, long monitoredServiceId) {
         ServiceMonitorResponse response =
             ServiceMonitorResponseImpl.builder()
                 .monitorType(MonitorType.SNMP)
@@ -255,13 +257,14 @@ public class SnmpMonitor extends AbstractServiceMonitor {
                 .ipAddress(hostAddress)
                 .reason("timeout")
                 .responseTime(-1)
+                .monitoredServiceId(monitoredServiceId)
                 .build()
             ;
 
         return response;
     }
 
-    private ServiceMonitorResponse createExceptionResponse(Throwable thrown, String hostAddress) {
+    private ServiceMonitorResponse createExceptionResponse(Throwable thrown, String hostAddress, long monitoredServiceId) {
         LOG.debug("SNMP poll failed", thrown);
 
         ServiceMonitorResponse response =
@@ -270,6 +273,7 @@ public class SnmpMonitor extends AbstractServiceMonitor {
                 .status(Status.Unknown)
                 .ipAddress(hostAddress)
                 .reason(thrown.getMessage())
+                .monitoredServiceId(monitoredServiceId)
                 .build()
             ;
 

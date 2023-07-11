@@ -28,17 +28,6 @@
 
 package org.opennms.horizon.inventory.component;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
-import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.verifyNoInteractions;
-
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -64,6 +53,17 @@ import org.opennms.taskset.contract.ScanType;
 import java.util.ArrayList;
 import java.util.Optional;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+
 @ExtendWith(MockitoExtension.class)
 class NodeMonitoringManagerTest {
 
@@ -74,7 +74,7 @@ class NodeMonitoringManagerTest {
     @Mock
     private PassiveDiscoveryRepository passiveDiscoveryRepository;
     @InjectMocks
-    private NodeMonitoringManager nodeMonitoringManager;
+    private InternalEventConsumer internalEventConsumer;
     private final String tenantId = "test-tenant";
     private Event event;
     private Node node;
@@ -114,7 +114,7 @@ class NodeMonitoringManagerTest {
         doReturn(node).when(nodeService).createNode(any(NodeCreateDTO.class), eq(ScanType.NODE_SCAN), eq(tenantId));
         doReturn(passiveDiscovery).when(passiveDiscoveryRepository).findByTenantIdAndLocationId(tenantId, locationId);
         ArgumentCaptor<NodeCreateDTO> argumentCaptor = ArgumentCaptor.forClass(NodeCreateDTO.class);
-        nodeMonitoringManager.receiveTrapEvent(event.toByteArray());
+        internalEventConsumer.receiveNewSuspectEvent(event.toByteArray());
         verify(nodeService).createNode(argumentCaptor.capture(), eq(ScanType.NODE_SCAN), eq(tenantId));
         verify(passiveDiscoveryService).sendNodeScan(node);
         NodeCreateDTO createDTO = argumentCaptor.getValue();
@@ -128,7 +128,7 @@ class NodeMonitoringManagerTest {
     void testReceiveEventWithDifferentUEI() {
         var anotherEvent = Event.newBuilder()
             .setUei("something else").build();
-        nodeMonitoringManager.receiveTrapEvent(anotherEvent.toByteArray());
+        internalEventConsumer.receiveNewSuspectEvent(anotherEvent.toByteArray());
         verifyNoInteractions(passiveDiscoveryService);
         verifyNoInteractions(nodeService);
     }
@@ -136,14 +136,14 @@ class NodeMonitoringManagerTest {
     @Test
     void testMissingTenantID() {
         Event testEvent = Event.newBuilder().setUei(EventConstants.NEW_SUSPECT_INTERFACE_EVENT_UEI).build();
-        assertThatThrownBy(() -> nodeMonitoringManager.receiveTrapEvent(testEvent.toByteArray())).isInstanceOf(InventoryRuntimeException.class);
+        assertThatThrownBy(() -> internalEventConsumer.receiveNewSuspectEvent(testEvent.toByteArray())).isInstanceOf(InventoryRuntimeException.class);
     }
 
     @Test
     void testEntityExistException() throws EntityExistException, LocationNotFoundException {
         doThrow(new EntityExistException("bad request")).when(nodeService).createNode(any(NodeCreateDTO.class), eq(ScanType.NODE_SCAN), eq(tenantId));
         ArgumentCaptor<NodeCreateDTO> argumentCaptor = ArgumentCaptor.forClass(NodeCreateDTO.class);
-        nodeMonitoringManager.receiveTrapEvent(event.toByteArray());
+        internalEventConsumer.receiveNewSuspectEvent(event.toByteArray());
         verify(nodeService).createNode(argumentCaptor.capture(), eq(ScanType.NODE_SCAN), eq(tenantId));
         NodeCreateDTO createDTO = argumentCaptor.getValue();
         assertThat(createDTO.getLocationId()).isEqualTo(event.getLocationId());

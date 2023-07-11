@@ -32,7 +32,7 @@
                     Skip
                 </FeatherButton>
                 <FeatherButton data-test="welcome-store-slide-three-continue-button" v-if="welcomeStore.discoverySubmitted"
-                    primary :disabled="!welcomeStore.slideThreeDisabled" @click="welcomeStore.skipSlideThree">
+                    primary :disabled="welcomeStore.slideThreeDisabled" @click="welcomeStore.skipSlideThree">
                     Continue
                 </FeatherButton>
                 <FeatherButton v-if="!welcomeStore.discoverySubmitted"

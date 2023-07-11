@@ -1,0 +1,32 @@
+:imagesdir: ../assets/images
+:!sectids:
+
+= Network Discovery
+
+The discovery process identifies devices and entities on your monitored network through either active or passive discovery.
+
+[[active-discovery]]
+== What is active discovery?
+
+Active discovery queries nodes and cloud APIs to detect the entities that you want to monitor. You can choose from two active discovery methods:
+
+* *ICMP/SNMP:* Performs a ping sweep and scans for SNMP MIBs on nodes that respond.
+
+* *Azure:* Connects to the Azure API, queries the virtual machines list, and creates entities for each VM in the node inventory.
+
+You can create multiple discovery events to target specific areas of your network.
+
+_**Benefits:** Can be more comprehensive than passive discovery._
+
+_**Disadvantages:** Can slow network performance as the discovery process tries to connect to all devices._
+
+[[passive-discovery]]
+== What is passive discovery?
+
+Passive discovery uses Syslog and SNMP traps to identify network devices. It does so by monitoring their activity through events, flows, and indirectly by evaluating other devices' configuration settings.
+
+Note that you can set only one passive discovery configuration.
+
+_**Benefits:** Low bandwidth consumption._
+
+_**Disadvantages:** May miss devices if they are not active. All devices must be enabled and configured to send Syslogs._

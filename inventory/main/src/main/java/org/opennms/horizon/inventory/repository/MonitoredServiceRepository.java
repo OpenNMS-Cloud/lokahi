@@ -51,4 +51,6 @@ public interface MonitoredServiceRepository extends JpaRepository<MonitoredServi
     Optional<MonitoredService> findByTenantIdTypeAndIpInterface(@Param("tenantId") String tenantId,
                                                                 @Param("monitoredServiceType") MonitoredServiceType monitoredServiceType,
                                                                 @Param("ipInterface") IpInterface ipInterface);
+
+    Optional<MonitoredService> findByIdAndTenantId(long id, String tenantId);
 }

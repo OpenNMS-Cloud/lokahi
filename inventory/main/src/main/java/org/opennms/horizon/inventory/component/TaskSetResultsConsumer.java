@@ -32,7 +32,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
 import org.opennms.horizon.inventory.exception.InventoryRuntimeException;
-import org.opennms.horizon.inventory.service.MonitoringLocationService;
+import org.opennms.horizon.inventory.service.taskset.response.MonitorResponseService;
 import org.opennms.horizon.inventory.service.taskset.response.ScannerResponseService;
 import org.opennms.taskset.contract.ScannerResponse;
 import org.opennms.taskset.contract.TaskResult;
@@ -51,6 +51,8 @@ public class TaskSetResultsConsumer {
 
     private final ScannerResponseService scannerResponseService;
 
+    private final MonitorResponseService monitorResponseService;
+
     @KafkaListener(topics = "${kafka.topics.task-set-results}", concurrency = "1")
     public void receiveMessage(@Payload byte[] data) {
         LOG.debug("Have message from Task Set Results kafka topic");
@@ -68,11 +70,13 @@ public class TaskSetResultsConsumer {
             for (TaskResult taskResult : message.getResultsList()) {
                 log.info("Received taskset results from minion with tenantId={}; locationId={}", tenantId, locationId);
                 if (taskResult.hasScannerResponse()) {
-
                     ScannerResponse response = taskResult.getScannerResponse();
-
                     scannerResponseService.accept(tenantId, Long.valueOf(locationId), response);
+                } else if(taskResult.hasMonitorResponse()) {
+                    var monitorResponse = taskResult.getMonitorResponse();
+                    monitorResponseService.updateMonitoredState(tenantId, monitorResponse);
                 }
+
             }
         } catch (Exception e) {
             log.error("Error while processing kafka message for TaskResults: ", e);

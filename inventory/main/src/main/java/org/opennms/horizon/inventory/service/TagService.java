@@ -363,11 +363,10 @@ public class TagService {
 
     private void removeTagsFromMonitoringPolicy(String tenantId, long monitoringPolicyId, TagCreateDTO tagCreateDTO) {
         String tagName = tagCreateDTO.getName();
-        var optional = repository.findByTenantIdAndName(tenantId, tagName);
-        Tag tag = optional.orElseGet(() -> mapCreateTag(tenantId, tagCreateDTO));
-        if (tag.getMonitorPolicyIds().stream().anyMatch(policyId -> policyId == monitoringPolicyId)) {
-            tag.getMonitorPolicyIds().remove(monitoringPolicyId);
-        }
+        Tag tag = repository.findByTenantIdAndName(tenantId, tagName)
+        .orElseGet(() -> mapCreateTag(tenantId, tagCreateDTO));
+
+        tag.getMonitorPolicyIds().remove(monitoringPolicyId);
         tag = repository.save(tag);
 
         if (tag.getMonitorPolicyIds().isEmpty() && tag.getNodes().isEmpty() &&

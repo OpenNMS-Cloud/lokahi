@@ -111,7 +111,7 @@ public class TagService {
                         .ifPresent(tag -> {
                             int oldSize = tag.getNodeIds().size();
                             tagOp.getNodeIdList().forEach(id -> tag.getNodeIds().remove(id));
-                            if(tag.getNodeIds().isEmpty() && tag.getPolicies().isEmpty()) {
+                            if (tag.getNodeIds().isEmpty() && tag.getPolicies().isEmpty()) {
                                 tagRepository.deleteById(tag.getId());
                                 log.info("deleted tag {}", tagOp);
                             } else {

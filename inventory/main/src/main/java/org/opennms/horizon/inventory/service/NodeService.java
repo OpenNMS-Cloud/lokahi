@@ -269,9 +269,9 @@ public class NodeService {
         mapper.updateFromNodeInfo(nodeInfo, node);
 
         if (StringUtils.isNotEmpty(nodeInfo.getSystemName())) {
-            // HS-1364: update the node label if the incoming System Name is set, and the existing node value is not
             Boolean validIpAddress = isValidInetAddress(node.getNodeLabel());
             if (validIpAddress) {
+                //Overwrite node label with System name if label is an IP Address.
                 node.setNodeLabel(nodeInfo.getSystemName());
             } else {
                 log.debug("Node already has a nodeLabel - keeping the existing value: node-label={}; system-name={}",

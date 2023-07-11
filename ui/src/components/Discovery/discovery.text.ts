@@ -48,7 +48,7 @@ export const DiscoverySyslogSNMPTrapsForm = {
   location: 'Search a location',
   help: {
     top: {
-      heading: 'Forward Syslog to BTO with the following details:',
+      heading: 'Forward Syslog to Lōkahi with the following details:',
       list: {
         text1: 'Syslog Ingest IP: 193.177.129.26 (Minion IP)',
         text2: 'Syslog Ingest UDP Port: 20013',

@@ -23,7 +23,8 @@
             <template #pre> <FeatherIcon :icon="icons.Location" /> </template
           ></FeatherInput>
         </div>
-        <div class="row">
+        <!-- Hidden until the map is ready, post-EAR. Tracked with HS-1801 -->
+        <!-- <div class="row">
           <AddressAutocomplete
             :address-model="formInputs"
             class="input-address"
@@ -43,7 +44,7 @@
             class="input-longitude"
             data-test="input-longitude"
           />
-        </div>
+        </div> -->
       </div>
       <FooterSection>
         <template #buttons>

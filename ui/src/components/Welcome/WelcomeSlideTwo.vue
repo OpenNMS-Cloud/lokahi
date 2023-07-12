@@ -129,7 +129,7 @@ onMounted(() => {
     updateScrollHeight();
 })
 const updateScrollHeight = () => {
-    textareaRef.value.style = `height: ${Number(textareaRef.value.scrollHeight) + 'px'};`
+    textareaRef.value.style = `height: ${Number(textareaRef.value.scrollHeight) + 10 + 'px'};`
 }
 const welcomeStore = useWelcomeStore()
 const { isDark } = useTheme();

@@ -68,10 +68,11 @@
                             </div>
                         </div>
                         <div class="welcome-slide-table-body">
-                            <pre>
-                            {{ dockerCmd }}
-                        </pre>
+                            <textarea :spellcheck="false" ref="textareaRef"
+                                @change="(e) => updateDockerCommand((e.target as HTMLTextAreaElement)?.value || '')"
+                                :value="welcomeStore.dockerCmd()" class="styled-like-pre" />
                         </div>
+                        <div class="password-right">Password:{{ welcomeStore.minionCert.password }}</div>
                     </div>
                 </div>
 
@@ -114,10 +115,22 @@ import InformationIcon from '@featherds/icon/action/Info'
 import useTheme from '@/composables/useTheme'
 import CollapsingWrapper from '../Common/CollapsingWrapper.vue'
 import { FeatherSpinner } from '@featherds/progress'
+import { ref } from 'vue';
+
+const textareaRef = ref();
 defineProps({
     visible: { type: Boolean, default: false }
 })
-const dockerCmd = computed(() => welcomeStore.dockerCmd());
+const updateDockerCommand = (newCommand: string) => {
+    welcomeStore.updateDockerCommand(newCommand)
+    updateScrollHeight();
+}
+onMounted(() => {
+    updateScrollHeight();
+})
+const updateScrollHeight = () => {
+    textareaRef.value.style = `height: ${Number(textareaRef.value.scrollHeight) + 'px'};`
+}
 const welcomeStore = useWelcomeStore()
 const { isDark } = useTheme();
 </script>
@@ -289,5 +302,21 @@ const { isDark } = useTheme();
         max-width: 15px;
         margin-right: 12px;
     }
+}
+
+.password-right {
+    display: flex;
+    justify-content: flex-end;
+    @include caption();
+    color: var(--feather-shade-2);
+    padding: var(--feather-spacing-xs) var(--feather-spacing-s);
+}
+
+.styled-like-pre {
+    background-color: transparent;
+    border: none;
+    resize: none;
+    width: 100%;
+    outline: 0;
 }
 </style>

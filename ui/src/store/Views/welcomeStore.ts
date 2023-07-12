@@ -14,7 +14,7 @@ import { useDiscoveryQueries } from '../Queries/discoveryQueries'
 import { REGEX_EXPRESSIONS } from '@/components/Discovery/discovery.constants'
 import { validationErrorsToStringRecord } from '@/services/validationService'
 import useMinionCmd from '@/composables/useMinionCmd'
-import { ComputedRef } from 'vue'
+import { CSSProperties, ComputedRef, StyleValue } from 'vue'
 import { useWelcomeQueries } from '../Queries/welcomeQueries'
 
 interface WelcomeStoreState {
@@ -46,12 +46,14 @@ interface WelcomeStoreState {
   minionStatusLoading: boolean
   minionStatusStarted: boolean
   minionStatusSuccess: boolean
+  modifiedDockerCommand: string
   ready: boolean
   refreshing: boolean
   showOnboarding: boolean
   slide: number
   slideOneCollapseVisible: boolean
   slideThreeDisabled: boolean
+  textStyle: CSSProperties,
   validateOnKeyup: boolean
 }
 
@@ -93,12 +95,14 @@ export const useWelcomeStore = defineStore('welcomeStore', {
     minionStatusLoading: false,
     minionStatusStarted: false,
     minionStatusSuccess: false,
+    modifiedDockerCommand: '',
     ready: false,
     refreshing: false,
     slide: 1,
     slideOneCollapseVisible: false,
     slideThreeDisabled: true,
     showOnboarding: false,
+    textStyle: {},
     validateOnKeyup: false
   } as WelcomeStoreState),
   actions: {
@@ -158,8 +162,12 @@ export const useWelcomeStore = defineStore('welcomeStore', {
     dockerCmd() {
       let dcmd = this.minionCmd.minionDockerCmd
       if (location.origin === 'https://onmshs.local:1443' || location.origin.startsWith('http://localhost:')) {
-        dcmd = `docker run --rm -p 8181:8181 -p 8101:8101 -p 1162:1162/udp -p 8877:8877/udp -p 4729:4729/udp -p 9999:9999/udp -p 162:162/udp -e USE_KUBERNETES="false" -e MINION_GATEWAY_HOST="host.docker.internal" -e MINION_GATEWAY_PORT=1443 -e MINION_GATEWAY_TLS="true" -e GRPC_CLIENT_TRUSTSTORE=/opt/karaf/gateway.crt --mount type=bind,source="${import.meta.env.VITE_MINION_PATH}/target/tmp/server-ca.crt",target="/opt/karaf/gateway.crt",readonly -e GRPC_CLIENT_KEYSTORE='/opt/karaf/minion.p12' -e GRPC_CLIENT_KEYSTORE_PASSWORD='${this.minionCert.password}' -e MINION_ID='default' --mount type=bind,source="${import.meta.env.VITE_MINION_PATH}/target/tmp/${this.defaultLocationName}-certificate.p12",target="/opt/karaf/minion.p12",readonly  -e GRPC_CLIENT_OVERRIDE_AUTHORITY="minion.onmshs.local" -e IGNITE_SERVER_ADDRESSES="localhost" opennms/lokahi-minion:latest`
+        dcmd = `docker run --rm -p 8181:8181 -p 8101:8101 -p 1162:1162/udp -p 8877:8877/udp -p 4729:4729/udp -p 9999:9999/udp -p 162:162/udp -e USE_KUBERNETES="false" -e MINION_GATEWAY_HOST="host.docker.internal" -e MINION_GATEWAY_PORT=1443 -e MINION_GATEWAY_TLS="true" -e GRPC_CLIENT_TRUSTSTORE=/opt/karaf/gateway.crt --mount type=bind,source="/PATH_TO_DOWNLOADED_FILE/target/tmp/server-ca.crt",target="/opt/karaf/gateway.crt",readonly -e GRPC_CLIENT_KEYSTORE='/opt/karaf/minion.p12' -e GRPC_CLIENT_KEYSTORE_PASSWORD='${this.minionCert.password}' -e MINION_ID='default' --mount type=bind,source="${import.meta.env.VITE_MINION_PATH}/target/tmp/${this.defaultLocationName}-certificate.p12",target="/opt/karaf/minion.p12",readonly  -e GRPC_CLIENT_OVERRIDE_AUTHORITY="minion.onmshs.local" -e IGNITE_SERVER_ADDRESSES="localhost" opennms/lokahi-minion:latest`
       }
+      if (this.modifiedDockerCommand) {
+        dcmd = this.modifiedDockerCommand
+      }
+
       return dcmd;
     },
     async downloadClick() {
@@ -298,6 +306,9 @@ export const useWelcomeStore = defineStore('welcomeStore', {
       if (this.minionStatusStarted && !this.minionStatusLoading && this.minionStatusSuccess) {
         this.minionStatusCopy = 'Minion detected.'
       }
+    },
+    updateDockerCommand(newCommand: string) {
+      this.modifiedDockerCommand = newCommand;
     },
     async validateFirstDiscovery() {
       try {

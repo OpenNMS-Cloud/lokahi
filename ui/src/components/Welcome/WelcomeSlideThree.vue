@@ -10,7 +10,7 @@
                 <FeatherInput label="Name" data-test="welcome-slide-three-name-input"
                     :modelValue="welcomeStore.firstDiscovery.name" :error="welcomeStore.firstDiscoveryErrors.name"
                     @update:modelValue="(e) => welcomeStore.updateFirstDiscovery('name', e)" />
-                <FeatherInput label="Management IPV4/IPV6" data-test="welcome-slide-three-ip-input"
+                <FeatherInput label="Management IPV4" data-test="welcome-slide-three-ip-input"
                     :modelValue="welcomeStore.firstDiscovery.ip" :error="welcomeStore.firstDiscoveryErrors.ip"
                     @update:modelValue="(e) => welcomeStore.updateFirstDiscovery('ip', e)" />
                 <FeatherInput label="Community String (optional)" data-test="welcome-slide-three-community-string-input"

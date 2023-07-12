@@ -54,7 +54,8 @@
                     <li>Docker environment with Docker Compose</li>
                     <li>Network Time Protocol (NTP) installed and configured</li>
                 </ul>
-                <a href="https://docs.docker.com/desktop/install/mac-install/" target="_blank" rel="noopener noreferrer">How
+                <a href="https://docs.docker.com/desktop/install/linux-install/" target="_blank"
+                    rel="noopener noreferrer">How
                     to set up
                     Docker
                     <FeatherIcon :icon="ChevronRight" />

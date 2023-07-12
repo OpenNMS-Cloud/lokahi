@@ -1,119 +1,41 @@
 <template>
-  <div
-    v-if="isTagManagerOpen"
-    class="ctrls"
-  >
-    <FeatherButton
-      v-if="!areAllNodesSelected"
-      @click="selectDeselectAllNodes(true)"
-      :disabled="!tagStore.isTagEditMode"
-      secondary
-      data-test="select-all-btn"
-    >
-      Select all
-    </FeatherButton>
-    <FeatherButton
-      v-else
-      @click="selectDeselectAllNodes(false)"
-      :disabled="!tagStore.isTagEditMode"
-      secondary
-      data-test="deselect-all-btn"
-    >
-      Deselect all
-    </FeatherButton>
-    <FeatherButton
-      @click="saveTagsToSelectedNodes"
-      :disabled="!nodesSelected.length"
-      primary
-      data-test="open-modal-btn"
-    >
-      {{ `Save tags to node${nodesSelected.length > 1 ? 's' : ''}` }}
-    </FeatherButton>
-  </div>
   <ul class="cards">
-    <li
-      v-for="node in nodes"
-      :key="node?.id"
-    >
+    <li v-for="node in tabContent" :key="node?.id">
       <section class="header">
-        <Icon
-          :icon="storageIcon"
-          data-test="icon-storage"
-        />
+        <Icon :icon="storageIcon" data-test="icon-storage" />
         <h4 data-test="heading">{{ node?.label }}</h4>
       </section>
       <section class="content">
         <div>
-          <FeatherChipList
-            label="List of metric chips"
-            data-test="metric-chip-list"
-            v-if="isMonitored(node)"
-          >
-            <MetricChip
-              v-for="metric in node?.metrics"
-              :key="metric?.type"
-              :metric="metric"
-            />
+          <FeatherChipList label="List of metric chips" data-test="metric-chip-list" v-if="isMonitored(node)">
+            <MetricChip v-for="metric in node?.metrics" :key="metric?.type" :metric="metric" />
           </FeatherChipList>
 
-          <div
-            class="tags-count-box"
-            @click="openModalForDeletingTags(node)"
-          >
+          <div class="tags-count-box" @click="openModalForDeletingTags(node)">
             Tags: <span class="count">{{ node.anchor.tagValue.length }}</span>
           </div>
 
-          <InventoryTextAnchorList
-            :anchor="node?.anchor"
-            data-test="text-anchor-list"
-          />
+          <InventoryTextAnchorList :anchor="node?.anchor" data-test="text-anchor-list" />
         </div>
-        <InventoryIconActionList
-          :node="node"
-          class="icon-action"
-          data-test="icon-action-list"
-        />
+        <InventoryIconActionList :node="node" class="icon-action" data-test="icon-action-list" />
       </section>
-      <InventoryNodeTagEditOverlay
-        v-if="tagStore.isTagEditMode"
-        :node="node"
-      />
+      <InventoryNodeTagEditOverlay v-if="tagStore.isTagEditMode" :node="node" />
     </li>
   </ul>
-  <PrimaryModal
-    :visible="isVisible"
-    :title="modal.title"
-    :class="modal.cssClass"
-  >
+  <PrimaryModal :visible="isVisible" :title="modal.title" :class="modal.cssClass">
     <template #content>
-      <FeatherChipList
-        :key="tagsForDeletion.toString()"
-        condensed
-        label="Tags"
-      >
-        <FeatherChip
-          v-for="(tag, index) in availableTagsToDelete"
-          :key="index"
-          @click="selectTagForDeletion(tag)"
-          :class="{ selected: tagsForDeletion.some((t) => t.id === tag.id) }"
-          class="pointer"
-        >
+      <FeatherChipList :key="tagsForDeletion.toString()" condensed label="Tags">
+        <FeatherChip v-for="(tag, index) in availableTagsToDelete" :key="index" @click="selectTagForDeletion(tag)"
+          :class="{ selected: tagsForDeletion.some((t) => t.id === tag.id) }" class="pointer">
           {{ tag.name }}
         </FeatherChip>
       </FeatherChipList>
     </template>
     <template #footer>
-      <FeatherButton
-        secondary
-        @click="closeModal"
-      >
+      <FeatherButton secondary @click="closeModal">
         {{ modal.cancelLabel }}
       </FeatherButton>
-      <FeatherButton
-        primary
-        @click="removeTagsFromNodes"
-        :disabled="!tagsForDeletion.length"
-      >
+      <FeatherButton primary @click="removeTagsFromNodes" :disabled="!tagsForDeletion.length">
         {{ modal.saveLabel }}
       </FeatherButton>
     </template>
@@ -144,8 +66,6 @@ const props = defineProps({
     required: true
   }
 })
-const nodes = ref<InventoryNode[]>(props.tabContent)
-watchEffect(() => nodes.value = props.tabContent)
 
 const availableTagsToDelete = ref(<Tag[]>[])
 const tagsForDeletion = ref([] as Tag[])
@@ -158,41 +78,12 @@ const nodeMutations = useNodeMutations()
 const inventoryQueries = useInventoryQueries()
 const inventoryStore = useInventoryStore()
 
-const isTagManagerOpen = computed(() => inventoryStore.isTagManagerOpen)
 const isTagManagerReset = computed(() => inventoryStore.isTagManagerReset)
 watch(isTagManagerReset, (isReset) => {
   if (isReset) resetState()
 })
 
-const nodesSelected = computed(() => {
-  // in case of single node selection toggling
-  areAllNodesSelected.value = inventoryStore.nodesSelected.length === nodes.value.length
 
-  return inventoryStore.nodesSelected
-})
-
-const areAllNodesSelected = ref(false)
-const selectDeselectAllNodes = (areSelected: boolean) => {
-  areAllNodesSelected.value = areSelected
-
-  nodes.value.forEach((node) => {
-    inventoryStore.addRemoveNodesSelected(node, areSelected)
-  })
-
-  nodes.value = nodes.value.map((node) => ({
-    ...node,
-    isNodeOverlayChecked: areSelected
-  }))
-}
-
-const saveTagsToSelectedNodes = async () => {
-  const tags = tagStore.tagsSelected.map(({ name }) => ({ name }))
-  const nodeIds = inventoryStore.nodesSelected.map((node) => node.id)
-  await nodeMutations.addTagsToNodes({ nodeIds, tags })
-
-  await inventoryQueries.fetchByState(props.state)
-  resetState()
-}
 
 const removeTagsFromNodes = async () => {
   const payload: TagListNodesRemoveInput = {
@@ -222,12 +113,6 @@ const resetState = () => {
   tagStore.setTagEditMode(false)
   inventoryStore.resetSelectedNode()
   tagsForDeletion.value = []
-
-  nodes.value = nodes.value.map((node) => ({
-    ...node,
-    isNodeOverlayChecked: false
-  }))
-
   inventoryStore.isTagManagerReset = false
 }
 
@@ -272,11 +157,13 @@ const storageIcon: IIcon = {
   padding: var(variables.$spacing-l) 0;
   min-width: vars.$min-width-smallest-screen;
 }
+
 ul.cards {
   display: flex;
   flex-flow: row wrap;
   gap: 1%;
-  > li {
+
+  >li {
     position: relative;
     padding: var(variables.$spacing-l) var(variables.$spacing-l);
     border: 1px solid var(variables.$secondary-text-on-surface);
@@ -289,29 +176,34 @@ ul.cards {
     @include mediaQueriesMixins.screen-sm {
       width: 100%;
     }
+
     @include mediaQueriesMixins.screen-md {
       width: 49%;
       min-width: auto;
     }
+
     @include mediaQueriesMixins.screen-lg {
       width: 48%;
     }
+
     @include mediaQueriesMixins.screen-xl {
       width: 32%;
       min-width: 350px;
       max-width: none;
     }
+
     @include mediaQueriesMixins.screen-xxl {
       width: 24%;
     }
 
-    > .header {
+    >.header {
       margin-bottom: var(variables.$spacing-s);
       display: flex;
       flex-direction: row;
       gap: 0.5rem;
       align-items: center;
-      > h4 {
+
+      >h4 {
         color: var(variables.$primary);
       }
     }

@@ -13,6 +13,7 @@
       class="name"
       :schema="nameV"
       data-test="azure-name-input"
+      :disabled="isDisabled"
     />
 
     <div class="row">
@@ -22,6 +23,7 @@
         class="column"
         :schema="clientIdV"
         data-test="azure-client-input"
+        :disabled="isDisabled"
       />
       <FeatherProtectedInput
         v-model="store.azure.clientSecret"
@@ -29,6 +31,7 @@
         class="column"
         :schema="clientSecretV"
         data-test="azure-secret-input"
+        :disabled="isDisabled"
       />
     </div>
 
@@ -39,6 +42,7 @@
         class="column"
         :schema="subIdV"
         data-test="azure-sub-input"
+        :disabled="isDisabled"
       />
       <FeatherInput
         v-model="store.azure.directoryId"
@@ -46,6 +50,7 @@
         class="column"
         :schema="dirIdV"
         data-test="azure-dir-input"
+        :disabled="isDisabled"
       />
     </div>
 
@@ -53,6 +58,7 @@
       @locationSelected="selectLocation"
       class="locations"
       type="single"
+      :disabled="isDisabled"
     />
     <BasicAutocomplete
       class="tags"
@@ -62,6 +68,7 @@
       :label="Common.tagsInput"
       ref="tagsAutocompleteRef"
       :preselectedItems="tags"
+      :disabled="isDisabled"
     />
 
     <div class="buttons">
@@ -105,6 +112,8 @@ const props = defineProps<{
   cancel: () => void
   discovery: AzureActiveDiscovery | null
 }>()
+
+const isDisabled = computed(() => Boolean(props.discovery))
 
 const tags = computed(() => (props.discovery?.id ? discoveryQueries.tagsByActiveDiscoveryId : []))
 

@@ -148,6 +148,9 @@ ul li {
     position: absolute;
     padding-bottom: 40px;
 
+    left: 0;
+    right: 0;
+
     a {
         color: var($clickable-normal);
     }

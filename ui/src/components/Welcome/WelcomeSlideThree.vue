@@ -66,6 +66,9 @@ const welcomeStore = useWelcomeStore()
     background-color: var($surface);
     position: absolute;
 
+    left: 0;
+    right: 0;
+
     h2 {
         @include headline2();
         margin-bottom: 12px;

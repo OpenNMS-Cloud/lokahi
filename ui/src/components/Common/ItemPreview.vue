@@ -6,13 +6,13 @@
     <div class="item-preview-body" v-if="!loading">
       <div class="item-preview-card">
         <div class="item-preview-meta">
-          <strong>{{ itemTitle }}</strong>
+          <strong data-test="item-preview-meta-id">{{ itemTitle }}</strong>
           <span>{{ itemSubtitle }}</span>
         </div>
         <div class="item-preview-statuses">
           <div class="item-preview-status" v-for="(item, index) in itemStatuses" :key="index">
             <span>{{ item.title }}</span>
-            <div :style="{ backgroundColor: item.statusColor, color: item.statusText }">{{ item.status }}</div>
+            <div data-test="item-preview-status-id" :style="{ backgroundColor: item.statusColor, color: item.statusText }">{{ item.status }}</div>
           </div>
         </div>
       </div>

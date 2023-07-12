@@ -1,27 +1,43 @@
 import { defineStore } from 'pinia'
 import { Tag } from '@/types/graphql'
+import { useInventoryStore } from '../Views/inventoryStore'
+import { useNodeMutations } from '../Mutations/nodeMutations'
+import { useInventoryQueries } from '../Queries/inventoryQueries'
+import { useTagQueries } from '../Queries/tagQueries'
 
 export const useTagStore = defineStore('tagStore', () => {
-  const tags = ref([] as Tag[])
+  const tagSelected = ref<Tag>();
   const tagsSelected = ref([] as Tag[])
   const isTagEditMode = ref(false)
+  const areAllTagsSelected = ref(false)
 
   const setTags = (tagList: Tag[]) => {
-    tags.value = tagList
+    tagsSelected.value = [...tagList]
+    updateTagEditMode();
   }
 
   const addNewTag = (newTag: Record<string, string>) => {
-    const tagExists = tags.value.some(({ name }) => name === newTag.name)
-    if (!tagExists) tags.value.push(newTag as Tag)
-
     const tagSelectedExists = tagsSelected.value.some(({ name }) => name === newTag.name)
     if (!tagSelectedExists) tagsSelected.value.push(newTag as Tag)
+    updateTagEditMode();
   }
-
+  const updateTagEditMode = () => {
+    isTagEditMode.value = tagsSelected.value.length > 0;
+  }
   const setTagEditMode = (isEdit: boolean) => {
     isTagEditMode.value = isEdit
   }
 
+  const deactivateTag = (tagIndex: number) => {
+    const newTags = [...tagsSelected.value];
+    newTags.splice(tagIndex, 1);
+    setTags(newTags);
+    if (newTags.length === 0) {
+      setTagEditMode(false)
+      const inventoryStore = useInventoryStore();
+      inventoryStore.nodesSelected = [];
+    }
+  }
   const toggleTagsSelected = (tag: Tag) => {
     const isTagAlreadySelected = tagsSelected.value.some(({ name }) => name === tag.name)
 
@@ -33,17 +49,49 @@ export const useTagStore = defineStore('tagStore', () => {
   }
 
   const selectAllTags = (selectAll: boolean) => {
-    tagsSelected.value = selectAll ? tags.value : []
+    tagsSelected.value = selectAll ? tagsSelected.value : []
+  }
+
+
+  const resetState = () => {
+    areAllTagsSelected.value = false
+    tagsSelected.value = [];
+  }
+
+  const saveTagsToSelectedNodes = async (state: string) => {
+    const tags = tagsSelected.value.map(({ name }) => ({ name }))
+    const inventoryStore = useInventoryStore();
+    const nodeMutations = useNodeMutations();
+    const inventoryQueries = useInventoryQueries();
+    const tagQueries = useTagQueries();
+    const nodeIds = inventoryStore.nodesSelected.map((node) => node.id)
+    await nodeMutations.addTagsToNodes({ nodeIds, tags })
+    await inventoryQueries.fetchByLastState();
+    tagsSelected.value = []
+    inventoryStore.isTagManagerOpen = false;
+    inventoryStore.nodesSelected = [];
+    isTagEditMode.value = false;
+    resetState()
+  }
+
+  const toggleSelectAll = () => {
+    areAllTagsSelected.value = !areAllTagsSelected.value
+    selectAllTags(areAllTagsSelected.value)
   }
 
   return {
-    tags,
+    tagSelected,
+    tagsSelected,
+    areAllTagsSelected,
     setTags,
     addNewTag,
     isTagEditMode: computed(() => isTagEditMode.value),
+    saveTagsToSelectedNodes,
     setTagEditMode,
     selectAllTags,
-    tagsSelected: computed(() => tagsSelected.value),
-    toggleTagsSelected
+    toggleSelectAll,
+    toggleTagsSelected,
+    deactivateTag,
+    updateTagEditMode
   }
 })

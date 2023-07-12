@@ -11,12 +11,14 @@
       :label="DiscoverySNMPForm.nameInputLabel"
       class="name-input"
       :schema="nameV"
+      :disabled="isDisabled"
     />
     <DiscoveryLocationsAutocomplete
       class="locations-select"
       type="single"
       :preLoadedlocation="props.discovery?.locationId"
       @location-selected="(loc: MonitoringLocation) => setSnmpConfig('locationId', loc.id)"
+      :disabled="isDisabled"
     />
     <BasicAutocomplete
       @items-selected="tagsSelectedListener"
@@ -27,6 +29,7 @@
       class="tags-autocomplete"
       data-test="tags-autocomplete"
       :preselectedItems="tags"
+      :disabled="isDisabled"
     />
     <div class="content-editable-container">
       <DiscoveryContentEditable
@@ -41,6 +44,7 @@
         :content="props.discovery?.ipAddresses?.join(', ')"
         isRequired
         :id="1"
+        :disabled="isDisabled"
       />
       <DiscoveryContentEditable
         @content-formatted="(val) => setSnmpConfig('snmpConfig.readCommunities', val)"
@@ -52,6 +56,7 @@
         class="community-input"
         :content="props.discovery?.snmpConfig?.readCommunities?.join(', ')"
         :id="2"
+        :disabled="isDisabled"
       />
       <DiscoveryContentEditable
         @content-formatted="(val) => setSnmpConfig('snmpConfig.ports', val)"
@@ -65,6 +70,7 @@
         :tooltipText="Common.tooltipPort"
         :content="props.discovery?.snmpConfig?.ports?.join(', ')"
         :id="3"
+        :disabled="isDisabled"
       />
     </div>
 
@@ -170,6 +176,8 @@ const saveHandler = async () => {
     discoveryInfo.value = {} as IcmpActiveDiscoveryCreateInput
   }
 }
+
+const isDisabled = computed(() => Boolean(props.discovery))
 </script>
 
 <style scoped lang="scss">

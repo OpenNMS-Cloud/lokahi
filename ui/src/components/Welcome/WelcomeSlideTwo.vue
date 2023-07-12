@@ -53,7 +53,8 @@
             <CollapsingWrapper :open="!!welcomeStore.minionCert.password">
                 <div class="welcome-slide-step" data-test="welcome-page-two-internal">
                     <h2>Step 2: Copy and Run Docker Install Command</h2>
-                    <pre>Replace <strong>PATH_TO_DOWNLOADED_FILE</strong> with the full path to the certificate file.</pre>
+                    <pre
+                        class="pre-wrap">Replace <strong>PATH_TO_DOWNLOADED_FILE</strong> with the full path to the certificate file.</pre>
                     <div class="welcome-slide-table">
                         <div class="welcome-slide-table-header">
                             <span>Command</span>
@@ -68,9 +69,11 @@
                             </div>
                         </div>
                         <div class="welcome-slide-table-body">
-                            <textarea :spellcheck="false" ref="textareaRef"
-                                @change="(e) => updateDockerCommand((e.target as HTMLTextAreaElement)?.value || '')"
+                            <textarea :spellcheck="false" ref="textareaRef" @click="highlightStrip"
+                                @input="(e) => updateDockerCommand((e.target as HTMLTextAreaElement)?.value || '')"
                                 :value="welcomeStore.dockerCmd()" class="styled-like-pre" />
+                            <div @click="closeAndHighlight" ref="highlighterRef" class="highlighted-docker"
+                                v-html="highlightedDocker" />
                         </div>
                         <div class="password-right">Password:{{ welcomeStore.minionCert.password }}</div>
                     </div>
@@ -118,18 +121,52 @@ import { FeatherSpinner } from '@featherds/progress'
 import { ref } from 'vue';
 
 const textareaRef = ref();
+const highlighterRef = ref();
+const closed = ref(false);
 defineProps({
     visible: { type: Boolean, default: false }
 })
-const updateDockerCommand = (newCommand: string) => {
+const highlightedDocker = computed(() => {
+    const existingCommand = welcomeStore.dockerCmd();
+    const stringToHighlight = 'PATH_TO_DOWNLOADED_FILE';
+    const regexToHighlight = new RegExp(stringToHighlight, 'i')
+    const content = existingCommand.replace(regexToHighlight, '<span style="word-break:break-all;background-color:var(--feather-primary);color:var(--feather-state-color-on-color)">$&</span>')
+    return content;
+})
+const updateDockerCommand = async (newCommand: string) => {
     welcomeStore.updateDockerCommand(newCommand)
+    await nextTick();
     updateScrollHeight();
 }
 onMounted(() => {
     updateScrollHeight();
+    window.addEventListener('resize', updateScrollHeight);
+})
+onUnmounted(() => {
+    window.removeEventListener('resize', updateScrollHeight);
 })
 const updateScrollHeight = () => {
-    textareaRef.value.style = `height: ${Number(textareaRef.value.scrollHeight) + 10 + 'px'};`
+    textareaRef.value.style = `height: 0px;`
+    textareaRef.value.style = `height: ${Number(textareaRef.value.scrollHeight) + 20 + 'px'};`
+    if (!closed.value) {
+        highlighterRef.value.style = `width:${Number(textareaRef.value.getBoundingClientRect().width)}px;height:${Number(textareaRef.value.getBoundingClientRect().height)}px;`
+    }
+}
+const closeAndHighlight = () => {
+    closed.value = true;
+    highlighterRef.value.classList.add('highlight-hidden');
+    highlightStrip();
+}
+const highlightStrip = () => {
+
+    textareaRef.value.classList.add('visible');
+    const stringToHighlight = 'PATH_TO_DOWNLOADED_FILE';
+    const existingCommand = welcomeStore.dockerCmd();
+    const indexOf = existingCommand.indexOf(stringToHighlight);
+    if (indexOf >= 0) {
+        textareaRef.value.focus();
+        textareaRef.value.setSelectionRange(indexOf, indexOf + stringToHighlight.length);
+    }
 }
 const welcomeStore = useWelcomeStore()
 const { isDark } = useTheme();
@@ -148,6 +185,8 @@ const { isDark } = useTheme();
     margin-top: -4px;
     width: 100%;
     position: absolute;
+    left: 0;
+    right: 0;
 
     h1 {
         @include headline1();
@@ -168,6 +207,10 @@ const { isDark } = useTheme();
 
     .welcome-slide-two-location-callout,
     .welcome-slide-table-body {
+        background-color: var(--feather-background);
+    }
+
+    .welcome-slide-two-location-callout {
         background-color: #e5f4f9;
     }
 }
@@ -218,6 +261,7 @@ const { isDark } = useTheme();
 
         .welcome-slide-table-body {
             padding: 12px 24px;
+            position: relative;
 
             pre {
                 margin: 0;
@@ -318,5 +362,71 @@ const { isDark } = useTheme();
     resize: none;
     width: 100%;
     outline: 0;
+    opacity: 0;
+    transition: none;
+
+    &::selection {
+        background-color: var(--feather-primary);
+        color: var(--feather-state-color-on-color);
+    }
+
+    &.visible {
+        opacity: 1;
+    }
+
+    @media (min-width:500px) and (max-width:547px) {
+        padding-right: 50px;
+    }
+
+}
+
+.pre-wrap {
+    white-space: pre-wrap;
+}
+
+.highlighted-content {
+    display: inline-block;
+    background-color: blue;
+}
+
+.highlighted-docker {
+    background-color: transparent;
+    position: absolute;
+    font-family: monospace;
+    font-size: 13px;
+    line-height: normal;
+    font-weight: var(--feather-body-small-font-weight);
+    text-transform: var(--feather-body-small-text-transform);
+    font-style: var(--feather-body-small-font-style);
+    color: var(--feather-primary-text-on-surface);
+    text-rendering: optimizeLegibility;
+    -moz-osx-font-smoothing: grayscale;
+    background-color: transparent;
+    border: none;
+    resize: none;
+    width: 92%;
+    outline: 0;
+    box-sizing: border-box;
+    padding-top: 3px;
+    padding-left: 2px;
+    padding-right: 2px;
+    letter-spacing: normal;
+    word-break: break-word;
+    opacity: 1;
+    top: 12px;
+    transition: none;
+
+    @media (min-width:642px) {
+        padding-right: 25px;
+    }
+
+    @media (min-width:500px) and (max-width:547px) {
+        padding-right: 50px;
+    }
+
+    &.highlight-hidden {
+        opacity: 0;
+        display: none;
+    }
 }
 </style>

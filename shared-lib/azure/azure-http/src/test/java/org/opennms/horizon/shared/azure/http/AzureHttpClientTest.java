@@ -33,11 +33,15 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import com.github.tomakehurst.wiremock.matching.EqualToPattern;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import org.apache.http.HttpStatus;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.opennms.horizon.shared.azure.http.dto.AzureHttpParams;
+import org.opennms.horizon.shared.azure.http.dto.error.AzureHttpError;
 import org.opennms.horizon.shared.azure.http.dto.instanceview.AzureInstanceView;
 import org.opennms.horizon.shared.azure.http.dto.instanceview.AzureStatus;
 import org.opennms.horizon.shared.azure.http.dto.login.AzureOAuthToken;
@@ -59,6 +63,7 @@ import org.opennms.horizon.shared.azure.http.dto.resourcegroup.AzureValue;
 import org.opennms.horizon.shared.azure.http.dto.resources.AzureResources;
 import org.opennms.horizon.shared.azure.http.dto.subscription.AzureSubscription;
 
+import java.text.DateFormat;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.HashMap;
@@ -156,18 +161,18 @@ public class AzureHttpClientTest {
         wireMock.stubFor(post(url)
             .withHeader("Content-Type", new EqualToPattern("application/x-www-form-urlencoded"))
             .willReturn(ResponseDefinitionBuilder.responseDefinition()
-                .withBody("{\"error\":{\"code\":\"AuthorizationFailed\",\"message\":\"authorization failed message\"}}")
-                .withStatus(HttpStatus.SC_INTERNAL_SERVER_ERROR)));
+                .withBody("{\"error\":\"invalid_client\",\"error_description\":\"AADSTS7000215: Invalid client secret provided. Ensure the secret being sent in the request is the client secret value, not the client secret ID, for a secret added to app 'da5b5bcb-589c-43d3-a7dd-af0900393c20'.\\r\\nTrace ID: d8e73b43-ae4d-40f9-9c4e-2404d5f30300\\r\\nCorrelation ID: fbf5bdb8-ac14-4f77-9941-5a5fb89112fc\\r\\nTimestamp: 2023-07-12 02:48:42Z\",\"error_codes\":[7000215],\"timestamp\":\"2023-07-12 02:48:42Z\",\"trace_id\":\"d8e73b43-ae4d-40f9-9c4e-2404d5f30300\",\"correlation_id\":\"fbf5bdb8-ac14-4f77-9941-5a5fb89112fc\",\"error_uri\":\"https://login.microsoftonline.com/error?code=7000215\"}")
+                .withStatus(HttpStatus.SC_UNAUTHORIZED)));
 
         AzureHttpException e = assertThrows(AzureHttpException.class, () -> {
             this.client.login(TEST_DIRECTORY_ID, TEST_CLIENT_ID, TEST_CLIENT_SECRET, TEST_TIMEOUT, TEST_RETRIES);
         });
 
-        assertTrue(e.hasDescription());
-        assertEquals("AuthorizationFailed: authorization failed message", e.getDescription().toString());
+        assertTrue(e.hasHttpError());
+        assertEquals("invalid_client", e.getHttpError().getError());
 
-        verify(exactly(TEST_RETRIES), postRequestedFor(urlEqualTo(url)));
-        assertEquals("Failed to get for endpoint: %s/%s/oauth2/token%s, status: 500, body: {\"error\":{\"code\":\"AuthorizationFailed\",\"message\":\"authorization failed message\"}}, retry: 2/2", e.getMessage());
+        // should not retry more than once for auth error
+        verify(exactly(1), postRequestedFor(urlEqualTo(url)));
     }
 
     @Test

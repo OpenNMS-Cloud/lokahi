@@ -29,9 +29,10 @@
 package org.opennms.horizon.shared.azure.http;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonSyntaxException;
 import lombok.extern.slf4j.Slf4j;
 import org.opennms.horizon.shared.azure.http.dto.AzureHttpParams;
-import org.opennms.horizon.shared.azure.http.dto.error.AzureErrorDescription;
 import org.opennms.horizon.shared.azure.http.dto.error.AzureHttpError;
 import org.opennms.horizon.shared.azure.http.dto.instanceview.AzureInstanceView;
 import org.opennms.horizon.shared.azure.http.dto.login.AzureOAuthToken;
@@ -43,6 +44,7 @@ import org.opennms.horizon.shared.azure.http.dto.resources.AzureResources;
 import org.opennms.horizon.shared.azure.http.dto.subscription.AzureSubscription;
 
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.net.http.HttpClient;
@@ -51,9 +53,10 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @Slf4j
 public class AzureHttpClient {
@@ -86,7 +89,10 @@ public class AzureHttpClient {
     /*
      * Parameters
      */
-    private static final String LOGIN_GRANT_TYPE_PARAM = "grant_type=client_credentials";
+    private static final String LOGIN_GRANT_TYPE_PARAM = "grant_type=authorization_code";
+//    private static final String LOGIN_GRANT_TYPE_PARAM = "grant_type=client_credentials";
+
+
     private static final String LOGIN_CLIENT_ID_PARAM = "client_id=";
     private static final String LOGIN_CLIENT_SECRET_PARAM = "client_secret=";
 
@@ -99,7 +105,6 @@ public class AzureHttpClient {
      * Misc
      */
     private static final String APPLICATION_FORM_URLENCODED_VALUE = "application/x-www-form-urlencoded";
-    private static final int STATUS_CODE_SUCCESSFUL = 200;
     private static final int INITIAL_BACKOFF_TIME_MS = 1000;
     private static final double EXPONENTIAL_BACKOFF_AMPLIFIER = 2.1d;
     private static final int MIN_TIMEOUT_MS = 300;
@@ -115,25 +120,38 @@ public class AzureHttpClient {
     public AzureHttpClient(AzureHttpParams params) {
         this.params = populateParamDefaults(params);
         this.client = HttpClient.newHttpClient();
-        this.gson = new Gson();
+        this.gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss'Z'").create();
     }
 
     public AzureOAuthToken login(String directoryId, String clientId, String clientSecret, long timeoutMs, int retries) throws AzureHttpException {
-        List<String> parameters = new LinkedList<>();
-        parameters.add(LOGIN_GRANT_TYPE_PARAM);
-        parameters.add(LOGIN_CLIENT_ID_PARAM + clientId);
-        parameters.add(LOGIN_CLIENT_SECRET_PARAM + clientSecret);
-        parameters.add("resource=" + params.getBaseManagementUrl() + "/");
+        StringBuilder postBody = new StringBuilder();
+        postBody.append(LOGIN_GRANT_TYPE_PARAM)
+            .append(PARAMETER_DELIMITER)
+            .append(LOGIN_CLIENT_ID_PARAM).append(Objects.requireNonNull(clientId))
+            .append(PARAMETER_DELIMITER)
+            .append(LOGIN_CLIENT_SECRET_PARAM).append(Objects.requireNonNull(clientSecret))
+            .append(PARAMETER_DELIMITER)
+            .append("resource=").append(params.getBaseManagementUrl()).append("/");
 
         String baseLoginUrl = params.getBaseLoginUrl();
         String versionQueryParam = API_VERSION_PARAM + params.getApiVersion();
         String url = String.format(OAUTH2_TOKEN_ENDPOINT, baseLoginUrl, directoryId, versionQueryParam);
         HttpRequest request = getHttpRequestBuilder(url, timeoutMs)
             .header(CONTENT_TYPE_HEADER, APPLICATION_FORM_URLENCODED_VALUE)
-            .POST(HttpRequest.BodyPublishers.ofString(String.join(PARAMETER_DELIMITER, parameters)))
+            .POST(HttpRequest.BodyPublishers.ofString(postBody.toString()))
             .build();
 
-        return performRequest(OAUTH2_TOKEN_ENDPOINT, AzureOAuthToken.class, request, retries);
+        log.error("========");
+        log.error("Request: {}", request);
+        log.error("bodyPublisher: {}", request.bodyPublisher().get().contentLength());
+        log.error("parameters: {}", postBody);
+        log.error("========");
+        try{
+            return performRequest(AzureOAuthToken.class, request, retries);
+        } catch (Exception ex){
+            ex.printStackTrace();
+            throw ex;
+        }
     }
 
     public AzureSubscription getSubscription(AzureOAuthToken token, String subscriptionId, long timeoutMs, int retries) throws AzureHttpException {
@@ -195,44 +213,31 @@ public class AzureHttpClient {
         String url = params.getBaseManagementUrl() + endpoint;
         HttpRequest request = buildGetHttpRequest(token, url, timeoutMs);
 
-        return performRequest(endpoint, clazz, request, retries);
+        return performRequest(clazz, request, retries);
     }
 
-    private <T> T performRequest(String endpoint, Class<T> clazz, HttpRequest request, int retries) throws AzureHttpException {
+    private <T> T performRequest(Class<T> clazz, HttpRequest request, int retries) throws AzureHttpException {
         if (retries < 1) {
             throw new AzureHttpException("Number of retries must be a positive number");
         }
 
-        AzureHttpException exception = null;
+        // prevent sona null pointer error
+        AzureHttpException lastException = new AzureHttpException("null error");
         long backoffTime = INITIAL_BACKOFF_TIME_MS;
 
         for (int retryCount = 1; retryCount <= retries; retryCount++) {
             try {
-                HttpResponse<String> httpResponse = client.send(request, HttpResponse.BodyHandlers.ofString());
+                return this.performSingleRequest(clazz, request);
+            } catch (AzureHttpException ex) {
+                if (ex.getHttpStatusCode() == HttpURLConnection.HTTP_UNAUTHORIZED) {
+                    log.error("Request: {}, HTTP_UNAUTHORIZED: {}", request, ex.getMessage(), ex);
+                    ex.printStackTrace();
 
-                String httpBody = httpResponse.body();
-
-                if (httpResponse.statusCode() == STATUS_CODE_SUCCESSFUL) {
-                    return gson.fromJson(httpBody, clazz);
+                    throw ex;
                 }
-
-                AzureHttpError error = gson.fromJson(httpBody, AzureHttpError.class);
-                AzureErrorDescription description = error.getError();
-
-                String message = String.format("Failed to get for endpoint: %s, status: %d, body: %s, retry: %d/%d",
-                    endpoint, httpResponse.statusCode(), httpResponse.body(), retryCount, retries);
-                exception = new AzureHttpException(message, description);
-
-            } catch (Exception e) {
-                String message = String.format("Failed to get for endpoint: %s, retry: %d/%d error: %s",
-                    endpoint, retryCount, retries, e.getMessage());
-                exception = new AzureHttpException(message, e);
-                if (e instanceof InterruptedException) {
-                    Thread.currentThread().interrupt();
-                }
-            }
-            if (retryCount != retries) {
-                log.warn(exception.getMessage());
+                lastException = ex;
+                log.warn(String.format("Failed to get for endpoint: %s, retry: %d/%d error: %s",
+                    request.uri(), retryCount, retries, lastException));
                 try {
                     Thread.sleep(backoffTime);
                     backoffTime *= EXPONENTIAL_BACKOFF_AMPLIFIER;
@@ -244,13 +249,42 @@ public class AzureHttpClient {
                 }
             }
         }
-        Throwable cause = exception.getCause();
-        if (cause instanceof InterruptedException) {
-            Thread.currentThread().interrupt();
-        }
-        throw exception;
+        throw lastException;
     }
 
+    private <T> T performSingleRequest(Class<T> clazz, HttpRequest request) throws AzureHttpException{
+        try {
+            HttpResponse<String> httpResponse = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            String httpBody = httpResponse.body();
+
+            log.info("============================");
+            log.info("request: {}", request);
+            log.info("header: {}", request.headers());
+            log.info("statusCode: {}", httpResponse.statusCode());
+            log.info("httpBody: {}", httpBody);
+            log.info("============================");
+
+            var statusCode = httpResponse.statusCode();
+            if(statusCode == HttpURLConnection.HTTP_OK){
+                return gson.fromJson(httpBody, clazz);
+            } else {
+                throw toHttpErrorException(httpBody, statusCode);
+            }
+        } catch (InterruptedException | JsonSyntaxException | IOException e) {
+            if (e instanceof InterruptedException) {
+                Thread.currentThread().interrupt();
+            }
+            String message = String.format("Failed to get for endpoint: %s, error: %s",
+                request.uri(), e.getMessage());
+            throw new AzureHttpException(message, e);
+        }
+    }
+
+    private AzureHttpException toHttpErrorException(String message, int httpStatusCode){
+        AzureHttpError error = gson.fromJson(message, AzureHttpError.class);
+        return new AzureHttpException(error, httpStatusCode);
+    }
     private HttpRequest buildGetHttpRequest(AzureOAuthToken token, String url, long timeoutMs) throws AzureHttpException {
         if (timeoutMs < MIN_TIMEOUT_MS) {
             throw new AzureHttpException("Timeout must be a positive number > " + MIN_TIMEOUT_MS);

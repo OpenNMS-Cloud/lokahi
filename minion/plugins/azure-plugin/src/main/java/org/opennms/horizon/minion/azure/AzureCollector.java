@@ -117,17 +117,10 @@ public class AzureCollector implements ServiceCollector {
                         .toList());
                 }
 
-                System.out.println("****************************************************");
-                System.out.println("****************************************************");
-                System.out.println("****************************************************");
 
-                System.out.println("AZURE COLLECTOR metricResults LIST");
-
-                System.out.println(metricResults);
-
-                System.out.println("****************************************************");
-                System.out.println("****************************************************");
-                System.out.println("****************************************************");
+                log.info("****************************************************");
+                log.info("AZURE COLLECTOR metricResults LIST: \n{}", metricResults);
+                log.info("****************************************************");
 
                 AzureResponseMetric results = AzureResponseMetric.newBuilder()
                     .addAllResults(metricResults)

@@ -21,17 +21,7 @@ export const useTagQueries = defineStore('tagQueries', () => {
     fetchOnMount: false,
     cachePolicy: 'network-only'
   })
-  const fetchTags = async () => {
-    await tagExecute()
 
-    if (!tagIsFetching.value) {
-      if (!tagError.value) {
-        tagStore.setTags(tagData.value?.tags || [])
-      } else {
-        // TODO: what kind of errors and how to manage them
-      }
-    }
-  }
 
   const {
     data: tagsSearchData,
@@ -49,18 +39,15 @@ export const useTagQueries = defineStore('tagQueries', () => {
 
     await tagsSearchExecute()
 
-    if (!tagsSearchIsFetching.value) {
-      if (!tagsSearchError.value) {
-        tagsSearched.value = tagsSearchData.value?.tags || []
-      } else {
-        // TODO: what kind of errors and how to manage them
-      }
+    if (tagsSearchData.value?.tags) {
+      tagsSearched.value = tagsSearchData?.value.tags
     }
   }
 
   return {
-    fetchTags,
     tagsSearched: computed(() => tagsSearched.value || []),
+    tagsSearchIsFetching,
+    tagsSearchExecute,
     getTagsSearch
   }
 })

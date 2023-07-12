@@ -90,7 +90,7 @@ public class MinionContainer extends GenericContainer<MinionContainer> {
     }
 
     public static void createNewOne(String minionId, String minionLocation) {
-        MinionContainer minionContainer = new MinionContainer(CucumberHooks.gatewayHost, minionId, minionLocation);
+        MinionContainer minionContainer = new MinionContainer(CucumberHooks.gatewayUrl, minionId, minionLocation);
         minionContainer.start();
         MINIONS.add(minionContainer);
     }

@@ -29,7 +29,7 @@
 package org.opennms.horizon.inventory.service;
 
 import com.google.protobuf.Int64Value;
-
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.opennms.horizon.inventory.component.TagPublisher;
 import org.opennms.horizon.inventory.dto.DeleteTagsDTO;
@@ -52,6 +52,7 @@ import org.opennms.horizon.inventory.repository.TagRepository;
 import org.opennms.horizon.inventory.repository.discovery.PassiveDiscoveryRepository;
 import org.opennms.horizon.inventory.repository.discovery.active.ActiveDiscoveryRepository;
 import org.opennms.horizon.shared.common.tag.proto.Operation;
+import org.opennms.horizon.shared.common.tag.proto.TagOperationList;
 import org.opennms.horizon.shared.common.tag.proto.TagOperationProto;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -66,6 +67,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class TagService {
     private final TagRepository repository;
     private final NodeRepository nodeRepository;
@@ -359,6 +361,26 @@ public class TagService {
         return mapper.modelToDTO(tag);
     }
 
+    private void removeTagsFromMonitoringPolicy(String tenantId, long monitoringPolicyId, TagCreateDTO tagCreateDTO) {
+        String tagName = tagCreateDTO.getName();
+        Tag tag = repository.findByTenantIdAndName(tenantId, tagName)
+        .orElseGet(() -> mapCreateTag(tenantId, tagCreateDTO));
+
+        tag.getMonitorPolicyIds().remove(monitoringPolicyId);
+        tag = repository.save(tag);
+
+        if (tag.getMonitorPolicyIds().isEmpty() && tag.getNodes().isEmpty() &&
+            tag.getActiveDiscoveries().isEmpty() && tag.getPassiveDiscoveries().isEmpty()) {
+            // If no other elements on tag, remove tag.
+            repository.delete(tag);
+        }
+
+        for (final var node: tag.getNodes()) {
+            this.nodeService.updateNodeMonitoredState(node);
+        }
+
+    }
+
 
     private Tag mapCreateTag(String tenantId, TagCreateDTO request) {
         Tag tag = mapper.createDtoToModel(request);
@@ -447,5 +469,59 @@ public class TagService {
         }
         return repository.findByTenantIdAndPassiveDiscoveryId(tenantId, passiveDiscoveryId)
             .stream().map(mapper::modelToDTO).toList();
+    }
+
+    @Transactional
+    public void insertOrUpdateTags(TagOperationList list) {
+        list.getTagsList().forEach(tagOp -> {
+            switch (tagOp.getOperation()) {
+                case ASSIGN_TAG -> {
+                    if (tagOp.getMonitoringPolicyIdList().isEmpty()) {
+                        // Only handle tag operation updates with monitoring policies
+                        return;
+                    }
+                    repository.findByTenantIdAndName(tagOp.getTenantId(), tagOp.getTagName())
+                        .ifPresentOrElse(tag -> {
+                            int oldSize = tag.getMonitorPolicyIds().size();
+                            tagOp.getMonitoringPolicyIdList().forEach(id -> {
+                                if (!tag.getMonitorPolicyIds().contains(id)) {
+                                    tag.getMonitorPolicyIds().add(id);
+                                }
+                            });
+                            repository.save(tag);
+                            log.info("added monitoring policyIds with data {} monitoring policy id size from {} to {}",
+                                tagOp, oldSize, tag.getMonitorPolicyIds().size());
+                        }, () -> {
+                            Tag tag = new Tag();
+                            tag.setName(tagOp.getTagName());
+                            tag.setTenantId(tagOp.getTenantId());
+                            tag.setMonitorPolicyIds(tagOp.getMonitoringPolicyIdList());
+                            repository.save(tag);
+                            log.info("inserted new tag with data {}", tagOp);
+                        });
+                }
+                case REMOVE_TAG -> {
+
+                    if (tagOp.getMonitoringPolicyIdList().isEmpty()) {
+                        // Only handle tag operation updates with monitoring policies
+                        return;
+                    }
+                    repository.findByTenantIdAndName(tagOp.getTenantId(), tagOp.getTagName())
+                        .ifPresent(tag -> {
+                            int oldSize = tag.getMonitorPolicyIds().size();
+                            tagOp.getMonitoringPolicyIdList().forEach(id -> tag.getMonitorPolicyIds().remove(id));
+                            if (tag.getMonitorPolicyIds().isEmpty() && tag.getNodes().isEmpty() &&
+                                tag.getPassiveDiscoveries().isEmpty() && tag.getActiveDiscoveries().isEmpty()) {
+                                repository.deleteById(tag.getId());
+                                log.info("deleted tag {}", tagOp);
+                            } else {
+                                repository.save(tag);
+                                log.info("removed monitoring policyIds for {} and monitoring policy size changed from {} to {}",
+                                    tagOp, oldSize, tag.getMonitorPolicyIds().size());
+                            }
+                        });
+                }
+            }
+        });
     }
 }

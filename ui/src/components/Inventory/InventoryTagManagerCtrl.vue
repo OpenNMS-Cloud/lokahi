@@ -1,17 +1,9 @@
 <template>
-  <FeatherButton
-    @click="toggleTagManager"
-    class="btn-as-input"
-  >
+  <FeatherButton @click="inventoryStore.toggleTagManager" text>
     <template v-slot:icon>
-      <label for="tagging">Tag manager</label>
-      <FeatherIcon
-        id="tagging"
-        :icon="isTagManagerOpen ? icon.ExpandLess : icon.ExpandMore"
-        aria-hidden="true"
-        focusable="false"
-        flex
-      />
+      <FeatherIcon id="tagging" :icon="inventoryStore.isTagManagerOpen ? ExpandLess : ExpandMore" aria-hidden="true"
+        focusable="false" flex />
+      <label for="tagging" style="cursor:pointer;">Tag manager</label>
     </template>
   </FeatherButton>
 </template>
@@ -23,12 +15,6 @@ import { useInventoryStore } from '@/store/Views/inventoryStore'
 
 const inventoryStore = useInventoryStore()
 
-const isTagManagerOpen = computed(() => inventoryStore.isTagManagerOpen)
-const toggleTagManager = () => {
-  inventoryStore.toggleTagManager()
-}
-
-const icon = markRaw({ ExpandLess, ExpandMore })
 </script>
 
 <style lang="scss" scoped>

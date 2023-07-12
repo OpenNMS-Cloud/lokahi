@@ -28,6 +28,7 @@
 
 package org.opennms.horizon.alertservice.service;
 
+import com.google.common.collect.Sets;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.opennms.horizon.alerts.proto.AlertType;
@@ -36,16 +37,20 @@ import org.opennms.horizon.alerts.proto.ManagedObjectType;
 import org.opennms.horizon.alerts.proto.MonitorPolicyProto;
 import org.opennms.horizon.alerts.proto.PolicyRuleProto;
 import org.opennms.horizon.alerts.proto.Severity;
+import org.opennms.horizon.alertservice.db.entity.AlertCondition;
 import org.opennms.horizon.alerts.proto.AlertConditionProto;
 import org.opennms.horizon.alertservice.db.entity.AlertDefinition;
 import org.opennms.horizon.alertservice.db.entity.MonitorPolicy;
 import org.opennms.horizon.alertservice.db.entity.Tag;
-import org.opennms.horizon.alertservice.db.entity.AlertCondition;
+import org.opennms.horizon.alertservice.db.repository.AlertConditionRepository;
 import org.opennms.horizon.alertservice.db.repository.AlertDefinitionRepository;
 import org.opennms.horizon.alertservice.db.repository.MonitorPolicyRepository;
 import org.opennms.horizon.alertservice.db.repository.TagRepository;
-import org.opennms.horizon.alertservice.db.repository.AlertConditionRepository;
 import org.opennms.horizon.alertservice.mapper.MonitorPolicyMapper;
+import org.opennms.horizon.alertservice.service.routing.TagOperationProducer;
+import org.opennms.horizon.shared.common.tag.proto.Operation;
+import org.opennms.horizon.shared.common.tag.proto.TagOperationList;
+import org.opennms.horizon.shared.common.tag.proto.TagOperationProto;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
@@ -71,6 +76,7 @@ public class MonitorPolicyService {
     private final AlertDefinitionRepository definitionRepo;
     private final AlertConditionRepository eventRepository;
     private final TagRepository tagRepository;
+    private final TagOperationProducer tagOperationProducer;
 
     @EventListener(ApplicationReadyEvent.class)
     public void defaultPolicies() {
@@ -112,9 +118,33 @@ public class MonitorPolicyService {
         updateData(policy, tenantId);
         MonitorPolicy newPolicy = repository.save(policy);
         createAlertDefinitionFromPolicy(newPolicy);
+        var existingTags = tagRepository.findByTenantIdAndPolicyId(newPolicy.getTenantId(), newPolicy.getId());
         var tags = updateTags(newPolicy, policy.getTags());
         newPolicy.setTags(tags);
+        handleTagOperationUpdate(existingTags, tags);
         return policyMapper.map(newPolicy);
+    }
+
+    private void handleTagOperationUpdate(List<Tag> existingTags, Set<Tag> newTags) {
+        var oldTags = new HashSet<>(existingTags);
+        var removedTags = Sets.difference(oldTags, newTags);
+        var addedTags = Sets.difference(newTags, oldTags);
+        var tagOperationUpdates = TagOperationList.newBuilder();
+        addedTags.forEach(tag -> {
+            var tagAddOp = TagOperationProto.newBuilder().setOperation(Operation.ASSIGN_TAG)
+                .setTagName(tag.getName())
+                .setTenantId(tag.getTenantId());
+            tag.getPolicies().forEach(monitorPolicy -> tagAddOp.addMonitoringPolicyId(monitorPolicy.getId()));
+            tagOperationUpdates.addTags(tagAddOp.build());
+        });
+        removedTags.forEach(tag -> {
+            var tagRemoveOp = TagOperationProto.newBuilder().setOperation(Operation.REMOVE_TAG)
+                .setTagName(tag.getName())
+                .setTenantId(tag.getTenantId());
+            tag.getPolicies().forEach(monitorPolicy -> tagRemoveOp.addMonitoringPolicyId(monitorPolicy.getId()));
+            tagOperationUpdates.addTags(tagRemoveOp.build());
+        });
+        tagOperationProducer.sendTagUpdate(tagOperationUpdates.build());
     }
 
     private Set<Tag> updateTags(MonitorPolicy newPolicy, Set<Tag> tags) {

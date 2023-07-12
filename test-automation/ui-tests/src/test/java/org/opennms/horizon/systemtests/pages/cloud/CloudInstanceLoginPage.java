@@ -26,20 +26,32 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.systemtests.steps.cloud;
+package org.opennms.horizon.systemtests.pages.cloud;
 
-import io.cucumber.java.en.Then;
-import org.opennms.horizon.systemtests.pages.cloud.CloudLeftPanelPage;
+import com.codeborne.selenide.SelenideElement;
+import org.openqa.selenium.By;
+import static com.codeborne.selenide.Condition.enabled;
+import static com.codeborne.selenide.Selenide.$;
 
-public class CloudLeftPanelSteps {
+public class CloudInstanceLoginPage {
+    private static final SelenideElement usernameField = $(By.id("idp-discovery-username"));
+    private static final SelenideElement nextBtn = $(By.id("idp-discovery-submit"));
+    private static final SelenideElement passwordField = $(By.id("okta-signin-password"));
+    private static final SelenideElement submitBtn = $(By.id("okta-signin-submit"));
 
-    @Then("Navigate to the {string} through the left panel")
-    public void clickOnLeftPanelSection(String section) {
-        CloudLeftPanelPage.clickOnPanelSection(section);
+    public static void setUsername(String username) {
+        usernameField.shouldBe(enabled).setValue(username);
     }
 
-    @Then("user sees the navigation panel for instance")
-    public void verifyLeftPanel() {
-        CloudLeftPanelPage.verifyLeftPanelIsDisplayed();
+    public static void clickNextBtn() {
+        nextBtn.shouldBe(enabled).click();
+    }
+
+    public static void setPassword(String password) {
+        passwordField.shouldBe(enabled).setValue(password);
+    }
+
+    public static void clickSubmitBtn() {
+        submitBtn.shouldBe(enabled).click();
     }
 }

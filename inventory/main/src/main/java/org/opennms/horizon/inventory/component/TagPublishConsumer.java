@@ -26,14 +26,14 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.alertservice.service.routing;
+package org.opennms.horizon.inventory.component;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.opennms.horizon.alertservice.service.TagService;
+import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.opennms.horizon.inventory.service.TagService;
 import org.opennms.horizon.shared.common.tag.proto.TagOperationList;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
@@ -41,19 +41,24 @@ import org.springframework.stereotype.Component;
 import java.util.Arrays;
 
 @Slf4j
-@RequiredArgsConstructor
 @Component
-@PropertySource("classpath:application.yaml")
-public class TagOperationConsumer {
+@RequiredArgsConstructor
+public class TagPublishConsumer {
+
     private final TagService tagService;
 
-    @KafkaListener(topics = "${kafka.topics.tag-operation}", concurrency = "1")
-    public void tagMessageConsumer(@Payload byte[] data) {
+    // auto.offset.reset = earliest needed here to consume all tags if Inventory service started much later than Alerts
+    @KafkaListener(topics = "${kafka.topics.tag-operation}", properties = ConsumerConfig.AUTO_OFFSET_RESET_CONFIG + "=earliest")
+    public void receiveMessage(@Payload byte[] data) {
+
         try {
             TagOperationList operationList = TagOperationList.parseFrom(data);
             tagService.insertOrUpdateTags(operationList);
         } catch (InvalidProtocolBufferException e) {
             log.error("Error while parsing TagOperationList, payload data {}", Arrays.toString(data), e);
         }
+
     }
+
+
 }

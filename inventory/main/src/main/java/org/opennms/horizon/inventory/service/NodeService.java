@@ -29,10 +29,8 @@
 package org.opennms.horizon.inventory.service;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
 import org.apache.commons.lang3.StringUtils;
 import org.opennms.horizon.inventory.component.TagPublisher;
 import org.opennms.horizon.inventory.discovery.IcmpActiveDiscoveryDTO;
@@ -249,7 +247,13 @@ public class NodeService {
         final var monitored = tagRepository.findByTenantIdAndNodeId(node.getTenantId(), node.getId()).stream()
             .anyMatch(tag -> !tag.getMonitorPolicyIds().isEmpty());
 
-        final var monitoredState = monitored
+        // System tenant will have default monitoring policies, we always need to match them.
+        var tagsOnSystemTenant = tagRepository.findByTenantId("system-tenant");
+        final var matchWithSystemTenant = tagsOnSystemTenant.stream()
+            .anyMatch(tag -> node.getTags().stream().map(Tag::getName)
+                .anyMatch(name -> name.equals(tag.getName())));
+
+        final var monitoredState = monitored || matchWithSystemTenant
             ? MonitoredState.MONITORED
             : node.getMonitoredState() == MonitoredState.DETECTED
                 ? MonitoredState.DETECTED
@@ -265,17 +269,28 @@ public class NodeService {
         mapper.updateFromNodeInfo(nodeInfo, node);
 
         if (StringUtils.isNotEmpty(nodeInfo.getSystemName())) {
-            // HS-1364: update the node label if the incoming System Name is set, and the existing node value is not
-            if (StringUtils.isEmpty(node.getNodeLabel())) {
+            Boolean validIpAddress = isValidInetAddress(node.getNodeLabel());
+            if (validIpAddress) {
+                //Overwrite node label with System name if label is an IP Address.
                 node.setNodeLabel(nodeInfo.getSystemName());
             } else {
-                log.debug("Node already has a nodeLabel - keeping the existing value: node-label={}; system-name={}", node.getNodeLabel(), nodeInfo.getSystemName());
+                log.debug("Node already has a nodeLabel - keeping the existing value: node-label={}; system-name={}",
+                    node.getNodeLabel(), nodeInfo.getSystemName());
             }
         }
 
         this.updateNodeMonitoredState(node);
 
         nodeRepository.save(node);
+    }
+
+    private Boolean isValidInetAddress(String ipAddress) {
+        try {
+            var inetAddress = InetAddressUtils.addr(ipAddress);
+            return true;
+        } catch (IllegalArgumentException  e) {
+            return false;
+        }
     }
 
     private void removeAssociatedTags(Node node) {

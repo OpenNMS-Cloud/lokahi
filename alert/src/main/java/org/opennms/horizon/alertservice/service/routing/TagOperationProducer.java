@@ -26,20 +26,30 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.systemtests.steps.cloud;
+package org.opennms.horizon.alertservice.service.routing;
 
-import io.cucumber.java.en.Then;
-import org.opennms.horizon.systemtests.pages.cloud.CloudLeftPanelPage;
+import lombok.extern.slf4j.Slf4j;
+import org.opennms.horizon.alertservice.config.KafkaTopicProperties;
+import org.opennms.horizon.shared.common.tag.proto.TagOperationList;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.stereotype.Component;
 
-public class CloudLeftPanelSteps {
+@Component
+@Slf4j
+public class TagOperationProducer {
 
-    @Then("Navigate to the {string} through the left panel")
-    public void clickOnLeftPanelSection(String section) {
-        CloudLeftPanelPage.clickOnPanelSection(section);
+    private final KafkaTemplate<String, byte[]> kafkaTemplate;
+
+    private final String kafkaTopic;
+
+    public TagOperationProducer(KafkaTemplate<String, byte[]> kafkaTemplate, KafkaTopicProperties kafkaTopicProperties) {
+        this.kafkaTopic = kafkaTopicProperties.getTagOperation();
+        this.kafkaTemplate = kafkaTemplate;
     }
 
-    @Then("user sees the navigation panel for instance")
-    public void verifyLeftPanel() {
-        CloudLeftPanelPage.verifyLeftPanelIsDisplayed();
+
+    public void sendTagUpdate(TagOperationList tagOperationList) {
+        log.info("Sending tag updates {}", tagOperationList);
+        kafkaTemplate.send(kafkaTopic, tagOperationList.toByteArray());
     }
 }

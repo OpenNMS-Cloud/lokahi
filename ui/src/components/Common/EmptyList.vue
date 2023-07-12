@@ -11,15 +11,10 @@
 }
  -->
 <template>
-  <div class="empty-list">
+  <div :class="['empty-list', bg ? 'bg' : '']">
     <div data-test="msg">{{ msg }}</div>
-    <FeatherButton
-      v-if="content.btn"
-      secondary
-      @click="content.btn?.action"
-      data-test="btn"
-      >{{ content.btn?.label }}</FeatherButton
-    >
+    <FeatherButton v-if="content.btn" secondary @click="content.btn?.action" data-test="btn">{{ content.btn?.label }}
+    </FeatherButton>
   </div>
 </template>
 
@@ -35,7 +30,8 @@ type Content = {
 }
 
 const props = defineProps<{
-  content: Content
+  content: Content,
+  bg?: boolean
 }>()
 
 const msg = computed(() => props.content.msg || '')
@@ -52,8 +48,13 @@ const msg = computed(() => props.content.msg || '')
   justify-content: center;
   align-items: center;
   height: 200px;
-  > button {
+
+  >button {
     margin-top: var(variables.$spacing-l);
   }
+}
+
+.bg {
+  background-color: var(--feather-surface);
 }
 </style>

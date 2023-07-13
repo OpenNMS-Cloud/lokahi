@@ -54,12 +54,24 @@
                     <li>Docker environment with Docker Compose</li>
                     <li>Network Time Protocol (NTP) installed and configured</li>
                 </ul>
-                <a href="https://docs.docker.com/desktop/install/linux-install/" target="_blank"
-                    rel="noopener noreferrer">How
-                    to set up
-                    Docker
-                    <FeatherIcon :icon="ChevronRight" />
-                </a>
+                <div>
+                    <span class="docker-setup">How to set up Docker:&nbsp;
+
+                        <a href="https://docs.docker.com/desktop/install/linux-install/" target="_blank"
+                            rel="noopener noreferrer">Linux
+                        </a>
+                        ,&nbsp;
+                        <a href="https://docs.docker.com/desktop/install/mac-install/" target="_blank"
+                            rel="noopener noreferrer">Mac
+                        </a>
+                        ,&nbsp;
+                        <a href="https://docs.docker.com/desktop/install/windows-install/" target="_blank"
+                            rel="noopener noreferrer">Windows
+                        </a>
+
+
+                    </span>
+                </div>
             </template>
         </CollapsingCard>
         <FeatherButton primary @click="welcomeStore.nextSlide" data-test="welcome-slide-one-setup-button">Start Setup
@@ -163,5 +175,9 @@ ul li {
 
 .icon-light {
     color: blue;
+}
+
+.docker-setup {
+    display: flex;
 }
 </style>

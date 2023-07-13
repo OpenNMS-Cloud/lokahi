@@ -15,6 +15,7 @@ export const useLocationStore = defineStore('locationStore', () => {
   const saveIsFetching = ref()
   const updateIsFetching = ref()
   const certIsFetching = ref()
+  const isDeleting = ref()
 
   const locationQueries = useLocationQueries()
   const minionsQueries = useMinionsQueries()
@@ -99,12 +100,14 @@ export const useLocationStore = defineStore('locationStore', () => {
 
   const deleteLocation = async (id: number) => {
     displayType.value = DisplayType.LIST
+    isDeleting.value = true
     const error = await locationMutations.deleteLocation({ id })
 
     if (!error.value) {
       await fetchLocations()
     }
 
+    isDeleting.value = false
     return !error.value
   }
 
@@ -149,6 +152,7 @@ export const useLocationStore = defineStore('locationStore', () => {
     updateLocation,
     updateIsFetching,
     certIsFetching,
+    isDeleting,
     deleteLocation,
     getMinionCertificate,
     revokeMinionCertificate,

@@ -74,6 +74,13 @@
       data-test="context-menu"
     />
   </div>
+  <DeleteConfirmationModal
+    :isVisible="isVisible"
+    :name="minion.label!"
+    :closeModal="() => closeModal()"
+    :deleteHandler="() => deleteMinion()"
+    :isDeleting="minionMutations.isDeletingMinion"
+  />
 </template>
 
 <script setup lang="ts">
@@ -81,10 +88,12 @@ import { Severity } from '@/types/graphql'
 import { useMinionMutations } from '@/store/Mutations/minionMutations'
 import { useLocationStore } from '@/store/Views/locationStore'
 import { useMinionsQueries } from '@/store/Queries/minionsQueries'
+import useModal from '@/composables/useModal'
 
 const minionMutations = useMinionMutations()
 const locationStore = useLocationStore()
 const minionsQueries = useMinionsQueries()
+const { openModal, closeModal, isVisible } = useModal()
 
 const props = defineProps({
   item: {
@@ -125,16 +134,13 @@ const minion = computed(() => {
   return props.item
 })
 
-const contextMenuItems = [
-  {
-    label: 'Delete',
-    handler: async () => {
-      await minionMutations.deleteMinion({ id: props.item.systemId })
-      await minionsQueries.refreshMinionsById()
-      locationStore.fetchLocations() // location may be gone if last minion deleted
-    }
-  }
-]
+const deleteMinion = async () => {
+  await minionMutations.deleteMinion({ id: props.item.systemId })
+  await minionsQueries.refreshMinionsById()
+  locationStore.fetchLocations() // location may be gone if last minion deleted
+}
+
+const contextMenuItems = [{ label: 'Delete', handler: () => openModal() }]
 
 type Pill = {
   style: string

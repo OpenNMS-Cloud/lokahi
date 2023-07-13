@@ -14,6 +14,7 @@ export const useMinionMutations = defineStore('minionMutations', () => {
   })
 
   return {
-    deleteMinion
+    deleteMinion,
+    isDeletingMinion
   }
 })

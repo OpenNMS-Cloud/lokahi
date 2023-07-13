@@ -38,6 +38,7 @@ declare module '@vue/runtime-core' {
     DashboardEmptyState: typeof import('./src/components/Dashboard/DashboardEmptyState.vue')['default']
     DashboardHeaderLinks: typeof import('./src/components/Dashboard/DashboardHeaderLinks.vue')['default']
     DashboardNetworkTraffic: typeof import('./src/components/Dashboard/DashboardNetworkTraffic.vue')['default']
+    DeleteConfirmationModal: typeof import('./src/components/Common/DeleteConfirmationModal.vue')['default']
     DiscoveryAzureForm: typeof import('./src/components/Discovery/DiscoveryAzureForm.vue')['default']
     DiscoveryContentEditable: typeof import('./src/components/Discovery/DiscoveryContentEditable.vue')['default']
     DiscoveryHelpConfiguring: typeof import('./src/components/Discovery/DiscoveryHelpConfiguring.vue')['default']

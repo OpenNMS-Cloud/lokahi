@@ -121,7 +121,8 @@ public class TagService {
                 .map(tagCreateDTO -> addTagToNode(tenantId, node, tagCreateDTO))
                 .toList();
             tagPublisher.publishTagUpdate(tagOpList);
-            nodeService.updateNodeMonitoredState(node);
+            // See HS-1812
+            //nodeService.updateNodeMonitoredState(node);
             return result;
         } else if (entityId.hasActiveDiscoveryId()) {
             ActiveDiscovery discovery = getActiveDiscovery(tenantId, entityId.getActiveDiscoveryId());

@@ -14,7 +14,7 @@
             <FeatherIcon :icon="icons.Location"> </FeatherIcon>
           </FeatherButton>
           <FeatherButton
-            @click="deleteLocation"
+            @click="openModal"
             icon="Delete"
           >
             <FeatherIcon :icon="Delete"> </FeatherIcon>
@@ -83,6 +83,13 @@
       </FooterSection>
     </form>
   </div>
+  <DeleteConfirmationModal
+    :isVisible="isVisible"
+    :name="locationStore.selectedLocation.location"
+    :closeModal="() => closeModal()"
+    :deleteHandler="() => deleteLocation()"
+    :isDeleting="locationStore.isDeleting"
+  />
 </template>
 
 <script setup lang="ts">
@@ -96,12 +103,16 @@ import { MonitoringLocationUpdateInput } from '@/types/graphql'
 import { DisplayType } from '@/types/locations.d'
 import { useLocationStore } from '@/store/Views/locationStore'
 import { createAndDownloadBlobFile } from '@/components/utils'
+import { useMinionsQueries } from '@/store/Queries/minionsQueries'
+import useModal from '@/composables/useModal'
 
 const props = defineProps<{
   id: number
 }>()
 
 const locationStore = useLocationStore()
+const minionsQueries = useMinionsQueries()
+const { openModal, closeModal, isVisible } = useModal()
 const formInputs = reactive({} as Required<MonitoringLocationUpdateInput>)
 
 watchEffect(() => {
@@ -149,6 +160,7 @@ const downloadCert = async () => {
 
 const deleteLocation = async () => {
   const success = await locationStore.deleteLocation(props.id)
+  await minionsQueries.refreshMinionsById()
 
   if (success) {
     form.clearErrors()

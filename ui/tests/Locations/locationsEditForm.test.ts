@@ -7,7 +7,10 @@ describe('LocationsEditForm', () => {
   beforeAll(() => {
     wrapper = mount({
       component: LocationsEditForm,
-      shallow: false
+      shallow: false,
+      props: {
+        id: 1
+      }
     })
   })
   afterAll(() => {

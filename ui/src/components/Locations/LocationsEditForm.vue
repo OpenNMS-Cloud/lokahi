@@ -85,7 +85,7 @@
   </div>
   <DeleteConfirmationModal
     :isVisible="isVisible"
-    :name="locationStore.selectedLocation.location"
+    :name="locationStore.selectedLocation?.location"
     :closeModal="() => closeModal()"
     :deleteHandler="() => deleteLocation()"
     :isDeleting="locationStore.isDeleting"

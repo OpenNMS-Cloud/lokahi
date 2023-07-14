@@ -18,13 +18,12 @@ import org.opennms.horizon.inventory.dto.TagDTO;
 import org.opennms.horizon.inventory.dto.TagEntityIdDTO;
 import org.opennms.horizon.inventory.dto.TagListDTO;
 import org.opennms.horizon.inventory.dto.TagRemoveListDTO;
+import org.opennms.horizon.inventory.service.NodeService;
 import org.opennms.horizon.inventory.service.TagService;
 
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 public class TagGrpcServiceTest {
 
@@ -32,6 +31,7 @@ public class TagGrpcServiceTest {
 
     private TagService mockTagService;
     private TenantLookup mockTenantLookup;
+    private NodeService mockNodeService;
 
     private TagCreateDTO testTagCreateDTO;
     private TagCreateListDTO testTagCreateListDTO;
@@ -46,6 +46,7 @@ public class TagGrpcServiceTest {
     public void setUp() {
         mockTagService = Mockito.mock(TagService.class);
         mockTenantLookup = Mockito.mock(TenantLookup.class);
+        mockNodeService = Mockito.mock(NodeService.class);
 
         testTagCreateDTO =
             TagCreateDTO.newBuilder()
@@ -75,7 +76,7 @@ public class TagGrpcServiceTest {
             DeleteTagsDTO.newBuilder()
                 .build();
 
-        target = new TagGrpcService(mockTagService, mockTenantLookup);
+        target = new TagGrpcService(mockTagService, mockTenantLookup, mockNodeService);
     }
 
     @Test

@@ -257,6 +257,28 @@ public class NodeService {
         }
     }
 
+    public void updateNodeMonitoredState(long nodeId, String tenantId) {
+
+        // See HS-1812, Always match "default" tag.
+        final var monitored = tagRepository.findByTenantIdAndNodeId(tenantId, nodeId).stream()
+            .anyMatch(tag -> !tag.getMonitorPolicyIds().isEmpty() || DEFAULT_TAG.equals(tag.getName()));
+
+        var optional = nodeRepository.findById(nodeId);
+        if(optional.isEmpty()) {
+            return;
+        }
+        var node = optional.get();
+        final var monitoredState = monitored ? MonitoredState.MONITORED
+            : node.getMonitoredState() == MonitoredState.DETECTED
+            ? MonitoredState.DETECTED
+            : MonitoredState.UNMONITORED;
+
+        if (node.getMonitoredState() != monitoredState) {
+            node.setMonitoredState(monitoredState);
+            this.nodeRepository.save(node);
+        }
+    }
+
     public void updateNodeInfo(Node node, NodeInfoResult nodeInfo) {
         mapper.updateFromNodeInfo(nodeInfo, node);
 
@@ -271,7 +293,7 @@ public class NodeService {
             }
         }
 
-        this.updateNodeMonitoredState(node);
+        this.updateNodeMonitoredState(node.getId(), node.getTenantId());
 
         nodeRepository.save(node);
     }

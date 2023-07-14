@@ -108,7 +108,9 @@ public class TagService {
         return tags.stream().toList();
     }
 
+
     private List<TagDTO> addTags(String tenantId, TagEntityIdDTO entityId, List<TagCreateDTO> tagCreateList) {
+
         if (entityId.hasNodeId()) {
             Node node = getNode(tenantId, entityId.getNodeId());
             List<TagOperationProto> tagOpList = tagCreateList.stream().map(t -> TagOperationProto.newBuilder()
@@ -121,8 +123,6 @@ public class TagService {
                 .map(tagCreateDTO -> addTagToNode(tenantId, node, tagCreateDTO))
                 .toList();
             tagPublisher.publishTagUpdate(tagOpList);
-            // See HS-1812
-            nodeService.updateNodeMonitoredState(node);
             return result;
         } else if (entityId.hasActiveDiscoveryId()) {
             ActiveDiscovery discovery = getActiveDiscovery(tenantId, entityId.getActiveDiscoveryId());
@@ -135,7 +135,9 @@ public class TagService {
                 .map(tagCreateDTO -> addTagToPassiveDiscovery(tenantId, discovery, tagCreateDTO))
                 .toList();
         } else if (entityId.hasMonitoringPolicyId()) {
-            throw new UnsupportedOperationException("Can't update monitoring policy tags through API");
+            return tagCreateList.stream().map(tagCreateDTO ->
+                    addTagsToMonitoringPolicy(tenantId, entityId.getMonitoringPolicyId(), tagCreateDTO))
+                .collect(Collectors.toList());
         } else {
             throw new InventoryRuntimeException("Invalid ID provided");
         }
@@ -164,7 +166,6 @@ public class TagService {
                 .addNodeId(node.getId())
                 .build()).collect(Collectors.toList());
             tagPublisher.publishTagUpdate(tagOpList);
-            nodeService.updateNodeMonitoredState(node);
         } else if (entityId.hasActiveDiscoveryId()) {
             ActiveDiscovery activeDiscovery = getActiveDiscovery(tenantId, entityId.getActiveDiscoveryId());
             tags.forEach(tag -> {
@@ -225,7 +226,7 @@ public class TagService {
                 repository.delete(tag);
 
                 for (final var node: nodes) {
-                    this.nodeService.updateNodeMonitoredState(node);
+                    this.nodeService.updateNodeMonitoredState(node.getId(),  node.getTenantId());
                 }
             }
         }
@@ -249,7 +250,6 @@ public class TagService {
         if (entityId.hasNodeId()) {
             Node node = getNode(tenantId, entityId.getNodeId());
             node.getTags().forEach(tag -> tag.getNodes().remove(node));
-            this.nodeService.updateNodeMonitoredState(node);
         } else if (entityId.hasActiveDiscoveryId()) {
             ActiveDiscovery activeDiscovery = getActiveDiscovery(tenantId, entityId.getActiveDiscoveryId());
             activeDiscovery.getTags().forEach(tag -> {
@@ -262,6 +262,7 @@ public class TagService {
             });
         }
     }
+
 
     private TagDTO addTagToNode(String tenantId, Node node, TagCreateDTO tagCreateDTO) {
         String tagName = tagCreateDTO.getName();
@@ -278,7 +279,6 @@ public class TagService {
 
         tag.getNodes().add(node);
         tag = repository.save(tag);
-        node.getTags().add(tag);
 
         return mapper.modelToDTO(tag);
     }
@@ -317,6 +317,22 @@ public class TagService {
 
         tag.getPassiveDiscoveries().add(discovery);
         tag = repository.save(tag);
+
+        return mapper.modelToDTO(tag);
+    }
+
+    private TagDTO addTagsToMonitoringPolicy(String tenantId, long monitoringPolicyId, TagCreateDTO tagCreateDTO) {
+        String tagName = tagCreateDTO.getName();
+        var optional = repository.findByTenantIdAndName(tenantId, tagName);
+        Tag tag = optional.orElseGet(() -> mapCreateTag(tenantId, tagCreateDTO));
+        if (tag.getMonitorPolicyIds().stream().noneMatch(policyId -> policyId == monitoringPolicyId)) {
+            tag.getMonitorPolicyIds().add(monitoringPolicyId);
+        }
+        tag = repository.save(tag);
+
+        for (final var node: tag.getNodes()) {
+            this.nodeService.updateNodeMonitoredState(node.getId(), node.getTenantId());
+        }
 
         return mapper.modelToDTO(tag);
     }

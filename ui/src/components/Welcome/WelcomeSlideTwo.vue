@@ -54,7 +54,7 @@
                 <div class="welcome-slide-step" data-test="welcome-page-two-internal">
                     <h2>Step 2: Copy and Run Docker Install Command</h2>
                     <pre
-                        class="pre-wrap">Replace <strong>PATH_TO_DOWNLOADED_FILE</strong> with the full path to the certificate file.</pre>
+                        class="pre-wrap">Replace <strong>PATH_TO_DOWNLOADED_FILE</strong> with the full path to the certificate you downloaded. Remember to store your password, certificate and docker command securely. You need all three to run your minion.</pre>
                     <div class="welcome-slide-table">
                         <div class="welcome-slide-table-header">
                             <span>Command</span>

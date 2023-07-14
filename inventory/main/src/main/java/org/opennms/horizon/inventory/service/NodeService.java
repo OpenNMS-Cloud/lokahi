@@ -41,9 +41,7 @@ import org.opennms.horizon.inventory.dto.TagCreateListDTO;
 import org.opennms.horizon.inventory.dto.TagEntityIdDTO;
 import org.opennms.horizon.inventory.exception.EntityExistException;
 import org.opennms.horizon.inventory.exception.LocationNotFoundException;
-import org.opennms.horizon.inventory.mapper.IpInterfaceMapper;
 import org.opennms.horizon.inventory.mapper.NodeMapper;
-import org.opennms.horizon.inventory.mapper.SnmpInterfaceMapper;
 import org.opennms.horizon.inventory.model.IpInterface;
 import org.opennms.horizon.inventory.model.MonitoringLocation;
 import org.opennms.horizon.inventory.model.Node;
@@ -88,6 +86,7 @@ public class NodeService {
     private final ThreadFactory threadFactory = new ThreadFactoryBuilder()
         .setNameFormat("delete-node-task-publish-%d")
         .build();
+    private final static String DEFAULT_TAG = "default";
     private final ExecutorService executorService = Executors.newFixedThreadPool(10, threadFactory);
     private final NodeRepository nodeRepository;
     private final MonitoringLocationRepository monitoringLocationRepository;
@@ -99,8 +98,6 @@ public class NodeService {
     private final TaskSetPublisher taskSetPublisher;
     private final TagService tagService;
     private final NodeMapper mapper;
-    private final SnmpInterfaceMapper snmpInterfaceMapper;
-    private final IpInterfaceMapper ipInterfaceMapper;
     private final TagPublisher tagPublisher;
     private final TagRepository tagRepository;
 
@@ -244,17 +241,12 @@ public class NodeService {
     }
 
     public void updateNodeMonitoredState(Node node) {
+
+        // See HS-1812, Always match "default" tag.
         final var monitored = tagRepository.findByTenantIdAndNodeId(node.getTenantId(), node.getId()).stream()
-            .anyMatch(tag -> !tag.getMonitorPolicyIds().isEmpty());
+            .anyMatch(tag -> !tag.getMonitorPolicyIds().isEmpty() || DEFAULT_TAG.equals(tag.getName()));
 
-        // System tenant will have default monitoring policies, we always need to match them.
-        var tagsOnSystemTenant = tagRepository.findByTenantId("system-tenant");
-        final var matchWithSystemTenant = tagsOnSystemTenant.stream()
-            .anyMatch(tag -> node.getTags().stream().map(Tag::getName)
-                .anyMatch(name -> name.equals(tag.getName())));
-
-        final var monitoredState = monitored || matchWithSystemTenant
-            ? MonitoredState.MONITORED
+        final var monitoredState = monitored ? MonitoredState.MONITORED
             : node.getMonitoredState() == MonitoredState.DETECTED
                 ? MonitoredState.DETECTED
                 : MonitoredState.UNMONITORED;
@@ -305,7 +297,6 @@ public class NodeService {
                 .build());
         }
         tagPublisher.publishTagUpdate(tagOpList);
-        this.updateNodeMonitoredState(node);
     }
 
     public void sendNewNodeTaskSetAsync(Node node, Long locationId, IcmpActiveDiscoveryDTO icmpDiscoveryDTO) {

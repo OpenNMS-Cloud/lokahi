@@ -31,5 +31,7 @@ package org.opennms.horizon.tenantmetrics;
 public interface TenantMetricsTracker {
     void addTenantMetricSampleCount(String tenant, int count);
 
-    void addTenantFlowSampleCount(String tenant, int count);
+    void addTenantFlowReceviedCount(String tenant, int count);
+
+    void addTenantFlowCompletedCount(String tenant, int count);
 }

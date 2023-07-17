@@ -28,7 +28,10 @@
 
 package org.opennms.horizon.flows;
 
+import com.codahale.metrics.MetricRegistry;
 import com.google.protobuf.InvalidProtocolBufferException;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
 import lombok.extern.slf4j.Slf4j;
 import org.opennms.horizon.flows.document.TenantLocationSpecificFlowDocumentLog;
 import org.opennms.horizon.flows.processing.Pipeline;
@@ -60,16 +63,15 @@ public class FlowProcessor {
     public void consume(@Payload byte[] data) {
         try {
             var flowDocumentLog = TenantLocationSpecificFlowDocumentLog.parseFrom(data);
+            String tenantId = flowDocumentLog.getTenantId();
+            metricsTracker.addTenantFlowReceviedCount(tenantId, flowDocumentLog.getMessageCount());
             CompletableFuture.supplyAsync(() -> {
                 try {
-                    String tenantId = flowDocumentLog.getTenantId();
-
                     log.trace("Processing flow: tenant-id={}; flow={}", tenantId, flowDocumentLog);
-
                     pipeline.process(flowDocumentLog);
-                    metricsTracker.addTenantFlowSampleCount(tenantId, flowDocumentLog.getMessageCount());
+                    metricsTracker.addTenantFlowCompletedCount(tenantId, flowDocumentLog.getMessageCount());
                 } catch (Exception exc) {
-                    log.warn("Error processing flow: {} error: {}", flowDocumentLog, exc);
+                    log.warn("Error processing flow: {} error: {}", flowDocumentLog, exc.getMessage());
                 }
                 return null;
             });

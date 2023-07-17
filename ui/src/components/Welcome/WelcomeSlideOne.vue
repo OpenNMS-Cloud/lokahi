@@ -53,6 +53,7 @@
                 <h4>Make sure you have the following:</h4>
                 <ul>
                     <li>Docker environment with Docker Compose</li>
+                    <li>Access to a terminal window</li>
                     <li>Network Time Protocol (NTP) installed and configured</li>
                 </ul>
                 <div>

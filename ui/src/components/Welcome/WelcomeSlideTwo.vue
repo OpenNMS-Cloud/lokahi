@@ -24,10 +24,10 @@
                 </div>
             </div>
             <div class="welcome-slide-step">
-                <h2>Step 1: Download Minion Installation Bundle</h2>
+                <h2>Step 1: Download Encrypted Minion Certificate</h2>
                 <div class="welcome-slide-table">
                     <div class="welcome-slide-table-header">
-                        <div>Minion Installation Bundle</div>
+                        <div>Encrypted Minion Certificate</div>
                         <div>
                             <FeatherButton text @click="welcomeStore.downloadClick" v-if="!welcomeStore.downloading"
                                 data-test="welcome-slide-two-download-button">
@@ -52,9 +52,9 @@
             </div>
             <CollapsingWrapper :open="!!welcomeStore.minionCert.password">
                 <div class="welcome-slide-step" data-test="welcome-page-two-internal">
-                    <h2>Step 2: Copy and Run Docker Install Command</h2>
+                    <h2>Step 2: Copy and Run Docker Install Command in Terminal Window</h2>
                     <pre
-                        class="pre-wrap">Replace <strong>PATH_TO_DOWNLOADED_FILE</strong> with the full path to the certificate you downloaded. Remember to store your password, certificate and docker command securely. You need all three to run your minion.</pre>
+                        class="pre-wrap">In the command, replace <strong>PATH_TO_DOWNLOADED_FILE</strong> with the full path to the certificate you downloaded. Remember to store your password, certificate and Docker command securely. You need all three to run your Minion.</pre>
                     <div class="welcome-slide-table">
                         <div class="welcome-slide-table-header">
                             <span>Command</span>
@@ -303,7 +303,7 @@ const { isDark } = useTheme();
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 24px 0;
+    padding: 24px;
     border: 1px solid var($border-on-surface);
     border-radius: 3px;
     margin-top: 24px;

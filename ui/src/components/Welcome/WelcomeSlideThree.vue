@@ -4,7 +4,7 @@
         <div class="welcome-slide-three-inner">
             <div class="welcome-slide-three-title">
                 <h2 data-test="welcome-slide-three-title">Start Your First Discovery</h2>
-                <p>We will try to discover one network device associated with the specified IP. </p>
+                <p>We will try to discover one network device associated with the specified IP address. </p>
             </div>
             <div class="welcome-slide-three-form">
                 <FeatherInput label="Name" data-test="welcome-slide-three-name-input"

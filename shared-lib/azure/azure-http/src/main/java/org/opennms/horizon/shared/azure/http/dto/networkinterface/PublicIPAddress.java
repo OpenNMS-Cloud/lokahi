@@ -11,4 +11,7 @@ public class PublicIPAddress {
     @SerializedName("id")
     @Expose
     private String id;
+    @SerializedName("name")
+    @Expose
+    private String name;
 }

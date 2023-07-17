@@ -89,13 +89,13 @@ public class AzureHttpClient {
     /*
      * Parameters
      */
-    private static final String LOGIN_GRANT_TYPE_PARAM = "grant_type=authorization_code";
-//    private static final String LOGIN_GRANT_TYPE_PARAM = "grant_type=client_credentials";
+    private static final String LOGIN_GRANT_TYPE_PARAM = "grant_type=client_credentials";
 
 
     private static final String LOGIN_CLIENT_ID_PARAM = "client_id=";
     private static final String LOGIN_CLIENT_SECRET_PARAM = "client_secret=";
 
+    // make sure all region support this version before upgrade
     private static final String DEFAULT_API_VERSION = "2021-04-01";
     private static final String DEFAULT_METRICS_API_VERSION = "2018-01-01";
     private static final String API_VERSION_PARAM = "?api-version=";

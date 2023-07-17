@@ -64,6 +64,7 @@ import org.opennms.horizon.inventory.service.discovery.active.IcmpActiveDiscover
 import org.opennms.horizon.inventory.service.taskset.TaskSetHandler;
 import org.opennms.horizon.shared.utils.InetAddressUtils;
 import org.opennms.node.scan.contract.IpInterfaceResult;
+import org.opennms.node.scan.contract.NodeInfoResult;
 import org.opennms.node.scan.contract.NodeScanResult;
 import org.opennms.node.scan.contract.ServiceResult;
 import org.opennms.node.scan.contract.SnmpInterfaceResult;
@@ -195,6 +196,12 @@ public class ScannerResponseService {
                         .build();
 
                     node = nodeService.createNode(createDTO, ScanType.AZURE_SCAN, tenantId);
+
+                    var nodeInfoResult = NodeInfoResult.newBuilder()
+                        .setSystemLocation(azureScanItem.getLocation())
+                        .setSystemDescr(azureScanItem.getOsName() + " (" + azureScanItem.getOsVersion() + ")").build();
+                    nodeService.updateNodeInfo(node, nodeInfoResult);
+
                     for (AzureScanNetworkInterfaceItem networkInterfaceItem : azureScanItem.getNetworkInterfaceItemsList()) {
                         ipInterfaceService.createFromAzureScanResult(tenantId, node, networkInterfaceItem);
                     }

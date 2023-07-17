@@ -51,7 +51,7 @@ public class IpInterfaceService {
         IpInterface ipInterface = new IpInterface();
         ipInterface.setNode(node);
         ipInterface.setTenantId(tenantId);
-        ipInterface.setSnmpPrimary(false);
+        ipInterface.setSnmpPrimary(networkInterfaceItem.getIsPrimary());
         ipInterface.setIpAddress(InetAddressUtils.getInetAddress(networkInterfaceItem.getIpAddress()));
         modelRepo.save(ipInterface);
     }

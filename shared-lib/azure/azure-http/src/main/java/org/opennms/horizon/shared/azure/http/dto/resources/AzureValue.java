@@ -41,4 +41,6 @@ public class AzureValue {
     private String name;
     @SerializedName("type")
     private String type;
+    @SerializedName("location")
+    private String location;
 }
